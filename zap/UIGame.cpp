@@ -1110,11 +1110,32 @@ bool checkInputCode(InputCode codeUserEntered, InputCode codeToActivateCommand)
 }
 
 
+// Helper function -- checks input keys and sees if we should start chatting.  Returns true if entered chat mode, false if not.
+bool GameUserInterface::startChatting(InputCode inputCode)
+{
+   GameSettings *settings = getGame()->getSettings();
+
+   if(checkInputCode(settings, InputCodeManager::BINDING_TEAMCHAT, inputCode))          // Start entering a team chat msg
+      mChatHelper->startChatting(ChatHelper::TeamChat);
+
+   else if(checkInputCode(settings, InputCodeManager::BINDING_GLOBCHAT, inputCode))     // Start entering a global chat msg
+      mChatHelper->startChatting(ChatHelper::GlobalChat);
+
+   else if(checkInputCode(settings, InputCodeManager::BINDING_CMDCHAT, inputCode))      // Start entering a command
+      mChatHelper->startChatting(ChatHelper::CmdChat);
+
+   else
+      return false;
+
+   mHelperStack.push_back(mChatHelper);
+   return true;
+}
+
+
 // Can only get here if we're not in chat mode
 bool GameUserInterface::processPlayModeKey(InputCode inputCode)
 {
    GameSettings *settings = getGame()->getSettings();
-   //InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
 
    // The following keys are allowed in both play mode and in loadout or
    // engineering menu modes if not used in the loadout menu above
@@ -1213,21 +1234,8 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    // The following keys are only allowed when there are no helpers or when top helper permits
    else if(mHelperStack.size() == 0 || !mHelperStack.last()->isChatDisabled())    
    {
-      if(checkInputCode(settings, InputCodeManager::BINDING_TEAMCHAT, inputCode))          // Start entering a team chat msg
-      {
-         mChatHelper->startChatting(ChatHelper::TeamChat);
-         mHelperStack.push_back(mChatHelper);
-      }
-      else if(checkInputCode(settings, InputCodeManager::BINDING_GLOBCHAT, inputCode))     // Start entering a global chat msg
-      {
-         mChatHelper->startChatting(ChatHelper::GlobalChat);
-         mHelperStack.push_back(mChatHelper);
-      }
-      else if(checkInputCode(settings, InputCodeManager::BINDING_CMDCHAT, inputCode))      // Start entering a command
-      {
-         mChatHelper->startChatting(ChatHelper::CmdChat);
-         mHelperStack.push_back(mChatHelper);
-      }
+      if(startChatting(inputCode))
+         return true;
 
       // These keys are only available when there is no helper active
       else if(mHelperStack.size() == 0)
