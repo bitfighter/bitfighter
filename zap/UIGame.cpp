@@ -950,7 +950,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    if(checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
       getGame()->setBusyChatting(true);
 
-   if(!startedInHelper || mHelperStack.size() == 0)
+   if(mHelperStack.size() == 0)
       getGame()->undelaySpawn();
 
    if(Parent::onKeyDown(inputCode))
