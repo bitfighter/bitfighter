@@ -34,7 +34,7 @@ ScreenInfo::ScreenInfo()
    MIN_SCALING_FACTOR = 0.15f;
    resetGameCanvasSize();        // Initialize GameCanvasSize vars
    setWindowSize(GAME_WIDTH, GAME_HEIGHT);      // In case these are used in a calculation before they're set... avoids spurious divide by 0
-   mPrevCanvasWidth = GAME_WIDTH;
+   mPrevCanvasWidth  = GAME_WIDTH;
    mPrevCanvasHeight = GAME_HEIGHT;
    mWindowMousePos.set(-1,-1);   // -1 is used to indicate initial run
    mActualized = false;
@@ -52,8 +52,8 @@ void ScreenInfo::init(S32 physicalScreenWidth, S32 physicalScreenHeight)
 
    mIsLandscape = physicalScreenRatio >= gameCanvasRatio;
 
-   mScalingRatioX = mIsLandscape ?  (F32)mPhysicalScreenWidth / (F32)mGameCanvasWidth : (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight;
-   mScalingRatioY = mIsLandscape ? (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight : (F32)mPhysicalScreenWidth / (F32)mGameCanvasWidth;
+   mScalingRatioX = mIsLandscape ? (F32)mPhysicalScreenWidth  / (F32)mGameCanvasWidth  : (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight;
+   mScalingRatioY = mIsLandscape ? (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight : (F32)mPhysicalScreenWidth  / (F32)mGameCanvasWidth;
 
 //   logprintf("mIsLandscape: %d", mIsLandscape);
 //
@@ -76,7 +76,7 @@ F32 ScreenInfo::getMinScalingFactor() { return MIN_SCALING_FACTOR; }
 
 void ScreenInfo::setWindowSize(S32 width, S32 height) 
 { 
-   mWindowWidth = width; 
+   mWindowWidth  = width; 
    mWindowHeight = height; 
 
    calcPixelRatio();
@@ -89,11 +89,11 @@ void ScreenInfo::calcPixelRatio()
 }
 
 
-S32 ScreenInfo::getWindowWidth() { return mWindowWidth; }
+S32 ScreenInfo::getWindowWidth()  { return mWindowWidth;  }
 S32 ScreenInfo::getWindowHeight() { return mWindowHeight; }
 
 // The following methods return values in PHYSICAL pixels -- how large is the entire physical monitor?
-S32 ScreenInfo::getPhysicalScreenWidth() { return mPhysicalScreenWidth; }
+S32 ScreenInfo::getPhysicalScreenWidth()  { return mPhysicalScreenWidth;  }
 S32 ScreenInfo::getPhysicalScreenHeight() { return mPhysicalScreenHeight; }
 
 
@@ -145,10 +145,10 @@ S32 ScreenInfo::getVertPhysicalMargin(DisplayMode mode)
 // The following methods return values in VIRTUAL pixels, not accurate in editor
 void ScreenInfo::setGameCanvasSize(S32 width, S32 height)
 {
-   mPrevCanvasWidth = mGameCanvasWidth;
+   mPrevCanvasWidth  = mGameCanvasWidth;
    mPrevCanvasHeight = mGameCanvasHeight;
 
-   mGameCanvasWidth = width;
+   mGameCanvasWidth  = width;
    mGameCanvasHeight = height;
 
    calcPixelRatio();
@@ -159,10 +159,10 @@ void ScreenInfo::resetGameCanvasSize()
    setGameCanvasSize(GAME_WIDTH, GAME_HEIGHT);
 }  
 
-S32 ScreenInfo::getGameCanvasWidth() { return mGameCanvasWidth; }       // canvasWidth, usually 800
+S32 ScreenInfo::getGameCanvasWidth()  { return mGameCanvasWidth;  }     // canvasWidth, usually 800
 S32 ScreenInfo::getGameCanvasHeight() { return mGameCanvasHeight; }     // canvasHeight, usually 600
 
-S32 ScreenInfo::getPrevCanvasWidth() { return mPrevCanvasWidth; }       
+S32 ScreenInfo::getPrevCanvasWidth()  { return mPrevCanvasWidth;  }       
 S32 ScreenInfo::getPrevCanvasHeight() { return mPrevCanvasHeight; }     
 
 
@@ -222,7 +222,6 @@ void ScreenInfo::setCanvasMousePos(S32 x, S32 y, DisplayMode mode)
 
 bool ScreenInfo::isActualized()  { return mActualized; }
 void ScreenInfo::setActualized() { mActualized = true; }
-
 
 
 const Point *ScreenInfo::getMousePos() { return &mCanvasMousePos; }

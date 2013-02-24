@@ -48,6 +48,7 @@
 #include "shipItems.h"           // For moduleInfos
 #include "NexusGame.h"
 #include "Zone.h"                // For instantiation
+#include "ChatHelper.h"          // For runCommand def
 
 #include "soccerGame.h"
 
@@ -269,12 +270,6 @@ void ClientGame::onConnectedToMaster()
    mSeenTimeOutMessage = false;     // Reset display of connection error
 
    logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
-}
-
-
-UIMode ClientGame::getUIMode()
-{
-   return mUIManager->getGameUserInterface()->getUIMode();
 }
 
 
@@ -716,8 +711,7 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
    if(playAlert)
       SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
 
-   if(getUIMode() == TeamShuffleMode)
-      mUIManager->getGameUserInterface()->getTeamShuffleHelper(this)->onPlayerJoined();
+   mUIManager->getGameUserInterface()->onPlayerJoined();
 
    mGameType->updateLeadingPlayerAndScore();
 }
@@ -731,8 +725,7 @@ void ClientGame::onPlayerQuit(const StringTableEntry &name)
    displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
    SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 
-   if(getUIMode() == TeamShuffleMode)
-      mUIManager->getGameUserInterface()->getTeamShuffleHelper(this)->onPlayerQuit();
+   mUIManager->getGameUserInterface()->onPlayerQuit();
 }
 
 
@@ -741,8 +734,7 @@ void ClientGame::onGameOver()
 {
    clearClientList();                   // Erase all info we have about fellow clients
 
-   if(getUIMode() == TeamShuffleMode)   // Exit Shuffle helper to keep things from getting too crashy
-      enterMode(PlayMode);             
+   mUIManager->getGameUserInterface()->onGameOver();
 
    // Kill any objects lingering in the database, such as forcefields
    getGameObjDatabase()->removeEverythingFromDatabase();    
@@ -801,6 +793,21 @@ void ClientGame::displayMessage(const Color &msgColor, const char *format, ...)
    va_end(args);
     
    getUIManager()->getGameUserInterface()->displayMessage(msgColor, message);
+}
+
+
+// A new server message is here!  We don't actually display anything here, despite the name...
+// just add it to the list, will be displayed in render()
+void ClientGame::displayMessagef(const Color &msgColor, const char *format, ...)
+{
+   va_list args;
+   char message[MAX_CHAT_MSG_LENGTH]; 
+
+   va_start(args, format);
+   vsnprintf(message, sizeof(message), format, args); 
+   va_end(args);
+    
+   displayMessage(msgColor, message);
 }
 
 
@@ -901,9 +908,35 @@ bool ClientGame::isLocalTestServer(const char *failureMessage)
 }
 
 
-void ClientGame::enterMode(UIMode mode)
+void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
 {
-   getUIManager()->getGameUserInterface()->enterMode(mode); 
+   switch(event)
+   {
+      case EngineerEventTurretBuilt:         // fallthrough ok
+      case EngineerEventForceFieldBuilt:
+         getUIManager()->getGameUserInterface()->exitHelper();
+         break;
+
+      case EngineerEventTeleporterEntranceBuilt:
+         setSelectedEngineeredObject(EngineeredTeleporterExit);
+         break;
+
+      case EngineerEventTeleporterExitBuilt:
+         getUIManager()->getGameUserInterface()->exitHelper(); 
+         break;
+
+      default:
+         break;
+   }
+}
+
+
+// Send a message to the server that we are (or are not) busy chatting
+void ClientGame::setBusyChatting(bool isBusy)
+{
+   GameConnection *conn = getConnectionToServer();
+   if(conn)
+      conn->c2sSetIsBusy(isBusy);
 }
 
 
@@ -1284,12 +1317,12 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
    }
 }
 
-extern CIniFile gINI;
 
+extern CIniFile gINI;
 
 void ClientGame::runCommand(const char *command)
 {
-   getUIManager()->getGameUserInterface()->runCommand(command);
+   ChatHelper::runCommand(this, command);
 }
 
 
@@ -2129,7 +2162,7 @@ AbstractTeam *ClientGame::getNewTeam()
 
 void ClientGame::setSelectedEngineeredObject(U32 objectType)
 {
-   getUIManager()->getGameUserInterface()->getEngineerHelper(this)->setSelectedEngineeredObject(objectType);
+   getUIManager()->getGameUserInterface()->setSelectedEngineeredObject(objectType);
 }
 
 };

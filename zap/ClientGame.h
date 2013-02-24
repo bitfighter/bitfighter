@@ -132,8 +132,6 @@ public:
 
    UIManager *getUIManager() const;
 
-   UIMode getUIMode();
-
    bool getInCommanderMap();
    void setInCommanderMap(bool inCommanderMap);
    F32 getCommanderZoomFraction() const;
@@ -190,8 +188,8 @@ public:
    bool hasLevelChange(const char *failureMessage);
    bool isLocalTestServer(const char *failureMessage);
 
-
-   void enterMode(UIMode mode);
+   void gotEngineerResponseEvent(EngineerResponseEvent event);
+   void setBusyChatting(bool busy);       // Tell the server we are (or are not) busy chatting
 
    void addToMuteList(const string &name);
    void removeFromMuteList(const string &name);
@@ -230,6 +228,7 @@ public:
 
    void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &message) const;
    void displayMessage(const Color &msgColor, const char *format, ...);
+   void displayMessagef(const Color &msgColor, const char *format, ...);
 
    void onConnectedToMaster();
    void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected);

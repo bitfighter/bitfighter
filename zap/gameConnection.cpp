@@ -463,24 +463,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cEngineerResponseEvent, (RangedU32<0,Enginee
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-   switch(event)
-   {
-      case EngineerEventTurretBuilt:
-      case EngineerEventForceFieldBuilt:
-         mClientGame->enterMode(PlayMode);  // Equivalent to HelperMenu::exitHelper();
-         break;
-
-      case EngineerEventTeleporterEntranceBuilt:
-         mClientGame->setSelectedEngineeredObject(EngineeredTeleporterExit);
-         break;
-
-      case EngineerEventTeleporterExitBuilt:
-         mClientGame->enterMode(PlayMode);  // Finally exit helper menu
-         break;
-
-      default:
-         break;
-   }
+   mClientGame->gotEngineerResponseEvent(EngineerResponseEvent(event.value));
 #endif
 }
 

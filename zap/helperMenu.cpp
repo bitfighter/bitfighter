@@ -61,10 +61,10 @@ InputCode HelperMenu::getActivationKey()
 }
 
 
-// Exit helper mode by entering play mode.  Only one mode is active at a time.
+// Exit helper mode by entering play mode
 void HelperMenu::exitHelper() 
 { 
-   mClientGame->enterMode(PlayMode); 
+   mClientGame->getUIManager()->getGameUserInterface()->exitHelper(); 
 }
 
 
@@ -94,6 +94,12 @@ bool HelperMenu::processInputCode(InputCode inputCode)
    }
 
    return false;
+}
+
+
+void HelperMenu::onTextInput(char ascii)
+{
+   // Do nothing (overridden by ChatHelper)
 }
 
 
@@ -145,6 +151,8 @@ void HelperMenu::activateHelp(UIManager *uiManager)
 
 
 bool HelperMenu::isEngineerHelper()   { return false; }
+bool HelperMenu::isChatHelper()       { return false; }
+
 bool HelperMenu::isMovementDisabled() { return false; }
 bool HelperMenu::isChatDisabled()     { return true;  }
 

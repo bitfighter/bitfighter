@@ -320,6 +320,17 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
 }
 
 
+Vector<string> parseStringAndStripLeadingSlash(const char *str)
+{
+   Vector<string> words = parseString(str);
+
+   if(words.size() > 0 && words[0][0] == '/')
+      words[0].erase(0, 1);      // Remove leading /
+
+   return words;
+}
+
+
 void parseComplexStringToMap(const string &inputString, map<string, string> &fillMap,
                              const string &entryDelimiter, const string &keyValueDelimiter)
 {

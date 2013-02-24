@@ -60,7 +60,7 @@ enum EngineerBuildObjects {
 
 
 // These are events used with engineering an object over the client/server protocols
-enum EngineerResponseEvents {
+enum EngineerResponseEvent {
    EngineerEventTurretBuilt,
    EngineerEventForceFieldBuilt,
    EngineerEventTeleporterEntranceBuilt,

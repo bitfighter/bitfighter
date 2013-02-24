@@ -41,6 +41,15 @@ class UIManager;
 
 class HelperMenu
 {
+public:
+   enum HelperMenuType {
+      ChatHelperType,
+      QuickChatHelperType,
+      LoadoutHelperType,
+      EngineerHelperType,
+      ShuffleTeamsHelperType
+   };
+
 private:
    virtual const char *getCancelMessage();
    virtual InputCode getActivationKey();
@@ -67,9 +76,11 @@ public:
    virtual void onMenuShow();
 
    virtual bool processInputCode(InputCode inputCode);  
+   virtual void onTextInput(char ascii);
 
    virtual void activateHelp(UIManager *uiManager);   // Open help to an appropriate page
    virtual bool isEngineerHelper();                   // Returns false, overridden by EngineerHelper
+   virtual bool isChatHelper();
    virtual bool isMovementDisabled();                 // Is ship movement disabled while this helper is active?
    virtual bool isChatDisabled();                     // Returns true if chat and friends should be disabled while this is active
 };

@@ -41,6 +41,8 @@
 #include "ScreenInfo.h"
 #include "JoystickRender.h"
 #include "CoreGame.h"         // For coreItem rendering
+#include "ChatCommands.h"
+#include "ChatHelper.h"
 
 #include "tnlAssert.h"
 
@@ -965,7 +967,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 
 
 extern CommandInfo chatCmds[];
-extern S32 chatCmdSize;
+extern const S32 chatCmdSize;
 
 void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 {
@@ -1007,7 +1009,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 
    F32 vertices[] = {
          cmdCol, ypos,
-         750, ypos
+         750,    ypos
    };
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
 
@@ -1017,7 +1019,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
    bool first = true;
    S32 section = -1;
 
-   for(S32 i = 0; i < chatCmdSize && U32(chatCmds[i].helpCategory) <= page; i++)
+   for(S32 i = 0; i < ChatHelper::chatCmdSize && U32(chatCmds[i].helpCategory) <= page; i++)
    {
       if(U32(chatCmds[i].helpCategory) < page)
          continue;

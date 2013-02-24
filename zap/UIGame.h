@@ -28,51 +28,19 @@
 
 #include "UI.h"
 #include "Timer.h"
+#include "ChatCommands.h"
 #include "voiceCodec.h"
 #include "Point.h"
 #include "Color.h"
 #include "Timer.h"
 #include "game.h"
 #include "ship.h"          // For ShipModuleCount
+#include "helperMenu.h"    // For HelperMenuType enum
 
 namespace Zap
 {
 
-enum ArgTypes {
-   NAME,    // Player name (can be tab-completed)
-   TEAM,    // Team name (can be tab-completed)
-   xINT,     // Integer argument
-   STR,     // String argument
-   PT,      // Point argument (only used by Lua scripts)
-   ARG_TYPES
-};
-
-enum HelpCategories {
-   ADV_COMMANDS,
-   SOUND_COMMANDS,
-   LEVEL_COMMANDS,
-   ADMIN_COMMANDS,
-   DEBUG_COMMANDS,
-   COMMAND_CATEGORIES
-};
-
 class GameUserInterface;
-
-const S32 MAX_CMDS = 9;
-
-struct CommandInfo 
-{
-   string cmdName;
-   void (GameUserInterface::*cmdCallback)(const Vector<string> &args);
-   ArgTypes cmdArgInfo[MAX_CMDS];
-   S32 cmdArgCount;
-   HelpCategories helpCategory;
-   S32 helpGroup;
-   S32 lines;                    // # lines required to display help (usually 1, occasionally 2)
-   string helpArgString[MAX_CMDS];
-   string helpTextString;
-};
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -129,7 +97,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class HelperMenu;
+class ChatHelper;
 class QuickChatHelper;
 class LoadoutHelper;
 class EngineerHelper;
@@ -163,23 +131,11 @@ private:
 
    bool mMissionOverlayActive;      // Are game instructions (F2) visible?
 
-   enum ChatType {            // Types of in-game chat messages:
-      GlobalChat,             // Goes to everyone in game
-      TeamChat,               // Goes to teammates only
-      CmdChat,                // Entering a command
-      NoChat                  // None of the above
-   };
-
    enum ShutdownMode {
       None,                   // Nothing happening
       ShuttingDown,           // Shutting down, obviously
       Canceled                // Was shutting down, but are no longer
    };
-
-   bool isCmdChat();          // Returns true if we're composing a command in the chat bar, false otherwise
-
-   ChatType mCurrentChatType; // Current in-game chat mode (global or local)
-   UIMode mCurrentUIMode;          
 
    U32 mChatCursorPos;        // Position of composition cursor
 
@@ -216,6 +172,8 @@ private:
    void renderTalkingClients();              // Render things related to voice chat
    void renderDebugStatus();                 // Render things related to debugging
 
+   void doExitHelper(S32 index);
+
    F32 mFPSAvg;
    F32 mPingAvg;
 
@@ -224,11 +182,12 @@ private:
    U32 mFrameIndex;
 
    // Various helper objects
-   HelperMenu *mHelper;       // Current helper
+   Vector<HelperMenu *> mHelperStack;        // Current helper
 
-   QuickChatHelper *mQuickChatHelper;
-   LoadoutHelper *mLoadoutHelper;
-   EngineerHelper *mEngineerHelper;
+   ChatHelper        *mChatHelper;
+   QuickChatHelper   *mQuickChatHelper;
+   LoadoutHelper     *mLoadoutHelper;
+   EngineerHelper    *mEngineerHelper;
    TeamShuffleHelper *mTeamShuffleHelper;
 
 
@@ -240,8 +199,8 @@ private:
       public:
          enum {
             FirstVoiceAudioSampleTime = 250,
-            VoiceAudioSampleTime = 100,
-            MaxDetectionThreshold = 2048,
+            VoiceAudioSampleTime      = 100,
+            MaxDetectionThreshold     = 2048,
          };
 
       Timer mVoiceAudioTimer;
@@ -264,8 +223,6 @@ private:
       void render();
    } mVoiceRecorder;
 
-   LineEditor mLineEditor;    // Message being composed
-
    ChatMessageDisplayer mServerMessageDisplayer;   // Messages from the server
    ChatMessageDisplayer mChatMessageDisplayer1;    // Short form, message expire
    ChatMessageDisplayer mChatMessageDisplayer2;    // Short form, messages do not expire
@@ -279,8 +236,6 @@ private:
    bool mFiring;                          // Are we firing?
    bool mModPrimaryActivated[ShipModuleCount];
    bool mModSecondaryActivated[ShipModuleCount];
-
-   void setBusyChatting(bool busy);       // Tell the server we are (or are not) busy chatting
 
    Timer mModuleDoubleTapTimer[ShipModuleCount];  // Timer for detecting if a module key is double-tapped
    static const S32 DoubleClickTimeout = 200;          // Timeout in milliseconds
@@ -302,6 +257,7 @@ public:
    void displayMessage(const Color &msgColor, const char *message);
    void displayMessagef(const Color &msgColor, const char *format, ...);
    void onChatMessageRecieved(const Color &msgColor, const char *format, ...);
+   const char *getChatMessage();    // Return message being composed in in-game chat
 
    void resetInputModeChangeAlertDisplayTimer(U32 timeInMs);
 
@@ -310,11 +266,13 @@ public:
    void renderReticle();            // Render crosshairs
    void renderProgressBar();        // Render level-load progress bar
    //void renderMessageDisplay();     // Render incoming server msgs
-   void renderCurrentChat();        // Render chat msg user is composing
    void renderLoadoutIndicators();  // Render indicators for the various loadout items
    void renderShutdownMessage();    // Render an alert if server is shutting down
    void renderLostConnectionMessage(); 
    void renderSuspendedMessage();
+
+   bool isChatting();               // Returns true if player is composing a chat message
+
    
    void renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible);
    void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
@@ -324,16 +282,8 @@ public:
    void resetLevelInfoDisplayTimer();     // 6 seconds
    void clearLevelInfoDisplayTimer();
 
-   bool runCommand(const char *input);
-   void issueChat();                // Send chat message (either Team or Global)
-   void cancelChat(bool undelaySpawn = true);
-
    void shutdownInitiated(U16 time, const StringTableEntry &who, const StringPtr &why, bool initiator);
    void cancelShutdown();
-
-   Vector<string> parseStringx(const char *str);    // Break a chat msg into parsable bits
-
-   void setVolume(VolumeType volType, const Vector<string> &words);
 
    // Mouse handling
    void onMouseDragged();
@@ -342,11 +292,12 @@ public:
    void onActivate();                 // Gets run when interface is first activated
    void onReactivate();               // Gets run when interface is subsequently reactivated
 
+   void onPlayerJoined();
+   void onPlayerQuit();
+   void onGameOver();
 
-   QuickChatHelper   *getQuickChatHelper(ClientGame *game);
-   LoadoutHelper     *getLoadoutHelper(ClientGame *game);
-   EngineerHelper    *getEngineerHelper(ClientGame *game);
-   TeamShuffleHelper *getTeamShuffleHelper(ClientGame *game);
+   void enableEngineer(bool engineerEnabled);
+   void setSelectedEngineeredObject(U32 objectType);
 
    void quitEngineerHelper();
 
@@ -355,10 +306,10 @@ public:
 
    bool onKeyDown(InputCode inputCode);
    void onKeyUp(InputCode inputCode);
+
    void onTextInput(char ascii);
 
    bool processPlayModeKey(InputCode inputCode);
-   bool processChatModeKey(InputCode inputCode);
 
    void chooseNextWeapon();           
    void choosePrevWeapon();   
@@ -368,8 +319,11 @@ public:
    void suspendGame();
    void unsuspendGame();
 
-   void enterMode(UIMode mode);     // Enter QuickChat, Loadout, or Engineer mode
-   UIMode getUIMode();
+   void enterMode(HelperMenu::HelperMenuType helperType);  
+   
+   void exitHelper();
+   void exitHelper(HelperMenu *helper);
+
 
    void renderEngineeredItemDeploymentMarker(Ship *ship);
 
@@ -383,63 +337,6 @@ public:
 
    // Message colors... (rest to follow someday)
    static Color privateF5MessageDisplayedInGameColor;
-
-
-   // TODO: Move these to ClientGame???  They could really go anywhere!
-   void announceHandler(const Vector<string> &words);
-   void mVolHandler(const Vector<string> &args);    
-   void sVolHandler(const Vector<string> &args);    
-   void vVolHandler(const Vector<string> &args);
-   void servVolHandler(const Vector<string> &args);
-   void mNextHandler(const Vector<string> &words);
-   void mPrevHandler(const Vector<string> &words);
-   void getMapHandler(const Vector<string> &words);
-   void nextLevelHandler(const Vector<string> &words);
-   void prevLevelHandler(const Vector<string> &words);
-   void restartLevelHandler(const Vector<string> &words);
-   void randomLevelHandler(const Vector<string> &words);
-   void shutdownServerHandler(const Vector<string> &words);
-   void kickPlayerHandler(const Vector<string> &words);
-   void submitPassHandler(const Vector<string> &words);
-   void showCoordsHandler(const Vector<string> &words);
-   void showIdsHandler(const Vector<string> &words);
-   void showZonesHandler(const Vector<string> &words);
-   void showPathsHandler(const Vector<string> &words);
-   void pauseBotsHandler(const Vector<string> &words);
-   void stepBotsHandler(const Vector<string> &words);
-   void setAdminPassHandler(const Vector<string> &words);
-   void setServerPassHandler(const Vector<string> &words);
-   void setLevPassHandler(const Vector<string> &words);
-   void setServerNameHandler(const Vector<string> &words);
-   void setServerDescrHandler(const Vector<string> &words);
-   void setLevelDirHandler(const Vector<string> &words);
-   void serverCommandHandler(const Vector<string> &words);
-   void pmHandler(const Vector<string> &words);
-   void muteHandler(const Vector<string> &words);
-   void voiceMuteHandler(const Vector<string> &words);
-   void maxFpsHandler(const Vector<string> &words);
-   void lagHandler(const Vector<string> &words);
-   void clearCacheHandler(const Vector<string> &words);
-   void lineWidthHandler(const Vector<string> &words);
-   void idleHandler(const Vector<string> &words);
-   void suspendHandler(const Vector<string> &words);
-   void showPresetsHandler(const Vector<string> &words);
-   void deleteCurrentLevelHandler(const Vector<string> &words);
-   void addTimeHandler(const Vector<string> &words);
-   void setTimeHandler(const Vector<string> &words);
-   void setWinningScoreHandler(const Vector<string> &words);
-   void resetScoreHandler(const Vector<string> &words);
-   void addBotHandler(const Vector<string> &words);
-   void addBotsHandler(const Vector<string> &words);
-   void kickBotHandler(const Vector<string> &words);
-   void kickBotsHandler(const Vector<string> &words);
-   void showBotsHandler(const Vector<string> &words);
-   void setMaxBotsHandler(const Vector<string> &words);
-   void banPlayerHandler(const Vector<string> &words);
-   void banIpHandler(const Vector<string> &words);
-   void renamePlayerHandler(const Vector<string> &words);
-   void globalMuteHandler(const Vector<string> &words);
-   void shuffleTeams(const Vector<string> &words);
 };
 
 

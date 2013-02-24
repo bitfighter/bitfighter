@@ -1281,10 +1281,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver
 
    if(gameOver)
    {
-      // Exit shuffle mode
-      ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-      if(clientGame->getUIMode() == TeamShuffleMode) 
-         clientGame->enterMode(PlayMode);
+      // Alert the UI that the game is now over
+      static_cast<ClientGame *>(mGame)->getUIManager()->getGameUserInterface()->onGameOver();
 
       // Tell timer it's all over
       mGameTimer.setGameIsOver();
@@ -2337,8 +2335,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    //clientGame->resetZoomDelta();
 
    gameUI->resetLevelInfoDisplayTimer();        // Start displaying the level info, now that we have it
-
-   gameUI->getLoadoutHelper(clientGame)->initialize(engineerEnabled);    // Now we know all we need to initialize our loadout options
+   gameUI->enableEngineer(engineerEnabled);     // Now we know all we need to initialize our loadout options
 #endif
 }
 

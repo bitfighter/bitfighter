@@ -38,6 +38,8 @@
 namespace Zap
 {
 
+static const S32 IN_GAME_CHAT_DISPLAY_POS = 500;
+
 class ChatMessage
 {
 public:

@@ -45,7 +45,7 @@ namespace Zap {
 class ScreenInfo
 {
 private:
-   static const S32 GAME_WIDTH = 800;
+   static const S32 GAME_WIDTH  = 800;
    static const S32 GAME_HEIGHT = 600;
 
    F32 MIN_SCALING_FACTOR;       // Limits minimum window size
@@ -95,7 +95,7 @@ public:
 
    // Dimensions of black bars in physical pixes, based on current window mode
    S32 getHorizPhysicalMargin(DisplayMode mode);
-   S32 getVertPhysicalMargin(DisplayMode mode);
+   S32 getVertPhysicalMargin (DisplayMode mode);
 
    // The following methods return values in VIRTUAL pixels, not accurate in editor
    void setGameCanvasSize(S32 width, S32 height);
@@ -118,7 +118,7 @@ public:
 
    Point convertCanvasToWindowCoord(S32 x, S32 y, DisplayMode mode);
 
-   void setMousePos(S32 x, S32 y, DisplayMode mode);
+   void setMousePos      (S32 x, S32 y, DisplayMode mode);
    void setCanvasMousePos(S32 x, S32 y, DisplayMode mode);
 
    const Point *getMousePos();
@@ -129,10 +129,10 @@ public:
 
    // SDL information
 #ifndef ZAP_DEDICATED
-#if SDL_VERSION_ATLEAST(2,0,0)
-   SDL_Window *sdlWindow;
-   SDL_GLContext *sdlGlContext;
-#endif
+#  if SDL_VERSION_ATLEAST(2,0,0)
+      SDL_Window *sdlWindow;
+      SDL_GLContext *sdlGlContext;
+#  endif
 #endif
 
 };

@@ -471,15 +471,15 @@ void UserInterface::renderDiagnosticKeysOverlay()
 
 void UserInterfaceData::get()
 {
-   vertMargin = UserInterface::vertMargin;
+   vertMargin  = UserInterface::vertMargin;
    horizMargin = UserInterface::horizMargin;
-   chatMargin = UserInterface::messageMargin;
+   chatMargin  = UserInterface::messageMargin;
 }
 
 
 void UserInterfaceData::set()
 {
-   UserInterface::vertMargin = vertMargin;
+   UserInterface::vertMargin  = vertMargin;
    UserInterface::horizMargin = horizMargin;
    UserInterface::messageMargin = chatMargin;
 }
