@@ -1111,7 +1111,7 @@ bool checkInputCode(InputCode codeUserEntered, InputCode codeToActivateCommand)
 
 
 // Helper function -- checks input keys and sees if we should start chatting.  Returns true if entered chat mode, false if not.
-bool GameUserInterface::startChatting(InputCode inputCode)
+bool GameUserInterface::checkEnterChatInputCode(InputCode inputCode)
 {
    GameSettings *settings = getGame()->getSettings();
 
@@ -1234,7 +1234,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    // The following keys are only allowed when there are no helpers or when top helper permits
    else if(mHelperStack.size() == 0 || !mHelperStack.last()->isChatDisabled())    
    {
-      if(startChatting(inputCode))
+      if(checkEnterChatInputCode(inputCode))
          return true;
 
       // These keys are only available when there is no helper active
