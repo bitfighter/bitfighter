@@ -162,7 +162,7 @@ private:
    Timer mLevelInfoDisplayTimer;
 
    void updateChatMessages(U32 timeDelta);
-   bool startChatting(InputCode inputCode);  // Helper for key handler
+   bool checkEnterChatInputCode(InputCode inputCode);  // Helper for key handler
 
    void renderInputModeChangeAlert();
    void renderMissionOverlay(const GameType *gameType);
