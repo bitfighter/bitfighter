@@ -1236,24 +1236,24 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    {
       if(checkEnterChatInputCode(inputCode))
          return true;
+   }
 
-      // These keys are only available when there is no helper active
-      else if(mHelperStack.size() == 0)
-      {
-         if(checkInputCode(settings, InputCodeManager::BINDING_QUICKCHAT, inputCode))
-            enterMode(HelperMenu::QuickChatHelperType);
-         else if(checkInputCode(settings, InputCodeManager::BINDING_LOADOUT, inputCode))
-            enterMode(HelperMenu::LoadoutHelperType);
-         else if(checkInputCode(settings, InputCodeManager::BINDING_DROPITEM, inputCode))
-            dropItem();
-         // Check if the user is trying to use keyboard to move when in joystick mode
-         else if(settings->getInputCodeManager()->getInputMode() == InputModeJoystick)      
-            if(checkInputCode(settings, InputCodeManager::BINDING_UP,    inputCode) ||
-               checkInputCode(settings, InputCodeManager::BINDING_DOWN,  inputCode) ||
-               checkInputCode(settings, InputCodeManager::BINDING_LEFT,  inputCode) ||
-               checkInputCode(settings, InputCodeManager::BINDING_RIGHT, inputCode))
-                  mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
-      }
+   // These keys are only available when there is no helper active
+   else if(mHelperStack.size() == 0)
+   {
+      if(checkInputCode(settings, InputCodeManager::BINDING_QUICKCHAT, inputCode))
+         enterMode(HelperMenu::QuickChatHelperType);
+      else if(checkInputCode(settings, InputCodeManager::BINDING_LOADOUT, inputCode))
+         enterMode(HelperMenu::LoadoutHelperType);
+      else if(checkInputCode(settings, InputCodeManager::BINDING_DROPITEM, inputCode))
+         dropItem();
+      // Check if the user is trying to use keyboard to move when in joystick mode
+      else if(settings->getInputCodeManager()->getInputMode() == InputModeJoystick)      
+         if(checkInputCode(settings, InputCodeManager::BINDING_UP,    inputCode) ||
+            checkInputCode(settings, InputCodeManager::BINDING_DOWN,  inputCode) ||
+            checkInputCode(settings, InputCodeManager::BINDING_LEFT,  inputCode) ||
+            checkInputCode(settings, InputCodeManager::BINDING_RIGHT, inputCode))
+               mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
    }
    else
       return false;
