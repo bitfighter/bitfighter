@@ -964,13 +964,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
 
       // If we have a helper, let that determine what happens when the help key is pressed.  Otherwise, show help normally.
       if(mHelperStack.size() > 0)
-      {
-         if(isChatting())
-            getUIManager()->getInstructionsUserInterface()->activatePage(InstructionsUserInterface::InstructionAdvancedCommands);
-         else
-            mHelperStack.last()->activateHelp(getUIManager());
-      }
-      
+         mHelperStack.last()->activateHelp(getUIManager());
       else
          getUIManager()->activate(InstructionsUI);
 

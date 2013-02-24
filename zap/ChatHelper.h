@@ -69,6 +69,8 @@ public:
 
    void render();                
    void onMenuShow();  
+   void activateHelp(UIManager *uiManager);
+
    bool processInputCode(InputCode inputCode);   
    void onTextInput(char ascii);
 

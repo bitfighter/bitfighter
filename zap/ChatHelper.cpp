@@ -25,12 +25,13 @@
 
 #include "ChatHelper.h"
 
-#include "UIChat.h"        // For font sizes and such
+#include "UIChat.h"           // For font sizes and such
 #include "ChatCommands.h"
 #include "ClientGame.h"
 #include "ClientInfo.h"
 #include "gameType.h"
 #include "Console.h"
+#include "UIInstructions.h"   // For code to activate help screen
 
 #include "ScreenInfo.h"
 #include "stringUtils.h"
@@ -251,6 +252,13 @@ void ChatHelper::render()
 void ChatHelper::onMenuShow()
 {
    // Do nothing
+}
+
+
+// When chatting, show command help if user presses F1
+void ChatHelper::activateHelp(UIManager *uiManager)
+{
+    getGame()->getUIManager()->getInstructionsUserInterface()->activatePage(InstructionsUserInterface::InstructionAdvancedCommands);
 }
 
 
