@@ -498,7 +498,7 @@ inline int luaW_new(lua_State* L, int args)
 {
     T* obj = LuaWrapper<T>::allocator(L);
     luaW_push<T>(L, obj);
-    luaW_hold<T>(L, obj);
+//    luaW_hold<T>(L, obj);
     luaW_postconstructor<T>(L, args);
     return 1;
 }

@@ -114,7 +114,7 @@ public:
 
 private:
    static const U32 CoreMinWidth = 20;
-   static const U32 CoreDefaultStartingHealth = 10;     // In ship-damage equivalents; these will be divided amongst all panels
+   static const U32 CoreDefaultStartingHealth = 40;     // In ship-damage equivalents; these will be divided amongst all panels
    static const U32 CoreHeartbeatStartInterval = 2000;  // In milliseconds
    static const U32 CoreHeartbeatMinInterval = 500;
    static const U32 CoreAttackedWarningDuration = 600;
