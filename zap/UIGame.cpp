@@ -2245,6 +2245,7 @@ const char *GameUserInterface::getChatMessage()
    return mChatHelper->getChatMessage();
 }
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
