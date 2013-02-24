@@ -62,7 +62,7 @@ protected:
    std::vector<T> innerVector;
 };
 
-// Avoid std::vector<bool>, over 10 times slower on 8 bit per byte, and need to get adderss of bool arrays.
+// Avoid std::vector<bool>, over 10 times slower on 8 bit per byte, and need to get address of bool arrays
 
 template<> class VectorBase<bool>
 {
@@ -144,7 +144,7 @@ template<class T> inline Vector<T>::Vector(const std::vector<T>& p)        // Co
    this->innerVector = p;
 }
 
-template<class T> inline Vector<T>::Vector(const T *array, U32 length)        // Constructor to wrap a C-style array
+template<class T> inline Vector<T>::Vector(const T *array, U32 length)     // Constructor to wrap a C-style array
 {
    this->innerVector = std::vector<T>(array, array + length);
 }
