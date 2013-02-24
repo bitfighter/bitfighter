@@ -858,11 +858,8 @@ void GameUserInterface::doExitHelper(S32 index)
 // Render potential location to deploy engineered item -- does nothing if we're not engineering
 void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
 {
-   if(mHelperStack.size() > 0 && mHelperStack.last()->isEngineerHelper())
-   {
-      TNLAssert(mEngineerHelper, "Engineer helper does not exist!");
+   if(mHelperStack.getIndex(mEngineerHelper) != -1)
       mEngineerHelper->renderDeploymentMarker(ship);
-   }
 }
 
 
