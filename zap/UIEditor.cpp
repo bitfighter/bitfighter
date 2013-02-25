@@ -1703,11 +1703,8 @@ void EditorUserInterface::renderItemInfoPanel()
                instructs  = obj->getInstructionMsg(keys.size());      // Various objects have different instructions
 
                S32 id = obj->getUserAssignedId();
-               if(id > 0)
-               {
-                  keys.push_back("Id");
-                  values.push_back(itos(id));
-               }
+               keys.push_back("Id");
+               values.push_back(id > 0 ? itos(id) : "Unassigned");
             }
             else                    // Second or subsequent selected object found
             {
@@ -1741,7 +1738,7 @@ void EditorUserInterface::renderItemInfoPanel()
       glColor(textColor);
       S32 w = drawStringAndGetWidth(xpos, ypos, PANEL_TEXT_SIZE, instructs);
       if(w > 0)
-         w += drawStringAndGetWidth(xpos, ypos, PANEL_TEXT_SIZE, " ");
+         w += drawStringAndGetWidth(xpos, ypos, PANEL_TEXT_SIZE, "; ");
       drawString(xpos + w, ypos, PANEL_TEXT_SIZE, "[#] to edit Id");
 
       if(!dockItem)

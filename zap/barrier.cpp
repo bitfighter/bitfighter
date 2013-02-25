@@ -505,7 +505,7 @@ const char *WallItem::getOnDockName()       { return "Wall";  }
 const char *WallItem::getPrettyNamePlural() { return "Walls"; }
 const char *WallItem::getEditorHelpString() { return "Walls define the general form of your level."; }
 
-const char *WallItem::getInstructionMsg(S32 attributeCount) { return "[+] and [-] to change"; }
+const char *WallItem::getInstructionMsg(S32 attributeCount) { return "[+] and [-] to change width"; }
 
 
 void WallItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
