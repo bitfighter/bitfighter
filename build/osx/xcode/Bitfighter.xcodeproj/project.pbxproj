@@ -162,6 +162,8 @@
 		738B57731446185700F25FDF /* InputCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576D1446185700F25FDF /* InputCode.cpp */; };
 		738B57741446185700F25FDF /* shipItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B57701446185700F25FDF /* shipItems.cpp */; };
 		738B9D0D15A1E0C700D1F76C /* Zone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B9D0B15A1E0C700D1F76C /* Zone.cpp */; };
+		73931AFA16DAE15F00465E9E /* ChatCommands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73931AF616DAE15F00465E9E /* ChatCommands.cpp */; };
+		73931AFB16DAE15F00465E9E /* ChatHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73931AF816DAE15F00465E9E /* ChatHelper.cpp */; };
 		73946E6114D50F0F00B95333 /* joystick_presets.ini in Resources */ = {isa = PBXBuildFile; fileRef = 73946E6014D50F0F00B95333 /* joystick_presets.ini */; };
 		739746A014B373980053CCF4 /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397469F14B373980053CCF4 /* libpng.framework */; };
 		739746F114B374E30053CCF4 /* WeaponInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 739746EF14B374E30053CCF4 /* WeaponInfo.cpp */; };
@@ -762,6 +764,10 @@
 		738B9D0A15A1E0C700D1F76C /* Engineerable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Engineerable.h; path = ../../../zap/Engineerable.h; sourceTree = SOURCE_ROOT; };
 		738B9D0B15A1E0C700D1F76C /* Zone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Zone.cpp; path = ../../../zap/Zone.cpp; sourceTree = SOURCE_ROOT; };
 		738B9D0C15A1E0C700D1F76C /* Zone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Zone.h; path = ../../../zap/Zone.h; sourceTree = SOURCE_ROOT; };
+		73931AF616DAE15F00465E9E /* ChatCommands.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChatCommands.cpp; path = ../../../zap/ChatCommands.cpp; sourceTree = SOURCE_ROOT; };
+		73931AF716DAE15F00465E9E /* ChatCommands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChatCommands.h; path = ../../../zap/ChatCommands.h; sourceTree = SOURCE_ROOT; };
+		73931AF816DAE15F00465E9E /* ChatHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChatHelper.cpp; path = ../../../zap/ChatHelper.cpp; sourceTree = SOURCE_ROOT; };
+		73931AF916DAE15F00465E9E /* ChatHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChatHelper.h; path = ../../../zap/ChatHelper.h; sourceTree = SOURCE_ROOT; };
 		73946E6014D50F0F00B95333 /* joystick_presets.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = joystick_presets.ini; path = ../../../exe/joystick_presets.ini; sourceTree = SOURCE_ROOT; };
 		7397469F14B373980053CCF4 /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = ../../../lib/libpng.framework; sourceTree = SOURCE_ROOT; };
 		739746EE14B374E30053CCF4 /* GameTypesEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GameTypesEnum.h; path = ../../../zap/GameTypesEnum.h; sourceTree = SOURCE_ROOT; };
@@ -1848,6 +1854,10 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				73931AF616DAE15F00465E9E /* ChatCommands.cpp */,
+				73931AF716DAE15F00465E9E /* ChatCommands.h */,
+				73931AF816DAE15F00465E9E /* ChatHelper.cpp */,
+				73931AF916DAE15F00465E9E /* ChatHelper.h */,
 				739D0BAA16B21B9F00F5B979 /* MathUtils.cpp */,
 				739D0BAB16B21B9F00F5B979 /* MathUtils.h */,
 				739D0BAC16B21B9F00F5B979 /* RenderUtils.cpp */,
@@ -3017,6 +3027,8 @@
 				7388B3D31601A71000C16E45 /* LuaScriptRunner.cpp in Sources */,
 				739D0BB016B21B9F00F5B979 /* MathUtils.cpp in Sources */,
 				739D0BB116B21B9F00F5B979 /* RenderUtils.cpp in Sources */,
+				73931AFA16DAE15F00465E9E /* ChatCommands.cpp in Sources */,
+				73931AFB16DAE15F00465E9E /* ChatHelper.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
