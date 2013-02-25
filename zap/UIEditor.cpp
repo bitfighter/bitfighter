@@ -1738,7 +1738,7 @@ void EditorUserInterface::renderItemInfoPanel()
       glColor(textColor);
       S32 w = drawStringAndGetWidth(xpos, ypos, PANEL_TEXT_SIZE, instructs);
       if(w > 0)
-         w += drawStringAndGetWidth(xpos, ypos, PANEL_TEXT_SIZE, "; ");
+         w += drawStringAndGetWidth(xpos + w, ypos, PANEL_TEXT_SIZE, "; ");
       drawString(xpos + w, ypos, PANEL_TEXT_SIZE, "[#] to edit Id");
 
       if(!dockItem)
