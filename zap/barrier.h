@@ -167,8 +167,8 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();          // Vertices should not be labeled
-   string getAttributeString();
-   const char *getInstructionMsg();
+   const char *getInstructionMsg(S32 attributeCount);
+   void fillAttributesVectors(Vector<string> &keys, Vector<string> &values); 
 
    bool hasTeam();
    bool canBeHostile();

@@ -250,12 +250,14 @@ void PickupItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 
 
 // Render some attributes when item is selected but not being edited
-string PickupItem::getAttributeString()
+void PickupItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
+   keys.push_back("Regen");
+
    if(mRepopDelay == 0)
-      return "Regen: None";
+      values.push_back("None");
    else
-      return "Regen: " + itos(mRepopDelay) + " sec" + ( mRepopDelay != 1 ? "s" : "");
+      values.push_back(itos(mRepopDelay) + " sec" + ( mRepopDelay != 1 ? "s" : ""));
 }
 
 #endif

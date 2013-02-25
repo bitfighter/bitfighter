@@ -400,9 +400,9 @@ void CoreItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 
 
 // Render some attributes when item is selected but not being edited
-string CoreItem::getAttributeString()
+void CoreItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
-   return "Health: " + itos(S32(mStartingHealth * DamageReductionRatio + 0.5));
+   keys.push_back("Health");   values.push_back(itos(S32(mStartingHealth * DamageReductionRatio + 0.5)));
 }
 
 #endif

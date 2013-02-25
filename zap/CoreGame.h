@@ -199,7 +199,7 @@ public:
    EditorAttributeMenuUI *getAttributeMenu();
    void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
    void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
-   string getAttributeString();
+   void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
 #endif
 
    ///// Editor methods

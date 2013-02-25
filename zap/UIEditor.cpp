@@ -1588,19 +1588,20 @@ void EditorUserInterface::renderDock()
 const S32 PANEL_TEXT_SIZE = 10;
 const S32 PANEL_SPACING = S32(PANEL_TEXT_SIZE * 1.3);
 
+static const S32 PanelBottom = gScreenInfo.getGameCanvasHeight() - EditorUserInterface::vertMargin;
+static const S32 PanelTop    = PanelBottom - (4 * PANEL_SPACING + 9);
+static const S32 PanelLeft   = EditorUserInterface::horizMargin;
+static const S32 PanelRight  = PanelLeft + 180;      // left + width
+static const S32 PanelInnerMargin = 4;
+
+
 void EditorUserInterface::renderInfoPanel() 
 {
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-
-   const S32 panelWidth = 180;
-   const S32 panelHeight = 4 * PANEL_SPACING + 9;
+   // Panel location and size
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-   drawFilledRect(horizMargin, canvasHeight - vertMargin, 
-                  horizMargin + panelWidth, canvasHeight - vertMargin - panelHeight, 
-                  Colors::richGreen, .7f, Colors::white);
-
+   drawFilledRect(PanelLeft, PanelBottom, PanelRight, PanelTop, Colors::richGreen, .7f, Colors::white);
 
    // Draw coordinates on panel -- if we're moving an item, show the coords of the snap vertex, otherwise show the coords of the
    // snapped mouse position
@@ -1630,7 +1631,7 @@ void EditorUserInterface::renderInfoPanel()
 
 void EditorUserInterface::renderPanelInfoLine(S32 line, const char *format, ...)
 {
-   const S32 XPOS = horizMargin + 4;
+   const S32 xpos = horizMargin + PanelInnerMargin;
 
    va_list args;
    static char text[512];  // reusable buffer
@@ -1639,35 +1640,54 @@ void EditorUserInterface::renderPanelInfoLine(S32 line, const char *format, ...)
    vsnprintf(text, sizeof(text), format, args); 
    va_end(args);
 
-   drawString(XPOS, gScreenInfo.getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - line * PANEL_SPACING + 6, PANEL_TEXT_SIZE, text);
+   drawString(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - line * PANEL_SPACING + 6, PANEL_TEXT_SIZE, text);
+}
+
+
+// Helper to render attributes in a colorful and lady-like fashion
+static void renderAttribText(S32 xpos, S32 ypos, S32 textsize, 
+                             const Color &keyColor, const Color &valColor, 
+                             const Vector<string> &keys, const Vector<string> &vals)
+{
+   TNLAssert(keys.size() == vals.size(), "Expected equal number of keys and values!");
+   for(S32 i = 0; i < keys.size(); i++)
+   {
+      glColor(keyColor);
+      xpos += drawStringAndGetWidth(xpos, ypos, textsize, keys[i].c_str());
+      xpos += drawStringAndGetWidth(xpos, ypos, textsize, ": ");
+
+      glColor(valColor);
+      xpos += drawStringAndGetWidth(xpos, ypos, textsize, vals[i].c_str());
+      if(i < keys.size() - 1)
+         xpos += drawStringAndGetWidth(xpos, ypos, textsize, "; ");
+   }
 }
 
 
 // Shows selected item attributes, or, if we're hovering over dock item, shows dock item info string
-// This method is a total mess!  TODO: Rewrite
 void EditorUserInterface::renderItemInfoPanel()
 {
-   string text = "";
-   string hoverText = "";
-   string item = "";
-   S32 hitCount = 0;
-   string attribs = "";
-   bool multipleKindsOfObjectsSelected = false;
+   string attribsText, hoverText, itemName, attribs;     // All intialized to ""
 
-   bool dockHit;
+   S32 hitCount = 0;
+   bool multipleKindsOfObjectsSelected = false;
+   bool dockItem = false;
+
+   static Vector<string> keys, values;    // Reusable containers
+   keys.clear();
+   values.clear();
+
    const char *instructs = "";
 
    if(mDockItemHit)
    {
-      dockHit = true;
-
-      item = mDockItemHit->getOnScreenName();
-      text = mDockItemHit->getEditorHelpString();
+      itemName    = mDockItemHit->getOnScreenName();
+      attribsText = mDockItemHit->getEditorHelpString();
+      dockItem = true;
    }
    else
    {
-      dockHit = false;
-
+      // Cycle through all our objects to find the selected ones
       const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
       for(S32 i = 0; i < objList->size(); i++)
@@ -1676,68 +1696,74 @@ void EditorUserInterface::renderItemInfoPanel()
 
          if(obj->isSelected())
          {
-            hitCount++;
-
-            if(text != "")
+            if(hitCount == 0)       // This is the first object we've hit
             {
-               if(item != obj->getOnScreenName())
+               itemName   = obj->getOnScreenName();
+               obj->fillAttributesVectors(keys, values);
+               instructs  = obj->getInstructionMsg(keys.size());      // Various objects have different instructions
+
+               S32 id = obj->getUserAssignedId();
+               if(id > 0)
                {
-                  item = "Multiple objects selected";
+                  keys.push_back("Id");
+                  values.push_back(itos(id));
+               }
+            }
+            else                    // Second or subsequent selected object found
+            {
+               if(multipleKindsOfObjectsSelected || itemName != obj->getOnScreenName())    // Different type of object
+               {
+                  itemName = "Multiple object types selected";
                   multipleKindsOfObjectsSelected = true;
                }
-
-               text = " ";
-               continue;
-            }
-            else
-            {
-               item = obj->getOnScreenName();
-               attribs = obj->getAttributeString();
             }
 
-            if(attribs != "")
-            {
-               text = "Attributes -> " + attribs;
-               instructs = obj->getInstructionMsg();
-            }
-            else
-               text = " ";
-         }
+            hitCount++;
+         }  // end if obj is selected
 
          else if(obj->isLitUp())
             hoverText = string("Hover: ") + obj->getOnScreenName();
       }
    }
 
+   /////
+   // Now render the info we collected above
 
-   Color textColor = (dockHit ? Colors::green : Colors::yellow);
+   // Green for dock item, yellow for regular item
+   const Color *textColor = (mDockItemHit ? &Colors::green : &Colors::yellow);
 
-   S32 xpos = horizMargin + 4 + 180 + 5;
+   S32 xpos = PanelRight + 9;
+   S32 ypos = PanelBottom - PANEL_TEXT_SIZE - PANEL_SPACING + 6;
    S32 upperLineTextSize = 14;
-   S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - PANEL_SPACING + 6;
 
-   if(text != "" && text != " ")
+   if(hitCount == 1)
    {
       glColor(textColor);
-      drawString(xpos, ypos,                 PANEL_TEXT_SIZE, instructs);
-      drawString(xpos, ypos - PANEL_SPACING, PANEL_TEXT_SIZE, text.c_str());
+      S32 w = drawStringAndGetWidth(xpos, ypos, PANEL_TEXT_SIZE, instructs);
+      if(w > 0)
+         w += drawStringAndGetWidth(xpos, ypos, PANEL_TEXT_SIZE, " ");
+      drawString(xpos + w, ypos, PANEL_TEXT_SIZE, "[#] to edit Id");
+
+      if(!dockItem)
+         renderAttribText(xpos, ypos - PANEL_SPACING, PANEL_TEXT_SIZE, Colors::cyan, Colors::white, keys, values);
    }
 
    ypos -= PANEL_SPACING + S32(upperLineTextSize * 1.3);
-   if(item != "")
+
+   if(hitCount > 0)
    {
       if(!multipleKindsOfObjectsSelected)
-         item = (mDraggingObjects ? "Dragging " : "Selected ") + item;
+         itemName = (mDraggingObjects ? "Dragging " : "Selected ") + itemName;
 
       if(hitCount > 1)
-         item += " (" + itos(hitCount) + ")";
+         itemName += " (" + itos(hitCount) + ")";
 
       glColor(textColor);
-      drawString(xpos, ypos, upperLineTextSize, item.c_str());
+      drawString(xpos, ypos, upperLineTextSize, itemName.c_str());
    }
 
    ypos -= S32(upperLineTextSize * 1.3);
-   if(hoverText != "" && !dockHit)
+   if(hoverText != "" && !mDockItemHit)
    {
       glColor(Colors::white);
       drawString(xpos, ypos, upperLineTextSize, hoverText.c_str());

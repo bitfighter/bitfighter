@@ -88,13 +88,13 @@ TextItem *TextItem::clone() const
 }
 
 
-string TextItem::getAttributeString()
+void TextItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
-   return "Text: " + mText;
+   keys.push_back("Text");   values.push_back(mText);
 }
 
 
-const char *TextItem::getInstructionMsg()
+const char *TextItem::getInstructionMsg(S32 attributeCount)
 {
    return "[Enter] to edit text";
 }

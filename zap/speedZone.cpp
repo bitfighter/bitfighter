@@ -355,9 +355,10 @@ void SpeedZone::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 
 
 // Render some attributes when item is selected but not being edited
-string SpeedZone::getAttributeString()
+void SpeedZone::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
-   return "Speed: " + itos(mSpeed) + "; Snap: " + (mSnapLocation ? "Yes" : "No");      
+   keys.push_back("Speed");   values.push_back(itos(mSpeed));
+   keys.push_back("Snap");    values.push_back(mSnapLocation ? "Yes" : "No");
 }
 
 #endif

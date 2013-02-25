@@ -505,8 +505,13 @@ const char *WallItem::getOnDockName()       { return "Wall";  }
 const char *WallItem::getPrettyNamePlural() { return "Walls"; }
 const char *WallItem::getEditorHelpString() { return "Walls define the general form of your level."; }
 
-string WallItem::getAttributeString()     { return "Width: " + itos(getWidth()); }
-const char *WallItem::getInstructionMsg() { return "[+] and [-] to change";      }
+const char *WallItem::getInstructionMsg(S32 attributeCount) { return "[+] and [-] to change"; }
+
+
+void WallItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
+{ 
+   keys.push_back("Width");   values.push_back(itos(getWidth()));
+}
 
 
 bool WallItem::hasTeam()      { return false; }

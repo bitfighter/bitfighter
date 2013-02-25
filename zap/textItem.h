@@ -113,11 +113,12 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();
-   string getAttributeString();
-   const char *getInstructionMsg();
+   const char *getInstructionMsg(S32 attributeCount);
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
+
+   void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
 
    void newObjectFromDock(F32 gridSize);
 

@@ -174,16 +174,17 @@ void AbstractSpawn::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 
 
 // Render some attributes when item is selected but not being edited
-string AbstractSpawn::getAttributeString()
+void AbstractSpawn::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
-
    if(getDefaultRespawnTime() == -1)
-      return "";
+      return;
+
+   keys.push_back("Spawn time:");
 
    if(mSpawnTime == 0)
-      return "Disabled";
+      values.push_back("Will not spawn");
    else
-      return "Spawn time: " + itos(mSpawnTime) + " sec" + ( mSpawnTime != 1 ? "s" : "");
+      values.push_back(itos(mSpawnTime) + " sec" + ( mSpawnTime != 1 ? "s" : ""));
 }
 
 #endif

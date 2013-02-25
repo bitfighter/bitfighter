@@ -186,8 +186,10 @@ public:
    virtual const char *getPrettyNamePlural();
    virtual const char *getOnDockName();
    virtual const char *getEditorHelpString();
-   virtual const char *getInstructionMsg();        // Message printed below item when it is selected
-   virtual string getAttributeString();            // Used for displaying object attributes in lower-left of editor
+   virtual const char *getInstructionMsg(S32 attributeCount);        // Message printed below item when it is selected
+   
+   // For displaying object attributes in lower-left of editor:
+   virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);   
 
 
    // Objects can be different sizes on the dock and in the editor.  We need to draw selection boxes in both locations,

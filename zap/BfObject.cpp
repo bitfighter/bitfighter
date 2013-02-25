@@ -334,18 +334,18 @@ const char *EditorObject::getOnScreenName()
 
 
 // Not all editor objects will implement this
-const char *EditorObject::getInstructionMsg()
+const char *EditorObject::getInstructionMsg(S32 attributeCount)
 {
-   if(getAttributeString() != "")
+   if(attributeCount > 0)
       return "[Enter] to edit attributes";
 
    return "";
 }
 
 
-string EditorObject::getAttributeString()
+void EditorObject::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
-   return "";
+   return;
 }
 
 

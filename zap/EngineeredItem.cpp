@@ -603,9 +603,9 @@ Point EngineeredItem::getEditorSelectionOffset(F32 currentScale)
 
 
 // Render some attributes when item is selected but not being edited
-string EngineeredItem::getAttributeString()
+void EngineeredItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
-   return "10% Heal: " + (mHealRate == 0 ? "Disabled" : itos(mHealRate) + " sec" + ( mHealRate != 1 ? "s" : ""));      
+   keys.push_back("10% Heal");   values.push_back((mHealRate == 0 ? "Disabled" : itos(mHealRate) + " sec" + (mHealRate != 1 ? "s" : "")));
 }
 
 #endif

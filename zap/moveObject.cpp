@@ -1617,9 +1617,9 @@ void Asteroid::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 
 
 // Render some attributes when item is selected but not being edited
-string Asteroid::getAttributeString()
+void Asteroid::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
-   return "Size: " + itos(mSizeLeft);      
+   keys.push_back("Size");   values.push_back(itos(mSizeLeft));
 }
 
 #endif
