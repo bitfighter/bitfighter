@@ -71,8 +71,6 @@ using namespace Zap;
 namespace ChatCommands 
 {
 
-class Zap::ClientGame;
-
 void announceHandler           (ClientGame *game, const Vector<string> &args);
 void mVolHandler               (ClientGame *game, const Vector<string> &args);    
 void sVolHandler               (ClientGame *game, const Vector<string> &args);    

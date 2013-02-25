@@ -6,6 +6,8 @@ find_package(PNG)
 find_package(Threads)
 
 set(CLIENT_SOURCES 
+   ChatCommands.cpp
+   ChatHelper.cpp
    ClientGame.cpp
    Console.cpp
    Cursor.cpp
