@@ -1588,16 +1588,16 @@ void EditorUserInterface::renderDock()
 const S32 PANEL_TEXT_SIZE = 10;
 const S32 PANEL_SPACING = S32(PANEL_TEXT_SIZE * 1.3);
 
-static const S32 PanelBottom = gScreenInfo.getGameCanvasHeight() - EditorUserInterface::vertMargin;
-static const S32 PanelTop    = PanelBottom - (4 * PANEL_SPACING + 9);
-static const S32 PanelLeft   = EditorUserInterface::horizMargin;
-static const S32 PanelRight  = PanelLeft + 180;      // left + width
-static const S32 PanelInnerMargin = 4;
-
+static S32 PanelBottom, PanelTop, PanelLeft, PanelRight, PanelInnerMargin;
 
 void EditorUserInterface::renderInfoPanel() 
 {
-   // Panel location and size
+   // Recalc dimensions in case screen mode changed
+   PanelBottom = gScreenInfo.getGameCanvasHeight() - EditorUserInterface::vertMargin;
+   PanelTop    = PanelBottom - (4 * PANEL_SPACING + 9);
+   PanelLeft   = EditorUserInterface::horizMargin;
+   PanelRight  = PanelLeft + 180;      // left + width
+   PanelInnerMargin = 4;
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
