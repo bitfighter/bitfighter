@@ -390,6 +390,7 @@ public:
 
    S32 lua_getSizeIndex(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
    S32 lua_getSizeCount(lua_State *L);   // Number of indexes of size we can have (returns int)
+   S32 lua_setSize(lua_State *L);        // Sets asteroid size
 };
 
 
