@@ -367,8 +367,11 @@ void SoccerBallItem::onAddedToGame(Game *game)
 
    // If this ball was added by Lua, make sure there is a spawn point at its
    // starting position
-   FlagSpawn *spawn = new FlagSpawn(mInitialPos, 0);
-   spawn->addToGame(mGame, mGame->getGameObjDatabase());
+   if(mLuaBall)
+   {
+      FlagSpawn *spawn = new FlagSpawn(mInitialPos, 0);
+      spawn->addToGame(mGame, mGame->getGameObjDatabase());
+   }
 }
 
 
