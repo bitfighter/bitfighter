@@ -88,6 +88,7 @@ private:
    F32 mDragFactor;
    StringTableEntry mLastPlayerTouchName;
    SafePtr<Ship> mLastPlayerTouch;
+   bool mLuaBall;
 
 public:
    explicit SoccerBallItem(lua_State *L = NULL);      // Combined Lua / C++ default constructor
@@ -105,7 +106,7 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode(F32 gridSize) const;
 
-   void onAddedToGame(Game *theGame);
+   void onAddedToGame(Game *game);
 
    bool collide(BfObject *hitObject);
 

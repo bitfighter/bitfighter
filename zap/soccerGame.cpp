@@ -274,6 +274,7 @@ SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)Soc
    mSendHomeTimer.setPeriod(1500);     // Ball will linger in goal for 1500 ms before being sent home
 
    mDragFactor = 0.0;      // No drag
+   mLuaBall = false;
 
    if(L)
    {
@@ -283,6 +284,8 @@ SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)Soc
 
       if(profile == 1)
          setPos(L, 1);
+
+      mLuaBall = true;
    }
 
    mInitialPos = getPos();
@@ -342,9 +345,9 @@ string SoccerBallItem::toLevelCode(F32 gridSize) const
 }
 
 
-void SoccerBallItem::onAddedToGame(Game *theGame)
+void SoccerBallItem::onAddedToGame(Game *game)
 {
-   Parent::onAddedToGame(theGame);
+   Parent::onAddedToGame(game);
 
    // Make soccer ball always visible
    if(!isGhost())
@@ -355,12 +358,17 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
    //   theGame->getGameType()->addItemOfInterest(this);
 
    //((SoccerGameType *) theGame->getGameType())->setBall(this);
-   GameType *gt = theGame->getGameType();
+   GameType *gt = game->getGameType();
    if(gt)
    {
       if(gt->getGameTypeId() == SoccerGame)
          static_cast<SoccerGameType *>(gt)->setBall(this);
    }
+
+   // If this ball was added by Lua, make sure there is a spawn point at its
+   // starting position
+   FlagSpawn *spawn = new FlagSpawn(mInitialPos, 0);
+   spawn->addToGame(mGame, mGame->getGameObjDatabase());
 }
 
 
