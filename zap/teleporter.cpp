@@ -891,9 +891,9 @@ void Teleporter::onGeomChanged()
 }   
 
 
-const char *Teleporter::getOnScreenName()     { return "Teleport";    }
+const char *Teleporter::getOnScreenName()     { return "Teleporter";    }
 const char *Teleporter::getPrettyNamePlural() { return "Teleporters"; }
-const char *Teleporter::getOnDockName()       { return "Teleport";    }
+const char *Teleporter::getOnDockName()       { return "Teleporter";    }
 const char *Teleporter::getEditorHelpString() { return "Teleports ships from one place to another. [T]"; }
 
 
