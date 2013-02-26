@@ -95,9 +95,7 @@ enum SFXProfiles
    SFXSpyBugDeploy,
    SFXSpyBugExplode,
 
-   SFXAsteroidSmallExplode,
-   SFXAsteroidMediumExplode,
-   SFXAsteroidLargeExplode,
+   SFXAsteroidExplode,
 
    // Ship noises
    SFXShipExplode,
