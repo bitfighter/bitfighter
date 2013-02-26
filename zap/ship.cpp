@@ -247,6 +247,7 @@ ClientInfo *Ship::getClientInfo()
 
 
 bool Ship::canAddToEditor() { return false; }      // No ships in the editor
+const char *Ship::getOnScreenName()     { return "Ship"; }
 
 
 void Ship::setEngineeredTeleporter(Teleporter *teleporter)
