@@ -1284,7 +1284,7 @@ GENERATE_LUA_METHODS_TABLE(SpyBug, LUA_METHODS);
 
 
 
-const char *SpyBug::luaClassName = "SpyBugItem";
+const char *SpyBug::luaClassName = "SpyBug";
 REGISTER_LUA_SUBCLASS(SpyBug, Burst);
 
 
