@@ -152,7 +152,7 @@ public:
 
    virtual void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity);
 
-   void move(F32 time, U32 stateIndex, bool displacing = false, Vector<SafePtr<MoveObject> > = Vector<SafePtr<MoveObject> >());
+   F32 move(F32 time, U32 stateIndex, bool displacing = false, Vector<SafePtr<MoveObject> > = Vector<SafePtr<MoveObject> >());
    virtual bool collide(BfObject *otherObject);
 
    // CollideTypes is used to improve speed on findFirstCollision

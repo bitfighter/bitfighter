@@ -379,7 +379,7 @@ void Ship::processMove(U32 stateIndex)
    else
       setVel(stateIndex, requestVel);
 
-   move(time, stateIndex, false);
+   F32 dist = move(time, stateIndex, false);
 }
 
 

@@ -331,18 +331,22 @@ F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip
    return result ? t : -1;
 }
 
+
 const F32 moveTimeEpsilon = 0.000001f;
 const F32 velocityEpsilon = 0.00001f;
 
 // Apply mMoveState info to an object to compute it's new position.  Used for ships et. al.
 // isBeingDisplaced is true when the object is being pushed by something else, which will only happen in a collision
 // Remember: stateIndex will be one of 0-ActualState, 1-RenderState, or 2-LastProcessState
-void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector<SafePtr<MoveObject> > displacerList)
+F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector<SafePtr<MoveObject> > displacerList)
 {
    U32 tryCount = 0;
    const U32 TRY_COUNT_MAX = 8;
    Vector<SafePtr<BfObject> > disabledList;
    F32 moveTimeStart = moveTime;
+
+   static Point origPos;   // Reusable container
+   origPos = getPos(stateIndex);
 
    while(moveTime > moveTimeEpsilon && tryCount < TRY_COUNT_MAX)     // moveTimeEpsilon is a very short, but non-zero, bit of time
    {
@@ -353,19 +357,19 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
          break;
 
       F32 collisionTime = moveTime;
-      Point collisionPoint;
+      static Point collisionPoint, newPos;     // Reusable containers
 
       BfObject *objectHit = findFirstCollision(stateIndex, collisionTime, collisionPoint);
       if(!objectHit)    // No collision (or if isBeingDisplaced is true, we haven't been pushed into another object)
       {
-         Point newPos = getPos(stateIndex) + getVel(stateIndex) * moveTime;   // Move to desired destination
+         newPos = getPos(stateIndex) + getVel(stateIndex) * moveTime;   // Move to desired destination
          setPos(stateIndex, newPos);
          break;
       }
 
       // Collision!  Advance to the point of collision
-      Point newPos = getPos(stateIndex) + getVel(stateIndex) * collisionTime;    // x = x + vt
-      setPos(stateIndex, newPos);                                                // setPos(x)
+      newPos = getPos(stateIndex) + getVel(stateIndex) * collisionTime;    // x = x + vt
+      setPos(stateIndex, newPos);                                          // setPos(x)
 
       // Collided is a sort of collision pre-handler; it will return true if the collision was dealt with, false if not
       if(collided(objectHit, stateIndex) || objectHit->collided(this, stateIndex))
@@ -379,8 +383,9 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
          TNLAssert(dynamic_cast<MoveObject *>(objectHit), "Not a MoveObject");
          MoveObject *moveObjectThatWasHit = static_cast<MoveObject *>(objectHit);
 
-         Point velDelta = moveObjectThatWasHit->getVel(stateIndex) - getVel(stateIndex);
-         Point posDelta = moveObjectThatWasHit->getPos(stateIndex) - getPos(stateIndex);
+         static Point velDelta, posDelta;    // Reusable containers
+         velDelta = moveObjectThatWasHit->getVel(stateIndex) - getVel(stateIndex);
+         posDelta = moveObjectThatWasHit->getPos(stateIndex) - getPos(stateIndex);
 
          // Prevent infinite loops with a series of objects trying to displace each other forever
          if(isBeingDisplaced)
@@ -433,6 +438,8 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
 
    if(tryCount == TRY_COUNT_MAX && moveTime > moveTimeStart * 0.98f)
       setVel(stateIndex, Point(0,0));  // prevents some overload by not trying to move anymore
+
+   return (getPos(stateIndex) - origPos).len();    // Return distance traveled during this move
 }
 
 
