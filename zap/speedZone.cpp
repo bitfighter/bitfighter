@@ -395,10 +395,12 @@ bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
 {
    TNLAssert(dynamic_cast<MoveObject *>(hitObject), "Not a MoveObject");
    MoveObject *s = static_cast<MoveObject *>(hitObject);
-   Point start = getVert(0);
-   Point end = getVert(1);
 
-   Point impulse = end - start;           // Gives us direction
+   static Point start, end, impulse, newVel;      // Reusable containers
+   start = getVert(0);
+   end   = getVert(1);
+
+   impulse = end - start;                 // Gives us direction
    impulse.normalize(mSpeed);             // Gives us the magnitude of speed
    Point shipNormal = s->getVel(stateIndex);
    shipNormal.normalize(mSpeed);
@@ -412,23 +414,22 @@ bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
 
    // This following line will cause ships entering the speedzone to have their location set to the same point
    // within the zone so that their path out will be very predictable.
-   Point newVel;
-
    if(mSnapLocation)
    {
-      Point diffpos = s->getPos(stateIndex) - start;
-      Point thisAngle = end - start;
-      thisAngle.normalize();
-      Point newPos = thisAngle * diffpos.dot(thisAngle) + start + impulse * 0.001f;
+      static Point diffpos, thisAngle, newPos, oldPos, oldVel, collisionPoint;    // Reusable point containers
 
-      Point oldPos = s->getPos(stateIndex);
-      Point oldVel = s->getVel(stateIndex);
+      diffpos = s->getPos(stateIndex) - start;
+      thisAngle = end - start;
+      thisAngle.normalize();
+      newPos = thisAngle * diffpos.dot(thisAngle) + start + impulse * 0.001f;
+
+      oldPos = s->getPos(stateIndex);
+      oldVel = s->getVel(stateIndex);
 
       ignoreThisCollision = true;  // Seem to need it to ignore collide to SpeedZone during a findFirstCollision
       s->setVel(stateIndex, newPos - oldPos);
 
       F32 collisionTime = 1;
-      Point collisionPoint;
       s->findFirstCollision(stateIndex, collisionTime, collisionPoint);
 
       Point p = s->getPos(stateIndex) + s->getVel(stateIndex) * collisionTime;    // x = x + vt
