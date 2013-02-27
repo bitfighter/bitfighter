@@ -784,6 +784,7 @@ void Ship::idle(BfObject::IdleCallPath path)
 }
 
 
+// Check to see if we collided with a GoFast
 void Ship::checkForSpeedzones()
 {
    SpeedZone *speedZone = static_cast<SpeedZone *>(isOnObject(SpeedZoneTypeNumber));
