@@ -305,10 +305,14 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
             {
                ClientInfo *c = mGame->getClientInfo(j);
 
-               if(c->getName() == name && !c->isAuthenticated())
+               if(c->getName() == name && (*c->getId() != clientId))
                {
-                  //makeUnique will think the name is in use by self, and rename it.
-                  mGame->getGameType()->updateClientChangedName(c, mGame->makeUnique(c->getName().getString()).c_str());
+                  if(c->isAuthenticated()) {
+                     c->getConnection()->disconnect(ReasonNone, "Another login was detected");
+                  } else {
+                     //makeUnique will think the name is in use by self, and rename it.
+                     mGame->getGameType()->updateClientChangedName(c, mGame->makeUnique(c->getName().getString()).c_str());
+                  }
                }
             }
 
