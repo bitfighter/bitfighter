@@ -80,7 +80,7 @@ private:
    BfObject *doIsInZone(const Vector<DatabaseObject *> &objects); // Private helper for isInZone() and isInAnyZone()
 
    // Idle helpers
-   void checkForSpeedzones();    
+   void checkForSpeedzones();                      // Check to see if we collided with a GoFast
    void checkForZones();
    void getZonesShipIsIn(Vector<DatabaseObject *> *zoneList);     // Fill zoneList with a list of all zones that the ship is currently in
 #ifndef ZAP_DEDICATED
