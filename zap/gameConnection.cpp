@@ -24,7 +24,6 @@
 //------------------------------------------------------------------------------------
 
 #include "gameConnection.h"
-//#include "game.h"
 #include "ServerGame.h"
 #include "soccerGame.h"          // For checking if pick up soccer is allowed
 #include "IniFile.h"             // For CIniFile def
