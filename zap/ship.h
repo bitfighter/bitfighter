@@ -81,7 +81,7 @@ private:
 
    // Idle helpers
    void checkForSpeedzones();                      // Check to see if we collided with a GoFast
-   void checkForZones();
+   void checkForZones();                           // See if ship entered or left any zones
    void getZonesShipIsIn(Vector<DatabaseObject *> *zoneList);     // Fill zoneList with a list of all zones that the ship is currently in
 #ifndef ZAP_DEDICATED
    bool isLocalPlayerShip(ClientGame *game);       // Returns true if ship represents local player
