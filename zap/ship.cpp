@@ -2308,13 +2308,13 @@ void Ship::render(S32 layerIndex)
    ClientInfo *clientInfo = getClientInfo();
 
    // Uncomment to see a crude display of distance traveled attached to your ship
-   if(isLocalShip)
-   {
-      Statistics *stats = getClientInfo()->getStatistics();
-      Statistics *s2 = gServerGame->getClientInfos()->first()->getStatistics();
-      drawStringfc(0, 30 + 14 + 5, 14, "Dist: %d, A: %d, T: %d, F: %d", stats->getDistanceTraveled(),
-         s2->mAsteroidsKilled, s2->mTurretsKilled, s2->mFFsKilled);
-   }
+   //if(isLocalShip)
+   //{
+   //   Statistics *stats = getClientInfo()->getStatistics();
+   //   Statistics *s2 = gServerGame->getClientInfos()->first()->getStatistics();
+   //   drawStringfc(0, 30 + 14 + 5, 14, "Dist: %d, A: %d, T: %d, F: %d", stats->getDistanceTraveled(),
+   //      s2->mAsteroidsKilled, s2->mTurretsKilled, s2->mFFsKilled);
+   //}
 
 
    if(!isLocalShip && layerIndex == 1 && clientInfo)      // Need to draw this before the glRotatef below, but only on layer 1...

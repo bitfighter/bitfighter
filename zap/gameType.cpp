@@ -1018,6 +1018,10 @@ VersionedGameStats GameType::getGameStats()
          playerStats->suicides       = statistics->getSuicides();
          playerStats->fratricides    = statistics->getFratricides();
 
+         playerStats->turretsEngr    = statistics->mTurretsEngineered;
+         playerStats->ffEngr         = statistics->mFFsEngineered;
+         playerStats->telEngr        = statistics->mTeleportersEngineered;
+
          playerStats->distTraveled   = statistics->getDistanceTraveled();
 
          // Bots have no conn, so we'll just set these stats manually.  We could streamline this bit here

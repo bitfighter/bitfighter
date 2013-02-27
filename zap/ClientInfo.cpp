@@ -342,16 +342,20 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
       Vector<StringTableEntry> e;
       e.push_back(getName());
 
+      Statistics *stats = getStatistics();
+
       switch(objectType)
       {
          case EngineeredTurret:
             e.push_back("turret");
             responseEvent = EngineerEventTurretBuilt;
+            stats->mTurretsEngineered++;
             break;
 
          case EngineeredForceField:
             e.push_back("force field");
             responseEvent = EngineerEventForceFieldBuilt;
+            stats->mFFsEngineered++;
             break;
 
          case EngineeredTeleporterEntrance:
@@ -362,9 +366,11 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
          case EngineeredTeleporterExit:
             e.push_back("teleport exit");
             responseEvent = EngineerEventTeleporterExitBuilt;
+            stats->mTeleportersEngineered++;
             break;
 
-         default:    // Shouldn't occur
+         default:
+            TNLAssert(false, "Should never get here");
             return false;
       }
 

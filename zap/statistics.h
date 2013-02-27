@@ -74,6 +74,9 @@ public:
    U32 mChangedLoadout;
    U32 mTeleport;
    U32 mPlayTime;
+   U32 mTurretsEngineered;
+   U32 mFFsEngineered;
+   U32 mTeleportersEngineered;
 
    Statistics();        // Constructor
 

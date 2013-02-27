@@ -300,6 +300,9 @@ void Statistics::resetStatistics()
    mChangedLoadout = 0;
    mTeleport = 0;
    mPlayTime = 0;
+   mTurretsEngineered = 0;
+   mFFsEngineered = 0;
+   mTeleportersEngineered = 0;
 }
 
 }
