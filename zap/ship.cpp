@@ -382,7 +382,7 @@ F32 Ship::processMove(U32 stateIndex)
    else
       setVel(stateIndex, requestVel);
 
-   F32 dist = move(time, stateIndex, false);
+   return move(time, stateIndex, false);
 }
 
 
@@ -648,10 +648,12 @@ void Ship::idle(BfObject::IdleCallPath path)
    }
    else
    {
+      // If we're the client and are out-of-touch with the server, don't move the ship... 
+      // moving won't actually hurt, but this seems somehow better
       if((path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote) && 
                getActualVel().lenSquared() != 0 && 
                getControllingClient() &&  getControllingClient()->lostContact())
-         return;  // If we're out-of-touch, don't move the ship... moving won't actually hurt, but this seems somehow better
+         return;  
 
       if(path == BfObject::ClientIdleControlMain)
       {
