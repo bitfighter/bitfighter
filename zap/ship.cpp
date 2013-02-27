@@ -685,7 +685,7 @@ void Ship::idle(BfObject::IdleCallPath path)
          static const F32 ShipVarNormalizeMultiplier = 128;
          static const F32 ShipVarNormalizeFraction = 0.0078125; // 1/ShipVarNormalizeMultiplier
 
-         Point p;
+         static Point p;
          
          p = getActualPos();
          p.scaleFloorDiv(ShipVarNormalizeMultiplier, ShipVarNormalizeFraction);
