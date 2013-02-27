@@ -667,8 +667,8 @@ void Ship::idle(BfObject::IdleCallPath path)
       mImpulseVector.set(0,0);
 
 
-      // For all other cases, advance the actual state of the object with the current move
-      // dist is the distnace the object moved during this tick
+      // For all other cases, advance the actual state of the object with the current move.
+      // Dist is the distance the ship moved this tick.
       F32 dist = processMove(ActualState);
 
       checkForSpeedzones();      // Check to see if we collided with a speed zone
