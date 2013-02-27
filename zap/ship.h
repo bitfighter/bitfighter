@@ -172,6 +172,7 @@ public:
    Point mImpulseVector;
 
    virtual bool canAddToEditor();
+   const char *getOnScreenName();
 
    F32 getSlipzoneSpeedMoficationFactor();
 

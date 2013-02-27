@@ -173,7 +173,7 @@ public:
 
    void onAddedToGame(Game *theGame);
 #ifndef ZAP_DEDICATED
-   void onItemDragging();
+   void onGeomChanged();
 #endif
 
    void damageObject(DamageInfo *theInfo);

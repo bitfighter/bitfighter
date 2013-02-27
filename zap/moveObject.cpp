@@ -1462,8 +1462,6 @@ U32 Asteroid::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & ItemChangedMask))
    {
       stream->writeInt(mSizeLeft, ASTEROID_SIZELEFT_BIT_COUNT);
-
-      // FIXME:  Why do we care about asteroid design on the server?
       stream->writeEnum(mDesign, ASTEROID_DESIGNS);
    }
 
@@ -1484,16 +1482,8 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
       setMass(getAsteroidMass(mSizeLeft));
       mDesign = stream->readEnum(ASTEROID_DESIGNS);
 
-      logprintf("unpack size left: %d", mSizeLeft);
-
       if(!mInitial)
-      {
-         // mSizeLeft is never transmitted when server-side it is 0, so handle with final explode below
-         if(mSizeLeft == 1)
-            SoundSystem::playSoundEffect(SFXAsteroidMediumExplode, getRenderPos());
-         else if(mSizeLeft >= 2)
-            SoundSystem::playSoundEffect(SFXAsteroidLargeExplode, getRenderPos());
-      }
+         SoundSystem::playSoundEffect(SFXAsteroidExplode, getRenderPos());
    }
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
@@ -1540,7 +1530,7 @@ TestFunc Asteroid::collideTypes()
 // Client only
 void Asteroid::onItemExploded(Point pos)
 {
-   SoundSystem::playSoundEffect(SFXAsteroidSmallExplode, getRenderPos());
+   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos);
    // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
 }
 
@@ -1644,6 +1634,7 @@ void Asteroid::fillAttributesVectors(Vector<string> &keys, Vector<string> &value
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getSizeIndex, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getSizeCount, ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, setSize,      ARRAYDEF({{ INT, END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(Asteroid, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(Asteroid, LUA_METHODS);
@@ -1671,6 +1662,30 @@ S32 Asteroid::lua_getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INIT
  *  @return  \e int - Index of the %asteroid's smallest size.
  */
 S32 Asteroid::lua_getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT + 1); }
+
+/**
+ *  @luafunc Asteroid::setSize(size)
+ *  @brief   Set the size of the %Asteroid.
+ *  @param   \eint size - The size the asteroid will be set to.
+ *  @descr   Setting the size of an %Asteroid will give you (size - 1) levels you'll have to destroy.  Each
+ *           level reduction will produce two more asteroids
+ *  @note    Any size less than 1 will default to size 3.  Please be responsible with your size choices.
+ */
+S32 Asteroid::lua_setSize(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Asteroid", "setSize");
+   S32 size = getInt(L, 1);
+
+   if(size <= 0)
+      mSizeLeft = ASTEROID_INITIAL_SIZELEFT;
+   else
+      mSizeLeft = size;
+
+   setRadius(getAsteroidRadius(mSizeLeft));
+   setMass(getAsteroidMass(mSizeLeft));
+
+   return 0;
+}
 
 
 ////////////////////////////////////////
@@ -1823,7 +1838,7 @@ bool Circle::collide(BfObject *otherObject)
 // Client only
 void Circle::onItemExploded(Point pos)
 {
-   SoundSystem::playSoundEffect(SFXAsteroidSmallExplode, pos);
+   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos);
 }
 
 
