@@ -737,7 +737,7 @@ void Ship::idle(BfObject::IdleCallPath path)
    }
 
    if(path == BfObject::ServerIdleMainLoop)
-      checkForZones();  // for energy drain checks
+      checkForZones();        // See if ship entered or left any zones
 
    // Update the object in the game's extents database
    updateExtentInDatabase();
@@ -808,6 +808,7 @@ Vector<DatabaseObject *> *Ship::getPrevZoneList()
 }
  
 
+// See if ship entered or left any zones
 // Server only
 void Ship::checkForZones()
 {
