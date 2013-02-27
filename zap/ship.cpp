@@ -646,13 +646,13 @@ void Ship::idle(BfObject::IdleCallPath path)
       mFastRechargeTimer.update(mCurrentMove.time);
       mFastRecharging = mFastRechargeTimer.getCurrent() == 0;
    }
-   else
+   else   // <=== do we really want this loop running if    path == BfObject::ServerIdleMainLoop && NOT controllingClientIsValid() ??
    {
       // If we're the client and are out-of-touch with the server, don't move the ship... 
       // moving won't actually hurt, but this seems somehow better
       if((path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote) && 
                getActualVel().lenSquared() != 0 && 
-               getControllingClient() &&  getControllingClient()->lostContact())
+               getControllingClient() && getControllingClient()->lostContact())
          return;  
 
       if(path == BfObject::ClientIdleControlMain)
@@ -670,6 +670,9 @@ void Ship::idle(BfObject::IdleCallPath path)
       // For all other cases, advance the actual state of the object with the current move.
       // Dist is the distance the ship moved this tick.
       F32 dist = processMove(ActualState);
+
+      if(path == BfObject::ServerIdleControlFromClient || path == BfObject::ClientIdleControlMain)
+         getClientInfo()->getStatistics()->accumulateDistance(dist);
 
       checkForSpeedzones();      // Check to see if we collided with a speed zone
 
@@ -1662,7 +1665,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(positionChanged && !isRobot() )
    {
       mCurrentMove.time = (U32) connection->getOneWayTime();
-      F32 dist = processMove(ActualState);      // In case client wants to track distance traveled
+      processMove(ActualState);
    }
 
    if(shipwarped)
@@ -2303,6 +2306,11 @@ void Ship::render(S32 layerIndex)
    glTranslate(getRenderPos());
 
    ClientInfo *clientInfo = getClientInfo();
+
+   // Uncomment to see a crude display of distance traveled attached to your ship
+   //if(isLocalShip)
+   //   drawStringc(0, 30 + 14 + 5, 14, itos(getClientInfo()->getStatistics()->getDistanceTraveled()).c_str());
+
 
    if(!isLocalShip && layerIndex == 1 && clientInfo)      // Need to draw this before the glRotatef below, but only on layer 1...
    {
