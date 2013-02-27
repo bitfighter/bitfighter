@@ -416,7 +416,7 @@ bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
    // within the zone so that their path out will be very predictable.
    if(mSnapLocation)
    {
-      static Point diffpos, thisAngle, newPos, oldPos, oldVel, collisionPoint;    // Reusable point containers
+      static Point diffpos, thisAngle, newPos, oldPos, oldVel, collisionPoint, p;    // Reusable points
 
       diffpos = s->getPos(stateIndex) - start;
       thisAngle = end - start;
@@ -432,7 +432,7 @@ bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
       F32 collisionTime = 1;
       s->findFirstCollision(stateIndex, collisionTime, collisionPoint);
 
-      Point p = s->getPos(stateIndex) + s->getVel(stateIndex) * collisionTime;    // x = x + vt
+      p = s->getPos(stateIndex) + s->getVel(stateIndex) * collisionTime;    // x = x + vt
       s->setPos(stateIndex, p);
 
       ignoreThisCollision = false;
@@ -456,7 +456,7 @@ bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
    s->setVel(stateIndex, newVel);
 
 
-   if(!s->isGhost() && stateIndex == ActualState)  // Only server needs to send information
+   if(!s->isGhost() && stateIndex == ActualState)        // Only server needs to send information
    {
       setMaskBits(HitMask);
 
