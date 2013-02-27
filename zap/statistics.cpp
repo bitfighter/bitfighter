@@ -293,6 +293,8 @@ void Statistics::resetStatistics()
    mFlagReturn = 0;
    mFlagScore = 0;
    mFlagDrop = 0;
+   mTurretsKilled = 0;
+   mFFsKilled = 0;
    mCrashedIntoAsteroid = 0;
    mChangedLoadout = 0;
    mTeleport = 0;

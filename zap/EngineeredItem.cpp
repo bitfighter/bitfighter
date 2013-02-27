@@ -738,15 +738,24 @@ void EngineeredItem::damageObject(DamageInfo *di)
       onDisabled();
 
       // Handle scoring
-      if(isTurret() && di->damagingObject && di->damagingObject->getOwner())
+      if(di->damagingObject && di->damagingObject->getOwner())
       {
          ClientInfo *player = di->damagingObject->getOwner();
-         GameType *gt = getGame()->getGameType();
 
-         if(gt->isTeamGame() && player->getTeamIndex() == getTeam())
-            gt->updateScore(player, GameType::KillOwnTurret);
-         else
-            gt->updateScore(player, GameType::KillEnemyTurret);
+         if(isTurret())
+         {
+            GameType *gt = getGame()->getGameType();
+
+            if(gt->isTeamGame() && player->getTeamIndex() == getTeam())
+               gt->updateScore(player, GameType::KillOwnTurret);
+            else
+               gt->updateScore(player, GameType::KillEnemyTurret);
+
+            player->getStatistics()->mTurretsKilled++;
+         }
+         // Currently isTurret is true for turrets, and false for ffs.  There are no other engineered objects
+         else if(!isTurret())
+            player->getStatistics()->mFFsKilled++;
       }
    }
    else if(prevHealth < disabledLevel && mHealth >= disabledLevel)   // Turret was just repaired or healed

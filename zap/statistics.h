@@ -65,6 +65,8 @@ private:
 public:
    U32 mFlagPickup;
    U32 mFlagDrop;
+   U32 mTurretsKilled;
+   U32 mFFsKilled;
    U32 mFlagReturn;  // used as Flag steal in HTF and retrieve
    U32 mFlagScore;
    U32 mCrashedIntoAsteroid;
