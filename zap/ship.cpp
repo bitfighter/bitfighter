@@ -1264,7 +1264,7 @@ void Ship::damageObject(DamageInfo *theInfo)
       mHealth = 1;
 
 
-   if(getClientInfo()) // could be NULL
+   if(getClientInfo()) // could be NULL <== could it?
    {
       Projectile *projectile = dynamic_cast<Projectile *>(theInfo->damagingObject);
 
