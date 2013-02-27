@@ -274,7 +274,7 @@ public:
 
    virtual void idle(IdleCallPath path);
 
-   virtual void processMove(U32 stateIndex);
+   F32 processMove(U32 stateIndex);
 
    WeaponType getSelectedWeapon();   // Return currently selected weapon
    U32 getSelectedWeaponIndex();     // Return index of currently selected weapon (0, 1, 2)

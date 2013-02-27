@@ -335,7 +335,7 @@ void Ship::setActualPos(Point p, bool warp)
 
 
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
-void Ship::processMove(U32 stateIndex)
+F32 Ship::processMove(U32 stateIndex)
 {
    static const F32 ARMOR_ACCEL_PENALTY_FACT = 0.35f;
    static const F32 ARMOR_SPEED_PENALTY_FACT = 1;
@@ -344,13 +344,14 @@ void Ship::processMove(U32 stateIndex)
    setAngle(stateIndex, mCurrentMove.angle);
 
    if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && getVel(stateIndex) == Point(0,0))
-      return;  // saves small amount of CPU processing to not processing any of below when ship is not moving.
+      return 0;  // saves small amount of CPU processing to not processing any of below when ship is not moving.
 
    F32 maxVel = (isModulePrimaryActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) *
                 (hasModule(ModuleArmor) ? ARMOR_SPEED_PENALTY_FACT : 1);
 
    F32 time = mCurrentMove.time * 0.001f;
-   Point requestVel(mCurrentMove.x, mCurrentMove.y);
+   static Point requestVel;
+   requestVel.set(mCurrentMove.x, mCurrentMove.y);
 
    // If going above this speed, you cannot change course
    static const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
@@ -363,7 +364,8 @@ void Ship::processMove(U32 stateIndex)
    if(len > maxVel)
       requestVel *= maxVel / len;
 
-   Point velDelta = requestVel - getVel(stateIndex);
+   static Point velDelta;     // Reusable container
+   velDelta = requestVel - getVel(stateIndex);
    F32 accRequested = velDelta.len();
 
 
@@ -637,7 +639,7 @@ void Ship::idle(BfObject::IdleCallPath path)
       // is what projectiles will collide against.  This allows
       // clients to properly lead other clients, instead of
       // piecewise stepping only when packets arrive from the client.
-      processMove(RenderState);
+      F32 dist = processMove(RenderState);
       if(getActualVel().lenSquared() != 0 || getActualPos() != getRenderPos())
          setMaskBits(PositionMask);
 
@@ -665,7 +667,7 @@ void Ship::idle(BfObject::IdleCallPath path)
 
       // For all other cases, advance the actual state of the
       // object with the current move.
-      processMove(ActualState);
+      F32 dist = processMove(ActualState);
 
       checkForSpeedzones();
 
@@ -1604,7 +1606,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          else
             mSpawnShield.reset(0);
       }
-      if(stream->readFlag())        // Health
+      if(stream->readFlag())     // Health
          mHealth = stream->readFloat(6);
    }
 
@@ -1661,7 +1663,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(positionChanged && !isRobot() )
    {
       mCurrentMove.time = (U32) connection->getOneWayTime();
-      processMove(ActualState);
+      F32 dist = processMove(ActualState);      // In case client wants to track distance traveled
    }
 
    if(shipwarped)
