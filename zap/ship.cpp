@@ -677,10 +677,8 @@ void Ship::idle(BfObject::IdleCallPath path)
          path == BfObject::ClientIdleControlMain ||
          path == BfObject::ClientIdleControlReplay)
       {
-         // For different optimizer settings and different platforms
-         // the floating point calculations may come out slightly
-         // differently in the lowest mantissa bits.  So normalize
-         // after each update the position and velocity, so that
+         // For different optimizer settings and different platforms the floating point calculations may come out slightly
+         // differently in the lowest mantissa bits.  So normalize after each update the position and velocity, so that
          // the control state update will not differ from client to server.
          static const F32 ShipVarNormalizeMultiplier = 128;
          static const F32 ShipVarNormalizeFraction = 0.0078125; // 1/ShipVarNormalizeMultiplier
@@ -699,11 +697,8 @@ void Ship::idle(BfObject::IdleCallPath path)
       if(path == BfObject::ServerIdleMainLoop ||
          path == BfObject::ServerIdleControlFromClient)
       {
-         // Update the render state on the server to match
-         // the actual updated state, and mark the object
-         // as having changed Position state.  An optimization
-         // here would check the before and after positions
-         // so as to not update unmoving ships.
+         // Update the render state on the server to match the actual updated state, and mark the object as having changed 
+         //Position state.  An optimization here would check the before and after positions so as to not update unmoving ships.
          if(getRenderAngle() != getActualAngle() || getRenderPos() != getActualPos() || getRenderVel() != getActualVel())
             setMaskBits(PositionMask);
 
@@ -711,13 +706,13 @@ void Ship::idle(BfObject::IdleCallPath path)
       }
       else if(path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote)
       {
-         // On the client, update the interpolation of this
-         // object unless we are replaying control moves.
+         // On the client, update the interpolation of this object unless we are replaying control moves
          mInterpolating = (getActualVel().lenSquared() < MoveObject::InterpMaxVelocity*MoveObject::InterpMaxVelocity);
          updateInterpolation();
       }
 
-      if(path != BfObject::ClientIdleControlReplay) // don't want the replay to make timer count down much faster, while having high ping.
+      // Don't want the replay to make timer count down much faster while having high ping
+      if(path != BfObject::ClientIdleControlReplay) 
       {
          mSensorEquipZoomTimer.update(mCurrentMove.time);
          mCloakTimer.update(mCurrentMove.time);
