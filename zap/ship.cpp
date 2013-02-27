@@ -728,7 +728,7 @@ void Ship::idle(BfObject::IdleCallPath path)
             if(path == ServerIdleControlFromClient && (mCurrentMove.x != 0 || mCurrentMove.y != 0))
             {
                mSpawnShield.clear();
-               setMaskBits(SpawnShieldMask);  // tell clients spawn shield did turn off due to moving
+               setMaskBits(SpawnShieldMask);  // Tell clients spawn shield turned off due to moving
             }
             else
                mSpawnShield.update(mCurrentMove.time);
