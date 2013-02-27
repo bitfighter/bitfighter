@@ -63,13 +63,14 @@ struct PlayerStats
 {
    string name;
    bool isAuthenticated;
-   Nonce nonce;          // used for authentication, will only send if isAuthenticated = true
+   Nonce nonce;         // used for authentication, will only send if isAuthenticated = true
    bool isRobot;
-   char gameResult;      // 'W', 'L', 'T'  // not sent, calculated in master
+   char gameResult;     // 'W', 'L', 'T'  // not sent, calculated in master
    S32 points;
    U32 kills;
-   U32 turretKills;
-   U32 ffKills;
+   U32 turretKills;     // Turrets killed
+   U32 ffKills;         // FFs killed
+   U32 astKills;        // Asteroids killed
    U32 deaths;
    U32 suicides;
    U32 switchedTeamCount;

@@ -295,6 +295,7 @@ void Statistics::resetStatistics()
    mFlagDrop = 0;
    mTurretsKilled = 0;
    mFFsKilled = 0;
+   mAsteroidsKilled = 0;
    mCrashedIntoAsteroid = 0;
    mChangedLoadout = 0;
    mTeleport = 0;

@@ -27,6 +27,7 @@
 #include "gameType.h"
 #include "goalZone.h"
 #include "GeomUtils.h"
+#include "ClientInfo.h"       // To give us access to the statistics object
 #include "ship.h"
 #include "SoundSystem.h"
 #include "speedZone.h"
@@ -669,14 +670,14 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
 
       if(ship && asteroid)      // Collided!  Do some damage!  Bring it on!
       {
-         DamageInfo theInfo;
-         theInfo.collisionPoint = getActualPos();
-         theInfo.damageAmount = 1.0f;     // Kill ship
-         theInfo.damageType = DamageTypePoint;
-         theInfo.damagingObject = asteroid;
-         theInfo.impulseVector = getActualVel();
+         DamageInfo damageInfo;
+         damageInfo.collisionPoint = getActualPos();
+         damageInfo.damageAmount = 1.0f;     // Kill ship
+         damageInfo.damageType = DamageTypePoint;
+         damageInfo.damagingObject = asteroid;
+         damageInfo.impulseVector = getActualVel();
 
-         ship->damageObject(&theInfo);
+         ship->damageObject(&damageInfo);
       }
    }
 #ifndef ZAP_DEDICATED
@@ -1413,10 +1414,14 @@ const Vector<Point> *Asteroid::getCollisionPoly() const
 }
 
 
-void Asteroid::damageObject(DamageInfo *theInfo)
+void Asteroid::damageObject(DamageInfo *damageInfo)
 {
-   if(hasExploded)   // Avoid index out of range error
+   if(hasExploded)
       return; 
+
+   ClientInfo *shooter = damageInfo->damagingObject->getOwner();
+   if(shooter)
+      shooter->getStatistics()->mAsteroidsKilled++;
 
    // Compute impulse direction
    mSizeLeft--;
@@ -1794,7 +1799,7 @@ const Vector<Point> *Circle::getCollisionPoly() const
 }
 
 
-void Circle::damageObject(DamageInfo *theInfo)
+void Circle::damageObject(DamageInfo *damageInfo)
 {
    // Compute impulse direction
    hasExploded = true;
@@ -2055,9 +2060,9 @@ void Worm::setPosAng(Point pos, F32 ang)
 }
 
 
-void Worm::damageObject(DamageInfo *theInfo)
+void Worm::damageObject(DamageInfo *damageInfo)
 {
-   mTailLength -= S32(theInfo->damageAmount * 8.f + .9f);
+   mTailLength -= S32(damageInfo->damageAmount * 8.f + .9f);
    if(mTailLength >= maxTailLength - 1)
       mTailLength = maxTailLength - 1;
 
@@ -2316,9 +2321,9 @@ F32 TestItem::getEditorRadius(F32 currentScale)
 
 
 // Appears to be server only??
-void TestItem::damageObject(DamageInfo *theInfo)
+void TestItem::damageObject(DamageInfo *damageInfo)
 {
-   computeImpulseDirection(theInfo);
+   computeImpulseDirection(damageInfo);
 }
 
 
@@ -2445,9 +2450,9 @@ bool ResourceItem::collide(BfObject *hitObject)
 }
 
 
-void ResourceItem::damageObject(DamageInfo *theInfo)
+void ResourceItem::damageObject(DamageInfo *damageInfo)
 {
-   computeImpulseDirection(theInfo);
+   computeImpulseDirection(damageInfo);
 }
 
 
