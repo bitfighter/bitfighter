@@ -1011,9 +1011,13 @@ VersionedGameStats GameType::getGameStats()
          playerStats->points         = clientInfo->getScore();
 
          playerStats->kills          = statistics->getKills();
+         playerStats->turretKills    = statistics->mTurretsKilled;
+         playerStats->ffKills        = statistics->mFFsKilled;
          playerStats->deaths         = statistics->getDeaths();
          playerStats->suicides       = statistics->getSuicides();
          playerStats->fratricides    = statistics->getFratricides();
+
+         playerStats->distTraveled   = statistics->getDistanceTraveled();
 
          // Bots have no conn, so we'll just set these stats manually.  We could streamline this bit here
          // by moving these settings over to the clientInfo.

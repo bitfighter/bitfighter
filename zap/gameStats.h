@@ -68,6 +68,8 @@ struct PlayerStats
    char gameResult;      // 'W', 'L', 'T'  // not sent, calculated in master
    S32 points;
    U32 kills;
+   U32 turretKills;
+   U32 ffKills;
    U32 deaths;
    U32 suicides;
    U32 switchedTeamCount;
@@ -82,6 +84,7 @@ struct PlayerStats
    U32 crashedIntoAsteroid;
    U32 changedLoadout;
    U32 teleport;
+   U32 distTraveled;
 	U32 playTime;
 
    bool isAdmin;
