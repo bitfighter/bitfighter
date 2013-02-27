@@ -639,7 +639,7 @@ void Ship::idle(BfObject::IdleCallPath path)
       // is what projectiles will collide against.  This allows
       // clients to properly lead other clients, instead of
       // piecewise stepping only when packets arrive from the client.
-      F32 dist = processMove(RenderState);
+      processMove(RenderState);
       if(getActualVel().lenSquared() != 0 || getActualPos() != getRenderPos())
          setMaskBits(PositionMask);
 
@@ -671,7 +671,7 @@ void Ship::idle(BfObject::IdleCallPath path)
       // object with the current move.
       F32 dist = processMove(ActualState);
 
-      checkForSpeedzones();
+      checkForSpeedzones();      // Check to see if we collided with a speed zone
 
       if(path == BfObject::ServerIdleControlFromClient ||
          path == BfObject::ClientIdleControlMain ||
