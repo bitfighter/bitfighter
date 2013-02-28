@@ -249,6 +249,7 @@ F32 Statistics::getCalculatedRating()
 
 
 static const U32 DIST_MULTIPLIER = 10000;
+static const U32 DIST_RATCHETING_DOWN_FACTOR = 10;    // The higher this is, the slower distance accrues
 
 void Statistics::accumulateDistance(F32 dist)
 {
@@ -264,7 +265,7 @@ U32 Statistics::getDistanceTraveled()
    if(mDist / DIST_MULTIPLIER > (U64)U32_MAX)
       return U32_MAX;
    else
-      return mDist / DIST_MULTIPLIER;
+      return mDist / (DIST_MULTIPLIER * DIST_RATCHETING_DOWN_FACTOR);
 }
 
 
