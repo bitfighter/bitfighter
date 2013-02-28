@@ -64,9 +64,9 @@ struct PlayerStats
 {
    string name;
    bool isAuthenticated;
-   Nonce nonce;         // used for authentication, will only send if isAuthenticated = true
+   Nonce nonce;         // Used for authentication, will only send if isAuthenticated == true
    bool isRobot;
-   char gameResult;     // 'W', 'L', 'T'  // not sent, calculated in master
+   char gameResult;     // 'W', 'L', 'T', not sent, calculated on master
    S32 points;
    U32 kills;
    U32 turretKills;     // Turrets killed xx
@@ -96,7 +96,7 @@ struct PlayerStats
    bool isLevelChanger;
    bool isHosting;
 
-   U32 fratricides;  // count of killing your team
+   U32 fratricides;  // Count of killing your team
 };
 
 
@@ -104,7 +104,7 @@ struct PlayerStats
 struct TeamStats 
 {
    U32 intColor;    // To send as number, not string
-   string hexColor; // not sent, calculated on receiving based on intColor
+   string hexColor; // Not sent, calculated on receiving based on intColor
    string name;
    S32 score;
    char gameResult;     // 'W', 'L', 'T'  // not sent, calculated in master
@@ -115,19 +115,19 @@ struct TeamStats
 // Embedded with VersionedGameStats below
 struct GameStats
 {
-   string serverName;       // not sent, master fills this in
-   string serverIP;         // not sent, master fills this in
-   S32 cs_protocol_version; // not sent, master fills this in
+   string serverName;       // Not sent, master fills this in
+   string serverIP;         // Not sent, master fills this in
+   S32 cs_protocol_version; // Not sent, master fills this in
    S32 build_version;
 
    string gameType;
    string levelName;
    bool isOfficial;
    bool isTesting;
-   U32 playerCount;  // not sent, this is calculated while receiving
-   U32 duration;     // game length in seconds
+   U32 playerCount;  // Not sent, this is calculated while receiving
+   U32 duration;     // Game length in seconds
    bool isTeamGame;
-   Vector<TeamStats> teamStats;     // for team games
+   Vector<TeamStats> teamStats;     // For team games
 };
 
 
