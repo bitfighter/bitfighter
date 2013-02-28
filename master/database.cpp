@@ -130,21 +130,30 @@ static void insertStatsShots(const DbQuery &query, U64 playerId, const Vector<We
 static U64 insertStatsPlayer(const DbQuery &query, const PlayerStats *playerStats, U64 gameId, const string &teamId)
 {
    string sql = "INSERT INTO stats_player(stats_game_id, stats_team_id, player_name, "
-                                               "is_authenticated, is_robot, "
-                                               "result, points, kill_count, "
-                                               "death_count, "
-                                               "suicide_count, switched_team_count, "
-                                               "asteroid_crashes, flag_drops, "
-                                               "flag_pickups, flag_returns, flag_scores, "
-                                               "teleport_uses) "
-                      "VALUES(" + itos(gameId) + ", " + teamId + ", '" + sanitize(playerStats->name) + "', " +
-                                 btos(playerStats->isAuthenticated) + ", " + btos(playerStats->isRobot) + ", '" +
-                                 playerStats->gameResult + "', " + itos(playerStats->points) + ", " + itos(playerStats->kills) + ", " + 
-                                 itos(playerStats->deaths) + ", " +
-                                 itos(playerStats->suicides) + ", " + itos(playerStats->switchedTeamCount) + ", " +
-                                 itos(playerStats->crashedIntoAsteroid) + ", " + itos(playerStats->flagDrop) + ", " + 
-                                 itos(playerStats->flagPickup) + ", " + itos(playerStats->flagReturn) + ", " + itos(playerStats->flagScore) + ", " + 
-                                 itos(playerStats->teleport) + ");";
+                                               "is_authenticated,               is_robot, "
+                                               "result,                         points, "
+                                               "kill_count,                     death_count, "
+                                               "suicide_count,                  switched_team_count, "
+                                               "asteroid_crashes,               flag_drops, "
+                                               "flag_pickups,                   flag_returns, "
+                                               "flag_scores,                    teleport_uses, "
+                                               "turret_kills,                   ff_kills, "
+                                               "asteroid_kills,                 turrets_engineered, "
+                                               "ffs_engineered,                 teleports_engineered, "
+                                               "distance_traveled )"                      
+                         "VALUES(" + itos(gameId) + ", " + teamId + ", '"     + sanitize(playerStats->name)           + "', " +
+                                 btos(playerStats->isAuthenticated)     + ", " + btos(playerStats->isRobot)           + ", " +
+                                 "'" + playerStats->gameResult + "'"    + ", " + itos(playerStats->points)            + ", " + 
+                                 itos(playerStats->kills)               + ", " + itos(playerStats->deaths)            + ", " +
+                                 itos(playerStats->suicides)            + ", " + itos(playerStats->switchedTeamCount) + ", " +
+                                 itos(playerStats->crashedIntoAsteroid) + ", " + itos(playerStats->flagDrop)          + ", " + 
+                                 itos(playerStats->flagPickup)          + ", " + itos(playerStats->flagReturn)        + ", " + 
+                                 itos(playerStats->flagScore)           + ", " + itos(playerStats->teleport)          + ", " + 
+                                 itos(playerStats->turretKills)         + ", " + itos(playerStats->ffKills)           + ", " + 
+                                 itos(playerStats->astKills)            + ", " + itos(playerStats->turretsEngr)       + ", " + 
+                                 itos(playerStats->ffEngr)              + ", " + itos(playerStats->telEngr)           + ", " + 
+                                 itos(playerStats->distTraveled)        + 
+                         ")";
 
    U64 playerId = query.runQuery(sql);
 
