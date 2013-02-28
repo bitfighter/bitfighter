@@ -48,16 +48,19 @@ struct WeaponStats
    U32 hitBy;
 };
 
+
 struct ModuleStats 
 {
    ShipModule shipModule;
    U32 seconds;
 };
 
+
 struct LoadoutStats
 {
    U32 loadoutHash;
 };
+
 
 // Embedded within TeamStats below
 struct PlayerStats
@@ -97,18 +100,22 @@ struct PlayerStats
    bool isHosting;
 
    U32 fratricides;  // Count of killing your team
+
+   PlayerStats();    // Constructor
 };
 
 
 // Embedded within GameStats below
 struct TeamStats 
 {
-   U32 intColor;    // To send as number, not string
-   string hexColor; // Not sent, calculated on receiving based on intColor
+   U32 intColor;     // To send as number, not string
+   string hexColor;  // Not sent, calculated on receiving based on intColor
    string name;
    S32 score;
-   char gameResult;     // 'W', 'L', 'T'  // not sent, calculated in master
+   char gameResult;  // 'W', 'L', 'T'  // not sent, calculated in master
    Vector<PlayerStats> playerStats;    // Info about all players on this team
+
+   TeamStats();      // Constructor
 };
 
 
@@ -128,6 +135,8 @@ struct GameStats
    U32 duration;     // Game length in seconds
    bool isTeamGame;
    Vector<TeamStats> teamStats;     // For team games
+
+   GameStats();      // Constructor
 };
 
 
@@ -139,6 +148,8 @@ struct VersionedGameStats
    U8 version;
    bool valid;
    GameStats gameStats;
+
+   VersionedGameStats();      // Constructor
 };
 
 
