@@ -134,7 +134,7 @@ struct GameStats
 // This contains the whole kilbasa
 struct VersionedGameStats
 {
-   static const U8 CURRENT_VERSION = 2;
+   static const U8 CURRENT_VERSION = 3;
 
    U8 version;
    bool valid;

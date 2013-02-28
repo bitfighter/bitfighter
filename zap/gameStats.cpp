@@ -142,8 +142,8 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
 
 namespace Types
 {
-   U8 readU8(TNL::BitStream &s)   { U8  val; read(s, &val); return val; }
-   S8 readS8(TNL::BitStream &s)   { S8  val; read(s, &val); return val; }
+   U8  readU8(TNL::BitStream &s)  { U8  val; read(s, &val); return val; }
+   S8  readS8(TNL::BitStream &s)  { S8  val; read(s, &val); return val; }
    U16 readU16(TNL::BitStream &s) { U16 val; read(s, &val); return val; }
    S16 readS16(TNL::BitStream &s) { S16 val; read(s, &val); return val; }
    U32 readU32(TNL::BitStream &s) { U32 val; read(s, &val); return val; }
@@ -318,7 +318,7 @@ namespace Types
          val->isAuthenticated = s.readFlag();
 
          if(val->isAuthenticated)
-            val->nonce.read(&s); // only needed if server claims a player is authenticated
+            val->nonce.read(&s); // Only needed if server claims a player is authenticated
 
          val->fratricides = readCompressedU32(s);
          val->flagPickup = readCompressedU32(s);
@@ -334,6 +334,17 @@ namespace Types
 
       read(s, &val->loadoutStats, version);
       read(s, &val->weaponStats, version);
+
+      if(version >= 3)
+      {
+         val->turretKills  = readCompressedU32(s);
+         val->ffKills      = readCompressedU32(s);
+         val->astKills     = readCompressedU32(s);
+         val->turretsEngr  = readCompressedU32(s);
+         val->ffEngr       = readCompressedU32(s);
+         val->telEngr      = readCompressedU32(s);
+         val->distTraveled = readCompressedU32(s);
+      }
 
       val->gameResult = 0;  // Will fill in later
    }
@@ -355,7 +366,8 @@ namespace Types
          s.writeFlag(val.isLevelChanger);
          val.nonce.write(&s);
       }
-      else
+      
+      if(version >= 1)
       {
          writeCompressedS32(s, val.points);
          writeCompressedU32(s, val.kills);
@@ -386,6 +398,17 @@ namespace Types
 
       write(s, val.loadoutStats, version);
       write(s, val.weaponStats, version);
+
+      if(version >= 3)
+      {
+         writeCompressedU32(s, val.turretKills);
+         writeCompressedU32(s, val.ffKills);
+         writeCompressedU32(s, val.astKills);
+         writeCompressedU32(s, val.turretsEngr);
+         writeCompressedU32(s, val.ffEngr);
+         writeCompressedU32(s, val.telEngr);
+         writeCompressedU32(s, val.distTraveled);
+      }
    }
 
 
@@ -488,7 +511,7 @@ namespace Types
    }
 
 
-   /// Writes objects into a BitStream. Server write and send to master.
+   /// Writes objects into a BitStream.  Server write and send to master.
    void write(TNL::BitStream &s, VersionedGameStats &val)
    {
       U32 bitStart = s.getBitPosition();
