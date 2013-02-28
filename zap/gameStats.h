@@ -72,12 +72,12 @@ struct PlayerStats
    char gameResult;     // 'W', 'L', 'T', not sent, calculated on master
    S32 points;
    U32 kills;
-   U32 turretKills;     // Turrets killed xx
-   U32 ffKills;         // FFs killed xx
-   U32 astKills;        // Asteroids killed xx
-   U32 turretsEngr;     // Turrets constructed with engineer  xx
-   U32 ffEngr;          // Forcefields engineered  xx
-   U32 telEngr;         // Teleporters engineered  xx
+   U32 turretKills;     // Turrets killed
+   U32 ffKills;         // FFs killed 
+   U32 astKills;        // Asteroids killed 
+   U32 turretsEngr;     // Turrets constructed with engineer
+   U32 ffEngr;          // Forcefields engineered
+   U32 telEngr;         // Teleporters engineered
    U32 deaths;
    U32 suicides;
    U32 switchedTeamCount;
@@ -92,7 +92,7 @@ struct PlayerStats
    U32 crashedIntoAsteroid;
    U32 changedLoadout;
    U32 teleport;
-   U32 distTraveled;   //xx
+   U32 distTraveled;
 	U32 playTime;
 
    bool isAdmin;
@@ -148,8 +148,6 @@ struct VersionedGameStats
    U8 version;
    bool valid;
    GameStats gameStats;
-
-   VersionedGameStats();      // Constructor
 };
 
 
