@@ -151,6 +151,7 @@ U32 readU32(TNL::BitStream &s) { U32 val; read(s, &val); return val; }
 S32 readS32(TNL::BitStream &s) { S32 val; read(s, &val); return val; }
 // for bool, use   s.readFlag();
 
+
 string readString(TNL::BitStream &s) { char val[256]; s.readString(val); return val; }
 void writeString(TNL::BitStream &s, const string &val) { s.writeString(val.c_str()); }
 
