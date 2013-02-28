@@ -59,6 +59,7 @@ struct LoadoutStats
    U32 loadoutHash;
 };
 
+// Embedded within TeamStats below
 struct PlayerStats
 {
    string name;
@@ -99,6 +100,7 @@ struct PlayerStats
 };
 
 
+// Embedded within GameStats below
 struct TeamStats 
 {
    U32 intColor;    // To send as number, not string
@@ -110,6 +112,7 @@ struct TeamStats
 };
 
 
+// Embedded with VersionedGameStats below
 struct GameStats
 {
    string serverName;       // not sent, master fills this in
@@ -128,6 +131,7 @@ struct GameStats
 };
 
 
+// This contains the whole kilbasa
 struct VersionedGameStats
 {
    static const U8 CURRENT_VERSION = 2;
