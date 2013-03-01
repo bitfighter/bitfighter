@@ -32,15 +32,15 @@
                                    // MASTER_PROTOCOL_VERSION = 4, client 015a and older (CS_PROTOCOL_VERSION <= 32) can not connect to our new master.
 #define CS_PROTOCOL_VERSION 36     // Change this when releasing an incompatible cs protocol (must be int)
 // 016 = 33 
-// 017, 017a = 35
-// 018 = 36
+// 017[ab] = 35
+// 018[a] = 36
 
 #define VERSION_016  3737
 #define VERSION_017  4252
 #define VERSION_017a 4265
 #define VERSION_017b 4537
 #define VERSION_018  6059
-#define VERSION_018a 6699          // TODO: Change this when we release 018a
+#define VERSION_018a 6796
 
 #define BUILD_VERSION VERSION_018a // Version of the game according to hg, will be unique every release (must be int)
                                    // Get from "hg summary"
