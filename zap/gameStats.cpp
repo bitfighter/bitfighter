@@ -93,12 +93,6 @@ PlayerStats::PlayerStats()    // Constructor
 
    S32 points              = 0;
    U32 kills               = 0;
-   U32 turretKills         = 0;
-   U32 ffKills             = 0;
-   U32 astKills            = 0;
-   U32 turretsEngr         = 0;
-   U32 ffEngr              = 0;
-   U32 telEngr             = 0;
    U32 deaths              = 0;
    U32 suicides            = 0;
    U32 switchedTeamCount   = 0;
@@ -109,9 +103,18 @@ PlayerStats::PlayerStats()    // Constructor
    U32 crashedIntoAsteroid = 0;
    U32 changedLoadout      = 0;
    U32 teleport            = 0;
-   U32 distTraveled        = 0;
    U32 playTime            = 0;
    U32 fratricides         = 0;
+
+   // V3 stats
+   U32 turretKills         = 0;
+   U32 ffKills             = 0;
+   U32 astKills            = 0;
+   U32 turretsEngr         = 0;
+   U32 ffEngr              = 0;
+   U32 telEngr             = 0;
+   U32 distTraveled        = 0;
+
 }
 
 
