@@ -83,37 +83,37 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
 
 PlayerStats::PlayerStats()    // Constructor
 {      
-   bool isAuthenticated = false;
-   bool isRobot         = false;
-   bool isAdmin         = false;
-   bool isLevelChanger  = false;
-   bool isHosting       = false;
+   isAuthenticated = false;
+   isRobot         = false;
+   isAdmin         = false;
+   isLevelChanger  = false;
+   isHosting       = false;
 
-   char gameResult = 0;
+   gameResult = 0;
 
-   S32 points              = 0;
-   U32 kills               = 0;
-   U32 deaths              = 0;
-   U32 suicides            = 0;
-   U32 switchedTeamCount   = 0;
-   U32 flagPickup          = 0;
-   U32 flagDrop            = 0;
-   U32 flagReturn          = 0;
-   U32 flagScore           = 0;
-   U32 crashedIntoAsteroid = 0;
-   U32 changedLoadout      = 0;
-   U32 teleport            = 0;
-   U32 playTime            = 0;
-   U32 fratricides         = 0;
+   points              = 0;
+   kills               = 0;
+   deaths              = 0;
+   suicides            = 0;
+   switchedTeamCount   = 0;
+   flagPickup          = 0;
+   flagDrop            = 0;
+   flagReturn          = 0;
+   flagScore           = 0;
+   crashedIntoAsteroid = 0;
+   changedLoadout      = 0;
+   teleport            = 0;
+   playTime            = 0;
+   fratricides         = 0;
 
    // V3 stats
-   U32 turretKills         = 0;
-   U32 ffKills             = 0;
-   U32 astKills            = 0;
-   U32 turretsEngr         = 0;
-   U32 ffEngr              = 0;
-   U32 telEngr             = 0;
-   U32 distTraveled        = 0;
+   turretKills         = 0;
+   ffKills             = 0;
+   astKills            = 0;
+   turretsEngr         = 0;
+   ffEngr              = 0;
+   telEngr             = 0;
+   distTraveled        = 0;
 }
 
 
@@ -122,9 +122,9 @@ PlayerStats::PlayerStats()    // Constructor
 
 TeamStats::TeamStats()      // Constructor
 {
-   U32 intColor    = 0;
-   S32 score       = 0;
-   char gameResult = 0;
+   intColor    = 0;
+   score       = 0;
+   gameResult  = 0;
 }
 
 
@@ -133,14 +133,14 @@ TeamStats::TeamStats()      // Constructor
 
 GameStats::GameStats()      // Constructor
 {
-   bool isOfficial = false;
-   bool isTesting  = false;
-   bool isTeamGame = false;
+   isOfficial = false;
+   isTesting  = false;
+   isTeamGame = false;
 
-   S32 cs_protocol_version = 0;
-   S32 build_version       = 0;
-   U32 playerCount         = 0;
-   U32 duration            = 0;
+   cs_protocol_version = 0;
+   build_version       = 0;
+   playerCount         = 0;
+   duration            = 0;
 }
 
 
