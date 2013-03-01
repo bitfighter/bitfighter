@@ -646,6 +646,7 @@ string DatabaseWriter::getSqliteSchema() {
       "   flag_pickups INTEGER  NOT NULL,"
       "   flag_returns INTEGER  NOT NULL,"
       "   flag_scores INTEGER  NOT NULL,"
+      "   teleport_uses INTEGER  NOT NULL,"
       "   turret_kills integer NOT NULL,"
       "   ff_kills integer NOT NULL,"
       "   asteroid_kills integer NOT NULL,"
