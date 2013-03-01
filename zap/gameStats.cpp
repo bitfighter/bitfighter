@@ -114,7 +114,6 @@ PlayerStats::PlayerStats()    // Constructor
    U32 ffEngr              = 0;
    U32 telEngr             = 0;
    U32 distTraveled        = 0;
-
 }
 
 
