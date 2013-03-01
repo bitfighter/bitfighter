@@ -177,6 +177,10 @@ if(SDL_FOUND)
 		${SDL_INCLUDE_DIR}
 		${X11_INCLUDE_DIR}
 	)
+	set_target_properties(bitfighter
+	        PROPERTIES
+	        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
+	)
 endif(SDL_FOUND)
 
 add_executable(bitfighterd
@@ -199,7 +203,7 @@ target_link_libraries(bitfighterd
 	tomcrypt
 )
 
-set_target_properties(bitfighterd bitfighter
+set_target_properties(bitfighterd
 	PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
 )
