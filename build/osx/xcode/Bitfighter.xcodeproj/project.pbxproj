@@ -2708,7 +2708,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "## This script will automatically update the plist when building the application\n# Parse out our versions\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/version.h |cut -f3 -d' ' | sed 's/\"//g' )\nbuildVersion=$( grep 'BUILD_VERSION' ../../../zap/version.h |cut -f3 -d' ' | sed 's/\"//g' )\n\n# This is the full path to our plist file\ninfoplist=\"$BUILT_PRODUCTS_DIR/$INFOPLIST_PATH\"\n\n# Update the plist with our versions\ndefaults write \"${infoplist%.plist}\" CFBundleShortVersionString \"${version}\"\ndefaults write \"${infoplist%.plist}\" CFBundleVersion \"${buildVersion}\"\n";
+			shellScript = "## This script will automatically update the plist when building the application\n# Parse out our versions\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/version.h |cut -f3 -d' ' | sed 's/\"//g' )\nbuildVersionDef=$( grep 'BUILD_VERSION' ../../../zap/version.h |cut -f3 -d' ' | sed 's/\"//g' )\nbuildVersion=$( grep -m1 \"${buildVersionDef}\" ../../../zap/version.h |cut -f3 -d' ' | sed 's/\"//g' )\n\n# This is the full path to our plist file\ninfoplist=\"$BUILT_PRODUCTS_DIR/$INFOPLIST_PATH\"\n\n# Update the plist with our versions\ndefaults write \"${infoplist%.plist}\" CFBundleShortVersionString \"${version}\"\ndefaults write \"${infoplist%.plist}\" CFBundleVersion \"${buildVersion}\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
