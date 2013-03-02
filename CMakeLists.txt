@@ -2,6 +2,7 @@ project (bitfighter)
 cmake_minimum_required (VERSION 2.6)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
 
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")

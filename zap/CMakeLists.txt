@@ -1,5 +1,4 @@
 find_package(SDL)
-find_package(X11)
 find_package(OpenAL)
 find_package(OpenGL)
 find_package(PNG)
@@ -154,10 +153,8 @@ if(SDL_FOUND)
 	)
 
 	target_link_libraries(bitfighter
-		SDLmain
 		${SDL_LIBRARY}
 		${PNG_LIBRARIES}
-		${X11_LIBRARIES}
 		${OPENGL_LIBRARY}
 		${OPENAL_LIBRARY}
 		${CMAKE_THREAD_LIBS_INIT}
@@ -175,7 +172,6 @@ if(SDL_FOUND)
 		${OPENGL_INCLUDE_DIR}
 		${PNG_INCLUDE_DIR}
 		${SDL_INCLUDE_DIR}
-		${X11_INCLUDE_DIR}
 	)
 	set_target_properties(bitfighter
 	        PROPERTIES
