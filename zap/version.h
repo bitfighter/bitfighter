@@ -45,7 +45,7 @@
 #define BUILD_VERSION VERSION_018a // Version of the game according to hg, will be unique every release (must be int)
                                    // Get from "hg summary"
 
-#define ZAP_GAME_RELEASE "018a"     // Change this with every release -- for display purposes only, string,
+#define ZAP_GAME_RELEASE "018a"    // Change this with every release -- for display purposes only, string,
                                    // will also be used for name of installer on windows, so be careful with spaces  
 
 #endif
