@@ -57,6 +57,8 @@ enum GeomType {
 class Geometry
 {
 public:
+   static const S32 MAX_POLY_POINTS = 32;       // Max number of points we can have in Walls, Nexuses, LoadoutZones, etc.
+
    Geometry();           // Constructor
    virtual ~Geometry();  // Destructor
 

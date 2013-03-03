@@ -535,8 +535,6 @@ void EditorUserInterface::cleanUp()
 }
 
 
-extern S32 gMaxPolygonPoints;
-
 // Loads a level
 void EditorUserInterface::loadLevel()
 {
@@ -3349,7 +3347,7 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIn
       if(obj->getObjectTypeNumber() == firstItem->getObjectTypeNumber() && obj->isSelected())
       {
          // Don't join if resulting object would be too big!
-         if(firstItem->getVertCount() + obj->getVertCount() > gMaxPolygonPoints)
+         if(firstItem->getVertCount() + obj->getVertCount() > Geometry::MAX_POLY_POINTS)
             continue;
 
          if(firstItem->getVert(0).distSquared(obj->getVert(0)) < .0001)   // First vertices are the same  1 2 3 | 1 4 5
@@ -4027,7 +4025,7 @@ void EditorUserInterface::onMouseClicked_right()
 
    if(mCreatingPoly || mCreatingPolyline)
    {
-      if(mNewItem->getVertCount() < gMaxPolygonPoints)            // Limit number of points in a polygon/polyline
+      if(mNewItem->getVertCount() < Geometry::MAX_POLY_POINTS)    // Limit number of points in a polygon/polyline
       {
          mNewItem->addVert(snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)));
          mNewItem->onGeomChanging();
@@ -4044,7 +4042,7 @@ void EditorUserInterface::onMouseClicked_right()
    // Can only add new vertices by clicking on item's edge, not it's interior (for polygons, that is)
    if(mEdgeHit != NONE && mHitItem && (mHitItem->getGeomType() == geomPolyLine || mHitItem->getGeomType() >= geomPolygon))
    {
-      if(mHitItem->getVertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
+      if(mHitItem->getVertCount() >= Geometry::MAX_POLY_POINTS)     // Polygon full -- can't add more
          return;
 
       Point newVertex = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos));   // adding vertex w/ right-mouse

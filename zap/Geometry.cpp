@@ -697,8 +697,6 @@ void SimpleLineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern S32 gMaxPolygonPoints;
-
 // Constructor
 PolylineGeometry::PolylineGeometry()
 {
@@ -753,7 +751,7 @@ void PolylineGeometry::clearVerts()
 
 bool PolylineGeometry::addVert(const Point &point, bool ignoreMaxPointsLimit) 
 { 
-   if(mPolyBounds.size() >= gMaxPolygonPoints && !ignoreMaxPointsLimit)
+   if(mPolyBounds.size() >= Geometry::MAX_POLY_POINTS && !ignoreMaxPointsLimit)
       return false;
 
    mPolyBounds.push_back(point); 
@@ -765,7 +763,7 @@ bool PolylineGeometry::addVert(const Point &point, bool ignoreMaxPointsLimit)
 
 bool PolylineGeometry::addVertFront(Point vert) 
 { 
-   if(mPolyBounds.size() >= gMaxPolygonPoints)
+   if(mPolyBounds.size() >= Geometry::MAX_POLY_POINTS)
       return false;
 
    mPolyBounds.push_front(vert); 
@@ -792,7 +790,7 @@ bool PolylineGeometry::deleteVert(S32 vertIndex)
 
 bool PolylineGeometry::insertVert(Point vertex, S32 vertIndex) 
 { 
-   if(mPolyBounds.size() >= gMaxPolygonPoints)
+   if(mPolyBounds.size() >= Geometry::MAX_POLY_POINTS)
       return false;
 
    mPolyBounds.insert(vertIndex, vertex);                                                   
@@ -888,7 +886,7 @@ F32 PolylineGeometry::getLabelAngle() const
 void PolylineGeometry::packGeom(GhostConnection *connection, BitStream *stream)
 {
    // - 1 because writeEnum ranges from 0 to n-1; mPolyBounds.size() ranges from 1 to n
-   stream->writeEnum(mPolyBounds.size() - 1, gMaxPolygonPoints);  
+   stream->writeEnum(mPolyBounds.size() - 1, Geometry::MAX_POLY_POINTS);  
    for(S32 i = 0; i < mPolyBounds.size(); i++)
       mPolyBounds[i].write(stream);
 }
@@ -896,7 +894,7 @@ void PolylineGeometry::packGeom(GhostConnection *connection, BitStream *stream)
 
 void PolylineGeometry::unpackGeom(GhostConnection *connection, BitStream *stream)
 {
-   U32 size = stream->readEnum(gMaxPolygonPoints) + 1;
+   U32 size = stream->readEnum(Geometry::MAX_POLY_POINTS) + 1;
 
    mPolyBounds.resize(size);
    mVertSelected.resize(size);
