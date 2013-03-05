@@ -33,6 +33,9 @@
 
 #include "freeglut_stroke.h"
 #include "freeglut_stroke_roman.h"
+#include "FontOrbitronLight.h"
+#include "FontOrbitronMedium.h"
+
 
 #include "Color.h"
 #include "Point.h"
@@ -51,7 +54,7 @@ void OpenglUtils::drawCharacter(S32 character)
    const SFG_StrokeFont* font;
 
    // This is GLUT_STROKE_ROMAN
-   font = &fgStrokeRoman;
+   font = &fgStrokeRoman;  // fgStrokeOrbitronMed
 
    if(!(character >= 0))
       return;
@@ -89,7 +92,7 @@ int OpenglUtils::getStringLength(const unsigned char* string )
    F32 this_line_length = 0.0;
    const SFG_StrokeFont* font;
 
-   font = &fgStrokeRoman;
+   font = &fgStrokeRoman;  // fgStrokeOrbitronMed, fgStrokeOrbitronLight
    if(!font)
       return 0;
    if ( !string || ! *string )
