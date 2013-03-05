@@ -32,7 +32,7 @@
 #include "OpenglUtils.h"
 
 #include "freeglut_stroke.h"
-#include "freeglut_stroke_roman.h"
+#include "FontStrokeRoman.h"
 #include "FontOrbitronLight.h"
 #include "FontOrbitronMedium.h"
 
