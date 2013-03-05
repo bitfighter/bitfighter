@@ -307,6 +307,9 @@
     <ClInclude Include="..\zap\input.h" />
     <ClInclude Include="..\zap\item.h" />
     <ClInclude Include="EventManager.h" />
+    <ClInclude Include="FontOrbitronLight.h" />
+    <ClInclude Include="FontOrbitronMedium.h" />
+    <ClInclude Include="FontStrokeRoman.h" />
     <ClInclude Include="GameTypesEnum.h" />
     <ClInclude Include="Geometry_Base.h" />
     <ClInclude Include="GeomObject.h" />
@@ -319,7 +322,6 @@
     <ClInclude Include="engineerHelper.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="freeglut_stroke.h" />
-    <ClInclude Include="freeglut_stroke_roman.h" />
     <ClInclude Include="gameStats.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="HTFGame.h" />
