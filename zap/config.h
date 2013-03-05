@@ -160,6 +160,8 @@ struct IniSettings      // With defaults specified
 private:
    F32 musicVolLevel;   // Use getter/setter!
 
+   Vector<PluginBinding> getDefaultPluginBindings() const;
+
 public:
    IniSettings();       // Constructor
 

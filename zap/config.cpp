@@ -181,8 +181,35 @@ IniSettings::IniSettings()
    version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
 
    oldGoalFlash = true;
+
+   pluginBindings = getDefaultPluginBindings();
 }
 
+
+Vector<PluginBinding> IniSettings::getDefaultPluginBindings() const
+{
+   Vector<PluginBinding> bindings;
+
+   static Vector<string> plugins;
+   plugins.push_back("Ctrl+;|draw_arcs.lua|Make curves!");
+
+   Vector<string> words;
+
+   // Parse the retrieved strings.  They'll be in the form "Key Script Help"
+   for(S32 i = 0; i < plugins.size(); i++)
+   {
+      parseString(trim(plugins[i]), words, '|');
+
+      PluginBinding binding;
+      binding.key = words[0];
+      binding.script = words[1];
+      binding.help = concatenate(words, 2);
+
+      bindings.push_back(binding);
+   }
+
+   return bindings;
+}
 
 
 F32 IniSettings::getMusicVolLevel()
@@ -265,7 +292,7 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
 }
 
 
-static void writePluginBindings(CIniFile *ini)
+static void writePluginBindings(CIniFile *ini, IniSettings *iniSettings)
 {
    const char *section = "EditorPlugins";
 
@@ -284,6 +311,16 @@ static void writePluginBindings(CIniFile *ini)
       addComment(" see the Bitfighter wiki for details.");
       addComment("----------------");
    }
+
+   Vector<string> plugins;
+   PluginBinding binding;
+   for(S32 i = 0; i < iniSettings->pluginBindings.size(); i++)
+   {
+      binding = iniSettings->pluginBindings[i];
+      plugins.push_back(string(binding.key + "|" + binding.script + "|" + binding.help));
+   }
+
+   ini->SetAllValues(section, "Plugin", plugins);
 }
 
 
@@ -1792,7 +1829,7 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeHost(ini, iniSettings);
    writeForeignServerInfo(ini, iniSettings);
    writeLoadoutPresets(ini, settings);
-   writePluginBindings(ini);
+   writePluginBindings(ini, iniSettings);
    writeConnectionsInfo(ini, iniSettings);
    writeEffects(ini, iniSettings);
    writeSounds(ini, iniSettings);
