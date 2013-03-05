@@ -54,7 +54,7 @@ void OpenglUtils::drawCharacter(S32 character)
    const SFG_StrokeFont* font;
 
    // This is GLUT_STROKE_ROMAN
-   font = &fgStrokeRoman;  // fgStrokeOrbitronMed
+   font = &fgStrokeRoman;  // fgStrokeOrbitronLight, fgStrokeOrbitronMed
 
    if(!(character >= 0))
       return;
@@ -92,7 +92,7 @@ int OpenglUtils::getStringLength(const unsigned char* string )
    F32 this_line_length = 0.0;
    const SFG_StrokeFont* font;
 
-   font = &fgStrokeRoman;  // fgStrokeOrbitronMed, fgStrokeOrbitronLight
+   font = &fgStrokeRoman;  // fgStrokeOrbitronLight, fgStrokeOrbitronMed
    if(!font)
       return 0;
    if ( !string || ! *string )
