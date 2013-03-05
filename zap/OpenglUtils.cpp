@@ -43,6 +43,8 @@
 
 namespace Zap {
 
+const SFG_StrokeFont* gFont = &fgStrokeRoman;  // fgStrokeOrbitronLight, fgStrokeOrbitronMed
+
 void OpenglUtils::drawCharacter(S32 character)
 {
    /*
@@ -51,19 +53,15 @@ void OpenglUtils::drawCharacter(S32 character)
    const SFG_StrokeChar *schar;
    const SFG_StrokeStrip *strip;
    S32 i, j;
-   const SFG_StrokeFont* font;
-
-   // This is GLUT_STROKE_ROMAN
-   font = &fgStrokeRoman;  // fgStrokeOrbitronLight, fgStrokeOrbitronMed
 
    if(!(character >= 0))
       return;
-   if(!(character < font->Quantity))
+   if(!(character < gFont->Quantity))
       return;
-   if(!font)
+   if(!gFont)
       return;
 
-   schar = font->Characters[ character ];
+   schar = gFont->Characters[ character ];
 
    if(!schar)
       return;
@@ -90,16 +88,14 @@ int OpenglUtils::getStringLength(const unsigned char* string )
    U8 c;
    F32 length = 0.0;
    F32 this_line_length = 0.0;
-   const SFG_StrokeFont* font;
 
-   font = &fgStrokeRoman;  // fgStrokeOrbitronLight, fgStrokeOrbitronMed
-   if(!font)
+   if(!gFont)
       return 0;
    if ( !string || ! *string )
       return 0;
 
    while( ( c = *string++) )
-      if( c < font->Quantity )
+      if( c < gFont->Quantity )
       {
          if( c == '\n' ) /* EOL; reset the length of this line */
          {
@@ -109,7 +105,7 @@ int OpenglUtils::getStringLength(const unsigned char* string )
          }
          else  /* Not an EOL, increment the length of this line */
          {
-            const SFG_StrokeChar *schar = font->Characters[ c ];
+            const SFG_StrokeChar *schar = gFont->Characters[ c ];
             if( schar )
                this_line_length += schar->Right;
          }
