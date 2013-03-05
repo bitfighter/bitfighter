@@ -12,9 +12,9 @@
 #include "tnlTypes.h"
 
 #ifdef TNL_OS_MOBILE
-#include "SDL_opengles.h"
+#  include "SDL_opengles.h"
 #else
-#include "SDL_opengl.h"
+#  include "SDL_opengl.h"
 #endif
 
 
@@ -28,6 +28,12 @@ namespace Zap {
 
 class OpenglUtils {
 public:
+   enum FontId {
+      FontRoman,
+      FontOrbitronLight,
+      FontOrbitronMed
+   };
+
    static void drawCharacter(S32 character);
    static S32 getStringLength(const unsigned char* string);
 };
@@ -45,6 +51,8 @@ extern void renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType);
 extern void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType);
 extern void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType);
 extern void renderLine(const Vector<Point> *points);
+
+extern void setFont(OpenglUtils::FontId fontId);
 
 extern void glScale(F32 scaleFactor);
 extern void glTranslate(const Point &pos);

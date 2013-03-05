@@ -161,7 +161,9 @@ void FXManager::TextEffect::render()
    glPushMatrix();
    glTranslate(pos);
    glScale(size);
+   setFont(OpenglUtils::FontOrbitronLight);
    drawStringc(0, 0, 12, text.c_str(), false);
+   setFont(OpenglUtils::FontRoman);
    glPopMatrix();
    //glLineWidth(gDefaultLineWidth);
 }

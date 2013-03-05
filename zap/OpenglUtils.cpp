@@ -43,7 +43,8 @@
 
 namespace Zap {
 
-const SFG_StrokeFont* gFont = &fgStrokeRoman;  // fgStrokeOrbitronLight, fgStrokeOrbitronMed
+const SFG_StrokeFont *gCurrentFont = &fgStrokeRoman;  // fgStrokeOrbitronLight, fgStrokeOrbitronMed
+
 
 void OpenglUtils::drawCharacter(S32 character)
 {
@@ -56,12 +57,12 @@ void OpenglUtils::drawCharacter(S32 character)
 
    if(!(character >= 0))
       return;
-   if(!(character < gFont->Quantity))
+   if(!(character < gCurrentFont->Quantity))
       return;
-   if(!gFont)
+   if(!gCurrentFont)
       return;
 
-   schar = gFont->Characters[ character ];
+   schar = gCurrentFont->Characters[ character ];
 
    if(!schar)
       return;
@@ -89,13 +90,13 @@ int OpenglUtils::getStringLength(const unsigned char* string )
    F32 length = 0.0;
    F32 this_line_length = 0.0;
 
-   if(!gFont)
+   if(!gCurrentFont)
       return 0;
    if ( !string || ! *string )
       return 0;
 
    while( ( c = *string++) )
-      if( c < gFont->Quantity )
+      if( c < gCurrentFont->Quantity )
       {
          if( c == '\n' ) /* EOL; reset the length of this line */
          {
@@ -105,7 +106,7 @@ int OpenglUtils::getStringLength(const unsigned char* string )
          }
          else  /* Not an EOL, increment the length of this line */
          {
-            const SFG_StrokeChar *schar = gFont->Characters[ c ];
+            const SFG_StrokeChar *schar = gCurrentFont->Characters[ c ];
             if( schar )
                this_line_length += schar->Right;
          }
@@ -113,6 +114,19 @@ int OpenglUtils::getStringLength(const unsigned char* string )
    if( length < this_line_length )
       length = this_line_length;
    return( S32 )( length + 0.5 );
+}
+
+
+void setFont(OpenglUtils::FontId fontId)
+{
+   if(fontId == OpenglUtils::FontRoman)
+      gCurrentFont = &fgStrokeRoman;
+   else if(fontId == OpenglUtils::FontOrbitronLight)
+      gCurrentFont = &fgStrokeOrbitronLight;
+   else if(fontId == OpenglUtils::FontOrbitronMed)
+      gCurrentFont = &fgStrokeOrbitronMed;
+   else
+      TNLAssert(false, "Unknown FontId!");
 }
 
 
