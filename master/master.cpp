@@ -1454,7 +1454,7 @@ public:
          {
             bool found = false;
             for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
-               if(strcmp(&message.getString()[12], walk->mPlayerOrServerName.getString()))
+               if(strcmp(&message.getString()[12], walk->mPlayerOrServerName.getString()) == 0)
                {
                   walk->mIsIgnoredFromList = !walk->mIsIgnoredFromList;
                   m2cSendChat(walk->mPlayerOrServerName, true, walk->mIsIgnoredFromList ? "player hidden" : "player not hidden anymore");
