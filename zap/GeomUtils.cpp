@@ -850,7 +850,8 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
          m++;
 
          /* remove v from remaining polygon */
-         for(s=v,t=v+1;t<nv;s++,t++) V[s] = V[t]; nv--;
+         for(s = v, t = v+1; t < nv; s++, t++) 
+            V[s] = V[t]; nv--;
 
          /* resest error detection counter */
          count = 2*nv;
@@ -910,7 +911,7 @@ bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vecto
    // Fire up clipper and union!
    Clipper clipper;
 
-   try  // there is a "throw" in AddPolygon..
+   try  // there is a "throw" in AddPolygon
    {
       clipper.AddPolygons(input, ptSubject);
    }
@@ -1062,7 +1063,7 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
    Vector<REAL> coords;
    Vector<REAL> holeMarkerList;
    holeMarkerList.resize(holeMarkerList2.size());
-   for(S32 i=0; i < holeMarkerList.size(); i++)
+   for(S32 i = 0; i < holeMarkerList.size(); i++)
       holeMarkerList[i] = holeMarkerList2[i]; // convert F32 to REAL(double)
 
    F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
@@ -1078,10 +1079,10 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
    // Using Triangle library
    Vector<S32> edges;
 
-   edges.push_back(0);       edges.push_back(1);
-   edges.push_back(1);       edges.push_back(2);
-   edges.push_back(2);       edges.push_back(3);
-   edges.push_back(3);       edges.push_back(0);
+   edges.push_back(0);       edges.push_back(1);      // 0 -> 1
+   edges.push_back(1);       edges.push_back(2);      // 1 -> 2
+   edges.push_back(2);       edges.push_back(3);      // 2 -> 3
+   edges.push_back(3);       edges.push_back(0);      // 3 -> 0
 
    Vector<Point> poly;
    for (S32 j = 0; j < polygonList.size(); j++)
@@ -1174,7 +1175,7 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
 
    // try and except allows continue running after error, but no zones get generated - windows only?
    // Adding the 'X' option gives a speed boost but seems to crash on several levels running on windows
-   triangulate2((char*)"zpQ", &in, &out, NULL);  // Replace Q with V to debug
+   triangulate2((char *)"zpQ", &in, &out, NULL);  // Replace Q with V to debug
 
    if(outputData.pointList)
       delete[] outputData.pointList;
