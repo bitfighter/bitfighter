@@ -709,6 +709,30 @@ bool EngineeredItem::isEnabled()
 
 void EngineeredItem::damageObject(DamageInfo *di)
 {
+   // Don't do self damage.  This is more complicated than it should probably be..
+   U8 damagingObjectType = di->damagingObject->getObjectTypeNumber();
+   if(isProjectileType(damagingObjectType))
+   {
+      BfObject *shooter = NULL;
+
+      if(damagingObjectType == BulletTypeNumber)
+         shooter = static_cast<Projectile*>(di->damagingObject)->mShooter;
+      else if(damagingObjectType == SeekerTypeNumber)
+         shooter = static_cast<Seeker*>(di->damagingObject)->mShooter;
+      else if(damagingObjectType == BurstTypeNumber)
+         shooter = static_cast<Burst*>(di->damagingObject)->mShooter;
+
+      // We have a shooter that is another engineered object (turret)
+      if(shooter != NULL && isEngineeredType(shooter->getObjectTypeNumber()))
+      {
+         EngineeredItem* engShooter = static_cast<EngineeredItem*>(shooter);
+
+         // Don't do self damage or damage to a team-turret
+         if(engShooter == this || engShooter->getTeam() == this->getTeam())
+            return;
+      }
+   }
+
    F32 prevHealth = mHealth;
 
    if(di->damageAmount > 0)
