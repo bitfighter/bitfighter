@@ -1489,8 +1489,6 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
       setMass(getAsteroidMass(mSizeLeft));
       mDesign = stream->readEnum(ASTEROID_DESIGNS);
 
-      logprintf("unpack size left: %d", mSizeLeft);
-
       if(!mInitial)
       {
          // mSizeLeft is never transmitted when server-side it is 0, so handle with final explode below
