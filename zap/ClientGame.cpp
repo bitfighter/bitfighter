@@ -161,6 +161,7 @@ ClientGame::~ClientGame()
 {
    if(getConnectionToMaster()) // Prevents errors when ClientGame is gone too soon.
       getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+
    closeConnectionToGameServer();      // I just added this for good measure... not really sure it's needed
    cleanUp();
 
