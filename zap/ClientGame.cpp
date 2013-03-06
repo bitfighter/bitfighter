@@ -231,7 +231,6 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
       {
          gameConnection->connect(getNetInterface(), remoteAddress);  
       }
-
    }
 
    //if(gClientGame2 && gClientGame != gClientGame2)  // make both client connect for now, until menus works in both clients.
