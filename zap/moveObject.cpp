@@ -1467,6 +1467,8 @@ U32 Asteroid::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & ItemChangedMask))
    {
       stream->writeInt(mSizeLeft, ASTEROID_SIZELEFT_BIT_COUNT);
+
+      // FIXME:  Why do we care about asteroid design on the server?
       stream->writeEnum(mDesign, ASTEROID_DESIGNS);
    }
 
@@ -1488,7 +1490,13 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mDesign = stream->readEnum(ASTEROID_DESIGNS);
 
       if(!mInitial)
-         SoundSystem::playSoundEffect(SFXAsteroidExplode, getRenderPos());
+      {
+         // mSizeLeft is never transmitted when server-side it is 0, so handle with final explode below
+         if(mSizeLeft == 1)
+            SoundSystem::playSoundEffect(SFXAsteroidMediumExplode, getRenderPos());
+         else if(mSizeLeft >= 2)
+            SoundSystem::playSoundEffect(SFXAsteroidLargeExplode, getRenderPos());
+      }
    }
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
@@ -1535,7 +1543,7 @@ TestFunc Asteroid::collideTypes()
 // Client only
 void Asteroid::onItemExploded(Point pos)
 {
-   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos);
+   SoundSystem::playSoundEffect(SFXAsteroidSmallExplode, getRenderPos());
    // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
 }
 
@@ -1843,7 +1851,7 @@ bool Circle::collide(BfObject *otherObject)
 // Client only
 void Circle::onItemExploded(Point pos)
 {
-   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos);
+   SoundSystem::playSoundEffect(SFXAsteroidSmallExplode, pos);
 }
 
 

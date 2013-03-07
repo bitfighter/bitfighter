@@ -73,7 +73,9 @@ static SFXProfile sfxProfilesModern[] = {
  {  "spybug_deploy.wav",   false, 0.4f,  false, 150, 600 },
  {  "spybug_explode.wav",  false, 0.8f,  false, 300, 800 },
 
- { "asteroid_explode_small.wav", false, 0.80f, false,  150, 800 },
+ { "asteroid_explode_small.wav",  false, 0.80f, false,  150, 800 },
+ { "asteroid_explode_medium.wav", false, 0.80f, false,  150, 800 },
+ { "asteroid_explode_large.wav",  false, 0.80f, false,  150, 800 },
 
  // Ship noises
  {  "ship_explode.wav",    false, 1.0,   false, 300, 1000 },

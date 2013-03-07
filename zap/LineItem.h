@@ -33,6 +33,7 @@ using namespace std;
 namespace Zap
 {
 
+class EditorAttributeMenuUI;
 
 class LineItem : public CentroidObject
 {
@@ -41,7 +42,12 @@ class LineItem : public CentroidObject
 private:
    Vector<Point> mRenderPoints;     // Precomputed points used for rendering linework
 
-   S32 mWidth;    
+   S32 mWidth;
+   bool mGlobal;    // If global, then all teams will see it
+
+#ifndef ZAP_DEDICATED
+   static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
+#endif
 
 public:
    explicit LineItem(lua_State *L = NULL);   // Combined C++ / Lua constructor
@@ -75,6 +81,14 @@ public:
    virtual S32 getWidth() const;
    void changeWidth(S32 amt);  
 
+#ifndef ZAP_DEDICATED
+   // These four methods are all that's needed to add an editable attribute to a class...
+   EditorAttributeMenuUI *getAttributeMenu();
+   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
+
+   void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
+#endif
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString();
@@ -96,6 +110,9 @@ public:
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
+
+   S32 lua_setGlobal(lua_State *L);
+   S32 lua_getGlobal(lua_State *L);
 };
 
 

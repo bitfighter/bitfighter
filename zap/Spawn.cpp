@@ -444,8 +444,7 @@ S32 ItemSpawn::lua_spawnNow(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// TODO:  change to TNL_IMPLEMENT_NETOBJECT for next version of Bitfighter that breaks compatibility
-TNL_IMPLEMENT_CLASS(AsteroidSpawn);
+TNL_IMPLEMENT_NETOBJECT_VERSION(AsteroidSpawn, 1);
 
 // Constructor
 AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
@@ -485,8 +484,7 @@ AsteroidSpawn::~AsteroidSpawn()
 
 void AsteroidSpawn::initialize()
 {
-   // Uncomment for asteroid spawn on the client when we go to 019
-//   mNetFlags.set(Ghostable);   // So we can render on the client
+   mNetFlags.set(Ghostable);   // So we can render on the client
    mObjectTypeNumber = AsteroidSpawnTypeNumber;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;

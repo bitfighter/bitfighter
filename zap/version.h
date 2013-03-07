@@ -30,7 +30,7 @@
 
 #define MASTER_PROTOCOL_VERSION 6  // Change this when releasing an incompatible cm/sm protocol (must be int)
                                    // MASTER_PROTOCOL_VERSION = 4, client 015a and older (CS_PROTOCOL_VERSION <= 32) can not connect to our new master.
-#define CS_PROTOCOL_VERSION 36     // Change this when releasing an incompatible cs protocol (must be int)
+#define CS_PROTOCOL_VERSION 37     // Change this when releasing an incompatible cs protocol (must be int)
 // 016 = 33 
 // 017[ab] = 35
 // 018[a] = 36
@@ -41,11 +41,12 @@
 #define VERSION_017b 4537
 #define VERSION_018  6059
 #define VERSION_018a 6800
+#define VERSION_019  6819          // TODO: change when releasing 019
 
-#define BUILD_VERSION VERSION_018a // Version of the game according to hg, will be unique every release (must be int)
+#define BUILD_VERSION VERSION_019 // Version of the game according to hg, will be unique every release (must be int)
                                    // Get from "hg summary"
 
-#define ZAP_GAME_RELEASE "018a"    // Change this with every release -- for display purposes only, string,
+#define ZAP_GAME_RELEASE "019"    // Change this with every release -- for display purposes only, string,
                                    // will also be used for name of installer on windows, so be careful with spaces  
 
 #endif
