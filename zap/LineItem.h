@@ -110,6 +110,9 @@ public:
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
+
+   S32 lua_setGlobal(lua_State *L);
+   S32 lua_getGlobal(lua_State *L);
 };
 
 
