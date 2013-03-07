@@ -1190,7 +1190,15 @@ void renderLoadoutZone(const Color *color, const Vector<Point> *outline, const V
                        const Point &centroid, F32 angle, F32 scaleFact)
 {
    renderZone(color, outline, fill);
-   renderPolygonLabel(centroid, angle, 25, "LOADOUT ZONE", scaleFact);
+   //renderPolygonLabel(centroid, angle, 25, "LOADOUT ZONE", scaleFact);
+   renderLoadoutZoneIcon(centroid);
+}
+
+
+void renderLoadoutZoneIcon(const Point &pos)
+{
+   // Pos, teeth, outer rad, inner rad, ang span of outer teeth, ang span of inner teeth, circle rad
+   drawGear(pos, 9, 20, 15, 15, 12, 8);   
 }
 
 
@@ -2520,11 +2528,51 @@ void drawDivetedTriangle(F32 height, F32 len)
       glTranslate(200, 200, 0);
       glRotatef(Platform::getRealMilliseconds() / 10 % 360,0,0,1);
       glScale(6);
-   renderPolygonOutline(&pts, &Colors::red);
+
+      renderPolygonOutline(&pts, &Colors::red);
 
    glPopMatrix();
 
 }
+
+
+void drawGear(const Point &pos, S32 teeth, F32 rad1, F32 rad2, F32 ang1, F32 ang2, F32 innerCircleRadius)
+{
+   Vector<Point> pts;
+
+   F32 ang1rad = degreesToRadians(ang1);
+   F32 ang2rad = degreesToRadians(ang2);
+
+   F32 a = Float2Pi / teeth;
+   F32 theta  = -ang1rad / 2;    // Start a little rotated to get an outer tooth facing up!
+
+   for(S32 i = 0; i < teeth; i++)
+   {
+      pts.push_back(Point(-rad1 * sin(theta), rad1 * cos(theta)));
+      theta += ang1rad;
+
+      pts.push_back(Point(-rad1 * sin(theta), rad1 * cos(theta)));
+      theta += a / 2 - (ang1rad / 2 + ang2rad / 2);
+
+      pts.push_back(Point(-rad2 * sin(theta), rad2 * cos(theta)));
+      theta += ang2rad;
+
+      pts.push_back(Point(-rad2 * sin(theta), rad2 * cos(theta)));
+      theta += a / 2 - (ang1rad / 2 + ang2rad / 2);
+   }
+
+   glPushMatrix();
+      glTranslate(pos.x, pos.y, 0);
+     // glRotatef(Platform::getRealMilliseconds() / 10 % 360,0,0,1);
+      //glScale(6);
+
+      renderPolygonOutline(&pts);
+
+      drawCircle(0, 0, innerCircleRadius);
+
+   glPopMatrix();
+}
+
 
 
 void render25FlagsBadge(F32 x, F32 y, F32 rad)

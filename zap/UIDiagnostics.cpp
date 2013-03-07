@@ -638,6 +638,7 @@ void DiagnosticUserInterface::render()
 #ifdef TNL_DEBUG
 
       //drawDivetedTriangle(20,9);
+      //drawGear(8,20,15,10,8, 5);
 
       for(S32 i = 0; i < 2; i++)
       {
