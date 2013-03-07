@@ -33,6 +33,7 @@
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "OpenglUtils.h"       // For glColor, et al
+#  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
 #endif
 
 
@@ -49,6 +50,11 @@ TNL_IMPLEMENT_NETOBJECT(LineItem);
    const S32 LineItem::MAX_LINE_WIDTH;
 #endif
 
+// Statics:
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *LineItem::mAttributeMenuUI = NULL;
+#endif
+
 // Combined C++ / Lua constructor
 LineItem::LineItem(lua_State *L)
 { 
@@ -57,6 +63,7 @@ LineItem::LineItem(lua_State *L)
    mObjectTypeNumber = LineTypeNumber;
 
    mWidth = 2;
+   mGlobal = true;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
    
@@ -94,10 +101,12 @@ LineItem *LineItem::clone() const
 void LineItem::render()
 {
 #ifndef ZAP_DEDICATED
+   bool sameTeam = false;
+
    GameConnection *gc = static_cast<ClientGame *>(getGame())->getConnectionToServer();
- 
-   // Don't render opposing team's text items... gc will only exist in game.  This block will be skipped when rendering preview in the editor.
-   if(gc)      
+
+   // Don't render opposing team's text items... gc will only exist in-game
+   if(gc)
    {
       BfObject *object = gc->getControlObject();
 
@@ -107,10 +116,14 @@ void LineItem::render()
       Ship *ship = static_cast<Ship *>(object);
 
       if(getTeam() == TEAM_NEUTRAL || ship->getTeam() == getTeam())
-      {
-         glColor(getColor());
-         renderLine(getOutline());
-      }
+         sameTeam = true;
+   }
+
+   // Now render
+   if(mGlobal || sameTeam)
+   {
+      glColor(getColor());
+      renderLine(getOutline());
    }
 #endif
 }
@@ -151,7 +164,16 @@ bool LineItem::processArguments(S32 argc, const char **argv, Game *game)
    setTeam (atoi(argv[0]));
    setWidth(atoi(argv[1]));
 
-   readGeom(argc, argv, 2, game->getGridSize());
+   int firstCoord = 2;
+   if(strcmp(argv[2], "Global") == 0)
+   {
+      mGlobal = true;
+      firstCoord = 3;
+   }
+   else
+      mGlobal = false;
+
+   readGeom(argc, argv, firstCoord, game->getGridSize());
 
    computeExtent();
 
@@ -161,7 +183,14 @@ bool LineItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string LineItem::toLevelCode(F32 gridSize) const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + itos(getWidth()) + " " + geomToLevelCode(gridSize);
+   string out = string(appendId(getClassName())) + " " + itos(getTeam()) + " " + itos(getWidth());
+
+   if(mGlobal)
+      out += " Global";
+
+   out += " " + geomToLevelCode(gridSize);
+
+   return out;
 }
 
 
@@ -204,6 +233,7 @@ U32 LineItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 {
    //stream->writeRangedU32(mWidth, 0, MAX_LINE_WIDTH);
    writeThisTeam(stream);
+   stream->write(mGlobal);
 
    packGeom(connection, stream);
 
@@ -215,6 +245,7 @@ void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    //mWidth = stream->readRangedU32(0, MAX_LINE_WIDTH);
    readThisTeam(stream);
+   mGlobal = stream->readFlag();  // Set this client side
 
    unpackGeom(connection, stream);
    updateExtentInDatabase();
@@ -260,6 +291,49 @@ void LineItem::changeWidth(S32 amt)
    setWidth(width);
    onGeomChanged();
 }
+
+#ifndef ZAP_DEDICATED
+
+EditorAttributeMenuUI *LineItem::getAttributeMenu()
+{
+   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
+   if(!mAttributeMenuUI)
+   {
+      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+      mAttributeMenuUI->addMenuItem(new YesNoMenuItem("Global:", true, "Viewable by all teams"));
+
+      // Add our standard save and exit option to the menu
+      mAttributeMenuUI->addSaveAndQuitMenuItem();
+   }
+
+   return mAttributeMenuUI;
+}
+
+
+// Get the menu looking like what we want
+void LineItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->getMenuItem(0)->setIntValue(mGlobal ? 1 : 0);
+}
+
+
+// Retrieve the values we need from the menu
+void LineItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   mGlobal = attributeMenu->getMenuItem(0)->getIntValue();    // Returns 0 or 1
+}
+
+
+// Render some attributes when item is selected but not being edited
+void LineItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
+{
+   keys.push_back("Global");    values.push_back(mGlobal ? "Yes" : "No");
+}
+
+#endif
 
 
 const char *LineItem::getOnScreenName()     { return "Line";      }
