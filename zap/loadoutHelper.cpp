@@ -111,6 +111,8 @@ void LoadoutHelper::initialize(bool includeEngineer)
 
 void LoadoutHelper::onMenuShow()
 {
+   Parent::onMenuShow();
+
    mCurrentIndex = 0;
 }
 
@@ -120,6 +122,7 @@ void LoadoutHelper::onMenuShow()
 
 void LoadoutHelper::render()
 {
+   S32 xPos = getLeftEdgeOfMenuPos();
    S32 yPos = MENU_TOP;
    const S32 fontSize = 15;
 
@@ -127,15 +130,15 @@ void LoadoutHelper::render()
    char helpStr[100];
 
    if(mCurrentIndex < ShipModuleCount)
-      dSprintf (helpStr, sizeof(helpStr), "Pick %d power modules for your ship:", ShipModuleCount);
+      dSprintf(helpStr, sizeof(helpStr), "Pick %d power modules for your ship:", ShipModuleCount);
    else
-      dSprintf (helpStr, sizeof(helpStr), "Pick %d weapons for your ship:", ShipWeaponCount);
+      dSprintf(helpStr, sizeof(helpStr), "Pick %d weapons for your ship:", ShipWeaponCount);
 
 
-   drawMenuBorderLine(yPos, loadoutMenuHeaderColor);
+   drawMenuBorderLine(xPos, yPos, loadoutMenuHeaderColor);
 
    glColor(loadoutMenuHeaderColor);
-   drawString(UserInterface::horizMargin, yPos, fontSize, helpStr);
+   drawString(xPos, yPos, fontSize, helpStr);
    yPos += fontSize + 10;
 
    Vector<LoadoutItem> *list = getList(mCurrentIndex);
@@ -171,12 +174,12 @@ void LoadoutHelper::render()
          U32 joystickIndex = Joystick::SelectedPresetIndex;
 
          if(inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
-            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + (showKeys ? 0 : 20)), (F32)yPos, 
+            JoystickRender::renderControllerButton(F32(xPos + (showKeys ? 0 : 20)), (F32)yPos, 
                                                    joystickIndex, list->get(i).button, false);
          if(showKeys)
          {
             glColor(Colors::white);     
-            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + 30), (F32)yPos, joystickIndex, list->get(i).key, false);
+            JoystickRender::renderControllerButton(F32(xPos + 30), (F32)yPos, joystickIndex, list->get(i).key, false);
          }
 
          if(selected)
@@ -184,21 +187,21 @@ void LoadoutHelper::render()
          else
             glColor(0.1f, 1.0, 0.1f);      // Color of not-yet selected item
 
-         S32 xPos = UserInterface::horizMargin + 50;
-         xPos += drawStringAndGetWidth(xPos, yPos, fontSize, list->get(i).text) + 8;      // The loadout entry itself
+         S32 textPos = xPos + 50;
+         textPos += drawStringAndGetWidth(textPos, yPos, fontSize, list->get(i).text) + 8;      // The loadout entry itself
          if(!selected)
             glColor(.2f, .8f, .8f);        // Color of help message
 
-         drawString(xPos, yPos, fontSize, list->get(i).help);      // The loadout help string, if there is one
+         drawString(textPos, yPos, fontSize, list->get(i).help);      // The loadout help string, if there is one
 
          yPos += fontSize + 7;
       }
    }
 
    // Add some help text
-   drawMenuBorderLine(yPos - fontSize - 2, loadoutMenuHeaderColor);
+   drawMenuBorderLine(xPos, yPos - fontSize - 2, loadoutMenuHeaderColor);
    yPos += 8;
-   drawMenuCancelText(yPos, loadoutMenuHeaderColor, fontSize);
+   drawMenuCancelText(xPos, yPos, loadoutMenuHeaderColor, fontSize);
 }
 
 

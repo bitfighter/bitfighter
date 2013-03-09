@@ -40,6 +40,7 @@ namespace Zap
 HelperMenu::HelperMenu(ClientGame *clientGame)
 {
    mClientGame = clientGame;
+   mShowTimer.setPeriod(150);    // Transition time, in ms
 }
 
 // Destructor
@@ -64,7 +65,21 @@ InputCode HelperMenu::getActivationKey()
 // Exit helper mode by entering play mode
 void HelperMenu::exitHelper() 
 { 
-   mClientGame->getUIManager()->getGameUserInterface()->exitHelper(); 
+   mShowTimer.invert();
+   mShowing = false;
+   mClientGame->getUIManager()->getGameUserInterface()->exitHelper();
+}
+
+
+F32 HelperMenu::getFraction()
+{
+   return mShowing ? mShowTimer.getFraction() : 1 - mShowTimer.getFraction();
+}
+
+
+F32 HelperMenu::getHelperWidth() const
+{
+   return 400;
 }
 
 
@@ -103,13 +118,13 @@ void HelperMenu::onTextInput(char ascii)
 }
 
 
-void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
+void HelperMenu::drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color)
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    F32 vertices[] = {
-         UserInterface::horizMargin, yPos + 20,
-         400, yPos + 20
+         xPos,        yPos + 20,
+         xPos + 400,  yPos + 20
    };
    F32 colors[] = {
          color.r, color.g, color.b, 1,
@@ -119,7 +134,7 @@ void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
 }
 
 
-void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
+void HelperMenu::drawMenuCancelText(S32 xPos, S32 yPos, const Color &color, S32 fontSize)
 {
    S32 butSize = JoystickRender::getControllerButtonRenderedSize(Joystick::SelectedPresetIndex, BUTTON_BACK);
    const S32 fontSizeSm = fontSize - 4;
@@ -130,11 +145,10 @@ void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
 
    // RenderedSize will be -1 if the button is not defined
    if(settings->getInputCodeManager()->getInputMode() == InputModeKeyboard || butSize == -1)
-      drawStringf(UserInterface::horizMargin, yPos, fontSizeSm, 
+      drawStringf(xPos, yPos, fontSizeSm, 
                   "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
    else
    {
-      S32 xPos = UserInterface::horizMargin;
       xPos += drawStringAndGetWidth(xPos, yPos, fontSizeSm, "Press ") + 4;
       JoystickRender::renderControllerButton(F32(xPos + 4), F32(yPos), Joystick::SelectedPresetIndex, BUTTON_BACK, false);
       xPos += butSize;
@@ -150,6 +164,14 @@ void HelperMenu::activateHelp(UIManager *uiManager)
 }
 
 
+// Return true if menu is playing the closing animation
+bool HelperMenu::isClosing() const
+{
+   return !mShowing && mShowTimer.getCurrent() > 0;
+}
+
+
+
 bool HelperMenu::isEngineerHelper()   { return false; }
 bool HelperMenu::isChatHelper()       { return false; }
 
@@ -157,7 +179,25 @@ bool HelperMenu::isMovementDisabled() { return false; }
 bool HelperMenu::isChatDisabled()     { return true;  }
 
 
-void HelperMenu::idle(U32 delta) { /* Do nothing */ }
-void HelperMenu::onMenuShow()    { /* Do nothing */ }
+void HelperMenu::idle(U32 deltaT) 
+{
+   if(mShowTimer.update(deltaT) && !mShowing)
+      mClientGame->getUIManager()->getGameUserInterface()->doneClosingHelper();
+}
+
+
+S32 HelperMenu::getLeftEdgeOfMenuPos()
+{
+   F32 width = getHelperWidth();
+   return UserInterface::horizMargin - width + (mShowing ? width - mShowTimer.getFraction() * width : 
+                                                           mShowTimer.getFraction() * width);
+}
+
+
+void HelperMenu::onMenuShow()    
+{
+   mShowTimer.invert();
+   mShowing = true;
+}
 
 };

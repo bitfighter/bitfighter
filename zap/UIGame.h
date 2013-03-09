@@ -88,7 +88,7 @@ public:
    void reset();
 
    void idle(U32 timeDelta);
-   void render(S32 ypos, bool helperVisible, bool anouncementActive);   // Render incoming chat msgs
+   void render(S32 ypos, bool helperVisible, bool anouncementActive, F32 alpha);   // Render incoming chat msgs
 
    void onChatMessageRecieved(const Color &msgColor, const string &msg);
    string substitueVars(const string &str);
@@ -184,6 +184,7 @@ private:
 
    // Various helper objects
    Vector<HelperMenu *> mHelperStack;        // Current helper
+   HelperMenu *mOffDeckHelper;               // Kind of the opposite of on deck
 
    ChatHelper        *mChatHelper;
    QuickChatHelper   *mQuickChatHelper;
@@ -322,10 +323,14 @@ public:
    void suspendGame();
    void unsuspendGame();
 
+
+   // These could all go into a helper manager class...
    void enterMode(HelperMenu::HelperMenuType helperType);  
    
    void exitHelper();
    void exitHelper(HelperMenu *helper);
+   void doneClosingHelper();
+   F32 getDimFactor();
 
 
    void renderEngineeredItemDeploymentMarker(Ship *ship);

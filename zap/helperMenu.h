@@ -29,6 +29,7 @@
 #include "InputCode.h"
 #include "tnl.h"
 #include "Color.h"
+#include "Timer.h"
 
 using namespace TNL; 
 
@@ -54,18 +55,27 @@ private:
    virtual const char *getCancelMessage();
    virtual InputCode getActivationKey();
 
+   bool mShowing;    // True when menu is being activated, false when deactivating
+
    ClientGame *mClientGame;
+
+   virtual F32 getHelperWidth() const;
 
 protected:
    static const S32 MENU_TOP = 180;     // Location of top of overlay menu
 
+   Timer mShowTimer;
+
+   S32 getLeftEdgeOfMenuPos();    // Return left edge of menu
+
    // Shortcut helper function
    virtual void exitHelper();
 
-   void drawMenuBorderLine(S32 yPos, const Color &color);
-   void drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize);
+   void drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color);
+   void drawMenuCancelText(S32 xPos, S32 yPos, const Color &color, S32 fontSize);
 
    ClientGame *getGame();
+
 
 public:
    explicit HelperMenu(ClientGame *clientGame);    // Constructor
@@ -74,6 +84,10 @@ public:
    virtual void render() = 0;
    virtual void idle(U32 delta);
    virtual void onMenuShow();
+
+   bool isClosing() const;                         // Return true if menu is playing the closing animation
+   F32 getFraction();                              // Get fraction of openness
+
 
    virtual bool processInputCode(InputCode inputCode);  
    virtual void onTextInput(char ascii);

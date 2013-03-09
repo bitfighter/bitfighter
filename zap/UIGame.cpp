@@ -216,6 +216,7 @@ void GameUserInterface::onActivate()
    mChatMessageDisplayer3.reset();
 
    mHelperStack.clear();               // Make sure we're not in chat or loadout-select mode or somesuch
+   mOffDeckHelper = NULL;
 
    for(S32 i = 0; i < ShipModuleCount; i++)
    {
@@ -340,6 +341,9 @@ void GameUserInterface::idle(U32 timeDelta)
    for(S32 i = 0; i < mHelperStack.size(); i++)
       mHelperStack[i]->idle(timeDelta);
 
+   if(mOffDeckHelper)
+      mOffDeckHelper->idle(timeDelta);
+
    mVoiceRecorder.idle(timeDelta);
 
    U32 indx = mFrameIndex % FPS_AVG_COUNT;
@@ -371,8 +375,6 @@ extern void checkMousePos(S32 maxdx, S32 maxdy);
 // Draw main game screen (client only)
 void GameUserInterface::render()
 {
-   glColor(Colors::black);
-
    if(!getGame()->isConnectedToServer())
    {
       glColor(Colors::white);
@@ -396,6 +398,9 @@ void GameUserInterface::render()
       // Higher indexed helpers render on top
       for(S32 i = 0; i < mHelperStack.size(); i++)
          mHelperStack[i]->render();
+
+      if(mOffDeckHelper)
+         mOffDeckHelper->render();
    }
    else
    {
@@ -419,6 +424,9 @@ void GameUserInterface::render()
       // Render QuickChat / Loadout menus (higher indexed helpers render on top of lower indexed ones)
       for(S32 i = 0; i < mHelperStack.size(); i++)
          mHelperStack[i]->render();
+
+      if(mOffDeckHelper)
+         mOffDeckHelper->render();
 
       GameType *gameType = getGame()->getGameType();
 
@@ -837,6 +845,23 @@ void GameUserInterface::exitHelper()
 }
 
 
+void GameUserInterface::doneClosingHelper()
+{
+   mOffDeckHelper = NULL;
+}
+
+
+F32 GameUserInterface::getDimFactor()
+{
+   static const F32 MAX_DIMMING = .2;
+   if(mOffDeckHelper)
+      return mOffDeckHelper->getFraction() * (1 - MAX_DIMMING) + MAX_DIMMING;
+   else if(mHelperStack.size() > 0)
+      return mHelperStack.last()->getFraction() * (1 - MAX_DIMMING) + MAX_DIMMING;
+   else return 1;
+}
+
+
 // Exit the specified helper
 void GameUserInterface::exitHelper(HelperMenu *helper)
 {
@@ -850,6 +875,7 @@ void GameUserInterface::exitHelper(HelperMenu *helper)
 void GameUserInterface::doExitHelper(S32 index)
 {
    //mHelperStack[index]->deactivate();
+   mOffDeckHelper = mHelperStack[index];
    mHelperStack.erase(index);
    getGame()->unsuspendGame();  
 }
@@ -1111,17 +1137,15 @@ bool GameUserInterface::checkEnterChatInputCode(InputCode inputCode)
 
    if(checkInputCode(settings, InputCodeManager::BINDING_TEAMCHAT, inputCode))          // Start entering a team chat msg
       mChatHelper->startChatting(ChatHelper::TeamChat);
-
    else if(checkInputCode(settings, InputCodeManager::BINDING_GLOBCHAT, inputCode))     // Start entering a global chat msg
       mChatHelper->startChatting(ChatHelper::GlobalChat);
-
    else if(checkInputCode(settings, InputCodeManager::BINDING_CMDCHAT, inputCode))      // Start entering a command
       mChatHelper->startChatting(ChatHelper::CmdChat);
-
    else
       return false;
 
-   mHelperStack.push_back(mChatHelper);
+   enterMode(HelperMenu::ChatHelperType);
+
    return true;
 }
 
@@ -1232,7 +1256,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          return true;
 
       // These keys are only available when there is no helper active
-      if(mHelperStack.size() == 0)
+      if(mHelperStack.size() == 0 || mHelperStack.last()->isClosing())
       {
          if(checkInputCode(settings, InputCodeManager::BINDING_QUICKCHAT, inputCode))
             enterMode(HelperMenu::QuickChatHelperType);
@@ -1271,14 +1295,17 @@ void GameUserInterface::renderChatMsgs()
    bool chatDisabled = (mHelperStack.size() > 0 && mHelperStack.last()->isChatDisabled());
    bool announcementActive = (mAnnouncementTimer.getCurrent() != 0);
 
-   if(mMessageDisplayMode == ShortTimeout)
-      mChatMessageDisplayer1.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive);
-   else if(mMessageDisplayMode == ShortFixed)
-      mChatMessageDisplayer2.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive);
-   else
-      mChatMessageDisplayer3.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive);
+   F32 alpha = getDimFactor();
 
-   mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, chatDisabled, false);
+   if(mMessageDisplayMode == ShortTimeout)
+      mChatMessageDisplayer1.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive, alpha);
+   else if(mMessageDisplayMode == ShortFixed)
+      mChatMessageDisplayer2.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive, alpha);
+   else
+      mChatMessageDisplayer3.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive, alpha);
+
+   F32 showIndicators = getGame()->getSettings()->getIniSettings()->showWeaponIndicators;
+   mServerMessageDisplayer.render(showIndicators ? messageMargin : vertMargin, chatDisabled, false, alpha);
 
    if(announcementActive)
       renderAnnouncement(IN_GAME_CHAT_DISPLAY_POS);
@@ -2419,7 +2446,7 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 
 
 // Render any incoming player chat msgs
-void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anouncementActive)
+void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anouncementActive, F32 alpha)
 {
    // Are we in the act of transitioning between one message and another?
    bool isScrolling = (mChatScrollTimer.getCurrent() > 0);  
@@ -2500,10 +2527,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
    {
       U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
 
-      if(helperVisible)
-         glColor(mMessages[index].color, 0.2f); // Dim
-      else
-         glColor(mMessages[index].color);       // Bright
+      glColor(mMessages[index].color, alpha); 
 
       drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
 

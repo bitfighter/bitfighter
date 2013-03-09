@@ -88,6 +88,8 @@ void TeamShuffleHelper::shuffle()
 
 void TeamShuffleHelper::onMenuShow()
 {
+   Parent::onMenuShow();
+
    shuffle();
 }
 

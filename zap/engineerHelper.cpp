@@ -77,6 +77,8 @@ void EngineerHelper::setSelectedEngineeredObject(U32 objectType)
 
 void EngineerHelper::onMenuShow()
 {
+   Parent::onMenuShow();
+
    mSelectedItem = -1;
 }
 
@@ -97,12 +99,12 @@ void EngineerHelper::render()
 
    if(isMenuBeingDisplayed())    // Haven't selected an item yet, so show the menu
    {
-      const S32 xPos = UserInterface::horizMargin + 50;
+      S32 xPos = getLeftEdgeOfMenuPos();
 
-      drawMenuBorderLine(yPos, engineerMenuHeaderColor);
+      drawMenuBorderLine(xPos, yPos, engineerMenuHeaderColor);
 
       glColor(engineerMenuHeaderColor);
-      drawString(UserInterface::horizMargin, yPos, fontSize, "What do you want to Engineer?");
+      drawString(xPos, yPos, fontSize, "What do you want to Engineer?");
       yPos += fontSize + 10;
 
       GameSettings *settings = getGame()->getSettings();
@@ -120,18 +122,18 @@ void EngineerHelper::render()
          U32 joystickIndex = Joystick::SelectedPresetIndex;
 
          if(inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
-            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + (showKeys ? 0 : 20)), (F32)yPos, 
+            JoystickRender::renderControllerButton(F32(xPos + (showKeys ? 0 : 20)), (F32)yPos, 
                                                    joystickIndex, mEngineerCostructionItemInfos[i].mButton, false);
 
          if(showKeys)
          {
             glColor(Colors::white);     // Render key in white
-            JoystickRender::renderControllerButton((F32)UserInterface::horizMargin + 20, (F32)yPos, 
+            JoystickRender::renderControllerButton((F32)xPos + 20, (F32)yPos, 
                                                    joystickIndex, mEngineerCostructionItemInfos[i].mKey, false);
          }
 
          glColor(0.1, 1.0, 0.1);     
-         S32 x = drawStringAndGetWidth(xPos, yPos, fontSize, mEngineerCostructionItemInfos[i].mName); 
+         S32 x = drawStringAndGetWidth(xPos + 50, yPos, fontSize, mEngineerCostructionItemInfos[i].mName); 
 
          glColor(.2, .8, .8);    
          drawString(xPos + x, yPos, fontSize, mEngineerCostructionItemInfos[i].mHelp);      // The help string, if there is one
@@ -141,10 +143,10 @@ void EngineerHelper::render()
 
       yPos += 2;
 
-      drawMenuBorderLine(yPos - fontSize - 2, engineerMenuHeaderColor);
+      drawMenuBorderLine(xPos, yPos - fontSize - 2, engineerMenuHeaderColor);
       yPos += 8;
 
-      drawMenuCancelText(yPos, engineerMenuHeaderColor, fontSize);
+      drawMenuCancelText(xPos, yPos, engineerMenuHeaderColor, fontSize);
    }
    else     // Have selected a module, need to indicate where to deploy
    {
