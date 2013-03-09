@@ -998,13 +998,6 @@ void checkOnlineUpdate(GameSettings *settings)
 }
 
 
-// Change this for packaging.  Can be done in package processing scripts using sed
-// We probably need to migrate to a build system sometime...
-#ifdef TNL_OS_LINUX
-#include "../config.h"
-#endif
-
-
 // This function returns the path where the game resources have been installed into the system
 // before being copied to the user's data path
 string getInstalledDataDir()

@@ -17,6 +17,20 @@ if (CMAKE_COMPILER_IS_GNUCC)
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELEASE} -g")
 endif()
 
+
+# Define the Linux data dir if not defined in a packaging build script already
+if("${CMAKE_SYSTEM}" MATCHES "Linux")
+	if(NOT LINUX_DATA_DIR)
+		set(LINUX_DATA_DIR "/usr/share")
+	endif()
+
+	message(STATUS "LINUX_DATA_DIR:  " ${LINUX_DATA_DIR})
+
+	# Quotes need to be a part of the definition or the compiler won't understand
+	add_definitions(-DLINUX_DATA_DIR="\\"${LINUX_DATA_DIR}\\"")
+endif()
+
+
 add_subdirectory(alure)
 add_subdirectory(tnl)
 add_subdirectory(lua/lua-vec)
