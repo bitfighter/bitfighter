@@ -41,7 +41,7 @@ namespace Zap
    //                                       Enum in Lua:   Fire  Min    Enrgy  Proj Proj. Dam-  Self-dam. Can dam.   Projectile
    //             Enum          Name        Weapon.Phaser  Delay Enrgy  Drain  Vel. Life  age    Factor   Teammate      Type
 #define WEAPON_ITEM_TABLE \
-   WEAPON_ITEM(WeaponPhaser,  "Phaser",      "Phaser",     100,   500,   500,  600, 1000, 0.21f,  0,       false, ProjectilePhaser ) \
+   WEAPON_ITEM(WeaponPhaser,  "Phaser",      "Phaser",     100,   500,   500,  600, 1000, 0.19f,  0,       false, ProjectilePhaser ) \
    WEAPON_ITEM(WeaponBounce,  "Bouncer",     "Bouncer",    100,  1800,  1800,  540, 1500, 0.15f,  0.5f,    false, ProjectileBounce ) \
    WEAPON_ITEM(WeaponTriple,  "Triple",      "Triple",     200,  1700,  1700,  550,  850, 0.14f,  0,       false, ProjectileTriple ) \
    WEAPON_ITEM(WeaponBurst,   "Burst",       "Burst",      700,  5000,  5000,  500, 1000, 0.50f,  1.0f,    false, NotAProjectile   ) \
