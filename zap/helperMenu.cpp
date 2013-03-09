@@ -171,7 +171,6 @@ bool HelperMenu::isClosing() const
 }
 
 
-
 bool HelperMenu::isEngineerHelper()   { return false; }
 bool HelperMenu::isChatHelper()       { return false; }
 
