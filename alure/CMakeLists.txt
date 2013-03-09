@@ -14,4 +14,4 @@ set(ALURE_SOURCES
 )
 
 add_library(alure ${ALURE_SOURCES})
-target_link_libraries(alure vorbisfile dl)
+target_link_libraries(alure vorbisfile modplug dl)

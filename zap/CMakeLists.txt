@@ -166,6 +166,7 @@ if(SDL_FOUND)
 		speex
 		tnl
 		tomcrypt
+		vorbisfile
 	)
 	include_directories(
 		${OPENAL_INCLUDE_DIR}
