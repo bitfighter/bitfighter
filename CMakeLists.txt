@@ -27,7 +27,7 @@ if("${CMAKE_SYSTEM}" MATCHES "Linux")
 	message(STATUS "LINUX_DATA_DIR:  " ${LINUX_DATA_DIR})
 
 	# Quotes need to be a part of the definition or the compiler won't understand
-	add_definitions(-DLINUX_DATA_DIR="\\"${LINUX_DATA_DIR}\\"")
+	add_definitions(-DLINUX_DATA_DIR="${LINUX_DATA_DIR}")
 endif()
 
 
