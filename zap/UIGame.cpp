@@ -288,7 +288,7 @@ void GameUserInterface::displayMessage(const Color &msgColor, const char *messag
    if(strcmp(message, "") == 0)
       return;
 
-   mServerMessageDisplayer.onChatMessageRecieved(msgColor, message);
+   mServerMessageDisplayer.onChatMessageReceived(msgColor, message);
 }
 
 
@@ -2207,7 +2207,7 @@ void GameUserInterface::renderDebugStatus()
 }
 
 
-void GameUserInterface::onChatMessageRecieved(const Color &msgColor, const char *format, ...)
+void GameUserInterface::onChatMessageReceived(const Color &msgColor, const char *format, ...)
 {
    // Ignore empty message
    if(!strcmp(format, ""))
@@ -2221,9 +2221,9 @@ void GameUserInterface::onChatMessageRecieved(const Color &msgColor, const char 
    vsnprintf(buffer, sizeof(buffer), format, args);
    va_end(args);
 
-   mChatMessageDisplayer1.onChatMessageRecieved(msgColor, buffer);      // Standard chat stream
-   mChatMessageDisplayer2.onChatMessageRecieved(msgColor, buffer);      // Short, non-expiring chat stream
-   mChatMessageDisplayer3.onChatMessageRecieved(msgColor, buffer);      // Long, non-expiring chat stream
+   mChatMessageDisplayer1.onChatMessageReceived(msgColor, buffer);      // Standard chat stream
+   mChatMessageDisplayer2.onChatMessageReceived(msgColor, buffer);      // Short, non-expiring chat stream
+   mChatMessageDisplayer3.onChatMessageReceived(msgColor, buffer);      // Long, non-expiring chat stream
 }
 
 
@@ -2358,7 +2358,7 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 
 
 // Add it to the list, will be displayed in render()
-void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const string &msg)
+void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const string &msg)
 {
    Vector<string> lines = wrapString(substitueVars(msg), mWrapWidth, mFontSize, "      ");
 

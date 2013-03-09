@@ -117,7 +117,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
       for(S32 i = 0; i < ipList.size(); i++)
          mServerList.push_back(ipList[i]);
    }
-   else  // Empty list recieved, transmission complete, send whole list on to the UI
+   else  // Empty list received, transmission complete, send whole list on to the UI
    {
       static_cast<ClientGame *>(mGame)->gotServerListFromMaster(mServerList);
 

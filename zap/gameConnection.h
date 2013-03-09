@@ -198,7 +198,7 @@ public:
    void setWaitingForPermissionsReply(bool waiting);
    bool waitingForPermissionsReply();
 
-   // Tell UI whether we've recieved password confirmation from server
+   // Tell UI whether we've received password confirmation from server
    void setGotPermissionsReply(bool gotReply);
    bool gotPermissionsReply();
 

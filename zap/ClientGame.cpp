@@ -1138,7 +1138,7 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          break;
 
       case NetConnection::ReasonPuzzle:
-         ui->setMessage(2, "Unable to connect to the server.  Recieved message:");
+         ui->setMessage(2, "Unable to connect to the server.  Received message:");
          ui->setMessage(3, "Invalid puzzle solution");
          ui->setMessage(5, "Please try a different game server, or try again later.");
 
@@ -1268,7 +1268,7 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          break;
 
       case NetConnection::ReasonError:
-         ui->setMessage(2, "Unable to connect to the server.  Recieved message:");
+         ui->setMessage(2, "Unable to connect to the server.  Received message:");
          ui->setMessage(3, string(reasonStr));
          ui->setMessage(5, "Please try a different game server, or try again later.");
 

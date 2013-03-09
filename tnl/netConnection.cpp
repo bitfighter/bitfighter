@@ -299,7 +299,7 @@ void NetConnection::writePacketHeader(BitStream *stream, NetPacketType packetTyp
    stream->writeInt(sendDelay >> 3, 8);
 
    // if we're resending this header, we can't advance the
-   // sequence recieved (in case this packet drops and the prev one
+   // sequence received (in case this packet drops and the prev one
    // goes through) 
 
    if(packetType == DataPacket)

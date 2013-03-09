@@ -2883,7 +2883,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
 }
 
 
-// Client acknowledges that it has recieved s2cSyncMessagesComplete, and is ready to go
+// Client acknowledges that it has received s2cSyncMessagesComplete, and is ready to go
 GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
@@ -3722,13 +3722,13 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringT
    Color theColor = Colors::yellow;
 
    if(fullClientInfo->getName() == toName && toName == fromName)      // Message sent to self
-      gameUI->onChatMessageRecieved(theColor, "%s: %s", toName.getString(), message.getString());
+      gameUI->onChatMessageReceived(theColor, "%s: %s", toName.getString(), message.getString());
 
    else if(fullClientInfo->getName() == toName)                       // To this player
-      gameUI->onChatMessageRecieved(theColor, "from %s: %s", fromName.getString(), message.getString());
+      gameUI->onChatMessageReceived(theColor, "from %s: %s", fromName.getString(), message.getString());
 
    else if(fullClientInfo->getName() == fromName)                     // From this player
-      gameUI->onChatMessageRecieved(theColor, "to %s: %s", toName.getString(), message.getString());
+      gameUI->onChatMessageReceived(theColor, "to %s: %s", toName.getString(), message.getString());
 
    else  
       TNLAssert(false, "Should never get here... shouldn't be able to see PM that is not from or not to you"); 
@@ -3745,7 +3745,7 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
       return;
 
    Color *color = global ? &gGlobalChatColor : &gTeamChatColor;
-   clientGame->getUIManager()->getGameUserInterface()->onChatMessageRecieved(*color, "%s: %s", clientName.getString(), message.getString());
+   clientGame->getUIManager()->getGameUserInterface()->onChatMessageReceived(*color, "%s: %s", clientName.getString(), message.getString());
 #endif
 }
 

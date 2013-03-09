@@ -90,7 +90,7 @@ public:
    void idle(U32 timeDelta);
    void render(S32 ypos, bool helperVisible, bool anouncementActive);   // Render incoming chat msgs
 
-   void onChatMessageRecieved(const Color &msgColor, const string &msg);
+   void onChatMessageReceived(const Color &msgColor, const string &msg);
    string substitueVars(const string &str);
 };
 
@@ -261,7 +261,7 @@ public:
    void setAnnouncement(string announcement);
    void displayMessage(const Color &msgColor, const char *message);
    void displayMessagef(const Color &msgColor, const char *format, ...);
-   void onChatMessageRecieved(const Color &msgColor, const char *format, ...);
+   void onChatMessageReceived(const Color &msgColor, const char *format, ...);
    const char *getChatMessage();    // Return message being composed in in-game chat
 
    void resetInputModeChangeAlertDisplayTimer(U32 timeInMs);

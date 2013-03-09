@@ -125,7 +125,7 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInt
    mLastSortColumn = 0;
    mHighlightColumn = 0;
    mSortAscending = true;
-   mRecievedListOfServersFromMaster = false;
+   mReceivedListOfServersFromMaster = false;
    mouseScrollTimer.setPeriod(10 * MenuUserInterface::MOUSE_SCROLL_INTERVAL);
 
    mServersPerPage = 8;    // To start with, anyway...
@@ -171,7 +171,7 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInt
 void QueryServersUserInterface::onActivate()
 {
    servers.clear();     // Start fresh
-   mRecievedListOfServersFromMaster = false;
+   mReceivedListOfServersFromMaster = false;
    mItemSelectedWithMouse = false;
    mScrollingUpMode = false;
    mJustMovedMouse = false;
@@ -337,7 +337,7 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
 
 void QueryServersUserInterface::gotServerListFromMaster(const Vector<IPAddress> &serverList)
 {
-   mRecievedListOfServersFromMaster = true;
+   mReceivedListOfServersFromMaster = true;
    addPingServers(serverList);
 }
 
@@ -410,7 +410,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
          s.serverDescr = string(serverDescr).substr(0, MaxServerDescrLen);
          s.msgColor = Colors::yellow;   // yellow server details
          s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
-         s.lastSendTime = Platform::getRealMilliseconds();     // Record time our last query was recieved, so we'll know when to send again
+         s.lastSendTime = Platform::getRealMilliseconds();     // Record time our last query was received, so we'll know when to send again
          if(s.state == ServerRef::SentQuery)
          {
             s.state = ServerRef::ReceivedQuery;
@@ -821,7 +821,7 @@ void QueryServersUserInterface::render()
       }
    }
    // Show some special messages if there are no servers, or we're not connected to the master
-   else if(connectedToMaster && mRecievedListOfServersFromMaster)        // We have our response, and there were no servers
+   else if(connectedToMaster && mReceivedListOfServersFromMaster)        // We have our response, and there were no servers
       drawmsg1 = true;
    else if(!connectedToMaster)         // Still waiting to connect to the master...
       drawmsg2 = true;

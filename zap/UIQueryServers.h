@@ -114,7 +114,7 @@ private:
 
 public:
    explicit QueryServersUserInterface(ClientGame *game);      // Constructor
-   bool mRecievedListOfServersFromMaster;
+   bool mReceivedListOfServersFromMaster;
    Nonce mNonce;
    U32 pendingPings;
    U32 pendingQueries;

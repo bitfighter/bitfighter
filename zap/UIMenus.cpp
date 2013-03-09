@@ -866,7 +866,7 @@ void MainMenuUserInterface::onActivate()
 }
 
 
-// Set the MOTD we recieved from the master
+// Set the MOTD we received from the master
 void MainMenuUserInterface::setMOTD(const char *motd)
 {
    strncpy(mMOTD, motd, MOTD_LEN);     
