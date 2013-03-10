@@ -64,8 +64,10 @@ private:
    void exitHelper();
 
 public:
-   explicit EngineerHelper(ClientGame *clientGame);          // Constructor
-   virtual ~EngineerHelper();
+   explicit EngineerHelper();    // Constructor
+   virtual ~EngineerHelper();    // Destructor
+
+   HelperMenuType getType();
 
    void setSelectedEngineeredObject(U32 objectType);
 
@@ -74,7 +76,6 @@ public:
    void render();                
    void renderDeploymentMarker(Ship *ship);
 
-   bool isEngineerHelper();      // returns true
    bool isChatDisabled();
 };
 

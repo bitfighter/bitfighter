@@ -98,30 +98,24 @@ Color GameUserInterface::privateF5MessageDisplayedInGameColor(Colors::blue);
 // Constructor
 GameUserInterface::GameUserInterface(ClientGame *game) : 
                   Parent(game), 
-                  mVoiceRecorder(game),  //  lines expr  topdown   wrap width          font size          line gap
-                  mServerMessageDisplayer(game, 6, true,  true,  SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, SRV_MSG_FONT_GAP),
-                  mChatMessageDisplayer1(game,  5, true,  false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
-                  mChatMessageDisplayer2(game,  5, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
-                  mChatMessageDisplayer3(game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP)
+                  mVoiceRecorder(game),  //   lines expr  topdown   wrap width          font size          line gap
+                  mServerMessageDisplayer(game,  6, true,  true,  SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, SRV_MSG_FONT_GAP),
+                  mChatMessageDisplayer1 (game,  5, true,  false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
+                  mChatMessageDisplayer2 (game,  5, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
+                  mChatMessageDisplayer3 (game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP)
 {
    mInScoreboardMode = false;
    mFPSVisible = false;
    displayInputModeChangeAlert = false;
    mMissionOverlayActive = false;
 
+   mHelperManager.initialize(game);
+
    mMessageDisplayMode = ShortTimeout;
 
    setMenuID(GameUI);
    mInScoreboardMode = false;
 	
-   // These deleted in destructor... could be references instead of pointers
-   mChatHelper        = new ChatHelper(game);
-   mQuickChatHelper   = new QuickChatHelper(game);
-   mLoadoutHelper     = new LoadoutHelper(game);
-   mEngineerHelper    = new EngineerHelper(game);
-   mTeamShuffleHelper = new TeamShuffleHelper(game);
-  
-
 #if 0 //defined(TNL_OS_XBOX)
    mFPSVisible = true;
 #else
@@ -157,40 +151,14 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
 // Destructor  -- only runs when we're exiting to the OS
 GameUserInterface::~GameUserInterface()
 {
-   delete mQuickChatHelper;
-   delete mLoadoutHelper;
-   delete mEngineerHelper;
-   delete mTeamShuffleHelper;
+   // Do nothing
 }
 
 
-void GameUserInterface::onPlayerJoined()
-{
-   if(mHelperStack.contains(mTeamShuffleHelper))
-      mTeamShuffleHelper->onPlayerJoined();
-}
-
-
-void GameUserInterface::onPlayerQuit()
-{
-   if(mHelperStack.contains(mTeamShuffleHelper))
-      mTeamShuffleHelper->onPlayerQuit();
-}
-
-
-void GameUserInterface::onGameOver()
-{
-   if(mHelperStack.contains(mTeamShuffleHelper))   // Exit Shuffle helper to keep things from getting too crashy
-      exitHelper(mTeamShuffleHelper); 
-}
-
-
-// Used when ship dies while engineering
-void GameUserInterface::quitEngineerHelper()
-{
-   if(mHelperStack.size() > 0 && mHelperStack.last() == mEngineerHelper)
-      mHelperStack.pop_back();
-}
+void GameUserInterface::onPlayerJoined()     { mHelperManager.onPlayerJoined();     }
+void GameUserInterface::onPlayerQuit()       { mHelperManager.onPlayerQuit();       }
+void GameUserInterface::onGameOver()         { mHelperManager.onGameOver();         }
+void GameUserInterface::quitEngineerHelper() { mHelperManager.quitEngineerHelper(); }  // When ship dies engineering
 
 
 void GameUserInterface::setAnnouncement(string message)
@@ -215,8 +183,7 @@ void GameUserInterface::onActivate()
    mChatMessageDisplayer2.reset();
    mChatMessageDisplayer3.reset();
 
-   mHelperStack.clear();               // Make sure we're not in chat or loadout-select mode or somesuch
-   mOffDeckHelper = NULL;
+   mHelperManager.reset();
 
    for(S32 i = 0; i < ShipModuleCount; i++)
    {
@@ -293,7 +260,6 @@ void GameUserInterface::displayMessage(const Color &msgColor, const char *messag
 }
 
 
-
 void GameUserInterface::idle(U32 timeDelta)
 {
    Parent::idle(timeDelta);
@@ -337,13 +303,8 @@ void GameUserInterface::idle(U32 timeDelta)
       else
          mRecalcFPSTimer -= timeDelta;
    }
-
-   for(S32 i = 0; i < mHelperStack.size(); i++)
-      mHelperStack[i]->idle(timeDelta);
-
-   if(mOffDeckHelper)
-      mOffDeckHelper->idle(timeDelta);
-
+   
+   mHelperManager.idle(timeDelta);
    mVoiceRecorder.idle(timeDelta);
 
    U32 indx = mFrameIndex % FPS_AVG_COUNT;
@@ -395,12 +356,7 @@ void GameUserInterface::render()
       renderChatMsgs();
       renderSuspendedMessage();
 
-      // Higher indexed helpers render on top
-      for(S32 i = 0; i < mHelperStack.size(); i++)
-         mHelperStack[i]->render();
-
-      if(mOffDeckHelper)
-         mOffDeckHelper->render();
+      mHelperManager.render();
    }
    else
    {
@@ -421,12 +377,7 @@ void GameUserInterface::render()
          drawStringf(gScreenInfo.getGameCanvasWidth() - horizMargin - 220, vertMargin, 20, "%4.1f fps | %1.0f ms", mFPSAvg, mPingAvg);
       }
 
-      // Render QuickChat / Loadout menus (higher indexed helpers render on top of lower indexed ones)
-      for(S32 i = 0; i < mHelperStack.size(); i++)
-         mHelperStack[i]->render();
-
-      if(mOffDeckHelper)
-         mOffDeckHelper->render();
+      mHelperManager.render();
 
       GameType *gameType = getGame()->getGameType();
 
@@ -463,7 +414,7 @@ if(mGotControlUpdate)
 // Returns true if player is composing a chat message
 bool GameUserInterface::isChatting()
 {
-   return mHelperStack.size() > 0 && mHelperStack.last()->isChatHelper();
+   return mHelperManager.isHelperActive(HelperMenu::ChatHelperType);
 }
 
 
@@ -613,18 +564,6 @@ void GameUserInterface::renderReticle()
                        getUIManager()->getCurrentUI()->getMenuID() == GameUI;                                    // And not when a menu is active
    if(shouldRender)
    {
-#if 0 // TNL_OS_WIN32
-      Point realMousePoint = mMousePoint;
-      if(!getGame()->getSettings()->getIniSettings()->controlsRelative)
-      {
-         F32 len = mMousePoint.len();
-         checkMousePos(gScreenInfo.getWindowWidth()  * 100 / canvasWidth,
-                       gScreenInfo.getWindowHeight() * 100 / canvasHeight);
-
-         if(len > 100)
-            realMousePoint *= 100 / len;
-      }
-#endif
       Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
 
       F32 vertices[] = {
@@ -647,7 +586,8 @@ void GameUserInterface::renderReticle()
             offsetMouse.x, offsetMouse.y + 30,
             offsetMouse.x, (F32)gScreenInfo.getGameCanvasHeight(),
       };
-      F32 colors[] = {
+
+      static F32 colors[] = {
             0, 1, 0, 0.7,  //Colors::green
             0, 1, 0, 0.7,
             0, 1, 0, 0.7,
@@ -665,6 +605,7 @@ void GameUserInterface::renderReticle()
             0, 1, 0, 0.7,
             0, 1, 0, 0,
       };
+
       renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
    }
 
@@ -710,8 +651,8 @@ void GameUserInterface::renderLoadoutIndicators()
       return;
 
    static const Color *INDICATOR_INACTIVE_COLOR = &Colors::green80;      
-   static const Color *INDICATOR_ACTIVE_COLOR = &Colors::red80;        
-   static const Color *INDICATOR_PASSIVE_COLOR = &Colors::yellow;
+   static const Color *INDICATOR_ACTIVE_COLOR   = &Colors::red80;        
+   static const Color *INDICATOR_PASSIVE_COLOR  = &Colors::yellow;
 
    U32 xPos = horizMargin;
 
@@ -757,7 +698,7 @@ void GameUserInterface::renderLoadoutIndicators()
 
 void GameUserInterface::onMouseDragged()
 {
-   TNLAssert(false, "Is this ever called?");
+   TNLAssert(false, "Is this ever called?");  // Probably not!
    onMouseMoved();
 }
 
@@ -794,98 +735,34 @@ void GameUserInterface::onMouseMoved()
 
 
 // Is engineer enabled on this level?  Only set at beginning of level, not changed during game
-void GameUserInterface::enableEngineer(bool engineerEnabled)
+void GameUserInterface::pregameSetup(bool engineerEnabled)
 {
-   mLoadoutHelper->initialize(engineerEnabled);
+   mHelperManager.pregameSetup(engineerEnabled);
 }
 
 
 void GameUserInterface::setSelectedEngineeredObject(U32 objectType)
 {
-   mEngineerHelper->setSelectedEngineeredObject(objectType);
+   mHelperManager.setSelectedEngineeredObject(objectType);
 }
 
 
-// Enter QuickChat, Loadout, or Engineer mode
-void GameUserInterface::enterMode(HelperMenu::HelperMenuType helperType)
+void GameUserInterface::activateHelper(HelperMenu::HelperMenuType helperType)
 {
-   switch(helperType)
-   {
-      case HelperMenu::ChatHelperType:
-         mHelperStack.push_back(mChatHelper);
-         break;
-      case HelperMenu::QuickChatHelperType:
-         mHelperStack.push_back(mQuickChatHelper);
-         break;
-      case HelperMenu::LoadoutHelperType:
-         mHelperStack.push_back(mLoadoutHelper);
-         break;
-      case HelperMenu::EngineerHelperType:
-         mHelperStack.push_back(mEngineerHelper);
-         break;
-      case HelperMenu::ShuffleTeamsHelperType:
-         mHelperStack.push_back(mTeamShuffleHelper);
-         break;
-      default:
-         TNLAssert(false, "Unknown helperType!");
-         return;
-   }
-
+   mHelperManager.activateHelper(helperType);
    playBoop();
-
-   mHelperStack.last()->onMenuShow();
 }
 
 
-// Exit the top-most helper
 void GameUserInterface::exitHelper()
 {
-   if(mHelperStack.size() > 0)
-      doExitHelper(mHelperStack.size() - 1);
+   mHelperManager.exitHelper();
 }
 
 
-void GameUserInterface::doneClosingHelper()
-{
-   mOffDeckHelper = NULL;
-}
-
-
-F32 GameUserInterface::getDimFactor()
-{
-   static const F32 MAX_DIMMING = .2;
-   if(mOffDeckHelper)
-      return mOffDeckHelper->getFraction() * (1 - MAX_DIMMING) + MAX_DIMMING;
-   else if(mHelperStack.size() > 0)
-      return mHelperStack.last()->getFraction() * (1 - MAX_DIMMING) + MAX_DIMMING;
-   else return 1;
-}
-
-
-// Exit the specified helper
-void GameUserInterface::exitHelper(HelperMenu *helper)
-{
-   S32 index = mHelperStack.getIndex(helper);
-
-   if(index >= 0)
-      doExitHelper(index);
-}
-
-
-void GameUserInterface::doExitHelper(S32 index)
-{
-   //mHelperStack[index]->deactivate();
-   mOffDeckHelper = mHelperStack[index];
-   mHelperStack.erase(index);
-   getGame()->unsuspendGame();  
-}
-
-
-// Render potential location to deploy engineered item -- does nothing if we're not engineering
 void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
 {
-   if(mHelperStack.getIndex(mEngineerHelper) != -1)
-      mEngineerHelper->renderDeploymentMarker(ship);
+   mHelperManager.renderEngineeredItemDeploymentMarker(ship);
 }
 
 
@@ -961,7 +838,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    GameSettings *settings = getGame()->getSettings();
 
    // Kind of hacky, but this will unsuspend and swallow the keystroke, which is what we want
-   if(mHelperStack.size() == 0 && (getGame()->isSuspended() || getGame()->isSpawnDelayed()))
+   if(!mHelperManager.isHelperActive() && (getGame()->isSuspended() || getGame()->isSpawnDelayed()))
    {
       getGame()->undelaySpawn();
       if(inputCode != KEY_ESCAPE)  // Lagged out and can't un-idle to bring up the menu?
@@ -971,7 +848,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    if(checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
       getGame()->setBusyChatting(true);
 
-   if(mHelperStack.size() == 0)        // No helper active
+   if(!mHelperManager.isHelperActive()) 
       getGame()->undelaySpawn();
 
    if(Parent::onKeyDown(inputCode))    // Let parent try handling the key
@@ -986,8 +863,8 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       getGame()->setBusyChatting(true);
 
       // If we have a helper, let that determine what happens when the help key is pressed.  Otherwise, show help normally.
-      if(mHelperStack.size() > 0)
-         mHelperStack.last()->activateHelp(getUIManager());
+      if(mHelperManager.isHelperActive())
+         mHelperManager.activateHelp(getUIManager());
       else
          getUIManager()->activate(InstructionsUI);
 
@@ -996,7 +873,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
 
    // Ctrl-/ toggles console window for the moment
    // Only open when there are no active helpers
-   if(mHelperStack.size() == 0 && inputCode == KEY_SLASH && InputCodeManager::checkModifier(KEY_CTRL))
+   if(!mHelperManager.isHelperActive() && inputCode == KEY_SLASH && InputCodeManager::checkModifier(KEY_CTRL))
    {
       if(gConsole.isOk())                 // Console is only not Ok if something bad has happened somewhere
          gConsole.toggleVisibility();
@@ -1018,7 +895,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       return true;
    }
 
-   if(mHelperStack.size() > 0 && mHelperStack.last()->processInputCode(inputCode))   // Will return true if key was processed
+   if(mHelperManager.processInputCode(inputCode))   // Will return true if key was processed
    {
       // Experimental, to keep ship from moving after entering a quick chat that has the same shortcut as a movement key
       InputCodeManager::setState(inputCode, false);
@@ -1026,7 +903,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    }
 
    // If we're not in a helper, and we apply the engineer module, then we can handle that locally by displaying a menu or message
-   if(mHelperStack.size() == 0)
+   if(!mHelperManager.isHelperActive())
    {
       Ship *ship = NULL;
       if(getGame()->getConnectionToServer())   // Prevents errors, getConnectionToServer() might be NULL, and getControlObject may crash if NULL
@@ -1042,7 +919,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
             if(msg != "")
                displayErrorMessage(msg.c_str());
             else
-               enterMode(HelperMenu::EngineerHelperType);
+               activateHelper(HelperMenu::EngineerHelperType);
 
             return true;
          }
@@ -1061,8 +938,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
 
 void GameUserInterface::onTextInput(char ascii)
 {
-   if(mHelperStack.size() > 0)
-      mHelperStack.last()->onTextInput(ascii);
+   mHelperManager.onTextInput(ascii);
 }
 
 
@@ -1136,15 +1012,13 @@ bool GameUserInterface::checkEnterChatInputCode(InputCode inputCode)
    GameSettings *settings = getGame()->getSettings();
 
    if(checkInputCode(settings, InputCodeManager::BINDING_TEAMCHAT, inputCode))          // Start entering a team chat msg
-      mChatHelper->startChatting(ChatHelper::TeamChat);
+      mHelperManager.activateHelper(ChatHelper::TeamChat);
    else if(checkInputCode(settings, InputCodeManager::BINDING_GLOBCHAT, inputCode))     // Start entering a global chat msg
-      mChatHelper->startChatting(ChatHelper::GlobalChat);
+      mHelperManager.activateHelper(ChatHelper::GlobalChat);
    else if(checkInputCode(settings, InputCodeManager::BINDING_CMDCHAT, inputCode))      // Start entering a command
-      mChatHelper->startChatting(ChatHelper::CmdChat);
+      mHelperManager.activateHelper(ChatHelper::CmdChat);
    else
       return false;
-
-   enterMode(HelperMenu::ChatHelperType);
 
    return true;
 }
@@ -1250,18 +1124,18 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    }
 
    // The following keys are only allowed when there are no helpers or when the top helper permits
-   else if(mHelperStack.size() == 0 || !mHelperStack.last()->isChatDisabled())    
+   else if(mHelperManager.isChatAllowed())    
    {
       if(checkEnterChatInputCode(inputCode))
          return true;
 
       // These keys are only available when there is no helper active
-      if(mHelperStack.size() == 0 || mHelperStack.last()->isClosing())
+      if(!mHelperManager.isHelperActive())
       {
          if(checkInputCode(settings, InputCodeManager::BINDING_QUICKCHAT, inputCode))
-            enterMode(HelperMenu::QuickChatHelperType);
+            activateHelper(HelperMenu::QuickChatHelperType);
          else if(checkInputCode(settings, InputCodeManager::BINDING_LOADOUT, inputCode))
-            enterMode(HelperMenu::LoadoutHelperType);
+            activateHelper(HelperMenu::LoadoutHelperType);
          else if(checkInputCode(settings, InputCodeManager::BINDING_DROPITEM, inputCode))
             dropItem();
          // Check if the user is trying to use keyboard to move when in joystick mode
@@ -1292,10 +1166,10 @@ void GameUserInterface::checkForKeyboardMovementKeysInJoystickMode(InputCode inp
 // Display proper chat queue based on mMessageDisplayMode.  These displayers are configured in the constructor. 
 void GameUserInterface::renderChatMsgs()
 {
-   bool chatDisabled = (mHelperStack.size() > 0 && mHelperStack.last()->isChatDisabled());
+   bool chatDisabled = !mHelperManager.isChatAllowed();
    bool announcementActive = (mAnnouncementTimer.getCurrent() != 0);
 
-   F32 alpha = getDimFactor();
+   F32 alpha = mHelperManager.getDimFactor();
 
    if(mMessageDisplayMode == ShortTimeout)
       mChatMessageDisplayer1.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive, alpha);
@@ -1385,7 +1259,7 @@ Move *GameUserInterface::getCurrentMove()
    if(!mDisableShipKeyboardInput && !gConsole.isVisible())
    {
       // Some helpers (like TeamShuffle) like to disable movement when they are active
-      if(mHelperStack.size() > 0 && mHelperStack.last()->isMovementDisabled())
+      if(mHelperManager.isMovementDisabled())
       {
          mCurrentMove.x = 0;
          mCurrentMove.y = 0;
@@ -2269,7 +2143,7 @@ void GameUserInterface::toggleChatDisplayMode()
 // Return message being composed in in-game chat
 const char *GameUserInterface::getChatMessage()
 {
-   return mChatHelper->getChatMessage();
+   return mHelperManager.getChatMessage();
 }
 
 

@@ -53,7 +53,7 @@ EngineerConstructionItemInfo engineerItemInfo[] = {
 ////////////////////////////////////////
 
 // Constructor
-EngineerHelper::EngineerHelper(ClientGame *clientGame) : Parent(clientGame)
+EngineerHelper::EngineerHelper()
 {
    mSelectedItem = -1;
    mEngineerCostructionItemInfos = Vector<EngineerConstructionItemInfo>(engineerItemInfo, ARRAYSIZE(engineerItemInfo));
@@ -65,6 +65,9 @@ EngineerHelper::~EngineerHelper()
 {
    // Do nothing
 }
+
+
+HelperMenu::HelperMenuType EngineerHelper::getType() { return EngineerHelperType; }
 
 
 void EngineerHelper::setSelectedEngineeredObject(U32 objectType)
@@ -80,12 +83,6 @@ void EngineerHelper::onMenuShow()
    Parent::onMenuShow();
 
    mSelectedItem = -1;
-}
-
-
-bool EngineerHelper::isEngineerHelper()
-{
-   return true;
 }
 
 

@@ -39,6 +39,8 @@ namespace Zap
 
 class ClientGame;
 class UIManager;
+class HelperManager;
+
 
 class HelperMenu
 {
@@ -58,6 +60,7 @@ private:
    bool mShowing;    // True when menu is being activated, false when deactivating
 
    ClientGame *mClientGame;
+   HelperManager *mHelperManager;
 
    virtual F32 getHelperWidth() const;
 
@@ -76,10 +79,11 @@ protected:
 
    ClientGame *getGame();
 
-
 public:
-   explicit HelperMenu(ClientGame *clientGame);    // Constructor
-   virtual ~HelperMenu();                          // Destructor
+   explicit HelperMenu();     // Constructor
+   virtual ~HelperMenu();     // Destructor
+
+   void initialize(ClientGame *game, HelperManager *helperManager);
 
    virtual void render() = 0;
    virtual void idle(U32 delta);
@@ -93,10 +97,10 @@ public:
    virtual void onTextInput(char ascii);
 
    virtual void activateHelp(UIManager *uiManager);   // Open help to an appropriate page
-   virtual bool isEngineerHelper();                   // Returns false, overridden by EngineerHelper
-   virtual bool isChatHelper();
    virtual bool isMovementDisabled();                 // Is ship movement disabled while this helper is active?
    virtual bool isChatDisabled();                     // Returns true if chat and friends should be disabled while this is active
+
+   virtual HelperMenuType getType() = 0;
 };
 
 

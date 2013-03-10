@@ -2344,7 +2344,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    //clientGame->resetZoomDelta();
 
    gameUI->resetLevelInfoDisplayTimer();        // Start displaying the level info, now that we have it
-   gameUI->enableEngineer(engineerEnabled);     // Now we know all we need to initialize our loadout options
+   gameUI->pregameSetup(engineerEnabled);       // Now we know all we need to initialize our loadout options
 #endif
 }
 

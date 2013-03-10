@@ -28,6 +28,8 @@
 
 #include "tnl.h"
 
+using namespace TNL;
+
 namespace Zap
 {
 

@@ -42,18 +42,21 @@ namespace Zap
 {
 
 // Constructor
-TeamShuffleHelper::TeamShuffleHelper(ClientGame *clientGame) : Parent(clientGame)
+TeamShuffleHelper::TeamShuffleHelper() : Parent()
 {
    playersPerTeam = 0;
-   topMargin = 0;
-   leftMargin = 0;
-   columnWidth = 0;
-   rowHeight = 0;
+   topMargin      = 0;
+   leftMargin     = 0;
+   columnWidth    = 0;
+   rowHeight      = 0;
    maxColumnWidth = 0;
-   cols = 0;
-   teamCount = 0;
-   rows = 0;
+   rows           = 0;
+   cols           = 0;
+   teamCount      = 0;
 }
+
+
+HelperMenu::HelperMenuType TeamShuffleHelper::getType() { return ShuffleTeamsHelperType; }
 
 
 // Randomly fill teams with clientInfos

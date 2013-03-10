@@ -64,9 +64,10 @@ protected:
    void exitHelper();
 
 public:
-   explicit ChatHelper(ClientGame *clientGame);      // Constructor
+   explicit ChatHelper();      // Constructor
+   HelperMenuType getType();
 
-   void startChatting(ChatType chatType);
+   void activate(ChatType chatType);
 
    bool isCmdChat();          // Returns true if we're composing a command in the chat bar, false otherwise
 
@@ -79,7 +80,6 @@ public:
 
    const char *getChatMessage();
 
-   bool isChatHelper();
    bool isMovementDisabled();
    bool isChatDisabled();
 

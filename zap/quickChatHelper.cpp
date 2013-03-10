@@ -44,10 +44,14 @@ namespace Zap
 
 Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file
 
-QuickChatHelper::QuickChatHelper(ClientGame *clientGame) : Parent(clientGame)
+QuickChatHelper::QuickChatHelper()
 {
    mCurNode = 0;
 }
+
+
+HelperMenu::HelperMenuType QuickChatHelper::getType() { return QuickChatHelperType; }
+
 
 extern Color gGlobalChatColor;
 extern Color gTeamChatColor;

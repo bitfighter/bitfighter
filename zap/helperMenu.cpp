@@ -37,11 +37,11 @@ namespace Zap
 {
 
 // Constructor
-HelperMenu::HelperMenu(ClientGame *clientGame)
+HelperMenu::HelperMenu()
 {
-   mClientGame = clientGame;
    mShowTimer.setPeriod(150);    // Transition time, in ms
 }
+
 
 // Destructor
 HelperMenu::~HelperMenu()
@@ -49,6 +49,12 @@ HelperMenu::~HelperMenu()
    // Do nothing
 }
 
+
+void HelperMenu::initialize(ClientGame *game, HelperManager *manager)
+{
+   mHelperManager = manager;
+   mClientGame = game;
+}
 
 const char *HelperMenu::getCancelMessage()
 {
@@ -171,9 +177,6 @@ bool HelperMenu::isClosing() const
 }
 
 
-bool HelperMenu::isEngineerHelper()   { return false; }
-bool HelperMenu::isChatHelper()       { return false; }
-
 bool HelperMenu::isMovementDisabled() { return false; }
 bool HelperMenu::isChatDisabled()     { return true;  }
 
@@ -181,7 +184,7 @@ bool HelperMenu::isChatDisabled()     { return true;  }
 void HelperMenu::idle(U32 deltaT) 
 {
    if(mShowTimer.update(deltaT) && !mShowing)
-      mClientGame->getUIManager()->getGameUserInterface()->doneClosingHelper();
+      mHelperManager->doneClosingHelper();
 }
 
 

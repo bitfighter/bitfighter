@@ -74,8 +74,9 @@ private:
    bool isValidItem(S32 index);    // Do we have the required prerequisites for this item?
 
 public:
-   explicit LoadoutHelper(ClientGame *clientGame);    // Constructor
-   void initialize(bool includeEngineer);    // Set things up
+   explicit LoadoutHelper();                 // Constructor
+   void pregameSetup(bool includeEngineer);  // Set things up
+   HelperMenu::HelperMenuType getType();
 
    void render();                
    void onMenuShow();  

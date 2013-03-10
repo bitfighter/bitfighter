@@ -78,14 +78,14 @@ LoadoutItem::LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 
 ////////////////////////////////////////
 
 // Constructor
-LoadoutHelper::LoadoutHelper(ClientGame *clientGame) : Parent(clientGame)
+LoadoutHelper::LoadoutHelper()
 {
    mCurrentIndex = 0;
 }
 
 
 // Gets called at the beginning of every game; available options may change based on level
-void LoadoutHelper::initialize(bool includeEngineer)
+void LoadoutHelper::pregameSetup(bool includeEngineer)
 {
    gLoadoutModules.clear();
    gLoadoutWeapons.clear();
@@ -107,6 +107,9 @@ void LoadoutHelper::initialize(bool includeEngineer)
    gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_5, BUTTON_5, WeaponMine,   "Mine Layer", "", ModuleNone));
    gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_6, BUTTON_6, WeaponSeeker, "Seeker",     "", ModuleNone));
 };
+
+
+HelperMenu::HelperMenuType LoadoutHelper::getType() { return LoadoutHelperType; }
 
 
 void LoadoutHelper::onMenuShow()

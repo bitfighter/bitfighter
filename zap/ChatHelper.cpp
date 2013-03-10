@@ -106,15 +106,17 @@ const S32 ChatHelper::chatCmdSize = ARRAYSIZE(chatCmds); // So instructions will
 
 static void makeCommandCandidateList();      // Forward delcaration
 
-ChatHelper::ChatHelper(ClientGame *clientGame) : Parent(clientGame),
-                                                 mLineEditor(200)
+ChatHelper::ChatHelper() : mLineEditor(200)
 {
    mCurrentChatType = NoChat;
    makeCommandCandidateList();
 }
 
 
-void ChatHelper::startChatting(ChatType chatType)
+HelperMenu::HelperMenuType ChatHelper::getType() { return ChatHelperType; }
+
+
+void ChatHelper::activate(ChatType chatType)
 {
    mCurrentChatType = chatType;
    getGame()->setBusyChatting(true);
@@ -535,7 +537,6 @@ void ChatHelper::exitHelper()
 }
 
 
-bool ChatHelper::isChatHelper()       { return true;  }
 bool ChatHelper::isMovementDisabled() { return true;  }
 bool ChatHelper::isChatDisabled()     { return false; }
 
