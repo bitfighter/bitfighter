@@ -258,6 +258,7 @@ void HelperManager::doExitHelper(S32 index)
    mOffDeckHelper = mHelperStack[index];
    mHelperStack.erase(index);
    mGame->unsuspendGame();
+   mGame->undelaySpawn();
 
    // If animation is disabled for this helper, immediately call doneClosingHelper()
    if(mOffDeckHelper->getActivationAnimationTime() == 0)
