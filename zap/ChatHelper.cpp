@@ -106,15 +106,17 @@ const S32 ChatHelper::chatCmdSize = ARRAYSIZE(chatCmds); // So instructions will
 
 static void makeCommandCandidateList();      // Forward delcaration
 
-ChatHelper::ChatHelper(ClientGame *clientGame) : Parent(clientGame),
-                                                 mLineEditor(200)
+ChatHelper::ChatHelper() : mLineEditor(200)
 {
    mCurrentChatType = NoChat;
    makeCommandCandidateList();
 }
 
 
-void ChatHelper::startChatting(ChatType chatType)
+HelperMenu::HelperMenuType ChatHelper::getType() { return ChatHelperType; }
+
+
+void ChatHelper::activate(ChatType chatType)
 {
    mCurrentChatType = chatType;
    getGame()->setBusyChatting(true);
@@ -132,9 +134,6 @@ bool ChatHelper::isCmdChat()
 
 void ChatHelper::render()
 {
-   if(mCurrentChatType == NoChat)
-      return;
-
    const char *promptStr;
 
    Color baseColor;
@@ -163,28 +162,27 @@ void ChatHelper::render()
    static const S32 CHAT_COMPOSE_FONT_SIZE = 12;
    static const S32 CHAT_COMPOSE_FONT_GAP = CHAT_COMPOSE_FONT_SIZE / 4;
 
+   S32 xPos = getLeftEdgeOfMenuPos();
 
    // Define some vars for readability:
-   static const S32 horizMargin = UserInterface::horizMargin;
-
    S32 promptSize = getStringWidth(CHAT_COMPOSE_FONT_SIZE, promptStr);
-   S32 nameSize = getStringWidthf(CHAT_COMPOSE_FONT_SIZE, "%s: ", getGame()->getClientInfo()->getName().getString());
-   S32 nameWidth = max(nameSize, promptSize);
+   S32 nameSize   = getStringWidthf(CHAT_COMPOSE_FONT_SIZE, "%s: ", getGame()->getClientInfo()->getName().getString());
+   S32 nameWidth  = max(nameSize, promptSize);
    // Above block repeated below...
 
 
    const S32 ypos = IN_GAME_CHAT_DISPLAY_POS + CHAT_COMPOSE_FONT_SIZE + 11;
 
-   S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - (nameWidth - promptSize) - 230;
+   S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * UserInterface::horizMargin - (nameWidth - promptSize) - 230;
 
    // Render text entry box like thingy
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    F32 vertices[] = {
-         horizMargin,            ypos - 3,
-         horizMargin + boxWidth, ypos - 3,
-         horizMargin + boxWidth, ypos + CHAT_COMPOSE_FONT_SIZE + 7,
-         horizMargin,            ypos + CHAT_COMPOSE_FONT_SIZE + 7
+         xPos,            ypos - 3,
+         xPos + boxWidth, ypos - 3,
+         xPos + boxWidth, ypos + CHAT_COMPOSE_FONT_SIZE + 7,
+         xPos,            ypos + CHAT_COMPOSE_FONT_SIZE + 7
    };
 
    for(S32 i = 1; i >= 0; i--)
@@ -197,9 +195,9 @@ void ChatHelper::render()
 
    // Display prompt
    S32 promptWidth = getStringWidth(CHAT_COMPOSE_FONT_SIZE, promptStr);
-   S32 xStartPos = horizMargin + 3 + promptWidth;
+   S32 xStartPos   = xPos + 3 + promptWidth;
 
-   drawString(horizMargin + 3, ypos, CHAT_COMPOSE_FONT_SIZE, promptStr);  // draw prompt
+   drawString(xPos + 3, ypos, CHAT_COMPOSE_FONT_SIZE, promptStr);  // draw prompt
 
    // Display typed text
    string displayString = mLineEditor.getString();
@@ -249,9 +247,9 @@ void ChatHelper::render()
 }
 
 
-void ChatHelper::onMenuShow()
+void ChatHelper::onActivated()
 {
-   // Do nothing
+   Parent::onActivated();
 }
 
 
@@ -329,14 +327,16 @@ static Vector<string> *getCandidateList(Game *game, const char *first, S32 arg)
 // Returns true if key was used, false if not
 bool ChatHelper::processInputCode(InputCode inputCode)
 {
-   if(inputCode == KEY_ENTER)
-      issueChat();
-   else if(inputCode == KEY_BACKSPACE)
+   // Check for backspace before processing parent because parent will use backspace to close helper, but we want to use
+   // it as a, well, a backspace key!
+   if(inputCode == KEY_BACKSPACE)
       mLineEditor.backspacePressed();
+   else if(Parent::processInputCode(inputCode))
+      return true;
+   else if(inputCode == KEY_ENTER)
+      issueChat();
    else if(inputCode == KEY_DELETE)
       mLineEditor.deletePressed();
-   else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)
-      cancelChat();
    else if(inputCode == KEY_TAB)      // Auto complete any commands
    {
       if(isCmdChat())     // It's a command!  Complete!  Complete!
@@ -452,8 +452,6 @@ void ChatHelper::issueChat()
 {
    TNLAssert(mCurrentChatType != NoChat, "Not in chat mode!");
 
-   bool shouldUndelaySpawn = true;
-
    if(!mLineEditor.isEmpty())
    {
       // Check if chat buffer holds a message or a command
@@ -464,10 +462,10 @@ void ChatHelper::issueChat()
             gameType->c2sSendChat(mCurrentChatType == GlobalChat, mLineEditor.c_str());   // Broadcast message
       }
       else    // It's a command
-         shouldUndelaySpawn = runCommand(getGame(), mLineEditor.c_str());
+         runCommand(getGame(), mLineEditor.c_str());
    }
 
-   cancelChat(shouldUndelaySpawn);     // Hide chat display
+   exitHelper();     // Hide chat display
 }
 
 
@@ -475,31 +473,37 @@ void ChatHelper::issueChat()
 // Returns true if command was handled (even if it was bogus); returning false will cause command to be passed on to the server
 // Runs on client; returns true unless we don't want to undelay a delayed spawn when command is entered
 // Static method
-bool ChatHelper::runCommand(ClientGame *game, const char *input)
+void ChatHelper::runCommand(ClientGame *game, const char *input)
 {
    Vector<string> words = parseStringAndStripLeadingSlash(input); 
 
    if(words.size() == 0)            // Just in case, must have 1 or more words to check the first word as command
-      return true;
+      return;
 
    GameConnection *gc = game->getConnectionToServer();
 
    if(!gc)
    {
       game->displayErrorMessage("!!! Not connected to server");
-      return true;
+      return;
    }
 
    for(U32 i = 0; i < ARRAYSIZE(chatCmds); i++)
       if(lcase(words[0]) == chatCmds[i].cmdName)
       {
          (*(chatCmds[i].cmdCallback))(game, words);
-         return true;  // TODO: return false in the case of /idle while spawnDelayed
+         return; 
       }
 
    serverCommandHandler(game, words);     // Command unknown to client, will pass it on to server
 
-   return true;
+   return;
+}
+
+
+F32 ChatHelper::getHelperWidth() const
+{
+   return 800;
 }
 
 
@@ -523,21 +527,16 @@ void ChatHelper::serverCommandHandler(ClientGame *game, const Vector<string> &wo
 }
 
 
-// undelaySpawn defaults to true
-void ChatHelper::cancelChat(bool undelaySpawn)
+// Need to handle the case where you do /idle while spawn delayed... you should NOT exit from spawn delay in that case
+void ChatHelper::exitHelper()
 {
+   Parent::exitHelper();
+
    mLineEditor.clear();
-   mCurrentChatType = NoChat;
    getGame()->setBusyChatting(false);
-
-   getGame()->getUIManager()->getGameUserInterface()->exitHelper();
-
-   if(undelaySpawn)
-      getGame()->undelaySpawn();
 }
 
 
-bool ChatHelper::isChatHelper()       { return true;  }
 bool ChatHelper::isMovementDisabled() { return true;  }
 bool ChatHelper::isChatDisabled()     { return false; }
 

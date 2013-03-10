@@ -32,8 +32,6 @@
 #include "../tnl/tnlNetBase.h"
 #include "../tnl/tnlNetStringTable.h"
 
-
-
 #include "UI.h"
 #include "Timer.h"
 #include "InputCode.h"
@@ -66,10 +64,11 @@ private:
    //virtual InputCode getActivationKey() { return keyQUICKCHAT[getGame()->getSettings()->getIniSettings()->inputMode]; } <=== don't supply a keycode to avoid canceling when pressed
 
 public:
-   explicit QuickChatHelper(ClientGame *clientGame);      // Constructor
+   explicit QuickChatHelper();      // Constructor
+   HelperMenuType getType();
 
    void render();                
-   void onMenuShow();  
+   void onActivated();  
    bool processInputCode(InputCode inputCode);   
    bool isMovementDisabled();
 };

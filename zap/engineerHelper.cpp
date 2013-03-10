@@ -41,11 +41,37 @@ namespace Zap
 {
 
 
-EngineerConstructionItemInfo engineerItemInfo[] = {
-      { EngineeredTurret,             KEY_1, BUTTON_1, true,  "Turret",          "", "Aim at a spot on a wall, and activate the module again." },
-      { EngineeredForceField,         KEY_2, BUTTON_2, true,  "Force Field",     "", "Aim at a spot on a wall, and activate the module again." },
-      { EngineeredTeleporterEntrance, KEY_3, BUTTON_3, true,  "Teleporter",      "", "Aim at a spot in open space, and activate the module again." },
-      { EngineeredTeleporterExit,     KEY_4, BUTTON_4, false, "Teleporter Exit", "", "Aim at a spot in open space, and activate the module again." },
+//static OverlayMenuItem<EngineerBuildObjects> engineerItemInfo[] = {
+//      { EngineeredTurret,             KEY_1, BUTTON_1, true,  "Turret",          "", "Aim at a spot on a wall, and activate the module again." },
+//      { EngineeredForceField,         KEY_2, BUTTON_2, true,  "Force Field",     "", "Aim at a spot on a wall, and activate the module again." },
+//      { EngineeredTeleporterEntrance, KEY_3, BUTTON_3, true,  "Teleporter",      "", "Aim at a spot in open space, and activate the module again." },
+//      { EngineeredTeleporterExit,     KEY_4, BUTTON_4, false, "Teleporter Exit", "", "Aim at a spot in open space, and activate the module again." },
+//};
+
+
+   // TODO: xmacroize to keep in sync
+
+static OverlayMenuItem engineerItemInfo[] = {
+   { KEY_1, BUTTON_1, true,  false, "Turret",          "" },
+   { KEY_2, BUTTON_2, true,  false, "Force Field",     "" },
+   { KEY_3, BUTTON_3, true,  false, "Teleporter",      "" },
+   { KEY_4, BUTTON_4, false, false, "Teleporter Exit", "" },
+};
+
+
+static const char *engineerInstructions[] = {
+   "Aim at a spot on a wall, and activate the module again.",
+   "Aim at a spot on a wall, and activate the module again.",
+   "Aim at a spot in open space, and activate the module again.",
+   "Aim at a spot in open space, and activate the module again."
+};
+
+static EngineerBuildObjects engineerLookup[] = 
+{
+   EngineeredTurret,            
+   EngineeredForceField,        
+   EngineeredTeleporterEntrance,
+   EngineeredTeleporterExit
 };
 
 
@@ -53,10 +79,9 @@ EngineerConstructionItemInfo engineerItemInfo[] = {
 ////////////////////////////////////////
 
 // Constructor
-EngineerHelper::EngineerHelper(ClientGame *clientGame) : Parent(clientGame)
+EngineerHelper::EngineerHelper()
 {
-   mSelectedItem = -1;
-   mEngineerCostructionItemInfos = Vector<EngineerConstructionItemInfo>(engineerItemInfo, ARRAYSIZE(engineerItemInfo));
+   mSelectedIndex = -1;
 }
 
 
@@ -67,99 +92,47 @@ EngineerHelper::~EngineerHelper()
 }
 
 
+HelperMenu::HelperMenuType EngineerHelper::getType() { return EngineerHelperType; }
+
+
 void EngineerHelper::setSelectedEngineeredObject(U32 objectType)
 {
-   for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
-      if(mEngineerCostructionItemInfos[i].mObjectType == objectType)
-         mSelectedItem = i;
+   for(S32 i = 0; i < ARRAYSIZE(engineerItemInfo); i++)
+      if(engineerLookup[i] == objectType)
+         mSelectedIndex = i;
 }
 
 
-void EngineerHelper::onMenuShow()
+void EngineerHelper::onActivated()
 {
-   mSelectedItem = -1;
+   Parent::onActivated();
+
+   mSelectedIndex = -1;
 }
 
-
-bool EngineerHelper::isEngineerHelper()
-{
-   return true;
-}
-
-
-static Point deployPosition, deployNormal;
 
 void EngineerHelper::render()
 {
    S32 yPos = MENU_TOP;
-   const S32 fontSize = 15;
-   const Color engineerMenuHeaderColor (Colors::red);
-
+   
    if(isMenuBeingDisplayed())    // Haven't selected an item yet, so show the menu
-   {
-      const S32 xPos = UserInterface::horizMargin + 50;
+      drawItemMenu(getLeftEdgeOfMenuPos(), yPos, "What do you want to Engineer?", engineerItemInfo, ARRAYSIZE(engineerItemInfo));
 
-      drawMenuBorderLine(yPos, engineerMenuHeaderColor);
-
-      glColor(engineerMenuHeaderColor);
-      drawString(UserInterface::horizMargin, yPos, fontSize, "What do you want to Engineer?");
-      yPos += fontSize + 10;
-
-      GameSettings *settings = getGame()->getSettings();
-      InputMode inputMode = settings->getInputCodeManager()->getInputMode();
-
-      bool showKeys = settings->getIniSettings()->showKeyboardKeys || inputMode == InputModeKeyboard;
-
-      for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
-      {
-         // Don't show an option that shouldn't be shown!
-         if(!mEngineerCostructionItemInfos[i].showOnMenu)
-            continue;
-
-         // Draw key controls for selecting the object to be created
-         U32 joystickIndex = Joystick::SelectedPresetIndex;
-
-         if(inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
-            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + (showKeys ? 0 : 20)), (F32)yPos, 
-                                                   joystickIndex, mEngineerCostructionItemInfos[i].mButton, false);
-
-         if(showKeys)
-         {
-            glColor(Colors::white);     // Render key in white
-            JoystickRender::renderControllerButton((F32)UserInterface::horizMargin + 20, (F32)yPos, 
-                                                   joystickIndex, mEngineerCostructionItemInfos[i].mKey, false);
-         }
-
-         glColor(0.1, 1.0, 0.1);     
-         S32 x = drawStringAndGetWidth(xPos, yPos, fontSize, mEngineerCostructionItemInfos[i].mName); 
-
-         glColor(.2, .8, .8);    
-         drawString(xPos + x, yPos, fontSize, mEngineerCostructionItemInfos[i].mHelp);      // The help string, if there is one
-
-         yPos += fontSize + 7;
-      }
-
-      yPos += 2;
-
-      drawMenuBorderLine(yPos - fontSize - 2, engineerMenuHeaderColor);
-      yPos += 8;
-
-      drawMenuCancelText(yPos, engineerMenuHeaderColor, fontSize);
-   }
    else     // Have selected a module, need to indicate where to deploy
    {
       S32 xPos = UserInterface::horizMargin;
+
       glColor(Colors::green);
-      drawStringf(xPos, yPos, fontSize, "Placing %s.", mEngineerCostructionItemInfos[mSelectedItem].mName);
-      yPos += fontSize + 7;
-      drawString(xPos, yPos, fontSize, mEngineerCostructionItemInfos[mSelectedItem].mInstruction);
+      drawStringf(xPos, yPos, MENU_FONT_SIZE, "Placing %s.", engineerItemInfo[mSelectedIndex].name);
+      yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
+      drawString(xPos, yPos, MENU_FONT_SIZE, engineerInstructions[mSelectedIndex]);
    }
 }
 
 
 bool EngineerHelper::isMenuBeingDisplayed()
 {
-   return mSelectedItem == -1;
+   return mSelectedIndex == -1;
 }
 
 
@@ -175,22 +148,22 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 
    if(isMenuBeingDisplayed())    // Menu is being displayed, so interpret keystrokes as menu items
    {
-      for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
+      for(S32 i = 0; i < ARRAYSIZE(engineerItemInfo); i++)
       {
          // Disallow selecting unselectable items
-         if(!mEngineerCostructionItemInfos[i].showOnMenu)
+         if(!engineerItemInfo[i].showOnMenu)
             continue;
 
-         if(inputCode == mEngineerCostructionItemInfos[i].mKey || inputCode == mEngineerCostructionItemInfos[i].mButton)
+         if(inputCode == engineerItemInfo[i].key || inputCode == engineerItemInfo[i].button)
          {
-            mSelectedItem = i;
+            mSelectedIndex = i;
             return true;
          }
       }
 
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
       TNLAssert(ship, "Will this ever be true?  If not, we can replace with static cast/assert. If this does assert, "
-                      "please document and remove this assert.");
+                      "please document and remove this assert.  This was probably added c. 017.");
 
       if(!ship || (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1) && ship->getModule(0) == ModuleEngineer) ||
                   (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2) && ship->getModule(1) == ModuleEngineer))
@@ -209,12 +182,12 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 
          // Check deployment status on client; will be checked again on server,
          // but server will only handle likely valid placements
-         if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType))
+         if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, engineerLookup[mSelectedIndex]))
          {
             // Send command to server to deploy, and deduct energy
             if(gc)
             {
-               gc->c2sEngineerDeployObject(mEngineerCostructionItemInfos[mSelectedItem].mObjectType);
+               gc->c2sEngineerDeployObject(engineerLookup[mSelectedIndex]);
                S32 energyCost = Game::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
                ship->creditEnergy(-energyCost);    // Deduct energy from engineer
             }
@@ -236,7 +209,7 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 
 void EngineerHelper::exitHelper()
 {
-   if(mSelectedItem != -1 && mEngineerCostructionItemInfos[mSelectedItem].mObjectType == EngineeredTeleporterExit)
+   if(mSelectedIndex != -1 && engineerLookup[mSelectedIndex] == EngineeredTeleporterExit)
    {
       GameConnection *gameConnection = getGame()->getConnectionToServer();
 
@@ -251,35 +224,30 @@ void EngineerHelper::exitHelper()
 // Basically draws a red box where the ship is pointing
 void EngineerHelper::renderDeploymentMarker(Ship *ship)
 {
+   static Point deployPosition, deployNormal;      // Reusable containers
+
    // Only render wall mounted items (not teleport)
-   if(mSelectedItem != -1 &&
-         EngineerModuleDeployer::findDeployPoint(ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType, deployPosition, deployNormal))
+   if(mSelectedIndex != -1 &&
+         EngineerModuleDeployer::findDeployPoint(ship, engineerLookup[mSelectedIndex], deployPosition, deployNormal))
    {
       EngineerModuleDeployer deployer;
-      bool canDeploy = deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType);
+      bool canDeploy = deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, engineerLookup[mSelectedIndex]);
 
-      switch(mEngineerCostructionItemInfos[mSelectedItem].mObjectType)
+      switch(engineerLookup[mSelectedIndex])
       {
          case EngineeredTurret:
          case EngineeredForceField:
-            if(canDeploy)
-               glColor(Colors::green);
-            else
-               glColor(Colors::red);
-
+            glColor(canDeploy ? Colors::green : Colors::red);
             drawSquare(deployPosition, 5);
             break;
 
          case EngineeredTeleporterEntrance:
          case EngineeredTeleporterExit:
-            if(canDeploy)
-               renderTeleporterOutline(deployPosition, 75.f, Colors::green);
-            else
-               renderTeleporterOutline(deployPosition, 75.f, Colors::red);
+            renderTeleporterOutline(deployPosition, 75.f, canDeploy ? Colors::green : Colors::red);
             break;
 
          default:
-            break;
+            TNLAssert(false, "Unexpected value!");
       }
    }
 }

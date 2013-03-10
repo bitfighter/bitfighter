@@ -55,20 +55,24 @@ private:
    ChatType mCurrentChatType;    // Current in-game chat mode (global or local)
 
    void issueChat();                // Send chat message (either Team or Global)
-   void cancelChat(bool undelaySpawn = true);
 
    // Related to running commands
    static void serverCommandHandler(ClientGame *game, const Vector<string> &words);
+   F32 getHelperWidth() const;
+
+protected:
+   void exitHelper();
 
 public:
-   explicit ChatHelper(ClientGame *clientGame);      // Constructor
+   explicit ChatHelper();      // Constructor
+   HelperMenuType getType();
 
-   void startChatting(ChatType chatType);
+   void activate(ChatType chatType);
 
    bool isCmdChat();          // Returns true if we're composing a command in the chat bar, false otherwise
 
    void render();                
-   void onMenuShow();  
+   void onActivated();  
    void activateHelp(UIManager *uiManager);
 
    bool processInputCode(InputCode inputCode);   
@@ -76,11 +80,10 @@ public:
 
    const char *getChatMessage();
 
-   bool isChatHelper();
    bool isMovementDisabled();
    bool isChatDisabled();
 
-   static bool runCommand(ClientGame *game, const char *input);
+   static void runCommand(ClientGame *game, const char *input);
 };
 
 };

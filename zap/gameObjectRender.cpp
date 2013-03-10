@@ -1198,7 +1198,7 @@ void renderLoadoutZone(const Color *color, const Vector<Point> *outline, const V
 void renderLoadoutZoneIcon(const Point &pos)
 {
    // Pos, teeth, outer rad, inner rad, ang span of outer teeth, ang span of inner teeth, circle rad
-   drawGear(pos, 9, 20, 15, 15, 12, 8);   
+   drawGear(pos, 7, 20, 15, 20, 18, 8);   
 }
 
 

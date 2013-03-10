@@ -52,6 +52,8 @@ public:
    // Return fraction of original time left on timer
    F32 getFraction() const;
 
+   void invert();    // Set current timer value to 1 - (currentFraction)
+
    void setPeriod(U32 period);
    U32 getPeriod() const;
    U32 getElapsed() const;

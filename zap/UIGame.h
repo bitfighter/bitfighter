@@ -34,8 +34,8 @@
 #include "Color.h"
 #include "Timer.h"
 #include "game.h"
-#include "ship.h"          // For ShipModuleCount
-#include "helperMenu.h"    // For HelperMenuType enum
+#include "ship.h"             // For ShipModuleCount
+#include "HelperManager.h"    // For HelperManager
 
 namespace Zap
 {
@@ -88,7 +88,7 @@ public:
    void reset();
 
    void idle(U32 timeDelta);
-   void render(S32 ypos, bool helperVisible, bool anouncementActive);   // Render incoming chat msgs
+   void render(S32 ypos, bool helperVisible, bool anouncementActive, F32 alpha);   // Render incoming chat msgs
 
    void onChatMessageReceived(const Color &msgColor, const string &msg);
    string substitueVars(const string &str);
@@ -97,14 +97,8 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ChatHelper;
-class QuickChatHelper;
-class LoadoutHelper;
-class EngineerHelper;
-class TeamShuffleHelper;
 class Move;
 class SoundEffect;
-
 
 class GameUserInterface : public UserInterface
 {
@@ -125,6 +119,9 @@ private:
    Move mCurrentMove;
    Move mTransformedMove;
    Point mMousePoint;
+
+   HelperManager mHelperManager;
+
 
    //Timer mDisplayMessageTimer;
    Timer mShutdownTimer;
@@ -173,24 +170,12 @@ private:
    void renderTalkingClients();              // Render things related to voice chat
    void renderDebugStatus();                 // Render things related to debugging
 
-   void doExitHelper(S32 index);
-
    F32 mFPSAvg;
    F32 mPingAvg;
 
    U32 mIdleTimeDelta[FPS_AVG_COUNT];
    U32 mPing[FPS_AVG_COUNT];
    U32 mFrameIndex;
-
-   // Various helper objects
-   Vector<HelperMenu *> mHelperStack;        // Current helper
-
-   ChatHelper        *mChatHelper;
-   QuickChatHelper   *mQuickChatHelper;
-   LoadoutHelper     *mLoadoutHelper;
-   EngineerHelper    *mEngineerHelper;
-   TeamShuffleHelper *mTeamShuffleHelper;
-
 
    struct VoiceRecorder
    {
@@ -301,7 +286,7 @@ public:
    void onPlayerQuit();
    void onGameOver();
 
-   void enableEngineer(bool engineerEnabled);
+   void pregameSetup(bool engineerEnabled);
    void setSelectedEngineeredObject(U32 objectType);
 
    void quitEngineerHelper();
@@ -322,11 +307,8 @@ public:
    void suspendGame();
    void unsuspendGame();
 
-   void enterMode(HelperMenu::HelperMenuType helperType);  
-   
+   void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd = false);  
    void exitHelper();
-   void exitHelper(HelperMenu *helper);
-
 
    void renderEngineeredItemDeploymentMarker(Ship *ship);
 

@@ -44,12 +44,8 @@ struct LoadoutItem
    const char *help;       // An additional bit of help text, also displayed on loadout menu
    ShipModule requires;    // Item requires this module be part of loadout (used only for spy-bugs)
 
-   ClientGame *mGame;
-
-   //LoadoutItem(); // { /* Do nothing */ };      // Should never be used
-
+   // Constructors
    LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 index);      // Shortcut for modules -- use info from ModuleInfos
-
    LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 index, const char *text, const char *help, ShipModule requires);
 };
 
@@ -71,14 +67,13 @@ private:
    const char *getCancelMessage();
    InputCode getActivationKey();
 
-   bool isValidItem(S32 index);    // Do we have the required prerequisites for this item?
-
 public:
-   explicit LoadoutHelper(ClientGame *clientGame);    // Constructor
-   void initialize(bool includeEngineer);    // Set things up
+   explicit LoadoutHelper();                 // Constructor
+   void pregameSetup(bool includeEngineer);  // Set things up
+   HelperMenu::HelperMenuType getType();
 
    void render();                
-   void onMenuShow();  
+   void onActivated();  
    bool processInputCode(InputCode inputCode);   
 
    void activateHelp(UIManager *uiManager);  // Open help to an appropriate page

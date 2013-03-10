@@ -26,9 +26,11 @@
 #ifndef _HELPERMENU_H_
 #define _HELPERMENU_H_
 
+#include "Engineerable.h"     // For EngineerBuildObjects enum
 #include "InputCode.h"
 #include "tnl.h"
 #include "Color.h"
+#include "Timer.h"
 
 using namespace TNL; 
 
@@ -38,6 +40,20 @@ namespace Zap
 
 class ClientGame;
 class UIManager;
+class HelperManager;
+
+
+struct OverlayMenuItem
+{
+public:
+   InputCode key;       // Keyboard key used to select in menu
+   InputCode button;    // Controller button used to select in menu
+   bool showOnMenu;     // Should this item actually be added to the menu?
+   bool markAsSelected; // Should this item be rendered in a special way to indicate it is selected?
+   const char *name;    // Name used on menu
+   const char *help;    // An additional bit of help text, also displayed on menu
+};
+
 
 class HelperMenu
 {
@@ -54,35 +70,58 @@ private:
    virtual const char *getCancelMessage();
    virtual InputCode getActivationKey();
 
+   bool mActivating;    // True when menu is being activated, false when deactivating, undefined 
+
    ClientGame *mClientGame;
+   HelperManager *mHelperManager;
+
+   virtual F32 getHelperWidth() const;
 
 protected:
-   static const S32 MENU_TOP = 180;     // Location of top of overlay menu
+   static const S32 MENU_TOP = 180;    // Location of top of overlay menu
+
+   Timer mAnimationTimer;              // Timer for activation/deactivation animation
+
+   S32 getLeftEdgeOfMenuPos();         // Return left edge of menu
 
    // Shortcut helper function
    virtual void exitHelper();
 
-   void drawMenuBorderLine(S32 yPos, const Color &color);
-   void drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize);
+   void drawItemMenu(S32 xPos, S32 yPos, const char *title, const OverlayMenuItem *items, S32 count);
+   void drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color);
+   void drawMenuCancelText(S32 xPos, S32 yPos, const Color &color, S32 fontSize);
 
    ClientGame *getGame();
 
+   static const S32 MENU_FONT_SIZE    = 15;
+   static const S32 MENU_FONT_SPACING =  7;
+   static const S32 MENU_PADDING      =  3;
+
+
 public:
-   explicit HelperMenu(ClientGame *clientGame);    // Constructor
-   virtual ~HelperMenu();                          // Destructor
+   explicit HelperMenu();     // Constructor
+   virtual ~HelperMenu();     // Destructor
+
+   void initialize(ClientGame *game, HelperManager *helperManager);
 
    virtual void render() = 0;
    virtual void idle(U32 delta);
-   virtual void onMenuShow();
+   virtual void onActivated();
+
+   bool isClosing() const;                         // Return true if menu is playing the closing animation
+   F32 getFraction();                              // Get fraction of openness
+
 
    virtual bool processInputCode(InputCode inputCode);  
    virtual void onTextInput(char ascii);
 
    virtual void activateHelp(UIManager *uiManager);   // Open help to an appropriate page
-   virtual bool isEngineerHelper();                   // Returns false, overridden by EngineerHelper
-   virtual bool isChatHelper();
    virtual bool isMovementDisabled();                 // Is ship movement disabled while this helper is active?
    virtual bool isChatDisabled();                     // Returns true if chat and friends should be disabled while this is active
+
+   virtual S32 getActivationAnimationTime();          // Return 0 to disable animations
+
+   virtual HelperMenuType getType() = 0;
 };
 
 
