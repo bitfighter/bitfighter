@@ -32,8 +32,6 @@
 #include "../tnl/tnlNetBase.h"
 #include "../tnl/tnlNetStringTable.h"
 
-
-
 #include "UI.h"
 #include "Timer.h"
 #include "InputCode.h"

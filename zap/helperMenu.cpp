@@ -97,8 +97,15 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const Overl
 {
    static const Color baseColor(Colors::red);
 
+   S32 displayItems = 0;
+
+   // Count how many items we will be displaying -- some may be hidden
+   for(S32 i = 0; i < count; i++)
+      if(items[i].showOnMenu)
+         displayItems++;
+
    // Frame the menu
-   S32 interiorMenuHeight = count * (MENU_FONT_SIZE + MENU_FONT_SPACING) + MENU_PADDING;
+   S32 interiorMenuHeight = displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + 2 * MENU_PADDING;
 
    drawMenuBorderLine(xPos, yPos,                      baseColor);
    drawMenuBorderLine(xPos, yPos + interiorMenuHeight, baseColor);
