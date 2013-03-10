@@ -196,7 +196,7 @@ S32 HelperMenu::getLeftEdgeOfMenuPos()
 }
 
 
-void HelperMenu::onMenuShow()    
+void HelperMenu::onActivated()    
 {
    mShowTimer.invert();
    mShowing = true;

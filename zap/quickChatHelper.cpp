@@ -160,9 +160,9 @@ void QuickChatHelper::render()
 }
 
 
-void QuickChatHelper::onMenuShow()
+void QuickChatHelper::onActivated()
 {
-   Parent::onMenuShow();
+   Parent::onActivated();
 
    mCurNode = 0;
 }

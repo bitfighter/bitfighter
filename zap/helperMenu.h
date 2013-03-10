@@ -87,7 +87,7 @@ public:
 
    virtual void render() = 0;
    virtual void idle(U32 delta);
-   virtual void onMenuShow();
+   virtual void onActivated();
 
    bool isClosing() const;                         // Return true if menu is playing the closing animation
    F32 getFraction();                              // Get fraction of openness

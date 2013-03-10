@@ -79,7 +79,7 @@ public:
    HelperMenu::HelperMenuType getType();
 
    void render();                
-   void onMenuShow();  
+   void onActivated();  
    bool processInputCode(InputCode inputCode);   
 
    void activateHelp(UIManager *uiManager);  // Open help to an appropriate page

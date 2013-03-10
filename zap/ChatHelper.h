@@ -72,7 +72,7 @@ public:
    bool isCmdChat();          // Returns true if we're composing a command in the chat bar, false otherwise
 
    void render();                
-   void onMenuShow();  
+   void onActivated();  
    void activateHelp(UIManager *uiManager);
 
    bool processInputCode(InputCode inputCode);   

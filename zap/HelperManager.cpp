@@ -204,7 +204,7 @@ void HelperManager::activateHelper(HelperMenu::HelperMenuType helperType, bool a
          return;
    }
 
-   mHelperStack[index]->onMenuShow();
+   mHelperStack[index]->onActivated();
 }
 
 

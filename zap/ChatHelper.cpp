@@ -247,9 +247,9 @@ void ChatHelper::render()
 }
 
 
-void ChatHelper::onMenuShow()
+void ChatHelper::onActivated()
 {
-   Parent::onMenuShow();
+   Parent::onActivated();
 }
 
 

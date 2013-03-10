@@ -70,7 +70,7 @@ public:
    HelperMenuType getType();
 
    void render();                
-   void onMenuShow();  
+   void onActivated();  
    bool processInputCode(InputCode inputCode);   
    bool isMovementDisabled();
 };

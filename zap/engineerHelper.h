@@ -71,7 +71,7 @@ public:
 
    void setSelectedEngineeredObject(U32 objectType);
 
-   void onMenuShow();
+   void onActivated();
    bool processInputCode(InputCode inputCode);   
    void render();                
    void renderDeploymentMarker(Ship *ship);

@@ -112,9 +112,9 @@ void LoadoutHelper::pregameSetup(bool includeEngineer)
 HelperMenu::HelperMenuType LoadoutHelper::getType() { return LoadoutHelperType; }
 
 
-void LoadoutHelper::onMenuShow()
+void LoadoutHelper::onActivated()
 {
-   Parent::onMenuShow();
+   Parent::onActivated();
 
    mCurrentIndex = 0;
 }

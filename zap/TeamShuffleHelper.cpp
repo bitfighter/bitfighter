@@ -89,9 +89,9 @@ void TeamShuffleHelper::shuffle()
 }
 
 
-void TeamShuffleHelper::onMenuShow()
+void TeamShuffleHelper::onActivated()
 {
-   Parent::onMenuShow();
+   Parent::onActivated();
 
    shuffle();
 }

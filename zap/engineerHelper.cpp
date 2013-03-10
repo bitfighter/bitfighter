@@ -78,9 +78,9 @@ void EngineerHelper::setSelectedEngineeredObject(U32 objectType)
 }
 
 
-void EngineerHelper::onMenuShow()
+void EngineerHelper::onActivated()
 {
-   Parent::onMenuShow();
+   Parent::onActivated();
 
    mSelectedItem = -1;
 }
