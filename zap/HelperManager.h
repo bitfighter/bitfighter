@@ -85,7 +85,7 @@ public:
    void pregameSetup(bool isEnabled);                    // Set whether engineer is allowed on this level
    void setSelectedEngineeredObject(U32 objectType);
 
-   void activateHelper(HelperMenu::HelperMenuType helperType);
+   void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd);
    void activateHelper(ChatHelper::ChatType chatType);   // Activate chat helper with specific chat subtype
    void exitHelper();
    void exitHelper(HelperMenu *helper);

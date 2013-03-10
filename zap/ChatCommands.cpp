@@ -853,7 +853,7 @@ void shuffleTeams(ClientGame *game, const Vector<string> &words)
          return;
       }
 
-      game->getUIManager()->getGameUserInterface()->activateHelper(HelperMenu::ShuffleTeamsHelperType);
+      game->getUIManager()->getGameUserInterface()->activateHelper(HelperMenu::ShuffleTeamsHelperType, true);
    }
 }
 

@@ -175,37 +175,42 @@ void HelperManager::quitEngineerHelper()
 
 
 // Enter QuickChat, Loadout, or Engineer mode
-void HelperManager::activateHelper(HelperMenu::HelperMenuType helperType)
+void HelperManager::activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd)
 {
+   // If we're activating this item with a chat cmd, we need to make it the 2nd to last item so that when we
+   // can close the chat overlay by popping the last item on the stack, as usual
+   S32 index = activatedWithChatCmd ? mHelperStack.size() - 1 : mHelperStack.size();
+   TNLAssert(index >= 0, "Bad index!");
+
    switch(helperType)
    {
       case HelperMenu::ChatHelperType:
-         mHelperStack.push_back(&mChatHelper);
+         mHelperStack.insert(index, &mChatHelper);
          break;
       case HelperMenu::QuickChatHelperType:
-         mHelperStack.push_back(&mQuickChatHelper);
+         mHelperStack.insert(index, &mQuickChatHelper);
          break;
       case HelperMenu::LoadoutHelperType:
-         mHelperStack.push_back(&mLoadoutHelper);
+         mHelperStack.insert(index, &mLoadoutHelper);
          break;
       case HelperMenu::EngineerHelperType:
-         mHelperStack.push_back(&mEngineerHelper);
+         mHelperStack.insert(index, &mEngineerHelper);
          break;
       case HelperMenu::ShuffleTeamsHelperType:
-         mHelperStack.push_back(&mTeamShuffleHelper);
+         mHelperStack.insert(index, &mTeamShuffleHelper);
          break;
       default:
          TNLAssert(false, "Unknown helperType!");
          return;
    }
 
-   mHelperStack.last()->onMenuShow();
+   mHelperStack[index]->onMenuShow();
 }
 
 
 void HelperManager::activateHelper(ChatHelper::ChatType chatType)
 {
-   activateHelper(HelperMenu::ChatHelperType);
+   activateHelper(HelperMenu::ChatHelperType, false);
    mChatHelper.activate(chatType);
 }
 

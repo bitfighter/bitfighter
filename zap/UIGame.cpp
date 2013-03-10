@@ -747,9 +747,9 @@ void GameUserInterface::setSelectedEngineeredObject(U32 objectType)
 }
 
 
-void GameUserInterface::activateHelper(HelperMenu::HelperMenuType helperType)
+void GameUserInterface::activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd)
 {
-   mHelperManager.activateHelper(helperType);
+   mHelperManager.activateHelper(helperType, activatedWithChatCmd);
    playBoop();
 }
 

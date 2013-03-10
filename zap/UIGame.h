@@ -307,7 +307,7 @@ public:
    void suspendGame();
    void unsuspendGame();
 
-   void activateHelper(HelperMenu::HelperMenuType helperType);  
+   void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd = false);  
    void exitHelper();
 
    void renderEngineeredItemDeploymentMarker(Ship *ship);
