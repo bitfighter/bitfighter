@@ -67,6 +67,8 @@ public:
 
    void render();                
    void onActivated();  
+   S32 getActivationAnimationTime();
+
    bool processInputCode(InputCode inputCode);   
 
    bool isMovementDisabled();

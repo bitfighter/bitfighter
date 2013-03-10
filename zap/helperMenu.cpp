@@ -39,7 +39,7 @@ namespace Zap
 // Constructor
 HelperMenu::HelperMenu()
 {
-   mShowTimer.setPeriod(150);    // Transition time, in ms
+   mAnimationTimer.setPeriod(getActivationAnimationTime());    // Transition time, in ms
 }
 
 
@@ -56,6 +56,7 @@ void HelperMenu::initialize(ClientGame *game, HelperManager *manager)
    mClientGame = game;
 }
 
+
 const char *HelperMenu::getCancelMessage()
 {
    return "";
@@ -71,7 +72,7 @@ InputCode HelperMenu::getActivationKey()
 // Exit helper mode by entering play mode
 void HelperMenu::exitHelper() 
 { 
-   mShowTimer.invert();
+   mAnimationTimer.invert();
    mActivating = false;
    mClientGame->getUIManager()->getGameUserInterface()->exitHelper();
 }
@@ -79,7 +80,10 @@ void HelperMenu::exitHelper()
 
 F32 HelperMenu::getFraction()
 {
-   return mActivating ? mShowTimer.getFraction() : 1 - mShowTimer.getFraction();
+   if(getActivationAnimationTime() == 0)
+      return 0;
+   else
+      return mActivating ? mAnimationTimer.getFraction() : 1 - mAnimationTimer.getFraction();
 }
 
 
@@ -173,7 +177,7 @@ void HelperMenu::activateHelp(UIManager *uiManager)
 // Return true if menu is playing the closing animation
 bool HelperMenu::isClosing() const
 {
-   return !mActivating && mShowTimer.getCurrent() > 0;
+   return !mActivating && mAnimationTimer.getCurrent() > 0;
 }
 
 
@@ -183,23 +187,35 @@ bool HelperMenu::isChatDisabled()     { return true;  }
 
 void HelperMenu::idle(U32 deltaT) 
 {
-   if(mShowTimer.update(deltaT) && !mActivating)
+   if(mAnimationTimer.update(deltaT) && !mActivating)
       mHelperManager->doneClosingHelper();
 }
 
 
 S32 HelperMenu::getLeftEdgeOfMenuPos()
 {
+   S32 trueLeftEdge = UserInterface::horizMargin;
+
+   if(getActivationAnimationTime() == 0)
+      return trueLeftEdge;
+
+   // else calculate where the left edge should be based on state of animation timer
+
    F32 width = getHelperWidth();
-   return UserInterface::horizMargin - width + (mActivating ? width - mShowTimer.getFraction() * width : 
-                                                           mShowTimer.getFraction() * width);
+   return trueLeftEdge - width + (mActivating ? width - mAnimationTimer.getFraction() * width : 
+                                                        mAnimationTimer.getFraction() * width);
 }
 
 
 void HelperMenu::onActivated()    
 {
-   mShowTimer.invert();
+   mAnimationTimer.invert();
    mActivating = true;
 }
+
+
+// Duration of activation animation -- return 0 to disable
+S32 HelperMenu::getActivationAnimationTime() { return 150; }
+
 
 };

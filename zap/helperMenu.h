@@ -57,7 +57,7 @@ private:
    virtual const char *getCancelMessage();
    virtual InputCode getActivationKey();
 
-   bool mActivating;    // True when menu is being activated, false when deactivating, undefined other times
+   bool mActivating;    // True when menu is being activated, false when deactivating, undefined 
 
    ClientGame *mClientGame;
    HelperManager *mHelperManager;
@@ -65,11 +65,11 @@ private:
    virtual F32 getHelperWidth() const;
 
 protected:
-   static const S32 MENU_TOP = 180;     // Location of top of overlay menu
+   static const S32 MENU_TOP = 180;    // Location of top of overlay menu
 
-   Timer mShowTimer;
+   Timer mAnimationTimer;              // Timer for activation/deactivation animation
 
-   S32 getLeftEdgeOfMenuPos();    // Return left edge of menu
+   S32 getLeftEdgeOfMenuPos();         // Return left edge of menu
 
    // Shortcut helper function
    virtual void exitHelper();
@@ -99,6 +99,8 @@ public:
    virtual void activateHelp(UIManager *uiManager);   // Open help to an appropriate page
    virtual bool isMovementDisabled();                 // Is ship movement disabled while this helper is active?
    virtual bool isChatDisabled();                     // Returns true if chat and friends should be disabled while this is active
+
+   virtual S32 getActivationAnimationTime();          // Return 0 to disable animations
 
    virtual HelperMenuType getType() = 0;
 };

@@ -229,9 +229,11 @@ void HelperManager::doneClosingHelper()
 }
 
 
+// We will darken certain areas of the screen when the helper is active.  This computes how much.
 F32 HelperManager::getDimFactor()
 {
-   static const F32 MAX_DIMMING = .2;
+   static const F32 MAX_DIMMING = .2;     // How dark areas are at their darkest, 0 = pure black, 1 = no dimming
+
    if(mOffDeckHelper)
       return mOffDeckHelper->getFraction() * (1 - MAX_DIMMING) + MAX_DIMMING;
    else if(mHelperStack.size() > 0)
@@ -255,7 +257,11 @@ void HelperManager::doExitHelper(S32 index)
    //mHelperStack[index]->deactivate();
    mOffDeckHelper = mHelperStack[index];
    mHelperStack.erase(index);
-   mGame->unsuspendGame();  
+   mGame->unsuspendGame();
+
+   // If animation is disabled for this helper, immediately call doneClosingHelper()
+   if(mOffDeckHelper->getActivationAnimationTime() == 0)
+      doneClosingHelper();
 }
 
 

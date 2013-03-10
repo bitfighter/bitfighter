@@ -97,6 +97,11 @@ void TeamShuffleHelper::onActivated()
 }
 
 
+// Duration of activation animation -- return 0 to disable
+S32 TeamShuffleHelper::getActivationAnimationTime() { return 0; }
+
+
+
 static F32 TEXT_SIZE_FACTOR = 1.2f;     // Give 20% breathing room for text 
 
 void TeamShuffleHelper::calculateRenderSizes()
