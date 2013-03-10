@@ -1216,7 +1216,7 @@ void Ship::damageObject(DamageInfo *theInfo)
    // Deal with grenades and other explody things, even if they cause no damage
    if(theInfo->damageType == DamageTypeArea)
    {
-      static const F32 ARMOR_IMPULSE_ABSORBTION_FACTOR = 0.35f;
+      static const F32 ARMOR_IMPULSE_ABSORBTION_FACTOR = 0.25f;
 
       // Armor pads impulses.  Here comes the tank!
       if(hasArmor)
