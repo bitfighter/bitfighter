@@ -71,6 +71,7 @@ public:
    bool hitShip;
    bool mAlive;
    bool mBounced;
+   U32 mLiveTimeIncreases;
    SafePtr<BfObject> mShooter;
 
    Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when weapon is fired  

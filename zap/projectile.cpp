@@ -77,6 +77,7 @@ void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel,
    hitShip = false;
    mAlive = true;
    mBounced = false;
+   mLiveTimeIncreases = 0;
    mShooter = shooter;
 
    setOwner(NULL);
@@ -298,6 +299,19 @@ void Projectile::idle(BfObject::IdleCallPath path)
             if(bounce)
             {
                mBounced = true;
+
+               static const U32 MAX_LIVETIME_INCREASES = 10;
+               static const U32 LIVETIME_INCREASE = 200;
+               static const S32 MAX_LIVETIME_MULTIPLIER = 3;
+
+               // Let's extend the projectile life time on each bounce, up to twice the normal
+               // live-time
+               if(mLiveTimeIncreases < MAX_LIVETIME_INCREASES &&
+                     mTimeRemaining < GameWeapon::weaponInfo[mWeaponType].projLiveTime * MAX_LIVETIME_MULTIPLIER)
+               {
+                  mTimeRemaining += LIVETIME_INCREASE;
+                  mLiveTimeIncreases++;
+               }
 
                // We hit something that we should bounce from, so bounce!
                F32 float1 = surfNormal.dot(mVelocity) * 2;
