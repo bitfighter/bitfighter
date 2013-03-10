@@ -1239,8 +1239,11 @@ void Ship::damageObject(DamageInfo *theInfo)
       // Having armor halves the damage
       if(hasModule(ModuleArmor))
       {
+         Projectile* projectile = NULL;
+         if(theInfo->damagingObject->getObjectTypeNumber() == BulletTypeNumber)
+            projectile = static_cast<Projectile*>(theInfo->damagingObject);
+
          // Except for bouncers - they do a little more damage
-         Projectile* projectile = dynamic_cast<Projectile*>(theInfo->damagingObject);
          if(projectile && projectile->mWeaponType == WeaponBounce)
             damageAmount *= 0.75;  // Bouncers do 3/4 damage
          else
