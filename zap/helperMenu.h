@@ -26,6 +26,7 @@
 #ifndef _HELPERMENU_H_
 #define _HELPERMENU_H_
 
+#include "Engineerable.h"     // For EngineerBuildObjects enum
 #include "InputCode.h"
 #include "tnl.h"
 #include "Color.h"
@@ -40,6 +41,18 @@ namespace Zap
 class ClientGame;
 class UIManager;
 class HelperManager;
+
+
+struct OverlayMenuItem
+{
+public:
+   InputCode key;       // Keyboard key used to select in menu
+   InputCode button;    // Controller button used to select in menu
+   bool showOnMenu;     // Should this item actually be added to the menu?
+   bool markAsSelected; // Should this item be rendered in a special way to indicate it is selected?
+   const char *name;    // Name used on menu
+   const char *help;    // An additional bit of help text, also displayed on menu
+};
 
 
 class HelperMenu
@@ -74,10 +87,16 @@ protected:
    // Shortcut helper function
    virtual void exitHelper();
 
+   void drawItemMenu(S32 xPos, S32 yPos, const char *title, const OverlayMenuItem *items, S32 count);
    void drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color);
    void drawMenuCancelText(S32 xPos, S32 yPos, const Color &color, S32 fontSize);
 
    ClientGame *getGame();
+
+   static const S32 MENU_FONT_SIZE    = 15;
+   static const S32 MENU_FONT_SPACING =  7;
+   static const S32 MENU_PADDING      =  3;
+
 
 public:
    explicit HelperMenu();     // Constructor

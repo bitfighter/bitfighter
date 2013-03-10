@@ -93,44 +93,73 @@ F32 HelperMenu::getHelperWidth() const
 }
 
 
-ClientGame *HelperMenu::getGame()
+void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const OverlayMenuItem *items, S32 count)
 {
-   return mClientGame;
-}
+   static const Color baseColor(Colors::red);
+
+   // Frame the menu
+   S32 interiorMenuHeight = count * (MENU_FONT_SIZE + MENU_FONT_SPACING) + MENU_PADDING;
+
+   drawMenuBorderLine(xPos, yPos,                      baseColor);
+   drawMenuBorderLine(xPos, yPos + interiorMenuHeight, baseColor);
+
+   // Draw the title
+   glColor(baseColor);
+   drawString(xPos, yPos, MENU_FONT_SIZE, title);
+   yPos += MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
 
 
-// Returns true if key was handled, false if it should be further processed
-bool HelperMenu::processInputCode(InputCode inputCode)
-{
-   // First, check navigation keys.  When in keyboard mode, we allow the loadout key to toggle menu on and off...
-   // we can't do this in joystick mode because it is likely that the loadout key is also used to select items
-   // from the loadout menu.
-   if(inputCode == KEY_ESCAPE  || inputCode == KEY_BACKSPACE    ||
-      inputCode == KEY_LEFT    || inputCode == BUTTON_DPAD_LEFT ||
-      inputCode == BUTTON_BACK || 
-      (getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeKeyboard && inputCode == getActivationKey()) )
+   // Determine whether to show keys or joystick buttons on menu
+   GameSettings *settings = getGame()->getSettings();
+   InputMode inputMode    = settings->getInputCodeManager()->getInputMode();
+   bool showKeys = settings->getIniSettings()->showKeyboardKeys || inputMode == InputModeKeyboard;
+
+   for(S32 i = 0; i < count; i++)
    {
-      exitHelper();      
+      // Don't show an option that shouldn't be shown!
+      if(!items[i].showOnMenu)
+         continue;
 
-      if(getGame()->getSettings()->getIniSettings()->verboseHelpMessages)
-         mClientGame->displayMessage(Colors::paleRed, getCancelMessage());
+      // Draw key controls for selecting the object to be created
+      U32 joystickIndex = Joystick::SelectedPresetIndex;
 
-      return true;
+      if(inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
+         JoystickRender::renderControllerButton(F32(xPos + (showKeys ? 0 : 20)), (F32)yPos, 
+                                                joystickIndex, items[i].button, false);
+
+      if(showKeys)
+      {
+         glColor(Colors::white);             // Render key in white
+         JoystickRender::renderControllerButton((F32)xPos + 20, (F32)yPos, 
+                                                joystickIndex, items[i].key, false);
+      }
+
+      if(items[i].markAsSelected)
+         glColor(1.0, 0.1f, 0.1f);      // Color of already selected item
+      else
+         glColor(0.1f, 1.0, 0.1f);      // Color of not-yet selected item
+
+
+      S32 x = drawStringAndGetWidth(xPos + 50, yPos, MENU_FONT_SIZE, items[i].name); 
+
+      // Render help string.  Highlight it if the item is not selected
+      if(!items[i].markAsSelected)
+         glColor(.2, .8, .8);    
+
+      drawString(xPos + x, yPos, MENU_FONT_SIZE, items[i].help);
+
+      yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
    }
 
-   return false;
-}
+   yPos += MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
 
-
-void HelperMenu::onTextInput(char ascii)
-{
-   // Do nothing (overridden by ChatHelper)
+   drawMenuCancelText(xPos, yPos, baseColor, MENU_FONT_SIZE);
 }
 
 
 void HelperMenu::drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color)
 {
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
+   TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on");
 
    F32 vertices[] = {
          xPos,        yPos + 20,
@@ -165,6 +194,41 @@ void HelperMenu::drawMenuCancelText(S32 xPos, S32 yPos, const Color &color, S32 
       glColor(color);
       drawString( xPos, yPos, fontSizeSm, "to cancel");
    }
+}
+
+
+ClientGame *HelperMenu::getGame()
+{
+   return mClientGame;
+}
+
+
+// Returns true if key was handled, false if it should be further processed
+bool HelperMenu::processInputCode(InputCode inputCode)
+{
+   // First, check navigation keys.  When in keyboard mode, we allow the loadout key to toggle menu on and off...
+   // we can't do this in joystick mode because it is likely that the loadout key is also used to select items
+   // from the loadout menu.
+   if(inputCode == KEY_ESCAPE  || inputCode == KEY_BACKSPACE    ||
+      inputCode == KEY_LEFT    || inputCode == BUTTON_DPAD_LEFT ||
+      inputCode == BUTTON_BACK || 
+      (getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeKeyboard && inputCode == getActivationKey()) )
+   {
+      exitHelper();      
+
+      if(getGame()->getSettings()->getIniSettings()->verboseHelpMessages)
+         mClientGame->displayMessage(Colors::paleRed, getCancelMessage());
+
+      return true;
+   }
+
+   return false;
+}
+
+
+void HelperMenu::onTextInput(char ascii)
+{
+   // Do nothing (overridden by ChatHelper)
 }
 
 

@@ -42,9 +42,6 @@
 namespace Zap
 {
 
-Vector<LoadoutItem> gLoadoutModules;
-Vector<LoadoutItem> gLoadoutWeapons;
-
 //LoadoutItem::LoadoutItem() { TNLAssert(false, "Do nothing, Should never be used"); }
 
 LoadoutItem::LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
@@ -57,8 +54,6 @@ LoadoutItem::LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 
    this->text = moduleInfo->getMenuName();
    this->help = moduleInfo->getMenuHelp();
    this->requires = ModuleNone;     // Currently, no modules depend on any other
-
-   mGame = game;
 }
 
 
@@ -70,9 +65,57 @@ LoadoutItem::LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 
    this->text = text;
    this->help = help;
    this->requires = requires;
-
-   mGame = game;
 }
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// May need to make these a class object in future if we ever do true multiplayer within one client... we could have
+// conflicts if two players try to change loadouts at the same time.
+
+static OverlayMenuItem loadoutModuleMenuItems[] = {
+   { KEY_1, BUTTON_1, true, false, "Turbo Boost",           "" },
+   { KEY_2, BUTTON_2, true, false, "Shield Generator",      "" },
+   { KEY_3, BUTTON_3, true, false, "Repair Module",         "" },
+   { KEY_4, BUTTON_4, true, false, "Enhanced Sensor",       "" },
+   { KEY_5, BUTTON_5, true, false, "Cloak Field Modulator", "" },
+   { KEY_6, BUTTON_6, true, false, "Armor",                 "" },
+   { KEY_7, BUTTON_7, true, false, "Engineer",              "" },
+};
+
+static const S32 moduleEngineerIndex = 6;
+
+static OverlayMenuItem loadoutWeaponMenuItems[] = {
+   { KEY_1, BUTTON_1, true, false, "Phaser",     "" },
+   { KEY_2, BUTTON_2, true, false, "Bouncer",    "" },
+   { KEY_3, BUTTON_3, true, false, "Triple",     "" },
+   { KEY_4, BUTTON_4, true, false, "Burster",    "" },
+   { KEY_5, BUTTON_5, true, false, "Mine Layer", "" },
+   { KEY_6, BUTTON_6, true, false, "Seeker",     "" },
+};
+
+
+// must be synchronized with above... TODO: put this in an xmacro!
+static U8 moduleLookup[] = 
+{
+   ModuleBoost,
+   ModuleShield,
+   ModuleRepair,
+   ModuleSensor,
+   ModuleCloak,
+   ModuleArmor,
+   ModuleEngineer
+};
+
+static U8 weaponLookup[] = 
+{
+   WeaponPhaser,
+   WeaponBounce,
+   WeaponTriple,
+   WeaponBurst, 
+   WeaponMine,  
+   WeaponSeeker
+};
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -84,32 +127,14 @@ LoadoutHelper::LoadoutHelper()
 }
 
 
+HelperMenu::HelperMenuType LoadoutHelper::getType() { return LoadoutHelperType; }
+
+
 // Gets called at the beginning of every game; available options may change based on level
 void LoadoutHelper::pregameSetup(bool includeEngineer)
 {
-   gLoadoutModules.clear();
-   gLoadoutWeapons.clear();
-
-   gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_1, BUTTON_1, ModuleBoost));
-   gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_2, BUTTON_2, ModuleShield));
-   gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_3, BUTTON_3, ModuleRepair));
-   gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_4, BUTTON_4, ModuleSensor));
-   gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_5, BUTTON_5, ModuleCloak));
-   gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_6, BUTTON_6, ModuleArmor));
-
-   if(includeEngineer)
-      gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_7, BUTTON_7, ModuleEngineer));
-
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_1, BUTTON_1, WeaponPhaser, "Phaser",     "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_2, BUTTON_2, WeaponBounce, "Bouncer",    "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_3, BUTTON_3, WeaponTriple, "Triple",     "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_4, BUTTON_4, WeaponBurst,  "Burster",    "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_5, BUTTON_5, WeaponMine,   "Mine Layer", "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_6, BUTTON_6, WeaponSeeker, "Seeker",     "", ModuleNone));
-};
-
-
-HelperMenu::HelperMenuType LoadoutHelper::getType() { return LoadoutHelperType; }
+   loadoutModuleMenuItems[moduleEngineerIndex].showOnMenu = includeEngineer;
+}
 
 
 void LoadoutHelper::onActivated()
@@ -117,11 +142,15 @@ void LoadoutHelper::onActivated()
    Parent::onActivated();
 
    mCurrentIndex = 0;
+
+   // Mark everything as unselected
+   for(S32 i = 0; i < ARRAYSIZE(loadoutWeaponMenuItems); i++)
+      loadoutWeaponMenuItems[i].markAsSelected = false;
+
+   for(S32 i = 0; i < ARRAYSIZE(loadoutModuleMenuItems); i++)
+      loadoutModuleMenuItems[i].markAsSelected = false;
 }
 
-
-// First, we work with modules, then with weapons
-#define getList(ct)  ((ct < ShipModuleCount) ? &gLoadoutModules : &gLoadoutWeapons)
 
 void LoadoutHelper::render()
 {
@@ -130,99 +159,19 @@ void LoadoutHelper::render()
    const S32 fontSize = 15;
 
    const Color loadoutMenuHeaderColor (Colors::red);
-   char helpStr[100];
+   char title[100];
 
    if(mCurrentIndex < ShipModuleCount)
-      dSprintf(helpStr, sizeof(helpStr), "Pick %d power modules for your ship:", ShipModuleCount);
+      dSprintf(title, sizeof(title), "Pick %d power modules for your ship:", ShipModuleCount);
    else
-      dSprintf(helpStr, sizeof(helpStr), "Pick %d weapons for your ship:", ShipWeaponCount);
+      dSprintf(title, sizeof(title), "Pick %d weapons for your ship:",       ShipWeaponCount);
 
 
-   drawMenuBorderLine(xPos, yPos, loadoutMenuHeaderColor);
+   // Point list to either the weapon list or the module list, depending on mCurrentIndex
+   OverlayMenuItem *list = (mCurrentIndex < ShipModuleCount) ? loadoutModuleMenuItems            : loadoutWeaponMenuItems;
+   S32              len =  (mCurrentIndex < ShipModuleCount) ? ARRAYSIZE(loadoutModuleMenuItems) : ARRAYSIZE(loadoutWeaponMenuItems);
 
-   glColor(loadoutMenuHeaderColor);
-   drawString(xPos, yPos, fontSize, helpStr);
-   yPos += fontSize + 10;
-
-   Vector<LoadoutItem> *list = getList(mCurrentIndex);
-
-   for(U32 i = 0; i < (U32)list->size(); i++)
-   {
-      bool selected = false;
-
-      // Cases of mCurrentIndex == 0 and mCurrentIndex == ShipModuleCount should both fall through the if/else if
-      // These are instances when a fresh new menu with nothing selected is displayed.
-
-      if(mCurrentIndex > 0 && mCurrentIndex < ShipModuleCount)    // Picking modules, but not the first one
-      {
-         for(S32 j = 0; j < mCurrentIndex; j++)
-            if(mModule[j] == i)
-               selected = true;
-      }
-      else if(mCurrentIndex > ShipModuleCount)                    // Picking weapons, but not the first one
-      {
-         for(S32 j = 0; j < mCurrentIndex - ShipModuleCount; j++)
-            if(mWeapon[j] == i)
-               selected = true;
-      }
-
-      // Draw key controls for selecting loadout items
-      GameSettings *settings = getGame()->getSettings();
-      InputMode inputMode = settings->getInputCodeManager()->getInputMode();
-
-      bool showKeys = settings->getIniSettings()->showKeyboardKeys || inputMode == InputModeKeyboard;
-
-      if(isValidItem(i))
-      {
-         U32 joystickIndex = Joystick::SelectedPresetIndex;
-
-         if(inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
-            JoystickRender::renderControllerButton(F32(xPos + (showKeys ? 0 : 20)), (F32)yPos, 
-                                                   joystickIndex, list->get(i).button, false);
-         if(showKeys)
-         {
-            glColor(Colors::white);     
-            JoystickRender::renderControllerButton(F32(xPos + 30), (F32)yPos, joystickIndex, list->get(i).key, false);
-         }
-
-         if(selected)
-            glColor(1.0, 0.1f, 0.1f);      // Color of already selected item
-         else
-            glColor(0.1f, 1.0, 0.1f);      // Color of not-yet selected item
-
-         S32 textPos = xPos + 50;
-         textPos += drawStringAndGetWidth(textPos, yPos, fontSize, list->get(i).text) + 8;      // The loadout entry itself
-         if(!selected)
-            glColor(.2f, .8f, .8f);        // Color of help message
-
-         drawString(textPos, yPos, fontSize, list->get(i).help);      // The loadout help string, if there is one
-
-         yPos += fontSize + 7;
-      }
-   }
-
-   // Add some help text
-   drawMenuBorderLine(xPos, yPos - fontSize - 2, loadoutMenuHeaderColor);
-   yPos += 8;
-   drawMenuCancelText(xPos, yPos, loadoutMenuHeaderColor, fontSize);
-}
-
-
-// Checks if there are prerequisites for item, and returns true if there are none, or they are satisfied, false if they are unsatisified
-bool LoadoutHelper::isValidItem(S32 index)
-{
-   Vector<LoadoutItem> *list = getList(mCurrentIndex);   // Gets list of modules or weapons, whichever is active
-
-   if(list->get(index).requires == ModuleNone)           // Selection has no prerequisites
-      return true;
-
-   // There are prerequsities... check to make sure user has already selected them
-   for(S32 i = 0; i < min(mCurrentIndex, ShipModuleCount); i++)
-      if(gLoadoutModules[mModule[i]].index == (U32)list->get(index).requires)    // They have
-         return true;
-
-   // There are prerequisites, but the user doesn't have them
-   return false;
+   drawItemMenu(getLeftEdgeOfMenuPos(), yPos, title, list, len);
 }
 
 
@@ -234,19 +183,14 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       return true;
    
    U32 index;
-   Vector<LoadoutItem> *list = getList(mCurrentIndex);
+   OverlayMenuItem *list = (mCurrentIndex < ShipModuleCount) ? loadoutModuleMenuItems            : loadoutWeaponMenuItems;
+   U32              len =  (mCurrentIndex < ShipModuleCount) ? ARRAYSIZE(loadoutModuleMenuItems) : ARRAYSIZE(loadoutWeaponMenuItems);
 
-   for(index = 0; index < (U32)list->size(); index++)
-      if(inputCode == list->get(index).key || inputCode == list->get(index).button)
+   for(index = 0; index < len; index++)
+      if(inputCode == list[index].key || inputCode == list[index].button)
          break;
 
-   if(index >= (U32)list->size())
-      return false;
-
-   if(!isValidItem(index))
-      return false;
-
-   if(!list->get(index).text)
+   if(!list[index].showOnMenu)
       return false;
 
    // Make sure user doesn't select the same loadout item twice
@@ -265,6 +209,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    if(!alreadyUsed)
    {
+      list[index].markAsSelected = true;
       mModule[mCurrentIndex] = index;
       mCurrentIndex++;
    }
@@ -275,12 +220,10 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       Vector<U8> loadout;
 
       for(S32 i = 0; i < ShipModuleCount; i++)
-         loadout.push_back(gLoadoutModules[mModule[i]].index);
+         loadout.push_back(moduleLookup[mModule[i]]);
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
-         loadout.push_back(gLoadoutWeapons[mWeapon[i]].index);
-
-      
+         loadout.push_back(weaponLookup[mWeapon[i]]);
 
       GameConnection *conn = getGame()->getConnectionToServer();
 
@@ -312,8 +255,6 @@ const char *LoadoutHelper::getCancelMessage()
 {
    return "Modifications canceled -- ship design unchanged.";
 }
-
-
 
 
 void LoadoutHelper::activateHelp(UIManager *uiManager)

@@ -34,21 +34,6 @@ using namespace TNL;
 namespace Zap
 {
 
-struct EngineerConstructionItemInfo
-{
-   EngineerBuildObjects mObjectType;
-   InputCode mKey;          // Keyboard key used to select in menu
-   InputCode mButton;       // Controller button used to select in menu
-   bool showOnMenu;         // Should this item actually be added to the menu?
-   const char *mName;       // Name used on menu
-   const char *mHelp;       // An additional bit of help text, also displayed on menu
-   const char *mInstruction;// Instructions displayed when module is selected
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class Ship;
 
 class EngineerHelper : public HelperMenu
@@ -57,8 +42,7 @@ class EngineerHelper : public HelperMenu
 
 private:
    const char *getCancelMessage();
-   S32 mSelectedItem;
-   Vector<EngineerConstructionItemInfo> mEngineerCostructionItemInfos;
+   S32 mSelectedIndex;
 
    bool isMenuBeingDisplayed();
    void exitHelper();
