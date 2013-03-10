@@ -229,16 +229,36 @@ void HelperManager::doneClosingHelper()
 }
 
 
-// We will darken certain areas of the screen when the helper is active.  This computes how much.
+// We will darken certain areas of the screen when the helper is active.  This computes how much.  
 F32 HelperManager::getDimFactor()
 {
-   static const F32 MAX_DIMMING = .2;     // How dark areas are at their darkest, 0 = pure black, 1 = no dimming
+   static const F32 DIM    = 0.2;    
+   static const F32 BRIGHT = 1.0;
 
-   if(mOffDeckHelper)
-      return mOffDeckHelper->getFraction() * (1 - MAX_DIMMING) + MAX_DIMMING;
-   else if(mHelperStack.size() > 0)
-      return mHelperStack.last()->getFraction() * (1 - MAX_DIMMING) + MAX_DIMMING;
-   else return 1;
+   // fromDim and toDim are true if chat text should be dimmed, false if not.  Their state is based on the
+   // characteristics of the active helper and the state of its activation/deactivation animation.
+   bool fromDim = false, toDim = false;
+
+   if(mOffDeckHelper && mOffDeckHelper->isChatDisabled())
+      fromDim = true;
+
+   if(mHelperStack.size() > 0 && mHelperStack.last()->isChatDisabled())
+      toDim = true;
+
+   if(fromDim)
+   {
+      if(toDim)         // Transitioning from a dim interfact to another one... should just stay dim
+         return DIM;    
+      else
+         return mOffDeckHelper->getFraction() * (1 - DIM) + DIM;
+   }
+   else
+   {
+      if(toDim)
+         return mHelperStack.last()->getFraction() * (1 - DIM) + DIM;
+      else              // Transitioning from a bright interfact to another one... should just stay bright
+         return BRIGHT;
+   }
 }
 
 
