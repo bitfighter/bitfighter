@@ -72,14 +72,14 @@ InputCode HelperMenu::getActivationKey()
 void HelperMenu::exitHelper() 
 { 
    mShowTimer.invert();
-   mShowing = false;
+   mActivating = false;
    mClientGame->getUIManager()->getGameUserInterface()->exitHelper();
 }
 
 
 F32 HelperMenu::getFraction()
 {
-   return mShowing ? mShowTimer.getFraction() : 1 - mShowTimer.getFraction();
+   return mActivating ? mShowTimer.getFraction() : 1 - mShowTimer.getFraction();
 }
 
 
@@ -173,7 +173,7 @@ void HelperMenu::activateHelp(UIManager *uiManager)
 // Return true if menu is playing the closing animation
 bool HelperMenu::isClosing() const
 {
-   return !mShowing && mShowTimer.getCurrent() > 0;
+   return !mActivating && mShowTimer.getCurrent() > 0;
 }
 
 
@@ -183,7 +183,7 @@ bool HelperMenu::isChatDisabled()     { return true;  }
 
 void HelperMenu::idle(U32 deltaT) 
 {
-   if(mShowTimer.update(deltaT) && !mShowing)
+   if(mShowTimer.update(deltaT) && !mActivating)
       mHelperManager->doneClosingHelper();
 }
 
@@ -191,7 +191,7 @@ void HelperMenu::idle(U32 deltaT)
 S32 HelperMenu::getLeftEdgeOfMenuPos()
 {
    F32 width = getHelperWidth();
-   return UserInterface::horizMargin - width + (mShowing ? width - mShowTimer.getFraction() * width : 
+   return UserInterface::horizMargin - width + (mActivating ? width - mShowTimer.getFraction() * width : 
                                                            mShowTimer.getFraction() * width);
 }
 
@@ -199,7 +199,7 @@ S32 HelperMenu::getLeftEdgeOfMenuPos()
 void HelperMenu::onActivated()    
 {
    mShowTimer.invert();
-   mShowing = true;
+   mActivating = true;
 }
 
 };

@@ -57,7 +57,7 @@ private:
    virtual const char *getCancelMessage();
    virtual InputCode getActivationKey();
 
-   bool mShowing;    // True when menu is being activated, false when deactivating
+   bool mActivating;    // True when menu is being activated, false when deactivating, undefined other times
 
    ClientGame *mClientGame;
    HelperManager *mHelperManager;
