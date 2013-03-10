@@ -1211,9 +1211,19 @@ void Ship::damageObject(DamageInfo *theInfo)
 {
    if(mHealth == 0 || hasExploded) return; // Stop multi-kill problem. Might stop robots from getting invincible.
 
+   bool hasArmor = hasModule(ModuleArmor);
+
    // Deal with grenades and other explody things, even if they cause no damage
    if(theInfo->damageType == DamageTypeArea)
-      mImpulseVector += theInfo->impulseVector;
+   {
+      static const F32 ARMOR_IMPULSE_ABSORBTION_FACTOR = 0.35f;
+
+      // Armor pads impulses.  Here comes the tank!
+      if(hasArmor)
+         mImpulseVector += (theInfo->impulseVector * ARMOR_IMPULSE_ABSORBTION_FACTOR);
+      else
+         mImpulseVector += theInfo->impulseVector;
+   }
 
    if(theInfo->damageAmount == 0)
       return;
@@ -1237,8 +1247,10 @@ void Ship::damageObject(DamageInfo *theInfo)
          return;
 
       // Having armor halves the damage
-      if(hasModule(ModuleArmor))
+      if(hasArmor)
       {
+         static const F32 ARMOR_REDUCTION_FACTOR = 0.4f;
+
          Projectile* projectile = NULL;
          if(theInfo->damagingObject->getObjectTypeNumber() == BulletTypeNumber)
             projectile = static_cast<Projectile*>(theInfo->damagingObject);
@@ -1247,7 +1259,7 @@ void Ship::damageObject(DamageInfo *theInfo)
          if(projectile && projectile->mWeaponType == WeaponBounce)
             damageAmount *= 0.75;  // Bouncers do 3/4 damage
          else
-            damageAmount *= 0.5;        // Everything else does 1/2
+            damageAmount *= ARMOR_REDUCTION_FACTOR;        // Everything else does 1/2
       }
    }
 
