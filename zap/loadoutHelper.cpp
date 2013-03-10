@@ -154,11 +154,6 @@ void LoadoutHelper::onActivated()
 
 void LoadoutHelper::render()
 {
-   S32 xPos = getLeftEdgeOfMenuPos();
-   S32 yPos = MENU_TOP;
-   const S32 fontSize = 15;
-
-   const Color loadoutMenuHeaderColor (Colors::red);
    char title[100];
 
    if(mCurrentIndex < ShipModuleCount)
@@ -171,7 +166,7 @@ void LoadoutHelper::render()
    OverlayMenuItem *list = (mCurrentIndex < ShipModuleCount) ? loadoutModuleMenuItems            : loadoutWeaponMenuItems;
    S32              len =  (mCurrentIndex < ShipModuleCount) ? ARRAYSIZE(loadoutModuleMenuItems) : ARRAYSIZE(loadoutWeaponMenuItems);
 
-   drawItemMenu(getLeftEdgeOfMenuPos(), yPos, title, list, len);
+   drawItemMenu(getLeftEdgeOfMenuPos(), MENU_TOP, title, list, len);
 }
 
 
