@@ -123,7 +123,6 @@ void ChatHelper::activate(ChatType chatType)
 }
 
 
-extern Color gGlobalChatColor, gTeamChatColor, gCmdChatColor;
 extern ScreenInfo gScreenInfo;
 
 bool ChatHelper::isCmdChat()
@@ -140,17 +139,17 @@ void ChatHelper::render()
 
    if(isCmdChat())      // Whatever the underlying chat mode, seems we're entering a command here
    {
-      baseColor = gCmdChatColor;
+      baseColor = Colors::cmdChatColor;
       promptStr = mCurrentChatType ? "(Command): /" : "(Command): ";
    }
    else if(mCurrentChatType == TeamChat)    // Team chat (goes to all players on team)
    {
-      baseColor = gTeamChatColor;
+      baseColor = Colors::teamChatColor;
       promptStr = "(Team): ";
    }
    else                                     // Global in-game chat (goes to all players in game)
    {
-      baseColor = gGlobalChatColor;
+      baseColor = Colors::cmdChatColor;
       promptStr = "(Global): ";
    }
 

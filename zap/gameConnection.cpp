@@ -831,8 +831,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
 }
 
 
-extern Color gCmdChatColor;
-
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
@@ -892,7 +890,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
 
    // Check for permissions being rescinded by server, will happen if admin changes level change pw
    if(clientInfo->isLevelChanger() && !granted)
-      mClientGame->displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
+      mClientGame->displayMessage(Colors::cmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
 
    clientInfo->setIsLevelChanger(granted);  // (simple set)
 
@@ -953,7 +951,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLoadout, (Vector<U8> loadout), (load
 Color colors[] =
 {
    Colors::white,          // ColorWhite
-   Colors::red,            // ColorRed    ==> also used for chat commands
+   Colors::cmdChatColor,   // ColorRed  
    Colors::green,          // ColorGreen
    Colors::blue,           // ColorBlue
    Colors::cyan,           // ColorAqua
@@ -961,8 +959,6 @@ Color colors[] =
    Color(0.6f, 1, 0.8f),   // ColorNuclearGreen
 };
 
-
-Color gCmdChatColor = colors[GameConnection::ColorRed];
 
 void GameConnection::displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 {

@@ -42,58 +42,36 @@
 namespace Zap
 {
 
-//LoadoutItem::LoadoutItem() { TNLAssert(false, "Do nothing, Should never be used"); }
-
-LoadoutItem::LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
-{
-   const ModuleInfo *moduleInfo = game->getModuleInfo((ShipModule) index);
-
-   this->key = key;
-   this->button = button;
-   this->index = index;
-   this->text = moduleInfo->getMenuName();
-   this->help = moduleInfo->getMenuHelp();
-   this->requires = ModuleNone;     // Currently, no modules depend on any other
-}
-
-
-LoadoutItem::LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 index, const char *text, const char *help, ShipModule requires) 
-{
-   this->key = key;
-   this->button = button;
-   this->index = index;
-   this->text = text;
-   this->help = help;
-   this->requires = requires;
-}
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 // May need to make these a class object in future if we ever do true multiplayer within one client... we could have
 // conflicts if two players try to change loadouts at the same time.
 
+// For clarity
+#define UNSEL_COLOR &Colors::overlayMenuUnselectedItemColor
+#define HELP_COLOR  &Colors::overlayMenuHelpColor
+
 static OverlayMenuItem loadoutModuleMenuItems[] = {
-   { KEY_1, BUTTON_1, true, false, "Turbo Boost",           "" },
-   { KEY_2, BUTTON_2, true, false, "Shield Generator",      "" },
-   { KEY_3, BUTTON_3, true, false, "Repair Module",         "" },
-   { KEY_4, BUTTON_4, true, false, "Enhanced Sensor",       "" },
-   { KEY_5, BUTTON_5, true, false, "Cloak Field Modulator", "" },
-   { KEY_6, BUTTON_6, true, false, "Armor",                 "" },
-   { KEY_7, BUTTON_7, true, false, "Engineer",              "" },
+   { KEY_1, BUTTON_1, true, "Turbo Boost",           UNSEL_COLOR, "",                               NULL       },
+   { KEY_2, BUTTON_2, true, "Shield Generator",      UNSEL_COLOR, "",                               NULL       },
+   { KEY_3, BUTTON_3, true, "Repair Module",         UNSEL_COLOR, "",                               NULL       },
+   { KEY_4, BUTTON_4, true, "Enhanced Sensor",       UNSEL_COLOR, "",                               NULL       },
+   { KEY_5, BUTTON_5, true, "Cloak Field Modulator", UNSEL_COLOR, "",                               NULL       },
+   { KEY_6, BUTTON_6, true, "Armor",                 UNSEL_COLOR, "(makes ship harder to control)", HELP_COLOR },
+   { KEY_7, BUTTON_7, true, "Engineer",              UNSEL_COLOR, "",                               NULL       },
 };
 
 static const S32 moduleEngineerIndex = 6;
 
 static OverlayMenuItem loadoutWeaponMenuItems[] = {
-   { KEY_1, BUTTON_1, true, false, "Phaser",     "" },
-   { KEY_2, BUTTON_2, true, false, "Bouncer",    "" },
-   { KEY_3, BUTTON_3, true, false, "Triple",     "" },
-   { KEY_4, BUTTON_4, true, false, "Burster",    "" },
-   { KEY_5, BUTTON_5, true, false, "Mine Layer", "" },
-   { KEY_6, BUTTON_6, true, false, "Seeker",     "" },
-};
+   { KEY_1, BUTTON_1, true, "Phaser",     UNSEL_COLOR, "", NULL },
+   { KEY_2, BUTTON_2, true, "Bouncer",    UNSEL_COLOR, "", NULL },
+   { KEY_3, BUTTON_3, true, "Triple",     UNSEL_COLOR, "", NULL },
+   { KEY_4, BUTTON_4, true, "Burster",    UNSEL_COLOR, "", NULL },
+   { KEY_5, BUTTON_5, true, "Mine Layer", UNSEL_COLOR, "", NULL },
+   { KEY_6, BUTTON_6, true, "Seeker",     UNSEL_COLOR, "", NULL },
+};                                                  
 
+#undef UNSEL_COLOR
+#undef HELP_COLOR
 
 // must be synchronized with above... TODO: put this in an xmacro!
 static U8 moduleLookup[] = 
@@ -116,6 +94,7 @@ static U8 weaponLookup[] =
    WeaponMine,  
    WeaponSeeker
 };
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -145,10 +124,16 @@ void LoadoutHelper::onActivated()
 
    // Mark everything as unselected
    for(S32 i = 0; i < ARRAYSIZE(loadoutWeaponMenuItems); i++)
-      loadoutWeaponMenuItems[i].markAsSelected = false;
+   {
+      loadoutWeaponMenuItems[i].itemColor = &Colors::overlayMenuUnselectedItemColor;
+      loadoutWeaponMenuItems[i].helpColor = &Colors::overlayMenuHelpColor;
+   }
 
    for(S32 i = 0; i < ARRAYSIZE(loadoutModuleMenuItems); i++)
-      loadoutModuleMenuItems[i].markAsSelected = false;
+   {
+      loadoutModuleMenuItems[i].itemColor = &Colors::overlayMenuUnselectedItemColor;
+      loadoutModuleMenuItems[i].helpColor = &Colors::overlayMenuHelpColor;
+   }
 }
 
 
@@ -163,8 +148,8 @@ void LoadoutHelper::render()
 
 
    // Point list to either the weapon list or the module list, depending on mCurrentIndex
-   OverlayMenuItem *list = (mCurrentIndex < ShipModuleCount) ? loadoutModuleMenuItems            : loadoutWeaponMenuItems;
-   S32              len =  (mCurrentIndex < ShipModuleCount) ? ARRAYSIZE(loadoutModuleMenuItems) : ARRAYSIZE(loadoutWeaponMenuItems);
+   const OverlayMenuItem *list = (mCurrentIndex < ShipModuleCount) ?           loadoutModuleMenuItems  :           loadoutWeaponMenuItems;
+   S32                     len = (mCurrentIndex < ShipModuleCount) ? ARRAYSIZE(loadoutModuleMenuItems) : ARRAYSIZE(loadoutWeaponMenuItems);
 
    drawItemMenu(getLeftEdgeOfMenuPos(), MENU_TOP, title, list, len);
 }
@@ -178,8 +163,8 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       return true;
    
    U32 index;
-   OverlayMenuItem *list = (mCurrentIndex < ShipModuleCount) ? loadoutModuleMenuItems            : loadoutWeaponMenuItems;
-   U32              len =  (mCurrentIndex < ShipModuleCount) ? ARRAYSIZE(loadoutModuleMenuItems) : ARRAYSIZE(loadoutWeaponMenuItems);
+   OverlayMenuItem *list = (mCurrentIndex < ShipModuleCount) ?           loadoutModuleMenuItems :            loadoutWeaponMenuItems;
+   U32               len = (mCurrentIndex < ShipModuleCount) ? ARRAYSIZE(loadoutModuleMenuItems) : ARRAYSIZE(loadoutWeaponMenuItems);
 
    for(index = 0; index < len; index++)
       if(inputCode == list[index].key || inputCode == list[index].button)
@@ -204,7 +189,8 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    if(!alreadyUsed)
    {
-      list[index].markAsSelected = true;
+      list[index].itemColor = &Colors::overlayMenuSelectedItemColor;
+      list[index].helpColor = &Colors::overlayMenuSelectedItemColor;
       mModule[mCurrentIndex] = index;
       mCurrentIndex++;
    }

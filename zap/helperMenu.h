@@ -46,12 +46,13 @@ class HelperManager;
 struct OverlayMenuItem
 {
 public:
-   InputCode key;       // Keyboard key used to select in menu
-   InputCode button;    // Controller button used to select in menu
-   bool showOnMenu;     // Should this item actually be added to the menu?
-   bool markAsSelected; // Should this item be rendered in a special way to indicate it is selected?
-   const char *name;    // Name used on menu
-   const char *help;    // An additional bit of help text, also displayed on menu
+   InputCode key;             // Keyboard key used to select in menu
+   InputCode button;          // Controller button used to select in menu
+   bool showOnMenu;           // Should this item actually be added to the menu?
+   const char *name;          // Name used on menu
+   const Color *itemColor;
+   const char *help;          // An additional bit of help text, also displayed on menu
+   const Color *helpColor;    // Pointer to color with which to render the item
 };
 
 

@@ -811,8 +811,6 @@ void ClientGame::displayMessagef(const Color &msgColor, const char *format, ...)
 }
 
 
-extern Color gCmdChatColor;
-
 void ClientGame::gotAdminPermissionsReply(bool granted)
 {
    static const char *adminPassSuccessMsg = "You've been granted permission to manage players and change levels";
@@ -822,7 +820,7 @@ void ClientGame::gotAdminPermissionsReply(bool granted)
    if(getUIManager()->getCurrentUI()->getMenuID() == GameMenuUI)
       getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = granted ? adminPassSuccessMsg : adminPassFailureMsg;
    else
-      displayMessage(gCmdChatColor, granted ? adminPassSuccessMsg : adminPassFailureMsg);
+      displayMessage(Colors::cmdChatColor, granted ? adminPassSuccessMsg : adminPassFailureMsg);
 }
 
 
@@ -835,7 +833,7 @@ void ClientGame::gotLevelChangePermissionsReply(bool granted)
    if(getUIManager()->getCurrentUI()->getMenuID() == GameMenuUI)
       getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = granted ? levelPassSuccessMsg : levelPassFailureMsg;
    else
-      displayMessage(gCmdChatColor, granted ? levelPassSuccessMsg : levelPassFailureMsg);
+      displayMessage(Colors::cmdChatColor, granted ? levelPassSuccessMsg : levelPassFailureMsg);
 }
 
 void ClientGame::gotWrongPassword()
@@ -846,7 +844,7 @@ void ClientGame::gotWrongPassword()
    if(getUIManager()->getCurrentUI()->getMenuID() == GameMenuUI)
       getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = levelPassFailureMsg;
    else
-      displayMessage(gCmdChatColor, levelPassFailureMsg);
+      displayMessage(Colors::cmdChatColor, levelPassFailureMsg);
 }
 
 void ClientGame::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken)

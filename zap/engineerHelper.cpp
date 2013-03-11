@@ -40,25 +40,16 @@
 namespace Zap
 {
 
-
-//static OverlayMenuItem<EngineerBuildObjects> engineerItemInfo[] = {
-//      { EngineeredTurret,             KEY_1, BUTTON_1, true,  "Turret",          "", "Aim at a spot on a wall, and activate the module again." },
-//      { EngineeredForceField,         KEY_2, BUTTON_2, true,  "Force Field",     "", "Aim at a spot on a wall, and activate the module again." },
-//      { EngineeredTeleporterEntrance, KEY_3, BUTTON_3, true,  "Teleporter",      "", "Aim at a spot in open space, and activate the module again." },
-//      { EngineeredTeleporterExit,     KEY_4, BUTTON_4, false, "Teleporter Exit", "", "Aim at a spot in open space, and activate the module again." },
-//};
-
-
    // TODO: xmacroize to keep in sync
 
 static OverlayMenuItem engineerItemInfo[] = {
-   { KEY_1, BUTTON_1, true,  false, "Turret",          "" },
-   { KEY_2, BUTTON_2, true,  false, "Force Field",     "" },
-   { KEY_3, BUTTON_3, true,  false, "Teleporter",      "" },
-   { KEY_4, BUTTON_4, false, false, "Teleporter Exit", "" },
-};
-
-
+   { KEY_1, BUTTON_1, true,  "Turret",          &Colors::overlayMenuUnselectedItemColor, "", NULL },
+   { KEY_2, BUTTON_2, true,  "Force Field",     &Colors::overlayMenuUnselectedItemColor, "", NULL },
+   { KEY_3, BUTTON_3, true,  "Teleporter",      &Colors::overlayMenuUnselectedItemColor, "", NULL },
+   { KEY_4, BUTTON_4, false, "Teleporter Exit", &Colors::overlayMenuUnselectedItemColor, "", NULL },
+};                                                         
+                                                           
+                                                           
 static const char *engineerInstructions[] = {
    "Aim at a spot on a wall, and activate the module again.",
    "Aim at a spot on a wall, and activate the module again.",

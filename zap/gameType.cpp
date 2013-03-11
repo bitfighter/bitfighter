@@ -3694,10 +3694,6 @@ void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderCl
 }
 
 
-extern Color gGlobalChatColor;
-extern Color gTeamChatColor;
-
-
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 1)
 {
 #ifndef ZAP_DEDICATED
@@ -3744,7 +3740,7 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
    if(clientGame->isOnMuteList(clientName.getString()))
       return;
 
-   Color *color = global ? &gGlobalChatColor : &gTeamChatColor;
+   const Color *color = global ? &Colors::globalChatColor : &Colors::teamChatColor;
    clientGame->getUIManager()->getGameUserInterface()->onChatMessageReceived(*color, "%s: %s", clientName.getString(), message.getString());
 #endif
 }

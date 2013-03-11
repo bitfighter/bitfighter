@@ -319,9 +319,6 @@ public:
    Move *getCurrentMove();
    Timer mProgressBarFadeTimer;     // For fading out progress bar after level is loaded
    bool mShowProgressBar;
-
-   // Message colors... (rest to follow someday)
-   static Color privateF5MessageDisplayedInGameColor;
 };
 
 

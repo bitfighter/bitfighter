@@ -85,6 +85,17 @@ namespace Colors
    const Color idlePlayerScoreboardColor(gray50);
    const Color standardPlayerScoreboardColor(white);
 
+   const Color overlayMenuSelectedItemColor   = Color(1.0f, 0.1f, 0.1f);
+   const Color overlayMenuUnselectedItemColor = Color(0.1f, 1.0f, 0.1f);
+   const Color overlayMenuHelpColor           = Color(.2, .8, .8);
+
+   // Chat colors
+   const Color globalChatColor(0.9, 0.9, 0.9);
+   const Color teamChatColor(Colors::green);
+   const Color cmdChatColor(Colors::red);
+   const Color privateF5MessageDisplayedInGameColor(Colors::blue);
+
+
    // Specialties
    const Color gold(.85f, .85f, .10f);
    const Color silver(.90f, .91f, .98f);

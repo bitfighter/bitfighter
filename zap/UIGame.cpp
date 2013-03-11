@@ -75,14 +75,6 @@
 namespace Zap
 {
 
-//GameUserInterface mGameUserInterface;
-
-// TODO: Make these static like privateF5MessageDisplayedInGameColor!
-Color gGlobalChatColor(0.9, 0.9, 0.9);
-Color gTeamChatColor(Colors::green);
-extern Color gCmdChatColor;
-
-
 // Sizes and other things to help with positioning
 static const S32 SRV_MSG_FONT_SIZE = 14;
 static const S32 SRV_MSG_FONT_GAP = 4;
@@ -90,9 +82,6 @@ static const S32 CHAT_FONT_SIZE = 12;
 static const S32 CHAT_FONT_GAP = 3;
 static const S32 CHAT_WRAP_WIDTH = 700;            // Max width of chat messages displayed in-game
 static const S32 SRV_MSG_WRAP_WIDTH = 750;
-
-
-Color GameUserInterface::privateF5MessageDisplayedInGameColor(Colors::blue);
 
 
 // Constructor
@@ -234,7 +223,7 @@ void GameUserInterface::displayErrorMessage(const char *format, ...)
    vsnprintf(stringBuffer, sizeof(stringBuffer), format, args);
    va_end(args);
 
-   displayMessage(gCmdChatColor, stringBuffer);
+   displayMessage(Colors::cmdChatColor, stringBuffer);
 }
 
 

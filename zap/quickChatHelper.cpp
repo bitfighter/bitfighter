@@ -54,8 +54,6 @@ QuickChatHelper::QuickChatHelper()
 HelperMenu::HelperMenuType QuickChatHelper::getType() { return QuickChatHelperType; }
 
 
-extern Color gGlobalChatColor;
-extern Color gTeamChatColor;
 extern Color gErrorMessageTextColor;
 
 
@@ -98,10 +96,10 @@ void QuickChatHelper::render()
          OverlayMenuItem item;
          item.button = gQuickChatTree[walk].buttonCode;
          item.key    = gQuickChatTree[walk].inputCode;
-         item.markAsSelected = false;
          item.showOnMenu = true;
          item.name = gQuickChatTree[walk].caption.c_str();
          item.help = "";
+         item.itemColor = gQuickChatTree[walk].teamOnly ? &Colors::teamChatColor : &Colors::globalChatColor;
 
          items.push_back(item);
       }

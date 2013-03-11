@@ -126,39 +126,36 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const Overl
       // Don't show an option that shouldn't be shown!
       if(!items[i].showOnMenu)
          continue;
-
+      
       // Draw key controls for selecting the object to be created
       U32 joystickIndex = Joystick::SelectedPresetIndex;
 
       if(inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
-         JoystickRender::renderControllerButton(F32(xPos + (showKeys ? 0 : 20)), (F32)yPos, 
+         JoystickRender::renderControllerButton(F32(xPos + (showKeys ? 5 : 25)), (F32)yPos, 
                                                 joystickIndex, items[i].button, false);
 
       if(showKeys)
       {
          glColor(Colors::white);             // Render key in white
-         JoystickRender::renderControllerButton((F32)xPos + 20, (F32)yPos, 
+         JoystickRender::renderControllerButton((F32)xPos + 30, (F32)yPos, 
                                                 joystickIndex, items[i].key, false);
       }
 
-      if(items[i].markAsSelected)
-         glColor(1.0, 0.1f, 0.1f);      // Color of already selected item
-      else
-         glColor(0.1f, 1.0, 0.1f);      // Color of not-yet selected item
-
+      glColor(items[i].itemColor);  
 
       S32 x = drawStringAndGetWidth(xPos + 50, yPos, MENU_FONT_SIZE, items[i].name); 
 
-      // Render help string.  Highlight it if the item is not selected
-      if(!items[i].markAsSelected)
-         glColor(.2, .8, .8);    
-
-      drawString(xPos + x, yPos, MENU_FONT_SIZE, items[i].help);
+      // Render help string, if one is available
+      if(items[i].help)
+      {
+         glColor(items[i].helpColor);    
+         drawString(xPos + 50 + 5 + x, yPos, MENU_FONT_SIZE, items[i].help);
+      }
 
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
    }
 
-   yPos += MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
+   yPos += 2 * MENU_PADDING;
 
    drawMenuCancelText(xPos, yPos, baseColor, MENU_FONT_SIZE);
 }
