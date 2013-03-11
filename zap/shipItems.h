@@ -41,7 +41,7 @@ namespace Zap
 //   Drain gets multiplied by milliseconds
 //               enum           name,     drain, cost,       type,               has2,   2cost,  menu name,             menu help text (renders in cyan)
 #define MODULE_ITEM_TABLE \
-   MODULE_ITEM(ModuleShield,  "Shield",      33,     0, ModulePrimaryUseActive,  false,     0, "Shield Generator",      ""                              ) \
+   MODULE_ITEM(ModuleShield,  "Shield",      40,     0, ModulePrimaryUseActive,  false,     0, "Shield Generator",      ""                              ) \
    MODULE_ITEM(ModuleBoost,   "Turbo",       21,     0, ModulePrimaryUseActive,  true,      0, "Turbo Boost",           ""                              ) \
    MODULE_ITEM(ModuleSensor,  "Sensor",       0, 35000, ModulePrimaryUseHybrid,  false,     0, "Enhanced Sensor",       ""                              ) \
    MODULE_ITEM(ModuleRepair,  "Repair",      21,     0, ModulePrimaryUseActive,  false,     0, "Repair Module",         ""                              ) \
