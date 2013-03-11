@@ -23,7 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "quickChatHelper.h"
+#include "quickChatHelper.h"     
+
 #include "UIGame.h"
 #include "gameType.h"
 #include "gameObjectRender.h"
@@ -63,21 +64,21 @@ extern Color gErrorMessageTextColor;
 // in remaining in QuickChat mode, is there?
 void QuickChatHelper::render()
 {
-   S32 xPos = getLeftEdgeOfMenuPos();
    S32 yPos = MENU_TOP;
-   const S32 fontSize = 15;
-
-   GameSettings *settings = getGame()->getSettings();
 
    if(!gQuickChatTree.size())
    {
       glColor(gErrorMessageTextColor);
-      drawCenteredString(yPos, fontSize, "Quick Chat messages improperly configured.  Please see bitfighter.ini.");
+      drawCenteredString(yPos, MENU_FONT_SIZE, "Quick Chat messages improperly configured.  Please see bitfighter.ini.");
       return;
    }
 
-   Vector<QuickChatNode> renderNodes;
-   InputMode inputMode = settings->getInputCodeManager()->getInputMode();
+
+   Vector<OverlayMenuItem> items;
+
+   GameSettings *settings = getGame()->getSettings();
+
+   InputMode inputMode   = settings->getInputCodeManager()->getInputMode();
    bool showKeyboardKeys = settings->getIniSettings()->showKeyboardKeys;
 
    S32 walk = mCurNode;
@@ -93,70 +94,91 @@ void QuickChatHelper::render()
    {     // When we're using a controller, don't present options with no defined controller key
       if(gQuickChatTree[walk].depth == matchLevel && ( (inputMode == InputModeKeyboard) || showKeyboardKeys || 
                                                        (gQuickChatTree[walk].buttonCode != KEY_UNKNOWN) ))
-         renderNodes.push_back(gQuickChatTree[walk]);
+      {
+         OverlayMenuItem item;
+         item.button = gQuickChatTree[walk].buttonCode;
+         item.key    = gQuickChatTree[walk].inputCode;
+         item.markAsSelected = false;
+         item.showOnMenu = true;
+         item.name = gQuickChatTree[walk].caption.c_str();
+         item.help = "";
+
+         items.push_back(item);
+      }
       walk--;
    }
 
-   const S32 indent = 20;
-   const Color quickChatMenuHeaderColor(Colors::red);
-
-   drawMenuBorderLine(xPos, yPos, quickChatMenuHeaderColor);
-
-   glColor(quickChatMenuHeaderColor);
-   drawString(xPos, yPos, fontSize, "QuickChat menu");
-   yPos += fontSize + 10;
-
-   if(!renderNodes.size())    // Nothing to render, let's go home
+   if(items.size() == 0)    // Nothing to render, let's go home
    {
       glColor(Colors::red); 
-      drawString(xPos, yPos, fontSize, "No messages here (misconfiguration?)");
-      yPos += fontSize + 7;
+      drawString(getLeftEdgeOfMenuPos(), yPos, MENU_FONT_SIZE, "No messages here (misconfiguration?)");
+      yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
    }
    else
-   {
-      bool showKeys = showKeyboardKeys || (inputMode == InputModeKeyboard);
+      drawItemMenu(getLeftEdgeOfMenuPos(), yPos, "QuickChat menu", &items[0], items.size());
 
-      S32 xPosBase = xPos + (showKeys ? 0 : indent);
-      S32 messageIndent = (matchLevel == 1) ? indent : 0;    // No indenting on submenus
 
-      for(S32 i = 0; i < renderNodes.size(); i++)
-      {
-         S32 textPos = xPosBase + (renderNodes[i].isMsgItem ? messageIndent : 0);
 
-         // Draw key controls for selecting quick chat items
-         if(inputMode == InputModeJoystick && renderNodes[i].buttonCode != KEY_UNKNOWN)     // Only draw joystick buttons when in joystick mode
-            JoystickRender::renderControllerButton((F32)textPos, (F32)yPos, 
-                                                   Joystick::SelectedPresetIndex, renderNodes[i].buttonCode, false);
+   //const S32 indent = 20;
+   //const Color quickChatMenuHeaderColor(Colors::red);
 
-         Color color = renderNodes[i].teamOnly ? gTeamChatColor : gGlobalChatColor;
-         if(showKeys)
-         {
-            glColor(color);
-            JoystickRender::renderControllerButton(F32(textPos + indent + 10), (F32)yPos, 
-                                                   Joystick::SelectedPresetIndex, renderNodes[i].inputCode, false);
-         }
+   //drawMenuBorderLine(xPos, yPos, quickChatMenuHeaderColor);
+
+   //glColor(quickChatMenuHeaderColor);
+   //drawString(xPos, yPos, fontSize, "QuickChat menu");
+   //yPos += fontSize + 10;
+
+   //if(!renderNodes.size())    // Nothing to render, let's go home
+   //{
+   //   glColor(Colors::red); 
+   //   drawString(xPos, yPos, fontSize, "No messages here (misconfiguration?)");
+   //   yPos += fontSize + 7;
+   //}
+   //else
+   //{
+   //   bool showKeys = showKeyboardKeys || (inputMode == InputModeKeyboard);
+
+   //   S32 xPosBase = xPos + (showKeys ? 0 : indent);
+   //   S32 messageIndent = (matchLevel == 1) ? indent : 0;    // No indenting on submenus
+
+   //   for(S32 i = 0; i < renderNodes.size(); i++)
+   //   {
+   //      S32 textPos = xPosBase + (renderNodes[i].isMsgItem ? messageIndent : 0);
+
+   //      // Draw key controls for selecting quick chat items
+   //      if(inputMode == InputModeJoystick && renderNodes[i].buttonCode != KEY_UNKNOWN)     // Only draw joystick buttons when in joystick mode
+   //         JoystickRender::renderControllerButton((F32)textPos, (F32)yPos, 
+   //                                                Joystick::SelectedPresetIndex, renderNodes[i].buttonCode, false);
+
+   //      Color color = renderNodes[i].teamOnly ? gTeamChatColor : gGlobalChatColor;
+   //      if(showKeys)
+   //      {
+   //         glColor(color);
+   //         JoystickRender::renderControllerButton(F32(textPos + indent + 10), (F32)yPos, 
+   //                                                Joystick::SelectedPresetIndex, renderNodes[i].inputCode, false);
+   //      }
  
-         glColor(color);
-         drawString(xPos + 50 + (renderNodes[i].isMsgItem ? messageIndent : 0), yPos, fontSize, renderNodes[i].caption.c_str());
-         yPos += fontSize + 7;
-      }
-   }
+   //      glColor(color);
+   //      drawString(xPos + 50 + (renderNodes[i].isMsgItem ? messageIndent : 0), yPos, fontSize, renderNodes[i].caption.c_str());
+   //      yPos += fontSize + 7;
+   //   }
+   //}
 
-   const S32 fontSizeSm = fontSize - 4;
+   //const S32 fontSizeSm = fontSize - 4;
 
-   glColor(gTeamChatColor);
-   drawString(xPos + indent, yPos, fontSizeSm, "Team Message");
-   glColor(gGlobalChatColor);
-   drawString(xPos + indent + S32(getStringWidth(fontSizeSm, "Team Message ")), yPos, fontSizeSm, "Global Message");
+   //glColor(gTeamChatColor);
+   //drawString(xPos + indent, yPos, fontSizeSm, "Team Message");
+   //glColor(gGlobalChatColor);
+   //drawString(xPos + indent + S32(getStringWidth(fontSizeSm, "Team Message ")), yPos, fontSizeSm, "Global Message");
 
-   yPos += 12;
+   //yPos += 12;
 
-   // Add some help text
-   drawMenuBorderLine(xPos, yPos - fontSize - 2, quickChatMenuHeaderColor);
-   yPos += 8;
-   drawMenuCancelText(xPos, yPos, quickChatMenuHeaderColor, fontSize);
+   //// Add some help text
+   //drawMenuBorderLine(xPos, yPos - fontSize - 2, quickChatMenuHeaderColor);
+   //yPos += 8;
+   //drawMenuCancelText(xPos, yPos, quickChatMenuHeaderColor, fontSize);
 
-   return;
+   //return;
 }
 
 

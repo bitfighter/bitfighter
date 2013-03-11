@@ -27,9 +27,9 @@
 #define _LOADOUTSELECT_H_
 
 #include "helperMenu.h"
+#include "ship.h"
 
 using namespace TNL;
-#include "ship.h"
 
 
 namespace Zap
