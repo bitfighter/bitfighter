@@ -64,12 +64,15 @@ private:
    U32 mWeapon[ShipWeaponCount];   // Weapons selected by user -- 3
    S32 mCurrentIndex;
 
+   Vector<OverlayMenuItem> mMenuOptions;
+   bool mEngineerEnabled;
+
    const char *getCancelMessage();
    InputCode getActivationKey();
 
 public:
    explicit LoadoutHelper();                 // Constructor
-   void pregameSetup(bool includeEngineer);  // Set things up
+   void pregameSetup(bool engineerEnabled);  // Set things up
    HelperMenu::HelperMenuType getType();
 
    void render();                

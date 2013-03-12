@@ -42,14 +42,11 @@
 namespace Zap
 {
 
-// May need to make these a class object in future if we ever do true multiplayer within one client... we could have
-// conflicts if two players try to change loadouts at the same time.
-
 // For clarity
 #define UNSEL_COLOR &Colors::overlayMenuUnselectedItemColor
 #define HELP_COLOR  &Colors::overlayMenuHelpColor
 
-static OverlayMenuItem loadoutModuleMenuItems[] = {
+static const OverlayMenuItem loadoutModuleMenuItems[] = {
    { KEY_1, BUTTON_1, true, "Turbo Boost",           UNSEL_COLOR, "",                               NULL       },
    { KEY_2, BUTTON_2, true, "Shield Generator",      UNSEL_COLOR, "",                               NULL       },
    { KEY_3, BUTTON_3, true, "Repair Module",         UNSEL_COLOR, "",                               NULL       },
@@ -61,7 +58,7 @@ static OverlayMenuItem loadoutModuleMenuItems[] = {
 
 static const S32 moduleEngineerIndex = 6;
 
-static OverlayMenuItem loadoutWeaponMenuItems[] = {
+static const OverlayMenuItem loadoutWeaponMenuItems[] = {
    { KEY_1, BUTTON_1, true, "Phaser",     UNSEL_COLOR, "", NULL },
    { KEY_2, BUTTON_2, true, "Bouncer",    UNSEL_COLOR, "", NULL },
    { KEY_3, BUTTON_3, true, "Triple",     UNSEL_COLOR, "", NULL },
@@ -110,9 +107,9 @@ HelperMenu::HelperMenuType LoadoutHelper::getType() { return LoadoutHelperType; 
 
 
 // Gets called at the beginning of every game; available options may change based on level
-void LoadoutHelper::pregameSetup(bool includeEngineer)
+void LoadoutHelper::pregameSetup(bool engineerEnabled)
 {
-   loadoutModuleMenuItems[moduleEngineerIndex].showOnMenu = includeEngineer;
+   mEngineerEnabled = engineerEnabled;
 }
 
 
@@ -121,19 +118,9 @@ void LoadoutHelper::onActivated()
    Parent::onActivated();
 
    mCurrentIndex = 0;
-
-   // Mark everything as unselected
-   for(S32 i = 0; i < ARRAYSIZE(loadoutWeaponMenuItems); i++)
-   {
-      loadoutWeaponMenuItems[i].itemColor = &Colors::overlayMenuUnselectedItemColor;
-      loadoutWeaponMenuItems[i].helpColor = &Colors::overlayMenuHelpColor;
-   }
-
-   for(S32 i = 0; i < ARRAYSIZE(loadoutModuleMenuItems); i++)
-   {
-      loadoutModuleMenuItems[i].itemColor = &Colors::overlayMenuUnselectedItemColor;
-      loadoutModuleMenuItems[i].helpColor = &Colors::overlayMenuHelpColor;
-   }
+   
+   mMenuOptions = Vector<OverlayMenuItem>(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems));
+   mMenuOptions[moduleEngineerIndex].showOnMenu = mEngineerEnabled;     // Can't delete this or other arrays will become unaligned
 }
 
 
@@ -146,12 +133,7 @@ void LoadoutHelper::render()
    else
       dSprintf(title, sizeof(title), "Pick %d weapons for your ship:",       ShipWeaponCount);
 
-
-   // Point list to either the weapon list or the module list, depending on mCurrentIndex
-   const OverlayMenuItem *list = (mCurrentIndex < ShipModuleCount) ?           loadoutModuleMenuItems  :           loadoutWeaponMenuItems;
-   S32                     len = (mCurrentIndex < ShipModuleCount) ? ARRAYSIZE(loadoutModuleMenuItems) : ARRAYSIZE(loadoutWeaponMenuItems);
-
-   drawItemMenu(getLeftEdgeOfMenuPos(), MENU_TOP, title, list, len);
+   drawItemMenu(getLeftEdgeOfMenuPos(), MENU_TOP, title, &mMenuOptions[0], mMenuOptions.size());
 }
 
 
@@ -162,15 +144,13 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
    if(Parent::processInputCode(inputCode))    // Check for cancel keys
       return true;
    
-   U32 index;
-   OverlayMenuItem *list = (mCurrentIndex < ShipModuleCount) ?           loadoutModuleMenuItems :            loadoutWeaponMenuItems;
-   U32               len = (mCurrentIndex < ShipModuleCount) ? ARRAYSIZE(loadoutModuleMenuItems) : ARRAYSIZE(loadoutWeaponMenuItems);
+   S32 index;
 
-   for(index = 0; index < len; index++)
-      if(inputCode == list[index].key || inputCode == list[index].button)
+   for(index = 0; index < mMenuOptions.size(); index++)
+      if(inputCode == mMenuOptions[index].key || inputCode == mMenuOptions[index].button)
          break;
 
-   if(!list[index].showOnMenu)
+   if(!mMenuOptions[index].showOnMenu)
       return false;
 
    // Make sure user doesn't select the same loadout item twice
@@ -189,10 +169,14 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    if(!alreadyUsed)
    {
-      list[index].itemColor = &Colors::overlayMenuSelectedItemColor;
-      list[index].helpColor = &Colors::overlayMenuSelectedItemColor;
+      mMenuOptions[index].itemColor = &Colors::overlayMenuSelectedItemColor;
+      mMenuOptions[index].helpColor = &Colors::overlayMenuSelectedItemColor;
       mModule[mCurrentIndex] = index;
       mCurrentIndex++;
+
+      // Check if we need to switch over to weapons
+      if(mCurrentIndex == ShipModuleCount)
+         mMenuOptions = Vector<OverlayMenuItem>(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems));
    }
 
    if(mCurrentIndex == ShipModuleCount + ShipWeaponCount)     // All loadout options selected, process complete
