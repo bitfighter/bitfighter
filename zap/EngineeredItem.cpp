@@ -1545,6 +1545,56 @@ S32 ForceFieldProjector::lua_getLoc(lua_State *L)
 }
 
 
+S32 ForceFieldProjector::lua_setLoc(lua_State *L)
+{
+   // TODO
+   return Parent::lua_setLoc(L);
+}
+
+
+S32 ForceFieldProjector::lua_removeFromGame(lua_State *L)
+{
+   // Remove field
+   onDisabled();
+
+   return Parent::lua_removeFromGame(L);
+}
+
+
+S32 ForceFieldProjector::lua_setTeam(lua_State *L)
+{
+   // Save old team
+   S32 prevTeam = getTeam();
+
+   // Change to new team
+   Parent::lua_setTeam(L);
+
+   // We need to set the mOriginalTeam team as the just-set team because of conflicts with
+   // projector-disabled logic due to the fact that they can start as neutral
+   mOriginalTeam = getTeam();
+
+   // Only re-add a forcefield if the team has changed and if it isn't disabled
+   //
+   // We're duplicating a lot of logic in the onEnabled() method because calling onEnabled()
+   // doesn't seem to work right after calling onDisabled().  Probably because of slow deletion?
+   if(mOriginalTeam != prevTeam && isEnabled())
+   {
+      onDisabled();
+
+      Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
+      Point end;
+      DatabaseObject *collObj;
+
+      ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+
+      mField = new ForceField(getTeam(), start, end);
+      mField->addToGame(getGame(), getGame()->getGameObjDatabase());
+   }
+
+   return 0;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 

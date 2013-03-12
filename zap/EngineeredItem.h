@@ -303,6 +303,9 @@ public:
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_getLoc(lua_State *L);
+   S32 lua_setLoc(lua_State *L);
+   S32 lua_setTeam(lua_State *L);
+   S32 lua_removeFromGame(lua_State *L);
 };
 
 
