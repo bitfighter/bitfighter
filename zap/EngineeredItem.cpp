@@ -766,7 +766,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
       {
          ClientInfo *player = di->damagingObject->getOwner();
 
-         if(isTurret())
+         if(mObjectTypeNumber == TurretTypeNumber)
          {
             GameType *gt = getGame()->getGameType();
 
@@ -777,8 +777,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
 
             player->getStatistics()->mTurretsKilled++;
          }
-         // Currently isTurret is true for turrets, and false for ffs.  There are no other engineered objects
-         else if(!isTurret())
+         else if(mObjectTypeNumber == ForceFieldProjectorTypeNumber)
             player->getStatistics()->mFFsKilled++;
       }
    }
@@ -856,12 +855,6 @@ void EngineeredItem::onDisabled()
 void EngineeredItem::onEnabled()
 {
    // Do nothing
-}
-
-
-bool EngineeredItem::isTurret()
-{
-   return false;
 }
 
 
@@ -1959,12 +1952,6 @@ void Turret::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
    mCurrentAngle = mAnchorNormal.ATAN2();
-}
-
-
-bool Turret::isTurret()
-{
-   return true;
 }
 
 

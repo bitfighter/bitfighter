@@ -94,7 +94,6 @@ public:
    virtual void onDestroyed();
    virtual void onDisabled();
    virtual void onEnabled();
-   virtual bool isTurret();
 
    virtual Vector<Point> getObjectGeometry(const Point &anchor, const Point &normal) const;
 
@@ -355,7 +354,6 @@ public:
    void render();
    void idle(IdleCallPath path);
    void onAddedToGame(Game *theGame);
-   bool isTurret();
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

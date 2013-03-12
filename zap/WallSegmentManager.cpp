@@ -120,7 +120,7 @@ void WallSegmentManager::finishedChangingWalls(GridDatabase *editorObjectDatabas
          engrItem->mountToWall(engrItem->getVert(0), editorObjectDatabase->getWallSegmentManager());
 
       // Calculate where all ffs land -- no telling if the segment we moved is or was interfering in its path
-      if(!engrItem->isTurret())
+      if(engrItem->getObjectTypeNumber() == ForceFieldProjectorTypeNumber)
       {
          ForceFieldProjector *ffp = static_cast<ForceFieldProjector *>(engrItem);
          ffp->findForceFieldEnd();
