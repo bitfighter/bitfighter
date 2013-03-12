@@ -146,7 +146,7 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const Overl
       S32 x = drawStringAndGetWidth(xPos + 50, yPos, MENU_FONT_SIZE, items[i].name); 
 
       // Render help string, if one is available
-      if(items[i].help)
+      if(strcmp(items[i].help, "") != 0)
       {
          glColor(items[i].helpColor);    
          drawString(xPos + 50 + 5 + x, yPos, MENU_FONT_SIZE, items[i].help);
