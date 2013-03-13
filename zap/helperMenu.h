@@ -91,7 +91,6 @@ protected:
                      const char **legendText = NULL, const Color **legendColors = NULL, S32 legendCount = 0);
 
    void drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color);
-   void drawMenuCancelText(S32 xPos, S32 yPos, const Color &color, S32 fontSize);
 
    ClientGame *getGame();
 

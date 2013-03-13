@@ -173,7 +173,22 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const Overl
 
    yPos += 2 * MENU_PADDING;
 
-   drawMenuCancelText(xPos, yPos, baseColor, MENU_FONT_SIZE);
+   glColor(baseColor);
+
+   // RenderedSize will be -1 if the button is not defined
+   if(settings->getInputCodeManager()->getInputMode() == InputModeKeyboard)
+      drawStringf(xPos, yPos, MENU_LEGEND_FONT_SIZE, 
+                  "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
+   else
+   {
+      S32 butSize = JoystickRender::getControllerButtonRenderedSize(Joystick::SelectedPresetIndex, BUTTON_BACK);
+
+      xPos += drawStringAndGetWidth(xPos, yPos, MENU_LEGEND_FONT_SIZE, "Press ") + 4;
+      JoystickRender::renderControllerButton(F32(xPos + 4), F32(yPos), Joystick::SelectedPresetIndex, BUTTON_BACK, false);
+      xPos += butSize;
+      glColor(baseColor);
+      drawString(xPos, yPos, MENU_LEGEND_FONT_SIZE, "to cancel");
+   }
 }
 
 
@@ -191,30 +206,6 @@ void HelperMenu::drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color)
    };
 
    renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
-}
-
-
-void HelperMenu::drawMenuCancelText(S32 xPos, S32 yPos, const Color &color, S32 fontSize)
-{
-   S32 butSize = JoystickRender::getControllerButtonRenderedSize(Joystick::SelectedPresetIndex, BUTTON_BACK);
-   const S32 fontSizeSm = fontSize - 4;
-
-   glColor(color);
-
-   GameSettings *settings = getGame()->getSettings();
-
-   // RenderedSize will be -1 if the button is not defined
-   if(settings->getInputCodeManager()->getInputMode() == InputModeKeyboard || butSize == -1)
-      drawStringf(xPos, yPos, fontSizeSm, 
-                  "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
-   else
-   {
-      xPos += drawStringAndGetWidth(xPos, yPos, fontSizeSm, "Press ") + 4;
-      JoystickRender::renderControllerButton(F32(xPos + 4), F32(yPos), Joystick::SelectedPresetIndex, BUTTON_BACK, false);
-      xPos += butSize;
-      glColor(color);
-      drawString( xPos, yPos, fontSizeSm, "to cancel");
-   }
 }
 
 
