@@ -64,7 +64,7 @@ private:
    U32 mWeapon[ShipWeaponCount];   // Weapons selected by user -- 3
    S32 mCurrentIndex;
 
-   Vector<OverlayMenuItem> mMenuOptions;
+   Vector<OverlayMenuItem> mMenuItems;
    bool mEngineerEnabled;
 
    const char *getCancelMessage();

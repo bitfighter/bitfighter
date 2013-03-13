@@ -45,14 +45,15 @@ namespace Zap
 
 Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file
 
-static const const char *quickChatLegendText[]   = { "Team Message ",        "Global Message"         };
-static const Color      *quickChatLegendColors[] = { &Colors::teamChatColor, &Colors::globalChatColor };
+static const char  *quickChatLegendText[]   = { "Team Message ",        "Global Message"         };
+static const Color *quickChatLegendColors[] = { &Colors::teamChatColor, &Colors::globalChatColor };
 
 
 QuickChatHelper::QuickChatHelper()
 {
    mCurNode = 0;
 }
+
 
 HelperMenu::HelperMenuType QuickChatHelper::getType() { return QuickChatHelperType; }
 
@@ -74,17 +75,41 @@ void QuickChatHelper::render()
       return;
    }
 
+   if(mMenuItems.size() == 0)    // Nothing to render, let's go home
+   {
+      glColor(Colors::red); 
+      drawString(getLeftEdgeOfMenuPos(), yPos, MENU_FONT_SIZE, "No messages here (misconfiguration?)");
+      yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
+   }
+   else
+      drawItemMenu(getLeftEdgeOfMenuPos(), yPos, "QuickChat menu", &mMenuItems[0], mMenuItems.size(), 
+                   quickChatLegendText, quickChatLegendColors, ARRAYSIZE(quickChatLegendText));
+}
 
-   Vector<OverlayMenuItem> items;
+
+void QuickChatHelper::onActivated()
+{
+   Parent::onActivated();
+
+   updateChatMenuItems(0);
+}
+
+
+void QuickChatHelper::updateChatMenuItems(S32 curNode)
+{
+   mCurNode = curNode;
+
+   S32 walk = mCurNode;
+   U32 matchLevel = gQuickChatTree[walk].depth + 1;
+   walk++;
+
+   mMenuItems.clear();
 
    GameSettings *settings = getGame()->getSettings();
 
    InputMode inputMode   = settings->getInputCodeManager()->getInputMode();
    bool showKeyboardKeys = settings->getIniSettings()->showKeyboardKeys;
 
-   S32 walk = mCurNode;
-   U32 matchLevel = gQuickChatTree[walk].depth + 1;
-   walk++;
 
    // First get to the end...
    while(gQuickChatTree[walk].depth >= matchLevel)
@@ -92,7 +117,8 @@ void QuickChatHelper::render()
 
    // Then draw bottom up...
    while(walk != mCurNode)
-   {     // When we're using a controller, don't present options with no defined controller key
+   {  
+      // When we're using a controller, don't present options with no defined controller key
       if(gQuickChatTree[walk].depth == matchLevel && ( (inputMode == InputModeKeyboard) || showKeyboardKeys || 
                                                        (gQuickChatTree[walk].buttonCode != KEY_UNKNOWN) ))
       {
@@ -104,28 +130,10 @@ void QuickChatHelper::render()
          item.help = "";
          item.itemColor = gQuickChatTree[walk].teamOnly ? &Colors::teamChatColor : &Colors::globalChatColor;
 
-         items.push_back(item);
+         mMenuItems.push_back(item);
       }
       walk--;
    }
-
-   if(items.size() == 0)    // Nothing to render, let's go home
-   {
-      glColor(Colors::red); 
-      drawString(getLeftEdgeOfMenuPos(), yPos, MENU_FONT_SIZE, "No messages here (misconfiguration?)");
-      yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
-   }
-   else
-      drawItemMenu(getLeftEdgeOfMenuPos(), yPos, "QuickChat menu", &items[0], items.size(), 
-                   quickChatLegendText, quickChatLegendColors, ARRAYSIZE(quickChatLegendText));
-}
-
-
-void QuickChatHelper::onActivated()
-{
-   Parent::onActivated();
-
-   mCurNode = 0;
 }
 
 
@@ -154,7 +162,7 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
       if(match && gQuickChatTree[walk].depth == matchLevel)
       {
          // ...then select it
-         mCurNode = walk;
+         updateChatMenuItems(walk);
 
          UserInterface::playBoop();
 

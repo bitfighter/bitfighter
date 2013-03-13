@@ -61,7 +61,9 @@ class QuickChatHelper : public HelperMenu
 
 private:
    S32 mCurNode;
-   //virtual InputCode getActivationKey() { return keyQUICKCHAT[getGame()->getSettings()->getIniSettings()->inputMode]; } <=== don't supply a keycode to avoid canceling when pressed
+   Vector<OverlayMenuItem> mMenuItems;
+
+   void updateChatMenuItems(S32 curNode);
 
 public:
    explicit QuickChatHelper();      // Constructor

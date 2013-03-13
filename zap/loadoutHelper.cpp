@@ -119,8 +119,8 @@ void LoadoutHelper::onActivated()
 
    mCurrentIndex = 0;
    
-   mMenuOptions = Vector<OverlayMenuItem>(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems));
-   mMenuOptions[moduleEngineerIndex].showOnMenu = mEngineerEnabled;     // Can't delete this or other arrays will become unaligned
+   mMenuItems = Vector<OverlayMenuItem>(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems));
+   mMenuItems[moduleEngineerIndex].showOnMenu = mEngineerEnabled;     // Can't delete this or other arrays will become unaligned
 }
 
 
@@ -133,7 +133,7 @@ void LoadoutHelper::render()
    else
       dSprintf(title, sizeof(title), "Pick %d weapons for your ship:",       ShipWeaponCount);
 
-   drawItemMenu(getLeftEdgeOfMenuPos(), MENU_TOP, title, &mMenuOptions[0], mMenuOptions.size());
+   drawItemMenu(getLeftEdgeOfMenuPos(), MENU_TOP, title, &mMenuItems[0], mMenuItems.size());
 }
 
 
@@ -146,11 +146,11 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
    
    S32 index;
 
-   for(index = 0; index < mMenuOptions.size(); index++)
-      if(inputCode == mMenuOptions[index].key || inputCode == mMenuOptions[index].button)
+   for(index = 0; index < mMenuItems.size(); index++)
+      if(inputCode == mMenuItems[index].key || inputCode == mMenuItems[index].button)
          break;
 
-   if(!mMenuOptions[index].showOnMenu)
+   if(!mMenuItems[index].showOnMenu)
       return false;
 
    // Make sure user doesn't select the same loadout item twice
@@ -169,14 +169,14 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    if(!alreadyUsed)
    {
-      mMenuOptions[index].itemColor = &Colors::overlayMenuSelectedItemColor;
-      mMenuOptions[index].helpColor = &Colors::overlayMenuSelectedItemColor;
+      mMenuItems[index].itemColor = &Colors::overlayMenuSelectedItemColor;
+      mMenuItems[index].helpColor = &Colors::overlayMenuSelectedItemColor;
       mModule[mCurrentIndex] = index;
       mCurrentIndex++;
 
       // Check if we need to switch over to weapons
       if(mCurrentIndex == ShipModuleCount)
-         mMenuOptions = Vector<OverlayMenuItem>(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems));
+         mMenuItems = Vector<OverlayMenuItem>(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems));
    }
 
    if(mCurrentIndex == ShipModuleCount + ShipWeaponCount)     // All loadout options selected, process complete
