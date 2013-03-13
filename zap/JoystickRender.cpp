@@ -183,25 +183,25 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
    {
       case Joystick::ButtonShapeRound:
          return buttonHalfHeight * 2;
-         break;
+
       case Joystick::ButtonShapeRect:
          return rectButtonWidth;
-         break;
+
       case Joystick::ButtonShapeSmallRect:
          return smallRectButtonWidth;
-         break;
+
       case Joystick::ButtonShapeRoundedRect:
          return rectButtonWidth;
-         break;
+
       case Joystick::ButtonShapeSmallRoundedRect:
          return smallRectButtonWidth;
-         break;
+
       case Joystick::ButtonShapeHorizEllipse:
          return horizEllipseButtonRadiusX * 2;
-         break;
+
       case Joystick::ButtonShapeRightTriangle:
          return rectButtonWidth;
-         break;
+
       default:
          return rectButtonWidth;
    }
