@@ -13,6 +13,7 @@ set(CLIENT_SOURCES
    engineerHelper.cpp
    Event.cpp
    gameObjectRender.cpp
+   HelperManager.cpp
    helperMenu.cpp
    Joystick.cpp
    JoystickRender.cpp

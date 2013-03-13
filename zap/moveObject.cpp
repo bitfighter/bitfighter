@@ -678,6 +678,13 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
          damageInfo.impulseVector = getActualVel();
 
          ship->damageObject(&damageInfo);
+
+         // Damage asteroid unless shield is up
+         if(!ship->isModulePrimaryActive(ModuleShield))
+         {
+            damageInfo.damagingObject = ship;
+            asteroid->damageObject(&damageInfo);
+         }
       }
    }
 #ifndef ZAP_DEDICATED

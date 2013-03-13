@@ -94,13 +94,13 @@ function fireAtObject(obj, weapon)
         end
     end
     
-    if(classId == ObjType.Ship    or   classId == ObjType.Robot   or   classId == ObjType.ForceFieldProjector   or
-       classId == ObjType.Turret  or   classId == ObjType.Core) then
-           if obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame() or obj:getTeamIndx() == Team.Neutral then
+    if obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame() or obj:getTeamIndx() == Team.Neutral then
+        if(classId == ObjType.Ship    or   classId == ObjType.Robot   or   classId == ObjType.ForceFieldProjector   or
+           classId == ObjType.Turret  or   classId == ObjType.Core    or   classId == ObjType.SpyBug) then
                 --logprint("It's an ally.")
                 return(false)
-           end
-   end
+        end
+    end
 
     
     local angle = getFiringSolution(obj)
