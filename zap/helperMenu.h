@@ -45,7 +45,6 @@ class HelperManager;
 
 struct OverlayMenuItem
 {
-public:
    InputCode key;             // Keyboard key used to select in menu
    InputCode button;          // Controller button used to select in menu
    bool showOnMenu;           // Should this item actually be added to the menu?
@@ -88,15 +87,18 @@ protected:
    // Shortcut helper function
    virtual void exitHelper();
 
-   void drawItemMenu(S32 xPos, S32 yPos, const char *title, const OverlayMenuItem *items, S32 count);
+   void drawItemMenu(S32 xPos, S32 yPos, const char *title, const OverlayMenuItem *items, S32 count,
+                     const char **legendText = NULL, const Color **legendColors = NULL, S32 legendCount = 0);
+
    void drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color);
    void drawMenuCancelText(S32 xPos, S32 yPos, const Color &color, S32 fontSize);
 
    ClientGame *getGame();
 
-   static const S32 MENU_FONT_SIZE    = 15;
-   static const S32 MENU_FONT_SPACING =  7;
-   static const S32 MENU_PADDING      =  3;
+   static const S32 MENU_FONT_SIZE        = 15;
+   static const S32 MENU_FONT_SPACING     =  7;
+   static const S32 MENU_PADDING          =  3;
+   static const S32 MENU_LEGEND_FONT_SIZE = 11;
 
 
 public:

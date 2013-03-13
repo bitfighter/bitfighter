@@ -93,7 +93,8 @@ F32 HelperMenu::getHelperWidth() const
 }
 
 
-void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const OverlayMenuItem *items, S32 count)
+void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const OverlayMenuItem *items, S32 count,
+                              const char **legendText, const Color **legendColors, S32 legendCount)
 {
    static const Color baseColor(Colors::red);
 
@@ -105,7 +106,8 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const Overl
          displayItems++;
 
    // Frame the menu
-   S32 interiorMenuHeight = displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + 2 * MENU_PADDING;
+   S32 interiorMenuHeight = displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + 2 * MENU_PADDING + 
+                            (legendCount > 0 ? MENU_LEGEND_FONT_SIZE + 2 * MENU_FONT_SPACING : 0);
 
    drawMenuBorderLine(xPos, yPos,                      baseColor);
    drawMenuBorderLine(xPos, yPos + interiorMenuHeight, baseColor);
@@ -136,7 +138,8 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const Overl
 
       if(showKeys)
       {
-         glColor(Colors::white);             // Render key in white
+         // Render key in white, or, if there is a legend, in the color of the adjacent item
+         glColor(legendCount > 0 ? items[i].itemColor : &Colors::white); 
          JoystickRender::renderControllerButton((F32)xPos + 30, (F32)yPos, 
                                                 joystickIndex, items[i].key, false);
       }
@@ -153,6 +156,19 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const Overl
       }
 
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
+   }
+
+   if(legendCount > 0)
+   {
+      yPos += MENU_FONT_SPACING;
+      S32 x = xPos + 20;
+      for(S32 i = 0; i < legendCount; i++)
+      {
+         glColor(legendColors[i]);
+         x += drawStringAndGetWidth(x, yPos, MENU_LEGEND_FONT_SIZE, legendText[i]);
+      }
+
+      yPos += MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING;
    }
 
    yPos += 2 * MENU_PADDING;
@@ -173,6 +189,7 @@ void HelperMenu::drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color)
          color.r, color.g, color.b, 1,
          color.r, color.g, color.b, 0,
    };
+
    renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
 }
 

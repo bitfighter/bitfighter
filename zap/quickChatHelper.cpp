@@ -45,6 +45,9 @@ namespace Zap
 
 Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file
 
+static const const char *quickChatLegendText[]   = { "Team Message ",        "Global Message"         };
+static const Color      *quickChatLegendColors[] = { &Colors::teamChatColor, &Colors::globalChatColor };
+
 
 QuickChatHelper::QuickChatHelper()
 {
@@ -113,9 +116,8 @@ void QuickChatHelper::render()
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
    }
    else
-      drawItemMenu(getLeftEdgeOfMenuPos(), yPos, "QuickChat menu", &items[0], items.size());
-
-
+      drawItemMenu(getLeftEdgeOfMenuPos(), yPos, "QuickChat menu", &items[0], items.size(), 
+                   quickChatLegendText, quickChatLegendColors, ARRAYSIZE(quickChatLegendText));
 
    //const S32 indent = 20;
    //const Color quickChatMenuHeaderColor(Colors::red);
