@@ -120,8 +120,8 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, S32 width, const char *title, 
 
    S32 interiorEdge = xPos + width + ITEM_INDENT + ITEM_HELP_PADDING + MENU_PADDING + MENU_PADDING;
 
-   drawFilledRect(0, top1, interiorEdge, top2,   Color(.10),    0.80f);
-   drawFilledRect(0, top2, interiorEdge, bottom, Colors::black, 0.80f);
+   drawFilledRect(0, top1, interiorEdge, top2,   Colors::black, 0.70f);
+   drawFilledRect(0, top2, interiorEdge, bottom, Colors::black, 0.70f);
    drawHollowRect(0, top1, interiorEdge, bottom, Color(.35,0,0));
 
    // Draw the title
