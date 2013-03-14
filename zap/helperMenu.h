@@ -94,8 +94,8 @@ protected:
    static const S32 MENU_FONT_SPACING     =  7;    // Vertical gap between lines
    static const S32 MENU_PADDING          =  3;
    static const S32 MENU_LEGEND_FONT_SIZE = 11;    // Smaller font of lengend items on QuickChat menus
-   static const S32 ITEM_HELP_PADDING = 5;         // Gap between item and its help text
-   static const S32 ITEM_INDENT = 50;              // Amount individual menu items are indented to make room for keys
+   static const S32 ITEM_HELP_PADDING     =  5;    // Gap between item and its help text
+   static const S32 ITEM_INDENT           = 50;    // Amount individual menu items are indented to make room for keys
 
 public:
    explicit HelperMenu();     // Constructor
