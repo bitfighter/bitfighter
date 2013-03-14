@@ -120,9 +120,24 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, S32 width, const char *title, 
 
    S32 interiorEdge = xPos + width + ITEM_INDENT + ITEM_HELP_PADDING + MENU_PADDING + MENU_PADDING;
 
-   drawFilledRect(0, top1, interiorEdge, top2,   Colors::black, 0.70f);
-   drawFilledRect(0, top2, interiorEdge, bottom, Colors::black, 0.70f);
-   drawHollowRect(0, top1, interiorEdge, bottom, Color(.35,0,0));
+   const S32 CORNER_SIZE = 15;
+   Point p[] = { Point(0, top1), Point(interiorEdge - CORNER_SIZE, top1),     // Top
+                 Point(interiorEdge, top1 + CORNER_SIZE),                     // Edge
+                 Point(interiorEdge, bottom), Point(0, bottom) };             // Bottom
+
+   Vector<Point> points(p, ARRAYSIZE(p));
+
+   // Fill
+   glColor(Colors::black, 0.70f);
+   renderPointVector(&points, GL_POLYGON);
+
+   // Border
+   glColor(Color(.35,0,0));
+   renderPointVector(&points, GL_LINE_STRIP);
+
+   // Gray line
+   glColor(Colors::gray20);
+   drawHorizLine(20, interiorEdge - 20, top2);
 
    // Draw the title
    glColor(baseColor);
