@@ -230,23 +230,6 @@ S32 HelperMenu::getWidth(const OverlayMenuItem *items, S32 count)
 }
 
 
-void HelperMenu::drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color)
-{
-   TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on");
-
-   F32 vertices[] = {
-         xPos,        yPos + 20,
-         xPos + 500,  yPos + 20
-   };
-   F32 colors[] = {
-         color.r, color.g, color.b, 1,
-         color.r, color.g, color.b, 1,
-   };
-
-   renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
-}
-
-
 ClientGame *HelperMenu::getGame()
 {
    return mClientGame;
