@@ -820,15 +820,8 @@ static void loadQuickChatMessages(CIniFile *ini)
 #ifndef ZAP_DEDICATED
    // Add initial node
    QuickChatNode emptynode;
-   emptynode.depth = 0;    // This is a beginning or ending node
-   emptynode.inputCode = KEY_UNKNOWN;
-   emptynode.buttonCode = KEY_UNKNOWN;
-   emptynode.teamOnly = false;
-   emptynode.commandOnly = false;
-   emptynode.caption = "";
-   emptynode.msg = "";
+
    gQuickChatTree.push_back(emptynode);
-   emptynode.isMsgItem = false;
 
    // Read QuickChat messages -- first search for keys matching "QuickChatMessagesGroup123"
    S32 keys = ini->GetNumSections();

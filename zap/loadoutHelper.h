@@ -63,6 +63,7 @@ private:
    U32 mModule[ShipModuleCount];   // Modules selected by user -- 2
    U32 mWeapon[ShipWeaponCount];   // Weapons selected by user -- 3
    S32 mCurrentIndex;
+   S32 mWidth;
 
    Vector<OverlayMenuItem> mMenuItems;
    bool mEngineerEnabled;

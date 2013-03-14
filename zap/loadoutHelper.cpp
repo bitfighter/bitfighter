@@ -100,6 +100,8 @@ static U8 weaponLookup[] =
 LoadoutHelper::LoadoutHelper()
 {
    mCurrentIndex = 0;
+   mWidth = max(getWidth(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems)),
+                getWidth(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems)));
 }
 
 
@@ -133,7 +135,7 @@ void LoadoutHelper::render()
    else
       dSprintf(title, sizeof(title), "Pick %d weapons for your ship:",       ShipWeaponCount);
 
-   drawItemMenu(getLeftEdgeOfMenuPos(), MENU_TOP, title, &mMenuItems[0], mMenuItems.size());
+   drawItemMenu(getLeftEdgeOfMenuPos(), MENU_TOP, mWidth, title, &mMenuItems[0], mMenuItems.size());
 }
 
 
@@ -150,7 +152,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       if(inputCode == mMenuItems[index].key || inputCode == mMenuItems[index].button)
          break;
 
-   if(!mMenuItems[index].showOnMenu)
+   if(index == mMenuItems.size() || !mMenuItems[index].showOnMenu)
       return false;
 
    // Make sure user doesn't select the same loadout item twice

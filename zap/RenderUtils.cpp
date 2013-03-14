@@ -538,6 +538,20 @@ void drawFilledRect(F32 x1, F32 y1, F32 x2, F32 y2)
 }
 
 
+void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor)
+{
+   glColor(fillColor);
+   drawFilledRect(x1, y1, x2, y2);
+}
+
+
+void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha)
+{
+   glColor(fillColor, fillAlpha);
+   drawFilledRect(x1, y1, x2, y2);
+}
+
+
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor)
 {
    drawFilledRect(x1, y1, x2, y2, fillColor, 1, outlineColor);

@@ -30,6 +30,7 @@
 #include "UIInstructions.h"
 #include "ClientGame.h"
 #include "JoystickRender.h"
+#include "RenderUtils.h"
 
 #include "OpenglUtils.h"
 
@@ -93,10 +94,17 @@ F32 HelperMenu::getHelperWidth() const
 }
 
 
-void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const OverlayMenuItem *items, S32 count,
+extern void drawVertLine  (S32 x,  S32 y1, S32 y2);
+extern void drawHorizLine (S32 x1, S32 x2, S32 y );
+
+void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, S32 width, const char *title, const OverlayMenuItem *items, S32 count,
                               const char **legendText, const Color **legendColors, S32 legendCount)
 {
    static const Color baseColor(Colors::red);
+
+   const S32 MENU_PADDING = 5;         // Padding around outer edge of overlay
+
+   TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on");
 
    S32 displayItems = 0;
 
@@ -106,11 +114,21 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const Overl
          displayItems++;
 
    // Frame the menu
-   S32 interiorMenuHeight = displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + 2 * MENU_PADDING + 
-                            (legendCount > 0 ? MENU_LEGEND_FONT_SIZE + 2 * MENU_FONT_SPACING : 0);
+   S32 interiorMenuHeight = MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING +                       // Title
+                            displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + 2 * MENU_PADDING +  // Menu items
+                            (legendCount > 0 ? MENU_LEGEND_FONT_SIZE + 2 * MENU_FONT_SPACING : 0) +   // Legend
+                            2 * MENU_PADDING +                                                        // Post-legend gap
+                            MENU_LEGEND_FONT_SIZE;                                                    // Instructions at bottom
 
-   drawMenuBorderLine(xPos, yPos,                      baseColor);
-   drawMenuBorderLine(xPos, yPos + interiorMenuHeight, baseColor);
+   S32 top1   = yPos - MENU_PADDING;
+   S32 top2   = yPos - MENU_PADDING + MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
+   S32 bottom = yPos + interiorMenuHeight + MENU_PADDING;
+
+   S32 interiorEdge = xPos + width + ITEM_INDENT + ITEM_HELP_PADDING + MENU_PADDING + MENU_PADDING;
+
+   drawFilledRect(0, top1, interiorEdge, top2,   Color(.10),    0.80f);
+   drawFilledRect(0, top2, interiorEdge, bottom, Colors::black, 0.80f);
+   drawHollowRect(0, top1, interiorEdge, bottom, Color(.35,0,0));
 
    // Draw the title
    glColor(baseColor);
@@ -122,6 +140,8 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const Overl
    GameSettings *settings = getGame()->getSettings();
    InputMode inputMode    = settings->getInputCodeManager()->getInputMode();
    bool showKeys = settings->getIniSettings()->showKeyboardKeys || inputMode == InputModeKeyboard;
+
+   yPos += 2;    // Aesthetics -- these pixels will be compensated for below
 
    for(S32 i = 0; i < count; i++)
    {
@@ -146,13 +166,13 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const Overl
 
       glColor(items[i].itemColor);  
 
-      S32 x = drawStringAndGetWidth(xPos + 50, yPos, MENU_FONT_SIZE, items[i].name); 
+      S32 x = drawStringAndGetWidth(xPos + ITEM_INDENT, yPos, MENU_FONT_SIZE, items[i].name); 
 
       // Render help string, if one is available
       if(strcmp(items[i].help, "") != 0)
       {
          glColor(items[i].helpColor);    
-         drawString(xPos + 50 + 5 + x, yPos, MENU_FONT_SIZE, items[i].help);
+         drawString(xPos + ITEM_INDENT + ITEM_HELP_PADDING + x, yPos, MENU_FONT_SIZE, items[i].help);
       }
 
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
@@ -173,6 +193,8 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const Overl
 
    yPos += 2 * MENU_PADDING;
 
+   yPos -= 2;    // Pixel compensation
+
    glColor(baseColor);
 
    // RenderedSize will be -1 if the button is not defined
@@ -192,17 +214,32 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, const char *title, const Overl
 }
 
 
+S32 HelperMenu::getWidth(const OverlayMenuItem *items, S32 count)
+{
+   S32 width = -1;
+   for(S32 i = 0; i < count; i++)
+   {
+      S32 w = getStringWidth(MENU_FONT_SIZE, items[i].name) + getStringWidth(MENU_FONT_SIZE, items[i].help);
+      if(w > width)
+         width = w;
+   }
+
+   return width;
+
+}
+
+
 void HelperMenu::drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color)
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on");
 
    F32 vertices[] = {
          xPos,        yPos + 20,
-         xPos + 400,  yPos + 20
+         xPos + 500,  yPos + 20
    };
    F32 colors[] = {
          color.r, color.g, color.b, 1,
-         color.r, color.g, color.b, 0,
+         color.r, color.g, color.b, 1,
    };
 
    renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);

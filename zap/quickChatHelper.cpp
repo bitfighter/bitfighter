@@ -48,10 +48,27 @@ Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups
 static const char  *quickChatLegendText[]   = { "Team Message ",        "Global Message"         };
 static const Color *quickChatLegendColors[] = { &Colors::teamChatColor, &Colors::globalChatColor };
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+QuickChatNode::QuickChatNode() : caption(""), msg("")
+{
+   depth = 0;        // This is a beginning or ending node
+   inputCode  = KEY_UNKNOWN;
+   buttonCode = KEY_UNKNOWN;
+   teamOnly    = false;
+   commandOnly = false;
+   isMsgItem   = false;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 QuickChatHelper::QuickChatHelper()
 {
    mCurNode = 0;
+   mWidth = -1;
 }
 
 
@@ -82,7 +99,7 @@ void QuickChatHelper::render()
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
    }
    else
-      drawItemMenu(getLeftEdgeOfMenuPos(), yPos, "QuickChat menu", &mMenuItems[0], mMenuItems.size(), 
+      drawItemMenu(getLeftEdgeOfMenuPos(), yPos, mWidth, "QuickChat menu", &mMenuItems[0], mMenuItems.size(), 
                    quickChatLegendText, quickChatLegendColors, ARRAYSIZE(quickChatLegendText));
 }
 
@@ -92,6 +109,17 @@ void QuickChatHelper::onActivated()
    Parent::onActivated();
 
    updateChatMenuItems(0);
+
+  
+   if(mWidth == -1)
+   {
+      for(S32 i = 0; i < gQuickChatTree.size(); i++)
+      {
+         S32 width = getStringWidth(MENU_FONT_SIZE, gQuickChatTree[i].caption.c_str());
+         if(width > mWidth)
+            mWidth = width;
+      }
+   }
 }
 
 

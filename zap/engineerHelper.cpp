@@ -69,10 +69,20 @@ static EngineerBuildObjects engineerLookup[] =
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+static const char *menuTitle = "What do you want to Engineer?";
+
 // Constructor
 EngineerHelper::EngineerHelper()
 {
    mSelectedIndex = -1;
+
+   // With this one, the title is wider than the text (at the moment at least), so we should consider the title width.  This
+   // is a bit tricky, however, since the menu items are normally indented, and that indention is added to the menu width
+   // we pass.  Therefore, to make everything look nice, we need to subtract that bit off here so we don't end up with a 
+   // much wider menu than necessary.  Add the horizMargin to make things look balanced.
+   mWidth = max(getWidth(engineerItemInfo, ARRAYSIZE(engineerItemInfo)), 
+                getStringWidth(MENU_FONT_SIZE, menuTitle) - (ITEM_INDENT + 2 * ITEM_HELP_PADDING) + UserInterface::horizMargin);
 }
 
 
@@ -107,7 +117,7 @@ void EngineerHelper::render()
    S32 yPos = MENU_TOP;
    
    if(isMenuBeingDisplayed())    // Haven't selected an item yet, so show the menu
-      drawItemMenu(getLeftEdgeOfMenuPos(), yPos, "What do you want to Engineer?", engineerItemInfo, ARRAYSIZE(engineerItemInfo));
+      drawItemMenu(getLeftEdgeOfMenuPos(), yPos, mWidth, menuTitle, engineerItemInfo, ARRAYSIZE(engineerItemInfo));
 
    else     // Have selected a module, need to indicate where to deploy
    {

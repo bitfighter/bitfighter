@@ -87,18 +87,19 @@ protected:
    // Shortcut helper function
    virtual void exitHelper();
 
-   void drawItemMenu(S32 xPos, S32 yPos, const char *title, const OverlayMenuItem *items, S32 count,
+   void drawItemMenu(S32 xPos, S32 yPos, S32 width, const char *title, const OverlayMenuItem *items, S32 count,
                      const char **legendText = NULL, const Color **legendColors = NULL, S32 legendCount = 0);
 
    void drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color);
 
    ClientGame *getGame();
 
-   static const S32 MENU_FONT_SIZE        = 15;
-   static const S32 MENU_FONT_SPACING     =  7;
+   static const S32 MENU_FONT_SIZE        = 15;    // Size of standard items
+   static const S32 MENU_FONT_SPACING     =  7;    // Vertical gap between lines
    static const S32 MENU_PADDING          =  3;
-   static const S32 MENU_LEGEND_FONT_SIZE = 11;
-
+   static const S32 MENU_LEGEND_FONT_SIZE = 11;    // Smaller font of lengend items on QuickChat menus
+   static const S32 ITEM_HELP_PADDING = 5;         // Gap between item and its help text
+   static const S32 ITEM_INDENT = 50;              // Amount individual menu items are indented to make room for keys
 
 public:
    explicit HelperMenu();     // Constructor
@@ -122,6 +123,7 @@ public:
    virtual bool isChatDisabled();                     // Returns true if chat and friends should be disabled while this is active
 
    virtual S32 getActivationAnimationTime();          // Return 0 to disable animations
+   S32 getWidth(const OverlayMenuItem *items, S32 count);
 
    virtual HelperMenuType getType() = 0;
 };

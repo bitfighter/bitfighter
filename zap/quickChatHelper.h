@@ -49,6 +49,8 @@ struct QuickChatNode
    string caption;
    string msg;
    bool isMsgItem;         // False for groups, true for messages
+
+   QuickChatNode();        // Constructor
 };
 
 
@@ -61,6 +63,7 @@ class QuickChatHelper : public HelperMenu
 
 private:
    S32 mCurNode;
+   S32 mWidth;
    Vector<OverlayMenuItem> mMenuItems;
 
    void updateChatMenuItems(S32 curNode);
