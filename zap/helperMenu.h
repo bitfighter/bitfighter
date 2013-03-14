@@ -75,8 +75,6 @@ private:
    ClientGame *mClientGame;
    HelperManager *mHelperManager;
 
-   virtual F32 getHelperWidth() const;
-
 protected:
    static const S32 MENU_TOP = 180;    // Location of top of overlay menu
 
@@ -89,8 +87,6 @@ protected:
 
    void drawItemMenu(S32 xPos, S32 yPos, S32 width, const char *title, const OverlayMenuItem *items, S32 count,
                      const char **legendText = NULL, const Color **legendColors = NULL, S32 legendCount = 0);
-
-   void drawMenuBorderLine(S32 xPos, S32 yPos, const Color &color);
 
    ClientGame *getGame();
 

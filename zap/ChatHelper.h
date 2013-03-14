@@ -58,7 +58,6 @@ private:
 
    // Related to running commands
    static void serverCommandHandler(ClientGame *game, const Vector<string> &words);
-   F32 getHelperWidth() const;
 
 protected:
    void exitHelper();

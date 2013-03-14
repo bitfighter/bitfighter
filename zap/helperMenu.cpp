@@ -88,12 +88,6 @@ F32 HelperMenu::getFraction()
 }
 
 
-F32 HelperMenu::getHelperWidth() const
-{
-   return 400;
-}
-
-
 extern void drawVertLine  (S32 x,  S32 y1, S32 y2);
 extern void drawHorizLine (S32 x1, S32 x2, S32 y );
 
@@ -298,7 +292,10 @@ S32 HelperMenu::getLeftEdgeOfMenuPos()
 
    // else calculate where the left edge should be based on state of animation timer
 
-   F32 width = getHelperWidth();
+   // Magic number that seems to work well... no matter that the real menu might be a different width... by
+   // using this constant, menus appear at a consistent rate.
+   F32 width = 400;     
+
    return trueLeftEdge - width + (mActivating ? width - mAnimationTimer.getFraction() * width : 
                                                         mAnimationTimer.getFraction() * width);
 }

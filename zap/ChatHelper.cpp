@@ -500,12 +500,6 @@ void ChatHelper::runCommand(ClientGame *game, const char *input)
 }
 
 
-F32 ChatHelper::getHelperWidth() const
-{
-   return 800;
-}
-
-
 // Use this method when you need to keep client/server compatibility between bitfighter
 // versions (e.g. 015 -> 015a)
 // If you are working on a new version (e.g. 016), then create an appropriate c2s handler function
