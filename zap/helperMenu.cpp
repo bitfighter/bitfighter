@@ -214,6 +214,7 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, S32 width, const char *title, 
 }
 
 
+// Calculate the width of the widest item in items
 S32 HelperMenu::getWidth(const OverlayMenuItem *items, S32 count)
 {
    S32 width = -1;
