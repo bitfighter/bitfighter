@@ -283,7 +283,7 @@ void HelperManager::doExitHelper(S32 index)
       mGame->undelaySpawn();
 
    // If animation is disabled for this helper, immediately call doneClosingHelper()
-   if(mOffDeckHelper->getActivationAnimationTime() == 0)
+   if(mOffDeckHelper->getAnimationPeriod() == 0)
       doneClosingHelper();
 }
 

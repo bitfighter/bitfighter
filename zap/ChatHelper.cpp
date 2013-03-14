@@ -110,6 +110,8 @@ ChatHelper::ChatHelper() : mLineEditor(200)
 {
    mCurrentChatType = NoChat;
    makeCommandCandidateList();
+
+   mAnimationTimer.setPeriod(65);    // Transition time, in ms
 }
 
 
@@ -149,7 +151,7 @@ void ChatHelper::render()
    }
    else                                     // Global in-game chat (goes to all players in game)
    {
-      baseColor = Colors::cmdChatColor;
+      baseColor = Colors::globalChatColor;
       promptStr = "(Global): ";
    }
 
@@ -161,7 +163,9 @@ void ChatHelper::render()
    static const S32 CHAT_COMPOSE_FONT_SIZE = 12;
    static const S32 CHAT_COMPOSE_FONT_GAP = CHAT_COMPOSE_FONT_SIZE / 4;
 
-   S32 xPos = getLeftEdgeOfMenuPos();
+   static const S32 BOX_HEIGHT = CHAT_COMPOSE_FONT_SIZE + 10;
+
+   S32 xPos = UserInterface::horizMargin;
 
    // Define some vars for readability:
    S32 promptSize = getStringWidth(CHAT_COMPOSE_FONT_SIZE, promptStr);
@@ -170,18 +174,51 @@ void ChatHelper::render()
    // Above block repeated below...
 
 
-   const S32 ypos = IN_GAME_CHAT_DISPLAY_POS + CHAT_COMPOSE_FONT_SIZE + 11;
+   S32 ypos = IN_GAME_CHAT_DISPLAY_POS + CHAT_COMPOSE_FONT_SIZE + 11;
+   S32 realYPos = ypos;
+
+   // Adjust for animated effect
+   ypos += (mActivating ?              mAnimationTimer.getFraction() * BOX_HEIGHT : 
+                          BOX_HEIGHT - mAnimationTimer.getFraction() * BOX_HEIGHT);
 
    S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * UserInterface::horizMargin - (nameWidth - promptSize) - 230;
+
+   GLboolean scissorsShouldBeEnabled;
+   
+   // Make these static to save a tiny bit of construction and tear-down costs.  We run this a lot, and they're small.
+   static GLint scissorBox[4];
+   static Point p1, p2;
+
+   // Only need to set scissors if we're scrolling.  When not scrolling, we control the display by only showing
+   // the specified number of lines; there are normally no partial lines that need vertical clipping as 
+   // there are when we're scrolling.  Note also that we only clip vertically, and can ignore the horizontal.
+   if(mAnimationTimer.getCurrent() > 0)    
+   {
+      glGetBooleanv(GL_SCISSOR_TEST, &scissorsShouldBeEnabled);
+
+      if(scissorsShouldBeEnabled)
+         glGetIntegerv(GL_SCISSOR_BOX, &scissorBox[0]);
+
+      DisplayMode mode = getGame()->getSettings()->getIniSettings()->displayMode;    // Windowed, full_screen_stretched, full_screen_unstretched
+      Point p1 = gScreenInfo.convertCanvasToWindowCoord(0, gScreenInfo.getGameCanvasHeight() - (realYPos - 3) - BOX_HEIGHT, mode);
+      Point p2 = gScreenInfo.convertCanvasToWindowCoord(gScreenInfo.getGameCanvasWidth(), BOX_HEIGHT, mode);
+
+      glScissor(p1.x, p1.y, p2.x, p2.y);
+
+      glEnable(GL_SCISSOR_TEST);
+   }
+
 
    // Render text entry box like thingy
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
+   F32 top = ypos - 3;
+
    F32 vertices[] = {
-         xPos,            ypos - 3,
-         xPos + boxWidth, ypos - 3,
-         xPos + boxWidth, ypos + CHAT_COMPOSE_FONT_SIZE + 7,
-         xPos,            ypos + CHAT_COMPOSE_FONT_SIZE + 7
+         xPos,            top,
+         xPos + boxWidth, top,
+         xPos + boxWidth, top + BOX_HEIGHT,
+         xPos,            top + BOX_HEIGHT
    };
 
    for(S32 i = 1; i >= 0; i--)
@@ -243,6 +280,15 @@ void ChatHelper::render()
 
    glColor(baseColor);
    mLineEditor.drawCursor(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE, displayWidth);
+
+   // Restore scissors settings -- only used during scrolling
+   if(mAnimationTimer.getCurrent() > 0)
+   {
+      if(scissorsShouldBeEnabled)
+         glScissor(scissorBox[0], scissorBox[1], scissorBox[2], scissorBox[3]);
+      else
+         glDisable(GL_SCISSOR_TEST);
+   }
 }
 
 

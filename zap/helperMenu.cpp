@@ -40,7 +40,7 @@ namespace Zap
 // Constructor
 HelperMenu::HelperMenu()
 {
-   mAnimationTimer.setPeriod(getActivationAnimationTime());    // Transition time, in ms
+   mAnimationTimer.setPeriod(150);    // Transition time, in ms
 }
 
 
@@ -81,9 +81,9 @@ void HelperMenu::exitHelper()
 
 F32 HelperMenu::getFraction()
 {
-   if(getActivationAnimationTime() == 0)
-      return 0;
-   else
+   //if(getActivationAnimationTime() == 0)
+   //   return 0;
+   //else
       return mActivating ? mAnimationTimer.getFraction() : 1 - mAnimationTimer.getFraction();
 }
 
@@ -220,7 +220,12 @@ S32 HelperMenu::getWidth(const OverlayMenuItem *items, S32 count)
    }
 
    return width;
+}
 
+
+S32 HelperMenu::getAnimationPeriod() const
+{
+   return mAnimationTimer.getPeriod();
 }
 
 
@@ -283,12 +288,13 @@ void HelperMenu::idle(U32 deltaT)
 }
 
 
+// Used for loadout-style menus
 S32 HelperMenu::getLeftEdgeOfMenuPos()
 {
    S32 trueLeftEdge = UserInterface::horizMargin;
 
-   if(getActivationAnimationTime() == 0)
-      return trueLeftEdge;
+   //if(getActivationAnimationTime() == 0)
+   //   return trueLeftEdge;
 
    // else calculate where the left edge should be based on state of animation timer
 
@@ -306,10 +312,5 @@ void HelperMenu::onActivated()
    mAnimationTimer.invert();
    mActivating = true;
 }
-
-
-// Duration of activation animation -- return 0 to disable
-S32 HelperMenu::getActivationAnimationTime() { return 150; }
-
 
 };
