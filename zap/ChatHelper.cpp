@@ -33,6 +33,7 @@
 #include "Console.h"
 #include "UIInstructions.h"   // For code to activate help screen
 
+#include "ScissorsManager.h"
 #include "ScreenInfo.h"
 #include "stringUtils.h"
 #include "OpenglUtils.h"
@@ -183,31 +184,13 @@ void ChatHelper::render()
 
    S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * UserInterface::horizMargin - (nameWidth - promptSize) - 230;
 
-   GLboolean scissorsShouldBeEnabled;
-   
-   // Make these static to save a tiny bit of construction and tear-down costs.  We run this a lot, and they're small.
-   static GLint scissorBox[4];
-   static Point p1, p2;
+   // Reuse this to avoid startup and breakdown costs
+   static ScissorsManager scissorsManager;
 
    // Only need to set scissors if we're scrolling.  When not scrolling, we control the display by only showing
    // the specified number of lines; there are normally no partial lines that need vertical clipping as 
    // there are when we're scrolling.  Note also that we only clip vertically, and can ignore the horizontal.
-   if(mAnimationTimer.getCurrent() > 0)    
-   {
-      glGetBooleanv(GL_SCISSOR_TEST, &scissorsShouldBeEnabled);
-
-      if(scissorsShouldBeEnabled)
-         glGetIntegerv(GL_SCISSOR_BOX, &scissorBox[0]);
-
-      DisplayMode mode = getGame()->getSettings()->getIniSettings()->displayMode;    // Windowed, full_screen_stretched, full_screen_unstretched
-      Point p1 = gScreenInfo.convertCanvasToWindowCoord(0, gScreenInfo.getGameCanvasHeight() - (realYPos - 3) - BOX_HEIGHT, mode);
-      Point p2 = gScreenInfo.convertCanvasToWindowCoord(gScreenInfo.getGameCanvasWidth(), BOX_HEIGHT, mode);
-
-      glScissor(p1.x, p1.y, p2.x, p2.y);
-
-      glEnable(GL_SCISSOR_TEST);
-   }
-
+   scissorsManager.enable(mAnimationTimer.getCurrent() > 0, getGame(), 0, realYPos - 3, gScreenInfo.getGameCanvasWidth(), BOX_HEIGHT);
 
    // Render text entry box like thingy
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
@@ -282,13 +265,7 @@ void ChatHelper::render()
    mLineEditor.drawCursor(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE, displayWidth);
 
    // Restore scissors settings -- only used during scrolling
-   if(mAnimationTimer.getCurrent() > 0)
-   {
-      if(scissorsShouldBeEnabled)
-         glScissor(scissorBox[0], scissorBox[1], scissorBox[2], scissorBox[3]);
-      else
-         glDisable(GL_SCISSOR_TEST);
-   }
+   scissorsManager.disable();
 }
 
 

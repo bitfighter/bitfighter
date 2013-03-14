@@ -248,6 +248,7 @@
     <ClCompile Include="oglconsole.c" />
     <ClCompile Include="GameSettings.cpp" />
     <ClCompile Include="RenderUtils.cpp" />
+    <ClCompile Include="ScissorsManager.cpp" />
     <ClCompile Include="ServerGame.cpp" />
     <ClCompile Include="shipItems.cpp" />
     <ClCompile Include="ShipShape.cpp" />
@@ -401,6 +402,7 @@
     <ClInclude Include="RenderUtils.h" />
     <ClInclude Include="retrieveGame.h" />
     <ClInclude Include="GameSettings.h" />
+    <ClInclude Include="ScissorsManager.h" />
     <ClInclude Include="ServerGame.h" />
     <ClInclude Include="SimpleLine.h" />
     <ClInclude Include="SlipZone.h" />

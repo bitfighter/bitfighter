@@ -73,14 +73,17 @@ private:
    ClientGame *mClientGame;
    HelperManager *mHelperManager;
 
+   S32 mOldBottom;
+
 protected:
    static const S32 MENU_TOP = 180;    // Location of top of overlay menu
 
    Timer mAnimationTimer;              // Timer for activation/deactivation animation
+   Timer mTransitionTimer;             // Timer for intra-helper transitions
 
    S32 getLeftEdgeOfMenuPos();         // Return left edge of menu
    bool mActivating;                   // True when menu is being activated, false when deactivating, undefined at other times
-
+   bool mTransitioning;
 
    // Shortcut helper function
    virtual void exitHelper();

@@ -41,6 +41,8 @@ namespace Zap
 HelperMenu::HelperMenu()
 {
    mAnimationTimer.setPeriod(150);    // Transition time, in ms
+   mTransitionTimer.setPeriod(65);
+   mTransitioning = false;
 }
 
 
@@ -117,6 +119,11 @@ void HelperMenu::drawItemMenu(S32 xPos, S32 yPos, S32 width, const char *title, 
    S32 top1   = yPos - MENU_PADDING;
    S32 top2   = yPos - MENU_PADDING + MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
    S32 bottom = yPos + interiorMenuHeight + MENU_PADDING;
+
+   if(mTransitionTimer.getCurrent() > 0)
+      bottom += (mOldBottom - bottom) * mTransitionTimer.getFraction();
+   else
+      mOldBottom = bottom;
 
    S32 interiorEdge = xPos + width + ITEM_INDENT + ITEM_HELP_PADDING + MENU_PADDING + MENU_PADDING;
 
@@ -300,6 +307,9 @@ void HelperMenu::idle(U32 deltaT)
 {
    if(mAnimationTimer.update(deltaT) && !mActivating)
       mHelperManager->doneClosingHelper();
+
+   if(mTransitionTimer.update(deltaT))
+      mTransitioning = false;
 }
 
 
@@ -326,6 +336,7 @@ void HelperMenu::onActivated()
 {
    mAnimationTimer.invert();
    mActivating = true;
+   mTransitioning = false;
 }
 
 };

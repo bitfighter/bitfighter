@@ -38,8 +38,13 @@ public:
    static S32 getStringLength(const unsigned char* string);
 };
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 class Color;
 class Point;
+
 extern void glColor(const Color &c, float alpha = 1.0);
 extern void glColor(const Color *c, float alpha = 1.0);
 extern void glColor(F32 c, float alpha = 1.0);

@@ -61,6 +61,7 @@
 #include "Colors.h"
 #include "Cursor.h"
 #include "CoreGame.h"
+#include "ScissorsManager.h"
 
 #include "../tnl/tnlEndian.h"
 
@@ -2320,39 +2321,22 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
 
    S32 lineHeight = mFontSize + mFontGap;
 
-   GLboolean scissorsShouldBeEnabled;
 
-   // Make these static to save a tiny bit of construction and tear-down costs.  We run this a lot, and they're small.
-   static GLint scissorBox[4];
-   static Point p1, p2;
+   // Reuse this to avoid startup and breakdown costs
+   static ScissorsManager scissorsManager;
 
    // Only need to set scissors if we're scrolling.  When not scrolling, we control the display by only showing
    // the specified number of lines; there are normally no partial lines that need vertical clipping as 
    // there are when we're scrolling.  Note also that we only clip vertically, and can ignore the horizontal.
    if(isScrolling)    
    {
-      glGetBooleanv(GL_SCISSOR_TEST, &scissorsShouldBeEnabled);
-
-      if(scissorsShouldBeEnabled)
-         glGetIntegerv(GL_SCISSOR_BOX, &scissorBox[0]);
-
       // Remember that our message list contains an extra entry that exists only for scrolling purposes.
       // We want the height of the clip window to omit this line, so we subtract 1 below.  
       S32 displayAreaHeight = (mMessages.size() - 1) * lineHeight;     
       S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
 
-      DisplayMode mode = mGame->getSettings()->getIniSettings()->displayMode;    // Windowed, full_screen_stretched, full_screen_unstretched
-
-      // p1 will be x and y, uses raw OpenGL coordinates, which are flipped from the system used in the game
-      p1 = gScreenInfo.convertCanvasToWindowCoord(0, gScreenInfo.getGameCanvasHeight() - displayAreaYPos,  mode);
-      // p2 will be w and h.  Also we don't care about width here... wrapping takes care of that.
-      p2 = gScreenInfo.convertCanvasToWindowCoord(gScreenInfo.getGameCanvasWidth(), displayAreaHeight, mode);
-
-      glScissor(p1.x, p1.y, p2.x, p2.y);
-
-      glEnable(GL_SCISSOR_TEST);
+      scissorsManager.enable(true, mGame, 0, displayAreaYPos - displayAreaHeight, gScreenInfo.getGameCanvasWidth(), displayAreaHeight);
    }
-
 
    // Initialize the starting rendering position.  This represents the bottom of the message rendering area, and
    // we'll work our way up as we go.  In all cases, newest messages will appear on the bottom, older ones on top.
@@ -2399,13 +2383,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
 
 
    // Restore scissors settings -- only used during scrolling
-   if(isScrolling)
-   {
-      if(scissorsShouldBeEnabled)
-         glScissor(scissorBox[0], scissorBox[1], scissorBox[2], scissorBox[3]);
-      else
-         glDisable(GL_SCISSOR_TEST);
-   }
+   scissorsManager.disable();
 }
 
 

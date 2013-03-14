@@ -117,6 +117,10 @@ int OpenglUtils::getStringLength(const unsigned char* string )
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 void setFont(OpenglUtils::FontId fontId)
 {
    if(fontId == OpenglUtils::FontRoman)

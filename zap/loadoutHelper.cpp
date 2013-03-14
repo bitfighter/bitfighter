@@ -178,7 +178,11 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
       // Check if we need to switch over to weapons
       if(mCurrentIndex == ShipModuleCount)
+      {
          mMenuItems = Vector<OverlayMenuItem>(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems));
+         mTransitioning = true;
+         mTransitionTimer.reset();
+      }
    }
 
    if(mCurrentIndex == ShipModuleCount + ShipWeaponCount)     // All loadout options selected, process complete
