@@ -262,9 +262,29 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
    }
    else if(style == 2)
    {
-      // Hollow blue box
-      drawHollowRect(inset, boxTop, canvasWidth - inset, boxTop + boxHeight, Colors::blue);
+      const S32 CORNER_SIZE = 15;
+      Point p[] = {
+            Point(inset, boxTop),                                // Top
+            Point((canvasWidth - inset) - CORNER_SIZE, boxTop),
+            Point(canvasWidth - inset, boxTop + CORNER_SIZE),    // Edge
+            Point(canvasWidth - inset, boxTop + boxHeight),      // Bottom
+            Point(inset + CORNER_SIZE, boxTop + boxHeight),
+            Point(inset, (boxTop + boxHeight) - CORNER_SIZE)     // Edge
+      };
+
+      Vector<Point> points(p, ARRAYSIZE(p));
+
+      // Fill
+      glColor(Colors::black, 0.70f);
+      renderPointVector(&points, GL_POLYGON);
+
+      // Border
       glColor(Colors::blue);
+      renderPointVector(&points, GL_LINE_LOOP);
+
+      // Hollow blue box
+//      drawHollowRect(inset, boxTop, canvasWidth - inset, boxTop + boxHeight, Colors::blue);
+//      glColor(Colors::blue);
    }
 
    // Draw title, message, and footer
