@@ -341,13 +341,9 @@ void GameUserInterface::render()
    getGame()->render();
 
    if(getGame()->isSuspended() || getGame()->isSpawnDelayed())
-   {
-      renderChatMsgs();
       renderSuspendedMessage();
 
-      mHelperManager.render();
-   }
-   else
+
    {
       renderReticle();              // Draw crosshairs if using mouse
       renderChatMsgs();             // Render incoming chat and server msgs
@@ -424,14 +420,9 @@ void GameUserInterface::renderSuspendedMessage()
    static const S32 DisplayStyle = 2;
    static const S32 VertOffset = -30;
 
-   // Fade what's below unless we're chatting
-   if(isChatting())
-      dimUnderlyingUI(getGame()->getUIFadeFactor());
 
    if(getGame()->requestedSpawnDelayed() && getGame()->isWaitingForSpawn())
    {
-      //dimUnderlyingUI(1);                                   // Completely obscure what's below
-
       waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.0f)) + " SECONDS";
       renderMessageBox("", "", waitMsg,  ARRAYSIZE(waitMsg),  VertOffset, DisplayStyle);
    }

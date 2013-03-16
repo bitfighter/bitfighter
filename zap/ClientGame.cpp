@@ -331,9 +331,7 @@ void ClientGame::setSpawnDelayed(bool spawnDelayed)
 
    mSpawnDelayed = spawnDelayed;
 
-   if(spawnDelayed)
-      mTimeToSuspend.reset();
-   else
+   if(!spawnDelayed)
    {
       unsuspendGame();
 
@@ -538,7 +536,7 @@ void ClientGame::idle(U32 timeDelta)
       SoundSystem::processAudio(timeDelta, mSettings->getIniSettings()->sfxVolLevel,
                                            mSettings->getIniSettings()->getMusicVolLevel(),
                                            mSettings->getIniSettings()->voiceChatVolLevel,
-                                           getUIManager()); 
+                                           getUIManager());
 
       // Need to update the game clock to keep it in sync with the clients
       if(mGameIsRunning && getGameType())
@@ -1909,30 +1907,36 @@ void ClientGame::renderOverlayMap()
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-// ==> should move render to UIGame?
+// ==> should move render to UIGame?  TODO: YES
 
-static Point screenSize, position;
+static Point screenSize, position, visExt;
 
 
 void ClientGame::renderNormal()
 {
-   if(!hasValidControlObject())
-      return;
+   // Here we determine if we have a control ship.
+   // If not (like after we've been killed), we'll still render the current position and things
+   Ship *ship = NULL;
 
-   BfObject *object = mConnectionToServer->getControlObject();
-   if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
-      return;
+   if(hasValidControlObject())
+   {
+      BfObject *object = mConnectionToServer->getControlObject();
+      if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
+         return;
 
-   Ship *ship = static_cast<Ship *>(object);  // This is the local player's ship
+      ship = static_cast<Ship *>(object);  // This is the local player's ship
 
-   position.set(ship->getRenderPos());
+      position.set(ship->getRenderPos());
+   }
 
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
    glTranslatef(gScreenInfo.getGameCanvasWidth() / 2.f, gScreenInfo.getGameCanvasHeight() / 2.f, 0);       
 
-   Point visExt = computePlayerVisArea(ship);
+   if(ship)
+      visExt = computePlayerVisArea(ship);
+
    glScalef((gScreenInfo.getGameCanvasWidth()  / 2) / visExt.x, 
             (gScreenInfo.getGameCanvasHeight() / 2) / visExt.y, 1);
 
@@ -2000,16 +2004,17 @@ void ClientGame::renderNormal()
 
 void ClientGame::render()
 {
-   bool renderObjectsWhileLoading = false;
+   UIID currentUI = mUIManager->getCurrentUI()->getMenuID();
 
-   if(!renderObjectsWhileLoading && !hasValidControlObject())
+   // Not in the Game UI (or one of its submenus)...
+   if(!currentUI == GameUI && !mUIManager->cameFrom(GameUI))
       return;
 
+   // Start of the level, we only show progress bar
    if(getUIManager()->getGameUserInterface()->mShowProgressBar)
-      renderCommander();
-   else if(mGameSuspended)
-      renderCommander();
-   else if(mCommanderZoomDelta > 0)
+      return;
+
+   if(mCommanderZoomDelta > 0)
       renderCommander();
    else
       renderNormal();
