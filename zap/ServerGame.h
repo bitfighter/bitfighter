@@ -150,6 +150,8 @@ public:
 
    bool isFull();      // More room at the inn?
 
+   bool isSuspended();
+
    void addClient(ClientInfo *clientInfo);
    void removeClient(ClientInfo *clientInfo);
 

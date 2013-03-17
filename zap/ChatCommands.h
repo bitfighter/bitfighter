@@ -106,7 +106,6 @@ void lagHandler                (ClientGame *game, const Vector<string> &args);
 void clearCacheHandler         (ClientGame *game, const Vector<string> &args);
 void lineWidthHandler          (ClientGame *game, const Vector<string> &args);
 void idleHandler               (ClientGame *game, const Vector<string> &args);
-void suspendHandler            (ClientGame *game, const Vector<string> &args);
 void showPresetsHandler        (ClientGame *game, const Vector<string> &args);
 void deleteCurrentLevelHandler (ClientGame *game, const Vector<string> &args);
 void addTimeHandler            (ClientGame *game, const Vector<string> &args);

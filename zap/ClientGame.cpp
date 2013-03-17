@@ -530,22 +530,6 @@ void ClientGame::idle(U32 timeDelta)
 
    mClientInfo->updateReturnToGameTimer(timeDelta);
 
-   if(isSuspended())
-   {
-      mNetInterface->processConnections();
-      SoundSystem::processAudio(timeDelta, mSettings->getIniSettings()->sfxVolLevel,
-                                           mSettings->getIniSettings()->getMusicVolLevel(),
-                                           mSettings->getIniSettings()->voiceChatVolLevel,
-                                           getUIManager());
-
-      // Need to update the game clock to keep it in sync with the clients
-      if(mGameIsRunning && getGameType())
-         getGameType()->advanceGameClock(timeDelta);
-
-      return;
-   }
-
-
    mCurrentTime += timeDelta;
 
    computeWorldObjectExtents();

@@ -186,9 +186,6 @@ void GameUserInterface::onActivate()
 
 void GameUserInterface::onReactivate()
 {
-   if(getGame()->isSuspended())
-      unsuspendGame();
-
    getGame()->undelaySpawn();
 
    mDisableShipKeyboardInput = false;
@@ -340,7 +337,7 @@ void GameUserInterface::render()
 
    getGame()->render();
 
-   if(getGame()->isSuspended() || getGame()->isSpawnDelayed())
+   if(getGame()->isSpawnDelayed())
       renderSuspendedMessage();
 
 
@@ -818,7 +815,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    GameSettings *settings = getGame()->getSettings();
 
    // Kind of hacky, but this will unsuspend and swallow the keystroke, which is what we want
-   if(!mHelperManager.isHelperActive() && (getGame()->isSuspended() || getGame()->isSpawnDelayed()))
+   if(!mHelperManager.isHelperActive() && getGame()->isSpawnDelayed())
    {
       getGame()->undelaySpawn();
       if(inputCode != KEY_ESCAPE)  // Lagged out and can't un-idle to bring up the menu?
@@ -1519,21 +1516,6 @@ void GameUserInterface::VoiceRecorder::process()
       if(gameType && sendBuffer->getBufferSize() < 1024)      // Don't try to send too big
          gameType->c2sVoiceChat(mGame->getSettings()->getIniSettings()->echoVoice, sendBuffer);
    }
-}
-
-
-void GameUserInterface::suspendGame()
-{
-   getGame()->getConnectionToServer()->suspendGame();    // Tell server we're suspending
-   getGame()->suspendGame(false);                        // Suspend locally
-   getUIManager()->activate(SuspendedUI);                // And enter chat mode
-}
-
-
-void GameUserInterface::unsuspendGame()
-{
-   getGame()->unsuspendGame();                                 // Unsuspend locally
-   getGame()->getConnectionToServer()->unsuspendGame();        // Tell the server we're unsuspending
 }
 
 

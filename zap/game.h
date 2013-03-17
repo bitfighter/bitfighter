@@ -390,7 +390,6 @@ public:
 
    GameSettings *getSettings();
 
-   bool isSuspended();
    bool isOrIsAboutToBeSuspended();
 
    void resetMasterConnectTimer();
