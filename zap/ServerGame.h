@@ -206,7 +206,6 @@ public:
    DataSender dataSender;
 
    void suspendGame();
-   void suspendGame(GameConnection *requestor);  // Suspend at player's request
    void unsuspendGame(bool remoteRequest);
 
    void suspenderLeftGame();

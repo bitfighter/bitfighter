@@ -867,20 +867,6 @@ void ServerGame::suspendGame()
    cycleLevel(getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL);    // Advance to beginning of next level
 }
 
-
- // Suspend at player's request
-void ServerGame::suspendGame(GameConnection *requestor)
-{
-   if(getPlayerCount() > 1)        // Should never happen, but will protect against hacked clients
-      return;
-
-   mGameSuspended = true;    
-   mSuspendor = requestor;
-   //mCommanderZoomDelta = CommanderMapZoomTime;     // When suspended, we show cmdr's map, need to make sure it's fully zoomed out
-
-   cycleLevel(REPLAY_LEVEL);  // Restart current level to make setting traps more difficult
-}
-
  
 // Resume game after it is no longer suspended
 void ServerGame::unsuspendGame(bool remoteRequest)
@@ -921,10 +907,12 @@ void ServerGame::suspendIfNoActivePlayers()
    if(mGameSuspended)
       return;
 
+   // Check all clients and make sure they're not active
    for(S32 i = 0; i < getClientCount(); i++)
    {
       ClientInfo *clientInfo = getClientInfo(i);
 
+      // Robots don't count
       if(!clientInfo->isRobot() && !clientInfo->isSpawnDelayed())
          return;
    }
