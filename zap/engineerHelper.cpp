@@ -117,7 +117,7 @@ void EngineerHelper::render()
    S32 yPos = MENU_TOP;
    
    if(isMenuBeingDisplayed())    // Haven't selected an item yet, so show the menu
-      drawItemMenu(getLeftEdgeOfMenuPos(), yPos, mWidth, menuTitle, engineerItemInfo, ARRAYSIZE(engineerItemInfo));
+      drawItemMenu(menuTitle, engineerItemInfo, ARRAYSIZE(engineerItemInfo), NULL, 0);
 
    else     // Have selected a module, need to indicate where to deploy
    {

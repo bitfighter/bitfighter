@@ -99,7 +99,7 @@ void QuickChatHelper::render()
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
    }
    else
-      drawItemMenu(getLeftEdgeOfMenuPos(), yPos, mWidth, "QuickChat menu", &mMenuItems[0], mMenuItems.size(), 
+      drawItemMenu("QuickChat menu", &mMenuItems[0], mMenuItems.size(), NULL, 0,
                    quickChatLegendText, quickChatLegendColors, ARRAYSIZE(quickChatLegendText));
 }
 

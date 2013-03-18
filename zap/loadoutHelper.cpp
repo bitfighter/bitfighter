@@ -120,9 +120,11 @@ void LoadoutHelper::onActivated()
    Parent::onActivated();
 
    mCurrentIndex = 0;
-   
-   mMenuItems = Vector<OverlayMenuItem>(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems));
-   mMenuItems[moduleEngineerIndex].showOnMenu = mEngineerEnabled;     // Can't delete this or other arrays will become unaligned
+
+   mModuleMenuItems = Vector<OverlayMenuItem>(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems));
+   mWeaponMenuItems = Vector<OverlayMenuItem>(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems));
+
+   mModuleMenuItems[moduleEngineerIndex].showOnMenu = mEngineerEnabled;    // Can't delete this or other arrays will become unaligned
 }
 
 
@@ -135,7 +137,11 @@ void LoadoutHelper::render()
    else
       dSprintf(title, sizeof(title), "Pick %d weapons for your ship:",       ShipWeaponCount);
 
-   drawItemMenu(getLeftEdgeOfMenuPos(), MENU_TOP, mWidth, title, &mMenuItems[0], mMenuItems.size());
+
+   if(mCurrentIndex < ShipModuleCount)
+      drawItemMenu(title, &mModuleMenuItems[0], mModuleMenuItems.size(), NULL, 0);
+   else
+      drawItemMenu(title, &mWeaponMenuItems[0], mWeaponMenuItems.size(), &mModuleMenuItems[0], mModuleMenuItems.size());
 }
 
 
@@ -148,11 +154,13 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
    
    S32 index;
 
-   for(index = 0; index < mMenuItems.size(); index++)
-      if(inputCode == mMenuItems[index].key || inputCode == mMenuItems[index].button)
+   Vector<OverlayMenuItem> *menuItems = (mCurrentIndex < ShipModuleCount) ? &mModuleMenuItems : &mWeaponMenuItems;
+
+   for(index = 0; index < menuItems->size(); index++)
+      if(inputCode == menuItems->get(index).key || inputCode == menuItems->get(index).button)
          break;
 
-   if(index == mMenuItems.size() || !mMenuItems[index].showOnMenu)
+   if(index == menuItems->size() || !menuItems->get(index).showOnMenu)
       return false;
 
    // Make sure user doesn't select the same loadout item twice
@@ -171,15 +179,15 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    if(!alreadyUsed)
    {
-      mMenuItems[index].itemColor = &Colors::overlayMenuSelectedItemColor;
-      mMenuItems[index].helpColor = &Colors::overlayMenuSelectedItemColor;
+      menuItems->get(index).itemColor = &Colors::overlayMenuSelectedItemColor;
+      menuItems->get(index).helpColor = &Colors::overlayMenuSelectedItemColor;
+
       mModule[mCurrentIndex] = index;
       mCurrentIndex++;
 
       // Check if we need to switch over to weapons
       if(mCurrentIndex == ShipModuleCount)
       {
-         mMenuItems = Vector<OverlayMenuItem>(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems));
          mTransitioning = true;
          mTransitionTimer.reset();
       }

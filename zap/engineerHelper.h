@@ -43,7 +43,6 @@ class EngineerHelper : public HelperMenu
 private:
    const char *getCancelMessage();
    S32 mSelectedIndex;
-   S32 mWidth;
 
    bool isMenuBeingDisplayed();
    void exitHelper();

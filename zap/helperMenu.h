@@ -75,6 +75,8 @@ private:
 
    S32 mOldBottom;
 
+   S32 calcInteriorEdge(S32 xPos, S32 width);
+
 protected:
    static const S32 MENU_TOP = 180;    // Location of top of overlay menu
 
@@ -88,17 +90,19 @@ protected:
    // Shortcut helper function
    virtual void exitHelper();
 
-   void drawItemMenu(S32 xPos, S32 yPos, S32 width, const char *title, const OverlayMenuItem *items, S32 count,
+   void drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, const OverlayMenuItem *prevItems, S32 prevCount,
                      const char **legendText = NULL, const Color **legendColors = NULL, S32 legendCount = 0);
 
    ClientGame *getGame();
 
    static const S32 MENU_FONT_SIZE        = 15;    // Size of standard items
    static const S32 MENU_FONT_SPACING     =  7;    // Vertical gap between lines
-   static const S32 MENU_PADDING          =  3;
    static const S32 MENU_LEGEND_FONT_SIZE = 11;    // Smaller font of lengend items on QuickChat menus
    static const S32 ITEM_HELP_PADDING     =  5;    // Gap between item and its help text
    static const S32 ITEM_INDENT           = 50;    // Amount individual menu items are indented to make room for keys
+   static const S32 MENU_PADDING          =  5;    // Padding around outer edge of overlay
+
+   S32 mWidth;    // Calculated width of menu
 
 public:
    explicit HelperMenu();     // Constructor
@@ -125,6 +129,8 @@ public:
    S32 getAnimationPeriod() const;
 
    virtual HelperMenuType getType() = 0;
+
+   S32 drawMenuItems(const OverlayMenuItem *items, S32 count, S32 bottom, bool newItems, bool renderKeysWithItemColor);
 };
 
 

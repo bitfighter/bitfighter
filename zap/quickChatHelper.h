@@ -63,7 +63,6 @@ class QuickChatHelper : public HelperMenu
 
 private:
    S32 mCurNode;
-   S32 mWidth;
    Vector<OverlayMenuItem> mMenuItems;
 
    void updateChatMenuItems(S32 curNode);
