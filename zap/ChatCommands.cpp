@@ -418,15 +418,6 @@ void idleHandler(ClientGame *game, const Vector<string> &words)
 }
 
 
-void suspendHandler(ClientGame *game, const Vector<string> &words)
-{
-   if(game->getPlayerCount() > 1)
-      game->displayErrorMessage("!!! Can't suspend when others are playing");
-   else
-      game->getUIManager()->getGameUserInterface()->suspendGame();
-}
-
-
 void showPresetsHandler(ClientGame *game, const Vector<string> &words)
 {
    Vector<U8> preset(Zap::ShipModuleCount + Zap::ShipWeaponCount);

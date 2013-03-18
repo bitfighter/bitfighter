@@ -300,12 +300,13 @@ void Projectile::idle(BfObject::IdleCallPath path)
             {
                mBounced = true;
 
-               static const U32 MAX_LIVETIME_INCREASES = 10;
+               static const U32 MAX_LIVETIME_INCREASES = 6;
                static const U32 LIVETIME_INCREASE = 500;
 
                // Let's extend the projectile life time on each bounce, up to twice the normal
                // live-time
-               if(mLiveTimeIncreases < MAX_LIVETIME_INCREASES)
+               if(mLiveTimeIncreases < MAX_LIVETIME_INCREASES &&
+                     mTimeRemaining < GameWeapon::weaponInfo[mWeaponType].projLiveTime)
                {
                   mTimeRemaining += LIVETIME_INCREASE;
                   mLiveTimeIncreases++;

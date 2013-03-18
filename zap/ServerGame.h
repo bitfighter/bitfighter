@@ -150,6 +150,8 @@ public:
 
    bool isFull();      // More room at the inn?
 
+   bool isSuspended();
+
    void addClient(ClientInfo *clientInfo);
    void removeClient(ClientInfo *clientInfo);
 
@@ -204,7 +206,6 @@ public:
    DataSender dataSender;
 
    void suspendGame();
-   void suspendGame(GameConnection *requestor);  // Suspend at player's request
    void unsuspendGame(bool remoteRequest);
 
    void suspenderLeftGame();

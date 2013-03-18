@@ -304,9 +304,6 @@ public:
    void selectWeapon(U32 index);    // Choose weapon by its index
    void activateModule(S32 index);  // Activate a specific module by its index
 
-   void suspendGame();
-   void unsuspendGame();
-
    void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd = false);  
    void exitHelper();
 

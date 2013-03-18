@@ -179,7 +179,6 @@ public:
 
    void submitPassword(const char *password);
 
-   void suspendGame();
    void unsuspendGame();
 
    void sendLevelList();
@@ -203,7 +202,6 @@ public:
    bool gotPermissionsReply();
 
    // Suspend/unsuspend game
-   TNL_DECLARE_RPC(c2sSuspendGame, (bool suspend));
    TNL_DECLARE_RPC(s2cSuspendGame, (bool gameIsRunning));
    TNL_DECLARE_RPC(s2cUnsuspend, ());
 

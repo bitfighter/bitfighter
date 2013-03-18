@@ -220,12 +220,6 @@ GameSettings *Game::getSettings()
 }
 
 
-bool Game::isSuspended()
-{
-   return mGameSuspended;
-}
-
-
 bool Game::isOrIsAboutToBeSuspended()
 {
    return mGameSuspended || mTimeToSuspend.getCurrent() > 0;

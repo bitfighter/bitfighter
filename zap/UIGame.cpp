@@ -187,9 +187,6 @@ void GameUserInterface::onActivate()
 
 void GameUserInterface::onReactivate()
 {
-   if(getGame()->isSuspended())
-      unsuspendGame();
-
    getGame()->undelaySpawn();
 
    mDisableShipKeyboardInput = false;
@@ -341,14 +338,10 @@ void GameUserInterface::render()
 
    getGame()->render();
 
-   if(getGame()->isSuspended() || getGame()->isSpawnDelayed())
-   {
-      renderChatMsgs();
+   if(getGame()->isSpawnDelayed())
       renderSuspendedMessage();
 
-      mHelperManager.render();
-   }
-   else
+
    {
       renderReticle();              // Draw crosshairs if using mouse
       renderChatMsgs();             // Render incoming chat and server msgs
@@ -425,14 +418,9 @@ void GameUserInterface::renderSuspendedMessage()
    static const S32 DisplayStyle = 2;
    static const S32 VertOffset = -30;
 
-   // Fade what's below unless we're chatting
-   if(isChatting())
-      dimUnderlyingUI(getGame()->getUIFadeFactor());
 
    if(getGame()->requestedSpawnDelayed() && getGame()->isWaitingForSpawn())
    {
-      //dimUnderlyingUI(1);                                   // Completely obscure what's below
-
       waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.0f)) + " SECONDS";
       renderMessageBox("", "", waitMsg,  ARRAYSIZE(waitMsg),  VertOffset, DisplayStyle);
    }
@@ -828,7 +816,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    GameSettings *settings = getGame()->getSettings();
 
    // Kind of hacky, but this will unsuspend and swallow the keystroke, which is what we want
-   if(!mHelperManager.isHelperActive() && (getGame()->isSuspended() || getGame()->isSpawnDelayed()))
+   if(!mHelperManager.isHelperActive() && getGame()->isSpawnDelayed())
    {
       getGame()->undelaySpawn();
       if(inputCode != KEY_ESCAPE)  // Lagged out and can't un-idle to bring up the menu?
@@ -1529,21 +1517,6 @@ void GameUserInterface::VoiceRecorder::process()
       if(gameType && sendBuffer->getBufferSize() < 1024)      // Don't try to send too big
          gameType->c2sVoiceChat(mGame->getSettings()->getIniSettings()->echoVoice, sendBuffer);
    }
-}
-
-
-void GameUserInterface::suspendGame()
-{
-   getGame()->getConnectionToServer()->suspendGame();    // Tell server we're suspending
-   getGame()->suspendGame(false);                        // Suspend locally
-   getUIManager()->activate(SuspendedUI);                // And enter chat mode
-}
-
-
-void GameUserInterface::unsuspendGame()
-{
-   getGame()->unsuspendGame();                                 // Unsuspend locally
-   getGame()->getConnectionToServer()->unsuspendGame();        // Tell the server we're unsuspending
 }
 
 

@@ -395,28 +395,6 @@ void GameConnection::submitPassword(const char *password)
 }
 
 
-void GameConnection::suspendGame()
-{
-   c2sSuspendGame(true);
-}
-
-
-void GameConnection::unsuspendGame()
-{
-   c2sSuspendGame(false);
-}
-
-// Client requests that the game be suspended while he waits for other players.  This runs on the server.
-TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
-{
-   if(suspend)
-      mServerGame->suspendGame(this);
-   else
-      mServerGame->unsuspendGame(true);
-}
-
-
 // If the server thinks everyone is alseep, it will suspend the game
 TNL_IMPLEMENT_RPC(GameConnection, s2cSuspendGame, (bool gameIsRunning), (gameIsRunning), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)

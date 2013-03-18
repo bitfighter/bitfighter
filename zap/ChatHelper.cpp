@@ -47,7 +47,6 @@ namespace Zap
    { "servvol",  &ChatCommands::servVolHandler,   { xINT },      1,      ADV_COMMANDS,     0,     1,    {"<0-10>"},             "Set volume of server"  },
    { "getmap",   &ChatCommands::getMapHandler,    { STR },       1,      ADV_COMMANDS,     1,     1,    {"[file]"},             "Save currently playing level in [file], if allowed" },
    { "idle",     &ChatCommands::idleHandler,      {  },          0,      ADV_COMMANDS,     1,     1,    {  },                   "Place client in idle mode (AFK)" },
-   { "suspend",  &ChatCommands::suspendHandler,   {  },          0,      ADV_COMMANDS,     1,     1,    {  },                   "Place server on hold while waiting for players" },
    { "pm",       &ChatCommands::pmHandler,        { NAME, STR }, 2,      ADV_COMMANDS,     1,     1,    {"<name>","<message>"}, "Send private message to player" },
    { "mute",     &ChatCommands::muteHandler,      { NAME },      1,      ADV_COMMANDS,     1,     1,    {"<name>"},             "Toggle hiding chat messages from <name>" },
    { "vmute",    &ChatCommands::voiceMuteHandler, { NAME },      1,      ADV_COMMANDS,     1,     1,    {"<name>"},             "Toggle muting voice chat from <name>" },
