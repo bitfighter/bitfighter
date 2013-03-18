@@ -44,7 +44,6 @@ HelperMenu::HelperMenu()
 {
    mAnimationTimer.setPeriod(150);    // Transition time, in ms
    mTransitionTimer.setPeriod(150);
-   mTransitioning = false;
 }
 
 
@@ -66,7 +65,6 @@ void HelperMenu::onActivated()
 {
    mAnimationTimer.invert();
    mActivating = true;
-   mTransitioning = false;
    mTransitionTimer.clear();
 }
 
@@ -373,8 +371,7 @@ void HelperMenu::idle(U32 deltaT)
    if(mAnimationTimer.update(deltaT) && !mActivating)
       mHelperManager->doneClosingHelper();
 
-   if(mTransitionTimer.update(deltaT))
-      mTransitioning = false;
+   mTransitionTimer.update(deltaT);
 }
 
 

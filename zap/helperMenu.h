@@ -85,7 +85,6 @@ protected:
 
    S32 getLeftEdgeOfMenuPos();         // Return left edge of menu
    bool mActivating;                   // True when menu is being activated, false when deactivating, undefined at other times
-   bool mTransitioning;
 
    // Shortcut helper function
    virtual void exitHelper();
