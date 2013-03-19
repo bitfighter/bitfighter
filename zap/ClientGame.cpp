@@ -1991,7 +1991,7 @@ void ClientGame::render()
    UIID currentUI = mUIManager->getCurrentUI()->getMenuID();
 
    // Not in the Game UI (or one of its submenus)...
-   if(!currentUI == GameUI && !mUIManager->cameFrom(GameUI))
+   if(currentUI != GameUI && !mUIManager->cameFrom(GameUI))
       return;
 
    // Start of the level, we only show progress bar
