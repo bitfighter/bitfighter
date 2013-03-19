@@ -142,7 +142,10 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    if(mTransitionTimer.getCurrent() > 0)
       transitionOffset = (mOldBottom - bottom) * mTransitionTimer.getFraction();
    else
+   {
       mOldBottom = bottom;
+      mOldCount = displayItems;
+   }
 
    bottom += transitionOffset;
 
@@ -231,8 +234,14 @@ extern ScreenInfo gScreenInfo;
 // Render a set of menu items.  Break this code out to make transitions easier.
 S32 HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 bottom, bool newItems, bool renderKeysWithItemColor)
 {
-   S32 height = (MENU_FONT_SIZE + MENU_FONT_SPACING) * count;
-   S32 height7 = (MENU_FONT_SIZE + MENU_FONT_SPACING) * 7;
+   S32 displayItems = 0;
+   // Count how many items we will be displaying -- some may be hidden
+   for(S32 i = 0; i < count; i++)
+      if(items[i].showOnMenu)
+         displayItems++;
+
+   S32 height = (MENU_FONT_SIZE + MENU_FONT_SPACING) * displayItems;
+   S32 oldHeight = (MENU_FONT_SIZE + MENU_FONT_SPACING) * mOldCount;
 
    S32 xPos = getLeftEdgeOfMenuPos();
    S32 yPos = MENU_TOP + MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
@@ -242,7 +251,7 @@ S32 HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 botto
    scissorsManager.enable(mTransitionTimer.getCurrent() > 0, getGame(), 0, yPos, 
                           gScreenInfo.getGameCanvasWidth(), bottom - yPos - (4 * MENU_PADDING + MENU_LEGEND_FONT_SIZE));
 
-   yPos += mTransitionTimer.getFraction() * height7 - (newItems ? 0 : height);
+   yPos += mTransitionTimer.getFraction() * oldHeight - (newItems ? 0 : height);
 
    // Determine whether to show keys or joystick buttons on menu
    GameSettings *settings = getGame()->getSettings();

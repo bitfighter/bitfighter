@@ -74,6 +74,7 @@ private:
    HelperManager *mHelperManager;
 
    S32 mOldBottom;
+   S32 mOldCount;
 
    S32 calcInteriorEdge(S32 xPos, S32 width);
 
