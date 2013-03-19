@@ -78,8 +78,15 @@ private:
 
    S32 calcInteriorEdge(S32 xPos, S32 width);
 
+   // Some render helpers
+   S32 drawMenuItems(const OverlayMenuItem *items, S32 count, S32 bottom, bool newItems, bool renderKeysWithItemColor);
+   void renderMenuFrame(S32 interiorEdge, S32 height);
+   void renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode);
+   S32 renderLegend(S32 xPos, S32 yPos, const char **legendtext, const Color **legendColors, S32 legendCount);
+
+
 protected:
-   static const S32 MENU_TOP = 180;    // Location of top of overlay menu
+   static const S32 MENU_TOP = 175;    // Location of top of title of overlay menu frame
 
    Timer mAnimationTimer;              // Timer for activation/deactivation animation
    Timer mTransitionTimer;             // Timer for intra-helper transitions
@@ -129,8 +136,6 @@ public:
    S32 getAnimationPeriod() const;
 
    virtual HelperMenuType getType() = 0;
-
-   S32 drawMenuItems(const OverlayMenuItem *items, S32 count, S32 bottom, bool newItems, bool renderKeysWithItemColor);
 };
 
 

@@ -83,7 +83,7 @@ extern Color gErrorMessageTextColor;
 // in remaining in QuickChat mode, is there?
 void QuickChatHelper::render()
 {
-   S32 yPos = MENU_TOP;
+   S32 yPos = MENU_TOP + MENU_PADDING;
 
    if(!gQuickChatTree.size())
    {

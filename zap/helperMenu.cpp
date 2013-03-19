@@ -124,15 +124,17 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
       if(items[i].showOnMenu)
          displayItems++;
 
-   // Frame the menu
-   S32 interiorMenuHeight = MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING +                       // Title
-                            displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + 2 * MENU_PADDING +  // Menu items
-                            (legendCount > 0 ? MENU_LEGEND_FONT_SIZE + 2 * MENU_FONT_SPACING : 0) +   // Legend
-                            2 * MENU_PADDING +                                                        // Post-legend gap
-                            MENU_LEGEND_FONT_SIZE;                                                    // Instructions at bottom
+   // Total height of the menu
+   S32 menuHeight = MENU_PADDING +                                                            // Top padding
+                    MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING +                       // Title
+                    displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + 2 * MENU_PADDING +  // Menu items
+                    (legendCount > 0 ? MENU_LEGEND_FONT_SIZE + 2 * MENU_FONT_SPACING : 0) +   // Legend
+                    2 * MENU_PADDING +                                                        // Post-legend gap
+                    MENU_LEGEND_FONT_SIZE +                                                   // Instructions at bottom
+                    MENU_PADDING;                                                             // Bottom padding
 
    S32 topOfMenuItemRenderArea = yPos - MENU_PADDING + MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
-   S32 bottom = yPos + interiorMenuHeight + MENU_PADDING;
+   S32 bottom = yPos + menuHeight;
 
    // If we are transitioning between items of different sizes, we will gradually change the rendered size during the transition
    // Generally, the top of the menu will stay in place, while the bottom will be adjusted.  Therefore, lower items need
@@ -153,22 +155,8 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    S32 interiorEdge = calcInteriorEdge(xPos, mWidth);
 
-   const S32 CORNER_SIZE = 15;      
-   S32 top = MENU_TOP - MENU_PADDING;      // Absolute top of menu as rendered
 
-   Point p[] = { Point(0, top), Point(interiorEdge - CORNER_SIZE, top),     // Top
-                 Point(interiorEdge, top + CORNER_SIZE),                    // Edge
-                 Point(interiorEdge, bottom), Point(0, bottom) };           // Bottom
-
-   Vector<Point> points(p, ARRAYSIZE(p));
-
-   // Fill
-   glColor(Colors::black, 0.70f);
-   renderPointVector(&points, GL_POLYGON);
-
-   // Border
-   glColor(Color(.35,0,0));
-   renderPointVector(&points, GL_LINE_STRIP);
+   renderMenuFrame(interiorEdge, menuHeight + transitionOffset);
 
    // Gray line
    glColor(Colors::gray20);
@@ -177,8 +165,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    // Draw the title
    glColor(baseColor);
    drawString(xPos, yPos, MENU_FONT_SIZE, title);
-   yPos += MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
-   yPos += transitionOffset;
+   yPos += MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING + transitionOffset;
 
    bool hasLegend = legendCount > 0;
 
@@ -187,45 +174,12 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    if(prevItems && mTransitionTimer.getCurrent() > 0)
       drawMenuItems(prevItems, prevCount, bottom, false, hasLegend);
 
-   ///// 
-   // Legend
-
    if(hasLegend)
-   {
-      yPos += MENU_FONT_SPACING;
-      S32 x = xPos + 20;
-      for(S32 i = 0; i < legendCount; i++)
-      {
-         glColor(legendColors[i]);
-         x += drawStringAndGetWidth(x, yPos, MENU_LEGEND_FONT_SIZE, legendText[i]);
-      }
-
-      yPos += MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING;
-   }
+      yPos += renderLegend(xPos, yPos, legendText, legendColors, legendCount);
 
    yPos += 2 * MENU_PADDING;
 
-   //yPos -= 2;    // Pixel compensation
-
-   /////
-   // Bottom of menu
-
-   glColor(baseColor);
-
-   // RenderedSize will be -1 if the button is not defined
-   if(getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeKeyboard)
-      drawStringf(xPos, yPos, MENU_LEGEND_FONT_SIZE, 
-                  "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
-   else
-   {
-      S32 butSize = JoystickRender::getControllerButtonRenderedSize(Joystick::SelectedPresetIndex, BUTTON_BACK);
-
-      xPos += drawStringAndGetWidth(xPos, yPos, MENU_LEGEND_FONT_SIZE, "Press ") + 4;
-      JoystickRender::renderControllerButton(F32(xPos + 4), F32(yPos), Joystick::SelectedPresetIndex, BUTTON_BACK, false);
-      xPos += butSize;
-      glColor(baseColor);
-      drawString(xPos, yPos, MENU_LEGEND_FONT_SIZE, "to cancel");
-   }
+   renderPressEscapeToCancel(xPos, yPos, baseColor, getGame()->getSettings()->getInputCodeManager()->getInputMode());
 }
 
 
@@ -244,7 +198,7 @@ S32 HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 botto
    S32 oldHeight = (MENU_FONT_SIZE + MENU_FONT_SPACING) * mOldCount;
 
    S32 xPos = getLeftEdgeOfMenuPos();
-   S32 yPos = MENU_TOP + MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
+   S32 yPos = MENU_TOP + MENU_FONT_SIZE + MENU_FONT_SPACING + 2 * MENU_PADDING;
 
    static ScissorsManager scissorsManager;
 
@@ -300,6 +254,62 @@ S32 HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 botto
    return height;
 }
 
+
+void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode)
+{
+   glColor(baseColor);
+
+   // RenderedSize will be -1 if the button is not defined
+   if(inputMode == InputModeKeyboard)
+      drawStringf(xPos, yPos, MENU_LEGEND_FONT_SIZE, 
+                  "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
+   else
+   {
+      S32 butSize = JoystickRender::getControllerButtonRenderedSize(Joystick::SelectedPresetIndex, BUTTON_BACK);
+
+      xPos += drawStringAndGetWidth(xPos, yPos, MENU_LEGEND_FONT_SIZE, "Press ") + 4;
+      JoystickRender::renderControllerButton(F32(xPos + 4), F32(yPos), Joystick::SelectedPresetIndex, BUTTON_BACK, false);
+      xPos += butSize;
+      glColor(baseColor);
+      drawString(xPos, yPos, MENU_LEGEND_FONT_SIZE, "to cancel");
+   }
+}
+
+
+S32 HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color **legendColors, S32 legendCount)
+{
+   x += 20;
+   y += MENU_FONT_SPACING;
+
+   for(S32 i = 0; i < legendCount; i++)
+   {
+      glColor(legendColors[i]);
+      x += drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legendText[i]);
+   }
+
+   return MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING;
+}
+
+
+void HelperMenu::renderMenuFrame(S32 interiorEdge, S32 height)
+{
+   const S32 CORNER_SIZE = 15;      
+   S32 bottom = MENU_TOP + height;
+
+   Point p[] = { Point(0, MENU_TOP), Point(interiorEdge - CORNER_SIZE, MENU_TOP),   // Top
+                 Point(interiorEdge, MENU_TOP + CORNER_SIZE),                       // Edge
+                 Point(interiorEdge, bottom), Point(0, bottom) };                   // Bottom
+
+   Vector<Point> points(p, ARRAYSIZE(p));
+
+   // Fill
+   glColor(Colors::black, 0.70f);
+   renderPointVector(&points, GL_POLYGON);
+
+   // Border
+   glColor(Color(.35,0,0));
+   renderPointVector(&points, GL_LINE_STRIP);
+}
 
 
 // Calculate the width of the widest item in items

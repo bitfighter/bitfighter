@@ -114,7 +114,7 @@ void EngineerHelper::onActivated()
 
 void EngineerHelper::render()
 {
-   S32 yPos = MENU_TOP;
+   S32 yPos = MENU_TOP + MENU_PADDING;
    
    if(isMenuBeingDisplayed())    // Haven't selected an item yet, so show the menu
       drawItemMenu(menuTitle, engineerItemInfo, ARRAYSIZE(engineerItemInfo), NULL, 0);
