@@ -71,7 +71,7 @@ foreach my $file (@files) {
       }
 
       # Lua base classes
-      if( $line =~ m|REGISTER_LUA_CLASS\( *(.+?) *\)| ) {
+      if( $line =~ m|REGISTER_LUA_CLASS *\( *(.+?) *\)| ) {
          my $class = $1;
          unshift(@{$classes{$class}}, "$shortClassDescr\n$longClassDescr\nclass $class { \n public:\n");   # unshift adds element to beginning of array
          $writeFile = 1;
@@ -79,7 +79,7 @@ foreach my $file (@files) {
       }
 
       # Lua subclasses
-      if( $line =~ m|REGISTER_LUA_SUBCLASS\( *(.+?) *, *(.+?) *\)| ) {
+      if( $line =~ m|REGISTER_LUA_SUBCLASS *\( *(.+?) *, *(.+?) *\)| ) {
          my $class = $1;
          my $parent = $2;
          unshift(@{$classes{$class}}, "$shortClassDescr\n$longClassDescr\nclass $class : public $parent { \n public:\n");    
@@ -89,7 +89,7 @@ foreach my $file (@files) {
          next;
       }
 
-      if( $line =~ m|define +LUA_METHODS\(CLASS, *METHOD\)| ) {
+      if( $line =~ m|define +LUA_METHODS *\(CLASS, *METHOD\)| ) {
          $collectingMethods = 1;
          next;
       }
@@ -101,7 +101,7 @@ foreach my $file (@files) {
             next;
          }
 
-         if( $line =~ m|GENERATE_LUA_METHODS_TABLE\( *(.+?) *,| ) {     # Signals we have all methods for this class, gives us class name; now generate code
+         if( $line =~ m|GENERATE_LUA_METHODS_TABLE *\( *(.+?) *,| ) {     # Signals we have all methods for this class, gives us class name; now generate code
             my $class = $1;
 
             foreach my $method (@methods) {
