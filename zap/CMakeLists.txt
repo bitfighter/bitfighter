@@ -50,6 +50,8 @@ set(CLIENT_SOURCES
    UIYesNo.cpp
    VideoSystem.cpp
    voiceCodec.cpp
+   ../fontstash/stb_truetype.c
+   ../fontstash/fontstash.c
 )
 
 set(SHARED_SOURCES

@@ -36,17 +36,81 @@
 #include "FontOrbitronLight.h"
 #include "FontOrbitronMedium.h"
 
+extern "C" {
+   #include "../fontstash/fontstash.h"
+}
+#include "../fontstash/stb_truetype.h"
 
 #include "Color.h"
 #include "Point.h"
 #include "tnlVector.h"
+#include "stringUtils.h"
+
+#include <stdio.h>
 
 namespace Zap {
 
 const SFG_StrokeFont *gCurrentFont = &fgStrokeRoman;  // fgStrokeOrbitronLight, fgStrokeOrbitronMed
 
 
-void OpenglUtils::drawCharacter(S32 character)
+// TODO: set up some sort of struct to hold stashes and ids for multiple fonts
+static S32 stashFontId = 0;
+struct sth_stash* stash = NULL;
+
+extern string getInstalledDataDir();
+
+void OpenglUtils::initFont()
+{
+   // We're switching screen modes, clean-up old stash before creating a new one
+   if(stash)
+      sth_delete(stash);
+
+   stash = sth_create(512, 512);
+
+   if (!stash)
+   {
+      printf("Could not create stash.\n");
+      return;
+   }
+
+   // TODO create a API to access the font dir
+   // TODO maybe load fonts from INI?
+   string fontFile = getInstalledDataDir() + getFileSeparator() + "fonts" + getFileSeparator() +
+         //"Orbitron Light.ttf";
+         //"OCRA.ttf";
+         "prime_regular.ttf";
+
+   stashFontId = sth_add_font(stash, fontFile.c_str());
+
+   if (stashFontId != 0)
+      printf("Loaded font from stash %d: %s\n", stashFontId, fontFile.c_str());
+   else
+      printf("Can't load font! %s\n", fontFile.c_str());
+}
+
+
+void OpenglUtils::shutdownFont()
+{
+   if(stash)
+      sth_delete(stash);
+}
+
+
+void OpenglUtils::drawTTFString(const char *string, F32 size)
+{
+   // Needed??
+   F32 outPos;
+
+   sth_begin_draw(stash);
+
+   // 152.381f is what I stole from the bottom of FontStrokeRoman.h as the font size
+   sth_draw_text(stash, stashFontId, size, 0.0, 0.0, string, &outPos);
+
+   sth_end_draw(stash);
+}
+
+
+void OpenglUtils::drawStrokeCharacter(S32 character)
 {
    /*
     * Draw a stroke character
@@ -84,7 +148,9 @@ void OpenglUtils::drawCharacter(S32 character)
    glTranslatef( schar->Right, 0.0, 0.0 );
 }
 
-int OpenglUtils::getStringLength(const unsigned char* string )
+
+// TODO: what to do here for TTF fonts?
+int OpenglUtils::getStringLength(const unsigned char* string)
 {
    U8 c;
    F32 length = 0.0;

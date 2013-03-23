@@ -34,7 +34,12 @@ public:
       FontOrbitronMed
    };
 
-   static void drawCharacter(S32 character);
+   static void initFont();
+   static void shutdownFont();
+
+   static void drawTTFString(const char *, F32 size);
+   static void drawStrokeCharacter(S32 character);
+
    static S32 getStringLength(const unsigned char* string);
 };
 

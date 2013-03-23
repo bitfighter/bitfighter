@@ -124,6 +124,7 @@ using namespace TNL;
 #  endif
 
 #  include "VideoSystem.h"
+#  include "OpenglUtils.h"
 #  include "ClientGame.h"
 #endif
 
@@ -763,6 +764,9 @@ void shutdownBitfighter()
       }
 
       SDL_QuitSubSystem(SDL_INIT_VIDEO);
+
+      // Clean up our font
+      OpenglUtils::shutdownFont();
 #endif
    }
 

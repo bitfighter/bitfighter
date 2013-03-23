@@ -31,6 +31,7 @@
 #include "ScreenInfo.h"
 #include "UI.h"
 #include "version.h"
+#include "OpenglUtils.h"
 
 #include "tnlLog.h"
 
@@ -465,7 +466,10 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    // horrible in split-screen mode.
    for(S32 i = 0; i < gClientGames.size(); i++)
       if(gClientGames[i]->getUIManager()->getCurrentUI())
-         gClientGames[i]->getUIManager()->getCurrentUI()->onDisplayModeChange();     
+         gClientGames[i]->getUIManager()->getCurrentUI()->onDisplayModeChange();
+
+   // Now initialize our TTF font
+   OpenglUtils::initFont();
 }
 
 

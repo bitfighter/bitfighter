@@ -47,7 +47,6 @@ F32 gLineWidth4 = 4.0f;
 extern ScreenInfo gScreenInfo;
 
 
-
 void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true)
 {
    static F32 modelview[16];
@@ -60,14 +59,32 @@ void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bo
       glLineWidth(linewidth);
    }
 
-   F32 scaleFactor = size / 120.0f;
    glPushMatrix();
       glTranslatef(x, y, 0);
       glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
-      glScalef(scaleFactor, -scaleFactor, 1);
-      for(S32 i = 0; string[i]; i++)
-         OpenglUtils::drawCharacter(string[i]);
+
+      static bool useTTF = true;  // XXX: change me to test ttf
+      if(useTTF)
+      {
+         // Flip upside down because y = -y
+         glScalef(1, -1, 1);
+
+         // Bonkers factor because we build the game around thinking the font size was 120
+         // when it was really 152.381 (see bottom of FontStrokeRoman.h as well as magic scale
+         // factor of 120.0f a few lines below).  This factor == 152.381 / 120
+         static F32 legacyNormalizationFactor = 1.26984166667f;
+
+         OpenglUtils::drawTTFString(string, size * legacyNormalizationFactor);
+      }
+      else
+      {
+         F32 scaleFactor = size / 120.0f;  // Where does this magic number come from?
+         glScalef(scaleFactor, -scaleFactor, 1);
+         for(S32 i = 0; string[i]; i++)
+            OpenglUtils::drawStrokeCharacter(string[i]);
+      }
    glPopMatrix();
+
 
    if(autoLineWidth)
       glLineWidth(gDefaultLineWidth);

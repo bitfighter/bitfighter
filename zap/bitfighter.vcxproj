@@ -133,6 +133,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\clipper\clipper.cpp" />
+    <ClCompile Include="..\fontstash\fontstash.c" />
+    <ClCompile Include="..\fontstash\stb_truetype.c" />
     <ClCompile Include="..\master\database.cpp" />
     <ClCompile Include="..\master\masterInterface.cpp" />
     <ClCompile Include="..\recast\RecastAlloc.cpp" />
@@ -267,6 +269,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\clipper\clipper.h" />
+    <ClInclude Include="..\fontstash\fontstash.h" />
+    <ClInclude Include="..\fontstash\stb_truetype.h" />
     <ClInclude Include="..\lua\include\lunar.h" />
     <ClInclude Include="..\master\database.h" />
     <ClInclude Include="..\master\masterInterface.h" />
