@@ -22,6 +22,7 @@ set(CLIENT_SOURCES
    OpenglUtils.cpp
    quickChatHelper.cpp
    RenderUtils.cpp
+   ScissorsManager.cpp
    ScreenShooter.cpp
    ShipShape.cpp
    sparkManager.cpp
