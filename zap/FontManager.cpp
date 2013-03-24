@@ -53,8 +53,10 @@ Font::Font(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont)
    mOk = true;
    mStrokeFont = strokeFont;
 
-   mStash = NULL;       // TTF only
+   //mStash = NULL;       // TTF only
 }
+
+static sth_stash *mStash = NULL;
 
 
 extern string getInstalledDataDir();
@@ -63,11 +65,14 @@ extern string getInstalledDataDir();
 Font::Font(FontManager::FontId fontId, const string &fontFile)
 {
    mFontId = fontId;
-
+      
    mIsStrokeFont = false;
    mStrokeFont = NULL;     // Stroke font only
 
-   mStash = sth_create(512, 512);
+   if(!mStash)
+      mStash = sth_create(512, 512);
+
+   TNLAssert(mStash, "Invalid font stash!");
 
    if(!mStash)
    {
@@ -78,6 +83,8 @@ Font::Font(FontManager::FontId fontId, const string &fontFile)
    string file = getInstalledDataDir() + getFileSeparator() + "fonts" + getFileSeparator() + fontFile;
 
    mStashFontId = sth_add_font(mStash, file.c_str());
+
+   TNLAssert(mStashFontId > 0, "Invalid font id!");
 
    if(mStashFontId == 0)
    {
@@ -92,7 +99,11 @@ Font::Font(FontManager::FontId fontId, const string &fontFile)
 // Destructor
 Font::~Font()
 {
-   sth_delete(mStash);
+   if(mStash)
+   {
+      sth_delete(mStash);
+      mStash = NULL;
+   }
 }
 
 
@@ -114,7 +125,7 @@ FontManager::FontId Font::getId()
 }
 
 
-::sth_stash *Font::getStash()
+sth_stash *Font::getStash()
 {
    return mStash;
 }
@@ -133,7 +144,6 @@ S32 Font::getStashFontId()
 
 static FontManager::FontId currentFontId;
 
-
 static Font *fontList[FontManager::FontCount];
 
 void FontManager::initialize()
@@ -144,7 +154,9 @@ void FontManager::initialize()
    fontList[FontOrbitronMedStroke]   = new Font(FontOrbitronMedStroke,   &fgStrokeOrbitronMed);
 
    // Our TTF fonts
-   fontList[FontOcrA]                = new Font(FontOcrA,                "OCRA.ttf");
+   fontList[FontOcrA]          = new Font(FontOcrA,          "OCRA.ttf");
+   fontList[FontOrbitronLight] = new Font(FontOrbitronLight, "Orbitron Light.ttf");
+   fontList[FontPrimeRegular]  = new Font(FontPrimeRegular,  "prime_regular.ttf");
 }
 
 

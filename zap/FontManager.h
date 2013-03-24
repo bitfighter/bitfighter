@@ -58,6 +58,8 @@ public:
       FontOrbitronLightStroke,
       FontOrbitronMedStroke,
       FontOcrA,
+      FontOrbitronLight,
+      FontPrimeRegular,
       FontCount
    };
 
@@ -99,7 +101,6 @@ private:
    FontManager::FontId mFontId;
 
    S32 mStashFontId;
-   sth_stash *mStash;            // Will be NULL for stroke fonts
 
    const SFG_StrokeFont *mStrokeFont;     // Will be NULL for TTF fonts
 
@@ -108,10 +109,13 @@ public:
    Font(FontManager::FontId fontId, const string &fontFile);               // TTF font constructor
    ~Font();                                                                // Destructor
 
+      /*static sth_stash *mStash;*/            // Will be NULL for stroke fonts
+
+
    FontManager::FontId getId();
    const SFG_StrokeFont *getStrokeFont();
    bool isStrokeFont();
-   ::sth_stash *getStash();
+   sth_stash *getStash();
    S32 getStashFontId();
 
 };

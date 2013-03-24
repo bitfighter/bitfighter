@@ -1465,6 +1465,7 @@ int main(int argc, char **argv)
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
 
       FontManager::initialize();
+      FontManager::setFont(FontManager::FontPrimeRegular);     // Default font
 
       // Now show any error messages from start-up
       Vector<string> configurationErrors = settings->getConfigurationErrors();
