@@ -1199,9 +1199,22 @@ S32 EngineeredItem::lua_getHealth(lua_State *L)
 S32 EngineeredItem::lua_setHealth(lua_State *L)
 { 
    checkArgList(L, functionArgs, "EngineeredItem", "setHealth");
-   mHealth = getFloat(L, 1);
+   F32 newHealth = getFloat(L, 1);
    checkHealthBounds();
-   return 0;     
+
+   // Just 'damage' the engineered item to take care of all of the disabling/mask/etc.
+   DamageInfo di;
+   di.damagingObject = NULL;
+
+   F32 healthDifference = mHealth - newHealth;
+   if(healthDifference > 0)
+      di.damageAmount = 4.0 * healthDifference;
+   else
+      di.damageAmount = healthDifference;
+
+   damageObject(&di);
+
+   return 0;
 }
 
 
