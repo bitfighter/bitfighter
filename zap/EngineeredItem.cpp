@@ -710,17 +710,22 @@ bool EngineeredItem::isEnabled()
 void EngineeredItem::damageObject(DamageInfo *di)
 {
    // Don't do self damage.  This is more complicated than it should probably be..
-   U8 damagingObjectType = di->damagingObject->getObjectTypeNumber();
+   BfObject *damagingObject = di->damagingObject;
+
+   U8 damagingObjectType = UnknownTypeNumber;
+   if(damagingObject != NULL)
+      damagingObjectType = damagingObject->getObjectTypeNumber();
+
    if(isProjectileType(damagingObjectType))
    {
       BfObject *shooter = NULL;
 
       if(damagingObjectType == BulletTypeNumber)
-         shooter = static_cast<Projectile*>(di->damagingObject)->mShooter;
+         shooter = static_cast<Projectile*>(damagingObject)->mShooter;
       else if(damagingObjectType == SeekerTypeNumber)
-         shooter = static_cast<Seeker*>(di->damagingObject)->mShooter;
+         shooter = static_cast<Seeker*>(damagingObject)->mShooter;
       else if(damagingObjectType == BurstTypeNumber)
-         shooter = static_cast<Burst*>(di->damagingObject)->mShooter;
+         shooter = static_cast<Burst*>(damagingObject)->mShooter;
 
       // We have a shooter that is another engineered object (turret)
       if(shooter != NULL && isEngineeredType(shooter->getObjectTypeNumber()))
@@ -762,9 +767,9 @@ void EngineeredItem::damageObject(DamageInfo *di)
       onDisabled();
 
       // Handle scoring
-      if(di->damagingObject && di->damagingObject->getOwner())
+      if(damagingObject && damagingObject->getOwner())
       {
-         ClientInfo *player = di->damagingObject->getOwner();
+         ClientInfo *player = damagingObject->getOwner();
 
          if(mObjectTypeNumber == TurretTypeNumber)
          {
@@ -785,9 +790,9 @@ void EngineeredItem::damageObject(DamageInfo *di)
    {
       if(getTeam() == TEAM_NEUTRAL)                   // Neutral objects...
       {
-         if(di->damagingObject)
+         if(damagingObject)
          {
-            setTeam(di->damagingObject->getTeam());   // ...join the team of their repairer
+            setTeam(damagingObject->getTeam());   // ...join the team of their repairer
             setMaskBits(TeamMask);                    // Broadcast new team status
          }
       }
