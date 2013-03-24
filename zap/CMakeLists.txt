@@ -12,6 +12,7 @@ set(CLIENT_SOURCES
    Cursor.cpp
    engineerHelper.cpp
    Event.cpp
+   FontManager.cpp
    gameObjectRender.cpp
    HelperManager.cpp
    helperMenu.cpp

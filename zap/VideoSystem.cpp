@@ -87,6 +87,18 @@ void VideoSystem::init()
       shutdownBitfighter();
    }
 
+
+   // Now, we want to setup our requested
+   // window attributes for our OpenGL window.
+   // Note on SDL_GL_RED/GREEN/BLUE/ALPHA_SIZE: On windows, it is better to not set them at all, or risk going extremely slow software rendering including if your desktop graphics set to 16 bit color.
+   //SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
+   //SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
+   //SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
+   //SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
+   SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );  // depth used in editor to display spybug visible area non-overlap
+   SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+
+
    // Get information about the current desktop video settings and initialize
    // our ScreenInfo class with with current width and height
 
@@ -138,17 +150,6 @@ void VideoSystem::init()
    gScreenInfo.init(info->current_w, info->current_h);
 
 #endif
-
-
-   // Now, we want to setup our requested
-   // window attributes for our OpenGL window.
-   // Note on SDL_GL_RED/GREEN/BLUE/ALPHA_SIZE: On windows, it is better to not set them at all, or risk going extremely slow software rendering including if your desktop graphics set to 16 bit color.
-   //SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
-   //SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
-   //SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
-   //SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
-   SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );  // depth used in editor to display spybug visible area non-overlap
-   SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
 
    // Set the window icon -- note that the icon must be a 32x32 bmp, and SDL will
