@@ -1,5 +1,22 @@
---- from quickBot v2, modified by sam686
---- works on all game modes, except this bot don't work on non-pickup soccer
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+--
+-- S_Bot, our beloved Standard Bot
+--
+-- Works on all game modes, some better than others
+--
+-- Authors:
+--  - Unknown    (original QuickBot v2 code)
+--  - sam686     (AI code for gametypes, other improvements)
+--  - watusimoto (maintenance, upgrades)
+--  - raptor     (maintenance, upgrades)
+--  - Fordcars   (AI improvements)
+--
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
 
 goalPt = point.new(0,0)
 
@@ -55,7 +72,13 @@ function shieldSelf()
             local bulletVel = bullet:getVel()
             local angleDiff = math.abs(angleDifference(point.angleTo(o, bulletVel), point.angleTo(bulletLoc, botLoc)))
             --logprint(angleDiff)
-            if (point.distanceTo(bulletLoc, botLoc) < distToShieldAt + bullet:getRad() + point.distanceTo(o, bulletVel) * 50 and angleDiff < math.pi / 4) then
+
+            local bulletFromTeam = false
+            if (game:isTeamGame() == true) and (bullet:getTeamIndx() == bot:getTeamIndx()) then -- If bullet is from team
+                bulletFromTeam = true                               -- bullet from team is true
+            end
+
+            if (bulletFromTeam == false) and (point.distanceTo(bulletLoc, botLoc) < distToShieldAt + bullet:getRad() + point.distanceTo(o, bulletVel) * 50 and angleDiff < math.pi / 4) then
                 bot:activateModule(Module.Shield)
                 return(true)
             end
@@ -332,15 +355,15 @@ function doObjective(closestEnemy)
     elseif(gameType == GameType.HTF or gameType == GameType.Retrieve) then
         -- Grab the flag and put it into goal zones
         -- Robot keeps trying to pick up the flags that is already in the goalZones
-        if bot:hasFlag() then
-            local otherFlag = getObjective(ObjType.GoalZone, bot:getTeamIndx(), true)   -- Find GoalZone on our team
-            if otherFlag ~= nil then 
-                gotoPosition(otherFlag:getLoc()) 
+        if bot:hasFlag() then                                                           -- If the bot has the flag
+            local otherFlag = getObjective(ObjType.GoalZone, bot:getTeamIndx(), true)   -- Find an avalible GoalZone on our team
+            if otherFlag ~= nil then                                                    -- If there is an avalible GoalZone
+                gotoPosition(otherFlag:getLoc())                                        -- Go to it
             end
-        else
+        else                                                                            -- If the bot doesn't have the flag
             local otherFlag = getObjective(ObjType.Flag, bot:getTeamIndx(), true)       -- Find flags on our team
-            if otherFlag ~= nil then 
-                gotoPosition(otherFlag:getLoc()) 
+            if otherFlag ~= nil then                                                    -- If there is a flag avalible
+                gotoPosition(otherFlag:getLoc())                                        -- Go to it
             end
         end
     elseif(gameType == GameType.CTF) then
@@ -348,33 +371,44 @@ function doObjective(closestEnemy)
         local myFlag    = getObjective(ObjType.Flag, bot:getTeamIndx(), true)    -- Find flags on our team
         local otherFlag = getObjective(ObjType.Flag, bot:getTeamIndx(), false)   -- Find flags not on our team
 
-        if(defense < .5) then
-            if bot:hasFlag() then
-                if not myFlag:isOnShip() then
-                    gotoPosition(myFlag:getLoc())
+        if(defense < .5) then                                                    -- If bot doesn't defend allot (default is 0)
+            if bot:hasFlag() then                                                -- If the bot has a flag
+                if not myFlag:isOnShip() then                                    -- If my flag is not on a ship
+                    gotoPosition(myFlag:getLoc())                                -- Go to position of my flag
                 else
-                    gotoAndOrbitPosition(myFlag:getLoc())
+                    gotoAndOrbitPosition(myFlag:getLoc())                        -- Otherwise, go and orbit the flag on enemy
                 end
                 --gotoPosition(myFlag:getLoc())
-            elseif(otherFlag ~= nil) then
-                if myFlag:isOnShip() then
-                    gotoPosition(myFlag:getLoc())
-                elseif not otherFlag:isOnShip() then
-                    gotoPosition(otherFlag:getLoc())
+            else                                                                 -- If the bot doesn't have the flag
+                local retrievingFlag = false
+                if not myFlag:isInInitLoc() and not myFlag:isOnShip() and                     -- If my flag is not in its initial location and my flag is not on a ship
+                        point.distSquared(myFlag:getLoc(), bot:getLoc()) <= 2000 * 2000 then  -- .. and we're within some sane range of the flag
+                    gotoPosition(myFlag:getLoc())                                             -- Go to and return my flag
+                    retrievingFlag = true
+                end
+
+                if otherFlag ~= nil then                                         -- If there is an enemy flag
+                    if not retrievingFlag then                                   -- .. and this bot isn't already retrieving a flag
+                        if myFlag:isOnShip() then                                -- If my flag is on a ship
+                            gotoPosition(myFlag:getLoc())                        -- Go to position of my flag
+                        elseif not otherFlag:isOnShip() then                     -- If enemy flag is not on a ship
+                            gotoPosition(otherFlag:getLoc())                     -- Go to that flag
                 else
-                    gotoAndOrbitPosition(otherFlag:getLoc())
+                            gotoAndOrbitPosition(otherFlag:getLoc())             -- Go and orbit our team flag's carrier
+                        end
+                    end
                 end
             end
         else
-            if bot:hasFlag() then
-                gotoPosition(myFlag:getLoc())
-            elseif myFlag:isInInitLoc() then
-                gotoAndOrbitPosition(myFlag:getLoc())
+            if bot:hasFlag() then                                                -- If the bot has a flag and has more than .5 defense
+                gotoPosition(myFlag:getLoc())                                    -- Go to team flag
+            elseif myFlag:isInInitLoc() then                                     -- If the bot doesn't have a flag and the team flag is in intial location
+                gotoAndOrbitPosition(myFlag:getLoc())                            -- Go and orbit team flag
             else
-                if myFlag:isOnShip() then
-                    gotoAndOrbitPosition(myFlag:getLoc())
+                if myFlag:isOnShip() then                                        -- If team flag is on a ship
+                    gotoAndOrbitPosition(myFlag:getLoc())                        -- Go and orbit team flag
                 else
-                    gotoPosition(myFlag:getLoc())
+                    gotoPosition(myFlag:getLoc())                                -- If team flag is not on a ship, go to team flag
                 end
             end
         end
