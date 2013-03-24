@@ -330,6 +330,8 @@ static void renderArrowBelow(S32 pos)
 // Basic menu rendering
 void MenuUserInterface::render()
 {
+   FontManager::pushFontContext(FontManager::MenuContext);
+
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
@@ -412,6 +414,8 @@ void MenuUserInterface::render()
    }
 
    renderExtras();  // Draw something unique on a menu
+
+   FontManager::popFontContext();
 }
 
 
