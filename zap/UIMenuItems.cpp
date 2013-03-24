@@ -188,9 +188,11 @@ const Color *MenuItem::getColor(bool isSelected)
 
 void MenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   FontManager::setFontContext(FontManager::MenuContext);
    glColor(*getColor(isSelected));
-   drawCenteredStringf(xpos, ypos, textsize, "%s%s", getPrompt().c_str(), mDisplayValAppendage);
+
+   FontManager::pushFontContext(FontManager::MenuContext);
+      drawCenteredStringf(xpos, ypos, textsize, "%s%s", getPrompt().c_str(), mDisplayValAppendage);
+   FontManager::popFontContext();
 }
 
 

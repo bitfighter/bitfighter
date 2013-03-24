@@ -160,11 +160,11 @@ void FXManager::TextEffect::render()
    glColor(color, alpha);
    //glLineWidth(size);
    glPushMatrix();
-   glTranslate(pos);
-   glScale(size);
-   FontManager::setFontContext(FontManager::TextEffectContext);
-   drawStringc(0, 0, 12, text.c_str());
-   FontManager::setFontContext(FontManager::MenuContext);      // TODO: Get rid of this!
+      glTranslate(pos);
+      glScale(size);
+      FontManager::pushFontContext(FontManager::TextEffectContext);
+         drawStringc(0, 0, 12, text.c_str());
+      FontManager::popFontContext();
    glPopMatrix();
    //glLineWidth(gDefaultLineWidth);
 }

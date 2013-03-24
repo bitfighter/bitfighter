@@ -82,6 +82,9 @@ public:
 
    static void setFont(FontId fontId);
    static void setFontContext(FontContext fontContext);
+
+   static void pushFontContext(FontContext fontContext);
+   static void popFontContext();
 };
 
 

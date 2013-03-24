@@ -196,6 +196,33 @@ void FontManager::setFontContext(FontContext fontContext)
 }
 
 
+static Vector<FontManager::FontId> contextStack;
+
+void FontManager::pushFontContext(FontContext fontContext)
+{
+   contextStack.push_back(currentFontId);
+   setFontContext(fontContext);
+}
+
+
+void FontManager::popFontContext()
+{
+   FontId fontId;
+
+   TNLAssert(contextStack.size() > 0, "No items on context stack!");
+   
+   if(contextStack.size() > 0)
+   {
+      fontId = contextStack.last();
+      contextStack.erase(contextStack.size() - 1);
+   }
+   else
+      fontId = FontRoman;
+
+   setFont(fontId);
+}
+
+
 void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
 {
    /*
