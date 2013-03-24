@@ -43,14 +43,14 @@ namespace Zap
 {
 
 
-class Font;
+class BfFont;
 
 class FontManager 
 {
 
 private:
    static S32 getStrokeFontStringLength(const SFG_StrokeFont *font, const char* string);
-   static S32 getTtfFontStringLength(Font *font, const char* string);
+   static S32 getTtfFontStringLength(BfFont *font, const char* string);
 
 public:
    enum FontId {
@@ -75,7 +75,7 @@ public:
 
    static bool initFont();
 
-   static void drawTTFString(Font *font, const char *string, F32 size);
+   static void drawTTFString(BfFont *font, const char *string, F32 size);
    static void drawStrokeCharacter(const SFG_StrokeFont *font, S32 character);
 
    static S32 getStringLength(const char* string);
@@ -93,7 +93,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Font 
+class BfFont 
 {
 private:
    bool mIsStrokeFont;
@@ -105,12 +105,9 @@ private:
    const SFG_StrokeFont *mStrokeFont;     // Will be NULL for TTF fonts
 
 public:
-   Font(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont);   // Stroke font constructor
-   Font(FontManager::FontId fontId, const string &fontFile);               // TTF font constructor
-   ~Font();                                                                // Destructor
-
-      /*static sth_stash *mStash;*/            // Will be NULL for stroke fonts
-
+   BfFont(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont);   // Stroke font constructor
+   BfFont(FontManager::FontId fontId, const string &fontFile);               // TTF font constructor
+   ~BfFont();                                                                // Destructor
 
    FontManager::FontId getId();
    const SFG_StrokeFont *getStrokeFont();

@@ -45,7 +45,7 @@ using namespace std;
 namespace Zap {
 
 // Stroke font constructor
-Font::Font(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont)
+BfFont::BfFont(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont)
 {
    mFontId = fontId;
    
@@ -62,7 +62,7 @@ static sth_stash *mStash = NULL;
 extern string getInstalledDataDir();
 
 // TTF font constructor
-Font::Font(FontManager::FontId fontId, const string &fontFile)
+BfFont::BfFont(FontManager::FontId fontId, const string &fontFile)
 {
    mFontId = fontId;
       
@@ -97,7 +97,7 @@ Font::Font(FontManager::FontId fontId, const string &fontFile)
 
 
 // Destructor
-Font::~Font()
+BfFont::~BfFont()
 {
    if(mStash)
    {
@@ -107,31 +107,31 @@ Font::~Font()
 }
 
 
-const SFG_StrokeFont *Font::getStrokeFont()
+const SFG_StrokeFont *BfFont::getStrokeFont()
 {
    return mStrokeFont;
 }
 
 
-bool Font::isStrokeFont()
+bool BfFont::isStrokeFont()
 {
    return mIsStrokeFont;
 }
 
 
-FontManager::FontId Font::getId()
+FontManager::FontId BfFont::getId()
 {
    return mFontId;
 }
 
 
-sth_stash *Font::getStash()
+sth_stash *BfFont::getStash()
 {
    return mStash;
 }
 
 
-S32 Font::getStashFontId()
+S32 BfFont::getStashFontId()
 {
    return mStashFontId;
 }
@@ -144,19 +144,19 @@ S32 Font::getStashFontId()
 
 static FontManager::FontId currentFontId;
 
-static Font *fontList[FontManager::FontCount];
+static BfFont *fontList[FontManager::FontCount];
 
 void FontManager::initialize()
 {
    // Our stroke fonts
-   fontList[FontRoman]               = new Font(FontRoman,               &fgStrokeRoman);
-   fontList[FontOrbitronLightStroke] = new Font(FontOrbitronLightStroke, &fgStrokeOrbitronLight);
-   fontList[FontOrbitronMedStroke]   = new Font(FontOrbitronMedStroke,   &fgStrokeOrbitronMed);
+   fontList[FontRoman]               = new BfFont(FontRoman,               &fgStrokeRoman);
+   fontList[FontOrbitronLightStroke] = new BfFont(FontOrbitronLightStroke, &fgStrokeOrbitronLight);
+   fontList[FontOrbitronMedStroke]   = new BfFont(FontOrbitronMedStroke,   &fgStrokeOrbitronMed);
 
    // Our TTF fonts
-   fontList[FontOcrA]          = new Font(FontOcrA,          "OCRA.ttf");
-   fontList[FontOrbitronLight] = new Font(FontOrbitronLight, "Orbitron Light.ttf");
-   fontList[FontPrimeRegular]  = new Font(FontPrimeRegular,  "prime_regular.ttf");
+   fontList[FontOcrA]          = new BfFont(FontOcrA,          "OCRA.ttf");
+   fontList[FontOrbitronLight] = new BfFont(FontOrbitronLight, "Orbitron Light.ttf");
+   fontList[FontPrimeRegular]  = new BfFont(FontPrimeRegular,  "prime_regular.ttf");
 }
 
 
@@ -167,7 +167,7 @@ void FontManager::cleanup()
 }
 
 
-void FontManager::drawTTFString(Font *font, const char *string, F32 size)
+void FontManager::drawTTFString(BfFont *font, const char *string, F32 size)
 {
    F32 outPos;
 
@@ -276,7 +276,7 @@ void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
 
 S32 FontManager::getStringLength(const char* string)
 {
-   Font *font = fontList[currentFontId];
+   BfFont *font = fontList[currentFontId];
 
    if(font->isStrokeFont())
       return getStrokeFontStringLength(font->getStrokeFont(), string);
@@ -319,7 +319,7 @@ S32 FontManager::getStrokeFontStringLength(const SFG_StrokeFont *font, const cha
 }
 
 
-S32 FontManager::getTtfFontStringLength(Font *font, const char *string)
+S32 FontManager::getTtfFontStringLength(BfFont *font, const char *string)
 {
    F32 minx, miny, maxx, maxy;
    sth_dim_text(font->getStash(), font->getStashFontId(), legacyRomanSizeFactorThanksGlut, string, &minx, &miny, &maxx, &maxy);
@@ -332,7 +332,7 @@ extern F32 gDefaultLineWidth;
 
 void FontManager::renderString(F32 size, const char *string)
 {
-   Font *font = fontList[currentFontId];
+   BfFont *font = fontList[currentFontId];
 
    if(font->isStrokeFont())
    {
