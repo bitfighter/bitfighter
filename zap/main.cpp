@@ -141,6 +141,7 @@ using namespace TNL;
 #include "ClientInfo.h"
 #include "Console.h"       // For access to console
 #include "BotNavMeshZone.h"
+#include "FontManager.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -765,8 +766,7 @@ void shutdownBitfighter()
 
       SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
-      // Clean up our font
-      OpenglUtils::shutdownFont();
+      FontManager::cleanup();
 #endif
    }
 
@@ -1463,6 +1463,8 @@ int main(int argc, char **argv)
       VideoSystem::actualizeScreenMode(settings, false, false);            // Create a display window
 
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
+
+      FontManager::initialize();
 
       // Now show any error messages from start-up
       Vector<string> configurationErrors = settings->getConfigurationErrors();

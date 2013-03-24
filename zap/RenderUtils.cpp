@@ -47,55 +47,23 @@ F32 gLineWidth4 = 4.0f;
 extern ScreenInfo gScreenInfo;
 
 
-void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true)
+void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
-   static F32 modelview[16];
-   glGetFloatv(GL_MODELVIEW_MATRIX, modelview);    // Fills modelview[]
-
-   if(autoLineWidth)
-   {
-      F32 linewidth = MAX(MIN(size * gScreenInfo.getPixelRatio() * modelview[0] / 20, 1.0f), 0.5f)    // Clamp to range of 0.5 - 1
-                                                                           * gDefaultLineWidth;       // then multiply by line width (2 by default)
-      glLineWidth(linewidth);
-   }
-
    glPushMatrix();
       glTranslatef(x, y, 0);
       glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
 
-      static bool useTTF = true;  // XXX: change me to test ttf
-      if(useTTF)
-      {
-         // Flip upside down because y = -y
-         glScalef(1, -1, 1);
+      FontManager::renderString(size, string);
 
-         // Bonkers factor because we build the game around thinking the font size was 120
-         // when it was really 152.381 (see bottom of FontStrokeRoman.h as well as magic scale
-         // factor of 120.0f a few lines below).  This factor == 152.381 / 120
-         static F32 legacyNormalizationFactor = 1.26984166667f;
-
-         OpenglUtils::drawTTFString(string, size * legacyNormalizationFactor);
-      }
-      else
-      {
-         F32 scaleFactor = size / 120.0f;  // Where does this magic number come from?
-         glScalef(scaleFactor, -scaleFactor, 1);
-         for(S32 i = 0; string[i]; i++)
-            OpenglUtils::drawStrokeCharacter(string[i]);
-      }
    glPopMatrix();
-
-
-   if(autoLineWidth)
-      glLineWidth(gDefaultLineWidth);
 }
 
 
 // Same but accepts S32 args
-void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool autoLineWidth)
-{
-   doDrawAngleString(F32(x), F32(y), size, angle, string, autoLineWidth);
-}
+//void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool autoLineWidth)
+//{
+//   doDrawAngleString(F32(x), F32(y), size, angle, string, autoLineWidth);
+//}
 
 
 // Center text between two points, adjust angle so it's always right-side-up
@@ -132,9 +100,9 @@ void drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...
 
 
 // New, fixed version
-void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth)
+void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
-   doDrawAngleString(x, y, size, angle, string, autoLineWidth);
+   doDrawAngleString(x, y, size, angle, string);
 }
 
 
@@ -250,10 +218,10 @@ void drawStringc(S32 x, S32 y, S32 size, const char *string)
 }
 
 
-void drawStringc(F32 x, F32 y, F32 size, const char *string, bool autoLineWidth)
+void drawStringc(F32 x, F32 y, F32 size, const char *string)
 {
    F32 len = getStringWidth(size, string);
-   drawAngleString(x - len / 2, y, size, 0, string, autoLineWidth);
+   drawAngleString(x - len / 2, y, size, 0, string);
 }
 
 
@@ -502,13 +470,13 @@ void drawTime(S32 x, S32 y, S32 size, S32 timeInMs, const char *prefixString)
 
 S32 getStringWidth(S32 size, const char *string)
 {
-   return OpenglUtils::getStringLength((const unsigned char *) string) * size / 120;
+   return FontManager::getStringLength(string) * size / 120;
 }
 
 
 F32 getStringWidth(F32 size, const char *string)
 {
-   return F32( OpenglUtils::getStringLength((const unsigned char *) string) ) * size / 120.f;
+   return F32( FontManager::getStringLength(string) ) * size / 120.f;
 }
 
 

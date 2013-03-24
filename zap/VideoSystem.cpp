@@ -300,6 +300,7 @@ S32 VideoSystem::getWindowPositionY()
 
 extern void setDefaultBlendFunction();
 extern Vector<ClientGame *> gClientGames;
+extern void exitToOs(S32 errcode);
 
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.
@@ -469,7 +470,11 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
          gClientGames[i]->getUIManager()->getCurrentUI()->onDisplayModeChange();
 
    // Now initialize our TTF font
-   OpenglUtils::initFont();
+   /*if(!FontManager::initFont())
+   {
+      logprintf(LogConsumer::LogError, "Problem configuring fonts!");
+      exitToOs(1);
+   }*/
 }
 
 

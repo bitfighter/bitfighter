@@ -10,6 +10,7 @@
 #define OPENGLUTILS_H_
 
 #include "tnlTypes.h"
+#include "FontManager.h"
 
 #ifdef TNL_OS_MOBILE
 #  include "SDL_opengles.h"
@@ -26,27 +27,6 @@ using namespace TNL;
 
 namespace Zap {
 
-class OpenglUtils {
-public:
-   enum FontId {
-      FontRoman,
-      FontOrbitronLight,
-      FontOrbitronMed
-   };
-
-   static void initFont();
-   static void shutdownFont();
-
-   static void drawTTFString(const char *, F32 size);
-   static void drawStrokeCharacter(S32 character);
-
-   static S32 getStringLength(const unsigned char* string);
-};
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-
 class Color;
 class Point;
 
@@ -62,7 +42,7 @@ extern void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType);
 extern void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType);
 extern void renderLine(const Vector<Point> *points);
 
-extern void setFont(OpenglUtils::FontId fontId);
+extern void setFont(FontManager::FontId fontId);
 
 extern void glScale(F32 scaleFactor);
 extern void glTranslate(const Point &pos);

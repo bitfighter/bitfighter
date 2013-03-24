@@ -178,6 +178,7 @@
     <ClCompile Include="engineerHelper.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="EventManager.cpp" />
+    <ClCompile Include="FontManager.cpp" />
     <ClCompile Include="gameStats.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="GeomObject.cpp" />
@@ -313,6 +314,7 @@
     <ClInclude Include="..\zap\input.h" />
     <ClInclude Include="..\zap\item.h" />
     <ClInclude Include="EventManager.h" />
+    <ClInclude Include="FontManager.h" />
     <ClInclude Include="FontOrbitronLight.h" />
     <ClInclude Include="FontOrbitronMedium.h" />
     <ClInclude Include="FontStrokeRoman.h" />

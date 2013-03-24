@@ -32,6 +32,7 @@
 
 #include "OpenglUtils.h"
 #include "MathUtils.h"
+#include "FontManager.h"
 #include "UI.h"
 
 using namespace TNL;
@@ -161,9 +162,9 @@ void FXManager::TextEffect::render()
    glPushMatrix();
    glTranslate(pos);
    glScale(size);
-   setFont(OpenglUtils::FontOrbitronLight);
-   drawStringc(0, 0, 12, text.c_str(), false);
-   setFont(OpenglUtils::FontRoman);
+   FontManager::setFontContext(FontManager::TextEffectContext);
+   drawStringc(0, 0, 12, text.c_str());
+   FontManager::setFontContext(FontManager::MenuContext);      // TODO: Get rid of this!
    glPopMatrix();
    //glLineWidth(gDefaultLineWidth);
 }
