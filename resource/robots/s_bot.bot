@@ -117,15 +117,24 @@ function fireAtObject(obj, weapon)
         end
     end
     
-    if obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame() or obj:getTeamIndx() == Team.Neutral then
-        if(classId == ObjType.Ship    or   classId == ObjType.Robot   or   classId == ObjType.ForceFieldProjector   or
-           classId == ObjType.Turret  or   classId == ObjType.Core    or   classId == ObjType.SpyBug) then
-                --logprint("It's an ally.")
-                return(false)
+    
+    -- No shooting various team related objects
+    if (obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame()) or  -- Same team
+        obj:getTeamIndx() == Team.Neutral then                            -- Neutral team
+        if (classId == ObjType.Ship    or   classId == ObjType.Robot   or   classId == ObjType.ForceFieldProjector   or
+            classId == ObjType.Turret  or   classId == ObjType.Core    or   classId == ObjType.SpyBug) then
+            return false
         end
     end
-
     
+    -- No shooting non-flag carriers in single player rabbit
+    if gameType == GameType.Rabbit and not game:isTeamGame() and 
+        (classId == ObjType.Ship or classId == ObjType.Robot) and 
+        not bot:hasFlag() and not obj:hasFlag() then
+        return false
+    end
+
+    -- We made it here!  We have a valid target..
     local angle = getFiringSolution(obj)
     if angle ~= nil and bot:hasWeapon(weapon) then
         bot:setAngle(angle + math.rad((math.random()-0.5)*20*(1-difficulty)))
