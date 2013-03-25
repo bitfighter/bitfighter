@@ -111,9 +111,13 @@ function fireAtObject(obj, weapon)
     local classId = obj:getClassId()
 
     if(classId == ObjType.Turret or classId == ObjType.ForceFieldProjector) then
-     if(obj:getHealth() < .1) then
-         --logprint("He's dead, Jim.")
-         return(false)
+        -- Ignore all same-team engineered objects...  even in single-team games
+        if obj:getTeamIndx() == bot:getTeamIndx() then
+            return false                                 -- Cancel fireAtObject function
+        end
+
+        if obj:getHealth() < .1  then                                             -- If item is essentially dead
+            return false                                                          
         end
     end
     
@@ -121,8 +125,8 @@ function fireAtObject(obj, weapon)
     -- No shooting various team related objects
     if (obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame()) or  -- Same team
         obj:getTeamIndx() == Team.Neutral then                            -- Neutral team
-        if (classId == ObjType.Ship    or   classId == ObjType.Robot   or   classId == ObjType.ForceFieldProjector   or
-            classId == ObjType.Turret  or   classId == ObjType.Core    or   classId == ObjType.SpyBug) then
+        if (classId == ObjType.Ship    or   classId == ObjType.Robot   or    -- Turrets and FFs handled above
+            classId == ObjType.Core    or   classId == ObjType.SpyBug) then
             return false
         end
     end
@@ -347,9 +351,12 @@ function doObjective(closestEnemy)
     elseif(gameType == GameType.Nexus) then
         -- Grab any flags that are found, and go to nexus when it opens
         local otherFlag = getObjective(ObjType.Flag)            -- Find any flags
-        if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
-        -- logprint(bot:getFlagCount())  -- always 1
-        if bot:getFlagCount() > 3 and (game:isNexusOpen() or game:getNexusTimeLeft() < 10000) then  --  Need to know if nexus is open
+        if otherFlag ~= nil then                                -- If there is a flag avalible
+            gotoPosition(otherFlag:getLoc()) 
+        end
+
+        --  If bot has more than 4 flags and the nexus is open or we're within 10 seconds of opening
+        if bot:getFlagCount() > 4 and (game:isNexusOpen() or game:getNexusTimeLeft() < 10) then  --  Need to know if nexus is open
             local nexusOrFlag = getObjective(ObjType.Nexus)  -- unimplemented push function error.
             if nexusOrFlag ~= nil then 
                 gotoPosition(nexusOrFlag:getLoc()) 
@@ -390,10 +397,12 @@ function doObjective(closestEnemy)
                 --gotoPosition(myFlag:getLoc())
             else                                                                 -- If the bot doesn't have the flag
                 local retrievingFlag = false
-                if not myFlag:isInInitLoc() and not myFlag:isOnShip() and                     -- If my flag is not in its initial location and my flag is not on a ship
-                        point.distSquared(myFlag:getLoc(), bot:getLoc()) <= 2000 * 2000 then  -- .. and we're within some sane range of the flag
-                    gotoPosition(myFlag:getLoc())                                             -- Go to and return my flag
-                    retrievingFlag = true
+                if myFlag ~= nil then
+                    if not myFlag:isInInitLoc() and not myFlag:isOnShip() and                     -- If my flag is not in its initial location and my flag is not on a ship
+                            point.distSquared(myFlag:getLoc(), bot:getLoc()) <= 2000 * 2000 then  -- .. and we're within some sane range of the flag
+                        gotoPosition(myFlag:getLoc())                                             -- Go to and return my flag
+                        retrievingFlag = true
+                    end
                 end
 
                 if otherFlag ~= nil then                                         -- If there is an enemy flag
@@ -402,7 +411,7 @@ function doObjective(closestEnemy)
                             gotoPosition(myFlag:getLoc())                        -- Go to position of my flag
                         elseif not otherFlag:isOnShip() then                     -- If enemy flag is not on a ship
                             gotoPosition(otherFlag:getLoc())                     -- Go to that flag
-                else
+                        else
                             gotoAndOrbitPosition(otherFlag:getLoc())             -- Go and orbit our team flag's carrier
                         end
                     end
