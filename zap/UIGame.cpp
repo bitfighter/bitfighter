@@ -1802,7 +1802,7 @@ void GameUserInterface::renderInputModeChangeAlert()
 void GameUserInterface::renderMissionOverlay(const GameType *gameType)
 {
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-   S32 yCenter = canvasHeight / 2;
+   static const S32 yStart = 50;  // 50 from the top
 
    // Fade message out
    F32 alpha = 1;
@@ -1810,32 +1810,31 @@ void GameUserInterface::renderMissionOverlay(const GameType *gameType)
       alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
 
    // Draw top info box
-   renderFancyBox(yCenter - 185, 270, 50, Colors::blue, alpha * 0.70f);
+   renderFancyBox(yStart, 210, 50, Colors::blue, alpha * 0.70f);
 
    glColor(Colors::white, alpha);
-   drawCenteredStringf(yCenter - 180, 30, "Level: %s", gameType->getLevelName()->getString());
+   drawCenteredStringf(yStart + 5, 30, "Level: %s", gameType->getLevelName()->getString());
 
    // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
    const char *gtPrefix = (gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && 
                            getGame()->getTeamCount() > 1) ? "Team " : "";
 
-   drawCenteredStringf(yCenter - 140, 30, "Game Type: %s%s", gtPrefix, gameType->getGameTypeName());
+   drawCenteredStringf(yStart + 45, 30, "Game Type: %s%s", gtPrefix, gameType->getGameTypeName());
 
    glColor(Colors::cyan, alpha);
-   drawCenteredString(yCenter - 100, 20, gameType->getInstructionString());
+   drawCenteredString(yStart + 85, 20, gameType->getInstructionString());
 
    glColor(Colors::magenta, alpha);
-   drawCenteredString(yCenter - 75, 20, gameType->getLevelDescription()->getString());
+   drawCenteredString(yStart + 110, 20, gameType->getLevelDescription()->getString());
 
    glColor(Colors::yellow, alpha);
-   drawCenteredStringf(yCenter - 50, 20, "Score to Win: %d", gameType->getWinningScore());
+   drawCenteredStringf(yStart + 135, 20, "Score to Win: %d", gameType->getWinningScore());
 
    if(gameType->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty
    {
       glColor(Colors::red, alpha);
-      drawCenteredStringf(yCenter + 50, 20, "%s", gameType->getLevelCredits()->getString());
+      drawCenteredStringf(yStart + 175, 20, "%s", gameType->getLevelCredits()->getString());
    }
-
 
    // Draw bottom info box
    renderFancyBox(canvasHeight - 105, 35, 155, Colors::blue, alpha * 0.70f);
