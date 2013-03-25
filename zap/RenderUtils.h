@@ -31,6 +31,7 @@
 
 #include "Point.h"
 #include "Colors.h"
+#include "FontManager.h"
 
 using namespace TNL;
 
@@ -139,6 +140,9 @@ void drawString4Colf(S32 y, S32 size, U32 col, const char *format, ...);
 void drawTime(S32 x, S32 y, S32 size, S32 timeInMs, const char *prefixString = "");
 
 // Return string rendering width (normal and formatted versions)
+S32 getStringWidth(FontManager::FontContext, S32 size, const char *string);
+F32 getStringWidth(FontManager::FontContext, F32 size, const char *string);
+
 F32 getStringWidth(F32 size, const char *str);
 S32 getStringWidth(S32 size, const char *str);
 
