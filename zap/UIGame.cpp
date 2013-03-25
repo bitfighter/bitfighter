@@ -1810,6 +1810,9 @@ void GameUserInterface::renderMissionOverlay(const GameType *gameType)
    if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !mMissionOverlayActive)
       alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
 
+   // Draw top info box
+   renderFancyBox(yCenter - 185, 270, 50, Colors::blue, alpha * 0.70f);
+
    glColor(Colors::white, alpha);
    drawCenteredStringf(yCenter - 180, 30, "Level: %s", gameType->getLevelName()->getString());
 
@@ -1825,9 +1828,8 @@ void GameUserInterface::renderMissionOverlay(const GameType *gameType)
    glColor(Colors::magenta, alpha);
    drawCenteredString(yCenter - 75, 20, gameType->getLevelDescription()->getString());
 
-   glColor(Colors::menuHelpColor, alpha);
-   drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", 
-                                               getInputCodeString(getGame()->getSettings(), InputCodeManager::BINDING_MISSION));
+   glColor(Colors::yellow, alpha);
+   drawCenteredStringf(yCenter - 50, 20, "Score to Win: %d", gameType->getWinningScore());
 
    if(gameType->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty
    {
@@ -1835,8 +1837,14 @@ void GameUserInterface::renderMissionOverlay(const GameType *gameType)
       drawCenteredStringf(yCenter + 50, 20, "%s", gameType->getLevelCredits()->getString());
    }
 
-   glColor(Colors::yellow, alpha);
-   drawCenteredStringf(yCenter - 50, 20, "Score to Win: %d", gameType->getWinningScore());
+
+   // Draw bottom info box
+   renderFancyBox(canvasHeight - 105, 35, 155, Colors::blue, alpha * 0.70f);
+
+   glColor(Colors::menuHelpColor, alpha);
+   S32 pos = drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again",
+                                               getInputCodeString(getGame()->getSettings(), InputCodeManager::BINDING_MISSION));
+
 
    mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
 }
