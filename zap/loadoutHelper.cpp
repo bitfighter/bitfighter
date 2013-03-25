@@ -47,13 +47,13 @@ namespace Zap
 #define HELP_COLOR  &Colors::overlayMenuHelpColor
 
 static const OverlayMenuItem loadoutModuleMenuItems[] = {
-   { KEY_1, BUTTON_1, true, "Turbo Boost",           UNSEL_COLOR, "",                               NULL       },
-   { KEY_2, BUTTON_2, true, "Shield Generator",      UNSEL_COLOR, "",                               NULL       },
-   { KEY_3, BUTTON_3, true, "Repair Module",         UNSEL_COLOR, "",                               NULL       },
-   { KEY_4, BUTTON_4, true, "Enhanced Sensor",       UNSEL_COLOR, "",                               NULL       },
-   { KEY_5, BUTTON_5, true, "Cloak Field Modulator", UNSEL_COLOR, "",                               NULL       },
-   { KEY_6, BUTTON_6, true, "Armor",                 UNSEL_COLOR, "(makes ship harder to control)", HELP_COLOR },
-   { KEY_7, BUTTON_7, true, "Engineer",              UNSEL_COLOR, "",                               NULL       },
+   { KEY_1, BUTTON_1, true, "Turbo Boost",           UNSEL_COLOR, "",               NULL       },
+   { KEY_2, BUTTON_2, true, "Shield Generator",      UNSEL_COLOR, "",               NULL       },
+   { KEY_3, BUTTON_3, true, "Repair Module",         UNSEL_COLOR, "",               NULL       },
+   { KEY_4, BUTTON_4, true, "Enhanced Sensor",       UNSEL_COLOR, "",               NULL       },
+   { KEY_5, BUTTON_5, true, "Cloak Field Modulator", UNSEL_COLOR, "",               NULL       },
+   { KEY_6, BUTTON_6, true, "Armor",                 UNSEL_COLOR, "(adds inertia)", HELP_COLOR },
+   { KEY_7, BUTTON_7, true, "Engineer",              UNSEL_COLOR, "",               NULL       },
 };
 
 static const S32 moduleEngineerIndex = 6;
