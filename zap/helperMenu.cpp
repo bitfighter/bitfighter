@@ -111,8 +111,6 @@ extern void drawHorizLine (S32 x1, S32 x2, S32 y );
 void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, const OverlayMenuItem *prevItems, S32 prevCount,
                               const char **legendText, const Color **legendColors, S32 legendCount)
 {
-   S32 yPos = MENU_TOP + MENU_PADDING;
-
    static const Color baseColor(Colors::red);
 
    TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on");
@@ -124,17 +122,21 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
       if(items[i].showOnMenu)
          displayItems++;
 
-   // Total height of the menu
-   S32 menuHeight = MENU_PADDING +                                                            // Top padding
-                    TITLE_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING +                      // Title
-                    displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + 2 * MENU_PADDING +  // Menu items
-                    (legendCount > 0 ? MENU_LEGEND_FONT_SIZE + 2 * MENU_FONT_SPACING : 0) +   // Legend
-                    2 * MENU_PADDING +                                                        // Post-legend gap
-                    MENU_LEGEND_FONT_SIZE +                                                   // Instructions at bottom
-                    MENU_PADDING;                                                             // Bottom padding
+   bool hasLegend = legendCount > 0;
 
-   S32 topOfMenuItemRenderArea = yPos + TITLE_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
-   S32 bottom = yPos + menuHeight;
+   // Height of menu parts
+   const S32 topPadding      = MENU_PADDING;
+   const S32 titleHeight     = TITLE_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
+   const S32 itemsHeight     = MENU_PADDING + displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + MENU_PADDING;
+   const S32 legendArea      = (hasLegend ? MENU_LEGEND_FONT_SIZE + 2 * MENU_FONT_SPACING : 0) + 2 * MENU_PADDING;
+   const S32 instructionArea = MENU_LEGEND_FONT_SIZE;
+   const S32 bottomPadding   = MENU_PADDING;
+
+   // Total height of the menu
+   const S32 totalHeight = topPadding + titleHeight + itemsHeight + legendArea + instructionArea + bottomPadding;     
+
+   S32 yPos = MENU_TOP + topPadding;
+   S32 bottom = MENU_TOP + totalHeight;
 
    // If we are transitioning between items of different sizes, we will gradually change the rendered size during the transition
    // Generally, the top of the menu will stay in place, while the bottom will be adjusted.  Therefore, lower items need
@@ -158,7 +160,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    S32 interiorEdge = calcInteriorEdge(xPos, mWidth);
 
 
-   renderMenuFrame(interiorEdge, menuHeight + transitionOffset);
+   renderMenuFrame(interiorEdge, totalHeight + transitionOffset);
 
    // Gray line
    glColor(Colors::gray20);
@@ -166,27 +168,30 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    S32 grayLineLeft = 20;
    S32 grayLineRight = interiorEdge - 20;
    S32 grayLineCenter = (grayLineLeft + grayLineRight) / 2;
+   S32 grayLineYPos = MENU_TOP + topPadding + titleHeight;
 
-   drawHorizLine(grayLineLeft, grayLineRight, topOfMenuItemRenderArea);
+   drawHorizLine(grayLineLeft, grayLineRight, grayLineYPos);
 
-   // Draw the title
+   // Draw the title (above gray line)
    glColor(baseColor);
-   drawCenteredString(grayLineCenter, yPos, TITLE_FONT_SIZE, title);
-   yPos += TITLE_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING + transitionOffset;
+   drawCenteredString(grayLineCenter, yPos + 2, TITLE_FONT_SIZE, title);
+   yPos += titleHeight + MENU_PADDING + transitionOffset;
 
-   bool hasLegend = legendCount > 0;
+   // Draw menu items (below gray line)
+   drawMenuItems(items, count, yPos, bottom, true, hasLegend);
 
-   yPos += drawMenuItems(items, count, bottom, true, hasLegend);
-
+   // If we're in transition, we need to call drawMenuItems again with the old items
    if(prevItems && mTransitionTimer.getCurrent() > 0)
-      drawMenuItems(prevItems, prevCount, bottom, false, hasLegend);
+      drawMenuItems(prevItems, prevCount, yPos, bottom, false, hasLegend);
+
+   yPos += itemsHeight;
 
    if(hasLegend)
       yPos += renderLegend(xPos, yPos, legendText, legendColors, legendCount);
 
-   yPos += 2 * MENU_PADDING;
+   yPos += MENU_PADDING;
 
-   renderPressEscapeToCancel(xPos, yPos, baseColor, getGame()->getSettings()->getInputCodeManager()->getInputMode());
+   renderPressEscapeToCancel(grayLineCenter, yPos + 2, baseColor, getGame()->getSettings()->getInputCodeManager()->getInputMode());
 
    FontManager::popFontContext();
 }
@@ -195,7 +200,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 extern ScreenInfo gScreenInfo;
 
 // Render a set of menu items.  Break this code out to make transitions easier.
-S32 HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 bottom, bool newItems, bool renderKeysWithItemColor)
+void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, bool renderKeysWithItemColor)
 {
    S32 displayItems = 0;
    // Count how many items we will be displaying -- some may be hidden
@@ -207,7 +212,6 @@ S32 HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 botto
    S32 oldHeight = (MENU_FONT_SIZE + MENU_FONT_SPACING) * mOldCount;
 
    S32 xPos = getLeftEdgeOfMenuPos();
-   S32 yPos = MENU_TOP + MENU_FONT_SIZE + MENU_FONT_SPACING + 2 * MENU_PADDING;
 
    static ScissorsManager scissorsManager;
 
@@ -259,8 +263,6 @@ S32 HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 botto
    }
 
    scissorsManager.disable();
-
-   return height;
 }
 
 
@@ -270,7 +272,7 @@ void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &base
 
    // RenderedSize will be -1 if the button is not defined
    if(inputMode == InputModeKeyboard)
-      drawStringf(xPos, yPos, MENU_LEGEND_FONT_SIZE, 
+      drawStringfc(xPos, yPos, MENU_LEGEND_FONT_SIZE, 
                   "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
    else
    {

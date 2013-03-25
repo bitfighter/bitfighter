@@ -79,7 +79,7 @@ private:
    S32 calcInteriorEdge(S32 xPos, S32 width);
 
    // Some render helpers
-   S32 drawMenuItems(const OverlayMenuItem *items, S32 count, S32 bottom, bool newItems, bool renderKeysWithItemColor);
+   void drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, bool renderKeysWithItemColor);
    void renderMenuFrame(S32 interiorEdge, S32 height);
    void renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode);
    S32 renderLegend(S32 xPos, S32 yPos, const char **legendtext, const Color **legendColors, S32 legendCount);
