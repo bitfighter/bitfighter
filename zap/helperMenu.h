@@ -108,6 +108,7 @@ protected:
    static const S32 ITEM_HELP_PADDING     =  5;    // Gap between item and its help text
    static const S32 ITEM_INDENT           = 50;    // Amount individual menu items are indented to make room for keys
    static const S32 MENU_PADDING          =  5;    // Padding around outer edge of overlay
+   static const S32 TITLE_FONT_SIZE       = 20;    // Size of title of menu
 
    S32 mWidth;    // Calculated width of menu
 

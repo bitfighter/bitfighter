@@ -154,9 +154,10 @@ void FontManager::initialize()
    fontList[FontOrbitronMedStroke]   = new BfFont(FontOrbitronMedStroke,   &fgStrokeOrbitronMed);
 
    // Our TTF fonts
-   fontList[FontOcrA]          = new BfFont(FontOcrA,          "OCRA.ttf");
-   fontList[FontOrbitronLight] = new BfFont(FontOrbitronLight, "Orbitron Light.ttf");
-   fontList[FontPrimeRegular]  = new BfFont(FontPrimeRegular,  "prime_regular.ttf");
+   fontList[FontOcrA]           = new BfFont(FontOcrA,          "OCRA.ttf");
+   fontList[FontOrbitronLight]  = new BfFont(FontOrbitronLight, "Orbitron Light.ttf");
+   fontList[FontOrbitronMedium] = new BfFont(FontOrbitronLight, "Orbitron Medium.ttf");
+   fontList[FontPrimeRegular]   = new BfFont(FontPrimeRegular,  "prime_regular.ttf");
 }
 
 
@@ -190,14 +191,19 @@ void FontManager::setFontContext(FontContext fontContext)
 {
    switch(fontContext)
    {
+      case BigMessageContext:
+         setFont(FontOrbitronMedStroke);
+         return;
       case MenuContext:
-         setFont(FontOcrA);
+      case LevelInfoContext:
+         setFont(FontRoman);
          return;
       case HUDContext:
-         setFont(FontRoman);
-         return;
       case HelpContext:
          setFont(FontRoman);
+         return;
+      case OverlayMenuContext:
+         setFont(FontPrimeRegular);
          return;
       case TextEffectContext:
          setFont(FontOrbitronLightStroke);
@@ -206,6 +212,13 @@ void FontManager::setFontContext(FontContext fontContext)
          TNLAssert(false, "Unknown font context!");
    }
 }
+// FontRoman,
+// FontOrbitronLightStroke,
+// FontOrbitronMedStroke,
+// FontOcrA,
+// FontOrbitronLight,
+// FontOrbitronMedium,
+// FontPrimeRegular
 
 
 static Vector<FontManager::FontId> contextStack;

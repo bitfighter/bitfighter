@@ -111,7 +111,7 @@ extern void drawHorizLine (S32 x1, S32 x2, S32 y );
 void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, const OverlayMenuItem *prevItems, S32 prevCount,
                               const char **legendText, const Color **legendColors, S32 legendCount)
 {
-   S32 yPos = MENU_TOP;
+   S32 yPos = MENU_TOP + MENU_PADDING;
 
    static const Color baseColor(Colors::red);
 
@@ -126,14 +126,14 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    // Total height of the menu
    S32 menuHeight = MENU_PADDING +                                                            // Top padding
-                    MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING +                       // Title
+                    TITLE_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING +                      // Title
                     displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + 2 * MENU_PADDING +  // Menu items
                     (legendCount > 0 ? MENU_LEGEND_FONT_SIZE + 2 * MENU_FONT_SPACING : 0) +   // Legend
                     2 * MENU_PADDING +                                                        // Post-legend gap
                     MENU_LEGEND_FONT_SIZE +                                                   // Instructions at bottom
                     MENU_PADDING;                                                             // Bottom padding
 
-   S32 topOfMenuItemRenderArea = yPos - MENU_PADDING + MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
+   S32 topOfMenuItemRenderArea = yPos + TITLE_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
    S32 bottom = yPos + menuHeight;
 
    // If we are transitioning between items of different sizes, we will gradually change the rendered size during the transition
@@ -151,6 +151,8 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    bottom += transitionOffset;
 
+   FontManager::pushFontContext(FontManager::OverlayMenuContext);
+
    S32 xPos = getLeftEdgeOfMenuPos();
 
    S32 interiorEdge = calcInteriorEdge(xPos, mWidth);
@@ -160,12 +162,17 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    // Gray line
    glColor(Colors::gray20);
-   drawHorizLine(20, interiorEdge - 20, topOfMenuItemRenderArea);
+
+   S32 grayLineLeft = 20;
+   S32 grayLineRight = interiorEdge - 20;
+   S32 grayLineCenter = (grayLineLeft + grayLineRight) / 2;
+
+   drawHorizLine(grayLineLeft, grayLineRight, topOfMenuItemRenderArea);
 
    // Draw the title
    glColor(baseColor);
-   drawString(xPos, yPos, MENU_FONT_SIZE, title);
-   yPos += MENU_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING + transitionOffset;
+   drawCenteredString(grayLineCenter, yPos, TITLE_FONT_SIZE, title);
+   yPos += TITLE_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING + transitionOffset;
 
    bool hasLegend = legendCount > 0;
 
@@ -180,6 +187,8 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    yPos += 2 * MENU_PADDING;
 
    renderPressEscapeToCancel(xPos, yPos, baseColor, getGame()->getSettings()->getInputCodeManager()->getInputMode());
+
+   FontManager::popFontContext();
 }
 
 

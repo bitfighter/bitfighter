@@ -133,9 +133,9 @@ void LoadoutHelper::render()
    char title[100];
 
    if(mCurrentIndex < ShipModuleCount)
-      dSprintf(title, sizeof(title), "Pick %d power modules for your ship:", ShipModuleCount);
+      dSprintf(title, sizeof(title), "Pick %d modules:", ShipModuleCount);
    else
-      dSprintf(title, sizeof(title), "Pick %d weapons for your ship:",       ShipWeaponCount);
+      dSprintf(title, sizeof(title), "Pick %d weapons:", ShipWeaponCount);
 
 
    if(mCurrentIndex < ShipModuleCount)

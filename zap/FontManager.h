@@ -59,15 +59,19 @@ public:
       FontOrbitronMedStroke,
       FontOcrA,
       FontOrbitronLight,
+      FontOrbitronMedium,
       FontPrimeRegular,
       FontCount
    };
 
    enum FontContext {
-      MenuContext,
-      HUDContext,
-      HelpContext,
-      TextEffectContext
+      BigMessageContext,      // Press any key to respawn, etc.
+      LevelInfoContext,       // Display info about the level (at beginning of game, and when F2 pressed)
+      MenuContext,            // Menu font (main game menus)
+      HUDContext,             // General HUD text
+      HelpContext,            // For Help screens
+      OverlayMenuContext,     // For Loadout Menus and such
+      TextEffectContext       // Yard Sale!!! text and the like
    };
 
    static void initialize();    
