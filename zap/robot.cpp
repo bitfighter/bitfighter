@@ -1324,12 +1324,8 @@ static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S
 
    // Make sure we can see it...
    Point n;
-   TestFunc testFunc = isWallType;
 
-   if(!targetIsShip)    // If the target isn't a ship, take forcefields into account
-      testFunc = isFlagCollideableType;
-
-   if(target->findObjectLOS(testFunc, ActualState, aimPos, target->getPos(), t, n))
+   if(target->findObjectLOS(isFlagCollideableType, ActualState, aimPos, target->getPos(), t, n))
       return false;
 
    // See if we're gonna clobber our own stuff...
