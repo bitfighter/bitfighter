@@ -132,16 +132,17 @@ void LoadoutHelper::render()
 {
    char title[100];
 
-   if(mCurrentIndex < ShipModuleCount)
+   bool showingModules = mCurrentIndex < ShipModuleCount;
+
+   if(showingModules)
       dSprintf(title, sizeof(title), "Pick %d modules:", ShipModuleCount);
    else
       dSprintf(title, sizeof(title), "Pick %d weapons:", ShipWeaponCount);
 
 
-   if(mCurrentIndex < ShipModuleCount)
-      drawItemMenu(title, &mModuleMenuItems[0], mModuleMenuItems.size(), NULL, 0);
-   else
-      drawItemMenu(title, &mWeaponMenuItems[0], mWeaponMenuItems.size(), &mModuleMenuItems[0], mModuleMenuItems.size());
+   // When we're showing the modules, firstMod will be NULL; when showing the weapons, it will point to the module array
+   const OverlayMenuItem *firstMod = showingModules ? NULL : &mModuleMenuItems[0];
+   drawItemMenu(title, &mWeaponMenuItems[0], mWeaponMenuItems.size(), firstMod, mModuleMenuItems.size());
 }
 
 

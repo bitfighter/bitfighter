@@ -48,6 +48,7 @@ Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups
 static const char  *quickChatLegendText[]   = { "Team Message ",        "Global Message"         };
 static const Color *quickChatLegendColors[] = { &Colors::teamChatColor, &Colors::globalChatColor };
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -69,6 +70,7 @@ QuickChatHelper::QuickChatHelper()
 {
    mCurNode = 0;
    mWidth = -1;
+   mMenuItems1IsCurrent = true;
 }
 
 
@@ -92,21 +94,31 @@ void QuickChatHelper::render()
       return;
    }
 
-   if(mMenuItems.size() == 0)    // Nothing to render, let's go home
+   Vector<OverlayMenuItem> *menuItems    = getMenuItems(mMenuItems1IsCurrent);
+   Vector<OverlayMenuItem> *oldMenuItems = getMenuItems(!mMenuItems1IsCurrent);
+
+   if(menuItems->size() == 0)    // Nothing to render, let's go home
    {
       glColor(Colors::red); 
       drawString(getLeftEdgeOfMenuPos(), yPos, MENU_FONT_SIZE, "No messages here (misconfiguration?)");
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
    }
    else
-      drawItemMenu("QuickChat menu", &mMenuItems[0], mMenuItems.size(), NULL, 0,
+   {
+      // Protect against an empty oldMenuItems list, as will happen when this is called at the top level
+      const OverlayMenuItem *oldItem = oldMenuItems->size() > 0 ? &oldMenuItems->get(0) : NULL;
+      drawItemMenu("QuickChat menu", &menuItems->get(0), menuItems->size(), oldItem, oldMenuItems->size(),
                    quickChatLegendText, quickChatLegendColors, ARRAYSIZE(quickChatLegendText));
+   }
 }
 
 
 void QuickChatHelper::onActivated()
 {
    Parent::onActivated();
+
+   mMenuItems1.clear();
+   mMenuItems2.clear();
 
    updateChatMenuItems(0);
 
@@ -123,6 +135,12 @@ void QuickChatHelper::onActivated()
 }
 
 
+Vector<OverlayMenuItem> *QuickChatHelper::getMenuItems(bool one)
+{
+   return one ? &mMenuItems1 : &mMenuItems2;
+}
+
+
 void QuickChatHelper::updateChatMenuItems(S32 curNode)
 {
    mCurNode = curNode;
@@ -131,7 +149,10 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
    U32 matchLevel = gQuickChatTree[walk].depth + 1;
    walk++;
 
-   mMenuItems.clear();
+   mMenuItems1IsCurrent = !mMenuItems1IsCurrent;
+
+   Vector<OverlayMenuItem> *menuItems = getMenuItems(mMenuItems1IsCurrent);
+   menuItems->clear();
 
    GameSettings *settings = getGame()->getSettings();
 
@@ -158,7 +179,7 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
          item.help = "";
          item.itemColor = gQuickChatTree[walk].teamOnly ? &Colors::teamChatColor : &Colors::globalChatColor;
 
-         mMenuItems.push_back(item);
+         menuItems->push_back(item);
       }
       walk--;
    }
@@ -176,6 +197,8 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
 
    // Try to find a match if we can...
 
+   S32 oldNode = mCurNode;
+
    // Set up walk...
    S32 walk = mCurNode;
    U32 matchLevel = gQuickChatTree[walk].depth + 1;
@@ -191,6 +214,7 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
       {
          // ...then select it
          updateChatMenuItems(walk);
+         mTransitionTimer.reset();
 
          UserInterface::playBoop();
 
@@ -213,6 +237,13 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
                   gt->c2sSendChatSTE(!gQuickChatTree[mCurNode].teamOnly, entry);
                }
             }
+
+            // Because we've run off the end of the menu tree, which is how we know we hit a terminal node and not the parent
+            // of yet more items, we need to restore the menus for the menu closing transition animation.  Finally,
+            // we will clear the transition timer to suppress the transition animation.
+            mMenuItems1IsCurrent = !mMenuItems1IsCurrent;
+            updateChatMenuItems(oldNode);
+            mTransitionTimer.clear();
          }
          return true;
       }

@@ -165,10 +165,10 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    // Gray line
    glColor(Colors::gray20);
 
-   S32 grayLineLeft = 20;
-   S32 grayLineRight = interiorEdge - 20;
+   S32 grayLineLeft   = xPos + 20;
+   S32 grayLineRight  = interiorEdge - 20;
    S32 grayLineCenter = (grayLineLeft + grayLineRight) / 2;
-   S32 grayLineYPos = MENU_TOP + topPadding + titleHeight;
+   S32 grayLineYPos   = MENU_TOP + topPadding + titleHeight;
 
    drawHorizLine(grayLineLeft, grayLineRight, grayLineYPos);
 
@@ -178,11 +178,11 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    yPos += titleHeight + MENU_PADDING + transitionOffset;
 
    // Draw menu items (below gray line)
-   drawMenuItems(items, count, yPos, bottom, true, hasLegend);
+   drawMenuItems(items, count, grayLineYPos, bottom, true, hasLegend);
 
    // If we're in transition, we need to call drawMenuItems again with the old items
    if(prevItems && mTransitionTimer.getCurrent() > 0)
-      drawMenuItems(prevItems, prevCount, yPos, bottom, false, hasLegend);
+      drawMenuItems(prevItems, prevCount, grayLineYPos, bottom, false, hasLegend);
 
    yPos += itemsHeight;
 

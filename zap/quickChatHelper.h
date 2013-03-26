@@ -63,7 +63,11 @@ class QuickChatHelper : public HelperMenu
 
 private:
    S32 mCurNode;
-   Vector<OverlayMenuItem> mMenuItems;
+   Vector<OverlayMenuItem> mMenuItems1;
+   Vector<OverlayMenuItem> mMenuItems2;
+   bool mMenuItems1IsCurrent;
+
+   Vector<OverlayMenuItem> *getMenuItems(bool one);
 
    void updateChatMenuItems(S32 curNode);
 
