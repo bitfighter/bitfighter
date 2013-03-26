@@ -1810,7 +1810,7 @@ void GameUserInterface::renderMissionOverlay(const GameType *gameType)
       alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
 
    // Draw top info box
-   renderFancyBox(yStart, 210, 50, Colors::blue, alpha * 0.70f);
+   renderFancyBox(yStart, 210, 30, Colors::blue, alpha * 0.70f);
 
    glColor(Colors::white, alpha);
    drawCenteredStringf(yStart + 5, 30, "Level: %s", gameType->getLevelName()->getString());
