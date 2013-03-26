@@ -170,7 +170,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    S32 grayLineCenter = (grayLineLeft + grayLineRight) / 2;
    S32 grayLineYPos   = MENU_TOP + topPadding + titleHeight;
 
-   drawHorizLine(grayLineLeft, grayLineRight, grayLineYPos);
+   drawHorizLine(grayLineLeft, grayLineRight, grayLineYPos - 2);
 
    // Draw the title (above gray line)
    glColor(baseColor);
@@ -184,10 +184,13 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    if(prevItems && mTransitionTimer.getCurrent() > 0)
       drawMenuItems(prevItems, prevCount, grayLineYPos, bottom, false, hasLegend);
 
-   yPos += itemsHeight;
+   yPos += itemsHeight - MENU_PADDING * 3;
 
    if(hasLegend)
-      yPos += renderLegend(xPos, yPos, legendText, legendColors, legendCount);
+   {
+      renderLegend(xPos, yPos, legendText, legendColors, legendCount);
+      yPos += MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING * 2;
+   }
 
    yPos += MENU_PADDING;
 
