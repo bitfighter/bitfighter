@@ -69,7 +69,7 @@ QuickChatNode::QuickChatNode() : caption(""), msg("")
 QuickChatHelper::QuickChatHelper()
 {
    mCurNode = 0;
-   mWidth = -1;
+   mItemWidth = -1;
    mMenuItems1IsCurrent = true;
 }
 
@@ -123,13 +123,13 @@ void QuickChatHelper::onActivated()
    updateChatMenuItems(0);
 
   
-   if(mWidth == -1)
+   if(mItemWidth == -1)
    {
       for(S32 i = 0; i < gQuickChatTree.size(); i++)
       {
          S32 width = getStringWidth(MENU_FONT_SIZE, gQuickChatTree[i].caption.c_str());
-         if(width > mWidth)
-            mWidth = width;
+         if(width > mItemWidth)
+            mItemWidth = width;
       }
    }
 }

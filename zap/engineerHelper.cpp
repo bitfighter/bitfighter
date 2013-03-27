@@ -81,8 +81,8 @@ EngineerHelper::EngineerHelper()
    // is a bit tricky, however, since the menu items are normally indented, and that indention is added to the menu width
    // we pass.  Therefore, to make everything look nice, we need to subtract that bit off here so we don't end up with a 
    // much wider menu than necessary.  Add the horizMargin to make things look balanced.
-   mWidth = max(getMaxItemWidth(engineerItemInfo, ARRAYSIZE(engineerItemInfo)), 
-                getStringWidth(MENU_FONT_SIZE, menuTitle) - (ITEM_INDENT + 2 * ITEM_HELP_PADDING) + UserInterface::horizMargin);
+   mItemWidth = max(getMaxItemWidth(engineerItemInfo, ARRAYSIZE(engineerItemInfo)), 
+                    getStringWidth(MENU_FONT_SIZE, menuTitle) - (ITEM_INDENT + 2 * ITEM_HELP_PADDING) + UserInterface::horizMargin);
 }
 
 

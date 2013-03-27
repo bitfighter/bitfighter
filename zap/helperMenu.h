@@ -76,13 +76,11 @@ private:
    S32 mOldBottom;
    S32 mOldCount;
 
-   S32 calcInteriorEdge(S32 xPos, S32 width);
-
    // Some render helpers
-   void drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, bool renderKeysWithItemColor);
+   S32 drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, bool renderKeysWithItemColor);
    void renderMenuFrame(S32 interiorEdge, S32 height);
    void renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode);
-   S32 renderLegend(S32 xPos, S32 yPos, const char **legendtext, const Color **legendColors, S32 legendCount);
+   void renderLegend(S32 xPos, S32 yPos, const char **legendtext, const Color **legendColors, S32 legendCount);
 
 
 protected:
@@ -110,7 +108,7 @@ protected:
    static const S32 MENU_PADDING          =  9;    // Padding around outer edge of overlay
    static const S32 TITLE_FONT_SIZE       = 20;    // Size of title of menu
 
-   S32 mWidth;    // Calculated width of menu
+   S32 mItemWidth;    // Calculated width of menu items
 
 public:
    explicit HelperMenu();     // Constructor
