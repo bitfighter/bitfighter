@@ -124,16 +124,18 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    bool hasLegend = legendCount > 0;
 
+   const S32 grayLineBuffer = 10;
+
    // Height of menu parts
-   const S32 topPadding      = MENU_PADDING;
-   const S32 titleHeight     = TITLE_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING;
-   const S32 itemsHeight     = MENU_PADDING + displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + MENU_PADDING;
-   const S32 legendArea      = (hasLegend ? MENU_LEGEND_FONT_SIZE + 2 * MENU_FONT_SPACING : 0) + 2 * MENU_PADDING;
-   const S32 instructionArea = MENU_LEGEND_FONT_SIZE;
-   const S32 bottomPadding   = MENU_PADDING;
+   const S32 topPadding        = MENU_PADDING;
+   const S32 titleHeight       = TITLE_FONT_SIZE + grayLineBuffer ;
+   const S32 itemsHeight       = displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + MENU_PADDING + grayLineBuffer;
+   const S32 legendHeight      = (hasLegend ? MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING : 0); 
+   const S32 instructionHeight = MENU_LEGEND_FONT_SIZE;
+   const S32 bottomPadding     = MENU_PADDING;
 
    // Total height of the menu
-   const S32 totalHeight = topPadding + titleHeight + itemsHeight + legendArea + instructionArea + bottomPadding;     
+   const S32 totalHeight = topPadding + titleHeight + itemsHeight + legendHeight + instructionHeight + bottomPadding;     
 
    S32 yPos = MENU_TOP + topPadding;
    S32 bottom = MENU_TOP + totalHeight;
@@ -159,42 +161,39 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    S32 interiorEdge = calcInteriorEdge(xPos, mWidth);
 
+   S32 grayLineLeft   = xPos + 20;
+   S32 grayLineRight  = interiorEdge - 20;
+   S32 grayLineCenter = (grayLineLeft + grayLineRight) / 2;
 
    renderMenuFrame(interiorEdge, totalHeight + transitionOffset);
+
+   // Draw the title (above gray line)
+   glColor(baseColor);
+   drawCenteredString(grayLineCenter, yPos, TITLE_FONT_SIZE, title);
+   yPos += titleHeight;
 
    // Gray line
    glColor(Colors::gray20);
 
-   S32 grayLineLeft   = xPos + 20;
-   S32 grayLineRight  = interiorEdge - 20;
-   S32 grayLineCenter = (grayLineLeft + grayLineRight) / 2;
-   S32 grayLineYPos   = MENU_TOP + topPadding + titleHeight;
+   drawHorizLine(grayLineLeft, grayLineRight, yPos + 2);
 
-   drawHorizLine(grayLineLeft, grayLineRight, grayLineYPos - 2);
-
-   // Draw the title (above gray line)
-   glColor(baseColor);
-   drawCenteredString(grayLineCenter, yPos + 2, TITLE_FONT_SIZE, title);
-   yPos += titleHeight + MENU_PADDING + transitionOffset;
+   yPos += grayLineBuffer;
 
    // Draw menu items (below gray line)
-   drawMenuItems(items, count, grayLineYPos, bottom, true, hasLegend);
+   drawMenuItems(items, count, yPos, bottom, true, hasLegend);
 
    // If we're in transition, we need to call drawMenuItems again with the old items
    if(prevItems && mTransitionTimer.getCurrent() > 0)
-      drawMenuItems(prevItems, prevCount, grayLineYPos, bottom, false, hasLegend);
+      drawMenuItems(prevItems, prevCount, yPos + 2, bottom, false, hasLegend);
 
-   yPos += itemsHeight - MENU_PADDING * 3;
+   yPos += itemsHeight + transitionOffset;     // itemsHeight includes grayLineBuffer
 
    if(hasLegend)
-   {
-      renderLegend(xPos, yPos, legendText, legendColors, legendCount);
-      yPos += MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING + MENU_PADDING * 2;
-   }
+      renderLegend(xPos, yPos - legendHeight - 3, legendText, legendColors, legendCount);
 
-   yPos += MENU_PADDING;
+   yPos += legendHeight;
 
-   renderPressEscapeToCancel(grayLineCenter, yPos + 2, baseColor, getGame()->getSettings()->getInputCodeManager()->getInputMode());
+   renderPressEscapeToCancel(grayLineCenter, yPos, baseColor, getGame()->getSettings()->getInputCodeManager()->getInputMode());
 
    FontManager::popFontContext();
 }
@@ -292,13 +291,15 @@ void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &base
 
 S32 HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color **legendColors, S32 legendCount)
 {
-   x += 20;
+   x += 20;    // Indent a tad
    y += MENU_FONT_SPACING;
+
+   const S32 SPACE_BETWEEN_LEGEND_ITEMS = 7;
 
    for(S32 i = 0; i < legendCount; i++)
    {
       glColor(legendColors[i]);
-      x += drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legendText[i]);
+      x += drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legendText[i]) + SPACE_BETWEEN_LEGEND_ITEMS;
    }
 
    return MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING;

@@ -45,7 +45,7 @@ namespace Zap
 
 Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file
 
-static const char  *quickChatLegendText[]   = { "Team Message ",        "Global Message"         };
+static const char  *quickChatLegendText[]   = { "Team Message",         "Global Message"         };
 static const Color *quickChatLegendColors[] = { &Colors::teamChatColor, &Colors::globalChatColor };
 
 
