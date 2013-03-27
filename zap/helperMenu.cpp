@@ -23,7 +23,6 @@
 //
 //------------------------------------------------------------------------------------
 
-
 #include "helperMenu.h"
 #include "UIGame.h"              // For mGameUserInterface
 #include "UIManager.h"
@@ -42,7 +41,6 @@ namespace Zap
 // Constructor
 HelperMenu::HelperMenu()
 {
-   mAnimationTimer.setPeriod(150);    // Transition time, in ms
    mTransitionTimer.setPeriod(150);
 }
 
@@ -63,8 +61,8 @@ void HelperMenu::initialize(ClientGame *game, HelperManager *manager)
 
 void HelperMenu::onActivated()    
 {
-   mAnimationTimer.invert();
-   mActivating = true;
+   Parent::onActivated();
+
    mTransitionTimer.clear();
 }
 
@@ -84,24 +82,8 @@ InputCode HelperMenu::getActivationKey()
 // Exit helper mode by entering play mode
 void HelperMenu::exitHelper() 
 { 
-   mAnimationTimer.invert();
-   mActivating = false;
+   Parent::onDeactivated();
    mClientGame->getUIManager()->getGameUserInterface()->exitHelper();
-}
-
-
-F32 HelperMenu::getFraction()
-{
-   //if(getActivationAnimationTime() == 0)
-   //   return 0;
-   //else
-      return mActivating ? mAnimationTimer.getFraction() : 1 - mAnimationTimer.getFraction();
-}
-
-
-S32 HelperMenu::calcInteriorEdge(S32 xPos, S32 width)
-{
-   return xPos + width + ITEM_INDENT + ITEM_HELP_PADDING + MENU_PADDING + MENU_PADDING;
 }
 
 
@@ -111,6 +93,10 @@ extern void drawHorizLine (S32 x1, S32 x2, S32 y );
 void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, const OverlayMenuItem *prevItems, S32 prevCount,
                               const char **legendText, const Color **legendColors, S32 legendCount)
 {
+   glPushMatrix();
+
+   glTranslate(getInsideEdge(), 0, 0);
+
    static const Color baseColor(Colors::red);
 
    TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on");
@@ -138,7 +124,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    const S32 totalHeight = topPadding + titleHeight + itemsHeight + legendHeight + instructionHeight + bottomPadding;     
 
    S32 yPos = MENU_TOP + topPadding;
-   S32 bottom = MENU_TOP + totalHeight;
+   S32 menuBottom = MENU_TOP + totalHeight;
 
    // If we are transitioning between items of different sizes, we will gradually change the rendered size during the transition
    // Generally, the top of the menu will stay in place, while the bottom will be adjusted.  Therefore, lower items need
@@ -146,22 +132,24 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    S32 transitionOffset = 0;
 
    if(mTransitionTimer.getCurrent() > 0)
-      transitionOffset = (mOldBottom - bottom) * mTransitionTimer.getFraction();
+      transitionOffset = (mOldBottom - menuBottom) * mTransitionTimer.getFraction();
    else
    {
-      mOldBottom = bottom;
+      mOldBottom = menuBottom;
       mOldCount = displayItems;
    }
 
-   bottom += transitionOffset;
+   menuBottom += transitionOffset;
 
    FontManager::pushFontContext(FontManager::OverlayMenuContext);
 
-   S32 xPos = getLeftEdgeOfMenuPos();
+   // First do a dry run with the menu items to get their indent level (draw == false).  Later
+   // we'll draw them for real.
+   S32 itemIndent = drawMenuItems(false, items, count, 0, menuBottom, true, hasLegend);
 
-   S32 interiorEdge = calcInteriorEdge(xPos, mWidth);
+   S32 interiorEdge = mItemWidth + itemIndent + MENU_PADDING;
 
-   S32 grayLineLeft   = xPos + 20;
+   S32 grayLineLeft   = 20;
    S32 grayLineRight  = interiorEdge - 20;
    S32 grayLineCenter = (grayLineLeft + grayLineRight) / 2;
 
@@ -180,29 +168,32 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    yPos += grayLineBuffer;
 
    // Draw menu items (below gray line)
-   drawMenuItems(items, count, yPos, bottom, true, hasLegend);
+   drawMenuItems(true, items, count, yPos, menuBottom, true, hasLegend);
 
    // If we're in transition, we need to call drawMenuItems again with the old items
    if(prevItems && mTransitionTimer.getCurrent() > 0)
-      drawMenuItems(prevItems, prevCount, yPos + 2, bottom, false, hasLegend);
+      drawMenuItems(true, prevItems, prevCount, yPos + 2, menuBottom, false, hasLegend);
 
-   yPos += itemsHeight + transitionOffset;     // itemsHeight includes grayLineBuffer
+   // itemsHeight includes grayLineBuffer, transitionOffset accounts for potentially changing menu height during transition
+   yPos += itemsHeight + transitionOffset;     
 
    if(hasLegend)
-      renderLegend(xPos, yPos - legendHeight - 3, legendText, legendColors, legendCount);
+      renderLegend(grayLineCenter, yPos - legendHeight - 3, legendText, legendColors, legendCount);
 
    yPos += legendHeight;
 
    renderPressEscapeToCancel(grayLineCenter, yPos, baseColor, getGame()->getSettings()->getInputCodeManager()->getInputMode());
 
    FontManager::popFontContext();
+
+   glPopMatrix();
 }
 
 
 extern ScreenInfo gScreenInfo;
 
-// Render a set of menu items.  Break this code out to make transitions easier.
-void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, bool renderKeysWithItemColor)
+// Render a set of menu items.  Break this code out to make transitions easier (when we'll be rendering two sets of items).
+S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, bool renderKeysWithItemColor)
 {
    S32 displayItems = 0;
    // Count how many items we will be displaying -- some may be hidden
@@ -213,7 +204,25 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos
    S32 height = (MENU_FONT_SIZE + MENU_FONT_SPACING) * displayItems;
    S32 oldHeight = (MENU_FONT_SIZE + MENU_FONT_SPACING) * mOldCount;
 
-   S32 xPos = getLeftEdgeOfMenuPos();
+      // Determine whether to show keys or joystick buttons on menu
+   GameSettings *settings   = getGame()->getSettings();
+   InputMode inputMode      = settings->getInputCodeManager()->getInputMode();
+   bool showKeys            = settings->getIniSettings()->showKeyboardKeys || inputMode == InputModeKeyboard;
+   bool showJoystickButtons = inputMode == InputModeJoystick;
+
+   // For testing, cycle through all valid combinations of keyboard/joystick button display to make sure all render properly
+   //S32 mode = Platform::getRealMilliseconds() / 1000 % 3;
+   //if(mode == 0) { showKeys = false; showJoystickButtons = true;  }
+   //if(mode == 1) { showKeys = true;  showJoystickButtons = false; }
+   //if(mode == 2) { showKeys = true;  showJoystickButtons = true;  }
+
+   S32 keyIndent  = showKeys ? (showJoystickButtons ? 28 : 20) : 0;
+   S32 jsIndent   = showJoystickButtons ? 20 : 0;
+   S32 itemIndent = jsIndent + keyIndent + 19;
+
+   // If draw is false, this was just a dry run to get itemIndent
+   if(!draw)
+      return itemIndent;
 
    static ScissorsManager scissorsManager;
 
@@ -222,10 +231,6 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos
 
    yPos += mTransitionTimer.getFraction() * oldHeight - (newItems ? 0 : height);
 
-   // Determine whether to show keys or joystick buttons on menu
-   GameSettings *settings = getGame()->getSettings();
-   InputMode inputMode    = settings->getInputCodeManager()->getInputMode();
-   bool showKeys = settings->getIniSettings()->showKeyboardKeys || inputMode == InputModeKeyboard;
 
    yPos += 2;    // Aesthetics
 
@@ -238,33 +243,35 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos
       // Draw key controls for selecting the object to be created
       U32 joystickIndex = Joystick::SelectedPresetIndex;
 
-      if(inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
-         JoystickRender::renderControllerButton(F32(xPos + (showKeys ? 5 : 25)), (F32)yPos, 
+      if(showJoystickButtons)     // Only draw joystick buttons when in joystick mode
+         JoystickRender::renderControllerButton(F32(jsIndent), (F32)yPos, 
                                                 joystickIndex, items[i].button, false);
 
       if(showKeys)
       {
          // Render key in white, or, if there is a legend, in the color of the adjacent item
          glColor(renderKeysWithItemColor ? items[i].itemColor : &Colors::white); 
-         JoystickRender::renderControllerButton((F32)xPos + 30, (F32)yPos, 
+         JoystickRender::renderControllerButton((F32)keyIndent + jsIndent, (F32)yPos, 
                                                 joystickIndex, items[i].key, false);
       }
 
       glColor(items[i].itemColor);  
 
-      S32 x = drawStringAndGetWidth(xPos + ITEM_INDENT, yPos, MENU_FONT_SIZE, items[i].name); 
+      S32 x = drawStringAndGetWidth(itemIndent, yPos, MENU_FONT_SIZE, items[i].name); 
 
       // Render help string, if one is available
       if(strcmp(items[i].help, "") != 0)
       {
          glColor(items[i].helpColor);    
-         drawString(xPos + ITEM_INDENT + ITEM_HELP_PADDING + x, yPos, MENU_FONT_SIZE, items[i].help);
+         drawString(itemIndent + x, yPos, MENU_FONT_SIZE, items[i].help);
       }
 
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
    }
 
    scissorsManager.disable();
+
+   return itemIndent;
 }
 
 
@@ -289,20 +296,24 @@ void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &base
 }
 
 
-S32 HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color **legendColors, S32 legendCount)
+void HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color **legendColors, S32 legendCount)
 {
-   x += 20;    // Indent a tad
+   S32 width = 0;
    y += MENU_FONT_SPACING;
 
    const S32 SPACE_BETWEEN_LEGEND_ITEMS = 7;
+
+   // First, get the total width so we can center poperly
+   for(S32 i = 0; i < legendCount; i++)
+      width += getStringWidth(MENU_LEGEND_FONT_SIZE, legendText[i]) + SPACE_BETWEEN_LEGEND_ITEMS;
+
+   x -= width / 2;
 
    for(S32 i = 0; i < legendCount; i++)
    {
       glColor(legendColors[i]);
       x += drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legendText[i]) + SPACE_BETWEEN_LEGEND_ITEMS;
    }
-
-   return MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING;
 }
 
 
@@ -339,12 +350,6 @@ S32 HelperMenu::getMaxItemWidth(const OverlayMenuItem *items, S32 count)
    }
 
    return width;
-}
-
-
-S32 HelperMenu::getAnimationPeriod() const
-{
-   return mAnimationTimer.getPeriod();
 }
 
 
@@ -389,35 +394,22 @@ void HelperMenu::activateHelp(UIManager *uiManager)
 }
 
 
-// Return true if menu is playing the closing animation
-bool HelperMenu::isClosing() const
-{
-   return !mActivating && mAnimationTimer.getCurrent() > 0;
-}
-
-
 bool HelperMenu::isMovementDisabled() { return false; }
 bool HelperMenu::isChatDisabled()     { return true;  }
 
 
 void HelperMenu::idle(U32 deltaT) 
 {
-   if(mAnimationTimer.update(deltaT) && !mActivating)
-      mHelperManager->doneClosingHelper();
+   Parent::idle(deltaT);
 
    mTransitionTimer.update(deltaT);
 }
 
 
-// Used for loadout-style menus
-S32 HelperMenu::getLeftEdgeOfMenuPos()
+// Gets run when closing animation is complet
+void HelperMenu::onWidgetClosed()
 {
-   // Magic number that seems to work well... no matter that the real menu might be a different width... by
-   // using this constant, menus appear at a consistent rate.
-   F32 width = 400;     
-
-   return UserInterface::horizMargin - width + (mActivating ? width - mAnimationTimer.getFraction() * width : 
-                                                              mAnimationTimer.getFraction() * width);
+   mHelperManager->doneClosingHelper();
 }
 
 

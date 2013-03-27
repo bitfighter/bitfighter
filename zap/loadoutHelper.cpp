@@ -100,8 +100,8 @@ static U8 weaponLookup[] =
 LoadoutHelper::LoadoutHelper()
 {
    mCurrentIndex = 0;
-   mWidth = max(getMaxItemWidth(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems)),
-                getMaxItemWidth(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems)));
+   mItemWidth = max(getMaxItemWidth(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems)),
+                    getMaxItemWidth(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems)));
 }
 
 

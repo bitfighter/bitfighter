@@ -256,7 +256,8 @@ void GameUserInterface::idle(U32 timeDelta)
    mInputModeChangeAlertDisplayTimer.update(timeDelta);
    mWrongModeMsgDisplay.update(timeDelta);
    mProgressBarFadeTimer.update(timeDelta);
-   mLevelInfoDisplayTimer.update(timeDelta);
+
+   mLevelInfoDisplayer.idle(timeDelta);
 
    if(mAnnouncementTimer.update(timeDelta))
       mAnnouncement = "";
@@ -861,7 +862,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    if(checkInputCode(settings, InputCodeManager::BINDING_MISSION, inputCode)) // F2
    {
       mMissionOverlayActive = true;
-      getUIManager()->getGameUserInterface()->clearLevelInfoDisplayTimer();   // Clear level-start display timer so releasing F2 always hides display
+      mLevelInfoDisplayer.clearTimer();   // Clear level-start display timer so releasing F2 always hides display
 
       return true;
    }
@@ -1304,13 +1305,7 @@ Move *GameUserInterface::getCurrentMove()
 
 void GameUserInterface::resetLevelInfoDisplayTimer()
 {
-   mLevelInfoDisplayTimer.reset(6000);  // 6 seconds
-}
-
-
-void GameUserInterface::clearLevelInfoDisplayTimer()
-{
-   mLevelInfoDisplayTimer.clear();
+   mLevelInfoDisplayer.resetTimer();
 }
 
 
@@ -1749,8 +1744,12 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
 
 void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible)
 {
-   if(mLevelInfoDisplayTimer.getCurrent() || mMissionOverlayActive)
-      renderMissionOverlay(gameType);
+   if(mLevelInfoDisplayer.getDisplayTime() || mMissionOverlayActive)
+   {
+      mLevelInfoDisplayer.render(gameType, getGame()->getTeamCount(), getInputCodeString(getGame()->getSettings(), 
+                                 InputCodeManager::BINDING_MISSION), mMissionOverlayActive);
+      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
+   }
 
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
       renderInputModeChangeAlert();
@@ -1796,55 +1795,6 @@ void GameUserInterface::renderInputModeChangeAlert()
    glColor(Colors::paleRed, alpha);
    drawCenteredStringf(vertMargin + 130, 20, "Input mode changed to %s", 
                        getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeJoystick ? "Joystick" : "Keyboard");
-}
-
-
-void GameUserInterface::renderMissionOverlay(const GameType *gameType)
-{
-   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-   static const S32 yStart = 50;  // 50 from the top
-
-   // Fade message out
-   F32 alpha = 1;
-   if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !mMissionOverlayActive)
-      alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
-
-   // Draw top info box
-   renderFancyBox(yStart, 210, 30, Colors::blue, alpha * 0.70f);
-
-   glColor(Colors::white, alpha);
-   drawCenteredStringf(yStart + 5, 30, "Level: %s", gameType->getLevelName()->getString());
-
-   // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
-   const char *gtPrefix = (gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && 
-                           getGame()->getTeamCount() > 1) ? "Team " : "";
-
-   drawCenteredStringf(yStart + 45, 30, "Game Type: %s%s", gtPrefix, gameType->getGameTypeName());
-
-   glColor(Colors::cyan, alpha);
-   drawCenteredString(yStart + 85, 20, gameType->getInstructionString());
-
-   glColor(Colors::magenta, alpha);
-   drawCenteredString(yStart + 110, 20, gameType->getLevelDescription()->getString());
-
-   glColor(Colors::yellow, alpha);
-   drawCenteredStringf(yStart + 135, 20, "Score to Win: %d", gameType->getWinningScore());
-
-   if(gameType->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty
-   {
-      glColor(Colors::red, alpha);
-      drawCenteredStringf(yStart + 175, 20, "%s", gameType->getLevelCredits()->getString());
-   }
-
-   // Draw bottom info box
-   renderFancyBox(canvasHeight - 105, 35, 155, Colors::blue, alpha * 0.70f);
-
-   glColor(Colors::menuHelpColor, alpha);
-   S32 pos = drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again",
-                                               getInputCodeString(getGame()->getSettings(), InputCodeManager::BINDING_MISSION));
-
-
-   mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
 }
 
 

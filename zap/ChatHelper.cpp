@@ -111,7 +111,7 @@ ChatHelper::ChatHelper() : mLineEditor(200)
    mCurrentChatType = NoChat;
    makeCommandCandidateList();
 
-   mAnimationTimer.setPeriod(65);    // Transition time, in ms
+   setAnimationTime(65);    // Menu appearance time
 }
 
 
@@ -174,12 +174,14 @@ void ChatHelper::render()
    // Above block repeated below...
 
 
-   S32 ypos = IN_GAME_CHAT_DISPLAY_POS + CHAT_COMPOSE_FONT_SIZE + 11;
+   S32 ypos = IN_GAME_CHAT_DISPLAY_POS + CHAT_COMPOSE_FONT_SIZE + 11;      // Top of the box when fully displayed
    S32 realYPos = ypos;
 
+   bool isAnimating = isOpening() || isClosing();
+
    // Adjust for animated effect
-   ypos += (mActivating ?              mAnimationTimer.getFraction() * BOX_HEIGHT : 
-                          BOX_HEIGHT - mAnimationTimer.getFraction() * BOX_HEIGHT);
+   if(isAnimating)
+      ypos += (getFraction()) * BOX_HEIGHT;
 
    S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * UserInterface::horizMargin - (nameWidth - promptSize) - 230;
 
@@ -189,7 +191,7 @@ void ChatHelper::render()
    // Only need to set scissors if we're scrolling.  When not scrolling, we control the display by only showing
    // the specified number of lines; there are normally no partial lines that need vertical clipping as 
    // there are when we're scrolling.  Note also that we only clip vertically, and can ignore the horizontal.
-   scissorsManager.enable(mAnimationTimer.getCurrent() > 0, getGame(), 0, realYPos - 3, gScreenInfo.getGameCanvasWidth(), BOX_HEIGHT);
+   scissorsManager.enable(isAnimating, getGame(), 0, realYPos - 3, gScreenInfo.getGameCanvasWidth(), BOX_HEIGHT);
 
    // Render text entry box like thingy
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");

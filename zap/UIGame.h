@@ -27,12 +27,10 @@
 #define _UIGAME_H_
 
 #include "UI.h"
-#include "Timer.h"
+#include "UILevelInfoDisplayer.h"
 #include "ChatCommands.h"
 #include "voiceCodec.h"
 #include "Point.h"
-#include "Color.h"
-#include "Timer.h"
 #include "game.h"
 #include "ship.h"             // For ShipModuleCount
 #include "HelperManager.h"    // For HelperManager
@@ -69,7 +67,6 @@ private:
    bool mFull;       // Our message displayer is full up
 
    U32 mNextGroupId;
-
 
    void advanceFirst();
    void advanceLast();
@@ -121,9 +118,8 @@ private:
    Point mMousePoint;
 
    HelperManager mHelperManager;
+   LevelInfoDisplayer mLevelInfoDisplayer;
 
-
-   //Timer mDisplayMessageTimer;
    Timer mShutdownTimer;
 
    bool mMissionOverlayActive;      // Are game instructions (F2) visible?
@@ -156,13 +152,11 @@ private:
 
    Timer mWrongModeMsgDisplay;               // Help if user is trying to use keyboard in joystick mode
    Timer mInputModeChangeAlertDisplayTimer;  // Remind user that they just changed input modes
-   Timer mLevelInfoDisplayTimer;
 
    void updateChatMessages(U32 timeDelta);
    bool checkEnterChatInputCode(InputCode inputCode);  // Helper for key handler
 
    void renderInputModeChangeAlert();
-   void renderMissionOverlay(const GameType *gameType);
    void renderTeamFlagScores(const GameType *gameType, U32 rightAlignCoord);
    void renderCoreScores(const GameType *gameType, U32 rightAlignCoord);
    void renderLeadingPlayerScores(const GameType *gameType, U32 rightAlignCoord);
@@ -269,8 +263,7 @@ public:
 
    void idle(U32 timeDelta);
 
-   void resetLevelInfoDisplayTimer();     // 6 seconds
-   void clearLevelInfoDisplayTimer();
+   void resetLevelInfoDisplayTimer();
 
    void shutdownInitiated(U16 time, const StringTableEntry &who, const StringPtr &why, bool initiator);
    void cancelShutdown();

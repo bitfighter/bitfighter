@@ -262,8 +262,10 @@
     <ClCompile Include="UIAbstractInstructions.cpp" />
     <ClCompile Include="UIEditorMenus.cpp" />
     <ClCompile Include="UIHighScores.cpp" />
+    <ClCompile Include="UILevelInfoDisplayer.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="UIMenuItems.cpp" />
+    <ClCompile Include="UISlideOutWidget.cpp" />
     <ClCompile Include="WallSegmentManager.cpp" />
     <ClCompile Include="Zone.cpp" />
     <ClCompile Include="ChatCheck.cpp" />
@@ -420,8 +422,10 @@
     <ClInclude Include="UIAbstractInstructions.h" />
     <ClInclude Include="UIEditorMenus.h" />
     <ClInclude Include="UIHighScores.h" />
+    <ClInclude Include="UILevelInfoDisplayer.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="UIMenuItems.h" />
+    <ClInclude Include="UISlideOutWidget.h" />
     <ClInclude Include="version.h" />
     <ClInclude Include="WallSegmentManager.h" />
     <ClInclude Include="Zone.h" />
