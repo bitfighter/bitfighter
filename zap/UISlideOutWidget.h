@@ -61,7 +61,7 @@ public:
    virtual void onWidgetClosed();   // Widget has finished closing
 
    F32 getFraction();               // Get fraction of openness
-   S32 getAnimationPeriod() const;
+   S32 getAnimationTime() const;
 
 };
 

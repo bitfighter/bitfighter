@@ -33,6 +33,8 @@ namespace Zap
 UISlideOutWidget::UISlideOutWidget()
 {
    mActivating = false;
+
+   // To change animation time, simply use the setAnimationTime() method in the child's constructor
    mAnimationTimer.setPeriod(150);    // Transition time, in ms
 }
 
@@ -99,7 +101,7 @@ F32 UISlideOutWidget::getFraction()
 }
 
 
-S32 UISlideOutWidget::getAnimationPeriod() const
+S32 UISlideOutWidget::getAnimationTime() const
 {
    return mAnimationTimer.getPeriod();
 }
