@@ -152,7 +152,6 @@ private:
 
    Timer mWrongModeMsgDisplay;               // Help if user is trying to use keyboard in joystick mode
    Timer mInputModeChangeAlertDisplayTimer;  // Remind user that they just changed input modes
-   Timer mLevelInfoDisplayTimer;
 
    void updateChatMessages(U32 timeDelta);
    bool checkEnterChatInputCode(InputCode inputCode);  // Helper for key handler
@@ -264,8 +263,7 @@ public:
 
    void idle(U32 timeDelta);
 
-   void resetLevelInfoDisplayTimer();     // 6 seconds
-   void clearLevelInfoDisplayTimer();
+   void resetLevelInfoDisplayTimer();
 
    void shutdownInitiated(U16 time, const StringTableEntry &who, const StringPtr &why, bool initiator);
    void cancelShutdown();

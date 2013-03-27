@@ -256,7 +256,8 @@ void GameUserInterface::idle(U32 timeDelta)
    mInputModeChangeAlertDisplayTimer.update(timeDelta);
    mWrongModeMsgDisplay.update(timeDelta);
    mProgressBarFadeTimer.update(timeDelta);
-   mLevelInfoDisplayTimer.update(timeDelta);
+
+   mLevelInfoDisplayer.idle(timeDelta);
 
    if(mAnnouncementTimer.update(timeDelta))
       mAnnouncement = "";
@@ -861,7 +862,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    if(checkInputCode(settings, InputCodeManager::BINDING_MISSION, inputCode)) // F2
    {
       mMissionOverlayActive = true;
-      getUIManager()->getGameUserInterface()->clearLevelInfoDisplayTimer();   // Clear level-start display timer so releasing F2 always hides display
+      mLevelInfoDisplayer.clearTimer();   // Clear level-start display timer so releasing F2 always hides display
 
       return true;
    }
@@ -1304,13 +1305,7 @@ Move *GameUserInterface::getCurrentMove()
 
 void GameUserInterface::resetLevelInfoDisplayTimer()
 {
-   mLevelInfoDisplayTimer.reset(6000);  // 6 seconds
-}
-
-
-void GameUserInterface::clearLevelInfoDisplayTimer()
-{
-   mLevelInfoDisplayTimer.clear();
+   mLevelInfoDisplayer.resetTimer();
 }
 
 
@@ -1749,7 +1744,7 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
 
 void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible)
 {
-   if(mLevelInfoDisplayTimer.getCurrent() || mMissionOverlayActive)
+   if(mLevelInfoDisplayer.getDisplayTime() || mMissionOverlayActive)
    {
       mLevelInfoDisplayer.render(gameType, getGame()->getTeamCount(), getInputCodeString(getGame()->getSettings(), 
                                  InputCodeManager::BINDING_MISSION), mMissionOverlayActive);

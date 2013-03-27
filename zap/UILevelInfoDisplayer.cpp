@@ -37,6 +37,30 @@
 namespace Zap
 {
 
+
+void LevelInfoDisplayer::resetTimer()
+{
+   mDisplayTimer.reset(6000);  // 6 seconds
+}
+
+void LevelInfoDisplayer::idle(U32 timeDelta)
+{
+   mDisplayTimer.update(timeDelta);
+}
+
+
+S32 LevelInfoDisplayer::getDisplayTime()
+{
+   return mDisplayTimer.getCurrent();
+}
+
+
+void LevelInfoDisplayer::clearTimer()
+{
+   mDisplayTimer.clear();
+}
+
+
 extern ScreenInfo gScreenInfo;
 
 void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const char *activationKey, bool userActivated)
