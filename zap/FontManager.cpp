@@ -158,6 +158,9 @@ void FontManager::initialize()
    fontList[FontOrbitronLight]  = new BfFont(FontOrbitronLight, "Orbitron Light.ttf");
    fontList[FontOrbitronMedium] = new BfFont(FontOrbitronLight, "Orbitron Medium.ttf");
    fontList[FontPrimeRegular]   = new BfFont(FontPrimeRegular,  "prime_regular.ttf");
+
+   // set texture blending function
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 
