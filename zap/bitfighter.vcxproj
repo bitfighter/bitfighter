@@ -262,6 +262,7 @@
     <ClCompile Include="UIAbstractInstructions.cpp" />
     <ClCompile Include="UIEditorMenus.cpp" />
     <ClCompile Include="UIHighScores.cpp" />
+    <ClCompile Include="UILevelInfoDisplayer.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="UIMenuItems.cpp" />
     <ClCompile Include="UISlideOutWidget.cpp" />
@@ -421,6 +422,7 @@
     <ClInclude Include="UIAbstractInstructions.h" />
     <ClInclude Include="UIEditorMenus.h" />
     <ClInclude Include="UIHighScores.h" />
+    <ClInclude Include="UILevelInfoDisplayer.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="UIMenuItems.h" />
     <ClInclude Include="UISlideOutWidget.h" />
