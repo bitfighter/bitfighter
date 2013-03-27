@@ -138,7 +138,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    const S32 totalHeight = topPadding + titleHeight + itemsHeight + legendHeight + instructionHeight + bottomPadding;     
 
    S32 yPos = MENU_TOP + topPadding;
-   S32 bottom = MENU_TOP + totalHeight;
+   S32 menuBottom = MENU_TOP + totalHeight;
 
    // If we are transitioning between items of different sizes, we will gradually change the rendered size during the transition
    // Generally, the top of the menu will stay in place, while the bottom will be adjusted.  Therefore, lower items need
@@ -146,14 +146,14 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    S32 transitionOffset = 0;
 
    if(mTransitionTimer.getCurrent() > 0)
-      transitionOffset = (mOldBottom - bottom) * mTransitionTimer.getFraction();
+      transitionOffset = (mOldBottom - menuBottom) * mTransitionTimer.getFraction();
    else
    {
-      mOldBottom = bottom;
+      mOldBottom = menuBottom;
       mOldCount = displayItems;
    }
 
-   bottom += transitionOffset;
+   menuBottom += transitionOffset;
 
    FontManager::pushFontContext(FontManager::OverlayMenuContext);
 
@@ -180,11 +180,11 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    yPos += grayLineBuffer;
 
    // Draw menu items (below gray line)
-   drawMenuItems(items, count, yPos, bottom, true, hasLegend);
+   drawMenuItems(items, count, yPos, menuBottom, true, hasLegend);
 
    // If we're in transition, we need to call drawMenuItems again with the old items
    if(prevItems && mTransitionTimer.getCurrent() > 0)
-      drawMenuItems(prevItems, prevCount, yPos + 2, bottom, false, hasLegend);
+      drawMenuItems(prevItems, prevCount, yPos + 2, menuBottom, false, hasLegend);
 
    yPos += itemsHeight + transitionOffset;     // itemsHeight includes grayLineBuffer
 
