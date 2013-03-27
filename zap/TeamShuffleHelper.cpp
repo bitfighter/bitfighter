@@ -54,7 +54,7 @@ TeamShuffleHelper::TeamShuffleHelper() : Parent()
    cols           = 0;
    teamCount      = 0;
 
-   mAnimationTimer.setPeriod(0);    // Transition time, in ms
+   setAnimationTime(0);    // Transition time, in ms
 }
 
 

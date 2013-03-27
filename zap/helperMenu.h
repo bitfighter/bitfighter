@@ -26,7 +26,8 @@
 #ifndef _HELPERMENU_H_
 #define _HELPERMENU_H_
 
-#include "Engineerable.h"     // For EngineerBuildObjects enum
+#include "UISlideOutWidget.h"    // Parent class
+#include "Engineerable.h"        // For EngineerBuildObjects enum
 #include "InputCode.h"
 #include "tnl.h"
 #include "Color.h"
@@ -55,8 +56,10 @@ struct OverlayMenuItem
 };
 
 
-class HelperMenu
+class HelperMenu : public UISlideOutWidget
 {
+   typedef UISlideOutWidget Parent;
+
 public:
    enum HelperMenuType {
       ChatHelperType,
@@ -86,11 +89,7 @@ private:
 protected:
    static const S32 MENU_TOP = 175;    // Location of top of title of overlay menu frame
 
-   Timer mAnimationTimer;              // Timer for activation/deactivation animation
    Timer mTransitionTimer;             // Timer for intra-helper transitions
-
-   S32 getLeftEdgeOfMenuPos();         // Return left edge of menu
-   bool mActivating;                   // True when menu is being activated, false when deactivating, undefined at other times
 
    // Shortcut helper function
    virtual void exitHelper();
@@ -120,9 +119,7 @@ public:
    virtual void idle(U32 delta);
    virtual void onActivated();
 
-   bool isClosing() const;                         // Return true if menu is playing the closing animation
-   F32 getFraction();                              // Get fraction of openness
-
+   void onWidgetClosed();                          // Gets run when closing animation is complet
 
    virtual bool processInputCode(InputCode inputCode);  
    virtual void onTextInput(char ascii);
@@ -132,7 +129,6 @@ public:
    virtual bool isChatDisabled();                     // Returns true if chat and friends should be disabled while this is active
 
    S32 getMaxItemWidth(const OverlayMenuItem *items, S32 count);
-   S32 getAnimationPeriod() const;
 
    virtual HelperMenuType getType() = 0;
 };

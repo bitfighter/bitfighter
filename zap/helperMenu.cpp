@@ -41,7 +41,6 @@ namespace Zap
 // Constructor
 HelperMenu::HelperMenu()
 {
-   mAnimationTimer.setPeriod(150);    // Transition time, in ms
    mTransitionTimer.setPeriod(150);
 }
 
@@ -62,8 +61,8 @@ void HelperMenu::initialize(ClientGame *game, HelperManager *manager)
 
 void HelperMenu::onActivated()    
 {
-   mAnimationTimer.invert();
-   mActivating = true;
+   Parent::onActivated();
+
    mTransitionTimer.clear();
 }
 
@@ -83,18 +82,8 @@ InputCode HelperMenu::getActivationKey()
 // Exit helper mode by entering play mode
 void HelperMenu::exitHelper() 
 { 
-   mAnimationTimer.invert();
-   mActivating = false;
+   Parent::onDeactivated();
    mClientGame->getUIManager()->getGameUserInterface()->exitHelper();
-}
-
-
-F32 HelperMenu::getFraction()
-{
-   //if(getActivationAnimationTime() == 0)
-   //   return 0;
-   //else
-      return mActivating ? mAnimationTimer.getFraction() : 1 - mAnimationTimer.getFraction();
 }
 
 
@@ -106,7 +95,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 {
    glPushMatrix();
 
-   glTranslate(getLeftEdgeOfMenuPos(), 0, 0);
+   glTranslate(getInsideEdge(), 0, 0);
 
    static const Color baseColor(Colors::red);
 
@@ -364,12 +353,6 @@ S32 HelperMenu::getMaxItemWidth(const OverlayMenuItem *items, S32 count)
 }
 
 
-S32 HelperMenu::getAnimationPeriod() const
-{
-   return mAnimationTimer.getPeriod();
-}
-
-
 ClientGame *HelperMenu::getGame()
 {
    return mClientGame;
@@ -411,35 +394,22 @@ void HelperMenu::activateHelp(UIManager *uiManager)
 }
 
 
-// Return true if menu is playing the closing animation
-bool HelperMenu::isClosing() const
-{
-   return !mActivating && mAnimationTimer.getCurrent() > 0;
-}
-
-
 bool HelperMenu::isMovementDisabled() { return false; }
 bool HelperMenu::isChatDisabled()     { return true;  }
 
 
 void HelperMenu::idle(U32 deltaT) 
 {
-   if(mAnimationTimer.update(deltaT) && !mActivating)
-      mHelperManager->doneClosingHelper();
+   Parent::idle(deltaT);
 
    mTransitionTimer.update(deltaT);
 }
 
 
-// Used for loadout-style menus
-S32 HelperMenu::getLeftEdgeOfMenuPos()
+// Gets run when closing animation is complet
+void HelperMenu::onWidgetClosed()
 {
-   // Magic number that seems to work well... no matter that the real menu might be a different width... by
-   // using this constant, menus appear at a consistent rate.
-   F32 width = 400;     
-
-   return (mActivating ? -mAnimationTimer.getFraction() * width : 
-                         (mAnimationTimer.getFraction() - 1) * width);
+   mHelperManager->doneClosingHelper();
 }
 
 
