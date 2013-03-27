@@ -38,24 +38,21 @@ namespace Zap
 {
 
 
-void LevelInfoDisplayer::resetTimer()
+void LevelInfoDisplayer::resetDisplayTimer()
 {
    mDisplayTimer.reset(6000);  // 6 seconds
 }
 
+
 void LevelInfoDisplayer::idle(U32 timeDelta)
 {
-   mDisplayTimer.update(timeDelta);
+   Parent::idle(timeDelta);
+   if(mDisplayTimer.update(timeDelta))
+      onDeactivated();
 }
 
 
-S32 LevelInfoDisplayer::getDisplayTime()
-{
-   return mDisplayTimer.getCurrent();
-}
-
-
-void LevelInfoDisplayer::clearTimer()
+void LevelInfoDisplayer::clearDisplayTimer()
 {
    mDisplayTimer.clear();
 }
@@ -65,16 +62,19 @@ extern ScreenInfo gScreenInfo;
 
 void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const char *activationKey, bool userActivated)
 {
+   glPushMatrix();
+   glTranslate(0, getInsideEdge(), 0);
+
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
    static const S32 yStart = 50;  // 50 from the top
 
    // Fade message out
    F32 alpha = 1;
-   if(mDisplayTimer.getCurrent() < 1000 && !userActivated)
-      alpha = mDisplayTimer.getCurrent() * 0.001f;
+   //if(mDisplayTimer.getCurrent() < 1000 && !userActivated)
+   //   alpha = mDisplayTimer.getCurrent() * 0.001f;
 
    // Draw top info box
-   UserInterface::renderFancyBox(yStart, 210, 30, Colors::blue, alpha * 0.70f);
+   UserInterface::renderFancyBox(yStart, 240, 30, Colors::blue, alpha * 0.70f);
 
    glColor(Colors::white, alpha);
    drawCenteredStringf(yStart + 5, 30, "Level: %s", gameType->getLevelName()->getString());
@@ -100,12 +100,16 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const c
       drawCenteredStringf(yStart + 175, 20, "%s", gameType->getLevelCredits()->getString());
    }
 
-   // Draw bottom info box
-   UserInterface::renderFancyBox(canvasHeight - 105, 35, 155, Colors::blue, alpha * 0.70f);
-
    glColor(Colors::menuHelpColor, alpha);
-   drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", activationKey);
+   drawCenteredStringf(yStart + 200, 20, "Press [%s] to see this information again", activationKey);
+
+   glPopMatrix();
 }
 
+
+bool LevelInfoDisplayer::isActive()  const
+{
+   return Parent::isActive() || mDisplayTimer.getCurrent() > 0;
+}
 
 };

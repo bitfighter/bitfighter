@@ -94,7 +94,6 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
                               const char **legendText, const Color **legendColors, S32 legendCount)
 {
    glPushMatrix();
-
    glTranslate(getInsideEdge(), 0, 0);
 
    static const Color baseColor(Colors::red);

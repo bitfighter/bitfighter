@@ -44,12 +44,12 @@ private:
    Timer mDisplayTimer;
 
 public:
-   void resetTimer();
+   void resetDisplayTimer();
    void idle(U32 timeDelta);
    void render(const GameType *gameType, S32 teamCount, const char *activationKey, bool userActivated);
 
-   S32 getDisplayTime();
-   void clearTimer();
+   void clearDisplayTimer();
+   virtual bool isActive() const;
 };
 
 

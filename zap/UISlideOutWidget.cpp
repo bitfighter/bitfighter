@@ -67,8 +67,8 @@ void UISlideOutWidget::onDeactivated()
 }
 
 
-void UISlideOutWidget::onWidgetOpened() { /* Do nothing */ }      // Gets run when opening animation is complet
-void UISlideOutWidget::onWidgetClosed() { /* Do nothing */ }      // Gets run when closing animation is complet
+void UISlideOutWidget::onWidgetOpened() { /* Do nothing */ }      // Gets run when opening animation is complete
+void UISlideOutWidget::onWidgetClosed() { /* Do nothing */ }      // Gets run when closing animation is complete
 
 
 F32 UISlideOutWidget::getInsideEdge()
@@ -85,6 +85,12 @@ F32 UISlideOutWidget::getInsideEdge()
 bool UISlideOutWidget::isOpening() const
 {
    return mActivating && mAnimationTimer.getCurrent() > 0;
+}
+
+
+bool UISlideOutWidget::isActive() const
+{
+   return mAnimationTimer.getCurrent() > 0;
 }
 
 

@@ -342,7 +342,6 @@ void GameUserInterface::render()
    if(getGame()->isSpawnDelayed())
       renderSuspendedMessage();
 
-
    {
       renderReticle();              // Draw crosshairs if using mouse
       renderChatMsgs();             // Render incoming chat and server msgs
@@ -861,8 +860,12 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
 
    if(checkInputCode(settings, InputCodeManager::BINDING_MISSION, inputCode)) // F2
    {
-      mMissionOverlayActive = true;
-      mLevelInfoDisplayer.clearTimer();   // Clear level-start display timer so releasing F2 always hides display
+      if(!mMissionOverlayActive)
+      {
+         mMissionOverlayActive = true;
+         mLevelInfoDisplayer.onActivated();
+         mLevelInfoDisplayer.clearDisplayTimer();   // Clear level-start display timer so releasing F2 always hides display
+      }
 
       return true;
    }
@@ -1184,7 +1187,10 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
    GameSettings *settings = getGame()->getSettings();
 
    if(checkInputCode(settings, InputCodeManager::BINDING_MISSION, inputCode))
+   {
       mMissionOverlayActive = false;
+      mLevelInfoDisplayer.onDeactivated();
+   }
    else if(checkInputCode(settings, InputCodeManager::BINDING_MOD1, inputCode))
    {
       mModPrimaryActivated[0] = false;
@@ -1305,7 +1311,8 @@ Move *GameUserInterface::getCurrentMove()
 
 void GameUserInterface::resetLevelInfoDisplayTimer()
 {
-   mLevelInfoDisplayer.resetTimer();
+   mLevelInfoDisplayer.onActivated();
+   mLevelInfoDisplayer.resetDisplayTimer();
 }
 
 
@@ -1744,7 +1751,10 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
 
 void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible)
 {
-   if(mLevelInfoDisplayer.getDisplayTime() || mMissionOverlayActive)
+   if(!mLevelInfoDisplayer.isActive())
+      int x = 0;
+
+   if(mLevelInfoDisplayer.isActive() || mMissionOverlayActive)
    {
       mLevelInfoDisplayer.render(gameType, getGame()->getTeamCount(), getInputCodeString(getGame()->getSettings(), 
                                  InputCodeManager::BINDING_MISSION), mMissionOverlayActive);
