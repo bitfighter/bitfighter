@@ -24,6 +24,12 @@
 //------------------------------------------------------------------------------------
 
 #include "UISlideOutWidget.h"
+#include "ScreenInfo.h"          // For gScreenInfo def
+#include "Point.h"
+#include "tnlVector.h"
+#include "Colors.h"
+#include "OpenglUtils.h"
+
 
 namespace Zap
 {
@@ -117,6 +123,68 @@ void UISlideOutWidget::setAnimationTime(U32 period)
 {
    mAnimationTimer.setPeriod(period);
 }
+
+
+
+extern ScreenInfo gScreenInfo;
+
+void UISlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor)
+{
+   const S32 CORNER_SIZE = 15;      
+
+   const S32 left   = ulx;
+   const S32 right  = ulx + width;
+   const S32 top    = uly;
+   const S32 bottom = uly + height;
+
+   bool topBox = false, leftBox = false, rightBox = false;
+
+   if(top == 0)
+      topBox = true;
+   else if(right == gScreenInfo.getGameCanvasWidth())
+      rightBox = true;
+   else if(left == 0)
+      leftBox = true;
+
+   Vector<Point> points;
+
+   if(leftBox)  // Clip UR corner -- going CW from top-left corner
+   {
+      Point p[] = { Point(left, top), Point(right - CORNER_SIZE, top),  // Top
+                    Point(right, top + CORNER_SIZE),                    // Right
+                    Point(right, bottom), Point(left, bottom) };        // Bottom
+
+      points = Vector<Point>(p, ARRAYSIZE(p));
+   }
+   else if(rightBox)              // Clip LL corner -- going CCW from top-right corner
+   {
+      Point p[] = { Point(right, top), Point(left, top),                        // Top
+                    Point(left, bottom - CORNER_SIZE),                          // Edge
+                    Point(left + CORNER_SIZE, bottom), Point(right, bottom) };  // Bottom
+
+      points = Vector<Point>(p, ARRAYSIZE(p));
+   }
+   else if(topBox)               // Clip LL corner -- going CCW from top-left corner
+   {
+      Point p[] = { Point(left, top), Point(left, bottom - CORNER_SIZE),
+                    Point(left + CORNER_SIZE, bottom),
+                    Point(right, bottom), Point(right, top) };
+
+      points = Vector<Point>(p, ARRAYSIZE(p));
+   }
+   else
+      TNLAssert(false, "Expected one of the above to be true!");
+
+
+   // Fill
+   glColor(Colors::black, 0.70f);
+   renderPointVector(&points, GL_POLYGON);
+
+   // Border
+   glColor(borderColor);
+   renderPointVector(&points, GL_LINE_STRIP);
+}
+
 
 
 };

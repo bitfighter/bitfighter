@@ -152,7 +152,8 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    S32 grayLineRight  = interiorEdge - 20;
    S32 grayLineCenter = (grayLineLeft + grayLineRight) / 2;
 
-   renderMenuFrame(interiorEdge, totalHeight + transitionOffset);
+   static const Color frameColor(.35,0,0);
+   renderSlideoutWidgetFrame(0, MENU_TOP, interiorEdge, totalHeight + transitionOffset, frameColor);
 
    // Draw the title (above gray line)
    glColor(baseColor);
@@ -262,7 +263,7 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
       if(strcmp(items[i].help, "") != 0)
       {
          glColor(items[i].helpColor);    
-         drawString(itemIndent + x, yPos, MENU_FONT_SIZE, items[i].help);
+         drawString(itemIndent + x + 5, yPos, MENU_FONT_SIZE, items[i].help);
       }
 
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
@@ -313,27 +314,6 @@ void HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color
       glColor(legendColors[i]);
       x += drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legendText[i]) + SPACE_BETWEEN_LEGEND_ITEMS;
    }
-}
-
-
-void HelperMenu::renderMenuFrame(S32 interiorEdge, S32 height)
-{
-   const S32 CORNER_SIZE = 15;      
-   S32 bottom = MENU_TOP + height;
-
-   Point p[] = { Point(0, MENU_TOP), Point(interiorEdge - CORNER_SIZE, MENU_TOP),   // Top
-                 Point(interiorEdge, MENU_TOP + CORNER_SIZE),                       // Edge
-                 Point(interiorEdge, bottom), Point(0, bottom) };                   // Bottom
-
-   Vector<Point> points(p, ARRAYSIZE(p));
-
-   // Fill
-   glColor(Colors::black, 0.70f);
-   renderPointVector(&points, GL_POLYGON);
-
-   // Border
-   glColor(Color(.35,0,0));
-   renderPointVector(&points, GL_LINE_STRIP);
 }
 
 

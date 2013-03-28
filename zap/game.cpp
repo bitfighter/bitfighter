@@ -862,7 +862,8 @@ static string getString(S32 argc, const char **argv)
 
 void Game::onReadLevelNameParam(S32 argc, const char **argv)
 {
-   string s = getString(argc, argv);
+   string s = trim(getString(argc, argv));
+
    getGameType()->setLevelName(s.substr(0, MAX_GAME_NAME_LEN).c_str());
 }
 

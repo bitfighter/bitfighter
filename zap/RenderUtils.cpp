@@ -378,13 +378,22 @@ S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor,
 {
    S32 xpos2 = getCenteredStringStartingPosf(size, "%s %s", leftStr, rightStr) + xpos - gScreenInfo.getGameCanvasWidth() / 2;
 
+   return drawStringPair(xpos2, ypos, size, leftColor, rightColor, leftStr, rightStr);
+}
+
+
+S32 drawStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
+                                         const char *leftStr, const char *rightStr)
+{
    glColor(leftColor);
-   xpos2 += drawStringAndGetWidthf((F32)xpos2, (F32)ypos, size, "%s ", leftStr);
+
+   // Use crazy width calculation to compensate for fontStash bug calculating with of terminal spaces
+   xpos += drawStringAndGetWidth((F32)xpos, (F32)ypos, size, leftStr) + 5; //getStringWidth(size, "X X") - getStringWidth(size, "XX");
 
    glColor(rightColor);
-   drawString(xpos2, ypos, size, rightStr);
+   drawString(xpos, ypos, size, rightStr);
 
-   return xpos2;
+   return xpos;
 }
 
 

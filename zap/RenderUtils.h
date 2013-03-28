@@ -107,6 +107,9 @@ void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const 
 
 S32 drawCenteredUnderlinedString(S32 y, S32 size, const char *string);
 
+S32 drawStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
+                             const char *leftStr, const char *rightStr);
+
 
 S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
                                     const char *leftStr, const char *rightStr);
