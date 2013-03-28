@@ -66,42 +66,74 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const c
    glTranslate(0, getInsideEdge(), 0);
 
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-   static const S32 yStart = 50;  // 50 from the top
 
-   // Fade message out
-   F32 alpha = 1;
-   //if(mDisplayTimer.getCurrent() < 1000 && !userActivated)
-   //   alpha = mDisplayTimer.getCurrent() * 0.001f;
+   bool showCredits = gameType->getLevelCredits()->isNotNull();    // Only render credits string if it's is not empty
+
+
+   const S32 titleSize = 30;
+   const S32 titleMargin = 10;
+   const S32 instructionSize = 20;
+   const S32 instructionMargin = 8;
+   const S32 descriptionSize = 20;
+   const S32 descriptionMargin = 8;
+   const S32 scoreToWinSize = 20;
+   const S32 scoreToWinMargin = 8;
+   const S32 creditsSize = 20;
+   const S32 creditsMargin = 8;
+   const S32 helpSize = 20;
+
+   const S32 topMargin = UserInterface::vertMargin;
+   const S32 bottomMargin = topMargin;
+
+   const S32 titleHeight = titleSize + titleMargin;
+   const S32 gameTypeHeight = titleSize + titleMargin;
+   const S32 instructionHeight = instructionSize + instructionMargin;
+   const S32 descriptionHeight = descriptionSize + descriptionMargin;
+   const S32 scoreToWinHeight = scoreToWinSize + scoreToWinMargin;
+   const S32 creditsHeight = creditsSize + creditsMargin;
+   const S32 helpHeight = helpSize + bottomMargin;
+
+   const S32 totalHeight = topMargin + titleHeight + gameTypeHeight + instructionHeight + descriptionHeight + scoreToWinHeight + creditsHeight + helpHeight;
+
+   S32 yPos = topMargin;
 
    // Draw top info box
-   UserInterface::renderFancyBox(yStart, 240, 30, Colors::blue, alpha * 0.70f);
+   UserInterface::renderFancyBox(0, totalHeight, 30, Colors::blue, 0.70f);
 
-   glColor(Colors::white, alpha);
-   drawCenteredStringf(yStart + 5, 30, "Level: %s", gameType->getLevelName()->getString());
+   glColor(Colors::white);
+   drawCenteredStringf(yPos, titleSize, "Level: %s", gameType->getLevelName()->getString());
+
+   yPos += titleHeight;
 
    // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
    const char *gtPrefix = (gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && 
                            teamCount > 1) ? "Team " : "";
 
-   drawCenteredStringf(yStart + 45, 30, "Game Type: %s%s", gtPrefix, gameType->getGameTypeName());
+   drawCenteredStringf(yPos, titleSize, "Game Type: %s%s", gtPrefix, gameType->getGameTypeName());
 
-   glColor(Colors::cyan, alpha);
-   drawCenteredString(yStart + 85, 20, gameType->getInstructionString());
+   yPos += gameTypeHeight;
 
-   glColor(Colors::magenta, alpha);
-   drawCenteredString(yStart + 110, 20, gameType->getLevelDescription()->getString());
+   glColor(Colors::cyan);
+   drawCenteredString(yPos, instructionSize, gameType->getInstructionString());
+   yPos += instructionHeight;
 
-   glColor(Colors::yellow, alpha);
-   drawCenteredStringf(yStart + 135, 20, "Score to Win: %d", gameType->getWinningScore());
+   glColor(Colors::magenta);
+   drawCenteredString(yPos, descriptionSize, gameType->getLevelDescription()->getString());
+   yPos += descriptionHeight;
 
-   if(gameType->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty
+   glColor(Colors::yellow);
+   drawCenteredStringf(yPos, scoreToWinSize, "Score to Win: %d", gameType->getWinningScore());
+   yPos += scoreToWinHeight;
+
+   if(showCredits)
    {
-      glColor(Colors::red, alpha);
-      drawCenteredStringf(yStart + 175, 20, "%s", gameType->getLevelCredits()->getString());
+      glColor(Colors::red);
+      drawCenteredStringf(yPos, creditsSize, "%s", gameType->getLevelCredits()->getString());
+      yPos += creditsHeight;
    }
 
-   glColor(Colors::menuHelpColor, alpha);
-   drawCenteredStringf(yStart + 200, 20, "Press [%s] to see this information again", activationKey);
+   glColor(Colors::menuHelpColor);
+   drawCenteredStringf(yPos, helpSize, "Press [%s] to see this information again", activationKey);
 
    glPopMatrix();
 }
