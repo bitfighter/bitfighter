@@ -42,12 +42,14 @@ set(CLIENT_SOURCES
    UIHighScores.cpp
    UIInstructions.cpp
    UIKeyDefMenu.cpp
+   UILevelInfoDisplayer.cpp
    UIManager.cpp
    UIMenuItems.cpp
    UIMenus.cpp
    UIMessage.cpp
    UINameEntry.cpp
    UIQueryServers.cpp
+   UISlideOutWidget.cpp
    UITeamDefMenu.cpp
    UIYesNo.cpp
    VideoSystem.cpp
