@@ -139,9 +139,15 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const c
 }
 
 
-bool LevelInfoDisplayer::isActive()  const
+bool LevelInfoDisplayer::isActive() const
 {
    return Parent::isActive() || mDisplayTimer.getCurrent() > 0;
+}
+
+
+bool LevelInfoDisplayer::isDisplayTimerActive() const
+{
+   return mDisplayTimer.getCurrent() > 0;
 }
 
 };

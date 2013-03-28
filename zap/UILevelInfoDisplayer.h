@@ -50,6 +50,8 @@ public:
 
    void clearDisplayTimer();
    virtual bool isActive() const;
+
+   bool isDisplayTimerActive() const;
 };
 
 

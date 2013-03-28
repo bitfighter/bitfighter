@@ -863,7 +863,9 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       if(!mMissionOverlayActive)
       {
          mMissionOverlayActive = true;
-         mLevelInfoDisplayer.onActivated();
+         if(!mLevelInfoDisplayer.isDisplayTimerActive())
+            mLevelInfoDisplayer.onActivated();
+
          mLevelInfoDisplayer.clearDisplayTimer();   // Clear level-start display timer so releasing F2 always hides display
       }
 
