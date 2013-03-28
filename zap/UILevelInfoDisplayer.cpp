@@ -40,7 +40,7 @@ namespace Zap
 
 void LevelInfoDisplayer::resetDisplayTimer()
 {
-   mDisplayTimer.reset(6000);  // 6 seconds
+   mDisplayTimer.reset(6 * 1000);
 }
 
 
@@ -70,27 +70,28 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const c
    bool showCredits = gameType->getLevelCredits()->isNotNull();    // Only render credits string if it's is not empty
 
 
-   const S32 titleSize = 30;
-   const S32 titleMargin = 10;
-   const S32 instructionSize = 20;
+   const S32 titleSize         = 30;
+   const S32 titleMargin       = 10;
+   const S32 instructionSize   = 20;
    const S32 instructionMargin = 8;
-   const S32 descriptionSize = 20;
+   const S32 descriptionSize   = 20;
    const S32 descriptionMargin = 8;
-   const S32 scoreToWinSize = 20;
-   const S32 scoreToWinMargin = 8;
-   const S32 creditsSize = 20;
-   const S32 creditsMargin = 8;
-   const S32 helpSize = 15;
+   const S32 scoreToWinSize    = 20;
+   const S32 scoreToWinMargin  = 8;
+   const S32 creditsSize       = 20;
+   const S32 creditsMargin     = 8;
+   const S32 helpSize          = 15;
 
-   const S32 topMargin = UserInterface::vertMargin;
+   const S32 topMargin    = UserInterface::vertMargin;
    const S32 bottomMargin = topMargin;
 
-   const S32 titleHeight = titleSize + titleMargin;
+   const S32 titleHeight       = titleSize       + titleMargin;
    const S32 instructionHeight = instructionSize + instructionMargin;
    const S32 descriptionHeight = descriptionSize + descriptionMargin;
-   const S32 scoreToWinHeight = scoreToWinSize + scoreToWinMargin;
-   const S32 creditsHeight = creditsSize + creditsMargin;
-   const S32 helpHeight = helpSize + bottomMargin;
+   const S32 scoreToWinHeight  = scoreToWinSize  + scoreToWinMargin;
+   const S32 creditsHeight     = creditsSize     + creditsMargin;
+   const S32 helpHeight        = helpSize        + bottomMargin;
+
 
    const S32 totalHeight = topMargin + titleHeight + instructionHeight + descriptionHeight + scoreToWinHeight + creditsHeight + helpHeight;
 
