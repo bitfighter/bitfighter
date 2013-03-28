@@ -80,38 +80,35 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const c
    const S32 scoreToWinMargin = 8;
    const S32 creditsSize = 20;
    const S32 creditsMargin = 8;
-   const S32 helpSize = 20;
+   const S32 helpSize = 15;
 
    const S32 topMargin = UserInterface::vertMargin;
    const S32 bottomMargin = topMargin;
 
    const S32 titleHeight = titleSize + titleMargin;
-   const S32 gameTypeHeight = titleSize + titleMargin;
    const S32 instructionHeight = instructionSize + instructionMargin;
    const S32 descriptionHeight = descriptionSize + descriptionMargin;
    const S32 scoreToWinHeight = scoreToWinSize + scoreToWinMargin;
    const S32 creditsHeight = creditsSize + creditsMargin;
    const S32 helpHeight = helpSize + bottomMargin;
 
-   const S32 totalHeight = topMargin + titleHeight + gameTypeHeight + instructionHeight + descriptionHeight + scoreToWinHeight + creditsHeight + helpHeight;
+   const S32 totalHeight = topMargin + titleHeight + instructionHeight + descriptionHeight + scoreToWinHeight + creditsHeight + helpHeight;
 
    S32 yPos = topMargin;
 
    // Draw top info box
    UserInterface::renderFancyBox(0, totalHeight, 30, Colors::blue, 0.70f);
 
-   glColor(Colors::white);
-   drawCenteredStringf(yPos, titleSize, "Level: %s", gameType->getLevelName()->getString());
-
-   yPos += titleHeight;
+   FontManager::pushFontContext(FontManager::LevelInfoContext);
 
    // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
-   const char *gtPrefix = (gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && 
-                           teamCount > 1) ? "Team " : "";
+   bool team = gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && teamCount > 1;
+   string gt = string(" [") + (team ? "Team " : "") + gameType->getGameTypeName() + "]";
 
-   drawCenteredStringf(yPos, titleSize, "Game Type: %s%s", gtPrefix, gameType->getGameTypeName());
+   drawCenteredStringPair(yPos, titleSize, Colors::white, Colors::green, gameType->getLevelName()->getString(), gt.c_str());
 
-   yPos += gameTypeHeight;
+
+   yPos += titleHeight;
 
    glColor(Colors::cyan);
    drawCenteredString(yPos, instructionSize, gameType->getInstructionString());
@@ -121,8 +118,7 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const c
    drawCenteredString(yPos, descriptionSize, gameType->getLevelDescription()->getString());
    yPos += descriptionHeight;
 
-   glColor(Colors::yellow);
-   drawCenteredStringf(yPos, scoreToWinSize, "Score to Win: %d", gameType->getWinningScore());
+   drawCenteredStringPair(yPos, scoreToWinSize, Colors::yellow, Colors::red, "Score to Win: ", itos(gameType->getWinningScore()).c_str());
    yPos += scoreToWinHeight;
 
    if(showCredits)
@@ -134,6 +130,8 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const c
 
    glColor(Colors::menuHelpColor);
    drawCenteredStringf(yPos, helpSize, "Press [%s] to see this information again", activationKey);
+
+   FontManager::popFontContext();
 
    glPopMatrix();
 }

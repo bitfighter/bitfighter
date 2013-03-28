@@ -198,13 +198,13 @@ void FontManager::setFontContext(FontContext fontContext)
          setFont(FontOrbitronMedStroke);
          return;
       case MenuContext:
-      case LevelInfoContext:
          setFont(FontRoman);
          return;
       case HUDContext:
       case HelpContext:
          setFont(FontRoman);
          return;
+      case LevelInfoContext:
       case OverlayMenuContext:
          setFont(FontPrimeRegular);
          return;
