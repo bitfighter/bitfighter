@@ -375,11 +375,11 @@ void InstructionsUserInterface::renderPage1()
    drawCenteredString(y, 20, "These special keys are also usually active:");
 
    y += 40;
-   renderKeyBindingQuad(y, "Help",    InputCodeManager::BINDING_HELP,    "Universal Chat",               InputCodeManager::BINDING_OUTGAMECHAT);
-   y += 26;
-   renderKeyBindingQuad(y, "Mission", InputCodeManager::BINDING_MISSION, "Display FPS / Lag",            InputCodeManager::BINDING_FPS);
-   y += 26;
-   renderKeyBindingQuad(y, "",        InputCodeManager::BINDING_NONE,    "Diagnostics", InputCodeManager::BINDING_DIAG);
+   renderKeyBindingQuad(y, "Help",    InputCodeManager::BINDING_HELP,    "Universal Chat",    InputCodeManager::BINDING_OUTGAMECHAT);
+   y += 26;                                                                                   
+   renderKeyBindingQuad(y, "Mission", InputCodeManager::BINDING_MISSION, "Display FPS / Lag", InputCodeManager::BINDING_FPS);
+   y += 26;                                                                                   
+   renderKeyBindingQuad(y, "",        InputCodeManager::BINDING_NONE,    "Diagnostics",       InputCodeManager::BINDING_DIAG);
 }
 
 
