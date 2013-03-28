@@ -28,7 +28,7 @@
 #include "Colors.h"
 #include "OpenglUtils.h"               
 #include "RenderUtils.h"
-#include "UI.h"                        // For renderFancyBox()
+#include "UI.h"                        
 #include "GameTypesEnum.h"
 #include "gameType.h"
 
@@ -62,24 +62,25 @@ extern ScreenInfo gScreenInfo;
 
 void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const char *activationKey, bool userActivated)
 {
+   FontManager::pushFontContext(FontManager::LevelInfoContext);
+
    glPushMatrix();
    glTranslate(0, getInsideEdge(), 0);
 
-   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-
-   bool showCredits = gameType->getLevelCredits()->isNotNull();    // Only render credits string if it's is not empty
-
+    // Only render these when they are not empty
+   bool showCredits = gameType->getLevelCredits()->isNotNull();    
+   bool showDescr   = gameType->getLevelDescription()->isNotNull();
 
    const S32 titleSize         = 30;
    const S32 titleMargin       = 10;
    const S32 instructionSize   = 20;
-   const S32 instructionMargin = 8;
+   const S32 instructionMargin =  8;
    const S32 descriptionSize   = 20;
-   const S32 descriptionMargin = 8;
+   const S32 descriptionMargin =  8;
    const S32 scoreToWinSize    = 20;
-   const S32 scoreToWinMargin  = 8;
+   const S32 scoreToWinMargin  =  8;
    const S32 creditsSize       = 20;
-   const S32 creditsMargin     = 8;
+   const S32 creditsMargin     =  8;
    const S32 helpSize          = 15;
 
    const S32 topMargin    = UserInterface::vertMargin;
@@ -87,27 +88,21 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const c
 
    const S32 titleHeight       = titleSize       + titleMargin;
    const S32 instructionHeight = instructionSize + instructionMargin;
-   const S32 descriptionHeight = descriptionSize + descriptionMargin;
    const S32 scoreToWinHeight  = scoreToWinSize  + scoreToWinMargin;
-   const S32 creditsHeight     = creditsSize     + creditsMargin;
    const S32 helpHeight        = helpSize        + bottomMargin;
 
+   const S32 descriptionHeight = showDescr   ? descriptionSize + descriptionMargin : 0;
+   const S32 creditsHeight     = showCredits ? creditsSize     + creditsMargin     : 0;
 
-   const S32 totalHeight = topMargin + titleHeight + instructionHeight + descriptionHeight + scoreToWinHeight + creditsHeight + helpHeight;
+   const S32 totalHeight = topMargin + titleHeight + instructionHeight + descriptionHeight + creditsHeight/* + helpHeight*/ + bottomMargin;
 
    S32 yPos = topMargin;
 
    // Draw top info box
-   UserInterface::renderFancyBox(0, totalHeight, 30, Colors::blue, 0.70f);
+   renderSlideoutWidgetFrame(30, 0, gScreenInfo.getGameCanvasWidth() - 60, totalHeight, Colors::blue);
 
-   FontManager::pushFontContext(FontManager::LevelInfoContext);
-
-   // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
-   bool team = gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && teamCount > 1;
-   string gt = string(" [") + (team ? "Team " : "") + gameType->getGameTypeName() + "]";
-
-   drawCenteredStringPair(yPos, titleSize, Colors::white, Colors::green, gameType->getLevelName()->getString(), gt.c_str());
-
+   glColor(Colors::white);
+   drawCenteredString(yPos, titleSize, gameType->getLevelName()->isNotNull() ? gameType->getLevelName()->getString() : "Unnamed Level");
 
    yPos += titleHeight;
 
@@ -115,26 +110,59 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const c
    drawCenteredString(yPos, instructionSize, gameType->getInstructionString());
    yPos += instructionHeight;
 
-   glColor(Colors::magenta);
-   drawCenteredString(yPos, descriptionSize, gameType->getLevelDescription()->getString());
-   yPos += descriptionHeight;
-
-   drawCenteredStringPair(yPos, scoreToWinSize, Colors::yellow, Colors::red, "Score to Win: ", itos(gameType->getWinningScore()).c_str());
-   yPos += scoreToWinHeight;
+   if(showDescr)
+   {
+      glColor(Colors::magenta);
+      drawCenteredString(yPos, descriptionSize, gameType->getLevelDescription()->getString());
+      yPos += descriptionHeight;
+   }
 
    if(showCredits)
    {
-      glColor(Colors::red);
-      drawCenteredStringf(yPos, creditsSize, "%s", gameType->getLevelCredits()->getString());
+      drawCenteredStringPair(yPos, creditsSize, Colors::cyan, Colors::red, "Designed By:", gameType->getLevelCredits()->getString());
       yPos += creditsHeight;
    }
 
-   glColor(Colors::menuHelpColor);
-   drawCenteredStringf(yPos, helpSize, "Press [%s] to see this information again", activationKey);
+   glPopMatrix();
+
+   /////
+   // Auxilliary side panel
+
+   glPushMatrix();
+   glTranslate(-getInsideEdge(), 0, 0);
+
+   const S32 sideBoxY = 275;
+   const S32 sideMargin = UserInterface::horizMargin;
+   const S32 rightEdge = gScreenInfo.getGameCanvasWidth() - sideMargin;
+
+   const S32 gameTypeTextSize = 20;
+   const S32 gameTypeMargin   = 8;
+   const S32 gameTypeHeight = gameTypeTextSize + gameTypeMargin;
+
+   const S32 sideBoxTotalHeight = topMargin + gameTypeHeight + scoreToWinHeight + bottomMargin;
+
+   // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
+   bool team = gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && teamCount > 1;
+   string gt = string(team ? "Team " : "") + gameType->getGameTypeName();
+
+   const char *scoreToWinStr = "Score to Win:";
+   const S32 scoreToWinWidth = getStringWidthf(scoreToWinSize, "%s%d", scoreToWinStr, gameType->getWinningScore()) + 5;
+   const S32 sideBoxWidth = max(getStringWidth (gameTypeTextSize, gt.c_str()), scoreToWinWidth) + sideMargin * 2;
+
+   renderSlideoutWidgetFrame(gScreenInfo.getGameCanvasWidth() - sideBoxWidth, sideBoxY, sideBoxWidth, sideBoxTotalHeight, Colors::blue);
+
+   yPos = sideBoxY + topMargin;
+
+   glColor(Colors::white);
+   drawStringfr(rightEdge, yPos, gameTypeTextSize, gt.c_str());
+   yPos += gameTypeHeight;
+
+   drawStringPair(rightEdge - scoreToWinWidth, yPos, scoreToWinSize, Colors::cyan, Colors::red, 
+                  scoreToWinStr, itos(gameType->getWinningScore()).c_str());
+   yPos += scoreToWinHeight;
+   glPopMatrix();
 
    FontManager::popFontContext();
-
-   glPopMatrix();
 }
 
 
