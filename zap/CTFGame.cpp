@@ -281,8 +281,11 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
 
 GameTypeId CTFGameType::getGameTypeId() const { return CTFGame; }
 
-const char *CTFGameType::getShortName()         const { return "CTF"; }
-const char *CTFGameType::getInstructionString() const { return "Take the opposing team's flag and touch it to your flag!"; }
+
+const char *CTFGameType::getShortName() const { return "CTF"; }
+
+static const char *instructions[] = { "Take the enemy flag",  "and touch it to yours!" };
+const char **CTFGameType::getInstructionString() const { return instructions; }
 
 
 bool CTFGameType::isFlagGame()          const { return true; }

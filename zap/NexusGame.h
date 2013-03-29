@@ -111,7 +111,7 @@ public:
 
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
-   const char *getInstructionString() const;
+   const char **getInstructionString() const;
 
    // Info about this game type:
    bool isFlagGame() const;

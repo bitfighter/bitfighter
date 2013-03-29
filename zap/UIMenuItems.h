@@ -77,7 +77,7 @@ private:
 
 protected:
    string mDisplayVal;     // Text displayed on menu
-   const char *mHelp;      // An optional help string
+   string mHelp;           // An optional help string
 
    Color mSelectedColor;
    Color mUnselectedColor;
@@ -91,8 +91,10 @@ public:
    // Constructors
    explicit MenuItem(lua_State *L = NULL);         // Combined default C++ / Lua constructor  ==> used at all?
    explicit MenuItem(const string &displayVal);
-   MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
-   MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const string &help, 
+            InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, 
+            InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual ~MenuItem();       // Destructor
 
@@ -111,7 +113,7 @@ public:
 
    S32 getIndex();      // Only used once...  TODO: Get rid of this, and perhaps user-assigned indices altogether
 
-   const char *getHelp();
+   const string getHelp();
 
    MenuUserInterface *getMenu();
    void setMenu(MenuUserInterface *menu);
@@ -196,7 +198,7 @@ protected:
 
 public:
    ValueMenuItem();
-   ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32), const char *help, InputCode k1, InputCode k2);
+   ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2);
 };
 
 
@@ -218,7 +220,7 @@ public:
    ToggleMenuItem();          // Default constructor -- do not use!
 
    ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
-                  void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+                  void (*callback)(ClientGame *, U32), const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    virtual ~ToggleMenuItem();  // Destructor
 
    virtual MenuItemTypes getItemType();
@@ -261,7 +263,7 @@ private:
    void setIndex(S32 index);     // Sets mIndex, but with range checking
 
 public:
-   YesNoMenuItem(string title, bool currOption, const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   YesNoMenuItem(string title, bool currOption, const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    virtual ~YesNoMenuItem();  // Destructor
 
    virtual string getValueForDisplayingInMenu();
@@ -307,7 +309,7 @@ public:
    CounterMenuItem();      // Default constructor, do not use
    CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, 
                    const string &units, const string &minMsg, 
-                   const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+                   const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual ~CounterMenuItem();  // Destructor
 
@@ -349,7 +351,7 @@ protected:
    virtual S32 getBigIncrement();
 
 public:
-   TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const char *help, 
+   TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
                        S32 step = 5, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual const char *getUnits();
@@ -371,7 +373,7 @@ protected:
    virtual S32 getBigIncrement();
 
 public:
-   TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const char *help, 
+   TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
                               InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual void setValue (const string &val);
@@ -400,7 +402,7 @@ protected:
 
 public:
    // Contstuctor
-   TextEntryMenuItem(string title, string val, string emptyVal, const char *help, U32 maxLen, 
+   TextEntryMenuItem(string title, string val, string emptyVal, const string &help, U32 maxLen, 
                      InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual ~TextEntryMenuItem();  // Destructor
@@ -446,7 +448,7 @@ public:
 
 class MaskedTextEntryMenuItem : public TextEntryMenuItem
 {
-   MaskedTextEntryMenuItem(string title, string val, string emptyVal, const char *help, U32 maxLen, 
+   MaskedTextEntryMenuItem(string title, string val, string emptyVal, const string &help, U32 maxLen, 
                           InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 };
 

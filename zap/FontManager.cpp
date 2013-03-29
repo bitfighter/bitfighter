@@ -158,6 +158,8 @@ void FontManager::initialize()
    fontList[FontOrbitronLight]  = new BfFont(FontOrbitronLight, "Orbitron Light.ttf");
    fontList[FontOrbitronMedium] = new BfFont(FontOrbitronLight, "Orbitron Medium.ttf");
    fontList[FontPrimeRegular]   = new BfFont(FontPrimeRegular,  "prime_regular.ttf");
+   fontList[FontTenby5]         = new BfFont(FontTenby5,        "tenbyfive.ttf");
+
 
    // set texture blending function
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -206,7 +208,7 @@ void FontManager::setFontContext(FontContext fontContext)
          return;
       case LevelInfoContext:
       case OverlayMenuContext:
-         setFont(FontPrimeRegular);
+         setFont(FontTenby5);
          return;
       case TextEffectContext:
          setFont(FontOrbitronLightStroke);
@@ -222,6 +224,7 @@ void FontManager::setFontContext(FontContext fontContext)
 // FontOrbitronLight,
 // FontOrbitronMedium,
 // FontPrimeRegular
+// Tenby5
 
 
 static Vector<FontManager::FontId> contextStack;

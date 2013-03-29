@@ -457,9 +457,10 @@ void ZoneControlGameType::onGameOver()
 
 
 GameTypeId ZoneControlGameType::getGameTypeId() const { return ZoneControlGame; }
+const char *ZoneControlGameType::getShortName() const { return "ZC"; }
 
-const char *ZoneControlGameType::getShortName()         const { return "ZC"; }
-const char *ZoneControlGameType::getInstructionString() const { return "Capture all the zones by carrying the flag into them! "; }
+static const char *instructions[] = { "Capture all the zones by",  "carrying the flag into them!" };
+const char **ZoneControlGameType::getInstructionString() const { return instructions; }
 
 bool ZoneControlGameType::isFlagGame()          const { return true;  }
 bool ZoneControlGameType::isTeamGame()          const { return true;  }

@@ -51,7 +51,7 @@ MenuItem::MenuItem(const string &displayVal)
 
 
 // Constructor
-MenuItem::MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const char *help, InputCode k1, InputCode k2)
+MenuItem::MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2)
 {
    initialize();
 
@@ -65,7 +65,7 @@ MenuItem::MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32)
 
 // Constructor
 MenuItem::MenuItem(S32 index, const string &displayVal, void (*callback)(ClientGame *, U32), 
-                   const char *help, InputCode k1, InputCode k2)
+                   const string &help, InputCode k1, InputCode k2)
 {
    initialize();
 
@@ -161,7 +161,7 @@ void MenuItem::setSecret(bool secret)
 }
 
 
-const char *MenuItem::getHelp()
+const string MenuItem::getHelp()
 {
    return mHelp;
 }
@@ -332,7 +332,7 @@ ValueMenuItem::ValueMenuItem()
 
 // Constructor
 ValueMenuItem::ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32), 
-                             const char *help, InputCode k1, InputCode k2) :
+                             const string &help, InputCode k1, InputCode k2) :
       Parent(displayValue, callback, help, k1, k2)
 {
    initialize();
@@ -383,7 +383,7 @@ ToggleMenuItem::ToggleMenuItem()
 
 // Constructor
 ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
-                               void (*callback)(ClientGame *, U32), const char *help, InputCode k1, InputCode k2) :
+                               void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2) :
       ValueMenuItem(title, callback, help, k1, k2)
 {
    mOptions = options;
@@ -628,7 +628,7 @@ ToggleMenuItem::ToggleMenuItem(lua_State *L)
 ////////////////////////////////////
 
 // Constructors
-YesNoMenuItem::YesNoMenuItem(string title, bool currOption, const char *help, InputCode k1, InputCode k2) :
+YesNoMenuItem::YesNoMenuItem(string title, bool currOption, const string &help, InputCode k1, InputCode k2) :
       ToggleMenuItem(title, Vector<string>(), currOption, true, NULL, help, k1, k2)
 {
    initialize();
@@ -751,7 +751,7 @@ YesNoMenuItem::YesNoMenuItem(lua_State *L)
 
 // Constructor
 CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, 
-                                 const string &minMsg, const char *help, InputCode k1, InputCode k2) :
+                                 const string &minMsg, const string &help, InputCode k1, InputCode k2) :
    Parent(title, NULL, help, k1, k2)
 {
    initialize();
@@ -996,7 +996,7 @@ CounterMenuItem::CounterMenuItem(lua_State *L)
 ////////////////////////////////////
 ////////////////////////////////////
 
-TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const char *help,
+TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help,
                                          S32 step, InputCode k1, InputCode k2) :
    CounterMenuItem(title, value, step, 0, maxVal, "", zeroMsg, help, k1, k2)
 {
@@ -1044,7 +1044,7 @@ string TimeCounterMenuItem::getValueForWritingToLevelFile()
 ////////////////////////////////////
 
 TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, 
-                                                       const char *help, InputCode k1, InputCode k2) :
+                                                       const string &help, InputCode k1, InputCode k2) :
    TimeCounterMenuItem(title, value, maxVal, zeroMsg, help, 1, k1, k2)
 {
    // Do nothing
@@ -1180,7 +1180,7 @@ void TeamMenuItem::activatedWithShortcutKey()
 ////////////////////////////////////
 ////////////////////////////////////
 
-TextEntryMenuItem::TextEntryMenuItem(string title, string val, string emptyVal, const char *help, U32 maxLen, InputCode k1, InputCode k2) :
+TextEntryMenuItem::TextEntryMenuItem(string title, string val, string emptyVal, const string &help, U32 maxLen, InputCode k1, InputCode k2) :
          ValueMenuItem(title, NULL, help, k1, k2),
          mLineEditor(LineEditor(maxLen, val))
 {
@@ -1377,7 +1377,7 @@ TextEntryMenuItem::TextEntryMenuItem(lua_State *L)
 ////////////////////////////////////
 ////////////////////////////////////
 
-MaskedTextEntryMenuItem::MaskedTextEntryMenuItem(string title, string val, string emptyVal, const char *help, 
+MaskedTextEntryMenuItem::MaskedTextEntryMenuItem(string title, string val, string emptyVal, const string &help, 
                                                  U32 maxLen, InputCode k1, InputCode k2) :
    TextEntryMenuItem(title, val, emptyVal, help, maxLen, k1, k2)
 {

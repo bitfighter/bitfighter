@@ -469,9 +469,10 @@ S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 
 
 GameTypeId RabbitGameType::getGameTypeId() const { return RabbitGame; }
+const char *RabbitGameType::getShortName() const { return "Rab"; }
 
-const char *RabbitGameType::getShortName()         const { return "Rab"; }
-const char *RabbitGameType::getInstructionString() const { return "Grab the flag and hold it for as long as you can!"; }
+static const char *instructions[] = { "Grab the flag and hold it",  "for as long as you can!" };
+const char **RabbitGameType::getInstructionString() const { return instructions; }
 
 bool RabbitGameType::isFlagGame()          const { return true; }
 bool RabbitGameType::canBeTeamGame()       const { return true;  }

@@ -195,7 +195,8 @@ void QuickMenuUI::render()
 
    S32 HELP_TEXT_SIZE = getTextSize(MENU_ITEM_SIZE_NORMAL);
 
-   S32 xoff = (getStringWidth(HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp()) - width) / 2;  // Amount help "sticks out" beyond menu box
+   // Amount help "sticks out" beyond menu box:
+   S32 xoff = (getStringWidth(HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str()) - width) / 2; 
    if(xoff > 0)
       instrXPos += max(xoff - left, min(gScreenInfo.getGameCanvasWidth() - xoff - right, 0));
 
@@ -205,7 +206,7 @@ void QuickMenuUI::render()
    else
       instrYPos = naturalTop + keepingItOnScreenAdjFactorY - HELP_TEXT_SIZE - getGap(MENU_ITEM_SIZE_NORMAL) - vpad;   // No room below, help goes above
 
-   drawCenteredString(instrXPos, instrYPos, HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp());
+   drawCenteredString(instrXPos, instrYPos, HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str());
 }
 
 

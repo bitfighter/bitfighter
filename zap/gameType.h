@@ -226,7 +226,7 @@ public:
 
    virtual GameTypeId getGameTypeId() const;
    virtual const char *getShortName() const;          // Will be overridden by other games
-   virtual const char *getInstructionString() const;  //          -- ditto --
+   virtual const char **getInstructionString() const; //          -- ditto --
    virtual bool isTeamGame() const;                   // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool canBeTeamGame() const;
    virtual bool canBeIndividualGame() const;

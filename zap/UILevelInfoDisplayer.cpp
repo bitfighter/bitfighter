@@ -71,55 +71,47 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const c
    bool showCredits = gameType->getLevelCredits()->isNotNull();    
    bool showDescr   = gameType->getLevelDescription()->isNotNull();
 
+   const char *title           = gameType->getLevelName()->isNotNull() ? gameType->getLevelName()->getString() : "Unnamed Level";
    const S32 titleSize         = 30;
-   const S32 titleMargin       = 10;
-   const S32 instructionSize   = 20;
-   const S32 instructionMargin =  8;
+   const S32 titleHeight       = titleSize + 10;
+
+   const char *descr           = gameType->getLevelDescription()->getString();
    const S32 descriptionSize   = 20;
-   const S32 descriptionMargin =  8;
-   const S32 scoreToWinSize    = 20;
-   const S32 scoreToWinMargin  =  8;
+   const S32 descriptionHeight = showDescr ? descriptionSize + 8 : 0;
+
+   const char *designedBy      = "Designed By:";
+   const char *credits         = gameType->getLevelCredits()->getString();
    const S32 creditsSize       = 20;
-   const S32 creditsMargin     =  8;
-   const S32 helpSize          = 15;
+   const S32 creditsHeight     = showCredits ? creditsSize + 8 : 0;
+   
+   const S32 frameMargin       = UserInterface::vertMargin;
 
-   const S32 topMargin    = UserInterface::vertMargin;
-   const S32 bottomMargin = topMargin;
+   const S32 totalHeight = frameMargin + titleHeight + descriptionHeight + creditsHeight + frameMargin;
+   //const S32 totalWidth = max(getStringWidth(titleSize, title), 
+   //                           max(getStringWidth(descriptionSize, descr), 
+   //                              max(getStringPairWidth(creditsSize, designedBy, credits), 400))) +
+   //                       frameMargin * 2;
 
-   const S32 titleHeight       = titleSize       + titleMargin;
-   const S32 instructionHeight = instructionSize + instructionMargin;
-   const S32 scoreToWinHeight  = scoreToWinSize  + scoreToWinMargin;
-   const S32 helpHeight        = helpSize        + bottomMargin;
-
-   const S32 descriptionHeight = showDescr   ? descriptionSize + descriptionMargin : 0;
-   const S32 creditsHeight     = showCredits ? creditsSize     + creditsMargin     : 0;
-
-   const S32 totalHeight = topMargin + titleHeight + instructionHeight + descriptionHeight + creditsHeight/* + helpHeight*/ + bottomMargin;
-
-   S32 yPos = topMargin;
+   const S32 totalWidth = gScreenInfo.getGameCanvasWidth() - 60;
+   S32 yPos = frameMargin;
 
    // Draw top info box
-   renderSlideoutWidgetFrame(30, 0, gScreenInfo.getGameCanvasWidth() - 60, totalHeight, Colors::blue);
+   renderSlideoutWidgetFrame((gScreenInfo.getGameCanvasWidth() - totalWidth) / 2, 0, totalWidth, totalHeight, Colors::blue);
 
    glColor(Colors::white);
-   drawCenteredString(yPos, titleSize, gameType->getLevelName()->isNotNull() ? gameType->getLevelName()->getString() : "Unnamed Level");
-
+   drawCenteredString(yPos, titleSize, title);
    yPos += titleHeight;
-
-   glColor(Colors::cyan);
-   drawCenteredString(yPos, instructionSize, gameType->getInstructionString());
-   yPos += instructionHeight;
 
    if(showDescr)
    {
       glColor(Colors::magenta);
-      drawCenteredString(yPos, descriptionSize, gameType->getLevelDescription()->getString());
+      drawCenteredString(yPos, descriptionSize, descr);
       yPos += descriptionHeight;
    }
 
    if(showCredits)
    {
-      drawCenteredStringPair(yPos, creditsSize, Colors::cyan, Colors::red, "Designed By:", gameType->getLevelCredits()->getString());
+      drawCenteredStringPair(yPos, creditsSize, Colors::cyan, Colors::red, designedBy, credits);
       yPos += creditsHeight;
    }
 
@@ -131,35 +123,63 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const c
    glPushMatrix();
    glTranslate(-getInsideEdge(), 0, 0);
 
-   const S32 sideBoxY = 275;
+   bool showTwoLinesOfInstructions = gameType->getInstructionString()[1];     // Show 'em if we got 'em
+
+   const S32 sideBoxY = 275;     // Top edge of side box
    const S32 sideMargin = UserInterface::horizMargin;
    const S32 rightEdge = gScreenInfo.getGameCanvasWidth() - sideMargin;
 
-   const S32 gameTypeTextSize = 20;
-   const S32 gameTypeMargin   = 8;
-   const S32 gameTypeHeight = gameTypeTextSize + gameTypeMargin;
+   const S32 gameTypeTextSize  = 20;
+   const S32 gameTypeMargin    =  8;
+   const S32 gameTypeHeight    = gameTypeTextSize + gameTypeMargin;
 
-   const S32 sideBoxTotalHeight = topMargin + gameTypeHeight + scoreToWinHeight + bottomMargin;
+   const S32 instructionSize   = 13;
+   const S32 instructionMargin =  8;
+   const S32 instructionHeight = instructionSize + instructionMargin;
 
+   const S32 scoreToWinSize    = 20;
+   const S32 scoreToWinMargin  =  8;
+   const S32 scoreToWinHeight  = scoreToWinSize  + scoreToWinMargin;
+
+   const S32 sideBoxTotalHeight = frameMargin + gameTypeHeight + instructionHeight * (showTwoLinesOfInstructions ? 2 : 1) + 
+                                  scoreToWinHeight + frameMargin;
+
+   const S32 instrWidth = max(getStringWidth(instructionSize, gameType->getInstructionString()[0]), 
+                              showTwoLinesOfInstructions ? getStringWidth(instructionSize, gameType->getInstructionString()[1]) : 0); 
+      
    // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
    bool team = gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && teamCount > 1;
-   string gt = string(team ? "Team " : "") + gameType->getGameTypeName();
+   string gt  = string(team ? "Team " : "") + gameType->getGameTypeName();
+   string sgt = string("[") + gameType->getShortName() + "]";
 
-   const char *scoreToWinStr = "Score to Win:";
+   static const char *scoreToWinStr = "Score to Win:";
    const S32 scoreToWinWidth = getStringWidthf(scoreToWinSize, "%s%d", scoreToWinStr, gameType->getWinningScore()) + 5;
-   const S32 sideBoxWidth = max(getStringWidth (gameTypeTextSize, gt.c_str()), scoreToWinWidth) + sideMargin * 2;
-
+   const S32 sideBoxWidth    = max(instrWidth, max(getStringPairWidth(gameTypeTextSize, gt.c_str(), sgt.c_str()), scoreToWinWidth)) + 
+                               sideMargin * 2;
+   const S32 sideBoxCen      = gScreenInfo.getGameCanvasWidth() - sideBoxWidth / 2;
+   
    renderSlideoutWidgetFrame(gScreenInfo.getGameCanvasWidth() - sideBoxWidth, sideBoxY, sideBoxWidth, sideBoxTotalHeight, Colors::blue);
 
-   yPos = sideBoxY + topMargin;
+   yPos = sideBoxY + frameMargin;
 
-   glColor(Colors::white);
-   drawStringfr(rightEdge, yPos, gameTypeTextSize, gt.c_str());
+   drawCenteredStringPair(sideBoxCen, yPos, gameTypeTextSize, Colors::white, Colors::cyan, gt.c_str(), sgt.c_str());
    yPos += gameTypeHeight;
 
-   drawStringPair(rightEdge - scoreToWinWidth, yPos, scoreToWinSize, Colors::cyan, Colors::red, 
+   glColor(Colors::yellow);
+   drawCenteredString(sideBoxCen, yPos, instructionSize, gameType->getInstructionString()[0]);
+   yPos += instructionHeight;
+
+   // Add a second line of instructions if there is one...
+   if(showTwoLinesOfInstructions)
+   {
+      drawCenteredString(sideBoxCen, yPos, instructionSize, gameType->getInstructionString()[1]);
+      yPos += instructionHeight;
+   }
+
+   drawCenteredStringPair(sideBoxCen, yPos, scoreToWinSize, Colors::cyan, Colors::red, 
                   scoreToWinStr, itos(gameType->getWinningScore()).c_str());
    yPos += scoreToWinHeight;
+
    glPopMatrix();
 
    FontManager::popFontContext();
