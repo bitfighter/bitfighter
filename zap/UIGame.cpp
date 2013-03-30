@@ -594,23 +594,26 @@ void GameUserInterface::renderReticle()
    }
 }
 
-static const S32 fontSize = 15;
-static const S32 gapSize = 3;       // Gap between text and box
+static const S32 indicatorFontSize = 15;
+static const S32 indicatorPadding = 3;       // Gap between text and box
 
-S32 gLoadoutIndicatorHeight = fontSize + gapSize * 2;
+S32 gLoadoutIndicatorHeight = indicatorFontSize + indicatorPadding * 2;
 
 
-static S32 renderIndicator(S32 xPos, const char *name)
+// Returns width of indicator component
+static S32 renderComponentIndicator(S32 xPos, const char *name)
 {
-   S32 width = getStringWidth(fontSize, name);
+   S32 yPos = UserInterface::vertMargin;
 
-   drawHollowRect(xPos, UserInterface::vertMargin, 
-                        xPos + width + 2 * gapSize, UserInterface::vertMargin + fontSize + 2 * gapSize + 1);
+   // Draw the weapon or module name
+   S32 textWidth = drawStringAndGetWidth(xPos + indicatorPadding, yPos + indicatorPadding, indicatorFontSize, name);
 
-   // Add the weapon or module name
-   drawString(xPos + gapSize, UserInterface::vertMargin + gapSize, fontSize, name);
+   S32 rectWidth  = textWidth + 2 * indicatorPadding;
+   S32 rectHeight = UserInterface::vertMargin + indicatorFontSize + 2 * indicatorPadding + 1;
 
-   return width + 2 * gapSize;
+   drawHollowRect(xPos, UserInterface::vertMargin, xPos + rectWidth, rectHeight);
+
+   return rectWidth;
 }
 
 
@@ -638,9 +641,9 @@ void GameUserInterface::renderLoadoutIndicators()
    {
       glColor(i == localShip->mActiveWeaponIndx ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
 
-      S32 width = renderIndicator(xPos, GameWeapon::weaponInfo[localShip->getWeapon(i)].name.getString());
+      S32 width = renderComponentIndicator(xPos, GameWeapon::weaponInfo[localShip->getWeapon(i)].name.getString());
 
-      xPos += width + gapSize;
+      xPos += width + indicatorPadding;
    }
 
    xPos += 20;    // Small horizontal gap to seperate the weapon indicators from the module indicators
@@ -666,9 +669,9 @@ void GameUserInterface::renderLoadoutIndicators()
             localShip->isModuleSecondaryActive(localShip->getModule(i)))
          glColor(Colors::orange67);
 
-      S32 width = renderIndicator(xPos, getGame()->getModuleInfo(localShip->getModule(i))->getName());
+      S32 width = renderComponentIndicator(xPos, getGame()->getModuleInfo(localShip->getModule(i))->getName());
 
-      xPos += width + gapSize;
+      xPos += width + indicatorPadding;
    }
 }
 
@@ -1705,16 +1708,18 @@ void GameUserInterface::renderScoreboard()
    }
 
    // Render symbol legend 
-   const S32 legendSize = fontSize - 3;     
-   const S32 legendGap  = 3;                        // Space between scoreboard and legend
+   const S32 legendSize = 12;     
+   const S32 legendGap  =  3;    // Space between scoreboard and legend
+
    const S32 humans     = getGame()->getPlayerCount();
    const S32 legendPos  = (canvasHeight - totalHeight) / 2 + totalHeight + legendGap;   
 
-   string legendWhite = itos(humans) + " Human" + (humans != 1 ? "s" : "") + " | " + adminSymbol + "= Admin | " + 
-                        levelChangerSymbol + "= Can Change Levels | " + botSymbol + "= Bot |";
+   string legend = itos(humans) + " Human" + (humans != 1 ? "s" : "") + " | " + adminSymbol + "= Admin | " + 
+                   levelChangerSymbol + "= Can Change Levels | " + botSymbol + "= Bot |";
 
    // Not quite the function's intended purpose, but it does the job
-   drawCenteredStringPair(legendPos, legendSize, Colors::standardPlayerScoreboardColor, Colors::idlePlayerScoreboardColor, legendWhite.c_str(), "Idle Player");
+   drawCenteredStringPair(legendPos, legendSize, Colors::standardPlayerScoreboardColor, 
+                          Colors::idlePlayerScoreboardColor, legend.c_str(), "Idle Player");
 }
 
 
