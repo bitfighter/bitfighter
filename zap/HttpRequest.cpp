@@ -71,7 +71,7 @@ bool HttpRequest::send()
 
    // send request
    while(true) {
-      usleep(10000);
+      Platform::sleep(50);
       NetError sendError;
       sendError = mSocket->send((unsigned char *) mRequest.c_str(), mRequest.size());
 
@@ -87,7 +87,7 @@ bool HttpRequest::send()
    }
 
    while(true) {
-      usleep(10000);
+      Platform::sleep(50);
       TNL::NetError recvError;
       int bytesRead;
       char receiveBuffer[HttpRequest::BufferSize];
