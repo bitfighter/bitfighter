@@ -44,6 +44,7 @@ using namespace std;
 #include "VideoSystem.h"
 #include "OpenglUtils.h"
 #include "MathUtils.h"           // For RADIANS_TO_DEGREES def
+#include "LoadoutIndicator.h"    // For LoadoutIndicatorHeight
 
 #include <string>
 
@@ -62,9 +63,7 @@ namespace Zap
    S32 UserInterface::vertMargin = 15;
 #endif
 
-extern S32 gLoadoutIndicatorHeight;
-
-S32 UserInterface::messageMargin = UserInterface::vertMargin + gLoadoutIndicatorHeight + 5;
+S32 UserInterface::messageMargin = UserInterface::vertMargin + UI::LoadoutIndicator::LoadoutIndicatorHeight + 5;
 
 extern Vector<ClientGame *> gClientGames;
 

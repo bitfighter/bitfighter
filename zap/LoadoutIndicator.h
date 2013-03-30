@@ -23,51 +23,32 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _MOVE_H_
-#define _MOVE_H_
 
-#include "shipItems.h"     // For ShipModuleCount, ShipWeaponCount
-#include "Point.h"
-
-#include "tnlLog.h"
 #include "tnlTypes.h"
-#include "tnlBitStream.h"
 
+
+// UGLY UGLY UGLY!!!  See http://stackoverflow.com/questions/2059665/why-cant-i-forward-declare-a-class-in-a-namespace-like-this
+namespace Zap {
+    class ClientGame;
+}
 
 using namespace TNL;
+using namespace Zap;
 
-//const S32 ShipModuleCount = 2; // TODO: Get rid of these  (including ship.h makes things go crazy, extern doesnt seem to work)
-//const S32 ShipWeaponCount = 3;
-
-namespace Zap
+namespace UI
 {
 
-// Can represent a move by a human player or a robot
-class Move 
+static const S32 indicatorFontSize = 15;
+static const S32 indicatorPadding = 3;       // Gap between text and box
+
+class LoadoutIndicator
 {
 public:
-   Move();                          // Constructor
+   LoadoutIndicator();      // Constructor
 
-   F32 x, y;
-   F32 angle;
-   bool fire;
-   bool modulePrimary[ShipModuleCount];    // Is given module primary component active?
-   bool moduleSecondary[ShipModuleCount];  // Is given module secondary component active?
-   U32 time;
+   static const S32 LoadoutIndicatorHeight = indicatorFontSize + indicatorPadding * 2;
 
-   enum {
-      MaxMoveTime = 127,
-   };
-
-   bool isAnyModActive() const;
-   bool isEqualMove(Move *prev);    // Compares this move to the previous one -- are they the same?
-   void pack(BitStream *stream, Move *prev, bool packTime);
-   void unpack(BitStream *stream, bool unpackTime);
-   void prepare();                  // Packs and unpacks move to ensure effects of rounding are same on client and server
+   void render(ClientGame *game);
 };
 
-};
-
-#endif
-
-
+}

@@ -63,7 +63,7 @@
 #include "CoreGame.h"
 #include "ScissorsManager.h"
 
-#include "../tnl/tnlEndian.h"
+#include "tnlEndian.h"
 
 #include "SDL.h"
 #include "OpenglUtils.h"
@@ -343,9 +343,9 @@ void GameUserInterface::render()
       renderSuspendedMessage();
 
    {
-      renderReticle();              // Draw crosshairs if using mouse
-      renderChatMsgs();             // Render incoming chat and server msgs
-      renderLoadoutIndicators();    // Draw indicators for the various loadout items
+      renderReticle();                       // Draw crosshairs if using mouse
+      renderChatMsgs();                      // Render incoming chat and server msgs
+      mLoadoutIndicator.render(getGame());   // Draw indicators for the various loadout items
 
       getUIManager()->getHostMenuUserInterface()->renderProgressListItems();  // This is the list of levels loaded while hosting
 
@@ -591,87 +591,6 @@ void GameUserInterface::renderReticle()
       glColor(Colors::paleRed);
       drawCenteredString(225, 20, "You are in joystick mode.");
       drawCenteredString(250, 20, "You can change to Keyboard input with the Options menu.");
-   }
-}
-
-static const S32 indicatorFontSize = 15;
-static const S32 indicatorPadding = 3;       // Gap between text and box
-
-S32 gLoadoutIndicatorHeight = indicatorFontSize + indicatorPadding * 2;
-
-
-// Returns width of indicator component
-static S32 renderComponentIndicator(S32 xPos, const char *name)
-{
-   S32 yPos = UserInterface::vertMargin;
-
-   // Draw the weapon or module name
-   S32 textWidth = drawStringAndGetWidth(xPos + indicatorPadding, yPos + indicatorPadding, indicatorFontSize, name);
-
-   S32 rectWidth  = textWidth + 2 * indicatorPadding;
-   S32 rectHeight = UserInterface::vertMargin + indicatorFontSize + 2 * indicatorPadding + 1;
-
-   drawHollowRect(xPos, UserInterface::vertMargin, xPos + rectWidth, rectHeight);
-
-   return rectWidth;
-}
-
-
-// Draw weapon indicators at top of the screen, runs on client
-void GameUserInterface::renderLoadoutIndicators()
-{
-   if(!getGame()->getSettings()->getIniSettings()->showWeaponIndicators)      // If we're not drawing them, we've got nothing to do
-      return;
-
-   if(!getGame()->getConnectionToServer())     // Can happen when first joining a game.  This was XelloBlue's crash...
-      return;
-
-   Ship *localShip = dynamic_cast<Ship *>(getGame()->getConnectionToServer()->getControlObject());
-   if(!localShip)
-      return;
-
-   static const Color *INDICATOR_INACTIVE_COLOR = &Colors::green80;      
-   static const Color *INDICATOR_ACTIVE_COLOR   = &Colors::red80;        
-   static const Color *INDICATOR_PASSIVE_COLOR  = &Colors::yellow;
-
-   U32 xPos = horizMargin;
-
-   // First, the weapons
-   for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
-   {
-      glColor(i == localShip->mActiveWeaponIndx ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
-
-      S32 width = renderComponentIndicator(xPos, GameWeapon::weaponInfo[localShip->getWeapon(i)].name.getString());
-
-      xPos += width + indicatorPadding;
-   }
-
-   xPos += 20;    // Small horizontal gap to seperate the weapon indicators from the module indicators
-
-   // Next, loadout modules
-   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-   {
-      if(gModuleInfo[localShip->getModule(i)].getPrimaryUseType() != ModulePrimaryUseActive)
-      {
-         if(gModuleInfo[localShip->getModule(i)].getPrimaryUseType() == ModulePrimaryUseHybrid &&
-               localShip->isModulePrimaryActive(localShip->getModule(i)))
-            glColor(INDICATOR_ACTIVE_COLOR);
-         else
-            glColor(INDICATOR_PASSIVE_COLOR);
-      }
-      else if(localShip->isModulePrimaryActive(localShip->getModule(i)))
-         glColor(INDICATOR_ACTIVE_COLOR);
-      else 
-         glColor(INDICATOR_INACTIVE_COLOR);
-
-      // Always change to orange if module secondary is fired
-      if(gModuleInfo[localShip->getModule(i)].hasSecondary() &&
-            localShip->isModuleSecondaryActive(localShip->getModule(i)))
-         glColor(Colors::orange67);
-
-      S32 width = renderComponentIndicator(xPos, getGame()->getModuleInfo(localShip->getModule(i))->getName());
-
-      xPos += width + indicatorPadding;
    }
 }
 

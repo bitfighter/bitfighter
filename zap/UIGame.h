@@ -33,7 +33,8 @@
 #include "Point.h"
 #include "game.h"
 #include "ship.h"             // For ShipModuleCount
-#include "HelperManager.h"    // For HelperManager
+#include "HelperManager.h"   
+#include "LoadoutIndicator.h"
 
 namespace Zap
 {
@@ -119,6 +120,7 @@ private:
 
    HelperManager mHelperManager;
    LevelInfoDisplayer mLevelInfoDisplayer;
+   LoadoutIndicator mLoadoutIndicator;
 
    Timer mShutdownTimer;
 
