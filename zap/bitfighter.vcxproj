@@ -184,6 +184,7 @@
     <ClCompile Include="GeomObject.cpp" />
     <ClCompile Include="HelperManager.cpp" />
     <ClCompile Include="helperMenu.cpp" />
+    <ClCompile Include="HttpRequest.cpp" />
     <ClCompile Include="Joystick.cpp" />
     <ClCompile Include="JoystickRender.cpp" />
     <ClCompile Include="LineItem.cpp" />
@@ -324,6 +325,7 @@
     <ClInclude Include="Geometry_Base.h" />
     <ClInclude Include="GeomObject.h" />
     <ClInclude Include="HelperManager.h" />
+    <ClInclude Include="HttpRequest.h" />
     <ClInclude Include="InputCodeEnum.h" />
     <ClInclude Include="Joystick.h" />
     <ClInclude Include="JoystickRender.h" />

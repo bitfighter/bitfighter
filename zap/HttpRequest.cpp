@@ -64,10 +64,18 @@ bool HttpRequest::send()
    // initiate the connection. this will block if DNS resolution is required
    TNL::NetError connectError = mSocket->connect(remoteAddress);
 
+// Note, according to http://stackoverflow.com/questions/2915672/snprintf-and-visual-studio-2010, sprintf and
+// _snprintf are not quite the same, though the differences do not matter here.
+#if _MSC_VER
+#  define snprintf _snprintf
+#endif
+
+   
    // construct the request
    string requestTemplate = "GET %s HTTP/1.0\r\n\r\n";
    char formattedRequest[2048];
-   snprintf(formattedRequest, 1024, requestTemplate.c_str(), location.c_str());
+   dSprintf(formattedRequest, 1024, requestTemplate.c_str(), location.c_str());
+
    mRequest = formattedRequest;
 
    // send request

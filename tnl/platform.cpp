@@ -488,6 +488,9 @@ bool atob(const char *str)
    return !stricmp(str, "true") || atof(str);
 }
 
+
+// Similar to snprintf -- print formatted string into buffer, but works on all platforms we support.
+// Overflow semantics may be different than snprintf.
 S32 dSprintf(char *buffer, U32 bufferSize, const char *format, ...)
 {
    va_list args;

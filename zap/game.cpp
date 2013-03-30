@@ -1103,8 +1103,10 @@ Point Game::computePlayerVisArea(Ship *ship) const
 }
 
 
+extern void exitToOs(S32 errcode);
+
 // Make sure name is unique.  If it's not, make it so.  The problem is that then the client doesn't know their official name.
-// This makes the assumption that we'll find a unique name before numstr runs out of space (allowing us to try 999,999,999 or so combinations)
+// This makes the assumption that we'll find a unique name before testing U32_MAX combinations.
 string Game::makeUnique(const char *name)
 {
    if(name[0] == 0)  // No zero-length name allowed
@@ -1125,14 +1127,16 @@ string Game::makeUnique(const char *name)
          {
             unique = false;
 
-            char numstr[10];
-            sprintf(numstr, ".%d", index);
+            char numstr[U32_MAX_DIGITS + 2];    // + 1 for the ., +1 for the \0
+
+            dSprintf(numstr, strlen(numstr), ".%d", index);
 
             // Max length name can be such that when number is appended, it's still less than MAX_PLAYER_NAME_LENGTH
             S32 maxNamePos = MAX_PLAYER_NAME_LENGTH - (S32)strlen(numstr); 
             proposedName = string(name).substr(0, maxNamePos) + numstr;     // Make sure name won't grow too long
 
             index++;
+
             break;
          }
       }
