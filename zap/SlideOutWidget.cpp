@@ -23,7 +23,7 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "UISlideOutWidget.h"
+#include "SlideOutWidget.h"
 #include "ScreenInfo.h"          // For gScreenInfo def
 #include "Point.h"
 #include "tnlVector.h"
@@ -36,7 +36,7 @@ namespace Zap
 
 
 // Constructor
-UISlideOutWidget::UISlideOutWidget()
+SlideOutWidget::SlideOutWidget()
 {
    mActivating = false;
 
@@ -45,7 +45,7 @@ UISlideOutWidget::UISlideOutWidget()
 }
 
 
-void UISlideOutWidget::idle(U32 deltaT)
+void SlideOutWidget::idle(U32 deltaT)
 {
    if(mAnimationTimer.update(deltaT))
    {
@@ -58,7 +58,7 @@ void UISlideOutWidget::idle(U32 deltaT)
 
 
 // User requested widget to open
-void UISlideOutWidget::onActivated() 
+void SlideOutWidget::onActivated() 
 {
    mAnimationTimer.invert();
    mActivating = true;
@@ -66,18 +66,18 @@ void UISlideOutWidget::onActivated()
 
 
 // User requested widget to close
-void UISlideOutWidget::onDeactivated()
+void SlideOutWidget::onDeactivated()
 {
    mAnimationTimer.invert();
    mActivating = false;
 }
 
 
-void UISlideOutWidget::onWidgetOpened() { /* Do nothing */ }      // Gets run when opening animation is complete
-void UISlideOutWidget::onWidgetClosed() { /* Do nothing */ }      // Gets run when closing animation is complete
+void SlideOutWidget::onWidgetOpened() { /* Do nothing */ }      // Gets run when opening animation is complete
+void SlideOutWidget::onWidgetClosed() { /* Do nothing */ }      // Gets run when closing animation is complete
 
 
-F32 UISlideOutWidget::getInsideEdge()
+F32 SlideOutWidget::getInsideEdge()
 {
    // Magic number that seems to work well... no matter that the real menu might be a different width... by
    // using this constant, menus appear at a consistent rate.
@@ -88,38 +88,38 @@ F32 UISlideOutWidget::getInsideEdge()
 }
 
 
-bool UISlideOutWidget::isOpening() const
+bool SlideOutWidget::isOpening() const
 {
    return mActivating && mAnimationTimer.getCurrent() > 0;
 }
 
 
-bool UISlideOutWidget::isActive() const
+bool SlideOutWidget::isActive() const
 {
    return mAnimationTimer.getCurrent() > 0;
 }
 
 
 // Return true if menu is playing the closing animation
-bool UISlideOutWidget::isClosing() const
+bool SlideOutWidget::isClosing() const
 {
    return !mActivating && mAnimationTimer.getCurrent() > 0;
 }
 
 
-F32 UISlideOutWidget::getFraction()
+F32 SlideOutWidget::getFraction()
 {
    return mActivating ? mAnimationTimer.getFraction() : 1 - mAnimationTimer.getFraction();
 }
 
 
-S32 UISlideOutWidget::getAnimationTime() const
+S32 SlideOutWidget::getAnimationTime() const
 {
    return mAnimationTimer.getPeriod();
 }
 
 
-void UISlideOutWidget::setAnimationTime(U32 period)
+void SlideOutWidget::setAnimationTime(U32 period)
 {
    mAnimationTimer.setPeriod(period);
 }
@@ -128,7 +128,7 @@ void UISlideOutWidget::setAnimationTime(U32 period)
 
 extern ScreenInfo gScreenInfo;
 
-void UISlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor)
+void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor)
 {
    const S32 CORNER_SIZE = 15;      
 

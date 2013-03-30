@@ -26,8 +26,8 @@
 #ifndef _HELPERMENU_H_
 #define _HELPERMENU_H_
 
-#include "UISlideOutWidget.h"    // Parent class
-#include "UIAToBScroller.h"      // Parent class, for internal transitions
+#include "SlideOutWidget.h"    // Parent class
+#include "AToBScroller.h"      // Parent class, for internal transitions
 
 #include "Engineerable.h"        // For EngineerBuildObjects enum
 #include "InputCode.h"
@@ -59,10 +59,10 @@ struct OverlayMenuItem
 };
 
 
-class HelperMenu : public UISlideOutWidget, public AToBScroller
+class HelperMenu : public SlideOutWidget, public AToBScroller
 {
-   typedef UISlideOutWidget Slider;
-   typedef AToBScroller     Scroller;
+   typedef SlideOutWidget Slider;
+   typedef AToBScroller   Scroller;
    
 public:
    enum HelperMenuType {

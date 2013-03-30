@@ -26,7 +26,7 @@
 #ifndef _UI_LEVEL_INFO_DISPLAYER_H_
 #define _UI_LEVEL_INFO_DISPLAYER_H_
 
-#include "UISlideOutWidget.h"
+#include "SlideOutWidget.h"
 
 using namespace TNL; 
 
@@ -36,9 +36,9 @@ namespace Zap
 
 class GameType;
 
-class LevelInfoDisplayer : public UISlideOutWidget
+class LevelInfoDisplayer : public SlideOutWidget
 {
-   typedef UISlideOutWidget Parent;
+   typedef SlideOutWidget Parent;
 
 private:
    Timer mDisplayTimer;

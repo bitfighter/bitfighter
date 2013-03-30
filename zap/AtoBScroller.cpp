@@ -23,7 +23,7 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "UIAToBScroller.h"
+#include "AToBScroller.h"
 #include "ScreenInfo.h"
 
 using namespace Zap;

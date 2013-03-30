@@ -39,7 +39,7 @@ namespace Zap
 
 class Color;
 
-class UISlideOutWidget
+class SlideOutWidget
 {
 private:
    bool mActivating;
@@ -53,7 +53,7 @@ protected:
    void renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor);
 
 public:
-   UISlideOutWidget();              // Constructor
+   SlideOutWidget();                // Constructor
 
    virtual void idle(U32 deltaT);
    virtual void onActivated();      // User requested widget to open
