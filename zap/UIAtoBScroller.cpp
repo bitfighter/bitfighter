@@ -26,7 +26,9 @@
 #include "UIAToBScroller.h"
 #include "ScreenInfo.h"
 
-namespace Zap
+using namespace Zap;
+
+namespace UI
 {
 
 
@@ -91,8 +93,6 @@ S32 AToBScroller::prepareToRenderFromDisplay(ClientGame *game, S32 top, S32 from
    return top - fromHeight * (1 - mScrollTimer.getFraction());
 }
 
-
-extern ScreenInfo gScreenInfo;
 
 // Returns the y-pos that the caller should render its display for the scrolling effect
 S32 AToBScroller::prepareToRenderToDisplay(ClientGame *game, S32 top, S32 fromHeight, S32 toHeight)

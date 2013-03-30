@@ -68,6 +68,7 @@ struct CommandInfo
 }
 
 using namespace Zap;
+
 namespace ChatCommands 
 {
 

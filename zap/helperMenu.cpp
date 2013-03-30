@@ -33,6 +33,8 @@
 
 #include "OpenglUtils.h"
 
+using namespace UI;
+
 namespace Zap
 {
 

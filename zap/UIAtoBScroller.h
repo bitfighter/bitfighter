@@ -27,11 +27,12 @@
 #include "Timer.h"
 
 using namespace TNL;
+using namespace Zap;
 
-namespace Zap
+class Zap::ClientGame;
+
+namespace UI
 {
-
-class ClientGame;
 
 // Class for producing a scrolling transition between two objects (A and B).  Used, for example, to help transition
 // between Modules and Weapons on the Loadout menu.

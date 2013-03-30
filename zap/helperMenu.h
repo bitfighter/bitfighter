@@ -35,7 +35,8 @@
 #include "Color.h"
 #include "Timer.h"
 
-using namespace TNL; 
+using namespace TNL;
+using namespace UI;
 
 
 namespace Zap
