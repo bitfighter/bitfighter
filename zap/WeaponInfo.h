@@ -43,7 +43,7 @@ namespace Zap
 #define WEAPON_ITEM_TABLE \
    WEAPON_ITEM(WeaponPhaser,  "Phaser",      "Phaser",     100,   500,   500,  600, 1000, 0.19f,  0,       false, ProjectilePhaser ) \
    WEAPON_ITEM(WeaponBounce,  "Bouncer",     "Bouncer",    100,  1600,  1600,  540, 1500, 0.15f,  0.4f,    false, ProjectileBounce ) \
-   WEAPON_ITEM(WeaponTriple,  "Triple",      "Triple",     200,  1700,  1700,  550,  850, 0.14f,  0,       false, ProjectileTriple ) \
+   WEAPON_ITEM(WeaponTriple,  "Triple",      "Triple",     200,  1700,  1700,  550,  850, 0.17f,  0,       false, ProjectileTriple ) \
    WEAPON_ITEM(WeaponBurst,   "Burst",       "Burst",      700, 10000, 10000,  500, 1000, 0.50f,  1.0f,    false, NotAProjectile   ) \
    WEAPON_ITEM(WeaponSeeker,  "Seeker",      "Seeker",     700, 20000, 20000,  600, 8000, 0.34f,  1.0f,    false, NotAProjectile   ) \
    WEAPON_ITEM(WeaponMine,    "Mine",        "Mine",       900, 55000, 55000,  500,   -1, 0.50f,  1.0f,    true,  NotAProjectile   ) \

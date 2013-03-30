@@ -600,9 +600,9 @@ void NexusGameType::setNewClosedTime(S32 timeInSeconds)
 // What does a particular scoring event score?
 S32 NexusGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 flags)
 {
-   S32 score = 0;
-   for(S32 count = 1; count <= flags; count++)
-      score += (count * 10);
+   // 10 * n(n+1)/2
+   // This means 1 flag == 10 points; 2 flags == 30; 3 flags == 60, etc.
+   S32 score = (10 * flags * (flags + 1)) / 2;
 
    if(scoreGroup == TeamScore)
    {
