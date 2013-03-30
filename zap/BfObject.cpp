@@ -1368,7 +1368,7 @@ S32 BfObject::lua_getTeamIndx(lua_State *L)
 /**
  * @luafunc  BfObject::setTeam(teamIndex)
  * @brief    Assigns the object to a team.
- * @param    \eint teamIndex - Index of the team the object should be assigned to.
+ * @param    \e int teamIndex - Index of the team the object should be assigned to.
  * @descr    Use the special team constants to make an item neutral or hostile.  Will have no effect on items 
  *           that are inherently teamless (such as a NexusZone).
  * @note     Remember that in Lua, indices start with 1!
