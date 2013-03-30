@@ -183,6 +183,7 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
       return 0;
 
    S32 displayItems = 0;
+
    // Count how many items we will be displaying -- some may be hidden
    for(S32 i = 0; i < count; i++)
       if(items[i].showOnMenu)
@@ -213,7 +214,6 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
 
    S32 yPos;
 
-   ////bottom - yPos - (4 * MENU_PADDING + MENU_LEGEND_FONT_SIZE)
    if(newItems)      // Draw the new items we're transitioning to
       yPos = prepareToRenderToDisplay(getGame(), top, oldHeight, height);
    else              // Draw the old items we're transitioning away from
@@ -222,8 +222,6 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
    // Don't render if there is no point!
    if(top == NO_RENDER)
       return itemIndent;      // Or whatever...
-
-   //yPos += oldHeight - getTransitionPos(oldHeight, height);
 
    yPos += 2;    // Aesthetics
 
