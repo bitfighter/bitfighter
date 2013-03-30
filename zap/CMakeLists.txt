@@ -31,6 +31,7 @@ set(CLIENT_SOURCES
    TeamShuffleHelper.cpp
    UI.cpp
    UIAbstractInstructions.cpp
+   UIAtoBScroller.cpp
    UIChat.cpp
    UICredits.cpp
    UIDiagnostics.cpp

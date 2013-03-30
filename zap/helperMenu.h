@@ -27,7 +27,7 @@
 #define _HELPERMENU_H_
 
 #include "UISlideOutWidget.h"    // Parent class
-#include "UIAToBScroller.h"      // Parent class, for internal transitions
+#include "UIAtoBScroller.h"      // Parent class, for internal transitions
 
 #include "Engineerable.h"        // For EngineerBuildObjects enum
 #include "InputCode.h"

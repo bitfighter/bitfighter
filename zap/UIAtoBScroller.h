@@ -29,7 +29,6 @@
 using namespace TNL;
 using namespace Zap;
 
-class Zap::ClientGame;
 
 namespace UI
 {
