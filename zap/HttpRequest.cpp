@@ -38,20 +38,8 @@ HttpRequest::HttpRequest(string url)
 {
 }
 
-string HttpRequest::netErrorToString(NetError err) {
-   switch(err) {
-      case TNL::NoError:
-         return "No error";
-      case TNL::InvalidPacketProtocol:
-         return "Invalid packet protocol";
-      case TNL::WouldBlock:
-         return "Operation would block";
-      case TNL::UnknownError:
-         return "Unknown error";
-   }
-}
-
-bool HttpRequest::send() {
+bool HttpRequest::send()
+{
    // hostname is anything before the first slash
    TNL::U32 index = mUrl.find('/');
    string host = mUrl.substr(0, index);
@@ -67,13 +55,13 @@ bool HttpRequest::send() {
    TNL::Address remoteAddress(addressString.c_str());
 
    // check that TNL understands the supplied address
-   if(!remoteAddress.isValid()) {
+   if(!remoteAddress.isValid())
+   {
       return false;
    }
 
    // initiate the connection. this will block if DNS resolution is required
    TNL::NetError connectError = mSocket->connect(remoteAddress);
-   cout << netErrorToString(connectError) << endl;
 
    // construct the request
    string requestTemplate = "GET %s HTTP/1.0\r\n\r\n";
@@ -83,59 +71,61 @@ bool HttpRequest::send() {
 
    // send request
    while(true) {
-      usleep(50000);
+      usleep(10000);
       NetError sendError;
       sendError = mSocket->send((unsigned char *) mRequest.c_str(), mRequest.size());
 
       if(sendError == WouldBlock)
       {
          continue;
-      } else if(sendError == NoError) {
+      }
+      else if(sendError == NoError)
+      {
          break;
       }
       return false;
    }
 
    while(true) {
-      usleep(50000);
+      usleep(10000);
       TNL::NetError recvError;
       int bytesRead;
-      char receiveBuffer[1024];
-      recvError = mSocket->recv((unsigned char*) receiveBuffer, 1024, &bytesRead);
-      cout << "got " << bytesRead << " bytes" << endl;
+      char receiveBuffer[HttpRequest::BufferSize];
+      recvError = mSocket->recv((unsigned char*) receiveBuffer, HttpRequest::BufferSize, &bytesRead);
 
-      if(recvError == TNL::WouldBlock) {
+      if(recvError == TNL::WouldBlock)
+      {
          // need to wait
          continue;
       }
 
       mResponse.append(receiveBuffer, 0, bytesRead);
 
-      if(bytesRead == 0) {
+      if(bytesRead == 0)
+      {
          parseResponse();
          return true;
       }
    }
 }
 
-string HttpRequest::getResponse() {
-   return mResponse;
-}
-
-string HttpRequest::getResponseBody() {
+string HttpRequest::getResponseBody()
+{
    return mResponseBody;
 }
 
-int HttpRequest::getResponseCode() {
+int HttpRequest::getResponseCode()
+{
    return mResponseCode;
 }
 
-void HttpRequest::parseResponse() {
+void HttpRequest::parseResponse()
+{
    int seperatorIndex = mResponse.find("\r\n\r\n");
    mResponseHead = mResponse.substr(0, seperatorIndex);
 
    int bodyIndex = seperatorIndex + 4;
-   mResponseBody = mResponse.substr(bodyIndex, mResponse.length() - bodyIndex);
+   mResponseBody = mResponse.substr(bodyIndex, mResponse.length());
 
    int responseCodeStart = mResponseHead.find(" ") + 1;
    int responseCodeEnd = mResponseHead.find("\r\n", responseCodeStart);

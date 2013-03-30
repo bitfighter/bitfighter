@@ -978,23 +978,25 @@ void globalMuteHandler(ClientGame *game, const Vector<string> &words)
 
 void downloadMapHandler(ClientGame *game, const Vector<string> &args)
 {
-   if(args.size() < 2) {
+   if(args.size() < 2)
+   {
       game->displayErrorMessage("You must specify a level");
       return;
    }
 
    HttpRequest req("bitfighter.org/pleiades/levels/raw/" + args[1]);
-   if(!req.send()) {
+   if(!req.send())
+   {
       game->displayErrorMessage("Error connecting to server");
    }
 
-   if(req.getResponseCode() != HttpRequest::OK) {
+   if(req.getResponseCode() != HttpRequest::OK)
+   {
       game->displayErrorMessage("Server returned an error: %d", req.getResponseCode());
       return;
    }
 
    string levelCode = req.getResponseBody();
-   cout << levelCode << endl;
    string levelFileName = "downloaded_" + args[1] + ".level";
 
    FolderManager *fm = game->getSettings()->getFolderManager();
@@ -1007,23 +1009,26 @@ void downloadMapHandler(ClientGame *game, const Vector<string> &args)
    game->displaySuccessMessage("Saved to %s", levelFileName.c_str());
 
    req = HttpRequest("bitfighter.org/pleiades/levels/raw/" + args[1] + "/levelgen");
-   if(!req.send()) {
+   if(!req.send())
+   {
       game->displayErrorMessage("Error connecting to server");
    }
 
-   if(req.getResponseCode() != HttpRequest::OK) {
+   if(req.getResponseCode() != HttpRequest::OK)
+   {
       game->displayErrorMessage("Server returned an error: %d", req.getResponseCode());
       return;
    }
 
    string levelgenCode = req.getResponseBody();
-   cout << levelgenCode << endl;
+   if(levelgenCode.length() > 0)
+   {
 
-   if(levelgenCode.length() > 0) {
+      // the leveldb prepends a lua comment with the target filename, and here we parse it
       int startIndex = 3; // the length of "-- "
       int breakIndex = levelgenCode.find_first_of("\r\n");
       string levelgenFileName = levelgenCode.substr(startIndex, breakIndex - startIndex);
-      // trim the filename line that the leveldb appends
+      // trim the filename line before writing
       levelgenCode = levelgenCode.substr(breakIndex + 2, levelgenCode.length());
 
       FolderManager *fm = game->getSettings()->getFolderManager();
