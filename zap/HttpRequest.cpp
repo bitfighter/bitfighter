@@ -31,7 +31,8 @@
 
 using namespace std;
 using namespace TNL;
-namespace Zap {
+namespace Zap
+{
 
 HttpRequest::HttpRequest(string url)
    : mUrl(url)
@@ -70,7 +71,8 @@ bool HttpRequest::send()
    mRequest = formattedRequest;
 
    // send request
-   while(true) {
+   while(true)
+   {
       Platform::sleep(50);
       NetError sendError;
       sendError = mSocket->send((unsigned char *) mRequest.c_str(), mRequest.size());
@@ -83,10 +85,12 @@ bool HttpRequest::send()
       {
          break;
       }
+
       return false;
    }
 
-   while(true) {
+   while(true)
+   {
       Platform::sleep(50);
       TNL::NetError recvError;
       int bytesRead;
