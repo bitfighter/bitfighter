@@ -24,16 +24,13 @@
 //------------------------------------------------------------------------------------
 
 
+#include "AToBScroller.h"
 #include "tnlTypes.h"
-
-
-// UGLY UGLY UGLY!!!  See http://stackoverflow.com/questions/2059665/why-cant-i-forward-declare-a-class-in-a-namespace-like-this
-namespace Zap {
-    class ClientGame;
-}
 
 using namespace TNL;
 using namespace Zap;
+
+class Zap::ClientGame;
 
 namespace UI
 {
@@ -41,8 +38,10 @@ namespace UI
 static const S32 indicatorFontSize = 15;
 static const S32 indicatorPadding = 3;       // Gap between text and box
 
-class LoadoutIndicator
+class LoadoutIndicator : public AToBScroller
 {
+   typedef AToBScroller Parent;
+
 public:
    LoadoutIndicator();      // Constructor
 
