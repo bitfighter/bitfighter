@@ -27,6 +27,8 @@
 #define _HELPERMENU_H_
 
 #include "UISlideOutWidget.h"    // Parent class
+#include "UIAToBScroller.h"      // Parent class, for internal transitions
+
 #include "Engineerable.h"        // For EngineerBuildObjects enum
 #include "InputCode.h"
 #include "tnl.h"
@@ -56,10 +58,11 @@ struct OverlayMenuItem
 };
 
 
-class HelperMenu : public UISlideOutWidget
+class HelperMenu : public UISlideOutWidget, public AToBScroller
 {
-   typedef UISlideOutWidget Parent;
-
+   typedef UISlideOutWidget Slider;
+   typedef AToBScroller     Scroller;
+   
 public:
    enum HelperMenuType {
       ChatHelperType,
@@ -88,8 +91,6 @@ private:
 protected:
    static const S32 MENU_TOP = 175;    // Location of top of title of overlay menu frame
 
-   Timer mTransitionTimer;             // Timer for intra-helper transitions
-
    // Shortcut helper function
    virtual void exitHelper();
 
@@ -109,9 +110,6 @@ protected:
    S32 mItemWidth;    // Calculated width of menu items
 
 public:
-   explicit HelperMenu();     // Constructor
-   virtual ~HelperMenu();     // Destructor
-
    void initialize(ClientGame *game, HelperManager *helperManager);
 
    virtual void render() = 0;

@@ -216,7 +216,7 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
       {
          // ...then select it
          updateChatMenuItems(walk);
-         mTransitionTimer.reset();
+         resetScrollTimer();
 
          UserInterface::playBoop();
 
@@ -245,7 +245,7 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
             // we will clear the transition timer to suppress the transition animation.
             mMenuItems1IsCurrent = !mMenuItems1IsCurrent;
             updateChatMenuItems(oldNode);
-            mTransitionTimer.clear();
+            clearScrollTimer();
          }
          return true;
       }

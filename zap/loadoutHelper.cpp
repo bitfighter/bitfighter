@@ -189,7 +189,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
       // Check if we need to switch over to weapons
       if(mCurrentIndex == ShipModuleCount)
-         mTransitionTimer.reset();
+         resetScrollTimer();
    }
 
    if(mCurrentIndex == ShipModuleCount + ShipWeaponCount)     // All loadout options selected, process complete
