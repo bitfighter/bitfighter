@@ -260,7 +260,7 @@ foreach my $file (@files) {
          # Enum will continue until we hit a line with no trailing \
          if( $line =~ m|#\s*define| ) {
             push(@enums, "\@\{\n");
-            push(@enums, "__Values__\n");
+            push(@enums, "# $enumName\n");# Add the list header
             $collectingEnum = 2;
             next;
          }
