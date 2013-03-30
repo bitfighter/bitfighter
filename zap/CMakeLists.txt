@@ -16,6 +16,7 @@ set(CLIENT_SOURCES
    gameObjectRender.cpp
    HelperManager.cpp
    helperMenu.cpp
+   HttpRequest.cpp
    Joystick.cpp
    JoystickRender.cpp
    loadoutHelper.cpp

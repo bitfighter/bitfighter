@@ -28,6 +28,7 @@
 #include "ClientGame.h"
 #include "ClientInfo.h"
 #include "gameType.h"
+#include "HttpRequest.h"
 
 
 namespace Zap {
@@ -972,6 +973,67 @@ void globalMuteHandler(ClientGame *game, const Vector<string> &words)
 
       if(game->getGameType())
          game->getGameType()->c2sGlobalMutePlayer(words[1].c_str());
+   }
+}
+
+void downloadMapHandler(ClientGame *game, const Vector<string> &args)
+{
+   if(args.size() < 2) {
+      game->displayErrorMessage("You must specify a level");
+      return;
+   }
+
+   HttpRequest req("bitfighter.org/pleiades/levels/raw/" + args[1]);
+   if(!req.send()) {
+      game->displayErrorMessage("Error connecting to server");
+   }
+
+   if(req.getResponseCode() != HttpRequest::OK) {
+      game->displayErrorMessage("Server returned an error: %d", req.getResponseCode());
+      return;
+   }
+
+   string levelCode = req.getResponseBody();
+   cout << levelCode << endl;
+   string levelFileName = "downloaded_" + args[1] + ".level";
+
+   FolderManager *fm = game->getSettings()->getFolderManager();
+
+   string filePath = joindir(fm->levelDir, levelFileName);
+   FILE *f = fopen(filePath.c_str(), "w");
+   fprintf(f, "%s", levelCode.c_str());
+   fclose(f);
+
+   game->displaySuccessMessage("Saved to %s", levelFileName.c_str());
+
+   req = HttpRequest("bitfighter.org/pleiades/levels/raw/" + args[1] + "/levelgen");
+   if(!req.send()) {
+      game->displayErrorMessage("Error connecting to server");
+   }
+
+   if(req.getResponseCode() != HttpRequest::OK) {
+      game->displayErrorMessage("Server returned an error: %d", req.getResponseCode());
+      return;
+   }
+
+   string levelgenCode = req.getResponseBody();
+   cout << levelgenCode << endl;
+
+   if(levelgenCode.length() > 0) {
+      int startIndex = 3; // the length of "-- "
+      int breakIndex = levelgenCode.find_first_of("\r\n");
+      string levelgenFileName = levelgenCode.substr(startIndex, breakIndex - startIndex);
+      // trim the filename line that the leveldb appends
+      levelgenCode = levelgenCode.substr(breakIndex + 2, levelgenCode.length());
+
+      FolderManager *fm = game->getSettings()->getFolderManager();
+
+      filePath = joindir(fm->levelDir, levelgenFileName);
+      FILE *f = fopen(filePath.c_str(), "w");
+      fprintf(f, "%s", levelgenCode.c_str());
+      fclose(f);
+
+      game->displaySuccessMessage("Saved to %s", levelgenFileName.c_str());
    }
 }
 

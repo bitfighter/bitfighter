@@ -42,14 +42,15 @@ namespace Zap
 {
    CommandInfo chatCmds[] = {   
    //  cmdName          cmdCallback                 cmdArgInfo cmdArgCount   helpCategory helpGroup lines,  helpArgString            helpTextString
-   	
-   { "password", &ChatCommands::submitPassHandler,{ STR },       1,      ADV_COMMANDS,     0,     1,    {"<password>"},         "Request admin or level change permissions"  },
-   { "servvol",  &ChatCommands::servVolHandler,   { xINT },      1,      ADV_COMMANDS,     0,     1,    {"<0-10>"},             "Set volume of server"  },
-   { "getmap",   &ChatCommands::getMapHandler,    { STR },       1,      ADV_COMMANDS,     1,     1,    {"[file]"},             "Save currently playing level in [file], if allowed" },
-   { "idle",     &ChatCommands::idleHandler,      {  },          0,      ADV_COMMANDS,     1,     1,    {  },                   "Place client in idle mode (AFK)" },
-   { "pm",       &ChatCommands::pmHandler,        { NAME, STR }, 2,      ADV_COMMANDS,     1,     1,    {"<name>","<message>"}, "Send private message to player" },
-   { "mute",     &ChatCommands::muteHandler,      { NAME },      1,      ADV_COMMANDS,     1,     1,    {"<name>"},             "Toggle hiding chat messages from <name>" },
-   { "vmute",    &ChatCommands::voiceMuteHandler, { NAME },      1,      ADV_COMMANDS,     1,     1,    {"<name>"},             "Toggle muting voice chat from <name>" },
+
+   { "dlmap",    &ChatCommands::downloadMapHandler, { STR },       1,      ADV_COMMANDS,     0,     1,    {"<level>"},            "Download the level from the online level database" },
+   { "password", &ChatCommands::submitPassHandler,  { STR },       1,      ADV_COMMANDS,     0,     1,    {"<password>"},         "Request admin or level change permissions"  },
+   { "servvol",  &ChatCommands::servVolHandler,     { xINT },      1,      ADV_COMMANDS,     0,     1,    {"<0-10>"},             "Set volume of server"  },
+   { "getmap",   &ChatCommands::getMapHandler,      { STR },       1,      ADV_COMMANDS,     1,     1,    {"[file]"},             "Save currently playing level in [file], if allowed" },
+   { "idle",     &ChatCommands::idleHandler,        {  },          0,      ADV_COMMANDS,     1,     1,    {  },                   "Place client in idle mode (AFK)" },
+   { "pm",       &ChatCommands::pmHandler,          { NAME, STR }, 2,      ADV_COMMANDS,     1,     1,    {"<name>","<message>"}, "Send private message to player" },
+   { "mute",     &ChatCommands::muteHandler,        { NAME },      1,      ADV_COMMANDS,     1,     1,    {"<name>"},             "Toggle hiding chat messages from <name>" },
+   { "vmute",    &ChatCommands::voiceMuteHandler,   { NAME },      1,      ADV_COMMANDS,     1,     1,    {"<name>"},             "Toggle muting voice chat from <name>" },
                  
    { "mvol",     &ChatCommands::mVolHandler,      { xINT },      1,      SOUND_COMMANDS,   2,     1,    {"<0-10>"},             "Set music volume"      },
    { "svol",     &ChatCommands::sVolHandler,      { xINT },      1,      SOUND_COMMANDS,   2,     1,    {"<0-10>"},             "Set SFX volume"        },
