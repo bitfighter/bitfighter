@@ -1137,6 +1137,11 @@ string Game::makeUnique(const char *name)
 
             index++;
 
+            if(index == U32_MAX)
+            {
+               logprintf(LogConsumer::LogError, "Too many players using the same name!  Aaaargh!");
+               exitToOs(1);
+            }
             break;
          }
       }
