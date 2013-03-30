@@ -4056,8 +4056,10 @@ Game *GameType::getGame() const
 
 GameTypeId GameType::getGameTypeId() const { return BitmatchGame; }
 
-const char *GameType::getShortName()         const { return "BM";       }
-const char *GameType::getInstructionString() const { return "Blast as many ships as you can!"; }
+const char *GameType::getShortName() const { return "BM"; }
+
+static const char *instructions[] = { "Blast as many ships",  "as you can!" };
+const char **GameType::getInstructionString() const { return instructions; }
 
 
 bool GameType::isFlagGame()          const { return false; }

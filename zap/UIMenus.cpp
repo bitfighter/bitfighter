@@ -410,7 +410,7 @@ void MenuUserInterface::render()
 
       ypos -= helpFontSize + 5;
       glColor(Colors::yellow);
-      drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getHelp());
+      drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getHelp().c_str());
    }
 
    renderExtras();  // Draw something unique on a menu

@@ -375,9 +375,10 @@ S32 HTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
 
 
 GameTypeId HTFGameType::getGameTypeId() const { return HTFGame; }
+const char *HTFGameType::getShortName() const { return "HTF"; }
 
-const char *HTFGameType::getShortName()         const { return "HTF"; }
-const char *HTFGameType::getInstructionString() const { return "Hold the flags at your capture zones!"; }
+static const char *instructions[] = { "Hold the flags at",  "your capture zones!" };
+const char **HTFGameType::getInstructionString() const { return instructions; }
 
 bool HTFGameType::isTeamGame()          const { return true;  }
 bool HTFGameType::canBeTeamGame()       const { return true;  }

@@ -648,9 +648,10 @@ S32 NexusGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEven
 
 
 GameTypeId NexusGameType::getGameTypeId() const { return NexusGame; }
+const char *NexusGameType::getShortName() const { return "N"; }
 
-const char *NexusGameType::getShortName()         const { return "N"; }
-const char *NexusGameType::getInstructionString() const { return "Collect flags and bring them to the Nexus!"; }
+static const char *instructions[] = { "Collect flags and deliver",  "them to the Nexus!" };
+const char **NexusGameType::getInstructionString() const { return instructions; }
 
 bool NexusGameType::isFlagGame()          const { return true;  } // Well, technically not, but we'll pervert flags as we load the level
 bool NexusGameType::canBeTeamGame()       const { return true;  }

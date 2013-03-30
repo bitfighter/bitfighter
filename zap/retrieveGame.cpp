@@ -388,9 +388,10 @@ S32 RetrieveGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreE
 
 
 GameTypeId RetrieveGameType::getGameTypeId() const { return RetrieveGame; }
+const char *RetrieveGameType::getShortName() const { return "Ret"; }
 
-const char *RetrieveGameType::getShortName()         const { return "Ret"; }
-const char *RetrieveGameType::getInstructionString() const { return "Find all the flags, and bring them to your capture zones!"; }
+static const char *instructions[] = { "Find all the flags, and bring",  "them to your capture zones!" };
+const char **RetrieveGameType::getInstructionString() const { return instructions; }
 
 bool RetrieveGameType::isTeamGame()          const { return true;  }
 bool RetrieveGameType::canBeTeamGame()       const { return true;  }

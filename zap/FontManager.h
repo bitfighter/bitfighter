@@ -61,6 +61,7 @@ public:
       FontOrbitronLight,
       FontOrbitronMedium,
       FontPrimeRegular,
+      FontTenby5,
       FontCount
    };
 
