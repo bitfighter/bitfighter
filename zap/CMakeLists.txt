@@ -5,6 +5,7 @@ find_package(PNG)
 find_package(Threads)
 
 set(CLIENT_SOURCES 
+   AToBScroller.cpp
    ChatCommands.cpp
    ChatHelper.cpp
    ClientGame.cpp
@@ -19,6 +20,7 @@ set(CLIENT_SOURCES
    HttpRequest.cpp
    Joystick.cpp
    JoystickRender.cpp
+   LoadoutIndicator.cpp
    loadoutHelper.cpp
    oglconsole.c
    OpenglUtils.cpp
@@ -27,11 +29,11 @@ set(CLIENT_SOURCES
    ScissorsManager.cpp
    ScreenShooter.cpp
    ShipShape.cpp
+   SlideOutWidget.cpp
    sparkManager.cpp
    TeamShuffleHelper.cpp
    UI.cpp
    UIAbstractInstructions.cpp
-   UIAtoBScroller.cpp
    UIChat.cpp
    UICredits.cpp
    UIDiagnostics.cpp
@@ -51,7 +53,6 @@ set(CLIENT_SOURCES
    UIMessage.cpp
    UINameEntry.cpp
    UIQueryServers.cpp
-   UISlideOutWidget.cpp
    UITeamDefMenu.cpp
    UIYesNo.cpp
    VideoSystem.cpp

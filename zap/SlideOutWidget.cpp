@@ -45,6 +45,13 @@ SlideOutWidget::SlideOutWidget()
 }
 
 
+// Destructor
+SlideOutWidget::~SlideOutWidget()
+{
+   // Do nothing
+}
+
+
 void SlideOutWidget::idle(U32 deltaT)
 {
    if(mAnimationTimer.update(deltaT))

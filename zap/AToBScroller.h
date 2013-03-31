@@ -23,13 +23,15 @@
 //
 //------------------------------------------------------------------------------------
 
+#ifndef _A_TO_B_SCROLLER_H_
+#define _A_TO_B_SCROLLER_H_
+
 #include "ScissorsManager.h"
 #include "Timer.h"
 
 using namespace TNL;
 using namespace Zap;
 
-class Zap::ClientGame;
 
 namespace UI
 {
@@ -61,6 +63,9 @@ protected:
 
 public:
    AToBScroller();      // Constructor
+   virtual ~AToBScroller();      // Constructor
 };
 
 }
+
+#endif  // _A_TO_B_SCROLLER_H_

@@ -54,6 +54,7 @@ protected:
 
 public:
    SlideOutWidget();                // Constructor
+   virtual ~SlideOutWidget();       // Destructor
 
    virtual void idle(U32 deltaT);
    virtual void onActivated();      // User requested widget to open

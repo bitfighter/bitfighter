@@ -39,6 +39,13 @@ AToBScroller::AToBScroller()
 }
 
 
+// Destructor
+AToBScroller::~AToBScroller()
+{
+   // Do nothing
+}
+
+
 void AToBScroller::onActivated()
 {
    mScrollTimer.clear();

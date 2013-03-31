@@ -23,14 +23,14 @@
 //
 //------------------------------------------------------------------------------------
 
+#ifndef _LOADOUT_INDICATOR_H_
+#define _LOADOUT_INDICATOR_H_
 
 #include "AToBScroller.h"
 #include "tnlTypes.h"
 
 using namespace TNL;
 using namespace Zap;
-
-class Zap::ClientGame;
 
 namespace UI
 {
@@ -51,3 +51,5 @@ public:
 };
 
 }
+
+#endif  // _LOADOUT_INDICATOR_H_
