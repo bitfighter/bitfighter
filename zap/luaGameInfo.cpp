@@ -51,10 +51,11 @@ LuaGameInfo::~LuaGameInfo()
 
 /**
  *  @luaclass GameInfo
- *  @brief    Simple menu item that calls a method or opens a submenu when selected.
- *  @descr    %MenuItem is the parent class for all other MenuItems.
+ *  @brief    Get information about the current game.
+ *  @descr    You can get information about the current game with the %GameInfo object.
  *
- *  Currently, you cannot instantiate a %MenuItem from Lua, though you can instatiate %MenuItem subclasses.
+ *  You only need get this object once, then you can use it as often as you like. It will
+ *  always reflect the latest data.
  */
 //                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
