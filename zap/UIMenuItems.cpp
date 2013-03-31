@@ -104,14 +104,6 @@ MenuItem::~MenuItem()
    LUAW_DESTRUCTOR_CLEANUP;
 } 
 
-// Generally speaking, we don't want Lua to collect menu items -- they are useless if they are not passed back to Bitfighter, and our menu
-// automatically handles deletion.  The only place we could get into trouble is if a script creates a bunch of MenuItems and holds on to 
-// them, never passing them back to the game.  That memory would be lost forever...
-bool MenuItem::shouldLuaGarbageCollectThisObject()
-{
-   return false;
-}
-
 
 MenuItemTypes MenuItem::getItemType()
 {
