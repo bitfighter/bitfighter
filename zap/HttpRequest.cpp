@@ -39,6 +39,11 @@ HttpRequest::HttpRequest(string url)
 {
 }
 
+HttpRequest::HttpRequest(char* url)
+{
+   mUrl = string(url);
+}
+
 bool HttpRequest::send()
 {
    // hostname is anything before the first slash

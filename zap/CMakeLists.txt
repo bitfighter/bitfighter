@@ -17,7 +17,6 @@ set(CLIENT_SOURCES
    gameObjectRender.cpp
    HelperManager.cpp
    helperMenu.cpp
-   HttpRequest.cpp
    Joystick.cpp
    JoystickRender.cpp
    LoadoutIndicator.cpp
@@ -93,9 +92,11 @@ set(SHARED_SOURCES
    goalZone.cpp
    gridDB.cpp
    HTFGame.cpp
+   HttpRequest.cpp
    IniFile.cpp
    InputCode.cpp
    item.cpp
+   LevelDatabaseDownloadThread.cpp
    lineEditor.cpp
    LineItem.cpp
    loadoutZone.cpp

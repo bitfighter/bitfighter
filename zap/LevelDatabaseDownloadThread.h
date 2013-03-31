@@ -23,44 +23,35 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _HttpRequest_H_
-#define _HttpRequest_H_
+#ifndef LEVELDATABASEDOWNLOADTHREAD_H
+#define LEVELDATABASEDOWNLOADTHREAD_H
 
-#include <tnl.h>
-#include <tnlUDP.h>
+#include "tnlThread.h"
+
 #include <string>
 
 using namespace std;
-using namespace TNL;
-
 namespace Zap
 {
 
-class HttpRequest {
+class ClientGame;
+class LevelDatabaseDownloadThread : public TNL::Thread
+{
+typedef Thread Parent;
 public:
-   static const int BufferSize = 4096;
-   static const int OK = 200;
+   static const char* LevelRequest;
+   static const char* LevelgenRequest;
+   static const int UrlLength = 2048;
 
-   explicit HttpRequest(string url);
-   explicit HttpRequest(char* url);
+   explicit LevelDatabaseDownloadThread(string levelId, ClientGame* game);
+   virtual ~LevelDatabaseDownloadThread();
 
-   bool send();
-   string getResponseBody();
-   int getResponseCode();
-
+   U32 run();
 private:
-   void parseResponse();
-
-   string mUrl;
-   string mRequest;
-   string mResponse;
-   string mResponseHead;
-   string mResponseBody;
-   int mResponseCode;
-   TNL::Address* mAddress;
-   TNL::Socket* mSocket;
+   string mLevelId;
+   ClientGame* mGame;
 };
 
 }
 
-#endif
+#endif // LEVELDATABASEDOWNLOADTHREAD_H
