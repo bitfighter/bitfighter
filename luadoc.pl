@@ -95,7 +95,7 @@ foreach my $file (@files) {
       }
 
       if( $collectingMethods ) {
-         if( $line =~ m|METHOD\( *CLASS, *(.+?) *,| ) {                 # Signals class declaration... methods will follow
+         if( $line =~ m|METHOD *\( *CLASS, *(.+?) *,| ) {                 # Signals class declaration... methods will follow
             my $method = $1;
             push(@methods, $method);
             next;
