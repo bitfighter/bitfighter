@@ -35,71 +35,81 @@
 namespace Zap
 {
 
-const char LuaGameInfo::className[] = "GameInfo";      // Class name as it appears to Lua scripts
-
 // Constructor
 LuaGameInfo::LuaGameInfo(lua_State *L)
 {
-   // Do nothing
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 LuaGameInfo::~LuaGameInfo()
 {
-   logprintf(LogConsumer::LogLuaObjectLifecycle, "Deleted LuaGameObject (%p)\n", this);     // Never gets run...
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
-// Define the methods we will expose to Lua
-Lunar<LuaGameInfo>::RegType LuaGameInfo::methods[] =
-{
-   method(LuaGameInfo, getGameType),
-   method(LuaGameInfo, getGameTypeName),
-   method(LuaGameInfo, getFlagCount),
-   method(LuaGameInfo, getWinningScore),
-   method(LuaGameInfo, getGameTimeTotal),
-   method(LuaGameInfo, getGameTimeRemaining),
-   method(LuaGameInfo, getLeadingScore),
-   method(LuaGameInfo, getLeadingTeam),
-   method(LuaGameInfo, getTeamCount),
-   method(LuaGameInfo, getLevelName),
-   method(LuaGameInfo, getGridSize),
-   method(LuaGameInfo, isTeamGame),
-   method(LuaGameInfo, getEventScore),
-   method(LuaGameInfo, getPlayers),
-   method(LuaGameInfo, isNexusOpen),
-   method(LuaGameInfo, getNexusTimeLeft),
+/**
+ *  @luaclass GameInfo
+ *  @brief    Simple menu item that calls a method or opens a submenu when selected.
+ *  @descr    %MenuItem is the parent class for all other MenuItems.
+ *
+ *  Currently, you cannot instantiate a %MenuItem from Lua, though you can instatiate %MenuItem subclasses.
+ */
+//                Fn name                  Param profiles            Profile count
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getGameType,          ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getGameTypeName,      ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getFlagCount,         ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getWinningScore,      ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getGameTimeTotal,     ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getGameTimeRemaining, ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getLeadingScore,      ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getLeadingTeam,       ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getTeamCount,         ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getLevelName,         ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getGridSize,          ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, isTeamGame,           ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getEventScore,        ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getPlayers,           ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, isNexusOpen,          ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getNexusTimeLeft,     ARRAYDEF({{ END }}), 1 ) \
 
-   {0,0}    // End method list
-};
+GENERATE_LUA_FUNARGS_TABLE(LuaGameInfo, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(LuaGameInfo, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *LuaGameInfo::luaClassName = "GameInfo";  // Class name as it appears to Lua scripts
+REGISTER_LUA_CLASS(LuaGameInfo);
 
 
 extern ServerGame *gServerGame;
 
-S32 LuaGameInfo::getGameType(lua_State *L)
+S32 LuaGameInfo::lua_getGameType(lua_State *L)
 {
    TNLAssert(gServerGame->getGameType(), "Need Gametype check in getGameType");
    return returnInt(L, gServerGame->getGameType()->getGameTypeId());
 }
 
 
-S32 LuaGameInfo::getGameTypeName(lua_State *L)      { return returnString(L, gServerGame->getGameType()->getGameTypeName()); }
-S32 LuaGameInfo::getFlagCount(lua_State *L)         { return returnInt   (L, gServerGame->getGameType()->getFlagCount()); }
-S32 LuaGameInfo::getWinningScore(lua_State *L)      { return returnInt   (L, gServerGame->getGameType()->getWinningScore()); }
-S32 LuaGameInfo::getGameTimeTotal(lua_State *L)     { return returnInt   (L, gServerGame->getGameType()->getTotalGameTime()); }
-S32 LuaGameInfo::getGameTimeRemaining(lua_State *L) { return returnInt   (L, gServerGame->getGameType()->getRemainingGameTime()); }
-S32 LuaGameInfo::getLeadingScore(lua_State *L)      { return returnInt   (L, gServerGame->getGameType()->getLeadingScore()); }
-S32 LuaGameInfo::getLeadingTeam(lua_State *L)       { return returnInt   (L, gServerGame->getGameType()->getLeadingTeam() + 1); }
+S32 LuaGameInfo::lua_getGameTypeName(lua_State *L)      { return returnString(L, gServerGame->getGameType()->getGameTypeName()); }
+S32 LuaGameInfo::lua_getFlagCount(lua_State *L)         { return returnInt   (L, gServerGame->getGameType()->getFlagCount()); }
+S32 LuaGameInfo::lua_getWinningScore(lua_State *L)      { return returnInt   (L, gServerGame->getGameType()->getWinningScore()); }
+S32 LuaGameInfo::lua_getGameTimeTotal(lua_State *L)     { return returnInt   (L, gServerGame->getGameType()->getTotalGameTime()); }
+S32 LuaGameInfo::lua_getGameTimeRemaining(lua_State *L) { return returnInt   (L, gServerGame->getGameType()->getRemainingGameTime()); }
+S32 LuaGameInfo::lua_getLeadingScore(lua_State *L)      { return returnInt   (L, gServerGame->getGameType()->getLeadingScore()); }
+S32 LuaGameInfo::lua_getLeadingTeam(lua_State *L)       { return returnInt   (L, gServerGame->getGameType()->getLeadingTeam() + 1); }
                                                                          
-S32 LuaGameInfo::getTeamCount(lua_State *L)         { return returnInt   (L, gServerGame->getTeamCount()); }
+S32 LuaGameInfo::lua_getTeamCount(lua_State *L)         { return returnInt   (L, gServerGame->getTeamCount()); }
 
-S32 LuaGameInfo::getLevelName(lua_State *L)         { return returnString(L, gServerGame->getGameType()->getLevelName()->getString()); }
-S32 LuaGameInfo::getGridSize(lua_State *L)          { return returnFloat (L, gServerGame->getGridSize()); }
-S32 LuaGameInfo::isTeamGame(lua_State *L)           { return returnBool  (L, gServerGame->getGameType()->isTeamGame()); }
+S32 LuaGameInfo::lua_getLevelName(lua_State *L)         { return returnString(L, gServerGame->getGameType()->getLevelName()->getString()); }
+S32 LuaGameInfo::lua_getGridSize(lua_State *L)          { return returnFloat (L, gServerGame->getGridSize()); }
+S32 LuaGameInfo::lua_isTeamGame(lua_State *L)           { return returnBool  (L, gServerGame->getGameType()->isTeamGame()); }
 
 
-S32 LuaGameInfo::isNexusOpen(lua_State *L)
+S32 LuaGameInfo::lua_isNexusOpen(lua_State *L)
 {
    GameType *gameType = gServerGame->getGameType();
    if(!gameType || gameType->getGameTypeId() != NexusGame)
@@ -109,7 +119,7 @@ S32 LuaGameInfo::isNexusOpen(lua_State *L)
 }
 
 
-S32 LuaGameInfo::getNexusTimeLeft(lua_State *L)
+S32 LuaGameInfo::lua_getNexusTimeLeft(lua_State *L)
 {
    GameType *gameType = gServerGame->getGameType();
    if(!gameType || gameType->getGameTypeId() != NexusGame)
@@ -119,7 +129,7 @@ S32 LuaGameInfo::getNexusTimeLeft(lua_State *L)
 }
 
 
-S32 LuaGameInfo::getEventScore(lua_State *L)
+S32 LuaGameInfo::lua_getEventScore(lua_State *L)
 {
    static const char *methodName = "GameInfo:getEventScore()";
    checkArgCount(L, 1, methodName);
@@ -130,7 +140,7 @@ S32 LuaGameInfo::getEventScore(lua_State *L)
 
 
 // Return a table listing all players on this team
-S32 LuaGameInfo::getPlayers(lua_State *L) 
+S32 LuaGameInfo::lua_getPlayers(lua_State *L) 
 {
    ServerGame *game = gServerGame;
 

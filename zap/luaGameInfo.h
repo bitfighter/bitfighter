@@ -41,29 +41,35 @@ public:
    explicit LuaGameInfo(lua_State *L);     // Constructor
    virtual ~LuaGameInfo();                 // Destructor
 
-   static const char className[];
 
-   static Lunar<LuaGameInfo>::RegType methods[];
+   S32 lua_getGameType(lua_State *L);
+   S32 lua_getGameTypeName(lua_State *L);
+   S32 lua_getFlagCount(lua_State *L);
+   S32 lua_getWinningScore(lua_State *L);
+   S32 lua_getGameTimeTotal(lua_State *L);
+   S32 lua_getGameTimeRemaining(lua_State *L);
+   S32 lua_getLeadingScore(lua_State *L);
+   S32 lua_getLeadingTeam(lua_State *L);
+   S32 lua_getTeamCount(lua_State *L);
 
-   S32 getGameType(lua_State *L);
-   S32 getGameTypeName(lua_State *L);
-   S32 getFlagCount(lua_State *L);
-   S32 getWinningScore(lua_State *L);
-   S32 getGameTimeTotal(lua_State *L);
-   S32 getGameTimeRemaining(lua_State *L);
-   S32 getLeadingScore(lua_State *L);
-   S32 getLeadingTeam(lua_State *L);
-   S32 getTeamCount(lua_State *L);
+   S32 lua_getLevelName(lua_State *L);
+   S32 lua_getGridSize(lua_State *L);
+   S32 lua_isTeamGame(lua_State *L);
 
-   S32 getLevelName(lua_State *L);
-   S32 getGridSize(lua_State *L);
-   S32 isTeamGame(lua_State *L);
+   S32 lua_getEventScore(lua_State *L);
 
-   S32 getEventScore(lua_State *L);
+   S32 lua_getPlayers(lua_State *L);       // Return table of all players/bots in game
+   S32 lua_isNexusOpen(lua_State *L);
+   S32 lua_getNexusTimeLeft(lua_State *L);
 
-   S32 getPlayers(lua_State *L);       // Return table of all players/bots in game
-   S32 isNexusOpen(lua_State *L);
-   S32 getNexusTimeLeft(lua_State *L);
+
+   ///// Lua interface
+   // Top level Lua methods
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(LuaGameInfo);
+
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 
