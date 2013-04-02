@@ -5,6 +5,7 @@ find_package(PNG)
 find_package(Threads)
 
 set(CLIENT_SOURCES 
+   AToBScroller.cpp
    ChatCommands.cpp
    ChatHelper.cpp
    ClientGame.cpp
@@ -16,9 +17,11 @@ set(CLIENT_SOURCES
    gameObjectRender.cpp
    HelperManager.cpp
    helperMenu.cpp
-   HttpRequest.cpp
    Joystick.cpp
    JoystickRender.cpp
+   LevelDatabaseDownloadThread.cpp
+   LevelDatabaseUploadThread.cpp
+   LoadoutIndicator.cpp
    loadoutHelper.cpp
    oglconsole.c
    OpenglUtils.cpp
@@ -27,11 +30,11 @@ set(CLIENT_SOURCES
    ScissorsManager.cpp
    ScreenShooter.cpp
    ShipShape.cpp
+   SlideOutWidget.cpp
    sparkManager.cpp
    TeamShuffleHelper.cpp
    UI.cpp
    UIAbstractInstructions.cpp
-   UIAtoBScroller.cpp
    UIChat.cpp
    UICredits.cpp
    UIDiagnostics.cpp
@@ -51,7 +54,6 @@ set(CLIENT_SOURCES
    UIMessage.cpp
    UINameEntry.cpp
    UIQueryServers.cpp
-   UISlideOutWidget.cpp
    UITeamDefMenu.cpp
    UIYesNo.cpp
    VideoSystem.cpp
@@ -92,9 +94,12 @@ set(SHARED_SOURCES
    goalZone.cpp
    gridDB.cpp
    HTFGame.cpp
+   HttpRequest.cpp
    IniFile.cpp
    InputCode.cpp
    item.cpp
+   LevelDatabaseDownloadThread.cpp
+   LevelDatabaseUploadThread.cpp
    lineEditor.cpp
    LineItem.cpp
    loadoutZone.cpp

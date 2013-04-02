@@ -30,7 +30,7 @@ function main()
                            -- our mission is to return it to one of our capture zones.
 
 
-   game = GameInfo()     -- Create the GameInfo object so we can get information about
+   game = GameInfo.new() -- Create the GameInfo object so we can get information about
                          -- the current game
 
    print("Level name ==> " .. game:getLevelName())

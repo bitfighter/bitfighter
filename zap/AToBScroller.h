@@ -58,7 +58,8 @@ protected:
    void doneRendering();
 
 public:
-   AToBScroller();      // Constructor
+   AToBScroller();            // Constructor
+   virtual ~AToBScroller();   // Destructor
 
    virtual void onActivated();
    virtual void idle(U32 deltaT);

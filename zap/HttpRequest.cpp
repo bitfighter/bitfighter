@@ -34,9 +34,17 @@ using namespace TNL;
 namespace Zap
 {
 
+const string HttpRequest::GetMethod = "GET";
+const string HttpRequest::PostMethod = "POST";
+
 HttpRequest::HttpRequest(string url)
-   : mUrl(url)
+   : mUrl(url), mMethod("GET")
 {
+}
+
+HttpRequest::HttpRequest(char* url)
+{
+   mUrl = string(url);
 }
 
 bool HttpRequest::send()
@@ -72,28 +80,54 @@ bool HttpRequest::send()
 
    
    // construct the request
-   string requestTemplate = "GET %s HTTP/1.0\r\n\r\n";
-   char formattedRequest[2048];
-   dSprintf(formattedRequest, 1024, requestTemplate.c_str(), location.c_str());
+   mRequest = "";
 
-   mRequest = formattedRequest;
+   // request line
+   mRequest += mMethod + " " + location + " HTTP/1.0";
+
+   // content type and data encoding for POST requests
+   if(mMethod == PostMethod)
+   {
+      mRequest += "\r\nContent-Type: application/x-www-form-urlencoded";
+
+      string encodedData;
+      map<string, string>::iterator it;
+      for(it = mData.begin(); it != mData.end(); it++)
+      {
+         encodedData += urlEncode((*it).first) + "=" + urlEncode((*it).second) + "&";
+      }
+
+      char contentLengthHeaderBuffer[1024];
+      dSprintf(contentLengthHeaderBuffer, 1024, "\r\nContent-Length: %d", encodedData.length());
+
+      mRequest += contentLengthHeaderBuffer;
+      mRequest += "\r\n\r\n";
+      mRequest += encodedData;
+   }
+   else
+   {
+      mRequest += "\r\n\r\n";
+   }
 
    // send request
    while(true)
    {
-      Platform::sleep(50);
+      Platform::sleep(5);
       NetError sendError;
       sendError = mSocket->send((unsigned char *) mRequest.c_str(), mRequest.size());
 
       if(sendError == WouldBlock)
       {
+         // need to wait
          continue;
       }
       else if(sendError == NoError)
       {
+         // data was transmitted
          break;
       }
 
+      // an error occured
       return false;
    }
 
@@ -115,9 +149,12 @@ bool HttpRequest::send()
 
       if(bytesRead == 0)
       {
+         // socket closed by remote host
          parseResponse();
          return true;
       }
+
+      // more data to read
    }
 }
 
@@ -143,6 +180,57 @@ void HttpRequest::parseResponse()
    int responseCodeEnd = mResponseHead.find("\r\n", responseCodeStart);
    string responseCode = mResponseHead.substr(responseCodeStart, responseCodeEnd - responseCodeStart);
    mResponseCode = atoi(responseCode.c_str());
+}
+
+string HttpRequest::urlEncodeChar(char c)
+{
+   U32 ordinal = c;
+   string result;
+   // see if the character is unreserved
+   if(
+      (ordinal >= 0x41 && ordinal <= 0x5A) || // lowercase
+      (ordinal >= 0x61 && ordinal <= 0x7A) || // uppercase
+      (ordinal >= 0x30 && ordinal <= 0x39) || // digits
+      ordinal == 0x2D ||                      // hyphen
+      ordinal == 0x2E ||                      // period
+      ordinal == 0x5F ||                      // underscore
+      ordinal == 0x7E                         // tilde
+   )
+   {
+      result = ordinal;
+   }
+   else
+   {
+      char buffer[4];
+      // Convert ordinal to a two character hex number in the range [0, 255],
+      // prefixed by a percentage sign
+      dSprintf(buffer, 16, (const char*) "%%%0.2x", (U32) ordinal & 0xFF);
+      result = buffer;
+   }
+   return result;
+}
+
+string HttpRequest::urlEncode(const string& str)
+{
+   string result;
+   string::const_iterator it;
+
+   for(it = str.begin(); it < str.end(); it++)
+   {
+      result += urlEncodeChar(*it);
+   }
+   return result;
+}
+
+void HttpRequest::setData(const string& key, const string& value)
+{
+   mData.erase(key);
+   mData[key] = value;
+}
+
+void HttpRequest::setMethod(const string& method)
+{
+   mMethod = method;
 }
 
 }

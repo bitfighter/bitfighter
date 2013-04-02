@@ -30,6 +30,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>        // For va_args
+#include <streambuf>
 #include <string>          // For... everything.  This is stringUtils, after all!
 #include <sstream>         // For parseString
 #include <sys/stat.h>      // For testing existence of folders
@@ -683,6 +684,45 @@ string writeLevelString(const char *in)
 
    string out = replaceString(in, "\"", "\"\"");
    return string("\"") + out + "\"";
+}
+
+bool writeFile(const string& path, const string& contents, bool append)
+{
+   ofstream file(path.c_str(), ios::out);
+   if(!file.is_open())
+   {
+      return false;
+   }
+
+   file << contents;
+   if(!file.good())
+   {
+      file.close();
+      return false;
+   }
+
+   file.close();
+   return true;
+}
+
+const string readFile(const string& path)
+{
+   ifstream file(path.c_str());
+   if(!file.is_open())
+   {
+      return "";
+   }
+
+   // make a string and resize it to hold the file contents
+   string result;
+   file.seekg(0, ios::end);
+   result.resize(file.tellg());
+   file.seekg(0, ios::beg);
+
+   file.read(&result[0], result.size());
+   file.close();
+
+   return result;
 }
 
 };

@@ -23,56 +23,35 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _UI_SLIDE_OUT_WIDGET_H_
-#define _UI_SLIDE_OUT_WIDGET_H_
+#ifndef LEVELDATABASEDOWNLOADTHREAD_H
+#define LEVELDATABASEDOWNLOADTHREAD_H
 
+#include "tnlThread.h"
 
-#include "tnlTypes.h"
-#include "Timer.h"
+#include <string>
 
-
-using namespace TNL; 
-
-
+using namespace std;
 namespace Zap
 {
 
-class Color;
-
-class SlideOutWidget
+class ClientGame;
+class LevelDatabaseDownloadThread : public TNL::Thread
 {
-private:
-   bool mActivating;
-   Timer mAnimationTimer;
-
-protected:
-   void setAnimationTime(U32 period);
-   bool isOpening() const;
-   bool isClosing() const;          // Return true if widget is playing the closing animation
-
-   void renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor);
-
+typedef Thread Parent;
 public:
-   SlideOutWidget();                // Constructor
-   virtual ~SlideOutWidget();       // Destructor
+   static const char* LevelRequest;
+   static const char* LevelgenRequest;
+   static const int UrlLength = 2048;
 
-   virtual void idle(U32 deltaT);
-   virtual void onActivated();      // User requested widget to open
-   virtual void onDeactivated();    // User requested widget to close
+   explicit LevelDatabaseDownloadThread(string levelId, ClientGame* game);
+   virtual ~LevelDatabaseDownloadThread();
 
-   F32 getInsideEdge();
-
-   virtual void onWidgetOpened();   // Widget has finished opening
-   virtual void onWidgetClosed();   // Widget has finished closing
-
-   virtual bool isActive() const;
-
-   F32 getFraction();               // Get fraction of openness
-   S32 getAnimationTime() const;
-
+   U32 run();
+private:
+   string mLevelId;
+   ClientGame* mGame;
 };
-
 
 }
 
-#endif
+#endif // LEVELDATABASEDOWNLOADTHREAD_H

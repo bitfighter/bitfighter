@@ -28,6 +28,7 @@
 
 #include <tnl.h>
 #include <tnlUDP.h>
+#include <map>
 #include <string>
 
 using namespace std;
@@ -40,8 +41,18 @@ class HttpRequest {
 public:
    static const int BufferSize = 4096;
    static const int OK = 200;
+   static const int Found = 302;
+   static const string GetMethod;
+   static const string PostMethod;
 
-   HttpRequest(string url);
+   explicit HttpRequest(string url);
+   explicit HttpRequest(char* url);
+
+   static string urlEncodeChar(char c);
+   static string urlEncode(const string& str);
+
+   void setMethod(const string&);
+   void setData(const string& key, const string& value);
    bool send();
    string getResponseBody();
    int getResponseCode();
@@ -54,9 +65,11 @@ private:
    string mResponse;
    string mResponseHead;
    string mResponseBody;
+   string mMethod;
    int mResponseCode;
    TNL::Address* mAddress;
    TNL::Socket* mSocket;
+   map<string, string> mData;
 };
 
 }

@@ -101,8 +101,6 @@ public:
    InputCode key1;            // Allow two shortcut keys per menu item...
    InputCode key2;
 
-   static bool shouldLuaGarbageCollectThisObject();   
-
    virtual MenuItemTypes getItemType();
 
    virtual void render(S32 ypos, S32 textsize, bool isSelected);              // Renders item horizontally centered on screen

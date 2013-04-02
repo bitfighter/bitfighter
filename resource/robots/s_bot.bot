@@ -35,7 +35,7 @@ function main()
     pathTimerMax = 250
     pathTimer = pathTimerMax
     dirToGo = 0
-    game = GameInfo()
+    game = GameInfo.new()
 
     difficulty         = tonumber(arg[1]) or .5
     agression          = tonumber(arg[2]) or 0.5
