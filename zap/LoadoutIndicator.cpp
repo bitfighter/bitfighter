@@ -40,7 +40,6 @@ namespace UI
 // Constructor
 LoadoutIndicator::LoadoutIndicator()
 {
-   // Do nothing
    mScrollTimer.setPeriod(200);
 }
 
