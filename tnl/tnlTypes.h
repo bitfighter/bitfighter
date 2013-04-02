@@ -250,8 +250,9 @@ static const S64 S64_MIN = S64(0x8000000000000000LL);             ///< Constant 
 static const S64 S64_MAX = S64(0x7FFFFFFFFFFFFFFFLL);             ///< Constant Max Limit S64
 static const U64 U64_MAX = U64(0xFFFFFFFFFFFFFFFFULL);            ///< Constant Max Limit U64
 
-static const U32 U16_MAX_DIGITS =  5;                             ///< U16_MAX = 65536 = 5 digits
-static const U32 U32_MAX_DIGITS = 10;                             ///< U32_MAX = 4294967296 = 10 digits
+static const U32 U16_MAX_DIGITS =  5;                             ///< U16_MAX =       65536 = 5 digits
+static const U32 U32_MAX_DIGITS = 10;                             ///< U32_MAX =  4294967296 = 10 digits
+static const U32 S32_MAX_DIGITS = 11;                             ///< S16_MIN = -2147483647 = 11 digits
 
 
 //----------------------------------------------------------------------------------

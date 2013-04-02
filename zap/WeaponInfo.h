@@ -57,7 +57,7 @@ enum WeaponType {
    WEAPON_ITEM_TABLE
 #undef WEAPON_ITEM
    WeaponCount, 
-   InvalidWeapon
+   WeaponNone
 };
 
 

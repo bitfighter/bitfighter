@@ -229,14 +229,22 @@ string Ship::toLevelCode(F32 gridSize) const
 }
 
 
+// Only called as part of initialize() -- set initial module and weapon selections
+// and initialize old loadout storage
 void Ship::setDefaultLoadout()
 {
-    // Set initial module and weapon selections
+    
    for(S32 i = 0; i < ShipModuleCount; i++)
-      mModule[i] = (ShipModule) DefaultLoadout[i];
+   {
+      mModule[i]    = (ShipModule) DefaultLoadout[i];
+      mOldModule[i] = ModuleNone;
+   }
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
+   {
+      mWeapon[i]    = (WeaponType) DefaultLoadout[i + ShipModuleCount];
+      mOldWeapon[i] = WeaponNone;
+   }
 }
 
 
@@ -528,16 +536,13 @@ void Ship::selectWeapon(S32 weaponIdx)
 }
 
 
-WeaponType Ship::getWeapon(U32 indx)
-{
-   return mWeapon[indx];
-}
+WeaponType  Ship::getWeapon(U32 indx) { return mWeapon[indx]; }
+WeaponType *Ship::getWeapons()        { return mWeapon;       }
+WeaponType *Ship::getOldWeapons()     { return mOldWeapon;    }
 
-
-ShipModule Ship::getModule(U32 indx)
-{
-   return mModule[indx];
-}
+ShipModule  Ship::getModule(U32 indx) { return mModule[indx]; }
+ShipModule *Ship::getModules()        { return mModule;       }
+ShipModule *Ship::getOldModules()     { return mOldModule;    }
 
 
 void Ship::processWeaponFire()
@@ -1450,7 +1455,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(stream->writeFlag(updateMask & ChangeTeamMask))    // A player with admin can change robots teams
       writeThisTeam(stream);
 
-   if(stream->writeFlag(updateMask & LoadoutMask))       // Module configuration
+   if(stream->writeFlag(updateMask & LoadoutMask))       // Loadout configuration
    {
       for(S32 i = 0; i < ShipModuleCount; i++)
          stream->writeEnum(mModule[i], ModuleCount);
@@ -1555,7 +1560,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())        // Team changed (ChangeTeamMask)
       readThisTeam(stream);
 
-   if(stream->readFlag())        // New module configuration
+   if(stream->readFlag())        // New loadout configuration (LoadoutMask)
    {
       bool hadSensorThen = false;
       bool hasSensorNow = false;
@@ -1563,6 +1568,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       for(S32 i = 0; i < ShipModuleCount; i++)
       {
+         mOldModule[i] = mModule[i];
+
          // Check old loadout for sensor
          if(mModule[i] == ModuleSensor)
             hadSensorThen = true;
@@ -1582,14 +1589,22 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mSensorEquipZoomTimer.reset();
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
+      {
+         mOldWeapon[i] = mWeapon[i];
          mWeapon[i] = (WeaponType) stream->readEnum(WeaponCount);
+      }
+
+
+      ClientGame *game = static_cast<ClientGame*>(getGame());
 
       if(!hasEngineerModule)  // can't engineer without this module
       {
-         ClientGame *game = static_cast<ClientGame*>(getGame());
          if(isLocalPlayerShip(game))  // If this ship is ours, quit engineer menu.
             game->getUIManager()->getGameUserInterface()->quitEngineerHelper();
       }
+
+      // Alert the UI that a new loadout has arrived
+      game->getUIManager()->getGameUserInterface()->newLoadoutHasArrived();
    }
 
    if(stream->readFlag())  // hasExploded

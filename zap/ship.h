@@ -110,11 +110,16 @@ protected:
 
    Vector<SafePtr<MountableItem> > mMountedItems;    
 
-   ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
+   ShipModule mModule[ShipModuleCount];      // Modules ship is carrying
    WeaponType mWeapon[ShipWeaponCount];
-   Point mSpawnPoint;                     // Where ship or robot spawned.  Will only be valid on server, client doesn't currently get this.
 
-   void initialize(const Point &pos);     // Some initialization code needed by both bots and ships
+   ShipModule mOldModule[ShipModuleCount];   // Modules ship was previously carrying
+   WeaponType mOldWeapon[ShipWeaponCount];
+
+
+   Point mSpawnPoint;                        // Where ship or robot spawned.  Will only be valid on server, client doesn't currently get this.
+
+   void initialize(const Point &pos);        // Some initialization code needed by both bots and ships
    void initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
@@ -185,6 +190,11 @@ public:
    void selectWeapon(S32 weaponIndex);    // Select weapon by index
    WeaponType getWeapon(U32 indx);        // Returns weapon in slot indx
    ShipModule getModule(U32 indx);        // Returns module in slot indx
+
+   ShipModule *getModules();
+   WeaponType *getWeapons();
+   ShipModule *getOldModules();
+   WeaponType *getOldWeapons();
 
 
    Timer mSensorEquipZoomTimer;

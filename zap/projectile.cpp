@@ -306,7 +306,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
                // Let's extend the projectile life time on each bounce, up to twice the normal
                // live-time
                if(mLiveTimeIncreases < MAX_LIVETIME_INCREASES &&
-                     mTimeRemaining < GameWeapon::weaponInfo[mWeaponType].projLiveTime)
+                     (S32)mTimeRemaining < GameWeapon::weaponInfo[mWeaponType].projLiveTime)
                {
                   mTimeRemaining += LIVETIME_INCREASE;
                   mLiveTimeIncreases++;

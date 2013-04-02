@@ -307,6 +307,8 @@ void GameUserInterface::idle(U32 timeDelta)
    HostMenuUserInterface *ui = getUIManager()->getHostMenuUserInterface();
    if(ui->levelLoadDisplayFadeTimer.update(timeDelta))
       ui->clearLevelLoadDisplay();
+
+   mLoadoutIndicator.idle(timeDelta);
 }
 
 
@@ -727,6 +729,14 @@ void GameUserInterface::activateModule(S32 index)
 
    // Now reset the double-tap timer since we've just activate this module
    mModuleDoubleTapTimer[index].reset();
+}
+
+
+// A new loadout has arrived
+void GameUserInterface::newLoadoutHasArrived()
+{
+   mLoadoutIndicator.onActivated();
+   mLoadoutIndicator.resetScrollTimer();
 }
 
 

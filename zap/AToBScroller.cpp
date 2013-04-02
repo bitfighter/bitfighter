@@ -67,6 +67,9 @@ void AToBScroller::resetScrollTimer()
 // This function caluclates the new position of an item given its original position and the one it's transitioning to.
 S32 AToBScroller::getTransitionPos(S32 fromPos, S32 toPos) const
 {
+   if(toPos == S32_MIN)
+      return fromPos;
+
    F32 fraction = mScrollTimer.getFraction();
 
    return fromPos * fraction + toPos * (1 - fraction);
@@ -102,8 +105,9 @@ S32 AToBScroller::prepareToRenderToDisplay(ClientGame *game, S32 top, S32 fromHe
 
    S32 height = getTransitionPos(fromHeight, toHeight);
 
-   mScissorsManager.enable(mScrollTimer.getCurrent() > 0, game, 0, top + getTransitionPos(height, 0), 
-                           gScreenInfo.getGameCanvasWidth(), getTransitionPos(0, height));
+   S32 vertBuffer = 2;  // A little extra space to avoid clipping lines at the top of our clip area
+   mScissorsManager.enable(mScrollTimer.getCurrent() > 0, game, 0, top + getTransitionPos(height, 0) - vertBuffer, 
+                           gScreenInfo.getGameCanvasWidth(), getTransitionPos(0, height) + 2 * vertBuffer);
 
    return top + fromHeight * mScrollTimer.getFraction();
 }

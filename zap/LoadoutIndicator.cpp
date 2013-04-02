@@ -41,24 +41,79 @@ namespace UI
 LoadoutIndicator::LoadoutIndicator()
 {
    // Do nothing
+   mScrollTimer.setPeriod(200);
 }
 
 
+static S32 getIndicatorHeight()
+{
+   return indicatorFontSize + 2 * indicatorPadding + 1;
+}
+
 
 // Returns width of indicator component
-static S32 renderComponentIndicator(S32 xPos, const char *name)
+static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 {
-   S32 yPos = UserInterface::vertMargin;
-
    // Draw the weapon or module name
    S32 textWidth = drawStringAndGetWidth(xPos + indicatorPadding, yPos + indicatorPadding, indicatorFontSize, name);
 
    S32 rectWidth  = textWidth + 2 * indicatorPadding;
-   S32 rectHeight = UserInterface::vertMargin + indicatorFontSize + 2 * indicatorPadding + 1;
+   S32 rectHeight = getIndicatorHeight();
 
-   drawHollowRect(xPos, UserInterface::vertMargin, xPos + rectWidth, rectHeight);
+   drawHollowRect(xPos, yPos, xPos + rectWidth, yPos + rectHeight);
 
    return rectWidth;
+}
+
+
+static void doRender(ShipModule *modules, WeaponType *weapons, Ship *ship, ClientGame *game, S32 top)
+{
+   if(modules[0] == ModuleNone)
+      return;
+
+   static const Color *INDICATOR_INACTIVE_COLOR = &Colors::green80;      
+   static const Color *INDICATOR_ACTIVE_COLOR   = &Colors::red80;        
+   static const Color *INDICATOR_PASSIVE_COLOR  = &Colors::yellow;
+
+   U32 xPos = UserInterface::horizMargin;
+   
+   // First, the weapons
+   for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
+   {
+      glColor(i == ship->mActiveWeaponIndx ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
+
+      S32 width = renderComponentIndicator(xPos, top, GameWeapon::weaponInfo[weapons[i]].name.getString());
+
+      xPos += width + indicatorPadding;
+   }
+
+   xPos += 20;    // Small horizontal gap to seperate the weapon indicators from the module indicators
+
+   // Next, loadout modules
+   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
+   {
+      if(gModuleInfo[modules[i]].getPrimaryUseType() != ModulePrimaryUseActive)
+      {
+         if(gModuleInfo[modules[i]].getPrimaryUseType() == ModulePrimaryUseHybrid &&
+               ship->isModulePrimaryActive(modules[i]))
+            glColor(INDICATOR_ACTIVE_COLOR);
+         else
+            glColor(INDICATOR_PASSIVE_COLOR);
+      }
+      else if(ship->isModulePrimaryActive(modules[i]))
+         glColor(INDICATOR_ACTIVE_COLOR);
+      else 
+         glColor(INDICATOR_INACTIVE_COLOR);
+
+      // Always change to orange if module secondary is fired
+      if(gModuleInfo[modules[i]].hasSecondary() &&
+            ship->isModuleSecondaryActive(modules[i]))
+         glColor(Colors::orange67);
+
+      S32 width = renderComponentIndicator(xPos, top, game->getModuleInfo(modules[i])->getName());
+
+      xPos += width + indicatorPadding;
+   }
 }
 
 
@@ -75,49 +130,24 @@ void LoadoutIndicator::render(ClientGame *game)
    if(!localShip)
       return;
 
-   static const Color *INDICATOR_INACTIVE_COLOR = &Colors::green80;      
-   static const Color *INDICATOR_ACTIVE_COLOR   = &Colors::red80;        
-   static const Color *INDICATOR_PASSIVE_COLOR  = &Colors::yellow;
+   const S32 indicatorTop    = UserInterface::vertMargin;      // Top of indicator y-pos
+   const S32 indicatorHeight = getIndicatorHeight();
+   S32 top;
 
-   U32 xPos = UserInterface::horizMargin;
-
-   // First, the weapons
-   for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
+   // Old loadout
+   top = Parent::prepareToRenderFromDisplay(game, indicatorTop - 1, indicatorHeight + 1);
+   if(top != NO_RENDER)
    {
-      glColor(i == localShip->mActiveWeaponIndx ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
-
-      S32 width = renderComponentIndicator(xPos, GameWeapon::weaponInfo[localShip->getWeapon(i)].name.getString());
-
-      xPos += width + indicatorPadding;
+      doRender(localShip->getOldModules(), localShip->getOldWeapons(), localShip, game, top);
+      doneRendering();
    }
 
-   xPos += 20;    // Small horizontal gap to seperate the weapon indicators from the module indicators
+   // Current loadout
+   top = Parent::prepareToRenderToDisplay(game, indicatorTop, indicatorHeight);
+   doRender(localShip->getModules(), localShip->getWeapons(), localShip, game, top);
+   doneRendering();
 
-   // Next, loadout modules
-   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-   {
-      if(gModuleInfo[localShip->getModule(i)].getPrimaryUseType() != ModulePrimaryUseActive)
-      {
-         if(gModuleInfo[localShip->getModule(i)].getPrimaryUseType() == ModulePrimaryUseHybrid &&
-               localShip->isModulePrimaryActive(localShip->getModule(i)))
-            glColor(INDICATOR_ACTIVE_COLOR);
-         else
-            glColor(INDICATOR_PASSIVE_COLOR);
-      }
-      else if(localShip->isModulePrimaryActive(localShip->getModule(i)))
-         glColor(INDICATOR_ACTIVE_COLOR);
-      else 
-         glColor(INDICATOR_INACTIVE_COLOR);
-
-      // Always change to orange if module secondary is fired
-      if(gModuleInfo[localShip->getModule(i)].hasSecondary() &&
-            localShip->isModuleSecondaryActive(localShip->getModule(i)))
-         glColor(Colors::orange67);
-
-      S32 width = renderComponentIndicator(xPos, game->getModuleInfo(localShip->getModule(i))->getName());
-
-      xPos += width + indicatorPadding;
-   }
 }
+
 
 }
