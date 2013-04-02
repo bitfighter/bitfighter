@@ -201,6 +201,8 @@ private:
 
    NameToAddressThread *mNameToAddressThread;
 
+   U32 mLevelDatabaseId;
+
 protected:
    U32 mNextMasterTryTime;
 
@@ -402,6 +404,9 @@ public:
    Point getScopeRange(bool sensorEquipped);
 
    string makeUnique(const char *name);
+
+   void setLevelDatabaseId(U32 id);
+   U32 getLevelDatabaseId();
 };
 
 
