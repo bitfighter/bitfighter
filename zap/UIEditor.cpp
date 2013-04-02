@@ -4546,15 +4546,9 @@ bool EditorUserInterface::doSaveLevel(const string &saveName, bool showFailMessa
    {
       FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
 
-      string fileName = joindir(folderManager->levelDir, saveName).c_str();
-
-      FILE *f = fopen(fileName.c_str(), "w");
-      if(!f)
+      string fileName = joindir(folderManager->levelDir, saveName);
+      if(!writeFile(fileName, getLevelText()))
          throw(SaveException("Could not open file for writing"));
-
-      s_fprintf(f, getLevelText().c_str());
-
-      fclose(f);
    }
    catch (SaveException &e)
    {
