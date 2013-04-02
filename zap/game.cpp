@@ -127,6 +127,7 @@ static Game *mObjectAddTarget = NULL;
 Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjDatabase(new GridDatabase())  // New database will be deleted by boost
 {
    mGridSize = 255;
+   mLevelDatabaseId = 0;
    mSettings = settings;
 
    mNextMasterTryTime = 0;
@@ -636,6 +637,20 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       return;
    }
 
+   else if(!stricmp(argv[0], "LevelDatabaseId"))
+   {
+      U32 id = atoi(argv[1]);
+      if(id == 0)
+      {
+         logprintf(LogConsumer::LogLevelError, "Invalid LevelDatabaseId specified");
+      }
+      else
+      {
+         setLevelDatabaseId(id);
+      }
+      return;
+   }
+
    // Parse GameType line... All game types are of form XXXXGameType
    else if(strlenCmd >= 8 && !strcmp(argv[0] + strlenCmd - 8, "GameType"))
    {
@@ -793,6 +808,11 @@ string Game::toLevelCode()
    str += string("LevelCredits ") + writeLevelString(gameType->getLevelCredits()->getString()) + "\n";
 
    str += string("GridSize ") + ftos(mGridSize) + "\n";
+
+   if(getLevelDatabaseId())
+   {
+      str += string("LevelDatabaseId ") + itos(getLevelDatabaseId()) + "\n";
+   }
 
    for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); i++)
       str += mActiveTeamManager->getTeam(i)->toLevelCode() + "\n";
@@ -1248,6 +1268,16 @@ void Game::onReadTeamParam(S32 argc, const char **argv)
 void Game::setActiveTeamManager(TeamManager *teamManager)
 {
    mActiveTeamManager = teamManager;
+}
+
+void Game::setLevelDatabaseId(U32 id)
+{
+   mLevelDatabaseId = id;
+}
+
+U32 Game::getLevelDatabaseId()
+{
+   return mLevelDatabaseId;
 }
 
 };

@@ -806,6 +806,7 @@ static void highScoresSelectedCallback(ClientGame *game, U32 unused)
 
 static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
+   game->setLevelDatabaseId(0);
    game->getUIManager()->getEditorUserInterface()->setLevelFileName("");      // Reset this so we get the level entry screen
    game->getUIManager()->activate(EditorUI);
 }

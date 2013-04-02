@@ -24,7 +24,15 @@ LevelDatabaseUploadThread::~LevelDatabaseUploadThread()
 U32 LevelDatabaseUploadThread::run()
 {
    EditorUserInterface* editor = mGame->getUIManager()->getEditorUserInterface();
-   editor->setSaveMessage("Uploading...", true);
+
+   if(mGame->getLevelDatabaseId())
+   {
+      editor->setSaveMessage("Updating Level...", true);
+   }
+   else
+   {
+      editor->setSaveMessage("Uploading New Level...", true);
+   }
 
    HttpRequest req(UploadRequest);
    req.setMethod(HttpRequest::PostMethod);
@@ -61,6 +69,7 @@ U32 LevelDatabaseUploadThread::run()
    }
 
    editor->setSaveMessage("Uploaded successfully", true);
+   mGame->setLevelDatabaseId(atoi(req.getResponseBody().c_str()));
 
    delete this;
    return 0;
