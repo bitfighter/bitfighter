@@ -713,10 +713,14 @@ const string readFile(const string& path)
       return "";
    }
 
-   // The extra parentheses around the first argument are required. Removing
-   // them will lead to the Most Vexing Parse problem
-   // http://www.informit.com/guides/content.aspx?g=cplusplus&seqNum=439
-   string result((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+   // make a string and resize it to hold the file contents
+   string result;
+   file.seekg(0, ios::end);
+   result.resize(file.tellg());
+   file.seekg(0, ios::beg);
+
+   file.read(&result[0], result.size());
+   file.close();
 
    return result;
 }
