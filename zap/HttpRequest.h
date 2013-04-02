@@ -41,20 +41,21 @@ class HttpRequest {
 public:
    static const int BufferSize = 4096;
    static const int OK = 200;
-   static const string UnreservedCharacters;
+   static const int Found = 302;
    static const string GetMethod;
    static const string PostMethod;
 
    explicit HttpRequest(string url);
    explicit HttpRequest(char* url);
 
+   static string urlEncodeChar(char c);
    static string urlEncode(const string& str);
 
+   void setMethod(const string&);
+   void setData(const string& key, const string& value);
    bool send();
    string getResponseBody();
    int getResponseCode();
-   void setMethod(const string&);
-   void setData(const string& key, const string& value);
 
 private:
    void parseResponse();

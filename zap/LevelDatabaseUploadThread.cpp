@@ -23,8 +23,10 @@ LevelDatabaseUploadThread::~LevelDatabaseUploadThread()
 
 U32 LevelDatabaseUploadThread::run()
 {
-   HttpRequest req(UploadRequest);
    EditorUserInterface* editor = mGame->getUIManager()->getEditorUserInterface();
+   editor->setSaveMessage("Uploading...", true);
+
+   HttpRequest req(UploadRequest);
    req.setMethod(HttpRequest::PostMethod);
    req.setData("data[User][username]", mGame->getSettings()->getPlayerName());
    req.setData("data[User][user_password]", mGame->getLoginPassword());
@@ -47,10 +49,11 @@ U32 LevelDatabaseUploadThread::run()
       return 0;
    }
 
-   if(req.getResponseCode() != HttpRequest::OK)
+   U32 responseCode = req.getResponseCode();
+   if(responseCode != HttpRequest::OK && responseCode != HttpRequest::Found)
    {
       stringstream message;
-      message << "Error uploading level: " << req.getResponseCode();
+      message << "Error uploading level: " << responseCode;
       editor->setSaveMessage(message.str(), false);
 
       delete this;
