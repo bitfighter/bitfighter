@@ -187,6 +187,8 @@
     <ClCompile Include="HttpRequest.cpp" />
     <ClCompile Include="Joystick.cpp" />
     <ClCompile Include="JoystickRender.cpp" />
+    <ClCompile Include="LevelDatabaseDownloadThread.cpp" />
+    <ClCompile Include="LevelDatabaseUploadThread.cpp" />
     <ClCompile Include="LineItem.cpp" />
     <ClCompile Include="loadoutHelper.cpp" />
     <ClCompile Include="..\zap\loadoutZone.cpp" />
@@ -340,6 +342,8 @@
     <ClInclude Include="gameStats.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="HTFGame.h" />
+    <ClInclude Include="LevelDatabaseDownloadThread.h" />
+    <ClInclude Include="LevelDatabaseUploadThread.h" />
     <ClInclude Include="LineItem.h" />
     <ClInclude Include="loadoutHelper.h" />
     <ClInclude Include="..\zap\loadoutZone.h" />
