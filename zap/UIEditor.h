@@ -288,7 +288,7 @@ public:
    Vector<string> mGameTypeArgs;
 
    bool saveLevel(bool showFailMessages, bool showSuccessMessages);   // Public because called from callbacks
-
+   string getLevelText();
 
    F32 getCurrentScale();
    Point getCurrentOffset();

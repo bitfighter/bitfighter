@@ -44,9 +44,11 @@ LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(string levelId, ClientG
 {
 }
 
+
 LevelDatabaseDownloadThread::~LevelDatabaseDownloadThread()
 {
 }
+
 
 U32 LevelDatabaseDownloadThread::run()
 {
@@ -73,17 +75,24 @@ U32 LevelDatabaseDownloadThread::run()
 
    FolderManager *fm = mGame->getSettings()->getFolderManager();
    string filePath = joindir(fm->levelDir, levelFileName);
-   FILE *f = fopen(filePath.c_str(), "w");
-   fprintf(f, "%s", levelCode.c_str());
-   fclose(f);
-
-   mGame->displaySuccessMessage("Saved to %s", levelFileName.c_str());
+   if(writeFile(filePath, levelCode))
+   {
+      mGame->displaySuccessMessage("Saved to %s", levelFileName.c_str());
+   }
+   else
+   {
+      mGame->displayErrorMessage("Could not write to %s", levelFileName.c_str());
+      delete this;
+      return 0;
+   }
 
    snprintf(url, UrlLength, LevelgenRequest, mLevelId.c_str());
    req = HttpRequest(url);
    if(!req.send())
    {
       mGame->displayErrorMessage("Error connecting to server");
+      delete this;
+      return 0;
    }
 
    if(req.getResponseCode() != HttpRequest::OK)
@@ -107,11 +116,14 @@ U32 LevelDatabaseDownloadThread::run()
 
       FolderManager *fm = mGame->getSettings()->getFolderManager();
       filePath = joindir(fm->levelDir, levelgenFileName);
-      FILE *f = fopen(filePath.c_str(), "w");
-      fprintf(f, "%s", levelgenCode.c_str());
-      fclose(f);
-
-      mGame->displaySuccessMessage("Saved to %s", levelgenFileName.c_str());
+      if(writeFile(filePath, levelgenCode))
+      {
+         mGame->displaySuccessMessage("Saved to %s", levelgenFileName.c_str());
+      }
+      else
+      {
+         mGame->displayErrorMessage("Could not write to %s", levelgenFileName.c_str());
+      }
    }
    delete this;
    return 0;

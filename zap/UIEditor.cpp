@@ -61,6 +61,7 @@
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
 #include "luaLevelGenerator.h"
 #include "stringUtils.h"
+#include "LevelDatabaseUploadThread.h"
 
 #include "Console.h"          // Our console object
 #include "ScreenInfo.h"
@@ -4508,6 +4509,36 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 }
 
 
+string EditorUserInterface::getLevelText() {
+   string result;
+
+   // Write out basic game parameters, including gameType info
+   result += getGame()->toLevelCode();    // Note that this toLevelCode appends a newline char; most don't
+
+   // Next come the robots
+   for(S32 i = 0; i < robots.size(); i++)
+      result += robots[i];
+
+   // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
+   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+
+   F32 gridSize = getGame()->getGridSize();
+
+   for(S32 j = 0; j < 2; j++)
+   {
+      for(S32 i = 0; i < objList->size(); i++)
+      {
+         BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+         // Writing wall items on first pass, non-wall items next -- that will make sure mountable items have something to grab onto
+         if((j == 0 && isWallType(obj->getObjectTypeNumber())) || (j == 1 && ! isWallType(obj->getObjectTypeNumber())) )
+            result += obj->toLevelCode(gridSize) + "\n";
+      }
+   }
+
+   return result;
+}
+
 // Returns true if successful, false otherwise
 bool EditorUserInterface::doSaveLevel(const string &saveName, bool showFailMessages)
 {
@@ -4521,27 +4552,8 @@ bool EditorUserInterface::doSaveLevel(const string &saveName, bool showFailMessa
       if(!f)
          throw(SaveException("Could not open file for writing"));
 
-      // Write out basic game parameters, including gameType info
-      s_fprintf(f, "%s", getGame()->toLevelCode().c_str());    // Note that this toLevelCode appends a newline char; most don't
+      s_fprintf(f, getLevelText().c_str());
 
-      // Next come the robots
-      for(S32 i = 0; i < robots.size(); i++)
-         s_fprintf(f, "%s\n", robots[i].c_str());
-
-      // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
-      const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-
-      F32 gridSize = getGame()->getGridSize();
-
-      for(S32 j = 0; j < 2; j++)
-         for(S32 i = 0; i < objList->size(); i++)
-         {
-            BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-            // Writing wall items on first pass, non-wall items next -- that will make sure mountable items have something to grab onto
-            if((j == 0 && isWallType(obj->getObjectTypeNumber())) || (j == 1 && ! isWallType(obj->getObjectTypeNumber())) )
-               s_fprintf(f, "%s\n", obj->toLevelCode(gridSize).c_str());
-         }
       fclose(f);
    }
    catch (SaveException &e)
@@ -4692,6 +4704,13 @@ static void activateTeamDefCallback(ClientGame *game, U32 unused)
    game->getUIManager()->activate(TeamDefUI);
 }
 
+void uploadToDbCallback(ClientGame *game, U32 unused)
+{
+   static Thread* uploadThread;
+   uploadThread = new LevelDatabaseUploadThread(game);
+   uploadThread->start();
+   game->getUIManager()->reactivatePrevUI();
+}
 
 void quitEditorCallback(ClientGame *game, U32 unused)
 {
@@ -4728,6 +4747,7 @@ void EditorMenuUserInterface::setupMenus()
    addMenuItem(new MenuItem("INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, getInputCode(settings, InputCodeManager::BINDING_HELP)));
    addMenuItem(new MenuItem("LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
    addMenuItem(new MenuItem("MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
+   addMenuItem(new MenuItem("UPLOAD TO DB",     uploadToDbCallback,          "", KEY_U));
    addMenuItem(new MenuItem("QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
 }
 

@@ -19,6 +19,8 @@ set(CLIENT_SOURCES
    helperMenu.cpp
    Joystick.cpp
    JoystickRender.cpp
+   LevelDatabaseDownloadThread.cpp
+   LevelDatabaseUploadThread.cpp
    LoadoutIndicator.cpp
    loadoutHelper.cpp
    oglconsole.c
@@ -97,6 +99,7 @@ set(SHARED_SOURCES
    InputCode.cpp
    item.cpp
    LevelDatabaseDownloadThread.cpp
+   LevelDatabaseUploadThread.cpp
    lineEditor.cpp
    LineItem.cpp
    loadoutZone.cpp

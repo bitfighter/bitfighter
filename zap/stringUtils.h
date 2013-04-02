@@ -35,6 +35,7 @@
 
 #include <string>
 #include <map>
+#include <fstream>
 
 namespace Zap
 {
@@ -122,6 +123,9 @@ string makeFilenameFromString(const char *levelname);
 string ctos(char c);
 
 string writeLevelString(const char *in);
+
+bool writeFile(const string& path, const string& contents, bool append = false);
+const string readFile(const string& path);
 
 };
 
