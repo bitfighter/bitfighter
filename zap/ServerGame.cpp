@@ -602,13 +602,13 @@ static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo>
    if(!aIsIdle && bIsIdle)
       return 1;
 
-   // If neither (or both) are idle, sort by ranking
-   F32 diff = (*a)->getCalculatedRating() - (*b)->getCalculatedRating();
-
-   if(diff == 0) 
+   // Let's be simple about this
+   if((*a)->getCalculatedRating() > (*b)->getCalculatedRating())
+      return 1;
+   else if((*a)->getCalculatedRating() < (*b)->getCalculatedRating())
+      return -1;
+   else
       return 0;
-
-   return diff > 0 ? 1 : -1;
 }
 
 
@@ -680,7 +680,9 @@ void ServerGame::cycleLevel(S32 nextLevel)
    mClientInfos.sort(AddOrderSort);
 
    if(mGameType.isValid())
-      for(S32 i = 0; i < getClientCount(); i++)
+   {
+      // Backwards!  So the lowest scorer goes on the larger team (if there is uneven teams)
+      for(S32 i = getClientCount() - 1; i > -1; i--)
       {
          ClientInfo *clientInfo = getClientInfo(i);   // Could be a robot when level have "Robot" line, or a levelgen adds one
          
@@ -693,6 +695,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
             connection->activateGhosting();                 // Tell clients we're done sending objects and are ready to start playing
          }
       }
+   }
 
    sendLevelStatsToMaster();     // Give the master some information about this level for its database
 
