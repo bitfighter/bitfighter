@@ -34,30 +34,25 @@ namespace Zap
 // Interface class to describe players/robots
 class LuaPlayerInfo : public LuaObject
 {
-private:
-   bool defunct;     // If true, this represents a dead player, and should be used with caution!
-
 public:
-   static const char className[];
-   static Lunar<LuaPlayerInfo>::RegType methods[];
-
-   LuaPlayerInfo();                 // Constructor
-   explicit LuaPlayerInfo(lua_State *L);     // Lua constructor
+   LuaPlayerInfo();  // Constructor
    virtual ~LuaPlayerInfo();
 
+   ///// Lua interface
+   LUAW_DECLARE_CLASS(LuaPlayerInfo);
+
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
+
    // These would be declared asbstract, except that Lunar strenusously objects...
-   virtual S32 getName(lua_State *L);
-   virtual S32 getShip(lua_State *L);
-   virtual S32 getTeamIndx(lua_State *L);
-   virtual S32 getRating(lua_State *L);
-   virtual S32 getScore(lua_State *L);
-   virtual S32 isRobot(lua_State *L);
-   virtual S32 getScriptName(lua_State *L);
-
-   void setDefunct();
-   bool isDefunct();
-
-   void push(lua_State *L);
+   virtual S32 lua_getName(lua_State *L);
+   virtual S32 lua_getShip(lua_State *L);
+   virtual S32 lua_getTeamIndx(lua_State *L);
+   virtual S32 lua_getRating(lua_State *L);
+   virtual S32 lua_getScore(lua_State *L);
+   virtual S32 lua_isRobot(lua_State *L);
+   virtual S32 lua_getScriptName(lua_State *L);
 };
 
 
@@ -74,13 +69,13 @@ public:
    explicit PlayerInfo(ClientInfo *clientInfo);   // C++ Constructor
    virtual ~PlayerInfo();                // Destructor
 
-   S32 getName(lua_State *L);
-   S32 getShip(lua_State *L);
-   S32 getScriptName(lua_State *L);
-   S32 getTeamIndx(lua_State *L);
-   S32 getRating(lua_State *L);
-   S32 getScore(lua_State *L);
-   S32 isRobot(lua_State *L);
+   S32 lua_getName(lua_State *L);
+   S32 lua_getShip(lua_State *L);
+   S32 lua_getScriptName(lua_State *L);
+   S32 lua_getTeamIndx(lua_State *L);
+   S32 lua_getRating(lua_State *L);
+   S32 lua_getScore(lua_State *L);
+   S32 lua_isRobot(lua_State *L);
 };
 
 
@@ -99,13 +94,13 @@ public:
    explicit RobotPlayerInfo(Robot *robot = NULL);     // C++ Constructor
    virtual ~RobotPlayerInfo();               // Destructor
 
-   S32 getName(lua_State *L);
-   S32 getShip(lua_State *L);
-   S32 getScriptName(lua_State *L);
-   S32 getTeamIndx(lua_State *L);
-   S32 getRating(lua_State *L);
-   S32 getScore(lua_State *L);
-   S32 isRobot(lua_State *L);
+   S32 lua_getName(lua_State *L);
+   S32 lua_getShip(lua_State *L);
+   S32 lua_getScriptName(lua_State *L);
+   S32 lua_getTeamIndx(lua_State *L);
+   S32 lua_getRating(lua_State *L);
+   S32 lua_getScore(lua_State *L);
+   S32 lua_isRobot(lua_State *L);
 };
 
 };

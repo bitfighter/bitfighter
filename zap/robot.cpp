@@ -119,8 +119,6 @@ Robot::~Robot()
       logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot %s terminated (%d bots left)", mScriptName.c_str(), getGame()->getRobotCount());
    }
 
-   mPlayerInfo->setDefunct();
-
    delete mPlayerInfo;
    if(mClientInfo.isValid())
       delete mClientInfo.getPointer();

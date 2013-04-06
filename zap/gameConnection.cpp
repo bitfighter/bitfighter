@@ -1787,7 +1787,7 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
    else     // Server
    {
       LuaPlayerInfo *playerInfo = getClientInfo()->getPlayerInfo();
-      playerInfo->setDefunct();
+
       EventManager::get()->fireEvent(NULL, EventManager::PlayerLeftEvent, playerInfo);
 
       mServerGame->removeClient(mClientInfo);

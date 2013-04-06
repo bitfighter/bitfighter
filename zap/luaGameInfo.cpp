@@ -153,7 +153,7 @@ S32 LuaGameInfo::lua_getPlayers(lua_State *L)
    {
       ClientInfo *clientInfo = game->getClientInfo(i);
 
-      if(clientInfo->getPlayerInfo()->isDefunct() || clientInfo->isRobot())     // Skip defunct players and bots
+      if(clientInfo->getPlayerInfo() == NULL || clientInfo->isRobot())     // Skip defunct players and bots
          continue;
       
       clientInfo->getPlayerInfo()->push(L);
