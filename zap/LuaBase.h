@@ -47,6 +47,7 @@ namespace Zap
 
 // Forward declarations
 class Ship;
+class Team;
 class LuaPlayerInfo;
 class MenuItem;
 class BfObject;
@@ -144,6 +145,7 @@ public:
    static S32 returnPoints(lua_State *L, const Vector<Point> *);
    static S32 returnMenuItem(lua_State *L, MenuItem *menuItem);
    static S32 returnShip(lua_State *L, Ship *ship);                // Handles null references properly
+   static S32 returnTeam(lua_State *L, Team *team);
    static S32 returnBfObject(lua_State *L, BfObject *bfObject);
 
    static S32 returnPlayerInfo(lua_State *L, Ship *ship);

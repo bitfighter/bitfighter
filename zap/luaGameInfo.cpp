@@ -75,6 +75,7 @@ LuaGameInfo::~LuaGameInfo()
    METHOD(CLASS, getPlayers,           ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, isNexusOpen,          ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getNexusTimeLeft,     ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getTeam,              ARRAYDEF({{ TEAM_INDX, END }}), 1 ) \
 
 GENERATE_LUA_FUNARGS_TABLE(LuaGameInfo, LUA_METHODS);
 GENERATE_LUA_METHODS_TABLE(LuaGameInfo, LUA_METHODS);
@@ -171,6 +172,15 @@ S32 LuaGameInfo::lua_getPlayers(lua_State *L)
    return 1;
 }
 
+
+S32 LuaGameInfo::lua_getTeam(lua_State *L)
+{
+   checkArgList(L, functionArgs, "GameInfo", "setTeam");
+
+   S32 index = getTeamIndex(L, 1);
+
+   return returnTeam(L, static_cast<Team*>(gServerGame->getTeam(index)));
+}
 
 ////////////////////////////////////
 ////////////////////////////////////

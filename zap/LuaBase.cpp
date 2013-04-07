@@ -698,6 +698,19 @@ S32 LuaBase::returnShip(lua_State *L, Ship *ship)
 }
 
 
+// If we have a ship, return it, otherwise return nil
+S32 LuaBase::returnTeam(lua_State *L, Team *team)
+{
+   if(team)
+   {
+      team->push(L);
+      return 1;
+   }
+
+   return returnNil(L);
+}
+
+
 S32 LuaBase::returnBfObject(lua_State *L, BfObject *bfObject)
 {
    if(bfObject)

@@ -42,6 +42,7 @@ class AbstractTeam
 {
 protected:
    Color mColor;
+   S32 mTeamIndex;           // Team index of this team according to the level file and game
 
 public:
    AbstractTeam();           // Constructor
@@ -56,6 +57,8 @@ public:
 
    virtual void setName(const char *name) = 0;
    virtual StringTableEntry getName() = 0;
+
+   void setTeamIndex(S32 index);
 
    bool processArguments(S32 argc, const char **argv);          // Read team info from level line
    string toLevelCode();
@@ -80,12 +83,10 @@ struct TeamInfo
 ////////////////////////////////////////
 
 // Class for managing teams in the game
-class Team : public AbstractTeam
+class Team : public AbstractTeam, public LuaObject
 {  
 private:
    StringTableEntry mName;
-
-   static S32 mNextId;    // Keep track of next available id for a new team
 
    S32 mPlayerCount;      // Number of human players --> Needs to be computed before use, not dynamically tracked (see countTeamPlayers())
    S32 mBotCount;         // Number of robot players --> Needs to be computed before use, not dynamically tracked
@@ -99,8 +100,6 @@ private:
 public:
    Team();              // Constructor
    virtual ~Team();     // Destructor
-
-   S32 mId;             // Only used for tracking teams after sorting; has no inherent meaning
 
    void setName(const char *name);
    void setName(StringTableEntry name);
@@ -125,6 +124,19 @@ public:
 
    void incrementPlayerCount();
    void incrementBotCount();
+
+   ///// Lua interface
+   LUAW_DECLARE_CLASS(Team);
+
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
+
+   S32 lua_getName(lua_State *L);
+   S32 lua_getIndex(lua_State *L);
+   S32 lua_getPlayerCount(lua_State *L);
+   S32 lua_getScore(lua_State *L);
+   S32 lua_getPlayers(lua_State *L);
 };
 
 
@@ -145,34 +157,6 @@ public:
    LineEditor *getLineEditor();
    void setName(const char *name);
    StringTableEntry getName();  // Wrap in STE to make signatures match
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class LuaTeamInfo : public LuaObject
-{
-
-private:
-   S32 mTeamIndex;                // Robots could potentially be on neutral or hostile team; maybe observer player could too
-   Team *mTeam;
-
-public:
-   explicit LuaTeamInfo(lua_State *L);     // Lua constructor
-   explicit LuaTeamInfo(Team *team);       // C++ constructor
-
-   virtual ~LuaTeamInfo();        // Destructor
-
-   static const char className[];
-
-   static Lunar<LuaTeamInfo>::RegType methods[];
-
-   S32 getName(lua_State *L);
-   S32 getIndex(lua_State *L);
-   S32 getPlayerCount(lua_State *L);
-   S32 getScore(lua_State *L);
-   S32 getPlayers(lua_State *L);
 };
 
 

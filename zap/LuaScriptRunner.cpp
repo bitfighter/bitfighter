@@ -530,8 +530,6 @@ void LuaScriptRunner::registerClasses()
    LuaW_Registrar::registerClasses(L);    // Register all objects that use our automatic registration scheme
 
    // Lunar managed objects, these to be ported to LuaW
-   Lunar<LuaTeamInfo>::Register(L);
-
    Lunar<LuaWeaponInfo>::Register(L);
    Lunar<LuaModuleInfo>::Register(L);
 }

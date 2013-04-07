@@ -62,6 +62,7 @@ public:
    S32 lua_isNexusOpen(lua_State *L);
    S32 lua_getNexusTimeLeft(lua_State *L);
 
+   S32 lua_getTeam(lua_State *L);
 
    ///// Lua interface
    // Top level Lua methods

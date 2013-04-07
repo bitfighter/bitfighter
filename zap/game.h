@@ -367,7 +367,6 @@ public:
    
    AbstractTeam *getTeam(S32 teamIndex) const;
 
-   Vector<Team *> *getSortedTeamList_score() const;
    bool getTeamHasFlag(S32 teamIndex) const;
 
    S32 getTeamIndex(const StringTableEntry &playerName);
