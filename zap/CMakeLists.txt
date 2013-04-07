@@ -33,6 +33,7 @@ set(CLIENT_SOURCES
    SlideOutWidget.cpp
    sparkManager.cpp
    TeamShuffleHelper.cpp
+   TimeLeftRenderer.cpp
    UI.cpp
    UIAbstractInstructions.cpp
    UIChat.cpp
