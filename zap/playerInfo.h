@@ -45,7 +45,7 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   // These would be declared asbstract, except that Lunar strenusously objects...
+   // Overridden by child classes, Is there a better way to do this?
    virtual S32 lua_getName(lua_State *L);
    virtual S32 lua_getShip(lua_State *L);
    virtual S32 lua_getTeamIndx(lua_State *L);
