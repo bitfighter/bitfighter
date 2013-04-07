@@ -156,7 +156,6 @@ private:
    S32 mLeadingPlayerScore;         // Score of mLeadingPlayer
    S32 mSecondLeadingPlayer;        // Player index of mClientInfos with highest score
    S32 mSecondLeadingPlayerScore;   // Score of mLeadingPlayer
-   S32 mDigitsNeededToDisplayScore; // Digits needed to display scores
 
    bool mCanSwitchTeams;            // Player can switch teams when this is true, not when it is false
    bool mBetweenLevels;             // We'll need to prohibit certain things (like team changes) when game is in an "intermediate" state
@@ -305,8 +304,6 @@ public:
 
    void addItemOfInterest(MoveItem *theItem);
 
-   S32 getDigitsNeededToDisplayScore() const;
-
    void broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &formatString);
 
    void broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, 
@@ -432,10 +429,13 @@ public:
 
 #ifndef ZAP_DEDICATED
    virtual void renderInterfaceOverlay(bool scoreboardVisible);
+   virtual void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
+
    void renderObjectiveArrow(const BfObject *target) const;
    void renderObjectiveArrow(const BfObject *target, const Color *c, F32 alphaMod = 1.0f) const;
    void renderObjectiveArrow(const Point &p, const Color *c, F32 alphaMod = 1.0f) const;
 #endif
+
 
    void addTime(U32 time);          // Extend the game by time (in ms)
 

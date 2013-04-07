@@ -34,6 +34,7 @@
 #  include "UIEditorMenus.h"
 #  include "UI.h"
 #  include "gameObjectRender.h"
+#  include "OpenglUtils.h"
 #endif
 
 #include <cmath>
@@ -93,14 +94,13 @@ void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
-bool CoreGameType::isTeamCoreBeingAttacked(S32 teamIndex)
+bool CoreGameType::isTeamCoreBeingAttacked(S32 teamIndex) const
 {
    for(S32 i = mCores.size() - 1; i >= 0; i--)
    {
       CoreItem *coreItem = mCores[i];
-      if(!coreItem)  // Core may have been destroyed
-         mCores.erase(i);
-      else if(coreItem->getTeam() == teamIndex)
+
+      if(coreItem && coreItem->getTeam() == teamIndex)
          if(coreItem->isBeingAttacked())
             return true;
    }
@@ -134,6 +134,16 @@ void CoreGameType::addCore(CoreItem *core, S32 team)
    if(!core->isGhost() && U32(team) < U32(getGame()->getTeamCount()))
       static_cast<Team *>(getGame()->getTeam(team))->addScore(1);
 }
+
+
+// Dont't need to handle scores here; will be handled elsewhere
+void CoreGameType::removeCore(CoreItem *core)
+{
+   S32 index = mCores.getIndex(core);
+   if(index > -1)
+      mCores.erase_fast(index);
+}
+
 
 void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data)
 {
@@ -240,16 +250,8 @@ static const char *instructions[] = { "Destroy enemy Cores",  0 };
 const char **CoreGameType::getInstructionString() const { return instructions; }
 
 
-bool CoreGameType::canBeTeamGame() const
-{
-   return true;
-}
-
-
-bool CoreGameType::canBeIndividualGame() const
-{
-   return false;
-}
+bool CoreGameType::canBeTeamGame()       const { return true;  }
+bool CoreGameType::canBeIndividualGame() const { return false; }
 
 
 TNL_IMPLEMENT_NETOBJECT(CoreGameType);
@@ -317,6 +319,11 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
 CoreItem::~CoreItem()
 {
    LUAW_DESTRUCTOR_CLEANUP;
+
+   // Alert the gameType, if it still exists (it might not when the game is over)
+   GameType *gameType = getGame()->getGameType();
+   if(gameType && gameType->getGameTypeId() == CoreGame)
+      static_cast<CoreGameType *>(gameType)->removeCore(this);
 }
 
 
@@ -363,6 +370,30 @@ void CoreItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
    renderCoreSimple(pos, getColor(), CoreRadius * 2);
 #endif
 }
+
+
+#ifndef ZAP_DEDICATED
+// xpos and ypos are coords of upper left corner of the adjacent score.  We'll need to adjust those coords
+// to position our ornament correctly.
+void CoreGameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const
+{
+   Point center(xpos, ypos + 16);
+   renderCoreSimple(center, getGame()->getTeam(teamIndex)->getColor(), 20);
+
+   // Flash the ornament if the Core is being attacked
+   if(isTeamCoreBeingAttacked(teamIndex)) 
+   {
+      const S32 flashCycleTime = 300;  
+      if(getGame()->getCurrentTime() % flashCycleTime > flashCycleTime / 2)
+         glColor(Colors::red80);
+      else
+         glColor(Colors::yellow, 0.6f);
+         
+      drawCircle(center, 15);
+   }
+}
+
+#endif
 
 
 #ifndef ZAP_DEDICATED
@@ -485,7 +516,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    }
 
    // Check for friendly fire
-   if(theInfo->damagingObject->getTeam() == this->getTeam())
+   if(theInfo->damagingObject->getTeam() == getTeam())
       return;
 
    // Which panel was hit?  Look at shot position, compare it to core position
@@ -847,9 +878,9 @@ void CoreItem::onAddedToGame(Game *theGame)
    if(!gameType)                 // Sam has observed this under extreme network packet loss
       return;
 
-   // Now add to game
+   // Alert the gameType
    if(gameType->getGameTypeId() == CoreGame)
-      static_cast<CoreGameType*>(gameType)->addCore(this, getTeam());
+      static_cast<CoreGameType *>(gameType)->addCore(this, getTeam());
 }
 
 

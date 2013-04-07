@@ -28,8 +28,7 @@
 
 using namespace Zap;
 
-namespace UI
-{
+namespace Zap { namespace UI {
 
 
 // Constructor
@@ -127,4 +126,4 @@ void AToBScroller::doneRendering()
 
 
 
-}
+} } // Nested namespace

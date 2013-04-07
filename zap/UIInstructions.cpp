@@ -882,7 +882,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             }
             break;
          case 19:
-            renderFlag(0, 0, &Colors::red);
+            renderFlag(&Colors::red);
             break;
          case 20:    // Loadout zone
             {              // braces needed: see C2360

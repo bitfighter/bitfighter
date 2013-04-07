@@ -202,7 +202,6 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000), mGameTimeUp
    mLeadingPlayerScore = 0;
    mSecondLeadingPlayer = -1;
    mSecondLeadingPlayerScore = 0;
-   mDigitsNeededToDisplayScore = 1;
    mCanSwitchTeams = true;       // Players can switch right away
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
    mGlowingZoneTeam = -1;        // By default, all zones glow
@@ -2105,19 +2104,15 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
 void GameType::updateLeadingTeamAndScore()
 {
    mLeadingTeamScore = S32_MIN;
-   mDigitsNeededToDisplayScore = -1;
 
    // Find the leading team...
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
-      S32 score = ((Team *)(mGame->getTeam(i)))->getScore();
-      S32 digits = score == 0 ? 1 : (S32(log10(F32(abs(score)))) + ((score < 0 && getGameTypeId() != CoreGame) ? 2 : 1));
-
-      mDigitsNeededToDisplayScore = MAX(digits, mDigitsNeededToDisplayScore);
+      S32 score = static_cast<Team *>(mGame->getTeam(i))->getScore();
 
       if(score > mLeadingTeamScore)
       {
-         mLeadingTeamScore = ((Team *)(mGame->getTeam(i)))->getScore();
+         mLeadingTeamScore = score;
          mLeadingTeam = i;
       }
    }
@@ -2233,6 +2228,26 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
 
 
 #ifndef ZAP_DEDICATED
+
+// xpos and ypos are coords of upper left corner of the adjacent score.  We'll need to adjust those coords
+// to position our ornament correctly.
+// Here we'll render big flags, which will work most of the time.  Core will override, other types will not use.
+void GameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const
+{
+   glPushMatrix();
+   glTranslate(F32(xpos), F32(ypos + 15), 0);
+   glScale(.75);
+   renderFlag(getGame()->getTeam(teamIndex)->getColor());
+   glPopMatrix();
+
+   // Add an indicator for the team that has the flag
+   if(teamHasFlag(teamIndex))
+   {
+      glColor(Colors::magenta);
+      drawString(xpos - 23, ypos + 7, 18, "*");      // These numbers are empirical alignment factors
+   }
+}
+
 
 static void switchTeamsCallback(ClientGame *game, U32 unused)
 {
@@ -4250,19 +4265,13 @@ bool GameType::levelHasLoadoutZone()
 
 U32 GameType::getLowerRightCornerScoreboardOffsetFromBottom() const
 {
-   return 60;
+   return 0;
 }
 
 
 const Vector<WallRec> *GameType::getBarrierList()
 {
    return &mWalls;
-}
-
-
-S32 GameType::getDigitsNeededToDisplayScore() const
-{
-   return mDigitsNeededToDisplayScore;
 }
 
 

@@ -1703,26 +1703,14 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
    Game *game = getGame();
    S32 teamCount = game->getTeamCount();
 
-   U32 rightAlignCoord = gScreenInfo.getGameCanvasWidth() - horizMargin;
+   bool showScore = gameType->isGameOver() || scoreboardVisible;
 
-   if((gameType->isGameOver() || scoreboardVisible) && teamCount > 0)
+   if(showScore && teamCount > 0)      // How could teamCount be 0?
       renderScoreboard();
    
-   // Render team scores in lower-right corner when scoreboard is off
-   else if(teamCount > 1 && gameType->isTeamGame())
-   {
-      // Render Core scores
-      if(gameType->getGameTypeId() == CoreGame)
-         renderCoreScores(gameType, rightAlignCoord);
+   // Render timer and associated doodads in the lower-right corner
+   mTimeLeftRenderer.render(gameType, showScore);
 
-      // Render scores for the rest of the team game types, which use flags
-      else
-         renderTeamFlagScores(gameType, rightAlignCoord);
-   }
-   else if(teamCount > 0 && !gameType->isTeamGame())     // For single team games like rabbit and bitmatch
-      renderLeadingPlayerScores(gameType, rightAlignCoord);
-
-   renderTimeLeft(rightAlignCoord);
    renderTalkingClients();
    renderDebugStatus();
 }
@@ -1741,180 +1729,6 @@ void GameUserInterface::renderInputModeChangeAlert()
    glColor(Colors::paleRed, alpha);
    drawCenteredStringf(vertMargin + 130, 20, "Input mode changed to %s", 
                        getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeJoystick ? "Joystick" : "Keyboard");
-}
-
-
-void GameUserInterface::renderTeamFlagScores(const GameType *gameType, U32 rightAlignCoord)
-{
-   S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom();
-
-   Game *game = getGame();
-   S32 teamCount = game->getTeamCount();
-
-   //Vector<Team *> *teams = game->getSortedTeamList_score();
-
-   const S32 textsize = 32;
-   S32 xpos = rightAlignCoord - gameType->getDigitsNeededToDisplayScore() * getStringWidth(textsize, "0");
-
-   for(S32 i = 0; i < teamCount; i++)
-   {
-      S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - (teamCount - i - 1) * 38;
-
-      if(gameType->teamHasFlag(i))
-      {
-         glColor(Colors::magenta);
-         drawString(xpos - 50, ypos + 3, 18, "*");
-      }
-
-      Team *team = (Team *)game->getTeam(i);
-      renderFlag(F32(xpos - 20), F32(ypos + 18), team->getColor());
-
-      glColor(Colors::white);
-      drawStringf(xpos, ypos, textsize, "%d", team->getScore());
-   }
-}
-
-
-void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlignCoord)
-{
-   CoreGameType *cgt = static_cast<CoreGameType*>(const_cast<GameType*>(gameType));
-
-   S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom();
-
-   Game *game = getGame();
-   S32 teamCount = game->getTeamCount();
-
-   //Vector<Team *> *teams = game->getSortedTeamList_score();
-
-   const S32 textSize = 32;
-   S32 xpos = rightAlignCoord - gameType->getDigitsNeededToDisplayScore() * getStringWidth(textSize, "0");
-
-   for(S32 i = 0; i < teamCount; i++)
-   {
-      S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - (teamCount - i - 1) * 38;
-
-      Team *team = (Team *)game->getTeam(i);
-      Point center(xpos - 20, ypos + 19);
-
-      renderCoreSimple(center, team->getColor(), 20);
-
-      // Render something if a Core is being attacked
-      if(cgt->isTeamCoreBeingAttacked(i))
-      {
-         if(game->getCurrentTime() % 300 > 150)
-            glColor(Colors::red80);
-         else
-            glColor(Colors::yellow, 0.6f);
-         
-         drawCircle(center, 15);
-      }
-
-      glColor(Colors::white);
-      drawStringf(xpos, ypos, textSize, "%d", team->getScore());
-   }
-}
-
-
-void GameUserInterface::renderLeadingPlayerScores(const GameType *gameType, U32 rightAlignCoord)
-{
-   // We can render before we get the first unpackUpdate packet that gets all the client infos.
-   // In this case just exit
-   if(getGame()->getLocalRemoteClientInfo() == NULL)
-      return;
-
-   if(gameType->getLeadingPlayer() < 0)
-      return;
-
-   Game *game = static_cast<Game *>(getGame());    // This is a sign of a problem
-
-   S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom() - 22;
-
-   const S32 textsize = 12;
-
-   /// Render player score
-   bool hasSecondLeader = gameType->getSecondLeadingPlayer() >= 0;
-
-
-   const StringTableEntry localClientName = getGame()->getClientInfo()->getName();
-
-   // The player is the leader if a leader is detected and it matches his name
-   bool localClientIsLeader = localClientName == game->getClientInfo(gameType->getLeadingPlayer())->getName();
-
-   const char *name;
-   S32 topScore, bottomScore;
-
-
-   const Color *winnerColor = &Colors::red;
-   const Color *loserColor = &Colors::red60;
-
-   S32 vertOffset = (hasSecondLeader || !localClientIsLeader) ? textsize * 4 / 3 : 0;    // Make room for a second entry, as needed
-   S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - vertOffset;
-
-   glColor(winnerColor);
-
-   name = game->getClientInfo(gameType->getLeadingPlayer())->getName().getString();
-   topScore = gameType->getLeadingPlayerScore();
-
-   drawStringfr(rightAlignCoord, ypos, textsize, "%s %d", name, topScore);
-
-
-   // Render bottom score if we have one
-   // This will either render the current client on the bottom; or, if he is the leader
-   // it will render the second leader
-   if(hasSecondLeader || !localClientIsLeader)
-   {
-      // Should test if leader first
-      if(!localClientIsLeader)
-      {
-         bottomScore = getGame()->getLocalRemoteClientInfo()->getScore();
-         name = getGame()->getLocalRemoteClientInfo()->getName().getString();
-      }
-      // hasSecondLeader
-      else
-      {
-         bottomScore = gameType->getSecondLeadingPlayerScore();
-         name = game->getClientInfo(gameType->getSecondLeadingPlayer())->getName().getString();
-      }
-
-      S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff;
-
-      // Special case: if players are tied, render both with winner's color
-      if(topScore == bottomScore)
-         glColor(winnerColor);
-      else
-         glColor(loserColor);
-
-      drawStringfr(rightAlignCoord, ypos, textsize, "%s %d", name, bottomScore);
-   }
-}
-
-
-void GameUserInterface::renderTimeLeft(U32 rightAlignCoord)
-{
-   const S32 size = 20;       // Size of time
-   const S32 gtsize = 12;     // Size of game type/score indicator
-   
-   GameType *gameType = getGame()->getGameType();
-
-   string txt = string("[") + gameType->getShortName() + "/" + itos(gameType->getWinningScore()) + "]";
-
-   static const U32 w00 = getStringWidth(size, "00:00");
-   static const U32 wUnlim = getStringWidth(size, "Unlim.");
-
-   U32 w = gameType->isTimeUnlimited() ? wUnlim : w00;
-
-   S32 x = rightAlignCoord - w;
-   S32 y = gScreenInfo.getGameCanvasHeight() - vertMargin - 20;
-
-   glColor(Colors::cyan);
-   drawStringfr(x - 5, y + ((size - gtsize) / 2) + 2, gtsize, txt.c_str());
-   
-   glColor(Colors::white);
-
-   if(gameType->isTimeUnlimited())  
-      drawString(x, y, size, "Unlim.");
-   else
-      drawTime(x, y, size, gameType->getRemainingGameTimeInMs());
 }
 
 

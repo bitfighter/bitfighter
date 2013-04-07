@@ -66,13 +66,14 @@ public:
    };
 
    enum FontContext {
-      BigMessageContext,      // Press any key to respawn, etc.
-      LevelInfoContext,       // Display info about the level (at beginning of game, and when F2 pressed)
-      MenuContext,            // Menu font (main game menus)
-      HUDContext,             // General HUD text
-      HelpContext,            // For Help screens
-      OverlayMenuContext,     // For Loadout Menus and such
-      TextEffectContext       // Yard Sale!!! text and the like
+      BigMessageContext,       // Press any key to respawn, etc.
+      LevelInfoContext,        // Display info about the level (at beginning of game, and when F2 pressed)
+      MenuContext,             // Menu font (main game menus)
+      HUDContext,              // General HUD text
+      HelpContext,             // For Help screens
+      LoadoutIndicatorContext, // For the obvious
+      OverlayMenuContext,      // For Loadout Menus and such
+      TextEffectContext        // Yard Sale!!! text and the like
    };
 
    static void initialize();    

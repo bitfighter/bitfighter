@@ -33,8 +33,7 @@
 
 using namespace Zap;
 
-namespace UI
-{
+namespace Zap { namespace UI {
 
 
 // Constructor
@@ -75,6 +74,8 @@ static void doRender(ShipModule *modules, WeaponType *weapons, Ship *ship, Clien
    static const Color *INDICATOR_PASSIVE_COLOR  = &Colors::yellow;
 
    U32 xPos = UserInterface::horizMargin;
+
+   FontManager::pushFontContext(FontManager::LoadoutIndicatorContext);
    
    // First, the weapons
    for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
@@ -113,6 +114,8 @@ static void doRender(ShipModule *modules, WeaponType *weapons, Ship *ship, Clien
 
       xPos += width + indicatorPadding;
    }
+
+   FontManager::popFontContext();
 }
 
 
@@ -149,4 +152,4 @@ void LoadoutIndicator::render(ClientGame *game)
 }
 
 
-}
+} } // Nested namespace

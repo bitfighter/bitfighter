@@ -142,6 +142,7 @@ extern void renderTurret(const Color &c, Point anchor, Point normal, bool enable
 
 extern void renderFlag(const Point &pos, const Color *flagColor);
 extern void renderFlag(F32 x, F32 y, const Color *flagColor);
+extern void renderFlag(const Color *flagColor);
 extern void renderFlag(const Point &pos, const Color *flagColor, const Color *mastColor, F32 alpha);
 extern void renderFlag(F32 x, F32 y, const Color *flagColor, const Color *mastColor, F32 alpha);
 

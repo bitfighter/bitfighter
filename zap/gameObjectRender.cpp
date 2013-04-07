@@ -1059,6 +1059,12 @@ void renderFlag(F32 x, F32 y, const Color *flagColor)
 }
 
 
+void renderFlag(const Color *flagColor)
+{
+   renderFlag(0, 0, flagColor);
+}
+
+
 void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
 {
    F32 alpha = 0.75f * parentAlpha;

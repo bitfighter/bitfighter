@@ -879,7 +879,7 @@ void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled
       glTranslatef(pos.x + 1, pos.y, 0);
       glScalef(0.4f / currentScale, 0.4f / currentScale, 1);
       Color color = *getColor();  // To avoid taking address of temporary
-      renderFlag(0, 0, &color);
+      renderFlag(&color);
 
       glColor(Colors::white);
       drawCircle(-4, 0, 26);
