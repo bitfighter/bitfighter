@@ -31,11 +31,9 @@
 #include "Timer.h"
 
 using namespace TNL;
-using namespace Zap;
 
 
-namespace UI
-{
+namespace Zap { namespace UI {
 
 // Class for producing a scrolling transition between two objects (A and B).  Used, for example, to help transition
 // between Modules and Weapons on the Loadout menu.
@@ -68,7 +66,7 @@ public:
 
 };
 
-}
+} } // Nested namespace
 
 
 #endif

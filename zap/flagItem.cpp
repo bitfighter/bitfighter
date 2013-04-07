@@ -322,7 +322,7 @@ void FlagItem::renderDock()
    glPushMatrix();
       glTranslate(getActualPos());
       glScale(0.6f);
-      renderFlag(0, 0, getColor());
+      renderFlag(getColor());
    glPopMatrix();   
 #endif
 }

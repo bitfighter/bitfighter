@@ -264,6 +264,7 @@
     <ClCompile Include="Spawn.cpp" />
     <ClCompile Include="stringUtils.cpp" />
     <ClCompile Include="TeamShuffleHelper.cpp" />
+    <ClCompile Include="TimeLeftRenderer.cpp" />
     <ClCompile Include="UIAbstractInstructions.cpp" />
     <ClCompile Include="UIEditorMenus.cpp" />
     <ClCompile Include="UIHighScores.cpp" />
@@ -429,6 +430,7 @@
     <ClInclude Include="TeamConstants.h" />
     <ClInclude Include="TeamPreset.h" />
     <ClInclude Include="TeamShuffleHelper.h" />
+    <ClInclude Include="TimeLeftRenderer.h" />
     <ClInclude Include="UIAbstractInstructions.h" />
     <ClInclude Include="UIEditorMenus.h" />
     <ClInclude Include="UIHighScores.h" />

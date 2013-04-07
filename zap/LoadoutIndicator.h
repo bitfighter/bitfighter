@@ -30,10 +30,8 @@
 #include "tnlTypes.h"
 
 using namespace TNL;
-using namespace Zap;
 
-namespace UI
-{
+namespace Zap { namespace UI {
 
 static const S32 indicatorFontSize = 15;
 static const S32 indicatorPadding = 3;       // Gap between text and box
@@ -50,6 +48,6 @@ public:
    void render(ClientGame *game);
 };
 
-}
+} } // Nested namespace
 
 #endif  // _LOADOUT_INDICATOR_H_

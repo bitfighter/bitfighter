@@ -52,20 +52,23 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode() const;
 
-   bool isTeamCoreBeingAttacked(S32 teamIndex);
+   bool isTeamCoreBeingAttacked(S32 teamIndex) const;
 
    // Runs on client
    void renderInterfaceOverlay(bool scoreboardVisible);
 
    void addCore(CoreItem *core, S32 team);
+   void removeCore(CoreItem *core);
 
    // What does aparticular scoring event score?
    void updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data = 0);
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
    void score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score);
 
+
 #ifndef ZAP_DEDICATED
    Vector<string> getGameParameterMenuKeys();
+   void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
 #endif
 
    GameTypeId getGameTypeId() const;
@@ -154,6 +157,7 @@ public:
 
    static F32 getCoreAngle(U32 time);
    void renderItem(const Point &pos);
+
    const Vector<Point> *getCollisionPoly() const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(BfObject *otherObject);

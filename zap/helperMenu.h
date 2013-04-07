@@ -36,11 +36,11 @@
 #include "Timer.h"
 
 using namespace TNL;
-using namespace UI;
-
+using namespace Zap::UI;
 
 namespace Zap
 {
+
 
 class ClientGame;
 class UIManager;

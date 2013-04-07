@@ -33,10 +33,11 @@
 
 #include "OpenglUtils.h"
 
-using namespace UI;
 
 namespace Zap
 {
+
+using namespace UI;
 
 void HelperMenu::initialize(ClientGame *game, HelperManager *manager)
 {

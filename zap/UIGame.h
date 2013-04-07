@@ -35,6 +35,7 @@
 #include "ship.h"             // For ShipModuleCount
 #include "HelperManager.h"   
 #include "LoadoutIndicator.h"
+#include "TimeLeftRenderer.h"
 
 namespace Zap
 {
@@ -97,6 +98,7 @@ public:
 
 class Move;
 class SoundEffect;
+using namespace Zap::UI;
 
 class GameUserInterface : public UserInterface
 {
@@ -121,6 +123,7 @@ private:
    HelperManager mHelperManager;
    LevelInfoDisplayer mLevelInfoDisplayer;
    LoadoutIndicator mLoadoutIndicator;
+   TimeLeftRenderer mTimeLeftRenderer;
 
    Timer mShutdownTimer;
 
@@ -159,10 +162,6 @@ private:
    bool checkEnterChatInputCode(InputCode inputCode);  // Helper for key handler
 
    void renderInputModeChangeAlert();
-   void renderTeamFlagScores(const GameType *gameType, U32 rightAlignCoord);
-   void renderCoreScores(const GameType *gameType, U32 rightAlignCoord);
-   void renderLeadingPlayerScores(const GameType *gameType, U32 rightAlignCoord);
-   void renderTimeLeft(U32 rightAlignCoord);
    void renderTalkingClients();              // Render things related to voice chat
    void renderDebugStatus();                 // Render things related to debugging
 

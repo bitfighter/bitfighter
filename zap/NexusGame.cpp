@@ -648,7 +648,7 @@ S32 NexusGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEven
 
 
 GameTypeId NexusGameType::getGameTypeId() const { return NexusGame; }
-const char *NexusGameType::getShortName() const { return "N"; }
+const char *NexusGameType::getShortName() const { return "Nex"; }
 
 static const char *instructions[] = { "Collect flags and deliver",  "them to the Nexus!" };
 const char **NexusGameType::getInstructionString() const { return instructions; }
@@ -660,7 +660,7 @@ bool NexusGameType::canBeIndividualGame() const { return true;  }
 
 U32 NexusGameType::getLowerRightCornerScoreboardOffsetFromBottom() const
 {
-   return 88;
+   return 28;
 }
 
 

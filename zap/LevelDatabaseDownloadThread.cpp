@@ -54,7 +54,7 @@ U32 LevelDatabaseDownloadThread::run()
 {
    char url[UrlLength];
    mGame->displaySuccessMessage("Downloading %s", mLevelId.c_str());
-   snprintf(url, UrlLength, LevelRequest, mLevelId.c_str());
+   dSprintf(url, UrlLength, LevelRequest, mLevelId.c_str());
    HttpRequest req(url);
    if(!req.send())
    {
@@ -86,7 +86,7 @@ U32 LevelDatabaseDownloadThread::run()
       return 0;
    }
 
-   snprintf(url, UrlLength, LevelgenRequest, mLevelId.c_str());
+   dSprintf(url, UrlLength, LevelgenRequest, mLevelId.c_str());
    req = HttpRequest(url);
    if(!req.send())
    {

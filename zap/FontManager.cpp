@@ -154,7 +154,7 @@ void FontManager::initialize()
    fontList[FontOrbitronMedStroke]   = new BfFont(FontOrbitronMedStroke,   &fgStrokeOrbitronMed);
 
    // Our TTF fonts
-   fontList[FontOcrA]           = new BfFont(FontOcrA,          "OCRA.ttf");
+   fontList[FontOcrA]           = new BfFont(FontOcrA,          "Digital.ttf");
    fontList[FontOrbitronLight]  = new BfFont(FontOrbitronLight, "Orbitron Light.ttf");
    fontList[FontOrbitronMedium] = new BfFont(FontOrbitronLight, "Orbitron Medium.ttf");
    fontList[FontPrimeRegular]   = new BfFont(FontPrimeRegular,  "prime_regular.ttf");
@@ -202,11 +202,13 @@ void FontManager::setFontContext(FontContext fontContext)
       case MenuContext:
          setFont(FontRoman);
          return;
-      case HUDContext:
+      
       case HelpContext:
          setFont(FontRoman);
          return;
+      case HUDContext:
       case LevelInfoContext:
+      case LoadoutIndicatorContext:
       case OverlayMenuContext:
          setFont(FontTenby5);
          return;

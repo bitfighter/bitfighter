@@ -36,7 +36,8 @@
 
 namespace Zap {
 
-#define makeBuffer    va_list args; va_start(args, format); char buffer[2048]; vsnprintf(buffer, sizeof(buffer), format, args); va_end(args);
+static char buffer[2048];     // Reusable buffer
+#define makeBuffer    va_list args; va_start(args, format); vsnprintf(buffer, sizeof(buffer), format, args); va_end(args);
 
 
 F32 gLineWidth1 = 1.0f;
