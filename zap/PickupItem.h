@@ -65,6 +65,7 @@ public:
    void onAddedToGame(Game *game);
    void idle(BfObject::IdleCallPath path);
    bool isVisible();
+   S32 getRenderSortValue();
 
    U32 getRepopDelay();
    void setRepopDelay(U32 delay);

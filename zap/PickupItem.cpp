@@ -102,6 +102,10 @@ bool PickupItem::isVisible()
    return mIsVisible;
 }
 
+S32 PickupItem::getRenderSortValue()
+{
+   return 1;
+}
 
 U32 PickupItem::getRepopDelay()
 {
