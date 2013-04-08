@@ -84,7 +84,7 @@ void SlideOutWidget::onWidgetOpened() { /* Do nothing */ }      // Gets run when
 void SlideOutWidget::onWidgetClosed() { /* Do nothing */ }      // Gets run when closing animation is complete
 
 
-F32 SlideOutWidget::getInsideEdge()
+F32 SlideOutWidget::getInsideEdge() const
 {
    // Magic number that seems to work well... no matter that the real menu might be a different width... by
    // using this constant, menus appear at a consistent rate.

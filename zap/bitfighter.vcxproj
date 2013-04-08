@@ -179,6 +179,7 @@
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="FontManager.cpp" />
+    <ClCompile Include="FpsRenderer.cpp" />
     <ClCompile Include="gameStats.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="GeomObject.cpp" />
@@ -326,6 +327,7 @@
     <ClInclude Include="FontOrbitronLight.h" />
     <ClInclude Include="FontOrbitronMedium.h" />
     <ClInclude Include="FontStrokeRoman.h" />
+    <ClInclude Include="FpsRenderer.h" />
     <ClInclude Include="GameTypesEnum.h" />
     <ClInclude Include="Geometry_Base.h" />
     <ClInclude Include="GeomObject.h" />

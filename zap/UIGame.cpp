@@ -92,10 +92,10 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
                   mServerMessageDisplayer(game,  6, true,  true,  SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, SRV_MSG_FONT_GAP),
                   mChatMessageDisplayer1 (game,  5, true,  false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mChatMessageDisplayer2 (game,  5, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
-                  mChatMessageDisplayer3 (game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP)
+                  mChatMessageDisplayer3 (game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
+                  mFpsRenderer(game)
 {
    mInScoreboardMode = false;
-   mFPSVisible = false;
    displayInputModeChangeAlert = false;
    mMissionOverlayActive = false;
 
@@ -105,26 +105,9 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
 
    setMenuID(GameUI);
    mInScoreboardMode = false;
-	
-#if 0 //defined(TNL_OS_XBOX)
-   mFPSVisible = true;
-#else
-   mFPSVisible = false;
-#endif
-
-   mFPSAvg = 0;
-   mPingAvg = 0;
-   mFrameIndex = 0;
-
-   for(S32 i = 0; i < FPS_AVG_COUNT; i++)
-   {
-      mIdleTimeDelta[i] = 50;
-      mPing[i] = 100;
-   }
 
    mGotControlUpdate = false;
-   mRecalcFPSTimer = 0;
-
+   
    mFiring = false;
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
@@ -271,37 +254,10 @@ void GameUserInterface::idle(U32 timeDelta)
    mChatMessageDisplayer2.idle(timeDelta);
    mChatMessageDisplayer3.idle(timeDelta);
 
-   // Time to recalc FPS?
-   if(mFPSVisible)        // Only bother if we're displaying the value...
-   {
-      if(timeDelta > mRecalcFPSTimer)
-      {
-         U32 sum = 0, sumping = 0;
-
-         for(S32 i = 0; i < FPS_AVG_COUNT; i++)
-         {
-            sum += mIdleTimeDelta[i];
-            sumping += mPing[i];
-         }
-
-         mFPSAvg = (1000 * FPS_AVG_COUNT) / F32(sum);
-         mPingAvg = F32(sumping) / 32;
-         mRecalcFPSTimer = 750;
-      }
-      else
-         mRecalcFPSTimer -= timeDelta;
-   }
+   mFpsRenderer.idle(timeDelta);
    
    mHelperManager.idle(timeDelta);
    mVoiceRecorder.idle(timeDelta);
-
-   U32 indx = mFrameIndex % FPS_AVG_COUNT;
-   mIdleTimeDelta[indx] = timeDelta;
-
-   if(getGame()->getConnectionToServer())
-      mPing[indx] = (U32)getGame()->getConnectionToServer()->getRoundTripTime();
-
-   mFrameIndex++;
 
    // Should we move this timer over to UIGame??
    HostMenuUserInterface *ui = getUIManager()->getHostMenuUserInterface();
@@ -355,12 +311,7 @@ void GameUserInterface::render()
 
       mVoiceRecorder.render();      // This is the indicator that someone is sending a voice msg
 
-      // Display running average FPS
-      if(mFPSVisible)
-      {
-         glColor(Colors::white);
-         drawStringf(gScreenInfo.getGameCanvasWidth() - horizMargin - 220, vertMargin, 20, "%4.1f fps | %1.0f ms", mFPSAvg, mPingAvg);
-      }
+      mFpsRenderer.render();        // Display running average FPS
 
       mHelperManager.render();
 
@@ -976,7 +927,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    else if(checkInputCode(settings, InputCodeManager::BINDING_SELWEAP3, inputCode))
       selectWeapon(2);
    else if(checkInputCode(settings, InputCodeManager::BINDING_FPS, inputCode))
-      mFPSVisible = !mFPSVisible;
+      mFpsRenderer.toggleVisibility();
    else if(checkInputCode(settings, InputCodeManager::BINDING_ADVWEAP, inputCode))
       chooseNextWeapon();
 

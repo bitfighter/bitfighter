@@ -23,56 +23,50 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _UI_SLIDE_OUT_WIDGET_H_
-#define _UI_SLIDE_OUT_WIDGET_H_
+#ifndef _FPS_RENDERER_
+#define _FPS_RENDERER_
 
+#include "SlideOutWidget.h"
 
-#include "tnlTypes.h"
-#include "Timer.h"
+using namespace TNL;
 
-
-using namespace TNL; 
-
-
-namespace Zap
+namespace Zap 
 {
 
-class Color;
+class ClientGame;
 
-class SlideOutWidget
+namespace UI
 {
+
+class FpsRenderer : public SlideOutWidget
+{
+   typedef SlideOutWidget Parent;
+
 private:
-   bool mActivating;
-   Timer mAnimationTimer;
+   static const S32 FPS_AVG_COUNT = 32;
+   bool mFPSVisible;             // Are we displaying FPS info?
 
-protected:
-   void setAnimationTime(U32 period);
-   bool isOpening() const;
-   bool isClosing() const;          // Return true if widget is playing the closing animation
+   F32 mFPSAvg;
 
-   void renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor);
+   U32 mPing[FPS_AVG_COUNT];
+   F32 mPingAvg;
+   
+   U32 mRecalcFPSTimer;          // Controls recalcing FPS running average
+   U32 mFrameIndex;
+
+   ClientGame *mGame;
+
+   U32 mIdleTimeDelta[FPS_AVG_COUNT];
 
 public:
-   SlideOutWidget();                // Constructor
-   virtual ~SlideOutWidget();       // Destructor
-
-   virtual void idle(U32 deltaT);
-   virtual void onActivated();      // User requested widget to open
-   virtual void onDeactivated();    // User requested widget to close
-
-   F32 getInsideEdge() const;
-
-   virtual void onWidgetOpened();   // Widget has finished opening
-   virtual void onWidgetClosed();   // Widget has finished closing
-
-   virtual bool isActive() const;
-
-   F32 getFraction();               // Get fraction of openness
-   S32 getAnimationTime() const;
-
+   FpsRenderer(ClientGame *game);      // Constructor
+   void idle(U32 timeDelta);
+   void render() const;
+   void toggleVisibility();
 };
 
+} } // Nested namespace
 
-}
 
 #endif
+

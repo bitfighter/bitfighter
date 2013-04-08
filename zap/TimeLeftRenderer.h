@@ -42,17 +42,17 @@ namespace UI
 class TimeLeftRenderer
 {
 private:
-   S32  renderTimeLeft           (const GameType *gameType) const;
-   S32  renderHeadlineScores     (const Game *game, S32 ypos) const;
-   void renderTeamScores         (const GameType *gameType, S32 bottom) const;
-   void renderLeadingPlayerScores(const GameType *gameType, S32 bottom) const;
+   S32  renderTimeLeft        (const GameType *gameType) const;
+   S32  renderHeadlineScores  (const Game *game, S32 ypos) const;
+   void renderTeamScores      (const GameType *gameType, S32 bottom) const;
+   void renderIndividualScores(const GameType *gameType, S32 bottom) const;
 
 public:
-   void render                   (const GameType *gameType, bool scoreboardVisible) const;
+   void render                (const GameType *gameType, bool scoreboardVisible) const;
 };
 
-}
-}
+} } // Nested namespace
+
 
 #endif
 

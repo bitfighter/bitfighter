@@ -176,8 +176,8 @@ S32 drawStringfr(S32 x, S32 y, S32 size, const char *format, ...)
 
 S32 drawStringr(S32 x, S32 y, S32 size, const char *string)
 {
-   S32 len = getStringWidth(size, string);
-   doDrawAngleString(x - len, y + size, (F32)size, 0, string);
+   F32 len = getStringWidth((F32)size, string);
+   doDrawAngleString((F32)x - len, (F32)y + size, (F32)size, 0, string);
 
    return len;
 }

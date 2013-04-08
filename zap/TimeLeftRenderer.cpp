@@ -41,7 +41,7 @@ void TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible) 
          renderTeamScores(gameType, timeTop);
 
       else if(teamCount > 0 && !gameType->isTeamGame())     // For single team games like rabbit and bitmatch
-         renderLeadingPlayerScores(gameType, timeTop);
+         renderIndividualScores(gameType, timeTop);
    }
 
    FontManager::popFontContext();
@@ -97,6 +97,8 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
 }
 
 
+// Try to mitigate some of the weirdness that comes from TTF hinting when trying to
+// right-align text
 static void drawStringDigitByDigit(S32 x, S32 y, S32 textsize, const string &s)
 {
    for(S32 i = (S32)s.length() - 1; i >= 0; i--)
@@ -107,7 +109,7 @@ static void drawStringDigitByDigit(S32 x, S32 y, S32 textsize, const string &s)
 // Render 1 or 2 scores: Either render the current client on the bottom (if only one player); 
 // or renders player on top and the 2nd player on the bottom (if player is winning);
 // or leader on top and player second (if player is losing)
-void TimeLeftRenderer::renderLeadingPlayerScores(const GameType *gameType, S32 bottom) const
+void TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 bottom) const
 {
    Game *game = gameType->getGame();
    ClientGame *clientGame = static_cast<ClientGame *>(game);

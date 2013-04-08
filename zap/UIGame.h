@@ -36,6 +36,7 @@
 #include "HelperManager.h"   
 #include "LoadoutIndicator.h"
 #include "TimeLeftRenderer.h"
+#include "FpsRenderer.h"
 
 namespace Zap
 {
@@ -124,6 +125,7 @@ private:
    LevelInfoDisplayer mLevelInfoDisplayer;
    LoadoutIndicator mLoadoutIndicator;
    TimeLeftRenderer mTimeLeftRenderer;
+   UI::FpsRenderer mFpsRenderer;
 
    Timer mShutdownTimer;
 
@@ -149,11 +151,7 @@ private:
 
    bool mGotControlUpdate;
 
-   bool mFPSVisible;          // Are we displaying FPS info?
-   U32 mRecalcFPSTimer;       // Controls recalcing FPS running average
-
    static const S32 WRONG_MODE_MSG_DISPLAY_TIME = 2500;
-   static const S32 FPS_AVG_COUNT = 32;
 
    Timer mWrongModeMsgDisplay;               // Help if user is trying to use keyboard in joystick mode
    Timer mInputModeChangeAlertDisplayTimer;  // Remind user that they just changed input modes
@@ -164,13 +162,6 @@ private:
    void renderInputModeChangeAlert();
    void renderTalkingClients();              // Render things related to voice chat
    void renderDebugStatus();                 // Render things related to debugging
-
-   F32 mFPSAvg;
-   F32 mPingAvg;
-
-   U32 mIdleTimeDelta[FPS_AVG_COUNT];
-   U32 mPing[FPS_AVG_COUNT];
-   U32 mFrameIndex;
 
    struct VoiceRecorder
    {
