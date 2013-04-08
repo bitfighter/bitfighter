@@ -382,7 +382,7 @@ F32 Ship::processMove(U32 stateIndex)
                   (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
    maxAccel *= getSlipzoneSpeedMoficationFactor();
 
-   if(accRequested > maxAccel)
+   if(accRequested > ABS(maxAccel))
    {
       velDelta *= maxAccel / accRequested;
       setVel(stateIndex, getVel(stateIndex) + velDelta);
