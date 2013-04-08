@@ -41,6 +41,8 @@ FpsRenderer::FpsRenderer(ClientGame *game)
 
 void FpsRenderer::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    if(mFPSVisible)        // Only bother if we're displaying the value...
    {
       if(timeDelta > mRecalcFPSTimer)
@@ -74,12 +76,12 @@ void FpsRenderer::idle(U32 timeDelta)
 
 void FpsRenderer::render() const
 {
-   if(!mFPSVisible)
+   if(!mFPSVisible && !isClosing())
       return;
 
    FontManager::pushFontContext(FontManager::HUDContext);
 
-   const S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin;
+   const S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - getInsideEdge();
    const S32 fontSize = 20;
    const S32 fontGap = 5;
 
@@ -95,6 +97,11 @@ void FpsRenderer::render() const
 void FpsRenderer::toggleVisibility()
 {
    mFPSVisible = !mFPSVisible;
+
+   if(mFPSVisible)
+      onActivated();
+   else
+      onDeactivated();
 }
 
 

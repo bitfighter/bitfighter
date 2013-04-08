@@ -40,6 +40,8 @@ namespace UI
 
 class FpsRenderer : public SlideOutWidget
 {
+   typedef SlideOutWidget Parent;
+
 private:
    static const S32 FPS_AVG_COUNT = 32;
    bool mFPSVisible;             // Are we displaying FPS info?

@@ -60,7 +60,7 @@ public:
    virtual void onActivated();      // User requested widget to open
    virtual void onDeactivated();    // User requested widget to close
 
-   F32 getInsideEdge();
+   F32 getInsideEdge() const;
 
    virtual void onWidgetOpened();   // Widget has finished opening
    virtual void onWidgetClosed();   // Widget has finished closing
