@@ -258,7 +258,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
       if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))  // starts with a letter
       {
          if(!strnicmp(argv2[i], "Delay=", 6))
-            mTeleporterCooldown = U32(atof(&argv2[i][6]) * 1000);
+            mTeleporterCooldown = MAX(100, U32(atof(&argv2[i][6]) * 1000));
       }
       else
       {
