@@ -358,8 +358,16 @@ void GameUserInterface::render()
       // Display running average FPS
       if(mFPSVisible)
       {
+         FontManager::pushFontContext(FontManager::HUDContext);
+         const S32 fontSize = 20;
+         const S32 fontGap = 5;
+         const S32 xpos = gScreenInfo.getGameCanvasWidth() - horizMargin;
+
          glColor(Colors::white);
-         drawStringf(gScreenInfo.getGameCanvasWidth() - horizMargin - 220, vertMargin, 20, "%4.1f fps | %1.0f ms", mFPSAvg, mPingAvg);
+         drawStringfr(xpos, vertMargin,                      fontSize, "%1.0f fps", mFPSAvg);
+         glColor(Colors::yellow);
+         drawStringfr(xpos, vertMargin + fontSize + fontGap, fontSize, "%1.0f ms",  mPingAvg);
+         FontManager::popFontContext();
       }
 
       mHelperManager.render();
