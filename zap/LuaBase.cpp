@@ -725,6 +725,11 @@ S32 LuaBase::returnBfObject(lua_State *L, BfObject *bfObject)
 
 S32 LuaBase::returnPlayerInfo(lua_State *L, Ship *ship)
 {
+   if(!ship || !ship->getClientInfo())
+   {
+      lua_pushnil(L);
+      return 0;
+   }
    return returnPlayerInfo(L, ship->getClientInfo()->getPlayerInfo());
 }
 
