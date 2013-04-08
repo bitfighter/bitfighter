@@ -75,6 +75,7 @@ LuaGameInfo::~LuaGameInfo()
    METHOD(CLASS, getPlayers,           ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, isNexusOpen,          ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getNexusTimeLeft,     ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getTeam,              ARRAYDEF({{ TEAM_INDX, END }}), 1 ) \
 
 GENERATE_LUA_FUNARGS_TABLE(LuaGameInfo, LUA_METHODS);
 GENERATE_LUA_METHODS_TABLE(LuaGameInfo, LUA_METHODS);
@@ -171,6 +172,15 @@ S32 LuaGameInfo::lua_getPlayers(lua_State *L)
    return 1;
 }
 
+
+S32 LuaGameInfo::lua_getTeam(lua_State *L)
+{
+   checkArgList(L, functionArgs, "GameInfo", "setTeam");
+
+   S32 index = getTeamIndex(L, 1);
+
+   return returnTeam(L, static_cast<Team*>(gServerGame->getTeam(index)));
+}
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -276,19 +286,6 @@ S32 LuaModuleInfo::getID(lua_State *L) { return returnInt(L, mModuleIndex); }
 ////////////////////////////////////
 ////////////////////////////////////
 
-REGISTER_LUA_CLASS(LuaLoadout);
-
-const char *LuaLoadout::luaClassName = "Loadout";     // Class name as it appears to Lua scripts
-
-// Will almost certainly need to be uncommented!!!
-// Lua Constructor
-//LuaLoadout::LuaLoadout(lua_State *L)
-//{
-//   // When creating a new loadout object, load it up with the default items
-//   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-//      mLoadout[i] = DefaultLoadout[i];
-//}
-
 
 // C++ Constructor -- specify items
 LuaLoadout::LuaLoadout(const U8 loadoutItems[])
@@ -309,53 +306,59 @@ LuaLoadout::~LuaLoadout()
 }
 
 
-const luaL_reg LuaLoadout::luaMethods[] =
+/**
+ *  @luaclass Loadout
+ *  @brief    Get and set ship Loadout properties
+ *  @descr    Use the %Loadout object to modify a ship or robots current loadout
+ *
+ *  You only need get this object once, then you can use it as often as you like. It will
+ *  always reflect the latest data.
+ */
+//                Fn name                  Param profiles            Profile count
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, setWeapon,      ARRAYDEF({{ WEAP_SLOT, WEAP_ENUM, END }}), 1 )  \
+   METHOD(CLASS, setModule,      ARRAYDEF({{ MOD_SLOT, MOD_ENUM, END }}), 1 )    \
+   METHOD(CLASS, isValid,        ARRAYDEF({{ END }}), 1 )                        \
+   METHOD(CLASS, equals,         ARRAYDEF({{ LOADOUT, END }}), 1 )               \
+   METHOD(CLASS, getWeapon,      ARRAYDEF({{ WEAP_SLOT, END }}), 1 )             \
+   METHOD(CLASS, getModule,      ARRAYDEF({{ MOD_SLOT, END }}), 1 )              \
+
+GENERATE_LUA_FUNARGS_TABLE(LuaLoadout, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(LuaLoadout, LUA_METHODS);
+
+#undef LUA_METHODS
+
+const char *LuaLoadout::luaClassName = "Loadout";     // Class name as it appears to Lua scripts
+REGISTER_LUA_CLASS(LuaLoadout);
+
+
+S32 LuaLoadout::lua_setWeapon(lua_State *L)     // setWeapon(i, mod) ==> Set weapon at index i
 {
-   { "setWeapon", luaW_doMethod<LuaLoadout, &LuaLoadout::setWeapon> },
-   { "setModule", luaW_doMethod<LuaLoadout, &LuaLoadout::setModule> },
-   { "isValid",   luaW_doMethod<LuaLoadout, &LuaLoadout::isValid>   },
-   { "equals",    luaW_doMethod<LuaLoadout, &LuaLoadout::equals>    },
-   { "getWeapon", luaW_doMethod<LuaLoadout, &LuaLoadout::getWeapon> },
-   { "getModule", luaW_doMethod<LuaLoadout, &LuaLoadout::getModule> },
+   checkArgList(L, functionArgs, "Loadout", "setWeapon");
 
-   {0,0}    // End method list
-};
+   U32 index = (U32) getInt(L, 1);
+   U32 weapon = (U32) getInt(L, 2);
 
+   mLoadout[index + ShipModuleCount - 1] = weapon;
 
-const LuaFunctionProfile LuaLoadout::functionArgs[] =
-{
-   { NULL, {{{ }}, 0 } }
-};
-
-
-
-S32 LuaLoadout::setWeapon(lua_State *L)     // setWeapon(i, mod) ==> Set weapon at index i
-{
-   static const char *methodName = "Loadout:setWeapon()";
-
-   checkArgCount(L, 2, methodName);
-   U32 indx = (U32) getInt(L, 1, methodName, 1, ShipWeaponCount);
-   U32 weap = (U32) getInt(L, 2, methodName, 0, WeaponCount - 1);
-
-   mLoadout[indx + ShipModuleCount - 1] = weap;
    return 0;
 }
 
 
-S32 LuaLoadout::setModule(lua_State *L)     // setModule(i, mod) ==> Set module at index i
+S32 LuaLoadout::lua_setModule(lua_State *L)     // setModule(i, mod) ==> Set module at index i
 {
-   static const char *methodName = "Loadout:setModule()";
+   checkArgList(L, functionArgs, "Loadout", "setModule");
 
-   checkArgCount(L, 2, methodName);
-   U32 indx = (U32) getInt(L, 1, methodName, 1, ShipModuleCount);
-   U32 mod  = (U32) getInt(L, 2, methodName, 0, ModuleCount - 1);
+   U32 index = (U32) getInt(L, 1);
+   U32 module  = (U32) getInt(L, 2);
 
-   mLoadout[indx - 1] = mod;
+   mLoadout[index - 1] = module;
+
    return 0;
 }
 
 
-S32 LuaLoadout::isValid(lua_State *L)       // isValid() ==> Is loadout config valid?
+S32 LuaLoadout::lua_isValid(lua_State *L)       // isValid() ==> Is loadout config valid?
 {
    U32 mod[ShipModuleCount];
    bool hasSensor = false;
@@ -391,9 +394,9 @@ S32 LuaLoadout::isValid(lua_State *L)       // isValid() ==> Is loadout config v
 }
 
 
-S32 LuaLoadout::equals(lua_State *L)        // equals(Loadout) ==> is loadout the same as Loadout?
+S32 LuaLoadout::lua_equals(lua_State *L)        // equals(Loadout) ==> is loadout the same as Loadout?
 {
-   checkArgCount(L, 1, "Loadout:equals()");
+   checkArgList(L, functionArgs, "Loadout", "equals");
 
    LuaLoadout *loadout = luaW_check<LuaLoadout>(L, 1);
 
@@ -406,27 +409,29 @@ S32 LuaLoadout::equals(lua_State *L)        // equals(Loadout) ==> is loadout th
 
 
 // Private helper function for above
-U8 LuaLoadout::getLoadoutItem(S32 indx)
+U8 LuaLoadout::getLoadoutItem(S32 index)
 {
-   return mLoadout[indx];
+   return mLoadout[index];
 }
 
 
-S32 LuaLoadout::getWeapon(lua_State *L)     // getWeapon(i) ==> return weapon at index i (1, 2, 3)
+S32 LuaLoadout::lua_getWeapon(lua_State *L)     // getWeapon(i) ==> return weapon at index i (1, 2, 3)
 {
-   static const char *methodName = "Loadout:getWeapon()";
-   checkArgCount(L, 1, methodName);
-   U32 weap = (U32) getInt(L, 1, methodName, 1, ShipWeaponCount);
-   return returnInt(L, mLoadout[weap + ShipModuleCount - 1]);
+   checkArgList(L, functionArgs, "Loadout", "getWeapon");
+
+   U32 weapon = (U32) getInt(L, 1);
+
+   return returnInt(L, mLoadout[weapon + ShipModuleCount - 1]);
 }
 
 
-S32 LuaLoadout::getModule(lua_State *L)     // getModule(i) ==> return module at index i (1, 2)
+S32 LuaLoadout::lua_getModule(lua_State *L)     // getModule(i) ==> return module at index i (1, 2)
 {
-   static const char *methodName = "Loadout:getModule()";
-   checkArgCount(L, 1, methodName);
-   U32 mod = (U32) getInt(L, 1, methodName, 1, ShipModuleCount);
-   return returnInt(L, mLoadout[mod - 1]);
+   checkArgList(L, functionArgs, "Loadout", "getModule");
+
+   U32 module = (U32) getInt(L, 1);
+
+   return returnInt(L, mLoadout[module - 1]);
 }
 
 

@@ -62,6 +62,7 @@ public:
    S32 lua_isNexusOpen(lua_State *L);
    S32 lua_getNexusTimeLeft(lua_State *L);
 
+   S32 lua_getTeam(lua_State *L);
 
    ///// Lua interface
    // Top level Lua methods
@@ -139,7 +140,6 @@ private:
    U8 mLoadout[ShipModuleCount + ShipWeaponCount];
 
 public:
-   //LuaLoadout(lua_State *L);                              // Lua constructor
    explicit LuaLoadout(const U8 loadoutItems[] = DefaultLoadout);    // C++ constructor
    virtual ~LuaLoadout();                                   // Destructor
 
@@ -149,12 +149,12 @@ public:
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 setWeapon(lua_State *L);     // setWeapon(i, mod) ==> Set weapon at index i
-   S32 setModule(lua_State *L);     // setModule(i, mod) ==> Set module at index i
-   S32 isValid(lua_State *L);       // isValid() ==> Is loadout config valid?
-   S32 equals(lua_State *L);        // equals(Loadout) ==> is loadout the same as Loadout?
-   S32 getWeapon(lua_State *L);     // getWeapon(i) ==> return weapon at index i
-   S32 getModule(lua_State *L);     // getModule(i) ==> return module at index i
+   S32 lua_setWeapon(lua_State *L);     // setWeapon(i, mod) ==> Set weapon at index i
+   S32 lua_setModule(lua_State *L);     // setModule(i, mod) ==> Set module at index i
+   S32 lua_isValid(lua_State *L);       // isValid() ==> Is loadout config valid?
+   S32 lua_equals(lua_State *L);        // equals(Loadout) ==> is loadout the same as Loadout?
+   S32 lua_getWeapon(lua_State *L);     // getWeapon(i) ==> return weapon at index i
+   S32 lua_getModule(lua_State *L);     // getModule(i) ==> return module at index i
 
    U8 getLoadoutItem(S32 indx);     // Helper function, not accessible from Lua
 };

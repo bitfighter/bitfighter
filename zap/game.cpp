@@ -465,33 +465,6 @@ GameType *Game::getGameType() const
 }
 
 
-// Sorts teams by score, high to low
-S32 QSORT_CALLBACK teamScoreSort(Team **a, Team **b)
-{
-   return (*b)->getScore() - (*a)->getScore();  
-}
-
-
-Vector<Team *> *Game::getSortedTeamList_score() const
-{
-   static Vector<Team *> teams;     // Static, since we return a pointer, and the object pointed to needs to outlive this function scope
-
-   S32 teamCount = getTeamCount();
-
-   teams.resize(teamCount);
-
-   for(S32 i = 0; i < teamCount; i++)
-   {
-      teams[i] = (Team *)getTeam(i);
-      teams[i]->mId = i;
-   }
-
-   teams.sort(teamScoreSort);
-
-   return &teams;
-}
-
-
 // There is a bigger need to use StringTableEntry and not const char *
 //    mainly to prevent errors on CTF neutral flag and out of range team number.
 StringTableEntry Game::getTeamName(S32 teamIndex) const

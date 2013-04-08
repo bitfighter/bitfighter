@@ -2703,6 +2703,7 @@ S32 Ship::lua_getCurrLoadout(lua_State *L)
    for(S32 i = 0; i < ShipWeaponCount; i++)
       loadoutItems[i + ShipModuleCount] = (U8)getWeapon(i);
 
+   // FIXME:  Memory leak?  where is this cleaned up?
    LuaLoadout *loadout = new LuaLoadout(loadoutItems);
    luaW_push<LuaLoadout>(L, loadout);
    luaW_hold<LuaLoadout>(L, loadout);
@@ -2725,6 +2726,7 @@ S32 Ship::lua_getReqLoadout(lua_State *L)
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
       loadoutItems[i] = requestedLoadout[i];
 
+   // FIXME:  Memory leak?  where is this cleaned up?
    LuaLoadout *loadout = new LuaLoadout(loadoutItems);
    luaW_push<LuaLoadout>(L, loadout);
    luaW_hold<LuaLoadout>(L, loadout);

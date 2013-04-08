@@ -44,7 +44,7 @@ namespace Zap
 // Constructor
 AbstractTeam::AbstractTeam()
 {
-   // Do nothing
+   mTeamIndex = -1;
 }
 
 
@@ -70,6 +70,12 @@ void AbstractTeam::setColor(const Color &color)
 const Color *AbstractTeam::getColor() const
 {
    return &mColor;
+}
+
+
+void AbstractTeam::setTeamIndex(S32 index)
+{
+   mTeamIndex = index;
 }
 
 
@@ -138,14 +144,14 @@ Team::Team()
    mScore = 0;
    mRating = 0;
 
-   mId = 0;
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 Team::~Team()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -235,6 +241,94 @@ void Team::incrementBotCount()
 }
 
 
+/**
+ *  @luaclass Team
+ *  @brief    Get information about a team in the current game
+ *  @descr    The %Team object contains data about each team in a game.
+ *
+ */
+//                Fn name                  Param profiles            Profile count
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getIndex,          ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getName,           ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getScore,          ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getPlayerCount,    ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getPlayers,        ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_FUNARGS_TABLE(Team, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(Team, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *Team::luaClassName = "Team";  // Class name as it appears to Lua scripts
+REGISTER_LUA_CLASS(Team);
+
+
+
+// We'll add 1 to the index to allow the first team in Lua to have index of 1, and the first team in C++ to have an index of 0
+S32 Team::lua_getIndex(lua_State *L)
+{
+   return returnInt(L, mTeamIndex + 1);
+}
+
+
+S32 Team::lua_getName(lua_State *L)
+{
+   return returnString(L, mName.getString());
+}
+
+
+S32 Team::lua_getScore(lua_State *L)
+{
+   return returnInt(L, mScore);
+}
+
+
+S32 Team::lua_getPlayerCount(lua_State *L)
+{
+   gServerGame->countTeamPlayers();    // Make sure player counts are up-to-date
+   return returnInt(L, mBotCount);
+}
+
+
+// Return a table listing all players on this team.  Is there a better way to do this?
+S32 Team::lua_getPlayers(lua_State *L)
+{
+   ServerGame *game = gServerGame;
+
+   TNLAssert(game->getPlayerCount() == game->getClientCount(), "Mismatched player counts!");
+
+   S32 pushed = 0;
+
+   lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
+
+   for(S32 i = 0; i < game->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = game->getClientInfo(i);
+
+      if(clientInfo->getTeamIndex() == mTeamIndex)
+      {
+         clientInfo->getPlayerInfo()->push(L);
+         pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+         lua_rawseti(L, 1, pushed);
+      }
+   }
+
+   for(S32 i = 0; i < game->getRobotCount(); i ++)
+   {
+      if(game->getBot(i)->getTeam() == mTeamIndex)
+      {
+         game->getBot(i)->getPlayerInfo()->push(L);
+         pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+         lua_rawseti(L, 1, pushed);
+      }
+   }
+
+   return 1;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -281,113 +375,6 @@ StringTableEntry EditorTeam::getName()
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-const char LuaTeamInfo::className[] = "TeamInfo";      // Class name as it appears to Lua scripts
-
-// Define the methods we will expose to Lua
-Lunar<LuaTeamInfo>::RegType LuaTeamInfo::methods[] =
-{
-   method(LuaTeamInfo, getName),
-   method(LuaTeamInfo, getIndex),
-   method(LuaTeamInfo, getPlayerCount),
-   method(LuaTeamInfo, getScore),
-   method(LuaTeamInfo, getPlayers),
-
-   {0,0}    // End method list 
-};
-
-
-// Lua constructor
-LuaTeamInfo::LuaTeamInfo(lua_State *L)
-{
-   static const char *methodName = "TeamInfo constructor";
-   checkArgCount(L, 1, methodName);
-
-   // Lua thinks first team has index 1... we know better, but we need to play along...
-   U32 teamIndx = (U32) getInt(L, 1, methodName, 1, gServerGame->getTeamCount()) - 1;
-
-   mTeam = (Team *)gServerGame->getTeam(teamIndx);
-   mTeamIndex = teamIndx;
-}
-
-
-// C++ constructor
-LuaTeamInfo::LuaTeamInfo(Team *team)
-{
-   mTeam = team;
-
-   const char *teamName = team->getName().getString();
-
-   Vector<boost::shared_ptr<Team> > teams = gServerGame->getTeamCount();
-
-   for(S32 i = 0; i < gServerGame->getTeamCount(); i++)
-      if(!strcmp(gServerGame->getTeam(i)->getName().getString(), teamName))
-      {
-         mTeamIndex = i;
-         break;
-      }
-}
-
-// Destructor
-LuaTeamInfo::~LuaTeamInfo()
-{
-   logprintf(LogConsumer::LogLuaObjectLifecycle, "deleted LuaTeamInfo (%p)\n", this);     // Never gets run...
-}
-
-
-// We'll add 1 to the index to allow the first team in Lua to have index of 1, and the first team in C++ to have an index of 0
-S32 LuaTeamInfo::getIndex(lua_State *L) { return returnInt(L, mTeamIndex + 1); }                   // getTeamIndex() ==> return team's index (returns int)
-S32 LuaTeamInfo::getName(lua_State *L)  { return returnString(L, mTeam->getName().getString()); }  // getTeamName() ==> return team name (returns string)
-S32 LuaTeamInfo::getScore(lua_State *L) { return returnInt(L, mTeam->getScore()); }                // getScore() ==> return team score (returns int)
-
-
-S32 LuaTeamInfo::getPlayerCount(lua_State *L)         // number getPlayerCount() ==> return player count
-{
-   gServerGame->countTeamPlayers();    // Make sure player counts are up-to-date
-   return returnInt(L, mTeam->getPlayerBotCount());
-}
-
-
-// Return a table listing all players on this team
-S32 LuaTeamInfo::getPlayers(lua_State *L)
-{
-   ServerGame *game = gServerGame;
-
-   TNLAssert(game->getPlayerCount() == game->getClientCount(), "Mismatched player counts!");
-
-   S32 pushed = 0;
-
-   lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
-
-   for(S32 i = 0; i < game->getClientCount(); i++)
-   {
-      ClientInfo *clientInfo = game->getClientInfo(i);
-
-      if(clientInfo->getTeamIndex() == mTeamIndex)
-      {
-         clientInfo->getPlayerInfo()->push(L);
-         pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
-         lua_rawseti(L, 1, pushed);
-      }
-   }
-
-   for(S32 i = 0; i < game->getRobotCount(); i ++)
-   {
-      if(game->getBot(i)->getTeam() == mTeamIndex)
-      {
-         game->getBot(i)->getPlayerInfo()->push(L);
-         pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
-         lua_rawseti(L, 1, pushed);
-      }
-   }
-
-   return 1;
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 
 // Destructor
 TeamManager::~TeamManager()
@@ -436,6 +423,8 @@ void TeamManager::addTeam(AbstractTeam *team)
    mTeams.push_back(team);
    mTeamHasFlagList.resize(mTeams.size());
    mTeamHasFlagList[mTeamHasFlagList.size() - 1] = false;
+
+   team->setTeamIndex(mTeams.size() - 1);  // Size of mTeams - 1 should be the index
 }
 
 
@@ -445,6 +434,8 @@ void TeamManager::addTeam(AbstractTeam *team, S32 index)
    mTeams[index] = team;
    mTeamHasFlagList.resize(mTeams.size());
    mTeamHasFlagList[index] = false;
+
+   team->setTeamIndex(index);
 }
 
 
@@ -471,6 +462,8 @@ void TeamManager::replaceTeam(AbstractTeam *team, S32 index)
 {
    delete mTeams[index];  // delete old team that is no longer used
    mTeams[index] = team;
+
+   team->setTeamIndex(index);
 }
 
 

@@ -69,8 +69,6 @@ public:
 
    virtual const char *getErrorMessagePrefix();
 
-   static Lunar<LuaLevelGenerator>::RegType methods[];
-
    // Lua methods
 
    // Handle events
