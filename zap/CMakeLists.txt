@@ -14,6 +14,7 @@ set(CLIENT_SOURCES
    engineerHelper.cpp
    Event.cpp
    FontManager.cpp
+   FpsRenderer.cpp
    gameObjectRender.cpp
    HelperManager.cpp
    helperMenu.cpp
