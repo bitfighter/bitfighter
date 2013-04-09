@@ -32,6 +32,7 @@ void TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible) 
 
    S32 timeTop = renderTimeLeft(gameType);
 
+   timeTop -= gameType->renderTimeLeftSpecial(timeTop);
    if(!scoreboardVisible)
    {
       Game *game = gameType->getGame();
@@ -54,7 +55,7 @@ void TimeLeftRenderer::renderTeamScores(const GameType *gameType, S32 bottom) co
    Game *game = gameType->getGame();
    bool core = gameType->getGameTypeId() == CoreGame;
 
-   S32 ypos = bottom - gameType->getLowerRightCornerScoreboardOffsetFromBottom() - bigScoreTextSize;      
+   S32 ypos = bottom - bigScoreTextSize;      
 
    S32 maxWidth = renderHeadlineScores(game, ypos);   // Use max score width to vertically align symbols
    S32 xpos = rightAlignCoord - maxWidth - 18;
@@ -125,7 +126,7 @@ void TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 bott
    const S32 textgap = 4;
    const S32 oneAdjFact = 2;
 
-   S32 ypos = bottom - gameType->getLowerRightCornerScoreboardOffsetFromBottom() - textsize; 
+   S32 ypos = bottom - textsize; 
 
    /// Render player score
    bool hasSecondLeader = gameType->getSecondLeadingPlayer() >= 0;

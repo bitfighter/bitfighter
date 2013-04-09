@@ -276,10 +276,6 @@ public:
 
    bool advanceGameClock(U32 deltaT);
 
-   // Game-specific location for the bottom of the scoreboard on the lower-right corner
-   // (because games like nexus have more stuff down there we need to look out for)
-   virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() const;
-
    enum
    {
       RespawnDelay = 1500,
@@ -430,6 +426,7 @@ public:
 #ifndef ZAP_DEDICATED
    virtual void renderInterfaceOverlay(bool scoreboardVisible);
    virtual void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
+   virtual S32 renderTimeLeftSpecial(S32 bottom) const;
 
    void renderObjectiveArrow(const BfObject *target) const;
    void renderObjectiveArrow(const BfObject *target, const Color *c, F32 alphaMod = 1.0f) const;

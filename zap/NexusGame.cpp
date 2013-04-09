@@ -162,7 +162,7 @@ string NexusGameType::toLevelCode() const
 // Returns time left in current Nexus cycle -- if we're open, this will be the time until Nexus closes; if we're closed,
 // it will return the time until Nexus opens
 // Client only
-S32 NexusGameType::getNexusTimeLeft()
+S32 NexusGameType::getNexusTimeLeft() const
 {
    return mGameTimer.getCurrent() / 1000 - mNexusChangeAtTime;
 }
@@ -658,25 +658,19 @@ bool NexusGameType::canBeTeamGame()       const { return true;  }
 bool NexusGameType::canBeIndividualGame() const { return true;  }
 
 
-U32 NexusGameType::getLowerRightCornerScoreboardOffsetFromBottom() const
-{
-   return 28;
-}
-
-
 //////////  Client only code:
 
 extern Color gNexusOpenColor;
 extern Color gNexusClosedColor;
 
 #ifndef ZAP_DEDICATED
-void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
-{
-   Parent::renderInterfaceOverlay(scoreboardVisible);
 
-   const S32 x = gScreenInfo.getGameCanvasWidth()  - UserInterface::horizMargin;
-   const S32 y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 25;
+S32 NexusGameType::renderTimeLeftSpecial(S32 bottom) const
+{
    const S32 size = 20;
+   const S32 gap = 4;
+   const S32 x = gScreenInfo.getGameCanvasWidth()  - UserInterface::horizMargin;
+   const S32 y = bottom;
 
    glColor(mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);      // Display timer in appropriate color
 
@@ -694,10 +688,18 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
       S32 w = w00 + (mNexusIsOpen ? wCloses : wOpens);
 
-      S32 timeLeft = min(getNexusTimeLeft() * 1000, (S32)mGameTimer.getCurrent());
+      S32 timeLeft = MIN(getNexusTimeLeft() * 1000, (S32)mGameTimer.getCurrent());
 
       drawTime(x - w, y - size, size, timeLeft, mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
    }
+
+   return size + gap;
+}
+
+
+void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
+{
+   Parent::renderInterfaceOverlay(scoreboardVisible);
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
       renderObjectiveArrow(mYardSaleWaypoints[i].pos, &Colors::white);

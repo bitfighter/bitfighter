@@ -71,8 +71,8 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode() const;
 
-   bool mNexusIsOpen;         // Is the nexus open?
-   S32 getNexusTimeLeft();    // Get time until the nexus changes state
+   bool mNexusIsOpen;               // Is the nexus open?
+   S32 getNexusTimeLeft() const;    // Get time until the nexus changes state
 
 
    bool isSpawnWithLoadoutGame();
@@ -104,6 +104,7 @@ public:
 
 #ifndef ZAP_DEDICATED
    void renderInterfaceOverlay(bool scoreboardVisible);
+   S32 renderTimeLeftSpecial(S32 bottom) const;
 #endif
 
    void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);
@@ -118,8 +119,6 @@ public:
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
 
-
-   U32 getLowerRightCornerScoreboardOffsetFromBottom() const;
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 

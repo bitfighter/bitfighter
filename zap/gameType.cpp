@@ -2249,6 +2249,12 @@ void GameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const
 }
 
 
+S32 GameType::renderTimeLeftSpecial(S32 bottom) const
+{
+   return 0;
+}
+
+
 static void switchTeamsCallback(ClientGame *game, U32 unused)
 {
    GameType *gt = game->getGameType();
@@ -4260,12 +4266,6 @@ bool GameType::isSpawnWithLoadoutGame()
 bool GameType::levelHasLoadoutZone()
 {
    return mLevelHasLoadoutZone;
-}
-
-
-U32 GameType::getLowerRightCornerScoreboardOffsetFromBottom() const
-{
-   return 0;
 }
 
 
