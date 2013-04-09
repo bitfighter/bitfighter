@@ -235,16 +235,10 @@ void Ship::setDefaultLoadout()
 {
     
    for(S32 i = 0; i < ShipModuleCount; i++)
-   {
       mModule[i]    = (ShipModule) DefaultLoadout[i];
-      mOldModule[i] = ModuleNone;
-   }
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-   {
-      mWeapon[i]    = (WeaponType) DefaultLoadout[i + ShipModuleCount];
-      mOldWeapon[i] = WeaponNone;
-   }
+      mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
 }
 
 
@@ -537,12 +531,7 @@ void Ship::selectWeapon(S32 weaponIdx)
 
 
 WeaponType  Ship::getWeapon(U32 indx) { return mWeapon[indx]; }
-WeaponType *Ship::getWeapons()        { return mWeapon;       }
-WeaponType *Ship::getOldWeapons()     { return mOldWeapon;    }
-
 ShipModule  Ship::getModule(U32 indx) { return mModule[indx]; }
-ShipModule *Ship::getModules()        { return mModule;       }
-ShipModule *Ship::getOldModules()     { return mOldModule;    }
 
 
 void Ship::processWeaponFire()
@@ -1568,8 +1557,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       for(S32 i = 0; i < ShipModuleCount; i++)
       {
-         mOldModule[i] = mModule[i];
-
          // Check old loadout for sensor
          if(mModule[i] == ModuleSensor)
             hadSensorThen = true;
@@ -1589,11 +1576,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mSensorEquipZoomTimer.reset();
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
-      {
-         mOldWeapon[i] = mWeapon[i];
          mWeapon[i] = (WeaponType) stream->readEnum(WeaponCount);
-      }
-
 
       ClientGame *game = static_cast<ClientGame*>(getGame());
 
@@ -1604,7 +1587,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
 
       // Alert the UI that a new loadout has arrived
-      game->getUIManager()->getGameUserInterface()->newLoadoutHasArrived();
+      if(isLocalPlayerShip(game))
+         game->getUIManager()->getGameUserInterface()->newLoadoutHasArrived(mModule, mWeapon);
    }
 
    if(stream->readFlag())  // hasExploded
@@ -1713,8 +1697,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(playSpawnEffect)
    {
       mWarpInTimer.reset(WarpFadeInTime);    // Make ship all spinny
-
-      TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
 
       static_cast<ClientGame *>(getGame())->emitTeleportInEffect(getActualPos(), 1);
 

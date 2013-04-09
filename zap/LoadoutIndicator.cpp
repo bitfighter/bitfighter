@@ -40,6 +40,40 @@ namespace Zap { namespace UI {
 LoadoutIndicator::LoadoutIndicator()
 {
    mScrollTimer.setPeriod(200);
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      mWeapons[i] = mOldWeapons[i] = WeaponNone;
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      mModules[i] = mOldModules[i] = ModuleNone;
+}
+
+
+void LoadoutIndicator::newLoadoutHasArrived(const ShipModule *modules, const WeaponType *weapons)
+{
+   bool loadoutChanged = false;
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      if(weapons[i] != mWeapons[i])
+      {
+         mOldWeapons[i] = mWeapons[i];
+         mWeapons[i]    = weapons[i];
+         loadoutChanged = true;
+      }
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      if(modules[i] != mModules[i])
+      {
+         mOldModules[i] = mModules[i];
+         mModules[i]    = modules[i];
+         loadoutChanged = true;
+      }
+
+   if(loadoutChanged)
+   {
+      onActivated();
+      resetScrollTimer();
+   }
 }
 
 
@@ -66,14 +100,15 @@ static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 
 static void doRender(ShipModule *modules, WeaponType *weapons, Ship *ship, ClientGame *game, S32 top)
 {
-   if(modules[0] == ModuleNone)
+   // If if we have no module, then this loadout has never been set, and there is nothing to render
+   if(modules[0] == ModuleNone)  
       return;
 
    static const Color *INDICATOR_INACTIVE_COLOR = &Colors::green80;      
    static const Color *INDICATOR_ACTIVE_COLOR   = &Colors::red80;        
    static const Color *INDICATOR_PASSIVE_COLOR  = &Colors::yellow;
 
-   U32 xPos = UserInterface::horizMargin;
+   U32 xPos = 10;
 
    FontManager::pushFontContext(FontManager::LoadoutIndicatorContext);
    
@@ -132,7 +167,7 @@ void LoadoutIndicator::render(ClientGame *game)
    if(!localShip)
       return;
 
-   const S32 indicatorTop    = UserInterface::vertMargin;      // Top of indicator y-pos
+   const S32 indicatorTop    = 10;      // Top of indicator y-pos
    const S32 indicatorHeight = getIndicatorHeight();
    S32 top;
 
@@ -140,15 +175,14 @@ void LoadoutIndicator::render(ClientGame *game)
    top = Parent::prepareToRenderFromDisplay(game, indicatorTop - 1, indicatorHeight + 1);
    if(top != NO_RENDER)
    {
-      doRender(localShip->getOldModules(), localShip->getOldWeapons(), localShip, game, top);
+      doRender(mOldModules, mOldWeapons, localShip, game, top);
       doneRendering();
    }
 
    // Current loadout
    top = Parent::prepareToRenderToDisplay(game, indicatorTop, indicatorHeight);
-   doRender(localShip->getModules(), localShip->getWeapons(), localShip, game, top);
+   doRender(mModules, mWeapons, localShip, game, top);
    doneRendering();
-
 }
 
 

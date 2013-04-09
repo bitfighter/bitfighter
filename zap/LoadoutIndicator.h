@@ -26,7 +26,9 @@
 #ifndef _LOADOUT_INDICATOR_H_
 #define _LOADOUT_INDICATOR_H_
 
-#include "AToBScroller.h"
+#include "AToBScroller.h"     // Parent
+#include "shipItems.h"
+
 #include "tnlTypes.h"
 
 using namespace TNL;
@@ -40,10 +42,19 @@ class LoadoutIndicator : public AToBScroller
 {
    typedef AToBScroller Parent;
 
+private:
+   ShipModule mModules[ShipModuleCount];      // Modules local ship is carrying
+   WeaponType mWeapons[ShipWeaponCount];
+
+   ShipModule mOldModules[ShipModuleCount];   // Modules local ship was previously carrying
+   WeaponType mOldWeapons[ShipWeaponCount];
+
 public:
    LoadoutIndicator();      // Constructor
 
    static const S32 LoadoutIndicatorHeight = indicatorFontSize + indicatorPadding * 2;
+
+   void newLoadoutHasArrived(const ShipModule *modules, const WeaponType *weapons);
 
    void render(ClientGame *game);
 };

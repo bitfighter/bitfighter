@@ -684,10 +684,9 @@ void GameUserInterface::activateModule(S32 index)
 
 
 // A new loadout has arrived
-void GameUserInterface::newLoadoutHasArrived()
+void GameUserInterface::newLoadoutHasArrived(const ShipModule *modules, const WeaponType *weapons)
 {
-   mLoadoutIndicator.onActivated();
-   mLoadoutIndicator.resetScrollTimer();
+   mLoadoutIndicator.newLoadoutHasArrived(modules, weapons);
 }
 
 
