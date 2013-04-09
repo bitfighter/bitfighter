@@ -1122,7 +1122,7 @@ string Game::makeUnique(const char *name)
 
             char numstr[U32_MAX_DIGITS + 2];    // + 1 for the ., +1 for the \0
 
-            dSprintf(numstr, strlen(numstr), ".%d", index);
+            dSprintf(numstr, ARRAYSIZE(numstr) - 1, ".%d", index);
 
             // Max length name can be such that when number is appended, it's still less than MAX_PLAYER_NAME_LENGTH
             S32 maxNamePos = MAX_PLAYER_NAME_LENGTH - (S32)strlen(numstr); 
