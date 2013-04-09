@@ -907,7 +907,7 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
-   if(updateMask & InitialMask)
+   if(stream->writeFlag(updateMask & (InitialMask | TeamMask)))
    {
       writeThisTeam(stream);
    }
@@ -944,7 +944,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
 
-   if(mInitial)
+   if(stream->readFlag())
    {
       readThisTeam(stream);
    }
