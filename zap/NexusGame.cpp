@@ -665,11 +665,11 @@ extern Color gNexusClosedColor;
 
 #ifndef ZAP_DEDICATED
 
-S32 NexusGameType::renderTimeLeftSpecial(S32 bottom) const
+S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom) const
 {
    const S32 size = 20;
    const S32 gap = 4;
-   const S32 x = gScreenInfo.getGameCanvasWidth()  - UserInterface::horizMargin;
+   const S32 x = right;
    const S32 y = bottom;
 
    glColor(mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);      // Display timer in appropriate color
@@ -682,13 +682,19 @@ S32 NexusGameType::renderTimeLeftSpecial(S32 bottom) const
       drawStringfr(x, y - size, size, "Nexus closed until end of game");
    else if(!isGameOver())
    {
-      static const U32 w00     = getStringWidth(size, "00:00");
+      static const U32 w0      = getStringWidth(size, "0");
       static const U32 wCloses = getStringWidth(size, "Nexus closes: ");
       static const U32 wOpens  = getStringWidth(size, "Nexus opens: ");
 
-      S32 w = w00 + (mNexusIsOpen ? wCloses : wOpens);
-
       S32 timeLeft = MIN(getNexusTimeLeft() * 1000, (S32)mGameTimer.getCurrent());
+
+      // Get the width of the minutes and 10 seconds digit(s), account for two leading 0s (00:45)
+      const U32 minsRemaining = timeLeft / (60 * 1000);
+      const U32 tenSecsRemaining = timeLeft / 1000 % 60 / 10;
+      string timestr = itos(minsRemaining) + ":" + itos(tenSecsRemaining);
+      const U32 minsWidth = getStringWidth(size, timestr.c_str()) + (minsRemaining < 10 ? w0 : 0);
+
+      S32 w = minsWidth + w0 + (mNexusIsOpen ? wCloses : wOpens);
 
       drawTime(x - w, y - size, size, timeLeft, mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
    }

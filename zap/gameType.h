@@ -426,7 +426,7 @@ public:
 #ifndef ZAP_DEDICATED
    virtual void renderInterfaceOverlay(bool scoreboardVisible);
    virtual void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
-   virtual S32 renderTimeLeftSpecial(S32 bottom) const;
+   virtual S32 renderTimeLeftSpecial(S32 right, S32 bottom) const;
 
    void renderObjectiveArrow(const BfObject *target) const;
    void renderObjectiveArrow(const BfObject *target, const Color *c, F32 alphaMod = 1.0f) const;

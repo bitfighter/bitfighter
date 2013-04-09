@@ -104,7 +104,7 @@ public:
 
 #ifndef ZAP_DEDICATED
    void renderInterfaceOverlay(bool scoreboardVisible);
-   S32 renderTimeLeftSpecial(S32 bottom) const;
+   S32 renderTimeLeftSpecial(S32 right, S32 bottom) const;
 #endif
 
    void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);

@@ -2249,7 +2249,7 @@ void GameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const
 }
 
 
-S32 GameType::renderTimeLeftSpecial(S32 bottom) const
+S32 GameType::renderTimeLeftSpecial(S32 right, S32 bottom) const
 {
    return 0;
 }

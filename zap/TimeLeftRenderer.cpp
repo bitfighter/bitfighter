@@ -32,7 +32,9 @@ void TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible) 
 
    S32 timeTop = renderTimeLeft(gameType);
 
-   timeTop -= gameType->renderTimeLeftSpecial(timeTop);
+   // Some game types *ahem* Nexus *ahem* require an extra line for the scoreboard... a "special" if you will
+   timeTop -= gameType->renderTimeLeftSpecial(rightAlignCoord, timeTop);
+
    if(!scoreboardVisible)
    {
       Game *game = gameType->getGame();
@@ -210,7 +212,6 @@ S32 TimeLeftRenderer::renderTimeLeft(const GameType *gameType) const
    const S32 grayLineVertPadding = 3;
 
    // Precalc some widths we'll need from time to time
-   static const U32 w00    = getStringWidth(timeTextSize, ":00");
    static const U32 w0     = getStringWidth(timeTextSize, "0");
    static const U32 wUnlim = getStringWidth(timeTextSize, "Unlim.");
 
@@ -219,9 +220,12 @@ S32 TimeLeftRenderer::renderTimeLeft(const GameType *gameType) const
       timeWidth = wUnlim;
    else
    {
+      // Get the width of the minutes and 10 seconds digit(s)
       // By using the actual minutes, we get a better fit while not changing the positioning too often
       U32 minsRemaining = gameType->getRemainingGameTimeInMs() / (60 * 1000);
-      timeWidth = getStringWidth(timeTextSize, itos(minsRemaining).c_str()) + w00;
+      const U32 tenSecsRemaining = gameType->getRemainingGameTimeInMs() / 1000 % 60 / 10;
+      string timestr = itos(minsRemaining) + ":" + itos(tenSecsRemaining);
+      timeWidth = getStringWidth(timeTextSize, timestr.c_str()) + w0;
 
       // Add a little extra for the leading 0 that's drawn for one digit times
       if(minsRemaining < 10)
@@ -239,11 +243,13 @@ S32 TimeLeftRenderer::renderTimeLeft(const GameType *gameType) const
 
    glColor(Colors::cyan);
    // Align with top of time, + 4 technically not needed, but just looks better
-   wt = drawStringfr(smallTextRPos, timeTop + 4, siSize, gameType->getShortName());
+   wt = drawStringfr(smallTextRPos, timeTop + 2, siSize, gameType->getShortName());
 
    glColor(Colors::red);
    // Align with bottom of time
-   wb = drawStringfr(smallTextRPos, timeTop + timeTextSize - siSize, siSize, itos(gameType->getWinningScore()).c_str()); 
+   S32 stwSizeBonus = 1;
+   wb = drawStringfr(smallTextRPos, timeTop + timeTextSize - siSize - stwSizeBonus, siSize + stwSizeBonus, 
+                     itos(gameType->getWinningScore()).c_str()); 
 
    glColor(Colors::white);
    if(gameType->isTimeUnlimited())  
@@ -251,11 +257,13 @@ S32 TimeLeftRenderer::renderTimeLeft(const GameType *gameType) const
    else
       drawTime(timeLeft, timeTop, timeTextSize, gameType->getRemainingGameTimeInMs());
 
+   const S32 leftLineOverhangAmount = 4;
+   const S32 visualVerticalTextAlignmentHackyFacty = 3;
    glColor(Colors::gray40);
-   drawHorizLine(smallTextRPos - max(wt, wb), rightAlignCoord, timeTop - grayLineVertPadding);
-   drawVertLine(grayLinePos, timeTop, timeTop + timeTextSize);
+   drawHorizLine(smallTextRPos - max(wt, wb) - leftLineOverhangAmount, rightAlignCoord, timeTop - grayLineVertPadding);
+   drawVertLine(grayLinePos, timeTop + visualVerticalTextAlignmentHackyFacty, timeTop + timeTextSize);
 
-   return timeTop - 2 * grayLineVertPadding - gDefaultLineWidth;
+   return timeTop - 2 * grayLineVertPadding - gDefaultLineWidth - 3;
 }
 
 
