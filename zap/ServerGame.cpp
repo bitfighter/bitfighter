@@ -996,6 +996,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
    // Levelgens:
    runLevelGenScript(getGameType()->getScriptName());                   // Run level's levelgen script (if any)
    runLevelGenScript(mSettings->getIniSettings()->globalLevelScript);   // And our global levelgen (if defined)
+   EventManager::get()->update();
 
    // Check after script, script might add Teams
    if(getGameType()->makeSureTeamCountIsNotZero())
