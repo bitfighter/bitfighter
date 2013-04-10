@@ -143,29 +143,6 @@ bool LoadoutTracker::update(const LoadoutTracker &loadout)
 }
 
 
-//
-//bool LoadoutTracker::update(const ShipModule *modules, const WeaponType *weapons)
-//{
-//   bool loadoutChanged = false;
-//
-//   for(S32 i = 0; i < ShipModuleCount; i++)
-//      if(modules[i] != mModules[i])
-//      {
-//         mModules[i]    = modules[i];
-//         loadoutChanged = true;
-//      }
-//
-//   for(S32 i = 0; i < ShipWeaponCount; i++)
-//      if(weapons[i] != mWeapons[i])
-//      {
-//         mWeapons[i]    = weapons[i];
-//         loadoutChanged = true;
-//      }
-//
-//   return loadoutChanged;
-//}
-
-
 // Takes an array of U8s repesenting loadout... M,M,W,W,W.  See DefaultLoadout for an example
 void LoadoutTracker::setLoadout(const U8 *items)
 {
