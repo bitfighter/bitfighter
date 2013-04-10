@@ -189,9 +189,6 @@ public:
    Timer mModuleSecondaryTimer[ModuleCount];  // Timer to prevent accidentally firing in quick succession
    Timer mSpyBugPlacementTimer;
    Timer mFastRechargeTimer;
-   static const U32 ModuleSecondaryTimerDelay = 500;
-   static const U32 SpyBugPlacementTimerDelay = 800;
-   static const U32 IdleRechargeCycleTimerDelay = 2000;
 
    void setChangeTeamMask();
 

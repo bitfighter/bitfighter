@@ -118,6 +118,10 @@ Ship::~Ship()
 
 void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot)
 {
+   static const U32 ModuleSecondaryTimerDelay = 500;
+   static const U32 SpyBugPlacementTimerDelay = 800;
+   static const U32 IdleRechargeCycleTimerDelay = 2000;
+
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
    mFastRecharging = false;
