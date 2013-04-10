@@ -27,13 +27,12 @@
 #include "IniFile.h"
 #include "config.h"
 #include "gameLoader.h"    // For LevelListLoader::levelList
+#include "LoadoutTracker.h"
 #include "version.h"
 #include "stringUtils.h"
 #include "InputCode.h"
 #include "BanList.h"
 #include "Colors.h"
-
-#include "ship.h"          // For Ship::stringToLoadout (this could be moved?)
 
 #include "stringUtils.h"  // For itos
 
@@ -284,7 +283,7 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
       if(!settings->getLoadoutPreset(i, preset))
          continue;
 
-      string presetStr = Ship::loadoutToString(preset);
+      string presetStr = LoadoutTracker::loadoutToString(preset);
 
       if(presetStr != "")
          ini->SetValue(section, "Preset" + itos(i + 1), presetStr);
@@ -525,14 +524,11 @@ static void loadLoadoutPresets(CIniFile *ini, GameSettings *settings)
    for(S32 i = 0; i < LOADOUT_PRESETS; i++)
       rawPresets.push_back(ini->GetValue("LoadoutPresets", "Preset" + itos(i + 1), ""));
    
-   Vector<U8> loadout;
-
    for(S32 i = 0; i < LOADOUT_PRESETS; i++)
    {
-      loadout.clear();
-
-      if(Ship::stringToLoadout(rawPresets[i], loadout))
-         settings->setLoadoutPreset(i, loadout);
+      LoadoutTracker loadout(rawPresets[i]);
+      if(loadout.isValid())
+         settings->setLoadoutPreset(&loadout, i);
    }
 }
 

@@ -98,6 +98,7 @@ namespace Zap
 
 class GameSettings;
 class BanList;
+class LoadoutTracker;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -243,7 +244,7 @@ public:
 
 
    bool getLoadoutPreset(S32 index, Vector<U8> &preset);
-   void setLoadoutPreset(S32 index, const Vector<U8> &preset);
+   void setLoadoutPreset(const LoadoutTracker *preset, S32 index);
 
    void addConfigurationError(const string &errorMessage);
    Vector<string> getConfigurationErrors();

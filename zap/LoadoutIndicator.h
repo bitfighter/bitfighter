@@ -56,6 +56,8 @@ public:
    void setModulePrimary(ShipModule module, bool isActive);
    void setModuleSecondary(ShipModule module, bool isActive);
 
+   const LoadoutTracker *getLoadout();
+
    void render(ClientGame *game);
 };
 

@@ -43,11 +43,13 @@ private:
 
    U32 mActiveWeapon;      // Index of active weapon
 
-   bool mModulePrimaryActive[ModuleCount];       // Is the primary component of the module active at this moment?
-   bool mModuleSecondaryActive[ModuleCount];     // Is the secondary component of the module active?
+   bool mModulePrimaryActive[ModuleCount];         // Is the primary component of the module active at this moment?
+   bool mModuleSecondaryActive[ModuleCount];       // Is the secondary component of the module active?
+
+   void resetLoadout();    // Reset this loadout to its factory settings
 
 public:
-   LoadoutTracker();       // Constructor
+   LoadoutTracker(const string &loadoutStr = "");  // Constructor
 
    bool update(const LoadoutTracker &tracker);
    //bool update(const ShipModule *modules, const WeaponType *weapons);
@@ -83,6 +85,9 @@ public:
 
    bool isModulePrimaryActive(ShipModule module) const;
    bool isModuleSecondaryActive(ShipModule module) const;
+
+   Vector<U8> loadoutToVector() const;
+   static string loadoutToString(const Vector<U8> &loadout);
 };
 
 

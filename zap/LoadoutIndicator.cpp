@@ -73,6 +73,12 @@ void LoadoutIndicator::setModuleSecondary(ShipModule module, bool isActive)
 }
 
 
+const LoadoutTracker *LoadoutIndicator::getLoadout()
+{
+   return &mCurrLoadout;
+}
+
+
 static S32 getIndicatorHeight()
 {
    return indicatorFontSize + 2 * indicatorPadding + 1;

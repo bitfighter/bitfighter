@@ -30,6 +30,7 @@
 #include "ScreenInfo.h"
 #include "stringUtils.h"      // For itos
 #include "LuaWrapper.h"       // For printing Lua class hiearchy
+#include "LoadoutTracker.h"
 
 #include "tnlTypes.h"         // For TNL_OS_WIN32 def
 #include "tnlLog.h"           // For logprintf
@@ -466,9 +467,9 @@ bool GameSettings::getLoadoutPreset(S32 index, Vector<U8> &preset)
 
 
 // Caller is responsible for bounds checking index...
-void GameSettings::setLoadoutPreset(S32 index, const Vector<U8> &preset) 
+void GameSettings::setLoadoutPreset(const LoadoutTracker *preset, S32 index) 
 {
-   mLoadoutPresets[index] = preset;
+   mLoadoutPresets[index] = preset->loadoutToVector();
 }
 
 

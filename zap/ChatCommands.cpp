@@ -28,6 +28,7 @@
 #include "ClientGame.h"
 #include "ClientInfo.h"
 #include "gameType.h"
+#include "LoadoutTracker.h"
 #include "LevelDatabaseDownloadThread.h"
 
 
@@ -428,7 +429,7 @@ void showPresetsHandler(ClientGame *game, const Vector<string> &words)
       preset.clear();
       game->getSettings()->getLoadoutPreset(i, preset);
 
-      string loadoutStr = Ship::loadoutToString(preset);
+      string loadoutStr = LoadoutTracker::loadoutToString(preset);
       
       string display;
       

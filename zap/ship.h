@@ -255,9 +255,6 @@ public:
    void setDefaultLoadout();                 // Set the ship's loadout to the default values
 
    ClientInfo *getClientInfo();
-   static string loadoutToString(const Vector<U8> &loadout);
-   static bool stringToLoadout(string loadoutStr, Vector<U8> &loadout);
-
 
    virtual void idle(IdleCallPath path);
 
@@ -276,7 +273,6 @@ public:
    void onAddedToGame(Game *game);
 
    void emitShipExplosion(Point pos);
-   //void setActualPos(Point p);
    void setActualPos(Point p, bool warp);
    bool isModulePrimaryActive(ShipModule module);
 
@@ -296,6 +292,7 @@ public:
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
    bool isRobot();

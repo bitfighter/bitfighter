@@ -25,26 +25,91 @@
 
 
 #include "LoadoutTracker.h"
+#include "game.h"             // For getModuleInfo
+#include "stringUtils.h"      // For parseString
+
+#include "tnlLog.h"
+
 
 namespace Zap
 {
 
 // Constructor
-LoadoutTracker::LoadoutTracker()
+LoadoutTracker::LoadoutTracker(const string &loadoutStr)
+{
+   resetLoadout();
+
+   // If we have a loadout string, try to get something useful out of it.
+   // Note that even if we are able to parse the loadout successfully, it might still be invalid for a 
+   // particular server or gameType... engineer, for example, is not allowed everywhere.
+   if(loadoutStr == "")
+      return;
+
+   Vector<string> words;
+   parseString(loadoutStr, words, ',');
+
+   if(words.size() != ShipModuleCount + ShipWeaponCount)      // Invalid loadout string
+   {
+      logprintf(LogConsumer::ConfigurationError, "Misconfigured loadout preset found in INI");
+      return;
+   }
+
+   bool found;
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+   {
+      found = false;
+      const char *word = words[i].c_str();
+
+      for(S32 j = 0; j < ModuleCount; j++)
+         if(stricmp(word, Game::getModuleInfo((ShipModule) j)->getName()) == 0)     // Case insensitive
+         {
+            mModules[i] = ShipModule(j);
+            found = true;
+            break;
+         }
+
+      if(!found)
+      {
+         logprintf(LogConsumer::ConfigurationError, "Unknown module found in loadout preset in INI file: %s", word);
+         resetLoadout();
+         return;
+      }
+   }
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+   {
+      found = false;
+      const char *word = words[i + ShipModuleCount].c_str();
+
+      for(S32 j = 0; j < WeaponCount; j++)
+         if(stricmp(word, GameWeapon::weaponInfo[j].name.getString()) == 0)
+         {
+            mWeapons[i] = WeaponType(j);
+            found = true;
+            break;
+         }
+
+      if(!found)
+      {
+         logprintf(LogConsumer::ConfigurationError, "Unknown weapon found in loadout preset in INI file: %s", word);
+         resetLoadout();
+         return;
+      }
+   }
+}
+
+
+// Reset this loadout to its factory settings
+void LoadoutTracker::resetLoadout()
 {
    for(S32 i = 0; i < ShipModuleCount; i++)
       mModules[i] = ModuleNone;
 
-   for(S32 i = 0; i < ModuleCount; i++)
-   {
-      mModulePrimaryActive[i] = false;  
-      mModuleSecondaryActive[i] = false;
-   }   
-   
-   
    for(S32 i = 0; i < ShipWeaponCount; i++)
       mWeapons[i] = WeaponNone;
 
+   deactivateAllModules();
    mActiveWeapon = 0;
 }
 
@@ -221,5 +286,39 @@ bool LoadoutTracker::isModuleSecondaryActive(ShipModule module) const
    return mModuleSecondaryActive[module];
 }
 
+
+Vector<U8> LoadoutTracker::loadoutToVector() const
+{
+   Vector<U8> loadout(ShipModuleCount + ShipWeaponCount);
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      loadout.push_back(U8(mModules[i]));
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      loadout.push_back(U8(mWeapons[i]));
+
+   return loadout;
+}
+
+
+// Will return an empty string if loadout looks invalid
+string LoadoutTracker::loadoutToString(const Vector<U8> &loadout)
+{
+   // Only expect missized loadout when presets haven't all been set, and loadout.size will be 0
+   if(loadout.size() != ShipModuleCount + ShipWeaponCount)
+      return "";
+
+   Vector<string> loadoutStrings(ShipModuleCount + ShipWeaponCount);    // Reserving some space makes things a tiny bit more efficient
+
+   // First modules
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      loadoutStrings.push_back(Game::getModuleInfo((ShipModule) loadout[i])->getName());
+
+   // Then weapons
+   for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
+      loadoutStrings.push_back(GameWeapon::weaponInfo[loadout[i]].name.getString());
+
+   return listToString(loadoutStrings, ',');
+}
 
 }

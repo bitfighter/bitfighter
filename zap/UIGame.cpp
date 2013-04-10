@@ -826,20 +826,9 @@ void GameUserInterface::onTextInput(char ascii)
 
 
 // Helper function...
-static void saveLoadoutPreset(ClientGame *game, S32 slot)
+static void saveLoadoutPreset(ClientGame *game, const LoadoutTracker *loadout, S32 slot)
 {
-   GameConnection *conn = game->getConnectionToServer();
-   if(!conn)
-      return;
-
-   Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
-   if(!ship)
-      return;
-
-   Vector<U8> loadout(ShipModuleCount + ShipWeaponCount);
-   ship->getLoadout(loadout);
-
-   game->getSettings()->setLoadoutPreset(slot, loadout);
+   game->getSettings()->setLoadoutPreset(loadout, slot);
    game->displaySuccessMessage(("Current loadout saved as preset " + itos(slot + 1)).c_str());
 }
 
@@ -919,15 +908,15 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    else if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl+] advances bots by 10 steps if frozen
       EventManager::get()->addSteps(10);
    else if(inputCode == KEY_1 && InputCodeManager::checkModifier(KEY_CTRL))               // Ctrl+1 saves loadout preset in first slot
-      saveLoadoutPreset(getGame(), 0);
+      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 0);
    else if(inputCode == KEY_1 && InputCodeManager::checkModifier(KEY_ALT))                // Alt+1 loads preset from first slot
       loadLoadoutPreset(getGame(), 0);
    else if(inputCode == KEY_2 && InputCodeManager::checkModifier(KEY_CTRL))               // Ctrl+2
-      saveLoadoutPreset(getGame(), 1);
+      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 1);
    else if(inputCode == KEY_2 && InputCodeManager::checkModifier(KEY_ALT))                // Alt+2
       loadLoadoutPreset(getGame(), 1);
    else if(inputCode == KEY_3 && InputCodeManager::checkModifier(KEY_CTRL))               // Ctrl+3
-      saveLoadoutPreset(getGame(), 2);
+      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 2);
    else if(inputCode == KEY_3 && InputCodeManager::checkModifier(KEY_ALT))                // Alt+3
       loadLoadoutPreset(getGame(), 2);
 
