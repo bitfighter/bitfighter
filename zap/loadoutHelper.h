@@ -60,8 +60,9 @@ class LoadoutHelper : public HelperMenu
    typedef HelperMenu Parent;
 
 private:
-   U32 mModule[ShipModuleCount];   // Modules selected by user -- 2
-   U32 mWeapon[ShipWeaponCount];   // Weapons selected by user -- 3
+   ShipModule mModule[ShipModuleCount];   // Modules selected by user -- 2
+   WeaponType mWeapon[ShipWeaponCount];   // Weapons selected by user -- 3
+
    S32 mCurrentIndex;
 
    Vector<OverlayMenuItem> mModuleMenuItems;

@@ -415,7 +415,7 @@ void ClientGame::updatePlayerNameAndPassword(const string &name, const string &p
 }
 
 
-void ClientGame::displayShipDesignChangedMessage(const Vector<U8> &loadout, const char *msgToShowIfLoadoutsAreTheSame)
+void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, const char *msgToShowIfLoadoutsAreTheSame)
 {
    if(!getConnectionToServer())
       return;
@@ -433,7 +433,7 @@ void ClientGame::displayShipDesignChangedMessage(const Vector<U8> &loadout, cons
 
    if(getSettings()->getIniSettings()->verboseHelpMessages)
    {
-      if(ship->isLoadoutSameAsCurrent(loadout))
+      if(ship->isLoadoutSameAsCurrent(loadout.toU8Vector()))
          displayErrorMessage(msgToShowIfLoadoutsAreTheSame);
       else
       {

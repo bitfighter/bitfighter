@@ -128,7 +128,7 @@ public:
    void correctPlayerName(const string &name);                                      // When server corrects capitalization of name or similar
    void updatePlayerNameAndPassword(const string &name, const string &password);    // When user enters new name and password on NameEntryUI
 
-   void displayShipDesignChangedMessage(const Vector<U8> &loadout, const char *msgToShowIfLoadoutsAreTheSame);
+   void displayShipDesignChangedMessage(const LoadoutTracker &loadout, const char *msgToShowIfLoadoutsAreTheSame);
 
    UIManager *getUIManager() const;
 

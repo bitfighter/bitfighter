@@ -86,8 +86,8 @@ public:
    bool isModulePrimaryActive(ShipModule module) const;
    bool isModuleSecondaryActive(ShipModule module) const;
 
-   Vector<U8> loadoutToVector() const;
-   static string loadoutToString(const Vector<U8> &loadout);
+   Vector<U8> toU8Vector() const;
+   string toString() const;
 };
 
 

@@ -835,12 +835,11 @@ static void saveLoadoutPreset(ClientGame *game, const LoadoutTracker *loadout, S
 
 static void loadLoadoutPreset(ClientGame *game, S32 slot)
 {
-   Vector<U8> loadout(ShipModuleCount + ShipWeaponCount);      // Define it
-   game->getSettings()->getLoadoutPreset(slot, loadout);       // Fill it
+   LoadoutTracker loadout = game->getSettings()->getLoadoutPreset(slot);
 
-   if(loadout.size() == 0)    // Looks like the preset might be empty!
+   if(!loadout.isValid())
    {
-      string msg = "Preset " + itos(slot + 1) + " is undefined -- to define it, try Ctrl-" + itos(slot + 1);
+      string msg = "Preset " + itos(slot + 1) + " is undefined -- to define it, try Ctrl+" + itos(slot + 1);
       game->displayErrorMessage(msg.c_str());
       return;
    }
@@ -849,13 +848,6 @@ static void loadLoadoutPreset(ClientGame *game, S32 slot)
    if(!gameType)
       return;
    
-   string err = gameType->validateLoadout(loadout);
-   
-   if(err != "")
-   {
-      game->displayErrorMessage((err + "; loadout not set").c_str());
-      return;
-   }
 
    GameConnection *conn = game->getConnectionToServer();
    if(!conn)
@@ -867,7 +859,7 @@ static void loadLoadoutPreset(ClientGame *game, S32 slot)
    // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
    // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
    // Tell server loadout has changed.  Server will activate it when we enter a loadout zone.
-   conn->c2sRequestLoadout(loadout);    
+   conn->c2sRequestLoadout(loadout.toU8Vector());    
 }
 
 

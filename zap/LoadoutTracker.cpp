@@ -264,7 +264,7 @@ bool LoadoutTracker::isModuleSecondaryActive(ShipModule module) const
 }
 
 
-Vector<U8> LoadoutTracker::loadoutToVector() const
+Vector<U8> LoadoutTracker::toU8Vector() const
 {
    Vector<U8> loadout(ShipModuleCount + ShipWeaponCount);
 
@@ -278,24 +278,23 @@ Vector<U8> LoadoutTracker::loadoutToVector() const
 }
 
 
-// Will return an empty string if loadout looks invalid
-string LoadoutTracker::loadoutToString(const Vector<U8> &loadout)
+string LoadoutTracker::toString() const
 {
-   // Only expect missized loadout when presets haven't all been set, and loadout.size will be 0
-   if(loadout.size() != ShipModuleCount + ShipWeaponCount)
+   if(!isValid())
       return "";
 
-   Vector<string> loadoutStrings(ShipModuleCount + ShipWeaponCount);    // Reserving some space makes things a tiny bit more efficient
+   Vector<string> loadoutStrings(ShipModuleCount + ShipWeaponCount);    // Reserve space for efficiency
 
    // First modules
    for(S32 i = 0; i < ShipModuleCount; i++)
-      loadoutStrings.push_back(Game::getModuleInfo((ShipModule) loadout[i])->getName());
+      loadoutStrings.push_back(Game::getModuleInfo((ShipModule) mModules[i])->getName());
 
    // Then weapons
-   for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-      loadoutStrings.push_back(GameWeapon::weaponInfo[loadout[i]].name.getString());
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      loadoutStrings.push_back(GameWeapon::weaponInfo[mWeapons[i]].name.getString());
 
    return listToString(loadoutStrings, ',');
 }
+
 
 }

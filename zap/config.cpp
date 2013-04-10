@@ -280,10 +280,7 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
 
    for(S32 i = 0; i < LOADOUT_PRESETS; i++)
    {
-      if(!settings->getLoadoutPreset(i, preset))
-         continue;
-
-      string presetStr = LoadoutTracker::loadoutToString(preset);
+      string presetStr = settings->getLoadoutPreset(i).toString();
 
       if(presetStr != "")
          ini->SetValue(section, "Preset" + itos(i + 1), presetStr);

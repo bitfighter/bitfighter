@@ -27,7 +27,8 @@
 #define _GAME_SETTINGS_H_
 
 #include "config.h"
-#include "InputCode.h"     // For InputCodeManager def
+#include "InputCode.h"        // For InputCodeManager def
+#include "LoadoutTracker.h"
 
 #include "tnlVector.h"
 #include <string>
@@ -98,7 +99,6 @@ namespace Zap
 
 class GameSettings;
 class BanList;
-class LoadoutTracker;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -152,8 +152,8 @@ private:
    F32 getF32(ParamId paramId);
 
    DisplayMode resolveCmdLineSpecifiedDisplayMode();  // Tries to figure out what display mode was specified on the cmd line, if any
-
-   Vector<Vector<U8> > mLoadoutPresets;
+      
+   Vector<LoadoutTracker> mLoadoutPresets;
 
    Vector<string> mConfigurationErrors;
 
@@ -242,8 +242,7 @@ public:
 
    string getLevelDir(SettingSource source);
 
-
-   bool getLoadoutPreset(S32 index, Vector<U8> &preset);
+   LoadoutTracker getLoadoutPreset(S32 index);
    void setLoadoutPreset(const LoadoutTracker *preset, S32 index);
 
    void addConfigurationError(const string &errorMessage);

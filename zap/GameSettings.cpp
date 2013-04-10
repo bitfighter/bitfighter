@@ -456,20 +456,17 @@ string GameSettings::getLevelDir(SettingSource source)
 }
 
 
-bool GameSettings::getLoadoutPreset(S32 index, Vector<U8> &preset) 
+LoadoutTracker GameSettings::getLoadoutPreset(S32 index) 
 { 
-   if(index < 0 || index >= mLoadoutPresets.size()) 
-      return false;
-
-   preset = mLoadoutPresets[index]; 
-   return true;
+   TNLAssert(index >= 0 && index < mLoadoutPresets.size(), "Preset index out of range!") ;
+   return mLoadoutPresets[index]; 
 }
 
 
 // Caller is responsible for bounds checking index...
 void GameSettings::setLoadoutPreset(const LoadoutTracker *preset, S32 index) 
 {
-   mLoadoutPresets[index] = preset->loadoutToVector();
+   mLoadoutPresets[index] = *preset;
 }
 
 

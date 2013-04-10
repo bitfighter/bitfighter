@@ -184,7 +184,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       menuItems->get(index).itemColor = &Colors::overlayMenuSelectedItemColor;
       menuItems->get(index).helpColor = &Colors::overlayMenuSelectedItemColor;
 
-      mModule[mCurrentIndex] = index;
+      mModule[mCurrentIndex] = ShipModule(index);
       mCurrentIndex++;
 
       // Check if we need to switch over to weapons
@@ -194,14 +194,13 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    if(mCurrentIndex == ShipModuleCount + ShipWeaponCount)     // All loadout options selected, process complete
    {
-      // Load the loadouts into a vector, and send them off to the GameConnection
-      Vector<U8> loadout;
+      LoadoutTracker loadout;
 
       for(S32 i = 0; i < ShipModuleCount; i++)
-         loadout.push_back(moduleLookup[mModule[i]]);
+         loadout.setModule(i, mModule[i]);
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
-         loadout.push_back(weaponLookup[mWeapon[i]]);
+         loadout.setWeapon(i, WeaponType(mWeapon[i]));
 
       GameConnection *conn = getGame()->getConnectionToServer();
 
@@ -213,7 +212,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
          // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
          // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
          // Tell server loadout has changed.  Server will activate it when we enter a loadout zone.
-         conn->c2sRequestLoadout(loadout);     
+         conn->c2sRequestLoadout(loadout.toU8Vector());     
       }
       exitHelper();     
    }
