@@ -28,7 +28,6 @@
 #include "ClientGame.h"
 #include "OpenglUtils.h"
 #include "UI.h"
-#include "shipItems.h"     // For ShipModuleCount, ShipWeaponCount
 
 
 using namespace Zap;
@@ -40,40 +39,37 @@ namespace Zap { namespace UI {
 LoadoutIndicator::LoadoutIndicator()
 {
    mScrollTimer.setPeriod(200);
-
-   for(S32 i = 0; i < ShipWeaponCount; i++)
-      mWeapons[i] = mOldWeapons[i] = WeaponNone;
-
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      mModules[i] = mOldModules[i] = ModuleNone;
 }
 
 
-void LoadoutIndicator::newLoadoutHasArrived(const ShipModule *modules, const WeaponType *weapons)
+void LoadoutIndicator::newLoadoutHasArrived(const LoadoutTracker &loadout)
 {
-   bool loadoutChanged = false;
-
-   for(S32 i = 0; i < ShipWeaponCount; i++)
-      if(weapons[i] != mWeapons[i])
-      {
-         mOldWeapons[i] = mWeapons[i];
-         mWeapons[i]    = weapons[i];
-         loadoutChanged = true;
-      }
-
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      if(modules[i] != mModules[i])
-      {
-         mOldModules[i] = mModules[i];
-         mModules[i]    = modules[i];
-         loadoutChanged = true;
-      }
+   mPrevLoadout.update(mCurrLoadout);
+   bool loadoutChanged = mCurrLoadout.update(loadout);
 
    if(loadoutChanged)
    {
       onActivated();
       resetScrollTimer();
    }
+}
+
+
+void LoadoutIndicator::setActiveWeapon(U32 weaponIndex)
+{
+   mCurrLoadout.setActiveWeapon(weaponIndex);
+}
+
+
+void LoadoutIndicator::setModulePrimary(ShipModule module, bool isActive)
+{
+   mCurrLoadout.setModulePrimary(module, isActive);
+}
+
+
+void LoadoutIndicator::setModuleSecondary(ShipModule module, bool isActive)
+{
+    mCurrLoadout.setModuleSecondary(module, isActive);
 }
 
 
@@ -98,10 +94,10 @@ static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 }
 
 
-static void doRender(ShipModule *modules, WeaponType *weapons, Ship *ship, ClientGame *game, S32 top)
+static void doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 {
    // If if we have no module, then this loadout has never been set, and there is nothing to render
-   if(modules[0] == ModuleNone)  
+   if(!loadout.isValid())  
       return;
 
    static const Color *INDICATOR_INACTIVE_COLOR = &Colors::green80;      
@@ -115,9 +111,9 @@ static void doRender(ShipModule *modules, WeaponType *weapons, Ship *ship, Clien
    // First, the weapons
    for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
    {
-      glColor(i == ship->mActiveWeaponIndx ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
+      glColor(loadout.isWeaponActive(i) ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
 
-      S32 width = renderComponentIndicator(xPos, top, GameWeapon::weaponInfo[weapons[i]].name.getString());
+      S32 width = renderComponentIndicator(xPos, top, GameWeapon::weaponInfo[loadout.getWeapon(i)].name.getString());
 
       xPos += width + indicatorPadding;
    }
@@ -127,25 +123,26 @@ static void doRender(ShipModule *modules, WeaponType *weapons, Ship *ship, Clien
    // Next, loadout modules
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
-      if(gModuleInfo[modules[i]].getPrimaryUseType() != ModulePrimaryUseActive)
+      ShipModule module = loadout.getModule(i);
+
+      if(gModuleInfo[module].getPrimaryUseType() != ModulePrimaryUseActive)
       {
-         if(gModuleInfo[modules[i]].getPrimaryUseType() == ModulePrimaryUseHybrid &&
-               ship->isModulePrimaryActive(modules[i]))
+         if(gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUseHybrid &&
+               loadout.isModulePrimaryActive(module))
             glColor(INDICATOR_ACTIVE_COLOR);
          else
             glColor(INDICATOR_PASSIVE_COLOR);
       }
-      else if(ship->isModulePrimaryActive(modules[i]))
+      else if(loadout.isModulePrimaryActive(module))
          glColor(INDICATOR_ACTIVE_COLOR);
       else 
          glColor(INDICATOR_INACTIVE_COLOR);
 
       // Always change to orange if module secondary is fired
-      if(gModuleInfo[modules[i]].hasSecondary() &&
-            ship->isModuleSecondaryActive(modules[i]))
+      if(gModuleInfo[module].hasSecondary() && loadout.isModuleSecondaryActive(module))
          glColor(Colors::orange67);
 
-      S32 width = renderComponentIndicator(xPos, top, game->getModuleInfo(modules[i])->getName());
+      S32 width = renderComponentIndicator(xPos, top, game->getModuleInfo(module)->getName());
 
       xPos += width + indicatorPadding;
    }
@@ -163,10 +160,6 @@ void LoadoutIndicator::render(ClientGame *game)
    if(!game->getConnectionToServer())     // Can happen when first joining a game.  This was XelloBlue's crash...
       return;
 
-   Ship *localShip = dynamic_cast<Ship *>(game->getConnectionToServer()->getControlObject());
-   if(!localShip)
-      return;
-
    const S32 indicatorTop    = 10;      // Top of indicator y-pos
    const S32 indicatorHeight = getIndicatorHeight();
    S32 top;
@@ -175,13 +168,13 @@ void LoadoutIndicator::render(ClientGame *game)
    top = Parent::prepareToRenderFromDisplay(game, indicatorTop - 1, indicatorHeight + 1);
    if(top != NO_RENDER)
    {
-      doRender(mOldModules, mOldWeapons, localShip, game, top);
+      doRender(mPrevLoadout, game, top);
       doneRendering();
    }
 
    // Current loadout
    top = Parent::prepareToRenderToDisplay(game, indicatorTop, indicatorHeight);
-   doRender(mModules, mWeapons, localShip, game, top);
+   doRender(mCurrLoadout, game, top);
    doneRendering();
 }
 

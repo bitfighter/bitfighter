@@ -207,6 +207,7 @@
     <ClCompile Include="..\zap\Rect.cpp" />
     <ClCompile Include="..\zap\Color.cpp" />
     <ClCompile Include="LoadoutIndicator.cpp" />
+    <ClCompile Include="LoadoutTracker.cpp" />
     <ClCompile Include="LuaBase.cpp" />
     <ClCompile Include="LuaScriptRunner.cpp" />
     <ClCompile Include="MathUtils.cpp" />
@@ -365,6 +366,7 @@
     <ClInclude Include="..\zap\polygon.h" />
     <ClInclude Include="..\zap\projectile.h" />
     <ClInclude Include="LoadoutIndicator.h" />
+    <ClInclude Include="LoadoutTracker.h" />
     <ClInclude Include="LuaBase.h" />
     <ClInclude Include="LuaException.h" />
     <ClInclude Include="LuaScriptRunner.h" />

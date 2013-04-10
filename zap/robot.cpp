@@ -79,12 +79,6 @@ Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),
    mScore = 0;
    mTotalScore = 0;
 
-   for(S32 i = 0; i < ModuleCount; i++)         // Here so valgrind won't complain if robot updates before initialize is run
-   {
-      mModulePrimaryActive[i] = false;
-      mModuleSecondaryActive[i] = false;
-   }
-
 #ifndef ZAP_DEDICATED
    mShapeType = ShipShape::Normal;
 #endif
@@ -969,11 +963,11 @@ S32 Robot::lua_setWeapon(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "setWeapon");
 
-   U32 weap = (U32)getInt(L, 1);
+   WeaponType weap = (WeaponType)getInt(L, 1);
 
    // Check the weapons we have on board -- if any match the requested weapon, activate it
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      if((U32)getWeapon(i) == weap)
+      if(mLoadout.getWeapon(i) == weap)
       {
          selectWeapon(i);
          break;
@@ -1000,10 +994,10 @@ S32 Robot::lua_setWeaponIndex(lua_State *L)
 S32 Robot::lua_hasWeapon(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "hasWeapon");
-   U32 weap = (U32)getInt(L, 1);
+   WeaponType weap = (WeaponType)getInt(L, 1);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      if((U32)getWeapon(i) == weap)
+      if(mLoadout.getWeapon(i) == weap)
          return returnBool(L, true);      // We have it!
 
    return returnBool(L, false);           // We don't!
@@ -1021,7 +1015,7 @@ S32 Robot::lua_activateModule(lua_State *L)
    for(S32 i = 0; i < ShipModuleCount; i++)
       if(getModule(i) == mod)
       {
-         activateModulePrimary(i);
+         mLoadout.setModuleIndxPrimary(i, true);
          break;
       }
 
@@ -1036,7 +1030,7 @@ S32 Robot::lua_activateModuleIndex(lua_State *L)
 
    U32 indx = (U32)getInt(L, 1);
 
-   activateModulePrimary(indx);
+   mLoadout.setModuleIndxPrimary(indx, true);
 
    return 0;
 }
@@ -1354,7 +1348,7 @@ S32 Robot::lua_getFiringSolution(lua_State *L)
 
    BfObject *target = luaW_check<BfObject>(L, 1);
 
-   WeaponInfo weap = GameWeapon::weaponInfo[getSelectedWeapon()];    // Robot's active weapon
+   WeaponInfo weap = GameWeapon::weaponInfo[mLoadout.getCurrentWeapon()];    // Robot's active weapon
 
    F32 interceptAngle;
 

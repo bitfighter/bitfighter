@@ -1857,7 +1857,7 @@ void ClientGame::renderOverlayMap()
    mapBounds.expand(Point(mapWidth * 2, mapHeight * 2));      //TODO: Fix
 
    rawRenderObjects.clear();
-   if(ship->isModulePrimaryActive(ModuleSensor))
+   if(/*ship->isModulePrimaryActive(ModuleSensor)*/true)
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
    else
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);

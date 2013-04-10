@@ -684,9 +684,27 @@ void GameUserInterface::activateModule(S32 index)
 
 
 // A new loadout has arrived
-void GameUserInterface::newLoadoutHasArrived(const ShipModule *modules, const WeaponType *weapons)
+void GameUserInterface::newLoadoutHasArrived(const LoadoutTracker &loadout)
 {
-   mLoadoutIndicator.newLoadoutHasArrived(modules, weapons);
+   mLoadoutIndicator.newLoadoutHasArrived(loadout);
+}
+
+
+void GameUserInterface::setActiveWeapon(U32 weaponIndex)
+{
+   mLoadoutIndicator.setActiveWeapon(weaponIndex);
+}
+
+
+void GameUserInterface::setModulePrimary(ShipModule module, bool isActive)
+{
+   mLoadoutIndicator.setModulePrimary(module, isActive);
+}
+
+
+void GameUserInterface::setModuleSecondary(ShipModule module, bool isActive)
+{
+   mLoadoutIndicator.setModuleSecondary(module, isActive);
 }
 
 

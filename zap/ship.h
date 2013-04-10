@@ -34,6 +34,7 @@
 #include "Timer.h"
 #include "shipItems.h"
 #include "gameWeapons.h"
+#include "LoadoutTracker.h"
 
 #ifndef ZAP_DEDICATED
 #  include "sparkManager.h"
@@ -57,10 +58,12 @@ private:
    bool mIsRobot;
 
    U32 mRespawnTime;
-   Vector<DatabaseObject *> mZones1;    // A list of zones the ship is currently in
+   Vector<DatabaseObject *> mZones1;      // A list of zones the ship is currently in
    Vector<DatabaseObject *> mZones2;
    bool mZones1IsCurrent;
    bool mFastRecharging;
+
+   void setActiveWeapon(U32 weaponIndex); // Setter for mActiveWeaponIndx
 
    SafePtr<Teleporter> mEngineeredTeleporter;
 
@@ -105,13 +108,9 @@ protected:
 
    SafePtr <ClientInfo> mClientInfo;
 
-   bool mModulePrimaryActive[ModuleCount];       // Is the primary component of the module active at this moment?
-   bool mModuleSecondaryActive[ModuleCount];     // Is the secondary component of the module active?
+   Vector<SafePtr<MountableItem> > mMountedItems;   
 
-   Vector<SafePtr<MountableItem> > mMountedItems;    
-
-   ShipModule mModule[ShipModuleCount];      // Modules ship is carrying
-   WeaponType mWeapon[ShipWeaponCount];
+   LoadoutTracker mLoadout;
 
    Point mSpawnPoint;                        // Where ship or robot spawned.  Will only be valid on server, client doesn't currently get this.
 
@@ -179,13 +178,9 @@ public:
 
    SFXHandle mModuleSound[ModuleCount];
 
-   U32 mActiveWeaponIndx;                 // Index of selected weapon on ship
-
    void selectNextWeapon();                   
    void selectPrevWeapon();
    void selectWeapon(S32 weaponIndex);    // Select weapon by index
-   WeaponType getWeapon(U32 indx);        // Returns weapon in slot indx
-   ShipModule getModule(U32 indx);        // Returns module in slot indx
 
    Timer mSensorEquipZoomTimer;
    Timer mWeaponFireDecloakTimer;
@@ -241,12 +236,7 @@ public:
    S32 getFlagIndex();     // Returns index of first flag, or NO_FLAG if ship has no flags
    S32 getFlagCount();     // Returns the number of flags ship is carrying
 
-
-
    void onGhostRemove();
-
-   bool isModulePrimaryActive(ShipModule mod);
-   bool isModuleSecondaryActive(ShipModule mod);
 
    bool hasModule(ShipModule mod);
 
@@ -276,9 +266,6 @@ public:
 
    F32 processMove(U32 stateIndex);
 
-   WeaponType getSelectedWeapon();   // Return currently selected weapon
-   U32 getSelectedWeaponIndex();     // Return index of currently selected weapon (0, 1, 2)
-
    void processWeaponFire();
    void processModules();
    void rechargeEnergy();
@@ -294,8 +281,9 @@ public:
    void emitShipExplosion(Point pos);
    //void setActualPos(Point p);
    void setActualPos(Point p, bool warp);
-   void activateModulePrimary(U32 indx);    // Activate the specified module primary component for the current move
-   void activateModuleSecondary(U32 indx);  // Activate the specified module secondary component for the current move
+   bool isModulePrimaryActive(ShipModule module);
+
+   ShipModule getModule(U32 modIndex);
 
    virtual void kill(DamageInfo *theInfo);
    virtual void kill();

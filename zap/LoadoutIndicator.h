@@ -27,9 +27,7 @@
 #define _LOADOUT_INDICATOR_H_
 
 #include "AToBScroller.h"     // Parent
-#include "shipItems.h"
-
-#include "tnlTypes.h"
+#include "LoadoutTracker.h"
 
 using namespace TNL;
 
@@ -38,23 +36,25 @@ namespace Zap { namespace UI {
 static const S32 indicatorFontSize = 15;
 static const S32 indicatorPadding = 3;       // Gap between text and box
 
+
 class LoadoutIndicator : public AToBScroller
 {
    typedef AToBScroller Parent;
 
 private:
-   ShipModule mModules[ShipModuleCount];      // Modules local ship is carrying
-   WeaponType mWeapons[ShipWeaponCount];
-
-   ShipModule mOldModules[ShipModuleCount];   // Modules local ship was previously carrying
-   WeaponType mOldWeapons[ShipWeaponCount];
+   LoadoutTracker mCurrLoadout;
+   LoadoutTracker mPrevLoadout;
 
 public:
-   LoadoutIndicator();      // Constructor
+   LoadoutIndicator();     // Constructor
 
    static const S32 LoadoutIndicatorHeight = indicatorFontSize + indicatorPadding * 2;
 
-   void newLoadoutHasArrived(const ShipModule *modules, const WeaponType *weapons);
+   void newLoadoutHasArrived(const LoadoutTracker &loadout);
+   void setActiveWeapon(U32 weaponIndex);
+
+   void setModulePrimary(ShipModule module, bool isActive);
+   void setModuleSecondary(ShipModule module, bool isActive);
 
    void render(ClientGame *game);
 };
