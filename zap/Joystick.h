@@ -195,6 +195,7 @@ public:
    static U32 HatInputCodeMask;
 
    static bool initJoystick(GameSettings *settings);
+   static bool enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore);
    static void shutdownJoystick();
 
    static void loadJoystickPresets(GameSettings *settings);

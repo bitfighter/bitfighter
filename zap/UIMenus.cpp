@@ -1144,6 +1144,8 @@ static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
 
    if(inputModeIndex >= 1)
       Joystick::UseJoystickNumber = inputModeIndex - 1;
+
+   Joystick::enableJoystick(game->getSettings(), true);
 }
 
 
@@ -1187,6 +1189,7 @@ void OptionsMenuUserInterface::setupMenus()
 #endif
 
    Joystick::initJoystick(settings);   // Refresh joystick list
+   Joystick::enableJoystick(settings, true);   // Refresh joystick list
 
    addStickOptions(&opts);
 

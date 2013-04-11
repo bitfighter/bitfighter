@@ -149,6 +149,14 @@ bool Joystick::initJoystick(GameSettings *settings)
       DetectedJoystickNameList.push_back(joystickName);
    }
 
+   return true;
+}
+
+bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
+{
+   if(settings->getInputCodeManager()->getInputMode() == InputModeKeyboard) // just don't enable at all in keyboard mode.
+      return true;
+
    // Enable joystick events
    SDL_JoystickEventState(SDL_ENABLE);
 
