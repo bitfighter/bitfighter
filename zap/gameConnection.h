@@ -208,7 +208,8 @@ public:
    void undelaySpawn();
 
    // Delay/undelay spawn
-   TNL_DECLARE_RPC(s2cPlayerSpawnDelayed, ());
+   TNL_DECLARE_RPC(s2cPlayerSpawnDelayed, (U8 waitTimeInOneTenthsSeconds));
+   TNL_DECLARE_RPC(s2cPlayerSpawnUndelayed, ());
    TNL_DECLARE_RPC(c2sPlayerSpawnUndelayed, ());
    TNL_DECLARE_RPC(c2sPlayerRequestSpawnDelayed, ());
 
@@ -327,6 +328,7 @@ public:
 
    void onConnectionTerminated(TerminationReason r, const char *string);
 
+   void disconnect(TerminationReason tr, const char *reason);
 
 
    TNL_DECLARE_NETCONNECTION(GameConnection);

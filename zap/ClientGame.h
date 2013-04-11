@@ -63,8 +63,6 @@ private:
    bool mInCommanderMap;
 
    U32 mCommanderZoomDelta;
-   bool mRequestedSpawnDelayed;                 // True if player used /idle command
-   bool mIsWaitingForSpawn;                     // True once client has initiated unspawn procedure
 
    Timer mScreenSaverTimer;
    void supressScreensaver();
@@ -84,7 +82,6 @@ private:
    bool mGameIsRunning;             // True if a suspended game is being played without us, false if it's full stop for everyone
 
    bool mSeenTimeOutMessage;
-   bool mSpawnDelayed;
 
 
    // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
@@ -111,8 +108,6 @@ public:
 
    bool hasValidControlObject();
    bool isConnectedToServer();
-   bool requestedSpawnDelayed();
-   bool isWaitingForSpawn();
 
    GameConnection *getConnectionToServer();
    void setConnectionToServer(GameConnection *connection);

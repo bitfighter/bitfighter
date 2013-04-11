@@ -108,9 +108,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    mUserInterfaceData = new UserInterfaceData();
 
    mInCommanderMap        = false;
-   mRequestedSpawnDelayed = false;
-   mIsWaitingForSpawn     = false;
-   mSpawnDelayed          = false;
    mGameIsRunning         = true;      // Only matters when game is suspended
    mSeenTimeOutMessage    = false;
 
@@ -181,8 +178,6 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
 
    mClientInfo->setIsAdmin(false); // Always start out with no permission
    mClientInfo->setIsLevelChanger(false);
-
-   mSpawnDelayed = false;
 
    MasterServerConnection *connToMaster = getConnectionToMaster();
    
@@ -326,17 +321,12 @@ Ship *ClientGame::getLocalShip()
 
 void ClientGame::setSpawnDelayed(bool spawnDelayed)
 {
-   if(mSpawnDelayed && spawnDelayed)    // Yes, yes, we heard you the first time!
+   if(getClientInfo()->isSpawnDelayed() != spawnDelayed)    // Yes, yes, we heard you the first time!
       return;
-
-   mSpawnDelayed = spawnDelayed;
 
    if(!spawnDelayed)
    {
       unsuspendGame();
-
-      mRequestedSpawnDelayed = false;
-      mIsWaitingForSpawn     = false;
 
       FXManager::clearSparks();
    }
@@ -353,10 +343,6 @@ void ClientGame::undelaySpawn()
       return;
 
    getConnectionToServer()->c2sPlayerSpawnUndelayed();
-   mIsWaitingForSpawn = true;
-
-   if(mRequestedSpawnDelayed)
-      mClientInfo->resetReturnToGameTimer();
 }
 
 
@@ -368,16 +354,13 @@ F32 ClientGame::getUIFadeFactor()
 
 
 // Provide access to these annoying bools
-bool ClientGame::requestedSpawnDelayed()  { return mRequestedSpawnDelayed; }
-bool ClientGame::isWaitingForSpawn()      { return mIsWaitingForSpawn;     }
-bool ClientGame::isSpawnDelayed()         { return mSpawnDelayed;          }
+bool ClientGame::isSpawnDelayed()         { return getClientInfo()->isSpawnDelayed();          }
 
 
 // Tells the server to spawn delay us... server may incur a penalty when we unspawn
 void ClientGame::requestSpawnDelayed()
 {
    getConnectionToServer()->c2sPlayerRequestSpawnDelayed();
-   mRequestedSpawnDelayed = true;
 }
 
 
