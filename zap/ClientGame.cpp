@@ -1669,7 +1669,7 @@ void ClientGame::renderCommander()
 
    BfObject *controlObject = mConnectionToServer->getControlObject();
    Ship *ship = NULL;
-   if(controlObject->getObjectTypeNumber() == PlayerShipTypeNumber)
+   if(controlObject && controlObject->getObjectTypeNumber() == PlayerShipTypeNumber)
       ship = static_cast<Ship *>(controlObject);      // This is the local player's ship
    
    Point position = ship ? ship->getRenderPos() : Point(0,0);
@@ -1694,7 +1694,7 @@ void ClientGame::renderCommander()
    // walls -- those will be rendered separately.
    rawRenderObjects.clear();
 
-   if(ship->hasModule(ModuleSensor))
+   if(ship && ship->hasModule(ModuleSensor))
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
    else
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
