@@ -282,7 +282,6 @@
     <ClInclude Include="..\clipper\clipper.h" />
     <ClInclude Include="..\fontstash\fontstash.h" />
     <ClInclude Include="..\fontstash\stb_truetype.h" />
-    <ClInclude Include="..\lua\include\lunar.h" />
     <ClInclude Include="..\master\database.h" />
     <ClInclude Include="..\master\masterInterface.h" />
     <ClInclude Include="..\recast\Recast.h" />

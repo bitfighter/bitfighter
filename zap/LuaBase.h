@@ -27,8 +27,6 @@
 #define _LUABASE_H_
 
 #include "lua.h"
-#include "../lua/include/lunar.h"
-
 #include "LuaException.h"           // LuaException def
 
 #include "Point.h"
