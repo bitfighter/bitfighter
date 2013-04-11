@@ -126,6 +126,7 @@ using namespace TNL;
 #  include "VideoSystem.h"
 #  include "OpenglUtils.h"
 #  include "ClientGame.h"
+#  include "FontManager.h"
 #endif
 
 #include "ServerGame.h"
@@ -141,7 +142,6 @@ using namespace TNL;
 #include "ClientInfo.h"
 #include "Console.h"       // For access to console
 #include "BotNavMeshZone.h"
-#include "FontManager.h"
 
 #include <math.h>
 #include <stdarg.h>
