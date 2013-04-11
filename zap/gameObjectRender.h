@@ -138,7 +138,7 @@ extern void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32
 extern void renderTeleporterOutline(const Point &center, F32 radius, const Color &color);
 extern void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale = 1);
 extern void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale);
-extern void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle);
+extern void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate = 0);
 
 extern void renderFlag(const Point &pos, const Color *flagColor);
 extern void renderFlag(F32 x, F32 y, const Color *flagColor);
@@ -251,7 +251,7 @@ extern void renderGrid(F32 curentScale, const Point &offset, const Point &origin
 
 extern void renderForceFieldProjector(Point pos, Point normal);
 extern void renderForceFieldProjector(Point pos, Point normal, const Color *teamColor, bool enabled);
-extern void renderForceFieldProjector(const Vector<Point> *geom, const Color *teamColor, bool enabled);
+extern void renderForceFieldProjector(const Vector<Point> *geom, const Color *teamColor, bool enabled, S32 healRate = 0);
 extern void renderForceField(Point start, Point end, const Color *c, bool fieldUp, F32 scale = 1);
 
 extern void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);

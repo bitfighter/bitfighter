@@ -77,7 +77,8 @@ protected:
    {
       InitialMask   = Parent::FirstFreeMask << 0,
       HealthMask    = Parent::FirstFreeMask << 1,
-      FirstFreeMask = Parent::FirstFreeMask << 2
+      HealRateMask  = Parent::FirstFreeMask << 2,
+      FirstFreeMask = Parent::FirstFreeMask << 3
    };
 
 public:
@@ -113,6 +114,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
+   void setHealRate(S32 rate);
    void damageObject(DamageInfo *damageInfo);
    void checkHealthBounds();
    bool collide(BfObject *hitObject);

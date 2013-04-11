@@ -487,8 +487,7 @@ bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
 
    if(argc >= 4)
    {
-      mHealRate = atoi(argv[3]);
-      mHealTimer.setPeriod(mHealRate * 1000);
+      setHealRate(atoi(argv[3]));
    }
 
    findMountPoint(game, pos);
@@ -978,6 +977,11 @@ U32 EngineeredItem::packUpdate(GhostConnection *connection, U32 updateMask, BitS
 
       stream->writeFlag(mIsDestroyed);
    }
+
+   if(stream->writeFlag(updateMask & HealRateMask))
+   {
+      stream->writeInt(mHealRate, 16);
+   }
    return 0;
 }
 
@@ -1017,11 +1021,23 @@ void EngineeredItem::unpackUpdate(GhostConnection *connection, BitStream *stream
          explode();
    }
 
+   if(stream->readFlag())
+   {
+      mHealRate = stream->readInt(16);
+   }
+
    if(initial)
    {
       computeObjectGeometry();
       computeExtent();
    }
+}
+
+void EngineeredItem::setHealRate(S32 rate)
+{
+   setMaskBits(HealRateMask);
+   mHealRate = rate;
+   mHealTimer.setPeriod(mHealRate * 1000);
 }
 
 
@@ -1260,6 +1276,8 @@ S32 EngineeredItem::lua_setHealRate(lua_State *L)
    if(healRate < 0)
       throw LuaException("Specified healRate is negative, and that just makes me crazy!");
 
+   setHealRate(healRate);
+
    return returnInt(L, mHealRate);
 }
 
@@ -1462,7 +1480,7 @@ void ForceFieldProjector::onAddedToGame(Game *theGame)
 
 void ForceFieldProjector::render()
 {
-   renderForceFieldProjector(&mCollisionPolyPoints, getColor(), isEnabled());
+   renderForceFieldProjector(&mCollisionPolyPoints, getColor(), isEnabled(), mHealRate);
 }
 
 
@@ -1482,7 +1500,7 @@ void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCorn
    {
       Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal, scaleFact);
 
-      renderForceFieldProjector(&mCollisionPolyPoints, color, true);
+      renderForceFieldProjector(&mCollisionPolyPoints, color, true, mHealRate);
       renderForceField(forceFieldStart, forceFieldEnd, color, true, scaleFact);
    }
    else
@@ -1975,7 +1993,7 @@ void Turret::onAddedToGame(Game *theGame)
 
 void Turret::render()
 {
-   renderTurret(*(getColor()), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle);
+   renderTurret(*(getColor()), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, mHealRate);
 }
 
 
