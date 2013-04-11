@@ -100,10 +100,9 @@ set(SHARED_SOURCES
    IniFile.cpp
    InputCode.cpp
    item.cpp
-   LevelDatabaseDownloadThread.cpp
-   LevelDatabaseUploadThread.cpp
    lineEditor.cpp
    LineItem.cpp
+   LoadoutTracker.cpp
    loadoutZone.cpp
    LuaBase.cpp
    luaGameInfo.cpp
