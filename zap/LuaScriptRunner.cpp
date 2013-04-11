@@ -28,10 +28,12 @@
 #include "luaGameInfo.h"
 #include "robot.h"             // For subscribing
 #include "playerInfo.h"        // For playerInfo def
+#include "shipItems.h"         // For gModuleInfo
 #include "UIMenuItems.h"       // For MenuItem def
 #include "config.h"            
 #include "ClientInfo.h"
 #include "Console.h"           // For gConsole
+#include "WeaponInfo.h"        // For GameWeapon::weaponInfo
 
 #include "luaLevelGenerator.h" // For managing event subscriptions
 
@@ -478,6 +480,7 @@ bool LuaScriptRunner::prepareEnvironment()
    // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
    // These will be copied into the script's environment when we run createEnvironment.
    setEnums(L);    
+   setGlobalObjectArrays(L);
 
    luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create a local scripting environment
    lua_getglobal(L, "e");                                //                                        -- environment e   
@@ -528,10 +531,6 @@ static string getStackTraceLine(lua_State *L, S32 level)
 void LuaScriptRunner::registerClasses()
 {
    LuaW_Registrar::registerClasses(L);    // Register all objects that use our automatic registration scheme
-
-   // Lunar managed objects, these to be ported to LuaW
-   Lunar<LuaWeaponInfo>::Register(L);
-   Lunar<LuaModuleInfo>::Register(L);
 }
 
 
@@ -954,6 +953,89 @@ void LuaScriptRunner::setEnums(lua_State *L)
 #undef setEnum
 #undef setGTEnum
 #undef setEventEnum
+
+
+
+
+void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
+{
+   // TODO:  Some how be more dynamic with the creation of these tables
+
+   // ModuleInfo
+   lua_newtable(L);                                // table
+
+   for(S32 i = 0; i < ModuleCount; i++)
+   {
+      lua_pushinteger(L, i);                       // table, index
+      lua_newtable(L);                             // table, index, table
+
+      lua_pushstring(L, "name");                   // table, index, table, key
+      lua_pushstring(L, gModuleInfo[i].mName);     // table, index, table, key, value
+      lua_rawset(L, -3);                           // table, index, table
+
+      lua_pushstring(L, "classId");                // table, index, table, key
+      lua_pushinteger(L, i);                       // table, index, table, key, value
+      lua_rawset(L, -3);                           // table, index, table
+
+      lua_rawset(L, -3);                           // table
+   }
+
+   lua_setglobal(L, "ModuleInfo");
+
+
+   // WeaponInfo
+   lua_newtable(L);                                // table
+
+   for(S32 i = 0; i < WeaponCount; i++)
+   {
+      lua_pushinteger(L, i);                       // table, index
+      lua_newtable(L);                             // table, index, table
+
+      lua_pushstring(L, "name");
+      lua_pushstring(L, GameWeapon::weaponInfo[i].name.getString());
+      lua_rawset(L, -3);
+
+      lua_pushstring(L, "classId");
+      lua_pushinteger(L, i);
+      lua_rawset(L, -3);
+
+      lua_pushstring(L, "fireDelay");
+      lua_pushinteger(L, GameWeapon::weaponInfo[i].fireDelay);
+      lua_rawset(L, -3);
+
+      lua_pushstring(L, "minEnergy");
+      lua_pushinteger(L, GameWeapon::weaponInfo[i].minEnergy);
+      lua_rawset(L, -3);
+
+      lua_pushstring(L, "energyDrain");
+      lua_pushinteger(L, GameWeapon::weaponInfo[i].drainEnergy);
+      lua_rawset(L, -3);
+
+      lua_pushstring(L, "projectileVelocity");
+      lua_pushinteger(L, GameWeapon::weaponInfo[i].projVelocity);
+      lua_rawset(L, -3);
+
+      lua_pushstring(L, "projectileLifeTime");
+      lua_pushinteger(L, GameWeapon::weaponInfo[i].projLiveTime);
+      lua_rawset(L, -3);
+
+      lua_pushstring(L, "damage");
+      lua_pushnumber(L, GameWeapon::weaponInfo[i].damageAmount);
+      lua_rawset(L, -3);
+
+      lua_pushstring(L, "damageSelf");
+      lua_pushnumber(L, GameWeapon::weaponInfo[i].damageAmount * GameWeapon::weaponInfo[i].damageSelfMultiplier);
+      lua_rawset(L, -3);
+
+      lua_pushstring(L, "canDamageTeammate");
+      lua_pushboolean(L, GameWeapon::weaponInfo[i].canDamageTeammate);
+      lua_rawset(L, -3);
+
+      lua_rawset(L, -3);                           // table
+   }
+
+   lua_setglobal(L, "WeaponInfo");
+}
 
 };
 

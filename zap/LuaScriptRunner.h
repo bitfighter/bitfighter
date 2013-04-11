@@ -103,6 +103,7 @@ private:
 
 
    void setEnums(lua_State *L);                       // Set a whole slew of enum values that we want the scripts to have access to
+   void setGlobalObjectArrays(lua_State *L);          // And some objects
    static void logErrorHandler(const char *msg, const char *prefix);
 
 protected:

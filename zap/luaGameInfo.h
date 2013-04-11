@@ -77,63 +77,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class LuaWeaponInfo : public LuaObject
-{
-
-private:
-   U32 mWeaponIndex;
-
-public:
-   // Initialize the pointer
-   explicit LuaWeaponInfo(lua_State *L);           // Lua constructor
-   explicit LuaWeaponInfo(WeaponType weapon);      // C++ constructor
-
-   virtual ~LuaWeaponInfo();                       // Destructor
-
-   static const char className[];
-
-   static Lunar<LuaWeaponInfo>::RegType methods[];
-
-   S32 getName(lua_State *L);
-   S32 getID(lua_State *L);
-
-   S32 getRange(lua_State *L);
-   S32 getFireDelay(lua_State *L);
-   S32 getMinEnergy(lua_State *L);
-   S32 getEnergyDrain(lua_State *L);
-   S32 getProjVel(lua_State *L);
-   S32 getProjLife(lua_State *L);
-   S32 getDamage(lua_State *L);
-   S32 getDamageSelf(lua_State *L);
-   S32 getCanDamageTeammate(lua_State *L);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class LuaModuleInfo : public LuaObject
-{
-private:
-   U32 mModuleIndex;
-
-public:
-   explicit LuaModuleInfo(lua_State *L);     // Constructor
-   virtual ~LuaModuleInfo();                 // Destructor
-
-   static const char className[];
-
-   static Lunar<LuaModuleInfo>::RegType methods[];
-
-   S32 getName(lua_State *L);
-   S32 getID(lua_State *L);
-
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class LuaLoadout : public LuaObject
 {
 private:
