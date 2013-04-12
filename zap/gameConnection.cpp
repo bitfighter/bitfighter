@@ -193,10 +193,19 @@ const char *GameConnection::getConnectionStateString(S32 i)
 
 
 // Player appears to be away, spawn is on hold until he returns
-TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (U8 waitTimeInOneTenthsSeconds), (waitTimeInOneTenthsSeconds), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
-#ifndef ZAP_DEDICATED  
+#ifndef ZAP_DEDICATED
+   getClientInfo()->setReturnToGameTimer(waitTimeInOneTenthsSeconds * 100);
+   getClientInfo()->setSpawnDelayed(true);
    mClientGame->setSpawnDelayed(true);
+#endif
+}
+TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnUndelayed, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+{
+#ifndef ZAP_DEDICATED
+   getClientInfo()->setSpawnDelayed(false);
+   mClientGame->setSpawnDelayed(false);
 #endif
 }
 
@@ -205,23 +214,26 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (), (), NetClassGroupGa
 // Server only, got here from c2sPlayerSpawnUndelayed(), or maybe when returnToGameTimer went off after being set here
 void GameConnection::undelaySpawn()
 {
-   FullClientInfo *clientInfo = static_cast<FullClientInfo *>(getClientInfo());
+    FullClientInfo *clientInfo = static_cast<FullClientInfo *>(getClientInfo());
 
    // Already spawn undelayed, ignore command
    if(!clientInfo->isSpawnDelayed())
       return;
 
    resetTimeSinceLastMove();
-   mServerGame->unsuspendGame(true);
+
+   if(mServerGame->isSuspended())
+      getClientInfo()->setReturnToGameTimer(0); // timer freezes when game is suspended..
 
    // Check if there is a penalty being applied to client (e.g. there is a 5 sec penalty for using the /idle command).
    // If so, start the timer clear the penalty flag, and leave.  We'll be back here again after the timer goes off.
-   if(clientInfo->hasReturnToGamePenalty())
+   if(clientInfo->hasReturnToGamePenalty() && !mServerGame->isSuspended())
    {
-      clientInfo->resetReturnToGameTimer();
-      clientInfo->setHasReturnToGamePenalty(false); 
+      s2cPlayerSpawnDelayed((getClientInfo()->getReturnToGameTime() + 99) / 100); // add for round up divide
       return;
    }
+
+   mServerGame->unsuspendGame(true);
 
 
    if(!clientInfo->getReturnToGameTime())
@@ -245,9 +257,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroup
 TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
    ClientInfo *clientInfo = getClientInfo();
-   clientInfo->setSpawnDelayed(true);           
    
-   static_cast<FullClientInfo *>(clientInfo)->setHasReturnToGamePenalty(true);   // Client will have to wait to rejoin the game
    
    // If we've just died, this will keep a second copy of ourselves from appearing
    clientInfo->respawnTimer.clear();
@@ -255,8 +265,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (), (), NetClass
    // Now suicide!
    Ship *ship = clientInfo->getShip();
    if(ship)
+   {
+      static_cast<FullClientInfo *>(clientInfo)->resetReturnToGameTimer();   // Client will have to wait to rejoin the game
       ship->kill();
+   }
 
+   clientInfo->setSpawnDelayed(true);           
    mServerGame->suspendIfNoActivePlayers();
 }
 
@@ -1775,6 +1789,8 @@ void GameConnection::onConnectionEstablished_server()
 // Established connection is terminated.  Compare to onConnectTerminate() below.
 void GameConnection::onConnectionTerminated(NetConnection::TerminationReason reason, const char *reasonStr)
 {
+   TNLAssert(reason == NetConnection::ReasonSelfDisconnect || !isLocalConnection(), "local connection should not be disconnected");
+
    if(isInitiator())    // i.e. this is a client that connected to the server
    {
 #ifndef ZAP_DEDICATED
@@ -1810,6 +1826,15 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *r
 #endif
 
    }
+}
+
+//This is here to avoid kicking the hosting player in case of duplicated authenticated name player joins or similar.
+void GameConnection::disconnect(TerminationReason reason, const char *reasonStr)
+{
+   if(reason == NetConnection::ReasonSelfDisconnect || !isLocalConnection())
+      Parent::disconnect(reason, reasonStr);
+   else
+      (this->*(isInitiator() ? &GameConnection::s2cDisplayErrorMessage_remote : &GameConnection::s2cDisplayErrorMessage))("Can't kick hosting player");
 }
 
 

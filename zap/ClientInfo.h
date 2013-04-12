@@ -161,6 +161,7 @@ public:
    Nonce *getId();
 
    U32 getReturnToGameTime();
+   void setReturnToGameTimer(U32 timeDelta);
    bool updateReturnToGameTimer(U32 timeDelta);
    void resetReturnToGameTimer();
 
@@ -182,7 +183,6 @@ class FullClientInfo : public ClientInfo
 
 private:
    GameConnection *mClientConnection;
-   bool mHasReturnToGamePenalty;
    
 public:
    FullClientInfo(Game *game, GameConnection *clientConnection, bool isRobot);   // Constructor
@@ -196,7 +196,6 @@ public:
 
    void setSpawnDelayed(bool spawnDelayed);
    bool shouldDelaySpawn();
-   void setHasReturnToGamePenalty(bool hasPenalty);
    bool hasReturnToGamePenalty();
 
    void setRating(F32 rating);

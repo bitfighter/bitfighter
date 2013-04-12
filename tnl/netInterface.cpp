@@ -1315,6 +1315,12 @@ void NetInterface::disconnect(NetConnection *conn, NetConnection::TerminationRea
    {
       conn->setConnectionState(NetConnection::Disconnected);
       conn->onConnectionTerminated(reason, reasonString);
+      if(conn->getRemoteConnectionObject()) // Let other side of local connection know this connection have ended.
+      {
+         conn->getRemoteConnectionObject()->setRemoteConnectionObject(NULL);
+         conn->getRemoteConnectionObject()->disconnect(reason, reasonString);
+         conn->setRemoteConnectionObject(NULL);
+      }
       if(conn->isNetworkConnection())
       {
          // send a disconnect packet...
