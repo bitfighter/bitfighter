@@ -28,6 +28,7 @@
 
 #include "Geometry_Base.h"    // For Geometry class def
 #include "Point.h"
+#include <string>
 
 namespace Zap
 {

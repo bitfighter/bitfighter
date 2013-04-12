@@ -276,7 +276,6 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
       addComment("----------------");
    }
 
-   Vector<U8> preset;
 
    for(S32 i = 0; i < LOADOUT_PRESETS; i++)
    {

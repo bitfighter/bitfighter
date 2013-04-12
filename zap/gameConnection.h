@@ -97,7 +97,6 @@ private:
    void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message);    // Helper function
 
    StringTableEntry mServerName;
-   Vector<U8> mLoadout;
    GameSettings *mSettings;
 
 public:
@@ -307,8 +306,6 @@ public:
    void updateTimers(U32 timeDelta);
 
    void displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e);
-
-   const Vector<U8> &getLoadout();
 
    static const U8 CONNECT_VERSION;  // may be useful in future version with same CS protocol number
    U8 mConnectionVersion;  // the CONNECT_VERSION of the other side of this connection

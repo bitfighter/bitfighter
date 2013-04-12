@@ -43,10 +43,10 @@ namespace Zap
    // TODO: xmacroize to keep in sync
 
 static OverlayMenuItem engineerItemInfo[] = {
-   { KEY_1, BUTTON_1, true,  0, "Turret",          &Colors::overlayMenuUnselectedItemColor, "", NULL },
-   { KEY_2, BUTTON_2, true,  0, "Force Field",     &Colors::overlayMenuUnselectedItemColor, "", NULL },
-   { KEY_3, BUTTON_3, true,  0, "Teleporter",      &Colors::overlayMenuUnselectedItemColor, "", NULL },
-   { KEY_4, BUTTON_4, false, 0, "Teleporter Exit", &Colors::overlayMenuUnselectedItemColor, "", NULL },
+   { KEY_1, BUTTON_1, true,  EngineeredTurret,             "Turret",          &Colors::overlayMenuUnselectedItemColor, "", NULL },
+   { KEY_2, BUTTON_2, true,  EngineeredForceField,         "Force Field",     &Colors::overlayMenuUnselectedItemColor, "", NULL },
+   { KEY_3, BUTTON_3, true,  EngineeredTeleporterEntrance, "Teleporter",      &Colors::overlayMenuUnselectedItemColor, "", NULL },
+   { KEY_4, BUTTON_4, false, EngineeredTeleporterExit,     "Teleporter Exit", &Colors::overlayMenuUnselectedItemColor, "", NULL },
 };                                                         
                                                            
                                                            
@@ -57,20 +57,12 @@ static const char *engineerInstructions[] = {
    "Aim at a spot in open space, and activate the module again."
 };
 
-static EngineerBuildObjects engineerLookup[] = 
-{
-   EngineeredTurret,            
-   EngineeredForceField,        
-   EngineeredTeleporterEntrance,
-   EngineeredTeleporterExit
-};
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 
-static const char *menuTitle = "What do you want to Engineer?";
+static const char *menuTitle = "Choose One:";
 
 // Constructor
 EngineerHelper::EngineerHelper()
@@ -99,7 +91,7 @@ HelperMenu::HelperMenuType EngineerHelper::getType() { return EngineerHelperType
 void EngineerHelper::setSelectedEngineeredObject(U32 objectType)
 {
    for(S32 i = 0; i < ARRAYSIZE(engineerItemInfo); i++)
-      if(engineerLookup[i] == objectType)
+      if(engineerItemInfo[i].itemIndex == objectType)
          mSelectedIndex = i;
 }
 
@@ -131,7 +123,7 @@ void EngineerHelper::render()
 }
 
 
-bool EngineerHelper::isMenuBeingDisplayed()
+bool EngineerHelper::isMenuBeingDisplayed() const
 {
    return mSelectedIndex == -1;
 }
@@ -183,12 +175,12 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 
          // Check deployment status on client; will be checked again on server,
          // but server will only handle likely valid placements
-         if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, engineerLookup[mSelectedIndex]))
+         if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, engineerItemInfo[mSelectedIndex].itemIndex))
          {
             // Send command to server to deploy, and deduct energy
             if(gc)
             {
-               gc->c2sEngineerDeployObject(engineerLookup[mSelectedIndex]);
+               gc->c2sEngineerDeployObject(engineerItemInfo[mSelectedIndex].itemIndex);
                S32 energyCost = Game::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
                ship->creditEnergy(-energyCost);    // Deduct energy from engineer
             }
@@ -210,7 +202,7 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 
 void EngineerHelper::exitHelper()
 {
-   if(mSelectedIndex != -1 && engineerLookup[mSelectedIndex] == EngineeredTeleporterExit)
+   if(mSelectedIndex != -1 && engineerItemInfo[mSelectedIndex].itemIndex == EngineeredTeleporterExit)
    {
       GameConnection *gameConnection = getGame()->getConnectionToServer();
 
@@ -222,19 +214,30 @@ void EngineerHelper::exitHelper()
 }
 
 
+S32 EngineerHelper::getAnimationTime() const
+{
+   if(isMenuBeingDisplayed())
+      return Parent::getAnimationTime();
+   
+   return 0;      // Returning 0 will cause menu to disappear immediately
+}
+
+
 // Basically draws a red box where the ship is pointing
 void EngineerHelper::renderDeploymentMarker(Ship *ship)
 {
    static Point deployPosition, deployNormal;      // Reusable containers
 
+   U32 item = engineerItemInfo[mSelectedIndex].itemIndex;
+
    // Only render wall mounted items (not teleport)
    if(mSelectedIndex != -1 &&
-         EngineerModuleDeployer::findDeployPoint(ship, engineerLookup[mSelectedIndex], deployPosition, deployNormal))
+         EngineerModuleDeployer::findDeployPoint(ship, item, deployPosition, deployNormal))
    {
       EngineerModuleDeployer deployer;
-      bool canDeploy = deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, engineerLookup[mSelectedIndex]);
+      bool canDeploy = deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, item);
 
-      switch(engineerLookup[mSelectedIndex])
+      switch(engineerItemInfo[mSelectedIndex].itemIndex)
       {
          case EngineeredTurret:
          case EngineeredForceField:
@@ -254,7 +257,7 @@ void EngineerHelper::renderDeploymentMarker(Ship *ship)
 }
 
 
-const char *EngineerHelper::getCancelMessage()
+const char *EngineerHelper::getCancelMessage() const
 {
    return "Engineered item not deployed";
 }

@@ -878,15 +878,12 @@ void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
    {
       case EngineerEventTurretBuilt:         // fallthrough ok
       case EngineerEventForceFieldBuilt:
+      case EngineerEventTeleporterExitBuilt:
          getUIManager()->getGameUserInterface()->exitHelper();
          break;
 
       case EngineerEventTeleporterEntranceBuilt:
          setSelectedEngineeredObject(EngineeredTeleporterExit);
-         break;
-
-      case EngineerEventTeleporterExitBuilt:
-         getUIManager()->getGameUserInterface()->exitHelper(); 
          break;
 
       default:

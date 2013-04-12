@@ -26,10 +26,12 @@
 #ifndef _SHIPITEMS_H_
 #define _SHIPITEMS_H_
 
-#include "WeaponInfo.h"    // For weapon defs for DefaultLoadout list
-#include "../tnl/tnlTypes.h"
+//#include "WeaponInfo.h"    // For weapon defs for DefaultLoadout list
+#include "tnlTypes.h"
+#include <string>
 
 using namespace TNL;
+using namespace std;
 
 namespace Zap
 {
@@ -72,9 +74,7 @@ enum ModulePrimaryUseType
 static const S32 ShipModuleCount = 2;                // Modules a ship can carry
 static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
 
-// _default_loadout_ is used only for initializing DefaultLoadout, which is why it has such a goofy name
-static const U8 _default_loadout_[] = { ModuleBoost, ModuleShield, WeaponPhaser, WeaponMine, WeaponBurst };
-static const Vector<U8> DefaultLoadout(_default_loadout_, ShipModuleCount + ShipWeaponCount);
+static const string DefaultLoadout = "Turbo, Shield, Phaser, Mine, Burst";
 
 
 struct ModuleInfo

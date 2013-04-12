@@ -40,7 +40,7 @@ class TeamShuffleHelper : public HelperMenu
    typedef HelperMenu Parent;
 
 private:
-   const char *getCancelMessage();
+   const char *getCancelMessage() const;
    InputCode getActivationKey();
 
    S32 columnWidth;

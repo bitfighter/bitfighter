@@ -42,7 +42,6 @@
 #include "Colors.h"
 #include "robot.h"            // For EventManager def
 #include "stringUtils.h"      // For itos
-//#include "game.h"
 #include "shipItems.h"
 #include "ClientInfo.h"
 #include "teleporter.h"
@@ -81,8 +80,9 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(Ship);
 
 #ifdef _MSC_VER
-#pragma warning(disable:4355)
+#  pragma warning(disable:4355)
 #endif
+
 
 // Constructor
 // Note that on client, we use all default values set in declaration; on the server, these values will be provided
@@ -194,7 +194,7 @@ void Ship::initialize(const Point &pos)
 
    mEnergy = (S32) ((F32) EnergyMax * .80);     // Start off with 80% energy
 
-   setDefaultLoadout();
+   mLoadout.setLoadout(DefaultLoadout);
 
    mCooldownNeeded = false;
 
@@ -227,22 +227,14 @@ string Ship::toLevelCode(F32 gridSize) const
 }
 
 
-// Only called as part of initialize() -- set initial module and weapon selections
-// and initialize old loadout storage
-void Ship::setDefaultLoadout()
-{
-   mLoadout.setLoadout(DefaultLoadout);
-}
-
-
 ClientInfo *Ship::getClientInfo()
 {
    return mClientInfo;
 }
 
 
-bool Ship::canAddToEditor() { return false; }      // No ships in the editor
-const char *Ship::getOnScreenName()     { return "Ship"; }
+bool Ship::canAddToEditor()          { return false;  }      // No ships in the editor
+const char *Ship::getOnScreenName()  { return "Ship"; }
 
 
 void Ship::setEngineeredTeleporter(Teleporter *teleporter)

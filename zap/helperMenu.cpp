@@ -54,7 +54,7 @@ void HelperMenu::onActivated()
 }
 
 
-const char *HelperMenu::getCancelMessage()
+const char *HelperMenu::getCancelMessage() const
 {
    return "";
 }

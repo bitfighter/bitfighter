@@ -70,7 +70,7 @@ private:
 
    bool mEngineerEnabled;
 
-   const char *getCancelMessage();
+   const char *getCancelMessage() const;
    InputCode getActivationKey();
 
 public:

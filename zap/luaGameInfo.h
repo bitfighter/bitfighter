@@ -28,6 +28,7 @@
 
 
 #include "LuaScriptRunner.h"
+#include "LoadoutTracker.h"
 #include "gameWeapons.h"
 #include "shipItems.h"     // For module defs
 #include "move.h"          // For ShipModuleCount + ShipWeaponCount
@@ -83,8 +84,8 @@ private:
    U8 mLoadout[ShipModuleCount + ShipWeaponCount];
 
 public:
-   explicit LuaLoadout(const Vector<U8> &loadout = DefaultLoadout);  // C++ constructor
-   virtual ~LuaLoadout();                                            // Destructor
+   explicit LuaLoadout(const Vector<U8> &loadout = LoadoutTracker(DefaultLoadout).toU8Vector());  // C++ constructor
+   virtual ~LuaLoadout();                                                                         // Destructor
 
    LUAW_DECLARE_CLASS(LuaLoadout);
 

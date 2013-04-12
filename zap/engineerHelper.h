@@ -41,10 +41,10 @@ class EngineerHelper : public HelperMenu
    typedef HelperMenu Parent;
 
 private:
-   const char *getCancelMessage();
+   const char *getCancelMessage() const;
    S32 mSelectedIndex;
 
-   bool isMenuBeingDisplayed();
+   bool isMenuBeingDisplayed() const;
    void exitHelper();
 
 public:
@@ -61,6 +61,7 @@ public:
    void renderDeploymentMarker(Ship *ship);
 
    bool isChatDisabled();
+   S32 getAnimationTime() const;
 };
 
 };

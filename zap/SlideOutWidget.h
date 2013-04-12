@@ -68,8 +68,7 @@ public:
    virtual bool isActive() const;
 
    F32 getFraction();               // Get fraction of openness
-   S32 getAnimationTime() const;
-
+   virtual S32 getAnimationTime() const;
 };
 
 

@@ -27,10 +27,13 @@
 #define _LOADOUT_TRACKER_H_
 
 #include "shipItems.h"
+#include "WeaponInfo.h"
 
 #include "tnlTypes.h"
+#include <string>
 
 using namespace TNL;
+using namespace std;
 
 namespace Zap 
 {
@@ -63,6 +66,7 @@ public:
 
    // Set loadout in bulk
    void setLoadout(const Vector<U8> &items);   // Pass an array of U8s repesenting loadout... M,M,W,W,W
+   void setLoadout(const string &loadoutStr);
 
    // Or set loadout a la carte
    void setModule(U32 moduleIndex, ShipModule module);

@@ -29,7 +29,6 @@
 #include "playerInfo.h"
 #include "EditorObject.h"        // For NO_TEAM def
 #include "EngineeredItem.h"      // For EngineerModuleDeployer def
-#include "gameConnection.h"
 
 #include "voiceCodec.h"
 

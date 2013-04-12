@@ -1921,11 +1921,6 @@ bool GameConnection::isInCommanderMap()
 }
 
 
-const Vector<U8> &GameConnection::getLoadout()
-{
-   return mLoadout;
-}
-
 
 };
 

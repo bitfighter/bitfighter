@@ -234,7 +234,7 @@ bool TeamShuffleHelper::processInputCode(InputCode inputCode)
 }
 
 
-const char *TeamShuffleHelper::getCancelMessage()
+const char *TeamShuffleHelper::getCancelMessage() const
 {
    return "Shuffle canceled -- teams unchanged";
 }

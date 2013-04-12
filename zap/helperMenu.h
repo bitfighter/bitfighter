@@ -75,7 +75,7 @@ public:
    };
 
 private:
-   virtual const char *getCancelMessage();
+   virtual const char *getCancelMessage() const;
    virtual InputCode getActivationKey();
 
    ClientGame *mClientGame;

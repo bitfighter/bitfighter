@@ -206,7 +206,7 @@ InputCode LoadoutHelper::getActivationKey()
 }
 
 
-const char *LoadoutHelper::getCancelMessage()
+const char *LoadoutHelper::getCancelMessage() const
 {
    return "Modifications canceled -- ship design unchanged.";
 }
