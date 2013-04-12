@@ -126,6 +126,7 @@ using namespace TNL;
 #  include "VideoSystem.h"
 #  include "OpenglUtils.h"
 #  include "ClientGame.h"
+#  include "FontManager.h"
 #endif
 
 #include "ServerGame.h"
@@ -141,7 +142,6 @@ using namespace TNL;
 #include "ClientInfo.h"
 #include "Console.h"       // For access to console
 #include "BotNavMeshZone.h"
-#include "FontManager.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -1441,6 +1441,7 @@ int main(int argc, char **argv)
       Joystick::loadJoystickPresets(settings);    // Load joystick presets from INI first
       SDL_Init(0);                                // Allows Joystick and VideoSystem to work.
       Joystick::initJoystick(settings);           // Initialize joystick system
+      Joystick::enableJoystick(settings, false);           // Initialize joystick system
 
 #ifdef TNL_OS_MAC_OSX
       // On OS X, make sure we're in the right directory (again)

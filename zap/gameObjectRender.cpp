@@ -944,9 +944,8 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
 
 
 // Renders turret!  --> note that anchor and normal can't be const &Points because of the point math
-void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle)
+void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
 {
-   glColor(c);
 
    Point cross(normal.y, -normal.x);
    Point aimCenter = anchor + normal * Turret::TURRET_OFFSET;
@@ -959,6 +958,15 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
       Point pos = normal * cos(theta) + cross * sin(theta);
       vertexArray.push_back(aimCenter + pos * 15);
    }
+
+   if(healRate > 0)
+   {
+      glColor(c * 0.8f, MAX(0, 0.9f - (F32) healRate * 0.01));
+      renderPointVector(&vertexArray, GL_POLYGON);
+   }
+
+   glColor(c);
+
    renderPointVector(&vertexArray, GL_LINE_STRIP);
 
    glLineWidth(gLineWidth3);
@@ -2129,13 +2137,19 @@ void renderForceFieldProjector(Point pos, Point normal, const Color *color, bool
 }
 
 
-void renderForceFieldProjector(const Vector<Point> *geom, const Color *color, bool enabled)
+void renderForceFieldProjector(const Vector<Point> *geom, const Color *color, bool enabled, S32 healRate)
 {
    F32 ForceFieldBrightnessProjector = 0.50;
 
    Color c(color);      // Create locally modifiable copy
 
    c = c * (1 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
+
+   if(healRate > 0)
+   {
+      glColor(c * 0.8f, MAX(0, 0.9f - (F32) healRate * 0.01));
+      renderPointVector(geom, GL_POLYGON);
+   }
 
    glColor(enabled ? c : (c * 0.6f));
 

@@ -791,6 +791,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\LoadoutTracker.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\lua.h"
 			>
 		</File>

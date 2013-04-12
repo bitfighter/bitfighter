@@ -793,6 +793,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\AToBScroller.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\BanList.cpp"
 			>
 		</File>
@@ -806,6 +810,14 @@
 		</File>
 		<File
 			RelativePath=".\ChatCheck.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ChatCommands.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ChatHelper.cpp"
 			>
 		</File>
 		<File
@@ -893,6 +905,18 @@
 			>
 		</File>
 		<File
+			RelativePath=".\FontManager.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\fontstash\fontstash.c"
+			>
+		</File>
+		<File
+			RelativePath=".\FpsRenderer.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\game.cpp"
 			>
 		</File>
@@ -949,7 +973,15 @@
 			>
 		</File>
 		<File
+			RelativePath=".\HelperManager.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\helperMenu.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\HttpRequest.cpp"
 			>
 		</File>
 		<File
@@ -981,11 +1013,27 @@
 			>
 		</File>
 		<File
+			RelativePath=".\LevelDatabaseDownloadThread.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\LevelDatabaseUploadThread.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\LineItem.cpp"
 			>
 		</File>
 		<File
 			RelativePath=".\loadoutHelper.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\LoadoutIndicator.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\LoadoutTracker.cpp"
 			>
 		</File>
 		<File
@@ -1097,6 +1145,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\ScissorsManager.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\ScreenInfo.cpp"
 			>
 		</File>
@@ -1129,6 +1181,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\SlideOutWidget.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\sparkManager.cpp"
 			>
 		</File>
@@ -1149,6 +1205,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\fontstash\stb_truetype.c"
+			>
+		</File>
+		<File
 			RelativePath=".\stringUtils.cpp"
 			>
 		</File>
@@ -1162,6 +1222,10 @@
 		</File>
 		<File
 			RelativePath=".\TeamShuffleHelper.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\TimeLeftRenderer.cpp"
 			>
 		</File>
 		<File
@@ -1186,6 +1250,10 @@
 		</File>
 		<File
 			RelativePath=".\UIHighScores.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\UILevelInfoDisplayer.cpp"
 			>
 		</File>
 		<File

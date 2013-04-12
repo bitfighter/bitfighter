@@ -837,27 +837,12 @@ void EditorUserInterface::onPluginMenuClosed(const Vector<string> &args)
    mPluginMenuValues[key] = args;
 
    if(!mPluginRunner->runMain(args))
-      showErrorRunningPluginMessage();
+      setSaveMessage("Plugin Error: press [/] for details", false);
 
    rebuildEverything(getDatabase());
 
    mPluginRunner.reset();
 }
-
-
-void EditorUserInterface::showErrorRunningPluginMessage()
-{
-   string pluginDir = getGame()->getSettings()->getFolderManager()->pluginDir;
-
-   Vector<StringTableEntry> messages;
-   messages.push_back("");
-   messages.push_back("");
-   messages.push_back("Error running plugin.");
-   messages.push_back("See the console (press [/]) or the logfile for details.");
-
-   getGame()->displayMessageBox("Plugin Error", "Press any key to return to the editor", messages);
-}
-
 
 
 void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName)

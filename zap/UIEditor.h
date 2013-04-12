@@ -248,7 +248,6 @@ private:
    map<string, Vector<string> > mPluginMenuValues;
 
    void showCouldNotFindScriptMessage(const string &scriptName);
-   void showErrorRunningPluginMessage();
 
    GridDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
    void translateSelectedItems(GridDatabase *database, const Point &offset);

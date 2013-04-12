@@ -81,7 +81,7 @@ public:
    inline Color& operator-=(const Color &c) { r -= c.r; g -= c.g; b -= c.b; return *this; }
 
    inline Color operator+(const F32 f) const { return Color (r + f, g + f, b + f); }
-   inline Color operator*(const F32 f) { return Color (r * f, g * f, b * f); }
+   inline Color operator*(const F32 f) const { return Color (r * f, g * f, b * f); }
    inline Color& operator*=(const F32 f) { r *= f; g *= f; b *= f; return *this; }
 
    inline bool operator==(const Color &col) const { return r == col.r && g == col.g && b == col.b; }

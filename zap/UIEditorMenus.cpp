@@ -233,7 +233,7 @@ bool QuickMenuUI::usesEditorScreenMode()                 // TODO: Rename this st
 
 void QuickMenuUI::onDisplayModeChange()
 {
-   getUIManager()->getPrevUI()->onDisplayModeChange();   // This is intended to run the same method in the editor
+   getUIManager()->getEditorUserInterface()->onDisplayModeChange();   // This is intended to run the same method in the editor
 
    // Reposition menu on screen, keeping same relative position as before
    Point pos(mMenuLocation.x * gScreenInfo.getGameCanvasWidth() /gScreenInfo.getPrevCanvasWidth(), 

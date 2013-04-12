@@ -487,6 +487,7 @@ Nonce *ClientInfo::getId()
 // Methods to provide access to mReturnToGameTimer -- this is used on the server to enforce a post /idle delay
 // and used on the client to display the (approximate) time left in that delay.
 U32  ClientInfo::getReturnToGameTime()                  { return mReturnToGameTimer.getCurrent();      }
+void ClientInfo::setReturnToGameTimer(U32 timeDelta) { mReturnToGameTimer.reset(timeDelta, mReturnToGameTimer.getPeriod()); }
 bool ClientInfo::updateReturnToGameTimer(U32 timeDelta) { return mReturnToGameTimer.update(timeDelta); }
 void ClientInfo::resetReturnToGameTimer()               {        mReturnToGameTimer.reset();           }
 
@@ -500,8 +501,6 @@ FullClientInfo::FullClientInfo(Game *game, GameConnection *gameConnection, bool 
    mGame = game;
    mClientConnection = gameConnection;
    mIsRobot = isRobot;
-
-   mHasReturnToGamePenalty = false;
 }
 
 
@@ -537,12 +536,6 @@ F32 FullClientInfo::getRating()
 }
 
 
-void FullClientInfo::setHasReturnToGamePenalty(bool hasPenalty)
-{
-   mHasReturnToGamePenalty = hasPenalty;
-}
-
-
 // Check if player is "on hold" due to inactivity; bots are never on hold.  Server only!
 bool FullClientInfo::shouldDelaySpawn()
 {
@@ -555,7 +548,7 @@ bool FullClientInfo::shouldDelaySpawn()
 
 bool FullClientInfo::hasReturnToGamePenalty()
 {
-   return mHasReturnToGamePenalty;
+   return mReturnToGameTimer.getCurrent() != 0;
 }
 
 
@@ -565,20 +558,19 @@ void FullClientInfo::setSpawnDelayed(bool spawnDelayed)
    if(spawnDelayed == mSpawnDelayed)                     // Already in requested state -- nothing to do
       return;
 
-   if(!spawnDelayed && mReturnToGameTimer.getCurrent())  // Already waiting to unspawn... hold your horses!
-      return;
-
-   if(spawnDelayed)                                      // Tell client their spawn has been delayed
-      getConnection()->s2cPlayerSpawnDelayed();          
-   else if(mHasReturnToGamePenalty)                      // Not so fast there, Chief... you still have to wait!
-   {
-      mReturnToGameTimer.reset();
-      mHasReturnToGamePenalty = false;
-      return;
-   }
+   //if(!spawnDelayed && mReturnToGameTimer.getCurrent())  // Already waiting to unspawn... hold your horses!
+      //return;
 
    mSpawnDelayed = spawnDelayed;
-   mGame->getGameType()->s2cSetIsSpawnDelayed(mName, spawnDelayed);  // Notify other clients
+
+   if(mGame->isServer())
+   {
+      if(spawnDelayed)                                      // Tell client their spawn has been delayed
+         getConnection()->s2cPlayerSpawnDelayed((getReturnToGameTime() + 99) / 100); // add for round up divide
+		else
+			getConnection()->s2cPlayerSpawnUndelayed();
+      mGame->getGameType()->s2cSetIsSpawnDelayed(mName, spawnDelayed);  // Notify other clients
+   }
 }
 
 
