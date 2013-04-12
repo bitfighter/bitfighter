@@ -71,29 +71,6 @@ static const OverlayMenuItem loadoutWeaponMenuItems[] = {
 #undef UNSEL_COLOR
 #undef HELP_COLOR
 
-// must be synchronized with above... TODO: put this in an xmacro!
-static U8 moduleLookup[] = 
-{
-   ModuleBoost,
-   ModuleShield,
-   ModuleRepair,
-   ModuleSensor,
-   ModuleCloak,
-   ModuleArmor,
-   ModuleEngineer
-};
-
-static U8 weaponLookup[] = 
-{
-   WeaponPhaser,
-   WeaponBounce,
-   WeaponTriple,
-   WeaponBurst, 
-   WeaponMine,  
-   WeaponSeeker
-};
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
