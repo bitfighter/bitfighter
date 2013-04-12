@@ -1408,7 +1408,7 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
       else
       {
          // Still using old loadout because we haven't entered a loadout zone yet...
-         setClientShipLoadout(clientInfo, clientInfo->mOldLoadout, true); 
+         setClientShipLoadout(clientInfo, clientInfo->getOldLoadout(), true); 
 
          // Unless we're actually spawning onto a loadout zone
          Vector<DatabaseObject *> loadoutZones;
@@ -1422,7 +1422,7 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
          } 
       }
 
-      clientInfo->mOldLoadout.clear();
+      clientInfo->resetOldLoadout();      // Why?
    }
 
    return true;
@@ -1503,49 +1503,26 @@ void GameType::SRV_updateShipLoadout(BfObject *shipObject)
 
 // Return error message if loadout is invalid, return "" if it looks ok
 // Runs on client and server
-string GameType::validateLoadout(const Vector<U8> &loadout)
+bool GameType::isLoadoutValid(const LoadoutTracker &loadout)
 {
-   bool spyBugAllowed = false;
+   if(!loadout.isValid())
+      return false;
 
-   if(loadout.size() != ShipModuleCount + ShipWeaponCount)     // Reject improperly sized loadouts.  Currently 2 + 3
-      return "Invalid loadout size";
+   // Reject if module contains engineer but it is not enabled on this level
+   if(!mEngineerEnabled && loadout.hasModule(ModuleEngineer))
+      return false;
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
-   {
-      if(loadout[i] >= U32(ModuleCount))   // Invalid number.  Might crash server if trying to continue...
-         return "Invalid module in loadout";
+   // Check for illegal weapons
+   if(loadout.hasWeapon(WeaponTurret))
+      return false;
 
-      if(!mEngineerEnabled && (loadout[i] == ModuleEngineer)) // Reject engineer if not enabled
-         return "Engineer module not allowed here";
-
-      if((loadout[i] == ModuleSensor))    // Allow spyBug when using Sensor
-         spyBugAllowed = true;
-   }
-
-   for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-   {
-      if(loadout[i] >= U32(WeaponCount))  // Invalid number
-         return "Invalid weapon in loadout";
-
-
-      if(loadout[i] == WeaponSpyBug && !spyBugAllowed)      // Reject spybug when not using ModuleSensor
-         return "Spybug not allowed when sensor not selected; loadout not set";
-
-
-      if(loadout[i] == WeaponTurret)      // Reject WeaponTurret
-         return "Illegal weapon in loadout";
-
-//      if(loadout[i] == WeaponSeeker)  // Reject Seeker, not supported yet
-//         return "Illegal weapon in loadout";
-   }
-
-   return "";     // Passed validation
+   return true;     // Passed validation
 }
 
 
 // Set the "on-deck" loadout for a ship, and make it effective immediately if we're in a loadout zone
 // Server only, called in direct response to request from client via c2sRequestLoadout()
-void GameType::SRV_clientRequestLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout)
+void GameType::SRV_clientRequestLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout)
 {
    Ship *ship = clientInfo->getShip();
 
@@ -1562,16 +1539,16 @@ void GameType::SRV_clientRequestLoadout(ClientInfo *clientInfo, const Vector<U8>
 
 // Called from above and elsewhere
 // Server only -- to trigger this on client, use GameConnection::c2sRequestLoadout()
-void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout, bool silent)
+void GameType::setClientShipLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout, bool silent)
 {
-   if(validateLoadout(loadout) != "")
+   if(!isLoadoutValid(loadout))
       return;
 
    Ship *ship = clientInfo->getShip();
 
    bool loadoutChanged = false;
    if(ship)
-      loadoutChanged = ship->setLoadout(loadout, silent);
+      loadoutChanged = ship->setLoadout(loadout.toU8Vector(), silent);
 
    if(loadoutChanged)
    {
@@ -1580,10 +1557,10 @@ void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &lo
       //    00000000000001110000000000000011
       U32 loadoutHash = 0;
       for(S32 i = 0; i < ShipModuleCount; i++)
-         loadoutHash |= BIT(loadout[i]);
+         loadoutHash |= BIT(loadout.hasModule(ShipModule(i)) ? 1 : 0);
 
-      for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-         loadoutHash |= BIT(loadout[i]) << 16;
+      for(S32 i = 0; i < ShipWeaponCount; i++)
+         loadoutHash |= BIT(loadout.hasWeapon(WeaponType(i)) ? 1 : 0) << 16;
 
       clientInfo->getStatistics()->addLoadout(loadoutHash);
    }

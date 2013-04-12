@@ -32,6 +32,7 @@
 #include "gameStats.h"           // For VersionedGameStats
 #include "statistics.h"
 #include "Spawn.h"
+#include "LoadoutTracker.h"
 
 #include "gameConnection.h"      // For MessageColors enum
 #include "GameTypesEnum.h"
@@ -436,10 +437,10 @@ public:
 
    void addTime(U32 time);          // Extend the game by time (in ms)
 
-   void SRV_clientRequestLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout);
+   void SRV_clientRequestLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout);
    void SRV_updateShipLoadout(BfObject *shipObject); // called from LoadoutZone when a Ship touches the zone
-   string validateLoadout(const Vector<U8> &loadout);
-   void setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout, bool silent = false);
+   bool isLoadoutValid(const LoadoutTracker &loadout);
+   void setClientShipLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout, bool silent = false);
 
    bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
 

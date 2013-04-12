@@ -35,6 +35,8 @@ using namespace TNL;
 namespace Zap 
 {
 
+class LuaLoadout;
+
 class LoadoutTracker
 {
 private:
@@ -46,16 +48,21 @@ private:
    bool mModulePrimaryActive[ModuleCount];         // Is the primary component of the module active at this moment?
    bool mModuleSecondaryActive[ModuleCount];       // Is the secondary component of the module active?
 
-   void resetLoadout();    // Reset this loadout to its factory settings
-
 public:
-   LoadoutTracker(const string &loadoutStr = "");  // Constructor
+   LoadoutTracker();                            // Constructor
+   LoadoutTracker(const string &loadoutStr);  
+   LoadoutTracker(const Vector<U8> &loadout);
+   LoadoutTracker(const LuaLoadout *loadout);
+
+
+   bool operator == (const LoadoutTracker &other) const;
+   bool operator != (const LoadoutTracker &other) const;
 
    bool update(const LoadoutTracker &tracker);
    //bool update(const ShipModule *modules, const WeaponType *weapons);
 
    // Set loadout in bulk
-   void setLoadout(const U8 *items);   // Pass an array of U8s repesenting loadout... M,M,W,W,W
+   void setLoadout(const Vector<U8> &items);   // Pass an array of U8s repesenting loadout... M,M,W,W,W
 
    // Or set loadout a la carte
    void setModule(U32 moduleIndex, ShipModule module);
@@ -78,10 +85,14 @@ public:
    WeaponType getCurrentWeapon() const;
    U32 getCurrentWeaponIndx() const;
 
+   void resetLoadout();    // Reset this loadout to its factory settings
+
+
 
    ShipModule getModule(U32 modIndex) const;
 
    bool hasModule(ShipModule mod) const;
+   bool hasWeapon(WeaponType weapon) const;
 
    bool isModulePrimaryActive(ShipModule module) const;
    bool isModuleSecondaryActive(ShipModule module) const;

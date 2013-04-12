@@ -561,7 +561,7 @@ void muteHandler(ClientGame *game, const Vector<string> &words)
       else if(game->isOnMuteList(words[1]))
       {
          game->removeFromMuteList(words[1]);
-         game->displaySuccessMessage("Player %s has been un-muted", words[1].c_str());
+         game->displaySuccessMessage("Player %s has been unmuted", words[1].c_str());
       }
 
       // Mute!
@@ -587,7 +587,7 @@ void voiceMuteHandler(ClientGame *game, const Vector<string> &words)
       else if(game->isOnVoiceMuteList(words[1]))
       {
          game->removeFromVoiceMuteList(words[1]);
-         game->displaySuccessMessage("Voice for %s has been un-muted", words[1].c_str());
+         game->displaySuccessMessage("Voice for %s has been unmuted", words[1].c_str());
       }
 
       // Mute!

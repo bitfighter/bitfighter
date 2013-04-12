@@ -43,10 +43,10 @@ namespace Zap
    // TODO: xmacroize to keep in sync
 
 static OverlayMenuItem engineerItemInfo[] = {
-   { KEY_1, BUTTON_1, true,  "Turret",          &Colors::overlayMenuUnselectedItemColor, "", NULL },
-   { KEY_2, BUTTON_2, true,  "Force Field",     &Colors::overlayMenuUnselectedItemColor, "", NULL },
-   { KEY_3, BUTTON_3, true,  "Teleporter",      &Colors::overlayMenuUnselectedItemColor, "", NULL },
-   { KEY_4, BUTTON_4, false, "Teleporter Exit", &Colors::overlayMenuUnselectedItemColor, "", NULL },
+   { KEY_1, BUTTON_1, true,  0, "Turret",          &Colors::overlayMenuUnselectedItemColor, "", NULL },
+   { KEY_2, BUTTON_2, true,  0, "Force Field",     &Colors::overlayMenuUnselectedItemColor, "", NULL },
+   { KEY_3, BUTTON_3, true,  0, "Teleporter",      &Colors::overlayMenuUnselectedItemColor, "", NULL },
+   { KEY_4, BUTTON_4, false, 0, "Teleporter Exit", &Colors::overlayMenuUnselectedItemColor, "", NULL },
 };                                                         
                                                            
                                                            

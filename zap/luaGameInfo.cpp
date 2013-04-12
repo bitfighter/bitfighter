@@ -183,16 +183,17 @@ S32 LuaGameInfo::lua_getTeam(lua_State *L)
 }
 
 
+
 ////////////////////////////////////
 ////////////////////////////////////
 
 
 // C++ Constructor -- specify items
-LuaLoadout::LuaLoadout(const U8 loadoutItems[])
+LuaLoadout::LuaLoadout(const Vector<U8> &loadout)
 {
    // When creating a new loadout object, load it up with the
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      mLoadout[i] = loadoutItems[i];
+      mLoadout[i] = loadout[i];
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -309,7 +310,7 @@ S32 LuaLoadout::lua_equals(lua_State *L)        // equals(Loadout) ==> is loadou
 
 
 // Private helper function for above
-U8 LuaLoadout::getLoadoutItem(S32 index)
+U8 LuaLoadout::getLoadoutItem(S32 index) const
 {
    return mLoadout[index];
 }

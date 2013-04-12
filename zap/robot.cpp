@@ -302,6 +302,7 @@ void Robot::killScript()
 }
 
 
+// Robot just died
 void Robot::kill()
 {
    if(hasExploded) 
@@ -311,7 +312,7 @@ void Robot::kill()
 
    setMaskBits(ExplodedMask);
    if(!isGhost() && getOwner())
-      getLoadout(getOwner()->mOldLoadout);
+      getOwner()->setOldLoadout(mLoadout);
 
    disableCollision();
 
@@ -1041,14 +1042,9 @@ S32 Robot::lua_setReqLoadout(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "setReqLoadout");
 
-   Vector<U8> vec;
+   LoadoutTracker loadout(luaW_check<LuaLoadout>(L, 1));
 
-   LuaLoadout *loadout = luaW_check<LuaLoadout>(L, 1);
-
-   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      vec.push_back(loadout->getLoadoutItem(i));
-
-   getOwner()->sRequestLoadout(vec);
+   getOwner()->requestLoadout(loadout);
 
    return 0;
 }
@@ -1059,15 +1055,10 @@ S32 Robot::lua_setCurrLoadout(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "setCurrLoadout");
 
-   Vector<U8> vec;
+   LoadoutTracker loadout(luaW_check<LuaLoadout>(L, 1));
 
-   LuaLoadout *loadout = luaW_check<LuaLoadout>(L, 1);
-   
-   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      vec.push_back(loadout->getLoadoutItem(i));
-
-   if(getGame()->getGameType()->validateLoadout(vec) == "")
-      setLoadout(vec);
+   if(getGame()->getGameType()->isLoadoutValid(loadout))
+      setLoadout(loadout.toU8Vector());
 
    return 0;
 }

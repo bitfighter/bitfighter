@@ -71,7 +71,10 @@ enum ModulePrimaryUseType
 
 static const S32 ShipModuleCount = 2;                // Modules a ship can carry
 static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
-static const U8 DefaultLoadout[] = { ModuleBoost, ModuleShield, WeaponPhaser, WeaponMine, WeaponBurst };
+
+// _default_loadout_ is used only for initializing DefaultLoadout, which is why it has such a goofy name
+static const U8 _default_loadout_[] = { ModuleBoost, ModuleShield, WeaponPhaser, WeaponMine, WeaponBurst };
+static const Vector<U8> DefaultLoadout(_default_loadout_, ShipModuleCount + ShipWeaponCount);
 
 
 struct ModuleInfo

@@ -35,6 +35,7 @@
 #include "ClientGame.h"
 #include "JoystickRender.h"
 #include "config.h"
+#include "WeaponInfo.h"
 
 #include "OpenglUtils.h"
 
@@ -47,24 +48,24 @@ namespace Zap
 #define HELP_COLOR  &Colors::overlayMenuHelpColor
 
 static const OverlayMenuItem loadoutModuleMenuItems[] = {
-   { KEY_1, BUTTON_1, true, "Turbo Boost",           UNSEL_COLOR, "",               NULL       },
-   { KEY_2, BUTTON_2, true, "Shield Generator",      UNSEL_COLOR, "",               NULL       },
-   { KEY_3, BUTTON_3, true, "Repair Module",         UNSEL_COLOR, "",               NULL       },
-   { KEY_4, BUTTON_4, true, "Enhanced Sensor",       UNSEL_COLOR, "",               NULL       },
-   { KEY_5, BUTTON_5, true, "Cloak Field Modulator", UNSEL_COLOR, "",               NULL       },
-   { KEY_6, BUTTON_6, true, "Armor",                 UNSEL_COLOR, "(adds inertia)", HELP_COLOR },
-   { KEY_7, BUTTON_7, true, "Engineer",              UNSEL_COLOR, "",               NULL       },
+   { KEY_1, BUTTON_1, true, ModuleBoost,    "Turbo Boost",           UNSEL_COLOR, "",               NULL       },
+   { KEY_2, BUTTON_2, true, ModuleShield,   "Shield Generator",      UNSEL_COLOR, "",               NULL       },
+   { KEY_3, BUTTON_3, true, ModuleRepair,   "Repair Module",         UNSEL_COLOR, "",               NULL       },
+   { KEY_4, BUTTON_4, true, ModuleSensor,   "Enhanced Sensor",       UNSEL_COLOR, "",               NULL       },
+   { KEY_5, BUTTON_5, true, ModuleCloak,    "Cloak Field Modulator", UNSEL_COLOR, "",               NULL       },
+   { KEY_6, BUTTON_6, true, ModuleArmor,    "Armor",                 UNSEL_COLOR, "(adds inertia)", HELP_COLOR },
+   { KEY_7, BUTTON_7, true, ModuleEngineer, "Engineer",              UNSEL_COLOR, "",               NULL       },
 };
 
 static const S32 moduleEngineerIndex = 6;
 
 static const OverlayMenuItem loadoutWeaponMenuItems[] = {
-   { KEY_1, BUTTON_1, true, "Phaser",     UNSEL_COLOR, "", NULL },
-   { KEY_2, BUTTON_2, true, "Bouncer",    UNSEL_COLOR, "", NULL },
-   { KEY_3, BUTTON_3, true, "Triple",     UNSEL_COLOR, "", NULL },
-   { KEY_4, BUTTON_4, true, "Burster",    UNSEL_COLOR, "", NULL },
-   { KEY_5, BUTTON_5, true, "Mine Layer", UNSEL_COLOR, "", NULL },
-   { KEY_6, BUTTON_6, true, "Seeker",     UNSEL_COLOR, "", NULL },
+   { KEY_1, BUTTON_1, true, WeaponPhaser, "Phaser",     UNSEL_COLOR, "", NULL },
+   { KEY_2, BUTTON_2, true, WeaponBounce, "Bouncer",    UNSEL_COLOR, "", NULL },
+   { KEY_3, BUTTON_3, true, WeaponTriple, "Triple",     UNSEL_COLOR, "", NULL },
+   { KEY_4, BUTTON_4, true, WeaponBurst,  "Burster",    UNSEL_COLOR, "", NULL },
+   { KEY_5, BUTTON_5, true, WeaponMine,   "Mine Layer", UNSEL_COLOR, "", NULL },
+   { KEY_6, BUTTON_6, true, WeaponSeeker, "Seeker",     UNSEL_COLOR, "", NULL },
 };                                                  
 
 #undef UNSEL_COLOR
@@ -141,7 +142,7 @@ void LoadoutHelper::render()
 
 
    if(showingModules)
-      drawItemMenu(title, &mModuleMenuItems[0], mModuleMenuItems.size(), NULL,0);
+      drawItemMenu(title, &mModuleMenuItems[0], mModuleMenuItems.size(), NULL, 0);
    else
       drawItemMenu(title, &mWeaponMenuItems[0], mWeaponMenuItems.size(), &mModuleMenuItems[0], mModuleMenuItems.size());
 }
@@ -197,10 +198,10 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       LoadoutTracker loadout;
 
       for(S32 i = 0; i < ShipModuleCount; i++)
-         loadout.setModule(i, mModule[i]);
+         loadout.setModule(i, ShipModule(loadoutModuleMenuItems[mModule[i]].itemIndex));
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
-         loadout.setWeapon(i, WeaponType(mWeapon[i]));
+         loadout.setWeapon(i, WeaponType(loadoutWeaponMenuItems[mWeapon[i]].itemIndex));
 
       GameConnection *conn = getGame()->getConnectionToServer();
 

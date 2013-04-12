@@ -52,6 +52,7 @@ struct OverlayMenuItem
    InputCode key;             // Keyboard key used to select in menu
    InputCode button;          // Controller button used to select in menu
    bool showOnMenu;           // Should this item actually be added to the menu?
+   U32 itemIndex;             // Only used on Loadout menu
    const char *name;          // Name used on menu
    const Color *itemColor;
    const char *help;          // An additional bit of help text, also displayed on menu

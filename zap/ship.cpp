@@ -1784,39 +1784,19 @@ void Ship::dismountAll(U8 objectType)
 }
 
 
-// Fills loadout 
-void Ship::getLoadout(Vector<U8> &loadout)
+bool Ship::isLoadoutSameAsCurrent(const LoadoutTracker &loadout)
 {
-   loadout.clear();
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      loadout.push_back(mLoadout.getWeapon(i));
-
-   for(S32 i = 0; i < ShipWeaponCount; i++)
-      loadout.push_back(mLoadout.getWeapon(i));
-}
-
-
-bool Ship::isLoadoutSameAsCurrent(const Vector<U8> &loadout)
-{
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      if(loadout[i] != (U8)mLoadout.getModule(i))
-         return false;
-
-   for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-      if(loadout[i] != (U8)mLoadout.getWeapon(i - ShipModuleCount))
-         return false;
-
-   return true;
+   return loadout == mLoadout;      // Yay for operator overloading!
 }
 
 
 // This actualizes the requested loadout... when, for example the user enters a loadout zone
 // To set the "on-deck" loadout, use GameType->setClientShipLoadout()
 // Returns true if loadout has changed
-bool Ship::setLoadout(const Vector<U8> &loadout, bool silent)
+bool Ship::setLoadout(const LoadoutTracker &loadout, bool silent)
 {
    // Check to see if the new configuration is the same as the old.  If so, we have nothing to do.
-   if(isLoadoutSameAsCurrent(loadout))      // Don't bother if ship config hasn't changed
+   if(loadout == mLoadout)      // Don't bother if ship config hasn't changed
       return false;
 
    if(getClientInfo())
@@ -1824,11 +1804,9 @@ bool Ship::setLoadout(const Vector<U8> &loadout, bool silent)
 
    WeaponType currentWeapon = mLoadout.getCurrentWeapon();
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      mLoadout.setModule(i, ShipModule(loadout[i]));
+   mLoadout = loadout;
 
-   for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-      mLoadout.setWeapon(i - ShipModuleCount, WeaponType(loadout[i]));
+   TNLAssert(mLoadout.getCurrentWeapon() == loadout.getCurrentWeapon(), "Delete this assert!");
 
    setMaskBits(LoadoutMask);
 
@@ -1907,12 +1885,13 @@ void Ship::kill(DamageInfo *theInfo)
 }
 
 
+// Ship was killed
 void Ship::kill()
 {
    if(isServer())    // Server only
    {
       if(getOwner())
-         getLoadout(getOwner()->mOldLoadout);      // Save current loadout in getOwner()->mOldLoadout
+         getOwner()->setOldLoadout(mLoadout);      // Save current loadout in getOwner()->mOldLoadout
 
       // Fire some events, starting with ShipKilledEvent
       EventManager::get()->fireEvent(EventManager::ShipKilledEvent, this);
@@ -2553,16 +2532,8 @@ S32 Ship::lua_getMountedItems(lua_State *L)
 // Return current loadout
 S32 Ship::lua_getCurrLoadout(lua_State *L)
 {
-   U8 loadoutItems[ShipModuleCount + ShipWeaponCount];
-
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      loadoutItems[i] = (U8)mLoadout.getModule(i);
-
-   for(S32 i = 0; i < ShipWeaponCount; i++)
-      loadoutItems[i + ShipModuleCount] = (U8)mLoadout.getWeapon(i);
-
-   // FIXME:  Memory leak?  where is this cleaned up?
-   LuaLoadout *loadout = new LuaLoadout(loadoutItems);
+   // Not a memory leak -- lauW_hold tells Lua to delete this object when it is finshed with it
+   LuaLoadout *loadout = new LuaLoadout(mLoadout.toU8Vector());
    luaW_push<LuaLoadout>(L, loadout);
    luaW_hold<LuaLoadout>(L, loadout);
 
@@ -2573,19 +2544,17 @@ S32 Ship::lua_getCurrLoadout(lua_State *L)
 // Return requested loadout
 S32 Ship::lua_getReqLoadout(lua_State *L)
 {
-   U8 loadoutItems[ShipModuleCount + ShipWeaponCount];
    ClientInfo *clientInfo = getOwner();
+   LoadoutTracker requestedLoadout;
 
-   const Vector<U8> requestedLoadout = clientInfo ? clientInfo->getLoadout() : Vector<U8>();
+    if(clientInfo) 
+       requestedLoadout = clientInfo->getLoadout();
 
-   if(!clientInfo || requestedLoadout.size() != ShipModuleCount + ShipWeaponCount)    // Robots and clients starts at zero size requested loadout
+    if(!requestedLoadout.isValid()) 
       return lua_getCurrLoadout(L);
 
-   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      loadoutItems[i] = requestedLoadout[i];
-
-   // FIXME:  Memory leak?  where is this cleaned up?
-   LuaLoadout *loadout = new LuaLoadout(loadoutItems);
+   // Not a memory leak -- lauW_hold tells Lua to delete this object when it is finshed with it
+   LuaLoadout *loadout = new LuaLoadout(requestedLoadout.toU8Vector());
    luaW_push<LuaLoadout>(L, loadout);
    luaW_hold<LuaLoadout>(L, loadout);
 

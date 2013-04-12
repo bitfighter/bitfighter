@@ -433,14 +433,15 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
 
    if(getSettings()->getIniSettings()->verboseHelpMessages)
    {
-      if(ship->isLoadoutSameAsCurrent(loadout.toU8Vector()))
+      if(ship->isLoadoutSameAsCurrent(loadout))
          displayErrorMessage(msgToShowIfLoadoutsAreTheSame);
       else
       {
          GameType *gt = getGameType();
 
          displaySuccessMessage("Ship design changed -- %s", 
-                              gt->levelHasLoadoutZone() ? "enter Loadout Zone to activate changes" : "changes will be activated when you respawn");
+                              gt->levelHasLoadoutZone() ? "enter Loadout Zone to activate changes" : 
+                                                          "changes will be activated when you respawn");
       }
    }
 }

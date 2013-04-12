@@ -83,8 +83,8 @@ private:
    U8 mLoadout[ShipModuleCount + ShipWeaponCount];
 
 public:
-   explicit LuaLoadout(const U8 loadoutItems[] = DefaultLoadout);    // C++ constructor
-   virtual ~LuaLoadout();                                   // Destructor
+   explicit LuaLoadout(const Vector<U8> &loadout = DefaultLoadout);  // C++ constructor
+   virtual ~LuaLoadout();                                            // Destructor
 
    LUAW_DECLARE_CLASS(LuaLoadout);
 
@@ -99,7 +99,7 @@ public:
    S32 lua_getWeapon(lua_State *L);     // getWeapon(i) ==> return weapon at index i
    S32 lua_getModule(lua_State *L);     // getModule(i) ==> return module at index i
 
-   U8 getLoadoutItem(S32 indx);     // Helper function, not accessible from Lua
+   U8 getLoadoutItem(S32 indx) const;   // Helper function, not accessible from Lua
 };
 
 

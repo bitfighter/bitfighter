@@ -195,31 +195,39 @@ void ClientInfo::setIsBusy(bool isBusy)
 
 void ClientInfo::resetLoadout(bool levelHasLoadoutZone)
 {
-   mOldLoadout.clear();
-
    // Save current loadout to put on-deck
-   Vector<U8> loadout = getLoadout();
+   LoadoutTracker loadout = getLoadout();
 
    resetLoadout();
+   mOldLoadout.resetLoadout();
 
    // If the current level has a loadout zone, put last level's load-out on-deck
    if(levelHasLoadoutZone)
-      sRequestLoadout(loadout);
+      requestLoadout(loadout);
 }
 
 
 void ClientInfo::resetLoadout()
 {
-   mLoadout.clear();
-
-   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      mLoadout.push_back(DefaultLoadout[i]);
+   mLoadout.setLoadout(DefaultLoadout);
 }
 
 
-const Vector<U8> &ClientInfo::getLoadout()
+const LoadoutTracker &ClientInfo::getLoadout() const
 {
    return mLoadout;
+}
+
+
+void ClientInfo::resetOldLoadout()
+{
+   mOldLoadout.resetLoadout();
+}
+
+
+void ClientInfo::setOldLoadout(const LoadoutTracker &loadout)
+{
+   mOldLoadout = loadout;
 }
 
 
@@ -443,14 +451,23 @@ void ClientInfo::sTeleporterCleanup()
 }
 
 
-void ClientInfo::sRequestLoadout(Vector<U8> &loadout)
+void ClientInfo::requestLoadout(const LoadoutTracker &loadout)
 {
+   if(!loadout.isValid())
+      return;
+
    mLoadout = loadout;
 
    GameType *gt = mGame->getGameType();
 
    if(gt)
       gt->SRV_clientRequestLoadout(this, mLoadout);    // This will set loadout if ship is in loadout zone
+}
+
+
+const LoadoutTracker &ClientInfo::getOldLoadout() const
+{
+   return mOldLoadout;
 }
 
 

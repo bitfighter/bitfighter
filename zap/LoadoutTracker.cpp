@@ -27,12 +27,20 @@
 #include "LoadoutTracker.h"
 #include "game.h"             // For getModuleInfo
 #include "stringUtils.h"      // For parseString
+#include "luaGameInfo.h"      // For LuaLoadout
 
 #include "tnlLog.h"
 
 
 namespace Zap
 {
+
+// Constructor
+LoadoutTracker::LoadoutTracker()
+{
+   resetLoadout();
+}
+
 
 // Constructor
 LoadoutTracker::LoadoutTracker(const string &loadoutStr)
@@ -100,6 +108,28 @@ LoadoutTracker::LoadoutTracker(const string &loadoutStr)
 }
 
 
+// Constructor
+LoadoutTracker::LoadoutTracker(const Vector<U8> &loadout)
+{
+   resetLoadout();
+   setLoadout(loadout);
+}
+
+
+// Constructor
+LoadoutTracker::LoadoutTracker(const LuaLoadout *loadout)
+{
+   resetLoadout();
+
+   Vector<U8> vec;
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+      vec.push_back(loadout->getLoadoutItem(i));
+
+   setLoadout(vec);
+}
+
+
+
 // Reset this loadout to its factory settings
 void LoadoutTracker::resetLoadout()
 {
@@ -143,9 +173,25 @@ bool LoadoutTracker::update(const LoadoutTracker &loadout)
 }
 
 
-// Takes an array of U8s repesenting loadout... M,M,W,W,W.  See DefaultLoadout for an example
-void LoadoutTracker::setLoadout(const U8 *items)
+// Takes a vector of U8s repesenting loadout... M,M,W,W,W.  See DefaultLoadout for an example
+void LoadoutTracker::setLoadout(const Vector<U8> &items)
 {
+   resetLoadout();
+
+   // Check for the proper number of items
+   if(items.size() != ShipModuleCount + ShipWeaponCount)
+      return;
+
+   // Do some range checking
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      if(items[i] >= ModuleCount)
+         return;
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      if(items[i + ShipModuleCount] >= WeaponCount)
+         return;
+
+   // If everything checks out, we can fill the loadout
    for(S32 i = 0; i < ShipModuleCount; i++)
       mModules[i] = (ShipModule) items[i];
 
@@ -216,6 +262,16 @@ bool LoadoutTracker::hasModule(ShipModule mod) const
 }
 
 
+bool LoadoutTracker::hasWeapon(WeaponType weapon) const
+{
+   for(U32 i = 0; i < ShipWeaponCount; i++)
+      if(mWeapons[i] == weapon)
+         return true;
+
+   return false;
+}
+
+
 bool LoadoutTracker::isValid() const
 {
    return mModules[0] != ModuleNone;
@@ -275,6 +331,26 @@ Vector<U8> LoadoutTracker::toU8Vector() const
       loadout.push_back(U8(mWeapons[i]));
 
    return loadout;
+}
+
+
+bool LoadoutTracker::operator == (const LoadoutTracker &other) const 
+{
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      if(getModule(i) != other.getModule(i))
+         return false;
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      if(getWeapon(i) != other.getWeapon(i))
+         return false;
+
+   return true;
+}
+
+
+bool LoadoutTracker::operator != (const LoadoutTracker &other) const 
+{
+   return !(*this == other);
 }
 
 
