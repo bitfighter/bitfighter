@@ -439,8 +439,6 @@ public:
 
    void SRV_clientRequestLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout);
    void SRV_updateShipLoadout(BfObject *shipObject); // called from LoadoutZone when a Ship touches the zone
-   bool isLoadoutValid(const LoadoutTracker &loadout);
-   void setClientShipLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout, bool silent = false);
 
    bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
 

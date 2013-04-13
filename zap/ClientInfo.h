@@ -108,9 +108,12 @@ public:
 
    Timer respawnTimer;
 
+   void updateLoadout(bool engineerAllowed, bool silent = false);
    void resetLoadout(bool levelHasLoadoutZone);
    void resetLoadout();
    void requestLoadout(const LoadoutTracker &loadout);
+
+   bool isLoadoutValid(const LoadoutTracker &loadout, bool engineerAllowed);
 
    void setNeedToCheckAuthenticationWithMaster(bool needToCheck);
    bool getNeedToCheckAuthenticationWithMaster();

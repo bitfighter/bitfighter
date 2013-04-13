@@ -199,6 +199,55 @@ void ClientInfo::setIsBusy(bool isBusy)
 }
 
 
+bool ClientInfo::isLoadoutValid(const LoadoutTracker &loadout, bool engineerAllowed)
+{
+   if(!loadout.isValid())
+      return false;
+
+   // Reject if module contains engineer but it is not enabled on this level
+   if(!engineerAllowed && loadout.hasModule(ModuleEngineer))
+      return false;
+
+   // Check for illegal weapons
+   if(loadout.hasWeapon(WeaponTurret))
+      return false;
+
+   return true;     // Passed validation
+}
+
+
+// Server only -- to trigger this on client, use GameConnection::c2sRequestLoadout()
+// Updates the ship's loadout to the current or on-deck loadout
+void::ClientInfo::updateLoadout(bool engineerAllowed, bool silent)
+{
+   LoadoutTracker loadout = getLoadout();
+
+   if(!isLoadoutValid(loadout, engineerAllowed))
+      return;
+
+   Ship *ship = getShip();
+
+   bool loadoutChanged = false;
+   if(ship)
+      loadoutChanged = ship->setLoadout(loadout.toU8Vector(), silent);
+
+   if(loadoutChanged)
+   {
+      // This builds a loadout 'hash' by devoting the first 16 bits to modules, the
+      // second 16 bits to weapons.  The integer created might look like so:
+      //    00000000000001110000000000000011
+      U32 loadoutHash = 0;
+      for(S32 i = 0; i < ShipModuleCount; i++)
+         loadoutHash |= BIT(loadout.hasModule(ShipModule(i)) ? 1 : 0);
+
+      for(S32 i = 0; i < ShipWeaponCount; i++)
+         loadoutHash |= BIT(loadout.hasWeapon(WeaponType(i)) ? 1 : 0) << 16;
+
+      getStatistics()->addLoadout(loadoutHash);
+   }
+}
+
+
 void ClientInfo::resetLoadout(bool levelHasLoadoutZone)
 {
    // Save current loadout to put on-deck

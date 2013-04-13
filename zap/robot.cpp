@@ -1057,8 +1057,8 @@ S32 Robot::lua_setCurrLoadout(lua_State *L)
 
    LoadoutTracker loadout(luaW_check<LuaLoadout>(L, 1));
 
-   if(getGame()->getGameType()->isLoadoutValid(loadout))
-      setLoadout(loadout.toU8Vector());
+   if(getClientInfo()->isLoadoutValid(loadout, getGame()->getGameType()->isEngineerEnabled()))
+      setLoadout(loadout);
 
    return 0;
 }

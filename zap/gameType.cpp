@@ -1399,12 +1399,12 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
       if(!levelHasLoadoutZone())
       {
          // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
-         setClientShipLoadout(clientInfo, clientInfo->getLoadout());      
+         clientInfo->updateLoadout(mEngineerEnabled);
       }
       else
       {
          // Still using old loadout because we haven't entered a loadout zone yet...
-         setClientShipLoadout(clientInfo, clientInfo->getOldLoadout(), true); 
+         clientInfo->updateLoadout(mEngineerEnabled, true);
 
          // Unless we're actually spawning onto a loadout zone
          Vector<DatabaseObject *> loadoutZones;
@@ -1438,10 +1438,6 @@ void GameType::spawnRobot(Robot *robot)
          robotPtr->deleteObject();
       return;
    }
-
-   // Should probably do this, but... not now.
-   //if(isSpawnWithLoadoutGame())
-   //   setClientShipLoadout(cl, theClient->getLoadout());                  // Set loadout if this is a SpawnWithLoadout type of game
 }
 
 
@@ -1493,26 +1489,7 @@ void GameType::SRV_updateShipLoadout(BfObject *shipObject)
    ClientInfo *clientInfo = shipObject->getOwner();
 
    if(clientInfo)
-      setClientShipLoadout(clientInfo, clientInfo->getLoadout());
-}
-
-
-// Return error message if loadout is invalid, return "" if it looks ok
-// Runs on client and server
-bool GameType::isLoadoutValid(const LoadoutTracker &loadout)
-{
-   if(!loadout.isValid())
-      return false;
-
-   // Reject if module contains engineer but it is not enabled on this level
-   if(!mEngineerEnabled && loadout.hasModule(ModuleEngineer))
-      return false;
-
-   // Check for illegal weapons
-   if(loadout.hasWeapon(WeaponTurret))
-      return false;
-
-   return true;     // Passed validation
+      clientInfo->updateLoadout(mEngineerEnabled);
 }
 
 
@@ -1528,37 +1505,7 @@ void GameType::SRV_clientRequestLoadout(ClientInfo *clientInfo, const LoadoutTra
 
       if(object)
          if(object->getTeam() == ship->getTeam() || object->getTeam() == -1)
-            setClientShipLoadout(clientInfo, loadout, false);
-   }
-}
-
-
-// Called from above and elsewhere
-// Server only -- to trigger this on client, use GameConnection::c2sRequestLoadout()
-void GameType::setClientShipLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout, bool silent)
-{
-   if(!isLoadoutValid(loadout))
-      return;
-
-   Ship *ship = clientInfo->getShip();
-
-   bool loadoutChanged = false;
-   if(ship)
-      loadoutChanged = ship->setLoadout(loadout.toU8Vector(), silent);
-
-   if(loadoutChanged)
-   {
-      // This builds a loadout 'hash' by devoting the first 16 bits to modules, the
-      // second 16 bits to weapons.  The integer created might look like so:
-      //    00000000000001110000000000000011
-      U32 loadoutHash = 0;
-      for(S32 i = 0; i < ShipModuleCount; i++)
-         loadoutHash |= BIT(loadout.hasModule(ShipModule(i)) ? 1 : 0);
-
-      for(S32 i = 0; i < ShipWeaponCount; i++)
-         loadoutHash |= BIT(loadout.hasWeapon(WeaponType(i)) ? 1 : 0) << 16;
-
-      clientInfo->getStatistics()->addLoadout(loadoutHash);
+            clientInfo->updateLoadout(mEngineerEnabled, false);
    }
 }
 
