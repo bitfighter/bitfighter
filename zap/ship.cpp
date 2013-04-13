@@ -2016,11 +2016,11 @@ void Ship::emitMovementSparks()
    leftVec.normalize();
    rightVec.normalize();
 
-   S32 bestId = -1, leftId, rightId;
-   F32 bestDot = -1;
+   S32 bestId = 0, leftId, rightId;
+   F32 bestDot = leftVec.dot(shipDirs[0]);
 
    // Find the left-wards match
-   for(S32 i = 0; i < cornerCount; i++)
+   for(S32 i = 1; i < cornerCount; i++)
    {
       F32 d = leftVec.dot(shipDirs[i]);
       if(d >= bestDot)
@@ -2034,10 +2034,10 @@ void Ship::emitMovementSparks()
    Point leftPt = getRenderPos() + shipDirs[bestId];
 
    // Find the right-wards match
-   bestId = -1;
-   bestDot = -1;
+   bestId = 0;
+   bestDot = rightVec.dot(shipDirs[0]);
 
-   for(S32 i = 0; i < cornerCount; i++)
+   for(S32 i = 1; i < cornerCount; i++)
    {
       F32 d = rightVec.dot(shipDirs[i]);
       if(d >= bestDot)

@@ -39,7 +39,20 @@
 
 #include "tnlNetBase.h"
 
+#include "MathUtils.h"
+
 namespace Zap {
+
+
+// A problem in openAL causes to freeze when doing this: alSource3f(source, AL_POSITION, sqrt(-3.f), 0, 0);
+// A level can cause invalid value when a level have this: Spawn 0 3.402823466e+38 3.402823466e+38
+// This function makes sure a point never return too big or invalid numbers which can freeze openAL
+static Point safePoint(Zap::Point pos)
+{
+   if(! abs(pos.x) < 1e20f) pos.x = 0;
+   if(! abs(pos.y) < 1e20f) pos.y = 0;
+   return pos;
+}
 
 //
 // Must keep this aligned with SFXProfiles!!
@@ -439,6 +452,8 @@ void SoundSystem::setListenerParams(Point pos, Point velocity)
    if(!gSFXValid)
       return;
 
+   pos = safePoint(pos);
+
    mListenerPosition = pos;
    mListenerVelocity = velocity;
    alListener3f(AL_POSITION, pos.x, pos.y, -mMaxDistance/2);
@@ -577,7 +592,8 @@ void SoundSystem::updateMovementParams(SFXHandle& effect)
    else
    {
       alSourcei(source, AL_SOURCE_RELATIVE, false);
-      alSource3f(source, AL_POSITION, effect->mPosition.x, effect->mPosition.y, 0);
+      Point pos = safePoint(effect->mPosition);
+      alSource3f(source, AL_POSITION, pos.x, pos.y, 0);
       //alSource3f(source, AL_VELOCITY, mVelocity.x, mVelocity.y, 0);
    }
 }
