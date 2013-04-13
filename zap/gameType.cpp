@@ -1735,7 +1735,7 @@ void GameType::queryItemsOfInterest()
 }
 
 
-// Zero teams will crash, returns true if we had to add a default team
+// Zero teams will crash, returns true if we had to add a default team.  Server only.
 bool GameType::makeSureTeamCountIsNotZero()
 {
    if(mGame->getTeamCount() == 0) 

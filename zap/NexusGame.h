@@ -199,7 +199,7 @@ private:
 
 public:
    explicit NexusZone(lua_State *L = NULL);     // Combined Lua / C++ constructor
-   virtual ~NexusZone();               // Destructor
+   virtual ~NexusZone();                        // Destructor
 
    NexusZone *clone() const;
 
