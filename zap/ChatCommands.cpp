@@ -33,7 +33,6 @@
 
 
 namespace Zap {
-   extern bool showDebugBots;  // in game.cpp
    extern S32 LOADOUT_PRESETS;
 }
 
@@ -346,7 +345,7 @@ void showBotsHandler(ClientGame *game, const Vector<string> &words)
 void showPathsHandler(ClientGame *game, const Vector<string> &words)
 {
    if(isLocalTestServer(game, "!!! Robots can only be shown on a test server")) 
-      showDebugBots = !showDebugBots;
+      game->toggleShowDebugBots();
 }
 
 

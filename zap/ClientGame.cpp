@@ -90,8 +90,6 @@ using namespace TNL;
 
 namespace Zap
 {
-bool showDebugBots = false;
-
 
 // Global Game objects
 Vector<ClientGame *> gClientGames;
@@ -115,6 +113,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    mDebugShowShipCoords   = false;
    mDebugShowObjectIds    = false;
    mDebugShowMeshZones    = false;
+   mShowDebugBots         = false;
 
    mCommanderZoomDelta = 0;
 
@@ -704,6 +703,12 @@ void ClientGame::onGameOver()
 
    // Kill any objects lingering in the database, such as forcefields
    getGameObjDatabase()->removeEverythingFromDatabase();    
+}
+
+
+void ClientGame::toggleShowDebugBots()
+{
+   mShowDebugBots = !mShowDebugBots;
 }
 
 
@@ -1660,7 +1665,7 @@ void ClientGame::renderCommander()
       renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
    // Add extra bots if we're showing them
-   if(showDebugBots)
+   if(mShowDebugBots)
       for(S32 i = 0; i < getBotCount(); i++)
          renderObjects.push_back(getBot(i));
 
@@ -1900,7 +1905,7 @@ void ClientGame::renderNormal()
       populateRenderZones(extentRect);
 
 
-   if(showDebugBots)
+   if(mShowDebugBots)
       for(S32 i = 0; i < getBotCount(); i++)
          renderObjects.push_back(getBot(i));
 

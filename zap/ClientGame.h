@@ -82,6 +82,7 @@ private:
    bool mGameIsRunning;             // True if a suspended game is being played without us, false if it's full stop for everyone
 
    bool mSeenTimeOutMessage;
+   bool mShowDebugBots;
 
 
    // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
@@ -191,6 +192,7 @@ public:
    void removeFromVoiceMuteList(const string &name);
    bool isOnVoiceMuteList(const string &name);
 
+   void toggleShowDebugBots();
 
    void connectionToServerRejected(const char *reason);
    void setMOTD(const char *motd);
