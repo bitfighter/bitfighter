@@ -154,8 +154,9 @@ bool Joystick::initJoystick(GameSettings *settings)
 
 bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 {
-   if(settings->getInputCodeManager()->getInputMode() == InputModeKeyboard) // just don't enable at all in keyboard mode.
-      return true;
+   if(settings->getInputCodeManager()->getInputMode() == InputModeKeyboard
+      && (hasBeenOpenedBefore || settings->getIniSettings()->alwaysStartInKeyboardMode)) // don't enable joystick at all in keyboard mode.
+         return true;
 
    // Enable joystick events
    SDL_JoystickEventState(SDL_ENABLE);
@@ -180,12 +181,6 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
    {
       settings->getIniSettings()->joystickType = joystickType;
       setSelectedPresetIndex(Joystick::getJoystickIndex(joystickType));
-   }
-
-   if(settings->getIniSettings()->alwaysStartInKeyboardMode)
-   {
-      settings->getInputCodeManager()->setInputMode(InputModeKeyboard);
-      return true;
    }
 
    // Set primary input to joystick if any controllers were found, even a generic one
