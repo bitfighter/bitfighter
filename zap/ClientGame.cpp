@@ -762,21 +762,6 @@ void ClientGame::displayMessage(const Color &msgColor, const char *format, ...)
 }
 
 
-// A new server message is here!  We don't actually display anything here, despite the name...
-// just add it to the list, will be displayed in render()
-void ClientGame::displayMessagef(const Color &msgColor, const char *format, ...)
-{
-   va_list args;
-   char message[MAX_CHAT_MSG_LENGTH]; 
-
-   va_start(args, format);
-   vsnprintf(message, sizeof(message), format, args); 
-   va_end(args);
-    
-   displayMessage(msgColor, message);
-}
-
-
 void ClientGame::gotAdminPermissionsReply(bool granted)
 {
    static const char *adminPassSuccessMsg = "You've been granted permission to manage players and change levels";

@@ -875,7 +875,7 @@ void Ship::processModules()
 
    for(S32 i = 0; i < ModuleCount; i++)
    {
-      wasModulePrimaryActive[i] = mLoadout.isModulePrimaryActive(ShipModule(i));
+      wasModulePrimaryActive[i]   = mLoadout.isModulePrimaryActive(ShipModule(i));
       wasModuleSecondaryActive[i] = mLoadout.isModuleSecondaryActive(ShipModule(i));
    }
 

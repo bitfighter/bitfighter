@@ -119,19 +119,19 @@ static void setVolume(ClientGame *game, VolumeType volType, const Vector<string>
    {
       case SfxVolumeType:
          ini->sfxVolLevel = (F32) vol / 10.f;
-         game->displayMessagef(Colors::cmdChatColor, "SFX volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+         game->displayMessage(Colors::cmdChatColor, "SFX volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
          return;
 
       case MusicVolumeType:
          ini->setMusicVolLevel((F32) vol / 10.f);
-         game->displayMessagef(Colors::cmdChatColor, "Music volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+         game->displayMessage(Colors::cmdChatColor, "Music volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
          return;
 
       case VoiceVolumeType:
       {
          F32 oldVol = ini->voiceChatVolLevel;
          ini->voiceChatVolLevel = (F32) vol / 10.f;
-         game->displayMessagef(Colors::cmdChatColor, "Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+         game->displayMessage(Colors::cmdChatColor, "Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
          if((oldVol == 0) != (vol == 0) && game->getConnectionToServer())
             game->getConnectionToServer()->s2rVoiceChatEnable(vol != 0);
          return;
@@ -139,7 +139,7 @@ static void setVolume(ClientGame *game, VolumeType volType, const Vector<string>
 
       case ServerAlertVolumeType:
          game->getConnectionToServer()->c2sSetServerAlertVolume((S8) vol);
-         game->displayMessagef(Colors::cmdChatColor, "Server alerts chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+         game->displayMessage(Colors::cmdChatColor, "Server alerts chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
          return;
    }
 }
