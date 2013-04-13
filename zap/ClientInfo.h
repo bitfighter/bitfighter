@@ -52,6 +52,7 @@ class LuaPlayerInfo;
 // This object only concerns itself with things that one client tracks about another.  We use it for other purposes, of course, 
 // as a convenient strucure for holding certain settings about the local client, or about remote clients when we are running on the server.
 // But the general scope of what we track should be limited; other items should be stored directly on the GameConnection object itself.
+// Note that this comment is probably out of date.
 class ClientInfo : public SafePtrData, public RefPtrData
 {
 private:
@@ -116,6 +117,8 @@ public:
 
    bool isSpawnDelayed();              // Returns true if spawn has actually been delayed   
    virtual void setSpawnDelayed(bool spawnDelayed) = 0;
+
+   virtual bool isPlayerInactive();    // Server only
 
    bool isBusy();
    void setIsBusy(bool isBusy);
@@ -201,7 +204,7 @@ public:
    void setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges);
 
    void setSpawnDelayed(bool spawnDelayed);
-   bool shouldDelaySpawn();
+   bool isPlayerInactive();
    bool hasReturnToGamePenalty();
 
    void setRating(F32 rating);

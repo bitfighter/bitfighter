@@ -179,6 +179,13 @@ bool ClientInfo::isShipSystemsDisabled()
 }
 
 
+bool ClientInfo::isPlayerInactive()
+{
+   TNLAssert(false, "Override this if you want to use it!");
+   return false;
+}
+
+
 // Returns true if spawn has actually been delayed 
 bool ClientInfo::isBusy()
 {
@@ -536,7 +543,7 @@ F32 FullClientInfo::getRating()
 
 
 // Check if player is "on hold" due to inactivity; bots are never on hold.  Server only!
-bool FullClientInfo::shouldDelaySpawn()
+bool FullClientInfo::isPlayerInactive()
 {
    if(mIsRobot)         // Robots are never spawn-delayed
       return false;

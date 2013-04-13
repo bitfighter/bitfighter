@@ -35,7 +35,6 @@
 #include "TeamShuffleHelper.h"
 
 #include "gameConnection.h"
-#include "ServerGame.h"          // For gServerGame refs
 #include "UIMenus.h"
 #include "UIInstructions.h"
 #include "UIChat.h"

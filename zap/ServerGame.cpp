@@ -74,7 +74,7 @@
 
 
 #ifdef PRINT_SOMETHING
-#include "ClientGame.h"  // only used to print some variables in ClientGame...
+#  include "ClientGame.h"  // only used to print some variables in ClientGame...
 #endif
 
 
@@ -96,10 +96,10 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
    mLevelLoadIndex = 0;
    mShutdownOriginator = NULL;
 
-   setAddTarget();         // When we do an addToGame, objects should be added to ServerGame
+   setAddTarget();               // When we do an addToGame, objects should be added to ServerGame
 
 
-   // Stupid c++ spec doesn't allow ternary logic with static const if there is no definition
+   // Stupid C++ spec doesn't allow ternary logic with static const if there is no definition
    // Workaround is to add '+' to force a read of the value
    // See:  http://stackoverflow.com/questions/5446005/why-dont-static-member-variables-play-well-with-the-ternary-operator
    mNextLevel = settings->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;

@@ -1358,6 +1358,7 @@ void GameType::onAddedToGame(Game *game)
 
 // Spawn a ship or a bot... returns true if ship/bot was spawned, false if it was not
 // Server only! (overridden in NexusGame)
+// This ClientInfo should be a FullClientInfo in every case
 bool GameType::spawnShip(ClientInfo *clientInfo)
 {
    // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never delays bots.
@@ -1367,16 +1368,11 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
    if(clientInfo->isSpawnDelayed())
       return false;
 
-   //if(mGame->isOrIsAboutToBeSuspended())
-   //   return false;
-
-   if(static_cast<FullClientInfo *>(clientInfo)->shouldDelaySpawn())
+   if(clientInfo->isPlayerInactive())
    {
       clientInfo->setSpawnDelayed(true);
       return false;
    }
-
-   //static_cast<ServerGame *>(getGame())->unsuspendGame(false);
 
    U32 teamIndex = clientInfo->getTeamIndex();
 
@@ -4266,7 +4262,7 @@ void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles
 void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, 
                                 const StringTableEntry &formatString, const Vector<StringTableEntry> &e)
 {
-   if(!isGameOver())  // Avoid flooding messages on game over.
+   if(!isGameOver())  // Avoid flooding messages on game over
       for(S32 i = 0; i < mGame->getClientCount(); i++)
          if(!mGame->getClientInfo(i)->isRobot())
             mGame->getClientInfo(i)->getConnection()->s2cDisplayMessageE(color, sfx, formatString, e);
