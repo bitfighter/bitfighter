@@ -101,7 +101,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             theNonce.read(stream);
             stream->read(&clientIdentityToken);
             
-            dynamic_cast<ClientGame *>(mGame)->gotPingResponse(remoteAddress, theNonce, clientIdentityToken);
+            static_cast<ClientGame *>(mGame)->gotPingResponse(remoteAddress, theNonce, clientIdentityToken);
          }
          break;
 #endif
