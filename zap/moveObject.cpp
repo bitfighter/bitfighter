@@ -1456,7 +1456,7 @@ void Asteroid::damageObject(DamageInfo *damageInfo)
    F32 ang2;
    do
       ang2 = TNL::Random::readF() * Float2Pi;      // Sync
-   while(ABS(ang2 - ang) < .0436 );    // That's 20 degrees in radians, folks!
+   while(abs(ang2 - ang) < .0436 );    // That's 20 degrees in radians, folks!
 
    newItem->setPosAng(getActualPos(), ang2);
 

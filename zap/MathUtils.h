@@ -40,10 +40,6 @@ using namespace TNL;
 #  define MAX(x,y) (((x) > (y)) ? (x) : (y))
 #endif
 
-#ifndef ABS
-#  define ABS(x) (((x) > 0) ? (x) : -(x))
-#endif
-
 #define sq(a) ((a) * (a))
 
 

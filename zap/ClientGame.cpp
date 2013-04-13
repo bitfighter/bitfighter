@@ -1660,7 +1660,7 @@ void ClientGame::renderCommander()
       renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
    // Add extra bots if we're showing them
-   if(gServerGame && showDebugBots)
+   if(showDebugBots)
       for(S32 i = 0; i < getBotCount(); i++)
          renderObjects.push_back(getBot(i));
 
@@ -1900,7 +1900,7 @@ void ClientGame::renderNormal()
       populateRenderZones(extentRect);
 
 
-   if(gServerGame && showDebugBots)
+   if(showDebugBots)
       for(S32 i = 0; i < getBotCount(); i++)
          renderObjects.push_back(getBot(i));
 

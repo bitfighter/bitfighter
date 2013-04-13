@@ -10082,6 +10082,12 @@ struct behavior *b;
     }
   }
 
+  if(i <= 2)
+  {
+    printf("Not enough vertices for triangulation.\n");
+    return 0;
+  }
+
   if (b->verbose) {
     printf("  Forming triangulation.\n");
   }
@@ -11231,7 +11237,8 @@ FILE *polyfile;
   incorners = corners;
   if (incorners < 3) {
     printf("Error:  Triangles must have at least 3 vertices.\n");
-    triexit(1);
+    return 0;
+    //triexit(1);
   }
   m->eextras = attribs;
 #else /* not TRILIBRARY */

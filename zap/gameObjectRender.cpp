@@ -715,8 +715,8 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
          F32 ang = pos.angleTo(dests->get(i));
          F32 sina = sin(ang);
          F32 cosa = cos(ang);
-         F32 asina = (sina * cosa < 0) ? ABS(sina) : -ABS(sina);
-         F32 acosa = ABS(cosa);
+         F32 asina = (sina * cosa < 0) ? abs(sina) : -abs(sina);
+         F32 acosa = abs(cosa);
 
          F32 dist = pos.distanceTo(dests->get(i));
 
