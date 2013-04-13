@@ -846,17 +846,6 @@ bool ClientGame::hasLevelChange(const char *failureMessage)
 }
 
 
-// Returns true if game is running on a local test server
-bool ClientGame::isLocalTestServer(const char *failureMessage)
-{
-   if(gServerGame && gServerGame->isTestServer())
-      return true;
-   
-   displayErrorMessage(failureMessage);
-   return false;
-}
-
-
 void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
 {
    switch(event)

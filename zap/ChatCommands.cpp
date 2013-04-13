@@ -298,6 +298,17 @@ void submitPassHandler(ClientGame *game, const Vector<string> &words)
 /////
 // Debugging command handlers
 
+
+static bool isLocalTestServer(ClientGame *game, const char *failureMessage)
+{
+   if(gServerGame && gServerGame->isTestServer())
+      return true;
+   
+   game->displayErrorMessage(failureMessage);
+   return false;
+}
+
+
 // Can work on any server, confers no advantage
 void showCoordsHandler(ClientGame *game, const Vector<string> &words)
 {
@@ -308,7 +319,7 @@ void showCoordsHandler(ClientGame *game, const Vector<string> &words)
 // Also lets players see invisible objects; uses illegal reachover and only works with local server
 void showIdsHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->isLocalTestServer("!!! Ids can only be displayed on a test server"))
+   if(isLocalTestServer(game, "!!! Ids can only be displayed on a test server"))
       game->toggleShowingObjectIds();
 }
 
@@ -316,7 +327,7 @@ void showIdsHandler(ClientGame *game, const Vector<string> &words)
 // Could possibly reveal out-of-scope turrets and forcefields and such; in any case uses illegal reachover and only works with local server
 void showZonesHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->isLocalTestServer("!!! Zones can only be displayed on a local host"))
+   if(isLocalTestServer(game, "!!! Zones can only be displayed on a local host"))
       game->toggleShowingMeshZones();
 }
 
@@ -324,7 +335,7 @@ void showZonesHandler(ClientGame *game, const Vector<string> &words)
 // Will work on any server, but offers advantage of being able to see out-of-scope bots; increases network traffic somewhat
 void showBotsHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->isLocalTestServer("!!! Robots can only be displayed on a test server"))
+   if(isLocalTestServer(game, "!!! Robots can only be displayed on a test server"))
    {
       if(game->getGameType())
          game->getGameType()->c2sShowBots();
@@ -334,7 +345,7 @@ void showBotsHandler(ClientGame *game, const Vector<string> &words)
 
 void showPathsHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->isLocalTestServer("!!! Robots can only be shown on a test server")) 
+   if(isLocalTestServer(game, "!!! Robots can only be shown on a test server")) 
       showDebugBots = !showDebugBots;
 }
 
@@ -342,7 +353,7 @@ void showPathsHandler(ClientGame *game, const Vector<string> &words)
 // Will only work on local server; may confer some advantage, use is apparent to all players when bots are frozen
 void pauseBotsHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->isLocalTestServer("!!! Robots can only be frozen on a test server")) 
+   if(isLocalTestServer(game, "!!! Robots can only be frozen on a test server")) 
       EventManager::get()->togglePauseStatus();
 }
 
@@ -350,7 +361,7 @@ void pauseBotsHandler(ClientGame *game, const Vector<string> &words)
 // Will only work on local server; may confer some advantage, use is apparent to all players when bots are frozen
 void stepBotsHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->isLocalTestServer("!!! Robots can only be stepped on a test server")) 
+   if(isLocalTestServer(game, "!!! Robots can only be stepped on a test server")) 
    {
       S32 steps = words.size() > 1 ? atoi(words[1].c_str()) : 1;
       EventManager::get()->addSteps(steps);
