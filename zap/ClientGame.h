@@ -93,8 +93,6 @@ private:
 
    S32 findClientIndex(const StringTableEntry &name);
 
-   void renderObjectIds();
-
    AbstractTeam *getNewTeam();
 
 public:

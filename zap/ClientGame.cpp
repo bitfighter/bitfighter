@@ -1928,7 +1928,7 @@ void ClientGame::renderNormal()
    // Again, we'll be accessing the server's data directly so we can see server-side item ids directly on the client.  Again,
    // the result is that we can only see zones on our local server.
    if(mDebugShowObjectIds)
-      renderObjectIds();
+      getUIManager()->getGameUserInterface()->renderObjectIds();
 
    glPopMatrix();
 
@@ -1956,35 +1956,6 @@ void ClientGame::render()
       renderCommander();
    else
       renderNormal();
-}
-
-
-// Show server-side object ids... using illegal reachover to obtain them!
-void ClientGame::renderObjectIds()
-{
-   TNLAssert(gServerGame, "Will crash on non server!");
-   if(!gServerGame)
-      return;
-
-   const Vector<DatabaseObject *> *objects = gServerGame->getGameObjDatabase()->findObjects_fast();
-
-   for(S32 i = 0; i < objects->size(); i++)
-   {
-      BfObject *obj = static_cast<BfObject *>(objects->get(i));
-      static const S32 height = 13;
-
-      S32 id = obj->getUserAssignedId();
-      S32 width = getStringWidthf(height, "[%d]", id);
-
-      F32 x = obj->getPos().x;
-      F32 y = obj->getPos().y;
-
-      glColor(Colors::black);
-      drawFilledRect(x - 1, y - 1, x + width + 1, y + height + 1);
-
-      glColor(Colors::gray70);
-      drawStringf(x, y, height, "[%d]", id);
-   }
 }
 
 

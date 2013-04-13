@@ -245,6 +245,7 @@ public:
    void renderShutdownMessage();    // Render an alert if server is shutting down
    void renderLostConnectionMessage(); 
    void renderSuspendedMessage();
+   void renderObjectIds();          // Render server-side object ids on client
 
    bool isChatting();               // Returns true if player is composing a chat message
 
