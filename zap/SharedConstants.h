@@ -54,7 +54,7 @@ enum AuthenticationStatus {
 
 
 enum MeritBadges {
-   NO_BADGES = 0,
+   NO_BADGES = 0,             // <--- REALLY?????
    DEVELOPER_BADGE = 0,
    FIRST_VICTORY = 1,
    BADGE_TWENTY_FIVE_FLAGS = 2,
