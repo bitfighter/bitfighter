@@ -565,17 +565,22 @@ FullClientInfo::~FullClientInfo()
    // Do nothing
 }
 
-
+// Seems to run on both client and server, or at least with mGame as a ClientGame and a ServerGame
 void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
 {
    TNLAssert(isAuthenticated || badges == NO_BADGES, "Unauthenticated players should never have badges!");
    Parent::setAuthenticated(isAuthenticated, badges);
 
+   // This is to test the assumption that we can replace gServerGame with mGame in the block below.  We are testing the hypothesis
+   // that if the first condition is true, mGame is a ServerGame, which would probably mean it is gServerGame.  In any event, 
+   // this seems to work in the several scenarios I tested.  I think this is good.
+   TNLAssert((mClientConnection && mClientConnection->isConnectionToClient()) == mGame->isServer(), "Would be nice if this were true!");
+
    // Broadcast new connection status to all clients, except the client that is authenticated.  Presumably they already know.  
    if(mClientConnection && mClientConnection->isConnectionToClient())      
-      for(S32 i = 0; i < gServerGame->getClientCount(); i++)
-         if(gServerGame->getClientInfo(i)->getName() != mName && gServerGame->getClientInfo(i)->getConnection())
-            gServerGame->getClientInfo(i)->getConnection()->s2cSetAuthenticated(mName, isAuthenticated, badges);
+      for(S32 i = 0; i < mGame->getClientCount(); i++)
+         if(mGame->getClientInfo(i)->getName() != mName && mGame->getClientInfo(i)->getConnection())
+            mGame->getClientInfo(i)->getConnection()->s2cSetAuthenticated(mName, isAuthenticated, badges);
 }
 
 
