@@ -1405,9 +1405,6 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 #ifndef ZAP_DEDICATED
    Parent::writeConnectRequest(stream);
 
-   //bool isLocal = isLocalConnection();
-   TNLAssert((gServerGame != NULL) == isLocalConnection(), "If this triggers, make a note, and delete this assert.  If not, we can get replace isLocal with isLocalConnection().");
-
    stream->write(CONNECT_VERSION);
 
    string serverPW;
@@ -1714,9 +1711,6 @@ void GameConnection::onConnectionEstablished_client()
    // If we arrive here and the saved password is empty it means that the user entered a good password.  
    // So let's save it for next time.
 
-   //bool isLocal = gServerGame;
-   TNLAssert((gServerGame != NULL) == isLocalConnection(), "If this triggers, make a note, and delete this assert.  If not, we can get replace isLocal with isLocalConnection().");
-      
    string lastServerName = mClientGame->getRequestedServerName();
 
    if(!isLocalConnection() && gINI.GetValue("SavedServerPasswords", lastServerName) == "")
