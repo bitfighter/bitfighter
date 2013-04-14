@@ -583,19 +583,21 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
 
 
 // Allow admins to change the passwords on their systems
-TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> type), (param, type),
+TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> paramType), (param, paramType),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
+   ParamType type = (ParamType) paramType.value;
+
    if(!mClientInfo->isAdmin())   // Do nothing --> non-admins have no pull here.  Note that this should never happen; client should filter out
       return;                    // non-admins before we get here, but we'll check anyway in case the client has been hacked.
 
    // Check for forbidden blank parameters -- the following commands require a value to be passed in param
-   if( (type == (U32)AdminPassword || type == (U32)ServerName || type == (U32)ServerDescr || type == (U32)LevelDir) &&
+   if( (type == AdminPassword || type == ServerName || type == ServerDescr || type == LevelDir) &&
                           !strcmp(param.getString(), ""))
       return;
 
    // Add a message to the server log
-   if(type == (U32)DeleteLevel)
+   if(type == DeleteLevel)
       logprintf(LogConsumer::ServerFilter, "User [%s] added level [%s] to server skip list", mClientInfo->getName().getString(), 
                                                 mServerGame->getCurrentLevelFileName().getString());
    else
@@ -606,22 +608,22 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    }
 
    // Update our in-memory copies of the param, but do not save the new values to the INI
-   if(type == (U32)LevelChangePassword)
+   if(type == LevelChangePassword)
       mSettings->setLevelChangePassword(param.getString(), false);
    
-   else if(type == (U32)AdminPassword)
+   else if(type == AdminPassword)
       mSettings->setAdminPassword(param.getString(), false);
    
-   else if(type == (U32)ServerPassword)
+   else if(type == ServerPassword)
       mSettings->setServerPassword(param.getString(), false);
    
-   else if(type == (U32)ServerName)
+   else if(type == ServerName)
    {
       mSettings->setHostName(param.getString(), false);
       if(mServerGame->getConnectionToMaster())
          mServerGame->getConnectionToMaster()->s2mChangeName(StringTableEntry(param.getString()));   
    }
-   else if(type == (U32)ServerDescr)
+   else if(type == ServerDescr)
    {
       mSettings->setHostDescr(param.getString(), false);
 
@@ -629,7 +631,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          mServerGame->getConnectionToMaster()->s2mServerDescription(StringTableEntry(param.getString()));
    }
 
-   else if(type == (U32)LevelDir)
+   else if(type == LevelDir)
    {
       FolderManager *folderManager = mSettings->getFolderManager();
       string candidate = folderManager->resolveLevelDir(param.getString());
@@ -697,7 +699,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
    }  // end change leveldir
 
-   else if(type == (U32)DeleteLevel)
+   else if(type == DeleteLevel)
    {
       // Avoid duplicates on skip list
       bool found = false;
@@ -719,7 +721,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       }
    }
 
-   if(type != (U32)DeleteLevel && type != (U32)LevelDir)
+   if(type != DeleteLevel && type != LevelDir)
    {
       const char *keys[] = { "LevelChangePassword", "AdminPassword", "ServerPassword", "ServerName", "ServerDescription" };
 
@@ -741,7 +743,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    // Pick out just the right message
    StringTableEntry msg;
 
-   if(type == (U32)LevelChangePassword)
+   if(type == LevelChangePassword)
    {
       msg = strcmp(param.getString(), "") ? levelPassChanged : levelPassCleared;
 
@@ -783,11 +785,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          }
       }
    }
-   else if(type == (U32)AdminPassword)
+   else if(type == AdminPassword)
       msg = adminPassChanged;
-   else if(type == (U32)ServerPassword)
+   else if(type == ServerPassword)
       msg = strcmp(param.getString(), "") ? serverPassChanged : serverPassCleared;
-   else if(type == (U32)ServerName)
+   else if(type == ServerName)
    {
       msg = serverNameChanged;
 
@@ -796,9 +798,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          if(mServerGame->getClientInfo(i)->getConnection())
             mServerGame->getClientInfo(i)->getConnection()->s2cSetServerName(mSettings->getHostName());
    }
-   else if(type == (U32)ServerDescr)
+   else if(type == ServerDescr)
       msg = serverDescrChanged;
-   else if(type == (U32)DeleteLevel)
+   else if(type == DeleteLevel)
       msg = serverLevelDeleted;
 
    s2cDisplayMessage(ColorRed, SFXNone, msg);      // Notify user their bidding has been done
