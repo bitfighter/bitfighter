@@ -170,7 +170,10 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
 {
    // Much of the time, this may seem pointless, but if we arrive here via the editor, we need to swap out the editor's team manager for
    // the one used by the game.  If we don't we'll clobber the editor's copy, and we'll get crashes in the team definition (F2) menu.
-   setActiveTeamManager(&mTeamManager); 
+   setActiveTeamManager(&mTeamManager);
+
+   mClientInfo->setIsAdmin(true);              // Local connection is always admin
+   mClientInfo->setIsLevelChanger(true);       // Local connection can always change levels
 
    getUIManager()->activate(GameUI);
    GameConnection *gameConnection = new GameConnection(this);
@@ -178,8 +181,6 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
    setConnectionToServer(gameConnection);
 
    gameConnection->connectLocal(getNetInterface(), remoteInterface);
-   mClientInfo->setIsAdmin(true);              // Local connection is always admin
-   mClientInfo->setIsLevelChanger(true);       // Local connection can always change levels
 
    // Note that gc and gameConnection aren't the same, nor are gc->getClientInfo() and mClientInfo the same.
    // I _think_ gc is the server view of the local connection, where as gameConnection is the client's view.
@@ -208,12 +209,12 @@ void ClientGame::joinRemoteGame(Address remoteAddress, bool isFromMaster)
 
    bool useArrangedConnection = isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected;
 
-   if(useArrangedConnection)     // Request arranged connection
+   if(useArrangedConnection)  // Request arranged connection
    {
       connToMaster->requestArrangedConnection(remoteAddress);
       getUIManager()->activate(GameUI);
    }
-   else        // Try a direct connection
+   else                       // Try a direct connection
    {
       getUIManager()->activate(GameUI);
       GameConnection *gameConnection = new GameConnection(this);
