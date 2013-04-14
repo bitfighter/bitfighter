@@ -2555,6 +2555,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
 #endif
 }
 
+
 // Tell all clients name has changed, and update server side name
 // Server only
 void GameType::updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
