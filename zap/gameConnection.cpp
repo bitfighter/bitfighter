@@ -842,75 +842,66 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetRole, (RangedU32<0,ClientInfo::MaxRoles>
 {
 #ifndef ZAP_DEDICATED
    ClientInfo *clientInfo = mClientGame->getClientInfo();
-   ClientInfo::ClientRole currentRole = (ClientInfo::ClientRole) role.value;
+
+   ClientInfo::ClientRole newRole = (ClientInfo::ClientRole) role.value;
+   ClientInfo::ClientRole currentRole = clientInfo->getRole();
+
+   // Role has stayed the same.  Do nothing
+   if(newRole == currentRole)
+      return;
 
    // We were demoted
-   bool lostRole = currentRole < clientInfo->getRole();
+   bool lostRole = newRole < currentRole;
 
-   switch(currentRole)
+   // Handle password saving in the INI
+   static string ownerKey = "SavedOwnerPasswords";
+   static string adminKey = "SavedAdminPasswords";
+   static string levelChangeKey = "SavedLevelChangePasswords";
+
+   // If we've got a new role, save our password
+   if(newRole != ClientInfo::RoleNone && mLastEnteredPassword != "")
    {
-      case ClientInfo::RoleOwner:
-         clientInfo->setRole(ClientInfo::RoleOwner);
+      if(newRole == ClientInfo::RoleOwner)
+         gINI.SetValue(ownerKey, getServerName(), mLastEnteredPassword, true);
+      else if(newRole == ClientInfo::RoleAdmin)
+         gINI.SetValue(adminKey, getServerName(), mLastEnteredPassword, true);
+      else if(newRole == ClientInfo::RoleLevelChanger)
+         gINI.SetValue(levelChangeKey, getServerName(), mLastEnteredPassword, true);
 
-         // If we entered a password, and it worked, let's save it for next time
-         if(mLastEnteredPassword != "")
-         {
-            gINI.SetValue("SavedOwnerPasswords", getServerName(), mLastEnteredPassword, true);
-            mLastEnteredPassword = "";
-         }
-
-         // We have the wrong password, let's make sure it's not saved
-         if(lostRole)
-            gINI.deleteKey("SavedOwnerPasswords", getServerName());
-
-         break;
-      case ClientInfo::RoleAdmin:
-         clientInfo->setRole(ClientInfo::RoleAdmin);
-
-         // If we entered a password, and it worked, let's save it for next time
-         if(mLastEnteredPassword != "")
-         {
-            gINI.SetValue("SavedAdminPasswords", getServerName(), mLastEnteredPassword, true);
-            mLastEnteredPassword = "";
-         }
-
-         // We have the wrong password, let's make sure it's not saved
-         if(lostRole)
-            gINI.deleteKey("SavedAdminPasswords", getServerName());
-
-         break;
-      case ClientInfo::RoleLevelChanger:
-         // If we entered a password, and it worked, let's save it for next time
-         if(mLastEnteredPassword != "")
-         {
-            gINI.SetValue("SavedLevelChangePasswords", getServerName(), mLastEnteredPassword, true);
-            mLastEnteredPassword = "";
-         }
-
-         // We have the wrong password, let's make sure it's not saved
-         if(lostRole)
-            gINI.deleteKey("SavedLevelChangePasswords", getServerName());
-
-         // Check for permissions being rescinded by server, will happen if admin changes level change pw
-         if(clientInfo->isLevelChanger() && lostRole)
-            mClientGame->displayMessage(Colors::cmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
-
-         clientInfo->setRole(ClientInfo::RoleLevelChanger);
-
-         break;
-      case ClientInfo::RoleNone:
-      default:
-         break;
+      mLastEnteredPassword = "";
    }
 
+   // If we're being demoted, get rid of our currently saved password
+   if(lostRole)
+   {
+      if(currentRole == ClientInfo::RoleOwner)
+         gINI.deleteKey(ownerKey, getServerName());
+      else if(currentRole == ClientInfo::RoleAdmin)
+         gINI.deleteKey(adminKey, getServerName());
+      else if(currentRole == ClientInfo::RoleLevelChanger)
+         gINI.deleteKey(levelChangeKey, getServerName());
+   }
+
+   // Extra instructions upon demotion
+   if(lostRole)
+   {
+      if(currentRole == ClientInfo::RoleLevelChanger)
+         mClientGame->displayMessage(Colors::cmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
+      else if(currentRole == ClientInfo::RoleAdmin)
+         mClientGame->displayMessage(Colors::cmdChatColor, "An owner has changed the admin password; you must enter the new password to become an admin.");
+   }
+
+   // Finally set our new role
+   clientInfo->setRole(newRole);
+
    // Notify UI of permissions update
-   if(currentRole != ClientInfo::RoleNone)
+   if(newRole != ClientInfo::RoleNone)
    {
       setGotPermissionsReply(true);
 
       // If we're not waiting, don't show us a message.  Supresses superflous messages on startup.
       if(waitingForPermissionsReply() && notify)
-         mClientGame->gotPermissionsReply(currentRole);
+         mClientGame->gotPermissionsReply(newRole);
    }
 #endif
 }
