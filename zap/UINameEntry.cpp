@@ -356,7 +356,7 @@ PreGamePasswordEntryUserInterface::~PreGamePasswordEntryUserInterface()
 
 void PreGamePasswordEntryUserInterface::onAccept(const char *text)
 {
-   getGame()->joinGame(connectAddress, false, false); // Not from master, not local
+   getGame()->joinRemoteGame(connectAddress, false);  // false: Not from master
 }
 
 

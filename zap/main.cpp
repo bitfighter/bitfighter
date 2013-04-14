@@ -423,7 +423,7 @@ void hostGame()
       ui->levelLoadDisplayDisplay = false;
       ui->levelLoadDisplayFadeTimer.reset();
 
-      gClientGames[i]->joinGame(Address(), false, true);   // ...then we'll play, too!
+      gClientGames[i]->joinLocalGame(gServerGame->getNetInterface());  // ...then we'll play, too!
    }
 #endif
 }

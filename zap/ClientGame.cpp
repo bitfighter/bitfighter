@@ -24,7 +24,6 @@
 //------------------------------------------------------------------------------------
 
 #include "ClientGame.h"
-#include "ServerGame.h"    // For gServerGame refs
 
 #include "ClientInfo.h"
 #include "barrier.h"
@@ -167,60 +166,63 @@ ClientGame::~ClientGame()
 }
 
 
-// Player has selected a game from the QueryServersUserInterface, and is ready to join
-// Also get here when hosting a game
-void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
+void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
 {
    // Much of the time, this may seem pointless, but if we arrive here via the editor, we need to swap out the editor's team manager for
    // the one used by the game.  If we don't we'll clobber the editor's copy, and we'll get crashes in the team definition (F2) menu.
+   setActiveTeamManager(&mTeamManager); 
+
+   getUIManager()->activate(GameUI);
+   GameConnection *gameConnection = new GameConnection(this);
+ 
+   setConnectionToServer(gameConnection);
+
+   gameConnection->connectLocal(getNetInterface(), remoteInterface);
+   mClientInfo->setIsAdmin(true);              // Local connection is always admin
+   mClientInfo->setIsLevelChanger(true);       // Local connection can always change levels
+
+   // Note that gc and gameConnection aren't the same, nor are gc->getClientInfo() and mClientInfo the same.
+   // I _think_ gc is the server view of the local connection, where as gameConnection is the client's view.
+   // Likewise with the clientInfos.  A little confusing, as they really represent the same thing in a way.  But different.
+   TNLAssert(dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()), 
+               "This should never be NULL here -- if it is, it means our connection to ourselves has failed for some reason");
+
+   GameConnection *gc = static_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()); 
+   gc->onLocalConnection();
+}
+
+
+// Player has selected a game from the QueryServersUserInterface, and is ready to join
+// Also get here when hosting a game
+void ClientGame::joinRemoteGame(Address remoteAddress, bool isFromMaster)
+{
+   // Much of the time, this may seem pointless, but if we arrive here via the editor, we need to swap out the editor's team manager for
+   // the one used by the game.  If we don't we'll clobber the editor's copy, and we'll get crashes in the team definition (F2) menu.
+   // Do we need this for joining a remote game?
    setActiveTeamManager(&mTeamManager);    
 
-   mClientInfo->setIsAdmin(false);        // Always start out with no permissions
+   mClientInfo->setIsAdmin(false);        // Start out with no permissions, server will upgrade if the proper pws are provided
    mClientInfo->setIsLevelChanger(false);
-
-   MasterServerConnection *connToMaster = getConnectionToMaster();
    
-   if(isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)     // Request arranged connection
+   MasterServerConnection *connToMaster = getConnectionToMaster();
+
+   bool useArrangedConnection = isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected;
+
+   if(useArrangedConnection)     // Request arranged connection
    {
       connToMaster->requestArrangedConnection(remoteAddress);
       getUIManager()->activate(GameUI);
    }
-   else                                                         // Try a direct connection
+   else        // Try a direct connection
    {
       getUIManager()->activate(GameUI);
       GameConnection *gameConnection = new GameConnection(this);
 
       setConnectionToServer(gameConnection);
 
-      if(local)   // We're a local client, running in the same process as the server... connect to that server
-      {
-         // Stuff on client side, so interface will offer the correct options.
-         // Note that if we're local, the passed address is probably a dummy; check caller if important.
-         gameConnection->connectLocal(getNetInterface(), gServerGame->getNetInterface());
-         mClientInfo->setIsAdmin(true);              // Local connection is always admin
-         mClientInfo->setIsLevelChanger(true);       // Local connection can always change levels
-
-         // Note that gc and gameConnection aren't the same, nor are gc->getClientInfo() and mClientInfo the same.
-         // I _think_ gc is the server view of the local connection, where as gameConnection is the client's view.
-         // Likewise with the clientInfos.  A little confusing, as they really represent the same thing in a way.  But different.
-         TNLAssert(dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()), 
-                   "This should never be NULL here -- if it is, it means our connection to ourselves has failed for some reason");
-
-         GameConnection *gc = static_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()); 
-         gc->onLocalConnection();
-      }
-      else        // Connect to a remote server, but not via the master server
-      {
-         gameConnection->connect(getNetInterface(), remoteAddress);  
-      }
+      // Connect to a remote server, but not via the master server
+      gameConnection->connect(getNetInterface(), remoteAddress);  
    }
-
-   //if(gClientGame2 && gClientGame != gClientGame2)  // make both client connect for now, until menus works in both clients.
-   //{
-   //   gClientGame = gClientGame2;
-   //   joinGame(remoteAddress, isFromMaster, local);
-   //   gClientGame = gClientGame1;
-   //}
 }
 
 

@@ -100,7 +100,9 @@ public:
    ClientGame(const Address &bindAddress, GameSettings *settings);
    virtual ~ClientGame();
 
-   void joinGame(Address remoteAddress, bool isFromMaster, bool local);
+   void joinLocalGame(GameNetInterface *remoteInterface);
+   void joinRemoteGame(Address remoteAddress, bool isFromMaster);
+
    void closeConnectionToGameServer();
 
    UserInterfaceData *mUserInterfaceData;
