@@ -2551,7 +2551,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
 
    // Notifiy the player
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-   clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "An admin as renamed %s to %s", oldName.getString(), newName.getString());
+   clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "An admin has renamed %s to %s", oldName.getString(), newName.getString());
 #endif
 }
 
