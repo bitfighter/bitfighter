@@ -330,7 +330,7 @@ S32 LuaLevelGenerator::getGridSize(lua_State *L)
  */
 S32 LuaLevelGenerator::getPlayerCount(lua_State *L)
 {
-   return returnInt(L, gServerGame ? gServerGame->getPlayerCount() : 1 );
+   return returnInt(L, mGame ? mGame->getPlayerCount() : 1 );
 }
 
 
@@ -346,7 +346,7 @@ S32 LuaLevelGenerator::globalMsg(lua_State *L)
 
    const char *message = getCheckedString(L, 1, methodName);
 
-   GameType *gt = gServerGame->getGameType();
+   GameType *gt = mGame->getGameType();
    if(gt)
    {
       gt->sendChatFromController(message);
