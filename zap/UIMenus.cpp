@@ -1715,7 +1715,9 @@ void GameMenuUserInterface::buildMenu()
 
          addMenuItem(new MenuItem("KICK A PLAYER", kickPlayerCallback, "", KEY_K));
       }
-      else     // Not admin
+
+      // Owner already has max permissions, so don't show option to enter a password
+      if(!gc->getClientInfo()->isOwner())
          addMenuItem(new MenuItem("ENTER PASSWORD", levelChangeOrAdminPWCallback, "", KEY_A, KEY_E));
    }
 

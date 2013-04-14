@@ -324,10 +324,15 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
       disconnect(ReasonConnectionsForbidden, "");
       return;
    }
-   // Check password
-   string adminPW = settings->getAdminPassword();
 
-   if(adminPW == "" || strcmp(md5.getSaltedHashFromString(adminPW).c_str(), password))
+   // Check password.  Should be admin or owner
+   string adminPW = settings->getAdminPassword();
+   string ownerPW = settings->getOwnerPassword();
+
+   bool goodOwnerPW = ownerPW != "" && strcmp(md5.getSaltedHashFromString(ownerPW).c_str(), password) == 0;
+   bool goodAdminPW = adminPW != "" && strcmp(md5.getSaltedHashFromString(adminPW).c_str(), password) == 0;
+
+   if(!goodOwnerPW && !goodAdminPW)
    {
       logprintf("Incorrect password!");
       disconnect(ReasonBadLogin, "Incorrect pasword");

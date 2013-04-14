@@ -163,7 +163,6 @@ Point MoveObject::getRenderVel() const { return getVel(RenderState); }
 
 F32 MoveObject::getActualAngle()           const { return getAngle(ActualState);      }
 F32 MoveObject::getRenderAngle()           const { return getAngle(RenderState);      }
-F32 MoveObject::getLastProcessStateAngle() const { return getAngle(LastProcessState); }
 
 
 void MoveObject::setActualPos(const Point &pos) { setPos(ActualState, pos); }
@@ -690,14 +689,16 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
 #ifndef ZAP_DEDICATED
    else     // Client only
    {
+      moveObjectThatWasHit->mWaitingForMoveToUpdate = true;
+
       //logprintf("Collision sound! %d", stateIndex); // <== why don't we see renderstate here more often?
       playCollisionSound(stateIndex, moveObjectThatWasHit, v1i);    
 
       MoveItem *item = dynamic_cast<MoveItem *>(moveObjectThatWasHit);
       GameType *gameType = getGame()->getGameType();
 
-      if(item && gameType && moveObjectThatWasHitWasMovingTooSlow)  // only if not moving fast, to prevent some overload
-         gameType->c2sResendItemStatus(item->getItemId());
+      //if(item && gameType && moveObjectThatWasHitWasMovingTooSlow)  // only if not moving fast, to prevent some overload
+         //gameType->c2sResendItemStatus(item->getItemId());
    }
 #endif
 }
@@ -900,7 +901,6 @@ void MoveItem::setActualVel(const Point &vel)
    setMaskBits(PositionMask);
 }
 
-
 void MoveItem::idle(BfObject::IdleCallPath path)
 {
    if(!isInDatabase())
@@ -911,6 +911,20 @@ void MoveItem::idle(BfObject::IdleCallPath path)
 
    float time = mCurrentMove.time * 0.001f;
    move(time, ActualState, false);
+
+   if(path == BfObject::ClientIdleMainRemote)
+   {
+      if(mWaitingForMoveToUpdate)
+      {
+         updateTimer -= time;
+         if(updateTimer < 0)
+         {
+            copyMoveState(LastUnpackUpdateState, ActualState);
+            mWaitingForMoveToUpdate = false;
+         }
+      }
+   }
+
    if(path == BfObject::ServerIdleMainLoop)
    {
       // Only update if it's actually moving...
@@ -926,7 +940,7 @@ void MoveItem::idle(BfObject::IdleCallPath path)
             prevMoveVelocity = getActualVel();
          }
       }
-      else if(prevMoveVelocity.lenSquared() != 0)
+      else if(prevMoveVelocity.lenSquared() != 0 || getActualPos() != getRenderPos())
       {
          setMaskBits(PositionMask);  // Tell client that this item is no longer moving
          prevMoveVelocity.set(0,0);
@@ -1004,6 +1018,9 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          setRenderVel(MoveObject::getActualVel());
          setRenderAngle(getActualAngle());
       }
+      copyMoveState(ActualState, LastUnpackUpdateState);
+      mWaitingForMoveToUpdate = false;
+      updateTimer = (getActualVel().lenSquared() < 0.0001f) ? 0.5f : 5.f;
    }
 }
 

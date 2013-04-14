@@ -53,6 +53,7 @@ enum ParamId {
 
    DEDICATED,
    SERVER_PASSWORD,
+   OWNER_PASSWORD,
    ADMIN_PASSWORD,
    NO_ADMIN_PASSWORD,
    LEVEL_CHANGE_PASSWORD,
@@ -127,6 +128,7 @@ private:
 
    // Various passwords
    string mServerPassword;
+   string mOwnerPassword;
    string mAdminPassword;
    string mLevelChangePassword;
 
@@ -172,6 +174,9 @@ public:
 
    string getServerPassword();
    void setServerPassword(const string &ServerPassword, bool updateINI);
+
+   string getOwnerPassword();
+   void setOwnerPassword(const string &OwnerPassword, bool updateINI);
 
    string getAdminPassword();
    void setAdminPassword(const string &AdminPassword, bool updateINI);
@@ -251,9 +256,11 @@ public:
    // Other methods
    void saveLevelChangePassword(const string &serverName, const string &password);
    void saveAdminPassword(const string &serverName, const string &password);
+   void saveOwnerPassword(const string &serverName, const string &password);
 
    void forgetLevelChangePassword(const string &serverName);
    void forgetAdminPassword(const string &serverName);
+   void forgetOwnerPassword(const string &serverName);
 
    void onFinishedLoading();     // Should be run after INI and cmd line params have been read
 

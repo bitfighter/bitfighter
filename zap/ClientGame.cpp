@@ -172,8 +172,7 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
    // the one used by the game.  If we don't we'll clobber the editor's copy, and we'll get crashes in the team definition (F2) menu.
    setActiveTeamManager(&mTeamManager);
 
-   mClientInfo->setIsAdmin(true);              // Local connection is always admin
-   mClientInfo->setIsLevelChanger(true);       // Local connection can always change levels
+   mClientInfo->setRole(ClientInfo::RoleOwner);                        // Local connection is always owner
 
    getUIManager()->activate(GameUI);
    GameConnection *gameConnection = new GameConnection(this);
@@ -202,8 +201,7 @@ void ClientGame::joinRemoteGame(Address remoteAddress, bool isFromMaster)
    // Do we need this for joining a remote game?
    setActiveTeamManager(&mTeamManager);    
 
-   mClientInfo->setIsAdmin(false);        // Start out with no permissions, server will upgrade if the proper pws are provided
-   mClientInfo->setIsLevelChanger(false);
+   mClientInfo->setRole(ClientInfo::RoleNone);        // Start out with no permissions, server will upgrade if the proper pws are provided
    
    MasterServerConnection *connToMaster = getConnectionToMaster();
 
@@ -758,30 +756,27 @@ void ClientGame::displayMessage(const Color &msgColor, const char *format, ...)
 }
 
 
-void ClientGame::gotAdminPermissionsReply(bool granted)
+void ClientGame::gotPermissionsReply(ClientInfo::ClientRole role)
 {
-   static const char *adminPassSuccessMsg = "You've been granted permission to manage players and change levels";
-   static const char *adminPassFailureMsg = "Incorrect password: Admin access denied";
+   static string ownerPassSuccessMsg = "You've been granted ownership permissions of this server";
+   static string adminPassSuccessMsg = "You've been granted permission to manage players and change levels";
+   static string levelPassSuccessMsg = "You've been granted permission to change levels";
+
+   string *message;
+   if(role == ClientInfo::RoleOwner)
+      message = &ownerPassSuccessMsg;
+   else if(role == ClientInfo::RoleAdmin)
+      message = &adminPassSuccessMsg;
+   else if(role == ClientInfo::RoleLevelChanger)
+      message = &levelPassSuccessMsg;
 
    // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
    if(getUIManager()->getCurrentUI()->getMenuID() == GameMenuUI)
-      getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = granted ? adminPassSuccessMsg : adminPassFailureMsg;
+      getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = *message;
    else
-      displayMessage(Colors::cmdChatColor, granted ? adminPassSuccessMsg : adminPassFailureMsg);
+      displayMessage(Colors::cmdChatColor, (*message).c_str());
 }
 
-
-void ClientGame::gotLevelChangePermissionsReply(bool granted)
-{
-   static const char *levelPassSuccessMsg = "You've been granted permission to change levels";
-   static const char *levelPassFailureMsg = "Incorrect password: Level changing permissions denied";
-
-   // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
-   if(getUIManager()->getCurrentUI()->getMenuID() == GameMenuUI)
-      getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = granted ? levelPassSuccessMsg : levelPassFailureMsg;
-   else
-      displayMessage(Colors::cmdChatColor, granted ? levelPassSuccessMsg : levelPassFailureMsg);
-}
 
 void ClientGame::gotWrongPassword()
 {
@@ -817,6 +812,17 @@ void ClientGame::shutdownInitiated(U16 time, const StringTableEntry &name, const
 void ClientGame::cancelShutdown() 
 { 
    getUIManager()->getGameUserInterface()->cancelShutdown(); 
+}
+
+
+// Returns true if we have owner privs, displays error message and returns false if not
+bool ClientGame::hasOwner(const char *failureMessage)
+{
+   if(mClientInfo->isOwner())
+      return true;
+
+   displayErrorMessage(failureMessage);
+   return false;
 }
 
 
@@ -965,6 +971,9 @@ void ClientGame::changePassword(GameConnection::ParamType type, const Vector<str
 
       else if(type == GameConnection::AdminPassword)
          mSettings->forgetAdminPassword(gc->getServerName());
+
+      else if(type == GameConnection::OwnerPassword)
+         mSettings->forgetOwnerPassword(gc->getServerName());
    }
    else                    // Non-empty password
    {
@@ -973,6 +982,9 @@ void ClientGame::changePassword(GameConnection::ParamType type, const Vector<str
          mSettings->saveLevelChangePassword(gc->getServerName(), words[1]);
          
       else if(type == GameConnection::AdminPassword)
+         mSettings->saveAdminPassword(gc->getServerName(), words[1]);
+
+      else if(type == GameConnection::OwnerPassword)
          mSettings->saveAdminPassword(gc->getServerName(), words[1]);
    }
 }

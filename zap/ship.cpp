@@ -125,6 +125,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
    mFastRecharging = false;
+   mLastProcessStateAngle = 0;
 
    // Set up module secondary delay timer
    for(S32 i = 0; i < ModuleCount; i++)
@@ -299,7 +300,7 @@ F32 Ship::processMove(U32 stateIndex)
    static const F32 ARMOR_ACCEL_PENALTY_FACT = 0.35f;
    static const F32 ARMOR_SPEED_PENALTY_FACT = 1;
 
-   copyMoveState(stateIndex, LastProcessState);
+   mLastProcessStateAngle = getAngle(stateIndex);
    setAngle(stateIndex, mCurrentMove.angle);
 
    if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && getVel(stateIndex) == Point(0,0))
@@ -2398,7 +2399,7 @@ void Ship::calcThrustComponents(F32 *thrusts)
    }
 
    // Tweak side thrusters to show rotational force
-   F32 rotVel = getAngleDiff(getLastProcessStateAngle(), getRenderAngle());
+   F32 rotVel = getAngleDiff(mLastProcessStateAngle, getRenderAngle());
 
    if(rotVel > 0.001)
       thrusts[3] += 0.25;

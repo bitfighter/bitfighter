@@ -48,8 +48,7 @@ ClientInfo::ClientInfo()
    mTotalScore = 0;
    mTeamIndex = (NO_TEAM + 0);
    mPing = 0;
-   mIsAdmin = false;
-   mIsLevelChanger = false;
+   mRole = RoleNone;
    mIsRobot = false;
    mIsAuthenticated = false;
    mBadges = NO_BADGES;
@@ -316,27 +315,33 @@ bool ClientInfo::isAuthenticated()
 }
 
 
-bool ClientInfo::isLevelChanger()
+ClientInfo::ClientRole ClientInfo::getRole()
 {
-   return mIsLevelChanger;
+   return mRole;
 }
 
 
-void ClientInfo::setIsLevelChanger(bool isLevelChanger)
+void ClientInfo::setRole(ClientRole role)
 {
-   mIsLevelChanger = isLevelChanger;
+   mRole = role;
+}
+
+
+bool ClientInfo::isLevelChanger()
+{
+   return mRole >= RoleLevelChanger;
 }
 
 
 bool ClientInfo::isAdmin()
 {
-   return mIsAdmin;
+   return mRole >= RoleAdmin;
 }
 
 
-void ClientInfo::setIsAdmin(bool isAdmin)
+bool ClientInfo::isOwner()
 {
-   mIsAdmin = isAdmin;
+   return mRole >= RoleOwner;
 }
 
 
@@ -685,14 +690,13 @@ void FullClientInfo::setIsEngineeringTeleporter(bool isEngineeringTeleporter)
 #ifndef ZAP_DEDICATED
 // Constructor
 RemoteClientInfo::RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges, 
-                                   bool isRobot, bool isAdmin, bool isLevelChanger, bool isSpawnDelayed, bool isBusy) : ClientInfo()
+                                   bool isRobot, ClientRole role, bool isSpawnDelayed, bool isBusy) : ClientInfo()
 {
    mGame = game;
    mName = name;
    mIsAuthenticated = isAuthenticated;
    mIsRobot = isRobot;
-   mIsAdmin = isAdmin;
-   mIsLevelChanger = isLevelChanger;
+   mRole = role;
    mTeamIndex = NO_TEAM;
    mRating = 0;
    mBadges = badges;

@@ -113,6 +113,7 @@ IniSettings::IniSettings()
    enableServerVoiceChat = true;
    allowTeamChanging = true;
    serverPassword = "";               // Passwords empty by default
+   ownerPassword = "";
    adminPassword = "";
    levelChangePassword = "";
    levelDir = "";
@@ -603,6 +604,7 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->hostdescr = ini->GetValue(section, "ServerDescription", iniSettings->hostdescr);
 
    iniSettings->serverPassword      = ini->GetValue (section, "ServerPassword", iniSettings->serverPassword);
+   iniSettings->ownerPassword       = ini->GetValue (section, "OwnerPassword", iniSettings->ownerPassword);
    iniSettings->adminPassword       = ini->GetValue (section, "AdminPassword", iniSettings->adminPassword);
    iniSettings->levelChangePassword = ini->GetValue (section, "LevelChangePassword", iniSettings->levelChangePassword);
    iniSettings->levelDir            = ini->GetValue (section, "LevelDir", iniSettings->levelDir);
@@ -1648,6 +1650,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment(" ServerAddress - The address of your server, e.g. IP:localhost:1234 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888 (leave blank to let the system decide)");
       addComment(" ServerDescription - A one line description of your server.  Please include nickname and physical location!");
       addComment(" ServerPassword - You can require players to use a password to play on your server.  Leave blank to grant access to all.");
+      addComment(" OwnerPassword - Super admin password.  Gives admin rights + power over admins.  Do not give this out!");
       addComment(" AdminPassword - Use this password to manage players & change levels on your server.");
       addComment(" LevelChangePassword - Use this password to change levels on your server.  Leave blank to grant access to all.");
       addComment(" LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
@@ -1678,6 +1681,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValue  (section, "ServerAddress", iniSettings->hostaddr);
    ini->SetValue  (section, "ServerDescription", iniSettings->hostdescr);
    ini->SetValue  (section, "ServerPassword", iniSettings->serverPassword);
+   ini->SetValue  (section, "OwnerPassword", iniSettings->ownerPassword);
    ini->SetValue  (section, "AdminPassword", iniSettings->adminPassword);
    ini->SetValue  (section, "LevelChangePassword", iniSettings->levelChangePassword);
    ini->SetValue  (section, "LevelDir", iniSettings->levelDir);
@@ -1784,6 +1788,7 @@ static void writePasswordSection(CIniFile *ini)
 {
    writePasswordSection_helper(ini, "SavedLevelChangePasswords");
    writePasswordSection_helper(ini, "SavedAdminPasswords");
+   writePasswordSection_helper(ini, "SavedOwnerPasswords");
    writePasswordSection_helper(ini, "SavedServerPasswords");
 }
 

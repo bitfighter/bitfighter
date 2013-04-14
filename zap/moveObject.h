@@ -35,7 +35,7 @@ namespace Zap
 enum MoveStateNames {
    ActualState = 0,
    RenderState,
-   LastProcessState,
+   LastUnpackUpdateState,
    MoveStateCount,
 };
 
@@ -83,6 +83,7 @@ protected:
 
    bool mInterpolating;
    F32 mMass;
+	bool mWaitingForMoveToUpdate;  // client only
 
    enum MaskBits {
       PositionMask     = Parent::FirstFreeMask << 0,     // <-- Indicates position has changed and needs to be updated
@@ -114,7 +115,6 @@ public:
 
    F32 getRenderAngle() const;
    F32 getActualAngle() const;
-   F32 getLastProcessStateAngle() const;
 
    // Because MoveObjects have multiple positions (actual, render), we need to implement the following
    // functions differently than most objects do
