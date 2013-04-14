@@ -64,6 +64,8 @@ private:
    bool mZones1IsCurrent;
    bool mFastRecharging;
 
+   F32 mLastProcessStateAngle;
+
    void setActiveWeapon(U32 weaponIndex); // Setter for mActiveWeaponIndx
 
    SafePtr<Teleporter> mEngineeredTeleporter;
