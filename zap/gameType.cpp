@@ -2429,18 +2429,17 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
       ship->kill();           // Destroy the old ship
    }
 
-   if(team < 0)                                                                     // If no team provided...
-      client->setTeamIndex((client->getTeamIndex() + 1) % mGame->getTeamCount());   // ...find the next one...
-   else                                                                             // ...otherwise...
-      client->setTeamIndex(team);                                                   // ...use the one provided
+   // If we have a team, use it, otherwise assign player to the next team
+   S32 teamIndex = team >= 0 ? team : (client->getTeamIndex() + 1) % mGame->getTeamCount();  
+   client->setTeamIndex(teamIndex);                                                  
 
-   if(client->getTeamIndex() >= 0)                                                  // But if we know the team...
-      s2cClientJoinedTeam(client->getName(), client->getTeamIndex(), !isGameOver()); // ...announce the change
+   if(client->getTeamIndex() >= 0)                                                     // But if we know the team...
+      s2cClientJoinedTeam(client->getName(), client->getTeamIndex(), !isGameOver());   // ...announce the change
 
-   spawnShip(client);                                                               // Create a new ship
+   spawnShip(client);                                                                  // Create a new ship
 
    if(!client->isRobot())
-      client->getConnection()->switchedTeamCount++;                                 // Track number of times the player switched teams
+      client->getConnection()->switchedTeamCount++;                                    // Track number of times the player switched teams
 }
 
 
