@@ -611,7 +611,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    if(type == LevelChangePassword)
       mSettings->setLevelChangePassword(param.getString(), false);
    
-   else if(type == AdminPassword)
+   else if(type == AdminPassword && mClientInfo->isOwner())
       mSettings->setAdminPassword(param.getString(), false);
    
    else if(type == ServerPassword)

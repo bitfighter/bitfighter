@@ -373,7 +373,7 @@ void stepBotsHandler(ClientGame *game, const Vector<string> &words)
 
 void setAdminPassHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasAdmin("!!! You don't have permission to set the admin password"))
+   if(game->hasOwner("!!! You don't have permission to set the admin password"))
       game->changePassword(GameConnection::AdminPassword, words, true);
 }
 
