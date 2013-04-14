@@ -856,6 +856,17 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
+
+   // If we know the owner password, apply for permissions if we don't already have them
+   if(!mClientInfo->isOwner())
+   {
+      string ownerPassword = gINI.GetValue("SavedOwnerPasswords", getServerName());
+      if(ownerPassword != "")
+      {
+         c2sSubmitPassword(md5.getSaltedHashFromString(ownerPassword).c_str());
+         setWaitingForPermissionsReply(false);     // Want to return silently
+      }
+   }
 }
 
 
