@@ -1,4 +1,4 @@
-   //-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
@@ -1647,7 +1647,7 @@ void GameConnection::onLocalConnection()
    sendLevelList();
 
    s2cSetRole(ClientInfo::RoleOwner, false);                  // Set Owner role on the client
-   setServerName(gServerGame->getSettings()->getHostName());  // Server name is whatever we've set locally
+   setServerName(mServerGame->getSettings()->getHostName());  // Server name is whatever we've set locally
 
    // Tell local host if we're authenticated... no need to verify
    getClientInfo()->setAuthenticated(getClientInfo()->isAuthenticated(), getClientInfo()->getBadges());  
