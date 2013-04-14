@@ -180,6 +180,7 @@ public:
    void deleteLevelGen(LuaLevelGenerator *levelgen); 
 
    // Check for permissions
+   bool hasOwner(const char *failureMessage);
    bool hasAdmin(const char *failureMessage);
    bool hasLevelChange(const char *failureMessage);
 

@@ -3259,7 +3259,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
    if(!bannedClientInfo)
       return;  // Error message handled client-side
 
-   if(bannedClientInfo->isAdmin())
+   if(bannedClientInfo->isAdmin() && !clientInfo->isOwner())
       return;  // Error message handled client-side
 
    // Cannot ban robot
@@ -3386,7 +3386,7 @@ GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (
    if(!targetClientInfo)
       return;  // Error message handled client-side
 
-   if(targetClientInfo->isAdmin())
+   if(targetClientInfo->isAdmin() && !clientInfo->isOwner())
       return;  // Error message handled client-side
 
    GameConnection *gc = targetClientInfo->getConnection();
@@ -3457,7 +3457,7 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickee
 
    if(!kickee->isRobot())
    {
-      if(kickee->isAdmin())
+      if(kickee->isAdmin() && !sourceClientInfo->isOwner())
       {
          source->s2cDisplayErrorMessage("Can't kick an administrator!");
          return;

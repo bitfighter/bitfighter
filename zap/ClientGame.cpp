@@ -815,6 +815,17 @@ void ClientGame::cancelShutdown()
 }
 
 
+// Returns true if we have owner privs, displays error message and returns false if not
+bool ClientGame::hasOwner(const char *failureMessage)
+{
+   if(mClientInfo->isOwner())
+      return true;
+
+   displayErrorMessage(failureMessage);
+   return false;
+}
+
+
 // Returns true if we have admin privs, displays error message and returns false if not
 bool ClientGame::hasAdmin(const char *failureMessage)
 {

@@ -880,8 +880,8 @@ void banPlayerHandler(ClientGame *game, const Vector<string> &words)
 
       if(bannedClientInfo->isAdmin())
       {
-         game->displayErrorMessage("!!! Cannot ban an admin");
-         return;
+         if(!game->hasOwner("!!! Cannot ban an admin"))
+            return;
       }
 
       S32 banDuration = 0;
@@ -972,8 +972,8 @@ void globalMuteHandler(ClientGame *game, const Vector<string> &words)
 
       if(clientInfo->isAdmin())
       {
-         game->displayErrorMessage("!!! Cannot mute an admin");
-         return;
+         if(!game->hasOwner("!!! Cannot mute an admin"))
+            return;
       }
 
       if(game->getGameType())
