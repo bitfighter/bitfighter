@@ -288,7 +288,7 @@ S32 Team::lua_getScore(lua_State *L)
 S32 Team::lua_getPlayerCount(lua_State *L)
 {
    gServerGame->countTeamPlayers();    // Make sure player counts are up-to-date
-   return returnInt(L, mBotCount);
+   return returnInt(L, mPlayerCount);
 }
 
 
