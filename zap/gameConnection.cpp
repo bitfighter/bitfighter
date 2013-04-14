@@ -786,7 +786,29 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       }
    }
    else if(type == AdminPassword)
+   {
       msg = adminPassChanged;
+
+      // Revoke all admin permissions upon password change (except Owner)
+      if(mClientInfo->isOwner())
+      {
+         for(S32 i = 0; i < mServerGame->getClientCount(); i++)
+         {
+            ClientInfo *clientInfo = mServerGame->getClientInfo(i);
+            GameConnection *conn = clientInfo->getConnection();
+
+            if(clientInfo->isAdmin() && (!clientInfo->isOwner()))
+            {
+               clientInfo->setRole(ClientInfo::RoleNone);
+               if(conn)
+                  conn->s2cSetRole(ClientInfo::RoleNone, false);
+
+               // Announce the change
+               mServerGame->getGameType()->s2cClientChangedRoles(clientInfo->getName(), ClientInfo::RoleNone);
+            }
+         }
+      }
+   }
    else if(type == ServerPassword)
       msg = strcmp(param.getString(), "") ? serverPassChanged : serverPassCleared;
    else if(type == ServerName)
