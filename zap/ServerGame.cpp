@@ -73,11 +73,6 @@
 #include "soccerGame.h"
 
 
-#ifdef PRINT_SOMETHING
-#  include "ClientGame.h"  // only used to print some variables in ClientGame...
-#endif
-
-
 using namespace TNL;
 
 namespace Zap
@@ -970,9 +965,6 @@ bool ServerGame::loadLevel(const string &levelFileName)
       return false;
    }
 
-#ifdef PRINT_SOMETHING
-   logprintf("1 server: %d, client %d", gServerGame->getGameObjDatabase()->getObjectCount(),gClientGame->getGameObjDatabase()->getObjectCount());
-#endif
    if(loadLevelFromFile(filename, getGameObjDatabase()))
       mLevelFileHash = md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
    else
@@ -980,9 +972,6 @@ bool ServerGame::loadLevel(const string &levelFileName)
       logprintf("Unable to process level file \"%s\".  Skipping...", levelFileName.c_str());
       return false;
    }
-#ifdef PRINT_SOMETHING
-   logprintf("2 server: %d, client %d", gServerGame->getGameObjDatabase()->getObjectCount(),gClientGame->getGameObjDatabase()->getObjectCount());
-#endif
 
    // We should have a gameType by the time we get here... but in case we don't, we'll add a default one now
    if(!getGameType())

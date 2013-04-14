@@ -71,12 +71,6 @@
 
 #include "soccerGame.h"
 
-
-#ifdef PRINT_SOMETHING
-#include "ClientGame.h"  // only used to print some variables in ClientGame...
-#endif
-
-
 using namespace TNL;
 
 namespace Zap
