@@ -3457,7 +3457,9 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickee
 
    if(!kickee->isRobot())
    {
-      if(kickee->isAdmin() && !sourceClientInfo->isOwner())
+      // No allowing admins to kick admins, or kicking of owners
+      if((sourceClientInfo->getRole() == ClientInfo::RoleAdmin && kickee->getRole() >= ClientInfo::RoleAdmin) ||
+            kickee->getRole() == ClientInfo::RoleOwner)
       {
          source->s2cDisplayErrorMessage("Can't kick an administrator!");
          return;
