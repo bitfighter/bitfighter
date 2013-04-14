@@ -46,7 +46,7 @@ public:
    virtual ~LevelLoader();  // Destructor
 
    // Put these in here so we can access them from luaLevelGenerator
-   static const S32 MAX_LEVEL_LINE_ARGS = 128;     // Most args on a single line,
+   static const S32 MAX_LEVEL_LINE_ARGS = 160;     // Most args on a single line,
    static const S32 MaxArgLen = 100;               // Each at most MaxArgLen bytes long  (enforced in addCharToArg)
    static const S32 MaxIdLen = S32_MAX_DIGITS + 1; // Max 32-bit int is 10 digits, plus room for a null
 
