@@ -1620,6 +1620,22 @@ void GameConnection::setClientInfo(ClientInfo *clientInfo)
 }
 
 
+// We've just established a local connection to a server running in the same process
+void GameConnection::onLocalConnection()
+{
+   getClientInfo()->setIsAdmin(true);                         // Set isAdmin on server
+   getClientInfo()->setIsLevelChanger(true);                  // Set isLevelChanger on server
+   sendLevelList();
+
+   s2cSetIsAdmin(true);                                       // Set isAdmin on the client
+   s2cSetIsLevelChanger(true, false);                         // Set isLevelChanger on the client
+   setServerName(gServerGame->getSettings()->getHostName());  // Server name is whatever we've set locally
+
+   // Tell local host if we're authenticated... no need to verify
+   getClientInfo()->setAuthenticated(getClientInfo()->isAuthenticated(), getClientInfo()->getBadges());  
+}
+
+
 bool GameConnection::lostContact()
 {
    return getTimeSinceLastPacketReceived() > 2000 && mLastPacketRecvTime != 0;   // No contact in 2000ms?  That's bad!

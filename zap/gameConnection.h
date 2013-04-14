@@ -170,6 +170,8 @@ public:
    ClientInfo *getClientInfo();
    void setClientInfo(ClientInfo *clientInfo);
 
+   void onLocalConnection();
+
    bool lostContact();
 
    string getServerName();

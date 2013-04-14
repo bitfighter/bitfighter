@@ -175,7 +175,7 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
    // the one used by the game.  If we don't we'll clobber the editor's copy, and we'll get crashes in the team definition (F2) menu.
    setActiveTeamManager(&mTeamManager);    
 
-   mClientInfo->setIsAdmin(false); // Always start out with no permission
+   mClientInfo->setIsAdmin(false);        // Always start out with no permissions
    mClientInfo->setIsLevelChanger(false);
 
    MasterServerConnection *connToMaster = getConnectionToMaster();
@@ -203,23 +203,11 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
          // Note that gc and gameConnection aren't the same, nor are gc->getClientInfo() and mClientInfo the same.
          // I _think_ gc is the server view of the local connection, where as gameConnection is the client's view.
          // Likewise with the clientInfos.  A little confusing, as they really represent the same thing in a way.  But different.
-         GameConnection *gc = dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()); 
-         TNLAssert(gc, "gc should never be NULL here -- if it is, it means our connection to ourselves has failed for some reason");
+         TNLAssert(dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()), 
+                   "This should never be NULL here -- if it is, it means our connection to ourselves has failed for some reason");
 
-         // Stuff on server side
-         if(gc)                              
-         {
-            gc->getClientInfo()->setIsAdmin(true);                         // Set isAdmin on server
-            gc->getClientInfo()->setIsLevelChanger(true);                  // Set isLevelChanger on server
-            gc->sendLevelList();
-
-            gc->s2cSetIsAdmin(true);                                       // Set isAdmin on the client
-            gc->s2cSetIsLevelChanger(true, false);                         // Set isLevelChanger on the client
-            gc->setServerName(gServerGame->getSettings()->getHostName());  // Server name is whatever we've set locally
-
-            // Tell local host if we're authenticated... no need to verify
-            gc->getClientInfo()->setAuthenticated(getClientInfo()->isAuthenticated(), getClientInfo()->getBadges());  
-         }
+         GameConnection *gc = static_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()); 
+         gc->onLocalConnection();
       }
       else        // Connect to a remote server, but not via the master server
       {
