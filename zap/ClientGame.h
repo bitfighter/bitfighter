@@ -209,10 +209,8 @@ public:
    void changeServerParam(GameConnection::ParamType type, const Vector<string> &words);
    bool checkName(const string &name);    // Make sure name is valid, and correct case of name if otherwise correct
 
-
    // Alert users when they get a reply to their request for elevated permissions
-   void gotAdminPermissionsReply(bool granted);
-   void gotLevelChangePermissionsReply(bool granted);
+   void gotPermissionsReply(ClientInfo::ClientRole role);
    void gotWrongPassword();
 
    void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken);

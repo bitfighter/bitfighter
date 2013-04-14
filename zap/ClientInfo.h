@@ -28,7 +28,6 @@
 
 #include "statistics.h"          // For Statistics def
 #include "SharedConstants.h"
-#include "ship.h"
 #include "LoadoutTracker.h"
 
 #include "Timer.h"
@@ -42,6 +41,7 @@ namespace Zap
 
 class Game;
 class GameConnection;
+class Ship;
 class SoundEffect;
 class VoiceDecoder;
 
@@ -55,6 +55,17 @@ class LuaPlayerInfo;
 // Note that this comment is probably out of date.
 class ClientInfo : public SafePtrData, public RefPtrData
 {
+public:
+   // Each role has all permissions a lesser one is granted
+   // Note:  changing this will break network compatibility
+   enum ClientRole {
+      RoleNone,
+      RoleLevelChanger,
+      RoleAdmin,
+      RoleOwner,
+      MaxRoles
+   };
+
 private:
    LuaPlayerInfo *mPlayerInfo;   // Lua access to this class
    Statistics mStatistics;       // Statistics tracker
@@ -71,8 +82,7 @@ protected:
    Nonce mId;
    S32 mTeamIndex;               // <=== Does not get set on the client's LocalClientInfo!!!
    S32 mPing;
-   bool mIsLevelChanger;
-   bool mIsAdmin;
+   ClientRole mRole;
    bool mIsRobot;
    bool mIsAuthenticated;
    bool mSpawnDelayed;
@@ -147,11 +157,11 @@ public:
    Int<BADGE_COUNT> getBadges();
    bool hasBadge(MeritBadges badge);
 
+   void setRole(ClientRole role);
+   ClientRole getRole();
    bool isLevelChanger();
-   void setIsLevelChanger(bool isLevelChanger);
-
    bool isAdmin();
-   void setIsAdmin(bool isAdmin);
+   bool isOwner();
 
    bool isRobot();
 
@@ -239,7 +249,7 @@ private:
 
 public:
    RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges,      // Constructor
-                    bool isRobot, bool isAdmin, bool isLevelChanger, bool isSpawnDelayed, bool isBusy);
+                    bool isRobot, ClientRole role, bool isSpawnDelayed, bool isBusy);
    virtual ~RemoteClientInfo();      
    // Destructor
    void initialize();

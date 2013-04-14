@@ -505,32 +505,52 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (StringTableEntry name, b
 TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
+   string ownerPW = mSettings->getOwnerPassword();
    string adminPW = mSettings->getAdminPassword();
    string levChangePW = mSettings->getLevelChangePassword();
 
-   // If admin password is blank, no one can get admin permissions except the local host, if there is one...
-   if(!mClientInfo->isAdmin() && adminPW != "" && !strcmp(md5.getSaltedHashFromString(adminPW).c_str(), pass))
+   GameType *gameType = mServerGame->getGameType();
+
+   if(!mClientInfo->isOwner() && ownerPW != "" && !strcmp(md5.getSaltedHashFromString(ownerPW).c_str(), pass))
    {
-      logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", mClientInfo->getName().getString());
+      logprintf(LogConsumer::ServerFilter, "User [%s] granted owner permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
 
-      mClientInfo->setIsAdmin(true);               // Enter admin PW and...
-
+      // Send level list if not already LevelChanger
       if(!mClientInfo->isLevelChanger())
-      {
-         mClientInfo->setIsLevelChanger(true);     // ...get these permissions too!
          sendLevelList();
-      }
-      
-      s2cSetIsAdmin(true);                         // Tell client they have been granted access
+
+      mClientInfo->setRole(ClientInfo::RoleOwner);
+      s2cSetRole(ClientInfo::RoleOwner, true);                    // Tell client they have been granted access
 
       if(mSettings->getIniSettings()->allowAdminMapUpload)
          s2rSendableFlags(ServerFlagAllowUpload);                 // Enable level uploads
 
       GameType *gameType = mServerGame->getGameType();
 
+      // Announce admin access was granted
       if(gameType)
-         gameType->s2cClientBecameAdmin(mClientInfo->getName());  // Announce change to world
+         gameType->s2cClientChangedRoles(mClientInfo->getName(), ClientInfo::RoleOwner);
+   }
+
+   // If admin password is blank, no one can get admin permissions except the local host, if there is one...
+   else if(!mClientInfo->isAdmin() && adminPW != "" && !strcmp(md5.getSaltedHashFromString(adminPW).c_str(), pass))
+   {
+      logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", mClientInfo->getName().getString());
+      mWrongPasswordCount = 0;
+
+      if(!mClientInfo->isLevelChanger())
+         sendLevelList();
+      
+      mClientInfo->setRole(ClientInfo::RoleAdmin);               // Enter admin PW and...
+      s2cSetRole(ClientInfo::RoleAdmin, true);                   // Tell client they have been granted access
+
+      if(mSettings->getIniSettings()->allowAdminMapUpload)
+         s2rSendableFlags(ServerFlagAllowUpload);                 // Enable level uploads
+
+      // Announce change to world
+      if(gameType)
+         gameType->s2cClientChangedRoles(mClientInfo->getName(), ClientInfo::RoleAdmin);
    }
 
    // If level change password is blank, it should already been granted to all clients
@@ -539,13 +559,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
 
-      mClientInfo->setIsLevelChanger(true);
+      mClientInfo->setRole(ClientInfo::RoleLevelChanger);
+      s2cSetRole(ClientInfo::RoleLevelChanger, true);      // Tell client they have been granted access
 
-      s2cSetIsLevelChanger(true, true);      // Tell client they have been granted access
       sendLevelList();                       // Send client the level list
 
       // Announce change to world
-      mServerGame->getGameType()->s2cClientBecameLevelChanger(mClientInfo->getName(), true);  
+      if(gameType)
+         gameType->s2cClientChangedRoles(mClientInfo->getName(), ClientInfo::RoleLevelChanger);
    }
    else
    {
@@ -734,11 +755,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
             if(!clientInfo->isLevelChanger())
             {
-               clientInfo->setIsLevelChanger(true);
+               clientInfo->setRole(ClientInfo::RoleLevelChanger);
                if(conn)
                {
                   conn->sendLevelList();
-                  conn->s2cSetIsLevelChanger(true, false);     // Silently
+                  conn->s2cSetRole(ClientInfo::RoleLevelChanger, false);     // Silently
                }
             }
          }
@@ -752,12 +773,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
             if(clientInfo->isLevelChanger() && (!clientInfo->isAdmin()))
             {
-               clientInfo->setIsLevelChanger(false);
+               clientInfo->setRole(ClientInfo::RoleNone);
                if(conn)
-                  conn->s2cSetIsLevelChanger(false, false);
+                  conn->s2cSetRole(ClientInfo::RoleNone, false);
 
                // Announce the change
-               mServerGame->getGameType()->s2cClientBecameLevelChanger(clientInfo->getName(), false);  
+               mServerGame->getGameType()->s2cClientChangedRoles(clientInfo->getName(), ClientInfo::RoleNone);
             }
          }
       }
@@ -782,15 +803,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
    s2cDisplayMessage(ColorRed, SFXNone, msg);      // Notify user their bidding has been done
 }
-
-
-//// Announce a new player has become an admin
-//TNL_IMPLEMENT_RPC(GameConnection, s2cClientBecameAdmin, (StringTableEntry name), (name), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
-//{
-//   ClientRef *cl = findClientConnection(name);
-//   cl->clientConnection->isAdmin = true;
-//   getUserInterface().displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
-//}
 
 
 // This gets called under two circumstances; when it's a new game, or when the server's name is changed by an admin
@@ -823,76 +835,84 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetRole, (RangedU32<0,ClientInfo::MaxRoles> role, bool notify), (role, notify),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-
    ClientInfo *clientInfo = mClientGame->getClientInfo();
+   ClientInfo::ClientRole currentRole = (ClientInfo::ClientRole) role.value;
 
-   clientInfo->setIsAdmin(granted);
+   // We were demoted
+   bool lostRole = currentRole < clientInfo->getRole();
 
-   // Admin permissions automatically give level change permission
-   if(granted)                      // Don't rescind level change permissions for entering a bad admin PW
+   switch(currentRole)
    {
-      //if(!clientInfo->isLevelChanger())
-      //   sendLevelList();  // error, client send level list to server?
+      case ClientInfo::RoleOwner:
+         clientInfo->setRole(ClientInfo::RoleOwner);
 
-      clientInfo->setIsLevelChanger(true);
+         // If we entered a password, and it worked, let's save it for next time
+         if(mLastEnteredPassword != "")
+         {
+            gINI.SetValue("SavedOwnerPasswords", getServerName(), mLastEnteredPassword, true);
+            mLastEnteredPassword = "";
+         }
+
+         // We have the wrong password, let's make sure it's not saved
+         if(lostRole)
+            gINI.deleteKey("SavedOwnerPasswords", getServerName());
+
+         break;
+      case ClientInfo::RoleAdmin:
+         clientInfo->setRole(ClientInfo::RoleAdmin);
+
+         // If we entered a password, and it worked, let's save it for next time
+         if(mLastEnteredPassword != "")
+         {
+            gINI.SetValue("SavedAdminPasswords", getServerName(), mLastEnteredPassword, true);
+            mLastEnteredPassword = "";
+         }
+
+         // We have the wrong password, let's make sure it's not saved
+         if(lostRole)
+            gINI.deleteKey("SavedAdminPasswords", getServerName());
+
+         break;
+      case ClientInfo::RoleLevelChanger:
+         // If we entered a password, and it worked, let's save it for next time
+         if(mLastEnteredPassword != "")
+         {
+            gINI.SetValue("SavedLevelChangePasswords", getServerName(), mLastEnteredPassword, true);
+            mLastEnteredPassword = "";
+         }
+
+         // We have the wrong password, let's make sure it's not saved
+         if(lostRole)
+            gINI.deleteKey("SavedLevelChangePasswords", getServerName());
+
+         // Check for permissions being rescinded by server, will happen if admin changes level change pw
+         if(clientInfo->isLevelChanger() && lostRole)
+            mClientGame->displayMessage(Colors::cmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
+
+         clientInfo->setRole(ClientInfo::RoleLevelChanger);
+
+         break;
+      case ClientInfo::RoleNone:
+      default:
+         break;
    }
 
-
-   // If we entered a password, and it worked, let's save it for next time
-   if(granted && mLastEnteredPassword != "")
+   // Notify UI of permissions update
+   if(currentRole != ClientInfo::RoleNone)
    {
-      gINI.SetValue("SavedAdminPasswords", getServerName(), mLastEnteredPassword, true);
-      mLastEnteredPassword = "";
+      setGotPermissionsReply(true);
+
+      // If we're not waiting, don't show us a message.  Supresses superflous messages on startup.
+      if(waitingForPermissionsReply() && notify)
+         mClientGame->gotPermissionsReply(currentRole);
    }
-
-   // We have the wrong password, let's make sure it's not saved
-   if(!granted)
-      gINI.deleteKey("SavedAdminPasswords", getServerName());
-
-   setGotPermissionsReply(true);
-
-   // If we're not waiting, don't do anything.  Supresses superflous messages on startup.
-   if(waitingForPermissionsReply())
-      mClientGame->gotAdminPermissionsReply(granted);
 #endif
 }
 
-
-TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool notify), (granted, notify),
-   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
-{
-#ifndef ZAP_DEDICATED
-
-   // If we entered a password, and it worked, let's save it for next time
-   if(granted && mLastEnteredPassword != "")
-   {
-      gINI.SetValue("SavedLevelChangePasswords", getServerName(), mLastEnteredPassword, true);
-      mLastEnteredPassword = "";
-   }
-
-   // We have the wrong password, let's make sure it's not saved
-   if(!granted)
-      gINI.deleteKey("SavedLevelChangePasswords", getServerName());
-
-   ClientInfo *clientInfo = mClientGame->getClientInfo();
-
-   // Check for permissions being rescinded by server, will happen if admin changes level change pw
-   if(clientInfo->isLevelChanger() && !granted)
-      mClientGame->displayMessage(Colors::cmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
-
-   clientInfo->setIsLevelChanger(granted);  // (simple set)
-
-   setGotPermissionsReply(true);
-
-   // If we're not waiting, don't show us a message.  Supresses superflous messages on startup.
-   if(waitingForPermissionsReply() && notify)
-      mClientGame->gotLevelChangePermissionsReply(granted);
-#endif
-}
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cWrongPassword, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
@@ -1623,12 +1643,10 @@ void GameConnection::setClientInfo(ClientInfo *clientInfo)
 // We've just established a local connection to a server running in the same process
 void GameConnection::onLocalConnection()
 {
-   getClientInfo()->setIsAdmin(true);                         // Set isAdmin on server
-   getClientInfo()->setIsLevelChanger(true);                  // Set isLevelChanger on server
+   getClientInfo()->setRole(ClientInfo::RoleOwner);           // Set Owner role on server
    sendLevelList();
 
-   s2cSetIsAdmin(true);                                       // Set isAdmin on the client
-   s2cSetIsLevelChanger(true, false);                         // Set isLevelChanger on the client
+   s2cSetRole(ClientInfo::RoleOwner, false);                  // Set Owner role on the client
    setServerName(gServerGame->getSettings()->getHostName());  // Server name is whatever we've set locally
 
    // Tell local host if we're authenticated... no need to verify
@@ -1775,8 +1793,8 @@ void GameConnection::onConnectionEstablished_server()
 
    if(mServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
    {
-      mClientInfo->setIsLevelChanger(true);
-      s2cSetIsLevelChanger(true, false);          // Tell client, but don't display notification
+      mClientInfo->setRole(ClientInfo::RoleLevelChanger);
+      s2cSetRole(ClientInfo::RoleLevelChanger, false);          // Tell client, but don't display notification
       sendLevelList();
    }
 

@@ -93,6 +93,7 @@ ParamInfo paramDefs[] = {
 // Options for hosting
 { "dedicated",             NO_PARAMETERS,  DEDICATED,             1, "",          "Run as a dedicated game server (i.e. no game window, console mode)",                     "" },
 { "serverpassword",        ONE_REQUIRED,   SERVER_PASSWORD,       1, "<string>",  "Specify a server password (players will need to know this to connect to your server)",    "You must enter a password with the -serverpassword option" },
+{ "ownerpassword",         ONE_REQUIRED,   OWNER_PASSWORD,        1, "<string>",  "Specify an owner password (allowing those with the password to have all admin priveleges and power over admins) when you host a game or run a dedicated server", "You must specify an owner password with the -ownerpassword option" },
 { "adminpassword",         ONE_REQUIRED,   ADMIN_PASSWORD,        1, "<string>",  "Specify an admin password (allowing those with the password to kick players and change their teams) when you host a game or run a dedicated server", "You must specify an admin password with the -adminpassword option" },
 { "noadminpassword",       NO_PARAMETERS,  NO_ADMIN_PASSWORD,     1, "",          "Overrides admin password specified in the INI (or cmd line), and will not allow anyone to have admin permissions", "" },
 { "levelchangepassword",   ONE_REQUIRED,   LEVEL_CHANGE_PASSWORD, 1, "<string>",  "Specify the password required for players to be able to change levels on your server when you host a game or run a dedicated server", "You must specify an level-change password with the -levelchangepassword option" },
@@ -245,6 +246,21 @@ void GameSettings::setServerPassword(const string &serverPassword, bool updateIN
 
    if(updateINI)
       mIniSettings.serverPassword = serverPassword; 
+}
+
+
+string GameSettings::getOwnerPassword()
+{
+   return mOwnerPassword;
+}
+
+
+void GameSettings::setOwnerPassword(const string &ownerPassword, bool updateINI)
+{
+   mOwnerPassword = ownerPassword;
+
+   if(updateINI)
+      mIniSettings.ownerPassword = ownerPassword;
 }
 
 
@@ -496,6 +512,13 @@ void GameSettings::saveAdminPassword(const string &serverName, const string &pas
 }
 
 
+void GameSettings::saveOwnerPassword(const string &serverName, const string &password)
+{
+   gINI.SetValue("SavedOwnerPasswords", serverName, password, true);
+   gINI.WriteFile();
+}
+
+
 void GameSettings::forgetLevelChangePassword(const string &serverName)
 {
    gINI.deleteKey("SavedLevelChangePasswords", serverName);
@@ -506,6 +529,13 @@ void GameSettings::forgetLevelChangePassword(const string &serverName)
 void GameSettings::forgetAdminPassword(const string &serverName)
 {
    gINI.deleteKey("SavedAdminPasswords", serverName);
+   gINI.WriteFile();
+}
+
+
+void GameSettings::forgetOwnerPassword(const string &serverName)
+{
+   gINI.deleteKey("SavedOwnerPasswords", serverName);
    gINI.WriteFile();
 }
 
@@ -764,6 +794,8 @@ void GameSettings::onFinishedLoading()
    // Some parameters can be specified both on the cmd line and in the INI... in those cases, the cmd line version takes precedence
    //                                First choice (cmdLine)             Second choice (INI)                  Third choice (fallback)
    mServerPassword         = *choose( getString(SERVER_PASSWORD),       mIniSettings.serverPassword );
+
+   mOwnerPassword          = *choose( getString(OWNER_PASSWORD),        mIniSettings.ownerPassword );
 
    // Admin and level change passwords have special overrides that force them to be blank... handle those below
    if(getSpecified(NO_ADMIN_PASSWORD))

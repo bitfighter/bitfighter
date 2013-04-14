@@ -1826,8 +1826,8 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
 
    // This message gets sent to all clients, even the client being added, though they presumably know most of this stuff already
    // This clientInfo belongs to the server; has no badge info for client...
-   s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), false, clientInfo->isAdmin(), 
-                clientInfo->isLevelChanger(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(), clientInfo->isBusy(), true, true);
+   s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), false,
+                clientInfo->getRole(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(), clientInfo->isBusy(), true, true);
 
 
    if(clientInfo->getTeamIndex() >= 0) 
@@ -2449,8 +2449,8 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 // ** Note that this method is essentially a mechanism for passing clientInfos from server to client. **
 GAMETYPE_RPC_S2C(GameType, s2cAddClient, 
                 (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, bool isLocalClient, 
-                 bool isAdmin, bool isLevelChanger, bool isRobot, bool isSpawnDelayed, bool isBusy, bool playAlert, bool showMessage),
-                (name, isAuthenticated, badges, isLocalClient, isAdmin, isLevelChanger, isRobot, isSpawnDelayed, isBusy, playAlert, showMessage))
+                 RangedU32<0, ClientInfo::MaxRoles> role, bool isRobot, bool isSpawnDelayed, bool isBusy, bool playAlert, bool showMessage),
+                (name, isAuthenticated, badges, isLocalClient, role, isRobot, isSpawnDelayed, isBusy, playAlert, showMessage))
 {
 #ifndef ZAP_DEDICATED
 
@@ -2458,7 +2458,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    // The new ClientInfo will be deleted in s2cRemoveClient   
-   ClientInfo *clientInfo = new RemoteClientInfo(clientGame, name, isAuthenticated, badges, isRobot, isAdmin, isLevelChanger, isSpawnDelayed, isBusy);
+   ClientInfo *clientInfo = new RemoteClientInfo(clientGame, name, isAuthenticated, badges, isRobot, (ClientInfo::ClientRole)role.value, isSpawnDelayed, isBusy);
 
    clientGame->onPlayerJoined(clientInfo, isLocalClient, playAlert, showMessage);
 
@@ -2689,7 +2689,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
 
 
 // Announce a new player has become an admin
-GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name))
+GAMETYPE_RPC_S2C(GameType, s2cClientChangedRoles, (StringTableEntry name, RangedU32<0, ClientInfo::MaxRoles> role), (name, role))
 {
 #ifndef ZAP_DEDICATED
    // Get a RemoteClientInfo representing the client that just became an admin
@@ -2697,8 +2697,13 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name)
    if(!clientInfo)
       return;
 
+   ClientInfo::ClientRole currentRole = (ClientInfo::ClientRole) role.value;
+
    // Record that fact in our local copy of info about them
-   clientInfo->setIsAdmin(true);
+   clientInfo->setRole(currentRole);
+
+   if(currentRole == ClientInfo::RoleNone)
+      return;
 
    // Now display a message to the local client, unless they were the ones who were granted the privs, in which case they already
    // saw a different message.
@@ -2706,31 +2711,12 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name)
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    if(clientGame->getClientInfo()->getName() != name)    // Don't show message to self
-      clientGame->displayMessage(Colors::cyan, "%s has been granted administrator access.", name.getString());
-#endif
-}
-
-
-// Announce a new player has permission to change levels
-GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name, bool isLevelChanger), (name, isLevelChanger))
-{
-#ifndef ZAP_DEDICATED
-   // Get a RemoteClientInfo representing the client that just became a level changer
-   ClientInfo *clientInfo = mGame->findClientInfo(name);      
-   if(!clientInfo)
-      return;
-
-   // Record that fact in our local copy of info about them
-   clientInfo->setIsLevelChanger(isLevelChanger);
-
-   if(isLevelChanger)
    {
-      // Now display a message to the local client, unless they were the ones who were granted the privs, in which case they already
-      // saw a different message.
-      TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
-      ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-
-      if(clientGame->getClientInfo()->getName() != name)    // Don't show message to self
+      if(currentRole == ClientInfo::RoleOwner)
+         clientGame->displayMessage(Colors::cyan, "%s is now an owner of this server.", name.getString());
+      else if(currentRole == ClientInfo::RoleAdmin)
+         clientGame->displayMessage(Colors::cyan, "%s has been granted administrator access.", name.getString());
+      else if(currentRole == ClientInfo::RoleLevelChanger)
          clientGame->displayMessage(Colors::cyan, "%s can now change levels.", name.getString());
    }
 #endif
@@ -2768,7 +2754,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
       bool isLocalClient = (conn == theConnection);
 
       s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), isLocalClient, 
-                   clientInfo->isAdmin(), clientInfo->isLevelChanger(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(),
+                   clientInfo->getRole(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(),
                    clientInfo->isBusy(), false, false);
 
       S32 team = clientInfo->getTeamIndex();

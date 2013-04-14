@@ -44,6 +44,7 @@
 #include "ServerGame.h"
 #include "Engineerable.h"
 #include "ChatCheck.h"
+#include "ClientInfo.h"
 
 using namespace TNL;
 using namespace std;
@@ -58,8 +59,6 @@ class ClientGame;
 struct LevelInfo;
 class GameSettings;
 class LuaPlayerInfo;
-class ClientInfo;
-class FullClientInfo;
 
 
 class GameConnection: public ControlObjectConnection, public DataSendable, public ChatCheck
@@ -131,6 +130,7 @@ public:
    {
       LevelChangePassword = 0,
       AdminPassword,
+      OwnerPassword,
       ServerPassword,
       ServerName,
       ServerDescr,
@@ -235,8 +235,7 @@ public:
    TNL_DECLARE_RPC(c2sSetParam, (StringPtr param, RangedU32<0, ParamTypeCount> type));
 
 
-   TNL_DECLARE_RPC(s2cSetIsAdmin, (bool granted));
-   TNL_DECLARE_RPC(s2cSetIsLevelChanger, (bool granted, bool notify));
+   TNL_DECLARE_RPC(s2cSetRole, (RangedU32<0, ClientInfo::MaxRoles> role, bool notify));
    TNL_DECLARE_RPC(s2cWrongPassword, ());
 
    TNL_DECLARE_RPC(s2cSetServerName, (StringTableEntry name));

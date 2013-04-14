@@ -212,6 +212,7 @@ public:
    string hostaddr;                 // User-specified address/port of server
    string hostdescr;                // One-line description of server
    string serverPassword;
+   string ownerPassword;
    string adminPassword;
    string levelChangePassword;      // Password to allow access to level changing functionality on non-local server
    string levelDir;                 // Folder where levels are stored, by default
