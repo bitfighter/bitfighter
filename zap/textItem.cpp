@@ -57,7 +57,7 @@ TextItem::TextItem(lua_State *L)
    mObjectTypeNumber = TextItemTypeNumber;
 
    // Some default values
-   mSize = 20;
+   mSize = 0;  // Don't have size option in editor, it will be auto-calculated from 2 points in editor and clients.
 
    if(L)
    {
@@ -287,7 +287,9 @@ Rect TextItem::calcExtents()
    // Don't care much about it on the server, as server won't render, and nothing collides with TextItems
 	return(Rect(getVert(0), getVert(1)));
 #else
-   F32 len = getStringWidth(mSize, mText.c_str());
+
+   //F32 len = getStringWidth(mSize, mText.c_str());  // Somehow can't use this or else running with -dedicated will crash...
+   F32 len = getVert(0).distanceTo(getVert(1));       // This will work, assuming all Text never go past the verticies.
    //F32 buf = mSize / 2;     // Provides some room to accomodate descenders on letters like j and g.
 
    F32 angle =  getVert(0).angleTo(getVert(1));
@@ -378,6 +380,10 @@ void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    stream->readString(txt);
 
    mText = txt;
+
+   if(mSize == 0)
+      recalcTextSize();  // Do this after setting mText and mSize, levelgen could add Text and the server can't calculate text size.
+
    updateExtentInDatabase();
 }
 
