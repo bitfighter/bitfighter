@@ -75,6 +75,7 @@ public:
       InstructionSoundCommands,
       InstructionLevelCommands,
       InstructionAdminCommands,
+      InstructionOwnerCommands,
       InstructionDebugCommands,
       //InstructionScriptingConsole,
       InstructionMaxPages

@@ -77,7 +77,6 @@ namespace Zap
    { "banip",              &ChatCommands::banIpHandler,              { STR, xINT },  2, ADMIN_COMMANDS,  0,  1,  {"<ip>","[duration]"},   "Ban an IP address from the server (def. = 60 mins)" },
    { "shutdown",           &ChatCommands::shutdownServerHandler,     { xINT, STR },  2, ADMIN_COMMANDS,  0,  1,  {"[time]","[message]"},  "Start orderly shutdown of server (def. = 10 secs)" },
    { "setlevpass",         &ChatCommands::setLevPassHandler,         { STR },        1, ADMIN_COMMANDS,  0,  1,  {"[passwd]"},            "Set level change password (use blank to clear)" },
-   { "setadminpass",       &ChatCommands::setAdminPassHandler,       { STR },        1, ADMIN_COMMANDS,  0,  1,  {"[passwd]"},            "Set admin password" },
    { "setserverpass",      &ChatCommands::setServerPassHandler,      { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<passwd>"},            "Set server password (use blank to clear)" },
    { "leveldir",           &ChatCommands::setLevelDirHandler,        { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<new level folder>"},  "Set leveldir param on the server (changes levels available)" },
    { "setservername",      &ChatCommands::setServerNameHandler,      { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Set server name" },
@@ -87,6 +86,9 @@ namespace Zap
    { "rename",             &ChatCommands::renamePlayerHandler,       { NAME, STR },  2, ADMIN_COMMANDS,  0,  1,  {"<from>","<to>"},       "Give a player a new name" },
    { "maxbots",            &ChatCommands::setMaxBotsHandler,         { xINT },       1, ADMIN_COMMANDS,  0,  1,  {"<count>"},             "Set the maximum bots allowed for this server" },
    { "shuffle",            &ChatCommands::shuffleTeams,              { },            0, ADMIN_COMMANDS,  0,  1,   { "" },                 "Randomly reshuffle teams" },
+
+   { "setownerpass",       &ChatCommands::setOwnerPassHandler,       { STR },        1, OWNER_COMMANDS,  0,  1,  {"[passwd]"},            "Set owner password" },
+   { "setadminpass",       &ChatCommands::setAdminPassHandler,       { STR },        1, OWNER_COMMANDS,  0,  1,  {"[passwd]"},            "Set admin password" },
 
    { "showcoords", &ChatCommands::showCoordsHandler,    {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show ship coordinates" },
    { "showzones",  &ChatCommands::showZonesHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show bot nav mesh zones" },

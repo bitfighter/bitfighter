@@ -592,7 +592,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       return;                    // non-admins before we get here, but we'll check anyway in case the client has been hacked.
 
    // Check for forbidden blank parameters -- the following commands require a value to be passed in param
-   if( (type == AdminPassword || type == ServerName || type == ServerDescr || type == LevelDir) &&
+   if( (type == AdminPassword || type == OwnerPassword || type == ServerName || type == ServerDescr || type == LevelDir) &&
                           !strcmp(param.getString(), ""))
       return;
 
@@ -611,7 +611,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    if(type == LevelChangePassword)
       mSettings->setLevelChangePassword(param.getString(), false);
    
-   else if(type == AdminPassword && mClientInfo->isOwner())
+   else if(type == OwnerPassword && mClientInfo->isOwner())   // Need to be owner to change this
+      mSettings->setOwnerPassword(param.getString(), false);
+
+   else if(type == AdminPassword && mClientInfo->isOwner())   // Need to be owner to change this
       mSettings->setAdminPassword(param.getString(), false);
    
    else if(type == ServerPassword)
@@ -734,6 +737,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    static StringTableEntry levelPassChanged   = "Level change password changed";
    static StringTableEntry levelPassCleared   = "Level change password cleared -- anyone can change levels";
    static StringTableEntry adminPassChanged   = "Admin password changed";
+   static StringTableEntry ownerPassChanged   = "Owner password changed";
    static StringTableEntry serverPassChanged  = "Server password changed -- only players with the password can connect";
    static StringTableEntry serverPassCleared  = "Server password cleared -- anyone can connect";
    static StringTableEntry serverNameChanged  = "Server name changed";
@@ -809,6 +813,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          }
       }
    }
+   else if(type == OwnerPassword)
+      msg = ownerPassChanged;
    else if(type == ServerPassword)
       msg = strcmp(param.getString(), "") ? serverPassChanged : serverPassCleared;
    else if(type == ServerName)
