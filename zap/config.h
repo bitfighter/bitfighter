@@ -160,8 +160,6 @@ struct IniSettings      // With defaults specified
 private:
    F32 musicVolLevel;   // Use getter/setter!
 
-   Vector<PluginBinding> getDefaultPluginBindings() const;
-
 public:
    IniSettings();       // Constructor
 
@@ -181,6 +179,8 @@ public:
    F32 getRawMusicVolLevel();
 
    void setMusicVolLevel(F32 vol);
+
+   Vector<PluginBinding> getDefaultPluginBindings() const;
 
    sfxSets sfxSet;                  // Which set of SFX does the user want?
 

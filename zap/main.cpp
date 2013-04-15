@@ -1213,7 +1213,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 
       // We added editor plugins
       gINI.addSection("EditorPlugins");
-      gINI.SetValue("EditorPlugins", "Plugin1", "Ctrl+;|draw_arcs.lua|Make curves!");
+      gINI.SetValue("EditorPlugins", "Plugin0", "Ctrl+;|draw_arcs.lua|Make curves!");
    }
 
    // 017:
@@ -1458,14 +1458,14 @@ int main(int argc, char **argv)
       SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);      // SDL_DEFAULT_REPEAT_DELAY defined as 500
 #endif
 
-      Zap::Cursor::init();
+      Cursor::init();
 
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
       VideoSystem::actualizeScreenMode(settings, false, false);            // Create a display window
 
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
 
-      FontManager::initialize();
+      // Fonts are initialized in VideoSystem::actualizeScreenMode because of OpenGL + texture loss/creation
       FontManager::setFont(FontManager::FontRoman);     // Default font
 
       // Now show any error messages from start-up

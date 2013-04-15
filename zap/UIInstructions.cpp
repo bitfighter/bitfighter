@@ -67,6 +67,7 @@ static const char *pageHeaders[] = {
    "SOUND AND MUSIC",
    "LEVEL COMMANDS",
    "ADMIN COMMANDS",
+   "OWNER COMMANDS",
    "DEBUG COMMANDS",
    //"SCRIPTING CONSOLE"
 };
@@ -161,6 +162,10 @@ void InstructionsUserInterface::render()
       case InstructionAdminCommands:
          renderPageCommands(InstructionAdminCommands - FIRST_COMMAND_PAGE, 
                             "Admin permissions are required to use these commands");            // Admin commands
+         break;
+      case InstructionOwnerCommands:
+         renderPageCommands(InstructionOwnerCommands - FIRST_COMMAND_PAGE,
+                            "Owner permissions are required to use these commands");            // Admin commands
          break;
       case InstructionDebugCommands:
          renderPageCommands(InstructionDebugCommands - FIRST_COMMAND_PAGE);     // Debug commands

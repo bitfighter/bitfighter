@@ -47,6 +47,7 @@ enum HelpCategories {
    SOUND_COMMANDS,
    LEVEL_COMMANDS,
    ADMIN_COMMANDS,
+   OWNER_COMMANDS,
    DEBUG_COMMANDS,
    COMMAND_CATEGORIES
 };
@@ -94,6 +95,7 @@ void showPathsHandler          (ClientGame *game, const Vector<string> &args);
 void pauseBotsHandler          (ClientGame *game, const Vector<string> &args);
 void stepBotsHandler           (ClientGame *game, const Vector<string> &args);
 void setAdminPassHandler       (ClientGame *game, const Vector<string> &args);
+void setOwnerPassHandler       (ClientGame *game, const Vector<string> &args);
 void setServerPassHandler      (ClientGame *game, const Vector<string> &args);
 void setLevPassHandler         (ClientGame *game, const Vector<string> &args);
 void setServerNameHandler      (ClientGame *game, const Vector<string> &args);

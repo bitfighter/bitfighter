@@ -166,9 +166,6 @@ public:
    S32 lua_activateModule(lua_State *L);       // Activate module this cycle --> takes module index
    S32 lua_activateModuleIndex(lua_State *L);  // Activate module this cycle --> takes module enum
 
-   S32 lua_setReqLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
-   S32 lua_setCurrLoadout(lua_State *L);       // Sets requested loadout to specified --> takes Loadout object
-
    S32 lua_engineerDeployObject(lua_State *L);
    S32 lua_dropItem(lua_State *L);
    S32 lua_copyMoveFromObject(lua_State *L);

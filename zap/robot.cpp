@@ -601,8 +601,6 @@ U16 Robot::findClosestZone(const Point &point)
                                                                                              \
    METHOD(CLASS,  activateModule,       ARRAYDEF({{ MOD_ENUM, END }}), 1 )                   \
    METHOD(CLASS,  activateModuleIndex,  ARRAYDEF({{ MOD_SLOT, END }}), 1 )                   \
-   METHOD(CLASS,  setReqLoadout,        ARRAYDEF({{ LOADOUT,  END }}), 1 )                   \
-   METHOD(CLASS,  setCurrLoadout,       ARRAYDEF({{ LOADOUT,  END }}), 1 )                   \
                                                                                              \
    METHOD(CLASS,  globalMsg,            ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS,  teamMsg,              ARRAYDEF({{ STR, END }}), 1 )                        \
@@ -1032,33 +1030,6 @@ S32 Robot::lua_activateModuleIndex(lua_State *L)
    U32 indx = (U32)getInt(L, 1);
 
    mLoadout.setModuleIndxPrimary(indx, true);
-
-   return 0;
-}
-
-
-// Sets requested loadout to specified
-S32 Robot::lua_setReqLoadout(lua_State *L)
-{
-   checkArgList(L, functionArgs, "Robot", "setReqLoadout");
-
-   LoadoutTracker loadout(luaW_check<LuaLoadout>(L, 1));
-
-   getOwner()->requestLoadout(loadout);
-
-   return 0;
-}
-
-
-// Sets loadout to specified 
-S32 Robot::lua_setCurrLoadout(lua_State *L)
-{
-   checkArgList(L, functionArgs, "Robot", "setCurrLoadout");
-
-   LoadoutTracker loadout(luaW_check<LuaLoadout>(L, 1));
-
-   if(getClientInfo()->isLoadoutValid(loadout, getGame()->getGameType()->isEngineerEnabled()))
-      setLoadout(loadout);
 
    return 0;
 }

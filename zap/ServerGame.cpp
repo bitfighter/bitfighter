@@ -983,8 +983,17 @@ bool ServerGame::loadLevel(const string &levelFileName)
 
 
    // Levelgens:
-   runLevelGenScript(getGameType()->getScriptName());                   // Run level's levelgen script (if any)
-   runLevelGenScript(mSettings->getIniSettings()->globalLevelScript);   // And our global levelgen (if defined)
+   // Run level's levelgen script (if any)
+   runLevelGenScript(getGameType()->getScriptName());
+
+   // Run any global levelgen scripts (if defined)
+   Vector<string> scriptList;
+   parseString(mSettings->getIniSettings()->globalLevelScript, scriptList, '|');
+
+   for(S32 i = 0; i < scriptList.size(); i++)
+      runLevelGenScript(scriptList[i]);
+
+   // Fire an update to make sure certain events run on level start (like onShipSpawned)
    EventManager::get()->update();
 
    // Check after script, script might add Teams

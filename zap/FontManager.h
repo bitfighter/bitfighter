@@ -79,8 +79,6 @@ public:
    static void initialize();    
    static void cleanup();   
 
-   static bool initFont();
-
    static void drawTTFString(BfFont *font, const char *string, F32 size);
    static void drawStrokeCharacter(const SFG_StrokeFont *font, S32 character);
 
