@@ -26,6 +26,8 @@
 #include "EditorPlugin.h"     // Header
 #include "gridDB.h"           // For database methods
 #include "BfObject.h"         // So we can cast to BfObject
+#include "barrier.h"
+#include "game.h"
 
 
 namespace Zap
@@ -35,16 +37,15 @@ EditorPlugin::EditorPlugin() { TNLAssert(false, "Don't use this constructor!"); 
 
 // Constructor
 EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
-                           GridDatabase *gridDatabase, LevelLoader *caller)
+                           GridDatabase *gridDatabase, Game *game)
 {
-   
    mScriptName = scriptName;
    mScriptArgs = scriptArgs;
 
    mGridDatabase = gridDatabase;
 
    mGridSize = gridSize;
-   mCaller = caller;
+   mGame = game;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -219,6 +220,7 @@ REGISTER_LUA_CLASS(EditorPlugin);
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getGridSize,        ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, addLevelLine,       ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, addItem,            ARRAYDEF({{ BFOBJ, END }}), 1 ) \
    METHOD(CLASS, getSelectedObjects, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getAllObjects,      ARRAYDEF({{ END }}), 1 ) \
 
@@ -251,12 +253,42 @@ S32 EditorPlugin::lua_getGridSize(lua_State *L)
 */
 S32 EditorPlugin::lua_addLevelLine(lua_State *L)
 {
-   static const char *methodName = "EditorPlugin:addLevelLine()";
+   static const char *methodName = "EditorPlugin:addItem()";
 
    checkArgCount(L, 1, methodName);
    const char *line = getCheckedString(L, 1, methodName);
 
-   mCaller->parseLevelLine(line, mGridDatabase, "Editor plugin: " + mScriptName);
+   mGame->parseLevelLine(line, mGridDatabase, "Editor plugin: " + mScriptName);
+
+   return 0;
+}
+
+
+/**
+ * @luafunc    EditorPlugin::addItem(BfObject)
+ * @brief      Adds an object to the editor by using the levelgen:addItem() functionality
+ * @param      BfObject - any BfObject to be added to the editor
+*/
+S32 EditorPlugin::lua_addItem(lua_State *L)
+{
+   checkArgList(L, functionArgs, "EditorPlugin", "addItem");
+
+   BfObject *obj = luaW_check<BfObject>(L, 1);
+
+   if(obj)
+   {
+      // Silently ignore illegal items when being run from the editor
+      if(obj->canAddToEditor())
+      {
+         // Some objects require special handling
+         if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
+            mGame->addPolyWall(static_cast<PolyWall *>(obj), mGridDatabase);
+         else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+            mGame->addWallItem(static_cast<WallItem *>(obj), mGridDatabase);
+         else
+            obj->addToGame(mGame, mGridDatabase);
+      }
+   }
 
    return 0;
 }

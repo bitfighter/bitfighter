@@ -39,7 +39,7 @@ private:
    static bool getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems);
 
    GridDatabase *mGridDatabase;
-   LevelLoader *mCaller;
+   Game *mGame;
    F32 mGridSize;
 
 protected:
@@ -49,7 +49,7 @@ public:
    // Constructors
    EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!
    EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
-                  GridDatabase *gridDatabase, LevelLoader *caller);
+                  GridDatabase *gridDatabase, Game *game);
 
    virtual ~EditorPlugin();  // Destructor
 
@@ -63,6 +63,7 @@ public:
    // Lua methods
    S32 lua_getGridSize(lua_State *L);
    S32 lua_addLevelLine(lua_State *L);
+   S32 lua_addItem(lua_State *L);
    S32 lua_getSelectedObjects(lua_State *L);        // Return all selected objects in the editor
    S32 lua_getAllObjects(lua_State *L);             // Return all objects in the editor
 
