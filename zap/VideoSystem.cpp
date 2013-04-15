@@ -470,12 +470,9 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
       if(gClientGames[i]->getUIManager()->getCurrentUI())
          gClientGames[i]->getUIManager()->getCurrentUI()->onDisplayModeChange();
 
-   // Now initialize our TTF font
-   /*if(!FontManager::initFont())
-   {
-      logprintf(LogConsumer::LogError, "Problem configuring fonts!");
-      exitToOs(1);
-   }*/
+   // Re-initialize our fonts because OpenGL textures can be lost upon screen change
+   FontManager::cleanup();
+   FontManager::initialize();
 }
 
 

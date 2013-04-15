@@ -146,6 +146,8 @@ static FontManager::FontId currentFontId;
 
 static BfFont *fontList[FontManager::FontCount];
 
+
+// This must be run after VideoSystem::actualizeScreenMode()
 void FontManager::initialize()
 {
    // Our stroke fonts
@@ -160,7 +162,6 @@ void FontManager::initialize()
    fontList[FontPrimeRegular]   = new BfFont(FontPrimeRegular,  "prime_regular.ttf");
    fontList[FontTenby5]         = new BfFont(FontTenby5,        "tenbyfive.ttf");
 
-
    // set texture blending function
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
@@ -169,7 +170,8 @@ void FontManager::initialize()
 void FontManager::cleanup()
 {
    for(S32 i = 0; i < FontCount; i++)
-      delete fontList[i];
+      if(fontList[i] != NULL)
+         delete fontList[i];
 }
 
 
