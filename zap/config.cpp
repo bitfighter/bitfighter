@@ -181,8 +181,6 @@ IniSettings::IniSettings()
    version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
 
    oldGoalFlash = true;
-
-   pluginBindings = getDefaultPluginBindings();
 }
 
 
@@ -555,6 +553,10 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
 
       iniSettings->pluginBindings.push_back(binding);
    }
+
+   // If no plugins we're loaded, add our defaults  (maybe we don't want to do this?)
+   if(iniSettings->pluginBindings.size() == 0)
+      iniSettings->pluginBindings = iniSettings->getDefaultPluginBindings();
 }
 
 
