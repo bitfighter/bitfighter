@@ -118,6 +118,8 @@ void LineItem::render()
       if(getTeam() == TEAM_NEUTRAL || ship->getTeam() == getTeam())
          sameTeam = true;
    }
+   else
+      sameTeam = true;     // Render item regardless of team when in editor, which is when gc will be NULL
 
    // Now render
    if(mGlobal || sameTeam)
