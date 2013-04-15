@@ -332,6 +332,9 @@ public:
    S32 lua_getReqLoadout(lua_State *L);
 
    S32 lua_getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
+
+   S32 lua_setReqLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
+   S32 lua_setCurrLoadout(lua_State *L);       // Sets current loadout to specified --> takes Loadout object
 };
 
 

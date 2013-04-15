@@ -2437,9 +2437,11 @@ bool Ship::isRobot()
    METHOD(CLASS, getMountedItems, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getCurrLoadout,  ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getReqLoadout,   ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, setReqLoadout,   ARRAYDEF({{ LOADOUT,  END }}), 1 ) \
+   METHOD(CLASS, setCurrLoadout,  ARRAYDEF({{ LOADOUT,  END }}), 1 ) \
 
 
-GENERATE_LUA_METHODS_TABLE (Ship, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(Ship, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(Ship, LUA_METHODS);
 
 #undef LUA_METHODS
@@ -2552,6 +2554,33 @@ S32 Ship::lua_getReqLoadout(lua_State *L)
    luaW_hold<LuaLoadout>(L, loadout);
 
    return 1;
+}
+
+
+// Sets requested loadout to specified
+S32 Ship::lua_setReqLoadout(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Ship", "setReqLoadout");
+
+   LoadoutTracker loadout(luaW_check<LuaLoadout>(L, 1));
+
+   getOwner()->requestLoadout(loadout);
+
+   return 0;
+}
+
+
+// Sets loadout to specified
+S32 Ship::lua_setCurrLoadout(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Ship", "setCurrLoadout");
+
+   LoadoutTracker loadout(luaW_check<LuaLoadout>(L, 1));
+
+   if(getClientInfo()->isLoadoutValid(loadout, getGame()->getGameType()->isEngineerEnabled()))
+      setLoadout(loadout);
+
+   return 0;
 }
 
 
