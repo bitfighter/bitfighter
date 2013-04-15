@@ -169,6 +169,9 @@ extern void renderNavMeshBorders(const Vector<ZoneBorder> &borders, F32 scaleFac
 class NeighboringZone;
 extern void renderNavMeshBorders(const Vector<NeighboringZone> &borders, F32 scaleFact = 1);
 
+extern void drawStars(Point *stars, S32 numStars, F32 alphaFrac, bool starsInDistance, Point cameraPos, Point visibleExtent);
+
+
 // Some things we use internally, but also need from UIEditorInstructions for consistency
 extern const Color BORDER_FILL_COLOR;
 extern const F32 BORDER_FILL_ALPHA;

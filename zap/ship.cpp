@@ -270,18 +270,6 @@ S32 Ship::getEnergy()
 }
 
 
-F32 Ship::getEnergyFraction()
-{
-   return (F32)mEnergy / (F32)EnergyMax;
-}
-
-
-S32 Ship::getMaxEnergy()
-{
-   return EnergyMax;
-}
-
-
 void Ship::setActualPos(Point p, bool warp)
 {
    Parent::setActualPos(p);
@@ -541,17 +529,15 @@ void Ship::processWeaponFire()
    }
 }
 
-
+// Compute the delta between our current render position and the server position after 
+// client-side prediction has been run
 void Ship::controlMoveReplayComplete()
 {
-   // Compute the delta between our current render position
-   // and the server position after client-side prediction has
-   // been run
    Point delta = getActualPos() - getRenderPos();
    F32 deltaLenSq = delta.lenSquared();
 
-   // If the delta is either very small, or greater than the
-   // max interpolation threshold, just warp to the new position
+   // If the delta is either very small, or greater than the max interpolation threshold, 
+   // just warp to the new position
    if(deltaLenSq <= sq(0.5) || deltaLenSq > sq(MaxControlObjectInterpDistance))
    {
 #ifndef ZAP_DEDICATED
@@ -2437,9 +2423,11 @@ bool Ship::isRobot()
    METHOD(CLASS, getMountedItems, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getCurrLoadout,  ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getReqLoadout,   ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, setReqLoadout,   ARRAYDEF({{ LOADOUT,  END }}), 1 ) \
+   METHOD(CLASS, setCurrLoadout,  ARRAYDEF({{ LOADOUT,  END }}), 1 ) \
 
 
-GENERATE_LUA_METHODS_TABLE (Ship, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(Ship, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(Ship, LUA_METHODS);
 
 #undef LUA_METHODS
@@ -2471,8 +2459,8 @@ S32 Ship::lua_getAngle(lua_State *L)        { return returnFloat(L, getCurrentMo
 S32 Ship::lua_getActiveWeapon(lua_State *L) { return returnInt  (L, mLoadout.getCurrentWeapon()); }  // Get WeaponIndex for current weapon
                                
 // Ship status
-S32 Ship::lua_getEnergy(lua_State *L)       { return returnFloat(L, getEnergyFraction()); }     // Return ship's energy as a fraction between 0 and 1
-S32 Ship::lua_getHealth(lua_State *L)       { return returnFloat(L, getHealth()); }             // Return ship's health as a fraction between 0 and 1
+S32 Ship::lua_getEnergy(lua_State *L)       { return returnFloat(L, (F32)mEnergy / (F32)EnergyMax); } // Return ship's energy as a fraction between 0 and 1
+S32 Ship::lua_getHealth(lua_State *L)       { return returnFloat(L, getHealth()); }                   // Return ship's health as a fraction between 0 and 1
 
 S32 Ship::lua_getMountedItems(lua_State *L)
 {
@@ -2552,6 +2540,33 @@ S32 Ship::lua_getReqLoadout(lua_State *L)
    luaW_hold<LuaLoadout>(L, loadout);
 
    return 1;
+}
+
+
+// Sets requested loadout to specified
+S32 Ship::lua_setReqLoadout(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Ship", "setReqLoadout");
+
+   LoadoutTracker loadout(luaW_check<LuaLoadout>(L, 1));
+
+   getOwner()->requestLoadout(loadout);
+
+   return 0;
+}
+
+
+// Sets loadout to specified
+S32 Ship::lua_setCurrLoadout(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Ship", "setCurrLoadout");
+
+   LoadoutTracker loadout(luaW_check<LuaLoadout>(L, 1));
+
+   if(getClientInfo()->isLoadoutValid(loadout, getGame()->getGameType()->isEngineerEnabled()))
+      setLoadout(loadout);
+
+   return 0;
 }
 
 

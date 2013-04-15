@@ -1161,7 +1161,7 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          else
          {
             ui->setMessage(1, "Disconnected for unknown reason:");
-            ui->setMessage(1, "Error number: " + itos(reason));
+            ui->setMessage(3, "Error number: " + itos(reason));
          }
 
          getUIManager()->activate(ui);
@@ -1406,81 +1406,6 @@ void ClientGame::zoomCommanderMap()
 }
 
 
-void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
-{
-   const F32 starChunkSize = 1024;        // Smaller numbers = more dense stars
-   const F32 starDist = 3500;             // Bigger value = slower moving stars
-
-   Point upperLeft = cameraPos - visibleExtent * 0.5f;   // UL corner of screen in "world" coords
-   Point lowerRight = cameraPos + visibleExtent * 0.5f;  // LR corner of screen in "world" coords
-
-   // When zooming out to commander's view, visibleExtent will grow larger and larger.  At some point, drawing all the stars
-   // needed to fill the zoomed out screen becomes overwhelming, and bogs the computer down.  So we really need to set some
-   // rational limit on where we stop showing stars during the zoom process (recall that stars are hidden when we are done zooming,
-   // so this effect should be transparent to the user except at the most extreme of scales, and then, the alternative is slowing 
-   // the computer greatly).  Note that 10000 is probably irrationally high.
-   if(visibleExtent.x > 10000 || visibleExtent.y > 10000) 
-      return;
-
-   upperLeft  *= 1 / starChunkSize;
-   lowerRight *= 1 / starChunkSize;
-
-   upperLeft.x = floor(upperLeft.x);      // Round to ints, slightly enlarging the corners to ensure
-   upperLeft.y = floor(upperLeft.y);      // the entire screen is "covered" by the bounding box
-
-   lowerRight.x = floor(lowerRight.x) + 0.5f;
-   lowerRight.y = floor(lowerRight.y) + 0.5f;
-
-   // Render some stars
-   glPointSize( gLineWidth1 );
-   glColor(0.8f * alphaFrac, 0.8f * alphaFrac, alphaFrac);
-
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glVertexPointer(2, GL_FLOAT, sizeof(Point), &mStars[0]);    // Each star is a pair of floats between 0 and 1
-
-   bool starsInDistance = mSettings->getStarsInDistance();
-
-   S32 fx1 = 0, fx2 = 0, fy1 = 0, fy2 = 0;
-
-   if(starsInDistance)
-   {
-      S32 xDist = (S32) (cameraPos.x / starDist);
-      S32 yDist = (S32) (cameraPos.y / starDist);
-
-      fx1 = -1 - xDist;
-      fx2 =  1 - xDist;
-      fy1 = -1 - yDist;
-      fy2 =  1 - yDist;
-   }
-
-   glDisable(GL_BLEND);
-
-   for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2; xPage++)
-      for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2; yPage++)
-      {
-         glPushMatrix();
-         glScale(starChunkSize);   // Creates points with coords btwn 0 and starChunkSize
-
-         if(starsInDistance)
-            glTranslatef(xPage + (cameraPos.x / starDist), yPage + (cameraPos.y / starDist), 0);
-         else
-            glTranslatef(xPage, yPage, 0);
-
-         glDrawArrays(GL_POINTS, 0, NumStars);
-         
-         //glColor(.1,.1,.1);
-         // for(S32 i = 0; i < 50; i++)
-         //   glDrawArrays(GL_LINE_LOOP, i * 6, 6);
-
-         glPopMatrix();
-      }
-
-   glEnable(GL_BLEND);
-
-   glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-
 S32 QSORT_CALLBACK renderSortCompare(BfObject **a, BfObject **b)
 {
    return (*a)->getRenderSortValue() - (*b)->getRenderSortValue();
@@ -1649,7 +1574,7 @@ void ClientGame::renderCommander()
 
    // zoomFrac == 1.0 when fully zoomed out to cmdr's map
    if(zoomFrac < 0.95)
-      drawStars(1 - zoomFrac, offset, modVisSize);
+      drawStars(mStars, NumStars, 1 - zoomFrac, mSettings->getStarsInDistance(), offset, modVisSize);
  
 
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
@@ -1888,7 +1813,7 @@ void ClientGame::renderNormal()
 
    glTranslatef(-position.x, -position.y, 0);
 
-   drawStars(1.0, position, visExt * 2);
+   drawStars(mStars, NumStars, 1.0, mSettings->getStarsInDistance(), position, visExt * 2);
 
    // Render all the objects the player can see
    screenSize.set(visExt);

@@ -135,7 +135,6 @@ public:
    void onGameOver();
 
    Point worldToScreenPoint(const Point *p) const;
-   void drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent);
 
    void render();             // Delegates to renderNormal, renderCommander, or renderSuspended, as appropriate
    void renderNormal();       // Render game in normal play mode
