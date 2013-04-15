@@ -204,7 +204,6 @@ Rect Item::calcExtents()
 //               Fn name           Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getRad,           ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, isOnShip,         ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getShip,          ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, isInCaptureZone,  ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getCaptureZone,   ARRAYDEF({{ END }}), 1 ) \
@@ -225,14 +224,6 @@ REGISTER_LUA_SUBCLASS(Item, BfObject);
  * @return  \e num representing the radius of the %item.
  */
 S32 Item::lua_getRad(lua_State *L) { return returnFloat(L, getRadius()); }
-
-/**
- * @luafunc Item::isOnShip()
- * @brief   Returns true if item is mounted on a ship.
- * @descr   Currently, only \link FlagItem FlagItems\endlink and \link ResourceItem ResourceItems\endlink can be mounted on ships.
- * @return  \e bool True if the item is mounted on a ship, false otherwise.
- */
-S32 Item::lua_isOnShip (lua_State *L) { return returnBool(L, false); }
 
 /**
  * @luafunc Item::getCaptureZone()

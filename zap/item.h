@@ -96,7 +96,6 @@ public:
 
    virtual S32 lua_getRad(lua_State *L);
    virtual S32 lua_isInCaptureZone(lua_State *L);      // Non-moving item is never in capture zone, even if it is!
-   virtual S32 lua_isOnShip(lua_State *L);             // Is item being carried by a ship? NO!
    virtual S32 lua_getCaptureZone(lua_State *L);
    virtual S32 lua_getShip(lua_State *L);
 };
