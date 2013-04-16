@@ -40,42 +40,45 @@ end
 --
 function main()
    -- arg table will include values from menu items above, in order
- 
-   local gridsize = plugin:getGridSize()
-   
    local scriptName = arg[0]
    local degrees = arg[1]
    local divisions = arg[2]
-   local radius = arg[3] / gridsize
+   local radius = arg[3]
    local startPoint = arg[4]
    local itemType = arg[5]
    local barrierWidth = arg[6]
-   local centerX = arg[7] / gridsize
-   local centerY = arg[8] / gridsize
+   local centerX = arg[7]
+   local centerY = arg[8]
    
-   
-   local levelLine
+   local object
 
-   -- First part of the level line
-   if(itemType == "BarrierMaker") then
-       levelLine = itemType .. " " .. barrierWidth .. " "
-   else
-       levelLine = itemType .. " 0 "
+   -- First, create our object
+   if itemType == "BarrierMaker" then
+      object = WallItem.new()
+   elseif itemType == "LoadoutZone" then
+      object = LoadoutZone.new()
+   elseif itemType == "GoalZone" then
+      object = GoalZone.new()
    end
    
    -- Each division is this many radians
    local step = toRads(degrees / divisions)
    
+   local geom = {}
+   
    -- Now add some coordinates
    for x = 0, divisions do
-      levelLine = levelLine .. radius * math.cos(x * step) + centerX .. " " .. radius * math.sin(x * step) - centerY .. "  "
+      table.insert(geom, point.new(radius * math.cos(x * step) + centerX, radius * math.sin(x * step) - centerY))
    end
 
+   -- Complete the circle if it's a circle
    if(degrees == 360) then
-      levelLine = levelLine .. radius * math.cos(toRads(startPoint)) + centerX .. " " .. radius * math.sin(toRads(startPoint)) - centerY .. "  "
+      table.insert(geom, point.new(radius * math.cos(toRads(startPoint)) + centerX, radius * math.sin(toRads(startPoint)) - centerY))
    end
+   
+   object:setGeom(geom)
 
    -- Now add item to the level
-   plugin:addLevelLine(levelLine)
+   plugin:addItem(object)
 end   
 
