@@ -236,7 +236,7 @@ S32 MenuUserInterface::getYStart()
 
 static void renderMenuInstructions(GameSettings *settings)
 {
-   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    S32 y = canvasHeight - UserInterface::vertMargin - 20;
@@ -258,7 +258,7 @@ static void renderMenuInstructions(GameSettings *settings)
       S32 totalWidth = upWidth + downWidth + startWidth + backWidth +
                        getStringWidth(size, "to choose |  to select |  exits menu");
 
-      S32 x = canvasWidth / 2 - UserInterface::horizMargin - totalWidth/2;
+      S32 x = canvasWidth / 2 - UserInterface::horizMargin - totalWidth / 2;
 
       JoystickRender::renderControllerButton((F32)x, (F32)y, joystickIndex, BUTTON_DPAD_UP, false);
       x += upWidth + getStringWidth(size, " ");
@@ -332,7 +332,7 @@ void MenuUserInterface::render()
 {
    FontManager::pushFontContext(FontManager::MenuContext);
 
-   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    // Draw the game screen, then dim it out so you can still see it under our overlay
@@ -2047,7 +2047,6 @@ void PlayerMenuUserInterface::render()
       newItem->setUnselectedColor(*getGame()->getTeamColor(clientInfo->getTeamIndex()));
 
       addMenuItem(newItem);
-
    }
 
    sortMenuItems();
