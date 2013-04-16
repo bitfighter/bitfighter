@@ -63,7 +63,6 @@ class FxManager
 
    Vector<DebrisChunk> mDebrisChunks;
 
-
    struct TextEffect
    {
       string text;
@@ -88,7 +87,7 @@ class FxManager
    U32 firstFreeIndex[SparkTypeCount];            // Tracks next available slot when we have fewer than MAX_SPARKS 
    U32 lastOverwrittenIndex[SparkTypeCount];      // Keep track of which spark we last overwrote
 
-   Spark gSparks[SparkTypeCount][MAX_SPARKS];     // Our sparks themselves... two types, each with room for MAX_SPARKS
+   Spark mSparks[SparkTypeCount][MAX_SPARKS];     // Our sparks themselves... two types, each with room for MAX_SPARKS
 
 public:
    FxManager();

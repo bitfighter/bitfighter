@@ -84,7 +84,7 @@ void FxManager::emitSpark(const Point &pos, const Point &vel, const Color &color
       firstFreeIndex[sparkType] += slotsNeeded;    // Point sparks take 1 slot, line sparks need 2
    }
 
-   s = gSparks[sparkType] + sparkIndex;            // Assign our spark to its slot
+   s = mSparks[sparkType] + sparkIndex;            // Assign our spark to its slot
 
    s->pos = pos;
    s->vel = vel;
@@ -95,7 +95,7 @@ void FxManager::emitSpark(const Point &pos, const Point &vel, const Color &color
 
    if(sparkType == SparkTypeLine)                  // Line sparks require two points; add the second here
    {
-      s2 = gSparks[sparkType] + sparkIndex + 1;    // Since we know we had room for two, this one should be available
+      s2 = mSparks[sparkType] + sparkIndex + 1;    // Since we know we had room for two, this one should be available
       Point len = vel;
       len.normalize(20);
       s2->pos = (pos - len);
@@ -230,11 +230,11 @@ void FxManager::idle(U32 timeDelta)
    for(U32 j = 0; j < SparkTypeCount; j++)
       for(U32 i = 0; i < firstFreeIndex[j]; )
       {
-         Spark *theSpark = gSparks[j] + i;
+         Spark *theSpark = mSparks[j] + i;
          if(theSpark->ttl < (S32)timeDelta)
          {                          // Spark is dead -- remove it
             firstFreeIndex[j]--;
-            *theSpark = gSparks[j][firstFreeIndex[j]];
+            *theSpark = mSparks[j][firstFreeIndex[j]];
          }
          else
          {
@@ -332,8 +332,8 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction)
          glEnableClientState(GL_COLOR_ARRAY);
          glEnableClientState(GL_VERTEX_ARRAY);
 
-         glVertexPointer(2, GL_FLOAT, sizeof(Spark), &gSparks[i][0].pos);     // Where to find the vertices -- see OpenGL docs
-         glColorPointer (4, GL_FLOAT, sizeof(Spark), &gSparks[i][0].color);   // Where to find the colors -- see OpenGL docs
+         glVertexPointer(2, GL_FLOAT, sizeof(Spark), &mSparks[i][0].pos);     // Where to find the vertices -- see OpenGL docs
+         glColorPointer (4, GL_FLOAT, sizeof(Spark), &mSparks[i][0].color);   // Where to find the colors -- see OpenGL docs
 
          if((SparkType) i == SparkTypePoint)
             glDrawArrays(GL_POINTS, 0, firstFreeIndex[i]);
@@ -415,9 +415,9 @@ void FxManager::clearSparks()
    for(U32 j = 0; j < SparkTypeCount; j++)
       for(U32 i = 0; i < firstFreeIndex[j]; )
       {
-         Spark *theSpark = gSparks[j] + i;
+         Spark *theSpark = mSparks[j] + i;
          firstFreeIndex[j]--;
-         *theSpark = gSparks[j][firstFreeIndex[j]];
+         *theSpark = mSparks[j][firstFreeIndex[j]];
       }
 }
 
