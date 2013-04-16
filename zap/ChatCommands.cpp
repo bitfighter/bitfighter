@@ -311,7 +311,7 @@ static bool isLocalTestServer(ClientGame *game, const char *failureMessage)
 // Can work on any server, confers no advantage
 void showCoordsHandler(ClientGame *game, const Vector<string> &words)
 {
-   game->toggleShowingShipCoords();
+   game->getUIManager()->getGameUserInterface()->toggleShowingShipCoords();
 }
 
 
@@ -319,7 +319,7 @@ void showCoordsHandler(ClientGame *game, const Vector<string> &words)
 void showIdsHandler(ClientGame *game, const Vector<string> &words)
 {
    if(isLocalTestServer(game, "!!! Ids can only be displayed on a test server"))
-      game->toggleShowingObjectIds();
+      game->getUIManager()->getGameUserInterface()->toggleShowingObjectIds();
 }
 
 
@@ -327,7 +327,7 @@ void showIdsHandler(ClientGame *game, const Vector<string> &words)
 void showZonesHandler(ClientGame *game, const Vector<string> &words)
 {
    if(isLocalTestServer(game, "!!! Zones can only be displayed on a local host"))
-      game->toggleShowingMeshZones();
+      game->getUIManager()->getGameUserInterface()->toggleShowingMeshZones();
 }
 
 
@@ -345,7 +345,7 @@ void showBotsHandler(ClientGame *game, const Vector<string> &words)
 void showPathsHandler(ClientGame *game, const Vector<string> &words)
 {
    if(isLocalTestServer(game, "!!! Robots can only be shown on a test server")) 
-      game->toggleShowDebugBots();
+      game->getUIManager()->getGameUserInterface()->toggleShowDebugBots();
 }
 
 

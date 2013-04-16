@@ -39,7 +39,7 @@
 #  include <windows.h>             // For screensaver... windows only feature, I'm afraid!
 #endif
 
-#include "sparkManager.h"
+#include "SparkTypesEnum.h"
 
 using namespace std;
 
@@ -47,17 +47,12 @@ namespace Zap
 {
 
 
-class ClientGame : public Game, public FXManager
+class ClientGame : public Game
 {
    typedef Game Parent;
 
 private:
-   enum {
-      NumStars = 256,               // 256 stars should be enough for anybody!   -- Bill Gates
-      CommanderMapZoomTime = 350,   // Transition time between regular map and commander's map; in ms, higher = slower
-   };
-
-   Point mStars[NumStars];
+   static const S32 CommanderMapZoomTime = 350;    // Transition time between regular map and commander's map; in ms, higher = slower
 
    SafePtr<GameConnection> mConnectionToServer; // If this is a client game, this is the connection to the server
    bool mInCommanderMap;
@@ -71,10 +66,6 @@ private:
 
    string mRemoteLevelDownloadFilename;
 
-   bool mDebugShowShipCoords;       // Show coords on ship?
-   bool mDebugShowObjectIds;        // Show object ids?
-   bool mDebugShowMeshZones;        // Show bot nav mesh zones?
-
    Vector<string> mMuteList;        // List of players we aren't listening to anymore because they've annoyed us!
    Vector<string> mVoiceMuteList;   // List of players we mute because they are abusing voice chat
 
@@ -82,7 +73,8 @@ private:
    bool mGameIsRunning;             // True if a suspended game is being played without us, false if it's full stop for everyone
 
    bool mSeenTimeOutMessage;
-   bool mShowDebugBots;
+
+   GameUserInterface *mUi;
 
 
    // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
@@ -107,7 +99,6 @@ public:
 
    UserInterfaceData *mUserInterfaceData;
 
-   bool hasValidControlObject();
    bool isConnectedToServer();
 
    GameConnection *getConnectionToServer();
@@ -137,25 +128,12 @@ public:
    Point worldToScreenPoint(const Point *p) const;
 
    void render();             // Delegates to renderNormal, renderCommander, or renderSuspended, as appropriate
-   void renderNormal();       // Render game in normal play mode
-   void renderCommander();    // Render game in commander's map mode
-   void renderSuspended();    // Render suspended game
 
-   void renderOverlayMap();   // Render the overlay map in normal play mode
    void resetZoomDelta();
    void clearZoomDelta();
    bool isServer();
    void idle(U32 timeDelta);
    void zoomCommanderMap();
-
-   bool isShowingDebugShipCoords() const;     // Show coords on ship?
-   void toggleShowingShipCoords();
-
-   bool isShowingDebugObjectIds() const;      // Show object ids?
-   void toggleShowingObjectIds();
-
-   bool isShowingDebugMeshZones()  const;     // Show bot nav mesh zones?
-   void toggleShowingMeshZones();
 
    Ship *findShip(const StringTableEntry &clientName);
 
@@ -172,6 +150,18 @@ public:
    bool isSpawnDelayed();
    void undelaySpawn();
    F32 getUIFadeFactor();
+
+   // Some FxManager passthroughs
+   void clearSparks();
+   void emitBlast(const Point &pos, U32 size);
+   void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2);
+   void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);
+   void emitTextEffect(const string &text, const Color &color, const Point &pos);
+   void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType);
+   void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
+   void emitTeleportInEffect(const Point &pos, U32 type);
+
+
 
    void requestSpawnDelayed();
    U32 getReturnToGameDelay();
@@ -193,8 +183,6 @@ public:
    void addToVoiceMuteList(const string &name);
    void removeFromVoiceMuteList(const string &name);
    bool isOnVoiceMuteList(const string &name);
-
-   void toggleShowDebugBots();
 
    void connectionToServerRejected(const char *reason);
    void setMOTD(const char *motd);

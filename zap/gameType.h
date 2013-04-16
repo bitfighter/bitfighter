@@ -288,7 +288,6 @@ public:
 
    const Vector<WallRec> *getBarrierList();
 
-   Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
    S32 mObjectsExpected;            // Count of objects we expect to get with this level (for display purposes only)
 
    struct ItemOfInterest

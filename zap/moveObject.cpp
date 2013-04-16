@@ -34,6 +34,7 @@
 #include "game.h"
 #include "gameConnection.h"
 #include "stringUtils.h"
+#include "SparkTypesEnum.h"
 
 #include "LuaScriptRunner.h"
 
@@ -604,12 +605,12 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
             if(TNL::Random::readF() > 0.5)
                static_cast<ClientGame *>(getGame())->emitSpark(collisionPoint, 
                                                                normal * chaos.len() + Point(normal.y, -normal.x) * scale * 5  + chaos + 
-                                                                         getVel(stateIndex) * 0.05f, bumpC);
+                                                                         getVel(stateIndex) * 0.05f, bumpC, 0, UI::SparkTypePoint);
 
             if(TNL::Random::readF() > 0.5)
                static_cast<ClientGame *>(getGame())->emitSpark(collisionPoint, 
                                                                normal * chaos.len() + Point(normal.y, -normal.x) * scale * -5 + chaos + 
-                                                                         getVel(stateIndex) * 0.05f, bumpC);
+                                                                         getVel(stateIndex) * 0.05f, bumpC, 0, UI::SparkTypePoint);
          }
       }
    }
@@ -1568,7 +1569,7 @@ TestFunc Asteroid::collideTypes()
 void Asteroid::onItemExploded(Point pos)
 {
    SoundSystem::playSoundEffect(SFXAsteroidSmallExplode, getRenderPos());
-   // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
+   // FxManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
 }
 
 

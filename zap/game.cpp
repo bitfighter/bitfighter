@@ -1203,9 +1203,9 @@ void Game::cleanUp()
 }
 
 
-Rect Game::getWorldExtents()
+const Rect *Game::getWorldExtents() const
 {
-   return mWorldExtents;
+   return &mWorldExtents;
 }
 
 

@@ -2038,14 +2038,14 @@ void Ship::emitMovementSparks()
    Point rightPt = getRenderPos() + shipDirs[bestId];
 
    // Select profile
-   FXTrail::TrailProfile profile;
+   FxTrail::TrailProfile profile;
 
    if(cloakActive)
-      profile = FXTrail::CloakedShip;
+      profile = FxTrail::CloakedShip;
    else if(boostActive)
-      profile = FXTrail::TurboShip;
+      profile = FxTrail::TurboShip;
    else
-      profile = FXTrail::Ship;
+      profile = FxTrail::Ship;
 
    // Stitch things up if we must...
    if(leftId == mLastTrailPoint[0] && rightId == mLastTrailPoint[1])
@@ -2111,7 +2111,7 @@ void Ship::emitMovementSparks()
                 TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
 
                 static_cast<ClientGame *>(getGame())->emitSpark(getRenderPos() - shipDirs[i] * 13,
-                                          -shipDirs[i] * 100 + chaos, thrust, TNL::Random::readI(0, 1500));
+                                          -shipDirs[i] * 100 + chaos, thrust, TNL::Random::readI(0, 1500), SparkTypePoint);
              }
           }
       }
@@ -2198,7 +2198,7 @@ void Ship::render(S32 layerIndex)
       glLineWidth(gDefaultLineWidth);
    }
 
-   if(clientGame->isShowingDebugShipCoords() && layerIndex == 1)
+   if(clientGame->getUIManager()->getGameUserInterface()->isShowingDebugShipCoords() && layerIndex == 1)
       renderShipCoords(getActualPos(), isLocalShip, alpha);
 
    glRotatef(radiansToDegrees(getRenderAngle()) - 90 + rotAmount, 0, 0, 1.0);

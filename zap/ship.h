@@ -198,7 +198,7 @@ public:
 #ifndef ZAP_DEDICATED
    U32 mSparkElapsed;
    S32 mLastTrailPoint[TrailCount];  // TrailCount = 2
-   FXTrail mTrail[TrailCount];
+   UI::FxTrail mTrail[TrailCount];
    ShipShape::ShipShapeType mShapeType;
 #endif
 

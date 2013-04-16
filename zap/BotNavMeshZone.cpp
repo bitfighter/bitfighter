@@ -475,7 +475,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
 
    mAllZones.deleteAndClear();
 
-   Rect bounds = game->getWorldExtents();
+   Rect bounds(game->getWorldExtents());
    bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
 
    // Make sure level isn't too big for zone generation, which uses 16 bit ints

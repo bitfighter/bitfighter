@@ -295,7 +295,7 @@ public:
 
    ClientInfo *findClientInfo(const StringTableEntry &name);      // Find client by name
    
-   Rect getWorldExtents();
+   const Rect *getWorldExtents() const;
 
    virtual bool isTestServer();                                   // Overridden in ServerGame
 

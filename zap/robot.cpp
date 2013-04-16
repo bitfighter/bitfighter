@@ -561,7 +561,7 @@ U16 Robot::findClosestZone(const Point &point)
    // Target must be outside extents of the map, find nearest zone if a straight line was drawn
    if(closestZone == U16_MAX)
    {
-      Point extentsCenter = getGame()->getWorldExtents().getCenter();
+      Point extentsCenter = getGame()->getWorldExtents()->getCenter();
 
       F32 collisionTimeIgnore;
       Point surfaceNormalIgnore;
