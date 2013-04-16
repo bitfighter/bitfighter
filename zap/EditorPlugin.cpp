@@ -219,7 +219,6 @@ REGISTER_LUA_CLASS(EditorPlugin);
 //               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getGridSize,        ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, addLevelLine,       ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, addItem,            ARRAYDEF({{ BFOBJ, END }}), 1 ) \
    METHOD(CLASS, getSelectedObjects, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getAllObjects,      ARRAYDEF({{ END }}), 1 ) \
@@ -241,26 +240,6 @@ GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
 S32 EditorPlugin::lua_getGridSize(lua_State *L)
 {
    return returnFloat(L, mGridSize);    
-}
-
-
-/**
- * @luafunc    EditorPlugin::addLevelLine(levelLine)
- * @brief      Adds an object to the editor by passing a line from a level file.
- * @deprecated This method is deprecated and will be removed in the future.  As an alternative, construct a BfObject directly and 
- *             add it to the game using the editorPlugin:addItem() method.
- * @param      levelLine - string containing the line of levelcode.
-*/
-S32 EditorPlugin::lua_addLevelLine(lua_State *L)
-{
-   static const char *methodName = "EditorPlugin:addItem()";
-
-   checkArgCount(L, 1, methodName);
-   const char *line = getCheckedString(L, 1, methodName);
-
-   mGame->parseLevelLine(line, mGridDatabase, "Editor plugin: " + mScriptName);
-
-   return 0;
 }
 
 

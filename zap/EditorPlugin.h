@@ -62,7 +62,6 @@ public:
 
    // Lua methods
    S32 lua_getGridSize(lua_State *L);
-   S32 lua_addLevelLine(lua_State *L);
    S32 lua_addItem(lua_State *L);
    S32 lua_getSelectedObjects(lua_State *L);        // Return all selected objects in the editor
    S32 lua_getAllObjects(lua_State *L);             // Return all objects in the editor
