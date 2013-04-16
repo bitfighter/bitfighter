@@ -2259,7 +2259,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
-   clientGame->FXManager::clearSparks();
+   clientGame->clearSparks();
 
    mLevelName = levelName;
    mLevelDescription = levelDesc;
@@ -2271,15 +2271,15 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    mEngineerEnabled = engineerEnabled;
    mEngineerUnrestrictedEnabled = engineerAbuseEnabled;
 
-   mViewBoundsWhileLoading = Rect(lx, ly, ux, uy);
+   GameUserInterface *gameUI = clientGame->getUIManager()->getGameUserInterface();
+   gameUI->setViewBoundsWhileLoading(lx, ly, ux, uy);
+   gameUI->mShowProgressBar = true;             // Show progress bar
 
    // Need to send this to the client because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
    mLevelHasLoadoutZone = levelHasLoadoutZone;        
 
    clientGame->mObjectsLoaded = 0;              // Reset item counter
 
-   GameUserInterface *gameUI = clientGame->getUIManager()->getGameUserInterface();
-   gameUI->mShowProgressBar = true;             // Show progress bar
 
    //clientGame->setInCommanderMap(true);       // If we change here, need to tell the server we are in this mode
    //clientGame->resetZoomDelta();

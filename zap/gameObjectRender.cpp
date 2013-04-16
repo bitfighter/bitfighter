@@ -2783,7 +2783,7 @@ void drawStars(Point *stars, S32 numStars, F32 alphaFrac, bool starsInDistance, 
    const F32 starChunkSize = 1024;        // Smaller numbers = more dense stars
    const F32 starDist = 3500;             // Bigger value = slower moving stars
 
-   Point upperLeft = cameraPos - visibleExtent * 0.5f;   // UL corner of screen in "world" coords
+   Point upperLeft  = cameraPos - visibleExtent * 0.5f;  // UL corner of screen in "world" coords
    Point lowerRight = cameraPos + visibleExtent * 0.5f;  // LR corner of screen in "world" coords
 
    // When zooming out to commander's view, visibleExtent will grow larger and larger.  At some point, drawing all the stars

@@ -810,7 +810,7 @@ void CoreItem::idle(BfObject::IdleCallPath path)
             Point vel = dir * (Random::readF() * 3 + 2) + cross * (Random::readF() - .2f);
             U32 ttl = Random::readI(0, 1000) + 500;
 
-            static_cast<ClientGame *>(getGame())->emitSpark(sparkEmissionPos, vel, Colors::gray20, ttl);
+            static_cast<ClientGame *>(getGame())->emitSpark(sparkEmissionPos, vel, Colors::gray20, ttl, UI::SparkTypePoint);
          }
       }
    }

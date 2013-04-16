@@ -49,6 +49,8 @@
 #include "Zone.h"                // For instantiation
 #include "ChatHelper.h"          // For runCommand def
 
+#include "SparkTypesEnum.h"
+
 #include "soccerGame.h"
 
 #include "UI.h"                  // For renderRect
@@ -76,8 +78,6 @@
 #include "tnlNetInterface.h"
 
 #include "md5wrapper.h"
-
-#include "OpenglUtils.h"
 
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>
@@ -108,12 +108,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    mGameIsRunning         = true;      // Only matters when game is suspended
    mSeenTimeOutMessage    = false;
 
-   // Some debugging settings
-   mDebugShowShipCoords   = false;
-   mDebugShowObjectIds    = false;
-   mDebugShowMeshZones    = false;
-   mShowDebugBots         = false;
-
    mCommanderZoomDelta = 0;
 
    mRemoteLevelDownloadFilename = "downloaded.level";
@@ -122,32 +116,9 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mClientInfo = new FullClientInfo(this, NULL, false);  // Will be deleted in destructor
 
-
-   // Create some random stars
-   for(U32 i = 0; i < NumStars; i++)
-   {
-      mStars[i].x = TNL::Random::readF();    // Between 0 and 1
-      mStars[i].y = TNL::Random::readF();
-   }
-
-   // //Create some random hexagons
-   //for(U32 i = 0; i < NumStars; i++)
-   //{
-   //   F32 x = TNL::Random::readF();
-   //   F32 y = TNL::Random::readF();
-   //   F32 ang = TNL::Random::readF() * Float2Pi;
-   //   F32 size = TNL::Random::readF() * .1;
-
-
-   //   for(S32 j = 0; j < 6; j++)
-   //   {
-   //      mStars[i * 6 + j].x = x + sin(ang + Float2Pi / 6 * j) * size;      // Between 0 and 1
-   //      mStars[i * 6 + j].y = y + cos(ang + Float2Pi / 6 * j) * size;
-   //   }
-   //}
-
    mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
 
+   mUi = mUIManager->getGameUserInterface();
 }
 
 
@@ -256,12 +227,6 @@ void ClientGame::onConnectedToMaster()
 }
 
 
-bool ClientGame::hasValidControlObject()
-{
-   return mConnectionToServer.isValid() && mConnectionToServer->getControlObject();
-}
-
-
 bool ClientGame::isConnectedToServer()
 {
    return mConnectionToServer.isValid() && mConnectionToServer->getConnectionState() == NetConnection::Connected;
@@ -316,9 +281,58 @@ void ClientGame::setSpawnDelayed(bool spawnDelayed)
    {
       unsuspendGame();
 
-      FXManager::clearSparks();
+      clearSparks();
    }
 }
+
+
+void ClientGame::clearSparks()
+{
+   mUi->clearSparks();
+}
+
+
+void ClientGame::emitBlast(const Point &pos, U32 size)
+{
+   mUi->emitBlast(pos, size);
+}
+
+
+void ClientGame::emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2)
+{
+   mUi->emitBurst(pos, scale, color1, color2);
+}
+
+
+void ClientGame::emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation)
+{
+   mUi->emitDebrisChunk(points, color, pos, vel, ttl, angle, rotation);
+}
+
+
+void ClientGame::emitTextEffect(const string &text, const Color &color, const Point &pos)
+{
+   mUi->emitTextEffect(text, color, pos);
+}
+
+
+void ClientGame::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType)
+{
+   mUi->emitSpark(pos, vel, color, ttl, sparkType);
+}
+
+
+void ClientGame::emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors)
+{
+   mUi->emitExplosion(pos, size, colorArray, numColors);
+}
+
+
+void ClientGame::emitTeleportInEffect(const Point &pos, U32 type)
+{
+   mUi->emitTeleportInEffect(pos, type);
+}
+
 
 
 // User has pressed a key, finished composing that most eloquent of chat messages, or taken some other action to undelay their spawn
@@ -513,7 +527,7 @@ void ClientGame::idle(U32 timeDelta)
       else
          mCommanderZoomDelta -= timeDelta;
 
-      getUIManager()->getGameUserInterface()->onMouseMoved();     // Keep ship pointed towards mouse
+      mUi->onMouseMoved();     // Keep ship pointed towards mouse
    }
    else if(mInCommanderMap && mCommanderZoomDelta != CommanderMapZoomTime)    // Zooming out to commander's map
    {
@@ -522,12 +536,12 @@ void ClientGame::idle(U32 timeDelta)
       if(mCommanderZoomDelta > CommanderMapZoomTime)
          mCommanderZoomDelta = CommanderMapZoomTime;
 
-      getUIManager()->getGameUserInterface()->onMouseMoved();  // Keep ship pointed towards mouse
+      mUi->onMouseMoved();  // Keep ship pointed towards mouse
    }
    // else we're not zooming in or out, which is most of the time
 
 
-   Move *theMove = getUIManager()->getGameUserInterface()->getCurrentMove();       // Get move from keyboard input
+   Move *theMove = mUi->getCurrentMove();       // Get move from keyboard input
 
    // Overwrite theMove if we're using joystick (also does some other essential joystick stuff)
    // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
@@ -589,7 +603,7 @@ void ClientGame::idle(U32 timeDelta)
    }
 
    processDeleteList(timeDelta);                         // Delete any objects marked for deletion
-   FXManager::idle(timeDelta);                           // Processes sparks and teleporter effects
+   
    SoundSystem::processAudio(timeDelta, mSettings->getIniSettings()->sfxVolLevel,
          mSettings->getIniSettings()->getMusicVolLevel(),
          mSettings->getIniSettings()->voiceChatVolLevel,
@@ -650,7 +664,7 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
    {
       // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
       // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
-      if(getUIManager()->getGameUserInterface()->isInScoreboardMode())
+      if(mUi->isInScoreboardMode())
          mGameType->c2sRequestScoreboardUpdates(true);
 
       if(showMessage)
@@ -692,12 +706,6 @@ void ClientGame::onGameOver()
 
    // Kill any objects lingering in the database, such as forcefields
    getGameObjDatabase()->removeEverythingFromDatabase();    
-}
-
-
-void ClientGame::toggleShowDebugBots()
-{
-   mShowDebugBots = !mShowDebugBots;
 }
 
 
@@ -752,7 +760,7 @@ void ClientGame::displayMessage(const Color &msgColor, const char *format, ...)
    vsnprintf(message, sizeof(message), format, args); 
    va_end(args);
     
-   getUIManager()->getGameUserInterface()->displayMessage(msgColor, message);
+   mUi->displayMessage(msgColor, message);
 }
 
 
@@ -805,13 +813,13 @@ void ClientGame::gotQueryResponse(const Address &address, const Nonce &nonce, co
 
 void ClientGame::shutdownInitiated(U16 time, const StringTableEntry &name, const StringPtr &reason, bool originator)
 {
-   getUIManager()->getGameUserInterface()->shutdownInitiated(time, name, reason, originator);
+   mUi->shutdownInitiated(time, name, reason, originator);
 }
 
 
 void ClientGame::cancelShutdown() 
 { 
-   getUIManager()->getGameUserInterface()->cancelShutdown(); 
+   mUi->cancelShutdown(); 
 }
 
 
@@ -855,7 +863,7 @@ void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
       case EngineerEventTurretBuilt:         // fallthrough ok
       case EngineerEventForceFieldBuilt:
       case EngineerEventTeleporterExitBuilt:
-         getUIManager()->getGameUserInterface()->exitHelper();
+         mUi->exitHelper();
          break;
 
       case EngineerEventTeleporterEntranceBuilt:
@@ -1310,7 +1318,7 @@ void ClientGame::displayErrorMessage(const char *format, ...)
    vsnprintf(message, sizeof(message), format, args);
    va_end(args);
 
-   getUIManager()->getGameUserInterface()->displayErrorMessage(message);
+   mUi->displayErrorMessage(message);
 }
 
 
@@ -1325,7 +1333,7 @@ void ClientGame::displaySuccessMessage(const char *format, ...)
    vsnprintf(message, sizeof(message), format, args);
    va_end(args);
 
-   getUIManager()->getGameUserInterface()->displaySuccessMessage(message);
+   mUi->displaySuccessMessage(message);
 }
 
 // Fire keyboard event to suppress screen saver
@@ -1351,17 +1359,6 @@ void ClientGame::supressScreensaver()
    SendInput(1, array, sizeof(INPUT));
 #endif
 }
-
-
-bool ClientGame::isShowingDebugShipCoords() const { return mDebugShowShipCoords;                  }
-void ClientGame::toggleShowingShipCoords()        { mDebugShowShipCoords = !mDebugShowShipCoords; }
-
-bool ClientGame::isShowingDebugObjectIds()  const { return mDebugShowObjectIds;                   }
-void ClientGame::toggleShowingObjectIds()         { mDebugShowObjectIds = !mDebugShowObjectIds;   }
-  
-  
-bool ClientGame::isShowingDebugMeshZones()  const { return mDebugShowMeshZones;                   }
-void ClientGame::toggleShowingMeshZones()         { mDebugShowMeshZones = !mDebugShowMeshZones;   }
 
 
 Ship *ClientGame::findShip(const StringTableEntry &clientName)
@@ -1403,12 +1400,6 @@ void ClientGame::zoomCommanderMap()
       else
          conn->c2sReleaseCommanderMap();
    }
-}
-
-
-S32 QSORT_CALLBACK renderSortCompare(BfObject **a, BfObject **b)
-{
-   return (*a)->getRenderSortValue() - (*b)->getRenderSortValue();
 }
 
 
@@ -1485,201 +1476,6 @@ Point ClientGame::worldToScreenPoint(const Point *point) const
 }
 
 
-void ClientGame::renderSuspended()
-{
-   glColor(Colors::yellow);
-   S32 textHeight = 20;
-   S32 textGap = 5;
-   S32 ypos = gScreenInfo.getGameCanvasHeight() / 2 - 3 * (textHeight + textGap);
-
-   drawCenteredString(ypos, textHeight, "==> Game is currently suspended, waiting for other players <==");
-   ypos += textHeight + textGap;
-   drawCenteredString(ypos, textHeight, "When another player joins, the game will start automatically.");
-   ypos += textHeight + textGap;
-   drawCenteredString(ypos, textHeight, "When the game restarts, the level will be reset.");
-   ypos += 2 * (textHeight + textGap);
-   drawCenteredString(ypos, textHeight, "Press <SPACE> to resume playing now");
-}
-
-
-static Vector<DatabaseObject *> rawRenderObjects;
-static Vector<BfObject *> renderObjects;
-static Vector<BotNavMeshZone *> renderZones;
-
-
-static void fillRenderZones()
-{
-   renderZones.clear();
-   for(S32 i = 0; i < rawRenderObjects.size(); i++)
-      renderZones.push_back(static_cast<BotNavMeshZone *>(rawRenderObjects[i]));
-}
-
-// Fills renderZones for drawing botNavMeshZones
-static void populateRenderZones()
-{
-   rawRenderObjects.clear();
-   BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
-   fillRenderZones();
-}
-
-
-static void populateRenderZones(const Rect extentRect)
-{
-   rawRenderObjects.clear();
-   BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, extentRect);
-   fillRenderZones();
-}
-
-
-void ClientGame::renderCommander()
-{
-   F32 zoomFrac = getCommanderZoomFraction();
-   
-   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-
-   Point worldExtents = (getUIManager()->getGameUserInterface()->mShowProgressBar ? getGameType()->mViewBoundsWhileLoading : 
-                                                                                    mWorldExtents).getExtents();
-
-   worldExtents.x *= canvasWidth  / F32(canvasWidth  - (UserInterface::horizMargin * 2));
-   worldExtents.y *= canvasHeight / F32(canvasHeight - (UserInterface::vertMargin * 2));
-
-   F32 aspectRatio = worldExtents.x / worldExtents.y;
-   F32 screenAspectRatio = F32(canvasWidth) / F32(canvasHeight);
-
-   if(aspectRatio > screenAspectRatio)
-      worldExtents.y *= aspectRatio / screenAspectRatio;
-   else
-      worldExtents.x *= screenAspectRatio / aspectRatio;
-
-   glPushMatrix();
-
-   BfObject *controlObject = mConnectionToServer->getControlObject();
-   Ship *ship = NULL;
-   if(controlObject && controlObject->getObjectTypeNumber() == PlayerShipTypeNumber)
-      ship = static_cast<Ship *>(controlObject);      // This is the local player's ship
-   
-   Point position = ship ? ship->getRenderPos() : Point(0,0);
-
-   Point visSize = ship ? computePlayerVisArea(ship) * 2 : worldExtents;
-   Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
-
-   // Put (0,0) at the center of the screen
-   glTranslatef(gScreenInfo.getGameCanvasWidth() * 0.5f, gScreenInfo.getGameCanvasHeight() * 0.5f, 0);    
-
-   glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
-
-   Point offset = (mWorldExtents.getCenter() - position) * zoomFrac + position;
-   glTranslatef(-offset.x, -offset.y, 0);
-
-   // zoomFrac == 1.0 when fully zoomed out to cmdr's map
-   if(zoomFrac < 0.95)
-      drawStars(mStars, NumStars, 1 - zoomFrac, mSettings->getStarsInDistance(), offset, modVisSize);
- 
-
-   // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
-   // walls -- those will be rendered separately.
-   rawRenderObjects.clear();
-
-   if(ship && ship->hasModule(ModuleSensor))
-      mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
-   else
-      mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
-
-   renderObjects.clear();
-
-   // Copy rawRenderObjects into renderObjects
-   for(S32 i = 0; i < rawRenderObjects.size(); i++)
-      renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
-
-   // Add extra bots if we're showing them
-   if(mShowDebugBots)
-      for(S32 i = 0; i < getBotCount(); i++)
-         renderObjects.push_back(getBot(i));
-
-   // If we're drawing bot zones, get them now (put them in the renderZones vector)
-   if(mDebugShowMeshZones)
-      populateRenderZones();
-
-   if(ship)
-   {
-      // Get info about the current player
-      GameType *gt = getGameType();
-      S32 playerTeam = -1;
-
-      if(gt)
-      {
-         playerTeam = ship->getTeam();
-         Color teamColor = *ship->getColor();
-
-         for(S32 i = 0; i < renderObjects.size(); i++)
-         {
-            // Render ship visibility range, and that of our teammates
-            if(isShipType(renderObjects[i]->getObjectTypeNumber()))
-            {
-               Ship *otherShip = static_cast<Ship *>(renderObjects[i]);
-
-               // Get team of this object
-               S32 otherShipTeam = otherShip->getTeam();
-               if((otherShipTeam == playerTeam && getGameType()->isTeamGame()) || otherShip == ship)  // On our team (in team game) || the ship is us
-               {
-                  Point p = otherShip->getRenderPos();
-                  Point visExt = computePlayerVisArea(otherShip);
-
-                  glColor(teamColor * zoomFrac * 0.35f);
-                  drawFilledRect(p.x - visExt.x, p.y - visExt.y, p.x + visExt.x, p.y + visExt.y);
-               }
-            }
-         }
-
-         const Vector<DatabaseObject *> *spyBugs = mGameObjDatabase->findObjects_fast(SpyBugTypeNumber);
-
-         // Render spy bug visibility range second, so ranges appear above ship scanner range
-         for(S32 i = 0; i < spyBugs->size(); i++)
-         {
-            SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
-
-            if(sb->isVisibleToPlayer(playerTeam, getGameType()->isTeamGame()))
-            {
-               renderSpyBugVisibleRange(sb->getRenderPos(), teamColor);
-               glColor(teamColor * 0.8f);     // Draw a marker in the middle
-               drawCircle(sb->getRenderPos(), 2);
-            }
-         }
-      }
-   }
-
-   // Now render the objects themselves
-   renderObjects.sort(renderSortCompare);
-
-   if(mDebugShowMeshZones)
-      for(S32 i = 0; i < renderZones.size(); i++)
-         renderZones[i]->render(0);
-
-   // First pass
-   for(S32 i = 0; i < renderObjects.size(); i++)
-      renderObjects[i]->render(0);
-
-   // Second pass
-   Barrier::renderEdges(1, *mSettings->getWallOutlineColor());    // Render wall edges
-
-   if(mDebugShowMeshZones)
-      for(S32 i = 0; i < renderZones.size(); i++)
-         renderZones[i]->render(1);
-
-   for(S32 i = 0; i < renderObjects.size(); i++)
-   {
-      // Keep our spy bugs from showing up on enemy commander maps, even if they're known
- //     if(!(renderObjects[i]->getObjectTypeMask() & SpyBugType && playerTeam != renderObjects[i]->getTeam()))
-         renderObjects[i]->render(1);
-   }
-
-   getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
-
-   glPopMatrix();
-}
-
-
 void ClientGame::resetZoomDelta()
 {
    mCommanderZoomDelta = CommanderMapZoomTime;
@@ -1692,187 +1488,6 @@ void ClientGame::clearZoomDelta()
 }
 
 
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-// This is a test of a partial map overlay to assist in navigation
-// still needs work, and early indications are that it is not
-// a beneficial addition to the game.
-
-void ClientGame::renderOverlayMap()
-{
-   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-
-   BfObject *controlObject = mConnectionToServer->getControlObject();
-   Ship *ship = static_cast<Ship *>(controlObject);
-
-   Point position = ship->getRenderPos();
-
-   S32 mapWidth = canvasWidth / 4;
-   S32 mapHeight = canvasHeight / 4;
-   S32 mapX = UserInterface::horizMargin;        // This may need to the the UL corner, rather than the LL one
-   S32 mapY = canvasHeight - UserInterface::vertMargin - mapHeight;
-   F32 mapScale = 0.1f;
-
-   F32 vertices[] = {
-         mapX, mapY,
-         mapX, mapY + mapHeight,
-         mapX + mapWidth, mapY + mapHeight,
-         mapX + mapWidth, mapY
-   };
-   renderVertexArray(vertices, 4, GL_LINE_LOOP);
-
-
-   glEnable(GL_SCISSOR_BOX);                    // Crop to overlay map display area
-   glScissor(mapX, mapY + mapHeight, mapWidth, mapHeight);  // Set cropping window
-
-   glPushMatrix();   // Set scaling and positioning of the overlay
-
-   glTranslatef(mapX + mapWidth / 2.f, mapY + mapHeight / 2.f, 0);          // Move map off to the corner
-   glScalef(mapScale, mapScale, 1);                                     // Scale map
-   glTranslatef(-position.x, -position.y, 0);                           // Put ship at the center of our overlay map area
-
-   // Render the objects.  Start by putting all command-map-visible objects into renderObjects
-   Rect mapBounds(position, position);
-   mapBounds.expand(Point(mapWidth * 2, mapHeight * 2));      //TODO: Fix
-
-   rawRenderObjects.clear();
-   if(/*ship->isModulePrimaryActive(ModuleSensor)*/true)
-      mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
-   else
-      mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
-
-   renderObjects.clear();
-   for(S32 i = 0; i < rawRenderObjects.size(); i++)
-      renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
-
-
-   renderObjects.sort(renderSortCompare);
-
-   for(S32 i = 0; i < renderObjects.size(); i++)
-      renderObjects[i]->render(0);
-
-   for(S32 i = 0; i < renderObjects.size(); i++)
-      // Keep our spy bugs from showing up on enemy commander maps, even if they're known
- //     if(!(renderObjects[i]->getObjectTypeMask() & SpyBugType && playerTeam != renderObjects[i]->getTeam()))
-         renderObjects[i]->render(1);
-
-   glPopMatrix();
-   glDisable(GL_SCISSOR_BOX);     // Stop cropping
-}
-
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-
-// ==> should move render to UIGame?  TODO: YES
-
-static Point screenSize, position, visExt;
-
-
-void ClientGame::renderNormal()
-{
-   // Here we determine if we have a control ship.
-   // If not (like after we've been killed), we'll still render the current position and things
-   Ship *ship = NULL;
-
-   if(hasValidControlObject())
-   {
-      BfObject *object = mConnectionToServer->getControlObject();
-      if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
-         return;
-
-      ship = static_cast<Ship *>(object);  // This is the local player's ship
-
-      position.set(ship->getRenderPos());
-   }
-
-   glPushMatrix();
-
-   // Put (0,0) at the center of the screen
-   glTranslatef(gScreenInfo.getGameCanvasWidth() / 2.f, gScreenInfo.getGameCanvasHeight() / 2.f, 0);       
-
-   if(ship)
-      visExt = computePlayerVisArea(ship);
-
-   glScalef((gScreenInfo.getGameCanvasWidth()  / 2) / visExt.x, 
-            (gScreenInfo.getGameCanvasHeight() / 2) / visExt.y, 1);
-
-   glTranslatef(-position.x, -position.y, 0);
-
-   drawStars(mStars, NumStars, 1.0, mSettings->getStarsInDistance(), position, visExt * 2);
-
-   // Render all the objects the player can see
-   screenSize.set(visExt);
-   Rect extentRect(position - screenSize, position + screenSize);
-
-   rawRenderObjects.clear();
-   mGameObjDatabase->findObjects((TestFunc)isAnyObjectType, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
-
-   renderObjects.clear();
-   for(S32 i = 0; i < rawRenderObjects.size(); i++)
-      renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
-
-   // Normally a big no-no, we'll access the server's bot zones directly if we are running locally so we can visualize them without bogging
-   // the game down with the normal process of transmitting zones from server to client.  The result is that we can only see zones on our local
-   // server.
-   if(mDebugShowMeshZones)
-      populateRenderZones(extentRect);
-
-
-   if(mShowDebugBots)
-      for(S32 i = 0; i < getBotCount(); i++)
-         renderObjects.push_back(getBot(i));
-
-   renderObjects.sort(renderSortCompare);
-
-   // Render in three passes, to ensure some objects are drawn above others
-   for(S32 j = -1; j < 2; j++)
-   {
-      Barrier::renderEdges(j, *mSettings->getWallOutlineColor());    // Render wall edges
-
-      if(mDebugShowMeshZones)
-         for(S32 i = 0; i < renderZones.size(); i++)
-            renderZones[i]->render(j);
-
-      for(S32 i = 0; i < renderObjects.size(); i++)
-         renderObjects[i]->render(j);
-
-      FXManager::render(j);
-   }
-
-   FXTrail::renderTrails();
-
-   getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
-
-   // Again, we'll be accessing the server's data directly so we can see server-side item ids directly on the client.  Again,
-   // the result is that we can only see zones on our local server.
-   if(mDebugShowObjectIds)
-      getUIManager()->getGameUserInterface()->renderObjectIds();
-
-   glPopMatrix();
-
-   // Render current ship's energy
-   if(ship)
-      renderEnergyGuage(ship->mEnergy);   
-
-   //renderOverlayMap();     // Draw a floating overlay map
-}
-
-
 void ClientGame::render()
 {
    UIID currentUI = mUIManager->getCurrentUI()->getMenuID();
@@ -1882,13 +1497,13 @@ void ClientGame::render()
       return;
 
    // Start of the level, we only show progress bar
-   if(getUIManager()->getGameUserInterface()->mShowProgressBar)
+   if(mUi->mShowProgressBar)
       return;
 
    if(mCommanderZoomDelta > 0)
-      renderCommander();
+      mUi->renderCommander(this);
    else
-      renderNormal();
+      mUi->renderNormal(this);
 }
 
 
@@ -1990,7 +1605,7 @@ AbstractTeam *ClientGame::getNewTeam()
 
 void ClientGame::setSelectedEngineeredObject(U32 objectType)
 {
-   getUIManager()->getGameUserInterface()->setSelectedEngineeredObject(objectType);
+   mUi->setSelectedEngineeredObject(objectType);
 }
 
 };

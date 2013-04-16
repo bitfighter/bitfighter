@@ -63,15 +63,18 @@ Rect::Rect()
    set(Point(), Point());
 }
 
+
 Rect::Rect(const Point &p1, const Point &p2)
 {
    set(p1, p2);
 }
 
+
 Rect::Rect(F32 x1, F32 y1, F32 x2, F32 y2)
 {
    set(Point(x1, y1), Point(x2, y2));
 }
+
 
 // Takes centerpoint and "diameter"
 Rect::Rect(const Point &p, member_type diameter)
@@ -79,11 +82,19 @@ Rect::Rect(const Point &p, member_type diameter)
    set(p, diameter);
 }
 
+
+Rect::Rect(const Rect *r)
+{
+   set(*r);
+}
+
+
 // Construct as a bounding box around multiple points
 Rect::Rect(const Vector<Point> &p)
 {
    set(p);
 }
+
 
 Point Rect::getCenter() const
 {

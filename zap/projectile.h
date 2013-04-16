@@ -319,7 +319,7 @@ private:
    void emitMovementSparks();
 
 #ifndef ZAP_DEDICATED
-   FXTrail mTrail;
+   UI::FxTrail mTrail;
 #endif
 
 

@@ -1434,7 +1434,6 @@ int main(int argc, char **argv)
    else
    {
 #ifndef ZAP_DEDICATED
-      createClientGame(settings);         // Instantiate ClietGame
 
       InputCodeManager::resetStates();    // Reset keyboard state mapping to show no keys depressed
 
@@ -1450,7 +1449,6 @@ int main(int argc, char **argv)
 
       VideoSystem::init();                // Initialize video and window system
 
-
 #if SDL_VERSION_ATLEAST(2,0,0)
       SDL_StartTextInput();
 #else
@@ -1462,6 +1460,11 @@ int main(int argc, char **argv)
 
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
       VideoSystem::actualizeScreenMode(settings, false, false);            // Create a display window
+
+      // Instantiate ClietGame -- this should be done after actualizeScreenMode() because the client game in turn instantiates some of the
+      // user interface code which triggers a long series of cascading events culminating in something somewhere determining the width
+      // of a string.  Which will crash if the fonts haven't been loaded, which happens as part of actualizeScreenMode.  So there.
+      createClientGame(settings);         
 
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
 

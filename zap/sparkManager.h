@@ -28,20 +28,15 @@
 
 #include "Point.h"
 #include "Color.h"
+#include "SparkTypesEnum.h"
+
 #include "tnlVector.h"
 
-namespace Zap
+namespace Zap { namespace UI
 {
 
-class FXManager
+class FxManager
 {
-   enum SparkType
-   {
-      SparkTypePoint = 0,
-      SparkTypeLine,
-      SparkTypeCount
-   };
-
    struct Spark
    {
       Point pos;
@@ -96,24 +91,23 @@ class FXManager
    Spark gSparks[SparkTypeCount][MAX_SPARKS];     // Our sparks themselves... two types, each with room for MAX_SPARKS
 
 public:
-   FXManager();
-   virtual ~FXManager();
+   FxManager();
+   virtual ~FxManager();
    void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl = 0, SparkType = SparkTypePoint);
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2);
    void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2, U32 count);
    void emitBlast(const Point &pos, U32 size);
-
    void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);
-   void emitTextEffect(string text, Color color, Point pos);
+   void emitTextEffect(const string &text, const Color &color, const Point &pos);
+   void emitTeleportInEffect(const Point &pos, U32 type);
 
-   void emitTeleportInEffect(Point pos, U32 type);
    void idle(U32 timeDelta);
-   void render(S32 renderPass);
+   void render(S32 renderPass, F32 commanderZoomFraction);
    void clearSparks();
 };
 
-class FXTrail
+class FxTrail
 {
 public:
    enum TrailProfile {
@@ -137,15 +131,15 @@ private:
    U32 mDropFreq;
    S32 mLength;
 
-   FXTrail *mNext;
+   FxTrail *mNext;
 
-   static FXTrail *mHead;
+   static FxTrail *mHead;
    void registerTrail();
    void unregisterTrail();
 
 public:
-   FXTrail(U32 dropFrequency = 32, U32 len = 15);
-   ~FXTrail();
+   FxTrail(U32 dropFrequency = 32, U32 len = 15);
+   ~FxTrail();
 
    /// Update the point this trail is attached to.
    void update(Point pos, TrailProfile profile);
@@ -161,7 +155,7 @@ public:
    static void renderTrails();
 };
 
-};
+}  }     // Nested namespace
 
 #endif
 

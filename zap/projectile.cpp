@@ -1579,7 +1579,7 @@ void Seeker::emitMovementSparks()
 
    emissionPoint *= warpInScale;
  
-   mTrail.update(getRenderPos() + emissionPoint, FXTrail::Seeker);
+   mTrail.update(getRenderPos() + emissionPoint, UI::FxTrail::Seeker);
 
 #endif
 }

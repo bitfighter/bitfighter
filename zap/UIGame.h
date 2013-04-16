@@ -37,6 +37,8 @@
 #include "LoadoutIndicator.h"
 #include "TimeLeftRenderer.h"
 #include "FpsRenderer.h"
+#include "sparkManager.h"
+
 
 namespace Zap
 {
@@ -127,6 +129,9 @@ private:
    TimeLeftRenderer mTimeLeftRenderer;
    UI::FpsRenderer mFpsRenderer;
 
+   Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
+
+
    Timer mShutdownTimer;
 
    bool mMissionOverlayActive;      // Are game instructions (F2) visible?
@@ -137,10 +142,24 @@ private:
       Canceled                // Was shutting down, but are no longer
    };
 
+
+   UI::FxManager mFxManager;
+
+   static const S32 NumStars = 256;    // 256 stars should be enough for anybody!   -- Bill Gates
+   Point mStars[NumStars];
+   void prepareStars();
+
    U32 mChatCursorPos;        // Position of composition cursor
 
    bool mInScoreboardMode;
    ShutdownMode mShutdownMode;
+
+
+   bool mDebugShowShipCoords;       // Show coords on ship?
+   bool mDebugShowObjectIds;        // Show object ids?
+   bool mDebugShowMeshZones;        // Show bot nav mesh zones?
+   bool mShowDebugBots;
+
 
    // Some rendering routines
    void renderScoreboard();
@@ -236,6 +255,9 @@ public:
 
    void resetInputModeChangeAlertDisplayTimer(U32 timeInMs);
 
+   void setViewBoundsWhileLoading(F32 lx, F32 ly, F32 ux, F32 uy);   
+
+
    void render();                   // Render game screen
   
    void renderReticle();            // Render crosshairs
@@ -248,6 +270,24 @@ public:
    void renderObjectIds();          // Render server-side object ids on client
 
    bool isChatting();               // Returns true if player is composing a chat message
+
+
+   void toggleShowingShipCoords();
+   void toggleShowingObjectIds();  
+   void toggleShowingMeshZones();  
+   void toggleShowDebugBots();
+
+   bool isShowingDebugShipCoords() const;
+
+   // FxManager passthroughs
+   void clearSparks();
+   void emitBlast(const Point &pos, U32 size);
+   void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2);
+   void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);
+   void emitTextEffect(const string &text, const Color &color, const Point &pos);
+   void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType);
+   void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
+   void emitTeleportInEffect(const Point &pos, U32 type);
 
    
    void renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible);
@@ -296,6 +336,12 @@ public:
 
    void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd = false);  
    void exitHelper();
+
+   void renderNormal(ClientGame *game);    // Render game in normal play mode
+   void renderCommander(ClientGame *game); // Render game in commander's map mode
+   void renderSuspended();             // Render suspended game
+
+   void renderOverlayMap();            // Render the overlay map in normal play mode
 
    void renderEngineeredItemDeploymentMarker(Ship *ship);
 

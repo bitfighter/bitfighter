@@ -37,11 +37,10 @@
 
 using namespace TNL;
 
-namespace Zap
-{
+namespace Zap { namespace UI {
 
 
-FXManager::FXManager()
+FxManager::FxManager()
 {
    for(U32 i = 0; i < SparkTypeCount; i++)
    {
@@ -52,14 +51,14 @@ FXManager::FXManager()
 }
 
 
-FXManager::~FXManager()
+FxManager::~FxManager()
 {
    // Do nothing
 }
 
 
 // Create a new spark.   ttl = Time To Live (milliseconds)
-void FXManager::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, SparkType sparkType)
+void FxManager::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType)
 {
    Spark *s;
    Spark *s2;
@@ -111,7 +110,7 @@ void FXManager::emitSpark(const Point &pos, const Point &vel, const Color &color
 #define rd(x) radiansToDegrees(x)
 
 
-void FXManager::DebrisChunk::idle(U32 timeDelta)
+void FxManager::DebrisChunk::idle(U32 timeDelta)
 {
    F32 dT = F32(timeDelta) * 0.001f;      // Convert timeDelta to seconds
 
@@ -121,7 +120,7 @@ void FXManager::DebrisChunk::idle(U32 timeDelta)
 }
 
 
-void FXManager::DebrisChunk::render()
+void FxManager::DebrisChunk::render()
 {
    glPushMatrix();
 
@@ -140,7 +139,7 @@ void FXManager::DebrisChunk::render()
 }
 
 
-void FXManager::TextEffect::idle(U32 timeDelta)
+void FxManager::TextEffect::idle(U32 timeDelta)
 {
    F32 dTsecs = F32(timeDelta) * 0.001f;     // Convert timeDelta to seconds
 
@@ -152,7 +151,7 @@ void FXManager::TextEffect::idle(U32 timeDelta)
 }
 
 
-void FXManager::TextEffect::render()
+void FxManager::TextEffect::render()
 {
    F32 alpha = 1;
    if(ttl < 300)
@@ -170,7 +169,7 @@ void FXManager::TextEffect::render()
 }
 
 
-void FXManager::emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation)
+void FxManager::emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation)
 {
    DebrisChunk debrisChunk;
 
@@ -186,7 +185,7 @@ void FXManager::emitDebrisChunk(const Vector<Point> &points, const Color &color,
 }
 
 
-void FXManager::emitTextEffect(string text, Color color, Point pos)
+void FxManager::emitTextEffect(const string &text, const Color &color, const Point &pos)
 {
    TextEffect textEffect;
 
@@ -203,7 +202,7 @@ void FXManager::emitTextEffect(string text, Color color, Point pos)
 }
 
 
-struct FXManager::TeleporterEffect
+struct FxManager::TeleporterEffect
 {
    Point pos;
    S32 time;
@@ -212,7 +211,7 @@ struct FXManager::TeleporterEffect
 };
 
 
-void FXManager::emitTeleportInEffect(Point pos, U32 type)
+void FxManager::emitTeleportInEffect(const Point &pos, U32 type)
 {
    TeleporterEffect *e = new TeleporterEffect;
 
@@ -224,7 +223,7 @@ void FXManager::emitTeleportInEffect(Point pos, U32 type)
 }
 
 
-void FXManager::idle(U32 timeDelta)
+void FxManager::idle(U32 timeDelta)
 {
    F32 dTsecs = timeDelta * .001f;
 
@@ -302,12 +301,8 @@ void FXManager::idle(U32 timeDelta)
 }
 
 
-void FXManager::render(S32 renderPass)
+void FxManager::render(S32 renderPass, F32 commanderZoomFraction)
 {
-   TNLAssert(dynamic_cast<ClientGame *>(this), "Not a ClientGame");
-   ClientGame *clientGame = static_cast<ClientGame *>(this);
-   F32 commanderZoomFraction = clientGame->getCommanderZoomFraction();
-
    // The teleporter effects should render under the ships and such
    if(renderPass == 0)
    {
@@ -359,7 +354,7 @@ void FXManager::render(S32 renderPass)
 
 
 // Create a circular pattern of long sparks, a-la bomb in Gridwars
-void FXManager::emitBlast(const Point &pos, U32 size)
+void FxManager::emitBlast(const Point &pos, U32 size)
 {
    const F32 speed = 800.0f;
    for(U32 i = 0; i < 360; i+=1)
@@ -372,7 +367,7 @@ void FXManager::emitBlast(const Point &pos, U32 size)
 }
 
 
-void FXManager::emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors)
+void FxManager::emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors)
 {
    for(U32 i = 0; i < (250.0 * size); i++)
    {
@@ -385,13 +380,13 @@ void FXManager::emitExplosion(const Point &pos, F32 size, const Color *colorArra
 }
 
 
-void FXManager::emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2)
+void FxManager::emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2)
 {
    emitBurst(pos, scale, color1, color2, 250);
 }
 
 
-void FXManager::emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2, U32 sparkCount)
+void FxManager::emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2, U32 sparkCount)
 {
    F32 size = 1;
 
@@ -414,7 +409,7 @@ void FXManager::emitBurst(const Point &pos, const Point &scale, const Color &col
 }
 
 
-void FXManager::clearSparks()
+void FxManager::clearSparks()
 {
    // Remove all sparks
    for(U32 j = 0; j < SparkTypeCount; j++)
@@ -429,7 +424,7 @@ void FXManager::clearSparks()
 
 //-----------------------------------------------------------------------------
 
-FXTrail::FXTrail(U32 dropFrequency, U32 len)
+FxTrail::FxTrail(U32 dropFrequency, U32 len)
 {
    mDropFreq = dropFrequency;
    mLength   = len;
@@ -437,13 +432,13 @@ FXTrail::FXTrail(U32 dropFrequency, U32 len)
 }
 
 
-FXTrail::~FXTrail()
+FxTrail::~FxTrail()
 {
    unregisterTrail();
 }
 
 
-void FXTrail::update(Point pos, TrailProfile profile)
+void FxTrail::update(Point pos, TrailProfile profile)
 {
    if(mNodes.size() < mLength)
    {
@@ -462,7 +457,7 @@ void FXTrail::update(Point pos, TrailProfile profile)
 }
 
 
-void FXTrail::idle(U32 timeDelta)
+void FxTrail::idle(U32 timeDelta)
 {
    if(mNodes.size() == 0)
       return;
@@ -473,11 +468,11 @@ void FXTrail::idle(U32 timeDelta)
 }
 
 
-void FXTrail::render()
+void FxTrail::render()
 {
    // Largest node size found was 15; I chose buffer of 32
-   static F32 fxTrailVertexArray[64];     // 2 coordinates per node
-   static F32 fxTrailColorArray[128];     // 4 colors components per node
+   static F32 FxTrailVertexArray[64];     // 2 coordinates per node
+   static F32 FxTrailColorArray[128];     // 4 colors components per node
 
    for(S32 i = 0; i < mNodes.size(); i++)
    {
@@ -511,27 +506,27 @@ void FXTrail::render()
             break;
       }
 
-      fxTrailColorArray[(4*i) + 0] = r - rFade * t;
-      fxTrailColorArray[(4*i) + 1] = g - gFade * t;
-      fxTrailColorArray[(4*i) + 2] = b - bFade * t;
-      fxTrailColorArray[(4*i) + 3] = a - aFade * t;
+      FxTrailColorArray[(4*i) + 0] = r - rFade * t;
+      FxTrailColorArray[(4*i) + 1] = g - gFade * t;
+      FxTrailColorArray[(4*i) + 2] = b - bFade * t;
+      FxTrailColorArray[(4*i) + 3] = a - aFade * t;
 
 
-      fxTrailVertexArray[(2*i) + 0] = mNodes[i].pos.x;
-      fxTrailVertexArray[(2*i) + 1] = mNodes[i].pos.y;
+      FxTrailVertexArray[(2*i) + 0] = mNodes[i].pos.x;
+      FxTrailVertexArray[(2*i) + 1] = mNodes[i].pos.y;
    }
 
-   renderColorVertexArray(fxTrailVertexArray, fxTrailColorArray, mNodes.size(), GL_LINE_STRIP);
+   renderColorVertexArray(FxTrailVertexArray, FxTrailColorArray, mNodes.size(), GL_LINE_STRIP);
 }
 
 
-void FXTrail::reset()
+void FxTrail::reset()
 {
    mNodes.clear();
 }
 
 
-Point FXTrail::getLastPos()
+Point FxTrail::getLastPos()
 {
    if(mNodes.size())
    {
@@ -542,20 +537,20 @@ Point FXTrail::getLastPos()
 }
 
 
-FXTrail * FXTrail::mHead = NULL;
+FxTrail * FxTrail::mHead = NULL;
 
-void FXTrail::registerTrail()
+void FxTrail::registerTrail()
 {
-   FXTrail *n = mHead;
+   FxTrail *n = mHead;
    mHead = this;
    mNext = n;
 }
 
 
-void FXTrail::unregisterTrail()
+void FxTrail::unregisterTrail()
 {
    // Find ourselves in the list (lame O(n) solution)
-   FXTrail *w = mHead, *p = NULL;
+   FxTrail *w = mHead, *p = NULL;
    while(w)
    {
       if(w == this)
@@ -575,11 +570,11 @@ void FXTrail::unregisterTrail()
 }
 
 
-void FXTrail::renderTrails()
+void FxTrail::renderTrails()
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-   FXTrail *w = mHead;
+   FxTrail *w = mHead;
    while(w)
    {
       w->render();
@@ -587,6 +582,6 @@ void FXTrail::renderTrails()
    }
 }
 
-};
+} } // Nexted namespace
 
 
