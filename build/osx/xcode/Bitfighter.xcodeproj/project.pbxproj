@@ -231,6 +231,22 @@
 		73B0FC1D1370ABB70019AE4E /* OpenAL-Soft.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73B0FB5C1370A9F80019AE4E /* OpenAL-Soft.framework */; };
 		73B0FC341370ABE80019AE4E /* ALURE.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7386B9F7136FE3000094A660 /* ALURE.framework */; };
 		73B0FC351370ABE80019AE4E /* OpenAL-Soft.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 73B0FB5C1370A9F80019AE4E /* OpenAL-Soft.framework */; };
+		73B1C2FF171CEA830007207A /* fontstash.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C2FB171CEA830007207A /* fontstash.c */; };
+		73B1C300171CEA830007207A /* stb_truetype.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C2FD171CEA830007207A /* stb_truetype.c */; };
+		73B1C328171CEAC40007207A /* AToBScroller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C30B171CEAC40007207A /* AToBScroller.cpp */; };
+		73B1C329171CEAC40007207A /* FontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C30D171CEAC40007207A /* FontManager.cpp */; };
+		73B1C32A171CEAC40007207A /* FpsRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C312171CEAC40007207A /* FpsRenderer.cpp */; };
+		73B1C32B171CEAC40007207A /* HelperManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C314171CEAC40007207A /* HelperManager.cpp */; };
+		73B1C32C171CEAC40007207A /* HttpRequest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C316171CEAC40007207A /* HttpRequest.cpp */; };
+		73B1C32D171CEAC40007207A /* LevelDatabaseDownloadThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C318171CEAC40007207A /* LevelDatabaseDownloadThread.cpp */; };
+		73B1C32E171CEAC40007207A /* LevelDatabaseUploadThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C31A171CEAC40007207A /* LevelDatabaseUploadThread.cpp */; };
+		73B1C32F171CEAC40007207A /* LoadoutIndicator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C31C171CEAC40007207A /* LoadoutIndicator.cpp */; };
+		73B1C330171CEAC40007207A /* LoadoutTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C31E171CEAC40007207A /* LoadoutTracker.cpp */; };
+		73B1C331171CEAC40007207A /* ScissorsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C320171CEAC40007207A /* ScissorsManager.cpp */; };
+		73B1C332171CEAC40007207A /* SlideOutWidget.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C322171CEAC40007207A /* SlideOutWidget.cpp */; };
+		73B1C333171CEAC40007207A /* TimeLeftRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C324171CEAC40007207A /* TimeLeftRenderer.cpp */; };
+		73B1C334171CEAC40007207A /* UILevelInfoDisplayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C326171CEAC40007207A /* UILevelInfoDisplayer.cpp */; };
+		73B1C36E171CEFE40007207A /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 73B1C365171CEFE40007207A /* fonts */; };
 		73B438FE13B2401700CA0A7A /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7379552E136E1C42003A660B /* CoreAudio.framework */; };
 		73B4390413B2403500CA0A7A /* hrtf.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B4390213B2403500CA0A7A /* hrtf.c */; };
 		73D2F3C412E2D7E800EA5EBE /* barrier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F28112E2D7E700EA5EBE /* barrier.cpp */; };
@@ -641,7 +657,6 @@
 		73851F6813ABF55000D88D2A /* Colors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Colors.h; path = ../../../zap/Colors.h; sourceTree = SOURCE_ROOT; };
 		73851F6913ABF55000D88D2A /* Event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Event.cpp; path = ../../../zap/Event.cpp; sourceTree = SOURCE_ROOT; };
 		73851F6A13ABF55000D88D2A /* Event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Event.h; path = ../../../zap/Event.h; sourceTree = SOURCE_ROOT; };
-		73851F6B13ABF55000D88D2A /* freeglut_stroke_roman.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = freeglut_stroke_roman.h; path = ../../../zap/freeglut_stroke_roman.h; sourceTree = SOURCE_ROOT; };
 		73851F6C13ABF55000D88D2A /* freeglut_stroke.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = freeglut_stroke.h; path = ../../../zap/freeglut_stroke.h; sourceTree = SOURCE_ROOT; };
 		73851F6D13ABF55000D88D2A /* OpenglUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenglUtils.cpp; path = ../../../zap/OpenglUtils.cpp; sourceTree = SOURCE_ROOT; };
 		73851F6E13ABF55000D88D2A /* OpenglUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenglUtils.h; path = ../../../zap/OpenglUtils.h; sourceTree = SOURCE_ROOT; };
@@ -839,6 +854,40 @@
 		73B0FBB81370AAD10019AE4E /* alThunk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alThunk.h; sourceTree = "<group>"; };
 		73B0FBB91370AAD10019AE4E /* alu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alu.h; sourceTree = "<group>"; };
 		73B0FBBA1370AAD10019AE4E /* bs2b.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bs2b.h; sourceTree = "<group>"; };
+		73B1C2FB171CEA830007207A /* fontstash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fontstash.c; sourceTree = "<group>"; };
+		73B1C2FC171CEA830007207A /* fontstash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fontstash.h; sourceTree = "<group>"; };
+		73B1C2FD171CEA830007207A /* stb_truetype.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = stb_truetype.c; sourceTree = "<group>"; };
+		73B1C2FE171CEA830007207A /* stb_truetype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_truetype.h; sourceTree = "<group>"; };
+		73B1C30B171CEAC40007207A /* AToBScroller.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AToBScroller.cpp; path = ../../../zap/AToBScroller.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C30C171CEAC40007207A /* AToBScroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AToBScroller.h; path = ../../../zap/AToBScroller.h; sourceTree = SOURCE_ROOT; };
+		73B1C30D171CEAC40007207A /* FontManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FontManager.cpp; path = ../../../zap/FontManager.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C30E171CEAC40007207A /* FontManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontManager.h; path = ../../../zap/FontManager.h; sourceTree = SOURCE_ROOT; };
+		73B1C30F171CEAC40007207A /* FontOrbitronLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontOrbitronLight.h; path = ../../../zap/FontOrbitronLight.h; sourceTree = SOURCE_ROOT; };
+		73B1C310171CEAC40007207A /* FontOrbitronMedium.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontOrbitronMedium.h; path = ../../../zap/FontOrbitronMedium.h; sourceTree = SOURCE_ROOT; };
+		73B1C311171CEAC40007207A /* FontStrokeRoman.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontStrokeRoman.h; path = ../../../zap/FontStrokeRoman.h; sourceTree = SOURCE_ROOT; };
+		73B1C312171CEAC40007207A /* FpsRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FpsRenderer.cpp; path = ../../../zap/FpsRenderer.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C313171CEAC40007207A /* FpsRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FpsRenderer.h; path = ../../../zap/FpsRenderer.h; sourceTree = SOURCE_ROOT; };
+		73B1C314171CEAC40007207A /* HelperManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HelperManager.cpp; path = ../../../zap/HelperManager.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C315171CEAC40007207A /* HelperManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HelperManager.h; path = ../../../zap/HelperManager.h; sourceTree = SOURCE_ROOT; };
+		73B1C316171CEAC40007207A /* HttpRequest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpRequest.cpp; path = ../../../zap/HttpRequest.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C317171CEAC40007207A /* HttpRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HttpRequest.h; path = ../../../zap/HttpRequest.h; sourceTree = SOURCE_ROOT; };
+		73B1C318171CEAC40007207A /* LevelDatabaseDownloadThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LevelDatabaseDownloadThread.cpp; path = ../../../zap/LevelDatabaseDownloadThread.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C319171CEAC40007207A /* LevelDatabaseDownloadThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LevelDatabaseDownloadThread.h; path = ../../../zap/LevelDatabaseDownloadThread.h; sourceTree = SOURCE_ROOT; };
+		73B1C31A171CEAC40007207A /* LevelDatabaseUploadThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LevelDatabaseUploadThread.cpp; path = ../../../zap/LevelDatabaseUploadThread.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C31B171CEAC40007207A /* LevelDatabaseUploadThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LevelDatabaseUploadThread.h; path = ../../../zap/LevelDatabaseUploadThread.h; sourceTree = SOURCE_ROOT; };
+		73B1C31C171CEAC40007207A /* LoadoutIndicator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LoadoutIndicator.cpp; path = ../../../zap/LoadoutIndicator.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C31D171CEAC40007207A /* LoadoutIndicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoadoutIndicator.h; path = ../../../zap/LoadoutIndicator.h; sourceTree = SOURCE_ROOT; };
+		73B1C31E171CEAC40007207A /* LoadoutTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LoadoutTracker.cpp; path = ../../../zap/LoadoutTracker.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C31F171CEAC40007207A /* LoadoutTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoadoutTracker.h; path = ../../../zap/LoadoutTracker.h; sourceTree = SOURCE_ROOT; };
+		73B1C320171CEAC40007207A /* ScissorsManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScissorsManager.cpp; path = ../../../zap/ScissorsManager.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C321171CEAC40007207A /* ScissorsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScissorsManager.h; path = ../../../zap/ScissorsManager.h; sourceTree = SOURCE_ROOT; };
+		73B1C322171CEAC40007207A /* SlideOutWidget.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SlideOutWidget.cpp; path = ../../../zap/SlideOutWidget.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C323171CEAC40007207A /* SlideOutWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlideOutWidget.h; path = ../../../zap/SlideOutWidget.h; sourceTree = SOURCE_ROOT; };
+		73B1C324171CEAC40007207A /* TimeLeftRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TimeLeftRenderer.cpp; path = ../../../zap/TimeLeftRenderer.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C325171CEAC40007207A /* TimeLeftRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TimeLeftRenderer.h; path = ../../../zap/TimeLeftRenderer.h; sourceTree = SOURCE_ROOT; };
+		73B1C326171CEAC40007207A /* UILevelInfoDisplayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UILevelInfoDisplayer.cpp; path = ../../../zap/UILevelInfoDisplayer.cpp; sourceTree = SOURCE_ROOT; };
+		73B1C327171CEAC40007207A /* UILevelInfoDisplayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UILevelInfoDisplayer.h; path = ../../../zap/UILevelInfoDisplayer.h; sourceTree = SOURCE_ROOT; };
+		73B1C365171CEFE40007207A /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = ../../../resource/fonts; sourceTree = SOURCE_ROOT; };
 		73B4390113B2403500CA0A7A /* hrtf_tables.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.pascal; name = hrtf_tables.inc; path = Alc/hrtf_tables.inc; sourceTree = "<group>"; };
 		73B4390213B2403500CA0A7A /* hrtf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = hrtf.c; path = Alc/hrtf.c; sourceTree = "<group>"; };
 		73B4BF00136A9D8600D5CAFF /* OpenAL-Soft-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OpenAL-Soft-Info.plist"; sourceTree = "<group>"; };
@@ -1356,6 +1405,7 @@
 		29B97314FDCFA39411CA2CEA /* Bitfighter */ = {
 			isa = PBXGroup;
 			children = (
+				73B1C2FA171CEA830007207A /* fontstash */,
 				73793C2516138CD6000E693E /* libmodplug */,
 				73A2B22213DE58630002EF92 /* libpng */,
 				73851EFA13ABF0FF00D88D2A /* libsdl */,
@@ -1384,6 +1434,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				73B1C365171CEFE40007207A /* fonts */,
 				6149CC6A161875A900783189 /* dsa_pub.pem */,
 				73846BC214CDD70D00A5553F /* editor_plugins */,
 				73A2B1F913DE57BD0002EF92 /* libpng-Info.plist */,
@@ -1851,9 +1902,50 @@
 			path = utils;
 			sourceTree = "<group>";
 		};
+		73B1C2FA171CEA830007207A /* fontstash */ = {
+			isa = PBXGroup;
+			children = (
+				73B1C2FB171CEA830007207A /* fontstash.c */,
+				73B1C2FC171CEA830007207A /* fontstash.h */,
+				73B1C2FD171CEA830007207A /* stb_truetype.c */,
+				73B1C2FE171CEA830007207A /* stb_truetype.h */,
+			);
+			name = fontstash;
+			path = ../../../fontstash;
+			sourceTree = SOURCE_ROOT;
+		};
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				73B1C30B171CEAC40007207A /* AToBScroller.cpp */,
+				73B1C30C171CEAC40007207A /* AToBScroller.h */,
+				73B1C30D171CEAC40007207A /* FontManager.cpp */,
+				73B1C30E171CEAC40007207A /* FontManager.h */,
+				73B1C30F171CEAC40007207A /* FontOrbitronLight.h */,
+				73B1C310171CEAC40007207A /* FontOrbitronMedium.h */,
+				73B1C311171CEAC40007207A /* FontStrokeRoman.h */,
+				73B1C312171CEAC40007207A /* FpsRenderer.cpp */,
+				73B1C313171CEAC40007207A /* FpsRenderer.h */,
+				73B1C314171CEAC40007207A /* HelperManager.cpp */,
+				73B1C315171CEAC40007207A /* HelperManager.h */,
+				73B1C316171CEAC40007207A /* HttpRequest.cpp */,
+				73B1C317171CEAC40007207A /* HttpRequest.h */,
+				73B1C318171CEAC40007207A /* LevelDatabaseDownloadThread.cpp */,
+				73B1C319171CEAC40007207A /* LevelDatabaseDownloadThread.h */,
+				73B1C31A171CEAC40007207A /* LevelDatabaseUploadThread.cpp */,
+				73B1C31B171CEAC40007207A /* LevelDatabaseUploadThread.h */,
+				73B1C31C171CEAC40007207A /* LoadoutIndicator.cpp */,
+				73B1C31D171CEAC40007207A /* LoadoutIndicator.h */,
+				73B1C31E171CEAC40007207A /* LoadoutTracker.cpp */,
+				73B1C31F171CEAC40007207A /* LoadoutTracker.h */,
+				73B1C320171CEAC40007207A /* ScissorsManager.cpp */,
+				73B1C321171CEAC40007207A /* ScissorsManager.h */,
+				73B1C322171CEAC40007207A /* SlideOutWidget.cpp */,
+				73B1C323171CEAC40007207A /* SlideOutWidget.h */,
+				73B1C324171CEAC40007207A /* TimeLeftRenderer.cpp */,
+				73B1C325171CEAC40007207A /* TimeLeftRenderer.h */,
+				73B1C326171CEAC40007207A /* UILevelInfoDisplayer.cpp */,
+				73B1C327171CEAC40007207A /* UILevelInfoDisplayer.h */,
 				73931AF616DAE15F00465E9E /* ChatCommands.cpp */,
 				73931AF716DAE15F00465E9E /* ChatCommands.h */,
 				73931AF816DAE15F00465E9E /* ChatHelper.cpp */,
@@ -1944,7 +2036,6 @@
 				73851F6813ABF55000D88D2A /* Colors.h */,
 				73851F6913ABF55000D88D2A /* Event.cpp */,
 				73851F6A13ABF55000D88D2A /* Event.h */,
-				73851F6B13ABF55000D88D2A /* freeglut_stroke_roman.h */,
 				73851F6C13ABF55000D88D2A /* freeglut_stroke.h */,
 				73851F6D13ABF55000D88D2A /* OpenglUtils.cpp */,
 				73851F6E13ABF55000D88D2A /* OpenglUtils.h */,
@@ -2678,6 +2769,7 @@
 				7388F06C139D5B46003C6BB0 /* music in Resources */,
 				73946E6114D50F0F00B95333 /* joystick_presets.ini in Resources */,
 				6149CC6B161875A900783189 /* dsa_pub.pem in Resources */,
+				73B1C36E171CEFE40007207A /* fonts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3029,6 +3121,21 @@
 				739D0BB116B21B9F00F5B979 /* RenderUtils.cpp in Sources */,
 				73931AFA16DAE15F00465E9E /* ChatCommands.cpp in Sources */,
 				73931AFB16DAE15F00465E9E /* ChatHelper.cpp in Sources */,
+				73B1C2FF171CEA830007207A /* fontstash.c in Sources */,
+				73B1C300171CEA830007207A /* stb_truetype.c in Sources */,
+				73B1C328171CEAC40007207A /* AToBScroller.cpp in Sources */,
+				73B1C329171CEAC40007207A /* FontManager.cpp in Sources */,
+				73B1C32A171CEAC40007207A /* FpsRenderer.cpp in Sources */,
+				73B1C32B171CEAC40007207A /* HelperManager.cpp in Sources */,
+				73B1C32C171CEAC40007207A /* HttpRequest.cpp in Sources */,
+				73B1C32D171CEAC40007207A /* LevelDatabaseDownloadThread.cpp in Sources */,
+				73B1C32E171CEAC40007207A /* LevelDatabaseUploadThread.cpp in Sources */,
+				73B1C32F171CEAC40007207A /* LoadoutIndicator.cpp in Sources */,
+				73B1C330171CEAC40007207A /* LoadoutTracker.cpp in Sources */,
+				73B1C331171CEAC40007207A /* ScissorsManager.cpp in Sources */,
+				73B1C332171CEAC40007207A /* SlideOutWidget.cpp in Sources */,
+				73B1C333171CEAC40007207A /* TimeLeftRenderer.cpp in Sources */,
+				73B1C334171CEAC40007207A /* UILevelInfoDisplayer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
