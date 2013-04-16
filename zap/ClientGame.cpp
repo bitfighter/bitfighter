@@ -1322,7 +1322,6 @@ void ClientGame::displayErrorMessage(const char *format, ...)
 }
 
 
-
 void ClientGame::displaySuccessMessage(const char *format, ...)
 {
    static char message[256];
@@ -1379,7 +1378,6 @@ Ship *ClientGame::findShip(const StringTableEntry &clientName)
 
    return NULL;
 }
-
 
 
 void ClientGame::zoomCommanderMap()
