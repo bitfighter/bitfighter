@@ -69,12 +69,12 @@ BfFont::BfFont(FontManager::FontId fontId, const string &fontFile)
    mIsStrokeFont = false;
    mStrokeFont = NULL;     // Stroke font only
 
-   if(!mStash)
+   if(mStash == NULL)
       mStash = sth_create(512, 512);
 
    TNLAssert(mStash, "Invalid font stash!");
 
-   if(!mStash)
+   if(mStash == NULL)
    {
       mOk = false;
       return;
@@ -99,11 +99,7 @@ BfFont::BfFont(FontManager::FontId fontId, const string &fontFile)
 // Destructor
 BfFont::~BfFont()
 {
-   if(mStash)
-   {
-      sth_delete(mStash);
-      mStash = NULL;
-   }
+   // Do nothing
 }
 
 
@@ -172,6 +168,12 @@ void FontManager::cleanup()
    for(S32 i = 0; i < FontCount; i++)
       if(fontList[i] != NULL)
          delete fontList[i];
+
+   if(mStash != NULL)
+   {
+      sth_delete(mStash);
+      mStash = NULL;
+   }
 }
 
 
@@ -219,6 +221,7 @@ void FontManager::setFontContext(FontContext fontContext)
          return;
       default:
          TNLAssert(false, "Unknown font context!");
+         break;
    }
 }
 // FontRoman,
