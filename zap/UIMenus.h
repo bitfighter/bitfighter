@@ -126,22 +126,42 @@ public:
 };
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-// <--- DO NOT SUBCLASS MainMenuUserInterface!! (unless you override onActivate) ---> //
-class MainMenuUserInterface : public MenuUserInterface
+class MenuUserInterfaceWithIntroductoryAnimation : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;
 
 private:
+   static const S32 FadeInTime = 400;       // Post animation fade in time (ms) 
+
+   static bool mFirstTime;    // Is this the first time an intro menu is being shown?
+   Timer mFadeInTimer;        // Track the brief fade in interval the first time menu is shown
+   bool mShowingAnimation;    // Is intro animation currently being played?
+
+public:
+   explicit MenuUserInterfaceWithIntroductoryAnimation(ClientGame *game);
+
+   void onActivate();
+   void idle(U32 timeDelta);
+   void render();
+   bool onKeyDown(InputCode inputCode);
+   void processSelection(U32 index);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// <--- DO NOT SUBCLASS MainMenuUserInterface!! (unless you override onActivate) ---> //
+class MainMenuUserInterface : public MenuUserInterfaceWithIntroductoryAnimation
+{
+   typedef MenuUserInterfaceWithIntroductoryAnimation Parent;
+
+private:
    char mMOTD[MOTD_LEN];
    U32 motdArriveTime;
-   Timer mFadeInTimer;        // Track the brief fade in interval the first time menu is shown
    Timer mColorTimer;
    Timer mColorTimer2;
    enum {
-      FadeInTime = 400,       // Time that fade in lasts (ms) 
       ColorTime = 1000,
       ColorTime2 = 1700,
    };
@@ -154,7 +174,6 @@ private:
 
 public:
    explicit MainMenuUserInterface(ClientGame *game);           // Constructor
-   void processSelection(U32 index);
    void onEscape();
    void render();
    void idle(U32 timeDelta); 
@@ -162,8 +181,6 @@ public:
    void onActivate();
    void setNeedToUpgrade(bool needToUpgrade);   // Is client in need of an upgrade?
 
-   bool mShowAnimation;                         // Is this the first time the menu is shown?
-   bool mFirstTime;
    void showUpgradeAlert();                     // Display message to the user that it is time to upgrade
    bool getNeedToUpgrade();
 };
@@ -233,10 +250,11 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class NameEntryUserInterface : public MenuUserInterface
+class NameEntryUserInterface : public MenuUserInterfaceWithIntroductoryAnimation
 {
+   typedef MenuUserInterfaceWithIntroductoryAnimation Parent;
+
 private:
-   typedef MenuUserInterface Parent;
    void renderExtras();
    NetConnection::TerminationReason mReason;
 

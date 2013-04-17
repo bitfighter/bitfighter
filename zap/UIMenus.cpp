@@ -577,12 +577,6 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode)
       return true;
    }
 
-   MainMenuUserInterface *ui = getUIManager()->getMainMenuUserInterface();
-
-   if(!ui->mFirstTime)
-      ui->mShowAnimation = false;    // Stop animations if a key is pressed
-
-
    // Process each key handler in turn until one works
    bool keyHandled = processMenuSpecificKeys(inputCode);
 
@@ -772,6 +766,72 @@ void MenuUserInterface::onEscape()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+bool MenuUserInterfaceWithIntroductoryAnimation::mFirstTime = true;
+
+
+// Constructor
+MenuUserInterfaceWithIntroductoryAnimation::MenuUserInterfaceWithIntroductoryAnimation(ClientGame *game) : Parent(game)
+{
+   mShowingAnimation = false;
+}
+
+
+void MenuUserInterfaceWithIntroductoryAnimation::onActivate()
+{
+   if(mFirstTime)
+   {
+      mFadeInTimer.reset(FadeInTime);
+      getUIManager()->activate(SplashUI);   // Show splash screen the first time through
+      mShowingAnimation = true;
+      mFirstTime = false;
+   }
+}
+
+
+void MenuUserInterfaceWithIntroductoryAnimation::idle(U32 timeDelta)
+{
+   Parent::idle(timeDelta);
+   mFadeInTimer.update(timeDelta);
+
+   mShowingAnimation = false;
+}
+
+
+void MenuUserInterfaceWithIntroductoryAnimation::render()
+{
+   Parent::render();
+
+   // Fade in the menu here if we are showing it the first time...  this will tie in
+   // nicely with the splash screen, and make the transition less jarring and sudden
+   if(mFadeInTimer.getCurrent())
+      dimUnderlyingUI(mFadeInTimer.getFraction());
+
+   // Render logo at top, never faded
+   renderStaticBitfighterLogo();
+}
+
+
+bool MenuUserInterfaceWithIntroductoryAnimation::onKeyDown(InputCode inputCode)
+{
+   if(mShowingAnimation)
+   {
+      mShowingAnimation = false;    // Stop animations if a key is pressed
+      return true;                  // Swallow the keystroke
+   }
+
+   return Parent::onKeyDown(inputCode);
+}
+
+
+// Take action based on menu selection
+void MenuUserInterfaceWithIntroductoryAnimation::processSelection(U32 index)
+{
+   mShowingAnimation = false;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 //////////
 // MainMenuUserInterface callbacks
@@ -797,12 +857,10 @@ static void optionsSelectedCallback(ClientGame *game, U32 unused)
    game->getUIManager()->activate(OptionsUI);
 }
 
-
 static void highScoresSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->activate(HighScoresUI);
 }
-
 
 static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
@@ -811,12 +869,10 @@ static void editorSelectedCallback(ClientGame *game, U32 unused)
    game->getUIManager()->activate(EditorUI);
 }
 
-
 static void creditsSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->activate(CreditsUI);
 }
-
 
 static void quitSelectedCallback(ClientGame *game, U32 unused)
 {
@@ -828,8 +884,6 @@ static void quitSelectedCallback(ClientGame *game, U32 unused)
 // Constructor
 MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   mShowAnimation = true;
-   mFirstTime = true;
    setMenuID(MainUI);
    mMenuTitle = "";
    mMOTD[0] = 0;
@@ -854,20 +908,16 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
 
 void MainMenuUserInterface::onActivate()
 {
+   Parent::onActivate();
+
    // Time for a clean start.  No matter how we got here, there's no going back.
    // Needed mainly because the editor makes things confusing.  Now that that's been reworked,
    // it's probably not needed at all.
    getUIManager()->clearPrevUIs();
 
-   mFadeInTimer.reset(FadeInTime);
    mColorTimer.reset(ColorTime);
    mColorTimer2.reset(ColorTime2);
    mTransDir = true;
-
-   mFirstTime = false;
-
-   if(mShowAnimation)
-      getUIManager()->activate(SplashUI);   // Show splash screen the first time through
 }
 
 
@@ -893,8 +943,6 @@ static const S32 MOTD_POS = 540;
 
 void MainMenuUserInterface::render()
 {
-   Parent::render();
-
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
@@ -910,13 +958,8 @@ void MainMenuUserInterface::render()
       drawString(canvasWidth - delta, MOTD_POS, 20, mMOTD);
    }
 
-   // Fade in the menu here if we are showing it the first time...  this will tie in
-   // nicely with the splash screen, and make the transition less jarring and sudden
-   if(mShowAnimation)
-      dimUnderlyingUI((F32) mFadeInTimer.getCurrent() / (F32) FadeInTime);
-
-   // Render logo at top, never faded
-   renderStaticBitfighterLogo();
+   // Parent renderer might dim what we've drawn so far, so run it last so it can have access to everything
+   Parent::render();
 }
 
 
@@ -924,7 +967,6 @@ void MainMenuUserInterface::idle(U32 timeDelta)
 {
    Parent::idle(timeDelta);
 
-   mFadeInTimer.update(timeDelta);
    if(mColorTimer.update(timeDelta))
    {
       mColorTimer.reset(ColorTime);
@@ -968,14 +1010,6 @@ void MainMenuUserInterface::showUpgradeAlert()
    getUIManager()->activate(ui);
 
    mShowedUpgradeAlert = true;            // Only show this alert once per session -- we don't need to beat them over the head with it!
-}
-
-
-// Take action based on menu selection
-void MainMenuUserInterface::processSelection(U32 index)
-{
-   if(!mFirstTime)
-      mShowAnimation = false;
 }
 
 
@@ -1297,11 +1331,13 @@ void OptionsMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : MenuUserInterface(game)
+NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(NameEntryUI);
-   mMenuTitle = "ENTER YOUR NICKNAME:";
+   mMenuTitle = "";
    mReason = NetConnection::ReasonNone;
+   mRenderInstructions = false;
+
 }
 
 
@@ -1390,17 +1426,19 @@ void NameEntryUserInterface::renderExtras()
    const S32 rows = 3;
    S32 row = 0;
 
+   S32 instrGap = mRenderInstructions ? 30 : 0;
+
    glColor(Colors::menuHelpColor);
 
-   drawCenteredString(canvasHeight - vertMargin - 30 - (rows - row) * size - (rows - row) * gap, size, 
-            "You can skip this screen by editing the [Settings] section of Bitfighter.ini");
+   //drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size, 
+   //         "You can skip this screen by editing the [Settings] section of Bitfighter.ini");
    row++;
 
-   drawCenteredString(canvasHeight - vertMargin - 30 - (rows - row) * size - (rows - row) * gap, size, 
+   drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size, 
             "A password is only needed if you are using a reserved name.  You can reserve your");
    row++;
 
-   drawCenteredString(canvasHeight - vertMargin - 30 - (rows - row) * size - (rows - row) * gap, size, 
+   drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size, 
             "nickname by registering for the bitfighter.org forums.  Registration is free.");
 
 
@@ -1413,6 +1451,10 @@ void NameEntryUserInterface::renderExtras()
 
       renderMessageBox("Invalid Name or Password", "", message, 3, -190);
    }
+
+   // Render logo at top, never faded
+   renderStaticBitfighterLogo();
+
 }
 
 // Save options to INI file, and return to our regularly scheduled program
