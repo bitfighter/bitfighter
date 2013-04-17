@@ -629,13 +629,19 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
    F32 t;
 
    // Start with a sweep of the area
+   //
+   // The smaller the increment, the closer to finding an accurate line perpendicular to the wall; however
+   // we will trade performance for accuracy here and follow up with finding the exact normal and anchor
+   // below this loop
+   //
    // Start at any angle other than 0.  Search at angle 0 seems to return the wrong wall sometimes
-   for(F32 theta = 1.0f; theta < Float2Pi + 1.0f; theta += FloatPi * 0.125f)   // Reducing to 0.0125 seems to have no effect
+   F32 increment = Float2Pi * 0.0625f;
+   for(F32 theta = increment; theta < Float2Pi + increment; theta += increment)
    {
       Point dir(cos(theta), sin(theta));
       dir *= snapDist;
       Point mountPos = pos - dir * 0.001f;  // Offsetting slightly prevents spazzy behavior in editor
-      
+
       // Look for walls
       DatabaseObject *wall = wallEdgeDatabase->findObjectLOS(testFunc, ActualState, format, mountPos, mountPos + dir, t, n);
 
@@ -650,6 +656,21 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
          }
       }
    }
+
+   // Re-normalize our position to a segment built from the found anchor and normal.  This is because
+   // the anchor may be slightly off due to the inaccurate sweep angles
+   //
+   // The algorithm here is to concoct a small segment through the anchor detected in the sweep, and
+   // make it perpendicular to the normal vector also detected in the sweep (so parallel to the wall
+   // edge).  Then find the new normal point to this segment and make that the anchor.
+   //
+   // 10 point length parallel segment should be plenty
+   Point normalNormal(normal.y, -normal.x);
+   Point p1 = Point(anchor.x + (5 * normalNormal.x), anchor.y + (5 * normalNormal.y));
+   Point p2 = Point(anchor.x - (5 * normalNormal.x), anchor.y - (5 * normalNormal.y));
+
+   // Now find our new anchor
+   findNormalPoint(pos, p1, p2, anchor);
 
    return closestWall;
 }
@@ -1106,13 +1127,12 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
    // First we snap to a wall edge -- this will ensure we don't end up attaching to an interior wall segment in the case of a wall intersection.
    // That will determine our location, but we also need to figure out which segment we're attaching to so that if that segment were to move,
    // we could update or item accordingly.  Unfortunately, there is no direct way to associate a WallEdge with a WallSegment, but we can do
-   // it indirectly by snapping again, this time to a segment in our WallSegment database.  By using the snap point we found initially, that will
-   // ensure the segment we find is associated with the edge found in the first pass.
+   // it indirectly by snapping again, this time to a segment in our WallSegment database.
    mountEdge = findAnchorPointAndNormal(wallSegmentManager->getWallEdgeDatabase(), pos, 
                                MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
 
    if(mountEdge)
-      mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), anchor,    // <== Note different database than above!
+      mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), pos,    // <== Note different database than above!
                                  MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
 
    // It is possible to find an edge but not a segment while a wall is being dragged -- the edge remains in it's original location 
