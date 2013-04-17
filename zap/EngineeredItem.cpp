@@ -631,7 +631,7 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
    // Start with a sweep of the area
    //
    // The smaller the increment, the closer to finding an accurate line perpendicular to the wall; however
-   // we will trade performance for accuracy here and follow up with finding the exact normal and anchor
+   // we will trade accuracy for performance here and follow up with finding the exact normal and anchor
    // below this loop
    //
    // Start at any angle other than 0.  Search at angle 0 seems to return the wrong wall sometimes
@@ -657,12 +657,12 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
       }
    }
 
-   // Re-normalize our position to a segment built from the found anchor and normal.  This is because
-   // the anchor may be slightly off due to the inaccurate sweep angles
+   // Re-adjust our anchor to a segment built from the anchor and normal vector found above.
+   // This is because the anchor may be slightly off due to the inaccurate sweep angles
    //
    // The algorithm here is to concoct a small segment through the anchor detected in the sweep, and
-   // make it perpendicular to the normal vector also detected in the sweep (so parallel to the wall
-   // edge).  Then find the new normal point to this segment and make that the anchor.
+   // make it perpendicular to the normal vector that was also detected in the sweep (so parallel to
+   // the wall edge).  Then find the new normal point to this segment and make that the anchor.
    //
    // 10 point length parallel segment should be plenty
    Point normalNormal(normal.y, -normal.x);
