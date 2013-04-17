@@ -913,18 +913,7 @@ void MainMenuUserInterface::render()
    // Fade in the menu here if we are showing it the first time...  this will tie in
    // nicely with the splash screen, and make the transition less jarring and sudden
    if(mShowAnimation)
-   {
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-       
-      glColor(Colors::black, (F32) mFadeInTimer.getCurrent() / (F32) FadeInTime);
-      F32 vertices[] = {
-            0, 0,
-            canvasWidth, 0,
-            canvasWidth, canvasHeight,
-            0, canvasHeight
-      };
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
-   }
+      dimUnderlyingUI((F32) mFadeInTimer.getCurrent() / (F32) FadeInTime);
 
    // Render logo at top, never faded
    renderStaticBitfighterLogo();
