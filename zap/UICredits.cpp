@@ -304,9 +304,7 @@ SplashUserInterface::SplashUserInterface(ClientGame *game) : Parent(game)
 
 void SplashUserInterface::onActivate()
 {
-   mSplashTimer.reset(spinTime);
-//   glLineWidth(gDefaultLineWidth);
-
+   mSplashTimer.reset(1500);     // Time of main animation
    mPhase = SplashPhaseAnimation;
 }
 
@@ -320,9 +318,9 @@ void SplashUserInterface::idle(U32 timeDelta)
       mPhase = SplashPhase(S32(mPhase) + 1);
 
       if(mPhase == SplashPhaseResting)
-         mSplashTimer.reset(restTime);
+         mSplashTimer.reset(150);      // Brief pause after main animation, before rising
       else if(mPhase == SplashPhaseRising)
-         mSplashTimer.reset(riseTime);
+         mSplashTimer.reset(800);      // Phase during which logo rises to the top
    }
 
    if(mPhase >= SplashPhaseDone)

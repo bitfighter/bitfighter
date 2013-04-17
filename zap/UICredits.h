@@ -99,18 +99,12 @@ class SplashUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 private:
-   enum {                // All times in ms
-      spinTime = 1500,
-      restTime = 150,
-      riseTime = 800,
-   };
-
    enum SplashPhase {
-      SplashPhaseNone = 0,
-      SplashPhaseAnimation = 1,
-      SplashPhaseResting = 2,
-      SplashPhaseRising = 3,
-      SplashPhaseDone = 4
+      SplashPhaseNone,
+      SplashPhaseAnimation,
+      SplashPhaseResting,
+      SplashPhaseRising,
+      SplashPhaseDone
    };
 
    Timer mSplashTimer;    // Timer controlling progress through the phase
