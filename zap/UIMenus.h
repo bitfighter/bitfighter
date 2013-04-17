@@ -162,7 +162,7 @@ public:
    void onActivate();
    void setNeedToUpgrade(bool needToUpgrade);   // Is client in need of an upgrade?
 
-   bool showAnimation;                          // Is this the first time the menu is shown?
+   bool mShowAnimation;                         // Is this the first time the menu is shown?
    bool mFirstTime;
    void showUpgradeAlert();                     // Display message to the user that it is time to upgrade
    bool getNeedToUpgrade();

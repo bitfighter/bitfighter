@@ -580,7 +580,7 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode)
    MainMenuUserInterface *ui = getUIManager()->getMainMenuUserInterface();
 
    if(!ui->mFirstTime)
-      ui->showAnimation = false;    // Stop animations if a key is pressed
+      ui->mShowAnimation = false;    // Stop animations if a key is pressed
 
 
    // Process each key handler in turn until one works
@@ -828,7 +828,7 @@ static void quitSelectedCallback(ClientGame *game, U32 unused)
 // Constructor
 MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   showAnimation = true;
+   mShowAnimation = true;
    mFirstTime = true;
    setMenuID(MainUI);
    mMenuTitle = "";
@@ -866,7 +866,7 @@ void MainMenuUserInterface::onActivate()
 
    mFirstTime = false;
 
-   if(showAnimation)
+   if(mShowAnimation)
       getUIManager()->activate(SplashUI);   // Show splash screen the first time through
 }
 
@@ -912,7 +912,7 @@ void MainMenuUserInterface::render()
 
    // Fade in the menu here if we are showing it the first time...  this will tie in
    // nicely with the splash screen, and make the transition less jarring and sudden
-   if(showAnimation)
+   if(mShowAnimation)
    {
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
        
@@ -986,7 +986,7 @@ void MainMenuUserInterface::showUpgradeAlert()
 void MainMenuUserInterface::processSelection(U32 index)
 {
    if(!mFirstTime)
-      showAnimation = false;
+      mShowAnimation = false;
 }
 
 
