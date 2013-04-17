@@ -36,39 +36,40 @@ using namespace TNL;
 namespace Zap
 {
 
-class UserInterface;
-class MainMenuUserInterface;
-class GameParamUserInterface;
+class ChatUserInterface; 
+class CreditsUserInterface;
+class DiagnosticUserInterface;
+class EditorInstructionsUserInterface;
+class EditorMenuUserInterface;
 class EditorUserInterface;
-class YesNoUserInterface;
-class TeamMenuUserInterface;
-class TeamDefUserInterface;
+class ErrorMessageUserInterface;
+class GameMenuUserInterface;
+class GameParamUserInterface;
+class GameUserInterface;
+class HighScoresUserInterface;
+class HostMenuUserInterface;
+class InputOptionsMenuUserInterface;
+class InstructionsUserInterface;
+class KeyDefMenuUserInterface;
+class LevelChangeOrAdminPasswordEntryUserInterface;
+class LevelMenuSelectUserInterface;
+class LevelMenuUserInterface;
+class LevelNameEntryUserInterface;
+class MainMenuUserInterface;
+class MessageUserInterface;
+class NameEntryUserInterface;
+class OptionsMenuUserInterface;
+class PlayerMenuUserInterface;
 class QueryServersUserInterface;
 class ServerPasswordEntryUserInterface;
-class GameUserInterface;
-class PlayerMenuUserInterface;
-class NameEntryUserInterface;
-class MessageUserInterface;
-class LevelMenuUserInterface;
-class LevelMenuSelectUserInterface;
-class LevelChangeOrAdminPasswordEntryUserInterface;
-class HostMenuUserInterface;
-class GameMenuUserInterface;
-class ErrorMessageUserInterface;
-class LevelNameEntryUserInterface;
 class ServerPasswordEntryUserInterface;
-class InstructionsUserInterface;
-class OptionsMenuUserInterface;
-class HighScoresUserInterface;
-class KeyDefMenuUserInterface;
-class DiagnosticUserInterface;
-class CreditsUserInterface;
-class EditorInstructionsUserInterface;
-class ChatUserInterface; 
-class SuspendedUserInterface;
-class EditorMenuUserInterface;
 class SplashUserInterface;
+class SuspendedUserInterface;
 class TeamDefUserInterface;
+class TeamDefUserInterface;
+class TeamMenuUserInterface;
+class UserInterface;
+class YesNoUserInterface;
 
 class Game;
 class ClientGame;
@@ -88,6 +89,7 @@ enum UIID {
    SuspendedUI,
    HighScoresUI,
    HostingUI,
+   InputOptionsUI,
    InstructionsUI,
    KeyDefUI,
    LevelUI,
@@ -113,38 +115,39 @@ class UIManager
 
 private:
    ClientGame *mGame;
-   UserInterface *mCurrentInterface;
+   UserInterface                                *mCurrentInterface;
 
-   MainMenuUserInterface *mMainMenuUserInterface;
-   GameParamUserInterface *mGameParamUserInterface;
-   YesNoUserInterface *mYesNoUserInterface;
-   TeamMenuUserInterface *mTeamMenuUserInterface;
-   QueryServersUserInterface *mQueryServersUserInterface;
-   ServerPasswordEntryUserInterface *mServerPasswordEntryUserInterface;
-   GameUserInterface *mGameUserInterface;
-   PlayerMenuUserInterface *mPlayerMenuUserInterface;
-   NameEntryUserInterface *mNameEntryUserInterface;
-   MessageUserInterface *mMessageUserInterface;
-   LevelMenuUserInterface *mLevelMenuUserInterface;
-   LevelMenuSelectUserInterface *mLevelMenuSelectUserInterface;
+   ChatUserInterface                            *mChatInterface;
+   CreditsUserInterface                         *mCreditsUserInterface;
+   DiagnosticUserInterface                      *mDiagnosticUserInterface;
+   EditorInstructionsUserInterface              *mEditorInstructionsUserInterface;
+   EditorMenuUserInterface                      *mEditorMenuUserInterface;
+   EditorUserInterface                          *mEditorUserInterface;
+   ErrorMessageUserInterface                    *mErrorMsgUserInterface;
+   GameMenuUserInterface                        *mGameMenuUserInterface;
+   GameParamUserInterface                       *mGameParamUserInterface;
+   GameUserInterface                            *mGameUserInterface;
+   HighScoresUserInterface                      *mHighScoresUserInterface;
+   HostMenuUserInterface                        *mHostMenuUserInterface;
+   InputOptionsMenuUserInterface                *mInputOptionsUserInterface;
+   InstructionsUserInterface                    *mInstructionsUserInterface;
+   KeyDefMenuUserInterface                      *mKeyDefMenuUserInterface;
    LevelChangeOrAdminPasswordEntryUserInterface *mLevelChangeOrAdminPasswordEntryUserInterface;
-   HostMenuUserInterface *mHostMenuUserInterface;
-   GameMenuUserInterface *mGameMenuUserInterface;
-   ErrorMessageUserInterface *mErrorMsgUserInterface;
-   InstructionsUserInterface *mInstructionsUserInterface;
-   OptionsMenuUserInterface *mOptionsMenuUserInterface;
-   HighScoresUserInterface *mHighScoresUserInterface;
-   KeyDefMenuUserInterface *mKeyDefMenuUserInterface;
-   DiagnosticUserInterface *mDiagnosticUserInterface;
-   CreditsUserInterface *mCreditsUserInterface;
-   EditorInstructionsUserInterface *mEditorInstructionsUserInterface;
-   ChatUserInterface *mChatInterface;
-   SuspendedUserInterface *mSuspendedUserInterface;
-   EditorMenuUserInterface *mEditorMenuUserInterface;
-   SplashUserInterface *mSplashUserInterface;
-   TeamDefUserInterface *mTeamDefUserInterface;
-   LevelNameEntryUserInterface *mLevelNameEntryUserInterface;
-   EditorUserInterface *mEditorUserInterface;
+   LevelMenuSelectUserInterface                 *mLevelMenuSelectUserInterface;
+   LevelMenuUserInterface                       *mLevelMenuUserInterface;
+   LevelNameEntryUserInterface                  *mLevelNameEntryUserInterface;
+   MainMenuUserInterface                        *mMainMenuUserInterface;
+   MessageUserInterface                         *mMessageUserInterface;
+   NameEntryUserInterface                       *mNameEntryUserInterface;
+   OptionsMenuUserInterface                     *mOptionsMenuUserInterface;
+   PlayerMenuUserInterface                      *mPlayerMenuUserInterface;
+   QueryServersUserInterface                    *mQueryServersUserInterface;
+   ServerPasswordEntryUserInterface             *mServerPasswordEntryUserInterface;
+   SplashUserInterface                          *mSplashUserInterface;
+   SuspendedUserInterface                       *mSuspendedUserInterface;
+   TeamDefUserInterface                         *mTeamDefUserInterface;
+   TeamMenuUserInterface                        *mTeamMenuUserInterface;
+   YesNoUserInterface                           *mYesNoUserInterface;
 
    Vector<UserInterface *> mPrevUIs;   // Previously active menus
 
@@ -163,36 +166,38 @@ public:
 
    /////
    // Interface getting methods
-   MainMenuUserInterface *getMainMenuUserInterface();
-   EditorUserInterface *getEditorUserInterface();
-   GameParamUserInterface *getGameParamUserInterface();
-   YesNoUserInterface *getYesNoUserInterface();
-   TeamMenuUserInterface *getTeamMenuUserInterface();
-   TeamDefUserInterface *getTeamDefUserInterface();
-   QueryServersUserInterface *getQueryServersUserInterface();
-   ServerPasswordEntryUserInterface *getServerPasswordEntryUserInterface();
-   GameUserInterface *getGameUserInterface();
-   PlayerMenuUserInterface *getPlayerMenuUserInterface();
-   NameEntryUserInterface *getNameEntryUserInterface();
-   MessageUserInterface *getMessageUserInterface();
-   LevelMenuUserInterface *getLevelMenuUserInterface();
-   LevelMenuSelectUserInterface *getLevelMenuSelectUserInterface();
+   MainMenuUserInterface                        *getMainMenuUserInterface();
+
+   ChatUserInterface                            *getChatUserInterface();
+   CreditsUserInterface                         *getCreditsUserInterface();
+   DiagnosticUserInterface                      *getDiagnosticUserInterface();
+   EditorInstructionsUserInterface              *getEditorInstructionsUserInterface();
+   EditorMenuUserInterface                      *getEditorMenuUserInterface();
+   EditorUserInterface                          *getEditorUserInterface();
+   ErrorMessageUserInterface                    *getErrorMsgUserInterface();
+   GameMenuUserInterface                        *getGameMenuUserInterface();
+   GameParamUserInterface                       *getGameParamUserInterface();
+   GameUserInterface                            *getGameUserInterface();
+   HighScoresUserInterface                      *getHighScoresUserInterface();
+   HostMenuUserInterface                        *getHostMenuUserInterface();
+   InputOptionsMenuUserInterface                *getInputOptionsUserInterface();
+   InstructionsUserInterface                    *getInstructionsUserInterface();
+   KeyDefMenuUserInterface                      *getKeyDefMenuUserInterface();
    LevelChangeOrAdminPasswordEntryUserInterface *getLevelChangeOrAdminPasswordEntryUserInterface();
-   HostMenuUserInterface *getHostMenuUserInterface();
-   GameMenuUserInterface *getGameMenuUserInterface();
-   ErrorMessageUserInterface *getErrorMsgUserInterface();
-   LevelNameEntryUserInterface *getLevelNameEntryUserInterface();
-   InstructionsUserInterface *getInstructionsUserInterface();
-   OptionsMenuUserInterface *getOptionsMenuUserInterface();
-   HighScoresUserInterface *getHighScoresUserInterface();
-   KeyDefMenuUserInterface *getKeyDefMenuUserInterface();
-   DiagnosticUserInterface *getDiagnosticUserInterface();
-   CreditsUserInterface *getCreditsUserInterface();
-   EditorInstructionsUserInterface *getEditorInstructionsUserInterface();
-   ChatUserInterface *getChatUserInterface();
-   SuspendedUserInterface *getSuspendedUserInterface();
-   EditorMenuUserInterface *getEditorMenuUserInterface();
-   SplashUserInterface *getSplashUserInterface();
+   LevelMenuSelectUserInterface                 *getLevelMenuSelectUserInterface();
+   LevelMenuUserInterface                       *getLevelMenuUserInterface();
+   LevelNameEntryUserInterface                  *getLevelNameEntryUserInterface();
+   MessageUserInterface                         *getMessageUserInterface();
+   NameEntryUserInterface                       *getNameEntryUserInterface();
+   OptionsMenuUserInterface                     *getOptionsMenuUserInterface();
+   PlayerMenuUserInterface                      *getPlayerMenuUserInterface();
+   QueryServersUserInterface                    *getQueryServersUserInterface();
+   ServerPasswordEntryUserInterface             *getServerPasswordEntryUserInterface();
+   SplashUserInterface                          *getSplashUserInterface();
+   SuspendedUserInterface                       *getSuspendedUserInterface();
+   TeamDefUserInterface                         *getTeamDefUserInterface();
+   TeamMenuUserInterface                        *getTeamMenuUserInterface();
+   YesNoUserInterface                           *getYesNoUserInterface();
 
    void reactivatePrevUI();
    void reactivate(UIID menuId);

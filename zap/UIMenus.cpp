@@ -1083,12 +1083,6 @@ static void setVoiceVolumeCallback(ClientGame *game, U32 vol)
 }
 
 
-static void setControlsCallback(ClientGame *game, U32 val)
-{
-   game->getSettings()->getIniSettings()->controlsRelative = (val == 1);
-}
-
-
 static void setFullscreenCallback(ClientGame *game, U32 mode)
 {
    GameSettings *settings = game->getSettings();
@@ -1101,74 +1095,9 @@ static void setFullscreenCallback(ClientGame *game, U32 mode)
 }
 
 
-static void defineKeysCallback(ClientGame *game, U32 unused)
+static void inputCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate(KeyDefUI);
-}
-
-static void setControllerCallback(ClientGame *game, U32 joystickIndex)
-{
-   game->getSettings()->getIniSettings()->joystickType = Joystick::JoystickPresetList[joystickIndex].identifier;
-   Joystick::setSelectedPresetIndex(joystickIndex);
-}
-
-
-static void addStickOptions(Vector<string> *opts)
-{
-   opts->clear();
-   opts->push_back("KEYBOARD");
-   
-   for(S32 i = 0; i < Joystick::DetectedJoystickNameList.size(); i++)
-      opts->push_back(string("JOYSTICK ") + itos(i + 1));
-}
-
-
-static S32 INPUT_MODE_MENU_ITEM_INDEX = 0;
-
-// Must be static; keeps track of the number of sticks the user had last time the setInputModeCallback was run.
-// That lets the function know if it needs to rebuild the menu because of new stick values available.
-static S32 sticks = -1;    
-
-static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
-{
-   // Refills Joystick::DetectedJoystickNameList to allow people to plug in joystick while in this menu...
-   Joystick::initJoystick(game->getSettings());
-
-   // If there is a different number of sticks than previously detected
-   if(sticks != Joystick::DetectedJoystickNameList.size())
-   {
-      ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(game->getUIManager()->getOptionsMenuUserInterface()->
-                                                                getMenuItem(INPUT_MODE_MENU_ITEM_INDEX));
-
-      // Rebuild this menu with the new number of sticks
-      if(menuItem)
-         addStickOptions(&menuItem->mOptions);
-
-      // Loop back to the first index if we hit the end of the list
-      if(inputModeIndex > (U32)Joystick::DetectedJoystickNameList.size())
-      {
-         inputModeIndex = 0;
-         menuItem->setValueIndex(0);
-      }
-
-      // Special case handler for common situation
-      if(sticks == 0 && Joystick::DetectedJoystickNameList.size() == 1)      // User just plugged a stick in
-         menuItem->setValueIndex(1);
-
-      // Save the current number of sticks
-      sticks = Joystick::DetectedJoystickNameList.size();
-   }
-
-   if(inputModeIndex == 0)
-      game->getSettings()->getInputCodeManager()->setInputMode(InputModeKeyboard);
-   else
-      game->getSettings()->getInputCodeManager()->setInputMode(InputModeJoystick);
-
-
-   if(inputModeIndex >= 1)
-      Joystick::UseJoystickNumber = inputModeIndex - 1;
-
-   Joystick::enableJoystick(game->getSettings(), true);
+   game->getUIManager()->activate(InputOptionsUI);
 }
 
 
@@ -1180,6 +1109,7 @@ static void setVoiceEchoCallback(ClientGame *game, U32 val)
 
 //////////
 
+// Used below and by UIEditor
 MenuItem *getWindowModeMenuItem(U32 displayMode)
 {
    Vector<string> opts;   
@@ -1195,54 +1125,18 @@ MenuItem *getWindowModeMenuItem(U32 displayMode)
 void OptionsMenuUserInterface::setupMenus()
 {
    clearMenuItems();
-   
    Vector<string> opts;
-   opts.push_back("ABSOLUTE");
-   opts.push_back("RELATIVE");
 
    GameSettings *settings = getGame()->getSettings();
 
-   bool relative = settings->getIniSettings()->controlsRelative;
+   addMenuItem(new MenuItem(getMenuItemCount(), "INPUT", inputCallback, 
+                        "Joystick settings, Remap keys", KEY_I));
 
-   addMenuItem(new ToggleMenuItem("CONTROLS:", opts, relative ? 1 : 0, true, 
-                                  setControlsCallback, "Set controls to absolute or relative mode", KEY_C));
 
 #ifndef TNL_OS_MOBILE
    addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->displayMode));
 #endif
 
-   Joystick::initJoystick(settings);   // Refresh joystick list
-   Joystick::enableJoystick(settings, true);   // Refresh joystick list
-
-   addStickOptions(&opts);
-
-   U32 inputMode = (U32)settings->getInputCodeManager()->getInputMode();   // 0 = keyboard, 1 = joystick
-   if(inputMode == InputModeJoystick)
-      inputMode += Joystick::UseJoystickNumber;
-
-   addMenuItem(new ToggleMenuItem("PRIMARY INPUT:", 
-                                  opts, 
-                                  (U32)inputMode,
-                                  true, 
-                                  setInputModeCallback, 
-                                  "Specify whether you want to play with your keyboard or joystick", 
-                                  KEY_P, KEY_I));
-
-   INPUT_MODE_MENU_ITEM_INDEX = getMenuItemCount() - 1;
-
-   opts.clear();
-   // Add the joystick names to opts
-   Joystick::getAllJoystickPrettyNames(opts);
-
-   U32 selectedOption = Joystick::SelectedPresetIndex;
-
-   addMenuItem(new ToggleMenuItem("JOYSTICK:", opts, selectedOption, true, 
-                                  setControllerCallback, "Choose which joystick to use in joystick mode", KEY_J));
-
-   addMenuItem(new MenuItem(getMenuItemCount(), "DEFINE KEYS / BUTTONS", defineKeysCallback, 
-                            "Remap keyboard or joystick controls", KEY_D, KEY_K));
-
-   opts.clear();
    for(S32 i = 0; i <= 10; i++)
       opts.push_back(getVolMsg( F32(i) / 10 ));
 
@@ -1324,6 +1218,177 @@ void OptionsMenuUserInterface::onEscape()
 {
    saveSettingsToINI(&gINI, getGame()->getSettings());
    getUIManager()->reactivatePrevUI();      //mGameUserInterface
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// Constructor
+InputOptionsMenuUserInterface::InputOptionsMenuUserInterface(ClientGame *game) : Parent(game)
+{
+   setMenuID(OptionsUI);
+   mMenuTitle = "OPTIONS MENU:";
+}
+
+
+void InputOptionsMenuUserInterface::processSelection(U32 index)
+{
+   // Do nothing
+}
+
+
+void InputOptionsMenuUserInterface::processShiftSelection(U32 index)
+{
+   // Do nothing
+}
+
+
+void InputOptionsMenuUserInterface::onActivate()
+{
+   Parent::onActivate();
+   setupMenus();
+}
+
+
+//////////
+// Callbacks for InputOptions menu
+static void setControlsCallback(ClientGame *game, U32 val)
+{
+   game->getSettings()->getIniSettings()->controlsRelative = (val == 1);
+}
+
+
+static void defineKeysCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate(KeyDefUI);
+}
+
+
+static void setControllerCallback(ClientGame *game, U32 joystickIndex)
+{
+   game->getSettings()->getIniSettings()->joystickType = Joystick::JoystickPresetList[joystickIndex].identifier;
+   Joystick::setSelectedPresetIndex(joystickIndex);
+}
+
+
+static void addStickOptions(Vector<string> *opts)
+{
+   opts->clear();
+   opts->push_back("KEYBOARD");
+   
+   for(S32 i = 0; i < Joystick::DetectedJoystickNameList.size(); i++)
+      opts->push_back(string("JOYSTICK ") + itos(i + 1));
+}
+
+
+static S32 INPUT_MODE_MENU_ITEM_INDEX = 0;
+
+// Must be static; keeps track of the number of sticks the user had last time the setInputModeCallback was run.
+// That lets the function know if it needs to rebuild the menu because of new stick values available.
+static S32 sticks = -1;    
+
+static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
+{
+   // Refills Joystick::DetectedJoystickNameList to allow people to plug in joystick while in this menu...
+   Joystick::initJoystick(game->getSettings());
+
+   // If there is a different number of sticks than previously detected
+   if(sticks != Joystick::DetectedJoystickNameList.size())
+   {
+      ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(game->getUIManager()->getInputOptionsUserInterface()->
+                                                                getMenuItem(INPUT_MODE_MENU_ITEM_INDEX));
+
+      // Rebuild this menu with the new number of sticks
+      if(menuItem)
+         addStickOptions(&menuItem->mOptions);
+
+      // Loop back to the first index if we hit the end of the list
+      if(inputModeIndex > (U32)Joystick::DetectedJoystickNameList.size())
+      {
+         inputModeIndex = 0;
+         menuItem->setValueIndex(0);
+      }
+
+      // Special case handler for common situation
+      if(sticks == 0 && Joystick::DetectedJoystickNameList.size() == 1)      // User just plugged a stick in
+         menuItem->setValueIndex(1);
+
+      // Save the current number of sticks
+      sticks = Joystick::DetectedJoystickNameList.size();
+   }
+
+   if(inputModeIndex == 0)
+      game->getSettings()->getInputCodeManager()->setInputMode(InputModeKeyboard);
+   else
+      game->getSettings()->getInputCodeManager()->setInputMode(InputModeJoystick);
+
+
+   if(inputModeIndex >= 1)
+      Joystick::UseJoystickNumber = inputModeIndex - 1;
+
+   Joystick::enableJoystick(game->getSettings(), true);
+}
+
+
+//////////
+
+void InputOptionsMenuUserInterface::setupMenus()
+{
+   clearMenuItems();
+   
+   Vector<string> opts;
+
+   GameSettings *settings = getGame()->getSettings();
+
+   Joystick::initJoystick(settings);            // Refresh joystick list
+   Joystick::enableJoystick(settings, true);    // Refresh joystick list
+
+   addStickOptions(&opts);
+
+   U32 inputMode = (U32)settings->getInputCodeManager()->getInputMode();   // 0 = keyboard, 1 = joystick
+   if(inputMode == InputModeJoystick)
+      inputMode += Joystick::UseJoystickNumber;
+
+   addMenuItem(new ToggleMenuItem("PRIMARY INPUT:", 
+                                  opts, 
+                                  (U32)inputMode,
+                                  true, 
+                                  setInputModeCallback, 
+                                  "Specify whether you want to play with your keyboard or joystick", 
+                                  KEY_P, KEY_I));
+
+   INPUT_MODE_MENU_ITEM_INDEX = getMenuItemCount() - 1;
+
+   opts.clear();
+   // Add the joystick names to opts
+   Joystick::getAllJoystickPrettyNames(opts);
+
+   U32 selectedOption = Joystick::SelectedPresetIndex;
+
+   addMenuItem(new ToggleMenuItem("JOYSTICK:", opts, selectedOption, true, 
+                                  setControllerCallback, "Choose which joystick to use in joystick mode", KEY_J));
+
+   addMenuItem(new MenuItem(getMenuItemCount(), "DEFINE KEYS / BUTTONS", defineKeysCallback, 
+                            "Remap keyboard or joystick controls", KEY_D, KEY_K));
+
+   opts.clear();
+   opts.push_back("ABSOLUTE");
+   opts.push_back("RELATIVE");
+
+   bool relative = settings->getIniSettings()->controlsRelative;
+
+   addMenuItem(new ToggleMenuItem("CONTROLS:", opts, relative ? 1 : 0, true, 
+                                  setControlsCallback, "Set controls to absolute (normal) or relative (like a tank) mode", KEY_C));
+}
+
+
+// Save options to INI file, and return to our regularly scheduled program
+void InputOptionsMenuUserInterface::onEscape()
+{
+   saveSettingsToINI(&gINI, getGame()->getSettings());
+   getUIManager()->reactivatePrevUI();      
 }
 
 

@@ -207,6 +207,24 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class InputOptionsMenuUserInterface : public MenuUserInterface
+{
+   typedef MenuUserInterface Parent;
+
+public:
+   explicit InputOptionsMenuUserInterface(ClientGame *game);        // Constructor
+   void processSelection(U32 index);            // Process selected menu item when right arrow is pressed
+   void processShiftSelection(U32 index);       // And when the left arrow is pressed
+   void onEscape();
+   void setupMenus();
+   void onActivate();
+   void toggleDisplayMode();
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 class HostMenuUserInterface : public MenuUserInterface
 {
    enum MenuItems {

@@ -77,6 +77,7 @@ UIManager::UIManager(ClientGame *clientGame)
    mGameMenuUserInterface = NULL;
    mErrorMsgUserInterface = NULL;
    mInstructionsUserInterface = NULL;
+   mInputOptionsUserInterface = NULL;
    mOptionsMenuUserInterface = NULL;
    mHighScoresUserInterface = NULL;
    mKeyDefMenuUserInterface = NULL;
@@ -115,6 +116,7 @@ UIManager::~UIManager()
    delete mGameMenuUserInterface;
    delete mErrorMsgUserInterface;
    delete mInstructionsUserInterface;
+   delete mInputOptionsUserInterface;
    delete mOptionsMenuUserInterface;
    delete mKeyDefMenuUserInterface;
    delete mDiagnosticUserInterface;
@@ -164,6 +166,8 @@ UserInterface *UIManager::getUI(UIID menuId)
          return getHostMenuUserInterface();
       case InstructionsUI:
          return getInstructionsUserInterface();
+      case InputOptionsUI:
+         return getInputOptionsUserInterface();
       case KeyDefUI:
          return getKeyDefMenuUserInterface();
       case LevelUI:
@@ -432,6 +436,16 @@ KeyDefMenuUserInterface *UIManager::getKeyDefMenuUserInterface()
       mKeyDefMenuUserInterface = new KeyDefMenuUserInterface(mGame);
 
    return mKeyDefMenuUserInterface;
+}
+
+
+InputOptionsMenuUserInterface *UIManager::getInputOptionsUserInterface()
+{
+   // Lazily initialize
+   if(!mInputOptionsUserInterface)
+      mInputOptionsUserInterface = new InputOptionsMenuUserInterface(mGame);
+
+   return mInputOptionsUserInterface;
 }
 
 
