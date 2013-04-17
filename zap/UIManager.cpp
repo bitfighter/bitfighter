@@ -61,36 +61,38 @@ UIManager::UIManager(ClientGame *clientGame)
 
 
    mMainMenuUserInterface = NULL;
+
+   mChatInterface = NULL;
+   mCreditsUserInterface = NULL;
+   mDiagnosticUserInterface = NULL;
+   mEditorInstructionsUserInterface = NULL;
+   mEditorMenuUserInterface = NULL;
+   mEditorUserInterface = NULL;
+   mErrorMsgUserInterface = NULL;
+   mGameMenuUserInterface = NULL;
    mGameParamUserInterface = NULL;
-   mYesNoUserInterface = NULL;
-   mTeamMenuUserInterface = NULL;
+   mGameUserInterface = NULL;
+   mHighScoresUserInterface = NULL;
+   mHostMenuUserInterface = NULL;
+   mInputOptionsUserInterface = NULL;
+   mInstructionsUserInterface = NULL;
+   mKeyDefMenuUserInterface = NULL;
+   mLevelChangeOrAdminPasswordEntryUserInterface = NULL;
+   mLevelMenuSelectUserInterface = NULL;
+   mLevelMenuUserInterface = NULL;
+   mLevelNameEntryUserInterface = NULL;
+   mMessageUserInterface = NULL;
+   mNameEntryUserInterface = NULL;
+   mOptionsMenuUserInterface = NULL;
+   mPlayerMenuUserInterface = NULL;
    mQueryServersUserInterface = NULL;
    mServerPasswordEntryUserInterface = NULL;
-   mGameUserInterface = NULL;
-   mPlayerMenuUserInterface = NULL;
-   mNameEntryUserInterface = NULL;
-   mMessageUserInterface = NULL;
-   mLevelMenuUserInterface = NULL;
-   mLevelMenuSelectUserInterface = NULL;
-   mLevelChangeOrAdminPasswordEntryUserInterface = NULL;
-   mHostMenuUserInterface = NULL;
-   mGameMenuUserInterface = NULL;
-   mErrorMsgUserInterface = NULL;
-   mInstructionsUserInterface = NULL;
-   mInputOptionsUserInterface = NULL;
-   mOptionsMenuUserInterface = NULL;
-   mHighScoresUserInterface = NULL;
-   mKeyDefMenuUserInterface = NULL;
-   mDiagnosticUserInterface = NULL;
-   mCreditsUserInterface = NULL;
-   mEditorInstructionsUserInterface = NULL;
-   mChatInterface = NULL;
-   mSuspendedUserInterface = NULL;
-   mEditorMenuUserInterface = NULL;
    mSplashUserInterface = NULL;
-   mLevelNameEntryUserInterface = NULL;
-   mEditorUserInterface = NULL;
+   mSoundOptionsMenuUserInterface = NULL;
+   mSuspendedUserInterface = NULL;
    mTeamDefUserInterface = NULL;
+   mTeamMenuUserInterface = NULL;
+   mYesNoUserInterface = NULL;
 
    mMenuTransitionTimer.reset(0);      // Set to 100 for a dizzying effect; doing so will cause editor to crash, so beware!
 }
@@ -100,35 +102,36 @@ UIManager::UIManager(ClientGame *clientGame)
 UIManager::~UIManager()
 {
    delete mMainMenuUserInterface;
+   delete mChatInterface;
+   delete mCreditsUserInterface;
+   delete mDiagnosticUserInterface;
+   delete mEditorInstructionsUserInterface;
+   delete mEditorMenuUserInterface;
+   delete mEditorUserInterface;
+   delete mErrorMsgUserInterface;
+   delete mGameMenuUserInterface;
    delete mGameParamUserInterface;
-   delete mYesNoUserInterface;
-   delete mTeamMenuUserInterface;
+   delete mGameUserInterface;
+   delete mHostMenuUserInterface;
+   delete mInputOptionsUserInterface;
+   delete mInstructionsUserInterface;
+   delete mKeyDefMenuUserInterface;
+   delete mLevelChangeOrAdminPasswordEntryUserInterface;
+   delete mLevelMenuSelectUserInterface;
+   delete mLevelMenuUserInterface;
+   delete mLevelNameEntryUserInterface;
+   delete mMessageUserInterface;
+   delete mNameEntryUserInterface;
+   delete mOptionsMenuUserInterface;
+   delete mPlayerMenuUserInterface;
    delete mQueryServersUserInterface;
    delete mServerPasswordEntryUserInterface;
-   delete mGameUserInterface;
-   delete mPlayerMenuUserInterface;
-   delete mNameEntryUserInterface;
-   delete mMessageUserInterface;
-   delete mLevelMenuUserInterface;
-   delete mLevelMenuSelectUserInterface;
-   delete mLevelChangeOrAdminPasswordEntryUserInterface;
-   delete mHostMenuUserInterface;
-   delete mGameMenuUserInterface;
-   delete mErrorMsgUserInterface;
-   delete mInstructionsUserInterface;
-   delete mInputOptionsUserInterface;
-   delete mOptionsMenuUserInterface;
-   delete mKeyDefMenuUserInterface;
-   delete mDiagnosticUserInterface;
-   delete mCreditsUserInterface;
-   delete mEditorInstructionsUserInterface;
-   delete mChatInterface;
-   delete mSuspendedUserInterface;
-   delete mEditorMenuUserInterface;
    delete mSplashUserInterface;
-   delete mLevelNameEntryUserInterface;
-   delete mEditorUserInterface;
+   delete mSoundOptionsMenuUserInterface;
+   delete mSuspendedUserInterface;
    delete mTeamDefUserInterface;
+   delete mTeamMenuUserInterface;
+   delete mYesNoUserInterface;
 }
 
 
@@ -186,6 +189,8 @@ UserInterface *UIManager::getUI(UIID menuId)
          return getServerPasswordEntryUserInterface();
       case PlayerUI:
          return getPlayerMenuUserInterface();
+      case SoundOptionsUI:
+         return getSoundOptionsMenuUserInterface();
       case TeamUI:
          return getTeamMenuUserInterface();
       case QueryServersScreenUI:
@@ -306,6 +311,16 @@ PlayerMenuUserInterface *UIManager::getPlayerMenuUserInterface()
       mPlayerMenuUserInterface = new PlayerMenuUserInterface(mGame);
 
    return mPlayerMenuUserInterface;
+}
+
+
+SoundOptionsMenuUserInterface *UIManager::getSoundOptionsMenuUserInterface()
+{
+   // Lazily initialize
+   if(!mSoundOptionsMenuUserInterface)
+      mSoundOptionsMenuUserInterface = new SoundOptionsMenuUserInterface(mGame);
+
+   return mSoundOptionsMenuUserInterface;
 }
 
 

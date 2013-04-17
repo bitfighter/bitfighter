@@ -1030,18 +1030,6 @@ OptionsMenuUserInterface::OptionsMenuUserInterface(ClientGame *game) : Parent(ga
 }
 
 
-void OptionsMenuUserInterface::processSelection(U32 index)
-{
-   // Do nothing
-}
-
-
-void OptionsMenuUserInterface::processShiftSelection(U32 index)
-{
-   // Do nothing
-}
-
-
 void OptionsMenuUserInterface::onActivate()
 {
    Parent::onActivate();
@@ -1049,37 +1037,18 @@ void OptionsMenuUserInterface::onActivate()
 }
 
 
-static string getVolMsg(F32 volume)
-{
-   S32 vol = U32((volume + 0.05) * 10.0);
-
-   string msg = itos(vol);
-
-   if(vol == 0)
-      msg += " [MUTE]";
-
-   return msg;
-}
-
-
 //////////
 // Callbacks for Options menu
-static void setSFXVolumeCallback(ClientGame *game, U32 vol)
+
+static void inputCallback(ClientGame *game, U32 unused)
 {
-   game->getSettings()->getIniSettings()->sfxVolLevel = F32(vol) / 10;
+   game->getUIManager()->activate(InputOptionsUI);
 }
 
-static void setMusicVolumeCallback(ClientGame *game, U32 vol)
-{
-   game->getSettings()->getIniSettings()->setMusicVolLevel(F32(vol) / 10);
-}
 
-static void setVoiceVolumeCallback(ClientGame *game, U32 vol)
+static void soundOptionsSelectedCallback(ClientGame *game, U32 unused)
 {
-   F32 oldVol = game->getSettings()->getIniSettings()->voiceChatVolLevel;
-   game->getSettings()->getIniSettings()->voiceChatVolLevel = F32(vol) / 10;
-   if((oldVol == 0) != (vol == 0) && game->getConnectionToServer())
-      game->getConnectionToServer()->s2rVoiceChatEnable(vol != 0);
+   game->getUIManager()->activate(SoundOptionsUI);
 }
 
 
@@ -1092,18 +1061,6 @@ static void setFullscreenCallback(ClientGame *game, U32 mode)
 
    settings->getIniSettings()->displayMode = (DisplayMode)mode;
    VideoSystem::actualizeScreenMode(game->getSettings(), false, game->getUIManager()->getCurrentUI()->usesEditorScreenMode());
-}
-
-
-static void inputCallback(ClientGame *game, U32 unused)
-{
-   game->getUIManager()->activate(InputOptionsUI);
-}
-
-
-static void setVoiceEchoCallback(ClientGame *game, U32 val)
-{
-   game->getSettings()->getIniSettings()->echoVoice = (val == 1);
 }
 
 
@@ -1132,34 +1089,13 @@ void OptionsMenuUserInterface::setupMenus()
    addMenuItem(new MenuItem(getMenuItemCount(), "INPUT", inputCallback, 
                         "Joystick settings, Remap keys", KEY_I));
 
+   addMenuItem(new MenuItem(getMenuItemCount(), "SOUNDS & OTHER STARTLING THINGS", soundOptionsSelectedCallback, 
+                        "Change volume and sound related options", KEY_S));
 
 #ifndef TNL_OS_MOBILE
    addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->displayMode));
 #endif
 
-   for(S32 i = 0; i <= 10; i++)
-      opts.push_back(getVolMsg( F32(i) / 10 ));
-
-   addMenuItem(new ToggleMenuItem("SFX VOLUME:",        opts, U32((settings->getIniSettings()->sfxVolLevel + 0.05) * 10.0), false, 
-                                  setSFXVolumeCallback,   "Set sound effects volume", KEY_S));
-
-   if(settings->getSpecified(NO_MUSIC))
-         addMenuItem(new MessageMenuItem("MUSIC MUTED FROM COMMAND LINE", Colors::red));
-   else
-      addMenuItem(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((settings->getIniSettings()->getMusicVolLevel() + 0.05) * 10.0), false,
-                                     setMusicVolumeCallback, "Set music volume", KEY_M));
-
-   addMenuItem(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((settings->getIniSettings()->voiceChatVolLevel + 0.05) * 10.0), false, 
-                                  setVoiceVolumeCallback, "Set voice chat volume", KEY_V));
-
-   // No music yet, so keep this out to keep menus from getting too long.  Uncomment when we have music.
-   //menuItems.push_back(new MenuItem("MUSIC VOLUME:", getVolMsg(settings->getIniSettings()->musicVolLevel), 6, KEY_M, KEY_UNKNOWN));
-
-   opts.clear();
-   opts.push_back("DISABLED");
-   opts.push_back("ENABLED");
-   addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, settings->getIniSettings()->echoVoice ? 1 : 0, true, 
-                                  setVoiceEchoCallback, "Toggle whether you hear your voice on voice chat",  KEY_E));
 #ifdef INCLUDE_CONN_SPEED_ITEM
    opts.clear();
    opts.push_back("VERY LOW");
@@ -1228,20 +1164,8 @@ void OptionsMenuUserInterface::onEscape()
 // Constructor
 InputOptionsMenuUserInterface::InputOptionsMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(OptionsUI);
-   mMenuTitle = "OPTIONS MENU:";
-}
-
-
-void InputOptionsMenuUserInterface::processSelection(U32 index)
-{
-   // Do nothing
-}
-
-
-void InputOptionsMenuUserInterface::processShiftSelection(U32 index)
-{
-   // Do nothing
+   setMenuID(InputOptionsUI);
+   mMenuTitle = "INPUT OPTIONS:";
 }
 
 
@@ -1396,6 +1320,101 @@ void InputOptionsMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
+SoundOptionsMenuUserInterface::SoundOptionsMenuUserInterface(ClientGame *game) : Parent(game)
+{
+   setMenuID(SoundOptionsUI);
+   mMenuTitle = "SOUND OPTIONS:";
+}
+
+
+void SoundOptionsMenuUserInterface::onActivate()
+{
+   Parent::onActivate();
+   setupMenus();
+}
+
+
+static string getVolMsg(F32 volume)
+{
+   S32 vol = U32((volume + 0.05) * 10.0);
+
+   string msg = itos(vol);
+
+   if(vol == 0)
+      msg += " [MUTE]";
+
+   return msg;
+}
+
+
+//////////
+// Callbacks for SoundOptions menu
+static void setSFXVolumeCallback(ClientGame *game, U32 vol)
+{
+   game->getSettings()->getIniSettings()->sfxVolLevel = F32(vol) / 10;
+}
+
+static void setMusicVolumeCallback(ClientGame *game, U32 vol)
+{
+   game->getSettings()->getIniSettings()->setMusicVolLevel(F32(vol) / 10);
+}
+
+static void setVoiceVolumeCallback(ClientGame *game, U32 vol)
+{
+   F32 oldVol = game->getSettings()->getIniSettings()->voiceChatVolLevel;
+   game->getSettings()->getIniSettings()->voiceChatVolLevel = F32(vol) / 10;
+   if((oldVol == 0) != (vol == 0) && game->getConnectionToServer())
+      game->getConnectionToServer()->s2rVoiceChatEnable(vol != 0);
+}
+
+
+static void setVoiceEchoCallback(ClientGame *game, U32 val)
+{
+   game->getSettings()->getIniSettings()->echoVoice = (val == 1);
+}
+
+
+void SoundOptionsMenuUserInterface::setupMenus()
+{
+   clearMenuItems();
+   Vector<string> opts;
+
+   GameSettings *settings = getGame()->getSettings();
+
+   for(S32 i = 0; i <= 10; i++)
+      opts.push_back(getVolMsg( F32(i) / 10 ));
+
+   addMenuItem(new ToggleMenuItem("SFX VOLUME:",        opts, U32((settings->getIniSettings()->sfxVolLevel + 0.05) * 10.0), false, 
+                                  setSFXVolumeCallback,   "Set sound effects volume", KEY_S));
+
+   if(settings->getSpecified(NO_MUSIC))
+         addMenuItem(new MessageMenuItem("MUSIC MUTED FROM COMMAND LINE", Colors::red));
+   else
+      addMenuItem(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((settings->getIniSettings()->getMusicVolLevel() + 0.05) * 10.0), false,
+                                     setMusicVolumeCallback, "Set music volume", KEY_M));
+
+   addMenuItem(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((settings->getIniSettings()->voiceChatVolLevel + 0.05) * 10.0), false, 
+                                  setVoiceVolumeCallback, "Set voice chat volume", KEY_V));
+   opts.clear();
+   opts.push_back("DISABLED");
+   opts.push_back("ENABLED");
+   addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, settings->getIniSettings()->echoVoice ? 1 : 0, true, 
+                                  setVoiceEchoCallback, "Toggle whether you hear your voice on voice chat",  KEY_E));
+}
+
+
+// Save options to INI file, and return to our regularly scheduled program
+void SoundOptionsMenuUserInterface::onEscape()
+{
+   saveSettingsToINI(&gINI, getGame()->getSettings());
+   getUIManager()->reactivatePrevUI();      //mGameUserInterface
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
 NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(NameEntryUI);
@@ -1406,21 +1425,9 @@ NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : Parent(game)
 }
 
 
-void NameEntryUserInterface::processSelection(U32 index)
-{
-   // Do nothing
-}
-
-
-void NameEntryUserInterface::processShiftSelection(U32 index)
-{
-   // Do nothing
-}
-
-
-void NameEntryUserInterface::setReactivationReason(NetConnection::TerminationReason r) 
+void NameEntryUserInterface::setReactivationReason(NetConnection::TerminationReason reason) 
 { 
-   mReason = r; 
+   mReason = reason; 
    mMenuTitle = ""; 
 }
 

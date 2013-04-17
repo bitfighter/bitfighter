@@ -60,6 +60,7 @@ class MessageUserInterface;
 class NameEntryUserInterface;
 class OptionsMenuUserInterface;
 class PlayerMenuUserInterface;
+class SoundOptionsMenuUserInterface;
 class QueryServersUserInterface;
 class ServerPasswordEntryUserInterface;
 class ServerPasswordEntryUserInterface;
@@ -103,6 +104,7 @@ enum UIID {
    PlayerUI,
    TeamUI,
    QueryServersScreenUI,
+   SoundOptionsUI,
    SplashUI,
    TeamDefUI,
    TextEntryUI,
@@ -141,6 +143,7 @@ private:
    NameEntryUserInterface                       *mNameEntryUserInterface;
    OptionsMenuUserInterface                     *mOptionsMenuUserInterface;
    PlayerMenuUserInterface                      *mPlayerMenuUserInterface;
+   SoundOptionsMenuUserInterface                *mSoundOptionsMenuUserInterface;
    QueryServersUserInterface                    *mQueryServersUserInterface;
    ServerPasswordEntryUserInterface             *mServerPasswordEntryUserInterface;
    SplashUserInterface                          *mSplashUserInterface;
@@ -193,6 +196,7 @@ public:
    PlayerMenuUserInterface                      *getPlayerMenuUserInterface();
    QueryServersUserInterface                    *getQueryServersUserInterface();
    ServerPasswordEntryUserInterface             *getServerPasswordEntryUserInterface();
+   SoundOptionsMenuUserInterface                *getSoundOptionsMenuUserInterface();
    SplashUserInterface                          *getSplashUserInterface();
    SuspendedUserInterface                       *getSuspendedUserInterface();
    TeamDefUserInterface                         *getTeamDefUserInterface();

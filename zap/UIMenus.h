@@ -119,9 +119,8 @@ public:
    void onMouseMoved();
    void processMouse();
 
-   void onActivate();
-   void onReactivate();
-
+   virtual void onActivate();
+   virtual void onReactivate();
    virtual void onEscape();
 };
 
@@ -195,8 +194,6 @@ class OptionsMenuUserInterface : public MenuUserInterface
 
 public:
    explicit OptionsMenuUserInterface(ClientGame *game);        // Constructor
-   void processSelection(U32 index);            // Process selected menu item when right arrow is pressed
-   void processShiftSelection(U32 index);       // And when the left arrow is pressed
    void onEscape();
    void setupMenus();
    void onActivate();
@@ -213,12 +210,24 @@ class InputOptionsMenuUserInterface : public MenuUserInterface
 
 public:
    explicit InputOptionsMenuUserInterface(ClientGame *game);        // Constructor
-   void processSelection(U32 index);            // Process selected menu item when right arrow is pressed
-   void processShiftSelection(U32 index);       // And when the left arrow is pressed
    void onEscape();
    void setupMenus();
    void onActivate();
-   void toggleDisplayMode();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class SoundOptionsMenuUserInterface : public MenuUserInterface
+{
+   typedef MenuUserInterface Parent;
+
+public:
+   explicit SoundOptionsMenuUserInterface(ClientGame *game);        // Constructor
+   void onEscape();
+   void setupMenus();
+   void onActivate();
 };
 
 ////////////////////////////////////////
@@ -268,6 +277,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Player enters their name and password
 class NameEntryUserInterface : public MenuUserInterfaceWithIntroductoryAnimation
 {
    typedef MenuUserInterfaceWithIntroductoryAnimation Parent;
@@ -278,8 +288,6 @@ private:
 
 public:
    explicit NameEntryUserInterface(ClientGame *game);    // Constructor
-   void processSelection(U32 index);            // Process selected menu item when right arrow is pressed
-   void processShiftSelection(U32 index);       // And when the left arrow is pressed
    void onEscape();
    void setupMenu();
    void onActivate();
