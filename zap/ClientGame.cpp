@@ -358,6 +358,33 @@ void ClientGame::emitTeleportInEffect(const Point &pos, U32 type)
 }
 
 
+// User selected Switch Teams meunu item
+void ClientGame::switchTeams()
+{
+   if(!mGameType)    // I think these GameType checks are not needed
+      return;
+
+   // If there are only two teams, just switch teams and skip the rigamarole
+   if(getTeamCount() == 2)
+   {
+      BfObject *controlObject = getConnectionToServer()->getControlObject();
+      if(!controlObject || !isShipType(controlObject->getObjectTypeNumber()))
+         return;
+
+      Ship *ship = static_cast<Ship *>(controlObject);   // Returns player's ship...
+
+      mGameType->c2sChangeTeams(1 - ship->getTeam());    // If two teams, team will either be 0 or 1, so "1 - " will toggle
+      getUIManager()->reactivate(GameUI);                // Jump back into the game (this option takes place immediately)
+   }
+   else
+   {
+      // Show menu to let player select a new team... future home of mUi->showTeamMenu()
+      TeamMenuUserInterface *ui = getUIManager()->getTeamMenuUserInterface();
+      ui->nameToChange = getPlayerName();
+      getUIManager()->activate(ui);                  
+   }
+}
+
 
 // User has pressed a key, finished composing that most eloquent of chat messages, or taken some other action to undelay their spawn
 void ClientGame::undelaySpawn()
@@ -653,9 +680,84 @@ void ClientGame::gotServerListFromMaster(const Vector<IPAddress> &serverList)
 }
 
 
-void ClientGame::gotChatMessage(const char *playerNick, const char *message, bool isPrivate, bool isSystem)
+// Message relayed through master -- global chat system
+void ClientGame::gotGlobalChatMessage(const char *playerNick, const char *message, bool isPrivate)
 {
-   getUIManager()->getChatUserInterface()->newMessage(playerNick, message, isPrivate, isSystem, false);
+   getUIManager()->getChatUserInterface()->newMessage(playerNick, message, isPrivate, false, false);
+}
+
+
+// Message relayed through server -- normal chat system
+void ClientGame::gotChatMessage(const StringTableEntry &clientName, const StringPtr &message, bool global)
+{
+   if(isOnMuteList(clientName.getString()))
+      return;
+
+   const Color *color = global ? &Colors::globalChatColor : &Colors::teamChatColor;
+   mUi->onChatMessageReceived(*color, "%s: %s", clientName.getString(), message.getString());
+}
+
+
+void ClientGame::gotChatPM(const StringTableEntry &fromName, const StringTableEntry &toName, const StringPtr &message)
+{
+   ClientInfo *fullClientInfo = getClientInfo();
+
+   Color color = Colors::yellow;
+
+   if(fullClientInfo->getName() == toName && toName == fromName)      // Message sent to self
+      mUi->onChatMessageReceived(color, "%s: %s", toName.getString(), message.getString());
+
+   else if(fullClientInfo->getName() == toName)                       // To this player
+      mUi->onChatMessageReceived(color, "from %s: %s", fromName.getString(), message.getString());
+
+   else if(fullClientInfo->getName() == fromName)                     // From this player
+      mUi->onChatMessageReceived(color, "to %s: %s", toName.getString(), message.getString());
+
+   else  
+      TNLAssert(false, "Should never get here... shouldn't be able to see PM that is not from or not to you"); 
+}
+
+
+void ClientGame::gotAnnouncement(const string &announcement)
+{
+	mUi->setAnnouncement(announcement);
+}
+
+
+void ClientGame::gotVoiceChat(const StringTableEntry &from, const ByteBufferPtr &voiceBuffer)
+{
+   ClientInfo *clientInfo = findClientInfo(from);
+
+   if(!clientInfo)
+      return;
+
+   if(isOnVoiceMuteList(from.getString()))
+      return;
+
+   ByteBufferPtr playBuffer = clientInfo->getVoiceDecoder()->decompressBuffer(*(voiceBuffer.getPointer()));
+   SoundSystem::queueVoiceChatBuffer(clientInfo->getVoiceSFX(), playBuffer);
+}
+
+
+void ClientGame::activatePlayerMenuUi()
+{
+   PlayerMenuUserInterface *ui = mUIManager->getPlayerMenuUserInterface();
+
+   ui->action = PlayerMenuUserInterface::ChangeTeam;
+   mUIManager->activate(ui);
+}
+
+
+void ClientGame::renderBasicInterfaceOverlay(bool scoreboardVisible)
+{
+   mUi->renderBasicInterfaceOverlay(scoreboardVisible);
+}
+
+
+void ClientGame::gameTypeIsAboutToBeDeleted()
+{
+   // Quit EngineerHelper when level changes, or when current GameType get removed
+   mUi->quitEngineerHelper();
 }
 
 
@@ -720,6 +822,14 @@ void ClientGame::onPlayerQuit(const StringTableEntry &name)
    SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 
    mUIManager->getGameUserInterface()->onPlayerQuit();
+}
+
+
+// Server tells the GameType that the game is now over.  We in turn tell the UI, which in turn notifies its helpers.
+// This begins the phase of showing the post-game scoreboard.
+void ClientGame::setGameOver()
+{
+   mUi->onGameOver();
 }
 
 

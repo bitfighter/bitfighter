@@ -547,7 +547,7 @@ public:
    T& operator*() const  { return *static_cast<T*>(mObject); }
    operator T*() const   { return static_cast<T*>(mObject); }
    operator T*() { return static_cast<T*>(mObject); }
-   T* getPointer() { return static_cast<T*>(mObject); }
+   T* getPointer() const { return static_cast<T*>(mObject); }
 };
 
 /// Base class for Object safe pointers.

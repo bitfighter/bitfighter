@@ -44,10 +44,8 @@
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
 #   include "loadoutHelper.h"
-#   include "UIGame.h"
 #   include "UIMenus.h"
 #   include "UIErrorMessage.h"   
-#   include "OpenglUtils.h"
 #endif
 
 
@@ -181,6 +179,15 @@ void GameTimer::setGameIsOver()
 }
 
 
+void GameTimer::setTimeRemaining(U32 timeLeft, bool isUnlimited)
+{
+   U32 offset = getCurrent() + getRenderingOffset() - timeLeft;
+
+   reset(timeLeft);
+   setIsUnlimited(isUnlimited);
+   setRenderingOffset(offset);
+}
+
 
 ////////////////////////////////////////      __              ___           
 ////////////////////////////////////////     /__  _. ._ _   _  |    ._   _  
@@ -276,14 +283,15 @@ bool GameType::onGhostAdd(GhostConnection *theConnection)
 #endif
 }
 
+
+// onGhostRemove is called on the client side before the destructor
+// when ghost is about to be deleted from the client
 void GameType::onGhostRemove()
 {
 #ifndef ZAP_DEDICATED
    TNLAssert(dynamic_cast<ClientGame *>(getGame()), "Should only be clientGame here!");
    ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-
-   // Quit EngineerHelper when level changes, or when current GameType get removed
-   clientGame->getUIManager()->getGameUserInterface()->quitEngineerHelper();
+   clientGame->gameTypeIsAboutToBeDeleted();
 #endif
 }
 
@@ -308,7 +316,6 @@ Vector<string> GameType::getGameParameterMenuKeys()
 
    return Vector<string> (vals, ARRAYSIZE(vals));
 }
-
 
 
 // Definitions for those items
@@ -782,7 +789,7 @@ bool GameType::advanceGameClock(U32 deltaT)
 #ifndef ZAP_DEDICATED
 void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
-   static_cast<ClientGame *>(mGame)->getUIManager()->getGameUserInterface()->renderBasicInterfaceOverlay(this, scoreboardVisible);
+   static_cast<ClientGame *>(mGame)->renderBasicInterfaceOverlay(scoreboardVisible);
 }
 
 
@@ -1289,8 +1296,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver
 
    if(gameOver)
    {
-      // Alert the UI that the game is now over
-      static_cast<ClientGame *>(mGame)->getUIManager()->getGameUserInterface()->onGameOver();
+      static_cast<ClientGame *>(mGame)->setGameOver();
 
       // Tell timer it's all over
       mGameTimer.setGameIsOver();
@@ -2177,30 +2183,8 @@ S32 GameType::renderTimeLeftSpecial(S32 right, S32 bottom) const
 
 static void switchTeamsCallback(ClientGame *game, U32 unused)
 {
-   GameType *gt = game->getGameType();
-   if(!gt)
-      return;
-
-   // If there are only two teams, just switch teams and skip the rigamarole
-   if(game->getTeamCount() == 2)
-   {
-      BfObject *controlObject = game->getConnectionToServer()->getControlObject();
-      if(!controlObject || !isShipType(controlObject->getObjectTypeNumber()))
-         return;
-
-      Ship *ship = static_cast<Ship *>(controlObject);   // Returns player's ship...
-
-      gt->c2sChangeTeams(1 - ship->getTeam());           // If two teams, team will either be 0 or 1, so "1 - " will toggle
-      game->getUIManager()->reactivate(GameUI);          // Jump back into the game (this option takes place immediately)
-   }
-   else
-   {
-      // Show menu to let player select a new team
-      TeamMenuUserInterface *ui = game->getUIManager()->getTeamMenuUserInterface();
-      ui->nameToChange = game->getClientInfo()->getName();
-      game->getUIManager()->activate(ui);                  
-   }
- }
+   game->switchTeams();
+}
 
 
 // Add any additional game-specific menu items, processed below
@@ -2227,10 +2211,7 @@ void GameType::addClientGameMenuOptions(ClientGame *game, MenuUserInterface *men
 
 static void switchPlayersTeamCallback(ClientGame *game, U32 unused)
 {
-   PlayerMenuUserInterface *ui = game->getUIManager()->getPlayerMenuUserInterface();
-
-   ui->action = PlayerMenuUserInterface::ChangeTeam;
-   game->getUIManager()->activate(ui);
+   game->activatePlayerMenuUi();
 }
 
 
@@ -2486,11 +2467,7 @@ void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 {
    TNLAssert(getGame()->isServer(), "This should only run on the server!");
 
-   U32 offset = mGameTimer.getCurrent() + mGameTimer.getRenderingOffset() - timeLeft;
-
-   mGameTimer.reset(timeLeft);
-   mGameTimer.setIsUnlimited(isUnlimited);
-   mGameTimer.setRenderingOffset(offset);
+   mGameTimer.setTimeRemaining(timeLeft, isUnlimited);
 }
 
 
@@ -3605,9 +3582,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), 
 {
 #ifndef ZAP_DEDICATED
 	ClientGame* clientGame = static_cast<ClientGame *>(mGame);
-	GameUserInterface* gameUI = clientGame->getUIManager()->getGameUserInterface();
-
-	gameUI->setAnnouncement(message);
+   clientGame->gotAnnouncement(message);
 #endif
 }
 
@@ -3616,25 +3591,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), 
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringTableEntry toName, StringPtr message), (fromName, toName, message))
 {
 #ifndef ZAP_DEDICATED
-
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-
-   ClientInfo *fullClientInfo = clientGame->getClientInfo();
-   GameUserInterface *gameUI = clientGame->getUIManager()->getGameUserInterface();
-
-   Color theColor = Colors::yellow;
-
-   if(fullClientInfo->getName() == toName && toName == fromName)      // Message sent to self
-      gameUI->onChatMessageReceived(theColor, "%s: %s", toName.getString(), message.getString());
-
-   else if(fullClientInfo->getName() == toName)                       // To this player
-      gameUI->onChatMessageReceived(theColor, "from %s: %s", fromName.getString(), message.getString());
-
-   else if(fullClientInfo->getName() == fromName)                     // From this player
-      gameUI->onChatMessageReceived(theColor, "to %s: %s", toName.getString(), message.getString());
-
-   else  
-      TNLAssert(false, "Should never get here... shouldn't be able to see PM that is not from or not to you"); 
+   clientGame->gotChatPM(fromName, toName, message);
 #endif
 }
 
@@ -3643,12 +3601,7 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
 {
 #ifndef ZAP_DEDICATED
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-
-   if(clientGame->isOnMuteList(clientName.getString()))
-      return;
-
-   const Color *color = global ? &Colors::globalChatColor : &Colors::teamChatColor;
-   clientGame->getUIManager()->getGameUserInterface()->onChatMessageReceived(*color, "%s: %s", clientName.getString(), message.getString());
+   clientGame->gotChatMessage(clientName, message, global);
 #endif
 }
 
@@ -3908,17 +3861,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
    NetClassGroupGameMask, RPCUnguaranteed, RPCToGhost, 0)
 {
 #ifndef ZAP_DEDICATED
-   ClientInfo *clientInfo = mGame->findClientInfo(clientName);
-   if(!clientInfo)
-      return;
-
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-   if(clientGame->isOnVoiceMuteList(clientName.getString()))
-      return;
-
-   ByteBufferPtr playBuffer = clientInfo->getVoiceDecoder()->decompressBuffer(*(voiceBuffer.getPointer()));
-   SoundSystem::queueVoiceChatBuffer(clientInfo->getVoiceSFX(), playBuffer);
-
+   static_cast<ClientGame *>(mGame)->gotVoiceChat(clientName, voiceBuffer);
 #endif
 }
 

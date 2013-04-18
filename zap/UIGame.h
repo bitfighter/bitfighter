@@ -253,7 +253,7 @@ public:
    void startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled);
    void doneLoadingLevel();
 
-   void setAnnouncement(string announcement);
+   void setAnnouncement(const string &announcement);
    void displayMessage(const Color &msgColor, const char *message);
    void onChatMessageReceived(const Color &msgColor, const char *format, ...);
    const char *getChatMessage();    // Return message being composed in in-game chat
@@ -295,7 +295,8 @@ public:
    void emitTeleportInEffect(const Point &pos, U32 type);
 
    
-   void renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible);
+   void renderBasicInterfaceOverlay(bool scoreboardVisible);
+   void renderLevelInfo();
    void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
 
    void idle(U32 timeDelta);

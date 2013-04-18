@@ -119,17 +119,20 @@ public:
    void startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled);
    void doneLoadingLevel();
 
+   void switchTeams();     // User selected Switch Teams meunu item
+
    UIManager *getUIManager() const;
 
    bool getInCommanderMap();
    void setInCommanderMap(bool inCommanderMap);
    F32 getCommanderZoomFraction() const;
 
-   void onGameOver();
+   void setGameOver();     // Post-game scoreboard is about to be displayed
+   void onGameOver();      // Post-game scoreboard has already been displayed
 
    Point worldToScreenPoint(const Point *p) const;
 
-   void render();             // Delegates to renderNormal, renderCommander, or renderSuspended, as appropriate
+   void render();          // Delegates to renderNormal, renderCommander, or renderSuspended, as appropriate
 
    void resetZoomDelta();
    void clearZoomDelta();
@@ -140,7 +143,18 @@ public:
    Ship *findShip(const StringTableEntry &clientName);
 
    void gotServerListFromMaster(const Vector<IPAddress> &serverList);
-   void gotChatMessage(const char *playerNick, const char *message, bool isPrivate, bool isSystem);
+
+   // Got some shizzle
+   void gotGlobalChatMessage(const char *playerNick, const char *message, bool isPrivate);
+   void gotChatMessage(const StringTableEntry &clientName, const StringPtr &message, bool global);
+   void gotChatPM(const StringTableEntry &fromName, const StringTableEntry &toName, const StringPtr &message);
+   void gotAnnouncement(const string &announcement);
+   void gotVoiceChat(const StringTableEntry &from, const ByteBufferPtr &voiceBuffer);
+
+   void gameTypeIsAboutToBeDeleted();
+   void activatePlayerMenuUi();
+   void renderBasicInterfaceOverlay(bool scoreboardVisible);
+
    void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
    void playerJoinedGlobalChat(const StringTableEntry &playerNick);
    void playerLeftGlobalChat(const StringTableEntry &playerNick);

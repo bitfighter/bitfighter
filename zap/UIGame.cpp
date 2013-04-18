@@ -146,10 +146,9 @@ void GameUserInterface::onGameOver()         { mHelperManager.onGameOver();     
 void GameUserInterface::quitEngineerHelper() { mHelperManager.quitEngineerHelper(); }  // When ship dies engineering
 
 
-void GameUserInterface::setAnnouncement(string message)
+void GameUserInterface::setAnnouncement(const string &message)
 {
 	mAnnouncement = message;
-
 	mAnnouncementTimer.reset();
 }
 
@@ -1750,27 +1749,16 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
 }
 
 
-void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible)
+void GameUserInterface::renderBasicInterfaceOverlay(bool scoreboardVisible)
 {
-   if(!mLevelInfoDisplayer.isActive())
-      int x = 0;
-
-   if(mLevelInfoDisplayer.isActive() || mMissionOverlayActive)
-   {
-      mLevelInfoDisplayer.render(gameType, getGame()->getTeamCount(), getInputCodeString(getGame()->getSettings(), 
-                                 InputCodeManager::BINDING_MISSION), mMissionOverlayActive);
-      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
-   }
-
+   GameType *gameType = getGame()->getGameType();
+   
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
       renderInputModeChangeAlert();
 
-   Game *game = getGame();
-   S32 teamCount = game->getTeamCount();
-
    bool showScore = gameType->isGameOver() || scoreboardVisible;
 
-   if(showScore && teamCount > 0)      // How could teamCount be 0?
+   if(showScore && getGame()->getTeamCount() > 0)      // How could teamCount be 0?
       renderScoreboard();
    
    // Render timer and associated doodads in the lower-right corner
@@ -1778,6 +1766,18 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
 
    renderTalkingClients();
    renderDebugStatus();
+}
+
+
+void GameUserInterface::renderLevelInfo()
+{
+   S32 teamCount = getGame()->getTeamCount();
+
+   if(mLevelInfoDisplayer.isActive() || mMissionOverlayActive)
+   {
+      mLevelInfoDisplayer.render(getGame()->getGameType(), teamCount);
+      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
+   }
 }
 
 
@@ -2062,6 +2062,8 @@ void GameUserInterface::renderNormal(ClientGame *game)
       renderEnergyGuage(ship->mEnergy);   
 
    //renderOverlayMap();     // Draw a floating overlay map
+
+   renderLevelInfo();
 }
 
 
@@ -2213,8 +2215,9 @@ void GameUserInterface::renderCommander(ClientGame *game)
    getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
 
    glPopMatrix();
-}
 
+   renderLevelInfo();
+}
 
 
 

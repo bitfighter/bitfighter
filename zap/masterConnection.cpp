@@ -358,7 +358,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendChat, (StringTableEntr
    if(mGame->isServer())
       return;
 
-   static_cast<ClientGame *>(mGame)->gotChatMessage(playerNick.getString(), message.getString(), isPrivate, false);
+   static_cast<ClientGame *>(mGame)->gotGlobalChatMessage(playerNick.getString(), message.getString(), isPrivate);
 }
 
 

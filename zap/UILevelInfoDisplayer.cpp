@@ -60,7 +60,7 @@ void LevelInfoDisplayer::clearDisplayTimer()
 
 extern ScreenInfo gScreenInfo;
 
-void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, const char *activationKey, bool userActivated)
+void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount)
 {
    FontManager::pushFontContext(FontManager::LevelInfoContext);
 

@@ -552,9 +552,9 @@ void Game::countTeamPlayers()
 }
 
 
-void Game::setGameType(GameType *theGameType)
+void Game::setGameType(GameType *gameType)
 {
-   mGameType = theGameType;
+   mGameType = gameType;
 }
 
 

@@ -46,7 +46,7 @@ private:
 public:
    void resetDisplayTimer();
    void idle(U32 timeDelta);
-   void render(const GameType *gameType, S32 teamCount, const char *activationKey, bool userActivated);
+   void render(const GameType *gameType, S32 teamCount);
 
    void clearDisplayTimer();
    virtual bool isActive() const;

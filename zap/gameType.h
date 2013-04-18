@@ -76,16 +76,20 @@ private:
 public:
    void reset(U32 timeInMs);
    void sync(U32 deltaT);
-   bool update(U32 deltaT);
    void extend(S32 deltaT);
 
-   bool isUnlimited() const;
    void setIsUnlimited(bool isUnlimited);
+   void setRenderingOffset(S32 offset);
+   void setGameIsOver();
+   void setTimeRemaining(U32 timeLeft, bool isUnlimited);
+
+   bool update(U32 deltaT);
+   bool isUnlimited() const;
+
    U32 getCurrent() const; 
    U32 getTotalGameTime() const;
    S32 getRenderingOffset() const;
-   void setRenderingOffset(S32 offset);
-   void setGameIsOver();
+
 
    string toString_minutes() const;      // Creates string representation of timer for level saving purposes
 };
