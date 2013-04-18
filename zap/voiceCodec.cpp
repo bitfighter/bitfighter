@@ -28,7 +28,7 @@
 namespace Zap
 {
 
-ByteBufferPtr VoiceEncoder::compressBuffer(ByteBufferPtr sampleBuffer)
+ByteBufferPtr VoiceEncoder::compressBuffer(const ByteBufferPtr &sampleBuffer)
 {
    U32 sampleCount = sampleBuffer->getBufferSize() >> 1;
    U32 spf = getSamplesPerFrame();

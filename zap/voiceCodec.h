@@ -55,7 +55,7 @@ class VoiceEncoder : public Object
    virtual U32 getMaxCompressedFrameSize() = 0;
    virtual U32 compressFrame(S16 *samplePtr, U8 *outputPtr) = 0;
 public:
-   ByteBufferPtr compressBuffer(ByteBufferPtr sampleBuffer);
+   ByteBufferPtr compressBuffer(const ByteBufferPtr &sampleBuffer);
 };
 
 /// The VoiceDecoder class is an abstract base class for the various
