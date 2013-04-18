@@ -270,7 +270,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
 
    if(collision)
    {
-      mErrorMessage = "!!! Cannot deply forcefield where it could cross another.";
+      mErrorMessage = "!!! Cannot deploy forcefield where it could cross another.";
       return false;
    }
 
