@@ -127,6 +127,8 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
    mAnnouncementTimer.setPeriod(15000);  // 15 seconds
    mAnnouncement = "";
 
+   mProgressBarFadeTimer.setPeriod(1000);
+
    prepareStars();
 }
 
@@ -240,6 +242,23 @@ void GameUserInterface::displayMessage(const Color &msgColor, const char *messag
 }
 
 
+void GameUserInterface::startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled)
+{
+   mShowProgressBar = true;             // Show progress bar
+   setViewBoundsWhileLoading(lx, ly, ux, uy);
+
+   resetLevelInfoDisplayTimer();        // Start displaying the level info, now that we have it
+   pregameSetup(engineerEnabled);       // Now we know all we need to initialize our loadout options
+}
+
+
+void GameUserInterface::doneLoadingLevel()
+{
+   mShowProgressBar = false;
+   mProgressBarFadeTimer.reset();
+}
+
+
 void GameUserInterface::idle(U32 timeDelta)
 {
    Parent::idle(timeDelta);
@@ -287,7 +306,7 @@ void GameUserInterface::resetInputModeChangeAlertDisplayTimer(U32 timeInMs)
 
 
 #ifdef TNL_OS_WIN32
-extern void checkMousePos(S32 maxdx, S32 maxdy);
+   extern void checkMousePos(S32 maxdx, S32 maxdy);
 #endif
 
 
@@ -1959,6 +1978,10 @@ static S32 QSORT_CALLBACK renderSortCompare(BfObject **a, BfObject **b)
 
 void GameUserInterface::renderNormal(ClientGame *game)
 {
+   // Start of the level, we only show progress bar
+   if(mShowProgressBar)
+      return;
+
    // Here we determine if we have a control ship.
    // If not (like after we've been killed), we'll still render the current position and things
    GameConnection *conn = game->getConnectionToServer();
@@ -2044,6 +2067,10 @@ void GameUserInterface::renderNormal(ClientGame *game)
 
 void GameUserInterface::renderCommander(ClientGame *game)
 {
+   // Start of the level, we only show progress bar
+   if(mShowProgressBar)
+      return;
+
    F32 zoomFrac = game->getCommanderZoomFraction();
 
    const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();

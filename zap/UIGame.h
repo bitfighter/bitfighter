@@ -116,8 +116,6 @@ private:
    };
 	
    MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
-   void renderChatMsgs();
-   void renderAnnouncement(S32 pos);
 
    Move mCurrentMove;
    Move mTransformedMove;
@@ -160,6 +158,8 @@ private:
    bool mDebugShowMeshZones;        // Show bot nav mesh zones?
    bool mShowDebugBots;
 
+   Timer mProgressBarFadeTimer;     // For fading out progress bar after level is loaded
+   bool mShowProgressBar;
 
    // Some rendering routines
    void renderScoreboard();
@@ -181,6 +181,8 @@ private:
    void renderInputModeChangeAlert();
    void renderTalkingClients();              // Render things related to voice chat
    void renderDebugStatus();                 // Render things related to debugging
+   void renderChatMsgs();
+   void renderAnnouncement(S32 pos);
 
    struct VoiceRecorder
    {
@@ -247,6 +249,9 @@ public:
 
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);
+
+   void startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled);
+   void doneLoadingLevel();
 
    void setAnnouncement(string announcement);
    void displayMessage(const Color &msgColor, const char *message);
@@ -350,8 +355,6 @@ public:
    bool isInScoreboardMode();
 
    Move *getCurrentMove();
-   Timer mProgressBarFadeTimer;     // For fading out progress bar after level is loaded
-   bool mShowProgressBar;
 };
 
 

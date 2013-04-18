@@ -249,6 +249,30 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
 }
 
 
+void ClientGame::startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled)
+{
+   mObjectsLoaded = 0;              // Reset item counter
+   clearSparks();
+
+   //setInCommanderMap(true);       // If we change here, need to tell the server we are in this mode
+   //resetZoomDelta();
+
+   mUi->startLoadingLevel(lx, ly, ux, uy, engineerEnabled);
+}
+
+
+void ClientGame::doneLoadingLevel()
+{
+   computeWorldObjectExtents();              // Make sure our world extents reflect all the objects we've loaded
+   Barrier::prepareRenderingGeometry(this);  // Get walls ready to render
+
+   //setInCommanderMap(false);               // Start game in regular mode, If we change here, need to tell the server we are in this mode. Map can change while in commander map.
+   //clearZoomDelta();                       // No in zoom effect
+
+   mUi->doneLoadingLevel();
+}
+
+
 ClientInfo *ClientGame::getClientInfo()
 {
    return mClientInfo;
@@ -1494,10 +1518,6 @@ void ClientGame::render()
 
    // Not in the Game UI (or one of its submenus)...
    if(currentUI != GameUI && !mUIManager->cameFrom(GameUI))
-      return;
-
-   // Start of the level, we only show progress bar
-   if(mUi->mShowProgressBar)
       return;
 
    if(mCommanderZoomDelta > 0)

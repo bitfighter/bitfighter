@@ -2256,11 +2256,6 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
                                                 levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled))
 {
 #ifndef ZAP_DEDICATED
-   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-
-   clientGame->clearSparks();
-
    mLevelName = levelName;
    mLevelDescription = levelDesc;
    mLevelCredits = levelCreds;
@@ -2275,17 +2270,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    // Need to send this to the client because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
    mLevelHasLoadoutZone = levelHasLoadoutZone;        
 
-   clientGame->mObjectsLoaded = 0;              // Reset item counter
-
-   GameUserInterface *gameUI = clientGame->getUIManager()->getGameUserInterface();
-   gameUI->mShowProgressBar = true;             // Show progress bar
-   gameUI->setViewBoundsWhileLoading(lx, ly, ux, uy);
-
-   gameUI->resetLevelInfoDisplayTimer();        // Start displaying the level info, now that we have it
-   gameUI->pregameSetup(engineerEnabled);       // Now we know all we need to initialize our loadout options
-
-   //clientGame->setInCommanderMap(true);       // If we change here, need to tell the server we are in this mode
-   //clientGame->resetZoomDelta();
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+   clientGame->startLoadingLevel(lx, ly, ux, uy, engineerEnabled);
 #endif
 }
 
@@ -2793,15 +2779,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
-
-   clientGame->computeWorldObjectExtents();          // Make sure our world extents reflect all the objects we've loaded
-   Barrier::prepareRenderingGeometry(clientGame);    // Get walls ready to render
-
-   clientGame->getUIManager()->getGameUserInterface()->mShowProgressBar = false;
-   //clientGame->setInCommanderMap(false);          // Start game in regular mode, If we change here, need to tell the server we are in this mode. Map can change while in commander map.
-   //clientGame->clearZoomDelta();                  // No in zoom effect
-   
-   clientGame->getUIManager()->getGameUserInterface()->mProgressBarFadeTimer.reset(1000);
+   clientGame->doneLoadingLevel();
 
    // Prepare scoreboard
    updateLeadingPlayerAndScore();
