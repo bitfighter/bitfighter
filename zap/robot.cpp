@@ -275,7 +275,7 @@ void Robot::onAddedToGame(Game *game)
    {
       TNLAssert(mClientInfo.isNull(), "mClientInfo should be NULL");
 
-      mClientInfo = new FullClientInfo(game, NULL, true);  // deleted in destructor
+      mClientInfo = new FullClientInfo(game, NULL, "Robot", true);  // deleted in destructor
       mClientInfo->setShip(this);
       this->setOwner(mClientInfo);
    }

@@ -294,7 +294,7 @@ void abortHosting_noLevels()
 
 // This is not a very good way of seeding the prng, but it should generate unique, if not cryptographicly secure, streams.
 // We'll get 4 bytes from the time, up to 12 bytes from the name, and any left over slots will be filled with unitialized junk.
-void seedRandomNumberGenerator(string name)
+void seedRandomNumberGenerator(const string &name)
 {
    U32 seconds = Platform::getRealMilliseconds();
    const S32 timeByteCount = 4;
@@ -817,8 +817,6 @@ void createClientGame(GameSettings *settings)
    {
       // Create a new client, and let the system figure out IP address and assign a port
       ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, settings->getIniSettings()->clientPortNumber), settings);  
-
-      clientGame->setLoginPassword(settings->getPlayerPassword());
 
        // Put any saved filename into the editor file entry thingy
       clientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(settings->getIniSettings()->lastEditorName);

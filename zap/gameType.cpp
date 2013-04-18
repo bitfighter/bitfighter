@@ -2271,21 +2271,21 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    mEngineerEnabled = engineerEnabled;
    mEngineerUnrestrictedEnabled = engineerAbuseEnabled;
 
-   GameUserInterface *gameUI = clientGame->getUIManager()->getGameUserInterface();
-   gameUI->setViewBoundsWhileLoading(lx, ly, ux, uy);
-   gameUI->mShowProgressBar = true;             // Show progress bar
 
    // Need to send this to the client because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
    mLevelHasLoadoutZone = levelHasLoadoutZone;        
 
    clientGame->mObjectsLoaded = 0;              // Reset item counter
 
-
-   //clientGame->setInCommanderMap(true);       // If we change here, need to tell the server we are in this mode
-   //clientGame->resetZoomDelta();
+   GameUserInterface *gameUI = clientGame->getUIManager()->getGameUserInterface();
+   gameUI->mShowProgressBar = true;             // Show progress bar
+   gameUI->setViewBoundsWhileLoading(lx, ly, ux, uy);
 
    gameUI->resetLevelInfoDisplayTimer();        // Start displaying the level info, now that we have it
    gameUI->pregameSetup(engineerEnabled);       // Now we know all we need to initialize our loadout options
+
+   //clientGame->setInCommanderMap(true);       // If we change here, need to tell the server we are in this mode
+   //clientGame->resetZoomDelta();
 #endif
 }
 

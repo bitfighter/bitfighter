@@ -471,8 +471,8 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       // First controller's autodetect string (for research purposes!)
       bstream->writeString(Joystick::DetectedJoystickNameList.size() > 0 ? Joystick::DetectedJoystickNameList[0].c_str() : "");
 
-      bstream->writeString(clientInfo->getName().getString());          // User's nickname
-      bstream->writeString(clientGame->getLoginPassword().c_str());     // and whatever password they supplied
+      bstream->writeString(clientGame->getPlayerName().c_str());          // User's nickname
+      bstream->writeString(clientGame->getPlayerPassword().c_str());      // and whatever password they supplied
 
       // Starting with MASTER_PROTOCOL_VERSION 6 we will write an 8 bit set of flags
       bstream->writeInt(clientInfo->getPlayerFlagstoSendToMaster(), 8);

@@ -207,8 +207,8 @@ private:
    GameConnection *mClientConnection;
    
 public:
-   FullClientInfo(Game *game, GameConnection *clientConnection, bool isRobot);   // Constructor
-   virtual ~FullClientInfo();                                                    // Destructor
+   FullClientInfo(Game *game, GameConnection *clientConnection, const string &name, bool isRobot); // Constructor
+   virtual ~FullClientInfo();                                                                      // Destructor
 
    // WARNING!! mClientConnection can be NULL on client and server's robots
    GameConnection *getConnection();

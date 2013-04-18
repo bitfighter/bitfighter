@@ -372,7 +372,6 @@ bool SplashUserInterface::onKeyDown(InputCode inputCode)
 {
    if(!Parent::onKeyDown(inputCode))
    {
-
       quitting = true;
       quit();                              // Quit the interface when any key is pressed...  any key at all.  Almost.
 

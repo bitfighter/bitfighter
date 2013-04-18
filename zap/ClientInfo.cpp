@@ -470,12 +470,12 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
 }
 
 
-void ClientInfo::setEngineeringTeleporter(bool isEngineeringTeleporter1)
+void ClientInfo::setEngineeringTeleporter(bool engineeringTeleporter)
 {
-   if(isEngineeringTeleporter() == isEngineeringTeleporter1)
+   if(isEngineeringTeleporter() == engineeringTeleporter)
       return;
 
-   setIsEngineeringTeleporter(isEngineeringTeleporter1);
+   setIsEngineeringTeleporter(engineeringTeleporter);
 
    // Tell everyone that a particular client is engineering a teleport
    for(S32 i = 0; i < mGame->getClientCount(); i++)
@@ -483,7 +483,7 @@ void ClientInfo::setEngineeringTeleporter(bool isEngineeringTeleporter1)
       GameType *gameType = mGame->getGameType();
 
       if(gameType)
-         gameType->s2cSetPlayerEngineeringTeleporter(mName, isEngineeringTeleporter1);
+         gameType->s2cSetPlayerEngineeringTeleporter(mName, engineeringTeleporter);
    }
 }
 
@@ -562,9 +562,11 @@ void ClientInfo::resetReturnToGameTimer()               {        mReturnToGameTi
 ////////////////////////////////////////
 
 // Constructor
-FullClientInfo::FullClientInfo(Game *game, GameConnection *gameConnection, bool isRobot) : ClientInfo()
+FullClientInfo::FullClientInfo(Game *game, GameConnection *gameConnection, const string &name, bool isRobot) : ClientInfo()
 {
    mGame = game;
+   mName = name;
+
    mClientConnection = gameConnection;
    mIsRobot = isRobot;
 }
@@ -629,9 +631,6 @@ void FullClientInfo::setSpawnDelayed(bool spawnDelayed)
    if(spawnDelayed == mSpawnDelayed)                     // Already in requested state -- nothing to do
       return;
 
-   //if(!spawnDelayed && mReturnToGameTimer.getCurrent())  // Already waiting to unspawn... hold your horses!
-      //return;
-
    mSpawnDelayed = spawnDelayed;
 
    if(mGame->isServer())
@@ -640,6 +639,7 @@ void FullClientInfo::setSpawnDelayed(bool spawnDelayed)
          getConnection()->s2cPlayerSpawnDelayed((getReturnToGameTime() + 99) / 100); // add for round up divide
 		else
 			getConnection()->s2cPlayerSpawnUndelayed();
+
       mGame->getGameType()->s2cSetIsSpawnDelayed(mName, spawnDelayed);  // Notify other clients
    }
 }

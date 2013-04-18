@@ -114,7 +114,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mUIManager = new UIManager(this);               // Gets deleted in destructor
 
-   mClientInfo = new FullClientInfo(this, NULL, false);  // Will be deleted in destructor
+   mClientInfo = new FullClientInfo(this, NULL, mSettings->getPlayerName(), false);  // Will be deleted in destructor
 
    mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
 
@@ -372,15 +372,25 @@ U32 ClientGame::getReturnToGameDelay()
 }
 
 
-string ClientGame::getLoginPassword() const
-{
-   return mLoginPassword;
-}
+string ClientGame::getPlayerName()     const { return mSettings->getPlayerName();     }
+string ClientGame::getPlayerPassword() const { return mSettings->getPlayerPassword(); }
 
 
-void ClientGame::setLoginPassword(const string &loginPassword)
+extern void seedRandomNumberGenerator(const string &name);
+
+void ClientGame::userEnteredLoginCredentials(const string &name, const string &password, bool savePassword)
 {
-   mLoginPassword = loginPassword;
+   getClientInfo()->setName(name);
+   getSettings()->setLoginCredentials(name, password, savePassword);      // Saves to INI
+
+   mNextMasterTryTime = 0;    // Will trigger connection attempt with master
+
+   setReadyToConnectToMaster(true);
+
+   seedRandomNumberGenerator(name);
+
+   if(getConnectionToServer())               // Rename while in game server, if connected
+      getConnectionToServer()->c2sRenameClient(name.c_str());
 }
 
 
@@ -388,15 +398,7 @@ void ClientGame::setLoginPassword(const string &loginPassword)
 void ClientGame::correctPlayerName(const string &name)
 {
    getClientInfo()->setName(name);
-   getSettings()->setPlayerName(name, false);                  // Save to INI
-}
-
-
-// When user enters new name and password on NameEntryUI
-void ClientGame::updatePlayerNameAndPassword(const string &name, const string &password)
-{
-   getClientInfo()->setName(name);
-   getSettings()->setPlayerNameAndPassword(name, password);    // Save to INI
+   getSettings()->updatePlayerName(name);    // Saves to INI
 }
 
 

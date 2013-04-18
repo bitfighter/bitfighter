@@ -547,7 +547,7 @@ TeamDefUserInterface *UIManager::getTeamDefUserInterface()
 // Reactivate previous interface, going to fallback if there is none
 void UIManager::reactivatePrevUI()
 {
-   if(mPrevUIs.size())
+   if(mPrevUIs.size() > 0)
    {
       UserInterface *prev = mPrevUIs.last();
       mPrevUIs.pop_back();

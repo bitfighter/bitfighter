@@ -1573,8 +1573,8 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
       ini->sectionComment(section, " MasterServerAddressList - Comma seperated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
       ini->sectionComment(section, " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
-      ini->sectionComment(section, " Nickname - Specify your nickname to bypass the name entry screen altogether");
-      ini->sectionComment(section, " Password - Password to use if your nickname has been reserved in the forums");
+      ini->sectionComment(section, " Nickname - Specify the nickname to use for autologin, or clear to disable autologin");
+      ini->sectionComment(section, " Password - Password to use for autologin, if your nickname has been reserved in the forums");
       ini->sectionComment(section, " EnableExperimentalAimMode - Use experimental aiming system (works only with controller) Yes/No");
       ini->sectionComment(section, " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
       ini->sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
@@ -1605,6 +1605,8 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 #endif
    ini->SetValue  (section, "MasterServerAddressList", iniSettings->masterAddress);
    ini->SetValue  (section, "DefaultName", iniSettings->defaultName);
+   ini->SetValue  (section, "Nickname", iniSettings->name);
+   ini->SetValue  (section, "Password", iniSettings->password);
    ini->SetValue  (section, "LastName", iniSettings->lastName);
    ini->SetValue  (section, "LastPassword", iniSettings->lastPassword);
    ini->SetValue  (section, "LastEditorName", iniSettings->lastEditorName);

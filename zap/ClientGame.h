@@ -69,7 +69,6 @@ private:
    Vector<string> mMuteList;        // List of players we aren't listening to anymore because they've annoyed us!
    Vector<string> mVoiceMuteList;   // List of players we mute because they are abusing voice chat
 
-   string mLoginPassword;
    bool mGameIsRunning;             // True if a suspended game is being played without us, false if it's full stop for everyone
 
    bool mSeenTimeOutMessage;
@@ -109,11 +108,11 @@ public:
    ClientInfo *getLocalRemoteClientInfo();
    Ship *getLocalShip();
 
-   string getLoginPassword() const;
-   void setLoginPassword(const string &loginPassword);
+   string getPlayerName() const;
+   string getPlayerPassword() const;
+   void userEnteredLoginCredentials(const string &name, const string &password, bool savePassword);
 
    void correctPlayerName(const string &name);                                      // When server corrects capitalization of name or similar
-   void updatePlayerNameAndPassword(const string &name, const string &password);    // When user enters new name and password on NameEntryUI
 
    void displayShipDesignChangedMessage(const LoadoutTracker &loadout, const char *msgToShowIfLoadoutsAreTheSame);
 

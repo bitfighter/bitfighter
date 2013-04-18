@@ -286,12 +286,6 @@ void Game::deleteAllBots()
 }
 
 
-void Game::resetMasterConnectTimer()
-{
-   mNextMasterTryTime = 0;
-}
-
-
 void Game::setReadyToConnectToMaster(bool ready)
 {
    mReadyToConnectToMaster = ready;

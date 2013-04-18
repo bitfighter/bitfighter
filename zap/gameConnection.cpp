@@ -1505,7 +1505,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
       return false;  // need a ServerGame
 
    TNLAssert(!mClientInfo, "mClientInfo should be NULL");
-   mClientInfo = new FullClientInfo(mServerGame, this, false);         // Deleted in destructor
+   mClientInfo = new FullClientInfo(mServerGame, this, "Remote Player", false);         // Deleted in destructor
    mSettings = mServerGame->getSettings();  // now that we got the server, set the settings.
 
    stream->read(&mConnectionVersion);

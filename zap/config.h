@@ -201,8 +201,8 @@ public:
 
 
    string masterAddress;            // Default address of our master server
-   string name;                     // Player name (none by default)    ==> will only be present if the user added it manually
-   string password;                 // Player pasword (none by default) ==> will only be present if the user added it manually
+   string name;                     // Player name (none by default)    
+   string password;                 // Player password (none by default) 
    string defaultName;              // Name used if user hits <enter> on name entry screen
    string lastName;                 // Name user entered last time the game was run -- will be used as default on name entry screen
    string lastPassword;

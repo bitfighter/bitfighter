@@ -123,7 +123,7 @@ private:
    string mHostName;                   // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
    string mHostDescr;                  // Brief description of host
 
-   string mPlayerName, mPlayerPassword;
+   string mPlayerName, mPlayerPassword;   // Resolved name/password, either from INI for cmdLine or login screen
    bool mPlayerNameSpecifiedOnCmdLine;
 
    // Various passwords
@@ -238,8 +238,10 @@ public:
 
    string getPlayerName();
 
-   void setPlayerName(const string &name, bool nameSuppliedByUser);
-   void setPlayerNameAndPassword(const string &name, const string &password);
+   void updatePlayerName(const string &name);
+   void setLoginCredentials(const string &name, const string &password, bool save);
+
+   void setAutologin(bool autologin);
 
    string getPlayerPassword();
 

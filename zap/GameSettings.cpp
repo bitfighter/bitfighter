@@ -426,34 +426,54 @@ string GameSettings::getPlayerName()
 }
 
 
-void GameSettings::setPlayerName(const string &name, bool nameSuppliedByUser)
+// User has entered name and password, and has clicked Ok.  That's the only way to get here.
+void GameSettings::setLoginCredentials(const string &name, const string &password, bool save)
 {
    mPlayerName = name;
+   mPlayerPassword = password;
 
-   // If the user has entered this new name manually, then we should save it in the INI for next time.  If it's merely an autocorrection from
-   // the master, then only save it if the name originally came from the INI.
-   if(nameSuppliedByUser || !mPlayerNameSpecifiedOnCmdLine)
+   if(save)
    {
-      mIniSettings.lastName = name;             // Save new name to the INI
+      mIniSettings.lastName = name;          
+      mIniSettings.lastPassword = password;
+   
       gINI.WriteFile();
-
-      mPlayerNameSpecifiedOnCmdLine = false;    // Wherever it originally came from, it's from the INI now
    }
 }
 
 
-void GameSettings::setPlayerNameAndPassword(const string &name, const string &password)
+// User name has been corrected by master server (usually changing only capitalization and such
+void GameSettings::updatePlayerName(const string &name)
 {
-   mPlayerPassword = password;
+   mPlayerName = name;
 
-   mIniSettings.lastPassword = password;
-   setPlayerName(name, true);                // Writes INI to disk
+   if(!mPlayerNameSpecifiedOnCmdLine)
+   {
+      mIniSettings.lastName = name;             // Save new name to the INI
+      gINI.WriteFile();
+   }
 }
 
 
+// Forums password
 string GameSettings::getPlayerPassword()
 {
    return mPlayerPassword;
+}
+
+
+void GameSettings::setAutologin(bool autologin)
+{
+   if(autologin)
+   {
+      mIniSettings.name     = mIniSettings.lastName;
+      mIniSettings.password = mIniSettings.lastPassword;
+   }
+   else
+   {
+      mIniSettings.name     = "";
+      mIniSettings.password = "";
+   }
 }
 
 

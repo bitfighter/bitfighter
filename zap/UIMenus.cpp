@@ -913,7 +913,7 @@ void MainMenuUserInterface::onActivate()
    // Time for a clean start.  No matter how we got here, there's no going back.
    // Needed mainly because the editor makes things confusing.  Now that that's been reworked,
    // it's probably not needed at all.
-   getUIManager()->clearPrevUIs();
+   //getUIManager()->clearPrevUIs();
 
    mColorTimer.reset(ColorTime);
    mColorTimer2.reset(ColorTime2);
@@ -1089,8 +1089,12 @@ void OptionsMenuUserInterface::setupMenus()
    addMenuItem(new MenuItem(getMenuItemCount(), "INPUT", inputCallback, 
                         "Joystick settings, Remap keys", KEY_I));
 
-   addMenuItem(new MenuItem(getMenuItemCount(), "SOUNDS & OTHER STARTLING THINGS", soundOptionsSelectedCallback, 
-                        "Change volume and sound related options", KEY_S));
+   addMenuItem(new MenuItem(getMenuItemCount(), "SOUNDS & MUSIC", soundOptionsSelectedCallback, 
+                        "Change sound and music related options", KEY_S));
+
+   addMenuItem(new YesNoMenuItem("AUTOLOGIN:", !settings->shouldShowNameEntryScreenOnStartup(), 
+                                 "If selected, you will automatically log in "
+                                 "on start, bypassing the first screen", KEY_A));
 
 #ifndef TNL_OS_MOBILE
    addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->displayMode));
@@ -1152,6 +1156,10 @@ void OptionsMenuUserInterface::toggleDisplayMode()
 // Save options to INI file, and return to our regularly scheduled program
 void OptionsMenuUserInterface::onEscape()
 {
+   bool autologin = getMenuItem(2)->getIntValue();
+
+   getGame()->getSettings()->setAutologin(autologin);
+
    saveSettingsToINI(&gINI, getGame()->getSettings());
    getUIManager()->reactivatePrevUI();      //mGameUserInterface
 }
@@ -1440,9 +1448,7 @@ void NameEntryUserInterface::onActivate()
 }
 
 
-extern void seedRandomNumberGenerator(string name);
-
-// User is ready to move on... deal with it
+// User has entered name and password, and has clicked OK
 static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
 {
    UIManager *uiManager = clientGame->getUIManager();
@@ -1453,19 +1459,12 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
    else
       uiManager->activate(MainUI);
 
-   clientGame->resetMasterConnectTimer();
-   
-   clientGame->updatePlayerNameAndPassword(ui->getMenuItem(1)->getValueForWritingToLevelFile(), 
-                                           ui->getMenuItem(3)->getIntValue() == 0 ? string("") : 
-                                                                                    ui->getMenuItem(2)->getValueForWritingToLevelFile());
+   string enteredName     = ui->getMenuItem(1)->getValueForWritingToLevelFile();
+   string enteredPassword = ui->getMenuItem(2)->getValueForWritingToLevelFile();
 
-   clientGame->setLoginPassword(ui->getMenuItem(2)->getValueForWritingToLevelFile());
+   bool savePassword      = ui->getMenuItem(3)->getIntValue() != 0;
 
-   clientGame->setReadyToConnectToMaster(true);
-   seedRandomNumberGenerator(clientGame->getClientInfo()->getName().getString());
-
-   if(clientGame->getConnectionToServer())                 // Rename while in game server, if connected
-      clientGame->getConnectionToServer()->c2sRenameClient(clientGame->getClientInfo()->getName());
+   clientGame->userEnteredLoginCredentials(enteredName, enteredPassword, savePassword);
 }
 
 
