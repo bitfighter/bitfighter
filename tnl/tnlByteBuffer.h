@@ -178,7 +178,6 @@ public:
 };
 
 typedef RefPtr<ByteBuffer> ByteBufferPtr;
-typedef const ByteBuffer &ByteBufferRef;
 
 };
 
