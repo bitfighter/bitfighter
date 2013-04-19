@@ -734,7 +734,7 @@ void ClientGame::gotVoiceChat(const StringTableEntry &from, const ByteBufferPtr 
    if(isOnVoiceMuteList(from.getString()))
       return;
 
-   ByteBufferPtr playBuffer = clientInfo->getVoiceDecoder()->decompressBuffer(*(voiceBuffer.getPointer()));
+   ByteBufferPtr playBuffer = clientInfo->getVoiceDecoder()->decompressBuffer(voiceBuffer);
    SoundSystem::queueVoiceChatBuffer(clientInfo->getVoiceSFX(), playBuffer);
 }
 

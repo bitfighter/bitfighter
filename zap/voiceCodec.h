@@ -70,7 +70,7 @@ class VoiceDecoder : public Object
 
    virtual U32 decompressFrame(S16 *framePtr, U8 *inputPtr, U32 inSize) = 0;
 public:
-   ByteBufferPtr decompressBuffer(ByteBufferRef compressedBuffer);
+   ByteBufferPtr decompressBuffer(const ByteBufferPtr &compressedBuffer);
 };
 
 /// The SpeexVoiceEncoder class implements the Speex codec

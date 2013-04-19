@@ -59,11 +59,11 @@ ByteBufferPtr VoiceEncoder::compressBuffer(const ByteBufferPtr &sampleBuffer)
    return NULL;
 }
 
-ByteBufferPtr VoiceDecoder::decompressBuffer(ByteBufferRef compressedBuffer)
+ByteBufferPtr VoiceDecoder::decompressBuffer(const ByteBufferPtr &compressedBuffer)
 {
    U32 spf = getSamplesPerFrame();
    U32 avgCompressedSize = getAvgCompressedFrameSize();
-   U32 compressedSize = compressedBuffer.getBufferSize();
+   U32 compressedSize = compressedBuffer->getBufferSize();
 
    // guess the total number of frames:
    U32 guessFrameCount = (compressedSize / avgCompressedSize) + 1;
@@ -71,7 +71,7 @@ ByteBufferPtr VoiceDecoder::decompressBuffer(ByteBufferRef compressedBuffer)
    ByteBufferPtr ret = new ByteBuffer(spf * sizeof(S16) * guessFrameCount);
 
    U32 p = 0;
-   U8 *inputPtr = (U8 *) compressedBuffer.getBuffer();
+   U8 *inputPtr = (U8 *) compressedBuffer->getBuffer();
    U32 frameCount = 0;
    S16 *samplePtr = (S16 *) ret->getBuffer();
 
