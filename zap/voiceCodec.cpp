@@ -59,7 +59,7 @@ ByteBufferPtr VoiceEncoder::compressBuffer(const ByteBufferPtr &sampleBuffer)
    return NULL;
 }
 
-ByteBufferPtr VoiceDecoder::decompressBuffer(const ByteBufferRef &compressedBuffer)
+ByteBufferPtr VoiceDecoder::decompressBuffer(ByteBufferRef compressedBuffer)
 {
    U32 spf = getSamplesPerFrame();
    U32 avgCompressedSize = getAvgCompressedFrameSize();
