@@ -404,14 +404,13 @@ void EditorInstructionsUserInterface::renderPageWalls()
       Vector<Point> edges;
       mWallSegmentManager.clipAllWallEdges(&wallSegments, edges);      // Remove interior wall outline fragments
 
-      glColor(EDITOR_WALL_FILL_COLOR);
       for(S32 i = 0; i < wallSegments.size(); i++)
       {
          WallSegment *wallSegment = static_cast<WallSegment *>(wallSegments[i]);
-         wallSegment->renderFill(Point(0,0));
+         wallSegment->renderFill(Point(0,0), EDITOR_WALL_FILL_COLOR);
       }
 
-      renderWallEdges(&edges, *getGame()->getSettings()->getWallOutlineColor());
+      renderWallEdges(edges, *getGame()->getSettings()->getWallOutlineColor());
 
       for(S32 i = 0; i < wallSegments.size(); i++)
          delete wallSegments[i];

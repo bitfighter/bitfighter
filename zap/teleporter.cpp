@@ -42,9 +42,8 @@ using namespace TNL;
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
-#   include "sparkManager.h"
 #   include "OpenglUtils.h"
-#   include "UI.h"
+//#   include "UI.h"
 #endif
 
 #include <math.h>
@@ -844,6 +843,8 @@ void Teleporter::doExplosion()
 }
 #endif
 
+
+extern F32 gLineWidth3;
 
 void Teleporter::renderEditorItem()
 {

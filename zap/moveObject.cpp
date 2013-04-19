@@ -40,7 +40,6 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "sparkManager.h"
 #  include "UIEditorMenus.h"
 #  include "OpenglUtils.h"
 #endif
@@ -1800,10 +1799,7 @@ void Circle::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(!hasExploded)
-   {
-      glColor(Colors::red);
-      drawCircle(pos, (F32)CIRCLE_RADIUS);
-   }
+      drawCircle(pos, (F32)CIRCLE_RADIUS, &Colors::red);
 #endif
 }
 

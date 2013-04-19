@@ -32,9 +32,7 @@
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "UIEditorMenus.h"
-#  include "UI.h"
 #  include "gameObjectRender.h"
-#  include "OpenglUtils.h"
 #endif
 
 #include <cmath>
@@ -384,12 +382,16 @@ void CoreGameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) c
    if(isTeamCoreBeingAttacked(teamIndex)) 
    {
       const S32 flashCycleTime = 300;  
-      if(getGame()->getCurrentTime() % flashCycleTime > flashCycleTime / 2)
-         glColor(Colors::red80);
-      else
-         glColor(Colors::yellow, 0.6f);
+      const Color *color = &Colors::red80;
+      F32 alpha = 1;
+
+      if(getGame()->getCurrentTime() % flashCycleTime <= flashCycleTime / 2)
+      {
+         color = &Colors::yellow;
+         alpha = 0.6f;
+      }
          
-      drawCircle(center, 15);
+      drawCircle(center, 15, color, alpha);
    }
 }
 

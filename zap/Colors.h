@@ -100,6 +100,8 @@ namespace Colors
    const Color gold(.85f, .85f, .10f);
    const Color silver(.90f, .91f, .98f);
    const Color bronze(.55f, .47f, .33f);
+
+   const Color wallFillColor(Colors::paleBlue);
 };
 
 }

@@ -52,10 +52,11 @@ extern const Color *PLAIN_COLOR;
 static const S32 NO_NUMBER = -1;
 
 class Ship;
+class WallItem;
 
 //////////
 // Primitives
-extern void drawFilledCircle(const Point &pos, F32 radius);
+extern void drawFilledCircle(const Point &pos, F32 radius, const Color *color = NULL);
 extern void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end);
 extern void drawCentroidMark(const Point &pos, F32 radius);
 extern void renderTwoPointPolygon(const Point &p1, const Point &p2, F32 width, S32 mode);
@@ -88,11 +89,11 @@ extern void drawDashedHollowCircle(const Point &center, F32 innerRadius, F32 out
 extern void drawDashedCircle(const Point &center, F32 radius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle);
 extern void drawHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, F32 offsetAngle);
 
-extern void drawSquare(const Point &pos, F32 size, bool filled = false);
-extern void drawSquare(const Point &pos, S32 size, bool filled = false);
-extern void drawFilledSquare(const Point &pos, F32 size);
-extern void drawFilledSquare(const Point &pos, S32 size);
-extern void drawFilledSquare(const Point &pos, F32 size);
+extern void drawSquare(const Point &pos, F32 radius, bool filled = false);
+extern void drawSquare(const Point &pos, S32 radius, bool filled = false);
+extern void drawHollowSquare(const Point &pos, F32 radius, const Color *color = NULL);
+extern void drawFilledSquare(const Point &pos, F32 radius, const Color *color = NULL);
+extern void drawFilledSquare(const Point &pos, S32 radius, const Color *color = NULL);
 
 extern void renderSmallSolidVertex(F32 currentScale, const Point &pos, bool snapping);
 
@@ -101,6 +102,7 @@ extern void renderVertex(char style, const Point &v, S32 number,           F32 s
 extern void renderVertex(char style, const Point &v, S32 number,           F32 scale, F32 alpha);
 extern void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F32 alpha);
 
+void renderLine(const Vector<Point> *points, const Color *color);
 
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 extern void drawVertLine (S32 x,  S32 y1, S32 y2);
@@ -109,8 +111,8 @@ extern void drawVertLine (F32 x,  F32 y1, F32 y2);
 
 extern void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *letterColor, char letter);
 
-extern void drawCircle(const Point &pos, F32 radius);
-extern void drawCircle(F32 x, F32 y, F32 radius);
+extern void drawCircle(const Point &pos, F32 radius, const Color *color = NULL, F32 alpha = 1.0);
+extern void drawCircle(F32 x, F32 y,     F32 radius, const Color *color = NULL, F32 alpha = 1.0);
 
 extern void drawDivetedTriangle(F32 height, F32 len);
 extern void drawGear(const Point &pos, S32 teeth, F32 r1, F32 r2, F32 ang1, F32 ang2, F32 innerCircleRadius);
@@ -141,10 +143,11 @@ extern void renderTurretFiringRange(const Point &pos, const Color &color, F32 cu
 extern void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate = 0);
 
 extern void renderFlag(const Point &pos, const Color *flagColor);
+extern void renderFlag(const Point &pos, F32 scale, const Color *flagColor);
 extern void renderFlag(F32 x, F32 y, const Color *flagColor);
 extern void renderFlag(const Color *flagColor);
 extern void renderFlag(const Point &pos, const Color *flagColor, const Color *mastColor, F32 alpha);
-extern void renderFlag(F32 x, F32 y, const Color *flagColor, const Color *mastColor, F32 alpha);
+extern void doRenderFlag(F32 x, F32 y, F32 scale, const Color *flagColor, const Color *mastColor, F32 alpha);
 
 
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
@@ -176,9 +179,10 @@ extern void drawStars(Point *stars, S32 numStars, F32 alphaFrac, bool starsInDis
 extern const Color BORDER_FILL_COLOR;
 extern const F32 BORDER_FILL_ALPHA;
 extern const F32 BORDER_WIDTH;
+extern float gDefaultLineWidth;
 
 extern void renderPolygonOutline(const Vector<Point> *outline);
-extern void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outlineColor, F32 alpha = 1);
+extern void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outlineColor, F32 alpha = 1, F32 lineThickness = gDefaultLineWidth);
 extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color *fillColor, F32 alpha = 1);
 extern void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outlinePoints,
                           const Color *fillColor, const Color *outlineColor, F32 alpha = 1);
@@ -209,16 +213,16 @@ extern void renderRepairItem(const Point &pos, bool forEditor, const Color *over
 
 extern void renderEnergyItem(const Point &pos); 
 
-extern void renderWallFill(const Vector<Point> *points, bool polyWall);
-extern void renderWallFill(const Vector<Point> *points, const Point &offset, bool polyWall);
+extern void renderWallFill(const Vector<Point> *points, const Color &fillColor, bool polyWall);
+extern void renderWallFill(const Vector<Point> *points, const Color &fillColor, const Point &offset, bool polyWall);
 
 extern void renderEnergyItem(const Point &pos, bool forEditor);
 extern void renderEnergySymbol();                                   // Render lightning bolt symbol
 extern void renderEnergySymbol(const Point &pos, F32 scaleFactor);  // Another signature
 
 // Wall rendering
-void renderWallEdges(const Vector<Point> *edges, const Color &outlineColor, F32 alpha = 1.0);
-void renderWallEdges(const Vector<Point> *edges, const Point &offset, const Color &outlineColor, F32 alpha = 1.0);
+void renderWallEdges(const Vector<Point> &edges, const Color &outlineColor, F32 alpha = 1.0);
+void renderWallEdges(const Vector<Point> &edges, const Point &offset, const Color &outlineColor, F32 alpha = 1.0);
 
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
 void renderSpeedZone(const Vector<Point> &pts, U32 time);
@@ -263,6 +267,16 @@ extern void renderStaticBitfighterLogo();
 
 extern void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge);
 
+extern void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &wallEdgePoints, 
+                        const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor, 
+                        const Color &fillColor, F32 currentScale, bool dragMode, bool drawSelected,
+                        const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha);
+
+
+extern void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color *color, 
+                              F32 currentScale, bool snappingToWallCornersEnabled);
+
+extern void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha);
 
 };
 

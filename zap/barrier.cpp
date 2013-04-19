@@ -33,10 +33,6 @@
 #include "stringUtils.h"
 #include "LuaWrapper.h"
 
-#ifndef ZAP_DEDICATED 
-#  include "OpenglUtils.h"
-#endif
-
 #include <cmath>
 
 
@@ -315,10 +311,7 @@ void Barrier::render(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
    if(layerIndex == 0)           // First pass: draw the fill
-   {
-      glColor(getGame()->getSettings()->getWallFillColor());
-      renderWallFill(&mRenderFillGeometry, mSolid);
-   }
+      renderWallFill(&mRenderFillGeometry, *getGame()->getSettings()->getWallFillColor(), mSolid);
 #endif
 }
 
@@ -327,7 +320,7 @@ void Barrier::render(S32 layerIndex)
 void Barrier::renderEdges(S32 layerIndex, const Color &outlineColor)  // static
 {
    if(layerIndex == 1)
-      renderWallEdges(&mRenderLineSegments, outlineColor);
+      renderWallEdges(mRenderLineSegments, outlineColor);
 }
 
 
@@ -475,11 +468,11 @@ void WallItem::render()
 void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
+   const Color *color = NULL;
    if(!isSelected() && !isLitUp())
-      glColor(getEditorRenderColor());
+      color = getEditorRenderColor();
 
-   renderLine(getOutline());
-   renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
+   renderWallOutline(this, getOutline(), color, currentScale, snappingToWallCornersEnabled);
 #endif
 }
 
@@ -519,14 +512,14 @@ bool WallItem::canBeHostile() { return false; }
 bool WallItem::canBeNeutral() { return false; }
 
 
-const Color *WallItem::getEditorRenderColor()
+const Color *WallItem::getEditorRenderColor() const
 {
    return &Colors::gray50;    // Color of wall spine in editor
 }
 
 
 // Size of object in editor 
-F32 WallItem::getEditorRadius(F32 currentScale)
+F32 WallItem::getEditorRadius(F32 currentScale) const
 {
    return getWallEditorRadius(currentScale);
 }
@@ -990,13 +983,13 @@ void WallSegment::resetEdges()
 }
 
 
-void WallSegment::renderFill(const Point &offset)
+void WallSegment::renderFill(const Point &offset, const Color &color)
 {
 #ifndef ZAP_DEDICATED
    if(mSelected)
-      renderWallFill(&mTriangulatedFillPoints, offset, true);       // Use true because all segment fills are triangulated
+      renderWallFill(&mTriangulatedFillPoints, color, offset, true);       // Use true because all segment fills are triangulated
    else
-      renderWallFill(&mTriangulatedFillPoints, true);
+      renderWallFill(&mTriangulatedFillPoints, color, true);
 #endif
 }
 

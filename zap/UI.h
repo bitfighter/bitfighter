@@ -57,10 +57,10 @@ using namespace std;
 namespace Zap
 {
 
-extern float gLineWidth1;
-extern float gDefaultLineWidth;
-extern float gLineWidth3;
-extern float gLineWidth4;
+extern F32 gLineWidth1;
+extern F32 gDefaultLineWidth;
+extern F32 gLineWidth3;
+extern F32 gLineWidth4;
 
 
 ////////////////////////////////////////

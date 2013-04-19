@@ -1148,25 +1148,25 @@ void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
 }
 
 
-const Color *GameSettings::getWallFillColor()
+const Color *GameSettings::getWallFillColor() const
 {
    return &mIniSettings.wallFillColor;
 }
 
 
-const Color *GameSettings::getWallOutlineColor()
+const Color *GameSettings::getWallOutlineColor() const
 {
    return &mIniSettings.wallOutlineColor;
 }
 
 
-bool GameSettings::getStarsInDistance()
+bool GameSettings::getStarsInDistance() const
 {
    return mIniSettings.starsInDistance;
 }
 
 
-bool GameSettings::getEnableExperimentalAimMode()
+bool GameSettings::getEnableExperimentalAimMode() const
 {
    return mIniSettings.enableExperimentalAimMode;
 }

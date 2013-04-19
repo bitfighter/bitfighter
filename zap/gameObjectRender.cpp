@@ -346,8 +346,11 @@ void drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle)
 }
 
 
-void drawFilledCircle(const Point &pos, F32 radius)
+void drawFilledCircle(const Point &pos, F32 radius, const Color *color)
 {
+   if(color)
+      glColor(color);
+
    drawFilledSector(pos, radius, 0, FloatTau);
 }
 
@@ -1038,32 +1041,37 @@ static void drawFlag(const Color *flagColor, const Color *mastColor, F32 alpha)
 }
 
 
-void renderFlag(F32 x, F32 y, const Color *flagColor, const Color *mastColor, F32 alpha)
+void doRenderFlag(F32 x, F32 y, F32 scale, const Color *flagColor, const Color *mastColor, F32 alpha)
 {
    glPushMatrix();
-   glTranslatef(x, y, 0);
-
-   drawFlag(flagColor, mastColor, alpha);
-
+      glTranslatef(x, y, 0);
+      glScale(scale);
+      drawFlag(flagColor, mastColor, alpha);
    glPopMatrix();
 }
 
 
 void renderFlag(const Point &pos, const Color *flagColor, const Color *mastColor, F32 alpha)
 {
-   renderFlag(pos.x, pos.y, flagColor, mastColor, alpha);
+   doRenderFlag(pos.x, pos.y, 1.0, flagColor, mastColor, alpha);
 }
 
 
 void renderFlag(const Point &pos, const Color *flagColor)
 {
-   renderFlag(pos.x, pos.y, flagColor, NULL, 1);
+   doRenderFlag(pos.x, pos.y, 1.0, flagColor, NULL, 1);
+}
+
+
+void renderFlag(const Point &pos, F32 scale, const Color *flagColor)
+{
+   doRenderFlag(pos.x, pos.y, scale, flagColor, NULL, 1);
 }
 
 
 void renderFlag(F32 x, F32 y, const Color *flagColor)
 {
-   renderFlag(x, y, flagColor, NULL, 1);
+   doRenderFlag(x, y, 1.0, flagColor, NULL, 1);
 }
 
 
@@ -1141,12 +1149,14 @@ void renderPolygonOutline(const Vector<Point> *outline)
 }
 
 
-void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outlineColor, F32 alpha)
+void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outlineColor, F32 alpha, F32 lineThickness)
 {
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
    glColor(outlineColor, alpha);
+   glLineWidth(lineThickness);
+
    renderPolygonOutline(outlinePoints);
+
+   glLineWidth(gDefaultLineWidth);
 }
 
 
@@ -1843,32 +1853,34 @@ void renderEnergyItem(const Point &pos)
 
 
 // Use faster method with no offset
-void renderWallFill(const Vector<Point> *points, bool polyWall)
+void renderWallFill(const Vector<Point> *points, const Color &fillColor, bool polyWall)
 {
+   glColor(fillColor);
    renderPointVector(points, polyWall ? GL_TRIANGLES : GL_TRIANGLE_FAN);
 }
 
 
 // Use slower method if each point needs to be offset
-void renderWallFill(const Vector<Point> *points, const Point &offset, bool polyWall)
+void renderWallFill(const Vector<Point> *points, const Color &fillColor, const Point &offset, bool polyWall)
 {
+   glColor(fillColor);
    renderPointVector(points, offset, polyWall ? GL_TRIANGLES : GL_TRIANGLE_FAN);
 }
 
 
 // Used in both editor and game
-void renderWallEdges(const Vector<Point> *edges, const Color &outlineColor, F32 alpha)
+void renderWallEdges(const Vector<Point> &edges, const Color &outlineColor, F32 alpha)
 {
    glColor(outlineColor, alpha);
-   renderPointVector(edges, GL_LINES);
+   renderPointVector(&edges, GL_LINES);
 }
 
 
 // Used in editor only
-void renderWallEdges(const Vector<Point> *edges, const Point &offset, const Color &outlineColor, F32 alpha)
+void renderWallEdges(const Vector<Point> &edges, const Point &offset, const Color &outlineColor, F32 alpha)
 {
    glColor(outlineColor, alpha);
-   renderPointVector(edges, offset, GL_LINES);
+   renderPointVector(&edges, offset, GL_LINES);
 }
 
 
@@ -2386,15 +2398,30 @@ void drawSquare(const Point &pos, S32 radius, bool filled)
 }
 
 
-void drawFilledSquare(const Point &pos, F32 radius)
+void drawHollowSquare(const Point &pos, F32 radius, const Color *color)
 {
+   if(color)
+      glColor(color);
+
+   drawSquare(pos, radius, false);
+}
+
+
+void drawFilledSquare(const Point &pos, F32 radius, const Color *color)
+{
+   if(color)
+      glColor(color);
+
     drawSquare(pos, radius, true);
 }
 
 
-void drawFilledSquare(const Point &pos, S32 radius)
+void drawFilledSquare(const Point &pos, S32 radius, const Color *color)
 {
-    drawSquare(pos, F32(radius), true);
+   if(color)
+      glColor(color);
+
+   drawSquare(pos, F32(radius), true);
 }
 
 
@@ -2457,6 +2484,15 @@ void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F
 }
 
 
+void renderLine(const Vector<Point> *points, const Color *color)
+{
+   if(color)
+      glColor(color);
+
+   renderLine(points);
+}
+
+
 static void drawLetter(char letter, const Point &pos, const Color *color, F32 alpha)
 {
    // Mark the item with a letter, unless we're showing the reference ship
@@ -2480,8 +2516,11 @@ void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *
 
 
 // Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
-void drawCircle(F32 x, F32 y, F32 radius)
+void drawCircle(F32 x, F32 y, F32 radius, const Color *color, F32 alpha)
 {
+   if(color)
+      glColor(color, alpha);
+
    F32 theta = Float2Pi * INV_NUM_CIRCLE_SIDES; // 1/32
 
    // Precalculate the sine and cosine
@@ -2498,12 +2537,12 @@ void drawCircle(F32 x, F32 y, F32 radius)
    // This is a repeated rotation
    for(S32 i = 0; i < NUM_CIRCLE_SIDES; i++)
    {
-      vertexArray[2*i] = curX + x;
-      vertexArray[(2*i)+1] = curY + y;
+      vertexArray[(2*i)]     = curX + x;
+      vertexArray[(2*i) + 1] = curY + y;
 
       // Apply the rotation matrix
       prevX = curX;
-      curX = (cosTheta * curX) - (sinTheta * curY);
+      curX = (cosTheta * curX)  - (sinTheta * curY);
       curY = (sinTheta * prevX) + (cosTheta * curY);
    }
 
@@ -2511,9 +2550,9 @@ void drawCircle(F32 x, F32 y, F32 radius)
 }
 
 
-void drawCircle(const Point &pos, F32 radius)
+void drawCircle(const Point &pos, F32 radius, const Color *color, F32 alpha)
 {
-   drawCircle(pos.x, pos.y, radius);
+   drawCircle(pos.x, pos.y, radius, color, alpha);
 }
 
 
@@ -2670,8 +2709,7 @@ void renderLevelDesignWinnerBadge(F32 x, F32 y, F32 rad)
    edges.push_back(Point(x + rm2, y + rm2));
    edges.push_back(Point(x + rm2, y - rm2));
 
-   glColor(0.5f, 0.5f, 1.0f);
-   renderWallFill(&edges, false);
+   renderWallFill(&edges, Colors::wallFillColor, false);
    renderPolygonOutline(&edges, &Colors::blue);
    glColor(Colors::white);
    renderCenteredString(Point(x, y), rad, "1");
@@ -2851,6 +2889,93 @@ void drawStars(Point *stars, S32 numStars, F32 alphaFrac, bool starsInDistance, 
 }
 
 
-};
+void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &wallEdgePoints, 
+                 const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor, 
+                 const Color &fillColor, F32 currentScale, bool dragMode, bool drawSelected,
+                 const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha)
+{
+   bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
+   S32 count = wallSegmentDatabase->getObjectCount();
+
+   if(!drawSelected)    // Essentially pass 1, drawn earlier in the process
+   {
+      // Render walls that have been moved first (i.e. render their shadows)
+      if(moved)
+      {
+         for(S32 i = 0; i < count; i++)
+         {
+            WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
+            if(wallSegment->isSelected())     
+               wallSegment->renderFill(Point(0,0), Color(.1));
+         }
+      }
+
+      // hack for now
+      Color color;
+      if(alpha < 1)
+         color = Colors::gray67;
+      else
+         color = fillColor * alpha;
+
+      for(S32 i = 0; i < count; i++)
+      {
+         WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
+         if(!moved || !wallSegment->isSelected())         
+            wallSegment->renderFill(selectedItemOffset, color);      // RenderFill ignores offset for unselected walls
+      }
+
+      renderWallEdges(wallEdgePoints, outlineColor);                 // Render wall outlines with unselected walls
+   }
+   else  // Render selected/moving walls last so they appear on top; this is pass 2, 
+   {
+      for(S32 i = 0; i < count; i++)
+      {
+         WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
+         if(wallSegment->isSelected())  
+            wallSegment->renderFill(selectedItemOffset, fillColor * alpha);
+      }
+
+      // Render wall outlines for selected walls only
+      renderWallEdges(selectedWallEdgePoints, selectedItemOffset, outlineColor);
+   }
+
+   if(showSnapVertices)
+   {
+      glLineWidth(gLineWidth1);
+
+      //glColor(Colors::magenta);
+      for(S32 i = 0; i < wallEdgePoints.size(); i++)
+         renderSmallSolidVertex(currentScale, wallEdgePoints[i], dragMode);
+
+      glLineWidth(gDefaultLineWidth);
+   }
+}
+
+
+void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color *color, 
+                       F32 currentScale, bool snappingToWallCornersEnabled)
+{
+   if(color)
+      glColor(color);
+
+   renderLine(outline);
+   renderPolyLineVertices(wallItem, snappingToWallCornersEnabled, currentScale);
+}
+
+
+void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
+{
+   // Mark the item with a letter, unless we're showing the reference ship
+   F32 vertOffset = 8;
+   if (letter >= 'a' && letter <= 'z')    // Better positioning for lowercase letters
+      vertOffset = 10;
+
+   glColor(color, alpha);
+   F32 xpos = pos.x - getStringWidthf(15, "%c", letter) / 2;
+
+   drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
+}
+
+}
 
 

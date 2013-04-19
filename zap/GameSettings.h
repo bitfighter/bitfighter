@@ -220,11 +220,11 @@ public:
 
    bool shouldShowNameEntryScreenOnStartup();
 
-   const Color *getWallFillColor();
-   const Color *getWallOutlineColor();
+   const Color *getWallFillColor() const;
+   const Color *getWallOutlineColor() const;
 
-   bool getStarsInDistance();
-   bool getEnableExperimentalAimMode();
+   bool getStarsInDistance() const;
+   bool getEnableExperimentalAimMode() const;
 
 
    // Accessor methods

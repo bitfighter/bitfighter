@@ -28,17 +28,12 @@
 #include "EngineeredItem.h"         // For forcefieldprojector def
 #include "game.h"
 
-#ifndef ZAP_DEDICATED 
-#  include "UI.h"
-#  include "OpenglUtils.h"
-#endif
-
-
 using namespace TNL;
 
 namespace Zap
 {
-   
+
+// Statics
 bool WallSegmentManager::mBatchUpdatingGeom = false;
 
 
@@ -158,6 +153,7 @@ void WallSegmentManager::rebuildEdges()
    // Data flow in this method: wallSegments -> wallEdgePoints -> wallEdges
 
    mWallEdgePoints.clear();
+
    // Run clipper --> fills mWallEdgePoints from mWallSegments
    clipAllWallEdges(mWallSegmentDatabase->findObjects_fast(), mWallEdgePoints);    
    mWallEdgeDatabase->removeEverythingFromDatabase();  //XXXX <---- THIS CAUSES THE CRASH
@@ -388,64 +384,11 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
 {
 #ifndef ZAP_DEDICATED
    // We'll use the editor color most of the time; only in preview mode do we use the game color
-   Color fillColor = previewMode ? *settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
+   const Color &fillColor = previewMode ? *settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
 
-   bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
-   S32 count = mWallSegmentDatabase->getObjectCount();
-
-   if(!drawSelected)    // Essentially pass 1, drawn earlier in the process
-   {
-      // Render walls that have been moved first (i.e. render their shadows)
-      glColor(.1, .1, .1);
-      if(moved)
-      {
-         for(S32 i = 0; i < count; i++)
-         {
-            WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
-            if(wallSegment->isSelected())     
-               wallSegment->renderFill(Point(0,0));
-         }
-      }
-
-      // hack for now
-      if(alpha < 1)
-         glColor(Colors::gray67);
-      else
-         glColor(fillColor * alpha);
-
-      for(S32 i = 0; i < count; i++)
-      {
-         WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
-         if(!moved || !wallSegment->isSelected())         
-            wallSegment->renderFill(selectedItemOffset);                   // RenderFill ignores offset for unselected walls
-      }
-
-      renderWallEdges(&mWallEdgePoints, *settings->getWallOutlineColor());  // Render wall outlines with unselected walls
-   }
-   else  // Render selected/moving walls last so they appear on top; this is pass 2, 
-   {
-      glColor(fillColor * alpha);
-      for(S32 i = 0; i < count; i++)
-      {
-         WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
-         if(wallSegment->isSelected())  
-            wallSegment->renderFill(selectedItemOffset);
-      }
-
-      // Render wall outlines for selected walls only
-      renderWallEdges(&mSelectedWallEdgePoints, selectedItemOffset, *settings->getWallOutlineColor());
-   }
-
-   if(showSnapVertices)
-   {
-      glLineWidth(gLineWidth1);
-
-      //glColor(Colors::magenta);
-      for(S32 i = 0; i < mWallEdgePoints.size(); i++)
-         renderSmallSolidVertex(currentScale, mWallEdgePoints[i], dragMode);
-
-      glLineWidth(gDefaultLineWidth);
-   }
+   Zap::renderWalls(mWallSegmentDatabase, mWallEdgePoints, mSelectedWallEdgePoints, *settings->getWallOutlineColor(),  
+                   fillColor, currentScale, dragMode, drawSelected, selectedItemOffset, previewMode, 
+                   showSnapVertices, alpha);
 #endif
 }
 

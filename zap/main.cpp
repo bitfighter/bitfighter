@@ -124,7 +124,6 @@ using namespace TNL;
 #  endif
 
 #  include "VideoSystem.h"
-#  include "OpenglUtils.h"
 #  include "ClientGame.h"
 #  include "FontManager.h"
 #endif

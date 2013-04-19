@@ -173,9 +173,9 @@ public:
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
-   F32 getEditorRadius(F32 currentScale);  // Basically, the size of our hit target for vertices
+   F32 getEditorRadius(F32 currentScale) const;  // Basically, the size of our hit target for vertices
 
-   const Color *getEditorRenderColor();    // Unselected wall spine color
+   const Color *getEditorRenderColor() const;    // Unselected wall spine color
 
    void scale(const Point &center, F32 scale);
 
@@ -294,7 +294,7 @@ public:
    void resetEdges();         // Compute basic edges from corner points
    void computeBoundingBox(); // Computes bounding box based on the corners, updates database
    
-   void renderFill(const Point &offset);
+   void renderFill(const Point &offset, const Color &color);
 
    const Vector<Point> *getCorners();
    const Vector<Point> *getEdges();

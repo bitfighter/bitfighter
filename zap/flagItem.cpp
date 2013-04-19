@@ -32,10 +32,6 @@
 #include "gameObjectRender.h"
 #include "ClientInfo.h"
 
-#ifndef ZAP_DEDICATED
-#  include "OpenglUtils.h"
-#endif
-
 namespace Zap
 {
 
@@ -319,11 +315,7 @@ void FlagItem::renderItemAlpha(const Point &pos, F32 alpha)
 void FlagItem::renderDock()
 {
 #ifndef ZAP_DEDICATED
-   glPushMatrix();
-      glTranslate(getActualPos());
-      glScale(0.6f);
-      renderFlag(getColor());
-   glPopMatrix();   
+   renderFlag(getActualPos(), 0.6, getColor());
 #endif
 }
 
