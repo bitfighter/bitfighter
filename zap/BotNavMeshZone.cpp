@@ -348,63 +348,6 @@ static BotNavMeshZone *findZoneContainingPoint(GridDatabase *botZoneDatabase, co
 #  define LOG_TIMER
 #endif
 
-// Required for input to Triangle
-static void buildHolesList(const Vector<DatabaseObject *> &barriers,
-      const Vector<DatabaseObject *> &turrets,
-      const Vector<DatabaseObject *> &forceFieldProjectors, Vector<F32> &holes)
-{
-   Point ctr; 
-
-   // Build holes list for barriers
-   for(S32 i = 0; i < barriers.size(); i++)
-   {
-      if(barriers[i]->getObjectTypeNumber() != BarrierTypeNumber)
-         continue;
-
-      Barrier *barrier = static_cast<Barrier *>(barriers[i]);
-
-      // Triangle requires a point interior to each hole.  Finding one depends on what type of barrier we have:
-      if(barrier->mSolid && barrier->mRenderFillGeometry.size() >= 3)     // Could be concave, centroid of first triangle of fill geom will be interior
-      {
-         ctr.set((barrier->mRenderFillGeometry[0].x + barrier->mRenderFillGeometry[1].x + barrier->mRenderFillGeometry[2].x) / 3, 
-                  (barrier->mRenderFillGeometry[0].y + barrier->mRenderFillGeometry[1].y + barrier->mRenderFillGeometry[2].y) / 3);
-      }
-      else                    // Standard wall, convex poly, center will be an interior point
-         ctr = barrier->getExtent().getCenter();
-
-      holes.push_back(ctr.x);
-      holes.push_back(ctr.y);
-   }
-
-   // Build holes list for turrets
-   for(S32 i = 0; i < turrets.size(); i++)
-   {
-      if(turrets[i]->getObjectTypeNumber() != TurretTypeNumber)
-         continue;
-
-      Turret *turret = static_cast<Turret *>(turrets[i]);
-
-      ctr = turret->getExtent().getCenter();
-
-      holes.push_back(ctr.x);
-      holes.push_back(ctr.y);
-   }
-
-   // Build holes list for forcefields
-   for(S32 i = 0; i < forceFieldProjectors.size(); i++)
-   {
-      if(forceFieldProjectors[i]->getObjectTypeNumber() != ForceFieldProjectorTypeNumber)
-         continue;
-
-      ForceFieldProjector *forceField = static_cast<ForceFieldProjector *>(forceFieldProjectors[i]);
-
-      ctr = forceField->getExtent().getCenter();
-
-      holes.push_back(ctr.x);
-      holes.push_back(ctr.y);
-   }
-}
-
 
 static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
                                 const Vector<DatabaseObject *> &turrets,
@@ -498,10 +441,9 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
    game->getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList, bounds);
 
    // Merge bot zone buffers from barriers, turrets, and forcefield projectors
+   // The Clipper library is the work horse here.  Its output is essential for the triangulation
    if(!mergeBotZoneBuffers(barrierList, turretList, forceFieldProjectorList, solution))
       return false;
-
-   buildHolesList(barrierList, turretList, forceFieldProjectorList, holes);
 
 
 #ifdef LOG_TIMER
@@ -509,8 +451,8 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
 #endif
 
    // Tessellate!
-   Triangulate::TriangleData triangleData;
-   if(!Triangulate::processComplex(triangleData, bounds, solution, holes))
+   Vector<Point> outputTriangles;  // Every 3 points is a triangle
+   if(!Triangulate::processComplex(outputTriangles, bounds, solution))
       return false;
 
 #ifdef LOG_TIMER
@@ -529,7 +471,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
       bounds.offset(Point(mesh.offsetX, mesh.offsetY));
 
       // Merge!  into convex polygons
-      recastPassed = Triangulate::mergeTriangles(triangleData, mesh);
+      recastPassed = Triangulate::mergeTriangles(outputTriangles, mesh);
    }
 
    populateZoneList();     // Populate mAllZones
@@ -608,25 +550,24 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
       TNLAssert(false, "Recast failed -- please report this level to the devs, and pick continue to build zones from triangle output");
       logprintf(LogConsumer::LogLevelError, "There were problems with bot nav zone creation -- please report this level to the devs!");
 
-      // Visualize triangle output
-      for(S32 i = 0; i < triangleData.triangleCount * 3; i+=3)
+      for(S32 i = 0; i < outputTriangles.size(); i+=3)
       {
          if(botZoneDatabase->getObjectCount() >= MAX_ZONES)      // Don't add too many zones...
             break;
 
-         BotNavMeshZone *botzone = new BotNavMeshZone();
+         BotNavMeshZone *botzone = new BotNavMeshZone(i/3);
          // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
          // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
          // for this object.
          if(!triangulateZones)
             botzone->disableTriangulation();
 
-         botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i]*2],   triangleData.pointList[triangleData.triangleList[i]*2 + 1]));
-         botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i+1]*2], triangleData.pointList[triangleData.triangleList[i+1]*2 + 1]));
-         botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i+2]*2], triangleData.pointList[triangleData.triangleList[i+2]*2 + 1]));
+         botzone->addVert(outputTriangles[i]);
+         botzone->addVert(outputTriangles[i+1]);
+         botzone->addVert(outputTriangles[i+2]);
 
          botzone->addToZoneDatabase();
-       }
+      }
 
       BotNavMeshZone::buildBotNavMeshZoneConnections(game);
    }

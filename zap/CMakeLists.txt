@@ -151,7 +151,11 @@ set(SHARED_SOURCES
    ../recast/RecastAlloc.cpp
    ../recast/RecastMesh.cpp
    ../sqlite/sqlite3.c
-   ../Triangle/triangle.c
+   ../poly2tri/common/shapes.cc
+   ../poly2tri/sweep/advancing_front.cc
+   ../poly2tri/sweep/cdt.cc
+   ../poly2tri/sweep/sweep.cc
+   ../poly2tri/sweep/sweep_context.cc
 )
 
 if(SDL_FOUND)

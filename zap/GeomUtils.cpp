@@ -54,10 +54,7 @@
 #include "../recast/Recast.h"
 #include "../recast/RecastAlloc.h"
 #include "../clipper/clipper.hpp"
-
-extern "C" {
-#  include "../Triangle/triangle.h"      // For Triangle!
-}
+#include "../poly2tri/poly2tri.h"
 
 #include <math.h>
 
@@ -105,7 +102,7 @@ Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 
 // To use with a Vector of points, pass in vector.address() and vector.size()
 bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint)
 {
-   int counter = 0;
+   bool oddCount = false;
    int i;
    double xinters;
    Point p1, p2;
@@ -119,13 +116,39 @@ bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &i
       {
          xinters = (inPoint.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
          if(p1.x == p2.x || inPoint.x <= xinters)
-            counter++;
+            oddCount = !oddCount;
       }
 
       p1 = p2;
    }
 
-   return (counter & 1) != 0;   // True when number is odd, false when number is even ==> essentially replaces (counter % 2 == 0)
+   return oddCount;   // True if we've crossed an odd number of lines
+}
+
+
+bool PolygonContains2p2t(p2t::Point **inVertices, int inNumVertices, const p2t::Point *inPoint)
+{
+   bool oddCount = false;
+   int i;
+   double xinters;
+   const p2t::Point *p1, *p2;
+
+   p1 = inVertices[inNumVertices-1];
+
+   for(i = 0; i < inNumVertices; i++)
+   {
+      p2 = inVertices[i];
+      if(inPoint->y > MIN(p1->y, p2->y) && inPoint->y <= MAX(p1->y, p2->y) && inPoint->x <= MAX(p1->x, p2->x) && (p1->y != p2->y))
+      {
+         xinters = (inPoint->y - p1->y) * (p2->x - p1->x) / (p2->y - p1->y) + p1->x;
+         if(p1->x == p2->x || inPoint->x <= xinters)
+            oddCount = !oddCount;
+      }
+
+      p1 = p2;
+   }
+
+   return oddCount;   // True if we've crossed an odd number of lines
 }
 
 
@@ -1036,177 +1059,121 @@ void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
 #endif
 
 
-REAL *pointsToCheck;
-S32 QSORT_CALLBACK IDtoPointSort(S32 *a_ptr, S32 *b_ptr)
+bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bounds,
+      const Vector<Vector<Point> >& polygonList)
 {
-   S32 a = (*a_ptr)*2;
-   S32 b = (*b_ptr)*2;
-   if(pointsToCheck[a] < pointsToCheck[b] )
-      return -1;
-   else if(pointsToCheck[a] > pointsToCheck[b] )
-      return 1;
-   else
-   {
-      if(pointsToCheck[a+1] < pointsToCheck[b+1] )
-         return -1;
-      else if(pointsToCheck[a+1] > pointsToCheck[b+1] )
-         return 1;
-   }
-   return 0;
-}
+   // Here we will divide up out input polygon list into holes and inner boundaries of circuit
+   // holes.  We know an inner boundary of a circuit-hole is wound clockwise because that's how
+   // we set up Clipper to output
+   //
+   // Also used to keep track of our memory to clean up
+   // TODO:  Convert to use our Point and Vector classes somehow?
+   vector<vector<p2t::Point*> > polylines;   // MUST be clockwise
+   vector<vector<p2t::Point*> > holes;       // MUST be counterclockwise
 
-
-// Triangulate a bounded area with complex polygon holes
-bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
-                                 const Vector<Vector<Point> >& polygonList, Vector<F32>& holeMarkerList2)
-{
-   Vector<REAL> coords;
-   Vector<REAL> holeMarkerList;
-   holeMarkerList.resize(holeMarkerList2.size());
-   for(S32 i = 0; i < holeMarkerList.size(); i++)
-      holeMarkerList[i] = holeMarkerList2[i]; // convert F32 to REAL(double)
+   // First build our map extents outline polygon.  Clockwise!
+   vector<p2t::Point*> outline;
 
    F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
    F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
 
-   coords.push_back(minx);   coords.push_back(miny);     // Point 0
-   coords.push_back(minx);   coords.push_back(maxy);     // Point 1
-   coords.push_back(maxx);   coords.push_back(maxy);     // Point 2
-   coords.push_back(maxx);   coords.push_back(miny);     // Point 3
+   outline.push_back(new p2t::Point(minx, miny));
+   outline.push_back(new p2t::Point(minx, maxy));
+   outline.push_back(new p2t::Point(maxx, maxy));
+   outline.push_back(new p2t::Point(maxx, miny));
 
-   S32 nextPt = 4;
+   polylines.push_back(outline);
 
-   // Using Triangle library
-   Vector<S32> edges;
-
-   edges.push_back(0);       edges.push_back(1);      // 0 -> 1
-   edges.push_back(1);       edges.push_back(2);      // 1 -> 2
-   edges.push_back(2);       edges.push_back(3);      // 2 -> 3
-   edges.push_back(3);       edges.push_back(0);      // 3 -> 0
-
-   Vector<Point> poly;
-   for (S32 j = 0; j < polygonList.size(); j++)
+   // Now determine what is a hole and what is another polyline bound we need to triangulate
+   // Almost everything will be a hole
+   for(S32 i = 0; i < polygonList.size(); i++)
    {
-      poly = polygonList[j];
+      Vector<Point> currentPoly = polygonList[i];
 
-      if(poly.size() == 0)
-         continue;
-
-      S32 first = nextPt;
-      for (S32 k = 0; k < poly.size(); k++)
+      if(isWoundClockwise(currentPoly))  // Considered a bounding polyline to triangulate
       {
-         coords.push_back(poly[k].x);
-         coords.push_back(poly[k].y);
+         vector<p2t::Point*> polyline;
+         for(S32 j = 0; j < currentPoly.size(); j++)
+            polyline.push_back(new p2t::Point(currentPoly[j].x, currentPoly[j].y));
 
-         if(k > 0)
-         {
-            edges.push_back(nextPt);
-            edges.push_back(nextPt + 1);
-            nextPt++;
-         }
+         polylines.push_back(polyline);
       }
-
-      // Close the loop
-      edges.push_back(nextPt);
-      edges.push_back(first);
-      nextPt++;
-   }
-
-   // Start of duplicate Points removal, helps to avoid error / crash in triangulate
-   Vector<S32> sortID;
-   sortID.resize(coords.size()/2);
-   for(S32 i=0; i<sortID.size(); i++)
-   {
-      sortID[i]=i;
-   }
-
-   pointsToCheck = coords.address();
-   sortID.sort(IDtoPointSort);
-
-   for(S32 i=sortID.size()-1; i>=1; i--)
-   {
-      S32 i2 = sortID[i];
-      S32 i2prev = sortID[i-1];
-      TNLAssert(IDtoPointSort(&sortID[i], &sortID[i-1]) >= 0, "Not sorted anymore...");
-      if(coords[i2*2] == coords[i2prev*2] && coords[i2*2+1] == coords[i2prev*2+1])
+      else
       {
-#ifdef TNL_DEBUG
-         logprintf("Duplicate points found %f,%f", coords[i2*2], coords[i2*2+1]);
-#endif
-         for(S32 j=0; j<edges.size(); j++)
-         {
-            if(edges[j] == i2)
-               edges[j] = i2prev;
-            else if(edges[j]*2+2 == coords.size())
-               edges[j] = i2;
-         }
-         for(S32 j=0; j<i; j++)
-            if(sortID[j]*2+2 == coords.size())
-               sortID[j] = i2;
-         coords.erase_fast(i2*2+1);
-         coords.erase_fast(i2*2);
+         vector<p2t::Point*> hole;
+         for(S32 j = 0; j < currentPoly.size(); j++)
+            hole.push_back(new p2t::Point(currentPoly[j].x, currentPoly[j].y));
+
+         holes.push_back(hole);
       }
    }
 
-#ifdef DUMP_DATA
-   // Dump points
-   for(S32 i = 0; i < coords.size(); i+=2)
-      logprintf("Point %d: %f, %f", i/2, coords[i], coords[i+1]);
+
+   vector<p2t::CDT*> cdtRegistry;       // For keeping track of memory
+
+   for(S32 i = 0; i < polylines.size(); i++)
+   {
+      vector<p2t::Point*> polyline = polylines[i];
+
+      // Create our worker and keep track of it for clean-up later
+      p2t::CDT* cdt = new p2t::CDT(polyline);
+      cdtRegistry.push_back(cdt);
+
+      // Here we filter holes so as to not make poly2tri do extra work.  This improved poly2tri
+      // performance by at least 1 magnitude
+      //
+      // TODO: possibly be even smarter here and filter out holes that belong to a 'child' polyline bound
+      // i.e. some sort of hierarchal hole-to-polyline bound relationship
+      vector<vector<p2t::Point*> > filteredHoles;
+      for(S32 k = 0; k < holes.size(); k++)
+      {
+         // If only one of the points of the hole is within our bounding polyline, the
+         // entire holes should be.  This is because Clipper guarantees no overlapping
+         // polygons.  Thanks Clipper!
+         if(PolygonContains2p2t(&polyline[0], polyline.size(), holes[k][0]))  // &polyline[0]  <- vector to array!
+            filteredHoles.push_back(holes[k]);
+      }
+
+      // Add our holes
+      for(S32 j = 0; j < filteredHoles.size(); j++)
+         cdt->AddHole(filteredHoles[j]);
+
+      // Do the work!
+      cdt->Triangulate();
+
+      // Add current output triangles to our total
+      vector<p2t::Triangle*> currentOutput = cdt->GetTriangles();
+
+      // Copy our data to TNL::Point and to our output Vector
+      p2t::Triangle *currentTriangle;
+      for(S32 i = 0; i < currentOutput.size(); i++)
+      {
+         currentTriangle = currentOutput[i];
+         outputTriangles.push_back(Point(currentTriangle->GetPoint(0)->x, currentTriangle->GetPoint(0)->y));
+         outputTriangles.push_back(Point(currentTriangle->GetPoint(1)->x, currentTriangle->GetPoint(1)->y));
+         outputTriangles.push_back(Point(currentTriangle->GetPoint(2)->x, currentTriangle->GetPoint(2)->y));
+      }
+   }
 
 
-   // Dump edges
-   for(S32 i = 0; i < edges.size(); i+=2)
-      logprintf("Edge %d, %d-%d", i/2, edges[i], edges[i+1]);
-#endif
+   // Clean up memory used with poly2tri
+   // Clean-up worker
+   for(S32 i = 0; i < cdtRegistry.size(); i++)
+      delete cdtRegistry[i];
 
-   triangulateio in, out;
+   // Free our many, many constructed pt2::Point objects
+   for(S32 i = 0; i < polylines.size(); i++)
+   {
+      vector<p2t::Point*> polyline = polylines[i];
+      vector<p2t::Point*>::iterator iterator;
+      for(iterator = polyline.begin(); iterator != polyline.end(); ++iterator)
+         delete *iterator;
 
-   initIoStruct(&in);
-   initIoStruct(&out);
+      polyline.clear();
+   }
 
-   in.numberofpoints = coords.size() / 2;
-   in.pointlist = coords.address();
-
-   in.segmentlist = edges.address();
-   in.numberofsegments = edges.size() / 2;
-
-   in.numberofholes = holeMarkerList.size() / 2;
-   in.holelist = holeMarkerList.address();
-
-   // try and except allows continue running after error, but no zones get generated - windows only?
-   // Adding the 'X' option gives a speed boost but seems to crash on several levels running on windows
-   triangulate2((char *)"zpQ", &in, &out, NULL);  // Replace Q with V to debug
-
-   if(outputData.pointList)
-      delete[] outputData.pointList;
-
-   // add triangle output to custom object for return storage
-   outputData.pointList = new F32[out.numberofpoints * 2];
-   for(S32 i=0; i < out.numberofpoints * 2; i++)
-      outputData.pointList[i] = (F32) out.pointlist[i]; // REAL (double) to F32
-
-   outputData.pointCount = out.numberofpoints;
-   outputData.triangleList = out.trianglelist;
-   outputData.triangleCount = out.numberoftriangles;
-
-   // clean up Triangle memory
-   //
-   // pointlist and trianglelist will not be freed as they are now wrapped in TriangleData
-   // to be used later
-   trifree(out.pointlist);  // with a conversion to F32, this REAL (double) size data can be freed
-   trifree(out.pointattributelist);
-   trifree(out.pointmarkerlist);
-   trifree(out.triangleattributelist);
-   trifree(out.segmentlist);
-   trifree(out.segmentmarkerlist);
-   trifree(out.edgelist);
-   trifree(out.edgemarkerlist);
-   trifree(out.normlist);
-   trifree(out.neighborlist);
-
-
-   // If no output points, no triangle points, or too many points, we can't use the data so return false
-   if(outputData.pointCount == 0 || outputData.triangleCount == 0)
+   // Make sure we have output data
+   if(outputTriangles.size() == 0)
       return false;
 
    return true;
@@ -1214,25 +1181,28 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
 
 
 // Merge triangles into convex polygons, uses Recast method
-bool Triangulate::mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S32 maxVertices)
+bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& mesh, S32 maxVertices)
 {
-   Vector<S32> intPoints(triangleData.pointCount * 2);     // 2 entries per point: x,y
-   intPoints.resize(triangleData.pointCount * 2);
+   S32 pointCount = triangleData.size();
+   S32 triangleCount = triangleData.size() / 3;
 
-   if(triangleData.pointCount > U16_MAX) // too many points for rcBuildPolyMesh
+   TNLAssert(pointCount % 3 == 0, "Triangles are not triangles?");
+
+   S32 intPoints[pointCount * 2];     // 2 entries per point: x,y
+   S32 triangleList[pointCount];      // 1 entry per vertex
+
+   if(pointCount > U16_MAX) // too many points for rcBuildPolyMesh
       return false;
 
-   TNLAssert((intPoints.size() == (triangleData.pointCount * 2)), "1 vector size is wrong");
-
-   for(S32 i = 0; i < triangleData.pointCount * 2; i+=2)
+   for(S32 i = 0; i < pointCount; i++)
    {
-      intPoints[i]   = (S32)floor(triangleData.pointList[i]   + 0.5) + mesh.offsetX;
-      intPoints[i+1] = (S32)floor(triangleData.pointList[i+1] + 0.5) + mesh.offsetY;
+      intPoints[2*i]   = (S32)floor(triangleData[i].x + 0.5) + mesh.offsetX;
+      intPoints[2*i+1] = (S32)floor(triangleData[i].y + 0.5) + mesh.offsetY;
+
+      triangleList[i] = i;  // Our triangle list is ordered so every 3 is a triangle in correct winding order
    }
 
-   TNLAssert((intPoints.size() == (triangleData.pointCount * 2)), "2 vector size is wrong");
-
-   return rcBuildPolyMesh(maxVertices, intPoints.address(), triangleData.pointCount, triangleData.triangleList, triangleData.triangleCount, mesh);
+   return rcBuildPolyMesh(maxVertices, intPoints, pointCount, triangleList, triangleCount, mesh);
 }
 
 
