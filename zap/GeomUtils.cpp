@@ -1172,8 +1172,10 @@ bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& 
 
    TNLAssert(pointCount % 3 == 0, "Triangles are not triangles?");
 
-   S32 intPoints[pointCount * 2];     // 2 entries per point: x,y
-   S32 triangleList[pointCount];      // 1 entry per vertex
+   Vector<S32> intPoints(pointCount * 2);     // 2 entries per point: x,y
+   intPoints.resize(pointCount * 2);
+   Vector<S32> triangleList(pointCount);      // 1 entry per vertex
+   triangleList.resize(pointCount);
 
    if(pointCount > U16_MAX) // too many points for rcBuildPolyMesh
       return false;
@@ -1186,7 +1188,7 @@ bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& 
       triangleList[i] = i;  // Our triangle list is ordered so every 3 is a triangle in correct winding order
    }
 
-   return rcBuildPolyMesh(maxVertices, intPoints, pointCount, triangleList, triangleCount, mesh);
+   return rcBuildPolyMesh(maxVertices, intPoints.address(), pointCount, triangleList.address(), triangleCount, mesh);
 }
 
 
