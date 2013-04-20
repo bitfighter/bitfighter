@@ -1108,7 +1108,7 @@ S32 Robot::lua_findObjects(lua_State *L)
    Rect queryRect(pos, pos);
    queryRect.expand(getGame()->computePlayerVisArea(this));  
 
-   return doFindObjects(L, "Robot:findObjects", &queryRect);
+   return LuaScriptRunner::findObjects(L, getGame()->getGameObjDatabase(), &queryRect, this);
 }
 
 
@@ -1141,7 +1141,7 @@ S32 Robot::lua_findGlobalObjects(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "findGlobalObjects");
 
-   return doFindObjects(L, "Robot:findGlobalObjects");
+   return LuaScriptRunner::findObjects(L, getGame()->getGameObjDatabase(), NULL, this);
 }
 
 
@@ -1162,82 +1162,6 @@ S32 Robot::lua_findObjectById(lua_State *L)
    checkArgList(L, functionArgs, "Robot", "findObjectById");
 
    return LuaScriptRunner::findObjectById(L, mGame->getGameObjDatabase()->findObjects_fast());
-}
-
-
-// If scope is NULL, we find all items
-S32 Robot::doFindObjects(lua_State *L, const char *methodName, Rect *scope)
-{
-   fillVector.clear();
-   static Vector<U8> types;
-
-   types.clear();
-
-   // We expect the stack to look like this: -- [fillTable], objType1, objType2, ...
-   // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
-   // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
-   // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
-   while(lua_isnumber(L, -1))
-   {
-      U8 typenum = (U8)lua_tointeger(L, -1);
-
-      // Requests for botzones have to be handled separately; not a problem, we'll just do the search here, and add them to
-      // fillVector, where they'll be merged with the rest of our search results.
-      if(typenum != BotNavMeshZoneTypeNumber)
-         types.push_back(typenum);
-      else
-      {
-         if(scope)   // Get other objects on screen-visible area only
-            BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, *scope);
-         else        // Get all objects
-            BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector);
-      }
-
-      lua_pop(L, 1);
-   }
-   
-   if(scope)      // Get other objects on screen-visible area only
-      getGame()->getGameObjDatabase()->findObjects(types, fillVector, *scope);
-   else           // Get all objects
-      getGame()->getGameObjDatabase()->findObjects(types, fillVector);
-
-
-   // We are expecting a table to be on top of the stack when we get here.  If not, we can add one.
-   if(!lua_istable(L, -1))
-   {
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
-      logprintf(LogConsumer::LogWarning, 
-                  "Finding objects will be far more efficient if your script provides a table -- see scripting docs for details!");
-      lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
-   }
-
-   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || LuaObject::dumpStack(L), "Should only have table!");
-
-
-   S32 pushed = 0;      // Count of items we put into our table
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      if(isShipType(fillVector[i]->getObjectTypeNumber()))
-      {
-         if(fillVector[i] == this)  // Don't add calling ship to the list of found objects!
-            continue;
-
-         // Ignore ship/robot if it's dead or cloaked (unless bot has sensor)
-         Ship *ship = static_cast<Ship *>(fillVector[i]);
-         if(!ship->isVisible(hasModule(ModuleSensor)) || ship->hasExploded)
-            continue;
-      }
-
-      static_cast<BfObject *>(fillVector[i])->push(L);
-      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
-      lua_rawseti(L, 1, pushed);
-   }
-
-   TNLAssert(lua_gettop(L) == 1 || LuaObject::dumpStack(L), "Stack has unexpected items on it!");
-
-   return 1;
 }
 
 
