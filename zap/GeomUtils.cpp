@@ -1042,22 +1042,6 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
       return true;
 }
 
-#if defined(TNL_OS_WIN32) && defined(TNL_COMPILER_VISUALC) && !defined(TNL_DEBUG)
-void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
-{
-   // error C2712: Cannot use __try in functions that require object unwinding
-   // must be here if wanting to cache exceptions
-   __try{
-      triangulate(a,b,c,d);
-   }__except(1){
-      logprintf("Exception tessellating with Triangle method");
-   }
-}
-
-#else
-#define triangulate2(a,b,c,d) triangulate(a,b,c,d)
-#endif
-
 
 bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bounds,
       const Vector<Vector<Point> >& polygonList)
@@ -1360,25 +1344,6 @@ Point shortenSegment(const Point &startPoint, const Point &endPoint, F32 lengthR
 
    // Return the new end-point
    return startPoint + dir;
-}
-
-
-
-Triangulate::TriangleData::TriangleData()
-{
-   pointList = NULL;
-   pointCount = 0;
-   triangleList = NULL;
-   triangleCount = 0;
-}
-
-Triangulate::TriangleData::~TriangleData()
-{
-   //if(pointList) free(pointList);
-   if(pointList)
-      delete[] pointList;
-   if(triangleList)
-      free(triangleList);
 }
 
 

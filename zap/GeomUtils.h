@@ -157,18 +157,6 @@ Vector<Vector<Point> > downscaleClipperPoints(const Polygons &inputPolygons);
 class Triangulate
 {
 public:
-   // class for output data of the triangulate process methods; hopefully cleans itself up
-   class TriangleData
-   {
-   public:
-      TriangleData();
-      ~TriangleData();
-
-      F32* pointList;
-      S32 pointCount;
-      S32* triangleList;
-      S32 triangleCount;
-   };
 
    // Triangulate a contour/polygon, places results in  Vector as series of triangles
    static bool Process(const Vector<Point> &contour, Vector<Point> &result);
