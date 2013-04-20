@@ -3066,4 +3066,14 @@ void renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color
 }
 
 
+void renderTeleporterEditorObject(const Point &pos, S32 radius, const Color &color)
+{
+   glColor(color);
+
+   glLineWidth(gLineWidth3);
+   drawPolygon(pos, 12, (F32)radius, 0);
+   glLineWidth(gDefaultLineWidth);
+}
+
+
 }

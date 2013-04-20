@@ -282,7 +282,7 @@ extern void renderCircleSpawn(const Point &pos, F32 scale = 1.0);
 extern void renderSpawn(const Point &pos, F32 scale, const Color *color);
 extern void renderFlightPlan(const Point &from, const Point &to, const Vector<Point> &flightPlan);
 extern void renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color, bool isSelected, bool isLitUp);
-
+extern void renderTeleporterEditorObject(const Point &pos, S32 radius, const Color &color);
 };
 
 #else
