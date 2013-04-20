@@ -307,7 +307,39 @@ S32 LuaLevelGenerator::logprint(lua_State *L)
  */
 S32 LuaLevelGenerator::findObjectById(lua_State *L)
 {
+   checkArgList(L, functionArgs, "Levelgen", "findObjectById");
+
    return LuaScriptRunner::findObjectById(L, mGame->getGameObjDatabase()->findObjects_fast());
+}
+
+
+/**
+  *   @luafunc Levelgen::findGlobalObjects(table, itemType, ...)
+  *   @brief   Finds all items of the specified type anywhere on the level.
+  *   @descr   Can specify multiple types.  The \e table argument is optional, but levelgens that call this function frequently will perform
+  *            better if they provide a reusable table in which found objects can be stored.  By providing a table, you will avoid
+  *            incurring the overhead of construction and destruction of a new one.
+  *
+  *   If a table is not provided, the function will create a table and return it on the stack.
+  *
+  *   @param  table - (Optional) Reusable table into which results can be written.
+  *   @param  itemType - One or more itemTypes specifying what types of objects to find.
+  *   @return resultsTable - Will either be a reference back to the passed \e table, or a new table if one was not provided.
+  *
+  *   @code items = { }     -- Reusable container for findGlobalObjects.  Because it is defined outside
+  *                         -- any functions, it will have global scope.
+  *
+  *         function countObjects(objType, ...)                -- Pass one or more object types
+  *           table.clear(items)                               -- Remove any items in table from previous use
+  *           levelgen:findGlobalObjects(items, objType, ...)  -- Put all items of specified type(s) into items table
+  *           print(#items)                                    -- Print the number of items found to the console
+  *         end
+  */
+S32 LuaLevelGenerator::findGlobalObjects(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Levelgen", "findGlobalObjects");
+
+   return LuaScriptRunner::findObjects(L, mGame->getGameObjDatabase(), NULL, NULL);
 }
 
 
@@ -377,6 +409,7 @@ const luaL_reg LuaLevelGenerator::luaMethods[] =
    { "addLevelLine",     luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::addLevelLine>     },
 
    { "findObjectById",   luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::findObjectById>   },
+   { "findGlobalObjects",luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::findGlobalObjects>},
                                                                                                 
    { "getGridSize",      luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::getGridSize>      },
    { "getPlayerCount",   luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::getPlayerCount>   },

@@ -50,10 +50,6 @@
 namespace Zap
 {
 
-// This method exists only for lunar support
-bool LuaObject::shouldLuaGarbageCollectThisObject() { return true; }
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -596,9 +592,6 @@ int LuaScriptRunner::luaPanicked(lua_State *L)
 // Called by various children classes
 S32 LuaScriptRunner::findObjectById(lua_State *L, const Vector<DatabaseObject *> *objects)
 {
-   static const char *methodName = "Levelgen:findObjectById()";
-   checkArgCount(L, 1, methodName);
-
    S32 id = getInt(L, 1);
 
    for(S32 i = 0; i < objects->size(); i++)

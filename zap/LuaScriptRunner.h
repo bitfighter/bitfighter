@@ -62,9 +62,6 @@ class MenuItem;
 class LuaObject : public LuaBase
 {
    typedef LuaBase Parent;
-
-public:
-   static bool shouldLuaGarbageCollectThisObject();     
 };
 
 
