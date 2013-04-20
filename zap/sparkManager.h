@@ -108,14 +108,6 @@ public:
 
 class FxTrail
 {
-public:
-   enum TrailProfile {
-      Ship,
-      CloakedShip,
-      TurboShip,
-      Seeker
-   };
-
 private:
    struct TrailNode
    {

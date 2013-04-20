@@ -149,10 +149,10 @@ void drawStringf(F32 x, F32 y, S32 size, const char *format, ...)
 }
 
 
-void drawStringfc(F32 x, F32 y, F32 size, const char *format, ...)
+S32 drawStringfc(F32 x, F32 y, F32 size, const char *format, ...)
 {
    makeBuffer;
-   drawStringc(x, y, (F32)size, buffer);
+   return drawStringc(x, y, (F32)size, buffer);
 }
 
 
@@ -213,16 +213,18 @@ S32 drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *format, ...)
 }
 
 
-void drawStringc(S32 x, S32 y, S32 size, const char *string)
+S32 drawStringc(S32 x, S32 y, S32 size, const char *string)
 {
-   drawStringc((F32)x, (F32)y, (F32)size, string);
+   return drawStringc((F32)x, (F32)y, (F32)size, string);
 }
 
 
-void drawStringc(F32 x, F32 y, F32 size, const char *string)
+S32 drawStringc(F32 x, F32 y, F32 size, const char *string)
 {
    F32 len = getStringWidth(size, string);
    drawAngleString(x - len / 2, y, size, 0, string);
+
+   return len;
 }
 
 

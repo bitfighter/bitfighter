@@ -36,7 +36,6 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "OpenglUtils.h"
 #endif
 
 #include "projectile.h"
@@ -624,11 +623,11 @@ void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
    for(S32 i = 0; i < getVertCount(); i++)
       if(vertSelected(i) || isVertexLitUp(i) || ((isSelected() || isLitUp())  && getVertCount() == 1))
       {
-         glColor((vertSelected(i) || (isSelected() && getGeomType() == geomPoint)) ? SELECT_COLOR : HIGHLIGHT_COLOR);
+         const Color *color = (vertSelected(i) || (isSelected() && getGeomType() == geomPoint)) ? SELECT_COLOR : HIGHLIGHT_COLOR;
 
          Point center = getVert(i) + getEditorSelectionOffset(currentScale);
 
-         drawSquare(center, radius / currentScale);
+         drawHollowSquare(center, radius / currentScale, color);
       }
 }
 #endif
@@ -645,8 +644,7 @@ Point BfObject::getDockLabelPos()
 void BfObject::highlightDockItem()
 {
 #ifndef ZAP_DEDICATED
-   glColor(HIGHLIGHT_COLOR);
-   drawSquare(getPos(), getDockRadius());
+   drawHollowSquare(getPos(), getDockRadius(), HIGHLIGHT_COLOR);
 #endif
 }
 

@@ -32,7 +32,6 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "OpenglUtils.h"       // For glColor, et al
 #  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
 #endif
 
@@ -123,10 +122,7 @@ void LineItem::render()
 
    // Now render
    if(mGlobal || sameTeam)
-   {
-      glColor(getColor());
-      renderLine(getOutline());
-   }
+      renderLine(getOutline(), getColor());
 #endif
 }
 
@@ -134,10 +130,12 @@ void LineItem::render()
 void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
-   if(!isSelected() && !isLitUp())
-      glColor(getEditorRenderColor());
+   const Color *color = NULL;       // HACK!  Should pass desired color into renderEditor instead of using NULL here
 
-   renderLine(getOutline());
+   if(!isSelected() && !isLitUp())           
+      color = getEditorRenderColor();
+
+   renderLine(getOutline(), color);
    renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
 #endif
 }

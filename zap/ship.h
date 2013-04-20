@@ -95,6 +95,10 @@ private:
    Vector<DatabaseObject *> *getCurrZoneList();    // Get list of zones ship is currently in
    Vector<DatabaseObject *> *getPrevZoneList();    // Get list of zones ship was in last tick
 
+   bool doesShipActivateSensor(const Ship *ship);
+   F32 getShipVisibility(const Ship *localShip);
+
+
 protected:
    enum MaskBits {
       MoveMask            = Parent::FirstFreeMask << 0, // New user input
@@ -157,8 +161,6 @@ public:
       EnergyCooldownThreshold = 15000,
       WeaponFireDecloakTime = 350,
       SensorZoomTime = 300,
-      SensorCloakInnerDetectionDistance = 300,
-      SensorCloakOuterDetectionDistance = 500,
       CloakFadeTime = 300,
       CloakCheckRadius = 200,
       RepairHundredthsPerSecond = 16,
@@ -208,7 +210,6 @@ public:
    Vector<SafePtr<BfObject> > mRepairTargets;            // TODO: Make this protected
 
    virtual void render(S32 layerIndex);
-   void calcThrustComponents(F32 *thrust);
 
    // Constructor
    Ship(ClientInfo *clientInfo, S32 team, const Point &p, bool isRobot = false);   // Standard constructor   

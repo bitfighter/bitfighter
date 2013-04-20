@@ -34,6 +34,7 @@
 #include "CoreGame.h"            // For CORE_PANELS
 #include "EngineeredItem.h"      // For TURRET_OFFSET
 #include "BotNavMeshZone.h"      // For Border def
+#include "teleporter.h"          // For TELEPORTER_RADIUS
 #include "version.h"
 #include "config.h"              // Only for testing burst graphics below
 #include "ScreenInfo.h"
@@ -41,7 +42,7 @@
 
 #include "UIEditor.h"            // For RenderingStyles enum
 
-#include "MathUtils.h"           // For converting radians to degrees
+#include "MathUtils.h"           // For converting radians to degrees, sq()
 #include "OpenglUtils.h"
 
 #include <math.h>
@@ -346,8 +347,11 @@ void drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle)
 }
 
 
-void drawFilledCircle(const Point &pos, F32 radius)
+void drawFilledCircle(const Point &pos, F32 radius, const Color *color)
 {
+   if(color)
+      glColor(color);
+
    drawFilledSector(pos, radius, 0, FloatTau);
 }
 
@@ -404,7 +408,7 @@ void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 leng
 }
 
 
-void renderActiveModules(F32 alpha, F32 radius, U32 sensorTime, bool cloakActive, bool shieldActive, bool sensorActive, bool repairActive,
+static void renderActiveModules(F32 alpha, F32 radius, U32 sensorTime, bool shieldActive, bool sensorActive, bool repairActive,
       bool hasArmor)
 {
    // Armor
@@ -421,7 +425,7 @@ void renderActiveModules(F32 alpha, F32 radius, U32 sensorTime, bool cloakActive
    // Shields
    if(shieldActive)
    {
-      F32 shieldRadius = radius + 3;
+      F32 shieldRadius = radius + 3;      // radius is the ship radius
 
       glColor(Colors::yellow, alpha);
       drawCircle(0, 0, shieldRadius);
@@ -490,7 +494,7 @@ static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 a
 
 
 void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
-                bool cloakActive, bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
+                bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
@@ -527,7 +531,143 @@ void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 
    renderVertexArray(shipShapeInfo->outerHullPoints, shipShapeInfo->outerHullPointCount, GL_LINE_LOOP);
 
    // Now render any module states
-   renderActiveModules(alpha, radius, sensorTime, cloakActive, shieldActive, sensorActive, repairActive, hasArmor);
+   renderActiveModules(alpha, radius, sensorTime, shieldActive, sensorActive, repairActive, hasArmor);
+}
+
+
+// Figure out the intensity of the thrusters based on the ship's actions and orientation
+static void calcThrustComponents(const Point &velocity, F32 angle, F32 deltaAngle, bool boostActive, F32 *thrusts)
+{
+   Point vel = velocity;         // Make a working copy that we can modify
+
+   F32 len = vel.len();
+
+   // Reset thrusts
+   for(U32 i = 0; i < 4; i++)
+      thrusts[i] = 0;            
+
+   if(len > 0)
+   {
+      if(len > 1)
+         vel *= 1 / len;
+
+      Point shipDirs[4];
+      shipDirs[0].set(cos(angle), sin(angle) );
+      shipDirs[1].set(-shipDirs[0]);
+      shipDirs[2].set( shipDirs[0].y, -shipDirs[0].x);
+      shipDirs[3].set(-shipDirs[0].y,  shipDirs[0].x);
+
+      for(U32 i = 0; i < 4; i++)
+         thrusts[i] = shipDirs[i].dot(vel);
+   }
+
+
+   if(deltaAngle > 0.001)
+      thrusts[3] += 0.25;
+   else if(deltaAngle < -0.001)
+      thrusts[2] += 0.25;
+   
+   if(boostActive)
+      for(U32 i = 0; i < 4; i++)
+         thrusts[i] *= 1.3f;
+}
+
+
+void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
+                F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, F32 alpha, 
+                U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
+                bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
+                bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
+                bool hasArmor, bool engineeringTeleport)
+   
+{
+   glPushMatrix();
+   glTranslate(renderPos);
+
+   // Draw the ship name, if there is one, before the glRotatef below, but only on layer 1...
+   // Don't label the local ship.
+   if(!isLocalShip && layerIndex == 1 && shipName != "")  
+   {
+      string renderName = isBusy ? "<<" + shipName + ">>" : shipName;
+
+      F32 textAlpha = 0.5f * alpha;
+      S32 textSize = 14;
+
+      glLineWidth(gLineWidth1);
+
+      glColor(Colors::white, textAlpha);
+      S32 len = drawStringc(0, 30 + textSize, textSize, renderName.c_str());
+
+      // Underline name if player is authenticated
+      if(isAuthenticated)
+         drawHorizLine(-len/2, len/2, 33 + textSize);
+
+      glLineWidth(gDefaultLineWidth);
+
+      // Show if the player is engineering a teleport
+      if(engineeringTeleport)
+         renderTeleporterOutline(Point(cos(angle), sin(angle)) * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS),
+               (F32)Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
+   }
+
+   if(showCoordinates && layerIndex == 1)
+      renderShipCoords(actualPos, isLocalShip, alpha);
+
+   F32 rotAmount = 0;      
+   if(warpInScale < 0.8f)
+      rotAmount = (0.8f - warpInScale) * 540;
+
+   // An angle of 0 means the ship is heading down the +X axis since we draw the ship 
+   // pointing up the Y axis, we should rotate by the ship's angle, - 90 degrees
+   glRotatef(radiansToDegrees(angle) - 90 + rotAmount, 0, 0, 1.0);
+   glScale(warpInScale);
+
+   // NOTE: Get rid of this if we stop sending location of cloaked ship to clients.  Also, we can stop
+   //       coming here altogether when layerIndex is not 1, and strip out a bunch of ifs above.
+   if(layerIndex == -1)    
+   {
+      // Draw the outline of the ship in solid black -- this will block out any stars and give
+      // a tantalizing hint of motion when the ship is cloaked.  Could also try some sort of star-twinkling or
+      // scrambling thing here as well...
+      glColor(Colors::black);
+
+      glDisable(GL_BLEND);
+
+      F32 vertices[] = { 20,-15,  0,25,  20,-15 };
+      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+
+      glEnable(GL_BLEND);
+   }
+
+   else     // LayerIndex == 1
+   {
+      // Calculate the various thrust components for rendering purposes; fills thrusts
+      static F32 thrusts[4];
+      calcThrustComponents(vel, angle, deltaAngle, boostActive, thrusts);  
+
+      renderShip(shape, color, alpha, thrusts, health, radius, renderTime,
+               shieldActive, sensorActive, repairActive, hasArmor);
+   }
+
+   glPopMatrix();
+}
+
+
+void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime)
+{
+   static const U32 BlinkStartTime = 1500;
+   static const U32 BlinkCycleDuration = 300;
+   static const U32 BlinkDuration = BlinkCycleDuration * 0.5f;       // Time shield is yellow or green during
+
+   if(shieldTime > BlinkStartTime || shieldTime % BlinkCycleDuration > BlinkDuration)
+      glColor(Colors::green65);  
+   else
+      glColor(Colors::yellow40);
+
+   // This rather gross looking variable helps manage problems with the resolution of F32s when getRealMilliseconds() returns a large value
+   const S32 BiggishNumber = 21988;
+   F32 offset = F32(renderTime % BiggishNumber) * FloatTau / BiggishNumber;
+   drawDashedHollowCircle(pos, Ship::CollisionRadius + 5, Ship::CollisionRadius + 10, 8, FloatTau / 24.0f, offset);
 }
 
 
@@ -1038,32 +1178,37 @@ static void drawFlag(const Color *flagColor, const Color *mastColor, F32 alpha)
 }
 
 
-void renderFlag(F32 x, F32 y, const Color *flagColor, const Color *mastColor, F32 alpha)
+void doRenderFlag(F32 x, F32 y, F32 scale, const Color *flagColor, const Color *mastColor, F32 alpha)
 {
    glPushMatrix();
-   glTranslatef(x, y, 0);
-
-   drawFlag(flagColor, mastColor, alpha);
-
+      glTranslatef(x, y, 0);
+      glScale(scale);
+      drawFlag(flagColor, mastColor, alpha);
    glPopMatrix();
 }
 
 
 void renderFlag(const Point &pos, const Color *flagColor, const Color *mastColor, F32 alpha)
 {
-   renderFlag(pos.x, pos.y, flagColor, mastColor, alpha);
+   doRenderFlag(pos.x, pos.y, 1.0, flagColor, mastColor, alpha);
 }
 
 
 void renderFlag(const Point &pos, const Color *flagColor)
 {
-   renderFlag(pos.x, pos.y, flagColor, NULL, 1);
+   doRenderFlag(pos.x, pos.y, 1.0, flagColor, NULL, 1);
+}
+
+
+void renderFlag(const Point &pos, F32 scale, const Color *flagColor)
+{
+   doRenderFlag(pos.x, pos.y, scale, flagColor, NULL, 1);
 }
 
 
 void renderFlag(F32 x, F32 y, const Color *flagColor)
 {
-   renderFlag(x, y, flagColor, NULL, 1);
+   doRenderFlag(x, y, 1.0, flagColor, NULL, 1);
 }
 
 
@@ -1098,6 +1243,18 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
             1, 1, 1, alpha
       };
       renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
+   glPopMatrix();
+}
+
+
+void renderFlagSpawn(const Point &pos, F32 currentScale, const Color *color)
+{
+   glPushMatrix();
+      glTranslatef(pos.x + 1, pos.y, 0);
+      glScalef(0.4f / currentScale, 0.4f / currentScale, 1);
+      renderFlag(color);
+
+      drawCircle(-4, 0, 26, &Colors::white);
    glPopMatrix();
 }
 
@@ -1141,12 +1298,14 @@ void renderPolygonOutline(const Vector<Point> *outline)
 }
 
 
-void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outlineColor, F32 alpha)
+void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outlineColor, F32 alpha, F32 lineThickness)
 {
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
    glColor(outlineColor, alpha);
+   glLineWidth(lineThickness);
+
    renderPolygonOutline(outlinePoints);
+
+   glLineWidth(gDefaultLineWidth);
 }
 
 
@@ -1843,32 +2002,34 @@ void renderEnergyItem(const Point &pos)
 
 
 // Use faster method with no offset
-void renderWallFill(const Vector<Point> *points, bool polyWall)
+void renderWallFill(const Vector<Point> *points, const Color &fillColor, bool polyWall)
 {
+   glColor(fillColor);
    renderPointVector(points, polyWall ? GL_TRIANGLES : GL_TRIANGLE_FAN);
 }
 
 
 // Use slower method if each point needs to be offset
-void renderWallFill(const Vector<Point> *points, const Point &offset, bool polyWall)
+void renderWallFill(const Vector<Point> *points, const Color &fillColor, const Point &offset, bool polyWall)
 {
+   glColor(fillColor);
    renderPointVector(points, offset, polyWall ? GL_TRIANGLES : GL_TRIANGLE_FAN);
 }
 
 
 // Used in both editor and game
-void renderWallEdges(const Vector<Point> *edges, const Color &outlineColor, F32 alpha)
+void renderWallEdges(const Vector<Point> &edges, const Color &outlineColor, F32 alpha)
 {
    glColor(outlineColor, alpha);
-   renderPointVector(edges, GL_LINES);
+   renderPointVector(&edges, GL_LINES);
 }
 
 
 // Used in editor only
-void renderWallEdges(const Vector<Point> *edges, const Point &offset, const Color &outlineColor, F32 alpha)
+void renderWallEdges(const Vector<Point> &edges, const Point &offset, const Color &outlineColor, F32 alpha)
 {
    glColor(outlineColor, alpha);
-   renderPointVector(edges, offset, GL_LINES);
+   renderPointVector(&edges, offset, GL_LINES);
 }
 
 
@@ -1961,9 +2122,9 @@ void renderAsteroidSpawn(const Point &pos, S32 time)
 }
 
 
-void renderAsteroidSpawnEditor(const Point &pos)
+void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
 {
-   F32 scale = 0.8f;
+   scale *= 0.8f;
    static const Point p(0,0);
 
    glPushMatrix();
@@ -1971,8 +2132,7 @@ void renderAsteroidSpawnEditor(const Point &pos)
       glScalef(scale, scale, 1);
       renderAsteroid(p, 2, .1f);
 
-      glColor(Colors::white);
-      drawCircle(p, 13);
+      drawCircle(p, 13, &Colors::white);
    glPopMatrix();
 }
 
@@ -2386,15 +2546,30 @@ void drawSquare(const Point &pos, S32 radius, bool filled)
 }
 
 
-void drawFilledSquare(const Point &pos, F32 radius)
+void drawHollowSquare(const Point &pos, F32 radius, const Color *color)
 {
+   if(color)
+      glColor(color);
+
+   drawSquare(pos, radius, false);
+}
+
+
+void drawFilledSquare(const Point &pos, F32 radius, const Color *color)
+{
+   if(color)
+      glColor(color);
+
     drawSquare(pos, radius, true);
 }
 
 
-void drawFilledSquare(const Point &pos, S32 radius)
+void drawFilledSquare(const Point &pos, S32 radius, const Color *color)
 {
-    drawSquare(pos, F32(radius), true);
+   if(color)
+      glColor(color);
+
+   drawSquare(pos, F32(radius), true);
 }
 
 
@@ -2457,6 +2632,15 @@ void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F
 }
 
 
+void renderLine(const Vector<Point> *points, const Color *color)
+{
+   if(color)
+      glColor(color);
+
+   renderLine(points);
+}
+
+
 static void drawLetter(char letter, const Point &pos, const Color *color, F32 alpha)
 {
    // Mark the item with a letter, unless we're showing the reference ship
@@ -2480,8 +2664,11 @@ void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *
 
 
 // Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
-void drawCircle(F32 x, F32 y, F32 radius)
+void drawCircle(F32 x, F32 y, F32 radius, const Color *color, F32 alpha)
 {
+   if(color)
+      glColor(color, alpha);
+
    F32 theta = Float2Pi * INV_NUM_CIRCLE_SIDES; // 1/32
 
    // Precalculate the sine and cosine
@@ -2498,12 +2685,12 @@ void drawCircle(F32 x, F32 y, F32 radius)
    // This is a repeated rotation
    for(S32 i = 0; i < NUM_CIRCLE_SIDES; i++)
    {
-      vertexArray[2*i] = curX + x;
-      vertexArray[(2*i)+1] = curY + y;
+      vertexArray[(2*i)]     = curX + x;
+      vertexArray[(2*i) + 1] = curY + y;
 
       // Apply the rotation matrix
       prevX = curX;
-      curX = (cosTheta * curX) - (sinTheta * curY);
+      curX = (cosTheta * curX)  - (sinTheta * curY);
       curY = (sinTheta * prevX) + (cosTheta * curY);
    }
 
@@ -2511,9 +2698,9 @@ void drawCircle(F32 x, F32 y, F32 radius)
 }
 
 
-void drawCircle(const Point &pos, F32 radius)
+void drawCircle(const Point &pos, F32 radius, const Color *color, F32 alpha)
 {
-   drawCircle(pos.x, pos.y, radius);
+   drawCircle(pos.x, pos.y, radius, color, alpha);
 }
 
 
@@ -2670,8 +2857,7 @@ void renderLevelDesignWinnerBadge(F32 x, F32 y, F32 rad)
    edges.push_back(Point(x + rm2, y + rm2));
    edges.push_back(Point(x + rm2, y - rm2));
 
-   glColor(0.5f, 0.5f, 1.0f);
-   renderWallFill(&edges, false);
+   renderWallFill(&edges, Colors::wallFillColor, false);
    renderPolygonOutline(&edges, &Colors::blue);
    glColor(Colors::white);
    renderCenteredString(Point(x, y), rad, "1");
@@ -2851,6 +3037,180 @@ void drawStars(Point *stars, S32 numStars, F32 alphaFrac, bool starsInDistance, 
 }
 
 
-};
+void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &wallEdgePoints, 
+                 const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor, 
+                 const Color &fillColor, F32 currentScale, bool dragMode, bool drawSelected,
+                 const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha)
+{
+   bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
+   S32 count = wallSegmentDatabase->getObjectCount();
+
+   if(!drawSelected)    // Essentially pass 1, drawn earlier in the process
+   {
+      // Render walls that have been moved first (i.e. render their shadows)
+      if(moved)
+      {
+         for(S32 i = 0; i < count; i++)
+         {
+            WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
+            if(wallSegment->isSelected())     
+               wallSegment->renderFill(Point(0,0), Color(.1));
+         }
+      }
+
+      // hack for now
+      Color color;
+      if(alpha < 1)
+         color = Colors::gray67;
+      else
+         color = fillColor * alpha;
+
+      for(S32 i = 0; i < count; i++)
+      {
+         WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
+         if(!moved || !wallSegment->isSelected())         
+            wallSegment->renderFill(selectedItemOffset, color);      // RenderFill ignores offset for unselected walls
+      }
+
+      renderWallEdges(wallEdgePoints, outlineColor);                 // Render wall outlines with unselected walls
+   }
+   else  // Render selected/moving walls last so they appear on top; this is pass 2, 
+   {
+      for(S32 i = 0; i < count; i++)
+      {
+         WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
+         if(wallSegment->isSelected())  
+            wallSegment->renderFill(selectedItemOffset, fillColor * alpha);
+      }
+
+      // Render wall outlines for selected walls only
+      renderWallEdges(selectedWallEdgePoints, selectedItemOffset, outlineColor);
+   }
+
+   if(showSnapVertices)
+   {
+      glLineWidth(gLineWidth1);
+
+      //glColor(Colors::magenta);
+      for(S32 i = 0; i < wallEdgePoints.size(); i++)
+         renderSmallSolidVertex(currentScale, wallEdgePoints[i], dragMode);
+
+      glLineWidth(gDefaultLineWidth);
+   }
+}
 
 
+void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color *color, 
+                       F32 currentScale, bool snappingToWallCornersEnabled)
+{
+   if(color)
+      glColor(color);
+
+   renderLine(outline);
+   renderPolyLineVertices(wallItem, snappingToWallCornersEnabled, currentScale);
+}
+
+
+void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
+{
+   // Mark the item with a letter, unless we're showing the reference ship
+   F32 vertOffset = 8;
+   if (letter >= 'a' && letter <= 'z')    // Better positioning for lowercase letters
+      vertOffset = 10;
+
+   glColor(color, alpha);
+   F32 xpos = pos.x - getStringWidthf(15, "%c", letter) / 2;
+
+   drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
+}
+
+
+void renderCircleSpawn(const Point &pos, F32 scale)
+{
+   scale *= 0.8f;
+   static const Point p(0,0);
+
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scale, scale, 1);
+      drawCircle(p, 8);
+
+      drawCircle(p, 13, &Colors::white);
+   glPopMatrix();  
+}
+
+
+void renderSpawn(const Point &pos, F32 scale, const Color *color)
+{   
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scale, scale, 1);    // Make item draw at constant size, regardless of zoom
+      renderSquareItem(Point(0,0), color, 1, &Colors::white, 'S');
+   glPopMatrix();
+}
+
+
+// For debugging bots -- renders the path the bot will take from its current location to its destination.
+// Note that the bot may cut corners as it goes.
+void renderFlightPlan(const Point &from, const Point &to, const Vector<Point> &flightPlan)
+{
+   glColor(Colors::red);
+
+   // Render from ship to start of flight plan
+   Vector<Point> line(2);
+   line.push_back(from);
+   line.push_back(to);
+   renderLine(&line);
+
+   // Render the flight plan itself
+   renderPointVector(&flightPlan, GL_LINE_STRIP);
+}
+
+
+// Used by SimpleLineItem to draw the chunky arrow that represents the item in the editor
+void renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color, bool isSelected, bool isLitUp)
+{
+   for(S32 i = 1; i >= 0; i--)
+   {
+      // Draw heavy colored line with colored core
+      glLineWidth(i ? gLineWidth4 : gDefaultLineWidth);                
+      glColor(color, i ? .35f : 1);         // Get color from child class
+
+      F32 ang = pos.angleTo(dest);
+      const F32 al = 15;                // Length of arrow-head, in editor units (15 pixels)
+      const F32 angoff = .5;            // Pitch of arrow-head prongs
+
+      // Draw arrowhead
+      F32 vertices[] = {
+            dest.x, dest.y,
+            dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al,
+            dest.x, dest.y,
+            dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al
+      };
+      renderVertexArray(vertices, 4, GL_LINES);
+
+      // Draw highlighted core on 2nd pass if item is selected, but not while it's being edited
+      if(!i && (isSelected || isLitUp))
+         glColor(isSelected ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
+
+      F32 vertices2[] = {
+            pos.x, pos.y,
+            dest.x, dest.y
+      };
+
+      renderVertexArray(vertices2, 2, GL_LINES);
+   }
+}
+
+
+void renderTeleporterEditorObject(const Point &pos, S32 radius, const Color &color)
+{
+   glColor(color);
+
+   glLineWidth(gLineWidth3);
+   drawPolygon(pos, 12, (F32)radius, 0);
+   glLineWidth(gDefaultLineWidth);
+}
+
+
+}

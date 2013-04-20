@@ -29,8 +29,7 @@
 #include "Colors.h"
 
 #ifndef ZAP_DEDICATED
-#include "OpenglUtils.h"
-#include "UI.h"
+//#include "UI.h"
 #endif
 
 namespace Zap
@@ -82,13 +81,12 @@ void PolygonObject::highlightDockItem()
 }
 
 
+extern F32 gLineWidth3;
+
 void PolygonObject::renderPolyHighlight()
 {
 #ifndef ZAP_DEDICATED
-   glLineWidth(gLineWidth3);
-   glColor(isSelected() ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
-   renderPolygonOutline(getOutline());
-   glLineWidth(gDefaultLineWidth);
+   renderPolygonOutline(getOutline(), isSelected() ? SELECT_COLOR : HIGHLIGHT_COLOR, 1, gLineWidth3);
 #endif
 }
 

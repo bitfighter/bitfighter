@@ -177,6 +177,11 @@ public:
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitTeleportInEffect(const Point &pos, U32 type);
 
+   // Passthroughs to mUi
+   void quitEngineerHelper();
+   void newLoadoutHasArrived(const LoadoutTracker &loadout);
+   void setActiveWeapon(U32 weaponIndex);
+   bool isShowingDebugShipCoords();
 
 
    void requestSpawnDelayed();

@@ -124,7 +124,6 @@ using namespace TNL;
 #  endif
 
 #  include "VideoSystem.h"
-#  include "OpenglUtils.h"
 #  include "ClientGame.h"
 #  include "FontManager.h"
 #endif
@@ -203,6 +202,7 @@ Color gHostileTeamColor(Colors::gray50);        // Objects that are "hostile-to-
 Color gMasterServerBlue(0.8, 0.8, 1);           // Messages about successful master server statii
 Color gHelpTextColor(Colors::green);
 Color EDITOR_WALL_FILL_COLOR(.5, .5, 1); 
+
 
 DataConnection *dataConn = NULL;
 

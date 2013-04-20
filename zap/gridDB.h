@@ -188,10 +188,10 @@ public:
    virtual void removeFromDatabase(DatabaseObject *theObject, bool deleteObject);
    virtual void removeEverythingFromDatabase();
 
-   S32 getObjectCount();                          // Return the number of objects currently in the database
-   S32 getObjectCount(U8 typeNumber);             // Return the number of objects currently in the database of specified type
-   bool hasObjectOfType(U8 typeNumber);
-   DatabaseObject *getObjectByIndex(S32 index);   // Kind of hacky, kind of useful
+   S32 getObjectCount() const;                          // Return the number of objects currently in the database
+   S32 getObjectCount(U8 typeNumber) const;             // Return the number of objects currently in the database of specified type
+   bool hasObjectOfType(U8 typeNumber) const;
+   DatabaseObject *getObjectByIndex(S32 index) const;   // Kind of hacky, kind of useful
 };
 
 class BfObject;

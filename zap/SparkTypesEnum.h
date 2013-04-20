@@ -36,6 +36,13 @@ namespace Zap { namespace UI {
       SparkTypeCount
    };
 
+   enum TrailProfile {
+      ShipProfile,
+      CloakedShipProfile,
+      TurboShipProfile,
+      SeekerProfile
+   };
+
 }  } // Nested namespace
 
 #endif

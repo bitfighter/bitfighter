@@ -27,18 +27,12 @@
 #include "ship.h"
 #include "goalZone.h"
 #include "gameType.h"
-//#include "flagItem.h"
 #include "game.h"
 #include "gameConnection.h"
 
 #include "gameObjectRender.h"
 #include "stringUtils.h"
 #include "gameObjectRender.h"
-
-#ifndef ZAP_DEDICATED
-#include "UI.h"
-#include "OpenglUtils.h"
-#endif
 
 namespace Zap
 {
@@ -163,8 +157,7 @@ void Item::setRadius(F32 radius)
 void Item::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
-   glColor(Colors::cyan);
-   drawSquare(pos, 10, true);
+   drawFilledSquare(pos, 10, &Colors::cyan);
 #endif
 }
 

@@ -845,6 +845,30 @@ void ClientGame::onGameOver()
 }
 
 
+void ClientGame::quitEngineerHelper()
+{
+   mUi->quitEngineerHelper();
+}
+
+
+void ClientGame::newLoadoutHasArrived(const LoadoutTracker &loadout)
+{
+   mUi->newLoadoutHasArrived(loadout);
+}
+
+
+void ClientGame::setActiveWeapon(U32 weaponIndex)
+{
+   mUi->setActiveWeapon(weaponIndex);
+}
+
+
+bool ClientGame::isShowingDebugShipCoords()
+{
+   return mUi->isShowingDebugShipCoords();
+}
+
+
 // Only happens when using connectArranged, part of punching through firewall
 void ClientGame::connectionToServerRejected(const char *reason)
 {

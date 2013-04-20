@@ -481,22 +481,22 @@ void FxTrail::render()
       F32 r, g, b, a, rFade, gFade, bFade, aFade;
 
       switch(mNodes[i].profile) {
-         case Ship:
+         case ShipProfile:
             r = 1;      g = 1;      b = 1;      a = 0.7f;
             rFade = 2;  gFade = 2;  bFade = 0;  aFade = 0.7f;
             break;
 
-         case CloakedShip:
+         case CloakedShipProfile:
             r = 0;      g = 0;      b = 0;      a = 0.0f;
             rFade = 0;  gFade = 0;  bFade = 0;  aFade = 0.0f;
             break;
 
-         case TurboShip:
+         case TurboShipProfile:
             r = 1;      g = 1;      b = 0;      a = 1;
             rFade = 1;  gFade = 1;  bFade = 0;  aFade = 1;
             break;
 
-         case Seeker:
+         case SeekerProfile:
             r = 0.5f;       g = 0.5f;    b = 0.5f;   a = 0.4f;
             rFade = 0.5f;   gFade = 1;   bFade = 1;  aFade = 0.2f;
             break;

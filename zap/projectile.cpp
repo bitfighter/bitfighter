@@ -34,9 +34,6 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "sparkManager.h"
-#  include "UI.h"
-#  include "OpenglUtils.h"
 #endif
 
 #include <cmath>
@@ -739,25 +736,6 @@ S32 Burst::lua_getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-static void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
-{
-#ifndef ZAP_DEDICATED
-   // Mark the item with a letter, unless we're showing the reference ship
-   F32 vertOffset = 8;
-   if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
-      vertOffset = 10;
-
-   glColor(color, alpha);
-   F32 xpos = pos.x - getStringWidthf(15, "%c", letter) / 2;
-
-   drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
-#endif
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 TNL_IMPLEMENT_NETOBJECT(Mine);
 
 // Constructor -- used when mine is planted
@@ -938,6 +916,9 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+extern const S32 SensorCloakInnerDetectionDistance;
+extern const S32 SensorCloakOuterDetectionDistance;
+
 void Mine::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
@@ -967,7 +948,7 @@ void Mine::renderItem(const Point &pos)
       // sensor is active and you're within the detection distance
       visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) ||
             mIsOwnedByLocalClient ||
-            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(Ship::SensorCloakInnerDetectionDistance));
+            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(SensorCloakInnerDetectionDistance));
    }
    else     // Must be in editor?
    {
@@ -991,9 +972,8 @@ void Mine::renderDock()
 #ifndef ZAP_DEDICATED
    Point pos = getActualPos();
 
-   glColor(.7, .7, .7);
-   drawCircle(pos, 9);
-   drawLetter('M', pos, Color(.7), 1);
+   drawCircle(pos, 9, &Colors::gray70);
+   drawLetter('M', pos, Colors::gray70, 1);
 #endif
 }
 
@@ -1206,7 +1186,7 @@ void SpyBug::renderItem(const Point &pos)
       visible = ((ship->getTeam() == getTeam()) && gameType->isTeamGame())   ||
             mIsOwnedByLocalClient ||
             getTeam() == TEAM_NEUTRAL ||
-            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(Ship::SensorCloakInnerDetectionDistance));
+            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(SensorCloakInnerDetectionDistance));
    }
    else    
       visible = true;      // We get here in editor when in preview mode
@@ -1229,11 +1209,9 @@ void SpyBug::renderDock()
 
    Point pos = getRenderPos();
 
-   glColor(getColor());
-   drawFilledCircle(pos, radius);
+   drawFilledCircle(pos, radius, getColor());
 
-   glColor(Colors::gray70);
-   drawCircle(pos, radius);
+   drawCircle(pos, radius, &Colors::gray70);
    drawLetter('S', pos, Color(getTeam() < 0 ? .5 : .7), 1);    // Use darker gray for neutral spybugs so S will show up clearer
 #endif
 }
@@ -1579,7 +1557,7 @@ void Seeker::emitMovementSparks()
 
    emissionPoint *= warpInScale;
  
-   mTrail.update(getRenderPos() + emissionPoint, UI::FxTrail::Seeker);
+   mTrail.update(getRenderPos() + emissionPoint, UI::SeekerProfile);
 
 #endif
 }

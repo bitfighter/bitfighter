@@ -42,9 +42,6 @@ using namespace TNL;
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
-#   include "sparkManager.h"
-#   include "OpenglUtils.h"
-#   include "UI.h"
 #endif
 
 #include <math.h>
@@ -848,11 +845,7 @@ void Teleporter::doExplosion()
 void Teleporter::renderEditorItem()
 {
 #ifndef ZAP_DEDICATED
-   glColor(Colors::green);
-
-   glLineWidth(gLineWidth3);
-   drawPolygon(getVert(0), 12, (F32)TELEPORTER_RADIUS, 0);
-   glLineWidth(gDefaultLineWidth);
+   renderTeleporterEditorObject(getVert(0), TELEPORTER_RADIUS, getEditorRenderColor());
 #endif
 }
 
