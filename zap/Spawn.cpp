@@ -23,14 +23,14 @@
 //
 //------------------------------------------------------------------------------------
 
+#include "Spawn.h"
+
 #ifndef ZAP_DEDICATED
-#  include "OpenglUtils.h"
 #  include "UIMenuItems.h"
 #  include "UIEditorMenus.h"
 #  include "ClientGame.h"
 #endif
 
-#include "Spawn.h"
 #include "game.h"
 #include "gameType.h"
 #include "NexusGame.h"           // For FlagSpawn::spawn()
@@ -287,13 +287,7 @@ S32 Spawn::getDefaultRespawnTime()
 void Spawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
-   Point pos = getPos();
-
-   glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(1/currentScale, 1/currentScale, 1);    // Make item draw at constant size, regardless of zoom
-      renderSquareItem(Point(0,0), getColor(), 1, &Colors::white, 'S');
-   glPopMatrix();
+   renderSpawn(getPos(), 1/currentScale, getColor());
 #endif
 }
 
@@ -568,13 +562,7 @@ void AsteroidSpawn::render(S32 layerIndex)
 void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
-   Point pos = getPos();
-
-   glPushMatrix();
-      glTranslate(pos);
-      glScale(1/currentScale);    // Make item draw at constant size, regardless of zoom
-      renderAsteroidSpawnEditor(Point(0,0));
-   glPopMatrix();
+   renderAsteroidSpawnEditor(getPos(), 1/currentScale);
 #endif
 }
 
@@ -695,34 +683,10 @@ void CircleSpawn::spawn()
 }
 
 
-static void renderCircleSpawn(const Point &pos)
-{
-#ifndef ZAP_DEDICATED
-   F32 scale = 0.8f;
-   static const Point p(0,0);
-
-   glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(scale, scale, 1);
-      drawCircle(p, 8);
-
-      glColor(Colors::white);
-      drawCircle(p, 13);
-   glPopMatrix();  
-#endif
-}
-
-
 void CircleSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
-   Point pos = getPos();
-
-   glPushMatrix();
-      glTranslate(pos);
-      glScale(1 / currentScale);    // Make item draw at constant size, regardless of zoom
-      renderCircleSpawn(Point(0,0));
-   glPopMatrix();   
+   renderCircleSpawn(getPos(), 1 / currentScale); 
 #endif
 }
 
@@ -874,16 +838,7 @@ void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
-
-   glPushMatrix();
-      glTranslatef(pos.x + 1, pos.y, 0);
-      glScalef(0.4f / currentScale, 0.4f / currentScale, 1);
-      Color color = *getColor();  // To avoid taking address of temporary
-      renderFlag(&color);
-
-      glColor(Colors::white);
-      drawCircle(-4, 0, 26);
-   glPopMatrix();
+   renderFlagSpawn(pos, currentScale, getColor());
 #endif
 }
 

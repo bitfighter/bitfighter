@@ -30,11 +30,6 @@
 
 #include <math.h>
 
-#ifndef ZAP_DEDICATED
-#include "OpenglUtils.h"
-#include "UI.h"
-#include "UIEditor.h"
-#endif
 
 namespace Zap
 {
@@ -68,8 +63,7 @@ F32 SimpleLine::getEditorRadius(F32 currentScale)
 void SimpleLine::renderDock()
 {
 #ifndef ZAP_DEDICATED
-   glColor(getEditorRenderColor());       // Blue for TextItem, red for GoFast, etc.
-   drawFilledSquare(getVert(0), 5);       // Draw origin of item to give user something to grab on the dock
+   drawFilledSquare(getVert(0), 5, &getEditorRenderColor());       // Draw origin of item to give user something to grab on the dock
 #endif
 }
 
@@ -101,39 +95,7 @@ Point SimpleLine::getInitialPlacementOffset(F32 gridSize)
 void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
-   Point pos = getVert(0);
-   Point dest = getVert(1);
-
-   for(S32 i = 1; i >= 0; i--)
-   {
-      // Draw heavy colored line with colored core
-      glLineWidth(i ? gLineWidth4 : gDefaultLineWidth);                
-      glColor(getEditorRenderColor(), i ? .35f : 1);         // Get color from child class
-
-      F32 ang = pos.angleTo(dest);
-      const F32 al = 15;                // Length of arrow-head, in editor units (15 pixels)
-      const F32 angoff = .5;            // Pitch of arrow-head prongs
-
-      // Draw arrowhead
-      F32 vertices[] = {
-            dest.x, dest.y,
-            dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al,
-            dest.x, dest.y,
-            dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al
-      };
-      renderVertexArray(vertices, 4, GL_LINES);
-
-      // Draw highlighted core on 2nd pass if item is selected, but not while it's being edited
-      if(!i && (isSelected() || isLitUp()))
-         glColor(isSelected() ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
-
-      F32 vertices2[] = {
-            pos.x, pos.y,
-            dest.x, dest.y
-      };
-      renderVertexArray(vertices2, 2, GL_LINES);
-   }
-
+   renderHeavysetArrow(getVert(0), getVert(1), getEditorRenderColor(), isSelected(), isLitUp());
    renderEditorItem();
 #endif
 }

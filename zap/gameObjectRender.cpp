@@ -1110,6 +1110,18 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
 }
 
 
+void renderFlagSpawn(const Point &pos, F32 currentScale, const Color *color)
+{
+   glPushMatrix();
+      glTranslatef(pos.x + 1, pos.y, 0);
+      glScalef(0.4f / currentScale, 0.4f / currentScale, 1);
+      renderFlag(color);
+
+      drawCircle(-4, 0, 26, &Colors::white);
+   glPopMatrix();
+}
+
+
 F32 renderCenteredString(const Point &pos, S32 size, const char *string)
 {
    F32 width = getStringWidth((F32)size, string);
@@ -1973,9 +1985,9 @@ void renderAsteroidSpawn(const Point &pos, S32 time)
 }
 
 
-void renderAsteroidSpawnEditor(const Point &pos)
+void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
 {
-   F32 scale = 0.8f;
+   scale *= 0.8f;
    static const Point p(0,0);
 
    glPushMatrix();
@@ -1983,8 +1995,7 @@ void renderAsteroidSpawnEditor(const Point &pos)
       glScalef(scale, scale, 1);
       renderAsteroid(p, 2, .1f);
 
-      glColor(Colors::white);
-      drawCircle(p, 13);
+      drawCircle(p, 13, &Colors::white);
    glPopMatrix();
 }
 
@@ -2976,6 +2987,83 @@ void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
    drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
 }
 
+
+void renderCircleSpawn(const Point &pos, F32 scale)
+{
+   scale *= 0.8f;
+   static const Point p(0,0);
+
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scale, scale, 1);
+      drawCircle(p, 8);
+
+      drawCircle(p, 13, &Colors::white);
+   glPopMatrix();  
 }
 
 
+void renderSpawn(const Point &pos, F32 scale, const Color *color)
+{   
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scale, scale, 1);    // Make item draw at constant size, regardless of zoom
+      renderSquareItem(Point(0,0), color, 1, &Colors::white, 'S');
+   glPopMatrix();
+}
+
+
+// For debugging bots -- renders the path the bot will take from its current location to its destination.
+// Note that the bot may cut corners as it goes.
+void renderFlightPlan(const Point &from, const Point &to, const Vector<Point> &flightPlan)
+{
+   glColor(Colors::red);
+
+   // Render from ship to start of flight plan
+   Vector<Point> line(2);
+   line.push_back(from);
+   line.push_back(to);
+   renderLine(&line);
+
+   // Render the flight plan itself
+   renderPointVector(&flightPlan, GL_LINE_STRIP);
+}
+
+
+// Used by SimpleLineItem to draw the chunky arrow that represents the item in the editor
+void renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color, bool isSelected, bool isLitUp)
+{
+   for(S32 i = 1; i >= 0; i--)
+   {
+      // Draw heavy colored line with colored core
+      glLineWidth(i ? gLineWidth4 : gDefaultLineWidth);                
+      glColor(color, i ? .35f : 1);         // Get color from child class
+
+      F32 ang = pos.angleTo(dest);
+      const F32 al = 15;                // Length of arrow-head, in editor units (15 pixels)
+      const F32 angoff = .5;            // Pitch of arrow-head prongs
+
+      // Draw arrowhead
+      F32 vertices[] = {
+            dest.x, dest.y,
+            dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al,
+            dest.x, dest.y,
+            dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al
+      };
+      renderVertexArray(vertices, 4, GL_LINES);
+
+      // Draw highlighted core on 2nd pass if item is selected, but not while it's being edited
+      if(!i && (isSelected || isLitUp))
+         glColor(isSelected ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
+
+      F32 vertices2[] = {
+            pos.x, pos.y,
+            dest.x, dest.y
+      };
+
+      renderVertexArray(vertices2, 2, GL_LINES);
+   }
+}
+
+
+}

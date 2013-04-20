@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "robot.h"
+
 #include "EventManager.h"
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
 #include "goalZone.h"
@@ -42,10 +43,6 @@
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 
 #include "MathUtils.h"           // For findLowestRootIninterval()
-
-#ifndef ZAP_DEDICATED
-#  include "OpenglUtils.h"
-#endif
 
 
 #define hypot _hypot    // Kill some warnings
@@ -444,16 +441,7 @@ void Robot::render(S32 layerIndex)
       Parent::render(layerIndex);
 
    else if(layerIndex == 1 && flightPlan.size() != 0)    // Client hosting is rendering server objects
-   {
-      // Render from ship to start of flight plan
-      Vector<Point> line(2);
-      line.push_back(getActualPos());
-      line.push_back(flightPlan[0]);
-      renderLine(&line);
-
-      // Render the flight plan
-      renderPointVector(&flightPlan, GL_LINE_STRIP);
-   }
+      renderFlightPlan(getActualPos(), flightPlan[0], flightPlan);
 #endif
 }
 

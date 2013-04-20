@@ -24,17 +24,14 @@
 //------------------------------------------------------------------------------------
 
 #include "textItem.h"
+
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"    // For renderTextItem()
 #include "game.h"
-#include "item.h"
-#include "stringUtils.h"
-#include "teamInfo.h"            // For TEAM_NEUTRAL
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "UIEditorMenus.h"     // For TextItemEditorAttributeMenuUI def
-#  include "OpenglUtils.h"
 #endif
 
 

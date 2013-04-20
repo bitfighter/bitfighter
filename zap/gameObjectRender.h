@@ -152,6 +152,7 @@ extern void doRenderFlag(F32 x, F32 y, F32 scale, const Color *flagColor, const 
 
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha);
+extern void renderFlagSpawn(const Point &pos, F32 currentScale, const Color *color);
 
 extern void renderZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill);   
 
@@ -236,7 +237,7 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact);
 void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha = 1);
 
 void renderAsteroidSpawn(const Point &pos, S32 time);
-void renderAsteroidSpawnEditor(const Point &pos);
+void renderAsteroidSpawnEditor(const Point &pos, F32 scale = 1.0);
 
 void renderResourceItem(const Point &pos, F32 alpha = 1);
 void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
@@ -277,6 +278,10 @@ extern void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, 
                               F32 currentScale, bool snappingToWallCornersEnabled);
 
 extern void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha);
+extern void renderCircleSpawn(const Point &pos, F32 scale = 1.0);
+extern void renderSpawn(const Point &pos, F32 scale, const Color *color);
+extern void renderFlightPlan(const Point &from, const Point &to, const Vector<Point> &flightPlan);
+extern void renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color, bool isSelected, bool isLitUp);
 
 };
 
