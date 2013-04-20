@@ -44,6 +44,7 @@ using namespace std;
 
 namespace Zap {
 
+
 // Stroke font constructor
 BfFont::BfFont(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont)
 {
@@ -53,10 +54,9 @@ BfFont::BfFont(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont)
    mOk = true;
    mStrokeFont = strokeFont;
 
-   //mStash = NULL;       // TTF only
+   // TTF only stuff that is ignored
+   mStashFontId = 0;
 }
-
-static sth_stash *mStash = NULL;
 
 
 extern string getInstalledDataDir();
@@ -69,12 +69,9 @@ BfFont::BfFont(FontManager::FontId fontId, const string &fontFile)
    mIsStrokeFont = false;
    mStrokeFont = NULL;     // Stroke font only
 
-   if(mStash == NULL)
-      mStash = sth_create(512, 512);
+   TNLAssert(FontManager::getStash(), "Invalid font stash!");
 
-   TNLAssert(mStash, "Invalid font stash!");
-
-   if(mStash == NULL)
+   if(FontManager::getStash() == NULL)
    {
       mOk = false;
       return;
@@ -82,7 +79,7 @@ BfFont::BfFont(FontManager::FontId fontId, const string &fontFile)
 
    string file = getInstalledDataDir() + getFileSeparator() + "fonts" + getFileSeparator() + fontFile;
 
-   mStashFontId = sth_add_font(mStash, file.c_str());
+   mStashFontId = sth_add_font(FontManager::getStash(), file.c_str());
 
    TNLAssert(mStashFontId > 0, "Invalid font id!");
 
@@ -121,12 +118,6 @@ FontManager::FontId BfFont::getId()
 }
 
 
-sth_stash *BfFont::getStash()
-{
-   return mStash;
-}
-
-
 S32 BfFont::getStashFontId()
 {
    return mStashFontId;
@@ -136,16 +127,19 @@ S32 BfFont::getStashFontId()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-//const SFG_StrokeFont *gCurrentFont = &fgStrokeRoman;  // fgStrokeOrbitronLight, fgStrokeOrbitronMed
 
 static FontManager::FontId currentFontId;
 
 static BfFont *fontList[FontManager::FontCount];
 
+sth_stash *FontManager::mStash = NULL;
 
 // This must be run after VideoSystem::actualizeScreenMode()
 void FontManager::initialize()
 {
+   if(mStash == NULL)
+      mStash = sth_create(512, 512);
+
    // Our stroke fonts
    fontList[FontRoman]               = new BfFont(FontRoman,               &fgStrokeRoman);
    fontList[FontOrbitronLightStroke] = new BfFont(FontOrbitronLightStroke, &fgStrokeOrbitronLight);
@@ -177,16 +171,22 @@ void FontManager::cleanup()
 }
 
 
+sth_stash *FontManager::getStash()
+{
+   return mStash;
+}
+
+
 void FontManager::drawTTFString(BfFont *font, const char *string, F32 size)
 {
    F32 outPos;
 
-   sth_begin_draw(font->getStash());
+   sth_begin_draw(mStash);
 
    // 152.381f is what I stole from the bottom of FontStrokeRoman.h as the font size
-   sth_draw_text(font->getStash(), font->getStashFontId(), size, 0.0, 0.0, string, &outPos);
+   sth_draw_text(mStash, font->getStashFontId(), size, 0.0, 0.0, string, &outPos);
 
-   sth_end_draw(font->getStash());
+   sth_end_draw(mStash);
 }
 
 
@@ -348,7 +348,7 @@ S32 FontManager::getStrokeFontStringLength(const SFG_StrokeFont *font, const cha
 S32 FontManager::getTtfFontStringLength(BfFont *font, const char *string)
 {
    F32 minx, miny, maxx, maxy;
-   sth_dim_text(font->getStash(), font->getStashFontId(), legacyRomanSizeFactorThanksGlut, string, &minx, &miny, &maxx, &maxy);
+   sth_dim_text(mStash, font->getStashFontId(), legacyRomanSizeFactorThanksGlut, string, &minx, &miny, &maxx, &maxy);
 
    return maxx - minx;
 }

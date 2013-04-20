@@ -39,9 +39,10 @@ extern "C" {
 using namespace TNL;
 using namespace std;
 
+struct sth_stash;
+
 namespace Zap
 {
-
 
 class BfFont;
 
@@ -49,6 +50,8 @@ class FontManager
 {
 
 private:
+   static sth_stash *mStash;
+
    static S32 getStrokeFontStringLength(const SFG_StrokeFont *font, const char* string);
    static S32 getTtfFontStringLength(BfFont *font, const char* string);
 
@@ -78,6 +81,8 @@ public:
 
    static void initialize();    
    static void cleanup();   
+
+   static sth_stash *getStash();
 
    static void drawTTFString(BfFont *font, const char *string, F32 size);
    static void drawStrokeCharacter(const SFG_StrokeFont *font, S32 character);
@@ -116,7 +121,6 @@ public:
    FontManager::FontId getId();
    const SFG_StrokeFont *getStrokeFont();
    bool isStrokeFont();
-   sth_stash *getStash();
    S32 getStashFontId();
 
 };
