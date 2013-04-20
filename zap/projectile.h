@@ -38,6 +38,9 @@ namespace Zap
 class Ship;
 class ClientInfo;
 
+const S32 SensorCloakInnerDetectionDistance = 300;
+const S32 SensorCloakOuterDetectionDistance = 500;
+
 ////////////////////////////////////
 ////////////////////////////////////
 
@@ -238,7 +241,6 @@ class SpyBug : public Burst
 
 private:
    void initialize(const Point &pos, Ship *owner);
-
 
 public:
    SpyBug(const Point &pos, Ship *planter);  // Constructor -- used when SpyBug is deployed

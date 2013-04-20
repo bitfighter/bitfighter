@@ -31,6 +31,13 @@
 
 namespace Zap {
 
+// Figure out the shortest path from a to b...   Returns between -FloatPi and FloatPi
+F32 getAngleDiff(F32 a, F32 b)
+{
+   a = fmod(b - a + FloatPi, Float2Pi);         // fmod may return negative
+   return a < 0 ? a + FloatPi : a - FloatPi;
+}
+
 
 static void swap(F32 &f1, F32 &f2)
 {

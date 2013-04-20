@@ -67,7 +67,6 @@ static const char *pageHeaders[] = {
    "SOUND AND MUSIC",
    "LEVEL COMMANDS",
    "ADMIN COMMANDS",
-   "OWNER COMMANDS",
    "DEBUG COMMANDS",
    //"SCRIPTING CONSOLE"
 };
@@ -162,10 +161,6 @@ void InstructionsUserInterface::render()
       case InstructionAdminCommands:
          renderPageCommands(InstructionAdminCommands - FIRST_COMMAND_PAGE, 
                             "Admin permissions are required to use these commands");            // Admin commands
-         break;
-      case InstructionOwnerCommands:
-         renderPageCommands(InstructionOwnerCommands - FIRST_COMMAND_PAGE,
-                            "Owner permissions are required to use these commands");            // Admin commands
          break;
       case InstructionDebugCommands:
          renderPageCommands(InstructionDebugCommands - FIRST_COMMAND_PAGE);     // Debug commands
@@ -690,13 +685,13 @@ void InstructionsUserInterface::renderModulesPage()
       {
          case 0:     // Boost
 
-            renderShip(ShipShape::Normal, &Colors::blue, 1, thrustsBoost, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, false);
+            renderShip(ShipShape::Normal, &Colors::blue, 1, thrustsBoost, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
             {
                F32 vertices[] = {
                      -20, -17,
                      -20, -50,
-                     20, -17,
-                     20, -50
+                      20, -17,
+                      20, -50
                };
                F32 colors[] = {
                      1, 1, 0, 1,  // Colors::yellow
@@ -709,11 +704,11 @@ void InstructionsUserInterface::renderModulesPage()
             break;
 
          case 1:     // Shield
-            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, true, false, false, false);
+            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, true, false, false, false);
             break;
 
          case 2:     // Armor
-            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, true);
+            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, true);
             break;
 
          // skip 3 for 2nd line of armor
@@ -723,12 +718,12 @@ void InstructionsUserInterface::renderModulesPage()
                F32 health = (getGame()->getCurrentTime() & 0x7FF) * 0.0005f;
 
                F32 alpha = 1.0;
-               renderShip(ShipShape::Normal, &Colors::blue, alpha, thrusts, health, (F32)Ship::CollisionRadius, 0, false, false, false, true, false);
+               renderShip(ShipShape::Normal, &Colors::blue, alpha, thrusts, health, (F32)Ship::CollisionRadius, 0, false, false, true, false);
             }
             break;
 
          case 5:     // Sensor
-            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, getGame()->getCurrentTime(), false, false, true, false, false);
+            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, getGame()->getCurrentTime(), false, true, false, false);
             break;
 
          // skip 6 for 2nd line of sensor
@@ -742,13 +737,13 @@ void InstructionsUserInterface::renderModulesPage()
                   alpha = frac * 0.001f;
                else
                   alpha = 1 - (frac * 0.001f);
-               renderShip(ShipShape::Normal, &Colors::blue, alpha, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, false);
+               renderShip(ShipShape::Normal, &Colors::blue, alpha, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
             }
             break;
 
          case 8:     // Engineer
             {
-               renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, false);
+               renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
                renderResourceItem(Point(0,0));
             }
             break;

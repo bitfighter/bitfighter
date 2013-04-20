@@ -68,9 +68,9 @@ void drawStringf(F32 x, F32 y, S32 size, const char *format, ...);
 
 
 // Draw strings centered at point
-void drawStringfc(F32 x, F32 y, F32 size, const char *format, ...);
-void drawStringc(F32 x, F32 y, F32 size, const char *string);
-void drawStringc(S32 x, S32 y, S32 size, const char *string);
+S32 drawStringfc(F32 x, F32 y, F32 size, const char *format, ...);
+S32 drawStringc (F32 x, F32 y, F32 size, const char *string);
+S32 drawStringc (S32 x, S32 y, S32 size, const char *string);
 
 
 // Draw strings right-aligned at point

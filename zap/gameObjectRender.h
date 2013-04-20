@@ -125,10 +125,22 @@ void renderEnergyGuage(S32 energy);
 extern F32 renderCenteredString(const Point &pos, S32 size, const char *string);
 extern F32 renderCenteredString(const Point &pos, F32 size, const char *string);
 
+// Renders the core ship, good for instructions and such
 extern void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
-                       bool cloakActive, bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
+                       bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
 
-void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha);   // Render repair rays to all the repairing objects
+// Renders the ship and all the fixins
+extern void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
+                       F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, F32 alpha, 
+                       U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
+                       bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
+                       bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
+                       bool hasArmor, bool engineeringTeleport);
+
+extern void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime);
+
+// Render repair rays to all the repairing objects
+extern void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha);   
 
 extern void renderShipCoords(const Point &coords, bool localShip, F32 alpha);
 

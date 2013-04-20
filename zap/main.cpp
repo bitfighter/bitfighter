@@ -203,6 +203,7 @@ Color gMasterServerBlue(0.8, 0.8, 1);           // Messages about successful mas
 Color gHelpTextColor(Colors::green);
 Color EDITOR_WALL_FILL_COLOR(.5, .5, 1); 
 
+
 DataConnection *dataConn = NULL;
 
 U16 DEFAULT_GAME_PORT = 28000;

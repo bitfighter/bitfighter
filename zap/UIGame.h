@@ -267,7 +267,6 @@ public:
   
    void renderReticle();            // Render crosshairs
    void renderProgressBar();        // Render level-load progress bar
-   //void renderMessageDisplay();     // Render incoming server msgs
    void renderLoadoutIndicators();  // Render indicators for the various loadout items
    void renderShutdownMessage();    // Render an alert if server is shutting down
    void renderLostConnectionMessage(); 

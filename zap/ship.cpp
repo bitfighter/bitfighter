@@ -52,11 +52,8 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-//#  include "OpenglUtils.h"
-//#  include "sparkManager.h"
-#  include "UI.h"
 #  include "UIMenus.h"
-#  include "UIGame.h"
+//#  include "UIGame.h"
 #endif
 
 #include "MathUtils.h"  // For radiansToDegrees
@@ -69,10 +66,6 @@
 #  define min(a,b) ((a) <= (b) ? (a) : (b))
 #  define max(a,b) ((a) >= (b) ? (a) : (b))
 #endif
-
-#define sq(a) ((a) * (a))
-
-static const bool showCloakedTeammates = true;    // Set to true to allow players to see their cloaked teammates
 
 namespace Zap
 {
@@ -1525,12 +1518,12 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       if(!hasEngineerModule)  // can't engineer without this module
       {
          if(isLocalPlayerShip(game))  // If this ship is ours, quit engineer menu.
-            game->getUIManager()->getGameUserInterface()->quitEngineerHelper();
+            game->quitEngineerHelper();
       }
 
       // Alert the UI that a new loadout has arrived
       if(isLocalPlayerShip(game))
-         game->getUIManager()->getGameUserInterface()->newLoadoutHasArrived(mLoadout);
+         game->newLoadoutHasArrived(mLoadout);
    }
 
    if(stream->readFlag())  // hasExploded
@@ -1547,7 +1540,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       ClientGame *game = static_cast<ClientGame*>(getGame());
       if(isLocalPlayerShip(game))   // If this ship is ours, quit engineer menu
-         game->getUIManager()->getGameUserInterface()->quitEngineerHelper();
+         game->quitEngineerHelper();
    }
    else
    {
@@ -1659,15 +1652,6 @@ F32 Ship::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSk
       value -= 2.3f;
 
    return value;
-}
-
-
-static F32 getAngleDiff(F32 a, F32 b)
-{
-   // Figure out the shortest path from a to b...
-   // Returns between -FloatPi and FloatPi
-   a = fmod(b - a + FloatPi, Float2Pi); // fmod may return negative.
-   return a < 0 ? a + FloatPi : a - FloatPi;
 }
 
 
@@ -1834,7 +1818,7 @@ void Ship::setActiveWeapon(U32 weaponIndex)
 
 #ifndef ZAP_DEDICATED
    if(!mGame->isServer())
-      static_cast<ClientGame *>(mGame)->getUIManager()->getGameUserInterface()->setActiveWeapon(weaponIndex);
+      static_cast<ClientGame *>(mGame)->setActiveWeapon(weaponIndex);
 #endif
 }
 
@@ -1969,9 +1953,6 @@ void Ship::emitMovementSparks()
    if(hasExploded || getActualVel().lenSquared() < sq(TOO_SLOW_FOR_SPARKS))
       return;
 
-   bool boostActive = mLoadout.isModulePrimaryActive(ModuleBoost);
-   bool cloakActive = mLoadout.isModulePrimaryActive(ModuleCloak);
-
    ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[mShapeType];
    S32 cornerCount = shipShapeInfo->cornerCount;
 
@@ -2037,15 +2018,18 @@ void Ship::emitMovementSparks()
    rightId = bestId;
    Point rightPt = getRenderPos() + shipDirs[bestId];
 
+   bool boostActive = mLoadout.isModulePrimaryActive(ModuleBoost);
+   bool cloakActive = mLoadout.isModulePrimaryActive(ModuleCloak);
+
    // Select profile
-   FxTrail::TrailProfile profile;
+   UI::TrailProfile profile;
 
    if(cloakActive)
-      profile = FxTrail::CloakedShip;
+      profile = UI::CloakedShipProfile;
    else if(boostActive)
-      profile = FxTrail::TurboShip;
+      profile = UI::TurboShipProfile;
    else
-      profile = FxTrail::Ship;
+      profile = UI::ShipProfile;
 
    // Stitch things up if we must...
    if(leftId == mLastTrailPoint[0] && rightId == mLastTrailPoint[1])
@@ -2111,7 +2095,7 @@ void Ship::emitMovementSparks()
                 TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
 
                 static_cast<ClientGame *>(getGame())->emitSpark(getRenderPos() - shipDirs[i] * 13,
-                                          -shipDirs[i] * 100 + chaos, thrust, TNL::Random::readI(0, 1500), SparkTypePoint);
+                                          -shipDirs[i] * 100 + chaos, thrust, TNL::Random::readI(0, 1500), UI::SparkTypePoint);
              }
           }
       }
@@ -2124,6 +2108,8 @@ extern bool gShowAimVector;
 
 void Ship::render(S32 layerIndex)
 {
+   TNLAssert(getGame()->getGameType(), "gameType should always be valid here");
+
 #ifndef ZAP_DEDICATED
    if(layerIndex == 0)  // Only render on layers -1 and 1
       return;
@@ -2131,191 +2117,54 @@ void Ship::render(S32 layerIndex)
    if(hasExploded)      // Don't render an exploded ship!
       return;
 
-   F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
-   F32 rotAmount = 0;      // We use rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
-   if(warpInScale < 0.8f)
-      rotAmount = (0.8f - warpInScale) * 540;
-
-   // An angle of 0 means the ship is heading down the +X axis
-   // since we draw the ship pointing up the Y axis, we should rotate
-   // by the ship's angle, - 90 degrees
    ClientGame *clientGame = static_cast<ClientGame *>(getGame());
    GameConnection *conn = clientGame->getConnectionToServer();
 
-   bool isLocalShip = !(conn && conn->getControlObject() != this);    // i.e. the ship belongs to the player viewing the rendering
-   S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : NO_TEAM; // To show cloaked teammates
+   ClientInfo *clientInfo = getClientInfo();    // Could be NULL
 
-   // Now adjust if using cloak module
-   F32 alpha = mLoadout.isModulePrimaryActive(ModuleCloak) ? mCloakTimer.getFraction() : 1 - mCloakTimer.getFraction();
+   // This is the local player's ship -- could be NULL
+   Ship *localShip = dynamic_cast<Ship *>(conn->getControlObject());
 
-   glPushMatrix();
-   glTranslate(getRenderPos());
+   const bool isLocalShip = !(conn && conn->getControlObject() != this);    // i.e. the ship belongs to the player viewing the rendering
+   const bool isAuthenticated = clientInfo->isAuthenticated();
 
-   ClientInfo *clientInfo = getClientInfo();
+   const bool boostActive  = mLoadout.isModulePrimaryActive(ModuleBoost);
+   const bool shieldActive = mLoadout.isModulePrimaryActive(ModuleShield);
+   const bool repairActive = mLoadout.isModulePrimaryActive(ModuleRepair) && mHealth < 1;
+   const bool sensorActive = doesShipActivateSensor(localShip);
+   const bool hasArmor     = hasModule(ModuleArmor);
 
-   // Uncomment to see a crude display of distance traveled attached to your ship
-   //if(isLocalShip)
-   //{
-   //   Statistics *stats = getClientInfo()->getStatistics();
-   //   Statistics *s2 = gServerGame->getClientInfos()->first()->getStatistics();
-   //   drawStringfc(0, 30 + 14 + 5, 14, "Dist: %d, A: %d, T: %d, F: %d", stats->getDistanceTraveled(),
-   //      s2->mAsteroidsKilled, s2->mTurretsKilled, s2->mFFsKilled);
-   //}
+   const Point vel(mCurrentMove.x, mCurrentMove.y);
 
+   // If the local player is cloaked, and is close enough to this ship, it will activate a sensor module, 
+   // and we'll need to draw it.  Here, we determine if that has happened.
+   
+   const bool isBusy = clientInfo ? clientInfo->isBusy() : false;
+   const bool engineeringTeleport = clientInfo->isEngineeringTeleporter();
+   const bool showCoordinates = clientGame->isShowingDebugShipCoords();
 
-   if(!isLocalShip && layerIndex == 1 && clientInfo)      // Need to draw this before the glRotatef below, but only on layer 1...
-   {
-      string str = getClientInfo() ? clientInfo->getName().getString() : string();
+   // Caclulate rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
+   F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
 
-      // Modify name if owner is busy
-      if(clientInfo->isBusy())
-         str = "<<" + str + ">>";
+   const string shipName = clientInfo ? clientInfo->getName().getString() : "";
 
-      TNLAssert(glIsEnabled(GL_BLEND), "Blending should be enabled here!");
+   const Color *color = getGame()->getGameType()->getTeamColor(this);
+   F32 alpha = getShipVisibility(localShip);
 
-      F32 textAlpha = 0.5f * alpha;
-      S32 textSize = 14;
+   F32 angle = getRenderAngle();
+   F32 deltaAngle = getAngleDiff(mLastProcessStateAngle, angle);     // Change in angle since we were last here
 
-      glLineWidth(gLineWidth1);
+   renderShip(layerIndex, getRenderPos(), getActualPos(), vel, angle, deltaAngle,
+              mShapeType, color, alpha, clientGame->getCurrentTime(), shipName, warpInScale, 
+              isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(), 
+              boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport);
 
-      glColor(Colors::white, textAlpha);
-      drawStringc(0, 30 + textSize, textSize, str.c_str());
-
-      // Underline name if player is authenticated
-      if(clientInfo->isAuthenticated())
-      {
-         S32 xoff = getStringWidth(textSize, str.c_str()) / 2;
-         drawHorizLine(-xoff, xoff, 33 + textSize);
-      }
-
-      // Show if that player is engineering a teleport
-      if(clientInfo->isEngineeringTeleporter())
-      {
-         renderTeleporterOutline(Point(cos(getRenderAngle()), sin(getRenderAngle())) * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS),
-               (F32)Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
-      }
-
-      glLineWidth(gDefaultLineWidth);
-   }
-
-   if(clientGame->getUIManager()->getGameUserInterface()->isShowingDebugShipCoords() && layerIndex == 1)
-      renderShipCoords(getActualPos(), isLocalShip, alpha);
-
-   glRotatef(radiansToDegrees(getRenderAngle()) - 90 + rotAmount, 0, 0, 1.0);
-   glScale(warpInScale);
-
-   if(layerIndex == -1)    // TODO: Get rid of this if we stop sending location of cloaked ship to clients
-   {
-      // Draw the outline of the ship in solid black -- this will block out any stars and give
-      // a tantalizing hint of motion when the ship is cloaked.  Could also try some sort of star-twinkling or
-      // scrambling thing here as well...
-      glColor(Colors::black);
-
-      glDisable(GL_BLEND);
-
-      F32 vertices[] = {
-            -20, -15,
-              0,  25,
-             20, -15
-      };
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
-
-      glEnable(GL_BLEND);
-
-
-      glPopMatrix();
-      return;
-   }
-
-   // LayerIndex == 1
-
-   GameType *gameType = clientGame->getGameType();
-   TNLAssert(gameType, "gameType should always be valid here");
-
-   if(!gameType)
-      return;     
-
-   F32 thrusts[4];
-   calcThrustComponents(thrusts);      // Calculate the various thrust components for rendering purposes
-
-
-   bool showSensorIndicator = false;
-
-   // Don't completely hide local player or ships on same team
-   if(isLocalShip || (showCloakedTeammates && getTeam() == localPlayerTeam && gameType->isTeamGame()))
-      alpha = max(alpha, 0.25f);     // Make sure we have at least .25 alpha
-
-   // Apply rules to cloaked players not on your team
-   else
-   {
-      // This is our local ship
-      Ship *localShip = dynamic_cast<Ship *>(conn->getControlObject());
-
-      if(localShip)
-      {
-         // If we have sensor equipped and this non-local ship is cloaked
-         if(localShip->hasModule(ModuleSensor) && alpha < 0.5)
-         {
-            // Do a distance check - cloaked ships are detected at a reduced distance
-            F32 distanceSquared = (localShip->getPos() - getPos()).lenSquared();
-
-            // Ship is within outer detection radius
-            if(distanceSquared < sq(SensorCloakOuterDetectionDistance))
-            {
-               // De-cloak a maximum of 0.5
-               if(distanceSquared < sq(SensorCloakInnerDetectionDistance))
-                  alpha = 0.5;
-               // Otherwise de-cloak proportionally to the distance between inner and outer detection radii
-               else
-               {
-                  F32 ratio = (sq(SensorCloakOuterDetectionDistance) - distanceSquared) /
-                        (sq(SensorCloakOuterDetectionDistance) - sq(SensorCloakInnerDetectionDistance));
-                  alpha = sq(ratio) * 0.5f;  // Non-linear
-               }
-            }
-         }
-
-         // If we have cloak, and this non-local ship has sensor
-         if(localShip->mLoadout.isModulePrimaryActive(ModuleCloak) && hasModule(ModuleSensor))
-         {
-            // Do the same distance check as when cloak is detected
-            F32 distanceSquared = (localShip->getPos() - getPos()).lenSquared();
-
-            if(distanceSquared < sq(SensorCloakOuterDetectionDistance))
-            {
-               // Now show that the ship has sensor
-               showSensorIndicator = true;
-            }
-         }
-      }
-   }
-
-
-   renderShip(mShapeType, gameType->getTeamColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime(),
-              mLoadout.isModulePrimaryActive(ModuleCloak), mLoadout.isModulePrimaryActive(ModuleShield), showSensorIndicator,
-              mLoadout.isModulePrimaryActive(ModuleRepair) && mHealth < 1, hasModule(ModuleArmor));
-
-   if(isLocalShip && gShowAimVector && mGame->getSettings()->getEnableExperimentalAimMode())   // Only show for local ship
-      renderAimVector();
-
-   glPopMatrix();
+   // TODO: DELETE THIS
+   //if(isLocalShip && gShowAimVector && mGame->getSettings()->getEnableExperimentalAimMode())   // Only show for local ship
+   //   renderAimVector();
 
    if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow 
-   {
-      static const U32 blinkStartTime = 1500;
-      static const U32 blinkCycleDuration = 300;
-      static const U32 blinkDuration = blinkCycleDuration * 0.5f;       // Time shield is yellow or green during
-
-      if(mSpawnShield.getCurrent() > blinkStartTime || mSpawnShield.getCurrent() % blinkCycleDuration > blinkDuration)
-         glColor(Colors::green65);  
-      else
-         glColor(Colors::yellow40);
-
-      // This rather gross looking variable helps manage problems with the resolution of F32s when getRealMilliseconds() returns a large value
-      const S32 biggishNumber = 21988;
-      F32 offset = F32(Platform::getRealMilliseconds() % biggishNumber) * FloatTau / biggishNumber;
-      drawDashedHollowCircle(getRenderPos(), CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24.0f, offset);
-   }
+      renderSpawnShield(getRenderPos(), mSpawnShield.getCurrent(), clientGame->getCurrentTime());
 
    if(mLoadout.isModulePrimaryActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent
       renderShipRepairRays(getRenderPos(), this, mRepairTargets, alpha);
@@ -2325,6 +2174,76 @@ void Ship::render(S32 layerIndex)
       if(mMountedItems[i].isValid())
          mMountedItems[i]->renderItemAlpha(getRenderPos(), alpha);
 #endif
+}
+
+
+// Determine if the specified ship will activate our sensor.  Ship can be NULL.
+bool Ship::doesShipActivateSensor(const Ship *ship)
+{
+   if(!ship)
+      return false;
+
+   // If ship is cloaking, and we have sensor...
+   if(ship->mLoadout.isModulePrimaryActive(ModuleCloak) && hasModule(ModuleSensor))
+   {
+      // ...then check the distance
+      F32 distanceSquared = (ship->getActualPos() - getActualPos()).lenSquared();
+
+      return (distanceSquared < sq(SensorCloakOuterDetectionDistance));
+   }
+
+   return false;
+}
+
+
+// Set to true to allow players to see their cloaked teammates, 
+// false if cloaked teammates should be invisible
+static const bool SHOW_CLOAKED_TEAMMATES = true;    
+
+// Determine ship's visibility, 0 = invisible, 1 = normal visibility.  
+// Value will be used as alpha when rendering ship.
+F32 Ship::getShipVisibility(const Ship *localShip)
+{
+   bool isLocalShip = (localShip == this);
+
+   const bool cloakActive  = mLoadout.isModulePrimaryActive(ModuleCloak);
+   const F32 cloakFraction =  mCloakTimer.getFraction();
+
+   // If ship is using cloak module, we'll reduce its visibility
+   F32 alpha = cloakActive ? cloakFraction : 1 - cloakFraction;
+
+   S32 localTeam =  localShip ? localShip->getTeam() : NO_TEAM;
+   bool teamGame = mGame->getGameType()->isTeamGame();
+   bool isFriendly = (getTeam() == localTeam) && teamGame;
+
+   // Don't completely hide local player or ships on same team (in a team game)
+   if(isLocalShip || (SHOW_CLOAKED_TEAMMATES && isFriendly))
+      return max(alpha, 0.25f);     // Make sure we have at least .25 alpha
+
+   // Apply rules to cloaked players not on your team
+
+   // If we have sensor equipped and this non-local ship is cloaked
+   if(localShip && localShip->mLoadout.isModulePrimaryActive(ModuleSensor) && alpha < 0.5)
+   {
+      // Do a distance check - cloaked ships are detected at a reduced distance
+      F32 distanceSquared = (localShip->getActualPos() - getActualPos()).lenSquared();
+
+      // Ship is within outer detection radius
+      if(distanceSquared < sq(SensorCloakOuterDetectionDistance))
+      {
+         // De-cloak a maximum of 0.5
+         if(distanceSquared < sq(SensorCloakInnerDetectionDistance))
+            return 0.5;
+
+         // Otherwise de-cloak proportionally to the distance between inner and outer detection radii
+         F32 ratio = (sq(SensorCloakOuterDetectionDistance) - distanceSquared) /
+                     (sq(SensorCloakOuterDetectionDistance) - sq(SensorCloakInnerDetectionDistance));
+
+         return sq(ratio) * 0.5f;  // Non-linear
+      }
+   }
+
+   return alpha;
 }
 
 
@@ -2358,44 +2277,6 @@ void Ship::removeMountedItem(MountableItem *item)
          mMountedItems.erase_fast(i);
          return;
       }
-}
-
-
-void Ship::calcThrustComponents(F32 *thrusts)
-{
-   Point velDir(mCurrentMove.x, mCurrentMove.y);
-   F32 len = velDir.len();
-
-   for(U32 i = 0; i < 4; i++)
-      thrusts[i] = 0;            // Reset thrusts
-
-   if(len > 0)
-   {
-      if(len > 1)
-         velDir *= 1 / len;
-
-      Point shipDirs[4];
-      shipDirs[0].set(cos(getRenderAngle()), sin(getRenderAngle()) );
-      shipDirs[1].set(-shipDirs[0]);
-      shipDirs[2].set( shipDirs[0].y, -shipDirs[0].x);
-      shipDirs[3].set(-shipDirs[0].y,  shipDirs[0].x);
-
-      for(U32 i = 0; i < ARRAYSIZE(shipDirs); i++)
-         thrusts[i] = shipDirs[i].dot(velDir);
-   }
-
-   // Tweak side thrusters to show rotational force
-   F32 rotVel = getAngleDiff(mLastProcessStateAngle, getRenderAngle());
-
-   if(rotVel > 0.001)
-      thrusts[3] += 0.25;
-   else if(rotVel < -0.001)
-      thrusts[2] += 0.25;
-
-   
-   if(mLoadout.isModulePrimaryActive(ModuleBoost))
-      for(U32 i = 0; i < 4; i++)
-         thrusts[i] *= 1.3f;
 }
 
 

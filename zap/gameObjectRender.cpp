@@ -34,6 +34,7 @@
 #include "CoreGame.h"            // For CORE_PANELS
 #include "EngineeredItem.h"      // For TURRET_OFFSET
 #include "BotNavMeshZone.h"      // For Border def
+#include "teleporter.h"          // For TELEPORTER_RADIUS
 #include "version.h"
 #include "config.h"              // Only for testing burst graphics below
 #include "ScreenInfo.h"
@@ -41,7 +42,7 @@
 
 #include "UIEditor.h"            // For RenderingStyles enum
 
-#include "MathUtils.h"           // For converting radians to degrees
+#include "MathUtils.h"           // For converting radians to degrees, sq()
 #include "OpenglUtils.h"
 
 #include <math.h>
@@ -407,7 +408,7 @@ void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 leng
 }
 
 
-void renderActiveModules(F32 alpha, F32 radius, U32 sensorTime, bool cloakActive, bool shieldActive, bool sensorActive, bool repairActive,
+static void renderActiveModules(F32 alpha, F32 radius, U32 sensorTime, bool shieldActive, bool sensorActive, bool repairActive,
       bool hasArmor)
 {
    // Armor
@@ -424,7 +425,7 @@ void renderActiveModules(F32 alpha, F32 radius, U32 sensorTime, bool cloakActive
    // Shields
    if(shieldActive)
    {
-      F32 shieldRadius = radius + 3;
+      F32 shieldRadius = radius + 3;      // radius is the ship radius
 
       glColor(Colors::yellow, alpha);
       drawCircle(0, 0, shieldRadius);
@@ -493,7 +494,7 @@ static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 a
 
 
 void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
-                bool cloakActive, bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
+                bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
@@ -530,7 +531,143 @@ void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 
    renderVertexArray(shipShapeInfo->outerHullPoints, shipShapeInfo->outerHullPointCount, GL_LINE_LOOP);
 
    // Now render any module states
-   renderActiveModules(alpha, radius, sensorTime, cloakActive, shieldActive, sensorActive, repairActive, hasArmor);
+   renderActiveModules(alpha, radius, sensorTime, shieldActive, sensorActive, repairActive, hasArmor);
+}
+
+
+// Figure out the intensity of the thrusters based on the ship's actions and orientation
+static void calcThrustComponents(const Point &velocity, F32 angle, F32 deltaAngle, bool boostActive, F32 *thrusts)
+{
+   Point vel = velocity;         // Make a working copy that we can modify
+
+   F32 len = vel.len();
+
+   // Reset thrusts
+   for(U32 i = 0; i < 4; i++)
+      thrusts[i] = 0;            
+
+   if(len > 0)
+   {
+      if(len > 1)
+         vel *= 1 / len;
+
+      Point shipDirs[4];
+      shipDirs[0].set(cos(angle), sin(angle) );
+      shipDirs[1].set(-shipDirs[0]);
+      shipDirs[2].set( shipDirs[0].y, -shipDirs[0].x);
+      shipDirs[3].set(-shipDirs[0].y,  shipDirs[0].x);
+
+      for(U32 i = 0; i < 4; i++)
+         thrusts[i] = shipDirs[i].dot(vel);
+   }
+
+
+   if(deltaAngle > 0.001)
+      thrusts[3] += 0.25;
+   else if(deltaAngle < -0.001)
+      thrusts[2] += 0.25;
+   
+   if(boostActive)
+      for(U32 i = 0; i < 4; i++)
+         thrusts[i] *= 1.3f;
+}
+
+
+void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
+                F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, F32 alpha, 
+                U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
+                bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
+                bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
+                bool hasArmor, bool engineeringTeleport)
+   
+{
+   glPushMatrix();
+   glTranslate(renderPos);
+
+   // Draw the ship name, if there is one, before the glRotatef below, but only on layer 1...
+   // Don't label the local ship.
+   if(!isLocalShip && layerIndex == 1 && shipName != "")  
+   {
+      string renderName = isBusy ? "<<" + shipName + ">>" : shipName;
+
+      F32 textAlpha = 0.5f * alpha;
+      S32 textSize = 14;
+
+      glLineWidth(gLineWidth1);
+
+      glColor(Colors::white, textAlpha);
+      S32 len = drawStringc(0, 30 + textSize, textSize, renderName.c_str());
+
+      // Underline name if player is authenticated
+      if(isAuthenticated)
+         drawHorizLine(-len/2, len/2, 33 + textSize);
+
+      glLineWidth(gDefaultLineWidth);
+
+      // Show if the player is engineering a teleport
+      if(engineeringTeleport)
+         renderTeleporterOutline(Point(cos(angle), sin(angle)) * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS),
+               (F32)Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
+   }
+
+   if(showCoordinates && layerIndex == 1)
+      renderShipCoords(actualPos, isLocalShip, alpha);
+
+   F32 rotAmount = 0;      
+   if(warpInScale < 0.8f)
+      rotAmount = (0.8f - warpInScale) * 540;
+
+   // An angle of 0 means the ship is heading down the +X axis since we draw the ship 
+   // pointing up the Y axis, we should rotate by the ship's angle, - 90 degrees
+   glRotatef(radiansToDegrees(angle) - 90 + rotAmount, 0, 0, 1.0);
+   glScale(warpInScale);
+
+   // NOTE: Get rid of this if we stop sending location of cloaked ship to clients.  Also, we can stop
+   //       coming here altogether when layerIndex is not 1, and strip out a bunch of ifs above.
+   if(layerIndex == -1)    
+   {
+      // Draw the outline of the ship in solid black -- this will block out any stars and give
+      // a tantalizing hint of motion when the ship is cloaked.  Could also try some sort of star-twinkling or
+      // scrambling thing here as well...
+      glColor(Colors::black);
+
+      glDisable(GL_BLEND);
+
+      F32 vertices[] = { 20,-15,  0,25,  20,-15 };
+      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+
+      glEnable(GL_BLEND);
+   }
+
+   else     // LayerIndex == 1
+   {
+      // Calculate the various thrust components for rendering purposes; fills thrusts
+      static F32 thrusts[4];
+      calcThrustComponents(vel, angle, deltaAngle, boostActive, thrusts);  
+
+      renderShip(shape, color, alpha, thrusts, health, radius, renderTime,
+               shieldActive, sensorActive, repairActive, hasArmor);
+   }
+
+   glPopMatrix();
+}
+
+
+void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime)
+{
+   static const U32 BlinkStartTime = 1500;
+   static const U32 BlinkCycleDuration = 300;
+   static const U32 BlinkDuration = BlinkCycleDuration * 0.5f;       // Time shield is yellow or green during
+
+   if(shieldTime > BlinkStartTime || shieldTime % BlinkCycleDuration > BlinkDuration)
+      glColor(Colors::green65);  
+   else
+      glColor(Colors::yellow40);
+
+   // This rather gross looking variable helps manage problems with the resolution of F32s when getRealMilliseconds() returns a large value
+   const S32 BiggishNumber = 21988;
+   F32 offset = F32(renderTime % BiggishNumber) * FloatTau / BiggishNumber;
+   drawDashedHollowCircle(pos, Ship::CollisionRadius + 5, Ship::CollisionRadius + 10, 8, FloatTau / 24.0f, offset);
 }
 
 

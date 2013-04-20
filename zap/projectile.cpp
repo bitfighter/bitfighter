@@ -916,6 +916,9 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+extern const S32 SensorCloakInnerDetectionDistance;
+extern const S32 SensorCloakOuterDetectionDistance;
+
 void Mine::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
@@ -945,7 +948,7 @@ void Mine::renderItem(const Point &pos)
       // sensor is active and you're within the detection distance
       visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) ||
             mIsOwnedByLocalClient ||
-            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(Ship::SensorCloakInnerDetectionDistance));
+            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(SensorCloakInnerDetectionDistance));
    }
    else     // Must be in editor?
    {
@@ -1183,7 +1186,7 @@ void SpyBug::renderItem(const Point &pos)
       visible = ((ship->getTeam() == getTeam()) && gameType->isTeamGame())   ||
             mIsOwnedByLocalClient ||
             getTeam() == TEAM_NEUTRAL ||
-            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(Ship::SensorCloakInnerDetectionDistance));
+            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(SensorCloakInnerDetectionDistance));
    }
    else    
       visible = true;      // We get here in editor when in preview mode
@@ -1554,7 +1557,7 @@ void Seeker::emitMovementSparks()
 
    emissionPoint *= warpInScale;
  
-   mTrail.update(getRenderPos() + emissionPoint, UI::FxTrail::Seeker);
+   mTrail.update(getRenderPos() + emissionPoint, UI::SeekerProfile);
 
 #endif
 }
