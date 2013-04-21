@@ -16,6 +16,7 @@ set(CLIENT_SOURCES
    FontManager.cpp
    FpsRenderer.cpp
    gameObjectRender.cpp
+   HelpBubble.cpp
    HelperManager.cpp
    helperMenu.cpp
    Joystick.cpp

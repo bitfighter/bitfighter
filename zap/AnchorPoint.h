@@ -26,7 +26,7 @@
 #ifndef _ANCHOR_POINT_H_
 #define _ANCHOR_POINT_H_
 
-#include "point.h"
+#include "Point.h"
 
 namespace Zap
 {
