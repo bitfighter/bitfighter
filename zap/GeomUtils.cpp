@@ -1166,7 +1166,7 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
 
       // Copy our data to TNL::Point and to our output Vector
       p2t::Triangle *currentTriangle;
-      for(S32 j = 0; j < currentOutput.size(); j++)
+      for(U32 j = 0; j < currentOutput.size(); j++)
       {
          currentTriangle = currentOutput[j];
          outputTriangles.push_back(Point(currentTriangle->GetPoint(0)->x, currentTriangle->GetPoint(0)->y));
