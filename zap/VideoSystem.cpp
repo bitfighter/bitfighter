@@ -301,7 +301,6 @@ S32 VideoSystem::getWindowPositionY()
 
 extern void setDefaultBlendFunction();
 extern Vector<ClientGame *> gClientGames;
-extern void exitToOs(S32 errcode);
 
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.
@@ -472,7 +471,7 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
 
    // Re-initialize our fonts because OpenGL textures can be lost upon screen change
    FontManager::cleanup();
-   FontManager::initialize();
+   FontManager::initialize(settings);
 }
 
 

@@ -63,7 +63,7 @@ struct FolderManager
 
    FolderManager(const string &levelDir,    const string &robotDir,  const string &sfxDir,        const string &musicDir, 
                  const string &iniDir,      const string &logDir,    const string &screenshotDir, const string &luaDir,
-                 const string &rootDataDir, const string &pluginDir);
+                 const string &rootDataDir, const string &pluginDir, const string &fontsDir);
 
    string levelDir;
    string robotDir;
@@ -75,6 +75,7 @@ struct FolderManager
    string luaDir;
    string rootDataDir;
    string pluginDir;
+   string fontsDir;
 
    void resolveDirs(GameSettings *settings);                                  
    void resolveLevelDir(GameSettings *settings);                                 
