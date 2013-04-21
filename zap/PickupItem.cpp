@@ -66,12 +66,14 @@ PickupItem::~PickupItem()
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
+
 void PickupItem::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
    if(game->isServer())      // At the moment, PickupItem::idle does nothing for client side
       linkToIdleList(&game->idlingObjects);
 }
+
 
 void PickupItem::idle(BfObject::IdleCallPath path)
 {
@@ -102,10 +104,12 @@ bool PickupItem::isVisible()
    return mIsVisible;
 }
 
+
 S32 PickupItem::getRenderSortValue()
 {
    return 1;
 }
+
 
 U32 PickupItem::getRepopDelay()
 {
