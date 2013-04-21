@@ -1899,7 +1899,7 @@ FolderManager::FolderManager()
 // Constructor
 FolderManager::FolderManager(const string &levelDir,    const string &robotDir,  const string &sfxDir,        const string &musicDir, 
                              const string &iniDir,      const string &logDir,    const string &screenshotDir, const string &luaDir,
-                             const string &rootDataDir, const string &pluginDir) :
+                             const string &rootDataDir, const string &pluginDir, const string &fontsDir) :
                levelDir      (levelDir),
                robotDir      (robotDir),
                sfxDir        (sfxDir),
@@ -1909,7 +1909,8 @@ FolderManager::FolderManager(const string &levelDir,    const string &robotDir, 
                screenshotDir (screenshotDir),
                luaDir        (luaDir),
                rootDataDir   (rootDataDir),
-               pluginDir     (pluginDir)
+               pluginDir     (pluginDir),
+               fontsDir      (fontsDir)
 {
    // Do nothing (more)
 }                
@@ -1952,6 +1953,7 @@ void FolderManager::resolveDirs(GameSettings *settings)
 
    // rootDataDir not used for these folders
    folderManager->sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
+   folderManager->fontsDir      = resolutionHelper(cmdLineDirs.fontsDir,      "", "fonts");
 
    gSqlite = folderManager->logDir + "stats";
 }

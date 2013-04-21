@@ -75,6 +75,7 @@ enum ParamId {
    SCREENSHOT_DIR,
    SFX_DIR,
    MUSIC_DIR,
+   FONTS_DIR,
 
    SIMULATED_LOSS,
    SIMULATED_LAG,

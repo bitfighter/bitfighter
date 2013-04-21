@@ -1083,6 +1083,13 @@ void setDefaultPaths(Vector<string> &argv)
       argv.push_back(getInstalledDataDir() + getFileSeparator() + "sfx");
    }
 
+   // And with -fontsdir
+   if(!argv.contains("-fontsdir"))
+   {
+      argv.push_back("-fontsdir");
+      argv.push_back(getInstalledDataDir() + getFileSeparator() + "fonts");
+   }
+
    // iOS needs the INI in an editable location
 #ifdef TNL_OS_IOS
    string fillPath;

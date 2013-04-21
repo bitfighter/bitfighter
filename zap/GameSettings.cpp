@@ -115,8 +115,9 @@ ParamInfo paramDefs[] = {
 { "robotdir",              ONE_REQUIRED,   ROBOT_DIR,             3, "<path>",                "Folder where robot scripts are stored",      "You must specify the robots folder with the -robotdir option" },
 { "screenshotdir",         ONE_REQUIRED,   SCREENSHOT_DIR,        3, "<path>",                "Folder where screenshots are stored",        "You must specify your screenshots folder with the -screenshotdir option" },
 { "sfxdir",                ONE_REQUIRED,   SFX_DIR,               3, "<path>",                "Folder where sounds are stored",             "You must specify your sounds folder with the -sfxdir option" },
-{ "musicdir",              ONE_REQUIRED,   MUSIC_DIR,             3, "<path>",                "Folder where game music stored",             "You must specify your sounds folder with the -musicdir option" }, 
+{ "musicdir",              ONE_REQUIRED,   MUSIC_DIR,             3, "<path>",                "Folder where game music stored",             "You must specify your music folder with the -musicdir option" },
 { "plugindir",             ONE_REQUIRED,   PLUGIN_DIR,            3, "<path>",                "Folder where editor plugins are stored",     "You must specify your plugins folder with the -plugindir option" },
+{ "fontsdir",              ONE_REQUIRED,   FONTS_DIR,             3, "<path>",                "Folder where fonts are stored",              "You must specify your fonts folder with the -fontsdir option" },
 
 // Developer-oriented options
 { "loss",                  ONE_REQUIRED,   SIMULATED_LOSS,        4, "<float>",   "Simulate the specified amount of packet loss, from 0 (no loss) to 1 (all packets lost)", "You must specify a loss rate between 0 and 1 with the -loss option" },
@@ -339,7 +340,8 @@ FolderManager GameSettings::getCmdLineFolderManager()
                           getString(SCREENSHOT_DIR),
                           getString(SCRIPTS_DIR),
                           getString(ROOT_DATA_DIR),
-                          getString(PLUGIN_DIR) );
+                          getString(PLUGIN_DIR),
+                          getString(FONTS_DIR));
 }
 
 

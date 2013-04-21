@@ -45,6 +45,7 @@ namespace Zap
 {
 
 class BfFont;
+class GameSettings;
 
 class FontManager 
 {
@@ -80,7 +81,7 @@ public:
       TextEffectContext        // Yard Sale!!! text and the like
    };
 
-   static void initialize();    
+   static void initialize(GameSettings *settings);
    static void cleanup();   
 
    static sth_stash *getStash();
@@ -115,9 +116,9 @@ private:
    const SFG_StrokeFont *mStrokeFont;     // Will be NULL for TTF fonts
 
 public:
-   BfFont(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont);   // Stroke font constructor
-   BfFont(FontManager::FontId fontId, const string &fontFile);               // TTF font constructor
-   ~BfFont();                                                                // Destructor
+   BfFont(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont);              // Stroke font constructor
+   BfFont(FontManager::FontId fontId, const string &fontFile, GameSettings *settings);  // TTF font constructor
+   virtual ~BfFont();                                                                   // Destructor
 
    FontManager::FontId getId();
    const SFG_StrokeFont *getStrokeFont();

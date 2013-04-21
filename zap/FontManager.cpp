@@ -25,6 +25,7 @@
 
 #include "FontManager.h"         // Class header
 
+#include "GameSettings.h"
 #include "OpenglUtils.h"         // For various rendering helpers
 #include "stringUtils.h"         // For getFileSeparator()
 #include "MathUtils.h"           // For MIN/MAX
@@ -59,10 +60,8 @@ BfFont::BfFont(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont)
 }
 
 
-extern string getInstalledDataDir();
-
 // TTF font constructor
-BfFont::BfFont(FontManager::FontId fontId, const string &fontFile)
+BfFont::BfFont(FontManager::FontId fontId, const string &fontFile, GameSettings *settings)
 {
    mFontId = fontId;
       
@@ -77,7 +76,7 @@ BfFont::BfFont(FontManager::FontId fontId, const string &fontFile)
       return;
    }
 
-   string file = getInstalledDataDir() + getFileSeparator() + "fonts" + getFileSeparator() + fontFile;
+   string file = settings->getFolderManager()->fontsDir + getFileSeparator() + fontFile;
 
    mStashFontId = sth_add_font(FontManager::getStash(), file.c_str());
 
@@ -135,7 +134,7 @@ static BfFont *fontList[FontManager::FontCount];
 sth_stash *FontManager::mStash = NULL;
 
 // This must be run after VideoSystem::actualizeScreenMode()
-void FontManager::initialize()
+void FontManager::initialize(GameSettings *settings)
 {
    if(mStash == NULL)
       mStash = sth_create(512, 512);
@@ -146,11 +145,11 @@ void FontManager::initialize()
    fontList[FontOrbitronMedStroke]   = new BfFont(FontOrbitronMedStroke,   &fgStrokeOrbitronMed);
 
    // Our TTF fonts
-   fontList[FontOcrA]           = new BfFont(FontOcrA,          "Digital.ttf");
-   fontList[FontOrbitronLight]  = new BfFont(FontOrbitronLight, "Orbitron Light.ttf");
-   fontList[FontOrbitronMedium] = new BfFont(FontOrbitronLight, "Orbitron Medium.ttf");
-   fontList[FontPrimeRegular]   = new BfFont(FontPrimeRegular,  "prime_regular.ttf");
-   fontList[FontTenby5]         = new BfFont(FontTenby5,        "tenbyfive.ttf");
+   fontList[FontOcrA]           = new BfFont(FontOcrA,          "Digital.ttf",         settings);
+   fontList[FontOrbitronLight]  = new BfFont(FontOrbitronLight, "Orbitron Light.ttf",  settings);
+   fontList[FontOrbitronMedium] = new BfFont(FontOrbitronLight, "Orbitron Medium.ttf", settings);
+   fontList[FontPrimeRegular]   = new BfFont(FontPrimeRegular,  "prime_regular.ttf",   settings);
+   fontList[FontTenby5]         = new BfFont(FontTenby5,        "tenbyfive.ttf",       settings);
 
    // set texture blending function
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

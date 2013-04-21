@@ -179,6 +179,9 @@ static void initFoldersBlock(FolderManager *folderManager, S32 textsize)
    names.push_back("Music Dir:");
    vals.push_back(folderManager->musicDir.c_str());
 
+   names.push_back("Fonts Dir:");
+   vals.push_back(folderManager->fontsDir.c_str());
+
    names.push_back("");
    vals.push_back("");
 
