@@ -67,6 +67,7 @@ static const char *pageHeaders[] = {
    "SOUND AND MUSIC",
    "LEVEL COMMANDS",
    "ADMIN COMMANDS",
+   "OWNER COMMANDS",
    "DEBUG COMMANDS",
    //"SCRIPTING CONSOLE"
 };
