@@ -34,8 +34,8 @@ namespace TNL {
 
 #ifdef TNL_ENABLE_ASSERTS
 
-#ifdef WIN32
-#   define _CRT_SECURE_NO_DEPRECATE    // Avoid warnings about vsnprintf
+#ifdef _MSC_VER
+#   define vsnprintf vsnprintf_s       // Avoid warnings about vsnprintf
 #endif /* WIN32 */
 
 //-------------------------------------- STATIC Declaration
