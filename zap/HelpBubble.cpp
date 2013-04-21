@@ -27,21 +27,24 @@
 #include "UIGame.h"
 #include "gameObjectRender.h"
 #include "Colors.h"
+#include "ScreenInfo.h"
 #include "FontManager.h"
 #include "OpenglUtils.h"
 
 using namespace TNL;
 
-namespace Zap { namespace UI {
+namespace Zap { 
+extern ScreenInfo gScreenInfo;
+namespace UI {
 
 
-HelpBubble::HelpBubble(const Vector<string> &text, const AnchorPoint &anchor, GameUserInterface *parentUi)
+HelpBubble::HelpBubble(const Vector<string> *text, const AnchorPoint &anchor, GameUserInterface *parentUi)
 {
    mText = text;
    mAnchor = anchor;
    mParentUi = parentUi;
 
-   mWidth = calcWidth();
+   mWidth  = calcWidth();
    mHeight = calcHeight();
 
    mFading = false;
@@ -68,7 +71,7 @@ static const S32 FontSize = 15;
 static const S32 FontGap = 4;
 static const S32 Margin = 5;           // Gap between edges and text
 
-void HelpBubble::render()
+void HelpBubble::render(const Point &centerPos)
 {
    F32 alpha = 1;
    if(mFading)
@@ -78,9 +81,8 @@ void HelpBubble::render()
    if(mAnchor.anchorType == ScreenAnchor)    // Anchored to fixed location on the screen
       pos = mAnchor.pos;
    else                                      // Anchord to a fixed location on the map, may be offscreen
-      pos = mAnchor.pos;      // ?????
-
-
+      pos = mAnchor.pos; // - centerPos + Point(gScreenInfo.getGameCanvasWidth() / 2.f, gScreenInfo.getGameCanvasHeight() / 2.f);
+   
    drawFilledRoundedRect(pos, mWidth, mHeight, Colors::red, Colors::white, 5, alpha);
 
    FontManager::pushFontContext(FontManager::BubbleContext);
@@ -88,9 +90,9 @@ void HelpBubble::render()
    glColor(Colors::white, alpha);
    F32 yPos = pos.y - mHeight / 2 + FontSize + FontGap;
 
-   for(S32 i = 0; i < mText.size(); i++)
+   for(S32 i = 0; i < mText->size(); i++)
    {
-      drawStringc(pos.x, yPos, (F32)FontSize, mText[i].c_str());
+      drawStringc(pos.x, yPos, (F32)FontSize, mText->get(i).c_str());
       yPos += FontSize + FontGap;
    }
 
@@ -102,9 +104,9 @@ S32 HelpBubble::calcWidth()
 {
    S32 width = 0;
 
-   for(S32 i = 0; i < mText.size(); i++)
+   for(S32 i = 0; i < mText->size(); i++)
    {
-      S32 w = getStringWidth(FontManager::BubbleContext, FontSize, mText[i].c_str());
+      S32 w = getStringWidth(FontManager::BubbleContext, FontSize, mText->get(i).c_str());
       width = max(width, w);
    }
 
@@ -114,7 +116,7 @@ S32 HelpBubble::calcWidth()
 
 S32 HelpBubble::calcHeight()
 {
-   return mText.size() * (FontSize + FontGap) + 2 * Margin;
+   return mText->size() * (FontSize + FontGap) + 2 * Margin;
 }
 
 

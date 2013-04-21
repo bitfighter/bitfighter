@@ -259,6 +259,19 @@ void GameUserInterface::doneLoadingLevel()
 }
 
 
+static Ship *getShip(GameConnection *conn)
+{
+   if(conn && conn->getControlObject())
+   {
+      BfObject *object = conn->getControlObject();
+      if(object && object->getObjectTypeNumber() == PlayerShipTypeNumber)
+         return static_cast<Ship *>(object);      // This is the local player's ship
+   }
+
+   return NULL;
+}
+
+
 void GameUserInterface::idle(U32 timeDelta)
 {
    Parent::idle(timeDelta);
@@ -299,6 +312,13 @@ void GameUserInterface::idle(U32 timeDelta)
 
    for(S32 i = 0; i < helpBubbles.size(); i++)
       helpBubbles[i]->idle(timeDelta);
+
+
+   // Update mShipPos... track this so that we can keep a fix on the ship location even if it subsequently dies
+   Ship *ship = getShip(getGame()->getConnectionToServer());
+
+   if(ship)
+      mShipPos.set(ship->getRenderPos());     // Get the player's ship position
 }
 
 
@@ -414,11 +434,7 @@ void GameUserInterface::render()
 
       renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
    }
-
    
-   for(S32 i = 0; i < helpBubbles.size(); i++)
-      helpBubbles[i]->render();
-
    renderShutdownMessage();
 
    renderConsole();  // Rendered last, so it's always on top
@@ -443,7 +459,7 @@ if(mGotControlUpdate)
 }
 
 
-void GameUserInterface::addHelpBubble(const Vector<string> &messages, const AnchorPoint &anchor)
+void GameUserInterface::addHelpBubble(const Vector<string> *messages, const AnchorPoint &anchor)
 {
    HelpBubble *helpBubble = new HelpBubble(messages, anchor, this);
    helpBubbles.push_back(helpBubble);
@@ -1953,7 +1969,7 @@ void GameUserInterface::setViewBoundsWhileLoading(F32 lx, F32 ly, F32 ux, F32 uy
 
 
 // Some reusable containers
-static Point screenSize, position, visSize, visExt;
+static Point screenSize, visSize, visExt;
 static Vector<DatabaseObject *> rawRenderObjects;
 static Vector<BfObject *> renderObjects;
 static Vector<BotNavMeshZone *> renderZones;
@@ -1983,19 +1999,6 @@ static void populateRenderZones(const Rect extentRect)
 }
 
 
-static Ship *getShip(GameConnection *conn)
-{
-   if(conn && conn->getControlObject())
-   {
-      BfObject *object = conn->getControlObject();
-      if(object && object->getObjectTypeNumber() == PlayerShipTypeNumber)
-      return static_cast<Ship *>(object);      // This is the local player's ship
-   }
-
-   return NULL;
-}
-
-
 static S32 QSORT_CALLBACK renderSortCompare(BfObject **a, BfObject **b)
 {
    return (*a)->getRenderSortValue() - (*b)->getRenderSortValue();
@@ -2011,13 +2014,10 @@ void GameUserInterface::renderNormal(ClientGame *game)
    // Here we determine if we have a control ship.
    // If not (like after we've been killed), we'll still render the current position and things
    GameConnection *conn = game->getConnectionToServer();
-   Ship *ship = getShip(game->getConnectionToServer());
+   Ship *ship = getShip(conn);
 
    if(ship)
-   {
-      position.set(ship->getRenderPos());     // Get the player's ship position
       visExt = game->computePlayerVisArea(ship);
-   }
 
    glPushMatrix();
 
@@ -2028,13 +2028,13 @@ void GameUserInterface::renderNormal(ClientGame *game)
    glScalef((gScreenInfo.getGameCanvasWidth()  / 2) / visExt.x, 
             (gScreenInfo.getGameCanvasHeight() / 2) / visExt.y, 1);
 
-   glTranslatef(-position.x, -position.y, 0);
+   glTranslatef(-mShipPos.x, -mShipPos.y, 0);
 
-   drawStars(mStars, NumStars, 1.0, game->getSettings()->getStarsInDistance(), position, visExt * 2);
+   drawStars(mStars, NumStars, 1.0, game->getSettings()->getStarsInDistance(), mShipPos, visExt * 2);
 
    // Render all the objects the player can see
    screenSize.set(visExt);
-   Rect extentRect(position - screenSize, position + screenSize);
+   Rect extentRect(mShipPos - screenSize, mShipPos + screenSize);
 
    // Fill rawRenderObjects with anything within extentRect (our visibility extent)
    rawRenderObjects.clear();
@@ -2073,6 +2073,10 @@ void GameUserInterface::renderNormal(ClientGame *game)
    }
 
    FxTrail::renderTrails();
+
+   for(S32 i = 0; i < helpBubbles.size(); i++)
+      helpBubbles[i]->render(mShipPos);
+
 
    getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
 
@@ -2122,7 +2126,7 @@ void GameUserInterface::renderCommander(ClientGame *game)
 
    Ship *ship = getShip(game->getConnectionToServer());
 
-   position = ship ? ship->getRenderPos()                 : Point(0,0);
+   //mShipPos = ship ? ship->getRenderPos()                 : Point(0,0);
    visSize  = ship ? game->computePlayerVisArea(ship) * 2 : worldExtents;
 
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
@@ -2134,7 +2138,7 @@ void GameUserInterface::renderCommander(ClientGame *game)
 
    glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
 
-   Point offset = (game->getWorldExtents()->getCenter() - position) * zoomFrac + position;
+   Point offset = (game->getWorldExtents()->getCenter() - mShipPos) * zoomFrac + mShipPos;
    glTranslatef(-offset.x, -offset.y, 0);
 
    // zoomFrac == 1.0 when fully zoomed out to cmdr's map

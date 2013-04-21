@@ -131,6 +131,8 @@ public:
    const char *getOnDockName();
    const char *getOnScreenName();
 
+   Vector<string> *getHelpBubbleText() const;
+
    virtual S32 getDockRadius();
    F32 getEditorRadius(F32 currentScale);
    void renderDock();

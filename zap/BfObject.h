@@ -401,6 +401,8 @@ public:
 
    void unselect();
 
+   virtual Vector<string> *getHelpBubbleText() const;
+
    // Account for the fact that the apparent selection center and actual object center are not quite aligned
    virtual Point getEditorSelectionOffset(F32 currentScale);  
 
@@ -413,7 +415,7 @@ public:
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
 
-   void setSnapped(bool snapped);                  // Overridden in EngineeredItem 
+   virtual void setSnapped(bool snapped);                  // Overridden in EngineeredItem 
 
    ///// Dock related
 #ifndef ZAP_DEDICATED

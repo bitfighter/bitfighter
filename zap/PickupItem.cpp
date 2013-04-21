@@ -202,7 +202,6 @@ void PickupItem::show()
 }
 
 
-
 // Implementations provided to keep class from being abstract; need non-abstract class
 // so luaW can (theoretically) instantiate this class, even though it never will.  If
 // that issue gets resolved, we can remove this code and revert the class to abstract.
@@ -432,10 +431,15 @@ const char *RepairItem::getOnDockName()       { return "Repair";       }
 const char *RepairItem::getPrettyNamePlural() { return "Repair Items"; }
 const char *RepairItem::getEditorHelpString() { return "Repairs damage to ships. [B]"; }
 
+S32 RepairItem::getDockRadius() { return 11; }
 
-S32 RepairItem::getDockRadius()
+
+Vector<string> *RepairItem::getHelpBubbleText() const
 {
-   return 11;
+   static string help[] = { "Pick up Repair Item to heal ship" };
+   static Vector<string> helpBubbleText = Vector<string>(help, ARRAYSIZE(help));
+
+   return &helpBubbleText;
 }
 
 

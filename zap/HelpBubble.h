@@ -43,7 +43,7 @@ namespace UI {
 class HelpBubble
 {
 private:
-   Vector<string> mText;
+   const Vector<string> *mText;
    AnchorPoint mAnchor;
    GameUserInterface *mParentUi;
 
@@ -57,10 +57,10 @@ private:
 
 public:
    
-   HelpBubble(const Vector<string> &text, const AnchorPoint &anchor, GameUserInterface *parentUi);     // Constructor
+   HelpBubble(const Vector<string> *text, const AnchorPoint &anchor, GameUserInterface *parentUi);     // Constructor
 
    void idle (U32 timeDelta);
-   void render();
+   void render(const Point &centerPos);
 };
 
 

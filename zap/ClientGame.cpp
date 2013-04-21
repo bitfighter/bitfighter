@@ -559,6 +559,8 @@ bool ClientGame::isServer()
 
 U32 prevTimeDelta = 0;
 
+static Timer xxx(10000);
+
 void ClientGame::idle(U32 timeDelta)
 {
    Parent::idle(timeDelta);
@@ -653,6 +655,26 @@ void ClientGame::idle(U32 timeDelta)
 
       if(controlObject)
          SoundSystem::setListenerParams(controlObject->getPos(), controlObject->getVel());
+
+
+      xxx.update(timeDelta);
+      // Check to see if there are any items near the ship we need to display help for
+      bool mShowingHelp = true;     // TODO: Set elsewhere
+      if(mShowingHelp && controlObject && xxx.getCurrent() == 0)
+      {
+         Rect searchRect = Rect(controlObject->getPos(), 200);
+         fillVector.clear();
+         mGameObjDatabase->findObjects(RepairItemTypeNumber, fillVector, searchRect);
+      }
+
+      for(S32 i = 0; i < fillVector.size(); i++)
+         if(fillVector[i]->getObjectTypeNumber() == RepairItemTypeNumber)
+         {
+            BfObject *obj = static_cast<BfObject *>(fillVector[i]);
+            mUi->addHelpBubble(obj->getHelpBubbleText(), AnchorPoint(obj->getPos() + Point(0, 50), MapAnchor));
+            xxx.reset();
+         }
+      
    }
 
    processDeleteList(timeDelta);                         // Delete any objects marked for deletion

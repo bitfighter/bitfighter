@@ -124,6 +124,7 @@ private:
    Move mCurrentMove;
    Move mTransformedMove;
    Point mMousePoint;
+   Point mShipPos;      // Track ship pos, so we have something if the ship disappears for whatever reason
 
    HelperManager mHelperManager;
    LevelInfoDisplayer mLevelInfoDisplayer;
@@ -287,7 +288,7 @@ public:
    void toggleShowingMeshZones();  
    void toggleShowDebugBots();
 
-   void addHelpBubble(const Vector<string> &messages, const AnchorPoint &anchor);
+   void addHelpBubble(const Vector<string> *messages, const AnchorPoint &anchor);
    void removeHelpBubble(UI::HelpBubble *bubble);
 
    bool isShowingDebugShipCoords() const;
