@@ -223,5 +223,14 @@ void LoadoutHelper::activateHelp(UIManager *uiManager)
 }
 
 
+void LoadoutHelper::onWidgetClosed()
+{
+   string msgs[] = { "You just changed your loadout", "", "Do something useful!" };
+   Vector<string> messages(msgs, ARRAYSIZE(msgs));
+   
+   getGame()->getUi()->addHelpBubble(messages, AnchorPoint(Point(100,100), ScreenAnchor));
+}
+
+
 };
 

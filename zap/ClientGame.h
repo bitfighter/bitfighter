@@ -122,6 +122,7 @@ public:
    void switchTeams();     // User selected Switch Teams meunu item
 
    UIManager *getUIManager() const;
+   GameUserInterface *getUi() const;
 
    bool getInCommanderMap();
    void setInCommanderMap(bool inCommanderMap);

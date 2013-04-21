@@ -64,6 +64,7 @@
 #include "Cursor.h"
 #include "CoreGame.h"
 #include "ScissorsManager.h"
+#include "HelpBubble.h"
 
 #include "tnlEndian.h"
 
@@ -295,6 +296,9 @@ void GameUserInterface::idle(U32 timeDelta)
    mLoadoutIndicator.idle(timeDelta);
 
    mFxManager.idle(timeDelta);      // Processes sparks and teleporter effects
+
+   for(S32 i = 0; i < helpBubbles.size(); i++)
+      helpBubbles[i]->idle(timeDelta);
 }
 
 
@@ -411,6 +415,10 @@ void GameUserInterface::render()
       renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
    }
 
+   
+   for(S32 i = 0; i < helpBubbles.size(); i++)
+      helpBubbles[i]->render();
+
    renderShutdownMessage();
 
    renderConsole();  // Rendered last, so it's always on top
@@ -432,6 +440,20 @@ if(con)
 if(mGotControlUpdate)
    drawString(710, 10, 30, "CU");
 #endif
+}
+
+
+void GameUserInterface::addHelpBubble(const Vector<string> &messages, const AnchorPoint &anchor)
+{
+   HelpBubble *helpBubble = new HelpBubble(messages, anchor, this);
+   helpBubbles.push_back(helpBubble);
+}
+
+
+void GameUserInterface::removeHelpBubble(UI::HelpBubble *bubble)
+{
+   S32 index = helpBubbles.getIndex(bubble);
+   helpBubbles.deleteAndErase_fast(index);
 }
 
 

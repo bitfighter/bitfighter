@@ -74,8 +74,8 @@ private:
    InputCode getActivationKey();
 
 public:
-   explicit LoadoutHelper();                 // Constructor
-   void pregameSetup(bool engineerEnabled);  // Set things up
+   explicit LoadoutHelper();                    // Constructor
+   void pregameSetup(bool engineerEnabled);     // Set things up
    HelperMenu::HelperMenuType getType();
 
    void render();                
@@ -83,6 +83,7 @@ public:
    bool processInputCode(InputCode inputCode);   
 
    void activateHelp(UIManager *uiManager);  // Open help to an appropriate page
+   void onWidgetClosed();
 };
 
 };

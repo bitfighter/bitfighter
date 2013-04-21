@@ -186,6 +186,7 @@
     <ClCompile Include="gameStats.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="GeomObject.cpp" />
+    <ClCompile Include="HelpBubble.cpp" />
     <ClCompile Include="HelperManager.cpp" />
     <ClCompile Include="helperMenu.cpp" />
     <ClCompile Include="HttpRequest.cpp" />
@@ -306,6 +307,7 @@
     <ClInclude Include="..\zap\CTFGame.h" />
     <ClInclude Include="..\zap\Directory.h" />
     <ClInclude Include="..\zap\dirent.h" />
+    <ClInclude Include="AnchorPoint.h" />
     <ClInclude Include="ChatCommands.h" />
     <ClInclude Include="ChatHelper.h" />
     <ClInclude Include="ClientInfo.h" />
@@ -340,6 +342,7 @@
     <ClInclude Include="GameTypesEnum.h" />
     <ClInclude Include="Geometry_Base.h" />
     <ClInclude Include="GeomObject.h" />
+    <ClInclude Include="HelpBubble.h" />
     <ClInclude Include="HelperManager.h" />
     <ClInclude Include="HttpRequest.h" />
     <ClInclude Include="InputCodeEnum.h" />

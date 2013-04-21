@@ -118,7 +118,7 @@ public:
    virtual void idle(U32 delta);
    virtual void onActivated();
 
-   void onWidgetClosed();                          // Gets run when closing animation is complet
+   virtual void onWidgetClosed();                     // Gets run when closing animation is complete
 
    virtual bool processInputCode(InputCode inputCode);  
    virtual void onTextInput(char ascii);

@@ -38,6 +38,7 @@
 #include "TimeLeftRenderer.h"
 #include "FpsRenderer.h"
 #include "sparkManager.h"
+#include "AnchorPoint.h"
 
 
 namespace Zap
@@ -101,6 +102,9 @@ public:
 
 class Move;
 class SoundEffect;
+
+namespace UI { class HelpBubble; }
+
 using namespace Zap::UI;
 
 class GameUserInterface : public UserInterface
@@ -126,6 +130,8 @@ private:
    LoadoutIndicator mLoadoutIndicator;
    TimeLeftRenderer mTimeLeftRenderer;
    UI::FpsRenderer mFpsRenderer;
+
+   Vector<UI::HelpBubble *> helpBubbles;
 
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
 
@@ -281,6 +287,9 @@ public:
    void toggleShowingMeshZones();  
    void toggleShowDebugBots();
 
+   void addHelpBubble(const Vector<string> &messages, const AnchorPoint &anchor);
+   void removeHelpBubble(UI::HelpBubble *bubble);
+
    bool isShowingDebugShipCoords() const;
 
    // FxManager passthroughs
@@ -358,7 +367,7 @@ public:
 };
 
 
-};
+}
 
 #endif
 

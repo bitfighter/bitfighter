@@ -1567,6 +1567,12 @@ UIManager *ClientGame::getUIManager() const
 }
 
 
+GameUserInterface *ClientGame::getUi() const
+{
+   return mUi;
+}
+
+
 bool ClientGame::getInCommanderMap()
 {
    return mInCommanderMap;
