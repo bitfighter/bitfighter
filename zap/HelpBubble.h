@@ -47,8 +47,13 @@ private:
    AnchorPoint mAnchor;
    GameUserInterface *mParentUi;
 
+   S32 mWidth, mHeight;
+
    Timer mDisplayTimer;
    bool mFading;           // False during normal display, true while fading out
+
+   S32 calcWidth();
+   S32 calcHeight();
 
 public:
    

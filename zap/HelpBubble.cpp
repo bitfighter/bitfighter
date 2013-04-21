@@ -27,6 +27,7 @@
 #include "UIGame.h"
 #include "gameObjectRender.h"
 #include "Colors.h"
+#include "FontManager.h"
 #include "OpenglUtils.h"
 
 using namespace TNL;
@@ -39,6 +40,9 @@ HelpBubble::HelpBubble(const Vector<string> &text, const AnchorPoint &anchor, Ga
    mText = text;
    mAnchor = anchor;
    mParentUi = parentUi;
+
+   mWidth = calcWidth();
+   mHeight = calcHeight();
 
    mFading = false;
    mDisplayTimer.reset(5000);
@@ -60,14 +64,57 @@ void HelpBubble::idle(U32 timeDelta)
 }
 
 
+static const S32 FontSize = 15;
+static const S32 FontGap = 4;
+static const S32 Margin = 5;           // Gap between edges and text
+
 void HelpBubble::render()
 {
    F32 alpha = 1;
    if(mFading)
       alpha = mDisplayTimer.getFraction();
 
-   glColor(Colors::red, alpha);
-   drawCircle(100,100,10);
+   Point pos;
+   if(mAnchor.anchorType == ScreenAnchor)    // Anchored to fixed location on the screen
+      pos = mAnchor.pos;
+   else                                      // Anchord to a fixed location on the map, may be offscreen
+      pos = mAnchor.pos;      // ?????
+
+
+   drawFilledRoundedRect(pos, mWidth, mHeight, Colors::red, Colors::white, 5, alpha);
+
+   FontManager::pushFontContext(FontManager::BubbleContext);
+
+   glColor(Colors::white, alpha);
+   F32 yPos = pos.y - mHeight / 2 + FontSize + FontGap;
+
+   for(S32 i = 0; i < mText.size(); i++)
+   {
+      drawStringc(pos.x, yPos, (F32)FontSize, mText[i].c_str());
+      yPos += FontSize + FontGap;
+   }
+
+   FontManager::popFontContext();
+}
+
+
+S32 HelpBubble::calcWidth()
+{
+   S32 width = 0;
+
+   for(S32 i = 0; i < mText.size(); i++)
+   {
+      S32 w = getStringWidth(FontManager::BubbleContext, FontSize, mText[i].c_str());
+      width = max(width, w);
+   }
+
+   return width + 2 * Margin;
+}
+
+
+S32 HelpBubble::calcHeight()
+{
+   return mText.size() * (FontSize + FontGap) + 2 * Margin;
 }
 
 

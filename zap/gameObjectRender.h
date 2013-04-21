@@ -65,8 +65,10 @@ extern void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 radius)
 extern void drawRoundedRect(const Point &pos, S32 width, S32 height, S32 radius);
 
 
-extern void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor, const Color &outlineColor, S32 radius);
-extern void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, const Color &outlineColor, F32 radius);
+extern void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor, 
+                                  const Color &outlineColor, S32 radius, F32 alpha = 1.0);
+extern void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, 
+                                  const Color &outlineColor, F32 radius, F32 alpha = 1.0);
 
 extern void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle);
 

@@ -203,6 +203,7 @@ void FontManager::setFontContext(FontContext fontContext)
       case BigMessageContext:
          setFont(FontOrbitronMedStroke);
          return;
+
       case MenuContext:
          setFont(FontRoman);
          return;
@@ -210,15 +211,19 @@ void FontManager::setFontContext(FontContext fontContext)
       case HelpContext:
          setFont(FontRoman);
          return;
+
+      case BubbleContext:
       case HUDContext:
       case LevelInfoContext:
       case LoadoutIndicatorContext:
       case OverlayMenuContext:
          setFont(FontTenby5);
          return;
+
       case TextEffectContext:
          setFont(FontOrbitronLightStroke);
          return;
+
       default:
          TNLAssert(false, "Unknown font context!");
          break;

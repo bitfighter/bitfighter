@@ -45,7 +45,10 @@ struct AnchorPoint
    Point pos;
    AnchorType anchorType;
    AnchorPoint(const Point &p, AnchorType t) : pos(p) { anchorType = t; }     // Sorry, can't bear to make a .cpp for just this!!!
+   AnchorPoint() { anchorType = ScreenAnchor; }     
+
 };
+
 
 
 }

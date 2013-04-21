@@ -248,15 +248,15 @@ void drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 }
 
 
-void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor, const Color &outlineColor, S32 radius)
+void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor, const Color &outlineColor, S32 radius, F32 alpha)
 {
-   drawFilledRoundedRect(pos, (F32)width, (F32)height, fillColor, outlineColor, (F32)radius);
+   drawFilledRoundedRect(pos, (F32)width, (F32)height, fillColor, outlineColor, (F32)radius, alpha);
 }
 
 
-void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, const Color &outlineColor, F32 radius)
+void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, const Color &outlineColor, F32 radius, F32 alpha)
 {
-   glColor(fillColor);
+   glColor(fillColor, alpha);
 
    drawFilledArc(Point(pos.x - width / 2 + radius, pos.y - height / 2 + radius), radius,      FloatPi, FloatPi + FloatHalfPi);
    drawFilledArc(Point(pos.x + width / 2 - radius, pos.y - height / 2 + radius), radius, -FloatHalfPi, 0);
@@ -267,9 +267,12 @@ void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color 
             pos.x + width / 2, pos.y + height / 2 - radius, GL_TRIANGLE_FAN);
 
    drawRect(pos.x - width / 2 + radius, pos.y - height / 2, 
-            pos.x + width / 2 - radius, pos.y + height / 2, GL_TRIANGLE_FAN);
+            pos.x + width / 2 - radius, pos.y - height / 2 + radius, GL_TRIANGLE_FAN);
 
-   glColor(outlineColor);
+   drawRect(pos.x - width / 2 + radius, pos.y + height / 2, 
+            pos.x + width / 2 - radius, pos.y + height / 2 - radius, GL_TRIANGLE_FAN);
+
+   glColor(outlineColor, alpha);
    drawRoundedRect(pos, width, height, radius);
 }
 
