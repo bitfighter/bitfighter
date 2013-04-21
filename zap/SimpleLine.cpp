@@ -63,7 +63,8 @@ F32 SimpleLine::getEditorRadius(F32 currentScale)
 void SimpleLine::renderDock()
 {
 #ifndef ZAP_DEDICATED
-   drawFilledSquare(getVert(0), 5, &getEditorRenderColor());       // Draw origin of item to give user something to grab on the dock
+   Color color = getEditorRenderColor();
+   drawFilledSquare(getVert(0), 5, &color);       // Draw origin of item to give user something to grab on the dock
 #endif
 }
 
