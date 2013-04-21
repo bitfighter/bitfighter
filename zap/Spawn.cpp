@@ -652,9 +652,7 @@ void CircleSpawn::spawn()
 
 void CircleSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
-#ifndef ZAP_DEDICATED
    renderCircleSpawn(getPos(), 1 / currentScale); 
-#endif
 }
 
 

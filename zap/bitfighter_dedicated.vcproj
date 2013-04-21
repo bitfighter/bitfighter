@@ -135,7 +135,6 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="../tnl;../boost;../libspeex"
 				PreprocessorDefinitions="ZAP_DEDICATED;WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;_SECURE_SCL=0;ZAP_DEDICATED"
 				RuntimeLibrary="0"
@@ -170,7 +169,6 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				LinkTimeCodeGeneration="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -639,6 +637,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\poly2tri\sweep\advancing_front.cc"
+			>
+		</File>
+		<File
 			RelativePath=".\BanList.cpp"
 			>
 		</File>
@@ -648,6 +650,10 @@
 		</File>
 		<File
 			RelativePath=".\BfObject.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\cdt.cc"
 			>
 		</File>
 		<File
@@ -899,6 +905,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\poly2tri\common\shapes.cc"
+			>
+		</File>
+		<File
 			RelativePath=".\SharedConstants.h"
 			>
 		</File>
@@ -924,6 +934,14 @@
 		</File>
 		<File
 			RelativePath=".\stringUtils.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\sweep.cc"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\sweep_context.cc"
 			>
 		</File>
 		<File

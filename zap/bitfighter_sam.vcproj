@@ -135,7 +135,6 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="2"
-				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="../tnl;../boost;../libsdl/SDL2;../openal;../libspeex;../libpng;../zlib"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;_SECURE_SCL=0"
 				RuntimeLibrary="0"
@@ -171,7 +170,6 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				LinkTimeCodeGeneration="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -793,6 +791,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\poly2tri\sweep\advancing_front.cc"
+			>
+		</File>
+		<File
 			RelativePath=".\AToBScroller.cpp"
 			>
 		</File>
@@ -806,6 +808,10 @@
 		</File>
 		<File
 			RelativePath=".\BfObject.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\cdt.cc"
 			>
 		</File>
 		<File
@@ -1169,6 +1175,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\poly2tri\common\shapes.cc"
+			>
+		</File>
+		<File
 			RelativePath=".\SharedConstants.h"
 			>
 		</File>
@@ -1213,6 +1223,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\poly2tri\sweep\sweep.cc"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\sweep_context.cc"
+			>
+		</File>
+		<File
 			RelativePath=".\teamInfo.cpp"
 			>
 		</File>
@@ -1234,10 +1252,6 @@
 		</File>
 		<File
 			RelativePath=".\Timer.h"
-			>
-		</File>
-		<File
-			RelativePath="..\Triangle\triangle.c"
 			>
 		</File>
 		<File
