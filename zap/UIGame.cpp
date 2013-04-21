@@ -1771,6 +1771,10 @@ void GameUserInterface::renderBasicInterfaceOverlay(bool scoreboardVisible)
 
 void GameUserInterface::renderLevelInfo()
 {
+   // Level Info requires gametype.  It can be NULL when switching levels
+   if(getGame()->getGameType() == NULL)
+      return;
+
    S32 teamCount = getGame()->getTeamCount();
 
    if(mLevelInfoDisplayer.isActive() || mMissionOverlayActive)
