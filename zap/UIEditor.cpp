@@ -2720,7 +2720,7 @@ void EditorUserInterface::findHitItemOnDock()
          for(S32 j = 0; j < mDockItems[i]->getVertCount(); j++)
             verts.push_back(mDockItems[i]->getVert(j));
 
-         if(PolygonContains2(verts.address(),verts.size(), mMousePos))
+         if(polygonContainsPoint(verts.address(),verts.size(), mMousePos))
          {
             mDockItemHit = mDockItems[i].get();
             return;

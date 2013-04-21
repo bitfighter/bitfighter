@@ -377,7 +377,7 @@ BfObject *Ship::doIsInZone(const Vector<DatabaseObject *> &objects)
       // Get points that define the zone boundaries
       const Vector<Point> *polyPoints = zone->getCollisionPoly();
 
-      if( polyPoints->size() != 0 && PolygonContains2(polyPoints->address(), polyPoints->size(), getActualPos()) )
+      if( polyPoints->size() != 0 && polygonContainsPoint(polyPoints->address(), polyPoints->size(), getActualPos()) )
          return zone;
    }
    return NULL;
@@ -773,7 +773,7 @@ void Ship::getZonesShipIsIn(Vector<DatabaseObject *> *zoneList)
       // Get points that define the zone boundaries
       const Vector<Point> *polyPoints = fillVector[i]->getCollisionPoly();
 
-      if(PolygonContains2(polyPoints->address(), polyPoints->size(), getActualPos()))
+      if(polygonContainsPoint(polyPoints->address(), polyPoints->size(), getActualPos()))
          zoneList->push_back(fillVector[i]);
    }
 }

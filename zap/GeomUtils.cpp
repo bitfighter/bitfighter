@@ -64,28 +64,6 @@ using namespace ClipperLib;
 namespace Zap
 {
 
-// Check if a polygon contains inPoint, returns true when it does
-// Assumes the polygon is a convex hull, and that the points are ordered in a certain direction
-// (is that CW or CCW??)
-
-// To use with a Vector of points, pass in vector.address() and vector.size()
-/*
-bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &inPoint)
-{
-   // Loop through edges
-   for (const Point *v1 = inVertices, *v2 = inVertices + inNumVertices - 1; v1 < inVertices + inNumVertices; v2 = v1, ++v1)
-   {
-      // If the point is outside this edge, the point is outside the polygon
-      Point v1_v2 = *v2 - *v1;
-      Point v1_point = inPoint - *v1;
-      if (v1_v2.x * v1_point.y - v1_point.x * v1_v2.y > 0.0f)
-         return false;
-   }
-
-   return true;
-}
-*/
-
 
 Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 angle)
 {
@@ -97,38 +75,43 @@ Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 
 }
 
 
-// From http://local.wasp.uwa.edu.au/~pbourke/geometry/insidepoly/
-// Should work on all polygons, convex and concave alike
-// To use with a Vector of points, pass in vector.address() and vector.size()
-bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint)
+inline S32 isLeft(const Point &p1, const Point &p2, const Point &p )
 {
-   bool oddCount = false;
-   int i;
-   double xinters;
-   Point p1, p2;
+    return ( (p2.x - p1.x) * (p.y - p1.y) - (p.x -  p1.x) * (p2.y - p1.y) );
+}
 
-   p1 = inVertices[inNumVertices-1];
+// Fast winding number test for finding if a point is in a polygon.  Adapted from:
+// http://geomalgorithms.com/a03-_inclusion.html#wn_PnPoly%28%29
+bool polygonContainsPoint(const Point *vertices, S32 vertexCount, const Point &point)
+{
+   S32 counter = 0;    // Winding number counter
 
-   for(i = 0; i < inNumVertices; i++) 
+   // loop through all edges of the polygon
+   S32 nextIndex;
+   for (S32 i = 0; i < vertexCount; i++)
    {
-      p2 = inVertices[i];
-      if(inPoint.y > MIN(p1.y, p2.y) && inPoint.y <= MAX(p1.y, p2.y) && inPoint.x <= MAX(p1.x, p2.x) && (p1.y != p2.y))
+      nextIndex = (i+1)%vertexCount;
+      if (vertices[i].y <= point.y)
       {
-         xinters = (inPoint.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
-         if(p1.x == p2.x || inPoint.x <= xinters)
-            oddCount = !oddCount;
+         if (vertices[nextIndex].y  > point.y)                        // an upward crossing
+            if (isLeft(vertices[i], vertices[nextIndex], point) > 0)  // point left of edge
+               ++counter;                                             // have a valid up intersect
       }
-
-      p1 = p2;
+      else
+      {
+         if (vertices[nextIndex].y  <= point.y)                       // a downward crossing
+            if (isLeft(vertices[i], vertices[nextIndex], point) < 0)  // point right of edge
+               --counter;                                             // have  a valid down intersect
+      }
    }
 
-   return oddCount;   // True if we've crossed an odd number of lines
+   return counter != 0;   // Point is outside polygon only when counter is 0
 }
 
 
 // Fast winding number test for finding if a point is in a polygon.  Adapted from:
 // http://geomalgorithms.com/a03-_inclusion.html#wn_PnPoly%28%29
-inline S32 isLeft( p2t::Point *p1, p2t::Point *p2, const p2t::Point *p3 )
+inline S32 isLeftP2t( p2t::Point *p1, p2t::Point *p2, const p2t::Point *p3 )
 {
     return ( (p2->x - p1->x) * (p3->y - p1->y) - (p3->x -  p1->x) * (p2->y - p1->y) );
 }
@@ -145,13 +128,13 @@ bool PolygonContains2p2t(p2t::Point **vertices, int vertexCount, const p2t::Poin
       if (vertices[i]->y <= point->y)
       {
          if (vertices[nextIndex]->y  > point->y)                      // an upward crossing
-            if (isLeft(vertices[i], vertices[nextIndex], point) > 0)  // point left of edge
+            if (isLeftP2t(vertices[i], vertices[nextIndex], point) > 0)  // point left of edge
                ++counter;                                             // have a valid up intersect
       }
       else
       {
          if (vertices[nextIndex]->y  <= point->y)                     // a downward crossing
-            if (isLeft(vertices[i], vertices[nextIndex], point) < 0)  // point right of edge
+            if (isLeftP2t(vertices[i], vertices[nextIndex], point) < 0)  // point right of edge
                --counter;                                             // have  a valid down intersect
       }
    }
@@ -281,7 +264,7 @@ bool circleCircleIntersect(const Point &center1, F32 radius1, const Point &cente
 bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint, Point *ignoreVelocityEpsilon)
 {
    // Check if the center is inside the polygon  ==> now works for all polys
-   if(PolygonContains2(inVertices, inNumVertices, inCenter))
+   if(polygonContainsPoint(inVertices, inNumVertices, inCenter))
    {
       outPoint = inCenter;
       return true;
@@ -345,7 +328,7 @@ bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, c
    }
 
    //  Entire line inside polygon?  If so, then the start will be within.
-   return PolygonContains2(points.address(), points.size(), start);
+   return polygonContainsPoint(points.address(), points.size(), start);
 }
 
 
@@ -371,7 +354,7 @@ bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
       rp1 = rp2;
    }
    //  All points of polygon is inside the other polygon?  At this point, if any are, all are.
-   return PolygonContains2(p1.address(), p1.size(), p2[0]) || PolygonContains2(p2.address(), p2.size(), p1[0]);
+   return polygonContainsPoint(p1.address(), p1.size(), p2[0]) || polygonContainsPoint(p2.address(), p2.size(), p1[0]);
 }
 
 

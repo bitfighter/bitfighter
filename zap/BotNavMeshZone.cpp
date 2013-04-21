@@ -163,7 +163,7 @@ U16 BotNavMeshZone::findZoneContaining(GridDatabase *botZoneDatabase, const Poin
       BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(fillVector[i]);
 
       if( zone->getExtent().contains(p) 
-                        && (PolygonContains2(zone->getOutline()->address(), zone->getOutline()->size(), p)) )
+                        && (polygonContainsPoint(zone->getOutline()->address(), zone->getOutline()->size(), p)) )
          return zone->mZoneId;
    }
 
@@ -333,7 +333,7 @@ static BotNavMeshZone *findZoneContainingPoint(GridDatabase *botZoneDatabase, co
    {
       BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(zones[i]);
 
-      if(zone && PolygonContains2(zone->getOutline()->address(), zone->getOutline()->size(), point))
+      if(zone && polygonContainsPoint(zone->getOutline()->address(), zone->getOutline()->size(), point))
          return zone;   
    }
 
