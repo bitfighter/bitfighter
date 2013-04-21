@@ -126,29 +126,37 @@ bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &i
 }
 
 
-bool PolygonContains2p2t(p2t::Point **inVertices, int inNumVertices, const p2t::Point *inPoint)
+// Fast winding number test for finding if a point is in a polygon.  Adapted from:
+// http://geomalgorithms.com/a03-_inclusion.html#wn_PnPoly%28%29
+inline S32 isLeft( p2t::Point *p1, p2t::Point *p2, const p2t::Point *p3 )
 {
-   bool oddCount = false;
-   int i;
-   double xinters;
-   const p2t::Point *p1, *p2;
+    return ( (p2->x - p1->x) * (p3->y - p1->y) - (p3->x -  p1->x) * (p2->y - p1->y) );
+}
 
-   p1 = inVertices[inNumVertices-1];
+bool PolygonContains2p2t(p2t::Point **vertices, int vertexCount, const p2t::Point *point)
+{
+   S32 counter = 0;    // Winding number counter
 
-   for(i = 0; i < inNumVertices; i++)
+   // loop through all edges of the polygon
+   S32 nextIndex;
+   for (S32 i = 0; i < vertexCount; i++)
    {
-      p2 = inVertices[i];
-      if(inPoint->y > MIN(p1->y, p2->y) && inPoint->y <= MAX(p1->y, p2->y) && inPoint->x <= MAX(p1->x, p2->x) && (p1->y != p2->y))
+      nextIndex = (i+1)%vertexCount;
+      if (vertices[i]->y <= point->y)
       {
-         xinters = (inPoint->y - p1->y) * (p2->x - p1->x) / (p2->y - p1->y) + p1->x;
-         if(p1->x == p2->x || inPoint->x <= xinters)
-            oddCount = !oddCount;
+         if (vertices[nextIndex]->y  > point->y)                      // an upward crossing
+            if (isLeft(vertices[i], vertices[nextIndex], point) > 0)  // point left of edge
+               ++counter;                                             // have a valid up intersect
       }
-
-      p1 = p2;
+      else
+      {
+         if (vertices[nextIndex]->y  <= point->y)                     // a downward crossing
+            if (isLeft(vertices[i], vertices[nextIndex], point) < 0)  // point right of edge
+               --counter;                                             // have  a valid down intersect
+      }
    }
 
-   return oddCount;   // True if we've crossed an odd number of lines
+   return counter != 0;   // Point is outside polygon only when counter is 0
 }
 
 
@@ -1051,12 +1059,13 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
    // we set up Clipper to output
    //
    // Also used to keep track of our memory to clean up
-   // TODO:  Convert to use our Point and Vector classes somehow?
-   vector<vector<p2t::Point*> > polylines;   // MUST be clockwise
-   vector<vector<p2t::Point*> > holes;       // MUST be counterclockwise
+   //
+   // TODO:  Convert to use our Zap::Point class somehow?
+   Vector<Vector<p2t::Point*> > polylines;   // MUST be clockwise
+   Vector<Vector<p2t::Point*> > holes;       // MUST be counterclockwise
 
    // First build our map extents outline polygon.  Clockwise!
-   vector<p2t::Point*> outline;
+   Vector<p2t::Point*> outline;
 
    F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
    F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
@@ -1076,7 +1085,7 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
 
       if(isWoundClockwise(currentPoly))  // Considered a bounding polyline to triangulate
       {
-         vector<p2t::Point*> polyline;
+         Vector<p2t::Point*> polyline;
          for(S32 j = 0; j < currentPoly.size(); j++)
             polyline.push_back(new p2t::Point(currentPoly[j].x, currentPoly[j].y));
 
@@ -1084,7 +1093,7 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
       }
       else
       {
-         vector<p2t::Point*> hole;
+         Vector<p2t::Point*> hole;
          for(S32 j = 0; j < currentPoly.size(); j++)
             hole.push_back(new p2t::Point(currentPoly[j].x, currentPoly[j].y));
 
@@ -1092,35 +1101,79 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
       }
    }
 
+   // Now reorder our polyline bounds to have the innermost first, so we can be more effecient
+   // with adding holes to the appropriate one
+   Vector<Vector<p2t::Point*> > sortedPolylines;
 
-   vector<p2t::CDT*> cdtRegistry;       // For keeping track of memory
-
-   for(S32 i = 0; i < polylines.size(); i++)
+   S32 polylinesToSort = polylines.size();
+   while(polylinesToSort > 0)
    {
-      vector<p2t::Point*> polyline = polylines[i];
-
-      // Create our worker and keep track of it for clean-up later
-      p2t::CDT* cdt = new p2t::CDT(polyline);
-      cdtRegistry.push_back(cdt);
-
-      // Here we filter holes so as to not make poly2tri do extra work.  This improved poly2tri
-      // performance by at least 1 magnitude
-      //
-      // TODO: possibly be even smarter here and filter out holes that belong to a 'child' polyline bound
-      // i.e. some sort of hierarchal hole-to-polyline bound relationship
-      vector<vector<p2t::Point*> > filteredHoles;
-      for(S32 k = 0; k < holes.size(); k++)
+      for(S32 i = polylines.size() - 1; i >= 0 ; i--)   // Backwards! to avoid iterating over erased elements
       {
-         // If only one of the points of the hole is within our bounding polyline, the
-         // entire holes should be.  This is because Clipper guarantees no overlapping
-         // polygons.  Thanks Clipper!
-         if(PolygonContains2p2t(&polyline[0], polyline.size(), holes[k][0]))  // &polyline[0]  <- vector to array!
-            filteredHoles.push_back(holes[k]);
+         bool foundInnerPolyline = false;
+
+         Vector<p2t::Point*> currentPoly = polylines[i];
+         for(S32 j = 0; j < polylines.size(); j++)
+         {
+            if(i == j)  // Skip ourselves
+               continue;
+
+            // If only one of the points of the hole is within our bounding polyline, the
+            // entire holes should be.  This is because Clipper guarantees no overlapping
+            // polygons.  Thanks Clipper!
+            //
+            // If we find an inner polyline then we're not the innermost
+            if(PolygonContains2p2t(&currentPoly[0], currentPoly.size(), polylines[j][0]))
+            {
+               foundInnerPolyline = true;
+               break;
+            }
+         }
+
+         // No inner poly was found, move to sorted list
+         if(!foundInnerPolyline)
+         {
+            sortedPolylines.push_back(currentPoly);
+            polylines.erase_fast(i);
+         }
       }
 
-      // Add our holes
+      polylinesToSort = polylines.size();
+   }
+
+
+   // Now go through all our polylines and trangulate them, using only the holes that are inside
+   //
+   // For keeping track of memory
+   Vector<p2t::CDT*> cdtRegistry;
+   Vector<Vector<Vector<p2t::Point*> > > holesRegistry;
+
+   for(S32 i = 0; i < sortedPolylines.size(); i++)
+   {
+      Vector<p2t::Point*> polyline = sortedPolylines[i];
+
+      // Create our worker and keep track of it for clean-up later
+      p2t::CDT* cdt = new p2t::CDT(polyline.getStlVector());
+      cdtRegistry.push_back(cdt);
+
+      // Here we filter holes so as to not make poly2tri do extra work.  Since we've sorted the
+      // polylines from innermost to outer-most, we just need to iterate through our holes, check
+      // if it's in a polyline and move it to a vector for this polylin
+      Vector<Vector<p2t::Point*> > filteredHoles;
+      for(S32 j = holes.size() - 1; j >= 0; j--)    // Backwards!  Because we're erasing elements
+      {
+         if(PolygonContains2p2t(&polyline[0], polyline.size(), holes[j][0]))
+         {
+            filteredHoles.push_back(holes[j]);
+            holes.erase_fast(j);
+         }
+      }
+      // Keep track of memory
+      holesRegistry.push_back(filteredHoles);
+
+      // Add our filtered holes
       for(S32 j = 0; j < filteredHoles.size(); j++)
-         cdt->AddHole(filteredHoles[j]);
+         cdt->AddHole(filteredHoles[j].getStlVector());
 
       // Do the work!
       cdt->Triangulate();
@@ -1130,9 +1183,9 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
 
       // Copy our data to TNL::Point and to our output Vector
       p2t::Triangle *currentTriangle;
-      for(S32 i = 0; i < currentOutput.size(); i++)
+      for(S32 j = 0; j < currentOutput.size(); j++)
       {
-         currentTriangle = currentOutput[i];
+         currentTriangle = currentOutput[j];
          outputTriangles.push_back(Point(currentTriangle->GetPoint(0)->x, currentTriangle->GetPoint(0)->y));
          outputTriangles.push_back(Point(currentTriangle->GetPoint(1)->x, currentTriangle->GetPoint(1)->y));
          outputTriangles.push_back(Point(currentTriangle->GetPoint(2)->x, currentTriangle->GetPoint(2)->y));
@@ -1141,20 +1194,28 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
 
 
    // Clean up memory used with poly2tri
+   //
    // Clean-up worker
    for(S32 i = 0; i < cdtRegistry.size(); i++)
       delete cdtRegistry[i];
 
    // Free our many, many constructed pt2::Point objects
-   for(S32 i = 0; i < polylines.size(); i++)
+   for(S32 i = 0; i < sortedPolylines.size(); i++)
    {
-      vector<p2t::Point*> polyline = polylines[i];
-      vector<p2t::Point*>::iterator iterator;
-      for(iterator = polyline.begin(); iterator != polyline.end(); ++iterator)
-         delete *iterator;
-
-      polyline.clear();
+      Vector<p2t::Point*> polyline = sortedPolylines[i];
+      polyline.deleteAndClear();
    }
+
+   // Free the holes!
+   for(S32 i = 0; i < holesRegistry.size(); i++)
+   {
+      for(S32 j = 0; j < holesRegistry[i].size(); j++)
+      {
+         Vector<p2t::Point*> hole = holesRegistry[i][j];
+         hole.deleteAndClear();
+      }
+   }
+
 
    // Make sure we have output data
    if(outputTriangles.size() == 0)

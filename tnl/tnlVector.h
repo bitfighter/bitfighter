@@ -152,10 +152,10 @@ template<class T> inline Vector<T>::Vector(const T *array, U32 length)     // Co
 template<class T> inline Vector<T>::~Vector() {}       // Destructor
 
 // returns a modifiable reference to the internal std::vector object
-//template<class T> inline std::vector<T>& Vector<T>::getStlVector()
-//{
-//   return this->innerVector;
-//}
+template<class T> inline std::vector<T>& Vector<T>::getStlVector()
+{
+   return this->innerVector;
+}
 
 template<class T> inline T* Vector<T>::address()
 {
