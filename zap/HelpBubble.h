@@ -30,12 +30,14 @@
 #include "Timer.h"
 #include "tnlVector.h"
 #include "tnlTypes.h"
+#include "tnlNetBase.h"    // For SafePtr
 
 using namespace TNL;
 
 namespace Zap { 
 
 class GameUserInterface;
+class BfObject;
   
 namespace UI {
 
@@ -45,6 +47,7 @@ class HelpBubble
 private:
    const Vector<string> *mText;
    AnchorPoint mAnchor;
+   SafePtr<BfObject> mRefObject;
    GameUserInterface *mParentUi;
 
    S32 mWidth, mHeight;
@@ -57,10 +60,10 @@ private:
 
 public:
    
-   HelpBubble(const Vector<string> *text, const AnchorPoint &anchor, GameUserInterface *parentUi);     // Constructor
+   HelpBubble(const Vector<string> *text, const AnchorPoint &anchor, BfObject *refObj, GameUserInterface *parentUi);     // Constructor
 
    void idle (U32 timeDelta);
-   void render(const Point &centerPos);
+   void render(const Point &centerPos, F32 scale);
 };
 
 

@@ -102,8 +102,8 @@ public:
    Point getCentroid() const;
    F32 getLabelAngle() const;
 
-   const Vector<Point> *getOutline() const;
-   const Vector<Point> *getFill()    const;
+   virtual const Vector<Point> *getOutline() const;
+           const Vector<Point> *getFill()    const;
 
    void reverseWinding();     
 

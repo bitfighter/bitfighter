@@ -32,7 +32,7 @@
 #include "gameConnection.h"
 #include "ClientInfo.h"
 
-#include "gameObjectRender.h"    // For drawSquare
+#include "gameObjectRender.h"    // For drawHollowSquare
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -620,6 +620,12 @@ Vector<string> *BfObject::getHelpBubbleText() const
 }
 
 
+bool BfObject::canShowHelpBubble() const
+{
+   return true;
+}
+
+
 #ifndef ZAP_DEDICATED
 // Render selected and highlighted vertices, called from renderEditor
 void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
@@ -630,7 +636,7 @@ void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
    for(S32 i = 0; i < getVertCount(); i++)
       if(vertSelected(i) || isVertexLitUp(i) || ((isSelected() || isLitUp())  && getVertCount() == 1))
       {
-         const Color *color = (vertSelected(i) || (isSelected() && getGeomType() == geomPoint)) ? SELECT_COLOR : HIGHLIGHT_COLOR;
+         const Color *color = &Colors::green; //(vertSelected(i) || (isSelected() && getGeomType() == geomPoint)) ? SELECT_COLOR : HIGHLIGHT_COLOR;
 
          Point center = getVert(i) + getEditorSelectionOffset(currentScale);
 

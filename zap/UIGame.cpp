@@ -64,7 +64,7 @@
 #include "Cursor.h"
 #include "CoreGame.h"
 #include "ScissorsManager.h"
-#include "HelpBubble.h"
+//#include "HelpBubble.h"
 
 #include "tnlEndian.h"
 
@@ -310,8 +310,25 @@ void GameUserInterface::idle(U32 timeDelta)
 
    mFxManager.idle(timeDelta);      // Processes sparks and teleporter effects
 
-   for(S32 i = 0; i < helpBubbles.size(); i++)
-      helpBubbles[i]->idle(timeDelta);
+   //for(S32 i = 0; i < helpBubbles.size(); i++)
+   //   helpBubbles[i]->idle(timeDelta);
+
+   for(S32 i = 0; i < mHelpTimer.size(); i++)
+      if(mHelpTimer[i].update(timeDelta))
+      {
+         if(mHelpFading[i])
+         {
+            mHelpTimer.erase(i);
+            mHelpFading.erase(i);
+            mHelpMessage.erase(i);
+            mHighlightType.erase(i);
+         }
+         else
+         {
+            mHelpFading[i] = true;
+            mHelpTimer[i].reset(500);
+         }
+      }
 
 
    // Update mShipPos... track this so that we can keep a fix on the ship location even if it subsequently dies
@@ -412,28 +429,29 @@ void GameUserInterface::render()
    if(getGame()->isSpawnDelayed())
       renderSuspendedMessage();
 
-   {
-      renderReticle();                       // Draw crosshairs if using mouse
-      renderChatMsgs();                      // Render incoming chat and server msgs
-      mLoadoutIndicator.render(getGame());   // Draw indicators for the various loadout items
 
-      getUIManager()->getHostMenuUserInterface()->renderProgressListItems();  // This is the list of levels loaded while hosting
+   renderHelpMessages();
 
-      renderProgressBar();          // This is the status bar that shows progress of loading this level
+   renderReticle();                       // Draw crosshairs if using mouse
+   renderChatMsgs();                      // Render incoming chat and server msgs
+   mLoadoutIndicator.render(getGame());   // Draw indicators for the various loadout items
 
-      mVoiceRecorder.render();      // This is the indicator that someone is sending a voice msg
+   getUIManager()->getHostMenuUserInterface()->renderProgressListItems();  // This is the list of levels loaded while hosting
 
-      mFpsRenderer.render();        // Display running average FPS
+   renderProgressBar();          // This is the status bar that shows progress of loading this level
 
-      mHelperManager.render();
+   mVoiceRecorder.render();      // This is the indicator that someone is sending a voice msg
 
-      GameType *gameType = getGame()->getGameType();
+   mFpsRenderer.render();        // Display running average FPS
 
-      if(gameType)
-         gameType->renderInterfaceOverlay(mInScoreboardMode);
+   mHelperManager.render();
 
-      renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
-   }
+   GameType *gameType = getGame()->getGameType();
+
+   if(gameType)
+      gameType->renderInterfaceOverlay(mInScoreboardMode);
+
+   renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
    
    renderShutdownMessage();
 
@@ -459,18 +477,61 @@ if(mGotControlUpdate)
 }
 
 
-void GameUserInterface::addHelpBubble(const Vector<string> *messages, const AnchorPoint &anchor)
+void GameUserInterface::renderHelpMessages()
 {
-   HelpBubble *helpBubble = new HelpBubble(messages, anchor, this);
-   helpBubbles.push_back(helpBubble);
+   static const S32 FontSize = 18;
+   static const S32 FontGap  = 6;
+
+   S32 yPos = gScreenInfo.getGameCanvasHeight() / 2 + 40;
+
+   FontManager::pushFontContext(FontManager::BubbleContext);
+
+   for(S32 i = 0; i < mHelpMessage.size(); i++)
+   {
+      F32 alpha = mHelpFading[i] ? mHelpTimer[i].getFraction() : 1;
+      glColor(Colors::green, alpha);
+
+      for(S32 j = 0; j < mHelpMessage[i]->size(); j++)
+      {
+         drawCenteredString(yPos, FontSize, mHelpMessage[i]->get(j).c_str());
+         yPos += FontSize + FontGap;
+      }
+
+      yPos += 10;    // gap between messages
+   }
+
+   FontManager::popFontContext();
 }
 
 
-void GameUserInterface::removeHelpBubble(UI::HelpBubble *bubble)
+void GameUserInterface::addHelpText(const Vector<string> *message, U8 highlightObjectType)
 {
-   S32 index = helpBubbles.getIndex(bubble);
-   helpBubbles.deleteAndErase_fast(index);
+   mHelpMessage.push_back(message);
+   mHighlightType.push_back(highlightObjectType);
+   mHelpTimer.push_back(Timer(10000));
+   mHelpFading.push_back(false);
 }
+
+
+//void GameUserInterface::addHelpBubble(BfObject *obj)
+//{
+//   HelpBubble *helpBubble = new HelpBubble(obj->getHelpBubbleText(), AnchorPoint(obj->getPos(), MapAnchor), obj, this);
+//   helpBubbles.push_back(helpBubble);
+//}
+//
+//
+//void GameUserInterface::addHelpBubble(const Vector<string> *messages, const Point &pos)
+//{
+//   HelpBubble *helpBubble = new HelpBubble(messages, AnchorPoint(pos, ScreenAnchor), NULL, this);
+//   helpBubbles.push_back(helpBubble);
+//}
+//
+//
+//void GameUserInterface::removeHelpBubble(UI::HelpBubble *bubble)
+//{
+//   S32 index = helpBubbles.getIndex(bubble);
+//   helpBubbles.deleteAndErase_fast(index);
+//}
 
 
 // Returns true if player is composing a chat message
@@ -2024,10 +2085,12 @@ void GameUserInterface::renderNormal(ClientGame *game)
    // Put (0,0) at the center of the screen
    glTranslatef(gScreenInfo.getGameCanvasWidth() / 2.f, gScreenInfo.getGameCanvasHeight() / 2.f, 0);       
 
+   F32 scaleFactX = (gScreenInfo.getGameCanvasWidth()  / 2) / visExt.x;
+   F32 scaleFactY = (gScreenInfo.getGameCanvasHeight() / 2) / visExt.y;
 
-   glScalef((gScreenInfo.getGameCanvasWidth()  / 2) / visExt.x, 
-            (gScreenInfo.getGameCanvasHeight() / 2) / visExt.y, 1);
+   TNLAssert(scaleFactX == scaleFactY, "I would expect these to be equal to avoid distortion!");
 
+   glScalef(scaleFactX, scaleFactY, 1);
    glTranslatef(-mShipPos.x, -mShipPos.y, 0);
 
    drawStars(mStars, NumStars, 1.0, game->getSettings()->getStarsInDistance(), mShipPos, visExt * 2);
@@ -2058,24 +2121,40 @@ void GameUserInterface::renderNormal(ClientGame *game)
    renderObjects.sort(renderSortCompare);
 
    // Render in three passes, to ensure some objects are drawn above others
-   for(S32 j = -1; j < 2; j++)
+   for(S32 i = -1; i < 2; i++)
    {
-      Barrier::renderEdges(j, *game->getSettings()->getWallOutlineColor());    // Render wall edges
+      Barrier::renderEdges(i, *game->getSettings()->getWallOutlineColor());    // Render wall edges
 
       if(mDebugShowMeshZones)
-         for(S32 i = 0; i < renderZones.size(); i++)
-            renderZones[i]->render(j);
+         for(S32 j = 0; j < renderZones.size(); j++)
+            renderZones[j]->render(i);
 
-      for(S32 i = 0; i < renderObjects.size(); i++)
-         renderObjects[i]->render(j);
+      for(S32 j = 0; j < renderObjects.size(); j++)
+         renderObjects[j]->render(i);
 
-      mFxManager.render(j, game->getCommanderZoomFraction());
+      mFxManager.render(i, game->getCommanderZoomFraction());
+   }
+
+
+   // Render a higlight around any objects in our highlight type list, for help
+   // Highly inefficient... turn off when not using, and find a better way (will have no effect 99% of time)
+   for(S32 i = 0; i < renderObjects.size(); i++)
+   {
+      S32 index = mHighlightType.getIndex(renderObjects[i]->getObjectTypeNumber());
+      if(index != -1)
+      {
+         F32 alpha = mHelpFading[index] ? mHelpTimer[index].getFraction() : 1;
+
+         Vector<Point> outline;
+         offsetPolygon(renderObjects[i]->getOutline(), outline, 14);
+         renderPolygonOutline(&outline, &Colors::green, alpha);
+      }
    }
 
    FxTrail::renderTrails();
 
-   for(S32 i = 0; i < helpBubbles.size(); i++)
-      helpBubbles[i]->render(mShipPos);
+   //for(S32 i = 0; i < helpBubbles.size(); i++)
+   //   helpBubbles[i]->render(mShipPos, scaleFactX);
 
 
    getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);

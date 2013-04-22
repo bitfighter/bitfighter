@@ -28,11 +28,16 @@
 #include "GeomUtils.h"              // For polygon triangulation
 
 #include "Rect.h"
-#include <math.h>
 
-// #include "tnlGhostConnection.h"  // appears to not be needed in here, as we are only handling pointer of GhostConnection
 #include "tnlBitStream.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
+
+#ifdef TNL_OS_WIN32
+#  include <windows.h>   // For ARRAYSIZE
+#endif
+
+#include <math.h>
+
 
 using namespace TNL;
 
@@ -420,7 +425,7 @@ bool PointGeometry::vertSelected(S32 vertIndex)
 
 const Vector<Point> *PointGeometry::getOutline() const
 {
-   TNLAssert(false, "Points do not have outline!");
+   TNLAssert(false, "Points do not have an inherent outline -- if you need an outline for this object, please implement an override for getOutline() in the object itself.");
    return NULL;
 }
 

@@ -1878,22 +1878,22 @@ void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideCol
    glTranslate(pos);
 
    glColor(overrideColor == NULL ? Colors::white : *overrideColor, alpha);
-   drawSquare(Point(0,0), size, false);
+   drawHollowSquare(Point(0,0), size);
 
    glColor(overrideColor == NULL ? Colors::red : *overrideColor, alpha);
    F32 vertices[] = {
-         crossWidth, crossWidth,
-         crossLen, crossWidth,
-         crossLen, -crossWidth,
-         crossWidth, -crossWidth,
-         crossWidth, -crossLen,
+          crossWidth,  crossWidth,
+          crossLen,    crossWidth,
+          crossLen,   -crossWidth,
+          crossWidth, -crossWidth,
+          crossWidth, -crossLen,
          -crossWidth, -crossLen,
          -crossWidth, -crossWidth,
-         -crossLen, -crossWidth,
-         -crossLen, crossWidth,
-         -crossWidth, crossWidth,
-         -crossWidth, crossLen,
-         crossWidth, crossLen
+         -crossLen,   -crossWidth,
+         -crossLen,    crossWidth,
+         -crossWidth,  crossWidth,
+         -crossWidth,  crossLen,
+          crossWidth,  crossLen
    };
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
 
@@ -1986,8 +1986,7 @@ void renderEnergyItem(const Point &pos, bool forEditor)
       glTranslate(pos);
 
       S32 size = 18;
-      glColor(Colors::white);
-      drawSquare(Point(0,0), size, false);
+      drawHollowSquare(Point(0,0), size, &Colors::white);
       glLineWidth(gDefaultLineWidth);
 
       // Scale down the symbol a little so it fits in the box
@@ -2796,7 +2795,6 @@ void render25FlagsBadge(F32 x, F32 y, F32 rad)
       renderFlag(-.10f * rad, -.10f * rad, &Colors::red50);
    glPopMatrix();
 
-   glColor(Colors::red);
    F32 ts = rad - 3;
    F32 width = getStringWidth(ts, "25");
    F32 tx = x + .30f * rad;
@@ -2805,6 +2803,7 @@ void render25FlagsBadge(F32 x, F32 y, F32 rad)
    glColor(Colors::yellow);
    drawFilledRect(F32(tx - width / 2.0 - 1.0), F32(ty - (ts + 2.0) / 2.0), 
                   F32(tx + width / 2.0 + 0.5), F32(ty + (ts + 2.0) / 2.0));
+
    glColor(Colors::gray20);
    renderCenteredString(Point(tx, ty), ts, "25");
 }

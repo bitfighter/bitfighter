@@ -225,10 +225,10 @@ void LoadoutHelper::activateHelp(UIManager *uiManager)
 
 void LoadoutHelper::onWidgetClosed()
 {
-   static string msgs[] = { "You just changed your loadout", "", "Do something useful!" };
+   static string msgs[] = { "You just changed your loadout", "Enter a Loadout Zone to get your new equipment" };
    static Vector<string> messages(msgs, ARRAYSIZE(msgs));
    
-   getGame()->getUi()->addHelpBubble(&messages, AnchorPoint(Point(300,300), ScreenAnchor));
+   getGame()->getUi()->addHelpText(&messages, UnknownTypeNumber);
 }
 
 

@@ -103,7 +103,7 @@ public:
 class Move;
 class SoundEffect;
 
-namespace UI { class HelpBubble; }
+//namespace UI { class HelpBubble; }
 
 using namespace Zap::UI;
 
@@ -132,7 +132,14 @@ private:
    TimeLeftRenderer mTimeLeftRenderer;
    UI::FpsRenderer mFpsRenderer;
 
-   Vector<UI::HelpBubble *> helpBubbles;
+   //Vector<UI::HelpBubble *> helpBubbles;
+   // TODO: Make this a struct
+   Vector<const Vector<string> *> mHelpMessage;
+   Vector<U8> mHighlightType;
+   Vector<Timer> mHelpTimer;
+   Vector<bool> mHelpFading;
+   void renderHelpMessages();
+
 
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
 
@@ -288,8 +295,12 @@ public:
    void toggleShowingMeshZones();  
    void toggleShowDebugBots();
 
-   void addHelpBubble(const Vector<string> *messages, const AnchorPoint &anchor);
-   void removeHelpBubble(UI::HelpBubble *bubble);
+   //void addHelpBubble(BfObject *obj);
+   //void addHelpBubble(const Vector<string> *messages, const Point &pos);
+   //void removeHelpBubble(UI::HelpBubble *bubble);
+
+   void addHelpText(const Vector<string> *message, U8 highlightObjectType);
+
 
    bool isShowingDebugShipCoords() const;
 

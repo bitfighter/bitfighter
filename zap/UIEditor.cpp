@@ -3548,13 +3548,13 @@ void EditorUserInterface::centerView()
    if(extents.getWidth() < 1 && extents.getHeight() < 1)    // e.g. a single point item
    {
       mCurrentScale = STARTING_SCALE;
-      mCurrentOffset.set(gScreenInfo.getGameCanvasWidth() / 2  - mCurrentScale * x, 
-                           gScreenInfo.getGameCanvasHeight() / 2 - mCurrentScale * y);
+      mCurrentOffset.set(gScreenInfo.getGameCanvasWidth()  / 2 - mCurrentScale * x, 
+                         gScreenInfo.getGameCanvasHeight() / 2 - mCurrentScale * y);
    }
    else
    {
-      mCurrentScale = min(gScreenInfo.getGameCanvasWidth() / extents.getWidth(), 
-                           gScreenInfo.getGameCanvasHeight() / extents.getHeight());
+      mCurrentScale = min(gScreenInfo.getGameCanvasWidth()  / extents.getWidth(), 
+                          gScreenInfo.getGameCanvasHeight() / extents.getHeight());
 
       mCurrentScale /= 1.3f;      // Zoom out a bit
 

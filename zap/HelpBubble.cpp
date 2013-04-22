@@ -25,6 +25,7 @@
 
 #include "HelpBubble.h"
 #include "UIGame.h"
+#include "BfObject.h"
 #include "gameObjectRender.h"
 #include "Colors.h"
 #include "ScreenInfo.h"
@@ -34,35 +35,49 @@
 using namespace TNL;
 
 namespace Zap { 
+
 extern ScreenInfo gScreenInfo;
+
 namespace UI {
 
 
-HelpBubble::HelpBubble(const Vector<string> *text, const AnchorPoint &anchor, GameUserInterface *parentUi)
+HelpBubble::HelpBubble(const Vector<string> *text, const AnchorPoint &anchor, BfObject *refObj, GameUserInterface *parentUi)
 {
    mText = text;
    mAnchor = anchor;
+   mRefObject = refObj;
    mParentUi = parentUi;
 
    mWidth  = calcWidth();
    mHeight = calcHeight();
 
    mFading = false;
-   mDisplayTimer.reset(5000);
+   mDisplayTimer.reset(55000);
 }
 
 
 void HelpBubble::idle(U32 timeDelta)
 {
+   // Check if reference object is still in the picture
+   if(!mRefObject->canShowHelpBubble())
+   {
+      //mParentUi->removeHelpBubble(this);
+      return;
+   }
+
    if(mDisplayTimer.update(timeDelta))
    {
-      if(mFading)
-         mParentUi->removeHelpBubble(this);
+      if(mFading) {}
+         //mParentUi->removeHelpBubble(this);
       else
       {
          mFading = true;
          mDisplayTimer.reset(500);
       }
+
+      // Check if our reference object has been deleted... if so, delete this
+      if(mAnchor.anchorType == MapAnchor && !mRefObject) {}
+         //mParentUi->removeHelpBubble(this);
    }
 }
 
@@ -71,23 +86,66 @@ static const S32 FontSize = 15;
 static const S32 FontGap = 4;
 static const S32 Margin = 5;           // Gap between edges and text
 
-void HelpBubble::render(const Point &centerPos)
+void HelpBubble::render(const Point &centerPos, F32 scale)
 {
    F32 alpha = 1;
    if(mFading)
       alpha = mDisplayTimer.getFraction();
 
+   const Color *color = &Colors::green;
+
    Point pos;
    if(mAnchor.anchorType == ScreenAnchor)    // Anchored to fixed location on the screen
       pos = mAnchor.pos;
-   else                                      // Anchord to a fixed location on the map, may be offscreen
-      pos = mAnchor.pos; // - centerPos + Point(gScreenInfo.getGameCanvasWidth() / 2.f, gScreenInfo.getGameCanvasHeight() / 2.f);
-   
-   drawFilledRoundedRect(pos, mWidth, mHeight, Colors::red, Colors::white, 5, alpha);
+   else                                      // Anchored to a fixed location on the map, may be offscreen
+   {
+      TNLAssert(mRefObject, "mRefObject has been deleted!");
+
+      pos = mRefObject->getPos();
+
+      F32 x =                                      (pos.x - centerPos.x) * scale + gScreenInfo.getGameCanvasWidth()  / 2;
+      F32 y = gScreenInfo.getGameCanvasHeight() - ((pos.y + centerPos.y) * scale + gScreenInfo.getGameCanvasHeight() / 2); 
+
+      bool adjustedY = false;
+
+      if(y > gScreenInfo.getGameCanvasHeight() * .33)
+      {
+         pos.y -= 18 + mHeight / 2;     // Label above
+         adjustedY = true;
+      }
+      else if(y < gScreenInfo.getGameCanvasHeight() * .66)       
+      {
+         pos.y += 18 + mHeight / 2;     // Label below
+         adjustedY = true;
+      }
+
+      S32 posBuffer = 50;
+      if(x < mWidth * scale + posBuffer)
+         pos.x += mWidth / 2 + 18;     // Label to right
+      else if(x > gScreenInfo.getGameCanvasWidth() - (mWidth * scale + posBuffer))
+         pos.x -= mWidth / 2 + 18;     // Label to left
+      else if(!adjustedY)
+         pos.y += 18 + mHeight / 2;     // Label below
+   }
+
+   // Highlight reference object, if there is one
+   if(mRefObject)
+   {
+      Vector<Point> outline;
+      offsetPolygon(mRefObject->getOutline(), outline, 10);
+      renderPolygonOutline(&outline, color, alpha);
+   }
+
+
+   // Figure out the best offset direction for the text
+   //gScreenInfo.getGameCanvasWidth();
+   //gScreenInfo.getGameCanvasHeight();
+
+
 
    FontManager::pushFontContext(FontManager::BubbleContext);
 
-   glColor(Colors::white, alpha);
+   glColor(color, alpha);
    F32 yPos = pos.y - mHeight / 2 + FontSize + FontGap;
 
    for(S32 i = 0; i < mText->size(); i++)

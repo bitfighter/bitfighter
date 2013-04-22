@@ -219,6 +219,46 @@ void PickupItem::onClientPickup()
 }
 
 
+// Only show help bubble when item is visible
+bool PickupItem::canShowHelpBubble() const
+{
+   return mIsVisible;
+}
+
+
+const Vector<Point> *PickupItem::getOutline() const
+{
+   static S32 rad = 18; // Should be based off something
+
+   static Vector<Point> outlinePoints;
+
+   F32 x = getPos().x;
+   F32 y = getPos().y;
+
+   outlinePoints.clear();
+   outlinePoints.reserve(4);
+
+   // Need to rebuild this every time because the object might be moving
+   outlinePoints.push_back(Point(x - rad, y - rad));
+   outlinePoints.push_back(Point(x + rad, y - rad));
+   outlinePoints.push_back(Point(x + rad, y + rad));
+   outlinePoints.push_back(Point(x - rad, y + rad));
+
+   return &outlinePoints;
+}
+
+
+// Fills outline with a buffered outline of the object
+//void PickupItem::getOutline()
+//{
+//   S32 rad = 18; // Should be based off something
+//   Point pts[] = { Point(-rad/2, -rad/2), Point(-rad/2,  rad/2), Point( rad/2,  rad/2), Point( rad/2, -rad/2) };
+//   Vector<Point> points(pts, ARRAYSIZE(pts));
+//
+//   return points;
+//}
+
+
 #ifndef ZAP_DEDICATED
 
 EditorAttributeMenuUI *PickupItem::getAttributeMenu()
