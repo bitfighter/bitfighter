@@ -168,6 +168,25 @@ void PickupItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())
       onClientPickup();
+
+
+
+
+      /////// DOES NOT BELONG HERE!!!!  TEMP TESTING ONLY !!!!!
+      static S32 rad = 18; // Should be based off something
+
+   F32 x = getPos().x;
+   F32 y = getPos().y;
+
+   mOutlinePoints.clear();
+   mOutlinePoints.reserve(4);
+
+   // Need to rebuild this every time because the object might be moving
+   mOutlinePoints.push_back(Point(x - rad, y - rad));
+   mOutlinePoints.push_back(Point(x + rad, y - rad));
+   mOutlinePoints.push_back(Point(x + rad, y + rad));
+   mOutlinePoints.push_back(Point(x - rad, y + rad));
+
 }
 
 
@@ -228,23 +247,7 @@ bool PickupItem::canShowHelpBubble() const
 
 const Vector<Point> *PickupItem::getOutline() const
 {
-   static S32 rad = 18; // Should be based off something
-
-   static Vector<Point> outlinePoints;
-
-   F32 x = getPos().x;
-   F32 y = getPos().y;
-
-   outlinePoints.clear();
-   outlinePoints.reserve(4);
-
-   // Need to rebuild this every time because the object might be moving
-   outlinePoints.push_back(Point(x - rad, y - rad));
-   outlinePoints.push_back(Point(x + rad, y - rad));
-   outlinePoints.push_back(Point(x + rad, y + rad));
-   outlinePoints.push_back(Point(x - rad, y + rad));
-
-   return &outlinePoints;
+   return &mOutlinePoints;
 }
 
 

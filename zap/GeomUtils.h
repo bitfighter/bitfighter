@@ -116,6 +116,7 @@ S32 findClosestPoint(const Point &point, const Vector<Point> &points);
 
 // Offset a complex polygon by a given amount
 void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset);
+void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset);
 
 // Convert a list of floats into a list of points, removing all collinear points
 Vector<Point> floatsToPoints(const Vector<F32> floats);

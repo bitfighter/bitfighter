@@ -2138,17 +2138,23 @@ void GameUserInterface::renderNormal(ClientGame *game)
 
    // Render a higlight around any objects in our highlight type list, for help
    // Highly inefficient... turn off when not using, and find a better way (will have no effect 99% of time)
-   for(S32 i = 0; i < renderObjects.size(); i++)
+   if(mHighlightType.size() > 0)
    {
-      S32 index = mHighlightType.getIndex(renderObjects[i]->getObjectTypeNumber());
-      if(index != -1)
-      {
-         F32 alpha = mHelpFading[index] ? mHelpTimer[index].getFraction() : 1;
+      Vector<const Vector<Point> *> polygons;
+      Vector<Vector<Point> > outlines;
 
-         Vector<Point> outline;
-         offsetPolygon(renderObjects[i]->getOutline(), outline, 14);
-         renderPolygonOutline(&outline, &Colors::green, alpha);
+      for(S32 i = 0; i < renderObjects.size(); i++)
+      {
+         S32 index = mHighlightType.getIndex(renderObjects[i]->getObjectTypeNumber());
+
+         if(index != -1)
+            polygons.push_back(renderObjects[i]->getOutline());
       }
+         
+      offsetPolygons(polygons, outlines, 14);
+
+      for(S32 j = 0; j < outlines.size(); j++)
+         renderPolygonOutline(&outlines[j], &Colors::green);
    }
 
    FxTrail::renderTrails();

@@ -974,6 +974,18 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
 }
 
 
+void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
+{
+   Polygons polygons = upscaleClipperPoints(inputPolys);
+
+   // Call Clipper to do the dirty work
+   OffsetPolygons(polygons, polygons, offset * CLIPPER_SCALE_FACT);
+
+   // Downscale
+   outputPolys = downscaleClipperPoints(polygons);
+}
+
+
 // Offset a complex polygon by a given amount
 // Uses clipper to create a buffer around a polygon with the given offset
 void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset)
@@ -981,14 +993,9 @@ void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, co
    Vector<const Vector<Point> *> tempInputVector;
    tempInputVector.push_back(inputPoly);
 
-   // Upscale for clipper
-   Polygons polygons = upscaleClipperPoints(tempInputVector);
+   Vector<Vector<Point> > tempOutputVector;
 
-   // Call Clipper to do the dirty work
-   OffsetPolygons(polygons, polygons, offset * CLIPPER_SCALE_FACT);
-
-   // Downscale
-   Vector<Vector<Point> > tempOutputVector = downscaleClipperPoints(polygons);
+   offsetPolygons(tempInputVector, tempOutputVector, offset);
 
    TNLAssert(tempOutputVector.size() > 0, "tempVector empty in offsetPolygon?");
    if(tempOutputVector.size() > 0)
