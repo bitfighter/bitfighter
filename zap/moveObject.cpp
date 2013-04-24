@@ -671,7 +671,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       {
          DamageInfo damageInfo;
          damageInfo.collisionPoint = getActualPos();
-         damageInfo.damageAmount = 1.0f;     // Kill ship
+         damageInfo.damageAmount = 1.25f;     // Kill ship, take away half-health of armor
          damageInfo.damageType = DamageTypePoint;
          damageInfo.damagingObject = asteroid;
          damageInfo.impulseVector = getActualVel();
