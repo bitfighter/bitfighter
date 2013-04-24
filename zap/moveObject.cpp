@@ -985,10 +985,10 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    mInitial = stream->readFlag();
 
-   if(mInitial)     // InitialMask
+   if(mInitial)                                    // InitialMask
       setItemId(stream->readRangedU32(0, U16_MAX));
 
-   if(stream->readFlag())     // PositionMask
+   if(stream->readFlag())                          // PositionMask
    {
       Point pt;
 

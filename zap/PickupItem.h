@@ -41,8 +41,6 @@ private:
    bool mIsVisible;
    Timer mRepopTimer;
 
-   Vector<Point> mOutlinePoints;
-
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
 #endif

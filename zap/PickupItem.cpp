@@ -55,6 +55,7 @@ PickupItem::PickupItem(float radius, S32 repopDelay) : Parent(radius)
 
    mRepopDelay = repopDelay;
    mNetFlags.set(Ghostable);
+   mRadius = 18;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -168,25 +169,6 @@ void PickupItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())
       onClientPickup();
-
-
-
-
-      /////// DOES NOT BELONG HERE!!!!  TEMP TESTING ONLY !!!!!
-      static S32 rad = 18; // Should be based off something
-
-   F32 x = getPos().x;
-   F32 y = getPos().y;
-
-   mOutlinePoints.clear();
-   mOutlinePoints.reserve(4);
-
-   // Need to rebuild this every time because the object might be moving
-   mOutlinePoints.push_back(Point(x - rad, y - rad));
-   mOutlinePoints.push_back(Point(x + rad, y - rad));
-   mOutlinePoints.push_back(Point(x + rad, y + rad));
-   mOutlinePoints.push_back(Point(x - rad, y + rad));
-
 }
 
 
@@ -249,17 +231,6 @@ const Vector<Point> *PickupItem::getOutline() const
 {
    return &mOutlinePoints;
 }
-
-
-// Fills outline with a buffered outline of the object
-//void PickupItem::getOutline()
-//{
-//   S32 rad = 18; // Should be based off something
-//   Point pts[] = { Point(-rad/2, -rad/2), Point(-rad/2,  rad/2), Point( rad/2,  rad/2), Point( rad/2, -rad/2) };
-//   Vector<Point> points(pts, ARRAYSIZE(pts));
-//
-//   return points;
-//}
 
 
 #ifndef ZAP_DEDICATED
@@ -494,7 +465,7 @@ void RepairItem::renderDock()
 
 F32 RepairItem::getEditorRadius(F32 currentScale)
 {
-   return 18 * currentScale + 5;
+   return mRadius * currentScale + 5;
 }
 
 

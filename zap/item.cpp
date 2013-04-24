@@ -134,6 +134,35 @@ void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+void Item::setPos(const Point &pos)
+{
+   Parent::setPos(pos);
+
+
+   // This works for pickup items only...
+   S32 rad = mRadius; 
+
+   F32 x = getPos().x;
+   F32 y = getPos().y;
+
+   mOutlinePoints.clear();
+   mOutlinePoints.reserve(4);
+
+   // Need to rebuild this every time because the object might be moving
+   mOutlinePoints.push_back(Point(x - rad, y - rad));
+   mOutlinePoints.push_back(Point(x + rad, y - rad));
+   mOutlinePoints.push_back(Point(x + rad, y + rad));
+   mOutlinePoints.push_back(Point(x - rad, y + rad));
+}
+
+
+// This has no practical effect, but we need a signature to help the compiler figure out the signatures
+void Item::setPos(lua_State *L, S32 stackIndex)
+{
+   Parent::setPos(L, stackIndex);
+}
+
+
 F32 Item::getRadius()
 {
    return mRadius;
@@ -144,13 +173,6 @@ void Item::setRadius(F32 radius)
 {
    mRadius = radius;
 }
-
-
-// We need this function here to create a valid signature at the item level for compilation purposes; it does nothing
-//void Item::setPos(const Point &pos)
-//{
-//   Parent::setPos(pos);
-//}
 
 
 // Provide generic item rendering; will be overridden

@@ -43,10 +43,11 @@ class Item : public PointObject
    typedef PointObject Parent;
 
 private:
-   U16 mItemId;                  // Item ID, shared between client and server
+   U16 mItemId;                     // Item ID, shared between client and server
 
 protected:
    F32 mRadius;
+   Vector<Point> mOutlinePoints;    // Points representing an outline of the item, recalculated when position set
 
    enum MaskBits {
       InitialMask     = Parent::FirstFreeMask << 0,
@@ -71,7 +72,8 @@ public:
    F32 getRadius();
    virtual void setRadius(F32 radius);
 
-   //virtual void setPos(const Point &pos);
+   virtual void setPos(const Point &pos);
+   virtual void setPos(lua_State *L, S32 stackIndex);
 
    virtual void renderItem(const Point &pos);      // Generic renderer -- will be overridden
    virtual void render();
