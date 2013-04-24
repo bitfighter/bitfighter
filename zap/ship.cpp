@@ -1175,7 +1175,7 @@ void Ship::damageObject(DamageInfo *theInfo)
       // Having armor halves the damage
       if(hasArmor)
       {
-         static const F32 ARMOR_REDUCTION_FACTOR = 0.4f;
+         static const F32 ARMOR_REDUCTION_FACTOR = 0.4f;   // This affects asteroid damage
 
          Projectile* projectile = NULL;
          if(theInfo->damagingObject->getObjectTypeNumber() == BulletTypeNumber)
