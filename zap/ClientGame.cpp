@@ -662,7 +662,7 @@ void ClientGame::idle(U32 timeDelta)
       bool mShowingHelp = true;     // TODO: Set elsewhere
       if(mShowingHelp && controlObject && xxx.getCurrent() == 0)
       {
-         Rect searchRect = Rect(controlObject->getPos(), 200);
+         Rect searchRect = Rect(controlObject->getPos(), 400);
          fillVector.clear();
          mGameObjDatabase->findObjects(RepairItemTypeNumber, fillVector, searchRect);
       }
