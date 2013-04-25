@@ -2641,11 +2641,14 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can
    // save the overhead of sending a separate message which, while theoretically cleaner, will never be needed practically.
-   fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects((TestFunc)isGrenadeType, fillVector);
+   if(localClientInfo->getName() == name)
+   {
+      fillVector.clear();
+      clientGame->getGameObjDatabase()->findObjects((TestFunc)isGrenadeType, fillVector);
 
-   for(S32 i = 0; i < fillVector.size(); i++)
-      static_cast<Burst *>(fillVector[i])->mIsOwnedByLocalClient = false;
+      for(S32 i = 0; i < fillVector.size(); i++)
+         static_cast<Burst *>(fillVector[i])->mIsOwnedByLocalClient = false;
+   }
 #endif
 }
 

@@ -340,7 +340,7 @@ static const U32 S32_MAX_DIGITS = 11;                             ///< S16_MIN =
 #    define TNL_SUPPORTS_VC_INLINE_X86_ASM
 #  endif
 
-#elif defined(__ppc__)
+#elif defined(__ppc__) || defined(__PPC__)
 #  define TNL_CPU_STRING "PowerPC"
 #  define TNL_CPU_PPC
 #  define TNL_BIG_ENDIAN

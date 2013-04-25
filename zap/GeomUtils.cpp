@@ -417,7 +417,7 @@ bool circleIntersectsSegment(Point center, float radius, Point start, Point end,
    Point d = center - start;
    Point v = end - start;
 
-   if(d.len() <= radius)
+   if(d.lenSquared() <= sq(radius))
    {
       collisionTime = 0;
       return true;
