@@ -227,12 +227,6 @@ bool PickupItem::canShowHelpBubble() const
 }
 
 
-const Vector<Point> *PickupItem::getOutline() const
-{
-   return &mOutlinePoints;
-}
-
-
 #ifndef ZAP_DEDICATED
 
 EditorAttributeMenuUI *PickupItem::getAttributeMenu()

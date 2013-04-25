@@ -28,6 +28,10 @@
 
 
 #include "MathUtils.h"
+#include "Point.h"
+#include "tnlVector.h"
+#include "tnlAssert.h"
+
 
 namespace Zap {
 
@@ -85,6 +89,5 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
 
    return false;
 }
-
 
 };

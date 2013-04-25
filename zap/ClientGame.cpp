@@ -665,16 +665,28 @@ void ClientGame::idle(U32 timeDelta)
          Rect searchRect = Rect(controlObject->getPos(), 400);
          fillVector.clear();
          mGameObjDatabase->findObjects(RepairItemTypeNumber, fillVector, searchRect);
+         mGameObjDatabase->findObjects(TestItemTypeNumber,   fillVector, searchRect);
+         mGameObjDatabase->findObjects(ResourceItemTypeNumber,   fillVector, searchRect);
       }
 
       for(S32 i = 0; i < fillVector.size(); i++)
+      {
          if(fillVector[i]->getObjectTypeNumber() == RepairItemTypeNumber)
          {
-            BfObject *obj = static_cast<BfObject *>(fillVector[i]);
             mUi->addHelpMessage(HelpItemManager::RepairItemSpottedHelpItem);
             xxx.reset();
          }
-      
+         else if(fillVector[i]->getObjectTypeNumber() == TestItemTypeNumber)
+         {
+            mUi->addHelpMessage(HelpItemManager::TestItemSpottedHelpItem);
+            xxx.reset();
+         }
+         else if(fillVector[i]->getObjectTypeNumber() == ResourceItemTypeNumber)
+         {
+            mUi->addHelpMessage(HelpItemManager::ResourceItemSpottedHelpItem);
+            xxx.reset();
+         }
+      }
    }
 
    processDeleteList(timeDelta);                         // Delete any objects marked for deletion

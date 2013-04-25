@@ -58,6 +58,8 @@ private:
    void renderKeyBindingQuad(S32 y, const char *str1, InputCodeManager::BindingName binding1, 
                                     const char *str2, InputCodeManager::BindingName binding2);
 
+   Vector<Point> mResourceItemPoints, mTestItemPoints;
+
 public:
 
    // This must be kept aligned with pageHeaders[]

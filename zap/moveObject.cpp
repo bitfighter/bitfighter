@@ -26,15 +26,16 @@
 #include "moveObject.h"
 #include "gameType.h"
 #include "goalZone.h"
-#include "GeomUtils.h"
 #include "ClientInfo.h"       // To give us access to the statistics object
 #include "ship.h"
 #include "SoundSystem.h"
 #include "speedZone.h"
 #include "game.h"
 #include "gameConnection.h"
-#include "stringUtils.h"
 #include "SparkTypesEnum.h"
+
+#include "GeomUtils.h"
+#include "stringUtils.h"
 
 #include "LuaScriptRunner.h"
 
@@ -197,6 +198,8 @@ void MoveObject::setPos(S32 stateIndex, const Point &pos)
       Parent::setPos(pos);
    else
       mMoveStates.setPos(stateIndex, pos);
+
+   setOutline();
 }
 
 
@@ -2327,7 +2330,14 @@ void TestItem::idle(BfObject::IdleCallPath path)
 
 void TestItem::renderItem(const Point &pos)
 {
-   renderTestItem(pos);
+   renderTestItem(mOutlinePoints);
+}
+
+
+void TestItem::setOutline()
+{
+   mOutlinePoints.clear();
+   calcPolygonVerts(getRenderPos(), TEST_ITEM_SIDES, mRadius, 0, mOutlinePoints);
 }
 
 
@@ -2360,7 +2370,7 @@ const Vector<Point> *TestItem::getCollisionPoly() const
 {
    //for(S32 i = 0; i < 8; i++)    // 8 so that first point gets repeated!  Needed?  Maybe not
    //{
-   //   Point p = Point(60 * cos(i * Float2Pi / 7 + FloatHalfPi) + getActualPos().x, 60 * sin(i * Float2Pi / 7 + FloatHalfPi) + getActualPos().y);
+   //   Point p = Point(60 * cos(i * Float2Pi / TEST_ITEM_SIDES + FloatHalfPi) + getActualPos().x, 60 * sin(i * Float2Pi / TEST_ITEM_SIDES + FloatHalfPi) + getActualPos().y);
    //   polyPoints.push_back(p);
    //}
 
@@ -2425,21 +2435,43 @@ ResourceItem *ResourceItem::clone() const
 }
 
 
+void ResourceItem::generateOutlinePoints(const Point &pos, F32 scale, Vector<Point> &points)
+{
+   static F32 resourcePoints[] = { -20,0,  -8,-8,  0,-20,  8,-8,  20,0,  8,8,  0,20,  -8,8 };
+
+   points.reserve(ARRAYSIZE(resourcePoints) / 2);
+
+   for(S32 i = 0; i < ARRAYSIZE(resourcePoints); i+=2)
+      points.push_back(Point(resourcePoints[i] * scale + pos.x, resourcePoints[i + 1] * scale + pos.y));
+}
+
+
+void ResourceItem::setOutline()
+{
+   mOutlinePoints.clear();
+   generateOutlinePoints(getRenderPos(), 1.0, mOutlinePoints);
+}
+
+
 void ResourceItem::renderItem(const Point &pos)
 {
-   renderResourceItem(pos);
+   renderResourceItem(mOutlinePoints);
 }
 
 
 void ResourceItem::renderItemAlpha(const Point &pos, F32 alpha)
 {
-   renderResourceItem(pos, alpha);
+   renderResourceItem(mOutlinePoints, alpha);
 }
 
 
 void ResourceItem::renderDock()
 {
-   renderResourceItem(getActualPos(), .4f, 0, 1);
+   static Vector<Point> points;
+   points.clear();
+   generateOutlinePoints(getActualPos(), 0.4, points);
+
+   renderResourceItem(points);
 }
 
 

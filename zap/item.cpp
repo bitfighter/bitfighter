@@ -138,12 +138,18 @@ void Item::setPos(const Point &pos)
 {
    Parent::setPos(pos);
 
+   setOutline();
+}
 
-   // This works for pickup items only...
-   S32 rad = mRadius; 
 
+// Generates a rectangle around the item; override for a more interesting outline
+// Outlines only needed on client... could probably get away with doing nothing on the server
+void Item::setOutline()
+{
    F32 x = getPos().x;
    F32 y = getPos().y;
+
+   S32 rad = mRadius; 
 
    mOutlinePoints.clear();
    mOutlinePoints.reserve(4);
@@ -153,6 +159,12 @@ void Item::setPos(const Point &pos)
    mOutlinePoints.push_back(Point(x + rad, y - rad));
    mOutlinePoints.push_back(Point(x + rad, y + rad));
    mOutlinePoints.push_back(Point(x - rad, y + rad));
+}
+
+
+const Vector<Point> *Item::getOutline() const
+{
+   return &mOutlinePoints;
 }
 
 

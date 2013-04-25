@@ -68,10 +68,27 @@ namespace Zap
 Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 angle)
 {
    Vector<Point> outputPoly(sideCount);
-   for(F32 theta = 0; theta < FloatTau; theta += FloatTau / sideCount)
-      outputPoly.push_back(Point(center.x + cos(theta + angle) * radius, center.y + sin(theta + angle) * radius));
-
+ 
+   calcPolygonVerts(center, sideCount, radius, angle, outputPoly);   
    return outputPoly;
+}
+
+
+void calcPolygonVerts(const Point &center, S32 sides, F32 radius, F32 angle, Vector<Point> &points)
+{
+   points.reserve(sides);
+
+   F32 theta = 0;
+   F32 dTheta = FloatTau / sides;
+
+   for(S32 i = 0; i < sides; i++)
+   {
+      F32 x = center.x + cos(theta + angle) * radius;
+      F32 y = center.y + sin(theta + angle) * radius;
+
+      points.push_back(Point(x, y));
+      theta += dTheta;
+   }
 }
 
 
@@ -1498,7 +1515,6 @@ void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, 
    cornerPoints.push_back(end   - crossVec);
    cornerPoints.push_back(start - crossVec);
 }
-
 
 
 };

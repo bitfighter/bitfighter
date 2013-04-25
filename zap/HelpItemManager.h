@@ -16,6 +16,8 @@ public:
 
 enum HelpItem {
    RepairItemSpottedHelpItem,
+   TestItemSpottedHelpItem,
+   ResourceItemSpottedHelpItem,
    LoadoutChangedLoadoutZoneHelpItem,
    LoadoutChangedNoLoadoutZoneHelpItem,
 };

@@ -242,8 +242,9 @@ void renderWallEdges(const Vector<Point> &edges, const Point &offset, const Colo
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
 void renderSpeedZone(const Vector<Point> &pts, U32 time);
 
-void renderTestItem(const Point &pos, F32 alpha = 1);
 void renderTestItem(const Point &pos, S32 size, F32 alpha = 1);
+//void renderTestItem(const Point &pos, S32 size, F32 alpha = 1);
+void renderTestItem(const Vector<Point> &points, F32 alpha = 1);
 
 void renderWorm(const Point &pos);
 
@@ -253,8 +254,8 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
 void renderAsteroidSpawn(const Point &pos, S32 time);
 void renderAsteroidSpawnEditor(const Point &pos, F32 scale = 1.0);
 
-void renderResourceItem(const Point &pos, F32 alpha = 1);
-void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
+void renderResourceItem(const Vector<Point> &points, F32 alpha = 1);
+//void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
 struct PanelGeom;
 void renderCore(const Point &pos, const Color *coreColor, U32 time, 

@@ -87,6 +87,9 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
    col2 = horizMargin + canvasWidth / 4 + 45;     // +45 to make a little more room for Action col
    col3 = horizMargin + canvasWidth / 2;
    col4 = horizMargin + (canvasWidth * 3) / 4 + 45;
+
+   calcPolygonVerts(Point(0,0), 7, TestItem::TEST_ITEM_RADIUS, 0, mTestItemPoints);
+   ResourceItem::generateOutlinePoints(Point(0,0), 1.0, mResourceItemPoints);
 }
 
 
@@ -745,7 +748,7 @@ void InstructionsUserInterface::renderModulesPage()
          case 8:     // Engineer
             {
                renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
-               renderResourceItem(Point(0,0));
+               renderResourceItem(mResourceItemPoints);
             }
             break;
       }
@@ -932,11 +935,11 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
          }
 
          case 24:    // TestItem
-            renderTestItem(Point(0,0));
+            renderTestItem(mTestItemPoints);
             break;
 
          case 25:    // ResourceItem
-            renderResourceItem(Point(0,0));
+            renderResourceItem(mResourceItemPoints);
             break;
 
          case 26:    // SoccerBall

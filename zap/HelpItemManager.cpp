@@ -15,9 +15,16 @@ struct HelpItems {
 };
 
 static HelpItems helpItems[] = {
-   { RepairItemTypeNumber, { "Repair item heals your ship", NULL } },
-   { UnknownTypeNumber,    { "You've selected a new ship configuration", "Find a Loadout Zone to make the changes", NULL } },
-   { UnknownTypeNumber,    { "You've selected a new ship configuration", "This level has no Loadout Zones", "So you are basically screwed", NULL } },
+   { RepairItemTypeNumber,    { "Repair item heals your ship", NULL } },
+   { TestItemTypeNumber,      { "TestItems are just bouncy objects that don't do much", NULL } },
+   { ResourceItemTypeNumber,  { "If you have the Engineer module (only permitted on some levels)", 
+                                "ResourceItems can be used to build things", 
+                                "Otherwise, they are just bouncy objects", NULL } },
+   { UnknownTypeNumber,       { "You've selected a new ship configuration", 
+                                "Find a Loadout Zone to make the changes", NULL } },
+   { UnknownTypeNumber,       { "You've selected a new ship configuration", 
+                                "This level has no Loadout Zones", 
+                                "So you are basically screwed", NULL } },
 };
 
 

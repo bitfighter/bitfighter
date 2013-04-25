@@ -76,6 +76,7 @@ class UserInterface
 
 private:
    UIID mInternalMenuID;                     // Unique interface ID
+
    static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
    static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
 

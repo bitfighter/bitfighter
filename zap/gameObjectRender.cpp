@@ -2053,16 +2053,18 @@ void renderSpeedZone(const Vector<Point> &points, U32 time)
 }
 
 
-void renderTestItem(const Point &pos, F32 alpha)
+void renderTestItem(const Point &pos, S32 size, F32 alpha)
 {
-   renderTestItem(pos, 60, alpha);
+   Vector<Point> pts;
+   calcPolygonVerts(pos, TestItem::TEST_ITEM_SIDES, size, 0, pts);
+   renderTestItem(pts, alpha);
 }
 
 
-void renderTestItem(const Point &pos, S32 size, F32 alpha)
+void renderTestItem(const Vector<Point> &points, F32 alpha)
 {
    glColor(Colors::yellow, alpha);
-   drawPolygon(pos, 7, (F32)size, 0);
+   renderVertexArray((F32 *)&points[0], points.size(), GL_LINE_LOOP);
 }
 
 
@@ -2138,23 +2140,24 @@ void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
    glPopMatrix();
 }
 
+//
+//void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha)
+//{
+//   glPushMatrix();
+//      glTranslate(pos);
+//      glScale(scaleFactor);
+//      glColor(color == NULL ? Colors::white : *color, alpha);
+//
+//      static F32 resourcePoints[] = { -8,8,  0,20,  8,8,  20,0,  8,-8,  0,-20,  -8,-8,  -20,0 };
+//      renderVertexArray(resourcePoints, ARRAYSIZE(resourcePoints) / 2, GL_LINE_LOOP);
+//   glPopMatrix();
+//}
 
-void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha)
+
+void renderResourceItem(const Vector<Point> &points, F32 alpha)
 {
-   glPushMatrix();
-      glTranslate(pos);
-      glScale(scaleFactor);
-      glColor(color == NULL ? Colors::white : *color, alpha);
-
-      static F32 resourcePoints[] = { -8,8,  0,20,  8,8,  20,0,  8,-8,  0,-20,  -8,-8,  -20,0 };
-      renderVertexArray(resourcePoints, ARRAYSIZE(resourcePoints) / 2, GL_LINE_LOOP);
-   glPopMatrix();
-}
-
-
-void renderResourceItem(const Point &pos, F32 alpha)
-{
-   renderResourceItem(pos, 1, 0, alpha);
+   glColor(Colors::white, alpha);
+   renderVertexArray((F32 *)&points[0], points.size(), GL_LINE_LOOP);
 }
 
 

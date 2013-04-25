@@ -70,8 +70,6 @@ public:
    U32 getRepopDelay();
    void setRepopDelay(U32 delay);
 
-   const Vector<Point> *getOutline() const;
-
 #ifndef ZAP_DEDICATED
    // These four methods are all that's needed to add an editable attribute to a class...
    EditorAttributeMenuUI *getAttributeMenu();

@@ -110,6 +110,8 @@ Point shortenSegment(const Point &startPoint, const Point &endPoint, F32 lengthR
 void removeCollinearPoints(Vector<Point> &points, bool isPolygon);
 
 Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 angle = 0);
+void calcPolygonVerts(const Point &pos, S32 sides, F32 radius, F32 angle, Vector<Point> &points);
+
 
 // Returns index of points Vector closest to point
 S32 findClosestPoint(const Point &point, const Vector<Point> &points);

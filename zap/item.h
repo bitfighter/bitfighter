@@ -75,6 +75,9 @@ public:
    virtual void setPos(const Point &pos);
    virtual void setPos(lua_State *L, S32 stackIndex);
 
+   virtual void setOutline();
+   const Vector<Point> *getOutline() const;
+
    virtual void renderItem(const Point &pos);      // Generic renderer -- will be overridden
    virtual void render();
 

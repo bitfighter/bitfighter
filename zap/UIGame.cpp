@@ -496,7 +496,7 @@ void GameUserInterface::renderHelpMessages()
          yPos += FontSize + FontGap;
       }
 
-      yPos += 10;    // gap between messages
+      yPos += 10;    // Gap between messages
    }
 
    FontManager::popFontContext();

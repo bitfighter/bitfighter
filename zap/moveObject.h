@@ -514,6 +514,9 @@ class TestItem : public MoveItem
 {
    typedef MoveItem Parent;
 
+private:
+   void setOutline();
+
 public:
    explicit TestItem(lua_State *L = NULL); // Combined Lua / C++ default constructor
    virtual ~TestItem();           // Destructor
@@ -523,6 +526,7 @@ public:
    void idle(BfObject::IdleCallPath path);
 
    static const S32 TEST_ITEM_RADIUS = 60;
+   static const S32 TEST_ITEM_SIDES  =  7;
 
    void renderItem(const Point &pos);
    void damageObject(DamageInfo *theInfo);
@@ -556,6 +560,9 @@ class ResourceItem : public MountableItem
 {
    typedef MountableItem Parent; 
 
+private:
+   void setOutline();
+
 public:
    explicit ResourceItem(lua_State *L = NULL); // Combined Lua / C++ default constructor
    virtual ~ResourceItem();           // Destructor
@@ -567,7 +574,10 @@ public:
    void renderItemAlpha(const Point &pos, F32 alpha);
    bool collide(BfObject *hitObject);
    void damageObject(DamageInfo *theInfo);
-   void dismount(DismountMode dismountMode);;
+   void dismount(DismountMode dismountMode);
+
+   static void generateOutlinePoints(const Point &pos, F32 scale, Vector<Point> &points);
+
 
    TNL_DECLARE_CLASS(ResourceItem);
 
