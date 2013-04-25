@@ -103,8 +103,6 @@ public:
 class Move;
 class SoundEffect;
 
-//namespace UI { class HelpBubble; }
-
 using namespace Zap::UI;
 
 class GameUserInterface : public UserInterface
@@ -132,7 +130,6 @@ private:
    TimeLeftRenderer mTimeLeftRenderer;
    UI::FpsRenderer mFpsRenderer;
 
-   //Vector<UI::HelpBubble *> helpBubbles;
    // TODO: Make this a struct
    Vector<const Vector<string> *> mHelpMessage;
    Vector<U8> mHighlightType;
@@ -294,10 +291,6 @@ public:
    void toggleShowingObjectIds();  
    void toggleShowingMeshZones();  
    void toggleShowDebugBots();
-
-   //void addHelpBubble(BfObject *obj);
-   //void addHelpBubble(const Vector<string> *messages, const Point &pos);
-   //void removeHelpBubble(UI::HelpBubble *bubble);
 
    void addHelpText(const Vector<string> *message, U8 highlightObjectType);
 

@@ -310,9 +310,6 @@ void GameUserInterface::idle(U32 timeDelta)
 
    mFxManager.idle(timeDelta);      // Processes sparks and teleporter effects
 
-   //for(S32 i = 0; i < helpBubbles.size(); i++)
-   //   helpBubbles[i]->idle(timeDelta);
-
    for(S32 i = 0; i < mHelpTimer.size(); i++)
       if(mHelpTimer[i].update(timeDelta))
       {
@@ -511,27 +508,6 @@ void GameUserInterface::addHelpText(const Vector<string> *message, U8 highlightO
    mHelpTimer.push_back(Timer(10000));
    mHelpFading.push_back(false);
 }
-
-
-//void GameUserInterface::addHelpBubble(BfObject *obj)
-//{
-//   HelpBubble *helpBubble = new HelpBubble(obj->getHelpBubbleText(), AnchorPoint(obj->getPos(), MapAnchor), obj, this);
-//   helpBubbles.push_back(helpBubble);
-//}
-//
-//
-//void GameUserInterface::addHelpBubble(const Vector<string> *messages, const Point &pos)
-//{
-//   HelpBubble *helpBubble = new HelpBubble(messages, AnchorPoint(pos, ScreenAnchor), NULL, this);
-//   helpBubbles.push_back(helpBubble);
-//}
-//
-//
-//void GameUserInterface::removeHelpBubble(UI::HelpBubble *bubble)
-//{
-//   S32 index = helpBubbles.getIndex(bubble);
-//   helpBubbles.deleteAndErase_fast(index);
-//}
 
 
 // Returns true if player is composing a chat message
@@ -2158,10 +2134,6 @@ void GameUserInterface::renderNormal(ClientGame *game)
    }
 
    FxTrail::renderTrails();
-
-   //for(S32 i = 0; i < helpBubbles.size(); i++)
-   //   helpBubbles[i]->render(mShipPos, scaleFactX);
-
 
    getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
 
