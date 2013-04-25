@@ -586,7 +586,7 @@ void Burst::idle(IdleCallPath path)
       return;
 
    if(!exploded)
-      if(getActualVel().len() < 4.0)
+      if(getActualVel().lenSquared() < sq(4.0))
          explode(getActualPos());
 
    // Update TTL
@@ -823,7 +823,7 @@ void Mine::idle(IdleCallPath path)
       Point ipos;
       if(foundObject->getCollisionCircle(ActualState, ipos, radius))
       {
-         if((ipos - pos).len() < (radius + SensorRadius))
+         if((ipos - pos).lenSquared() < sq(radius + SensorRadius))
          {
             bool isMine = foundObject->getObjectTypeNumber() == MineTypeNumber;
             if(!isMine)

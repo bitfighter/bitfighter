@@ -28,6 +28,7 @@
 #include "gameType.h"
 #include "ship.h"
 #include "GeomUtils.h"
+#include "MathUtils.h"
 #include "game.h"
 #include "gameConnection.h"
 #include "ClientInfo.h"
@@ -954,7 +955,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
       Point objPos = foundObject->getPos();
       Point delta = objPos - pos;
 
-      if(delta.len() > outerRad)
+      if(delta.lenSquared() > sq(outerRad))
          continue;
 
       // Check if this pair of objects can damage one another
