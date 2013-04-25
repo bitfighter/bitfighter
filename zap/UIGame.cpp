@@ -315,10 +315,9 @@ void GameUserInterface::idle(U32 timeDelta)
       {
          if(mHelpFading[i])
          {
-            mHelpTimer.erase(i);
+            mHelpItems.erase(i);
             mHelpFading.erase(i);
-            mHelpMessage.erase(i);
-            mHighlightType.erase(i);
+            mHelpTimer.erase(i);
          }
          else
          {
@@ -483,14 +482,17 @@ void GameUserInterface::renderHelpMessages()
 
    FontManager::pushFontContext(FontManager::BubbleContext);
 
-   for(S32 i = 0; i < mHelpMessage.size(); i++)
+   for(S32 i = 0; i < mHelpItems.size(); i++)
    {
       F32 alpha = mHelpFading[i] ? mHelpTimer[i].getFraction() : 1;
       glColor(Colors::green, alpha);
 
-      for(S32 j = 0; j < mHelpMessage[i]->size(); j++)
+      const char **messages = mHelpItemManager.getHelpMessages(mHelpItems[i]);
+
+      // Final item in messages array will be NULL; iterate until we hit that
+      for(S32 j = 0; messages[j]; j++)
       {
-         drawCenteredString(yPos, FontSize, mHelpMessage[i]->get(j).c_str());
+         drawCenteredString(yPos, FontSize, messages[j]);
          yPos += FontSize + FontGap;
       }
 
@@ -501,10 +503,9 @@ void GameUserInterface::renderHelpMessages()
 }
 
 
-void GameUserInterface::addHelpText(const Vector<string> *message, U8 highlightObjectType)
+void GameUserInterface::addHelpMessage(HelpItemManager::HelpItem item)
 {
-   mHelpMessage.push_back(message);
-   mHighlightType.push_back(highlightObjectType);
+   mHelpItems.push_back(item);
    mHelpTimer.push_back(Timer(10000));
    mHelpFading.push_back(false);
 }
@@ -2113,18 +2114,20 @@ void GameUserInterface::renderNormal(ClientGame *game)
 
 
    // Render a higlight around any objects in our highlight type list, for help
-   // Highly inefficient... turn off when not using, and find a better way (will have no effect 99% of time)
-   if(mHighlightType.size() > 0)
+   // Not the most efficient... but will have no effect 99% of time
+   if(mHelpItems.size() > 0)
    {
       Vector<const Vector<Point> *> polygons;
       Vector<Vector<Point> > outlines;
 
-      for(S32 i = 0; i < renderObjects.size(); i++)
+      for(S32 i = 0; i < mHelpItems.size(); i++)
       {
-         S32 index = mHighlightType.getIndex(renderObjects[i]->getObjectTypeNumber());
+         if(mHelpItemManager.getAssociatedItem(mHelpItems[i]) == UnknownTypeNumber)
+            continue;
 
-         if(index != -1)
-            polygons.push_back(renderObjects[i]->getOutline());
+         for(S32 j = 0; j < renderObjects.size(); j++)
+            if(mHelpItemManager.getAssociatedItem(mHelpItems[i]) == renderObjects[j]->getObjectTypeNumber())
+               polygons.push_back(renderObjects[j]->getOutline());
       }
          
       offsetPolygons(polygons, outlines, 14);

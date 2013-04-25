@@ -32,13 +32,13 @@
 #include "voiceCodec.h"
 #include "Point.h"
 #include "game.h"
-#include "ship.h"             // For ShipModuleCount
+#include "ship.h"                // For ShipModuleCount
 #include "HelperManager.h"   
 #include "LoadoutIndicator.h"
 #include "TimeLeftRenderer.h"
 #include "FpsRenderer.h"
 #include "sparkManager.h"
-#include "AnchorPoint.h"
+#include "HelpItemManager.h"     // For HelpItem enum
 
 
 namespace Zap
@@ -131,8 +131,9 @@ private:
    UI::FpsRenderer mFpsRenderer;
 
    // TODO: Make this a struct
-   Vector<const Vector<string> *> mHelpMessage;
-   Vector<U8> mHighlightType;
+
+   HelpItemManager mHelpItemManager;
+   Vector<HelpItemManager::HelpItem> mHelpItems;
    Vector<Timer> mHelpTimer;
    Vector<bool> mHelpFading;
    void renderHelpMessages();
@@ -292,8 +293,7 @@ public:
    void toggleShowingMeshZones();  
    void toggleShowDebugBots();
 
-   void addHelpText(const Vector<string> *message, U8 highlightObjectType);
-
+   void addHelpMessage(HelpItemManager::HelpItem item);
 
    bool isShowingDebugShipCoords() const;
 

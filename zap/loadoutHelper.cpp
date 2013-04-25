@@ -25,7 +25,7 @@
 
 #include "loadoutHelper.h"
 
-#include "InputCode.h"     // For BindingName enum
+#include "InputCode.h"           // For BindingName enum
 #include "UIGame.h"
 #include "UIMenus.h"
 #include "UIManager.h"
@@ -36,6 +36,7 @@
 #include "JoystickRender.h"
 #include "config.h"
 #include "WeaponInfo.h"
+#include "HelpItemManager.h"  // For HelpItem enum
 
 #include "OpenglUtils.h"
 
@@ -225,10 +226,11 @@ void LoadoutHelper::activateHelp(UIManager *uiManager)
 
 void LoadoutHelper::onWidgetClosed()
 {
-   static string msgs[] = { "You just changed your loadout", "Enter a Loadout Zone to get your new equipment" };
-   static Vector<string> messages(msgs, ARRAYSIZE(msgs));
-   
-   getGame()->getUi()->addHelpText(&messages, UnknownTypeNumber);
+   HelpItemManager::HelpItem helpItem = getGame()->getGameType()->levelHasLoadoutZone() ? 
+                                                HelpItemManager::LoadoutChangedLoadoutZoneHelpItem : 
+                                                HelpItemManager::LoadoutChangedNoLoadoutZoneHelpItem;
+
+   getGame()->getUi()->addHelpMessage(helpItem);
 }
 
 

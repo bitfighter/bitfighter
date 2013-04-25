@@ -59,8 +59,8 @@ protected:
    static bool mInitial;     // True on initial unpack, false thereafter
 
 public:
-   explicit Item(F32 radius = 1);     // Constructor
-   virtual ~Item();          // Destructor
+   explicit Item(F32 radius = 1);   // Constructor
+   virtual ~Item();                 // Destructor
 
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
 

@@ -671,7 +671,7 @@ void ClientGame::idle(U32 timeDelta)
          if(fillVector[i]->getObjectTypeNumber() == RepairItemTypeNumber)
          {
             BfObject *obj = static_cast<BfObject *>(fillVector[i]);
-            mUi->addHelpText(obj->getHelpBubbleText(), RepairItemTypeNumber);
+            mUi->addHelpMessage(HelpItemManager::RepairItemSpottedHelpItem);
             xxx.reset();
          }
       

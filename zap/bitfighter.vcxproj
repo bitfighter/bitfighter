@@ -189,6 +189,7 @@
     <ClCompile Include="HelpBubble.cpp" />
     <ClCompile Include="HelperManager.cpp" />
     <ClCompile Include="helperMenu.cpp" />
+    <ClCompile Include="HelpItemManager.cpp" />
     <ClCompile Include="HttpRequest.cpp" />
     <ClCompile Include="Joystick.cpp" />
     <ClCompile Include="JoystickRender.cpp" />
@@ -344,6 +345,7 @@
     <ClInclude Include="GeomObject.h" />
     <ClInclude Include="HelpBubble.h" />
     <ClInclude Include="HelperManager.h" />
+    <ClInclude Include="HelpItemManager.h" />
     <ClInclude Include="HttpRequest.h" />
     <ClInclude Include="InputCodeEnum.h" />
     <ClInclude Include="Joystick.h" />
