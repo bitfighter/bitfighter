@@ -88,9 +88,6 @@ public:
    virtual bool pickup(Ship *theShip);
    virtual void onClientPickup();
 
-   bool canShowHelpBubble() const;
-   //void getOutline();
-
 	///// Lua interface
 	LUAW_DECLARE_CLASS(PickupItem);
 
@@ -133,8 +130,6 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();
-
-   Vector<string> *getHelpBubbleText() const;
 
    virtual S32 getDockRadius();
    F32 getEditorRadius(F32 currentScale);

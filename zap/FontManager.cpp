@@ -211,7 +211,7 @@ void FontManager::setFontContext(FontContext fontContext)
          setFont(FontRoman);
          return;
 
-      case BubbleContext:
+      case HelpItemContext:
       case HUDContext:
       case LevelInfoContext:
       case LoadoutIndicatorContext:

@@ -130,13 +130,7 @@ private:
    TimeLeftRenderer mTimeLeftRenderer;
    UI::FpsRenderer mFpsRenderer;
 
-   // TODO: Make this a struct
-
    HelpItemManager mHelpItemManager;
-   Vector<HelpItemManager::HelpItem> mHelpItems;
-   Vector<Timer> mHelpTimer;
-   Vector<bool> mHelpFading;
-   void renderHelpMessages();
 
 
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map

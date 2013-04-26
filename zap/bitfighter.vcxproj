@@ -186,7 +186,6 @@
     <ClCompile Include="gameStats.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="GeomObject.cpp" />
-    <ClCompile Include="HelpBubble.cpp" />
     <ClCompile Include="HelperManager.cpp" />
     <ClCompile Include="helperMenu.cpp" />
     <ClCompile Include="HelpItemManager.cpp" />
@@ -343,7 +342,6 @@
     <ClInclude Include="GameTypesEnum.h" />
     <ClInclude Include="Geometry_Base.h" />
     <ClInclude Include="GeomObject.h" />
-    <ClInclude Include="HelpBubble.h" />
     <ClInclude Include="HelperManager.h" />
     <ClInclude Include="HelpItemManager.h" />
     <ClInclude Include="HttpRequest.h" />

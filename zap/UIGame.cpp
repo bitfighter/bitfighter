@@ -64,7 +64,6 @@
 #include "Cursor.h"
 #include "CoreGame.h"
 #include "ScissorsManager.h"
-//#include "HelpBubble.h"
 
 #include "tnlEndian.h"
 
@@ -310,22 +309,7 @@ void GameUserInterface::idle(U32 timeDelta)
 
    mFxManager.idle(timeDelta);      // Processes sparks and teleporter effects
 
-   for(S32 i = 0; i < mHelpTimer.size(); i++)
-      if(mHelpTimer[i].update(timeDelta))
-      {
-         if(mHelpFading[i])
-         {
-            mHelpItems.erase(i);
-            mHelpFading.erase(i);
-            mHelpTimer.erase(i);
-         }
-         else
-         {
-            mHelpFading[i] = true;
-            mHelpTimer[i].reset(500);
-         }
-      }
-
+   mHelpItemManager.idle(timeDelta);
 
    // Update mShipPos... track this so that we can keep a fix on the ship location even if it subsequently dies
    Ship *ship = getShip(getGame()->getConnectionToServer());
@@ -426,7 +410,7 @@ void GameUserInterface::render()
       renderSuspendedMessage();
 
 
-   renderHelpMessages();
+   mHelpItemManager.renderMessages(gScreenInfo.getGameCanvasHeight() / 2 + 40);
 
    renderReticle();                       // Draw crosshairs if using mouse
    renderChatMsgs();                      // Render incoming chat and server msgs
@@ -473,41 +457,9 @@ if(mGotControlUpdate)
 }
 
 
-void GameUserInterface::renderHelpMessages()
+void GameUserInterface::addHelpMessage(HelpItemManager::HelpItem msg)
 {
-   static const S32 FontSize = 18;
-   static const S32 FontGap  = 6;
-
-   S32 yPos = gScreenInfo.getGameCanvasHeight() / 2 + 40;
-
-   FontManager::pushFontContext(FontManager::BubbleContext);
-
-   for(S32 i = 0; i < mHelpItems.size(); i++)
-   {
-      F32 alpha = mHelpFading[i] ? mHelpTimer[i].getFraction() : 1;
-      glColor(Colors::green, alpha);
-
-      const char **messages = mHelpItemManager.getHelpMessages(mHelpItems[i]);
-
-      // Final item in messages array will be NULL; iterate until we hit that
-      for(S32 j = 0; messages[j]; j++)
-      {
-         drawCenteredString(yPos, FontSize, messages[j]);
-         yPos += FontSize + FontGap;
-      }
-
-      yPos += 10;    // Gap between messages
-   }
-
-   FontManager::popFontContext();
-}
-
-
-void GameUserInterface::addHelpMessage(HelpItemManager::HelpItem item)
-{
-   mHelpItems.push_back(item);
-   mHelpTimer.push_back(Timer(10000));
-   mHelpFading.push_back(false);
+   mHelpItemManager.addHelpMessage(msg);
 }
 
 
@@ -2114,27 +2066,27 @@ void GameUserInterface::renderNormal(ClientGame *game)
 
 
    // Render a higlight around any objects in our highlight type list, for help
-   // Not the most efficient... but will have no effect 99% of time
-   if(mHelpItems.size() > 0)
+   static Vector<const Vector<Point> *> polygons;
+   polygons.clear();
+
+   const Vector<U8> *itemsToHighlight = mHelpItemManager.getItemsToHighlight();
+
+   for(S32 i = 0; i < itemsToHighlight->size(); i++)
+      for(S32 j = 0; j < renderObjects.size(); j++)
+         if(itemsToHighlight->get(i) == renderObjects[j]->getObjectTypeNumber())
+            polygons.push_back(renderObjects[j]->getOutline());
+
+   if(polygons.size() > 0)
    {
-      Vector<const Vector<Point> *> polygons;
       Vector<Vector<Point> > outlines;
 
-      for(S32 i = 0; i < mHelpItems.size(); i++)
-      {
-         if(mHelpItemManager.getAssociatedItem(mHelpItems[i]) == UnknownTypeNumber)
-            continue;
-
-         for(S32 j = 0; j < renderObjects.size(); j++)
-            if(mHelpItemManager.getAssociatedItem(mHelpItems[i]) == renderObjects[j]->getObjectTypeNumber())
-               polygons.push_back(renderObjects[j]->getOutline());
-      }
-         
       offsetPolygons(polygons, outlines, 14);
 
       for(S32 j = 0; j < outlines.size(); j++)
          renderPolygonOutline(&outlines[j], &Colors::green);
    }
+
+
 
    FxTrail::renderTrails();
 

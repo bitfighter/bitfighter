@@ -614,19 +614,6 @@ void BfObject::prepareForDock(ClientGame *game, const Point &point, S32 teamInde
 #endif
 
 
-Vector<string> *BfObject::getHelpBubbleText() const
-{
-   static Vector<string> helpBubbleText = Vector<string>();
-   return &helpBubbleText;
-}
-
-
-bool BfObject::canShowHelpBubble() const
-{
-   return true;
-}
-
-
 #ifndef ZAP_DEDICATED
 // Render selected and highlighted vertices, called from renderEditor
 void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)

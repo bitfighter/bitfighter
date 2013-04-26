@@ -425,7 +425,8 @@ bool PointGeometry::vertSelected(S32 vertIndex)
 
 const Vector<Point> *PointGeometry::getOutline() const
 {
-   TNLAssert(false, "Points do not have an inherent outline -- if you need an outline for this object, please implement an override for getOutline() in the object itself.");
+   TNLAssert(false, "Points do not have an inherent outline -- if you need an outline for this object, "
+                    "please implement an override for getOutline() in the object itself.");
    return NULL;
 }
 
@@ -596,7 +597,7 @@ void SimpleLineGeometry::selectVert(S32 vertIndex)
 
 void SimpleLineGeometry::aselectVert(S32 vertIndex)
 {
-   if (vertIndex == 1)
+   if(vertIndex == 1)
       mToSelected = true;
    else
       mFromSelected = true;
@@ -605,7 +606,7 @@ void SimpleLineGeometry::aselectVert(S32 vertIndex)
 
 void SimpleLineGeometry::unselectVert(S32 vertIndex)
 {
-   if (vertIndex == 1)
+   if(vertIndex == 1)
       mToSelected = false;
    else
       mFromSelected = false;
@@ -865,7 +866,7 @@ void PolylineGeometry::checkIfAnyVertsSelected()
 
 const Vector<Point> *PolylineGeometry::getOutline() const
 {
-   return (Vector<Point> *) &mPolyBounds;
+   return &mPolyBounds;
 }
 
 
@@ -897,6 +898,7 @@ void PolylineGeometry::packGeom(GhostConnection *connection, BitStream *stream)
 }
 
 
+// Client only, I think.  Why would a server be unpacking?
 void PolylineGeometry::unpackGeom(GhostConnection *connection, BitStream *stream)
 {
    U32 size = stream->readEnum(Geometry::MAX_POLY_POINTS) + 1;
@@ -906,6 +908,11 @@ void PolylineGeometry::unpackGeom(GhostConnection *connection, BitStream *stream
    
    for(U32 i = 0; i < size; i++)
       mPolyBounds[i].read(stream);
+
+   // If we are getting this from a packet, we can reverse the order of the points without consequence.
+   // Putting them in CCW order makes it easier for Clipper to use these points as input.
+   if(isWoundClockwise(mPolyBounds))
+      mPolyBounds.reverse();
 }
 
 

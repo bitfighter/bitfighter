@@ -71,7 +71,7 @@ public:
 
    enum FontContext {
       BigMessageContext,       // Press any key to respawn, etc.
-      BubbleContext,           // Help bubbles
+      HelpItemContext,         // In-game help messages
       LevelInfoContext,        // Display info about the level (at beginning of game, and when F2 pressed)
       MenuContext,             // Menu font (main game menus)
       HUDContext,              // General HUD text

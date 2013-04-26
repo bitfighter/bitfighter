@@ -559,8 +559,6 @@ bool ClientGame::isServer()
 
 U32 prevTimeDelta = 0;
 
-static Timer xxx(10000);
-
 void ClientGame::idle(U32 timeDelta)
 {
    Parent::idle(timeDelta);
@@ -657,35 +655,25 @@ void ClientGame::idle(U32 timeDelta)
          SoundSystem::setListenerParams(controlObject->getPos(), controlObject->getVel());
 
 
-      xxx.update(timeDelta);
       // Check to see if there are any items near the ship we need to display help for
       bool mShowingHelp = true;     // TODO: Set elsewhere
-      if(mShowingHelp && controlObject && xxx.getCurrent() == 0)
+      if(mShowingHelp && controlObject)
       {
          Rect searchRect = Rect(controlObject->getPos(), 400);
          fillVector.clear();
-         mGameObjDatabase->findObjects(RepairItemTypeNumber, fillVector, searchRect);
-         mGameObjDatabase->findObjects(TestItemTypeNumber,   fillVector, searchRect);
-         mGameObjDatabase->findObjects(ResourceItemTypeNumber,   fillVector, searchRect);
+         mGameObjDatabase->findObjects(RepairItemTypeNumber,   fillVector, searchRect);
+         mGameObjDatabase->findObjects(TestItemTypeNumber,     fillVector, searchRect);
+         mGameObjDatabase->findObjects(ResourceItemTypeNumber, fillVector, searchRect);
       }
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
          if(fillVector[i]->getObjectTypeNumber() == RepairItemTypeNumber)
-         {
             mUi->addHelpMessage(HelpItemManager::RepairItemSpottedHelpItem);
-            xxx.reset();
-         }
          else if(fillVector[i]->getObjectTypeNumber() == TestItemTypeNumber)
-         {
             mUi->addHelpMessage(HelpItemManager::TestItemSpottedHelpItem);
-            xxx.reset();
-         }
          else if(fillVector[i]->getObjectTypeNumber() == ResourceItemTypeNumber)
-         {
             mUi->addHelpMessage(HelpItemManager::ResourceItemSpottedHelpItem);
-            xxx.reset();
-         }
       }
    }
 

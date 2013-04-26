@@ -220,13 +220,6 @@ void PickupItem::onClientPickup()
 }
 
 
-// Only show help bubble when item is visible
-bool PickupItem::canShowHelpBubble() const
-{
-   return mIsVisible;
-}
-
-
 #ifndef ZAP_DEDICATED
 
 EditorAttributeMenuUI *PickupItem::getAttributeMenu()
@@ -440,15 +433,6 @@ const char *RepairItem::getPrettyNamePlural() { return "Repair Items"; }
 const char *RepairItem::getEditorHelpString() { return "Repairs damage to ships. [B]"; }
 
 S32 RepairItem::getDockRadius() { return 11; }
-
-
-Vector<string> *RepairItem::getHelpBubbleText() const
-{
-   static string help[] = { "Pick up Repair Item to heal ship" };
-   static Vector<string> helpBubbleText = Vector<string>(help, ARRAYSIZE(help));
-
-   return &helpBubbleText;
-}
 
 
 void RepairItem::renderDock()
