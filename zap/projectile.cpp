@@ -738,6 +738,11 @@ S32 Burst::lua_getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
 
 TNL_IMPLEMENT_NETOBJECT(Mine);
 
+
+const U32 Mine::FuseDelay = 100;
+const S32 Mine::SensorRadius = 50;
+
+
 // Constructor -- used when mine is planted
 Mine::Mine(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter, BurstRadius)
 {
@@ -771,8 +776,6 @@ Mine::~Mine()
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
-const U32 Mine::mFuseDelay = 100;
-
 
 void Mine::initialize(const Point &pos, Ship *planter)
 {
@@ -782,7 +785,7 @@ void Mine::initialize(const Point &pos, Ship *planter)
    mArmed = false;
    mKillString = "mine";      // Triggers special message when player killed
 
-   mFuseTimer.setPeriod(mFuseDelay);
+   mFuseTimer.setPeriod(FuseDelay);
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }

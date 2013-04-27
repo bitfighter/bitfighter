@@ -179,16 +179,15 @@ class Mine : public Burst
    typedef Burst Parent;
 
 private:
-   static const U32 mFuseDelay;
+   static const U32 FuseDelay;            // Delay of Mine explosion if exploded by another Mine
+
+   bool mArmed;
    Timer mFuseTimer;
    void initialize(const Point &pos, Ship *planter);
 
 public:
+   static const S32 SensorRadius;         // Radius of outer circle when mine is rendered
    static const S32 ArmedMask = Burst::FirstFreeMask;
-
-   static const S32 SensorRadius = 50;          // Radius of outer circle when mine is rendered
-   static const S32 InnerBlastRadius = 100;
-   static const S32 OuterBlastRadius = 250;
 
    Mine(const Point &pos, Ship *owner);   // Constructor -- used when mine is planted
    explicit Mine(lua_State *L = NULL);    // Combined Lua / C++ default constructor -- used in Lua and editor
@@ -196,7 +195,6 @@ public:
 
    Mine *clone() const;
 
-   bool mArmed;
    bool collide(BfObject *otherObj);
    void idle(IdleCallPath path);
 
