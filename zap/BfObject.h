@@ -457,6 +457,9 @@ public:
    virtual S32 lua_getGeom(lua_State *L);
 
    S32 lua_clone(lua_State *L);
+
+   S32 lua_isSelected(lua_State *L);
+   S32 lua_setSelected(lua_State *L);
 };
 
 

@@ -1300,6 +1300,8 @@ void BfObject::writeThisTeam(BitStream *stream)
    METHOD(CLASS, setGeom,        ARRAYDEF({{ PT,        END }, { GEOM, END }}), 2 ) \
    METHOD(CLASS, getGeom,        ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, clone,          ARRAYDEF({{            END }               }), 1 ) \
+   METHOD(CLASS, isSelected,     ARRAYDEF({{            END }               }), 1 ) \
+   METHOD(CLASS, setSelected,    ARRAYDEF({{ BOOL,      END }               }), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(BfObject, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(BfObject, LUA_METHODS);
@@ -1449,6 +1451,34 @@ S32 BfObject::lua_clone(lua_State *L)
 {
    TNLAssert(false, "Not yet implemented!!!");
    return 0;      // TODO: return clone -- how do we prevent leaks here?
+}
+
+
+/**
+ * @luafunc  bool BfObject::isSelected()
+ * @brief    Determine if an object is selected in the editor.
+ * @descr    This is useful for editor plugins only.
+ * @return   Returns true if the object is selected, false if not.
+ */
+S32 BfObject::lua_isSelected(lua_State *L)
+{
+   return returnBool(L, isSelected());
+}
+
+
+/**
+ * @luafunc  bool BfObject::setSelected()
+ * @brief    Determine if an object is selected in the editor.
+ * @descr    This is useful for editor plugins only.
+ * @return   Returns true if the object is selected, false if not.
+ */
+S32 BfObject::lua_setSelected(lua_State *L)
+{
+   checkArgList(L, functionArgs, "BfObject", "setSelected");
+
+   setSelected(getBool(L, 1));
+
+   return 0;
 }
 
 
