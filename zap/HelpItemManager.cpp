@@ -14,7 +14,7 @@ namespace Zap { namespace UI {
 
 
 
-static enum Priority {
+enum Priority {
    Low,
    High,
    Immediate      // Add regardless of flood control
