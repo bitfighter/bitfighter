@@ -89,7 +89,7 @@ public:
 
    virtual void onAddedToGame(Game *theGame);
 
-   static bool checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb);
+   static bool checkDeploymentPosition(const Vector<Point> &thisBounds, const GridDatabase *gb);
    void onConstructed();
 
    virtual void onDestroyed();
@@ -222,7 +222,7 @@ public:
    const Vector<Point> *getOutline();
 
    static Vector<Point> computeGeom(const Point &start, const Point &end, F32 scaleFact = 1);
-   static bool findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, 
+   static bool findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal, 
                                  Point &end, DatabaseObject **collObj);
 
    void render();
@@ -403,13 +403,13 @@ private:
 
 public:
    // Check potential deployment position
-   bool canCreateObjectAtLocation(GridDatabase *database, Ship *ship, U32 objectType);
+   bool canCreateObjectAtLocation(const GridDatabase *database, const Ship *ship, U32 objectType);
 
    bool deployEngineeredItem(ClientInfo *clientInfo, U32 objectType);  // Deploy!
    string getErrorMessage();
 
-   static bool findDeployPoint(Ship *ship, U32 objectType, Point &deployPosition, Point &deployNormal);
-   static string checkResourcesAndEnergy(Ship *ship);
+   static bool findDeployPoint(const Ship *ship, U32 objectType, Point &deployPosition, Point &deployNormal);
+   static string checkResourcesAndEnergy(const Ship *ship);
 };
 
 

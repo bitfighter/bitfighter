@@ -99,7 +99,7 @@ protected:
    void drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, const OverlayMenuItem *prevItems, S32 prevCount,
                      const char **legendText = NULL, const Color **legendColors = NULL, S32 legendCount = 0);
 
-   ClientGame *getGame();
+   ClientGame *getGame() const;
 
    static const S32 MENU_FONT_SIZE        = 15;    // Size of standard items
    static const S32 MENU_FONT_SPACING     =  7;    // Vertical gap between lines

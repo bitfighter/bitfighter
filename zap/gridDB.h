@@ -70,7 +70,7 @@ public:
 
    void initialize();
 
-   GridDatabase *getDatabase();           // Returns the database in which this object is stored, NULL if not in any database
+   GridDatabase *getDatabase() const;           // Returns the database in which this object is stored, NULL if not in any database
 
    Rect getExtent() const;
    void setExtent(const Rect &extentRect);
@@ -109,18 +109,18 @@ private:
    static U32 mQueryId;
    static U32 mCountGridDatabase;
 
-   WallSegmentManager *mWallSegmentManager;    
-
-   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
-   void findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
-   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins, bool sameQuery = false);
-
-   void fillBins(const Rect &extents, IntRect &bins);          // Helper function -- translates extents into bins to search
+   WallSegmentManager *mWallSegmentManager;
 
    Vector<DatabaseObject *> mAllObjects;
    Vector<DatabaseObject *> mGoalZones;
    Vector<DatabaseObject *> mFlags;
    Vector<DatabaseObject *> mSpyBugs;
+
+   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins) const;
+   void findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins) const;
+   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins, bool sameQuery = false) const;
+
+   void fillBins(const Rect &extents, IntRect &bins) const;    // Helper function -- translates extents into bins to search
 
 public:
    enum {
@@ -146,27 +146,27 @@ public:
    static const S32 BucketWidthBitShift = 8;    // Width/height of each bucket in pixels, in a form of 2 ^ n, 8 is 256 pixels
 
    DatabaseObject *findObjectLOS(U8 typeNumber, U32 stateIndex, bool format, const Point &rayStart, const Point &rayEnd,
-                                 float &collisionTime, Point &surfaceNormal);
+                                 float &collisionTime, Point &surfaceNormal) const;
    DatabaseObject *findObjectLOS(U8 typeNumber, U32 stateIndex, const Point &rayStart, const Point &rayEnd,
-                                 float &collisionTime, Point &surfaceNormal);
+                                 float &collisionTime, Point &surfaceNormal) const;
    DatabaseObject *findObjectLOS(TestFunc testFunc, U32 stateIndex, bool format, const Point &rayStart, const Point &rayEnd,
-                                 float &collisionTime, Point &surfaceNormal);
+                                 float &collisionTime, Point &surfaceNormal) const;
    DatabaseObject *findObjectLOS(TestFunc testFunc, U32 stateIndex, const Point &rayStart, const Point &rayEnd,
-                                 float &collisionTime, Point &surfaceNormal);
+                                 float &collisionTime, Point &surfaceNormal) const;
    bool pointCanSeePoint(const Point &point1, const Point &point2);
 
-   void findObjects(Vector<DatabaseObject *> &fillVector);     // Returns all objects in the database
-   const Vector<DatabaseObject *> *findObjects_fast() const;   // Faster than above, but results can't be modified
+   void findObjects(Vector<DatabaseObject *> &fillVector) const;     // Returns all objects in the database
+   const Vector<DatabaseObject *> *findObjects_fast() const;         // Faster than above, but results can't be modified
    const Vector<DatabaseObject *> *findObjects_fast(U8 typeNumber) const;   // Currently only works with goalZones, may be expanded in the future
 
-   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector);
-   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector) const;
+   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;
 
-   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector);
-   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents, bool sameQuery = false);
+   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector) const;
+   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents, bool sameQuery = false) const;
 
-   void findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector);
-   void findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+   void findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector) const;
+   void findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;
 
    void copyObjects(const GridDatabase *source);
 

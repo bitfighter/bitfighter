@@ -91,7 +91,7 @@ public:
    void reset();
 
    void idle(U32 timeDelta);
-   void render(S32 ypos, bool helperVisible, bool anouncementActive, F32 alpha);   // Render incoming chat msgs
+   void render(S32 ypos, bool helperVisible, bool anouncementActive, F32 alpha) const;   // Render incoming chat msgs
 
    void onChatMessageReceived(const Color &msgColor, const string &msg);
    string substitueVars(const string &str);
@@ -184,11 +184,11 @@ private:
    void updateChatMessages(U32 timeDelta);
    bool checkEnterChatInputCode(InputCode inputCode);  // Helper for key handler
 
-   void renderInputModeChangeAlert();
-   void renderTalkingClients();              // Render things related to voice chat
-   void renderDebugStatus();                 // Render things related to debugging
-   void renderChatMsgs();
-   void renderAnnouncement(S32 pos);
+   void renderInputModeChangeAlert() const;
+   void renderTalkingClients() const;        // Render things related to voice chat
+   void renderDebugStatus() const;           // Render things related to debugging
+   void renderChatMsgs() const;
+   void renderAnnouncement(S32 pos) const;
 
    struct VoiceRecorder
    {
@@ -219,7 +219,7 @@ private:
       void start();
       void stop();
       void stopNow();
-      void render();
+      void render() const;
    } mVoiceRecorder;
 
    ChatMessageDisplayer mServerMessageDisplayer;   // Messages from the server
@@ -269,17 +269,16 @@ public:
    void setViewBoundsWhileLoading(F32 lx, F32 ly, F32 ux, F32 uy);   
 
 
-   void render();                   // Render game screen
+   void render();                         // Render game screen
   
-   void renderReticle();            // Render crosshairs
-   void renderProgressBar();        // Render level-load progress bar
-   void renderLoadoutIndicators();  // Render indicators for the various loadout items
-   void renderShutdownMessage();    // Render an alert if server is shutting down
-   void renderLostConnectionMessage(); 
-   void renderSuspendedMessage();
-   void renderObjectIds();          // Render server-side object ids on client
+   void renderReticle() const;            // Render crosshairs
+   void renderProgressBar() const;        // Render level-load progress bar
+   void renderShutdownMessage() const;    // Render an alert if server is shutting down
+   void renderLostConnectionMessage() const; 
+   void renderSuspendedMessage() const;
+   void renderObjectIds() const;          // Render server-side object ids on client
 
-   bool isChatting();               // Returns true if player is composing a chat message
+   bool isChatting() const;               // Returns true if player is composing a chat message
 
 
    void toggleShowingShipCoords();

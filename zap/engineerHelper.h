@@ -58,7 +58,7 @@ public:
    void onActivated();
    bool processInputCode(InputCode inputCode);   
    void render();                
-   void renderDeploymentMarker(Ship *ship);
+   void renderDeploymentMarker(const Ship *ship);
 
    bool isChatDisabled();
    S32 getAnimationTime() const;

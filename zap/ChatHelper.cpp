@@ -440,7 +440,7 @@ bool ChatHelper::processInputCode(InputCode inputCode)
 }
 
 
-const char *ChatHelper::getChatMessage()
+const char *ChatHelper::getChatMessage() const
 {
    return mLineEditor.c_str();
 }
@@ -557,8 +557,8 @@ void ChatHelper::exitHelper()
 }
 
 
-bool ChatHelper::isMovementDisabled() { return true;  }
-bool ChatHelper::isChatDisabled()     { return false; }
+bool ChatHelper::isMovementDisabled() const { return true;  }
+bool ChatHelper::isChatDisabled()     const { return false; }
 
 
 };

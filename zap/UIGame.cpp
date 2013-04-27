@@ -464,13 +464,13 @@ void GameUserInterface::addHelpMessage(HelpItemManager::HelpItem msg)
 
 
 // Returns true if player is composing a chat message
-bool GameUserInterface::isChatting()
+bool GameUserInterface::isChatting() const
 {
    return mHelperManager.isHelperActive(HelperMenu::ChatHelperType);
 }
 
 
-void GameUserInterface::renderSuspendedMessage()
+void GameUserInterface::renderSuspendedMessage() const
 {
    static string waitMsg[] = { "", 
                                "WILL RESPAWN",
@@ -497,7 +497,7 @@ void GameUserInterface::renderSuspendedMessage()
 }
 
 
-void GameUserInterface::renderLostConnectionMessage()
+void GameUserInterface::renderLostConnectionMessage() const
 {
    GameConnection *connection = getGame()->getConnectionToServer();
 
@@ -515,7 +515,7 @@ void GameUserInterface::renderLostConnectionMessage()
 }
 
 
-void GameUserInterface::renderShutdownMessage()
+void GameUserInterface::renderShutdownMessage() const
 {
    if(mShutdownMode == None)
       return;
@@ -593,7 +593,7 @@ void GameUserInterface::cancelShutdown()
 
 
 // Draws level-load progress bar across the bottom of the screen
-void GameUserInterface::renderProgressBar()
+void GameUserInterface::renderProgressBar() const
 {
    GameType *gt = getGame()->getGameType();
    if((mShowProgressBar || mProgressBarFadeTimer.getCurrent() > 0) && gt && gt->mObjectsExpected > 0)
@@ -631,7 +631,7 @@ void GameUserInterface::renderProgressBar()
 
 
 // Draw the reticle (i.e. the mouse cursor) if we are using keyboard/mouse
-void GameUserInterface::renderReticle()
+void GameUserInterface::renderReticle() const
 {
    bool shouldRender = getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeKeyboard &&   // Reticle in keyboard mode only
                        getUIManager()->getCurrentUI()->getMenuID() == GameUI;                                    // And not when a menu is active
@@ -1171,7 +1171,7 @@ void GameUserInterface::checkForKeyboardMovementKeysInJoystickMode(InputCode inp
 
 
 // Display proper chat queue based on mMessageDisplayMode.  These displayers are configured in the constructor. 
-void GameUserInterface::renderChatMsgs()
+void GameUserInterface::renderChatMsgs() const
 {
    bool chatDisabled = !mHelperManager.isChatAllowed();
    bool announcementActive = (mAnnouncementTimer.getCurrent() != 0);
@@ -1193,7 +1193,7 @@ void GameUserInterface::renderChatMsgs()
 }
 
 
-void GameUserInterface::renderAnnouncement(S32 pos)
+void GameUserInterface::renderAnnouncement(S32 pos) const
 {
    glColor(Colors::red);
    glLineWidth(gLineWidth4);
@@ -1375,7 +1375,7 @@ void GameUserInterface::VoiceRecorder::idle(U32 timeDelta)
 }
 
 
-void GameUserInterface::VoiceRecorder::render()
+void GameUserInterface::VoiceRecorder::render() const
 {
    if(mRecordingAudio)
    {
@@ -1814,7 +1814,7 @@ void GameUserInterface::renderLevelInfo()
 
 
 // Display alert about input mode changing
-void GameUserInterface::renderInputModeChangeAlert()
+void GameUserInterface::renderInputModeChangeAlert() const
 {
    F32 alpha = 1;
 
@@ -1829,7 +1829,7 @@ void GameUserInterface::renderInputModeChangeAlert()
 }
 
 
-void GameUserInterface::renderTalkingClients()
+void GameUserInterface::renderTalkingClients() const
 {
    S32 y = 150;
 
@@ -1849,7 +1849,7 @@ void GameUserInterface::renderTalkingClients()
 }
 
 
-void GameUserInterface::renderDebugStatus()
+void GameUserInterface::renderDebugStatus() const
 {
    // When bots are frozen, render large pause icon in lower left
    if(EventManager::get()->isPaused())
@@ -1885,7 +1885,7 @@ void GameUserInterface::renderDebugStatus()
 
 
 // Show server-side object ids... using illegal reachover to obtain them!
-void GameUserInterface::renderObjectIds()
+void GameUserInterface::renderObjectIds() const
 {
    TNLAssert(gServerGame, "Will crash on non server!");
    if(!gServerGame)
@@ -2544,7 +2544,7 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 
 
 // Render any incoming player chat msgs
-void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anouncementActive, F32 alpha)
+void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anouncementActive, F32 alpha) const
 {
    // Are we in the act of transitioning between one message and another?
    bool isScrolling = (mChatScrollTimer.getCurrent() > 0);  

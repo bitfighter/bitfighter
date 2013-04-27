@@ -995,7 +995,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
 }
 
 
-void BfObject::findObjects(TestFunc objectTypeTest, Vector<DatabaseObject *> &fillVector, const Rect &ext)
+void BfObject::findObjects(TestFunc objectTypeTest, Vector<DatabaseObject *> &fillVector, const Rect &ext) const
 {
    GridDatabase *gridDB = getDatabase();
 
@@ -1004,7 +1004,7 @@ void BfObject::findObjects(TestFunc objectTypeTest, Vector<DatabaseObject *> &fi
 }
 
 
-void BfObject::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &ext)
+void BfObject::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &ext) const
 {
    GridDatabase *gridDB = getDatabase();
 
@@ -1014,7 +1014,7 @@ void BfObject::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, 
 
 
 BfObject *BfObject::findObjectLOS(U8 typeNumber, U32 stateIndex, const Point &rayStart, const Point &rayEnd,
-                                      float &collisionTime, Point &collisionNormal)
+                                      float &collisionTime, Point &collisionNormal) const
 {
    GridDatabase *gridDB = getDatabase();
 
@@ -1028,7 +1028,7 @@ BfObject *BfObject::findObjectLOS(U8 typeNumber, U32 stateIndex, const Point &ra
 
 
 BfObject *BfObject::findObjectLOS(TestFunc objectTypeTest, U32 stateIndex, const Point &rayStart, const Point &rayEnd,
-                                      float &collisionTime, Point &collisionNormal)
+                                      float &collisionTime, Point &collisionNormal) const
 {
    GridDatabase *gridDB = getDatabase();
 

@@ -73,7 +73,7 @@ void LoadoutIndicator::setModuleSecondary(ShipModule module, bool isActive)
 }
 
 
-const LoadoutTracker *LoadoutIndicator::getLoadout()
+const LoadoutTracker *LoadoutIndicator::getLoadout() const
 {
    return &mCurrLoadout;
 }

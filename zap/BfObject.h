@@ -288,8 +288,8 @@ public:
       FirstFreeMask = BIT(2)
    };
 
-   BfObject *findObjectLOS(U8 typeNumber, U32 stateIndex, const Point &start, const Point &end, float &collisionTime, Point &normal);
-   BfObject *findObjectLOS(TestFunc,      U32 stateIndex, const Point &start, const Point &end, float &collisionTime, Point &normal);
+   BfObject *findObjectLOS(U8 typeNumber, U32 stateIndex, const Point &start, const Point &end, float &collisionTime, Point &normal) const;
+   BfObject *findObjectLOS(TestFunc,      U32 stateIndex, const Point &start, const Point &end, float &collisionTime, Point &normal) const;
 
    bool controllingClientIsValid();                   // Checks if controllingClient is valid
    SafePtr<GameConnection> getControllingClient();
@@ -300,8 +300,8 @@ public:
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
-   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents);
-   void findObjects(TestFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;
+   void findObjects(TestFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;
 
    virtual S32 getRenderSortValue();
 

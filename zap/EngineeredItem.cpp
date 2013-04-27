@@ -111,7 +111,7 @@ void Engineerable::releaseResource(const Point &releasePos, GridDatabase *databa
 ////////////////////////////////////////
 
 // Returns true if deploy point is valid, false otherwise.  deployPosition and deployNormal are populated if successful.
-bool EngineerModuleDeployer::findDeployPoint(Ship *ship, U32 objectType, Point &deployPosition, Point &deployNormal)
+bool EngineerModuleDeployer::findDeployPoint(const Ship *ship, U32 objectType, Point &deployPosition, Point &deployNormal)
 {
    if(objectType == EngineeredTurret || objectType == EngineeredForceField)
    {
@@ -143,7 +143,7 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, U32 objectType, Point &
 
 
 // Check for sufficient energy and resources; return empty string if everything is ok
-string EngineerModuleDeployer::checkResourcesAndEnergy(Ship *ship)
+string EngineerModuleDeployer::checkResourcesAndEnergy(const Ship *ship)
 {
    if(!ship->isCarryingItem(ResourceItemTypeNumber))
       return "!!! Need resource item to use Engineer module";
@@ -157,7 +157,7 @@ string EngineerModuleDeployer::checkResourcesAndEnergy(Ship *ship)
 
 // Returns "" if location is OK, otherwise returns an error message
 // Runs on client and server
-bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectDatabase, Ship *ship, U32 objectType)
+bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameObjectDatabase, const Ship *ship, U32 objectType)
 {
    string msg;
 
@@ -958,7 +958,7 @@ bool EngineeredItem::isDestroyed()
 // Make sure position looks good when player deploys item with Engineer module -- make sure we're not deploying on top of
 // a wall or another engineered item
 // static method
-bool EngineeredItem::checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb)
+bool EngineeredItem::checkDeploymentPosition(const Vector<Point> &thisBounds, const GridDatabase *gb)
 {
    Vector<DatabaseObject *> foundObjects;
    Rect queryRect(thisBounds);
@@ -1799,7 +1799,7 @@ Vector<Point> ForceField::computeGeom(const Point &start, const Point &end, F32 
 
 
 // Pass in a database containing walls or wallsegments
-bool ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal,  
+bool ForceField::findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal,  
                                    Point &end, DatabaseObject **collObj)
 {
    F32 time;

@@ -69,13 +69,13 @@ public:
 
    void idle(U32 timeDelta);
 
-   void render();
-   void renderEngineeredItemDeploymentMarker(Ship *ship);
+   void render() const;
+   void renderEngineeredItemDeploymentMarker(const Ship *ship);
 
-   bool isChatAllowed();
-   bool isMovementDisabled();
-   bool isHelperActive();
-   bool isHelperActive(HelperMenu::HelperMenuType helperType);
+   bool isChatAllowed() const;
+   bool isMovementDisabled() const;
+   bool isHelperActive() const;
+   bool isHelperActive(HelperMenu::HelperMenuType helperType) const;
 
    bool processInputCode(InputCode inputCode);
 
@@ -91,8 +91,8 @@ public:
    void exitHelper(HelperMenu *helper);
    void doneClosingHelper();
 
-   F32 getDimFactor();
-   const char *getChatMessage();
+   F32 getDimFactor() const;
+   const char *getChatMessage() const;
 };
 
 

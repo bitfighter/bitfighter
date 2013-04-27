@@ -76,7 +76,7 @@ void LineEditor::clear()
 }
 
 
-bool LineEditor::isEmpty()
+bool LineEditor::isEmpty() const
 {
    return mLine.empty();
 }
@@ -124,19 +124,19 @@ void LineEditor::setPrompt(const string &prompt)
 }
 
 
-string LineEditor::getPrompt()
+string LineEditor::getPrompt() const
 {
    return mPrompt;
 }
 
 
-const char *LineEditor::c_str()
+const char *LineEditor::c_str() const
 {
    return mLine.c_str();
 }
 
 
-char LineEditor::at(U32 pos)
+char LineEditor::at(U32 pos) const
 {
    if(pos >= mLine.length())
       return 0;

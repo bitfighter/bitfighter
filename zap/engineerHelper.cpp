@@ -224,7 +224,7 @@ S32 EngineerHelper::getAnimationTime() const
 
 
 // Basically draws a red box where the ship is pointing
-void EngineerHelper::renderDeploymentMarker(Ship *ship)
+void EngineerHelper::renderDeploymentMarker(const Ship *ship)
 {
    static Point deployPosition, deployNormal;      // Reusable containers
 

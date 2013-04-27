@@ -349,7 +349,7 @@ Rect Teleporter::calcExtents()
 }
 
 
-bool Teleporter::checkDeploymentPosition(const Point &position, GridDatabase *gb, Ship *ship)
+bool Teleporter::checkDeploymentPosition(const Point &position, const GridDatabase *gb, const Ship *ship)
 {
    Rect queryRect(position, TELEPORTER_RADIUS * 2);
    Point outPoint;  // only used as a return value in polygonCircleIntersect

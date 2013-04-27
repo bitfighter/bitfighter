@@ -119,7 +119,7 @@ public:
 
    virtual bool usesEditorScreenMode();   // Returns true if the UI attempts to use entire screen like editor, false otherwise
 
-   void renderConsole();                  // Render game console
+   void renderConsole()const ;            // Render game console
    virtual void renderMasterStatus();     // Render master server connection status
 
    // Helpers to simplify dealing with key bindings
@@ -136,12 +136,12 @@ public:
    virtual void onMouseMoved();
    virtual void onMouseDragged();
 
-   void renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0, S32 style = 1);
-   void renderUnboxedMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0);
+   void renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0, S32 style = 1) const;
+   void renderUnboxedMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0) const;
 
    static void renderFancyBox(S32 boxTop, S32 boxHeight, S32 inset, Color borderColor, F32 alpha);
 
-   void dimUnderlyingUI(F32 amount = 0.75f);
+   void dimUnderlyingUI(F32 amount = 0.75f) const;
 
    static void renderDiagnosticKeysOverlay();
 

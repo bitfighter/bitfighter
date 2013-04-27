@@ -324,7 +324,7 @@ S32 HelperMenu::getMaxItemWidth(const OverlayMenuItem *items, S32 count)
 }
 
 
-ClientGame *HelperMenu::getGame()
+ClientGame *HelperMenu::getGame() const
 {
    return mClientGame;
 }

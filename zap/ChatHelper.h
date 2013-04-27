@@ -77,10 +77,10 @@ public:
    bool processInputCode(InputCode inputCode);   
    void onTextInput(char ascii);
 
-   const char *getChatMessage();
+   const char *getChatMessage() const;
 
-   bool isMovementDisabled();
-   bool isChatDisabled();
+   bool isMovementDisabled() const;
+   bool isChatDisabled() const;
 
    static void runCommand(ClientGame *game, const char *input);
 };

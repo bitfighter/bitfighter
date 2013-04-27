@@ -80,8 +80,8 @@ public:
    void deletePressed();                        // User hit Delete
    void handleBackspace(InputCode inputCode);   // Pass KEY_BACKSPACE or KEY_DELETE and it will do the right thing!
    void clear();                                // Clear the string and tab-expansion matchlist
-   char at(U32 pos);                            // Get char at pos
-   bool isEmpty();                              // Is string empty
+   char at(U32 pos) const;                      // Get char at pos
+   bool isEmpty() const;                        // Is string empty
 
    void setSecret(bool secret);
 
@@ -94,8 +94,8 @@ public:
 
    void setString(const string &str);           // Set the string
    void setPrompt(const string &prompt);
-   string getPrompt();
-   const char *c_str();                         // Return the string in c_str format
+   string getPrompt() const;
+   const char *c_str() const;                   // Return the string in c_str format
 
    void drawCursor(S32 x, S32 y, S32 fontSize);                             // Draw our cursor, assuming string is drawn at x,y
    void drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle);             // Draw our cursor, assuming string is drawn at x,y at specified angle

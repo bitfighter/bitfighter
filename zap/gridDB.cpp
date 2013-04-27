@@ -267,7 +267,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
 }
 
 
-void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector)
+void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector) const
 {
    fillVector.resize(mAllObjects.size());
 
@@ -300,7 +300,7 @@ const Vector<DatabaseObject *> *GridDatabase::findObjects_fast(U8 typeNumber) co
 }
 
 
-void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins)
+void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins) const
 {
    static Vector<U8> types;
    types.resize(1);
@@ -311,7 +311,7 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
 }
 
 
-void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins)
+void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins) const
 {
    mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
@@ -333,7 +333,7 @@ void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> 
 
 
 // Find all objects in database of type typeNumber
-void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector)
+void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector) const
 {
    // If the user is looking for a type we maintain a list for, it will be faster to use that list than to cycle through the general item list.
    TNLAssert(typeNumber != GoalZoneTypeNumber && typeNumber != FlagTypeNumber && typeNumber != SpyBugTypeNumber, 
@@ -367,7 +367,7 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
 
 
 // Translates extents into bins to search
-void GridDatabase::fillBins(const Rect &extents, IntRect &bins)
+void GridDatabase::fillBins(const Rect &extents, IntRect &bins) const
 {
    bins.minx = S32(extents.min.x) >> BucketWidthBitShift;
    bins.miny = S32(extents.min.y) >> BucketWidthBitShift;
@@ -383,7 +383,7 @@ void GridDatabase::fillBins(const Rect &extents, IntRect &bins)
 
 
 // Find all objects in &extents that are of type typeNumber
-void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents)
+void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents) const
 {
    static IntRect bins;
    fillBins(extents, bins);
@@ -392,7 +392,7 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
 }
 
 
-void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins, bool sameQuery)
+void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins, bool sameQuery) const
 {
    TNLAssert(this, "findObjects 'this' is NULL");
    if(!sameQuery)
@@ -416,7 +416,7 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
 
 
 // Find all objects in database using derived type test function
-void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector)
+void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector) const
 {
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(testFunc(mAllObjects[i]->getObjectTypeNumber()))
@@ -425,7 +425,7 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
 
 
 // Find all objects in database using derived type test function
-void GridDatabase::findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector, const Rect &extents)
+void GridDatabase::findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector, const Rect &extents) const
 {
    static IntRect bins;
    fillBins(extents, bins);
@@ -435,7 +435,7 @@ void GridDatabase::findObjects(const Vector<U8> &types, Vector<DatabaseObject *>
 
 
 // Find all objects in database using derived type test function
-void GridDatabase::findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector)
+void GridDatabase::findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector) const
 {
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(testTypes(types, mAllObjects[i]->getObjectTypeNumber()))
@@ -454,7 +454,7 @@ bool GridDatabase::testTypes(const Vector<U8> &types, U8 objectType) const
 
 
 // Find all objects in &extents derived type test function
-void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents, bool sameQuery)
+void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents, bool sameQuery) const
 {
    static IntRect bins;
    fillBins(extents, bins);
@@ -569,7 +569,7 @@ void DatabaseObject::initialize()
 //             (at least I think that's what's going on here - CE)
 DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex,
                                             const Point &rayStart, const Point &rayEnd, 
-                                            float &collisionTime, Point &surfaceNormal)
+                                            float &collisionTime, Point &surfaceNormal) const
 {
    return findObjectLOS(typeNumber, stateIndex, true, rayStart, rayEnd, collisionTime, surfaceNormal);
 }
@@ -578,7 +578,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex,
 // Format is a passthrough to polygonLineIntersect().  Will be true for most items, false for walls in editor.
 DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool format,
                                             const Point &rayStart, const Point &rayEnd,
-                                            float &collisionTime, Point &surfaceNormal)
+                                            float &collisionTime, Point &surfaceNormal) const
 {
    Rect queryRect(rayStart, rayEnd);
 
@@ -640,7 +640,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool 
 
 DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, bool format,
                                             const Point &rayStart, const Point &rayEnd, 
-                                            float &collisionTime, Point &surfaceNormal)
+                                            float &collisionTime, Point &surfaceNormal) const
 {
    Rect queryRect(rayStart, rayEnd);
 
@@ -707,7 +707,7 @@ DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, b
 
 DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex,
                                             const Point &rayStart, const Point &rayEnd,
-                                            float &collisionTime, Point &surfaceNormal)
+                                            float &collisionTime, Point &surfaceNormal) const
 {
    return findObjectLOS(testFunc, stateIndex, true, rayStart, rayEnd, collisionTime, surfaceNormal);
 }
@@ -844,7 +844,7 @@ U8 DatabaseObject::getObjectTypeNumber() const
 }
 
 
-GridDatabase *DatabaseObject::getDatabase()
+GridDatabase *DatabaseObject::getDatabase() const
 {
    return mDatabase;
 }

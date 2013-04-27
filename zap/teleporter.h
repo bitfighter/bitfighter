@@ -132,7 +132,7 @@ public:
 
    void newObjectFromDock(F32 gridSize);
 
-   static bool checkDeploymentPosition(const Point &position, GridDatabase *gb, Ship *ship);
+   static bool checkDeploymentPosition(const Point &position, const GridDatabase *gb, const Ship *ship);
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode(F32 gridSize) const;

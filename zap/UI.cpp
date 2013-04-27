@@ -186,7 +186,7 @@ void UserInterface::renderMasterStatus()
 }
 
 
-void UserInterface::renderConsole()
+void UserInterface::renderConsole() const
 {
 #ifndef BF_NO_CONSOLE
    // Temporarily disable scissors mode so we can use the full width of the screen
@@ -206,7 +206,7 @@ void UserInterface::renderConsole()
 
 extern ScreenInfo gScreenInfo;
 
-void UserInterface::renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset, S32 style)
+void UserInterface::renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset, S32 style) const
 {
    const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
@@ -274,7 +274,7 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
 }
 
 
-// This renders a semi-transparent box with two corners angled.  A fancy UI element
+// This renders a semi-transparent box with two corners angled.  A fancy UI element.
 void UserInterface::renderFancyBox(S32 boxTop, S32 boxHeight, S32 inset, Color borderColor, F32 alpha)
 {
    const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
@@ -303,7 +303,7 @@ void UserInterface::renderFancyBox(S32 boxTop, S32 boxHeight, S32 inset, Color b
 
 
 // This function could use some further cleaning; currently only used for the delayed spawn notification
-void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset)
+void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset) const
 {
    dimUnderlyingUI();
 
@@ -353,7 +353,7 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
 }
 
 
-void UserInterface::dimUnderlyingUI(F32 amount)
+void UserInterface::dimUnderlyingUI(F32 amount) const
 {
    glColor(Colors::black, amount); 
 

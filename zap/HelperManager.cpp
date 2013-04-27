@@ -98,7 +98,7 @@ void HelperManager::idle(U32 timeDelta)
 }
 
 
-void HelperManager::render()
+void HelperManager::render() const
 {
    // Higher indexed helpers render on top
    for(S32 i = 0; i < mHelperStack.size(); i++)
@@ -109,7 +109,7 @@ void HelperManager::render()
 }
 
 
-bool HelperManager::isHelperActive(HelperMenu::HelperMenuType helperType)
+bool HelperManager::isHelperActive(HelperMenu::HelperMenuType helperType) const
 {
    return mHelperStack.size() > 0 && mHelperStack.last()->getType() == helperType;
 }
@@ -122,19 +122,19 @@ void HelperManager::activateHelp(UIManager *uiManager)
 
 
 // Entering chat mode is allowed if 1) there are no helpers open; or 2) the top-most helper allows it
-bool HelperManager::isChatAllowed()
+bool HelperManager::isChatAllowed() const
 {
    return mHelperStack.size() == 0 || !mHelperStack.last()->isChatDisabled();
 }
 
 
-bool HelperManager::isMovementDisabled()
+bool HelperManager::isMovementDisabled() const
 {
    return mHelperStack.size() > 0 && mHelperStack.last()->isMovementDisabled();
 }
 
 
-bool HelperManager::isHelperActive()
+bool HelperManager::isHelperActive() const
 {
    return mHelperStack.size() > 0;
 }
@@ -230,7 +230,7 @@ void HelperManager::doneClosingHelper()
 
 
 // We will darken certain areas of the screen when the helper is active.  This computes how much.  
-F32 HelperManager::getDimFactor()
+F32 HelperManager::getDimFactor() const
 {
    static const F32 DIM    = 0.2;    
    static const F32 BRIGHT = 1.0;
@@ -289,7 +289,7 @@ void HelperManager::doExitHelper(S32 index)
 
 
 // Render potential location to deploy engineered item -- does nothing if we're not engineering
-void HelperManager::renderEngineeredItemDeploymentMarker(Ship *ship)
+void HelperManager::renderEngineeredItemDeploymentMarker(const Ship *ship)
 {
    if(mHelperStack.getIndex(&mEngineerHelper) != -1)
       mEngineerHelper.renderDeploymentMarker(ship);
@@ -297,7 +297,7 @@ void HelperManager::renderEngineeredItemDeploymentMarker(Ship *ship)
 
 
 // Return message being composed in in-game chat
-const char *HelperManager::getChatMessage()
+const char *HelperManager::getChatMessage() const
 {
    return mChatHelper.getChatMessage();
 }
