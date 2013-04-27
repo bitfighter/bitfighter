@@ -867,6 +867,14 @@ bool Mine::collide(BfObject *otherObj)
 
 void Mine::damageObject(DamageInfo *info)
 {
+   // Bursts don't explode mines unless they're within the trigger radius
+   BfObject *bfObject = info->damagingObject;
+   if(bfObject && bfObject->getObjectTypeNumber() == BurstTypeNumber)
+   {
+      if(getPos().distSquared(bfObject->getPos()) > sq(SensorRadius))
+         return;
+   }
+
    if(info->damageAmount > 0.f && !exploded)
       explode(getActualPos());
 }
