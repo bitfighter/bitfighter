@@ -179,6 +179,8 @@ class Mine : public Burst
    typedef Burst Parent;
 
 private:
+   static const U32 mFuseDelay;
+   Timer mFuseTimer;
    void initialize(const Point &pos, Ship *planter);
 
 public:
