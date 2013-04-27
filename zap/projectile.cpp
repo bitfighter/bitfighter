@@ -738,6 +738,11 @@ S32 Burst::lua_getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
 
 TNL_IMPLEMENT_NETOBJECT(Mine);
 
+
+const U32 Mine::FuseDelay = 100;
+const S32 Mine::SensorRadius = 50;
+
+
 // Constructor -- used when mine is planted
 Mine::Mine(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter, BurstRadius)
 {
@@ -780,6 +785,8 @@ void Mine::initialize(const Point &pos, Ship *planter)
    mArmed = false;
    mKillString = "mine";      // Triggers special message when player killed
 
+   mFuseTimer.setPeriod(FuseDelay);
+
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
@@ -804,6 +811,13 @@ void Mine::idle(IdleCallPath path)
 
    if(exploded || path != BfObject::ServerIdleMainLoop)
       return;
+
+   // If our fuse has gone off, count down until explode
+   if(mFuseTimer.update(mCurrentMove.time))
+   {
+      explode(getActualPos());
+      return;
+   }
 
    // And check for enemies in the area...
    Point pos = getActualPos();
@@ -859,8 +873,10 @@ bool Mine::collide(BfObject *otherObj)
 {
    if(isGhost())
       return false;  // avoid client side explode, server side don't explode
+
    if(isProjectileType(otherObj->getObjectTypeNumber()))
       explode(getActualPos());
+
    return false;
 }
 
@@ -873,6 +889,14 @@ void Mine::damageObject(DamageInfo *info)
    {
       if(getPos().distSquared(bfObject->getPos()) > sq(SensorRadius))
          return;
+   }
+
+   // If another mine explosion hit us, delay exploding slightly.  This is so an
+   // entire minefield doesn't explode at once.
+   if(bfObject && bfObject->getObjectTypeNumber() == MineTypeNumber)
+   {
+      mFuseTimer.reset();
+      return;
    }
 
    if(info->damageAmount > 0.f && !exploded)
