@@ -2009,6 +2009,11 @@ void GameUserInterface::renderNormal(ClientGame *game)
    if(ship)
       visExt = game->computePlayerVisArea(ship);
 
+   // TODO: This should not be needed here -- mPos is set elsewhere, but appears to be lagged by a frame, which 
+   //       creates a weird slightly off-center effect when moving.  This is harmless for the moment, but should be removed.
+   if(ship)
+      mShipPos.set(ship->getRenderPos());
+
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
