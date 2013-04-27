@@ -167,6 +167,19 @@ void GameUserInterface::onActivate()
    mChatMessageDisplayer2.reset();
    mChatMessageDisplayer3.reset();
 
+   mHelpItemManager.reset();
+   mHelpItemManager.queueHelpMessage(HelpItemManager::WelcomeItem);
+
+   // Queue up some initial help messages for the new users
+   GameSettings *settings = getGame()->getSettings();
+
+   if(settings->getInputCodeManager()->getInputMode() == InputModeJoystick)
+      mHelpItemManager.queueHelpMessage(HelpItemManager::ControlsJSItem);
+   else
+      mHelpItemManager.queueHelpMessage(HelpItemManager::ControlsKBItem);
+
+
+
    mHelperManager.reset();
 
    for(S32 i = 0; i < ShipModuleCount; i++)

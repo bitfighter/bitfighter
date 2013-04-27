@@ -15,6 +15,7 @@ namespace Zap { namespace UI {
 
 
 enum Priority {
+   Paced,         // These will be doled out in drips and drabs
    Low,
    High,
    Immediate      // Add regardless of flood control
@@ -45,19 +46,57 @@ static HelpItems helpItems[] = {
    { UnknownTypeNumber,      Immediate, { "You've selected a new ship configuration", 
                                           "This level has no Loadout Zones", 
                                           "So you are basically screwed", NULL } },
+
+   { UnknownTypeNumber,      Immediate, { "Wecome to Bitfighter.  I'll help you get",
+                                          "oriented and find your way around.",
+                                          "You can disable these messages in the Options menu.", NULL } },
+
+   { UnknownTypeNumber,      Paced,     { "You can control your ship with the XXX keys.",
+                                          "Aim and fire with the mouse.", NULL } },
+
+   { UnknownTypeNumber,      Paced,     { "You can control your ship with the left joystick.",
+                                          "Aim and fire with the right.", NULL } }
+
 };
 
 
 // Constructor
 HelpItemManager::HelpItemManager()
 {
-   mFloodControl.setPeriod(10 * 1000);      // Generally, don't show items more frequently than this, in ms
+   mFloodControl.setPeriod(10 * 1000);       // Generally, don't show items more frequently than this, in ms
+   mPacedTimer.setPeriod(15 * 1000);         // How often to show a new paced message
+   mInitialDelayTimer.setPeriod(4 * 1000);   // Show nothing until this timer has expired
+
+   mDisabled = false;
+}
+
+
+void HelpItemManager::reset()
+{
+   mInitialDelayTimer.reset();               // Provide a short breather before displaying any help items
 }
 
 
 void HelpItemManager::idle(U32 timeDelta)
 {
+   mInitialDelayTimer.update(timeDelta);
+
+   if(mInitialDelayTimer.getCurrent() > 0)
+      return;
+
    mFloodControl.update(timeDelta);
+   mPacedTimer.update(timeDelta);
+
+
+   // Add queued items
+   if(mPacedTimer.getCurrent() == 0 && mQueuedItems.size() > 0)
+   {
+      HelpItem queuedMessage = mQueuedItems[0];
+      mQueuedItems.erase(0);
+
+      addHelpMessage(queuedMessage);
+      mPacedTimer.reset();
+   }
 
    for(S32 i = 0; i < mHelpTimer.size(); i++)
       if(mHelpTimer[i].update(timeDelta))
@@ -84,6 +123,9 @@ void HelpItemManager::renderMessages(S32 yPos) const
    static const S32 FontSize = 18;
    static const S32 FontGap  = 6;
 
+   if(mInitialDelayTimer.getCurrent() > 0)
+      return;
+
    FontManager::pushFontContext(FontManager::HelpItemContext);
 
    for(S32 i = 0; i < mHelpItems.size(); i++)
@@ -108,8 +150,18 @@ void HelpItemManager::renderMessages(S32 yPos) const
 }
 
 
+void HelpItemManager::queueHelpMessage(HelpItem msg)
+{
+    mQueuedItems.push_back(msg);
+}
+
+
 void HelpItemManager::addHelpMessage(HelpItem msg)
 {
+   // Nothing to do if we are disabled
+   if(mDisabled)
+      return;
+
    // Make sure we don't end up with a duplicate message -- should we renew the timer in this instance?
    if(mHelpItems.contains(msg))
       return;
@@ -146,6 +198,19 @@ void HelpItemManager::buildItemsToHighlightList()
          mItemsToHighlight.push_back(assItem);
    }
 }
+
+
+void HelpItemManager::enable()
+{
+   mDisabled = false;
+}
+
+
+void HelpItemManager::disable()
+{
+   mDisabled = true;
+}
+
 
 
 } } // Nested namespace

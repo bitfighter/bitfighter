@@ -132,9 +132,7 @@ private:
 
    HelpItemManager mHelpItemManager;
 
-
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
-
 
    Timer mShutdownTimer;
 

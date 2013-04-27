@@ -22,13 +22,22 @@ enum HelpItem {
    ResourceItemSpottedHelpItem,
    LoadoutChangedLoadoutZoneHelpItem,
    LoadoutChangedNoLoadoutZoneHelpItem,
+   WelcomeItem,
+   ControlsKBItem,
+   ControlsJSItem,
 };
 
 private:
    Vector<HelpItem> mHelpItems;
+   Vector<HelpItem> mQueuedItems;
    Vector<Timer>    mHelpTimer;
    Vector<bool>     mHelpFading;
    Vector<U8>       mItemsToHighlight;
+
+   Timer mPacedTimer;
+   Timer mInitialDelayTimer;
+
+   bool mDisabled;
 
    Timer mFloodControl;
 
@@ -37,10 +46,16 @@ private:
 public:
    HelpItemManager();   // Constructor
 
+   void reset();
+
    void idle(U32 timeDelta);
    void renderMessages(S32 yPos) const;
 
+   void queueHelpMessage(HelpItem msg);      
    void addHelpMessage(HelpItem msg);
+
+   void enable();
+   void disable();
 
 
    const Vector<U8> *getItemsToHighlight() const;
