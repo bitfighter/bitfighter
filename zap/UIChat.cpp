@@ -531,7 +531,7 @@ void ChatUserInterface::onActivate()
       mPlayersInGlobalChat.clear();
 
    mRenderUnderlyingUI = true;
-   mDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
+   mDisableShipKeyboardInput = true;       // Prevent keystrokes from getting to game
 }
 
 

@@ -144,7 +144,7 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
    // the one used by the game.  If we don't we'll clobber the editor's copy, and we'll get crashes in the team definition (F2) menu.
    setActiveTeamManager(&mTeamManager);
 
-   mClientInfo->setRole(ClientInfo::RoleOwner);                        // Local connection is always owner
+   mClientInfo->setRole(ClientInfo::RoleOwner);       // Local connection is always owner
 
    getUIManager()->activate(GameUI);
    GameConnection *gameConnection = new GameConnection(this);
@@ -179,14 +179,13 @@ void ClientGame::joinRemoteGame(Address remoteAddress, bool isFromMaster)
 
    bool useArrangedConnection = isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected;
 
+   getUIManager()->activate(GameUI);
+
    if(useArrangedConnection)  // Request arranged connection
-   {
       connToMaster->requestArrangedConnection(remoteAddress);
-      getUIManager()->activate(GameUI);
-   }
+
    else                       // Try a direct connection
    {
-      getUIManager()->activate(GameUI);
       GameConnection *gameConnection = new GameConnection(this);
 
       setConnectionToServer(gameConnection);

@@ -76,7 +76,7 @@ public:
    ControlObjectConnection();
 
    void setControlObject(BfObject *theObject);
-   BfObject *getControlObject();
+   BfObject *getControlObject() const;
    U32 getControlCRC();
 
    void addPendingMove(Move *theMove);

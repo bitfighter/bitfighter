@@ -75,7 +75,7 @@ void ControlObjectConnection::packetReceived(PacketNotify *notify)
 }
 
 
-BfObject *ControlObjectConnection::getControlObject()
+BfObject *ControlObjectConnection::getControlObject() const
 {
    return controlObject;
 }

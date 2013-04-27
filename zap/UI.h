@@ -89,7 +89,7 @@ private:
    void reactivate();
 
 protected:
-   static bool mDisableShipKeyboardInput;    // Disable ship movement while user is in menus
+   bool mDisableShipKeyboardInput;           // Disable ship movement while user is in menus
    void setMenuID(UIID menuID);              // Set interface's name
 
 public:

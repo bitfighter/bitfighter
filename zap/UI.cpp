@@ -71,15 +71,12 @@ extern Vector<ClientGame *> gClientGames;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Declare statics
-bool UserInterface::mDisableShipKeyboardInput = true;
-
-
 // Constructor
 UserInterface::UserInterface(ClientGame *clientGame)
 {
    mClientGame = clientGame;
    mTimeSinceLastInput = 0;
+   mDisableShipKeyboardInput = true;
 
    mInternalMenuID = InvalidUI;
 }

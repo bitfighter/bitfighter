@@ -258,7 +258,7 @@ void GameUserInterface::doneLoadingLevel()
 }
 
 
-static Ship *getShip(GameConnection *conn)
+static Ship *getShip(const GameConnection *conn)
 {
    if(conn && conn->getControlObject())
    {
