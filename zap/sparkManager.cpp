@@ -28,7 +28,6 @@
 #include "gameObjectRender.h"
 #include "Colors.h"
 #include "config.h"
-#include "ClientGame.h"    // For getCommanderZoomFraction()
 
 #include "OpenglUtils.h"
 #include "MathUtils.h"

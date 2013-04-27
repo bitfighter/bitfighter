@@ -1112,7 +1112,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       }
    }     
    else if(checkInputCode(settings, InputCodeManager::BINDING_CMDRMAP, inputCode))
-      getGame()->zoomCommanderMap();
+      getGame()->toggleCommanderMap();
 
    else if(checkInputCode(settings, InputCodeManager::BINDING_SCRBRD, inputCode))
    {     // (braces needed)
@@ -2115,8 +2115,6 @@ void GameUserInterface::renderCommander(ClientGame *game)
    if(mShowProgressBar)
       return;
 
-   F32 zoomFrac = game->getCommanderZoomFraction();
-
    const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
@@ -2139,15 +2137,17 @@ void GameUserInterface::renderCommander(ClientGame *game)
    Ship *ship = getShip(game->getConnectionToServer());
 
    //mShipPos = ship ? ship->getRenderPos()                 : Point(0,0);
-   visSize  = ship ? game->computePlayerVisArea(ship) * 2 : worldExtents;
+   visSize = ship ? game->computePlayerVisArea(ship) * 2 : worldExtents;
 
-   Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
 
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
    glTranslatef(gScreenInfo.getGameCanvasWidth() * 0.5f, gScreenInfo.getGameCanvasHeight() * 0.5f, 0);    
 
+   F32 zoomFrac = game->getCommanderZoomFraction();
+
+   Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
    glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
 
    Point offset = (game->getWorldExtents()->getCenter() - mShipPos) * zoomFrac + mShipPos;

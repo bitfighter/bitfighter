@@ -1768,7 +1768,6 @@ void GameConnection::onConnectionEstablished_client()
 #ifndef ZAP_DEDICATED
    setConnectionSpeed(mClientGame->getSettings()->getIniSettings()->connectionSpeed);  // set speed depending on client
    mClientGame->setInCommanderMap(false);       // Start game in regular mode
-   mClientGame->clearZoomDelta();               // No in zoom effect
    setGhostFrom(false);
    setGhostTo(true);
    logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());

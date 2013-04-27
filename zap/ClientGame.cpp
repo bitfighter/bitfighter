@@ -108,7 +108,8 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    mGameIsRunning         = true;      // Only matters when game is suspended
    mSeenTimeOutMessage    = false;
 
-   mCommanderZoomDelta = 0;
+   // Transition time between regular map and commander's map; in ms, higher = slower
+   mCommanderZoomDelta.setPeriod(350);
 
    mRemoteLevelDownloadFilename = "downloaded.level";
 
@@ -254,9 +255,6 @@ void ClientGame::startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineer
    mObjectsLoaded = 0;              // Reset item counter
    clearSparks();
 
-   //setInCommanderMap(true);       // If we change here, need to tell the server we are in this mode
-   //resetZoomDelta();
-
    mUi->startLoadingLevel(lx, ly, ux, uy, engineerEnabled);
 }
 
@@ -265,9 +263,6 @@ void ClientGame::doneLoadingLevel()
 {
    computeWorldObjectExtents();              // Make sure our world extents reflect all the objects we've loaded
    Barrier::prepareRenderingGeometry(this);  // Get walls ready to render
-
-   //setInCommanderMap(false);               // Start game in regular mode, If we change here, need to tell the server we are in this mode. Map can change while in commander map.
-   //clearZoomDelta();                       // No in zoom effect
 
    mUi->doneLoadingLevel();
 }
@@ -573,25 +568,10 @@ void ClientGame::idle(U32 timeDelta)
 
    computeWorldObjectExtents();
 
-   if(!mInCommanderMap && mCommanderZoomDelta != 0)               // Zooming into normal view
-   {
-      if(timeDelta > mCommanderZoomDelta)
-         mCommanderZoomDelta = 0;
-      else
-         mCommanderZoomDelta -= timeDelta;
+   if(mCommanderZoomDelta.getCurrent() > 0)               
+      mUi->onMouseMoved();     // Keep ship pointed towards mouse cmdrs map zoom transition
 
-      mUi->onMouseMoved();     // Keep ship pointed towards mouse
-   }
-   else if(mInCommanderMap && mCommanderZoomDelta != CommanderMapZoomTime)    // Zooming out to commander's map
-   {
-      mCommanderZoomDelta += timeDelta;
-
-      if(mCommanderZoomDelta > CommanderMapZoomTime)
-         mCommanderZoomDelta = CommanderMapZoomTime;
-
-      mUi->onMouseMoved();  // Keep ship pointed towards mouse
-   }
-   // else we're not zooming in or out, which is most of the time
+   mCommanderZoomDelta.update(timeDelta);
 
 
    Move *theMove = mUi->getCurrentMove();       // Get move from keyboard input
@@ -1562,9 +1542,12 @@ Ship *ClientGame::findShip(const StringTableEntry &clientName)
 }
 
 
-void ClientGame::zoomCommanderMap()
+// Toggles commander's map activation status
+void ClientGame::toggleCommanderMap()
 {
    mInCommanderMap = !mInCommanderMap;
+   mCommanderZoomDelta.invert();
+
    if(mInCommanderMap)
       SoundSystem::playSoundEffect(SFXUICommUp);
    else
@@ -1604,12 +1587,13 @@ bool ClientGame::getInCommanderMap()
 void ClientGame::setInCommanderMap(bool inCommanderMap)
 {
    mInCommanderMap = inCommanderMap;
+   mCommanderZoomDelta.clear();
 }
 
 
 F32 ClientGame::getCommanderZoomFraction() const
 {
-   return mCommanderZoomDelta / F32(CommanderMapZoomTime);
+   return mInCommanderMap ? 1 - mCommanderZoomDelta.getFraction() : mCommanderZoomDelta.getFraction();
 }
 
 
@@ -1628,7 +1612,7 @@ Point ClientGame::worldToScreenPoint(const Point *point) const
 
    Point position = ship->getRenderPos();    // Ship's location (which will be coords of screen's center)
    
-   if(mCommanderZoomDelta)    // In commander's map, or zooming in/out
+   if(mInCommanderMap || mCommanderZoomDelta.getCurrent() > 0)    // In commander's map, or zooming in/out
    {
       F32 zoomFrac = getCommanderZoomFraction();
       Point worldExtents = mWorldExtents.getExtents();
@@ -1662,18 +1646,6 @@ Point ClientGame::worldToScreenPoint(const Point *point) const
 }
 
 
-void ClientGame::resetZoomDelta()
-{
-   mCommanderZoomDelta = CommanderMapZoomTime;
-}
-
-
-void ClientGame::clearZoomDelta()
-{
-   mCommanderZoomDelta = 0;
-}
-
-
 void ClientGame::render()
 {
    UIID currentUI = mUIManager->getCurrentUI()->getMenuID();
@@ -1682,7 +1654,8 @@ void ClientGame::render()
    if(currentUI != GameUI && !mUIManager->cameFrom(GameUI))
       return;
 
-   if(mCommanderZoomDelta > 0)
+   // We render the cmdrs map during the transition
+   if(mInCommanderMap || mCommanderZoomDelta.getCurrent() > 0)
       mUi->renderCommander(this);
    else
       mUi->renderNormal(this);

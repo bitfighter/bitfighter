@@ -52,12 +52,10 @@ class ClientGame : public Game
    typedef Game Parent;
 
 private:
-   static const S32 CommanderMapZoomTime = 350;    // Transition time between regular map and commander's map; in ms, higher = slower
-
    SafePtr<GameConnection> mConnectionToServer; // If this is a client game, this is the connection to the server
-   bool mInCommanderMap;
 
-   U32 mCommanderZoomDelta;
+   bool mInCommanderMap;
+   Timer mCommanderZoomDelta;
 
    Timer mScreenSaverTimer;
    void supressScreensaver();
@@ -135,11 +133,9 @@ public:
 
    void render();          // Delegates to renderNormal, renderCommander, or renderSuspended, as appropriate
 
-   void resetZoomDelta();
-   void clearZoomDelta();
    bool isServer();
    void idle(U32 timeDelta);
-   void zoomCommanderMap();
+   void toggleCommanderMap();
 
    Ship *findShip(const StringTableEntry &clientName);
 
