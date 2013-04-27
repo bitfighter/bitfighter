@@ -96,15 +96,15 @@ public:
 
    UserInterfaceData *mUserInterfaceData;
 
-   bool isConnectedToServer();
+   bool isConnectedToServer() const;
 
-   GameConnection *getConnectionToServer();
+   GameConnection *getConnectionToServer() const;
    void setConnectionToServer(GameConnection *connection);
 
-   ClientInfo *getClientInfo();
+   ClientInfo *getClientInfo() const;
 
-   ClientInfo *getLocalRemoteClientInfo();
-   Ship *getLocalShip();
+   ClientInfo *getLocalRemoteClientInfo() const;
+   Ship *getLocalShip() const;
 
    string getPlayerName() const;
    string getPlayerPassword() const;
@@ -160,9 +160,9 @@ public:
    void onPlayerQuit(const StringTableEntry &name);
 
    void setSpawnDelayed(bool spawnDelayed);
-   bool isSpawnDelayed();
+   bool isSpawnDelayed() const;
    void undelaySpawn();
-   F32 getUIFadeFactor();
+   F32 getUIFadeFactor() const;
 
    // Some FxManager passthroughs
    void clearSparks();
@@ -182,7 +182,7 @@ public:
 
 
    void requestSpawnDelayed();
-   U32 getReturnToGameDelay();
+   U32 getReturnToGameDelay() const;
 
    void deleteLevelGen(LuaLevelGenerator *levelgen); 
 

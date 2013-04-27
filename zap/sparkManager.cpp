@@ -119,7 +119,7 @@ void FxManager::DebrisChunk::idle(U32 timeDelta)
 }
 
 
-void FxManager::DebrisChunk::render()
+void FxManager::DebrisChunk::render() const
 {
    glPushMatrix();
 
@@ -150,7 +150,7 @@ void FxManager::TextEffect::idle(U32 timeDelta)
 }
 
 
-void FxManager::TextEffect::render()
+void FxManager::TextEffect::render() const
 {
    F32 alpha = 1;
    if(ttl < 300)
@@ -300,7 +300,7 @@ void FxManager::idle(U32 timeDelta)
 }
 
 
-void FxManager::render(S32 renderPass, F32 commanderZoomFraction)
+void FxManager::render(S32 renderPass, F32 commanderZoomFraction) const
 {
    // The teleporter effects should render under the ships and such
    if(renderPass == 0)
@@ -467,7 +467,7 @@ void FxTrail::idle(U32 timeDelta)
 }
 
 
-void FxTrail::render()
+void FxTrail::render() const
 {
    // Largest node size found was 15; I chose buffer of 32
    static F32 FxTrailVertexArray[64];     // 2 coordinates per node

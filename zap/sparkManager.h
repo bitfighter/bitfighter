@@ -58,7 +58,7 @@ class FxManager
       F32 rotation;
 
       void idle(U32 timeDelta);
-      void render();
+      void render() const;
    };
 
    Vector<DebrisChunk> mDebrisChunks;
@@ -74,7 +74,7 @@ class FxManager
       S32 ttl;    // Milliseconds
       
       void idle(U32 timeDelta);
-      void render();
+      void render() const;
    };
 
    Vector<TextEffect> mTextEffects;
@@ -102,7 +102,7 @@ public:
    void emitTeleportInEffect(const Point &pos, U32 type);
 
    void idle(U32 timeDelta);
-   void render(S32 renderPass, F32 commanderZoomFraction);
+   void render(S32 renderPass, F32 commanderZoomFraction) const;
    void clearSparks();
 };
 
@@ -137,7 +137,7 @@ public:
 
    void idle(U32 timeDelta);
 
-   void render();
+   void render() const;
 
    void reset();
 

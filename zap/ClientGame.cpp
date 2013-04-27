@@ -228,13 +228,13 @@ void ClientGame::onConnectedToMaster()
 }
 
 
-bool ClientGame::isConnectedToServer()
+bool ClientGame::isConnectedToServer() const
 {
    return mConnectionToServer.isValid() && mConnectionToServer->getConnectionState() == NetConnection::Connected;
 }
 
 
-GameConnection *ClientGame::getConnectionToServer()
+GameConnection *ClientGame::getConnectionToServer() const
 {
    return mConnectionToServer;
 }
@@ -268,20 +268,20 @@ void ClientGame::doneLoadingLevel()
 }
 
 
-ClientInfo *ClientGame::getClientInfo()
+ClientInfo *ClientGame::getClientInfo() const
 {
    return mClientInfo;
 }
 
 
-ClientInfo *ClientGame::getLocalRemoteClientInfo()
+ClientInfo *ClientGame::getLocalRemoteClientInfo() const
 {
    return mLocalRemoteClientInfo;
 }
 
 
-Ship *ClientGame::getLocalShip()
-{
+Ship *ClientGame::getLocalShip() const
+{ 
    GameConnection *gc = getConnectionToServer();
 
    if(gc)
@@ -394,7 +394,7 @@ void ClientGame::undelaySpawn()
 }
 
 
-F32 ClientGame::getUIFadeFactor()
+F32 ClientGame::getUIFadeFactor() const
 {
    return 1 - mTimeToSuspend.getFraction();     
 }
@@ -402,7 +402,10 @@ F32 ClientGame::getUIFadeFactor()
 
 
 // Provide access to these annoying bools
-bool ClientGame::isSpawnDelayed()         { return getClientInfo()->isSpawnDelayed();          }
+bool ClientGame::isSpawnDelayed() const
+{ 
+   return getClientInfo()->isSpawnDelayed();
+}
 
 
 // Tells the server to spawn delay us... server may incur a penalty when we unspawn
@@ -412,7 +415,7 @@ void ClientGame::requestSpawnDelayed()
 }
 
 
-U32 ClientGame::getReturnToGameDelay()
+U32 ClientGame::getReturnToGameDelay() const
 {
    return mClientInfo->getReturnToGameTime();
 }

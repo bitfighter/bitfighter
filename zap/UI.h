@@ -100,7 +100,7 @@ public:
    UIID getMenuID() const;                   // Retrieve interface's name
    UIID getPrevMenuID() const;               // Retrieve previous interface's name
 
-   ClientGame *getGame();
+   ClientGame *getGame() const;
 
    UIManager *getUIManager() const;
 

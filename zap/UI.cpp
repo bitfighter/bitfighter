@@ -91,7 +91,7 @@ UserInterface::~UserInterface()
 }
 
 
-ClientGame *UserInterface::getGame()
+ClientGame *UserInterface::getGame() const
 {
    return mClientGame;
 }

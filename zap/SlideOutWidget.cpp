@@ -135,7 +135,7 @@ void SlideOutWidget::setAnimationTime(U32 period)
 
 extern ScreenInfo gScreenInfo;
 
-void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor)
+void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor) const
 {
    const S32 CORNER_SIZE = 15;      
 
