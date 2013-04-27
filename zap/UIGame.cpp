@@ -2019,10 +2019,9 @@ void GameUserInterface::renderNormal(ClientGame *game)
    // Put (0,0) at the center of the screen
    glTranslatef(gScreenInfo.getGameCanvasWidth() / 2.f, gScreenInfo.getGameCanvasHeight() / 2.f, 0);       
 
+   // These scaling factors are different when changing the visible area by equiping the sensor module
    F32 scaleFactX = (gScreenInfo.getGameCanvasWidth()  / 2) / visExt.x;
    F32 scaleFactY = (gScreenInfo.getGameCanvasHeight() / 2) / visExt.y;
-
-   TNLAssert(scaleFactX == scaleFactY, "I would expect these to be equal to avoid distortion!");
 
    glScalef(scaleFactX, scaleFactY, 1);
    glTranslatef(-mShipPos.x, -mShipPos.y, 0);
