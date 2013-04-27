@@ -146,7 +146,6 @@ extern void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<Safe
 
 extern void renderShipCoords(const Point &coords, bool localShip, F32 alpha);
 
-extern void renderAimVector();
 extern void drawFourArrows(const Point &pos);
 
 extern void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha, 

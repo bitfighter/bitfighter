@@ -246,8 +246,8 @@ public:
 
    void setEngineeredTeleporter(Teleporter *teleporter);
    Teleporter *getEngineeredTeleporter();
-   F32 getSensorZoomFraction();
-   Point getAimVector();
+   F32 getSensorZoomFraction() const;
+   Point getAimVector() const;
 
    void deploySpybug();
 

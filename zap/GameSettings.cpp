@@ -1168,12 +1168,6 @@ bool GameSettings::getStarsInDistance() const
 }
 
 
-bool GameSettings::getEnableExperimentalAimMode() const
-{
-   return mIniSettings.enableExperimentalAimMode;
-}
-
-
 // Accessor methods
 U32 GameSettings::getSimulatedStutter()
 {

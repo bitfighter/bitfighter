@@ -738,28 +738,6 @@ void drawFourArrows(const Point &pos)
 
 }
 
-// This is a line extending from the ship to give joystick players some idea of where they're aiming
-void renderAimVector()
-{
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
-   F32 vertices[] = {
-         0, 50,   // Gradient from here...
-         0, 150,  // ...to here
-         0, 150,  // Solid from here on out
-         0, 1000  // 1000 is pretty aribitrary!
-   };
-
-   F32 colors[] = {
-         0, 1, 0, 0,
-         0, 1, 0, 0.5,
-         0, 1, 0, 0.5,
-         0, 1, 0, 0.5
-   };
-
-   renderColorVertexArray(vertices, colors, 4, GL_LINES);
-}
-
 
 // TODO: Document me better!  Especially the nerdy math stuff
 void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha,

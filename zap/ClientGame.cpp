@@ -490,8 +490,6 @@ void ClientGame::deleteLevelGen(LuaLevelGenerator *levelgen)
 }
 
 
-extern bool gShowAimVector;
-
 static void joystickUpdateMove(GameSettings *settings, Move *theMove)
 {
    // One of each of left/right axis and up/down axis should be 0 by this point
@@ -518,34 +516,25 @@ static void joystickUpdateMove(GameSettings *settings, Move *theMove)
    //         );
 
 
-   // Goofball implementation of enableExperimentalAimMode here replicates old behavior when setting is disabled
-
    //logprintf("XY from shoot axes. x: %f, y: %f", x, y);
 
-   Point p(Joystick::JoystickInputData[ShootAxesRight].value - Joystick::JoystickInputData[ShootAxesLeft].value, Joystick::JoystickInputData[ShootAxesDown].value - Joystick::JoystickInputData[ShootAxesUp].value);
-   F32 plen = p.len();
+   Point p(Joystick::JoystickInputData[ShootAxesRight].value - Joystick::JoystickInputData[ShootAxesLeft].value, 
+           Joystick::JoystickInputData[ShootAxesDown].value  - Joystick::JoystickInputData[ShootAxesUp].value);
 
-   F32 maxplen = max(fabs(p.x), fabs(p.y));
+   F32 fact =  p.len();
 
-   F32 fact = settings->getEnableExperimentalAimMode() ? maxplen : plen;
-
-   if(fact > (settings->getEnableExperimentalAimMode() ? 0.95 : 0.66f))    // It requires a large movement to actually fire...
+   if(fact > 0.66f)        // It requires a large movement to actually fire...
    {
       theMove->angle = atan2(p.y, p.x);
       theMove->fire = true;
-      gShowAimVector = true;
    }
-   else if(fact > 0.25)   // ...but you can change aim with a smaller one
+   else if(fact > 0.25)    // ...but you can change aim with a smaller one
    {
       theMove->angle = atan2(p.y, p.x);
       theMove->fire = false;
-      gShowAimVector = true;
    }
    else
-   {
       theMove->fire = false;
-      gShowAimVector = false;
-   }
 }
 
 

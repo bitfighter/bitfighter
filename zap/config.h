@@ -192,8 +192,6 @@ public:
    bool verboseHelpMessages;        // If true, we'll show more handholding messages
    bool showKeyboardKeys;           // True if we show the keyboard shortcuts in joystick mode
 
-   bool enableExperimentalAimMode;  // True if we want to show an aim vector in joystick mode
-
    bool allowGetMap;                // allow '/GetMap' command
    bool allowDataConnections;       // Specify whether data connections are allowed on this computer
 

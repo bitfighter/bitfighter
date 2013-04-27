@@ -187,8 +187,6 @@ namespace Zap
 md5wrapper md5;
 
 
-bool gShowAimVector = false;     // Do we render an aim vector?  This should probably not be a global, but until we find a better place for it...
-
 CIniFile gINI("dummy");          // This is our INI file.  Filename set down in main(), but compiler seems to want an arg here.
 Console gConsole;                // For the moment, we'll just have one console for everything.  This may change later, but probably won't.
 

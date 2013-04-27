@@ -434,14 +434,14 @@ bool Ship::isOnObject(BfObject *object)
 }
 
 
-F32 Ship::getSensorZoomFraction()
+F32 Ship::getSensorZoomFraction() const
 {
    return 1 - mSensorEquipZoomTimer.getFraction();
 }
 
 
-// Returns vector for aiming a weapon based on direction ship is facing
-Point Ship::getAimVector()
+// Returns vector based on direction ship is facing
+Point Ship::getAimVector() const
 {
    return Point(cos(getActualAngle()), sin(getActualAngle()));
 }
@@ -1060,7 +1060,7 @@ void Ship::deploySpybug()
 
    Point direction = getAimVector();
    GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, getActualPos(),
-                                    getActualVel(), 0, CollisionRadius - 2, this);
+                                       getActualVel(), 0, CollisionRadius - 2, this);
 
    if(getClientInfo())
       getClientInfo()->getStatistics()->countShot(WeaponSpyBug);
@@ -2104,8 +2104,6 @@ void Ship::emitMovementSparks()
 }
 
 
-extern bool gShowAimVector;
-
 void Ship::render(S32 layerIndex)
 {
    TNLAssert(getGame()->getGameType(), "gameType should always be valid here");
@@ -2158,10 +2156,6 @@ void Ship::render(S32 layerIndex)
               mShapeType, color, alpha, clientGame->getCurrentTime(), shipName, warpInScale, 
               isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(), 
               boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport);
-
-   // TODO: DELETE THIS
-   //if(isLocalShip && gShowAimVector && mGame->getSettings()->getEnableExperimentalAimMode())   // Only show for local ship
-   //   renderAimVector();
 
    if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow 
       renderSpawnShield(getRenderPos(), mSpawnShield.getCurrent(), clientGame->getCurrentTime());

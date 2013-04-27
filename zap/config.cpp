@@ -87,7 +87,6 @@ IniSettings::IniSettings()
 
    starsInDistance = true;            // True if stars move in distance behind maze, false if they are in fixed location
    diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
-   enableExperimentalAimMode = false; // True if we want to show experimental aiming vector in joystick mode
 
    showWeaponIndicators = true;       // True if we show the weapon indicators on the top of the screen
    verboseHelpMessages = true;        // If true, we'll show more handholding messages
@@ -457,7 +456,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
    iniSettings->connectionSpeed = ini->GetValueI(section, "ConnectionSpeed", iniSettings->connectionSpeed);
 
-   iniSettings->enableExperimentalAimMode = ini->GetValueYN(section, "EnableExperimentalAimMode", iniSettings->enableExperimentalAimMode);
    S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxFPS);
    if(fps >= 1) 
       iniSettings->maxFPS = fps;   // Otherwise, leave it at the default value
@@ -1575,7 +1573,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
       ini->sectionComment(section, " Nickname - Specify the nickname to use for autologin, or clear to disable autologin");
       ini->sectionComment(section, " Password - Password to use for autologin, if your nickname has been reserved in the forums");
-      ini->sectionComment(section, " EnableExperimentalAimMode - Use experimental aiming system (works only with controller) Yes/No");
       ini->sectionComment(section, " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
       ini->sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
       ini->sectionComment(section, " LastEditorName - Last edited file name");
@@ -1611,7 +1608,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValue  (section, "LastPassword", iniSettings->lastPassword);
    ini->SetValue  (section, "LastEditorName", iniSettings->lastEditorName);
 
-   ini->setValueYN(section, "EnableExperimentalAimMode", iniSettings->enableExperimentalAimMode);
    ini->SetValueI (section, "MaxFPS", iniSettings->maxFPS);  
 
    ini->SetValueI (section, "ConnectionSpeed", iniSettings->connectionSpeed);  

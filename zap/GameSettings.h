@@ -225,8 +225,6 @@ public:
    const Color *getWallOutlineColor() const;
 
    bool getStarsInDistance() const;
-   bool getEnableExperimentalAimMode() const;
-
 
    // Accessor methods
    U32 getSimulatedStutter();
