@@ -68,20 +68,20 @@ Zone *Zone::clone() const
 
 void Zone::render()
 {
-   renderZone(&Colors::white, getOutline(), getFill());
+   // Do nothing -- zones aren't rendered in-game
 }
 
 
 void Zone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
-   render();
+   renderZone(&Colors::white, getOutline(), getFill());
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);
 }
 
 
 void Zone::renderDock()
 {
-   render();
+   renderZone(&Colors::white, getOutline(), getFill());
 }
 
 
