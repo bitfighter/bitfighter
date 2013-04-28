@@ -5,6 +5,7 @@
 #include "Colors.h"
 #include "OpenglUtils.h"
 #include "RenderUtils.h"
+#include "MathUtils.h"     // For min()
 
 
 
@@ -20,6 +21,9 @@ enum Priority {
    High,
    Immediate      // Add regardless of flood control
 };
+
+enum Whose {
+
 
 
 static const S32 MAX_LINES = 8;     // Excluding sentinel item
@@ -46,6 +50,8 @@ HelpItemManager::HelpItemManager()
    mInitialDelayTimer.setPeriod(4 * 1000);   // Show nothing until this timer has expired
 
    mDisabled = false;
+
+   clearAlreadySeenList();
 }
 
 
@@ -121,7 +127,7 @@ void HelpItemManager::renderMessages(S32 yPos) const
          yPos += FontSize + FontGap;
       }
 
-      yPos += 10;    // Gap between messages
+      yPos += 15;    // Gap between messages
    }
 
    FontManager::popFontContext();
@@ -134,14 +140,46 @@ void HelpItemManager::queueHelpMessage(HelpItem msg)
 }
 
 
+void HelpItemManager::clearAlreadySeenList()
+{
+   for(S32 i = 0; i < HelpItemCount; i++)
+      mAlreadySeen[i] = false;
+}
+
+
+// Produce a string of Ys and Ns based on which messages have been seen, suitable for storing in the INI
+const string HelpItemManager::getAlreadySeenString() const
+{
+   string s = "";
+
+   for(S32 i = 0; i < HelpItemCount; i++)
+      s += mAlreadySeen[i] ? "Y" : "N";
+
+   return s;
+}
+
+
+// Takes a string; we'll mark a message as being seen every time we encounter a 'Y'
+void HelpItemManager::setAlreadySeenString(const string &vals)
+{
+   clearAlreadySeenList();
+
+   S32 count = MIN(vals.size(), HelpItemCount);
+
+   for(S32 i = 0; i < count; i++)
+      if(vals.at(i) == 'Y')
+         mAlreadySeen[i] = true;
+}
+
+
 void HelpItemManager::addHelpMessage(HelpItem msg)
 {
    // Nothing to do if we are disabled
    if(mDisabled)
       return;
 
-   // Make sure we don't end up with a duplicate message -- should we renew the timer in this instance?
-   if(mHelpItems.contains(msg))
+   // Only display a message once
+   if(mAlreadySeen[msg])
       return;
 
    // Limit the pacing of new items added -- unless item has immediate priority
@@ -151,6 +189,8 @@ void HelpItemManager::addHelpMessage(HelpItem msg)
    mHelpItems.push_back(msg);
    mHelpTimer.push_back(Timer(10000));    // Display time
    mHelpFading.push_back(false);
+
+   mAlreadySeen[msg] = true;
 
    mFloodControl.reset();
 
