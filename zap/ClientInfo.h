@@ -101,7 +101,7 @@ public:
    virtual GameConnection *getConnection() = 0;
    virtual void setConnection(GameConnection *conn) = 0;
 
-   const StringTableEntry getName();
+   const StringTableEntry getName() const;
    void setName(const StringTableEntry &name);
 
    const U8 getPlayerFlagstoSendToMaster() const;

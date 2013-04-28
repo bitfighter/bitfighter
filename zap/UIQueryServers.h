@@ -52,7 +52,7 @@ private:
    bool isMouseOver(F32 mouseX, F32 mouseY);
    Color mBgColor, mFgColor, mHlColor;
 
-   bool isActive();
+   bool isActive() const;
 
 public:
    Button(ClientGame *game, S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void(*callback)(ClientGame *));   // Constructor

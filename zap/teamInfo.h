@@ -56,12 +56,12 @@ public:
    const Color *getColor() const;
 
    virtual void setName(const char *name) = 0;
-   virtual StringTableEntry getName() = 0;
+   virtual StringTableEntry getName() const = 0;
 
    void setTeamIndex(S32 index);
 
    bool processArguments(S32 argc, const char **argv);          // Read team info from level line
-   string toLevelCode();
+   string toLevelCode() const;
 
    void alterRed(F32 amt);
    void alterGreen(F32 amt);
@@ -104,7 +104,7 @@ public:
    void setName(const char *name);
    void setName(StringTableEntry name);
   
-   StringTableEntry getName();
+   StringTableEntry getName() const;
 
    S32 getScore();
    void setScore(S32 score);
@@ -156,7 +156,7 @@ public:
 
    LineEditor *getLineEditor();
    void setName(const char *name);
-   StringTableEntry getName();  // Wrap in STE to make signatures match
+   StringTableEntry getName() const;  // Wrap in STE to make signatures match
 };
 
 

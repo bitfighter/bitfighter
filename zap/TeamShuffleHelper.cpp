@@ -260,7 +260,7 @@ InputCode TeamShuffleHelper::getActivationKey()
 }
 
 
-bool TeamShuffleHelper::isMovementDisabled()
+bool TeamShuffleHelper::isMovementDisabled() const
 {
    return true;
 }

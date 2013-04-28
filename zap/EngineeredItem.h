@@ -219,7 +219,7 @@ public:
 
    const Vector<Point> *getCollisionPoly() const;
 
-   const Vector<Point> *getOutline();
+   const Vector<Point> *getOutline() const;
 
    static Vector<Point> computeGeom(const Point &start, const Point &end, F32 scaleFact = 1);
    static bool findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal, 

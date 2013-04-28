@@ -92,7 +92,7 @@ bool AbstractTeam::processArguments(S32 argc, const char **argv)
 }
 
 
-string AbstractTeam::toLevelCode()
+string AbstractTeam::toLevelCode() const
 {
    return string("Team ") + writeLevelString(getName().getString()) + " " + mColor.toRGBString();
 }
@@ -175,7 +175,7 @@ void Team::setName(StringTableEntry name)
 }
 
 
-StringTableEntry Team::getName()
+StringTableEntry Team::getName() const
 {
    return mName;
 }
@@ -367,7 +367,7 @@ void EditorTeam::setName(const char *name)
 }
 
 
-StringTableEntry EditorTeam::getName()
+StringTableEntry EditorTeam::getName() const
 {
    return StringTableEntry(mNameEditor.c_str());
 }

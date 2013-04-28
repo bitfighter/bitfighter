@@ -93,7 +93,7 @@ bool ClientInfo::hasBadge(MeritBadges badge)
 }
 
 
-const StringTableEntry ClientInfo::getName()
+const StringTableEntry ClientInfo::getName() const
 {
    return mName;
 }

@@ -756,7 +756,7 @@ bool Game::processLevelParam(S32 argc, const char **argv)
 
 
 // Write out the game processed above; returns multiline string
-string Game::toLevelCode()
+string Game::toLevelCode() const
 {
    string str;
 
@@ -1236,7 +1236,7 @@ void Game::setLevelDatabaseId(U32 id)
    mLevelDatabaseId = id;
 }
 
-U32 Game::getLevelDatabaseId()
+U32 Game::getLevelDatabaseId() const
 {
    return mLevelDatabaseId;
 }

@@ -1452,7 +1452,7 @@ void Button::onClick(F32 mouseX, F32 mouseY)
 }
 
 
-bool Button::isActive()
+bool Button::isActive() const
 {
    return mGame->getUIManager()->getQueryServersUserInterface()->getLastPage() > 0;
 }

@@ -60,7 +60,7 @@ public:
    void render();                
    void renderDeploymentMarker(const Ship *ship);
 
-   bool isChatDisabled();
+   bool isChatDisabled() const;
    S32 getAnimationTime() const;
 };
 

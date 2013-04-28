@@ -70,7 +70,7 @@ public:
 
    bool processInputCode(InputCode inputCode);   
 
-   bool isMovementDisabled();
+   bool isMovementDisabled() const;
 
    void onPlayerJoined();
    void onPlayerQuit();

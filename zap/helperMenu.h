@@ -124,8 +124,8 @@ public:
    virtual void onTextInput(char ascii);
 
    virtual void activateHelp(UIManager *uiManager);   // Open help to an appropriate page
-   virtual bool isMovementDisabled();                 // Is ship movement disabled while this helper is active?
-   virtual bool isChatDisabled();                     // Returns true if chat and friends should be disabled while this is active
+   virtual bool isMovementDisabled() const;           // Is ship movement disabled while this helper is active?
+   virtual bool isChatDisabled() const;               // Returns true if chat and friends should be disabled while this is active
 
    S32 getMaxItemWidth(const OverlayMenuItem *items, S32 count);
 

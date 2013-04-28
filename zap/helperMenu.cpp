@@ -365,8 +365,8 @@ void HelperMenu::activateHelp(UIManager *uiManager)
 }
 
 
-bool HelperMenu::isMovementDisabled() { return false; }
-bool HelperMenu::isChatDisabled()     { return true;  }
+bool HelperMenu::isMovementDisabled() const { return false; }
+bool HelperMenu::isChatDisabled() const     { return true;  }
 
 
 void HelperMenu::idle(U32 deltaT) 

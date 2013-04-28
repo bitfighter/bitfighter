@@ -162,8 +162,8 @@ Point MoveObject::getRenderPos() const { return getPos(RenderState); }
 Point MoveObject::getActualVel() const { return getVel(ActualState); }
 Point MoveObject::getRenderVel() const { return getVel(RenderState); }
 
-F32 MoveObject::getActualAngle()           const { return getAngle(ActualState);      }
-F32 MoveObject::getRenderAngle()           const { return getAngle(RenderState);      }
+F32 MoveObject::getActualAngle() const { return getAngle(ActualState); }
+F32 MoveObject::getRenderAngle() const { return getAngle(RenderState); }
 
 
 void MoveObject::setActualPos(const Point &pos) { setPos(ActualState, pos); }
@@ -903,6 +903,7 @@ void MoveItem::setActualVel(const Point &vel)
    Parent::setActualVel(vel);
    setMaskBits(PositionMask);
 }
+
 
 void MoveItem::idle(BfObject::IdleCallPath path)
 {

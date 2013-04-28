@@ -326,7 +326,7 @@ public:
 
    virtual void processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName);  
    bool processLevelParam(S32 argc, const char **argv);
-   string toLevelCode();
+   string toLevelCode() const;
 
    virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id) = 0;
    virtual void addPolyWall(PolyWall *polyWall, GridDatabase *database) = 0;     
@@ -403,7 +403,7 @@ public:
    string makeUnique(const char *name);
 
    void setLevelDatabaseId(U32 id);
-   U32 getLevelDatabaseId();
+   U32 getLevelDatabaseId() const;
 };
 
 

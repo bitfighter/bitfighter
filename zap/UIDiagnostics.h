@@ -46,7 +46,7 @@ public:
    void render();
    void quit();
    bool onKeyDown(InputCode inputCode);
-   bool isActive();
+   bool isActive() const;
 };
 
 

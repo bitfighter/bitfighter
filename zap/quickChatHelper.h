@@ -78,7 +78,7 @@ public:
    void render();                
    void onActivated();  
    bool processInputCode(InputCode inputCode);   
-   bool isMovementDisabled();
+   bool isMovementDisabled() const;
 };
 
 extern Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file

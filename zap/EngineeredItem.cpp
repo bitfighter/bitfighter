@@ -1706,16 +1706,18 @@ bool ForceField::intersects(ForceField *forceField)
 }
 
 
-const Vector<Point> *ForceField::getOutline()
+const Vector<Point> *ForceField::getOutline() const
 {
    return &mOutline;
 }
+
 
 void ForceField::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
    linkToIdleList(&game->idlingObjects);
 }
+
 
 void ForceField::idle(BfObject::IdleCallPath path)
 {

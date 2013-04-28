@@ -84,7 +84,7 @@ void DiagnosticUserInterface::idle(U32 timeDelta)
 }
 
 
-bool DiagnosticUserInterface::isActive()
+bool DiagnosticUserInterface::isActive() const
 {
    return mActive;
 }

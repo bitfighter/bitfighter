@@ -64,7 +64,7 @@ public:
    void resetPosition();
 
    void setActive(bool active);
-   bool isActive();
+   bool isActive() const;
 };
 
 ////////////////////////////////////////

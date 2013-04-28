@@ -285,7 +285,7 @@ void CreditsScroller::setActive(bool active)
 }
 
 
-bool CreditsScroller::isActive()
+bool CreditsScroller::isActive() const
 {
    return mActivated;
 }

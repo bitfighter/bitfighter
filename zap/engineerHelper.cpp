@@ -264,7 +264,7 @@ const char *EngineerHelper::getCancelMessage() const
 
 
 // When a menu is not active, we'll allow players to enter chat
-bool EngineerHelper::isChatDisabled()
+bool EngineerHelper::isChatDisabled() const
 {
    return isMenuBeingDisplayed();
 }
