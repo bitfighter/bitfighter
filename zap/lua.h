@@ -1,6 +1,11 @@
 #ifndef _LUA_H_
 #define _LUA_H_
 
+// Turn on lua_assert in our debug builds
+#ifdef TNL_DEBUG
+#  define lua_assert
+#endif
+
 // Need to include lua headers this way --> wrap them in a simpler looking .h file...
 
 extern "C" {

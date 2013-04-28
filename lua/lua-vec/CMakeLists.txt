@@ -32,3 +32,10 @@ set(LUA_VEC_SOURCES
 	src/lgcveclib.c
 )
 add_library(lua-vec ${LUA_VEC_SOURCES})
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set_target_properties(lua-vec
+		PROPERTIES
+		COMPILE_DEFINITIONS TNL_DEBUG
+	)
+endif()
