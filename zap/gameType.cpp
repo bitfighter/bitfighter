@@ -1490,7 +1490,7 @@ Point GameType::getSpawnPoint(S32 teamIndex)
 
 
 // This gets run when the ship hits a loadout zone -- server only
-void GameType::SRV_updateShipLoadout(BfObject *shipObject)
+void GameType::updateShipLoadout(BfObject *shipObject)
 {
    ClientInfo *clientInfo = shipObject->getOwner();
 
@@ -1501,7 +1501,7 @@ void GameType::SRV_updateShipLoadout(BfObject *shipObject)
 
 // Set the "on-deck" loadout for a ship, and make it effective immediately if we're in a loadout zone
 // Server only, called in direct response to request from client via c2sRequestLoadout()
-void GameType::SRV_clientRequestLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout)
+void GameType::clientRequestLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout)
 {
    Ship *ship = clientInfo->getShip();
 

@@ -440,8 +440,8 @@ public:
 
    void addTime(U32 time);          // Extend the game by time (in ms)
 
-   void SRV_clientRequestLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout);
-   void SRV_updateShipLoadout(BfObject *shipObject); // called from LoadoutZone when a Ship touches the zone
+   void clientRequestLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout);
+   void updateShipLoadout(BfObject *shipObject); // called from LoadoutZone when a Ship touches the zone
 
    bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
 

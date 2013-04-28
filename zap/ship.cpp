@@ -1768,6 +1768,7 @@ bool Ship::isLoadoutSameAsCurrent(const LoadoutTracker &loadout)
 // This actualizes the requested loadout... when, for example the user enters a loadout zone
 // To set the "on-deck" loadout, use GameType->setClientShipLoadout()
 // Returns true if loadout has changed
+// Server only?
 bool Ship::setLoadout(const LoadoutTracker &loadout, bool silent)
 {
    // Check to see if the new configuration is the same as the old.  If so, we have nothing to do.
