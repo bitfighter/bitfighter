@@ -8,43 +8,43 @@
 
 
 #define HELP_ITEM_TABLE \
-   HELP_TABLE_ITEM(RepairItemSpottedItem,   RepairItemTypeNumber,   Low,  ARRAYDEF({"Repair items heal your ship", NULL }))   \
-   HELP_TABLE_ITEM(TestItemSpottedItem,     TestItemTypeNumber,     Low,  ARRAYDEF({ "Test Items are just bouncy objects that don't do much", NULL })) \
-   HELP_TABLE_ITEM(ResourceItemSpottedItem, ResourceItemTypeNumber, Low,  ARRAYDEF({ "If you have the Engineer module (only permitted on some levels)", \
-                                                                                         "Resource Items can be used to build things", \
-                                                                                         "Otherwise, they are just bouncy objects", NULL }))\
-   HELP_TABLE_ITEM(LoadoutChangedZoneItem,   LoadoutZoneTypeNumber, Immediate, ARRAYDEF({ "You've selected a new ship configuration", \
-                                                                                          "Find a Loadout Zone to make the changes", NULL })) \
-   HELP_TABLE_ITEM(LoadoutChangedNoZoneItem, UnknownTypeNumber,     Immediate, ARRAYDEF({ "You've selected a new ship configuration", \
-                                                                                          "This level has no Loadout Zones", \
-                                                                                          "So you are basically screwed", NULL } ))\
-                                                                                          \
-   HELP_TABLE_ITEM(WelcomeItem,              UnknownTypeNumber,     Immediate, ARRAYDEF({ "Wecome to Bitfighter.  I'll help you get",\
-                                                                                          "oriented and find your way around.",\
-                                                                                          "You can disable these messages in the Options menu.", NULL }))\
-                                            \
-   HELP_TABLE_ITEM(ControlsKBItem,           UnknownTypeNumber,     Paced,     ARRAYDEF({ "Move your ship with the XXX keys.",\
-                                                                                          "Aim and fire with the mouse.", NULL }))\
-                                            \
-   HELP_TABLE_ITEM(ControlsJSItem,           UnknownTypeNumber,     Paced,     ARRAYDEF({ "Move your ship with the left joystick.",\
-                                                                                          "Aim and fire with the right.", NULL }))\
-                                            \
-   HELP_TABLE_ITEM(CmdrsMapItem,             UnknownTypeNumber,     Paced,     ARRAYDEF({ "Feeling lost?  See the commander's map by pressing XXX.", NULL }))\
-                                            \
-   HELP_TABLE_ITEM(ChangeConfigItem,         UnknownTypeNumber,     Paced,     ARRAYDEF({ "You can change your ship configuration",\
-                                                                                          "by pressing the XXX key.", NULL }))\
+   HELP_TABLE_ITEM(RepairItemSpottedItem,   RepairItemTypeNumber,   Low,       ARRAYDEF({"Repair items heal your ship", NULL }))                                    \
+   HELP_TABLE_ITEM(TestItemSpottedItem,     TestItemTypeNumber,     Low,       ARRAYDEF({ "Test Items are just bouncy objects that don't do much", NULL }))         \
+   HELP_TABLE_ITEM(ResourceItemSpottedItem, ResourceItemTypeNumber, Low,       ARRAYDEF({ "If you have the Engineer module (only permitted on some levels)",        \
+                                                                                          "Resource Items can be used to build things",                             \
+                                                                                          "Otherwise, they are just bouncy objects", NULL }))                       \
+   HELP_TABLE_ITEM(LoadoutChangedZoneItem,   LoadoutZoneTypeNumber, Immediate, ARRAYDEF({ "You've selected a new ship configuration",                               \
+                                                                                          "Find a Loadout Zone to make the changes", NULL }))                       \
+   HELP_TABLE_ITEM(LoadoutChangedNoZoneItem, UnknownTypeNumber,     Immediate, ARRAYDEF({ "You've selected a new ship configuration",                               \
+                                                                                          "This level has no Loadout Zones",                                        \
+                                                                                          "So you are basically screwed", NULL } ))                                 \
+                                                                                                                                                                    \
+   HELP_TABLE_ITEM(WelcomeItem,              UnknownTypeNumber,     Immediate, ARRAYDEF({ "Wecome to Bitfighter.  I'll help you get",                               \
+                                                                                          "oriented and find your way around.",                                     \
+                                                                                          "You can disable these messages in the Options menu.", NULL }))           \
+                                                                                                                                                                    \
+   HELP_TABLE_ITEM(ControlsKBItem,           UnknownTypeNumber,     Paced,     ARRAYDEF({ "Move your ship with the XXX keys.",                                      \
+                                                                                          "Aim and fire with the mouse.", NULL }))                                  \
+                                                                                                                                                                    \
+   HELP_TABLE_ITEM(ControlsJSItem,           UnknownTypeNumber,     Paced,     ARRAYDEF({ "Move your ship with the left joystick.",                                 \
+                                                                                          "Aim and fire with the right.", NULL }))                                  \
+                                                                                                                                                                    \
+   HELP_TABLE_ITEM(CmdrsMapItem,             UnknownTypeNumber,     Paced,     ARRAYDEF({ "Feeling lost?  See the commander's map by pressing XXX.", NULL }))       \
+                                                                                                                                                                    \
+   HELP_TABLE_ITEM(ChangeConfigItem,         UnknownTypeNumber,     Paced,     ARRAYDEF({ "You can change your ship configuration",                                 \
+                                                                                          "by pressing the XXX key.", NULL }))                                      \
+                                                                                                                                                                    \
+   HELP_TABLE_ITEM(GameModesItem,            UnknownTypeNumner,     Paced,     ARRAYDEF({ "Bitfighter has several game modes.",                                     \
+                                                                                          "You can see the objective of the current game by pressing F2.", NULL })) \
+                                                                                                                                                                    \
+   HELP_TABLE_ITEM(LowerLeftItem,            UnknownTypeNumner,     Paced,     ARRAYDEF({ "The current game type, time left, and winning score",                    \
+                                                                                          "are shown in the lower-right of the screen.", NULL }))                   \
+                                                                                                                                                                    \
+   HELP_TABLE_ITEM(ObjectiveArrowItem,       UnknownTypeNumner,     Paced,     ARRAYDEF({ "Objective arrows point the way to critical objects.",                    \
+                                                                                                                                                                    \
+   HELP_TABLE_ITEM(AddBotsItem,              UnknownTypeNumner,     Paced,     ARRAYDEF({ "Feeling lonely?  Other players are better, but you",                     \
+                                                                                          "can add bots with the /addbots command.", NULL }))                       \
 
-//Bitfighter has several game modes.
-//You can see the objective of the current game by pressing F2.
-//
-//The current game type, time left, and winning score
-//are shown in the lower-right of the screen.
-//
-//Objective arrows point the way to critical objects.
-//
-//Feeling lonely?  Other players are better, but you
-//can add bots with the /addbots command.
-//
 
 
 
