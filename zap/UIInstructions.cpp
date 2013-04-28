@@ -156,7 +156,7 @@ void InstructionsUserInterface::render()
                             "Tip: Define QuickChat items to quickly enter commands (see INI for details)");
          break;
       case InstructionSoundCommands:
-         renderPageCommands(InstructionSoundCommands - FIRST_COMMAND_PAGE);     // Sound control commands
+         renderPageCommands(InstructionSoundCommands - FIRST_COMMAND_PAGE);            // Sound control commands
          break;
       case InstructionLevelCommands:
          renderPageCommands(InstructionLevelCommands - FIRST_COMMAND_PAGE, 
@@ -164,14 +164,14 @@ void InstructionsUserInterface::render()
          break;
       case InstructionAdminCommands:
          renderPageCommands(InstructionAdminCommands - FIRST_COMMAND_PAGE, 
-                            "Admin permissions are required to use these commands");            // Admin commands
-         break;
-      case InstructionOwnerCommands:
-         renderPageCommands(InstructionOwnerCommands - FIRST_COMMAND_PAGE,
-                            "Owner permissions are required to use these commands");            // Admin commands
-         break;
-      case InstructionDebugCommands:
-         renderPageCommands(InstructionDebugCommands - FIRST_COMMAND_PAGE);     // Debug commands
+                            "Admin permissions are required to use these commands");   // Admin commands
+         break;                                                                        
+      case InstructionOwnerCommands:                                                   
+         renderPageCommands(InstructionOwnerCommands - FIRST_COMMAND_PAGE,             
+                            "Owner permissions are required to use these commands");   // Owner commands
+         break;                                                                        
+      case InstructionDebugCommands:                                                   
+         renderPageCommands(InstructionDebugCommands - FIRST_COMMAND_PAGE);            // Debug commands
          break;
 
       //case InstructionScriptingConsole:
@@ -600,6 +600,7 @@ void InstructionsUserInterface::renderPageGameIndicators()
    S32 y = 40;
    S32 descSize = 20;
    S32 textSize = 17;
+   S32 textGap = 9;
 
    static const char *indicatorInstructions1[] = {
       "Special indicators are helps on the scoreboard or other areas that",
@@ -611,14 +612,14 @@ void InstructionsUserInterface::renderPageGameIndicators()
    for(U32 i = 0; i < ARRAYSIZE(indicatorInstructions1); i++)
    {
       drawCenteredString(y, descSize, indicatorInstructions1[i]);
-      y += 26;
+      y += textSize + textGap;
    }
 
    y += 20;
 
    glColor(Colors::cyan);
    drawCenteredString(y, descSize, indicatorPageHeadings[0]);
-   y += 26;
+   y += textSize + textGap;
 
    y = renderScoreboardMarks(y, textSize) + 60;
    y = renderBadges(y, textSize, descSize);
@@ -648,16 +649,17 @@ void InstructionsUserInterface::renderModulesPage()
 {
    S32 y = 40;
    S32 textsize = 20;
+   S32 textGap = 6;
 
    glColor(Colors::white);
 
    for(U32 i = 0; i < ARRAYSIZE(moduleInstructions); i++)
    {
       drawCenteredString(y, textsize, moduleInstructions[i]);
-      y += 26;
+      y += textsize + textGap;
    }
 
-   y += 20;
+   y += textsize;
 
    glColor(Colors::cyan);
    drawCenteredString(y, textsize, "LIST OF MODULES");
