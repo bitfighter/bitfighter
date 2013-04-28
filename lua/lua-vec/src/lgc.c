@@ -29,6 +29,11 @@
 #define GCFINALIZECOST	100
 
 
+#ifdef TNL_DEBUG
+#  define tnl_assert
+#endif
+
+
 #define maskmarks	cast_byte(~(bitmask(BLACKBIT)|WHITEBITS))
 
 #define makewhite(g,x)	\
