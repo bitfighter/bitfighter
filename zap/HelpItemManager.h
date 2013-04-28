@@ -19,12 +19,13 @@
                                                                                           "Resource Items can be used to build things.",                            \
                                                                                           "Otherwise, they are just bouncy objects.", NULL }))                      \
                                                                                                                                                                     \
-   HELP_TABLE_ITEM(LoadoutChangedZoneItem,   LoadoutZoneTypeNumber, Immediate, ARRAYDEF({ "You've selected a new ship configuration.",                              \
-                                                                                          "Find a Loadout Zone to make the changes.", NULL }))                      \
-                                                                                                                                                                    \
    HELP_TABLE_ITEM(LoadoutChangedNoZoneItem, UnknownTypeNumber,     Immediate, ARRAYDEF({ "You've selected a new ship configuration.",                              \
                                                                                           "This level has no Loadout Zones,",                                       \
                                                                                           "So you are basically screwed.", NULL }))                                 \
+                                                                                                                                                                    \
+   HELP_TABLE_ITEM(LoadoutChangedZoneItem,   LoadoutZoneTypeNumber, Immediate, ARRAYDEF({ "You've selected a new ship configuration.",                              \
+                                                                                          "Find a Loadout Zone to make the changes.", NULL }))                      \
+                                                                                                                                                                    \
    HELP_TABLE_ITEM(LoadoutFinishedItem,      UnknownTypeNumber,     Immediate, ARRAYDEF({ "Loadout updated.  Good job!", NULL }))                                   \
                                                                                                                                                                     \
    HELP_TABLE_ITEM(WelcomeItem,              UnknownTypeNumber,     Immediate, ARRAYDEF({ "Wecome to Bitfighter.  I'll help you get",                               \
@@ -57,21 +58,20 @@
 using namespace TNL;
 using namespace std;
 
-namespace Zap { namespace UI {
+namespace Zap { 
+   
 
-
-class HelpItemManager
-{
-
-public:
-
-enum HelpItem {
+   enum HelpItem {
 #define HELP_TABLE_ITEM(value, b, c, d) value,
    HELP_ITEM_TABLE
 #undef HELP_TABLE_ITEM
    HelpItemCount
 };
 
+namespace UI {
+
+class HelpItemManager
+{
 
 private:
    Vector<HelpItem> mHelpItems;
@@ -100,7 +100,7 @@ public:
    void renderMessages(S32 yPos) const;
 
    void queueHelpMessage(HelpItem msg);      
-   void addHelpMessage(HelpItem msg);
+   void addHelpItem(HelpItem msg);
 
    void enable();
    void disable();

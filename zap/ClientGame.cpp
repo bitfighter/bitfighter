@@ -640,11 +640,11 @@ void ClientGame::idle(U32 timeDelta)
       for(S32 i = 0; i < fillVector.size(); i++)
       {
          if(fillVector[i]->getObjectTypeNumber() == RepairItemTypeNumber)
-            mUi->addHelpMessage(HelpItemManager::RepairItemSpottedItem);
+            addHelpItem(RepairItemSpottedItem);
          else if(fillVector[i]->getObjectTypeNumber() == TestItemTypeNumber)
-            mUi->addHelpMessage(HelpItemManager::TestItemSpottedItem);
+            addHelpItem(TestItemSpottedItem);
          else if(fillVector[i]->getObjectTypeNumber() == ResourceItemTypeNumber)
-            mUi->addHelpMessage(HelpItemManager::ResourceItemSpottedItem);
+            addHelpItem(ResourceItemSpottedItem);
       }
    }
 
@@ -664,6 +664,12 @@ void ClientGame::idle(U32 timeDelta)
    }
 
    mUIManager->idle(timeDelta);
+}
+
+
+void ClientGame::addHelpItem(HelpItem item)
+{
+   mUi->addHelpItem(item);
 }
 
 

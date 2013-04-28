@@ -22,6 +22,7 @@ enum Priority {
    Immediate      // Add regardless of flood control
 };
 
+
 //enum Whose {
 
 
@@ -78,7 +79,7 @@ void HelpItemManager::idle(U32 timeDelta)
       HelpItem queuedMessage = mQueuedItems[0];
       mQueuedItems.erase(0);
 
-      addHelpMessage(queuedMessage);
+      addHelpItem(queuedMessage);
       mPacedTimer.reset();
    }
 
@@ -169,10 +170,14 @@ void HelpItemManager::setAlreadySeenString(const string &vals)
    for(S32 i = 0; i < count; i++)
       if(vals.at(i) == 'Y')
          mAlreadySeen[i] = true;
+
+   // Probably should be drawn from a definition elsewhere, but some pairs of messages are dependent on one another.
+   // If the first has already been shown, don't show the second
+   mAlreadySeen[LoadoutFinishedItem] = mAlreadySeen[LoadoutChangedZoneItem];
 }
 
 
-void HelpItemManager::addHelpMessage(HelpItem msg)
+void HelpItemManager::addHelpItem(HelpItem msg)
 {
    // Nothing to do if we are disabled
    if(mDisabled)

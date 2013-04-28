@@ -284,7 +284,7 @@ public:
    void toggleShowingMeshZones();  
    void toggleShowDebugBots();
 
-   void addHelpMessage(HelpItemManager::HelpItem item);
+   void addHelpItem(HelpItem item);
 
    bool isShowingDebugShipCoords() const;
 

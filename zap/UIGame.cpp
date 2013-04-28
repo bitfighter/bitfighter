@@ -168,15 +168,15 @@ void GameUserInterface::onActivate()
    mChatMessageDisplayer3.reset();
 
    mHelpItemManager.reset();
-   mHelpItemManager.queueHelpMessage(HelpItemManager::WelcomeItem);
+   mHelpItemManager.queueHelpMessage(WelcomeItem);
 
    // Queue up some initial help messages for the new users
    GameSettings *settings = getGame()->getSettings();
 
    if(settings->getInputCodeManager()->getInputMode() == InputModeJoystick)
-      mHelpItemManager.queueHelpMessage(HelpItemManager::ControlsJSItem);
+      mHelpItemManager.queueHelpMessage(ControlsJSItem);
    else
-      mHelpItemManager.queueHelpMessage(HelpItemManager::ControlsKBItem);
+      mHelpItemManager.queueHelpMessage(ControlsKBItem);
 
 
 
@@ -470,9 +470,9 @@ if(mGotControlUpdate)
 }
 
 
-void GameUserInterface::addHelpMessage(HelpItemManager::HelpItem msg)
+void GameUserInterface::addHelpItem(HelpItem item)
 {
-   mHelpItemManager.addHelpMessage(msg);
+   mHelpItemManager.addHelpItem(item);
 }
 
 

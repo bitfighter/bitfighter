@@ -34,6 +34,7 @@
 
 #include "gameConnection.h"
 #include "dataConnection.h"      // For DataSender
+#include "HelpItemManager.h"     // For HelpItems enum
 
 #ifdef TNL_OS_WIN32
 #  include <windows.h>             // For screensaver... windows only feature, I'm afraid!
@@ -138,6 +139,8 @@ public:
    void toggleCommanderMap();
 
    Ship *findShip(const StringTableEntry &clientName);
+
+   void addHelpItem(HelpItem item);
 
    void gotServerListFromMaster(const Vector<IPAddress> &serverList);
 

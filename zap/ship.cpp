@@ -1524,6 +1524,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       // Alert the UI that a new loadout has arrived
       if(isLocalPlayerShip(game))
          game->newLoadoutHasArrived(mLoadout);
+
+      if(!wasInitialUpdate)
+         game->addHelpItem(LoadoutFinishedItem);
    }
 
    if(stream->readFlag())  // hasExploded
