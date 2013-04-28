@@ -58,27 +58,12 @@ class HelpItemManager
 
 public:
 
-//enum HelpItem {
-//   RepairItemSpottedHelpItem,
-//   TestItemSpottedHelpItem,
-//   ResourceItemSpottedHelpItem,
-//   LoadoutChangedLoadoutZoneHelpItem,
-//   LoadoutChangedNoLoadoutZoneHelpItem,
-//   WelcomeItem,
-//   ControlsKBItem,
-//   ControlsJSItem,
-//};
-
-
-
 enum HelpItem {
 #define HELP_TABLE_ITEM(value, b, c, d) value,
    HELP_ITEM_TABLE
 #undef HELP_TABLE_ITEM
    HelpItemCount
 };
-
-
 
 
 private:

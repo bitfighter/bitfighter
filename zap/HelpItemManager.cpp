@@ -31,57 +31,11 @@ struct HelpItems {
 };
 
 
-
 static HelpItems helpItems[] = {
 #define HELP_TABLE_ITEM(a, assItem, priority, msgs) { assItem, priority, msgs},
       HELP_ITEM_TABLE
    #undef HELP_TABLE_ITEM
 };
-
-//static HelpItems helpItems[] = {
-//   { RepairItemTypeNumber,   Low,       { "Repair items heal your ship", NULL } },
-//
-//   { TestItemTypeNumber,     Low,       { "Test Items are just bouncy objects that don't do much", NULL } },
-//
-//   { ResourceItemTypeNumber, Low,       { "If you have the Engineer module (only permitted on some levels)", 
-//                                          "Resource Items can be used to build things", 
-//                                          "Otherwise, they are just bouncy objects", NULL } },
-//
-//   { LoadoutZoneTypeNumber,  Immediate, { "You've selected a new ship configuration", 
-//                                          "Find a Loadout Zone to make the changes", NULL } },
-//
-//   { UnknownTypeNumber,      Immediate, { "You've selected a new ship configuration", 
-//                                          "This level has no Loadout Zones", 
-//                                          "So you are basically screwed", NULL } },
-//
-//   { UnknownTypeNumber,      Immediate, { "Wecome to Bitfighter.  I'll help you get",
-//                                          "oriented and find your way around.",
-//                                          "You can disable these messages in the Options menu.", NULL } },
-//
-//   { UnknownTypeNumber,      Paced,     { "Move your ship with the XXX keys.",
-//                                          "Aim and fire with the mouse.", NULL } },
-//
-//   { UnknownTypeNumber,      Paced,     { "Move your ship with the left joystick.",
-//                                          "Aim and fire with the right.", NULL } },
-//
-//   { UnknownTypeNumber,      Paced,     { "Feeling lost?  See the commander's map by pressing XXX.", NULL } },
-//
-//   { UnknownTypeNumber,      Paced,     { "You can change your ship configuration",
-//                                          "by pressing the XXX key.", NULL } },
-//
-//Bitfighter has several game modes.
-//You can see the objective of the current game by pressing F2.
-//
-//The current game type, time left, and winning score
-//are shown in the lower-right of the screen.
-//
-//Objective arrows point the way to critical objects.
-//
-//Feeling lonely?  Other players are better, but you
-//can add bots with the /addbots command.
-//
-
-
 
 
 // Constructor
