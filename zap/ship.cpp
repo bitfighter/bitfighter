@@ -2136,7 +2136,7 @@ void Ship::render(S32 layerIndex)
    Ship *localShip = dynamic_cast<Ship *>(conn->getControlObject());
 
    const bool isLocalShip = !(conn && conn->getControlObject() != this);    // i.e. the ship belongs to the player viewing the rendering
-   const bool isAuthenticated = clientInfo->isAuthenticated();
+   const bool isAuthenticated = clientInfo ? clientInfo->isAuthenticated() : false;
 
    const bool boostActive  = mLoadout.isModulePrimaryActive(ModuleBoost);
    const bool shieldActive = mLoadout.isModulePrimaryActive(ModuleShield);
@@ -2150,7 +2150,7 @@ void Ship::render(S32 layerIndex)
    // and we'll need to draw it.  Here, we determine if that has happened.
    
    const bool isBusy = clientInfo ? clientInfo->isBusy() : false;
-   const bool engineeringTeleport = clientInfo->isEngineeringTeleporter();
+   const bool engineeringTeleport = clientInfo ? clientInfo->isEngineeringTeleporter() : false;
    const bool showCoordinates = clientGame->isShowingDebugShipCoords();
 
    // Caclulate rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
