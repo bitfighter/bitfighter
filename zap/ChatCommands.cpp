@@ -233,7 +233,7 @@ void randomLevelHandler(ClientGame *game, const Vector<string> &words)
 
 void shutdownServerHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasAdmin("!!! You don't have permission to shut the server down"))
+   if(game->hasOwner("!!! You don't have permission to shut the server down"))
    {
       U16 time = 0;
       bool timefound = true;

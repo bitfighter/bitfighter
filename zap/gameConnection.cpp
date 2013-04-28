@@ -1222,7 +1222,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reason), (time, reason), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   if(!mClientInfo->isAdmin())
+   if(!mClientInfo->isOwner())
       return;
 
    logprintf(LogConsumer::ServerFilter, "User [%s] requested shutdown in %d seconds [%s]", 
