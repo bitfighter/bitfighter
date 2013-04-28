@@ -1655,6 +1655,18 @@ F32 Ship::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSk
 }
 
 
+void Ship::updateInterpolation()
+{
+   Parent::updateInterpolation();
+
+   // Update position of any mounted items
+   for(S32 i = 0; i < mMountedItems.size(); i++)
+      if(mMountedItems[i].isValid())
+         mMountedItems[i]->setRenderPos(getRenderPos());
+}
+
+
+
 bool Ship::hasModule(ShipModule mod)
 {
    return mLoadout.hasModule(mod);
