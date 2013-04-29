@@ -219,7 +219,7 @@ bool ClientInfo::isLoadoutValid(const LoadoutTracker &loadout, bool engineerAllo
 // Updates the ship's loadout to the current or on-deck loadout
 void::ClientInfo::updateLoadout(bool useOnDeck, bool engineerAllowed, bool silent)
 {
-   LoadoutTracker loadout = current ? getOnDeckLoadout() : getOldLoadout();
+   LoadoutTracker loadout = useOnDeck ? getOnDeckLoadout() : getOldLoadout();
 
    // This could be triggered if on-deck loadout were set on a level where engineer were allowed,
    // but not actualized until after a level change where engineer was banned.
