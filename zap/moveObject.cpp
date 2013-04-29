@@ -628,7 +628,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
 
    collisionVector.normalize();
 
-   bool moveObjectThatWasHitWasMovingTooSlow = (moveObjectThatWasHit->getVel(stateIndex).lenSquared() < 0.001f);
+//   bool moveObjectThatWasHitWasMovingTooSlow = (moveObjectThatWasHit->getVel(stateIndex).lenSquared() < 0.001f);
 
    // Initial velocities projected onto collisionVector
    F32 v1i = getVel(stateIndex).dot(collisionVector);
@@ -697,11 +697,11 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       //logprintf("Collision sound! %d", stateIndex); // <== why don't we see renderstate here more often?
       playCollisionSound(stateIndex, moveObjectThatWasHit, v1i);    
 
-      MoveItem *item = dynamic_cast<MoveItem *>(moveObjectThatWasHit);
-      GameType *gameType = getGame()->getGameType();
-
-      //if(item && gameType && moveObjectThatWasHitWasMovingTooSlow)  // only if not moving fast, to prevent some overload
-         //gameType->c2sResendItemStatus(item->getItemId());
+//      MoveItem *item = dynamic_cast<MoveItem *>(moveObjectThatWasHit);
+//      GameType *gameType = getGame()->getGameType();
+//
+//      if(item && gameType && moveObjectThatWasHitWasMovingTooSlow)  // only if not moving fast, to prevent some overload
+//         gameType->c2sResendItemStatus(item->getItemId());
    }
 #endif
 }
@@ -2442,7 +2442,7 @@ void ResourceItem::generateOutlinePoints(const Point &pos, F32 scale, Vector<Poi
 
    points.reserve(ARRAYSIZE(resourcePoints) / 2);
 
-   for(S32 i = 0; i < ARRAYSIZE(resourcePoints); i+=2)
+   for(U32 i = 0; i < ARRAYSIZE(resourcePoints); i+=2)
       points.push_back(Point(resourcePoints[i] * scale + pos.x, resourcePoints[i + 1] * scale + pos.y));
 }
 

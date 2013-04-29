@@ -90,7 +90,7 @@ HelperMenu::HelperMenuType EngineerHelper::getType() { return EngineerHelperType
 
 void EngineerHelper::setSelectedEngineeredObject(U32 objectType)
 {
-   for(S32 i = 0; i < ARRAYSIZE(engineerItemInfo); i++)
+   for(U32 i = 0; i < ARRAYSIZE(engineerItemInfo); i++)
       if(engineerItemInfo[i].itemIndex == objectType)
          mSelectedIndex = i;
 }
@@ -141,7 +141,7 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 
    if(isMenuBeingDisplayed())    // Menu is being displayed, so interpret keystrokes as menu items
    {
-      for(S32 i = 0; i < ARRAYSIZE(engineerItemInfo); i++)
+      for(U32 i = 0; i < ARRAYSIZE(engineerItemInfo); i++)
       {
          // Disallow selecting unselectable items
          if(!engineerItemInfo[i].showOnMenu)

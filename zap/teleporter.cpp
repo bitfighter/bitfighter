@@ -606,7 +606,6 @@ bool Teleporter::collide(BfObject *otherObject)
    if(isShipType(otherObjectType))     // i.e. ship or robot
    {
       static const F32 TRIGGER_RADIUS  = F32(TELEPORTER_RADIUS - Ship::CollisionRadius);
-      static const F32 TELEPORT_RADIUS = F32(TELEPORTER_RADIUS + Ship::CollisionRadius);
 
       if(isGhost())
          return false; // Server only

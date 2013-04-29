@@ -58,7 +58,7 @@ U32 LevelDatabaseUploadThread::run()
       return 0;
    }
 
-   U32 responseCode = req.getResponseCode();
+   S32 responseCode = req.getResponseCode();
    if(responseCode != HttpRequest::OK && responseCode != HttpRequest::Found)
    {
       stringstream message;
