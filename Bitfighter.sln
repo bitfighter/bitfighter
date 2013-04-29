@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtomcrypt", "libtomcrypt\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua-vec", "lua\lua-vec\lua-vec.vcxproj", "{9D7B0AAD-B135-449D-8E12-1ED548AC1048}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bitfighter_test", "bitfighter_test\bitfighter_test.vcxproj", "{5D8BCEE5-458E-4711-9940-1C98F088F6DE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -54,6 +56,12 @@ Global
 		{9D7B0AAD-B135-449D-8E12-1ED548AC1048}.Release|Win32.Build.0 = Release|Win32
 		{9D7B0AAD-B135-449D-8E12-1ED548AC1048}.Template|Win32.ActiveCfg = Template|Win32
 		{9D7B0AAD-B135-449D-8E12-1ED548AC1048}.Template|Win32.Build.0 = Template|Win32
+		{5D8BCEE5-458E-4711-9940-1C98F088F6DE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5D8BCEE5-458E-4711-9940-1C98F088F6DE}.Debug|Win32.Build.0 = Debug|Win32
+		{5D8BCEE5-458E-4711-9940-1C98F088F6DE}.Release|Win32.ActiveCfg = Release|Win32
+		{5D8BCEE5-458E-4711-9940-1C98F088F6DE}.Release|Win32.Build.0 = Release|Win32
+		{5D8BCEE5-458E-4711-9940-1C98F088F6DE}.Template|Win32.ActiveCfg = Release|Win32
+		{5D8BCEE5-458E-4711-9940-1C98F088F6DE}.Template|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
