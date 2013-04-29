@@ -173,7 +173,7 @@ public:
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
-   F32 getEditorRadius(F32 currentScale) const;  // Basically, the size of our hit target for vertices
+   F32 getEditorRadius(F32 currentScale);        // Basically, the size of our hit target for vertices
 
    const Color *getEditorRenderColor() const;    // Unselected wall spine color
 
