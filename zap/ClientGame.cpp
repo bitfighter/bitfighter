@@ -850,6 +850,8 @@ void ClientGame::quitEngineerHelper()
 }
 
 
+// Called by Ship::unpack() -- loadouts are transmitted via the ship object
+// Data flow: Ship->ClientGame->GameUserInterface->LoadoutIndicator
 void ClientGame::newLoadoutHasArrived(const LoadoutTracker &loadout)
 {
    mUi->newLoadoutHasArrived(loadout);
