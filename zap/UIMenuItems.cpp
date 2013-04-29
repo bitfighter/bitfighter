@@ -870,12 +870,6 @@ string CounterMenuItem::getValueForDisplayingInMenu()
 }
 
 
-const char *CounterMenuItem::getUnits()
-{
-   return mUnits.c_str();
-}
-
-
 S32 CounterMenuItem::getIntValue() const
 {
    return mValue;
@@ -1002,7 +996,7 @@ S32 TimeCounterMenuItem::getBigIncrement()
 }
 
 
-const char *TimeCounterMenuItem::getUnits()
+string TimeCounterMenuItem::getUnits() const
 {
    return mValue >= 60 ? "mins" : "secs";
 }

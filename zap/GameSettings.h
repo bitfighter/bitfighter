@@ -224,8 +224,6 @@ public:
    const Color *getWallFillColor() const;
    const Color *getWallOutlineColor() const;
 
-   bool getStarsInDistance() const;
-
    // Accessor methods
    U32 getSimulatedStutter();
    F32 getSimulatedLoss();

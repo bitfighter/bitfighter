@@ -259,7 +259,7 @@ void LoadoutTracker::deactivateAllModules()
 
 bool LoadoutTracker::hasModule(ShipModule mod) const
 {
-   for(U32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; i++)
       if(mModules[i] == mod)
          return true;
 
@@ -269,7 +269,7 @@ bool LoadoutTracker::hasModule(ShipModule mod) const
 
 bool LoadoutTracker::hasWeapon(WeaponType weapon) const
 {
-   for(U32 i = 0; i < ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; i++)
       if(mWeapons[i] == weapon)
          return true;
 

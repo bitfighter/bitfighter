@@ -85,7 +85,6 @@ IniSettings::IniSettings()
 
    sfxSet = sfxModernSet;             // Start off with our modern sounds
 
-   starsInDistance = true;            // True if stars move in distance behind maze, false if they are in fixed location
    diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
 
    showWeaponIndicators = true;       // True if we show the weapon indicators on the top of the screen
@@ -560,7 +559,7 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
 
 static void loadEffectsSettings(CIniFile *ini, IniSettings *iniSettings)
 {
-   iniSettings->starsInDistance  = (lcase(ini->GetValue("Effects", "StarsInDistance", (iniSettings->starsInDistance ? "Yes" : "No"))) == "yes");
+   // Nothing at the moment
 }
 
 
@@ -1505,11 +1504,8 @@ static void writeEffects(CIniFile *ini, IniSettings *iniSettings)
    {
       ini->sectionComment(section, "----------------");
       ini->sectionComment(section, " Various visual effects");
-      ini->sectionComment(section, " StarsInDistance - Yes gives the game a floating, 3-D effect.  No gives the flat 'classic zap' mode.");
       ini->sectionComment(section, "----------------");
    }
-
-   ini->setValueYN(section, "StarsInDistance", iniSettings->starsInDistance);
 }
 
 static void writeSounds(CIniFile *ini, IniSettings *iniSettings)

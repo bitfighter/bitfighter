@@ -508,7 +508,7 @@ void LuaScriptRunner::logErrorHandler(const char *msg, const char *prefix)
    LuaObject::clearStack(L);
 }
 
-
+/*
 static string getStackTraceLine(lua_State *L, S32 level)
 {
 	lua_Debug ar;
@@ -522,7 +522,7 @@ static string getStackTraceLine(lua_State *L, S32 level)
 
    return str;    // Implicitly converted to string to avoid passing pointer to deleted buffer
 }
-
+*/
 
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()

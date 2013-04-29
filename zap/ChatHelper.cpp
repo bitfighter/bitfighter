@@ -164,7 +164,7 @@ void ChatHelper::render()
 
    // Size of chat composition elements
    static const S32 CHAT_COMPOSE_FONT_SIZE = 12;
-   static const S32 CHAT_COMPOSE_FONT_GAP = CHAT_COMPOSE_FONT_SIZE / 4;
+//   static const S32 CHAT_COMPOSE_FONT_GAP = CHAT_COMPOSE_FONT_SIZE / 4;
 
    static const S32 BOX_HEIGHT = CHAT_COMPOSE_FONT_SIZE + 10;
 
@@ -202,10 +202,10 @@ void ChatHelper::render()
    F32 top = ypos - 3;
 
    F32 vertices[] = {
-         xPos,            top,
-         xPos + boxWidth, top,
-         xPos + boxWidth, top + BOX_HEIGHT,
-         xPos,            top + BOX_HEIGHT
+         (F32)xPos,            top,
+         (F32)xPos + boxWidth, top,
+         (F32)xPos + boxWidth, top + BOX_HEIGHT,
+         (F32)xPos,            top + BOX_HEIGHT
    };
 
    for(S32 i = 1; i >= 0; i--)

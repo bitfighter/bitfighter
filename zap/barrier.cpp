@@ -519,7 +519,7 @@ const Color *WallItem::getEditorRenderColor() const
 
 
 // Size of object in editor 
-F32 WallItem::getEditorRadius(F32 currentScale) const
+F32 WallItem::getEditorRadius(F32 currentScale)
 {
    return getWallEditorRadius(currentScale);
 }

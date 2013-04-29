@@ -944,7 +944,6 @@ static const S32 MOTD_POS = 540;
 void MainMenuUserInterface::render()
 {
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    if(strcmp(mMOTD, ""))
    {

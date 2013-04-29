@@ -185,7 +185,6 @@ public:
 
    sfxSets sfxSet;                  // Which set of SFX does the user want?
 
-   bool starsInDistance;            // True if stars move in distance behind maze, false if they are in fixed location
    bool diagnosticKeyDumpMode;      // True if want to dump keystrokes to the screen
 
    bool showWeaponIndicators;       // True if we show the weapon indicators on the top of the screen

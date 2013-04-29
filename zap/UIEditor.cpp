@@ -1483,14 +1483,6 @@ bool EditorUserInterface::showMinorGridLines()
 }
 
 
-static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
-{
-   TNLAssert(dynamic_cast<BfObject *>(*a), "Not a BfObject");
-   TNLAssert(dynamic_cast<BfObject *>(*b), "Not a BfObject");
-   return ((BfObject *)(*b))->getTeam() - ((BfObject *)(*a))->getTeam();
-}
-
-
 void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
 {
    const Vector<DatabaseObject *> *spyBugs = editorDb->findObjects_fast(SpyBugTypeNumber);

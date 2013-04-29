@@ -117,7 +117,7 @@ bool Joystick::initJoystick(GameSettings *settings)
    bool hasBeenOpenedBefore = (sdlJoystick != NULL);
 
    // Close if already open.
-   if (sdlJoystick != NULL)
+   if(hasBeenOpenedBefore)
    {
       SDL_JoystickClose(sdlJoystick);
       sdlJoystick = NULL;

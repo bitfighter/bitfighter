@@ -2947,7 +2947,7 @@ void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 g
 }
 
 
-void drawStars(const Point *stars, S32 numStars, F32 alphaFrac, bool starsInDistance, Point cameraPos, Point visibleExtent)
+void drawStars(const Point *stars, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent)
 {
    const F32 starChunkSize = 1024;        // Smaller numbers = more dense stars
    const F32 starDist = 3500;             // Bigger value = slower moving stars
@@ -2979,18 +2979,16 @@ void drawStars(const Point *stars, S32 numStars, F32 alphaFrac, bool starsInDist
    glEnableClientState(GL_VERTEX_ARRAY);
    glVertexPointer(2, GL_FLOAT, sizeof(Point), &stars[0]);    // Each star is a pair of floats between 0 and 1
 
-   S32 fx1 = 0, fx2 = 0, fy1 = 0, fy2 = 0;
 
-   if(starsInDistance)
-   {
-      S32 xDist = (S32) (cameraPos.x / starDist);
-      S32 yDist = (S32) (cameraPos.y / starDist);
+   // Do some calculations for the parallax
+   S32 xDist = (S32) (cameraPos.x / starDist);
+   S32 yDist = (S32) (cameraPos.y / starDist);
 
-      fx1 = -1 - xDist;
-      fx2 =  1 - xDist;
-      fy1 = -1 - yDist;
-      fy2 =  1 - yDist;
-   }
+   S32 fx1 = -1 - xDist;
+   S32 fx2 =  1 - xDist;
+   S32 fy1 = -1 - yDist;
+   S32 fy2 =  1 - yDist;
+
 
    glDisable(GL_BLEND);
 
@@ -3000,10 +2998,7 @@ void drawStars(const Point *stars, S32 numStars, F32 alphaFrac, bool starsInDist
          glPushMatrix();
          glScale(starChunkSize);   // Creates points with coords btwn 0 and starChunkSize
 
-         if(starsInDistance)
-            glTranslatef(xPage + (cameraPos.x / starDist), yPage + (cameraPos.y / starDist), 0);
-         else
-            glTranslatef(xPage, yPage, 0);
+         glTranslatef(xPage + (cameraPos.x / starDist), yPage + (cameraPos.y / starDist), 0);
 
          glDrawArrays(GL_POINTS, 0, numStars);
          

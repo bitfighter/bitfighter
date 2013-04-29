@@ -128,7 +128,6 @@ private:
    LevelInfoDisplayer mLevelInfoDisplayer;
    LoadoutIndicator mLoadoutIndicator;
    TimeLeftRenderer mTimeLeftRenderer;
-   UI::FpsRenderer mFpsRenderer;
 
    HelpItemManager mHelpItemManager;
 
@@ -224,6 +223,8 @@ private:
    ChatMessageDisplayer mChatMessageDisplayer1;    // Short form, message expire
    ChatMessageDisplayer mChatMessageDisplayer2;    // Short form, messages do not expire
    ChatMessageDisplayer mChatMessageDisplayer3;    // Long form, messages do not expire
+
+   UI::FpsRenderer mFpsRenderer;
 
    Timer mAnnouncementTimer;
    string mAnnouncement;

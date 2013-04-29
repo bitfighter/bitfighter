@@ -2055,7 +2055,7 @@ void GameUserInterface::renderNormal(ClientGame *game)
    glScalef(scaleFactX, scaleFactY, 1);
    glTranslatef(-mShipPos.x, -mShipPos.y, 0);
 
-   drawStars(mStars, NumStars, 1.0, game->getSettings()->getStarsInDistance(), mShipPos, visExt * 2);
+   drawStars(mStars, NumStars, 1.0, mShipPos, visExt * 2);
 
    // Render all the objects the player can see
    screenSize.set(visExt);
@@ -2202,7 +2202,7 @@ void GameUserInterface::renderCommander(ClientGame *game)
 
    // zoomFrac == 1.0 when fully zoomed out to cmdr's map
    if(zoomFrac < 0.95)
-      drawStars(mStars, NumStars, 1 - zoomFrac, game->getSettings()->getStarsInDistance(), offset, modVisSize);
+      drawStars(mStars, NumStars, 1 - zoomFrac, offset, modVisSize);
  
 
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
