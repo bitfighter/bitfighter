@@ -55,7 +55,7 @@ void TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible) 
 void TimeLeftRenderer::renderTeamScores(const GameType *gameType, S32 bottom) const
 {
    Game *game = gameType->getGame();
-   bool core = gameType->getGameTypeId() == CoreGame;
+//   bool core = gameType->getGameTypeId() == CoreGame;
 
    S32 ypos = bottom - bigScoreTextSize;      
 

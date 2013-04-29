@@ -275,7 +275,6 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
 void UserInterface::renderFancyBox(S32 boxTop, S32 boxHeight, S32 inset, Color borderColor, F32 alpha)
 {
    const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    const S32 CORNER_SIZE = 15;
          Point p[] = {

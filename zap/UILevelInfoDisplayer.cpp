@@ -127,7 +127,6 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount) const
 
    const S32 sideBoxY = 275;     // Top edge of side box
    const S32 sideMargin = UserInterface::horizMargin;
-   const S32 rightEdge = gScreenInfo.getGameCanvasWidth() - sideMargin;
 
    const S32 gameTypeTextSize  = 20;
    const S32 gameTypeMargin    =  8;

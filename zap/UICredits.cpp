@@ -261,8 +261,8 @@ void CreditsScroller::render()
    F32 vertices[] = {
          0, 0,
          0, 150,
-         gScreenInfo.getGameCanvasWidth(), 150,
-         gScreenInfo.getGameCanvasWidth(), 0
+         (F32)gScreenInfo.getGameCanvasWidth(), 150,
+         (F32)gScreenInfo.getGameCanvasWidth(), 0
    };
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
