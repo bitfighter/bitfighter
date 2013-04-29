@@ -117,6 +117,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
    mGotControlUpdate = false;
    
    mFiring = false;
+
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
       mModPrimaryActivated[i] = false;
@@ -168,23 +169,22 @@ void GameUserInterface::onActivate()
    mChatMessageDisplayer3.reset();
 
    mHelpItemManager.reset();
-   mHelpItemManager.queueHelpMessage(WelcomeItem);
+   mHelpItemManager.queueHelpItem(WelcomeItem);
 
    // Queue up some initial help messages for the new users
    GameSettings *settings = getGame()->getSettings();
 
-   if(settings->getInputCodeManager()->getInputMode() == InputModeJoystick)
-      mHelpItemManager.queueHelpMessage(ControlsJSItem);
-   else
-      mHelpItemManager.queueHelpMessage(ControlsKBItem);
+   mHelpItemManager.queueHelpItem(ControlsKBItem);
 
-
-
+   mHelpItemManager.queueHelpItem(ChangeWeaponsItem);
+   mHelpItemManager.queueHelpItem(CmdrsMapItem);
+   mHelpItemManager.queueHelpItem(ChangeConfigItem);
+   
    mHelperManager.reset();
 
    for(S32 i = 0; i < ShipModuleCount; i++)
    {
-      mModPrimaryActivated[i] = false;
+      mModPrimaryActivated[i]   = false;
       mModSecondaryActivated[i] = false;
    }
 
@@ -204,7 +204,7 @@ void GameUserInterface::onReactivate()
 
    for(S32 i = 0; i < ShipModuleCount; i++)
    {
-      mModPrimaryActivated[i] = false;
+      mModPrimaryActivated[i]   = false;
       mModSecondaryActivated[i] = false;
    }
 
@@ -818,6 +818,8 @@ void GameUserInterface::selectWeapon(U32 indx)
    GameType *gameType = getGame()->getGameType();
    if(gameType)
       gameType->c2sSelectWeapon(indx);
+
+   mHelpItemManager.removeHelpItemFromQueue(ChangeWeaponsItem);
 }
 
 
@@ -836,6 +838,9 @@ void GameUserInterface::activateModule(S32 index)
 
    // Now reset the double-tap timer since we've just activate this module
    mModuleDoubleTapTimer[index].reset();
+
+   // Player figured out how to activate their modules... skip related help
+   mHelpItemManager.removeHelpItemFromQueue(ControlsModulesItem);           
 }
 
 
@@ -953,7 +958,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
          if((checkInputCode(settings, InputCodeManager::BINDING_MOD1, inputCode) && ship->getModule(0) == ModuleEngineer) ||
             (checkInputCode(settings, InputCodeManager::BINDING_MOD2, inputCode) && ship->getModule(1) == ModuleEngineer))
          {
-            string msg = EngineerModuleDeployer::checkResourcesAndEnergy(ship);      // Returns "" if ok, error message otherwise
+            string msg = EngineerModuleDeployer::checkResourcesAndEnergy(ship);  // Returns "" if ok, error message otherwise
 
             if(msg != "")
                displayErrorMessage(msg.c_str());
@@ -1072,8 +1077,11 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       activateModule(0);
    else if(checkInputCode(settings, InputCodeManager::BINDING_MOD2, inputCode))       
       activateModule(1);
-   else if(checkInputCode(settings, InputCodeManager::BINDING_FIRE, inputCode))       
+   else if(checkInputCode(settings, InputCodeManager::BINDING_FIRE, inputCode))
+   {
       mFiring = true;
+      mHelpItemManager.removeHelpItemFromQueue(ControlsKBItem, 0xFF - 1);
+   }
    else if(checkInputCode(settings, InputCodeManager::BINDING_SELWEAP1, inputCode))
       selectWeapon(0);
    else if(checkInputCode(settings, InputCodeManager::BINDING_SELWEAP2, inputCode))
@@ -1125,7 +1133,10 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       }
    }     
    else if(checkInputCode(settings, InputCodeManager::BINDING_CMDRMAP, inputCode))
+   {
       getGame()->toggleCommanderMap();
+      mHelpItemManager.removeHelpItemFromQueue(CmdrsMapItem);          
+   }
 
    else if(checkInputCode(settings, InputCodeManager::BINDING_SCRBRD, inputCode))
    {     // (braces needed)
@@ -1298,11 +1309,16 @@ Move *GameUserInterface::getCurrentMove()
                               (InputCodeManager::getState(getInputCode(settings, InputCodeManager::BINDING_UP))    ? 1 : 0));
       }
 
+      // If player is moving, do not show move instructions
+      if(mCurrentMove.y > 0 || mCurrentMove.x > 0)
+         mHelpItemManager.removeHelpItemFromQueue(ControlsKBItem, 1);
+
+
       mCurrentMove.fire = mFiring;
 
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)
       {
-         mCurrentMove.modulePrimary[i] = mModPrimaryActivated[i];
+         mCurrentMove.modulePrimary[i]   = mModPrimaryActivated[i];
          mCurrentMove.moduleSecondary[i] = mModSecondaryActivated[i];
       }
    }
@@ -1338,8 +1354,8 @@ Move *GameUserInterface::getCurrentMove()
       mTransformedMove.y = newMoveDir.y;
 
       // Sanity checks
-      mTransformedMove.x = min(1.0f, mTransformedMove.x);
-      mTransformedMove.y = min(1.0f, mTransformedMove.y);
+      mTransformedMove.x = min( 1.0f, mTransformedMove.x);
+      mTransformedMove.y = min( 1.0f, mTransformedMove.y);
       mTransformedMove.x = max(-1.0f, mTransformedMove.x);
       mTransformedMove.y = max(-1.0f, mTransformedMove.y);
 
@@ -2086,12 +2102,26 @@ void GameUserInterface::renderNormal(ClientGame *game)
    static Vector<const Vector<Point> *> polygons;
    polygons.clear();
 
-   const Vector<U8> *itemsToHighlight = mHelpItemManager.getItemsToHighlight();
+   const Vector<HighlightItem> *itemsToHighlight = mHelpItemManager.getItemsToHighlight();
 
    for(S32 i = 0; i < itemsToHighlight->size(); i++)
       for(S32 j = 0; j < renderObjects.size(); j++)
-         if(itemsToHighlight->get(i) == renderObjects[j]->getObjectTypeNumber())
-            polygons.push_back(renderObjects[j]->getOutline());
+         if(itemsToHighlight->get(i).type == renderObjects[j]->getObjectTypeNumber())
+         {
+            HighlightItem::Whose whose = itemsToHighlight->get(i).whose;
+
+            S32 team = renderObjects[j]->getTeam();
+            S32 playerTeam = ship ? ship->getTeam() : NO_TEAM;
+
+            if(whose == HighlightItem::Any ||
+               whose == HighlightItem::Team && team == playerTeam ||
+               whose == HighlightItem::TorNeut && (team == playerTeam || team == TEAM_NEUTRAL) ||
+               whose == HighlightItem::Enemy && (team >= 0 && team != playerTeam || team == TEAM_HOSTILE) ||
+               whose == HighlightItem::Neutral && team == TEAM_NEUTRAL ||
+               whose == HighlightItem::Hostile && team == TEAM_HOSTILE)
+
+               polygons.push_back(renderObjects[j]->getOutline());
+         }
 
    if(polygons.size() > 0)
    {

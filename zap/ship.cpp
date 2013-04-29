@@ -1464,7 +1464,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       ClientInfo *clientInfo = getGame()->findClientInfo(playerName);
 
       // A null player name is the tell-tale sign of a 'Ship' object in the level file
-//      TNLAssert(clientInfo || playerName.isNull(), "We need a clientInfo for this ship!");
+      // TNLAssert(clientInfo || playerName.isNull(), "We need a clientInfo for this ship!");
 
       mClientInfo = clientInfo;
 
@@ -1501,7 +1501,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          if(mLoadout.getModule(i) == ModuleSensor)
             hasSensorNow = true;
 
-         if(mLoadout.getModule(i) == ModuleEngineer)
+         else if(mLoadout.getModule(i) == ModuleEngineer)
             hasEngineerModule = true;
       }
 
@@ -1514,13 +1514,13 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       ClientGame *game = static_cast<ClientGame*>(getGame());
 
-      if(!hasEngineerModule)  // can't engineer without this module
+      if(!hasEngineerModule)           // Can't engineer without this module
       {
-         if(isLocalPlayerShip(game))  // If this ship is ours, quit engineer menu.
+         if(isLocalPlayerShip(game))   // If this ship is ours, quit engineer menu
             game->quitEngineerHelper();
       }
 
-      // Alert the UI that a new loadout has arrived
+      // Alert the UI that a new loadout has arrived (ClientGame->GameUI->LoadoutIndicator)
       if(isLocalPlayerShip(game))
          game->newLoadoutHasArrived(mLoadout);
 
@@ -1869,7 +1869,7 @@ void Ship::kill()
    if(isServer())    // Server only
    {
       if(getOwner())
-         getOwner()->setOldLoadout(mLoadout);      // Save current loadout in getOwner()->mOldLoadout
+         getOwner()->saveActiveLoadout(mLoadout);      // Save current loadout in getOwner()->mActiveLoadout
 
       // Fire some events, starting with ShipKilledEvent
       EventManager::get()->fireEvent(EventManager::ShipKilledEvent, this);

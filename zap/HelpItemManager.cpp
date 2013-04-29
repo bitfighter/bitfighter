@@ -16,30 +16,27 @@ namespace Zap { namespace UI {
 
 
 enum Priority {
-   Paced,         // These will be doled out in drips and drabs
+   Paced,   // These will be doled out in drips and drabs
    Low,
    High,
-   Immediate      // Add regardless of flood control
+   Now      // Add regardless of flood control
 };
-
-
-//enum Whose {
-
 
 
 static const S32 MAX_LINES = 8;     // Excluding sentinel item
 
 struct HelpItems {
    U8 associatedItem;
+   HighlightItem::Whose whose;
    Priority priority;
    const char *helpMessages[MAX_LINES + 1];
 };
 
 
 static HelpItems helpItems[] = {
-#define HELP_TABLE_ITEM(a, assItem, priority, msgs) { assItem, priority, msgs},
+#  define HELP_TABLE_ITEM(a, assItem, whose, priority, msgs) { assItem, HighlightItem::whose, priority, msgs},
       HELP_ITEM_TABLE
-   #undef HELP_TABLE_ITEM
+#  undef HELP_TABLE_ITEM
 };
 
 
@@ -76,12 +73,13 @@ void HelpItemManager::idle(U32 timeDelta)
    // Add queued items
    if(mPacedTimer.getCurrent() == 0 && mQueuedItems.size() > 0)
    {
-      HelpItem queuedMessage = mQueuedItems[0];
+      HelpItem queuedMessage = mQueuedItems[0].helpItem;
       mQueuedItems.erase(0);
 
       addHelpItem(queuedMessage);
       mPacedTimer.reset();
    }
+
 
    for(S32 i = 0; i < mHelpTimer.size(); i++)
       if(mHelpTimer[i].update(timeDelta))
@@ -135,9 +133,34 @@ void HelpItemManager::renderMessages(S32 yPos) const
 }
 
 
-void HelpItemManager::queueHelpMessage(HelpItem msg)
+void HelpItemManager::queueHelpItem(HelpItem item)
 {
-    mQueuedItems.push_back(msg);
+   WeightedHelpItem weightedItem;
+   weightedItem.helpItem = item;
+   weightedItem.removalWeight = 0;
+
+   mQueuedItems.push_back(weightedItem);
+}
+
+
+// The weight factor allows us to require several events to "vote" for removing an item before 
+// it happens... basically once the weights OR to 0xFF, the item is toast.
+void HelpItemManager::removeHelpItemFromQueue(HelpItem msg, U8 weight)
+{
+   S32 index = -1;
+   for(S32 i = 0; i < mQueuedItems.size(); i++)
+      if(mQueuedItems[i].helpItem == msg)
+      {
+         index = i;
+         break;
+      }
+
+    if(index != -1)
+    {
+       mQueuedItems[index].removalWeight |= weight;
+       if(mQueuedItems[index].removalWeight == 0xFF)
+         mQueuedItems.erase(index);
+    }
 }
 
 
@@ -187,12 +210,13 @@ void HelpItemManager::addHelpItem(HelpItem msg)
    if(mAlreadySeen[msg])
       return;
 
-   // Limit the pacing of new items added -- unless item has immediate priority
-   if(mFloodControl.getCurrent() > 0 && helpItems[msg].priority != Immediate)
+   // Limit the pacing of new items added -- don't add if there are queued items waiting, or priority is Now
+   if((mFloodControl.getCurrent() > 0 || mQueuedItems.size() > 0) && 
+      (helpItems[msg].priority != Now && helpItems[msg].priority != Paced))
       return;
 
    mHelpItems.push_back(msg);
-   mHelpTimer.push_back(Timer(10000));    // Display time
+   mHelpTimer.push_back(Timer(7 * 1000));    // Display time
    mHelpFading.push_back(false);
 
    mAlreadySeen[msg] = true;
@@ -203,7 +227,7 @@ void HelpItemManager::addHelpItem(HelpItem msg)
 }
 
 
-const Vector<U8> *HelpItemManager::getItemsToHighlight() const
+const Vector<HighlightItem> *HelpItemManager::getItemsToHighlight() const
 {
    return &mItemsToHighlight;
 }
@@ -215,10 +239,16 @@ void HelpItemManager::buildItemsToHighlightList()
 
    for(S32 i = 0; i < mHelpItems.size(); i++)
    {
-      U8 assItem = helpItems[mHelpItems[i]].associatedItem;
+      U8 itemType = helpItems[mHelpItems[i]].associatedItem;
 
-      if(assItem != UnknownTypeNumber)
-         mItemsToHighlight.push_back(assItem);
+      if(itemType != UnknownTypeNumber)
+      {
+         HighlightItem item;
+         item.type = itemType;
+         item.whose = helpItems[mHelpItems[i]].whose;
+      
+         mItemsToHighlight.push_back(item);
+      }
    }
 }
 

@@ -256,7 +256,7 @@ void ClientInfo::resetLoadout(bool levelHasLoadoutZone)
    LoadoutTracker loadout = getOnDeckLoadout();
 
    resetLoadout();
-   mOldLoadout.resetLoadout();
+   mActiveLoadout.resetLoadout();
 
    // If the current level has a loadout zone, put last level's load-out on-deck
    if(levelHasLoadoutZone)
@@ -277,15 +277,16 @@ const LoadoutTracker &ClientInfo::getOnDeckLoadout() const
 
 
 // Resets this mOldLoadout to its factory settings
-void ClientInfo::resetOldLoadout()
+void ClientInfo::resetActiveLoadout()
 {
-   mOldLoadout.resetLoadout();
+   mActiveLoadout.resetLoadout();
 }
 
 
-void ClientInfo::setOldLoadout(const LoadoutTracker &loadout)
+// This is only called when a ship/bot dies
+void ClientInfo::saveActiveLoadout(const LoadoutTracker &loadout)
 {
-   mOldLoadout = loadout;
+   mActiveLoadout = loadout;
 }
 
 
@@ -538,7 +539,7 @@ void ClientInfo::requestLoadout(const LoadoutTracker &loadout)
 
 const LoadoutTracker &ClientInfo::getOldLoadout() const
 {
-   return mOldLoadout;
+   return mActiveLoadout;
 }
 
 

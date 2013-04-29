@@ -360,7 +360,9 @@ void ControlObjectConnection::readCompressedPoint(Point &p, BitStream *stream)
 void ControlObjectConnection::addToTimeCredit(U32 timeAmount)
 {
    mMoveTimeCredit += timeAmount;
-   if(mMoveTimeCredit > MaxMoveTimeCredit){
+   
+   if(mMoveTimeCredit > MaxMoveTimeCredit)
+   {
       // Prevent unlimited shield when client is freezing, slow, or lagging (or some cheater has triggered a breakpoint in rabbit!)
       if(controlObject.isValid())
       {
@@ -368,8 +370,8 @@ void ControlObjectConnection::addToTimeCredit(U32 timeAmount)
          move.time = mMoveTimeCredit - MaxMoveTimeCredit;
          controlObject->setCurrentMove(move);
          controlObject->idle(BfObject::ServerIdleControlFromClient);
-
       }
+
       mMoveTimeCredit = MaxMoveTimeCredit;
    }
 }

@@ -1424,7 +1424,7 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
          } 
       }
 
-      clientInfo->resetOldLoadout();      // Why?
+      //clientInfo->resetActiveLoadout();      // Why?
    }
 
    return true;

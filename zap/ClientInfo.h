@@ -71,7 +71,7 @@ private:
    Statistics mStatistics;       // Statistics tracker
    SafePtr<Ship> mShip;          // SafePtr will return NULL if ship object is deleted
    LoadoutTracker mOnDeckLoadout;
-   LoadoutTracker mOldLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
+   LoadoutTracker mActiveLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
 
    bool mNeedToCheckAuthenticationWithMaster;
 
@@ -115,8 +115,8 @@ public:
    const LoadoutTracker &getOnDeckLoadout() const;
    const LoadoutTracker &getOldLoadout() const;
 
-   void resetOldLoadout();
-   void setOldLoadout(const LoadoutTracker &loadout);
+   void resetActiveLoadout();
+   void saveActiveLoadout(const LoadoutTracker &loadout);
    void updateLoadout(bool useOnDeck, bool engineerAllowed, bool silent = false);
    void resetLoadout(bool levelHasLoadoutZone);
    void resetLoadout();

@@ -309,7 +309,7 @@ void Robot::kill()
 
    setMaskBits(ExplodedMask);
    if(!isGhost() && getOwner())
-      getOwner()->setOldLoadout(mLoadout);
+      getOwner()->saveActiveLoadout(mLoadout);
 
    disableCollision();
 
