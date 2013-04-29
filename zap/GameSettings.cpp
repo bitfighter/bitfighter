@@ -1162,12 +1162,6 @@ const Color *GameSettings::getWallOutlineColor() const
 }
 
 
-bool GameSettings::getStarsInDistance() const
-{
-   return mIniSettings.starsInDistance;
-}
-
-
 // Accessor methods
 U32 GameSettings::getSimulatedStutter()
 {
