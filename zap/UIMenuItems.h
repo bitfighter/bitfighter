@@ -316,7 +316,6 @@ public:
 
    virtual MenuItemTypes getItemType();
    virtual string getValueForDisplayingInMenu();
-   virtual const char *getUnits();
    virtual S32 getIntValue() const;
    virtual void setValue(const string &val);
    virtual void setIntValue(S32 val);
@@ -352,7 +351,7 @@ public:
    TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
                        S32 step = 5, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
-   virtual const char *getUnits();
+   virtual string getUnits() const;
 
    virtual MenuItemTypes getItemType();
    virtual void setValue (const string &val);
