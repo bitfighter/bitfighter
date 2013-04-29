@@ -1405,12 +1405,12 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
       if(!levelHasLoadoutZone())
       {
          // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
-         clientInfo->updateLoadout(mEngineerEnabled);
+         clientInfo->updateLoadout(true, mEngineerEnabled);
       }
       else
       {
          // Still using old loadout because we haven't entered a loadout zone yet...
-         clientInfo->updateLoadout(mEngineerEnabled, true);
+         clientInfo->updateLoadout(false, mEngineerEnabled, true);
 
          // Unless we're actually spawning onto a loadout zone
          Vector<DatabaseObject *> loadoutZones;
@@ -1495,11 +1495,12 @@ void GameType::updateShipLoadout(BfObject *shipObject)
    ClientInfo *clientInfo = shipObject->getOwner();
 
    if(clientInfo)
-      clientInfo->updateLoadout(mEngineerEnabled);
+      clientInfo->updateLoadout(true, mEngineerEnabled);
 }
 
 
 // Set the "on-deck" loadout for a ship, and make it effective immediately if we're in a loadout zone
+// clientInfo already has the loadout; we only get here from ClientInfo::requestLoadout
 // Server only, called in direct response to request from client via c2sRequestLoadout()
 void GameType::clientRequestLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout)
 {
@@ -1511,7 +1512,7 @@ void GameType::clientRequestLoadout(ClientInfo *clientInfo, const LoadoutTracker
 
       if(object)
          if(object->getTeam() == ship->getTeam() || object->getTeam() == -1)
-            clientInfo->updateLoadout(mEngineerEnabled, false);
+            clientInfo->updateLoadout(true, mEngineerEnabled, false);
    }
 }
 

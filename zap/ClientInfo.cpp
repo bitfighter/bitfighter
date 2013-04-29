@@ -217,11 +217,13 @@ bool ClientInfo::isLoadoutValid(const LoadoutTracker &loadout, bool engineerAllo
 
 // Server only -- to trigger this on client, use GameConnection::c2sRequestLoadout()
 // Updates the ship's loadout to the current or on-deck loadout
-void::ClientInfo::updateLoadout(bool engineerAllowed, bool silent)
+void::ClientInfo::updateLoadout(bool useOnDeck, bool engineerAllowed, bool silent)
 {
-   LoadoutTracker loadout = getLoadout();
+   LoadoutTracker loadout = current ? getOnDeckLoadout() : getOldLoadout();
 
-   if(!isLoadoutValid(loadout, engineerAllowed))
+   // This could be triggered if on-deck loadout were set on a level where engineer were allowed,
+   // but not actualized until after a level change where engineer was banned.
+   if(!isLoadoutValid(loadout, engineerAllowed))   
       return;
 
    Ship *ship = getShip();
@@ -230,6 +232,7 @@ void::ClientInfo::updateLoadout(bool engineerAllowed, bool silent)
    if(ship)
       loadoutChanged = ship->setLoadout(loadout.toU8Vector(), silent);
 
+   // Write some stats
    if(loadoutChanged)
    {
       // This builds a loadout 'hash' by devoting the first 16 bits to modules, the
@@ -250,7 +253,7 @@ void::ClientInfo::updateLoadout(bool engineerAllowed, bool silent)
 void ClientInfo::resetLoadout(bool levelHasLoadoutZone)
 {
    // Save current loadout to put on-deck
-   LoadoutTracker loadout = getLoadout();
+   LoadoutTracker loadout = getOnDeckLoadout();
 
    resetLoadout();
    mOldLoadout.resetLoadout();
@@ -263,16 +266,17 @@ void ClientInfo::resetLoadout(bool levelHasLoadoutZone)
 
 void ClientInfo::resetLoadout()
 {
-   mLoadout.setLoadout(DefaultLoadout);
+   mOnDeckLoadout.setLoadout(DefaultLoadout);
 }
 
 
-const LoadoutTracker &ClientInfo::getLoadout() const
+const LoadoutTracker &ClientInfo::getOnDeckLoadout() const
 {
-   return mLoadout;
+   return mOnDeckLoadout;
 }
 
 
+// Resets this mOldLoadout to its factory settings
 void ClientInfo::resetOldLoadout()
 {
    mOldLoadout.resetLoadout();
@@ -517,17 +521,18 @@ void ClientInfo::sTeleporterCleanup()
 }
 
 
+// Client has requested a new loadout
 void ClientInfo::requestLoadout(const LoadoutTracker &loadout)
 {
    if(!loadout.isValid())
       return;
 
-   mLoadout = loadout;
+   mOnDeckLoadout = loadout;
 
    GameType *gt = mGame->getGameType();
 
    if(gt)
-      gt->clientRequestLoadout(this, mLoadout);    // This will set loadout if ship is in loadout zone
+      gt->clientRequestLoadout(this, loadout);    // This will set loadout if ship is in loadout zone
 }
 
 

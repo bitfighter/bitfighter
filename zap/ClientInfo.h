@@ -70,7 +70,7 @@ private:
    LuaPlayerInfo *mPlayerInfo;   // Lua access to this class
    Statistics mStatistics;       // Statistics tracker
    SafePtr<Ship> mShip;          // SafePtr will return NULL if ship object is deleted
-   LoadoutTracker mLoadout;
+   LoadoutTracker mOnDeckLoadout;
    LoadoutTracker mOldLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
 
    bool mNeedToCheckAuthenticationWithMaster;
@@ -111,17 +111,19 @@ public:
    void setScore(S32 score);
    void addScore(S32 score);
 
-   const LoadoutTracker &getLoadout() const;
+   // Whole mess of loadout related functions
+   const LoadoutTracker &getOnDeckLoadout() const;
    const LoadoutTracker &getOldLoadout() const;
+
    void resetOldLoadout();
    void setOldLoadout(const LoadoutTracker &loadout);
-
-   Timer respawnTimer;
-
-   void updateLoadout(bool engineerAllowed, bool silent = false);
+   void updateLoadout(bool useOnDeck, bool engineerAllowed, bool silent = false);
    void resetLoadout(bool levelHasLoadoutZone);
    void resetLoadout();
    void requestLoadout(const LoadoutTracker &loadout);
+
+   Timer respawnTimer;
+
 
    bool isLoadoutValid(const LoadoutTracker &loadout, bool engineerAllowed);
 

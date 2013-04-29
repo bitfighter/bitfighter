@@ -53,7 +53,6 @@
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "UIMenus.h"
-//#  include "UIGame.h"
 #endif
 
 #include "MathUtils.h"  // For radiansToDegrees
@@ -2420,7 +2419,7 @@ S32 Ship::lua_getReqLoadout(lua_State *L)
    LoadoutTracker requestedLoadout;
 
     if(clientInfo) 
-       requestedLoadout = clientInfo->getLoadout();
+       requestedLoadout = clientInfo->getOnDeckLoadout();
 
     if(!requestedLoadout.isValid()) 
       return lua_getCurrLoadout(L);
