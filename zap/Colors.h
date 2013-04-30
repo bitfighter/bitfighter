@@ -73,6 +73,7 @@ namespace Colors
 
    // Greens
    const Color richGreen(0, .35f, 0);
+   const Color green50(0, .50f, 0);
    const Color green65(0, .65f, 0);
    const Color green80(0, .80f, 0);
 

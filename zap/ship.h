@@ -209,7 +209,7 @@ public:
 
    Vector<SafePtr<BfObject> > mRepairTargets;            // TODO: Make this protected
 
-   virtual void render(S32 layerIndex);
+   virtual void renderLayer(S32 layerIndex);
 
    // Constructor
    Ship(ClientInfo *clientInfo, S32 team, const Point &p, bool isRobot = false);   // Standard constructor   
@@ -278,7 +278,7 @@ public:
 
    ShipModule getModule(U32 modIndex);
 
-   virtual void kill(DamageInfo *theInfo);
+   virtual void killAndScore(DamageInfo *theInfo);
    virtual void kill();
 
    void destroyPartiallyDeployedTeleporter();

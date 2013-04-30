@@ -1198,7 +1198,7 @@ void Ship::damageObject(DamageInfo *theInfo)
    if(mHealth <= 0)
    {
       mHealth = 0;
-      kill(theInfo);
+      killAndScore(theInfo);
    }
    else if(mHealth > 1)
       mHealth = 1;
@@ -1850,7 +1850,7 @@ ShipModule Ship::getModule(U32 modIndex)
 }
 
 
-void Ship::kill(DamageInfo *theInfo)
+void Ship::killAndScore(DamageInfo *theInfo)
 {
    if(isClient())     // Server only, please...
       return;
@@ -2119,7 +2119,7 @@ void Ship::emitMovementSparks()
 }
 
 
-void Ship::render(S32 layerIndex)
+void Ship::renderLayer(S32 layerIndex)
 {
    TNLAssert(getGame()->getGameType(), "gameType should always be valid here");
 

@@ -153,7 +153,9 @@ public:
                                  float &collisionTime, Point &surfaceNormal) const;
    DatabaseObject *findObjectLOS(TestFunc testFunc, U32 stateIndex, const Point &rayStart, const Point &rayEnd,
                                  float &collisionTime, Point &surfaceNormal) const;
+
    bool pointCanSeePoint(const Point &point1, const Point &point2);
+   void computeSelectionMinMax(Point &min, Point &max);
 
    void findObjects(Vector<DatabaseObject *> &fillVector) const;     // Returns all objects in the database
    const Vector<DatabaseObject *> *findObjects_fast() const;         // Faster than above, but results can't be modified

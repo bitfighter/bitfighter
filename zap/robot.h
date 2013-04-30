@@ -79,7 +79,7 @@ public:
 
    void kill();
 
-   void render(S32 layerIndex);
+   void renderLayer(S32 layerIndex);
    void idle(IdleCallPath path);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
