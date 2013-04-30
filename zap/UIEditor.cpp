@@ -2186,35 +2186,6 @@ bool EditorUserInterface::anyItemsSelected(GridDatabase *database)
 }
 
 
-// TODO: Move this method to GridDatabase!!
-// Find all objects in bounds, populate points passed in min & max
-void EditorUserInterface::computeSelectionMinMax(GridDatabase *database, Point &min, Point &max)
-{
-   min.set( F32_MAX,  F32_MAX);
-   max.set(-F32_MAX, -F32_MAX);
-
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-
-   for(S32 i = 0; i < objList->size(); i++)
-   {
-      BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-      if(obj->isSelected())
-      {
-         for(S32 j = 0; j < obj->getVertCount(); j++)
-         {
-            Point v = obj->getVert(j);
-
-            if(v.x < min.x)   min.x = v.x;
-            if(v.x > max.x)   max.x = v.x;
-            if(v.y < min.y)   min.y = v.y;
-            if(v.y > max.y)   max.y = v.y;
-         }
-      }
-   }
-}
-
-
 // Copy selection to the clipboard
 void EditorUserInterface::copySelection()
 {
@@ -2299,7 +2270,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
 
    // Find center of selection
    Point min, max;                        
-   computeSelectionMinMax(database, min, max);
+   database->computeSelectionMinMax(min, max);
    Point ctr = (min + max) * 0.5;
 
    if(scale > 1 && min.distanceTo(max) * scale  > 50 * getGame()->getGridSize())    // If walls get too big, they'll bog down the db
@@ -2443,7 +2414,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 void EditorUserInterface::flipSelectionHorizontal()
 {
    Point min, max;
-   computeSelectionMinMax(getDatabase(), min, max);
+   getDatabase()->computeSelectionMinMax(min, max);
    F32 centerX = (min.x + max.x) / 2;
 
    flipSelection(centerX, true);
@@ -2453,7 +2424,7 @@ void EditorUserInterface::flipSelectionHorizontal()
 void EditorUserInterface::flipSelectionVertical()
 {
    Point min, max;
-   computeSelectionMinMax(getDatabase(), min, max);
+   getDatabase()->computeSelectionMinMax(min, max);
    F32 centerY = (min.y + max.y) / 2;
 
    flipSelection(centerY, false);
@@ -2470,7 +2441,7 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
    saveUndoState();
 
    Point min, max;
-   computeSelectionMinMax(database, min, max);
+   database->computeSelectionMinMax(min, max);
 //   F32 centerX = (min.x + max.x) / 2;
 
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();

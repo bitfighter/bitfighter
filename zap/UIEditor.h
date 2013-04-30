@@ -224,7 +224,6 @@ private:
    SafePtr<BfObject> mDraggingDockItem;
    SafePtr<BfObject> mDockItemHit;
 
-   void computeSelectionMinMax(GridDatabase *database, Point &min, Point &max);
    bool mouseOnDock();                // Return whether mouse is currently over the dock
    bool mNeedToSave;                  // Have we modified the level such that we need to save?
 
