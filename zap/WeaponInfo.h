@@ -26,9 +26,11 @@
 #ifndef WEAPONINFO_H_
 #define WEAPONINFO_H_
 
+//#include "Color.h"
+//#include "SoundSystem.h"
+
 #include "tnlNetStringTable.h"
-#include "Color.h"
-#include "SoundSystem.h"
+
 
 using namespace TNL;
 
@@ -87,24 +89,8 @@ struct WeaponInfo
    F32 damageSelfMultiplier;        // Adjust damage if you shoot yourself
    bool canDamageTeammate;
    ProjectileType projectileType;   // If this is a projectile item, which sort is it?  If not, use NotAProjectile
-};
 
-
-/////////////////////////////////////
-/////////////////////////////////////
-
-static const U32 NumSparkColors = 4;
-
-struct ProjectileInfo
-{
-   ProjectileInfo(Color _sparkColor1, Color _sparkColor2, Color _sparkColor3, Color _sparkColor4, Color _projColor1,
-         Color _projColor2, F32 _scaleFactor, SFXProfiles _projectileSound, SFXProfiles _impactSound );
-
-   Color       sparkColors[NumSparkColors];
-   Color       projColors[2];
-   F32         scaleFactor;
-   SFXProfiles projectileSound;
-   SFXProfiles impactSound;
+   static WeaponInfo getWeaponInfo(WeaponType weaponType);
 };
 
 

@@ -1059,11 +1059,13 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
 
    for(S32 i = 0; i < WeaponCount; i++)
    {
+      WeaponInfo weaponInfo = WeaponInfo::getWeaponInfo(WeaponType(i));
+
       lua_pushinteger(L, i);                       // table, index
       lua_newtable(L);                             // table, index, table
 
       lua_pushstring(L, "name");
-      lua_pushstring(L, GameWeapon::weaponInfo[i].name.getString());
+      lua_pushstring(L, weaponInfo.name.getString());
       lua_rawset(L, -3);
 
       lua_pushstring(L, "classId");
@@ -1071,35 +1073,35 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
       lua_rawset(L, -3);
 
       lua_pushstring(L, "fireDelay");
-      lua_pushinteger(L, GameWeapon::weaponInfo[i].fireDelay);
+      lua_pushinteger(L, weaponInfo.fireDelay);
       lua_rawset(L, -3);
 
       lua_pushstring(L, "minEnergy");
-      lua_pushinteger(L, GameWeapon::weaponInfo[i].minEnergy);
+      lua_pushinteger(L, weaponInfo.minEnergy);
       lua_rawset(L, -3);
 
       lua_pushstring(L, "energyDrain");
-      lua_pushinteger(L, GameWeapon::weaponInfo[i].drainEnergy);
+      lua_pushinteger(L, weaponInfo.drainEnergy);
       lua_rawset(L, -3);
 
       lua_pushstring(L, "projectileVelocity");
-      lua_pushinteger(L, GameWeapon::weaponInfo[i].projVelocity);
+      lua_pushinteger(L, weaponInfo.projVelocity);
       lua_rawset(L, -3);
 
       lua_pushstring(L, "projectileLifeTime");
-      lua_pushinteger(L, GameWeapon::weaponInfo[i].projLiveTime);
+      lua_pushinteger(L, weaponInfo.projLiveTime);
       lua_rawset(L, -3);
 
       lua_pushstring(L, "damage");
-      lua_pushnumber(L, GameWeapon::weaponInfo[i].damageAmount);
+      lua_pushnumber(L, weaponInfo.damageAmount);
       lua_rawset(L, -3);
 
       lua_pushstring(L, "damageSelf");
-      lua_pushnumber(L, GameWeapon::weaponInfo[i].damageAmount * GameWeapon::weaponInfo[i].damageSelfMultiplier);
+      lua_pushnumber(L, weaponInfo.damageAmount * weaponInfo.damageSelfMultiplier);
       lua_rawset(L, -3);
 
       lua_pushstring(L, "canDamageTeammate");
-      lua_pushboolean(L, GameWeapon::weaponInfo[i].canDamageTeammate);
+      lua_pushboolean(L, weaponInfo.canDamageTeammate);
       lua_rawset(L, -3);
 
       lua_rawset(L, -3);                           // table

@@ -28,6 +28,7 @@
 
 //#include "WeaponInfo.h"    // For weapon defs for DefaultLoadout list
 #include "tnlTypes.h"
+#include "tnlAssert.h"
 #include <string>
 
 using namespace TNL;
@@ -89,16 +90,20 @@ struct ModuleInfo
    const char *mMenuHelp;
 
    S32 getPrimaryEnergyDrain() const;
-   S32 getPrimaryPerUseCost() const;
+   S32 getPrimaryPerUseCost()  const;
    bool hasSecondary() const;
    S32 getSecondaryPerUseCost() const;
-   const char *getName() const;
-   ModulePrimaryUseType getPrimaryUseType() const;
+    ModulePrimaryUseType getPrimaryUseType() const;
+
+   const char *getName()     const;
    const char *getMenuName() const;
    const char *getMenuHelp() const;
+
+   static const ModuleInfo *getModuleInfo(ShipModule module);
 };
 
 extern const ModuleInfo gModuleInfo[ModuleCount];
+
 
 };
 #endif

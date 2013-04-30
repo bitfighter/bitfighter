@@ -1222,7 +1222,7 @@ S32 Robot::lua_getFiringSolution(lua_State *L)
 
    BfObject *target = luaW_check<BfObject>(L, 1);
 
-   WeaponInfo weap = GameWeapon::weaponInfo[mLoadout.getCurrentWeapon()];    // Robot's active weapon
+   WeaponInfo weap = WeaponInfo::getWeaponInfo(mLoadout.getCurrentWeapon());    // Robot's active weapon
 
    F32 interceptAngle;
 

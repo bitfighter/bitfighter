@@ -301,8 +301,6 @@ public:
 
    virtual const Color *getTeamColor(S32 teamId) const;
 
-   static const ModuleInfo *getModuleInfo(ShipModule module);
-   
    void computeWorldObjectExtents();
    Rect computeBarrierExtents();
 

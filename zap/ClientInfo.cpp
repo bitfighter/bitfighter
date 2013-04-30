@@ -23,13 +23,14 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "ship.h"
 #include "ClientInfo.h"
+
 #include "gameConnection.h"
 #include "playerInfo.h"
 #include "EditorObject.h"        // For NO_TEAM def
 #include "EngineeredItem.h"      // For EngineerModuleDeployer def
 
+#include "SoundEffect.h"
 #include "voiceCodec.h"
 
 
@@ -460,14 +461,14 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
       gameType->broadcastMessage(GameConnection::ColorAqua, SFXNone, msg, e);
 
       // Finally, deduct energy cost
-      S32 energyCost = Game::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
+      S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
       ship->creditEnergy(-energyCost);    // Deduct energy from engineer
 
       return true;
    }
 
    // Else deployment failed and we need to credit some energy back to the client
-   S32 energyCost = Game::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
+   S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
    getConnection()->s2cCreditEnergy(energyCost);  
 
    // And depart quietly

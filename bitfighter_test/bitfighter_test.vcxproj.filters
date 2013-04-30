@@ -4,5 +4,8 @@
     <ClCompile Include="..\zap\Point.cpp" />
     <ClCompile Include="main_test.cpp" />
     <ClCompile Include="..\zap\stringUtils.cpp" />
+    <ClCompile Include="..\zap\LoadoutTracker.cpp" />
+    <ClCompile Include="..\zap\WeaponInfo.cpp" />
+    <ClCompile Include="..\zap\shipItems.cpp" />
   </ItemGroup>
 </Project>

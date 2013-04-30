@@ -30,6 +30,7 @@
 #include "WeaponInfo.h"
 
 #include "tnlTypes.h"
+#include "tnlVector.h"
 #include <string>
 
 using namespace TNL;
@@ -55,14 +56,11 @@ public:
    LoadoutTracker();                            // Constructor
    LoadoutTracker(const string &loadoutStr);  
    LoadoutTracker(const Vector<U8> &loadout);
-   LoadoutTracker(const LuaLoadout *loadout);
-
 
    bool operator == (const LoadoutTracker &other) const;
    bool operator != (const LoadoutTracker &other) const;
 
    bool update(const LoadoutTracker &tracker);
-   //bool update(const ShipModule *modules, const WeaponType *weapons);
 
    // Set loadout in bulk
    void setLoadout(const Vector<U8> &items);   // Pass an array of U8s repesenting loadout... M,M,W,W,W

@@ -500,13 +500,15 @@ void GameType::printRules()
    printf("Projectiles:\n\n");
    for(S32 i = 0; i < WeaponCount; i++)
    {
-      printf("Name: %s \n",                          GameWeapon::weaponInfo[i].name.getString());
-      printf("\tEnergy Drain: %d\n",                 GameWeapon::weaponInfo[i].drainEnergy);
-      printf("\tVelocity: %d\n",                     GameWeapon::weaponInfo[i].projVelocity);
-      printf("\tLifespan (ms): %d\n",                GameWeapon::weaponInfo[i].projLiveTime);
-      printf("\tDamage: %2.2f\n",                    GameWeapon::weaponInfo[i].damageAmount);
-      printf("\tDamage To Self Multiplier: %2.2f\n", GameWeapon::weaponInfo[i].damageSelfMultiplier);
-      printf("\tCan Damage Teammate: %s\n",          GameWeapon::weaponInfo[i].canDamageTeammate ? "Yes" : "No");
+      WeaponInfo weaponInfo = WeaponInfo::getWeaponInfo(WeaponType(i));
+
+      printf("Name: %s \n",                          weaponInfo.name.getString());
+      printf("\tEnergy Drain: %d\n",                 weaponInfo.drainEnergy);
+      printf("\tVelocity: %d\n",                     weaponInfo.projVelocity);
+      printf("\tLifespan (ms): %d\n",                weaponInfo.projLiveTime);
+      printf("\tDamage: %2.2f\n",                    weaponInfo.damageAmount);
+      printf("\tDamage To Self Multiplier: %2.2f\n", weaponInfo.damageSelfMultiplier);
+      printf("\tCan Damage Teammate: %s\n",          weaponInfo.canDamageTeammate ? "Yes" : "No");
    }
 
    printf("\n\n");
@@ -1877,11 +1879,11 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 
    // Check for self-inflicted damage
    if(damagerOwner && damagerOwner == victim->getOwner())
-      return GameWeapon::weaponInfo[weaponType].damageSelfMultiplier != 0;
+      return WeaponInfo::getWeaponInfo(weaponType).damageSelfMultiplier != 0;
 
    // Check for friendly fire, unless Spybug - they always get blowed up
    else if(damager->getTeam() == victim->getTeam() && victim->getObjectTypeNumber() != SpyBugTypeNumber)
-      return !isTeamGame() || GameWeapon::weaponInfo[weaponType].canDamageTeammate;
+      return !isTeamGame() || WeaponInfo::getWeaponInfo(weaponType).canDamageTeammate;
 
    return true;
 }

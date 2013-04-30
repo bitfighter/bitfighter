@@ -85,7 +85,7 @@
       <PreprocessKeepComments>false</PreprocessKeepComments>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PreprocessorDefinitions>BF_WRITE_TO_SQLITE;TNL_ENABLE_ASSERTS;TNL_DEBUG;TNL_ENABLE_LOGGING;_HAS_ITERATOR_DEBUGGING=0;WIN32;_DEBUG;_LIB;_HAS_CPP0X=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <MinimalRebuild>true</MinimalRebuild>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <DisableSpecificWarnings>4996;4305;4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>

@@ -61,7 +61,6 @@
 
 #include "BotNavMeshZone.h"      // For zone clearing code
 #include "ScreenInfo.h"
-#include "Joystick.h"
 
 #include "UIGame.h"
 #include "UIEditor.h"
@@ -349,6 +348,65 @@ void ClientGame::emitExplosion(const Point &pos, F32 size, const Color *colorArr
 void ClientGame::emitTeleportInEffect(const Point &pos, U32 type)
 {
    mUi->emitTeleportInEffect(pos, type);
+}
+
+
+Color ShipExplosionColors[] = {
+   Colors::red,  Color(0.9, 0.5, 0),  Colors::white,     Colors::yellow,
+   Colors::red,  Color(0.8, 1.0, 0),  Color(1, 0.5, 0),  Colors::white,
+   Colors::red,  Color(0.9, 0.5, 0),  Colors::white,     Colors::yellow,
+};
+
+
+void ClientGame::emitShipExplosion(const Point &pos)
+ {
+   SoundSystem::playSoundEffect(SFXShipExplode, pos);
+
+   F32 a = TNL::Random::readF() * 0.4f + 0.5f;
+   F32 b = TNL::Random::readF() * 0.2f + 0.9f;
+
+   F32 c = TNL::Random::readF() * 0.15f + 0.125f;
+   F32 d = TNL::Random::readF() * 0.2f + 0.9f;
+
+   emitExplosion(pos, 0.9f, ShipExplosionColors, ARRAYSIZE(ShipExplosionColors));
+   emitBurst(pos, Point(a,c), Color(1,1,0.25), Colors::red);
+   emitBurst(pos, Point(b,d), Colors::yellow, Color(0,0.75,0));
+ }
+
+
+void ClientGame::updateModuleSounds(const Point &pos, const Point &vel, const LoadoutTracker &loadout)
+{
+
+   const S32 moduleSFXs[ModuleCount] =
+   {
+      SFXShieldActive,
+      SFXShipBoost,
+      SFXNone,       // No more sensor
+      SFXRepairActive,
+      SFXUIBoop,     // Need better sound...
+      SFXCloakActive,
+      SFXNone,       // Armor... tough, but he don't say much
+   };
+   
+   for(U32 i = 0; i < ModuleCount; i++)
+   {
+      if(loadout.isModulePrimaryActive(ShipModule(i)) && moduleSFXs[i] != SFXNone)
+      {
+         if(mModuleSound[i].isValid())
+            SoundSystem::setMovementParams(mModuleSound[i], pos, vel);
+         else if(moduleSFXs[i] != -1)
+            mModuleSound[i] = SoundSystem::playSoundEffect(moduleSFXs[i], pos, vel);
+      }
+      else
+      {
+         if(mModuleSound[i].isValid())
+         {
+//            mModuleSound[i]->stop();    <-- why was this removed?
+            SoundSystem::stopSoundEffect(mModuleSound[i]);
+            mModuleSound[i] = NULL;
+         }
+      }
+   }
 }
 
 

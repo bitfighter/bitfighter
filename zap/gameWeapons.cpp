@@ -30,8 +30,24 @@
 
 #include "Colors.h"
 
+   
 namespace Zap
 {
+
+ProjectileInfo::ProjectileInfo(Color _sparkColor1, Color _sparkColor2, Color _sparkColor3,
+      Color _sparkColor4, Color _projColor1, Color _projColor2, F32 _scaleFactor,
+      SFXProfiles _projectileSound, SFXProfiles _impactSound )
+{
+   sparkColors[0]  = _sparkColor1;
+   sparkColors[1]  = _sparkColor2;
+   sparkColors[2]  = _sparkColor3;
+   sparkColors[3]  = _sparkColor4;
+   projColors[0]   = _projColor1;
+   projColors[1]   = _projColor2;
+   scaleFactor     = _scaleFactor;
+   projectileSound = _projectileSound;
+   impactSound     = _impactSound;
+}
 
 
 ProjectileInfo GameWeapon::projectileInfo[ProjectileTypeCount] =
@@ -44,20 +60,10 @@ ProjectileInfo GameWeapon::projectileInfo[ProjectileTypeCount] =
 };
 
 
-// Define a list of WeaponInfos
-WeaponInfo GameWeapon::weaponInfo[] = {
-#  define WEAPON_ITEM(a, name, c, delay, minEn, drainEn, projVel, projTTL, damage, selfDamage, canDamTMs, projType) \
-   { StringTableEntry(name), delay, minEn, drainEn, projVel, projTTL, damage, selfDamage, canDamTMs, projType },
-      WEAPON_ITEM_TABLE
-#  undef WEAPON_ITEM
-};
-
 // Here we actually intantiate the various projectiles when fired
 void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, const Point &shooterPos, const Point &shooterVel, S32 time, F32 shooterRadius, BfObject *shooter)
 {
-   //BfObject *proj = NULL;
-   WeaponInfo *wi = weaponInfo + weapon;
-   Point projVel = dir * F32(wi->projVelocity) + dir * shooterVel.dot(dir);
+   Point projVel = dir * F32(WeaponInfo::getWeaponInfo(weapon).projVelocity) + dir * shooterVel.dot(dir);
    Point firePos = shooterPos + dir * shooterRadius;
 
    // Advance pos by the distance the projectile would have traveled in time... fixes skipped shot effect on stuttering CPU

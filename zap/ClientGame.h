@@ -35,9 +35,10 @@
 #include "gameConnection.h"
 #include "dataConnection.h"      // For DataSender
 #include "HelpItemManager.h"     // For HelpItems enum
+#include "SoundEffect.h"         // For SFXHandle def
 
 #ifdef TNL_OS_WIN32
-#  include <windows.h>             // For screensaver... windows only feature, I'm afraid!
+#  include <windows.h>           // For screensaver... windows only feature, I'm afraid!
 #endif
 
 #include "SparkTypesEnum.h"
@@ -73,6 +74,8 @@ private:
    bool mSeenTimeOutMessage;
 
    GameUserInterface *mUi;
+
+   SFXHandle mModuleSound[ModuleCount];
 
 
    // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
@@ -176,6 +179,9 @@ public:
    void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType);
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitTeleportInEffect(const Point &pos, U32 type);
+   void emitShipExplosion(const Point &pos);
+
+   void updateModuleSounds(const Point &pos, const Point &vel, const LoadoutTracker &loadout);
 
    // Passthroughs to mUi
    void quitEngineerHelper();

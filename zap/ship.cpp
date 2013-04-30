@@ -24,38 +24,28 @@
 //------------------------------------------------------------------------------------
 
 #include "ship.h"
-#include "item.h"
 
-#include "projectile.h"
-#include "gameLoader.h"
-#include "SoundSystem.h"
-#include "gameType.h"
-#include "NexusGame.h"
-#include "gameConnection.h"
-#include "shipItems.h"
+#include "stringUtils.h"   // For itos
+#include "MathUtils.h"     // For radiansToDegrees
+
+
+// These should not be dependencies
 #include "speedZone.h"
-#include "gameWeapons.h"
-#include "gameObjectRender.h"
-#include "config.h"
-#include "statistics.h"
 #include "SlipZone.h"
-#include "Colors.h"
-#include "robot.h"            // For EventManager def
-#include "stringUtils.h"      // For itos
-#include "shipItems.h"
-#include "ClientInfo.h"
+#include "Zone.h"
 #include "teleporter.h"
+#include "SoundEffect.h"
+
 
 #ifdef TNL_OS_WIN32
-#  include <windows.h>   // For ARRAYSIZE
+#  include <windows.h>     // For ARRAYSIZE
 #endif
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "UIMenus.h"
+#  include "sparkManager.h"
 #endif
 
-#include "MathUtils.h"  // For radiansToDegrees
 
 #include <stdio.h>
 
@@ -262,7 +252,7 @@ S32 Ship::getEnergy() const
 }
 
 
-void Ship::setActualPos(Point p, bool warp)
+void Ship::setActualPos(const Point &p, bool warp)
 {
    Parent::setActualPos(p);
    Parent::setRenderPos(p);
@@ -487,9 +477,9 @@ void Ship::processWeaponFire()
    if(gameType && mCurrentMove.fire && (!getClientInfo() || !getClientInfo()->isShipSystemsDisabled()))
    {
       // In a while loop, to catch up the firing rate for low Frame Per Second
-      while(mFireTimer <= 0 && mEnergy >= GameWeapon::weaponInfo[curWeapon].minEnergy)
+      while(mFireTimer <= 0 && mEnergy >= WeaponInfo::getWeaponInfo(curWeapon).minEnergy)
       {
-         mEnergy -= GameWeapon::weaponInfo[curWeapon].drainEnergy;      // Drain energy
+         mEnergy -= WeaponInfo::getWeaponInfo(curWeapon).drainEnergy;      // Drain energy
 #ifdef SHOW_SERVER_SITUATION
          // Make a noise when the client thinks we've shot -- ideally, there should be one boop per shot, delayed by about half
          // of whatever /lag is set to.
@@ -509,7 +499,7 @@ void Ship::processWeaponFire()
             GameWeapon::createWeaponProjectiles(curWeapon, dir, getActualPos(), getActualVel(), 0, CollisionRadius - 2, this);
          }
 
-         mFireTimer += S32(GameWeapon::weaponInfo[curWeapon].fireDelay);
+         mFireTimer += S32(WeaponInfo::getWeaponInfo(curWeapon).fireDelay);
 
          // If we've fired, Spawn Shield turns off
          if(mSpawnShield.getCurrent() != 0)
@@ -709,6 +699,7 @@ void Ship::idle(BfObject::IdleCallPath path)
 
 
 // Check to see if we collided with a GoFast
+// TODO: Called from idle(): why isn't his handled like an ordinary collision?
 void Ship::checkForSpeedzones()
 {
    SpeedZone *speedZone = static_cast<SpeedZone *>(isOnObject(SpeedZoneTypeNumber));
@@ -865,7 +856,7 @@ void Ship::processModules()
    for(S32 i = 0; i < ShipModuleCount; i++)   
    {
       // If you have passive module, it's always active, no restrictions, but is off for energy consumption purposes
-      if(getGame()->getModuleInfo(mLoadout.getModule(i))->getPrimaryUseType() == ModulePrimaryUsePassive)
+      if(ModuleInfo::getModuleInfo(mLoadout.getModule(i))->getPrimaryUseType() == ModulePrimaryUsePassive)
          mLoadout.setModuleIndxPrimary(i, true);         // needs to be true to allow stats counting
 
       // Set loaded module states to 'on' if detected as so, unless modules are disabled or we need to cooldown
@@ -935,7 +926,7 @@ void Ship::processModules()
    {
       if(mLoadout.isModulePrimaryActive(ShipModule(i)))
       {
-         const ModuleInfo *moduleInfo = getGame()->getModuleInfo((ShipModule) i);
+         const ModuleInfo *moduleInfo = ModuleInfo::getModuleInfo((ShipModule) i);
          S32 energyUsed = moduleInfo->getPrimaryEnergyDrain() * timeInMilliSeconds;
          mEnergy -= energyUsed;
 
@@ -1038,7 +1029,7 @@ void Ship::processModules()
 // Runs on server only, at the request of c2sDeploySpybug
 void Ship::deploySpybug()
 {
-   const ModuleInfo *moduleInfo = getGame()->getModuleInfo(ModuleSensor);     // Spybug is attached to this module
+   const ModuleInfo *moduleInfo = ModuleInfo::getModuleInfo(ModuleSensor);     // Spybug is attached to this module
 
    S32 deploymentEnergy = moduleInfo->getPrimaryPerUseCost();
 
@@ -1248,36 +1239,8 @@ void Ship::onAddedToGame(Game *game)
 
 void Ship::updateModuleSounds()
 {
-   const S32 moduleSFXs[ModuleCount] =
-   {
-      SFXShieldActive,
-      SFXShipBoost,
-      SFXNone,  // No more sensor
-      SFXRepairActive,
-      SFXUIBoop, // Need better sound...
-      SFXCloakActive,
-      SFXNone, // armor
-   };
-   
-   for(U32 i = 0; i < ModuleCount; i++)
-   {
-      if(mLoadout.isModulePrimaryActive(ShipModule(i)) && moduleSFXs[i] != SFXNone)
-      {
-         if(mModuleSound[i].isValid())
-            SoundSystem::setMovementParams(mModuleSound[i], getRenderPos(), getRenderVel());
-         else if(moduleSFXs[i] != -1)
-            mModuleSound[i] = SoundSystem::playSoundEffect(moduleSFXs[i], getRenderPos(),  getRenderVel());
-      }
-      else
-      {
-         if(mModuleSound[i].isValid())
-         {
-//            mModuleSound[i]->stop();
-            SoundSystem::stopSoundEffect(mModuleSound[i]);
-            mModuleSound[i] = NULL;
-         }
-      }
-   }
+   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+   clientGame->updateModuleSounds(getRenderPos(), getRenderVel(), mLoadout);
 }
 
 
@@ -1287,10 +1250,8 @@ static U32 MaxFireDelay = 0;
 void Ship::computeMaxFireDelay()
 {
    for(S32 i = 0; i < WeaponCount; i++)
-   {
-      if(GameWeapon::weaponInfo[i].fireDelay > MaxFireDelay)
-         MaxFireDelay = GameWeapon::weaponInfo[i].fireDelay;
-   }
+      if(WeaponInfo::getWeaponInfo(WeaponType(i)).fireDelay > MaxFireDelay)
+         MaxFireDelay = WeaponInfo::getWeaponInfo(WeaponType(i)).fireDelay;
 }
 
 
@@ -1342,7 +1303,7 @@ void Ship::readControlState(BitStream *stream)
 #ifndef ZAP_DEDICATED
    if(previousWeapon != mLoadout.getCurrentWeapon() && !getGame()->getSettings()->getIniSettings()->showWeaponIndicators)
       static_cast<ClientGame *>(getGame())->displayMessage(Colors::cyan, "%s selected.", 
-                         GameWeapon::weaponInfo[mLoadout.getCurrentWeapon()].name.getString());
+                         WeaponInfo::getWeaponInfo(mLoadout.getCurrentWeapon()).name.getString());
 #endif
 }
 
@@ -1537,7 +1498,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          disableCollision();
 
          if(!wasInitialUpdate)
-            emitShipExplosion(getRenderPos());    // Boom!
+            emitExplosion();     // Boom!
       }
 
       ClientGame *game = static_cast<ClientGame*>(getGame());
@@ -1546,7 +1507,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
    else
    {
-      if(stream->readFlag())        // Respawn
+      if(stream->readFlag())     // Respawn
       {
          if(hasExploded)
             enableCollision();
@@ -1920,41 +1881,13 @@ void Ship::setChangeTeamMask()
 }
 
 
-Color ShipExplosionColors[] = {
-   Colors::red,
-   Color(0.9, 0.5, 0),
-   Colors::white,
-   Colors::yellow,
-   Colors::red,
-   Color(0.8, 1.0, 0),
-   Color(1, 0.5, 0),
-   Colors::white,
-   Colors::red,
-   Color(0.9, 0.5, 0),
-   Colors::white,
-   Colors::yellow,
-};
-
-
-static const S32 NumShipExplosionColors = ARRAYSIZE(ShipExplosionColors);
-
-void Ship::emitShipExplosion(Point pos)
+void Ship::emitExplosion()
 {
 #ifndef ZAP_DEDICATED
-   SoundSystem::playSoundEffect(SFXShipExplode, pos);
-
-   F32 a = TNL::Random::readF() * 0.4f + 0.5f;
-   F32 b = TNL::Random::readF() * 0.2f + 0.9f;
-
-   F32 c = TNL::Random::readF() * 0.15f + 0.125f;
-   F32 d = TNL::Random::readF() * 0.2f + 0.9f;
-
    TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
-   game->emitExplosion(getActualPos(), 0.9f, ShipExplosionColors, NumShipExplosionColors);
-   game->emitBurst(pos, Point(a,c), Color(1,1,0.25), Colors::red);
-   game->emitBurst(pos, Point(b,d), Colors::yellow, Color(0,0.75,0));
+   game->emitShipExplosion(getRenderPos());
 #endif
 }
 
@@ -2433,14 +2366,22 @@ S32 Ship::lua_getReqLoadout(lua_State *L)
 }
 
 
+static LoadoutTracker getLoadout(const LuaLoadout *luaLoadout)
+{
+   Vector<U8> vec;
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+      vec.push_back(luaLoadout->getLoadoutItem(i));
+   
+   return LoadoutTracker(vec);
+}
+
+
 // Sets requested loadout to specified
 S32 Ship::lua_setReqLoadout(lua_State *L)
 {
    checkArgList(L, functionArgs, "Ship", "setReqLoadout");
 
-   LoadoutTracker loadout(luaW_check<LuaLoadout>(L, 1));
-
-   getOwner()->requestLoadout(loadout);
+   getOwner()->requestLoadout(getLoadout(luaW_check<LuaLoadout>(L, 1)));
 
    return 0;
 }
@@ -2451,7 +2392,7 @@ S32 Ship::lua_setCurrLoadout(lua_State *L)
 {
    checkArgList(L, functionArgs, "Ship", "setCurrLoadout");
 
-   LoadoutTracker loadout(luaW_check<LuaLoadout>(L, 1));
+   LoadoutTracker loadout = getLoadout(luaW_check<LuaLoadout>(L, 1));
 
    if(getClientInfo()->isLoadoutValid(loadout, getGame()->getGameType()->isEngineerEnabled()))
       setLoadout(loadout);

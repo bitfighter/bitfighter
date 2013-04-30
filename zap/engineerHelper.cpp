@@ -181,7 +181,7 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
             if(gc)
             {
                gc->c2sEngineerDeployObject(engineerItemInfo[mSelectedIndex].itemIndex);
-               S32 energyCost = Game::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
+               S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
                ship->creditEnergy(-energyCost);    // Deduct energy from engineer
             }
          }

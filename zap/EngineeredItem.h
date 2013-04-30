@@ -33,6 +33,7 @@
 #include "LuaWrapper.h"
 #include "Engineerable.h"
 #include "TeamConstants.h"    // For TEAM_NEUTRAL constant
+#include "WeaponInfo.h"
 
 
 namespace Zap
@@ -332,7 +333,8 @@ public:
 
    Turret *clone() const;
 
-   S32 mWeaponFireType;
+   WeaponType mWeaponFireType;
+
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode(F32 gridSize) const;
 

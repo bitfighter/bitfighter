@@ -25,9 +25,7 @@
 
 
 #include "LoadoutTracker.h"
-#include "game.h"             // For getModuleInfo
 #include "stringUtils.h"      // For parseString
-#include "luaGameInfo.h"      // For LuaLoadout
 
 #include "tnlLog.h"
 
@@ -58,20 +56,6 @@ LoadoutTracker::LoadoutTracker(const Vector<U8> &loadout)
 }
 
 
-// Constructor
-LoadoutTracker::LoadoutTracker(const LuaLoadout *loadout)
-{
-   resetLoadout();
-
-   Vector<U8> vec;
-   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      vec.push_back(loadout->getLoadoutItem(i));
-
-   setLoadout(vec);
-}
-
-
-
 // Reset this loadout to its factory settings
 void LoadoutTracker::resetLoadout()
 {
@@ -100,7 +84,7 @@ bool LoadoutTracker::update(const LoadoutTracker &loadout)
 
    for(S32 i = 0; i < ModuleCount; i++)
    {
-      mModulePrimaryActive[i] = loadout.mModulePrimaryActive[i];  
+      mModulePrimaryActive[i]   = loadout.mModulePrimaryActive[i];  
       mModuleSecondaryActive[i] = loadout.mModuleSecondaryActive[i];
    }
 
@@ -167,7 +151,7 @@ void LoadoutTracker::setLoadout(const string &loadoutStr)
       const char *word = words[i].c_str();
 
       for(S32 j = 0; j < ModuleCount; j++)
-         if(stricmp(word, Game::getModuleInfo((ShipModule) j)->getName()) == 0)     // Case insensitive
+         if(stricmp(word, ModuleInfo::getModuleInfo((ShipModule) j)->getName()) == 0)     // Case insensitive
          {
             mModules[i] = ShipModule(j);
             found = true;
@@ -188,7 +172,7 @@ void LoadoutTracker::setLoadout(const string &loadoutStr)
       const char *word = words[i + ShipModuleCount].c_str();
 
       for(S32 j = 0; j < WeaponCount; j++)
-         if(stricmp(word, GameWeapon::weaponInfo[j].name.getString()) == 0)
+         if(stricmp(word, WeaponInfo::getWeaponInfo(WeaponType(j)).name.getString()) == 0)
          {
             mWeapons[i] = WeaponType(j);
             found = true;
@@ -368,11 +352,11 @@ string LoadoutTracker::toString() const
 
    // First modules
    for(S32 i = 0; i < ShipModuleCount; i++)
-      loadoutStrings.push_back(Game::getModuleInfo((ShipModule) mModules[i])->getName());
+      loadoutStrings.push_back(ModuleInfo::getModuleInfo((ShipModule) mModules[i])->getName());
 
    // Then weapons
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      loadoutStrings.push_back(GameWeapon::weaponInfo[mWeapons[i]].name.getString());
+      loadoutStrings.push_back(WeaponInfo::getWeaponInfo(mWeapons[i]).name.getString());
 
    return listToString(loadoutStrings, ',');
 }

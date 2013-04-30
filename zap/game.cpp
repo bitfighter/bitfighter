@@ -1043,13 +1043,6 @@ void Game::deleteObjects(TestFunc testFunc)
 }
 
 
-const ModuleInfo *Game::getModuleInfo(ShipModule module)
-{
-   TNLAssert(U32(module) < U32(ModuleCount), "out of range module");
-   return &gModuleInfo[(U32) module];
-}
-
-
 void Game::computeWorldObjectExtents()
 {
    mWorldExtents = mGameObjDatabase->getExtents();

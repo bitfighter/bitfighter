@@ -31,20 +31,17 @@
 #include "gameConnection.h"
 #include "stringUtils.h"
 #include "ClientInfo.h"
+#include "MathUtils.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #endif
 
-#include <cmath>
-
-#define sq(a) ((a) * (a))
-
-namespace Zap
-{
-
 
 TNL_IMPLEMENT_NETOBJECT(Projectile);
+
+namespace Zap 
+{
 
 // Constructor -- used when weapon is fired  
 Projectile::Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter)
@@ -69,7 +66,7 @@ void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel,
    setPos(pos);
    mVelocity = vel;
 
-   mTimeRemaining = GameWeapon::weaponInfo[type].projLiveTime;
+   mTimeRemaining = WeaponInfo::getWeaponInfo(type).projLiveTime;
    mCollided = false;
    hitShip = false;
    mAlive = true;
@@ -92,7 +89,7 @@ void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel,
       mKillString = shooter->getKillString();
    }
 
-   mType = GameWeapon::weaponInfo[type].projectileType;
+   mType = WeaponInfo::getWeaponInfo(type).projectileType;
    mWeaponType = type;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -189,11 +186,11 @@ void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
       DamageInfo damageInfo;
 
       damageInfo.collisionPoint       = collisionPoint;
-      damageInfo.damageAmount         = GameWeapon::weaponInfo[mWeaponType].damageAmount;
+      damageInfo.damageAmount         = WeaponInfo::getWeaponInfo(mWeaponType).damageAmount;
       damageInfo.damageType           = DamageTypePoint;
       damageInfo.damagingObject       = this;
       damageInfo.impulseVector        = mVelocity;
-      damageInfo.damageSelfMultiplier = GameWeapon::weaponInfo[mWeaponType].damageSelfMultiplier;
+      damageInfo.damageSelfMultiplier = WeaponInfo::getWeaponInfo(mWeaponType).damageSelfMultiplier;
 
       hitObject->damageObject(&damageInfo);
 
@@ -303,7 +300,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
                // Let's extend the projectile life time on each bounce, up to twice the normal
                // live-time
                if(mLiveTimeIncreases < MAX_LIVETIME_INCREASES &&
-                     (S32)mTimeRemaining < GameWeapon::weaponInfo[mWeaponType].projLiveTime)
+                     (S32)mTimeRemaining < WeaponInfo::getWeaponInfo(mWeaponType).projLiveTime)
                {
                   mTimeRemaining += LIVETIME_INCREASE;
                   mLiveTimeIncreases++;
@@ -526,7 +523,7 @@ void Burst::initialize(const Point &pos, const Point &vel, BfObject *shooter)
 
    updateExtentInDatabase();
 
-   mTimeRemaining = GameWeapon::weaponInfo[WeaponBurst].projLiveTime;
+   mTimeRemaining = WeaponInfo::getWeaponInfo(WeaponBurst).projLiveTime;
    exploded = false;
 
    if(!shooter)
@@ -671,9 +668,9 @@ void Burst::explode(const Point &pos)
    DamageInfo damageInfo;
    damageInfo.collisionPoint       = pos;    // Location of burst at time of explosion
    damageInfo.damagingObject       = this;
-   damageInfo.damageAmount         = GameWeapon::weaponInfo[mWeaponType].damageAmount;
+   damageInfo.damageAmount         = WeaponInfo::getWeaponInfo(mWeaponType).damageAmount;
    damageInfo.damageType           = DamageTypeArea;
-   damageInfo.damageSelfMultiplier = GameWeapon::weaponInfo[mWeaponType].damageSelfMultiplier;
+   damageInfo.damageSelfMultiplier = WeaponInfo::getWeaponInfo(mWeaponType).damageSelfMultiplier;
 
    S32 hits = radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, (TestFunc)isDamageableType, damageInfo);
 
@@ -701,8 +698,8 @@ void Burst::renderItem(const Point &pos)
    if(exploded)
       return;
 
-   WeaponInfo *wi = GameWeapon::weaponInfo + WeaponBurst;
-   F32 initTTL = (F32) wi->projLiveTime;
+   F32 initTTL = (F32) WeaponInfo::getWeaponInfo(WeaponBurst).projLiveTime;
+
    renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL);
 }
 
@@ -1351,7 +1348,7 @@ void Seeker::initialize(const Point &pos, const Point &vel, F32 angle, BfObject 
 
    updateExtentInDatabase();
 
-   mTimeRemaining = GameWeapon::weaponInfo[WeaponSeeker].projLiveTime;
+   mTimeRemaining = WeaponInfo::getWeaponInfo(WeaponSeeker).projLiveTime;
    exploded = false;
    mBounced = false;
 
@@ -1471,12 +1468,12 @@ void Seeker::idle(IdleCallPath path)
          }
 
          // Get current speed
-         F32 speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
+         F32 speed = WeaponInfo::getWeaponInfo(mWeaponType).projVelocity;
 
          //F32 speed = getVel().len();
          // Set minimum speed to the default
-         //if(speed < GameWeapon::weaponInfo[mWeaponType].projVelocity)
-         //   speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
+         //if(speed < WeaponInfo::getWeaponInfo(mWeaponType).projVelocity)
+         //   speed = WeaponInfo::getWeaponInfo(mWeaponType).projVelocity;
          // Else, increase or decrease depending on our trajectory to the target
          //else
          //{
@@ -1574,7 +1571,7 @@ void Seeker::emitMovementSparks()
 {
 #ifndef ZAP_DEDICATED
 
-   Point center(-10 + -20 * getActualVel().len() / GameWeapon::weaponInfo[WeaponSeeker].projVelocity, 0);
+   Point center(-10 + -20 * getActualVel().len() / WeaponInfo::getWeaponInfo(WeaponSeeker).projVelocity, 0);
 
    F32 th = getActualVel().ATAN2();
 
@@ -1672,11 +1669,11 @@ void Seeker::handleCollision(BfObject *hitObject, Point collisionPoint)
       DamageInfo theInfo;
 
       theInfo.collisionPoint = collisionPoint;
-      theInfo.damageAmount = GameWeapon::weaponInfo[mWeaponType].damageAmount;
+      theInfo.damageAmount = WeaponInfo::getWeaponInfo(mWeaponType).damageAmount;
       theInfo.damageType = DamageTypePoint;
       theInfo.damagingObject = this;
       theInfo.impulseVector = getVel();
-      theInfo.damageSelfMultiplier = GameWeapon::weaponInfo[mWeaponType].damageSelfMultiplier;
+      theInfo.damageSelfMultiplier = WeaponInfo::getWeaponInfo(mWeaponType).damageSelfMultiplier;
 
       hitObject->damageObject(&theInfo);
 
@@ -1765,7 +1762,7 @@ void Seeker::renderItem(const Point &pos)
    if(!isCollisionEnabled())  // (exploded) always disables collision.
       return;
 
-   F32 startLiveTime = (F32) GameWeapon::weaponInfo[mWeaponType].projLiveTime;
+   F32 startLiveTime = (F32) WeaponInfo::getWeaponInfo(mWeaponType).projLiveTime;
    renderSeeker(pos, getActualAngle(), getActualVel().len(), (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())));
 #endif
 }

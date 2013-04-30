@@ -23,8 +23,9 @@
 //
 //------------------------------------------------------------------------------------
 
+
 #ifdef ZAP_DEDICATED
-#error "No joystick.h for dedicated build"
+#  error "No joystick.h for dedicated build"
 #endif
 
 #ifndef JOYSTICK_H_

@@ -34,7 +34,6 @@
 #include "ServerGame.h"
 
 #ifndef ZAP_DEDICATED
-#  include "Joystick.h"
 #  include "UIMenus.h"
 #  include "UINameEntry.h"
 #  include "UIChat.h"

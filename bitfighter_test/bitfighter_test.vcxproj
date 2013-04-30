@@ -101,8 +101,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\zap\LoadoutTracker.cpp" />
     <ClCompile Include="..\zap\Point.cpp" />
+    <ClCompile Include="..\zap\shipItems.cpp" />
     <ClCompile Include="..\zap\stringUtils.cpp" />
+    <ClCompile Include="..\zap\WeaponInfo.cpp" />
     <ClCompile Include="main_test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

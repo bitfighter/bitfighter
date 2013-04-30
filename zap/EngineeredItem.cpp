@@ -148,7 +148,7 @@ string EngineerModuleDeployer::checkResourcesAndEnergy(const Ship *ship)
    if(!ship->isCarryingItem(ResourceItemTypeNumber))
       return "!!! Need resource item to use Engineer module";
 
-   if(ship->getEnergy() < ship->getGame()->getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost())
+   if(ship->getEnergy() < ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost())
       return "!!! Not enough energy to engineer an object";
 
    return "";
@@ -1925,10 +1925,10 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
          if(!strncmp(argv2[i], "W=", 2))  // W= is in 015a
          {
             S32 w = 0;
-            while(w < WeaponCount && stricmp(GameWeapon::weaponInfo[w].name.getString(), &argv2[i][2]))
+            while(w < WeaponCount && stricmp(WeaponInfo::getWeaponInfo(WeaponType(w)).name.getString(), &argv2[i][2]))
                w++;
             if(w < WeaponCount)
-               mWeaponFireType = w;
+               mWeaponFireType = WeaponType(w);
             break;
          }
       }
@@ -1954,7 +1954,7 @@ string Turret::toLevelCode(F32 gridSize) const
    string out = Parent::toLevelCode(gridSize);
 
    if(mWeaponFireType != WeaponTurret)
-      out = out + " " + writeLevelString((string("W=") + GameWeapon::weaponInfo[mWeaponFireType].name.getString()).c_str());
+      out = out + " " + writeLevelString((string("W=") + WeaponInfo::getWeaponInfo(mWeaponFireType).name.getString()).c_str());
 
    return out;
 }
@@ -2107,12 +2107,12 @@ void Turret::idle(IdleCallPath path)
 
       // Calculate where we have to shoot to hit this...
       Point Vs = potential->getVel();
-      F32 S = (F32)GameWeapon::weaponInfo[mWeaponFireType].projVelocity;
+      F32 S = (F32)WeaponInfo::getWeaponInfo(mWeaponFireType).projVelocity;
       Point d = potential->getPos() - aimPos;
 
 // This could possibly be combined with Robot's getFiringSolution, as it's essentially the same thing
       F32 t;      // t is set in next statement
-      if(!findLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), GameWeapon::weaponInfo[mWeaponFireType].projLiveTime * 0.001f, t))
+      if(!findLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), WeaponInfo::getWeaponInfo(mWeaponFireType).projLiveTime * 0.001f, t))
          continue;
 
       Point leadPos = potential->getPos() + Vs * t;
@@ -2135,7 +2135,7 @@ void Turret::idle(IdleCallPath path)
       // See if we're gonna clobber our own stuff...
       disableCollision();
       Point delta2 = delta;
-      delta2.normalize(GameWeapon::weaponInfo[mWeaponFireType].projLiveTime * (F32)GameWeapon::weaponInfo[mWeaponFireType].projVelocity / 1000.f);
+      delta2.normalize(WeaponInfo::getWeaponInfo(mWeaponFireType).projLiveTime * (F32)WeaponInfo::getWeaponInfo(mWeaponFireType).projVelocity / 1000.f);
       BfObject *hitObject = findObjectLOS((TestFunc) isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 
@@ -2192,7 +2192,7 @@ void Turret::idle(IdleCallPath path)
          mKillString = killer.c_str();
 
          GameWeapon::createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, 0, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
-         mFireTimer.reset(GameWeapon::weaponInfo[mWeaponFireType].fireDelay);
+         mFireTimer.reset(WeaponInfo::getWeaponInfo(mWeaponFireType).fireDelay);
       }
    }
 }

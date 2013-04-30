@@ -119,7 +119,7 @@ static void doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    {
       glColor(loadout.isWeaponActive(i) ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
 
-      S32 width = renderComponentIndicator(xPos, top, GameWeapon::weaponInfo[loadout.getWeapon(i)].name.getString());
+      S32 width = renderComponentIndicator(xPos, top, WeaponInfo::getWeaponInfo(loadout.getWeapon(i)).name.getString());
 
       xPos += width + indicatorPadding;
    }
@@ -148,7 +148,7 @@ static void doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
       if(gModuleInfo[module].hasSecondary() && loadout.isModuleSecondaryActive(module))
          glColor(Colors::orange67);
 
-      S32 width = renderComponentIndicator(xPos, top, game->getModuleInfo(module)->getName());
+      S32 width = renderComponentIndicator(xPos, top, ModuleInfo::getModuleInfo(module)->getName());
 
       xPos += width + indicatorPadding;
    }

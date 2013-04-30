@@ -26,20 +26,20 @@
 #ifndef _SHIP_H_
 #define _SHIP_H_
 
-#include "item.h"    // for Item and LuaItem
 #include "BfObject.h"
+#include "item.h"    // for Item and LuaItem
 #include "moveObject.h"
-#include "LuaScriptRunner.h"
-#include "SoundEffect.h"
-#include "Timer.h"
-#include "shipItems.h"
-#include "gameWeapons.h"
 #include "LoadoutTracker.h"
+
+#include "LuaScriptRunner.h"
+#include "Timer.h"
 
 #ifndef ZAP_DEDICATED
 #  include "sparkManager.h"
 #  include "ShipShape.h"
 #endif
+
+#include "tnlVector.h"
 
 
 namespace Zap
@@ -181,8 +181,6 @@ public:
 
    F32 getSlipzoneSpeedMoficationFactor();
 
-   SFXHandle mModuleSound[ModuleCount];
-
    void selectNextWeapon();                   
    void selectPrevWeapon();
    void selectWeapon(S32 weaponIndex);    // Select weapon by index
@@ -272,8 +270,8 @@ public:
    void controlMoveReplayComplete();
    void onAddedToGame(Game *game);
 
-   void emitShipExplosion(Point pos);
-   void setActualPos(Point p, bool warp);
+   void emitExplosion();
+   void setActualPos(const Point &p, bool warp);
    bool isModulePrimaryActive(ShipModule module);
 
    ShipModule getModule(U32 modIndex);

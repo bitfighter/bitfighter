@@ -42,22 +42,18 @@ const char *WeaponInfo::getWeaponName(WeaponType weaponType)
 }
 
 
-/////////////////////////////////////
-/////////////////////////////////////
+// Define a list of WeaponInfos
+WeaponInfo weaponInfo[] = {
+#  define WEAPON_ITEM(a, name, c, delay, minEn, drainEn, projVel, projTTL, damage, selfDamage, canDamTMs, projType) \
+   { StringTableEntry(name), delay, minEn, drainEn, projVel, projTTL, damage, selfDamage, canDamTMs, projType },
+      WEAPON_ITEM_TABLE
+#  undef WEAPON_ITEM
+};
 
-ProjectileInfo::ProjectileInfo(Color _sparkColor1, Color _sparkColor2, Color _sparkColor3,
-      Color _sparkColor4, Color _projColor1, Color _projColor2, F32 _scaleFactor,
-      SFXProfiles _projectileSound, SFXProfiles _impactSound )
+
+WeaponInfo WeaponInfo::getWeaponInfo(WeaponType weaponType)
 {
-   sparkColors[0]  = _sparkColor1;
-   sparkColors[1]  = _sparkColor2;
-   sparkColors[2]  = _sparkColor3;
-   sparkColors[3]  = _sparkColor4;
-   projColors[0]   = _projColor1;
-   projColors[1]   = _projColor2;
-   scaleFactor     = _scaleFactor;
-   projectileSound = _projectileSound;
-   impactSound     = _impactSound;
+   return weaponInfo[weaponType];
 }
 
 
