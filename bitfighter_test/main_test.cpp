@@ -18,6 +18,7 @@ class BfTest : public testing::Test
    // Config code can go here
 };
 
+
 TEST_F(BfTest, LoadoutTrackerTests) 
 {
    LoadoutTracker t1;
