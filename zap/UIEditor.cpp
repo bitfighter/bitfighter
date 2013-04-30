@@ -265,8 +265,6 @@ void EditorUserInterface::populateDock()
 // Destructor -- unwind things in an orderly fashion.  Note that mLevelGenDatabase will clear itself as the referenced object is deleted.
 EditorUserInterface::~EditorUserInterface()
 {
-   //clearDatabase(getDatabase());  --> will happen as a matter of course when mEditorDatabase is deleted as part of destructing this UI
-
    mDockItems.clear();
    mClipboard.clear();
 
@@ -2215,17 +2213,6 @@ void EditorUserInterface::computeSelectionMinMax(GridDatabase *database, Point &
       }
    }
 }
-
-
-// TODO: Move to GridDatabase
-//void EditorUserInterface::clearDatabase(GridDatabase *database)
-//{
-//   fillVector.clear();
-//   database->findObjects(fillVector);
-//
-//   for(S32 i = 0; i < fillVector.size(); i++)
-//      database->removeFromDatabase(fillVector[i], true);
-//}
 
 
 // Copy selection to the clipboard

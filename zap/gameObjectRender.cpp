@@ -1662,13 +1662,6 @@ void renderMine(const Point &pos, bool armed, bool visible)
 
 
 // lifeLeft is a number between 0 and 1.  Burst explodes when lifeLeft == 0.
-
-// burstGraphicsMode is between 1 and 5
-// 1 = flash & color change
-// 2 = flash only
-// 3 = color change only
-// 4 = normal rendering, filled circle
-// 5 = normal rendering
 void renderGrenade(const Point &pos, F32 lifeLeft)
 {
    glColor(Colors::white);
@@ -1676,7 +1669,7 @@ void renderGrenade(const Point &pos, F32 lifeLeft)
 
    bool innerVis = true;
 
-   // TODO:  replace with algorithm?
+   // When in doubt, write it out!
    if(lifeLeft > .85)
       innerVis = false;
    else if(lifeLeft > .7)
@@ -1702,68 +1695,6 @@ void renderGrenade(const Point &pos, F32 lifeLeft)
       drawFilledCircle(pos, 6);
    else
       drawCircle(pos, 6);
-
-/*
-   const S32 r1 = 6;
-   const S32 r2 = 7;
-   const S32 r3 = 8;
-   const S32 r4 = 12;
-   const S32 wedges = 12;
-   const F32 wedgeAngle = 360 / 12 * Float2Pi / 360;     // 22.5 = 360 / wedges
-
-
-   F32 alpha = 1 - (vel / 500) * (vel / 500);      // TODO: Make 500 come from constant in gameWeapons.cpp
-
-   // Color inner circle with a color that gets darker as grenade slows
-
-   glColor4f(1,.5,0,alpha);
-   drawFilledCircle(pos, r3);
-   glDisable(GL_BLEND);
-
-   bool inOut = true;
-
-      glColor(1,1,0);
-      glLineWidth(gLineWidth1);
-      F32 off = 0;
-      for(S32 j = 0; j < 2; j++)
-      {
-         if(j)
-         {
-            off =  vel/50;
-            glColor(1,.5,0);
-
-         }
-      // Draw each of the 16 wedge pieces
-      for(S32 i = 0; i < wedges; i++)
-      {
-         F32 a1 = i * wedgeAngle - vel / 100 + off;
-         F32 a2 = a1 + wedgeAngle;
-         S32 ra, rb;
-
-         if(inOut)
-         {
-            ra = r4 + 2*(1-j);
-            rb = r3;
-         }
-         else
-         {
-            ra = r3;
-            rb = r4 + 2*(1-j);
-         }
-
-         glBegin(GL_LINES);
-            glVertex2f(ra * cos(a1) + pos.x, ra * sin(a1) + pos.y);
-            glVertex2f(rb * cos(a1) + pos.x, rb * sin(a1) + pos.y);
-
-            glVertex2f(rb * cos(a1) + pos.x, rb * sin(a1) + pos.y);
-            glVertex2f(rb * cos(a2) + pos.x, rb * sin(a2) + pos.y);
-         glEnd();
-
-         inOut = !inOut;
-      }
-      }
-      glLineWidth(gDefaultLineWidth);
-      */
 }
 
 
