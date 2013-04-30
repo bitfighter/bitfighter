@@ -278,7 +278,7 @@ public:
 
    ShipModule getModule(U32 modIndex);
 
-   virtual void kill(DamageInfo *theInfo);
+   virtual void killAndScore(DamageInfo *theInfo);
    virtual void kill();
 
    void destroyPartiallyDeployedTeleporter();
