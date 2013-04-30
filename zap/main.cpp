@@ -1343,7 +1343,7 @@ static bool thisProgramHasCreatedConsoleWindow()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-#ifdef TNL_OS_XBOX
+#if defined(TNL_OS_XBOX) || defined(BITFIGHTER_TEST)
 int zapmain(int argc, char **argv)
 #else
 int main(int argc, char **argv)

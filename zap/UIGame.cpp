@@ -172,7 +172,7 @@ void GameUserInterface::onActivate()
    mHelpItemManager.queueHelpItem(WelcomeItem);
 
    // Queue up some initial help messages for the new users
-   GameSettings *settings = getGame()->getSettings();
+//   GameSettings *settings = getGame()->getSettings();
 
    mHelpItemManager.queueHelpItem(ControlsKBItem);
 
@@ -2089,10 +2089,10 @@ void GameUserInterface::renderNormal(ClientGame *game)
 
       if(mDebugShowMeshZones)
          for(S32 j = 0; j < renderZones.size(); j++)
-            renderZones[j]->render(i);
+            renderZones[j]->renderLayer(i);
 
       for(S32 j = 0; j < renderObjects.size(); j++)
-         renderObjects[j]->render(i);
+         renderObjects[j]->renderLayer(i);
 
       mFxManager.render(i, game->getCommanderZoomFraction());
    }
@@ -2113,12 +2113,12 @@ void GameUserInterface::renderNormal(ClientGame *game)
             S32 team = renderObjects[j]->getTeam();
             S32 playerTeam = ship ? ship->getTeam() : NO_TEAM;
 
-            if(whose == HighlightItem::Any ||
-               whose == HighlightItem::Team && team == playerTeam ||
-               whose == HighlightItem::TorNeut && (team == playerTeam || team == TEAM_NEUTRAL) ||
-               whose == HighlightItem::Enemy && (team >= 0 && team != playerTeam || team == TEAM_HOSTILE) ||
-               whose == HighlightItem::Neutral && team == TEAM_NEUTRAL ||
-               whose == HighlightItem::Hostile && team == TEAM_HOSTILE)
+            if( whose == HighlightItem::Any ||
+               (whose == HighlightItem::Team && team == playerTeam) ||
+               (whose == HighlightItem::TorNeut && (team == playerTeam || team == TEAM_NEUTRAL)) ||
+               (whose == HighlightItem::Enemy && ((team >= 0 && team != playerTeam) || team == TEAM_HOSTILE)) ||
+               (whose == HighlightItem::Neutral && team == TEAM_NEUTRAL) ||
+               (whose == HighlightItem::Hostile && team == TEAM_HOSTILE) )
 
                polygons.push_back(renderObjects[j]->getOutline());
          }
@@ -2281,24 +2281,24 @@ void GameUserInterface::renderCommander(ClientGame *game)
 
    if(mDebugShowMeshZones)
       for(S32 i = 0; i < renderZones.size(); i++)
-         renderZones[i]->render(0);
+         renderZones[i]->renderLayer(0);
 
    // First pass
    for(S32 i = 0; i < renderObjects.size(); i++)
-      renderObjects[i]->render(0);
+      renderObjects[i]->renderLayer(0);
 
    // Second pass
    Barrier::renderEdges(1, *game->getSettings()->getWallOutlineColor());    // Render wall edges
 
    if(mDebugShowMeshZones)
       for(S32 i = 0; i < renderZones.size(); i++)
-         renderZones[i]->render(1);
+         renderZones[i]->renderLayer(1);
 
    for(S32 i = 0; i < renderObjects.size(); i++)
    {
       // Keep our spy bugs from showing up on enemy commander maps, even if they're known
  //     if(!(renderObjects[i]->getObjectTypeMask() & SpyBugType && playerTeam != renderObjects[i]->getTeam()))
-         renderObjects[i]->render(1);
+         renderObjects[i]->renderLayer(1);
    }
 
    getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);

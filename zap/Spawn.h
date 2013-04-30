@@ -201,7 +201,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   void render(S32 layerIndex);
+   void renderLayer(S32 layerIndex);
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 

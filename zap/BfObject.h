@@ -311,11 +311,14 @@ public:
    void setCurrentMove(const Move &theMove);
    void setLastMove(const Move &theMove);
 
-   // Render is called twice for every object that is in the
-   // render list.  By default BfObject will call the render()
+   // renderLayer() is called three times for every object that is in the
+   // render list, at layers -1, 0, 1.  By default renderLayer() call the render()
    // method one time (when layerIndex == 0).
-   // TODO: Would be better to render once and use different z-order to create layers?
-   virtual void render(S32 layerIndex);
+   //
+   // Note that it may be possible to use OpenGL z-order instead of our layer system.
+   // Although you'd have to get around the issue of alpha blended objects - they
+   // are usually rendered in a different order when sent to OpenGL
+   virtual void renderLayer(S32 layerIndex);
    virtual void render();
 
    virtual void idle(IdleCallPath path);              

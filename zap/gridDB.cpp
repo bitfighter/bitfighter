@@ -722,6 +722,31 @@ bool GridDatabase::pointCanSeePoint(const Point &point1, const Point &point2)
 }
 
 
+void GridDatabase::computeSelectionMinMax(Point &min, Point &max)
+{
+   min.set( F32_MAX,  F32_MAX);
+   max.set(-F32_MAX, -F32_MAX);
+
+   for(S32 i = 0; i < mAllObjects.size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(mAllObjects[i]);
+
+      if(obj->isSelected())
+      {
+         for(S32 j = 0; j < obj->getVertCount(); j++)
+         {
+            Point v = obj->getVert(j);
+
+            if(v.x < min.x)   min.x = v.x;
+            if(v.x > max.x)   max.x = v.x;
+            if(v.y < min.y)   min.y = v.y;
+            if(v.y > max.y)   max.y = v.y;
+         }
+      }
+   }
+}
+
+
 S32 GridDatabase::getObjectCount() const
 {
    return mAllObjects.size();

@@ -544,7 +544,7 @@ void AsteroidSpawn::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 
 // Used for rendering in-game
-void AsteroidSpawn::render(S32 layerIndex)
+void AsteroidSpawn::renderLayer(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
    if(layerIndex != -1)

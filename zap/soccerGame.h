@@ -79,7 +79,7 @@ public:
 
 class SoccerBallItem : public MoveItem
 {
-   typedef MoveItem Parent;      // TODO: Should be PointObject???
+   typedef MoveItem Parent;
 
 private:
    Point mInitialPos;

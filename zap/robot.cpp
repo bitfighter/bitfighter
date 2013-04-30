@@ -434,11 +434,11 @@ bool Robot::canSeePoint(Point point, bool wallOnly)
 }
 
 
-void Robot::render(S32 layerIndex)
+void Robot::renderLayer(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
    if(isGhost())                                         // Client rendering client's objects
-      Parent::render(layerIndex);
+      Parent::renderLayer(layerIndex);
 
    else if(layerIndex == 1 && flightPlan.size() != 0)    // Client hosting is rendering server objects
       renderFlightPlan(getActualPos(), flightPlan[0], flightPlan);
