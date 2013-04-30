@@ -59,7 +59,6 @@ class WallItem;
 extern void drawFilledCircle(const Point &pos, F32 radius, const Color *color = NULL);
 extern void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end);
 extern void drawCentroidMark(const Point &pos, F32 radius);
-extern void renderTwoPointPolygon(const Point &p1, const Point &p2, F32 width, S32 mode);
 
 extern void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 radius);
 extern void drawRoundedRect(const Point &pos, S32 width, S32 height, S32 radius);
@@ -175,16 +174,10 @@ extern void renderLoadoutZone(const Color *c, const Vector<Point> *outline, cons
 extern void renderLoadoutZoneIcon(const Point &pos);
 
 extern void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill,
-                              const Point &centroid, S32 zoneId, bool isConvex, bool isSelected = false);
-
-class Border;
-extern void renderNavMeshBorder(const Border &border, F32 scaleFact, const Color &color, F32 fillAlpha, F32 width);
-
-class ZoneBorder;
-extern void renderNavMeshBorders(const Vector<ZoneBorder> &borders, F32 scaleFact = 1);
+                              const Point &centroid, S32 zoneId);
 
 class NeighboringZone;
-extern void renderNavMeshBorders(const Vector<NeighboringZone> &borders, F32 scaleFact = 1);
+extern void renderNavMeshBorders(const Vector<NeighboringZone> &borders);
 
 extern void drawStars(const Point *stars, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent);
 

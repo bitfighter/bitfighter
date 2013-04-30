@@ -1260,7 +1260,7 @@ void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *
    glPushMatrix();
       glScale(scaleFact);
       glTranslate(centroid);
-      glRotatef(angle * 360 / FloatTau, 0, 0, 1);
+      glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
       renderCenteredString(Point(0,0), size,  text);
    glPopMatrix();
 }
@@ -1356,68 +1356,36 @@ void renderLoadoutZoneIcon(const Point &pos)
 }
 
 
-void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill, const Point &centroid, 
-                       S32 zoneId, bool isConvex, bool isSelected)
+void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill, const Point &centroid,
+                       S32 zoneId)
 {
-   Color outlineColor = isConvex ? Colors::green : Colors::red;
-   Color fillColor = outlineColor * .5;
+   renderPolygon(fill, outline, &Colors::green50, &Colors::green, .4f);
 
-   renderPolygon(fill, outline, &fillColor, &outlineColor, isSelected ? .65f : .4f);
+   char buf[6];  // Can't have more than 65535 zones
+   dSprintf(buf, 24, "%d", zoneId);
 
-   if(zoneId > 0)
-   {
-      char buf[24];
-      dSprintf(buf, 24, "%d", zoneId );
-
-      renderPolygonLabel(centroid, 0, 25, buf);
-   }
-   else if(zoneId == -2)
-      drawCentroidMark(centroid, .05f);
-}
-
-
-void renderNavMeshBorder(const Border &border, F32 scaleFact, const Color &color, F32 fillAlpha, F32 width)
-{
-   for(S32 j = 1; j >= 0; j--)
-   {
-      glColor(color, j ? fillAlpha : 1); 
-      renderTwoPointPolygon(border.borderStart, border.borderEnd, width * scaleFact, j ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
-   }
-}
-
-
-void renderTwoPointPolygon(const Point &p1, const Point &p2, F32 width, S32 mode)
-{
-   F32 ang = p1.angleTo(p2);
-   F32 cosa = cos(ang) * width;
-   F32 sina = sin(ang) * width;
-
-   F32 vertices[] = {
-         p1.x + sina, p1.y - cosa,
-         p2.x + sina, p2.y - cosa,
-         p2.x - sina, p2.y + cosa,
-         p1.x - sina, p1.y + cosa
-   };
-   renderVertexArray(vertices, 4, mode);
-}
-
-const Color BORDER_FILL_COLOR(0,1,1);
-const F32 BORDER_FILL_ALPHA = .25;
-const F32 BORDER_WIDTH = 3;
-
-// Only used in editor
-void renderNavMeshBorders(const Vector<ZoneBorder> &borders, F32 scaleFact)
-{
-   for(S32 i = 0; i < borders.size(); i++)
-      renderNavMeshBorder(borders[i], scaleFact, BORDER_FILL_COLOR, BORDER_FILL_ALPHA, BORDER_WIDTH);
+   renderPolygonLabel(centroid, 0, 25, buf);
 }
 
 
 // Only used in-game
-void renderNavMeshBorders(const Vector<NeighboringZone> &borders, F32 scaleFact)
+void renderNavMeshBorders(const Vector<NeighboringZone> &borders)
 {
+   glLineWidth(4.);
+
+   glColor(Colors::cyan);
+
+   // Go through each border and render
    for(S32 i = 0; i < borders.size(); i++)
-      renderNavMeshBorder(borders[i], scaleFact, BORDER_FILL_COLOR, BORDER_FILL_ALPHA, BORDER_WIDTH);
+   {
+      F32 vertices[] = {
+            borders[i].borderStart.x, borders[i].borderStart.y,
+            borders[i].borderEnd.x, borders[i].borderEnd.y,
+      };
+      renderVertexArray(vertices, 2, GL_LINES);
+   }
+
+   glLineWidth(gDefaultLineWidth);
 }
 
 

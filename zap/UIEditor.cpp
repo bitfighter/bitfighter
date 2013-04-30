@@ -101,7 +101,6 @@ enum EntryMode {
 
 
 static EntryMode entryMode;
-static Vector<ZoneBorder> zoneBorders;
 
 static void saveLevelCallback(ClientGame *game)
 {
