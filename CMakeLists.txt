@@ -37,6 +37,7 @@ add_subdirectory(lua/lua-vec)
 add_subdirectory(mysql++)
 add_subdirectory(libtomcrypt)
 add_subdirectory(master)
+add_subdirectory(gtest)
 add_subdirectory(zap)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" _insource)
