@@ -172,7 +172,7 @@ void GameUserInterface::onActivate()
    mHelpItemManager.queueHelpItem(WelcomeItem);
 
    // Queue up some initial help messages for the new users
-   GameSettings *settings = getGame()->getSettings();
+//   GameSettings *settings = getGame()->getSettings();
 
    mHelpItemManager.queueHelpItem(ControlsKBItem);
 
@@ -2113,12 +2113,12 @@ void GameUserInterface::renderNormal(ClientGame *game)
             S32 team = renderObjects[j]->getTeam();
             S32 playerTeam = ship ? ship->getTeam() : NO_TEAM;
 
-            if(whose == HighlightItem::Any ||
-               whose == HighlightItem::Team && team == playerTeam ||
-               whose == HighlightItem::TorNeut && (team == playerTeam || team == TEAM_NEUTRAL) ||
-               whose == HighlightItem::Enemy && (team >= 0 && team != playerTeam || team == TEAM_HOSTILE) ||
-               whose == HighlightItem::Neutral && team == TEAM_NEUTRAL ||
-               whose == HighlightItem::Hostile && team == TEAM_HOSTILE)
+            if( whose == HighlightItem::Any ||
+               (whose == HighlightItem::Team && team == playerTeam) ||
+               (whose == HighlightItem::TorNeut && (team == playerTeam || team == TEAM_NEUTRAL)) ||
+               (whose == HighlightItem::Enemy && ((team >= 0 && team != playerTeam) || team == TEAM_HOSTILE)) ||
+               (whose == HighlightItem::Neutral && team == TEAM_NEUTRAL) ||
+               (whose == HighlightItem::Hostile && team == TEAM_HOSTILE) )
 
                polygons.push_back(renderObjects[j]->getOutline());
          }
