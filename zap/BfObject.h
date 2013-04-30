@@ -315,7 +315,7 @@ public:
    // render list.  By default BfObject will call the render()
    // method one time (when layerIndex == 0).
    // TODO: Would be better to render once and use different z-order to create layers?
-   virtual void render(S32 layerIndex);
+   virtual void renderLayer(S32 layerIndex);
    virtual void render();
 
    virtual void idle(IdleCallPath path);              

@@ -1119,7 +1119,7 @@ void BfObject::render()
 }
 
 
-void BfObject::render(S32 layerIndex)
+void BfObject::renderLayer(S32 layerIndex)
 {
    if(layerIndex == 1)
       render();

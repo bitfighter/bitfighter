@@ -2119,7 +2119,7 @@ void Ship::emitMovementSparks()
 }
 
 
-void Ship::render(S32 layerIndex)
+void Ship::renderLayer(S32 layerIndex)
 {
    TNLAssert(getGame()->getGameType(), "gameType should always be valid here");
 

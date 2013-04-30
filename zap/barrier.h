@@ -74,7 +74,7 @@ public:
    static Vector<Point> mRenderLineSegments;       // The clipped line segments representing this barrier
    Vector<Point> mBotZoneBufferLineSegments;       // The line segments representing a buffered barrier
 
-   void render(S32 layerIndex);                                           // Renders barrier fill barrier-by-barrier
+   void renderLayer(S32 layerIndex);                                           // Renders barrier fill barrier-by-barrier
    static void renderEdges(S32 layerIndex, const Color &outlineColor);    // Renders all edges in one pass
 
    // Returns a sorting key for the object.  Barriers should be drawn first so as to appear behind other objects.

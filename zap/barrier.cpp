@@ -307,7 +307,7 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vec
 
 
 // Render wall fill only for this wall; all edges rendered in a single pass later
-void Barrier::render(S32 layerIndex)
+void Barrier::renderLayer(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
    if(layerIndex == 0)           // First pass: draw the fill
