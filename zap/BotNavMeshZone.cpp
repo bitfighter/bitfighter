@@ -33,6 +33,7 @@
 #include "../recast/Recast.h"    // For zone generation
 #include "../recast/RecastAlloc.h"
 #include "ServerGame.h"
+#include "../clipper/clipper.hpp"
 
 #ifndef ZAP_DEDICATED
 #  include "UIMenus.h"
@@ -348,11 +349,10 @@ static BotNavMeshZone *findZoneContainingPoint(GridDatabase *botZoneDatabase, co
 #  define LOG_TIMER
 #endif
 
-
 static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
                                 const Vector<DatabaseObject *> &turrets,
                                 const Vector<DatabaseObject *> &forceFieldProjectors, 
-                                      Vector<Vector<Point> > &solution)
+                                      PolyTree &solution)
 {
 
    Vector<const Vector<Point> *> inputPolygons;
@@ -390,7 +390,7 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
       inputPolygons.push_back(forceFieldProjector->getBufferForBotZone());
    }
 
-   return mergePolys(inputPolygons, solution);
+   return mergePolysToPolyTree(inputPolygons, solution);
 }
 
 
@@ -429,7 +429,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
    }
 
    Vector<F32> holes;
-   Vector<Vector<Point> > solution;
+   PolyTree solution;
 
    Vector<DatabaseObject *> barrierList;
    game->getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList, bounds);
@@ -441,7 +441,8 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
    game->getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList, bounds);
 
    // Merge bot zone buffers from barriers, turrets, and forcefield projectors
-   // The Clipper library is the work horse here.  Its output is essential for the triangulation
+   // The Clipper library is the work horse here.  Its output is essential for the
+   // triangulation.  The output contains the upscaled Clipper points (you will need to downscale)
    if(!mergeBotZoneBuffers(barrierList, turretList, forceFieldProjectorList, solution))
       return false;
 
@@ -451,6 +452,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
 #endif
 
    // Tessellate!
+   // This will downscale the Clipper output and use poly2tri to triangulate
    Vector<Point> outputTriangles;  // Every 3 points is a triangle
    if(!Triangulate::processComplex(outputTriangles, bounds, solution))
       return false;
