@@ -853,12 +853,12 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
          mGameType->c2sRequestScoreboardUpdates(true);
 
       if(showMessage)
-         displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");
+         displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");     // SysMsg
    }
    else     // A remote player has joined the fray
    {
       if(showMessage) // Might as well not display when no sound being played, prevents message flood of many players join loading new GameType
-         displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", clientInfo->getName().getString());
+         displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", clientInfo->getName().getString()); // SysMsg
 
    }
    if(playAlert)
@@ -875,7 +875,7 @@ void ClientGame::onPlayerQuit(const StringTableEntry &name)
 {
    removeFromClientList(name);
 
-   displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
+   displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());     // SysMsg
    SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 
    mUIManager->getGameUserInterface()->onPlayerQuit();
@@ -1001,7 +1001,7 @@ void ClientGame::gotPermissionsReply(ClientInfo::ClientRole role)
    if(getUIManager()->getCurrentUI()->getMenuID() == GameMenuUI)
       getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = *message;
    else
-      displayMessage(Colors::cmdChatColor, (*message).c_str());
+      displayMessage(Colors::cmdChatColor, (*message).c_str());      // ChatCmd
 }
 
 
@@ -1013,7 +1013,7 @@ void ClientGame::gotWrongPassword()
    if(getUIManager()->getCurrentUI()->getMenuID() == GameMenuUI)
       getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = levelPassFailureMsg;
    else
-      displayMessage(Colors::cmdChatColor, levelPassFailureMsg);
+      displayMessage(Colors::cmdChatColor, levelPassFailureMsg);     // ChatCmd
 }
 
 void ClientGame::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken)
