@@ -31,7 +31,7 @@
 #include <string>
 
 #ifndef ZAP_DEDICATED
-#include "Joystick.h"
+#  include "Joystick.h"
 #endif
 
 using namespace std;

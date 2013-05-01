@@ -58,15 +58,15 @@ enum JoystickAxesMask {
    ShootAxesUpMask = BIT(6),
    ShootAxesDownMask = BIT(7),
 
-   MoveAxisLeftRightMask = MoveAxesLeftMask | MoveAxesRightMask,
-   MoveAxisUpDownMask = MoveAxesUpMask | MoveAxesDownMask,
+   MoveAxisLeftRightMask  = MoveAxesLeftMask  | MoveAxesRightMask,
+   MoveAxisUpDownMask     = MoveAxesUpMask    | MoveAxesDownMask,
    ShootAxisLeftRightMask = ShootAxesLeftMask | ShootAxesRightMask,
-   ShootAxisUpDownMask = ShootAxesUpMask | ShootAxesDownMask,
+   ShootAxisUpDownMask    = ShootAxesUpMask   | ShootAxesDownMask,
 
-   MoveAxesMask = MoveAxesLeftMask | MoveAxesRightMask | MoveAxesUpMask | MoveAxesDownMask,
+   MoveAxesMask  = MoveAxesLeftMask  | MoveAxesRightMask  | MoveAxesUpMask  | MoveAxesDownMask,
    ShootAxesMask = ShootAxesLeftMask | ShootAxesRightMask | ShootAxesUpMask | ShootAxesDownMask,
 
-   NegativeAxesMask = MoveAxesLeftMask | MoveAxesUpMask | ShootAxesLeftMask | ShootAxesUpMask,
+   NegativeAxesMask = MoveAxesLeftMask  | MoveAxesUpMask   | ShootAxesLeftMask  | ShootAxesUpMask,
    PositiveAxesMask = MoveAxesRightMask | MoveAxesDownMask | ShootAxesRightMask | ShootAxesDownMask,
 
    AllAxesMask = MoveAxesMask | ShootAxesMask,
