@@ -479,10 +479,10 @@ void Joystick::loadJoystickPresets(GameSettings *settings)
             lcase(joystickPresetsINI.GetValue(sectionId, "SearchStringIsSubstring")) == "yes";
 
       // Axis of evil
-      joystickInfo.moveAxesSdlIndex[0] = stoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisLeftRight"));
-      joystickInfo.moveAxesSdlIndex[1] = stoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisUpDown"));
-      joystickInfo.shootAxesSdlIndex[0] = stoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisLeftRight"));
-      joystickInfo.shootAxesSdlIndex[1] = stoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisUpDown"));
+      joystickInfo.moveAxesSdlIndex[0] = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisLeftRight"));
+      joystickInfo.moveAxesSdlIndex[1] = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisUpDown"));
+      joystickInfo.shootAxesSdlIndex[0] = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisLeftRight"));
+      joystickInfo.shootAxesSdlIndex[1] = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisUpDown"));
 
       Vector<string> sectionKeys;
       joystickPresetsINI.GetAllKeys(sectionId, sectionKeys);
@@ -522,7 +522,7 @@ void Joystick::loadJoystickPresets(GameSettings *settings)
          buttonInfo.color = stringToColor(buttonInfoMap["Color"]);
          buttonInfo.buttonShape = buttonLabelToButtonShape(buttonInfoMap["Shape"]);
          buttonInfo.buttonSymbol = stringToButtonSymbol(buttonInfoMap["Label"]);
-         buttonInfo.sdlButton = buttonInfoMap["Raw"] == "" ? FakeRawButton : U8(stoi(buttonInfoMap["Raw"]));
+         buttonInfo.sdlButton = buttonInfoMap["Raw"] == "" ? FakeRawButton : U8(Zap::stoi(buttonInfoMap["Raw"]));
 
          // Set the button info with index of the Joystick::Button
          joystickInfo.buttonMappings[buttonInfo.button] = buttonInfo;
