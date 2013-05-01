@@ -68,8 +68,8 @@ public:
    /////
    // This class serves only to provide an implementation of the abstract methods in LuaItem
    // that are common to the polygon classes
-   S32 getRad(lua_State *L);              // Radius of item (returns number)
-   S32 getVel(lua_State *L);              // Velocity of item (returns point)
+   S32 getRad(lua_State *L);        // Radius of item (returns number)
+   S32 getVel(lua_State *L);        // Velocity of item (returns point)
 };
 
 };

@@ -27,10 +27,10 @@
 #ifndef _GEOMETRY_H_
 #define _GEOMETRY_H_
 
+#include "BfObject.h" 
 #include "Point.h"
 #include "Rect.h"
 #include "tnlVector.h"
-#include "BfObject.h" 
 
 namespace TNL
 {
