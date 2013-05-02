@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _HttpRequest_H_
-#define _HttpRequest_H_
+#ifndef HTTPREQUEST_H_
+#define HTTPREQUEST_H_
 
 #include <tnl.h>
 #include <tnlUDP.h>
@@ -44,34 +44,41 @@ public:
    static const int Found = 302;
    static const string GetMethod;
    static const string PostMethod;
-
-   explicit HttpRequest(string url);
-   explicit HttpRequest(char* url);
+   static const int PollInterval = 20;
 
    static string urlEncodeChar(char c);
    static string urlEncode(const string& str);
 
-   void setMethod(const string&);
-   void setData(const string& key, const string& value);
-   bool send();
+   HttpRequest(string url = "/", TNL::Socket* socket = NULL, TNL::Address* localAddress = NULL, TNL::Address* remoteAddress = NULL);
+
+   string buildRequest();
    string getResponseBody();
    int getResponseCode();
+   string getResponseHead();
+   void parseResponse(string response);
+   void setData(const string& key, const string& value);
+   void setMethod(const string&);
+   void setTimeout(int timeout);
+   bool send();
+
+   bool sendRequest(string request);
+   string receiveResponse();
 
 private:
-   void parseResponse();
-
-   string mUrl;
+   TNL::Address* mLocalAddress;
+   TNL::Address* mRemoteAddress;
+   map<string, string> mData;
+   string mMethod;
    string mRequest;
    string mResponse;
    string mResponseHead;
    string mResponseBody;
-   string mMethod;
    int mResponseCode;
-   TNL::Address* mAddress;
    TNL::Socket* mSocket;
-   map<string, string> mData;
+   int mTimeout;
+   string mUrl;
 };
 
 }
 
-#endif
+#endif /* HTTPREQUEST_H_ */

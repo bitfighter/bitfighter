@@ -2,12 +2,20 @@ project (bitfighter)
 cmake_minimum_required (VERSION 2.6)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
 
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+# Linker flags
+if(MSVC)
+	set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:MSVCRT.lib /NODEFAULTLIB:LIBCMT.lib")
+else()
+	# Only link in what is absolutely necessary
+	set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
+endif()
+
+# Compiler specific flags
 if (CMAKE_COMPILER_IS_GNUCC)
 	set(CMAKE_C_FLAGS_DEBUG "-g -Wall")
 	set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
@@ -15,6 +23,21 @@ if (CMAKE_COMPILER_IS_GNUCC)
 	set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -Wno-narrowing")
 	set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELEASE} -g")
+endif()
+
+if(MSVC)
+	# Using /MT avoids linking against the stupid MSVC runtime libraries
+	set(CompilerFlags
+		CMAKE_CXX_FLAGS
+		CMAKE_CXX_FLAGS_DEBUG
+		CMAKE_CXX_FLAGS_RELEASE
+		CMAKE_C_FLAGS
+		CMAKE_C_FLAGS_DEBUG
+		CMAKE_C_FLAGS_RELEASE
+	)
+	foreach(CompilerFlag ${CompilerFlags})
+	  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+	endforeach()
 endif()
 
 
@@ -31,7 +54,40 @@ if("${CMAKE_SYSTEM}" MATCHES "Linux")
 endif()
 
 
-add_subdirectory(alure)
+# Now search for dependencies
+# Set up Windows specific locations for libraries and headers
+if(WIN32)
+	set(SDL2_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libsdl)
+	set(OGG_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libogg)
+	set(VORBIS_SEARCH_PATHS	${CMAKE_SOURCE_DIR}/lib	${CMAKE_SOURCE_DIR}/libvorbis)
+	set(VORBISFILE_SEARCH_PATHS	${CMAKE_SOURCE_DIR}/lib	${CMAKE_SOURCE_DIR}/libvorbis)
+	set(SPEEX_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libspeex)
+	set(MODPLUG_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libmodplug)
+	set(ALURE_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/alure)
+
+	# OpenAL
+	set(OPENAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/openal/include")
+	set(OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/lib/OpenAL32.lib")
+	
+	# libpng
+	set(PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
+	set(PNG_PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
+	set(PNG_LIBRARY "${CMAKE_SOURCE_DIR}/lib/libpng14.lib")
+	
+	# zlib
+	set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/zlib")
+	set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/lib/zlib.lib")
+endif()
+
+if(MSVC)
+	# Add parallel build to Visual Studio
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif()
+
+# ALURE is not compiled on visual studio presently
+if(NOT MSVC)
+	add_subdirectory(alure)
+endif()
 add_subdirectory(tnl)
 add_subdirectory(lua/lua-vec)
 add_subdirectory(mysql++)

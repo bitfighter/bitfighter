@@ -24,8 +24,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _TNL_UDP_H_
-#define _TNL_UDP_H_
+#ifndef TNLUDP_H_
+#define TNLUDP_H_
 
 #ifndef _TNL_TYPES_H_
 #include "tnlTypes.h"
@@ -96,7 +96,7 @@ public:
       set(theAddress);
    }
 
-   bool isValid() { return mIsValid; }
+   virtual bool isValid() { return mIsValid; }
 
    /// Sets the address to the specified string, returning true if
    /// the string was a valid address.  Note that this call may block
@@ -193,9 +193,9 @@ public:
    /// returns IP addresses, with the port field set to 0.
    static void getInterfaceAddresses(Vector<Address> *addressVector);
 
-   NetError connect(const Address &theAddress);
-   NetError recv(U8 *buffer, S32 bufferSize, S32 *bytesRead);
-   NetError send(const U8 *buffer, S32 bufferSize);
+   virtual NetError connect(const Address &theAddress);
+   virtual NetError recv(U8 *buffer, S32 bufferSize, S32 *bytesRead);
+   virtual NetError send(const U8 *buffer, S32 bufferSize);
 };
 
 //inline void read(BitStream &s, IPAddress *val)
@@ -211,4 +211,4 @@ public:
 //}
 
 };
-#endif
+#endif /* TNLUDP_H_ */
