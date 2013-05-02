@@ -31,17 +31,18 @@
 #endif
 
 #include "game.h"
-
-#include "gameConnection.h"
-#include "dataConnection.h"      // For DataSender
 #include "HelpItemManager.h"     // For HelpItems enum
 #include "SoundEffect.h"         // For SFXHandle def
+#include "Engineerable.h"        // For EngineerResponseEvent enum
+#include "ClientInfo.h"          // For ClientRole enum
+#include "SparkTypesEnum.h"
+#include "gameConnection.h"
+
 
 #ifdef TNL_OS_WIN32
 #  include <windows.h>           // For screensaver... windows only feature, I'm afraid!
 #endif
 
-#include "SparkTypesEnum.h"
 
 using namespace std;
 
@@ -77,7 +78,6 @@ private:
 
    SFXHandle mModuleSound[ModuleCount];
 
-
    // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
    // about the local player.  When a player connects to a server, all players (including the connecting player) are sent a much briefer
    // set of info about the player, which is stored in a RemoteClientInfo.  So when a player connects, they get several RemoteClientInfos,
@@ -88,6 +88,8 @@ private:
    S32 findClientIndex(const StringTableEntry &name);
 
    AbstractTeam *getNewTeam();
+
+   Vector<string> mRobots;                      // A list of robots read in from a level file when loading from the editor
 
 public:
    ClientGame(const Address &bindAddress, GameSettings *settings);
@@ -126,6 +128,9 @@ public:
    UIManager *getUIManager() const;
    GameUserInterface *getUi() const;
 
+   // A place to store input from the joysticks while we are composing our moves
+   F32 mJoystickInputs[JoystickAxesDirectionCount];
+
    bool getInCommanderMap();
    void setInCommanderMap(bool inCommanderMap);
    F32 getCommanderZoomFraction() const;
@@ -133,7 +138,7 @@ public:
    void setGameOver();     // Post-game scoreboard is about to be displayed
    void onGameOver();      // Post-game scoreboard has already been displayed
 
-   Point worldToScreenPoint(const Point *p) const;
+   Point worldToScreenPoint(const Point *p, S32 canvasWidth, S32 canvasHeight) const;
 
    void render();          // Delegates to renderNormal, renderCommander, or renderSuspended, as appropriate
 
@@ -180,6 +185,14 @@ public:
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitTeleportInEffect(const Point &pos, U32 type);
    void emitShipExplosion(const Point &pos);
+
+   // Sound some related passthroughs
+   SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f) const;
+   SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const;
+   SFXHandle playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain = 1.0f) const;
+   void playNextTrack() const;
+   void playPrevTrack() const;
+   void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const;
 
    void updateModuleSounds(const Point &pos, const Point &vel, const LoadoutTracker &loadout);
 
@@ -260,6 +273,8 @@ public:
    void addWallItem(WallItem *wallItem, GridDatabase *database);                          // Add wallItem item to game
 
    void setSelectedEngineeredObject(U32 objectType);
+
+   const Vector<string> *getLevelRobotLines() const;
 };
 
 ////////////////////////////////////////

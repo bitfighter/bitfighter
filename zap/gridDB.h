@@ -196,15 +196,17 @@ public:
    DatabaseObject *getObjectByIndex(S32 index) const;   // Kind of hacky, kind of useful
 };
 
+
 class BfObject;
-struct idleLinkedList // used by "Game" and "BfObject"
+
+struct IdleLinkedList // used by "Game" and "BfObject"
 {
-   idleLinkedList *prevList;
+   IdleLinkedList *prevList;
    BfObject *nextList;
-   idleLinkedList();
-	idleLinkedList(const idleLinkedList &t);
-   ~idleLinkedList();
-   void linkToIdleList(idleLinkedList *list);
+   IdleLinkedList();
+	IdleLinkedList(const IdleLinkedList &t);
+   ~IdleLinkedList();
+   void linkToIdleList(IdleLinkedList *list);
    void unlinkFromIdleList();
 };
 

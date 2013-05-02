@@ -40,6 +40,8 @@
 #include "robot.h"
 #include "loadoutZone.h"      // For LoadoutZone
 
+#include "OpenglUtils.h"
+
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
@@ -789,20 +791,20 @@ bool GameType::advanceGameClock(U32 deltaT)
 
 
 #ifndef ZAP_DEDICATED
-void GameType::renderInterfaceOverlay(bool scoreboardVisible)
+void GameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
 {
    static_cast<ClientGame *>(mGame)->renderBasicInterfaceOverlay(scoreboardVisible);
 }
 
 
 // Client only
-void GameType::renderObjectiveArrow(const BfObject *target) const
+void GameType::renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32 canvasHeight) const
 {
-   renderObjectiveArrow(target, target->getColor(), 1.0f);
+   renderObjectiveArrow(target, target->getColor(), canvasWidth, canvasHeight, 1.0f);
 }
 
 
-void GameType::renderObjectiveArrow(const BfObject *target, const Color *c, F32 alphaMod) const
+void GameType::renderObjectiveArrow(const BfObject *target, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
 {
    if(!target)
       return;
@@ -841,11 +843,11 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *c, F32 
          targetPoint.y = r.min.y;
    }
 
-   renderObjectiveArrow(targetPoint, c, alphaMod);
+   renderObjectiveArrow(targetPoint, c, canvasWidth, canvasHeight, alphaMod);
 }
 
 
-void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outlineColor, F32 alphaMod) const
+void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outlineColor, S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
 {
    ClientGame *game = static_cast<ClientGame *>(mGame);
 
@@ -859,8 +861,8 @@ void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outl
    if(!co)
       return;
 
-   Point rp = game->worldToScreenPoint(&nearestPoint);
-   Point center(400, 300);
+   Point rp = game->worldToScreenPoint(&nearestPoint, canvasWidth, canvasHeight);
+   Point center(canvasWidth / 2, canvasHeight/ 2);
    Point arrowDir = rp - center;
 
    F32 er = arrowDir.x * arrowDir.x / (350 * 350) + arrowDir.y * arrowDir.y / (250 * 250);
@@ -3662,7 +3664,7 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 
    S32 count = ship->getMountedItemCount();
    for(S32 i = count - 1; i >= 0; i--)
-      ship->getMountedItem(i)->dismount(MountableItem::DISMOUNT_NORMAL);
+      ship->getMountedItem(i)->dismount(DISMOUNT_NORMAL);
 }
 
 
@@ -4298,7 +4300,7 @@ void GameType::addFlag(FlagItem *flag)
 
 
 // Runs only on server
-void GameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)   
+void GameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode)
 { 
    TNLAssert(isServer(), "Should not run on client!");
    if(item->getObjectTypeNumber() == FlagTypeNumber)

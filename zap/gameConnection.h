@@ -27,24 +27,24 @@
 #define _GAMECONNECTION_H_
 
 
-#include "controlObjectConnection.h"
-#include "dataConnection.h"            // For DataSendable interface
-#include "statistics.h"
-#include "SoundSystem.h"               // For NumSFXBuffers
+#include "ChatCheck.h"                 // Parent class
+#include "controlObjectConnection.h"   // Parent class
+#include "dataConnection.h"            // Parent class DataSendable
+
 #include "SharedConstants.h"           // For BADGE_COUNT constant
+#include "GameTypesEnum.h"
+#include "SoundSystemEnums.h"          // For NumSFXBuffers
 
 #include "ship.h"                      // For Ship::EnergyMax
+#include "ClientInfo.h"
+#include "Engineerable.h"
+#include "Timer.h"
 
 #include "tnlNetConnection.h"
-#include "Timer.h"
+
 #include <time.h>
 #include "boost/smart_ptr/shared_ptr.hpp"
 
-#include "GameTypesEnum.h"
-#include "ServerGame.h"
-#include "Engineerable.h"
-#include "ChatCheck.h"
-#include "ClientInfo.h"
 
 using namespace TNL;
 using namespace std;
@@ -56,6 +56,7 @@ namespace Zap
 ////////////////////////////////////////
 
 class ClientGame;
+class ServerGame;
 struct LevelInfo;
 class GameSettings;
 class LuaPlayerInfo;
@@ -323,10 +324,8 @@ public:
    void onConnectionEstablished_server();
 
    void onConnectTerminated(TerminationReason r, const char *notUsed);
-
    void onConnectionTerminated(TerminationReason r, const char *string);
-
-   void disconnect(TerminationReason tr, const char *reason);
+   void disconnect(TerminationReason r, const char *reason);
 
 
    TNL_DECLARE_NETCONNECTION(GameConnection);

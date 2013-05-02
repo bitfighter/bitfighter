@@ -116,13 +116,13 @@ void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-void HTFGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
+void HTFGameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode)
 {
    Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      if(dismountMode != MountableItem::DISMOUNT_SILENT)
+      if(dismountMode != DISMOUNT_SILENT)
       {
          if(ship->getClientInfo())
          {
@@ -177,7 +177,7 @@ void HTFGameType::shipTouchZone(Ship *ship, GoalZone *zone)
 
    broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
-   mountedFlag->dismount(MountableItem::DISMOUNT_SILENT);
+   mountedFlag->dismount(DISMOUNT_SILENT);
 
    mountedFlag->setZone(zone);                                 // Assign zone to the flag
    mountedFlag->mTimer.reset(ScoreTime);                       // Start countdown 'til scorin' time!  // TODO: Should this timer be on the zone instead?
@@ -240,11 +240,11 @@ void HTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
 }
 
 
-void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
+void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
 {
 #ifndef ZAP_DEDICATED
 
-   Parent::renderInterfaceOverlay(scoreboardVisible);
+   Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
 
    BfObject *object = static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject();
 
@@ -287,7 +287,7 @@ void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
             }
          }
          if(!found)
-            renderObjectiveArrow(goalZone);
+            renderObjectiveArrow(goalZone, canvasWidth, canvasHeight);
       }
       uFlag = true;
       break;
@@ -302,15 +302,15 @@ void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
          GoalZone *goalZone = flag->getZone();
 
          if(goalZone && goalZone->getTeam() != team)
-            renderObjectiveArrow(flag, goalZone->getColor());
+            renderObjectiveArrow(flag, goalZone->getColor(), canvasWidth, canvasHeight);
          else if(!goalZone)
-            renderObjectiveArrow(flag, getTeamColor(TEAM_NEUTRAL));
+            renderObjectiveArrow(flag, getTeamColor(TEAM_NEUTRAL), canvasWidth, canvasHeight);
       }
       else
       {
          Ship *mount = flag->getMount();
          if(mount && mount != ship)
-            renderObjectiveArrow(mount);
+            renderObjectiveArrow(mount, canvasWidth, canvasHeight);
       }
    }
 #endif

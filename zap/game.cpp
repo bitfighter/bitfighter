@@ -23,44 +23,16 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "barrier.h"
-#include "config.h"
-#include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "game.h"
-#include "gameLoader.h"
-#include "gameNetInterface.h"
-#include "BfObject.h"
-#include "gameObjectRender.h"
-#include "gameType.h"
+#include "config.h"
 #include "masterConnection.h"
 #include "move.h"
-#include "moveObject.h"
-#include "projectile.h"          // For SpyBug class
-#include "SoundSystem.h"
-#include "SharedConstants.h"     // For ServerInfoFlags enum
-#include "ship.h"
-#include "GeomUtils.h"
-#include "luaLevelGenerator.h"
 #include "robot.h"
-#include "shipItems.h"           // For moduleInfos
 #include "stringUtils.h"
-#include "NexusGame.h"           // For creating new NexusFlagItem
-#include "teamInfo.h"            // For TeamManager def
-#include "playerInfo.h"
-
-#include "ClientInfo.h"
-
-#include "IniFile.h"             // For CIniFile def
-#include "BanList.h"             // For banList kick duration
-
-#include "BotNavMeshZone.h"      // For zone clearing code
-
-#include "WallSegmentManager.h"
-
-#include "tnl.h"
-#include "tnlRandom.h"
-#include "tnlGhostConnection.h"
-#include "tnlNetInterface.h"
+#include "SlipZone.h"  
+#include "teleporter.h"
+#include "ServerGame.h"
+#include "gameNetInterface.h"
 
 #include "md5wrapper.h"
 
@@ -68,8 +40,6 @@
 #include <sys/stat.h>
 #include <cmath>
 
-
-#include "soccerGame.h"
 
 using namespace TNL;
 
@@ -485,12 +455,36 @@ void Game::replaceTeam(AbstractTeam *team, S32 index) { mActiveTeamManager->repl
 void Game::clearTeams()                               { mActiveTeamManager->clearTeams();             }
 void Game::clearTeamHasFlagList()                     { mActiveTeamManager->clearTeamHasFlagList();   }
 
+// Pass through to to GameType
+void Game::addWall(const WallRec &barrier) { mGameType->addWall(barrier, this); }
+
 
 void Game::setTeamHasFlag(S32 teamIndex, bool hasFlag)
 {
    mActiveTeamManager->setTeamHasFlag(teamIndex, hasFlag);
 }
 
+
+// Get slowing factor if we are in a slip zone; could be used if we have go faster zones
+F32 Game::getShipSpeedModificationFactor(const Ship *ship) const
+{
+   BfObject *obj = ship->isInZone(SlipZoneTypeNumber);
+
+   if(obj)
+   {
+      SlipZone *slipzone = static_cast<SlipZone *>(obj);
+      return slipzone->slipAmount;
+   }
+
+   return 1.0f;
+}
+
+
+void Game::teleporterDestroyed(Teleporter *teleporter)
+{
+   if(teleporter)
+      teleporter->onDestroyed();       
+}
 
 
 S32           Game::getTeamCount()                const { return mActiveTeamManager->getTeamCount();            } 
@@ -1233,6 +1227,49 @@ U32 Game::getLevelDatabaseId() const
 {
    return mLevelDatabaseId;
 }
+
+
+// Server only
+void Game::onFlagMounted(S32 teamIndex)
+{
+   if(mGameType)
+      mGameType->onFlagMounted(teamIndex);
+}
+
+
+// Server only
+void Game::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode)
+{
+   if(mGameType)
+      mGameType->itemDropped(ship, item, dismountMode);
+}
+
+
+const Color *Game::getObjTeamColor(const BfObject *obj) const
+{ 
+   return mGameType->getTeamColor(obj);
+}
+
+
+bool Game::objectCanDamageObject(BfObject *damager, BfObject *victim) const
+{
+   return mGameType ? mGameType->objectCanDamageObject(damager, victim) : false;
+}
+
+
+// Static method
+bool Game::isLocalTestServer()
+{
+   return gServerGame && gServerGame->isTestServer();
+}
+
+
+// Static method
+const GridDatabase *Game::getServerGameObjectDatabase()
+{
+   return gServerGame->getGameObjDatabase();
+}
+
 
 };
 

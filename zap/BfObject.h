@@ -27,10 +27,11 @@
 #define _BFOBJECT_H_
 
 #include "gridDB.h"           // Base class
-#include "tnlNetObject.h"
+#include "LuaScriptRunner.h"  // Base class
 #include "move.h"
 #include "LuaWrapper.h"
-#include "LuaScriptRunner.h"  // Base class
+
+#include "tnlNetObject.h"
 
 #if defined(TNL_COMPILER_VISUALC)
 #  pragma warning( disable : 4250)
@@ -228,7 +229,7 @@ class EditorAttributeMenuUI;
 class WallSegment;
 class ClientInfo;
 
-class BfObject : public DatabaseObject, public NetObject, public EditorObject, public LuaObject, public idleLinkedList
+class BfObject : public DatabaseObject, public NetObject, public EditorObject, public LuaObject, public IdleLinkedList
 {
    typedef NetObject Parent;
 

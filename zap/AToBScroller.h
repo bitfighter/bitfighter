@@ -27,21 +27,24 @@
 #define _A_TO_B_SCROLLER_H_
 
 
-#include "ScissorsManager.h"
 #include "Timer.h"
 
 using namespace TNL;
 
 
-namespace Zap { namespace UI {
+namespace Zap { 
+   
+class ClientGame;
+
+namespace UI {
+
+
+
 
 // Class for producing a scrolling transition between two objects (A and B).  Used, for example, to help transition
 // between Modules and Weapons on the Loadout menu.
 class AToBScroller
 {
-private:
-   ScissorsManager mScissorsManager;      // Could probably be static, practically...
-
 protected:
    Timer mScrollTimer;
    S32 getTransitionPos(S32 fromPos, S32 toPos) const;

@@ -35,6 +35,7 @@
 #include "ScreenInfo.h"
 #include "ClientGame.h"
 #include "ClientInfo.h"
+#include "SoundSystem.h"
 
 #include "OpenglUtils.h"
 

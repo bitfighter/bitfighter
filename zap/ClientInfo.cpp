@@ -29,9 +29,9 @@
 #include "playerInfo.h"
 #include "EditorObject.h"        // For NO_TEAM def
 #include "EngineeredItem.h"      // For EngineerModuleDeployer def
+#include "ClientGame.h"
 
-#include "SoundEffect.h"
-#include "voiceCodec.h"
+#include "voiceCodec.h"    // This should be removed
 
 
 class Game;
@@ -684,6 +684,12 @@ VoiceDecoder *FullClientInfo::getVoiceDecoder()
 }
 
 
+void FullClientInfo::playVoiceChat(const ByteBufferPtr &voiceBuffer)
+{
+   TNLAssert(false, "Can't play voice from this class!");
+}
+
+
 bool FullClientInfo::isEngineeringTeleporter()
 {
    return getShip()->getEngineeredTeleporter() != NULL;
@@ -770,6 +776,13 @@ SoundEffect *RemoteClientInfo::getVoiceSFX()
 VoiceDecoder *RemoteClientInfo::getVoiceDecoder()
 {
    return mDecoder;
+}
+
+
+void RemoteClientInfo::playVoiceChat(const ByteBufferPtr &voiceBuffer)
+{
+   ByteBufferPtr playBuffer = getVoiceDecoder()->decompressBuffer(voiceBuffer);
+   mGame->queueVoiceChatBuffer(getVoiceSFX(), playBuffer);
 }
 
 

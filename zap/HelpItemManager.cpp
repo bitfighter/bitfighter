@@ -109,7 +109,7 @@ void HelpItemManager::renderMessages(S32 yPos) const
    if(mInitialDelayTimer.getCurrent() > 0)
       return;
 
-   FontManager::pushFontContext(FontManager::HelpItemContext);
+   FontManager::pushFontContext(HelpItemContext);
 
    for(S32 i = 0; i < mHelpItems.size(); i++)
    {

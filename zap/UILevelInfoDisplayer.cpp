@@ -31,6 +31,7 @@
 #include "UI.h"                        
 #include "GameTypesEnum.h"
 #include "gameType.h"
+#include "FontManager.h"
 
 
 
@@ -62,7 +63,7 @@ extern ScreenInfo gScreenInfo;
 
 void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount) const
 {
-   FontManager::pushFontContext(FontManager::LevelInfoContext);
+   FontManager::pushFontContext(LevelInfoContext);
 
    glPushMatrix();
    glTranslate(0, getInsideEdge(), 0);

@@ -43,12 +43,6 @@
 #include "tnl.h"
 #include "tnlLog.h"
 
-#ifdef TNL_OS_MOBILE
-#  include "SDL_opengles.h"
-#else
-#  include "SDL_opengl.h"
-#endif
-
 #include <string>
 
 using namespace TNL;

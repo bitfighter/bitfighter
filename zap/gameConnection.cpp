@@ -24,16 +24,15 @@
 //------------------------------------------------------------------------------------
 
 #include "gameConnection.h"
+
 #include "ServerGame.h"
-#include "soccerGame.h"          // For checking if pick up soccer is allowed
 #include "IniFile.h"             // For CIniFile def
-#include "playerInfo.h"
 #include "shipItems.h"           // For EngineerBuildObjects enum
 #include "masterConnection.h"    // For MasterServerConnection def
-#include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "BanList.h"
 #include "gameNetInterface.h"
-#include "ClientInfo.h"
+
+#include "SoundSystemEnums.h"
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
@@ -425,7 +424,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cUnsuspend, (), (), NetClassGroupGameMask, R
 {
 #ifndef ZAP_DEDICATED
    mClientGame->unsuspendGame();       
-   SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
+   mClientGame->playSoundEffect(SFXPlayerJoined, 1);
 #endif
 }
 
@@ -1011,12 +1010,11 @@ void GameConnection::displayMessage(U32 colorIndex, U32 sfxEnum, const char *mes
 #ifndef ZAP_DEDICATED
    mClientGame->displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
-      SoundSystem::playSoundEffect(sfxEnum);
+      mClientGame->playSoundEffect(sfxEnum);
 #endif
 }
 
 
-// I believe this is not used -CE
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageESI,
                   (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString,
                   Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i),
@@ -1201,7 +1199,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
 
    if(isRelative)
       newLevelIndex = (mServerGame->getCurrentLevelIndex() + newLevelIndex ) % mServerGame->getLevelCount();
-   else if(newLevelIndex == ServerGame::REPLAY_LEVEL)
+   else if(newLevelIndex == REPLAY_LEVEL)
       restart = true;
 
    StringTableEntry msg( restart ? "%e0 restarted the current level." : "%e0 changed the level to %e1." );

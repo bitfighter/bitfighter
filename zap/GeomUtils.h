@@ -49,6 +49,9 @@
 #ifndef _GEOM_UTILS_
 #define _GEOM_UTILS_
 
+#include "Point.h"
+#include "Rect.h"
+
 #include <string>
 #include <vector>
 

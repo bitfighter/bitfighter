@@ -10,11 +10,9 @@
 #include "Console.h"
 #include "config.h"
 #include "UIMenus.h"
-#include "UIDiagnostics.h"
 #include "IniFile.h"
 #include "ScreenInfo.h"
 #include "Joystick.h"
-#include "Cursor.h"
 #include "ClientGame.h"
 #include "InputCode.h"     // For InputCodeManager def
 #include "ScreenShooter.h"
@@ -57,19 +55,19 @@ void Event::setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode repo
 
 // Argument of axisMask is one of the 4 axes:
 //    MoveAxisLeftRightMask, MoveAxisUpDownMask, ShootAxisLeftRightMask, ShootAxisUpDownMask
-void Event::updateJoyAxesDirections(UserInterface *currentUI, U32 axisMask, S16 value)
+void Event::updateJoyAxesDirections(ClientGame *game, U32 axisMask, S16 value)
 {
    // Get our current joystick-axis-direction and its opposite on the same axis
    U32 detectedAxesDirectionMask = 0;
    U32 oppositeDetectedAxesDirectionMask = 0;
    if (value < 0)
    {
-      detectedAxesDirectionMask = axisMask & NegativeAxesMask;
+      detectedAxesDirectionMask         = axisMask & NegativeAxesMask;
       oppositeDetectedAxesDirectionMask = axisMask & PositiveAxesMask;
    }
    else
    {
-      detectedAxesDirectionMask = axisMask & PositiveAxesMask;
+      detectedAxesDirectionMask         = axisMask & PositiveAxesMask;
       oppositeDetectedAxesDirectionMask = axisMask & NegativeAxesMask;
    }
 
@@ -77,11 +75,11 @@ void Event::updateJoyAxesDirections(UserInterface *currentUI, U32 axisMask, S16 
    // from enum JoystickAxesDirections
    U32 axesDirectionIndex = 0;
    U32 oppositeAxesDirectionIndex = 0;
-   for (S32 i = 0; i < MaxAxesDirections; i++)
+   for (S32 i = 0; i < JoystickAxesDirectionCount; i++)
    {
-      if(Joystick::JoystickInputData[i].axesMask & detectedAxesDirectionMask)
+      if(JoystickInputData[i].axesMask & detectedAxesDirectionMask)
          axesDirectionIndex = i;
-      if(Joystick::JoystickInputData[i].axesMask & oppositeDetectedAxesDirectionMask)
+      if(JoystickInputData[i].axesMask & oppositeDetectedAxesDirectionMask)
          oppositeAxesDirectionIndex = i;
    }
 
@@ -96,23 +94,21 @@ void Event::updateJoyAxesDirections(UserInterface *currentUI, U32 axisMask, S16 
    else if(absValue > Joystick::UpperSensitivityThreshold)
       normalValue = 1.0f;
    else
-      normalValue = (F32)(absValue - Joystick::LowerSensitivityThreshold) / (F32)(Joystick::UpperSensitivityThreshold - Joystick::LowerSensitivityThreshold);
+      normalValue = (F32)(absValue - Joystick::LowerSensitivityThreshold) / 
+                    (F32)(Joystick::UpperSensitivityThreshold - Joystick::LowerSensitivityThreshold);
 
-//   logprintf("value: %d;\tnormalValue: %f", value, normalValue);
+   game->mJoystickInputs[axesDirectionIndex] = normalValue;
 
-   Joystick::JoystickInputData[axesDirectionIndex].value = normalValue;
-
-
-   // Now set the opposite axis back to zero
-   Joystick::JoystickInputData[oppositeAxesDirectionIndex].value = 0.0f;
+   // Set the opposite axis back to zero
+   game->mJoystickInputs[oppositeAxesDirectionIndex] = 0.0f;
 
 
    // Determine what to set the InputCode state, it is binary so set the threshold has half -> 0.5
    // Set the mask if it is above the digital threshold
    U32 currentInputCodeMask = 0;
 
-   for (S32 i = 0; i < MaxAxesDirections; i++)
-      if (fabs(Joystick::JoystickInputData[i].value) > 0.5)
+   for (S32 i = 0; i < JoystickAxesDirectionCount; i++)
+      if (fabs(game->mJoystickInputs[i]) > 0.5)
          currentInputCodeMask |= (1 << i);
 
 
@@ -120,18 +116,20 @@ void Event::updateJoyAxesDirections(UserInterface *currentUI, U32 axisMask, S16 
    U32 inputCodeDownDeltaMask = currentInputCodeMask & ~Joystick::AxesInputCodeMask;
    U32 inputCodeUpDeltaMask = ~currentInputCodeMask & Joystick::AxesInputCodeMask;
 
-   for (S32 i = 0; i < MaxAxesDirections; i++)
+   UserInterface *currentUI = game->getUIManager()->getCurrentUI();
+
+   for(S32 i = 0; i < JoystickAxesDirectionCount; i++)
    {
       // If the current axes direction is set in the inputCodeDownDeltaMask, set the input code down
-      if(Joystick::JoystickInputData[i].axesMask & inputCodeDownDeltaMask)
+      if(JoystickInputData[i].axesMask & inputCodeDownDeltaMask)
       {
-         inputCodeDown(currentUI, Joystick::JoystickInputData[i].inputCode);
+         inputCodeDown(currentUI, JoystickInputData[i].inputCode);
          continue;
       }
 
       // If the current axes direction is set in the inputCodeUpDeltaMask, set the input code up
-      if(Joystick::JoystickInputData[i].axesMask & inputCodeUpDeltaMask)
-         inputCodeUp(currentUI, Joystick::JoystickInputData[i].inputCode);
+      if(JoystickInputData[i].axesMask & inputCodeUpDeltaMask)
+         inputCodeUp(currentUI, JoystickInputData[i].inputCode);
    }
 
    // Finally alter the global axes InputCode mask to reflect the current inputCodeState
@@ -239,7 +237,7 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
          break;
 
       case SDL_JOYAXISMOTION:
-         onJoyAxis(currentUI, event->jaxis.which, event->jaxis.axis, event->jaxis.value);
+         onJoyAxis(game, event->jaxis.which, event->jaxis.axis, event->jaxis.value);
          break;
 
       case SDL_JOYBALLMOTION:
@@ -414,7 +412,7 @@ void Event::onMouseButtonUp(UserInterface *currentUI, S32 x, S32 y, InputCode in
 }
 
 
-void Event::onJoyAxis(UserInterface *currentUI, U8 whichJoystick, U8 axis, S16 value)
+void Event::onJoyAxis(ClientGame *game, U8 whichJoystick, U8 axis, S16 value)
 {
 //   logprintf("SDL Axis number: %u, value: %d", axis, value);
 
@@ -423,19 +421,19 @@ void Event::onJoyAxis(UserInterface *currentUI, U8 whichJoystick, U8 axis, S16 v
 
    // Left/Right movement axis
    if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].moveAxesSdlIndex[0])
-      updateJoyAxesDirections(currentUI, MoveAxisLeftRightMask,  value);
+      updateJoyAxesDirections(game, MoveAxisLeftRightMask,  value);
 
    // Up/down movement axis
    if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].moveAxesSdlIndex[1])
-      updateJoyAxesDirections(currentUI, MoveAxisUpDownMask,  value);
+      updateJoyAxesDirections(game, MoveAxisUpDownMask,  value);
 
    // Left/Right shooting axis
    if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].shootAxesSdlIndex[0])
-      updateJoyAxesDirections(currentUI, ShootAxisLeftRightMask, value);
+      updateJoyAxesDirections(game, ShootAxisLeftRightMask, value);
 
    // Up/down shooting axis
    if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].shootAxesSdlIndex[1])
-      updateJoyAxesDirections(currentUI, ShootAxisUpDownMask, value);
+      updateJoyAxesDirections(game, ShootAxisUpDownMask, value);
 }
 
 

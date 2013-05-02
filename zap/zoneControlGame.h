@@ -45,7 +45,7 @@ public:
 
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
-   void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);
+   void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
 
    void addFlag(FlagItem *flag);     // Server only
 
@@ -62,7 +62,7 @@ public:
 
    void onFlagMounted(S32 teamIndex);
 
-   void renderInterfaceOverlay(bool scoreboardVisible);
+   void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
    bool teamHasFlag(S32 teamIndex) const;
 
    void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);

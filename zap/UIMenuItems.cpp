@@ -27,6 +27,7 @@
 #include "UIMenus.h"
 #include "UI.h"
 #include "ScreenInfo.h"    // For gScreenInfo stuff
+#include "FontManager.h"
 
 #include "OpenglUtils.h"
 
@@ -182,7 +183,7 @@ void MenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    glColor(*getColor(isSelected));
 
-   FontManager::pushFontContext(FontManager::MenuContext);
+   FontManager::pushFontContext(MenuContext);
       drawCenteredStringf(xpos, ypos, textsize, "%s%s", getPrompt().c_str(), mDisplayValAppendage);
    FontManager::popFontContext();
 }

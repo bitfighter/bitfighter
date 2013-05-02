@@ -31,7 +31,7 @@
 #include "ConfigEnum.h"
 
 #ifndef ZAP_DEDICATED
-#include "SDL.h"
+#  include "SDL.h"      // For SDL_VERSION_ATLEAST macro
 #endif
 
 using namespace TNL;

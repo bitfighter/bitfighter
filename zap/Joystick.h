@@ -23,7 +23,6 @@
 //
 //------------------------------------------------------------------------------------
 
-
 #ifdef ZAP_DEDICATED
 #  error "No joystick.h for dedicated build"
 #endif
@@ -31,9 +30,11 @@
 #ifndef JOYSTICK_H_
 #define JOYSTICK_H_
 
+#include "JoystickButtonEnum.h"
+
+#include "Color.h"
 #include "tnlTypes.h"
 #include "tnlVector.h"
-#include "Color.h"
 
 #include "SDL_joystick.h"
 
@@ -48,42 +49,6 @@ namespace Zap {
 
 class GameSettings;
 
-enum JoystickAxesMask {
-   MoveAxesLeftMask = BIT(0),
-   MoveAxesRightMask = BIT(1),
-   MoveAxesUpMask = BIT(2),
-   MoveAxesDownMask = BIT(3),
-   ShootAxesLeftMask = BIT(4),
-   ShootAxesRightMask = BIT(5),
-   ShootAxesUpMask = BIT(6),
-   ShootAxesDownMask = BIT(7),
-
-   MoveAxisLeftRightMask  = MoveAxesLeftMask  | MoveAxesRightMask,
-   MoveAxisUpDownMask     = MoveAxesUpMask    | MoveAxesDownMask,
-   ShootAxisLeftRightMask = ShootAxesLeftMask | ShootAxesRightMask,
-   ShootAxisUpDownMask    = ShootAxesUpMask   | ShootAxesDownMask,
-
-   MoveAxesMask  = MoveAxesLeftMask  | MoveAxesRightMask  | MoveAxesUpMask  | MoveAxesDownMask,
-   ShootAxesMask = ShootAxesLeftMask | ShootAxesRightMask | ShootAxesUpMask | ShootAxesDownMask,
-
-   NegativeAxesMask = MoveAxesLeftMask  | MoveAxesUpMask   | ShootAxesLeftMask  | ShootAxesUpMask,
-   PositiveAxesMask = MoveAxesRightMask | MoveAxesDownMask | ShootAxesRightMask | ShootAxesDownMask,
-
-   AllAxesMask = MoveAxesMask | ShootAxesMask,
-};
-
-enum JoystickAxesDirections {
-   MoveAxesLeft,
-   MoveAxesRight,
-   MoveAxesUp,
-   MoveAxesDown,
-   ShootAxesLeft,
-   ShootAxesRight,
-   ShootAxesUp,
-   ShootAxesDown,
-   MaxAxesDirections
-};
-
 enum JoystickHatDirections {
    HatUp,
    HatRight,
@@ -93,43 +58,11 @@ enum JoystickHatDirections {
 };
 
 
-struct JoystickInput {
-   U32 axesDirection;
-   U32 axesMask;
-   InputCode inputCode;
-   F32 value;
-};
-
-
 class Joystick {
 private:
    static SDL_Joystick *sdlJoystick;       // The current Joystick in use
 
 public:
-   // This enum is for the in-game button type.  SDL raw button inputs will map to one of these
-   enum Button {
-      Button1,
-      Button2,
-      Button3,
-      Button4,
-      Button5,
-      Button6,
-      Button7,
-      Button8,
-      Button9,
-      Button10,
-      Button11,
-      Button12,
-      ButtonStart,
-      ButtonBack,
-      ButtonDPadUp,
-      ButtonDPadDown,
-      ButtonDPadLeft,
-      ButtonDPadRight,
-      MaxJoystickButtons,
-      ButtonUnknown,
-   };
-
    enum ButtonShape {
       ButtonShapeRound,
       ButtonShapeRect,
@@ -153,7 +86,7 @@ public:
 
 
    struct ButtonInfo {
-      Joystick::Button button;
+      JoystickButton button;
       U8 sdlButton;
       string label;
       Color color;
@@ -171,7 +104,7 @@ public:
       U32 moveAxesSdlIndex[2];       // primary axes; 0 -> left/right, 1 -> up/down
       U32 shootAxesSdlIndex[2];      // secondary axes; could be anything; first -> left/right, second -> up/down
 
-      ButtonInfo buttonMappings[MaxJoystickButtons];
+      ButtonInfo buttonMappings[JoystickButtonCount];
    };
 
    Joystick();
@@ -183,7 +116,6 @@ public:
 
    static U32 ButtonMask;    // Holds what buttons are current pressed down - can support up to 32
    static F32 rawAxis[rawAxisCount];
-   static Vector<string> DetectedJoystickNameList;   // All detected joystick names
 
    // static data
    static S16 LowerSensitivityThreshold;
@@ -191,7 +123,6 @@ public:
    static S32 UseJoystickNumber;
    static Vector<JoystickInfo> JoystickPresetList;
    static U32 SelectedPresetIndex;
-   static JoystickInput JoystickInputData[MaxAxesDirections];
    static U32 AxesInputCodeMask;
    static U32 HatInputCodeMask;
 
@@ -207,14 +138,14 @@ public:
    static void setSelectedPresetIndex(U32 joystickIndex);
 
    static void getAllJoystickPrettyNames(Vector<string> &nameList);
-   static Button stringToJoystickButton(const string &buttonString);
+   static JoystickButton stringToJoystickButton(const string &buttonString);
    static ButtonShape buttonLabelToButtonShape(const string &label);
    static ButtonSymbol stringToButtonSymbol(const string &label);
    static Color stringToColor(const string &colorString);
    static U32 getJoystickIndex(const string &joystickIndex);
    static JoystickInfo *getJoystickInfo(const string &joystickIndex);
 
-   static Button remapSdlButtonToJoystickButton(U8 button);
+   static JoystickButton remapSdlButtonToJoystickButton(U8 button);
 };
 
 } /* namespace Zap */

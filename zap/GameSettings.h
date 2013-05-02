@@ -201,6 +201,7 @@ private:
    Vector<string> getLevelList(const string &levelDir, bool ignoreCmdLine);    // Workhorse for above methods
 
 public:
+   static S32 UseJoystickNumber;
 
    Vector<string> *getMasterServerList();
    void saveMasterAddressListInIniUnlessItCameFromCmdLine();
@@ -267,6 +268,9 @@ public:
    static void sendRes(GameSettings *settings, const Vector<string> &words);
    static void showRules(GameSettings *settings, const Vector<string> &words);
    static void showHelp(GameSettings *settings, const Vector<string> &words);
+
+   static Vector<string> DetectedJoystickNameList;   // List of joysticks we found attached to this machine
+
 };
 
 

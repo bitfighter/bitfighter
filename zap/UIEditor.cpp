@@ -89,8 +89,8 @@ const F32 STARTING_SCALE = 0.5;
 
 static GridDatabase *mLoadTarget;
 
-// statics
-Vector<string> EditorUserInterface::robots;        // List of robot lines in the level file
+
+//Vector<string> EditorUserInterface::robots;        // List of robot lines in the level file
 
 enum EntryMode {
    EntryID,          // Entering an objectID
@@ -146,6 +146,8 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos... also creates a ton of empty dbs.  Maybe we should be using pointers?
    mAutoScrollWithMouse = false;
    mAutoScrollWithMouseReady = false;
+
+   mEditorAttributeMenuItemBuilder.initialize(game);
 }
 
 
@@ -524,7 +526,6 @@ void EditorUserInterface::cleanUp()
    mAddingVertex = false;
    clearLevelGenItems();
    mGameTypeArgs.clear();
-   robots.clear();
 
    game->resetLevelInfo();
 
@@ -658,7 +659,8 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    // Load the items
    LuaLevelGenerator levelGen(name, args, getGame()->getGridSize(), database, getGame());
 
-   bool error = !levelGen.runScript();      // Error reporting handled within
+   // Error reporting handled within -- we won't cache these scripts for easier development   
+   bool error = !levelGen.runScript(false);      
 
    if(error)
    {
@@ -769,7 +771,9 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    mPluginRunner = boost::shared_ptr<EditorPlugin>(plugin);
 
    // Loads the script and runs it to get everything loaded into memory.  Does not run main().
-   if(!mPluginRunner->prepareEnvironment() || !mPluginRunner->loadScript()) 
+   // We won't cache scripts here because the performance impact should be relatively small, and it will
+   // make it easier to develop them.  If circumstances change, we might want to start caching.
+   if(!mPluginRunner->prepareEnvironment() || !mPluginRunner->loadScript(false)) 
    {
       showPluginError(getGame(), "during loading");
       mPluginRunner.reset();
@@ -1941,11 +1945,11 @@ static void setColor(bool isSelected, bool isLitUp, bool isScriptItem)
    F32 alpha = isScriptItem ? .6f : 1;     // So script items will appear somewhat translucent
 
    if(isSelected)
-      glColor(SELECT_COLOR, alpha);       // yellow
+      glColor(Colors::EDITOR_SELECT_COLOR, alpha);       // yellow
    else if(isLitUp)
-      glColor(HIGHLIGHT_COLOR, alpha);    // white
+      glColor(Colors::EDITOR_HIGHLIGHT_COLOR, alpha);    // white
    else  // Normal
-      glColor(PLAIN_COLOR, alpha);
+      glColor(Colors::EDITOR_PLAIN_COLOR, alpha);
 }
 
 
@@ -2005,7 +2009,7 @@ void EditorUserInterface::renderObjectsUnderConstruction()
    glLineWidth(gLineWidth3);
 
    if(mCreatingPoly) // Wall
-      glColor(*SELECT_COLOR);
+      glColor(Colors::EDITOR_SELECT_COLOR);
    else              // LineItem --> Caution! we're rendering an object that doesn't exist yet; its game is NULL
       glColor(getGame()->getTeamColor(mCurrentTeam));
 
@@ -2054,7 +2058,7 @@ void EditorUserInterface::renderDockItems()
 
 static void renderDockItem(BfObject *object, F32 currentScale, S32 snapVertexIndex)
 {
-   glColor(PLAIN_COLOR);
+   glColor(Colors::EDITOR_PLAIN_COLOR);
 
    object->renderDock();
    renderDockItemLabel(object->getDockLabelPos(), object->getOnDockName());
@@ -4120,7 +4124,7 @@ void EditorUserInterface::startAttributeEditor()
          }
 
          // Activate the attribute editor if there is one
-         EditorAttributeMenuUI *menu = obj_i->getAttributeMenu();
+         EditorAttributeMenuUI *menu = mEditorAttributeMenuItemBuilder.getAttributeMenu(obj_i);
          if(menu)
          {
             menu->startEditingAttrs(obj_i);
@@ -4443,15 +4447,18 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 }
 
 
-string EditorUserInterface::getLevelText() {
+string EditorUserInterface::getLevelText() 
+{
    string result;
 
    // Write out basic game parameters, including gameType info
    result += getGame()->toLevelCode();    // Note that this toLevelCode appends a newline char; most don't
 
+   const Vector<string> *robots = getGame()->getLevelRobotLines();
+
    // Next come the robots
-   for(S32 i = 0; i < robots.size(); i++)
-      result += robots[i];
+   for(S32 i = 0; i < robots->size(); i++)
+      result += robots->get(i);
 
    // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
@@ -4472,6 +4479,7 @@ string EditorUserInterface::getLevelText() {
 
    return result;
 }
+
 
 // Returns true if successful, false otherwise
 bool EditorUserInterface::doSaveLevel(const string &saveName, bool showFailMessages)

@@ -24,30 +24,21 @@
 //------------------------------------------------------------------------------------
 
 #include "moveObject.h"
-#include "gameType.h"
-#include "goalZone.h"
-#include "ClientInfo.h"       // To give us access to the statistics object
-#include "ship.h"
-#include "SoundSystem.h"
-#include "speedZone.h"
-#include "game.h"
-#include "gameConnection.h"
-#include "SparkTypesEnum.h"
 
+#include "SparkTypesEnum.h"
+#include "SoundSystemEnums.h"
+
+#include "Colors.h"
 #include "GeomUtils.h"
 #include "stringUtils.h"
+#include "MathUtils.h"     // For findLowestRootIninterval()
 
 #include "LuaScriptRunner.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "UIEditorMenus.h"
-#  include "OpenglUtils.h"
+#  include "gameObjectRender.h"
 #endif
-
-#include "LuaWrapper.h"
-
-#include "MathUtils.h"           // For findLowestRootIninterval()
 
 
 namespace Zap
@@ -595,7 +586,7 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
       if(scale > 0.5f)
       {
          // Make a noise...
-         SoundSystem::playSoundEffect(SFXBounceWall, collisionPoint, Point(), getMin(1.0f, scale - 0.25f));
+         getGame()->playSoundEffect(SFXBounceWall, collisionPoint, Point(), getMin(1.0f, scale - 0.25f));
 
          Color bumpC(scale/3, scale/3, scale);
 
@@ -711,7 +702,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
 void MoveObject::playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity)
 {
    if(velocity > 0.25)    // Make sound if the objects are moving fast enough
-      SoundSystem::playSoundEffect(SFXBounceObject, moveObjectThatWasHit->getPos(stateIndex));
+      getGame()->playSoundEffect(SFXBounceObject, moveObjectThatWasHit->getPos(stateIndex));
 }
 
 
@@ -1205,7 +1196,7 @@ void MountableItem::mountToShip(Ship *ship)
     if(!isGhost()) // i.e. if this is the server
     {
        TNLAssert(getGame(), "NULL game!");
-       getGame()->getGameType()->onFlagMounted(ship->getTeam());
+       getGame()->onFlagMounted(ship->getTeam());
     }
 }
 
@@ -1239,11 +1230,7 @@ void MountableItem::dismount(DismountMode dismountMode)
 
    // Notify the GameType so it can do any special handling that it might require
    if(isServer())
-   {
-      GameType *gt = getGame()->getGameType();
-      if(gt)
-         gt->itemDropped(ship, this, dismountMode);      // Server-only method; generally broadcasts message and things like that
-   }
+      getGame()->itemDropped(ship, this, dismountMode);      // Server-only method; generally broadcasts message and things like that
 
    mDroppedTimer.reset();
 }
@@ -1337,7 +1324,6 @@ void VelocityItem::setInitialPosVelAng(const Point &pos, const Point &vel, F32 a
 
 TNL_IMPLEMENT_NETOBJECT(Asteroid);
 
-static const S32 ASTEROID_INITIAL_SIZELEFT            = 3;
 static const F32 ASTEROID_MASS_LAST_SIZE              = 1;
 static const F32 ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE = 89 * 0.2f;
 static const F32 ASTEROID_SPEED                       = 250;
@@ -1388,6 +1374,21 @@ Asteroid *Asteroid::clone() const
 U32 Asteroid::getDesignCount()
 {
    return ASTEROID_DESIGNS;
+}
+
+
+S32 Asteroid::getCurrentSize() const
+{
+   return mSizeLeft;
+}
+
+
+void Asteroid::setCurrentSize(S32 size)
+{
+   mSizeLeft = min(size, ASTEROID_SIZELEFT_MAX);
+
+   setRadius(getAsteroidRadius(mSizeLeft));
+   setMass(getAsteroidMass(mSizeLeft));
 }
 
 
@@ -1485,9 +1486,6 @@ void Asteroid::damageObject(DamageInfo *damageInfo)
 }
 
 
-static U8 ASTEROID_SIZELEFT_BIT_COUNT = 3;
-static S32 ASTEROID_SIZELEFT_MAX = 5;   // For editor attribute. real limit based on bit count is (1 << ASTEROID_SIZELEFT_BIT_COUNT) - 1; // = 7
-
 U32 Asteroid::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
@@ -1521,9 +1519,9 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
       {
          // mSizeLeft is never transmitted when server-side it is 0, so handle with final explode below
          if(mSizeLeft == 1)
-            SoundSystem::playSoundEffect(SFXAsteroidMediumExplode, getRenderPos());
+            getGame()->playSoundEffect(SFXAsteroidMediumExplode, getRenderPos());
          else if(mSizeLeft >= 2)
-            SoundSystem::playSoundEffect(SFXAsteroidLargeExplode, getRenderPos());
+            getGame()->playSoundEffect(SFXAsteroidLargeExplode, getRenderPos());
       }
    }
 
@@ -1571,8 +1569,7 @@ TestFunc Asteroid::collideTypes()
 // Client only
 void Asteroid::onItemExploded(Point pos)
 {
-   SoundSystem::playSoundEffect(SFXAsteroidSmallExplode, getRenderPos());
-   // FxManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
+   getGame()->playSoundEffect(SFXAsteroidSmallExplode, getRenderPos());
 }
 
 
@@ -1615,43 +1612,43 @@ string Asteroid::toLevelCode(F32 gridSize) const
 }
 
 
-#ifndef ZAP_DEDICATED
+//#ifndef ZAP_DEDICATED
 
-EditorAttributeMenuUI *Asteroid::mAttributeMenuUI = NULL;
-
-EditorAttributeMenuUI *Asteroid::getAttributeMenu()
-{
-   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
-   if(!mAttributeMenuUI)
-   {
-      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-
-      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
-
-      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Size:", mSizeLeft, 1, 1, ASTEROID_SIZELEFT_MAX, "", "", ""));
-
-      // Add our standard save and exit option to the menu
-      mAttributeMenuUI->addSaveAndQuitMenuItem();
-   }
-
-   return mAttributeMenuUI;
-}
-
-
-// Get the menu looking like what we want
-void Asteroid::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   attributeMenu->getMenuItem(0)->setIntValue(mSizeLeft);
-}
-
-
-// Retrieve the values we need from the menu
-void Asteroid::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   mSizeLeft = attributeMenu->getMenuItem(0)->getIntValue();
-   setRadius(getAsteroidRadius(mSizeLeft));
-   setMass(getAsteroidMass(mSizeLeft));
-}
+//EditorAttributeMenuUI *Asteroid::mAttributeMenuUI = NULL;
+//
+//EditorAttributeMenuUI *Asteroid::getAttributeMenu()
+//{
+//   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
+//   if(!mAttributeMenuUI)
+//   {
+//      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+//
+//      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+//
+//      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Size:", mSizeLeft, 1, 1, ASTEROID_SIZELEFT_MAX, "", "", ""));
+//
+//      // Add our standard save and exit option to the menu
+//      mAttributeMenuUI->addSaveAndQuitMenuItem();
+//   }
+//
+//   return mAttributeMenuUI;
+//}
+//
+//
+//// Get the menu looking like what we want
+//void Asteroid::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+//{
+//   attributeMenu->getMenuItem(0)->setIntValue(mSizeLeft);
+//}
+//
+//
+//// Retrieve the values we need from the menu
+//void Asteroid::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+//{
+//   mSizeLeft = attributeMenu->getMenuItem(0)->getIntValue();
+//   setRadius(getAsteroidRadius(mSizeLeft));
+//   setMass(getAsteroidMass(mSizeLeft));
+//}
 
 
 // Render some attributes when item is selected but not being edited
@@ -1660,7 +1657,7 @@ void Asteroid::fillAttributesVectors(Vector<string> &keys, Vector<string> &value
    keys.push_back("Size");   values.push_back(itos(mSizeLeft));
 }
 
-#endif
+//#endif
 
 
 /////
@@ -1876,7 +1873,7 @@ bool Circle::collide(BfObject *otherObject)
 // Client only
 void Circle::onItemExploded(Point pos)
 {
-   SoundSystem::playSoundEffect(SFXAsteroidSmallExplode, pos);
+   getGame()->playSoundEffect(SFXAsteroidSmallExplode, pos);
 }
 
 
@@ -1955,67 +1952,17 @@ const char *Worm::getOnScreenName()
    return "Worm";
 }
 
+
 string Worm::toLevelCode(F32 gridSize) const
 {
    return string(appendId(getClassName())) + " " + geomToLevelCode(gridSize);
 }
 
+
 void Worm::render()
 {
-#ifndef ZAP_DEDICATED
-
    if(!hasExploded)
-   {
-      if(mTailLength <= 1)
-      {
-         renderWorm(mPoints[mHeadIndex]);
-         return;
-      }
-      F32 p[maxTailLength * 2];
-      S32 i = mHeadIndex;
-      for(S32 count = 0; count <= mTailLength; count++)
-      {
-         p[count * 2] = mPoints[i].x;
-         p[count * 2 + 1] = mPoints[i].y;
-         i--;
-         if(i < 0)
-            i = maxTailLength - 1;
-      }
-      glColor(Colors::white);
-
-      static const F32 WormColors[maxTailLength * 4] = {
-         1,   1,   1,  1,
-      .90f,.80f,.66f,  1,
-      .80f,.60f,.33f,  1,
-      .70f,.40f,   0,  1,
-      .80f,.60f,.33f,  1,
-      .90f,.80f,.66f,  1,
-         1,   1,   1,  1,
-      .90f,.80f,.66f,  1,
-      .80f,.60f,.33f,  1,
-      .70f,.40f,   0,  1,
-      .80f,.60f,.33f,  1,
-      .90f,.80f,.66f,  1,
-         1,   1,   1,  1,
-      .90f,.80f,.66f,  1,
-      .80f,.60f,.33f,  1,
-      .70f,.40f,   0,  1,
-      .80f,.60f,.33f,  1,
-      .90f,.80f,.66f,  1,
-         1,   1,   1,  1,
-      .90f,.80f,.66f,  1,
-      .80f,.60f,.33f,  1,
-      .70f,.40f,   0,  1,
-      .80f,.60f,.33f,  1,
-      .90f,.80f,.66f,  1,
-         1,   1,   1,  1,
-      .90f,.80f,.66f,  1,
-      .80f,.60f,.33f,  1,
-      .70f,.40f,   0,  1,
-      };
-      renderColorVertexArray(p, WormColors, mTailLength + 1, GL_LINE_STRIP);
-   }
-#endif
+      renderWorm(mPoints, mHeadIndex, mTailLength);
 }
 
 
@@ -2027,7 +1974,7 @@ Worm *Worm::clone() const
 
 F32 Worm::getRadius()
 {
-   return WORM_RADIUS;
+   return (F32)WORM_RADIUS;
 }
 
 
@@ -2076,12 +2023,12 @@ bool Worm::collide(BfObject *otherObject)
 void Worm::setPosAng(Point pos, F32 ang)
 {
    mHeadIndex++;
-   if(mHeadIndex >= maxTailLength)
+   if(mHeadIndex >= MaxTailLength)
       mHeadIndex = 0;
 
    mPoints[mHeadIndex] = pos;
 
-   if(mTailLength < maxTailLength - 1)
+   if(mTailLength < MaxTailLength - 1)
    {
       mTailLength++;
       setMaskBits(TailPointPartsMask << mHeadIndex | ExplodeOrTailLengthMask);
@@ -2096,8 +2043,8 @@ void Worm::setPosAng(Point pos, F32 ang)
 void Worm::damageObject(DamageInfo *damageInfo)
 {
    mTailLength -= S32(damageInfo->damageAmount * 8.f + .9f);
-   if(mTailLength >= maxTailLength - 1)
-      mTailLength = maxTailLength - 1;
+   if(mTailLength >= MaxTailLength - 1)
+      mTailLength = MaxTailLength - 1;
 
 
    if(mTailLength < 2)
@@ -2200,13 +2147,13 @@ void Worm::idle(BfObject::IdleCallPath path)
       mPolyPoints.push_back(mPoints[i]);
       i--;
       if(i < 0)
-         i = maxTailLength - 1;
+         i = MaxTailLength - 1;
    }
    for(S32 count = 0; count < mTailLength; count++)
    {
       mPolyPoints.push_back(mPoints[i]);
       i++;
-      if(i >= maxTailLength)
+      if(i >= MaxTailLength)
          i = 0;
    }
 }
@@ -2222,7 +2169,7 @@ U32 Worm::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(stream->writeFlag(U32(TailPointPartsMask << mHeadIndex) == (updateMask & TailPointPartsFullMask)))
       mPoints[mHeadIndex].write(stream);
    else
-      for(S32 i = 0; i < maxTailLength; i++)
+      for(S32 i = 0; i < MaxTailLength; i++)
       {
          if(stream->writeFlag(TailPointPartsMask << i))
          {
@@ -2250,7 +2197,7 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())
       mPoints[mHeadIndex].read(stream);
    else
-      for(S32 i=0; i < maxTailLength; i++)
+      for(S32 i=0; i < MaxTailLength; i++)
       {
          if(stream->readFlag())
          {
@@ -2270,9 +2217,9 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
          disableCollision();
          ClientGame *game = static_cast<ClientGame *>(getGame());
 
-         static const S32 WormExplodeColorsTotal = 2;
-         static const Color WormExplodeColors[WormExplodeColorsTotal] = {Colors::orange50, Colors::orange67};
-         game->emitExplosion(mPoints[mHeadIndex], 0.4f, WormExplodeColors, WormExplodeColorsTotal);
+         static const Color WormExplodeColors[] = { Colors::orange50, Colors::orange67 };
+
+         game->emitExplosion(mPoints[mHeadIndex], 0.4f, WormExplodeColors, ARRAYSIZE(WormExplodeColors));
       }
    }
 
@@ -2470,7 +2417,7 @@ void ResourceItem::renderDock()
 {
    static Vector<Point> points;
    points.clear();
-   generateOutlinePoints(getActualPos(), 0.4, points);
+   generateOutlinePoints(getActualPos(), 0.4f   , points);
 
    renderResourceItem(points);
 }

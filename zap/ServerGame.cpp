@@ -1026,7 +1026,7 @@ void ServerGame::runLevelGenScript(const string &scriptName)
    LuaLevelGenerator *levelgen = new LuaLevelGenerator(fullname, *getGameType()->getScriptArgs(), getGridSize(), 
                                                        getGameObjDatabase(), this);
 
-   if(!levelgen->runScript())
+   if(!levelgen->runScript(!isTestServer()))    // Do not cache on test server
       delete levelgen;
    else
       mLevelGens.push_back(levelgen);
@@ -1572,6 +1572,34 @@ S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &levelInfo)
 
    return mLevelInfos.size() - 1;
 }
+
+
+SFXHandle ServerGame::playSoundEffect(U32 profileIndex, F32 gain) const
+{
+   TNLAssert(false, "No sounds on a ServerGame!");
+   return 0;
+}
+
+
+SFXHandle ServerGame::playSoundEffect(U32 profileIndex, const Point &position) const
+{
+   TNLAssert(false, "No sounds on a ServerGame!");
+   return 0;
+}
+
+
+SFXHandle ServerGame::playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain) const
+{
+   TNLAssert(false, "No sounds on a ServerGame!");
+   return 0;
+}
+
+
+void ServerGame::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const
+{
+   TNLAssert(false, "No sounds on a ServerGame!");
+}
+
 
 
 };

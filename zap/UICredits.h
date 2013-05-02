@@ -27,7 +27,6 @@
 #define _UICREDITS_H_
 
 #include "UI.h"
-#include "game.h"
 
 namespace Zap
 {

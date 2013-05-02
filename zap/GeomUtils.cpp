@@ -43,18 +43,18 @@
 // Please have a look at the notes. They indicate obvious places for optimization
 // if you are using a swept ellipsoid against a large number of polygons.
 
-#include "tnlVector.h"
-#include "tnlTypes.h"
-#include "tnlLog.h"
 
 #include "GeomUtils.h"
 #include "MathUtils.h"                    // For findLowestRootInInterval()
-#include "Point.h"
-#include "Rect.h"
+
 #include "../recast/Recast.h"
 #include "../recast/RecastAlloc.h"
 #include "../clipper/clipper.hpp"
 #include "../poly2tri/poly2tri.h"
+
+#include "tnlVector.h"
+#include "tnlTypes.h"
+#include "tnlLog.h"
 
 #include <math.h>
 
@@ -94,7 +94,7 @@ void calcPolygonVerts(const Point &center, S32 sides, F32 radius, F32 angle, Vec
 
 inline S32 isLeft(const Point &p1, const Point &p2, const Point &p )
 {
-    return ( (p2.x - p1.x) * (p.y - p1.y) - (p.x -  p1.x) * (p2.y - p1.y) );
+    return S32( (p2.x - p1.x) * (p.y - p1.y) - (p.x -  p1.x) * (p2.y - p1.y) );
 }
 
 // Fast winding number test for finding if a point is in a polygon.  Adapted from:
@@ -130,7 +130,7 @@ bool polygonContainsPoint(const Point *vertices, S32 vertexCount, const Point &p
 // http://geomalgorithms.com/a03-_inclusion.html#wn_PnPoly%28%29
 inline S32 isLeftP2t( p2t::Point *p1, p2t::Point *p2, const p2t::Point *p3 )
 {
-    return ( (p2->x - p1->x) * (p3->y - p1->y) - (p3->x -  p1->x) * (p2->y - p1->y) );
+    return S32( (p2->x - p1->x) * (p3->y - p1->y) - (p3->x -  p1->x) * (p2->y - p1->y) );
 }
 
 bool PolygonContains2p2t(p2t::Point **vertices, int vertexCount, const p2t::Point *point)

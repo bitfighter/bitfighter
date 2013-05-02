@@ -26,6 +26,7 @@
 #ifndef SOUNDSYSTEM_H_
 #define SOUNDSYSTEM_H_
 
+#include "SoundSystemEnums.h"
 #include "ConfigEnum.h"     // For sfxSets
 #include "Timer.h"
 
@@ -34,16 +35,17 @@
 #endif
 
 #ifndef BF_NO_AUDIO
-#include "../openal/alInclude.h"
-#include "../alure/AL/alure.h"
+#  include "../openal/alInclude.h"
+#  include "../alure/AL/alure.h"
 #else
-class alureStream;
+   class alureStream;
 #endif
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
 #include <string>
+
 
 // forward declarations
 typedef unsigned int ALuint;
@@ -66,92 +68,6 @@ class SoundEffect;
 class UIManager;
 typedef RefPtr<SoundEffect> SFXHandle;
 
-// Must keep this aligned with sfxProfilesModern[] and sfxProfilesClassic[]
-enum SFXProfiles
-{
-   // Utility sounds
-   SFXVoice,
-   SFXNone,
-
-   SFXPlayerJoined,
-   SFXPlayerLeft,
-
-   // Weapon noises
-   SFXPhaserProjectile,
-   SFXPhaserImpact,
-   SFXBounceProjectile,
-   SFXBounceImpact,
-   SFXTripleProjectile,
-   SFXTripleImpact,
-   SFXTurretProjectile,
-   SFXTurretImpact,
-
-   SFXBurst, 
-
-   SFXMineDeploy,
-   SFXMineArm,
-   SFXMineExplode,
-
-   SFXSpyBugDeploy,
-   SFXSpyBugExplode,
-
-   SFXAsteroidSmallExplode,
-   SFXAsteroidMediumExplode,
-   SFXAsteroidLargeExplode,
-
-   // Ship noises
-   SFXShipExplode,
-   SFXShipHeal,      // Ship picked up a health pack or energy item
-   SFXShipBoost,
-   SFXShipHit,       // Ship is hit by a projectile
-
-   SFXBounceWall,
-   SFXBounceObject,
-   SFXBounceShield,
-
-   SFXShieldActive,
-   SFXSensorActive,
-   SFXRepairActive,
-   SFXCloakActive,
-
-   // Flag noises
-   SFXFlagCapture,
-   SFXFlagDrop,
-   SFXFlagReturn,
-   SFXFlagSnatch,
-
-   // Teleport noises
-   SFXTeleportIn,
-   SFXTeleportOut,
-   SFXTeleportExploding,
-
-   // GoFast noises
-   SFXGoFastOutside,
-   SFXGoFastInside,
-
-   // Forcefield noises
-   SFXForceFieldUp,
-   SFXForceFieldDown,
-
-   // UI noises
-   SFXUIBoop,
-   SFXUICommUp,
-   SFXUICommDown,
-   SFXIncomingMessage,
-
-   // Core-related noises
-   SFXCoreHeartbeat,
-   SFXCoreExplode,
-   SFXCorePanelExplode,
-
-   // Seekers
-   SFXSeekerFire,
-
-   // Other noises
-   SFXAchievementEarned,
-
-   NumSFXBuffers     // Count of the number of SFX sounds we have
-};
 
 enum MusicCommand {
    MusicCommandNone,
@@ -237,20 +153,20 @@ public:
    // General functions
    static void init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVol);
    static void shutdown();
-   static void setListenerParams(Point pos, Point velocity);
+   static void setListenerParams(const Point &position, const Point &velocity);
    static void processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, UIManager *uiManager);  // Client version
    static void processAudio(F32 sfxVol);                                                                   // Server version
 
    // Sound Effect functions
    static void processSoundEffects(F32 sfxVol, F32 voiceVol);
    static SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f);
-   static SFXHandle playSoundEffect(U32 profileIndex, Point position);
-   static SFXHandle playSoundEffect(U32 profileIndex, Point position, Point velocity, F32 gain = 1.0f);
+   static SFXHandle playSoundEffect(U32 profileIndex, const Point &position);
+   static SFXHandle playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain = 1.0f);
    static void playSoundEffect(const SFXHandle &effect);
    static SFXHandle playRecordedBuffer(ByteBufferPtr p, F32 gain);
    static void stopSoundEffect(SFXHandle &effect);
    static void unqueueBuffers(S32 sourceIndex);
-   static void setMovementParams(SFXHandle& effect, Point position, Point velocity);
+   static void setMovementParams(SFXHandle& effect, const Point &position, const Point &velocity);
    static void updateMovementParams(SFXHandle& effect);
 
    // Voice Chat functions

@@ -25,21 +25,27 @@
 
 #include "SoundSystem.h"
 #include "SoundEffect.h"
-#include "tnlLog.h"
-#include "Point.h"
-#include "tnlByteBuffer.h"
 
 #ifndef BF_NO_AUDIO
 
 #include "SFXProfile.h"
 #include "config.h"
-#include "stringUtils.h"
 #include "UI.h"
 #include "UIManager.h"
 
-#include "tnlNetBase.h"
-
 #include "MathUtils.h"
+#include "stringUtils.h"
+
+#include "Point.h"
+
+#include "tnlByteBuffer.h"
+#include "tnlNetBase.h"
+#include "tnlLog.h"
+
+
+#ifdef TNL_OS_WIN32
+#  include <windows.h>   // For ARRAYSIZE
+#endif
 
 namespace Zap {
 
@@ -447,16 +453,16 @@ bool SoundSystem::musicSystemValid()
 }
 
 
-void SoundSystem::setListenerParams(Point pos, Point velocity)
+void SoundSystem::setListenerParams(const Point &pos, const Point &velocity)
 {
    if(!gSFXValid)
       return;
 
-   pos = safePoint(pos);
+   Point position = safePoint(pos);
 
-   mListenerPosition = pos;
+   mListenerPosition = position;
    mListenerVelocity = velocity;
-   alListener3f(AL_POSITION, pos.x, pos.y, -mMaxDistance/2);
+   alListener3f(AL_POSITION, position.x, position.y, -mMaxDistance / 2);
 }
 
 
@@ -476,13 +482,13 @@ SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, F32 gain)
 }
 
 
-SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, Point position)
+SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, const Point &position)
 {
    return playSoundEffect(profileIndex, position, Point(0,0));
 }
 
 
-SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, Point position, Point velocity, F32 gain)
+SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain)
 {
    SFXHandle ret = new SoundEffect(profileIndex, NULL, gain, position, velocity);
    playSoundEffect(ret);
@@ -510,7 +516,7 @@ void SoundSystem::playSoundEffect(const SFXHandle &effect)
 }
 
 
-void SoundSystem::stopSoundEffect(SFXHandle& effect)
+void SoundSystem::stopSoundEffect(SFXHandle &effect)
 {
    if(!gSFXValid)
       return;
@@ -567,7 +573,7 @@ void SoundSystem::unqueueBuffers(S32 sourceIndex)
 }
 
 
-void SoundSystem::setMovementParams(SFXHandle& effect, Point position, Point velocity)
+void SoundSystem::setMovementParams(SFXHandle& effect, const Point &position, const Point &velocity)
 {
    if(!gSFXValid)
       return;
@@ -580,7 +586,7 @@ void SoundSystem::setMovementParams(SFXHandle& effect, Point position, Point vel
 }
 
 
-void SoundSystem::updateMovementParams(SFXHandle& effect)
+void SoundSystem::updateMovementParams(SFXHandle &effect)
 {
    ALuint source = gFreeSources[effect->mSourceIndex];
    if(effect->mProfile->isRelative)

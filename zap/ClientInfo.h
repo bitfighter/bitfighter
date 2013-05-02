@@ -191,6 +191,7 @@ public:
 
    virtual SoundEffect *getVoiceSFX() = 0;
    virtual VoiceDecoder *getVoiceDecoder() = 0;
+   virtual void playVoiceChat(const ByteBufferPtr &voiceBuffer) = 0;
 
    virtual bool isEngineeringTeleporter() = 0;
    virtual void setIsEngineeringTeleporter(bool isEngineeringTeleporter) = 0;
@@ -227,6 +228,7 @@ public:
 
    SoundEffect *getVoiceSFX();
    VoiceDecoder *getVoiceDecoder();
+   void playVoiceChat(const ByteBufferPtr &voiceBuffer);
 
    bool isEngineeringTeleporter();
    void setIsEngineeringTeleporter(bool isEngineeringTeleporter);
@@ -267,6 +269,7 @@ public:
    // Voice chat stuff -- these will be invalid on the server side
    SoundEffect *getVoiceSFX();
    VoiceDecoder *getVoiceDecoder();
+   void playVoiceChat(const ByteBufferPtr &voiceBuffer);
 
    bool isEngineeringTeleporter();
    void setIsEngineeringTeleporter(bool isEngineeringTeleporter);

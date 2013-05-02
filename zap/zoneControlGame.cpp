@@ -90,13 +90,13 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
+void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode)
 {
    Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      if(dismountMode != MountableItem::DISMOUNT_SILENT)
+      if(dismountMode != DISMOUNT_SILENT)
       {
          if(ship->getClientInfo())
          {
@@ -221,7 +221,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
       FlagItem *mountedFlag = static_cast<FlagItem *>(item);
 
-      mountedFlag->dismount(MountableItem::DISMOUNT_SILENT);
+      mountedFlag->dismount(DISMOUNT_SILENT);
       mountedFlag->sendHome();
    }
 }
@@ -257,11 +257,11 @@ void ZoneControlGameType::performProxyScopeQuery(BfObject *scopeObject, ClientIn
 
 
 // Do some extra rendering required by this game, runs on client
-void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
+void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
 {
 #ifndef ZAP_DEDICATED
 
-   Parent::renderInterfaceOverlay(scoreboardVisible);
+   Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
 
    BfObject *object = static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject();
 
@@ -287,7 +287,7 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
          TNLAssert(zone, "There was a !zone check here before, not sure what it was for!");
 
          if(zone->getTeam() != ship->getTeam())
-            renderObjectiveArrow(zone);
+            renderObjectiveArrow(zone, canvasWidth, canvasHeight);
       }
    }
    else
@@ -301,10 +301,10 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
          if(flag->getTeam() == TEAM_NEUTRAL || flag->getTeam() == ship->getTeam() || flag->isMounted())
          {
             if(!flag->isMounted())
-               renderObjectiveArrow(flag);
+               renderObjectiveArrow(flag, canvasWidth, canvasHeight);
             else
                if(flag->getMount())
-                  renderObjectiveArrow(flag->getMount());
+                  renderObjectiveArrow(flag->getMount(), canvasWidth, canvasHeight);
          }
       }
 
@@ -329,7 +329,7 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
             TNLAssert(zone, "There was a !zone check here before, not sure what it was for!");
 
             if(zone->getTeam() != whichTeamHasFlag)
-               renderObjectiveArrow(zone, zone->getColor(), 0.4f);
+               renderObjectiveArrow(zone, zone->getColor(), canvasWidth, canvasHeight, 0.4f);
 
             //      Zone recently changed hands   &&        Zone is not neutral      &&  Zone is not local player's team 
             else if(zone->didRecentlyChangeTeam() && zone->getTeam() != TEAM_NEUTRAL && zone->getTeam() != ship->getTeam())
@@ -339,7 +339,7 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
                if(zone->isFlashing())
                   c *= 0.7f;
-               renderObjectiveArrow(zone, &c);
+               renderObjectiveArrow(zone, &c, canvasWidth, canvasHeight);
             }
          }
    }

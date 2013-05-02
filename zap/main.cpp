@@ -1440,10 +1440,10 @@ int main(int argc, char **argv)
 
       InputCodeManager::resetStates();    // Reset keyboard state mapping to show no keys depressed
 
-      Joystick::loadJoystickPresets(settings);    // Load joystick presets from INI first
-      SDL_Init(0);                                // Allows Joystick and VideoSystem to work.
-      Joystick::initJoystick(settings);           // Initialize joystick system
-      Joystick::enableJoystick(settings, false);           // Initialize joystick system
+      Joystick::loadJoystickPresets(settings);     // Load joystick presets from INI first
+      SDL_Init(0);                                 // Allows Joystick and VideoSystem to work.
+      Joystick::initJoystick(settings);            // Initialize joystick system
+      Joystick::enableJoystick(settings, false);   // Initialize joystick system
 
 #ifdef TNL_OS_MAC_OSX
       // On OS X, make sure we're in the right directory (again)
@@ -1472,7 +1472,7 @@ int main(int argc, char **argv)
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
 
       // Fonts are initialized in VideoSystem::actualizeScreenMode because of OpenGL + texture loss/creation
-      FontManager::setFont(FontManager::FontRoman);     // Default font
+      FontManager::setFont(FontRoman);     // Default font
 
       // Now show any error messages from start-up
       Vector<string> configurationErrors = settings->getConfigurationErrors();

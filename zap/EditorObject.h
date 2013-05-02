@@ -29,10 +29,6 @@
 
 #include "BfObject.h"          // We inherit from this -- for BfObject, for now
 
-#include "Point.h"
-#include "tnlVector.h"
-#include "Geometry.h"
-
 using namespace std;
 using namespace TNL;
 

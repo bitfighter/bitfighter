@@ -147,7 +147,8 @@ void Move::unpack(BitStream *stream, bool unpackTime)
 }
 
 
-void Move::prepare()    // Packs and unpacks move to ensure effects of rounding are same on client and server
+// Pack and unpack the move to ensure the effects of rounding are same on client and server
+void Move::prepare()    
 {
    PacketStream stream;
    pack(&stream, NULL, false);

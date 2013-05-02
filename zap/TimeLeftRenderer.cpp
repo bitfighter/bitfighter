@@ -9,6 +9,7 @@
 #include "ScreenInfo.h"
 #include "ClientInfo.h"
 #include "UI.h"                  // For vertMargin
+#include "FontManager.h"
 
 #include <math.h>
 
@@ -28,7 +29,7 @@ const S32 bigScoreTextGap = 5;
 
 void TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible) const
 {
-   FontManager::pushFontContext(FontManager::LoadoutIndicatorContext);
+   FontManager::pushFontContext(LoadoutIndicatorContext);
 
    S32 timeTop = renderTimeLeft(gameType);
 

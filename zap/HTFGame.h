@@ -52,7 +52,7 @@ public:
    // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this may be important!!!
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
 
-   void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);
+   void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
 
    void shipTouchZone(Ship *s, GoalZone *z);
 
@@ -62,7 +62,7 @@ public:
    // Same code as in retrieveGame, CTF
    void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
 
-   void renderInterfaceOverlay(bool scoreboardVisible);
+   void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
 
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;

@@ -24,33 +24,17 @@
 //------------------------------------------------------------------------------------
 
 #include "BfObject.h"
-#include "moveObject.h"          // For ActualState definition
-#include "gameType.h"
-#include "ship.h"
-#include "GeomUtils.h"
-#include "MathUtils.h"
-#include "game.h"
-#include "gameConnection.h"
-#include "ClientInfo.h"
-
 #include "gameObjectRender.h"    // For drawHollowSquare
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #endif
 
-#include "projectile.h"
-#include "PickupItem.h"          // For getItem function below
-#include "soccerGame.h"          // For getItem function below
+#include "Colors.h"
 
-#include "stringUtils.h"         // For itos
-
-#include "LuaScriptRunner.h"     // For LuaObject def and returnInt method
-#include "lua.h"                 // For push prototype
-
-#include "tnlBitStream.h"
-
-#include <math.h>
+#include "GeomUtils.h"
+#include "MathUtils.h"           // For sq()
+#include "stringUtils.h"         // For itos()
 
 using namespace TNL;
 
@@ -520,7 +504,7 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
 
 const Color *BfObject::getColor() const
 { 
-   return mGame->getGameType()->getTeamColor(this);
+   return mGame->getObjTeamColor(this);
 }
 
 
@@ -624,7 +608,8 @@ void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
    for(S32 i = 0; i < getVertCount(); i++)
       if(vertSelected(i) || isVertexLitUp(i) || ((isSelected() || isLitUp())  && getVertCount() == 1))
       {
-         const Color *color = &Colors::green; //(vertSelected(i) || (isSelected() && getGeomType() == geomPoint)) ? SELECT_COLOR : HIGHLIGHT_COLOR;
+         const Color *color = (vertSelected(i) || (isSelected() && getGeomType() == geomPoint)) ? 
+                                &Colors::EDITOR_SELECT_COLOR : &Colors::EDITOR_HIGHLIGHT_COLOR;
 
          Point center = getVert(i) + getEditorSelectionOffset(currentScale);
 
@@ -645,7 +630,7 @@ Point BfObject::getDockLabelPos()
 void BfObject::highlightDockItem()
 {
 #ifndef ZAP_DEDICATED
-   drawHollowSquare(getPos(), getDockRadius(), HIGHLIGHT_COLOR);
+   drawHollowSquare(getPos(), (F32)getDockRadius(), &Colors::EDITOR_HIGHLIGHT_COLOR);
 #endif
 }
 
@@ -913,8 +898,6 @@ bool BfObject::objectIntersectsSegment(BfObject *object, const Point &rayStart, 
 // Returns number of ships hit
 S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force)
 {
-   GameType *gameType = getGame()->getGameType();
-
    // Check for players within range.  If so, blast them to little tiny bits!
    // Those within innerRad get full force of the damage.  Those within outerRad get damage proportional to distance.
    Rect queryRect(pos, pos);
@@ -946,7 +929,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
          continue;
 
       // Check if this pair of objects can damage one another
-      if(gameType && !gameType->objectCanDamageObject(info.damagingObject, foundObject))
+      if(getGame()->objectCanDamageObject(info.damagingObject, foundObject))
          continue;
 
       // Do an LOS check...

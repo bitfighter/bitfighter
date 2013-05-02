@@ -354,13 +354,13 @@ void RabbitGameType::onFlagMounted(S32 teamIndex)
 }
 
 
-void RabbitGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
+void RabbitGameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode)
 {
    Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      if(dismountMode != MountableItem::DISMOUNT_SILENT)
+      if(dismountMode != DISMOUNT_SILENT)
       {
          FlagItem *flag = static_cast<FlagItem *>(item);
 

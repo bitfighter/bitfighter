@@ -33,9 +33,9 @@
 #define FREEGLUT_STROKE_H_
 
 #ifdef TNL_OS_MOBILE
-#include "SDL_opengles.h"
+#  include "SDL_opengles.h"
 #else
-#include "SDL_opengl.h"
+#  include "SDL_opengl.h"
 #endif
 
 typedef struct tagSFG_StrokeVertex SFG_StrokeVertex;

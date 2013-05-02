@@ -47,7 +47,7 @@ namespace Zap {
 
 
 // Stroke font constructor
-BfFont::BfFont(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont)
+BfFont::BfFont(FontId fontId, const ::SFG_StrokeFont *strokeFont)
 {
    mFontId = fontId;
    
@@ -61,7 +61,7 @@ BfFont::BfFont(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont)
 
 
 // TTF font constructor
-BfFont::BfFont(FontManager::FontId fontId, const string &fontFile, GameSettings *settings)
+BfFont::BfFont(FontId fontId, const string &fontFile, GameSettings *settings)
 {
    mFontId = fontId;
       
@@ -111,7 +111,7 @@ bool BfFont::isStrokeFont()
 }
 
 
-FontManager::FontId BfFont::getId()
+FontId BfFont::getId()
 {
    return mFontId;
 }
@@ -127,9 +127,9 @@ S32 BfFont::getStashFontId()
 ////////////////////////////////////////
 
 
-static FontManager::FontId currentFontId;
+static FontId currentFontId;
 
-static BfFont *fontList[FontManager::FontCount];
+static BfFont *fontList[FontCount];
 
 sth_stash *FontManager::mStash = NULL;
 
@@ -238,7 +238,7 @@ void FontManager::setFontContext(FontContext fontContext)
 // Tenby5
 
 
-static Vector<FontManager::FontId> contextStack;
+static Vector<FontId> contextStack;
 
 void FontManager::pushFontContext(FontContext fontContext)
 {

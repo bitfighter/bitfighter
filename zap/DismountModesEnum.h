@@ -23,37 +23,21 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "EditorObject.h"
+#ifndef _DISMOUNT_MODES_ENUM_H
+#define _DISMOUNT_MODES_ENUM_H
 
-namespace Zap
+namespace Zap 
 {
 
-
-// Constructor
-PointObject::PointObject(F32 radius)
+// Reasons/modes we might dismount an item
+enum DismountMode
 {
-   mRadius = radius;
-   setNewGeometry(geomPoint, radius);
-}
-
-
-// Destructor
-PointObject::~PointObject()
-{
-   // Do nothing
-}
-
-
-void PointObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
-{
-#ifndef ZAP_DEDICATED
-   setPos(point);
-   Parent::prepareForDock(game, point, teamIndex);
-#endif
-}
-
-
-F32 PointObject::getRadius() { return mRadius; }
-
-
+   DISMOUNT_NORMAL,              // Item was dismounted under normal circumstances
+   DISMOUNT_MOUNT_WAS_KILLED,    // Item was dismounted due to death of mount
+   DISMOUNT_SILENT,              // Item was dismounted, do not make an announcement
 };
+
+
+}
+
+#endif

@@ -80,7 +80,7 @@ public:
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    bool isCarryingItems(Ship *ship);
-   void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);
+   void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
 
    void openNexus(S32 timeNexusOpened);
    void closeNexus(S32 timeNexusClosed);
@@ -103,7 +103,7 @@ public:
    static void releaseFlag(Game *game, const Point &pos, const Point &startVel = Point(0,0), S32 count = 1);
 
 #ifndef ZAP_DEDICATED
-   void renderInterfaceOverlay(bool scoreboardVisible);
+   void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
    S32 renderTimeLeftSpecial(S32 right, S32 bottom) const;
 #endif
 

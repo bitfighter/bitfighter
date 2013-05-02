@@ -26,19 +26,18 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#include "gridDB.h"
-#include "Timer.h"
-#include "gameLoader.h"
-#include "Rect.h"
-#include "Colors.h"
-#include "shipItems.h"           // For moduleInfos
-#include "dataConnection.h"      // For DataSender
-#include "SharedConstants.h"     // For badges enum
+#include "gameLoader.h"          // Parent class
 
 #include "GameTypesEnum.h"
+#include "DismountModesEnum.h"
+
 #include "GameSettings.h"
+#include "SoundEffect.h"         // For SFXHandle def
 
 #include "teamInfo.h"            // For ClassManager
+
+#include "Timer.h"
+#include "Rect.h"
 
 #include "tnlNetObject.h"
 #include "tnlTypes.h"
@@ -176,6 +175,11 @@ class ClientInfo;
 class PolyWall;
 class WallItem;
 class LuaLevelGenerator;
+class Teleporter;
+class MoveItem;
+
+struct WallRec;
+
 
 class Game : public LevelLoader
 {
@@ -257,7 +261,7 @@ protected:
    virtual AbstractTeam *getNewTeam() = 0;
 
 public:
-   idleLinkedList idlingObjects;
+   IdleLinkedList idlingObjects;
 
    static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
    static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
@@ -330,6 +334,8 @@ public:
    virtual void addPolyWall(PolyWall *polyWall, GridDatabase *database) = 0;     
    virtual void addWallItem(WallItem *wallItem, GridDatabase *database) = 0;     
 
+   void addWall(const WallRec &barrier);
+
    virtual void deleteLevelGen(LuaLevelGenerator *levelgen) = 0; 
 
 
@@ -381,6 +387,8 @@ public:
    void setTeamHasFlag(S32 teamIndex, bool hasFlag);
    void clearTeamHasFlagList();
 
+   F32 getShipSpeedModificationFactor(const Ship *ship) const;
+   void teleporterDestroyed(Teleporter *teleporter);
 
    StringTableEntry getTeamName(S32 teamIndex) const;   // Return the name of the team
 
@@ -402,6 +410,21 @@ public:
 
    void setLevelDatabaseId(U32 id);
    U32 getLevelDatabaseId() const;
+
+   // A couple of statics to keep gServerGame out of some classes
+   static bool isLocalTestServer();
+   static const GridDatabase *Game::getServerGameObjectDatabase();
+
+   // Passthroughs to GameType
+   void onFlagMounted(S32 teamIndex);
+   void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
+   const Color *getObjTeamColor(const BfObject *obj) const;
+   bool objectCanDamageObject(BfObject *damager, BfObject *victim) const;
+
+   virtual SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f) const = 0;
+   virtual SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const = 0;
+   virtual SFXHandle playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain = 1.0f) const = 0;
+   virtual void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const = 0;
 };
 
 

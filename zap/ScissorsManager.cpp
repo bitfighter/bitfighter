@@ -28,6 +28,8 @@
 #include "ConfigEnum.h"          // For DisplayMode def
 #include "ClientGame.h"
 #include "ScreenInfo.h"
+#include "OpenglUtils.h"
+
 
 namespace Zap
 {

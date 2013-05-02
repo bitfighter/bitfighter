@@ -32,6 +32,7 @@
 #include "UI.h"
 #include "version.h"
 #include "OpenglUtils.h"
+#include "FontManager.h"
 
 #include "tnlLog.h"
 

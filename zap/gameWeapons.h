@@ -26,10 +26,12 @@
 #ifndef _GAMEWEAPONS_H_
 #define _GAMEWEAPONS_H_
 
-#include "Point.h"
 #include "WeaponInfo.h"
+#include "SoundSystemEnums.h"
 #include "Color.h"
-#include "SoundSystem.h"
+#include "Point.h"
+//#include "SoundSystem.h"
+
 #include "tnlTypes.h"
 
 using namespace TNL;

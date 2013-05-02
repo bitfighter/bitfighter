@@ -92,7 +92,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
                broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
-               mountedFlag->dismount(MountableItem::DISMOUNT_SILENT);
+               mountedFlag->dismount(DISMOUNT_SILENT);
                mountedFlag->sendHome();
 
                updateScore(theShip, CaptureFlag);
@@ -156,11 +156,11 @@ void CTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
 }
 
 
-void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
+void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
 {
 #ifndef ZAP_DEDICATED
    // Render basic overlay
-   Parent::renderInterfaceOverlay(scoreboardVisible);
+   Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
 
    // Add some objective arrows...
    // ...but rendering objective arrows makes no sense if there is no ship at the moment
@@ -179,10 +179,10 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
       {
          Ship *mount = flag->getMount();
          if(mount)
-            renderObjectiveArrow(mount);
+            renderObjectiveArrow(mount, canvasWidth, canvasHeight);
       }
       else
-         renderObjectiveArrow(flag);
+         renderObjectiveArrow(flag, canvasWidth, canvasHeight);
    }
 #endif
 }
@@ -204,13 +204,13 @@ void CTFGameType::onFlagMounted(S32 teamIndex)
 class FlagItem;
 
 
-void CTFGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
+void CTFGameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode)
 {
    Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      if(dismountMode != MountableItem::DISMOUNT_SILENT)
+      if(dismountMode != DISMOUNT_SILENT)
       {
          FlagItem *flag = static_cast<FlagItem *>(item);
          static StringTableEntry dropString("%e0 dropped the %e1 flag!");

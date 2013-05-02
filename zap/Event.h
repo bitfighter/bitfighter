@@ -31,19 +31,19 @@ private:
    static bool mAllowTextInput;   // Flag to allow text translation pass-through
 
    static void setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode mode);
-   static void updateJoyAxesDirections(UserInterface *currentUI, U32 axisMask, S16 value);
+   static void updateJoyAxesDirections(ClientGame *game, U32 axisMask, S16 value);
 
    static void inputCodeUp(UserInterface *currentUI, InputCode inputCode);
    static bool inputCodeDown(UserInterface *currentUI, InputCode inputCode);
 
    static void onKeyDown(ClientGame *game, SDL_Event *event);
+   static void onJoyAxis(ClientGame *game, U8 which, U8 axis, S16 value);
    static void onKeyUp(UserInterface *currentUI, SDL_Event *event);
    static void onTextInput(UserInterface *currentUI, char unicode);
    static void onMouseMoved(UserInterface *currentUI, S32 x, S32 y, DisplayMode mode);
    static void onMouseWheel(UserInterface *currentUI, bool Up, bool Down);  //Not implemented
    static void onMouseButtonDown(UserInterface *currentUI, S32 x, S32 y, InputCode inputCode, DisplayMode mode);
    static void onMouseButtonUp(UserInterface *currentUI, S32 x, S32 y, InputCode inputCode, DisplayMode mode);
-   static void onJoyAxis(UserInterface *currentUI, U8 which, U8 axis, S16 value);
    static void onJoyButtonDown(UserInterface *currentUI, U8 which, U8 button);
    static void onJoyButtonUp(UserInterface *currentUI, U8 which, U8 button);
    static void onJoyHat(UserInterface *currentUI, U8 which, U8 hat, U8 directionMask);

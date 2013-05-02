@@ -168,8 +168,8 @@ public:
    bool runMain();                                    // Run a script's main() function
    bool runMain(const Vector<string> &args);          // Run a script's main() function, putting args into Lua's arg table
 
-   bool loadScript();   // Loads script from file into a Lua chunk, then runs it
-   bool runScript();    // Load the script, execute the chunk to get it in memory, then run its main() function
+   bool loadScript(bool cacheScript);  // Loads script from file into a Lua chunk, then runs it
+   bool runScript(bool cacheScript);   // Load the script, execute the chunk to get it in memory, then run its main() function
 
    bool runCmd(const char *function, S32 returnValues);
 

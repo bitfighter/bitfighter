@@ -10,7 +10,7 @@
 #define OPENGLUTILS_H_
 
 #include "tnlTypes.h"
-#include "FontManager.h"
+#include "FontContextEnum.h"
 
 #ifdef TNL_OS_MOBILE
 #  include "SDL_opengles.h"
@@ -42,7 +42,7 @@ extern void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType);
 extern void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType);
 extern void renderLine(const Vector<Point> *points);
 
-extern void setFont(FontManager::FontId fontId);
+extern void setFont(FontId fontId);
 
 extern void glScale(F32 scaleFactor);
 extern void glTranslate(const Point &pos);

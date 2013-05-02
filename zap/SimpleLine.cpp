@@ -25,8 +25,6 @@
 
 #include "SimpleLine.h"
 #include "gameObjectRender.h"
-#include "Colors.h"
-#include "config.h"
 
 #include <math.h>
 

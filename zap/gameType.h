@@ -33,9 +33,11 @@
 #include "statistics.h"
 #include "Spawn.h"
 #include "LoadoutTracker.h"
+#include "barrier.h"             // For WallRec def
 
 #include "gameConnection.h"      // For MessageColors enum
 #include "GameTypesEnum.h"
+#include "DismountModesEnum.h"
 
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -58,8 +60,6 @@ class Team;
 class SpyBug;
 class MenuUserInterface;
 class Zone;
-
-struct WallRec;
 
 
 ////////////////////////////////////////
@@ -428,13 +428,13 @@ public:
    virtual void changeClientTeam(ClientInfo *client, S32 team);     // Change player to team indicated, -1 = cycle teams
 
 #ifndef ZAP_DEDICATED
-   virtual void renderInterfaceOverlay(bool scoreboardVisible);
+   virtual void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
    virtual void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
    virtual S32 renderTimeLeftSpecial(S32 right, S32 bottom) const;
 
-   void renderObjectiveArrow(const BfObject *target) const;
-   void renderObjectiveArrow(const BfObject *target, const Color *c, F32 alphaMod = 1.0f) const;
-   void renderObjectiveArrow(const Point &p, const Color *c, F32 alphaMod = 1.0f) const;
+   void renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32 canvasHeigh) const;
+   void renderObjectiveArrow(const BfObject *target, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
+   void renderObjectiveArrow(const Point &p, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
 #endif
 
 
@@ -455,7 +455,7 @@ public:
 
    // gameType flag methods for CTF, Rabbit, Football
    virtual void addFlag(FlagItem *flag);
-   virtual void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);    // TODO: Make this a mountableItem instead of MoveItem
+   virtual void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);    // TODO: Make this a mountableItem instead of MoveItem
    virtual void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    virtual void shipTouchZone(Ship *ship, GoalZone *zone);

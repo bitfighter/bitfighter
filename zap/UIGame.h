@@ -29,7 +29,6 @@
 #include "UI.h"
 #include "UILevelInfoDisplayer.h"
 #include "ChatCommands.h"
-#include "voiceCodec.h"
 #include "Point.h"
 #include "game.h"
 #include "ship.h"                // For ShipModuleCount
@@ -102,6 +101,7 @@ public:
 
 class Move;
 class SoundEffect;
+class VoiceEncoder;
 
 using namespace Zap::UI;
 
@@ -361,6 +361,19 @@ public:
    bool isInScoreboardMode();
 
    Move *getCurrentMove();
+
+   // Sound related
+   SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const;
+   SFXHandle playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain) const;
+   SFXHandle playSoundEffect(U32 profileIndex, F32 gain) const;
+   void setMovementParams(SFXHandle& effect, const Point &position, const Point &velocity) const;
+   void stopSoundEffect(SFXHandle &effect) const;
+   void setListenerParams(const Point &position, const Point &velocity) const;
+   void processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, UIManager *uiManager) const;
+   void playNextTrack() const;
+   void playPrevTrack() const;
+   void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const;
+
 };
 
 

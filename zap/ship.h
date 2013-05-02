@@ -68,12 +68,12 @@ private:
 
    void setActiveWeapon(U32 weaponIndex); // Setter for mActiveWeaponIndx
 
-   SafePtr<Teleporter> mEngineeredTeleporter;
+   Teleporter *mEngineeredTeleporter;
 
    // Find objects of specified type that may be under the ship, and put them in fillVector.  This is a private helper
    // for isInZone() and isInAnyZone().
    template <typename T>
-   void findObjectsUnderShip(T typeNumberOrFunction)
+   void findObjectsUnderShip(T typeNumberOrFunction) const
    {
       Rect rect(getActualPos(), getActualPos());
       rect.expand(Point(CollisionRadius, CollisionRadius));
@@ -83,7 +83,7 @@ private:
    }
 
 
-   BfObject *doIsInZone(const Vector<DatabaseObject *> &objects); // Private helper for isInZone() and isInAnyZone()
+   BfObject *doIsInZone(const Vector<DatabaseObject *> &objects) const; // Private helper for isInZone() and isInAnyZone()
 
    // Idle helpers
    void checkForSpeedzones();                      // Check to see if we collided with a GoFast
@@ -178,8 +178,6 @@ public:
 
    virtual bool canAddToEditor();
    const char *getOnScreenName();
-
-   F32 getSlipzoneSpeedMoficationFactor();
 
    void selectNextWeapon();                   
    void selectPrevWeapon();
@@ -297,8 +295,8 @@ public:
 
    bool isRobot();
 
-   BfObject *isInZone(U8 zoneType);    // Return whether the ship is currently in a zone of the specified type, and which one
-   BfObject *isInAnyZone();            // Return whether the ship is currently in any zone, and which one
+   BfObject *isInZone(U8 zoneType) const; // Return whether the ship is currently in a zone of the specified type, and which one
+   BfObject *isInAnyZone() const;         // Return whether the ship is currently in any zone, and which one
 
    DatabaseObject *isOnObject(U8 objectType); // Returns the object in question if this ship is on an object of type objectType
 

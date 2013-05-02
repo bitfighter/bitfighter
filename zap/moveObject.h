@@ -28,6 +28,7 @@
 
 #include "item.h"          // Parent class
 #include "LuaWrapper.h"
+#include "DismountModesEnum.h"
 
 namespace Zap
 {
@@ -249,13 +250,6 @@ public:
    // Mounting related functions
    Ship *getMount();
 
-   // Reasons/modes we might dismount an item
-   enum DismountMode
-   {
-      DISMOUNT_NORMAL,              // Item was dismounted under normal circumstances
-      DISMOUNT_MOUNT_WAS_KILLED,    // Item was dismounted due to death of mount
-      DISMOUNT_SILENT,              // Item was dismounted, do not make an announcement
-   };
    virtual void dismount(DismountMode dismountMode);
 
    virtual void mountToShip(Ship *theShip);
@@ -332,6 +326,13 @@ protected:
    };
 
 public:
+   static const U8 ASTEROID_SIZELEFT_BIT_COUNT = 3;
+
+   // For editor attribute. real limit based on bit count is (1 << ASTEROID_SIZELEFT_BIT_COUNT) - 1; // = 7
+   static const S32 ASTEROID_SIZELEFT_MAX      = 5;   
+   static const S32 ASTEROID_INITIAL_SIZELEFT  = 3;      // Starting size
+
+
    explicit Asteroid(lua_State *L = NULL); // Combined Lua / C++ default constructor
    virtual ~Asteroid();           // Destructor
 
@@ -355,19 +356,22 @@ public:
    bool processArguments(S32 argc2, const char **argv2, Game *game);
    string toLevelCode(F32 gridSize) const;
 
-#ifndef ZAP_DEDICATED
-private:
-   static EditorAttributeMenuUI *mAttributeMenuUI;
-public:
-   // These four methods are all that's needed to add an editable attribute to a class...
-   EditorAttributeMenuUI *getAttributeMenu();
-   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
-   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
+//#ifndef ZAP_DEDICATED
+//private:
+//   static EditorAttributeMenuUI *mAttributeMenuUI;
+//
+//public:
+//   // These four methods are all that's needed to add an editable attribute to a class...
+//   EditorAttributeMenuUI *getAttributeMenu();
+//   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
+//   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
 
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
-#endif
+//#endif
 
    static U32 getDesignCount();
+   S32 getCurrentSize() const;
+   void setCurrentSize(S32 size);
 
    TNL_DECLARE_CLASS(Asteroid);
 
@@ -454,6 +458,7 @@ typedef BfObject Parent;
 
 public:
    static const S32 WORM_RADIUS = 5;
+   static const S32 MaxTailLength = 28;
 
 private:
    bool hasExploded;
@@ -461,20 +466,18 @@ private:
    Timer mDirTimer;
    Vector<Point> mPolyPoints;
 
-   static const S32 maxTailLength = 28;
 
 protected:
    enum MaskBits {
       ExplodeOrTailLengthMask = Parent::FirstFreeMask << 0,
-      TailPointPartsMask = Parent::FirstFreeMask << 1,  // there are multiple tail parts
-      TailPointPartsFullMask = ((1 << maxTailLength) - 1) * TailPointPartsMask,
-      FirstFreeMask = TailPointPartsMask << maxTailLength,
+      TailPointPartsMask      = Parent::FirstFreeMask << 1,  // there are multiple tail parts
+      TailPointPartsFullMask  = ((1 << MaxTailLength) - 1) * TailPointPartsMask,
+      FirstFreeMask           = TailPointPartsMask << MaxTailLength,
    };
 
-   Point mPoints[maxTailLength];
+   Point mPoints[MaxTailLength];
    S32 mHeadIndex;
    S32 mTailLength;
-
 
 public:
    Worm();     // Constructor  

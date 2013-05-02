@@ -24,6 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "gameObjectRender.h"
+//#include "Colors.h"
+
+#ifndef TEST_BUILD
 
 #include "tnlRandom.h"
 
@@ -49,12 +52,6 @@
 
 namespace Zap
 {
-
-const Color *HIGHLIGHT_COLOR = &Colors::white;
-const Color *SELECT_COLOR = &Colors::yellow;
-const Color *PLAIN_COLOR = &Colors::gray75;
-
-const float gShapeLineWidth = 2.0f;
 
 static const S32 NUM_CIRCLE_SIDES = 32;
 static const F32 INV_NUM_CIRCLE_SIDES = 1 / F32(NUM_CIRCLE_SIDES);
@@ -2214,6 +2211,61 @@ void renderForceField(Point start, Point end, const Color *color, bool fieldUp, 
 }
 
 
+void renderWorm(Point *points, S32 headIndex, S32 tailLength)
+{
+   if(tailLength <= 1)
+   {
+      renderWorm(points[headIndex]);
+      return;
+   }
+   F32 p[Worm::MaxTailLength * 2];
+   S32 i = headIndex;
+   for(S32 count = 0; count <= tailLength; count++)
+   {
+      p[count * 2]     = points[i].x;
+      p[count * 2 + 1] = points[i].y;
+      i--;
+      if(i < 0)
+         i = Worm::MaxTailLength - 1;
+   }
+   glColor(Colors::white);
+
+   static const F32 WormColors[Worm::MaxTailLength * 4] = {
+      1,   1,   1,  1,
+   .90f,.80f,.66f,  1,
+   .80f,.60f,.33f,  1,
+   .70f,.40f,   0,  1,
+   .80f,.60f,.33f,  1,
+   .90f,.80f,.66f,  1,
+      1,   1,   1,  1,
+   .90f,.80f,.66f,  1,
+   .80f,.60f,.33f,  1,
+   .70f,.40f,   0,  1,
+   .80f,.60f,.33f,  1,
+   .90f,.80f,.66f,  1,
+      1,   1,   1,  1,
+   .90f,.80f,.66f,  1,
+   .80f,.60f,.33f,  1,
+   .70f,.40f,   0,  1,
+   .80f,.60f,.33f,  1,
+   .90f,.80f,.66f,  1,
+      1,   1,   1,  1,
+   .90f,.80f,.66f,  1,
+   .80f,.60f,.33f,  1,
+   .70f,.40f,   0,  1,
+   .80f,.60f,.33f,  1,
+   .90f,.80f,.66f,  1,
+      1,   1,   1,  1,
+   .90f,.80f,.66f,  1,
+   .80f,.60f,.33f,  1,
+   .70f,.40f,   0,  1,
+   };
+
+   renderColorVertexArray(p, WormColors, tailLength + 1, GL_LINE_STRIP);
+}
+
+
+
 struct pixLoc
 {
    S16 x;
@@ -2495,9 +2547,9 @@ void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F
    }
       
    if(style == HighlightedVertex)
-      glColor(*HIGHLIGHT_COLOR, alpha);
+      glColor(Colors::EDITOR_HIGHLIGHT_COLOR, alpha);
    else if(style == SelectedVertex)
-      glColor(*SELECT_COLOR, alpha);
+      glColor(Colors::EDITOR_SELECT_COLOR, alpha);
    else if(style == SnappingVertex)
       glColor(Colors::magenta, alpha);
    else     // SelectedItemVertex
@@ -2621,11 +2673,10 @@ void drawDivetedTriangle(F32 height, F32 len)
       renderPolygonOutline(&pts, &Colors::red);
 
    glPopMatrix();
-
 }
 
 
-void drawGear(const Point &pos, S32 teeth, F32 rad1, F32 rad2, F32 ang1, F32 ang2, F32 innerCircleRadius)
+void drawGear(const Point &pos, S32 teeth, F32 radius1, F32 radius2, F32 ang1, F32 ang2, F32 innerCircleRadius)
 {
    Vector<Point> pts;
 
@@ -2637,16 +2688,16 @@ void drawGear(const Point &pos, S32 teeth, F32 rad1, F32 rad2, F32 ang1, F32 ang
 
    for(S32 i = 0; i < teeth; i++)
    {
-      pts.push_back(Point(-rad1 * sin(theta), rad1 * cos(theta)));
+      pts.push_back(Point(-radius1 * sin(theta), radius1 * cos(theta)));
       theta += ang1rad;
 
-      pts.push_back(Point(-rad1 * sin(theta), rad1 * cos(theta)));
+      pts.push_back(Point(-radius1 * sin(theta), radius1 * cos(theta)));
       theta += a / 2 - (ang1rad / 2 + ang2rad / 2);
 
-      pts.push_back(Point(-rad2 * sin(theta), rad2 * cos(theta)));
+      pts.push_back(Point(-radius2 * sin(theta), radius2 * cos(theta)));
       theta += ang2rad;
 
-      pts.push_back(Point(-rad2 * sin(theta), rad2 * cos(theta)));
+      pts.push_back(Point(-radius2 * sin(theta), radius2 * cos(theta)));
       theta += a / 2 - (ang1rad / 2 + ang2rad / 2);
    }
 
@@ -3068,7 +3119,7 @@ void renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color
 
       // Draw highlighted core on 2nd pass if item is selected, but not while it's being edited
       if(!i && (isSelected || isLitUp))
-         glColor(isSelected ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
+         glColor(isSelected ? Colors::EDITOR_SELECT_COLOR : Colors::EDITOR_HIGHLIGHT_COLOR);
 
       F32 vertices2[] = {
             pos.x, pos.y,
@@ -3091,3 +3142,148 @@ void renderTeleporterEditorObject(const Point &pos, S32 radius, const Color &col
 
 
 }
+
+
+#else
+using namespace TNL;
+namespace Zap {
+
+void drawHorizLine(S32 x1, S32 x2, S32 y) { }
+void drawVertLine(S32 x, S32 y1, S32 y2) { }
+void drawHorizLine(F32 x1, F32 x2, F32 y) { }
+void drawVertLine(F32 x, F32 y1, F32 y2) { }
+void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle) { }
+void drawDashedArc(const Point &center, F32 radius, F32 arcTheta, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle) { }
+void drawDashedCircle(const Point &center, F32 radius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle) { }
+void drawAngledRay(const Point &center, F32 innerRadius, F32 outerRadius, F32 angle) { }
+void drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 rayCount, F32 offsetAngle) { }
+void drawAngledRayArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, S32 rayCount, F32 offsetAngle) { }
+void drawDashedHollowCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle) { }
+void drawHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, F32 offsetAngle) { }
+void drawRoundedRect(const Point &pos, S32 width, S32 height, S32 rad) { }
+void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 rad) { }
+void drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle) { }
+void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor, const Color &outlineColor, S32 radius, F32 alpha) { }
+void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, const Color &outlineColor, F32 radius, F32 alpha) { }
+void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U32 glStyle) { }
+void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle) { }
+void drawEllipse(const Point &pos, F32 width, F32 height, F32 angle) { }
+void drawEllipse(const Point &pos, S32 width, S32 height, F32 angle) { }
+void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle) { }
+void drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle) { }
+void drawFilledCircle(const Point &pos, F32 radius, const Color *color) { }
+void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end) { }
+void drawCentroidMark(const Point &pos, F32 radius) { }
+void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 length, F32 width) { }
+void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime, bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor) { }
+void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime) { }
+void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha) { }
+void renderShipCoords(const Point &coords, bool localShip, F32 alpha) { }
+void drawFourArrows(const Point &pos) { }
+void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha, const Vector<Point> *dests, U32 trackerCount) { }
+void renderTeleporterOutline(const Point &center, F32 radius, const Color &color) { }
+void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScale) { }
+void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale) { }
+void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale) { }
+void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate) { }
+void doRenderFlag(F32 x, F32 y, F32 scale, const Color *flagColor, const Color *mastColor, F32 alpha) { }
+void renderFlag(const Point &pos, const Color *flagColor, const Color *mastColor, F32 alpha) { }
+void renderFlag(const Point &pos, const Color *flagColor) { }
+void renderFlag(const Point &pos, F32 scale, const Color *flagColor) { }
+void renderFlag(F32 x, F32 y, const Color *flagColor) { }
+void renderFlag(const Color *flagColor) { }
+void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha) { }
+void renderFlagSpawn(const Point &pos, F32 currentScale, const Color *color) { }
+F32 renderCenteredString(const Point &pos, S32 size, const char *string) { return 0; }
+F32 renderCenteredString(const Point &pos, F32 size, const char *string) { return 0; }
+void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact) { }
+void renderTriangulatedPolygonFill(const Vector<Point> *fill) { }
+void renderPolygonOutline(const Vector<Point> *outline) { }
+void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outlineColor, F32 alpha, F32 lineThickness) { }
+void renderPolygonFill(const Vector<Point> *triangulatedFillPoints, const Color *fillColor, F32 alpha) { }
+void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outlinePoints, const Color *fillColor, const Color *outlineColor, F32 alpha) { }
+void drawStar(const Point &pos, S32 points, F32 radius, F32 innerRadius) { }
+void renderZone(const Color *outlineColor, const Vector<Point> *outline, const Vector<Point> *fill) { }
+void renderLoadoutZone(const Color *color, const Vector<Point> *outline, const Vector<Point> *fill, const Point &centroid, F32 angle, F32 scaleFact) { }
+void renderLoadoutZoneIcon(const Point &pos) { }
+void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill, const Point &centroid, S32 zoneId) { }
+void renderNavMeshBorders(const Vector<NeighboringZone> &borders) { }
+void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill) { }
+void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, bool useOldStyle) { }
+void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, bool open, F32 glowFraction) { }
+void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, bool open, F32 glowFraction, F32 scaleFact) { }
+void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill, const Point &centroid) { }
+void renderProjectile(const Point &pos, U32 type, U32 time) { }
+void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaining) { }
+void renderMine(const Point &pos, bool armed, bool visible) { }
+void renderGrenade(const Point &pos, F32 lifeLeft) { }
+void renderSpyBug(const Point &pos, const Color &teamColor, bool visible, bool drawOutline) { }
+void renderRepairItem(const Point &pos) { }
+void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha) { }
+void renderEnergyGuage(S32 energy) { }
+void renderEnergySymbol(const Point &pos, F32 scaleFactor) { }
+void renderEnergySymbol() {}
+void renderEnergyItem(const Point &pos, bool forEditor) { }
+void renderEnergyItem(const Point &pos) { }
+void renderWallFill(const Vector<Point> *points, const Color &fillColor, bool polyWall) { }
+void renderWallFill(const Vector<Point> *points, const Color &fillColor, const Point &offset, bool polyWall) { }
+void renderWallEdges(const Vector<Point> &edges, const Color &outlineColor, F32 alpha) { }
+void renderWallEdges(const Vector<Point> &edges, const Point &offset, const Color &outlineColor, F32 alpha) { }
+void renderSpeedZone(const Vector<Point> &points, U32 time) { }
+void renderTestItem(const Point &pos, S32 size, F32 alpha) { }
+void renderTestItem(const Vector<Point> &points, F32 alpha) { }
+void renderWorm(const Point &pos) { }
+void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha) { }
+void renderAsteroid(const Point &pos, S32 design, F32 scaleFact) { }
+void renderAsteroidSpawn(const Point &pos, S32 time) { }
+void renderAsteroidSpawnEditor(const Point &pos, F32 scale) { }
+void renderResourceItem(const Vector<Point> &points, F32 alpha) { }
+void renderSoccerBall(const Point &pos, F32 size) { }
+void renderCore(const Point &pos, const Color *coreColor, U32 time, PanelGeom *panelGeom, F32 panelHealth[], F32 panelStartingHealth) { }
+void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width) { }
+void renderSoccerBall(const Point &pos) { }
+void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color *color) { }
+void renderForceFieldProjector(Point pos, Point normal, const Color *color, bool enabled) { }
+void renderForceFieldProjector(const Vector<Point> *geom, const Color *color, bool enabled, S32 healRate) { }
+void renderForceField(Point start, Point end, const Color *color, bool fieldUp, F32 scaleFact) { }
+void renderWorm(Point *points, S32 headIndex, S32 tailLength) { }
+void renderStaticBitfighterLogo() { }
+void renderBitfighterLogo(U32 mask) { }
+void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask) { }
+void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask) { }
+void drawSquare(const Point &pos, F32 radius, bool filled) { }
+void drawSquare(const Point &pos, S32 radius, bool filled) { }
+void drawHollowSquare(const Point &pos, F32 radius, const Color *color) { }
+void drawFilledSquare(const Point &pos, F32 radius, const Color *color) { }
+void drawFilledSquare(const Point &pos, S32 radius, const Color *color) { }
+void renderSmallSolidVertex(F32 currentScale, const Point &pos, bool snapping) { }
+void renderVertex(char style, const Point &v, S32 number) { }
+void renderVertex(char style, const Point &v, S32 number, F32 scale) { }
+void renderVertex(char style, const Point &v, S32 number, F32 scale, F32 alpha) { }
+void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F32 alpha) { }
+void renderLine(const Vector<Point> *points, const Color *color) { }
+void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *letterColor, char letter) { }
+void drawCircle(F32 x, F32 y, F32 radius, const Color *color, F32 alpha) { }
+void drawCircle(const Point &pos, F32 radius, const Color *color, F32 alpha) { }
+void drawDivetedTriangle(F32 height, F32 len) { }
+void drawGear(const Point &pos, S32 teeth, F32 rad1, F32 rad2, F32 ang1, F32 ang2, F32 innerCircleRadius) { }
+void render25FlagsBadge(F32 x, F32 y, F32 rad) { }
+void renderDeveloperBadge(F32 x, F32 y, F32 rad) { }
+void renderBBBBadge(F32 x, F32 y, F32 rad, const Color &color) { }
+void renderLevelDesignWinnerBadge(F32 x, F32 y, F32 rad) { }
+void renderZoneControllerBadge(F32 x, F32 y, F32 rad) { }
+void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge) {}
+void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines) { }
+void drawStars(const Point *stars, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent) { }
+void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &wallEdgePoints, const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor, const Color &fillColor, F32 currentScale, bool dragMode, bool drawSelected, const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha) { }
+void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color *color, F32 currentScale, bool snappingToWallCornersEnabled) { }
+void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha) { }
+void renderCircleSpawn(const Point &pos, F32 scale) { }
+void renderSpawn(const Point &pos, F32 scale, const Color *color) { }
+void renderFlightPlan(const Point &from, const Point &to, const Vector<Point> &flightPlan) { }
+void renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color, bool isSelected, bool isLitUp) { }
+void renderTeleporterEditorObject(const Point &pos, S32 radius, const Color &color) { }
+
+}
+#endif
+

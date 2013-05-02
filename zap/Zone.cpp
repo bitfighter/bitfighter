@@ -27,6 +27,7 @@
 #include "game.h"
 #include "stringUtils.h"
 #include "Geometry.h"
+#include "Colors.h"
 
 namespace Zap
 {

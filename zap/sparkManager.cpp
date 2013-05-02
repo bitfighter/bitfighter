@@ -160,7 +160,7 @@ void FxManager::TextEffect::render() const
    glPushMatrix();
       glTranslate(pos);
       glScale(size);
-      FontManager::pushFontContext(FontManager::TextEffectContext);
+      FontManager::pushFontContext(TextEffectContext);
          drawStringc(0, 0, 12, text.c_str());
       FontManager::popFontContext();
    glPopMatrix();

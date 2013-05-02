@@ -41,30 +41,15 @@ namespace Zap {
 SDL_Joystick *Joystick::sdlJoystick = NULL;
 
 // public
-Vector<string> Joystick::DetectedJoystickNameList;
 Vector<Joystick::JoystickInfo> Joystick::JoystickPresetList;
 
 U32 Joystick::ButtonMask = 0;
 F32 Joystick::rawAxis[Joystick::rawAxisCount];
 S16 Joystick::LowerSensitivityThreshold = 4900;   // out of 32767, ~15%, any less than this is ends up as zero
 S16 Joystick::UpperSensitivityThreshold = 30000;  // out of 32767, ~91%, any more than this is full amount
-S32 Joystick::UseJoystickNumber = 0;
 U32 Joystick::AxesInputCodeMask = 0;
 U32 Joystick::HatInputCodeMask = 0;
 U32 Joystick::SelectedPresetIndex = 0;
-
-
-// Needs to be Aligned with JoystickAxesDirections
-JoystickInput Joystick::JoystickInputData[MaxAxesDirections] = {
-      { MoveAxesLeft,   MoveAxesLeftMask,   STICK_1_LEFT,  0.0f },
-      { MoveAxesRight,  MoveAxesRightMask,  STICK_1_RIGHT, 0.0f },
-      { MoveAxesUp,     MoveAxesUpMask,     STICK_1_UP,    0.0f },
-      { MoveAxesDown,   MoveAxesDownMask,   STICK_1_DOWN,  0.0f },
-      { ShootAxesLeft,  ShootAxesLeftMask,  STICK_2_LEFT,  0.0f },
-      { ShootAxesRight, ShootAxesRightMask, STICK_2_RIGHT, 0.0f },
-      { ShootAxesUp,    ShootAxesUpMask,    STICK_2_UP,    0.0f },
-      { ShootAxesDown,  ShootAxesDownMask,  STICK_2_DOWN,  0.0f },
-};
 
 
 CIniFile joystickPresetsINI("dummy");
@@ -81,6 +66,7 @@ Joystick::~Joystick()
 {
    // Do nothing
 }
+
 
 bool Joystick::initJoystick(GameSettings *settings)
 {
@@ -112,7 +98,7 @@ bool Joystick::initJoystick(GameSettings *settings)
    }
 #endif
 
-   DetectedJoystickNameList.clear();
+   GameSettings::DetectedJoystickNameList.clear();
 
    bool hasBeenOpenedBefore = (sdlJoystick != NULL);
 
@@ -146,11 +132,12 @@ bool Joystick::initJoystick(GameSettings *settings)
    {
       const char *joystickName = SDL_JoystickName(i);
       logprintf("%d.) Autodetect string = \"%s\"", i + 1, joystickName);
-      DetectedJoystickNameList.push_back(joystickName);
+      GameSettings::DetectedJoystickNameList.push_back(joystickName);
    }
 
    return true;
 }
+
 
 bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 {
@@ -163,13 +150,13 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 
 
    // Start using joystick
-   sdlJoystick = SDL_JoystickOpen(UseJoystickNumber);
+   sdlJoystick = SDL_JoystickOpen(GameSettings::UseJoystickNumber);
    if(sdlJoystick == NULL)
    {
-      logprintf("Error opening joystick %d [%s]", UseJoystickNumber + 1, SDL_JoystickName(UseJoystickNumber));
+      logprintf("Error opening joystick %d [%s]", GameSettings::UseJoystickNumber + 1, SDL_JoystickName(GameSettings::UseJoystickNumber));
       return false;
    }
-   logprintf("Using joystick %d - %s", UseJoystickNumber + 1, SDL_JoystickName(UseJoystickNumber));
+   logprintf("Using joystick %d - %s", GameSettings::UseJoystickNumber + 1, SDL_JoystickName(GameSettings::UseJoystickNumber));
 
 
    // Now try and autodetect the joystick and update the game settings
@@ -235,10 +222,10 @@ S32 Joystick::checkJoystickString_partial_match(const string &controllerName)
 // Returns a valid name of one of our joystick profiles
 string Joystick::autodetectJoystick(GameSettings *settings)
 {
-   if(DetectedJoystickNameList.size() == 0)  // No controllers detected
+   if(GameSettings::DetectedJoystickNameList.size() == 0)  // No controllers detected
       return "NoJoystick";
 
-   string controllerName = DetectedJoystickNameList[UseJoystickNumber];
+   string controllerName = GameSettings::DetectedJoystickNameList[GameSettings::UseJoystickNumber];
 
    S32 match;
    // First check against predefined joysticks that have exact search strings
@@ -265,13 +252,13 @@ string Joystick::autodetectJoystick(GameSettings *settings)
 }
 
 
-Joystick::Button Joystick::remapSdlButtonToJoystickButton(U8 rawButton)
+JoystickButton Joystick::remapSdlButtonToJoystickButton(U8 rawButton)
 {
-   for(S32 i = 0; i < MaxJoystickButtons; i++)
+   for(S32 i = 0; i < JoystickButtonCount; i++)
       if(JoystickPresetList[SelectedPresetIndex].buttonMappings[i].sdlButton == rawButton)
          return JoystickPresetList[SelectedPresetIndex].buttonMappings[i].button;
 
-   return ButtonUnknown;
+   return JoystickButtonUnknown;
 }
 
 
@@ -282,46 +269,46 @@ void Joystick::getAllJoystickPrettyNames(Vector<string> &nameList)
 }
 
 
-Joystick::Button Joystick::stringToJoystickButton(const string &buttonString)
+JoystickButton Joystick::stringToJoystickButton(const string &buttonString)
 {
    if(buttonString == "Button1")
-      return Button1;
+      return JoystickButton1;
    else if(buttonString == "Button2")
-      return Button2;
+      return JoystickButton2;
    else if(buttonString == "Button3")
-      return Button3;
+      return JoystickButton3;
    else if(buttonString == "Button4")
-      return Button4;
+      return JoystickButton4;
    else if(buttonString == "Button5")
-      return Button5;
+      return JoystickButton5;
    else if(buttonString == "Button6")
-      return Button6;
+      return JoystickButton6;
    else if(buttonString == "Button7")
-      return Button7;
+      return JoystickButton7;
    else if(buttonString == "Button8")
-      return Button8;
+      return JoystickButton8;
    else if(buttonString == "Button9")
-      return Button9;
+      return JoystickButton9;
    else if(buttonString == "Button10")
-      return Button10;
+      return JoystickButton10;
    else if(buttonString == "Button11")
-      return Button11;
+      return JoystickButton11;
    else if(buttonString == "Button12")
-      return Button12;
+      return JoystickButton12;
    else if(buttonString == "ButtonStart")
-      return ButtonStart;
+      return JoystickButtonStart;
    else if(buttonString == "ButtonBack")
-      return ButtonBack;
+      return JoystickButtonBack;
    else if(buttonString == "ButtonDPadUp")
-      return ButtonDPadUp;
+      return JoystickButtonDPadUp;
    else if(buttonString == "ButtonDPadDown")
-      return ButtonDPadDown;
+      return JoystickButtonDPadDown;
    else if(buttonString == "ButtonDPadLeft")
-      return ButtonDPadLeft;
+      return JoystickButtonDPadLeft;
    else if(buttonString == "ButtonDPadRight")
-      return ButtonDPadRight;
+      return JoystickButtonDPadRight;
 
-   return ButtonUnknown;
+   return JoystickButtonUnknown;
 }
 
 
@@ -428,9 +415,9 @@ Joystick::JoystickInfo Joystick::getGenericJoystickInfo()
    joystickInfo.shootAxesSdlIndex[1] = 3;
 
    // Make the button graphics all the same
-   for(S32 i = 0; i < MaxJoystickButtons; i++)
+   for(S32 i = 0; i < JoystickButtonCount; i++)
    {
-      joystickInfo.buttonMappings[i].button = (Joystick::Button)i;  // 'i' should be in line with Joystick::Button
+      joystickInfo.buttonMappings[i].button = (JoystickButton)i;  // 'i' should be in line with JoystickButton
       joystickInfo.buttonMappings[i].label = "";
       joystickInfo.buttonMappings[i].color = Colors::white;
       joystickInfo.buttonMappings[i].buttonShape = ButtonShapeRound;
@@ -441,8 +428,8 @@ Joystick::JoystickInfo Joystick::getGenericJoystickInfo()
    for(S32 i = 0; i < 8; i++)
       joystickInfo.buttonMappings[i].label = itos(i);
 
-   joystickInfo.buttonMappings[ButtonBack].label = "9";
-   joystickInfo.buttonMappings[ButtonStart].label = "10";
+   joystickInfo.buttonMappings[JoystickButtonBack].label = "9";
+   joystickInfo.buttonMappings[JoystickButtonStart].label = "10";
    
    return joystickInfo;
 }
@@ -509,7 +496,7 @@ void Joystick::loadJoystickPresets(GameSettings *settings)
          buttonInfo.button = stringToJoystickButton(buttonKeyNames[i]);
 
          // Our button was not detected properly (misspelling?)
-         if(buttonInfo.button == ButtonUnknown)
+         if(buttonInfo.button == JoystickButtonUnknown)
          {
             string message = "Joystick preset button not found: " + buttonKeyNames[i];
             settings->addConfigurationError(message);
@@ -524,7 +511,7 @@ void Joystick::loadJoystickPresets(GameSettings *settings)
          buttonInfo.buttonSymbol = stringToButtonSymbol(buttonInfoMap["Label"]);
          buttonInfo.sdlButton = buttonInfoMap["Raw"] == "" ? FakeRawButton : U8(stoi(buttonInfoMap["Raw"]));
 
-         // Set the button info with index of the Joystick::Button
+         // Set the button info with index of the JoystickButton
          joystickInfo.buttonMappings[buttonInfo.button] = buttonInfo;
       }
 

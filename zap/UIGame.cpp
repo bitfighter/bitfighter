@@ -64,6 +64,8 @@
 #include "Cursor.h"
 #include "CoreGame.h"
 #include "ScissorsManager.h"
+#include "voiceCodec.h"
+
 
 #include "tnlEndian.h"
 
@@ -442,7 +444,7 @@ void GameUserInterface::render()
    GameType *gameType = getGame()->getGameType();
 
    if(gameType)
-      gameType->renderInterfaceOverlay(mInScoreboardMode);
+      gameType->renderInterfaceOverlay(mInScoreboardMode, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
 
    renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
    
@@ -731,8 +733,7 @@ void GameUserInterface::onMouseMoved()
          return;
 
       Point o = ship->getRenderPos();  // To avoid taking address of temporary
-      Point p = getGame()->worldToScreenPoint( &o );
-
+      Point p = getGame()->worldToScreenPoint(&o, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
       mCurrentMove.angle = atan2(mMousePoint.y + gScreenInfo.getGameCanvasHeight() / 2 - p.y, 
                                  mMousePoint.x + gScreenInfo.getGameCanvasWidth()  / 2 - p.x);
    }
@@ -1916,11 +1917,11 @@ void GameUserInterface::renderDebugStatus() const
 // Show server-side object ids... using illegal reachover to obtain them!
 void GameUserInterface::renderObjectIds() const
 {
-   TNLAssert(gServerGame, "Will crash on non server!");
-   if(!gServerGame)
+   TNLAssert(Game::isLocalTestServer(), "Will crash on non server!");
+   if(!Game::isLocalTestServer())
       return;
 
-   const Vector<DatabaseObject *> *objects = gServerGame->getGameObjDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objects = Game::getServerGameObjectDatabase()->findObjects_fast();
 
    for(S32 i = 0; i < objects->size(); i++)
    {
@@ -2133,8 +2134,6 @@ void GameUserInterface::renderNormal(ClientGame *game)
          renderPolygonOutline(&outlines[j], &Colors::green);
    }
 
-
-
    FxTrail::renderTrails();
 
    getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
@@ -2142,7 +2141,7 @@ void GameUserInterface::renderNormal(ClientGame *game)
    // Again, we'll be accessing the server's data directly so we can see server-side item ids directly on the client.  Again,
    // the result is that we can only see zones on our local server.
    if(mDebugShowObjectIds)
-      getUIManager()->getGameUserInterface()->renderObjectIds();
+      renderObjectIds();
 
    glPopMatrix();
 
@@ -2410,6 +2409,66 @@ void GameUserInterface::renderSuspended()
    drawCenteredString(ypos, textHeight, "When the game restarts, the level will be reset.");
    ypos += 2 * (textHeight + textGap);
    drawCenteredString(ypos, textHeight, "Press <SPACE> to resume playing now");
+}
+
+
+SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, F32 gain) const
+{
+   return SoundSystem::playSoundEffect(profileIndex, gain);
+}
+
+
+SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, const Point &position) const
+{
+   return SoundSystem::playSoundEffect(profileIndex, position);
+}
+
+
+SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain) const
+{
+   return SoundSystem::playSoundEffect(profileIndex, position, velocity, gain);
+}
+
+
+void GameUserInterface::setMovementParams(SFXHandle &effect, const Point &position, const Point &velocity) const
+{
+   SoundSystem::setMovementParams(effect, position, velocity);
+}
+
+
+void GameUserInterface::stopSoundEffect(SFXHandle &effect) const
+{
+   SoundSystem::stopSoundEffect(effect);
+}
+
+
+void GameUserInterface::setListenerParams(const Point &position, const Point &velocity) const
+{
+   SoundSystem::setListenerParams(position, velocity);
+}
+
+
+void GameUserInterface::processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, UIManager *uiManager) const
+{
+   SoundSystem::processAudio(timeDelta, sfxVol, musicVol, voiceVol, uiManager);
+}
+
+
+void GameUserInterface::playNextTrack() const
+{
+   SoundSystem::playNextTrack();
+}
+
+
+void GameUserInterface::playPrevTrack() const
+{
+   SoundSystem::playPrevTrack();
+}
+
+
+void GameUserInterface::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const
+{
+   SoundSystem::queueVoiceChatBuffer(effect, p);
 }
 
 

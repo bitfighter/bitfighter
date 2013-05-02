@@ -103,6 +103,12 @@ namespace Colors
    const Color bronze(.55f, .47f, .33f);
 
    const Color wallFillColor(Colors::paleBlue);
+
+   // Editor colors
+   const Color EDITOR_HIGHLIGHT_COLOR(Colors::white);
+   const Color EDITOR_SELECT_COLOR(Colors::yellow);
+   const Color EDITOR_PLAIN_COLOR(Colors::gray75);
+
 };
 
 }

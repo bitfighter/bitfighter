@@ -27,7 +27,7 @@
 #define _LUABASE_H_
 
 #include "lua.h"
-#include "LuaException.h"           // LuaException def
+#include "LuaException.h"     // LuaException def
 
 #include "Point.h"
 #include "tnlTypes.h"

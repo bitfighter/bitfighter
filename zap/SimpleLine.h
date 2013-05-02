@@ -26,8 +26,8 @@
 #ifndef _SIMPLELINE_H_
 #define _SIMPLELINE_H_
 
-#include "EditorObject.h"
-#include "Geometry.h"
+
+#include "BfObject.h"      // Parent
 
 namespace Zap
 {

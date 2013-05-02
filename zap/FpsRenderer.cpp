@@ -29,6 +29,7 @@
 #include "OpenglUtils.h"
 #include "ScreenInfo.h"
 #include "UI.h"                  // For horizMargin, vertMargin
+#include "FontManager.h"
 
 namespace Zap { 
 
@@ -99,7 +100,7 @@ void FpsRenderer::render() const
    if(!mFPSVisible && !isClosing())
       return;
 
-   FontManager::pushFontContext(FontManager::HUDContext);
+   FontManager::pushFontContext(HUDContext);
 
    const S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - getInsideEdge();
    const S32 fontSize = 20;

@@ -334,7 +334,7 @@ void EditorAttributeMenuUI::startEditingAttrs(BfObject *object)
    Point center = (mObject->getVert(0) + mObject->getVert(1)) * ui->getCurrentScale() / 2 + ui->getCurrentOffset();
    setMenuCenterPoint(center);  
 
-   object->startEditingAttrs(this);
+   EditorAttributeMenuItemBuilder::startEditingAttrs(this, object);
 }
 
 
@@ -348,7 +348,7 @@ void EditorAttributeMenuUI::doneEditingAttrs(BfObject *object)
 {
    // Has to be object, not mObject... this gets run once for every selected item of same type as mObject, and we need to make
    // sure that those objects (passed in as object), get updated.
-   object->doneEditingAttrs(this);     
+   EditorAttributeMenuItemBuilder::doneEditingAttrs(this, object);     
 
    // Only run on object that is the subject of this editor.  See TextItemEditorAttributeMenuUI::doneEditingAttrs() for explanation
    // of why this may be run on objects that are not actually the ones being edited (hence the need for passing an object in).

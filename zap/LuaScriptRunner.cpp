@@ -50,6 +50,7 @@
 namespace Zap
 {
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -133,9 +134,9 @@ const char *LuaScriptRunner::getScriptId()
 
 // Load the script, execute the chunk to get it in memory, then run its main() function
 // Return false if there was an error, true if not
-bool LuaScriptRunner::runScript()
+bool LuaScriptRunner::runScript(bool cacheScript)
 {
-   return prepareEnvironment() && loadScript() && runMain(); 
+   return prepareEnvironment() && loadScript(cacheScript) && runMain(); 
 }
 
 
@@ -203,18 +204,13 @@ void LuaScriptRunner::pushStackTracer()
 // Loads script from file into a Lua chunk, then runs it.  This has the effect of loading all our functions into the local environment,
 // defining any globals, and executing any "loose" code not defined in a function.  If we're going to get any compile errors, they'll
 // show up here.
-bool LuaScriptRunner::loadScript()
+bool LuaScriptRunner::loadScript(bool cacheScript)
 {
    static const S32 MAX_CACHE_SIZE = 16;
 
    // On a dedicated server, we'll always cache our scripts; on a regular server, we'll cache script except when the user is testing
    // from the editor.  In that case, we'll want to see script changes take place immediately, and we're willing to pay a small
    // performance penalty on level load to get that.
-#ifdef ZAP_DEDICATED
-   bool cacheScripts = true;
-#else
-   bool cacheScripts = gServerGame && !gServerGame->isTestServer();
-#endif
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
@@ -222,7 +218,7 @@ bool LuaScriptRunner::loadScript()
    {
       pushStackTracer();            // -- _stackTracer
 
-      if(!cacheScripts)
+      if(!cacheScript)
          loadCompileScript(mScriptName.c_str());
       else  
       {

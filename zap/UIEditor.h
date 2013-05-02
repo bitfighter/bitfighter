@@ -40,6 +40,7 @@
 #include "tnlNetStringTable.h"
 #include "barrier.h"             // For wall related defs (WallSegmentManager, etc.)
 #include "Colors.h"
+#include "EditorAttributeMenuItemBuilder.h"
 
 #include <string>
 
@@ -170,6 +171,8 @@ private:
    void renderSaveMessage();
    void renderWarnings();
 
+   EditorAttributeMenuItemBuilder mEditorAttributeMenuItemBuilder;
+
    bool mCreatingPoly;
    bool mCreatingPolyline;
    bool mDragSelecting;
@@ -298,8 +301,6 @@ public:
    Vector<TeamInfo> mOldTeams;     // Team list from before we run team editor, so we can see what changed
 
    void rebuildEverything(GridDatabase *database);   // Does lots of things in undo, redo, and add items from script
-
-   static Vector<string> robots;
 
    void onQuitted();       // Releases some memory when quitting the editor
 

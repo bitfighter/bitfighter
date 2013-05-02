@@ -414,7 +414,7 @@ bool RepairItem::pickup(Ship *theShip)
 // Runs on client when item's unpack method signifies the item has been picked up
 void RepairItem::onClientPickup()
 {
-   SoundSystem::playSoundEffect(SFXShipHeal, getPos());
+   getGame()->playSoundEffect(SFXShipHeal, getPos());
 }
 
 
@@ -544,7 +544,7 @@ bool EnergyItem::pickup(Ship *theShip)
 // Runs on client when item's unpack method signifies the item has been picked up
 void EnergyItem::onClientPickup()
 {
-   SoundSystem::playSoundEffect(SFXShipHeal, getPos());
+   getGame()->playSoundEffect(SFXShipHeal, getPos());
 }
 
 

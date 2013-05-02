@@ -67,10 +67,10 @@ string CoreGameType::toLevelCode() const
 
 
 // Runs on client
-void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible)
+void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
 {
 #ifndef ZAP_DEDICATED
-   Parent::renderInterfaceOverlay(scoreboardVisible);
+   Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
 
    BfObject *object = static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject();
 
@@ -82,11 +82,9 @@ void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible)
    for(S32 i = mCores.size() - 1; i >= 0; i--)
    {
       CoreItem *coreItem = mCores[i];
-      if(!coreItem)  // Core may have been destroyed
-         mCores.erase(i);
-      else
+      if(coreItem)  // Core may have been destroyed
          if(coreItem->getTeam() != ship->getTeam())
-            renderObjectiveArrow(coreItem);
+            renderObjectiveArrow(coreItem, canvasWidth, canvasHeight);
    }
 #endif
 }
@@ -169,6 +167,7 @@ void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event,
          gameOverManGameOver();
    }
 }
+
 
 S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {

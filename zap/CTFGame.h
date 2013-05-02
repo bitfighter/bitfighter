@@ -42,9 +42,9 @@ private:
 public:
    void addFlag(FlagItem *flag);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
-   void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);
+   void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
    void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
-   void renderInterfaceOverlay(bool scoreboardVisible);
+   void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
 
    bool teamHasFlag(S32 teamIndex) const;
    void onFlagMounted(S32 teamIndex);

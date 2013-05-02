@@ -22,38 +22,36 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //------------------------------------------------------------------------------------
+#ifndef _EDITOR_ATTRIBUTE_MENU_ITEM_BUILDER_H_
+#define _EDITOR_ATTRIBUTE_MENU_ITEM_BUILDER_H_
 
-#include "EditorObject.h"
 
 namespace Zap
 {
 
+class BfObject;
+class EditorAttributeMenuUI;
+class ClientGame;
 
-// Constructor
-PointObject::PointObject(F32 radius)
+
+class EditorAttributeMenuItemBuilder
 {
-   mRadius = radius;
-   setNewGeometry(geomPoint, radius);
-}
+private:
+   ClientGame *mGame;
+   bool mInitialized;
 
+public:
+   EditorAttributeMenuItemBuilder();     // Constructor
 
-// Destructor
-PointObject::~PointObject()
-{
-   // Do nothing
-}
+   void initialize(ClientGame *game);
 
-
-void PointObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
-{
-#ifndef ZAP_DEDICATED
-   setPos(point);
-   Parent::prepareForDock(game, point, teamIndex);
-#endif
-}
-
-
-F32 PointObject::getRadius() { return mRadius; }
-
+   EditorAttributeMenuUI *getAttributeMenu(BfObject *obj);
+   static void startEditingAttrs(EditorAttributeMenuUI *attributeMenu, BfObject *obj);
+   static void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu, BfObject *obj);
 
 };
+
+
+}
+
+#endif

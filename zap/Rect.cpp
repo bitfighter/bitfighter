@@ -160,7 +160,7 @@ void Rect::set(const Rect &r)
 // Takes centerpoint and "diameter"
 void Rect::set(const Point &p, member_type diameter)
 {
-   F32 radius = diameter * 0.5;
+   F32 radius = diameter * 0.5f;
    min.x = p.x - radius;
    max.x = p.x + radius;
    min.y = p.y - radius;

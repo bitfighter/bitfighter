@@ -24,17 +24,11 @@
 //------------------------------------------------------------------------------------
 
 #include "LuaBase.h"          // Header
-
-#include "LuaWrapper.h"
-
-#include "game.h"             // For loadTarget
-#include "item.h"             // For item def
-#include "UIMenuItems.h"      // For MenuItem def
-
-#include "ship.h"             // For access to Ship's push function
 #include "playerInfo.h"       // For access to PlayerInfo's push function
-#include "ClientInfo.h"       // For one minor use below
-#include "BfObject.h"         // Required for returnBfObject()
+#include "LuaWrapper.h"
+#include "game.h"
+
+#include "stringUtils.h"      // For itos
 
 
 namespace Zap

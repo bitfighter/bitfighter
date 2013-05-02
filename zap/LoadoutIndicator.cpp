@@ -28,6 +28,7 @@
 #include "ClientGame.h"
 #include "OpenglUtils.h"
 #include "UI.h"
+#include "FontManager.h"
 
 
 using namespace Zap;
@@ -112,7 +113,7 @@ static void doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 
    U32 xPos = 10;
 
-   FontManager::pushFontContext(FontManager::LoadoutIndicatorContext);
+   FontManager::pushFontContext(LoadoutIndicatorContext);
    
    // First, the weapons
    for(U32 i = 0; i < (U32)ShipWeaponCount; i++)

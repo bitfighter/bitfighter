@@ -154,11 +154,11 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
 
 
 // Runs on client
-void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
+void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
 {
 #ifndef ZAP_DEDICATED
 
-   Parent::renderInterfaceOverlay(scoreboardVisible);
+   Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
 
    BfObject *object = static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject();
 
@@ -176,11 +176,11 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
       GoalZone *zone = static_cast<GoalZone *>(zones->get(i));
 
       if(zone->getTeam() != team)
-         renderObjectiveArrow(zone);
+         renderObjectiveArrow(zone, canvasWidth, canvasHeight);
    }
 
    if(mBall.isValid())
-      renderObjectiveArrow(mBall);
+      renderObjectiveArrow(mBall, canvasWidth, canvasHeight);
 #endif
 }
 

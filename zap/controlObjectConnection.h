@@ -26,12 +26,12 @@
 #ifndef _CONTROLOBJECTCONNECTION_H_
 #define _CONTROLOBJECTCONNECTION_H_
 
-#include "../tnl/tnl.h"
-#include "../tnl/tnlGhostConnection.h"
-
 #include "move.h"
 #include "Point.h"
 #include "BfObject.h" 
+
+#include "tnl.h"
+#include "tnlGhostConnection.h"
 
 using namespace TNL;
 

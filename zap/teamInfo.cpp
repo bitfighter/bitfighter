@@ -31,6 +31,7 @@
 #include "ClientInfo.h"
 #include "ServerGame.h"
 #include "robot.h"
+#include "Colors.h"
 
 #ifdef ZAP_DEDICATED
 #   include "Colors.h"

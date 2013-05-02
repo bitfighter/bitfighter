@@ -30,6 +30,8 @@
 #include "gameType.h"
 #include "LoadoutTracker.h"
 #include "LevelDatabaseDownloadThread.h"
+#include "OpenglUtils.h"
+#include "LevelSpecifierEnum.h"
 
 
 namespace Zap {
@@ -167,13 +169,13 @@ void servVolHandler(ClientGame *game, const Vector<string> &words)
 
 void mNextHandler(ClientGame *game, const Vector<string> &words)
 {
-   SoundSystem::playNextTrack();
+   game->playNextTrack();
 }
 
 
 void mPrevHandler(ClientGame *game, const Vector<string> &words)
 {
-   SoundSystem::playPrevTrack();
+   game->playPrevTrack();
 }
 
 
@@ -207,27 +209,27 @@ void getMapHandler(ClientGame *game, const Vector<string> &words)
 void nextLevelHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasLevelChange("!!! You don't have permission to change levels"))
-      game->getConnectionToServer()->c2sRequestLevelChange(ServerGame::NEXT_LEVEL, false);
+      game->getConnectionToServer()->c2sRequestLevelChange(NEXT_LEVEL, false);
 }
 
 
 void prevLevelHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasLevelChange("!!! You don't have permission to change levels"))
-      game->getConnectionToServer()->c2sRequestLevelChange(ServerGame::PREVIOUS_LEVEL, false);
+      game->getConnectionToServer()->c2sRequestLevelChange(PREVIOUS_LEVEL, false);
 }
 
 
 void restartLevelHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasLevelChange("!!! You don't have permission to change levels"))
-      game->getConnectionToServer()->c2sRequestLevelChange(ServerGame::REPLAY_LEVEL, false);
+      game->getConnectionToServer()->c2sRequestLevelChange(REPLAY_LEVEL, false);
 }
 
 void randomLevelHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasLevelChange("!!! You don't have permission to change levels"))
-      game->getConnectionToServer()->c2sRequestLevelChange(ServerGame::RANDOM_LEVEL, false);
+      game->getConnectionToServer()->c2sRequestLevelChange(RANDOM_LEVEL, false);
 }
 
 
@@ -300,7 +302,7 @@ void submitPassHandler(ClientGame *game, const Vector<string> &words)
 
 static bool isLocalTestServer(ClientGame *game, const char *failureMessage)
 {
-   if(gServerGame && gServerGame->isTestServer())
+   if(Game::isLocalTestServer())
       return true;
    
    game->displayErrorMessage(failureMessage);

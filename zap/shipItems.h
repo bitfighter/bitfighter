@@ -80,6 +80,10 @@ static const string DefaultLoadout = "Turbo, Shield, Phaser, Mine, Burst";
 
 struct ModuleInfo
 {
+   // Detection ranges for sensor against cloaked players
+   static const S32 SensorCloakInnerDetectionDistance = 300;   // Max detection inside this radius
+   static const S32 SensorCloakOuterDetectionDistance = 500;   // No detection outside this radius
+
    const char *mName;
    S32 mPrimaryEnergyDrain;       // Continuous energy drain while primary component is in use
    S32 mPrimaryUseCost;           // Per use energy drain of primary component (if it has one)

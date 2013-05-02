@@ -969,17 +969,19 @@ DatabaseObject *DatabaseObject::clone() const
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// idleLinkedList: Used by both BfObject and Game, move this struct elsewhere?
-idleLinkedList::idleLinkedList() {prevList = NULL; nextList = NULL;}
-idleLinkedList::~idleLinkedList() {unlinkFromIdleList();}
-idleLinkedList::idleLinkedList(const idleLinkedList &t)
+// IdleLinkedList: Used by both BfObject and Game, move this struct elsewhere?
+IdleLinkedList::IdleLinkedList() { prevList = NULL; nextList = NULL; }
+IdleLinkedList::~IdleLinkedList() { unlinkFromIdleList(); }
+IdleLinkedList::IdleLinkedList(const IdleLinkedList &t)
 {
    prevList = NULL;
    nextList = NULL;
    if(t.prevList) 
-      linkToIdleList((idleLinkedList *) &t);  // Link our copy to existing list?
+      linkToIdleList((IdleLinkedList *) &t);  // Link our copy to existing list?
 }
-void idleLinkedList::linkToIdleList(idleLinkedList *list)
+
+
+void IdleLinkedList::linkToIdleList(IdleLinkedList *list)
 {
    if(!prevList)
    {
@@ -990,7 +992,9 @@ void idleLinkedList::linkToIdleList(idleLinkedList *list)
          nextList->prevList = this;
    }
 }
-void idleLinkedList::unlinkFromIdleList()
+
+
+void IdleLinkedList::unlinkFromIdleList()
 {
    if(prevList)
       prevList->nextList = nextList;

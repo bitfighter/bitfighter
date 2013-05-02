@@ -38,10 +38,6 @@ namespace Zap
 class Ship;
 class ClientInfo;
 
-const S32 SensorCloakInnerDetectionDistance = 300;
-const S32 SensorCloakOuterDetectionDistance = 500;
-
-
 /////////////////////////////////////
 /////////////////////////////////////
 

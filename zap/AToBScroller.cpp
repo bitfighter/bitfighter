@@ -25,10 +25,15 @@
 
 #include "AToBScroller.h"
 #include "ScreenInfo.h"
+#include "ScissorsManager.h"
+
 
 using namespace Zap;
 
 namespace Zap { namespace UI {
+
+
+static ScissorsManager scissorsManager;      // Could probably be static, practically...
 
 
 // Constructor
@@ -96,8 +101,8 @@ S32 AToBScroller::prepareToRenderFromDisplay(ClientGame *game, S32 top, S32 from
 
    S32 height = getTransitionPos(fromHeight, toHeight);
 
-   mScissorsManager.enable(mScrollTimer.getCurrent() > 0, game, 0, top, 
-                        gScreenInfo.getGameCanvasWidth(), getTransitionPos(height, 0));
+   scissorsManager.enable(mScrollTimer.getCurrent() > 0, game, 0, top, 
+                          gScreenInfo.getGameCanvasWidth(), getTransitionPos(height, 0));
 
    return top - fromHeight * (1 - mScrollTimer.getFraction());
 }
@@ -112,8 +117,8 @@ S32 AToBScroller::prepareToRenderToDisplay(ClientGame *game, S32 top, S32 fromHe
    S32 height = getTransitionPos(fromHeight, toHeight);
 
    S32 vertBuffer = 2;  // A little extra space to avoid clipping lines at the top of our clip area
-   mScissorsManager.enable(mScrollTimer.getCurrent() > 0, game, 0, top + getTransitionPos(height, 0) - vertBuffer, 
-                           gScreenInfo.getGameCanvasWidth(), getTransitionPos(0, height) + 2 * vertBuffer);
+   scissorsManager.enable(mScrollTimer.getCurrent() > 0, game, 0, top + getTransitionPos(height, 0) - vertBuffer, 
+                          gScreenInfo.getGameCanvasWidth(), getTransitionPos(0, height) + 2 * vertBuffer);
 
    return top + fromHeight * mScrollTimer.getFraction();
 }
@@ -121,7 +126,7 @@ S32 AToBScroller::prepareToRenderToDisplay(ClientGame *game, S32 top, S32 fromHe
 
 void AToBScroller::doneRendering()
 {
-   mScissorsManager.disable();
+   scissorsManager.disable();
 }
 
 

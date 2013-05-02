@@ -26,6 +26,7 @@
 #ifndef _FONT_MANAGER_H_
 #define _FONT_MANAGER_H_
 
+#include "FontContextEnum.h"
 #include "freeglut_stroke.h"     // Our stroke font handler -- include here to resolve namespace grief
 
 extern "C" { 
@@ -57,30 +58,6 @@ private:
    static S32 getTtfFontStringLength(BfFont *font, const char* string);
 
 public:
-   enum FontId {
-      FontRoman,
-      FontOrbitronLightStroke,
-      FontOrbitronMedStroke,
-      FontOcrA,
-      FontOrbitronLight,
-      FontOrbitronMedium,
-      FontPrimeRegular,
-      FontTenby5,
-      FontCount
-   };
-
-   enum FontContext {
-      BigMessageContext,       // Press any key to respawn, etc.
-      HelpItemContext,         // In-game help messages
-      LevelInfoContext,        // Display info about the level (at beginning of game, and when F2 pressed)
-      MenuContext,             // Menu font (main game menus)
-      HUDContext,              // General HUD text
-      HelpContext,             // For Help screens
-      LoadoutIndicatorContext, // For the obvious
-      OverlayMenuContext,      // For Loadout Menus and such
-      TextEffectContext        // Yard Sale!!! text and the like
-   };
-
    static void initialize(GameSettings *settings);
    static void cleanup();   
 
@@ -109,18 +86,18 @@ class BfFont
 private:
    bool mIsStrokeFont;
    bool mOk;
-   FontManager::FontId mFontId;
+   FontId mFontId;
 
    S32 mStashFontId;
 
    const SFG_StrokeFont *mStrokeFont;     // Will be NULL for TTF fonts
 
 public:
-   BfFont(FontManager::FontId fontId, const ::SFG_StrokeFont *strokeFont);              // Stroke font constructor
-   BfFont(FontManager::FontId fontId, const string &fontFile, GameSettings *settings);  // TTF font constructor
+   BfFont(FontId fontId, const ::SFG_StrokeFont *strokeFont);              // Stroke font constructor
+   BfFont(FontId fontId, const string &fontFile, GameSettings *settings);  // TTF font constructor
    virtual ~BfFont();                                                                   // Destructor
 
-   FontManager::FontId getId();
+   FontId getId();
    const SFG_StrokeFont *getStrokeFont();
    bool isStrokeFont();
    S32 getStashFontId();

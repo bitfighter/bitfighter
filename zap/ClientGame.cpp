@@ -25,64 +25,23 @@
 
 #include "ClientGame.h"
 
-#include "ClientInfo.h"
-#include "barrier.h"
-#include "config.h"
-#include "EngineeredItem.h"      // For EngineerModuleDeployer
-#include "engineerHelper.h"
-#include "GameSettings.h"
-#include "gameLoader.h"
-#include "gameNetInterface.h"
-#include "BfObject.h"
-#include "gameObjectRender.h"
 #include "masterConnection.h"
-#include "move.h"
-#include "moveObject.h"
-#include "projectile.h"          // For SpyBug class
-#include "SharedConstants.h"     // For ServerInfoFlags enum
-#include "sparkManager.h"
-#include "GeomUtils.h"
-#include "luaLevelGenerator.h"
-#include "robot.h"
-#include "shipItems.h"           // For moduleInfos
-#include "NexusGame.h"
-#include "Zone.h"                // For instantiation
-#include "ChatHelper.h"          // For runCommand def
-
-#include "SparkTypesEnum.h"
-
-#include "soccerGame.h"
-
-#include "UI.h"                  // For renderRect
-
-#include "stringUtils.h"
-
+#include "gameNetInterface.h"
 #include "IniFile.h"             // For CIniFile def
 
-#include "BotNavMeshZone.h"      // For zone clearing code
-#include "ScreenInfo.h"
+#include "barrier.h"
 
+#include "UIManager.h"
+#include "UIMenus.h"
 #include "UIGame.h"
-#include "UIEditor.h"
 #include "UINameEntry.h"
 #include "UIQueryServers.h"
 #include "UIErrorMessage.h"
 #include "UIHighScores.h"
 
-#include "TeamShuffleHelper.h"   // For... wait for it... TeamShuffleHelper class!!!
-
-#include "tnl.h"
-#include "tnlRandom.h"
-#include "tnlGhostConnection.h"
-#include "tnlNetInterface.h"
-
-#include "md5wrapper.h"
-
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>
 #include <cmath>
-
-
 
 using namespace TNL;
 
@@ -91,8 +50,6 @@ namespace Zap
 
 // Global Game objects
 Vector<ClientGame *> gClientGames;
-
-extern ScreenInfo gScreenInfo;
 
 
 ////////////////////////////////////////
@@ -119,6 +76,9 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
 
    mUi = mUIManager->getGameUserInterface();
+
+   for(S32 i = 0; i < JoystickAxesDirectionCount; i++)
+      mJoystickInputs[i] = 0;
 }
 
 
@@ -252,6 +212,8 @@ void ClientGame::startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineer
 {
    mObjectsLoaded = 0;              // Reset item counter
    clearSparks();
+   
+   mRobots.clear();
 
    mUi->startLoadingLevel(lx, ly, ux, uy, engineerEnabled);
 }
@@ -360,7 +322,7 @@ Color ShipExplosionColors[] = {
 
 void ClientGame::emitShipExplosion(const Point &pos)
  {
-   SoundSystem::playSoundEffect(SFXShipExplode, pos);
+   playSoundEffect(SFXShipExplode, pos);
 
    F32 a = TNL::Random::readF() * 0.4f + 0.5f;
    F32 b = TNL::Random::readF() * 0.2f + 0.9f;
@@ -374,9 +336,45 @@ void ClientGame::emitShipExplosion(const Point &pos)
  }
 
 
+
+SFXHandle ClientGame::playSoundEffect(U32 profileIndex, F32 gain) const
+{
+   return mUi->playSoundEffect(profileIndex, gain);
+}
+
+
+SFXHandle ClientGame::playSoundEffect(U32 profileIndex, const Point &position) const
+{
+   return mUi->playSoundEffect(profileIndex, position);
+}
+
+
+SFXHandle ClientGame::playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain) const
+{
+   return mUi->playSoundEffect(profileIndex, position, velocity, gain);
+}
+
+
+void ClientGame::playNextTrack() const
+{
+   mUi->playNextTrack();
+}
+
+
+void ClientGame::playPrevTrack() const
+{
+   mUi->playPrevTrack();
+}
+
+
+void ClientGame::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const
+{
+   mUi->queueVoiceChatBuffer(effect, p);
+}
+
+
 void ClientGame::updateModuleSounds(const Point &pos, const Point &vel, const LoadoutTracker &loadout)
 {
-
    const S32 moduleSFXs[ModuleCount] =
    {
       SFXShieldActive,
@@ -393,16 +391,15 @@ void ClientGame::updateModuleSounds(const Point &pos, const Point &vel, const Lo
       if(loadout.isModulePrimaryActive(ShipModule(i)) && moduleSFXs[i] != SFXNone)
       {
          if(mModuleSound[i].isValid())
-            SoundSystem::setMovementParams(mModuleSound[i], pos, vel);
+            mUi->setMovementParams(mModuleSound[i], pos, vel);
          else if(moduleSFXs[i] != -1)
-            mModuleSound[i] = SoundSystem::playSoundEffect(moduleSFXs[i], pos, vel);
+            mModuleSound[i] = playSoundEffect(moduleSFXs[i], pos, vel);
       }
       else
       {
          if(mModuleSound[i].isValid())
          {
-//            mModuleSound[i]->stop();    <-- why was this removed?
-            SoundSystem::stopSoundEffect(mModuleSound[i]);
+            mUi->stopSoundEffect(mModuleSound[i]);
             mModuleSound[i] = NULL;
          }
       }
@@ -547,23 +544,25 @@ void ClientGame::deleteLevelGen(LuaLevelGenerator *levelgen)
 }
 
 
-static void joystickUpdateMove(GameSettings *settings, Move *theMove)
+static void joystickUpdateMove(ClientGame *game, GameSettings *settings, Move *theMove)
 {
    // One of each of left/right axis and up/down axis should be 0 by this point
    // but let's guarantee it..   why?
-   theMove->x = Joystick::JoystickInputData[MoveAxesRight].value - Joystick::JoystickInputData[MoveAxesLeft].value;
+   theMove->x = game->mJoystickInputs[JoystickMoveAxesRight] - 
+                game->mJoystickInputs[JoystickMoveAxesLeft];
    theMove->x = MAX(theMove->x, -1);
    theMove->x = MIN(theMove->x, 1);
-   theMove->y = Joystick::JoystickInputData[MoveAxesDown].value - Joystick::JoystickInputData[MoveAxesUp].value;
+   theMove->y =  game->mJoystickInputs[JoystickMoveAxesDown] - 
+                 game->mJoystickInputs[JoystickMoveAxesUp];
    theMove->y = MAX(theMove->y, -1);
    theMove->y = MIN(theMove->y, 1);
 
    //logprintf(
    //      "Joystick axis values. Move: Left: %f, Right: %f, Up: %f, Down: %f\nShoot: Left: %f, Right: %f, Up: %f, Down: %f ",
-   //      Joystick::JoystickInputData[MoveAxesLeft].value, Joystick::JoystickInputData[MoveAxesRight].value,
-   //      Joystick::JoystickInputData[MoveAxesUp].value, Joystick::JoystickInputData[MoveAxesDown].value,
-   //      Joystick::JoystickInputData[ShootAxesLeft].value, Joystick::JoystickInputData[ShootAxesRight].value,
-   //      Joystick::JoystickInputData[ShootAxesUp].value, Joystick::JoystickInputData[ShootAxesDown].value
+   //      mJoystickInputs[MoveAxesLeft],  mJoystickInputs[MoveAxesRight],
+   //      mJoystickInputs[MoveAxesUp],    mJoystickInputs[MoveAxesDown],
+   //      mJoystickInputs[ShootAxesLeft], mJoystickInputs[ShootAxesRight],
+   //      mJoystickInputs[ShootAxesUp],   mJoystickInputs[ShootAxesDown]
    //      );
 
    //logprintf(
@@ -575,8 +574,11 @@ static void joystickUpdateMove(GameSettings *settings, Move *theMove)
 
    //logprintf("XY from shoot axes. x: %f, y: %f", x, y);
 
-   Point p(Joystick::JoystickInputData[ShootAxesRight].value - Joystick::JoystickInputData[ShootAxesLeft].value, 
-           Joystick::JoystickInputData[ShootAxesDown].value  - Joystick::JoystickInputData[ShootAxesUp].value);
+
+   Point p(game->mJoystickInputs[JoystickShootAxesRight] - 
+           game->mJoystickInputs[JoystickShootAxesLeft], 
+                             game->mJoystickInputs[JoystickShootAxesDown]  - 
+                             game->mJoystickInputs[JoystickShootAxesUp]);
 
    F32 fact =  p.len();
 
@@ -630,7 +632,7 @@ void ClientGame::idle(U32 timeDelta)
    // kill the joystick.  The design of combining joystick input and move updating really sucks.
    if(mSettings->getInputCodeManager()->getInputMode() == InputModeJoystick || 
       getUIManager()->getCurrentUI() == getUIManager()->getOptionsMenuUserInterface())
-         joystickUpdateMove(mSettings, theMove);
+         joystickUpdateMove(this, mSettings, theMove);
 
    theMove->time = timeDelta + prevTimeDelta;
 
@@ -681,7 +683,7 @@ void ClientGame::idle(U32 timeDelta)
          mGameType->idle(BfObject::ClientIdleMainRemote, timeDelta);
 
       if(controlObject)
-         SoundSystem::setListenerParams(controlObject->getPos(), controlObject->getVel());
+         mUi->setListenerParams(controlObject->getPos(), controlObject->getVel());
 
 
       // Check to see if there are any items near the ship we need to display help for
@@ -708,7 +710,7 @@ void ClientGame::idle(U32 timeDelta)
 
    processDeleteList(timeDelta);                         // Delete any objects marked for deletion
    
-   SoundSystem::processAudio(timeDelta, mSettings->getIniSettings()->sfxVolLevel,
+   mUi->processAudio(timeDelta, mSettings->getIniSettings()->sfxVolLevel,
          mSettings->getIniSettings()->getMusicVolLevel(),
          mSettings->getIniSettings()->voiceChatVolLevel,
          getUIManager());  
@@ -791,8 +793,7 @@ void ClientGame::gotVoiceChat(const StringTableEntry &from, const ByteBufferPtr 
    if(isOnVoiceMuteList(from.getString()))
       return;
 
-   ByteBufferPtr playBuffer = clientInfo->getVoiceDecoder()->decompressBuffer(voiceBuffer);
-   SoundSystem::queueVoiceChatBuffer(clientInfo->getVoiceSFX(), playBuffer);
+   clientInfo->playVoiceChat(voiceBuffer);
 }
 
 
@@ -862,7 +863,7 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
 
    }
    if(playAlert)
-      SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
+      playSoundEffect(SFXPlayerJoined, 1);
 
    mUIManager->getGameUserInterface()->onPlayerJoined();
 
@@ -876,7 +877,7 @@ void ClientGame::onPlayerQuit(const StringTableEntry &name)
    removeFromClientList(name);
 
    displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());     // SysMsg
-   SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
+   playSoundEffect(SFXPlayerLeft, 1);
 
    mUIManager->getGameUserInterface()->onPlayerQuit();
 }
@@ -1606,9 +1607,9 @@ void ClientGame::toggleCommanderMap()
    mCommanderZoomDelta.invert();
 
    if(mInCommanderMap)
-      SoundSystem::playSoundEffect(SFXUICommUp);
+      playSoundEffect(SFXUICommUp);
    else
-      SoundSystem::playSoundEffect(SFXUICommDown);
+      playSoundEffect(SFXUICommDown);
 
 
    GameConnection *conn = getConnectionToServer();
@@ -1655,11 +1656,8 @@ F32 ClientGame::getCommanderZoomFraction() const
 
 
 // Called from renderObjectiveArrow() & ship's onMouseMoved() when in commander's map
-Point ClientGame::worldToScreenPoint(const Point *point) const
+Point ClientGame::worldToScreenPoint(const Point *point,  S32 canvasWidth, S32 canvasHeight) const
 {
-   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-
    BfObject *controlObject = mConnectionToServer->getControlObject();
 
    if(!controlObject || controlObject->getObjectTypeNumber() != PlayerShipTypeNumber)
@@ -1689,15 +1687,15 @@ Point ClientGame::worldToScreenPoint(const Point *point) const
 
       Point visScale(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y );
 
-      Point ret = (*point - offset) * visScale + Point((gScreenInfo.getGameCanvasWidth() / 2), (gScreenInfo.getGameCanvasHeight() / 2));
+      Point ret = (*point - offset) * visScale + Point((canvasWidth / 2), (canvasHeight / 2));
       return ret;
    }
    else                       // Normal map view
    {
       Point visExt = computePlayerVisArea(ship);
-      Point scaleFactor((gScreenInfo.getGameCanvasWidth() / 2) / visExt.x, (gScreenInfo.getGameCanvasHeight() / 2) / visExt.y);
+      Point scaleFactor((canvasWidth / 2) / visExt.x, (canvasHeight / 2) / visExt.y);
 
-      Point ret = (*point - position) * scaleFactor + Point((gScreenInfo.getGameCanvasWidth() / 2), (gScreenInfo.getGameCanvasHeight() / 2));
+      Point ret = (*point - position) * scaleFactor + Point((canvasWidth / 2), (canvasHeight / 2));
       return ret;
    }
 }
@@ -1783,7 +1781,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          robot.append(argv[i]);
       }
 
-      EditorUserInterface::robots.push_back(robot);
+      mRobots.push_back(robot);
    }
       
    else 
@@ -1818,6 +1816,12 @@ AbstractTeam *ClientGame::getNewTeam()
 void ClientGame::setSelectedEngineeredObject(U32 objectType)
 {
    mUi->setSelectedEngineeredObject(objectType);
+}
+
+
+const Vector<string> *ClientGame::getLevelRobotLines() const
+{
+   return &mRobots;
 }
 
 };

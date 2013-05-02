@@ -25,12 +25,10 @@
 
 #include "GameSettings.h"
 #include "SharedConstants.h"  // For MAX_PLAYERS
-#include "config.h"           // For IniSettings, CmdLineSettings defs
 #include "BanList.h"
 #include "ScreenInfo.h"
 #include "stringUtils.h"      // For itos
 #include "LuaWrapper.h"       // For printing Lua class hiearchy
-#include "LoadoutTracker.h"
 
 #include "tnlTypes.h"         // For TNL_OS_WIN32 def
 #include "tnlLog.h"           // For logprintf
@@ -171,6 +169,8 @@ const char *helpTitles[] = {
 ////////////////////////////////////////
 // Define statics
 FolderManager *GameSettings::mFolderManager = NULL;
+Vector<string> GameSettings::DetectedJoystickNameList;      // List of joysticks we found attached to this machine
+S32 GameSettings::UseJoystickNumber = 0;
 
 
 // For now...  soon all these things will be contained herein
@@ -887,7 +887,7 @@ void GameSettings::onFinishedLoading()
 #ifndef ZAP_DEDICATED
    U32 stick = getU32(USE_STICK);
    if(stick > 0)
-      Joystick::UseJoystickNumber = stick - 1;
+      UseJoystickNumber = stick - 1;
 #endif
 }
 

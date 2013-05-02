@@ -24,15 +24,12 @@
 //------------------------------------------------------------------------------------
 
 #include "item.h"
-#include "ship.h"
-#include "goalZone.h"
-#include "gameType.h"
 #include "game.h"
 #include "gameConnection.h"
 
 #include "gameObjectRender.h"
+#include "Colors.h"
 #include "stringUtils.h"
-#include "gameObjectRender.h"
 
 namespace Zap
 {
@@ -149,7 +146,7 @@ void Item::setOutline()
    F32 x = getPos().x;
    F32 y = getPos().y;
 
-   S32 rad = mRadius; 
+   S32 rad = (S32)mRadius; 
 
    mOutlinePoints.clear();
    mOutlinePoints.reserve(4);

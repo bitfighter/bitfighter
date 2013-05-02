@@ -42,9 +42,17 @@ using namespace std;
 #include "Joystick.h"
 #include "masterConnection.h"    // For MasterServerConnection def
 #include "VideoSystem.h"
+#include "SoundSystem.h"
 #include "OpenglUtils.h"
 #include "MathUtils.h"           // For RADIANS_TO_DEGREES def
 #include "LoadoutIndicator.h"    // For LoadoutIndicatorHeight
+
+#ifdef TNL_OS_MOBILE
+#  include "SDL_opengles.h"
+#else
+#  include "SDL_opengl.h"
+#endif
+
 
 #include <string>
 

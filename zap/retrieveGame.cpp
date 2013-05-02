@@ -107,13 +107,13 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
+void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode)
 {
    Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      if(dismountMode != MountableItem::DISMOUNT_SILENT)
+      if(dismountMode != DISMOUNT_SILENT)
       {
          if(ship->getClientInfo())
          {
@@ -165,7 +165,7 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
                        (getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber) == 1) ? oneFlagCapString : capString, e);
 
       // Drop the flag into the zone
-      mountedFlag->dismount(MountableItem::DISMOUNT_SILENT);
+      mountedFlag->dismount(DISMOUNT_SILENT);
 
       const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
       S32 flagIndex = flags->getIndex(mountedFlag);
@@ -257,11 +257,11 @@ void RetrieveGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo 
 
 
 // Runs on client
-void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
+void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
 {
 #ifndef ZAP_DEDICATED
 
-   Parent::renderInterfaceOverlay(scoreboardVisible);
+   Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
 
    BfObject *object = static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject();
 
@@ -297,7 +297,7 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
                }
 
             if(!found)
-               renderObjectiveArrow(goalZone);
+               renderObjectiveArrow(goalZone, canvasWidth, canvasHeight);
          }
          uFlag = true;
          break;
@@ -312,9 +312,9 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
          GoalZone *gz = flag->getZone();
 
          if(gz && gz->getTeam() != team)
-            renderObjectiveArrow(flag, gz->getColor());
+            renderObjectiveArrow(flag, gz->getColor(), canvasWidth, canvasHeight);
          else if(!gz)
-            renderObjectiveArrow(flag, getTeamColor(TEAM_NEUTRAL));
+            renderObjectiveArrow(flag, getTeamColor(TEAM_NEUTRAL), canvasWidth, canvasHeight);
       }
       else
       {
@@ -322,7 +322,7 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
          Ship *mount = flag->getMount();
 
          if(mount && mount != ship)
-            renderObjectiveArrow(mount);
+            renderObjectiveArrow(mount, canvasWidth, canvasHeight);
       }
    }
 #endif

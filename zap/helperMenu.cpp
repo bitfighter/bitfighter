@@ -30,6 +30,7 @@
 #include "ClientGame.h"
 #include "JoystickRender.h"
 #include "RenderUtils.h"
+#include "FontManager.h"
 
 #include "OpenglUtils.h"
 
@@ -125,7 +126,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
       mOldCount = displayItems;
    }
 
-   FontManager::pushFontContext(FontManager::OverlayMenuContext);
+   FontManager::pushFontContext(OverlayMenuContext);
 
    // First do a dry run with the menu items to get their indent level (draw == false).  Later
    // we'll draw them for real.
@@ -315,7 +316,7 @@ S32 HelperMenu::getMaxItemWidth(const OverlayMenuItem *items, S32 count)
    S32 width = -1;
    for(S32 i = 0; i < count; i++)
    {
-      S32 w = getStringWidth(FontManager::OverlayMenuContext, MENU_FONT_SIZE, items[i].name) + getStringWidth(MENU_FONT_SIZE, items[i].help);
+      S32 w = getStringWidth(OverlayMenuContext, MENU_FONT_SIZE, items[i].name) + getStringWidth(MENU_FONT_SIZE, items[i].help);
       if(w > width)
          width = w;
    }

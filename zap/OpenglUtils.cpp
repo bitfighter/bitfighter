@@ -36,6 +36,9 @@
 #include "tnlVector.h"
 #include "stringUtils.h"
 
+#include "FontManager.h"
+
+
 #include <stdio.h>
 
 namespace Zap {

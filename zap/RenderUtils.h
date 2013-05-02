@@ -23,15 +23,16 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _RENDER_UTILS_
-#define _RENDER_UTILS_
+#ifndef _RENDER_UTILS_H_
+#define _RENDER_UTILS_H_
 
-#include "tnlTypes.h"
-#include "tnlVector.h"
 
 #include "Point.h"
 #include "Colors.h"
-#include "FontManager.h"
+#include "FontContextEnum.h"
+
+#include "tnlTypes.h"
+#include "tnlVector.h"
 
 using namespace TNL;
 
@@ -143,8 +144,8 @@ void drawString4Colf(S32 y, S32 size, U32 col, const char *format, ...);
 void drawTime(S32 x, S32 y, S32 size, S32 timeInMs, const char *prefixString = "");
 
 // Return string rendering width (normal and formatted versions)
-S32 getStringWidth(FontManager::FontContext, S32 size, const char *string);
-F32 getStringWidth(FontManager::FontContext, F32 size, const char *string);
+S32 getStringWidth(FontContext context, S32 size, const char *string);
+F32 getStringWidth(FontContext context, F32 size, const char *string);
 
 F32 getStringWidth(F32 size, const char *str);
 S32 getStringWidth(S32 size, const char *str);

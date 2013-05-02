@@ -75,7 +75,7 @@ F32 Timer::getFraction() const
 
 void Timer::invert()
 {
-   mCurrentCounter = (1.0f - getFraction()) * mPeriod;
+   mCurrentCounter = U32((1.0f - getFraction()) * mPeriod);
 }
 
 

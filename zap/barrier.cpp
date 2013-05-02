@@ -24,14 +24,13 @@
 //------------------------------------------------------------------------------------
 
 #include "barrier.h"
+
 #include "WallSegmentManager.h"
-#include "BotNavMeshZone.h"
+#include "BotNavMeshZone.h"         // For BufferRadius
 #include "gameObjectRender.h"
-#include "gameType.h"               // For BarrierRec struct
 #include "game.h"
-#include "config.h"
+#include "Colors.h"
 #include "stringUtils.h"
-#include "LuaWrapper.h"
 
 #include <cmath>
 
@@ -571,8 +570,7 @@ void WallItem::addToGame(Game *game, GridDatabase *database)
 
    // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
    // is convenient to transmit to the clients
-   WallRec wallRec(this);
-   game->getGameType()->addWall(wallRec, game);
+   game->addWall(WallRec(this));
 
    onAddedToGame(game);
 }
@@ -790,8 +788,7 @@ void PolyWall::addToGame(Game *game, GridDatabase *database)
 
    // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
    // is convenient to transmit to the clients
-   WallRec wallRec(this);
-   game->getGameType()->addWall(wallRec, game);
+   game->addWall(WallRec(this));
 
    onAddedToGame(game);
 }

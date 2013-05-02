@@ -24,14 +24,12 @@
 //------------------------------------------------------------------------------------
 
 #include "UICredits.h"
-#include "UIMenus.h"
 #include "gameObjectRender.h"    // For renderBitfighterLogo
-#include "ClientGame.h"
 
-#include "../tnl/tnlRandom.h"
 #include "ScreenInfo.h"
 
 #include "OpenglUtils.h"
+#include "SoundSystem.h"
 
 #include <stdio.h>
 #include <math.h>

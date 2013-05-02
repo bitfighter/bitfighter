@@ -159,7 +159,7 @@ const char *Robot::getErrorMessagePrefix() { return "***ROBOT ERROR***"; }
 // Server only
 bool Robot::start()
 {
-   if(!runScript())     // Load the script, execute the chunk to get it in memory, then run its main() function
+   if(!runScript(!getGame()->isTestServer()))   // Load the script, execute the chunk to get it in memory, then run its main() function
       return false;
 
    // Pass true so that if this bot doesn't have a TickEvent handler, we don't print a message
@@ -1267,7 +1267,7 @@ S32 Robot::lua_dropItem(lua_State *L)
 
    S32 count = mMountedItems.size();
    for(S32 i = count - 1; i >= 0; i--)
-      mMountedItems[i]->dismount(MountableItem::DISMOUNT_NORMAL);
+      mMountedItems[i]->dismount(DISMOUNT_NORMAL);
 
    return 0;
 }

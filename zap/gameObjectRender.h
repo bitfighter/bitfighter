@@ -45,9 +45,9 @@ using namespace std;
 namespace Zap
 {
 
-extern const Color *HIGHLIGHT_COLOR;
-extern const Color *SELECT_COLOR;
-extern const Color *PLAIN_COLOR;
+//extern const Color *HIGHLIGHT_COLOR;
+//extern const Color *SELECT_COLOR;
+//extern const Color *PLAIN_COLOR;
 
 static const S32 NO_NUMBER = -1;
 
@@ -257,6 +257,8 @@ void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width);
 
 void renderSoccerBall(const Point &pos, F32 size);
 void renderSoccerBall(const Point &pos);
+
+void renderWorm(Point *points, S32 headIndex, S32 tailLength);
 
 void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color *color);
 

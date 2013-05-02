@@ -37,6 +37,7 @@
 #   include "ClientGame.h"
 #   include "UIGame.h"
 #   include "UIMenuItems.h"
+#   include "OpenglUtils.h"
 #endif
 
 
@@ -84,7 +85,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
    {
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s returned %d flag%s to the Nexus for %d points!", 
                                  clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
-      SoundSystem::playSoundEffect(SFXFlagCapture);
+      clientGame->playSoundEffect(SFXFlagCapture);
 
       Ship *ship = clientGame->findShip(clientName);
       if(ship && score >= 100)
@@ -93,7 +94,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
    else if(msgIndex == NexusMsgYardSale)
    {
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s is having a YARD SALE!", clientName.getString());
-      SoundSystem::playSoundEffect(SFXFlagSnatch);
+      clientGame->playSoundEffect(SFXFlagSnatch);
 
       Ship *ship = clientGame->findShip(clientName);
       if(ship)
@@ -102,12 +103,12 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
    else if(msgIndex == NexusMsgGameOverWin)
    {
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "Player %s wins the game!", clientName.getString());
-      SoundSystem::playSoundEffect(SFXFlagCapture);
+      clientGame->playSoundEffect(SFXFlagCapture);
    }
    else if(msgIndex == NexusMsgGameOverTie)
    {
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "The game ended in a tie.");
-      SoundSystem::playSoundEffect(SFXFlagDrop);
+      clientGame->playSoundEffect(SFXFlagDrop);
    }
 #endif
 }
@@ -279,13 +280,13 @@ static FlagItem *findFirstFlag(Ship *ship)
 
 // The flag will come from ship->mount.  *item is used as it is posssible to carry and drop multiple items.
 // This method doesn't actually do any dropping; it only sends out an appropriate flag-drop message.
-void NexusGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
+void NexusGameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode)
 {
    Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      if(dismountMode != MountableItem::DISMOUNT_SILENT)
+      if(dismountMode != DISMOUNT_SILENT)
       {
          FlagItem *flag = static_cast<FlagItem *>(item);
 
@@ -482,7 +483,7 @@ void NexusGameType::idle_client(U32 deltaT)
       if(!isGameOver())
       {
          static_cast<ClientGame *>(getGame())->displayMessage(Color(0.6f, 1, 0.8f), "The Nexus is now OPEN!");
-         SoundSystem::playSoundEffect(SFXFlagSnatch);
+         getGame()->playSoundEffect(SFXFlagSnatch);
       }
 
       mNexusIsOpen = true;
@@ -494,7 +495,7 @@ void NexusGameType::idle_client(U32 deltaT)
       if(!isGameOver())
       {
          static_cast<ClientGame *>(getGame())->displayMessage(Color(0.6f, 1, 0.8f), "The Nexus is now CLOSED!");
-         SoundSystem::playSoundEffect(SFXFlagDrop);
+         getGame()->playSoundEffect(SFXFlagDrop);
       }
 
       mNexusIsOpen = false;
@@ -702,15 +703,17 @@ S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom) const
 }
 
 
-void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
+void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
 {
-   Parent::renderInterfaceOverlay(scoreboardVisible);
+   Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
-      renderObjectiveArrow(mYardSaleWaypoints[i].pos, &Colors::white);
+      renderObjectiveArrow(mYardSaleWaypoints[i].pos, &Colors::white, canvasWidth, canvasHeight);
+
+   Color *color = mNexusIsOpen ? &gNexusOpenColor : &gNexusClosedColor;
 
    for(S32 i = 0; i < mNexus.size(); i++)
-      renderObjectiveArrow(mNexus[i].getPointer(), mNexusIsOpen ? &gNexusOpenColor : &gNexusClosedColor);
+      renderObjectiveArrow(mNexus[i], color, canvasWidth, canvasHeight);
 }
 #endif
 

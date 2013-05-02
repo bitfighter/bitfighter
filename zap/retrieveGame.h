@@ -48,7 +48,7 @@ public:
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
 
 
-   void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);
+   void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
 
 
    // The ship has entered a drop zone, either friend or foe
@@ -63,7 +63,7 @@ public:
 
 
    // Runs on client
-   void renderInterfaceOverlay(bool scoreboardVisible);
+   void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
 
 
    // What does a particular scoring event score?

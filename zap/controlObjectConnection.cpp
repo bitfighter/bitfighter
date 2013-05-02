@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "BfObject.h"
 #include "controlObjectConnection.h"
+#include "BfObject.h"
 #include "game.h"
 
 #include <math.h>

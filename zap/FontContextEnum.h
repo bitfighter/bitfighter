@@ -23,37 +23,37 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "EditorObject.h"
+#ifndef _FONT_CONTEXT_ENUM_H_
+#define _FONT_CONTEXT_ENUM_H_
 
 namespace Zap
-{
+{     
+   enum FontContext {
+      BigMessageContext,       // Press any key to respawn, etc.
+      HelpItemContext,         // In-game help messages
+      LevelInfoContext,        // Display info about the level (at beginning of game, and when F2 pressed)
+      MenuContext,             // Menu font (main game menus)
+      HUDContext,              // General HUD text
+      HelpContext,             // For Help screens
+      LoadoutIndicatorContext, // For the obvious
+      OverlayMenuContext,      // For Loadout Menus and such
+      TextEffectContext        // Yard Sale!!! text and the like
+   };
 
 
-// Constructor
-PointObject::PointObject(F32 radius)
-{
-   mRadius = radius;
-   setNewGeometry(geomPoint, radius);
-}
-
-
-// Destructor
-PointObject::~PointObject()
-{
-   // Do nothing
-}
-
-
-void PointObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
-{
-#ifndef ZAP_DEDICATED
-   setPos(point);
-   Parent::prepareForDock(game, point, teamIndex);
-#endif
-}
-
-
-F32 PointObject::getRadius() { return mRadius; }
-
+   enum FontId {
+      FontRoman,
+      FontOrbitronLightStroke,
+      FontOrbitronMedStroke,
+      FontOcrA,
+      FontOrbitronLight,
+      FontOrbitronMedium,
+      FontPrimeRegular,
+      FontTenby5,
+      FontCount
+   };
 
 };
+
+
+#endif

@@ -27,6 +27,8 @@
 #define _SERVER_GAME_H_
 
 #include "game.h"       // Parent class def
+#include "dataConnection.h"
+#include "LevelSpecifierEnum.h"
 
 using namespace std;
 
@@ -137,12 +139,6 @@ public:
 
    bool startHosting();
 
-   static const S32 NEXT_LEVEL = -1;
-   static const S32 REPLAY_LEVEL = -2;
-   static const S32 PREVIOUS_LEVEL = -3;
-   static const S32 RANDOM_LEVEL = -4;
-   static const S32 FIRST_LEVEL = 0;
-
    U32 getMaxPlayers();
 
    bool isDedicated();
@@ -179,7 +175,6 @@ public:
 
    void startAllBots();                         // Loop through all our bots and run thier main() functions
 
-
    StringTableEntry getLevelNameFromIndex(S32 indx);
    S32 getAbsoluteLevelIndex(S32 indx);         // Figures out the level index if the input is a relative index
    string getLevelFileNameFromIndex(S32 indx);
@@ -215,6 +210,12 @@ public:
    S32 addUploadedLevelInfo(const char *filename, LevelInfo &info);
 
    HostingModePhases hostingModePhase;
+
+   // SFX Related -- these will just generate an error, as they should never be called
+   SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f) const;
+   SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const;
+   SFXHandle playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain = 1.0f) const;
+   void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const;
 };
 
 ////////////////////////////////////////

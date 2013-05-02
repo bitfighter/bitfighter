@@ -23,37 +23,18 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "EditorObject.h"
+#ifndef _LEVEL_SPECIFIER_ENUM_H_
+#define _LEVEL_SPECIFIER_ENUM_H_
 
 namespace Zap
 {
-
-
-// Constructor
-PointObject::PointObject(F32 radius)
-{
-   mRadius = radius;
-   setNewGeometry(geomPoint, radius);
-}
-
-
-// Destructor
-PointObject::~PointObject()
-{
-   // Do nothing
-}
-
-
-void PointObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
-{
-#ifndef ZAP_DEDICATED
-   setPos(point);
-   Parent::prepareForDock(game, point, teamIndex);
-#endif
-}
-
-
-F32 PointObject::getRadius() { return mRadius; }
-
-
+   enum LevelSpecifier {
+      NEXT_LEVEL = -1,
+      REPLAY_LEVEL = -2,
+      PREVIOUS_LEVEL = -3,
+      RANDOM_LEVEL = -4,
+      FIRST_LEVEL = 0,
+   };
 };
+
+#endif 

@@ -27,14 +27,9 @@
 
 #include "stringUtils.h"   // For itos
 #include "MathUtils.h"     // For radiansToDegrees
-
-
-// These should not be dependencies
-#include "speedZone.h"
-#include "SlipZone.h"
+#include "projectile.h"
 #include "Zone.h"
-#include "teleporter.h"
-#include "SoundEffect.h"
+#include "Colors.h"
 
 
 #ifdef TNL_OS_WIN32
@@ -43,7 +38,6 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "sparkManager.h"
 #endif
 
 
@@ -108,6 +102,8 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    mFireTimer = 0;
    mFastRecharging = false;
    mLastProcessStateAngle = 0;
+
+   mEngineeredTeleporter = NULL;
 
    // Set up module secondary delay timer
    for(S32 i = 0; i < ModuleCount; i++)
@@ -302,7 +298,8 @@ F32 Ship::processMove(U32 stateIndex)
    // Apply turbo-boost if active, reduce accel and max vel when armor is present
    F32 maxAccel = (mLoadout.isModulePrimaryActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time *
                   (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
-   maxAccel *= getSlipzoneSpeedMoficationFactor();
+
+   maxAccel *= getGame()->getShipSpeedModificationFactor(this);
 
    if(accRequested > abs(maxAccel))
    {
@@ -316,26 +313,10 @@ F32 Ship::processMove(U32 stateIndex)
 }
 
 
-// Returns the zone in question if this ship is in a zone of type zoneType
-// Note: If you are in multiple zones of type zoneTypeNumber, and aribtrary one will be returned, and the level designer will be flogged
-/* //// BUG: always returns NULL on client side, needed to avoid jumpy energy drain on hostile loadout, and slip zone, when lagging in someone server.
-BfObject *Ship::isInZone(U8 zoneTypeNumber)
-{
-   Vector<DatabaseObject *> *currZoneList = getCurrZoneList();
-
-   for(S32 i = 0; i < currZoneList->size(); i++)
-      if(currZoneList->get(i)->getObjectTypeNumber() == zoneTypeNumber)
-         return static_cast<BfObject *>(currZoneList->get(i));
-
-   return NULL;
-}
-*/
-
-
 // Returns the zone in question if this ship is in any zone.
 // If ship is in multiple zones, an aribtrary one will be returned, and the level designer will be flogged.
 
-BfObject *Ship::isInAnyZone()
+BfObject *Ship::isInAnyZone() const
 {
    findObjectsUnderShip((TestFunc)isZoneType);  // Fills fillVector
    return doIsInZone(fillVector);
@@ -344,7 +325,7 @@ BfObject *Ship::isInAnyZone()
 
 // Returns the zone in question if this ship is in a zone of type zoneType.
 // If ship is in multiple zones of type zoneTypeNumber, an aribtrary one will be returned, and the level designer will be flogged.
-BfObject *Ship::isInZone(U8 zoneTypeNumber)
+BfObject *Ship::isInZone(U8 zoneTypeNumber) const
 {
    findObjectsUnderShip(zoneTypeNumber);        // Fills fillVector
    return doIsInZone(fillVector);
@@ -352,7 +333,7 @@ BfObject *Ship::isInZone(U8 zoneTypeNumber)
 
 
 // Private helper for isInZone() and isInAnyZone() -- these fill fillVector, and we operate on it below
-BfObject *Ship::doIsInZone(const Vector<DatabaseObject *> &objects)
+BfObject *Ship::doIsInZone(const Vector<DatabaseObject *> &objects) const
 {
    if(objects.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
       return NULL;
@@ -370,19 +351,6 @@ BfObject *Ship::doIsInZone(const Vector<DatabaseObject *> &objects)
          return zone;
    }
    return NULL;
-}
-
-
-F32 Ship::getSlipzoneSpeedMoficationFactor()
-{
-   BfObject *obj = isInZone(SlipZoneTypeNumber);
-   if(obj)
-   {
-      TNLAssert(dynamic_cast<SlipZone *>(obj), "SlipZoneTypeNumber must be SlipZone only");
-      SlipZone *slipzone = static_cast<SlipZone *>(obj);
-      return slipzone->slipAmount;
-   }
-   return 1.0f;
 }
 
 
@@ -525,7 +493,7 @@ void Ship::controlMoveReplayComplete()
 #ifndef ZAP_DEDICATED
       // If it's a large delta, get rid of the movement trails
       if(deltaLenSq > sq(MaxControlObjectInterpDistance))
-         for(S32 i=0; i<TrailCount; i++)
+         for(S32 i = 0; i < TrailCount; i++)
             mTrail[i].reset();
 #endif
 
@@ -589,8 +557,6 @@ void Ship::idle(BfObject::IdleCallPath path)
 
       if(path == BfObject::ServerIdleControlFromClient || path == BfObject::ClientIdleControlMain)
          getClientInfo()->getStatistics()->accumulateDistance(dist);
-
-      checkForSpeedzones();      // Check to see if we collided with a speed zone
 
       if(path == BfObject::ServerIdleControlFromClient ||
          path == BfObject::ClientIdleControlMain ||
@@ -695,17 +661,6 @@ void Ship::idle(BfObject::IdleCallPath path)
       updateModuleSounds();
    }
 #endif
-}
-
-
-// Check to see if we collided with a GoFast
-// TODO: Called from idle(): why isn't his handled like an ordinary collision?
-void Ship::checkForSpeedzones()
-{
-   SpeedZone *speedZone = static_cast<SpeedZone *>(isOnObject(SpeedZoneTypeNumber));
-
-   if(speedZone && speedZone->collide(this))
-      speedZone->collided(this, ActualState);
 }
 
 
@@ -1162,20 +1117,21 @@ void Ship::damageObject(DamageInfo *theInfo)
       if(mSpawnShield.getCurrent() != 0)
          return;
 
-      // Having armor halves the damage
+      // Having armor reduces damage
       if(hasArmor)
       {
-         static const F32 ARMOR_REDUCTION_FACTOR = 0.4f;   // This affects asteroid damage
+         static const F32 ArmorDamageReductionFactor = 0.4f;            // Having armor dramatically reduces damage
+         static const F32 ArmorDamageReductionFactorBouncers = 0.75f;   // But is less effective against bouncers
 
-         Projectile* projectile = NULL;
+         Projectile *projectile = NULL;
          if(theInfo->damagingObject->getObjectTypeNumber() == BulletTypeNumber)
-            projectile = static_cast<Projectile*>(theInfo->damagingObject);
+            projectile = static_cast<Projectile *>(theInfo->damagingObject);
 
          // Except for bouncers - they do a little more damage
          if(projectile && projectile->mWeaponType == WeaponBounce)
-            damageAmount *= 0.75;  // Bouncers do 3/4 damage
+            damageAmount *= ArmorDamageReductionFactorBouncers;   // Damaged by a bouncer
          else
-            damageAmount *= ARMOR_REDUCTION_FACTOR;        // Everything else does 1/2
+            damageAmount *= ArmorDamageReductionFactor;           // Any other damage, including asteroids
       }
    }
 
@@ -1197,7 +1153,9 @@ void Ship::damageObject(DamageInfo *theInfo)
 
    if(getClientInfo()) // could be NULL <== could it?
    {
-      Projectile *projectile = dynamic_cast<Projectile *>(theInfo->damagingObject);
+      Projectile *projectile = NULL;
+      if(theInfo->damagingObject->getObjectTypeNumber() == BulletTypeNumber)
+         projectile = static_cast<Projectile *>(theInfo->damagingObject);
 
       if(projectile)
          getClientInfo()->getStatistics()->countHitBy(projectile->mWeaponType);
@@ -1695,7 +1653,7 @@ MountableItem *Ship::dismountFirst(U8 objectType)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
       {
          MountableItem *item = mMountedItems[i];
-         item->dismount(MountableItem::DISMOUNT_NORMAL);
+         item->dismount(DISMOUNT_NORMAL);
          return item;
       }
 
@@ -1709,7 +1667,7 @@ void Ship::dismountAll()
    // Count down here because as items are dismounted, they will be removed from the mMountedItems vector
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)       
       if(mMountedItems[i].isValid())               // Can be NULL when quitting the server
-         mMountedItems[i]->dismount(MountableItem::DISMOUNT_MOUNT_WAS_KILLED);
+         mMountedItems[i]->dismount(DISMOUNT_MOUNT_WAS_KILLED);
 }
 
 
@@ -1718,7 +1676,7 @@ void Ship::dismountAll(U8 objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
-         mMountedItems[i]->dismount(MountableItem::DISMOUNT_NORMAL);
+         mMountedItems[i]->dismount(DISMOUNT_NORMAL);
 }
 
 
@@ -1863,14 +1821,14 @@ void Ship::kill()
 }
 
 
-// Server only
+// Server only -- ship has been killed, or player changed loadout in middle of engineering
 void Ship::destroyPartiallyDeployedTeleporter()
 {
-   if(mEngineeredTeleporter.isValid())
+   if(mEngineeredTeleporter)
    {
       Teleporter *t = mEngineeredTeleporter;
-      mEngineeredTeleporter = NULL;
-      t->onDestroyed();       // Set to NULL first to avoid "Your teleporter got destroyed" message
+      mEngineeredTeleporter = NULL;          // Set to NULL first to avoid "Your teleporter got destroyed" message
+      getGame()->teleporterDestroyed(t);
    }
 }
 
@@ -2014,11 +1972,11 @@ void Ship::emitMovementSparks()
       if(len > 1)
          velDir *= 1 / len;
 
-      Point shipDirs[4];
+      static Point shipDirs[4];
       shipDirs[0].set(cos(getRenderAngle()), sin(getRenderAngle()));
       shipDirs[1].set(-shipDirs[0]);
       shipDirs[2].set( shipDirs[0].y, -shipDirs[0].x);
-      shipDirs[3].set(-shipDirs[0].y, shipDirs[0].x);
+      shipDirs[3].set(-shipDirs[0].y,  shipDirs[0].x);
 
       for(U32 i = 0; i < 4; i++)
       {
@@ -2085,9 +2043,9 @@ void Ship::renderLayer(S32 layerIndex)
    // If the local player is cloaked, and is close enough to this ship, it will activate a sensor module, 
    // and we'll need to draw it.  Here, we determine if that has happened.
    
-   const bool isBusy = clientInfo ? clientInfo->isBusy() : false;
+   const bool isBusy              = clientInfo ? clientInfo->isBusy() : false;
    const bool engineeringTeleport = clientInfo ? clientInfo->isEngineeringTeleporter() : false;
-   const bool showCoordinates = clientGame->isShowingDebugShipCoords();
+   const bool showCoordinates     = clientGame->isShowingDebugShipCoords();
 
    // Caclulate rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
    F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
@@ -2131,7 +2089,7 @@ bool Ship::doesShipActivateSensor(const Ship *ship)
       // ...then check the distance
       F32 distanceSquared = (ship->getActualPos() - getActualPos()).lenSquared();
 
-      return (distanceSquared < sq(SensorCloakOuterDetectionDistance));
+      return (distanceSquared < sq(ModuleInfo::SensorCloakOuterDetectionDistance));
    }
 
    return false;
@@ -2171,15 +2129,15 @@ F32 Ship::getShipVisibility(const Ship *localShip)
       F32 distanceSquared = (localShip->getActualPos() - getActualPos()).lenSquared();
 
       // Ship is within outer detection radius
-      if(distanceSquared < sq(SensorCloakOuterDetectionDistance))
+      if(distanceSquared < sq(ModuleInfo::SensorCloakOuterDetectionDistance))
       {
-         // De-cloak a maximum of 0.5
-         if(distanceSquared < sq(SensorCloakInnerDetectionDistance))
+         // Inside inner radius? De-cloak a maximum of 0.5
+         if(distanceSquared < sq(ModuleInfo::SensorCloakInnerDetectionDistance))
             return 0.5;
 
          // Otherwise de-cloak proportionally to the distance between inner and outer detection radii
-         F32 ratio = (sq(SensorCloakOuterDetectionDistance) - distanceSquared) /
-                     (sq(SensorCloakOuterDetectionDistance) - sq(SensorCloakInnerDetectionDistance));
+         F32 ratio = (sq(ModuleInfo::SensorCloakOuterDetectionDistance) - distanceSquared) /
+                     (sq(ModuleInfo::SensorCloakOuterDetectionDistance) - sq(ModuleInfo::SensorCloakInnerDetectionDistance));
 
          return sq(ratio) * 0.5f;  // Non-linear
       }

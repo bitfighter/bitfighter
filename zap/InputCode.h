@@ -27,12 +27,11 @@
 #define _INPUTCODE_H_
 
 #include "input.h"            // For InputMode enum
+#include "JoystickButtonEnum.h"
+
 #include "tnlVector.h"
 #include <string>
 
-#ifndef ZAP_DEDICATED
-#  include "Joystick.h"
-#endif
 
 using namespace std;
 
@@ -127,7 +126,7 @@ public:
 
 #ifndef ZAP_DEDICATED
    static InputCode joyHatToInputCode(int hatDirectionMask);
-   static InputCode joystickButtonToInputCode(Joystick::Button button);
+   static InputCode joystickButtonToInputCode(JoystickButton button);
 #endif
 
    static InputCode convertJoystickToKeyboard(InputCode inputCode);
