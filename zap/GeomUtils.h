@@ -59,6 +59,7 @@ namespace ClipperLib {
    struct IntPoint;
    typedef std::vector<IntPoint> Polygon;
    typedef std::vector<Polygon> Polygons;
+   class PolyTree;
 };
 struct rcPolyMesh;
 
@@ -125,6 +126,7 @@ Vector<Point> floatsToPoints(const Vector<F32> floats);
 
 // Use Clipper to merge inputPolygons, placing the result in solution
 bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vector<Point> > &outputPolygons);
+bool mergePolysToPolyTree(const Vector<const Vector<Point> *> &inputPolygons, PolyTree &solution);
 
 // Convert a Polygons to a list of points in a-b b-c c-d d-a format
 void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineSegmentPoints);
@@ -165,7 +167,7 @@ public:
    static bool Process(const Vector<Point> &contour, Vector<Point> &result);
 
    // Triangulate a bounded area with complex polygon holes
-   static bool processComplex(Vector<Point> &outputTriangles, const Rect& bounds, const Vector<Vector<Point> >& polygonList);
+   static bool processComplex(Vector<Point> &outputTriangles, const Rect& bounds, const PolyTree &polygonList);
 
    // Merge triangles into convex polygons
    static bool mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& mesh, S32 maxVertices = 6);

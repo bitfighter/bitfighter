@@ -57,6 +57,7 @@
 #include "../poly2tri/poly2tri.h"
 
 #include <math.h>
+#include <deque>
 
 using namespace TNL;
 using namespace ClipperLib;
@@ -895,7 +896,8 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 }
 
 
-static const F32 CLIPPER_SCALE_FACT = 1000;
+static const F32 CLIPPER_SCALE_FACT = 1000.0f;
+static const F32 CLIPPER_SCALE_FACT_INVERSE = 0.001f;
 
 Polygons upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons) 
 {
@@ -926,7 +928,7 @@ Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons)
       outputPolygons[i].resize((U32)inputPolygons[i].size());
 
       for(U32 j = 0; j < inputPolygons[i].size(); j++)
-         outputPolygons[i][j] = Point(F32(inputPolygons[i][j].X) / CLIPPER_SCALE_FACT, F32(inputPolygons[i][j].Y) / CLIPPER_SCALE_FACT);
+         outputPolygons[i][j] = Point(F32(inputPolygons[i][j].X) * CLIPPER_SCALE_FACT_INVERSE, F32(inputPolygons[i][j].Y) * CLIPPER_SCALE_FACT_INVERSE);
    }
 
    return outputPolygons;
@@ -957,6 +959,28 @@ bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vecto
       outputPolygons = downscaleClipperPoints(solution);
 
    return success;
+}
+
+
+// Use Clipper to merge inputPolygons, placing the result in outputPolygons
+// NOTE: this does NOT downscale the Clipper points.  You must do this afterwards
+bool mergePolysToPolyTree(const Vector<const Vector<Point> *> &inputPolygons, PolyTree &solution)
+{
+   Polygons input = upscaleClipperPoints(inputPolygons);
+
+   // Fire up clipper and union!
+   Clipper clipper;
+
+   try  // there is a "throw" in AddPolygon
+   {
+      clipper.AddPolygons(input, ptSubject);
+   }
+   catch(...)
+   {
+      logprintf(LogConsumer::LogError, "clipper.AddPolygons, something went wrong");
+   }
+
+   return clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
 }
 
 
@@ -1059,168 +1083,102 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
 
 
 bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bounds,
-      const Vector<Vector<Point> >& polygonList)
+      const PolyTree &polyTree)
 {
-   // Here we will divide up out input polygon list into holes and inner boundaries of circuit
-   // holes.  We know an inner boundary of a circuit-hole is wound clockwise because that's how
-   // we set up Clipper to output
-   //
-   // Also used to keep track of our memory to clean up
-   //
-   // TODO:  Convert to use our Zap::Point class somehow?
-   Vector<Vector<p2t::Point*> > polylines;   // MUST be clockwise
-   Vector<Vector<p2t::Point*> > holes;       // MUST be counterclockwise
-
-   // First build our map extents outline polygon.  Clockwise!
-   Vector<p2t::Point*> outline;
-
+   // First build our map extents outline polygon (polyline).  Clockwise into Clipper's format
    F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
    F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
 
-   outline.push_back(new p2t::Point(minx, miny));
-   outline.push_back(new p2t::Point(minx, maxy));
-   outline.push_back(new p2t::Point(maxx, maxy));
-   outline.push_back(new p2t::Point(maxx, miny));
-
-   polylines.push_back(outline);
-
-   // Now determine what is a hole and what is another polyline bound we need to triangulate
-   // Almost everything will be a hole
-   for(S32 i = 0; i < polygonList.size(); i++)
-   {
-      Vector<Point> currentPoly = polygonList[i];
-
-      if(isWoundClockwise(currentPoly))  // Considered a bounding polyline to triangulate
-      {
-         Vector<p2t::Point*> polyline;
-         for(S32 j = 0; j < currentPoly.size(); j++)
-            polyline.push_back(new p2t::Point(currentPoly[j].x, currentPoly[j].y));
-
-         polylines.push_back(polyline);
-      }
-      else
-      {
-         Vector<p2t::Point*> hole;
-         for(S32 j = 0; j < currentPoly.size(); j++)
-            hole.push_back(new p2t::Point(currentPoly[j].x, currentPoly[j].y));
-
-         holes.push_back(hole);
-      }
-   }
-
-   // Now reorder our polyline bounds to have the innermost first, so we can be more effecient
-   // with adding holes to the appropriate one
-   Vector<Vector<p2t::Point*> > sortedPolylines;
-
-   S32 polylinesToSort = polylines.size();
-   while(polylinesToSort > 0)
-   {
-      for(S32 i = polylines.size() - 1; i >= 0 ; i--)   // Backwards! to avoid iterating over erased elements
-      {
-         bool foundInnerPolyline = false;
-
-         Vector<p2t::Point*> currentPoly = polylines[i];
-         for(S32 j = 0; j < polylines.size(); j++)
-         {
-            if(i == j)  // Skip ourselves
-               continue;
-
-            // If only one of the points of the hole is within our bounding polyline, the
-            // entire holes should be.  This is because Clipper guarantees no overlapping
-            // polygons.  Thanks Clipper!
-            //
-            // If we find an inner polyline then we're not the innermost
-            if(PolygonContains2p2t(&currentPoly[0], currentPoly.size(), polylines[j][0]))
-            {
-               foundInnerPolyline = true;
-               break;
-            }
-         }
-
-         // No inner poly was found, move to sorted list
-         if(!foundInnerPolyline)
-         {
-            sortedPolylines.push_back(currentPoly);
-            polylines.erase_fast(i);
-         }
-      }
-
-      polylinesToSort = polylines.size();
-   }
+   Polygon outline;
+   outline.push_back(IntPoint(S64(minx * CLIPPER_SCALE_FACT), S64(miny * CLIPPER_SCALE_FACT)));
+   outline.push_back(IntPoint(S64(minx * CLIPPER_SCALE_FACT), S64(maxy * CLIPPER_SCALE_FACT)));
+   outline.push_back(IntPoint(S64(maxx * CLIPPER_SCALE_FACT), S64(maxy * CLIPPER_SCALE_FACT)));
+   outline.push_back(IntPoint(S64(maxx * CLIPPER_SCALE_FACT), S64(miny * CLIPPER_SCALE_FACT)));
 
 
-   // Now go through all our polylines and trangulate them, using only the holes that are inside
-   //
-   // For keeping track of memory
+   // Keep track of memory for all the poly2tri objects we create
    Vector<p2t::CDT*> cdtRegistry;
-   Vector<Vector<Vector<p2t::Point*> > > holesRegistry;
+   Vector<Vector<p2t::Point*> > holesRegistry;
+   Vector<Vector<p2t::Point*> > polylinesRegistry;
 
-   for(S32 i = 0; i < sortedPolylines.size(); i++)
+
+   // Let's be tricky and add our outline to the root node (it should have none), it'll be
+   // our first Clipper hole
+   PolyNode *rootNode = polyTree.GetFirst()->Parent;
+   rootNode->Contour = outline;
+
+   // Now traverse our polyline nodes and triangulate them with only their children holes
+   PolyNode *currentNode = rootNode;
+   while(currentNode != NULL)
    {
-      Vector<p2t::Point*> polyline = sortedPolylines[i];
-
-      // Create our worker and keep track of it for clean-up later
-      p2t::CDT* cdt = new p2t::CDT(polyline.getStlVector());
-      cdtRegistry.push_back(cdt);
-
-      // Here we filter holes so as to not make poly2tri do extra work.  Since we've sorted the
-      // polylines from innermost to outer-most, we just need to iterate through our holes, check
-      // if it's in a polyline and move it to a vector for this polylin
-      Vector<Vector<p2t::Point*> > filteredHoles;
-      for(S32 j = holes.size() - 1; j >= 0; j--)    // Backwards!  Because we're erasing elements
+      // A Clipper hole is actually what we want to build zones for; they become our bounding
+      // polylines.  poly2tri holes are therefore the inverse
+      if(currentNode->IsHole())
       {
-         if(PolygonContains2p2t(&polyline[0], polyline.size(), holes[j][0]))
+         // Build up this polyline in poly2tri's format (downscale Clipper points)
+         Vector<p2t::Point*> polyline;
+         for(U32 j = 0; j < currentNode->Contour.size(); j++)
+            polyline.push_back(new p2t::Point(F64(currentNode->Contour[j].X) * CLIPPER_SCALE_FACT_INVERSE, F64(currentNode->Contour[j].Y) * CLIPPER_SCALE_FACT_INVERSE));
+
+         polylinesRegistry.push_back(polyline);  // Memory
+
+         // Set our polyline in poly2tri
+         p2t::CDT* cdt = new p2t::CDT(polyline.getStlVector());
+         cdtRegistry.push_back(cdt);
+
+         for(U32 j = 0; j < currentNode->Childs.size(); j++)
          {
-            filteredHoles.push_back(holes[j]);
-            holes.erase_fast(j);
+            PolyNode *childNode = currentNode->Childs[j];
+
+            Vector<p2t::Point*> hole;
+            for(U32 j = 0; j < childNode->Contour.size(); j++)
+               hole.push_back(new p2t::Point(F64(childNode->Contour[j].X) * CLIPPER_SCALE_FACT_INVERSE, F64(childNode->Contour[j].Y) * CLIPPER_SCALE_FACT_INVERSE));
+
+            holesRegistry.push_back(hole);  // Memory
+
+            // Add the holes for this polyline
+            cdt->AddHole(hole.getStlVector());
+         }
+
+         // Do the work!
+         cdt->Triangulate();
+
+         // Add current output triangles to our total
+         vector<p2t::Triangle*> currentOutput = cdt->GetTriangles();
+
+         // Copy our data to TNL::Point and to our output Vector
+         p2t::Triangle *currentTriangle;
+         for(U32 j = 0; j < currentOutput.size(); j++)
+         {
+            currentTriangle = currentOutput[j];
+            outputTriangles.push_back(Point(currentTriangle->GetPoint(0)->x, currentTriangle->GetPoint(0)->y));
+            outputTriangles.push_back(Point(currentTriangle->GetPoint(1)->x, currentTriangle->GetPoint(1)->y));
+            outputTriangles.push_back(Point(currentTriangle->GetPoint(2)->x, currentTriangle->GetPoint(2)->y));
          }
       }
-      // Keep track of memory
-      holesRegistry.push_back(filteredHoles);
 
-      // Add our filtered holes
-      for(S32 j = 0; j < filteredHoles.size(); j++)
-         cdt->AddHole(filteredHoles[j].getStlVector());
-
-      // Do the work!
-      cdt->Triangulate();
-
-      // Add current output triangles to our total
-      vector<p2t::Triangle*> currentOutput = cdt->GetTriangles();
-
-      // Copy our data to TNL::Point and to our output Vector
-      p2t::Triangle *currentTriangle;
-      for(U32 j = 0; j < currentOutput.size(); j++)
-      {
-         currentTriangle = currentOutput[j];
-         outputTriangles.push_back(Point(currentTriangle->GetPoint(0)->x, currentTriangle->GetPoint(0)->y));
-         outputTriangles.push_back(Point(currentTriangle->GetPoint(1)->x, currentTriangle->GetPoint(1)->y));
-         outputTriangles.push_back(Point(currentTriangle->GetPoint(2)->x, currentTriangle->GetPoint(2)->y));
-      }
+      currentNode = currentNode->GetNext();
    }
 
 
    // Clean up memory used with poly2tri
    //
-   // Clean-up worker
+   // Clean-up workers
    for(S32 i = 0; i < cdtRegistry.size(); i++)
       delete cdtRegistry[i];
 
-   // Free our many, many constructed pt2::Point objects
-   for(S32 i = 0; i < sortedPolylines.size(); i++)
+   // Free the polylines
+   for(S32 i = 0; i < polylinesRegistry.size(); i++)
    {
-      Vector<p2t::Point*> polyline = sortedPolylines[i];
+      Vector<p2t::Point*> polyline = polylinesRegistry[i];
       polyline.deleteAndClear();
    }
 
-   // Free the holes!
+   // Free the holes
    for(S32 i = 0; i < holesRegistry.size(); i++)
    {
-      for(S32 j = 0; j < holesRegistry[i].size(); j++)
-      {
-         Vector<p2t::Point*> hole = holesRegistry[i][j];
-         hole.deleteAndClear();
-      }
+      Vector<p2t::Point*> hole = holesRegistry[i];
+      hole.deleteAndClear();
    }
 
 
