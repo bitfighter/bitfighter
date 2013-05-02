@@ -114,7 +114,7 @@ TEST_F(HttpRequestTest, receiveTimeout)
 }
 
 
-TEST_F(HttpRequestTest, sendFail)
+TEST_F(HttpRequestTest, connectError)
 {
    req = HttpRequest("/", &sock, NULL, new MockAddress());
    sock.data = "HTTP/1.1 200 OK\r\n\r\nresponse";
