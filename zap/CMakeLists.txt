@@ -161,6 +161,7 @@ set(CLIENT_SOURCES
 
 set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
+   ${CMAKE_SOURCE_DIR}/bitfighter_test/HttpRequestTest.cpp
 )
 
 # libraries used by both client and server
@@ -261,7 +262,7 @@ include_directories(
 )
 
 # test runner executable
-add_executable(test
+add_executable(test EXCLUDE_FROM_ALL
 	${CLIENT_SOURCES}
 	${SHARED_SOURCES}
 	${TEST_SOURCES}

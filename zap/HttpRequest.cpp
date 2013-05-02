@@ -37,143 +37,94 @@ namespace Zap
 const string HttpRequest::GetMethod = "GET";
 const string HttpRequest::PostMethod = "POST";
 
-HttpRequest::HttpRequest(string url)
-   : mUrl(url), mMethod("GET")
+HttpRequest::HttpRequest(string url, TNL::Socket* socket, TNL::Address* localAddress, TNL::Address* remoteAddress)
+   : mUrl(url), mMethod("GET"), mResponseCode(0), mTimeout(30000)
 {
+   // hostname is anything before the first '/'
+   TNL::U32 index = mUrl.find('/');
+   string host = mUrl.substr(0, index);
+   string addressString = "ip:" + host + ":80";
+
+   mLocalAddress = localAddress ? localAddress : new Address(TCPProtocol, Address::Any, 0);
+   mRemoteAddress = remoteAddress ? remoteAddress : new Address(addressString.c_str());
+   mSocket = socket ? socket : new Socket(*mLocalAddress);
 }
 
-HttpRequest::HttpRequest(char* url)
-{
-   mUrl = string(url);
-}
 
 bool HttpRequest::send()
 {
-   // hostname is anything before the first slash
-   TNL::U32 index = mUrl.find('/');
-   string host = mUrl.substr(0, index);
-
-   // location is anything that comes after
-   string location = mUrl.substr(index, mUrl.length() - index);
-
-   mAddress = new Address(TCPProtocol, Address::Any, 0);
-   mSocket = new Socket(*mAddress);
-
-   // TNL address strings are of the form transport:hostname:port
-   string addressString = "ip:" + host + ":80";
-   TNL::Address remoteAddress(addressString.c_str());
-
    // check that TNL understands the supplied address
-   if(!remoteAddress.isValid())
+   if(!mRemoteAddress->isValid())
    {
       return false;
    }
 
    // initiate the connection. this will block if DNS resolution is required
-   TNL::NetError connectError = mSocket->connect(remoteAddress);
-   
-   // construct the request
-   mRequest = "";
-
-   // request line
-   mRequest += mMethod + " " + location + " HTTP/1.0";
-
-   // content type and data encoding for POST requests
-   if(mMethod == PostMethod)
+   if(mSocket->connect(*mRemoteAddress) != UnknownError)
    {
-      mRequest += "\r\nContent-Type: application/x-www-form-urlencoded";
-
-      string encodedData;
-      map<string, string>::iterator it;
-      for(it = mData.begin(); it != mData.end(); it++)
-      {
-         encodedData += urlEncode((*it).first) + "=" + urlEncode((*it).second) + "&";
-      }
-
-      char contentLengthHeaderBuffer[1024];
-      dSprintf(contentLengthHeaderBuffer, 1024, "\r\nContent-Length: %d", encodedData.length());
-
-      mRequest += contentLengthHeaderBuffer;
-      mRequest += "\r\n\r\n";
-      mRequest += encodedData;
-   }
-   else
-   {
-      mRequest += "\r\n\r\n";
-   }
-
-   // send request
-   while(true)
-   {
-      Platform::sleep(5);
-      NetError sendError;
-      sendError = mSocket->send((unsigned char *) mRequest.c_str(), mRequest.size());
-
-      if(sendError == WouldBlock)
-      {
-         // need to wait
-         continue;
-      }
-      else if(sendError == NoError)
-      {
-         // data was transmitted
-         break;
-      }
-
-      // an error occured
       return false;
    }
 
-   while(true)
+   buildRequest();
+   if(!sendRequest(mRequest))
    {
-      Platform::sleep(50);
-      TNL::NetError recvError;
-      int bytesRead;
-      char receiveBuffer[HttpRequest::BufferSize];
-      recvError = mSocket->recv((unsigned char*) receiveBuffer, HttpRequest::BufferSize, &bytesRead);
-
-      if(recvError == TNL::WouldBlock)
-      {
-         // need to wait
-         continue;
-      }
-
-      mResponse.append(receiveBuffer, 0, bytesRead);
-
-      if(bytesRead == 0)
-      {
-         // socket closed by remote host
-         parseResponse();
-         return true;
-      }
-
-      // more data to read
+      return false;
    }
+
+   string response = receiveResponse();
+   if(response == "")
+   {
+      return false;
+   }
+
+   parseResponse(response);
+   if(getResponseCode() == 0)
+   {
+      return false;
+   }
+
+   return true;
 }
+
 
 string HttpRequest::getResponseBody()
 {
    return mResponseBody;
 }
 
+
+string HttpRequest::getResponseHead()
+{
+   return mResponseHead;
+}
+
+
 int HttpRequest::getResponseCode()
 {
    return mResponseCode;
 }
 
-void HttpRequest::parseResponse()
+
+void HttpRequest::parseResponse(string response)
 {
-   int seperatorIndex = mResponse.find("\r\n\r\n");
-   mResponseHead = mResponse.substr(0, seperatorIndex);
+   int seperatorIndex = response.find("\r\n\r\n");
+   if(seperatorIndex == string::npos)
+   {
+      // seperator not found, this response isn't valid
+      return;
+   }
+
+   mResponseHead = response.substr(0, seperatorIndex);
 
    int bodyIndex = seperatorIndex + 4;
-   mResponseBody = mResponse.substr(bodyIndex, mResponse.length());
+   mResponseBody = response.substr(bodyIndex, response.length());
 
    int responseCodeStart = mResponseHead.find(" ") + 1;
    int responseCodeEnd = mResponseHead.find("\r\n", responseCodeStart);
    string responseCode = mResponseHead.substr(responseCodeStart, responseCodeEnd - responseCodeStart);
    mResponseCode = atoi(responseCode.c_str());
 }
+
 
 string HttpRequest::urlEncodeChar(char c)
 {
@@ -203,6 +154,7 @@ string HttpRequest::urlEncodeChar(char c)
    return result;
 }
 
+
 string HttpRequest::urlEncode(const string& str)
 {
    string result;
@@ -215,15 +167,125 @@ string HttpRequest::urlEncode(const string& str)
    return result;
 }
 
+
 void HttpRequest::setData(const string& key, const string& value)
 {
    mData.erase(key);
    mData[key] = value;
 }
 
+
 void HttpRequest::setMethod(const string& method)
 {
    mMethod = method;
+}
+
+
+string HttpRequest::buildRequest()
+{
+   // location is anything that comes after the first '/'
+   TNL::U32 index = mUrl.find('/');
+   string location = mUrl.substr(index, mUrl.length() - index);
+
+   // construct the request
+   mRequest = "";
+
+   // request line
+   mRequest += mMethod + " " + location + " HTTP/1.0";
+
+   // content type and data encoding for POST requests
+   if(mMethod == PostMethod)
+   {
+      mRequest += "\r\nContent-Type: application/x-www-form-urlencoded";
+
+      string encodedData;
+      map<string, string>::iterator it;
+      for(it = mData.begin(); it != mData.end(); it++)
+      {
+         encodedData += urlEncode((*it).first) + "=" + urlEncode((*it).second) + "&";
+      }
+
+      char contentLengthHeaderBuffer[1024];
+      dSprintf(contentLengthHeaderBuffer, 1024, "\r\nContent-Length: %d", encodedData.length());
+
+      mRequest += contentLengthHeaderBuffer;
+      mRequest += "\r\n\r\n";
+      mRequest += encodedData;
+   }
+   else
+   {
+      mRequest += "\r\n\r\n";
+   }
+   return mRequest;
+}
+
+
+bool HttpRequest::sendRequest(string request)
+{
+   int startTime = Platform::getRealMilliseconds();
+   while(Platform::getRealMilliseconds() - startTime < mTimeout)
+   {
+      Platform::sleep(PollInterval);
+      NetError sendError;
+      sendError = mSocket->send((unsigned char *) mRequest.c_str(), mRequest.size());
+
+      if(sendError == WouldBlock)
+      {
+         // need to wait
+         continue;
+      }
+      else if(sendError == NoError)
+      {
+         // data was transmitted
+         return true;
+      }
+
+      // an error occured
+      return false;
+   }
+}
+
+
+string HttpRequest::receiveResponse()
+{
+   mResponse = "";
+   int startTime = Platform::getRealMilliseconds();
+   while(Platform::getRealMilliseconds() - startTime < mTimeout)
+   {
+      Platform::sleep(50);
+      TNL::NetError recvError;
+      int bytesRead = 0;
+      char receiveBuffer[HttpRequest::BufferSize] = { 0 };
+      recvError = mSocket->recv((unsigned char*) receiveBuffer, HttpRequest::BufferSize, &bytesRead);
+
+      if(recvError == TNL::WouldBlock)
+      {
+         // need to wait
+         continue;
+      }
+
+      if(recvError == TNL::UnknownError)
+      {
+         // there was an error, ignore partial responses
+         mResponse = "";
+         break;
+      }
+
+      mResponse.append(receiveBuffer, 0, bytesRead);
+
+      if(bytesRead == 0)
+      {
+         break;
+      }
+
+      // more data to read
+   }
+   return mResponse;
+}
+
+void HttpRequest::setTimeout(int timeout)
+{
+   mTimeout = timeout;
 }
 
 }
