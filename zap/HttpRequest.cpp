@@ -243,6 +243,7 @@ bool HttpRequest::sendRequest(string request)
       // an error occured
       return false;
    }
+   return false;
 }
 
 
