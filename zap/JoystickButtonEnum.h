@@ -105,19 +105,6 @@ struct JoystickStaticDataStruct {
 };
 
 
-// Needs to be Aligned with JoystickAxesDirections... X-Macro?
-static JoystickStaticDataStruct JoystickInputData[JoystickAxesDirectionCount] = {
-   { JoystickMoveAxesLeft,   MoveAxesLeftMask,   STICK_1_LEFT  },
-   { JoystickMoveAxesRight,  MoveAxesRightMask,  STICK_1_RIGHT },
-   { JoystickMoveAxesUp,     MoveAxesUpMask,     STICK_1_UP    },
-   { JoystickMoveAxesDown,   MoveAxesDownMask,   STICK_1_DOWN  },
-   { JoystickShootAxesLeft,  ShootAxesLeftMask,  STICK_2_LEFT  },
-   { JoystickShootAxesRight, ShootAxesRightMask, STICK_2_RIGHT },
-   { JoystickShootAxesUp,    ShootAxesUpMask,    STICK_2_UP    },
-   { JoystickShootAxesDown,  ShootAxesDownMask,  STICK_2_DOWN  },
-};
-
-
 }
 
 #endif

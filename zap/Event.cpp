@@ -53,6 +53,19 @@ void Event::setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode repo
 }
 
 
+// Needs to be Aligned with JoystickAxesDirections... X-Macro?
+static JoystickStaticDataStruct JoystickInputData[JoystickAxesDirectionCount] = {
+   { JoystickMoveAxesLeft,   MoveAxesLeftMask,   STICK_1_LEFT  },
+   { JoystickMoveAxesRight,  MoveAxesRightMask,  STICK_1_RIGHT },
+   { JoystickMoveAxesUp,     MoveAxesUpMask,     STICK_1_UP    },
+   { JoystickMoveAxesDown,   MoveAxesDownMask,   STICK_1_DOWN  },
+   { JoystickShootAxesLeft,  ShootAxesLeftMask,  STICK_2_LEFT  },
+   { JoystickShootAxesRight, ShootAxesRightMask, STICK_2_RIGHT },
+   { JoystickShootAxesUp,    ShootAxesUpMask,    STICK_2_UP    },
+   { JoystickShootAxesDown,  ShootAxesDownMask,  STICK_2_DOWN  },
+};
+
+
 // Argument of axisMask is one of the 4 axes:
 //    MoveAxisLeftRightMask, MoveAxisUpDownMask, ShootAxisLeftRightMask, ShootAxisUpDownMask
 void Event::updateJoyAxesDirections(ClientGame *game, U32 axisMask, S16 value)

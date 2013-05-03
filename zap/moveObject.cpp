@@ -1328,6 +1328,12 @@ static const F32 ASTEROID_MASS_LAST_SIZE              = 1;
 static const F32 ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE = 89 * 0.2f;
 static const F32 ASTEROID_SPEED                       = 250;
 
+
+
+const U8 Asteroid::ASTEROID_SIZELEFT_BIT_COUNT = 3;
+const S32 Asteroid::ASTEROID_SIZELEFT_MAX      = 5;
+const S32 Asteroid::ASTEROID_INITIAL_SIZELEFT  = 3;
+
 /**
  *   @luafunc Asteroid::Asteroid()
  *   @luafunc Asteroid::Asteroid(geom)

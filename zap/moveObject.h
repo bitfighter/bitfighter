@@ -326,15 +326,14 @@ protected:
    };
 
 public:
-   static const U8 ASTEROID_SIZELEFT_BIT_COUNT = 3;
-
-   // For editor attribute. real limit based on bit count is (1 << ASTEROID_SIZELEFT_BIT_COUNT) - 1; // = 7
-   static const S32 ASTEROID_SIZELEFT_MAX      = 5;   
-   static const S32 ASTEROID_INITIAL_SIZELEFT  = 3;      // Starting size
-
-
    explicit Asteroid(lua_State *L = NULL); // Combined Lua / C++ default constructor
    virtual ~Asteroid();           // Destructor
+
+   static const U8 ASTEROID_SIZELEFT_BIT_COUNT;
+
+   // For editor attribute. real limit based on bit count is (1 << ASTEROID_SIZELEFT_BIT_COUNT) - 1; // = 7
+   static const S32 ASTEROID_SIZELEFT_MAX;
+   static const S32 ASTEROID_INITIAL_SIZELEFT;      // Starting size
 
    Asteroid *clone() const;
 

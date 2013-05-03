@@ -128,6 +128,7 @@ set(CLIENT_SOURCES
 	ClientGame.cpp
 	Console.cpp
 	Cursor.cpp
+	EditorAttributeMenuItemBuilder.cpp
 	engineerHelper.cpp
 	Event.cpp
 	FontManager.cpp

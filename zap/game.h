@@ -413,7 +413,7 @@ public:
 
    // A couple of statics to keep gServerGame out of some classes
    static bool isLocalTestServer();
-   static const GridDatabase *Game::getServerGameObjectDatabase();
+   static const GridDatabase *getServerGameObjectDatabase();
 
    // Passthroughs to GameType
    void onFlagMounted(S32 teamIndex);
