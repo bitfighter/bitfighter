@@ -83,7 +83,7 @@ void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel,
       if(isShipType(shooter->getObjectTypeNumber()))
       {
          Ship *ship = static_cast<Ship *>(shooter);
-         setOwner(ship->getClientInfo());
+         setOwner(ship->getClientInfo());    // Else owner remains NULL
       }
 
       setTeam(shooter->getTeam());
@@ -152,7 +152,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
       TNLAssert(connection, "Defunct connection to server in projectile.cpp!");
 
       if(stream->readFlag())
-         mShooter = dynamic_cast<Ship *>(connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize)));
+         mShooter = static_cast<Ship *>(connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize)));
 
       setExtent(Rect(getPos(), 0));
       initial = true;
@@ -742,9 +742,9 @@ const S32 Mine::SensorRadius = 50;
 
 
 // Constructor -- used when mine is planted
-Mine::Mine(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter, BurstRadius)
+Mine::Mine(const Point &pos, BfObject *planter) : Burst(pos, Point(0,0), planter, BurstRadius)
 {
-   initialize(pos, planter);
+   initialize(pos);
 }
 
 /**
@@ -754,7 +754,7 @@ Mine::Mine(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter, Bu
 // Combined Lua / C++ default constructor -- used in Lua and editor
 Mine::Mine(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL, BurstRadius)
 {
-   initialize(Point(0,0), NULL);
+   initialize(Point(0,0));
    
    if(L)
    {
@@ -775,7 +775,7 @@ Mine::~Mine()
 }
 
 
-void Mine::initialize(const Point &pos, Ship *planter)
+void Mine::initialize(const Point &pos)
 {
    mObjectTypeNumber = MineTypeNumber;
    mWeaponType = WeaponMine;
@@ -1041,7 +1041,7 @@ REGISTER_LUA_SUBCLASS(Mine, Burst);
 TNL_IMPLEMENT_NETOBJECT(SpyBug);
 
 // Constructor -- used when SpyBug is deployed
-SpyBug::SpyBug(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter)
+SpyBug::SpyBug(const Point &pos, BfObject *planter) : Burst(pos, Point(0,0), planter)
 {
    initialize(pos, planter);
 }
@@ -1067,12 +1067,12 @@ SpyBug::SpyBug(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL)
 }
 
 
-void SpyBug::initialize(const Point &pos, Ship *planter)
+void SpyBug::initialize(const Point &pos, BfObject *planter)
 {
    mObjectTypeNumber = SpyBugTypeNumber;
    mWeaponType = WeaponSpyBug;
 
-   if(!planter)
+   if(planter == NULL)
       setTeam(TEAM_NEUTRAL);     // Burst will set this to TEAM_HOSTILE
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;

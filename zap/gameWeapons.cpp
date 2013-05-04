@@ -25,7 +25,6 @@
 
 #include "gameWeapons.h"
 #include "projectile.h"
-#include "ship.h"
 #include "game.h"
 
 #include "Colors.h"
@@ -92,10 +91,10 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
          (new Burst(shooterPos + dir * shooterRadius * 0.9f, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
          break;
       case WeaponMine:
-         (new Mine(firePos, static_cast<Ship *>(shooter)))->addToGame(game, game->getGameObjDatabase());
+         (new Mine(firePos, shooter))->addToGame(game, game->getGameObjDatabase());
          break;
       case WeaponSpyBug:
-         (new SpyBug(firePos, static_cast<Ship *>(shooter)))->addToGame(game, game->getGameObjDatabase());
+         (new SpyBug(firePos, shooter))->addToGame(game, game->getGameObjDatabase());
          break;
       case WeaponSeeker:
          (new Seeker(shooterPos + dir * shooterRadius * 0.9f, projVel, dir.ATAN2(), shooter))->addToGame(game, game->getGameObjDatabase());

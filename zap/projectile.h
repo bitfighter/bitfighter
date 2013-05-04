@@ -35,7 +35,6 @@
 namespace Zap
 {
 
-class Ship;
 class ClientInfo;
 
 /////////////////////////////////////
@@ -177,19 +176,19 @@ class Mine : public Burst
    typedef Burst Parent;
 
 private:
-   static const U32 FuseDelay;            // Delay of Mine explosion if exploded by another Mine
+   static const U32 FuseDelay;               // Delay of Mine explosion if exploded by another Mine
 
    bool mArmed;
    Timer mFuseTimer;
-   void initialize(const Point &pos, Ship *planter);
+   void initialize(const Point &pos);
 
 public:
-   static const S32 SensorRadius;         // Radius of outer circle when mine is rendered
+   static const S32 SensorRadius;            // Radius of outer circle when mine is rendered
    static const S32 ArmedMask = Burst::FirstFreeMask;
 
-   Mine(const Point &pos, Ship *owner);   // Constructor -- used when mine is planted
-   explicit Mine(lua_State *L = NULL);    // Combined Lua / C++ default constructor -- used in Lua and editor
-   virtual ~Mine();                       // Destructor
+   Mine(const Point &pos, BfObject *owner);  // Constructor -- used when mine is planted
+   explicit Mine(lua_State *L = NULL);       // Combined Lua / C++ default constructor -- used in Lua and editor
+   virtual ~Mine();                          // Destructor
 
    Mine *clone() const;
 
@@ -238,12 +237,12 @@ class SpyBug : public Burst
    typedef Burst Parent;
 
 private:
-   void initialize(const Point &pos, Ship *owner);
+   void initialize(const Point &pos, BfObject *owner);
 
 public:
-   SpyBug(const Point &pos, Ship *planter);  // Constructor -- used when SpyBug is deployed
-   explicit SpyBug(lua_State *L = NULL);     // Combined Lua / C++ default constructor -- used in Lua and editor
-   virtual ~SpyBug();                        // Destructor
+   SpyBug(const Point &pos, BfObject *planter); // Constructor -- used when SpyBug is deployed
+   explicit SpyBug(lua_State *L = NULL);        // Combined Lua / C++ default constructor -- used in Lua and editor
+   virtual ~SpyBug();                           // Destructor
    SpyBug *clone() const;
 
    static const S32 SPY_BUG_RANGE = 300;     // How far can a spy bug see?
