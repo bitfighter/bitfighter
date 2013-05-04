@@ -63,6 +63,17 @@
     <ClCompile Include="..\zap\IniFile.cpp" />
     <ClCompile Include="..\zap\gameWeapons.cpp" />
     <ClCompile Include="..\zap\BanList.cpp" />
+    <ClCompile Include="..\zap\BotNavMeshZone.cpp" />
+    <ClCompile Include="..\poly2tri\sweep\cdt.cc">
+      <Filter>poly2tri</Filter>
+    </ClCompile>
+    <ClCompile Include="..\zap\ChatCheck.cpp" />
+    <ClCompile Include="..\zap\ChatCommands.cpp" />
+    <ClCompile Include="..\zap\ChatHelper.cpp" />
+    <ClCompile Include="..\zap\Console.cpp" />
+    <ClCompile Include="..\zap\Cursor.cpp" />
+    <ClCompile Include="..\zap\CTFGame.cpp" />
+    <ClCompile Include="..\zap\CoreGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">

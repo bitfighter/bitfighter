@@ -107,16 +107,25 @@
   <ItemGroup>
     <ClCompile Include="..\clipper\clipper.cpp" />
     <ClCompile Include="..\poly2tri\sweep\advancing_front.cc" />
+    <ClCompile Include="..\poly2tri\sweep\cdt.cc" />
     <ClCompile Include="..\recast\RecastAlloc.cpp" />
     <ClCompile Include="..\recast\RecastMesh.cpp" />
     <ClCompile Include="..\zap\BanList.cpp" />
     <ClCompile Include="..\zap\barrier.cpp" />
     <ClCompile Include="..\zap\BfObject.cpp" />
+    <ClCompile Include="..\zap\BotNavMeshZone.cpp" />
+    <ClCompile Include="..\zap\ChatCheck.cpp" />
+    <ClCompile Include="..\zap\ChatCommands.cpp" />
+    <ClCompile Include="..\zap\ChatHelper.cpp" />
     <ClCompile Include="..\zap\ClientGame.cpp" />
     <ClCompile Include="..\zap\ClientInfo.cpp" />
     <ClCompile Include="..\zap\Color.cpp" />
     <ClCompile Include="..\zap\config.cpp" />
+    <ClCompile Include="..\zap\Console.cpp" />
     <ClCompile Include="..\zap\controlObjectConnection.cpp" />
+    <ClCompile Include="..\zap\CoreGame.cpp" />
+    <ClCompile Include="..\zap\CTFGame.cpp" />
+    <ClCompile Include="..\zap\Cursor.cpp" />
     <ClCompile Include="..\zap\EditorObject.cpp" />
     <ClCompile Include="..\zap\FpsRenderer.cpp" />
     <ClCompile Include="..\zap\game.cpp" />
