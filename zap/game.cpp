@@ -455,6 +455,19 @@ void Game::replaceTeam(AbstractTeam *team, S32 index) { mActiveTeamManager->repl
 void Game::clearTeams()                               { mActiveTeamManager->clearTeams();             }
 void Game::clearTeamHasFlagList()                     { mActiveTeamManager->clearTeamHasFlagList();   }
 
+
+void Game::addPolyWall(BfObject *polyWall, GridDatabase *database)
+{
+   polyWall->addToGame(this, database);
+}
+
+
+void Game::addWallItem(BfObject *wallItem, GridDatabase *database)
+{
+   wallItem->addToGame(this, database);
+}
+
+
 // Pass through to to GameType
 void Game::addWall(const WallRec &barrier) { mGameType->addWall(barrier, this); }
 

@@ -165,8 +165,9 @@ public:
 
 
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);
-   void addPolyWall(PolyWall *polyWall, GridDatabase *database);
-   void addWallItem(WallItem *wallItem, GridDatabase *database);
+
+   void addPolyWall(BfObject *polyWall, GridDatabase *database);
+   void addWallItem(BfObject *wallItem, GridDatabase *database);
 
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    void sendLevelStatsToMaster();

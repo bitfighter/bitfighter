@@ -331,8 +331,9 @@ public:
    string toLevelCode() const;
 
    virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id) = 0;
-   virtual void addPolyWall(PolyWall *polyWall, GridDatabase *database) = 0;     
-   virtual void addWallItem(WallItem *wallItem, GridDatabase *database) = 0;     
+
+   virtual void addPolyWall(BfObject *polyWall, GridDatabase *database);     
+   virtual void addWallItem(BfObject *wallItem, GridDatabase *database);     
 
    void addWall(const WallRec &barrier);
 

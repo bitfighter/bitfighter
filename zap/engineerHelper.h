@@ -27,7 +27,7 @@
 #define _ENGINEERHELPER_H_
 
 #include "helperMenu.h"
-#include "Engineerable.h"     // For EngineerBuildObjects enum
+//#include "Engineerable.h"     // For EngineerBuildObjects enum
 
 using namespace TNL;
 

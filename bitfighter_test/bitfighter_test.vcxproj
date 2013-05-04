@@ -127,6 +127,7 @@
     <ClCompile Include="..\zap\CTFGame.cpp" />
     <ClCompile Include="..\zap\Cursor.cpp" />
     <ClCompile Include="..\zap\EditorAttributeMenuItemBuilder.cpp" />
+    <ClCompile Include="..\zap\EditorPlugin.cpp" />
     <ClCompile Include="..\zap\FpsRenderer.cpp" />
     <ClCompile Include="..\zap\game.cpp" />
     <ClCompile Include="..\zap\gameConnection.cpp" />
@@ -171,6 +172,7 @@
     <ClCompile Include="..\zap\VideoSystem.cpp" />
     <ClCompile Include="..\zap\WallSegmentManager.cpp" />
     <ClCompile Include="..\zap\WeaponInfo.cpp" />
+    <ClCompile Include="..\zap\Zone.cpp" />
     <ClCompile Include="main_test.cpp" />
   </ItemGroup>
   <ItemGroup>

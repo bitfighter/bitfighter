@@ -563,9 +563,10 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 }
 
 
-void ServerGame::addPolyWall(PolyWall *polyWall, GridDatabase *unused)
+void ServerGame::addPolyWall(BfObject *polyWall, GridDatabase *unused)
 {
-   polyWall->addToGame(this, this->getGameObjDatabase());
+   Parent::addPolyWall(polyWall, getGameObjDatabase());
+
    // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
    // is convenient to transmit to the clients
    //WallRec wallRec(polyWall);
@@ -573,9 +574,9 @@ void ServerGame::addPolyWall(PolyWall *polyWall, GridDatabase *unused)
 }
 
 
-void ServerGame::addWallItem(WallItem *wallItem, GridDatabase *unused)
+void ServerGame::addWallItem(BfObject *wallItem, GridDatabase *unused)
 {
-   wallItem->addToGame(this, this->getGameObjDatabase());
+   Parent::addWallItem(wallItem, getGameObjDatabase());
 
    // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
    // is convenient to transmit to the clients

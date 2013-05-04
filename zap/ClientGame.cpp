@@ -1803,18 +1803,20 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
 
 // Add polywall item to game
-void ClientGame::addPolyWall(PolyWall *polyWall, GridDatabase *database)
+void ClientGame::addPolyWall(BfObject *polyWall, GridDatabase *database)
 {
-   polyWall->addToGame(this, database);
+   Parent::addPolyWall(polyWall, database);
    polyWall->onGeomChanged(); 
 }
 
 
 // Add polywall item to game
-void ClientGame::addWallItem(WallItem *wallItem, GridDatabase *database)
+void ClientGame::addWallItem(BfObject *wallItem, GridDatabase *database)
 {
-   wallItem->addToGame(this, database);
-   wallItem->processEndPoints();
+   Parent::addWallItem(wallItem, database);
+
+   // Do we want to run onGeomChanged here instead?  If so, we can combine with addPolyWall.
+   static_cast<WallItem *>(wallItem)->processEndPoints();      
 }
 
 

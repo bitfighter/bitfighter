@@ -24,9 +24,6 @@
 //------------------------------------------------------------------------------------
 
 #include "EditorPlugin.h"     // Header
-#include "gridDB.h"           // For database methods
-#include "BfObject.h"         // So we can cast to BfObject
-#include "barrier.h"
 #include "game.h"
 
 
@@ -261,9 +258,9 @@ S32 EditorPlugin::lua_addItem(lua_State *L)
       {
          // Some objects require special handling
          if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
-            mGame->addPolyWall(static_cast<PolyWall *>(obj), mGridDatabase);
+            mGame->addPolyWall(obj, mGridDatabase);
          else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
-            mGame->addWallItem(static_cast<WallItem *>(obj), mGridDatabase);
+            mGame->addWallItem(obj, mGridDatabase);
          else
             obj->addToGame(mGame, mGridDatabase);
       }

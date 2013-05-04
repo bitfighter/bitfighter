@@ -25,30 +25,28 @@
 
 #include "ship.h"
 
-#include "stringUtils.h"   // For itos
-#include "MathUtils.h"     // For radiansToDegrees
 #include "projectile.h"
 #include "Zone.h"
 #include "Colors.h"
+
+#ifndef ZAP_DEDICATED
+#  include "ClientGame.h"
+#endif
+
+#include "gameObjectRender.h"
+
+#include "stringUtils.h"   // For itos
+#include "MathUtils.h"     // For radiansToDegrees
 
 
 #ifdef TNL_OS_WIN32
 #  include <windows.h>     // For ARRAYSIZE
 #endif
 
-#ifndef ZAP_DEDICATED
-#  include "ClientGame.h"
-#endif
-
-
 #include <stdio.h>
 
 #define hypot _hypot    // Kill some warnings
 
-#ifndef min
-#  define min(a,b) ((a) <= (b) ? (a) : (b))
-#  define max(a,b) ((a) >= (b) ? (a) : (b))
-#endif
 
 namespace Zap
 {
@@ -1015,7 +1013,7 @@ void Ship::deploySpybug()
 // Energy can be negative!
 void Ship::creditEnergy(S32 deltaEnergy)
 {
-   mEnergy = max(0, min(EnergyMax, mEnergy + deltaEnergy));
+   mEnergy = MAX(0, MIN(EnergyMax, mEnergy + deltaEnergy));
 }
 
 

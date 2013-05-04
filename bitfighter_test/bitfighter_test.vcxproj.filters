@@ -76,6 +76,8 @@
     <ClCompile Include="..\zap\EditorAttributeMenuItemBuilder.cpp" />
     <ClCompile Include="..\zap\PointObject.cpp" />
     <ClCompile Include="..\zap\UIEditorMenus.cpp" />
+    <ClCompile Include="..\zap\Zone.cpp" />
+    <ClCompile Include="..\zap\EditorPlugin.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">
