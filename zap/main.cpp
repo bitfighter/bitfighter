@@ -1395,7 +1395,6 @@ int main(int argc, char **argv)
    LuaScriptRunner::startLua();                                // Create single "L" instance which all scripts will use
    // TODO: What should we do if this fails?  Quit the game?
 
-
    setupLogging(settings->getIniSettings());    // Turns various logging options on and off
 
    Ship::computeMaxFireDelay();                 // Look over weapon info and get some ranges, which we'll need before we start sending data
