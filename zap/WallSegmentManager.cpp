@@ -24,7 +24,6 @@
 //------------------------------------------------------------------------------------
 
 #include "WallSegmentManager.h"
-#include "gameObjectRender.h"
 #include "EngineeredItem.h"         // For forcefieldprojector def
 #include "game.h"
 
@@ -322,6 +321,19 @@ void WallSegmentManager::clearSelected()
 }
 
 
+const Vector<Point> *WallSegmentManager::getWallEdgePoints() const
+{
+   return &mWallEdgePoints;
+}
+
+
+const Vector<Point> *WallSegmentManager::getSelectedWallEdgePoints() const
+{
+   return &mSelectedWallEdgePoints;
+}
+
+
+
 void WallSegmentManager::setSelected(S32 owner, bool selected)
 {
    S32 count = mWallSegmentDatabase->getObjectCount();
@@ -374,23 +386,6 @@ void WallSegmentManager::deleteSegments(S32 owner)
       mWallSegmentDatabase->removeFromDatabase(toBeDeleted[i], true);
 }
 
-
-extern Color EDITOR_WALL_FILL_COLOR;
-
-// Only called from the editor -- renders both walls and polywalls.  
-// Does not render centerlines -- those are drawn by calling wall's render fn.
-void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, bool drawSelected,
-                                     const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha)
-{
-#ifndef ZAP_DEDICATED
-   // We'll use the editor color most of the time; only in preview mode do we use the game color
-   const Color &fillColor = previewMode ? *settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
-
-   Zap::renderWalls(mWallSegmentDatabase, mWallEdgePoints, mSelectedWallEdgePoints, *settings->getWallOutlineColor(),  
-                   fillColor, currentScale, dragMode, drawSelected, selectedItemOffset, previewMode, 
-                   showSnapVertices, alpha);
-#endif
-}
 
 
 };

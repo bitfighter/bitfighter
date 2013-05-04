@@ -28,6 +28,7 @@
 #include "Colors.h"
 #include "ScreenInfo.h"
 
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 namespace Zap

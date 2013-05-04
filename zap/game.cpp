@@ -1257,6 +1257,19 @@ bool Game::objectCanDamageObject(BfObject *damager, BfObject *victim) const
 }
 
 
+void Game::releaseFlag(const Point &pos, const Point &vel, const S32 count) const
+{
+   if(mGameType)
+      mGameType->releaseFlag(pos, vel, count);
+}
+
+
+S32 Game::getRenderTime() const
+{
+   return mGameType->getRemainingGameTimeInMs() + mGameType->getRenderingOffset();
+}
+
+
 // Static method
 bool Game::isLocalTestServer()
 {
@@ -1268,6 +1281,33 @@ bool Game::isLocalTestServer()
 const GridDatabase *Game::getServerGameObjectDatabase()
 {
    return gServerGame->getGameObjDatabase();
+}
+
+
+// This is not a very good way of seeding the prng, but it should generate unique, if not cryptographicly secure, streams.
+// We'll get 4 bytes from the time, up to 12 bytes from the name, and any left over slots will be filled with unitialized junk.
+// Static method
+void Game::seedRandomNumberGenerator(const string &name)
+{
+   U32 seconds = Platform::getRealMilliseconds();
+   const S32 timeByteCount = 4;
+   const S32 totalByteCount = 16;
+
+   S32 nameBytes = min((S32)name.length(), totalByteCount - timeByteCount);     // # of bytes we get from the provided name
+
+   unsigned char buf[totalByteCount] = {0};  // Should be initialized for libtomcrypt
+
+   // Bytes from the time
+   buf[0] = U8(seconds);
+   buf[1] = U8(seconds >> 8);
+   buf[2] = U8(seconds >> 16);
+   buf[3] = U8(seconds >> 24);
+
+   // Bytes from the name
+   for(S32 i = 0; i < nameBytes; i++)
+      buf[i + timeByteCount] = name.at(i);
+
+   Random::addEntropy(buf, totalByteCount);     // May be some uninitialized bytes at the end of the buffer, but that's ok
 }
 
 

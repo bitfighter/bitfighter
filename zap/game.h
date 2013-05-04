@@ -413,18 +413,23 @@ public:
 
    // A couple of statics to keep gServerGame out of some classes
    static bool isLocalTestServer();
-   static const GridDatabase *Game::getServerGameObjectDatabase();
+   static const GridDatabase *getServerGameObjectDatabase();
 
    // Passthroughs to GameType
    void onFlagMounted(S32 teamIndex);
    void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
    const Color *getObjTeamColor(const BfObject *obj) const;
    bool objectCanDamageObject(BfObject *damager, BfObject *victim) const;
+   void releaseFlag(const Point &pos, const Point &vel = Point(0,0), const S32 count = 1) const;
+   S32 getRenderTime() const;
 
    virtual SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f) const = 0;
    virtual SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const = 0;
    virtual SFXHandle playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain = 1.0f) const = 0;
    virtual void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const = 0;
+
+   // Misc junk
+   static void seedRandomNumberGenerator(const string &name);
 };
 
 

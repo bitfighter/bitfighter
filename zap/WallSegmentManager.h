@@ -26,7 +26,7 @@
 #ifndef _WALL_SEGMENT_MANAGER_H_
 #define _WALL_SEGMENT_MANAGER_H_
 
-#include "BfObject.h"
+#include "gridDB.h"
 #include "Point.h"
 #include "tnlVector.h"
 #include "tnlNetObject.h"
@@ -56,6 +56,9 @@ public:
 
    GridDatabase *getWallSegmentDatabase();
    GridDatabase *getWallEdgeDatabase();
+
+   const Vector<Point> *getWallEdgePoints() const;
+   const Vector<Point> *getSelectedWallEdgePoints() const;
 
    static void beginBatchGeomUpdate();                                     // Suspend certain geometry operations so they can be batched when 
    static void endBatchGeomUpdate(GridDatabase *db, bool modifiedWalls);   // this method is called
@@ -91,11 +94,6 @@ public:
 
    // Populate wallEdges
    void clipAllWallEdges(const Vector<DatabaseObject *> *wallSegments, Vector<Point> &wallEdges);
- 
-   ////////////////
-   // Render functions
-   void renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, bool drawSelected, const Point &selectedItemOffset,
-                    bool previewMode, bool showSnapVertices, F32 alpha);
 };
 
 

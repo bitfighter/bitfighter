@@ -28,6 +28,7 @@
 
 #include "ScreenInfo.h"
 
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 #include "SoundSystem.h"
 

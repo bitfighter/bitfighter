@@ -30,6 +30,8 @@
 #include "ScreenInfo.h"    // For canvasHeight
 #include "ClientGame.h"    // For UIManager and callback
 #include "game.h"
+
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 namespace Zap
@@ -135,7 +137,7 @@ void QuickMenuUI::render()
                   Color(.1), Color(.5));
 
    // Now that the background has been drawn, adjust left and right to create the inset for the menu item highlights
-   left += 3;
+   left  += 3;
    right -= 4;
 
    // First draw the menu title
@@ -302,8 +304,7 @@ void QuickMenuUI::addSaveAndQuitMenuItem(const char *menuText, const char *helpT
 ////////////////////////////////////////
 
 // Constructor
-EditorAttributeMenuUI::EditorAttributeMenuUI(ClientGame *game) :
-      Parent(game)
+EditorAttributeMenuUI::EditorAttributeMenuUI(ClientGame *game) : Parent(game)
 {
    mObject = NULL;
 }

@@ -669,8 +669,6 @@ S32 WallItem::lua_setGeom(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern Color EDITOR_WALL_FILL_COLOR;
-
 TNL_IMPLEMENT_NETOBJECT(PolyWall);
 
 /**
@@ -718,7 +716,7 @@ S32 PolyWall::getRenderSortValue()
 
 void PolyWall::renderDock()
 {
-   renderPolygonFill(getFill(), &EDITOR_WALL_FILL_COLOR);
+   renderPolygonFill(getFill(), &Colors::EDITOR_WALL_FILL_COLOR);
    renderPolygonOutline(getOutline(), getGame()->getSettings()->getWallOutlineColor());
 }
 

@@ -68,6 +68,7 @@
 #include "VideoSystem.h"
 
 #include "SDL.h"
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 #include <boost/shared_ptr.hpp>
@@ -1862,8 +1863,8 @@ void EditorUserInterface::render()
       delta = mDraggingObjects ? mSnapDelta : Point(0,0);
 
       // == Render walls and polyWalls ==
-      renderWalls(&mLevelGenDatabase, delta, false, true );
-      renderWalls(editorDb, delta, false, false);
+      renderWallsAndPolywalls(&mLevelGenDatabase, delta, false, true );
+      renderWallsAndPolywalls(editorDb, delta, false, false);
 
       // == Normal, unselected items ==
       // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
@@ -1876,7 +1877,7 @@ void EditorUserInterface::render()
       // We do render polywalls here because this is what draws the highlighted outline when the polywall is selected.
       renderObjects(editorDb, RENDER_SELECTED_NONWALLS, false);               // Render selected objects 
 
-      renderWalls(editorDb, delta, true, false);   
+      renderWallsAndPolywalls(editorDb, delta, true, false);   
 
       // == Draw geomPolyLine features under construction ==
       if(mCreatingPoly || mCreatingPolyline)    
@@ -1989,16 +1990,22 @@ void EditorUserInterface::renderObjects(GridDatabase *database, RenderModes rend
 }
 
 
-// Render walls and centerlines
-void EditorUserInterface::renderWalls(GridDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase)
+// Render walls (both normal walls and polywalls, outlines and fills) and centerlines
+void EditorUserInterface::renderWallsAndPolywalls(GridDatabase *database, const Point &offset, bool drawSelected, bool isLevelGenDatabase)
 {
-   // Render wall outlines and fill
-   database->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, selected,
-                                                  offset, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
+   GameSettings *settings = getGame()->getSettings();
+
+   WallSegmentManager *wsm = database->getWallSegmentManager();
+   const Color &fillColor = mPreviewMode ? *settings->getWallFillColor() : Colors::EDITOR_WALL_FILL_COLOR;
+
+   renderWalls(wsm->getWallSegmentDatabase(), *wsm->getWallEdgePoints(), *wsm->getSelectedWallEdgePoints(), *settings->getWallOutlineColor(),  
+               fillColor, mCurrentScale, mDraggingObjects, drawSelected, offset, mPreviewMode, 
+               getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
+
 
    // Render walls as ordinary objects; this will draw wall centerlines
    if(!isLevelGenDatabase)
-      renderObjects(database, selected ? RENDER_SELECTED_WALLS : RENDER_UNSELECTED_WALLS, false);  
+      renderObjects(database, drawSelected ? RENDER_SELECTED_WALLS : RENDER_UNSELECTED_WALLS, false);  
 }
 
 

@@ -27,6 +27,8 @@
 #include "BfObject.h"
 #include "UIEditorMenus.h"
 
+#include "textItem.h"
+
 
 namespace Zap
 {
@@ -48,48 +50,134 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
 {
    TNLAssert(mInitialized, "Must initialize before use!");
 
-   if(obj->getObjectTypeNumber() == AsteroidTypeNumber)
+   switch(obj->getObjectTypeNumber())
    {
-      static EditorAttributeMenuUI *attributeMenuUI = NULL;
-
-      // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
-      if(!attributeMenuUI)
+      case AsteroidTypeNumber:
       {
-         attributeMenuUI = new EditorAttributeMenuUI(mGame);
+         static EditorAttributeMenuUI *attributeMenuUI = NULL;
 
-         attributeMenuUI->addMenuItem(
-               new CounterMenuItem("Size:", Asteroid::ASTEROID_INITIAL_SIZELEFT, 1, 1, Asteroid::ASTEROID_SIZELEFT_MAX, "", "", "")
-            );
+         // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
+         if(!attributeMenuUI)
+         {
+            attributeMenuUI = new EditorAttributeMenuUI(mGame);
 
-         // Add our standard save and exit option to the menu
-         attributeMenuUI->addSaveAndQuitMenuItem();
+            attributeMenuUI->addMenuItem(
+                  new CounterMenuItem("Size:", Asteroid::ASTEROID_INITIAL_SIZELEFT, 1, 1, Asteroid::ASTEROID_SIZELEFT_MAX, "", "", "")
+               );
+
+            // Add our standard save and exit option to the menu
+            attributeMenuUI->addSaveAndQuitMenuItem();
+         }
+
+         return attributeMenuUI;
       }
 
-      return attributeMenuUI;
+      case ShipSpawnTypeNumber:
+      case CircleSpawnTypeNumber:
+      case AsteroidSpawnTypeNumber:
+      case FlagSpawnTypeNumber:
+      {
+         if(static_cast<AbstractSpawn *>(obj)->getDefaultRespawnTime() == -1)  // No editing RespawnTimer for Ship Spawn
+            return NULL;
+
+         static EditorAttributeMenuUI *attributeMenuUI = NULL;
+
+         if(!attributeMenuUI)
+         {
+            ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+
+            attributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+            CounterMenuItem *menuItem = new CounterMenuItem("Spawn Timer:", 999, 1, 0, 1000, "secs", "Never spawns", 
+                                                            "Time it takes for each item to be spawned");
+            attributeMenuUI->addMenuItem(menuItem);
+
+            // Add our standard save and exit option to the menu
+            attributeMenuUI->addSaveAndQuitMenuItem();
+         }
+
+          return attributeMenuUI;
+      }
+
+      case TextItemTypeNumber:
+      {
+         static EditorAttributeMenuUI *attributeMenuUI = NULL;
+
+         // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
+         if(!attributeMenuUI)
+         {
+            attributeMenuUI = new EditorAttributeMenuUI(static_cast<ClientGame *>(mGame));
+
+            // "Blah" will be overwritten when startEditingAttrs() is called
+            TextEntryMenuItem *menuItem = new TextEntryMenuItem("Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
+            menuItem->setTextEditedCallback(TextItem::textEditedCallback);
+
+            attributeMenuUI->addMenuItem(menuItem);
+
+            // Add our standard save and exit option to the menu
+            attributeMenuUI->addSaveAndQuitMenuItem();
+         }
+
+         return attributeMenuUI;
+      }
+
+      default:
+         return obj->getAttributeMenu();
    }
-   else
-      return obj->getAttributeMenu();
 }
 
 
 // Get the menu looking like what we want (static)
 void EditorAttributeMenuItemBuilder::startEditingAttrs(EditorAttributeMenuUI *attributeMenu, BfObject *obj)
 {
-   if(obj->getObjectTypeNumber() == AsteroidTypeNumber)
-      attributeMenu->getMenuItem(0)->setIntValue(static_cast<Asteroid *>(obj)->getCurrentSize());
-   else
-      obj->startEditingAttrs(attributeMenu);
+   switch(obj->getObjectTypeNumber())
+   {
+      case AsteroidTypeNumber:
+         attributeMenu->getMenuItem(0)->setIntValue(static_cast<Asteroid *>(obj)->getCurrentSize());
+         break;
+
+      case ShipSpawnTypeNumber:
+      case CircleSpawnTypeNumber:
+      case AsteroidSpawnTypeNumber:
+      case FlagSpawnTypeNumber:
+         attributeMenu->getMenuItem(0)->setIntValue(static_cast<AbstractSpawn *>(obj)->getSpawnTime());
+         break;
+
+      case TextItemTypeNumber:
+         attributeMenu->getMenuItem(0)->setValue(static_cast<TextItem *>(obj)->getText());
+         break;
+
+      default:
+         obj->startEditingAttrs(attributeMenu);
+   }
 }
 
 
 // Retrieve the values we need from the menu (static)
 void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu, BfObject *obj)
 {
-   if(obj->getObjectTypeNumber() == AsteroidTypeNumber)
-      static_cast<Asteroid *>(obj)->setCurrentSize(attributeMenu->getMenuItem(0)->getIntValue());
-   else
-      obj->doneEditingAttrs(attributeMenu);
+   switch(obj->getObjectTypeNumber())
+   {
+      case AsteroidTypeNumber:
+         static_cast<Asteroid *>(obj)->setCurrentSize(attributeMenu->getMenuItem(0)->getIntValue());
+         break;
+
+      case ShipSpawnTypeNumber:
+      case CircleSpawnTypeNumber:
+      case AsteroidSpawnTypeNumber:
+      case FlagSpawnTypeNumber:
+         static_cast<AbstractSpawn *>(obj)->setSpawnTime(attributeMenu->getMenuItem(0)->getIntValue());
+         break;
+
+      case TextItemTypeNumber:
+         static_cast<TextItem *>(obj)->setText(attributeMenu->getMenuItem(0)->getValue());
+         break;
+
+      default:
+         obj->doneEditingAttrs(attributeMenu);
+   }
 }
 
 
 }
+

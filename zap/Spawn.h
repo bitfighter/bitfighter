@@ -29,7 +29,7 @@
 
 #include "EditorObject.h"     // For PointObject def
 #include "Timer.h"
-#include "LuaWrapper.h"
+//#include "LuaWrapper.h"
 
 
 namespace Zap
@@ -62,18 +62,14 @@ public:
    
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
-#ifndef ZAP_DEDICATED
-   // These four methods are all that's needed to add an editable attribute to a class...
-   EditorAttributeMenuUI *getAttributeMenu();
-   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
-   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
-
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
-#endif
 
    virtual const char *getClassName() const = 0;
 
    virtual S32 getDefaultRespawnTime() = 0;
+
+   void setSpawnTime(S32 spawnTime);
+   S32 getSpawnTime() const;
 
    virtual string toLevelCode(F32 gridSize) const;
 

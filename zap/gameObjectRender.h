@@ -37,6 +37,8 @@
 #include "SharedConstants.h"     // For MeritBadges enum
 #include "ShipShape.h"
 
+#include "BfObject.h"            // Need to use BfObject with SafePtr.  Whether this is really needed is a different question.
+
 #include <string>
 
 using namespace TNL;
@@ -45,14 +47,11 @@ using namespace std;
 namespace Zap
 {
 
-//extern const Color *HIGHLIGHT_COLOR;
-//extern const Color *SELECT_COLOR;
-//extern const Color *PLAIN_COLOR;
-
 static const S32 NO_NUMBER = -1;
 
 class Ship;
 class WallItem;
+
 
 //////////
 // Primitives
@@ -180,6 +179,11 @@ class NeighboringZone;
 extern void renderNavMeshBorders(const Vector<NeighboringZone> &borders);
 
 extern void drawStars(const Point *stars, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent);
+
+extern void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color *outlineColor, 
+                               S32 canvasWidth, S32 canvasHeight, F32 alphaMod);
+
+extern void renderScoreboardOrnamentTeamFlags(S32 xpos, S32 ypos, const Color *color, bool teamHasFlag);
 
 
 // Some things we use internally, but also need from UIEditorInstructions for consistency

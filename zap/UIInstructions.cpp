@@ -24,29 +24,22 @@
 //------------------------------------------------------------------------------------
 
 #include "UIInstructions.h"
-#include "UIMenus.h"
-#include "UIGame.h"
-#include "UIChat.h"
-#include "UIDiagnostics.h"
+
 #include "ClientGame.h"
 #include "gameObjectRender.h"
-#include "ship.h"
 #include "teleporter.h"
-#include "EngineeredItem.h"
-#include "input.h"
 #include "speedZone.h"        // For SpeedZone::height
-#include "GeomUtils.h"        // For polygon triangulation
-#include "config.h"
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "JoystickRender.h"
 #include "CoreGame.h"         // For coreItem rendering
 #include "ChatCommands.h"
-#include "ChatHelper.h"
+
+#include "RenderUtils.h"
+#include "OpenglUtils.h"
 
 #include "tnlAssert.h"
 
-#include "OpenglUtils.h"
 
 namespace Zap
 {

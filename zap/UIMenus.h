@@ -26,11 +26,11 @@
 #ifndef _UIMENUS_H_
 #define _UIMENUS_H_
 
-#include "UI.h"
-#include "input.h"         // For InputMode def
+#include "UI.h"                  // Parent class
+#include "SharedConstants.h"     // For MOTD_LEN
 #include "UIMenuItems.h"
-#include "tnlNetConnection.h" // for TerminationReason
-
+#include "tnlNetConnection.h"    // for TerminationReason
+#include "config.h"
 
 namespace Zap
 {
@@ -97,8 +97,6 @@ public:
    S32 getMenuItemCount();
 
    bool itemSelectedWithMouse;
-
-   static const S32 MOUSE_SCROLL_INTERVAL = 100;
 
    string mMenuTitle;
    string mMenuSubTitle;

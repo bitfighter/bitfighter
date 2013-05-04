@@ -24,27 +24,28 @@
 //------------------------------------------------------------------------------------
 
 #include "VideoSystem.h"
+
 #include "ClientGame.h"
-#include "GameSettings.h"
 #include "IniFile.h"
 #include "Console.h"
 #include "ScreenInfo.h"
 #include "UI.h"
 #include "version.h"
-#include "OpenglUtils.h"
 #include "FontManager.h"
+
+#include "stringUtils.h"
 
 #include "tnlLog.h"
 
-#include "SDL.h"
+//#include "SDL.h"
 
-#ifdef TNL_OS_MOBILE
-#  include "SDL_opengles.h"
-   // Needed for GLES compatibility
-#  define glOrtho glOrthof
-#else
-#  include "SDL_opengl.h"
-#endif
+//#ifdef TNL_OS_MOBILE
+//#  include "SDL_opengles.h"
+//   // Needed for GLES compatibility
+//#  define glOrtho glOrthof
+//#else
+//#  include "SDL_opengl.h"
+//#endif
 
 #if !SDL_VERSION_ATLEAST(2,0,0)
 #  include "SDL_syswm.h"

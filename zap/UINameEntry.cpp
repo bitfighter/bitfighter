@@ -34,6 +34,7 @@
 #include "md5wrapper.h"
 #include "ScreenInfo.h"
 
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 #include <string>

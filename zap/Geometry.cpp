@@ -24,10 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "Geometry.h"
-#include "Geometry_Base.h"
 #include "GeomUtils.h"              // For polygon triangulation
-
-#include "Rect.h"
 
 #include "tnlBitStream.h"
 #include "boost/smart_ptr/shared_ptr.hpp"

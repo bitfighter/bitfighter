@@ -26,7 +26,8 @@
 #ifndef _UI_HIGH_SCORES_H_
 #define _UI_HIGH_SCORES_H_
 
-#include "UI.h"
+#include "UI.h"                  // Parent class
+#include "tnlNetStringTable.h"   // For StringTableEntry def
 
 
 namespace Zap

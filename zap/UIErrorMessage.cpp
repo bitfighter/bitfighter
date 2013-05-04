@@ -23,10 +23,7 @@
 //
 //------------------------------------------------------------------------------------
 
-// Renders a simple message box, and waits for the user to hit a key
-
 #include "UIErrorMessage.h"
-#include "UIMenus.h"
 
 #include <stdio.h>
 #include <math.h>

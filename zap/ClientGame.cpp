@@ -30,6 +30,7 @@
 #include "IniFile.h"             // For CIniFile def
 
 #include "barrier.h"
+#include "gameType.h"
 
 #include "UIManager.h"
 #include "UIMenus.h"
@@ -478,8 +479,6 @@ U32 ClientGame::getReturnToGameDelay() const
 string ClientGame::getPlayerName()     const { return mSettings->getPlayerName();     }
 string ClientGame::getPlayerPassword() const { return mSettings->getPlayerPassword(); }
 
-
-extern void seedRandomNumberGenerator(const string &name);
 
 void ClientGame::userEnteredLoginCredentials(const string &name, const string &password, bool savePassword)
 {

@@ -26,8 +26,7 @@
 #ifndef _UIERRORMSG_H_
 #define _UIERRORMSG_H_
 
-#include "UI.h"
-#include "game.h"
+#include "UI.h"   // Parent class
 
 namespace Zap
 {

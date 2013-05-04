@@ -32,12 +32,13 @@
 #include "ClientInfo.h"
 
 #ifndef ZAP_DEDICATED
-#   include "gameObjectRender.h"
-#   include "ScreenInfo.h"
-#   include "ClientGame.h"
-#   include "UIGame.h"
-#   include "UIMenuItems.h"
-#   include "OpenglUtils.h"
+#  include "gameObjectRender.h"
+#  include "ScreenInfo.h"
+#  include "ClientGame.h"
+#  include "UIGame.h"
+#  include "UIMenuItems.h"
+#  include "OpenglUtils.h"
+#  include "RenderUtils.h"
 #endif
 
 
@@ -436,12 +437,14 @@ void NexusGameType::onGhostAvailable(GhostConnection *theConnection)
 }
 
 
-// Emit a flag in a random direction at a random speed
-// Server only, static method.  Only called from dropFlags().
+// Emit a flag in a random direction at a random speed.
+// Server only.
 // If a flag is released from a ship, it will have underlying startVel, to which a random vector will be added
-void NexusGameType::releaseFlag(Game *game, const Point &pos, const Point &startVel, S32 count)
+void NexusGameType::releaseFlag(const Point &pos, const Point &startVel, S32 count)
 {
    static const S32 MAX_SPEED = 100;
+
+   Game *game = getGame();
 
    F32 th = TNL::Random::readF() * FloatTau;
    F32 f = (TNL::Random::readF() * 2 - 1) * MAX_SPEED;
@@ -879,14 +882,14 @@ void NexusFlagItem::dropFlags(U32 flags)
          // and the last loop is (i == 1), dropping exact amount using only limited FlagItems
          U32 flagValue = flags / i;
 
-         NexusGameType::releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel(), flagValue);
+         getGame()->releaseFlag(mMount->getActualPos(), mMount->getActualVel(), flagValue);
 
          flags -= flagValue;
       }
    }
    else     // Normal situation
       for(U32 i = 0; i < flags; i++)
-         NexusGameType::releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel());
+         getGame()->releaseFlag(mMount->getActualPos(), mMount->getActualVel());
 
    changeFlagCount(0);
 }

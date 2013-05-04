@@ -32,13 +32,13 @@
 // especially for the INI settings...  if the INI is deleted, these defaults
 // will be used to rebuild it.
 
-#include "tnlTypes.h"
-#include "tnlNetStringTable.h"
-#include "tnlVector.h"
 #include "Color.h"      // For Color def
 #include "ConfigEnum.h" // For sfxSets, DisplayMode
 
-#include "input.h"
+#include "tnlTypes.h"
+#include "tnlNetStringTable.h"
+#include "tnlVector.h"
+
 #include <string>
 
 using namespace std;

@@ -31,6 +31,7 @@
 #include "masterConnection.h"    // For MasterServerConnection def
 #include "BanList.h"
 #include "gameNetInterface.h"
+#include "gameType.h"
 
 #include "SoundSystemEnums.h"
 

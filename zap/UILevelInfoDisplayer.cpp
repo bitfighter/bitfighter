@@ -26,13 +26,14 @@
 #include "UILevelInfoDisplayer.h"      // Header
 #include "ScreenInfo.h"
 #include "Colors.h"
-#include "OpenglUtils.h"               
-#include "RenderUtils.h"
 #include "UI.h"                        
 #include "GameTypesEnum.h"
 #include "gameType.h"
 #include "FontManager.h"
 
+#include "stringUtils.h"
+#include "OpenglUtils.h"               
+#include "RenderUtils.h"
 
 
 namespace Zap

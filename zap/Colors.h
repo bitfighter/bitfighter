@@ -109,6 +109,8 @@ namespace Colors
    const Color EDITOR_SELECT_COLOR(Colors::yellow);
    const Color EDITOR_PLAIN_COLOR(Colors::gray75);
 
+   const Color EDITOR_WALL_FILL_COLOR(.5f, .5f, 1.0f);
+
 };
 
 }

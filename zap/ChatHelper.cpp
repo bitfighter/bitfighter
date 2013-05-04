@@ -35,8 +35,10 @@
 
 #include "ScissorsManager.h"
 #include "ScreenInfo.h"
-#include "stringUtils.h"
+
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
+#include "stringUtils.h"
 
 namespace Zap
 {

@@ -25,24 +25,19 @@
 
 #include "UIQueryServers.h"
 
-#include "UIChat.h"
-#include "UIDiagnostics.h"
-#include "UIMenus.h"
-
 #include "masterConnection.h"
 #include "gameNetInterface.h"
 #include "ClientGame.h"
-#include "gameType.h"
 #include "Colors.h"
-#include "InputCode.h"
 #include "ScreenInfo.h"
 #include "gameObjectRender.h"
 #include "Cursor.h"
 
-#include "tnlRandom.h"
-
-#include "SDL.h"
+#include "stringUtils.h"
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
+
+#include "tnlRandom.h"
 
 #include <math.h>
 
@@ -126,7 +121,7 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInt
    mHighlightColumn = 0;
    mSortAscending = true;
    mReceivedListOfServersFromMaster = false;
-   mouseScrollTimer.setPeriod(10 * MenuUserInterface::MOUSE_SCROLL_INTERVAL);
+   mouseScrollTimer.setPeriod(10 * MOUSE_SCROLL_INTERVAL);
 
    mServersPerPage = 8;    // To start with, anyway...
 
@@ -861,7 +856,7 @@ void QueryServersUserInterface::renderColumnHeaders()
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
    // Draw vertical dividing lines
-   glColor(0.7);
+   glColor(0.7f);
 
    for(S32 i = 1; i < columns.size(); i++)
       drawVertLine(columns[i].xStart - 4, COLUMN_HEADER_TOP, TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2);

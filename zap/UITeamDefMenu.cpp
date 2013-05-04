@@ -40,6 +40,7 @@
 
 
 #include "SDL.h"
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 #include <string>

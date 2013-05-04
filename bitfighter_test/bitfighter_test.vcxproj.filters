@@ -31,89 +31,35 @@
     <ClCompile Include="..\recast\RecastMesh.cpp">
       <Filter>Recast</Filter>
     </ClCompile>
-    <ClCompile Include="..\tnl\assert.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\vector.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\asymmetricKey.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\bitStream.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\byteBuffer.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\certificate.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\clientPuzzle.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\connectionStringTable.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\dataChunker.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\eventConnection.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\ghostConnection.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\huffmanStringProcessor.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\journal.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\log.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\netBase.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\netConnection.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\netInterface.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\netObject.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\netStringTable.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\platform.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\random.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\rpc.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\symmetricCipher.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\thread.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\tnlMethodDispatch.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tnl\udp.cpp">
-      <Filter>tnl</Filter>
-    </ClCompile>
     <ClCompile Include="..\zap\SimpleLine.cpp" />
     <ClCompile Include="..\zap\ClientGame.cpp" />
     <ClCompile Include="..\zap\RenderUtils.cpp" />
     <ClCompile Include="..\zap\gameConnection.cpp" />
     <ClCompile Include="..\zap\controlObjectConnection.cpp" />
+    <ClCompile Include="..\zap\Geometry.cpp" />
+    <ClCompile Include="..\zap\UIManager.cpp" />
+    <ClCompile Include="..\zap\ClientInfo.cpp" />
+    <ClCompile Include="..\zap\GameSettings.cpp" />
+    <ClCompile Include="..\zap\masterConnection.cpp" />
+    <ClCompile Include="..\zap\UIGame.cpp" />
+    <ClCompile Include="..\zap\barrier.cpp" />
+    <ClCompile Include="..\zap\WallSegmentManager.cpp" />
+    <ClCompile Include="..\zap\polygon.cpp" />
+    <ClCompile Include="..\zap\gameType.cpp" />
+    <ClCompile Include="..\zap\FpsRenderer.cpp" />
+    <ClCompile Include="..\zap\config.cpp" />
+    <ClCompile Include="..\zap\InputCode.cpp" />
+    <ClCompile Include="..\zap\UIQueryServers.cpp" />
+    <ClCompile Include="..\zap\Spawn.cpp" />
+    <ClCompile Include="..\zap\UIChat.cpp" />
+    <ClCompile Include="..\zap\UIErrorMessage.cpp" />
+    <ClCompile Include="..\zap\UIMenus.cpp" />
+    <ClCompile Include="..\zap\UIHighScores.cpp" />
+    <ClCompile Include="..\zap\UI.cpp" />
+    <ClCompile Include="..\zap\UIInstructions.cpp" />
+    <ClCompile Include="..\poly2tri\sweep\advancing_front.cc" />
+    <ClCompile Include="..\zap\textItem.cpp" />
+    <ClCompile Include="..\zap\VideoSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">
@@ -124,9 +70,6 @@
     </Filter>
     <Filter Include="poly2tri">
       <UniqueIdentifier>{87329b99-c2ef-46f8-ba8e-818e9390cad4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="tnl">
-      <UniqueIdentifier>{b169ec23-38ec-4157-8a57-3395c4843d31}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -139,106 +82,5 @@
     <ClInclude Include="..\recast\RecastAlloc.h">
       <Filter>Recast</Filter>
     </ClInclude>
-    <ClInclude Include="..\tnl\tnl.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlAssert.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlAsymmetricKey.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlBitSet.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlBitStream.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlByteBuffer.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlCertificate.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlClientPuzzle.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlConnectionStringTable.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlDataChunker.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlEndian.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlEventConnection.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlGhostConnection.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlHuffmanStringProcessor.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlJournal.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlLog.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlMethodDispatch.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlNetBase.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlNetConnection.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlNetEvent.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlNetInterface.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlNetObject.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlNetStringTable.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlNonce.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlPlatform.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlRandom.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlRPC.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlSymmetricCipher.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlThread.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlTypes.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlUDP.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tnl\tnlVector.h">
-      <Filter>tnl</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\tnl\tnl.overview.txt">
-      <Filter>tnl</Filter>
-    </None>
   </ItemGroup>
 </Project>

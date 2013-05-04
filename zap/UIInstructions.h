@@ -27,7 +27,7 @@
 #define _UIINSTRUCTIONS_H_
 
 #include "UIAbstractInstructions.h"
-#include "UI.h"
+#include "Point.h"
 
 namespace Zap
 {

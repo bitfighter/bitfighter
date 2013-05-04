@@ -199,7 +199,7 @@ Color gNeutralTeamColor(Colors::gray80);        // Objects that are neutral (on 
 Color gHostileTeamColor(Colors::gray50);        // Objects that are "hostile-to-all" (on team -2)
 Color gMasterServerBlue(0.8, 0.8, 1);           // Messages about successful master server statii
 Color gHelpTextColor(Colors::green);
-Color EDITOR_WALL_FILL_COLOR(.5, .5, 1); 
+ 
 
 
 DataConnection *dataConn = NULL;
@@ -290,31 +290,6 @@ void abortHosting_noLevels()
 #  define min(a,b) ((a) <= (b) ? (a) : (b))
 #endif
 
-// This is not a very good way of seeding the prng, but it should generate unique, if not cryptographicly secure, streams.
-// We'll get 4 bytes from the time, up to 12 bytes from the name, and any left over slots will be filled with unitialized junk.
-void seedRandomNumberGenerator(const string &name)
-{
-   U32 seconds = Platform::getRealMilliseconds();
-   const S32 timeByteCount = 4;
-   const S32 totalByteCount = 16;
-
-   S32 nameBytes = min((S32)name.length(), totalByteCount - timeByteCount);     // # of bytes we get from the provided name
-
-   unsigned char buf[totalByteCount] = {0};  // Should be initialized for libtomcrypt
-
-   // Bytes from the time
-   buf[0] = U8(seconds);
-   buf[1] = U8(seconds >> 8);
-   buf[2] = U8(seconds >> 16);
-   buf[3] = U8(seconds >> 24);
-
-   // Bytes from the name
-   for(S32 i = 0; i < nameBytes; i++)
-      buf[i + timeByteCount] = name.at(i);
-
-   Random::addEntropy(buf, totalByteCount);     // May be some uninitialized bytes at the end of the buffer, but that's ok
-}
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -371,7 +346,7 @@ void initHostGame(GameSettings *settings, const Vector<string> &levelList, bool 
    gServerGame = new ServerGame(address, settings, testMode, dedicatedServer);
 
    gServerGame->setReadyToConnectToMaster(true);
-   seedRandomNumberGenerator(settings->getHostName());
+   Game::seedRandomNumberGenerator(settings->getHostName());
 
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
    if(!testMode)
@@ -819,7 +794,7 @@ void createClientGame(GameSettings *settings)
        // Put any saved filename into the editor file entry thingy
       clientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(settings->getIniSettings()->lastEditorName);
 
-      seedRandomNumberGenerator(settings->getIniSettings()->lastName);
+      Game::seedRandomNumberGenerator(settings->getIniSettings()->lastName);
       clientGame->getClientInfo()->getId()->getRandom();
 
       gClientGames.push_back(clientGame);
@@ -842,7 +817,7 @@ void createClientGame(GameSettings *settings)
          //   gClientGame = gClientGame1;
          //}
          //gClientGame->getUIManager()->getNameEntryUserInterface()->activate();     <-- won't work no more!
-         seedRandomNumberGenerator(settings->getIniSettings()->lastName);
+         Game::seedRandomNumberGenerator(settings->getIniSettings()->lastName);
       }
       else
       {
@@ -864,7 +839,7 @@ void createClientGame(GameSettings *settings)
          //gClientGame->getUIManager()->getMainMenuUserInterface()->activate();<-- won't work no more!
 
          //gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
-         seedRandomNumberGenerator(settings->getPlayerName());
+         Game::seedRandomNumberGenerator(settings->getPlayerName());
       }
    }
 #endif

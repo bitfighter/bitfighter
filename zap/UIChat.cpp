@@ -25,18 +25,14 @@
 
 #include "UIChat.h"
 #include "UIQueryServers.h"      // For menuID
-#include "input.h"
 #include "masterConnection.h"
-#include "UINameEntry.h"
-#include "UIMenus.h"
 #include "UIGame.h"  // For putting private messages into game console
-#include "UIDiagnostics.h"
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "ClientGame.h"
-#include "ClientInfo.h"
 #include "SoundSystem.h"
 
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 #include <stdarg.h>

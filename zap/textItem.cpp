@@ -31,8 +31,10 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "UIEditorMenus.h"     // For TextItemEditorAttributeMenuUI def
 #endif
+
+#include "stringUtils.h"
+#include "RenderUtils.h"
 
 
 #include <math.h>
@@ -398,58 +400,11 @@ void TextItem::onGeomChanged()
 }
 
 
-#ifndef ZAP_DEDICATED
-// Static method: Provide hook into the object currently being edited with the attrubute editor for callback purposes
-BfObject *TextItem::getAttributeEditorObject()     
+void TextItem::textEditedCallback(string text, BfObject *obj)
 {
-   return mAttributeMenuUI->getObject(); 
-}
-
-
-static void textEditedCallback(string text)
-{
-   TextItem *textItem = dynamic_cast<TextItem *>(TextItem::getAttributeEditorObject());
+   TextItem *textItem = dynamic_cast<TextItem *>(obj);
    textItem->setText(text);
 }
-
-
-EditorAttributeMenuUI *TextItem::getAttributeMenu()
-{
-   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
-   if(!mAttributeMenuUI)
-   {
-      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
-
-      // "Blah" will be overwritten when startEditingAttrs() is called
-      TextEntryMenuItem *menuItem = new TextEntryMenuItem("Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
-      menuItem->setTextEditedCallback(textEditedCallback);
-
-      mAttributeMenuUI->addMenuItem(menuItem);
-
-      // Add our standard save and exit option to the menu
-      mAttributeMenuUI->addSaveAndQuitMenuItem();
-   }
-
-   return mAttributeMenuUI;
-}
-
-
-// Get the menu looking like what we want
-void TextItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   attributeMenu->getMenuItem(0)->setValue(mText);
-}
-
-
-// Retrieve the values we need from the menu
-void TextItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   mText = attributeMenu->getMenuItem(0)->getValue();
-}
-
-#endif
-
 
 //// Lua methods
 

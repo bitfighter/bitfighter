@@ -27,9 +27,8 @@
 #ifndef _GEOMETRY_H_
 #define _GEOMETRY_H_
 
-#include "BfObject.h" 
+#include "Geometry_Base.h"    // Parent class
 #include "Point.h"
-#include "Rect.h"
 #include "tnlVector.h"
 
 namespace TNL

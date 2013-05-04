@@ -26,18 +26,16 @@
 #include "InputCode.h"
 #include "GameSettings.h"        // For access to UseJoystickNumber static
 
-#include "tnlJournal.h"
-#include "tnlLog.h"              // For logprintf
-
-#include "zapjournal.h"          // For journaling support
 #include "stringUtils.h"         // For itos
 
-#include <ctype.h>
+#include "tnlLog.h"              // For logprintf
 
 #ifndef ZAP_DEDICATED
-#  include "Joystick.h"
 #  include "SDL.h"
 #endif
+
+
+#include <ctype.h>
 
 #ifdef TNL_OS_WIN32
 #  include <windows.h>           // For ARRAYSIZE 

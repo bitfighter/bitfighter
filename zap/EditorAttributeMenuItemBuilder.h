@@ -48,7 +48,6 @@ public:
    EditorAttributeMenuUI *getAttributeMenu(BfObject *obj);
    static void startEditingAttrs(EditorAttributeMenuUI *attributeMenu, BfObject *obj);
    static void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu, BfObject *obj);
-
 };
 
 

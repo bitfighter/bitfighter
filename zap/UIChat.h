@@ -29,7 +29,7 @@
 #include "tnlNetBase.h"
 
 #include "game.h"
-#include "UI.h"
+#include "UI.h"      // Parent class of ChatUserInterface
 #include "Color.h"
 #include "lineEditor.h"
 

@@ -25,10 +25,13 @@
 
 #include "UIMenuItems.h"
 #include "UIMenus.h"
+#include "UIEditorMenus.h"
+
 #include "UI.h"
 #include "ScreenInfo.h"    // For gScreenInfo stuff
 #include "FontManager.h"
 
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 
@@ -1228,9 +1231,8 @@ bool TextEntryMenuItem::handleKey(InputCode inputCode)
    if(inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)
    {
       mLineEditor.handleBackspace(inputCode); 
-
       if(mTextEditedCallback)
-         mTextEditedCallback(mLineEditor.getString());
+         mTextEditedCallback(mLineEditor.getString(), static_cast<EditorAttributeMenuUI *>(mMenu)->getObject());
 
       return true;
    }
@@ -1252,7 +1254,7 @@ void TextEntryMenuItem::handleTextInput(char ascii)
       mLineEditor.addChar(ascii);
 
       if(mTextEditedCallback)
-         mTextEditedCallback(mLineEditor.getString());
+         mTextEditedCallback(mLineEditor.getString(), static_cast<EditorAttributeMenuUI *>(mMenu)->getObject());
    }
 }
 
@@ -1311,7 +1313,7 @@ void TextEntryMenuItem::activatedWithShortcutKey()
 }
 
 
-void TextEntryMenuItem::setTextEditedCallback(void(*callback)(string))
+void TextEntryMenuItem::setTextEditedCallback(void(*callback)(string, BfObject *))
 {
    mTextEditedCallback = callback;
 }

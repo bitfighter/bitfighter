@@ -28,16 +28,15 @@
 
 #include "UI.h"
 #include "UILevelInfoDisplayer.h"
-#include "ChatCommands.h"
-#include "Point.h"
-#include "game.h"
-#include "ship.h"                // For ShipModuleCount
 #include "HelperManager.h"   
 #include "LoadoutIndicator.h"
 #include "TimeLeftRenderer.h"
 #include "FpsRenderer.h"
-#include "sparkManager.h"
-#include "HelpItemManager.h"     // For HelpItem enum
+#include "HelpItemManager.h"     
+
+#include "SoundEffect.h"
+
+#include "Point.h"
 
 
 namespace Zap

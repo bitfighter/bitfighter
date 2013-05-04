@@ -27,7 +27,8 @@
 #include <math.h>
 
 #ifndef ZAP_DEDICATED
-#include "UI.h"
+#  include "UI.h"
+#  include "RenderUtils.h"
 #endif
 
 namespace Zap
