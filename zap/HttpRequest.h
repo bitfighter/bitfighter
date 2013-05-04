@@ -58,7 +58,7 @@ public:
    void parseResponse(string response);
    void setData(const string& key, const string& value);
    void setMethod(const string&);
-   void setTimeout(int timeout);
+   void setTimeout(U32 timeout);
    bool send();
 
    bool sendRequest(string request);
@@ -68,6 +68,7 @@ private:
    TNL::Address* mLocalAddress;
    TNL::Address* mRemoteAddress;
    map<string, string> mData;
+   string mUrl;
    string mMethod;
    string mRequest;
    string mResponse;
@@ -75,8 +76,7 @@ private:
    string mResponseBody;
    int mResponseCode;
    TNL::Socket* mSocket;
-   int mTimeout;
-   string mUrl;
+   U32 mTimeout;
 };
 
 }
