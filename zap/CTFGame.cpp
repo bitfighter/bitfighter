@@ -25,11 +25,9 @@
 
 #include "CTFGame.h"
 #include "flagItem.h"
-#include "ClientInfo.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "UIGame.h"
 #endif
 
 #include <stdio.h>

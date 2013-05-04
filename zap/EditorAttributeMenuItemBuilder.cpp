@@ -27,6 +27,7 @@
 #include "BfObject.h"
 #include "UIEditorMenus.h"
 #include "moveObject.h"
+#include "CoreGame.h"      // For CoreItem static values
 
 #include "textItem.h"
 
@@ -47,6 +48,11 @@ void EditorAttributeMenuItemBuilder::initialize(ClientGame *game)
 }
 
 
+// Since many of these attribute menus will never be shown in a given session, and each is relatively inexpensive to build,
+// we'll create them lazily on an as-needed basis.  Each section below has a static pointer enclosed in a block so that it
+// will be isloated from other similar variables with the same name.  Since these are statics, they will be destroyed only
+// when this object is destroyed, which will be when the game exits.
+
 EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject *obj)
 {
    TNLAssert(mInitialized, "Must initialize before use!");
@@ -57,7 +63,6 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
       {
          static EditorAttributeMenuUI *attributeMenuUI = NULL;
 
-         // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
          if(!attributeMenuUI)
          {
             attributeMenuUI = new EditorAttributeMenuUI(mGame);
@@ -98,6 +103,26 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
          }
 
           return attributeMenuUI;
+      }
+
+      case CoreTypeNumber:
+      {
+         static EditorAttributeMenuUI *attributeMenuUI = NULL;
+
+         if(!attributeMenuUI)
+         {
+            ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+
+            attributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+            attributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreItem::CoreDefaultStartingHealth,
+                                         1, 1, S32(CoreItem::DamageReductionRatio), "", "", ""));
+
+            // Add our standard save and exit option to the menu
+            attributeMenuUI->addSaveAndQuitMenuItem();
+         }
+
+         return attributeMenuUI;
       }
 
       case TextItemTypeNumber:
@@ -144,6 +169,10 @@ void EditorAttributeMenuItemBuilder::startEditingAttrs(EditorAttributeMenuUI *at
          attributeMenu->getMenuItem(0)->setIntValue(static_cast<AbstractSpawn *>(obj)->getSpawnTime());
          break;
 
+      case CoreTypeNumber:
+         attributeMenu->getMenuItem(0)->setIntValue(S32(static_cast<CoreItem *>(obj)->getStartingHealth() + 0.5));
+         break;
+
       case TextItemTypeNumber:
          attributeMenu->getMenuItem(0)->setValue(static_cast<TextItem *>(obj)->getText());
          break;
@@ -168,6 +197,10 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
       case AsteroidSpawnTypeNumber:
       case FlagSpawnTypeNumber:
          static_cast<AbstractSpawn *>(obj)->setSpawnTime(attributeMenu->getMenuItem(0)->getIntValue());
+         break;
+
+      case CoreTypeNumber:
+         static_cast<CoreItem *>(obj)->setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()));
          break;
 
       case TextItemTypeNumber:

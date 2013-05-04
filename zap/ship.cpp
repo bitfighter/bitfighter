@@ -236,7 +236,7 @@ void Ship::onGhostRemove()
 }
 
 
-F32 Ship::getHealth()
+F32 Ship::getHealth() const
 {
    return mHealth;
 }

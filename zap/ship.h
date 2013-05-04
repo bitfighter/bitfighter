@@ -212,7 +212,7 @@ public:
    explicit Ship(lua_State *L = NULL);                                             // Combined Lua / C++ default constructor
    virtual ~Ship();                                                                // Destructor
 
-   F32 getHealth();
+   F32 getHealth() const;
    S32 getEnergy() const;
 
    // Related to mounting and carrying items

@@ -119,7 +119,7 @@ public:
    void damageObject(DamageInfo *damageInfo);
    void checkHealthBounds();
    bool collide(BfObject *hitObject);
-   F32 getHealth();
+   F32 getHealth() const;
    void healObject(S32 time);
    Point mountToWall(const Point &pos, WallSegmentManager *wallSegmentManager);
 

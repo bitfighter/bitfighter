@@ -1147,7 +1147,7 @@ bool BfObject::collisionPolyPointIntersect(Point center, F32 radius)
 }
 
 
-F32 BfObject::getHealth()
+F32 BfObject::getHealth() const
 {
    return 1;
 }

@@ -26,8 +26,8 @@
 #ifndef COREGAME_H_
 #define COREGAME_H_
 
-#include "gameType.h"
-#include "item.h"
+#include "gameType.h"   // Parent class for CoreGameType
+#include "item.h"       // Parent class for CoreItem
 
 
 namespace Zap {
@@ -112,13 +112,14 @@ class CoreItem : public Item
 typedef Item Parent;
 
 public:
-   static const F32 PANEL_ANGLE;          // = FloatTau / (F32) CoreItem::CORE_PANELS;
+   static const F32 PANEL_ANGLE;                         // = FloatTau / (F32) CoreItem::CORE_PANELS;
+   static const F32 DamageReductionRatio;
    static const U32 CoreRadius = 100;
+   static const U32 CoreDefaultStartingHealth = 40;      // In ship-damage equivalents; these will be divided amongst all panels
 
 private:
    static const U32 CoreMinWidth = 20;
-   static const U32 CoreDefaultStartingHealth = 40;     // In ship-damage equivalents; these will be divided amongst all panels
-   static const U32 CoreHeartbeatStartInterval = 2000;  // In milliseconds
+   static const U32 CoreHeartbeatStartInterval = 2000;   // In milliseconds
    static const U32 CoreHeartbeatMinInterval = 500;
    static const U32 CoreAttackedWarningDuration = 600;
    static const U32 ExplosionInterval = 600;
@@ -126,8 +127,6 @@ private:
 
    U32 mCurrentExplosionNumber;
    PanelGeom mPanelGeom;
-
-   static const F32 DamageReductionRatio;
 
    bool mHasExploded;
    bool mBeingAttacked;
@@ -140,9 +139,6 @@ private:
    Timer mExplosionTimer;        // Client-side timer
    Timer mAttackedWarningTimer;  // Server-side timer
 
-#ifndef ZAP_DEDICATED
-   static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
-#endif
 protected:
    enum MaskBits {
       PanelDamagedMask = Parent::FirstFreeMask << 0,  // each bit mask have own panel updates (PanelDamagedMask << n)
@@ -165,8 +161,9 @@ public:
    bool isBeingAttacked();
 
    void setStartingHealth(F32 health);
-   F32 getTotalCurrentHealth();           // Returns total current health of all panels
-   F32 getHealth();                       // Returns overall current health of item as a ratio between 0 and 1
+   F32 getStartingHealth() const;
+   F32 getTotalCurrentHealth() const;     // Returns total current health of all panels
+   F32 getHealth() const;                       // Returns overall current health of item as a ratio between 0 and 1
    bool isPanelDamaged(S32 panelIndex);
    bool isPanelInRepairRange(const Point &origin, S32 panelIndex);
 
@@ -198,13 +195,7 @@ public:
 
    TNL_DECLARE_CLASS(CoreItem);
 
-#ifndef ZAP_DEDICATED
-   // These four methods are all that's needed to add an editable attribute to a class...
-   EditorAttributeMenuUI *getAttributeMenu();
-   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
-   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
    void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
-#endif
 
    ///// Editor methods
    const char *getEditorHelpString();

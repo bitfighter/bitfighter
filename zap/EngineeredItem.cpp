@@ -846,7 +846,7 @@ bool EngineeredItem::collide(BfObject *hitObject)
 }
 
 
-F32 EngineeredItem::getHealth()
+F32 EngineeredItem::getHealth() const
 {
    return mHealth;
 }

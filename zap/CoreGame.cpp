@@ -24,16 +24,18 @@
 //------------------------------------------------------------------------------------
 
 #include "CoreGame.h"
-#include "item.h"
-#include "projectile.h"
-#include "stringUtils.h"
-#include "ClientInfo.h"
+
+#include "SoundSystem.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "UIEditorMenus.h"
+//#  include "UIEditorMenus.h"  // <==
 #  include "gameObjectRender.h"
 #endif
+
+#include "Colors.h"
+
+#include "stringUtils.h"
 
 #include <cmath>
 
@@ -258,12 +260,7 @@ TNL_IMPLEMENT_NETOBJECT(CoreGameType);
 ////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(CoreItem);
-class LuaCore;
-
-// Statics:
-#ifndef ZAP_DEDICATED
-EditorAttributeMenuUI *CoreItem::mAttributeMenuUI = NULL;
-#endif
+//class LuaCore;
 
 
 // Ratio at which damage is reduced so that Core Health can fit between 0 and 1.0
@@ -282,7 +279,7 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
-   setStartingHealth(F32(CoreDefaultStartingHealth) / DamageReductionRatio);      // Hits to kill
+   setStartingHealth(F32(CoreDefaultStartingHealth));      // Hits to kill
 
    mHasExploded = false;
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
@@ -304,7 +301,7 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
       {
          setPos(L, 1);
          setTeam(L, 2);
-         setStartingHealth(getFloat(L, 3) / DamageReductionRatio);
+         setStartingHealth(getFloat(L, 3));
       }
    }
 
@@ -397,49 +394,11 @@ void CoreGameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) c
 #endif
 
 
-#ifndef ZAP_DEDICATED
-
-EditorAttributeMenuUI *CoreItem::getAttributeMenu()
-{
-   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
-   if(!mAttributeMenuUI)
-   {
-      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-
-      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
-
-      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreDefaultStartingHealth,
-            1, 1, S32(DamageReductionRatio), "", "", ""));
-
-      // Add our standard save and exit option to the menu
-      mAttributeMenuUI->addSaveAndQuitMenuItem();
-   }
-
-   return mAttributeMenuUI;
-}
-
-
-// Get the menu looking like what we want
-void CoreItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   attributeMenu->getMenuItem(0)->setIntValue(S32(mStartingHealth * DamageReductionRatio + 0.5));
-}
-
-
-// Retrieve the values we need from the menu
-void CoreItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()) / DamageReductionRatio);
-}
-
-
 // Render some attributes when item is selected but not being edited
 void CoreItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
    keys.push_back("Health");   values.push_back(itos(S32(mStartingHealth * DamageReductionRatio + 0.5)));
 }
-
-#endif
 
 
 const char *CoreItem::getOnScreenName()     { return "Core";  }
@@ -821,7 +780,7 @@ void CoreItem::idle(BfObject::IdleCallPath path)
 
 void CoreItem::setStartingHealth(F32 health)
 {
-   mStartingHealth = health;
+   mStartingHealth = health / DamageReductionRatio;
 
    // Now that starting health has been set, divide it amongst the panels
    mStartingPanelHealth = mStartingHealth / CORE_PANELS;
@@ -832,7 +791,13 @@ void CoreItem::setStartingHealth(F32 health)
 }
 
 
-F32 CoreItem::getTotalCurrentHealth()
+F32 CoreItem::getStartingHealth() const
+{
+   return mStartingHealth * DamageReductionRatio;
+}
+
+
+F32 CoreItem::getTotalCurrentHealth() const
 {
    F32 total = 0;
 
@@ -843,7 +808,7 @@ F32 CoreItem::getTotalCurrentHealth()
 }
 
 
-F32 CoreItem::getHealth()
+F32 CoreItem::getHealth() const
 {
    // health is from 0 to 1.0
    return getTotalCurrentHealth() / mStartingHealth;
@@ -991,7 +956,7 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
       return false;
 
    setTeam(atoi(argv[0]));
-   setStartingHealth((F32)atof(argv[1]) / DamageReductionRatio);
+   setStartingHealth((F32)atof(argv[1]));
 
    if(!Parent::processArguments(argc-2, argv+2, game))
       return false;
@@ -1098,7 +1063,7 @@ S32 CoreItem::lua_getFullHealth(lua_State *L)
 S32 CoreItem::lua_setFullHealth(lua_State *L) 
 { 
    checkArgList(L, functionArgs, "CoreItem", "setFullHealth");
-   setStartingHealth(getFloat(L, 1) / DamageReductionRatio);
+   setStartingHealth(getFloat(L, 1));
 
    return 0;     
 }
