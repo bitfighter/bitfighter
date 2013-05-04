@@ -2,7 +2,9 @@
 #include "tnlPlatform.h"
 
 using namespace TNL;
-namespace Zap{
+
+namespace Zap
+{
 
 
 ChatCheck::ChatCheck()
