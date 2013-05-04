@@ -28,10 +28,7 @@
 
 
 #include "helperMenu.h"    // Parent
-
-#include "UI.h"
-#include "Timer.h"
-#include "InputCode.h"
+#include "lineEditor.h"
 
 namespace Zap
 {

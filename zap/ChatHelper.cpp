@@ -25,12 +25,10 @@
 
 #include "ChatHelper.h"
 
-#include "UIChat.h"           // For font sizes and such
 #include "ChatCommands.h"
 #include "ClientGame.h"
-#include "ClientInfo.h"
-#include "gameType.h"
 #include "Console.h"
+#include "UIChat.h"           // For font sizes and such
 #include "UIInstructions.h"   // For code to activate help screen
 
 #include "ScissorsManager.h"
@@ -304,9 +302,8 @@ static void makeTeamNameList(const Game *game, Vector<string> &nameCandidateList
 {
    nameCandidateList.clear();
 
-   if(game->getGameType())
-      for(S32 i = 0; i < game->getTeamCount(); i++)
-         nameCandidateList.push_back(game->getTeamName(i).getString());
+   for(S32 i = 0; i < game->getTeamCount(); i++)
+      nameCandidateList.push_back(game->getTeamName(i).getString());
 }
 
 
@@ -483,14 +480,11 @@ void ChatHelper::issueChat()
    if(!mLineEditor.isEmpty())
    {
       // Check if chat buffer holds a message or a command
-      if(!isCmdChat())    // It's not a command
-      {
-         GameType *gameType = getGame()->getGameType();
-         if(gameType)
-            gameType->c2sSendChat(mCurrentChatType == GlobalChat, mLineEditor.c_str());   // Broadcast message
-      }
-      else    // It's a command
+      if(isCmdChat())    // It's a command
          runCommand(getGame(), mLineEditor.c_str());
+      else               // It's a chat message
+         getGame()->sendChat(mCurrentChatType == GlobalChat, mLineEditor.c_str());   // Broadcast message
+         
    }
 
    exitHelper();     // Hide chat display
@@ -535,17 +529,12 @@ void ChatHelper::runCommand(ClientGame *game, const char *input)
 // Static method
 void ChatHelper::serverCommandHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameType *gameType = game->getGameType();
+   Vector<StringPtr> args;
 
-   if(gameType)
-   {
-      Vector<StringPtr> args;
+   for(S32 i = 1; i < words.size(); i++)
+      args.push_back(StringPtr(words[i]));
 
-      for(S32 i = 1; i < words.size(); i++)
-         args.push_back(StringPtr(words[i]));
-
-      gameType->c2sSendCommand(StringTableEntry(words[0], false), args);
-   }
+   game->sendCommand(StringTableEntry(words[0], false), args);
 }
 
 

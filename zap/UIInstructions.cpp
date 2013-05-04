@@ -34,6 +34,7 @@
 #include "JoystickRender.h"
 #include "CoreGame.h"         // For coreItem rendering
 #include "ChatCommands.h"
+#include "ChatHelper.h"       // For ChatHelper::chatCmdSize
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"

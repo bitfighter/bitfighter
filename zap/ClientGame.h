@@ -163,9 +163,6 @@ public:
    void activatePlayerMenuUi();
    void renderBasicInterfaceOverlay(bool scoreboardVisible);
 
-   void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
-   void playerJoinedGlobalChat(const StringTableEntry &playerNick);
-   void playerLeftGlobalChat(const StringTableEntry &playerNick);
 
    void onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool playAlert, bool showMessage);
    void onPlayerQuit(const StringTableEntry &name);
@@ -174,6 +171,14 @@ public:
    bool isSpawnDelayed() const;
    void undelaySpawn();
    F32 getUIFadeFactor() const;
+
+
+   // Chat related
+   void sendChat(bool isGlobal, const StringPtr &message);
+   void sendCommand(const StringTableEntry &cmd, const Vector<StringPtr> &args);
+   void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
+   void playerJoinedGlobalChat(const StringTableEntry &playerNick);
+   void playerLeftGlobalChat(const StringTableEntry &playerNick);
 
    // Some FxManager passthroughs
    void clearSparks();

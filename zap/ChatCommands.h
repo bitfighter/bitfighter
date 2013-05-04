@@ -26,7 +26,13 @@
 #ifndef _CHATCMDS_H_
 #define _CHATCMDS_H_
 
-#include "UIGame.h"
+#include "tnlTypes.h"
+#include "tnlVector.h"
+
+#include <string>
+
+using namespace TNL;
+using namespace std;
 
 namespace Zap
 {
@@ -53,6 +59,9 @@ enum HelpCategories {
 };
 
 
+class ClientGame;
+
+
 struct CommandInfo 
 {
    string cmdName;
@@ -69,6 +78,7 @@ struct CommandInfo
 }
 
 using namespace Zap;
+
 
 namespace ChatCommands 
 {

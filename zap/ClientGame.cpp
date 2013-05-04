@@ -836,6 +836,20 @@ void ClientGame::playerLeftGlobalChat(const StringTableEntry &playerNick)
 }
 
 
+void ClientGame::sendChat(bool isGlobal, const StringPtr &message)
+{
+   if(getGameType())
+      getGameType()->c2sSendChat(isGlobal, message);
+}
+
+
+void ClientGame::sendCommand(const StringTableEntry &cmd, const Vector<StringPtr> &args)
+{
+   if(getGameType())
+      getGameType()->c2sSendCommand(cmd, args);
+}
+
+
 // A new player has just joined the game; if isLocalClient is true, that new player is us!
 // ClientInfo will be a RemoteClientInfo
 void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool playAlert, bool showMessage)

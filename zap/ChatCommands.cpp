@@ -26,11 +26,12 @@
 #include "ChatCommands.h"
 
 #include "ClientGame.h"
-#include "ClientInfo.h"
 #include "gameType.h"
-#include "LoadoutTracker.h"
 #include "LevelDatabaseDownloadThread.h"
 #include "LevelSpecifierEnum.h"
+
+#include "UIManager.h"
+#include "UIGame.h"
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
