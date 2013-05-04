@@ -24,10 +24,11 @@
 //------------------------------------------------------------------------------------
 
 #include "Zone.h"
+
 #include "game.h"
-#include "stringUtils.h"
-#include "Geometry.h"
 #include "Colors.h"
+
+#include "gameObjectRender.h"
 
 namespace Zap
 {

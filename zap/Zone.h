@@ -26,11 +26,8 @@
 #ifndef _ZONE_H_
 #define _ZONE_H_
 
-#include "BfObject.h"
-#include "gameType.h"
-#include "gameNetInterface.h"
-#include "gameObjectRender.h"
-#include "polygon.h"
+#include "polygon.h"          // Parent class
+
 
 namespace Zap
 {
