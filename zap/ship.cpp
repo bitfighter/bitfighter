@@ -30,6 +30,7 @@
 #include "projectile.h"
 #include "Zone.h"
 #include "Colors.h"
+#include "gameObjectRender.h"
 
 
 #ifdef TNL_OS_WIN32
