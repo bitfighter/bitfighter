@@ -26,10 +26,7 @@
 #ifndef _POLYGON_H_
 #define _POLYGON_H_
 
-#include "BfObject.h"
-#include "EditorObject.h"     // For PolygonObject parentage
-#include "LuaScriptRunner.h"
-#include "Geometry.h"
+#include "BfObject.h"     // For CentroidObject def
 
 namespace Zap
 {

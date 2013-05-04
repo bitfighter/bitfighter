@@ -31,15 +31,9 @@
 #endif
 
 #include "UIManager.h"
-#include "InputCode.h"
-#include "SharedConstants.h"
-#include "Timer.h"
 #include "lineEditor.h"
-#include "config.h"           // For DisplayMode enum
-#include "stringUtils.h"      // For itos
 
-#include "RenderUtils.h"
-
+#include "Timer.h"
 #include "tnl.h"
 #include "tnlLog.h"
 
@@ -62,7 +56,9 @@ extern F32 gLineWidth4;
 
 class Game;
 class ClientGame;
+class GameSettings;
 class UIManager;
+class Color;
 
 class UserInterface
 {
@@ -89,7 +85,12 @@ protected:
 public:
    explicit UserInterface(ClientGame *game);       // Constructor
    virtual ~UserInterface();                       // Destructor
+
+   static const S32 MOUSE_SCROLL_INTERVAL = 100;
    static const S32 MAX_PASSWORD_LENGTH = 32;      // Arbitrary, doesn't matter, but needs to be _something_
+
+   static const S32 MaxServerNameLen = 40;
+   static const S32 MaxServerDescrLen = 254;
 
    UIID getMenuID() const;                   // Retrieve interface's name
    UIID getPrevMenuID() const;               // Retrieve previous interface's name

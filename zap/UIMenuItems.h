@@ -72,12 +72,13 @@ class MenuItem : public LuaObject
 private:
    S32 mIndex;
    MenuItemSize mMenuItemSize;
-   MenuUserInterface *mMenu;
    virtual void initialize();
 
 protected:
    string mDisplayVal;     // Text displayed on menu
    string mHelp;           // An optional help string
+      
+   MenuUserInterface *mMenu;
 
    Color mSelectedColor;
    Color mUnselectedColor;
@@ -395,7 +396,7 @@ private:
 
 protected:
       LineEditor mLineEditor;
-      void (*mTextEditedCallback)(string);
+      void (*mTextEditedCallback)(string, BfObject *);
 
 public:
    // Contstuctor
@@ -425,7 +426,7 @@ public:
 
    virtual void activatedWithShortcutKey();
 
-   virtual void setTextEditedCallback(void (*callback)(string));
+   virtual void setTextEditedCallback(void (*callback)(string, BfObject *));
 
    virtual void setSecret(bool secret);
 

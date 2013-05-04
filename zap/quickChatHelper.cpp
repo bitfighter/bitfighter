@@ -36,6 +36,7 @@
 #include "JoystickRender.h"
 #include "ClientGame.h"
 
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 #include <ctype.h>

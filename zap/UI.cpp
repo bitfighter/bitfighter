@@ -22,19 +22,10 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //------------------------------------------------------------------------------------
-#include "tnl.h"
 
-using namespace TNL;
-using namespace std;
 
 #include "UI.h"
-#include "move.h"
-#include "InputCode.h"
-#include "UIMenus.h"
-#include "UIDiagnostics.h"
-#include "UIChat.h"
-#include "input.h"               // For MaxJoystickButtons const
-#include "config.h"
+
 #include "ClientGame.h"
 #include "Console.h"             // For console rendering
 #include "Colors.h"
@@ -44,22 +35,16 @@ using namespace std;
 #include "VideoSystem.h"
 #include "SoundSystem.h"
 #include "OpenglUtils.h"
-#include "MathUtils.h"           // For RADIANS_TO_DEGREES def
 #include "LoadoutIndicator.h"    // For LoadoutIndicatorHeight
 
-#ifdef TNL_OS_MOBILE
-#  include "SDL_opengles.h"
-#else
-#  include "SDL_opengl.h"
-#endif
-
+#include "MathUtils.h"           // For RADIANS_TO_DEGREES def
+#include "RenderUtils.h"
 
 #include <string>
 
-#include <math.h>
-
-
 using namespace std;
+using namespace TNL;
+
 namespace Zap
 {
 

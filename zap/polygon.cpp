@@ -24,13 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "polygon.h"
-#include "GeomUtils.h"           // For polygon triangulation
 #include "gameObjectRender.h"
 #include "Colors.h"
-
-#ifndef ZAP_DEDICATED
-//#include "UI.h"
-#endif
 
 namespace Zap
 {

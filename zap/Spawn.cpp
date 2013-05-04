@@ -25,20 +25,14 @@
 
 #include "Spawn.h"
 
-#ifndef ZAP_DEDICATED
-#  include "UIMenuItems.h"
-#  include "UIEditorMenus.h"
-#  include "ClientGame.h"
-#endif
-
 #include "game.h"
-#include "gameType.h"
-#include "NexusGame.h"           // For FlagSpawn::spawn()
 
 #include "stringUtils.h"         // For itos()
 #include "gameObjectRender.h"    // For renderSquareItem(), renderFlag(), drawCircle()
 #include "moveObject.h"          // For Circle, Asteroid class defs
 
+#include "gameConnection.h"
+#include "tnlRandom.h"
 
 namespace Zap
 {
@@ -50,10 +44,11 @@ namespace Zap
 
 // TODO: Move all time related stuff down to ItemSpawn
 
+// Time is in seconds
 AbstractSpawn::AbstractSpawn(const Point &pos, S32 time)
 {
    setPos(pos);
-   setRespawnTime(time);
+   setRespawnTime((F32)time);
 };
 
 
@@ -118,6 +113,18 @@ string AbstractSpawn::toLevelCode(F32 gridSize) const
 }
 
 
+void AbstractSpawn::setSpawnTime(S32 spawnTime)
+{
+   mSpawnTime = spawnTime;
+}
+
+
+S32 AbstractSpawn::getSpawnTime() const
+{
+   return mSpawnTime;
+}
+
+
 bool AbstractSpawn::updateTimer(U32 deltaT)
 {
    return mTimer.update(deltaT);
@@ -136,43 +143,6 @@ U32 AbstractSpawn::getPeriod()
 }
 
 
-#ifndef ZAP_DEDICATED
-
-EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()
-{
-   if(getDefaultRespawnTime() == -1)  // No editing RespawnTimer for Ship Spawn
-      return NULL;
-
-   if(!mAttributeMenuUI)
-   {
-      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-
-      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
-
-      CounterMenuItem *menuItem = new CounterMenuItem("Spawn Timer:", 999, 1, 0, 1000, "secs", "Never spawns", 
-                                                      "Time it takes for each item to be spawned");
-      mAttributeMenuUI->addMenuItem(menuItem);
-
-      // Add our standard save and exit option to the menu
-      mAttributeMenuUI->addSaveAndQuitMenuItem();
-   }
-
-   return mAttributeMenuUI;
-}
-
-
-void AbstractSpawn::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   attributeMenu->getMenuItem(0)->setIntValue(mSpawnTime);
-}
-
-
-void AbstractSpawn::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   mSpawnTime = attributeMenu->getMenuItem(0)->getIntValue();
-}
-
-
 // Render some attributes when item is selected but not being edited
 void AbstractSpawn::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
@@ -187,7 +157,6 @@ void AbstractSpawn::fillAttributesVectors(Vector<string> &keys, Vector<string> &
       values.push_back(itos(mSpawnTime) + " sec" + ( mSpawnTime != 1 ? "s" : ""));
 }
 
-#endif
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -550,9 +519,7 @@ void AsteroidSpawn::renderLayer(S32 layerIndex)
    if(layerIndex != -1)
       return;
 
-   GameType *gameType = getGame()->getGameType();
-
-   S32 time = gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset();
+   S32 time = getGame()->getRenderTime();
 
    renderAsteroidSpawn(getPos(), time);
 #endif
@@ -801,10 +768,8 @@ FlagSpawn *FlagSpawn::clone() const
 
 void FlagSpawn::spawn()
 {
-   Parent::spawn();     // Resets timer
-
-   if(getGame()->getGameType()->getGameTypeId() == NexusGame)
-      NexusGameType::releaseFlag(getGame(), getPos());
+   Parent::spawn();                    // Resets timer
+   getGame()->releaseFlag(getPos());   // Asserts if game is not Nexus
 }
 
 

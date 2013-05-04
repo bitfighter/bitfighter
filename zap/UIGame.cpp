@@ -28,12 +28,6 @@
 
 #include "UIGame.h"
 
-#include "ChatHelper.h"
-#include "quickChatHelper.h"
-#include "loadoutHelper.h"
-#include "engineerHelper.h"
-#include "TeamShuffleHelper.h"
-
 #include "gameConnection.h"
 #include "UIMenus.h"
 #include "UIInstructions.h"
@@ -41,8 +35,6 @@
 #include "UIMessage.h"
 #include "UIDiagnostics.h"
 #include "UIErrorMessage.h"
-#include "EventManager.h"
-#include "gameType.h"
 #include "IniFile.h"             // For access to gINI functions
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "shipItems.h"           // For EngineerBuildObjects
@@ -50,26 +42,19 @@
 #include "BotNavMeshZone.h"
 #include "projectile.h"          // For SpyBug
 #include "robot.h"
-#include "input.h"
-#include "loadoutHelper.h"
-#include "gameNetInterface.h"
-#include "SoundSystem.h"
+
 #include "md5wrapper.h"          // For submission of passwords
 #include "Console.h"             // Our console object
-#include "config.h"              // For Getmap level dir
 #include "ScreenInfo.h"
 #include "ClientGame.h"
-#include "ClientInfo.h"
 #include "Colors.h"
 #include "Cursor.h"
-#include "CoreGame.h"
 #include "ScissorsManager.h"
 #include "voiceCodec.h"
 
-
 #include "tnlEndian.h"
 
-#include "SDL.h"
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 #include <ctype.h>
@@ -437,7 +422,7 @@ void GameUserInterface::render()
 
    mVoiceRecorder.render();      // This is the indicator that someone is sending a voice msg
 
-   mFpsRenderer.render();        // Display running average FPS
+   mFpsRenderer.render(gScreenInfo.getGameCanvasWidth());     // Display running average FPS
 
    mHelperManager.render();
 
@@ -618,26 +603,26 @@ void GameUserInterface::renderProgressBar() const
       glColor(Colors::green, mShowProgressBar ? 1 : mProgressBarFadeTimer.getFraction());
 
       // Outline
-      const S32 left = 200;
-      const S32 width = gScreenInfo.getGameCanvasWidth() - 2 * left;
-      const S32 height = 10;
+      const F32 left = 200;
+      const F32 width = gScreenInfo.getGameCanvasWidth() - 2 * left;
+      const F32 height = 10;
 
       // For some reason, there are occasions where the status bar doesn't progress all the way over during the load process.
       // The problem is that, for some reason, some objects do not add themselves to the loaded object counter, and this creates
       // a disconcerting effect, as if the level did not fully load.  Rather than waste any more time on this problem, we'll just
       // fill in the status bar while it's fading, to make it look like the level fully loaded.  Since the only thing that this
       // whole mechanism is used for is to display something to the user, this should work fine.
-      S32 barWidth = mShowProgressBar ? S32((F32) width * (F32) getGame()->mObjectsLoaded / (F32) gt->mObjectsExpected) : width;
+      F32 barWidth = mShowProgressBar ? S32((F32) width * (F32) getGame()->mObjectsLoaded / (F32) gt->mObjectsExpected) : width;
 
       for(S32 i = 1; i >= 0; i--)
       {
-         S32 w = i ? width : barWidth;
+         F32 w = i ? width : barWidth;
 
          F32 vertices[] = {
-               left,     gScreenInfo.getGameCanvasHeight() - vertMargin,
-               left + w, gScreenInfo.getGameCanvasHeight() - vertMargin,
-               left + w, gScreenInfo.getGameCanvasHeight() - vertMargin - height,
-               left,     gScreenInfo.getGameCanvasHeight() - vertMargin - height
+               left,     F32(gScreenInfo.getGameCanvasHeight() - vertMargin),
+               left + w, F32(gScreenInfo.getGameCanvasHeight() - vertMargin),
+               left + w, F32(gScreenInfo.getGameCanvasHeight() - vertMargin - height),
+               left,     F32(gScreenInfo.getGameCanvasHeight() - vertMargin - height)
          };
          renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GL_LINE_LOOP : GL_TRIANGLE_FAN);
       }
@@ -676,22 +661,22 @@ void GameUserInterface::renderReticle() const
       };
 
       static F32 colors[] = {
-            0, 1, 0, 0.7,  //Colors::green
-            0, 1, 0, 0.7,
-            0, 1, 0, 0.7,
-            0, 1, 0, 0.7,
+            0.0f, 1.0f, 0.0f, 0.7f,  //Colors::green
+            0.0f, 1.0f, 0.0f, 0.7f,
+            0.0f, 1.0f, 0.0f, 0.7f,
+            0.0f, 1.0f, 0.0f, 0.7f,
 
-            0, 1, 0, 0,
-            0, 1, 0, 0.7,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.7f,
 
-            0, 1, 0, 0.7,
-            0, 1, 0, 0,
+            0.0f, 1.0f, 0.0f, 0.7f,
+            0.0f, 1.0f, 0.0f, 0.0f,
 
-            0, 1, 0, 0,
-            0, 1, 0, 0.7,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.7f,
 
-            0, 1, 0, 0.7,
-            0, 1, 0, 0,
+            0.0f, 1.0f, 0.0f, 0.7f,
+            0.0f, 1.0f, 0.0f, 0.0f,
       };
 
       renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
@@ -1415,10 +1400,10 @@ void GameUserInterface::VoiceRecorder::render() const
       // Render low/high volume lines
       glColor(1, 1 ,1);
       F32 vertices[] = {
-            10, 130,
-            10, 145,
-            10 + totalLineCount * 2, 130,
-            10 + totalLineCount * 2, 145
+            10.0f,                        130.0f,
+            10.0f,                        145.0f,
+            F32(10 + totalLineCount * 2), 130.0f,
+            F32(10 + totalLineCount * 2), 145.0f
       };
       renderVertexArray(vertices, ARRAYSIZE(vertices)/2, GL_LINES);
 
@@ -1455,10 +1440,10 @@ void GameUserInterface::VoiceRecorder::render() const
             colorArray[(8*(i-1))+7] = 1;
          }
 
-         vertexArray[4*(i-1)]     = 10 + i * 2;
-         vertexArray[(4*(i-1))+1] = 130;
-         vertexArray[(4*(i-1))+2] = 10 + i * 2;
-         vertexArray[(4*(i-1))+3] = 145;
+         vertexArray[4*(i-1)]     = F32(10 + i * 2);
+         vertexArray[(4*(i-1))+1] = F32(130);
+         vertexArray[(4*(i-1))+2] = F32(10 + i * 2);
+         vertexArray[(4*(i-1))+3] = F32(145);
       }
 
       renderColorVertexArray(vertexArray, colorArray, S32(full*2), GL_LINES);

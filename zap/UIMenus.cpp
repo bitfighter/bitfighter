@@ -25,35 +25,23 @@
 
 #include "UIMenus.h"
 
-#include "UINameEntry.h"
 #include "UIGame.h"
-#include "UIQueryServers.h"
-#include "UICredits.h"
-#include "UIChat.h"
-#include "UIEditor.h"
-#include "UIInstructions.h"
-#include "UIDiagnostics.h"
-#include "UIKeyDefMenu.h"
-#include "UIErrorMessage.h"
-#include "UIHighScores.h"
+#include "UIEditor.h"         // Can get rid of this with a passthrough in MenuManager
+#include "UIErrorMessage.h"   // Can get rid of this with a passthrough in MenuManager
 
+#include "Colors.h"
 #include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
 #include "ClientGame.h"
 #include "ServerGame.h"
-#include "ClientInfo.h"
-#include "gameType.h"
-#include "input.h"
+#include "gameType.h"            // Can get rid of this with some simple passthroughs
 #include "IniFile.h"
-#include "config.h"
-#include "Colors.h"
 #include "ScreenInfo.h"
-#include "Joystick.h"
 #include "JoystickRender.h"
 #include "Cursor.h"
 #include "VideoSystem.h"
 #include "FontManager.h"
+#include "RenderUtils.h"
 
-#include "SDL.h"
 #include "OpenglUtils.h"
 
 #include <algorithm>
@@ -1583,10 +1571,10 @@ void HostMenuUserInterface::setupMenus()
    addMenuItem(new MenuItem("START HOSTING", startHostingCallback, "", KEY_H));
 
    addMenuItem(new TextEntryMenuItem("SERVER NAME:", settings->getHostName(), 
-                                     "<Bitfighter Host>", "", QueryServersUserInterface::MaxServerNameLen,  KEY_N));
+                                     "<Bitfighter Host>", "", MaxServerNameLen,  KEY_N));
 
    addMenuItem(new TextEntryMenuItem("DESCRIPTION:", settings->getHostDescr(),                    
-                                     "<Empty>", "", QueryServersUserInterface::MaxServerDescrLen, KEY_D));
+                                     "<Empty>", "", MaxServerDescrLen, KEY_D));
 
    addMenuItem(new TextEntryMenuItem("LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(), 
                                      "<Anyone can change levels>", "", MAX_PASSWORD_LENGTH, KEY_L));

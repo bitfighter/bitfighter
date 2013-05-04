@@ -31,7 +31,7 @@
 #include "Point.h"
 #include "Color.h"
 
-#include "../tnl/tnlNonce.h"
+#include "tnlNonce.h"
 
 #include <stdarg.h>
 
@@ -122,9 +122,6 @@ public:
    U32 mLastUsedServerId;     // A unique ID we can assign to new servers
    Timer mMasterRequeryTimer;
    U32 time;
-
-   static const S32 MaxServerNameLen = 40;
-   static const S32 MaxServerDescrLen = 254;
 
    void advancePage();
    void backPage();

@@ -929,7 +929,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
          continue;
 
       // Check if this pair of objects can damage one another
-      if(getGame()->objectCanDamageObject(info.damagingObject, foundObject))
+      if(!getGame()->objectCanDamageObject(info.damagingObject, foundObject))
          continue;
 
       // Do an LOS check...

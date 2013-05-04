@@ -34,6 +34,7 @@
 #  include "SDL.h"      // For SDL_VERSION_ATLEAST macro
 #endif
 
+
 using namespace TNL;
 
 namespace Zap {

@@ -683,10 +683,10 @@ void UIManager::renderCurrent()
       GLint viewport[4];
       glGetIntegerv(GL_VIEWPORT, viewport);    
 
-      glViewport(viewport[0] + (mLastWasLower ? 1 : -1) * viewport[2] * (1 - mMenuTransitionTimer.getFraction()), 0, viewport[2], viewport[3]);
+      glViewport(viewport[0] + GLint((mLastWasLower ? 1 : -1) * viewport[2] * (1 - mMenuTransitionTimer.getFraction())), 0, viewport[2], viewport[3]);
       mLastUI->render();
 
-      glViewport(viewport[0] - (mLastWasLower ? 1 : -1) * viewport[2] * mMenuTransitionTimer.getFraction(), 0, viewport[2], viewport[3]);
+      glViewport(viewport[0] - GLint((mLastWasLower ? 1 : -1) * viewport[2] * mMenuTransitionTimer.getFraction()), 0, viewport[2], viewport[3]);
       mCurrentInterface->render();
 
       // Restore viewport for posterity

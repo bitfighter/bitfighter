@@ -25,8 +25,6 @@
 
 #include "RenderUtils.h"
 
-#ifndef TEST_BUILD
-
 #include "UI.h"
 #include "ScreenInfo.h"
 
@@ -767,38 +765,4 @@ U32 drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
 
 };
 
-#else
-namespace Zap {
-void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string) { }
-void drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...) { }
-void drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...) { }
-void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string) { }
-void drawString(S32 x, S32 y, S32 size, const char *string) { }
-void drawString(F32 x, F32 y, S32 size, const char *string) { }
-void drawString(F32 x, F32 y, F32 size, const char *string) { }
-void drawStringf(S32 x, S32 y, S32 size, const char *format, ...) { }
-void drawStringf(F32 x, F32 y, F32 size, const char *format, ...) { }
-void drawStringf(F32 x, F32 y, S32 size, const char *format, ...) { }
-void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const Color &bodyColor, const Color &keyColor) { }
-F32 drawCenteredString(F32 x, F32 y, S32 size, const char *string) { return 0; }
-F32 drawCenteredString(F32 x, F32 y, F32 size, const char *string) { return 0; }
-void drawString4Col(S32 y, S32 size, U32 col, const char *string) { }
-void drawString4Colf(S32 y, S32 size, U32 col, const char *format, ...) { }
-void drawTime(S32 x, S32 y, S32 size, S32 timeInMs, const char *prefixString) { }
-F32 getStringWidth(FontContext fontContext, F32 size, const char *string) { return 0; }
-F32 getStringWidth(F32 size, const char *string) { return 0; }
-F32 getStringWidthf(F32 size, const char *format, ...) { return 0; }
-void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode) { }
-void drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode) { }
-void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2) { }
-void drawFilledRect(F32 x1, F32 y1, F32 x2, F32 y2) { }
-void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor) { }
-void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha) { }
-void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor) { }
-void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor) { }
-void drawHollowRect(const Point &p1, const Point &p2) { }
-void drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &outlineColor) { }
-void drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2) { }
-};
 
-#endif

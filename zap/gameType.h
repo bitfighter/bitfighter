@@ -28,11 +28,7 @@
 
 #include "Timer.h"
 #include "flagItem.h"
-#include "teamInfo.h"
 #include "gameStats.h"           // For VersionedGameStats
-#include "statistics.h"
-#include "Spawn.h"
-#include "LoadoutTracker.h"
 #include "barrier.h"             // For WallRec def
 
 #include "gameConnection.h"      // For MessageColors enum
@@ -457,6 +453,8 @@ public:
    virtual void addFlag(FlagItem *flag);
    virtual void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);    // TODO: Make this a mountableItem instead of MoveItem
    virtual void shipTouchFlag(Ship *ship, FlagItem *flag);
+
+   virtual void releaseFlag(const Point &pos, const Point &vel = Point(0,0), S32 count = 1);
 
    virtual void shipTouchZone(Ship *ship, GoalZone *zone);
 

@@ -286,7 +286,7 @@ SoundSystem::~SoundSystem()
 void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVolLevel)
 {
    // Initialize the sound device
-   if(!alureInitDevice(NULL, NULL))
+   if(!alureInitDevice(NULL, NULL))    // <=== causes crash on exit
    {
       logprintf(LogConsumer::LogError, "Failed to open OpenAL device: %s\n", alureGetErrorString());
       return;

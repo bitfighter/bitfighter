@@ -30,6 +30,8 @@
 #include "ClientGame.h"
 #include "UIErrorMessage.h"
 #include "ScreenInfo.h"          // For canvas dimensions
+
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 namespace Zap

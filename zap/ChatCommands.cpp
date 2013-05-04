@@ -30,8 +30,11 @@
 #include "gameType.h"
 #include "LoadoutTracker.h"
 #include "LevelDatabaseDownloadThread.h"
-#include "OpenglUtils.h"
 #include "LevelSpecifierEnum.h"
+
+#include "stringUtils.h"
+#include "RenderUtils.h"
+#include "OpenglUtils.h"
 
 
 namespace Zap {

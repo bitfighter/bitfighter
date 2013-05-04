@@ -24,38 +24,24 @@
 //------------------------------------------------------------------------------------
 
 #include "gameType.h"
-#include "EngineeredItem.h"
-#include "gameObjectRender.h"
-#include "SoundEffect.h"
-#include "config.h"
+
 #include "projectile.h"       // For s2cClientJoinedTeam()
-#include "playerInfo.h"       // For LuaPlayerInfo constructor  
-#include "stringUtils.h"      // For itos
-#include "gameStats.h"        // For VersionedGameStats def
 #include "version.h"
 #include "BanList.h"
 #include "IniFile.h"          // For CIniFile
-#include "ClientInfo.h"
 #include "ServerGame.h"
 #include "robot.h"
 #include "loadoutZone.h"      // For LoadoutZone
 
-#include "OpenglUtils.h"
+//#include "OpenglUtils.h"
 
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
-#   include "loadoutHelper.h"
 #   include "UIMenus.h"
-#   include "UIErrorMessage.h"   
 #endif
 
-
-#include "../master/database.h"
-
-#include "statistics.h"
 #include "masterConnection.h"    
-
 
 #include "tnlThread.h"
 #include <math.h>
@@ -804,12 +790,14 @@ void GameType::renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32
 }
 
 
-void GameType::renderObjectiveArrow(const BfObject *target, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
+// Client only
+void GameType::renderObjectiveArrow(const BfObject *target, const Color *color, S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
 {
    if(!target)
       return;
 
-   GameConnection *gc = static_cast<ClientGame *>(mGame)->getConnectionToServer();
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+   GameConnection *gc = clientGame->getConnectionToServer();
    BfObject *ship = NULL;
 
    if(gc)
@@ -817,6 +805,8 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *c, S32 
 
    if(!ship)
       return;
+
+   ClientGame *game = static_cast<ClientGame *>(mGame);
 
    Point targetPoint;
 
@@ -843,15 +833,16 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *c, S32 
          targetPoint.y = r.min.y;
    }
 
-   renderObjectiveArrow(targetPoint, c, canvasWidth, canvasHeight, alphaMod);
+   Point p = game->worldToScreenPoint(&targetPoint, canvasWidth, canvasHeight);
+   drawObjectiveArrow(p, clientGame->getCommanderZoomFraction(), color, canvasWidth, canvasHeight, alphaMod);
 }
 
 
 void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outlineColor, S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
 {
-   ClientGame *game = static_cast<ClientGame *>(mGame);
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
-   GameConnection *gc = game->getConnectionToServer();
+   GameConnection *gc = clientGame->getConnectionToServer();
 
    BfObject *co = NULL;
 
@@ -861,66 +852,9 @@ void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outl
    if(!co)
       return;
 
-   Point rp = game->worldToScreenPoint(&nearestPoint, canvasWidth, canvasHeight);
-   Point center(canvasWidth / 2, canvasHeight/ 2);
-   Point arrowDir = rp - center;
-
-   F32 er = arrowDir.x * arrowDir.x / (350 * 350) + arrowDir.y * arrowDir.y / (250 * 250);
-   if(er < 1)
-      return;
-   Point np = rp;
-
-   er = sqrt(er);
-   rp.x = arrowDir.x / er;
-   rp.y = arrowDir.y / er;
-   rp += center;
-
-   F32 dist = (np - rp).len();
-
-   arrowDir.normalize();
-   Point crossVec(arrowDir.y, -arrowDir.x);
-
-   // Fade the arrows as we transition to/from commander's map
-   F32 alpha = (1 - game->getCommanderZoomFraction()) * 0.6f * alphaMod;
-   if(!alpha)
-      return;
-
-   // Make indicator fade as we approach the target
-   if(dist < 50)
-      alpha *= dist * 0.02f;
-
-   // Scale arrow accorging to distance from objective --> doesn't look very nice
-   //F32 scale = max(1 - (min(max(dist,100),1000) - 100) / 900, .5);
-   F32 scale = 1.0;
-
-   Point p2 = rp - arrowDir * 23 * scale + crossVec * 8 * scale;
-   Point p3 = rp - arrowDir * 23 * scale - crossVec * 8 * scale;
-
-   Color fillColor = *outlineColor;    // Create local copy
-   fillColor *= .7f;
-
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
-   F32 vertices[] = {
-         rp.x, rp.y,
-         p2.x, p2.y,
-         p3.x, p3.y
-   };
-   // This loops twice: once to render the objective arrow, once to render the outline
-   for(S32 i = 0; i < 2; i++)
-   {
-      glColor(i == 1 ? &fillColor : outlineColor, alpha);
-      renderVertexArray(vertices, 3, i == 1 ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
-   }
-
-//   Point cen = rp - arrowDir * 12;
-
-   // Try labelling the objective arrows... kind of lame.
-   //drawStringf(cen.x - UserInterface::getStringWidthf(10,"%2.1f", dist/100) / 2, cen.y - 5, 10, "%2.1f", dist/100);
-
-   // Add an icon to the objective arrow...  kind of lame.
-   //renderSmallFlag(cen, c, alpha);
+   drawObjectiveArrow(nearestPoint, clientGame->getCommanderZoomFraction(), outlineColor, canvasWidth, canvasHeight, alphaMod);
 }
+
 #endif
 
 
@@ -2165,18 +2099,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
 // Here we'll render big flags, which will work most of the time.  Core will override, other types will not use.
 void GameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const
 {
-   glPushMatrix();
-   glTranslate(F32(xpos), F32(ypos + 15), 0);
-   glScale(.75);
-   renderFlag(getGame()->getTeam(teamIndex)->getColor());
-   glPopMatrix();
-
-   // Add an indicator for the team that has the flag
-   if(teamHasFlag(teamIndex))
-   {
-      glColor(Colors::magenta);
-      drawString(xpos - 23, ypos + 7, 18, "*");      // These numbers are empirical alignment factors
-   }
+   renderScoreboardOrnamentTeamFlags(xpos, ypos, getGame()->getTeam(teamIndex)->getColor(), teamHasFlag(teamIndex));
 }
 
 
@@ -2189,6 +2112,12 @@ S32 GameType::renderTimeLeftSpecial(S32 right, S32 bottom) const
 static void switchTeamsCallback(ClientGame *game, U32 unused)
 {
    game->switchTeams();
+}
+
+
+void GameType::releaseFlag(const Point &pos, const Point &vel, S32 count)
+{
+   TNLAssert(false, "Override if you want to use this method!");
 }
 
 
@@ -2818,7 +2747,8 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
       if(clientInfo->isAdmin())
       {
          bool prev_enableServerVoiceChat = serverGame->getSettings()->getIniSettings()->enableServerVoiceChat;
-         loadSettingsFromINI(&gINI, serverGame->getSettings());;
+         loadSettingsFromINI(&gINI, serverGame->getSettings());
+
          if(prev_enableServerVoiceChat != serverGame->getSettings()->getIniSettings()->enableServerVoiceChat)
             for(S32 i = 0; i < mGame->getClientCount(); i++)
                if(!mGame->getClientInfo(i)->isRobot())

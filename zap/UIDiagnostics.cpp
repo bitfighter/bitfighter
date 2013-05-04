@@ -43,6 +43,7 @@
 
 #include "tnl.h"
 
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 #include <stdio.h>

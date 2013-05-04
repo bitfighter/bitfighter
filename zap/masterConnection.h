@@ -28,7 +28,6 @@
 
 #include "../master/masterInterface.h"
 
-#include "gameType.h"
 #include "gameConnection.h"
 
 #include "tnlNetObject.h"

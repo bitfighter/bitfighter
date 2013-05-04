@@ -61,7 +61,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\gtest\include; ..\zap;..\tnl;..\libtomcrypt;..\boost</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\gtest\include;..\zap;..\tnl;..\boost;..\libtomcrypt;..\libsdl\SDL2;..\openal;..\libspeex;..\alure;..\libpng;..\zlib;..\gtest\include</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PreprocessorDefinitions>BF_WRITE_TO_SQLITE;TNL_ENABLE_ASSERTS;TNL_DEBUG;TNL_ENABLE_LOGGING;TEST_BUILD;_HAS_ITERATOR_DEBUGGING=0;WIN32;_DEBUG;_LIB;_HAS_CPP0X=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -106,58 +106,56 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\clipper\clipper.cpp" />
+    <ClCompile Include="..\poly2tri\sweep\advancing_front.cc" />
     <ClCompile Include="..\recast\RecastAlloc.cpp" />
     <ClCompile Include="..\recast\RecastMesh.cpp" />
-    <ClCompile Include="..\tnl\assert.cpp" />
-    <ClCompile Include="..\tnl\asymmetricKey.cpp" />
-    <ClCompile Include="..\tnl\bitStream.cpp" />
-    <ClCompile Include="..\tnl\byteBuffer.cpp" />
-    <ClCompile Include="..\tnl\certificate.cpp" />
-    <ClCompile Include="..\tnl\clientPuzzle.cpp" />
-    <ClCompile Include="..\tnl\connectionStringTable.cpp" />
-    <ClCompile Include="..\tnl\dataChunker.cpp" />
-    <ClCompile Include="..\tnl\eventConnection.cpp" />
-    <ClCompile Include="..\tnl\ghostConnection.cpp" />
-    <ClCompile Include="..\tnl\huffmanStringProcessor.cpp" />
-    <ClCompile Include="..\tnl\journal.cpp" />
-    <ClCompile Include="..\tnl\log.cpp" />
-    <ClCompile Include="..\tnl\netBase.cpp" />
-    <ClCompile Include="..\tnl\netConnection.cpp" />
-    <ClCompile Include="..\tnl\netInterface.cpp" />
-    <ClCompile Include="..\tnl\netObject.cpp" />
-    <ClCompile Include="..\tnl\netStringTable.cpp" />
-    <ClCompile Include="..\tnl\platform.cpp" />
-    <ClCompile Include="..\tnl\random.cpp" />
-    <ClCompile Include="..\tnl\rpc.cpp" />
-    <ClCompile Include="..\tnl\symmetricCipher.cpp" />
-    <ClCompile Include="..\tnl\thread.cpp" />
-    <ClCompile Include="..\tnl\tnlMethodDispatch.cpp" />
-    <ClCompile Include="..\tnl\udp.cpp" />
-    <ClCompile Include="..\tnl\vector.cpp" />
+    <ClCompile Include="..\zap\barrier.cpp" />
     <ClCompile Include="..\zap\BfObject.cpp" />
     <ClCompile Include="..\zap\ClientGame.cpp" />
+    <ClCompile Include="..\zap\ClientInfo.cpp" />
     <ClCompile Include="..\zap\Color.cpp" />
+    <ClCompile Include="..\zap\config.cpp" />
     <ClCompile Include="..\zap\controlObjectConnection.cpp" />
     <ClCompile Include="..\zap\EditorObject.cpp" />
+    <ClCompile Include="..\zap\FpsRenderer.cpp" />
     <ClCompile Include="..\zap\game.cpp" />
     <ClCompile Include="..\zap\gameConnection.cpp" />
     <ClCompile Include="..\zap\gameObjectRender.cpp" />
+    <ClCompile Include="..\zap\GameSettings.cpp" />
+    <ClCompile Include="..\zap\gameType.cpp" />
+    <ClCompile Include="..\zap\Geometry.cpp" />
     <ClCompile Include="..\zap\GeomObject.cpp" />
     <ClCompile Include="..\zap\GeomUtils.cpp" />
     <ClCompile Include="..\zap\gridDB.cpp" />
+    <ClCompile Include="..\zap\InputCode.cpp" />
     <ClCompile Include="..\zap\item.cpp" />
     <ClCompile Include="..\zap\LoadoutTracker.cpp" />
     <ClCompile Include="..\zap\LuaBase.cpp" />
+    <ClCompile Include="..\zap\masterConnection.cpp" />
     <ClCompile Include="..\zap\move.cpp" />
     <ClCompile Include="..\zap\moveObject.cpp" />
     <ClCompile Include="..\zap\Point.cpp" />
+    <ClCompile Include="..\zap\polygon.cpp" />
     <ClCompile Include="..\zap\Rect.cpp" />
     <ClCompile Include="..\zap\RenderUtils.cpp" />
     <ClCompile Include="..\zap\ship.cpp" />
     <ClCompile Include="..\zap\shipItems.cpp" />
     <ClCompile Include="..\zap\SimpleLine.cpp" />
+    <ClCompile Include="..\zap\Spawn.cpp" />
     <ClCompile Include="..\zap\stringUtils.cpp" />
+    <ClCompile Include="..\zap\textItem.cpp" />
     <ClCompile Include="..\zap\Timer.cpp" />
+    <ClCompile Include="..\zap\UI.cpp" />
+    <ClCompile Include="..\zap\UIChat.cpp" />
+    <ClCompile Include="..\zap\UIErrorMessage.cpp" />
+    <ClCompile Include="..\zap\UIGame.cpp" />
+    <ClCompile Include="..\zap\UIHighScores.cpp" />
+    <ClCompile Include="..\zap\UIInstructions.cpp" />
+    <ClCompile Include="..\zap\UIManager.cpp" />
+    <ClCompile Include="..\zap\UIMenus.cpp" />
+    <ClCompile Include="..\zap\UIQueryServers.cpp" />
+    <ClCompile Include="..\zap\VideoSystem.cpp" />
+    <ClCompile Include="..\zap\WallSegmentManager.cpp" />
     <ClCompile Include="..\zap\WeaponInfo.cpp" />
     <ClCompile Include="main_test.cpp" />
   </ItemGroup>
@@ -165,41 +163,6 @@
     <ClInclude Include="..\clipper\clipper.h" />
     <ClInclude Include="..\recast\Recast.h" />
     <ClInclude Include="..\recast\RecastAlloc.h" />
-    <ClInclude Include="..\tnl\tnl.h" />
-    <ClInclude Include="..\tnl\tnlAssert.h" />
-    <ClInclude Include="..\tnl\tnlAsymmetricKey.h" />
-    <ClInclude Include="..\tnl\tnlBitSet.h" />
-    <ClInclude Include="..\tnl\tnlBitStream.h" />
-    <ClInclude Include="..\tnl\tnlByteBuffer.h" />
-    <ClInclude Include="..\tnl\tnlCertificate.h" />
-    <ClInclude Include="..\tnl\tnlClientPuzzle.h" />
-    <ClInclude Include="..\tnl\tnlConnectionStringTable.h" />
-    <ClInclude Include="..\tnl\tnlDataChunker.h" />
-    <ClInclude Include="..\tnl\tnlEndian.h" />
-    <ClInclude Include="..\tnl\tnlEventConnection.h" />
-    <ClInclude Include="..\tnl\tnlGhostConnection.h" />
-    <ClInclude Include="..\tnl\tnlHuffmanStringProcessor.h" />
-    <ClInclude Include="..\tnl\tnlJournal.h" />
-    <ClInclude Include="..\tnl\tnlLog.h" />
-    <ClInclude Include="..\tnl\tnlMethodDispatch.h" />
-    <ClInclude Include="..\tnl\tnlNetBase.h" />
-    <ClInclude Include="..\tnl\tnlNetConnection.h" />
-    <ClInclude Include="..\tnl\tnlNetEvent.h" />
-    <ClInclude Include="..\tnl\tnlNetInterface.h" />
-    <ClInclude Include="..\tnl\tnlNetObject.h" />
-    <ClInclude Include="..\tnl\tnlNetStringTable.h" />
-    <ClInclude Include="..\tnl\tnlNonce.h" />
-    <ClInclude Include="..\tnl\tnlPlatform.h" />
-    <ClInclude Include="..\tnl\tnlRandom.h" />
-    <ClInclude Include="..\tnl\tnlRPC.h" />
-    <ClInclude Include="..\tnl\tnlSymmetricCipher.h" />
-    <ClInclude Include="..\tnl\tnlThread.h" />
-    <ClInclude Include="..\tnl\tnlTypes.h" />
-    <ClInclude Include="..\tnl\tnlUDP.h" />
-    <ClInclude Include="..\tnl\tnlVector.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\tnl\tnl.overview.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

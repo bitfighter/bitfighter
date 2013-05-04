@@ -24,11 +24,14 @@
 //------------------------------------------------------------------------------------
 
 #include "LoadoutIndicator.h"
+
+#include "UI.h"
 #include "ScreenInfo.h"
 #include "ClientGame.h"
-#include "OpenglUtils.h"
-#include "UI.h"
 #include "FontManager.h"
+
+#include "RenderUtils.h"
+#include "OpenglUtils.h"
 
 
 using namespace Zap;

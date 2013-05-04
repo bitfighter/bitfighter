@@ -23,16 +23,17 @@
 //
 //------------------------------------------------------------------------------------
 
+#include "UI.h"
 #include "sparkManager.h"
 #include "teleporter.h"
 #include "gameObjectRender.h"
 #include "Colors.h"
 #include "config.h"
 
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 #include "MathUtils.h"
 #include "FontManager.h"
-#include "UI.h"
 
 using namespace TNL;
 

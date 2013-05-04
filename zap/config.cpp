@@ -23,14 +23,10 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "input.h"
-#include "IniFile.h"
 #include "config.h"
-#include "gameLoader.h"    // For LevelListLoader::levelList
-#include "LoadoutTracker.h"
+
+#include "IniFile.h"
 #include "version.h"
-#include "stringUtils.h"
-#include "InputCode.h"
 #include "BanList.h"
 #include "Colors.h"
 
@@ -39,12 +35,8 @@
 #include "GameSettings.h"
 
 #ifndef ZAP_DEDICATED
-#  include "Joystick.h"
 #  include "quickChatHelper.h"
 #endif
-
-#include "stringUtils.h"
-#include "dataConnection.h"   // For defs of stuff used by transferResource() function below
 
 #ifdef _MSC_VER
 #  pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++

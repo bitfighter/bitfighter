@@ -351,7 +351,6 @@ static const char *wallInstructions[] =
 
 
 extern Color gNeutralTeamColor;
-extern Color EDITOR_WALL_FILL_COLOR;
 
 void EditorInstructionsUserInterface::renderPageWalls()
 {
@@ -407,7 +406,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
       for(S32 i = 0; i < wallSegments.size(); i++)
       {
          WallSegment *wallSegment = static_cast<WallSegment *>(wallSegments[i]);
-         wallSegment->renderFill(Point(0,0), EDITOR_WALL_FILL_COLOR);
+         wallSegment->renderFill(Point(0,0), Colors::EDITOR_WALL_FILL_COLOR);
       }
 
       renderWallEdges(edges, *getGame()->getSettings()->getWallOutlineColor());

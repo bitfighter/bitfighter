@@ -27,13 +27,9 @@
 #include "ClientGame.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
-#include "ScreenInfo.h"
-#include "UI.h"                  // For horizMargin, vertMargin
 #include "FontManager.h"
 
 namespace Zap { 
-
-extern ScreenInfo gScreenInfo;
 
 namespace UI {
 
@@ -95,21 +91,24 @@ void FpsRenderer::idle(U32 timeDelta)
 }
 
 
-void FpsRenderer::render() const
+void FpsRenderer::render(S32 canvasWidth) const
 {
    if(!mFPSVisible && !isClosing())
       return;
 
    FontManager::pushFontContext(HUDContext);
 
-   const S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - getInsideEdge();
+   static const S32 horizMargin = 10;
+   static const S32 vertMargin = 10;
+
+   const S32 xpos = canvasWidth - horizMargin - S32(getInsideEdge());
    const S32 fontSize = 20;
    const S32 fontGap = 5;
 
    glColor(Colors::white);
-   drawStringfr(xpos, UserInterface::vertMargin,                      fontSize, "%1.0f fps", mFPSAvg);
+   drawStringfr(xpos, vertMargin,                      fontSize, "%1.0f fps", mFPSAvg);
    glColor(Colors::yellow);
-   drawStringfr(xpos, UserInterface::vertMargin + fontSize + fontGap, fontSize, "%1.0f ms",  mPingAvg);
+   drawStringfr(xpos, vertMargin + fontSize + fontGap, fontSize, "%1.0f ms",  mPingAvg);
    
    FontManager::popFontContext();
 }

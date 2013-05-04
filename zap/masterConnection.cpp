@@ -24,27 +24,15 @@
 //------------------------------------------------------------------------------------
 
 #include "masterConnection.h"
-#include "gameConnection.h"
-#include "gameNetInterface.h"
-#include "BfObject.h"
 #include "version.h"
-#include "config.h"
-#include "ClientInfo.h"
-#include "stringUtils.h"
 #include "ServerGame.h"
+#include "gameType.h"
 
 #ifndef ZAP_DEDICATED
-#  include "UIMenus.h"
-#  include "UINameEntry.h"
-#  include "UIChat.h"
-#  include "UIErrorMessage.h"
 #  include "ClientGame.h"
 #endif
 
-#include "SharedConstants.h"    // For AuthenticationStatus enum
-
-#include "tnl.h"
-#include "../tnl/tnlNetInterface.h"
+#include "tnlNetInterface.h"
 
 namespace Zap
 {
@@ -445,6 +433,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    // Added in master protocol 6
    bstream->writeEnum(mConnectionType, MasterConnectionTypeCount);
 
+   // We're a server
    if(mConnectionType == MasterConnectionTypeServer)
    {
       ServerGame *serverGame = static_cast<ServerGame *>(mGame);
@@ -461,6 +450,8 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->writeString(serverGame->getSettings()->getHostDescr().c_str());      // Server description
 
    }
+
+   // We're a client
    else if(mConnectionType == MasterConnectionTypeClient)
    {
 #ifndef ZAP_DEDICATED
