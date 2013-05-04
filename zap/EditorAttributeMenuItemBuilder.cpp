@@ -26,6 +26,7 @@
 #include "EditorAttributeMenuItemBuilder.h"
 #include "BfObject.h"
 #include "UIEditorMenus.h"
+#include "moveObject.h"
 
 #include "textItem.h"
 
