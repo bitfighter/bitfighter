@@ -1,23 +1,40 @@
-//#include "gameLoader.h"                   // For MAX_LEVEL_FILE_LENGTH def  <-- there has to be a better way!
+//-----------------------------------------------------------------------------------
+//
+// Bitfighter - A multiplayer vector graphics space game
+// Based on Zap demo released for Torque Network Library by GarageGames.com
+//
+// Derivative work copyright (C) 2008-2009 Chris Eykamp
+// Original work copyright (C) 2004 GarageGames.com, Inc.
+// Other code copyright as noted
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful (and fun!),
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//------------------------------------------------------------------------------------
 
 #include "dataConnection.h"
-#include "tnlEventConnection.h"
 #include "ServerGame.h"
 #include "gameNetInterface.h"             // for GetGame() through GameNetInterface
 
-#include "tnl.h"
-#include "tnlLog.h"
-#include "tnlVector.h"
-#include "tnlNetBase.h"
-#include "tnlHuffmanStringProcessor.h"    // For HuffmanStringProcessor::MAX_SENDABLE_LINE_LENGTH
-
 #include "stringUtils.h"
-#include "config.h"                       // For configDirs
+//#include "config.h"                       // For configDirs
+//#include "GameSettings.h"
 
 #include "md5wrapper.h"                   // For password verification
 
 using namespace TNL;
-//using namespace std;
+
 
 namespace Zap {
 
@@ -151,6 +168,8 @@ DataSendable::~DataSendable()
 DataSender::DataSender()
 {
    mDone = true;
+   mLineCtr = 0;
+   mFileType = INVALID_RESOURCE_TYPE;
 }
 
 
@@ -278,6 +297,8 @@ DataConnection::DataConnection(GameSettings *settings, const Nonce &clientId)
    mClientId = clientId;
 
    mAction = REQUEST_CURRENT_LEVEL;
+   mFileType = INVALID_RESOURCE_TYPE;
+   mOutputFile = NULL;
 }
 
 
@@ -314,7 +335,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    TNLAssert(dynamic_cast<GameNetInterface *>(getInterface()), "Not a GameNetInterface");
    TNLAssert(((GameNetInterface *)getInterface())->getGame()->isServer(), "Not a ServerGame");
 
-   ServerGame *game = (ServerGame *)(((GameNetInterface *)getInterface())->getGame());
+   ServerGame *game = static_cast<ServerGame *>(((GameNetInterface *)getInterface())->getGame());
    GameSettings *settings = game->getSettings();
 
    // Check if data connections are allowed

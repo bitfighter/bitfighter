@@ -26,12 +26,9 @@
 #ifndef _SHIP_H_
 #define _SHIP_H_
 
-#include "BfObject.h"
-#include "item.h"    // for Item and LuaItem
 #include "moveObject.h"
 #include "LoadoutTracker.h"
 
-#include "LuaScriptRunner.h"
 #include "Timer.h"
 
 #ifndef ZAP_DEDICATED
@@ -45,9 +42,12 @@
 namespace Zap
 {
 
+class DamageInfo;
+class ClientInfo;
+class LoadoutTracker;
+class MountableItem;
 class SpeedZone;
 class Statistics;
-class ClientInfo;
 class Teleporter;
 
 // class derived_class_name: public base_class_name

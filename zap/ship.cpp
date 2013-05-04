@@ -28,6 +28,7 @@
 #include "projectile.h"
 #include "Zone.h"
 #include "Colors.h"
+#include "gameObjectRender.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
