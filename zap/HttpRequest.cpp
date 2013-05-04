@@ -107,7 +107,7 @@ int HttpRequest::getResponseCode()
 
 void HttpRequest::parseResponse(string response)
 {
-   int seperatorIndex = response.find("\r\n\r\n");
+   U32 seperatorIndex = response.find("\r\n\r\n");
    if(seperatorIndex == string::npos)
    {
       // seperator not found, this response isn't valid
@@ -116,11 +116,11 @@ void HttpRequest::parseResponse(string response)
 
    mResponseHead = response.substr(0, seperatorIndex);
 
-   int bodyIndex = seperatorIndex + 4;
+   U32 bodyIndex = seperatorIndex + 4;
    mResponseBody = response.substr(bodyIndex, response.length());
 
-   int responseCodeStart = mResponseHead.find(" ") + 1;
-   int responseCodeEnd = mResponseHead.find("\r\n", responseCodeStart);
+   U32 responseCodeStart = mResponseHead.find(" ") + 1;
+   U32 responseCodeEnd = mResponseHead.find("\r\n", responseCodeStart);
    string responseCode = mResponseHead.substr(responseCodeStart, responseCodeEnd - responseCodeStart);
    mResponseCode = atoi(responseCode.c_str());
 }
@@ -222,7 +222,7 @@ string HttpRequest::buildRequest()
 
 bool HttpRequest::sendRequest(string request)
 {
-   int startTime = Platform::getRealMilliseconds();
+   U32 startTime = Platform::getRealMilliseconds();
    while(Platform::getRealMilliseconds() - startTime < mTimeout)
    {
       Platform::sleep(PollInterval);
@@ -284,7 +284,7 @@ string HttpRequest::receiveResponse()
    return mResponse;
 }
 
-void HttpRequest::setTimeout(int timeout)
+void HttpRequest::setTimeout(U32 timeout)
 {
    mTimeout = timeout;
 }
