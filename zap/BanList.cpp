@@ -24,8 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "BanList.h"
-#include "stringUtils.h"
 #include "config.h"
+#include "stringUtils.h"
 
 #include "tnlLog.h"
 
@@ -46,7 +46,7 @@ BanList::BanList(const string &iniDir)
    banListWildcardCharater = "*";
 
    defaultBanDurationMinutes = 60;
-   kickDurationMilliseconds = 30000;     // 30 seconds is a good breather
+   kickDurationMilliseconds = 30 * 1000;     // 30 seconds is a good breather
 }
 
 
