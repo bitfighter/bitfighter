@@ -40,7 +40,6 @@ set(SHARED_SOURCES
 	CoreGame.cpp
 	CTFGame.cpp
 	dataConnection.cpp
-	EditorObject.cpp
 	EditorPlugin.cpp
 	EngineeredItem.cpp
 	EventManager.cpp
@@ -81,6 +80,7 @@ set(SHARED_SOURCES
 	PickupItem.cpp
 	playerInfo.cpp
 	Point.cpp
+	PointObject.cpp
 	polygon.cpp
 	projectile.cpp
 	rabbitGame.cpp

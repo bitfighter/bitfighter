@@ -126,7 +126,7 @@
     <ClCompile Include="..\zap\CoreGame.cpp" />
     <ClCompile Include="..\zap\CTFGame.cpp" />
     <ClCompile Include="..\zap\Cursor.cpp" />
-    <ClCompile Include="..\zap\EditorObject.cpp" />
+    <ClCompile Include="..\zap\EditorAttributeMenuItemBuilder.cpp" />
     <ClCompile Include="..\zap\FpsRenderer.cpp" />
     <ClCompile Include="..\zap\game.cpp" />
     <ClCompile Include="..\zap\gameConnection.cpp" />
@@ -147,6 +147,7 @@
     <ClCompile Include="..\zap\move.cpp" />
     <ClCompile Include="..\zap\moveObject.cpp" />
     <ClCompile Include="..\zap\Point.cpp" />
+    <ClCompile Include="..\zap\PointObject.cpp" />
     <ClCompile Include="..\zap\polygon.cpp" />
     <ClCompile Include="..\zap\Rect.cpp" />
     <ClCompile Include="..\zap\RenderUtils.cpp" />
@@ -159,6 +160,7 @@
     <ClCompile Include="..\zap\Timer.cpp" />
     <ClCompile Include="..\zap\UI.cpp" />
     <ClCompile Include="..\zap\UIChat.cpp" />
+    <ClCompile Include="..\zap\UIEditorMenus.cpp" />
     <ClCompile Include="..\zap\UIErrorMessage.cpp" />
     <ClCompile Include="..\zap\UIGame.cpp" />
     <ClCompile Include="..\zap\UIHighScores.cpp" />

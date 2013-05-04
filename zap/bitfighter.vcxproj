@@ -241,7 +241,6 @@
     <ClCompile Include="..\zap\item.cpp" />
     <ClCompile Include="..\zap\InputCode.cpp" />
     <ClCompile Include="..\zap\lineEditor.cpp" />
-    <ClCompile Include="EditorObject.cpp" />
     <ClCompile Include="engineerHelper.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="EventManager.cpp" />
@@ -281,6 +280,7 @@
     <ClCompile Include="MathUtils.cpp" />
     <ClCompile Include="OpenglUtils.cpp" />
     <ClCompile Include="PickupItem.cpp" />
+    <ClCompile Include="PointObject.cpp" />
     <ClCompile Include="quickChatHelper.cpp" />
     <ClCompile Include="..\zap\rabbitGame.cpp" />
     <ClCompile Include="..\zap\retrieveGame.cpp" />
@@ -416,7 +416,6 @@
     <ClInclude Include="JoystickRender.h" />
     <ClInclude Include="..\zap\InputCode.h" />
     <ClInclude Include="..\zap\lineEditor.h" />
-    <ClInclude Include="EditorObject.h" />
     <ClInclude Include="engineerHelper.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="freeglut_stroke.h" />
@@ -452,6 +451,7 @@
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="OpenglUtils.h" />
     <ClInclude Include="PickupItem.h" />
+    <ClInclude Include="PointObject.h" />
     <ClInclude Include="quickChatHelper.h" />
     <ClInclude Include="..\zap\rabbitGame.h" />
     <ClInclude Include="..\zap\resource.h" />

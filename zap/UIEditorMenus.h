@@ -27,8 +27,7 @@
 #define _UIEDITORMENUS_H_
 
 
-#include "UIMenus.h"
-#include "UIEditor.h"      // For EditorObject
+#include "UIMenus.h"    // Parent class
 
 namespace Zap
 {

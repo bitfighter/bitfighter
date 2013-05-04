@@ -27,7 +27,7 @@
 #define _ITEM_H_
 
 #include "BfObject.h"               // Parent class
-#include "EditorObject.h"           // Parent class
+#include "PointObject.h"           // Parent class
 #include "LuaScriptRunner.h"        // Parent class
 
 #include "Timer.h"

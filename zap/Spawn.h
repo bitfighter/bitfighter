@@ -27,9 +27,8 @@
 #ifndef _SPAWN_H_
 #define _SPAWN_H_
 
-#include "EditorObject.h"     // For PointObject def
+#include "PointObject.h"     // For PointObject def
 #include "Timer.h"
-//#include "LuaWrapper.h"
 
 
 namespace Zap

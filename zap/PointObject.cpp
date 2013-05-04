@@ -23,7 +23,7 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "EditorObject.h"
+#include "PointObject.h"
 
 namespace Zap
 {

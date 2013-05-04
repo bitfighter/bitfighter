@@ -10,7 +10,6 @@
     <ClCompile Include="..\zap\ship.cpp" />
     <ClCompile Include="..\zap\moveObject.cpp" />
     <ClCompile Include="..\zap\item.cpp" />
-    <ClCompile Include="..\zap\EditorObject.cpp" />
     <ClCompile Include="..\zap\BfObject.cpp" />
     <ClCompile Include="..\zap\gridDB.cpp" />
     <ClCompile Include="..\zap\GeomObject.cpp" />
@@ -74,6 +73,9 @@
     <ClCompile Include="..\zap\Cursor.cpp" />
     <ClCompile Include="..\zap\CTFGame.cpp" />
     <ClCompile Include="..\zap\CoreGame.cpp" />
+    <ClCompile Include="..\zap\EditorAttributeMenuItemBuilder.cpp" />
+    <ClCompile Include="..\zap\PointObject.cpp" />
+    <ClCompile Include="..\zap\UIEditorMenus.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">

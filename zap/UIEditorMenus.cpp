@@ -24,12 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "UIEditorMenus.h"
-#include "textItem.h"
-#include "speedZone.h"
-#include "PickupItem.h"    // For PickupItem def
+#include "UIEditor.h"
 #include "ScreenInfo.h"    // For canvasHeight
 #include "ClientGame.h"    // For UIManager and callback
-#include "game.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
@@ -137,7 +134,7 @@ void QuickMenuUI::render()
                   Color(.1), Color(.5));
 
    // Now that the background has been drawn, adjust left and right to create the inset for the menu item highlights
-   left  += 3;
+   left += 3;
    right -= 4;
 
    // First draw the menu title
