@@ -32,6 +32,7 @@
 #endif
 
 #include "SDL_mouse.h"     
+#include "SDL_version.h"
 
 namespace Zap
 {
