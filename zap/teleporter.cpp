@@ -36,18 +36,13 @@ using namespace TNL;
 #include "SoundSystem.h"
 
 #include "stringUtils.h"
-#include "tnlMethodDispatch.h"      // For writing vectors
+#include "MathUtils.h"           // For sq
+#include "tnlMethodDispatch.h"   // For writing vectors
 
 #include "ship.h"
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
-#endif
-
-#include <math.h>
-
-#ifndef sq
-#  define sq(a) ((a) * (a))
 #endif
 
 
@@ -150,7 +145,7 @@ void DestManager::read(BitStream *stream)
 }
 
 
-/*const*/ Vector<Point> *DestManager::getDestList() /*const*/
+const Vector<Point> *DestManager::getDestList() const
 {
    return &mDests;
 }
@@ -694,7 +689,7 @@ void Teleporter::onConstructed()
 }
 
 
-bool Teleporter::hasAnyDests()
+bool Teleporter::hasAnyDests() const
 {
    return mDestManager.getDestCount() > 0;
 }
@@ -705,6 +700,12 @@ void Teleporter::setEndpoint(const Point &point)
 {
    mDestManager.addDest(point);
    setVert(point, 1);
+}
+
+
+const Vector<Point> *Teleporter::getDestList() const
+{
+   return mDestManager.getDestList();
 }
 
 

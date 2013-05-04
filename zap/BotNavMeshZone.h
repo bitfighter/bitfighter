@@ -26,12 +26,7 @@
 #ifndef _BOTNAVMESHZONES_H_
 #define _BOTNAVMESHZONES_H_
 
-#include "BfObject.h"    // For base classes
-#include "polygon.h"
-#include "ship.h"
-
-#include "tnlNetBase.h"
-
+#include "gridDB.h"    // Parent
 
 namespace Zap
 {
@@ -78,11 +73,11 @@ private:
    static void populateZoneList();                 // Populates mAllZones
 
 public:
-   explicit BotNavMeshZone(S32 id = -1);    // Constructor
-   virtual ~BotNavMeshZone();               // Destructor
+   explicit BotNavMeshZone(S32 id = -1);     // Constructor
+   virtual ~BotNavMeshZone();                // Destructor
    
-   static const S32 BufferRadius = Ship::CollisionRadius;  // Radius to buffer objects when creating the holes for zones
-   static const S32 LEVEL_ZONE_BUFFER = 30;                // Extra padding around the game extents to allow outsize zones to be created
+   static const S32 BufferRadius;            // Radius to buffer objects when creating the holes for zones
+   static const S32 LEVEL_ZONE_BUFFER = 30;  // Extra padding around the game extents to allow outsize zones to be created
 
    void renderLayer(S32 layerIndex);
 
@@ -112,12 +107,13 @@ public:
 
    static const Vector<BotNavMeshZone *> *getBotZones();                // Return cached list of all zones
 
-   static bool buildBotMeshZones(ServerGame *game, bool triangulateZones);
-   static void buildBotNavMeshZoneConnections(ServerGame *game);
-   static bool buildBotNavMeshZoneConnectionsRecastStyle(ServerGame *game, rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
-   static void linkTeleportersBotNavMeshZoneConnections(ServerGame *game);
+   static bool buildBotMeshZones(const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList, 
+                                 const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
+                                 const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones);
 
-   //TNL_DECLARE_CLASS(BotNavMeshZone);
+   static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
+   static void buildBotNavMeshZoneConnections(const Vector<pair<Point, const Vector<Point> *> > &teleporterData);
+   static void linkTeleportersBotNavMeshZoneConnections(const Vector<pair<Point, const Vector<Point> *> > &teleporterData);
 };
 
 

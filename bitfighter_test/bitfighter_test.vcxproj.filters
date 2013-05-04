@@ -61,6 +61,8 @@
     <ClCompile Include="..\zap\textItem.cpp" />
     <ClCompile Include="..\zap\VideoSystem.cpp" />
     <ClCompile Include="..\zap\IniFile.cpp" />
+    <ClCompile Include="..\zap\gameWeapons.cpp" />
+    <ClCompile Include="..\zap\BanList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">

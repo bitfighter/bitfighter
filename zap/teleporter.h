@@ -64,7 +64,7 @@ struct DestManager
       void read(BitStream *stream);                // Read a whole list of dests
 
       void clear();
-      /*const*/ Vector<Point> *getDestList() /*const*/;
+      const Vector<Point> *getDestList() const;
 };
 
 
@@ -175,8 +175,9 @@ public:
 
    void onConstructed();
 
-   bool hasAnyDests();
+   bool hasAnyDests() const;
    void setEndpoint(const Point &point);
+   const Vector<Point> *getDestList() const;
 
    // Some properties about the item that will be needed in the editor
    const char *getOnScreenName();

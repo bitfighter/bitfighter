@@ -109,6 +109,7 @@
     <ClCompile Include="..\poly2tri\sweep\advancing_front.cc" />
     <ClCompile Include="..\recast\RecastAlloc.cpp" />
     <ClCompile Include="..\recast\RecastMesh.cpp" />
+    <ClCompile Include="..\zap\BanList.cpp" />
     <ClCompile Include="..\zap\barrier.cpp" />
     <ClCompile Include="..\zap\BfObject.cpp" />
     <ClCompile Include="..\zap\ClientGame.cpp" />
@@ -123,6 +124,7 @@
     <ClCompile Include="..\zap\gameObjectRender.cpp" />
     <ClCompile Include="..\zap\GameSettings.cpp" />
     <ClCompile Include="..\zap\gameType.cpp" />
+    <ClCompile Include="..\zap\gameWeapons.cpp" />
     <ClCompile Include="..\zap\Geometry.cpp" />
     <ClCompile Include="..\zap\GeomObject.cpp" />
     <ClCompile Include="..\zap\GeomUtils.cpp" />

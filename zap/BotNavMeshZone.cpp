@@ -24,20 +24,16 @@
 //------------------------------------------------------------------------------------
 
 #include "BotNavMeshZone.h"
-#include "GeomUtils.h"
-#include "robot.h"
-#include "gameObjectRender.h"
-#include "teleporter.h"
-#include "barrier.h"             // For Barrier methods in generating zones
-#include "EngineeredItem.h"   // For Turret and ForceFieldProjector methods in generating zones
-#include "../recast/Recast.h"    // For zone generation
-#include "../recast/RecastAlloc.h"
-#include "ServerGame.h"
-#include "../clipper/clipper.hpp"
 
-#ifndef ZAP_DEDICATED
-#  include "UIMenus.h"
-#endif
+#include "ship.h"                   // For Ship::CollisionRadius
+#include "gameObjectRender.h"
+#include "barrier.h"                // For Barrier methods in generating zones
+#include "EngineeredItem.h"         // For Turret and ForceFieldProjector methods in generating zones
+#include "GeomUtils.h"
+
+#include "../recast/Recast.h"       
+#include "../recast/RecastAlloc.h"
+#include "../clipper/clipper.hpp"
 
 #include <vector>
 #include <math.h>
@@ -59,7 +55,9 @@ namespace Zap
 {
 
 // Declare our statics
-static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766), AStar::findPath is limited
+static const S32 MAX_ZONES = 10000;                              // Don't make this go above S16 max - 1 (32,766), AStar::findPath is limited
+const S32 BotNavMeshZone::BufferRadius = Ship::CollisionRadius;  // Radius to buffer objects when creating the holes for zones
+
 Vector<BotNavMeshZone *> BotNavMeshZone::mAllZones;
 
 static GridDatabase *botZoneDatabase;
@@ -191,7 +189,7 @@ struct rcEdge
 
 
 // Build connections between zones using the adjacency data created in recast
-bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(ServerGame *game, rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap)    
+bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap)    
 {
    if(mAllZones.size() == 0)      // Nothing to do!
       return true;
@@ -409,16 +407,17 @@ void BotNavMeshZone::populateZoneList()
 
 // Server only
 // Use the Triangle library to create zones.  Aggregate triangles with Recast
-bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
+bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList, 
+                                       const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
+                                       const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones)
 {
-
 #ifdef LOG_TIMER
    U32 starttime = Platform::getRealMilliseconds();
 #endif
 
+   Rect bounds(worldExtents);      // Modifiable copy
    mAllZones.deleteAndClear();
 
-   Rect bounds(game->getWorldExtents());
    bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
 
    // Make sure level isn't too big for zone generation, which uses 16 bit ints
@@ -430,15 +429,6 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
 
    Vector<F32> holes;
    PolyTree solution;
-
-   Vector<DatabaseObject *> barrierList;
-   game->getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList, bounds);
-
-   Vector<DatabaseObject *> turretList;
-   game->getGameObjDatabase()->findObjects(TurretTypeNumber, turretList, bounds);
-
-   Vector<DatabaseObject *> forceFieldProjectorList;
-   game->getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList, bounds);
 
    // Merge bot zone buffers from barriers, turrets, and forcefield projectors
    // The Clipper library is the work horse here.  Its output is essential for the
@@ -541,8 +531,8 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
       if(addedZones)
          populateZoneList();     // Repopulate mAllZones with the zones we modified above
 
-      buildBotNavMeshZoneConnectionsRecastStyle(game, mesh, polyToZoneMap);
-      linkTeleportersBotNavMeshZoneConnections(game);
+      buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
+      linkTeleportersBotNavMeshZoneConnections(teleporterData);
    }
 
    // If recast failed, build zones from the underlying triangle geometry.  This bit could be made more efficient by using the adjacnecy
@@ -571,7 +561,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
          botzone->addToZoneDatabase();
       }
 
-      BotNavMeshZone::buildBotNavMeshZoneConnections(game);
+      BotNavMeshZone::buildBotNavMeshZoneConnections(teleporterData);
    }
 
 #ifdef LOG_TIMER
@@ -593,7 +583,7 @@ const Vector<BotNavMeshZone *> *BotNavMeshZone::getBotZones()
 
 // Only runs on server
 // TODO can be combined with buildBotNavMeshZoneConnectionsRecastStyle() ?
-void BotNavMeshZone::buildBotNavMeshZoneConnections(ServerGame *game)    
+void BotNavMeshZone::buildBotNavMeshZoneConnections(const Vector<pair<Point, const Vector<Point> *> > &teleporterData)    
 {
    if(mAllZones.size() == 0)      // Nothing to do!
       return;
@@ -640,42 +630,40 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections(ServerGame *game)
       }
    }
 
-   linkTeleportersBotNavMeshZoneConnections(game);
+   linkTeleportersBotNavMeshZoneConnections(teleporterData);
 }
 
 
 // Only runs on server
-void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
+void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(const Vector<pair<Point, const Vector<Point> *> > &teleporterData)
 {
    NeighboringZone neighbor;
    // Now create paths representing the teleporters
-   Vector<DatabaseObject *> teleporters, dests;
+   Point origin, dest;
 
-   game->getGameObjDatabase()->findObjects(TeleporterTypeNumber, teleporters);
-
-   for(S32 i = 0; i < teleporters.size(); i++)
+   for(S32 i = 0; i < teleporterData.size(); i++)
    {
-      Teleporter *teleporter = static_cast<Teleporter *>(teleporters[i]);
-
-      BotNavMeshZone *origZone = findZoneContainingPoint(botZoneDatabase, teleporter->getPos());
+      origin = teleporterData[i].first;
+      BotNavMeshZone *origZone = findZoneContainingPoint(botZoneDatabase, origin);
 
       if(origZone != NULL)
-         for(S32 j = 0; j < teleporter->getDestCount(); j++)     // Review each teleporter destination
+         for(S32 j = 0; j < teleporterData[i].second->size(); j++)     // Review each teleporter destination
          {
-            BotNavMeshZone *destZone = findZoneContainingPoint(botZoneDatabase, teleporter->getDest(j));
+            dest = teleporterData[i].second->get(j);
+            BotNavMeshZone *destZone = findZoneContainingPoint(botZoneDatabase, dest);
 
             if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
             {
                // Teleporter is one way path
                neighbor.zoneID = destZone->mZoneId;
-               neighbor.borderStart.set(teleporter->getPos());
-               neighbor.borderEnd.set(teleporter->getDest(j));
-               neighbor.borderCenter.set(teleporter->getPos());
+               neighbor.borderStart.set(origin);
+               neighbor.borderEnd.set(dest);
+               neighbor.borderCenter.set(origin);
 
                // Teleport instantly, at no cost -- except this is wrong... if teleporter has multiple dests, actual cost could be quite high.
                // This should be the average of the costs of traveling from each dest zone to the target zone
                neighbor.distTo = 0;                                    
-               neighbor.center.set(teleporter->getPos());
+               neighbor.center.set(origin);
 
                origZone->mNeighbors.push_back(neighbor);
             }
