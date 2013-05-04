@@ -719,8 +719,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       {
          // Add level to our skip list.  Deleting it from the active list of levels is more of a challenge...
          skipList->push_back(mServerGame->getCurrentLevelFileName().getString());
-         writeSkipList(&gINI, skipList);           // Write skipped levels to INI
-         gINI.WriteFile();                         // Save new INI settings to disk
+         writeSkipList(&GameSettings::iniFile, skipList);   // Write skipped levels to INI
+         GameSettings::iniFile.WriteFile();                 // Save new INI settings to disk
       }
    }
 
@@ -729,8 +729,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       const char *keys[] = { "LevelChangePassword", "AdminPassword", "ServerPassword", "ServerName", "ServerDescription" };
 
       // Update the INI file
-      gINI.SetValue("Host", keys[type], param.getString(), true);
-      gINI.WriteFile();    // Save new INI settings to disk
+      GameSettings::iniFile.SetValue("Host", keys[type], param.getString(), true);
+      GameSettings::iniFile.WriteFile();    // Save new INI settings to disk
    }
 
    // Some messages we might show the user... should these just be inserted directly below?
@@ -844,7 +844,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
    // If we know the level change password, apply for permissions if we don't already have them
    if(!mClientInfo->isLevelChanger())
    {
-      string levelChangePassword = gINI.GetValue("SavedLevelChangePasswords", getServerName());
+      string levelChangePassword = GameSettings::iniFile.GetValue("SavedLevelChangePasswords", getServerName());
       if(levelChangePassword != "")
       {
          c2sSubmitPassword(md5.getSaltedHashFromString(levelChangePassword).c_str());
@@ -855,7 +855,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
    // If we know the admin password, apply for permissions if we don't already have them
    if(!mClientInfo->isAdmin())
    {
-      string adminPassword = gINI.GetValue("SavedAdminPasswords", getServerName());
+      string adminPassword = GameSettings::iniFile.GetValue("SavedAdminPasswords", getServerName());
       if(adminPassword != "")
       {
          c2sSubmitPassword(md5.getSaltedHashFromString(adminPassword).c_str());
@@ -866,7 +866,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
    // If we know the owner password, apply for permissions if we don't already have them
    if(!mClientInfo->isOwner())
    {
-      string ownerPassword = gINI.GetValue("SavedOwnerPasswords", getServerName());
+      string ownerPassword = GameSettings::iniFile.GetValue("SavedOwnerPasswords", getServerName());
       if(ownerPassword != "")
       {
          c2sSubmitPassword(md5.getSaltedHashFromString(ownerPassword).c_str());
@@ -901,11 +901,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetRole, (RangedU32<0,ClientInfo::MaxRoles>
    if(newRole != ClientInfo::RoleNone && mLastEnteredPassword != "")
    {
       if(newRole == ClientInfo::RoleOwner)
-         gINI.SetValue(ownerKey, getServerName(), mLastEnteredPassword, true);
+         GameSettings::iniFile.SetValue(ownerKey, getServerName(), mLastEnteredPassword, true);
       else if(newRole == ClientInfo::RoleAdmin)
-         gINI.SetValue(adminKey, getServerName(), mLastEnteredPassword, true);
+         GameSettings::iniFile.SetValue(adminKey, getServerName(), mLastEnteredPassword, true);
       else if(newRole == ClientInfo::RoleLevelChanger)
-         gINI.SetValue(levelChangeKey, getServerName(), mLastEnteredPassword, true);
+         GameSettings::iniFile.SetValue(levelChangeKey, getServerName(), mLastEnteredPassword, true);
 
       mLastEnteredPassword = "";
    }
@@ -914,11 +914,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetRole, (RangedU32<0,ClientInfo::MaxRoles>
    if(lostRole)
    {
       if(currentRole == ClientInfo::RoleOwner)
-         gINI.deleteKey(ownerKey, getServerName());
+         GameSettings::iniFile.deleteKey(ownerKey, getServerName());
       else if(currentRole == ClientInfo::RoleAdmin)
-         gINI.deleteKey(adminKey, getServerName());
+         GameSettings::iniFile.deleteKey(adminKey, getServerName());
       else if(currentRole == ClientInfo::RoleLevelChanger)
-         gINI.deleteKey(levelChangeKey, getServerName());
+         GameSettings::iniFile.deleteKey(levelChangeKey, getServerName());
    }
 
    // Extra instructions upon demotion
@@ -1466,8 +1466,8 @@ void GameConnection::writeConnectRequest(BitStream *stream)
       serverPW = md5.getSaltedHashFromString(mSettings->getServerPassword());
 
    // If we have a saved password for this server, use that
-   else if(gINI.GetValue("SavedServerPasswords", lastServerName) != "")
-      serverPW = md5.getSaltedHashFromString(gINI.GetValue("SavedServerPasswords", lastServerName)); 
+   else if(GameSettings::iniFile.GetValue("SavedServerPasswords", lastServerName) != "")
+      serverPW = md5.getSaltedHashFromString(GameSettings::iniFile.GetValue("SavedServerPasswords", lastServerName)); 
 
    // Otherwise, use whatever's in the interface entry box
    else 
@@ -1777,8 +1777,8 @@ void GameConnection::onConnectionEstablished_client()
 
    string lastServerName = mClientGame->getRequestedServerName();
 
-   if(!isLocalConnection() && gINI.GetValue("SavedServerPasswords", lastServerName) == "")
-      gINI.SetValue("SavedServerPasswords", lastServerName, mClientGame->getServerPassword(), true);
+   if(!isLocalConnection() && GameSettings::iniFile.GetValue("SavedServerPasswords", lastServerName) == "")
+      GameSettings::iniFile.SetValue("SavedServerPasswords", lastServerName, mClientGame->getServerPassword(), true);
 
 
    if(!isLocalConnection())    // Might use /connect, want to add to list after successfully connected. Does nothing while connected to master.

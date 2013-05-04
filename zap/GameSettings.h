@@ -164,6 +164,8 @@ public:
    GameSettings();            // Constructor
    virtual ~GameSettings();   // Destructor
 
+   static CIniFile iniFile;
+
    void readCmdLineParams(const Vector<string> &argv);
    void resolveDirs();
 

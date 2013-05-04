@@ -1148,7 +1148,7 @@ void OptionsMenuUserInterface::onEscape()
 
    getGame()->getSettings()->setAutologin(autologin);
 
-   saveSettingsToINI(&gINI, getGame()->getSettings());
+   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
    getUIManager()->reactivatePrevUI();      //mGameUserInterface
 }
 
@@ -1309,7 +1309,7 @@ void InputOptionsMenuUserInterface::setupMenus()
 // Save options to INI file, and return to our regularly scheduled program
 void InputOptionsMenuUserInterface::onEscape()
 {
-   saveSettingsToINI(&gINI, getGame()->getSettings());
+   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
    getUIManager()->reactivatePrevUI();      
 }
 
@@ -1404,7 +1404,7 @@ void SoundOptionsMenuUserInterface::setupMenus()
 // Save options to INI file, and return to our regularly scheduled program
 void SoundOptionsMenuUserInterface::onEscape()
 {
-   saveSettingsToINI(&gINI, getGame()->getSettings());
+   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
    getUIManager()->reactivatePrevUI();      //mGameUserInterface
 }
 
@@ -1617,7 +1617,7 @@ void HostMenuUserInterface::saveSettings()
    settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getIntValue() != 0);
    //settings->getIniSettings()->maxplayers = getMenuItem(OPT_MAX_PLAYERS)->getIntValue();
 
-   saveSettingsToINI(&gINI, getGame()->getSettings());
+   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
 }
 
 

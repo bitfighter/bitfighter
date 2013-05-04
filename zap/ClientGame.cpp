@@ -1353,7 +1353,7 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
       {
          // We have the wrong password, let's make sure it's not saved
          string serverName = getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
-         gINI.deleteKey("SavedServerPasswords", serverName);
+         GameSettings::iniFile.deleteKey("SavedServerPasswords", serverName);
    
          ServerPasswordEntryUserInterface *ui = getUIManager()->getServerPasswordEntryUserInterface();
          ui->setConnectServer(serverAddress);
@@ -1486,8 +1486,6 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
    }
 }
 
-
-extern CIniFile gINI;
 
 void ClientGame::runCommand(const char *command)
 {

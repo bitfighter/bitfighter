@@ -127,6 +127,7 @@
     <ClCompile Include="..\zap\GeomObject.cpp" />
     <ClCompile Include="..\zap\GeomUtils.cpp" />
     <ClCompile Include="..\zap\gridDB.cpp" />
+    <ClCompile Include="..\zap\IniFile.cpp" />
     <ClCompile Include="..\zap\InputCode.cpp" />
     <ClCompile Include="..\zap\item.cpp" />
     <ClCompile Include="..\zap\LoadoutTracker.cpp" />

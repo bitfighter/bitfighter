@@ -2747,7 +2747,7 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
       if(clientInfo->isAdmin())
       {
          bool prev_enableServerVoiceChat = serverGame->getSettings()->getIniSettings()->enableServerVoiceChat;
-         loadSettingsFromINI(&gINI, serverGame->getSettings());
+         loadSettingsFromINI(&GameSettings::iniFile, serverGame->getSettings());
 
          if(prev_enableServerVoiceChat != serverGame->getSettings()->getIniSettings()->enableServerVoiceChat)
             for(S32 i = 0; i < mGame->getClientCount(); i++)
@@ -3167,10 +3167,10 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
    logprintf(LogConsumer::ServerFilter, "%s was banned for %d minutes", ipAddress.toString(), banDuration);
 
    // Save BanList in memory
-   writeServerBanList(&gINI, settings->getBanList());
+   writeServerBanList(&GameSettings::iniFile, settings->getBanList());
 
    // Save new INI settings to disk
-   gINI.WriteFile();
+   GameSettings::iniFile.WriteFile();
 
    GameConnection *conn = clientInfo->getConnection();
 
@@ -3221,10 +3221,10 @@ GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 dura
    logprintf(LogConsumer::ServerFilter, "%s - banned for %d minutes", ipAddress.toString(), banDuration);
 
    // Save BanList in memory
-   writeServerBanList(&gINI, settings->getBanList());
+   writeServerBanList(&GameSettings::iniFile, settings->getBanList());
 
    // Save new INI settings to disk
-   gINI.WriteFile();
+   GameSettings::iniFile.WriteFile();
 
 
    if(!playerDisconnected)

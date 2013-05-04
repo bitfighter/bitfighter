@@ -322,8 +322,8 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
       settings->getIniSettings()->winXPos = getWindowPositionX();
       settings->getIniSettings()->winYPos = getWindowPositionY();
 
-      gINI.SetValueI("Settings", "WindowXPos", settings->getIniSettings()->winXPos, true);
-      gINI.SetValueI("Settings", "WindowYPos", settings->getIniSettings()->winYPos, true);
+      GameSettings::iniFile.SetValueI("Settings", "WindowXPos", settings->getIniSettings()->winXPos, true);
+      GameSettings::iniFile.SetValueI("Settings", "WindowYPos", settings->getIniSettings()->winYPos, true);
    }
 
    // When we're in the editor, let's take advantage of the entire screen unstretched

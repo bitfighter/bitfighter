@@ -186,10 +186,7 @@ namespace Zap
 // Handle any md5 requests
 md5wrapper md5;
 
-
-CIniFile gINI("dummy");          // This is our INI file.  Filename set down in main(), but compiler seems to want an arg here.
 Console gConsole;                // For the moment, we'll just have one console for everything.  This may change later, but probably won't.
-
 
 // Some colors -- other candidates include global and local chat colors, which are defined elsewhere.  Include here?
 Color gNexusOpenColor(0, 0.7, 0);
@@ -1174,8 +1171,8 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    logprintf("Bitfighter was recently updated.  Migrating user preferences...");
 
    // Wipe out all comments; they will be automatically replaced with any updates
-   gINI.deleteHeaderComments();
-   gINI.deleteAllSectionComments();
+   GameSettings::iniFile.deleteHeaderComments();
+   GameSettings::iniFile.deleteAllSectionComments();
 
    // Now for the version specific changes.  This can only grow larger!
    // See version.h for short history of roughly what version corresponds to a game release
@@ -1190,8 +1187,8 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
 
       // We added editor plugins
-      gINI.addSection("EditorPlugins");
-      gINI.SetValue("EditorPlugins", "Plugin0", "Ctrl+;|draw_arcs.lua|Make curves!");
+      GameSettings::iniFile.addSection("EditorPlugins");
+      GameSettings::iniFile.SetValue("EditorPlugins", "Plugin0", "Ctrl+;|draw_arcs.lua|Make curves!");
    }
 
    // 017:
@@ -1378,8 +1375,8 @@ int main(int argc, char **argv)
    InputCodeManager::initializeKeyNames();      // Used by loadSettingsFromINI()
 
    // Load our INI
-   gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
-   loadSettingsFromINI(&gINI, settings);
+   GameSettings::iniFile.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
+   loadSettingsFromINI(&GameSettings::iniFile, settings);
 
    // Time to check if there is an online update (for any relevant platforms)
    if(!isStandalone)

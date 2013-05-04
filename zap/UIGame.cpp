@@ -35,7 +35,6 @@
 #include "UIMessage.h"
 #include "UIDiagnostics.h"
 #include "UIErrorMessage.h"
-#include "IniFile.h"             // For access to gINI functions
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "shipItems.h"           // For EngineerBuildObjects
 #include "gameObjectRender.h"

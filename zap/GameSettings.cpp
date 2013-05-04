@@ -169,12 +169,12 @@ const char *helpTitles[] = {
 ////////////////////////////////////////
 // Define statics
 FolderManager *GameSettings::mFolderManager = NULL;
-Vector<string> GameSettings::DetectedJoystickNameList;      // List of joysticks we found attached to this machine
+Vector<string> GameSettings::DetectedJoystickNameList;   // List of joysticks we found attached to this machine
 S32 GameSettings::UseJoystickNumber = 0;
+CIniFile GameSettings::iniFile("dummy");                 // Our INI file.  Real filename will be supplied later.
 
 
 // For now...  soon all these things will be contained herein
-extern CIniFile gINI;
 extern S32 LOADOUT_PRESETS;
 
 // Constructor
@@ -399,8 +399,8 @@ void GameSettings::save()
    //   BanList *bl = settings->getBanList();
    //   bl->writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
 
-   saveWindowMode(&gINI, &mIniSettings);              
-   saveSettingsToINI(&gINI, this);        // Writes settings to gINI, then writes it to disk
+   saveWindowMode(&iniFile, &mIniSettings);              
+   saveSettingsToINI(&iniFile, this);        // Writes settings to iniFile, then writes it to disk
 }
 
 
@@ -439,7 +439,7 @@ void GameSettings::setLoginCredentials(const string &name, const string &passwor
       mIniSettings.lastName = name;          
       mIniSettings.lastPassword = password;
    
-      gINI.WriteFile();
+      iniFile.WriteFile();
    }
 }
 
@@ -452,7 +452,7 @@ void GameSettings::updatePlayerName(const string &name)
    if(!mPlayerNameSpecifiedOnCmdLine)
    {
       mIniSettings.lastName = name;             // Save new name to the INI
-      gINI.WriteFile();
+      iniFile.WriteFile();
    }
 }
 
@@ -522,43 +522,43 @@ Vector<string> GameSettings::getConfigurationErrors()
 
 void GameSettings::saveLevelChangePassword(const string &serverName, const string &password)
 {
-   gINI.SetValue("SavedLevelChangePasswords", serverName, password, true);
-   gINI.WriteFile();
+   iniFile.SetValue("SavedLevelChangePasswords", serverName, password, true);
+   iniFile.WriteFile();
 }
 
 
 void GameSettings::saveAdminPassword(const string &serverName, const string &password)
 {
-   gINI.SetValue("SavedAdminPasswords", serverName, password, true);
-   gINI.WriteFile();
+   iniFile.SetValue("SavedAdminPasswords", serverName, password, true);
+   iniFile.WriteFile();
 }
 
 
 void GameSettings::saveOwnerPassword(const string &serverName, const string &password)
 {
-   gINI.SetValue("SavedOwnerPasswords", serverName, password, true);
-   gINI.WriteFile();
+   iniFile.SetValue("SavedOwnerPasswords", serverName, password, true);
+   iniFile.WriteFile();
 }
 
 
 void GameSettings::forgetLevelChangePassword(const string &serverName)
 {
-   gINI.deleteKey("SavedLevelChangePasswords", serverName);
-   gINI.WriteFile();
+   iniFile.deleteKey("SavedLevelChangePasswords", serverName);
+   iniFile.WriteFile();
 }
 
 
 void GameSettings::forgetAdminPassword(const string &serverName)
 {
-   gINI.deleteKey("SavedAdminPasswords", serverName);
-   gINI.WriteFile();
+   iniFile.deleteKey("SavedAdminPasswords", serverName);
+   iniFile.WriteFile();
 }
 
 
 void GameSettings::forgetOwnerPassword(const string &serverName)
 {
-   gINI.deleteKey("SavedOwnerPasswords", serverName);
-   gINI.WriteFile();
+   iniFile.deleteKey("SavedOwnerPasswords", serverName);
+   iniFile.WriteFile();
 }
 
 

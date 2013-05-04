@@ -15,34 +15,19 @@
 // Also added a check to ensure duplicate keys aren't created
 ////////////////////////
 
-//#define UNICODE
-//#define _UNICODE
-
-//#include <tchar.h>
-
-//#include "../tnl/tnlLog.h"        // For logprintf
-
-// C++ Includes
-//#include "stdafx.h"
-#include <iostream>
-#include <fstream>
-#include <sstream>
+#include "IniFile.h"
 
 #include "tnlJournal.h"       // For journaling support
 #include "stringUtils.h"      // for lcase
 #include "zapjournal.h"
 #include "tnlTypes.h"
 
-
-// C Includes
 #include <stdio.h>
 #include <stdarg.h>
 #include <ctype.h>
-
-// Local Includes
-#include "IniFile.h"
-
-//#include <windows.h>    // For wsprintf
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 
 #if defined(WIN32)
@@ -58,7 +43,7 @@ namespace Zap
 
 
 // Constructor
-CIniFile::CIniFile(const string iniPath)
+CIniFile::CIniFile(const string &iniPath)
 {
    Path(iniPath);
    caseInsensitive = true;        // Case sensitivity creates confusion!

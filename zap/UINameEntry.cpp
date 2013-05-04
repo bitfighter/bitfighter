@@ -284,8 +284,6 @@ void LevelNameEntryUserInterface::completePartial()
 }
 
 
-extern CIniFile gINI;
-
 void LevelNameEntryUserInterface::onAccept(const char *name)
 {
    EditorUserInterface *ui = static_cast<EditorUserInterface *>(getUIManager()->getUI(EditorUI));
@@ -296,7 +294,7 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
    
    // Get that baby into the INI file
    getGame()->getSettings()->getIniSettings()->lastEditorName = name;
-   saveSettingsToINI(&gINI, getGame()->getSettings());             
+   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());             
    // Should be...
    //getGame()->getIniSettings()->saveSettingsToDisk();
 }

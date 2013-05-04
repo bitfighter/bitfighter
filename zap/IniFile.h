@@ -11,18 +11,14 @@
 //               platform. Tested on Windows/Linux/Irix
 //////////////////////////////////////////////////////////////////////
 
-#ifndef CIniFile_H
-#define CIniFile_H
-
-//#define _UNICODE
-
-// C++ Includes
-#include <string>
+#ifndef _CIniFile_H_
+#define _CIniFile_H_
 
 #include <tnlVector.h>     // For Vector type
 
-// C Includes
 #include <stdlib.h>
+#include <string>
+
 
 #define MAX_KEYNAME    128
 #define MAX_VALUENAME  128
@@ -62,7 +58,7 @@ public:
 
    S32 lineCount;
 
-   explicit CIniFile( const string iniPath = "");    // Constructor
+   explicit CIniFile( const string &iniPath = "");   // Constructor
    virtual ~CIniFile();                              // Destructor
 
    void processLine(string line);     // Process a line of an input file (CE)
@@ -205,8 +201,6 @@ public:
 
    bool     deleteAllSectionComments();
 };
-
-extern CIniFile gINI;
 
 };
 #endif

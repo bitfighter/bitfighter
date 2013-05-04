@@ -60,6 +60,7 @@
     <ClCompile Include="..\poly2tri\sweep\advancing_front.cc" />
     <ClCompile Include="..\zap\textItem.cpp" />
     <ClCompile Include="..\zap\VideoSystem.cpp" />
+    <ClCompile Include="..\zap\IniFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">
