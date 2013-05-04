@@ -26,19 +26,12 @@
 #include "Cursor.h"
 
 #include "tnlAssert.h"
-#include "tnlLog.h"
 
-//#include "gameObjectRender.h"
-//#include "ScreenInfo.h"
-
-#ifdef TNL_OS_MOBILE
-#include "SDL_opengles.h"
-#else
-#include "SDL_opengl.h"
+#ifdef TNL_OS_WIN32 
+#  include <Windows.h>        // For ARRAYSIZE def
 #endif
 
-#include "SDL_mouse.h"
-#include "SDL_version.h"
+#include "SDL_mouse.h"     
 
 namespace Zap
 {
