@@ -26,7 +26,6 @@
 // Renders a simple message box, waits for the user to hit Y or N, and runs a registered function
 
 #include "UIYesNo.h"
-#include "UIMenus.h"
 
 #include <stdio.h>
 

@@ -23,31 +23,26 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "config.h"
 #include "UIDiagnostics.h"
-#include "UINameEntry.h"
+
 #include "UIMenus.h"
-#include "UIGame.h"
 #include "masterConnection.h"
-#include "InputModeEnum.h"
-#include "version.h"
 #include "ScreenInfo.h"
-#include "Joystick.h"
 #include "JoystickRender.h"
 #include "ClientGame.h"
-#include "ClientInfo.h"
+#include "config.h"
+#include "version.h"
 
 #include "gameObjectRender.h"    // For drawCircle in badge rendering below
 
 #include "ServerGame.h"          // For gServerGame refs
 
-#include "tnl.h"
-
+#include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 
-#include <stdio.h>
-#include <cmath>
+#include "tnl.h"
+
 
 namespace Zap
 {

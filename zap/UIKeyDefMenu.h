@@ -27,8 +27,9 @@
 #define _UIKEYDEFMENUS_H_
 
 
-#include "UI.h"
-#include "InputModeEnum.h"
+#include "UI.h"               // Parent
+
+#include "Color.h"
 #include "Timer.h"
 
 #include "tnlTypes.h"

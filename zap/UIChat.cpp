@@ -24,19 +24,18 @@
 //------------------------------------------------------------------------------------
 
 #include "UIChat.h"
+
 #include "UIQueryServers.h"      // For menuID
+#include "UIGame.h"              // For putting private messages into game console
 #include "masterConnection.h"
-#include "UIGame.h"  // For putting private messages into game console
-#include "Colors.h"
 #include "ScreenInfo.h"
 #include "ClientGame.h"
+#include "Colors.h"
 #include "SoundSystem.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 
-#include <stdarg.h>
-#include <utility>
 
 namespace Zap
 {

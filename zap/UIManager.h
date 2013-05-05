@@ -218,6 +218,8 @@ public:
    void activate(UserInterface *, bool save = true);
 
    void idle(U32 timeDelta);
+
+   void renderAndDimGameUserInterface();
 };
 
 };

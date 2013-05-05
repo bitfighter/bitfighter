@@ -33,6 +33,8 @@
 #include "teleporter.h"
 #include "ServerGame.h"
 #include "gameNetInterface.h"
+//#include "gameLoader.h"
+
 
 #include "md5wrapper.h"
 
@@ -657,18 +659,18 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
    
    else
    {
-      char obj[LevelLoader::MaxArgLen + 1];
+      string objName;
 
       // Convert any NexusFlagItem into FlagItem, only NexusFlagItem will show up on ship
       if(!stricmp(argv[0], "HuntersFlagItem") || !stricmp(argv[0], "NexusFlagItem"))
-         strcpy(obj, "FlagItem");
+         objName = "FlagItem";
 
       // Convert legacy Hunters* objects
       else if(stricmp(argv[0], "HuntersNexusObject") == 0 || stricmp(argv[0], "NexusObject") == 0)
-         strcpy(obj, "NexusZone");
+         objName = "NexusZone";
 
       else
-         strncpy(obj, argv[0], LevelLoader::MaxArgLen);
+         objName = argv[0];
 
 
       if(!getGameType())   // Must have a GameType at this point, if not, we will add one to prevent problems loading a level with missing GameType
@@ -678,8 +680,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
          gt->addToGame(this, database);
       }
 
-      obj[LevelLoader::MaxArgLen] = '\0';
-      TNL::Object *theObject = TNL::Object::create(obj);                // Create an object of the type specified on the line
+      TNL::Object *theObject = TNL::Object::create(objName.c_str());    // Create an object of the type specified on the line
 
       SafePtr<BfObject> object  = dynamic_cast<BfObject *>(theObject);  // Force our new object to be a BfObject
       BfObject *eObject = dynamic_cast<BfObject *>(theObject);
@@ -687,7 +688,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
 
       if(!object && !eObject)    // Well... that was a bad idea!
       {
-         logprintf(LogConsumer::LogLevelError, "Unknown object type \"%s\" in level \"%s\"", obj, levelFileName.c_str());
+         logprintf(LogConsumer::LogLevelError, "Unknown object type \"%s\" in level \"%s\"", objName.c_str(), levelFileName.c_str());
          delete theObject;
          return;
       }
@@ -712,7 +713,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       else
       {
          if(!validArgs)
-            logprintf(LogConsumer::LogLevelError, "Invalid arguments in object \"%s\" in level \"%s\"", obj, levelFileName.c_str());
+            logprintf(LogConsumer::LogLevelError, "Invalid arguments in object \"%s\" in level \"%s\"", objName.c_str(), levelFileName.c_str());
 
          delete object.getPointer();
       }
@@ -1217,7 +1218,7 @@ const Color *Game::getTeamColor(S32 teamId) const
 
 void Game::onReadTeamParam(S32 argc, const char **argv)
 {
-   if(getTeamCount() < GameType::MAX_TEAMS)     // Too many teams?
+   if(getTeamCount() < MAX_TEAMS)     // Too many teams?
    {
       AbstractTeam *team = getNewTeam();
       if(team->processArguments(argc, argv))

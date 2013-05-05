@@ -137,7 +137,6 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
       return true;
 
    InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
-   GameConnection *gc = getGame()->getConnectionToServer();
 
    if(isMenuBeingDisplayed())    // Menu is being displayed, so interpret keystrokes as menu items
    {
@@ -154,9 +153,7 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
          }
       }
 
-      Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      TNLAssert(ship, "Will this ever be true?  If not, we can replace with static cast/assert. If this does assert, "
-                      "please document and remove this assert.  This was probably added c. 017.");
+      Ship *ship = getGame()->getLocalPlayerShip();
 
       if(!ship || (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1) && ship->getModule(0) == ModuleEngineer) ||
                   (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2) && ship->getModule(1) == ModuleEngineer))
@@ -167,7 +164,8 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
    }
    else                       // Placing item
    {
-      Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
+      Ship *ship = getGame()->getLocalPlayerShip();
+
       if(ship && ((inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1) && ship->getModule(0) == ModuleEngineer) ||
                   (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2) && ship->getModule(1) == ModuleEngineer)))
       {
@@ -178,12 +176,9 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
          if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, engineerItemInfo[mSelectedIndex].itemIndex))
          {
             // Send command to server to deploy, and deduct energy
-            if(gc)
-            {
-               gc->c2sEngineerDeployObject(engineerItemInfo[mSelectedIndex].itemIndex);
-               S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
-               ship->creditEnergy(-energyCost);    // Deduct energy from engineer
-            }
+            getGame()->getConnectionToServer()->c2sEngineerDeployObject(engineerItemInfo[mSelectedIndex].itemIndex);
+            S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
+            ship->creditEnergy(-energyCost);    // Deduct energy from engineer
          }
          // If location is bad, show error message
          else

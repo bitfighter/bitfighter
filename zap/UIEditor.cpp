@@ -24,59 +24,47 @@
 //------------------------------------------------------------------------------------
 
 #include "UIEditor.h"
+
 #include "UIEditorMenus.h"       // For access to menu methods such as setObject
-
-#include "Cursor.h"              // For various editor cursor
-
-#include "UINameEntry.h"
-#include "UIEditorInstructions.h"
-#include "UIChat.h"
-#include "UIDiagnostics.h"
-#include "UITeamDefMenu.h"
-#include "UIGameParameters.h"
-#include "UIErrorMessage.h"
 #include "UIYesNo.h"
-#include "gameObjectRender.h"
+
+#include "gridDB.h"
+#include "WallSegmentManager.h"
+
 #include "ClientGame.h"  
-#include "gameType.h"
-#include "ClientInfo.h"          // For getting player name, default level credits
-#include "soccerGame.h"          // For Soccer ball radius
-#include "NexusGame.h"           // For NexusZone def
 #include "CoreGame.h"            // For CoreItem def
-#include "EngineeredItem.h"      // For Turret properties
-#include "PickupItem.h"          // For RepairItem
+#include "NexusGame.h"           // For NexusZone def
+#include "soccerGame.h"          // For Soccer ball radius
+
 #include "barrier.h"             // For DEFAULT_BARRIER_WIDTH
-#include "item.h"                // For Asteroid defs
-#include "teleporter.h"          // For Teleporter def
-#include "speedZone.h"           // For Speedzone def
-#include "loadoutZone.h"         // For LoadoutZone def
-#include "config.h"
+#include "EngineeredItem.h"      // For Turret properties
 #include "goalZone.h"
-#include "EditorPlugin.h"        // For plugin support
+#include "item.h"                // For Asteroid defs
+#include "loadoutZone.h"         // For LoadoutZone def
+#include "PickupItem.h"          // For RepairItem
+#include "speedZone.h"           // For Speedzone def
+#include "teleporter.h"          // For Teleporter def
+#include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
+
+#include "config.h"
+#include "Cursor.h"              // For various editor cursor
+#include "Colors.h"
 
 #include "gameLoader.h"          // For LevelLoadException def
 
-#include "Colors.h"
-#include "GeomUtils.h"
-#include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
 #include "luaLevelGenerator.h"
-#include "stringUtils.h"
 #include "LevelDatabaseUploadThread.h"
+#include "gameObjectRender.h"
 
 #include "Console.h"          // Our console object
 #include "ScreenInfo.h"
 #include "VideoSystem.h"
 
-#include "SDL.h"
+#include "stringUtils.h"
+#include "GeomUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 
-#include <boost/shared_ptr.hpp>
-
-#include <ctype.h>
-#include <exception>
-#include <algorithm>             // For sort
-#include <math.h>
 
 using namespace boost;
 
@@ -303,10 +291,7 @@ void EditorUserInterface::saveUndoState(bool forceSelectionOfTargetObject)
 
    GridDatabase *newDB = new GridDatabase();    // Make a copy
 
-
    newDB->copyObjects(getDatabase());
-
-
 
    mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<GridDatabase>(newDB);  
 

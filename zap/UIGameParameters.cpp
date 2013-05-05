@@ -23,28 +23,15 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "UIMenus.h"
 #include "UIGameParameters.h"
-#include "UIChat.h"
-#include "UIDiagnostics.h"
+
 #include "UIEditor.h"
-#include "UINameEntry.h"
-#include "InputModeEnum.h"
-#include "InputCode.h"
-#include "IniFile.h"
-#include "config.h"
+#include "game.h"
 #include "gameType.h"
 #include "ClientGame.h"
 #include "Cursor.h"
 
-#include "SDL.h"
-#ifdef TNL_OS_MOBILE
-#include "SDL_opengles.h"
-#else
-#include "SDL_opengl.h"
-#endif
-
-#include <string>
+#include "stringUtils.h"
 
 
 namespace Zap

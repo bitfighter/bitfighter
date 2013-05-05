@@ -102,18 +102,10 @@ void LineItem::render()
 #ifndef ZAP_DEDICATED
    bool sameTeam = false;
 
-   GameConnection *gc = static_cast<ClientGame *>(getGame())->getConnectionToServer();
-
-   // Don't render opposing team's text items... gc will only exist in-game
-   if(gc)
+   Ship *ship = getGame()->getLocalPlayerShip();
+   // Don't render opposing team's text items... ship will only exist in-game
+   if(ship)
    {
-      BfObject *object = gc->getControlObject();
-
-      if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
-         return;
-
-      Ship *ship = static_cast<Ship *>(object);
-
       if(getTeam() == TEAM_NEUTRAL || ship->getTeam() == getTeam())
          sameTeam = true;
    }

@@ -162,9 +162,9 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth
 
    // Add some objective arrows...
    // ...but rendering objective arrows makes no sense if there is no ship at the moment
-   BfObject *object = static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject();
+   Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
+   if(!ship)
       return;
 
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);

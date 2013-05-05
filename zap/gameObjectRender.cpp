@@ -25,8 +25,7 @@
 
 #include "gameObjectRender.h"
 
-
-#include "UI.h"
+#include "UI.h"                  // For margins only
 #include "projectile.h"
 #include "speedZone.h"
 #include "soccerGame.h"
@@ -38,9 +37,11 @@
 #include "config.h"              // Only for testing burst graphics below
 #include "ScreenInfo.h"
 #include "game.h"
+#include "VertexStylesEnum.h"
 
-#include "UIEditor.h"            // For RenderingStyles enum
+//#include "UIEditor.h"            // For RenderingStyles enum
 
+#include "stringUtils.h"
 #include "RenderUtils.h"
 #include "MathUtils.h"           // For converting radians to degrees, sq()
 #include "OpenglUtils.h"
@@ -55,6 +56,9 @@ namespace Zap
 static const S32 NUM_CIRCLE_SIDES = 32;
 static const F32 INV_NUM_CIRCLE_SIDES = 1 / F32(NUM_CIRCLE_SIDES);
 static const F32 CIRCLE_SIDE_THETA = Float2Pi * INV_NUM_CIRCLE_SIDES;
+
+extern F32 gLineWidth1;
+extern F32 gLineWidth3;
 
 
 void drawHorizLine(S32 x1, S32 x2, S32 y)

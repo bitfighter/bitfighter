@@ -710,4 +710,11 @@ void UIManager::idle(U32 timeDelta)
 }
 
 
+void UIManager::renderAndDimGameUserInterface()
+{
+   getGameUserInterface()->render();
+   UserInterface::dimUnderlyingUI();
+}
+
+
 };

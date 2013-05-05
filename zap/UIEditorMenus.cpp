@@ -28,6 +28,7 @@
 #include "ScreenInfo.h"    // For canvasHeight
 #include "ClientGame.h"    // For UIManager and callback
 
+#include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 

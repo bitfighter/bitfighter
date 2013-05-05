@@ -23,12 +23,10 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _UIYESNO_H_
-#define _UIYESNO_H_
+#ifndef _UI_YES_NO_H_
+#define _UI_YES_NO_H_
 
-#include "UI.h"
 #include "UIErrorMessage.h"
-#include "game.h"
 
 namespace Zap
 {

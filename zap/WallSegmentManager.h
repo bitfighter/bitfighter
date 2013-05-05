@@ -26,8 +26,8 @@
 #ifndef _WALL_SEGMENT_MANAGER_H_
 #define _WALL_SEGMENT_MANAGER_H_
 
-#include "gridDB.h"
 #include "Point.h"
+
 #include "tnlVector.h"
 #include "tnlNetObject.h"
 
@@ -37,6 +37,9 @@ namespace Zap
 class GameSettings;
 class WallEdge;
 class WallSegment;
+class GridDatabase;
+class DatabaseObject;
+class BfObject;
 
 
 class WallSegmentManager

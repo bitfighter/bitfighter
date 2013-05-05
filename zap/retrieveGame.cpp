@@ -32,9 +32,7 @@
 #include "gameConnection.h"
 #include "ClientInfo.h"
 
-#ifndef ZAP_DEDICATED
-#  include "ClientGame.h"
-#endif
+#include "Game.h"
 
 namespace Zap
 {
@@ -263,12 +261,10 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvas
 
    Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
 
-   BfObject *object = static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject();
+   Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
+   if(!ship)
       return;
-
-   Ship *ship = static_cast<Ship *>(object);
 
    bool uFlag = false;
    S32 team = ship->getTeam();

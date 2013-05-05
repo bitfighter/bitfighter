@@ -954,22 +954,13 @@ void Mine::renderItem(const Point &pos)
 
    bool visible, armed;
 
-   Game *game = getGame();
-   ClientGame *clientGame = static_cast<ClientGame *>(game);
+   Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(clientGame && clientGame->getConnectionToServer())
+   if(ship)
    {
-      GameConnection *localClient = clientGame->getConnectionToServer();
-      BfObject *controlObject = localClient->getControlObject();
-
-      if(!controlObject || !isShipType(controlObject->getObjectTypeNumber()))
-         return;
-
-      Ship *ship = static_cast<Ship *>(controlObject);
-
       armed = mArmed;
 
-      GameType *gameType = clientGame->getGameType();
+      GameType *gameType = getGame()->getGameType();
 
       // Can see mine if laid by teammate in team game OR you laid it yourself OR
       // sensor is active and you're within the detection distance
@@ -1192,21 +1183,11 @@ void SpyBug::renderItem(const Point &pos)
 
    bool visible;
 
-   Game *game = getGame();
-   ClientGame *clientGame = static_cast<ClientGame *>(game);
+   Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(clientGame->getConnectionToServer())
+   if(ship)
    {
-      GameConnection *conn = clientGame->getConnectionToServer();   
-
-      BfObject *controlObject = conn->getControlObject();
-
-      if(!controlObject || !isShipType(controlObject->getObjectTypeNumber()))
-         return;
-
-      Ship *ship = static_cast<Ship *>(controlObject);
-
-      GameType *gameType = clientGame->getGameType();
+      GameType *gameType = getGame()->getGameType();
 
       // Can see bug if laid by teammate in team game OR you laid it yourself OR
       // spyBug is neutral OR sensor is active and you're within the detection distance

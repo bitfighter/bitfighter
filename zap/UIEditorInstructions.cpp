@@ -23,26 +23,19 @@
 //
 //------------------------------------------------------------------------------------
 
-
-#include "ClientGame.h"    // For usage with getGame()
-#include "InputModeEnum.h"
-#include "config.h"
-#include "barrier.h"            
-#include "UIAbstractInstructions.h"
 #include "UIEditorInstructions.h"
-#include "UIMenus.h"
-#include "UIGame.h"
-#include "UIChat.h"
-#include "UIDiagnostics.h"
-#include "UIEditor.h"
+
+#include "ClientGame.h"       // For usage with getGame()
+#include "barrier.h"     
+#include "BotNavMeshZone.h"   // For Border class def
 #include "gameObjectRender.h"
 #include "ScreenInfo.h"
+#include "VertexStylesEnum.h"
 
-#include "GeomUtils.h"      // For polygon triangulation
+#include "GeomUtils.h"        // For polygon triangulation
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 
-#include <math.h>
 
 namespace Zap
 {

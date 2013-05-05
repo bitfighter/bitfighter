@@ -980,6 +980,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sDeploySpybug, (), (), NetClassGroupGameMask
 TNL_IMPLEMENT_RPC(GameConnection, s2cCreditEnergy, (RangedU32<0, Ship::EnergyMax> energy), (energy), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
    Ship *ship = static_cast<Ship *>(getControlObject());
+
    if(ship)
       ship->creditEnergy((S32)energy);
 }

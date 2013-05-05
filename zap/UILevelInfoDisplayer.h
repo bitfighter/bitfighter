@@ -26,7 +26,7 @@
 #ifndef _UI_LEVEL_INFO_DISPLAYER_H_
 #define _UI_LEVEL_INFO_DISPLAYER_H_
 
-#include "SlideOutWidget.h"
+#include "SlideOutWidget.h"      // Parent
 
 using namespace TNL; 
 

@@ -25,11 +25,10 @@
 
 #include "UIMenus.h"
 
-#include "UIGame.h"
+#include "UIGame.h"           // Only barely used
 #include "UIEditor.h"         // Can get rid of this with a passthrough in MenuManager
 #include "UIErrorMessage.h"   // Can get rid of this with a passthrough in MenuManager
 
-#include "Colors.h"
 #include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
 #include "ClientGame.h"
 #include "ServerGame.h"
@@ -37,11 +36,13 @@
 #include "IniFile.h"
 #include "ScreenInfo.h"
 #include "JoystickRender.h"
+#include "Colors.h"
 #include "Cursor.h"
 #include "VideoSystem.h"
 #include "FontManager.h"
-#include "RenderUtils.h"
 
+#include "stringUtils.h"
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 #include <algorithm>
@@ -326,12 +327,7 @@ void MenuUserInterface::render()
 
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(getGame()->getConnectionToServer())
-   {
-      if(getUIManager()->getGameUserInterface())
-         getUIManager()->getGameUserInterface()->render();
-
-      dimUnderlyingUI();
-   }
+      getUIManager()->renderAndDimGameUserInterface();
 
    // Title 
    glColor(Colors::white);    
@@ -2216,12 +2212,10 @@ void TeamMenuUserInterface::render()
    }
 
    string name = "";
-   if(getGame()->getConnectionToServer() && getGame()->getConnectionToServer()->getControlObject())
-   {
-      Ship *ship = dynamic_cast<Ship *>(getGame()->getConnectionToServer()->getControlObject());
-      if(ship && ship->getClientInfo())
-         name = ship->getClientInfo()->getName().getString();
-   }
+   Ship *ship = getGame()->getLocalPlayerShip();
+
+   if(ship && ship->getClientInfo())
+      name = ship->getClientInfo()->getName().getString();
 
    if(name != nameToChange)    // i.e. names differ, this isn't the local player
    {

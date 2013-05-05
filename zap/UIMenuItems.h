@@ -27,8 +27,7 @@
 #define _MENU_ITEMS_H_
 
 #include "teamInfo.h"      // For Team def
-#include "Colors.h"
-#include "stringUtils.h"   // For itos
+#include "Color.h"
 
 #include <string>
 

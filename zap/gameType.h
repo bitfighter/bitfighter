@@ -31,6 +31,7 @@
 #include "gameStats.h"           // For VersionedGameStats
 #include "barrier.h"             // For WallRec def
 
+#include "game.h"                // For MaxTeams
 #include "gameConnection.h"      // For MessageColors enum
 #include "GameTypesEnum.h"
 #include "DismountModesEnum.h"
@@ -210,10 +211,9 @@ public:
 
    static const S32 MAX_GAME_TIME = S32_MAX;
 
-   static const S32 MAX_TEAMS = 9;                                   // Max teams allowed -- careful changing this; used for RPC ranges
-   static const S32 gFirstTeamNumber = -2;                           // First team is "Hostile to All" with index -2
-   static const U32 gMaxTeamCount = MAX_TEAMS - gFirstTeamNumber;    // Number of possible teams, including Neutral and Hostile to All
-   static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to base class if needed
+   static const S32 gFirstTeamNumber = -2;                              // First team is "Hostile to All" with index -2
+   static const U32 gMaxTeamCount = Game::MAX_TEAMS - gFirstTeamNumber; // Number of possible teams, including Neutral and Hostile to All
+   static const char *validateGameType(const char *gtype);              // Returns a valid gameType, defaulting to base class if needed
 
    Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
@@ -469,7 +469,7 @@ public:
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isAuthenticated, Int<BADGE_COUNT> badges, 
                                   bool isMyClient, RangedU32<0, ClientInfo::MaxRoles> role, bool isRobot, bool isSpawnDelayed, bool isBusy, bool playAlert, bool showMessage));
-   TNL_DECLARE_RPC(s2cClientJoinedTeam, (StringTableEntry clientName, RangedU32<0, MAX_TEAMS> teamIndex, bool showMessage));
+   TNL_DECLARE_RPC(s2cClientJoinedTeam, (StringTableEntry clientName, RangedU32<0, Game::MAX_TEAMS> teamIndex, bool showMessage));
 
    TNL_DECLARE_RPC(s2cClientChangedRoles, (StringTableEntry clientName, RangedU32<0, ClientInfo::MaxRoles> role));
 
@@ -503,7 +503,7 @@ public:
    void updateRatings();               // Update everyone's game-normalized ratings at the end of the game
 
 
-   TNL_DECLARE_RPC(s2cSetTeamScore, (RangedU32<0, MAX_TEAMS> teamIndex, U32 score));
+   TNL_DECLARE_RPC(s2cSetTeamScore, (RangedU32<0, Game::MAX_TEAMS> teamIndex, U32 score));
    TNL_DECLARE_RPC(s2cSetPlayerScore, (U16 index, S32 score));
 
    TNL_DECLARE_RPC(c2sRequestScoreboardUpdates, (bool updates));

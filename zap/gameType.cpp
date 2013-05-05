@@ -33,9 +33,6 @@
 #include "robot.h"
 #include "loadoutZone.h"      // For LoadoutZone
 
-//#include "OpenglUtils.h"
-
-
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
 #   include "UIMenus.h"
@@ -43,15 +40,15 @@
 
 #include "masterConnection.h"    
 
+#include "Colors.h"
+
+#include "stringUtils.h"
+
 #include "tnlThread.h"
 #include <math.h>
 
 namespace Zap
 {
-
-#ifdef TNL_OS_MAC_OSX
-const S32 GameType::MAX_TEAMS;
-#endif
 
 
 // List of valid game types -- these are the "official" names, not the more user-friendly names provided by getGameTypeName
@@ -260,10 +257,10 @@ void GameType::addToGame(Game *game, GridDatabase *database)
 bool GameType::onGhostAdd(GhostConnection *theConnection)
 {
 #ifndef ZAP_DEDICATED
-   ClientGame *clientGame = ((GameConnection *) theConnection)->getClientGame();
-   TNLAssert(clientGame, "Should only be client here!");
+   Game *game = ((GameConnection *) theConnection)->getClientGame();
+   TNLAssert(game && !game->isServer(), "Should only be client here!");
 
-   addToGame(clientGame, clientGame->getGameObjDatabase());
+   addToGame(game, game->getGameObjDatabase());
    return true;
 #else
    TNLAssert(false, "Should only be client here!");
@@ -796,17 +793,11 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *color, 
    if(!target)
       return;
 
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-   GameConnection *gc = clientGame->getConnectionToServer();
-   BfObject *ship = NULL;
-
-   if(gc)
-      ship = gc->getControlObject();
+   Ship *ship = getGame()->getLocalPlayerShip();
 
    if(!ship)
       return;
 
-   ClientGame *game = static_cast<ClientGame *>(mGame);
 
    Point targetPoint;
 
@@ -833,7 +824,8 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *color, 
          targetPoint.y = r.min.y;
    }
 
-   Point p = game->worldToScreenPoint(&targetPoint, canvasWidth, canvasHeight);
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+   Point p = clientGame->worldToScreenPoint(&targetPoint, canvasWidth, canvasHeight);
    drawObjectiveArrow(p, clientGame->getCommanderZoomFraction(), color, canvasWidth, canvasHeight, alphaMod);
 }
 
@@ -842,14 +834,9 @@ void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outl
 {
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
-   GameConnection *gc = clientGame->getConnectionToServer();
+   Ship *ship = getGame()->getLocalPlayerShip();
 
-   BfObject *co = NULL;
-
-   if(gc)
-      co = gc->getControlObject();
-
-   if(!co)
+   if(!ship)
       return;
 
    drawObjectiveArrow(nearestPoint, clientGame->getCommanderZoomFraction(), outlineColor, canvasWidth, canvasHeight, alphaMod);
@@ -2495,7 +2482,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g,
 }
 
 
-GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, GameType::MAX_TEAMS> teamIndex, U32 score), (teamIndex, score))
+GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, Game::MAX_TEAMS> teamIndex, U32 score), (teamIndex, score))
 {
    TNLAssert(teamIndex < U32(mGame->getTeamCount()), "teamIndex out of range");
 
@@ -2549,7 +2536,7 @@ GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEn
 
 // Announce a new player has joined the team
 GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam, 
-                (StringTableEntry name, RangedU32<0, GameType::MAX_TEAMS> teamIndex, bool showMessage), 
+                (StringTableEntry name, RangedU32<0, Game::MAX_TEAMS> teamIndex, bool showMessage), 
                 (name, teamIndex, showMessage))
 {
 #ifndef ZAP_DEDICATED

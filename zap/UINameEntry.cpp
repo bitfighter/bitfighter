@@ -24,16 +24,13 @@
 //------------------------------------------------------------------------------------
 
 #include "UINameEntry.h"
-#include "UIMenus.h"
+
 #include "UIGame.h"
-#include "UIChat.h"
-#include "UIEditor.h"
+#include "UIEditor.h"      // Only used once, could probably be refactored out
 #include "ClientGame.h"
-#include "gameConnection.h"
-#include "config.h"
-#include "md5wrapper.h"
 #include "ScreenInfo.h"
 
+#include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 

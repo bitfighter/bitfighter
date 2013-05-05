@@ -26,7 +26,7 @@
 #ifndef _VOICECODEC_H_
 #define _VOICECODEC_H_
 
-#include "../tnl/tnlByteBuffer.h"
+#include "tnlByteBuffer.h"
 
 #if defined(TNL_OS_MOBILE) || defined(BF_NO_AUDIO)
 #  define BF_NO_VOICECHAT

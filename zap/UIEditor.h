@@ -26,21 +26,20 @@
 #ifndef _UIEDITOR_H_
 #define _UIEDITOR_H_
 
-#include "UIMenus.h"
+#include "UI.h"                  // Parent
+#include "UIMenus.h"             // Parent
 
 #include "EditorPlugin.h"        // For plugin support
-#include "UIEditorMenus.h"       // For PluginMenuUI
+#include "teamInfo.h"            // For TeamManager def
 
-#include "gameLoader.h"
+#include "VertexStylesEnum.h"
 #include "BfObject.h"            // For BfObject definition
-#include "gridDB.h"              // For DatabaseObject definition
 #include "Timer.h"
 #include "Point.h"
-#include "BotNavMeshZone.h"      // For Border def
-#include "tnlNetStringTable.h"
-#include "barrier.h"             // For wall related defs (WallSegmentManager, etc.)
-#include "Colors.h"
+#include "Color.h"
 #include "EditorAttributeMenuItemBuilder.h"
+
+#include "tnlNetStringTable.h"
 
 #include <string>
 
@@ -54,19 +53,11 @@ namespace Zap
 
 class EditorTeam;
 class LuaLevelGenerator;
-
-enum VertexRenderStyles
-{
-   SnappingVertex,                  // Vertex that indicates snapping point
-   HighlightedVertex,               // Highlighted vertex
-   SelectedVertex,                  // Vertex itself is selected
-   SelectedItemVertex,              // Non-highlighted vertex of a selected item
-   UnselectedItemVertex,            // Non-highlighted vertex of a non-selected item
-};
-
-
 class EditorAttributeMenuUI;
 class PluginMenuUI;
+class DatabaseObject;
+class GameType;
+struct FolderManager;
 
 class EditorUserInterface : public UserInterface
 {

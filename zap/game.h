@@ -268,6 +268,9 @@ public:
    static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
    static const S32 MAX_GRID_SIZE = 1000;    // A bit ridiculous too...  250-300 seems about right for normal use.  But we'll let folks experiment.
 
+   static const S32 MAX_TEAMS = 9;           // Max teams allowed -- careful changing this; used for RPC ranges
+
+
    static const S32 PLAYER_VISUAL_DISTANCE_HORIZONTAL = 600;    // How far player can see normally horizontally...
    static const S32 PLAYER_VISUAL_DISTANCE_VERTICAL = 450;      // ...and vertically
 
@@ -340,6 +343,8 @@ public:
 
    virtual void deleteLevelGen(LuaLevelGenerator *levelgen) = 0; 
 
+
+   virtual Ship *getLocalPlayerShip() const = 0;
 
    void setGameTime(F32 time);                                          // Only used during level load process
 

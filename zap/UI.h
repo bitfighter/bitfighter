@@ -136,7 +136,7 @@ public:
 
    static void renderFancyBox(S32 boxTop, S32 boxHeight, S32 inset, Color borderColor, F32 alpha);
 
-   void dimUnderlyingUI(F32 amount = 0.75f) const;
+   static void dimUnderlyingUI(F32 amount = 0.75f);
 
    static void renderDiagnosticKeysOverlay();
 

@@ -40,6 +40,10 @@
 #include "UIErrorMessage.h"
 #include "UIHighScores.h"
 
+#include "Colors.h"
+
+#include "stringUtils.h"
+
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>
 #include <cmath>
@@ -238,17 +242,6 @@ ClientInfo *ClientGame::getClientInfo() const
 ClientInfo *ClientGame::getLocalRemoteClientInfo() const
 {
    return mLocalRemoteClientInfo;
-}
-
-
-Ship *ClientGame::getLocalShip() const
-{ 
-   GameConnection *gc = getConnectionToServer();
-
-   if(gc)
-      return static_cast<Ship *>(gc->getControlObject());
-
-   return NULL;
 }
 
 
@@ -1669,12 +1662,10 @@ F32 ClientGame::getCommanderZoomFraction() const
 // Called from renderObjectiveArrow() & ship's onMouseMoved() when in commander's map
 Point ClientGame::worldToScreenPoint(const Point *point,  S32 canvasWidth, S32 canvasHeight) const
 {
-   BfObject *controlObject = mConnectionToServer->getControlObject();
+   Ship *ship = getLocalPlayerShip();
 
-   if(!controlObject || controlObject->getObjectTypeNumber() != PlayerShipTypeNumber)
+   if(!ship)
       return Point(0,0);
-
-   Ship *ship = static_cast<Ship *>(controlObject);
 
    Point position = ship->getRenderPos();    // Ship's location (which will be coords of screen's center)
    
@@ -1836,6 +1827,25 @@ const Vector<string> *ClientGame::getLevelRobotLines() const
 {
    return &mRobots;
 }
+
+
+Ship *ClientGame::getLocalPlayerShip() const
+{
+   if(!mConnectionToServer)      // Needed if we get here while joining a server in cmdrs map mode
+      return NULL;
+
+   BfObject *object = mConnectionToServer->getControlObject();
+
+   if(!object)
+      return NULL;
+
+   // Completely unneeded at this point -- planyes can only control a ship!
+   if(object->getObjectTypeNumber() != PlayerShipTypeNumber)
+      return NULL;
+
+  return static_cast<Ship *>(object);
+}
+
 
 };
 

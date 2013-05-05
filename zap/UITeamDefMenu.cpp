@@ -23,23 +23,13 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "UIMenus.h"
 #include "UITeamDefMenu.h"
-#include "UIChat.h"
-#include "UIDiagnostics.h"
+
 #include "UIEditor.h"
-#include "InputModeEnum.h"
-#include "InputCode.h"
-#include "IniFile.h"
-#include "config.h"
-#include "gameType.h"      // For MAX_TEAMS
 #include "ScreenInfo.h"
 #include "ClientGame.h"
 #include "Cursor.h"
-#include "TeamPreset.h"    // For TeamPreset def
 
-
-#include "SDL.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 
@@ -299,14 +289,14 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    {
       S32 teamCount = ui->getTeamCount();
 
-      if(teamCount >= GameType::MAX_TEAMS)
+      if(teamCount >= Game::MAX_TEAMS)
       {
          errorMsgTimer.reset(errorMsgDisplayTime);
          errorMsg = "Too many teams for this interface";
          return true;
       }
 
-      S32 presetIndex = teamCount % GameType::MAX_TEAMS;
+      S32 presetIndex = teamCount % Game::MAX_TEAMS;
 
       EditorTeam *team = new EditorTeam(gTeamPresets[presetIndex]);
       ui->addTeam(team, teamCount);

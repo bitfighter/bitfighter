@@ -520,6 +520,7 @@
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="UIMenuItems.h" />
     <ClInclude Include="version.h" />
+    <ClInclude Include="VertexStylesEnum.h" />
     <ClInclude Include="WallSegmentManager.h" />
     <ClInclude Include="Zone.h" />
     <ClInclude Include="zoneControlGame.h" />

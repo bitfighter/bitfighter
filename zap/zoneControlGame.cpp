@@ -24,16 +24,10 @@
 //------------------------------------------------------------------------------------
 
 #include "zoneControlGame.h"
-#include "goalZone.h"
-#include "flagItem.h"
-#include "gameObjectRender.h"
-#include "ClientInfo.h"
-#include "gameConnection.h"
-#include "masterConnection.h"
 
-#ifndef ZAP_DEDICATED
-#  include "ClientGame.h"
-#endif
+#include "goalZone.h"
+#include "gameObjectRender.h"
+#include "game.h"
 
 
 namespace Zap
@@ -263,14 +257,9 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 can
 
    Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
 
-   BfObject *object = static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject();
-
-   if(!object)
+   Ship *ship = getGame()->getLocalPlayerShip();
+   if(!ship)
       return;
-
-   TNLAssert(object->getObjectTypeNumber() == PlayerShipTypeNumber, "Control object is not ship?!?");    // Added 9/23/2012, can probably delete
-
-   Ship *ship = static_cast<Ship *>(object);
 
    bool localClientHasFlag = (ship->getFlagCount() != 0);
 

@@ -342,7 +342,8 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
 }
 
 
-void UserInterface::dimUnderlyingUI(F32 amount) const
+// Static method
+void UserInterface::dimUnderlyingUI(F32 amount)
 {
    glColor(Colors::black, amount); 
 

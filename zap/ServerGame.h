@@ -208,6 +208,8 @@ public:
    GameConnection *getSuspendor();
    void suspendIfNoActivePlayers();
 
+   Ship *getLocalPlayerShip() const;
+
    S32 addUploadedLevelInfo(const char *filename, LevelInfo &info);
 
    HostingModePhases hostingModePhase;

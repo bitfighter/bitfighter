@@ -25,9 +25,6 @@
 
 #include "UIErrorMessage.h"
 
-#include <stdio.h>
-#include <math.h>
-
 namespace Zap
 {
 

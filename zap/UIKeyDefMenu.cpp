@@ -23,22 +23,12 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "UIMenus.h"
 #include "UIKeyDefMenu.h"
-#include "UIChat.h"
-#include "UIDiagnostics.h"
-#include "UIGame.h"
-#include "InputModeEnum.h"
-#include "InputCode.h"
-#include "IniFile.h"
-#include "config.h"
-#include "Colors.h"
 #include "ScreenInfo.h"
 #include "JoystickRender.h"
 #include "ClientGame.h"
 #include "Cursor.h"
 
-#include "SDL.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 
@@ -213,15 +203,12 @@ bool KeyDefMenuUserInterface::isDuplicate(S32 key, const Vector<KeyDefMenuItem> 
 
 void KeyDefMenuUserInterface::render()
 {
-   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(getGame()->getConnectionToServer())
-   {
-      getUIManager()->getGameUserInterface()->render();
-      dimUnderlyingUI();
-   }
+      getUIManager()->renderAndDimGameUserInterface();
 
    glColor(Colors::white);
    drawCenteredString(vertMargin, 30, mMenuTitle);

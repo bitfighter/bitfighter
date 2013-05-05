@@ -23,12 +23,14 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "UILevelInfoDisplayer.h"      // Header
+#include "UILevelInfoDisplayer.h"   // Header
+
 #include "ScreenInfo.h"
 #include "Colors.h"
-#include "UI.h"                        
+#include "game.h"
+#include "UI.h"                     // Only here for the margins
 #include "GameTypesEnum.h"
-#include "gameType.h"
+#include "gameType.h"               // Can get rid of with a bunch of passthroughs
 #include "FontManager.h"
 
 #include "stringUtils.h"

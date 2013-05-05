@@ -25,7 +25,7 @@
 #ifndef _ZONECONTROLGAMETYPE_H_
 #define _ZONECONTROLGAMETYPE_H_
 
-#include "gameType.h"
+#include "gameType.h"      // Parent
 
 namespace Zap
 {

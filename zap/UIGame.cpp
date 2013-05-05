@@ -28,7 +28,6 @@
 
 #include "UIGame.h"
 
-#include "gameConnection.h"
 #include "UIMenus.h"
 #include "UIInstructions.h"
 #include "UIChat.h"
@@ -53,6 +52,7 @@
 
 #include "tnlEndian.h"
 
+#include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 #include "GeomUtils.h"
@@ -258,19 +258,6 @@ void GameUserInterface::doneLoadingLevel()
 }
 
 
-static Ship *getShip(const GameConnection *conn)
-{
-   if(conn && conn->getControlObject())
-   {
-      BfObject *object = conn->getControlObject();
-      if(object && object->getObjectTypeNumber() == PlayerShipTypeNumber)
-         return static_cast<Ship *>(object);      // This is the local player's ship
-   }
-
-   return NULL;
-}
-
-
 void GameUserInterface::idle(U32 timeDelta)
 {
    Parent::idle(timeDelta);
@@ -312,7 +299,7 @@ void GameUserInterface::idle(U32 timeDelta)
    mHelpItemManager.idle(timeDelta);
 
    // Update mShipPos... track this so that we can keep a fix on the ship location even if it subsequently dies
-   Ship *ship = getShip(getGame()->getConnectionToServer());
+   Ship *ship = getGame()->getLocalPlayerShip();
 
    if(ship)
       mShipPos.set(ship->getRenderPos());     // Get the player's ship position
@@ -707,14 +694,9 @@ void GameUserInterface::onMouseMoved()
 
    if(getGame()->getInCommanderMap())     // Ship not in center of the screen in cmdrs map.  Where is it?
    {
-      // If we join a server while in commander's map, we'll be here without a gameConnection and we'll get a crash without this check
-      GameConnection *gameConnection = getGame()->getConnectionToServer();
-      if(!gameConnection)
-         return;
+      Ship *ship = getGame()->getLocalPlayerShip();
 
-      // Here's our ship...
-      Ship *ship = dynamic_cast<Ship *>(gameConnection->getControlObject());
-      if(!ship)      // Can sometimes happen when switching levels. This will stop the ensuing crashing.
+      if(!ship)
          return;
 
       Point o = ship->getRenderPos();  // To avoid taking address of temporary
@@ -766,7 +748,8 @@ void GameUserInterface::dropItem()
    if(!getGame()->getConnectionToServer())
       return;
 
-   Ship *ship = dynamic_cast<Ship *>(getGame()->getConnectionToServer()->getControlObject());
+   Ship *ship = getGame()->getLocalPlayerShip();
+
    GameType *gt = getGame()->getGameType();
    if(!ship || !gt)
       return;
@@ -935,9 +918,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    // If we're not in a helper, and we apply the engineer module, then we can handle that locally by displaying a menu or message
    if(!mHelperManager.isHelperActive())
    {
-      Ship *ship = NULL;
-      if(getGame()->getConnectionToServer())   // Prevents errors, getConnectionToServer() might be NULL, and getControlObject may crash if NULL
-         ship = dynamic_cast<Ship *>(getGame()->getConnectionToServer()->getControlObject());
+      Ship *ship = getGame()->getLocalPlayerShip();
          
       if(ship)
       {
@@ -2018,8 +1999,7 @@ void GameUserInterface::renderNormal(ClientGame *game)
 
    // Here we determine if we have a control ship.
    // If not (like after we've been killed), we'll still render the current position and things
-   GameConnection *conn = game->getConnectionToServer();
-   Ship *ship = getShip(conn);
+   Ship *ship = getGame()->getLocalPlayerShip();
 
    if(ship)
       visExt = game->computePlayerVisArea(ship);
@@ -2165,7 +2145,7 @@ void GameUserInterface::renderCommander(ClientGame *game)
       worldExtents.x *= screenAspectRatio / aspectRatio;
 
 
-   Ship *ship = getShip(game->getConnectionToServer());
+   Ship *ship = getGame()->getLocalPlayerShip();
 
    //mShipPos = ship ? ship->getRenderPos()                 : Point(0,0);
    visSize = ship ? game->computePlayerVisArea(ship) * 2 : worldExtents;

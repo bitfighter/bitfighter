@@ -24,9 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "WallSegmentManager.h"
+
 #include "barrier.h"
-#include "EngineeredItem.h"         // For forcefieldprojector def
-#include "game.h"
+#include "EngineeredItem.h"      // For forcefieldprojector def ==> probably should not be here
 
 #include "GeomUtils.h"
 

@@ -110,7 +110,6 @@ public:
    ClientInfo *getClientInfo() const;
 
    ClientInfo *getLocalRemoteClientInfo() const;
-   Ship *getLocalShip() const;
 
    string getPlayerName() const;
    string getPlayerPassword() const;
@@ -281,6 +280,9 @@ public:
    void setSelectedEngineeredObject(U32 objectType);
 
    const Vector<string> *getLevelRobotLines() const;
+
+   Ship *getLocalPlayerShip() const;
+
 };
 
 ////////////////////////////////////////

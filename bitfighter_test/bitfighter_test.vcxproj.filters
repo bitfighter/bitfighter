@@ -87,6 +87,25 @@
     <ClCompile Include="..\zap\FontManager.cpp" />
     <ClCompile Include="..\zap\flagItem.cpp" />
     <ClCompile Include="..\fontstash\fontstash.c" />
+    <ClCompile Include="..\zap\gameLoader.cpp" />
+    <ClCompile Include="..\zap\gameStats.cpp" />
+    <ClCompile Include="..\zap\goalZone.cpp" />
+    <ClCompile Include="..\zap\zoneControlGame.cpp" />
+    <ClCompile Include="..\zap\HTFGame.cpp" />
+    <ClCompile Include="..\zap\voiceCodec.cpp" />
+    <ClCompile Include="..\zap\UIAbstractInstructions.cpp" />
+    <ClCompile Include="..\zap\UICredits.cpp" />
+    <ClCompile Include="..\zap\UIDiagnostics.cpp" />
+    <ClCompile Include="..\zap\UIEditor.cpp" />
+    <ClCompile Include="..\zap\UIEditorInstructions.cpp" />
+    <ClCompile Include="..\zap\UIGameParameters.cpp" />
+    <ClCompile Include="..\zap\UIKeyDefMenu.cpp" />
+    <ClCompile Include="..\zap\UILevelInfoDisplayer.cpp" />
+    <ClCompile Include="..\zap\UIMenuItems.cpp" />
+    <ClCompile Include="..\zap\UIMessage.cpp" />
+    <ClCompile Include="..\zap\UINameEntry.cpp" />
+    <ClCompile Include="..\zap\UITeamDefMenu.cpp" />
+    <ClCompile Include="..\zap\UIYesNo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">

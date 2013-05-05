@@ -26,12 +26,13 @@
 #ifndef _UICHAT_H_
 #define _UICHAT_H_
 
-#include "tnlNetBase.h"
 
-#include "game.h"
 #include "UI.h"      // Parent class of ChatUserInterface
 #include "Color.h"
 #include "lineEditor.h"
+
+#include "tnlNetStringTable.h"
+#include "tnlNetBase.h"
 
 #include <map>
 
@@ -39,6 +40,8 @@ namespace Zap
 {
 
 static const S32 IN_GAME_CHAT_DISPLAY_POS = 500;
+
+class ClientGame;
 
 class ChatMessage
 {

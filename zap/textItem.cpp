@@ -113,14 +113,13 @@ void TextItem::newObjectFromDock(F32 gridSize)
 void TextItem::render()
 {
 #ifndef ZAP_DEDICATED
-   ClientGame *game = static_cast<ClientGame *>(getGame());
-   
+   Ship *ship = getGame()->getLocalPlayerShip();
+
    // Don't render opposing team's text items if we are in a game... but in editor preview mode, where
    // we don't have a connection to the server, text will be rendered normally
-   if(game->getConnectionToServer())
+   if(ship)
    {
-      Ship *ship = dynamic_cast<Ship *>(game->getConnectionToServer()->getControlObject());
-      if( (!ship && getTeam() != TEAM_NEUTRAL) || (ship && ship->getTeam() != getTeam() && getTeam() != TEAM_NEUTRAL) )
+      if(ship->getTeam() != getTeam() && getTeam() != TEAM_NEUTRAL)
          return;
    }
 

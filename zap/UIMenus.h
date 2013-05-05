@@ -29,8 +29,9 @@
 #include "UI.h"                  // Parent class
 #include "SharedConstants.h"     // For MOTD_LEN
 #include "UIMenuItems.h"
-#include "tnlNetConnection.h"    // for TerminationReason
 #include "config.h"
+
+#include "tnlNetConnection.h"    // for TerminationReason
 
 namespace Zap
 {

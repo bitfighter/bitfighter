@@ -1582,6 +1582,14 @@ void ServerGame::gameEnded()
 }
 
 
+Ship *ServerGame::getLocalPlayerShip() const
+{
+   TNLAssert(false, "Cannot get local player's ship from a ServerGame!");
+   return NULL;
+}
+
+
+
 S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &levelInfo)
 {
    if(levelInfo.mLevelName == "")            // Make sure we have something in the name field

@@ -27,10 +27,10 @@
 #include "UIMenus.h"
 #include "UIEditorMenus.h"
 
-#include "UI.h"
 #include "ScreenInfo.h"    // For gScreenInfo stuff
 #include "FontManager.h"
 
+#include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 

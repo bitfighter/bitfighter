@@ -26,14 +26,12 @@
 #ifndef _UIGAMEPARAMS_H_
 #define _UIGAMEPARAMS_H_
 
+
+#include "UIMenus.h"
+
 #include "tnlTypes.h"
 
-#include "UI.h"
-#include "InputModeEnum.h"
-#include "Timer.h"
-#include "UIMenus.h"
 #include <string>
-
 #include <map>
 
 namespace Zap

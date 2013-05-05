@@ -28,6 +28,7 @@
 
 #include "UI.h"
 #include "InputModeEnum.h"
+#include "Color.h"
 #include "Timer.h"
 
 namespace Zap

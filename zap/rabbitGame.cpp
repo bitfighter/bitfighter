@@ -212,7 +212,6 @@ bool RabbitGameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 
 const Color *RabbitGameType::getTeamColor(const BfObject *object) const
 {
-#ifndef ZAP_DEDICATED
    // Neutral flags are orange in Rabbit
    if(object->getObjectTypeNumber() == FlagTypeNumber && object->getTeam() == TEAM_NEUTRAL)
       return &Colors::orange50;  
@@ -220,19 +219,20 @@ const Color *RabbitGameType::getTeamColor(const BfObject *object) const
    // In team game, ships use team color
    if(isShipType(object->getObjectTypeNumber()) && !isTeamGame())
    {
-      Ship *localShip = static_cast<ClientGame *>(getGame())->getLocalShip(); // (getLocalShip can return NULL)
-      
-      if(object == localShip)                            // Players always appear green to themselves
-         return &Colors::green;
+      Ship *localShip = getGame()->getLocalPlayerShip();    // (can return NULL)
+      if(localShip)
+      {
+         if(object == localShip)                            // Players always appear green to themselves
+            return &Colors::green;
 
-      const Ship *ship = static_cast<const Ship *>(object);
+         const Ship *ship = static_cast<const Ship *>(object);
 
-      if(shipHasFlag(ship) || shipHasFlag(localShip))    // If a ship has the flag, it's red; if we have the flag, others are red
-         return &Colors::red;
+         if(shipHasFlag(ship) || shipHasFlag(localShip))    // If a ship has the flag, it's red; if we have the flag, others are red
+            return &Colors::red;
+      }
 
-      return &Colors::green;                             // All others are green
+      return &Colors::green;                                // All others are green
    }
-#endif
 
    return Parent::getTeamColor(object);
 }
