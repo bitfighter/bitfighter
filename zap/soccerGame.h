@@ -27,8 +27,6 @@
 #define _SOCCERGAME_H_
 
 #include "gameType.h"
-#include "item.h"
-#include "LuaWrapper.h"
 
 namespace Zap
 {

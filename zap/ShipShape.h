@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef SHIPSHAPE_H_
-#define SHIPSHAPE_H_
+#ifndef _SHIP_SHAPE_H_
+#define _SHIP_SHAPE_H_
 
 #include "tnlTypes.h"
 #include "Color.h"

@@ -110,6 +110,24 @@
     <ClCompile Include="..\zap\TeamShuffleHelper.cpp" />
     <ClCompile Include="..\zap\teleporter.cpp" />
     <ClCompile Include="..\zap\TimeLeftRenderer.cpp" />
+    <ClCompile Include="..\zap\ScissorsManager.cpp" />
+    <ClCompile Include="..\zap\ScreenInfo.cpp" />
+    <ClCompile Include="..\zap\ScreenShooter.cpp" />
+    <ClCompile Include="..\zap\ServerGame.cpp" />
+    <ClCompile Include="..\poly2tri\common\shapes.cc" />
+    <ClCompile Include="..\zap\ShipShape.cpp" />
+    <ClCompile Include="..\zap\SlideOutWidget.cpp" />
+    <ClCompile Include="..\zap\SlipZone.cpp" />
+    <ClCompile Include="..\zap\soccerGame.cpp" />
+    <ClCompile Include="..\zap\SoundSystem.cpp" />
+    <ClCompile Include="..\zap\SoundEffect.cpp" />
+    <ClCompile Include="..\zap\sparkManager.cpp" />
+    <ClCompile Include="..\zap\speedZone.cpp" />
+    <ClCompile Include="..\zap\statistics.cpp" />
+    <ClCompile Include="..\sqlite\sqlite3.c" />
+    <ClCompile Include="..\fontstash\stb_truetype.c" />
+    <ClCompile Include="..\poly2tri\sweep\sweep.cc" />
+    <ClCompile Include="..\poly2tri\sweep\sweep_context.cc" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">

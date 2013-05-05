@@ -24,11 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "ScissorsManager.h"     // Class header
-
-#include "ConfigEnum.h"          // For DisplayMode def
-#include "ClientGame.h"
 #include "ScreenInfo.h"
-#include "OpenglUtils.h"
 
 
 namespace Zap
@@ -37,7 +33,7 @@ namespace Zap
 extern ScreenInfo gScreenInfo;
 
 // Store previous scissors settings
-void ScissorsManager::enable(bool enable, ClientGame *game, F32 x, F32 y, F32 width, F32 height) 
+void ScissorsManager::enable(bool enable, DisplayMode displayMode, F32 x, F32 y, F32 width, F32 height) 
 {
    mManagerEnabled = enable;
 
@@ -49,11 +45,9 @@ void ScissorsManager::enable(bool enable, ClientGame *game, F32 x, F32 y, F32 wi
    if(mScissorsWasEnabled)
       glGetIntegerv(GL_SCISSOR_BOX, &mScissorBox[0]);
 
-   DisplayMode mode = game->getSettings()->getIniSettings()->displayMode;    // Windowed, full_screen_stretched, full_screen_unstretched
-
    static Point p1, p2;
-   p1 = gScreenInfo.convertCanvasToWindowCoord(x, gScreenInfo.getGameCanvasHeight() - y - height, mode);
-   p2 = gScreenInfo.convertCanvasToWindowCoord(width, height, mode);
+   p1 = gScreenInfo.convertCanvasToWindowCoord(x, gScreenInfo.getGameCanvasHeight() - y - height, displayMode);
+   p2 = gScreenInfo.convertCanvasToWindowCoord(width, height, displayMode);
 
    glScissor(p1.x, p1.y, p2.x, p2.y);
 

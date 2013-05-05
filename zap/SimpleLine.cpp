@@ -26,8 +26,6 @@
 #include "SimpleLine.h"
 #include "gameObjectRender.h"
 
-#include <math.h>
-
 
 namespace Zap
 {

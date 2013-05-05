@@ -26,9 +26,16 @@
 #ifndef _SCISSORS_MANAGER_H_
 #define _SCISSORS_MANAGER_H_
 
-#include "OpenglUtils.h"
 #include "Point.h"
+#include "ConfigEnum.h"          // For DisplayMode def
 #include "tnlTypes.h"
+
+// Need this ugliness to get GLint and GLboolean 
+#ifdef TNL_OS_MOBILE
+#  include "SDL_opengles.h"
+#else
+#  include "SDL_opengl.h"
+#endif
 
 using namespace TNL; 
 
@@ -48,8 +55,8 @@ private:
    bool mManagerEnabled;
 
 public:
-   void enable(bool enable, ClientGame *game, F32 x, F32 y, F32 width, F32 height);  // Store previous scissors settings
-   void disable();                                                                   // Restore previous scissors settings
+   void enable(bool enable, DisplayMode displayMode, F32 x, F32 y, F32 width, F32 height);  // Store previous scissors settings
+   void disable();                                                                          // Restore previous scissors settings
 };
 
 

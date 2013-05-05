@@ -44,6 +44,7 @@
 #include "tnlNetObject.h"
 #include "tnlTypes.h"
 #include "tnlThread.h"
+#include "tnlNonce.h"
 
 #include "boost/smart_ptr/shared_ptr.hpp"
 
@@ -303,6 +304,17 @@ public:
    void setAddTarget();
    void clearAddTarget();
    static Game *getAddTarget();
+
+   virtual U32 getMaxPlayers() const;
+   virtual bool isTestServer() const;
+   virtual bool isDedicated() const;
+
+   virtual void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken);
+   virtual void gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
+                                U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
+
+   virtual void displayMessage(const Color &msgColor, const char *format, ...) const;
+
 
    ClientInfo *findClientInfo(const StringTableEntry &name);      // Find client by name
    

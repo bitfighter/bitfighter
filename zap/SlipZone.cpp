@@ -24,15 +24,12 @@
 //------------------------------------------------------------------------------------
 
 
-#include "BfObject.h"
-#include "gameType.h"
-#include "gameNetInterface.h"
-#include "stringUtils.h"
-#include "gameObjectRender.h"
-#include "polygon.h"
-#include "ship.h"
 #include "SlipZone.h"
+
 #include "game.h"
+#include "gameObjectRender.h"
+
+#include "stringUtils.h"
 
 namespace Zap
 {

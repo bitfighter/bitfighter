@@ -84,9 +84,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
 
    if(msgIndex == NexusMsgScore)
    {
-      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s returned %d flag%s to the Nexus for %d points!", 
+      getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s returned %d flag%s to the Nexus for %d points!", 
                                  clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
-      clientGame->playSoundEffect(SFXFlagCapture);
+      getGame()->playSoundEffect(SFXFlagCapture);
 
       Ship *ship = clientGame->findShip(clientName);
       if(ship && score >= 100)
@@ -94,8 +94,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
    }
    else if(msgIndex == NexusMsgYardSale)
    {
-      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s is having a YARD SALE!", clientName.getString());
-      clientGame->playSoundEffect(SFXFlagSnatch);
+      getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s is having a YARD SALE!", clientName.getString());
+      getGame()->playSoundEffect(SFXFlagSnatch);
 
       Ship *ship = clientGame->findShip(clientName);
       if(ship)
@@ -103,13 +103,13 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
    }
    else if(msgIndex == NexusMsgGameOverWin)
    {
-      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "Player %s wins the game!", clientName.getString());
-      clientGame->playSoundEffect(SFXFlagCapture);
+      getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), "Player %s wins the game!", clientName.getString());
+      getGame()->playSoundEffect(SFXFlagCapture);
    }
    else if(msgIndex == NexusMsgGameOverTie)
    {
-      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "The game ended in a tie.");
-      clientGame->playSoundEffect(SFXFlagDrop);
+      getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), "The game ended in a tie.");
+      getGame()->playSoundEffect(SFXFlagDrop);
    }
 #endif
 }
@@ -485,7 +485,7 @@ void NexusGameType::idle_client(U32 deltaT)
    {
       if(!isGameOver())
       {
-         static_cast<ClientGame *>(getGame())->displayMessage(Color(0.6f, 1, 0.8f), "The Nexus is now OPEN!");
+         getGame()->displayMessage(Color(0.6f, 1, 0.8f), "The Nexus is now OPEN!");
          getGame()->playSoundEffect(SFXFlagSnatch);
       }
 
@@ -497,7 +497,7 @@ void NexusGameType::idle_client(U32 deltaT)
    {
       if(!isGameOver())
       {
-         static_cast<ClientGame *>(getGame())->displayMessage(Color(0.6f, 1, 0.8f), "The Nexus is now CLOSED!");
+         getGame()->displayMessage(Color(0.6f, 1, 0.8f), "The Nexus is now CLOSED!");
          getGame()->playSoundEffect(SFXFlagDrop);
       }
 

@@ -175,7 +175,7 @@ void LoadoutIndicator::render(ClientGame *game)
    S32 top;
 
    // Old loadout
-   top = Parent::prepareToRenderFromDisplay(game, indicatorTop - 1, indicatorHeight + 1);
+   top = Parent::prepareToRenderFromDisplay(game->getSettings()->getIniSettings()->displayMode, indicatorTop - 1, indicatorHeight + 1);
    if(top != NO_RENDER)
    {
       doRender(mPrevLoadout, game, top);
@@ -183,7 +183,7 @@ void LoadoutIndicator::render(ClientGame *game)
    }
 
    // Current loadout
-   top = Parent::prepareToRenderToDisplay(game, indicatorTop, indicatorHeight);
+   top = Parent::prepareToRenderToDisplay(game->getSettings()->getIniSettings()->displayMode, indicatorTop, indicatorHeight);
    doRender(mCurrLoadout, game, top);
    doneRendering();
 }

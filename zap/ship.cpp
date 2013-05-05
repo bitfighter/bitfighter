@@ -26,9 +26,10 @@
 #include "ship.h"
 
 #include "projectile.h"
+#include "gameType.h"
 #include "Zone.h"
 #include "Colors.h"
-#include "gameObjectRender.h"
+
 #include "luaGameInfo.h"   // For LuaLoadout
 
 #ifndef ZAP_DEDICATED
@@ -45,8 +46,6 @@
 #ifdef TNL_OS_WIN32
 #  include <windows.h>     // For ARRAYSIZE
 #endif
-
-#include <stdio.h>
 
 #define hypot _hypot    // Kill some warnings
 
@@ -1261,7 +1260,7 @@ void Ship::readControlState(BitStream *stream)
 
 #ifndef ZAP_DEDICATED
    if(previousWeapon != mLoadout.getCurrentWeapon() && !getGame()->getSettings()->getIniSettings()->showWeaponIndicators)
-      static_cast<ClientGame *>(getGame())->displayMessage(Colors::cyan, "%s selected.", 
+      getGame()->displayMessage(Colors::cyan, "%s selected.", 
                          WeaponInfo::getWeaponInfo(mLoadout.getCurrentWeapon()).name.getString());
 #endif
 }
@@ -1557,7 +1556,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       static_cast<ClientGame *>(getGame())->emitTeleportInEffect(getActualPos(), 1);
 
-      SoundSystem::playSoundEffect(SFXTeleportIn, getActualPos());
+      getGame()->playSoundEffect(SFXTeleportIn, getActualPos());
    }
 
 #endif

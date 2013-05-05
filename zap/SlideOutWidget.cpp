@@ -24,12 +24,13 @@
 //------------------------------------------------------------------------------------
 
 #include "SlideOutWidget.h"
+
 #include "ScreenInfo.h"          // For gScreenInfo def
 #include "Point.h"
-#include "tnlVector.h"
 #include "Colors.h"
 #include "OpenglUtils.h"
 
+#include "tnlVector.h"
 
 namespace Zap
 {

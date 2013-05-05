@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef SFXPROFILE_H_
-#define SFXPROFILE_H_
+#ifndef _SFX_PROFILE_H_
+#define _SFX_PROFILE_H_
 
 #include "tnlTypes.h"
 
@@ -42,4 +42,4 @@ struct SFXProfile
 
 }
 
-#endif /* SFXPROFILE_H_ */
+#endif

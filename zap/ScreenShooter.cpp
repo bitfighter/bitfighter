@@ -27,26 +27,17 @@
 
 #ifndef BF_NO_SCREENSHOTS
 
-#include "config.h"
+#include "UI.h"
 #include "ScreenInfo.h"
 #include "ClientGame.h"
-#include "VideoSystem.h"      // For setting screen geom vars
-#include "ConfigEnum.h"
-#include "UI.h"
+#include "VideoSystem.h"   // For setting screen geom vars
 #include "stringUtils.h"
-
-#include "tnlLog.h"
-
-#include "zlib.h"
 
 #ifdef TNL_OS_MOBILE
 #  include "SDL_opengles.h"
 #else
 #  include "SDL_opengl.h"
 #endif
-
-#include "string.h"
-#include "cmath"
 
 using namespace std;
 

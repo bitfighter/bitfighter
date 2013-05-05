@@ -24,13 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "gameNetInterface.h"
+
 #include "game.h"
 #include "version.h"
-#include "ServerGame.h"
-
-#ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#endif
 
 namespace Zap
 {
@@ -92,19 +88,17 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
          }
          break;
 
-#ifndef ZAP_DEDICATED
-      case PingResponse: // Client only
-         if(!mGame->isServer())
+      case PingResponse: 
+         if(!mGame->isServer())  // Client only
          {
             Nonce theNonce;
             U32 clientIdentityToken;
             theNonce.read(stream);
             stream->read(&clientIdentityToken);
             
-            static_cast<ClientGame *>(mGame)->gotPingResponse(remoteAddress, theNonce, clientIdentityToken);
+            mGame->gotPingResponse(remoteAddress, theNonce, clientIdentityToken);
          }
          break;
-#endif
 
       case Query:
          if(mGame->isServer())
@@ -124,10 +118,10 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
                queryResponse.writeStringTableEntry(mGame->getSettings()->getHostDescr());
 
                queryResponse.write(mGame->getPlayerCount());
-               queryResponse.write(((ServerGame *)mGame)->getMaxPlayers());
+               queryResponse.write(mGame->getMaxPlayers());
                queryResponse.write(mGame->getRobotCount());
-               queryResponse.writeFlag(((ServerGame *)mGame)->isDedicated());
-               queryResponse.writeFlag(((ServerGame *)mGame)->isTestServer());
+               queryResponse.writeFlag(mGame->isDedicated());
+               queryResponse.writeFlag(mGame->isTestServer());
                queryResponse.writeFlag(mGame->getSettings()->getServerPassword() != "");
 
                queryResponse.sendto(mSocket, remoteAddress);
@@ -135,9 +129,8 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
          }
          break;
 
-#ifndef ZAP_DEDICATED
-      case QueryResponse: // Client only
-         if(!mGame->isServer())
+      case QueryResponse: 
+         if(!mGame->isServer())  // Client only
          {
             Nonce theNonce;
             StringTableEntry name;
@@ -157,11 +150,9 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             passwordRequired = stream->readFlag();
 
             // Alert the user
-            dynamic_cast<ClientGame *>(mGame)->gotQueryResponse(remoteAddress, theNonce, name.getString(), descr.getString(), playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
+            mGame->gotQueryResponse(remoteAddress, theNonce, name.getString(), descr.getString(), playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
          }
          break;
-#endif
-
    }
 }
 

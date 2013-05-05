@@ -976,7 +976,7 @@ void ClientGame::setNeedToUpgrade(bool needToUpgrade)
 }
 
 
-void ClientGame::displayMessage(const Color &msgColor, const char *format, ...)
+void ClientGame::displayMessage(const Color &msgColor, const char *format, ...) const
 {
    va_list args;
    char message[MAX_CHAT_MSG_LENGTH]; 

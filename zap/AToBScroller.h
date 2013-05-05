@@ -28,6 +28,8 @@
 
 
 #include "Timer.h"
+#include "ConfigEnum.h" // For DisplayMode def
+
 
 using namespace TNL;
 
@@ -53,8 +55,8 @@ protected:
    static const S32 NO_RENDER = S32_MAX;
 
    // These will return the top render position, or NO_RENDER if rendering can be skipped
-   S32 prepareToRenderFromDisplay(ClientGame *game, S32 top, S32 fromHeight, S32 toHeight = S32_MIN);
-   S32 prepareToRenderToDisplay  (ClientGame *game, S32 top, S32 fromHeight, S32 toHeight = S32_MIN);
+   S32 prepareToRenderFromDisplay(DisplayMode displayMode, S32 top, S32 fromHeight, S32 toHeight = S32_MIN);
+   S32 prepareToRenderToDisplay  (DisplayMode displayMode, S32 top, S32 fromHeight, S32 toHeight = S32_MIN);
    void doneRendering();
 
 public:

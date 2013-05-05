@@ -35,7 +35,6 @@
 #include "teleporter.h"
 #include "ServerGame.h"
 #include "gameNetInterface.h"
-//#include "gameLoader.h"
 
 
 #include "md5wrapper.h"
@@ -1369,6 +1368,48 @@ void Game::seedRandomNumberGenerator(const string &name)
 
    Random::addEntropy(buf, totalByteCount);     // May be some uninitialized bytes at the end of the buffer, but that's ok
 }
+
+
+U32 Game::getMaxPlayers() const 
+{
+   TNLAssert(false, "Not implemented for this class!");
+   return 0;
+}
+
+   
+bool Game::isTestServer() const 
+{
+   TNLAssert(false, "Not implemented for this class!");
+   return false;
+}
+
+
+void Game::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken)
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
+void Game::gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
+                            U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
+void Game::displayMessage(const Color &msgColor, const char *format, ...) const
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
+
+bool Game::isDedicated() const  
+{
+   TNLAssert(false, "Not implemented for this class!");
+   return false;
+}
+
 
 
 };

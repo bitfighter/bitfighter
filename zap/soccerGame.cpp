@@ -24,18 +24,13 @@
 //------------------------------------------------------------------------------------
 
 #include "soccerGame.h"
+
 #include "gameNetInterface.h"
 #include "projectile.h"
-#include "gameObjectRender.h"
 #include "goalZone.h"
-#include "gameConnection.h"
-#include "ClientInfo.h"
 #include "Spawn.h"      // For AbstractSpawn def
 
-#ifndef ZAP_DEDICATED
-#  include "ClientGame.h"
-#  include "UIGame.h"
-#endif
+#include "gameObjectRender.h"
 
 
 namespace Zap
@@ -54,12 +49,10 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex), (msgIndex, clientName, teamIndex),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
-#ifndef ZAP_DEDICATED
-
    // Before calling this RPC, we subtracted gFirstTeamNumber, so we need to add it back here...
    S32 teamIndexAdjusted = (S32) teamIndex + GameType::gFirstTeamNumber;      
    string msg;
-   SoundSystem::playSoundEffect(SFXFlagCapture);
+   getGame()->playSoundEffect(SFXFlagCapture);
 
    // Compose the message
 
@@ -101,13 +94,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
                   (getGame()->getTeamCount() == 2 ? "" : "s") + " a point!";
    }
 
-
-   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-
    // Print the message
-   clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
-
-#endif
+   getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
 }
 
 

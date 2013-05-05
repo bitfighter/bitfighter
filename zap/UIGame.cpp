@@ -2636,7 +2636,8 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
       S32 displayAreaHeight = (mMessages.size() - 1) * lineHeight;     
       S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
 
-      scissorsManager.enable(true, mGame, 0, displayAreaYPos - displayAreaHeight, gScreenInfo.getGameCanvasWidth(), displayAreaHeight);
+      scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->displayMode, 
+                             0, displayAreaYPos - displayAreaHeight, gScreenInfo.getGameCanvasWidth(), displayAreaHeight);
    }
 
    // Initialize the starting rendering position.  This represents the bottom of the message rendering area, and

@@ -35,7 +35,6 @@ using namespace std;
 namespace Zap
 {
 
-
 class LuaLevelGenerator;
 class Robot;
 class PolyWall;
@@ -139,9 +138,10 @@ public:
 
    bool startHosting();
 
-   U32 getMaxPlayers();
+   U32 getMaxPlayers() const;
 
-   bool isDedicated();
+   bool isTestServer() const;
+   bool isDedicated() const;
    void setDedicated(bool dedicated);
 
    bool isFull();      // More room at the inn?
@@ -196,8 +196,6 @@ public:
    LevelInfo getLevelInfo(S32 index);
    void clearLevelInfos();
    void addLevelInfo(const LevelInfo &levelInfo);
-
-   bool isTestServer();
 
    DataSender dataSender;
 

@@ -24,55 +24,21 @@
 //------------------------------------------------------------------------------------
 
 #include "ServerGame.h"
-#include "barrier.h"
-#include "config.h"
-#include "EngineeredItem.h"      // For EngineerModuleDeployer
-#include "gameLoader.h"
-#include "gameNetInterface.h"
-#include "BfObject.h"
-#include "gameObjectRender.h"
+
 #include "gameType.h"
+#include "gameNetInterface.h"
 #include "masterConnection.h"
-#include "move.h"
-#include "moveObject.h"
-#include "projectile.h"          // For SpyBug class
 #include "SoundSystem.h"
-#include "SharedConstants.h"     // For ServerInfoFlags enum
-#include "ship.h"
-#include "GeomUtils.h"
 #include "luaLevelGenerator.h"
 #include "robot.h"
-#include "shipItems.h"           // For moduleInfos
-#include "stringUtils.h"
-#include "NexusGame.h"           // For creating new NexusFlagItem
-#include "teamInfo.h"            // For TeamManager def
-#include "playerInfo.h"
-#include "Zone.h"                // For instantiating zones
-
 #include "teleporter.h"
-
-#include "ClientInfo.h"
-
-#include "IniFile.h"             // For CIniFile def
 #include "BanList.h"             // For banList kick duration
-
 #include "BotNavMeshZone.h"      // For zone clearing code
-
-#include "WallSegmentManager.h"
-
-#include "tnl.h"
-#include "tnlRandom.h"
-#include "tnlGhostConnection.h"
-#include "tnlNetInterface.h"
 
 #include "md5wrapper.h"
 
-#include <boost/shared_ptr.hpp>
-#include <sys/stat.h>
-#include <cmath>
-
-
-#include "soccerGame.h"
+#include "gameObjectRender.h"
+#include "stringUtils.h"
 
 
 using namespace TNL;
@@ -281,7 +247,7 @@ void ServerGame::addLevelInfo(const LevelInfo &levelInfo)
 }
 
 
-bool ServerGame::isTestServer()
+bool ServerGame::isTestServer() const
 {
    return mTestMode;
 }
@@ -1129,13 +1095,13 @@ void ServerGame::startAllBots()
 }
 
 
-U32 ServerGame::getMaxPlayers()
+U32 ServerGame::getMaxPlayers() const
 {
    return mSettings->getMaxPlayers();
 }
 
 
-bool ServerGame::isDedicated()
+bool ServerGame::isDedicated() const
 {
    return mDedicated;
 }

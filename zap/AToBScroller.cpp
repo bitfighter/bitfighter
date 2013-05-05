@@ -94,14 +94,14 @@ bool AToBScroller::isActive() const
 
 
 // Returns the y-pos that the caller should render its display for the scrolling effect, or NO_RENDER if the caller shouldn't bother
-S32 AToBScroller::prepareToRenderFromDisplay(ClientGame *game, S32 top, S32 fromHeight, S32 toHeight)
+S32 AToBScroller::prepareToRenderFromDisplay(DisplayMode displayMode, S32 top, S32 fromHeight, S32 toHeight)
 {
    if(mScrollTimer.getCurrent() == 0)
       return NO_RENDER;
 
    S32 height = getTransitionPos(fromHeight, toHeight);
 
-   scissorsManager.enable(mScrollTimer.getCurrent() > 0, game, 0, top, 
+   scissorsManager.enable(mScrollTimer.getCurrent() > 0, displayMode, 0, top, 
                           gScreenInfo.getGameCanvasWidth(), getTransitionPos(height, 0));
 
    return top - fromHeight * (1 - mScrollTimer.getFraction());
@@ -109,7 +109,7 @@ S32 AToBScroller::prepareToRenderFromDisplay(ClientGame *game, S32 top, S32 from
 
 
 // Returns the y-pos that the caller should render its display for the scrolling effect
-S32 AToBScroller::prepareToRenderToDisplay(ClientGame *game, S32 top, S32 fromHeight, S32 toHeight)
+S32 AToBScroller::prepareToRenderToDisplay(DisplayMode displayMode, S32 top, S32 fromHeight, S32 toHeight)
 {
    if(mScrollTimer.getCurrent() == 0)
       return top;
@@ -117,7 +117,7 @@ S32 AToBScroller::prepareToRenderToDisplay(ClientGame *game, S32 top, S32 fromHe
    S32 height = getTransitionPos(fromHeight, toHeight);
 
    S32 vertBuffer = 2;  // A little extra space to avoid clipping lines at the top of our clip area
-   scissorsManager.enable(mScrollTimer.getCurrent() > 0, game, 0, top + getTransitionPos(height, 0) - vertBuffer, 
+   scissorsManager.enable(mScrollTimer.getCurrent() > 0, displayMode, 0, top + getTransitionPos(height, 0) - vertBuffer, 
                           gScreenInfo.getGameCanvasWidth(), getTransitionPos(0, height) + 2 * vertBuffer);
 
    return top + fromHeight * mScrollTimer.getFraction();

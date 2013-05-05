@@ -2434,8 +2434,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
    }
 
    // Notifiy the player
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-   clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "An admin has renamed %s to %s", oldName.getString(), newName.getString());
+   mGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "An admin has renamed %s to %s", oldName.getString(), newName.getString());
 #endif
 }
 
@@ -2523,15 +2522,10 @@ GAMETYPE_RPC_S2C(GameType, s2cSetNewTimeRemaining, (U32 timeLeftInMs, bool isUnl
 // Server has sent us (the client) a message telling us the winning score has changed, and who changed it
 GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEntry changer), (winningScore, changer))
 {
-#ifndef ZAP_DEDICATED
    mWinningScore = winningScore;
 
-   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-
-   clientGame->displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
+   mGame->displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
                "%s changed the winning score to %d.", changer.getString(), mWinningScore);
-#endif
 }
 
 
@@ -2549,15 +2543,14 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
 
    // The following works as long as everyone runs with a unique name.  Fails if two players have names that collide and have
    // been corrected by the server.
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-   ClientInfo *localClientInfo = clientGame->getClientInfo();
+   ClientInfo *localClientInfo = static_cast<ClientGame *>(mGame)->getClientInfo();
 
    if(showMessage)
    {
       if(localClientInfo->getName() == name)      
-         clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", mGame->getTeamName(teamIndex).getString());
+         mGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", mGame->getTeamName(teamIndex).getString());
       else
-         clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), mGame->getTeamName(teamIndex).getString());
+         mGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), mGame->getTeamName(teamIndex).getString());
    }
 
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
@@ -2566,7 +2559,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    if(localClientInfo->getName() == name)
    {
       fillVector.clear();
-      clientGame->getGameObjDatabase()->findObjects((TestFunc)isGrenadeType, fillVector);
+      mGame->getGameObjDatabase()->findObjects((TestFunc)isGrenadeType, fillVector);
 
       for(S32 i = 0; i < fillVector.size(); i++)
          static_cast<Burst *>(fillVector[i])->mIsOwnedByLocalClient = false;
@@ -2594,17 +2587,14 @@ GAMETYPE_RPC_S2C(GameType, s2cClientChangedRoles, (StringTableEntry name, Ranged
 
    // Now display a message to the local client, unless they were the ones who were granted the privs, in which case they already
    // saw a different message.
-   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-
-   if(clientGame->getClientInfo()->getName() != name)    // Don't show message to self
+   if(static_cast<ClientGame *>(mGame)->getClientInfo()->getName() != name)    // Don't show message to self
    {
       if(currentRole == ClientInfo::RoleOwner)
-         clientGame->displayMessage(Colors::cyan, "%s is now an owner of this server.", name.getString());
+         mGame->displayMessage(Colors::cyan, "%s is now an owner of this server.", name.getString());
       else if(currentRole == ClientInfo::RoleAdmin)
-         clientGame->displayMessage(Colors::cyan, "%s has been granted administrator access.", name.getString());
+         mGame->displayMessage(Colors::cyan, "%s has been granted administrator access.", name.getString());
       else if(currentRole == ClientInfo::RoleLevelChanger)
-         clientGame->displayMessage(Colors::cyan, "%s can now change levels.", name.getString());
+         mGame->displayMessage(Colors::cyan, "%s can now change levels.", name.getString());
    }
 #endif
 }
@@ -3647,8 +3637,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
    else
       return;
 
-   clientGame->displayMessage(Colors::yellow, message.c_str(), clientName.getString());
-   SoundSystem::playSoundEffect(SFXAchievementEarned);
+   mGame->displayMessage(Colors::yellow, message.c_str(), clientName.getString());
+   mGame->playSoundEffect(SFXAchievementEarned);
 
    Ship *ship = clientGame->findShip(clientName);
    if(ship)
@@ -3729,29 +3719,25 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cScoreboardUpdate,
 
 GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTableEntry killer, StringTableEntry killerDescr), (victim, killer, killerDescr))
 {
-#ifndef ZAP_DEDICATED
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-   
    if(killer)  // Known killer, was self, robot, or another player
    {
       if(killer == victim)
          if(killerDescr == "mine")
-            clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by own mine", victim.getString());
+            mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by own mine", victim.getString());
          else
-            clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", victim.getString());
+            mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", victim.getString());
       else
          if(killerDescr == "mine")
-            clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by mine laid by %s", victim.getString(), killer.getString());
+            mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by mine laid by %s", victim.getString(), killer.getString());
          else
-            clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped %s", killer.getString(), victim.getString());
+            mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped %s", killer.getString(), victim.getString());
    }
    else if(killerDescr == "mine")   // Killer was some object with its own kill description string
-      clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got blown up by a mine", victim.getString());
+      mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got blown up by a mine", victim.getString());
    else if(killerDescr != "")
-      clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s %s", victim.getString(), killerDescr.getString());
+      mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s %s", victim.getString(), killerDescr.getString());
    else         // Killer unknown
-      clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
-#endif
+      mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
 }
 
 

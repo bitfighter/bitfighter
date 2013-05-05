@@ -44,7 +44,6 @@ namespace Zap
 
 struct DamageInfo;
 class ClientInfo;
-class LoadoutTracker;
 class MountableItem;
 class SpeedZone;
 class Statistics;

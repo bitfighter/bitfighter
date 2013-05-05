@@ -26,7 +26,6 @@
 #ifndef _SHIPITEMS_H_
 #define _SHIPITEMS_H_
 
-//#include "WeaponInfo.h"    // For weapon defs for DefaultLoadout list
 #include "tnlTypes.h"
 #include "tnlAssert.h"
 #include <string>

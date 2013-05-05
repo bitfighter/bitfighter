@@ -257,7 +257,7 @@ public:
    void cancelShutdown();
 
    void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &message) const;
-   void displayMessage(const Color &msgColor, const char *format, ...);
+   void displayMessage(const Color &msgColor, const char *format, ...) const;
 
    void onConnectedToMaster();
    void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected);

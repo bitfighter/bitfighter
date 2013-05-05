@@ -925,9 +925,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetRole, (RangedU32<0,ClientInfo::MaxRoles>
    if(lostRole)
    {
       if(currentRole == ClientInfo::RoleLevelChanger)
-         mClientGame->displayMessage(Colors::cmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
+         mClientGame->displayMessage(Colors::cmdChatColor, 
+            "An admin has changed the level change password; you must enter the new password to change levels.");
       else if(currentRole == ClientInfo::RoleAdmin)
-         mClientGame->displayMessage(Colors::cmdChatColor, "An owner has changed the admin password; you must enter the new password to become an admin.");
+         mClientGame->displayMessage(Colors::cmdChatColor, 
+            "An owner has changed the admin password; you must enter the new password to become an admin.");
    }
 
    // Finally set our new role

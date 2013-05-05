@@ -23,10 +23,9 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _SLIPZONE_H_
-#define _SLIPZONE_H_
+#ifndef _SLIP_ZONE_H_
+#define _SLIP_ZONE_H_
 
-#include "BfObject.h"
 #include "polygon.h"
 
 namespace Zap
