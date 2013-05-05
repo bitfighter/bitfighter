@@ -25,6 +25,7 @@
 
 #include "UIAbstractInstructions.h"
 #include "ScreenInfo.h"
+#include "Colors.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"

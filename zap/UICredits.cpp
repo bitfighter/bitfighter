@@ -27,6 +27,7 @@
 #include "gameObjectRender.h"    // For renderBitfighterLogo
 
 #include "ScreenInfo.h"
+#include "Colors.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"

@@ -39,7 +39,7 @@
 #include "game.h"
 #include "VertexStylesEnum.h"
 
-//#include "UIEditor.h"            // For RenderingStyles enum
+#include "Colors.h"
 
 #include "stringUtils.h"
 #include "RenderUtils.h"

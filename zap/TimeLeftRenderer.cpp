@@ -29,6 +29,7 @@
 #include "gameType.h"
 #include "ScreenInfo.h"
 #include "FontManager.h"
+#include "Colors.h"
 #include "gameObjectRender.h"    // For renderFlag()
 
 #include "stringUtils.h"

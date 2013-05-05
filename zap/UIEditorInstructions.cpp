@@ -32,6 +32,8 @@
 #include "ScreenInfo.h"
 #include "VertexStylesEnum.h"
 
+#include "Colors.h"
+
 #include "GeomUtils.h"        // For polygon triangulation
 #include "RenderUtils.h"
 #include "OpenglUtils.h"

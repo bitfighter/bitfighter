@@ -30,6 +30,7 @@
 #include "masterConnection.h" // For master connection details
 
 #include "ClientInfo.h"
+#include "Colors.h"
 
 #ifndef ZAP_DEDICATED
 #  include "gameObjectRender.h"

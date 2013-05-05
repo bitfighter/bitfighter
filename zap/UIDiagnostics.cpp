@@ -33,9 +33,11 @@
 #include "config.h"
 #include "version.h"
 
-#include "gameObjectRender.h"    // For drawCircle in badge rendering below
 
 #include "ServerGame.h"          // For gServerGame refs
+
+#include "Colors.h"
+#include "gameObjectRender.h"    // For drawCircle in badge rendering below
 
 #include "stringUtils.h"
 #include "RenderUtils.h"

@@ -33,6 +33,8 @@
 #include "UIManager.h"
 #include "UIGame.h"
 
+#include "Colors.h"
+
 #include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"

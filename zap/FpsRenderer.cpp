@@ -24,10 +24,14 @@
 //------------------------------------------------------------------------------------
 
 #include "FpsRenderer.h"
+
 #include "ClientGame.h"
+#include "FontManager.h"
+
+#include "Colors.h"
+
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
-#include "FontManager.h"
 
 namespace Zap { 
 

@@ -30,6 +30,8 @@
 
 #include "gameObjectRender.h"    // For renderTextItem()
 
+#include "Colors.h"
+
 #include "stringUtils.h"
 #include "RenderUtils.h"
 

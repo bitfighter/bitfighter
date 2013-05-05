@@ -26,6 +26,7 @@
 #include "TeamShuffleHelper.h"
 #include "ClientGame.h"
 #include "ScreenInfo.h"
+#include "Colors.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"

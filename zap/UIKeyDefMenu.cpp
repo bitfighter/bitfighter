@@ -29,6 +29,8 @@
 #include "ClientGame.h"
 #include "Cursor.h"
 
+#include "Colors.h"
+
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 

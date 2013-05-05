@@ -32,6 +32,8 @@
 #include "RenderUtils.h"
 #include "FontManager.h"
 
+#include "Colors.h"
+
 #include "OpenglUtils.h"
 
 

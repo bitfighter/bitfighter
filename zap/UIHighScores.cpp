@@ -31,6 +31,8 @@
 #include "UIErrorMessage.h"
 #include "ScreenInfo.h"          // For canvas dimensions
 
+#include "Colors.h"
+
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 
