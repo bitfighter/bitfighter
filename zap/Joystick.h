@@ -36,12 +36,15 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
-#include "SDL_joystick.h"
-
 #include <string>
 
 using namespace TNL;
 using namespace std;
+
+// Forward declarations
+struct _SDL_Joystick;
+typedef struct _SDL_Joystick SDL_Joystick;
+
 
 namespace Zap {
 

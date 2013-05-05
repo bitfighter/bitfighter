@@ -24,11 +24,11 @@
 //------------------------------------------------------------------------------------
 
 #include "JoystickRender.h"
-#include "UI.h"
+#include "Joystick.h"
+#include "InputCode.h"
 #include "gameObjectRender.h"
-#include "config.h"
 #include "Colors.h"
-
+//
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 

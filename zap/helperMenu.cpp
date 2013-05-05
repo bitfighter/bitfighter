@@ -28,6 +28,7 @@
 #include "UIManager.h"
 #include "UIInstructions.h"
 #include "ClientGame.h"
+#include "Joystick.h"
 #include "JoystickRender.h"
 #include "FontManager.h"
 

@@ -25,6 +25,7 @@
 
 #include "UIKeyDefMenu.h"
 #include "ScreenInfo.h"
+#include "Joystick.h"
 #include "JoystickRender.h"
 #include "ClientGame.h"
 #include "Cursor.h"

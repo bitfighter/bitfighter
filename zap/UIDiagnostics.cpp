@@ -29,6 +29,7 @@
 #include "masterConnection.h"
 #include "ScreenInfo.h"
 #include "JoystickRender.h"
+#include "Joystick.h"
 #include "ClientGame.h"
 #include "config.h"
 #include "version.h"

@@ -35,6 +35,7 @@
 #include "gameType.h"            // Can get rid of this with some simple passthroughs
 #include "IniFile.h"
 #include "ScreenInfo.h"
+#include "Joystick.h"
 #include "JoystickRender.h"
 #include "Colors.h"
 #include "Cursor.h"
