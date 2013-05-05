@@ -27,15 +27,14 @@
 #define JOYSTICKRENDER_H_
 
 #include "tnlTypes.h"
-#include "InputCode.h"
 #include "Point.h"
-#include "Joystick.h"
 
 using namespace TNL;
 
 namespace Zap
 {
 
+#include "InputCodeEnum.h"    // Include inside Zap namespace
 
 class JoystickRender
 {

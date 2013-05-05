@@ -24,15 +24,19 @@
 //------------------------------------------------------------------------------------
 
 #include "Joystick.h"
-#include "stringUtils.h"
-#include "tnlLog.h"
-#include "ClientGame.h"
+#include "GameSettings.h"
 #include "IniFile.h"
 #include "Colors.h"
 
+#include "stringUtils.h"
+
+#include "tnlLog.h"
+
 #include "SDL.h"
+#include "SDL_joystick.h"
 
 #include <map>
+
 
 namespace Zap {
 

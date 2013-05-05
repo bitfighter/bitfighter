@@ -31,6 +31,7 @@
 #include "speedZone.h"        // For SpeedZone::height
 #include "Colors.h"
 #include "ScreenInfo.h"
+#include "Joystick.h"
 #include "JoystickRender.h"
 #include "CoreGame.h"         // For coreItem rendering
 #include "ChatCommands.h"

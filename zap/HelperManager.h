@@ -26,8 +26,6 @@
 #ifndef _HELPER_MANAGER_H_
 #define _HELPER_MANAGER_H_
 
-#include "TeamConstants.h"
-
 #include "ChatHelper.h"
 #include "quickChatHelper.h"
 #include "loadoutHelper.h"

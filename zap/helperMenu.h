@@ -29,11 +29,7 @@
 #include "SlideOutWidget.h"    // Parent class
 #include "AToBScroller.h"      // Parent class, for internal transitions
 
-#include "Engineerable.h"        // For EngineerBuildObjects enum
-#include "InputCode.h"
-#include "tnl.h"
-#include "Color.h"
-#include "Timer.h"
+#include "InputModeEnum.h"
 
 using namespace TNL;
 using namespace Zap::UI;
@@ -41,6 +37,7 @@ using namespace Zap::UI;
 namespace Zap
 {
 
+#include "InputCodeEnum.h"
 
 class ClientGame;
 class UIManager;

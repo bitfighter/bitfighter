@@ -39,12 +39,12 @@ namespace Zap
 
 class HttpRequest {
 public:
-   static const int BufferSize = 4096;
-   static const int OK = 200;
-   static const int Found = 302;
+   static const S32 BufferSize = 4096;
+   static const S32 OK = 200;
+   static const S32 Found = 302;
    static const string GetMethod;
    static const string PostMethod;
-   static const int PollInterval = 20;
+   static const S32 PollInterval = 20;
 
    static string urlEncodeChar(char c);
    static string urlEncode(const string& str);
@@ -53,7 +53,7 @@ public:
 
    string buildRequest();
    string getResponseBody();
-   int getResponseCode();
+   S32 getResponseCode();
    string getResponseHead();
    void parseResponse(string response);
    void setData(const string& key, const string& value);
@@ -74,7 +74,7 @@ private:
    string mResponse;
    string mResponseHead;
    string mResponseBody;
-   int mResponseCode;
+   S32 mResponseCode;
    TNL::Socket* mSocket;
    U32 mTimeout;
 };
