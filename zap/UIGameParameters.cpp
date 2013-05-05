@@ -29,7 +29,7 @@
 #include "UIDiagnostics.h"
 #include "UIEditor.h"
 #include "UINameEntry.h"
-#include "input.h"
+#include "InputModeEnum.h"
 #include "InputCode.h"
 #include "IniFile.h"
 #include "config.h"

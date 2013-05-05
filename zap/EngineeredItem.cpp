@@ -24,39 +24,23 @@
 //------------------------------------------------------------------------------------
 
 #include "EngineeredItem.h"
-#include "projectile.h"
-#include "gameType.h"
+
 #include "gameWeapons.h"
-#include "SoundSystem.h"
 #include "gameObjectRender.h"
-#include "GeomUtils.h"
-#include "BotNavMeshZone.h"
-#include "gameConnection.h"
 #include "WallSegmentManager.h"
-#include "ClientInfo.h"
 #include "teleporter.h"
 
 
 #ifndef ZAP_DEDICATED
-#  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
 #  include "ClientGame.h"        // for accessing client's spark manager
 #endif
-
 
 #include "Colors.h"
 #include "stringUtils.h"
 #include "MathUtils.h"           // For findLowestRootIninterval()
 
-
-#include <math.h>
-
 namespace Zap
 {
-
-// Statics:
-#ifndef ZAP_DEDICATED
-   EditorAttributeMenuUI *EngineeredItem::mAttributeMenuUI = NULL;
-#endif
 
 static bool forceFieldEdgesIntersectPoints(const Vector<Point> *points, const Vector<Point> forceField)
 {
@@ -509,16 +493,6 @@ F32 EngineeredItem::getSelectionOffsetMagnitude()
 }
 
 
-// Server only
-void EngineeredItem::computeBufferForBotZone(Vector<Point> &zonePoints)
-{
-   TNLAssert(!isWoundClockwise(*getCollisionPoly()), "Points need to be wound clockwise!");
-
-   // Fill zonePoints
-   offsetPolygon(getCollisionPoly(), zonePoints, (F32)BotNavMeshZone::BufferRadius);
-}
-
-
 void EngineeredItem::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
@@ -536,44 +510,6 @@ string EngineeredItem::toLevelCode(F32 gridSize) const
 {
    return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode(gridSize) + " " + itos(mHealRate);
 }
-
-
-#ifndef ZAP_DEDICATED
-
-EditorAttributeMenuUI *EngineeredItem::getAttributeMenu()
-{
-   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
-   if(!mAttributeMenuUI)
-   {
-      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
-
-      // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
-      CounterMenuItem *menuItem = new CounterMenuItem("10% Heal:", 99, 1, 0, 100, "secs", "Disabled", 
-                                                      "Time for this item to heal itself 10%");
-      mAttributeMenuUI->addMenuItem(menuItem);
-
-      // Add our standard save and exit option to the menu
-      mAttributeMenuUI->addSaveAndQuitMenuItem();
-   }
-
-   return mAttributeMenuUI;
-}
-
-
-// Get the menu looking like what we want
-void EngineeredItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   attributeMenu->getMenuItem(0)->setIntValue(mHealRate);
-}
-
-
-// Retrieve the values we need from the menu
-void EngineeredItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   mHealRate = attributeMenu->getMenuItem(0)->getIntValue();
-}
-#endif
 
 
 void EngineeredItem::onGeomChanged()
@@ -600,14 +536,14 @@ Point EngineeredItem::getEditorSelectionOffset(F32 currentScale)
    return Point(x,y);
 }
 
+#endif
+
 
 // Render some attributes when item is selected but not being edited
 void EngineeredItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
    keys.push_back("10% Heal");   values.push_back((mHealRate == 0 ? "Disabled" : itos(mHealRate) + " sec" + (mHealRate != 1 ? "s" : "")));
 }
-
-#endif
 
 
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
@@ -741,11 +677,11 @@ void EngineeredItem::damageObject(DamageInfo *di)
       BfObject *shooter = NULL;
 
       if(damagingObjectType == BulletTypeNumber)
-         shooter = static_cast<Projectile*>(damagingObject)->mShooter;
+         shooter = static_cast<Projectile *>(damagingObject)->mShooter;
       else if(damagingObjectType == SeekerTypeNumber)
-         shooter = static_cast<Seeker*>(damagingObject)->mShooter;
+         shooter = static_cast<Seeker *>(damagingObject)->mShooter;
       else if(damagingObjectType == BurstTypeNumber)
-         shooter = static_cast<Burst*>(damagingObject)->mShooter;
+         shooter = static_cast<Burst *>(damagingObject)->mShooter;
 
       // We have a shooter that is another engineered object (turret)
       if(shooter != NULL && isEngineeredType(shooter->getObjectTypeNumber()))
@@ -1062,6 +998,12 @@ void EngineeredItem::setHealRate(S32 rate)
 }
 
 
+S32 EngineeredItem::getHealRate() const
+{
+   return mHealRate;
+}
+
+
 void EngineeredItem::healObject(S32 time)
 {
    if(mHealRate == 0 || getTeam() == TEAM_NEUTRAL)      // Neutral items don't heal!
@@ -1086,9 +1028,10 @@ void EngineeredItem::healObject(S32 time)
 
 
 // Server only
-const Vector<Point> *EngineeredItem::getBufferForBotZone()
+void EngineeredItem::getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const
 {
-   return &mBufferedObjectPointsForBotZone;
+   // Fill zonePoints
+   offsetPolygon(getCollisionPoly(), points, bufferRadius);
 }
 
 
@@ -1114,7 +1057,6 @@ void EngineeredItem::findMountPoint(Game *game, const Point &pos)
    
    computeObjectGeometry();                                    // Fills mCollisionPolyPoints 
    computeExtent();                                            // Uses mCollisionPolyPoints
-   computeBufferForBotZone(mBufferedObjectPointsForBotZone);   // Fill mBufferedObjectPointsForBotZone
 }
 
 

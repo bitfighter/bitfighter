@@ -26,11 +26,13 @@
 #ifndef _UIKEYDEFMENUS_H_
 #define _UIKEYDEFMENUS_H_
 
-#include "../tnl/tnlTypes.h"
 
 #include "UI.h"
-#include "input.h"
+#include "InputModeEnum.h"
 #include "Timer.h"
+
+#include "tnlTypes.h"
+
 #include <string>
 
 namespace Zap

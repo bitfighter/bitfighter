@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "WallSegmentManager.h"
+#include "barrier.h"
 #include "EngineeredItem.h"         // For forcefieldprojector def
 #include "game.h"
 

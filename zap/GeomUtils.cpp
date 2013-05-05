@@ -917,6 +917,25 @@ Polygons upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons
 }
 
 
+// Same as above, using slightly different input structure
+Polygons upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons) 
+{
+   Polygons outputPolygons;
+
+   outputPolygons.resize(inputPolygons.size());
+
+   for(S32 i = 0; i < inputPolygons.size(); i++) 
+   {
+      outputPolygons[i].resize(inputPolygons[i].size());
+
+      for(S32 j = 0; j < inputPolygons[i].size(); j++)
+         outputPolygons[i][j] = IntPoint(S64(inputPolygons[i].get(j).x * CLIPPER_SCALE_FACT), S64(inputPolygons[i].get(j).y * CLIPPER_SCALE_FACT));
+   }
+
+   return outputPolygons;
+}
+
+
 Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons) 
 {
    Vector<Vector<Point> > outputPolygons;
@@ -964,7 +983,7 @@ bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vecto
 
 // Use Clipper to merge inputPolygons, placing the result in outputPolygons
 // NOTE: this does NOT downscale the Clipper points.  You must do this afterwards
-bool mergePolysToPolyTree(const Vector<const Vector<Point> *> &inputPolygons, PolyTree &solution)
+bool mergePolysToPolyTree(const Vector<Vector<Point> > &inputPolygons, PolyTree &solution)
 {
    Polygons input = upscaleClipperPoints(inputPolygons);
 

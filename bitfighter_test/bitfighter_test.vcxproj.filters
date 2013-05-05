@@ -78,6 +78,12 @@
     <ClCompile Include="..\zap\UIEditorMenus.cpp" />
     <ClCompile Include="..\zap\Zone.cpp" />
     <ClCompile Include="..\zap\EditorPlugin.cpp" />
+    <ClCompile Include="..\master\database.cpp" />
+    <ClCompile Include="..\zap\dataConnection.cpp" />
+    <ClCompile Include="..\zap\EventManager.cpp" />
+    <ClCompile Include="..\zap\Event.cpp" />
+    <ClCompile Include="..\zap\engineerHelper.cpp" />
+    <ClCompile Include="..\zap\EngineeredItem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">

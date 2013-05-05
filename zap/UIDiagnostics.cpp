@@ -29,7 +29,7 @@
 #include "UIMenus.h"
 #include "UIGame.h"
 #include "masterConnection.h"
-#include "input.h"
+#include "InputModeEnum.h"
 #include "version.h"
 #include "ScreenInfo.h"
 #include "Joystick.h"

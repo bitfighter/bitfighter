@@ -24,16 +24,15 @@
 //------------------------------------------------------------------------------------
 
 #include "engineerHelper.h"
+
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
-#include "UIGame.h"
-#include "Color.h"                  // For Color def
+#include "UI.h"                  // For margin info -- can we just get rid of this as antiquated?
+#include "Color.h"               // For Color def
 #include "Colors.h"
 #include "ClientGame.h"
 #include "JoystickRender.h"
 #include "config.h"
-#include "gameObjectRender.h"       // For drawSquare
-
-#include "ship.h"
+#include "gameObjectRender.h"    // For drawSquare
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"

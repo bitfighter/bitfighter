@@ -1,22 +1,36 @@
-/*
- * Input.h
- *
- *  Created on: Jun 12, 2011
- *      Author: noonespecial
- */
-#ifndef INPUT_H_
-#define INPUT_H_
+//-----------------------------------------------------------------------------------
+//
+// Bitfighter - A multiplayer vector graphics space game
+// Based on Zap demo released for Torque Network Library by GarageGames.com
+//
+// Derivative work copyright (C) 2008-2009 Chris Eykamp
+// Original work copyright (C) 2004 GarageGames.com, Inc.
+// Other code copyright as noted
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful (and fun!),
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//------------------------------------------------------------------------------------
 
-#include "tnlTypes.h"
+#ifndef _EVENT_H_
+#define _EVENT_H_
+
 #include "InputCode.h"
 #include "ConfigEnum.h"
+#include "tnlTypes.h"
 
-#include "SDL.h"
-
-#if SDL_VERSION_ATLEAST(2,0,0)
-#  define SDLKey SDL_Keycode
-#  define SDLMod SDL_Keymod
-#endif
+union SDL_Event;     // Outside Zap namespace, please!
 
 using namespace TNL;
 
@@ -24,6 +38,7 @@ namespace Zap {
 
 class ClientGame;
 class UserInterface;
+
 
 class Event 
 {
@@ -55,7 +70,7 @@ public:
    Event();
    virtual ~Event();
 
-   static void onEvent(ClientGame *game, SDL_Event* event);
+   static void onEvent(ClientGame *game, SDL_Event *event);
 };
 
 }

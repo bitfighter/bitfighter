@@ -8,8 +8,7 @@
 #include "Event.h"
 
 #include "Console.h"
-#include "config.h"
-#include "UIMenus.h"
+#include "UIMenus.h"       // ==> Could be refactored out with some work
 #include "IniFile.h"
 #include "ScreenInfo.h"
 #include "Joystick.h"
@@ -17,11 +16,19 @@
 #include "InputCode.h"     // For InputCodeManager def
 #include "ScreenShooter.h"
 
+#include "SDL.h" 
+
+#if SDL_VERSION_ATLEAST(2,0,0)
+#  define SDLKey SDL_Keycode
+#  define SDLMod SDL_Keymod
+#endif
+
 #ifdef TNL_OS_MOBILE
 #  include "SDL_opengles.h"
 #else
 #  include "SDL_opengl.h"
 #endif
+
 
 #include <cmath>
 

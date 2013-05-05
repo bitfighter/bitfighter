@@ -25,7 +25,7 @@
 
 
 #include "ClientGame.h"    // For usage with getGame()
-#include "input.h"
+#include "InputModeEnum.h"
 #include "config.h"
 #include "barrier.h"            
 #include "UIAbstractInstructions.h"

@@ -26,12 +26,9 @@
 #ifndef _ENGINEEREDITEM_H_
 #define _ENGINEEREDITEM_H_
 
-#include "BfObject.h"
-#include "item.h"
-#include "moveObject.h"       // For MoveItem def
-#include "barrier.h"
-#include "LuaWrapper.h"
-#include "Engineerable.h"
+#include "item.h"             // Parent
+#include "Engineerable.h"     // Parent
+
 #include "TeamConstants.h"    // For TEAM_NEUTRAL constant
 #include "WeaponInfo.h"
 
@@ -43,9 +40,6 @@ class EngineeredItem : public Item, public Engineerable
 {
 private:
    typedef Item Parent;
-
-   void computeBufferForBotZone(Vector<Point> &zonePoints);    // Server only
-   Vector<Point> mBufferedObjectPointsForBotZone;              // Only populated on the server
 
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;    // Menu for text editing; since it's static, don't bother with smart pointer
@@ -116,6 +110,8 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void setHealRate(S32 rate);
+   S32 getHealRate() const;
+
    void damageObject(DamageInfo *damageInfo);
    void checkHealthBounds();
    bool collide(BfObject *hitObject);
@@ -125,7 +121,7 @@ public:
 
    void onGeomChanged();
 
-   const Vector<Point> *getBufferForBotZone();
+   void getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const;
 
    // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
    static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, bool format, 
@@ -150,15 +146,7 @@ public:
    /////
    // Editor stuff
    virtual string toLevelCode(F32 gridSize) const;
-
-#ifndef ZAP_DEDICATED
-   // These four methods are all that's needed to add an editable attribute to a class...
-   EditorAttributeMenuUI *getAttributeMenu();
-   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
-   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
-
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
-#endif
 
 	///// Lua interface
 	LUAW_DECLARE_CLASS(EngineeredItem);

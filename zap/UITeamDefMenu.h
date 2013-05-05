@@ -27,7 +27,7 @@
 #define _UITEAMDEFMENU_H_
 
 #include "UI.h"
-#include "input.h"
+#include "InputModeEnum.h"
 #include "Timer.h"
 
 namespace Zap

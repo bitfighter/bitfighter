@@ -45,13 +45,6 @@ class Barrier : public BfObject
 {
    typedef BfObject Parent;
 
-private:
-   Vector<Point> mBufferedObjectPointsForBotZone;
-
-   // Takes a segment and "puffs it out" to a polygon for bot zone generation.
-   // This polygon is the width of the barrier plus the ship's collision radius added to the outside
-   static void computeBufferForBotZone(const Vector<Point> &points, F32 width, bool isPolywall, Vector<Point> &bufferedPoints);
-
 public:
    // Constructor
    Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = DEFAULT_BARRIER_WIDTH, bool solid = false);
@@ -87,15 +80,13 @@ public:
    bool collide(BfObject *otherObject);
 
 
-   const Vector<Point> *getBufferForBotZone();
+   void getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const;
 
    // Clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints
    static void clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints);
 
    // Combine multiple barriers into a single complex polygon
    static bool unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vector<Point> > &solution);
-
-
 
    static void prepareRenderingGeometry(Game *game);
 

@@ -28,12 +28,14 @@
 #include "UIEditorMenus.h"
 #include "moveObject.h"
 #include "CoreGame.h"      // For CoreItem static values
+#include "EngineeredItem.h"
 
 #include "textItem.h"
 
 
 namespace Zap
 {
+
 
 EditorAttributeMenuItemBuilder::EditorAttributeMenuItemBuilder()
 {
@@ -125,6 +127,30 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
          return attributeMenuUI;
       }
 
+
+      case TurretTypeNumber:
+      case ForceFieldProjectorTypeNumber:
+      {
+         static EditorAttributeMenuUI *attributeMenuUI = NULL;
+
+         if(!attributeMenuUI)
+         {
+            ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+
+            attributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+            // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
+            CounterMenuItem *menuItem = new CounterMenuItem("10% Heal:", 99, 1, 0, 100, "secs", "Disabled", 
+                                                            "Time for this item to heal itself 10%");
+            attributeMenuUI->addMenuItem(menuItem);
+
+            // Add our standard save and exit option to the menu
+            attributeMenuUI->addSaveAndQuitMenuItem();
+         }
+
+         return attributeMenuUI;
+      }
+
       case TextItemTypeNumber:
       {
          static EditorAttributeMenuUI *attributeMenuUI = NULL;
@@ -173,6 +199,11 @@ void EditorAttributeMenuItemBuilder::startEditingAttrs(EditorAttributeMenuUI *at
          attributeMenu->getMenuItem(0)->setIntValue(S32(static_cast<CoreItem *>(obj)->getStartingHealth() + 0.5));
          break;
 
+      case TurretTypeNumber:
+      case ForceFieldProjectorTypeNumber:
+         attributeMenu->getMenuItem(0)->setIntValue(static_cast<EngineeredItem *>(obj)->getHealRate());
+         break;
+
       case TextItemTypeNumber:
          attributeMenu->getMenuItem(0)->setValue(static_cast<TextItem *>(obj)->getText());
          break;
@@ -203,6 +234,11 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
          static_cast<CoreItem *>(obj)->setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()));
          break;
 
+         
+      case TurretTypeNumber:
+      case ForceFieldProjectorTypeNumber:
+         static_cast<EngineeredItem *>(obj)->setHealRate(attributeMenu->getMenuItem(0)->getIntValue());
+
       case TextItemTypeNumber:
          static_cast<TextItem *>(obj)->setText(attributeMenu->getMenuItem(0)->getValue());
          break;
@@ -214,4 +250,3 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
 
 
 }
-

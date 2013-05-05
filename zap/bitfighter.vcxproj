@@ -396,7 +396,6 @@
     <ClInclude Include="..\zap\gridDB.h" />
     <ClInclude Include="..\zap\NexusGame.h" />
     <ClInclude Include="..\zap\IniFile.h" />
-    <ClInclude Include="..\zap\input.h" />
     <ClInclude Include="..\zap\item.h" />
     <ClInclude Include="EventManager.h" />
     <ClInclude Include="FontContextEnum.h" />
@@ -412,6 +411,7 @@
     <ClInclude Include="HelpItemManager.h" />
     <ClInclude Include="HttpRequest.h" />
     <ClInclude Include="InputCodeEnum.h" />
+    <ClInclude Include="InputModeEnum.h" />
     <ClInclude Include="Joystick.h" />
     <ClInclude Include="JoystickRender.h" />
     <ClInclude Include="..\zap\InputCode.h" />

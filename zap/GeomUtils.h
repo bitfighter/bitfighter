@@ -129,7 +129,7 @@ Vector<Point> floatsToPoints(const Vector<F32> floats);
 
 // Use Clipper to merge inputPolygons, placing the result in solution
 bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vector<Point> > &outputPolygons);
-bool mergePolysToPolyTree(const Vector<const Vector<Point> *> &inputPolygons, PolyTree &solution);
+bool mergePolysToPolyTree(const Vector<Vector<Point> > &inputPolygons, PolyTree &solution);
 
 // Convert a Polygons to a list of points in a-b b-c c-d d-a format
 void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineSegmentPoints);
@@ -144,6 +144,8 @@ bool isConvex(const Vector<Point> *verts);
 
 // scale Geometric points for clipper
 Polygons upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons);
+Polygons upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons);
+
 Vector<Vector<Point> > downscaleClipperPoints(const Polygons &inputPolygons);
 
 /*****************************************************************/

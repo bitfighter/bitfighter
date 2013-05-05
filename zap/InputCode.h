@@ -26,7 +26,7 @@
 #ifndef _INPUTCODE_H_
 #define _INPUTCODE_H_
 
-#include "input.h"            // For InputMode enum
+#include "InputModeEnum.h"      
 #include "JoystickButtonEnum.h"
 
 #include "tnlVector.h"

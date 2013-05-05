@@ -187,9 +187,6 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
    mRenderOutlineGeometry = getCollisionPoly(); 
 
    GeomObject::setGeom(*mRenderOutlineGeometry);
-
-   // Compute a special buffered wall that makes computing bot zones easier
-   computeBufferForBotZone(mPoints, mWidth, mSolid, mBufferedObjectPointsForBotZone);   
 }
 
 
@@ -209,53 +206,46 @@ bool Barrier::collide(BfObject *otherObject)
 }
 
 
-// Server only
-const Vector<Point> *Barrier::getBufferForBotZone()
-{
-   return &mBufferedObjectPointsForBotZone;
-}
-
-
-// Server only
-void Barrier::computeBufferForBotZone(const Vector<Point> &points, F32 width, bool isPolywall, Vector<Point> &bufferedPoints)  // static
+// Server only -- fills points
+void Barrier::getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const
 {
    // Use a clipper library to buffer polywalls; should be counter-clockwise by here
-   if(isPolywall)
-      offsetPolygon(&points, bufferedPoints, (F32)BotNavMeshZone::BufferRadius);
+   if(mSolid)
+      offsetPolygon(&mPoints, points, bufferRadius);
 
    // If a barrier, do our own buffer
    // Puffs out segment to the specified width with a further buffer for bot zones, has an inset tangent corner cut
    else
    {
-      const Point &start = points[0];
-      const Point &end   = points[1];
+      const Point &start = mPoints[0];
+      const Point &end   = mPoints[1];
       Point difference   = end - start;
 
-      Point crossVector(difference.y, -difference.x);  // Create a point whose vector from 0,0 is perpenticular to the original vector
-      crossVector.normalize((width * 0.5f) + BotNavMeshZone::BufferRadius);  // Reduce point so the vector has length of barrier width + ship radius
+      Point crossVector(difference.y, -difference.x);          // Create a point whose vector from 0,0 is perpenticular to the original vector
+      crossVector.normalize((mWidth * 0.5f) + bufferRadius);   // Reduce point so the vector has length of barrier width + ship radius
 
-      Point parallelVector(difference.x, difference.y); // Create a vector parallel to original segment
-      parallelVector.normalize((F32)BotNavMeshZone::BufferRadius);  // Reduce point so vector has length of ship radius
+      Point parallelVector(difference.x, difference.y);        // Create a vector parallel to original segment
+      parallelVector.normalize(bufferRadius);                  // Reduce point so vector has length of ship radius
 
       // For octagonal zones
       //   create extra vectors that are offset full offset to create 'cut' corners
       //   (FloatSqrtHalf * BotNavMeshZone::BufferRadius)  creates a tangent to the radius of the buffer
       //   we then subtract a little from the tangent cut to shorten the buffer on the corners and allow zones to be created when barriers are close
       Point crossPartial = crossVector;
-      crossPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) + (width * 0.5f) - (0.3f * BotNavMeshZone::BufferRadius));
+      crossPartial.normalize((FloatSqrtHalf * bufferRadius) + (mWidth * 0.5f) - (0.3f * bufferRadius));
 
       Point parallelPartial = parallelVector;
-      parallelPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) - (0.3f * BotNavMeshZone::BufferRadius));
+      parallelPartial.normalize((FloatSqrtHalf * bufferRadius) - (0.3f * bufferRadius));
 
       // Now add/subtract perpendicular and parallel vectors to buffer the segments
-      bufferedPoints.push_back((start - parallelVector)  + crossPartial);
-      bufferedPoints.push_back((start - parallelPartial) + crossVector);
-      bufferedPoints.push_back((end   + parallelPartial) + crossVector);
-      bufferedPoints.push_back((end   + parallelVector)  + crossPartial);
-      bufferedPoints.push_back((end   + parallelVector)  - crossPartial);
-      bufferedPoints.push_back((end   + parallelPartial) - crossVector);
-      bufferedPoints.push_back((start - parallelPartial) - crossVector);
-      bufferedPoints.push_back((start - parallelVector)  - crossPartial);
+      points.push_back((start - parallelVector)  + crossPartial);
+      points.push_back((start - parallelPartial) + crossVector);
+      points.push_back((end   + parallelPartial) + crossVector);
+      points.push_back((end   + parallelVector)  + crossPartial);
+      points.push_back((end   + parallelVector)  - crossPartial);
+      points.push_back((end   + parallelPartial) - crossVector);
+      points.push_back((start - parallelPartial) - crossVector);
+      points.push_back((start - parallelVector)  - crossPartial);
    }
 }
 

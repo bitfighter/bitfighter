@@ -26,8 +26,7 @@
 #ifndef _ENGINEERHELPER_H_
 #define _ENGINEERHELPER_H_
 
-#include "helperMenu.h"
-//#include "Engineerable.h"     // For EngineerBuildObjects enum
+#include "helperMenu.h"    // Parent
 
 using namespace TNL;
 

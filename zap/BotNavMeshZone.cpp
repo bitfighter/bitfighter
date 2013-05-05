@@ -350,10 +350,10 @@ static BotNavMeshZone *findZoneContainingPoint(GridDatabase *botZoneDatabase, co
 static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
                                 const Vector<DatabaseObject *> &turrets,
                                 const Vector<DatabaseObject *> &forceFieldProjectors, 
-                                      PolyTree &solution)
+                                F32 bufferRadius,   PolyTree &solution)
 {
 
-   Vector<const Vector<Point> *> inputPolygons;
+   Vector<Vector<Point> > inputPolygons;
 
    // Add barriers
    for(S32 i = 0; i < barriers.size(); i++)
@@ -363,7 +363,8 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
 
       Barrier *barrier = static_cast<Barrier *>(barriers[i]);
 
-      inputPolygons.push_back(barrier->getBufferForBotZone());
+      inputPolygons.push_back(Vector<Point>());
+      barrier->getBufferForBotZone(bufferRadius, inputPolygons.last());
    }
 
    // Add turrets
@@ -372,9 +373,10 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
       if(turrets[i]->getObjectTypeNumber() != TurretTypeNumber)
          continue;
 
-      Turret* turret = static_cast<Turret *>(turrets[i]);
+      Turret *turret = static_cast<Turret *>(turrets[i]);
 
-      inputPolygons.push_back(turret->getBufferForBotZone());
+      inputPolygons.push_back(Vector<Point>());
+      turret->getBufferForBotZone(bufferRadius, inputPolygons.last());
    }
 
    // Add forcefield projectors
@@ -383,9 +385,10 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
       if(forceFieldProjectors[i]->getObjectTypeNumber() != ForceFieldProjectorTypeNumber)
          continue;
 
-      ForceFieldProjector* forceFieldProjector = static_cast<ForceFieldProjector *>(forceFieldProjectors[i]);
+      ForceFieldProjector *forceFieldProjector = static_cast<ForceFieldProjector *>(forceFieldProjectors[i]);
 
-      inputPolygons.push_back(forceFieldProjector->getBufferForBotZone());
+      inputPolygons.push_back(Vector<Point>());
+      forceFieldProjector->getBufferForBotZone(bufferRadius, inputPolygons.last());
    }
 
    return mergePolysToPolyTree(inputPolygons, solution);
@@ -433,7 +436,7 @@ bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<Da
    // Merge bot zone buffers from barriers, turrets, and forcefield projectors
    // The Clipper library is the work horse here.  Its output is essential for the
    // triangulation.  The output contains the upscaled Clipper points (you will need to downscale)
-   if(!mergeBotZoneBuffers(barrierList, turretList, forceFieldProjectorList, solution))
+   if(!mergeBotZoneBuffers(barrierList, turretList, forceFieldProjectorList, BufferRadius, solution))
       return false;
 
 

@@ -42,7 +42,7 @@
 namespace Zap
 {
 
-class DamageInfo;
+struct DamageInfo;
 class ClientInfo;
 class LoadoutTracker;
 class MountableItem;

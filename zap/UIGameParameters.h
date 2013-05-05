@@ -26,10 +26,10 @@
 #ifndef _UIGAMEPARAMS_H_
 #define _UIGAMEPARAMS_H_
 
-#include "../tnl/tnlTypes.h"
+#include "tnlTypes.h"
 
 #include "UI.h"
-#include "input.h"
+#include "InputModeEnum.h"
 #include "Timer.h"
 #include "UIMenus.h"
 #include <string>

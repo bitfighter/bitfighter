@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "EventManager.h"
+
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
 #include "robot.h"
 #include "Zone.h"

@@ -28,7 +28,7 @@
 #include "UIGame.h"
 #include "gameType.h"
 #include "gameObjectRender.h"
-#include "input.h"
+#include "InputModeEnum.h"
 #include "UIMenus.h"
 #include "config.h"
 #include "Colors.h"

@@ -106,6 +106,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\clipper\clipper.cpp" />
+    <ClCompile Include="..\master\database.cpp" />
     <ClCompile Include="..\poly2tri\sweep\advancing_front.cc" />
     <ClCompile Include="..\poly2tri\sweep\cdt.cc" />
     <ClCompile Include="..\recast\RecastAlloc.cpp" />
@@ -126,8 +127,13 @@
     <ClCompile Include="..\zap\CoreGame.cpp" />
     <ClCompile Include="..\zap\CTFGame.cpp" />
     <ClCompile Include="..\zap\Cursor.cpp" />
+    <ClCompile Include="..\zap\dataConnection.cpp" />
     <ClCompile Include="..\zap\EditorAttributeMenuItemBuilder.cpp" />
     <ClCompile Include="..\zap\EditorPlugin.cpp" />
+    <ClCompile Include="..\zap\EngineeredItem.cpp" />
+    <ClCompile Include="..\zap\engineerHelper.cpp" />
+    <ClCompile Include="..\zap\Event.cpp" />
+    <ClCompile Include="..\zap\EventManager.cpp" />
     <ClCompile Include="..\zap\FpsRenderer.cpp" />
     <ClCompile Include="..\zap\game.cpp" />
     <ClCompile Include="..\zap\gameConnection.cpp" />

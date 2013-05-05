@@ -28,7 +28,7 @@
 #include "UIChat.h"
 #include "UIDiagnostics.h"
 #include "UIGame.h"
-#include "input.h"
+#include "InputModeEnum.h"
 #include "InputCode.h"
 #include "IniFile.h"
 #include "config.h"

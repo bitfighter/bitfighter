@@ -26,9 +26,11 @@
 #ifndef _EVENT_MANAGER_H_
 #define _EVENT_MANAGER_H_
 
+#include "LuaBase.h"    // For ScriptContext def
+
 #include "tnlTypes.h"
 #include "tnlVector.h"
-#include "LuaBase.h"    // For ScriptContext def
+
 
 using namespace TNL;
 
