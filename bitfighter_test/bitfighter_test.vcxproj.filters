@@ -136,6 +136,27 @@
     <ClCompile Include="..\zap\playerInfo.cpp" />
     <ClCompile Include="..\zap\PickupItem.cpp" />
     <ClCompile Include="..\zap\projectile.cpp" />
+    <ClCompile Include="..\zap\HelperManager.cpp" />
+    <ClCompile Include="..\zap\helperMenu.cpp" />
+    <ClCompile Include="..\zap\HelpItemManager.cpp" />
+    <ClCompile Include="..\zap\HttpRequest.cpp" />
+    <ClCompile Include="..\zap\LevelDatabaseDownloadThread.cpp" />
+    <ClCompile Include="..\zap\LevelDatabaseUploadThread.cpp" />
+    <ClCompile Include="..\zap\lineEditor.cpp" />
+    <ClCompile Include="..\zap\LineItem.cpp" />
+    <ClCompile Include="..\zap\loadoutHelper.cpp" />
+    <ClCompile Include="..\zap\LoadoutIndicator.cpp" />
+    <ClCompile Include="..\zap\loadoutZone.cpp" />
+    <ClCompile Include="..\zap\luaGameInfo.cpp" />
+    <ClCompile Include="..\zap\luaLevelGenerator.cpp" />
+    <ClCompile Include="..\zap\LuaScriptRunner.cpp" />
+    <ClCompile Include="..\master\masterInterface.cpp" />
+    <ClCompile Include="..\zap\MathUtils.cpp" />
+    <ClCompile Include="..\zap\md5wrapper.cpp" />
+    <ClCompile Include="..\zap\NexusGame.cpp" />
+    <ClCompile Include="..\zap\oglconsole.c" />
+    <ClCompile Include="..\zap\OpenglUtils.cpp" />
+    <ClCompile Include="..\zap\AtoBScroller.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">
