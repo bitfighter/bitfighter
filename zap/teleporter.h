@@ -27,12 +27,10 @@
 #define _TELEPORTER_H_
 
 #include "SimpleLine.h"    // For SimpleLine def
-#include "gameConnection.h"
-#include "BfObject.h"
-#include "projectile.h"    // For LuaItem
-#include "Point.h"
-#include "Colors.h"
 #include "Engineerable.h"
+
+#include "Point.h"
+#include "Timer.h"
 
 #include "tnlNetObject.h"
 

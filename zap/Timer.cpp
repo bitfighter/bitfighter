@@ -25,7 +25,6 @@
 
 #include "Timer.h"
 
-#include <cmath>
 
 namespace Zap
 {

@@ -24,6 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "game.h"
+
+#include "gameType.h"
 #include "config.h"
 #include "masterConnection.h"
 #include "move.h"

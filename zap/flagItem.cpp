@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "flagItem.h"
+#include "Spawn.h"
 #include "goalZone.h"
 #include "ship.h"
 #include "ServerGame.h"

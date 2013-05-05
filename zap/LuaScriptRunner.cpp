@@ -212,7 +212,7 @@ bool LuaScriptRunner::loadScript(bool cacheScript)
    // from the editor.  In that case, we'll want to see script changes take place immediately, and we're willing to pay a small
    // performance penalty on level load to get that.
 
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
 
    try
    {
@@ -254,7 +254,7 @@ bool LuaScriptRunner::loadScript(bool cacheScript)
 
       // If we are here, script loaded and compiled; everything should be dandy.
       TNLAssert((lua_gettop(L) == 2 && lua_isfunction(L, 1) && lua_isfunction(L, 2)) 
-                        || LuaObject::dumpStack(L), "Expected a single function on the stack!");
+                        || LuaBase::dumpStack(L), "Expected a single function on the stack!");
 
       setEnvironment();
 
@@ -289,7 +289,7 @@ bool LuaScriptRunner::runMain()
 // Takes the passed args, puts them into a Lua table called arg, pushes it on the stack, and runs the "main" function.
 bool LuaScriptRunner::runMain(const Vector<string> &args)
 {
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
 
    setLuaArgs(args);
    bool error = runCmd("main", 0);
@@ -463,7 +463,7 @@ bool LuaScriptRunner::prepareEnvironment()
       return false;
    }
 
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
 
    // Register all our classes in the global namespace... they will be copied below when we copy the environment
 
@@ -501,7 +501,7 @@ void LuaScriptRunner::logErrorHandler(const char *msg, const char *prefix)
    // Log the error to the logging system and also to the game console
    logprintf(LogConsumer::LogError, "%s %s", prefix, msg);
 
-   LuaObject::clearStack(L);
+   LuaBase::clearStack(L);
 }
 
 /*
@@ -556,7 +556,7 @@ void LuaScriptRunner::setLuaArgs(const Vector<string> &args)
 // Set up paths so that we can use require to load code in our scripts 
 void LuaScriptRunner::setModulePath()   
 {
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
 
    lua_pushliteral(L, "package");                           // -- "package"
    lua_gettable(L, LUA_GLOBALSINDEX);                       // -- table (value of package global)
@@ -566,7 +566,7 @@ void LuaScriptRunner::setModulePath()
    lua_settable(L, -3);                                     // -- table
    lua_pop(L, 1);                                           // -- <<empty stack>>
 
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not cleared!");
 }
 
 
@@ -641,14 +641,14 @@ S32 LuaScriptRunner::findObjects(lua_State *L, GridDatabase *database, Rect *sco
    // We are expecting a table to be on top of the stack when we get here.  If not, we can add one.
    if(!lua_istable(L, -1))
    {
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+      TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not cleared!");
 
       logprintf(LogConsumer::LogWarning,
                   "Finding objects will be far more efficient if your script provides a table -- see scripting docs for details!");
       lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
    }
 
-   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || LuaObject::dumpStack(L), "Should only have table!");
+   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || LuaBase::dumpStack(L), "Should only have table!");
 
 
    S32 pushed = 0;      // Count of items we put into our table
@@ -672,7 +672,7 @@ S32 LuaScriptRunner::findObjects(lua_State *L, GridDatabase *database, Rect *sco
       lua_rawseti(L, 1, pushed);
    }
 
-   TNLAssert(lua_gettop(L) == 1 || LuaObject::dumpStack(L), "Stack has unexpected items on it!");
+   TNLAssert(lua_gettop(L) == 1 || LuaBase::dumpStack(L), "Stack has unexpected items on it!");
 
    return 1;
 }
@@ -697,7 +697,7 @@ S32 LuaScriptRunner::doSubscribe(lua_State *L, ScriptContext context)
 
 S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
 {
-   lua_Integer eventType = LuaObject::getInt(L, -1);
+   lua_Integer eventType = LuaBase::getInt(L, -1);
 
    if(mSubscriptions[eventType])
    {
@@ -705,7 +705,7 @@ S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
       mSubscriptions[eventType] = false;
    }
 
-   LuaObject::clearStack(L);
+   LuaBase::clearStack(L);
 
    return 0;
 }
@@ -799,7 +799,7 @@ S32 LuaScriptRunner::print(lua_State *L)
 
 S32 LuaScriptRunner::getMachineTime(lua_State *L)
 {
-   return LuaObject::returnInt(L, Platform::getRealMilliseconds());
+   return LuaBase::returnInt(L, Platform::getRealMilliseconds());
 }
 
 
@@ -816,7 +816,7 @@ S32 LuaScriptRunner::findFile(lua_State *L)
    string fullname = folderManager->findScriptFile(filename);     // Looks in luadir, levelgens dir, bots dir
 
    lua_pop(L, 1);    // Remove passed arg from stack
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not cleared!");
 
    if(fullname == "")
    {

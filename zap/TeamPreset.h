@@ -23,10 +23,10 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _UITEAMPRESET_H_
-#define _UITEAMPRESET_H_
+#ifndef _UI_TEAM_PRESET_H_
+#define _UI_TEAM_PRESET_H_
 
-#include "../tnl/tnlTypes.h"
+#include "tnlTypes.h"
 
 namespace Zap
 {

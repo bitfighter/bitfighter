@@ -145,7 +145,7 @@ bool Robot::initialize(Point &pos)
    catch(LuaException &e)
    {
       logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
-      LuaObject::clearStack(L);
+      LuaBase::clearStack(L);
       return false;
    }
 
@@ -196,7 +196,7 @@ bool Robot::prepareEnvironment()
    catch(LuaException &e)
    {
       logError(e.what());
-      LuaObject::clearStack(L);
+      LuaBase::clearStack(L);
       return false;
    }
 
@@ -220,7 +220,7 @@ static string getNextName()
 // Run bot's getName function, return default name if fn isn't defined
 string Robot::runGetName()
 {
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
 
    // error will only be true if: 1) getName doesn't exist, which should never happen -- getName is stubbed out in robot_helper_functions.lua
    //                             2) getName generates an error

@@ -26,12 +26,17 @@
 #ifndef _TEAM_INFO_H_
 #define _TEAM_INFO_H_
 
-#include "luaGameInfo.h"      // For LuaObject def
-#include "Spawn.h"            // For FlagSpawn def
-#include "lineEditor.h"
-#include "TeamPreset.h"       // For TeamPreset def
-#include "TeamConstants.h"    // For TEAM_NEUTRAL et. al.
+#include "LuaBase.h"          // Parent class
 
+#include "TeamPreset.h"       // For TeamPreset def
+#include "lineEditor.h"
+#include "LuaWrapper.h"
+#include "TeamConstants.h"    // For TEAM_NEUTRAL et. al.
+#include "Color.h"
+
+#include "tnlNetStringTable.h"
+
+#include <string>
 
 namespace Zap
 {
@@ -82,8 +87,10 @@ struct TeamInfo
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class FlagSpawn;
+
 // Class for managing teams in the game
-class Team : public AbstractTeam, public LuaObject
+class Team : public AbstractTeam, public LuaBase
 {  
 private:
    StringTableEntry mName;

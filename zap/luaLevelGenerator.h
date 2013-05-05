@@ -40,7 +40,7 @@ namespace Zap
 class GridDatabase;
 class Game;
 
-class LuaLevelGenerator: public LuaScriptRunner, public LuaObject
+class LuaLevelGenerator: public LuaScriptRunner
 {
 
 private:

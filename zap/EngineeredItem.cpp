@@ -29,6 +29,9 @@
 #include "gameObjectRender.h"
 #include "WallSegmentManager.h"
 #include "teleporter.h"
+#include "gameType.h"
+
+#include "projectile.h"
 
 
 #ifndef ZAP_DEDICATED
@@ -866,7 +869,7 @@ void EngineeredItem::explode()
       Colors::yellow,
    };
 
-   SoundSystem::playSoundEffect(SFXShipExplode, getPos());
+   getGame()->playSoundEffect(SFXShipExplode, getPos());
 
    F32 a = TNL::Random::readF() * 0.4f + 0.5f;
    F32 b = TNL::Random::readF() * 0.2f + 0.9f;
@@ -1533,7 +1536,7 @@ REGISTER_LUA_SUBCLASS(ForceFieldProjector, EngineeredItem);
 // LuaItem methods -- override method in parent class
 S32 ForceFieldProjector::lua_getLoc(lua_State *L)
 {
-   return LuaObject::returnPoint(L, getPos() + mAnchorNormal * getRadius() );
+   return LuaBase::returnPoint(L, getPos() + mAnchorNormal * getRadius() );
 }
 
 
@@ -1719,7 +1722,7 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
    mFieldUp = stream->readFlag();
 
    if(initial || (wasUp != mFieldUp))
-      SoundSystem::playSoundEffect(mFieldUp ? SFXForceFieldUp : SFXForceFieldDown, mStart);
+      getGame()->playSoundEffect(mFieldUp ? SFXForceFieldUp : SFXForceFieldDown, mStart);
 }
 
 
@@ -2215,7 +2218,7 @@ S32 Turret::lua_getRad(lua_State *L)
 
 S32 Turret::lua_getLoc(lua_State *L)
 {
-   return LuaObject::returnPoint(L, getPos() + mAnchorNormal * TURRET_OFFSET);
+   return LuaBase::returnPoint(L, getPos() + mAnchorNormal * TURRET_OFFSET);
 }
 
 

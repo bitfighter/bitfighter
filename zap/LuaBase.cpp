@@ -655,7 +655,7 @@ S32 LuaBase::returnPoint(lua_State *L, const Point &pt)
 // Return a table of points to calling Lua function
 S32 LuaBase::returnPoints(lua_State *L, const Vector<Point> *points)
 {
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not clean!");
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not clean!");
 
    // Create an empty table with enough space reserved
    lua_createtable(L, points->size(), 0);                  //                                -- table                                                   

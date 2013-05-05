@@ -31,6 +31,7 @@
 #include "IniFile.h"          // For CIniFile
 #include "ServerGame.h"
 #include "robot.h"
+#include "Spawn.h"
 #include "loadoutZone.h"      // For LoadoutZone
 
 #ifndef ZAP_DEDICATED

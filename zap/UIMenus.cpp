@@ -2172,21 +2172,16 @@ static void processTeamSelectionCallback(ClientGame *game, U32 index)
 
 void TeamMenuUserInterface::processSelection(U32 index)        
 {
-   GameType *gt = getGame()->getGameType();
-
-   if(!gt)
-      return;
-
    // Make sure user isn't just changing to the team they're already on...
    if(index != (U32)getGame()->getTeamIndex(nameToChange.c_str()))
    {
       if(getPrevMenuID() == PlayerUI)        // Initiated by an admin (PlayerUI is the kick/change team player-pick admin menu)
       {
          StringTableEntry e(nameToChange.c_str());
-         gt->c2sTriggerTeamChange(e, index); // Index will be the team index
+         getGame()->changePlayerTeam(e, index);    // Index will be the team index
       }
-      else                                   // Came from player changing own team
-         gt->c2sChangeTeams(index); 
+      else                                         // Came from player changing own team
+         getGame()->changeOwnTeam(index); 
    }
 
    getUIManager()->reactivate(GameUI);       // Back to the game!

@@ -106,6 +106,10 @@
     <ClCompile Include="..\zap\UINameEntry.cpp" />
     <ClCompile Include="..\zap\UITeamDefMenu.cpp" />
     <ClCompile Include="..\zap\UIYesNo.cpp" />
+    <ClCompile Include="..\zap\teamInfo.cpp" />
+    <ClCompile Include="..\zap\TeamShuffleHelper.cpp" />
+    <ClCompile Include="..\zap\teleporter.cpp" />
+    <ClCompile Include="..\zap\TimeLeftRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">

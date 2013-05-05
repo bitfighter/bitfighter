@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _LUAOBJECT_H_
-#define _LUAOBJECT_H_
+#ifndef _LUA_SCRIPT_RUNNER_H
+#define _LUA_SCRIPT_RUNNER_H
 
 #include "LuaBase.h"          // Parent class
 #include "GameTypesEnum.h"
@@ -58,17 +58,10 @@ class Rect;
 class Ship;
 class MenuItem;
 
-
-class LuaObject : public LuaBase
-{
-   typedef LuaBase Parent;
-};
-
-
 //////////////////////////////////////////
 ////////////////////////////////////////
 
-typedef struct { LuaObject *objectPtr; } UserData;
+typedef struct { LuaBase *objectPtr; } UserData;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -143,7 +136,7 @@ void setSelf(lua_State *L, T *self, const char *name)
                                                                                                     
    lua_pop(L, -1);                                          // Cleanup                                -- <<empty stack>>
 
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not cleared!");
 }
 
 
@@ -197,7 +190,7 @@ public:
    template <class T>
    void tickTimer(U32 deltaT)          
    {
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+      TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
       clearStack(L);
 
       luaW_push<T>(L, static_cast<T *>(this));           // -- this

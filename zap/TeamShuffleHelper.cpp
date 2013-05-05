@@ -25,18 +25,10 @@
 
 #include "TeamShuffleHelper.h"
 #include "ClientGame.h"
-#include "UIGame.h"
-#include "UIMenus.h"
 #include "ScreenInfo.h"
-#include "gameType.h"
-#include "ClientInfo.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
-
-#include <algorithm>
-#include <math.h> 
-
 
 
 namespace Zap
@@ -209,10 +201,6 @@ bool TeamShuffleHelper::processInputCode(InputCode inputCode)
    {
       exitHelper();
 
-      GameType *gameType = getGame()->getGameType();
-      if(!gameType)
-         return true;
-
       // Now determine if a player is going to change teams
       for(S32 i = 0; i < mTeams.size(); i++)
          for(S32 j = 0; j < mTeams[i].size(); j++)
@@ -228,7 +216,7 @@ bool TeamShuffleHelper::processInputCode(InputCode inputCode)
                continue;
 
             // Trigger a team change for the player
-            gameType->c2sTriggerTeamChange(thisClientInfo->getName(), i);
+            getGame()->changePlayerTeam(thisClientInfo->getName(), i);
          }
    }
 

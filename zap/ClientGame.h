@@ -122,8 +122,6 @@ public:
    void startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled);
    void doneLoadingLevel();
 
-   void switchTeams();     // User selected Switch Teams meunu item
-
    UIManager *getUIManager() const;
    GameUserInterface *getUi() const;
 
@@ -178,6 +176,12 @@ public:
    void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
    void playerJoinedGlobalChat(const StringTableEntry &playerNick);
    void playerLeftGlobalChat(const StringTableEntry &playerNick);
+
+   // Team related
+   void changePlayerTeam(const StringTableEntry &playerName, S32 teamIndex) const;
+   void changeOwnTeam(S32 teamIndex) const;
+   void switchTeams();     // User selected Switch Teams meunu item
+
 
    // Some FxManager passthroughs
    void clearSparks();

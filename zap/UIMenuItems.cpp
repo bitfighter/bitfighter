@@ -30,6 +30,9 @@
 #include "ScreenInfo.h"    // For gScreenInfo stuff
 #include "FontManager.h"
 
+#include "LuaWrapper.h"
+#include "LuaScriptRunner.h"
+
 #include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"

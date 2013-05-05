@@ -24,18 +24,13 @@
 //------------------------------------------------------------------------------------
 
 #include "teamInfo.h"
+
 #include "playerInfo.h"
-#include "gameType.h"
-#include "game.h"
-#include "stringUtils.h"
-#include "ClientInfo.h"
 #include "ServerGame.h"
 #include "robot.h"
 #include "Colors.h"
 
-#ifdef ZAP_DEDICATED
-#   include "Colors.h"
-#endif
+#include "stringUtils.h"
 
 namespace Zap
 {

@@ -29,6 +29,7 @@
 #include "Zone.h"
 #include "Colors.h"
 #include "gameObjectRender.h"
+#include "luaGameInfo.h"   // For LuaLoadout
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"

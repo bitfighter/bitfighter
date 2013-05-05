@@ -30,6 +30,7 @@
 #include "goalZone.h"
 #include "gameConnection.h"
 #include "ClientInfo.h"
+#include "Spawn.h"      // For AbstractSpawn def
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"

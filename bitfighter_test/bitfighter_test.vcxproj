@@ -170,7 +170,11 @@
     <ClCompile Include="..\zap\SimpleLine.cpp" />
     <ClCompile Include="..\zap\Spawn.cpp" />
     <ClCompile Include="..\zap\stringUtils.cpp" />
+    <ClCompile Include="..\zap\teamInfo.cpp" />
+    <ClCompile Include="..\zap\TeamShuffleHelper.cpp" />
+    <ClCompile Include="..\zap\teleporter.cpp" />
     <ClCompile Include="..\zap\textItem.cpp" />
+    <ClCompile Include="..\zap\TimeLeftRenderer.cpp" />
     <ClCompile Include="..\zap\Timer.cpp" />
     <ClCompile Include="..\zap\UI.cpp" />
     <ClCompile Include="..\zap\UIAbstractInstructions.cpp" />

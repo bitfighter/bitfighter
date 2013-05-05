@@ -29,6 +29,7 @@
 #include "moveObject.h"
 #include "CoreGame.h"      // For CoreItem static values
 #include "EngineeredItem.h"
+#include "Spawn.h"
 
 #include "textItem.h"
 

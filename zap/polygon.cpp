@@ -140,13 +140,13 @@ Point PolygonObject::getInitialPlacementOffset(F32 gridSize)
 
 S32 PolygonObject::getRad(lua_State *L)
 {
-   return LuaObject::returnInt(L, 0);
+   return LuaBase::returnInt(L, 0);
 }
 
 
 S32 PolygonObject::getVel(lua_State *L)
 {
-   return LuaObject::returnPoint(L, Point(0,0));
+   return LuaBase::returnPoint(L, Point(0,0));
 }
 
 

@@ -42,6 +42,9 @@
 #include "item.h"                // For Asteroid defs
 #include "loadoutZone.h"         // For LoadoutZone def
 #include "PickupItem.h"          // For RepairItem
+#include "projectile.h"
+
+#include "Spawn.h"
 #include "speedZone.h"           // For Speedzone def
 #include "teleporter.h"          // For Teleporter def
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE

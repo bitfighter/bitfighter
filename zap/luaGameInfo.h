@@ -36,12 +36,11 @@
 namespace Zap
 {
 
-class LuaGameInfo : public LuaObject
+class LuaGameInfo : public LuaBase
 {
 public:
    explicit LuaGameInfo(lua_State *L);     // Constructor
    virtual ~LuaGameInfo();                 // Destructor
-
 
    S32 lua_getGameType(lua_State *L);
    S32 lua_getGameTypeName(lua_State *L);
@@ -78,7 +77,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class LuaLoadout : public LuaObject
+class LuaLoadout : public LuaBase
 {
 private:
    U8 mLoadout[ShipModuleCount + ShipWeaponCount];

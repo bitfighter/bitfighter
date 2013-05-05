@@ -375,7 +375,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
       catch(LuaException &e)
       {
          handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
-         LuaObject::clearStack(L);
+         LuaBase::clearStack(L);
          return;
       }
    }
@@ -404,7 +404,7 @@ void EventManager::handleEventFiringError(lua_State *L, const Subscription &subs
       logprintf(LogConsumer::LogError, "Error firing event %s: %s", eventDefs[eventType].name, errorMsg);
    }
 
-   LuaObject::clearStack(L);
+   LuaBase::clearStack(L);
 }
 
 

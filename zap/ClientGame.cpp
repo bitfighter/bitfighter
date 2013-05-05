@@ -416,8 +416,8 @@ void ClientGame::switchTeams()
 
       Ship *ship = static_cast<Ship *>(controlObject);   // Returns player's ship...
 
-      mGameType->c2sChangeTeams(1 - ship->getTeam());    // If two teams, team will either be 0 or 1, so "1 - " will toggle
-      getUIManager()->reactivate(GameUI);                // Jump back into the game (this option takes place immediately)
+      changeOwnTeam(1 - ship->getTeam());    // If two teams, team will either be 0 or 1, so "1 - " will toggle
+      getUIManager()->reactivate(GameUI);    // Jump back into the game (this option takes place immediately)
    }
    else
    {
@@ -446,7 +446,6 @@ F32 ClientGame::getUIFadeFactor() const
 {
    return 1 - mTimeToSuspend.getFraction();     
 }
-
 
 
 // Provide access to these annoying bools
@@ -1844,6 +1843,24 @@ Ship *ClientGame::getLocalPlayerShip() const
       return NULL;
 
   return static_cast<Ship *>(object);
+}
+
+
+void ClientGame::changePlayerTeam(const StringTableEntry &playerName, S32 teamIndex) const
+{
+   if(!getGameType())
+      return;
+
+   getGameType()->c2sTriggerTeamChange(playerName, teamIndex);
+}
+
+
+void ClientGame::changeOwnTeam(S32 teamIndex) const
+{
+   if(!getGameType())
+      return;
+
+   getGameType()->c2sChangeTeams(teamIndex);
 }
 
 

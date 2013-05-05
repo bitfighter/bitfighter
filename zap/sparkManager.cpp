@@ -35,6 +35,8 @@
 #include "MathUtils.h"
 #include "FontManager.h"
 
+#include "tnlRandom.h"
+
 using namespace TNL;
 
 namespace Zap { namespace UI {

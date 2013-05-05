@@ -66,7 +66,7 @@ class MenuUserInterface;
 ////////////////////////////////////
 ////////////////////////////////////
 
-class MenuItem : public LuaObject
+class MenuItem : public LuaBase
 {
 private:
    S32 mIndex;

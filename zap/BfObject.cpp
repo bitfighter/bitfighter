@@ -1471,7 +1471,7 @@ S32 BfObject::lua_setSelected(lua_State *L)
 // 2D objects need special handling when getting/setting location
 S32 CentroidObject::lua_getLoc(lua_State *L)
 {
-   return LuaObject::returnPoint(L, getCentroid());      // Do we want this to return a series of points?
+   return LuaBase::returnPoint(L, getCentroid());      // Do we want this to return a series of points?
 }
 
 

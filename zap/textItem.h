@@ -27,7 +27,7 @@
 #define _TEXTITEM_H_
 
 #include "SimpleLine.h"       // For base class def
-#include "Colors.h"
+#include "Color.h"
 
 using namespace std;
 

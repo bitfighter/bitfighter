@@ -32,9 +32,11 @@
 #include "DismountModesEnum.h"
 
 #include "GameSettings.h"
-#include "SoundEffect.h"         // For SFXHandle def
+#include "SoundEffect.h"         // For SFXHandle
 
 #include "teamInfo.h"            // For ClassManager
+#include "gridDB.h"              // For IdleLinkedList
+#include "BfObject.h"            // For TypeNumber def
 
 #include "Timer.h"
 #include "Rect.h"
@@ -178,6 +180,7 @@ class WallItem;
 class LuaLevelGenerator;
 class Teleporter;
 class MoveItem;
+class AbstractSpawn;
 
 struct WallRec;
 

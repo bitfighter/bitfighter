@@ -25,28 +25,18 @@
 
 #include "teleporter.h"
 
-using namespace TNL;
-
-#include "loadoutZone.h"          // For when ship teleports onto a loadout zone
-#include "gameLoader.h"
-#include "gameObjectRender.h"
-#include "ClientInfo.h"
-
 #include "Colors.h"
-#include "SoundSystem.h"
+#include "gameObjectRender.h"
 
 #include "stringUtils.h"
 #include "MathUtils.h"           // For sq
 #include "GeomUtils.h"
 
-#include "ship.h"
-
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
 #endif
 
-#include "tnlMethodDispatch.h"   // For writing vectors
-
+using namespace TNL;
 
 namespace Zap
 {
@@ -464,10 +454,10 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
          TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
          static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDestManager.getDest(dest), 0);
 
-         SoundSystem::playSoundEffect(SFXTeleportIn, mDestManager.getDest(dest));
+         getGame()->playSoundEffect(SFXTeleportIn, mDestManager.getDest(dest));
       }
 
-      SoundSystem::playSoundEffect(SFXTeleportOut, getVert(0));
+      getGame()->playSoundEffect(SFXTeleportOut, getVert(0));
 #endif
       mTeleportCooldown.reset(mTeleporterCooldown);
    }
@@ -479,7 +469,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mHasExploded = true;
          disableCollision();
          mExplosionTimer.reset(TeleporterExplosionTime);
-         SoundSystem::playSoundEffect(SFXTeleportExploding, getVert(0));
+         getGame()->playSoundEffect(SFXTeleportExploding, getVert(0));
          mFinalExplosionTriggered = false;
       }
    }
@@ -826,7 +816,7 @@ void Teleporter::doExplosion()
          Colors::yellow,
    };
 
-   SoundSystem::playSoundEffect(SFXShipExplode, getPos());
+   getGame()->playSoundEffect(SFXShipExplode, getPos());
 
    F32 a = TNL::Random::readF() * 0.4f  + 0.5f;
    F32 b = TNL::Random::readF() * 0.2f  + 0.9f;

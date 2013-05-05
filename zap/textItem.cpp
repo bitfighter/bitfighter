@@ -25,19 +25,14 @@
 
 #include "textItem.h"
 
-#include "gameNetInterface.h"
-#include "gameObjectRender.h"    // For renderTextItem()
 #include "game.h"
+#include "ship.h"
 
-#ifndef ZAP_DEDICATED
-#  include "ClientGame.h"
-#endif
+#include "gameObjectRender.h"    // For renderTextItem()
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
 
-
-#include <math.h>
 
 namespace Zap
 {
