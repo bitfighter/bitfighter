@@ -24,16 +24,17 @@
 //------------------------------------------------------------------------------------
 
 #include "helperMenu.h"
+
 #include "UIGame.h"              // For mGameUserInterface
-#include "UIManager.h"
-#include "UIInstructions.h"
 #include "ClientGame.h"
-#include "JoystickRender.h"
-#include "RenderUtils.h"
 #include "FontManager.h"
+
+#include "Joystick.h"
+#include "JoystickRender.h"
 
 #include "Colors.h"
 
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 
