@@ -39,6 +39,8 @@
 #  include "SDL_opengl.h"
 #endif
 
+#include "zlib.h"
+
 using namespace std;
 
 namespace Zap
