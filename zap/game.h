@@ -427,7 +427,10 @@ public:
    Vector<AbstractSpawn *> getSpawnPoints(TypeNumber typeNumber, S32 teamIndex);
    void addFlag(FlagItem *flag);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
+   void shipTouchZone(Ship *ship, GoalZone *zone);
    bool isTeamGame() const;
+   Timer &getGlowZoneTimer();
+   S32 getGlowingZoneTeam();
 
    virtual SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f) const = 0;
    virtual SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const = 0;

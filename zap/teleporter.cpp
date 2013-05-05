@@ -37,13 +37,15 @@ using namespace TNL;
 
 #include "stringUtils.h"
 #include "MathUtils.h"           // For sq
-#include "tnlMethodDispatch.h"   // For writing vectors
+#include "GeomUtils.h"
 
 #include "ship.h"
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
 #endif
+
+#include "tnlMethodDispatch.h"   // For writing vectors
 
 
 namespace Zap

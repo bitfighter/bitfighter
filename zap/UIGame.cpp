@@ -55,6 +55,7 @@
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
+#include "GeomUtils.h"
 
 #include <ctype.h>
 #include <stdio.h>

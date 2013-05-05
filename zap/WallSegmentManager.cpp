@@ -28,6 +28,8 @@
 #include "EngineeredItem.h"         // For forcefieldprojector def
 #include "game.h"
 
+#include "GeomUtils.h"
+
 using namespace TNL;
 
 namespace Zap

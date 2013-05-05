@@ -33,7 +33,6 @@
 #include "tnlVector.h"
 
 #include "Rect.h"
-#include "GeomUtils.h"
 
 
 using namespace TNL;

@@ -1302,9 +1302,28 @@ void Game::shipTouchFlag(Ship *ship, FlagItem *flag)
 }
 
 
+void Game::shipTouchZone(Ship *ship, GoalZone *zone)
+{
+   if(mGameType)
+      mGameType->shipTouchZone(ship, zone);
+}
+
+
 bool Game::isTeamGame() const
 {
    return mGameType->isTeamGame();
+}
+
+
+Timer &Game::getGlowZoneTimer()
+{
+   return mGameType->mZoneGlowTimer;
+}
+
+
+S32 Game::getGlowingZoneTeam()
+{
+   return mGameType->mGlowingZoneTeam;
 }
 
 

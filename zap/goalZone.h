@@ -27,8 +27,6 @@
 #define _GOALZONE_H_
 
 #include "Zone.h"          // Parent class
-#include "BfObject.h"
-#include "polygon.h"
 #include "Timer.h"
 
 namespace Zap

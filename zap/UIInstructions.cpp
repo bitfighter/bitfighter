@@ -38,6 +38,7 @@
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
+#include "GeomUtils.h"
 
 #include "tnlAssert.h"
 

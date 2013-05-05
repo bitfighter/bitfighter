@@ -38,6 +38,7 @@
 #include "Colors.h"
 #include "stringUtils.h"
 #include "MathUtils.h"           // For findLowestRootIninterval()
+#include "GeomUtils.h"
 
 namespace Zap
 {

@@ -39,10 +39,10 @@
 #include "ClientInfo.h"
 #include "ServerGame.h"
 
-//#include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 
 #include "MathUtils.h"           // For findLowestRootIninterval()
+#include "GeomUtils.h"
 
 
 #define hypot _hypot    // Kill some warnings

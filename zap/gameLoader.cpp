@@ -28,10 +28,6 @@
 #endif
 
 #include "gameLoader.h"
-#include "teleporter.h"
-
-#include "config.h"     // For CmdLineSettings
-#include "stringUtils.h"
 
 #include "tnl.h"
 #include "tnlLog.h"
@@ -45,18 +41,15 @@
 #  endif
 
 
-
 using namespace TNL;
 
 
 namespace Zap
 {
 
-// GCC wants storage for these, for some reason.  Unfortunately VC++ doesn't want that.
-#ifndef WIN32
-const int LevelLoader::MAX_LEVEL_LINE_ARGS;
-const int LevelLoader::MaxArgLen;
-#endif
+const S32 LevelLoader::MaxArgLen = 100;               // Each at most MaxArgLen bytes long  (enforced in addCharToArg)
+const S32 LevelLoader::MaxIdLen = S32_MAX_DIGITS + 1; // Max 32-bit int is 10 digits, plus room for a null
+const S32 LevelLoader::MaxLevelLineLength = 4096;     // Max total level line length we'll tolerate
 
 // For readability and laziness...
 #define MaxArgc LevelLoader::MAX_LEVEL_LINE_ARGS
@@ -252,7 +245,7 @@ stateLineParseDone:
 // Reads files by chunks, converts to lines
 bool LevelLoader::loadLevelFromFile(const string &filename, GridDatabase *database)
 {
-   char levelChunk[MAX_LEVEL_LINE_LENGTH];     // Data buffer for reading in chunks of our level file
+   char levelChunk[MaxLevelLineLength];     // Data buffer for reading in chunks of our level file
    FILE *file = fopen(filename.c_str(), "r");
 
 #ifdef SAM_ONLY

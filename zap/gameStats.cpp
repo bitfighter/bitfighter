@@ -24,22 +24,15 @@
 //------------------------------------------------------------------------------------
 
 #include "gameStats.h"
-//#include "config.h"
 #include "../master/database.h"
-#include "gameWeapons.h"         // For WeaponType enum
 
 #include "tnlMethodDispatch.h"
-#include "tnlAssert.h"
-
-#include "Color.h"
-
 
 // This is shared in both client and master.
-// this read/write is usually the hardest part about struct, but this allows custom version handling.
+// this read/write is usually the hardest part about this struct, but this allows custom version handling.
 
 using namespace TNL;
 using namespace Zap;
-
 
 
 U32 calculateChecksum(BitStream &s, U32 length, U32 bitStart = 0)

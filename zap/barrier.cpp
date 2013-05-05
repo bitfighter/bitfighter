@@ -31,6 +31,7 @@
 #include "game.h"
 #include "Colors.h"
 #include "stringUtils.h"
+#include "GeomUtils.h"
 
 #include <cmath>
 

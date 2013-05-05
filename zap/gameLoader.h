@@ -45,12 +45,13 @@ public:
    LevelLoader();           // Constructor
    virtual ~LevelLoader();  // Destructor
 
-   // Put these in here so we can access them from luaLevelGenerator
-   static const S32 MAX_LEVEL_LINE_ARGS = 160;     // Most args on a single line,
-   static const S32 MaxArgLen = 100;               // Each at most MaxArgLen bytes long  (enforced in addCharToArg)
-   static const S32 MaxIdLen = S32_MAX_DIGITS + 1; // Max 32-bit int is 10 digits, plus room for a null
+   // Must be public for the array initializations at the start of gameLoader.cpp
+   static const S32 MaxArgLen;            // Each at most MaxArgLen bytes long  (enforced in addCharToArg)
+   static const S32 MaxIdLen;             // Max 32-bit int is 10 digits, plus room for a null
+   static const S32 MaxLevelLineLength;   // Max total level line length we'll tolerate
 
-   static const S32 MAX_LEVEL_LINE_LENGTH = 4096;  // Max total level line length we'll tolerate
+   // Put these in here so we can access them from luaLevelGenerator
+   static const S32 MAX_LEVEL_LINE_ARGS = 4096;  // Most args on a single line,
 
    bool loadLevelFromFile(const string &filename, GridDatabase *database);
    void parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName);

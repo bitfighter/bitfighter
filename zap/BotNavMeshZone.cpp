@@ -31,7 +31,6 @@
 #include "EngineeredItem.h"         // For Turret and ForceFieldProjector methods in generating zones
 #include "GeomUtils.h"
 
-#include "../recast/Recast.h"       
 #include "../recast/RecastAlloc.h"
 #include "../clipper/clipper.hpp"
 

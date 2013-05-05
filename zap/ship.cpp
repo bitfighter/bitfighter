@@ -38,6 +38,7 @@
 
 #include "stringUtils.h"   // For itos
 #include "MathUtils.h"     // For radiansToDegrees
+#include "GeomUtils.h"
 
 
 #ifdef TNL_OS_WIN32

@@ -26,6 +26,7 @@
 #include "gridDB.h"
 #include "moveObject.h"    // For def of ActualState
 #include "WallSegmentManager.h"
+#include "GeomUtils.h"
 
 namespace Zap
 {

@@ -44,6 +44,7 @@
 #include "RenderUtils.h"
 #include "MathUtils.h"           // For converting radians to degrees, sq()
 #include "OpenglUtils.h"
+#include "GeomUtils.h"
 
 #include "tnlRandom.h"
 

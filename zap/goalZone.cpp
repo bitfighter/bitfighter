@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "goalZone.h"
-#include "gameType.h"
+#include "ship.h"
 #include "gameObjectRender.h"
 #include "game.h"
 #include "stringUtils.h"
@@ -85,11 +85,11 @@ GoalZone *GoalZone::clone() const
 
 void GoalZone::render()
 {
-   GameType *gt = getGame()->getGameType();
-   F32 glow = gt->mZoneGlowTimer.getFraction();
+   F32 glow = getGame()->getGlowZoneTimer().getFraction();
+   S32 glowingZoneTeam = getGame()->getGlowingZoneTeam();
 
    // Check if to make sure that the zone matches the glow team if we're glowing
-   if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != getTeam())
+   if(glowingZoneTeam >= 0 && glowingZoneTeam != getTeam())
       glow = 0;
 
    bool useOldStyle = getGame()->getSettings()->getIniSettings()->oldGoalFlash;
@@ -208,7 +208,7 @@ bool GoalZone::collide(BfObject *hitObject)
    if( !isGhost() && (isShipType(hitObject->getObjectTypeNumber())) )
    {
       Ship *s = static_cast<Ship *>(hitObject); 
-      getGame()->getGameType()->shipTouchZone(s, this);
+      getGame()->shipTouchZone(s, this);
    }
 
    return false;

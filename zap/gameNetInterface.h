@@ -26,7 +26,7 @@
 #ifndef _GAMENETINTERFACE_H_
 #define _GAMENETINTERFACE_H_
 
-#include "../tnl/tnlNetInterface.h"
+#include "tnlNetInterface.h"
 
 using namespace TNL;
 

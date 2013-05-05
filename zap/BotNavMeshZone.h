@@ -26,12 +26,12 @@
 #ifndef _BOTNAVMESHZONES_H_
 #define _BOTNAVMESHZONES_H_
 
-#include "gridDB.h"    // Parent
+#include "gridDB.h"            // Parent
+#include "../recast/Recast.h"  // for rcPolyMesh;
 
 namespace Zap
 {
 
-class ServerGame;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -58,6 +58,8 @@ public:
    F32 distTo;
 };
 
+
+class ServerGame;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
