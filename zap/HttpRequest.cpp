@@ -31,6 +31,7 @@
 
 using namespace std;
 using namespace TNL;
+
 namespace Zap
 {
 
@@ -99,7 +100,7 @@ string HttpRequest::getResponseHead()
 }
 
 
-int HttpRequest::getResponseCode()
+S32 HttpRequest::getResponseCode()
 {
    return mResponseCode;
 }
@@ -250,12 +251,12 @@ bool HttpRequest::sendRequest(string request)
 string HttpRequest::receiveResponse()
 {
    mResponse = "";
-   int startTime = Platform::getRealMilliseconds();
+   S32 startTime = Platform::getRealMilliseconds();
    while(Platform::getRealMilliseconds() - startTime < mTimeout)
    {
       Platform::sleep(50);
       TNL::NetError recvError;
-      int bytesRead = 0;
+      S32 bytesRead = 0;
       char receiveBuffer[HttpRequest::BufferSize] = { 0 };
       recvError = mSocket->recv((unsigned char*) receiveBuffer, HttpRequest::BufferSize, &bytesRead);
 

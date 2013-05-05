@@ -28,6 +28,8 @@
 
 #include "helperMenu.h"
 
+#include "tnlVector.h"
+
 using namespace TNL;
 
 namespace Zap

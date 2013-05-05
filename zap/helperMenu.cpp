@@ -29,9 +29,9 @@
 #include "UIInstructions.h"
 #include "ClientGame.h"
 #include "JoystickRender.h"
-#include "RenderUtils.h"
 #include "FontManager.h"
 
+#include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 
@@ -42,8 +42,8 @@ using namespace UI;
 
 void HelperMenu::initialize(ClientGame *game, HelperManager *manager)
 {
-   mHelperManager = manager;
-   mClientGame = game;
+//   mHelperManager = manager;
+//   mClientGame = game;
 }
 
 

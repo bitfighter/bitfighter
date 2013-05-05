@@ -36,7 +36,8 @@ namespace Zap
 // Constructor
 HelperManager::HelperManager()
 {
-   // Do nothing
+   mOffDeckHelper = NULL;
+   mGame = NULL;
 }
 
 
