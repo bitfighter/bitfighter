@@ -28,6 +28,7 @@
 
 #include "UIGame.h"
 
+#include "gameType.h"
 #include "UIMenus.h"
 #include "UIInstructions.h"
 #include "UIChat.h"
@@ -49,6 +50,7 @@
 #include "Cursor.h"
 #include "ScissorsManager.h"
 #include "voiceCodec.h"
+#include "SoundSystem.h"
 
 #include "tnlEndian.h"
 
@@ -2379,13 +2381,13 @@ void GameUserInterface::renderSuspended()
 
 SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, F32 gain) const
 {
-   return SoundSystem::playSoundEffect(profileIndex, gain);
+   return getGame()->playSoundEffect(profileIndex, gain);
 }
 
 
 SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, const Point &position) const
 {
-   return SoundSystem::playSoundEffect(profileIndex, position);
+   return getGame()->playSoundEffect(profileIndex, position);
 }
 
 

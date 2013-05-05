@@ -26,14 +26,16 @@
 #ifndef _PROJECTILE_H_
 #define _PROJECTILE_H_
 
-#include "gameType.h"
-#include "BfObject.h"
-#include "item.h"
-#include "gameWeapons.h"
-#include "SoundSystem.h" // for enum SFXProfiles
+#include "BfObject.h"      // Parent
+#include "moveObject.h"    // Parent
+
+#include "Point.h"
+#include "WeaponInfo.h"
+#include "sparkManager.h"
 
 namespace Zap
 {
+
 
 class ClientInfo;
 

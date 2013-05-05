@@ -24,8 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "polygon.h"
-#include "gameObjectRender.h"
+
 #include "Colors.h"
+#include "gameObjectRender.h"
 
 namespace Zap
 {

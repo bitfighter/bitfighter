@@ -26,7 +26,7 @@
 #ifndef _GAMETYPE_H_
 #define _GAMETYPE_H_
 
-#include "Timer.h"
+
 #include "flagItem.h"
 #include "gameStats.h"           // For VersionedGameStats
 #include "barrier.h"             // For WallRec def
@@ -35,6 +35,8 @@
 #include "gameConnection.h"      // For MessageColors enum
 #include "GameTypesEnum.h"
 #include "DismountModesEnum.h"
+
+#include "Timer.h"
 
 #include <string>
 #include <boost/shared_ptr.hpp>

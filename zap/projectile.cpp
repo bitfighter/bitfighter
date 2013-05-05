@@ -24,19 +24,16 @@
 //------------------------------------------------------------------------------------
 
 #include "projectile.h"
-#include "gameWeapons.h"
-#include "SoundSystem.h"
-#include "BfObject.h"
-#include "gameObjectRender.h"
-#include "gameConnection.h"
-#include "stringUtils.h"
-#include "ClientInfo.h"
-#include "MathUtils.h"
-#include "Colors.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #endif
+
+#include "Colors.h"
+#include "gameObjectRender.h"
+
+#include "stringUtils.h"
+#include "MathUtils.h"
 
 
 TNL_IMPLEMENT_NETOBJECT(Projectile);
@@ -135,7 +132,7 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
-   if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before inital for SoundSystem::playSoundEffect
+   if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before inital for getGame()->playSoundEffect
    {
       static Point pos;    // Reusable container
       ((GameConnection *) connection)->readCompressedPoint(pos, stream);
@@ -156,7 +153,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       setExtent(Rect(getPos(), 0));
       initial = true;
-      SoundSystem::playSoundEffect(GameWeapon::projectileInfo[mType].projectileSound, getPos(), mVelocity);
+      getGame()->playSoundEffect(GameWeapon::projectileInfo[mType].projectileSound, getPos(), mVelocity);
    }
    bool preCollided = mCollided;
    mCollided = stream->readFlag();
@@ -336,7 +333,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
                }
 
                if(isGhost())
-                  SoundSystem::playSoundEffect(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(mVelocity) * 2);
+                  getGame()->playSoundEffect(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(mVelocity) * 2);
             }
             else  // Not bouncing
             {
@@ -410,7 +407,7 @@ void Projectile::explode(BfObject *hitObject, Point pos)
       else                                                   // We hit something else
          sound = GameWeapon::projectileInfo[mType].impactSound;
 
-      SoundSystem::playSoundEffect(sound, pos, mVelocity);   // Play the sound
+      getGame()->playSoundEffect(sound, pos, mVelocity);   // Play the sound
    }
 #endif
 }
@@ -621,7 +618,7 @@ void Burst::unpackUpdate(GhostConnection *connection, BitStream *stream)
       doExplosion(getActualPos());
 
    if(stream->readFlag())
-      SoundSystem::playSoundEffect(SFXBurst, getActualPos(), getActualVel());
+      getGame()->playSoundEffect(SFXBurst, getActualPos(), getActualVel());
 }
 
 
@@ -649,7 +646,7 @@ void Burst::doExplosion(const Point &pos)
       //static_cast<ClientGame *>(getGame())->emitExplosion(getRenderPos(), 0.5, GameWeapon::projectileInfo[ProjectilePhaser].sparkColors, NumSparkColors);      // Original, nancy explosion
       static_cast<ClientGame *>(getGame())->emitBlast(pos, OuterBlastRadius);          // New, manly explosion
 
-      SoundSystem::playSoundEffect(SFXMineExplode, getActualPos());
+      getGame()->playSoundEffect(SFXMineExplode, getActualPos());
    }
 #endif
 }
@@ -940,9 +937,9 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
    mArmed = stream->readFlag();
 
    if(initial && !mArmed)
-      SoundSystem::playSoundEffect(SFXMineDeploy, getActualPos());
+      getGame()->playSoundEffect(SFXMineDeploy, getActualPos());
    else if(!initial && !wasArmed && mArmed)
-      SoundSystem::playSoundEffect(SFXMineArm, getActualPos());
+      getGame()->playSoundEffect(SFXMineArm, getActualPos());
 }
 
 
@@ -960,11 +957,9 @@ void Mine::renderItem(const Point &pos)
    {
       armed = mArmed;
 
-      GameType *gameType = getGame()->getGameType();
-
       // Can see mine if laid by teammate in team game OR you laid it yourself OR
       // sensor is active and you're within the detection distance
-      visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) ||
+      visible = ( (ship->getTeam() == getTeam()) && getGame()->isTeamGame() ) ||
             mIsOwnedByLocalClient ||
             (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(ModuleInfo::SensorCloakInnerDetectionDistance));
    }
@@ -1171,7 +1166,7 @@ void SpyBug::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->read(&mIsOwnedByLocalClient);
    }
    if(initial)
-      SoundSystem::playSoundEffect(SFXSpyBugDeploy, getActualPos());
+      getGame()->playSoundEffect(SFXSpyBugDeploy, getActualPos());
 }
 
 
@@ -1187,11 +1182,9 @@ void SpyBug::renderItem(const Point &pos)
 
    if(ship)
    {
-      GameType *gameType = getGame()->getGameType();
-
       // Can see bug if laid by teammate in team game OR you laid it yourself OR
       // spyBug is neutral OR sensor is active and you're within the detection distance
-      visible = ((ship->getTeam() == getTeam()) && gameType->isTeamGame())   ||
+      visible = ((ship->getTeam() == getTeam()) && getGame()->isTeamGame())   ||
             mIsOwnedByLocalClient ||
             getTeam() == TEAM_NEUTRAL ||
             (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(ModuleInfo::SensorCloakInnerDetectionDistance));
@@ -1499,7 +1492,7 @@ void Seeker::acquireTarget()
       //   continue;
 
       // Don't target teammates in team games (except self)
-      if(getGame()->getGameType()->isTeamGame() && mShooter && mShooter->getTeam() == foundObject->getTeam() && mShooter != foundObject)
+      if(getGame()->isTeamGame() && mShooter && mShooter->getTeam() == foundObject->getTeam() && mShooter != foundObject)
          continue;
 
       Point delta = foundObject->getPos() - getPos();
@@ -1600,7 +1593,7 @@ void Seeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
       enableCollision();
 
    if(stream->readFlag())     // InitialMask --> seeker was just created
-      SoundSystem::playSoundEffect(SFXSeekerFire, getPos(), getVel());
+      getGame()->playSoundEffect(SFXSeekerFire, getPos(), getVel());
 
    if(stream->readFlag())     // PositionMask --> for angle changes since they are not handled in MoveItem
       setActualAngle(stream->readSignedFloat(8) * FloatPi);
@@ -1630,7 +1623,7 @@ void Seeker::doExplosion(const Point &pos)
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
       static_cast<ClientGame *>(getGame())->emitBlast(pos, 100);          // New, manly explosion
 
-      SoundSystem::playSoundEffect(SFXMineExplode, getPos());
+      getGame()->playSoundEffect(SFXMineExplode, getPos());
    }
 #endif
 }

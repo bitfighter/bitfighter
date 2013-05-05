@@ -41,10 +41,6 @@ private:
    bool mIsVisible;
    Timer mRepopTimer;
 
-#ifndef ZAP_DEDICATED
-   static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
-#endif
-
 protected:
    enum MaskBits {
       PickupMask    = Parent::FirstFreeMask << 0,
@@ -70,14 +66,7 @@ public:
    U32 getRepopDelay();
    void setRepopDelay(U32 delay);
 
-#ifndef ZAP_DEDICATED
-   // These four methods are all that's needed to add an editable attribute to a class...
-   EditorAttributeMenuUI *getAttributeMenu();
-   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
-   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
-
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
-#endif
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -172,7 +161,6 @@ public:
    const char *getOnDockName();
    const char *getOnScreenName();
 
-
    ///// Lua interface
 	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(EnergyItem);
 
@@ -180,7 +168,6 @@ public:
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
-
 
 
 };    // namespace

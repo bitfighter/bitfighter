@@ -24,8 +24,6 @@
 //------------------------------------------------------------------------------------
 
 #include "playerInfo.h"
-#include "gameConnection.h"
-#include "ClientInfo.h"
 #include "robot.h"         // Used in RobotPlayerInfo below...
 
 namespace Zap

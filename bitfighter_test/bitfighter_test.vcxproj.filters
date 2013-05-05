@@ -133,6 +133,9 @@
     <ClCompile Include="..\zap\rabbitGame.cpp" />
     <ClCompile Include="..\zap\retrieveGame.cpp" />
     <ClCompile Include="..\zap\robot.cpp" />
+    <ClCompile Include="..\zap\playerInfo.cpp" />
+    <ClCompile Include="..\zap\PickupItem.cpp" />
+    <ClCompile Include="..\zap\projectile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">

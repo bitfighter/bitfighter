@@ -30,6 +30,7 @@
 #include "CoreGame.h"      // For CoreItem static values
 #include "EngineeredItem.h"
 #include "Spawn.h"
+#include "PickupItem.h"
 
 #include "textItem.h"
 
@@ -152,6 +153,31 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
          return attributeMenuUI;
       }
 
+
+      case RepairItemTypeNumber:
+      case EnergyItemTypeNumber:
+      {
+         static EditorAttributeMenuUI *attributeMenuUI = NULL;
+
+         if(!attributeMenuUI)
+         {
+            ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+
+            attributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+            // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
+            CounterMenuItem *menuItem = new CounterMenuItem("Regen Time:", 99, 1, 0, 100, "secs", "No regen", 
+                                                            "Time for this item to reappear after it has been picked up");
+
+            attributeMenuUI->addMenuItem(menuItem);
+
+            // Add our standard save and exit option to the menu
+            attributeMenuUI->addSaveAndQuitMenuItem();
+         }
+
+         return attributeMenuUI;
+      }
+   
       case TextItemTypeNumber:
       {
          static EditorAttributeMenuUI *attributeMenuUI = NULL;
@@ -205,6 +231,11 @@ void EditorAttributeMenuItemBuilder::startEditingAttrs(EditorAttributeMenuUI *at
          attributeMenu->getMenuItem(0)->setIntValue(static_cast<EngineeredItem *>(obj)->getHealRate());
          break;
 
+      case RepairItemTypeNumber:
+      case EnergyItemTypeNumber:
+         attributeMenu->getMenuItem(0)->setIntValue(static_cast<PickupItem *>(obj)->getRepopDelay());
+         break;
+
       case TextItemTypeNumber:
          attributeMenu->getMenuItem(0)->setValue(static_cast<TextItem *>(obj)->getText());
          break;
@@ -239,6 +270,11 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
       case TurretTypeNumber:
       case ForceFieldProjectorTypeNumber:
          static_cast<EngineeredItem *>(obj)->setHealRate(attributeMenu->getMenuItem(0)->getIntValue());
+
+      case RepairItemTypeNumber:
+      case EnergyItemTypeNumber:
+         static_cast<PickupItem *>(obj)->setRepopDelay(attributeMenu->getMenuItem(0)->getIntValue());
+         break;
 
       case TextItemTypeNumber:
          static_cast<TextItem *>(obj)->setText(attributeMenu->getMenuItem(0)->getValue());

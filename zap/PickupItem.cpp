@@ -24,16 +24,10 @@
 //------------------------------------------------------------------------------------
 
 #include "PickupItem.h"
-#include "gameType.h"
+
+#include "game.h"
 #include "gameConnection.h"
 #include "ClientInfo.h"
-#include "game.h"
-#include "LuaWrapper.h"
-
-#ifndef ZAP_DEDICATED
-#  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
-#  include "ClientGame.h"
-#endif
 
 #include "gameObjectRender.h"
 #include "stringUtils.h"         // For itos()
@@ -41,12 +35,6 @@
 
 namespace Zap
 {
-
-// Statics:
-#ifndef ZAP_DEDICATED
-   EditorAttributeMenuUI *PickupItem::mAttributeMenuUI = NULL;
-#endif
-
 
 // Constructor
 PickupItem::PickupItem(float radius, S32 repopDelay) : Parent(radius)
@@ -206,7 +194,7 @@ void PickupItem::show()
 // Implementations provided to keep class from being abstract; need non-abstract class
 // so luaW can (theoretically) instantiate this class, even though it never will.  If
 // that issue gets resolved, we can remove this code and revert the class to abstract.
-bool PickupItem::pickup(Ship *theShip) 
+bool PickupItem::pickup(Ship *ship) 
 { 
    TNLAssert(false, "Function not implemented!"); 
    return false;
@@ -220,43 +208,6 @@ void PickupItem::onClientPickup()
 }
 
 
-#ifndef ZAP_DEDICATED
-
-EditorAttributeMenuUI *PickupItem::getAttributeMenu()
-{
-   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
-   if(!mAttributeMenuUI)
-   {
-      mAttributeMenuUI = new EditorAttributeMenuUI(static_cast<ClientGame *>(getGame()));
-
-      // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
-      CounterMenuItem *menuItem = new CounterMenuItem("Regen Time:", 99, 1, 0, 100, "secs", "No regen", 
-                                                      "Time for this item to reappear after it has been picked up");
-
-      mAttributeMenuUI->addMenuItem(menuItem);
-
-      // Add our standard save and exit option to the menu
-      mAttributeMenuUI->addSaveAndQuitMenuItem();
-   }
-
-   return mAttributeMenuUI;
-}
-
-
-// Get the menu looking like what we want
-void PickupItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   attributeMenu->getMenuItem(0)->setIntValue(mRepopDelay);
-}
-
-
-// Retrieve the values we need from the menu
-void PickupItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-{
-   mRepopDelay = attributeMenu->getMenuItem(0)->getIntValue();
-}
-
-
 // Render some attributes when item is selected but not being edited
 void PickupItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
@@ -267,8 +218,6 @@ void PickupItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &val
    else
       values.push_back(itos(mRepopDelay) + " sec" + ( mRepopDelay != 1 ? "s" : ""));
 }
-
-#endif
 
 
 /////
@@ -396,9 +345,9 @@ RepairItem *RepairItem::clone() const
 
 
 // Runs on server, returns true if we're doing the pickup, false otherwise
-bool RepairItem::pickup(Ship *theShip)
+bool RepairItem::pickup(Ship *ship)
 {
-   if(theShip->getHealth() >= 1)
+   if(ship->getHealth() >= 1)
       return false;
 
    DamageInfo di;
@@ -406,7 +355,7 @@ bool RepairItem::pickup(Ship *theShip)
    di.damageType = DamageTypePoint;
    di.damagingObject = this;
 
-   theShip->damageObject(&di);
+   ship->damageObject(&di);
    return true;
 }
 
@@ -519,9 +468,9 @@ EnergyItem *EnergyItem::clone() const
 
 
 // Runs on server, returns true if we're doing the pickup, false otherwise
-bool EnergyItem::pickup(Ship *theShip)
+bool EnergyItem::pickup(Ship *ship)
 {
-   S32 energy = theShip->getEnergy();
+   S32 energy = ship->getEnergy();
 
    if(energy >= Ship::EnergyMax)             // Energy?  We don't need no stinkin' energy!!
       return false;
@@ -529,13 +478,13 @@ bool EnergyItem::pickup(Ship *theShip)
    static const S32 EnergyItemFillip = Ship::EnergyMax / 2;
 
    // Credit the ship 
-   theShip->creditEnergy(EnergyItemFillip);  // Bump up energy by 50%, changeEnergy() sets energy delta
+   ship->creditEnergy(EnergyItemFillip);  // Bump up energy by 50%, changeEnergy() sets energy delta
 
    // And tell the client to do the same.  Note that we are handling energy with a s2c because it is possible to be
    // traveling so fast that the EnergyItem goes out of scope before there is a chance to use the pack/unpack mechanims
    // to get the energy credit to the client.  s2c will work regardless.
-   if(!theShip->isRobot() && theShip->getControllingClient() != NULL)
-      theShip->getControllingClient()->s2cCreditEnergy(EnergyItemFillip);
+   if(!ship->isRobot() && ship->getControllingClient() != NULL)
+      ship->getControllingClient()->s2cCreditEnergy(EnergyItemFillip);
 
    return true;
 }
