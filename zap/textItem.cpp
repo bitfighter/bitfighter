@@ -33,6 +33,8 @@
 #include "stringUtils.h"
 #include "RenderUtils.h"
 
+#include <cmath>
+
 
 namespace Zap
 {

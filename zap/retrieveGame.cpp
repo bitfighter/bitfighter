@@ -32,7 +32,7 @@
 #include "gameConnection.h"
 #include "ClientInfo.h"
 
-#include "Game.h"
+#include "game.h"
 
 namespace Zap
 {

@@ -43,6 +43,8 @@
 
 #include "tnl.h"
 
+#include <cmath>
+
 
 namespace Zap
 {
