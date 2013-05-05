@@ -26,10 +26,11 @@
 #include "FontManager.h"         // Class header
 
 #include "GameSettings.h"
+#include "ScreenInfo.h"
+
 #include "OpenglUtils.h"         // For various rendering helpers
 #include "stringUtils.h"         // For getFileSeparator()
 #include "MathUtils.h"           // For MIN/MAX
-#include "ScreenInfo.h"
 
 // Our stroke fonts
 #include "FontStrokeRoman.h"
