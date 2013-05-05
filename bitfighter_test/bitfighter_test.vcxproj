@@ -106,6 +106,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\clipper\clipper.cpp" />
+    <ClCompile Include="..\fontstash\fontstash.c" />
     <ClCompile Include="..\master\database.cpp" />
     <ClCompile Include="..\poly2tri\sweep\advancing_front.cc" />
     <ClCompile Include="..\poly2tri\sweep\cdt.cc" />
@@ -134,6 +135,8 @@
     <ClCompile Include="..\zap\engineerHelper.cpp" />
     <ClCompile Include="..\zap\Event.cpp" />
     <ClCompile Include="..\zap\EventManager.cpp" />
+    <ClCompile Include="..\zap\flagItem.cpp" />
+    <ClCompile Include="..\zap\FontManager.cpp" />
     <ClCompile Include="..\zap\FpsRenderer.cpp" />
     <ClCompile Include="..\zap\game.cpp" />
     <ClCompile Include="..\zap\gameConnection.cpp" />

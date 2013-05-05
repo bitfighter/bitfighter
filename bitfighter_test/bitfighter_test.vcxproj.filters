@@ -84,6 +84,9 @@
     <ClCompile Include="..\zap\Event.cpp" />
     <ClCompile Include="..\zap\engineerHelper.cpp" />
     <ClCompile Include="..\zap\EngineeredItem.cpp" />
+    <ClCompile Include="..\zap\FontManager.cpp" />
+    <ClCompile Include="..\zap\flagItem.cpp" />
+    <ClCompile Include="..\fontstash\fontstash.c" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">
