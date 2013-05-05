@@ -25,21 +25,9 @@
 
 #include "robot.h"
 
-#include "EventManager.h"
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
-#include "goalZone.h"
-#include "loadoutZone.h"
-#include "soccerGame.h"          // For lua object defs
-#include "NexusGame.h"           // For lua object defs
-#include "EngineeredItem.h"      // For lua object defs
-#include "PickupItem.h"          // For lua object defs
-#include "teleporter.h"          // For lua object defs
-#include "CoreGame.h"            // For lua object defs
-#include "GameTypesEnum.h"
-#include "ClientInfo.h"
-#include "ServerGame.h"
-
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
+#include "gameObjectRender.h"
 
 #include "MathUtils.h"           // For findLowestRootIninterval()
 #include "GeomUtils.h"
@@ -375,7 +363,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
 // Returns zone ID of current zone
 S32 Robot::getCurrentZone()
 {
-   TNLAssert(dynamic_cast<ServerGame *>(getGame()), "Not a ServerGame");
+   TNLAssert(getGame()->isServer(), "Not a ServerGame");
 
    // We're in uncharted territory -- try to get the current zone
    mCurrentZone = BotNavMeshZone::findZoneContaining(BotNavMeshZone::getBotZoneDatabase(), getActualPos());
@@ -684,11 +672,9 @@ S32 Robot::lua_hasLosPt(lua_State *L)
 // optimizations will be helpful.
 S32 Robot::lua_getWaypoint(lua_State *L)
 {
-   TNLAssert(dynamic_cast<ServerGame *>(getGame()), "Not a ServerGame");
+   TNLAssert(getGame()->isServer(), "Not a ServerGame");
 
    checkArgList(L, functionArgs, "Robot", "getWaypoint");
-
-   ServerGame *serverGame = (ServerGame *) getGame();
 
    Point target = getPointOrXY(L, 1);
 
@@ -794,16 +780,16 @@ S32 Robot::lua_getWaypoint(lua_State *L)
 
    const Vector<BotNavMeshZone *> *zones = BotNavMeshZone::getBotZones();      // Grab our pre-cached list of nav zones
 
-   if(serverGame->getGameType()->cachedBotFlightPlans.find(pathIndex) == serverGame->getGameType()->cachedBotFlightPlans.end())
+   if(getGame()->getGameType()->cachedBotFlightPlans.find(pathIndex) == getGame()->getGameType()->cachedBotFlightPlans.end())
    {
       // Not found so calculate flight plan
       flightPlan = AStar::findPath(zones, currentZone, targetZone, target);
 
       // Add to cache
-      serverGame->getGameType()->cachedBotFlightPlans[pathIndex] = flightPlan;
+      getGame()->getGameType()->cachedBotFlightPlans[pathIndex] = flightPlan;
    }
    else
-      flightPlan = serverGame->getGameType()->cachedBotFlightPlans[pathIndex];
+      flightPlan = getGame()->getGameType()->cachedBotFlightPlans[pathIndex];
 
    if(flightPlan.size() > 0)
       return returnPoint(L, flightPlan.last());

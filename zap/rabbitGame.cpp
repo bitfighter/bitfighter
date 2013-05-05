@@ -24,19 +24,14 @@
 //------------------------------------------------------------------------------------
 
 #include "rabbitGame.h"
-#include "SoundSystem.h"
-#include "flagItem.h"
 #include "Colors.h"
-#include "gameConnection.h"
-#include "stringUtils.h"
-#include "ClientInfo.h"
 
 #ifndef ZAP_DEDICATED
-#  include "UIGame.h"
 #  include "UIMenuItems.h"
 #endif
 
-#include <stdio.h>
+#include "stringUtils.h"
+
 
 namespace Zap
 {

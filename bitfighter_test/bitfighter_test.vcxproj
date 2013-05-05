@@ -160,6 +160,8 @@
     <ClCompile Include="..\zap\IniFile.cpp" />
     <ClCompile Include="..\zap\InputCode.cpp" />
     <ClCompile Include="..\zap\item.cpp" />
+    <ClCompile Include="..\zap\Joystick.cpp" />
+    <ClCompile Include="..\zap\JoystickRender.cpp" />
     <ClCompile Include="..\zap\LoadoutTracker.cpp" />
     <ClCompile Include="..\zap\LuaBase.cpp" />
     <ClCompile Include="..\zap\masterConnection.cpp" />
@@ -168,8 +170,11 @@
     <ClCompile Include="..\zap\Point.cpp" />
     <ClCompile Include="..\zap\PointObject.cpp" />
     <ClCompile Include="..\zap\polygon.cpp" />
+    <ClCompile Include="..\zap\rabbitGame.cpp" />
     <ClCompile Include="..\zap\Rect.cpp" />
     <ClCompile Include="..\zap\RenderUtils.cpp" />
+    <ClCompile Include="..\zap\retrieveGame.cpp" />
+    <ClCompile Include="..\zap\robot.cpp" />
     <ClCompile Include="..\zap\ScissorsManager.cpp" />
     <ClCompile Include="..\zap\ScreenInfo.cpp" />
     <ClCompile Include="..\zap\ScreenShooter.cpp" />

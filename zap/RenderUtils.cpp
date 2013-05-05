@@ -31,6 +31,7 @@
 #include "MathUtils.h"     // For MIN/MAX def
 #include "OpenglUtils.h"
 #include "FontManager.h"
+#include "Colors.h"
 
 #include <stdarg.h>        // For va_args
 

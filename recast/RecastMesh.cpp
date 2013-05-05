@@ -21,7 +21,7 @@
 #include "tnlAssert.h"
 #include "tnlLog.h"
 
-#include "../zap/Rect.h"     // For Rect
+#include "../zap/Rect.h"      // For Rect
 #include <map>                // For zonemap map
 #include <vector>             // For piority list
 #include <algorithm>          // For sorting the piority list

@@ -24,15 +24,10 @@
 //------------------------------------------------------------------------------------
 
 #include "retrieveGame.h"
-#include "goalZone.h"
-#include "ship.h"
-#include "flagItem.h"
-#include "gameObjectRender.h"
-#include "game.h"
-#include "gameConnection.h"
-#include "ClientInfo.h"
 
+#include "goalZone.h"
 #include "game.h"
+#include "gameObjectRender.h"
 
 namespace Zap
 {

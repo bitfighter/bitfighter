@@ -28,7 +28,7 @@
 
 
 #include "Point.h"
-#include "Colors.h"
+#include "Color.h"
 #include "FontContextEnum.h"
 
 #include "tnlTypes.h"

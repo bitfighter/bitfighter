@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _BOTNAVMESHZONES_H_
-#define _BOTNAVMESHZONES_H_
+#ifndef _BOT_NAV_MESH_ZONES_H_
+#define _BOT_NAV_MESH_ZONES_H_
 
 #include "gridDB.h"            // Parent
 #include "../recast/Recast.h"  // for rcPolyMesh;

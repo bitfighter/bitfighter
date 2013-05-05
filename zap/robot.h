@@ -28,10 +28,6 @@
 
 
 #include "ship.h"             // Parent class
-#include "LuaScriptRunner.h"
-#include "game.h"             // For ClientInfo def
-
-#include "EventManager.h"
 
 namespace Zap
 {
