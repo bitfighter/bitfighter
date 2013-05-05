@@ -26,8 +26,7 @@
 #ifndef _FLAGITEM_H_
 #define _FLAGITEM_H_
 
-#include "ship.h"
-#include "LuaWrapper.h"
+#include "moveObject.h"
 
 namespace Zap
 {

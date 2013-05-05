@@ -1283,6 +1283,31 @@ S32 Game::getRenderTime() const
 }
 
 
+Vector<AbstractSpawn *> Game::getSpawnPoints(TypeNumber typeNumber, S32 teamIndex)
+{
+   return mGameType->getSpawnPoints(typeNumber, teamIndex);
+}
+
+
+void Game::addFlag(FlagItem *flag)
+{
+   return mGameType->addFlag(flag);
+}
+
+
+void Game::shipTouchFlag(Ship *ship, FlagItem *flag)
+{
+   if(mGameType)
+      mGameType->shipTouchFlag(ship, flag);
+}
+
+
+bool Game::isTeamGame() const
+{
+   return mGameType->isTeamGame();
+}
+
+
 // Static method
 bool Game::isLocalTestServer()
 {

@@ -111,6 +111,7 @@ const U32 MAX_GAME_DESCR_LEN = 60;    // Any longer, and it won't fit on-screen;
 // Some forward declarations
 class AnonymousMasterServerConnection;
 class MasterServerConnection;
+class FlagItem;
 class GameNetInterface;
 class GameType;
 class BfObject;
@@ -423,6 +424,10 @@ public:
    bool objectCanDamageObject(BfObject *damager, BfObject *victim) const;
    void releaseFlag(const Point &pos, const Point &vel = Point(0,0), const S32 count = 1) const;
    S32 getRenderTime() const;
+   Vector<AbstractSpawn *> getSpawnPoints(TypeNumber typeNumber, S32 teamIndex);
+   void addFlag(FlagItem *flag);
+   void shipTouchFlag(Ship *ship, FlagItem *flag);
+   bool isTeamGame() const;
 
    virtual SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f) const = 0;
    virtual SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const = 0;

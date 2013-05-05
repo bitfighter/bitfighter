@@ -25,10 +25,10 @@
 
 #include "flagItem.h"
 #include "goalZone.h"
-#include "gameType.h"
+#include "ship.h"
 #include "ServerGame.h"
+#include "tnlGhostConnection.h"
 #include "stringUtils.h"      // For itos
-#include "gameConnection.h"
 #include "gameObjectRender.h"
 #include "ClientInfo.h"
 
@@ -110,7 +110,7 @@ FlagItem *FlagItem::clone() const
 void FlagItem::onAddedToGame(Game *theGame)
 { 
    Parent::onAddedToGame(theGame);
-   theGame->getGameType()->addFlag(this);    
+   theGame->addFlag(this);
 }
 
 
@@ -243,7 +243,7 @@ void FlagItem::sendHome()
    // Everything else should remain as it was
 
    // First, make a list of valid spawn points -- start with a list of all spawn points, then remove any occupied ones
-   Vector<AbstractSpawn *> spawnPoints = getGame()->getGameType()->getSpawnPoints(FlagSpawnTypeNumber, getTeam());
+   Vector<AbstractSpawn *> spawnPoints = getGame()->getSpawnPoints(FlagSpawnTypeNumber, getTeam());
    removeOccupiedSpawnPoints(spawnPoints);
 
 
@@ -270,7 +270,7 @@ void FlagItem::sendHome()
 // Removes occupied spawns from spawnPoints list
 void FlagItem::removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints) // Modifies spawnPoints
 {
-   bool isTeamGame = getGame()->getGameType()->isTeamGame();
+   bool isTeamGame = getGame()->isTeamGame();
 
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
@@ -369,13 +369,8 @@ bool FlagItem::collide(BfObject *hitObject)
    if(ship->hasExploded)
       return false;
 
-   GameType *gt = getGame()->getGameType();
-
-   if(!gt)     // Something is wrong...
-      return false;     
-   
    // Finally!
-   gt->shipTouchFlag(ship, this);
+   getGame()->shipTouchFlag(ship, this);
 
    return false;
 }
