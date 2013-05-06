@@ -72,16 +72,18 @@ TEST_F(BfTest, LittleStory)
    ship.addToGame(&serverGame, serverGame.getGameObjDatabase());
 
    ASSERT_EQ(ship.getPos(), Point(0,0));     // By default, the ship starts at 0,0
+   ship.setMove(Move(0,0));
+   serverGame.idle(10);
+   ASSERT_EQ(ship.getPos(), Point(0,0));     // When processing move of 0,0, we expect the ship to stay put
 
-   ship.setActualVel(Point(100,0));          // Give the ship some velocity
-
+   // Test that we can simulate several ticks, and the ship advances every cycle
    for(S32 i = 0; i < 20; i++)
    {
+      Point prevPos = ship.getPos();
+      ship.setMove(Move(1,0));      // Length 1 = max speed
       serverGame.idle(10);
-      printf("%d %s\n", i, ship.getPos().toString().c_str());
+      ASSERT_NE(ship.getPos(), prevPos);
    }
-
-   ASSERT_NE(ship.getPos(), Point(0,0));     // After idling, ship should have moved
 }
 
 
