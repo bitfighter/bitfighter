@@ -41,7 +41,10 @@ namespace Zap
 class Move 
 {
 public:
-   Move();                          // Constructor
+   Move();              // Constructor
+   Move(F32 x, F32 y);  // Constructor used in tests
+
+   void initialize();
 
    F32 x, y;
    F32 angle;
@@ -50,9 +53,7 @@ public:
    bool moduleSecondary[ShipModuleCount];  // Is given module secondary component active?
    U32 time;
 
-   enum {
-      MaxMoveTime = 127,
-   };
+   static const S32 MaxMoveTime = 127;
 
    bool isAnyModActive() const;
    bool isEqualMove(Move *prev);    // Compares this move to the previous one -- are they the same?

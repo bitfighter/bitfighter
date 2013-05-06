@@ -38,6 +38,21 @@ namespace Zap
 // Constructor
 Move::Move()
 {
+   initialize();
+}
+
+
+Move::Move(F32 x, F32 y)
+{
+   initialize();
+
+   this->x = x;
+   this->y = y;
+}
+
+
+void Move::initialize()
+{
    fire = false; 
    time = 32; 
    x = 0;
