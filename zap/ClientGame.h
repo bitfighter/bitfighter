@@ -172,10 +172,12 @@ public:
 
    // Chat related
    void sendChat(bool isGlobal, const StringPtr &message);
+   void sendChatSTE(bool global, const StringTableEntry &message) const;
    void sendCommand(const StringTableEntry &cmd, const Vector<StringPtr> &args);
    void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
    void playerJoinedGlobalChat(const StringTableEntry &playerNick);
    void playerLeftGlobalChat(const StringTableEntry &playerNick);
+
 
    // Team related
    void changePlayerTeam(const StringTableEntry &playerName, S32 teamIndex) const;

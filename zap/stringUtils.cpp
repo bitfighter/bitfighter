@@ -726,5 +726,33 @@ const string readFile(const string& path)
    return result;
 }
 
+
+
+// Returns the directory of this running executable
+string getExecutableDir()
+{
+   string path;
+
+#if defined(TNL_OS_LINUX)
+   char buffer[1024] = {0};
+   readlink("/proc/self/exe", buffer, sizeof(buffer));
+   path = extractDirectory(string(buffer));
+
+#elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
+   getExecutablePath(path);  // Directory.h
+
+#elif defined(TNL_OS_WIN32)
+   char buffer[MAX_PATH] = {0};
+   GetModuleFileName(NULL, buffer, MAX_PATH);
+   path = extractDirectory(string(buffer));
+
+#else
+#  error "Path needs to be defined for this platform"
+#endif
+
+   return path;
+}
+
+
 };
 

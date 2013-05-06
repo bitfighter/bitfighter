@@ -38,8 +38,6 @@
 namespace Zap
 {
 
-extern Color gErrorMessageTextColor;
-
 MessageUserInterface::MessageUserInterface(ClientGame *game) : Parent(game) { /* Do nothing */ }
 
 void MessageUserInterface::onActivate()
@@ -97,7 +95,7 @@ void MessageUserInterface::setStyle(U32 style)
 {
    mFadeTime = 3500;
    mBox = false;
-   mMessageColor = gErrorMessageTextColor;
+   mMessageColor = Colors::ErrorMessageTextColor;
    mVertOffset = 0;
    mTitle = (char*)"";
 }

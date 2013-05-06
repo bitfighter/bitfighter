@@ -39,6 +39,7 @@
 #include "UIQueryServers.h"
 #include "UIErrorMessage.h"
 #include "UIHighScores.h"
+#include "EditorTeam.h"
 
 #include "Colors.h"
 
@@ -832,6 +833,13 @@ void ClientGame::sendChat(bool isGlobal, const StringPtr &message)
 {
    if(getGameType())
       getGameType()->c2sSendChat(isGlobal, message);
+}
+
+
+void ClientGame::sendChatSTE(bool global, const StringTableEntry &message) const
+{
+   if(getGameType())
+      getGameType()->c2sSendChatSTE(global, message);;
 }
 
 

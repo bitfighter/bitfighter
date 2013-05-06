@@ -28,6 +28,10 @@
 #include "SparkTypesEnum.h"
 #include "SoundSystemEnums.h"
 
+#include "game.h"
+#include "gameConnection.h"
+#include "ship.h"
+
 #include "Colors.h"
 #include "GeomUtils.h"
 #include "stringUtils.h"
@@ -35,9 +39,10 @@
 
 #include "LuaScriptRunner.h"
 
+#include "gameObjectRender.h"  // This has stub methods when compiled as ZAP_DEDICATED
+
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "gameObjectRender.h"
 #endif
 
 
@@ -2070,11 +2075,13 @@ static bool isCollideableTypeWorm(U8 x)
          x == ForceFieldProjectorTypeNumber;
 }
 
+
 void Worm::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
    linkToIdleList(&game->idlingObjects);
 }
+
 
 void Worm::idle(BfObject::IdleCallPath path)
 {

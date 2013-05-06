@@ -39,8 +39,6 @@
 #   include "ClientGame.h"
 #endif
 
-#include "md5wrapper.h"
-
 #include "Colors.h"
 #include "stringUtils.h"         // For strictjoindir()
 
@@ -395,11 +393,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
 }
 
 
-extern md5wrapper md5;
-
 void GameConnection::submitPassword(const char *password)
 {
-   string encrypted = md5.getSaltedHashFromString(password);
+   string encrypted = Game::md5.getSaltedHashFromString(password);
    c2sSubmitPassword(encrypted.c_str());
 
    mLastEnteredPassword = password;
@@ -511,7 +507,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
 
    GameType *gameType = mServerGame->getGameType();
 
-   if(!mClientInfo->isOwner() && ownerPW != "" && !strcmp(md5.getSaltedHashFromString(ownerPW).c_str(), pass))
+   if(!mClientInfo->isOwner() && ownerPW != "" && !strcmp(Game::md5.getSaltedHashFromString(ownerPW).c_str(), pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted owner permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -534,7 +530,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    }
 
    // If admin password is blank, no one can get admin permissions except the local host, if there is one...
-   else if(!mClientInfo->isAdmin() && adminPW != "" && !strcmp(md5.getSaltedHashFromString(adminPW).c_str(), pass))
+   else if(!mClientInfo->isAdmin() && adminPW != "" && !strcmp(Game::md5.getSaltedHashFromString(adminPW).c_str(), pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -554,7 +550,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    }
 
    // If level change password is blank, it should already been granted to all clients
-   else if(!mClientInfo->isLevelChanger() && !strcmp(md5.getSaltedHashFromString(levChangePW).c_str(), pass)) 
+   else if(!mClientInfo->isLevelChanger() && !strcmp(Game::md5.getSaltedHashFromString(levChangePW).c_str(), pass)) 
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -847,7 +843,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string levelChangePassword = GameSettings::iniFile.GetValue("SavedLevelChangePasswords", getServerName());
       if(levelChangePassword != "")
       {
-         c2sSubmitPassword(md5.getSaltedHashFromString(levelChangePassword).c_str());
+         c2sSubmitPassword(Game::md5.getSaltedHashFromString(levelChangePassword).c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -858,7 +854,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string adminPassword = GameSettings::iniFile.GetValue("SavedAdminPasswords", getServerName());
       if(adminPassword != "")
       {
-         c2sSubmitPassword(md5.getSaltedHashFromString(adminPassword).c_str());
+         c2sSubmitPassword(Game::md5.getSaltedHashFromString(adminPassword).c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -869,7 +865,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string ownerPassword = GameSettings::iniFile.GetValue("SavedOwnerPasswords", getServerName());
       if(ownerPassword != "")
       {
-         c2sSubmitPassword(md5.getSaltedHashFromString(ownerPassword).c_str());
+         c2sSubmitPassword(Game::md5.getSaltedHashFromString(ownerPassword).c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -1466,11 +1462,11 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
    // If we're local, just use the password we already know because, you know, we're the server
    if(isLocalConnection())
-      serverPW = md5.getSaltedHashFromString(mSettings->getServerPassword());
+      serverPW = Game::md5.getSaltedHashFromString(mSettings->getServerPassword());
 
    // If we have a saved password for this server, use that
    else if(GameSettings::iniFile.GetValue("SavedServerPasswords", lastServerName) != "")
-      serverPW = md5.getSaltedHashFromString(GameSettings::iniFile.GetValue("SavedServerPasswords", lastServerName)); 
+      serverPW = Game::md5.getSaltedHashFromString(GameSettings::iniFile.GetValue("SavedServerPasswords", lastServerName)); 
 
    // Otherwise, use whatever's in the interface entry box
    else 
@@ -1515,7 +1511,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    stream->readString(buf);
    string serverPassword = mServerGame->getSettings()->getServerPassword();
 
-   if(serverPassword != "" && stricmp(buf, md5.getSaltedHashFromString(serverPassword).c_str()))
+   if(serverPassword != "" && stricmp(buf, Game::md5.getSaltedHashFromString(serverPassword).c_str()))
    {
       reason = ReasonNeedServerPassword;
       return false;

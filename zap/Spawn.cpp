@@ -48,7 +48,7 @@ namespace Zap
 AbstractSpawn::AbstractSpawn(const Point &pos, S32 time)
 {
    setPos(pos);
-   setRespawnTime((F32)time);
+   setRespawnTime(time);
 };
 
 
@@ -64,7 +64,7 @@ AbstractSpawn::~AbstractSpawn()
 }
 
 
-void AbstractSpawn::setRespawnTime(F32 time)       // in seconds
+void AbstractSpawn::setRespawnTime(S32 time)       // in seconds
 {
    mSpawnTime = time;
    mTimer.reset(time * 1000);
@@ -371,15 +371,15 @@ S32 ItemSpawn::lua_getSpawnTime(lua_State *L)
 
 /**
   *  @luafunc ItemSpawn::setSpawnTime(time)
-  *  @brief   Sets time between item emission events.
+  *  @brief   Sets time between item emission events, in seconds.
   *  @descr   Note that setting the spawn time also resets the timer, so that the next item will be spawned after \e time seconds.
-  *  @param   \e time: Number representing spawn time in seconds.
+  *  @param   \e int seconds: Number representing spawn time in seconds.
   */
 S32 ItemSpawn::lua_setSpawnTime(lua_State *L)
 {
    checkArgList(L, functionArgs, "ItemSpawn", "setSpawnTime");
 
-   setRespawnTime(getFloat(L, 1));
+   setRespawnTime(getInt(L, 1));
 
    return 0;
 }
@@ -433,7 +433,7 @@ AsteroidSpawn::AsteroidSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_
          setPos(L, 1);
 
       if(profile == 2)
-         setRespawnTime(getFloat(L, 2));
+         setRespawnTime(getInt(L, 2));
    }
 }
 
@@ -593,7 +593,7 @@ CircleSpawn::CircleSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME
          setPos(L, 1);
 
       if(profile == 2)
-         setRespawnTime(getFloat(L, 2));
+         setRespawnTime(getInt(L, 2));
    }
 }
 
@@ -652,9 +652,7 @@ void CircleSpawn::spawn()
 
 void CircleSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
-#ifndef ZAP_DEDICATED
    renderCircleSpawn(getPos(), 1 / currentScale); 
-#endif
 }
 
 
@@ -720,7 +718,7 @@ FlagSpawn::FlagSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
          setTeam(L, 2);
 
       if(profile == 3)      
-         setRespawnTime(getFloat(L, 3));
+         setRespawnTime(getInt(L, 3));
    }
 }
 

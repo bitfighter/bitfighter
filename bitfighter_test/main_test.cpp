@@ -2,7 +2,10 @@
 
 #include "gtest/gtest.h"
 
+#include "BfObject.h"
 #include "LoadoutTracker.h"
+#include "ServerGame.h"
+#include "ship.h"
 
 #include <string>
 
@@ -12,6 +15,12 @@
 
 
 using namespace Zap;
+namespace Zap
+{
+void exitToOs(S32 errcode) { TNLAssert(false, "Should never be called!"); }
+void shutdownBitfighter()  { TNLAssert(false, "Should never be called!"); };
+}
+
 
 class BfTest : public testing::Test
 {
@@ -48,6 +57,31 @@ TEST_F(BfTest, LoadoutTrackerTests)
    ASSERT_EQ(outItems.size(), ShipModuleCount + ShipWeaponCount);
    for(S32 i = 0; i < outItems.size(); i++)
       ASSERT_EQ(outItems[i], items[i]);
+}
+
+TEST_F(BfTest, LittleStory) 
+{
+   Address addr;
+   GameSettings settings;
+   ServerGame serverGame(addr, &settings, false, false);
+
+   ASSERT_TRUE(serverGame.isSuspended());    // ServerGame starts suspended
+   serverGame.unsuspendGame(false);          
+
+   Ship ship;
+   ship.addToGame(&serverGame, serverGame.getGameObjDatabase());
+
+   ASSERT_EQ(ship.getPos(), Point(0,0));     // By default, the ship starts at 0,0
+
+   ship.setActualVel(Point(100,0));          // Give the ship some velocity
+
+   for(S32 i = 0; i < 20; i++)
+   {
+      serverGame.idle(10);
+      printf("%d %s\n", i, ship.getPos().toString().c_str());
+   }
+
+   ASSERT_NE(ship.getPos(), Point(0,0));     // After idling, ship should have moved
 }
 
 

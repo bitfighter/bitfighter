@@ -282,8 +282,6 @@ static S32 showNameDescrBlock(const string &hostName, const string &hostDescr, S
 }
 
 
-extern Color gMasterServerBlue;
-
 static S32 showMasterBlock(ClientGame *game, S32 textsize, S32 ypos, S32 gap, bool leftcol)
 {
    drawCenteredStringPair2Colf(ypos, textsize, leftcol, "Master Srvr Addr:", "%s", 
@@ -294,7 +292,7 @@ static S32 showMasterBlock(ClientGame *game, S32 textsize, S32 ypos, S32 gap, bo
 
    if(game->getConnectionToMaster() && game->getConnectionToMaster()->isEstablished())
    {
-      glColor(gMasterServerBlue);
+      glColor(Colors::MasterServerBlue);
       drawCenteredString2Colf(ypos, textsize, leftcol, "Connected to [%s]", 
                                              game->getConnectionToMaster()->getMasterName().c_str() );
    }

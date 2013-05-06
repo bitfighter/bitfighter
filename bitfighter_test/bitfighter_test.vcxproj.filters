@@ -154,9 +154,13 @@
     <ClCompile Include="..\zap\MathUtils.cpp" />
     <ClCompile Include="..\zap\md5wrapper.cpp" />
     <ClCompile Include="..\zap\NexusGame.cpp" />
-    <ClCompile Include="..\zap\oglconsole.c" />
     <ClCompile Include="..\zap\OpenglUtils.cpp" />
     <ClCompile Include="..\zap\AtoBScroller.cpp" />
+    <ClCompile Include="..\zap\EditorTeam.cpp" />
+    <ClCompile Include="..\zap\oglconsole.cpp" />
+    <ClCompile Include="..\zap\SystemFunctions.cpp" />
+    <ClCompile Include="..\zap\quickChatHelper.cpp" />
+    <ClCompile Include="..\zap\gameNetInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Clipper">

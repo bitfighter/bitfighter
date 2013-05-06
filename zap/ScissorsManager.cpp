@@ -46,8 +46,8 @@ void ScissorsManager::enable(bool enable, DisplayMode displayMode, F32 x, F32 y,
       glGetIntegerv(GL_SCISSOR_BOX, &mScissorBox[0]);
 
    static Point p1, p2;
-   p1 = gScreenInfo.convertCanvasToWindowCoord(x, gScreenInfo.getGameCanvasHeight() - y - height, displayMode);
-   p2 = gScreenInfo.convertCanvasToWindowCoord(width, height, displayMode);
+   p1 = gScreenInfo.convertCanvasToWindowCoord(x,     gScreenInfo.getGameCanvasHeight() - y - height, displayMode);
+   p2 = gScreenInfo.convertCanvasToWindowCoord(width, height,                                         displayMode);
 
    glScissor(p1.x, p1.y, p2.x, p2.y);
 

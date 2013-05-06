@@ -114,7 +114,7 @@ const char *TextEntryUserInterface::getText()
 
 string TextEntryUserInterface::getSaltedHashText()
 {
-   return md5.getSaltedHashFromString(lineEditor.getString());
+   return Game::md5.getSaltedHashFromString(lineEditor.getString());
 }
 
 
@@ -166,7 +166,7 @@ LevelNameEntryUserInterface::LevelNameEntryUserInterface(ClientGame *game) : Par
    instr1 = "Enter an existing level, or create your own!";
    instr2 = "Arrows / wheel cycle existing levels | Tab completes partial name";
    resetOnActivate = false;
-   lineEditor.setFilter(LineEditor::fileNameFilter);
+   lineEditor.setFilter(fileNameFilter);
    lineEditor.mMaxLen = MAX_FILE_NAME_LEN;
 
    mLevelIndex = 0;

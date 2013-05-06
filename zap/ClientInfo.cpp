@@ -28,7 +28,6 @@
 #include "gameConnection.h"
 #include "playerInfo.h"
 #include "EngineeredItem.h"   // For EngineerModuleDeployer def
-#include "ClientGame.h"
 
 #include "voiceCodec.h"       // This should be removed
 
@@ -110,6 +109,7 @@ const U8 ClientInfo::getPlayerFlagstoSendToMaster() const
 
    return bitmask;
 }
+
 
 void ClientInfo::setName(const StringTableEntry &name)
 {

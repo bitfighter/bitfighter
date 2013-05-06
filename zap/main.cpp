@@ -94,6 +94,7 @@ include (replaces require)
 #endif
 
 #include "IniFile.h"
+#include "SystemFunctions.h"
 
 #include "tnl.h"
 #include "tnlRandom.h"
@@ -101,9 +102,6 @@ include (replaces require)
 #include "tnlJournal.h"
 
 #include "zapjournal.h"
-
-#include "md5wrapper.h"
-
 
 using namespace TNL;
 
@@ -134,13 +132,14 @@ using namespace TNL;
 #include "ScreenInfo.h"
 #include "stringUtils.h"
 #include "BanList.h"
-#include "dataConnection.h"
+//#include "dataConnection.h"
 #include "game.h"
 #include "SoundSystem.h"
 #include "InputCode.h"     // initializeKeyNames()
 #include "ClientInfo.h"
 #include "Console.h"       // For access to console
 #include "BotNavMeshZone.h"
+#include "ship.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -183,31 +182,8 @@ namespace Zap
    extern Vector<ClientGame *> gClientGames;
 #endif
 
-// Handle any md5 requests
-md5wrapper md5;
-
-Console gConsole;                // For the moment, we'll just have one console for everything.  This may change later, but probably won't.
-
-// Some colors -- other candidates include global and local chat colors, which are defined elsewhere.  Include here?
-Color gNexusOpenColor(0, 0.7, 0);
-Color gNexusClosedColor(0.85, 0.3, 0);
-Color gErrorMessageTextColor(Colors::paleRed);
-Color gNeutralTeamColor(Colors::gray80);        // Objects that are neutral (on team -1)
-Color gHostileTeamColor(Colors::gray50);        // Objects that are "hostile-to-all" (on team -2)
-Color gMasterServerBlue(0.8, 0.8, 1);           // Messages about successful master server statii
-Color gHelpTextColor(Colors::green);
- 
-
-
-DataConnection *dataConn = NULL;
-
-U16 DEFAULT_GAME_PORT = 28000;
-
-ScreenInfo gScreenInfo;
 
 ZapJournal gZapJournal;          // Our main journaling object
-
-S32 LOADOUT_PRESETS = 3;
 
 void exitToOs(S32 errcode)
 {
@@ -227,153 +203,14 @@ void exitToOs()
 }
 
 
-void shutdownBitfighter();    // Forward declaration
-
-// If we can't load any levels, here's the plan...
-void abortHosting_noLevels()
-{
-   TNLAssert(gServerGame, "gServerGame should always exist here!");
-
-   if(gServerGame->isDedicated())  
-   {
-      FolderManager *folderManager = gServerGame->getSettings()->getFolderManager();
-      const char *levelDir = folderManager->levelDir.c_str();
-
-      logprintf(LogConsumer::LogError,     "No levels found in folder %s.  Cannot host a game.", levelDir);
-      logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", levelDir);
-   }
 
 
-#ifndef ZAP_DEDICATED
-   for(S32 i = 0; i < gClientGames.size(); i++)
-   {
-      UIManager *uiManager = gClientGames[i]->getUIManager();
-
-      ErrorMessageUserInterface *errUI = static_cast<ErrorMessageUserInterface *>(uiManager->getUI(ErrorMessageUI));
-
-      FolderManager *folderManager = gServerGame->getSettings()->getFolderManager();
-      string levelDir = folderManager->levelDir;
-
-      errUI->reset();
-      errUI->setTitle("HOUSTON, WE HAVE A PROBLEM");
-      errUI->setMessage(1, "No levels were loaded.  Cannot host a game.");
-      errUI->setMessage(3, "Check the LevelDir parameter in your INI file,");
-      errUI->setMessage(4, "or your command-line parameters to make sure");
-      errUI->setMessage(5, "you have correctly specified a folder containing");
-      errUI->setMessage(6, "valid level files.");
-      errUI->setMessage(8, "Trying to load levels from folder:");
-      errUI->setMessage(9, levelDir == "" ? "<<Unresolvable>>" : levelDir.c_str());
-
-      uiManager->activate(ErrorMessageUI);
-
-      HostMenuUserInterface *menuUI = static_cast<HostMenuUserInterface *>(uiManager->getUI(HostingUI));
-      menuUI->levelLoadDisplayDisplay = false;
-      menuUI->levelLoadDisplayFadeTimer.clear();
-   }
-#endif
-
-   delete gServerGame;  // need gServerGame for above message
-   gServerGame = NULL;
-
-#ifndef ZAP_DEDICATED
-   if(gClientGames.size() == 0)
-#endif
-      shutdownBitfighter();      // Quit in an orderly fashion
-}
 
 
 // GCC thinks min isn't defined, VC++ thinks it is
 #ifndef min
 #  define min(a,b) ((a) <= (b) ? (a) : (b))
 #endif
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-// Call this function when running game in console mode; causes output to be dumped to console, if it was run from one
-// Loosely based on http://www.codeproject.com/KB/dialog/ConsoleAdapter.aspx
-bool writeToConsole()
-{
-
-#if defined(WIN32) && (_WIN32_WINNT >= 0x0500)
-   // _WIN32_WINNT is needed in case of compiling for old windows 98 (this code won't work for windows 98)
-   if(!AttachConsole(-1))
-      return false;
-
-   try
-   {
-      int m_nCRTOut = _open_osfhandle((intptr_t) GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
-      if(m_nCRTOut == -1)
-         return false;
-
-      FILE *m_fpCRTOut = _fdopen( m_nCRTOut, "w" );
-
-      if( !m_fpCRTOut )
-         return false;
-
-      *stdout = *m_fpCRTOut;
-
-      //// If clear is not done, any cout statement before AllocConsole will 
-      //// cause, the cout after AllocConsole to fail, so this is very important
-      // But here, we're not using AllocConsole...
-      //std::cout.clear();
-   }
-   catch ( ... )
-   {
-      return false;
-   } 
-#endif    
-   return true;
-}
-
-
-// Host a game (and maybe even play a bit, too!)
-void initHostGame(GameSettings *settings, const Vector<string> &levelList, bool testMode, bool dedicatedServer)
-{
-   TNLAssert(!gServerGame, "already exists!");
-   if(gServerGame)
-   {
-      delete gServerGame;
-      gServerGame = NULL;
-   }
-
-   Address address(IPProtocol, Address::Any, DEFAULT_GAME_PORT);     // Equivalent to ("IP:Any:28000")
-   address.set(settings->getHostAddress());                          // May overwrite parts of address, depending on what getHostAddress contains
-
-   gServerGame = new ServerGame(address, settings, testMode, dedicatedServer);
-
-   gServerGame->setReadyToConnectToMaster(true);
-   Game::seedRandomNumberGenerator(settings->getHostName());
-
-   // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
-   if(!testMode)
-   {
-      logprintf(LogConsumer::ServerFilter, "----------\nBitfighter server started [%s]", getTimeStamp().c_str());
-      logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", gServerGame->getSettings()->getHostName().c_str(), 
-                                                                            gServerGame->getSettings()->getHostDescr().c_str());
-
-      logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelList.size());
-   }
-
-   if(levelList.size())
-   {
-      gServerGame->buildBasicLevelInfoList(levelList);     // Take levels in gLevelList and create a set of empty levelInfo records
-      gServerGame->resetLevelLoadIndex();
-
-#ifndef ZAP_DEDICATED
-      for(S32 i = 0; i < gClientGames.size(); i++)
-         gClientGames[i]->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = true;
-#endif
-   }
-   else  // No levels!
-   {
-      abortHosting_noLevels();
-      return;
-   }
-
-   // Do this even if there are no levels, so hostGame error handling will be triggered
-   gServerGame->hostingModePhase = ServerGame::LoadingLevels;
-}
 
 
 // All levels loaded, we're ready to go
@@ -450,10 +287,9 @@ void display()
 #endif
 }
 
-
 #endif // ZAP_DEDICATED
 
-
+void shutdownBitfighter();    // Forward declaration
 
 void gameIdle(U32 integerTime)
 {
@@ -862,33 +698,6 @@ void setupLogging(const string &logDir)
 }
 
 
-// TODO: Move this to tnlPlatform.h
-// This function returns the directory of this running executable
-string getExecutableDir()
-{
-   string path;
-
-#if defined(TNL_OS_LINUX)
-   char buffer[1024] = {0};
-   readlink("/proc/self/exe", buffer, sizeof(buffer));
-   path = extractDirectory(string(buffer));
-
-#elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
-   getExecutablePath(path);  // Directory.h
-
-#elif defined(TNL_OS_WIN32)
-   char buffer[MAX_PATH] = {0};
-   GetModuleFileName(NULL, buffer, MAX_PATH);
-   path = extractDirectory(string(buffer));
-
-#else
-#  error "Path needs to be defined for this platform"
-#endif
-
-   return path;
-}
-
-
 #ifdef USE_BFUP
 #  include <direct.h>
 #  include <stdlib.h>
@@ -967,37 +776,6 @@ void checkOnlineUpdate(GameSettings *settings)
 #ifdef TNL_OS_MAC_OSX
    checkForUpdates();  // From Directory.h
 #endif
-}
-
-
-// This function returns the path where the game resources have been installed into the system
-// before being copied to the user's data path
-string getInstalledDataDir()
-{
-   string path;
-
-#if defined(TNL_OS_LINUX)
-   // In Linux, the data dir can be anywhere!  Usually in something like /usr/share/bitfighter
-   // or /usr/local/share/bitfighter.  Ignore if compiling DEBUG
-#if defined(LINUX_DATA_DIR) && !defined(TNL_DEBUG)
-   path = string(LINUX_DATA_DIR) + "/bitfighter";
-#else
-   // We'll default to the directory the executable is in
-   path = getExecutableDir();
-#endif
-
-#elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
-   getAppResourcePath(path);  // Directory.h
-
-#elif defined(TNL_OS_WIN32)
-   // On Windows, the installed data dir is always where the executable is
-   path = getExecutableDir();
-
-#else
-#  error "Path needs to be defined for this platform"
-#endif
-
-   return path;
 }
 
 
@@ -1404,7 +1182,7 @@ int main(int argc, char **argv)
    BotNavMeshZone::createBotZoneDatabase();
 
    if(settings->isDedicatedServer())
-      initHostGame(settings, settings->getLevelList(), false, true);     // Figure out what levels we'll be playing with, and start hosting  
+      initHosting(settings, settings->getLevelList(), false, true);     // Figure out what levels we'll be playing with, and start hosting  
    else
    {
 #ifndef ZAP_DEDICATED

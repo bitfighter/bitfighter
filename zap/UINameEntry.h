@@ -29,12 +29,10 @@
 #include "UI.h"
 #include "Timer.h"
 #include "config.h"
-#include "md5wrapper.h"    // For hashing
 
 namespace Zap
 {
 
-extern md5wrapper md5;
 
 class TextEntryUserInterface : public UserInterface
 {

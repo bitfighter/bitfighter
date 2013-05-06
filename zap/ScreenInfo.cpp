@@ -27,6 +27,11 @@
 
 namespace Zap {
 
+
+// Our global screenInfo object
+ScreenInfo gScreenInfo;
+
+
 ScreenInfo::ScreenInfo()
 {
    MIN_SCALING_FACTOR = 0.15f;
@@ -87,54 +92,54 @@ void ScreenInfo::calcPixelRatio()
 }
 
 
-S32 ScreenInfo::getWindowWidth()  { return mWindowWidth;  }
-S32 ScreenInfo::getWindowHeight() { return mWindowHeight; }
+S32 ScreenInfo::getWindowWidth()  const { return mWindowWidth;  }
+S32 ScreenInfo::getWindowHeight() const { return mWindowHeight; }
 
 // The following methods return values in PHYSICAL pixels -- how large is the entire physical monitor?
-S32 ScreenInfo::getPhysicalScreenWidth()  { return mPhysicalScreenWidth;  }
-S32 ScreenInfo::getPhysicalScreenHeight() { return mPhysicalScreenHeight; }
+S32 ScreenInfo::getPhysicalScreenWidth()  const { return mPhysicalScreenWidth;  }
+S32 ScreenInfo::getPhysicalScreenHeight() const { return mPhysicalScreenHeight; }
 
 
 // How many physical pixels make up a virtual one?
-F32 ScreenInfo::getPixelRatio() { return mPixelRatio; }
+F32 ScreenInfo::getPixelRatio() const { return mPixelRatio; }
 
-F32 ScreenInfo::getScalingRatio() { return mScalingRatioY; }
+F32 ScreenInfo::getScalingRatio() const { return mScalingRatioY; }
 
 
 // Game canvas size in physical pixels, assuming full screen unstretched mode
-S32 ScreenInfo::getDrawAreaWidth()
+S32 ScreenInfo::getDrawAreaWidth() const
 {
    return mIsLandscape ? S32((F32)mGameCanvasWidth * mScalingRatioY) : mPhysicalScreenWidth;
 }
 
 
-S32 ScreenInfo::getDrawAreaHeight()
+S32 ScreenInfo::getDrawAreaHeight() const
 {
    return mIsLandscape ? mPhysicalScreenHeight : S32((F32)mGameCanvasHeight * mScalingRatioX);
 }
 
 
 // Dimensions of black bars in physical pixels in full-screen unstretched mode.  Does not reflect current window mode
-S32 ScreenInfo::getHorizPhysicalMargin()
+S32 ScreenInfo::getHorizPhysicalMargin() const
 {
    return mIsLandscape ? (mPhysicalScreenWidth - getDrawAreaWidth()) / 2 : 0;
 }
 
 
-S32 ScreenInfo::getVertPhysicalMargin()
+S32 ScreenInfo::getVertPhysicalMargin() const
 {
    return mIsLandscape ? 0 : (mPhysicalScreenHeight - getDrawAreaHeight()) / 2;
 }
 
 
 // Dimensions of black bars in physical pixes, based on current window mode
-S32 ScreenInfo::getHorizPhysicalMargin(DisplayMode mode)
+S32 ScreenInfo::getHorizPhysicalMargin(DisplayMode mode) const
 {
    return mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED ? getHorizPhysicalMargin() : 0;
 }
 
 
-S32 ScreenInfo::getVertPhysicalMargin(DisplayMode mode)
+S32 ScreenInfo::getVertPhysicalMargin(DisplayMode mode) const
 {
    return mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED ? getVertPhysicalMargin() : 0;
 }
@@ -157,25 +162,25 @@ void ScreenInfo::resetGameCanvasSize()
    setGameCanvasSize(GAME_WIDTH, GAME_HEIGHT);
 }  
 
-S32 ScreenInfo::getGameCanvasWidth()  { return mGameCanvasWidth;  }     // canvasWidth, usually 800
-S32 ScreenInfo::getGameCanvasHeight() { return mGameCanvasHeight; }     // canvasHeight, usually 600
-
-S32 ScreenInfo::getPrevCanvasWidth()  { return mPrevCanvasWidth;  }       
-S32 ScreenInfo::getPrevCanvasHeight() { return mPrevCanvasHeight; }     
+S32 ScreenInfo::getGameCanvasWidth()  const { return mGameCanvasWidth;  }     // canvasWidth, usually 800
+S32 ScreenInfo::getGameCanvasHeight() const { return mGameCanvasHeight; }     // canvasHeight, usually 600
+                                      
+S32 ScreenInfo::getPrevCanvasWidth()  const { return mPrevCanvasWidth;  }       
+S32 ScreenInfo::getPrevCanvasHeight() const { return mPrevCanvasHeight; }     
 
 
 // Dimensions of black bars in game-sized pixels
-S32 ScreenInfo::getHorizDrawMargin()
+S32 ScreenInfo::getHorizDrawMargin() const
 {
    return mIsLandscape ? S32(getHorizPhysicalMargin() / mScalingRatioY) : 0;
 }
 
-S32 ScreenInfo::getVertDrawMargin()
+S32 ScreenInfo::getVertDrawMargin() const
 {
    return mIsLandscape ? 0 : S32(getVertPhysicalMargin() / mScalingRatioX);
 }
 
-bool ScreenInfo::isLandscape() { return mIsLandscape; }     // Whether physical screen is landscape, or at least more landscape than our game window
+bool ScreenInfo::isLandscape() const { return mIsLandscape; }     // Whether physical screen is landscape, or at least more landscape than our game window
 
 // Convert physical window screen coordinates into virtual, in-game coordinate
 Point ScreenInfo::convertWindowToCanvasCoord(const Point &p, DisplayMode mode) {
@@ -197,9 +202,15 @@ Point ScreenInfo::convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode)
 }
 
 
-Point ScreenInfo::convertCanvasToWindowCoord(S32 x, S32 y, DisplayMode mode)
+Point ScreenInfo::convertCanvasToWindowCoord(S32 x, S32 y, DisplayMode mode) const
 {
-   return Point(x * (getWindowWidth()  - 2 * getHorizPhysicalMargin(mode)) / getGameCanvasWidth()  +  getHorizPhysicalMargin(mode),
+   return convertCanvasToWindowCoord((F32)x, (F32)y, mode);
+}
+
+
+Point ScreenInfo::convertCanvasToWindowCoord(F32 x, F32 y, DisplayMode mode) const
+{
+   return Point(x * (getWindowWidth()  - 2 * getHorizPhysicalMargin(mode)) / getGameCanvasWidth()  + getHorizPhysicalMargin(mode),
                 y * (getWindowHeight() - 2 * getVertPhysicalMargin(mode))  / getGameCanvasHeight() + getVertPhysicalMargin(mode));
 }
 

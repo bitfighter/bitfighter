@@ -31,6 +31,12 @@
 #include "stringUtils.h"
 #include "MathUtils.h"           // For sq
 #include "GeomUtils.h"
+#include "tnlRandom.h"
+#include "game.h"
+#include "ship.h"
+#include "SoundSystemEnums.h"
+#include "ClientInfo.h"
+#include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
@@ -368,7 +374,7 @@ bool Teleporter::checkDeploymentPosition(const Point &position, const GridDataba
       else
       {
          if(bfObject->getCollisionCircle(RenderState, foundObjectCenter, foundObjectRadius))
-            if(circleCircleIntersect(foundObjectCenter, foundObjectRadius, position, TELEPORTER_RADIUS))
+            if(circleCircleIntersect(foundObjectCenter, foundObjectRadius, position, (F32)TELEPORTER_RADIUS))
                return false;
       }
 
@@ -780,7 +786,7 @@ void Teleporter::render()
    {
       // Render the exit of engineered teleports with an outline.  If teleporter has exploded, implode the exit.
       // The implosion calculations were an attempt to avoid using another timer, but perhaps that would be clearer than this mess
-      const F32 IMPLOSION_FACTOR = .2;     // Smaller numbers = faster implosion
+      const F32 IMPLOSION_FACTOR = 0.2f;     // Smaller numbers = faster implosion
 
       F32 implosionOffset  = mExplosionTimer.getPeriod() * (1 - IMPLOSION_FACTOR);
       F32 implosionTime    = mExplosionTimer.getPeriod() * IMPLOSION_FACTOR;

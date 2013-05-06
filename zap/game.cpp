@@ -81,6 +81,7 @@ U32 NameToAddressThread::run()
 ServerGame *gServerGame = NULL;
 
 static Vector<DatabaseObject *> fillVector2;
+md5wrapper Game::md5;
 
 
 ////////////////////////////////////
@@ -1329,6 +1330,38 @@ S32 Game::getGlowingZoneTeam()
 }
 
 
+string Game::getScriptName() const
+{
+   return mGameType->getScriptName();
+}
+
+
+bool Game::levelHasLoadoutZone()
+{
+   return mGameType->levelHasLoadoutZone();
+}
+
+
+void Game::updateShipLoadout(BfObject *shipObject)
+{
+   return mGameType->updateShipLoadout(shipObject);
+}
+
+
+void Game::sendChatFromController(const StringPtr &message)
+{
+   if(mGameType)
+      mGameType->sendChatFromController(message);
+}
+
+
+void Game::updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
+{
+   if(mGameType)
+      mGameType->updateClientChangedName(clientInfo, newName);
+}
+
+
 // Static method
 bool Game::isLocalTestServer()
 {
@@ -1406,10 +1439,8 @@ void Game::displayMessage(const Color &msgColor, const char *format, ...) const
 
 bool Game::isDedicated() const  
 {
-   TNLAssert(false, "Not implemented for this class!");
    return false;
 }
-
 
 
 };

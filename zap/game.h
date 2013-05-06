@@ -37,6 +37,7 @@
 #include "teamInfo.h"            // For ClassManager
 #include "gridDB.h"              // For IdleLinkedList
 #include "BfObject.h"            // For TypeNumber def
+#include "md5wrapper.h"
 
 #include "Timer.h"
 #include "Rect.h"
@@ -283,6 +284,8 @@ public:
    static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL = 800;    // How far player can see with sensor equipped horizontally...
    static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL = 600;      // ...and vertically
 
+   static md5wrapper md5;
+
    Game(const Address &theBindAddress, GameSettings *settings);   // Constructor
    virtual ~Game();                                               // Destructor
 
@@ -314,7 +317,6 @@ public:
                                 U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 
    virtual void displayMessage(const Color &msgColor, const char *format, ...) const;
-
 
    ClientInfo *findClientInfo(const StringTableEntry &name);      // Find client by name
    
@@ -388,6 +390,10 @@ public:
    void setScopeAlwaysObject(BfObject *theObject);
    GameType *getGameType() const;
 
+   // MD5 utilties
+   string getSaltedHash(const string &stringToBeHashed) const;
+
+
    // Team functions
    S32 getTeamCount() const;
    
@@ -451,6 +457,11 @@ public:
    bool isTeamGame() const;
    Timer &getGlowZoneTimer();
    S32 getGlowingZoneTeam();
+   string getScriptName() const;
+   bool levelHasLoadoutZone();
+   void updateShipLoadout(BfObject *shipObject);
+   void sendChatFromController(const StringPtr &message);
+   void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName);
 
    virtual SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f) const = 0;
    virtual SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const = 0;

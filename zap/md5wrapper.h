@@ -61,5 +61,6 @@ class md5wrapper
 		std::string getHashFromFile(std::string filename);
 };
 
+
 //include protection
 #endif // MD5WRAPPER_H

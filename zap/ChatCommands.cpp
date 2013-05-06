@@ -40,10 +40,6 @@
 #include "OpenglUtils.h"
 
 
-namespace Zap {
-   extern S32 LOADOUT_PRESETS;
-}
-
 namespace ChatCommands
 {
 
@@ -447,7 +443,7 @@ void idleHandler(ClientGame *game, const Vector<string> &words)
 
 void showPresetsHandler(ClientGame *game, const Vector<string> &words)
 {
-   for(S32 i = 0; i < LOADOUT_PRESETS; i++)
+   for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
    {
       string loadoutStr = game->getSettings()->getLoadoutPreset(i).toString();
       string display;
@@ -493,6 +489,8 @@ void maxFpsHandler(ClientGame *game, const Vector<string> &words)
       game->getSettings()->getIniSettings()->maxFPS = number;
 }
 
+
+#define atof(x) ((F32)atof(x))   // It should be a float already, dammit... it's not called atod!
 
 void lagHandler(ClientGame *game, const Vector<string> &words)
 {

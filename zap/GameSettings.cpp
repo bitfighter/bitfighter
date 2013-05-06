@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "GameSettings.h"
+
 #include "SharedConstants.h"  // For MAX_PLAYERS
 #include "BanList.h"
 #include "ScreenInfo.h"
@@ -174,14 +175,12 @@ S32 GameSettings::UseJoystickNumber = 0;
 CIniFile GameSettings::iniFile("dummy");                 // Our INI file.  Real filename will be supplied later.
 
 
-// For now...  soon all these things will be contained herein
-extern S32 LOADOUT_PRESETS;
 
 // Constructor
 GameSettings::GameSettings()
 {
    mBanList = new BanList(getFolderManager()->iniDir);
-   mLoadoutPresets.resize(LOADOUT_PRESETS);           // Make sure we have the right number of slots available
+   mLoadoutPresets.resize(LoadoutPresetCount);   // Make sure we have the right number of slots available
 }
 
 
@@ -357,8 +356,6 @@ void GameSettings::resolveDirs()
    getFolderManager()->resolveDirs(this);        // Resolve all folders except for levels folder, which is resolved later
 }
 
-
-extern U16 DEFAULT_GAME_PORT;
 
 string GameSettings::getHostAddress()
 {

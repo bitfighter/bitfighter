@@ -328,50 +328,6 @@ S32 Team::lua_getPlayers(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
-EditorTeam::EditorTeam()
-{
-   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
-}
-
-
-// Constructor II
-EditorTeam::EditorTeam(const TeamPreset &preset)
-{
-   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
-   mNameEditor.setString(preset.name);
-   mColor = Color(preset.r, preset.g, preset.b);
-}
-
-
-// Destructor
-EditorTeam::~EditorTeam()
-{
-   // Do nothing
-}
-
-
-LineEditor *EditorTeam::getLineEditor()
-{
-   return &mNameEditor;
-}
-
-
-void EditorTeam::setName(const char *name)
-{
-   mNameEditor.setString(name);
-}
-
-
-StringTableEntry EditorTeam::getName() const
-{
-   return StringTableEntry(mNameEditor.c_str());
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 // Destructor
 TeamManager::~TeamManager()
 {
@@ -385,15 +341,12 @@ S32 TeamManager::getTeamCount()
 }
 
 
-extern Color gNeutralTeamColor;
-extern Color gHostileTeamColor;
-
 const Color *TeamManager::getTeamColor(S32 index) const
 {
    if(index == TEAM_NEUTRAL)
-      return &gNeutralTeamColor;
+      return &Colors::NeutralTeamColor;
    else if(index == TEAM_HOSTILE)
-      return &gHostileTeamColor;
+      return &Colors::HostileTeamColor;
    else if((U32)index < (U32)mTeams.size())     // Using U32 lets us handle goofball negative team numbers without explicitly checking for them
       return mTeams[index]->getColor();
    else

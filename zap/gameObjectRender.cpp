@@ -1450,17 +1450,14 @@ void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<P
 }
 
 
-extern Color gNexusOpenColor;
-extern Color gNexusClosedColor;
-
 static Color getNexusBaseColor(bool open, F32 glowFraction)
 {
    Color color;
 
    if(open)
-      color.interp(glowFraction, Colors::yellow, gNexusOpenColor);
+      color.interp(glowFraction, Colors::yellow, Colors::NexusOpenColor);
    else
-      color = gNexusClosedColor;
+      color = Colors::NexusClosedColor;
 
    return color;
 }

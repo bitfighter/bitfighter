@@ -138,6 +138,7 @@
     <ClCompile Include="..\zap\dataConnection.cpp" />
     <ClCompile Include="..\zap\EditorAttributeMenuItemBuilder.cpp" />
     <ClCompile Include="..\zap\EditorPlugin.cpp" />
+    <ClCompile Include="..\zap\EditorTeam.cpp" />
     <ClCompile Include="..\zap\EngineeredItem.cpp" />
     <ClCompile Include="..\zap\engineerHelper.cpp" />
     <ClCompile Include="..\zap\Event.cpp" />
@@ -148,6 +149,7 @@
     <ClCompile Include="..\zap\game.cpp" />
     <ClCompile Include="..\zap\gameConnection.cpp" />
     <ClCompile Include="..\zap\gameLoader.cpp" />
+    <ClCompile Include="..\zap\gameNetInterface.cpp" />
     <ClCompile Include="..\zap\gameObjectRender.cpp" />
     <ClCompile Include="..\zap\GameSettings.cpp" />
     <ClCompile Include="..\zap\gameStats.cpp" />
@@ -186,7 +188,7 @@
     <ClCompile Include="..\zap\move.cpp" />
     <ClCompile Include="..\zap\moveObject.cpp" />
     <ClCompile Include="..\zap\NexusGame.cpp" />
-    <ClCompile Include="..\zap\oglconsole.c" />
+    <ClCompile Include="..\zap\oglconsole.cpp" />
     <ClCompile Include="..\zap\OpenglUtils.cpp" />
     <ClCompile Include="..\zap\PickupItem.cpp" />
     <ClCompile Include="..\zap\playerInfo.cpp" />
@@ -194,6 +196,7 @@
     <ClCompile Include="..\zap\PointObject.cpp" />
     <ClCompile Include="..\zap\polygon.cpp" />
     <ClCompile Include="..\zap\projectile.cpp" />
+    <ClCompile Include="..\zap\quickChatHelper.cpp" />
     <ClCompile Include="..\zap\rabbitGame.cpp" />
     <ClCompile Include="..\zap\Rect.cpp" />
     <ClCompile Include="..\zap\RenderUtils.cpp" />
@@ -217,6 +220,7 @@
     <ClCompile Include="..\zap\speedZone.cpp" />
     <ClCompile Include="..\zap\statistics.cpp" />
     <ClCompile Include="..\zap\stringUtils.cpp" />
+    <ClCompile Include="..\zap\SystemFunctions.cpp" />
     <ClCompile Include="..\zap\teamInfo.cpp" />
     <ClCompile Include="..\zap\TeamShuffleHelper.cpp" />
     <ClCompile Include="..\zap\teleporter.cpp" />

@@ -222,6 +222,7 @@
     <ClCompile Include="Cursor.cpp" />
     <ClCompile Include="EditorAttributeMenuItemBuilder.cpp" />
     <ClCompile Include="EditorPlugin.cpp" />
+    <ClCompile Include="EditorTeam.cpp" />
     <ClCompile Include="EngineeredItem.cpp" />
     <ClCompile Include="..\zap\flagItem.cpp" />
     <ClCompile Include="..\zap\game.cpp" />
@@ -322,7 +323,7 @@
     <ClCompile Include="..\zap\WeaponInfo.cpp" />
     <ClCompile Include="..\zap\zoneControlGame.cpp" />
     <ClCompile Include="dataConnection.cpp" />
-    <ClCompile Include="oglconsole.c" />
+    <ClCompile Include="oglconsole.cpp" />
     <ClCompile Include="GameSettings.cpp" />
     <ClCompile Include="RenderUtils.cpp" />
     <ClCompile Include="ScissorsManager.cpp" />
@@ -333,6 +334,7 @@
     <ClCompile Include="SlideOutWidget.cpp" />
     <ClCompile Include="Spawn.cpp" />
     <ClCompile Include="stringUtils.cpp" />
+    <ClCompile Include="SystemFunctions.cpp" />
     <ClCompile Include="TeamShuffleHelper.cpp" />
     <ClCompile Include="TimeLeftRenderer.cpp" />
     <ClCompile Include="UIAbstractInstructions.cpp" />
@@ -380,6 +382,7 @@
     <ClInclude Include="Cursor.h" />
     <ClInclude Include="EditorAttributeMenuItemBuilder.h" />
     <ClInclude Include="EditorPlugin.h" />
+    <ClInclude Include="EditorTeam.h" />
     <ClInclude Include="EngineeredItem.h" />
     <ClInclude Include="..\zap\flagItem.h" />
     <ClInclude Include="..\zap\ftol.h" />
@@ -508,6 +511,7 @@
     <ClInclude Include="SlipZone.h" />
     <ClInclude Include="Spawn.h" />
     <ClInclude Include="stringUtils.h" />
+    <ClInclude Include="SystemFunctions.h" />
     <ClInclude Include="TeamConstants.h" />
     <ClInclude Include="TeamPreset.h" />
     <ClInclude Include="TeamShuffleHelper.h" />

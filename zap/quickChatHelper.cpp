@@ -25,16 +25,10 @@
 
 #include "quickChatHelper.h"     
 
-#include "UIGame.h"
-#include "gameType.h"
-#include "gameObjectRender.h"
-#include "InputModeEnum.h"
-#include "UIMenus.h"
-#include "config.h"
+#include "UI.h"      // For playBoop()
+
+#include "ClientGame.h"
 #include "Colors.h"
-#include "ClientGame.h"
-#include "JoystickRender.h"
-#include "ClientGame.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
@@ -43,8 +37,6 @@
 
 namespace Zap
 {
-
-Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file
 
 static const char  *quickChatLegendText[]   = { "Team Message",         "Global Message"         };
 static const Color *quickChatLegendColors[] = { &Colors::teamChatColor, &Colors::globalChatColor };
@@ -67,6 +59,9 @@ QuickChatNode::QuickChatNode() : caption(""), msg("")
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+Vector<QuickChatNode> QuickChatHelper::nodeTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file
+
 QuickChatHelper::QuickChatHelper()
 {
    mCurNode = 0;
@@ -78,9 +73,6 @@ QuickChatHelper::QuickChatHelper()
 HelperMenu::HelperMenuType QuickChatHelper::getType() { return QuickChatHelperType; }
 
 
-extern Color gErrorMessageTextColor;
-
-
 // Returns true if there was something to render, false if our current chat tree position has nothing to render.  This can happen
 // when a chat tree has a bunch of keyboard only items and we're in joystick mode... if no items are drawn, there's no point
 // in remaining in QuickChat mode, is there?
@@ -88,9 +80,9 @@ void QuickChatHelper::render()
 {
    S32 yPos = MENU_TOP + MENU_PADDING;
 
-   if(!gQuickChatTree.size())
+   if(!nodeTree.size())
    {
-      glColor(gErrorMessageTextColor);
+      glColor(Colors::ErrorMessageTextColor);
       drawCenteredString(yPos, MENU_FONT_SIZE, "Quick Chat messages improperly configured.  Please see bitfighter.ini.");
       return;
    }
@@ -128,9 +120,9 @@ void QuickChatHelper::onActivated()
   
    if(mItemWidth == -1)
    {
-      for(S32 i = 0; i < gQuickChatTree.size(); i++)
+      for(S32 i = 0; i < nodeTree.size(); i++)
       {
-         S32 width = getStringWidth(MENU_FONT_SIZE, gQuickChatTree[i].caption.c_str());
+         S32 width = getStringWidth(MENU_FONT_SIZE, nodeTree[i].caption.c_str());
          if(width > mItemWidth)
             mItemWidth = width;
       }
@@ -149,7 +141,7 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
    mCurNode = curNode;
 
    S32 walk = mCurNode;
-   U32 matchLevel = gQuickChatTree[walk].depth + 1;
+   U32 matchLevel = nodeTree[walk].depth + 1;
    walk++;
 
    mMenuItems1IsCurrent = !mMenuItems1IsCurrent;
@@ -164,23 +156,23 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
 
 
    // First get to the end...
-   while(gQuickChatTree[walk].depth >= matchLevel)
+   while(nodeTree[walk].depth >= matchLevel)
       walk++;
 
    // Then draw bottom up...
    while(walk != mCurNode)
    {  
       // When we're using a controller, don't present options with no defined controller key
-      if(gQuickChatTree[walk].depth == matchLevel && ( (inputMode == InputModeKeyboard) || showKeyboardKeys || 
-                                                       (gQuickChatTree[walk].buttonCode != KEY_UNKNOWN) ))
+      if(nodeTree[walk].depth == matchLevel && ( (inputMode == InputModeKeyboard) || showKeyboardKeys || 
+                                                       (nodeTree[walk].buttonCode != KEY_UNKNOWN) ))
       {
          OverlayMenuItem item;
-         item.button = gQuickChatTree[walk].buttonCode;
-         item.key    = gQuickChatTree[walk].inputCode;
+         item.button = nodeTree[walk].buttonCode;
+         item.key    = nodeTree[walk].inputCode;
          item.showOnMenu = true;
-         item.name = gQuickChatTree[walk].caption.c_str();
+         item.name = nodeTree[walk].caption.c_str();
          item.help = "";
-         item.itemColor = gQuickChatTree[walk].teamOnly ? &Colors::teamChatColor : &Colors::globalChatColor;
+         item.itemColor = nodeTree[walk].teamOnly ? &Colors::teamChatColor : &Colors::globalChatColor;
 
          menuItems->push_back(item);
       }
@@ -195,7 +187,7 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
    if(Parent::processInputCode(inputCode))
       return true;
 
-   if(!gQuickChatTree.size())       // We'll crash if we go any further!
+   if(!nodeTree.size())       // We'll crash if we go any further!
       return false;
 
    // Try to find a match if we can...
@@ -204,16 +196,16 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
 
    // Set up walk...
    S32 walk = mCurNode;
-   U32 matchLevel = gQuickChatTree[walk].depth + 1;
+   U32 matchLevel = nodeTree[walk].depth + 1;
    walk++;
 
    // Iterate over anything at our desired depth or lower
-   while(gQuickChatTree[walk].depth >= matchLevel)
+   while(nodeTree[walk].depth >= matchLevel)
    {
       // If it has the same key...
-      bool match = (inputCode == gQuickChatTree[walk].inputCode) || (inputCode == gQuickChatTree[walk].buttonCode);
+      bool match = (inputCode == nodeTree[walk].inputCode) || (inputCode == nodeTree[walk].buttonCode);
 
-      if(match && gQuickChatTree[walk].depth == matchLevel)
+      if(match && nodeTree[walk].depth == matchLevel)
       {
          // ...then select it
          updateChatMenuItems(walk);
@@ -223,23 +215,15 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
 
          // If we're at a leaf (ie, next child down is higher or equal to us), then issue the chat and call it good
          walk++;
-         if(gQuickChatTree[mCurNode].depth >= gQuickChatTree[walk].depth)
+         if(nodeTree[mCurNode].depth >= nodeTree[walk].depth)
          {
             exitHelper();
 
-            if(gQuickChatTree[mCurNode].commandOnly)
-               getGame()->runCommand(gQuickChatTree[mCurNode].msg.c_str());
+            if(nodeTree[mCurNode].commandOnly)
+               getGame()->runCommand(nodeTree[mCurNode].msg.c_str());
 
             else
-            {
-               GameType *gt = getGame()->getGameType();
-
-               if(gt)
-               {
-                  StringTableEntry entry(gQuickChatTree[mCurNode].msg.c_str());
-                  gt->c2sSendChatSTE(!gQuickChatTree[mCurNode].teamOnly, entry);
-               }
-            }
+               getGame()->sendChatSTE(!nodeTree[mCurNode].teamOnly, nodeTree[mCurNode].msg.c_str());
 
             // Because we've run off the end of the menu tree, which is how we know we hit a terminal node and not the parent
             // of yet more items, we need to restore the menus for the menu closing transition animation.  Finally,

@@ -52,12 +52,14 @@
 #include "config.h"
 #include "Cursor.h"              // For various editor cursor
 #include "Colors.h"
+#include "EditorTeam.h"
 
 #include "gameLoader.h"          // For LevelLoadException def
 
 #include "luaLevelGenerator.h"
 #include "LevelDatabaseUploadThread.h"
 #include "gameObjectRender.h"
+#include "SystemFunctions.h"
 
 #include "Console.h"          // Our console object
 #include "ScreenInfo.h"
@@ -1466,8 +1468,6 @@ S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vect
 ////////////////////////////////////
 // Rendering routines
 
-extern Color gErrorMessageTextColor;
-
 
 bool EditorUserInterface::showMinorGridLines()
 {
@@ -2111,7 +2111,7 @@ void EditorUserInterface::renderWarnings()
    {
       S32 ypos = vertMargin + 50;
 
-      glColor(gErrorMessageTextColor);
+      glColor(Colors::ErrorMessageTextColor);
 
       for(S32 i = 0; i < mLevelErrorMsgs.size(); i++)
       {
@@ -3431,7 +3431,7 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 }
 
 
-static LineEditor getNewEntryBox(string value, string prompt, S32 length, LineEditor::LineEditorFilter filter)
+static LineEditor getNewEntryBox(string value, string prompt, S32 length, LineEditorFilter filter)
 {
    LineEditor entryBox(length);
    entryBox.setPrompt(prompt);
@@ -3610,7 +3610,7 @@ void EditorUserInterface::onTextInput(char ascii)
       BfObject *selectedObj = static_cast<BfObject *>(objList->get(selected));
 
       S32 id = selectedObj->getUserAssignedId();
-      mEntryBox = getNewEntryBox( id <= 0 ? "" : itos(id), "Item ID:", 10, LineEditor::digitsOnlyFilter);
+      mEntryBox = getNewEntryBox( id <= 0 ? "" : itos(id), "Item ID:", 10, digitsOnlyFilter);
       entryMode = EntryID;
    }
 }
@@ -3713,7 +3713,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       if(!anyItemsSelected(getDatabase()))
          return true;
 
-      mEntryBox = getNewEntryBox("", "Rotation angle:", 10, LineEditor::numericFilter);
+      mEntryBox = getNewEntryBox("", "Rotation angle:", 10, numericFilter);
       entryMode = EntryAngle;
    }
    else if(inputString == "Ctrl+R")       // Run levelgen script, or clear last results
@@ -3766,7 +3766,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    {
       if(anyItemsSelected(getDatabase()))
       {
-         mEntryBox = getNewEntryBox("", "Resize factor:", 10, LineEditor::numericFilter);
+         mEntryBox = getNewEntryBox("", "Resize factor:", 10, numericFilter);
          entryMode = EntryScale;
       }
    }
@@ -4403,7 +4403,7 @@ void EditorUserInterface::setWarnMessage(string msg1, string msg2)
    mWarnMsg1 = msg1;
    mWarnMsg2 = msg2;
    mWarnMsgTimer.reset(4000, 4000);    // Display for 4 seconds
-   mWarnMsgColor = gErrorMessageTextColor;
+   mWarnMsgColor = Colors::ErrorMessageTextColor;
 }
 
 
@@ -4507,8 +4507,6 @@ void testLevelStart_local(ClientGame *game)
 }
 
 
-extern void initHostGame(GameSettings *settings, const Vector<string> &levelList, bool testMode, bool dedicatedServer);
-
 void EditorUserInterface::testLevel()
 {
    bool gameTypeError = false;
@@ -4568,7 +4566,7 @@ void EditorUserInterface::testLevelStart()
 
       Vector<string> levelList;
       levelList.push_back(TestFileName);
-      initHostGame(getGame()->getSettings(), levelList, true, false);
+      initHosting(getGame()->getSettings(), levelList, true, false);
    }
 }
 

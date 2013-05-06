@@ -28,10 +28,6 @@
 #include "gameNetInterface.h"             // for GetGame() through GameNetInterface
 
 #include "stringUtils.h"
-//#include "config.h"                       // For configDirs
-//#include "GameSettings.h"
-
-#include "md5wrapper.h"                   // For password verification
 
 using namespace TNL;
 
@@ -86,10 +82,10 @@ static string getOutputFolder(FolderManager *folderManager, FileType filetype)
 }
 
 
-extern md5wrapper md5;
 extern bool writeToConsole();
 extern void exitToOs(S32 errcode);
-extern DataConnection *dataConn;
+
+
 
 void transferResource(GameSettings *settings, const string &addr, const string &pw, const string &fileName, const string &resourceType, bool sending)
 {
@@ -103,7 +99,7 @@ void transferResource(GameSettings *settings, const string &addr, const string &
       exitToOs(1);
    }
 
-   string password = md5.getSaltedHashFromString(pw);
+   string password = Game::md5.getSaltedHashFromString(pw);
 
    FileType fileType = getResourceType(resourceType.c_str());
    if(fileType == INVALID_RESOURCE_TYPE)
@@ -111,6 +107,8 @@ void transferResource(GameSettings *settings, const string &addr, const string &
       printf("Invalid resource type: Please sepecify BOT, LEVEL, or LEVELGEN\n");
       exitToOs(1);
    }
+
+   DataConnection *dataConn;
 
    dataConn = new DataConnection(settings, sending ? SEND_FILE : REQUEST_FILE, password, fileName, fileType);
 
@@ -323,8 +321,6 @@ string DataConnection::getErrorMessage(SenderStatus stat, const string &filename
 TNL_IMPLEMENT_NETCONNECTION(DataConnection, NetClassGroupGame, true);
 
 
-extern md5wrapper md5;
-
 // Client sends this message to set up the coming transfer.  Server checks for the password, and then, if the client is requesting
 // a file, initiates the transfer.  If client is sending a file, it gets things ready then sends s2cOkToSend to indicate it's ready.
 TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile, 
@@ -350,8 +346,8 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    string adminPW = settings->getAdminPassword();
    string ownerPW = settings->getOwnerPassword();
 
-   bool goodOwnerPW = ownerPW != "" && strcmp(md5.getSaltedHashFromString(ownerPW).c_str(), password) == 0;
-   bool goodAdminPW = adminPW != "" && strcmp(md5.getSaltedHashFromString(adminPW).c_str(), password) == 0;
+   bool goodOwnerPW = ownerPW != "" && strcmp(Game::md5.getSaltedHashFromString(ownerPW).c_str(), password) == 0;
+   bool goodAdminPW = adminPW != "" && strcmp(Game::md5.getSaltedHashFromString(adminPW).c_str(), password) == 0;
 
    if(!goodOwnerPW && !goodAdminPW)
    {

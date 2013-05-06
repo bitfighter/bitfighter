@@ -29,13 +29,12 @@
 
 #include "helperMenu.h"
 
-#include "UI.h"
-#include "Timer.h"
-#include "InputCode.h"
-
 #include "tnlNetBase.h"
 #include "tnlNetStringTable.h"
 
+#include <string>
+
+using namespace std;
 
 namespace Zap
 {
@@ -75,6 +74,8 @@ private:
 public:
    explicit QuickChatHelper();      // Constructor
    HelperMenuType getType();
+
+   static Vector<QuickChatNode> nodeTree;
 
    void render();                
    void onActivated();  

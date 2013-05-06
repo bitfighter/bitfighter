@@ -41,6 +41,7 @@
 #include "Cursor.h"
 #include "VideoSystem.h"
 #include "FontManager.h"
+#include "SystemFunctions.h"
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
@@ -1470,7 +1471,7 @@ void NameEntryUserInterface::setupMenu()
    menuItem->setSize(MENU_ITEM_SIZE_SMALL);
    addMenuItem(menuItem);
    
-   getMenuItem(1)->setFilter(LineEditor::nickNameFilter);  // Quotes are incompatible with PHPBB3 logins, %s are used for var substitution
+   getMenuItem(1)->setFilter(nickNameFilter);  // Quotes are incompatible with PHPBB3 logins, %s are used for var substitution
    getMenuItem(2)->setSecret(true);
 }
 
@@ -1547,15 +1548,13 @@ void HostMenuUserInterface::onActivate()
 }
 
 
-extern void initHostGame(GameSettings *settings, const Vector<string> &levelList, bool testMode, bool dedicatedServer);
-
 static void startHostingCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getHostMenuUserInterface()->saveSettings();
 
    GameSettings *settings = game->getSettings();
 
-   initHostGame(settings, settings->getLevelList(), false, false);
+   initHosting(settings, settings->getLevelList(), false, false);
 }
 
 
@@ -1585,7 +1584,7 @@ void HostMenuUserInterface::setupMenus()
    addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
 
    //addMenuItem(new CounterMenuItem("MAXIMUM PLAYERS:",   settings->getIniSettings()->maxplayers, 1, 2, MAX_PLAYERS, "", "", "", KEY_P));
-   //addMenuItem(new TextEntryMenuItem("PORT:",             itos(DEFAULT_GAME_PORT),  "Use default of " + itos(DEFAULT_GAME_PORT), 
+   //addMenuItem(new TextEntryMenuItem("PORT:",             itos(GameSettings::DEFAULT_GAME_PORT),  "Use default of " + itos(DEFAULT_GAME_PORT), 
    //                                         "", 10, KEY_P));
 }
 

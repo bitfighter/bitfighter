@@ -25,18 +25,19 @@
 
 #include "config.h"
 
+#include "GameSettings.h"
 #include "IniFile.h"
 #include "version.h"
 #include "BanList.h"
 #include "Colors.h"
 
-#include "stringUtils.h"  // For itos
-
-#include "GameSettings.h"
-
 #ifndef ZAP_DEDICATED
 #  include "quickChatHelper.h"
 #endif
+
+#include "stringUtils.h"  // For itos
+
+#include "tnlLog.h"
 
 #ifdef _MSC_VER
 #  pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
@@ -44,11 +45,6 @@
 
 #ifdef TNL_OS_WIN32
 #  include <windows.h>   // For ARRAYSIZE when using ZAP_DEDICATED
-#endif
-
-#ifndef min
-#  define min(a,b) ((a) <= (b) ? (a) : (b))
-#  define max(a,b) ((a) >= (b) ? (a) : (b))
 #endif
 
 
@@ -246,7 +242,6 @@ static void loadForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
 // Use macro to make code more readable
 #define addComment(comment) ini->sectionComment(section, comment);
 
-extern S32 LOADOUT_PRESETS;
 
 static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
 {
@@ -266,7 +261,7 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
    }
 
 
-   for(S32 i = 0; i < LOADOUT_PRESETS; i++)
+   for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
    {
       string presetStr = settings->getLoadoutPreset(i).toString();
 
@@ -402,6 +397,12 @@ static string displayModeToString(DisplayMode mode)
 }
 
 
+extern F32 gLineWidth1;
+extern F32 gDefaultLineWidth;
+extern F32 gLineWidth3;
+extern F32 gLineWidth4;
+
+
 static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    string section = "Settings";
@@ -503,12 +504,12 @@ static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
 
 static void loadLoadoutPresets(CIniFile *ini, GameSettings *settings)
 {
-   Vector<string> rawPresets(LOADOUT_PRESETS);
+   Vector<string> rawPresets(GameSettings::LoadoutPresetCount);
 
-   for(S32 i = 0; i < LOADOUT_PRESETS; i++)
+   for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
       rawPresets.push_back(ini->GetValue("LoadoutPresets", "Preset" + itos(i + 1), ""));
    
-   for(S32 i = 0; i < LOADOUT_PRESETS; i++)
+   for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
    {
       LoadoutTracker loadout(rawPresets[i]);
       if(loadout.isValid())
@@ -804,9 +805,9 @@ static void loadQuickChatMessages(CIniFile *ini)
 {
 #ifndef ZAP_DEDICATED
    // Add initial node
-   QuickChatNode emptynode;
+   QuickChatNode emptyNode;
 
-   gQuickChatTree.push_back(emptynode);
+   QuickChatHelper::nodeTree.push_back(emptyNode);
 
    // Read QuickChat messages -- first search for keys matching "QuickChatMessagesGroup123"
    S32 keys = ini->GetNumSections();
@@ -835,7 +836,7 @@ static void loadQuickChatMessages(CIniFile *ini)
       node.caption = ini->GetValue(messages[i], "Caption", "Caption");
       node.msg = ini->GetValue(messages[i], "Message", "Message");
       node.isMsgItem = true;
-      gQuickChatTree.push_back(node);
+      QuickChatHelper::nodeTree.push_back(node);
    }
 
    for(S32 i = 0; i < keys; i++)
@@ -873,7 +874,7 @@ static void loadQuickChatMessages(CIniFile *ini)
       node.caption = ini->GetValue(groups[i], "Caption", "Caption");
       node.msg = "";
       node.isMsgItem = false;
-      gQuickChatTree.push_back(node);
+      QuickChatHelper::nodeTree.push_back(node);
 
       for(S32 j = messages.size()-1; j >= 0; j--)
       {
@@ -886,12 +887,12 @@ static void loadQuickChatMessages(CIniFile *ini)
          node.caption = ini->GetValue(messages[j], "Caption", "Caption");
          node.msg = ini->GetValue(messages[j], "Message", "Message");
          node.isMsgItem = true;
-         gQuickChatTree.push_back(node);
+         QuickChatHelper::nodeTree.push_back(node);
       }
    }
 
    // Add final node.  Last verse, same as the first.
-   gQuickChatTree.push_back(emptynode);
+   QuickChatHelper::nodeTree.push_back(emptyNode);
 #endif
 }
 

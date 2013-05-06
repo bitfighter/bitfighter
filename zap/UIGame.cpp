@@ -42,7 +42,6 @@
 #include "projectile.h"          // For SpyBug
 #include "robot.h"
 
-#include "md5wrapper.h"          // For submission of passwords
 #include "Console.h"             // Our console object
 #include "ScreenInfo.h"
 #include "ClientGame.h"
@@ -2381,13 +2380,13 @@ void GameUserInterface::renderSuspended()
 
 SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, F32 gain) const
 {
-   return getGame()->playSoundEffect(profileIndex, gain);
+   return SoundSystem::playSoundEffect(profileIndex, gain);
 }
 
 
 SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, const Point &position) const
 {
-   return getGame()->playSoundEffect(profileIndex, position);
+   return SoundSystem::playSoundEffect(profileIndex, position);
 }
 
 

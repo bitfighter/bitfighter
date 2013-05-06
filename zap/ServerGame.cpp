@@ -35,8 +35,6 @@
 #include "BanList.h"             // For banList kick duration
 #include "BotNavMeshZone.h"      // For zone clearing code
 
-#include "md5wrapper.h"
-
 #include "gameObjectRender.h"
 #include "stringUtils.h"
 
@@ -51,6 +49,8 @@ namespace Zap
 ServerGame::ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated) : 
       Game(address, settings)
 {
+   //TNLAssert(settings, "Must have valid settings to create a ClientGame!");
+
    mVoteTimer = 0;
    mVoteYes = 0;
    mVoteNo = 0;
@@ -949,8 +949,6 @@ inline string getPathFromFilename(const string &filename)
 }
 
 
-extern md5wrapper md5;
-
 bool ServerGame::loadLevel(const string &levelFileName)
 {
    FolderManager *folderManager = getSettings()->getFolderManager();
@@ -1141,7 +1139,7 @@ bool ServerGame::isServer()
 // Top-level idle loop for server, runs only on the server by definition
 void ServerGame::idle(U32 timeDelta)
 {
-   Parent::idle(timeDelta);
+  Parent::idle(timeDelta);
 
    processSimulatedStutter(timeDelta);
    processVoting(timeDelta);
@@ -1151,6 +1149,7 @@ void ServerGame::idle(U32 timeDelta)
       this->getConnectionToMaster()->postNetEvent(mSendLevelInfoDelayNetInfo);
       mSendLevelInfoDelayNetInfo = NULL; // we can now let it free memory
    }
+
 
    // If there are no players on the server, we can enter "suspended animation" mode, but not during the first half-second of hosting.
    // This will prevent locally hosted game from immediately suspending for a frame, giving the local client a chance to 
@@ -1228,7 +1227,7 @@ void ServerGame::idle(U32 timeDelta)
 
       botControlTickTimer.reset();
    }
-
+   
    // Visit each game object, handling moves and running its idle method
    for(BfObject *obj = idlingObjects.nextList, *objNext; obj != NULL; obj = objNext)
    {

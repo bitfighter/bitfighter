@@ -127,6 +127,9 @@ string writeLevelString(const char *in);
 bool writeFile(const string& path, const string& contents, bool append = false);
 const string readFile(const string& path);
 
+string getExecutableDir();
+
+
 };
 
 #endif

@@ -189,7 +189,7 @@ void QueryServersUserInterface::onActivate()
       s.serverName = name;
       s.id = i;
       s.pingTime = Random::readF() * 512;
-      s.serverAddress.port = DEFAULT_GAME_PORT;
+      s.serverAddress.port = GameSettings::DEFAULT_GAME_PORT;
       s.serverAddress.netNum[0] = Random::readI();
       s.maxPlayers = Random::readF() * 16 + 8;
       s.playerCount = Random::readF() * s.maxPlayers;
@@ -638,7 +638,6 @@ static void renderLockIcon()
 }
 
 
-extern Color gMasterServerBlue;
 extern void glScale(F32 scaleFactor);
 
 void QueryServersUserInterface::render()
@@ -668,7 +667,7 @@ void QueryServersUserInterface::render()
 
    if(connectedToMaster)
    {
-      glColor(gMasterServerBlue);
+      glColor(Colors::MasterServerBlue);
       drawCenteredStringf(vertMargin - 8, 12, "Connected to %s", masterConn->getMasterName().c_str() );
    }
    else
@@ -1356,8 +1355,6 @@ void QueryServersUserInterface::sort()
 }
 
 
-extern U16 DEFAULT_GAME_PORT;
-
 // Look for /commands in chat message before handing off to parent
 void QueryServersUserInterface::issueChat()
 {
@@ -1374,7 +1371,7 @@ void QueryServersUserInterface::issueChat()
       if(address.isValid())
       {
          if(address.port == 0)
-            address.port = DEFAULT_GAME_PORT;   // Use default port number if the user did not supply one
+            address.port = GameSettings::DEFAULT_GAME_PORT;   // Use default port number if the user did not supply one
 
          getGame()->joinRemoteGame(address, false);
       }

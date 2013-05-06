@@ -30,6 +30,7 @@
 #include "InputCode.h"        // For InputCodeManager def
 #include "LoadoutTracker.h"
 
+#include "tnlTypes.h"
 #include "tnlVector.h"
 #include <string>
 
@@ -165,6 +166,10 @@ public:
    virtual ~GameSettings();   // Destructor
 
    static CIniFile iniFile;
+   static const S32 LoadoutPresetCount = 3;     // How many presets do we save?
+
+   static const U16 DEFAULT_GAME_PORT = 28000;
+
 
    void readCmdLineParams(const Vector<string> &argv);
    void resolveDirs();

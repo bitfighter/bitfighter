@@ -38,7 +38,10 @@ using namespace TNL;
 
 namespace Zap
 {
-//static lua_State *L = NULL;    
+
+
+Console gConsole;    // For the moment, we'll just have one console for everything.  This may change later, but probably won't.
+
 
 // Constructor
 Console::Console()

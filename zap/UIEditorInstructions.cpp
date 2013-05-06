@@ -345,8 +345,6 @@ static const char *wallInstructions[] =
 };
 
 
-extern Color gNeutralTeamColor;
-
 void EditorInstructionsUserInterface::renderPageWalls()
 {
    // Draw animated creation of walls
@@ -410,7 +408,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
          delete wallSegments[i];
    }
 
-   glColor(mAnimStage <= 11 ? Colors::yellow : gNeutralTeamColor);
+   glColor(mAnimStage <= 11 ? Colors::yellow : Colors::NeutralTeamColor);
 
    glLineWidth(WALL_SPINE_WIDTH);
 

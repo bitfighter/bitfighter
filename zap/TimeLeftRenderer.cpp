@@ -288,7 +288,7 @@ S32 TimeLeftRenderer::renderTimeLeft(const GameType *gameType) const
    drawHorizLine(smallTextRPos - max(wt, wb) - leftLineOverhangAmount, rightAlignCoord, timeTop - grayLineVertPadding);
    drawVertLine(grayLinePos, timeTop + visualVerticalTextAlignmentHackyFacty, timeTop + timeTextSize);
 
-   return timeTop - 2 * grayLineVertPadding - gDefaultLineWidth - 3;
+   return timeTop - 2 * grayLineVertPadding - (S32)gDefaultLineWidth - 3;
 }
 
 
