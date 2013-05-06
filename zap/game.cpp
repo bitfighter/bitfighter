@@ -483,7 +483,7 @@ void Game::setTeamHasFlag(S32 teamIndex, bool hasFlag)
 
 
 // Get slowing factor if we are in a slip zone; could be used if we have go faster zones
-F32 Game::getShipSpeedModificationFactor(const Ship *ship) const
+F32 Game::getShipAccelModificationFactor(const Ship *ship) const
 {
    BfObject *obj = ship->isInZone(SlipZoneTypeNumber);
 

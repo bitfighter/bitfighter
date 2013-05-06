@@ -139,7 +139,7 @@ public:
       MaxVelocity = 450,        // points per second
       Acceleration = 2500,      // points per second per second
       BoostMaxVelocity = 700,   // points per second
-      BoostAcceleration = 5000, // points per second per second
+      BoostAccelFact = 2,       // Will modify Acceleration
 
       VisibilityRadius = 30,
       KillDeleteDelay = 1500,
@@ -253,6 +253,7 @@ public:
 
    virtual void idle(IdleCallPath path);
 
+   void setMove(const Move &move);      // Used by tests only
    F32 processMove(U32 stateIndex);
 
    void processWeaponFire();

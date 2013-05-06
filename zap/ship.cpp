@@ -263,51 +263,59 @@ void Ship::setActualPos(const Point &p, bool warp)
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
 F32 Ship::processMove(U32 stateIndex)
 {
-   static const F32 ARMOR_ACCEL_PENALTY_FACT = 0.35f;
-   static const F32 ARMOR_SPEED_PENALTY_FACT = 1;
+   static const F32 NORMAL_ACCEL_FACT = 1.0f;
+   static const F32 ARMOR_ACCEL_FACT  = 0.35f;
+
+   static const F32 NORMAL_SPEED_FACT = 1.0f;
+   static const F32 ARMOR_SPEED_FACT  = 1.0f;
 
    mLastProcessStateAngle = getAngle(stateIndex);
    setAngle(stateIndex, mCurrentMove.angle);
 
+   // Nothing to do when ship is not moving
    if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && getVel(stateIndex) == Point(0,0))
-      return 0;  // saves small amount of CPU processing to not processing any of below when ship is not moving.
+      return 0;  
 
    F32 maxVel = (mLoadout.isModulePrimaryActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) *
-                (hasModule(ModuleArmor) ? ARMOR_SPEED_PENALTY_FACT : 1);
+                (hasModule(ModuleArmor) ? ARMOR_SPEED_FACT : NORMAL_SPEED_FACT);
 
    F32 time = mCurrentMove.time * 0.001f;
-   static Point requestVel;
+
+   static Point requestVel, accel;     // Reusable containers
+
+   // This is what the client requested
    requestVel.set(mCurrentMove.x, mCurrentMove.y);
 
-   // If going above this speed, you cannot change course
-   static const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
+   static const S32 MAX_CONTROLLABLE_SPEED = 1000;    
+
+   // If you are going too fast (i.e. > MAX_CONTROLLABLE_SPEED), you cannot move, and will automatically 
+   // "hit the brakes" by requesting a speed of 0
    if(getVel(stateIndex).lenSquared() > sq(MAX_CONTROLLABLE_SPEED))
       requestVel.set(0,0);
 
    requestVel *= maxVel;
-   F32 len = requestVel.len();
 
-   if(len > maxVel)
-      requestVel *= maxVel / len;
+   // Limit requestVel to maxVel (but can be lower)
+   if(requestVel.lenSquared() > sq(maxVel))
+      requestVel.normalize(maxVel);
 
-   static Point velDelta;     // Reusable container
-   velDelta = requestVel - getVel(stateIndex);
-   F32 accRequested = velDelta.len();
+   // a  = requested vel - current vel
+   accel = requestVel    - getVel(stateIndex);
 
+   // Increase acceleration when turbo-boost is active, reduce it when armor is present
+   F32 maxAccel = Acceleration * time *                                                // Standard accel, modified by:
+                  (mLoadout.isModulePrimaryActive(ModuleBoost) ? BoostAccelFact : 1) * // Boost
+                  (hasModule(ModuleArmor) ? ARMOR_ACCEL_FACT : NORMAL_ACCEL_FACT) *    // Armor
+                  getGame()->getShipAccelModificationFactor(this);                     // Slip zones
 
-   // Apply turbo-boost if active, reduce accel and max vel when armor is present
-   F32 maxAccel = (mLoadout.isModulePrimaryActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time *
-                  (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
-
-   maxAccel *= getGame()->getShipSpeedModificationFactor(this);
-
-   if(accRequested > abs(maxAccel))
-   {
-      velDelta *= maxAccel / accRequested;
-      setVel(stateIndex, getVel(stateIndex) + velDelta);
-   }
-   else
+   // If you are requesting a lower accel than the max, you get it instantly... else you are limited to max
+   if(accel.lenSquared() <= sq(maxAccel))
       setVel(stateIndex, requestVel);
+   else
+   {
+      accel.normalize(maxAccel);
+      setVel(stateIndex, getVel(stateIndex) + accel);
+   }
 
    return move(time, stateIndex, false);
 }
@@ -315,7 +323,6 @@ F32 Ship::processMove(U32 stateIndex)
 
 // Returns the zone in question if this ship is in any zone.
 // If ship is in multiple zones, an aribtrary one will be returned, and the level designer will be flogged.
-
 BfObject *Ship::isInAnyZone() const
 {
    findObjectsUnderShip((TestFunc)isZoneType);  // Fills fillVector
@@ -1046,10 +1053,8 @@ void Ship::rechargeEnergy()
       //else if(currentLoadoutZoneTeam != NO_TEAM)
       //   mEnergy += EnergyRechargeRateInEnemyLoadoutZoneModifier * timeInMilliSeconds;
 
-      // Recharge energy very fast if we're completely idle for a given amount of time, unless
-      // we're in a hostile loadout zone
-      if(mCurrentMove.x != 0 || mCurrentMove.y != 0 || mCurrentMove.fire || mCurrentMove.isAnyModActive() /*||
-            currentLoadoutZoneTeam == TEAM_HOSTILE*/)
+      // Recharge energy very fast if we're completely idle for a given amount of time
+      if(mCurrentMove.x != 0 || mCurrentMove.y != 0 || mCurrentMove.fire || mCurrentMove.isAnyModActive())
       {
          mFastRechargeTimer.reset();
          mFastRecharging = false;
@@ -1263,6 +1268,13 @@ void Ship::readControlState(BitStream *stream)
       getGame()->displayMessage(Colors::cyan, "%s selected.", 
                          WeaponInfo::getWeaponInfo(mLoadout.getCurrentWeapon()).name.getString());
 #endif
+}
+
+
+// Only used by tests
+void Ship::setMove(const Move &move)
+{
+   mCurrentMove = move;
 }
 
 

@@ -415,7 +415,7 @@ public:
    void setTeamHasFlag(S32 teamIndex, bool hasFlag);
    void clearTeamHasFlagList();
 
-   F32 getShipSpeedModificationFactor(const Ship *ship) const;
+   F32 getShipAccelModificationFactor(const Ship *ship) const;
    void teleporterDestroyed(Teleporter *teleporter);
 
    StringTableEntry getTeamName(S32 teamIndex) const;   // Return the name of the team
