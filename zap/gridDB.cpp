@@ -28,6 +28,8 @@
 #include "WallSegmentManager.h"
 #include "GeomUtils.h"
 
+#include "tnlLog.h"
+
 namespace Zap
 {
 

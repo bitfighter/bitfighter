@@ -24,9 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "masterConnection.h"
+#include "game.h"
 #include "version.h"
 #include "ServerGame.h"
-#include "gameType.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -298,7 +298,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
                      c->getConnection()->disconnect(ReasonNone, "Another login was detected");
                   } else {
                      //makeUnique will think the name is in use by self, and rename it.
-                     mGame->getGameType()->updateClientChangedName(c, mGame->makeUnique(c->getName().getString()).c_str());
+                     mGame->updateClientChangedName(c, mGame->makeUnique(c->getName().getString()).c_str());
                   }
                }
             }
@@ -309,7 +309,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
             clientInfo->setName(oldName);                          // restore name to properly get it updated to clients.
 
             if(clientInfo->getName() != uniqueName)
-               mGame->getGameType()->updateClientChangedName(clientInfo, uniqueName);
+               mGame->updateClientChangedName(clientInfo, uniqueName);
          }
          else if(status == AuthenticationStatusUnauthenticatedName)
          {  

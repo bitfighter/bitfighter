@@ -1354,6 +1354,13 @@ void Game::sendChatFromController(const StringPtr &message)
 }
 
 
+void Game::updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
+{
+   if(mGameType)
+      mGameType->updateClientChangedName(clientInfo, newName);
+}
+
+
 // Static method
 bool Game::isLocalTestServer()
 {

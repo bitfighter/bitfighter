@@ -27,17 +27,12 @@
 #define _MOVE_H_
 
 #include "shipItems.h"     // For ShipModuleCount, ShipWeaponCount
-#include "Point.h"
 
-#include "tnlLog.h"
-#include "tnlTypes.h"
-#include "tnlBitStream.h"
-
+namespace TNL {
+   class BitStream;
+}
 
 using namespace TNL;
-
-//const S32 ShipModuleCount = 2; // TODO: Get rid of these  (including ship.h makes things go crazy, extern doesnt seem to work)
-//const S32 ShipWeaponCount = 3;
 
 namespace Zap
 {

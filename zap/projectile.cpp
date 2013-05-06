@@ -24,6 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "projectile.h"
+#include "ship.h"
+#include "game.h"
+#include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"

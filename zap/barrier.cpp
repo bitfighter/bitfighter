@@ -33,6 +33,8 @@
 #include "stringUtils.h"
 #include "GeomUtils.h"
 
+#include "tnlLog.h"
+
 #include <cmath>
 
 

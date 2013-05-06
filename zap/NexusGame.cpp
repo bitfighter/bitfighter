@@ -24,26 +24,21 @@
 //------------------------------------------------------------------------------------
 
 #include "NexusGame.h"
-#include "EventManager.h"      
 
 #include "stringUtils.h"      // For ftos et al
-#include "masterConnection.h" // For master connection details
 
-#include "ClientInfo.h"
 #include "Colors.h"
 
 #ifndef ZAP_DEDICATED
 #  include "gameObjectRender.h"
-#  include "ScreenInfo.h"
 #  include "ClientGame.h"
-#  include "UIGame.h"
 #  include "UIMenuItems.h"
 #  include "OpenglUtils.h"
 #  include "RenderUtils.h"
 #endif
 
 
-#include <math.h>
+#include <cmath>
 
 namespace Zap
 {
