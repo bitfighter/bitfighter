@@ -1197,8 +1197,10 @@ void Ship::onAddedToGame(Game *game)
 
 void Ship::updateModuleSounds()
 {
+#ifndef ZAP_DEDICATED
    ClientGame *clientGame = static_cast<ClientGame *>(getGame());
    clientGame->updateModuleSounds(getRenderPos(), getRenderVel(), mLoadout);
+#endif
 }
 
 

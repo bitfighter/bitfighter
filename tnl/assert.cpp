@@ -36,6 +36,7 @@ namespace TNL {
 
 #ifdef _MSC_VER
 #pragma warning( disable : 4996 )          // Avoid warnings about vsnprintf  C4996
+                        // note that gcc does not appear to support vsnprintf_s
 #endif /* WIN32 */
 
 //-------------------------------------- STATIC Declaration
@@ -94,7 +95,7 @@ const char* avar(const char *message, ...)
    static char buffer[4096];
    va_list args;
    va_start(args, message);
-	vsnprintf(buffer, sizeof(buffer), message, args);
+   vsnprintf(buffer, sizeof(buffer), message, args);
    va_end(args);
    return( buffer );
 }

@@ -386,14 +386,6 @@
 			Name="UI"
 			>
 			<File
-				RelativePath=".\lineEditor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\lineEditor.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ShipShape.cpp"
 				>
 			</File>
@@ -1032,6 +1024,14 @@
 		</File>
 		<File
 			RelativePath=".\LevelDatabaseUploadThread.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\lineEditor.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\lineEditor.h"
 			>
 		</File>
 		<File

@@ -31,6 +31,12 @@
 #include "stringUtils.h"
 #include "MathUtils.h"           // For sq
 #include "GeomUtils.h"
+#include "tnlRandom.h"
+#include "game.h"
+#include "ship.h"
+#include "SoundSystemEnums.h"
+#include "ClientInfo.h"
+#include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"

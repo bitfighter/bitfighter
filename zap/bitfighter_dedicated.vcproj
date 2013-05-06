@@ -383,14 +383,6 @@
 		<Filter
 			Name="UI"
 			>
-			<File
-				RelativePath=".\lineEditor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\lineEditor.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="SoundAndVoice"
@@ -709,10 +701,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\EditorObject.cpp"
-			>
-		</File>
-		<File
 			RelativePath=".\EngineeredItem.cpp"
 			>
 		</File>
@@ -877,6 +865,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\PointObject.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\recast\RecastAlloc.cpp"
 			>
 		</File>
@@ -958,10 +950,6 @@
 		</File>
 		<File
 			RelativePath=".\Timer.h"
-			>
-		</File>
-		<File
-			RelativePath="..\Triangle\triangle.c"
 			>
 		</File>
 		<File

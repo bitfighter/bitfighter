@@ -25,6 +25,7 @@
 
 #include "SoundSystem.h"
 #include "SoundEffect.h"
+#include "tnlLog.h"
 
 #ifndef BF_NO_AUDIO
 
@@ -40,7 +41,6 @@
 
 #include "tnlByteBuffer.h"
 #include "tnlNetBase.h"
-#include "tnlLog.h"
 
 
 #ifdef TNL_OS_WIN32
@@ -1169,7 +1169,7 @@ void SoundSystem::playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol)
    // Do nothing
 }
 
-void SoundSystem::setMovementParams(SFXHandle& effect, Point position, Point velocity)
+void SoundSystem::setMovementParams(SFXHandle& effect, const Point &position, const Point &velocity)
 {
    // Do nothing
 }
@@ -1179,11 +1179,11 @@ SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, F32 gain)
    return new SoundEffect(0,NULL,0,Point(0,0), Point(0,0));
 }
 
-SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, Point position)
+SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, const Point &position)
 {
    return new SoundEffect(0,NULL,0,Point(0,0), Point(0,0));
 }
-SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, Point position, Point velocity, F32 gain)
+SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain)
 {
    return new SoundEffect(0,NULL,0,Point(0,0), Point(0,0));
 }
@@ -1223,7 +1223,7 @@ void SoundSystem::processAudio(F32 sfxVol)
    // Do nothing
 }
 
-void SoundSystem::setListenerParams(Point pos, Point velocity)
+void SoundSystem::setListenerParams(const Point &position, const Point &velocity)
 {
    // Do nothing
 }
