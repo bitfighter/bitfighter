@@ -887,6 +887,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\EditorAttributeMenuItemBuilder.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\EditorObject.cpp"
 			>
 		</File>
@@ -984,6 +988,10 @@
 		</File>
 		<File
 			RelativePath=".\helperMenu.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\HelpItemManager.cpp"
 			>
 		</File>
 		<File
@@ -1099,7 +1107,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\oglconsole.c"
+			RelativePath=".\oglconsole.cpp"
 			>
 		</File>
 		<File
