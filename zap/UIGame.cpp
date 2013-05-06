@@ -2381,13 +2381,13 @@ void GameUserInterface::renderSuspended()
 
 SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, F32 gain) const
 {
-   return getGame()->playSoundEffect(profileIndex, gain);
+   return SoundSystem::playSoundEffect(profileIndex, gain);
 }
 
 
 SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, const Point &position) const
 {
-   return getGame()->playSoundEffect(profileIndex, position);
+   return SoundSystem::playSoundEffect(profileIndex, position);
 }
 
 
