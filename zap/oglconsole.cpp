@@ -26,8 +26,6 @@
 // End Bitfighter specific block
 
 
-#define C ((_OGLCONSOLE_Console*)console)
-
 // There are two fonts available: The original ConsoleFont and the alternate PackedFont,
 // which is a chunkier, more pixelly font than ConsoleFont.
 // Uncomment the following line to use PackedFont:
@@ -261,7 +259,7 @@ int OGLCONSOLE_CreateFont()
 #define DEFAULT_MAX_LINES 256
 
 /* OGLCONSOLE console structure */
-typedef struct
+struct _OGLCONSOLE_Console
 {
     GLdouble mvMatrix[16];
     int mvMatrixUse;
@@ -298,7 +296,7 @@ typedef struct
     /* Various callback functions defined by the user */
     void(*enterKeyCallback)(OGLCONSOLE_Console console, char *cmd);
 
-} _OGLCONSOLE_Console;
+};
 
 /* To save code, I've gone with an imperative "modal" kind of interface */
 _OGLCONSOLE_Console *programConsole = NULL;
@@ -309,7 +307,7 @@ _OGLCONSOLE_Console *userConsole = NULL;
 /* Set the callback for a console */
 void OGLCONSOLE_EnterKey(void(*cbfun)(OGLCONSOLE_Console console, char *cmd))
 {
-    programConsole->enterKeyCallback = (void*)cbfun;
+    programConsole->enterKeyCallback = cbfun;
 }
 
 static
@@ -418,7 +416,7 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
 #endif
 
     /* Allocate memory for our console */
-    console = (void*)malloc(sizeof(_OGLCONSOLE_Console));
+    console = (_OGLCONSOLE_Console*)malloc(sizeof(_OGLCONSOLE_Console));
 
     if(console == NULL)     // Malloc failed?
        return NULL;
@@ -477,15 +475,15 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
 
 
     /* Temporary shit */
-    OGLCONSOLE_Output((void*)console, "Console initialized\n");
+    OGLCONSOLE_Output(console, "Console initialized\n");
 
-    OGLCONSOLE_Output((void*)console,
+    OGLCONSOLE_Output(console,
             "Console display lines: %i\n", console->textHeight);
 
-    OGLCONSOLE_Output((void*)console,
+    OGLCONSOLE_Output(console,
             "Console display columns: %i\n", console->textWidth);
 
-    OGLCONSOLE_Output((void*)console,
+    OGLCONSOLE_Output(console,
             "Console input length: %i\n", MAX_INPUT_LENGTH);
 
 
@@ -500,7 +498,7 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
  * operations a console can be engaged in are receiving programmer interaction,
  * or receiving end-user interaction. fyi, "user" always refers to the
  * programmer, end-user refers to the real end-user) */
-static void OGLCONSOLE_DestroyReal(OGLCONSOLE_Console console, int safe)
+static void OGLCONSOLE_DestroyReal(OGLCONSOLE_Console C, int safe)
 {
 	if (C)
 	{
@@ -544,10 +542,10 @@ void OGLCONSOLE_Destroy(OGLCONSOLE_Console console)
 void OGLCONSOLE_Quit()
 {
     if (programConsole)
-        OGLCONSOLE_DestroyReal((void*)programConsole, 0);
+        OGLCONSOLE_DestroyReal(programConsole, 0);
 
     if (programConsole != userConsole && userConsole)
-        OGLCONSOLE_DestroyReal((void*)userConsole, 0);
+        OGLCONSOLE_DestroyReal(userConsole, 0);
     programConsole = NULL;
     userConsole = NULL;
 }
@@ -566,7 +564,7 @@ int OGLCONSOLE_GetVisibility()
 
 /* This routine is meant for applications with a single console, if you use
  * multiple consoles in your program, use Render() instead */
-void OGLCONSOLE_Draw() { OGLCONSOLE_Render((void*)userConsole); }
+void OGLCONSOLE_Draw() { OGLCONSOLE_Render(userConsole); }
 
 void OGLCONSOLE_setCursor(int drawCursor) { userConsole->drawCursor = drawCursor; }
 
@@ -580,7 +578,7 @@ void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
 
 /* This function draws a single specific console; if you only use one console in
  * your program, use Draw() instead */
-void OGLCONSOLE_Render(OGLCONSOLE_Console console)
+void OGLCONSOLE_Render(OGLCONSOLE_Console C)
 {
 #ifndef ZAP_DEDICATED
 
@@ -804,9 +802,9 @@ void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
 }
 
 /* This is the final, internal function for printing text to a console */
-void OGLCONSOLE_Output(OGLCONSOLE_Console console, const char *s, ...)
+void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
 {
-   if(console)
+   if(C)
    {
      va_list argument;
      /* cache some console properties */
@@ -932,7 +930,7 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console console, const char *s, ...)
 
 /* Internal encapsulation of the act for adding a command the user executed to
  * their command history for that particular console */
-void OGLCONSOLE_AddHistory(OGLCONSOLE_Console console, char *s)
+void OGLCONSOLE_AddHistory(OGLCONSOLE_Console C, char *s)
 {
     /* Skip blank lines */
     int blank = 1;
@@ -1108,13 +1106,13 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
          OGLCONSOLE_YankHistory(userConsole);
 
          /* Add user's command to history */
-         OGLCONSOLE_AddHistory((void*)userConsole, userConsole->inputLine);
+         OGLCONSOLE_AddHistory(userConsole, userConsole->inputLine);
 
          /* Print user's command to the console */
-         OGLCONSOLE_Output((void*)userConsole, "%s\n", userConsole->inputLine);
+         OGLCONSOLE_Output(userConsole, "%s\n", userConsole->inputLine);
 
          /* Invoke console's enter-key callback function */
-         userConsole->enterKeyCallback((void*)userConsole,userConsole->inputLine);
+         userConsole->enterKeyCallback(userConsole,userConsole->inputLine);
 
          /* Erase command line */
          userConsole->inputCursorPos = 0;
