@@ -283,8 +283,9 @@ F32 Ship::processMove(U32 stateIndex)
 
    static Point requestVel, accel;     // Reusable containers
 
-   // This is what the client requested
+   // This is what the client requested -- basically requestVel.len() will range from 0 to 1; any higher will be clipped
    requestVel.set(mCurrentMove.x, mCurrentMove.y);
+   requestVel *= maxVel;
 
    static const S32 MAX_CONTROLLABLE_SPEED = 1000;    
 
@@ -293,7 +294,6 @@ F32 Ship::processMove(U32 stateIndex)
    if(getVel(stateIndex).lenSquared() > sq(MAX_CONTROLLABLE_SPEED))
       requestVel.set(0,0);
 
-   requestVel *= maxVel;
 
    // Limit requestVel to maxVel (but can be lower)
    if(requestVel.lenSquared() > sq(maxVel))
