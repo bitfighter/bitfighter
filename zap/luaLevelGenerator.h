@@ -26,10 +26,7 @@
 #ifndef _LUALEVELGENERATOR_H_
 #define _LUALEVELGENERATOR_H_
 
-#include "LuaScriptRunner.h"
-#include "gameLoader.h"
-#include "LuaWrapper.h"
-#include "tnlLog.h"        // For logging
+#include "LuaScriptRunner.h"  // Parent class
 
 
 using namespace std;

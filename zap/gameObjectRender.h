@@ -334,7 +334,7 @@ extern void renderTeleporterEditorObject(const Point &pos, S32 radius, const Col
 #define renderPolygonOutline
 #define drawCircle
 #define drawSquare
-
+#define renderCircleSpawn
 
 #endif
 #endif

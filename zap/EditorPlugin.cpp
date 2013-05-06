@@ -26,6 +26,8 @@
 #include "EditorPlugin.h"     // Header
 #include "game.h"
 
+#include "tnlLog.h"
+
 
 namespace Zap
 {

@@ -10,12 +10,9 @@
 #ifndef BF_NO_CONSOLE
 
 /* Opaque to you you lowly user */
-typedef struct _OGLCONSOLE_Console *OGLCONSOLE_Console;
+struct _OGLCONSOLE_Console;
+typedef _OGLCONSOLE_Console *OGLCONSOLE_Console;
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 
 #define MAX_CONSOLE_OUTPUT_LENGTH 4096
@@ -64,10 +61,6 @@ int OGLCONSOLE_GetVisibility();
 
 /* Create the console font */
 int OGLCONSOLE_CreateFont();
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // BF_NO_CONSOLE
 

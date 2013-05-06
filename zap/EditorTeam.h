@@ -23,46 +23,38 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _MOVE_H_
-#define _MOVE_H_
+#ifndef _EDITOR_TEAM_H_
+#define _EDITOR_TEAM_H_
 
-#include "shipItems.h"     // For ShipModuleCount, ShipWeaponCount
+#include "teamInfo.h"  // Parent class
+#include "lineEditor.h"
 
-namespace TNL {
-   class BitStream;
-}
-
-using namespace TNL;
+#include <string>
 
 namespace Zap
 {
 
-// Can represent a move by a human player or a robot
-class Move 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Class for managing teams in the editor
+class EditorTeam : public AbstractTeam
 {
+private:
+   LineEditor mNameEditor;
+
 public:
-   Move();                          // Constructor
+   EditorTeam();                          // Constructor
+   explicit EditorTeam(const TeamPreset &preset);  // Constructor II
+   virtual ~EditorTeam();                 // Destructor
 
-   F32 x, y;
-   F32 angle;
-   bool fire;
-   bool modulePrimary[ShipModuleCount];    // Is given module primary component active?
-   bool moduleSecondary[ShipModuleCount];  // Is given module secondary component active?
-   U32 time;
-
-   enum {
-      MaxMoveTime = 127,
-   };
-
-   bool isAnyModActive() const;
-   bool isEqualMove(Move *prev);    // Compares this move to the previous one -- are they the same?
-   void pack(BitStream *stream, Move *prev, bool packTime);
-   void unpack(BitStream *stream, bool unpackTime);
-   void prepare();                  // Packs and unpacks move to ensure effects of rounding are same on client and server
+   LineEditor *getLineEditor();
+   void setName(const char *name);
+   StringTableEntry getName() const;  // Wrap in STE to make signatures match
 };
+
 
 };
 
 #endif
-
-

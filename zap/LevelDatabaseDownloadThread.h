@@ -39,9 +39,9 @@ class LevelDatabaseDownloadThread : public TNL::Thread
 {
 typedef Thread Parent;
 public:
-   static const char* LevelRequest;
-   static const char* LevelgenRequest;
-   static const int UrlLength = 2048;
+   static string LevelRequest;
+   static string LevelgenRequest;
+   static const S32 UrlLength = 2048;
 
    explicit LevelDatabaseDownloadThread(string levelId, ClientGame* game);
    virtual ~LevelDatabaseDownloadThread();

@@ -27,7 +27,10 @@
 #define _LOADOUTSELECT_H_
 
 #include "helperMenu.h"
-#include "ship.h"
+#include "shipItems.h"
+#include "WeaponInfo.h"
+
+#include "tnlVector.h"
 
 using namespace TNL;
 

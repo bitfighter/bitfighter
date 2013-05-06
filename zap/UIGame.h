@@ -32,11 +32,16 @@
 #include "LoadoutIndicator.h"
 #include "TimeLeftRenderer.h"
 #include "FpsRenderer.h"
-#include "HelpItemManager.h"     
+#include "HelpItemManager.h"
+#include "move.h"
 
 #include "SoundEffect.h"
+#include "sparkManager.h"
 
-#include "Point.h"
+#include "Color.h"
+#include "Rect.h"
+
+#include "tnlString.h"
 
 
 namespace Zap

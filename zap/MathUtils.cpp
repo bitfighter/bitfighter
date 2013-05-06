@@ -28,9 +28,6 @@
 
 
 #include "MathUtils.h"
-#include "Point.h"
-#include "tnlVector.h"
-#include "tnlAssert.h"
 
 
 namespace Zap {

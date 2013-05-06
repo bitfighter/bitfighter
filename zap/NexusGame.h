@@ -27,9 +27,6 @@
 #define _NEXUSGAME_H_
 
 #include "gameType.h"
-#include "item.h"
-#include "polygon.h"
-#include "LuaWrapper.h"
 #include "Zone.h"
 
 namespace Zap

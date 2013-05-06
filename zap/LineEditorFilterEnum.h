@@ -23,46 +23,18 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _MOVE_H_
-#define _MOVE_H_
-
-#include "shipItems.h"     // For ShipModuleCount, ShipWeaponCount
-
-namespace TNL {
-   class BitStream;
-}
-
-using namespace TNL;
+#ifndef _LINE_EDITOR_FILTER_ENUM_H_
+#define _LINE_EDITOR_FILTER_ENUM_H_
 
 namespace Zap
 {
-
-// Can represent a move by a human player or a robot
-class Move 
-{
-public:
-   Move();                          // Constructor
-
-   F32 x, y;
-   F32 angle;
-   bool fire;
-   bool modulePrimary[ShipModuleCount];    // Is given module primary component active?
-   bool moduleSecondary[ShipModuleCount];  // Is given module secondary component active?
-   U32 time;
-
-   enum {
-      MaxMoveTime = 127,
+   enum LineEditorFilter {
+      allAsciiFilter,          // any ascii character
+      digitsOnlyFilter,        // 0-9
+      numericFilter,           // 0-9, -, .
+      fileNameFilter,          // A-Z, a-z, 0-9, _
+      nickNameFilter           // No "s, and don't let name start with spaces
    };
-
-   bool isAnyModActive() const;
-   bool isEqualMove(Move *prev);    // Compares this move to the previous one -- are they the same?
-   void pack(BitStream *stream, Move *prev, bool packTime);
-   void unpack(BitStream *stream, bool unpackTime);
-   void prepare();                  // Packs and unpacks move to ensure effects of rounding are same on client and server
 };
 
-};
-
-#endif
-
-
+#endif 

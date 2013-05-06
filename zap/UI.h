@@ -32,6 +32,7 @@
 
 #include "UIManager.h"
 #include "lineEditor.h"
+#include "InputCode.h"
 
 #include "Timer.h"
 #include "tnl.h"

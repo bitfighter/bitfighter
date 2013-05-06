@@ -23,46 +23,52 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _MOVE_H_
-#define _MOVE_H_
+#include "EditorTeam.h"
 
-#include "shipItems.h"     // For ShipModuleCount, ShipWeaponCount
-
-namespace TNL {
-   class BitStream;
-}
-
-using namespace TNL;
 
 namespace Zap
 {
 
-// Can represent a move by a human player or a robot
-class Move 
+
+// Constructor
+EditorTeam::EditorTeam()
 {
-public:
-   Move();                          // Constructor
+   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
+}
 
-   F32 x, y;
-   F32 angle;
-   bool fire;
-   bool modulePrimary[ShipModuleCount];    // Is given module primary component active?
-   bool moduleSecondary[ShipModuleCount];  // Is given module secondary component active?
-   U32 time;
 
-   enum {
-      MaxMoveTime = 127,
-   };
+// Constructor II
+EditorTeam::EditorTeam(const TeamPreset &preset)
+{
+   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
+   mNameEditor.setString(preset.name);
+   mColor = Color(preset.r, preset.g, preset.b);
+}
 
-   bool isAnyModActive() const;
-   bool isEqualMove(Move *prev);    // Compares this move to the previous one -- are they the same?
-   void pack(BitStream *stream, Move *prev, bool packTime);
-   void unpack(BitStream *stream, bool unpackTime);
-   void prepare();                  // Packs and unpacks move to ensure effects of rounding are same on client and server
+
+// Destructor
+EditorTeam::~EditorTeam()
+{
+   // Do nothing
+}
+
+
+LineEditor *EditorTeam::getLineEditor()
+{
+   return &mNameEditor;
+}
+
+
+void EditorTeam::setName(const char *name)
+{
+   mNameEditor.setString(name);
+}
+
+
+StringTableEntry EditorTeam::getName() const
+{
+   return StringTableEntry(mNameEditor.c_str());
+}
+
+
 };
-
-};
-
-#endif
-
-

@@ -25,20 +25,13 @@
 
 #include "loadoutHelper.h"
 
-#include "InputCode.h"           // For BindingName enum
 #include "UIGame.h"
-#include "UIMenus.h"
 #include "UIManager.h"
 #include "UIInstructions.h"
-#include "gameType.h"
 #include "Colors.h"
+#include "LoadoutTracker.h"
+#include "gameConnection.h"
 #include "ClientGame.h"
-#include "JoystickRender.h"
-#include "config.h"
-#include "WeaponInfo.h"
-#include "HelpItemManager.h"  // For HelpItem enum
-
-#include "OpenglUtils.h"
 
 
 namespace Zap
@@ -226,7 +219,7 @@ void LoadoutHelper::activateHelp(UIManager *uiManager)
 
 void LoadoutHelper::onWidgetClosed()
 {
-   bool hasLoadout = getGame()->getGameType()->levelHasLoadoutZone();
+   bool hasLoadout = getGame()->levelHasLoadoutZone();
    getGame()->getUi()->addHelpItem(hasLoadout ?  LoadoutChangedZoneItem : LoadoutChangedNoZoneItem);
 }
 

@@ -97,38 +97,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-/**
- * @luaenum ScoringEvent(1,1)
- * The ScoringEvent enum represents different actions that change the score.
- */
-#define SCORING_EVENT_TABLE \
-   SCORING_EVENT_ITEM(KillEnemy,               "KillEnemy")               /* all games                                 */ \
-   SCORING_EVENT_ITEM(KillSelf,                "KillSelf")                /* all games                                 */ \
-   SCORING_EVENT_ITEM(KillTeammate,            "KillTeammate")            /* all games                                 */ \
-   SCORING_EVENT_ITEM(KillEnemyTurret,         "KillEnemyTurret")         /* all games                                 */ \
-   SCORING_EVENT_ITEM(KillOwnTurret,           "KillOwnTurret")           /* all games                                 */ \
-                                                                                                                          \
-   SCORING_EVENT_ITEM(KilledByAsteroid,        "KilledByAsteroid")        /* all games                                 */ \
-   SCORING_EVENT_ITEM(KilledByTurret,          "KilledByTurret")          /* all games                                 */ \
-                                                                                                                          \
-   SCORING_EVENT_ITEM(CaptureFlag,             "CaptureFlag")             /*                                           */ \
-   SCORING_EVENT_ITEM(CaptureZone,             "CaptureZone")             /* zone control -> gain zone                 */ \
-   SCORING_EVENT_ITEM(UncaptureZone,           "UncaptureZone")           /* zone control -> lose zone                 */ \
-   SCORING_EVENT_ITEM(HoldFlagInZone,          "HoldFlagInZone")          /* htf                                       */ \
-   SCORING_EVENT_ITEM(RemoveFlagFromEnemyZone, "RemoveFlagFromEnemyZone") /* htf                                       */ \
-   SCORING_EVENT_ITEM(RabbitHoldsFlag,         "RabbitHoldsFlag")         /* rabbit, called every second               */ \
-   SCORING_EVENT_ITEM(RabbitKilled,            "RabbitKilled")            /* rabbit                                    */ \
-   SCORING_EVENT_ITEM(RabbitKills,             "RabbitKills")             /* rabbit                                    */ \
-   SCORING_EVENT_ITEM(ReturnFlagsToNexus,      "ReturnFlagsToNexus")      /* nexus game                                */ \
-   SCORING_EVENT_ITEM(ReturnFlagToZone,        "ReturnFlagToZone")        /* retrieve -> flag returned to zone         */ \
-   SCORING_EVENT_ITEM(LostFlag,                "LostFlag")                /* retrieve -> enemy took flag               */ \
-   SCORING_EVENT_ITEM(ReturnTeamFlag,          "ReturnTeamFlag")          /* ctf -> holds enemy flag, touches own flag */ \
-   SCORING_EVENT_ITEM(ScoreGoalEnemyTeam,      "ScoreGoalEnemyTeam")      /* soccer                                    */ \
-   SCORING_EVENT_ITEM(ScoreGoalHostileTeam,    "ScoreGoalHostileTeam")    /* soccer                                    */ \
-   SCORING_EVENT_ITEM(ScoreGoalOwnTeam,        "ScoreGoalOwnTeam")        /* soccer -> score on self                   */ \
-   SCORING_EVENT_ITEM(EnemyCoreDestroyed,      "EnemyCoreDestroyed")      /* core -> enemy core is destroyed           */ \
-   SCORING_EVENT_ITEM(OwnCoreDestroyed,        "OwnCoreDestroyed")        /* core -> own core is destroyed             */ \
-
 
 class GameType : public NetObject
 {
@@ -203,14 +171,6 @@ protected:
 
 
 public:
-   // Define an enum of scoring events from the values in SCORING_EVENT_TABLE
-   enum ScoringEvent {
-      #define SCORING_EVENT_ITEM(value, b) value,
-         SCORING_EVENT_TABLE
-      #undef SCORING_EVENT_ITEM
-         ScoringEventsCount
-   };
-
    static const S32 MAX_GAME_TIME = S32_MAX;
 
    static const S32 gFirstTeamNumber = -2;                              // First team is "Hostile to All" with index -2

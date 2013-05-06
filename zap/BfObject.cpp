@@ -25,6 +25,11 @@
 
 #include "BfObject.h"
 #include "gameObjectRender.h"    // For drawHollowSquare
+#include "gameConnection.h"
+#include "game.h"
+#include "ClientInfo.h"
+#include "moveObject.h"
+#include "TeamConstants.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"

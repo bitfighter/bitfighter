@@ -14,7 +14,7 @@ class ClientGame;
 class LevelDatabaseUploadThread : public TNL::Thread
 {
 public:
-   static const char* UploadRequest;
+   static const string UploadRequest;
 
    LevelDatabaseUploadThread(ClientGame* game);
    virtual ~LevelDatabaseUploadThread();

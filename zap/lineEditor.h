@@ -28,14 +28,17 @@
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
+#include "LineEditorFilterEnum.h"
 #include "Timer.h"
-#include "InputCode.h"
+
 #include <string>
 
 using namespace std;
 
 namespace Zap
 {
+
+#include "InputCodeEnum.h"
 
 //
 // Class to manage all sorts of single-line editing tasks
@@ -62,14 +65,6 @@ private:
 
 public:
    U32 mMaxLen;
-
-   enum LineEditorFilter {
-      allAsciiFilter,          // any ascii character
-      digitsOnlyFilter,        // 0-9
-      numericFilter,           // 0-9, -, .
-      fileNameFilter,          // A-Z, a-z, 0-9, _
-      nickNameFilter           // No "s, and don't let name start with spaces
-   };
 
    LineEditor(U32 maxLength = 256, string value = "");   // Constructor
    virtual ~LineEditor();

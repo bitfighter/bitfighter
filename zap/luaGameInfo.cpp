@@ -28,7 +28,6 @@
 #include "gameType.h"
 #include "NexusGame.h"
 #include "ServerGame.h"
-#include "ClientInfo.h"
 #include "robot.h"
 
 
@@ -135,7 +134,7 @@ S32 LuaGameInfo::lua_getEventScore(lua_State *L)
 {
    static const char *methodName = "GameInfo:getEventScore()";
    checkArgCount(L, 1, methodName);
-   GameType::ScoringEvent scoringEvent = (GameType::ScoringEvent) getInt(L, 1, methodName, 0, GameType::ScoringEventsCount - 1);
+   ScoringEvent scoringEvent = (ScoringEvent) getInt(L, 1, methodName, 0, ScoringEventsCount - 1);
 
    return returnInt(L, gServerGame->getGameType()->getEventScore(GameType::TeamScore, scoringEvent, 0));
 };

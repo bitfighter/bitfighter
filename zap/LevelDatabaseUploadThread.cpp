@@ -1,7 +1,6 @@
 #include "LevelDatabaseUploadThread.h"
 #include "HttpRequest.h"
 #include "ClientGame.h"
-#include "gameType.h"
 #include "UIEditor.h"
 #include "stringUtils.h"
 
@@ -10,7 +9,7 @@
 namespace Zap
 {
 
-const char* LevelDatabaseUploadThread::UploadRequest = "bitfighter.org/pleiades/levels/upload";
+const string LevelDatabaseUploadThread::UploadRequest = "bitfighter.org/pleiades/levels/upload";
 
 LevelDatabaseUploadThread::LevelDatabaseUploadThread(ClientGame* game)
 {
@@ -42,7 +41,7 @@ U32 LevelDatabaseUploadThread::run()
    req.setData("data[Level][content]", editor->getLevelText());
 
    string levelgenFilename;
-   levelgenFilename = mGame->getGameType()->getScriptName();
+   levelgenFilename = mGame->getScriptName();
 
    if(levelgenFilename != "")
    {

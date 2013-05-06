@@ -24,8 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "LevelDatabaseDownloadThread.h"
-#include "ClientGame.h"
 #include "HttpRequest.h"
+#include "ClientGame.h"
+
 #include "stringUtils.h"
 
 #include "tnlThread.h"
@@ -36,8 +37,8 @@
 namespace Zap
 {
 
-const char* LevelDatabaseDownloadThread::LevelRequest = "bitfighter.org/pleiades/levels/raw/%s";
-const char* LevelDatabaseDownloadThread::LevelgenRequest = "bitfighter.org/pleiades/levels/raw/%s/levelgen";
+string LevelDatabaseDownloadThread::LevelRequest = "bitfighter.org/pleiades/levels/raw/%s";
+string LevelDatabaseDownloadThread::LevelgenRequest = "bitfighter.org/pleiades/levels/raw/%s/levelgen";
 
 LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(string levelId, ClientGame *game)
    : mLevelId(levelId), mGame(game)
@@ -54,7 +55,7 @@ U32 LevelDatabaseDownloadThread::run()
 {
    char url[UrlLength];
    mGame->displaySuccessMessage("Downloading %s", mLevelId.c_str());
-   dSprintf(url, UrlLength, LevelRequest, mLevelId.c_str());
+   dSprintf(url, UrlLength, LevelRequest.c_str(), mLevelId.c_str());
    HttpRequest req(url);
    if(!req.send())
    {
@@ -86,7 +87,7 @@ U32 LevelDatabaseDownloadThread::run()
       return 0;
    }
 
-   dSprintf(url, UrlLength, LevelgenRequest, mLevelId.c_str());
+   dSprintf(url, UrlLength, LevelgenRequest.c_str(), mLevelId.c_str());
    req = HttpRequest(url);
    if(!req.send())
    {

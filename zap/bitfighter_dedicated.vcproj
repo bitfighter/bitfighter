@@ -135,7 +135,6 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="../tnl;../boost;../libspeex"
 				PreprocessorDefinitions="ZAP_DEDICATED;WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;_SECURE_SCL=0;ZAP_DEDICATED"
 				RuntimeLibrary="0"
@@ -170,7 +169,6 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				LinkTimeCodeGeneration="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -385,14 +383,6 @@
 		<Filter
 			Name="UI"
 			>
-			<File
-				RelativePath=".\lineEditor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\lineEditor.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="SoundAndVoice"
@@ -639,6 +629,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\poly2tri\sweep\advancing_front.cc"
+			>
+		</File>
+		<File
 			RelativePath=".\BanList.cpp"
 			>
 		</File>
@@ -648,6 +642,10 @@
 		</File>
 		<File
 			RelativePath=".\BfObject.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\cdt.cc"
 			>
 		</File>
 		<File
@@ -700,10 +698,6 @@
 		</File>
 		<File
 			RelativePath=".\dataConnection.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\EditorObject.cpp"
 			>
 		</File>
 		<File
@@ -871,6 +865,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\PointObject.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\recast\RecastAlloc.cpp"
 			>
 		</File>
@@ -896,6 +894,10 @@
 		</File>
 		<File
 			RelativePath=".\ServerGame.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\common\shapes.cc"
 			>
 		</File>
 		<File
@@ -927,6 +929,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\poly2tri\sweep\sweep.cc"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\sweep_context.cc"
+			>
+		</File>
+		<File
 			RelativePath=".\teamInfo.cpp"
 			>
 		</File>
@@ -940,10 +950,6 @@
 		</File>
 		<File
 			RelativePath=".\Timer.h"
-			>
-		</File>
-		<File
-			RelativePath="..\Triangle\triangle.c"
 			>
 		</File>
 		<File

@@ -33,10 +33,12 @@
 #include "robot.h"
 #include "Spawn.h"
 #include "loadoutZone.h"      // For LoadoutZone
+#include "LineEditorFilterEnum.h"
 
 #ifndef ZAP_DEDICATED
-#   include "ClientGame.h"
-#   include "UIMenus.h"
+#  include "gameObjectRender.h"
+#  include "ClientGame.h"
+#  include "UIMenus.h"
 #endif
 
 #include "masterConnection.h"    
@@ -310,7 +312,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
    if(key == "Level Name")
    {
       MenuItem *item = new TextEntryMenuItem("Level Name:", mLevelName.getString(), "", "The level's name -- pick a good one!", MAX_GAME_NAME_LEN);   
-      item->setFilter(LineEditor::allAsciiFilter);
+      item->setFilter(allAsciiFilter);
 
       return boost::shared_ptr<MenuItem>(item);
    }
@@ -2100,12 +2102,6 @@ S32 GameType::renderTimeLeftSpecial(S32 right, S32 bottom) const
 static void switchTeamsCallback(ClientGame *game, U32 unused)
 {
    game->switchTeams();
-}
-
-
-void GameType::releaseFlag(const Point &pos, const Point &vel, S32 count)
-{
-   TNLAssert(false, "Override if you want to use this method!");
 }
 
 
@@ -4214,6 +4210,7 @@ void GameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode
 
 // These methods will be overridden by some game types
 void GameType::shipTouchFlag(Ship *ship, FlagItem *flag) { /* Do nothing */ }
+void GameType::releaseFlag(const Point &pos, const Point &vel, S32 count) { TNLAssert(false, "Override if you want to use this method!"); }
 void GameType::shipTouchZone(Ship *ship, GoalZone *zone) { /* Do nothing */ }
 void GameType::majorScoringEventOcurred(S32 team)        { /* Do nothing */ }
 

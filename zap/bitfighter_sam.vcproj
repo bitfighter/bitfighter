@@ -135,7 +135,6 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="2"
-				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="../tnl;../boost;../libsdl/SDL2;../openal;../libspeex;../libpng;../zlib"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;_SECURE_SCL=0"
 				RuntimeLibrary="0"
@@ -171,7 +170,6 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				LinkTimeCodeGeneration="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -387,14 +385,6 @@
 		<Filter
 			Name="UI"
 			>
-			<File
-				RelativePath=".\lineEditor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\lineEditor.h"
-				>
-			</File>
 			<File
 				RelativePath=".\ShipShape.cpp"
 				>
@@ -793,6 +783,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\poly2tri\sweep\advancing_front.cc"
+			>
+		</File>
+		<File
 			RelativePath=".\AToBScroller.cpp"
 			>
 		</File>
@@ -806,6 +800,10 @@
 		</File>
 		<File
 			RelativePath=".\BfObject.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\cdt.cc"
 			>
 		</File>
 		<File
@@ -881,11 +879,15 @@
 			>
 		</File>
 		<File
-			RelativePath=".\EditorObject.cpp"
+			RelativePath=".\EditorAttributeMenuItemBuilder.cpp"
 			>
 		</File>
 		<File
 			RelativePath=".\EditorPlugin.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\EditorTeam.cpp"
 			>
 		</File>
 		<File
@@ -981,6 +983,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\HelpItemManager.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\HttpRequest.cpp"
 			>
 		</File>
@@ -1018,6 +1024,14 @@
 		</File>
 		<File
 			RelativePath=".\LevelDatabaseUploadThread.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\lineEditor.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\lineEditor.h"
 			>
 		</File>
 		<File
@@ -1093,7 +1107,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\oglconsole.c"
+			RelativePath=".\oglconsole.cpp"
 			>
 		</File>
 		<File
@@ -1118,6 +1132,10 @@
 		</File>
 		<File
 			RelativePath=".\Point.h"
+			>
+		</File>
+		<File
+			RelativePath=".\PointObject.cpp"
 			>
 		</File>
 		<File
@@ -1169,6 +1187,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\poly2tri\common\shapes.cc"
+			>
+		</File>
+		<File
 			RelativePath=".\SharedConstants.h"
 			>
 		</File>
@@ -1213,6 +1235,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\poly2tri\sweep\sweep.cc"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\sweep_context.cc"
+			>
+		</File>
+		<File
 			RelativePath=".\teamInfo.cpp"
 			>
 		</File>
@@ -1234,10 +1264,6 @@
 		</File>
 		<File
 			RelativePath=".\Timer.h"
-			>
-		</File>
-		<File
-			RelativePath="..\Triangle\triangle.c"
 			>
 		</File>
 		<File

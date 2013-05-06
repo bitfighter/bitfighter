@@ -28,16 +28,14 @@
 
 #include "../master/masterInterface.h"
 
-#include "gameConnection.h"
-
-#include "tnlNetObject.h"
-
 #include <string>
 
 using namespace std;
 
 namespace Zap
 {
+
+class Game;
 
 class MasterServerConnection : public MasterServerInterface
 {

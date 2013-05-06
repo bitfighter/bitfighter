@@ -27,6 +27,7 @@
 
 #include "game.h"
 #include "ship.h"
+#include "stringUtils.h"
 
 #include "gameObjectRender.h"    // For renderTextItem()
 

@@ -24,12 +24,11 @@
 //------------------------------------------------------------------------------------
 
 #include "LineItem.h"
+#include "game.h"
+#include "ship.h"
 #include "gameObjectRender.h"    // For renderPolyLineVertices()
 #include "stringUtils.h"         // For itos
-#include "teamInfo.h"            // For TEAM_NEUTRAL
-#include "ship.h"                // To check player's team
-#include "game.h"
-
+//
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
@@ -43,11 +42,8 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(LineItem);
 
-// Why does GCC need this for signed int?
-#ifndef TNL_OS_WIN32
-   const S32 LineItem::MIN_LINE_WIDTH;
-   const S32 LineItem::MAX_LINE_WIDTH;
-#endif
+const S32 LineItem::MIN_LINE_WIDTH = 1;
+const S32 LineItem::MAX_LINE_WIDTH = 255;
 
 // Statics:
 #ifndef ZAP_DEDICATED

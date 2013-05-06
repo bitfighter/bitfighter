@@ -35,7 +35,8 @@ namespace TNL {
 #ifdef TNL_ENABLE_ASSERTS
 
 #ifdef _MSC_VER
-#   define vsnprintf vsnprintf_s       // Avoid warnings about vsnprintf
+#pragma warning( disable : 4996 )          // Avoid warnings about vsnprintf  C4996
+                        // note that gcc does not appear to support vsnprintf_s
 #endif /* WIN32 */
 
 //-------------------------------------- STATIC Declaration

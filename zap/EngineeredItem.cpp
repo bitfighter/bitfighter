@@ -736,9 +736,9 @@ void EngineeredItem::damageObject(DamageInfo *di)
             GameType *gt = getGame()->getGameType();
 
             if(gt->isTeamGame() && player->getTeamIndex() == getTeam())
-               gt->updateScore(player, GameType::KillOwnTurret);
+               gt->updateScore(player, KillOwnTurret);
             else
-               gt->updateScore(player, GameType::KillEnemyTurret);
+               gt->updateScore(player, KillEnemyTurret);
 
             player->getStatistics()->mTurretsKilled++;
          }

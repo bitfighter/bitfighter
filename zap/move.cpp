@@ -26,6 +26,8 @@
 #include "move.h"
 #include "MathUtils.h"     // For radiansToUnit() def
 
+#include "tnlBitStream.h"
+
 #ifdef TNL_OS_WIN32
 #  include <windows.h>     // For ARRAYSIZE
 #endif
