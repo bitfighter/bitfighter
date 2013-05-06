@@ -322,7 +322,7 @@
     <ClCompile Include="..\zap\WeaponInfo.cpp" />
     <ClCompile Include="..\zap\zoneControlGame.cpp" />
     <ClCompile Include="dataConnection.cpp" />
-    <ClCompile Include="oglconsole.c" />
+    <ClCompile Include="oglconsole.cpp" />
     <ClCompile Include="GameSettings.cpp" />
     <ClCompile Include="RenderUtils.cpp" />
     <ClCompile Include="ScissorsManager.cpp" />
