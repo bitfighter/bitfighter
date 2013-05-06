@@ -39,6 +39,7 @@
 #include "UIQueryServers.h"
 #include "UIErrorMessage.h"
 #include "UIHighScores.h"
+#include "EditorTeam.h"
 
 #include "Colors.h"
 

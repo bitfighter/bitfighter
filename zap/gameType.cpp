@@ -33,10 +33,12 @@
 #include "robot.h"
 #include "Spawn.h"
 #include "loadoutZone.h"      // For LoadoutZone
+#include "LineEditorFilterEnum.h"
 
 #ifndef ZAP_DEDICATED
-#   include "ClientGame.h"
-#   include "UIMenus.h"
+#  include "gameObjectRender.h"
+#  include "ClientGame.h"
+#  include "UIMenus.h"
 #endif
 
 #include "masterConnection.h"    
@@ -310,7 +312,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
    if(key == "Level Name")
    {
       MenuItem *item = new TextEntryMenuItem("Level Name:", mLevelName.getString(), "", "The level's name -- pick a good one!", MAX_GAME_NAME_LEN);   
-      item->setFilter(LineEditor::allAsciiFilter);
+      item->setFilter(allAsciiFilter);
 
       return boost::shared_ptr<MenuItem>(item);
    }

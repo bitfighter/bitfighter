@@ -25,8 +25,6 @@
 
 #include "LoadoutIndicator.h"
 
-#include "UI.h"
-#include "ScreenInfo.h"
 #include "ClientGame.h"
 #include "FontManager.h"
 

@@ -26,7 +26,7 @@
 #ifndef _LINEITEM_H_
 #define _LINEITEM_H_
 
-#include "SimpleLine.h"       // For SimpleLine def
+#include "BfObject.h"
 
 using namespace std;
 
@@ -99,8 +99,8 @@ public:
    bool canBeHostile();
    bool canBeNeutral();
 
-   static const S32 MIN_LINE_WIDTH = 1;
-   static const S32 MAX_LINE_WIDTH = 255;
+   static const S32 MIN_LINE_WIDTH;
+   static const S32 MAX_LINE_WIDTH;
 
    TNL_DECLARE_CLASS(LineItem);
 

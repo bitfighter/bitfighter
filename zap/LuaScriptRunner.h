@@ -27,11 +27,8 @@
 #define _LUA_SCRIPT_RUNNER_H
 
 #include "LuaBase.h"          // Parent class
-#include "GameTypesEnum.h"
 #include "EventManager.h"
 #include "LuaWrapper.h"
-
-#include "Point.h"
 
 #include "tnl.h"
 #include "tnlVector.h"

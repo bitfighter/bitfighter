@@ -141,6 +141,7 @@ using namespace TNL;
 #include "ClientInfo.h"
 #include "Console.h"       // For access to console
 #include "BotNavMeshZone.h"
+#include "ship.h"
 
 #include <math.h>
 #include <stdarg.h>

@@ -328,50 +328,6 @@ S32 Team::lua_getPlayers(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
-EditorTeam::EditorTeam()
-{
-   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
-}
-
-
-// Constructor II
-EditorTeam::EditorTeam(const TeamPreset &preset)
-{
-   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
-   mNameEditor.setString(preset.name);
-   mColor = Color(preset.r, preset.g, preset.b);
-}
-
-
-// Destructor
-EditorTeam::~EditorTeam()
-{
-   // Do nothing
-}
-
-
-LineEditor *EditorTeam::getLineEditor()
-{
-   return &mNameEditor;
-}
-
-
-void EditorTeam::setName(const char *name)
-{
-   mNameEditor.setString(name);
-}
-
-
-StringTableEntry EditorTeam::getName() const
-{
-   return StringTableEntry(mNameEditor.c_str());
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 // Destructor
 TeamManager::~TeamManager()
 {

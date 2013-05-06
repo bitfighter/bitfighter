@@ -24,13 +24,13 @@
 //------------------------------------------------------------------------------------
 
 #include "luaLevelGenerator.h"
-#include "gameType.h"
-#include "config.h"              // For definition of FolderManager struct
+#include "gameLoader.h"
 #include "game.h"
-#include "stringUtils.h"
-#include "ServerGame.h"
-#include "LuaWrapper.h"
 #include "barrier.h"             // For PolyWall def
+
+#include "stringUtils.h"         // fileExists
+
+#include "tnlLog.h"
 
 namespace Zap
 {
@@ -378,14 +378,10 @@ S32 LuaLevelGenerator::globalMsg(lua_State *L)
 
    const char *message = getCheckedString(L, 1, methodName);
 
-   GameType *gt = mGame->getGameType();
-   if(gt)
-   {
-      gt->sendChatFromController(message);
+   mGame->sendChatFromController(message);
 
-      // Fire our event handler
-      EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, NULL, true);
-   }
+   // Fire our event handler
+   EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, NULL, true);
 
    return 0;
 }

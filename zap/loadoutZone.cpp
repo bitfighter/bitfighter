@@ -25,6 +25,8 @@
 
 #include "loadoutZone.h"
 #include "game.h"
+
+#include "gameObjectRender.h"
 #include "stringUtils.h"
 
 namespace Zap
@@ -164,7 +166,7 @@ bool LoadoutZone::collide(BfObject *hitObject)
    if(!isGhost() &&                                                           // On the server
          (hitObject->getTeam() == getTeam() || getTeam() == TEAM_NEUTRAL) &&  // The zone is on the same team as hitObject, or it's neutral
          isShipType(hitObject->getObjectTypeNumber()))                        // The thing that hit the zone is a ship
-      getGame()->getGameType()->updateShipLoadout(hitObject);      
+      getGame()->updateShipLoadout(hitObject);
 
    return false;
 }

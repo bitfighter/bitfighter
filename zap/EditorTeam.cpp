@@ -23,35 +23,52 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef LEVELDATABASEDOWNLOADTHREAD_H
-#define LEVELDATABASEDOWNLOADTHREAD_H
+#include "EditorTeam.h"
 
-#include "tnlThread.h"
 
-#include <string>
-
-using namespace std;
 namespace Zap
 {
 
-class ClientGame;
-class LevelDatabaseDownloadThread : public TNL::Thread
+
+// Constructor
+EditorTeam::EditorTeam()
 {
-typedef Thread Parent;
-public:
-   static string LevelRequest;
-   static string LevelgenRequest;
-   static const S32 UrlLength = 2048;
-
-   explicit LevelDatabaseDownloadThread(string levelId, ClientGame* game);
-   virtual ~LevelDatabaseDownloadThread();
-
-   U32 run();
-private:
-   string mLevelId;
-   ClientGame* mGame;
-};
-
+   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
 }
 
-#endif // LEVELDATABASEDOWNLOADTHREAD_H
+
+// Constructor II
+EditorTeam::EditorTeam(const TeamPreset &preset)
+{
+   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
+   mNameEditor.setString(preset.name);
+   mColor = Color(preset.r, preset.g, preset.b);
+}
+
+
+// Destructor
+EditorTeam::~EditorTeam()
+{
+   // Do nothing
+}
+
+
+LineEditor *EditorTeam::getLineEditor()
+{
+   return &mNameEditor;
+}
+
+
+void EditorTeam::setName(const char *name)
+{
+   mNameEditor.setString(name);
+}
+
+
+StringTableEntry EditorTeam::getName() const
+{
+   return StringTableEntry(mNameEditor.c_str());
+}
+
+
+};

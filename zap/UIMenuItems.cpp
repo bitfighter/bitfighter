@@ -241,7 +241,7 @@ S32         MenuItem::getIntValue() const             { return 0;  }
 
 void MenuItem::setValue(const string &val)                    { /* Do nothing */ }
 void MenuItem::setIntValue(S32 val)                           { /* Do nothing */ }
-void MenuItem::setFilter(LineEditor::LineEditorFilter filter) { /* Do nothing */ }
+void MenuItem::setFilter(LineEditorFilter filter) { /* Do nothing */ }
 
 
 string MenuItem::getValueForWritingToLevelFile()
@@ -1306,7 +1306,7 @@ void TextEntryMenuItem::setValue(const string &val)
 }
 
 
-void TextEntryMenuItem::setFilter(LineEditor::LineEditorFilter filter)
+void TextEntryMenuItem::setFilter(LineEditorFilter filter)
 {
    mLineEditor.setFilter(filter);
 }

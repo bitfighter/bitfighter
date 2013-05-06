@@ -24,24 +24,22 @@
 //------------------------------------------------------------------------------------
 
 #include "LuaScriptRunner.h"   // Header
-
-#include "luaGameInfo.h"
-#include "robot.h"             // For subscribing
-#include "playerInfo.h"        // For playerInfo def
-#include "shipItems.h"         // For gModuleInfo
-#include "UIMenuItems.h"       // For MenuItem def
-#include "config.h"            
-#include "ClientInfo.h"
-#include "Console.h"           // For gConsole
-#include "WeaponInfo.h"        // For GameWeapon::weaponInfo
+#include "BfObject.h"
+#include "ship.h"
 #include "BotNavMeshZone.h"
+#include "Engineerable.h"
 
-#include "luaLevelGenerator.h" // For managing event subscriptions
+#include "GameTypesEnum.h"
+#include "TeamConstants.h"
 
-#include "stringUtils.h"       // For joindir  
-#include "lua.h"
+#include "config.h"
+#include "GameSettings.h"
+#include "Console.h"           // For gConsole
+
+#include "stringUtils.h"
 
 #include "tnlLog.h"            // For logprintf
+#include "tnlRandom.h"
 
 #include <iostream>            // For enum code
 #include <sstream>             // For enum code
@@ -984,7 +982,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
    // Scoring Events
    add_enum_to_lua(L, "ScoringEvent",
-   #  define SCORING_EVENT_ITEM(value, luaEnumName)  luaEnumName, true, GameType::value,
+   #  define SCORING_EVENT_ITEM(value, luaEnumName)  luaEnumName, true, value,
          SCORING_EVENT_TABLE
    #  undef SCORING_EVENT_ITEM
       (char*)NULL);

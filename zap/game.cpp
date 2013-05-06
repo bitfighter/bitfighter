@@ -1329,6 +1329,31 @@ S32 Game::getGlowingZoneTeam()
 }
 
 
+string Game::getScriptName() const
+{
+   return mGameType->getScriptName();
+}
+
+
+bool Game::levelHasLoadoutZone()
+{
+   return mGameType->levelHasLoadoutZone();
+}
+
+
+void Game::updateShipLoadout(BfObject *shipObject)
+{
+   return mGameType->updateShipLoadout(shipObject);
+}
+
+
+void Game::sendChatFromController(const StringPtr &message)
+{
+   if(mGameType)
+      mGameType->sendChatFromController(message);
+}
+
+
 // Static method
 bool Game::isLocalTestServer()
 {

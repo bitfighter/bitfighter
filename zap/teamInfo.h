@@ -29,7 +29,6 @@
 #include "LuaBase.h"          // Parent class
 
 #include "TeamPreset.h"       // For TeamPreset def
-#include "lineEditor.h"
 #include "LuaWrapper.h"
 #include "TeamConstants.h"    // For TEAM_NEUTRAL et. al.
 #include "Color.h"
@@ -144,26 +143,6 @@ public:
    S32 lua_getPlayerCount(lua_State *L);
    S32 lua_getScore(lua_State *L);
    S32 lua_getPlayers(lua_State *L);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Class for managing teams in the editor
-class EditorTeam : public AbstractTeam
-{
-private:
-   LineEditor mNameEditor;
-
-public:
-   EditorTeam();                          // Constructor
-   explicit EditorTeam(const TeamPreset &preset);  // Constructor II
-   virtual ~EditorTeam();                 // Destructor
-
-   LineEditor *getLineEditor();
-   void setName(const char *name);
-   StringTableEntry getName() const;  // Wrap in STE to make signatures match
 };
 
 

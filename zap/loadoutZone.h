@@ -23,13 +23,9 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _LOADOUTZONE_H_6742_
-#define _LOADOUTZONE_H_6742_
+#ifndef _LOADOUTZONE_H_
+#define _LOADOUTZONE_H_
 
-#include "BfObject.h"
-#include "gameType.h"
-#include "gameNetInterface.h"
-#include "gameObjectRender.h"
 #include "Zone.h"
 
 namespace Zap

@@ -26,6 +26,7 @@
 #include "UITeamDefMenu.h"
 
 #include "UIEditor.h"
+#include "EditorTeam.h"
 #include "ScreenInfo.h"
 #include "ClientGame.h"
 #include "Cursor.h"

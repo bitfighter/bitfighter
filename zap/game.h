@@ -451,6 +451,10 @@ public:
    bool isTeamGame() const;
    Timer &getGlowZoneTimer();
    S32 getGlowingZoneTeam();
+   string getScriptName() const;
+   bool levelHasLoadoutZone();
+   void updateShipLoadout(BfObject *shipObject);
+   void sendChatFromController(const StringPtr &message);
 
    virtual SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f) const = 0;
    virtual SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const = 0;

@@ -24,12 +24,11 @@
 //------------------------------------------------------------------------------------
 
 #include "lineEditor.h"
-#include <math.h>
+#include "UI.h"
 
-#ifndef ZAP_DEDICATED
-#  include "UI.h"
-#  include "RenderUtils.h"
-#endif
+#include "RenderUtils.h"
+
+#include <math.h>
 
 namespace Zap
 {
@@ -196,7 +195,6 @@ void LineEditor::completePartial(const Vector<string> *candidates, const string 
 // Draw our cursor, assuming string is drawn at x,y  (vert spacing works differently than on the angle version
 void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
 {
-#ifndef ZAP_DEDICATED
    S32 width;
    
    if(mMasked)
@@ -205,7 +203,6 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
       width = getStringWidth(fontSize, mLine.c_str());
     
    drawCursorAngle(x, y + fontSize, fontSize, width, 0);
-#endif
 }
 
 
@@ -219,10 +216,8 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth)
 // Draw our cursor, assuming string is drawn at x,y at specified angle 
 void LineEditor::drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle)
 {
-#ifndef ZAP_DEDICATED
    S32 width = S32(getStringWidth(fontSize, mLine.c_str()));
    drawCursorAngle(S32(x), S32(y), fontSize, width, angle);
-#endif
 }
 
 
@@ -235,7 +230,6 @@ void LineEditor::drawCursorAngle(S32 x, S32 y, S32 fontSize, S32 width, F32 angl
 // static
 void LineEditor::drawCursorAngle(S32 x, S32 y, F32 fontSize, S32 width, F32 angle)
 {
-#ifndef ZAP_DEDICATED
    if((Platform::getRealMilliseconds() / 100) % 2)
    {
       const F32 gap = fontSize / 6;
@@ -244,7 +238,6 @@ void LineEditor::drawCursorAngle(S32 x, S32 y, F32 fontSize, S32 width, F32 angl
 
       drawAngleString(xpos, ypos, (F32)fontSize, angle, "_");
    }
-#endif
 }
 
 

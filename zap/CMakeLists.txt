@@ -62,7 +62,6 @@ set(SHARED_SOURCES
 	IniFile.cpp
 	InputCode.cpp
 	item.cpp
-	lineEditor.cpp
 	LineItem.cpp
 	LoadoutTracker.cpp
 	loadoutZone.cpp
@@ -129,6 +128,7 @@ set(CLIENT_SOURCES
 	Console.cpp
 	Cursor.cpp
 	EditorAttributeMenuItemBuilder.cpp
+	EditorTeam.cpp
 	engineerHelper.cpp
 	Event.cpp
 	FontManager.cpp
@@ -141,6 +141,7 @@ set(CLIENT_SOURCES
 	JoystickRender.cpp
 	LevelDatabaseDownloadThread.cpp
 	LevelDatabaseUploadThread.cpp
+	lineEditor.cpp
 	LoadoutIndicator.cpp
 	loadoutHelper.cpp
 	oglconsole.c

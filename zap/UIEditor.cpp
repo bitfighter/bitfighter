@@ -52,6 +52,7 @@
 #include "config.h"
 #include "Cursor.h"              // For various editor cursor
 #include "Colors.h"
+#include "EditorTeam.h"
 
 #include "gameLoader.h"          // For LevelLoadException def
 
@@ -3431,7 +3432,7 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 }
 
 
-static LineEditor getNewEntryBox(string value, string prompt, S32 length, LineEditor::LineEditorFilter filter)
+static LineEditor getNewEntryBox(string value, string prompt, S32 length, LineEditorFilter filter)
 {
    LineEditor entryBox(length);
    entryBox.setPrompt(prompt);
@@ -3610,7 +3611,7 @@ void EditorUserInterface::onTextInput(char ascii)
       BfObject *selectedObj = static_cast<BfObject *>(objList->get(selected));
 
       S32 id = selectedObj->getUserAssignedId();
-      mEntryBox = getNewEntryBox( id <= 0 ? "" : itos(id), "Item ID:", 10, LineEditor::digitsOnlyFilter);
+      mEntryBox = getNewEntryBox( id <= 0 ? "" : itos(id), "Item ID:", 10, digitsOnlyFilter);
       entryMode = EntryID;
    }
 }
@@ -3713,7 +3714,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       if(!anyItemsSelected(getDatabase()))
          return true;
 
-      mEntryBox = getNewEntryBox("", "Rotation angle:", 10, LineEditor::numericFilter);
+      mEntryBox = getNewEntryBox("", "Rotation angle:", 10, numericFilter);
       entryMode = EntryAngle;
    }
    else if(inputString == "Ctrl+R")       // Run levelgen script, or clear last results
@@ -3766,7 +3767,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    {
       if(anyItemsSelected(getDatabase()))
       {
-         mEntryBox = getNewEntryBox("", "Resize factor:", 10, LineEditor::numericFilter);
+         mEntryBox = getNewEntryBox("", "Resize factor:", 10, numericFilter);
          entryMode = EntryScale;
       }
    }

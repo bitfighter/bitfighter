@@ -23,35 +23,38 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef LEVELDATABASEDOWNLOADTHREAD_H
-#define LEVELDATABASEDOWNLOADTHREAD_H
+#ifndef _EDITOR_TEAM_H_
+#define _EDITOR_TEAM_H_
 
-#include "tnlThread.h"
+#include "teamInfo.h"  // Parent class
+#include "lineEditor.h"
 
 #include <string>
 
-using namespace std;
 namespace Zap
 {
 
-class ClientGame;
-class LevelDatabaseDownloadThread : public TNL::Thread
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Class for managing teams in the editor
+class EditorTeam : public AbstractTeam
 {
-typedef Thread Parent;
-public:
-   static string LevelRequest;
-   static string LevelgenRequest;
-   static const S32 UrlLength = 2048;
-
-   explicit LevelDatabaseDownloadThread(string levelId, ClientGame* game);
-   virtual ~LevelDatabaseDownloadThread();
-
-   U32 run();
 private:
-   string mLevelId;
-   ClientGame* mGame;
+   LineEditor mNameEditor;
+
+public:
+   EditorTeam();                          // Constructor
+   explicit EditorTeam(const TeamPreset &preset);  // Constructor II
+   virtual ~EditorTeam();                 // Destructor
+
+   LineEditor *getLineEditor();
+   void setName(const char *name);
+   StringTableEntry getName() const;  // Wrap in STE to make signatures match
 };
 
-}
 
-#endif // LEVELDATABASEDOWNLOADTHREAD_H
+};
+
+#endif

@@ -27,6 +27,7 @@
 #define _MENU_ITEMS_H_
 
 #include "teamInfo.h"      // For Team def
+#include "lineEditor.h"
 #include "Color.h"
 
 #include <string>
@@ -138,7 +139,7 @@ public:
 
    virtual bool handleKey(InputCode inputCode);
    virtual void handleTextInput(char ascii);
-   virtual void setFilter(LineEditor::LineEditorFilter filter);
+   virtual void setFilter(LineEditorFilter filter);
    virtual void activatedWithShortcutKey();
 
    virtual bool enterAdvancesItem();
@@ -421,7 +422,7 @@ public:
    virtual string getValue() const;
    void setValue(const string &val);
 
-   virtual void setFilter(LineEditor::LineEditorFilter filter);
+   virtual void setFilter(LineEditorFilter filter);
 
    virtual void activatedWithShortcutKey();
 
