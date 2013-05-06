@@ -6,6 +6,7 @@
 #include "LoadoutTracker.h"
 #include "ServerGame.h"
 #include "ship.h"
+#include "EngineeredItem.h"
 
 #include <string>
 
@@ -76,14 +77,30 @@ TEST_F(BfTest, LittleStory)
    serverGame.idle(10);
    ASSERT_EQ(ship.getPos(), Point(0,0));     // When processing move of 0,0, we expect the ship to stay put
 
+   ship.setMove(Move(1,0));                  // Length 1 = max speed; moves stay active until replaced
+
    // Test that we can simulate several ticks, and the ship advances every cycle
    for(S32 i = 0; i < 20; i++)
    {
       Point prevPos = ship.getPos();
-      ship.setMove(Move(1,0));      // Length 1 = max speed
       serverGame.idle(10);
       ASSERT_NE(ship.getPos(), prevPos);
    }
+
+   // Note -- ship is over near (71, 0)
+
+
+   // Uh oh, here comes a turret!
+   Turret t(2, Point(71, -100), Point(0, 10));    // Turret is below the ship
+   t.addToGame(&serverGame, serverGame.getGameObjDatabase());
+
+   for(S32 i = 0; i < 20; i++)
+   {
+      ship.setMove(Move(0,0));
+      serverGame.idle(100);
+      printf("health %f   %s\n", ship.getHealth(), ship.getActualPos().toString().c_str());
+   }
+
 }
 
 
