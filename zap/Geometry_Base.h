@@ -31,7 +31,7 @@
 
 namespace TNL
 {
-   class GhostConnection; // speeds up compiler, or use #include "tnlGhostConnection.h"
+   class GhostConnection; 
    class BitStream;
 }
 

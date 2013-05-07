@@ -53,8 +53,8 @@ namespace Zap {
 
 inline F32 radiansToDegrees(F32 angle) { return angle * RADIANS_TO_DEGREES; }
 inline F32 degreesToRadians(F32 angle) { return angle * DEGREES_TO_RADIANS; }
-inline F32 radiansToUnit(F32 angle)    { return angle * FloatInverse2Pi; }
-inline F32 unitToRadians(F32 angle)    { return angle * Float2Pi; }
+inline F32 radiansToUnit(F32 angle)    { return angle * FloatInverse2Pi; }       // angle / 2pi
+inline F32 unitToRadians(F32 angle)    { return angle * Float2Pi; }              // angle * 2pi
 
 extern F32 getAngleDiff(F32 a, F32 b);
 

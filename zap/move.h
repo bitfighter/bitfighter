@@ -42,7 +42,7 @@ class Move
 {
 public:
    Move();              // Constructor
-   Move(F32 x, F32 y);  // Constructor used in tests
+   Move(F32 x, F32 y, F32 angle = 0);  // Constructor used in tests
 
    void initialize();
 
@@ -60,6 +60,9 @@ public:
    void pack(BitStream *stream, Move *prev, bool packTime);
    void unpack(BitStream *stream, bool unpackTime);
    void prepare();                  // Packs and unpacks move to ensure effects of rounding are same on client and server
+   string toString();
+   void set(F32 x, F32 y, F32 angle = 0);
+
 };
 
 };

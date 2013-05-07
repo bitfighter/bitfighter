@@ -233,8 +233,8 @@ void HelperManager::doneClosingHelper()
 // We will darken certain areas of the screen when the helper is active.  This computes how much.  
 F32 HelperManager::getDimFactor() const
 {
-   static const F32 DIM    = 0.2;    
-   static const F32 BRIGHT = 1.0;
+   static const F32 DIM    = 0.2f;    
+   static const F32 BRIGHT = 1.0f;
 
    // fromDim and toDim are true if chat text should be dimmed, false if not.  Their state is based on the
    // characteristics of the active helper and the state of its activation/deactivation animation.

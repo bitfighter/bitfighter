@@ -112,6 +112,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    mSpyBugPlacementTimer.setPeriod(SpyBugPlacementTimerDelay);
    mSensorEquipZoomTimer.setPeriod(SensorZoomTime);
    mFastRechargeTimer.reset(IdleRechargeCycleTimerDelay, IdleRechargeCycleTimerDelay);
+   mSendSpawnEffectTimer.setPeriod(300);
 
    mNetFlags.set(Ghostable);
 
@@ -157,7 +158,7 @@ void Ship::initialize(const Point &pos)
 {
    // Does this ever evaluate to true?
    if(getGame())
-      mRespawnTime = getGame()->getCurrentTime();
+      mSendSpawnEffectTimer.reset();
 
    setPosVelAng(pos, Point(0,0), 0);
 
@@ -536,6 +537,8 @@ void Ship::idle(BfObject::IdleCallPath path)
 
       mFastRechargeTimer.update(mCurrentMove.time);
       mFastRecharging = mFastRechargeTimer.getCurrent() == 0;
+
+      mSendSpawnEffectTimer.update(mCurrentMove.time);
    }
    else   // <=== do we really want this loop running if    path == BfObject::ServerIdleMainLoop && NOT controllingClientIsValid() ??
    {
@@ -1168,13 +1171,15 @@ void Ship::damageObject(DamageInfo *theInfo)
    }
 }
 
-#ifndef ZAP_DEDICATED
+
 // Returns true if ship represents local player
+#ifndef ZAP_DEDICATED
 bool Ship::isLocalPlayerShip(ClientGame *game)
 {
    return getClientInfo() == game->getLocalRemoteClientInfo();
 }
 #endif
+
 
 // Runs when ship spawns -- runs on client and server
 // Gets run on client every time ship spawns, gets run on server once per level
@@ -1192,7 +1197,7 @@ void Ship::onAddedToGame(Game *game)
    else                 // Server
 #endif
    {
-      mRespawnTime = getGame()->getCurrentTime();
+      mSendSpawnEffectTimer.reset();
       EventManager::get()->fireEvent(EventManager::ShipSpawnedEvent, this);
    }
 }
@@ -1232,7 +1237,8 @@ void Ship::writeControlState(BitStream *stream)
    //stream->writeFlag(mFastRecharging);
    stream->writeFlag(mCooldownNeeded);
    if(mFireTimer < 0)   // mFireTimer could be negative
-      stream->writeRangedU32(MaxFireDelay + (mFireTimer < -S32(negativeFireDelay) ? negativeFireDelay : U32(-mFireTimer)),0, MaxFireDelay + negativeFireDelay);
+      stream->writeRangedU32(MaxFireDelay + (mFireTimer < -S32(negativeFireDelay) ? negativeFireDelay : U32(-mFireTimer)), 
+                             0, MaxFireDelay + negativeFireDelay);
    else
       stream->writeRangedU32(U32(mFireTimer), 0, MaxFireDelay + negativeFireDelay);
 
@@ -1322,7 +1328,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       // Note that RespawnMask is only used by Robots -- can this be refactored out of Ship.cpp?
       if(stream->writeFlag(updateMask & (RespawnMask | SpawnShieldMask)))
       {
-         stream->writeFlag((updateMask & RespawnMask) != 0 && getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
+         stream->writeFlag((updateMask & RespawnMask) != 0 && mSendSpawnEffectTimer.getCurrent() > 0);  // If true, ship will appear to spawn on client
          U32 sendNumber = (mSpawnShield.getCurrent() + (SpawnShieldTime / 16 / 2)) * 16 / SpawnShieldTime; // rounding
          if(stream->writeFlag(sendNumber != 0))
             stream->writeInt(sendNumber - 1, 4); 
@@ -1351,7 +1357,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    {
       if(stream->writeFlag(updateMask & PositionMask))         // <=== ONE
       {
-         // Send position and speed
+         // Send position and speed  ==> why render? SHOULD BE ACTUAL??  How do render and actual pos diverge on the server?
          gameConnection->writeCompressedPoint(getRenderPos(), stream);
          writeCompressedVelocity(getRenderVel(), BoostMaxVelocity + 1, stream);
       }
@@ -1443,20 +1449,25 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       for(S32 i = 0; i < ShipWeaponCount; i++)
          mLoadout.setWeapon(i, (WeaponType) stream->readEnum(WeaponCount));
 
-      ClientGame *game = static_cast<ClientGame*>(getGame());
-
-      if(!hasEngineerModule)           // Can't engineer without this module
+      // Notify the user interface (via the ClientGame object) about some things that may have changed.
+      // Note that during testing, we might not have a game object, so we'll need to check for NULL here.
+      if(getGame())
       {
-         if(isLocalPlayerShip(game))   // If this ship is ours, quit engineer menu
-            game->quitEngineerHelper();
+         ClientGame *game = static_cast<ClientGame*>(getGame());
+
+         if(!hasEngineerModule)           // Can't engineer without this module
+         {
+            if(isLocalPlayerShip(game))   // If this ship is ours, quit engineer menu (does nothing if menu is not shown)
+               game->quitEngineerHelper();
+         }
+
+         // Alert the UI that a new loadout has arrived (ClientGame->GameUI->LoadoutIndicator)
+         if(isLocalPlayerShip(game))
+            game->newLoadoutHasArrived(mLoadout);
+
+         if(!wasInitialUpdate)
+            game->addHelpItem(LoadoutFinishedItem);
       }
-
-      // Alert the UI that a new loadout has arrived (ClientGame->GameUI->LoadoutIndicator)
-      if(isLocalPlayerShip(game))
-         game->newLoadoutHasArrived(mLoadout);
-
-      if(!wasInitialUpdate)
-         game->addHelpItem(LoadoutFinishedItem);
    }
 
    if(stream->readFlag())  // hasExploded

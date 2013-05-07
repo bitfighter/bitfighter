@@ -8,6 +8,10 @@
 #include "ship.h"
 #include "EngineeredItem.h"
 
+
+#include "tnlNetObject.h"
+#include "tnlGhostConnection.h"
+
 #include <string>
 
 #ifdef TNL_OS_WIN32
@@ -60,6 +64,81 @@ TEST_F(BfTest, LoadoutTrackerTests)
       ASSERT_EQ(outItems[i], items[i]);
 }
 
+
+static void packUnpack(Move move1, Move &move2)
+{
+   PacketStream stream;    // Create a stream
+
+   move1.pack(&stream, NULL, false);   // Write the move
+   stream.setBitPosition(0);           // Move the stream's pointer back to the beginning
+   move2.unpack(&stream, false);       // Read the move
+}
+
+
+// Generic pack/unpack tester -- can feed it any class that supports pack/unpack
+template <class T>
+void packUnpack(T input, T &output, U32 mask = 0xFFFFFFFF)
+{
+   BitStream stream;       
+   GhostConnection conn;
+   
+   output.markAsGhost(); 
+
+   input.packUpdate(&conn, mask, &stream);   // Write the object
+   stream.setBitPosition(0);                 // Move the stream's pointer back to the beginning
+   output.unpackUpdate(&conn, &stream);      // Read the object back
+}
+
+
+TEST_F(BfTest, ShipTests)
+{
+   Ship s1, s2;
+
+   // Set some shippy stuff
+
+   packUnpack(s1, s2);   
+
+   // Verify that everything is the same
+}
+
+
+TEST_F(BfTest, MoveTests)
+{
+   Move move1, move2;
+   
+   // Demonstrate testing of a basic pack/unpack cycle... but prepare basically already does this so I'm not 
+   // sure this test is really that interesting
+   move1.set(0.125f, 0.75f, 33.3f);    
+   move1.prepare();
+   packUnpack(move1, move2);
+   ASSERT_TRUE(move1.isEqualMove(&move2)); 
+
+   // An area of concern by an earlier dev is that angles might get transmitted incorreclty.  I agree that the math
+   // is confusing, so let's create some tests to verify that prepare() normalizes the input angle to between
+   // 0 and 2pi, which will then be handled properly by writeInt (and nicely keeps angles sane).
+
+   // Obvious cases
+   move1.angle = FloatHalfPi;             move1.prepare();  ASSERT_EQ(move1.angle, FloatHalfPi);                     
+   move1.angle = FloatPi + FloatHalfPi;   move1.prepare();  ASSERT_EQ(move1.angle, FloatPi + FloatHalfPi);         
+
+   // Negative angles
+   move1.angle = -FloatHalfPi;            move1.prepare();  ASSERT_EQ(move1.angle, FloatPi + FloatHalfPi);  // -1/4 turn = 3/4 turn  
+   move1.angle = -FloatPi - FloatHalfPi;  move1.prepare();  ASSERT_EQ(move1.angle, FloatHalfPi);            // -3/4 turn = 1/4 turn  
+
+   // Exactly one turn
+   move1.angle =  Float2Pi;               move1.prepare();  ASSERT_EQ(move1.angle, 0);  // Wrap exactly once, pos. dir
+   move1.angle = -Float2Pi;               move1.prepare();  ASSERT_EQ(move1.angle, 0);  // Wrap exactly once, neg. dir
+
+   // Large angles
+   move1.angle = Float2Pi + FloatHalfPi;  move1.prepare();  ASSERT_EQ(move1.angle, FloatHalfPi);            // Wrap in pos. dir         
+   move1.angle = -Float2Pi - FloatHalfPi; move1.prepare();  ASSERT_EQ(move1.angle, FloatPi + FloatHalfPi);  // Wrap in neg. dir 
+
+   // Really large angles -- we'll never see these in the game
+   move1.angle = 432 * Float2Pi;          move1.prepare();  ASSERT_EQ(move1.angle, 0);  // Big angles 
+   move1.angle =  -9 * Float2Pi;          move1.prepare();  ASSERT_EQ(move1.angle, 0);  // Big neg. angles 
+} 
+
+
 TEST_F(BfTest, LittleStory) 
 {
    Address addr;
@@ -98,7 +177,7 @@ TEST_F(BfTest, LittleStory)
    {
       ship.setMove(Move(0,0));
       serverGame.idle(100);
-      printf("health %f   %s\n", ship.getHealth(), ship.getActualPos().toString().c_str());
+      //printf("health %f   %s\n", ship.getHealth(), ship.getActualPos().toString().c_str());
    }
 
 }

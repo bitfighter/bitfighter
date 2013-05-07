@@ -1190,7 +1190,7 @@ S32 EngineeredItem::lua_setHealth(lua_State *L)
 
    F32 healthDifference = mHealth - newHealth;
    if(healthDifference > 0)
-      di.damageAmount = 4.0 * healthDifference;
+      di.damageAmount = 4.0f * healthDifference;
    else
       di.damageAmount = healthDifference;
 

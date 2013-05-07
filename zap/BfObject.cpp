@@ -1262,15 +1262,18 @@ bool BfObject::onGhostAdd(GhostConnection *theConnection)
 }
 
 
+static const U8 TeamBits = 4;
+static const U8 TeamOffset = 2;     // To account for Neutral and Hostile teams
+
 void BfObject::readThisTeam(BitStream *stream)
 {
-   mTeam = stream->readInt(4) - 2;
+   mTeam = stream->readInt(TeamBits) - TeamOffset;
 }
 
 
 void BfObject::writeThisTeam(BitStream *stream)
 {
-   stream->writeInt(mTeam + 2, 4);
+   stream->writeInt(mTeam + TeamOffset, TeamBits);
 }
 
 

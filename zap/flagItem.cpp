@@ -316,7 +316,7 @@ void FlagItem::renderItemAlpha(const Point &pos, F32 alpha)
 void FlagItem::renderDock()
 {
 #ifndef ZAP_DEDICATED
-   renderFlag(getActualPos(), 0.6, getColor());
+   renderFlag(getActualPos(), 0.6f, getColor());
 #endif
 }
 

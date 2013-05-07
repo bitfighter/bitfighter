@@ -57,7 +57,7 @@ class Ship : public MoveObject
 private:
    bool mIsRobot;
 
-   U32 mRespawnTime;
+   Timer mSendSpawnEffectTimer;           // Only meaningful on the server
    Vector<DatabaseObject *> mZones1;      // A list of zones the ship is currently in
    Vector<DatabaseObject *> mZones2;
    bool mZones1IsCurrent;
@@ -99,19 +99,6 @@ private:
 
 
 protected:
-   enum MaskBits {
-      MoveMask            = Parent::FirstFreeMask << 0, // New user input
-      HealthMask          = Parent::FirstFreeMask << 1,
-      ModulePrimaryMask   = Parent::FirstFreeMask << 2, // Is module primary component active
-      ModuleSecondaryMask = Parent::FirstFreeMask << 3, // Is module secondary component active
-      LoadoutMask         = Parent::FirstFreeMask << 4,
-      RespawnMask         = Parent::FirstFreeMask << 5, // For when robots respawn
-      TeleportMask        = Parent::FirstFreeMask << 6, // Ship has just teleported
-      ChangeTeamMask      = Parent::FirstFreeMask << 7, // Used for when robots change teams
-      SpawnShieldMask     = Parent::FirstFreeMask << 8, // Used for the spawn shield
-      FirstFreeMask       = Parent::FirstFreeMask << 9
-   };
-
    SafePtr <ClientInfo> mClientInfo;
 
    Vector<SafePtr<MountableItem> > mMountedItems;   
@@ -127,6 +114,19 @@ protected:
    string toLevelCode(F32 gridSize) const;
 
 public:
+   enum MaskBits {
+      MoveMask            = Parent::FirstFreeMask << 0, // New user input
+      HealthMask          = Parent::FirstFreeMask << 1,
+      ModulePrimaryMask   = Parent::FirstFreeMask << 2, // Is module primary component active
+      ModuleSecondaryMask = Parent::FirstFreeMask << 3, // Is module secondary component active
+      LoadoutMask         = Parent::FirstFreeMask << 4,
+      RespawnMask         = Parent::FirstFreeMask << 5, // For when robots respawn
+      TeleportMask        = Parent::FirstFreeMask << 6, // Ship has just teleported
+      ChangeTeamMask      = Parent::FirstFreeMask << 7, // Used for when robots change teams
+      SpawnShieldMask     = Parent::FirstFreeMask << 8, // Used for the spawn shield
+      FirstFreeMask       = Parent::FirstFreeMask << 9
+   };
+
    static const S32 CollisionRadius = 24;          // This is the ship's radius
    static const S32 RepairRadius = 65;
    static const U32 SpawnShieldTime = 5000;        // Time spawn shields are active
