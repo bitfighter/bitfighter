@@ -565,7 +565,7 @@ static sfxSets stringToSFXSet(string sfxSet)
 
 static F32 checkVol(F32 vol)
 {
-   return max(min(vol, 1), 0);    // Restrict volume to be between 0 and 1
+   return max(min(vol, 1.f), 0.f);    // Restrict volume to be between 0 and 1
 }
 
 

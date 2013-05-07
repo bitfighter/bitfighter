@@ -99,6 +99,7 @@ set(SHARED_SOURCES
 	speedZone.cpp
 	statistics.cpp
 	stringUtils.cpp
+	SystemFunctions.cpp
 	teamInfo.cpp
 	teleporter.cpp
 	textItem.cpp

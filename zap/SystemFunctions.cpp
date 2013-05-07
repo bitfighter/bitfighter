@@ -40,7 +40,6 @@
 #ifdef WIN32
 #  include <fcntl.h>
 #  include <io.h>
-//#  include <direct.h>
 #endif
 
 #include "tnlAssert.h"
