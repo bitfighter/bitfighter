@@ -2030,7 +2030,6 @@ void Turret::idle(IdleCallPath path)
    Point bestDelta;
 
    Point delta;
-
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
@@ -2046,7 +2045,7 @@ void Turret::idle(IdleCallPath path)
       if(isMountableItemType(fillVector[i]->getObjectTypeNumber()))
          if(static_cast<MountableItem *>(fillVector[i])->isMounted())
             continue;
-
+      
       BfObject *potential = static_cast<BfObject *>(fillVector[i]);
       if(potential->getTeam() == getTeam())     // Is target on our team?
          continue;                              // ...if so, skip it!
@@ -2132,12 +2131,13 @@ void Turret::idle(IdleCallPath path)
       {
          bestDelta.normalize();
          Point velocity;
-
+         
          // String handling in C++ is such a mess!!!
          string killer = string("got blasted by ") + getGame()->getTeamName(getTeam()).getString() + " turret";
          mKillString = killer.c_str();
 
-         GameWeapon::createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, 0, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
+         GameWeapon::createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, 
+                                             0, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
          mFireTimer.reset(WeaponInfo::getWeaponInfo(mWeaponFireType).fireDelay);
       }
    }

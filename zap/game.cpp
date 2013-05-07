@@ -1403,6 +1403,15 @@ void Game::seedRandomNumberGenerator(const string &name)
 }
 
 
+bool Game::objectCanDamageObject(BfObject *damager, BfObject *victim)
+{
+   if(!getGameType())
+      return true;
+   else
+      return getGameType()->objectCanDamageObject(damager, victim);
+}
+
+
 U32 Game::getMaxPlayers() const 
 {
    TNLAssert(false, "Not implemented for this class!");

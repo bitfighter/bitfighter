@@ -462,6 +462,7 @@ public:
    void updateShipLoadout(BfObject *shipObject);
    void sendChatFromController(const StringPtr &message);
    void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName);
+   bool objectCanDamageObject(BfObject *damager, BfObject *victim);
 
    virtual SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f) const = 0;
    virtual SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const = 0;

@@ -1109,7 +1109,7 @@ void Ship::damageObject(DamageInfo *theInfo)
 
    if(theInfo->damageAmount > 0)
    {
-      if(!getGame()->getGameType()->objectCanDamageObject(theInfo->damagingObject, this))
+      if(!getGame()->objectCanDamageObject(theInfo->damagingObject, this))
          return;
 
       // Factor in shields

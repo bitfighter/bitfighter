@@ -248,7 +248,8 @@ string GameType::toLevelCode() const
 }
 
 
-// GameType object is the first to be added when a new game starts... therefore, this is a reasonable signifier that a new game is starting up.  I think.
+// GameType object is the first to be added when a new game starts... 
+// therefore, this is a reasonable signifier that a new game is starting up.  I think.
 void GameType::addToGame(Game *game, GridDatabase *database)
 {
    mGame = game;
