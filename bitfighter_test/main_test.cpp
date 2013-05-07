@@ -3,10 +3,12 @@
 #include "gtest/gtest.h"
 
 #include "BfObject.h"
+#include "EngineeredItem.h"
+#include "gameType.h"
 #include "LoadoutTracker.h"
 #include "ServerGame.h"
 #include "ship.h"
-#include "EngineeredItem.h"
+
 
 
 #include "tnlNetObject.h"
@@ -145,41 +147,51 @@ TEST_F(BfTest, LittleStory)
    GameSettings settings;
    ServerGame serverGame(addr, &settings, false, false);
 
+   GameType gt;
+   gt.addToGame(&serverGame, serverGame.getGameObjDatabase());
+
    ASSERT_TRUE(serverGame.isSuspended());    // ServerGame starts suspended
    serverGame.unsuspendGame(false);          
 
-   Ship ship;
-   ship.addToGame(&serverGame, serverGame.getGameObjDatabase());
+   // When adding objects to the game, use new and a pointer -- the game will 
+   // delete defunct objects, so a reference will not work.
+   SafePtr<Ship> ship = new Ship;
+   ship->addToGame(&serverGame, serverGame.getGameObjDatabase());
 
-   ASSERT_EQ(ship.getPos(), Point(0,0));     // By default, the ship starts at 0,0
-   ship.setMove(Move(0,0));
+   ASSERT_EQ(ship->getPos(), Point(0,0));     // By default, the ship starts at 0,0
+   ship->setMove(Move(0,0));
    serverGame.idle(10);
-   ASSERT_EQ(ship.getPos(), Point(0,0));     // When processing move of 0,0, we expect the ship to stay put
+   ASSERT_EQ(ship->getPos(), Point(0,0));     // When processing move of 0,0, we expect the ship to stay put
 
-   ship.setMove(Move(1,0));                  // Length 1 = max speed; moves stay active until replaced
+   ship->setMove(Move(1,0));                  // Length 1 = max speed; moves stay active until replaced
 
    // Test that we can simulate several ticks, and the ship advances every cycle
    for(S32 i = 0; i < 20; i++)
    {
-      Point prevPos = ship.getPos();
+      Point prevPos = ship->getPos();
       serverGame.idle(10);
-      ASSERT_NE(ship.getPos(), prevPos);
+      ASSERT_NE(ship->getPos(), prevPos);
    }
 
    // Note -- ship is over near (71, 0)
 
 
    // Uh oh, here comes a turret!
-   Turret t(2, Point(71, -100), Point(0, 10));    // Turret is below the ship
+   Turret t(2, Point(71, -100), Point(0, 1));    // Turret is below the ship, pointing up
    t.addToGame(&serverGame, serverGame.getGameObjDatabase());
 
-   for(S32 i = 0; i < 20; i++)
+   bool shipDeleted = false;
+   for(S32 i = 0; i < 100; i++)
    {
-      ship.setMove(Move(0,0));
+      ship->setMove(Move(0,0));
       serverGame.idle(100);
-      //printf("health %f   %s\n", ship.getHealth(), ship.getActualPos().toString().c_str());
+      if(!ship)
+      {
+         shipDeleted = true;
+         break;
+      }
    }
-
+   ASSERT_TRUE(shipDeleted);     // Ship was killed, and ship object was cleaned up
 }
 
 

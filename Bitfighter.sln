@@ -20,6 +20,11 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua-vec", "lua\lua-vec\lua-vec.vcxproj", "{9D7B0AAD-B135-449D-8E12-1ED548AC1048}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bitfighter_test", "bitfighter_test\bitfighter_test.vcxproj", "{5D8BCEE5-458E-4711-9940-1C98F088F6DE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A} = {3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}
+		{9D7B0AAD-B135-449D-8E12-1ED548AC1048} = {9D7B0AAD-B135-449D-8E12-1ED548AC1048}
+		{5AAE89B5-1F53-4539-9899-071E68FD9A29} = {5AAE89B5-1F53-4539-9899-071E68FD9A29}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
