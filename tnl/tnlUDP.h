@@ -85,20 +85,14 @@ public:
 
    /// Constructs an address from a string, of the form "transport:address:port"
    /// where transport is one of ip, ipx, or (in the future) ipv6
-   Address(const char *string)
-   {
-      set(string);
-   }
+   Address(const char *string);
 
    /// Constructs an address from an IP address.
-   Address(const IPAddress &theAddress)
-   {
-      set(theAddress);
-   }
+   Address(const IPAddress &theAddress);
 
    virtual ~Address();
 
-   virtual bool isValid() { return mIsValid; }
+   virtual bool isValid();
 
    /// Sets the address to the specified string, returning true if
    /// the string was a valid address.  Note that this call may block
@@ -116,18 +110,13 @@ public:
    bool operator==(const Address &theAddress) const;
 
    /// returns true if theAddress is not equal to this.
-   bool operator!=(const Address &theAddress) const { return !operator==(theAddress); }
+   bool operator!=(const Address &theAddress) const;
 
    /// returns true if the addresses are equal, not including the port.
-   bool isEqualAddress(const Address &theAddress) const {
-      return transport == theAddress.transport &&
-             netNum[0] == theAddress.netNum[0] &&
-             netNum[1] == theAddress.netNum[1] &&
-             netNum[2] == theAddress.netNum[2] &&
-             netNum[3] == theAddress.netNum[3]; }
+   bool isEqualAddress(const Address &theAddress) const;
 
    /// Returns a 32-bit hash of this network address.
-   U32 hash() const { return netNum[0] ^ (U32(port) << 8) ^ (netNum[1] << 16) ^ (netNum[1] >> 16) ^ (netNum[2] << 5); }
+   U32 hash() const;
 
    /// Returns a packed IPAddress of this address
    IPAddress toIPAddress() const;

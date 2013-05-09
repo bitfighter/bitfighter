@@ -601,6 +601,11 @@ bool Address::operator ==(const Address &theAddress) const
       netNum[3] == theAddress.netNum[3];
 }
 
+bool Address::operator!=(const Address &theAddress) const
+{
+   return !operator==(theAddress);
+}
+
 // Constructor
 Address::Address(TransportProtocol type, Address::NamedAddress name, U16 aPort)
 {
@@ -634,9 +639,24 @@ Address::Address(TransportProtocol type, Address::NamedAddress name, U16 aPort)
    mIsValid = true;
 }
 
+Address::Address(const char *string)
+{
+   set(string);
+}
+
+Address::Address(const IPAddress &theAddress)
+{
+   set(theAddress);
+}
+
 Address::~Address()
 {
    // Do nothing
+}
+
+bool Address::isValid()
+{
+   return mIsValid;
 }
 
 bool Address::set(const IPAddress &address)
@@ -648,14 +668,6 @@ bool Address::set(const IPAddress &address)
    mIsValid = (netNum[0] != 0);
    return true;
 
-}
-
-IPAddress Address::toIPAddress() const
-{
-   IPAddress ret;
-   ret.port = port;
-   ret.netNum = netNum[0];
-   return ret;
 }
 
 bool Address::set(std::string addressString)
@@ -829,6 +841,28 @@ const char *Address::toString() const
          U8(netNum[2] >> 8), U8(netNum[2]), port);
    }
    return addressBuffer;
+}
+
+bool Address::isEqualAddress(const Address &theAddress) const
+{
+   return transport == theAddress.transport &&
+         netNum[0] == theAddress.netNum[0] &&
+         netNum[1] == theAddress.netNum[1] &&
+         netNum[2] == theAddress.netNum[2] &&
+         netNum[3] == theAddress.netNum[3];
+}
+
+U32 Address::hash() const
+{
+   return netNum[0] ^ (U32(port) << 8) ^ (netNum[1] << 16) ^ (netNum[1] >> 16) ^ (netNum[2] << 5);
+}
+
+IPAddress Address::toIPAddress() const
+{
+   IPAddress ret;
+   ret.port = port;
+   ret.netNum = netNum[0];
+   return ret;
 }
 
 NetError getLastError()
