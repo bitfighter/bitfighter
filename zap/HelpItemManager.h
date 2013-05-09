@@ -59,6 +59,30 @@
    HELP_TABLE_ITEM(AddBotsItem,              UnknownTypeNumber,      Any,    Paced, ARRAYDEF({ "Feeling lonely?  Playing with others is better, but you",                \
                                                                                                "can add bots with the /addbots command.", NULL }))                       \
 
+//In a Nexus Game, bring flags to the Nexus to score points.
+//Energy Items recharge your batteries.
+//Friendly turrets are not a threat.
+//Enemy turrets are dangerous.
+//Neutral turrets can be "converted" with the Repair module.
+//Teleporters will take you places!
+//Use GoFasts to move around quickly.
+//Disable enemy forcefields by damaging thier projector.
+//Friendly forcefields will let you pass freely.
+//Like to be sneaky?  Try the cloak module.
+//Want to know who's winning?  Hit xxxx to see the scoreboard.
+//You've got the Boost module.  Try double-click the activation key.
+//You are carrying an object.  Hit XXX to drop it.
+//Someone is sending chat messages.  Use XXX or XXX to respond.
+//   XXX sends a message to your team, YYY sends one to everyone.
+//F1 will give you more help if you need it.
+//Ever play Asteroids?  These are the real deal.   (or maybe just "Careful!")
+//Enemy mines can be hard to see.
+//Friendly mines are visible but dangerous.
+//This is a SpyBug. You can see enemy ships on the Cmdrs Map ([xXX]).
+//   Place your own with the Sensor module.
+
+
+
 
 using namespace TNL;
 using namespace std;
