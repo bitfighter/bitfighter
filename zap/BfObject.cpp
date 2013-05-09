@@ -1089,15 +1089,15 @@ const Move &BfObject::getLastMove()
 }
 
 
-void BfObject::setCurrentMove(const Move &theMove)
+void BfObject::setCurrentMove(const Move &move)
 {
-   mCurrentMove = theMove;
+   mCurrentMove = move;
 }
 
 
-void BfObject::setLastMove(const Move &theMove)
+void BfObject::setPrevMove(const Move &move)
 {
-   mLastMove = theMove;
+   mLastMove = move;
 }
 
 

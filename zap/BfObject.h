@@ -309,8 +309,8 @@ public:
    // Move related      
    const Move &getCurrentMove();
    const Move &getLastMove();
-   void setCurrentMove(const Move &theMove);
-   void setLastMove(const Move &theMove);
+   void setCurrentMove(const Move &move);
+   void setPrevMove(const Move &move);
 
    // renderLayer() is called three times for every object that is in the
    // render list, at layers -1, 0, 1.  By default renderLayer() call the render()
