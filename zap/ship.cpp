@@ -2234,6 +2234,7 @@ MountableItem *Ship::getMountedItem(S32 index) const
 
 void Ship::addMountedItem(MountableItem *item)
 {
+   TNLAssert(item->getMount() == this, "Mounting to wrong ship!  Maybe try item.mountToShip(&ship);");
    mMountedItems.push_back(item);
 }
 
