@@ -54,6 +54,8 @@ private:
    MoveState mMoveState[MoveStateCount];     // MoveStateCount = 3, as per enum above
 
 public:
+   virtual ~MoveStates();
+
    virtual Point getPos(S32 state) const;
    virtual void setPos(S32 state, const Point &pos);
 
@@ -577,6 +579,7 @@ public:
    bool collide(BfObject *hitObject);
    void damageObject(DamageInfo *theInfo);
    void dismount(DismountMode dismountMode);
+   bool isItemThatMakesYouVisibleWhileCloaked();
 
    static void generateOutlinePoints(const Point &pos, F32 scale, Vector<Point> &points);
 

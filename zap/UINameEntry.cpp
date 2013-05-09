@@ -56,6 +56,12 @@ TextEntryUserInterface::TextEntryUserInterface(ClientGame *game) : Parent(game)
    lineEditor = LineEditor(MAX_PLAYER_NAME_LENGTH);
 }
 
+// Constructor
+TextEntryUserInterface::~TextEntryUserInterface()
+{
+   // Do nothing
+}
+
 
 void TextEntryUserInterface::onActivate()
 {

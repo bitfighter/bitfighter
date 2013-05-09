@@ -49,6 +49,14 @@
 namespace Zap
 {
 
+
+// Needed virtual destructor
+MoveStates::~MoveStates()
+{
+   // Do nothing
+}
+
+
 Point MoveStates::getPos(S32 state) const             
 {
    TNLAssert(state != ActualState, "Do NOT use getPos with the ActualState!");
@@ -2482,6 +2490,12 @@ void ResourceItem::dismount(DismountMode dismountMode)
 
    if(!isGhost() && ship)   // Server only, to prevent desync
       setActualVel(ship->getActualVel() * 1.5);
+}
+
+
+bool ResourceItem::isItemThatMakesYouVisibleWhileCloaked()
+{
+   return false;
 }
 
 

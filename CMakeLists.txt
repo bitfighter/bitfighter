@@ -9,7 +9,7 @@ endif()
 
 # Linker flags
 if(MSVC)
-	set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:MSVCRT.lib /NODEFAULTLIB:LIBCMT.lib")
+	set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:MSVCRT.lib")
 else()
 	# Only link in what is absolutely necessary
 	set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")

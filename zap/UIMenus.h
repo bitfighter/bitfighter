@@ -91,6 +91,7 @@ public:
    // Constructor
    explicit MenuUserInterface(ClientGame *game);
    MenuUserInterface(ClientGame *game, const string &title);
+   virtual ~MenuUserInterface();
 
    bool isScrollingMenu();
 

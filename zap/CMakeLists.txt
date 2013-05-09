@@ -290,11 +290,8 @@ set_target_properties(bitfighterd
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set_target_properties(bitfighterd bitfighter
-		PROPERTIES COMPILE_DEFINITIONS TNL_DEBUG
-	)
-endif()
+set_target_properties(bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG")
+set_target_properties(bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "TNL_DEBUG")
 
 
 if(WIN32)

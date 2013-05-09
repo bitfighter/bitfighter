@@ -333,7 +333,7 @@ void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType, const
 }
 
 
-// onPlayerJoined, onPlayerLeft
+// onPlayerJoined, onPlayerLeft, onPlayerTeamChanged
 void EventManager::fireEvent(LuaScriptRunner *player, EventType eventType, LuaPlayerInfo *playerInfo)
 {
    if(suppressEvents(eventType))   

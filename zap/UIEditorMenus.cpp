@@ -37,7 +37,7 @@
 namespace Zap
 {
 
-   // Constructors
+// Constructors
 QuickMenuUI::QuickMenuUI(ClientGame *game) : Parent(game)
 {
    initialize();
@@ -49,6 +49,11 @@ QuickMenuUI::QuickMenuUI(ClientGame *game, const string &title) : Parent(game, t
    initialize();
 }
 
+// Destructor
+QuickMenuUI::~QuickMenuUI()
+{
+   // Do nothing
+}
 
 void QuickMenuUI::initialize()
 {
@@ -307,6 +312,12 @@ void QuickMenuUI::addSaveAndQuitMenuItem(const char *menuText, const char *helpT
 EditorAttributeMenuUI::EditorAttributeMenuUI(ClientGame *game) : Parent(game)
 {
    mObject = NULL;
+}
+
+// Destructor
+EditorAttributeMenuUI::~EditorAttributeMenuUI()
+{
+   // Do nothing
 }
 
 
