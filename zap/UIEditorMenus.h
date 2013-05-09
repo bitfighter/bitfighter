@@ -93,6 +93,8 @@ protected:
 
 public:
    explicit EditorAttributeMenuUI(ClientGame *game);    // Constructor
+   virtual ~EditorAttributeMenuUI();                    // Destructor
+
    BfObject *getObject();
 
    virtual void startEditingAttrs(BfObject *object);

@@ -314,6 +314,12 @@ EditorAttributeMenuUI::EditorAttributeMenuUI(ClientGame *game) : Parent(game)
    mObject = NULL;
 }
 
+// Destructor
+EditorAttributeMenuUI::~EditorAttributeMenuUI()
+{
+   // Do nothing
+}
+
 
 BfObject *EditorAttributeMenuUI::getObject()
 {
