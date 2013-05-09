@@ -653,26 +653,27 @@ void ClientGame::idle(U32 timeDelta)
       // Visit each game object, handling moves and running its idle method
       for(BfObject *obj = idlingObjects.nextList, *objNext; obj != NULL; obj = objNext)
       {
-         objNext = obj->nextList; // Just in case this object is deleted inside idle function
+         objNext = obj->nextList;      // Just in case this object is deleted inside idle function
 
          if(obj->isDeleted())
             continue;
 
-         if(obj == controlObject)
+         if(obj == controlObject)      // That is, if we are idling the local ship
          {
             obj->setCurrentMove(*theMove);
-            obj->idle(BfObject::ClientIdleControlMain);  // on client, object is our control object
+            obj->idle(BfObject::ClientIdlingLocalShip);  // on client, object is our control object
          }
          else
          {
             Move m = obj->getCurrentMove();
             m.time = timeDelta;
             obj->setCurrentMove(m);
-            obj->idle(BfObject::ClientIdleMainRemote);    // on client, object is not our control object
+            obj->idle(BfObject::ClientIdlingNotLocalShip);    // on client, object is not our control object
          }
       }
+
       if(mGameType)
-         mGameType->idle(BfObject::ClientIdleMainRemote, timeDelta);
+         mGameType->idle(BfObject::ClientIdlingNotLocalShip, timeDelta);
 
       if(controlObject)
          mUi->setListenerParams(controlObject->getPos(), controlObject->getVel());

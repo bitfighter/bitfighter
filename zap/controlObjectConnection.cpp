@@ -63,6 +63,7 @@ void ControlObjectConnection::setControlObject(BfObject *theObject)
       theObject->setControllingClient((GameConnection *) this);
 }
 
+
 void ControlObjectConnection::packetReceived(PacketNotify *notify)
 {
    if(isConnectionToServer())  // only client needs to handle this
@@ -116,7 +117,10 @@ void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *noti
    if(isConnectionToServer())
    {
       S8 firstSendIndex = highSendIndex[0];
-      if(S8(firstSendIndex - firstMoveIndex) < 0)   // S8(...) appears to be needed here, even though they are both already S8, somehow the compiler converts them to 32 bit, screwing up the S8 overflow.
+      
+      // Cast to S8 appears to be needed here, even though they are both already S8, 
+      // somehow the compiler converts them to 32 bit, screwing up the S8 overflow
+      if(S8(firstSendIndex - firstMoveIndex) < 0)   
          firstSendIndex = firstMoveIndex;
 
       bstream->writeInt(getControlCRC(), CLIENTCONTROLBITS);
@@ -171,6 +175,7 @@ void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *noti
    Parent::writePacket(bstream, notify);
 }
 
+
 void ControlObjectConnection::readPacket(BitStream *bstream)
 {
    // We only replay control object moves if we got an update
@@ -208,7 +213,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
          {
             mMoveTimeCredit -= theMove.time;
             controlObject->setCurrentMove(theMove);
-            controlObject->idle(BfObject::ServerIdleControlFromClient);
+            controlObject->idle(BfObject::ServerProcessingUpdatesFromClient);
             onGotNewMove(theMove);
          }
          firstMoveIndex++;
@@ -240,6 +245,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
    }
    Parent::readPacket(bstream);
 
+
    if(replayControlObjectMoves && controlObject.isValid())
    {
       for(S32 i = 0; i < pendingMoves.size(); i++)
@@ -247,7 +253,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
          Move theMove = pendingMoves[i];
          theMove.prepare();
          controlObject->setCurrentMove(theMove);
-         controlObject->idle(BfObject::ClientIdleControlReplay);
+         controlObject->idle(BfObject::ClientReplayingPendingMoves);
       }
       controlObject->controlMoveReplayComplete();
    }
@@ -369,7 +375,7 @@ void ControlObjectConnection::addToTimeCredit(U32 timeAmount)
          Move move = controlObject->getCurrentMove();
          move.time = mMoveTimeCredit - MaxMoveTimeCredit;
          controlObject->setCurrentMove(move);
-         controlObject->idle(BfObject::ServerIdleControlFromClient);
+         controlObject->idle(BfObject::ServerProcessingUpdatesFromClient);
       }
 
       mMoveTimeCredit = MaxMoveTimeCredit;

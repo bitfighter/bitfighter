@@ -317,6 +317,9 @@ public:
                                 U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 
    virtual void displayMessage(const Color &msgColor, const char *format, ...) const;
+   virtual ClientInfo *getLocalRemoteClientInfo() const;
+   virtual void quitEngineerHelper();
+
 
    ClientInfo *findClientInfo(const StringTableEntry &name);      // Find client by name
    

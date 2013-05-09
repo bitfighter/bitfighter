@@ -707,20 +707,20 @@ const Vector<Point> *Teleporter::getDestList() const
 }
 
 
-void Teleporter::idle(BfObject::IdleCallPath path)
+void Teleporter::idle(IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
    mTime += deltaT;
 
    // Client only
-   if(path == BfObject::ClientIdleMainRemote)
+   if(path == ClientIdlingNotLocalShip)
    {
       // Update Explosion Timer
       if(mHasExploded)
          mExplosionTimer.update(deltaT);
    }
 
-   if(mTeleportCooldown.update(deltaT) && path == BfObject::ServerIdleMainLoop)
+   if(mTeleportCooldown.update(deltaT) && path == ServerIdleMainLoop)
       doTeleport();
 }
 

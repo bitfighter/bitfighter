@@ -589,7 +589,7 @@ void Burst::idle(IdleCallPath path)
 
    // Update TTL
    S32 deltaT = mCurrentMove.time;
-   if(path == BfObject::ClientIdleMainRemote)
+   if(path == ClientIdlingNotLocalShip)
       mTimeRemaining += deltaT;
    else if(!exploded)
    {
@@ -1365,10 +1365,12 @@ F32 Seeker::TargetSearchAngle = FloatTau * .6f;     // Anglular spread in front 
 // Runs on client and server
 void Seeker::idle(IdleCallPath path)
 {
+   TNLAssert(path == ClientIdlingNotLocalShip || path == ServerIdleMainLoop, "Unexpected idle path!");
+
    Parent::idle(path);
 
 #ifndef ZAP_DEDICATED
-   if(path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote)
+   if(path == ClientIdlingNotLocalShip)
    {
       emitMovementSparks();
       mTrail.idle(mCurrentMove.time);

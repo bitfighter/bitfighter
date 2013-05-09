@@ -88,9 +88,8 @@ private:
    void checkForSpeedzones();                      // Check to see if we collided with a GoFast
    void checkForZones();                           // See if ship entered or left any zones
    void getZonesShipIsIn(Vector<DatabaseObject *> *zoneList);     // Fill zoneList with a list of all zones that the ship is currently in
-#ifndef ZAP_DEDICATED
-   bool isLocalPlayerShip(ClientGame *game);       // Returns true if ship represents local player
-#endif
+   bool isLocalPlayerShip(Game *game) const;       // Returns true if ship represents local player
+  
    Vector<DatabaseObject *> *getCurrZoneList();    // Get list of zones ship is currently in
    Vector<DatabaseObject *> *getPrevZoneList();    // Get list of zones ship was in last tick
 
@@ -126,6 +125,7 @@ public:
       SpawnShieldMask     = Parent::FirstFreeMask << 8, // Used for the spawn shield
       FirstFreeMask       = Parent::FirstFreeMask << 9
    };
+
 
    static const S32 CollisionRadius = 24;          // This is the ship's radius
    static const S32 RepairRadius = 65;
@@ -249,7 +249,7 @@ public:
    bool setLoadout(const LoadoutTracker &loadout, bool silent = false);
    bool isLoadoutSameAsCurrent(const LoadoutTracker &loadout);
 
-   ClientInfo *getClientInfo();
+   ClientInfo *getClientInfo() const;
 
    virtual void idle(IdleCallPath path);
 
@@ -262,6 +262,7 @@ public:
 
    void updateModuleSounds();
    void emitMovementSparks();
+   void updateTrails();
    void findRepairTargets();
    void repairTargets();
 

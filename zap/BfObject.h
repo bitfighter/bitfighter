@@ -235,11 +235,11 @@ class BfObject : public DatabaseObject, public NetObject, public EditorObject, p
 
 public:
    enum IdleCallPath {
-      ServerIdleMainLoop,              // On server, when called from top-level idle loop
-      ServerIdleControlFromClient,     // On server, when processing moves from the client
-      ClientIdleMainRemote,            // On client, when object is not our control object
-      ClientIdleControlMain,           // On client, when object is our control object
-      ClientIdleControlReplay,
+      ServerIdleMainLoop,                 // On server, when called from top-level idle loop
+      ServerProcessingUpdatesFromClient,  // On server, when processing moves from the client (only used for Ship)
+      ClientIdlingNotLocalShip,           // On client, when object is not our control object
+      ClientIdlingLocalShip,              // On client, when object is our control object (i.e. when processing local player's ship)
+      ClientReplayingPendingMoves,
    };
 
 private:

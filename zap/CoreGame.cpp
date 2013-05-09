@@ -705,10 +705,11 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
 void CoreItem::idle(BfObject::IdleCallPath path)
 {
+   logprintf("Core path: %d", path);
    mPanelGeom.isValid = false;      // Force recalculation of panel geometry next time it's needed
 
    // Update attack timer on the server
-   if(path == BfObject::ServerIdleMainLoop)
+   if(path == ServerIdleMainLoop)
    {
       // If timer runs out, then set this Core as having a changed state so the client
       // knows it isn't being attacked anymore
@@ -718,7 +719,7 @@ void CoreItem::idle(BfObject::IdleCallPath path)
 
 #ifndef ZAP_DEDICATED
    // Only run the following on the client
-   if(path != BfObject::ClientIdleMainRemote)
+   if(path != ClientIdlingNotLocalShip)
       return;
 
    // Update Explosion Timer

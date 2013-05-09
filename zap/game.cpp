@@ -1445,6 +1445,17 @@ void Game::displayMessage(const Color &msgColor, const char *format, ...) const
 }
 
 
+ClientInfo *Game::getLocalRemoteClientInfo() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
+void Game::quitEngineerHelper()
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
 
 bool Game::isDedicated() const  
 {

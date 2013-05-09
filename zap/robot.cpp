@@ -436,7 +436,7 @@ void Robot::renderLayer(S32 layerIndex)
 
 void Robot::idle(BfObject::IdleCallPath path)
 {
-   TNLAssert(path != BfObject::ServerIdleControlFromClient, "Should never idle with ServerIdleControlFromClient");
+   TNLAssert(path != BfObject::ServerProcessingUpdatesFromClient, "Should never idle with ServerProcessingUpdatesFromClient");
 
    if(hasExploded)
       return;
@@ -451,7 +451,7 @@ void Robot::idle(BfObject::IdleCallPath path)
 
       tickTimer<Robot>(deltaT);
 
-      Parent::idle(BfObject::ServerIdleControlFromClient);   // Let's say the script is the client  ==> really not sure this is right
+      Parent::idle(BfObject::ServerProcessingUpdatesFromClient);   // Let's say the script is the client  ==> really not sure this is right
    }
 }
 

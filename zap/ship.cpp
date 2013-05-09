@@ -207,7 +207,7 @@ string Ship::toLevelCode(F32 gridSize) const
 }
 
 
-ClientInfo *Ship::getClientInfo()
+ClientInfo *Ship::getClientInfo() const
 {
    return mClientInfo;
 }
@@ -513,18 +513,18 @@ void Ship::controlMoveReplayComplete()
 }
 
 
-void Ship::idle(BfObject::IdleCallPath path)
+void Ship::idle(IdleCallPath path)
 {
-   // Don't process exploded ships
+   // Don't idle exploded ships
    if(hasExploded)
       return;
 
-   if(path == BfObject::ServerIdleControlFromClient && getClientInfo())
+   if(path == ServerProcessingUpdatesFromClient && getClientInfo())
       getClientInfo()->getStatistics()->mPlayTime += mCurrentMove.time;
 
    Parent::idle(path);
 
-   if(path == BfObject::ServerIdleMainLoop && controllingClientIsValid())
+   if(path == ServerIdleMainLoop && controllingClientIsValid())
    {
       // If this is a controlled object in the server's main
       // idle loop, process the render state forward -- this
@@ -540,16 +540,17 @@ void Ship::idle(BfObject::IdleCallPath path)
 
       mSendSpawnEffectTimer.update(mCurrentMove.time);
    }
-   else   // <=== do we really want this loop running if    path == BfObject::ServerIdleMainLoop && NOT controllingClientIsValid() ??
+   else   // <=== do we really want this loop running if    path == ServerIdleMainLoop && NOT controllingClientIsValid() ??
    {
+      TNLAssert(path != ServerIdleMainLoop, "Does this ever happen?  If so, document and remove assert...");
       // If we're the client and are out-of-touch with the server, don't move the ship... 
       // moving won't actually hurt, but this seems somehow better
-      if((path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote) && 
+      if((path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip) && 
                getActualVel().lenSquared() != 0 && 
                getControllingClient() && getControllingClient()->lostContact())
          return;  
 
-      if(path == BfObject::ClientIdleControlMain)
+      if(path == ClientIdlingLocalShip)
       {
          mFastRechargeTimer.update(mCurrentMove.time);
          mFastRecharging = mFastRechargeTimer.getCurrent() == 0;
@@ -563,12 +564,12 @@ void Ship::idle(BfObject::IdleCallPath path)
       // Dist is the distance the ship moved this tick.
       F32 dist = processMove(ActualState);
 
-      if(path == BfObject::ServerIdleControlFromClient || path == BfObject::ClientIdleControlMain)
+      if(path == ServerProcessingUpdatesFromClient || path == ClientIdlingLocalShip)
          getClientInfo()->getStatistics()->accumulateDistance(dist);
 
-      if(path == BfObject::ServerIdleControlFromClient ||
-         path == BfObject::ClientIdleControlMain ||
-         path == BfObject::ClientIdleControlReplay)
+      if(path == ServerProcessingUpdatesFromClient ||
+         path == ClientIdlingLocalShip             ||
+         path == ClientReplayingPendingMoves)
       {
          // For different optimizer settings and different platforms the floating point calculations may come out slightly
          // differently in the lowest mantissa bits.  So normalize after each update the position and velocity, so that
@@ -587,17 +588,16 @@ void Ship::idle(BfObject::IdleCallPath path)
          Parent::setActualVel(p);
       }
 
-      if(path == BfObject::ServerIdleMainLoop ||
-         path == BfObject::ServerIdleControlFromClient)
+      if(path == ServerIdleMainLoop || path == ServerProcessingUpdatesFromClient)
       {
          // Update the render state on the server to match the actual updated state, and mark the object as having changed 
-         //Position state.  An optimization here would check the before and after positions so as to not update unmoving ships.
+         // Position state.  An optimization here would check the before and after positions so as to not update unmoving ships.
          if(getRenderAngle() != getActualAngle() || getRenderPos() != getActualPos() || getRenderVel() != getActualVel())
             setMaskBits(PositionMask);
 
          copyMoveState(ActualState, RenderState);
       }
-      else if(path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote)
+      else if(path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip)
       {
          // On the client, update the interpolation of this object unless we are replaying control moves
          mInterpolating = (getActualVel().lenSquared() < MoveObject::InterpMaxVelocity*MoveObject::InterpMaxVelocity);
@@ -605,7 +605,7 @@ void Ship::idle(BfObject::IdleCallPath path)
       }
 
       // Don't want the replay to make timer count down much faster while having high ping
-      if(path != BfObject::ClientIdleControlReplay) 
+      if(path != ClientReplayingPendingMoves) 
       {
          mSensorEquipZoomTimer.update(mCurrentMove.time);
          mCloakTimer.update(mCurrentMove.time);
@@ -613,7 +613,7 @@ void Ship::idle(BfObject::IdleCallPath path)
          // Update spawn shield unless we move the ship - then it turns off .. server only
          if(mSpawnShield.getCurrent() != 0)
          {
-            if(path == ServerIdleControlFromClient && (mCurrentMove.x != 0 || mCurrentMove.y != 0))
+            if(path == ServerProcessingUpdatesFromClient && (mCurrentMove.x != 0 || mCurrentMove.y != 0))
             {
                mSpawnShield.clear();
                setMaskBits(SpawnShieldMask);  // Tell clients spawn shield turned off due to moving
@@ -624,7 +624,7 @@ void Ship::idle(BfObject::IdleCallPath path)
       }
    }
 
-   if(path == BfObject::ServerIdleMainLoop)
+   if(path == ServerIdleMainLoop)
       checkForZones();        // See if ship entered or left any zones
 
    // Update the object in the game's extents database
@@ -632,43 +632,39 @@ void Ship::idle(BfObject::IdleCallPath path)
 
    // If this is a move executing on the server and it's different from the last move,
    // then mark the move to be updated to the ghosts
-   if(path == BfObject::ServerIdleControlFromClient && !mCurrentMove.isEqualMove(&mLastMove))
+   if(path == ServerProcessingUpdatesFromClient && !mCurrentMove.isEqualMove(&mLastMove))
       setMaskBits(MoveMask);
 
    mLastMove = mCurrentMove;
 
-   if(path == BfObject::ServerIdleControlFromClient ||
-      path == BfObject::ClientIdleControlMain       ||
-      path == BfObject::ClientIdleControlReplay       )
-   {
-      // Process weapons and modules on controlled objects; handles all the energy reductions as well
-      if(path != ClientIdleControlReplay)
-      {
-         processWeaponFire();
-         processModules();
-         rechargeEnergy();
-      }
+   mRepairTargets.clear();
 
-      if(path == BfObject::ServerIdleControlFromClient && mLoadout.isModulePrimaryActive(ModuleRepair))
-         repairTargets();
+   // Find any repair targets for rendering repair rays -- on other paths, this will be done in processModules
+   if(path == ClientIdlingNotLocalShip)
+      if(mLoadout.isModulePrimaryActive(ModuleRepair))
+         findRepairTargets();       
+
+   // Process weapons and modules on controlled objects; handles all the energy reductions as well
+   if(path == ServerProcessingUpdatesFromClient || path == ClientIdlingLocalShip)
+   {
+      processWeaponFire();
+      processModules();
+      rechargeEnergy();
    }
 
-#ifndef ZAP_DEDICATED
-   if(path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote)
-   {
-      if(path == BfObject::ClientIdleMainRemote && mLoadout.isModulePrimaryActive(ModuleRepair))
-         findRepairTargets(); // for rendering found targets
+   if(path == ServerProcessingUpdatesFromClient)
+      repairTargets();
+      
 
+   if(path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip)
+   {
       mWarpInTimer.update(mCurrentMove.time);
 
       // Emit some particles, trail sections and update the turbo noise
       emitMovementSparks();
-      for(U32 i = 0; i < TrailCount; i++)
-         mTrail[i].idle(mCurrentMove.time);
-
-      updateModuleSounds();
+      updateTrails();
+      updateModuleSounds();                       
    }
-#endif
 }
 
 
@@ -734,11 +730,8 @@ void Ship::getZonesShipIsIn(Vector<DatabaseObject *> *zoneList)
 
 static Vector<DatabaseObject *> foundObjects;      // Reusable container
 
-// Returns true if we found a suitable target
 void Ship::findRepairTargets()
 {
-   mRepairTargets.clear();
-
    // We use the render position in findRepairTargets so that
    // ships that are moving can repair each other (server) and
    // so that ships don't render funny repair lines to interpolating
@@ -777,12 +770,15 @@ void Ship::findRepairTargets()
 }
 
 
-// Repairs ALL repair targets found above
+// Repairs ALL repair targets found above; server only
 void Ship::repairTargets()
 {
+   if(mRepairTargets.size() == 0)
+      return;
+
    F32 totalRepair = RepairHundredthsPerSecond * 0.01f * mCurrentMove.time * 0.001f;
 
-//   totalRepair /= mRepairTargets.size();      // Divide repair amongst repair targets... makes repair too weak
+   // totalRepair /= mRepairTargets.size();      // Divide repair amongst repair targets... makes repair too weak
 
    DamageInfo di;
    di.damageAmount = -totalRepair;
@@ -1172,13 +1168,11 @@ void Ship::damageObject(DamageInfo *theInfo)
 }
 
 
-// Returns true if ship represents local player
-#ifndef ZAP_DEDICATED
-bool Ship::isLocalPlayerShip(ClientGame *game)
+// Returns true if ship represents local player -- client only
+bool Ship::isLocalPlayerShip(Game *game) const
 {
    return getClientInfo() == game->getLocalRemoteClientInfo();
 }
-#endif
 
 
 // Runs when ship spawns -- runs on client and server
@@ -1189,9 +1183,8 @@ void Ship::onAddedToGame(Game *game)
 #ifndef ZAP_DEDICATED
    if(isClient())       // Client
    {
-      ClientGame *clientGame = static_cast<ClientGame *>(game);
-      if(isLocalPlayerShip(clientGame))
-         clientGame->setSpawnDelayed(false);    // Server tells us we're undelayed by spawning our ship
+      if(isLocalPlayerShip(game))
+         static_cast<ClientGame *>(game)->setSpawnDelayed(false);    // Server tells us we're undelayed by spawning our ship
    }
 
    else                 // Server
@@ -1343,6 +1336,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
    stream->writeFlag((updateMask & TeleportMask) && !(updateMask & InitialMask));
 
+   // Send position if this is our intial update or this ship does not represent the client that owns this ship
    bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
 
    if(!shouldWritePosition)
@@ -1357,7 +1351,9 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    {
       if(stream->writeFlag(updateMask & PositionMask))         // <=== ONE
       {
-         // Send position and speed  ==> why render? SHOULD BE ACTUAL??  How do render and actual pos diverge on the server?
+         // Send position and speed  ==> use renderPos because that is the server's best guess of where a client-controlled
+         //                              ship is at any given moment, even if the server hasn't heard from the client for
+         //                              dseveral frames due to network delays.
          gameConnection->writeCompressedPoint(getRenderPos(), stream);
          writeCompressedVelocity(getRenderVel(), BoostMaxVelocity + 1, stream);
       }
@@ -1366,12 +1362,12 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
       // If a module primary component is detected as on, pack it
       if(stream->writeFlag(updateMask & ModulePrimaryMask))    // <=== THREE
-         for(S32 i = 0; i < ModuleCount; i++)                  // Send info about which modules are active
+         for(S32 i = 0; i < ModuleCount; i++)                  // Send info about which modules are active (primary)
             stream->writeFlag(mLoadout.isModulePrimaryActive(ShipModule(i)));
 
       // If a module secondary component is detected as on, pack it
       if(stream->writeFlag(updateMask & ModuleSecondaryMask))  // <=== FOUR
-         for(S32 i = 0; i < ModuleCount; i++)                  // Send info about which modules are active
+         for(S32 i = 0; i < ModuleCount; i++)                  // Send info about which modules are active (secondary)
             stream->writeFlag(mLoadout.isModuleSecondaryActive(ShipModule(i)));
    }
    return 0;
@@ -1386,7 +1382,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    bool shipwarped = false;         // True when position changes a lot
 
    bool wasInitialUpdate = false;
-   bool playSpawnEffect = false;
+   bool playSpawnEffect  = false;
 
    TNLAssert(isClient(), "We are expecting a ClientGame here!");
 
@@ -1394,6 +1390,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       wasInitialUpdate = true;
 
+      // During the initial update, we need to assign a ClientInfo object to this ship.  We'll 
+      // identifyt the proper ClientInfo by the player's name.
+      //
       // Read the name and use it to find the clientInfo that should be waiting for us... hopefully
       StringTableEntry playerName;
       stream->readStringTableEntry(&playerName);
@@ -1453,20 +1452,18 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       // Note that during testing, we might not have a game object, so we'll need to check for NULL here.
       if(getGame())
       {
-         ClientGame *game = static_cast<ClientGame*>(getGame());
-
          if(!hasEngineerModule)           // Can't engineer without this module
          {
-            if(isLocalPlayerShip(game))   // If this ship is ours, quit engineer menu (does nothing if menu is not shown)
-               game->quitEngineerHelper();
+            if(isLocalPlayerShip(getGame()))   // If this ship is ours, quit engineer menu (does nothing if menu is not shown)
+               getGame()->quitEngineerHelper();
          }
 
          // Alert the UI that a new loadout has arrived (ClientGame->GameUI->LoadoutIndicator)
-         if(isLocalPlayerShip(game))
-            game->newLoadoutHasArrived(mLoadout);
+         if(isLocalPlayerShip(getGame()))
+            static_cast<ClientGame *>(getGame())->newLoadoutHasArrived(mLoadout);
 
          if(!wasInitialUpdate)
-            game->addHelpItem(LoadoutFinishedItem);
+            static_cast<ClientGame *>(getGame())->addHelpItem(LoadoutFinishedItem);
       }
    }
 
@@ -1482,9 +1479,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
             emitExplosion();     // Boom!
       }
 
-      ClientGame *game = static_cast<ClientGame*>(getGame());
-      if(isLocalPlayerShip(game))   // If this ship is ours, quit engineer menu
-         game->quitEngineerHelper();
+      if(isLocalPlayerShip(getGame()))   // If this ship is ours, quit engineer menu
+         getGame()->quitEngineerHelper();
    }
    else
    {
@@ -1527,8 +1523,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())     // MoveMask
    {
-      mCurrentMove = Move();  // A new, blank move
-      mCurrentMove.unpack(stream, false);
+      mCurrentMove.initialize();             // Reset mCurrentMove to its factory defaults
+      mCurrentMove.unpack(stream, false);    // And populate it with data from stream
    }
 
    if(stream->readFlag())     // ModulePrimaryMask
@@ -1862,6 +1858,7 @@ void Ship::setChangeTeamMask()
 }
 
 
+// Client only
 void Ship::emitExplosion()
 {
 #ifndef ZAP_DEDICATED
@@ -1873,11 +1870,10 @@ void Ship::emitExplosion()
 }
 
 
+// Client only
 void Ship::emitMovementSparks()
 {
 #ifndef ZAP_DEDICATED
-   //U32 deltaT = mCurrentMove.time;
-
    static const F32 TOO_SLOW_FOR_SPARKS = 0.1f;
    if(hasExploded || getActualVel().lenSquared() < sq(TOO_SLOW_FOR_SPARKS))
       return;
@@ -2029,6 +2025,16 @@ void Ship::emitMovementSparks()
           }
       }
    }
+#endif
+}
+
+
+// Client only
+void Ship::updateTrails()
+{
+#ifndef ZAP_DEDICATED
+   for(U32 i = 0; i < TrailCount; i++)
+      mTrail[i].idle(mCurrentMove.time); 
 #endif
 }
 

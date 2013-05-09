@@ -271,7 +271,7 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 void GoalZone::idle(BfObject::IdleCallPath path)
 {
-   if(path != BfObject::ClientIdleMainRemote || mFlashCount == 0)
+   if(path != ClientIdlingNotLocalShip || mFlashCount == 0)
       return;
 
    if(mFlashTimer.update(mCurrentMove.time))
