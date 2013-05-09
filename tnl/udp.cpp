@@ -634,6 +634,11 @@ Address::Address(TransportProtocol type, Address::NamedAddress name, U16 aPort)
    mIsValid = true;
 }
 
+Address::~Address()
+{
+   // Do nothing
+}
+
 bool Address::set(const IPAddress &address)
 {
    transport = IPProtocol;

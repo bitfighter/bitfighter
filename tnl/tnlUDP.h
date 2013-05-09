@@ -96,6 +96,8 @@ public:
       set(theAddress);
    }
 
+   virtual ~Address();
+
    virtual bool isValid() { return mIsValid; }
 
    /// Sets the address to the specified string, returning true if
@@ -170,7 +172,7 @@ public:
    Socket(const Address &bindAddress, U32 sendBufferSize = DefaultBufferSize, U32 recvBufferSize = DefaultBufferSize, bool acceptsBroadcast = true, bool nonblockingIO = true);
 
    /// Closes the socket.
-   ~Socket();
+   virtual ~Socket();
 
    /// Returns true if the socket was created successfully.
    bool isValid();
