@@ -92,15 +92,73 @@ void packUnpack(T input, T &output, U32 mask = 0xFFFFFFFF)
 }
 
 
+TEST_F(BfTest, LoadoutManagementTests)
+{
+   Address addr;
+   GameSettings settings;
+   ServerGame serverGame(addr, &settings, false, false);
+   GameType gt;
+   gt.addToGame(&serverGame, serverGame.getGameObjDatabase());
+
+   Ship s;
+   s.addToGame(&serverGame, serverGame.getGameObjDatabase());
+
+   // Tests to ensure that currently selected weapon stays the same when changing loadout
+   s.setLoadout(LoadoutTracker("Shield,Repair,Burst,Phaser,Bouncer"));        // Set initial loadout
+   s.selectWeapon(2);                                                         // Make bouncers active weapon
+   s.setLoadout(LoadoutTracker("Armor,Sensor,Phaser,Bouncer,Seeker"), false); // Set loadout in noisy mode
+   ASSERT_EQ(s.getActiveWeapon(), WeaponBounce);                              // Bouncer should still be active weapon
+   s.setLoadout(LoadoutTracker("Armor,Shield,Triple,Mine,Bouncer"), true);    // Set loadout in silent mode
+   ASSERT_EQ(s.getActiveWeapon(), WeaponBounce);                              // Bouncer should _still_ be active weapon
+   s.setLoadout(LoadoutTracker("Armor,Shield,Triple,Phaser,Mine"), false);    // Set loadout in noisy mode
+   ASSERT_EQ(s.getActiveWeapon(), WeaponTriple);                              // Bouncer not in loadout, should select first weap (Triple)
+   s.selectWeapon(2);                                                         // Select 3rd weapon, Mine
+   ASSERT_EQ(s.getActiveWeapon(), WeaponMine);                                // Confirm we've selected it
+   s.setLoadout(LoadoutTracker("Armor,Shield,Seeker,Phaser,Triple"), true);   // Set loadout in silent mode
+   ASSERT_EQ(s.getActiveWeapon(), WeaponSeeker);                              // Mine not in loadout, should select first weap (Seeker)
+
+   // Tests to ensure that resource items get dropped when changing loadout away from engineer.  We'll also add a flag
+   // and verify that the flag is not similarly dropped.
+   ResourceItem r;
+   FlagItem f;
+
+   r.addToGame(&serverGame, serverGame.getGameObjDatabase());
+   f.addToGame(&serverGame, serverGame.getGameObjDatabase());
+
+   s.setLoadout(LoadoutTracker("Engineer,Shield,Triple,Mine,Bouncer"));       // Ship has engineer
+   r.mountToShip(&s);
+   f.mountToShip(&s);
+   ASSERT_TRUE(s.isCarryingItem(ResourceItemTypeNumber));
+   ASSERT_TRUE(s.isCarryingItem(FlagTypeNumber));
+   s.setLoadout(LoadoutTracker("Turbo,Shield,Triple,Mine,Bouncer"), false);   // Ship does not have engineer
+   ASSERT_FALSE(s.isCarryingItem(ResourceItemTypeNumber));
+   ASSERT_TRUE(s.isCarryingItem(FlagTypeNumber));
+
+   // Same test, in silent mode
+   s.setLoadout(LoadoutTracker("Engineer,Shield,Triple,Mine,Bouncer"));       // Ship has engineer
+   r.mountToShip(&s);
+   ASSERT_TRUE(s.isCarryingItem(ResourceItemTypeNumber));
+   ASSERT_TRUE(s.isCarryingItem(FlagTypeNumber));
+   s.setLoadout(LoadoutTracker("Turbo,Shield,Triple,Mine,Bouncer"), true);    // Ship does not have engineer
+   ASSERT_FALSE(s.isCarryingItem(ResourceItemTypeNumber));
+   ASSERT_TRUE(s.isCarryingItem(FlagTypeNumber));
+}
+
+
 TEST_F(BfTest, ShipTests)
 {
-   Ship s1, s2;
+   Ship serverShip, clientShip;
+   ASSERT_TRUE(serverShip.isServerCopyOf(clientShip));   // New ships start out equal
 
-   // Set some shippy stuff
+   // Set some shippy stuff on serverShip
+   serverShip.setRenderPos(Point(100,100));
+   serverShip.setLoadout(LoadoutTracker("Shield,Repair,Burst,Phaser,Bouncer"));
 
-   packUnpack(s1, s2);   
+   ASSERT_FALSE(serverShip.isServerCopyOf(clientShip));  // After updating server copy, ships no longer equal
 
-   // Verify that everything is the same
+   packUnpack(serverShip, clientShip);                   // Transmit server details to client
+
+   ASSERT_TRUE(serverShip.isServerCopyOf(clientShip));   // Ships should be equal again
 }
 
 
@@ -145,6 +203,7 @@ TEST_F(BfTest, LittleStory)
 {
    Address addr;
    GameSettings settings;
+   { ServerGame serverGame(addr, &settings, false, false); }
    ServerGame serverGame(addr, &settings, false, false);
 
    GameType gt;
@@ -169,8 +228,8 @@ TEST_F(BfTest, LittleStory)
    for(S32 i = 0; i < 20; i++)
    {
       Point prevPos = ship->getPos();
-      serverGame.idle(10);
-      ASSERT_NE(ship->getPos(), prevPos);
+      serverGame.idle(10);                   // when i == 16 this locks up... why?
+      ASSERT_NE(ship->getPos(), prevPos);    
    }
 
    // Note -- ship is over near (71, 0)
@@ -191,7 +250,7 @@ TEST_F(BfTest, LittleStory)
          break;
       }
    }
-   ASSERT_TRUE(shipDeleted);     // Ship was killed, and ship object was cleaned up
+   ASSERT_TRUE(shipDeleted);     // Ship was killed, and object was cleaned up
 }
 
 

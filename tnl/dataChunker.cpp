@@ -48,6 +48,8 @@ DataChunker::~DataChunker()
 void *DataChunker::alloc(S32 size)
 {
    TNLAssert(size <= chunkSize, "Data chunk too large.");
+   TNLAssert(size > 0, "Cannot allocate a 0 byte block!");
+
    if(!curBlock || size + curBlock->curIndex > chunkSize)
    {
       DataBlock *temp = new DataBlock(chunkSize);

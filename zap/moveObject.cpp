@@ -138,8 +138,8 @@ void MoveObject::onAddedToGame(Game *game)
 #endif
 }
 
-static const float MoveObjectCollisionElasticity = 1.7f;
 
+static const float MoveObjectCollisionElasticity = 1.7f;
 
 Rect MoveObject::calcExtents()
 {

@@ -1441,7 +1441,7 @@ void GameType::clientRequestLoadout(ClientInfo *clientInfo, const LoadoutTracker
 
       if(object)
          if(object->getTeam() == ship->getTeam() || object->getTeam() == -1)
-            clientInfo->updateLoadout(true, mEngineerEnabled, false);
+            clientInfo->updateLoadout(true, mEngineerEnabled);
    }
 }
 

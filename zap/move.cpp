@@ -91,7 +91,7 @@ bool Move::isAnyModActive() const
 }
 
 
-bool Move::isEqualMove(Move *move)
+bool Move::isEqualMove(const Move *move) const
 {
    for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
       if(move->modulePrimary[i] != modulePrimary[i] || move->moduleSecondary[i] != moduleSecondary[i])

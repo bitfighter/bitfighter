@@ -84,8 +84,8 @@ public:
    bool isWeaponActive(U32 weaponIndex) const;
 
    WeaponType getWeapon(U32 weaponIndex) const;
-   WeaponType getCurrentWeapon() const;
-   U32 getCurrentWeaponIndx() const;
+   WeaponType getActiveWeapon() const;
+   U32 getActiveWeaponIndx() const;
 
    void resetLoadout();    // Reset this loadout to its factory settings
 

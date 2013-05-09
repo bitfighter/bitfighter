@@ -152,6 +152,33 @@ Ship *Ship::clone() const
 }
 
 
+// Compare a client copy of a ship to the server copy and see if they are "equal"
+bool Ship::isServerCopyOf(const Ship &clientShip) const
+{
+    if(mLoadout != clientShip.mLoadout)
+       return false;
+
+    if(mHealth != clientShip.mHealth || mEnergy != clientShip.mEnergy || getTeam() != clientShip.getTeam())
+       return false;
+
+    // Server sends renderPos/vel, client stores those in actualPos/vel
+    if(getRenderPos() != clientShip.getActualPos() || getRenderVel() != clientShip.getRenderVel())
+       return false;
+
+    if(!mCurrentMove.isEqualMove(&clientShip.mCurrentMove))
+       return false;
+
+    if(mMountedItems.size() != clientShip.mMountedItems.size())
+       return false;
+
+    for(S32 i = 0; i < mMountedItems.size(); i++)
+       if(mMountedItems[i]->getObjectTypeNumber() != clientShip.mMountedItems[i]->getObjectTypeNumber())
+          return false;
+
+    return true;
+}
+
+
 // Initialize some things that both ships and bots care about... this will get run during the ship's constructor
 // and also after a bot respawns and needs to reset itself
 void Ship::initialize(const Point &pos)
@@ -414,17 +441,17 @@ Point Ship::getAimVector() const
 
 void Ship::selectNextWeapon()
 {
-   setActiveWeapon(mLoadout.getCurrentWeaponIndx() + 1);
+   setActiveWeapon(mLoadout.getActiveWeaponIndx() + 1);
 }
 
 
 void Ship::selectPrevWeapon()
 {
-   setActiveWeapon(mLoadout.getCurrentWeaponIndx() - 1);
+   setActiveWeapon(mLoadout.getActiveWeaponIndx() - 1);
 }
 
 
-// I *think* this runs only on the server
+// I *think* this runs only on the server, and from tests
 void Ship::selectWeapon(S32 weaponIdx)
 {
    while(weaponIdx < 0)
@@ -445,7 +472,7 @@ void Ship::processWeaponFire()
 
    mWeaponFireDecloakTimer.update(mCurrentMove.time);
 
-   WeaponType curWeapon = mLoadout.getCurrentWeapon();
+   WeaponType curWeapon = mLoadout.getActiveWeapon();
 
    GameType *gameType = getGame()->getGameType();
 
@@ -532,6 +559,7 @@ void Ship::idle(IdleCallPath path)
       // clients to properly lead other clients, instead of
       // piecewise stepping only when packets arrive from the client.
       processMove(RenderState);
+
       if(getActualVel().lenSquared() != 0 || getActualPos() != getRenderPos())
          setMaskBits(PositionMask);
 
@@ -542,7 +570,9 @@ void Ship::idle(IdleCallPath path)
    }
    else   // <=== do we really want this loop running if    path == ServerIdleMainLoop && NOT controllingClientIsValid() ??
    {
-      TNLAssert(path != ServerIdleMainLoop, "Does this ever happen?  If so, document and remove assert...");
+      //TNLAssert(path != ServerIdleMainLoop, "Does this ever happen?  If so, document and remove assert...");
+      // Happens during testing...
+
       // If we're the client and are out-of-touch with the server, don't move the ship... 
       // moving won't actually hurt, but this seems somehow better
       if((path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip) && 
@@ -1235,7 +1265,7 @@ void Ship::writeControlState(BitStream *stream)
    else
       stream->writeRangedU32(U32(mFireTimer), 0, MaxFireDelay + negativeFireDelay);
 
-   stream->writeRangedU32(mLoadout.getCurrentWeaponIndx(), 0, ShipWeaponCount);
+   stream->writeRangedU32(mLoadout.getActiveWeaponIndx(), 0, ShipWeaponCount);
 }
 
 
@@ -1259,13 +1289,13 @@ void Ship::readControlState(BitStream *stream)
    //if(mFireTimer > S32(MaxFireDelay))
    //   mFireTimer =  S32(MaxFireDelay) - mFireTimer;
 
-   WeaponType previousWeapon = mLoadout.getCurrentWeapon();
+   WeaponType previousWeapon = mLoadout.getActiveWeapon();
    setActiveWeapon(stream->readRangedU32(0, ShipWeaponCount));
 
 #ifndef ZAP_DEDICATED
-   if(previousWeapon != mLoadout.getCurrentWeapon() && !getGame()->getSettings()->getIniSettings()->showWeaponIndicators)
+   if(previousWeapon != mLoadout.getActiveWeapon() && !getGame()->getSettings()->getIniSettings()->showWeaponIndicators)
       getGame()->displayMessage(Colors::cyan, "%s selected.", 
-                         WeaponInfo::getWeaponInfo(mLoadout.getCurrentWeapon()).name.getString());
+                         WeaponInfo::getWeaponInfo(mLoadout.getActiveWeapon()).name.getString());
 #endif
 }
 
@@ -1708,6 +1738,8 @@ bool Ship::isLoadoutSameAsCurrent(const LoadoutTracker &loadout)
 // This actualizes the requested loadout... when, for example the user enters a loadout zone
 // To set the "on-deck" loadout, use GameType->setClientShipLoadout()
 // Returns true if loadout has changed
+// silent param only true when a ship is spawning and there is a loadout zone in the level; we need to update
+// the ship's loadout to be what they had before they died, but we don't want to send a message to the client
 // Server only?
 bool Ship::setLoadout(const LoadoutTracker &loadout, bool silent)
 {
@@ -1718,21 +1750,18 @@ bool Ship::setLoadout(const LoadoutTracker &loadout, bool silent)
    if(getClientInfo())
       getClientInfo()->getStatistics()->mChangedLoadout++;
 
-   WeaponType currentWeapon = mLoadout.getCurrentWeapon();
+   WeaponType currentWeapon = mLoadout.getActiveWeapon();
 
    mLoadout = loadout;
 
-   TNLAssert(mLoadout.getCurrentWeapon() == loadout.getCurrentWeapon(), "Delete this assert!");
+   TNLAssert(mLoadout.getActiveWeapon() == loadout.getActiveWeapon(), "Delete this assert!");
 
    setMaskBits(LoadoutMask);
-
-   if(silent) 
-      return true;
 
    // Try to see if we can maintain the same weapon we had before.
    S32 i;
    for(i = 0; i < ShipWeaponCount; i++)
-      if(mLoadout.getCurrentWeapon() == currentWeapon)
+      if(mLoadout.getWeapon(i) == currentWeapon)
       {
          setActiveWeapon(i);
          break;
@@ -1752,27 +1781,39 @@ bool Ship::setLoadout(const LoadoutTracker &loadout, bool silent)
       }
    }
 
-   // And notifiy user
-   GameConnection *cc = getControllingClient();
-
-   if(cc)
+   if(!silent) 
    {
-      static StringTableEntry msg("Ship loadout configuration updated.");
-      cc->s2cDisplayMessage(GameConnection::ColorAqua, SFXUIBoop, msg);
+      // Notifiy user
+      GameConnection *cc = getControllingClient();
+
+      if(cc)
+      {
+         static StringTableEntry msg("Ship loadout configuration updated.");
+         cc->s2cDisplayMessage(GameConnection::ColorAqua, SFXUIBoop, msg);
+      }
    }
 
    return true;
 }
 
 
+// Runs on client and server
 void Ship::setActiveWeapon(U32 weaponIndex)
 {
    mLoadout.setActiveWeapon(weaponIndex);
 
 #ifndef ZAP_DEDICATED
-   if(!mGame->isServer())
+   // Notify the UI that the weapon has changed (mGame might be NULL when testing)
+   if(mGame && !mGame->isServer())    
       static_cast<ClientGame *>(mGame)->setActiveWeapon(weaponIndex);
 #endif
+}
+
+
+// Used by tests
+WeaponType Ship::getActiveWeapon() const
+{
+   return mLoadout.getActiveWeapon();
 }
 
 
@@ -2265,8 +2306,8 @@ S32 Ship::lua_isModActive(lua_State *L) {
    return returnBool(L, mLoadout.isModulePrimaryActive(module) || mLoadout.isModuleSecondaryActive(module));
 }
 
-S32 Ship::lua_getAngle(lua_State *L)        { return returnFloat(L, getCurrentMove().angle);      }  // Get angle ship is pointing at
-S32 Ship::lua_getActiveWeapon(lua_State *L) { return returnInt  (L, mLoadout.getCurrentWeapon()); }  // Get WeaponIndex for current weapon
+S32 Ship::lua_getAngle(lua_State *L)        { return returnFloat(L, getCurrentMove().angle);     }  // Get angle ship is pointing at
+S32 Ship::lua_getActiveWeapon(lua_State *L) { return returnInt  (L, mLoadout.getActiveWeapon()); }  // Get WeaponIndex for current weapon
                                
 // Ship status
 S32 Ship::lua_getEnergy(lua_State *L)       { return returnFloat(L, (F32)mEnergy / (F32)EnergyMax); } // Return ship's energy as a fraction between 0 and 1

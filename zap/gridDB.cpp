@@ -87,7 +87,10 @@ GridDatabase::~GridDatabase()
    mCountGridDatabase--;
 
    if(mCountGridDatabase == 0)
+   {
       delete mChunker;
+      mChunker = NULL;
+   }
 }
 
 

@@ -181,6 +181,8 @@ public:
    void selectNextWeapon();                   
    void selectPrevWeapon();
    void selectWeapon(S32 weaponIndex);    // Select weapon by index
+   WeaponType getActiveWeapon() const;
+
 
    Timer mSensorEquipZoomTimer;
    Timer mWeaponFireDecloakTimer;
@@ -210,6 +212,8 @@ public:
    Ship(ClientInfo *clientInfo, S32 team, const Point &p, bool isRobot = false);   // Standard constructor   
    explicit Ship(lua_State *L = NULL);                                             // Combined Lua / C++ default constructor
    virtual ~Ship();                                                                // Destructor
+                                             
+   bool isServerCopyOf(const Ship &r) const; // Kind of like an equality comparitor, but accounting for differences btwn client and server
 
    F32 getHealth() const;
    S32 getEnergy() const;

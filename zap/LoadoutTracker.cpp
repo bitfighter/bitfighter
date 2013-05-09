@@ -279,13 +279,13 @@ WeaponType LoadoutTracker::getWeapon(U32 weaponIndex) const
 }
 
 
-WeaponType LoadoutTracker::getCurrentWeapon() const
+WeaponType LoadoutTracker::getActiveWeapon() const
 {
    return mWeapons[mActiveWeapon];
 }
 
 
-U32 LoadoutTracker::getCurrentWeaponIndx() const
+U32 LoadoutTracker::getActiveWeaponIndx() const
 {
    return mActiveWeapon;
 }

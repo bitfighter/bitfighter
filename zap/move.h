@@ -56,7 +56,7 @@ public:
    static const S32 MaxMoveTime = 127;
 
    bool isAnyModActive() const;
-   bool isEqualMove(Move *prev);    // Compares this move to the previous one -- are they the same?
+   bool isEqualMove(const Move *move) const;    // Compares this move to the previous one -- are they the same?
    void pack(BitStream *stream, Move *prev, bool packTime);
    void unpack(BitStream *stream, bool unpackTime);
    void prepare();                  // Packs and unpacks move to ensure effects of rounding are same on client and server

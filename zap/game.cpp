@@ -1294,7 +1294,8 @@ Vector<AbstractSpawn *> Game::getSpawnPoints(TypeNumber typeNumber, S32 teamInde
 
 void Game::addFlag(FlagItem *flag)
 {
-   return mGameType->addFlag(flag);
+   if(mGameType)
+      mGameType->addFlag(flag);
 }
 
 

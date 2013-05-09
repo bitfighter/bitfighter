@@ -106,7 +106,7 @@ class GridDatabase
 private:
    U32 mDatabaseId;
    static U32 mQueryId;
-   static U32 mCountGridDatabase;
+   static U32 mCountGridDatabase;      // Reference counter for destruction of mChunker
 
    WallSegmentManager *mWallSegmentManager;
 
@@ -139,7 +139,7 @@ public:
 
    explicit GridDatabase(bool createWallSegmentManager = true);   // Constructor
    // GridDatabase::GridDatabase(const GridDatabase &source);
-   virtual ~GridDatabase();                              // Destructor
+   virtual ~GridDatabase();                                       // Destructor
 
 
    static const S32 BucketWidthBitShift = 8;    // Width/height of each bucket in pixels, in a form of 2 ^ n, 8 is 256 pixels

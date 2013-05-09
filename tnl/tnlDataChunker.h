@@ -96,8 +96,8 @@ template<class T>
 class ClassChunker: private DataChunker
 {
    S32 numAllocated; ///< number of elements currently allocated through this ClassChunker
-   S32 elementSize; ///< the size of each element, or the size of a pointer, whichever is greater
-   T *freeListHead; ///< a pointer to a linked list of freed elements for reuse
+   S32 elementSize;  ///< the size of each element, or the size of a pointer, whichever is greater
+   T *freeListHead;  ///< a pointer to a linked list of freed elements for reuse
 public:
    ClassChunker(S32 size = DataChunker::ChunkSize) : DataChunker(size)
    {
