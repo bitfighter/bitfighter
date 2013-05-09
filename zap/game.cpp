@@ -1449,6 +1449,7 @@ void Game::displayMessage(const Color &msgColor, const char *format, ...) const
 ClientInfo *Game::getLocalRemoteClientInfo() const
 {
    TNLAssert(false, "Not implemented for this class!");
+   return NULL;
 }
 
 
