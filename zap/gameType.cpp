@@ -2290,6 +2290,9 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
    if(client->getTeamIndex() == team)     // Don't explode if not switching team
       return;
 
+   // Fire onPlayerTeamChangedEvent
+   EventManager::get()->fireEvent(NULL, EventManager::PlayerTeamChangedEvent, client->getPlayerInfo());
+
    TNLAssert(client->isRobot() || client->getConnection()->getControlObject() == client->getShip(), "Not equal?!?");
    Ship *ship = client->getShip();    // Get the ship that's switching
 

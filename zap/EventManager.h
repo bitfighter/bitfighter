@@ -55,16 +55,17 @@ class EventManager
 // See http://stackoverflow.com/questions/6635851/real-world-use-of-x-macros
 //          Enum                 Name               Lua event handler 
 #define EVENT_TABLE \
-   EVENT(TickEvent,             "Tick",            "onTick"            ) \
-   EVENT(ShipSpawnedEvent,      "ShipSpawned",     "onShipSpawned"     ) \
-   EVENT(ShipKilledEvent,       "ShipKilled",      "onShipKilled"      ) \
-   EVENT(PlayerJoinedEvent,     "PlayerJoined",    "onPlayerJoined"    ) \
-   EVENT(PlayerLeftEvent,       "PlayerLeft",      "onPlayerLeft"      ) \
-   EVENT(MsgReceivedEvent,      "MsgReceived",     "onMsgReceived"     ) \
-   EVENT(NexusOpenedEvent,      "NexusOpened",     "onNexusOpened"     ) \
-   EVENT(NexusClosedEvent,      "NexusClosed",     "onNexusClosed"     ) \
-   EVENT(ShipEnteredZoneEvent,  "ShipEnteredZone", "onShipEnteredZone" ) \
-   EVENT(ShipLeftZoneEvent,     "ShipLeftZone",    "onShipLeftZone"    ) \
+   EVENT(TickEvent,              "Tick",              "onTick"             ) \
+   EVENT(ShipSpawnedEvent,       "ShipSpawned",       "onShipSpawned"      ) \
+   EVENT(ShipKilledEvent,        "ShipKilled",        "onShipKilled"       ) \
+   EVENT(PlayerJoinedEvent,      "PlayerJoined",      "onPlayerJoined"     ) \
+   EVENT(PlayerLeftEvent,        "PlayerLeft",        "onPlayerLeft"       ) \
+   EVENT(PlayerTeamChangedEvent, "PlayerTeamChanged", "onPlayerTeamChanged") \
+   EVENT(MsgReceivedEvent,       "MsgReceived",       "onMsgReceived"      ) \
+   EVENT(NexusOpenedEvent,       "NexusOpened",       "onNexusOpened"      ) \
+   EVENT(NexusClosedEvent,       "NexusClosed",       "onNexusClosed"      ) \
+   EVENT(ShipEnteredZoneEvent,   "ShipEnteredZone",   "onShipEnteredZone"  ) \
+   EVENT(ShipLeftZoneEvent,      "ShipLeftZone",      "onShipLeftZone"     ) \
 
 public:
 
