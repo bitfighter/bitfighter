@@ -401,6 +401,12 @@ ChatUserInterface::ChatUserInterface(ClientGame *game) : Parent(game), ChatParen
    mRenderUnderlyingUI = false;
 }
 
+// Destructor
+ChatUserInterface::~ChatUserInterface()
+{
+   // Do nothing
+}
+
 
 void ChatUserInterface::idle(U32 timeDelta)
 {

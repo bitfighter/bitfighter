@@ -54,6 +54,8 @@ private:
    MoveState mMoveState[MoveStateCount];     // MoveStateCount = 3, as per enum above
 
 public:
+   virtual ~MoveStates();
+
    virtual Point getPos(S32 state) const;
    virtual void setPos(S32 state, const Point &pos);
 

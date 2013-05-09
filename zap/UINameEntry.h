@@ -53,6 +53,7 @@ protected:
 
 public:
    explicit TextEntryUserInterface(ClientGame *game);  // Constructor
+   virtual ~TextEntryUserInterface();                  // Destructor
 
    virtual void onActivate();
    void render();
@@ -67,19 +68,6 @@ public:
    string getSaltedHashText();
    void setString(string str);
 };
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-//class NameEntryUserInterface : public MenuUserInterface
-//{
-//public:
-//   NameEntryUserInterface();      // Constructor
-//
-//   virtual void onAccept(const char *text);
-//   virtual void onEscape();
-//};
 
 
 ////////////////////////////////////////

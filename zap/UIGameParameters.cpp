@@ -89,6 +89,12 @@ GameParamUserInterface::GameParamUserInterface(ClientGame *game) : Parent(game)
 }
 
 
+GameParamUserInterface::~GameParamUserInterface()
+{
+   // Do nothing
+}
+
+
 void GameParamUserInterface::onActivate()
 {
    selectedIndex = 0;                          // First item selected when we begin

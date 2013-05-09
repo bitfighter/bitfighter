@@ -80,6 +80,12 @@ MenuUserInterface::MenuUserInterface(ClientGame *game, const string &title) : Us
    mMenuTitle = title;
 }
 
+// Destructor
+MenuUserInterface::~MenuUserInterface()
+{
+   // Do nothing
+}
+
 
 void MenuUserInterface::initialize()
 {

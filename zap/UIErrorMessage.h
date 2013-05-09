@@ -40,6 +40,8 @@ private:
 
 public:
    explicit AbstractMessageUserInterface(ClientGame *game);      // Constructor
+   virtual ~AbstractMessageUserInterface();                      // Destructor
+
    static const S32 MAX_LINES = 9;
    const char *mTitle;
    const char *mInstr;

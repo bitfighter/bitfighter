@@ -63,6 +63,7 @@ public:
    // Constructors
    explicit QuickMenuUI(ClientGame *game);
    QuickMenuUI(ClientGame *game, const string &title);
+   virtual ~QuickMenuUI();
 
    void render();
 

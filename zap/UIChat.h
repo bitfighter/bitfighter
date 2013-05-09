@@ -142,6 +142,7 @@ private:
 
 public:
    explicit ChatUserInterface(ClientGame *game);      // Constructor
+   virtual ~ChatUserInterface();                      // Constructor
 
    // UI related
    void render();

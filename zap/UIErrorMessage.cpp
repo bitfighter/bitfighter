@@ -35,6 +35,12 @@ AbstractMessageUserInterface::AbstractMessageUserInterface(ClientGame *game) : P
 }
 
 
+AbstractMessageUserInterface::~AbstractMessageUserInterface()
+{
+   // Do nothing
+}
+
+
 void AbstractMessageUserInterface::onActivate()
 {
    // Do nothing -- block parent's onActivate
