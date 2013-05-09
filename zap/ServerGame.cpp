@@ -918,8 +918,9 @@ void ServerGame::suspendIfNoActivePlayers()
          return;
    }
 
-
-   if(getPlayerCount() == 0)
+   // If this is not a dedicated server, the only way we'd get to 0 players is if the locally hosted player
+   // has quit... which means we're shutting down.  In which case we don't want to suspend.
+   if(getPlayerCount() == 0 && isDedicated())
       suspendGame();
    else
    {
@@ -928,7 +929,7 @@ void ServerGame::suspendIfNoActivePlayers()
          if(!getClientInfo(i)->isRobot())  
             getClientInfo(i)->getConnection()->s2cSuspendGame(false);
 
-      mTimeToSuspend.reset();
+      mTimeToSuspend.reset();    // Game will suspend when this timer expires
    }
 }
 

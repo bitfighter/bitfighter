@@ -2374,8 +2374,7 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
 
    // Note that we do not need to delete clientConnection... TNL handles that, and the destructor gets runs shortly after we get here
 
-   if(!static_cast<ServerGame *>(getGame())->isTestServer())
-      static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
+   static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
 }
 
 
