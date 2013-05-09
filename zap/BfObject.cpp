@@ -1085,7 +1085,7 @@ const Move &BfObject::getCurrentMove()
 
 const Move &BfObject::getLastMove()
 {
-   return mLastMove;
+   return mPrevMove;
 }
 
 
@@ -1097,7 +1097,7 @@ void BfObject::setCurrentMove(const Move &move)
 
 void BfObject::setPrevMove(const Move &move)
 {
-   mLastMove = move;
+   mPrevMove = move;
 }
 
 

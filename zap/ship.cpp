@@ -632,10 +632,10 @@ void Ship::idle(IdleCallPath path)
 
    // If this is a move executing on the server and it's different from the last move,
    // then mark the move to be updated to the ghosts
-   if(path == ServerProcessingUpdatesFromClient && !mCurrentMove.isEqualMove(&mLastMove))
+   if(path == ServerProcessingUpdatesFromClient && !mCurrentMove.isEqualMove(&mPrevMove))
       setMaskBits(MoveMask);
 
-   mLastMove = mCurrentMove;
+   mPrevMove = mCurrentMove;
 
    mRepairTargets.clear();
 

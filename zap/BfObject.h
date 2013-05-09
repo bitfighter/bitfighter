@@ -256,7 +256,7 @@ private:
 
 
 protected:
-   Move mLastMove;      // The move for the previous update
+   Move mPrevMove;      // The move for the previous update
    Move mCurrentMove;   // The move for the current update
    StringTableEntry mKillString;     // Alternate descr of what shot projectile (e.g. "Red turret"), used when shooter is not a ship or robot
    Game *mGame;
