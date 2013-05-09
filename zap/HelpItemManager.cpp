@@ -69,7 +69,6 @@ void HelpItemManager::idle(U32 timeDelta)
    mFloodControl.update(timeDelta);
    mPacedTimer.update(timeDelta);
 
-
    // Add queued items
    if(mPacedTimer.getCurrent() == 0 && mQueuedItems.size() > 0)
    {
@@ -79,7 +78,6 @@ void HelpItemManager::idle(U32 timeDelta)
       addHelpItem(queuedMessage);
       mPacedTimer.reset();
    }
-
 
    for(S32 i = 0; i < mHelpTimer.size(); i++)
       if(mHelpTimer[i].update(timeDelta))
