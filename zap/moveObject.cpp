@@ -2488,6 +2488,12 @@ void ResourceItem::dismount(DismountMode dismountMode)
 }
 
 
+bool ResourceItem::isItemThatMakesYouVisibleWhileCloaked()
+{
+   return false;
+}
+
+
 /////
 // Lua interface
 

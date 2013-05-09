@@ -577,6 +577,7 @@ public:
    bool collide(BfObject *hitObject);
    void damageObject(DamageInfo *theInfo);
    void dismount(DismountMode dismountMode);
+   bool isItemThatMakesYouVisibleWhileCloaked();
 
    static void generateOutlinePoints(const Point &pos, F32 scale, Vector<Point> &points);
 
