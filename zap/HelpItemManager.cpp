@@ -117,7 +117,28 @@ static S32 doRenderMessages(const char **messages, S32 yPos)
    for(S32 i = 0; messages[i]; i++)
    {
       TNLAssert(i < MAX_LINES, "Too many lines... better increase MAX_LINES!");
-      drawCenteredString(yPos, FontSize, messages[i]);
+
+      // Do some token subsititution for dynamic elements such as keybindings
+      // [[MOVEMENT]]
+
+
+      string renderStr(messages[i]);
+
+      // See if any substitutions will be necessary
+      size_t startPos = renderStr.find("[[");      // If this isn't here, no further searching is necessary
+      if(startPos != string::npos)
+      {
+         const char *what = "[[MOVEMENT]]";
+         size_t pos = renderStr.find(what, startPos);
+
+         if(pos != string::npos)
+         {
+            size_t len = strlen(what);
+            renderStr.replace(pos, len, "A-W-S-D");
+         }
+      }
+
+      drawCenteredString(yPos, FontSize, renderStr.c_str());
       yPos += FontSize + FontGap;
    }
 
