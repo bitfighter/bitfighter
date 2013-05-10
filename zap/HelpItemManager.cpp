@@ -108,14 +108,17 @@ void HelpItemManager::idle(U32 timeDelta)
 }
 
 
-static S32 doRenderMessages(const char **messages, S32 yPos, S32 fontSize, S32 fontGap)
+static S32 doRenderMessages(const char **messages, S32 yPos)
 {
+   static const S32 FontSize = 18;
+   static const S32 FontGap  = 6;
+
    // Final item in messages array will be NULL; loop until we hit that
    for(S32 i = 0; messages[i]; i++)
    {
       TNLAssert(i < MAX_LINES, "Too many lines... better increase MAX_LINES!");
-      drawCenteredString(yPos, fontSize, messages[i]);
-      yPos += fontSize + fontGap;
+      drawCenteredString(yPos, FontSize, messages[i]);
+      yPos += FontSize + FontGap;
    }
 
    return yPos;
@@ -124,9 +127,6 @@ static S32 doRenderMessages(const char **messages, S32 yPos, S32 fontSize, S32 f
 
 void HelpItemManager::renderMessages(S32 yPos) const
 {
-   static const S32 FontSize = 18;
-   static const S32 FontGap  = 6;
-
 #  ifdef TNL_DEBUG
       // This bit is for displaying our help messages one-by-one so we can see how they look on-screen
       if(mTestingTimer.getCurrent() > 0)
@@ -135,7 +135,7 @@ void HelpItemManager::renderMessages(S32 yPos) const
          glColor(Colors::red);
 
          const char **messages = helpItems[mTestingCtr % HelpItemCount].helpMessages;
-         doRenderMessages(messages, yPos, FontSize, FontGap);
+         doRenderMessages(messages, yPos);
 
          FontManager::popFontContext();
          return;
@@ -153,7 +153,7 @@ void HelpItemManager::renderMessages(S32 yPos) const
       glColor(Colors::green, alpha);
 
       const char **messages = helpItems[mHelpItems[i]].helpMessages;
-      yPos += doRenderMessages(messages, yPos, FontSize, FontGap) + 15;  // Gap between messages
+      yPos += doRenderMessages(messages, yPos) + 15;  // Gap between messages
    }
 
    FontManager::popFontContext();
