@@ -24,8 +24,8 @@
 using namespace Zap;
 namespace Zap
 {
-void exitToOs(S32 errcode) { TNLAssert(false, "Should never be called!"); }
-void shutdownBitfighter()  { TNLAssert(false, "Should never be called!"); };
+//void exitToOs(S32 errcode) { TNLAssert(false, "Should never be called!"); }
+//void shutdownBitfighter()  { TNLAssert(false, "Should never be called!"); };
 }
 
 
