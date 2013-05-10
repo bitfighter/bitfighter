@@ -74,12 +74,6 @@ private:
 
    Timer mFloodControl;
 
-   // For displaying items in a test capacity
-#ifdef TNL_DEBUG
-   S32 mTestingCtr;
-   Timer mTestingTimer;
-#endif
-
    void buildItemsToHighlightList();
 
 public:
@@ -104,6 +98,14 @@ public:
    void setAlreadySeenString(const string &vals);
 
    const Vector<HighlightItem> *getItemsToHighlight() const;
+
+
+#ifdef TNL_DEBUG
+   // For displaying items in a test capacity
+   S32 mTestingCtr;
+   Timer mTestingTimer;
+   void debugShowNextHelpItem();
+#endif
 };
 
 

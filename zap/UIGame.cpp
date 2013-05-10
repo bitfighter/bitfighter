@@ -938,6 +938,13 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       }
    }
 
+#ifdef TNL_DEBUG
+   // These commands only available in debug builds
+   if(inputCode == KEY_H && InputCodeManager::checkModifier(KEY_CTRL))     // Ctrl+H to show next HelpItem
+      mHelpItemManager.debugShowNextHelpItem();
+#endif
+
+
    if(!gConsole.isVisible())
    {
       if(!isChatting())

@@ -50,7 +50,7 @@ HelpItemManager::HelpItemManager()
    mDisabled = false;
 
 #ifdef TNL_DEBUG
-   mTestingCtr = 0;
+   mTestingCtr = -1;
    mTestingTimer.setPeriod(4000);
 #endif
 
@@ -73,6 +73,10 @@ void HelpItemManager::idle(U32 timeDelta)
 
    mFloodControl.update(timeDelta);
    mPacedTimer.update(timeDelta);
+
+#ifdef TNL_DEBUG
+   mTestingTimer.update(timeDelta);
+#endif
 
    // Add queued items
    if(mPacedTimer.getCurrent() == 0 && mQueuedItems.size() > 0)
@@ -115,7 +119,7 @@ void HelpItemManager::renderMessages(S32 yPos) const
       {
          FontManager::pushFontContext(HelpItemContext);
          glColor(Colors::red);
-         const char **messages = helpItems[mTestingCtr].helpMessages;
+         const char **messages = helpItems[mTestingCtr % HelpItemCount].helpMessages;
 
          // Final item in messages array will be NULL; loop until we hit that
          for(S32 j = 0; messages[j]; j++)
@@ -130,7 +134,7 @@ void HelpItemManager::renderMessages(S32 yPos) const
 #  endif
 
    if(mInitialDelayTimer.getCurrent() > 0)
-      return
+      return;
    
    FontManager::pushFontContext(HelpItemContext);
 
@@ -154,6 +158,15 @@ void HelpItemManager::renderMessages(S32 yPos) const
 
    FontManager::popFontContext();
 }
+
+
+#ifdef TNL_DEBUG
+void HelpItemManager::debugShowNextHelpItem()
+{
+   mTestingCtr++;
+   mTestingTimer.reset();
+}
+#endif
 
 
 void HelpItemManager::queueHelpItem(HelpItem item)
