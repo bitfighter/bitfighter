@@ -24,8 +24,7 @@ find_package(Vorbis)
 find_package(VorbisFile)
 find_package(Speex)
 find_package(ModPlug)
-	
-option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and create 'coverage' target" NO)
+
 
 set(SHARED_SOURCES
 	BanList.cpp
@@ -185,17 +184,13 @@ set(CLIENT_SOURCES
 	../fontstash/fontstash.c
 )
 
-set(TEST_SOURCES
-	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
-   ${CMAKE_SOURCE_DIR}/bitfighter_test/HttpRequestTest.cpp
-)
-
 
 if(MSVC)
 	set(EXTRA_LIBS ws2_32 winmm)
 else()
 	set(EXTRA_LIBS dl m)
 endif()
+
 # libraries used by both client and server
 set(SHARED_LIBS
 	${CMAKE_THREAD_LIBS_INIT}
@@ -219,6 +214,10 @@ set(CLIENT_LIBS
 	${VORBISFILE_LIBRARIES}
 )
 
+
+##
+## Full client build
+##
 if(SDL_FOUND OR SDL2_FOUND)
 	add_executable(bitfighter
 		${SHARED_SOURCES}
@@ -247,29 +246,12 @@ if(SDL_FOUND OR SDL2_FOUND)
 
 	# Where to put the executable
 	set_target_properties(bitfighter PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe)
-	
-	# Install windows libraries and resources
-	if(MSVC)
-		file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
-		file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
-		file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
-	
-		add_custom_command(TARGET bitfighter POST_BUILD 
-			COMMAND xcopy /e /d /y ${resDir}* ${exeDir} 
-			COMMAND xcopy /d /y ${libDir}*.dll ${exeDir}
-		)
-		
-		# Work around the "Debug", "Release", etc. directories Visual Studio tries to add
-		foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
-			string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
-			set_target_properties(bitfighter 
-				PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_SOURCE_DIR}/exe
-			)
-		endforeach()
-	endif()
 endif()
 
 
+##
+## Dedicated server build
+##
 add_executable(bitfighterd
 	EXCLUDE_FROM_ALL
 	${SHARED_SOURCES}
@@ -290,22 +272,6 @@ set_target_properties(bitfighterd
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
 )
 
-set_target_properties(bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG")
-set_target_properties(bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "TNL_DEBUG")
-
-
-if(WIN32)
-	if(MSVC)
-		# Set some special linker flags for Windows visual studio
-		set_target_properties(bitfighter PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-		set_target_properties(bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
-		set_target_properties(bitfighter PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-		set_target_properties(bitfighter PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
-		set_target_properties(bitfighter PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-		set_target_properties(bitfighter PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
-	endif()
-endif()
-
 get_property(DEDICATED_DEFS TARGET bitfighterd PROPERTY COMPILE_DEFINITIONS)
 set_target_properties(bitfighterd
 	PROPERTIES
@@ -315,10 +281,19 @@ set_target_properties(bitfighterd
 include_directories(
 	${CMAKE_SOURCE_DIR}/tnl
 	${CMAKE_SOURCE_DIR}/boost
-	${CMAKE_SOURCE_DIR}/gtest/include
 )
 
-# test runner executable
+
+##
+## Test runner executable
+##
+option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and create 'coverage' target" NO)
+
+set(TEST_SOURCES
+	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/HttpRequestTest.cpp
+)
+
 add_executable(test EXCLUDE_FROM_ALL
 	${CLIENT_SOURCES}
 	${SHARED_SOURCES}
@@ -349,6 +324,10 @@ set_target_properties(test
 	COMPILE_DEFINITIONS BITFIGHTER_TEST
 )
 
+include_directories(
+	${CMAKE_SOURCE_DIR}/gtest/include
+)
+
 # to use the coverage target, install lcov, enable BITFIGHTER_COVERAGE, and run it
 # coverage data is output to the 'cov' directory in html format.
 if(BITFIGHTER_COVERAGE)
@@ -365,4 +344,40 @@ if(BITFIGHTER_COVERAGE)
       DEPENDS test alure lua-vec tnl tomcrypt
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build 
    )
+endif()
+
+
+##
+## Settings for all targets
+##
+set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG")
+set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "TNL_DEBUG")
+
+# Visual Studio only settings
+if(MSVC)
+	# Install windows libraries and resources
+	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
+	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
+	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
+
+	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
+		COMMAND xcopy /e /d /y ${resDir}* ${exeDir} 
+		COMMAND xcopy /d /y ${libDir}*.dll ${exeDir}
+	)
+	
+	# Work around the "Debug", "Release", etc. directories Visual Studio tries to add
+	foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
+		string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
+		set_target_properties(test bitfighterd bitfighter 
+			PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_SOURCE_DIR}/exe
+		)
+	endforeach()
+
+	# Set some linker flags to use console mode in debug build, etc..
+	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+	set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
+	set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
+	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 endif()

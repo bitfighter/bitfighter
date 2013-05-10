@@ -1123,7 +1123,14 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
 
    // Let's be tricky and add our outline to the root node (it should have none), it'll be
    // our first Clipper hole
-   PolyNode *rootNode = polyTree.GetFirst()->Parent;
+   PolyNode *rootNode = NULL;
+
+   PolyNode tempNode;
+   if(polyTree.Total() == 0)  // Polytree is empty with no root node, e.g. on an empty level
+      rootNode = &tempNode;
+   else
+      rootNode = polyTree.GetFirst()->Parent;
+
    rootNode->Contour = outline;
 
    // Now traverse our polyline nodes and triangulate them with only their children holes
