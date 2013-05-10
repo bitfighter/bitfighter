@@ -10,9 +10,9 @@
 #include "ship.h"
 
 
-
 #include "tnlNetObject.h"
 #include "tnlGhostConnection.h"
+#include "tnlPlatform.h"
 
 #include <string>
 

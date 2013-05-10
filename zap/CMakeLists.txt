@@ -24,8 +24,7 @@ find_package(Vorbis)
 find_package(VorbisFile)
 find_package(Speex)
 find_package(ModPlug)
-	
-option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and create 'coverage' target" NO)
+
 
 set(SHARED_SOURCES
 	BanList.cpp
@@ -185,17 +184,13 @@ set(CLIENT_SOURCES
 	../fontstash/fontstash.c
 )
 
-set(TEST_SOURCES
-	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
-   ${CMAKE_SOURCE_DIR}/bitfighter_test/HttpRequestTest.cpp
-)
-
 
 if(MSVC)
 	set(EXTRA_LIBS ws2_32 winmm)
 else()
 	set(EXTRA_LIBS dl m)
 endif()
+
 # libraries used by both client and server
 set(SHARED_LIBS
 	${CMAKE_THREAD_LIBS_INIT}
@@ -318,7 +313,17 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/gtest/include
 )
 
-# test runner executable
+
+##
+## Test runner executable
+##
+option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and create 'coverage' target" NO)
+
+set(TEST_SOURCES
+	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/HttpRequestTest.cpp
+)
+
 add_executable(test EXCLUDE_FROM_ALL
 	${CLIENT_SOURCES}
 	${SHARED_SOURCES}
