@@ -128,17 +128,18 @@ void GridDatabase::copyObjects(const GridDatabase *source)
 
 
    for(S32 i = 0; i < source->mAllObjects.size(); i++)
-      addToDatabase(source->mAllObjects[i]->clone(), source->mAllObjects[i]->getExtent());
+      addToDatabase(source->mAllObjects[i]->clone());
 
    sortObjects(mAllObjects);
 }
 
 
-void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
+// This is private
+void GridDatabase::addToDatabase(DatabaseObject *theObject)
 {
-   TNLAssert(theObject->mDatabase != this,  "Already added to database, trying to add to same database again!");
-   TNLAssert(!theObject->mDatabase,         "Already added to database, trying to add to different database!");
-   TNLAssert(theObject->mExtent == extents, "Extents not equal!");  // <== if this never trips, should we just use mExtent rather than passing extens?
+   TNLAssert(theObject->mDatabase != this, "Already added to database, trying to add to same database again!");
+   TNLAssert(!theObject->mDatabase,        "Already added to database, trying to add to different database!");
+   TNLAssert(theObject->getExtentSet(),    "Object extents were never set!");
 
    if(theObject->mDatabase)      // Should never happen
       return;
@@ -146,7 +147,7 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
    theObject->mDatabase = this;
 
    static IntRect bins;
-   fillBins(extents, bins);
+   fillBins(theObject->getExtent(), bins);
 
    for(S32 x = bins.minx; bins.maxx - x >= 0; x++)
       for(S32 y = bins.miny; bins.maxy - y >= 0; y++)
@@ -176,7 +177,7 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 void GridDatabase::addToDatabase(const Vector<DatabaseObject *> &objects)
 {
    for(S32 i = 0; i < objects.size(); i++)
-      addToDatabase(objects[i], objects[i]->getExtent());
+      addToDatabase(objects[i]);
 }
 
 
@@ -550,6 +551,7 @@ DatabaseObject::DatabaseObject(const DatabaseObject &t) : Parent(t)
    initialize();
    mObjectTypeNumber = t.mObjectTypeNumber; 
    mExtent = t.mExtent;
+   mExtentSet = t.mExtentSet;
 }
 
 
@@ -566,6 +568,7 @@ void DatabaseObject::initialize()
 {
    mLastQueryId = 0; 
    mExtent = Rect(); 
+   mExtentSet = false;
    mDatabase = NULL;
 }
 
@@ -807,20 +810,12 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index) const
 } 
 
 
-void DatabaseObject::addToDatabase(GridDatabase *database, const Rect &extent)
-{
-   if(mDatabase)
-      return;
-
-   mExtent = extent;
-   addToDatabase(database);
-}
-
-
 void DatabaseObject::addToDatabase(GridDatabase *database)
 {
+   TNLAssert(mExtentSet, "Extent has not been set on this object!");    // Sanity check
+
    if(isDatabasable())
-      database->addToDatabase(this, mExtent);
+      database->addToDatabase(this);
 }
 
 
@@ -887,7 +882,11 @@ Rect DatabaseObject::getExtent() const
 }
 
 
-//extern string itos(int);
+bool DatabaseObject::getExtentSet() const
+{
+   return mExtentSet;
+}
+
 
 // Update object's extents in the database -- will not add object to database if it's not already in it
 void DatabaseObject::setExtent(const Rect &extents)
@@ -961,6 +960,7 @@ void DatabaseObject::setExtent(const Rect &extents)
    }
 
    mExtent.set(extents);
+   mExtentSet = true;
 }
 
 

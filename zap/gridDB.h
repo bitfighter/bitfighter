@@ -57,6 +57,7 @@ friend class EditorObjectDatabase;
 private:
    U32 mLastQueryId;
    Rect mExtent;
+   bool mExtentSet;     // A flag to mark whether extent has been set on this object
    GridDatabase *mDatabase;
 
 protected:
@@ -72,7 +73,10 @@ public:
    GridDatabase *getDatabase() const;           // Returns the database in which this object is stored, NULL if not in any database
 
    Rect getExtent() const;
+   bool getExtentSet() const;
+
    void setExtent(const Rect &extentRect);
+   
 
    virtual const Vector<Point> *getCollisionPoly() const;
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
@@ -83,7 +87,6 @@ public:
    bool isDeleted();
 
    void addToDatabase(GridDatabase *database);
-   void addToDatabase(GridDatabase *database, const Rect &extent);
 
    void removeFromDatabase(bool deleteObject);
 
@@ -182,7 +185,7 @@ public:
 
    WallSegmentManager *getWallSegmentManager() const;      
 
-   void addToDatabase(DatabaseObject *theObject, const Rect &extents);
+   void addToDatabase(DatabaseObject *databaseObject);
    void addToDatabase(const Vector<DatabaseObject *> &objects);
 
 

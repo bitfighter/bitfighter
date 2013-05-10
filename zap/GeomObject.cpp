@@ -184,10 +184,8 @@ void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridS
    onPointsChanged();
 } 
 
-string GeomObject::geomToLevelCode(F32 gridSize) const {  return mGeometry.geomToLevelCode(gridSize);  }
-
-
-Rect GeomObject::calcExtents() {  return mGeometry.getGeometry()->calcExtents();  }
+string GeomObject::geomToLevelCode(F32 gridSize) const {  return mGeometry.geomToLevelCode(gridSize);     }
+Rect GeomObject::calcExtents()                         {  return mGeometry.getGeometry()->calcExtents();  }
 
 
 // Settings

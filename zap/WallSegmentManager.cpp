@@ -164,8 +164,8 @@ void WallSegmentManager::rebuildEdges()
    // delete the object when it is ulitmately removed.
    for(S32 i = 0; i < mWallEdgePoints.size(); i+=2)
    {
-      WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1]);                  // Create the edge object
-      newEdge->addToDatabase(mWallEdgeDatabase, Rect(mWallEdgePoints[i], mWallEdgePoints[i+1]));   // And add it to the database
+      WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1]);   // Create the edge object
+      newEdge->addToDatabase(mWallEdgeDatabase);                                    // And add it to the database
    }
 }
 

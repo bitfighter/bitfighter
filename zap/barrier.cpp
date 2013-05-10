@@ -869,6 +869,8 @@ WallEdge::WallEdge(const Point &start, const Point &end)
    mPoints.push_back(start);
    mPoints.push_back(end);
 
+   setExtent(Rect(start, end));
+
    // Set some things required by DatabaseObject
    mObjectTypeNumber = WallEdgeTypeNumber;
 }
@@ -930,8 +932,10 @@ void WallSegment::init(GridDatabase *database, S32 owner)
 
    mObjectTypeNumber = WallSegmentTypeNumber;
 
+   setExtent(Rect(mCorners));
+
    // Add item to database, set its extents
-   addToDatabase(database, Rect(mCorners));
+   addToDatabase(database);
    
    // Drawing filled wall requires that points be triangluated
    Triangulate::Process(mCorners, mTriangulatedFillPoints);    // ==> Fills mTriangulatedFillPoints
