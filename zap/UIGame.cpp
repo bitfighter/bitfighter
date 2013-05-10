@@ -2069,7 +2069,7 @@ void GameUserInterface::renderNormal(ClientGame *game)
    static Vector<const Vector<Point> *> polygons;
    polygons.clear();
 
-   const Vector<HighlightItem> *itemsToHighlight = mHelpItemManager.getItemsToHighlight();
+   const Vector<HighlightItem> *itemsToHighlight       = mHelpItemManager.getItemsToHighlight();
 
    for(S32 i = 0; i < itemsToHighlight->size(); i++)
       for(S32 j = 0; j < renderObjects.size(); j++)

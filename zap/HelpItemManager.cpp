@@ -49,6 +49,11 @@ HelpItemManager::HelpItemManager()
 
    mDisabled = false;
 
+#ifdef TNL_DEBUG
+   mTestingCtr = 0;
+   mTestingTimer.setPeriod(4000);
+#endif
+
    clearAlreadySeenList();
 }
 
@@ -104,9 +109,29 @@ void HelpItemManager::renderMessages(S32 yPos) const
    static const S32 FontSize = 18;
    static const S32 FontGap  = 6;
 
-   if(mInitialDelayTimer.getCurrent() > 0)
-      return;
+#  ifdef TNL_DEBUG
+      // This bit is for displaying our help messages one-by-one so we can see how they look on-screen
+      if(mTestingTimer.getCurrent() > 0)
+      {
+         FontManager::pushFontContext(HelpItemContext);
+         glColor(Colors::red);
+         const char **messages = helpItems[mTestingCtr].helpMessages;
 
+         // Final item in messages array will be NULL; loop until we hit that
+         for(S32 j = 0; messages[j]; j++)
+         {
+            TNLAssert(j < MAX_LINES, "Too many lines... better increase MAX_LINES!");
+            drawCenteredString(yPos, FontSize, messages[j]);
+            yPos += FontSize + FontGap;
+         }
+         FontManager::popFontContext();
+         return;
+      }
+#  endif
+
+   if(mInitialDelayTimer.getCurrent() > 0)
+      return
+   
    FontManager::pushFontContext(HelpItemContext);
 
    for(S32 i = 0; i < mHelpItems.size(); i++)
@@ -116,7 +141,7 @@ void HelpItemManager::renderMessages(S32 yPos) const
 
       const char **messages = helpItems[mHelpItems[i]].helpMessages;
 
-      // Final item in messages array will be NULL; iterate until we hit that
+      // Final item in messages array will be NULL; loop until we hit that
       for(S32 j = 0; messages[j]; j++)
       {
          TNLAssert(j < MAX_LINES, "Too many lines... better increase MAX_LINES!");
