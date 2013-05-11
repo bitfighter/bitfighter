@@ -96,6 +96,8 @@ private:
 
 public:
    DataSender();        // Constructor
+   virtual ~DataSender();
+
    SenderStatus initialize(DataSendable *connection, FolderManager *folderManager, string filename, FileType fileType);   
 
    bool isDone();
@@ -127,6 +129,7 @@ public:
    // Constructors
    DataConnection(GameSettings *settings = NULL, ActionType action = NO_ACTION, string password = "", string filename = "", FileType fileType = LEVELGEN_TYPE);
    DataConnection(GameSettings *settings, const Nonce &clientId);
+   virtual ~DataConnection();
 
    DataSender mDataSender;
    void onConnectionEstablished();

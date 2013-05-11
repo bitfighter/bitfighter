@@ -55,6 +55,7 @@ private:
 
 public:
    HelperManager();     // Constructor
+   virtual ~HelperManager();
 
    void initialize(ClientGame *game);
 

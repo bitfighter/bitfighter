@@ -42,6 +42,7 @@ private:
 
 public:
    EditorAttributeMenuItemBuilder();     // Constructor
+   virtual ~EditorAttributeMenuItemBuilder();
 
    void initialize(ClientGame *game);
 

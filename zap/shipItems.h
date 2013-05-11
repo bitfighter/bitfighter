@@ -96,7 +96,7 @@ struct ModuleInfo
    S32 getPrimaryPerUseCost()  const;
    bool hasSecondary() const;
    S32 getSecondaryPerUseCost() const;
-    ModulePrimaryUseType getPrimaryUseType() const;
+   ModulePrimaryUseType getPrimaryUseType() const;
 
    const char *getName()     const;
    const char *getMenuName() const;

@@ -52,6 +52,8 @@ private:
 
 public:
    explicit TeamDefUserInterface(ClientGame *game);     // Constructor
+   virtual ~TeamDefUserInterface();
+
    const char *mMenuTitle;
    const char *mMenuSubTitle;
    Color mMenuSubTitleColor;

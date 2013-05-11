@@ -41,6 +41,12 @@ Statistics::Statistics()
    resetStatistics();
 }
 
+// Destructor
+Statistics::~Statistics()
+{
+   // Do nothing
+}
+
 
 void Statistics::countShot(WeaponType weaponType)
 {

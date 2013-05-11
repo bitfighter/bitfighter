@@ -301,6 +301,12 @@ SplashUserInterface::SplashUserInterface(ClientGame *game) : Parent(game)
    mPhase = SplashPhaseNone;
 }
 
+// Destructor
+SplashUserInterface::~SplashUserInterface()
+{
+   // Do nothing
+}
+
 
 void SplashUserInterface::onActivate()
 {

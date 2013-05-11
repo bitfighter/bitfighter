@@ -42,6 +42,12 @@ SlipZone::SlipZone()     // Constructor
    slipAmount = 0.1f;
 }
 
+// Destructor
+SlipZone::~SlipZone()
+{
+   // Do nothing
+}
+
 
 SlipZone *SlipZone::clone() const
 {

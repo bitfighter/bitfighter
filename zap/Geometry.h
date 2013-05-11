@@ -225,6 +225,7 @@ private:
 
 public:
    PolygonGeometry();      // Constructor
+   virtual ~PolygonGeometry();
 
    GeomType getGeomType() const;
 

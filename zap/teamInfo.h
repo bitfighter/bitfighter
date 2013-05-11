@@ -156,7 +156,7 @@ private:
    Vector<S32> mTeamHasFlagList;      // Track which team (or teams) have the flag
 
 public:
-   ~TeamManager();      // Destructor
+   virtual ~TeamManager();      // Destructor
 
    const Color *getTeamColor(S32 index) const;
    S32 getTeamCount();

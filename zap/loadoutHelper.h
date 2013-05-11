@@ -50,6 +50,7 @@ struct LoadoutItem
    // Constructors
    LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 index);      // Shortcut for modules -- use info from ModuleInfos
    LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 index, const char *text, const char *help, ShipModule requires);
+   virtual ~LoadoutItem();
 };
 
 
@@ -78,6 +79,8 @@ private:
 
 public:
    explicit LoadoutHelper();                    // Constructor
+   virtual ~LoadoutHelper();
+
    void pregameSetup(bool engineerEnabled);     // Set things up
    HelperMenu::HelperMenuType getType();
 

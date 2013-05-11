@@ -48,7 +48,10 @@ public:
       Query,
       QueryResponse,
    };
+
    GameNetInterface(const Address &bindAddress, Game *theGame);
+   virtual ~GameNetInterface();
+
    void handleInfoPacket(const Address &remoteAddress, U8 packetType, BitStream *stream);
    void sendPing(const Address &theAddress, const Nonce &clientNonce);
    void sendQuery(const Address &theAddress, const Nonce &clientNonce, U32 identityToken);

@@ -74,6 +74,7 @@ protected:
 
 public:
    ControlObjectConnection();
+   virtual ~ControlObjectConnection();
 
    void setControlObject(BfObject *theObject);
    BfObject *getControlObject() const;

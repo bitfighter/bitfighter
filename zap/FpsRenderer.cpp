@@ -59,6 +59,12 @@ FpsRenderer::FpsRenderer(ClientGame *game)
    }
 }
 
+// Destructor
+FpsRenderer::~FpsRenderer()
+{
+   // Do nothing
+}
+
 
 void FpsRenderer::idle(U32 timeDelta)
 {

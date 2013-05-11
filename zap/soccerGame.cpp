@@ -42,6 +42,12 @@ SoccerGameType::SoccerGameType()
    // Do nothing
 }
 
+// Destructor
+SoccerGameType::~SoccerGameType()
+{
+   // Do nothing
+}
+
 
 TNL_IMPLEMENT_NETOBJECT(SoccerGameType);
 

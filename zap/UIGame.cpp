@@ -2481,6 +2481,12 @@ ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool 
    mNextGroupId = 0;
 }
 
+// Destructor
+ChatMessageDisplayer::~ChatMessageDisplayer()
+{
+   // Do nothing
+}
+
 
 // Effectivley clears all messages
 void ChatMessageDisplayer::reset()

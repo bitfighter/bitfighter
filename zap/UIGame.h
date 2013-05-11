@@ -91,6 +91,8 @@ private:
 public:
    // Constructor
    ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool msgsExpire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontGap);
+   virtual ~ChatMessageDisplayer();
+
    void reset();
 
    void idle(U32 timeDelta);

@@ -40,6 +40,7 @@ public:
 
    SlipZone();       // Constructor
    SlipZone *clone() const;
+   virtual ~SlipZone();
 
    bool processArguments(S32 argc, const char **argv, Game *game);
 

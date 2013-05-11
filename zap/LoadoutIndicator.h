@@ -47,6 +47,7 @@ private:
 
 public:
    LoadoutIndicator();     // Constructor
+   virtual ~LoadoutIndicator();
 
    static const S32 LoadoutIndicatorHeight = indicatorFontSize + indicatorPadding * 2;
 

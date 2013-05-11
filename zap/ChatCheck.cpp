@@ -17,6 +17,12 @@ ChatCheck::ChatCheck()
    mChatPrevMessageMode = 0;
 }
 
+// Destructor
+ChatCheck::~ChatCheck()
+{
+   // Do nothing
+}
+
 
 bool ChatCheck::checkMessage(const char *message, U32 mode)
 {

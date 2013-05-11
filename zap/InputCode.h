@@ -105,6 +105,7 @@ public:
    };
 
    InputCodeManager();     // Constructor
+   virtual ~InputCodeManager();
 
    static const char *inputCodeToString(InputCode inputCode);
    static InputCode stringToInputCode(const char *inputName);
@@ -169,6 +170,8 @@ public:
 struct BindingSet
 {
    BindingSet();     // Constructor
+   virtual ~BindingSet();
+
    bool hasKeypad();
 
    InputCode getBinding(InputCodeManager::BindingName bindingName) const;

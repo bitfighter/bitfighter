@@ -48,6 +48,7 @@ class Barrier : public BfObject
 public:
    // Constructor
    Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = DEFAULT_BARRIER_WIDTH, bool solid = false);
+   virtual ~Barrier();
 
    Vector<Point> mPoints;  // The points of the barrier --> if only two, first will be start, second end of an old-school segment
 

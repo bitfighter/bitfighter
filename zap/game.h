@@ -500,6 +500,7 @@ public:
 
    // Constructor, used on server side, augmented with setInfo method below
    explicit LevelInfo(const string &levelFile);
+   virtual ~LevelInfo();
 
    const char *getLevelTypeName();
 };

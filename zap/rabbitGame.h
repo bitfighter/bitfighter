@@ -55,6 +55,7 @@ public:
    };
 
    RabbitGameType();  // Constructor
+   virtual ~RabbitGameType();
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode() const;

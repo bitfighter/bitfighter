@@ -57,6 +57,12 @@ ChatMessage::ChatMessage(string frm, string msg, Color col, bool isPriv, bool is
    isSystem = isSys;
 }
 
+// Destructor
+ChatMessage::~ChatMessage()
+{
+   // Do nothing
+}
+
 
 Vector<StringTableEntry> AbstractChat::mPlayersInGlobalChat;
 
@@ -567,6 +573,12 @@ void ChatUserInterface::onEscape()
 SuspendedUserInterface::SuspendedUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(SuspendedUI);
+}
+
+// Destructor
+SuspendedUserInterface::~SuspendedUserInterface()
+{
+   // Do nothing
 }
 
 

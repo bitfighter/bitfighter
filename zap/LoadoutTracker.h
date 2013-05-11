@@ -56,6 +56,7 @@ public:
    LoadoutTracker();                            // Constructor
    LoadoutTracker(const string &loadoutStr);  
    LoadoutTracker(const Vector<U8> &loadout);
+   virtual ~LoadoutTracker();
 
    bool operator == (const LoadoutTracker &other) const;
    bool operator != (const LoadoutTracker &other) const;

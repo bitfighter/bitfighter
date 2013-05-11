@@ -14,7 +14,7 @@ struct PictureLoader
    U32 y;
    U32 *data;
    PictureLoader() {x=0; y=0; data=NULL;}
-   ~PictureLoader() {if(data) delete data;}
+   virtual ~PictureLoader() {if(data) delete data;}
 };
 
 PictureLoader *LoadPicture(const char* path);

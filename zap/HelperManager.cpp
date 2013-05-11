@@ -40,6 +40,12 @@ HelperManager::HelperManager()
    mGame = NULL;
 }
 
+// Destructor
+HelperManager::~HelperManager()
+{
+   // Do nothing
+}
+
 
 void HelperManager::initialize(ClientGame *game)
 {

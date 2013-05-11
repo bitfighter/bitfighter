@@ -42,6 +42,12 @@ ZoneControlGameType::ZoneControlGameType()
    mPossibleZcBadgeAchiever = NULL;
 }
 
+// Destructor
+ZoneControlGameType::~ZoneControlGameType()
+{
+   // Do nothing
+}
+
 
 void ZoneControlGameType::addFlag(FlagItem *flag)
 {

@@ -42,6 +42,12 @@ AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame 
    /* Do nothing */
 }
 
+// Destructor
+AbstractInstructionsUserInterface::~AbstractInstructionsUserInterface()
+{
+   // Do nothing
+}
+
 
 void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activationCommand, const ControlStringsEditor *cmdList)
 {

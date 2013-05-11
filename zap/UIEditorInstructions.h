@@ -46,6 +46,8 @@ private:
 
 public:
    explicit EditorInstructionsUserInterface(ClientGame *game);      // Constructor
+   virtual ~EditorInstructionsUserInterface();
+
    void render();
    void renderPageCommands(S32 page);
    void renderPageWalls();

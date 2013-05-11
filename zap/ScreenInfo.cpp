@@ -43,6 +43,12 @@ ScreenInfo::ScreenInfo()
    mActualized = false;
 }
 
+// Destructor
+ScreenInfo::~ScreenInfo()
+{
+   // Do nothing
+}
+
 
 // Can't initialize until SDL has been set up
 void ScreenInfo::init(S32 physicalScreenWidth, S32 physicalScreenHeight)

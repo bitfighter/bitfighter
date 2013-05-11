@@ -41,6 +41,8 @@ private:
 
 public:
    explicit YesNoUserInterface(ClientGame *game);      // Constructor
+   virtual ~YesNoUserInterface();
+
    void reset();
    bool onKeyDown(InputCode inputCode);
    void registerYesFunction(void(*ptr)(ClientGame *));

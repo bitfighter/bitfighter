@@ -51,6 +51,12 @@ HttpRequest::HttpRequest(string url, TNL::Socket* socket, TNL::Address* localAdd
    mSocket = socket ? socket : new Socket(*mLocalAddress);
 }
 
+// Destructor
+HttpRequest::~HttpRequest()
+{
+   // Do nothing
+}
+
 
 bool HttpRequest::send()
 {

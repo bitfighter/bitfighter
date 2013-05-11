@@ -84,6 +84,9 @@ class GameZone : public Zone
    typedef Zone Parent;
 
 public:
+   GameZone();
+   virtual ~GameZone();
+
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
 };

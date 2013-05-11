@@ -48,6 +48,12 @@ ProjectileInfo::ProjectileInfo(Color _sparkColor1, Color _sparkColor2, Color _sp
    impactSound     = _impactSound;
 }
 
+// Destructor
+ProjectileInfo::~ProjectileInfo()
+{
+   // Do nothing
+}
+
 
 ProjectileInfo GameWeapon::projectileInfo[ProjectileTypeCount] =
 {

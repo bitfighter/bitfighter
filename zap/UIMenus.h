@@ -141,6 +141,7 @@ private:
 
 public:
    explicit MenuUserInterfaceWithIntroductoryAnimation(ClientGame *game);
+   virtual ~MenuUserInterfaceWithIntroductoryAnimation();
 
    void onActivate();
    void idle(U32 timeDelta);
@@ -176,6 +177,8 @@ private:
 
 public:
    explicit MainMenuUserInterface(ClientGame *game);           // Constructor
+   virtual ~MainMenuUserInterface();
+
    void onEscape();
    void render();
    void idle(U32 timeDelta); 
@@ -197,6 +200,8 @@ class OptionsMenuUserInterface : public MenuUserInterface
 
 public:
    explicit OptionsMenuUserInterface(ClientGame *game);        // Constructor
+   virtual ~OptionsMenuUserInterface();
+
    void onEscape();
    void setupMenus();
    void onActivate();
@@ -213,6 +218,8 @@ class InputOptionsMenuUserInterface : public MenuUserInterface
 
 public:
    explicit InputOptionsMenuUserInterface(ClientGame *game);        // Constructor
+   virtual ~InputOptionsMenuUserInterface();
+
    void onEscape();
    void setupMenus();
    void onActivate();
@@ -228,6 +235,8 @@ class SoundOptionsMenuUserInterface : public MenuUserInterface
 
 public:
    explicit SoundOptionsMenuUserInterface(ClientGame *game);        // Constructor
+   virtual ~SoundOptionsMenuUserInterface();
+
    void onEscape();
    void setupMenus();
    void onActivate();
@@ -263,6 +272,8 @@ private:
 
 public:
    explicit HostMenuUserInterface(ClientGame *game);        // Constructor
+   virtual ~HostMenuUserInterface();
+
    void onEscape();
    void setupMenus();
    void onActivate();
@@ -291,6 +302,8 @@ private:
 
 public:
    explicit NameEntryUserInterface(ClientGame *game);    // Constructor
+   virtual ~NameEntryUserInterface();
+
    void onEscape();
    void setupMenu();
    void onActivate();
@@ -325,6 +338,7 @@ private:
 
 public:
    explicit GameMenuUserInterface(ClientGame *game);            // Constructor
+   virtual ~GameMenuUserInterface();
 
    void idle(U32 timeDelta);
    void onActivate();
@@ -343,6 +357,8 @@ private:
 
 public:
    explicit LevelMenuUserInterface(ClientGame *game);        // Constructor
+   virtual ~LevelMenuUserInterface();
+
    void onActivate();
    void onEscape();
 };
@@ -360,6 +376,8 @@ private:
 
 public:
    explicit LevelMenuSelectUserInterface(ClientGame *game);        // Constructor
+   virtual ~LevelMenuSelectUserInterface();
+
    string category;
    void onActivate();
    bool processMenuSpecificKeys(InputCode inputCode);  // Custom key handling for level selection menus
@@ -381,6 +399,8 @@ private:
 
 public:
    AdminMenuUserInterface();      // Constructor
+   virtual ~AdminMenuUserInterface();
+
    void onActivate();
    void processSelection(U32 index);
    void processShiftSelection(U32 index);
@@ -397,6 +417,7 @@ class PlayerMenuUserInterface : public MenuUserInterface
 
 public:
    explicit PlayerMenuUserInterface(ClientGame *game);        // Constructor
+   virtual ~PlayerMenuUserInterface();
 
    void render();
    void playerSelected(U32 index);
@@ -418,6 +439,8 @@ class TeamMenuUserInterface : public MenuUserInterface
 
 public:
    explicit TeamMenuUserInterface(ClientGame *game);        // Constructor
+   virtual ~TeamMenuUserInterface();
+
    void render();
    void onEscape();
    string nameToChange;

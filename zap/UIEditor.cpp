@@ -4582,6 +4582,12 @@ EditorMenuUserInterface::EditorMenuUserInterface(ClientGame *game) : Parent(game
    mMenuTitle = "EDITOR MENU";
 }
 
+// Destructor
+EditorMenuUserInterface::~EditorMenuUserInterface()
+{
+   // Do nothing
+}
+
 
 void EditorMenuUserInterface::onActivate()
 {

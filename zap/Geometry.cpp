@@ -1012,6 +1012,12 @@ PolygonGeometry::PolygonGeometry() : PolylineGeometry()
    mTriangluationDisabled = false;
 }
 
+// Destructor
+PolygonGeometry::~PolygonGeometry()
+{
+   // Do nothing
+}
+
 
 GeomType PolygonGeometry::getGeomType() const
 {

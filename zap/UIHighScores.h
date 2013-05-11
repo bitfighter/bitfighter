@@ -56,6 +56,7 @@ private:
 
 public:
    explicit HighScoresUserInterface(ClientGame *game);    // Constructor
+   virtual ~HighScoresUserInterface();
 
    void onActivate();
    void onReactivate();

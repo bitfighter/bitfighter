@@ -60,6 +60,12 @@ BindingSet::BindingSet()
    keyMISSION     = KEY_F2;      // Show current mission info
 }
 
+// Destructor
+BindingSet::~BindingSet()
+{
+   // Do nothing
+}
+
 
 InputCode BindingSet::getBinding(InputCodeManager::BindingName bindingName) const
 {
@@ -304,6 +310,12 @@ InputCodeManager::InputCodeManager()
 
    // Check to make sure we haven't fouled things up somehow
    TNLAssert(ARRAYSIZE(BINDING_STRINGS) == BINDING_DEFINEABLE_KEY_COUNT, "Problem somewhere!");
+}
+
+// Destructor
+InputCodeManager::~InputCodeManager()
+{
+   // Do nothing
 }
 
 

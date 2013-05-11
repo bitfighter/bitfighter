@@ -79,7 +79,7 @@ protected:
 
 public:
    Console();     // Constructor
-   ~Console();    // Destructor
+   virtual ~Console();    // Destructor
 
    void initialize();
    void quit();

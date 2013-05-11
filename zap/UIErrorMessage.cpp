@@ -117,6 +117,12 @@ ErrorMessageUserInterface::ErrorMessageUserInterface(ClientGame *game) : Parent(
    setMenuID(ErrorMessageUI);
 }
 
+// Destructor
+ErrorMessageUserInterface::~ErrorMessageUserInterface()
+{
+   // Do nothing
+}
+
 
 void ErrorMessageUserInterface::reset()
 {

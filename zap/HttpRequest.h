@@ -50,6 +50,7 @@ public:
    static string urlEncode(const string& str);
 
    HttpRequest(string url = "/", TNL::Socket* socket = NULL, TNL::Address* localAddress = NULL, TNL::Address* remoteAddress = NULL);
+   virtual ~HttpRequest();
 
    string buildRequest();
    string getResponseBody();

@@ -64,6 +64,7 @@ private:
 
 public:
    explicit TeamShuffleHelper();             // Constructor
+   virtual ~TeamShuffleHelper();
 
    HelperMenuType getType();
 

@@ -40,6 +40,8 @@ private:
    typedef GameType Parent;
 
 public:
+   virtual ~CTFGameType();
+
    void addFlag(FlagItem *flag);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);

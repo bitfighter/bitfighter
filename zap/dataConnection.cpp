@@ -170,6 +170,12 @@ DataSender::DataSender()
    mFileType = INVALID_RESOURCE_TYPE;
 }
 
+// Destructor
+DataSender::~DataSender()
+{
+   // Do nothing
+}
+
 
 bool DataSender::isDone()
 {
@@ -299,6 +305,11 @@ DataConnection::DataConnection(GameSettings *settings, const Nonce &clientId)
    mOutputFile = NULL;
 }
 
+// Destructor
+DataConnection::~DataConnection()
+{
+   // Do nothing
+}
 
 
 // static method

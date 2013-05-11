@@ -39,6 +39,12 @@ HTFGameType::HTFGameType()
    // Do nothing
 }
 
+// Destructor
+HTFGameType::~HTFGameType()
+{
+   // Do nothing
+}
+
 
 bool HTFGameType::isFlagGame() const { return true; }
 

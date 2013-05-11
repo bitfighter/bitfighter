@@ -1477,6 +1477,13 @@ S32 BfObject::lua_setSelected(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Destructor
+CentroidObject::~CentroidObject()
+{
+   // Do nothing
+}
+
+
 // 2D objects need special handling when getting/setting location
 S32 CentroidObject::lua_getLoc(lua_State *L)
 {

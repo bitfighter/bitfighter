@@ -55,6 +55,12 @@ LoadoutTracker::LoadoutTracker(const Vector<U8> &loadout)
    setLoadout(loadout);
 }
 
+// Destructor
+LoadoutTracker::~LoadoutTracker()
+{
+   // Do nothing
+}
+
 
 // Reset this loadout to its factory settings
 void LoadoutTracker::resetLoadout()

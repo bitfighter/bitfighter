@@ -1163,6 +1163,12 @@ LevelInfo::LevelInfo(const string &levelFile)
    mLevelFileName = levelFile.c_str();
 }
 
+// Destructor
+LevelInfo::~LevelInfo()
+{
+   // Do nothing
+}
+
 
 void LevelInfo::initialize()
 {

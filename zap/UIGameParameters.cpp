@@ -50,6 +50,12 @@ SavedMenuItem::SavedMenuItem(MenuItem *menuItem)
    setValues(menuItem);
 }
 
+// Destructor
+SavedMenuItem::~SavedMenuItem()
+{
+   // Do nothing
+}
+
 
 void SavedMenuItem::setValues(MenuItem *menuItem)
 {

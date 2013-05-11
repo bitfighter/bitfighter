@@ -51,6 +51,8 @@ private:
 
 public:
    explicit MessageUserInterface(ClientGame *game);     // Constructor
+   virtual ~MessageUserInterface();
+
    char *mMessage[mNumLines];
    void onActivate();
    void setMessage (S32 id, char *message);  // Set a line of message

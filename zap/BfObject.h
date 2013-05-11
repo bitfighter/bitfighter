@@ -473,6 +473,8 @@ public:
 class CentroidObject : public BfObject
 {
 public:
+   virtual ~CentroidObject();
+
    // Provide special location handlers
    virtual S32 lua_getLoc(lua_State *L);
    virtual S32 lua_setLoc(lua_State *L);

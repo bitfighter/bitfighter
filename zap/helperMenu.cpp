@@ -43,6 +43,19 @@ namespace Zap
 
 using namespace UI;
 
+// Constuctor
+HelperMenu::HelperMenu()
+{
+   // Do nothing
+}
+
+// Destructor
+HelperMenu::~HelperMenu()
+{
+   // Do nothing
+}
+
+
 void HelperMenu::initialize(ClientGame *game, HelperManager *manager)
 {
    mHelperManager = manager;

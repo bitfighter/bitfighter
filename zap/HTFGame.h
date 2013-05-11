@@ -42,6 +42,7 @@ class HTFGameType : public GameType
    };
 public:
    HTFGameType();    // Constructor
+   virtual ~HTFGameType();
 
    bool isFlagGame() const;
 

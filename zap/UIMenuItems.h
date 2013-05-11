@@ -171,6 +171,7 @@ class MessageMenuItem : public MenuItem
 {
 public:
    MessageMenuItem(string displayVal, const Color &color);
+   virtual ~MessageMenuItem();
 };
 
 
@@ -198,6 +199,7 @@ protected:
 public:
    ValueMenuItem();
    ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2);
+   virtual ~ValueMenuItem();
 };
 
 
@@ -351,6 +353,7 @@ protected:
 public:
    TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
                        S32 step = 5, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   virtual ~TimeCounterMenuItem();
 
    virtual string getUnits() const;
 
@@ -373,6 +376,7 @@ protected:
 public:
    TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
                               InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   virtual ~TimeCounterMenuItemSeconds();
 
    virtual void setValue (const string &val);
    virtual string getValueForWritingToLevelFile();
@@ -448,6 +452,7 @@ class MaskedTextEntryMenuItem : public TextEntryMenuItem
 {
    MaskedTextEntryMenuItem(string title, string val, string emptyVal, const string &help, U32 maxLen, 
                           InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   virtual ~MaskedTextEntryMenuItem();
 };
 
 
@@ -463,6 +468,7 @@ private:
 public:
    // Constructor
    PlayerMenuItem(S32 index, const char *text, void (*callback)(ClientGame *, U32), InputCode k1, PlayerType type);
+   virtual ~PlayerMenuItem();
 
    virtual MenuItemTypes getItemType();
 
@@ -485,6 +491,7 @@ private:
 
 public:
    TeamMenuItem(S32 index, AbstractTeam *team, void (*callback)(ClientGame *, U32), InputCode inputCode, bool isCurrent);
+   virtual ~TeamMenuItem();
 
    virtual MenuItemTypes getItemType();
 

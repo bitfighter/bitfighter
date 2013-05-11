@@ -120,6 +120,12 @@ NexusGameType::NexusGameType() : GameType(100)
    mNexusChangeAtTime = -1;
 }
 
+// Destructor
+NexusGameType::~NexusGameType()
+{
+   // Do nothing
+}
+
 
 bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
 {

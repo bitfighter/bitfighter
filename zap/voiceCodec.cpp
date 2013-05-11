@@ -28,6 +28,18 @@
 namespace Zap
 {
 
+// Destructor
+VoiceEncoder::VoiceEncoder()
+{
+   // Do nothing
+}
+
+// Destructor
+VoiceEncoder::~VoiceEncoder()
+{
+   // Do nothing
+}
+
 ByteBufferPtr VoiceEncoder::compressBuffer(const ByteBufferPtr &sampleBuffer)
 {
    U32 sampleCount = sampleBuffer->getBufferSize() >> 1;
@@ -57,6 +69,18 @@ ByteBufferPtr VoiceEncoder::compressBuffer(const ByteBufferPtr &sampleBuffer)
       return ret;
    }
    return NULL;
+}
+
+// Destructor
+VoiceDecoder::VoiceDecoder()
+{
+   // Do nothing
+}
+
+// Destructor
+VoiceDecoder::~VoiceDecoder()
+{
+   // Do nothing
 }
 
 ByteBufferPtr VoiceDecoder::decompressBuffer(const ByteBufferPtr &compressedBuffer)

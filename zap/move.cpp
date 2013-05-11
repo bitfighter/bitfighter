@@ -52,6 +52,12 @@ Move::Move(F32 x, F32 y, F32 angle)
    set(x, y, angle);
 }
 
+// Destructor
+Move::~Move()
+{
+   // Do nothing
+}
+
 
 void Move::initialize()
 {
