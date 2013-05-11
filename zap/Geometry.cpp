@@ -27,6 +27,7 @@
 #include "GeomUtils.h"              // For polygon triangulation
 
 #include "tnlBitStream.h"
+#include "tnlLog.h"
 #include "boost/smart_ptr/shared_ptr.hpp"
 
 #ifdef TNL_OS_WIN32
@@ -917,11 +918,18 @@ void PolylineGeometry::setGeom(const Vector<Point> &points)
 {
    S32 size = points.size();
 
-   mPolyBounds.resize(size);
-   mVertSelected.resize(size);
+   mPolyBounds.empty();
 
    for(S32 i = 0; i < size; i++)
-      mPolyBounds[i] = points[i];
+   {
+      // filter out points with NaN values
+      if(points[i] == points[i])
+      {
+         mPolyBounds.push_back(points[i]);
+      }
+   }
+
+   mVertSelected.resize(mPolyBounds.size());
 }
 
 

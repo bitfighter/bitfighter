@@ -293,6 +293,7 @@ option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and 
 set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/HttpRequestTest.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/PolylineGeometryTest.cpp
 )
 
 add_executable(test EXCLUDE_FROM_ALL
