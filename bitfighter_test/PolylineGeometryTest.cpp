@@ -17,10 +17,15 @@ TEST_F(PolylineGeometryTest, setGeomTest)
 
    PolylineGeometry pg;
    pg.setGeom(geom);
+
    const Vector<Point> &newGeom = *pg.getOutline();
 
    // Any points with NaN coordinates should be ignored
    EXPECT_EQ(newGeom.size(), 3);
+   for(S32 i =0; i < newGeom.size(); i++)
+   {
+      EXPECT_EQ(geom[i], newGeom[i]);
+   }
 }
 
 TEST_F(PolylineGeometryTest, setGeomWithNanPointTest)
@@ -39,4 +44,9 @@ TEST_F(PolylineGeometryTest, setGeomWithNanPointTest)
 
    // Any points with NaN coordinates should be ignored
    EXPECT_EQ(newGeom.size(), 2);
+   for(S32 i =0; i < newGeom.size(); i++)
+   {
+      // comparing against itself is false with NaN coordinates
+      EXPECT_EQ(newGeom[i], newGeom[i]);
+   }
 }
