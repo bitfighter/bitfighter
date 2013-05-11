@@ -918,7 +918,7 @@ void PolylineGeometry::setGeom(const Vector<Point> &points)
 {
    S32 size = points.size();
 
-   mPolyBounds.empty();
+   mPolyBounds.clear();
 
    for(S32 i = 0; i < size; i++)
    {

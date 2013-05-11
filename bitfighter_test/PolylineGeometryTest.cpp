@@ -22,9 +22,22 @@ TEST_F(PolylineGeometryTest, setGeomTest)
 
    // Any points with NaN coordinates should be ignored
    EXPECT_EQ(newGeom.size(), 3);
-   for(S32 i =0; i < newGeom.size(); i++)
+   for(S32 i = 0; i < newGeom.size(); i++)
    {
       EXPECT_EQ(geom[i], newGeom[i]);
+   }
+
+   Vector<Point> secondGeom(0);
+   secondGeom.push_back(Point(0, 0));
+   secondGeom.push_back(Point(2, 0));
+   secondGeom.push_back(Point(2, 2));
+   pg.setGeom(secondGeom);
+
+   // Any points with NaN coordinates should be ignored
+   EXPECT_EQ(newGeom.size(), 3);
+   for(S32 i = 0; i < newGeom.size(); i++)
+   {
+      EXPECT_EQ(secondGeom[i], newGeom[i]);
    }
 }
 
