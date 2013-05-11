@@ -69,12 +69,15 @@ TEST_F(HttpRequestTest, badResponse)
    EXPECT_EQ(0, req.getResponseCode());
 }
 
+TEST_F(HttpRequestTest, separatorOnlyResponse)
+{
+   req.parseResponse("\r\n\r\n");
+   EXPECT_EQ(0, req.getResponseCode());
+}
 
 TEST_F(HttpRequestTest, emptyResponse)
 {
-   string response = "";
-   req.parseResponse(response);
-
+   req.parseResponse("");
    EXPECT_EQ(0, req.getResponseCode());
 }
 

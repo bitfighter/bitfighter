@@ -109,7 +109,7 @@ S32 HttpRequest::getResponseCode()
 void HttpRequest::parseResponse(string response)
 {
    U32 seperatorIndex = response.find("\r\n\r\n");
-   if(seperatorIndex == string::npos)
+   if(seperatorIndex == string::npos || response == "")
    {
       // seperator not found, this response isn't valid
       return;
