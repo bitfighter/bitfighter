@@ -68,7 +68,6 @@ set(SHARED_SOURCES
 	luaGameInfo.cpp
 	luaLevelGenerator.cpp
 	LuaScriptRunner.cpp
-	main.cpp
 	masterConnection.cpp
 	MathUtils.cpp
 	md5wrapper.cpp
@@ -222,6 +221,7 @@ if(SDL_FOUND OR SDL2_FOUND)
 	add_executable(bitfighter
 		${SHARED_SOURCES}
 		${CLIENT_SOURCES}
+		main.cpp
 	)
 
 	add_dependencies(bitfighter
@@ -255,6 +255,7 @@ endif()
 add_executable(bitfighterd
 	EXCLUDE_FROM_ALL
 	${SHARED_SOURCES}
+	main.cpp
 )
 
 add_dependencies(bitfighterd
