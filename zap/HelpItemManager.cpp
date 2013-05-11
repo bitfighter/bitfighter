@@ -1,6 +1,7 @@
 #include "HelpItemManager.h"
 
 #include "BfObject.h"      // For TypeNumbers
+#include "InputCode.h"     // For InputCodeManager
 #include "FontManager.h"
 #include "Colors.h"
 #include "OpenglUtils.h"
@@ -41,8 +42,10 @@ static HelpItems helpItems[] = {
 
 
 // Constructor
-HelpItemManager::HelpItemManager()
+HelpItemManager::HelpItemManager(InputCodeManager *inputCodeManager)
 {
+   mInputCodeManager = inputCodeManager;
+
    mFloodControl.setPeriod(10 * 1000);       // Generally, don't show items more frequently than this, in ms
    mPacedTimer.setPeriod(15 * 1000);         // How often to show a new paced message
    mInitialDelayTimer.setPeriod(4 * 1000);   // Show nothing until this timer has expired
@@ -108,7 +111,33 @@ void HelpItemManager::idle(U32 timeDelta)
 }
 
 
-static S32 doRenderMessages(const char **messages, S32 yPos)
+// [[CHANGEWEP KEYS]]
+static void doSubstitutions(const InputCodeManager *inputCodeManager, string &str)
+{
+   size_t startPos = str.find("[[");      // If this isn't here, no further searching is necessary
+   
+   if(startPos == string::npos)
+      return;
+
+   const char *what = "[[MOVEMENT]]";
+   size_t pos = str.find(what, startPos);
+
+   if(pos != string::npos)
+   {
+      size_t len = strlen(what);
+      //InputMode inputMode = inputCodeManager->getInputMode();
+
+      string keys = string(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_UP)))   +
+                    string(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_DOWN))) +
+                    string(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_LEFT))) +
+                    string(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_RIGHT)));
+
+      str.replace(pos, len, keys);
+   }
+}
+
+
+static S32 doRenderMessages(const InputCodeManager *inputCodeManager, const char **messages, S32 yPos)
 {
    static const S32 FontSize = 18;
    static const S32 FontGap  = 6;
@@ -119,24 +148,9 @@ static S32 doRenderMessages(const char **messages, S32 yPos)
       TNLAssert(i < MAX_LINES, "Too many lines... better increase MAX_LINES!");
 
       // Do some token subsititution for dynamic elements such as keybindings
-      // [[MOVEMENT]]
-
-
       string renderStr(messages[i]);
 
-      // See if any substitutions will be necessary
-      size_t startPos = renderStr.find("[[");      // If this isn't here, no further searching is necessary
-      if(startPos != string::npos)
-      {
-         const char *what = "[[MOVEMENT]]";
-         size_t pos = renderStr.find(what, startPos);
-
-         if(pos != string::npos)
-         {
-            size_t len = strlen(what);
-            renderStr.replace(pos, len, "A-W-S-D");
-         }
-      }
+      doSubstitutions(inputCodeManager, renderStr);
 
       drawCenteredString(yPos, FontSize, renderStr.c_str());
       yPos += FontSize + FontGap;
@@ -156,7 +170,7 @@ void HelpItemManager::renderMessages(S32 yPos) const
          glColor(Colors::red);
 
          const char **messages = helpItems[mTestingCtr % HelpItemCount].helpMessages;
-         doRenderMessages(messages, yPos);
+         doRenderMessages(mInputCodeManager, messages, yPos);
 
          FontManager::popFontContext();
          return;
@@ -174,7 +188,7 @@ void HelpItemManager::renderMessages(S32 yPos) const
       glColor(Colors::green, alpha);
 
       const char **messages = helpItems[mHelpItems[i]].helpMessages;
-      yPos += doRenderMessages(messages, yPos) + 15;  // Gap between messages
+      yPos += doRenderMessages(mInputCodeManager, messages, yPos) + 15;  // Gap between messages
    }
 
    FontManager::popFontContext();

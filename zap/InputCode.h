@@ -142,8 +142,8 @@ public:
    static bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3);            
 
    void setInputMode(InputMode inputMode);
-   InputMode getInputMode();
-   string getInputModeString();     // Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
+   InputMode getInputMode()    const;
+   string getInputModeString() const;  // Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
 
    #ifndef ZAP_DEDICATED
       static InputCode sdlKeyToInputCode(int key);             // Convert SDL keys to InputCode
@@ -157,8 +157,8 @@ public:
    static bool isKeyboardKey(InputCode inputCode);             // Is inputCode a key on the keyboard?
    static bool isModifier(InputCode inputCode);                // Is inputCode a modifier key?
 
-   InputCode getBinding(BindingName binding);
-   InputCode getBinding(BindingName bindingName, InputMode inputMode);
+   InputCode getBinding(BindingName binding) const; 
+   InputCode getBinding(BindingName bindingName, InputMode inputMode) const;
    void setBinding(BindingName bindingName, InputCode key);
    void setBinding(BindingName bindingName, InputMode inputMode, InputCode key);
 };
@@ -171,7 +171,7 @@ struct BindingSet
    BindingSet();     // Constructor
    bool hasKeypad();
 
-   InputCode getBinding(InputCodeManager::BindingName bindingName);
+   InputCode getBinding(InputCodeManager::BindingName bindingName) const;
    void setBinding(InputCodeManager::BindingName bindingName, InputCode key);
 
    InputCode inputSELWEAP1;

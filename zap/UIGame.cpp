@@ -83,7 +83,8 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
                   mChatMessageDisplayer1 (game,  5, true,  false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mChatMessageDisplayer2 (game,  5, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mChatMessageDisplayer3 (game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
-                  mFpsRenderer(game)
+                  mFpsRenderer(game),
+                  mHelpItemManager(game->getSettings()->getInputCodeManager())
 {
    mInScoreboardMode = false;
    displayInputModeChangeAlert = false;
@@ -2076,7 +2077,7 @@ void GameUserInterface::renderNormal(ClientGame *game)
    static Vector<const Vector<Point> *> polygons;
    polygons.clear();
 
-   const Vector<HighlightItem> *itemsToHighlight       = mHelpItemManager.getItemsToHighlight();
+   const Vector<HighlightItem> *itemsToHighlight = mHelpItemManager.getItemsToHighlight();
 
    for(S32 i = 0; i < itemsToHighlight->size(); i++)
       for(S32 j = 0; j < renderObjects.size(); j++)
@@ -2651,7 +2652,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
    // Initialize the starting rendering position.  This represents the bottom of the message rendering area, and
    // we'll work our way up as we go.  In all cases, newest messages will appear on the bottom, older ones on top.
    // Note that anchorPos reflects something different (i.e. the top or the bottom of the area) in each case.
-   S32 y = anchorPos + mChatScrollTimer.getFraction() * lineHeight;
+   S32 y = anchorPos + S32(mChatScrollTimer.getFraction() * lineHeight);
 
    // Advance anchor from top to the bottom of the render area.  When we are rendering at the bottom, anchorPos
    // already represents the bottom, so no additional adjustment is necessary.

@@ -61,7 +61,7 @@ BindingSet::BindingSet()
 }
 
 
-InputCode BindingSet::getBinding(InputCodeManager::BindingName bindingName)
+InputCode BindingSet::getBinding(InputCodeManager::BindingName bindingName) const
 {
    switch(bindingName)
    {
@@ -556,18 +556,18 @@ char InputCodeManager::keyToAscii(int unicode, InputCode inputCode)
 
 
 // We'll be using this one most of the time
-InputCode InputCodeManager::getBinding(BindingName bindingName)
+InputCode InputCodeManager::getBinding(BindingName bindingName) const
 {
    return getBinding(bindingName, mInputMode);
 }
 
 
 // Only used for saving to INI and such where we need to bulk-read bindings
-InputCode InputCodeManager::getBinding(BindingName bindingName, InputMode inputMode)
+InputCode InputCodeManager::getBinding(BindingName bindingName, InputMode inputMode) const
 {
    S32 mode = (S32)inputMode;    // 0 or 1 at present
 
-   BindingSet *bindingSet = &mBindingSets[mode];
+   const BindingSet *bindingSet = &mBindingSets[mode];
    
    return bindingSet->getBinding(bindingName);
 }
@@ -606,23 +606,19 @@ void InputCodeManager::setInputMode(InputMode inputMode)
 }
 
 
-InputMode InputCodeManager::getInputMode()
+InputMode InputCodeManager::getInputMode() const
 {
    return mInputMode;
 }
 
 
 // Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
-string InputCodeManager::getInputModeString()
+string InputCodeManager::getInputModeString() const
 {
-#ifndef ZAP_DEDICATED
    if(mInputMode == InputModeJoystick)
       return "Joystick " + itos(GameSettings::UseJoystickNumber + 1);    // Humans use 1-based indices!
    else
       return "Keyboard";
-#else
-   return "Keyboard";
-#endif
 }
 
 
