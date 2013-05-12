@@ -197,7 +197,6 @@ protected:
    void setUnselectedValueColor(const Color &color);
 
 public:
-   ValueMenuItem();
    ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2);
    virtual ~ValueMenuItem();
 };
@@ -218,8 +217,6 @@ protected:
    bool mWrap;
 
 public:
-   ToggleMenuItem();          // Default constructor -- do not use!
-
    ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
                   void (*callback)(ClientGame *, U32), const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    virtual ~ToggleMenuItem();  // Destructor
@@ -307,7 +304,6 @@ protected:
    virtual S32 getBigIncrement();    // How much our counter is incremented when shift is down (multiplier)
 
 public:
-   CounterMenuItem();      // Default constructor, do not use
    CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, 
                    const string &units, const string &minMsg, 
                    const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);

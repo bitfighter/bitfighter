@@ -330,8 +330,11 @@ MessageMenuItem::~MessageMenuItem()
 ////////////////////////////////////
 ////////////////////////////////////
 
+
 // Constructor
-ValueMenuItem::ValueMenuItem()
+ValueMenuItem::ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32),
+                             const string &help, InputCode k1, InputCode k2) :
+      Parent(displayValue, callback, help, k1, k2)
 {
    initialize();
 }
@@ -340,15 +343,6 @@ ValueMenuItem::ValueMenuItem()
 ValueMenuItem::~ValueMenuItem()
 {
    // Do nothing
-}
-
-
-// Constructor
-ValueMenuItem::ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32), 
-                             const string &help, InputCode k1, InputCode k2) :
-      Parent(displayValue, callback, help, k1, k2)
-{
-   initialize();
 }
 
 
@@ -387,12 +381,6 @@ void ValueMenuItem::setUnselectedValueColor(const Color &color)
 
 ////////////////////////////////////
 ////////////////////////////////////
-
-ToggleMenuItem::ToggleMenuItem()
-{
-   // Do nothing -- do not use this constructor, please!
-}
-
 
 // Constructor
 ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
@@ -620,7 +608,7 @@ REGISTER_LUA_SUBCLASS(ToggleMenuItem, MenuItem);
 
 
 // Lua Constructor, called from plugins
-ToggleMenuItem::ToggleMenuItem(lua_State *L)
+ToggleMenuItem::ToggleMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, KEY_NONE)
 {
    const char *methodName = "ToggleMenuItem constructor";
 
@@ -647,6 +635,24 @@ YesNoMenuItem::YesNoMenuItem(string title, bool currOption, const string &help, 
    initialize();
 
    setIndex(currOption);
+}
+
+
+// Lua Constructor
+YesNoMenuItem::YesNoMenuItem(lua_State *L) : Parent("", Vector<string>(), 0, true, NULL, "")
+{
+   initialize();
+
+   dumpStack(L);
+
+   const char *methodName = "YesNoMenuItem constructor";
+
+   // Required items -- will throw if they are missing or misspecified
+   mDisplayVal = getCheckedString(L, 1, methodName);
+
+   // Optional (but recommended) items
+   setIndex(getInt(L, 2, 1) - 1);                // - 1 for compatibility with Lua's 1-based array index
+   mHelp = getString(L, 3, "");
 }
 
 
@@ -741,24 +747,6 @@ const char *YesNoMenuItem::luaClassName = "YesNoMenuItem";
 REGISTER_LUA_SUBCLASS(YesNoMenuItem, ToggleMenuItem);
 
 
-// Lua Constructor
-YesNoMenuItem::YesNoMenuItem(lua_State *L)
-{
-   initialize();
-
-   dumpStack(L);
-
-   const char *methodName = "YesNoMenuItem constructor";
-
-   // Required items -- will throw if they are missing or misspecified
-   mDisplayVal = getCheckedString(L, 1, methodName);
-
-   // Optional (but recommended) items
-   setIndex(getInt(L, 2, 1) - 1);                // - 1 for compatibility with Lua's 1-based array index
-   mHelp = getString(L, 3, "");
-}
-
-
 ////////////////////////////////////
 ////////////////////////////////////
 
@@ -776,12 +764,6 @@ CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 m
    mMinMsg = minMsg;   
 
    setIntValue(value);     // Needs to be done after mMinValue and mMaxValue are set
-}
-
-
-CounterMenuItem::CounterMenuItem()
-{
-   // Do nothing
 }
 
 
@@ -968,7 +950,7 @@ REGISTER_LUA_SUBCLASS(CounterMenuItem, MenuItem);
 
 
 // Lua Constructor, called from scripts
-CounterMenuItem::CounterMenuItem(lua_State *L)
+CounterMenuItem::CounterMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, KEY_NONE)
 {
    const char *methodName = "CounterMenuItem constructor";
 
@@ -1387,7 +1369,7 @@ REGISTER_LUA_SUBCLASS(TextEntryMenuItem, MenuItem);
 
 
 // Lua Constructor
-TextEntryMenuItem::TextEntryMenuItem(lua_State *L)
+TextEntryMenuItem::TextEntryMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, KEY_NONE)
 {
    initialize();
 
