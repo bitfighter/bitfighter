@@ -137,7 +137,7 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
    }
    if(packTime)
    {
-      if(time >= MaxMoveTime)
+      if(time >= U32(MaxMoveTime))
       {
          stream->writeRangedU32(127, 0, MaxMoveTime);
          stream->writeInt(time - MaxMoveTime, MoveTimeBits);   // More bits, but sent less frequently
@@ -173,7 +173,7 @@ void Move::unpack(BitStream *stream, bool unpackTime)
    if(unpackTime)
    {
       time = stream->readRangedU32(0, MaxMoveTime);
-      if(time >= MaxMoveTime)
+      if(time >= U32(MaxMoveTime))
          time = stream->readInt(MoveTimeBits) + MaxMoveTime;
    }
 }

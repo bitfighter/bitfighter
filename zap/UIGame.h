@@ -135,8 +135,6 @@ private:
    LoadoutIndicator mLoadoutIndicator;
    TimeLeftRenderer mTimeLeftRenderer;
 
-   HelpItemManager mHelpItemManager;
-
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
 
    Timer mShutdownTimer;
@@ -231,6 +229,8 @@ private:
    ChatMessageDisplayer mChatMessageDisplayer3;    // Long form, messages do not expire
 
    UI::FpsRenderer mFpsRenderer;
+
+   HelpItemManager mHelpItemManager;
 
    Timer mAnnouncementTimer;
    string mAnnouncement;
