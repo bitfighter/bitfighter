@@ -192,6 +192,12 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
    GeomObject::setGeom(*mRenderOutlineGeometry);
 }
 
+// Destructor
+Barrier::~Barrier()
+{
+   // Do nothing
+}
+
 
 // Processes mPoints and fills polyPoints 
 const Vector<Point> *Barrier::getCollisionPoly() const

@@ -56,6 +56,7 @@ private:
 
 public:
    Button(ClientGame *game, S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void(*callback)(ClientGame *));   // Constructor
+   virtual ~Button();
 
    void render(F32 mouseX, F32 mouseY);
    void onClick(F32 mouseX, F32 mouseY);
@@ -114,6 +115,8 @@ private:
 
 public:
    explicit QueryServersUserInterface(ClientGame *game);      // Constructor
+   virtual ~QueryServersUserInterface();
+
    bool mReceivedListOfServersFromMaster;
    Nonce mNonce;
    U32 pendingPings;
@@ -165,12 +168,14 @@ public:
       U32 playerCount, maxPlayers, botCount;     // U32 because that's what we use on the master
 
       ServerRef(); // Quickie constructor
+      virtual ~ServerRef();
    };
    struct ColumnInfo
    {
       const char *name;
       S32 xStart;
       ColumnInfo(const char *nm = NULL, U32 xs = 0);     // Constructor
+      virtual ~ColumnInfo();
    };
 
    Vector<ServerRef> servers;

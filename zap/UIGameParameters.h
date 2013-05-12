@@ -52,6 +52,7 @@ public:
    SavedMenuItem();    // Default constructor
 
    explicit SavedMenuItem(MenuItem *menuItem);
+   virtual ~SavedMenuItem();
 
    void setValues(MenuItem *menuItem);
 

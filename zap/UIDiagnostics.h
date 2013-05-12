@@ -40,6 +40,8 @@ private:
    S32 mCurPage;
 public:
    explicit DiagnosticUserInterface(ClientGame *game);     // Constructor
+   virtual ~DiagnosticUserInterface();
+
    void onActivate();
    void idle(U32 t);
    void render();

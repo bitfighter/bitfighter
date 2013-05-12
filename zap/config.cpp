@@ -170,6 +170,13 @@ IniSettings::IniSettings()
 }
 
 
+// Destructor
+IniSettings::~IniSettings()
+{
+   // Do nothing
+}
+
+
 Vector<PluginBinding> IniSettings::getDefaultPluginBindings() const
 {
    Vector<PluginBinding> bindings;
@@ -1898,7 +1905,14 @@ FolderManager::FolderManager(const string &levelDir,    const string &robotDir, 
                fontsDir      (fontsDir)
 {
    // Do nothing (more)
-}                
+}
+
+
+// Destructor
+FolderManager::~FolderManager()
+{
+   // Do nothing
+}
 
 
 static string resolutionHelper(const string &cmdLineDir, const string &rootDataDir, const string &subdir)
@@ -2184,6 +2198,12 @@ string FolderManager::findBotFile(const string &filename) const
 CmdLineSettings::CmdLineSettings()
 {
    init();
+}
+
+// Destructor
+CmdLineSettings::~CmdLineSettings()
+{
+   // Do nothing
 }
 
 

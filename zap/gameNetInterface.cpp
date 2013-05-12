@@ -37,6 +37,12 @@ GameNetInterface::GameNetInterface(const Address &bindAddress, Game *theGame) : 
    mGame = theGame;
 };
 
+// Destructor
+GameNetInterface::~GameNetInterface()
+{
+   // Do nothing
+}
+
 
 void GameNetInterface::processPacket(const Address &sourceAddress, BitStream *pStream)
 {

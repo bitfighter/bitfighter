@@ -38,6 +38,9 @@ private:
    typedef GameType Parent;
 
 public:
+   RetrieveGameType();
+   virtual ~RetrieveGameType();
+
    // Server only
    void addFlag(FlagItem *flag);
 

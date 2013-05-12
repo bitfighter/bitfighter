@@ -52,6 +52,7 @@ protected:
 
 public:
    explicit AbstractInstructionsUserInterface(ClientGame *clientGame);      // Constructor
+   virtual ~AbstractInstructionsUserInterface();
 };
 
 }

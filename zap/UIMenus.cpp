@@ -768,6 +768,12 @@ MenuUserInterfaceWithIntroductoryAnimation::MenuUserInterfaceWithIntroductoryAni
    mShowingAnimation = false;
 }
 
+// Destructor
+MenuUserInterfaceWithIntroductoryAnimation::~MenuUserInterfaceWithIntroductoryAnimation()
+{
+   // Do nothing
+}
+
 
 void MenuUserInterfaceWithIntroductoryAnimation::onActivate()
 {
@@ -898,6 +904,12 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
    addMenuItem(new MenuItem("QUIT",                   quitSelectedCallback,       "", KEY_Q));
 }
 
+// Destructor
+MainMenuUserInterface::~MainMenuUserInterface()
+{
+   // Do nothing
+}
+
 
 void MainMenuUserInterface::onActivate()
 {
@@ -1019,6 +1031,12 @@ OptionsMenuUserInterface::OptionsMenuUserInterface(ClientGame *game) : Parent(ga
 {
    setMenuID(OptionsUI);
    mMenuTitle = "OPTIONS MENU:";
+}
+
+// Destructor
+OptionsMenuUserInterface::~OptionsMenuUserInterface()
+{
+   // Do nothing
 }
 
 
@@ -1166,6 +1184,12 @@ InputOptionsMenuUserInterface::InputOptionsMenuUserInterface(ClientGame *game) :
 {
    setMenuID(InputOptionsUI);
    mMenuTitle = "INPUT OPTIONS:";
+}
+
+// Destructor
+InputOptionsMenuUserInterface::~InputOptionsMenuUserInterface()
+{
+   // Do nothing
 }
 
 
@@ -1328,6 +1352,12 @@ SoundOptionsMenuUserInterface::SoundOptionsMenuUserInterface(ClientGame *game) :
    mMenuTitle = "SOUND OPTIONS:";
 }
 
+// Destructor
+SoundOptionsMenuUserInterface::~SoundOptionsMenuUserInterface()
+{
+   // Do nothing
+}
+
 
 void SoundOptionsMenuUserInterface::onActivate()
 {
@@ -1424,6 +1454,12 @@ NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : Parent(game)
    mReason = NetConnection::ReasonNone;
    mRenderInstructions = false;
 
+}
+
+// Destructor
+NameEntryUserInterface::~NameEntryUserInterface()
+{
+   // Do nothing
 }
 
 
@@ -1541,6 +1577,12 @@ HostMenuUserInterface::HostMenuUserInterface(ClientGame *game) : MenuUserInterfa
    levelLoadDisplayFadeTimer.setPeriod(1000);
    levelLoadDisplayDisplay = true;
    mEditingIndex = -1;     // Not editing at the start
+}
+
+// Destructor
+HostMenuUserInterface::~HostMenuUserInterface()
+{
+   // Do nothing
 }
 
 
@@ -1683,6 +1725,12 @@ GameMenuUserInterface::GameMenuUserInterface(ClientGame *game) : MenuUserInterfa
 {
    setMenuID(GameMenuUI);
    mMenuTitle = "GAME MENU:";
+}
+
+// Destructor
+GameMenuUserInterface::~GameMenuUserInterface()
+{
+   // Do nothing
 }
 
 
@@ -1840,6 +1888,12 @@ LevelMenuUserInterface::LevelMenuUserInterface(ClientGame *game) : MenuUserInter
    setMenuID(LevelTypeUI);
 }
 
+// Destructor
+LevelMenuUserInterface::~LevelMenuUserInterface()
+{
+   // Do nothing
+}
+
 
 static const char *UPLOAD_LEVELS = "UPLOAD LEVELS";
 static const char *ALL_LEVELS = "All Levels";
@@ -1929,6 +1983,12 @@ void LevelMenuUserInterface::onEscape()
 LevelMenuSelectUserInterface::LevelMenuSelectUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(LevelUI);
+}
+
+// Destructor
+LevelMenuSelectUserInterface::~LevelMenuSelectUserInterface()
+{
+   // Do nothing
 }
 
 
@@ -2079,6 +2139,12 @@ PlayerMenuUserInterface::PlayerMenuUserInterface(ClientGame *game) : Parent(game
    setMenuID(PlayerUI);
 }
 
+// Destructor
+PlayerMenuUserInterface::~PlayerMenuUserInterface()
+{
+   // Do nothing
+}
+
 
 static void playerSelectedCallback(ClientGame *game, U32 index) 
 {
@@ -2167,6 +2233,12 @@ TeamMenuUserInterface::TeamMenuUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(TeamUI);
    mMenuSubTitle = "[Human Players | Bots | Score]";
+}
+
+// Destructor
+TeamMenuUserInterface::~TeamMenuUserInterface()
+{
+   // Do nothing
 }
 
 

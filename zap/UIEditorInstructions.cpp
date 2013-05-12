@@ -55,6 +55,12 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    mAnimStage = 0;
 }
 
+// Destructor
+EditorInstructionsUserInterface::~EditorInstructionsUserInterface()
+{
+   // Do nothing
+}
+
 
 void EditorInstructionsUserInterface::onActivate()
 {

@@ -290,6 +290,7 @@ private:
 
 public:
    VelocityItem(const Point &pos, F32 speed, F32 radius, F32 mass);     // Constructor
+   virtual ~VelocityItem();
 
    void setPosAng(Point pos, F32 ang);
    void setInitialPosVelAng(const Point &pos, const Point &vel, F32 ang);
@@ -481,7 +482,9 @@ protected:
    S32 mTailLength;
 
 public:
-   Worm();     // Constructor  
+   Worm();     // Constructor
+   virtual ~Worm();
+
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode(F32 gridSize) const;
    const char *getOnScreenName();

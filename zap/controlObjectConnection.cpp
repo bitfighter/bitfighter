@@ -50,6 +50,12 @@ ControlObjectConnection::ControlObjectConnection()
    mIsBusy = false;
 }
 
+// Destructor
+ControlObjectConnection::~ControlObjectConnection()
+{
+   // Do nothing
+}
+
 
 // Only gets run on the server
 void ControlObjectConnection::setControlObject(BfObject *theObject)

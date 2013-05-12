@@ -410,6 +410,7 @@ protected:
 
 public:
    explicit EditorMenuUserInterface(ClientGame *game);    // Constructor
+   virtual ~EditorMenuUserInterface();
 };
 
 

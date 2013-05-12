@@ -42,7 +42,7 @@ private:
 
 public:
    ZoneControlGameType();  // Constructor
-
+   virtual ~ZoneControlGameType();
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);

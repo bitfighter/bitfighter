@@ -98,6 +98,7 @@ private:
 public:
    EventManager();                       // C++ constructor
    explicit EventManager(lua_State *L);  // Lua Constructor
+   virtual ~EventManager();
 
    static void shutdown();
 

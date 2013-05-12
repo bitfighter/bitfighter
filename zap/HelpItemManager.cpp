@@ -61,6 +61,12 @@ HelpItemManager::HelpItemManager(InputCodeManager *inputCodeManager)
    clearAlreadySeenList();
 }
 
+// Destructor
+HelpItemManager::~HelpItemManager()
+{
+   // Do nothing
+}
+
 
 void HelpItemManager::reset()
 {

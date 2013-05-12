@@ -109,6 +109,9 @@ protected:
    S32 mItemWidth;    // Calculated width of menu items
 
 public:
+   HelperMenu();
+   virtual ~HelperMenu();
+
    void initialize(ClientGame *game, HelperManager *helperManager);
 
    virtual void render() = 0;

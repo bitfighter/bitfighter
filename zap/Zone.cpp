@@ -182,6 +182,19 @@ REGISTER_LUA_SUBCLASS(Zone, BfObject);
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+GameZone::GameZone()
+{
+   // Do nothing
+}
+
+// Destructor
+GameZone::~GameZone()
+{
+   // Do nothing
+}
+
+
 U32 GameZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & GeomMask))

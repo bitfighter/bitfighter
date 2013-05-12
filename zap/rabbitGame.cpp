@@ -93,6 +93,12 @@ RabbitGameType::RabbitGameType()
    mFlagScoreTimer = 5 * 1000;
 }
 
+// Destructor
+RabbitGameType::~RabbitGameType()
+{
+   // Do nothing
+}
+
 
 bool RabbitGameType::processArguments(S32 argc, const char **argv, Game *game)
 {

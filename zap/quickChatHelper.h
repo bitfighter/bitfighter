@@ -51,6 +51,7 @@ struct QuickChatNode
    bool isMsgItem;         // False for groups, true for messages
 
    QuickChatNode();        // Constructor
+   virtual ~QuickChatNode();
 };
 
 
@@ -73,6 +74,8 @@ private:
 
 public:
    explicit QuickChatHelper();      // Constructor
+   virtual ~QuickChatHelper();
+
    HelperMenuType getType();
 
    static Vector<QuickChatNode> nodeTree;

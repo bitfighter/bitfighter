@@ -65,6 +65,11 @@ Color::Color(U32 rgbInt)
    b = F32(U8(rgbInt >> 16)) / 255.0f;
 };
 
+// Destructor
+Color::~Color()
+{
+   // Do nothing
+}
 
 
 void Color::read(const char **argv) 

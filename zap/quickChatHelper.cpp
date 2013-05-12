@@ -55,6 +55,12 @@ QuickChatNode::QuickChatNode() : caption(""), msg("")
    isMsgItem   = false;
 }
 
+// Destructor
+QuickChatNode::~QuickChatNode()
+{
+   // Do nothing
+}
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -67,6 +73,12 @@ QuickChatHelper::QuickChatHelper()
    mCurNode = 0;
    mItemWidth = -1;
    mMenuItems1IsCurrent = true;
+}
+
+// Destructor
+QuickChatHelper::~QuickChatHelper()
+{
+   // Do nothing
 }
 
 

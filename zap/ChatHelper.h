@@ -61,6 +61,8 @@ protected:
 
 public:
    explicit ChatHelper();      // Constructor
+   virtual ~ChatHelper();
+
    HelperMenuType getType();
 
    void activate(ChatType chatType);

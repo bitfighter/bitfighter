@@ -88,6 +88,12 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
    ResourceItem::generateOutlinePoints(Point(0,0), 1.0, mResourceItemPoints);
 }
 
+// Destructor
+InstructionsUserInterface::~InstructionsUserInterface()
+{
+   // Do nothing
+}
+
 
 void InstructionsUserInterface::onActivate()
 {

@@ -44,6 +44,12 @@ EditorAttributeMenuItemBuilder::EditorAttributeMenuItemBuilder()
    mInitialized = false;
 }
 
+// Destructor
+EditorAttributeMenuItemBuilder::~EditorAttributeMenuItemBuilder()
+{
+   // Do nothing
+}
+
 
 void EditorAttributeMenuItemBuilder::initialize(ClientGame *game)
 {

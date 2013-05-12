@@ -88,6 +88,7 @@ private:
 
 public:
    explicit LevelNameEntryUserInterface(ClientGame *game);      // Constructor
+   virtual ~LevelNameEntryUserInterface();
 
    virtual bool onKeyDown(InputCode inputCode);
    virtual void onAccept(const char *text);
@@ -106,6 +107,7 @@ class PasswordEntryUserInterface :  public TextEntryUserInterface
 
 public:
    explicit PasswordEntryUserInterface(ClientGame *game);    // Constructor
+   virtual ~PasswordEntryUserInterface();
 
    virtual void render();
    virtual void onAccept(const char *text) = 0;
@@ -142,6 +144,8 @@ class InGamePasswordEntryUserInterface :  public PasswordEntryUserInterface
 
 public:
    explicit InGamePasswordEntryUserInterface(ClientGame *game);  // Constructor
+   virtual ~InGamePasswordEntryUserInterface();
+
    void onAccept(const char *text);
    void onEscape();
    virtual void submitPassword(GameConnection *gameConnection, const char *text) = 0;
@@ -157,6 +161,7 @@ class ServerPasswordEntryUserInterface : public PreGamePasswordEntryUserInterfac
 
 public:
    explicit ServerPasswordEntryUserInterface(ClientGame *game);                // Constructor
+   virtual ~ServerPasswordEntryUserInterface();
 };
 
 

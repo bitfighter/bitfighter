@@ -179,6 +179,12 @@ LevelNameEntryUserInterface::LevelNameEntryUserInterface(ClientGame *game) : Par
    mFoundLevel = false;
 }
 
+// Destructor
+LevelNameEntryUserInterface::~LevelNameEntryUserInterface()
+{
+   // Do nothing
+}
+
 
 void LevelNameEntryUserInterface::onEscape()
 {
@@ -314,6 +320,12 @@ PasswordEntryUserInterface::PasswordEntryUserInterface(ClientGame *game) : Paren
    setSecret(true);
 }
 
+// Destructor
+PasswordEntryUserInterface::~PasswordEntryUserInterface()
+{
+   // Do nothing
+}
+
 
 void PasswordEntryUserInterface::render()
 {
@@ -388,6 +400,12 @@ ServerPasswordEntryUserInterface::ServerPasswordEntryUserInterface(ClientGame *g
    instr2 = "Enter the password required for access to the server";
 }
 
+// Destructor
+ServerPasswordEntryUserInterface::~ServerPasswordEntryUserInterface()
+{
+   // Do nothing
+}
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -397,6 +415,12 @@ InGamePasswordEntryUserInterface::InGamePasswordEntryUserInterface(ClientGame *g
       Parent(game)
 {
    /* Do nothing */
+}
+
+// Destructor
+InGamePasswordEntryUserInterface::~InGamePasswordEntryUserInterface()
+{
+   // Do nothing
 }
 
 

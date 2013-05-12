@@ -41,6 +41,12 @@ YesNoUserInterface::YesNoUserInterface(ClientGame *game) : Parent(game)
    mNoFunction = NULL;
 }
 
+// Destructor
+YesNoUserInterface::~YesNoUserInterface()
+{
+   // Do nothing
+}
+
 
 void YesNoUserInterface::registerYesFunction(void(*ptr)(ClientGame *game))
 {

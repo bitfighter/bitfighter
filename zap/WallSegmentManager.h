@@ -55,7 +55,7 @@ private:
 
 public:
    WallSegmentManager();   // Constructor
-   ~WallSegmentManager();  // Destructor
+   virtual ~WallSegmentManager();  // Destructor
 
    GridDatabase *getWallSegmentDatabase();
    GridDatabase *getWallEdgeDatabase();

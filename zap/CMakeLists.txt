@@ -68,7 +68,6 @@ set(SHARED_SOURCES
 	luaGameInfo.cpp
 	luaLevelGenerator.cpp
 	LuaScriptRunner.cpp
-	main.cpp
 	masterConnection.cpp
 	MathUtils.cpp
 	md5wrapper.cpp
@@ -225,6 +224,7 @@ if(SDL_FOUND OR SDL2_FOUND)
 	add_executable(bitfighter
 		${SHARED_SOURCES}
 		${CLIENT_SOURCES}
+		main.cpp
 	)
 
 	add_dependencies(bitfighter
@@ -258,6 +258,7 @@ endif()
 add_executable(bitfighterd
 	EXCLUDE_FROM_ALL
 	${SHARED_SOURCES}
+	main.cpp
 )
 
 add_dependencies(bitfighterd
@@ -295,6 +296,7 @@ option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and 
 set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/HttpRequestTest.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/PolylineGeometryTest.cpp
 )
 
 add_executable(test EXCLUDE_FROM_ALL

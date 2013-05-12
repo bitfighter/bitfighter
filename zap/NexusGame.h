@@ -65,6 +65,8 @@ protected:
 
 public:
    NexusGameType();           // Constructor
+   virtual ~NexusGameType();
+
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode() const;
 

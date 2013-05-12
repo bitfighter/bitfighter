@@ -51,6 +51,12 @@ HighScoresUserInterface::HighScoresUserInterface(ClientGame *game) : Parent(game
    mHaveHighScores = false;
 }
 
+// Destructor
+HighScoresUserInterface::~HighScoresUserInterface()
+{
+   // Do nothing
+}
+
 
 void HighScoresUserInterface::render()
 {

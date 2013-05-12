@@ -48,6 +48,7 @@ class ChatMessage
 public:
    ChatMessage();// Quickie constructor
    ChatMessage(string frm, string msg, Color col, bool isPriv, bool isSys);    // "Real" constructor
+   virtual ~ChatMessage();
 
    Color color;      // Chat message colors
    string message;   // Hold chat messages
@@ -173,6 +174,7 @@ private:
 
 public:
    explicit SuspendedUserInterface(ClientGame *game);    // Constructor
+   virtual ~SuspendedUserInterface();
 };
 
 

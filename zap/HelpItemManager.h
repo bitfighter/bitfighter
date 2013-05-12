@@ -83,6 +83,7 @@ private:
 
 public:
    HelpItemManager(InputCodeManager *inputCodeManager);   // Constructor
+   virtual ~HelpItemManager();
 
    void reset();
 

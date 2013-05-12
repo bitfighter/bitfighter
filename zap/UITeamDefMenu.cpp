@@ -84,6 +84,12 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : Parent(game)
    mMenuSubTitleColor = Colors::white;
 }
 
+// Destructor
+TeamDefUserInterface::~TeamDefUserInterface()
+{
+   // Do nothing
+}
+
 static const U32 errorMsgDisplayTime = 4000; // 4 seconds
 static const S32 fontsize = 19;
 static const S32 fontgap = 12;

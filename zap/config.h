@@ -60,6 +60,7 @@ struct FolderManager
 {
    // Constructors
    FolderManager();
+   virtual ~FolderManager();
 
    FolderManager(const string &levelDir,    const string &robotDir,  const string &sfxDir,        const string &musicDir, 
                  const string &iniDir,      const string &logDir,    const string &screenshotDir, const string &luaDir,
@@ -103,6 +104,7 @@ class GameSettings;
 struct CmdLineSettings
 {
    CmdLineSettings();      // Constructor
+   virtual ~CmdLineSettings();
 
    void init();
    
@@ -163,6 +165,7 @@ private:
 
 public:
    IniSettings();       // Constructor
+   virtual ~IniSettings();
 
    bool controlsRelative;
    DisplayMode displayMode;

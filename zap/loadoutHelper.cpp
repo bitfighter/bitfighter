@@ -76,6 +76,12 @@ LoadoutHelper::LoadoutHelper()
                     getMaxItemWidth(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems)));
 }
 
+// Destructor
+LoadoutHelper::~LoadoutHelper()
+{
+   // Do nothing
+}
+
 
 HelperMenu::HelperMenuType LoadoutHelper::getType() { return LoadoutHelperType; }
 

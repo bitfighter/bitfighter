@@ -67,6 +67,7 @@ private:
 
 public:
    ScreenInfo();      // Constructor
+   virtual ~ScreenInfo();
 
    F32 getMinScalingFactor();
 

@@ -102,12 +102,24 @@ QueryServersUserInterface::ServerRef::ServerRef()
    state = Start;
 }
 
+// Destructor
+QueryServersUserInterface::ServerRef::~ServerRef()
+{
+   // Do nothing
+}
+
 
 // Constructor
 QueryServersUserInterface::ColumnInfo::ColumnInfo(const char *nm, U32 xs)
 {
    name = nm;
    xStart = xs;
+}
+
+// Destructor
+QueryServersUserInterface::ColumnInfo::~ColumnInfo()
+{
+   // Do nothing
 }
 
 
@@ -160,6 +172,12 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInt
    
    buttons.push_back(prevButton);
    buttons.push_back(nextButton);
+}
+
+// Destructor
+QueryServersUserInterface::~QueryServersUserInterface()
+{
+   // Do nothing
 }
 
 // Initialize: Runs when "connect to server" screen is shown
@@ -1427,6 +1445,12 @@ Button::Button(ClientGame *game, S32 x, S32 y, S32 textSize, S32 padding, const 
    mHlColor = hlColor;
    mBgColor = Colors::richGreen;
    mOnClickCallback = onClickCallback;
+}
+
+// Destructor
+Button::~Button()
+{
+   // Do nothing
 }
 
 

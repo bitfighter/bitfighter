@@ -1612,6 +1612,12 @@ ForceField::ForceField(S32 team, Point start, Point end)
    mNetFlags.set(Ghostable);
 }
 
+// Destructor
+ForceField::~ForceField()
+{
+   // Do nothing
+}
+
 
 bool ForceField::collide(BfObject *hitObject)
 {

@@ -43,6 +43,7 @@ class Move
 public:
    Move();              // Constructor
    Move(F32 x, F32 y, F32 angle = 0);  // Constructor used in tests
+   virtual ~Move();
 
    void initialize();
 

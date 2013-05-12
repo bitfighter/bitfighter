@@ -1313,6 +1313,12 @@ VelocityItem::VelocityItem(const Point &pos, F32 speed, F32 radius, F32 mass) : 
    setPosAng(pos, TNL::Random::readF() * FloatTau);
 }
 
+// Destructor
+VelocityItem::~VelocityItem()
+{
+   // Do nothing
+}
+
 
 void VelocityItem::setPosAng(Point pos, F32 ang)
 {
@@ -1939,6 +1945,12 @@ Worm::Worm()
    mTailLength = 0;
 
    mAngle = 0;
+}
+
+// Destructor
+Worm::~Worm()
+{
+   // Do nothing
 }
 
 

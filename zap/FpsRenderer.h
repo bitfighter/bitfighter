@@ -60,6 +60,8 @@ private:
 
 public:
    FpsRenderer(ClientGame *game);      // Constructor
+   virtual ~FpsRenderer();
+
    void idle(U32 timeDelta);
    void render(S32 canvasWidth) const;
    void toggleVisibility();

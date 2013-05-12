@@ -53,6 +53,7 @@ struct KeyDefMenuItem
    string helpString;
 
    KeyDefMenuItem(const char *text, U32 index, U32 col, InputCodeManager::BindingName PC, string helpStr);     // Constructor
+   virtual ~KeyDefMenuItem();
 };
 
 
@@ -73,6 +74,8 @@ private:
 
 public:
    explicit KeyDefMenuUserInterface(ClientGame *game);   // Constructor
+   virtual ~KeyDefMenuUserInterface();
+
    Vector<KeyDefMenuItem> menuItems;      // Array of menu items
    const char *mMenuTitle;
    const char *mMenuSubTitle;

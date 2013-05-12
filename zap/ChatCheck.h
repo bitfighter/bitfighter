@@ -47,6 +47,7 @@ public:
    bool mChatMute;  // Can mute something forever..
 
    ChatCheck();
+   virtual ~ChatCheck();
 
    // The chat mode is: 0 = global, 1 = team, 2 = private; used when chatting the same message again, this time global
    bool checkMessage(const char *message, U32 mode);

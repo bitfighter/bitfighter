@@ -44,6 +44,9 @@ private:
    Timer mDisplayTimer;
 
 public:
+   LevelInfoDisplayer();
+   virtual ~LevelInfoDisplayer();
+
    void resetDisplayTimer();
    void idle(U32 timeDelta);
    void render(const GameType *gameType, S32 teamCount) const;

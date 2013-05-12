@@ -57,6 +57,8 @@ public:
 
    explicit Color(U32 rgbInt);
 
+   virtual ~Color();
+
    void read(const char **argv);
 
    void interp(float t, const Color &c1, const Color &c2);

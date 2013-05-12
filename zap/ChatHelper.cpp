@@ -119,6 +119,12 @@ ChatHelper::ChatHelper() : mLineEditor(200)
    setAnimationTime(65);    // Menu appearance time
 }
 
+// Destructor
+ChatHelper::~ChatHelper()
+{
+   // Do nothing
+}
+
 
 HelperMenu::HelperMenuType ChatHelper::getType() { return ChatHelperType; }
 

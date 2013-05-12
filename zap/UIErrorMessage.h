@@ -67,6 +67,7 @@ class ErrorMessageUserInterface : public AbstractMessageUserInterface
 
 public:
    explicit ErrorMessageUserInterface(ClientGame *game);      // Constructor
+   virtual ~ErrorMessageUserInterface();
    void reset();
 
    bool onKeyDown(InputCode inputCode);

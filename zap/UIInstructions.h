@@ -84,6 +84,8 @@ public:
    };
 
    explicit InstructionsUserInterface(ClientGame *game);      // Constructor
+   virtual ~InstructionsUserInterface();
+
    void render();
 
    bool onKeyDown(InputCode inputCode);

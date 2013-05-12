@@ -71,6 +71,12 @@ DiagnosticUserInterface::DiagnosticUserInterface(ClientGame *game) : Parent(game
    mCurPage = 0;
 }
 
+// Destructor
+DiagnosticUserInterface::~DiagnosticUserInterface()
+{
+   // Do nothing
+}
+
 
 void DiagnosticUserInterface::onActivate()
 {

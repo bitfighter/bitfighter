@@ -130,7 +130,7 @@ private:
 
 public:
    FxTrail(U32 dropFrequency = 32, U32 len = 15);
-   ~FxTrail();
+   virtual ~FxTrail();
 
    /// Update the point this trail is attached to.
    void update(Point pos, TrailProfile profile);

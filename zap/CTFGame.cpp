@@ -38,6 +38,13 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(CTFGameType);
 
 
+// Destructor
+CTFGameType::~CTFGameType()
+{
+   // Do nothing
+}
+
+
 void CTFGameType::addFlag(FlagItem *flag)
 {
    Parent::addFlag(flag);

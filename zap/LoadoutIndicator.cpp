@@ -45,6 +45,12 @@ LoadoutIndicator::LoadoutIndicator()
    mScrollTimer.setPeriod(200);
 }
 
+// Destructor
+LoadoutIndicator::~LoadoutIndicator()
+{
+   // Do nothing
+}
+
 
 void LoadoutIndicator::newLoadoutHasArrived(const LoadoutTracker &loadout)
 {

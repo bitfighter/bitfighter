@@ -41,6 +41,18 @@
 namespace Zap
 {
 
+// Constructor
+LevelInfoDisplayer::LevelInfoDisplayer()
+{
+   // Do nothing
+}
+
+// Destructor
+LevelInfoDisplayer::~LevelInfoDisplayer()
+{
+   // Do nothing
+}
+
 
 void LevelInfoDisplayer::resetDisplayTimer()
 {

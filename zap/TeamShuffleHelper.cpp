@@ -54,6 +54,12 @@ TeamShuffleHelper::TeamShuffleHelper() : Parent()
    setAnimationTime(0);    // Transition time, in ms
 }
 
+// Destructor
+TeamShuffleHelper::~TeamShuffleHelper()
+{
+   // Do nothing
+}
+
 
 HelperMenu::HelperMenuType TeamShuffleHelper::getType() { return ShuffleTeamsHelperType; }
 

@@ -320,6 +320,12 @@ MessageMenuItem::MessageMenuItem(string displayVal, const Color &color) : MenuIt
    mUnselectedColor = color;
 }
 
+// Destructor
+MessageMenuItem::~MessageMenuItem()
+{
+   // Do nothing
+}
+
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -328,6 +334,12 @@ MessageMenuItem::MessageMenuItem(string displayVal, const Color &color) : MenuIt
 ValueMenuItem::ValueMenuItem()
 {
    initialize();
+}
+
+// Destructor
+ValueMenuItem::~ValueMenuItem()
+{
+   // Do nothing
 }
 
 
@@ -998,6 +1010,12 @@ TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 max
    // Do nothing
 }
 
+// Destructor
+TimeCounterMenuItem::~TimeCounterMenuItem()
+{
+   // Do nothing
+}
+
 
 S32 TimeCounterMenuItem::getBigIncrement()
 {
@@ -1045,6 +1063,12 @@ TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(const string &title, S32 
    // Do nothing
 }
 
+// Destructor
+TimeCounterMenuItemSeconds::~TimeCounterMenuItemSeconds()
+{
+   // Do nothing
+}
+
 
 S32 TimeCounterMenuItemSeconds::getBigIncrement()
 {
@@ -1077,6 +1101,12 @@ PlayerMenuItem::PlayerMenuItem(S32 index, const char *text, void (*callback)(Cli
       MenuItem(index, text, callback, "", k1, KEY_UNKNOWN)
 {
    mType = type;
+}
+
+// Destructor
+PlayerMenuItem::~PlayerMenuItem()
+{
+   // Do nothing
 }
 
 
@@ -1131,6 +1161,12 @@ TeamMenuItem::TeamMenuItem(S32 index, AbstractTeam *team, void (*callback)(Clien
    mIsCurrent = isCurrent;
    mUnselectedColor = *team->getColor();
    mSelectedColor = *team->getColor();
+}
+
+// Destructor
+TeamMenuItem::~TeamMenuItem()
+{
+   // Do nothing
 }
 
 
@@ -1376,6 +1412,12 @@ MaskedTextEntryMenuItem::MaskedTextEntryMenuItem(string title, string val, strin
    TextEntryMenuItem(title, val, emptyVal, help, maxLen, k1, k2)
 {
    mLineEditor.setSecret(true);
+}
+
+// Destructor
+MaskedTextEntryMenuItem::~MaskedTextEntryMenuItem()
+{
+   // Do nothing
 }
 
 };

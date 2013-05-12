@@ -33,6 +33,19 @@ namespace Zap
 {
 
 
+// Constructor
+RetrieveGameType::RetrieveGameType()
+{
+   // Do nothing
+}
+
+// Destructor
+RetrieveGameType::~RetrieveGameType()
+{
+   // Do nothing
+}
+
+
 bool RetrieveGameType::isFlagGame() const { return true; }
 
 

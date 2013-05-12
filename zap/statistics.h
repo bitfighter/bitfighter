@@ -79,6 +79,7 @@ public:
    U32 mTeleportersEngineered;
 
    Statistics();        // Constructor
+   virtual ~Statistics();
 
    void countShot(WeaponType weaponType);    // Record a shot
    void countHit(WeaponType weaponType);     // Record a hit

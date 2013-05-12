@@ -111,6 +111,7 @@ private:
 
 public:
    explicit SplashUserInterface(ClientGame *game);      // Constructor
+   virtual ~SplashUserInterface();
 
    void onActivate();
    void idle(U32 timeDelta);
