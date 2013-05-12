@@ -31,7 +31,10 @@ set(LUA_VEC_SOURCES
 	src/lveclib.c
 	src/lgcveclib.c
 )
-add_library(lua-vec ${LUA_VEC_SOURCES})
+
+file(GLOB LUA_VEC_HEADERS "src/*.h")
+
+add_library(lua-vec ${LUA_VEC_SOURCES} ${LUA_VEC_HEADERS})
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set_target_properties(lua-vec

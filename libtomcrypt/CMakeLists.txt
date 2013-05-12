@@ -49,7 +49,9 @@ set(TOMCRYPT_SOURCES
 	mpi.c
 )
 
-add_library(tomcrypt ${TOMCRYPT_SOURCES})
+file(GLOB TOMCRYPT_HEADERS "*.h")
+
+add_library(tomcrypt ${TOMCRYPT_SOURCES} ${TOMCRYPT_HEADERS})
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
 	set_target_properties(tomcrypt

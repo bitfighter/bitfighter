@@ -26,7 +26,10 @@ set(TNL_SOURCES
 	udp.cpp
 	vector.cpp
 )
-add_library(tnl ${TNL_SOURCES})
+
+file(GLOB TNL_HEADERS "*.h")
+
+add_library(tnl ${TNL_SOURCES} ${TNL_HEADERS})
 target_link_libraries(tnl tomcrypt)
 
 set_target_properties(tnl PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG;TNL_ENABLE_LOGGING")

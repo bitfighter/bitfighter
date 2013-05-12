@@ -834,6 +834,7 @@ void EditorUserInterface::onPluginMenuClosed(const Vector<string> &args)
       setSaveMessage("Plugin Error: press [/] for details", false);
 
    rebuildEverything(getDatabase());
+   findSnapVertex();
 
    mPluginRunner.reset();
 }

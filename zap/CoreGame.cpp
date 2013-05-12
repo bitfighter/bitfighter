@@ -705,7 +705,6 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
 void CoreItem::idle(BfObject::IdleCallPath path)
 {
-   logprintf("Core path: %d", path);
    mPanelGeom.isValid = false;      // Force recalculation of panel geometry next time it's needed
 
    // Update attack timer on the server
