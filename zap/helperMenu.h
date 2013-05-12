@@ -30,6 +30,7 @@
 #include "AToBScroller.h"      // Parent class, for internal transitions
 
 #include "InputModeEnum.h"
+#include "InputCodeEnum.h"
 
 using namespace TNL;
 using namespace Zap::UI;
@@ -37,7 +38,6 @@ using namespace Zap::UI;
 namespace Zap
 {
 
-#include "InputCodeEnum.h"
 
 class ClientGame;
 class UIManager;

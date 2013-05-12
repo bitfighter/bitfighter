@@ -30,6 +30,7 @@
 #include "tnlVector.h"
 #include "LineEditorFilterEnum.h"
 #include "Timer.h"
+#include "InputCodeEnum.h"
 
 #include <string>
 
@@ -38,7 +39,6 @@ using namespace std;
 namespace Zap
 {
 
-#include "InputCodeEnum.h"
 
 //
 // Class to manage all sorts of single-line editing tasks

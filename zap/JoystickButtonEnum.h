@@ -27,13 +27,13 @@
 #define JOYSTICK_BUTTON_ENUM_H_
 
 #include "tnlTypes.h" 
+#include "InputCodeEnum.h"
 
 using namespace TNL;
 
 namespace Zap 
 {
 
-#include "InputCodeEnum.h"    // Inside Zap namespace
 
 // This enum is for the in-game button type.  SDL raw button inputs will map to one of these
 enum JoystickButton {

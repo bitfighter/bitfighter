@@ -28,13 +28,13 @@
 
 #include "tnlTypes.h"
 #include "Point.h"
+#include "InputCodeEnum.h"
 
 using namespace TNL;
 
 namespace Zap
 {
 
-#include "InputCodeEnum.h"    // Include inside Zap namespace
 
 class JoystickRender
 {

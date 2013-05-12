@@ -26,7 +26,8 @@
 #ifndef _INPUTCODE_H_
 #define _INPUTCODE_H_
 
-#include "InputModeEnum.h"      
+#include "InputModeEnum.h"
+#include "InputCodeEnum.h"
 #include "JoystickButtonEnum.h"
 
 #include "tnlVector.h"
@@ -37,8 +38,6 @@ using namespace std;
 
 namespace Zap
 {
-
-#include "InputCodeEnum.h"    // Include inside Zap namespace
 
 
 

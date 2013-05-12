@@ -31,6 +31,7 @@
 #define JOYSTICK_H_
 
 #include "JoystickButtonEnum.h"
+#include "InputCodeEnum.h"
 
 #include "Color.h"
 #include "tnlTypes.h"
@@ -48,7 +49,6 @@ typedef struct _SDL_Joystick SDL_Joystick;
 
 namespace Zap {
 
-#include "InputCodeEnum.h"    // Include inside Zap namespace
 
 class GameSettings;
 

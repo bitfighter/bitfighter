@@ -7,6 +7,7 @@
 
 
 #include "oglconsole.h"
+#include "InputCodeEnum.h"
 
 #ifndef BF_NO_CONSOLE
 
@@ -997,13 +998,12 @@ void OGLCONSOLE_HideConsole()
       userConsole->visibility = -SLIDE_STEPS;
 }  
 
-#include "InputCodeEnum.h"
 
-#define KEY_RETURN      KEY_ENTER
+#define KEY_RETURN      Zap::KEY_ENTER
 #define KMOD_SHIFT      1
 
-#define SHOW_CONSOLE_KEY KEY_NONE      // Bitfighter console created via different mechanism
-#define HIDE_CONSOLE_KEY KEY_ESCAPE
+#define SHOW_CONSOLE_KEY Zap::KEY_NONE      // Bitfighter console created via different mechanism
+#define HIDE_CONSOLE_KEY Zap::KEY_ESCAPE
 
 
 int wrap(_OGLCONSOLE_Console *userConsole, int index)
@@ -1056,8 +1056,8 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
    /* The operation for delete and backspace keys are very similar */
-    else if (sym == KEY_DELETE
-         ||  sym == KEY_BACKSPACE)
+    else if (sym == Zap::KEY_DELETE
+         ||  sym == Zap::KEY_BACKSPACE)
     {
         /* If string is not empty */
         if (getCurrentLineLength(userConsole))
@@ -1068,7 +1068,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
             OGLCONSOLE_YankHistory(userConsole);
 
             /* Is this a backspace? */
-            if (sym == KEY_BACKSPACE)
+            if (sym == Zap::KEY_BACKSPACE)
             {
                /* Backspace operations bail if the cursor is at the beginning
                  * of the input line */
@@ -1123,7 +1123,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Page up key
-    else if (sym == KEY_PAGEUP)
+    else if (sym == Zap::KEY_PAGEUP)
     {
         userConsole->lineScrollIndex -= userConsole->textHeight / 2;
 
@@ -1134,7 +1134,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Page down key
-    else if (sym == KEY_PAGEDOWN)
+    else if (sym == Zap::KEY_PAGEDOWN)
     {
         userConsole->lineScrollIndex += userConsole->textHeight / 2;
 
@@ -1144,7 +1144,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
         return 1;
     }
      // Home key
-     else if (sym == KEY_HOME)
+     else if (sym == Zap::KEY_HOME)
      {
          /* Yank the command history if necessary */
          OGLCONSOLE_YankHistory(userConsole);
@@ -1154,7 +1154,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
      }
 
      // End key
-     else if (sym == KEY_END)
+     else if (sym == Zap::KEY_END)
      {
          /* Yank the command history if necessary */
          OGLCONSOLE_YankHistory(userConsole);
@@ -1165,7 +1165,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
 
 
     // Arrow key up
-    else if (sym == KEY_UP)
+    else if (sym == Zap::KEY_UP)
     {
         // Shift key is for scrolling the output display
         if (mod & KMOD_SHIFT)
@@ -1199,7 +1199,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Arrow key down
-    else if (sym == KEY_DOWN)
+    else if (sym == Zap::KEY_DOWN)
     {
         // Shift key is for scrolling the output display
         if (mod & KMOD_SHIFT)
@@ -1233,7 +1233,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Arrow key left
-    else if (sym == KEY_LEFT)
+    else if (sym == Zap::KEY_LEFT)
     {
         /* Yank the command history if necessary */
         OGLCONSOLE_YankHistory(userConsole);
@@ -1245,7 +1245,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Arrow key right
-    else if (sym == KEY_RIGHT)
+    else if (sym == Zap::KEY_RIGHT)
     {
         /* Yank the command history if necessary */
         OGLCONSOLE_YankHistory(userConsole);
