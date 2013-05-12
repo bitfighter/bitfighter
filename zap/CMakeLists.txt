@@ -183,6 +183,20 @@ set(CLIENT_SOURCES
 	../fontstash/fontstash.c
 )
 
+file(GLOB BITFIGHTER_HEADERS
+	*.h 
+	)
+
+file(GLOB OTHER_HEADERS
+	../other/*.h 
+	../fontstash/*.h 
+	../clipper/*.h* 
+	../recast/*.h 
+	../sqlite/*.h
+	../poly2tri/*.h
+	../poly2tri/common/*.h
+	../poly2tri/sweep/*.h
+	)
 
 if(MSVC)
 	set(EXTRA_LIBS ws2_32 winmm)
@@ -221,6 +235,8 @@ if(SDL_FOUND OR SDL2_FOUND)
 	add_executable(bitfighter
 		${SHARED_SOURCES}
 		${CLIENT_SOURCES}
+		${BITFIGHTER_HEADERS}
+		${OTHER_HEADERS}
 		main.cpp
 	)
 
@@ -300,6 +316,7 @@ add_executable(test EXCLUDE_FROM_ALL
 	${CLIENT_SOURCES}
 	${SHARED_SOURCES}
 	${TEST_SOURCES}
+	${BITFIGHTER_HEADERS}
 )
 
 target_link_libraries(test

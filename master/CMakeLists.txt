@@ -22,10 +22,12 @@ set(MASTER_PHPBB_SOURCES
 	phpbbhash.cpp
 )
 
+file(GLOB MASTER_HEADERS "*.h")
 
 add_executable(master
 	EXCLUDE_FROM_ALL
 	${MASTER_SOURCES}
+	${MASTER_HEADERS}
 )
 
 add_dependencies(master
@@ -70,8 +72,7 @@ if(FOUND_MYSQL)
 
 	set_target_properties(master
 		PROPERTIES
-		COMPILE_DEFINITIONS BF_WRITE_TO_MYSQL
-		COMPILE_DEFINITIONS VERIFY_PHPBB3
+		COMPILE_DEFINITIONS "BF_WRITE_TO_MYSQL;VERIFY_PHPBB3"
 	)
 
 	include_directories(../mysql++ ${MYSQL_INCLUDE_DIR})
