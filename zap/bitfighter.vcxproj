@@ -334,6 +334,7 @@
     <ClCompile Include="SlideOutWidget.cpp" />
     <ClCompile Include="Spawn.cpp" />
     <ClCompile Include="stringUtils.cpp" />
+    <ClCompile Include="SymbolShape.cpp" />
     <ClCompile Include="SystemFunctions.cpp" />
     <ClCompile Include="TeamShuffleHelper.cpp" />
     <ClCompile Include="TimeLeftRenderer.cpp" />
@@ -511,6 +512,7 @@
     <ClInclude Include="SlipZone.h" />
     <ClInclude Include="Spawn.h" />
     <ClInclude Include="stringUtils.h" />
+    <ClInclude Include="SymbolShape.h" />
     <ClInclude Include="SystemFunctions.h" />
     <ClInclude Include="TeamConstants.h" />
     <ClInclude Include="TeamPreset.h" />

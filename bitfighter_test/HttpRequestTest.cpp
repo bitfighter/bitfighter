@@ -1,7 +1,7 @@
 #include "MockSocket.h"
 #include "MockAddress.h"
 
-#include "HttpRequest.h"
+#include "../zap/HttpRequest.h"
 
 #include "gtest/gtest.h"
 #include "tnlLog.h"

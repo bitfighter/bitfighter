@@ -2,12 +2,12 @@
 
 #include "gtest/gtest.h"
 
-#include "BfObject.h"
-#include "EngineeredItem.h"
-#include "gameType.h"
-#include "LoadoutTracker.h"
-#include "ServerGame.h"
-#include "ship.h"
+#include "../zap/BfObject.h"
+#include "../zap/EngineeredItem.h"
+#include "../zap/gameType.h"
+#include "../zap/LoadoutTracker.h"
+#include "../zap/ServerGame.h"
+#include "../zap/ship.h"
 
 
 #include "tnlNetObject.h"
