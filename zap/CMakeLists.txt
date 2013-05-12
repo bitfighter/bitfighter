@@ -152,6 +152,7 @@ set(CLIENT_SOURCES
 	ShipShape.cpp
 	SlideOutWidget.cpp
 	sparkManager.cpp
+	SymbolShape.cpp
 	TeamShuffleHelper.cpp
 	TimeLeftRenderer.cpp
 	UI.cpp
@@ -182,6 +183,8 @@ set(CLIENT_SOURCES
 	../fontstash/stb_truetype.c
 	../fontstash/fontstash.c
 )
+
+## Need something like this for header files --> file(GLOB Demo_HEADERS *.h)
 
 
 if(MSVC)

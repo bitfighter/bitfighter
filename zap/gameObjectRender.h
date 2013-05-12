@@ -115,7 +115,7 @@ extern void drawCircle(const Point &pos, F32 radius, const Color *color = NULL, 
 extern void drawCircle(F32 x, F32 y,     F32 radius, const Color *color = NULL, F32 alpha = 1.0);
 
 extern void drawDivetedTriangle(F32 height, F32 len);
-extern void drawGear(const Point &pos, S32 teeth, F32 r1, F32 r2, F32 ang1, F32 ang2, F32 innerCircleRadius);
+extern void drawGear(const Point &center, S32 teeth, F32 r1, F32 r2, F32 ang1, F32 ang2, F32 innerCircleRadius);
 
 
 //////////
@@ -170,7 +170,7 @@ extern void renderZone(const Color *c, const Vector<Point> *outline, const Vecto
 extern void renderLoadoutZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, 
                               const Point &centroid, F32 angle, F32 scaleFact = 1);
 
-extern void renderLoadoutZoneIcon(const Point &pos);
+extern void renderLoadoutZoneIcon(const Point &center, S32 outerRadius = 20);
 
 extern void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill,
                               const Point &centroid, S32 zoneId);

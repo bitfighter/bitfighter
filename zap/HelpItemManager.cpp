@@ -3,6 +3,7 @@
 #include "BfObject.h"      // For TypeNumbers
 #include "InputCode.h"     // For InputCodeManager
 #include "FontManager.h"
+#include "SymbolShape.h"
 #include "Colors.h"
 #include "OpenglUtils.h"
 #include "RenderUtils.h"
@@ -46,15 +47,15 @@ HelpItemManager::HelpItemManager(InputCodeManager *inputCodeManager)
 {
    mInputCodeManager = inputCodeManager;
 
-   mFloodControl.setPeriod(10 * 1000);       // Generally, don't show items more frequently than this, in ms
-   mPacedTimer.setPeriod(15 * 1000);         // How often to show a new paced message
-   mInitialDelayTimer.setPeriod(4 * 1000);   // Show nothing until this timer has expired
+   mFloodControl.setPeriod     (10 * 1000);  // Generally, don't show items more frequently than this, in ms
+   mPacedTimer.setPeriod       (15 * 1000);  // How often to show a new paced message
+   mInitialDelayTimer.setPeriod( 4 * 1000);  // Show nothing until this timer has expired
 
    mDisabled = false;
 
 #ifdef TNL_DEBUG
    mTestingCtr = -1;
-   mTestingTimer.setPeriod(4000);
+   mTestingTimer.setPeriod(8 * 1000);
 #endif
 
    clearAlreadySeenList();
@@ -117,29 +118,79 @@ void HelpItemManager::idle(U32 timeDelta)
 }
 
 
-// [[CHANGEWEP KEYS]]
-static void doSubstitutions(const InputCodeManager *inputCodeManager, string &str)
+// DON'T PANIC!!! THIS IS A ROUGH INTERMEDIATE FORM THAT WILL BE SIMPLIFIED AND STREAMLINED!!!
+
+// This method allocates new items (added to shapes vector).  They MUST be cleaned up or we will have leaks!
+void getSymbolShape(const InputCodeManager *inputCodeManager, const string &bindingName, Vector<SymbolShape *> &symbols)
 {
-   size_t startPos = str.find("[[");      // If this isn't here, no further searching is necessary
+   if(bindingName == "LOADOUT")
+      symbols.push_back(new SymbolGear());
+
+   else if(bindingName == "BINDING_CMDRMAP")
+      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_CMDRMAP))));
+
+   else if(bindingName == "BINDING_SCRBRD")
+      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SCRBRD))));
+
+   else if(bindingName == "BINDING_DROPITEM")
+      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_DROPITEM))));
+
+   else if(bindingName == "CHANGEWEP")
+   {
+      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1))));
+      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP2))));
+      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP3))));
+   }
+
+   else if(bindingName == "MOVEMENT")
+   {
+      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_UP))));
+      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_DOWN))));
+      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_LEFT))));
+      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_RIGHT))));
+   }
+
+   else 
+      symbols.push_back(new SymbolText("Unknown Binding: " + bindingName));
+}
+
+
+static void symbolParse(const InputCodeManager *inputCodeManager, string &str, size_t offset, Vector<SymbolShape *> &symbols);
+
+static void doCheck(const InputCodeManager *inputCodeManager, string &str, const string &what, S32 startPos, Vector<SymbolShape *> &symbols)
+{
+   size_t len = what.length(); 
+
+   if(str.substr(startPos + 2, len) == what && str.substr(startPos + 2 + len, 2) == "]]")
+   {
+      getSymbolShape(inputCodeManager, what, symbols);
+      symbolParse(inputCodeManager, str, startPos + len + 4, symbols);
+      return;
+   }
+}
+
+
+static void symbolParse(const InputCodeManager *inputCodeManager, string &str, size_t offset, Vector<SymbolShape *> &symbols)
+{
+   size_t startPos = str.find("[[", offset);      // If this isn't here, no further searching is necessary
    
    if(startPos == string::npos)
-      return;
-
-   const char *what = "[[MOVEMENT]]";
-   size_t pos = str.find(what, startPos);
-
-   if(pos != string::npos)
    {
-      size_t len = strlen(what);
-      //InputMode inputMode = inputCodeManager->getInputMode();
-
-      string keys = string(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_UP)))   +
-                    string(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_DOWN))) +
-                    string(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_LEFT))) +
-                    string(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_RIGHT)));
-
-      str.replace(pos, len, keys);
+      // No further symbols herein, convert the rest to text symbol and exit
+      symbols.push_back(new SymbolText(str.substr(offset)));
+      return;
    }
+
+   //InputCodeManager::BINDING_SCRBRD
+
+   symbols.push_back(new SymbolText(str.substr(offset, startPos - offset)));
+
+   doCheck(inputCodeManager, str, "LOADOUT", startPos, symbols);
+   doCheck(inputCodeManager, str, "MOVEMENT", startPos, symbols);
+   doCheck(inputCodeManager, str, "CHANGEWEP", startPos, symbols);
+   doCheck(inputCodeManager, str, "BINDING_DROPITEM", startPos, symbols);
+   doCheck(inputCodeManager, str, "BINDING_CMDRMAP", startPos, symbols);
+   doCheck(inputCodeManager, str, "BINDING_SCRBRD", startPos, symbols);
 }
 
 
@@ -155,10 +206,33 @@ static S32 doRenderMessages(const InputCodeManager *inputCodeManager, const char
 
       // Do some token subsititution for dynamic elements such as keybindings
       string renderStr(messages[i]);
+      
+      //// Temp special handling
+      //if(renderStr.find("[[LOADOUT]]") != string::npos)
+      //{
+      //   Vector<SymbolShape *> symbols;
 
-      doSubstitutions(inputCodeManager, renderStr);
+      //   string s1 = renderStr.substr(0, renderStr.find("[[LOADOUT]]"));
+      //   string s2 = renderStr.substr(renderStr.find("[[LOADOUT]]") + 11);
 
-      drawCenteredString(yPos, FontSize, renderStr.c_str());
+      //   // These will be cleaned up by SymbolString destructor
+      //   symbols.push_back(new SymbolText(s1, FontSize, FontContext::HUDContext));
+      //   symbols.push_back(new SymbolGear(12));  
+      //   symbols.push_back(new SymbolText(s2, FontSize, FontContext::HUDContext));
+
+      //   UI::SymbolString symbolString(symbols, FontSize, FontContext::HUDContext);
+
+      //   symbolString.renderCenter(Point(400, yPos));
+
+      //   return yPos + FontSize + FontGap;
+      //}
+      
+      Vector<SymbolShape *> symbols;
+      symbolParse(inputCodeManager, renderStr, 0, symbols);
+
+      UI::SymbolString symbolString(symbols, FontSize, FontContext::HUDContext);
+      symbolString.renderCenter(Point(400, yPos));
+
       yPos += FontSize + FontGap;
    }
 

@@ -1349,10 +1349,11 @@ void renderLoadoutZone(const Color *color, const Vector<Point> *outline, const V
 }
 
 
-void renderLoadoutZoneIcon(const Point &pos)
+// In normal usage, outerRadius is 20, which is the default if no radius is specified
+void renderLoadoutZoneIcon(const Point &center, S32 outerRadius)
 {
    // Pos, teeth, outer rad, inner rad, ang span of outer teeth, ang span of inner teeth, circle rad
-   drawGear(pos, 7, 20, 15, 20, 18, 8);   
+   drawGear(center, 7, outerRadius, 0.75f * outerRadius, 20.0f, 18.0f, 0.4 * outerRadius);   
 }
 
 
@@ -2676,9 +2677,10 @@ void drawDivetedTriangle(F32 height, F32 len)
 }
 
 
-void drawGear(const Point &pos, S32 teeth, F32 radius1, F32 radius2, F32 ang1, F32 ang2, F32 innerCircleRadius)
+void drawGear(const Point &center, S32 teeth, F32 radius1, F32 radius2, F32 ang1, F32 ang2, F32 innerCircleRadius)
 {
-   Vector<Point> pts;
+   static Vector<Point> pts;
+   pts.clear();
 
    F32 ang1rad = degreesToRadians(ang1);
    F32 ang2rad = degreesToRadians(ang2);
@@ -2702,7 +2704,7 @@ void drawGear(const Point &pos, S32 teeth, F32 radius1, F32 radius2, F32 ang1, F
    }
 
    glPushMatrix();
-      glTranslate(pos.x, pos.y, 0);
+      glTranslate(center.x, center.y, 0);
      // glRotatef(Platform::getRealMilliseconds() / 10 % 360,0,0,1);
       //glScale(6);
 
