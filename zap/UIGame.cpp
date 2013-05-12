@@ -117,6 +117,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
    mAnnouncementTimer.setPeriod(15000);  // 15 seconds
    mAnnouncement = "";
 
+   mShowProgressBar = false;
    mProgressBarFadeTimer.setPeriod(1000);
 
    prepareStars();
