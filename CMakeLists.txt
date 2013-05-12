@@ -38,6 +38,9 @@ if(MSVC)
 	foreach(CompilerFlag ${CompilerFlags})
 	  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
 	endforeach()
+	
+	# Enable 'Edit and Continue' debugging support
+	add_definitions(/ZI)
 endif()
 
 
