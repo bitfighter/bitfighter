@@ -127,7 +127,7 @@ SymbolGear::SymbolGear() : Parent(0)
 
 void SymbolGear::updateWidth(S32 fontSize, FontContext fontContext)
 {
-   mWidth = S32(4.0f / 3.0f * fontSize);     // mWidth is effectively a diameter; we'll use mWidth / 2 for our rendering radius
+   mWidth = S32(1.333f * fontSize);    // mWidth is effectively a diameter; we'll use mWidth / 2 for our rendering radius
    mHeight = mWidth;
 }
 
