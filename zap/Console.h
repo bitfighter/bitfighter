@@ -26,6 +26,8 @@
 #ifndef _CONSOLE_H_
 #define _CONSOLE_H_
 
+#include "InputCode.h"           // For InputCodeManager and associated enums
+
 #if defined(ZAP_DEDICATED) || defined(TNL_OS_MOBILE)
 #define BF_NO_CONSOLE
 #endif
@@ -56,7 +58,6 @@ public:
 #else
 
 #include "LuaScriptRunner.h"     // Parent class
-#include "InputCode.h"           // For InputCodeManager and associated enums
 #include "oglconsole.h"
 #include "lua.h"
 #include "tnlTypes.h"

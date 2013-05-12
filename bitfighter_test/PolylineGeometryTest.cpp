@@ -48,7 +48,9 @@ TEST_F(PolylineGeometryTest, setGeomWithNanPointTest)
    geom.push_back(Point(1, 0));
 
    // 0.0 / 0.0 results in NaN rather than a division by zero error
-   geom.push_back(Point(0.0 / 0.0, 0.0 / 0.0));
+   F32 nan = 0.0;
+   nan = nan / nan;
+   geom.push_back(Point(nan, nan));  // Visual C++ 2008 won't compile "0.0 / 0.0" (compile error)
 
    PolylineGeometry pg;
    pg.setGeom(geom);

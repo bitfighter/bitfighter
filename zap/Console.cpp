@@ -35,6 +35,7 @@
 
 
 using namespace TNL;
+#endif
 
 namespace Zap
 {
@@ -42,6 +43,7 @@ namespace Zap
 
 Console gConsole;    // For the moment, we'll just have one console for everything.  This may change later, but probably won't.
 
+#ifndef BF_NO_CONSOLE
 
 // Constructor
 Console::Console()
@@ -271,7 +273,6 @@ void Console::output(const char *format, ...)
 }
 
 
-};
 
 
 // Consider adding line editing using http://www.cs.utah.edu/~bigler/code/libedit.html
@@ -280,3 +281,4 @@ void Console::output(const char *format, ...)
 // also see lua.c
 
 #endif // BF_NO_CONSOLE
+};

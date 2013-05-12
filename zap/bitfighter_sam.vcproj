@@ -1243,6 +1243,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\SystemFunctions.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\teamInfo.cpp"
 			>
 		</File>

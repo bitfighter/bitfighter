@@ -35,6 +35,7 @@ set(SHARED_SOURCES
 	ClientInfo.cpp
 	Color.cpp
 	config.cpp
+	Console.cpp
 	controlObjectConnection.cpp
 	CoreGame.cpp
 	CTFGame.cpp
@@ -124,7 +125,6 @@ set(CLIENT_SOURCES
 	ChatCommands.cpp
 	ChatHelper.cpp
 	ClientGame.cpp
-	Console.cpp
 	Cursor.cpp
 	EditorAttributeMenuItemBuilder.cpp
 	EditorTeam.cpp
@@ -328,6 +328,7 @@ set_target_properties(test
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/gtest/include
+	${CMAKE_SOURCE_DIR}/zap
 )
 
 # to use the coverage target, install lcov, enable BITFIGHTER_COVERAGE, and run it
