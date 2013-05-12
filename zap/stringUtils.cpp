@@ -42,7 +42,7 @@
 #endif
 
 #ifdef TNL_OS_WIN32
-#  include "dirent.h"        // Need local copy for Windows builds
+#  include "../other/dirent.h"        // Need local copy for Windows builds
 #else
 #  include <dirent.h>        // Need standard copy for *NIXes
 #endif
