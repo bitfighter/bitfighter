@@ -134,25 +134,15 @@ void renderPointVector(const Vector<Point> *points, U32 geomType)
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-// Use slower method here because we need to visit each point to add offset
 void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
 {
-   // I chose 32768 as a buffer because that was enough for the editor to handle at least
-   // 10 ctf3-sized levels with points in the editor.  I added the assert just in case,
-   // it may need to be increased for some crazy levels out there
-   static F32 pointVectorVertexArray[32768];
-   TNLAssert(points->size() <= 32768, "static array for this render function is too small");
-
-   for(S32 i = 0; i < points->size(); i++)
-   {
-      pointVectorVertexArray[2*i]     = points->get(i).x + offset.x;
-      pointVectorVertexArray[(2*i)+1] = points->get(i).y + offset.y;
-   }
-
+   glPushMatrix();
+   glTranslate(offset);
    glEnableClientState(GL_VERTEX_ARRAY);
-      glVertexPointer(2, GL_FLOAT, 0, pointVectorVertexArray);
+      glVertexPointer(2, GL_FLOAT, 0, points->address());
       glDrawArrays(geomType, 0, points->size());
    glDisableClientState(GL_VERTEX_ARRAY);
+   glPopMatrix();
 }
 
 
