@@ -63,6 +63,7 @@ public:
    };
 
 
+   // TODO -- Hook into xmacro with BINDING_STRINGS
    enum BindingName {
       BINDING_SELWEAP1,    // Name def depends on these being in this order from here...
       BINDING_SELWEAP2,
@@ -107,6 +108,8 @@ public:
    virtual ~InputCodeManager();
 
    static const char *inputCodeToString(InputCode inputCode);
+   static const char *inputCodeToGlyph(InputCode inputCode);
+
    static InputCode stringToInputCode(const char *inputName);
 
    static void setState(InputCode inputCode, bool state);   // Set key state (t=down, f=up)
@@ -118,8 +121,7 @@ public:
    //static S32 getBindingCount();
    static string getBindingName(BindingName binding);
    
-   InputCode getKeyBoundToBindingCodeName(string name);
-   
+   InputCode getKeyBoundToBindingCodeName(const string &name) const;
 
    // Some converters
    InputCode filterInputCode(InputCode inputCode);    // Calls filters below

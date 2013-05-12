@@ -1,6 +1,32 @@
+﻿//-----------------------------------------------------------------------------------
+//
+// Bitfighter - A multiplayer vector graphics space game
+// Based on Zap demo released for Torque Network Library by GarageGames.com
+//
+// Derivative work copyright (C) 2008-2009 Chris Eykamp
+// Original work copyright (C) 2004 GarageGames.com, Inc.
+// Other code copyright as noted
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//------------------------------------------------------------------------------------
+
 #include "SymbolShape.h"
 
 #include "FontManager.h"
+#include "InputCode.h"
 
 #include "gameObjectRender.h"
 #include "Colors.h"
@@ -157,7 +183,31 @@ void SymbolText::updateWidth(S32 fontSize, FontContext fontContext)
 
 void SymbolText::render(const Point &center, S32 fontSize, FontContext fontContext) const
 {
+   FontManager::pushFontContext(fontContext);
    drawString(center.x - mWidth / 2, center.y - fontSize / 2, fontSize, mText.c_str());
+   FontManager::popFontContext();
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+SymbolKey::SymbolKey(const string &text) : Parent(text)
+{
+   // Do nothing
+}
+
+
+void SymbolKey::updateWidth(S32 fontSize, FontContext fontContext)
+{
+   mWidth = getStringWidth(KeyContext, fontSize, mText.c_str());
+}
+
+
+void SymbolKey::render(const Point &center, S32 fontSize, FontContext fontContext) const
+{
+   Parent::render(center, fontSize, KeyContext);
 }
 
 
@@ -183,7 +233,7 @@ SymbolString::SymbolString(const Vector<SymbolShape *> &symbols, S32 fontSize, F
 
 SymbolString::~SymbolString()
 {
-   mSymbols.deleteAndClear();    // Clean up those pointers
+   mSymbols.clear();    // Clean up those pointers
 }
 
 
@@ -209,6 +259,79 @@ void SymbolString::renderCenter(const Point &center) const
    FontManager::popFontContext();
 }
 
+
+// Locally defined class, used only here, and only for ensuring objects are cleaned up on exit
+class SymbolHolder
+{
+private:
+   static Vector<SymbolShape *> mKeySymbols;
+   static SymbolGear *mSymbolGear;
+
+public:
+   SymbolHolder() 
+   {
+      if(mKeySymbols.size() == 0)                     // Should always be the case
+         mKeySymbols.resize(LAST_KEYBOARD_KEY + 1);   // Values will be initialized to NULL
+   }
+
+
+   ~SymbolHolder()
+   {
+      mKeySymbols.deleteAndClear();                   // Delete objects created in getSymbol
+      delete mSymbolGear;
+   }
+
+
+   SymbolShape *getSymbol(InputCode inputCode)
+   {
+      // Lazily initialize -- we're unlikely to actually need more than a few of these during a session
+      if(!mKeySymbols[inputCode])
+      {
+         string stuff = InputCodeManager::inputCodeToGlyph(inputCode);
+         if(stuff != "")
+            mKeySymbols[inputCode] = new SymbolKey(stuff);
+         else
+            mKeySymbols[inputCode] = new SymbolText("[" + string(InputCodeManager::inputCodeToString(inputCode)) + "]");
+      }
+
+      return mKeySymbols[inputCode];
+   }
+
+
+   SymbolShape *getSymbolGear()
+   {
+      if(!mSymbolGear)
+         mSymbolGear = new SymbolGear();
+
+      return mSymbolGear;
+   }
+
+};
+
+// Statics used by SymbolHolder
+Vector<SymbolShape *> SymbolHolder::mKeySymbols;      
+SymbolGear *SymbolHolder::mSymbolGear = NULL;
+
+static SymbolHolder symbolHolder;
+
+
+// Static method
+SymbolShape *SymbolString::getControlSymbol(InputCode inputCode)
+{
+   if(InputCodeManager::isKeyboardKey(inputCode))
+      return symbolHolder.getSymbol(inputCode);
+   else
+   { 
+      TNLAssert(false, "Deal with it!");
+      return NULL;      // Certain to crash
+   }
+}
+
+
+SymbolShape *SymbolString::getSymbolGear()
+{
+   return symbolHolder.getSymbolGear();
+}
 
 
 } } // Nested namespace

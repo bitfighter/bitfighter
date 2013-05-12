@@ -146,11 +146,12 @@ void FontManager::initialize(GameSettings *settings)
    fontList[FontOrbitronMedStroke]   = new BfFont(FontOrbitronMedStroke,   &fgStrokeOrbitronMed);
 
    // Our TTF fonts
-   fontList[FontOcrA]           = new BfFont(FontOcrA,          "Digital.ttf",         settings);
-   fontList[FontOrbitronLight]  = new BfFont(FontOrbitronLight, "Orbitron Light.ttf",  settings);
-   fontList[FontOrbitronMedium] = new BfFont(FontOrbitronLight, "Orbitron Medium.ttf", settings);
-   fontList[FontPrimeRegular]   = new BfFont(FontPrimeRegular,  "prime_regular.ttf",   settings);
-   fontList[FontTenby5]         = new BfFont(FontTenby5,        "tenbyfive.ttf",       settings);
+   fontList[FontOcrA]           = new BfFont(FontOcrA,          "Digital.ttf",          settings);
+   fontList[FontOrbitronLight]  = new BfFont(FontOrbitronLight, "Orbitron Light.ttf",   settings);
+   fontList[FontOrbitronMedium] = new BfFont(FontOrbitronLight, "Orbitron Medium.ttf",  settings);
+   fontList[FontPrimeRegular]   = new BfFont(FontPrimeRegular,  "prime_regular.ttf",    settings);
+   fontList[FontTenby5]         = new BfFont(FontTenby5,        "tenbyfive.ttf",        settings);
+   fontList[KeyCaps]            = new BfFont(KeyCaps,           "DavysBigKeyCaps2.ttf", settings);     // LinBiolinum_K
 
    // set texture blending function
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -218,6 +219,10 @@ void FontManager::setFontContext(FontContext fontContext)
       case LoadoutIndicatorContext:
       case OverlayMenuContext:
          setFont(FontTenby5);
+         return;
+
+      case KeyContext:
+         setFont(KeyCaps);
          return;
 
       case TextEffectContext:
@@ -355,7 +360,7 @@ S32 FontManager::getTtfFontStringLength(BfFont *font, const char *string)
    F32 minx, miny, maxx, maxy;
    sth_dim_text(mStash, font->getStashFontId(), legacyRomanSizeFactorThanksGlut, string, &minx, &miny, &maxx, &maxy);
 
-   return maxx - minx;
+   return S32(maxx - minx);
 }
 
 

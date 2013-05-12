@@ -83,7 +83,7 @@ S32 AToBScroller::getTransitionPos(S32 fromPos, S32 toPos) const
 
    F32 fraction = mScrollTimer.getFraction();
 
-   return fromPos * fraction + toPos * (1 - fraction);
+   return S32(fromPos * fraction + toPos * (1 - fraction));
 }
 
 

@@ -261,6 +261,8 @@ bool BindingSet::hasKeypad()
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+// Seems like a good xmacro candidate!
 static const string BINDING_STRINGS[] = 
 {
    "SelWeapon1",		   // BINDING_SELWEAP1 
@@ -1750,6 +1752,7 @@ JoystickButton inputCodeToJoystickButton(InputCode inputCode)
 #endif
 
 
+
 // We'll also treat controller buttons like simulated keystrokes
 bool InputCodeManager::isControllerButton(InputCode inputCode)
 {
@@ -1765,7 +1768,7 @@ bool InputCodeManager::isKeypadKey(InputCode inputCode)
 
 bool InputCodeManager::isKeyboardKey(InputCode inputCode)
 {
-   return inputCode >= KEY_0 && inputCode <= KEY_KEYPAD_EQUALS;
+   return inputCode >= FIRST_KEYBOARD_KEY && inputCode <= LAST_KEYBOARD_KEY;
 }
 
 
@@ -1805,7 +1808,8 @@ string InputCodeManager::getBindingName(BindingName bindingName)
 }
 
 
-InputCode InputCodeManager::getKeyBoundToBindingCodeName(string name)
+// i.e. return KEY_1 when passed "SelWeapon1"
+InputCode InputCodeManager::getKeyBoundToBindingCodeName(const string &name) const
 {
    // Linear search not at all efficient, but this will be called very infrequently, in non-performance sensitive area
    for(U32 i = 0; i < ARRAYSIZE(BINDING_STRINGS); i++)
@@ -1817,166 +1821,188 @@ InputCode InputCodeManager::getKeyBoundToBindingCodeName(string name)
 
 
 // Array tying InputCodes to string representations; used for translating one to the other 
-static const char *keyNames[KEY_COUNT];
+
+struct KeyNames {
+   const char *keyName;
+   const char *keyGlyph;      // For the font we're using for key glyphs... change fonts, and these are toast
+};
+
+
+static KeyNames keyNames[KEY_COUNT];
+
 
 void InputCodeManager::initializeKeyNames()
 {
    // Fill name list with default value
    for(S32 i = 0; i < KEY_COUNT; i++)
-      keyNames[i] = "Unknown Key";
+   {
+      keyNames[i].keyName = "Unknown Key";
+      keyNames[i].keyGlyph = "";
+   }
+
+   // Find the unicode in Character Map or similar utility, 
+   // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
 
    // Now keys we know with our locally defined names
-   keyNames[S32(KEY_BACKSPACE)] = "Backspace";
-   keyNames[S32(KEY_DELETE)] = "Del";
-   keyNames[S32(KEY_TAB)] = "Tab";
-   keyNames[S32(KEY_ENTER)] = "Enter";
-   keyNames[S32(KEY_ESCAPE)] = "Esc";
-   keyNames[S32(KEY_SPACE)] = "Space";
-   keyNames[S32(KEY_0)] = "0";
-   keyNames[S32(KEY_1)] = "1";
-   keyNames[S32(KEY_2)] = "2";
-   keyNames[S32(KEY_3)] = "3";
-   keyNames[S32(KEY_4)] = "4";
-   keyNames[S32(KEY_5)] = "5";
-   keyNames[S32(KEY_6)] = "6";
-   keyNames[S32(KEY_7)] = "7";
-   keyNames[S32(KEY_8)] = "8";
-   keyNames[S32(KEY_9)] = "9";
-   keyNames[S32(KEY_A)] = "A";
-   keyNames[S32(KEY_B)] = "B";
-   keyNames[S32(KEY_C)] = "C";
-   keyNames[S32(KEY_D)] = "D";
-   keyNames[S32(KEY_E)] = "E";
-   keyNames[S32(KEY_F)] = "F";
-   keyNames[S32(KEY_G)] = "G";
-   keyNames[S32(KEY_H)] = "H";
-   keyNames[S32(KEY_I)] = "I";
-   keyNames[S32(KEY_J)] = "J";
-   keyNames[S32(KEY_K)] = "K";
-   keyNames[S32(KEY_L)] = "L";
-   keyNames[S32(KEY_M)] = "M";
-   keyNames[S32(KEY_N)] = "N";
-   keyNames[S32(KEY_O)] = "O";
-   keyNames[S32(KEY_P)] = "P";
-   keyNames[S32(KEY_Q)] = "Q";
-   keyNames[S32(KEY_R)] = "R";
-   keyNames[S32(KEY_S)] = "S";
-   keyNames[S32(KEY_T)] = "T";
-   keyNames[S32(KEY_U)] = "U";
-   keyNames[S32(KEY_V)] = "V";
-   keyNames[S32(KEY_W)] = "W";
-   keyNames[S32(KEY_X)] = "X";
-   keyNames[S32(KEY_Y)] = "Y";
-   keyNames[S32(KEY_Z)] = "Z";
-   keyNames[S32(KEY_TILDE)] = "~";
-   keyNames[S32(KEY_MINUS)] = "-";
-   keyNames[S32(KEY_EQUALS)] = "=";
-   keyNames[S32(KEY_OPENBRACKET)] = "[";
-   keyNames[S32(KEY_CLOSEBRACKET)] = "]";
-   keyNames[S32(KEY_BACKSLASH)] = "\\";
-   keyNames[S32(KEY_SEMICOLON)] = ";";
-   keyNames[S32(KEY_QUOTE)] = "'";
-   keyNames[S32(KEY_COMMA)] = ",";
-   keyNames[S32(KEY_PERIOD)] = ".";
-   keyNames[S32(KEY_SLASH)] = "/";
-   keyNames[S32(KEY_PAGEUP)] = "Page Up";
-   keyNames[S32(KEY_PAGEDOWN)] = "Page Down";
-   keyNames[S32(KEY_END)] = "End";
-   keyNames[S32(KEY_HOME)] = "Home";
-   keyNames[S32(KEY_LEFT)] = "Left Arrow";
-   keyNames[S32(KEY_UP)] = "Up Arrow";
-   keyNames[S32(KEY_RIGHT)] = "Right Arrow";
-   keyNames[S32(KEY_DOWN)] = "Down Arrow";
-   keyNames[S32(KEY_INSERT)] = "Insert";
-   keyNames[S32(KEY_F1)] = "F1";
-   keyNames[S32(KEY_F2)] = "F2";
-   keyNames[S32(KEY_F3)] = "F3";
-   keyNames[S32(KEY_F4)] = "F4";
-   keyNames[S32(KEY_F5)] = "F5";
-   keyNames[S32(KEY_F6)] = "F6";
-   keyNames[S32(KEY_F7)] = "F7";
-   keyNames[S32(KEY_F8)] = "F8";
-   keyNames[S32(KEY_F9)] = "F9";
-   keyNames[S32(KEY_F10)] = "F10";
-   keyNames[S32(KEY_F11)] = "F11";
-   keyNames[S32(KEY_F12)] = "F12";
-   keyNames[S32(KEY_SHIFT)] = "Shift";
-   keyNames[S32(KEY_ALT)] = "Alt";
-   keyNames[S32(KEY_CTRL)] = "Ctrl";
-   keyNames[S32(KEY_META)] = "Meta";
-   keyNames[S32(KEY_SUPER)] = "Super";
-   keyNames[S32(MOUSE_LEFT)] = "Left-mouse";
-   keyNames[S32(MOUSE_MIDDLE)] = "Middle-mouse";
-   keyNames[S32(MOUSE_RIGHT)] = "Right-mouse";
-   keyNames[S32(MOUSE_WHEEL_UP)] = "Mouse wheel up";
-   keyNames[S32(MOUSE_WHEEL_DOWN)] = "Mouse wheel down";
-   keyNames[S32(BUTTON_1)] = "Button 1";
-   keyNames[S32(BUTTON_2)] = "Button 2";
-   keyNames[S32(BUTTON_3)] = "Button 3";
-   keyNames[S32(BUTTON_4)] = "Button 4";
-   keyNames[S32(BUTTON_5)] = "Button 5";
-   keyNames[S32(BUTTON_6)] = "Button 6";
-   keyNames[S32(BUTTON_7)] = "Button 7";
-   keyNames[S32(BUTTON_8)] = "Button 8";
-   keyNames[S32(BUTTON_9)] = "Button 9";
-   keyNames[S32(BUTTON_10)] = "Button 10";
-   keyNames[S32(BUTTON_11)] = "Button 11";
-   keyNames[S32(BUTTON_12)] = "Button 12";
-   keyNames[S32(BUTTON_BACK)] = "Back";
-   keyNames[S32(BUTTON_START)] = "Start";
-   keyNames[S32(BUTTON_DPAD_UP)] = "DPad Up";
-   keyNames[S32(BUTTON_DPAD_DOWN)] = "DPad Down";
-   keyNames[S32(BUTTON_DPAD_LEFT)] = "DPad Left";
-   keyNames[S32(BUTTON_DPAD_RIGHT)] = "DPad Right";
-   keyNames[S32(STICK_1_LEFT)] = "Stick 1 Left";
-   keyNames[S32(STICK_1_RIGHT)] = "Stick 1 Right";
-   keyNames[S32(STICK_1_UP)] = "Stick 1 Up";
-   keyNames[S32(STICK_1_DOWN)] = "Stick 1 Down";
-   keyNames[S32(STICK_2_LEFT)] = "Stick 2 Left";
-   keyNames[S32(STICK_2_RIGHT)] = "Stick 2 Right";
-   keyNames[S32(STICK_2_UP)] = "Stick 2 Up";
-   keyNames[S32(STICK_2_DOWN)] = "Stick 2 Down";
-   keyNames[S32(MOUSE)] = "Mouse";
-   keyNames[S32(LEFT_JOYSTICK)] = "Left joystick";
-   keyNames[S32(RIGHT_JOYSTICK)] = "Right joystick";
-   keyNames[S32(KEY_CTRL_M)] = "Ctrl-M";
-   keyNames[S32(KEY_CTRL_Q)] = "Ctrl-Q";
-   keyNames[S32(KEY_CTRL_S)] = "Ctrl-S";
-   keyNames[S32(KEY_BACKQUOTE)] = "`";
-   keyNames[S32(KEY_MENU)] = "Menu";
-   keyNames[S32(KEY_KEYPAD_DIVIDE)] = "Keypad /";
-   keyNames[S32(KEY_KEYPAD_MULTIPLY)] = "Keypad *";
-   keyNames[S32(KEY_KEYPAD_MINUS)] = "Keypad -";
-   keyNames[S32(KEY_KEYPAD_PLUS)] = "Keypad +";
-   keyNames[S32(KEY_PRINT)] = "PrntScrn";
-   keyNames[S32(KEY_PAUSE)] = "Pause";
-   keyNames[S32(KEY_SCROLLOCK)] = "ScrollLock";
-   keyNames[S32(KEY_KEYPAD1)] = "Keypad 1";
-   keyNames[S32(KEY_KEYPAD2)] = "Keypad 2";
-   keyNames[S32(KEY_KEYPAD3)] = "Keypad 3";
-   keyNames[S32(KEY_KEYPAD4)] = "Keypad 4";
-   keyNames[S32(KEY_KEYPAD5)] = "Keypad 5";
-   keyNames[S32(KEY_KEYPAD6)] = "Keypad 6";
-   keyNames[S32(KEY_KEYPAD7)] = "Keypad 7";
-   keyNames[S32(KEY_KEYPAD8)] = "Keypad 8";
-   keyNames[S32(KEY_KEYPAD9)] = "Keypad 9";
-   keyNames[S32(KEY_KEYPAD0)] = "Keypad 0";
-   keyNames[S32(KEY_KEYPAD_PERIOD)] = "Keypad .";
-   keyNames[S32(KEY_KEYPAD_ENTER)] = "Keypad Enter";
-   keyNames[S32(KEY_LESS)] = "Less";
+   keyNames[S32(KEY_BACKSPACE)].keyName       = "Backspace";        keyNames[S32(KEY_BACKSPACE)].keyGlyph =       "\xE2\x8C\xAB";
+   keyNames[S32(KEY_DELETE)].keyName          = "Del";              keyNames[S32(KEY_DELETE)].keyGlyph =          "\xEE\x86\x8A";
+   keyNames[S32(KEY_TAB)].keyName             = "Tab";              keyNames[S32(KEY_TAB)].keyGlyph =             "\xEE\x85\xB5";
+   keyNames[S32(KEY_ENTER)].keyName           = "Enter";            keyNames[S32(KEY_ENTER)].keyGlyph =           "\xEE\x85\xB6";
+   keyNames[S32(KEY_ESCAPE)].keyName          = "Esc";              keyNames[S32(KEY_ESCAPE)].keyGlyph =          "\xEE\x86\x95";
+   keyNames[S32(KEY_SPACE)].keyName           = "Space";            keyNames[S32(KEY_SPACE)].keyGlyph =           " ";
+   keyNames[S32(KEY_0)].keyName               = "0";                keyNames[S32(KEY_0)].keyGlyph =               "0";
+   keyNames[S32(KEY_1)].keyName               = "1";                keyNames[S32(KEY_1)].keyGlyph =               "1";
+   keyNames[S32(KEY_2)].keyName               = "2";                keyNames[S32(KEY_2)].keyGlyph =               "2";
+   keyNames[S32(KEY_3)].keyName               = "3";                keyNames[S32(KEY_3)].keyGlyph =               "3";
+   keyNames[S32(KEY_4)].keyName               = "4";                keyNames[S32(KEY_4)].keyGlyph =               "4";
+   keyNames[S32(KEY_5)].keyName               = "5";                keyNames[S32(KEY_5)].keyGlyph =               "5";
+   keyNames[S32(KEY_6)].keyName               = "6";                keyNames[S32(KEY_6)].keyGlyph =               "6";
+   keyNames[S32(KEY_7)].keyName               = "7";                keyNames[S32(KEY_7)].keyGlyph =               "7";
+   keyNames[S32(KEY_8)].keyName               = "8";                keyNames[S32(KEY_8)].keyGlyph =               "8";
+   keyNames[S32(KEY_9)].keyName               = "9";                keyNames[S32(KEY_9)].keyGlyph =               "9";
+   keyNames[S32(KEY_A)].keyName               = "A";                keyNames[S32(KEY_A)].keyGlyph =               "A";
+   keyNames[S32(KEY_B)].keyName               = "B";                keyNames[S32(KEY_B)].keyGlyph =               "B";
+   keyNames[S32(KEY_C)].keyName               = "C";                keyNames[S32(KEY_C)].keyGlyph =               "C";
+   keyNames[S32(KEY_D)].keyName               = "D";                keyNames[S32(KEY_D)].keyGlyph =               "D";
+   keyNames[S32(KEY_E)].keyName               = "E";                keyNames[S32(KEY_E)].keyGlyph =               "E";
+   keyNames[S32(KEY_F)].keyName               = "F";                keyNames[S32(KEY_F)].keyGlyph =               "F";
+   keyNames[S32(KEY_G)].keyName               = "G";                keyNames[S32(KEY_G)].keyGlyph =               "G";
+   keyNames[S32(KEY_H)].keyName               = "H";                keyNames[S32(KEY_H)].keyGlyph =               "H";
+   keyNames[S32(KEY_I)].keyName               = "I";                keyNames[S32(KEY_I)].keyGlyph =               "I";
+   keyNames[S32(KEY_J)].keyName               = "J";                keyNames[S32(KEY_J)].keyGlyph =               "J";
+   keyNames[S32(KEY_K)].keyName               = "K";                keyNames[S32(KEY_K)].keyGlyph =               "K";
+   keyNames[S32(KEY_L)].keyName               = "L";                keyNames[S32(KEY_L)].keyGlyph =               "L";
+   keyNames[S32(KEY_M)].keyName               = "M";                keyNames[S32(KEY_M)].keyGlyph =               "M";
+   keyNames[S32(KEY_N)].keyName               = "N";                keyNames[S32(KEY_N)].keyGlyph =               "N";
+   keyNames[S32(KEY_O)].keyName               = "O";                keyNames[S32(KEY_O)].keyGlyph =               "O";
+   keyNames[S32(KEY_P)].keyName               = "P";                keyNames[S32(KEY_P)].keyGlyph =               "P";
+   keyNames[S32(KEY_Q)].keyName               = "Q";                keyNames[S32(KEY_Q)].keyGlyph =               "Q";
+   keyNames[S32(KEY_R)].keyName               = "R";                keyNames[S32(KEY_R)].keyGlyph =               "R";
+   keyNames[S32(KEY_S)].keyName               = "S";                keyNames[S32(KEY_S)].keyGlyph =               "S";
+   keyNames[S32(KEY_T)].keyName               = "T";                keyNames[S32(KEY_T)].keyGlyph =               "T";
+   keyNames[S32(KEY_U)].keyName               = "U";                keyNames[S32(KEY_U)].keyGlyph =               "U";
+   keyNames[S32(KEY_V)].keyName               = "V";                keyNames[S32(KEY_V)].keyGlyph =               "V";
+   keyNames[S32(KEY_W)].keyName               = "W";                keyNames[S32(KEY_W)].keyGlyph =               "W";
+   keyNames[S32(KEY_X)].keyName               = "X";                keyNames[S32(KEY_X)].keyGlyph =               "X";
+   keyNames[S32(KEY_Y)].keyName               = "Y";                keyNames[S32(KEY_Y)].keyGlyph =               "Y";
+   keyNames[S32(KEY_Z)].keyName               = "Z";                keyNames[S32(KEY_Z)].keyGlyph =               "Z";
+   keyNames[S32(KEY_TILDE)].keyName           = "~";                keyNames[S32(KEY_TILDE)].keyGlyph =           "~";
+   keyNames[S32(KEY_MINUS)].keyName           = "-";                keyNames[S32(KEY_MINUS)].keyGlyph =           "-";
+   keyNames[S32(KEY_EQUALS)].keyName          = "=";                keyNames[S32(KEY_EQUALS)].keyGlyph =          "=";
+   keyNames[S32(KEY_OPENBRACKET)].keyName     = "[";                keyNames[S32(KEY_OPENBRACKET)].keyGlyph =     "[";
+   keyNames[S32(KEY_CLOSEBRACKET)].keyName    = "]";                keyNames[S32(KEY_CLOSEBRACKET)].keyGlyph =    "]";
+   keyNames[S32(KEY_BACKSLASH)].keyName       = "\\";               keyNames[S32(KEY_BACKSLASH)].keyGlyph =       "\\";
+   keyNames[S32(KEY_SEMICOLON)].keyName       = ";";                keyNames[S32(KEY_SEMICOLON)].keyGlyph =       ";";
+   keyNames[S32(KEY_QUOTE)].keyName           = "'";                keyNames[S32(KEY_QUOTE)].keyGlyph =           "'";
+   keyNames[S32(KEY_COMMA)].keyName           = ",";                keyNames[S32(KEY_COMMA)].keyGlyph =           ",";
+   keyNames[S32(KEY_PERIOD)].keyName          = ".";                keyNames[S32(KEY_PERIOD)].keyGlyph =          ".";
+   keyNames[S32(KEY_SLASH)].keyName           = "/";                keyNames[S32(KEY_SLASH)].keyGlyph =           "/";
+   keyNames[S32(KEY_PAGEUP)].keyName          = "Page Up";          keyNames[S32(KEY_PAGEUP)].keyGlyph =          "\xEE\x86\x9A";
+   keyNames[S32(KEY_PAGEDOWN)].keyName        = "Page Down";        keyNames[S32(KEY_PAGEDOWN)].keyGlyph =        "\xEE\x86\x9B";
+   keyNames[S32(KEY_END)].keyName             = "End";              keyNames[S32(KEY_END)].keyGlyph =             "\xEE\x86\x83";
+   keyNames[S32(KEY_HOME)].keyName            = "Home";             keyNames[S32(KEY_HOME)].keyGlyph =            "\xEE\x86\x89";
+   keyNames[S32(KEY_LEFT)].keyName            = "Left Arrow";       keyNames[S32(KEY_LEFT)].keyGlyph =            "\xE2\x86\x90";
+   keyNames[S32(KEY_UP)].keyName              = "Up Arrow";         keyNames[S32(KEY_UP)].keyGlyph =              "\xE2\x86\x91";
+   keyNames[S32(KEY_RIGHT)].keyName           = "Right Arrow";      keyNames[S32(KEY_RIGHT)].keyGlyph =           "\xE2\x86\x92";
+   keyNames[S32(KEY_DOWN)].keyName            = "Down Arrow";       keyNames[S32(KEY_DOWN)].keyGlyph =            "\xE2\x86\x93";
+   keyNames[S32(KEY_INSERT)].keyName          = "Insert";           keyNames[S32(KEY_INSERT)].keyGlyph =          "\xEE\x86\x8B";
+   keyNames[S32(KEY_F1)].keyName              = "F1";               keyNames[S32(KEY_F1)].keyGlyph =              "\xEE\x85\xB8";
+   keyNames[S32(KEY_F2)].keyName              = "F2";               keyNames[S32(KEY_F2)].keyGlyph =              "\xEE\x85\xB9";
+   keyNames[S32(KEY_F3)].keyName              = "F3";               keyNames[S32(KEY_F3)].keyGlyph =              "\xEE\x85\xBA";
+   keyNames[S32(KEY_F4)].keyName              = "F4";               keyNames[S32(KEY_F4)].keyGlyph =              "\xEE\x85\xBB";
+   keyNames[S32(KEY_F5)].keyName              = "F5";               keyNames[S32(KEY_F5)].keyGlyph =              "\xEE\x85\xBC";
+   keyNames[S32(KEY_F6)].keyName              = "F6";               keyNames[S32(KEY_F6)].keyGlyph =              "\xEE\x85\xBD";
+   keyNames[S32(KEY_F7)].keyName              = "F7";               keyNames[S32(KEY_F7)].keyGlyph =              "\xEE\x85\xBE";
+   keyNames[S32(KEY_F8)].keyName              = "F8";               keyNames[S32(KEY_F8)].keyGlyph =              "\xEE\x85\xBF";
+   keyNames[S32(KEY_F9)].keyName              = "F9";               keyNames[S32(KEY_F9)].keyGlyph =              "\xEE\x86\x80";
+   keyNames[S32(KEY_F10)].keyName             = "F10";              keyNames[S32(KEY_F10)].keyGlyph =             "\xEE\x86\x81";
+   keyNames[S32(KEY_F11)].keyName             = "F11";              keyNames[S32(KEY_F11)].keyGlyph =             "\xEE\x86\x82";
+   keyNames[S32(KEY_F12)].keyName             = "F12";              keyNames[S32(KEY_F12)].keyGlyph =             "\xEE\x86\x83";
+   keyNames[S32(KEY_SHIFT)].keyName           = "Shift";            keyNames[S32(KEY_SHIFT)].keyGlyph =           "\xEE\x85\xB4";
+   keyNames[S32(KEY_ALT)].keyName             = "Alt";              keyNames[S32(KEY_ALT)].keyGlyph =             "\xEE\x85\xB1";
+   keyNames[S32(KEY_CTRL)].keyName            = "Ctrl";             keyNames[S32(KEY_CTRL)].keyGlyph =            "\xEE\x85\xB3";
+   keyNames[S32(KEY_META)].keyName            = "Meta";             keyNames[S32(KEY_META)].keyGlyph =            "";
+   keyNames[S32(KEY_SUPER)].keyName           = "Super";            keyNames[S32(KEY_SUPER)].keyGlyph =           "";
+   keyNames[S32(MOUSE_LEFT)].keyName          = "Left-mouse";       keyNames[S32(MOUSE_LEFT)].keyGlyph =          "";
+   keyNames[S32(MOUSE_MIDDLE)].keyName        = "Middle-mouse";     keyNames[S32(MOUSE_MIDDLE)].keyGlyph =        "";
+   keyNames[S32(MOUSE_RIGHT)].keyName         = "Right-mouse";      keyNames[S32(MOUSE_RIGHT)].keyGlyph =         "";
+   keyNames[S32(MOUSE_WHEEL_UP)].keyName      = "Mouse wheel up";   keyNames[S32(MOUSE_WHEEL_UP)].keyGlyph =      "";
+   keyNames[S32(MOUSE_WHEEL_DOWN)].keyName    = "Mouse wheel down"; keyNames[S32(MOUSE_WHEEL_DOWN)].keyGlyph =    "";
+   keyNames[S32(BUTTON_1)].keyName            = "Button 1";         keyNames[S32(BUTTON_1)].keyGlyph =            "";
+   keyNames[S32(BUTTON_2)].keyName            = "Button 2";         keyNames[S32(BUTTON_2)].keyGlyph =            "";
+   keyNames[S32(BUTTON_3)].keyName            = "Button 3";         keyNames[S32(BUTTON_3)].keyGlyph =            "";
+   keyNames[S32(BUTTON_4)].keyName            = "Button 4";         keyNames[S32(BUTTON_4)].keyGlyph =            "";
+   keyNames[S32(BUTTON_5)].keyName            = "Button 5";         keyNames[S32(BUTTON_5)].keyGlyph =            "";
+   keyNames[S32(BUTTON_6)].keyName            = "Button 6";         keyNames[S32(BUTTON_6)].keyGlyph =            "";
+   keyNames[S32(BUTTON_7)].keyName            = "Button 7";         keyNames[S32(BUTTON_7)].keyGlyph =            "";
+   keyNames[S32(BUTTON_8)].keyName            = "Button 8";         keyNames[S32(BUTTON_8)].keyGlyph =            "";
+   keyNames[S32(BUTTON_9)].keyName            = "Button 9";         keyNames[S32(BUTTON_9)].keyGlyph =            "";
+   keyNames[S32(BUTTON_10)].keyName           = "Button 10";        keyNames[S32(BUTTON_10)].keyGlyph =           "";
+   keyNames[S32(BUTTON_11)].keyName           = "Button 11";        keyNames[S32(BUTTON_11)].keyGlyph =           "";
+   keyNames[S32(BUTTON_12)].keyName           = "Button 12";        keyNames[S32(BUTTON_12)].keyGlyph =           "";
+   keyNames[S32(BUTTON_BACK)].keyName         = "Back";             keyNames[S32(BUTTON_BACK)].keyGlyph =         "";
+   keyNames[S32(BUTTON_START)].keyName        = "Start";            keyNames[S32(BUTTON_START)].keyGlyph =        "";
+   keyNames[S32(BUTTON_DPAD_UP)].keyName      = "DPad Up";          keyNames[S32(BUTTON_DPAD_UP)].keyGlyph =      "";
+   keyNames[S32(BUTTON_DPAD_DOWN)].keyName    = "DPad Down";        keyNames[S32(BUTTON_DPAD_DOWN)].keyGlyph =    "";
+   keyNames[S32(BUTTON_DPAD_LEFT)].keyName    = "DPad Left";        keyNames[S32(BUTTON_DPAD_LEFT)].keyGlyph =    "";
+   keyNames[S32(BUTTON_DPAD_RIGHT)].keyName   = "DPad Right";       keyNames[S32(BUTTON_DPAD_RIGHT)].keyGlyph =   "";
+   keyNames[S32(STICK_1_LEFT)].keyName        = "Stick 1 Left";     keyNames[S32(STICK_1_LEFT)].keyGlyph =        "";
+   keyNames[S32(STICK_1_RIGHT)].keyName       = "Stick 1 Right";    keyNames[S32(STICK_1_RIGHT)].keyGlyph =       "";
+   keyNames[S32(STICK_1_UP)].keyName          = "Stick 1 Up";       keyNames[S32(STICK_1_UP)].keyGlyph =          "";
+   keyNames[S32(STICK_1_DOWN)].keyName        = "Stick 1 Down";     keyNames[S32(STICK_1_DOWN)].keyGlyph =        "";
+   keyNames[S32(STICK_2_LEFT)].keyName        = "Stick 2 Left";     keyNames[S32(STICK_2_LEFT)].keyGlyph =        "";
+   keyNames[S32(STICK_2_RIGHT)].keyName       = "Stick 2 Right";    keyNames[S32(STICK_2_RIGHT)].keyGlyph =       "";
+   keyNames[S32(STICK_2_UP)].keyName          = "Stick 2 Up";       keyNames[S32(STICK_2_UP)].keyGlyph =          "";
+   keyNames[S32(STICK_2_DOWN)].keyName        = "Stick 2 Down";     keyNames[S32(STICK_2_DOWN)].keyGlyph =        "";
+   keyNames[S32(MOUSE)].keyName               = "Mouse";            keyNames[S32(MOUSE)].keyGlyph =               "";
+   keyNames[S32(LEFT_JOYSTICK)].keyName       = "Left joystick";    keyNames[S32(LEFT_JOYSTICK)].keyGlyph =       "";
+   keyNames[S32(RIGHT_JOYSTICK)].keyName      = "Right joystick";   keyNames[S32(RIGHT_JOYSTICK)].keyGlyph =      "";
+   keyNames[S32(KEY_CTRL_M)].keyName          = "Ctrl-M";           keyNames[S32(KEY_CTRL_M)].keyGlyph =          "\xEE\x85\xB3M";
+   keyNames[S32(KEY_CTRL_Q)].keyName          = "Ctrl-Q";           keyNames[S32(KEY_CTRL_Q)].keyGlyph =          "\xEE\x85\xB3Q";
+   keyNames[S32(KEY_CTRL_S)].keyName          = "Ctrl-S";           keyNames[S32(KEY_CTRL_S)].keyGlyph =          "\xEE\x85\xB3S";
+   keyNames[S32(KEY_BACKQUOTE)].keyName       = "`";                keyNames[S32(KEY_BACKQUOTE)].keyGlyph =       "`";
+   keyNames[S32(KEY_MENU)].keyName            = "Menu";             keyNames[S32(KEY_MENU)].keyGlyph =            "";
+   keyNames[S32(KEY_KEYPAD_DIVIDE)].keyName   = "Keypad /";         keyNames[S32(KEY_KEYPAD_DIVIDE)].keyGlyph =   "\xEE\x86\xAA";
+   keyNames[S32(KEY_KEYPAD_MULTIPLY)].keyName = "Keypad *";         keyNames[S32(KEY_KEYPAD_MULTIPLY)].keyGlyph = "\xEE\x86\xAD";
+   keyNames[S32(KEY_KEYPAD_MINUS)].keyName    = "Keypad -";         keyNames[S32(KEY_KEYPAD_MINUS)].keyGlyph =    "\xEE\x86\xAC";
+   keyNames[S32(KEY_KEYPAD_PLUS)].keyName     = "Keypad +";         keyNames[S32(KEY_KEYPAD_PLUS)].keyGlyph =     "\xEE\x86\xAB";
+   keyNames[S32(KEY_PRINT)].keyName           = "PrntScrn";         keyNames[S32(KEY_PRINT)].keyGlyph =           "";
+   keyNames[S32(KEY_PAUSE)].keyName           = "Pause";            keyNames[S32(KEY_PAUSE)].keyGlyph =           "";
+   keyNames[S32(KEY_SCROLLOCK)].keyName       = "ScrollLock";       keyNames[S32(KEY_SCROLLOCK)].keyGlyph =       "";
+   keyNames[S32(KEY_KEYPAD1)].keyName         = "Keypad 1";         keyNames[S32(KEY_KEYPAD1)].keyGlyph =         "\xEE\x86\xA1";
+   keyNames[S32(KEY_KEYPAD2)].keyName         = "Keypad 2";         keyNames[S32(KEY_KEYPAD2)].keyGlyph =         "\xEE\x86\xA2";
+   keyNames[S32(KEY_KEYPAD3)].keyName         = "Keypad 3";         keyNames[S32(KEY_KEYPAD3)].keyGlyph =         "\xEE\x86\xA3";
+   keyNames[S32(KEY_KEYPAD4)].keyName         = "Keypad 4";         keyNames[S32(KEY_KEYPAD4)].keyGlyph =         "\xEE\x86\xA4";
+   keyNames[S32(KEY_KEYPAD5)].keyName         = "Keypad 5";         keyNames[S32(KEY_KEYPAD5)].keyGlyph =         "\xEE\x86\xA5";
+   keyNames[S32(KEY_KEYPAD6)].keyName         = "Keypad 6";         keyNames[S32(KEY_KEYPAD6)].keyGlyph =         "\xEE\x86\xA6";
+   keyNames[S32(KEY_KEYPAD7)].keyName         = "Keypad 7";         keyNames[S32(KEY_KEYPAD7)].keyGlyph =         "\xEE\x86\xA7";
+   keyNames[S32(KEY_KEYPAD8)].keyName         = "Keypad 8";         keyNames[S32(KEY_KEYPAD8)].keyGlyph =         "\xEE\x86\xA8";
+   keyNames[S32(KEY_KEYPAD9)].keyName         = "Keypad 9";         keyNames[S32(KEY_KEYPAD9)].keyGlyph =         "\xEE\x86\xA9";
+   keyNames[S32(KEY_KEYPAD0)].keyName         = "Keypad 0";         keyNames[S32(KEY_KEYPAD0)].keyGlyph =         "\xEE\x86\xA0";
+   keyNames[S32(KEY_KEYPAD_PERIOD)].keyName   = "Keypad .";         keyNames[S32(KEY_KEYPAD_PERIOD)].keyGlyph =   "";
+   keyNames[S32(KEY_KEYPAD_ENTER)].keyName    = "Keypad Enter";     keyNames[S32(KEY_KEYPAD_ENTER)].keyGlyph =    "\xEE\x86\xAE";
+   keyNames[S32(KEY_LESS)].keyName            = "Less";             keyNames[S32(KEY_LESS)].keyGlyph =            "";
 }
 
 
-// Translate an InputCode into a string name, primarily used
-// for displaying keys in help and during rebind mode, and
-// also when storing key bindings in INI files
+// Translate an InputCode into a string name, primarily used for displaying keys in
+// help and during rebind mode, and also when storing key bindings in INI files
+// Static method
 const char *InputCodeManager::inputCodeToString(InputCode inputCode)
 {
-   //TNLAssert(U32(inputCode) < U32(KEY_COUNT), "inputCode out of range");
    if(U32(inputCode) >= U32(KEY_COUNT))
       return "";
 
-   return keyNames[S32(inputCode)];
+   return keyNames[S32(inputCode)].keyName;
+}
+
+
+const char *InputCodeManager::inputCodeToGlyph(InputCode inputCode)
+{
+   if(U32(inputCode) >= U32(KEY_COUNT))
+      return "";
+
+   return keyNames[S32(inputCode)].keyGlyph;
 }
 
 
@@ -1985,7 +2011,7 @@ const char *InputCodeManager::inputCodeToString(InputCode inputCode)
 InputCode InputCodeManager::stringToInputCode(const char *inputName)
 {
    for(S32 i = 0; i < KEY_COUNT; i++)
-      if(stricmp(inputName, keyNames[i]) == 0)
+      if(stricmp(inputName, keyNames[i].keyName) == 0)
          return InputCode(i);
 
    return KEY_UNKNOWN;

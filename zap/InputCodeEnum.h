@@ -26,6 +26,10 @@
 #ifndef INPUT_CODE_ENUM_H_
 #define INPUT_CODE_ENUM_H_
 
+#include "tnlTypes.h"
+
+using namespace TNL;
+
 namespace Zap
 {
 
@@ -135,6 +139,9 @@ enum InputCode {
    KEY_UNKNOWN, KEY_NONE,
    BUTTON_UNKNOWN
 };
+
+static const U32 FIRST_KEYBOARD_KEY = (U32)KEY_0;
+static const U32 LAST_KEYBOARD_KEY  = (U32)KEY_KEYPAD_EQUALS;
 
 };
 

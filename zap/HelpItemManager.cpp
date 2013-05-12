@@ -2,7 +2,31 @@
 
 #include "BfObject.h"      // For TypeNumbers
 #include "InputCode.h"     // For InputCodeManager
-#include "FontManager.h"
+#include "FontManager.h"//-----------------------------------------------------------------------------------
+//
+// Bitfighter - A multiplayer vector graphics space game
+// Based on Zap demo released for Torque Network Library by GarageGames.com
+//
+// Derivative work copyright (C) 2008-2009 Chris Eykamp
+// Original work copyright (C) 2004 GarageGames.com, Inc.
+// Other code copyright as noted
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//------------------------------------------------------------------------------------
+
 #include "SymbolShape.h"
 #include "Colors.h"
 #include "OpenglUtils.h"
@@ -120,77 +144,64 @@ void HelpItemManager::idle(U32 timeDelta)
 
 // DON'T PANIC!!! THIS IS A ROUGH INTERMEDIATE FORM THAT WILL BE SIMPLIFIED AND STREAMLINED!!!
 
-// This method allocates new items (added to shapes vector).  They MUST be cleaned up or we will have leaks!
-void getSymbolShape(const InputCodeManager *inputCodeManager, const string &bindingName, Vector<SymbolShape *> &symbols)
+void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbolName, Vector<SymbolShape *> &symbols)
 {
-   if(bindingName == "LOADOUT")
-      symbols.push_back(new SymbolGear());
+   // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
+   InputCode inputCode = inputCodeManager->getKeyBoundToBindingCodeName(symbolName);
+   
+   if(inputCode != KEY_UNKNOWN)
+      symbols.push_back(SymbolString::getControlSymbol(inputCode));
 
-   else if(bindingName == "BINDING_CMDRMAP")
-      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_CMDRMAP))));
-
-   else if(bindingName == "BINDING_SCRBRD")
-      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SCRBRD))));
-
-   else if(bindingName == "BINDING_DROPITEM")
-      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_DROPITEM))));
-
-   else if(bindingName == "CHANGEWEP")
+   else if(symbolName == "LOADOUT_ICON")
+      symbols.push_back(SymbolString::getSymbolGear());
+   
+   else if(symbolName == "CHANGEWEP")
    {
-      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1))));
-      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP2))));
-      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP3))));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP2)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP3)));
    }
 
-   else if(bindingName == "MOVEMENT")
+   else if(symbolName == "MOVEMENT")
    {
-      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_UP))));
-      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_DOWN))));
-      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_LEFT))));
-      symbols.push_back(new SymbolText(InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_RIGHT))));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_UP)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_DOWN)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_LEFT)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_RIGHT)));
    }
+
+   else if(symbolName == "MODULE_CTRLS") {}
+
+
+   
 
    else 
-      symbols.push_back(new SymbolText("Unknown Binding: " + bindingName));
+      symbols.push_back(new SymbolText("Unknown Symbol: " + symbolName));
 }
 
 
-static void symbolParse(const InputCodeManager *inputCodeManager, string &str, size_t offset, Vector<SymbolShape *> &symbols);
-
-static void doCheck(const InputCodeManager *inputCodeManager, string &str, const string &what, S32 startPos, Vector<SymbolShape *> &symbols)
+static void symbolParse(const InputCodeManager *inputCodeManager, string &str, Vector<SymbolShape *> &symbols)
 {
-   size_t len = what.length(); 
+   size_t offset = 0;
 
-   if(str.substr(startPos + 2, len) == what && str.substr(startPos + 2 + len, 2) == "]]")
+   while(true)
    {
-      getSymbolShape(inputCodeManager, what, symbols);
-      symbolParse(inputCodeManager, str, startPos + len + 4, symbols);
-      return;
+      size_t startPos = str.find("[[", offset);      // If this isn't here, no further searching is necessary
+      size_t endPos   = str.find("]]", offset + 2);
+
+      if(startPos == string::npos || endPos == string::npos)
+      {
+         // No further symbols herein, convert the rest to text symbol and exit
+         symbols.push_back(new SymbolText(str.substr(offset)));
+         return;
+      }
+
+      symbols.push_back(new SymbolText(str.substr(offset, startPos - offset)));
+
+      getSymbolShape(inputCodeManager, str.substr(startPos + 2, endPos - startPos - 2), symbols);    // + 2 to advance past the "[["
+
+      offset = endPos + 2;
    }
-}
-
-
-static void symbolParse(const InputCodeManager *inputCodeManager, string &str, size_t offset, Vector<SymbolShape *> &symbols)
-{
-   size_t startPos = str.find("[[", offset);      // If this isn't here, no further searching is necessary
-   
-   if(startPos == string::npos)
-   {
-      // No further symbols herein, convert the rest to text symbol and exit
-      symbols.push_back(new SymbolText(str.substr(offset)));
-      return;
-   }
-
-   //InputCodeManager::BINDING_SCRBRD
-
-   symbols.push_back(new SymbolText(str.substr(offset, startPos - offset)));
-
-   doCheck(inputCodeManager, str, "LOADOUT", startPos, symbols);
-   doCheck(inputCodeManager, str, "MOVEMENT", startPos, symbols);
-   doCheck(inputCodeManager, str, "CHANGEWEP", startPos, symbols);
-   doCheck(inputCodeManager, str, "BINDING_DROPITEM", startPos, symbols);
-   doCheck(inputCodeManager, str, "BINDING_CMDRMAP", startPos, symbols);
-   doCheck(inputCodeManager, str, "BINDING_SCRBRD", startPos, symbols);
 }
 
 
@@ -207,28 +218,8 @@ static S32 doRenderMessages(const InputCodeManager *inputCodeManager, const char
       // Do some token subsititution for dynamic elements such as keybindings
       string renderStr(messages[i]);
       
-      //// Temp special handling
-      //if(renderStr.find("[[LOADOUT]]") != string::npos)
-      //{
-      //   Vector<SymbolShape *> symbols;
-
-      //   string s1 = renderStr.substr(0, renderStr.find("[[LOADOUT]]"));
-      //   string s2 = renderStr.substr(renderStr.find("[[LOADOUT]]") + 11);
-
-      //   // These will be cleaned up by SymbolString destructor
-      //   symbols.push_back(new SymbolText(s1, FontSize, FontContext::HUDContext));
-      //   symbols.push_back(new SymbolGear(12));  
-      //   symbols.push_back(new SymbolText(s2, FontSize, FontContext::HUDContext));
-
-      //   UI::SymbolString symbolString(symbols, FontSize, FontContext::HUDContext);
-
-      //   symbolString.renderCenter(Point(400, yPos));
-
-      //   return yPos + FontSize + FontGap;
-      //}
-      
       Vector<SymbolShape *> symbols;
-      symbolParse(inputCodeManager, renderStr, 0, symbols);
+      symbolParse(inputCodeManager, renderStr, symbols);
 
       UI::SymbolString symbolString(symbols, FontSize, FontContext::HUDContext);
       symbolString.renderCenter(Point(400, yPos));

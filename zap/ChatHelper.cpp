@@ -192,7 +192,7 @@ void ChatHelper::render()
 
    // Adjust for animated effect
    if(isAnimating)
-      ypos += (getFraction()) * BOX_HEIGHT;
+      ypos += S32((getFraction()) * BOX_HEIGHT);
 
    S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * UserInterface::horizMargin - (nameWidth - promptSize) - 230;
 
