@@ -353,8 +353,12 @@ endif()
 ##
 ## Settings for all targets
 ##
-set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG")
-set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "TNL_DEBUG")
+
+# You can only call 'set_target_properties' once for each properties-target combination, therefore
+# we'll build up a list and call 'set_target_properties' at the end
+set(ALL_DEBUG_DEFS
+	"TNL_DEBUG"
+)
 
 # Visual Studio only settings
 if(MSVC)
@@ -378,9 +382,13 @@ if(MSVC)
 
 	# Set some linker flags to use console mode in debug build, etc..
 	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-	set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
 	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-	set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
 	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
 	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
+	
+	# Set more compiler flags for console on appropriate targets
+	list(APPEND ALL_DEBUG_DEFS "_CONSOLE")
 endif()
+
+set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "${ALL_DEBUG_DEFS}")
+set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "${ALL_DEBUG_DEFS}")
