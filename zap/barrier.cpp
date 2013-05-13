@@ -62,6 +62,14 @@ WallRec::WallRec(F32 width, bool solid, const Vector<F32> &verts)
 }
 
 
+WallRec::WallRec(F32 width, bool solid)
+{
+   this->width = width;
+   this->solid = solid;
+   this->verts.clear();
+}
+
+
 // Constructor
 WallRec::WallRec(const WallItem *wallItem)
 {
@@ -125,6 +133,14 @@ void WallRec::constructWalls(Game *game) const
          Barrier *b = new Barrier(pts, width, false);    // false = not solid
          b->addToGame(game, game->getGameObjDatabase());
       }
+   }
+}
+
+void WallRec::addVertices(Vector<F32> newVerts)
+{
+   for(S32 i = 0; i < newVerts.size(); i++)
+   {
+      verts.push_back(newVerts[i]);
    }
 }
 
