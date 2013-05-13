@@ -52,6 +52,7 @@ KeyDefMenuItem::KeyDefMenuItem(const char *text, U32 index, U32 col, InputCodeMa
    helpString = helpStr;
 }
 
+
 // Destructor
 KeyDefMenuItem::~KeyDefMenuItem()
 {
@@ -71,6 +72,7 @@ KeyDefMenuUserInterface::KeyDefMenuUserInterface(ClientGame *game) : Parent(game
    mMenuSubTitle = "";
    mMenuFooter = "UP, DOWN, LEFT, RIGHT to choose | ENTER to select | ESC exits menu";
 }
+
 
 // Destructor
 KeyDefMenuUserInterface::~KeyDefMenuUserInterface()
