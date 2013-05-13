@@ -57,7 +57,8 @@ public:
 
    explicit Color(U32 rgbInt);
 
-   virtual ~Color();
+   // Do not add a virtual destructor as it adds a pointer before the r, g, b members.  This
+   // will mess up the pointer tricks with feeding the Color to OpenGL
 
    void read(const char **argv);
 
