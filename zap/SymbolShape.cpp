@@ -371,8 +371,8 @@ SymbolShape *SymbolString::getControlSymbol(InputCode inputCode)
       return symbolHolder.getSymbol(inputCode);
    else
    { 
-      TNLAssert(false, "Deal with it!");
-      return NULL;      // Certain to crash
+      //TNLAssert(false, "Deal with it!");
+      return symbolHolder.getSymbol(KEY_WORLD_0);
    }
 }
 
