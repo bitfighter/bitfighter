@@ -184,9 +184,7 @@ set(CLIENT_SOURCES
 	../fontstash/fontstash.c
 )
 
-file(GLOB BITFIGHTER_HEADERS
-	*.h 
-	)
+file(GLOB BITFIGHTER_HEADERS *.h)
 
 file(GLOB OTHER_HEADERS
 	../other/*.h 
@@ -197,10 +195,12 @@ file(GLOB OTHER_HEADERS
 	../poly2tri/*.h
 	../poly2tri/common/*.h
 	../poly2tri/sweep/*.h
-	)
+)
 
 if(MSVC)
 	set(EXTRA_LIBS ws2_32 winmm)
+	# Add icon resource in Visual Studio
+	list(APPEND CLIENT_SOURCES ZAP.rc)
 else()
 	set(EXTRA_LIBS dl m)
 endif()
