@@ -388,6 +388,29 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
 }
 
 
+// onScoreChanged
+void EventManager::fireEvent(EventType eventType, S32 score, S32 team, LuaPlayerInfo *playerInfo)
+{
+   if(suppressEvents(eventType))
+         return;
+
+   lua_State *L = LuaScriptRunner::getL();
+
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   {
+      lua_pushinteger(L, score);   // -- score
+      lua_pushinteger(L, team);    // -- score, team
+
+      if(playerInfo)
+         playerInfo->push(L);      // -- score, team, playerInfo
+      else
+         lua_pushnil(L);
+
+      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
+   }
+}
+
+
 // Actually fire the event, called by one of the fireEvent() methods above
 // Returns true if there was an error, false if everything ran ok
 bool EventManager::fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, LuaBase::ScriptContext context)

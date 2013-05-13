@@ -66,6 +66,7 @@ class EventManager
    EVENT(NexusClosedEvent,       "NexusClosed",       "onNexusClosed"      ) \
    EVENT(ShipEnteredZoneEvent,   "ShipEnteredZone",   "onShipEnteredZone"  ) \
    EVENT(ShipLeftZoneEvent,      "ShipLeftZone",      "onShipLeftZone"     ) \
+   EVENT(ScoreChangedEvent,      "ScoreChanged",      "onScoreChanged"     ) \
 
 public:
 
@@ -122,8 +123,9 @@ public:
    void fireEvent(EventType eventType, U32 deltaT);      // Tick
    void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
    void fireEvent(LuaScriptRunner *sender, EventType eventType, const char *message, LuaPlayerInfo *playerInfo, bool global);  // MsgReceived
-   void fireEvent(LuaScriptRunner *player, EventType eventType, LuaPlayerInfo *playerInfo);  // PlayerJoined, PlayerLeft
+   void fireEvent(LuaScriptRunner *player, EventType eventType, LuaPlayerInfo *playerInfo);  // PlayerJoined, PlayerLeft, PlayerTeamChanged
    void fireEvent(EventType eventType, Ship *ship, Zone *zone); // ShipEnteredZoneEvent, ShipLeftZoneEvent
+   void fireEvent(EventType eventType, S32 score, S32 team, LuaPlayerInfo *playerInfo);
 
    // Allow the pausing of event firing for debugging purposes
    void setPaused(bool isPaused);
