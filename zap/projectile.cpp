@@ -450,6 +450,7 @@ void Projectile::renderItem(const Point &pos)
    METHOD(CLASS, getRad,    ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getWeapon, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getVel,    ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, setVel,    ARRAYDEF({{ PT,  END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(Projectile, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(Projectile, LUA_METHODS);
@@ -490,6 +491,21 @@ S32 Projectile::lua_getVel(lua_State *L)
 S32 Projectile::lua_getWeapon(lua_State *L)
 { 
    return returnInt(L, mWeaponType);      
+}
+
+
+/**
+  *  @luafunc Projectile::setVel(vel)
+  *  @brief   Sets the projectile's velocity.
+  *  @descr   As with other functions that take a point as an input, you can also specify the x and y components as numeric arguments.
+  *  @param   vel - A point representing velocity.
+  */
+S32 Projectile::lua_setVel(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Projectile", "setVel");
+   mVelocity = getPointOrXY(L, 1);
+
+   return 0;
 }
 
 

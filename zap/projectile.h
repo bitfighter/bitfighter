@@ -111,6 +111,7 @@ public:
    S32 lua_getRad(lua_State *L);      // Radius of item (returns number)
    S32 lua_getVel(lua_State *L);
    S32 lua_getWeapon(lua_State *L);   // Return which type of weapon this is
+   S32 lua_setVel(lua_State *L);
 };
 
 
