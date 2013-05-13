@@ -26,6 +26,19 @@ find_package(Speex)
 find_package(ModPlug)
 
 
+# Define the Linux data dir if not defined in a packaging build script already
+if("${CMAKE_SYSTEM}" MATCHES "Linux")
+	if(NOT LINUX_DATA_DIR)
+		set(LINUX_DATA_DIR "/usr/share")
+	endif()
+
+	message(STATUS "LINUX_DATA_DIR: ${LINUX_DATA_DIR}.  Change this by invoking cmake with -DLINUX_DATA_DIR=<SOME_DIRECTORY>")
+
+	# Quotes need to be a part of the definition or the compiler won't understand
+	add_definitions(-DLINUX_DATA_DIR="${LINUX_DATA_DIR}")
+endif()
+
+
 set(SHARED_SOURCES
 	BanList.cpp
 	barrier.cpp
