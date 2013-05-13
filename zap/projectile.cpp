@@ -54,7 +54,23 @@ Projectile::Projectile(WeaponType type, const Point &pos, const Point &vel, BfOb
 // Combined Lua / C++ default constructor -- only used in Lua at the moment
 Projectile::Projectile(lua_State *L)
 {
-   initialize(WeaponPhaser, Point(0,0), Point(0,0), NULL);
+   WeaponType type = WeaponPhaser;
+   if(L)
+   {
+      // These are the signatures we'll accept for Lua to construct this object
+      static LuaFunctionArgList constructorArgList = { {{ END }, { WEAP_ENUM, END }}, 2 };
+
+      if(checkArgList(L, constructorArgList, "Projectile", "constructor") == 1)
+      {
+         WeaponType newType = (WeaponType)getInt(L, 1);
+
+         // Only allow projectile types that use this class
+         if(WeaponInfo::getWeaponInfo(newType).projectileType != NotAProjectile)
+            type = newType;
+      }
+   }
+
+   initialize(type, Point(0,0), Point(0,0), NULL);
 }
 
 
