@@ -208,7 +208,7 @@ void ChatHelper::render()
    // Render text entry box like thingy
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-   F32 top = ypos - 3;
+   F32 top = (F32)ypos - 3;
 
    F32 vertices[] = {
          (F32)xPos,            top,

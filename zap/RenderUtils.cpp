@@ -586,6 +586,13 @@ void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 
 }
 
 
+void drawHollowRect(const Point &center, S32 width, S32 height)
+{
+   drawHollowRect(S32(center.x - (F32)width / 2), S32(center.y - (F32)height / 2),
+                  S32(center.x + (F32)width / 2), S32(center.y + (F32)height / 2));
+}
+
+
 void drawHollowRect(const Point &p1, const Point &p2)
 {
    drawHollowRect((S32)p1.x, (S32)p1.y, (S32)p2.x, (S32)p2.y);

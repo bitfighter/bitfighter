@@ -240,18 +240,8 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
    // Render keyboard keys, just in case
    if(!InputCodeManager::isControllerButton(inputCode))
    {
-      const char *glyph = InputCodeManager::inputCodeToGlyph(inputCode);
-      if(strcmp(glyph, "") != 0)
-      {
-         FontManager::pushFontContext(KeyContext);
-         drawString(x - 10, y, 15, glyph);
-         FontManager::popFontContext();
-      }
-      else
-      {
-         // Offset a bit in the x direction.
-         drawStringf(x - 10, y, 15, "[%s]", InputCodeManager::inputCodeToString(inputCode));
-      }
+      // Offset a bit in the x direction
+      drawStringf(x - 10, y, 15, "[%s]", InputCodeManager::inputCodeToString(inputCode));
       return;
    }
 

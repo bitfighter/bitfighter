@@ -69,8 +69,12 @@ static const char *pageHeaders[] = {
 };
 
 
+static const S32 FontSize = 18;
+static const S32 FontGap = 8;
+
 // Constructor
-InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game)
+InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game),
+                                                                         mControls(FontSize, FontGap)
 {
    // Quick sanity check...
    TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum IntructionPages!!!");
@@ -84,7 +88,7 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
    col3 = horizMargin + canvasWidth / 2;
    col4 = horizMargin + (canvasWidth * 3) / 4 + 45;
 
-   calcPolygonVerts(Point(0,0), 7, TestItem::TEST_ITEM_RADIUS, 0, mTestItemPoints);
+   calcPolygonVerts(Point(0,0), 7, (F32)TestItem::TEST_ITEM_RADIUS, 0, mTestItemPoints);
    ResourceItem::generateOutlinePoints(Point(0,0), 1.0, mResourceItemPoints);
 }
 
@@ -98,6 +102,23 @@ InstructionsUserInterface::~InstructionsUserInterface()
 void InstructionsUserInterface::onActivate()
 {
    mCurPage = 0;
+   mUsingArrowKeys = usingArrowKeys();
+
+   Vector<SymbolShape *> symbols;
+
+   GameSettings *settings = getGame()->getSettings();
+
+   mControls.clear();
+
+   symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_UP)));
+   mControls.add(SymbolString(symbols, FontSize, HelpContext));
+
+   symbols.clear();
+   symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_LEFT)));
+   symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_DOWN)));
+   symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_RIGHT)));
+
+   mControls.add(SymbolString(symbols, FontSize, HelpContext));
 }
 
 
@@ -280,21 +301,21 @@ void InstructionsUserInterface::renderKeyBindingQuad(S32 y, const char *str1, In
    GameSettings *settings = getGame()->getSettings();
    
    glColor(txtColor);
-   drawString(col1, y, 18, str1);
+   drawString(col1, y, FontSize, str1);
 
    if(binding1 != InputCodeManager::BINDING_NONE)
    {
       glColor(keyColor);
-      drawStringf(col2, y, 18, "[%s]",  getInputCodeString(settings, binding1));
+      drawStringf(col2, y, FontSize, "[%s]",  getInputCodeString(settings, binding1));
    }
 
    glColor(txtColor);
-   drawString(col3, y, 18, str2);
+   drawString(col3, y, FontSize, str2);
 
    if(binding2 != InputCodeManager::BINDING_NONE)
    {
       glColor(keyColor);
-      drawStringf(col4, y, 18, "[%s]",  getInputCodeString(settings, binding2));
+      drawStringf(col4, y, FontSize, "[%s]",  getInputCodeString(settings, binding2));
    }
 }
 
@@ -349,28 +370,30 @@ void InstructionsUserInterface::renderPage1()
       else
       {
          glColor(txtColor);
-         drawString(actCol, y, 18, controls[i].controlString);      // Textual description of function (1st arg in lists above)
+         drawString(actCol, y, FontSize, controls[i].controlString);      // Textual description of function (1st arg in lists above)
 
          glColor(keyColor);
 
          // We'll also handle special case of arrow keys...
          if(controls[i].primaryControlIndex == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_UD)
          {     // (braces needed)
-            if(usingArrowKeys())
-               drawString(contCol, y, 18, "Arrow Keys");
-            else     // Center Up key above Down key
-               drawStringf(contCol + getStringWidthf(15, "[%s] ", getInputCodeString(settings, InputCodeManager::BINDING_LEFT)), y + 4, 
-                                                     15, "[%s]",  getInputCodeString(settings, InputCodeManager::BINDING_UP));
+            if(mUsingArrowKeys)
+               drawString(contCol, y, FontSize, "Arrow Keys");
+            //else     // Center Up key above Down key
+            //   drawStringf(contCol + getStringWidthf(15, "[%s] ", getInputCodeString(settings, InputCodeManager::BINDING_LEFT)), y + 4, 
+            //                                         15, "[%s]",  getInputCodeString(settings, InputCodeManager::BINDING_UP));
          }
          else if (controls[i].primaryControlIndex == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LR)
          {     // (braces needed)
             if(usingArrowKeys())
                y -= 26;    // Hide this line
             else
-               drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", 
-                     getInputCodeString(settings, InputCodeManager::BINDING_LEFT),
-                     getInputCodeString(settings, InputCodeManager::BINDING_DOWN),
-                     getInputCodeString(settings, InputCodeManager::BINDING_RIGHT));
+               mControls.renderLL(col2, y - FontSize + 4);
+
+               //drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", 
+               //      getInputCodeString(settings, InputCodeManager::BINDING_LEFT),
+               //      getInputCodeString(settings, InputCodeManager::BINDING_DOWN),
+               //      getInputCodeString(settings, InputCodeManager::BINDING_RIGHT));
          }
          else
             JoystickRender::renderControllerButton((F32)contCol, F32(y + 4), Joystick::SelectedPresetIndex,
@@ -990,7 +1013,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
    S32 cmdCol = horizMargin;                                                         // Action column
    S32 descrCol = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 55;   // Control column
 
-   const S32 instrSize = 18;
+   const S32 instrSize = FontSize;
 
    glColor(Colors::green);
    drawStringf(cmdCol, ypos, instrSize, "Enter a cmd by pressing [%s], or by typing one at the chat prompt", 

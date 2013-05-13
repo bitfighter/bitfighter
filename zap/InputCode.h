@@ -108,7 +108,6 @@ public:
    virtual ~InputCodeManager();
 
    static const char *inputCodeToString(InputCode inputCode);
-   static const char *inputCodeToGlyph(InputCode inputCode);
 
    static InputCode stringToInputCode(const char *inputName);
 
