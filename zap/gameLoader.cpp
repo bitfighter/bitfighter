@@ -28,9 +28,13 @@
 #endif
 
 #include "gameLoader.h"
+#include "stringUtils.h"
 
 #include "tnl.h"
 #include "tnlLog.h"
+
+#include <fstream>
+#include <sstream>
 
 #include <stdio.h>
 
@@ -47,64 +51,10 @@ using namespace TNL;
 namespace Zap
 {
 
+// TODO: These are no longer needed, but some other parts of the code still use them
 const S32 LevelLoader::MaxArgLen = 100;               // Each at most MaxArgLen bytes long  (enforced in addCharToArg)
 const S32 LevelLoader::MaxIdLen = S32_MAX_DIGITS + 1; // Max 32-bit int is 10 digits, plus room for a null
 const S32 LevelLoader::MaxLevelLineLength = 4096;     // Max total level line length we'll tolerate
-
-// For readability and laziness...
-#define MaxArgc LevelLoader::MAX_LEVEL_LINE_ARGS
-#define MaxArgLen LevelLoader::MaxArgLen
-#define MaxIdLen LevelLoader::MaxIdLen
-
-static char *argv[MaxArgc];
-static char id[MaxIdLen];
-
-static char argv_buffer[MaxArgc][MaxArgLen];
-static int argc;
-static int argLen = 0;
-static int idLen = 0;
-static const char *argString;
-
-
-inline char getNextChar()
-{
-   while(*argString == '\r')
-      argString++;
-   return *argString++;
-}
-
-
-inline void addCharToArg(char c)
-{
-   if(c >= ' ' && c <= '~')         // Limit ourselves to printable chars
-      if(argc < MaxArgc && argLen < MaxArgLen - 1)
-      {
-         argv[argc][argLen] = c;
-         argLen++;
-      }
-}
-
-
-inline void addCharToID(char c)
-{
-   if(c >= '0' && c <= '9')         // Limit ourselves to numerics
-      if(idLen < MaxIdLen - 1)
-      {
-         id[idLen] = c;
-         idLen++;
-      }
-}
-
-
-inline void addArg()
-{
-   if(argc < MaxArgc)
-   {
-      argv[argc][argLen] = 0;       // Null terminate the string
-      argc++;
-      argLen = 0;
-   }
-}
 
 
 // Constructor
@@ -127,188 +77,57 @@ LevelLoader::~LevelLoader()
 
 void LevelLoader::parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName)
 {
-   argc = 0;
-   argLen = 0;
-   idLen = 0;
+   Vector<string> args = parseString(string(line));
+   U32 argc = args.size();
+   S32 id = 0;
+   const char** argv = new const char* [argc];
 
-   argString = line;
-
-   char c;
-
-   for(S32 i = 0; i < MaxArgc; i++)
-      argv[i] = argv_buffer[i];
-
-stateEatingWhitespace:
-   c = getNextChar();
-   if(c == ' ' || c == '\t')
-      goto stateEatingWhitespace;
-   if(c == '\n' || !c)
-      goto stateLineParseDone;
-   if(c == '\"')
-      goto stateReadString;
-   if(c == '#')
-      goto stateEatingComment;
-
-
-stateAddCharToIdent:
-   addCharToArg(c);
-   c = getNextChar();
-   if(c == ' ' || c == '\t')
+   for(U32 i = 0; i < argc; i++)
    {
-      addArg();
-      goto stateEatingWhitespace;
-   }
-   if(c == '\n' || !c)
-   {
-      addArg();
-      goto stateLineParseDone;
-   }
-   if(c == '\"')
-   {
-      addArg();
-      goto stateReadString;
-   }
-   if(c == '!' && argc == 0)     // ID's can only appear in first arg
-   {
-      goto stateAddCharToID;
-   }
-   goto stateAddCharToIdent;
-
-
-stateAddCharToID:
-   c = getNextChar();           // First time here we know c == '!', so let's just move on to the next one
-
-   if(c == ' ' || c == '\t')
-   {
-      addArg();
-      goto stateEatingWhitespace;
-   }
-   if(c == '\n' || !c)
-   {
-      addArg();
-      goto stateLineParseDone;
+      argv[i] = args[i].c_str();
    }
 
-   addCharToID(c);
-   goto stateAddCharToID;
-
-
-stateReadString:
-   c = getNextChar();
-   if(c == '\"')
+   if(argc >= 1)
    {
-      if(*argString != '\"')  // allows "(letter ""I"")" to be this: (letter "I")  problem with \" is having to use \\, and problems with early version of a single \ in string (level name, TextItem, Team name).
+      size_t pos = args[0].find("!");
+      if(pos != string::npos)
       {
-         addArg();
-         goto stateEatingWhitespace;
-      }
-      argString++; // skip a character
-   }
-   if(c == '\n' || !c)
-   {
-      addArg();
-      goto stateLineParseDone;
-   }
-
-   addCharToArg(c);
-   goto stateReadString;
-
-
-stateEatingComment:
-   c = getNextChar();
-   if(c != '\n' && c)
-      goto stateEatingComment;
-
-
-stateLineParseDone:
-   if(argc)
-   {
-      id[idLen] = 0;    // Make sure our id string is null terminated
-      try
-      {
-         processLevelLoadLine(argc, atoi(id), (const char **) argv, database, levelFileName);
-      }
-      catch(LevelLoadException &e)
-      {
-         logprintf("Level Error: Can't parse %s: %s", line, e.what());  // TODO: fix "line" variable having hundreds of level lines
+         id = atoi(args[0].substr(pos, args[0].size() - pos).c_str());
       }
    }
-   argc = 0;
-   argLen = 0;
-   idLen = 0;
 
-   if(c)
-      goto stateEatingWhitespace;
-}  // parseLevelLine
+   try
+   {
+      processLevelLoadLine(argc, id, (const char **) argv, database, levelFileName);
+   }
+   catch(LevelLoadException &e)
+   {
+      logprintf("Level Error: Can't parse %s: %s", line, e.what());  // TODO: fix "line" variable having hundreds of level lines
+   }
+}
 
+
+
+bool LevelLoader::loadLevelFromString(const string &contents, GridDatabase* database, const string &filename)
+{
+   istringstream iss(contents);
+   string line;
+   while(std::getline(iss, line))
+   {
+      parseLevelLine(line.c_str(), database, filename);
+   }
+}
 
 // Reads files by chunks, converts to lines
 bool LevelLoader::loadLevelFromFile(const string &filename, GridDatabase *database)
 {
-   char levelChunk[MaxLevelLineLength];     // Data buffer for reading in chunks of our level file
-   FILE *file = fopen(filename.c_str(), "r");
+   string contents = readFile(filename);
+   loadLevelFromString(contents, database, filename);
 
 #ifdef SAM_ONLY
    // In case the level crash the game trying to load, want to know which file is the problem. 
    logprintf("Loading %s", filename.c_str());
 #endif
-
-   if(!file)               // Can't open file
-      return false;
-
-   S32 cur = 0;            // Cursor, or pointer to character in our chunk
-   S32 lastByteRead = -1;  // Position of last byte read in chunk; if read an entire chunk, will be c. 4096
-
-   while(lastByteRead != 0)
-   {
-      // Read a chunk of the level file, filling any space in levelChunk buffer after cur
-      lastByteRead = (S32)fread(&levelChunk[cur], 1, sizeof(levelChunk) - 1 - cur, file);   // using -1 to make room for a NULL character
-      TNLAssert(lastByteRead >= 0, "lastByteRead is negative while reading level");
-
-      if(lastByteRead < 0) 
-         lastByteRead = 0;  // Makes sure there are no errors if somehow this is negative
-
-      lastByteRead += cur;
-
-      // Advance cursor to end of chunk
-      cur = lastByteRead - 1;
-
-      if(cur == sizeof(levelChunk) - 2)       // Haven't finished the file yet
-      {
-         while(levelChunk[cur] != '\n' && cur != 0)  // cur == 0 indicates the line is too long
-            cur--;      // Back cursor up, looking for final \n in our chunk
-
-         if(cur == 0)
-         {
-            logprintf(LogConsumer::LogLevelError, "Load level ==> Some lines too long in file %s (max len = %d)", 
-                      filename.c_str(), sizeof(levelChunk) - 2);  // -2 : need room for NULL and \n character
-
-            cur = lastByteRead - 1; // Did not find \n, go back to end of chunk. Without this line, it will freeze in endless loop.
-         }
-                     // small cur number (cur > 0) is OK, as cur will then have to be a big number on next pass.
-      }
-      cur++;   // Advance cursor past that last \n, now points to first char of second line in chunk
-
-      TNLAssert(cur >= 0 && cur < (S32)sizeof(levelChunk), "LevelLoader::loadLevelFromFile, Cur out of range");
-
-      char c = levelChunk[cur];     // Read a char, hold onto it for a second
-      levelChunk[cur] = 0;          // Replace it with null
-
-      // ParseLevelLine will read from the beginning of the chunk until it hits the null we just inserted
-      parseLevelLine(levelChunk, database, filename); 
-      levelChunk[cur] = c;          // Replace the null with our saved char
-
-      // Now get rid of that line we just processed with parseLevelLine, by copying the data starting at cur back to the beginning of our chunk
-      S32 cur2 = 0;
-      while(cur + cur2 != lastByteRead)      // Don't go beyond the data we've read
-      {
-         levelChunk[cur2] = levelChunk[cur + cur2];      // Copy
-         cur2++;                                         // Advance
-      }
-      cur = cur2;                            // Move cur back from cur2
-   }
-
-   fclose(file);
 
    return true;
 }

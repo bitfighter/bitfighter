@@ -53,6 +53,7 @@ public:
    // Put these in here so we can access them from luaLevelGenerator
    static const S32 MAX_LEVEL_LINE_ARGS = 4096;  // Most args on a single line,
 
+   bool loadLevelFromString(const string &contents, GridDatabase *database, const string& filename = "");
    bool loadLevelFromFile(const string &filename, GridDatabase *database);
    void parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName);
 
