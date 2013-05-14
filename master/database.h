@@ -43,7 +43,7 @@ using namespace mysqlpp;
 
 
 #ifndef BF_WRITE_TO_MYSQL
-typedef void Query;  // probably better then an empty class
+struct Query {};  // Dummy object for SQLite
 #endif
 
 using namespace TNL;

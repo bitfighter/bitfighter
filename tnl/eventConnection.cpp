@@ -52,7 +52,7 @@ EventConnection::EventConnection()
    mTNLDataBuffer = NULL;
 }
 
-static const U32 mTNLDataBufferMaxSize = 1024 * 256;
+static const U32 mTNLDataBufferMaxSize = 1024 * 1024 * 4;  // 4 MB
 
 EventConnection::~EventConnection()
 {
@@ -609,7 +609,7 @@ NetEvent *EventConnection::unpackNetEvent(BitStream *bstream)
 
    if(mConnectionParameters.mDebugObjectSizes)
    {
-      TNLAssert(endingPosition == bstream->getBitPosition(),
+      TNLAssert((endingPosition - bstream->getBitPosition() & ~(~0 << BitStreamPosBitSize)) == 0,
                 avar("Unpack did not match pack for event of class %s.", evt->getClassName()) );
    }
    return evt;

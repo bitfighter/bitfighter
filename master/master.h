@@ -59,7 +59,7 @@ class MasterServerConnection : public MasterServerInterface, public Zap::ChatChe
 private:
    typedef MasterServerInterface Parent;
 
-	char *mLoggingStatus;
+	string mLoggingStatus;
 
 public:
    static HighScores highScores;    // Cached high scores

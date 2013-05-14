@@ -29,8 +29,8 @@ if(MSVC)
 	message(${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO})
 	foreach(LinkerFlag ${LinkerFlags})
 		# Handle both /INCREMENTAL:YES and /INCREMENTAL
-		string(REPLACE "INCREMENTAL:YES" "INCREMENTAL:NO" ${LinkerFlag} "${${LinkerFlag}}")
-		string(REGEX REPLACE "INCREMENTAL([^:]*)" "INCREMENTAL:NO\\1" ${LinkerFlag} "${${LinkerFlag}}")
+		string(REPLACE "INCREMENTAL:YES" "INCREMENTAL" ${LinkerFlag} "${${LinkerFlag}}")
+		string(REPLACE "INCREMENTAL" "INCREMENTAL:NO" ${LinkerFlag} "${${LinkerFlag}}")
 	endforeach()
 	message(${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO})
 	
