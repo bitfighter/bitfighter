@@ -113,12 +113,10 @@ struct WallRec
 
 public:
    WallRec(F32 width, bool solid, const Vector<F32> &verts);   // Constructor
-   WallRec(F32 width, bool solid);
    explicit WallRec(const WallItem *wallItem);                          // Constructor
    explicit WallRec(const PolyWall *polyWall);                          // Constructor
 
    void constructWalls(Game *theGame) const;
-   void addVertices(Vector<F32> newVerts);
 };
  
 
