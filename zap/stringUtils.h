@@ -84,6 +84,7 @@ Vector<string> parseStringAndStripLeadingSlash(const char *str);
 void parseComplexStringToMap(const string &inputString, map<string, string> &fillMap,
                              const string &entryDelimiter = ";", const string &keyValueDelimiter = ":");
 
+const char *findPointerOfArg(const char *message, S32 count);
 
 string concatenate(const Vector<string> &words, S32 startingWith = 0);
 

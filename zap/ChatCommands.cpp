@@ -43,24 +43,6 @@
 namespace ChatCommands
 {
 
-// Returns a pointer of string of chars, after "count" number of args
-static const char *findPointerOfArg(const char *message, S32 count)
-{
-   S32 spacecount = 0;
-   S32 cur = 0;
-   char prevchar = 0;
-
-   // Message needs to include everything including multiple spaces.  Message starts after second space.
-   while(message[cur] != '\0' && spacecount != count)
-   {
-      if(message[cur] == ' ' && prevchar != ' ')
-         spacecount++;        // Double space does not count as a seperate parameter
-      prevchar = message[cur];
-      cur++;
-   }
-   return &message[cur];
-}
-
 
 // static method
 void addTimeHandler(ClientGame *game, const Vector<string> &words)

@@ -1411,140 +1411,158 @@ public:
    // Got out-of-game chat message from client, need to relay it to others
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr message))
    {
+      // Variables needed for private message handling
       bool isPrivate = false;
-      char privateTo[MAX_PLAYER_NAME_LENGTH + 1];
-      char strippedMessage[MAX_CHAT_MSG_LENGTH + 1];
+      string pmRecipient;
+      const char *strippedMessage = NULL;
 
-      // Check if the message is private.  If so, we need to parse it.
-      if(message.getString()[0] == '/')      // Format: /ToNick Message goes here
+      bool badCommand = false;
+
+      // Incoming command!
+      if(message.getString()[0] == '/')
       {
-         if(!strnicmp(message.getString(), "/dropserver ", 12) && mIsMasterAdmin)
-         {
-            bool droppedServer = false;
-            Address addr(&message.getString()[12]);
+         Vector<string> words = parseStringAndStripLeadingSlash(message.getString());
 
-            for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
-               if(walk->getNetAddress().isEqualAddress(addr) && (addr.port == 0 || addr.port == walk->getNetAddress().port))
-               {
-                  walk->mIsIgnoredFromList = true;
-                  m2cSendChat(walk->mPlayerOrServerName, true, "dropped");
-                  droppedServer = true;
-               }
+         string command = lcase(words[0]);
 
-            if(!droppedServer)
-               m2cSendChat(mPlayerOrServerName, true, "dropserver: address not found");
+         // Master Admin-only commands
+         if(mIsMasterAdmin)
+         {
+            if(command == "dropserver")
+            {
+               bool droppedServer = false;
+               Address addr(words[1].c_str());
 
-            return;
+               for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
+                  if(walk->getNetAddress().isEqualAddress(addr) && (addr.port == 0 || addr.port == walk->getNetAddress().port))
+                  {
+                     walk->mIsIgnoredFromList = true;
+                     m2cSendChat(walk->mPlayerOrServerName, true, "dropped");
+                     droppedServer = true;
+                  }
+
+               if(!droppedServer)
+                  m2cSendChat(mPlayerOrServerName, true, "dropserver: address not found");
+
+               return;
+            }
+            else if(command == "restoreservers")
+            {
+               bool broughtBackServer = false;
+               for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
+                  if(walk->mIsIgnoredFromList)
+                  {
+                     broughtBackServer = true;
+                     walk->mIsIgnoredFromList = false;
+                     m2cSendChat(walk->mPlayerOrServerName, true, "servers restored");
+                  }
+               if(!broughtBackServer)
+                  m2cSendChat(mPlayerOrServerName, true, "No server was hidden");
+               return;
+            }
+            else if(command == "hideplayer")
+            {
+               bool found = false;
+               for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+                  if(strcmp(words[1].c_str(), walk->mPlayerOrServerName.getString()) == 0)
+                  {
+                     walk->mIsIgnoredFromList = !walk->mIsIgnoredFromList;
+                     m2cSendChat(walk->mPlayerOrServerName, true, walk->mIsIgnoredFromList ? "player hidden" : "player not hidden anymore");
+                     found = true;
+                  }
+               if(!found)
+                  m2cSendChat(mPlayerOrServerName, true, "player not found");
+            }
+            else if(command == "hideip")
+            {
+               Address addr(words[1].c_str());
+               bool found = false;
+               for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+                  if(addr.isEqualAddress(walk->getNetAddress()))
+                  {
+                     walk->mIsIgnoredFromList = true;
+                     m2cSendChat(walk->mPlayerOrServerName, true, "player now hidden");
+                     c2mLeaveGlobalChat_remote();  // Also mute and delist the player
+                     found = true;
+                  }
+               gListAddressHide.push_back(addr);
+               if(found)
+                  m2cSendChat(mPlayerOrServerName, true, "player found, and is in IP hidden list");
+               if(!found)
+                  m2cSendChat(mPlayerOrServerName, true, "player not found, but is in IP hidden list");
+            }
+            else if(command ==  "unhideips")
+            {
+               gListAddressHide.clear();
+               m2cSendChat(mPlayerOrServerName, true, "cleared IP hidden list");
+            }
+            else
+               badCommand = true;  // Don't relay bad commands as chat messages
          }
-         else if(mIsMasterAdmin && !stricmp(message.getString(), "/bringbackservers"))
-         {
-            bool broughtBackServer = false;
-            for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
-               if(walk->mIsIgnoredFromList)
-               {
-                  broughtBackServer = true;
-                  walk->mIsIgnoredFromList = false;
-                  m2cSendChat(walk->mPlayerOrServerName, true, "brought back");
-               }
-            if(!broughtBackServer)
-               m2cSendChat(mPlayerOrServerName, true, "No server was hidden");
-            return;
-         }
-         else if(mIsMasterAdmin && !strnicmp(message.getString(), "/hideplayer ", 12))
-         {
-            bool found = false;
-            for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
-               if(strcmp(&message.getString()[12], walk->mPlayerOrServerName.getString()) == 0)
-               {
-                  walk->mIsIgnoredFromList = !walk->mIsIgnoredFromList;
-                  m2cSendChat(walk->mPlayerOrServerName, true, walk->mIsIgnoredFromList ? "player hidden" : "player not hidden anymore");
-                  found = true;
-               }
-            if(!found)
-               m2cSendChat(mPlayerOrServerName, true, "player not found");
-         }
-         else if(mIsMasterAdmin && !strnicmp(message.getString(), "/hideIP ", 8))
-         {
-            Address addr(&message.getString()[8]);
-            bool found = false;
-            for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
-               if(addr.isEqualAddress(walk->getNetAddress()))
-               {
-                  walk->mIsIgnoredFromList = true;
-                  m2cSendChat(walk->mPlayerOrServerName, true, "player now hidden");
-                  c2mLeaveGlobalChat_remote();  // Also mute and delist the player
-                  found = true;
-               }
-            gListAddressHide.push_back(addr);
-            if(found)
-               m2cSendChat(mPlayerOrServerName, true, "player found, and is in IP hidden list");
-            if(!found)
-               m2cSendChat(mPlayerOrServerName, true, "player not found, but is in hidden IP list");
-         }
-         else if(mIsMasterAdmin && !stricmp(message.getString(), "/unhideIPs"))
-         {
-            gListAddressHide.clear();
-            m2cSendChat(mPlayerOrServerName, true, "cleared hiding IP list");
-         }
+         // Not admin command
          else
          {
-            isPrivate = true;
-
-            bool buildingTo = true;
-            S32 j = 0, k = 0;
-
-            for(S32 i = 1; message.getString()[i]; i++)    // Start at 1 to lose the leading '/'
+            if(command == "pm")
             {
-               char c = message.getString()[i];
-
-               if(buildingTo)
-               {     // (braces required)
-                  if (c == ' ' || c == '\t')
-                     buildingTo = false;
-                  else
-                     if (j < MAX_PLAYER_NAME_LENGTH) privateTo[j++] = c;
+               if(words.size() < 3)  // No message?
+               {
+                  logprintf(LogConsumer::LogError, "Malformed private message: %s", message.getString());
+                  m2cSendChat(mPlayerOrServerName, true, "Malformed private message");
+                  return;
                }
-               else
-                  if (k < MAX_CHAT_MSG_LENGTH) strippedMessage[k++] = c;
-            }
 
-            if(buildingTo)       // If we're still in buildingTo mode by the time we get here, it means...
-            {
-               logprintf(LogConsumer::LogError, "Malformed private message: %s", message.getString());
-               return;           // ...that there was no body of the message.  In which case, we're done.
-            }
+               isPrivate = true;
 
-            privateTo[j] = 0;          // Make sure our strings are
-            strippedMessage[k] = 0;    // properly terminated
+               pmRecipient = words[1];
+
+               S32 argCount = 2 + countCharInString(words[1], ' ');  // Set pointer after 2 args + number of spaces in player name
+               strippedMessage = findPointerOfArg(message, argCount);
+
+               // Now relay the message and only send to client with the specified nick
+               for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+               {
+                  if(stricmp(walk->mPlayerOrServerName.getString(), pmRecipient.c_str()) == 0)
+                  {
+                     walk->m2cSendChat(mPlayerOrServerName, isPrivate, strippedMessage);
+                     break;
+                  }
+               }
+            }
+            else
+               badCommand = true;  // Don't relay bad commands as chat messages
          }
       }
 
-      if(mIsIgnoredFromList || !checkMessage(message, isPrivate ? 2 : 0)) // prevent problems with chatting too fast that no one can read.
+
+      // If player is being ignored or chatting too fast
+      if(mIsIgnoredFromList || !checkMessage(message, isPrivate ? 2 : 0))
       {
          if(!mChatTooFast)
             logprintf(LogConsumer::LogChat, mIsIgnoredFromList ? "Tried to chat but muted and hidden: %s" : "This player may be chatting to fast: %s ", mPlayerOrServerName.getString());
+
          mChatTooFast = true;
-         static const StringTableEntry msg("< You are chatting too fast, your message didn't make it through. ");
+         static const StringTableEntry msg("< You are chatting too fast, your message didn't make it through.");
          m2cSendChat(msg, false, StringPtr(" "));
-         return;
+
+         return;  // Bail
       }
       mChatTooFast = false;
 
-      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+
+      // Now relay the chat to all connected clients
+      if(!badCommand && !isPrivate)
       {
-         if(isPrivate)
+         for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          {
-            if(!stricmp(walk->mPlayerOrServerName.getString(), privateTo))     // Only send to player(s) with the specified nick
-               walk->m2cSendChat(mPlayerOrServerName, isPrivate, strippedMessage);
-         }
-         else                    // Send to everyone...
             if(walk != this)    // ...except self!
                walk->m2cSendChat(mPlayerOrServerName, isPrivate, message);
+         }
       }
+
 
       // Log F5 chat messages
       if(isPrivate)
-         logprintf(LogConsumer::LogChat, "Relayed private msg from %s to %s: %s", mPlayerOrServerName.getString(), privateTo, strippedMessage);
+         logprintf(LogConsumer::LogChat, "Relayed private msg from %s to %s: %s", mPlayerOrServerName.getString(), pmRecipient.c_str(), strippedMessage);
       else
          logprintf(LogConsumer::LogChat, "Relayed chat msg from %s: %s", mPlayerOrServerName.getString(), message.getString());
    }
