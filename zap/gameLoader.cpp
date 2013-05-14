@@ -108,7 +108,7 @@ void LevelLoader::parseLevelLine(const char *line, GridDatabase *database, const
 
 
 
-bool LevelLoader::loadLevelFromString(const string &contents, GridDatabase* database, const string &filename)
+void LevelLoader::loadLevelFromString(const string &contents, GridDatabase* database, const string &filename)
 {
    istringstream iss(contents);
    string line;
@@ -122,6 +122,11 @@ bool LevelLoader::loadLevelFromString(const string &contents, GridDatabase* data
 bool LevelLoader::loadLevelFromFile(const string &filename, GridDatabase *database)
 {
    string contents = readFile(filename);
+   if(contents == "")
+   {
+      return false;
+   }
+
    loadLevelFromString(contents, database, filename);
 
 #ifdef SAM_ONLY
