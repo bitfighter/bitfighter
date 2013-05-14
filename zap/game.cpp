@@ -593,6 +593,11 @@ void Game::resetLevelInfo()
 // Used by ServerGame and the editor
 void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName)
 {
+   if(argc == 0)
+   {
+      return;
+   }
+
    S32 strlenCmd = (S32) strlen(argv[0]);
 
    // This is a legacy from the old Zap! days... we do bots differently in Bitfighter, so we'll just ignore this line if we find it.
