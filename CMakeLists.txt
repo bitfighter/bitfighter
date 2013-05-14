@@ -21,6 +21,19 @@ endif()
 # 
 if(MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:MSVCRT.lib")
+
+	# Disable incremental linking on RelWithDebInfo for sam686
+	set(LinkerFlags
+		CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
+	)
+	message(${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO})
+	foreach(LinkerFlag ${LinkerFlags})
+		# Handle both /INCREMENTAL:YES and /INCREMENTAL
+		string(REPLACE "INCREMENTAL:YES" "INCREMENTAL:NO" ${LinkerFlag} "${${LinkerFlag}}")
+		string(REGEX REPLACE "INCREMENTAL([^:]*)" "INCREMENTAL:NO\\1" ${LinkerFlag} "${${LinkerFlag}}")
+	endforeach()
+	message(${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO})
+	
 else()
 	# Only link in what is absolutely necessary
 	set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
