@@ -593,7 +593,7 @@ void Game::resetLevelInfo()
 // Used by ServerGame and the editor
 void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName)
 {
-   if(argc == 0)
+   if(argc == 0 || !strcmp(argv[0], "#"))
    {
       return;
    }
