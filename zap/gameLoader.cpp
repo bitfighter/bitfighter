@@ -82,18 +82,19 @@ void LevelLoader::parseLevelLine(const char *line, GridDatabase *database, const
    S32 id = 0;
    const char** argv = new const char* [argc];
 
-   for(U32 i = 0; i < argc; i++)
-   {
-      argv[i] = args[i].c_str();
-   }
-
    if(argc >= 1)
    {
       size_t pos = args[0].find("!");
       if(pos != string::npos)
       {
-         id = atoi(args[0].substr(pos, args[0].size() - pos).c_str());
+         id = atoi(args[0].substr(pos + 1, args[0].size() - pos - 1).c_str());
+         args[0] = args[0].substr(0, pos);
       }
+   }
+
+   for(U32 i = 0; i < argc; i++)
+   {
+      argv[i] = args[i].c_str();
    }
 
    try
