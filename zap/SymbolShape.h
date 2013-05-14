@@ -168,7 +168,7 @@ private:
 public:
    SymbolString(const Vector<SymbolShape *> &symbols, S32 fontSize, FontContext fontContext);   // Constructor
    SymbolString(S32 fontSize, FontContext fontContext);     // Constructor (can't use until you've setSymbols)
-   virtual SymbolString::~SymbolString();                   // Destructor
+   virtual ~SymbolString();                                 // Destructor
 
    void setSymbols(const Vector<SymbolShape *> &symbols);
 

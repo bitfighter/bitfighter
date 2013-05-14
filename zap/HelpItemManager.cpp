@@ -222,7 +222,7 @@ static S32 doRenderMessages(const InputCodeManager *inputCodeManager, const char
       Vector<SymbolShape *> symbols;
       symbolParse(inputCodeManager, renderStr, symbols);
 
-      UI::SymbolString symbolString(symbols, FontSize, FontContext::HUDContext);
+      UI::SymbolString symbolString(symbols, FontSize, HUDContext);
       symbolString.renderCC(Point(400, yPos));
 
       yPos += FontSize + FontGap;
