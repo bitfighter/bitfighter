@@ -47,7 +47,7 @@ class MockSocket : public Socket
       if(!dataSent)
       {
          data.copy((char*) buffer, data.length());
-         buffer[data.length()] = NULL;
+         buffer[data.length()] = 0;
          *bytesRead = data.length();
          dataSent = true;
       }

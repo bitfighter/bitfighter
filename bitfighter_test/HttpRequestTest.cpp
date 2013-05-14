@@ -8,23 +8,41 @@
 
 #include <string>
 
-using namespace Zap;
+namespace Zap
+{
+
 class HttpRequestTest : public testing::Test
 {
    public:
    HttpRequest req;
-   MockSocket sock;
+   MockSocket* sock;
 
    HttpRequestTest()
-      : sock(), req("/", &sock)
+      : req("/")
    {
+   }
+
+   virtual ~HttpRequestTest()
+   {
+   }
+
+   void plantMocks()
+   {
+      // prevents memory leaks
+      req.~HttpRequest();
+
+      sock = new MockSocket();
+      req.mSocket = sock;
+      req.mLocalAddress = new MockAddress();
+      req.mRemoteAddress = new MockAddress();
    }
 };
 
 
 TEST_F(HttpRequestTest, urlTest)
 {
-   req = HttpRequest("example.com/test");
+   req.setUrl("example.com/test");
+   plantMocks();
 
    string result = req.buildRequest();
    EXPECT_NE(string::npos, result.find("GET /test"));
@@ -84,14 +102,16 @@ TEST_F(HttpRequestTest, emptyResponse)
 
 TEST_F(HttpRequestTest, sendSuccess)
 {
-   sock.sendError = NoError;
+   plantMocks();
+   sock->sendError = NoError;
    EXPECT_TRUE(req.sendRequest(string("test")));
 }
 
 
 TEST_F(HttpRequestTest, sendTimeout)
 {
-   sock.sendError = WouldBlock;
+   plantMocks();
+   sock->sendError = WouldBlock;
 
    // don't really want to wait for a default timout, so set the timeout
    // to two polling intervals
@@ -102,16 +122,16 @@ TEST_F(HttpRequestTest, sendTimeout)
 
 TEST_F(HttpRequestTest, receiveSuccess)
 {
-   sock.receiveError = NoError;
-
+   plantMocks();
+   sock->receiveError = NoError;
    EXPECT_STREQ("", req.receiveResponse().c_str());
 }
 
 
 TEST_F(HttpRequestTest, receiveTimeout)
 {
-   sock.receiveError = WouldBlock;
-
+   plantMocks();
+   sock->receiveError = WouldBlock;
    req.setTimeout(HttpRequest::PollInterval * 2);
    EXPECT_STREQ("", req.receiveResponse().c_str());
 }
@@ -119,37 +139,38 @@ TEST_F(HttpRequestTest, receiveTimeout)
 
 TEST_F(HttpRequestTest, connectError)
 {
-   req = HttpRequest("/", &sock, NULL, new MockAddress());
-   sock.data = "HTTP/1.1 200 OK\r\n\r\nresponse";
+   plantMocks();
+   sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
    // XXX: connect returns UnknownError on a successful call
-   sock.connectError = NoError;
+   sock->connectError = NoError;
    EXPECT_FALSE(req.send());
 }
 
 
 TEST_F(HttpRequestTest, sendError)
 {
-   req = HttpRequest("/", &sock, NULL, new MockAddress());
-   sock.data = "HTTP/1.1 200 OK\r\n\r\nresponse";
-   sock.sendError = UnknownError;
+   plantMocks();
+   sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
+   sock->sendError = UnknownError;
    EXPECT_FALSE(req.send());
 }
 
 
 TEST_F(HttpRequestTest, receiveFail)
 {
-   req = HttpRequest("/", &sock, NULL, new MockAddress());
-   sock.data = "HTTP/1.1 200 OK\r\n\r\nresponse";
-   sock.receiveError = UnknownError;
+   plantMocks();
+   sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
+   sock->receiveError = UnknownError;
    EXPECT_FALSE(req.send());
 }
 
 
 TEST_F(HttpRequestTest, successTest)
 {
-   req = HttpRequest("/", &sock, NULL, new MockAddress());
-   sock.data = "HTTP/1.1 200 OK\r\n\r\nresponse";
+   plantMocks();
+   sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
    EXPECT_TRUE(req.send());
 }
 
+};
 

@@ -26,7 +26,10 @@
 #ifndef HTTPREQUEST_H_
 #define HTTPREQUEST_H_
 
+#include "gtest/gtest_prod.h"
+
 #include <tnl.h>
+#include <tnlNetBase.h>
 #include <tnlUDP.h>
 #include <map>
 #include <string>
@@ -37,6 +40,7 @@ using namespace TNL;
 namespace Zap
 {
 
+class HttpRequestTest;
 class HttpRequest {
 public:
    static const S32 BufferSize = 4096;
@@ -49,7 +53,7 @@ public:
    static string urlEncodeChar(char c);
    static string urlEncode(const string& str);
 
-   HttpRequest(string url = "/", TNL::Socket* socket = NULL, TNL::Address* localAddress = NULL, TNL::Address* remoteAddress = NULL);
+   HttpRequest(string url = "/");
    virtual ~HttpRequest();
 
    string buildRequest();
@@ -60,14 +64,17 @@ public:
    void setData(const string& key, const string& value);
    void setMethod(const string&);
    void setTimeout(U32 timeout);
+   void setUrl(const string& url);
    bool send();
 
    bool sendRequest(string request);
    string receiveResponse();
 
 private:
-   TNL::Address* mLocalAddress;
-   TNL::Address* mRemoteAddress;
+   Address* mLocalAddress;
+   Address* mRemoteAddress;
+   Socket* mSocket;
+
    map<string, string> mData;
    string mUrl;
    string mMethod;
@@ -76,8 +83,9 @@ private:
    string mResponseHead;
    string mResponseBody;
    S32 mResponseCode;
-   TNL::Socket* mSocket;
    U32 mTimeout;
+
+   friend class HttpRequestTest;
 };
 
 }
