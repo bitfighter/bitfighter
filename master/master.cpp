@@ -239,6 +239,7 @@ public:
                mEntryThread = 0;
          }
       }
+      return 0;
    }
    void runAtMainThread()
    {
@@ -283,9 +284,9 @@ public:
       mPrev->mNext = mNext;
       mNext->mPrev = mPrev;
 
-      if(mLoggingStatus)
+      if(mLoggingStatus == "")
       {
-         logprintf(LogConsumer::LogConnection, "CONNECT_FAILED\t%s\t%s\t%s", getTimeStamp().c_str(), getNetAddress().toString(), mLoggingStatus);
+         logprintf(LogConsumer::LogConnection, "CONNECT_FAILED\t%s\t%s\t%s", getTimeStamp().c_str(), getNetAddress().toString(), mLoggingStatus.c_str());
       }
       else if(mConnectionType == MasterConnectionTypeServer)
       {
@@ -1208,7 +1209,7 @@ public:
             mConnectionType = MasterConnectionTypeClient;
       }
 
-      mLoggingStatus = NULL;
+      mLoggingStatus = "";
 
       // Now read the bitstream and do other logic according to the connection type
       switch(mConnectionType)
