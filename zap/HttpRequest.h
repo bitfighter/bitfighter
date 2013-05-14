@@ -28,12 +28,14 @@
 
 #include "gtest/gtest_prod.h"
 
+#include "boost/shared_ptr.hpp"
 #include <tnl.h>
 #include <tnlNetBase.h>
 #include <tnlUDP.h>
 #include <map>
 #include <string>
 
+using boost::shared_ptr;
 using namespace std;
 using namespace TNL;
 
@@ -71,9 +73,9 @@ public:
    string receiveResponse();
 
 private:
-   Address* mLocalAddress;
-   Address* mRemoteAddress;
-   Socket* mSocket;
+   shared_ptr<Address> mLocalAddress;
+   shared_ptr<Address> mRemoteAddress;
+   shared_ptr<Socket> mSocket;
 
    map<string, string> mData;
    string mUrl;

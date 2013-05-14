@@ -3,6 +3,7 @@
 
 #include "../zap/HttpRequest.h"
 
+#include "boost/shared_ptr.hpp"
 #include "gtest/gtest.h"
 #include "tnlLog.h"
 
@@ -11,11 +12,13 @@
 namespace Zap
 {
 
+using boost::shared_ptr;
+
 class HttpRequestTest : public testing::Test
 {
    public:
    HttpRequest req;
-   MockSocket* sock;
+   shared_ptr<MockSocket> sock;
 
    HttpRequestTest()
       : req("/")
@@ -28,13 +31,10 @@ class HttpRequestTest : public testing::Test
 
    void plantMocks()
    {
-      // prevents memory leaks
-      req.~HttpRequest();
-
-      sock = new MockSocket();
+      sock.reset(new MockSocket());
       req.mSocket = sock;
-      req.mLocalAddress = new MockAddress();
-      req.mRemoteAddress = new MockAddress();
+      req.mLocalAddress.reset(new MockAddress());
+      req.mRemoteAddress.reset(new MockAddress());
    }
 };
 
@@ -42,7 +42,6 @@ class HttpRequestTest : public testing::Test
 TEST_F(HttpRequestTest, urlTest)
 {
    req.setUrl("example.com/test");
-   plantMocks();
 
    string result = req.buildRequest();
    EXPECT_NE(string::npos, result.find("GET /test"));

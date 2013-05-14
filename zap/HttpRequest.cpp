@@ -39,31 +39,30 @@ const string HttpRequest::GetMethod = "GET";
 const string HttpRequest::PostMethod = "POST";
 
 HttpRequest::HttpRequest(string url)
-   : mUrl(url), mMethod("GET"), mResponseCode(0), mTimeout(30000), mSocket(0), mLocalAddress(0), mRemoteAddress(0)
+   : mUrl(url), mMethod("GET"), mResponseCode(0), mTimeout(30000)
 {
-   mLocalAddress = new Address(TCPProtocol, Address::Any, 0);
-   mSocket = new Socket(*mLocalAddress);
+   mLocalAddress.reset(new Address(TCPProtocol, Address::Any, 0));
+   mSocket.reset(new Socket(*mLocalAddress));
    setUrl(url);
 }
 
 // Destructor
 HttpRequest::~HttpRequest()
 {
-   delete mLocalAddress;
-   delete mSocket;
-   delete mRemoteAddress;
+
 }
 
 
 void HttpRequest::setUrl(const string& url)
 {
+   mUrl = url;
+
    // hostname is anything before the first '/'
    TNL::U32 index = mUrl.find('/');
    string host = mUrl.substr(0, index);
    string addressString = "ip:" + host + ":80";
 
-   delete mRemoteAddress;
-   mRemoteAddress = new Address(addressString.c_str());
+   mRemoteAddress.reset(new Address(addressString.c_str()));
 }
 
 
