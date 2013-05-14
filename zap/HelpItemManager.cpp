@@ -183,12 +183,12 @@ void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symb
 
 static void symbolParse(const InputCodeManager *inputCodeManager, string &str, Vector<SymbolShape *> &symbols)
 {
-   size_t offset = 0;
+   std::size_t offset = 0;
 
    while(true)
    {
-      size_t startPos = str.find("[[", offset);      // If this isn't here, no further searching is necessary
-      size_t endPos   = str.find("]]", offset + 2);
+      std::size_t startPos = str.find("[[", offset);      // If this isn't here, no further searching is necessary
+      std::size_t endPos   = str.find("]]", offset + 2);
 
       if(startPos == string::npos || endPos == string::npos)
       {

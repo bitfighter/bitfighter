@@ -1765,11 +1765,14 @@ void GameConnection::onConnectionEstablished_client()
 {
 #ifndef ZAP_DEDICATED
    setConnectionSpeed(mClientGame->getSettings()->getIniSettings()->connectionSpeed);  // set speed depending on client
-   mClientGame->setInCommanderMap(false);       // Start game in regular mode
    setGhostFrom(false);
    setGhostTo(true);
    logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());
 
+   // This is a new connection, server is expecting the new client to not show idling message.
+   getClientInfo()->setSpawnDelayed(false);
+   mClientGame->setSpawnDelayed(false);
+   mClientGame->setInCommanderMap(false);       // Start game in regular mode
 
    // If we arrive here and the saved password is empty it means that the user entered a good password.  
    // So let's save it for next time.

@@ -3,11 +3,22 @@ cmake_minimum_required (VERSION 2.6)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
+
+# No creating project files in-source.  Bad, evil things happen
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" _insource)
+if (_insource)
+	message(SEND_ERROR "No building in-source.  You must run CMake from the \"build\" directory.")
+	message(FATAL_ERROR "Remove the file CMakeCache.txt in ${CMAKE_SOURCE_DIR} first.")
+endif()
+
+# Default to Release for a build type
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-# Linker flags
+#
+# Global linker flags
+# 
 if(MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:MSVCRT.lib")
 else()
@@ -15,7 +26,9 @@ else()
 	set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
 endif()
 
-# Compiler specific flags
+# 
+# Global compiler specific flags
+# 
 if (CMAKE_COMPILER_IS_GNUCC)
 	set(CMAKE_C_FLAGS_DEBUG "-g -Wall")
 	set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
@@ -44,19 +57,6 @@ if(MSVC)
 	# Enable 'Edit and Continue' debugging support
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /ZI")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
-endif()
-
-
-# Define the Linux data dir if not defined in a packaging build script already
-if("${CMAKE_SYSTEM}" MATCHES "Linux")
-	if(NOT LINUX_DATA_DIR)
-		set(LINUX_DATA_DIR "/usr/share")
-	endif()
-
-	message(STATUS "LINUX_DATA_DIR:  " ${LINUX_DATA_DIR})
-
-	# Quotes need to be a part of the definition or the compiler won't understand
-	add_definitions(-DLINUX_DATA_DIR="${LINUX_DATA_DIR}")
 endif()
 
 
@@ -94,6 +94,7 @@ endif()
 if(NOT MSVC)
 	add_subdirectory(alure)
 endif()
+
 add_subdirectory(tnl)
 add_subdirectory(lua/lua-vec)
 add_subdirectory(mysql++)
@@ -101,9 +102,3 @@ add_subdirectory(libtomcrypt)
 add_subdirectory(master)
 add_subdirectory(gtest)
 add_subdirectory(zap)
-
-string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" _insource)
-if (_insource)
-	message(SEND_ERROR "You must run \"cmake ..\" from the \"build\" directory")
-	message(FATAL_ERROR "Remove the file CMakeCache.txt in ${CMAKE_SOURCE_DIR} first.")
-endif (_insource)

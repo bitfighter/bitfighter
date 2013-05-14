@@ -220,6 +220,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000), mGameTimeUp
 
    mObjectsExpected = 0;
    mGame = NULL;
+   mCurrentWall = NULL;
 }
 
 
@@ -1901,15 +1902,26 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
 
    S32 newScore = S32_MIN;
 
+   // Get event scores
+   S32 playerPoints = getEventScore(IndividualScore, scoringEvent, data);
+   S32 teamPoints = getEventScore(TeamScore, scoringEvent, data);
+
+   // Grab our LuaPlayerInfo for the Lua event if it exists
+   LuaPlayerInfo *playerInfo = NULL;
+   if(player != NULL)
+      playerInfo = player->getPlayerInfo();
+
+
+   // Here we handle scoring for free-for-all (single-team) games.  Note that we keep track of the
+   // player score in team games as well, for statistical tracking of player points in all games
    if(player != NULL)
    {
       // Individual scores
-      S32 points = getEventScore(IndividualScore, scoringEvent, data);
-      TNLAssert(points != naScore, "Bad score value");
+      TNLAssert(playerPoints != naScore, "Bad score value");
 
-      if(points != 0)
+      if(playerPoints != 0)
       {
-         player->addScore(points);
+         player->addScore(playerPoints);
          newScore = player->getScore();
 
          // Broadcast player scores for rendering on the client
@@ -1920,38 +1932,57 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
       }
    }
 
+   // Handle team scoring
    if(isTeamGame())
    {
       // Just in case...  completely superfluous, gratuitous check
       if(U32(teamIndex) >= U32(mGame->getTeamCount()))
          return;
 
-      S32 points = getEventScore(TeamScore, scoringEvent, data);
-      TNLAssert(points != naScore, "Bad score value");
-      if(points == 0)
+      TNLAssert(teamPoints != naScore, "Bad score value");
+      if(teamPoints == 0)
          return;
 
-      // This is kind of a hack to emulate adding a point to every team *except* the scoring team.  The scoring team has its score
-      // deducted, then the same amount is added to every team.  Assumes that points < 0.
+      // Add points to every team but scoring team for this event
+      // Assumes that points < 0.
       if(scoringEvent == ScoreGoalOwnTeam)
       {
          for(S32 i = 0; i < mGame->getTeamCount(); i++)
          {
-            ((Team *)mGame->getTeam(i))->addScore(-points);            // Add magnitiude of negative score to all teams
-            s2cSetTeamScore(i, ((Team *)(mGame->getTeam(i)))->getScore());     // Broadcast result
+            if(i != teamIndex)  // Every team but scoring team
+            {
+               // Fire Lua event, but not for scoring team
+               EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, -teamPoints, i + 1, playerInfo);
+
+               // Adjust score of everyone, scoring team will have it changed back again after this loop
+               ((Team *)mGame->getTeam(i))->addScore(-teamPoints);             // Add magnitiude of negative score to all teams
+               s2cSetTeamScore(i, ((Team *)(mGame->getTeam(i)))->getScore());  // Broadcast result
+            }
          }
       }
+      else
+      {
+         // Fire Lua event for scoring team
+         EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, teamPoints, teamIndex + 1, playerInfo);
 
-      // Now add the score
-      Team *team = (Team *)mGame->getTeam(teamIndex);
-      team->addScore(points);
-      s2cSetTeamScore(teamIndex, team->getScore());     // Broadcast new team score
+         // Now add the score
+         Team *team = (Team *)mGame->getTeam(teamIndex);
+         team->addScore(teamPoints);
+         s2cSetTeamScore(teamIndex, team->getScore());     // Broadcast new team score
+      }
 
       updateLeadingTeamAndScore();
       newScore = mLeadingTeamScore;
    }
+   // Fire scoring event for non-team games
+   else
+   {
+      EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, playerPoints, teamIndex + 1, playerInfo);
+   }
 
-   if(newScore >= mWinningScore)        // End game if max score has been reached
+
+   // End game if max score has been reached
+   if(newScore >= mWinningScore)
       gameOverManGameOver();
 }
 
@@ -2650,8 +2681,30 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    Vector<F32> v;
    s2cAddWalls(v, 0, false);
 
-   for(S32 i = 0; i < mWalls.size(); i++)
-      s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
+   S32 i, j, k;
+   for(i = 0; i < mWalls.size(); i++)
+   {
+      // To stay under TNL's packet size limit, we must send the vertices in groups
+      j = 0;
+      while(j < mWalls[i].verts.size())
+      {
+         v.clear();
+         for(k = 0; k < MaxGeometryFloatsPerRPC && (j + k) < mWalls[i].verts.size(); k++)
+         {
+            v.push_back(mWalls[i].verts[j + k]);
+         }
+         s2cAddWalls(v, mWalls[i].width, mWalls[i].solid);
+         j += k;
+      }
+
+      // if we sent the max number of vertices in the last vertex group, then we
+      // need to send another rpc with no vertices to "close" the wall
+      if(k == MaxGeometryFloatsPerRPC)
+      {
+         v.clear();
+         s2cAddWalls(v, mWalls[i].width, mWalls[i].solid);
+      }
+   }
 
    broadcastNewRemainingTime();
    s2cSetGameOver(mGameOver);
@@ -2695,13 +2748,27 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 // Gets called multiple times as barriers are added
 GAMETYPE_RPC_S2C(GameType, s2cAddWalls, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid))
 {
-   // Empty wall deletes all existing walls
-   if(!verts.size())
-      mGame->deleteObjects((TestFunc)isWallType);
-   else
+   if(mCurrentWall == NULL)
    {
-      WallRec wall(width, solid, verts);
-      wall.constructWalls(mGame);
+      // empty vertex list with no current wall means to delete all walls
+      if(verts.size() == 0)
+      {
+         mGame->deleteObjects((TestFunc)isWallType);
+         return;
+      }
+
+      // otherwise, create our new wall
+      mCurrentWall = new WallRec(width, solid);
+   }
+
+   mCurrentWall->addVertices(verts);
+
+   // if the max number of vertices were sent, we expect another RPC for this wall,
+   // otherwise it is considered "finished"
+   if(verts.size() != MaxGeometryFloatsPerRPC)
+   {
+      mCurrentWall->constructWalls(mGame);
+      mCurrentWall = NULL;
    }
 }
 

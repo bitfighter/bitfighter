@@ -103,6 +103,7 @@ class GameType : public NetObject
    typedef NetObject Parent;
 
    static const S32 TeamNotSpecified = -99999;
+   static const U32 MaxGeometryFloatsPerRPC = 128;
 
 private:
    Game *mGame;
@@ -150,6 +151,8 @@ private:
    S32 mMaxRecPlayers;         // Recommended max players for this level
 
    Vector<SafePtr<MoveItem> > mCacheResendItem;  // Speed up c2sResendItemStatus
+
+   WallRec* mCurrentWall; // pointer to the current wall for s2cAddWalls
 
    void idle_client(U32 deltaT);
    void idle_server(U32 deltaT);

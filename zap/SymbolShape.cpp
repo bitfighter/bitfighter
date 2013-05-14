@@ -40,6 +40,13 @@ using namespace TNL;
 namespace Zap { namespace UI {
 
 
+// Destructor
+SymbolShape::~SymbolShape()
+{
+   // Do nothing
+}
+
+
 S32 SymbolShape::getWidth() const
 {
    return mWidth;
@@ -61,6 +68,12 @@ SymbolRoundedRect::SymbolRoundedRect(S32 width, S32 height, S32 radius)
    mRadius = radius;
 }
 
+// Destructor
+SymbolRoundedRect::~SymbolRoundedRect()
+{
+   // Do nothing
+}
+
 
 void SymbolRoundedRect::render(const Point &center, S32 fontSize, FontContext fontContext) const
 {
@@ -76,6 +89,12 @@ SymbolHorizEllipse::SymbolHorizEllipse(S32 width, S32 height)
 {
    mWidth = width;
    mHeight = height;
+}
+
+// Destructor
+SymbolHorizEllipse::~SymbolHorizEllipse()
+{
+   // Do nothing
 }
 
 
@@ -98,6 +117,12 @@ void SymbolHorizEllipse::render(const Point &center, S32 fontSize, FontContext f
 SymbolRightTriangle::SymbolRightTriangle(S32 width)
 {
    mWidth = width;
+}
+
+// Destructor
+SymbolRightTriangle::~SymbolRightTriangle()
+{
+   // Do nothing
 }
 
 
@@ -134,6 +159,12 @@ SymbolCircle::SymbolCircle(S32 radius)
    mHeight = radius * 2;
 }
 
+// Destructor
+SymbolCircle::~SymbolCircle()
+{
+   // Do nothing
+}
+
 void SymbolCircle::render(const Point &center, S32 fontSize, FontContext fontContext) const
 {
    drawCircle(center, (F32)mWidth / 2);
@@ -146,6 +177,12 @@ void SymbolCircle::render(const Point &center, S32 fontSize, FontContext fontCon
 
 // Constructor
 SymbolGear::SymbolGear() : Parent(0)
+{
+   // Do nothing
+}
+
+// Destructor
+SymbolGear::~SymbolGear()
 {
    // Do nothing
 }
@@ -174,6 +211,12 @@ SymbolText::SymbolText(const string &text)
    mWidth = -1;
 }
 
+// Destructor
+SymbolText::~SymbolText()
+{
+   // Do nothing
+}
+
 
 void SymbolText::updateWidth(S32 fontSize, FontContext fontContext)
 {
@@ -194,6 +237,12 @@ void SymbolText::render(const Point &center, S32 fontSize, FontContext fontConte
 
 
 SymbolKey::SymbolKey(const string &text) : Parent(text)
+{
+   // Do nothing
+}
+
+// Destructor
+SymbolKey::~SymbolKey()
 {
    // Do nothing
 }
@@ -295,7 +344,7 @@ SymbolString::SymbolString(S32 fontSize, FontContext fontContext)
    mWidth = 0;
 }
 
-
+// Destructor
 SymbolString::~SymbolString()
 {
    mSymbols.clear();    // Clean up those pointers
@@ -404,8 +453,8 @@ SymbolShape *SymbolString::getControlSymbol(InputCode inputCode)
       return symbolHolder.getSymbol(inputCode);
    else
    { 
-      TNLAssert(false, "Deal with it!");
-      return NULL;      // Certain to crash
+      //TNLAssert(false, "Deal with it!");
+      return symbolHolder.getSymbol(KEY_WORLD_0);
    }
 }
 

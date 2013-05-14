@@ -45,6 +45,8 @@ class SymbolShape
 protected:
    S32 mWidth, mHeight;
 public:
+   virtual ~SymbolShape();
+
    virtual void render(const Point &pos, S32 fontSize, FontContext fontContext) const = 0;
    virtual void updateWidth(S32 fontSize, FontContext fontContext);
 
@@ -61,6 +63,8 @@ private:
 
 public:
    SymbolRoundedRect(S32 width, S32 height, S32 radius);   // Constructor
+   virtual ~SymbolRoundedRect();
+
    void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
 };
 
@@ -71,6 +75,8 @@ class SymbolHorizEllipse : public SymbolShape
 
 public:
    SymbolHorizEllipse(S32 width, S32 height); // Constructor
+   virtual ~SymbolHorizEllipse();
+
    void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
 };
 
@@ -81,6 +87,8 @@ class SymbolRightTriangle : public SymbolShape
 
 public:
    SymbolRightTriangle(S32 width); // Constructor
+   virtual ~SymbolRightTriangle();
+
    void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
 };
 
@@ -91,6 +99,8 @@ class SymbolCircle : public SymbolShape
 
 public:
    SymbolCircle(S32 radius); // Constructor
+   virtual ~SymbolCircle();
+
    virtual void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
 };
 
@@ -104,6 +114,8 @@ private:
 
 public:
    SymbolGear();  // Constructor
+   virtual ~SymbolGear();
+
    void updateWidth(S32 fontSize, FontContext fontContext);
    void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
 };
@@ -118,6 +130,8 @@ protected:
 
 public:
    SymbolText(const string &text);
+   virtual ~SymbolText();
+
    virtual void updateWidth(S32 fontSize, FontContext fontContext);
    virtual void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
 };
@@ -129,6 +143,8 @@ class SymbolKey : public SymbolText
 
 public:
    SymbolKey(const string &text);
+   virtual ~SymbolKey();
+
    void updateWidth(S32 fontSize, FontContext fontContext);
    void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
 };
