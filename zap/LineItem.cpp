@@ -298,7 +298,9 @@ void LineItem::changeWidth(S32 amt)
 void LineItem::setGeom(lua_State *L, S32 stackIndex)
 {
    Parent::setGeom(L, stackIndex);
-   s2cSetGeom(*GeomObject::getOutline());
+
+   if(!isGhost())
+      s2cSetGeom(*GeomObject::getOutline());
 }
 
 
