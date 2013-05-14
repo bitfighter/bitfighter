@@ -59,6 +59,8 @@ public:
 
    bool processArguments(S32 argc, const char **argv, Game *game);   // Create objects from parameters stored in level file
    void onAddedToGame(Game *theGame);
+   virtual void onGhostAvailable(GhostConnection *connection);
+   virtual void onGhostAddBeforeUpdate(GhostConnection *connection);
    void computeExtent();                                             // Bounding box for quick collision-possibility elimination
 
    const Vector<Point> *getCollisionPoly() const;                    // More precise boundary for precise collision detection
@@ -67,6 +69,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
+   virtual void setGeom(lua_State *L, S32 stackIndex);
  
    /////
    // Editor methods
@@ -103,6 +106,7 @@ public:
    static const S32 MAX_LINE_WIDTH;
 
    TNL_DECLARE_CLASS(LineItem);
+   TNL_DECLARE_RPC(s2cSetGeom, (Vector<Point> geom));
 
    ///// Lua Interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(LineItem);

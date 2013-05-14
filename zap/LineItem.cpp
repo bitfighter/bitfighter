@@ -42,6 +42,14 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(LineItem);
 
+TNL_IMPLEMENT_NETOBJECT_RPC(LineItem, s2cSetGeom,
+      (Vector<Point> geom), (geom),
+      NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
+{
+   GeomObject::setGeom(geom);
+   updateExtentInDatabase();
+}
+
 const S32 LineItem::MIN_LINE_WIDTH = 1;
 const S32 LineItem::MAX_LINE_WIDTH = 255;
 
@@ -190,6 +198,18 @@ void LineItem::onAddedToGame(Game *game)
       setScopeAlways();
 }
 
+void LineItem::onGhostAvailable(GhostConnection* connection)
+{
+   Parent::onGhostAvailable(connection);
+   s2cSetGeom(*GeomObject::getOutline());
+}
+
+void LineItem::onGhostAddBeforeUpdate(GhostConnection* connection)
+{
+   Parent::onGhostAddBeforeUpdate(connection);
+   updateExtentInDatabase();
+}
+
 
 // Bounding box for quick collision-possibility elimination, and display scoping purposes
 void LineItem::computeExtent()
@@ -223,8 +243,6 @@ U32 LineItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    writeThisTeam(stream);
    stream->write(mGlobal);
 
-   packGeom(connection, stream);
-
    return 0;
 }
 
@@ -234,9 +252,6 @@ void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    //mWidth = stream->readRangedU32(0, MAX_LINE_WIDTH);
    readThisTeam(stream);
    mGlobal = stream->readFlag();  // Set this client side
-
-   unpackGeom(connection, stream);
-   updateExtentInDatabase();
 }
 
 
@@ -279,6 +294,13 @@ void LineItem::changeWidth(S32 amt)
    setWidth(width);
    onGeomChanged();
 }
+
+void LineItem::setGeom(lua_State *L, S32 stackIndex)
+{
+   Parent::setGeom(L, stackIndex);
+   s2cSetGeom(*GeomObject::getOutline());
+}
+
 
 #ifndef ZAP_DEDICATED
 
