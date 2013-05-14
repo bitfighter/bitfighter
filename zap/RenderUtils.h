@@ -47,6 +47,7 @@ void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, cons
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha);
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor);
 
+void drawHollowRect(const Point &center, S32 width, S32 height);
 void drawHollowRect(const Point &p1, const Point &p2);
 void drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2);
 void drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &outlineColor);

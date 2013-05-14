@@ -184,7 +184,7 @@ void SymbolText::updateWidth(S32 fontSize, FontContext fontContext)
 void SymbolText::render(const Point &center, S32 fontSize, FontContext fontContext) const
 {
    FontManager::pushFontContext(fontContext);
-   drawString(center.x - mWidth / 2, center.y - fontSize / 2, fontSize, mText.c_str());
+   drawStringc(center.x, center.y + fontSize / 2, (F32)fontSize, mText.c_str());
    FontManager::popFontContext();
 }
 
@@ -199,15 +199,30 @@ SymbolKey::SymbolKey(const string &text) : Parent(text)
 }
 
 
+static S32 Margin = 3;              // Buffer within key around text
+static S32 Gap = 3;                 // Distance between keys
+static S32 FontSizeReduction = 4;   // How much smaller keycap font is than surrounding text
+static S32 VertAdj = 2;             // To help with vertical centering
+
 void SymbolKey::updateWidth(S32 fontSize, FontContext fontContext)
 {
-   mWidth = getStringWidth(KeyContext, fontSize, mText.c_str());
+   fontSize -= FontSizeReduction;
+
+   S32 width = getStringWidth(fontContext, fontSize, mText.c_str()) + Margin * 2;
+
+   mHeight = fontSize + Margin * 2;
+   mWidth = max(width, mHeight) + VertAdj * Gap;
 }
 
 
 void SymbolKey::render(const Point &center, S32 fontSize, FontContext fontContext) const
 {
-   Parent::render(center, fontSize, KeyContext);
+   static const Point vertAdj(0, VertAdj);
+   Parent::render(center + vertAdj, fontSize - FontSizeReduction, fontContext);
+
+   S32 width =  max(mWidth - 2 * Gap, mHeight);
+
+   drawHollowRect(center + vertAdj, width, mHeight);
 }
 
 
@@ -215,19 +230,69 @@ void SymbolKey::render(const Point &center, S32 fontSize, FontContext fontContex
 ////////////////////////////////////////
 
 
-SymbolString::SymbolString(const Vector<SymbolShape *> &symbols, S32 fontSize, FontContext fontContext)
+SymbolStringSet::SymbolStringSet(S32 fontSize, S32 gap)
 {
-   mSymbols     = symbols;
+   mFontSize = fontSize;
+   mGap = gap;
+}
+
+
+void SymbolStringSet::clear()
+{
+   mSymbolStrings.clear();
+}
+
+
+void SymbolStringSet::add(const SymbolString &symbolString)
+{
+   mSymbolStrings.push_back(symbolString);
+}
+
+
+void SymbolStringSet::renderLL(S32 x, S32 y) const
+{
+   for(S32 i = 0; i < mSymbolStrings.size(); i++)
+   {
+      mSymbolStrings[i].renderLL(x, y);
+      y += mFontSize + mGap;
+   }
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+static S32 computeWidth(const Vector<SymbolShape *> &symbols, S32 fontSize, FontContext fontContext)
+{
+   S32 width = 0;
+
+   for(S32 i = 0; i < symbols.size(); i++)
+   {
+      symbols[i]->updateWidth(fontSize, fontContext);
+      width += symbols[i]->getWidth();
+   }
+
+   return width;
+}
+
+
+SymbolString::SymbolString(const Vector<SymbolShape *> &symbols, S32 fontSize, FontContext fontContext) : mSymbols(symbols)
+{
    mFontSize    = fontSize;
    mFontContext = fontContext;
+   mReady = true;
+
+   mWidth = computeWidth(symbols, fontSize, fontContext);
+}
+
+
+SymbolString::SymbolString(S32 fontSize, FontContext fontContext)
+{
+   mFontSize    = fontSize;
+   mFontContext = fontContext;
+   mReady = false;
 
    mWidth = 0;
-
-   for(S32 i = 0; i < mSymbols.size(); i++)
-   {
-      mSymbols[i]->updateWidth(fontSize, fontContext);
-      mWidth += mSymbols[i]->getWidth();
-   }
 }
 
 
@@ -237,22 +302,45 @@ SymbolString::~SymbolString()
 }
 
 
+void SymbolString::setSymbols(const Vector<SymbolShape *> &symbols)
+{
+   mSymbols = symbols;
+
+   mWidth = computeWidth(symbols, mFontSize, mFontContext);
+   mReady = true;
+}
+
+
 S32 SymbolString::getWidth() const
 { 
+   TNLAssert(mReady, "Not ready!");
+
    return mWidth;
 }
 
 
-void SymbolString::renderCenter(const Point &center) const
+// x & y are coordinates of lower left corner of where we want to render
+void SymbolString::renderLL(S32 x, S32 y) const
 {
-   S32 x = (S32)center.x - getWidth() / 2;
-   S32 y = (S32)center.y;
+   TNLAssert(mReady, "Not ready!");
+
+   renderCC(Point(x + mWidth / 2, y - mFontSize / 2));
+}
+
+
+// Center is the point where we want the string centered, vertically and horizontally
+void SymbolString::renderCC(const Point &center) const
+{
+   TNLAssert(mReady, "Not ready!");
+
+   S32 x = (S32)center.x - mWidth / 2;
+   S32 y = (S32)center.y + mFontSize / 2;
 
    FontManager::pushFontContext(mFontContext);
 
    for(S32 i = 0; i < mSymbols.size(); i++)
    {
-      mSymbols[i]->render(Point(x + mSymbols[i]->getWidth() / 2, y + mFontSize / 2), mFontSize, mFontContext);
+      mSymbols[i]->render(Point(x + mSymbols[i]->getWidth() / 2, y), mFontSize, mFontContext);
       x += mSymbols[i]->getWidth();
    }
 
@@ -286,13 +374,7 @@ public:
    {
       // Lazily initialize -- we're unlikely to actually need more than a few of these during a session
       if(!mKeySymbols[inputCode])
-      {
-         string stuff = InputCodeManager::inputCodeToGlyph(inputCode);
-         if(stuff != "")
-            mKeySymbols[inputCode] = new SymbolKey(stuff);
-         else
-            mKeySymbols[inputCode] = new SymbolText("[" + string(InputCodeManager::inputCodeToString(inputCode)) + "]");
-      }
+         mKeySymbols[inputCode] = new SymbolKey(InputCodeManager::inputCodeToString(inputCode));
 
       return mKeySymbols[inputCode];
    }
@@ -328,6 +410,7 @@ SymbolShape *SymbolString::getControlSymbol(InputCode inputCode)
 }
 
 
+// Static method
 SymbolShape *SymbolString::getSymbolGear()
 {
    return symbolHolder.getSymbolGear();

@@ -27,6 +27,7 @@
 #define _UIINSTRUCTIONS_H_
 
 #include "UIAbstractInstructions.h"
+#include "SymbolShape.h"
 #include "Point.h"
 
 namespace Zap
@@ -38,6 +39,7 @@ class InstructionsUserInterface : public AbstractInstructionsUserInterface
 
 private:
    S32 mCurPage;
+   bool mUsingArrowKeys;
 
    S32 col1;
    S32 col2;
@@ -59,6 +61,8 @@ private:
                                     const char *str2, InputCodeManager::BindingName binding2);
 
    Vector<Point> mResourceItemPoints, mTestItemPoints;
+
+   UI::SymbolStringSet mControls;
 
 public:
 

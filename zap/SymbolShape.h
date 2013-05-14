@@ -143,21 +143,44 @@ class SymbolString
 private:
    S32 mWidth;
    S32 mFontSize;
+   S32 mReady;
+
    FontContext mFontContext;
 
    Vector<SymbolShape *> mSymbols;
 
 public:
-   SymbolString(const Vector<SymbolShape *> &symbols, S32 fontSize, FontContext fontContext);      // Constructor
-   virtual SymbolString::~SymbolString();
+   SymbolString(const Vector<SymbolShape *> &symbols, S32 fontSize, FontContext fontContext);   // Constructor
+   SymbolString(S32 fontSize, FontContext fontContext);     // Constructor (can't use until you've setSymbols)
+   virtual SymbolString::~SymbolString();                   // Destructor
+
+   void setSymbols(const Vector<SymbolShape *> &symbols);
 
    S32 getWidth() const;
-   void renderCenter(const Point &center) const;
+
+   void renderLL(S32 x, S32 y) const;
+   void renderCC(const Point &center) const;
 
    static SymbolShape *getControlSymbol(InputCode inputCode);
+
    static SymbolShape *getSymbolGear();
 };
 
+
+class SymbolStringSet 
+{
+private:
+   S32 mFontSize;
+   S32 mGap;
+
+   Vector<SymbolString> mSymbolStrings;
+
+public:
+   SymbolStringSet(S32 fontSize, S32 gap);
+   void clear();
+   void add(const SymbolString &symbolString);
+   void renderLL(S32 x, S32 y) const;
+};
 
 } } // Nested namespace
 

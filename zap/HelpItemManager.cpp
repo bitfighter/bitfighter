@@ -1,8 +1,4 @@
-#include "HelpItemManager.h"
-
-#include "BfObject.h"      // For TypeNumbers
-#include "InputCode.h"     // For InputCodeManager
-#include "FontManager.h"//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
@@ -27,12 +23,17 @@
 //
 //------------------------------------------------------------------------------------
 
+#include "HelpItemManager.h"
+
+#include "BfObject.h"      // For TypeNumbers
+#include "InputCode.h"     // For InputCodeManager
+#include "FontManager.h"
+
 #include "SymbolShape.h"
 #include "Colors.h"
 #include "OpenglUtils.h"
 #include "RenderUtils.h"
 #include "MathUtils.h"     // For min()
-
 
 
 using namespace TNL;
@@ -222,7 +223,7 @@ static S32 doRenderMessages(const InputCodeManager *inputCodeManager, const char
       symbolParse(inputCodeManager, renderStr, symbols);
 
       UI::SymbolString symbolString(symbols, FontSize, FontContext::HUDContext);
-      symbolString.renderCenter(Point(400, yPos));
+      symbolString.renderCC(Point(400, yPos));
 
       yPos += FontSize + FontGap;
    }
