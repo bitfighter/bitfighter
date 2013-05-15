@@ -28,6 +28,7 @@
 #include "ClientGame.h"
 #include "gameType.h"
 #include "LevelDatabaseDownloadThread.h"
+#include "LevelDatabaseRateThread.h"
 #include "LevelSpecifierEnum.h"
 
 #include "UIManager.h"
@@ -990,5 +991,17 @@ void downloadMapHandler(ClientGame *game, const Vector<string> &args)
    downloadThread->start();
 }
 
+void rateMapHandler(ClientGame *game, const Vector<string> &args)
+{
+   static Thread* rateThread;
+   if(args.size() < 2)
+   {
+      game->displayErrorMessage("You must specify a rating (\"up\" or \"down\")");
+      return;
+   }
+
+   rateThread = new LevelDatabaseRateThread(game, args[1]);
+   rateThread->start();
+}
 
 };

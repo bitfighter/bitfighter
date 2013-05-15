@@ -152,6 +152,7 @@ set(CLIENT_SOURCES
 	Joystick.cpp
 	JoystickRender.cpp
 	LevelDatabaseDownloadThread.cpp
+	LevelDatabaseRateThread.cpp
 	LevelDatabaseUploadThread.cpp
 	lineEditor.cpp
 	LoadoutIndicator.cpp

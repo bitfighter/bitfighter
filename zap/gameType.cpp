@@ -2180,10 +2180,10 @@ void GameType::addAdminGameMenuOptions(MenuUserInterface *menu)
 // Also serves to tell the client we're on a new level.
 GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, 
                                                 StringTableEntry levelCreds, S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, 
-                                                bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled),
+                                                bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId),
                                             (levelName, levelDesc, teamScoreLimit, 
                                                 levelCreds, objectCount, lx, ly, ux, uy, 
-                                                levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled))
+                                                levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled, levelDatabaseId))
 {
 #ifndef ZAP_DEDICATED
    mLevelName = levelName;
@@ -2202,6 +2202,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
 
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
    clientGame->startLoadingLevel(lx, ly, ux, uy, engineerEnabled);
+   clientGame->setLevelDatabaseId(levelDatabaseId);
 #endif
 }
 
@@ -2640,7 +2641,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
    s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, mGame->mObjectsLoaded, 
                    barrierExtents.min.x, barrierExtents.min.y, barrierExtents.max.x, barrierExtents.max.y, 
-                   mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled);
+                   mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId());
 
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
