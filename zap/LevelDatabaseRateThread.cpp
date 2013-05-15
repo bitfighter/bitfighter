@@ -56,13 +56,12 @@ U32 LevelDatabaseRateThread::run()
    {
       stringstream message("Error rating level: ");
       message << responseCode;
-      logprintf(req.getResponseBody().c_str());
-      mGame->displayErrorMessage(message.str().c_str());
+      mGame->displayErrorMessage(req.getResponseBody().c_str());
       delete this;
       return 0;
    }
 
-   mGame->displaySuccessMessage("Rated successfully", true);
+   mGame->displaySuccessMessage(req.getResponseBody().c_str());
 
    delete this;
    return 0;

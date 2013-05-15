@@ -237,6 +237,7 @@ string HttpRequest::buildRequest()
       dSprintf(contentLengthHeaderBuffer, 1024, "\r\nContent-Length: %d", encodedData.tellp());
 
       mRequest += contentLengthHeaderBuffer;
+      mRequest += "\r\nUser-Agent: Bitfighter";
       mRequest += "\r\nContent-Type: multipart/form-data, boundary=" + HttpRequestBoundary;
       mRequest += "\r\n\r\n";
       mRequest += encodedData.str();
