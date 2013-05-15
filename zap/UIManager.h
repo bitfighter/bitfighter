@@ -247,7 +247,9 @@ public:
    // ServerPasswordUI
    void setConnectAddressAndActivatePasswordEntryUI(const Address &serverAddress);
 
-
+   // HostMenuUI
+   void enableLevelLoadDisplay();
+   void disableLevelLoadDisplay(bool fade);
 };
 
 };

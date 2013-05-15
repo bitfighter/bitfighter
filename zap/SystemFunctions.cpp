@@ -89,7 +89,7 @@ void initHosting(GameSettings *settings, const Vector<string> &levelList, bool t
 
 #ifndef ZAP_DEDICATED
       for(S32 i = 0; i < gClientGames.size(); i++)
-         gClientGames[i]->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = true;
+         gClientGames[i]->getUIManager()->enableLevelLoadDisplay();
 #endif
    }
    else  // No levels!
@@ -141,10 +141,7 @@ void abortHosting_noLevels()
       errUI->setMessage(9, levelDir == "" ? "<<Unresolvable>>" : levelDir.c_str());
 
       uiManager->activate(ErrorMessageUI);
-
-      HostMenuUserInterface *menuUI = static_cast<HostMenuUserInterface *>(uiManager->getUI(HostingUI));
-      menuUI->levelLoadDisplayDisplay = false;
-      menuUI->levelLoadDisplayFadeTimer.clear();
+      uiManager->disableLevelLoadDisplay(false); 
    }
 #endif
 

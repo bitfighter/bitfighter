@@ -1575,8 +1575,8 @@ HostMenuUserInterface::HostMenuUserInterface(ClientGame *game) : MenuUserInterfa
    setMenuID(HostingUI);
    mMenuTitle ="HOST A GAME:";
 
-   levelLoadDisplayFadeTimer.setPeriod(1000);
-   levelLoadDisplayDisplay = true;
+   mLevelLoadDisplayFadeTimer.setPeriod(1000);
+   mLevelLoadDisplay = true;
    mEditingIndex = -1;     // Not editing at the start
 }
 
@@ -1694,6 +1694,20 @@ void HostMenuUserInterface::addProgressListItem(string item)
 }
 
 
+void HostMenuUserInterface::showLevelLoadDisplay(bool show, bool fade)
+{
+   mLevelLoadDisplay = show;
+
+   if(!show)
+   {
+      if(fade)
+         mLevelLoadDisplayFadeTimer.reset();
+      else
+         mLevelLoadDisplayFadeTimer.clear();
+   }
+}
+
+
 void HostMenuUserInterface::clearLevelLoadDisplay()
 {
    mLevelLoadDisplayNames.clear();
@@ -1703,14 +1717,14 @@ void HostMenuUserInterface::clearLevelLoadDisplay()
 
 void HostMenuUserInterface::renderProgressListItems()
 {
-   if(levelLoadDisplayDisplay || levelLoadDisplayFadeTimer.getCurrent() > 0)
+   if(mLevelLoadDisplay || mLevelLoadDisplayFadeTimer.getCurrent() > 0)
    {
       TNLAssert(glIsEnabled(GL_BLEND), "Blending should be enabled here!");
 
       for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
       {
          glColor(Colors::white, (1.4f - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.f)) * 
-                                        (levelLoadDisplayDisplay ? 1 : levelLoadDisplayFadeTimer.getFraction()) );
+                                        (mLevelLoadDisplay ? 1 : mLevelLoadDisplayFadeTimer.getFraction()) );
          drawStringf(100, gScreenInfo.getGameCanvasHeight() - vertMargin - (mLevelLoadDisplayNames.size() - i) * 20, 
                      15, "%s", mLevelLoadDisplayNames[i].c_str());
       }

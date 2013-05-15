@@ -783,4 +783,15 @@ void UIManager::setConnectAddressAndActivatePasswordEntryUI(const Address &serve
 }
 
 
+void UIManager::enableLevelLoadDisplay()
+{
+   getHostMenuUserInterface()->showLevelLoadDisplay(true, false);
+}
+
+
+void UIManager::disableLevelLoadDisplay(bool fade)
+{
+   getHostMenuUserInterface()->showLevelLoadDisplay(false, fade);
+}
+
 };

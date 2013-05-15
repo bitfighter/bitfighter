@@ -292,7 +292,7 @@ void GameUserInterface::idle(U32 timeDelta)
 
    // Should we move this timer over to UIGame??
    HostMenuUserInterface *ui = getUIManager()->getHostMenuUserInterface();
-   if(ui->levelLoadDisplayFadeTimer.update(timeDelta))
+   if(ui->mLevelLoadDisplayFadeTimer.update(timeDelta))
       ui->clearLevelLoadDisplay();
 
    mLoadoutIndicator.idle(timeDelta);

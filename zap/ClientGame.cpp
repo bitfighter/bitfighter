@@ -35,8 +35,8 @@
 #include "UIManager.h"
 #include "UIMenus.h"
 #include "UIGame.h"
-//#include "UINameEntry.h"
 #include "UIErrorMessage.h"
+
 #include "EditorTeam.h"
 
 #include "Colors.h"
@@ -170,7 +170,7 @@ void ClientGame::closeConnectionToGameServer()
    if(getConnectionToServer())
       getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
-   getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
+   getUIManager()->disableLevelLoadDisplay(false);
 
    onGameOver();  
 }

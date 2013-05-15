@@ -269,10 +269,13 @@ private:
    Vector<string> mLevelLoadDisplayNames;    // For displaying levels as they're loaded in host mode
    S32 mLevelLoadDisplayTotal;
    S32 mEditingIndex;                        // Index of item we're editing, -1 if none
+   bool mLevelLoadDisplay;
 
 public:
    explicit HostMenuUserInterface(ClientGame *game);        // Constructor
    virtual ~HostMenuUserInterface();
+
+   //void idle(U32 timeDelta);
 
    void onEscape();
    void setupMenus();
@@ -280,12 +283,13 @@ public:
    void render();
    void saveSettings();       // Save parameters in INI file
 
-   // For displaying the list of levels as we load them:
-   Timer levelLoadDisplayFadeTimer;
-   bool levelLoadDisplayDisplay;
+   void showLevelLoadDisplay(bool show, bool fade);
+   Timer mLevelLoadDisplayFadeTimer;
+
+   void clearLevelLoadDisplay();
+
    void addProgressListItem(string item);
    void renderProgressListItems();
-   void clearLevelLoadDisplay();
 };
 
 ////////////////////////////////////////
