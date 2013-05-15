@@ -278,6 +278,9 @@ public:
 
    static Vector<string> DetectedJoystickNameList;   // List of joysticks we found attached to this machine
 
+   // Dealing with saved passwords for servers
+   static void saveServerPassword(const string &serverName, const string &password);
+   static string getServerPassword(const string &serverName);
    static void deleteServerPassword(const string &serverName);
 };
 

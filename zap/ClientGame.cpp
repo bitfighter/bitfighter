@@ -35,7 +35,7 @@
 #include "UIManager.h"
 #include "UIMenus.h"
 #include "UIGame.h"
-#include "UINameEntry.h"
+//#include "UINameEntry.h"
 #include "UIErrorMessage.h"
 #include "EditorTeam.h"
 
@@ -476,7 +476,7 @@ void ClientGame::userEnteredLoginCredentials(const string &name, const string &p
    getClientInfo()->setName(name);
    getSettings()->setLoginCredentials(name, password, savePassword);      // Saves to INI
 
-   mNextMasterTryTime = 0;    // Will trigger connection attempt with master
+   mNextMasterTryTime = 0;                   // Triggers connection attempt with master
 
    setReadyToConnectToMaster(true);
 
@@ -1230,8 +1230,19 @@ void ClientGame::changePassword(GameConnection::ParamType type, const Vector<str
 }
 
 
-bool ClientGame::submitPassword(const char *password)
+// User entered password for joining a game
+void ClientGame::submitServerAccessPassword(const Address &connectAddress, const char *password)
 {
+   mEnteredServerAccessPassword = password;
+   joinRemoteGame(connectAddress, false);  // false: Not from master
+}
+
+
+// User entered password to get permissions on the server
+bool ClientGame::submitServerPermissionsPassword(const char *password)
+{
+   mEnteredServerPermsPassword = password;
+
    GameConnection *gameConnection = getConnectionToServer();
 
    if(gameConnection)
@@ -1524,15 +1535,15 @@ string ClientGame::getRequestedServerName()
 }
 
 
-string ClientGame::getServerPassword()
+string ClientGame::getEnteredServerAccessPassword()
 {
-   return getUIManager()->getServerPasswordEntryUserInterface()->getText();
+   return mEnteredServerAccessPassword;
 }
 
 
-string ClientGame::getHashedServerPassword()
+string ClientGame::getHashedServerAccessPassword()
 {
-   return md5.getSaltedHashFromString(getServerPassword());
+   return md5.getSaltedHashFromString(mEnteredServerAccessPassword);
 }
 
 

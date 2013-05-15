@@ -76,6 +76,9 @@ private:
 
    GameUserInterface *mUi;
 
+   string mEnteredServerPermsPassword;
+   string mEnteredServerAccessPassword;
+
    SFXHandle mModuleSound[ModuleCount];
 
    // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
@@ -243,7 +246,9 @@ public:
    string getRemoteLevelDownloadFilename() const;
    void setRemoteLevelDownloadFilename(const string &filename);
 
-   bool submitPassword(const char *password);
+   void submitServerAccessPassword(const Address &connectAddress, const char *password);
+   bool submitServerPermissionsPassword(const char *password);
+
 
    void changePassword(GameConnection::ParamType type, const Vector<string> &words, bool required);
    void changeServerParam(GameConnection::ParamType type, const Vector<string> &words);
@@ -270,8 +275,10 @@ public:
    void runCommand(const char *command);
 
    string getRequestedServerName();
-   string getServerPassword();
-   string getHashedServerPassword();
+
+   void setServerPassword(const string &password);
+   string getEnteredServerAccessPassword();
+   string getHashedServerAccessPassword();
 
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);

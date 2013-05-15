@@ -1179,10 +1179,25 @@ U32 GameSettings::getSimulatedLag()
 
 
 // static method
+void GameSettings::saveServerPassword(const string &serverName, const string &password)
+{
+   iniFile.SetValue("SavedServerPasswords", serverName, password, true);
+}
+
+
+string GameSettings::getServerPassword(const string &serverName)
+{
+   return iniFile.GetValue("SavedServerPasswords", serverName);
+}
+
+
+// static method
 void GameSettings::deleteServerPassword(const string &serverName)
 {
    iniFile.deleteKey("SavedServerPasswords", serverName);
 }
+
+
 
 
 };

@@ -1465,12 +1465,12 @@ void GameConnection::writeConnectRequest(BitStream *stream)
       serverPW = Game::md5.getSaltedHashFromString(mSettings->getServerPassword());
 
    // If we have a saved password for this server, use that
-   else if(GameSettings::iniFile.GetValue("SavedServerPasswords", lastServerName) != "")
-      serverPW = Game::md5.getSaltedHashFromString(GameSettings::iniFile.GetValue("SavedServerPasswords", lastServerName)); 
+   else if(GameSettings::getServerPassword(lastServerName) != "")
+      serverPW = Game::md5.getSaltedHashFromString(GameSettings::getServerPassword(lastServerName)); 
 
-   // Otherwise, use whatever's in the interface entry box
+   // Otherwise, use whatever the user entered
    else 
-      serverPW = mClientGame->getHashedServerPassword();
+      serverPW = mClientGame->getHashedServerAccessPassword();
 
    // Write some info about the client... name, id, and verification status
    stream->writeString(serverPW.c_str());
@@ -1779,8 +1779,8 @@ void GameConnection::onConnectionEstablished_client()
 
    string lastServerName = mClientGame->getRequestedServerName();
 
-   if(!isLocalConnection() && GameSettings::iniFile.GetValue("SavedServerPasswords", lastServerName) == "")
-      GameSettings::iniFile.SetValue("SavedServerPasswords", lastServerName, mClientGame->getServerPassword(), true);
+   if(!isLocalConnection() && GameSettings::getServerPassword(lastServerName) == "")
+      GameSettings::saveServerPassword(lastServerName, mClientGame->getEnteredServerAccessPassword());
 
 
    if(!isLocalConnection())    // Might use /connect, want to add to list after successfully connected. Does nothing while connected to master.
