@@ -359,12 +359,13 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction) const
 void FxManager::emitBlast(const Point &pos, U32 size)
 {
    const F32 speed = 800.0f;
-   for(U32 i = 0; i < 360; i+=1)
+
+   for(F32 i = 0.0f; i < 360.0f; i += 1)
    {
       Point dir = Point(cos(dr(i)), sin(dr(i)));
       // Emit a ring of bright orange sparks, as well as a whole host of yellow ones
-      emitSpark(pos + dir * 50, dir * TNL::Random::readF() * 500, Colors::yellow, TNL::Random::readI(0, U32(1000.f * F32(1000.f / speed))), SparkTypePoint );
-      emitSpark(pos + dir * 50, dir * speed, Color(1, .8, .45), U32(1000.f * F32(size - 50) / speed), SparkTypeLine);
+      emitSpark(pos + dir * 50, dir * TNL::Random::readF() * 500, Colors::yellow,    TNL::Random::readI(0, U32(1000.f * F32(1000.f / speed))), SparkTypePoint );
+      emitSpark(pos + dir * 50, dir * speed,                      Color(1, .8, .45), U32(1000.f * F32(size - 50) / speed),                     SparkTypeLine);
    }
 }
 
@@ -375,9 +376,11 @@ void FxManager::emitExplosion(const Point &pos, F32 size, const Color *colorArra
    {
       F32 th = TNL::Random::readF() * 2 * 3.14f;
       F32 f = (TNL::Random::readF() * 2 - 1) * 400 * size;
-      U32 colorIndex = TNL::Random::readI() % numColors;
+      
+      S32 colorIndex = TNL::Random::readI() % numColors;
+      S32 ttl        = S32(F32(TNL::Random::readI(0, 1000) + 2000) * size);
 
-      emitSpark(pos, Point(cos(th)*f, sin(th)*f), colorArray[colorIndex], TNL::Random::readI(0, 1000) * size + 2000 * size);
+      emitSpark(pos, Point(cos(th)*f, sin(th)*f), colorArray[colorIndex], ttl);
    }
 }
 
