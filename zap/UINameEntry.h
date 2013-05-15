@@ -57,15 +57,13 @@ public:
 
    virtual void onActivate();
    void render();
-   void idle(U32 t);
 
    void setSecret(bool secret);
 
    virtual bool onKeyDown(InputCode inputCode);
    virtual void onTextInput(char ascii);
 
-   const char *getText();
-   string getSaltedHashText();
+   string getText();
    void setString(string str);
 };
 
@@ -125,30 +123,30 @@ class PreGamePasswordEntryUserInterface :  public PasswordEntryUserInterface
    typedef PasswordEntryUserInterface Parent;
 
 private:
-   Address connectAddress;
+   Address mConnectAddress;
+
 public:
    explicit PreGamePasswordEntryUserInterface(ClientGame *game);    // Constructor
    virtual ~PreGamePasswordEntryUserInterface();
    void onAccept(const char *text);
    void onEscape();
-   void setConnectServer(const Address &addr);
+   void setAddressToConnectTo(const Address &addr);
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class InGamePasswordEntryUserInterface :  public PasswordEntryUserInterface
+class LevelChangeOrAdminPasswordEntryUserInterface :  public PasswordEntryUserInterface
 {
    typedef PasswordEntryUserInterface Parent;
 
 public:
-   explicit InGamePasswordEntryUserInterface(ClientGame *game);  // Constructor
-   virtual ~InGamePasswordEntryUserInterface();
+   explicit LevelChangeOrAdminPasswordEntryUserInterface(ClientGame *game);  // Constructor
+   virtual ~LevelChangeOrAdminPasswordEntryUserInterface();
 
    void onAccept(const char *text);
    void onEscape();
-   virtual void submitPassword(GameConnection *gameConnection, const char *text) = 0;
 };
 
 
@@ -162,21 +160,6 @@ class ServerPasswordEntryUserInterface : public PreGamePasswordEntryUserInterfac
 public:
    explicit ServerPasswordEntryUserInterface(ClientGame *game);                // Constructor
    virtual ~ServerPasswordEntryUserInterface();
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class LevelChangeOrAdminPasswordEntryUserInterface : public InGamePasswordEntryUserInterface
-{
-   typedef InGamePasswordEntryUserInterface Parent;
-
-public:
-   explicit LevelChangeOrAdminPasswordEntryUserInterface(ClientGame *game);     // Constructor
-   virtual ~LevelChangeOrAdminPasswordEntryUserInterface();
-
-   void submitPassword(GameConnection *gameConnection, const char *text);
 };
 
 

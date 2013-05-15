@@ -717,4 +717,70 @@ void UIManager::renderAndDimGameUserInterface()
 }
 
 
+void UIManager::setHighScores(const Vector<StringTableEntry> &groupNames, const Vector<string> &names, const Vector<string> &scores)
+{
+   getHighScoresUserInterface()->setHighScores(groupNames, names, scores);
+}
+
+
+// Message relayed through master -- global chat system
+void UIManager::gotGlobalChatMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf)
+{
+   getChatUserInterface()->newMessage(from, message, isPrivate, isSystem, fromSelf);
+}
+
+
+void UIManager::gotServerListFromMaster(const Vector<IPAddress> &serverList)
+{
+   getQueryServersUserInterface()->gotServerListFromMaster(serverList);
+}
+
+
+void UIManager::setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks)
+{
+   getChatUserInterface()->setPlayersInGlobalChat(playerNicks);
+}
+
+
+void UIManager::playerJoinedGlobalChat(const StringTableEntry &playerNick)
+{
+   getChatUserInterface()->playerJoinedGlobalChat(playerNick);
+}
+
+
+void UIManager::playerLeftGlobalChat(const StringTableEntry &playerNick)
+{
+   getChatUserInterface()->playerLeftGlobalChat(playerNick);
+}
+
+
+void UIManager::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken)
+{
+   getQueryServersUserInterface()->gotPingResponse(address, nonce, clientIdentityToken);
+}
+
+
+void UIManager::gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
+                                 U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
+{
+   getQueryServersUserInterface()->gotQueryResponse(address, nonce, serverName, serverDescr, playerCount, 
+                                                    maxPlayers, botCount, dedicated, test, passwordRequired);
+}
+
+
+string UIManager::getLastSelectedServerName()
+{
+   return getQueryServersUserInterface()->getLastSelectedServerName();
+}
+
+
+void UIManager::setConnectAddressAndActivatePasswordEntryUI(const Address &serverAddress)
+{
+   ServerPasswordEntryUserInterface *ui = getServerPasswordEntryUserInterface();
+   ui->setAddressToConnectTo(serverAddress);
+
+   activate(ui);
+}
+
+
 };

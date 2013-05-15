@@ -1178,4 +1178,11 @@ U32 GameSettings::getSimulatedLag()
 }
 
 
+// static method
+void GameSettings::deleteServerPassword(const string &serverName)
+{
+   iniFile.deleteKey("SavedServerPasswords", serverName);
+}
+
+
 };

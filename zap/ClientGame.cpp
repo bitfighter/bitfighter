@@ -36,9 +36,7 @@
 #include "UIMenus.h"
 #include "UIGame.h"
 #include "UINameEntry.h"
-#include "UIQueryServers.h"
 #include "UIErrorMessage.h"
-#include "UIHighScores.h"
 #include "EditorTeam.h"
 
 #include "Colors.h"
@@ -728,14 +726,14 @@ void ClientGame::addHelpItem(HelpItem item)
 
 void ClientGame::gotServerListFromMaster(const Vector<IPAddress> &serverList)
 {
-   getUIManager()->getQueryServersUserInterface()->gotServerListFromMaster(serverList);
+   getUIManager()->gotServerListFromMaster(serverList);
 }
 
 
 // Message relayed through master -- global chat system
 void ClientGame::gotGlobalChatMessage(const char *playerNick, const char *message, bool isPrivate)
 {
-   getUIManager()->getChatUserInterface()->newMessage(playerNick, message, isPrivate, false, false);
+   getUIManager()->gotGlobalChatMessage(playerNick, message, isPrivate, false, false);
 }
 
 
@@ -814,19 +812,19 @@ void ClientGame::gameTypeIsAboutToBeDeleted()
 
 void ClientGame::setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks)
 {
-   getUIManager()->getChatUserInterface()->setPlayersInGlobalChat(playerNicks);
+   getUIManager()->setPlayersInGlobalChat(playerNicks);
 }
 
 
 void ClientGame::playerJoinedGlobalChat(const StringTableEntry &playerNick)
 {
-   getUIManager()->getChatUserInterface()->playerJoinedGlobalChat(playerNick);
+   getUIManager()->playerJoinedGlobalChat(playerNick);
 }
 
 
 void ClientGame::playerLeftGlobalChat(const StringTableEntry &playerNick)
 {
-   getUIManager()->getChatUserInterface()->playerLeftGlobalChat(playerNick);
+   getUIManager()->playerLeftGlobalChat(playerNick);
 }
 
 
@@ -973,9 +971,9 @@ void ClientGame::setMOTD(const char *motd)
 }
 
 
-void ClientGame::setHighScores(Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores)
+void ClientGame::setHighScores(const Vector<StringTableEntry> &groupNames, const Vector<string> &names, const Vector<string> &scores) const
 {
-   getUIManager()->getHighScoresUserInterface()->setHighScores(groupNames, names, scores);
+   getUIManager()->setHighScores(groupNames, names, scores);
 }
 
 
@@ -1033,15 +1031,15 @@ void ClientGame::gotWrongPassword()
 
 void ClientGame::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken)
 {
-   getUIManager()->getQueryServersUserInterface()->gotPingResponse(address, nonce, clientIdentityToken);
+   getUIManager()->gotPingResponse(address, nonce, clientIdentityToken);
 }
 
 
 void ClientGame::gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
-                                   U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
+                                  U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
-   getUIManager()->getQueryServersUserInterface()->gotQueryResponse(address, nonce, serverName, serverDescr, playerCount, 
-                                                                    maxPlayers, botCount, dedicated, test, passwordRequired);
+   getUIManager()->gotQueryResponse(address, nonce, serverName, serverDescr, playerCount, 
+                                    maxPlayers, botCount, dedicated, test, passwordRequired);
 }
 
 
@@ -1232,6 +1230,20 @@ void ClientGame::changePassword(GameConnection::ParamType type, const Vector<str
 }
 
 
+bool ClientGame::submitPassword(const char *password)
+{
+   GameConnection *gameConnection = getConnectionToServer();
+
+   if(gameConnection)
+   {
+      gameConnection->submitPassword(password);
+      return true;
+   }
+
+   return false;
+}
+
+
 void ClientGame::changeServerParam(GameConnection::ParamType type, const Vector<string> &words)
 {
    // Concatenate all params into a single string
@@ -1367,13 +1379,11 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
       case NetConnection::ReasonNeedServerPassword:
       {
          // We have the wrong password, let's make sure it's not saved
-         string serverName = getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
-         GameSettings::iniFile.deleteKey("SavedServerPasswords", serverName);
+         string serverName = getUIManager()->getLastSelectedServerName();
+         GameSettings::deleteServerPassword(serverName);
    
-         ServerPasswordEntryUserInterface *ui = getUIManager()->getServerPasswordEntryUserInterface();
-         ui->setConnectServer(serverAddress);
+         getUIManager()->setConnectAddressAndActivatePasswordEntryUI(Address(serverAddress));
 
-         getUIManager()->activate(ui);
          break;
       }
 
@@ -1510,7 +1520,7 @@ void ClientGame::runCommand(const char *command)
 
 string ClientGame::getRequestedServerName()
 {
-   return getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
+   return getUIManager()->getLastSelectedServerName();
 }
 
 
@@ -1522,7 +1532,7 @@ string ClientGame::getServerPassword()
 
 string ClientGame::getHashedServerPassword()
 {
-   return getUIManager()->getServerPasswordEntryUserInterface()->getSaltedHashText();
+   return md5.getSaltedHashFromString(getServerPassword());
 }
 
 

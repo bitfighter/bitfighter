@@ -104,19 +104,27 @@ void InstructionsUserInterface::onActivate()
    mCurPage = 0;
    mUsingArrowKeys = usingArrowKeys();
 
-   Vector<SymbolShape *> symbols;
+   Vector<SymbolShapePtr> symbols;
 
    GameSettings *settings = getGame()->getSettings();
 
    mControls.clear();
 
-   symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_UP)));
-   mControls.add(SymbolString(symbols, FontSize, HelpContext));
+   if(getGame()->getSettings()->getInputCodeManager()->getInputMode() != InputModeKeyboard)
+   {
+      symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_UP)));
+      mControls.add(SymbolString(symbols, FontSize, HelpContext));
 
-   symbols.clear();
-   symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_LEFT)));
-   symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_DOWN)));
-   symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_RIGHT)));
+      symbols.clear();
+      symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_LEFT)));
+      symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_DOWN)));
+      symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_RIGHT)));
+   }
+   else
+   {
+      symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_DUMMY_STICK_LEFT)));
+      symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_DUMMY_STICK_RIGHT)));
+   }
 
    mControls.add(SymbolString(symbols, FontSize, HelpContext));
 }
@@ -328,6 +336,8 @@ void InstructionsUserInterface::renderPage1()
    S32 actCol = col1;      // Action column
    S32 contCol = col2;     // Control column
 
+   S32 HeaderFontSize = 20;
+
    GameSettings *settings = getGame()->getSettings();
 
    bool firstCol = true;
@@ -339,10 +349,10 @@ void InstructionsUserInterface::renderPage1()
                                               controlsKeyboard : controlsGamepad;
 
    glColor(secColor);
-   drawString(col1, starty, 20, "Action");
-   drawString(col2, starty, 20, "Control");
-   drawString(col3, starty, 20, "Action");
-   drawString(col4, starty, 20, "Control");
+   drawString(col1, starty, HeaderFontSize, "Action");
+   drawString(col2, starty, HeaderFontSize, "Control");
+   drawString(col3, starty, HeaderFontSize, "Action");
+   drawString(col4, starty, HeaderFontSize, "Control");
 
    y = starty + 28;
 
@@ -374,27 +384,14 @@ void InstructionsUserInterface::renderPage1()
 
          glColor(keyColor);
 
-         // We'll also handle special case of arrow keys...
+
          if(controls[i].primaryControlIndex == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_UD)
-         {     // (braces needed)
-            if(mUsingArrowKeys)
-               drawString(contCol, y, FontSize, "Arrow Keys");
-            //else     // Center Up key above Down key
-            //   drawStringf(contCol + getStringWidthf(15, "[%s] ", getInputCodeString(settings, InputCodeManager::BINDING_LEFT)), y + 4, 
-            //                                         15, "[%s]",  getInputCodeString(settings, InputCodeManager::BINDING_UP));
+         {
+            // Do nothing
          }
          else if (controls[i].primaryControlIndex == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LR)
-         {     // (braces needed)
-            if(usingArrowKeys())
-               y -= 26;    // Hide this line
-            else
-               mControls.renderLL(col2, y - FontSize + 4);
+            mControls.renderCL(col2 + getStringWidth(HelpContext, HeaderFontSize, "Control") / 2, y - FontSize + 4);
 
-               //drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", 
-               //      getInputCodeString(settings, InputCodeManager::BINDING_LEFT),
-               //      getInputCodeString(settings, InputCodeManager::BINDING_DOWN),
-               //      getInputCodeString(settings, InputCodeManager::BINDING_RIGHT));
-         }
          else
             JoystickRender::renderControllerButton((F32)contCol, F32(y + 4), Joystick::SelectedPresetIndex,
                                                    getInputCode(settings, controls[i].primaryControlIndex), false);

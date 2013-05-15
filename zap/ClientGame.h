@@ -238,10 +238,12 @@ public:
    void setMOTD(const char *motd);
    void setNeedToUpgrade(bool needToUpgrade);
 
-   void setHighScores(Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores);
+   void setHighScores(const Vector<StringTableEntry> &groupNames, const Vector<string> &names, const Vector<string> &scores) const;
 
    string getRemoteLevelDownloadFilename() const;
    void setRemoteLevelDownloadFilename(const string &filename);
+
+   bool submitPassword(const char *password);
 
    void changePassword(GameConnection::ParamType type, const Vector<string> &words, bool required);
    void changeServerParam(GameConnection::ParamType type, const Vector<string> &words);

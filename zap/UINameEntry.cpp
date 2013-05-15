@@ -72,7 +72,7 @@ void TextEntryUserInterface::onActivate()
 
 void TextEntryUserInterface::render()
 {
-   glColor(1,1,1);
+   glColor(Colors::white);
 
    const S32 fontSize = 20;
    const S32 fontSizeBig = 30;
@@ -82,11 +82,12 @@ void TextEntryUserInterface::render()
 
    drawCenteredString(y, fontSize, title);
    y += 45;
-   glColor(0, 1, 0);
+
+   glColor(Colors::green);
    drawCenteredString(canvasHeight - vertMargin - 2 * fontSize - 5, fontSize, instr1);
    drawCenteredString(canvasHeight - vertMargin - fontSize, fontSize, instr2);
 
-   glColor(1,1,1);
+   glColor(Colors::white);
 
    // this will have an effect of shrinking the text to fit on-screen when text get very long
    S32 w = getStringWidthf(fontSizeBig, lineEditor.getDisplayString().c_str());
@@ -100,27 +101,15 @@ void TextEntryUserInterface::render()
 }
 
 
-void TextEntryUserInterface::idle(U32 timeDelta)
-{
-   Parent::idle(timeDelta);
-}
-
-
 void TextEntryUserInterface::setSecret(bool secret)
 {
    lineEditor.setSecret(secret);
 }
 
 
-const char *TextEntryUserInterface::getText()
+string TextEntryUserInterface::getText()
 {
-   return lineEditor.c_str();
-}
-
-
-string TextEntryUserInterface::getSaltedHashText()
-{
-   return Game::md5.getSaltedHashFromString(lineEditor.getString());
+   return lineEditor.getString();
 }
 
 
@@ -372,7 +361,7 @@ PreGamePasswordEntryUserInterface::~PreGamePasswordEntryUserInterface()
 
 void PreGamePasswordEntryUserInterface::onAccept(const char *text)
 {
-   getGame()->joinRemoteGame(connectAddress, false);  // false: Not from master
+   getGame()->joinRemoteGame(mConnectAddress, false);  // false: Not from master
 }
 
 
@@ -382,9 +371,9 @@ void PreGamePasswordEntryUserInterface::onEscape()
 }
 
 
-void PreGamePasswordEntryUserInterface::setConnectServer(const Address &addr)
+void PreGamePasswordEntryUserInterface::setAddressToConnectTo(const Address &addr)
 {
-   connectAddress = addr;
+   mConnectAddress = addr;
 }
 
 
@@ -410,42 +399,6 @@ ServerPasswordEntryUserInterface::~ServerPasswordEntryUserInterface()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
-InGamePasswordEntryUserInterface::InGamePasswordEntryUserInterface(ClientGame *game) :
-      Parent(game)
-{
-   /* Do nothing */
-}
-
-// Destructor
-InGamePasswordEntryUserInterface::~InGamePasswordEntryUserInterface()
-{
-   // Do nothing
-}
-
-
-void InGamePasswordEntryUserInterface::onAccept(const char *text)
-{
-   GameConnection *gc = getGame()->getConnectionToServer();
-   if(gc)
-   {
-      submitPassword(gc, text);
-
-      getUIManager()->reactivatePrevUI();                                      // Reactivating clears subtitle message, so reactivate first...
-      getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = "** checking password **";     // ...then set the message
-   }
-   else
-      getUIManager()->reactivatePrevUI();                                      // Otherwise, just reactivate the previous menu
-}
-
-
-void InGamePasswordEntryUserInterface::onEscape()
-{
-   getUIManager()->reactivatePrevUI();
-}
-
-////////////////////////////////////////
-////////////////////////////////////////
 
 // Constructor
 LevelChangeOrAdminPasswordEntryUserInterface::LevelChangeOrAdminPasswordEntryUserInterface(ClientGame *game) : Parent(game)     
@@ -456,14 +409,31 @@ LevelChangeOrAdminPasswordEntryUserInterface::LevelChangeOrAdminPasswordEntryUse
    instr2 = "Enter level change or admin password to change levels on this server";
 }
 
+
+// Destructor
 LevelChangeOrAdminPasswordEntryUserInterface::~LevelChangeOrAdminPasswordEntryUserInterface()
 {
+   // Do nothing
 }
 
 
-void LevelChangeOrAdminPasswordEntryUserInterface::submitPassword(GameConnection *gameConnection, const char *text)
+void LevelChangeOrAdminPasswordEntryUserInterface::onAccept(const char *text)
 {
-   gameConnection->submitPassword(text);
+   bool submitting = getGame()->submitPassword(text);
+
+   if(submitting)
+   {
+      getUIManager()->reactivatePrevUI();                                      // Reactivating clears subtitle message, so reactivate first...
+      getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = "** checking password **";     // ...then set the message
+   }
+   else
+      getUIManager()->reactivatePrevUI();                                      // Otherwise, just reactivate the previous menu
+}
+
+
+void LevelChangeOrAdminPasswordEntryUserInterface::onEscape()
+{
+   getUIManager()->reactivatePrevUI();
 }
 
 

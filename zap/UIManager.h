@@ -28,6 +28,10 @@
 
 #include "Timer.h"
 #include "tnlVector.h"
+#include "tnlNetStringTable.h"
+#include "tnlUDP.h"
+#include "tnlNonce.h"
+
 #include <memory>
 
 using namespace std;
@@ -220,6 +224,30 @@ public:
    void idle(U32 timeDelta);
 
    void renderAndDimGameUserInterface();
+
+
+   // Some passthroughs
+
+   // HighScores UI:
+   void setHighScores(const Vector<StringTableEntry> &groupNames, const Vector<string> &names, const Vector<string> &scores);
+
+   // ChatUI:
+   void gotGlobalChatMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf);
+   void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
+   void playerJoinedGlobalChat(const StringTableEntry &playerNick);
+   void playerLeftGlobalChat  (const StringTableEntry &playerNick);
+
+   // QueryServersUI:
+   void gotServerListFromMaster(const Vector<IPAddress> &serverList);
+   void gotPingResponse (const Address &address, const Nonce &nonce, U32 clientIdentityToken);
+   void gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
+                         U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
+   string getLastSelectedServerName();
+
+   // ServerPasswordUI
+   void setConnectAddressAndActivatePasswordEntryUI(const Address &serverAddress);
+
+
 };
 
 };
