@@ -56,14 +56,16 @@ TEST_F(HttpRequestTest, urlEncodeTest)
    EXPECT_EQ(expected, result);
 }
 
-
-TEST_F(HttpRequestTest, postDataTest)
+TEST_F(HttpRequestTest, postData)
 {
-   req.setData("foo", "bar");
+   unsigned char data[] = "data";
+   req.addFile("fieldName", "filename.txt", data, sizeof(data));
+   req.setData("testKey", "testValue");
    req.setMethod(HttpRequest::PostMethod);
 
    string result = req.buildRequest();
-   EXPECT_NE(string::npos, result.find("\r\n\r\nfoo=bar&"));
+   EXPECT_NE(string::npos, result.find("Content-Disposition: form-data; name=\"testKey\"\r\n\r\ntestValue\r\n--"));
+   EXPECT_NE(string::npos, result.find("Content-Disposition: form-data; name=\"fieldName\"; filename=\"filename.txt\"\r\n\r\ndata\r\n"));
 }
 
 

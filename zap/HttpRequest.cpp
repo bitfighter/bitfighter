@@ -37,6 +37,7 @@ namespace Zap
 
 const string HttpRequest::GetMethod = "GET";
 const string HttpRequest::PostMethod = "POST";
+const string HttpRequest::HttpRequestBoundary = "---REQUEST---BOUNDARY---";
 
 HttpRequest::HttpRequest(string url)
    : mUrl(url), mMethod("GET"), mResponseCode(0), mTimeout(30000)
@@ -202,22 +203,30 @@ string HttpRequest::buildRequest()
    TNL::U32 index = mUrl.find('/');
    string location = mUrl.substr(index, mUrl.length() - index);
 
-   // construct the request
-   mRequest = "";
-
    // request line
-   mRequest += mMethod + " " + location + " HTTP/1.0";
+   mRequest = mMethod + " " + location + " HTTP/1.0";
 
    // content type and data encoding for POST requests
    if(mMethod == PostMethod)
    {
-      mRequest += "\r\nContent-Type: application/x-www-form-urlencoded";
+      mRequest += "\r\nContent-Type: multipart/form-data, boundary=" + HttpRequestBoundary;
 
       string encodedData;
-      map<string, string>::iterator it;
-      for(it = mData.begin(); it != mData.end(); it++)
+      for(map<string, string>::iterator it = mData.begin(); it != mData.end(); it++)
       {
-         encodedData += urlEncode((*it).first) + "=" + urlEncode((*it).second) + "&";
+         encodedData += "--" + HttpRequestBoundary + "\r\n";
+         encodedData += "Content-Disposition: form-data; name=\"" + (*it).first + "\"\r\n\r\n";
+         encodedData += (*it).second + "\r\n";
+      }
+
+      for(list<HttpRequestFileInfo>::iterator it = mFiles.begin(); it != mFiles.end(); it++)
+      {
+         char* dataString = new char[0xFFFF];
+         dSprintf(dataString, (*it).length, (const char*) (*it).data);
+         encodedData += "--" + HttpRequestBoundary + "\r\n";
+         encodedData += "Content-Disposition: form-data; name=\"" + (*it).fieldName + "\"; filename=\"" + (*it).fileName + "\"\r\n\r\n";
+         encodedData += dataString;
+         encodedData += "\r\n";
       }
 
       char contentLengthHeaderBuffer[1024];
@@ -302,6 +311,16 @@ string HttpRequest::receiveResponse()
 void HttpRequest::setTimeout(U32 timeout)
 {
    mTimeout = timeout;
+}
+
+void HttpRequest::addFile(string field, string filename, const U8* data, U32 length)
+{
+   HttpRequestFileInfo info;
+   info.fieldName = field;
+   info.fileName = filename;
+   info.data = data;
+   info.length = length;
+   mFiles.push_back(info);
 }
 
 }

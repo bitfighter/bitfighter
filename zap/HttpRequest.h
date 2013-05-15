@@ -33,6 +33,7 @@
 #include <tnlNetBase.h>
 #include <tnlUDP.h>
 #include <map>
+#include <list>
 #include <string>
 
 using boost::shared_ptr;
@@ -42,8 +43,17 @@ using namespace TNL;
 namespace Zap
 {
 
+struct HttpRequestFileInfo
+{
+   string fileName;
+   string fieldName;
+   const U8* data;
+   U32 length;
+};
+
 class HttpRequestTest;
-class HttpRequest {
+class HttpRequest
+{
 public:
    static const S32 BufferSize = 4096;
    static const S32 OK = 200;
@@ -51,6 +61,7 @@ public:
    static const string GetMethod;
    static const string PostMethod;
    static const S32 PollInterval = 20;
+   static const string HttpRequestBoundary;
 
    static string urlEncodeChar(char c);
    static string urlEncode(const string& str);
@@ -58,6 +69,7 @@ public:
    HttpRequest(string url = "/");
    virtual ~HttpRequest();
 
+   void addFile(string field, string filename, const U8* data, U32 length);
    string buildRequest();
    string getResponseBody();
    S32 getResponseCode();
@@ -78,6 +90,7 @@ private:
    shared_ptr<Socket> mSocket;
 
    map<string, string> mData;
+   list<HttpRequestFileInfo> mFiles;
    string mUrl;
    string mMethod;
    string mRequest;
