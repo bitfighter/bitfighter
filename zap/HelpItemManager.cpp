@@ -145,7 +145,7 @@ void HelpItemManager::idle(U32 timeDelta)
 
 // DON'T PANIC!!! THIS IS A ROUGH INTERMEDIATE FORM THAT WILL BE SIMPLIFIED AND STREAMLINED!!!
 
-void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbolName, Vector<SymbolShape *> &symbols)
+void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbolName, Vector<SymbolShapePtr> &symbols)
 {
    // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
    InputCode inputCode = inputCodeManager->getKeyBoundToBindingCodeName(symbolName);
@@ -177,11 +177,11 @@ void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symb
    
 
    else 
-      symbols.push_back(new SymbolText("Unknown Symbol: " + symbolName));
+      symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName)));
 }
 
 
-static void symbolParse(const InputCodeManager *inputCodeManager, string &str, Vector<SymbolShape *> &symbols)
+static void symbolParse(const InputCodeManager *inputCodeManager, string &str, Vector<SymbolShapePtr > &symbols)
 {
    std::size_t offset = 0;
 
@@ -193,11 +193,11 @@ static void symbolParse(const InputCodeManager *inputCodeManager, string &str, V
       if(startPos == string::npos || endPos == string::npos)
       {
          // No further symbols herein, convert the rest to text symbol and exit
-         symbols.push_back(new SymbolText(str.substr(offset)));
+         symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset))));
          return;
       }
 
-      symbols.push_back(new SymbolText(str.substr(offset, startPos - offset)));
+      symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset))));
 
       getSymbolShape(inputCodeManager, str.substr(startPos + 2, endPos - startPos - 2), symbols);    // + 2 to advance past the "[["
 
@@ -219,10 +219,10 @@ static S32 doRenderMessages(const InputCodeManager *inputCodeManager, const char
       // Do some token subsititution for dynamic elements such as keybindings
       string renderStr(messages[i]);
       
-      Vector<SymbolShape *> symbols;
+      Vector<SymbolShapePtr> symbols;
       symbolParse(inputCodeManager, renderStr, symbols);
 
-      UI::SymbolString symbolString(symbols, FontSize, FontContext::HUDContext);
+      UI::SymbolString symbolString(symbols, FontSize, HUDContext);
       symbolString.renderCC(Point(400, yPos));
 
       yPos += FontSize + FontGap;

@@ -158,6 +158,9 @@ public:
    static bool isKeyboardKey(InputCode inputCode);             // Is inputCode a key on the keyboard?
    static bool isModifier(InputCode inputCode);                // Is inputCode a modifier key?
 
+   static JoystickButton inputCodeToJoystickButton(InputCode inputCode);
+
+
    InputCode getBinding(BindingName binding) const; 
    InputCode getBinding(BindingName bindingName, InputMode inputMode) const;
    void setBinding(BindingName bindingName, InputCode key);

@@ -27,6 +27,7 @@
 
 #include "FontManager.h"
 #include "InputCode.h"
+#include "Joystick.h"
 
 #include "gameObjectRender.h"
 #include "Colors.h"
@@ -38,6 +39,265 @@ using namespace TNL;
 
 
 namespace Zap { namespace UI {
+
+
+SymbolStringSet::SymbolStringSet(S32 fontSize, S32 gap)
+{
+   mFontSize = fontSize;
+   mGap = gap;
+}
+
+
+void SymbolStringSet::clear()
+{
+   mSymbolStrings.clear();
+}
+
+
+void SymbolStringSet::add(const SymbolString &symbolString)
+{
+   mSymbolStrings.push_back(symbolString);
+}
+
+
+void SymbolStringSet::renderLL(S32 x, S32 y) const
+{
+   for(S32 i = 0; i < mSymbolStrings.size(); i++)
+   {
+      mSymbolStrings[i].renderLL(x, y);
+      y += mFontSize + mGap;
+   }
+}
+
+
+// x & y are coordinates of baseline of first item, will be centered in x direction
+// Subsequent strings will be centered under the first
+void SymbolStringSet::renderCL(S32 x, S32 y) const
+{
+   for(S32 i = 0; i < mSymbolStrings.size(); i++)
+   {
+      mSymbolStrings[i].renderCC(x, y - mFontSize / 2);
+      y += mFontSize + mGap;
+   }
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+static S32 computeWidth(const Vector<SymbolShapePtr> &symbols, S32 fontSize, FontContext fontContext)
+{
+   S32 width = 0;
+
+   for(S32 i = 0; i < symbols.size(); i++)
+   {
+      symbols[i]->updateWidth(fontSize, fontContext);
+      width += symbols[i]->getWidth();
+   }
+
+   return width;
+}
+
+
+// Constructor with symbols
+SymbolString::SymbolString(const Vector<SymbolShapePtr> &symbols, S32 fontSize, FontContext fontContext) : mSymbols(symbols)
+{
+   mFontSize    = fontSize;
+   mFontContext = fontContext;
+   mReady = true;
+
+   mWidth = computeWidth(symbols, fontSize, fontContext);
+}
+
+
+// Constructor -- symbols will be provided later
+SymbolString::SymbolString(S32 fontSize, FontContext fontContext)
+{
+   mFontSize    = fontSize;
+   mFontContext = fontContext;
+   mReady = false;
+
+   mWidth = 0;
+}
+
+
+// Destructor
+SymbolString::~SymbolString()
+{
+  // Do nothing
+}
+
+
+void SymbolString::setSymbols(const Vector<SymbolShapePtr> &symbols)
+{
+   mSymbols = symbols;
+
+   mWidth = computeWidth(symbols, mFontSize, mFontContext);
+   mReady = true;
+}
+
+
+S32 SymbolString::getWidth() const
+{ 
+   TNLAssert(mReady, "Not ready!");
+
+   return mWidth;
+}
+
+
+// x & y are coordinates of lower left corner of where we want to render
+void SymbolString::renderLL(S32 x, S32 y) const
+{
+   TNLAssert(mReady, "Not ready!");
+
+   renderCC(Point(x + mWidth / 2, y - mFontSize / 2));
+}
+
+
+// Center is the point where we want the first string centered, vertically and horizontally
+void SymbolString::renderCC(const Point &center) const
+{
+   renderCC((S32)center.x, (S32)center.y);
+}
+
+
+void SymbolString::renderCC(S32 x, S32 y) const
+{
+   TNLAssert(mReady, "Not ready!");
+
+  x -= mWidth / 2;
+  y += mFontSize / 2;
+
+   FontManager::pushFontContext(mFontContext);
+
+   for(S32 i = 0; i < mSymbols.size(); i++)
+   {
+      mSymbols[i]->render(Point(x + mSymbols[i]->getWidth() / 2, y), mFontSize, mFontContext);
+      x += mSymbols[i]->getWidth();
+   }
+
+   FontManager::popFontContext();
+}
+
+
+static const S32 buttonHalfHeight = 9;   // This is the default half-height of a button
+static const S32 rectButtonWidth = 24;
+static const S32 rectButtonHeight = 18;
+static const S32 smallRectButtonWidth = 19;
+static const S32 smallRectButtonHeight = 15;
+static const S32 horizEllipseButtonRadiusX = 14;
+static const S32 horizEllipseButtonRadiusY = 8;
+static const S32 rightTriangleWidth = 28;
+static const S32 rightTriangleHeight = 18;
+static const S32 RectRadius = 3;
+static const S32 RoundedRectRadius = 5;
+
+
+// Forward declaration
+SymbolShapePtr getSymbol(InputCode inputCode);
+
+static SymbolShapePtr getSymbol(Joystick::ButtonShape shape)
+{
+   switch(shape)
+   {
+      case Joystick::ButtonShapeRound:
+         return SymbolShapePtr(new SymbolCircle(buttonHalfHeight));
+
+      case Joystick::ButtonShapeRect:
+         return SymbolShapePtr(new SymbolRoundedRect(rectButtonWidth, 
+                                                     rectButtonHeight, 
+                                                     RectRadius));
+
+      case Joystick::ButtonShapeSmallRect:
+         return SymbolShapePtr(new SymbolRoundedRect(smallRectButtonWidth, 
+                                                     smallRectButtonHeight, 
+                                                     RectRadius));
+
+      case Joystick::ButtonShapeRoundedRect:
+         return SymbolShapePtr(new SymbolRoundedRect(rectButtonWidth, 
+                                                     rectButtonHeight, 
+                                                     RoundedRectRadius));
+
+      case Joystick::ButtonShapeSmallRoundedRect:
+         return SymbolShapePtr(new SymbolRoundedRect(smallRectButtonWidth, 
+                                                     smallRectButtonHeight, 
+                                                     RoundedRectRadius));
+                                                     
+      case Joystick::ButtonShapeHorizEllipse:
+         return SymbolShapePtr(new SymbolHorizEllipse(horizEllipseButtonRadiusX, 
+                                                      horizEllipseButtonRadiusY));
+
+      case Joystick::ButtonShapeRightTriangle:
+         return SymbolShapePtr(new SymbolRightTriangle(rightTriangleWidth));
+
+      default:
+         TNLAssert(false, "Unknown button shape!");
+         return getSymbol(InputCode::KEY_UNKNOWN);
+   }
+}
+
+
+static SymbolShapePtr getSymbol(InputCode inputCode)
+{
+   if(InputCodeManager::isKeyboardKey(inputCode))
+   {
+      const char *str = InputCodeManager::inputCodeToString(inputCode);
+      return SymbolShapePtr(new SymbolKey(str));
+   }
+   else if(inputCode == LEFT_JOYSTICK)
+   {
+      return getSymbol(Joystick::ButtonShapeRound);
+   }
+   else if(InputCodeManager::isControllerButton(inputCode))
+   {
+      // This gives us the logical button that inputCode represents... something like JoystickButton3
+      JoystickButton button = InputCodeManager::inputCodeToJoystickButton(inputCode);
+
+      // Now we need to figure out which symbol to use for this button, depending on controller make/model
+      Joystick::ButtonInfo buttonInfo = Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].buttonMappings[button];
+
+      // Don't render if button doesn't exist... what is this about???
+      if(buttonInfo.sdlButton == Joystick::FakeRawButton)
+         return getSymbol(InputCode::KEY_UNKNOWN);
+
+      // This gets us the button shape index, which will tell us what to draw... something like ButtonShapeRound
+      Joystick::ButtonShape buttonShape = buttonInfo.buttonShape;
+
+      SymbolShapePtr symbol = getSymbol(buttonShape);
+
+      //const char *label = buttonInfo.label.c_str();
+      //Color *buttonColor = &buttonInfo.color;
+
+      return symbol;
+
+   }
+   else if(inputCode == InputCode::KEY_UNKNOWN)
+   {
+      return SymbolShapePtr(new SymbolUnknown());
+   }
+   else
+   {
+      return getSymbol(InputCode::KEY_UNKNOWN);
+   }
+}
+
+
+// Static method
+SymbolShapePtr SymbolString::getControlSymbol(InputCode inputCode)
+{
+   return getSymbol(inputCode);
+}
+
+
+// Static method
+SymbolShapePtr SymbolString::getSymbolGear()
+{
+   return SymbolShapePtr(new SymbolGear());
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 
 // Destructor
@@ -57,7 +317,6 @@ void SymbolShape::updateWidth(S32 fontSize, FontContext fontContext)
 {
    // Do nothing (is overridden)
 }
-
 
 
 // Constructor
@@ -91,6 +350,7 @@ SymbolHorizEllipse::SymbolHorizEllipse(S32 width, S32 height)
    mHeight = height;
 }
 
+
 // Destructor
 SymbolHorizEllipse::~SymbolHorizEllipse()
 {
@@ -118,6 +378,7 @@ SymbolRightTriangle::SymbolRightTriangle(S32 width)
 {
    mWidth = width;
 }
+
 
 // Destructor
 SymbolRightTriangle::~SymbolRightTriangle()
@@ -159,11 +420,13 @@ SymbolCircle::SymbolCircle(S32 radius)
    mHeight = radius * 2;
 }
 
+
 // Destructor
 SymbolCircle::~SymbolCircle()
 {
    // Do nothing
 }
+
 
 void SymbolCircle::render(const Point &center, S32 fontSize, FontContext fontContext) const
 {
@@ -180,6 +443,7 @@ SymbolGear::SymbolGear() : Parent(0)
 {
    // Do nothing
 }
+
 
 // Destructor
 SymbolGear::~SymbolGear()
@@ -211,6 +475,7 @@ SymbolText::SymbolText(const string &text)
    mWidth = -1;
 }
 
+
 // Destructor
 SymbolText::~SymbolText()
 {
@@ -241,6 +506,7 @@ SymbolKey::SymbolKey(const string &text) : Parent(text)
    // Do nothing
 }
 
+
 // Destructor
 SymbolKey::~SymbolKey()
 {
@@ -257,7 +523,12 @@ void SymbolKey::updateWidth(S32 fontSize, FontContext fontContext)
 {
    fontSize -= FontSizeReduction;
 
-   S32 width = getStringWidth(fontContext, fontSize, mText.c_str()) + Margin * 2;
+   S32 width;
+   
+   if(mText == "Up Arrow" || mText == "Down Arrow" || mText == "Left Arrow" || mText == "Right Arrow")
+      width = 0;     // Make a square button; mWidth will be set to mHeight below
+   else
+      width = getStringWidth(fontContext, fontSize, mText.c_str()) + Margin * 2;
 
    mHeight = fontSize + Margin * 2;
    mWidth = max(width, mHeight) + VertAdj * Gap;
@@ -267,7 +538,20 @@ void SymbolKey::updateWidth(S32 fontSize, FontContext fontContext)
 void SymbolKey::render(const Point &center, S32 fontSize, FontContext fontContext) const
 {
    static const Point vertAdj(0, VertAdj);
-   Parent::render(center + vertAdj, fontSize - FontSizeReduction, fontContext);
+
+   fontSize -= FontSizeReduction;
+
+   // Handle some special cases:
+   if(mText == "Up Arrow")
+      renderUpArrow(center + vertAdj, fontSize);
+   else if(mText == "Down Arrow")
+      renderDownArrow(center + vertAdj, fontSize);
+   else if(mText == "Left Arrow")
+      renderLeftArrow(center + vertAdj, fontSize);
+   else if(mText == "Right Arrow")
+      renderRightArrow(center + vertAdj, fontSize);
+   else
+      Parent::render(center + vertAdj, fontSize, KeyContext);
 
    S32 width =  max(mWidth - 2 * Gap, mHeight);
 
@@ -278,191 +562,21 @@ void SymbolKey::render(const Point &center, S32 fontSize, FontContext fontContex
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// TODO: Override rendering with different color, if we add colors to this system
 
-SymbolStringSet::SymbolStringSet(S32 fontSize, S32 gap)
+// Symbol to be used when we don't know what symbol to use
+
+// Constructor
+SymbolUnknown::SymbolUnknown() : Parent("~?~")
 {
-   mFontSize = fontSize;
-   mGap = gap;
+   // Do nothing
 }
 
-
-void SymbolStringSet::clear()
-{
-   mSymbolStrings.clear();
-}
-
-
-void SymbolStringSet::add(const SymbolString &symbolString)
-{
-   mSymbolStrings.push_back(symbolString);
-}
-
-
-void SymbolStringSet::renderLL(S32 x, S32 y) const
-{
-   for(S32 i = 0; i < mSymbolStrings.size(); i++)
-   {
-      mSymbolStrings[i].renderLL(x, y);
-      y += mFontSize + mGap;
-   }
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-static S32 computeWidth(const Vector<SymbolShape *> &symbols, S32 fontSize, FontContext fontContext)
-{
-   S32 width = 0;
-
-   for(S32 i = 0; i < symbols.size(); i++)
-   {
-      symbols[i]->updateWidth(fontSize, fontContext);
-      width += symbols[i]->getWidth();
-   }
-
-   return width;
-}
-
-
-SymbolString::SymbolString(const Vector<SymbolShape *> &symbols, S32 fontSize, FontContext fontContext) : mSymbols(symbols)
-{
-   mFontSize    = fontSize;
-   mFontContext = fontContext;
-   mReady = true;
-
-   mWidth = computeWidth(symbols, fontSize, fontContext);
-}
-
-
-SymbolString::SymbolString(S32 fontSize, FontContext fontContext)
-{
-   mFontSize    = fontSize;
-   mFontContext = fontContext;
-   mReady = false;
-
-   mWidth = 0;
-}
 
 // Destructor
-SymbolString::~SymbolString()
+SymbolUnknown::~SymbolUnknown()
 {
-   mSymbols.clear();    // Clean up those pointers
-}
-
-
-void SymbolString::setSymbols(const Vector<SymbolShape *> &symbols)
-{
-   mSymbols = symbols;
-
-   mWidth = computeWidth(symbols, mFontSize, mFontContext);
-   mReady = true;
-}
-
-
-S32 SymbolString::getWidth() const
-{ 
-   TNLAssert(mReady, "Not ready!");
-
-   return mWidth;
-}
-
-
-// x & y are coordinates of lower left corner of where we want to render
-void SymbolString::renderLL(S32 x, S32 y) const
-{
-   TNLAssert(mReady, "Not ready!");
-
-   renderCC(Point(x + mWidth / 2, y - mFontSize / 2));
-}
-
-
-// Center is the point where we want the string centered, vertically and horizontally
-void SymbolString::renderCC(const Point &center) const
-{
-   TNLAssert(mReady, "Not ready!");
-
-   S32 x = (S32)center.x - mWidth / 2;
-   S32 y = (S32)center.y + mFontSize / 2;
-
-   FontManager::pushFontContext(mFontContext);
-
-   for(S32 i = 0; i < mSymbols.size(); i++)
-   {
-      mSymbols[i]->render(Point(x + mSymbols[i]->getWidth() / 2, y), mFontSize, mFontContext);
-      x += mSymbols[i]->getWidth();
-   }
-
-   FontManager::popFontContext();
-}
-
-
-// Locally defined class, used only here, and only for ensuring objects are cleaned up on exit
-class SymbolHolder
-{
-private:
-   static Vector<SymbolShape *> mKeySymbols;
-   static SymbolGear *mSymbolGear;
-
-public:
-   SymbolHolder() 
-   {
-      if(mKeySymbols.size() == 0)                     // Should always be the case
-         mKeySymbols.resize(LAST_KEYBOARD_KEY + 1);   // Values will be initialized to NULL
-   }
-
-
-   ~SymbolHolder()
-   {
-      mKeySymbols.deleteAndClear();                   // Delete objects created in getSymbol
-      delete mSymbolGear;
-   }
-
-
-   SymbolShape *getSymbol(InputCode inputCode)
-   {
-      // Lazily initialize -- we're unlikely to actually need more than a few of these during a session
-      if(!mKeySymbols[inputCode])
-         mKeySymbols[inputCode] = new SymbolKey(InputCodeManager::inputCodeToString(inputCode));
-
-      return mKeySymbols[inputCode];
-   }
-
-
-   SymbolShape *getSymbolGear()
-   {
-      if(!mSymbolGear)
-         mSymbolGear = new SymbolGear();
-
-      return mSymbolGear;
-   }
-
-};
-
-// Statics used by SymbolHolder
-Vector<SymbolShape *> SymbolHolder::mKeySymbols;      
-SymbolGear *SymbolHolder::mSymbolGear = NULL;
-
-static SymbolHolder symbolHolder;
-
-
-// Static method
-SymbolShape *SymbolString::getControlSymbol(InputCode inputCode)
-{
-   if(InputCodeManager::isKeyboardKey(inputCode))
-      return symbolHolder.getSymbol(inputCode);
-   else
-   { 
-      //TNLAssert(false, "Deal with it!");
-      return symbolHolder.getSymbol(KEY_WORLD_0);
-   }
-}
-
-
-// Static method
-SymbolShape *SymbolString::getSymbolGear()
-{
-   return symbolHolder.getSymbolGear();
+   // Do nothing
 }
 
 

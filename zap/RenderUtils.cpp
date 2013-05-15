@@ -265,7 +265,6 @@ void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const 
 }
 
 
-
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
 S32 drawCenteredUnderlinedString(S32 y, S32 size, const char *string)
@@ -609,6 +608,71 @@ void drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &outlineColor)
 void drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2)
 {
    drawRect(x1, y1, x2, y2, GL_LINE_LOOP);
+}
+
+
+void renderUpArrow(const Point &center, S32 size)
+{
+   F32 offset = (F32)size / 2;
+   F32 top = center.y - offset;
+   F32 bot = center.y + offset;
+   F32 capHeight = size * 0.39f;    // An artist need provide no explanation
+
+   F32 vertices[] = { center.x, top,     center.x,             bot, 
+                      center.x, top,     center.x - capHeight, top + capHeight,
+                      center.x, top,     center.x + capHeight, top + capHeight
+                    };
+
+   renderVertexArray(vertices, ARRAYSIZE(vertices), GL_LINES);
+}
+
+
+void renderDownArrow(const Point &center, S32 size)
+{
+   F32 offset = (F32)size / 2;
+   F32 top = center.y - offset;
+   F32 bot = center.y + offset;
+   F32 capHeight = size * 0.39f;    // An artist need provide no explanation
+
+   F32 vertices[] = { center.x, top,     center.x,             bot, 
+                      center.x, bot,     center.x - capHeight, bot - capHeight,
+                      center.x, bot,     center.x + capHeight, bot - capHeight
+                    };
+
+   renderVertexArray(vertices, ARRAYSIZE(vertices), GL_LINES);
+}
+
+
+void renderLeftArrow(const Point &center, S32 size)
+{
+   F32 offset = (F32)size / 2;
+   F32 left = center.x - offset;
+   F32 right = center.x + offset;
+   F32 capHeight = size * 0.39f;    // An artist need provide no explanation
+
+   F32 vertices[] = { left, center.y,     right,            center.y, 
+                      left, center.y,     left + capHeight, center.y - capHeight,
+                      left, center.y,     left + capHeight, center.y + capHeight
+                    };
+
+   renderVertexArray(vertices, ARRAYSIZE(vertices), GL_LINES);
+}
+
+
+void renderRightArrow(const Point &center, S32 size)
+{
+   F32 offset = (F32)size / 2;
+   F32 left = center.x - offset;
+   F32 right = center.x + offset;
+   F32 capHeight = size * 0.39f;    // An artist need provide no explanation
+
+   F32 vertices[] = { left,  center.y,     right,             center.y, 
+                      right, center.y,     right - capHeight, center.y - capHeight,
+                      right, center.y,     right - capHeight, center.y + capHeight
+                    };
+
+   renderVertexArray(vertices, ARRAYSIZE(vertices), GL_LINES);
+
 }
 
 

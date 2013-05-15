@@ -151,7 +151,7 @@ void FontManager::initialize(GameSettings *settings)
    fontList[FontOrbitronMedium] = new BfFont(FontOrbitronLight, "Orbitron Medium.ttf", settings);
    fontList[FontPrimeRegular]   = new BfFont(FontPrimeRegular,  "prime_regular.ttf",   settings);
    fontList[FontTenby5]         = new BfFont(FontTenby5,        "tenbyfive.ttf",       settings);
-   fontList[KeyCaps]            = new BfFont(KeyCaps,           "LinBiolinum_K.ttf",   settings);     // DavysBigKeyCaps2
+   fontList[KeyCaps]            = new BfFont(KeyCaps,           "tenbyfive.ttf",       settings);     // DavysBigKeyCaps2
 
    // set texture blending function
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

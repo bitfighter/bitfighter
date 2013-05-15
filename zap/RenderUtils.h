@@ -56,6 +56,12 @@ void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode);
 void drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode);
 
 
+void renderUpArrow(const Point &center, S32 size);
+void renderDownArrow(const Point &center, S32 size);
+void renderLeftArrow(const Point &center, S32 size);
+void renderRightArrow(const Point &center, S32 size);
+
+
 // Draw string at given location (normal and formatted versions)
 // Note it is important that x be S32 because for longer strings, they are occasionally drawn starting off-screen
 // to the left, and better to have them partially appear than not appear at all, which will happen if they are U32

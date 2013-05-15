@@ -53,7 +53,8 @@ S16 Joystick::LowerSensitivityThreshold = 4900;   // out of 32767, ~15%, any les
 S16 Joystick::UpperSensitivityThreshold = 30000;  // out of 32767, ~91%, any more than this is full amount
 U32 Joystick::AxesInputCodeMask = 0;
 U32 Joystick::HatInputCodeMask = 0;
-U32 Joystick::SelectedPresetIndex = 0;
+
+U32 Joystick::SelectedPresetIndex = 0;    // TODO: This should be non-static on ClientGame, I think
 
 
 CIniFile joystickPresetsINI("dummy");
@@ -145,8 +146,8 @@ bool Joystick::initJoystick(GameSettings *settings)
 
 bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 {
-   if(settings->getInputCodeManager()->getInputMode() == InputModeKeyboard
-      && (hasBeenOpenedBefore || settings->getIniSettings()->alwaysStartInKeyboardMode)) // don't enable joystick at all in keyboard mode.
+   if(settings->getInputCodeManager()->getInputMode() == InputModeKeyboard &&
+        (hasBeenOpenedBefore || settings->getIniSettings()->alwaysStartInKeyboardMode)) // Don't enable joystick at all in keyboard mode
          return true;
 
    // Enable joystick events

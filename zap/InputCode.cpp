@@ -502,6 +502,51 @@ InputCode InputCodeManager::convertJoystickToKeyboard(InputCode inputCode)
 }
 
 
+JoystickButton InputCodeManager::inputCodeToJoystickButton(InputCode inputCode)
+{
+   switch(inputCode)
+   {
+      case BUTTON_1:
+         return JoystickButton1;
+      case BUTTON_2:
+         return JoystickButton2;
+      case BUTTON_3:
+         return JoystickButton3;
+      case BUTTON_4:
+         return JoystickButton4;
+      case BUTTON_5:
+         return JoystickButton5;
+      case BUTTON_6:
+         return JoystickButton6;
+      case BUTTON_7:
+         return JoystickButton7;
+      case BUTTON_8:
+         return JoystickButton8;
+      case BUTTON_9:
+         return JoystickButton9;
+      case BUTTON_10:
+         return JoystickButton10;
+      case BUTTON_11:
+         return JoystickButton11;
+      case BUTTON_12:
+         return JoystickButton12;
+      case BUTTON_START:
+         return JoystickButtonStart;
+      case BUTTON_BACK:
+         return JoystickButtonBack;
+      case BUTTON_DPAD_UP:
+         return JoystickButtonDPadUp;
+      case BUTTON_DPAD_DOWN:
+         return JoystickButtonDPadDown;
+      case BUTTON_DPAD_LEFT:
+         return JoystickButtonDPadLeft;
+      case BUTTON_DPAD_RIGHT:
+         return JoystickButtonDPadRight;
+      default:
+         return JoystickButtonUnknown;
+   }
+}
+
 InputCode InputCodeManager::filterInputCode(InputCode inputCode)
 {
    // We'll only apply numpad to standard key conversion if there are no keypad bindings
@@ -1701,52 +1746,6 @@ InputCode InputCodeManager::joyHatToInputCode(int hatDirectionMask)
          return BUTTON_DPAD_LEFT;
       default:
          return BUTTON_UNKNOWN;
-   }
-}
-
-
-JoystickButton inputCodeToJoystickButton(InputCode inputCode)
-{
-   switch(inputCode)
-   {
-      case BUTTON_1:
-         return JoystickButton1;
-      case BUTTON_2:
-         return JoystickButton2;
-      case BUTTON_3:
-         return JoystickButton3;
-      case BUTTON_4:
-         return JoystickButton4;
-      case BUTTON_5:
-         return JoystickButton5;
-      case BUTTON_6:
-         return JoystickButton6;
-      case BUTTON_7:
-         return JoystickButton7;
-      case BUTTON_8:
-         return JoystickButton8;
-      case BUTTON_9:
-         return JoystickButton9;
-      case BUTTON_10:
-         return JoystickButton10;
-      case BUTTON_11:
-         return JoystickButton11;
-      case BUTTON_12:
-         return JoystickButton12;
-      case BUTTON_START:
-         return JoystickButtonStart;
-      case BUTTON_BACK:
-         return JoystickButtonBack;
-      case BUTTON_DPAD_UP:
-         return JoystickButtonDPadUp;
-      case BUTTON_DPAD_DOWN:
-         return JoystickButtonDPadDown;
-      case BUTTON_DPAD_LEFT:
-         return JoystickButtonDPadLeft;
-      case BUTTON_DPAD_RIGHT:
-         return JoystickButtonDPadRight;
-      default:
-         return JoystickButtonUnknown;
    }
 }
 #endif

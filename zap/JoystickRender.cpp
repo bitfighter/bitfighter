@@ -171,9 +171,6 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
 }
 
 
-extern JoystickButton inputCodeToJoystickButton(InputCode inputCode);
-
-
 S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode inputCode)
 {
    // Return keyboard key size, just in case
@@ -181,7 +178,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
       return getStringWidthf(15, "[%s]", InputCodeManager::inputCodeToString(inputCode));
 
    // Get joystick button size
-   JoystickButton button = inputCodeToJoystickButton(inputCode);
+   JoystickButton button = InputCodeManager::inputCodeToJoystickButton(inputCode);
 
    Joystick::ButtonShape buttonShape =
          Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].buttonShape;
@@ -245,7 +242,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
       return;
    }
 
-   JoystickButton button = inputCodeToJoystickButton(inputCode);
+   JoystickButton button = InputCodeManager::inputCodeToJoystickButton(inputCode);
 
    // Don't render if button doesn't exist
    if(Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].sdlButton == Joystick::FakeRawButton)

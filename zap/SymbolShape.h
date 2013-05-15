@@ -33,6 +33,8 @@
 #include "tnlVector.h"
 #include "tnlTypes.h"
 
+#include <boost/shared_ptr.hpp>
+
 
 using namespace TNL;
 
@@ -52,6 +54,9 @@ public:
 
    S32 getWidth() const;
 };
+
+
+typedef boost::shared_ptr<SymbolShape> SymbolShapePtr;
 
 
 class SymbolRoundedRect : public SymbolShape
@@ -150,6 +155,17 @@ public:
 };
 
 
+// Symbol to be used when we don't know what symbol to use
+class SymbolUnknown : public SymbolKey
+{
+   typedef SymbolKey Parent;
+
+public:
+   SymbolUnknown();
+   virtual ~SymbolUnknown();
+};
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -163,23 +179,24 @@ private:
 
    FontContext mFontContext;
 
-   Vector<SymbolShape *> mSymbols;
+   Vector<boost::shared_ptr<SymbolShape> > mSymbols;
 
 public:
-   SymbolString(const Vector<SymbolShape *> &symbols, S32 fontSize, FontContext fontContext);   // Constructor
+   SymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, S32 fontSize, FontContext fontContext);   // Constructor
    SymbolString(S32 fontSize, FontContext fontContext);     // Constructor (can't use until you've setSymbols)
-   virtual SymbolString::~SymbolString();                   // Destructor
+   virtual ~SymbolString();                                 // Destructor
 
-   void setSymbols(const Vector<SymbolShape *> &symbols);
+   void setSymbols(const Vector<boost::shared_ptr<SymbolShape> > &symbols);
 
    S32 getWidth() const;
 
    void renderLL(S32 x, S32 y) const;
+   void renderCC(S32 x, S32 y) const;
    void renderCC(const Point &center) const;
 
-   static SymbolShape *getControlSymbol(InputCode inputCode);
+   static boost::shared_ptr<SymbolShape> getControlSymbol(InputCode inputCode);
 
-   static SymbolShape *getSymbolGear();
+   static boost::shared_ptr<SymbolShape> getSymbolGear();
 };
 
 
@@ -196,6 +213,8 @@ public:
    void clear();
    void add(const SymbolString &symbolString);
    void renderLL(S32 x, S32 y) const;
+   void renderCL(S32 x, S32 y) const;
+
 };
 
 } } // Nested namespace
