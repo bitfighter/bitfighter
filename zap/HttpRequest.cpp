@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 
 using namespace std;
@@ -209,37 +210,42 @@ string HttpRequest::buildRequest()
    // content type and data encoding for POST requests
    if(mMethod == PostMethod)
    {
-      mRequest += "\r\nContent-Type: multipart/form-data, boundary=" + HttpRequestBoundary;
-
-      string encodedData;
+      stringstream encodedData("");
       for(map<string, string>::iterator it = mData.begin(); it != mData.end(); it++)
       {
-         encodedData += "--" + HttpRequestBoundary + "\r\n";
-         encodedData += "Content-Disposition: form-data; name=\"" + (*it).first + "\"\r\n\r\n";
-         encodedData += (*it).second + "\r\n";
+         encodedData << "--" + HttpRequestBoundary + "\r\n";
+         encodedData << "Content-Disposition: form-data; name=\"" + (*it).first + "\"\r\n\r\n";
+         encodedData << (*it).second + "\r\n";
       }
 
       for(list<HttpRequestFileInfo>::iterator it = mFiles.begin(); it != mFiles.end(); it++)
       {
-         char* dataString = new char[0xFFFF];
-         dSprintf(dataString, (*it).length, (const char*) (*it).data);
-         encodedData += "--" + HttpRequestBoundary + "\r\n";
-         encodedData += "Content-Disposition: form-data; name=\"" + (*it).fieldName + "\"; filename=\"" + (*it).fileName + "\"\r\n\r\n";
-         encodedData += dataString;
-         encodedData += "\r\n";
+         stringstream fileData;
+         fileData.write((const char*) (*it).data, (*it).length);
+
+         encodedData << "--" + HttpRequestBoundary + "\r\n";
+         encodedData << "Content-Disposition: form-data; name=\"" + (*it).fieldName + "\"; filename=\"" + (*it).fileName + "\"\r\n";
+         encodedData << "Content-Type: image/png\r\n";
+         encodedData << "Content-Transfer-Encoding: binary\r\n\r\n";
+         encodedData << fileData.str();
+         encodedData << "\r\n";
       }
 
+      encodedData << "--" + HttpRequestBoundary + "\r\n";
+
       char contentLengthHeaderBuffer[1024];
-      dSprintf(contentLengthHeaderBuffer, 1024, "\r\nContent-Length: %d", encodedData.length());
+      dSprintf(contentLengthHeaderBuffer, 1024, "\r\nContent-Length: %d", encodedData.tellp());
 
       mRequest += contentLengthHeaderBuffer;
+      mRequest += "\r\nContent-Type: multipart/form-data, boundary=" + HttpRequestBoundary;
       mRequest += "\r\n\r\n";
-      mRequest += encodedData;
+      mRequest += encodedData.str();
    }
    else
    {
       mRequest += "\r\n\r\n";
    }
+   cout << mRequest << endl;
    return mRequest;
 }
 
