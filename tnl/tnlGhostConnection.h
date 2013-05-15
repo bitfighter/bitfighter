@@ -174,8 +174,8 @@ public:
    U32 getGhostingSequence() { return mGhostingSequence; }
 
    enum GhostConstants {
-      GhostIdBitSize = 10,            ///< Size, in bits, of the integer used to transmit ghost IDs
-      GhostLookupTableSizeShift = 10, ///< The size of the hash table used to lookup source NetObjects by remote ghost ID is 1 << GhostLookupTableSizeShift.
+      GhostIdBitSize = 12,            ///< Size, in bits, of the integer used to transmit ghost IDs
+      GhostLookupTableSizeShift = 12, ///< The size of the hash table used to lookup source NetObjects by remote ghost ID is 1 << GhostLookupTableSizeShift.
 
       MaxGhostCount = (1 << GhostIdBitSize),   ///< Maximum number of ghosts that can be active at any one time.
       GhostCountBitSize = GhostIdBitSize + 1,  ///< Size of the field needed to transmit the total number of ghosts.

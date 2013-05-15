@@ -33,6 +33,9 @@
 
 namespace TNL {
 
+const U8 ID_BIT_SIZE = 4;
+const U8 ID_BIT_OFFSET = 1;
+
 GhostConnection::GhostConnection()
 {
    // ghost management data:
@@ -314,14 +317,14 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
    for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0; i--)
       mGhostArray[i]->arrayIndex = i;
 
-   S32 sendSize = 1;
+   U8 sendSize = 1;
    while(maxIndex >>= 1)
       sendSize++;
 
-   if(sendSize < 3)
-      sendSize = 3;
+   if(sendSize < ID_BIT_OFFSET)
+      sendSize = ID_BIT_OFFSET;
 
-   bstream->writeInt(sendSize - 3, 3); // 0-7 3 bit number
+   bool BitSizeWritten = false;
 
    U32 count = 0;
    bool have_something_to_send = bstream->getBitPosition() >= 256;
@@ -337,6 +340,11 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       ConnectionStringTable::PacketEntry *strEntry = getCurrentWritePacketNotify()->stringList.stringTail;;
 
       bstream->writeFlag(true);
+      if(!BitSizeWritten)
+      {
+         BitSizeWritten = true;
+         bstream->writeInt(sendSize - ID_BIT_OFFSET, ID_BIT_SIZE);
+      }
       bstream->writeInt(walk->index, sendSize);
       if(!bstream->writeFlag(walk->flags & GhostInfo::KillGhost))
       {
@@ -448,17 +456,16 @@ void GhostConnection::readPacket(BitStream *bstream)
    if(!bstream->readFlag())
       return;
 
-   S32 idSize;
-   idSize = bstream->readInt( 3 );
-   idSize += 3;
+   U8 idSize = U8_MAX;
 
    // while there's an object waiting...
 
    while(bstream->readFlag())
    {
-      U32 index;
+      if(idSize == U8_MAX)
+         idSize = (U8)  bstream->readInt( ID_BIT_SIZE ) + ID_BIT_OFFSET;
       //S32 startPos = bstream->getCurPos();
-      index = (U32) bstream->readInt(idSize);
+      U32 index = bstream->readInt(idSize);
       if(bstream->readFlag()) // is this ghost being deleted?
       {
          TNLAssert(mLocalGhosts[index] != NULL, "Error, NULL ghost encountered.");
