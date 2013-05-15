@@ -262,7 +262,7 @@ void Statistics::accumulateDistance(F32 dist)
    // We'll track distance as an integer to avoid data loss due to a small float being added to a big one.
    // Not that precision is important; it isn't... but rather to avoid appearance of "going no further" once
    // you've gone a certain distance.
-   mDist += dist * DIST_MULTIPLIER;
+   mDist += U64(dist * DIST_MULTIPLIER);
 }
 
 
@@ -271,7 +271,7 @@ U32 Statistics::getDistanceTraveled()
    if(mDist / DIST_MULTIPLIER > (U64)U32_MAX)
       return U32_MAX;
    else
-      return mDist / (DIST_MULTIPLIER * DIST_RATCHETING_DOWN_FACTOR);
+      return U32(mDist / (DIST_MULTIPLIER * DIST_RATCHETING_DOWN_FACTOR));
 }
 
 
