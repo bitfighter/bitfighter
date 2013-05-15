@@ -278,7 +278,6 @@ public:
 
    void setServerPassword(const string &password);
    string getEnteredServerAccessPassword();
-   string getHashedServerAccessPassword();
 
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);

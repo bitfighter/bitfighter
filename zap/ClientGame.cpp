@@ -1541,12 +1541,6 @@ string ClientGame::getEnteredServerAccessPassword()
 }
 
 
-string ClientGame::getHashedServerAccessPassword()
-{
-   return md5.getSaltedHashFromString(mEnteredServerAccessPassword);
-}
-
-
 void ClientGame::suspendGame(bool gameIsRunning)
 {
    mGameIsRunning = gameIsRunning;

@@ -1449,6 +1449,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rVoiceChatEnable, (bool enable), (enable), N
 }
 
 
+static string serverPW;
+
 // Send password, client's name, and version info to game server
 void GameConnection::writeConnectRequest(BitStream *stream)
 {
@@ -1456,24 +1458,23 @@ void GameConnection::writeConnectRequest(BitStream *stream)
    Parent::writeConnectRequest(stream);
 
    stream->write(CONNECT_VERSION);
-
-   string serverPW;
+   
    string lastServerName = mClientGame->getRequestedServerName();
 
    // If we're local, just use the password we already know because, you know, we're the server
    if(isLocalConnection())
-      serverPW = Game::md5.getSaltedHashFromString(mSettings->getServerPassword());
+      serverPW = mSettings->getServerPassword();
 
    // If we have a saved password for this server, use that
    else if(GameSettings::getServerPassword(lastServerName) != "")
-      serverPW = Game::md5.getSaltedHashFromString(GameSettings::getServerPassword(lastServerName)); 
+      serverPW = GameSettings::getServerPassword(lastServerName); 
 
    // Otherwise, use whatever the user entered
    else 
-      serverPW = mClientGame->getHashedServerAccessPassword();
+      serverPW = mClientGame->getEnteredServerAccessPassword();
 
    // Write some info about the client... name, id, and verification status
-   stream->writeString(serverPW.c_str());
+   stream->writeString(Game::md5.getSaltedHashFromString(serverPW).c_str());
    stream->writeString(mClientInfo->getName().getString());
 
     mClientInfo->getId()->write(stream);
@@ -1774,14 +1775,13 @@ void GameConnection::onConnectionEstablished_client()
    mClientGame->setSpawnDelayed(false);
    mClientGame->setInCommanderMap(false);       // Start game in regular mode
 
-   // If we arrive here and the saved password is empty it means that the user entered a good password.  
-   // So let's save it for next time.
 
    string lastServerName = mClientGame->getRequestedServerName();
 
-   if(!isLocalConnection() && GameSettings::getServerPassword(lastServerName) == "")
-      GameSettings::saveServerPassword(lastServerName, mClientGame->getEnteredServerAccessPassword());
-
+   // ServerPW is whatever we used to connect to the server.  If the server has no password, we can send any ol' junk
+   // and it will be accepted; we have no way of knowing if the server password is blank aside from explicitly trying it.
+   if(!isLocalConnection())
+      GameSettings::saveServerPassword(lastServerName, serverPW);
 
    if(!isLocalConnection())    // Might use /connect, want to add to list after successfully connected. Does nothing while connected to master.
    {         
