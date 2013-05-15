@@ -169,6 +169,7 @@ private:
    bool mDragSelecting;
    bool mAddingVertex;
    bool mPreviewMode;
+   bool mScreenshotMode;
    LineEditor mEntryBox;
 
    boost::shared_ptr<EditorPlugin> mPluginRunner;
@@ -389,6 +390,8 @@ public:
    void clearLevelGenItems();             // Clear any previously created levelgen items
 
    void addToEditor(BfObject *obj);
+
+   void createNormalizedScreenshot(ClientGame* game);
 };
 
 

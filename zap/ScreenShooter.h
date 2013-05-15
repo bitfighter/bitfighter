@@ -64,7 +64,7 @@ public:
    ScreenShooter();
    virtual ~ScreenShooter();
 
-   static void saveScreenshot(UIManager *uiManager, GameSettings *settings);
+   static void saveScreenshot(UIManager *uiManager, GameSettings *settings, string filename = "");
 };
 
 } /* namespace Zap */

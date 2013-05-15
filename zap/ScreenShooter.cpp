@@ -118,7 +118,7 @@ void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 
 // Thanks to the good developers of naev for excellent code to base this off of.
 // Much was copied directly.
-void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings)
+void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings, string filename)
 {
    string folder = settings->getFolderManager()->screenshotDir;
 
@@ -128,12 +128,19 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings)
    string fullFilename;
    S32 ctr = 0;
 
-   while(true)    // Settle in for the long haul, boys.  This seems crazy...
+   if(filename == "")
    {
-      fullFilename = joindir(folder, "screenshot_" + itos(ctr++) + ".png");
+      while(true)    // Settle in for the long haul, boys.  This seems crazy...
+      {
+         fullFilename = joindir(folder, "screenshot_" + itos(ctr++) + ".png");
 
-      if(!fileExists(fullFilename))
-         break;
+         if(!fileExists(fullFilename))
+            break;
+      }
+   }
+   else
+   {
+      fullFilename = joindir(folder, filename + ".png");
    }
 
    // We default to resizing the opengl viewport to the standard canvas size, unless we're

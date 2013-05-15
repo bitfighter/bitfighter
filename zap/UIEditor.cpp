@@ -69,6 +69,7 @@
 #include "GeomUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
+#include "ScreenShooter.h"
 
 #include <cmath>
 
@@ -144,6 +145,9 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mAutoScrollWithMouseReady = false;
 
    mEditorAttributeMenuItemBuilder.initialize(game);
+
+   mPreviewMode = false;
+   mScreenshotMode = false;
 }
 
 
@@ -1901,9 +1905,9 @@ void EditorUserInterface::render()
     glPopMatrix(); 
 
 
-   if(mPreviewMode)
+   if(mPreviewMode && !mScreenshotMode)
       renderReferenceShip();
-   else
+   else if(!mScreenshotMode)
    {
       // The following items are hidden in preview mode:
       renderDock();
@@ -4572,6 +4576,22 @@ void EditorUserInterface::testLevelStart()
 }
 
 
+void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
+{
+   mPreviewMode = true;
+   mScreenshotMode = true;
+
+   glClear(GL_COLOR_BUFFER_BIT);
+   centerView();
+   render();
+   ScreenShooter::saveScreenshot(game->getUIManager(), game->getSettings(), "upload_screenshot");
+
+   mPreviewMode = false;
+   mScreenshotMode = false;
+}
+
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -4644,11 +4664,14 @@ static void activateTeamDefCallback(ClientGame *game, U32 unused)
 
 void uploadToDbCallback(ClientGame *game, U32 unused)
 {
+   game->getUIManager()->reactivatePrevUI();
+   game->getUIManager()->getEditorUserInterface()->createNormalizedScreenshot(game);
+
    static Thread* uploadThread;
    uploadThread = new LevelDatabaseUploadThread(game);
    uploadThread->start();
-   game->getUIManager()->reactivatePrevUI();
 }
+
 
 void quitEditorCallback(ClientGame *game, U32 unused)
 {

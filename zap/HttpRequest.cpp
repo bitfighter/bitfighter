@@ -245,7 +245,7 @@ string HttpRequest::buildRequest()
    {
       mRequest += "\r\n\r\n";
    }
-   cout << mRequest << endl;
+
    return mRequest;
 }
 

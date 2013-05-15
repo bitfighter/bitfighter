@@ -993,13 +993,13 @@ void downloadMapHandler(ClientGame *game, const Vector<string> &args)
 
 void rateMapHandler(ClientGame *game, const Vector<string> &args)
 {
-   static Thread* rateThread;
    if(args.size() < 2)
    {
       game->displayErrorMessage("You must specify a rating (\"up\" or \"down\")");
       return;
    }
 
+   static Thread* rateThread;
    rateThread = new LevelDatabaseRateThread(game, args[1]);
    rateThread->start();
 }
