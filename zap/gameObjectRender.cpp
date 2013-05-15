@@ -1082,7 +1082,8 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
 
    if(healRate > 0)
    {
-      glColor(c * 0.8f, MAX(0, 0.9f - (F32) healRate * 0.01));
+      F32 alpha = MAX(0, 0.9f - (F32) healRate * 0.01f);
+      glColor(c * 0.8f, alpha);
       renderPointVector(&vertexArray, GL_POLYGON);
    }
 

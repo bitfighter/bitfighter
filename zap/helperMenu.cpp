@@ -290,7 +290,7 @@ void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &base
 
    // RenderedSize will be -1 if the button is not defined
    if(inputMode == InputModeKeyboard)
-      drawStringfc(xPos, yPos, MENU_LEGEND_FONT_SIZE, 
+      drawStringfc((F32)xPos, (F32)yPos, (F32)MENU_LEGEND_FONT_SIZE, 
                   "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
    else
    {
