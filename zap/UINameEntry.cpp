@@ -347,31 +347,31 @@ void PasswordEntryUserInterface::render()
 ////////////////////////////////////////
 
 // Constructor
-PreGamePasswordEntryUserInterface::PreGamePasswordEntryUserInterface(ClientGame *game) : Parent(game)
+ServerAccessPasswordEntryUserInterface::ServerAccessPasswordEntryUserInterface(ClientGame *game) : Parent(game)
 {
    /* Do nothing */
 }
 
 
-PreGamePasswordEntryUserInterface::~PreGamePasswordEntryUserInterface()
+ServerAccessPasswordEntryUserInterface::~ServerAccessPasswordEntryUserInterface()
 {
    // Do nothing
 }
 
 
-void PreGamePasswordEntryUserInterface::onAccept(const char *text)
+void ServerAccessPasswordEntryUserInterface::onAccept(const char *text)
 {
    getGame()->submitServerAccessPassword(mConnectAddress, text);
 }
 
 
-void PreGamePasswordEntryUserInterface::onEscape()
+void ServerAccessPasswordEntryUserInterface::onEscape()
 {
    getUIManager()->activate(MainUI);
 }
 
 
-void PreGamePasswordEntryUserInterface::setAddressToConnectTo(const Address &address)
+void ServerAccessPasswordEntryUserInterface::setAddressToConnectTo(const Address &address)
 {
    mConnectAddress = address;
 }

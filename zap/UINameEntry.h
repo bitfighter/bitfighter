@@ -118,7 +118,7 @@ public:
 
 class GameConnection;
 
-class PreGamePasswordEntryUserInterface :  public PasswordEntryUserInterface
+class ServerAccessPasswordEntryUserInterface :  public PasswordEntryUserInterface
 {
    typedef PasswordEntryUserInterface Parent;
 
@@ -126,8 +126,8 @@ private:
    Address mConnectAddress;
 
 public:
-   explicit PreGamePasswordEntryUserInterface(ClientGame *game);    // Constructor
-   virtual ~PreGamePasswordEntryUserInterface();
+   explicit ServerAccessPasswordEntryUserInterface(ClientGame *game);    // Constructor
+   virtual ~ServerAccessPasswordEntryUserInterface();
    void onAccept(const char *text);
    void onEscape();
    void setAddressToConnectTo(const Address &addr);
@@ -153,9 +153,9 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ServerPasswordEntryUserInterface : public PreGamePasswordEntryUserInterface
+class ServerPasswordEntryUserInterface : public ServerAccessPasswordEntryUserInterface
 {
-   typedef PreGamePasswordEntryUserInterface Parent;
+   typedef ServerAccessPasswordEntryUserInterface Parent;
 
 public:
    explicit ServerPasswordEntryUserInterface(ClientGame *game);                // Constructor
