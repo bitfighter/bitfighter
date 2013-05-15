@@ -85,9 +85,9 @@ public:
    string receiveResponse();
 
 private:
-   shared_ptr<Address> mLocalAddress;
-   shared_ptr<Address> mRemoteAddress;
-   shared_ptr<Socket> mSocket;
+   boost::shared_ptr<Address> mLocalAddress;
+   boost::shared_ptr<Address> mRemoteAddress;
+   boost::shared_ptr<Socket> mSocket;
 
    map<string, string> mData;
    list<HttpRequestFileInfo> mFiles;
