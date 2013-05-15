@@ -293,7 +293,7 @@ static void renderArrow(S32 pos, bool pointingUp)
 
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
-   F32 y = 0;
+   S32 y = 0;
    if(pointingUp)    // Up arrow
       y = pos - (ARROW_HEIGHT + ARROW_MARGIN) - 7;
    else              // Down arrow
@@ -302,8 +302,9 @@ static void renderArrow(S32 pos, bool pointingUp)
    F32 vertices[] = {
          (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7,
          (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7,
-         canvasWidth / 2, y
+         canvasWidth / 2,                 (F32)y
    };
+
    for(S32 i = 1; i >= 0; i--)
    {
       // First create a black poly to blot out what's behind, then the arrow itself
