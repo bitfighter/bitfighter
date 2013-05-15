@@ -252,12 +252,19 @@ string HttpRequest::buildRequest()
 
 bool HttpRequest::sendRequest(string request)
 {
+   static const U32 bytesAtOnce = 512;
+   unsigned char sendBuffer[bytesAtOnce];
+
+   U32 bytesSent = 0, bytesTotal = request.size();
    U32 startTime = Platform::getRealMilliseconds();
+
    while(Platform::getRealMilliseconds() - startTime < mTimeout)
    {
+      memcpy(sendBuffer, request.c_str() + bytesSent, min(bytesTotal - bytesSent, bytesAtOnce));
+
       Platform::sleep(PollInterval);
       NetError sendError;
-      sendError = mSocket->send((unsigned char *) mRequest.c_str(), mRequest.size());
+      sendError = mSocket->send(sendBuffer, min(bytesTotal - bytesSent, bytesAtOnce));
 
       if(sendError == WouldBlock)
       {
@@ -267,6 +274,11 @@ bool HttpRequest::sendRequest(string request)
       else if(sendError == NoError)
       {
          // data was transmitted
+         bytesSent += bytesAtOnce;
+
+         if(bytesSent < bytesTotal)
+            continue;
+
          return true;
       }
 
