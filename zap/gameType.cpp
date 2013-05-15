@@ -220,7 +220,6 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000), mGameTimeUp
 
    mObjectsExpected = 0;
    mGame = NULL;
-   mCurrentWall = NULL;
 }
 
 
@@ -2181,10 +2180,10 @@ void GameType::addAdminGameMenuOptions(MenuUserInterface *menu)
 // Also serves to tell the client we're on a new level.
 GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, 
                                                 StringTableEntry levelCreds, S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, 
-                                                bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled),
+                                                bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId),
                                             (levelName, levelDesc, teamScoreLimit, 
                                                 levelCreds, objectCount, lx, ly, ux, uy, 
-                                                levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled))
+                                                levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled, levelDatabaseId))
 {
 #ifndef ZAP_DEDICATED
    mLevelName = levelName;
@@ -2203,6 +2202,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
 
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
    clientGame->startLoadingLevel(lx, ly, ux, uy, engineerEnabled);
+   clientGame->setLevelDatabaseId(levelDatabaseId);
 #endif
 }
 
@@ -2641,7 +2641,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
    s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, mGame->mObjectsLoaded, 
                    barrierExtents.min.x, barrierExtents.min.y, barrierExtents.max.x, barrierExtents.max.y, 
-                   mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled);
+                   mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId());
 
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
@@ -2681,30 +2681,8 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    Vector<F32> v;
    s2cAddWalls(v, 0, false);
 
-   S32 i, j, k;
-   for(i = 0; i < mWalls.size(); i++)
-   {
-      // To stay under TNL's packet size limit, we must send the vertices in groups
-      j = 0;
-      while(j < mWalls[i].verts.size())
-      {
-         v.clear();
-         for(k = 0; k < MaxGeometryFloatsPerRPC && (j + k) < mWalls[i].verts.size(); k++)
-         {
-            v.push_back(mWalls[i].verts[j + k]);
-         }
-         s2cAddWalls(v, mWalls[i].width, mWalls[i].solid);
-         j += k;
-      }
-
-      // if we sent the max number of vertices in the last vertex group, then we
-      // need to send another rpc with no vertices to "close" the wall
-      if(k == MaxGeometryFloatsPerRPC)
-      {
-         v.clear();
-         s2cAddWalls(v, mWalls[i].width, mWalls[i].solid);
-      }
-   }
+   for(S32 i = 0; i < mWalls.size(); i++)
+      s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
 
    broadcastNewRemainingTime();
    s2cSetGameOver(mGameOver);
@@ -2746,29 +2724,15 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 
 
 // Gets called multiple times as barriers are added
-GAMETYPE_RPC_S2C(GameType, s2cAddWalls, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid))
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAddWalls, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
 {
-   if(mCurrentWall == NULL)
+   // Empty wall deletes all existing walls
+   if(!verts.size())
+      mGame->deleteObjects((TestFunc)isWallType);
+   else
    {
-      // empty vertex list with no current wall means to delete all walls
-      if(verts.size() == 0)
-      {
-         mGame->deleteObjects((TestFunc)isWallType);
-         return;
-      }
-
-      // otherwise, create our new wall
-      mCurrentWall = new WallRec(width, solid);
-   }
-
-   mCurrentWall->addVertices(verts);
-
-   // if the max number of vertices were sent, we expect another RPC for this wall,
-   // otherwise it is considered "finished"
-   if(verts.size() != MaxGeometryFloatsPerRPC)
-   {
-      mCurrentWall->constructWalls(mGame);
-      mCurrentWall = NULL;
+      WallRec wall(width, solid, verts);
+      wall.constructWalls(mGame);
    }
 }
 

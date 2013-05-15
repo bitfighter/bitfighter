@@ -26,18 +26,34 @@
 #ifndef HTTPREQUEST_H_
 #define HTTPREQUEST_H_
 
+#include "gtest/gtest_prod.h"
+
+#include "boost/shared_ptr.hpp"
 #include <tnl.h>
+#include <tnlNetBase.h>
 #include <tnlUDP.h>
 #include <map>
+#include <list>
 #include <string>
 
+using boost::shared_ptr;
 using namespace std;
 using namespace TNL;
 
 namespace Zap
 {
 
-class HttpRequest {
+struct HttpRequestFileInfo
+{
+   string fileName;
+   string fieldName;
+   const U8* data;
+   U32 length;
+};
+
+class HttpRequestTest;
+class HttpRequest
+{
 public:
    static const S32 BufferSize = 4096;
    static const S32 OK = 200;
@@ -45,13 +61,15 @@ public:
    static const string GetMethod;
    static const string PostMethod;
    static const S32 PollInterval = 20;
+   static const string HttpRequestBoundary;
 
    static string urlEncodeChar(char c);
    static string urlEncode(const string& str);
 
-   HttpRequest(string url = "/", TNL::Socket* socket = NULL, TNL::Address* localAddress = NULL, TNL::Address* remoteAddress = NULL);
+   HttpRequest(string url = "/");
    virtual ~HttpRequest();
 
+   void addFile(string field, string filename, const U8* data, U32 length);
    string buildRequest();
    string getResponseBody();
    S32 getResponseCode();
@@ -60,15 +78,19 @@ public:
    void setData(const string& key, const string& value);
    void setMethod(const string&);
    void setTimeout(U32 timeout);
+   void setUrl(const string& url);
    bool send();
 
    bool sendRequest(string request);
    string receiveResponse();
 
 private:
-   TNL::Address* mLocalAddress;
-   TNL::Address* mRemoteAddress;
+   shared_ptr<Address> mLocalAddress;
+   shared_ptr<Address> mRemoteAddress;
+   shared_ptr<Socket> mSocket;
+
    map<string, string> mData;
+   list<HttpRequestFileInfo> mFiles;
    string mUrl;
    string mMethod;
    string mRequest;
@@ -76,8 +98,9 @@ private:
    string mResponseHead;
    string mResponseBody;
    S32 mResponseCode;
-   TNL::Socket* mSocket;
    U32 mTimeout;
+
+   friend class HttpRequestTest;
 };
 
 }

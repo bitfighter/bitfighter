@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 
 using namespace std;
@@ -37,24 +38,33 @@ namespace Zap
 
 const string HttpRequest::GetMethod = "GET";
 const string HttpRequest::PostMethod = "POST";
+const string HttpRequest::HttpRequestBoundary = "---REQUEST---BOUNDARY---";
 
-HttpRequest::HttpRequest(string url, TNL::Socket* socket, TNL::Address* localAddress, TNL::Address* remoteAddress)
+HttpRequest::HttpRequest(string url)
    : mUrl(url), mMethod("GET"), mResponseCode(0), mTimeout(30000)
 {
-   // hostname is anything before the first '/'
-   TNL::U32 index = mUrl.find('/');
-   string host = mUrl.substr(0, index);
-   string addressString = "ip:" + host + ":80";
-
-   mLocalAddress = localAddress ? localAddress : new Address(TCPProtocol, Address::Any, 0);
-   mRemoteAddress = remoteAddress ? remoteAddress : new Address(addressString.c_str());
-   mSocket = socket ? socket : new Socket(*mLocalAddress);
+   mLocalAddress.reset(new Address(TCPProtocol, Address::Any, 0));
+   mSocket.reset(new Socket(*mLocalAddress));
+   setUrl(url);
 }
 
 // Destructor
 HttpRequest::~HttpRequest()
 {
-   // Do nothing
+
+}
+
+
+void HttpRequest::setUrl(const string& url)
+{
+   mUrl = url;
+
+   // hostname is anything before the first '/'
+   TNL::U32 index = mUrl.find('/');
+   string host = mUrl.substr(0, index);
+   string addressString = "ip:" + host + ":80";
+
+   mRemoteAddress.reset(new Address(addressString.c_str()));
 }
 
 
@@ -194,47 +204,67 @@ string HttpRequest::buildRequest()
    TNL::U32 index = mUrl.find('/');
    string location = mUrl.substr(index, mUrl.length() - index);
 
-   // construct the request
-   mRequest = "";
-
    // request line
-   mRequest += mMethod + " " + location + " HTTP/1.0";
+   mRequest = mMethod + " " + location + " HTTP/1.0";
 
    // content type and data encoding for POST requests
    if(mMethod == PostMethod)
    {
-      mRequest += "\r\nContent-Type: application/x-www-form-urlencoded";
-
-      string encodedData;
-      map<string, string>::iterator it;
-      for(it = mData.begin(); it != mData.end(); it++)
+      stringstream encodedData("");
+      for(map<string, string>::iterator it = mData.begin(); it != mData.end(); it++)
       {
-         encodedData += urlEncode((*it).first) + "=" + urlEncode((*it).second) + "&";
+         encodedData << "--" + HttpRequestBoundary + "\r\n";
+         encodedData << "Content-Disposition: form-data; name=\"" + (*it).first + "\"\r\n\r\n";
+         encodedData << (*it).second + "\r\n";
       }
 
+      for(list<HttpRequestFileInfo>::iterator it = mFiles.begin(); it != mFiles.end(); it++)
+      {
+         stringstream fileData;
+         fileData.write((const char*) (*it).data, (*it).length);
+
+         encodedData << "--" + HttpRequestBoundary + "\r\n";
+         encodedData << "Content-Disposition: form-data; name=\"" + (*it).fieldName + "\"; filename=\"" + (*it).fileName + "\"\r\n";
+         encodedData << "Content-Type: image/png\r\n";
+         encodedData << "Content-Transfer-Encoding: binary\r\n\r\n";
+         encodedData << fileData.str();
+         encodedData << "\r\n";
+      }
+
+      encodedData << "--" + HttpRequestBoundary + "\r\n";
+
       char contentLengthHeaderBuffer[1024];
-      dSprintf(contentLengthHeaderBuffer, 1024, "\r\nContent-Length: %d", encodedData.length());
+      dSprintf(contentLengthHeaderBuffer, 1024, "\r\nContent-Length: %d", encodedData.tellp());
 
       mRequest += contentLengthHeaderBuffer;
+      mRequest += "\r\nContent-Type: multipart/form-data, boundary=" + HttpRequestBoundary;
       mRequest += "\r\n\r\n";
-      mRequest += encodedData;
+      mRequest += encodedData.str();
    }
    else
    {
       mRequest += "\r\n\r\n";
    }
+
    return mRequest;
 }
 
 
 bool HttpRequest::sendRequest(string request)
 {
+   static const U32 bytesAtOnce = 512;
+   unsigned char sendBuffer[bytesAtOnce];
+
+   U32 bytesSent = 0, bytesTotal = request.size();
    U32 startTime = Platform::getRealMilliseconds();
+
    while(Platform::getRealMilliseconds() - startTime < mTimeout)
    {
+      memcpy(sendBuffer, request.c_str() + bytesSent, min(bytesTotal - bytesSent, bytesAtOnce));
+
       Platform::sleep(PollInterval);
       NetError sendError;
-      sendError = mSocket->send((unsigned char *) mRequest.c_str(), mRequest.size());
+      sendError = mSocket->send(sendBuffer, min(bytesTotal - bytesSent, bytesAtOnce));
 
       if(sendError == WouldBlock)
       {
@@ -244,6 +274,11 @@ bool HttpRequest::sendRequest(string request)
       else if(sendError == NoError)
       {
          // data was transmitted
+         bytesSent += bytesAtOnce;
+
+         if(bytesSent < bytesTotal)
+            continue;
+
          return true;
       }
 
@@ -294,6 +329,16 @@ string HttpRequest::receiveResponse()
 void HttpRequest::setTimeout(U32 timeout)
 {
    mTimeout = timeout;
+}
+
+void HttpRequest::addFile(string field, string filename, const U8* data, U32 length)
+{
+   HttpRequestFileInfo info;
+   info.fieldName = field;
+   info.fileName = filename;
+   info.data = data;
+   info.length = length;
+   mFiles.push_back(info);
 }
 
 }

@@ -28,6 +28,7 @@
 #include "ClientGame.h"
 #include "gameType.h"
 #include "LevelDatabaseDownloadThread.h"
+#include "LevelDatabaseRateThread.h"
 #include "LevelSpecifierEnum.h"
 
 #include "UIManager.h"
@@ -42,24 +43,6 @@
 
 namespace ChatCommands
 {
-
-// Returns a pointer of string of chars, after "count" number of args
-static const char *findPointerOfArg(const char *message, S32 count)
-{
-   S32 spacecount = 0;
-   S32 cur = 0;
-   char prevchar = 0;
-
-   // Message needs to include everything including multiple spaces.  Message starts after second space.
-   while(message[cur] != '\0' && spacecount != count)
-   {
-      if(message[cur] == ' ' && prevchar != ' ')
-         spacecount++;        // Double space does not count as a seperate parameter
-      prevchar = message[cur];
-      cur++;
-   }
-   return &message[cur];
-}
 
 
 // static method
@@ -1008,5 +991,17 @@ void downloadMapHandler(ClientGame *game, const Vector<string> &args)
    downloadThread->start();
 }
 
+void rateMapHandler(ClientGame *game, const Vector<string> &args)
+{
+   if(args.size() < 2)
+   {
+      game->displayErrorMessage("You must specify a rating (\"up\" or \"down\")");
+      return;
+   }
+
+   static Thread* rateThread;
+   rateThread = new LevelDatabaseRateThread(game, args[1]);
+   rateThread->start();
+}
 
 };

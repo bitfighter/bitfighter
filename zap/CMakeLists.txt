@@ -152,6 +152,7 @@ set(CLIENT_SOURCES
 	Joystick.cpp
 	JoystickRender.cpp
 	LevelDatabaseDownloadThread.cpp
+	LevelDatabaseRateThread.cpp
 	LevelDatabaseUploadThread.cpp
 	lineEditor.cpp
 	LoadoutIndicator.cpp
@@ -323,7 +324,9 @@ option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and 
 set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/HttpRequestTest.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/LevelLoaderTest.cpp	
 	${CMAKE_SOURCE_DIR}/bitfighter_test/PolylineGeometryTest.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/ServerGameTest.cpp
 )
 
 add_executable(test EXCLUDE_FROM_ALL

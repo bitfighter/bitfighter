@@ -361,6 +361,25 @@ void parseComplexStringToMap(const string &inputString, map<string, string> &fil
 }
 
 
+// Returns a pointer of string of chars, after "count" number of args
+const char *findPointerOfArg(const char *message, S32 count)
+{
+   S32 spacecount = 0;
+   S32 cur = 0;
+   char prevchar = 0;
+
+   // Message needs to include everything including multiple spaces.  Message starts after second space.
+   while(message[cur] != '\0' && spacecount != count)
+   {
+      if(message[cur] == ' ' && prevchar != ' ')
+         spacecount++;        // Double space does not count as a seperate parameter
+      prevchar = message[cur];
+      cur++;
+   }
+   return &message[cur];
+}
+
+
 // Concatenate all strings in words into one, startingWith default to zero
 // TODO: Merge with listToString below
 string concatenate(const Vector<string> &words, S32 startingWith)

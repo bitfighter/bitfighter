@@ -957,6 +957,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
    resetLevelInfo();
 
    mObjectsLoaded = 0;
+   setLevelDatabaseId(0);
 
    string filename = folderManager->findLevelFile(levelFileName);
 

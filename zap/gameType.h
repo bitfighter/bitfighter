@@ -103,7 +103,6 @@ class GameType : public NetObject
    typedef NetObject Parent;
 
    static const S32 TeamNotSpecified = -99999;
-   static const U32 MaxGeometryFloatsPerRPC = 128;
 
 private:
    Game *mGame;
@@ -151,8 +150,6 @@ private:
    S32 mMaxRecPlayers;         // Recommended max players for this level
 
    Vector<SafePtr<MoveItem> > mCacheResendItem;  // Speed up c2sResendItemStatus
-
-   WallRec* mCurrentWall; // pointer to the current wall for s2cAddWalls
 
    void idle_client(U32 deltaT);
    void idle_server(U32 deltaT);
@@ -429,7 +426,7 @@ public:
 
    virtual void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, 
-                                     S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled));
+                                     S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId));
    TNL_DECLARE_RPC(s2cAddWalls, (Vector<F32> barrier, F32 width, bool solid));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isAuthenticated, Int<BADGE_COUNT> badges, 
