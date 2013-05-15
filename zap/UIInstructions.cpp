@@ -1036,7 +1036,6 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
    drawString(cmdCol, ypos, headerSize, "Command");
    drawString(descrCol, ypos, headerSize, "Description");
 
-   //glColor(0,1,0);
    ypos += cmdSize + cmdGap;
 
    F32 vertices[] = {
