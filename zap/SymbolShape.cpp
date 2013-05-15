@@ -193,8 +193,7 @@ static const S32 RectRadius = 3;
 static const S32 RoundedRectRadius = 5;
 
 
-// Forward declaration
-SymbolShapePtr getSymbol(InputCode inputCode);
+static SymbolShapePtr getSymbol(InputCode inputCode);
 
 static SymbolShapePtr getSymbol(Joystick::ButtonShape shape)
 {
@@ -232,7 +231,7 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape)
 
       default:
          TNLAssert(false, "Unknown button shape!");
-         return getSymbol(InputCode::KEY_UNKNOWN);
+         return getSymbol(KEY_UNKNOWN);
    }
 }
 
@@ -258,7 +257,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode)
 
       // Don't render if button doesn't exist... what is this about???
       if(buttonInfo.sdlButton == Joystick::FakeRawButton)
-         return getSymbol(InputCode::KEY_UNKNOWN);
+         return getSymbol(KEY_UNKNOWN);
 
       // This gets us the button shape index, which will tell us what to draw... something like ButtonShapeRound
       Joystick::ButtonShape buttonShape = buttonInfo.buttonShape;
@@ -271,13 +270,13 @@ static SymbolShapePtr getSymbol(InputCode inputCode)
       return symbol;
 
    }
-   else if(inputCode == InputCode::KEY_UNKNOWN)
+   else if(inputCode == KEY_UNKNOWN)
    {
       return SymbolShapePtr(new SymbolUnknown());
    }
    else
    {
-      return getSymbol(InputCode::KEY_UNKNOWN);
+      return getSymbol(KEY_UNKNOWN);
    }
 }
 
