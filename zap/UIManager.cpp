@@ -223,9 +223,10 @@ bool UIManager::isCurrentUI(UIID uiid)
    if(mCurrentInterface->getMenuID() == uiid)
       return true;
 
-   for(S32 i = 0; i < mPrevUIs.size(); i++)
-      if(mPrevUIs[i]->getMenuID() == uiid)
-         return true;
+   // Not checking for Previous UI, as the function name says.
+   //for(S32 i = 0; i < mPrevUIs.size(); i++)
+   //   if(mPrevUIs[i]->getMenuID() == uiid)
+   //      return true;
 
    return false;
 }
