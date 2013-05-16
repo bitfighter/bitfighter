@@ -267,6 +267,7 @@ public:
 
    void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &message) const;
    void displayMessage(const Color &msgColor, const char *format, ...) const;
+   void displayCmdChatMessage(const char *format, ...) const;
 
    void onConnectedToMaster();
    void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected);
@@ -296,6 +297,9 @@ public:
    const Vector<string> *getLevelRobotLines() const;
 
    Ship *getLocalPlayerShip() const;
+
+   // Settings related
+   InputMode getInputMode();
 
 };
 

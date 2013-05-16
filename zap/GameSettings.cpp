@@ -1198,6 +1198,11 @@ void GameSettings::deleteServerPassword(const string &serverName)
 }
 
 
+InputMode GameSettings::getInputMode()
+{
+   return getInputCodeManager()->getInputMode();
+}
+
 
 
 };

@@ -186,7 +186,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    yPos += legendHeight;
 
-   renderPressEscapeToCancel(grayLineCenter, yPos, baseColor, getGame()->getSettings()->getInputCodeManager()->getInputMode());
+   renderPressEscapeToCancel(grayLineCenter, yPos, baseColor, getGame()->getInputMode());
 
    FontManager::popFontContext();
 
@@ -211,9 +211,8 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
    S32 oldHeight = (MENU_FONT_SIZE + MENU_FONT_SPACING) * mOldCount;
 
    // Determine whether to show keys or joystick buttons on menu
-   GameSettings *settings   = getGame()->getSettings();
-   InputMode inputMode      = settings->getInputCodeManager()->getInputMode();
-   bool showKeys            = settings->getIniSettings()->showKeyboardKeys || inputMode == InputModeKeyboard;
+   InputMode inputMode      = getGame()->getInputMode();
+   bool showKeys            = getGame()->getSettings()->getIniSettings()->showKeyboardKeys || inputMode == InputModeKeyboard;
    bool showJoystickButtons = inputMode == InputModeJoystick;
 
    // For testing, cycle through all valid combinations of keyboard/joystick button display to make sure all render properly
@@ -356,7 +355,7 @@ bool HelperMenu::processInputCode(InputCode inputCode)
    if(inputCode == KEY_ESCAPE  || inputCode == KEY_BACKSPACE    ||
       inputCode == KEY_LEFT    || inputCode == BUTTON_DPAD_LEFT ||
       inputCode == BUTTON_BACK || 
-      (getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeKeyboard && inputCode == getActivationKey()) )
+      (getGame()->getInputMode() == InputModeKeyboard && inputCode == getActivationKey()) )
    {
       exitHelper();      
 

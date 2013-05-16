@@ -68,7 +68,7 @@ void addTimeHandler(ClientGame *game, const Vector<string> &words)
       {
          if(game->getGameType())
          {
-            game->displayMessage(Colors::cmdChatColor, "Extended game by %d minute%s", mins, (mins == 1) ? "" : "s");
+            game->displayCmdChatMessage("Extended game by %d minute%s", mins, (mins == 1) ? "" : "s");
             game->getGameType()->addTime(mins * 60 * 1000);
          }
       }
@@ -105,19 +105,19 @@ static void setVolume(ClientGame *game, VolumeType volType, const Vector<string>
    {
       case SfxVolumeType:
          ini->sfxVolLevel = (F32) vol / 10.f;
-         game->displayMessage(Colors::cmdChatColor, "SFX volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+         game->displayCmdChatMessage("SFX volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
          return;
 
       case MusicVolumeType:
          ini->setMusicVolLevel((F32) vol / 10.f);
-         game->displayMessage(Colors::cmdChatColor, "Music volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+         game->displayCmdChatMessage("Music volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
          return;
 
       case VoiceVolumeType:
       {
          F32 oldVol = ini->voiceChatVolLevel;
          ini->voiceChatVolLevel = (F32) vol / 10.f;
-         game->displayMessage(Colors::cmdChatColor, "Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+         game->displayCmdChatMessage("Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
          if((oldVol == 0) != (vol == 0) && game->getConnectionToServer())
             game->getConnectionToServer()->s2rVoiceChatEnable(vol != 0);
          return;
@@ -125,7 +125,7 @@ static void setVolume(ClientGame *game, VolumeType volType, const Vector<string>
 
       case ServerAlertVolumeType:
          game->getConnectionToServer()->c2sSetServerAlertVolume((S8) vol);
-         game->displayMessage(Colors::cmdChatColor, "Server alerts chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+         game->displayCmdChatMessage("Server alerts chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
          return;
    }
 }

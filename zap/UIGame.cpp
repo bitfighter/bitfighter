@@ -289,11 +289,7 @@ void GameUserInterface::idle(U32 timeDelta)
    
    mHelperManager.idle(timeDelta);
    mVoiceRecorder.idle(timeDelta);
-
-   // Should we move this timer over to UIGame??
-   HostMenuUserInterface *ui = getUIManager()->getHostMenuUserInterface();
-   if(ui->mLevelLoadDisplayFadeTimer.update(timeDelta))
-      ui->clearLevelLoadDisplay();
+   mLevelListDisplayer.idle(timeDelta);
 
    mLoadoutIndicator.idle(timeDelta);
 
@@ -406,11 +402,9 @@ void GameUserInterface::render()
    renderChatMsgs();                      // Render incoming chat and server msgs
    mLoadoutIndicator.render(getGame());   // Draw indicators for the various loadout items
 
-   getUIManager()->getHostMenuUserInterface()->renderProgressListItems();  // This is the list of levels loaded while hosting
-
-   renderProgressBar();          // This is the status bar that shows progress of loading this level
-
-   mVoiceRecorder.render();      // This is the indicator that someone is sending a voice msg
+   renderLevelListDisplayer();            // List of levels loaded while hosting
+   renderProgressBar();                   // Status bar that shows progress of loading this level
+   mVoiceRecorder.render();               // Indicator that someone is sending a voice msg
 
    mFpsRenderer.render(gScreenInfo.getGameCanvasWidth());     // Display running average FPS
 
@@ -484,6 +478,12 @@ void GameUserInterface::renderSuspendedMessage() const
    }
    else
       renderMessageBox("", "", readyMsg, ARRAYSIZE(readyMsg), VertOffset, DisplayStyle);
+}
+
+
+void GameUserInterface::renderLevelListDisplayer() const
+{
+   mLevelListDisplayer.render();
 }
 
 
@@ -582,6 +582,18 @@ void GameUserInterface::cancelShutdown()
 }
 
 
+void GameUserInterface::showLevelLoadDisplay(bool show, bool fade)
+{
+   mLevelListDisplayer.showLevelLoadDisplay(show, fade);
+}
+
+
+void GameUserInterface::serverLoadedLevel(const string &levelName)
+{
+   mLevelListDisplayer.addLevelName(levelName);
+}
+
+
 // Draws level-load progress bar across the bottom of the screen
 void GameUserInterface::renderProgressBar() const
 {
@@ -623,8 +635,8 @@ void GameUserInterface::renderProgressBar() const
 // Draw the reticle (i.e. the mouse cursor) if we are using keyboard/mouse
 void GameUserInterface::renderReticle() const
 {
-   bool shouldRender = getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeKeyboard &&   // Reticle in keyboard mode only
-                       getUIManager()->getCurrentUI()->getMenuID() == GameUI;                                    // And not when a menu is active
+   bool shouldRender = getGame()->getInputMode() == InputModeKeyboard &&         // Reticle in keyboard mode only
+                       getUIManager()->getCurrentUI()->getMenuID() == GameUI;    // And not when a menu is active
    if(shouldRender)
    {
       Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
@@ -1147,7 +1159,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          else if(checkInputCode(settings, InputCodeManager::BINDING_DROPITEM, inputCode))
             dropItem();
          // Check if the user is trying to use keyboard to move when in joystick mode
-         else if(settings->getInputCodeManager()->getInputMode() == InputModeJoystick)      
+         else if(settings->getInputMode() == InputModeJoystick)      
             checkForKeyboardMovementKeysInJoystickMode(inputCode);
       }
    }
@@ -1831,7 +1843,7 @@ void GameUserInterface::renderInputModeChangeAlert() const
 
    glColor(Colors::paleRed, alpha);
    drawCenteredStringf(vertMargin + 130, 20, "Input mode changed to %s", 
-                       getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeJoystick ? "Joystick" : "Keyboard");
+                       getGame()->getInputMode() == InputModeJoystick ? "Joystick" : "Keyboard");
 }
 
 
@@ -2653,7 +2665,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
       S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
 
       scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->displayMode, 
-                             0, displayAreaYPos - displayAreaHeight, gScreenInfo.getGameCanvasWidth(), displayAreaHeight);
+                             0.0f, F32(displayAreaYPos - displayAreaHeight), F32(gScreenInfo.getGameCanvasWidth()), F32(displayAreaHeight));
    }
 
    // Initialize the starting rendering position.  This represents the bottom of the message rendering area, and
@@ -2702,6 +2714,88 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
 
    // Restore scissors settings -- only used during scrolling
    scissorsManager.disable();
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+LevelListDisplayer::LevelListDisplayer()
+{
+   mLevelLoadDisplayFadeTimer.setPeriod(1000);
+   mLevelLoadDisplay = true;
+}
+
+
+void LevelListDisplayer::idle(U32 timeDelta)
+{
+   if(mLevelLoadDisplayFadeTimer.update(timeDelta))
+      clearLevelLoadDisplay();
+}
+
+
+// Shows the list of levels loaded when hosting a game
+// If we want the list to fade out, pass true for fade, or pass false to make it disapear instantly
+// fade param has no effect when show is true
+void LevelListDisplayer::showLevelLoadDisplay(bool show, bool fade)
+{
+   mLevelLoadDisplay = show;
+
+   if(!show)
+   {
+      if(fade)
+         mLevelLoadDisplayFadeTimer.reset();
+      else
+         mLevelLoadDisplayFadeTimer.clear();
+   }
+}
+
+
+void LevelListDisplayer::clearLevelLoadDisplay()
+{
+   mLevelLoadDisplayNames.clear();
+   mLevelLoadDisplayTotal = 0;
+}
+
+
+void LevelListDisplayer::render() const
+{
+   if(mLevelLoadDisplay || mLevelLoadDisplayFadeTimer.getCurrent() > 0)
+   {
+      TNLAssert(glIsEnabled(GL_BLEND), "Blending should be enabled here!");
+
+      for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
+      {
+         glColor(Colors::white, (1.4f - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.f)) * 
+                                        (mLevelLoadDisplay ? 1 : mLevelLoadDisplayFadeTimer.getFraction()) );
+         drawStringf(100, gScreenInfo.getGameCanvasHeight() - /*vertMargin*/ 0 - (mLevelLoadDisplayNames.size() - i) * 20, 
+                     15, "%s", mLevelLoadDisplayNames[i].c_str());
+      }
+   }
+}
+
+
+
+void LevelListDisplayer::addLevelName(const string &levelName)
+{
+   render();
+   addProgressListItem("Loaded level " + levelName + "...");
+}
+
+
+// Add bit of text to progress item, and manage the list
+void LevelListDisplayer::addProgressListItem(string item)
+{
+   static const S32 MaxItems = 15;
+
+   mLevelLoadDisplayNames.push_back(item);
+
+   mLevelLoadDisplayTotal++;
+
+   // Keep the list from growing too long:
+   if(mLevelLoadDisplayNames.size() > MaxItems)
+      mLevelLoadDisplayNames.erase(0);
 }
 
 

@@ -373,8 +373,20 @@ void idle()
    {
       settings = gServerGame->getSettings();
 
+      string levelName;
+
       if(gServerGame->hostingModePhase == ServerGame::LoadingLevels)
-         gServerGame->loadNextLevelInfo();
+      {
+         levelName = gServerGame->loadNextLevelInfo();
+
+#ifndef ZAP_DEDICATED
+         // Notify any client UIs that the server has loaded a level
+         if(levelName != "")
+            for(S32 i = 0; i < gClientGames.size(); i++)
+               gClientGames[i]->getUIManager()->serverLoadedLevel(levelName);
+#endif
+      }
+
       else if(gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels)
          hostGame();
    }

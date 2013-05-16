@@ -244,7 +244,7 @@ static void renderMenuInstructions(GameSettings *settings)
 
    U32 joystickIndex = Joystick::SelectedPresetIndex;
 
-   if(settings->getInputCodeManager()->getInputMode() == InputModeKeyboard)
+   if(settings->getInputMode() == InputModeKeyboard)
       drawCenteredString(y, size, "UP, DOWN to choose | ENTER to select | ESC exits menu");
    else
    {
@@ -560,7 +560,7 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode)
       if(inputCode == KEY_ESCAPE)     // Can only get here when hosting
       {
          gServerGame->hostingModePhase = ServerGame::NotHosting;
-         getUIManager()->getHostMenuUserInterface()->clearLevelLoadDisplay();
+         //getUIManager()->getHostMenuUserInterface()->clearLevelLoadDisplay();
          getGame()->closeConnectionToGameServer();
 
          delete gServerGame;
@@ -1298,13 +1298,13 @@ void InputOptionsMenuUserInterface::setupMenus()
 
    addStickOptions(&opts);
 
-   U32 inputMode = (U32)settings->getInputCodeManager()->getInputMode();   // 0 = keyboard, 1 = joystick
+   U32 inputMode = (U32)settings->getInputMode();   // 0 = keyboard, 1 = joystick
    if(inputMode == InputModeJoystick)
       inputMode += GameSettings::UseJoystickNumber;
 
    addMenuItem(new ToggleMenuItem("PRIMARY INPUT:", 
                                   opts, 
-                                  (U32)inputMode,
+                                  inputMode,
                                   true, 
                                   setInputModeCallback, 
                                   "Specify whether you want to play with your keyboard or joystick", 
@@ -1575,8 +1575,6 @@ HostMenuUserInterface::HostMenuUserInterface(ClientGame *game) : MenuUserInterfa
    setMenuID(HostingUI);
    mMenuTitle ="HOST A GAME:";
 
-   mLevelLoadDisplayFadeTimer.setPeriod(1000);
-   mLevelLoadDisplay = true;
    mEditingIndex = -1;     // Not editing at the start
 }
 
@@ -1591,9 +1589,6 @@ void HostMenuUserInterface::onActivate()
 {
    Parent::onActivate();
    setupMenus();
-
-   mLevelLoadDisplayTotal = 0;
-   clearLevelLoadDisplay();
 }
 
 
@@ -1669,66 +1664,7 @@ void HostMenuUserInterface::saveSettings()
 void HostMenuUserInterface::render()
 {
    Parent::render();
-
-   // If we're in LoadingLevels mode, show the progress panel...
-   renderProgressListItems();
-   if(gServerGame && (gServerGame->hostingModePhase == ServerGame::LoadingLevels || 
-                      gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels))
-   {
-      // There will be exactly one new entry every time we get here!
-      addProgressListItem("Loaded level " + gServerGame->getLastLevelLoadName() + "...");
-   }
-}
-
-
-// Add bit of text to progress item, and manage the list
-void HostMenuUserInterface::addProgressListItem(string item)
-{
-   mLevelLoadDisplayNames.push_back(item);
-
-   mLevelLoadDisplayTotal++;
-
-   // Keep the list from growing too long:
-   if(mLevelLoadDisplayNames.size() > 15)
-      mLevelLoadDisplayNames.erase(0);
-}
-
-
-void HostMenuUserInterface::showLevelLoadDisplay(bool show, bool fade)
-{
-   mLevelLoadDisplay = show;
-
-   if(!show)
-   {
-      if(fade)
-         mLevelLoadDisplayFadeTimer.reset();
-      else
-         mLevelLoadDisplayFadeTimer.clear();
-   }
-}
-
-
-void HostMenuUserInterface::clearLevelLoadDisplay()
-{
-   mLevelLoadDisplayNames.clear();
-   mLevelLoadDisplayTotal = 0;
-}
-
-
-void HostMenuUserInterface::renderProgressListItems()
-{
-   if(mLevelLoadDisplay || mLevelLoadDisplayFadeTimer.getCurrent() > 0)
-   {
-      TNLAssert(glIsEnabled(GL_BLEND), "Blending should be enabled here!");
-
-      for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
-      {
-         glColor(Colors::white, (1.4f - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.f)) * 
-                                        (mLevelLoadDisplay ? 1 : mLevelLoadDisplayFadeTimer.getFraction()) );
-         drawStringf(100, gScreenInfo.getGameCanvasHeight() - vertMargin - (mLevelLoadDisplayNames.size() - i) * 20, 
-                     15, "%s", mLevelLoadDisplayNames[i].c_str());
-      }
-   }
+   getUIManager()->renderLevelListDisplayer();
 }
 
 
@@ -1741,6 +1677,7 @@ GameMenuUserInterface::GameMenuUserInterface(ClientGame *game) : MenuUserInterfa
    setMenuID(GameMenuUI);
    mMenuTitle = "GAME MENU:";
 }
+
 
 // Destructor
 GameMenuUserInterface::~GameMenuUserInterface()
@@ -1776,7 +1713,6 @@ void GameMenuUserInterface::onReactivate()
 {
    mMenuSubTitle = "";
 }
-
 
 
 static void endGameCallback(ClientGame *game, U32 unused)
@@ -1821,11 +1757,7 @@ static void levelChangeOrAdminPWCallback(ClientGame *game, U32 unused)
 
 static void kickPlayerCallback(ClientGame *game, U32 unused)
 {
-   PlayerMenuUserInterface *ui = game->getUIManager()->getPlayerMenuUserInterface();
-
-   ui->action = PlayerMenuUserInterface::Kick;
-
-   game->getUIManager()->activate(ui);
+   game->getUIManager()->showPlayerActionMenu(PlayerActionKick);
 }
 
 
@@ -1835,7 +1767,7 @@ void GameMenuUserInterface::buildMenu()
    GameSettings *settings = getGame()->getSettings();
    
    // Save input mode so we can see if we need to display alert if it changes
-   lastInputMode = settings->getInputCodeManager()->getInputMode();  
+   lastInputMode = settings->getInputMode();  
 
 
    addMenuItem(new MenuItem("OPTIONS",      optionsSelectedCallback, "", KEY_O));
@@ -1890,9 +1822,10 @@ void GameMenuUserInterface::onEscape()
    getUIManager()->reactivatePrevUI();      //mGameUserInterface
 
    // Show alert about input mode changing, if needed
-   bool inputModesChanged = (lastInputMode != getGame()->getSettings()->getInputCodeManager()->getInputMode());
+   bool inputModesChanged = (lastInputMode != getGame()->getInputMode());
    getUIManager()->getGameUserInterface()->resetInputModeChangeAlertDisplayTimer(inputModesChanged ? 2800 : 0);
 }
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -1902,6 +1835,7 @@ LevelMenuUserInterface::LevelMenuUserInterface(ClientGame *game) : MenuUserInter
 {
    setMenuID(LevelTypeUI);
 }
+
 
 // Destructor
 LevelMenuUserInterface::~LevelMenuUserInterface()
@@ -2181,7 +2115,7 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
 
    GameType *gt = getGame()->getGameType();
 
-   if(action == ChangeTeam)
+   if(action == PlayerActionChangeTeam)
    {
       TeamMenuUserInterface *ui = getUIManager()->getTeamMenuUserInterface();
       ui->nameToChange = getMenuItem(index)->getPrompt();
@@ -2193,7 +2127,7 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
       gt->c2sKickPlayer(getMenuItem(index)->getPrompt());
 
 
-   if(action != ChangeTeam)                   // Unless we need to move on to the change team screen...
+   if(action != PlayerActionChangeTeam)       // Unless we need to move on to the change team screen...
       getUIManager()->reactivate(GameUI);     // ...it's back to the game!
 }
 
@@ -2226,10 +2160,13 @@ void PlayerMenuUserInterface::render()
 
    sortMenuItems();
 
-   if(action == Kick)
+   if(action == PlayerActionKick)
       mMenuTitle = "CHOOSE PLAYER TO KICK:";
-   else if(action == ChangeTeam)
+   else if(action == PlayerActionChangeTeam)
       mMenuTitle = "CHOOSE WHOSE TEAM TO CHANGE:";
+   else
+      TNLAssert(false, "Unknown action!");
+
    Parent::render();
 }
 
@@ -2324,6 +2261,7 @@ void TeamMenuUserInterface::onEscape()
 {
    getUIManager()->reactivatePrevUI();
 }
+
 
 
 };

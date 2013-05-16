@@ -276,7 +276,7 @@ void ServerGame::resetLevelLoadIndex()
 }
 
 
-// This is only used while we're building a list of levels to display on the host during loading.
+// This is only used while we're building a list of levels to display on the host during loading
 string ServerGame::getLastLevelLoadName()
 {
    if(mLevelInfos.size() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
@@ -284,7 +284,7 @@ string ServerGame::getLastLevelLoadName()
    else if(mLevelLoadIndex == 0)    // Still not sure when this would happen
       return "";
    else
-      return mLevelInfos[mLevelLoadIndex - 1].mLevelName.getString();
+      return mLevelInfos.last().mLevelName.getString();
 }
 
 
@@ -399,19 +399,26 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
 }
 
 
-void ServerGame::loadNextLevelInfo()
+// Returns name of level loaded
+string ServerGame::loadNextLevelInfo()
 {
    FolderManager *folderManager = getSettings()->getFolderManager();
+   string levelName;
 
    string levelFile = folderManager->findLevelFile(mLevelInfos[mLevelLoadIndex].mLevelFileName.getString());
 
    if(getLevelInfo(levelFile, mLevelInfos[mLevelLoadIndex]))    // Populate mLevelInfos[i] with data from levelFile
+   {
+      levelName = mLevelInfos[mLevelLoadIndex].mLevelName.getString();
       mLevelLoadIndex++;
+   }
    else
       mLevelInfos.erase(mLevelLoadIndex);
 
    if(mLevelLoadIndex == mLevelInfos.size())
       hostingModePhase = DoneLoadingLevels;
+
+   return levelName;
 }
 
 
@@ -1554,7 +1561,6 @@ Ship *ServerGame::getLocalPlayerShip() const
    TNLAssert(false, "Cannot get local player's ship from a ServerGame!");
    return NULL;
 }
-
 
 
 S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &levelInfo)

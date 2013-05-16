@@ -266,10 +266,7 @@ class HostMenuUserInterface : public MenuUserInterface
    typedef MenuUserInterface Parent;
 
 private:
-   Vector<string> mLevelLoadDisplayNames;    // For displaying levels as they're loaded in host mode
-   S32 mLevelLoadDisplayTotal;
    S32 mEditingIndex;                        // Index of item we're editing, -1 if none
-   bool mLevelLoadDisplay;
 
 public:
    explicit HostMenuUserInterface(ClientGame *game);        // Constructor
@@ -282,15 +279,8 @@ public:
    void onActivate();
    void render();
    void saveSettings();       // Save parameters in INI file
-
-   void showLevelLoadDisplay(bool show, bool fade);
-   Timer mLevelLoadDisplayFadeTimer;
-
-   void clearLevelLoadDisplay();
-
-   void addProgressListItem(string item);
-   void renderProgressListItems();
 };
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -427,11 +417,7 @@ public:
    void playerSelected(U32 index);
    void onEscape();
 
-   enum Action {
-      Kick,
-      ChangeTeam,
-      ActionCount,
-   } action;
+   PlayerAction action;
 };
 
 ////////////////////////////////////////

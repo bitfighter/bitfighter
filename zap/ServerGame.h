@@ -155,9 +155,9 @@ public:
 
    void buildBasicLevelInfoList(const Vector<string> &levelList);
    void resetLevelLoadIndex();
-   void loadNextLevelInfo();
+   string loadNextLevelInfo();
    bool getLevelInfo(const string &fullFilename, LevelInfo &levelInfo); // Populates levelInfo with data from fullFilename
-   string getLastLevelLoadName();                     // For updating the UI
+string getLastLevelLoadName();                     // For updating the UI
 
    bool loadLevel(const string &fileName);            // Load a level
    void runLevelGenScript(const string &scriptName);  // Run any levelgens specified by the level or in the INI

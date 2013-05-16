@@ -110,7 +110,7 @@ void InstructionsUserInterface::onActivate()
 
    mControls.clear();
 
-   if(getGame()->getSettings()->getInputCodeManager()->getInputMode() != InputModeKeyboard)
+   if(getGame()->getInputMode() != InputModeKeyboard)
    {
       symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_UP)));
       mControls.add(SymbolString(symbols, FontSize, HelpContext));
@@ -345,8 +345,7 @@ void InstructionsUserInterface::renderPage1()
 
    drawHorizLine(col1, 750, starty + 26);
 
-   ControlString *controls = (getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeKeyboard) ? 
-                                              controlsKeyboard : controlsGamepad;
+   ControlString *controls = (getGame()->getInputMode() == InputModeKeyboard) ? controlsKeyboard : controlsGamepad;
 
    glColor(secColor);
    drawString(col1, starty, HeaderFontSize, "Action");

@@ -98,7 +98,7 @@ void drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *
 void drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...)
 {
    makeBuffer;
-   doDrawAngleString((S32) x, (S32) y, size, angle, buffer);
+   doDrawAngleString(x, y, size, angle, buffer);
 }
 
 

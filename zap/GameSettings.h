@@ -282,6 +282,9 @@ public:
    static void saveServerPassword(const string &serverName, const string &password);
    static string getServerPassword(const string &serverName);
    static void deleteServerPassword(const string &serverName);
+
+   // InputCode related
+   InputMode getInputMode();
 };
 
 

@@ -116,6 +116,12 @@ enum UIID {
    InvalidUI        // Not a valid UI
 };
 
+enum PlayerAction {
+      PlayerActionKick,
+      PlayerActionChangeTeam,
+      ActionCount
+   };
+
 class UIManager
 {
 
@@ -247,9 +253,24 @@ public:
    // ServerPasswordUI
    void setConnectAddressAndActivatePasswordEntryUI(const Address &serverAddress);
 
-   // HostMenuUI
+   // GameUI
+   void renderLevelListDisplayer();
    void enableLevelLoadDisplay();
+   void serverLoadedLevel(const string &levelName);
    void disableLevelLoadDisplay(bool fade);
+   void gotPassOrPermsReply(const ClientGame *game, const char *message);
+
+   // MainMenuUi
+   void setMOTD(const char *motd);
+   void setNeedToUpgrade(bool needToUpgrade);
+
+   // PlayerUI
+   void showPlayerActionMenu(PlayerAction action);
+
+   // TeamMenuUI
+   void showMenuToChangeNameForPlayer(const string &playerName);
+
+
 };
 
 };

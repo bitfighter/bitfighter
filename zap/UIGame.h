@@ -105,6 +105,32 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+// For displaying levels as they're loaded in host mode
+class LevelListDisplayer
+{
+private:
+   Vector<string> mLevelLoadDisplayNames;    
+   S32 mLevelLoadDisplayTotal;
+   bool mLevelLoadDisplay;
+   Timer mLevelLoadDisplayFadeTimer;
+
+   void addProgressListItem(string item);
+
+public:
+   LevelListDisplayer();
+   void idle(U32 timeDelta);
+   void render() const;
+   void addLevelName(const string &levelName);     
+
+   void showLevelLoadDisplay(bool show, bool fade);
+   void clearLevelLoadDisplay();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class Move;
 class SoundEffect;
 class VoiceEncoder;
@@ -134,6 +160,8 @@ private:
    LevelInfoDisplayer mLevelInfoDisplayer;
    LoadoutIndicator mLoadoutIndicator;
    TimeLeftRenderer mTimeLeftRenderer;
+
+   LevelListDisplayer mLevelListDisplayer;
 
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
 
@@ -273,6 +301,8 @@ public:
 
    void setViewBoundsWhileLoading(F32 lx, F32 ly, F32 ux, F32 uy);   
 
+   void showLevelLoadDisplay(bool show, bool fade);
+   void serverLoadedLevel(const string &levelName);
 
    void render();                         // Render game screen
   
@@ -282,6 +312,7 @@ public:
    void renderLostConnectionMessage() const; 
    void renderSuspendedMessage() const;
    void renderObjectIds() const;          // Render server-side object ids on client
+   void renderLevelListDisplayer() const;
 
    bool isChatting() const;               // Returns true if player is composing a chat message
 

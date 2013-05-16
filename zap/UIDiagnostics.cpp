@@ -388,7 +388,7 @@ void DiagnosticUserInterface::render()
 
       bool joystickDetected = GameSettings::DetectedJoystickNameList.size() > 0;
 
-      if(joystickDetected && getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeKeyboard)
+      if(joystickDetected && getGame()->getInputMode() == InputModeKeyboard)
       {
          drawCenteredString(400, textsize, "Joystick not enabled, you may set input mode to Joystick in option menu.");
          joystickDetected = false;

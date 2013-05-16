@@ -45,6 +45,7 @@
 #include "UIGame.h"
 #include "UIHighScores.h"
 #include "ScreenInfo.h"
+#include "ClientGame.h"
 
 #ifdef TNL_OS_MOBILE
 #  include "SDL_opengles.h"
@@ -785,13 +786,65 @@ void UIManager::setConnectAddressAndActivatePasswordEntryUI(const Address &serve
 
 void UIManager::enableLevelLoadDisplay()
 {
-   getHostMenuUserInterface()->showLevelLoadDisplay(true, false);
+   getGameUserInterface()->showLevelLoadDisplay(true, false);
+}
+
+
+void UIManager::serverLoadedLevel(const string &levelName)
+{
+   getGameUserInterface()->serverLoadedLevel(levelName);
 }
 
 
 void UIManager::disableLevelLoadDisplay(bool fade)
 {
-   getHostMenuUserInterface()->showLevelLoadDisplay(false, fade);
+   getGameUserInterface()->showLevelLoadDisplay(false, fade);
 }
+
+
+void UIManager::renderLevelListDisplayer()
+{
+   getGameUserInterface()->renderLevelListDisplayer();
+}
+
+
+void UIManager::setMOTD(const char *motd)
+{
+   getMainMenuUserInterface()->setMOTD(motd); 
+}
+
+
+void UIManager::setNeedToUpgrade(bool needToUpgrade)
+{
+   getMainMenuUserInterface()->setNeedToUpgrade(needToUpgrade);
+}
+
+
+void UIManager::gotPassOrPermsReply(const ClientGame *game, const char *message)
+{
+   // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
+   if(getCurrentUI()->getMenuID() == GameMenuUI)
+      getGameMenuUserInterface()->mMenuSubTitle = message;
+   else
+      game->displayCmdChatMessage(message);     
+}
+
+
+void UIManager::showPlayerActionMenu(PlayerAction action)
+{
+   PlayerMenuUserInterface *ui = getPlayerMenuUserInterface();
+   ui->action = action;
+
+   activate(ui);
+};
+
+
+void UIManager::showMenuToChangeNameForPlayer(const string &playerName)
+{
+   TeamMenuUserInterface *ui = getTeamMenuUserInterface();
+   ui->nameToChange = playerName;
+   activate(ui);                  
+}
+
 
 };

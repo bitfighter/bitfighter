@@ -163,7 +163,7 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
 
    GameSettings *settings = getGame()->getSettings();
 
-   InputMode inputMode   = settings->getInputCodeManager()->getInputMode();
+   InputMode inputMode   = settings->getInputMode();
    bool showKeyboardKeys = settings->getIniSettings()->showKeyboardKeys;
 
 

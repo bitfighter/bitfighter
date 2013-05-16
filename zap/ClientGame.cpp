@@ -33,7 +33,6 @@
 #include "gameType.h"
 
 #include "UIManager.h"
-#include "UIMenus.h"
 #include "UIGame.h"
 #include "UIErrorMessage.h"
 
@@ -409,22 +408,15 @@ void ClientGame::switchTeams()
    // If there are only two teams, just switch teams and skip the rigamarole
    if(getTeamCount() == 2)
    {
-      BfObject *controlObject = getConnectionToServer()->getControlObject();
-      if(!controlObject || !isShipType(controlObject->getObjectTypeNumber()))
+      Ship *ship = getLocalPlayerShip();   // Returns player's ship, can return NULL...
+      if(!ship)
          return;
 
-      Ship *ship = static_cast<Ship *>(controlObject);   // Returns player's ship...
-
-      changeOwnTeam(1 - ship->getTeam());    // If two teams, team will either be 0 or 1, so "1 - " will toggle
+      changeOwnTeam(1 - ship->getTeam());    // If two teams, team will either be 0 or 1, so "1 - team" will toggle
       getUIManager()->reactivate(GameUI);    // Jump back into the game (this option takes place immediately)
    }
-   else
-   {
-      // Show menu to let player select a new team... future home of mUi->showTeamMenu()
-      TeamMenuUserInterface *ui = getUIManager()->getTeamMenuUserInterface();
-      ui->nameToChange = getPlayerName();
-      getUIManager()->activate(ui);                  
-   }
+   else     // More than 2 teams, need to present menu to choose
+      getUIManager()->showMenuToChangeNameForPlayer(getPlayerName());  
 }
 
 
@@ -620,9 +612,8 @@ void ClientGame::idle(U32 timeDelta)
    // Overwrite theMove if we're using joystick (also does some other essential joystick stuff)
    // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
    // kill the joystick.  The design of combining joystick input and move updating really sucks.
-   if(mSettings->getInputCodeManager()->getInputMode() == InputModeJoystick || 
-      getUIManager()->getCurrentUI() == getUIManager()->getOptionsMenuUserInterface())
-         joystickUpdateMove(this, mSettings, theMove);
+   if(getInputMode() == InputModeJoystick || getUIManager()->getCurrentUI()->getMenuID() == OptionsUI)
+      joystickUpdateMove(this, mSettings, theMove);
 
    theMove->time = timeDelta + prevTimeDelta;
 
@@ -790,10 +781,7 @@ void ClientGame::gotVoiceChat(const StringTableEntry &from, const ByteBufferPtr 
 
 void ClientGame::activatePlayerMenuUi()
 {
-   PlayerMenuUserInterface *ui = mUIManager->getPlayerMenuUserInterface();
-
-   ui->action = PlayerMenuUserInterface::ChangeTeam;
-   mUIManager->activate(ui);
+   getUIManager()->showPlayerActionMenu(PlayerActionChangeTeam);
 }
 
 
@@ -967,7 +955,7 @@ void ClientGame::connectionToServerRejected(const char *reason)
 
 void ClientGame::setMOTD(const char *motd)
 {
-   getUIManager()->getMainMenuUserInterface()->setMOTD(motd); 
+   getUIManager()->setMOTD(motd); 
 }
 
 
@@ -979,7 +967,21 @@ void ClientGame::setHighScores(const Vector<StringTableEntry> &groupNames, const
 
 void ClientGame::setNeedToUpgrade(bool needToUpgrade)
 {
-  getUIManager()->getMainMenuUserInterface()->setNeedToUpgrade(needToUpgrade);
+   getUIManager()->setNeedToUpgrade(needToUpgrade);
+}
+
+
+
+void ClientGame::displayCmdChatMessage(const char *format, ...) const
+{
+   va_list args;
+   char message[MAX_CHAT_MSG_LENGTH]; 
+
+   va_start(args, format);
+   vsnprintf(message, sizeof(message), format, args); 
+   va_end(args);
+
+   mUi->displayMessage(Colors::cmdChatColor, message);
 }
 
 
@@ -998,36 +1000,25 @@ void ClientGame::displayMessage(const Color &msgColor, const char *format, ...) 
 
 void ClientGame::gotPermissionsReply(ClientInfo::ClientRole role)
 {
-   static string ownerPassSuccessMsg = "You've been granted ownership permissions of this server";
-   static string adminPassSuccessMsg = "You've been granted permission to manage players and change levels";
-   static string levelPassSuccessMsg = "You've been granted permission to change levels";
+   const char *message;
 
-   string *message;
    if(role == ClientInfo::RoleOwner)
-      message = &ownerPassSuccessMsg;
+      message = "You've been granted ownership permissions of this server";
    else if(role == ClientInfo::RoleAdmin)
-      message = &adminPassSuccessMsg;
+      message = "You've been granted permission to manage players and change levels";
    else if(role == ClientInfo::RoleLevelChanger)
-      message = &levelPassSuccessMsg;
+      message = "You've been granted permission to change levels";
 
-   // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
-   if(getUIManager()->getCurrentUI()->getMenuID() == GameMenuUI)
-      getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = *message;
-   else
-      displayMessage(Colors::cmdChatColor, (*message).c_str());      // ChatCmd
+   // Notify the UI that the message has arrived
+   getUIManager()->gotPassOrPermsReply(this, message);
 }
 
 
 void ClientGame::gotWrongPassword()
 {
-   static const char *levelPassFailureMsg = "Incorrect password";
-
-   // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
-   if(getUIManager()->getCurrentUI()->getMenuID() == GameMenuUI)
-      getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = levelPassFailureMsg;
-   else
-      displayMessage(Colors::cmdChatColor, levelPassFailureMsg);     // ChatCmd
+   getUIManager()->gotPassOrPermsReply(this, "Incorrect password");
 }
+
 
 void ClientGame::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken)
 {
@@ -1852,6 +1843,7 @@ const Vector<string> *ClientGame::getLevelRobotLines() const
 }
 
 
+// Note: Can return NULL!
 Ship *ClientGame::getLocalPlayerShip() const
 {
    if(!mConnectionToServer)      // Needed if we get here while joining a server in cmdrs map mode
@@ -1862,11 +1854,9 @@ Ship *ClientGame::getLocalPlayerShip() const
    if(!object)
       return NULL;
 
-   // Completely unneeded at this point -- planyes can only control a ship!
-   if(object->getObjectTypeNumber() != PlayerShipTypeNumber)
-      return NULL;
+   TNLAssert(object->getObjectTypeNumber() != PlayerShipTypeNumber, "What is this dude controlling??");
 
-  return static_cast<Ship *>(object);
+   return static_cast<Ship *>(object);
 }
 
 
@@ -1887,6 +1877,11 @@ void ClientGame::changeOwnTeam(S32 teamIndex) const
    getGameType()->c2sChangeTeams(teamIndex);
 }
 
+
+InputMode ClientGame::getInputMode()
+{
+   return mSettings->getInputMode();
+}
 
 };
 
