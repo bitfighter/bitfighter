@@ -251,7 +251,7 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
    }
    else if(style == 2)
    {
-      renderFancyBox(boxTop, boxHeight, inset, 15, Colors::blue, 0.70f);
+      renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::black, 0.70f, Colors::blue);
    }
 
    // Draw title, message, and footer
@@ -265,28 +265,32 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
 
 
 // This renders a semi-transparent box with two corners angled.  A fancy UI element.
-void UserInterface::renderFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, Color borderColor, F32 alpha)
+void UserInterface::renderFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor)
 {
-   const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
+   Point p[] = {
+         Point(xLeft, yTop),                                // Top
+         Point(xRight - cornerInset, yTop),
+         Point(xRight, yTop + cornerInset),    // Edge
+         Point(xRight, yBottom),      // Bottom
+         Point(xLeft + cornerInset, yBottom),
+         Point(xLeft, yBottom - cornerInset)     // Edge
+   };
 
-         Point p[] = {
-               Point(inset, boxTop),                                // Top
-               Point((canvasWidth - inset) - cornerInset, boxTop),
-               Point(canvasWidth - inset, boxTop + cornerInset),    // Edge
-               Point(canvasWidth - inset, boxTop + boxHeight),      // Bottom
-               Point(inset + cornerInset, boxTop + boxHeight),
-               Point(inset, (boxTop + boxHeight) - cornerInset)     // Edge
-         };
+   Vector<Point> points(p, ARRAYSIZE(p));
 
-         Vector<Point> points(p, ARRAYSIZE(p));
+   // Fill
+   glColor(fillColor, fillAlpha);
+   renderPointVector(&points, GL_POLYGON);
 
-         // Fill
-         glColor(Colors::black, alpha);
-         renderPointVector(&points, GL_POLYGON);
+   // Border
+   glColor(borderColor, fillAlpha);
+   renderPointVector(&points, GL_LINE_LOOP);
+}
 
-         // Border
-         glColor(borderColor, alpha);
-         renderPointVector(&points, GL_LINE_LOOP);
+
+void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor)
+{
+   renderFancyBox(inset, boxTop, gScreenInfo.getGameCanvasWidth() - inset, boxTop + boxHeight, cornerInset, fillColor, fillAlpha, borderColor);
 }
 
 

@@ -1552,9 +1552,9 @@ void EditorUserInterface::renderDock()
 
    S32 dockHeight = getDockHeight();
 
-   drawFilledRect(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin, 
-                  canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight, 
-                  Colors::red30, .7f, (mouseOnDock() ? Colors::yellow : Colors::white));
+   renderFancyBox(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin - dockHeight,
+                  canvasWidth - horizMargin,              canvasHeight - vertMargin,
+                  8, Colors::red30, .7f, (mouseOnDock() ? Colors::yellow : Colors::white));
 }
 
 
@@ -1574,7 +1574,8 @@ void EditorUserInterface::renderInfoPanel()
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-   drawFilledRect(PanelLeft, PanelBottom, PanelRight, PanelTop, Colors::richGreen, .7f, Colors::white);
+   renderFancyBox(PanelLeft, PanelTop, PanelRight, PanelBottom, 6, Colors::richGreen, .7f, Colors::white);
+
 
    // Draw coordinates on panel -- if we're moving an item, show the coords of the snap vertex, otherwise show the coords of the
    // snapped mouse position
@@ -2091,7 +2092,7 @@ void EditorUserInterface::renderSaveMessage()
 
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-      renderFancyBox(515, 40, 200, 10, Colors::blue, 0.80f * alpha);
+      renderCenteredFancyBox(515, 40, 200, 10, Colors::black, 0.80f * alpha, Colors::blue);
 
       glColor(mSaveMsgColor, alpha);
       drawCenteredString(520, 25, mSaveMsg.c_str());
