@@ -251,7 +251,7 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
    }
    else if(style == 2)
    {
-      renderFancyBox(boxTop, boxHeight, inset, Colors::blue, 0.70f);
+      renderFancyBox(boxTop, boxHeight, inset, 15, Colors::blue, 0.70f);
    }
 
    // Draw title, message, and footer
@@ -265,18 +265,17 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
 
 
 // This renders a semi-transparent box with two corners angled.  A fancy UI element.
-void UserInterface::renderFancyBox(S32 boxTop, S32 boxHeight, S32 inset, Color borderColor, F32 alpha)
+void UserInterface::renderFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, Color borderColor, F32 alpha)
 {
    const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
 
-   const S32 CORNER_SIZE = 15;
          Point p[] = {
                Point(inset, boxTop),                                // Top
-               Point((canvasWidth - inset) - CORNER_SIZE, boxTop),
-               Point(canvasWidth - inset, boxTop + CORNER_SIZE),    // Edge
+               Point((canvasWidth - inset) - cornerInset, boxTop),
+               Point(canvasWidth - inset, boxTop + cornerInset),    // Edge
                Point(canvasWidth - inset, boxTop + boxHeight),      // Bottom
-               Point(inset + CORNER_SIZE, boxTop + boxHeight),
-               Point(inset, (boxTop + boxHeight) - CORNER_SIZE)     // Edge
+               Point(inset + cornerInset, boxTop + boxHeight),
+               Point(inset, (boxTop + boxHeight) - cornerInset)     // Edge
          };
 
          Vector<Point> points(p, ARRAYSIZE(p));

@@ -2091,8 +2091,10 @@ void EditorUserInterface::renderSaveMessage()
 
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
+      renderFancyBox(515, 40, 200, 10, Colors::blue, 0.80f * alpha);
+
       glColor(mSaveMsgColor, alpha);
-      drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - 65, 25, mSaveMsg.c_str());
+      drawCenteredString(520, 25, mSaveMsg.c_str());
    }
 }
 
@@ -4398,7 +4400,7 @@ void EditorUserInterface::idle(U32 timeDelta)
 void EditorUserInterface::setSaveMessage(string msg, bool savedOK)
 {
    mSaveMsg = msg;
-   mSaveMsgTimer.reset(4000, 4000);    // Display for 4 seconds
+   mSaveMsgTimer.reset(5000, 5000);    // Display for 5 seconds
    mSaveMsgColor = (savedOK ? Colors::green : Colors::red);
 }
 

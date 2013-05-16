@@ -135,7 +135,7 @@ public:
    void renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0, S32 style = 1) const;
    void renderUnboxedMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0) const;
 
-   static void renderFancyBox(S32 boxTop, S32 boxHeight, S32 inset, Color borderColor, F32 alpha);
+   static void renderFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, Color borderColor, F32 alpha);
 
    static void dimUnderlyingUI(F32 amount = 0.75f);
 
