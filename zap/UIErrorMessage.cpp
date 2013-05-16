@@ -51,7 +51,7 @@ void AbstractMessageUserInterface::onActivate()
 void AbstractMessageUserInterface::setMessage(S32 id, string message)
 {
    TNLAssert(id >= 1 && id <= MAX_LINES, "Invalid line id!");
-   mMessage[id-1] = message;
+   mMessage[id - 1] = message;
 }
 
 

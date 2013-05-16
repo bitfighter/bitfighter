@@ -34,7 +34,6 @@
 
 #include "UIManager.h"
 #include "UIGame.h"
-#include "UIErrorMessage.h"
 
 #include "EditorTeam.h"
 
@@ -936,18 +935,20 @@ void ClientGame::connectionToServerRejected(const char *reason)
 
    uiManager->activate(MainUI);
 
-   ErrorMessageUserInterface *ui = static_cast<ErrorMessageUserInterface *>(uiManager->getUI(ErrorMessageUI));
+   const char *title = "Connection Terminated";
+   const char *instr = "";
+   
+   Vector<string> messages;
 
-   ui->reset();
-   ui->setTitle("Connection Terminated");
-   ui->setMessage(2, "Server did not respond or rejected");
-   ui->setMessage(3, "when trying to punch through firewall");
-   ui->setMessage(4, "Unable to join game.  Please try a different server.");
+   messages.push_back("");
+   messages.push_back("Error when trying to punch through firewall.");
+   messages.push_back("Server did not respond or rejected you.");
+   messages.push_back("Unable to join game.  Please try a different server.");
 
    if(reason[0])
-      ui->setMessage(5, string(reason));
+      messages.push_back(reason);
 
-   uiManager->activate(ErrorMessageUI);
+   getUIManager()->displayMessageBox(title, instr, messages);
 
    closeConnectionToGameServer();
 }
@@ -1288,25 +1289,18 @@ bool ClientGame::checkName(const string &name)
 
 
 void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, 
-                                   const Vector<StringTableEntry> &message) const
+                                   const Vector<StringTableEntry> &messages) const
 {
-   ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
-
-   ui->reset();
-   ui->setTitle(title.getString());
-   ui->setInstr(instr.getString());
-
-   for(S32 i = 0; i < message.size(); i++)
-      ui->setMessage(i+1, message[i].getString());      // UIErrorMsgInterface ==> first line = 1
-
-   getUIManager()->activate(ui);
+   getUIManager()->displayMessageBox(title, instr, messages);
 }
 
 
 // Established connection is terminated.  Compare to onConnectTerminate() below.
 void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected)
 {
-   clearClientList();  // this can fix all cases of extra names appearing on score board when connecting to server after getting disconnected other then "SelfDisconnect"
+   // Calling clearClientList can fix cases of extra names appearing on score board when connecting to server 
+   // after getting disconnected for reasons other then "SelfDisconnect"
+   clearClientList();  
 
    if(getUIManager()->cameFrom(EditorUI))
      getUIManager()->reactivate(EditorUI);
@@ -1316,66 +1310,78 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
    unsuspendGame();
 
    // Display a context-appropriate error message
-   ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+   const char *title = "Connection Terminated";
+   const char *instr = "";
 
-   ui->reset();
-   ui->setTitle("Connection Terminated");
+   Vector<string> messages;
 
    switch(reason)
    {
       case NetConnection::ReasonTimedOut:
-         ui->setMessage(2, "Your connection timed out.  Please try again later.");
+         messages.push_back("");
+         messages.push_back("Your connection timed out.  Please try again later.");
 
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
       case NetConnection::ReasonIdle:
-         ui->setMessage(2, "The server kicked you because you were idle too long.");
-         ui->setMessage(4, "Feel free to rejoin the game when you are ready.");
+         messages.push_back("");
+         messages.push_back("The server kicked you because you were idle too long.");
+         messages.push_back("");
+         messages.push_back("Feel free to rejoin the game when you are ready.");
 
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
       case NetConnection::ReasonPuzzle:
-         ui->setMessage(2, "Unable to connect to the server.  Received message:");
-         ui->setMessage(3, "Invalid puzzle solution");
-         ui->setMessage(5, "Please try a different game server, or try again later.");
+         messages.push_back("");
+         messages.push_back("Unable to connect to the server.  Received message:");
+         messages.push_back("Invalid puzzle solution");
+         messages.push_back("");
+         messages.push_back("Please try a different game server, or try again later.");
 
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
       case NetConnection::ReasonKickedByAdmin:
-         ui->setMessage(2, "You were kicked off the server by an admin.");
-         ui->setMessage(4, "You can try another server, host your own,");
-         ui->setMessage(5, "or try the server that kicked you again later.");
+         messages.push_back("");
+         messages.push_back("You were kicked off the server by an admin.");
+         messages.push_back("");
+         messages.push_back("You can try another server, host your own,");
+         messages.push_back("or try the server that kicked you again later.");
 
          getUIManager()->activate(NameEntryUI);
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
       case NetConnection::ReasonBanned:
-         ui->setMessage(2, "You are banned from playing on this server");
-         ui->setMessage(3, "Contact the server administrator if you think");
-         ui->setMessage(4, "this was in error.");
+         messages.push_back("");
+         messages.push_back("You are banned from playing on this server");
+         messages.push_back("Contact the server administrator if you think");
+         messages.push_back("this was in error.");
 
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
       case NetConnection::ReasonFloodControl:
-         ui->setMessage(2, "Your connection was rejected by the server");
-         ui->setMessage(3, "because you sent too many connection requests.");
-         ui->setMessage(5, "Please try a different game server, or try again later.");
+         messages.push_back("");
+         messages.push_back("Your connection was rejected by the server");
+         messages.push_back("because you sent too many connection requests.");
+         messages.push_back("");
+         messages.push_back("Please try a different game server, or try again later.");
 
          getUIManager()->activate(NameEntryUI);
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
       case NetConnection::ReasonShutdown:
-         ui->setMessage(2, "Remote server shut down.");
-         ui->setMessage(4, "Please try a different server,");
-         ui->setMessage(5, "or host a game of your own!");
+         messages.push_back("");
+         messages.push_back("Remote server shut down.");
+         messages.push_back("");
+         messages.push_back("Please try a different server,");
+         messages.push_back("or host a game of your own!");
 
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
       case NetConnection::ReasonNeedServerPassword:
@@ -1390,15 +1396,13 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
       }
 
       case NetConnection::ReasonServerFull:
-         // Display a context-appropriate error message
-         ui->reset();
-         ui->setTitle("Connection Terminated");
+         messages.push_back("");
+         messages.push_back("Could not connect to server");
+         messages.push_back("because server is full.");
+         messages.push_back("");
+         messages.push_back("Please try a different server, or try again later.");
 
-         ui->setMessage(2, "Could not connect to server");
-         ui->setMessage(3, "because server is full.");
-         ui->setMessage(5, "Please try a different server, or try again later.");
-
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox("Connection Terminated", instr, messages);
          break;
 
       case NetConnection::ReasonSelfDisconnect:
@@ -1409,16 +1413,17 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
       default:
          if(reasonStr[0])
          {
-            ui->setMessage(1, "Disconnected for this reason:");
-            ui->setMessage(2, string(reasonStr));
+            messages.push_back("Disconnected for this reason:");
+            messages.push_back(reasonStr);
          }
          else
          {
-            ui->setMessage(1, "Disconnected for unknown reason:");
-            ui->setMessage(3, "Error number: " + itos(reason));
+            messages.push_back("Disconnected for unknown reason:");
+            messages.push_back("");
+            messages.push_back("Error number: " + itos(reason));
          }
 
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
          break;
    }
 }
@@ -1426,49 +1431,58 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
 
 void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected)
 {
-   ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+   const char *title = "Connection Terminated";
+   const char *instr = "";
 
-   ui->reset();
+   Vector<string> messages;
 
    switch(reason)
    {
       case NetConnection::ReasonDuplicateId:
-         ui->setMessage(2, "Your connection was rejected by the server");
-         ui->setMessage(3, "because you sent a duplicate player id. Player ids are");
-         ui->setMessage(4, "generated randomly, and collisions are extremely rare.");
-         ui->setMessage(5, "Please restart Bitfighter and try again.  Statistically");
-         ui->setMessage(6, "speaking, you should never see this message again!");
-         getUIManager()->activate(ui);
+         messages.push_back("");
+         messages.push_back("Your connection was rejected by the server");
+         messages.push_back("because you sent a duplicate player id. Player ids are");
+         messages.push_back("generated randomly, and collisions are extremely rare.");
+         messages.push_back("Please restart Bitfighter and try again.  Statistically");
+         messages.push_back("speaking, you should never see this message again!");
+
+         getUIManager()->displayMessageBox(title, instr, messages);
 
          getClientInfo()->getId()->getRandom();        // Get a different ID and retry to successfully connect to master
          break;
 
       case NetConnection::ReasonBadLogin:
-         ui->setMessage(2, "Unable to log you in with the username/password you");
-         ui->setMessage(3, "provided. If you have an account, please verify your");
-         ui->setMessage(4, "password. Otherwise, you chose a reserved name; please");
-         ui->setMessage(5, "try another.");
-         ui->setMessage(7, "Please check your credentials and try again.");
+         messages.push_back("");
+         messages.push_back("Unable to log you in with the username/password you");
+         messages.push_back("provided. If you have an account, please verify your");
+         messages.push_back("password. Otherwise, you chose a reserved name; please");
+         messages.push_back("try another.");
+         messages.push_back("");
+         messages.push_back("Please check your credentials and try again.");
 
          getUIManager()->activate(NameEntryUI);
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
       case NetConnection::ReasonInvalidUsername:
-         ui->setMessage(2, "Your connection was rejected by the server because");
-         ui->setMessage(3, "you sent an username that contained illegal characters.");
-         ui->setMessage(5, "Please try a different name.");
+         messages.push_back("");
+         messages.push_back("Your connection was rejected by the server because");
+         messages.push_back("you sent an username that contained illegal characters.");
+         messages.push_back("");
+         messages.push_back("Please try a different name.");
 
          getUIManager()->activate(NameEntryUI);
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
       case NetConnection::ReasonError:
-         ui->setMessage(2, "Unable to connect to the server.  Received message:");
-         ui->setMessage(3, string(reasonStr));
-         ui->setMessage(5, "Please try a different game server, or try again later.");
+         messages.push_back("");
+         messages.push_back("Unable to connect to the server.  Received message:");
+         messages.push_back(string(reasonStr));
+         messages.push_back("");
+         messages.push_back("Please try a different game server, or try again later.");
 
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
       case NetConnection::ReasonTimedOut:
@@ -1478,37 +1492,42 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          if(wasFullyConnected)
             break;
 
-         ui->setMessage(2, "My attempt to connect to the Master Server failed because");
-         ui->setMessage(3, "the server did not respond.  Either the server is down,");
-         ui->setMessage(4, "or, more likely, you are either not connected to the internet");
-         ui->setMessage(5, "or your firewall is blocking the connection.");
-         ui->setMessage(7, "I will continue to try connecting, but you will not see this");
-         ui->setMessage(8, "message again until you successfully connect or restart Bitfighter.");
+         messages.push_back("");
+         messages.push_back("My attempt to connect to the Master Server failed because");
+         messages.push_back("the server did not respond.  Either the server is down,");
+         messages.push_back("or, more likely, you are either not connected to the internet");
+         messages.push_back("or your firewall is blocking the connection.");
+         messages.push_back("");
+         messages.push_back("I will continue to try connecting, but you will not see this");
+         messages.push_back("message again until you successfully connect or restart Bitfighter.");
 
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
 
          mSeenTimeOutMessage = true;
          break;
 
       case NetConnection::ReasonSelfDisconnect:
-         // no errors when client disconnect (when quitting bitfighter)
+         // No errors when client disconnect (this happens when quitting bitfighter normally)
       case NetConnection::ReasonAnonymous:
          // Anonymous connections are disconnected quickly, usually after retrieving some data
          break;
 
       default:  // Not handled
-         ui->setMessage(2, "Unable to connect to the master server, with error code:");
+         messages.push_back("");
+         messages.push_back("Unable to connect to the master server, with error code:");
 
          if(reasonStr[0])
-            ui->setMessage(3, itos(reason) + " " + reasonStr);
+            messages.push_back(itos(reason) + " " + reasonStr);
          else
-            ui->setMessage(3, "MasterServer Error #" + itos(reason));
+            messages.push_back("MasterServer Error #" + itos(reason));
 
-         ui->setMessage(5, "Check your Internet Connection and firewall settings.");
-         ui->setMessage(7, "Please report this error code to the");
-         ui->setMessage(8, "Bitfighter developers.");
+         messages.push_back("");
+         messages.push_back("Check your Internet Connection and firewall settings.");
+         messages.push_back("");
+         messages.push_back("Please report this error code to the");
+         messages.push_back("Bitfighter developers.");
 
-         getUIManager()->activate(ui);
+         getUIManager()->displayMessageBox(title, instr, messages);
          break;
    }
 }
@@ -1854,7 +1873,7 @@ Ship *ClientGame::getLocalPlayerShip() const
    if(!object)
       return NULL;
 
-   TNLAssert(object->getObjectTypeNumber() != PlayerShipTypeNumber, "What is this dude controlling??");
+   TNLAssert(object->getObjectTypeNumber() == PlayerShipTypeNumber, "What is this dude controlling??");
 
    return static_cast<Ship *>(object);
 }

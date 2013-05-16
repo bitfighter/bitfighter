@@ -270,6 +270,10 @@ public:
    // TeamMenuUI
    void showMenuToChangeNameForPlayer(const string &playerName);
 
+   // ErrorMessageUI
+   void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &messages);
+   void displayMessageBox(const char *title, const char *instr, const Vector<string> &messages);
+
 
 };
 

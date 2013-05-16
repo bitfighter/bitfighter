@@ -847,4 +847,39 @@ void UIManager::showMenuToChangeNameForPlayer(const string &playerName)
 }
 
 
+void UIManager::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, 
+                                  const Vector<StringTableEntry> &messages)
+{
+   ErrorMessageUserInterface *ui = getErrorMsgUserInterface();
+
+   ui->reset();
+   ui->setTitle(title.getString());
+   ui->setInstr(instr.getString());
+
+   for(S32 i = 0; i < messages.size(); i++)
+      ui->setMessage(i + 1, messages[i].getString());      // UIErrorMsgInterface ==> first line = 1
+
+   activate(ui);
+}
+
+
+void UIManager::displayMessageBox(const char *title, const char *instr, const Vector<string> &messages)
+{
+   ErrorMessageUserInterface *ui = getErrorMsgUserInterface();
+
+   ui->reset();
+   ui->setTitle(title);
+   ui->setInstr(instr);
+
+   for(S32 i = 0; i < messages.size(); i++)
+      ui->setMessage(i + 1, messages[i]);      // UIErrorMsgInterface ==> first line = 1
+
+   activate(ui);
+}
+
+
+
+
+
+
 };
