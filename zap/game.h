@@ -335,7 +335,7 @@ public:
    Point computePlayerVisArea(Ship *ship) const;
 
    U32 getTimeUnconnectedToMaster();
-   void onConnectedToMaster();
+   virtual void onConnectedToMaster();
 
    void resetLevelInfo();
 
