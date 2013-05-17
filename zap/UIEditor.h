@@ -119,6 +119,9 @@ private:
    bool mJustInsertedVertex;
    bool mRedoingAnUndo;
 
+   Vector<string> mRobotLines;         // A list of robot lines read from a level file when loading from the editor
+
+
    void clearSnapEnvironment();
 
    static const U32 UNDO_STATES = 128;
@@ -301,12 +304,14 @@ public:
 
    void addTeam(EditorTeam *team);
    void addTeam(EditorTeam *team, S32 index);
-
    void removeTeam(S32 teamId);
    void clearTeams();
 
    bool getNeedToSave() const;
    void setNeedToSave(bool needToSave);
+
+   void clearRobotLines();
+   void addRobotLine(const string &robotLine);
 
    bool mDraggingObjects;     // Should be private
 

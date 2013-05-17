@@ -768,7 +768,7 @@ void Ship::findRepairTargets()
    // ships (client)
 
    Point pos = getRenderPos();
-   Rect r(pos, 2 * (RepairRadius + CollisionRadius));
+   Rect r(pos, (RepairRadius + CollisionRadius));
    
    foundObjects.clear();
    findObjects((TestFunc)isWithHealthType, foundObjects, r);   // All isWithHealthType objects are items
@@ -1214,7 +1214,7 @@ void Ship::onAddedToGame(Game *game)
    if(isClient())       // Client
    {
       if(isLocalPlayerShip(game))
-         static_cast<ClientGame *>(game)->setSpawnDelayed(false);    // Server tells us we're undelayed by spawning our ship
+         static_cast<ClientGame *>(game)->unsuspendGame();    // Server tells us we're undelayed by spawning our ship
    }
 
    else                 // Server

@@ -1513,7 +1513,7 @@ void Seeker::acquireTarget()
    // Used for wall detection
    static Vector<DatabaseObject *> localFillVector;
 
-   Rect queryRect(getPos(), TargetAcquisitionRadius);
+   Rect queryRect(getPos(), TargetAcquisitionRadius / 2);      // <=== RAPTOR: should this be / 2 or not? (I added it, need to discuss - Wat)
    fillVector.clear();
    findObjects(isSeekerTarget, fillVector, queryRect);
 

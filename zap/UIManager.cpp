@@ -47,6 +47,8 @@
 #include "ScreenInfo.h"
 #include "ClientGame.h"
 
+#include "SoundSystem.h"
+
 #ifdef TNL_OS_MOBILE
 #  include "SDL_opengles.h"
 #else
@@ -61,6 +63,8 @@ namespace Zap
 UIManager::UIManager(ClientGame *clientGame) 
 { 
    mGame = clientGame; 
+   mSettings = clientGame->getSettings();
+
    mCurrentInterface = NULL;
 
    mLastUI = NULL;
@@ -85,7 +89,6 @@ UIManager::UIManager(ClientGame *clientGame)
    mInstructionsUserInterface = NULL;
    mKeyDefMenuUserInterface = NULL;
    mLevelChangeOrAdminPasswordEntryUserInterface = NULL;
-   mLevelMenuSelectUserInterface = NULL;
    mLevelMenuUserInterface = NULL;
    mLevelNameEntryUserInterface = NULL;
    mMessageUserInterface = NULL;
@@ -124,7 +127,6 @@ UIManager::~UIManager()
    delete mInstructionsUserInterface;
    delete mKeyDefMenuUserInterface;
    delete mLevelChangeOrAdminPasswordEntryUserInterface;
-   delete mLevelMenuSelectUserInterface;
    delete mLevelMenuUserInterface;
    delete mLevelNameEntryUserInterface;
    delete mMessageUserInterface;
@@ -223,9 +225,10 @@ bool UIManager::isCurrentUI(UIID uiid)
    if(mCurrentInterface->getMenuID() == uiid)
       return true;
 
-   for(S32 i = 0; i < mPrevUIs.size(); i++)
-      if(mPrevUIs[i]->getMenuID() == uiid)
-         return true;
+   // Not checking for Previous UI, as the function name says.
+   //for(S32 i = 0; i < mPrevUIs.size(); i++)
+   //   if(mPrevUIs[i]->getMenuID() == uiid)
+   //      return true;
 
    return false;
 }
@@ -363,11 +366,10 @@ LevelMenuUserInterface *UIManager::getLevelMenuUserInterface()
 
 LevelMenuSelectUserInterface *UIManager::getLevelMenuSelectUserInterface()
 {
+   static LevelMenuSelectUserInterface ui(mGame);
    // Lazily initialize
-   if(!mLevelMenuSelectUserInterface)
-      mLevelMenuSelectUserInterface = new LevelMenuSelectUserInterface(mGame);
 
-   return mLevelMenuSelectUserInterface;
+   return &ui;
 }
 
 
@@ -668,6 +670,16 @@ void UIManager::saveUI(UserInterface *ui)
 }
 
 
+// Game connection is terminated -- reactivate the appropriate UI
+void UIManager::onConnectionTerminated()
+{
+   if(cameFrom(EditorUI))
+     reactivate(EditorUI);
+   else
+     reactivate(MainUI);
+}
+
+
 //extern ScreenInfo gScreenInfo;
 
 void UIManager::renderCurrent()
@@ -708,6 +720,39 @@ void UIManager::renderCurrent()
 void UIManager::idle(U32 timeDelta)
 {
    mMenuTransitionTimer.update(timeDelta);
+   processAudio(timeDelta);
+}
+
+
+// Select music based on where we are
+MusicLocation UIManager::selectMusic()
+{
+   UIID currentUI = getCurrentUI()->getMenuID();
+
+   // In game (or one of its submenus)...
+   if(currentUI == GameUI || cameFrom(GameUI))
+      return MusicLocationGame;
+
+   // In editor...
+   if(currentUI == EditorUI || cameFrom(EditorUI))
+      return MusicLocationEditor;
+
+   // In credits...
+   if(currentUI == CreditsUI || cameFrom(CreditsUI))
+      return MusicLocationCredits;
+
+   // Otherwise, we must be in the menus...
+   return MusicLocationMenus;
+}
+
+
+void UIManager::processAudio(U32 timeDelta)
+{
+   SoundSystem::processAudio(timeDelta, 
+                             mSettings->getIniSettings()->sfxVolLevel,
+                             mSettings->getIniSettings()->getMusicVolLevel(),
+                             mSettings->getIniSettings()->voiceChatVolLevel,
+                             selectMusic());  
 }
 
 
@@ -820,7 +865,7 @@ void UIManager::setNeedToUpgrade(bool needToUpgrade)
 }
 
 
-void UIManager::gotPassOrPermsReply(const ClientGame *game, const char *message)
+void UIManager::gotPasswordOrPermissionsReply(const ClientGame *game, const char *message)
 {
    // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
    if(getCurrentUI()->getMenuID() == GameMenuUI)
@@ -878,8 +923,108 @@ void UIManager::displayMessageBox(const char *title, const char *instr, const Ve
 }
 
 
+void UIManager::startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled)
+{
+   clearSparks();
+   getEditorUserInterface()->clearRobotLines();
+   getGameUserInterface()->startLoadingLevel(lx, ly, ux, uy, engineerEnabled);
+}
 
 
+void UIManager::readRobotLine(const string &robotLine)
+{
+   getEditorUserInterface()->addRobotLine(robotLine);
+}
+
+
+void UIManager::doneLoadingLevel()
+{
+   getGameUserInterface()->doneLoadingLevel();
+}
+
+
+void UIManager::clearSparks()
+{
+   getGameUserInterface()->clearSparks();
+}
+
+
+void UIManager::emitBlast(const Point &pos, U32 size)
+{
+   getGameUserInterface()->emitBlast(pos, size);
+}
+
+
+void UIManager::emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2)
+{
+   getGameUserInterface()->emitBurst(pos, scale, color1, color2);
+}
+
+
+void UIManager::emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation)
+{
+   getGameUserInterface()->emitDebrisChunk(points, color, pos, vel, ttl, angle, rotation);
+}
+
+
+void UIManager::emitTextEffect(const string &text, const Color &color, const Point &pos)
+{
+   getGameUserInterface()->emitTextEffect(text, color, pos);
+}
+
+
+void UIManager::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType)
+{
+   getGameUserInterface()->emitSpark(pos, vel, color, ttl, sparkType);
+}
+
+
+void UIManager::emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors)
+{
+   getGameUserInterface()->emitExplosion(pos, size, colorArray, numColors);
+}
+
+
+void UIManager::emitTeleportInEffect(const Point &pos, U32 type)
+{
+   getGameUserInterface()->emitTeleportInEffect(pos, type);
+}
+
+
+SFXHandle UIManager::playSoundEffect(U32 profileIndex, F32 gain)
+{
+   return getGameUserInterface()->playSoundEffect(profileIndex, gain);
+}
+
+
+SFXHandle UIManager::playSoundEffect(U32 profileIndex, const Point &position)
+{
+   return getGameUserInterface()->playSoundEffect(profileIndex, position);
+}
+
+
+SFXHandle UIManager::playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain)
+{
+   return getGameUserInterface()->playSoundEffect(profileIndex, position, velocity, gain);
+}
+
+
+void UIManager::playNextTrack()
+{
+   getGameUserInterface()->playNextTrack();
+}
+
+
+void UIManager::playPrevTrack()
+{
+   getGameUserInterface()->playPrevTrack();
+}
+
+
+void UIManager::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p)
+{
+   getGameUserInterface()->queueVoiceChatBuffer(effect, p);
+}
 
 
 };

@@ -92,8 +92,6 @@ private:
 
    AbstractTeam *getNewTeam();
 
-   Vector<string> mRobots;                      // A list of robots read in from a level file when loading from the editor
-
 public:
    ClientGame(const Address &bindAddress, GameSettings *settings);
    virtual ~ClientGame();
@@ -103,7 +101,7 @@ public:
 
    void closeConnectionToGameServer();
 
-   UserInterfaceData *mUserInterfaceData;
+   //UserInterfaceData *mUserInterfaceData;
 
    bool isConnectedToServer() const;
 
@@ -189,7 +187,6 @@ public:
 
 
    // Some FxManager passthroughs
-   void clearSparks();
    void emitBlast(const Point &pos, U32 size);
    void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2);
    void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);
@@ -293,8 +290,6 @@ public:
    void addWallItem(BfObject *wallItem, GridDatabase *database);     // Add wallItem item to game
 
    void setSelectedEngineeredObject(U32 objectType);
-
-   const Vector<string> *getLevelRobotLines() const;
 
    Ship *getLocalPlayerShip() const;
 

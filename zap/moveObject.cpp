@@ -1787,7 +1787,7 @@ void Circle::idle(BfObject::IdleCallPath path)
    {
       // Find nearest ship
       fillVector.clear();
-      findObjects((TestFunc)isShipType, fillVector, Rect(getActualPos(), 1200));
+      findObjects((TestFunc)isShipType, fillVector, Rect(getActualPos(), 600));
 
       F32 dist = F32_MAX;
       Ship *closest = NULL;

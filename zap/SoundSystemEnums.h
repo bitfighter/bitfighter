@@ -118,6 +118,14 @@ enum SFXProfiles
 };
 
 
+enum MusicLocation {
+   MusicLocationNone,
+   MusicLocationMenus,
+   MusicLocationGame,
+   MusicLocationCredits,
+   MusicLocationEditor
+};
+
 
 }
 

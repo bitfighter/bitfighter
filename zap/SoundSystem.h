@@ -65,7 +65,6 @@ namespace Zap {
 // Forward declarations
 class Point;
 class SoundEffect;
-class UIManager;
 typedef RefPtr<SoundEffect> SFXHandle;
 
 
@@ -90,14 +89,6 @@ enum MusicState {
    MusicStateStopping,
    MusicStatePausing,
    MusicStateResuming,
-};
-
-enum MusicLocation {
-   MusicLocationNone,
-   MusicLocationMenus,
-   MusicLocationGame,
-   MusicLocationCredits,
-   MusicLocationEditor,
 };
 
 struct MusicData
@@ -154,8 +145,8 @@ public:
    static void init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVol);
    static void shutdown();
    static void setListenerParams(const Point &position, const Point &velocity);
-   static void processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, UIManager *uiManager);  // Client version
-   static void processAudio(F32 sfxVol);                                                                   // Server version
+   static void processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, MusicLocation);  // Client version
+   static void processAudio(F32 sfxVol);                                                            // Server version
 
    // Sound Effect functions
    static void processSoundEffects(F32 sfxVol, F32 voiceVol);

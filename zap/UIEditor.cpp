@@ -2491,9 +2491,9 @@ void EditorUserInterface::findHitItemAndEdge()
    mHitVertex = NONE;
 
    // Make hit rectangle larger than 1x1 -- when we consider point items, we need to make sure that we grab the item even when we're not right
-   // on top of it, as the point item's hit target is much larger than the item itself.  100 is a guess that seems to work well.
+   // on top of it, as the point item's hit target is much larger than the item itself.  50 is a guess that seems to work well.
    // Note that this is only used for requesting a candidate list from the database, actual hit detection is more precise.
-   const Rect cursorRect((mMousePos - mCurrentOffset) / mCurrentScale, 100); 
+   const Rect cursorRect((mMousePos - mCurrentOffset) / mCurrentScale, 50); 
 
    fillVector.clear();
    GridDatabase *editorDb = getDatabase();
@@ -4459,11 +4459,9 @@ string EditorUserInterface::getLevelText()
    // Write out basic game parameters, including gameType info
    result += getGame()->toLevelCode();    // Note that this toLevelCode appends a newline char; most don't
 
-   const Vector<string> *robots = getGame()->getLevelRobotLines();
-
    // Next come the robots
-   for(S32 i = 0; i < robots->size(); i++)
-      result += robots->get(i);
+   for(S32 i = 0; i < mRobotLines.size(); i++)
+      result += mRobotLines[i];
 
    // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
@@ -4483,6 +4481,18 @@ string EditorUserInterface::getLevelText()
    }
 
    return result;
+}
+
+
+void EditorUserInterface::clearRobotLines()
+{
+   mRobotLines.clear();
+}
+
+
+void EditorUserInterface::addRobotLine(const string &robotLine)
+{
+   mRobotLines.push_back(robotLine);
 }
 
 

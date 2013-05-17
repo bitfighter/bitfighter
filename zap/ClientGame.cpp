@@ -60,7 +60,7 @@ Vector<ClientGame *> gClientGames;
 // Constructor
 ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Game(bindAddress, settings)
 {
-   mUserInterfaceData = new UserInterfaceData();
+   //mUserInterfaceData = new UserInterfaceData();
 
    mInCommanderMap        = false;
    mGameIsRunning         = true;      // Only matters when game is suspended
@@ -93,7 +93,7 @@ ClientGame::~ClientGame()
    closeConnectionToGameServer();      // I just added this for good measure... not really sure it's needed
    cleanUp();
 
-   delete mUserInterfaceData;
+   //delete mUserInterfaceData;
    delete mUIManager; 
    delete mConnectionToServer.getPointer();
 }
@@ -212,12 +212,9 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
 
 void ClientGame::startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled)
 {
-   mObjectsLoaded = 0;              // Reset item counter
-   clearSparks();
-   
-   mRobots.clear();
+   mObjectsLoaded = 0;                       // Reset item counter
 
-   mUi->startLoadingLevel(lx, ly, ux, uy, engineerEnabled);
+   getUIManager()->startLoadingLevel(lx, ly, ux, uy, engineerEnabled);
 }
 
 
@@ -226,7 +223,7 @@ void ClientGame::doneLoadingLevel()
    computeWorldObjectExtents();              // Make sure our world extents reflect all the objects we've loaded
    Barrier::prepareRenderingGeometry(this);  // Get walls ready to render
 
-   mUi->doneLoadingLevel();
+   getUIManager()->doneLoadingLevel();
 }
 
 
@@ -244,63 +241,53 @@ ClientInfo *ClientGame::getLocalRemoteClientInfo() const
 
 void ClientGame::setSpawnDelayed(bool spawnDelayed)
 {
-   if(getClientInfo()->isSpawnDelayed() != spawnDelayed)    // Yes, yes, we heard you the first time!
-      return;
-
    if(!spawnDelayed)
    {
       unsuspendGame();
-
-      clearSparks();
+      getUIManager()->clearSparks();
    }
-}
-
-
-void ClientGame::clearSparks()
-{
-   mUi->clearSparks();
 }
 
 
 void ClientGame::emitBlast(const Point &pos, U32 size)
 {
-   mUi->emitBlast(pos, size);
+   getUIManager()->emitBlast(pos, size);
 }
 
 
 void ClientGame::emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2)
 {
-   mUi->emitBurst(pos, scale, color1, color2);
+   getUIManager()->emitBurst(pos, scale, color1, color2);
 }
 
 
 void ClientGame::emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation)
 {
-   mUi->emitDebrisChunk(points, color, pos, vel, ttl, angle, rotation);
+   getUIManager()->emitDebrisChunk(points, color, pos, vel, ttl, angle, rotation);
 }
 
 
 void ClientGame::emitTextEffect(const string &text, const Color &color, const Point &pos)
 {
-   mUi->emitTextEffect(text, color, pos);
+   getUIManager()->emitTextEffect(text, color, pos);
 }
 
 
 void ClientGame::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType)
 {
-   mUi->emitSpark(pos, vel, color, ttl, sparkType);
+   getUIManager()->emitSpark(pos, vel, color, ttl, sparkType);
 }
 
 
 void ClientGame::emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors)
 {
-   mUi->emitExplosion(pos, size, colorArray, numColors);
+   getUIManager()->emitExplosion(pos, size, colorArray, numColors);
 }
 
 
 void ClientGame::emitTeleportInEffect(const Point &pos, U32 type)
 {
-   mUi->emitTeleportInEffect(pos, type);
+   getUIManager()->emitTeleportInEffect(pos, type);
 }
 
 
@@ -330,37 +317,37 @@ void ClientGame::emitShipExplosion(const Point &pos)
 
 SFXHandle ClientGame::playSoundEffect(U32 profileIndex, F32 gain) const
 {
-   return mUi->playSoundEffect(profileIndex, gain);
+   return getUIManager()->playSoundEffect(profileIndex, gain);
 }
 
 
 SFXHandle ClientGame::playSoundEffect(U32 profileIndex, const Point &position) const
 {
-   return mUi->playSoundEffect(profileIndex, position);
+   return getUIManager()->playSoundEffect(profileIndex, position);
 }
 
 
 SFXHandle ClientGame::playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain) const
 {
-   return mUi->playSoundEffect(profileIndex, position, velocity, gain);
+   return getUIManager()->playSoundEffect(profileIndex, position, velocity, gain);
 }
 
 
 void ClientGame::playNextTrack() const
 {
-   mUi->playNextTrack();
+   getUIManager()->playNextTrack();
 }
 
 
 void ClientGame::playPrevTrack() const
 {
-   mUi->playPrevTrack();
+   getUIManager()->playPrevTrack();
 }
 
 
 void ClientGame::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const
 {
-   mUi->queueVoiceChatBuffer(effect, p);
+   getUIManager()->queueVoiceChatBuffer(effect, p);
 }
 
 
@@ -616,7 +603,7 @@ void ClientGame::idle(U32 timeDelta)
 
    theMove->time = timeDelta + prevTimeDelta;
 
-   if(mConnectionToServer.isValid())
+   if(mConnectionToServer.isValid())      // i.e. if we're connected to a game server
    {
       // Disable controls if we are going too fast (usually by being blasted around by a GoFast or mine or whatever)
       BfObject *controlObject = mConnectionToServer->getControlObject();
@@ -671,7 +658,8 @@ void ClientGame::idle(U32 timeDelta)
       bool mShowingHelp = true;     // TODO: Set elsewhere
       if(mShowingHelp && controlObject)
       {
-         Rect searchRect = Rect(controlObject->getPos(), 400);
+         static const S32 HelpSearchRadius = 200;
+         Rect searchRect = Rect(controlObject->getPos(), HelpSearchRadius);
          fillVector.clear();
          mGameObjDatabase->findObjects(RepairItemTypeNumber,   fillVector, searchRect);
          mGameObjDatabase->findObjects(TestItemTypeNumber,     fillVector, searchRect);
@@ -691,11 +679,6 @@ void ClientGame::idle(U32 timeDelta)
 
    processDeleteList(timeDelta);                         // Delete any objects marked for deletion
    
-   mUi->processAudio(timeDelta, mSettings->getIniSettings()->sfxVolLevel,
-         mSettings->getIniSettings()->getMusicVolLevel(),
-         mSettings->getIniSettings()->voiceChatVolLevel,
-         getUIManager());  
-
    mNetInterface->processConnections();                  // Pass updated ship info to the server
 
    if(mScreenSaverTimer.update(timeDelta))               // Attempt, vainly, I'm afraid, to suppress screensavers
@@ -895,10 +878,11 @@ void ClientGame::onGameOver()
 {
    clearClientList();                   // Erase all info we have about fellow clients
 
-   mUIManager->getGameUserInterface()->onGameOver();
-
    // Kill any objects lingering in the database, such as forcefields
    getGameObjDatabase()->removeEverythingFromDatabase();    
+
+   // Inform the UI
+   getUIManager()->getGameUserInterface()->onGameOver();
 }
 
 
@@ -960,6 +944,7 @@ void ClientGame::setMOTD(const char *motd)
 }
 
 
+// Got some new scores from the Master... better inform the UI
 void ClientGame::setHighScores(const Vector<StringTableEntry> &groupNames, const Vector<string> &names, const Vector<string> &scores) const
 {
    getUIManager()->setHighScores(groupNames, names, scores);
@@ -1011,13 +996,13 @@ void ClientGame::gotPermissionsReply(ClientInfo::ClientRole role)
       message = "You've been granted permission to change levels";
 
    // Notify the UI that the message has arrived
-   getUIManager()->gotPassOrPermsReply(this, message);
+   getUIManager()->gotPasswordOrPermissionsReply(this, message);
 }
 
 
 void ClientGame::gotWrongPassword()
 {
-   getUIManager()->gotPassOrPermsReply(this, "Incorrect password");
+   getUIManager()->gotPasswordOrPermissionsReply(this, "Incorrect password");
 }
 
 
@@ -1302,10 +1287,7 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
    // after getting disconnected for reasons other then "SelfDisconnect"
    clearClientList();  
 
-   if(getUIManager()->cameFrom(EditorUI))
-     getUIManager()->reactivate(EditorUI);
-   else
-     getUIManager()->reactivate(MainUI);
+   getUIManager()->onConnectionTerminated();    // Let the UI know
 
    unsuspendGame();
 
@@ -1806,17 +1788,17 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
    {
       // For now, we'll just make a list of robots and associated params, and write that out when saving the level.  We'll leave robots as
       // full-fledged objects on the server (instead of pseudoItems here).
-      string robot = "";
+      string robotLine = "";
 
       for(S32 i = 0; i < argc; i++)
       {
          if(i > 0)
-            robot.append(" ");
+            robotLine.append(" ");
 
-         robot.append(argv[i]);
+         robotLine.append(argv[i]);
       }
 
-      mRobots.push_back(robot);
+      getUIManager()->readRobotLine(robotLine);
    }
       
    else 
@@ -1853,12 +1835,6 @@ AbstractTeam *ClientGame::getNewTeam()
 void ClientGame::setSelectedEngineeredObject(U32 objectType)
 {
    mUi->setSelectedEngineeredObject(objectType);
-}
-
-
-const Vector<string> *ClientGame::getLevelRobotLines() const
-{
-   return &mRobots;
 }
 
 

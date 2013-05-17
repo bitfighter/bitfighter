@@ -195,10 +195,13 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (U8 waitTimeInOneTenths
 {
 #ifndef ZAP_DEDICATED
    getClientInfo()->setReturnToGameTimer(waitTimeInOneTenthsSeconds * 100);
+
    getClientInfo()->setSpawnDelayed(true);
    mClientGame->setSpawnDelayed(true);
 #endif
 }
+
+
 TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnUndelayed, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
@@ -1681,7 +1684,8 @@ void GameConnection::onLocalConnection()
    setServerName(mServerGame->getSettings()->getHostName());  // Server name is whatever we've set locally
 
    // Tell local host if we're authenticated... no need to verify
-   getClientInfo()->setAuthenticated(getClientInfo()->isAuthenticated(), getClientInfo()->getBadges());  
+   GameConnection *gc = static_cast<GameConnection *>(getRemoteConnectionObject());
+   getClientInfo()->setAuthenticated(gc->getClientInfo()->isAuthenticated(), gc->getClientInfo()->getBadges());  
 }
 
 

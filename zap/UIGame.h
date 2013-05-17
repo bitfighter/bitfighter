@@ -406,7 +406,6 @@ public:
    void setMovementParams(SFXHandle& effect, const Point &position, const Point &velocity) const;
    void stopSoundEffect(SFXHandle &effect) const;
    void setListenerParams(const Point &position, const Point &velocity) const;
-   void processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, UIManager *uiManager) const;
    void playNextTrack() const;
    void playPrevTrack() const;
    void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const;

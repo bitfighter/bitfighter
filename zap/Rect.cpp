@@ -76,13 +76,6 @@ Rect::Rect(F32 x1, F32 y1, F32 x2, F32 y2)
 }
 
 
-// Takes centerpoint and "diameter"
-Rect::Rect(const Point &p, member_type diameter)
-{
-   set(p, diameter);
-}
-
-
 Rect::Rect(const Rect *r)
 {
    set(*r);
@@ -158,9 +151,8 @@ void Rect::set(const Rect &r)
 }
 
 // Takes centerpoint and "diameter"
-void Rect::set(const Point &p, member_type diameter)
+void Rect::set(const Point &p, F32 radius)
 {
-   F32 radius = diameter * 0.5f;
    min.x = p.x - radius;
    max.x = p.x + radius;
    min.y = p.y - radius;

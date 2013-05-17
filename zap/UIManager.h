@@ -26,7 +26,15 @@
 #ifndef _UI_MANAGER_H_
 #define _UI_MANAGER_H_
 
+#include "SoundEffect.h"
+
+#include "SoundSystemEnums.h"
+#include "SparkTypesEnum.h"
+
+#include "Color.h"
+#include "Point.h"
 #include "Timer.h"
+
 #include "tnlVector.h"
 #include "tnlNetStringTable.h"
 #include "tnlUDP.h"
@@ -78,6 +86,7 @@ class YesNoUserInterface;
 
 class Game;
 class ClientGame;
+class GameSettings;
 
 enum UIID {
    CreditsUI,
@@ -127,6 +136,8 @@ class UIManager
 
 private:
    ClientGame *mGame;
+   GameSettings *mSettings;
+
    UserInterface                                *mCurrentInterface;
 
    ChatUserInterface                            *mChatInterface;
@@ -145,7 +156,6 @@ private:
    InstructionsUserInterface                    *mInstructionsUserInterface;
    KeyDefMenuUserInterface                      *mKeyDefMenuUserInterface;
    LevelChangeOrAdminPasswordEntryUserInterface *mLevelChangeOrAdminPasswordEntryUserInterface;
-   LevelMenuSelectUserInterface                 *mLevelMenuSelectUserInterface;
    LevelMenuUserInterface                       *mLevelMenuUserInterface;
    LevelNameEntryUserInterface                  *mLevelNameEntryUserInterface;
    MainMenuUserInterface                        *mMainMenuUserInterface;
@@ -168,6 +178,11 @@ private:
    bool mLastWasLower;                 // True if mLastUI was lower in the hierarchy than mCurrentUI
 
    Timer mMenuTransitionTimer;
+
+   // Sounds
+   MusicLocation selectMusic();
+   void processAudio(U32 timeDelta);
+
 
 public:
    explicit UIManager(ClientGame *clientGame);  // Constructor
@@ -231,6 +246,7 @@ public:
 
    void renderAndDimGameUserInterface();
 
+   void onConnectionTerminated();
 
    // Some passthroughs
 
@@ -258,7 +274,7 @@ public:
    void enableLevelLoadDisplay();
    void serverLoadedLevel(const string &levelName);
    void disableLevelLoadDisplay(bool fade);
-   void gotPassOrPermsReply(const ClientGame *game, const char *message);
+   void gotPasswordOrPermissionsReply(const ClientGame *game, const char *message);
 
    // MainMenuUi
    void setMOTD(const char *motd);
@@ -274,6 +290,26 @@ public:
    void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &messages);
    void displayMessageBox(const char *title, const char *instr, const Vector<string> &messages);
 
+   // GameUI
+   void startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled);
+   void doneLoadingLevel();
+   void clearSparks();
+   void emitBlast(const Point &pos, U32 size);
+   void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2);
+   void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);
+   void emitTextEffect(const string &text, const Color &color, const Point &pos);
+   void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType);
+   void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
+   void emitTeleportInEffect(const Point &pos, U32 type);
+   SFXHandle playSoundEffect(U32 profileIndex, F32 gain);
+   SFXHandle playSoundEffect(U32 profileIndex, const Point &position);
+   SFXHandle playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain);
+   void playNextTrack();
+   void playPrevTrack();
+   void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p);
+
+   // EditorUI
+   void readRobotLine(const string &robotLine);
 
 };
 

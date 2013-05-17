@@ -344,7 +344,7 @@ Rect Teleporter::calcExtents()
 
 bool Teleporter::checkDeploymentPosition(const Point &position, const GridDatabase *gb, const Ship *ship)
 {
-   Rect queryRect(position, TELEPORTER_RADIUS * 2);
+   Rect queryRect(position, TELEPORTER_RADIUS);
    Point outPoint;  // only used as a return value in polygonCircleIntersect
 
    foundObjects.clear();
@@ -537,7 +537,7 @@ void Teleporter::doTeleport()
    if(mDestManager.getDestCount() == 0)      // Ignore 0-dest teleporters -- where would you go??
       return;
 
-   Rect queryRect(getVert(0), TRIGGER_RADIUS * 2);     
+   Rect queryRect(getVert(0), TRIGGER_RADIUS);     
 
    foundObjects.clear();
    findObjects((TestFunc)isShipType, foundObjects, queryRect);
@@ -584,7 +584,7 @@ void Teleporter::doTeleport()
    }
 
    Vector<DatabaseObject *> foundTeleporters; // Must be kept local, non static, because of possible recursive.
-   queryRect.set(getVert(0), TRIGGER_RADIUS * 2);
+   queryRect.set(getVert(0), TRIGGER_RADIUS);
    findObjects(TeleporterTypeNumber, foundTeleporters, queryRect);
    for(S32 i = 0; i < foundTeleporters.size(); i++)
       if(static_cast<Teleporter *>(foundTeleporters[i])->mTeleportCooldown.getCurrent() == 0)
@@ -653,7 +653,7 @@ const Vector<Point> *Teleporter::getCollisionPoly() const
 
 void Teleporter::computeExtent()
 {
-   setExtent(Rect(getVert(0), (F32)TELEPORTER_RADIUS * 2));    // This Rect constructor takes a diameter, not a radius
+   setExtent(Rect(getVert(0), TELEPORTER_RADIUS));    // This Rect constructor takes a diameter, not a radius
 }
 
 

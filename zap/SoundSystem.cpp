@@ -32,7 +32,6 @@
 #include "SFXProfile.h"
 #include "config.h"
 #include "UI.h"
-#include "UIManager.h"
 
 #include "MathUtils.h"
 #include "stringUtils.h"
@@ -605,33 +604,11 @@ void SoundSystem::updateMovementParams(SFXHandle &effect)
 }
 
 
-// Select music based on where we are
-static MusicLocation selectMusic(UIManager *uiManager)
-{
-   UIID currentUI = uiManager->getCurrentUI()->getMenuID();
-
-   // In game (or one of its submenus)...
-   if(currentUI == GameUI || uiManager->cameFrom(GameUI))
-      return MusicLocationGame;
-
-   // In editor...
-   if(currentUI == EditorUI || uiManager->cameFrom(EditorUI))
-      return MusicLocationEditor;
-
-   // In credits...
-   if(currentUI == CreditsUI || uiManager->cameFrom(CreditsUI))
-      return MusicLocationCredits;
-
-   // Otherwise in menus...
-   return MusicLocationMenus;
-}
-
-
 // Client version
-void SoundSystem::processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, UIManager *uiManager)
+void SoundSystem::processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, MusicLocation musicLocation)
 {
    processSoundEffects(sfxVol, voiceVol);
-   processMusic(timeDelta, musicVol, selectMusic(uiManager));
+   processMusic(timeDelta, musicVol, musicLocation);
    processVoiceChat();
 
    alureUpdate();
@@ -1213,7 +1190,7 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
    logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
 }
 
-void SoundSystem::processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, UIManager *uiManager)
+void SoundSystem::processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, MusicLocation musicLocation)
 {
    // Do nothing
 }

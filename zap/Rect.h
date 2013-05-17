@@ -63,7 +63,13 @@ public:
    Rect();                                      // Constuctor
    Rect(const Point &p1, const Point &p2);      // Constuctor
    Rect(F32 x1, F32 y1, F32 x2, F32 y2);        // Constuctor
-   Rect(const Point &p, member_type size);      // Constuctor, takes centerpoint and "diameter"
+   // Try a templatized constructor as an alternative to casting casting casting
+   template <typename T>
+   Rect(const Point &p, T radius)             // Constuctor, takes centerpoint and "radius"
+   {
+      set(p, (F32)radius);
+   }
+
    explicit Rect(const Rect *rect);             // Constructor, takes pointer to another rectangle
 
    explicit Rect(const Vector<Point> &p);       // Construct as a bounding box around multiple points
@@ -76,7 +82,7 @@ public:
 
    void set(const Rect &r);
 
-   void set(const Point &p, member_type size);   // Takes point and "radius"
+   void set(const Point &p, F32 radius);   // Takes point and "radius"
 
    bool contains(const Point &p) const;          // Returns true if rect contains p
 
