@@ -2367,19 +2367,25 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 // This suggests that RemoteClientInfos are not retained from game to game, but are generated anew.
 // ** Note that this method is essentially a mechanism for passing clientInfos from server to client. **
 GAMETYPE_RPC_S2C(GameType, s2cAddClient, 
-                (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, bool isLocalClient, 
+                (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, bool isMyClient, 
                  RangedU32<0, ClientInfo::MaxRoles> role, bool isRobot, bool isSpawnDelayed, bool isBusy, bool playAlert, bool showMessage),
-                (name, isAuthenticated, badges, isLocalClient, role, isRobot, isSpawnDelayed, isBusy, playAlert, showMessage))
+                (name, isAuthenticated, badges, isMyClient, role, isRobot, isSpawnDelayed, isBusy, playAlert, showMessage))
 {
 #ifndef ZAP_DEDICATED
 
    TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
+   if(isMyClient && !isAuthenticated && clientGame->getClientInfo()->isAuthenticated())
+   {
+      isAuthenticated = true;
+      badges = clientGame->getClientInfo()->getBadges();
+   }
+
    // The new ClientInfo will be deleted in s2cRemoveClient   
    ClientInfo *clientInfo = new RemoteClientInfo(clientGame, name, isAuthenticated, badges, isRobot, (ClientInfo::ClientRole)role.value, isSpawnDelayed, isBusy);
 
-   clientGame->onPlayerJoined(clientInfo, isLocalClient, playAlert, showMessage);
+   clientGame->onPlayerJoined(clientInfo, isMyClient, playAlert, showMessage);
 
 #endif
 }
@@ -3403,23 +3409,23 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhostParent, 1)
 {
-	GameConnection *source = (GameConnection *)getRPCSourceConnection();
-	ClientInfo *sourceClientInfo = source->getClientInfo();
-	
-	if(!sourceClientInfo->isAdmin())
-	      return;
+   GameConnection *source = (GameConnection *)getRPCSourceConnection();
+   ClientInfo *sourceClientInfo = source->getClientInfo();
+   
+   if(!sourceClientInfo->isAdmin())
+         return;
 
-	for(S32 i = 0; i < mGame->getClientCount(); i++)
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
-		ClientInfo *clientInfo = mGame->getClientInfo(i);
-		
-		if(clientInfo->isRobot())
-			continue;
+      ClientInfo *clientInfo = mGame->getClientInfo(i);
+      
+      if(clientInfo->isRobot())
+         continue;
 
-		RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayAnnouncement, (message));
-			
-		clientInfo->getConnection()->postNetEvent(theEvent);
-	}
+      RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayAnnouncement, (message));
+         
+      clientInfo->getConnection()->postNetEvent(theEvent);
+   }
 }
 
 
@@ -3528,7 +3534,7 @@ void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderCl
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 1)
 {
 #ifndef ZAP_DEDICATED
-	ClientGame* clientGame = static_cast<ClientGame *>(mGame);
+   ClientGame* clientGame = static_cast<ClientGame *>(mGame);
    clientGame->gotAnnouncement(message);
 #endif
 }
