@@ -50,6 +50,7 @@
 #include "ScissorsManager.h"
 #include "voiceCodec.h"
 #include "SoundSystem.h"
+#include "FontManager.h"
 
 #include "tnlEndian.h"
 
@@ -1629,6 +1630,7 @@ void GameUserInterface::renderScoreboard()
    if(maxTeamPlayers == 0)
       return;
 
+   static const U32 gap = 3;  // Small gap for use between various UI elements
 
    const U32 drawableWidth = gScreenInfo.getGameCanvasWidth() - horizMargin * 2;
    const U32 columnCount = min(teams, 2);
@@ -1641,42 +1643,45 @@ void GameUserInterface::renderScoreboard()
    const U32 desiredHeight = (canvasHeight - vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
    const U32 maxHeight = MIN(30, (desiredHeight - teamAreaHeight) / maxTeamPlayers);
 
-   const U32 sectionHeight = (teamAreaHeight + maxHeight * maxTeamPlayers);
+   const U32 sectionHeight = teamAreaHeight + (maxHeight * maxTeamPlayers) + (2 * gap);
    const U32 totalHeight = sectionHeight * numTeamRows + (numTeamRows - 1) * 2;
 
    // Vertical scale ratio to maximum line height
    const F32 scaleRatio = ((F32)maxHeight) / 30.f;
 
-   const char *botSymbol = "B ";
-   const char *levelChangerSymbol = "+ ";
-   const char *adminSymbol = "@ ";
+   const char *botSymbol = "B";
+   const char *levelChangerSymbol = "+";
+   const char *adminSymbol = "@";
 
+   const S32 playerFontSize = S32(maxHeight * 0.75f);
+   const S32 teamFontSize = 26;
+   const S32 symbolFontSize = S32(playerFontSize * 0.75f);
+
+   // Outer scoreboard box
+   renderFancyBox(horizMargin - gap, (canvasHeight - totalHeight)/2 - (2 * gap),
+                  (gScreenInfo.getGameCanvasWidth() - horizMargin) + gap, (canvasHeight - totalHeight)/2 + totalHeight + 20,
+                  13, Colors::black, 0.85f, Colors::blue);
+
+   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
+
+   FontManager::pushFontContext(ScoreboardContext);
 
    for(S32 i = 0; i < teams; i++)
    {
-      const S32 yt = (canvasHeight - totalHeight) / 2 + (i >> 1) * (sectionHeight + 2);  // y-top
-      const S32 yb = yt + sectionHeight;     // y-bottom
-      const S32 xl = 10 + (i & 1) * teamWidth;
-      const S32 xr = xl + teamWidth - 2;
+      const S32 yt = (canvasHeight - totalHeight) / 2 + (i >> 1) * sectionHeight;  // y-top
+//      const S32 yb = yt + sectionHeight;     // y-bottom
+      const S32 xl = horizMargin + gap + (i & 1) * teamWidth;
+      const S32 xr = (xl + teamWidth) - (2 * gap);
 
       const Color *teamColor = getGame()->getTeamColor(i);
 
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
-      glColor(teamColor, 0.6f);
-      drawRect(xl, yt, xr, yb, GL_TRIANGLE_FAN);
-
-      //// Render team scores
-      glColor(Colors::white);
       if(isTeamGame)     
       {
-         renderFlag(F32(xl + 20), F32(yt + 18), teamColor);
-         renderFlag(F32(xr - 20), F32(yt + 18), teamColor);
+         renderFancyBox(xl, yt, xr, yt + teamFontSize + 2 * gap, 10, *teamColor, 0.6f, *teamColor);
 
-         drawHorizLine(xl, xr, yt + S32(teamAreaHeight));
-
-         drawString(xl + 40, yt + 2, 30, getGame()->getTeamName(i).getString());
-         drawStringf(xr - 140, yt + 2, 30, "%d", ((Team *)(getGame()->getTeam(i)))->getScore());
+         glColor(Colors::white);
+         drawString(xl + 40, yt + 2, teamFontSize, getGame()->getTeamName(i).getString());
+         drawStringf(xr - 140, yt + 2, teamFontSize, "%d", ((Team *)(getGame()->getTeam(i)))->getScore());
       }
 
       // Now for player scores.  First build a list, then sort it, then display it.
@@ -1688,18 +1693,16 @@ void GameUserInterface::renderScoreboard()
       gameType->getSortedPlayerScores(i, playerScores);     // Fills playerScores for team i
 #endif
 
-      const S32 fontSize = U32(maxHeight * 0.85f);
 
       S32 curRowY = yt + teamAreaHeight + 1;
 
       // Use any symbol for an offset
-      const S32 symbolFontSize = S32(fontSize * 0.8f);
-      const S32 symbolSize = getStringWidth(symbolFontSize, botSymbol);
+      const S32 symbolOffset = getStringWidth(symbolFontSize, adminSymbol) + gap;  // Use admin symbol as it's the widest
 
       for(S32 j = 0; j < playerScores.size(); j++)
       {
          S32 x = xl + 40;
-         S32 vertAdjustFact = (fontSize - symbolFontSize) / 2 - 1;
+         S32 vertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;
 
          bool isDelayed = playerScores[j]->isSpawnDelayed();
          const Color *nameColor = isDelayed ? &Colors::idlePlayerScoreboardColor : &Colors::standardPlayerScoreboardColor;
@@ -1709,17 +1712,17 @@ void GameUserInterface::renderScoreboard()
 
          // Add the mark of the bot
          if(playerScores[j]->isRobot())
-            drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, botSymbol);
+            drawString(x - symbolOffset, curRowY + vertAdjustFact + 2, symbolFontSize, botSymbol);
 
          // Add level changer mark
          if(playerScores[j]->isLevelChanger() && !playerScores[j]->isAdmin())
-            drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, levelChangerSymbol);
+            drawString(x - symbolOffset, curRowY + vertAdjustFact + 2, symbolFontSize, levelChangerSymbol);
 
          // Add admin mark
          if(playerScores[j]->isAdmin())
-            drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, adminSymbol);
+            drawString(x - symbolOffset, curRowY + vertAdjustFact + 2, symbolFontSize, adminSymbol);
 
-         S32 nameWidth = drawStringAndGetWidth(x - 8, curRowY, fontSize, playerScores[j]->getName().getString());
+         S32 nameWidth = drawStringAndGetWidth(x, curRowY, playerFontSize, playerScores[j]->getName().getString());
 
          renderBadges(playerScores[j], x + nameWidth + 8, curRowY + (maxHeight / 2), scaleRatio);
          
@@ -1736,8 +1739,8 @@ void GameUserInterface::renderScoreboard()
                dSprintf(buff, sizeof(buff), "%d  %2.2f", playerScores[j]->getScore(), playerScores[j]->getRating());
          }
 
-         drawString(xr - (85 + S32(getStringWidth(F32(fontSize), buff))), curRowY, fontSize, buff);
-         drawStringf(xr - 60, curRowY, fontSize, "%d", playerScores[j]->getPing());
+         drawString(xr - (85 + S32(getStringWidth(F32(playerFontSize), buff))), curRowY, playerFontSize, buff);
+         drawStringf(xr - 60, curRowY, playerFontSize, "%d", playerScores[j]->getPing());
          curRowY += maxHeight;
       }
 
@@ -1759,6 +1762,8 @@ void GameUserInterface::renderScoreboard()
    // Not quite the function's intended purpose, but it does the job
    drawCenteredStringPair(legendPos, legendSize, Colors::standardPlayerScoreboardColor, 
                           Colors::idlePlayerScoreboardColor, legend.c_str(), "Idle Player");
+
+   FontManager::popFontContext();
 }
 
 
@@ -2725,6 +2730,7 @@ LevelListDisplayer::LevelListDisplayer()
 {
    mLevelLoadDisplayFadeTimer.setPeriod(1000);
    mLevelLoadDisplay = true;
+   mLevelLoadDisplayTotal = 0;
 }
 
 

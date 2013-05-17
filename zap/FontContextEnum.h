@@ -38,7 +38,8 @@ namespace Zap
       KeyContext,              // For keyboard keys
       LoadoutIndicatorContext, // For the obvious
       OverlayMenuContext,      // For Loadout Menus and such
-      TextEffectContext        // Yard Sale!!! text and the like
+      TextEffectContext,       // Yard Sale!!! text and the like
+      ScoreboardContext,       // In-game scoreboard font
    };
 
 
