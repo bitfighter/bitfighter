@@ -4751,7 +4751,7 @@ void EditorUserInterface::findPlugins()
       PluginInfo info(plugins[i], plugins[i]);
 
       // check for a binding
-      for(S32 j = 0; j < plugins.size(); j++)
+      for(S32 j = 0; j < bindings.size(); j++)
       {
          if(bindings[j].script == plugins[i])
          {
