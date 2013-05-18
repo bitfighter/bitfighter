@@ -3924,7 +3924,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    else if(inputString == "F9")
    {
       U32 maxWidth = 0;
-      for(S32 i; i < mPluginInfos.size(); i++)
+      for(S32 i = 0; i < mPluginInfos.size(); i++)
       {
          U32 width = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
          maxWidth = max(maxWidth, width);

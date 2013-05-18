@@ -512,11 +512,11 @@ static int get_quad(struct sth_stash* stash, struct sth_font* fnt, struct sth_gl
 
 	if (fnt->type == BMFONT) scale = isize/(glyph->size*10.0f);
 
-	rx = floorf(*x + scale * glyph->xoff);
-	ry = floorf(*y - scale * glyph->yoff);
+	rx = (int)floorf(*x + scale * glyph->xoff);
+	ry = (int)floorf(*y - scale * glyph->yoff);
 	
-	q->x0 = rx;
-	q->y0 = ry;
+	q->x0 = (float)rx;
+	q->y0 = (float)ry;
 	q->x1 = rx + scale * (glyph->x1 - glyph->x0);
 	q->y1 = ry - scale * (glyph->y1 - glyph->y0);
 	
