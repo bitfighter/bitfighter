@@ -243,7 +243,7 @@ MusicLocation UIManager::selectMusic()
       return MusicLocationGame;
 
    // In editor...
-   if(currentUI == getUI<EditorUserInterface>() || getUI<EditorUserInterface>())
+   if(currentUI == getUI<EditorUserInterface>() || cameFrom<EditorUserInterface>())
       return MusicLocationEditor;
 
    // In credits...
