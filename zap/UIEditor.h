@@ -69,6 +69,7 @@ public:
       PluginInfo(string prettyName, string fileName) : prettyName(prettyName), fileName(fileName) { }
       string prettyName;
       string fileName;
+      string binding;
    };
 
    enum SpecialAttribute   // Some items have special attributes.  These are the ones
@@ -417,6 +418,7 @@ public:
    void createNormalizedScreenshot(ClientGame* game);
 
    void findPlugins();
+   U32 findPluginDockWidth();
 };
 
 
