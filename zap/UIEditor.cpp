@@ -2212,7 +2212,11 @@ void EditorUserInterface::copySelection()
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
       if(obj->isSelected())
-         mClipboard.push_back(boost::shared_ptr<BfObject>(obj->copy()));
+      {
+         BfObject *objcopy = obj->copy();
+         objcopy->unlinkFromIdleList();  // Prevents Game::cleanUp() and shared_ptr from trying to free this twice (double delete error)
+         mClipboard.push_back(boost::shared_ptr<BfObject>(objcopy));
+      }
    }
 }
 
