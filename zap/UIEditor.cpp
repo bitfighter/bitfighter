@@ -4748,7 +4748,22 @@ void EditorUserInterface::findPlugins()
    const Vector<PluginBinding> &bindings = *getGame()->getSettings()->getPluginBindings();
    for(S32 i = 0; i < plugins.size(); i++)
    {
-      PluginInfo info(plugins[i], plugins[i]);
+      // try to find the title
+      string title;
+      Vector<MenuItem*> menu;
+      EditorPlugin plugin(dirName + "/" + plugins[i], Vector<string>(), getGame()->getGridSize(), mLoadTarget, getGame());
+      if(plugin.prepareEnvironment() && plugin.loadScript(false))
+      {
+         plugin.runGetArgsMenu(title, menu);
+      }
+
+      // if the title is blank or couldn't be found, use the file name
+      if(title == "")
+      {
+         title = plugins[i];
+      }
+
+      PluginInfo info(title, plugins[i]);
 
       // check for a binding
       for(S32 j = 0; j < bindings.size(); j++)
