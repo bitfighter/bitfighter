@@ -32,6 +32,7 @@
 #include "UI.h"
 #include "version.h"
 #include "FontManager.h"
+#include "UIManager.h"
 
 #include "stringUtils.h"
 
