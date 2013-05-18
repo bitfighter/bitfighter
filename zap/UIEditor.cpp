@@ -90,6 +90,10 @@ const F32 STARTING_SCALE = 0.5;
 
 static GridDatabase *mLoadTarget;
 
+S32 QSORT_CALLBACK pluginInfoSort(EditorUserInterface::PluginInfo *a, EditorUserInterface::PluginInfo *b)
+{
+   return stricmp((a)->prettyName.c_str(), (b)->prettyName.c_str());
+}
 
 //Vector<string> EditorUserInterface::robots;        // List of robot lines in the level file
 
@@ -4723,6 +4727,8 @@ void EditorUserInterface::findPlugins()
    {
       mPluginInfos.push_back(PluginInfo(plugins[i], plugins[i]));
    }
+
+   mPluginInfos.sort(pluginInfoSort);
 }
 
 
