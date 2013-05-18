@@ -307,9 +307,9 @@ static void renderArrow(S32 pos, bool pointingUp)
       y = pos + (ARROW_HEIGHT + ARROW_MARGIN) - 7;
 
    F32 vertices[] = {
-         (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7,
-         (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7,
-         canvasWidth / 2,                 (F32)y
+         F32(canvasWidth - ARROW_WIDTH) / 2, F32(pos - ARROW_MARGIN - 7),
+         F32(canvasWidth + ARROW_WIDTH) / 2, F32(pos - ARROW_MARGIN - 7),
+         F32(canvasWidth) / 2,               F32(y)
    };
 
    for(S32 i = 1; i >= 0; i--)
