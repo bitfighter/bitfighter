@@ -1771,8 +1771,8 @@ void Seeker::renderItem(const Point &pos)
    if(!isCollisionEnabled())  // (exploded) always disables collision.
       return;
 
-   F32 startLiveTime = (F32) WeaponInfo::getWeaponInfo(mWeaponType).projLiveTime;
-   renderSeeker(pos, getActualAngle(), getActualVel().len(), (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())));
+   S32 startLiveTime = WeaponInfo::getWeaponInfo(mWeaponType).projLiveTime;
+   renderSeeker(pos, getActualAngle(), getActualVel().len(), startLiveTime - (getGame()->getCurrentTime() - getCreationTime()));
 #endif
 }
 
