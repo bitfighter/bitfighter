@@ -64,6 +64,13 @@ class EditorUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 public:
+   struct PluginInfo
+   {
+      PluginInfo(string prettyName, string fileName) : prettyName(prettyName), fileName(fileName) { }
+      string prettyName;
+      string fileName;
+   };
+
    enum SpecialAttribute   // Some items have special attributes.  These are the ones
    {                       // we can edit in the editor
       Text = 0,
@@ -95,6 +102,13 @@ private:
       RENDER_UNSELECTED_WALLS,
       RENDER_SELECTED_WALLS
    };
+
+   enum DockMode {
+      DOCKMODE_ITEMS,
+      DOCKMODE_PLUGINS
+   };
+
+   DockMode mDockMode;
 
    SnapContext mSnapContext;
 
@@ -159,6 +173,7 @@ private:
    void renderReferenceShip();
    void renderDragSelectBox();      // Render box when selecting a group of items
    void renderDockItems();          // Render all items on the dock
+   void renderDockPlugins();
    void renderSaveMessage();
    void renderWarnings();
 
@@ -175,6 +190,7 @@ private:
    boost::shared_ptr<EditorPlugin> mPluginRunner;
 
    Vector<string> mLevelErrorMsgs, mLevelWarnings;
+   Vector<PluginInfo> mPluginInfos;
 
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
 
@@ -204,6 +220,7 @@ private:
    bool checkForPolygonHit(const Point &point, BfObject *object);    
 
    void findHitItemOnDock();     // Sets mDockItemHit
+   S32 findHitPlugin();
 
    void findSnapVertex();
    S32 mSnapVertexIndex;
@@ -219,6 +236,7 @@ private:
    SafePtr<BfObject> mDraggingDockItem;
    SafePtr<BfObject> mDockItemHit;
 
+   U32 mDockWidth;
    bool mouseOnDock();                // Return whether mouse is currently over the dock
    bool mNeedToSave;                  // Have we modified the level such that we need to save?
 
@@ -392,6 +410,8 @@ public:
    void addToEditor(BfObject *obj);
 
    void createNormalizedScreenshot(ClientGame* game);
+
+   void findPlugins();
 };
 
 
