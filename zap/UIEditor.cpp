@@ -1490,14 +1490,22 @@ bool EditorUserInterface::showMinorGridLines()
    return mCurrentScale >= .5;
 }
 
+static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
+{
+   TNLAssert(dynamic_cast<BfObject *>(*a), "Not a BfObject");
+   TNLAssert(dynamic_cast<BfObject *>(*b), "Not a BfObject");
+   return ((BfObject *)(*b))->getTeam() - ((BfObject *)(*a))->getTeam();
+}
+
 
 void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
 {
-   const Vector<DatabaseObject *> *spyBugs = editorDb->findObjects_fast(SpyBugTypeNumber);
-
-   if(spyBugs->size() != 0)
+   fillVector = *editorDb->findObjects_fast(SpyBugTypeNumber);  // This will actually copy vector of pointers to fillVector
+                                                                // so we can sort by team, this is still faster then findObjects.
+   if(fillVector.size() != 0)
    {
       // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team
+      fillVector.sort(sortByTeam); // Need to sort by team, or else won't properly combine the colors.
       glClear(GL_DEPTH_BUFFER_BIT);
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_DEPTH_WRITEMASK);
@@ -1508,20 +1516,21 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
       // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
       glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
 
+      S32 prevTeam = -10;
+
       // Draw spybug visibility ranges first, underneath everything else
-      for(S32 i = 0; i < spyBugs->size(); i++)
+      for(S32 i = 0; i < fillVector.size(); i++)
       {
-         SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
-         F32 translation = 0.05f * sb->getTeam();  // This way, each team ends up with a consistent but unique z-pos
+         BfObject *editorObj = dynamic_cast<BfObject *>(fillVector[i]);
 
-         glTranslatef(0, 0, translation);
+         if(i != 0 && editorObj->getTeam() != prevTeam)
+            glTranslatef(0, 0, 0.05f);
+         prevTeam = editorObj->getTeam();
 
-         Point pos = sb->getPos();
+         Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderSpyBugVisibleRange(pos, *sb->getColor(), mCurrentScale);
-
-         glTranslatef(0, 0, -translation);         // Reset translation back to where it was
+         renderSpyBugVisibleRange(pos, *editorObj->getColor(), mCurrentScale);
       }
 
       setDefaultBlendFunction();
