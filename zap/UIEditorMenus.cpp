@@ -24,7 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "UIEditorMenus.h"
+
 #include "UIEditor.h"
+#include "UIManager.h"
 #include "ScreenInfo.h"    // For canvasHeight
 #include "ClientGame.h"    // For UIManager and callback
 
@@ -240,7 +242,7 @@ bool QuickMenuUI::usesEditorScreenMode()                 // TODO: Rename this st
 
 void QuickMenuUI::onDisplayModeChange()
 {
-   getUIManager()->getEditorUserInterface()->onDisplayModeChange();   // This is intended to run the same method in the editor
+   getUIManager()->getUI<EditorUserInterface>()->onDisplayModeChange();   // This is intended to run the same method in the editor
 
    // Reposition menu on screen, keeping same relative position as before
    Point pos(mMenuLocation.x * gScreenInfo.getGameCanvasWidth() /gScreenInfo.getPrevCanvasWidth(), 
@@ -329,7 +331,7 @@ BfObject *EditorAttributeMenuUI::getObject()
 
 string EditorAttributeMenuUI::getTitle()
 {
-   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    S32 selectedObjCount = ui->getItemSelectedCount();
    return string("Attributes for ") + (selectedObjCount != 1 ? itos(selectedObjCount) + " " + mObject->getPrettyNamePlural() : 
@@ -341,7 +343,7 @@ void EditorAttributeMenuUI::startEditingAttrs(BfObject *object)
 { 
    mObject = object; 
 
-   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    Point center = (mObject->getVert(0) + mObject->getVert(1)) * ui->getCurrentScale() / 2 + ui->getCurrentOffset();
    setMenuCenterPoint(center);  
@@ -365,7 +367,7 @@ void EditorAttributeMenuUI::doneEditingAttrs(BfObject *object)
    // Only run on object that is the subject of this editor.  See TextItemEditorAttributeMenuUI::doneEditingAttrs() for explanation
    // of why this may be run on objects that are not actually the ones being edited (hence the need for passing an object in).
    if(object == mObject)   
-      getUIManager()->getEditorUserInterface()->doneEditingAttributes(this, mObject); 
+      getUIManager()->getUI<EditorUserInterface>()->doneEditingAttributes(this, mObject); 
 }
 
 
@@ -399,7 +401,7 @@ void PluginMenuUI::doneEditing()
    getMenuResponses(responses);              // Fills responses
    responses.erase(responses.size() - 1);    // Remove last arg, which corresponds to our "save and quit" menu item
 
-   getGame()->getUIManager()->getEditorUserInterface()->onPluginMenuClosed(responses);
+   getGame()->getUIManager()->getUI<EditorUserInterface>()->onPluginMenuClosed(responses);
 }
 
 

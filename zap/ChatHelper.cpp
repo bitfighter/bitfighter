@@ -25,6 +25,7 @@
 
 #include "ChatHelper.h"
 
+#include "UIManager.h"
 #include "ChatCommands.h"
 #include "ClientGame.h"
 #include "Console.h"
@@ -292,7 +293,7 @@ void ChatHelper::onActivated()
 // When chatting, show command help if user presses F1
 void ChatHelper::activateHelp(UIManager *uiManager)
 {
-    getGame()->getUIManager()->getInstructionsUserInterface()->activatePage(InstructionsUserInterface::InstructionAdvancedCommands);
+    uiManager->getUI<InstructionsUserInterface>()->activatePage(InstructionsUserInterface::InstructionAdvancedCommands);
 }
 
 

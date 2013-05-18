@@ -114,7 +114,6 @@ public:
    bool isLandscape() const;     // Whether physical screen is landscape, or at least more landscape than our game window
 
    // Convert physical window screen coordinates into virtual, in-game coordinate
-   Point convertWindowToCanvasCoord(const Point &p, DisplayMode mode);
    Point convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode);
 
    Point convertCanvasToWindowCoord(S32 x, S32 y, DisplayMode mode) const;

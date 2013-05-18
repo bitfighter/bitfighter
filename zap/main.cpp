@@ -110,6 +110,8 @@ using namespace TNL;
 #  include "UINameEntry.h"
 #  include "UIEditor.h"
 #  include "UIErrorMessage.h"
+#  include "UIManager.h"
+
 #  include "Cursor.h"          // For cursor defs
 #  include "Joystick.h"
 #  include "Event.h"
@@ -301,8 +303,8 @@ void gameIdle(U32 integerTime)
          uiManager->getCurrentUI()->idle(integerTime);
 
       // If we're in a UI and GameUI is still running, we need to idle that too
-      if(uiManager->cameFrom(GameUI))
-         uiManager->getGameUserInterface()->idle(integerTime);
+      if(uiManager->cameFrom<GameUserInterface>())
+         uiManager->getUI<GameUserInterface>()->idle(integerTime);
    }
 #endif
 
@@ -633,7 +635,7 @@ void createClientGame(GameSettings *settings)
       ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, settings->getIniSettings()->clientPortNumber), settings);  
 
        // Put any saved filename into the editor file entry thingy
-      clientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(settings->getIniSettings()->lastEditorName);
+      clientGame->getUIManager()->getUI<LevelNameEntryUserInterface>()->setString(settings->getIniSettings()->lastEditorName);
 
       Game::seedRandomNumberGenerator(settings->getIniSettings()->lastName);
       clientGame->getClientInfo()->getId()->getRandom();
@@ -646,25 +648,25 @@ void createClientGame(GameSettings *settings)
       if(settings->shouldShowNameEntryScreenOnStartup())
       {
          for(S32 i = 0; i < gClientGames.size(); i++)
-            gClientGames[i]->getUIManager()->activate(NameEntryUI);
+            gClientGames[i]->getUIManager()->activate<NameEntryUserInterface>();
 
          //if(gClientGame)
          //{
          //   gClientGame = gClientGame2;
          //   gClientGame1->mUserInterfaceData->get();
-         //   gClientGame->getUIManager()->getNameEntryUserInterface()->activate();  <-- won't work no more!
+         //   gClientGame->getUIManager()->getUI<NameEntryUserInterface>()->activate();  <-- won't work no more!
          //   gClientGame2->mUserInterfaceData->get();
          //   gClientGame1->mUserInterfaceData->set();
          //   gClientGame = gClientGame1;
          //}
-         //gClientGame->getUIManager()->getNameEntryUserInterface()->activate();     <-- won't work no more!
+         //gClientGame->getUIManager()->getUI<NameEntryUserInterface>()->activate();     <-- won't work no more!
          Game::seedRandomNumberGenerator(settings->getIniSettings()->lastName);
       }
       else
       {
          for(S32 i = 0; i < gClientGames.size(); i++)
          {
-            gClientGames[i]->getUIManager()->activate(MainUI);
+            gClientGames[i]->getUIManager()->activate<MainMenuUserInterface>();
             gClientGames[i]->setReadyToConnectToMaster(true);        
          }
 
@@ -677,7 +679,7 @@ void createClientGame(GameSettings *settings)
          //   gClientGame1->mUserInterfaceData->set();
          //   gClientGame = gClientGame1;
          //}
-         //gClientGame->getUIManager()->getMainMenuUserInterface()->activate();<-- won't work no more!
+         //gClientGame->getUIManager()->getUI<MainMenuUserInterface>()->activate();<-- won't work no more!
 
          //gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
          Game::seedRandomNumberGenerator(settings->getPlayerName());
@@ -1237,7 +1239,7 @@ int main(int argc, char **argv)
          for(S32 i = 0; i < gClientGames.size(); i++)
          {
             UIManager *uiManager = gClientGames[i]->getUIManager();
-            ErrorMessageUserInterface *ui = uiManager->getErrorMsgUserInterface();
+            ErrorMessageUserInterface *ui = uiManager->getUI<ErrorMessageUserInterface>();
 
             ui->reset();
             ui->setTitle("CONFIGURATION ERROR");

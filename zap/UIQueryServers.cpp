@@ -25,6 +25,9 @@
 
 #include "UIQueryServers.h"
 
+#include "UIMenus.h"
+#include "UIManager.h"
+
 #include "masterConnection.h"
 #include "gameNetInterface.h"
 #include "ClientGame.h"
@@ -71,13 +74,13 @@ static const U32 AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER = (SEL_SERVER_IN
 // Button callbacks
 static void nextButtonClickedCallback(ClientGame *game)
 {
-   game->getUIManager()->getQueryServersUserInterface()->advancePage();
+   game->getUIManager()->getUI<QueryServersUserInterface>()->advancePage();
 }
 
 
 static void prevButtonClickedCallback(ClientGame *game)
 {
-   game->getUIManager()->getQueryServersUserInterface()->backPage();
+   game->getUIManager()->getUI<QueryServersUserInterface>()->backPage();
 }
 
 
@@ -126,7 +129,6 @@ QueryServersUserInterface::ColumnInfo::~ColumnInfo()
 // Constructor
 QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInterface(game), ChatParent(game)
 {
-   setMenuID(QueryServersScreenUI);
    mLastUsedServerId = 0;
    mSortColumn = 0;
    mLastSortColumn = 0;
@@ -997,7 +999,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
       mShowChat = !mShowChat;
       if(mShowChat) 
       {
-         ChatUserInterface *ui = getUIManager()->getChatUserInterface();
+         ChatUserInterface *ui = getUIManager()->getUI<ChatUserInterface>();
          ui->setRenderUnderlyingUI(false);    // Don't want this screen to bleed through...
 
          getUIManager()->activate(ui);
@@ -1064,7 +1066,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
    {
       playBoop();
       leaveGlobalChat();
-      getUIManager()->activate(MainUI);
+      getUIManager()->activate<MainMenuUserInterface>();
    }
    else if(inputCode == KEY_LEFT)
    {
@@ -1470,7 +1472,7 @@ void Button::onClick(F32 mouseX, F32 mouseY)
 
 bool Button::isActive() const
 {
-   return mGame->getUIManager()->getQueryServersUserInterface()->getLastPage() > 0;
+   return mGame->getUIManager()->getUI<QueryServersUserInterface>()->getLastPage() > 0;
 }
 
 

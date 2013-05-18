@@ -125,7 +125,7 @@ void abortHosting_noLevels()
    {
       UIManager *uiManager = gClientGames[i]->getUIManager();
 
-      ErrorMessageUserInterface *errUI = static_cast<ErrorMessageUserInterface *>(uiManager->getUI(ErrorMessageUI));
+      ErrorMessageUserInterface *errUI = uiManager->getUI<ErrorMessageUserInterface>();
 
       FolderManager *folderManager = gServerGame->getSettings()->getFolderManager();
       string levelDir = folderManager->levelDir;
@@ -140,7 +140,7 @@ void abortHosting_noLevels()
       errUI->setMessage(8, "Trying to load levels from folder:");
       errUI->setMessage(9, levelDir == "" ? "<<Unresolvable>>" : levelDir.c_str());
 
-      uiManager->activate(ErrorMessageUI);
+      uiManager->activate<ErrorMessageUserInterface>();
       uiManager->disableLevelLoadDisplay(false); 
    }
 #endif

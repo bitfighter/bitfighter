@@ -27,7 +27,9 @@
 #define _UIMENUS_H_
 
 #include "UI.h"                  // Parent class
+
 #include "SharedConstants.h"     // For MOTD_LEN
+#include "PlayerActionEnum.h"
 #include "UIMenuItems.h"
 #include "config.h"
 

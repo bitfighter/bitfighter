@@ -188,10 +188,6 @@ S32 ScreenInfo::getVertDrawMargin() const
 
 bool ScreenInfo::isLandscape() const { return mIsLandscape; }     // Whether physical screen is landscape, or at least more landscape than our game window
 
-// Convert physical window screen coordinates into virtual, in-game coordinate
-Point ScreenInfo::convertWindowToCanvasCoord(const Point &p, DisplayMode mode) {
-   return convertWindowToCanvasCoord((S32)p.x, (S32)p.y, mode);
-}
 
 Point ScreenInfo::convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode)
 {

@@ -32,8 +32,10 @@
 #include "barrier.h"
 #include "gameType.h"
 
-#include "UIManager.h"
 #include "UIGame.h"
+#include "UIMenus.h"
+#include "UINameEntry.h"
+#include "UIManager.h"
 
 #include "EditorTeam.h"
 
@@ -77,7 +79,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
 
-   mUi = mUIManager->getGameUserInterface();
+   mUi = mUIManager->getUI<GameUserInterface>();
 
    for(S32 i = 0; i < JoystickAxesDirectionCount; i++)
       mJoystickInputs[i] = 0;
@@ -107,7 +109,7 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
 
    mClientInfo->setRole(ClientInfo::RoleOwner);       // Local connection is always owner
 
-   getUIManager()->activate(GameUI);
+   getUIManager()->activate<GameUserInterface>();
    GameConnection *gameConnection = new GameConnection(this);
  
    setConnectionToServer(gameConnection);
@@ -140,7 +142,7 @@ void ClientGame::joinRemoteGame(Address remoteAddress, bool isFromMaster)
 
    bool useArrangedConnection = isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected;
 
-   getUIManager()->activate(GameUI);
+   getUIManager()->activate<GameUserInterface>();
 
    if(useArrangedConnection)  // Request arranged connection
       connToMaster->requestArrangedConnection(remoteAddress);
@@ -394,12 +396,12 @@ void ClientGame::switchTeams()
    // If there are only two teams, just switch teams and skip the rigamarole
    if(getTeamCount() == 2)
    {
-      Ship *ship = getLocalPlayerShip();   // Returns player's ship, can return NULL...
+      Ship *ship = getLocalPlayerShip();     // Returns player's ship, can return NULL...
       if(!ship)
          return;
 
       changeOwnTeam(1 - ship->getTeam());    // If two teams, team will either be 0 or 1, so "1 - team" will toggle
-      getUIManager()->reactivate(GameUI);    // Jump back into the game (this option takes place immediately)
+      getUIManager()->reactivate(getUIManager()->getUI<GameUserInterface>());   // Jump back into the game (this option takes place immediately)
    }
    else     // More than 2 teams, need to present menu to choose
       getUIManager()->showMenuToChangeNameForPlayer(getPlayerName());  
@@ -411,6 +413,8 @@ void ClientGame::undelaySpawn()
 {
    if(!isSpawnDelayed())                        // Already undelayed, nothing to do
       return;
+
+   UserInterface *ui = getUIManager()->getUI<GameUserInterface>();
 
    if(mClientInfo->getReturnToGameTime() > 0)   // Waiting for post /idle rejoin timer to wind down, nothing to do
       return;
@@ -598,7 +602,7 @@ void ClientGame::idle(U32 timeDelta)
    // Overwrite theMove if we're using joystick (also does some other essential joystick stuff)
    // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
    // kill the joystick.  The design of combining joystick input and move updating really sucks.
-   if(getInputMode() == InputModeJoystick || getUIManager()->getCurrentUI()->getMenuID() == OptionsUI)
+   if(getInputMode() == InputModeJoystick || getUIManager()->getCurrentUI() == getUIManager()->getUI<OptionsMenuUserInterface>())
       joystickUpdateMove(this, mSettings, theMove);
 
    theMove->time = timeDelta + prevTimeDelta;
@@ -847,7 +851,7 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
    if(playAlert)
       playSoundEffect(SFXPlayerJoined, 1);
 
-   mUIManager->getGameUserInterface()->onPlayerJoined();
+   mUIManager->getUI<GameUserInterface>()->onPlayerJoined();
 
    mGameType->updateLeadingPlayerAndScore();
 }
@@ -861,7 +865,7 @@ void ClientGame::onPlayerQuit(const StringTableEntry &name)
    displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());     // SysMsg
    playSoundEffect(SFXPlayerLeft, 1);
 
-   mUIManager->getGameUserInterface()->onPlayerQuit();
+   mUIManager->getUI<GameUserInterface>()->onPlayerQuit();
 }
 
 
@@ -882,7 +886,7 @@ void ClientGame::onGameOver()
    getGameObjDatabase()->removeEverythingFromDatabase();    
 
    // Inform the UI
-   getUIManager()->getGameUserInterface()->onGameOver();
+   getUIManager()->getUI<GameUserInterface>()->onGameOver();
 }
 
 
@@ -917,7 +921,7 @@ void ClientGame::connectionToServerRejected(const char *reason)
 {
    UIManager *uiManager = getUIManager();
 
-   uiManager->activate(MainUI);
+   uiManager->activate<MainMenuUserInterface>();
 
    const char *title = "Connection Terminated";
    const char *instr = "";
@@ -1332,7 +1336,7 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          messages.push_back("You can try another server, host your own,");
          messages.push_back("or try the server that kicked you again later.");
 
-         getUIManager()->activate(NameEntryUI);
+         getUIManager()->activate<NameEntryUserInterface>();
          getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
@@ -1352,7 +1356,7 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          messages.push_back("");
          messages.push_back("Please try a different game server, or try again later.");
 
-         getUIManager()->activate(NameEntryUI);
+         getUIManager()->activate<NameEntryUserInterface>();
          getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
@@ -1442,7 +1446,7 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          messages.push_back("");
          messages.push_back("Please check your credentials and try again.");
 
-         getUIManager()->activate(NameEntryUI);
+         getUIManager()->activate<NameEntryUserInterface>();
          getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
@@ -1453,7 +1457,7 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          messages.push_back("");
          messages.push_back("Please try a different name.");
 
-         getUIManager()->activate(NameEntryUI);
+         getUIManager()->activate<NameEntryUserInterface>();
          getUIManager()->displayMessageBox(title, instr, messages);
          break;
 
@@ -1720,10 +1724,10 @@ Point ClientGame::worldToScreenPoint(const Point *point,  S32 canvasWidth, S32 c
 
 void ClientGame::render()
 {
-   UIID currentUI = mUIManager->getCurrentUI()->getMenuID();
+   UserInterface *currentUI = mUIManager->getCurrentUI();
 
    // Not in the Game UI (or one of its submenus)...
-   if(currentUI != GameUI && !mUIManager->cameFrom(GameUI))
+   if(currentUI != mUIManager->getUI<GameUserInterface>() && !mUIManager->cameFrom<GameUserInterface>())
       return;
 
    // We render the cmdrs map during the transition

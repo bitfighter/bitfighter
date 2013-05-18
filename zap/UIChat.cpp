@@ -27,6 +27,8 @@
 
 #include "UIQueryServers.h"      // For menuID
 #include "UIGame.h"              // For putting private messages into game console
+#include "UIManager.h"
+
 #include "masterConnection.h"
 #include "ScreenInfo.h"
 #include "ClientGame.h"
@@ -150,7 +152,7 @@ void AbstractChat::playerJoinedGlobalChat(const StringTableEntry &playerNick)
 
 void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
 {
-   ChatUserInterface *ui = mGame->getUIManager()->getChatUserInterface();
+   ChatUserInterface *ui = mGame->getUIManager()->getUI<ChatUserInterface>();
 
    for(S32 i = 0; i < ui->mPlayersInGlobalChat.size(); i++)
       if(ui->mPlayersInGlobalChat[i] == playerNick)
@@ -168,7 +170,7 @@ void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
 
 bool AbstractChat::isPlayerInGlobalChat(const StringTableEntry &playerNick)
 {
-   ChatUserInterface *ui = mGame->getUIManager()->getChatUserInterface();
+   ChatUserInterface *ui = mGame->getUIManager()->getUI<ChatUserInterface>();
 
    for(S32 i = 0; i < ui->mPlayersInGlobalChat.size(); i++)
       if(ui->mPlayersInGlobalChat[i] == playerNick)
@@ -337,14 +339,14 @@ void AbstractChat::renderMessageComposition(S32 ypos)
 }
 
 
+// I think this function is broken... if you are in UIQueryServers, you don't get your message!
+// TODO:  Verify or fix!!!  RAPTOR!
 void AbstractChat::deliverPrivateMessage(const char *sender, const char *message)
 {
    // If player not in UIChat or UIQueryServers, then display message in-game if possible.  2 line message.
-   UIID currId = mGame->getUIManager()->getCurrentUI()->getMenuID();
-
-   if(currId != QueryServersScreenUI )
+   if(!mGame->getUIManager()->isCurrentUI<QueryServersUserInterface>())
    {
-      GameUserInterface *gameUI = mGame->getUIManager()->getGameUserInterface();
+      GameUserInterface *gameUI = mGame->getUIManager()->getUI<GameUserInterface>();
 
       gameUI->onChatMessageReceived(Colors::privateF5MessageDisplayedInGameColor,
          "Private message from %s: Press [%s] to enter chat mode", 
@@ -402,8 +404,6 @@ void AbstractChat::renderChatters(S32 xpos, S32 ypos)
 // Constructor
 ChatUserInterface::ChatUserInterface(ClientGame *game) : Parent(game), ChatParent(game)
 {
-   setMenuID(GlobalChatUI);
-
    mRenderUnderlyingUI = false;
 }
 
@@ -535,7 +535,7 @@ void ChatUserInterface::onActivate()
       masterConn->c2mJoinGlobalChat();
 
    // Only clear the chat list if the previous UI was NOT UIQueryServers
-   if(getUIManager()->getPrevUI() != getUIManager()->getQueryServersUserInterface())
+   if(getUIManager()->getPrevUI() != getUIManager()->getUI<QueryServersUserInterface>())
       mPlayersInGlobalChat.clear();
 
    mRenderUnderlyingUI = true;
@@ -547,7 +547,7 @@ void ChatUserInterface::onOutGameChat()
 {
    // Escape chat only if the previous UI isn't UIQueryServers
    // This is to prevent spamming the chat window with joined/left messages
-   if(getUIManager()->getPrevUI() == getUIManager()->getQueryServersUserInterface())
+   if(getUIManager()->getPrevUI() == getUIManager()->getUI<QueryServersUserInterface>())
       getUIManager()->reactivatePrevUI();
    else
       onEscape();
@@ -558,7 +558,7 @@ void ChatUserInterface::onEscape()
 {
    // Don't leave if UIQueryServers is a parent unless we're in-game...
    // Is UIQueryServers supposed to be a parent of UIGame??
-   if(!getUIManager()->cameFrom(QueryServersScreenUI) || getUIManager()->cameFrom(GameUI))
+   if(!getUIManager()->cameFrom<QueryServersUserInterface>() || getUIManager()->cameFrom<GameUserInterface>())
       leaveGlobalChat();
 
    getUIManager()->reactivatePrevUI();
@@ -572,7 +572,7 @@ void ChatUserInterface::onEscape()
 // Constructor
 SuspendedUserInterface::SuspendedUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(SuspendedUI);
+   // Do nothing
 }
 
 // Destructor

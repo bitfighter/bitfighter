@@ -28,6 +28,14 @@
 #include "UIGame.h"           // Only barely used
 #include "UIEditor.h"         // Can get rid of this with a passthrough in MenuManager
 #include "UIErrorMessage.h"   // Can get rid of this with a passthrough in MenuManager
+#include "UICredits.h"
+#include "UIQueryServers.h"
+#include "UIGameParameters.h"
+#include "UIHighScores.h"
+#include "UIInstructions.h"
+#include "UIKeyDefMenu.h"
+#include "UINameEntry.h"
+#include "UIManager.h"
 
 #include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
 #include "ClientGame.h"
@@ -89,7 +97,6 @@ MenuUserInterface::~MenuUserInterface()
 
 void MenuUserInterface::initialize()
 {
-   setMenuID(GenericUI);
    mMenuTitle = "Menu:";
    mMenuSubTitle = "";
 
@@ -222,9 +229,9 @@ S32 MenuUserInterface::checkMenuIndexBounds(S32 index)
 // Get vert pos of first menu item
 S32 MenuUserInterface::getYStart()
 {
-   S32 vertOff = (getMenuID() == MainUI) ? 40 : 0;    // Make room for the logo on the main menu
+   S32 vertOff = getUIManager()->isCurrentUI<MainMenuUserInterface>() ? 40 : 0;    // Make room for the logo on the main menu
 
-   if(getMenuID() == GameParamsUI)  // If we're on the GameParams menu, start at a constant position
+   if(getUIManager()->isCurrentUI<GameParamUserInterface>())  // If we're on the GameParams menu, start at a constant position
       return 70;
    else                             // Otherwise, attpempt to center the menu vertically
       return (gScreenInfo.getGameCanvasHeight() - min(mMenuItems.size(), mMaxMenuSize) * 
@@ -781,7 +788,7 @@ void MenuUserInterfaceWithIntroductoryAnimation::onActivate()
    if(mFirstTime)
    {
       mFadeInTimer.reset(FadeInTime);
-      getUIManager()->activate(SplashUI);   // Show splash screen the first time through
+      getUIManager()->activate<SplashUserInterface>();   // Show splash screen the first time through
       mShowingAnimation = true;
       mFirstTime = false;
    }
@@ -839,39 +846,39 @@ void MenuUserInterfaceWithIntroductoryAnimation::processSelection(U32 index)
 
 static void joinSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate(QueryServersScreenUI);
+   game->getUIManager()->activate<QueryServersUserInterface>();
 }
 
 static void hostSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate(HostingUI);
+   game->getUIManager()->activate<HostMenuUserInterface>();
 }
 
 static void helpSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate(InstructionsUI);
+   game->getUIManager()->activate<InstructionsUserInterface>();
 }
 
 static void optionsSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate(OptionsUI);
+   game->getUIManager()->activate<OptionsMenuUserInterface>();
 }
 
 static void highScoresSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate(HighScoresUI);
+   game->getUIManager()->activate<HighScoresUserInterface>();
 }
 
 static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
    game->setLevelDatabaseId(0);
-   game->getUIManager()->getEditorUserInterface()->setLevelFileName("");      // Reset this so we get the level entry screen
-   game->getUIManager()->activate(EditorUI);
+   game->getUIManager()->getUI<EditorUserInterface>()->setLevelFileName("");      // Reset this so we get the level entry screen
+   game->getUIManager()->activate<EditorUserInterface>();
 }
 
 static void creditsSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate(CreditsUI);
+   game->getUIManager()->activate<CreditsUserInterface>();
 }
 
 static void quitSelectedCallback(ClientGame *game, U32 unused)
@@ -884,7 +891,6 @@ static void quitSelectedCallback(ClientGame *game, U32 unused)
 // Constructor
 MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(MainUI);
    mMenuTitle = "";
    mMOTD[0] = 0;
    mMenuSubTitle = "";
@@ -1002,7 +1008,7 @@ void MainMenuUserInterface::renderExtras()
 
 void MainMenuUserInterface::showUpgradeAlert()
 {
-   ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+   ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
 
    ui->reset();
    ui->setTitle("OUTDATED VERSION");
@@ -1030,9 +1036,9 @@ void MainMenuUserInterface::onEscape()
 // Constructor
 OptionsMenuUserInterface::OptionsMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(OptionsUI);
    mMenuTitle = "OPTIONS MENU:";
 }
+
 
 // Destructor
 OptionsMenuUserInterface::~OptionsMenuUserInterface()
@@ -1053,13 +1059,13 @@ void OptionsMenuUserInterface::onActivate()
 
 static void inputCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate(InputOptionsUI);
+   game->getUIManager()->activate<InputOptionsMenuUserInterface>();
 }
 
 
 static void soundOptionsSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate(SoundOptionsUI);
+   game->getUIManager()->activate<SoundOptionsMenuUserInterface>();
 }
 
 
@@ -1183,9 +1189,9 @@ void OptionsMenuUserInterface::onEscape()
 // Constructor
 InputOptionsMenuUserInterface::InputOptionsMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(InputOptionsUI);
    mMenuTitle = "INPUT OPTIONS:";
 }
+
 
 // Destructor
 InputOptionsMenuUserInterface::~InputOptionsMenuUserInterface()
@@ -1211,7 +1217,7 @@ static void setControlsCallback(ClientGame *game, U32 val)
 
 static void defineKeysCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate(KeyDefUI);
+   game->getUIManager()->activate<KeyDefMenuUserInterface>();
 }
 
 
@@ -1248,7 +1254,7 @@ static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
    // If there is a different number of sticks than previously detected
    if(sticks != GameSettings::DetectedJoystickNameList.size())
    {
-      ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(game->getUIManager()->getInputOptionsUserInterface()->
+      ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(game->getUIManager()->getUI<InputOptionsMenuUserInterface>()->
                                                                 getMenuItem(INPUT_MODE_MENU_ITEM_INDEX));
 
       // Rebuild this menu with the new number of sticks
@@ -1349,9 +1355,9 @@ void InputOptionsMenuUserInterface::onEscape()
 // Constructor
 SoundOptionsMenuUserInterface::SoundOptionsMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(SoundOptionsUI);
    mMenuTitle = "SOUND OPTIONS:";
 }
+
 
 // Destructor
 SoundOptionsMenuUserInterface::~SoundOptionsMenuUserInterface()
@@ -1450,12 +1456,11 @@ void SoundOptionsMenuUserInterface::onEscape()
 // Constructor
 NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(NameEntryUI);
    mMenuTitle = "";
    mReason = NetConnection::ReasonNone;
    mRenderInstructions = false;
-
 }
+
 
 // Destructor
 NameEntryUserInterface::~NameEntryUserInterface()
@@ -1483,12 +1488,12 @@ void NameEntryUserInterface::onActivate()
 static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
 {
    UIManager *uiManager = clientGame->getUIManager();
-   NameEntryUserInterface *ui = uiManager->getNameEntryUserInterface();
+   NameEntryUserInterface *ui = uiManager->getUI<NameEntryUserInterface>();
 
    if(uiManager->hasPrevUI())
       uiManager->reactivatePrevUI();
    else
-      uiManager->activate(MainUI);
+      uiManager->activate<MainMenuUserInterface>();
 
    string enteredName     = ui->getMenuItem(1)->getValueForWritingToLevelFile();
    string enteredPassword = ui->getMenuItem(2)->getValueForWritingToLevelFile();
@@ -1572,11 +1577,11 @@ void NameEntryUserInterface::onEscape()
 // Constructor
 HostMenuUserInterface::HostMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
 {
-   setMenuID(HostingUI);
    mMenuTitle ="HOST A GAME:";
 
    mEditingIndex = -1;     // Not editing at the start
 }
+
 
 // Destructor
 HostMenuUserInterface::~HostMenuUserInterface()
@@ -1594,7 +1599,7 @@ void HostMenuUserInterface::onActivate()
 
 static void startHostingCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getHostMenuUserInterface()->saveSettings();
+   game->getUIManager()->getUI<HostMenuUserInterface>()->saveSettings();
 
    GameSettings *settings = game->getSettings();
 
@@ -1674,7 +1679,6 @@ void HostMenuUserInterface::render()
 // Constructor
 GameMenuUserInterface::GameMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
 {
-   setMenuID(GameMenuUI);
    mMenuTitle = "GAME MENU:";
 }
 
@@ -1738,7 +1742,7 @@ static void addTwoMinsCallback(ClientGame *game, U32 unused)
 
 static void chooseNewLevelCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate(LevelTypeUI);
+   game->getUIManager()->activate<LevelMenuUserInterface>();
 }
 
 
@@ -1751,7 +1755,7 @@ static void restartGameCallback(ClientGame *game, U32 unused)
 
 static void levelChangeOrAdminPWCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate(LevelChangePasswordEntryUI);
+   game->getUIManager()->activate<LevelChangeOrAdminPasswordEntryUserInterface>();
 }
 
 
@@ -1810,7 +1814,7 @@ void GameMenuUserInterface::buildMenu()
          addMenuItem(new MenuItem("ENTER PASSWORD", levelChangeOrAdminPWCallback, "", KEY_A, KEY_E));
    }
 
-   if(getUIManager()->cameFrom(EditorUI))    // Came from editor
+   if(getUIManager()->cameFrom<EditorUserInterface>())    // Came from editor
       addMenuItem(new MenuItem("RETURN TO EDITOR", endGameCallback, "", KEY_Q, KEY_R));
    else
       addMenuItem(new MenuItem("QUIT GAME",        endGameCallback, "", KEY_Q));
@@ -1823,7 +1827,7 @@ void GameMenuUserInterface::onEscape()
 
    // Show alert about input mode changing, if needed
    bool inputModesChanged = (lastInputMode != getGame()->getInputMode());
-   getUIManager()->getGameUserInterface()->resetInputModeChangeAlertDisplayTimer(inputModesChanged ? 2800 : 0);
+   getUIManager()->getUI<GameUserInterface>()->resetInputModeChangeAlertDisplayTimer(inputModesChanged ? 2800 : 0);
 }
 
 
@@ -1833,7 +1837,7 @@ void GameMenuUserInterface::onEscape()
 // Constructor
 LevelMenuUserInterface::LevelMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
 {
-   setMenuID(LevelTypeUI);
+   // Do nothing
 }
 
 
@@ -1852,7 +1856,7 @@ static const U32 UPLOAD_LEVELS_MENUID = 0x80000002;
 
 static void selectLevelTypeCallback(ClientGame *game, U32 level)
 {
-   LevelMenuSelectUserInterface *ui = game->getUIManager()->getLevelMenuSelectUserInterface();
+   LevelMenuSelectUserInterface *ui = game->getUIManager()->getUI<LevelMenuSelectUserInterface>();
 
    // First entry will be "All Levels", subsequent entries will be level types populated from mLevelInfos
    if(level == ALL_LEVELS_MENUID)
@@ -1931,7 +1935,7 @@ void LevelMenuUserInterface::onEscape()
 // Constructor
 LevelMenuSelectUserInterface::LevelMenuSelectUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(LevelUI);
+   // Do nothing
 }
 
 // Destructor
@@ -1943,7 +1947,7 @@ LevelMenuSelectUserInterface::~LevelMenuSelectUserInterface()
 
 static void processLevelSelectionCallback(ClientGame *game, U32 index)             
 {
-   game->getUIManager()->getLevelMenuSelectUserInterface()->processSelection(index);
+   game->getUIManager()->getUI<LevelMenuSelectUserInterface>()->processSelection(index);
 }
 
 
@@ -1963,9 +1967,9 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
          getGame()->displayErrorMessage("!!! Can't upload level: unable to read file");
    }
    else
-      gc->c2sRequestLevelChange(index, false);     // The selection index is the level to load
+      gc->c2sRequestLevelChange(index, false);           // The selection index is the level to load
 
-   getUIManager()->reactivate(GameUI);             // Back to the game menu
+   getUIManager()->reactivate(getUIManager()->getUI<GameMenuUserInterface>());  // Back to the game menu
 }
 
 
@@ -2085,7 +2089,7 @@ void LevelMenuSelectUserInterface::onEscape()
 // Constructor
 PlayerMenuUserInterface::PlayerMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(PlayerUI);
+   // Do nothing
 }
 
 // Destructor
@@ -2097,7 +2101,7 @@ PlayerMenuUserInterface::~PlayerMenuUserInterface()
 
 static void playerSelectedCallback(ClientGame *game, U32 index) 
 {
-   game->getUIManager()->getPlayerMenuUserInterface()->playerSelected(index);
+   game->getUIManager()->getUI<PlayerMenuUserInterface>()->playerSelected(index);
 }
 
 
@@ -2117,18 +2121,18 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
 
    if(action == PlayerActionChangeTeam)
    {
-      TeamMenuUserInterface *ui = getUIManager()->getTeamMenuUserInterface();
+      TeamMenuUserInterface *ui = getUIManager()->getUI<TeamMenuUserInterface>();
       ui->nameToChange = getMenuItem(index)->getPrompt();
 
-      getUIManager()->activate(TeamUI);     // Show menu to let player select a new team
+      getUIManager()->activate<TeamMenuUserInterface>();     // Show menu to let player select a new team
    }
 
    else if(gt)    // action == Kick
       gt->c2sKickPlayer(getMenuItem(index)->getPrompt());
 
 
-   if(action != PlayerActionChangeTeam)       // Unless we need to move on to the change team screen...
-      getUIManager()->reactivate(GameUI);     // ...it's back to the game!
+   if(action != PlayerActionChangeTeam)                 // Unless we need to move on to the change team screen...
+      getUIManager()->reactivate(getUIManager()->getUI<GameUserInterface>());  // ...it's back to the game!
 }
 
 
@@ -2183,7 +2187,6 @@ void PlayerMenuUserInterface::onEscape()
 // Constructor
 TeamMenuUserInterface::TeamMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(TeamUI);
    mMenuSubTitle = "[Human Players | Bots | Score]";
 }
 
@@ -2196,7 +2199,7 @@ TeamMenuUserInterface::~TeamMenuUserInterface()
 
 static void processTeamSelectionCallback(ClientGame *game, U32 index)        
 {
-   game->getUIManager()->getTeamMenuUserInterface()->processSelection(index);
+   game->getUIManager()->getUI<TeamMenuUserInterface>()->processSelection(index);
 }
 
 
@@ -2205,16 +2208,17 @@ void TeamMenuUserInterface::processSelection(U32 index)
    // Make sure user isn't just changing to the team they're already on...
    if(index != (U32)getGame()->getTeamIndex(nameToChange.c_str()))
    {
-      if(getPrevMenuID() == PlayerUI)        // Initiated by an admin (PlayerUI is the kick/change team player-pick admin menu)
+      // Check if was initiated by an admin (PlayerUI is the kick/change team player-pick admin menu)
+      if(getUIManager()->getPrevUI() == getUIManager()->getUI<PlayerMenuUserInterface>())        
       {
          StringTableEntry e(nameToChange.c_str());
-         getGame()->changePlayerTeam(e, index);    // Index will be the team index
+         getGame()->changePlayerTeam(e, index);       // Index will be the team index
       }
-      else                                         // Came from player changing own team
+      else                                            // Came from player changing own team
          getGame()->changeOwnTeam(index); 
    }
 
-   getUIManager()->reactivate(GameUI);       // Back to the game!
+   getUIManager()->reactivate(getUIManager()->getUI<GameUserInterface>());   // Back to the game!
 }
 
 

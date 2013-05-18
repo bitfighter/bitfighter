@@ -26,6 +26,8 @@
 #include "UITeamDefMenu.h"
 
 #include "UIEditor.h"
+#include "UIManager.h"
+
 #include "EditorTeam.h"
 #include "ScreenInfo.h"
 #include "ClientGame.h"
@@ -78,7 +80,6 @@ TeamPreset gTeamPresets[] = {
 // Constructor
 TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(TeamDefUI);
    mMenuTitle = "Configure Teams";
    mMenuSubTitle = "For quick configuration, press [ALT-1] - [ALT-9] to specify number of teams";
    mMenuSubTitleColor = Colors::white;
@@ -101,7 +102,7 @@ void TeamDefUserInterface::onActivate()
    selectedIndex = 0;                                 // First item selected when we begin
    mEditing = false;                                  // Not editing anything by default
 
-   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
    S32 teamCount = ui->getTeamCount();
 
    ui->mOldTeams.resize(teamCount);  // Avoid unnecessary reallocations
@@ -149,7 +150,7 @@ void TeamDefUserInterface::render()
    glColor(Colors::white);
    drawCenteredString(canvasHeight - vertMargin - 20, 18, "Arrow Keys to choose | ESC to exit");
 
-   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    S32 size = ui->getTeamCount();
 
@@ -219,7 +220,7 @@ void TeamDefUserInterface::render()
 void TeamDefUserInterface::onEscape()
 {
    // Make sure there is at least one team left...
-   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    ui->makeSureThereIsAtLeastOneTeam();
    ui->teamsHaveChanged();
@@ -236,7 +237,7 @@ extern bool isPrintable(char c);
 
 void TeamDefUserInterface::onTextInput(char ascii)
 {
-   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    if(mEditing)
    {
@@ -254,7 +255,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    if(Parent::onKeyDown(inputCode))
       return true;
 
-   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    if(inputCode == KEY_ENTER)
    {
@@ -381,7 +382,7 @@ void TeamDefUserInterface::onMouseMoved()
 
    Cursor::enableCursor();
 
-   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    S32 teams = ui->getTeamCount();
 

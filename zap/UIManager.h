@@ -30,6 +30,7 @@
 
 #include "SoundSystemEnums.h"
 #include "SparkTypesEnum.h"
+#include "PlayerActionEnum.h"
 
 #include "Color.h"
 #include "Point.h"
@@ -48,88 +49,47 @@ using namespace TNL;
 namespace Zap
 {
 
-class ChatUserInterface; 
-class CreditsUserInterface;
-class DiagnosticUserInterface;
-class EditorInstructionsUserInterface;
-class EditorMenuUserInterface;
-class EditorUserInterface;
-class ErrorMessageUserInterface;
-class GameMenuUserInterface;
-class GameParamUserInterface;
-class GameUserInterface;
-class HighScoresUserInterface;
-class HostMenuUserInterface;
-class InputOptionsMenuUserInterface;
-class InstructionsUserInterface;
-class KeyDefMenuUserInterface;
-class LevelChangeOrAdminPasswordEntryUserInterface;
-class LevelMenuSelectUserInterface;
-class LevelMenuUserInterface;
-class LevelNameEntryUserInterface;
-class MainMenuUserInterface;
-class MessageUserInterface;
-class NameEntryUserInterface;
-class OptionsMenuUserInterface;
-class PlayerMenuUserInterface;
-class SoundOptionsMenuUserInterface;
-class QueryServersUserInterface;
-class ServerPasswordEntryUserInterface;
-class ServerPasswordEntryUserInterface;
-class SplashUserInterface;
-class SuspendedUserInterface;
-class TeamDefUserInterface;
-class TeamDefUserInterface;
-class TeamMenuUserInterface;
-class UserInterface;
-class YesNoUserInterface;
+//class ChatUserInterface; 
+//class CreditsUserInterface;
+//class DiagnosticUserInterface;
+//class EditorInstructionsUserInterface;
+//class EditorMenuUserInterface;
+//class EditorUserInterface;
+//class ErrorMessageUserInterface;
+//class GameMenuUserInterface;
+//class GameParamUserInterface;
+//class GameUserInterface;
+//class HighScoresUserInterface;
+//class HostMenuUserInterface;
+//class InputOptionsMenuUserInterface;
+//class InstructionsUserInterface;
+//class KeyDefMenuUserInterface;
+//class LevelChangeOrAdminPasswordEntryUserInterface;
+//class LevelMenuSelectUserInterface;
+//class LevelMenuUserInterface;
+//class LevelNameEntryUserInterface;
+//class MainMenuUserInterface;
+//class MessageUserInterface;
+//class NameEntryUserInterface;
+//class OptionsMenuUserInterface;
+//class PlayerMenuUserInterface;
+//class SoundOptionsMenuUserInterface;
+//class QueryServersUserInterface;
+//class ServerPasswordEntryUserInterface;
+//class ServerPasswordEntryUserInterface;
+//class SplashUserInterface;
+//class SuspendedUserInterface;
+//class TeamDefUserInterface;
+//class TeamDefUserInterface;
+//class TeamMenuUserInterface;
+//class UserInterface;
+//class YesNoUserInterface;
 
 class Game;
 class ClientGame;
 class GameSettings;
+class UserInterface;
 
-enum UIID {
-   CreditsUI,
-   DiagnosticsScreenUI,
-   EditorInstructionsUI,
-   EditorUI,
-   EditorMenuUI,        // <=== Don't confuse this with EditorUI!!!
-   ErrorMessageUI,
-   GameMenuUI,
-   GameParamsUI,
-   GameUI,
-   GenericUI,
-   GlobalChatUI,
-   SuspendedUI,
-   HighScoresUI,
-   HostingUI,
-   InputOptionsUI,
-   InstructionsUI,
-   KeyDefUI,
-   LevelUI,
-   LevelNameEntryUI,
-   LevelChangePasswordEntryUI,
-   LevelTypeUI,
-   MainUI,
-   NameEntryUI,
-   OptionsUI,
-   PasswordEntryUI,
-   PlayerUI,
-   TeamUI,
-   QueryServersScreenUI,
-   SoundOptionsUI,
-   SplashUI,
-   TeamDefUI,
-   TextEntryUI,
-   YesOrNoUI,
-   InvalidUI        // Not a valid UI
-};
-
-enum PlayerAction {
-      PlayerActionKick,
-      PlayerActionChangeTeam,
-      ActionCount
-   };
 
 class UIManager
 {
@@ -138,39 +98,7 @@ private:
    ClientGame *mGame;
    GameSettings *mSettings;
 
-   UserInterface                                *mCurrentInterface;
-
-   ChatUserInterface                            *mChatInterface;
-   CreditsUserInterface                         *mCreditsUserInterface;
-   DiagnosticUserInterface                      *mDiagnosticUserInterface;
-   EditorInstructionsUserInterface              *mEditorInstructionsUserInterface;
-   EditorMenuUserInterface                      *mEditorMenuUserInterface;
-   EditorUserInterface                          *mEditorUserInterface;
-   ErrorMessageUserInterface                    *mErrorMsgUserInterface;
-   GameMenuUserInterface                        *mGameMenuUserInterface;
-   GameParamUserInterface                       *mGameParamUserInterface;
-   GameUserInterface                            *mGameUserInterface;
-   HighScoresUserInterface                      *mHighScoresUserInterface;
-   HostMenuUserInterface                        *mHostMenuUserInterface;
-   InputOptionsMenuUserInterface                *mInputOptionsUserInterface;
-   InstructionsUserInterface                    *mInstructionsUserInterface;
-   KeyDefMenuUserInterface                      *mKeyDefMenuUserInterface;
-   LevelChangeOrAdminPasswordEntryUserInterface *mLevelChangeOrAdminPasswordEntryUserInterface;
-   LevelMenuUserInterface                       *mLevelMenuUserInterface;
-   LevelNameEntryUserInterface                  *mLevelNameEntryUserInterface;
-   MainMenuUserInterface                        *mMainMenuUserInterface;
-   MessageUserInterface                         *mMessageUserInterface;
-   NameEntryUserInterface                       *mNameEntryUserInterface;
-   OptionsMenuUserInterface                     *mOptionsMenuUserInterface;
-   PlayerMenuUserInterface                      *mPlayerMenuUserInterface;
-   SoundOptionsMenuUserInterface                *mSoundOptionsMenuUserInterface;
-   QueryServersUserInterface                    *mQueryServersUserInterface;
-   ServerPasswordEntryUserInterface             *mServerPasswordEntryUserInterface;
-   SplashUserInterface                          *mSplashUserInterface;
-   SuspendedUserInterface                       *mSuspendedUserInterface;
-   TeamDefUserInterface                         *mTeamDefUserInterface;
-   TeamMenuUserInterface                        *mTeamMenuUserInterface;
-   YesNoUserInterface                           *mYesNoUserInterface;
+   UserInterface *mCurrentInterface;
 
    Vector<UserInterface *> mPrevUIs;   // Previously active menus
 
@@ -188,59 +116,57 @@ public:
    explicit UIManager(ClientGame *clientGame);  // Constructor
    virtual ~UIManager();                        // Destructor
 
-   bool isCurrentUI(UIID uiid);
-   UserInterface *getUI(UIID menuId);
+
+   template <typename T>
+   T *getUI()
+   {
+      static T ui(mGame);        // Uses lazy initialization
+
+      return &ui;
+   }
 
 
-   /////
-   // Interface getting methods
-   MainMenuUserInterface                        *getMainMenuUserInterface();
+   template <typename T>
+   bool isCurrentUI()
+   {
+      return mCurrentInterface == getUI<T>();
+   }
 
-   ChatUserInterface                            *getChatUserInterface();
-   CreditsUserInterface                         *getCreditsUserInterface();
-   DiagnosticUserInterface                      *getDiagnosticUserInterface();
-   EditorInstructionsUserInterface              *getEditorInstructionsUserInterface();
-   EditorMenuUserInterface                      *getEditorMenuUserInterface();
-   EditorUserInterface                          *getEditorUserInterface();
-   ErrorMessageUserInterface                    *getErrorMsgUserInterface();
-   GameMenuUserInterface                        *getGameMenuUserInterface();
-   GameParamUserInterface                       *getGameParamUserInterface();
-   GameUserInterface                            *getGameUserInterface();
-   HighScoresUserInterface                      *getHighScoresUserInterface();
-   HostMenuUserInterface                        *getHostMenuUserInterface();
-   InputOptionsMenuUserInterface                *getInputOptionsUserInterface();
-   InstructionsUserInterface                    *getInstructionsUserInterface();
-   KeyDefMenuUserInterface                      *getKeyDefMenuUserInterface();
-   LevelChangeOrAdminPasswordEntryUserInterface *getLevelChangeOrAdminPasswordEntryUserInterface();
-   LevelMenuSelectUserInterface                 *getLevelMenuSelectUserInterface();
-   LevelMenuUserInterface                       *getLevelMenuUserInterface();
-   LevelNameEntryUserInterface                  *getLevelNameEntryUserInterface();
-   MessageUserInterface                         *getMessageUserInterface();
-   NameEntryUserInterface                       *getNameEntryUserInterface();
-   OptionsMenuUserInterface                     *getOptionsMenuUserInterface();
-   PlayerMenuUserInterface                      *getPlayerMenuUserInterface();
-   QueryServersUserInterface                    *getQueryServersUserInterface();
-   ServerPasswordEntryUserInterface             *getServerPasswordEntryUserInterface();
-   SoundOptionsMenuUserInterface                *getSoundOptionsMenuUserInterface();
-   SplashUserInterface                          *getSplashUserInterface();
-   SuspendedUserInterface                       *getSuspendedUserInterface();
-   TeamDefUserInterface                         *getTeamDefUserInterface();
-   TeamMenuUserInterface                        *getTeamMenuUserInterface();
-   YesNoUserInterface                           *getYesNoUserInterface();
 
+   // Did we arrive at our current interface via the specified interface?
+   template <typename T>
+   bool cameFrom()
+   {
+      for(S32 i = 0; i < mPrevUIs.size(); i++)
+         if(mPrevUIs[i] == getUI<T>())
+            return true;
+
+      return false;
+   }
+
+ 
    void reactivatePrevUI();
-   void reactivate(UIID menuId);
+   void reactivate(const UserInterface *ui);
+
    bool hasPrevUI();
    void clearPrevUIs();
    void renderPrevUI(const UserInterface *ui);
-   bool cameFrom(UIID menuID);        // Did we arrive at our current interface via the specified interface?
+
+
    void saveUI(UserInterface *ui);
 
    void renderCurrent();
    UserInterface *getCurrentUI();
    UserInterface *getPrevUI();
-   void activate(UIID menuID, bool save = true);
-   void activate(UserInterface *, bool save = true);
+   //void activate(UIID menuID, bool save = true);
+
+   template <typename T>
+   void activate(bool save = true)
+   {
+      activate(getUI<T>(), save);
+   }
+
+   void activate(UserInterface *ui, bool save = true);
 
    void idle(U32 timeDelta);
 

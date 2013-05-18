@@ -8,6 +8,7 @@
 #include "Event.h"
 
 #include "Console.h"
+#include "UIManager.h"
 #include "UIMenus.h"       // ==> Could be refactored out with some work
 #include "IniFile.h"
 #include "ScreenInfo.h"
@@ -53,7 +54,10 @@ Event::~Event()
 void Event::setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode reportedDisplayMode)
 {
    // Handle special case of editor... would be better handled elsewhere?
-   if(currentUI->getMenuID() == EditorUI && reportedDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+
+   // If we are in the editor, we want to tell setMousePos that we are running in fullscreen stretched mode because it 
+   // will convert the mouse coordinate assuming no black bars at the margins.  
+   if(currentUI->usesEditorScreenMode() && reportedDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
       reportedDisplayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
 
    gScreenInfo.setMousePos(x, y, reportedDisplayMode);
@@ -346,7 +350,7 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
    {
       const Point *pos = gScreenInfo.getMousePos();
 
-      game->getUIManager()->getOptionsMenuUserInterface()->toggleDisplayMode();
+      game->getUIManager()->getUI<OptionsMenuUserInterface>()->toggleDisplayMode();
 
       gScreenInfo.setCanvasMousePos((S32)pos->x, (S32)pos->y, game->getSettings()->getIniSettings()->displayMode);
 

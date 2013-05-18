@@ -25,6 +25,9 @@
 
 #include "UIErrorMessage.h"
 
+#include "UIManager.h"
+
+
 namespace Zap
 {
 
@@ -114,7 +117,7 @@ void AbstractMessageUserInterface::render()
 // Constructor
 ErrorMessageUserInterface::ErrorMessageUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(ErrorMessageUI);
+   // Do nothing
 }
 
 // Destructor

@@ -25,10 +25,12 @@
 
 #include "UIHighScores.h"
 
+#include "UIErrorMessage.h"
+#include "UIManager.h"
+
+#include "ClientGame.h"
 #include "gameObjectRender.h"
 #include "masterConnection.h"   
-#include "ClientGame.h"
-#include "UIErrorMessage.h"
 #include "ScreenInfo.h"          // For canvas dimensions
 
 #include "Colors.h"
@@ -47,7 +49,6 @@ namespace Zap
 // Constructor
 HighScoresUserInterface::HighScoresUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(HighScoresUI);
    mHaveHighScores = false;
 }
 
@@ -143,7 +144,7 @@ void HighScoresUserInterface::renderWaitingForScores()
 
    string msg;
 
-   ErrorMessageUserInterface *errUI = getGame()->getUIManager()->getErrorMsgUserInterface();
+   ErrorMessageUserInterface *errUI = getGame()->getUIManager()->getUI<ErrorMessageUserInterface>();
    errUI->reset();
    errUI->setInstr("");
 

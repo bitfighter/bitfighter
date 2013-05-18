@@ -27,6 +27,8 @@
 
 #include "UIGame.h"
 #include "UIEditor.h"      // Only used once, could probably be refactored out
+#include "UIManager.h"
+
 #include "ClientGame.h"
 #include "ScreenInfo.h"
 
@@ -46,7 +48,6 @@ using namespace std;
 // Constructor
 TextEntryUserInterface::TextEntryUserInterface(ClientGame *game) : Parent(game)  
 {
-   setMenuID(TextEntryUI);
    title = "ENTER TEXT:";
    instr1 = "";
    instr2 = "Enter some text above";
@@ -156,7 +157,6 @@ void TextEntryUserInterface::setString(string str)
 // Constructor
 LevelNameEntryUserInterface::LevelNameEntryUserInterface(ClientGame *game) : Parent(game)     
 {
-   setMenuID(LevelNameEntryUI);
    title = "ENTER LEVEL TO EDIT:";
    instr1 = "Enter an existing level, or create your own!";
    instr2 = "Arrows / wheel cycle existing levels | Tab completes partial name";
@@ -286,7 +286,7 @@ void LevelNameEntryUserInterface::completePartial()
 
 void LevelNameEntryUserInterface::onAccept(const char *name)
 {
-   EditorUserInterface *ui = static_cast<EditorUserInterface *>(getUIManager()->getUI(EditorUI));
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
    ui->setLevelFileName(name);
 
    playBoop();
@@ -324,7 +324,7 @@ void PasswordEntryUserInterface::render()
 
    if(getGame()->getConnectionToServer())
    {
-      getUIManager()->getGameUserInterface()->render();
+      getUIManager()->getUI<GameUserInterface>()->render();
 
       glColor(Colors::black, 0.5);
 
@@ -367,7 +367,7 @@ void ServerAccessPasswordEntryUserInterface::onAccept(const char *text)
 
 void ServerAccessPasswordEntryUserInterface::onEscape()
 {
-   getUIManager()->activate(MainUI);
+   getUIManager()->activate<MainMenuUserInterface>();
 }
 
 
@@ -383,7 +383,6 @@ void ServerAccessPasswordEntryUserInterface::setAddressToConnectTo(const Address
 // Constructor
 ServerPasswordEntryUserInterface::ServerPasswordEntryUserInterface(ClientGame *game) : Parent(game)     
 {
-   setMenuID(PasswordEntryUI);
    title = "ENTER SERVER PASSWORD:";
    instr1 = "";
    instr2 = "Enter the password required for access to the server";
@@ -403,7 +402,6 @@ ServerPasswordEntryUserInterface::~ServerPasswordEntryUserInterface()
 // Constructor
 LevelChangeOrAdminPasswordEntryUserInterface::LevelChangeOrAdminPasswordEntryUserInterface(ClientGame *game) : Parent(game)     
 {
-   setMenuID(LevelChangePasswordEntryUI);
    title = "ENTER PASSWORD:";
    instr1 = "";
    instr2 = "Enter level change or admin password to change levels on this server";
@@ -424,7 +422,7 @@ void LevelChangeOrAdminPasswordEntryUserInterface::onAccept(const char *text)
    if(submitting)
    {
       getUIManager()->reactivatePrevUI();                                      // Reactivating clears subtitle message, so reactivate first...
-      getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = "** checking password **";     // ...then set the message
+      getUIManager()->getUI<GameMenuUserInterface>()->mMenuSubTitle = "** checking password **";     // ...then set the message
    }
    else
       getUIManager()->reactivatePrevUI();                                      // Otherwise, just reactivate the previous menu

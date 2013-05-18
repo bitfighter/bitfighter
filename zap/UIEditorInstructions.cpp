@@ -25,6 +25,8 @@
 
 #include "UIEditorInstructions.h"
 
+#include "UIManager.h"
+
 #include "ClientGame.h"       // For usage with getGame()
 #include "barrier.h"     
 #include "BotNavMeshZone.h"   // For Border class def
@@ -49,11 +51,10 @@ static Border border34;
 // Constructor
 EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(EditorInstructionsUI);
-
    mCurPage = 1;
    mAnimStage = 0;
 }
+
 
 // Destructor
 EditorInstructionsUserInterface::~EditorInstructionsUserInterface()

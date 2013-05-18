@@ -24,8 +24,10 @@
 //------------------------------------------------------------------------------------
 
 #include "UICredits.h"
-#include "gameObjectRender.h"    // For renderBitfighterLogo
 
+#include "UIManager.h"
+
+#include "gameObjectRender.h"    // For renderBitfighterLogo
 #include "ScreenInfo.h"
 #include "Colors.h"
 
@@ -100,8 +102,6 @@ static bool quitting = false;
 // Constructor
 CreditsUserInterface::CreditsUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(CreditsUI);
-
    mScroller = new CreditsScroller();
 }
 
@@ -119,7 +119,7 @@ void CreditsUserInterface::onActivate()
    quitting = false;
 
    // Show splash animation at beginning of credits
-   getUIManager()->activate(SplashUI);
+   getUIManager()->activate<SplashUserInterface>();
 
    mScroller->setActive(true);
 }
@@ -297,7 +297,6 @@ bool CreditsScroller::isActive() const
 // Constructor
 SplashUserInterface::SplashUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(SplashUI);
    mPhase = SplashPhaseNone;
 }
 

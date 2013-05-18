@@ -26,6 +26,9 @@
 #include "helperMenu.h"
 
 #include "UIGame.h"              // For mGameUserInterface
+#include "UIInstructions.h"
+
+#include "UIManager.h"
 #include "ClientGame.h"
 #include "FontManager.h"
 
@@ -87,7 +90,7 @@ InputCode HelperMenu::getActivationKey()
 void HelperMenu::exitHelper() 
 { 
    Slider::onDeactivated();
-   mClientGame->getUIManager()->getGameUserInterface()->exitHelper();
+   mClientGame->getUIManager()->getUI<GameUserInterface>()->exitHelper();
 }
 
 
@@ -377,7 +380,7 @@ void HelperMenu::onTextInput(char ascii)
 
 void HelperMenu::activateHelp(UIManager *uiManager)
 {
-    uiManager->activate(InstructionsUI);
+    uiManager->activate<InstructionsUserInterface>();
 }
 
 

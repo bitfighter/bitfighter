@@ -28,6 +28,8 @@
 #ifndef BF_NO_SCREENSHOTS
 
 #include "UI.h"
+#include "UIEditor.h"
+#include "UIManager.h"
 #include "ScreenInfo.h"
 #include "ClientGame.h"
 #include "VideoSystem.h"   // For setting screen geom vars
@@ -116,6 +118,7 @@ void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 }
 
 
+
 // Thanks to the good developers of naev for excellent code to base this off of.
 // Much was copied directly.
 void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings, string filename)
@@ -145,8 +148,8 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
 
    // We default to resizing the opengl viewport to the standard canvas size, unless we're
    // in the editor or our window is smaller than the canvas size
-   bool doResize = uiManager->getCurrentUI()->getMenuID() != EditorUI &&
-         gScreenInfo.getWindowWidth() > gScreenInfo.getGameCanvasWidth();
+   bool doResize = (!uiManager->isCurrentUI<EditorUserInterface>()) &&
+                     gScreenInfo.getWindowWidth() > gScreenInfo.getGameCanvasWidth();
 
    // Change opengl viewport temporarily to have consistent screenshot sizes
    if(doResize)

@@ -26,6 +26,8 @@
 #include "UIDiagnostics.h"
 
 #include "UIMenus.h"
+#include "UIManager.h"
+
 #include "masterConnection.h"
 #include "ScreenInfo.h"
 #include "JoystickRender.h"
@@ -65,8 +67,6 @@ static const S32 NUM_PAGES = 3;
 // Constructor
 DiagnosticUserInterface::DiagnosticUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(DiagnosticsScreenUI);
-
    mActive = false;
    mCurPage = 0;
 }
@@ -361,7 +361,7 @@ void DiagnosticUserInterface::render()
 
       textsize = 16;
 
-      bool needToUpgrade = getUIManager()->getMainMenuUserInterface()->getNeedToUpgrade();
+      bool needToUpgrade = getUIManager()->getUI<MainMenuUserInterface>()->getNeedToUpgrade();
 
       drawCenteredString2Colf(ypos, textsize, false, "%s", needToUpgrade ? "<<Update available>>" : "<<Current version>>");
       ypos += textsize + gap;

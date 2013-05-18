@@ -28,13 +28,15 @@
 
 #include "UIGame.h"
 
-#include "gameType.h"
 #include "UIMenus.h"
 #include "UIInstructions.h"
 #include "UIChat.h"
 #include "UIMessage.h"
 #include "UIDiagnostics.h"
 #include "UIErrorMessage.h"
+#include "UIManager.h"
+
+#include "gameType.h"
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "shipItems.h"           // For EngineerBuildObjects
 #include "gameObjectRender.h"
@@ -95,7 +97,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
 
    mMessageDisplayMode = ShortTimeout;
 
-   setMenuID(GameUI);
    mInScoreboardMode = false;
 
    // Some debugging settings
@@ -637,7 +638,7 @@ void GameUserInterface::renderProgressBar() const
 void GameUserInterface::renderReticle() const
 {
    bool shouldRender = getGame()->getInputMode() == InputModeKeyboard &&         // Reticle in keyboard mode only
-                       getUIManager()->getCurrentUI()->getMenuID() == GameUI;    // And not when a menu is active
+                       getUIManager()->isCurrentUI<GameUserInterface>();    // And not when a menu is active
    if(shouldRender)
    {
       Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
@@ -889,7 +890,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       if(mHelperManager.isHelperActive())
          mHelperManager.activateHelp(getUIManager());
       else
-         getUIManager()->activate(InstructionsUI);
+         getUIManager()->activate<InstructionsUserInterface>();
 
       return true;
    }
@@ -1114,12 +1115,12 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       if(!getGame()->isConnectedToServer())     // Perhaps we're still joining?
       {
          getGame()->closeConnectionToGameServer();
-         getUIManager()->activate(MainUI);      // Back to main menu
+         getUIManager()->activate<MainMenuUserInterface>();      // Back to main menu
       }
       else
       {
          getGame()->setBusyChatting(true);
-         getUIManager()->activate(GameMenuUI);
+         getUIManager()->activate<GameMenuUserInterface>();
       }
    }     
    else if(checkInputCode(settings, InputCodeManager::BINDING_CMDRMAP, inputCode))
@@ -2128,7 +2129,7 @@ void GameUserInterface::renderNormal(ClientGame *game)
 
    FxTrail::renderTrails();
 
-   getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
+   getUIManager()->getUI<GameUserInterface>()->renderEngineeredItemDeploymentMarker(ship);
 
    // Again, we'll be accessing the server's data directly so we can see server-side item ids directly on the client.  Again,
    // the result is that we can only see zones on our local server.
@@ -2292,7 +2293,7 @@ void GameUserInterface::renderCommander(ClientGame *game)
          renderObjects[i]->renderLayer(1);
    }
 
-   getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
+   getUIManager()->getUI<GameUserInterface>()->renderEngineeredItemDeploymentMarker(ship);
 
    glPopMatrix();
 

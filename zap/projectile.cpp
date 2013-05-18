@@ -1390,7 +1390,7 @@ static F32 normalizeAngle(F32 angle)
 
 
 U32 Seeker::SpeedIncreasePerSecond = 300;
-U32 Seeker::TargetAcquisitionRadius = 800;
+U32 Seeker::TargetAcquisitionRadius = 400;
 F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2;
 F32 Seeker::TargetSearchAngle = FloatTau * .6f;     // Anglular spread in front of ship to search for targets
 
@@ -1513,7 +1513,7 @@ void Seeker::acquireTarget()
    // Used for wall detection
    static Vector<DatabaseObject *> localFillVector;
 
-   Rect queryRect(getPos(), TargetAcquisitionRadius / 2);      // <=== RAPTOR: should this be / 2 or not? (I added it, need to discuss - Wat)
+   Rect queryRect(getPos(), TargetAcquisitionRadius);
    fillVector.clear();
    findObjects(isSeekerTarget, fillVector, queryRect);
 

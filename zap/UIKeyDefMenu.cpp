@@ -24,6 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "UIKeyDefMenu.h"
+
+#include "UIManager.h"
+
 #include "ScreenInfo.h"
 #include "Joystick.h"
 #include "JoystickRender.h"
@@ -67,7 +70,6 @@ KeyDefMenuItem::~KeyDefMenuItem()
 // Constructor
 KeyDefMenuUserInterface::KeyDefMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(KeyDefUI);
    mMenuTitle = "Define Keys";
    mMenuSubTitle = "";
    mMenuFooter = "UP, DOWN, LEFT, RIGHT to choose | ENTER to select | ESC exits menu";

@@ -26,6 +26,11 @@
 
 #include "UI.h"
 
+#include "UIChat.h"
+#include "UIDiagnostics.h"
+#include "UIMenus.h"
+#include "UIManager.h"
+
 #include "ClientGame.h"
 #include "Console.h"             // For console rendering
 #include "Colors.h"
@@ -70,8 +75,6 @@ UserInterface::UserInterface(ClientGame *clientGame)
    mClientGame = clientGame;
    mTimeSinceLastInput = 0;
    mDisableShipKeyboardInput = true;
-
-   mInternalMenuID = InvalidUI;
 }
 
 
@@ -109,33 +112,6 @@ void UserInterface::activate()
 void UserInterface::reactivate()
 {
    onReactivate();
-}
-
-
-// Set interface's name.  This name is used internally only for debugging
-// and to identify interfaces when searching for matches.  Each interface
-// should have a unique id.
-
-void UserInterface::setMenuID(UIID menuID)
-{
-   mInternalMenuID = menuID;
-}
-
-
-// Retrieve interface's id
-UIID UserInterface::getMenuID() const
-{
-   return mInternalMenuID;
-}
-
-
-// Retrieve previous interface's id
-UIID UserInterface::getPrevMenuID() const
-{
-   if(getUIManager()->hasPrevUI())
-      return getUIManager()->getPrevUI()->mInternalMenuID;
-   else
-      return InvalidUI;
 }
 
 
@@ -410,6 +386,10 @@ const char *UserInterface::getInputCodeString(GameSettings *settings, InputCodeM
    return InputCodeManager::inputCodeToString(getInputCode(settings, binding));
 }
 
+
+class ChatUserInterface;
+class NameEntryUserInterface;
+class DiagnosticUserInterface;
  
 bool UserInterface::onKeyDown(InputCode inputCode)
 { 
@@ -422,10 +402,10 @@ bool UserInterface::onKeyDown(InputCode inputCode)
 
    if(checkInputCode(settings, InputCodeManager::BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
    { 
-      if(uiManager->isCurrentUI(DiagnosticsScreenUI))
+      if(uiManager->isCurrentUI<DiagnosticUserInterface>())
          return false;
 
-      uiManager->activate(DiagnosticsScreenUI);
+      uiManager->activate<DiagnosticUserInterface>();
 
       playBoop();
       
@@ -435,10 +415,10 @@ bool UserInterface::onKeyDown(InputCode inputCode)
    {
       // Don't activate if we're already in chat or if we're on the Name Entry
       // screen (since we don't have a nick yet)
-      if(uiManager->isCurrentUI(GlobalChatUI) || uiManager->isCurrentUI(NameEntryUI))
+      if(uiManager->isCurrentUI<ChatUserInterface>() || uiManager->isCurrentUI<NameEntryUserInterface>())
          return false;
 
-      getGame()->getUIManager()->activate(GlobalChatUI);
+      getGame()->getUIManager()->activate<ChatUserInterface>();
       playBoop();
 
       handled = true;

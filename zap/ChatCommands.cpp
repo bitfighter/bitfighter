@@ -298,7 +298,7 @@ static bool isLocalTestServer(ClientGame *game, const char *failureMessage)
 // Can work on any server, confers no advantage
 void showCoordsHandler(ClientGame *game, const Vector<string> &words)
 {
-   game->getUIManager()->getGameUserInterface()->toggleShowingShipCoords();
+   game->getUIManager()->getUI<GameUserInterface>()->toggleShowingShipCoords();
 }
 
 
@@ -306,7 +306,7 @@ void showCoordsHandler(ClientGame *game, const Vector<string> &words)
 void showIdsHandler(ClientGame *game, const Vector<string> &words)
 {
    if(isLocalTestServer(game, "!!! Ids can only be displayed on a test server"))
-      game->getUIManager()->getGameUserInterface()->toggleShowingObjectIds();
+      game->getUIManager()->getUI<GameUserInterface>()->toggleShowingObjectIds();
 }
 
 
@@ -314,7 +314,7 @@ void showIdsHandler(ClientGame *game, const Vector<string> &words)
 void showZonesHandler(ClientGame *game, const Vector<string> &words)
 {
    if(isLocalTestServer(game, "!!! Zones can only be displayed on a local host"))
-      game->getUIManager()->getGameUserInterface()->toggleShowingMeshZones();
+      game->getUIManager()->getUI<GameUserInterface>()->toggleShowingMeshZones();
 }
 
 
@@ -332,7 +332,7 @@ void showBotsHandler(ClientGame *game, const Vector<string> &words)
 void showPathsHandler(ClientGame *game, const Vector<string> &words)
 {
    if(isLocalTestServer(game, "!!! Robots can only be shown on a test server")) 
-      game->getUIManager()->getGameUserInterface()->toggleShowDebugBots();
+      game->getUIManager()->getUI<GameUserInterface>()->toggleShowDebugBots();
 }
 
 
@@ -542,7 +542,7 @@ void pmHandler(ClientGame *game, const Vector<string> &words)
       else
       {
          S32 argCount = 2 + countCharInString(words[1], ' ');  // Set pointer after 2 args + number of spaces in player name
-         const char *message = game->getUIManager()->getGameUserInterface()->getChatMessage();   // Get the original line
+         const char *message = game->getUIManager()->getUI<GameUserInterface>()->getChatMessage();   // Get the original line
          message = findPointerOfArg(message, argCount);        // Get the rest of the message
 
          GameType *gt = game->getGameType();
@@ -845,7 +845,7 @@ void shuffleTeams(ClientGame *game, const Vector<string> &words)
          return;
       }
 
-      game->getUIManager()->getGameUserInterface()->activateHelper(HelperMenu::ShuffleTeamsHelperType, true);
+      game->getUIManager()->getUI<GameUserInterface>()->activateHelper(HelperMenu::ShuffleTeamsHelperType, true);
    }
 }
 

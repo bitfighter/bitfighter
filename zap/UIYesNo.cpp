@@ -35,11 +35,10 @@ namespace Zap
 // Constructor
 YesNoUserInterface::YesNoUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(YesOrNoUI);
-
    mYesFunction = NULL;
    mNoFunction = NULL;
 }
+
 
 // Destructor
 YesNoUserInterface::~YesNoUserInterface()

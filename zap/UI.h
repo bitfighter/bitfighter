@@ -30,7 +30,7 @@
 #  error "UI.h shouldn't be included in dedicated build"
 #endif
 
-#include "UIManager.h"
+//#include "UIManager.h"
 #include "lineEditor.h"
 #include "InputCode.h"
 
@@ -66,7 +66,7 @@ class UserInterface
    friend class UIManager;    // Give UIManager access to private and protected members
 
 private:
-   UIID mInternalMenuID;                     // Unique interface ID
+   //UIID mInternalMenuID;                     // Unique interface ID
 
    static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
    static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
@@ -81,7 +81,6 @@ private:
 
 protected:
    bool mDisableShipKeyboardInput;           // Disable ship movement while user is in menus
-   void setMenuID(UIID menuID);              // Set interface's name
 
 public:
    explicit UserInterface(ClientGame *game);       // Constructor
@@ -93,8 +92,8 @@ public:
    static const S32 MaxServerNameLen = 40;
    static const S32 MaxServerDescrLen = 254;
 
-   UIID getMenuID() const;                   // Retrieve interface's name
-   UIID getPrevMenuID() const;               // Retrieve previous interface's name
+   //UIID getMenuID() const;                   // Retrieve interface's name
+   //UIID getPrevMenuID() const;               // Retrieve previous interface's name
 
    ClientGame *getGame() const;
 
@@ -111,7 +110,6 @@ public:
    virtual void onDeactivate(bool nextUIUsesEditorScreenMode);
    virtual void onReactivate();
    virtual void onDisplayModeChange();
-
 
    virtual bool usesEditorScreenMode();   // Returns true if the UI attempts to use entire screen like editor, false otherwise
 

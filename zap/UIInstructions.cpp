@@ -25,6 +25,8 @@
 
 #include "UIInstructions.h"
 
+#include "UIManager.h"
+
 #include "ClientGame.h"
 #include "gameObjectRender.h"
 #include "teleporter.h"
@@ -79,8 +81,6 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
    // Quick sanity check...
    TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum IntructionPages!!!");
 
-   setMenuID(InstructionsUI);
-   
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
    col1 = horizMargin + 0 * canvasWidth / 4;
@@ -216,7 +216,7 @@ void InstructionsUserInterface::render()
 
 void InstructionsUserInterface::activatePage(IntructionPages pageIndex)
 {
-   getUIManager()->activate(getMenuID());                // Activates ourselves, essentially
+   getUIManager()->activate(this);                // Activates ourselves, essentially
    mCurPage = pageIndex;
 }
 

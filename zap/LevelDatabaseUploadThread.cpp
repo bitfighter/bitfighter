@@ -1,4 +1,6 @@
 #include "LevelDatabaseUploadThread.h"
+
+#include "UIManager.h"
 #include "HttpRequest.h"
 #include "ClientGame.h"
 #include "UIEditor.h"
@@ -24,7 +26,7 @@ LevelDatabaseUploadThread::~LevelDatabaseUploadThread()
 
 U32 LevelDatabaseUploadThread::run()
 {
-   EditorUserInterface* editor = mGame->getUIManager()->getEditorUserInterface();
+   EditorUserInterface* editor = mGame->getUIManager()->getUI<EditorUserInterface>();
 
    if(mGame->getLevelDatabaseId())
    {

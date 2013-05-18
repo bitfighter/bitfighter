@@ -26,6 +26,8 @@
 #include "UIGameParameters.h"
 
 #include "UIEditor.h"
+#include "UIManager.h"
+
 #include "game.h"
 #include "gameType.h"
 #include "ClientGame.h"
@@ -82,8 +84,6 @@ string SavedMenuItem::getParamVal()
 // Constructor
 GameParamUserInterface::GameParamUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(GameParamsUI);
-   
    mMenuTitle = "Game Parameters Menu";
    mMenuSubTitle = "";
    mMaxMenuSize = S32_MAX;                // We never want scrolling on this menu!
@@ -141,7 +141,7 @@ static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
    gt->addToGame(game, NULL);    // GameType::addToGame() ignores database (and what would it do with one, anyway?), so we can pass NULL
 
    // If we have a new gameType, we might have new game parameters; update the menu!
-   game->getUIManager()->getGameParamUserInterface()->updateMenuItems();
+   game->getUIManager()->getUI<GameParamUserInterface>()->updateMenuItems();
 }
 
 
@@ -182,7 +182,7 @@ void GameParamUserInterface::updateMenuItems()
                                   instructs));
 
 
-   string fn = stripExtension(getUIManager()->getEditorUserInterface()->getLevelFileName());
+   string fn = stripExtension(getUIManager()->getUI<EditorUserInterface>()->getLevelFileName());
    addMenuItem(new TextEntryMenuItem("Filename:",                         // name
                                      fn,                                  // val
                                      "",                                  // empty val
@@ -215,7 +215,7 @@ void GameParamUserInterface::updateMenuItems()
 // Runs as we're exiting the menu
 void GameParamUserInterface::onEscape()
 {
-   getUIManager()->getEditorUserInterface()->setLevelFileName(getMenuItem(1)->getValue());  
+   getUIManager()->getUI<EditorUserInterface>()->setLevelFileName(getMenuItem(1)->getValue());  
 
    GameType *gameType = getGame()->getGameType();
 
@@ -231,7 +231,7 @@ void GameParamUserInterface::onEscape()
 
    if(anythingChanged())
    {
-      EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+      EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
       ui->setNeedToSave(true);       // Need to save to retain our changes
       ui->mAllUndoneUndoLevel = -1;  // This change can't be undone
