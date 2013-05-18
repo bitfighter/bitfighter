@@ -34,6 +34,7 @@
 #include "Color.h"
 
 #include "tnlNetStringTable.h"
+#include "tnlNetBase.h"
 
 #include <string>
 
@@ -42,7 +43,7 @@ namespace Zap
 
 static const S32 MAX_NAME_LEN = 256;
 
-class AbstractTeam
+class AbstractTeam : public RefPtrData
 {
 protected:
    Color mColor;
@@ -152,7 +153,7 @@ public:
 class TeamManager
 {
 private:
-   Vector<AbstractTeam *> mTeams;
+   Vector<RefPtr<AbstractTeam> > mTeams;
    Vector<S32> mTeamHasFlagList;      // Track which team (or teams) have the flag
 
 public:

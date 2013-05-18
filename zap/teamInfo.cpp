@@ -362,7 +362,7 @@ AbstractTeam *TeamManager::getTeam(S32 teamIndex)
 
 void TeamManager::removeTeam(S32 teamIndex)
 {
-   mTeams.deleteAndErase(teamIndex);
+   mTeams.erase(teamIndex);
    mTeamHasFlagList.resize(mTeams.size());
 }
 
@@ -409,7 +409,6 @@ void TeamManager::clearTeamHasFlagList()
 
 void TeamManager::replaceTeam(AbstractTeam *team, S32 index)
 {
-   delete mTeams[index];  // delete old team that is no longer used
    mTeams[index] = team;
 
    team->setTeamIndex(index);
@@ -418,7 +417,7 @@ void TeamManager::replaceTeam(AbstractTeam *team, S32 index)
 
 void TeamManager::clearTeams()
 {
-   mTeams.deleteAndClear();
+   mTeams.clear();
    mTeamHasFlagList.clear();
 }
 
