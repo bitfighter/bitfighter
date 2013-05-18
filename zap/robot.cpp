@@ -988,7 +988,7 @@ S32 Robot::lua_activateModule(lua_State *L)
    for(S32 i = 0; i < ShipModuleCount; i++)
       if(getModule(i) == mod)
       {
-         mLoadout.setModuleIndxPrimary(i, true);
+         mCurrentMove.modulePrimary[i] = true;
          break;
       }
 
@@ -1003,7 +1003,7 @@ S32 Robot::lua_activateModuleIndex(lua_State *L)
 
    U32 indx = (U32)getInt(L, 1);
 
-   mLoadout.setModuleIndxPrimary(indx, true);
+   mCurrentMove.modulePrimary[indx] = true;
 
    return 0;
 }

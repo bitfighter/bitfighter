@@ -174,10 +174,14 @@ S32 LuaGameInfo::lua_getPlayers(lua_State *L)
 
 S32 LuaGameInfo::lua_getTeam(lua_State *L)
 {
-   checkArgList(L, functionArgs, "GameInfo", "setTeam");
+   checkArgList(L, functionArgs, "GameInfo", "getTeam");
 
    S32 index = getTeamIndex(L, 1);
+   
+   if(U32(index) >= U32(gServerGame->getTeamCount())) // Out of range index?
+      return returnNil(L);
 
+   TNLAssert(dynamic_cast<Team*>(gServerGame->getTeam(index)), "Bad team pointer or bad type");
    return returnTeam(L, static_cast<Team*>(gServerGame->getTeam(index)));
 }
 

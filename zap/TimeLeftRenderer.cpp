@@ -108,6 +108,7 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
 
    for(S32 i = teamCount - 1; i >= 0; i--)
    {
+      TNLAssert(dynamic_cast<Team *>(game->getTeam(i)), "Bad team pointer or bad type");
       S32 score = static_cast<Team *>(game->getTeam(i))->getScore();
       //score = Platform::getRealMilliseconds() / 1000 % 20 * i;  // Uncomment to test display of various scores
 

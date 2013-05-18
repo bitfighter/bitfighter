@@ -84,13 +84,21 @@ using namespace boost;
 namespace Zap
 {
 
-const S32 DOCK_WIDTH = 50;          // Width of dock, in pixels
+// Dock widths in pixels
+const S32 ITEMS_DOCK_WIDTH = 50;
+const S32 PLUGINS_DOCK_WIDTH = 150;
+const U32 PLUGIN_LINE_SPACING = 20;
+
 const F32 MIN_SCALE = .05f;         // Most zoomed-in scale
 const F32 MAX_SCALE = 2.5;          // Most zoomed-out scale
 const F32 STARTING_SCALE = 0.5;
 
 static GridDatabase *mLoadTarget;
 
+S32 QSORT_CALLBACK pluginInfoSort(EditorUserInterface::PluginInfo *a, EditorUserInterface::PluginInfo *b)
+{
+   return stricmp((a)->prettyName.c_str(), (b)->prettyName.c_str());
+}
 
 //Vector<string> EditorUserInterface::robots;        // List of robot lines in the level file
 
@@ -135,6 +143,8 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mHitItem     = NULL;
    mNewItem     = NULL;
    mDockItemHit = NULL;
+   mDockWidth = ITEMS_DOCK_WIDTH;
+   mDockMode = DOCKMODE_ITEMS;
 
    mHitVertex = NONE;
    mEdgeHit   = NONE;
@@ -189,7 +199,7 @@ void EditorUserInterface::populateDock()
 {
    mDockItems.clear();
 
-   F32 xPos = (F32)gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH / 2;
+   F32 xPos = (F32)gScreenInfo.getGameCanvasWidth() - horizMargin - ITEMS_DOCK_WIDTH / 2;
    F32 yPos = 35;
    const F32 spacer = 35;
 
@@ -1222,6 +1232,7 @@ void EditorUserInterface::onActivate()
    VideoSystem::actualizeScreenMode(settings, true, usesEditorScreenMode());
 
    centerView();
+   findPlugins();
 }
 
 
@@ -1484,14 +1495,22 @@ bool EditorUserInterface::showMinorGridLines()
    return mCurrentScale >= .5;
 }
 
+static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
+{
+   TNLAssert(dynamic_cast<BfObject *>(*a), "Not a BfObject");
+   TNLAssert(dynamic_cast<BfObject *>(*b), "Not a BfObject");
+   return ((BfObject *)(*b))->getTeam() - ((BfObject *)(*a))->getTeam();
+}
+
 
 void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
 {
-   const Vector<DatabaseObject *> *spyBugs = editorDb->findObjects_fast(SpyBugTypeNumber);
-
-   if(spyBugs->size() != 0)
+   fillVector = *editorDb->findObjects_fast(SpyBugTypeNumber);  // This will actually copy vector of pointers to fillVector
+                                                                // so we can sort by team, this is still faster then findObjects.
+   if(fillVector.size() != 0)
    {
       // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team
+      fillVector.sort(sortByTeam); // Need to sort by team, or else won't properly combine the colors.
       glClear(GL_DEPTH_BUFFER_BIT);
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_DEPTH_WRITEMASK);
@@ -1502,20 +1521,21 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
       // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
       glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
 
+      S32 prevTeam = -10;
+
       // Draw spybug visibility ranges first, underneath everything else
-      for(S32 i = 0; i < spyBugs->size(); i++)
+      for(S32 i = 0; i < fillVector.size(); i++)
       {
-         SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
-         F32 translation = 0.05f * sb->getTeam();  // This way, each team ends up with a consistent but unique z-pos
+         BfObject *editorObj = dynamic_cast<BfObject *>(fillVector[i]);
 
-         glTranslatef(0, 0, translation);
+         if(i != 0 && editorObj->getTeam() != prevTeam)
+            glTranslatef(0, 0, 0.05f);
+         prevTeam = editorObj->getTeam();
 
-         Point pos = sb->getPos();
+         Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderSpyBugVisibleRange(pos, *sb->getColor(), mCurrentScale);
-
-         glTranslatef(0, 0, -translation);         // Reset translation back to where it was
+         renderSpyBugVisibleRange(pos, *editorObj->getColor(), mCurrentScale);
       }
 
       setDefaultBlendFunction();
@@ -1555,11 +1575,35 @@ void EditorUserInterface::renderDock()
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
+   Color fillColor;
+
+   switch(mDockMode)
+   {
+      case DOCKMODE_ITEMS:
+         fillColor = Colors::red30;
+         break;
+
+      case DOCKMODE_PLUGINS:
+         fillColor = Colors::blue40;
+         break;
+   }
+
    S32 dockHeight = getDockHeight();
 
-   renderFancyBox(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin - dockHeight,
+   renderFancyBox(canvasWidth - mDockWidth - horizMargin, canvasHeight - vertMargin - dockHeight,
                   canvasWidth - horizMargin,              canvasHeight - vertMargin,
-                  8, Colors::red30, .7f, (mouseOnDock() ? Colors::yellow : Colors::white));
+                  8, fillColor, .7f, (mouseOnDock() ? Colors::yellow : Colors::white));
+
+   switch(mDockMode)
+   {
+      case DOCKMODE_ITEMS:
+         renderDockItems();
+         break;
+
+      case DOCKMODE_PLUGINS:
+         renderDockPlugins();
+         break;
+   }
 }
 
 
@@ -1917,7 +1961,7 @@ void EditorUserInterface::render()
    {
       // The following items are hidden in preview mode:
       renderDock();
-      renderDockItems();
+
       renderInfoPanel();
       renderItemInfoPanel();
 
@@ -2087,6 +2131,22 @@ static void renderDockItemLabel(const Point &pos, const char *label)
 }
 
 
+void EditorUserInterface::renderDockPlugins()
+{
+   S32 hoveredPlugin = mouseOnDock() ? findHitPlugin() : -1;
+   for(S32 i = 0; i < mPluginInfos.size(); i++)
+   {
+      if(hoveredPlugin == i)
+      {
+         S32 x = gScreenInfo.getGameCanvasWidth() - mDockWidth - horizMargin;
+         S32 y = 1.5 * vertMargin + PLUGIN_LINE_SPACING*i;
+         drawHollowRect(x + horizMargin / 3, y, x + mDockWidth - horizMargin / 3, y + PLUGIN_LINE_SPACING, Colors::white);
+      }
+      renderDockItemLabel(Point(gScreenInfo.getGameCanvasWidth() - mDockWidth / 2 - horizMargin, 1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 0.33)), mPluginInfos[i].prettyName.c_str());
+   }
+}
+
+
 void EditorUserInterface::renderSaveMessage()
 {
    if(mSaveMsgTimer.getCurrent())
@@ -2217,7 +2277,11 @@ void EditorUserInterface::copySelection()
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
       if(obj->isSelected())
-         mClipboard.push_back(boost::shared_ptr<BfObject>(obj->copy()));
+      {
+         BfObject *objcopy = obj->copy();
+         objcopy->unlinkFromIdleList();  // Prevents Game::cleanUp() and shared_ptr from trying to free this twice (double delete error)
+         mClipboard.push_back(boost::shared_ptr<BfObject>(objcopy));
+      }
    }
 }
 
@@ -2691,6 +2755,22 @@ void EditorUserInterface::findHitItemOnDock()
       }
 
    return;
+}
+
+
+S32 EditorUserInterface::findHitPlugin()
+{
+   S32 i;
+   for(i = 0; i < mPluginInfos.size(); i++)
+   {
+      if(mMousePos.y > 1.5 * vertMargin + PLUGIN_LINE_SPACING * i &&
+         mMousePos.y < 1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 1)
+      )
+      {
+         return i;
+      }
+   }
+   return -1;
 }
 
 
@@ -3836,6 +3916,22 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       mSnapContext = NO_SNAPPING;
    else if(inputString == "Tab")             // Turn on preview mode
       mPreviewMode = true;
+   else if(inputString == "F8")
+   {
+      mDockMode = DOCKMODE_ITEMS;
+      mDockWidth = ITEMS_DOCK_WIDTH;
+   }
+   else if(inputString == "F9")
+   {
+      U32 maxWidth = 0;
+      for(S32 i; i < mPluginInfos.size(); i++)
+      {
+         U32 width = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
+         maxWidth = max(maxWidth, width);
+      }
+      mDockMode = DOCKMODE_PLUGINS;
+      mDockWidth = maxWidth + horizMargin;
+   }
    else if(checkPluginKeyBindings(inputString))
    {
       // Do nothing
@@ -3877,11 +3973,20 @@ void EditorUserInterface::onMouseClicked_left()
 
    if(mouseOnDock())    // On the dock?  Did we hit something to start dragging off the dock?
    {
+      switch(mDockMode)
+      {
+         case DOCKMODE_ITEMS:
       clearSelection(getDatabase());
       mDraggingDockItem = mDockItemHit;      // Could be NULL
 
       if(mDraggingDockItem)
          SDL_SetCursor(Cursor::getSpray());
+            break;
+
+         case DOCKMODE_PLUGINS:
+            runPlugin(getGame()->getSettings()->getFolderManager(), mPluginInfos[findHitPlugin()].fileName, Vector<string>());
+            break;
+      }
    }
    else                 // Mouse is not on dock
    {
@@ -4332,7 +4437,7 @@ void EditorUserInterface::onFinishedDragging()
 
 bool EditorUserInterface::mouseOnDock()
 {
-   return (mMousePos.x >= gScreenInfo.getGameCanvasWidth() - DOCK_WIDTH - horizMargin &&
+   return (mMousePos.x >= gScreenInfo.getGameCanvasWidth() - mDockWidth - horizMargin &&
            mMousePos.x <= gScreenInfo.getGameCanvasWidth() - horizMargin &&
            mMousePos.y >= gScreenInfo.getGameCanvasHeight() - vertMargin - getDockHeight() &&
            mMousePos.y <= gScreenInfo.getGameCanvasHeight() - vertMargin);
@@ -4632,6 +4737,22 @@ void EditorMenuUserInterface::onActivate()
 {
    Parent::onActivate();
    setupMenus();
+}
+
+void EditorUserInterface::findPlugins()
+{
+   mPluginInfos.clear();
+   string dirName = getGame()->getSettings()->getFolderManager()->pluginDir;
+   Vector<string> plugins;
+   string extension = ".lua";
+   getFilesFromFolder(dirName, plugins, &extension, 1);
+
+   for(S32 i = 0; i < plugins.size(); i++)
+   {
+      mPluginInfos.push_back(PluginInfo(plugins[i], plugins[i]));
+   }
+
+   mPluginInfos.sort(pluginInfoSort);
 }
 
 

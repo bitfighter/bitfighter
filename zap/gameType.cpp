@@ -1994,6 +1994,7 @@ void GameType::updateLeadingTeamAndScore()
    // Find the leading team...
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
+      TNLAssert(dynamic_cast<Team *>(mGame->getTeam(i)), "Bad team pointer or bad type");
       S32 score = static_cast<Team *>(mGame->getTeam(i))->getScore();
 
       if(score > mLeadingTeamScore)
