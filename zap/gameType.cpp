@@ -185,7 +185,7 @@ void GameTimer::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
 // Constructor
-GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000), mGameTimeUpdateTimer(30000), mBotBalanceAnalysisTimer(10000)
+GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(3000), mGameTimeUpdateTimer(30000), mBotBalanceAnalysisTimer(10000)
 {
    mNetFlags.set(Ghostable);
    mBetweenLevels = true;
@@ -3717,29 +3717,19 @@ void GameType::updateClientScoreboard(ClientInfo *requestor)
       else
          mPingTimes.push_back(MaxPing);
 
-      mScores.push_back(info->getScore());
-
       // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
       mRatings.push_back(info->getCalculatedRating());
    }
 
-   // Next come the robots ... Robots is part of mClientList
-   //for(S32 i = 0; i < Robot::getBotCount(); i++)
-   //{
-   //   mPingTimes.push_back(0);
-   //   mScores.push_back(Robot::robots[i]->getScore());
-   //   mRatings.push_back(max(min((U32)(Robot::robots[i]->getRating() * 100.0) + 100, maxRating), minRating));
-   //}
-
    NetObject::setRPCDestConnection(requestor->getConnection());
-   s2cScoreboardUpdate(mPingTimes, mScores, mRatings);
+   s2cScoreboardUpdate(mPingTimes, mRatings);
    NetObject::setRPCDestConnection(NULL);
 }
 
 
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cScoreboardUpdate,
-                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<SignedFloat<8> > ratings),
-                 (pingTimes, scores, ratings), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
+                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedFloat<8> > ratings),
+                 (pingTimes, ratings), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
@@ -3749,7 +3739,6 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cScoreboardUpdate,
       ClientInfo *client = mGame->getClientInfo(i);
 
       client->setPing(pingTimes[i]);
-      client->setScore(scores[i]);
       client->setRating(ratings[i]);
    }
 }

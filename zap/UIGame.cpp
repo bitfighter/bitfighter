@@ -97,8 +97,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
 
    mMessageDisplayMode = ShortTimeout;
 
-   mInScoreboardMode = false;
-
    // Some debugging settings
    mDebugShowShipCoords   = false;
    mDebugShowObjectIds    = false;

@@ -469,7 +469,7 @@ public:
    TNL_DECLARE_RPC(s2cSetPlayerScore, (U16 index, S32 score));
 
    TNL_DECLARE_RPC(c2sRequestScoreboardUpdates, (bool updates));
-   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<SignedFloat<8> > ratings));
+   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedFloat<8> > ratings));
 
    void updateClientScoreboard(ClientInfo *clientInfo);
 
