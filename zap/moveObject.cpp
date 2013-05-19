@@ -2032,13 +2032,31 @@ bool Worm::getCollisionCircle(U32 state, Point &center, F32 &radius) const
    return false;
 }
 
+void Worm::computeCollisionPoly()
+{
+   S32 i = mHeadIndex;
+   mPolyPoints.clear();
+	TNLAssert(mTailLength != 0, "Must not be zero length");
+
+   for(S32 count = 0; count < mTailLength; count++)
+   {
+      mPolyPoints.push_back(mPoints[i]);
+      i--;
+      if(i < 0)
+         i = MaxTailLength - 1;
+   }
+   for(S32 count = 0; count < mTailLength; count++)
+   {
+      mPolyPoints.push_back(mPoints[i]);
+      i++;
+      if(i >= MaxTailLength)
+         i = 0;
+   }
+}
 
 const Vector<Point> *Worm::getCollisionPoly() const
 {
-   if(mPolyPoints.size() > 0)
-      return &mPolyPoints;
-   else
-      return NULL;
+   return &mPolyPoints;
 }
 
 bool Worm::collide(BfObject *otherObject)
@@ -2064,6 +2082,7 @@ void Worm::setPosAng(Point pos, F32 ang)
    else
       setMaskBits(TailPointPartsMask << mHeadIndex);
 
+   computeCollisionPoly();
    setExtent(Rect(*getCollisionPoly()));
 }
 
@@ -2166,26 +2185,7 @@ void Worm::idle(BfObject::IdleCallPath path)
       mDirTimer.reset(TNL::Random::readI(300, 400));
    }
 
-   Parent::idle(path);
-
-   // Recompute mPolyPoints
-   S32 i = mHeadIndex;
-   mPolyPoints.clear();
-
-   for(S32 count = 0; count < mTailLength; count++)
-   {
-      mPolyPoints.push_back(mPoints[i]);
-      i--;
-      if(i < 0)
-         i = MaxTailLength - 1;
-   }
-   for(S32 count = 0; count < mTailLength; count++)
-   {
-      mPolyPoints.push_back(mPoints[i]);
-      i++;
-      if(i >= MaxTailLength)
-         i = 0;
-   }
+   //Parent::idle(path);
 }
 
 
@@ -2235,6 +2235,7 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
          }
       }
 
+
    if(stream->readFlag())
    {
       bool explode = (stream->readFlag());     // Exploding!  Take cover!!
@@ -2253,6 +2254,7 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
    }
 
+   computeCollisionPoly();
    setExtent(Rect(*getCollisionPoly()));
 #endif
 }
