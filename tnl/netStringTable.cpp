@@ -149,7 +149,7 @@ void init()
       mBuckets[i] = 0;
 
    mNumBuckets = InitialHashTableSize;
-   mItemCount = 1;
+   mItemCount = 0;
 
    mNodeList = (Node **) malloc(InitialNodeListSize * sizeof(Node *));
    for(U32 i = 1; i < InitialNodeListSize; i++)
