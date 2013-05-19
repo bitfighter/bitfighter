@@ -476,6 +476,8 @@ bool LuaScriptRunner::prepareEnvironment()
    luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create a local scripting environment
    lua_getglobal(L, "e");                                //                                        -- environment e   
    lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
+   lua_pushnil(L);                                       //
+   lua_setglobal(L, "e");                                //
 
    return true;
 }
