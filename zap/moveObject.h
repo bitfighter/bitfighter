@@ -496,6 +496,7 @@ public:
    void render();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
+   void onGeomChanged();
 
    F32 getEditorRadius(F32 currentScale);
 

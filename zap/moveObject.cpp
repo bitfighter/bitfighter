@@ -2009,6 +2009,7 @@ F32 Worm::getRadius()
 
 void Worm::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
+   mPoints[mHeadIndex] = getPos();
    render();
 }
 
@@ -2024,6 +2025,10 @@ F32 Worm::getEditorRadius(F32 currentScale)
    return 10;     // Or something... who knows??
 }
 
+void Worm::onGeomChanged()
+{
+   setPosAng(getPos(), mAngle);
+}
 
 bool Worm::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
@@ -2036,7 +2041,6 @@ void Worm::computeCollisionPoly()
 {
    S32 i = mHeadIndex;
    mPolyPoints.clear();
-	TNLAssert(mTailLength != 0, "Must not be zero length");
 
    for(S32 count = 0; count < mTailLength; count++)
    {
@@ -2056,7 +2060,10 @@ void Worm::computeCollisionPoly()
 
 const Vector<Point> *Worm::getCollisionPoly() const
 {
-   return &mPolyPoints;
+   if(mPolyPoints.size() != 0)
+      return &mPolyPoints;
+   else
+      return NULL;
 }
 
 bool Worm::collide(BfObject *otherObject)
@@ -2097,8 +2104,11 @@ void Worm::damageObject(DamageInfo *damageInfo)
    if(mTailLength < 2)
    {
       hasExploded = true;
+      disableCollision();
       deleteObject(500);
    }
+   else
+      computeCollisionPoly();
    setMaskBits(ExplodeOrTailLengthMask);
 }
 
