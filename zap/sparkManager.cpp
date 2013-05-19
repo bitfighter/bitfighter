@@ -41,6 +41,13 @@ using namespace TNL;
 
 namespace Zap { namespace UI {
 
+struct FxManager::TeleporterEffect
+{
+   Point pos;
+   S32 time;
+   U32 type;
+   TeleporterEffect *nextEffect;
+};
 
 FxManager::FxManager()
 {
@@ -55,7 +62,13 @@ FxManager::FxManager()
 
 FxManager::~FxManager()
 {
-   // Do nothing
+   TeleporterEffect *e = teleporterEffects;
+   while(e != NULL)
+   {
+      TeleporterEffect *e_current = e;
+      e = e->nextEffect;
+      delete e_current;
+   }
 }
 
 
@@ -202,15 +215,6 @@ void FxManager::emitTextEffect(const string &text, const Color &color, const Poi
 
    mTextEffects.push_back(textEffect);
 }
-
-
-struct FxManager::TeleporterEffect
-{
-   Point pos;
-   S32 time;
-   U32 type;
-   TeleporterEffect *nextEffect;
-};
 
 
 void FxManager::emitTeleportInEffect(const Point &pos, U32 type)
