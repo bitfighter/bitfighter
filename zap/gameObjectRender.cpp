@@ -2722,7 +2722,7 @@ void render25FlagsBadge(F32 x, F32 y, F32 rad)
 {
    glPushMatrix();
       glTranslate(x, y, 0);
-      glScale(.50);
+      glScale(.05 * rad);
       glColor(Colors::gray40);
       drawEllipse(Point(-16, 15), 6, 2, 0);
 
