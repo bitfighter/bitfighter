@@ -337,7 +337,7 @@ public:
    void emitTeleportInEffect(const Point &pos, U32 type);
 
    
-   void renderBasicInterfaceOverlay(bool scoreboardVisible);
+   void renderBasicInterfaceOverlay();
    void renderLevelInfo();
    void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
 

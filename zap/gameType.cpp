@@ -778,9 +778,9 @@ bool GameType::advanceGameClock(U32 deltaT)
 
 
 #ifndef ZAP_DEDICATED
-void GameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
+void GameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
 {
-   static_cast<ClientGame *>(mGame)->renderBasicInterfaceOverlay(scoreboardVisible);
+   static_cast<ClientGame *>(mGame)->renderBasicInterfaceOverlay();
 }
 
 

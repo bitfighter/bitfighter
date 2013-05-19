@@ -66,7 +66,7 @@ public:
 
 
    // Runs on client
-   void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
+   void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
 
 
    // What does a particular scoring event score?

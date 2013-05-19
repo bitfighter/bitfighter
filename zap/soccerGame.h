@@ -49,7 +49,7 @@ public:
    void updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent scoringEvent, S32 score);   // Helper function to make sure the two-arg version of updateScore doesn't get a null ship
 
    void setBall(SoccerBallItem *theBall);
-   void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
+   void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 

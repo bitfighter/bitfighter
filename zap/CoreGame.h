@@ -55,7 +55,7 @@ public:
    bool isTeamCoreBeingAttacked(S32 teamIndex) const;
 
    // Runs on client
-   void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
+   void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
 
    void addCore(CoreItem *core, S32 team);
    void removeCore(CoreItem *core);

@@ -413,7 +413,7 @@ void GameUserInterface::render()
    GameType *gameType = getGame()->getGameType();
 
    if(gameType)
-      gameType->renderInterfaceOverlay(mInScoreboardMode, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
+      gameType->renderInterfaceOverlay(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
 
    renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
    
@@ -1807,14 +1807,14 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
 }
 
 
-void GameUserInterface::renderBasicInterfaceOverlay(bool scoreboardVisible)
+void GameUserInterface::renderBasicInterfaceOverlay()
 {
    GameType *gameType = getGame()->getGameType();
    
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
       renderInputModeChangeAlert();
 
-   bool showScore = gameType->isGameOver() || scoreboardVisible;
+   bool showScore = gameType->isGameOver() || mInScoreboardMode;
 
    if(showScore && getGame()->getTeamCount() > 0)      // How could teamCount be 0?
       renderScoreboard();

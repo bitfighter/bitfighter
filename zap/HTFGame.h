@@ -63,7 +63,7 @@ public:
    // Same code as in retrieveGame, CTF
    void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
 
-   void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
+   void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
 
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;

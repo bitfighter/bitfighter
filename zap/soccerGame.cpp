@@ -149,11 +149,11 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
 
 
 // Runs on client
-void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
+void SoccerGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
 {
 #ifndef ZAP_DEDICATED
 
-   Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
+   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
 
    Ship *ship = getGame()->getLocalPlayerShip();
 

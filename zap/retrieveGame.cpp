@@ -263,11 +263,11 @@ void RetrieveGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo 
 
 
 // Runs on client
-void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
+void RetrieveGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
 {
 #ifndef ZAP_DEDICATED
 
-   Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
+   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
 
    Ship *ship = getGame()->getLocalPlayerShip();
 

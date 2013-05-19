@@ -769,9 +769,9 @@ void ClientGame::activatePlayerMenuUi()
 }
 
 
-void ClientGame::renderBasicInterfaceOverlay(bool scoreboardVisible)
+void ClientGame::renderBasicInterfaceOverlay()
 {
-   mUi->renderBasicInterfaceOverlay(scoreboardVisible);
+   mUi->renderBasicInterfaceOverlay();
 }
 
 
