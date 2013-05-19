@@ -270,12 +270,8 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
          ui->getTeam(selectedIndex)->setName(origName.c_str());
          mEditing = false;
       }
-      else if(inputCode == KEY_BACKSPACE || inputCode == KEY_DELETE)
-      {
-         ui->getTeam(selectedIndex)->getLineEditor()->handleBackspace(inputCode);
-      }
       else
-         return false;
+         return ui->getTeam(selectedIndex)->getLineEditor()->handleKey(inputCode);
    }
 
    else if(inputCode == KEY_DELETE || inputCode == KEY_MINUS)            // Del or Minus - Delete current team

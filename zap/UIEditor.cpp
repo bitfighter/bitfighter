@@ -4203,14 +4203,8 @@ bool EditorUserInterface::textEntryInputCodeHandler(InputCode inputCode)
       entryMode = EntryNone;
       return true;
    }
-   else if(inputCode == KEY_BACKSPACE || inputCode == KEY_DELETE)
-   {
-      mEntryBox.handleBackspace(inputCode);
-      return true;
-   }
 
-   // Else ignore keystroke
-   return false;
+   return mEntryBox.handleKey(inputCode);
 }
 
 

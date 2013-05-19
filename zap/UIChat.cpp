@@ -509,10 +509,8 @@ bool ChatUserInterface::onKeyDown(InputCode inputCode)
       onEscape();
    else if (inputCode == KEY_ENTER)                // Submits message
       issueChat();
-   else if (inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)       // Do backspacey things
-      mLineEditor.handleBackspace(inputCode);
    else
-      return false;
+      return mLineEditor.handleKey(inputCode);
 
    // A key was handled
    return true;

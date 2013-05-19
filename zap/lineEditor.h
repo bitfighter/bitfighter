@@ -65,6 +65,7 @@ private:
 
 public:
    U32 mMaxLen;
+   U32 mCursorOffset;
 
    LineEditor(U32 maxLength = 256, string value = "");   // Constructor
    virtual ~LineEditor();
@@ -73,7 +74,7 @@ public:
    bool addChar(char c);                        // Returns true if char was added to line
    void backspacePressed();                     // User hit Backspace
    void deletePressed();                        // User hit Delete
-   void handleBackspace(InputCode inputCode);   // Pass KEY_BACKSPACE or KEY_DELETE and it will do the right thing!
+   bool handleKey(InputCode inputCode);
    void clear();                                // Clear the string and tab-expansion matchlist
    char at(U32 pos) const;                      // Get char at pos
    bool isEmpty() const;                        // Is string empty
@@ -86,6 +87,7 @@ public:
    string getString() const;                    // Return the string in string format
    const string *getStringPtr() const;
    string getDisplayString() const;
+   string getStringBeforeCursor() const;
 
    void setString(const string &str);           // Set the string
    void setPrompt(const string &prompt);

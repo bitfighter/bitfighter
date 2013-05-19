@@ -1251,16 +1251,11 @@ S32 TextEntryMenuItem::getWidth(S32 textsize)
 
 bool TextEntryMenuItem::handleKey(InputCode inputCode)
 { 
-   if(inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)
-   {
-      mLineEditor.handleBackspace(inputCode); 
-      if(mTextEditedCallback)
-         mTextEditedCallback(mLineEditor.getString(), static_cast<EditorAttributeMenuUI *>(mMenu)->getObject());
+   bool handled = mLineEditor.handleKey(inputCode);
+   if(mTextEditedCallback)
+      mTextEditedCallback(mLineEditor.getString(), static_cast<EditorAttributeMenuUI *>(mMenu)->getObject());
 
-      return true;
-   }
-
-   return false;
+   return handled;
 }
 
 
