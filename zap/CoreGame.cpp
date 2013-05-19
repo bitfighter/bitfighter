@@ -127,9 +127,9 @@ void CoreGameType::addCore(CoreItem *core, S32 team)
 {
    mCores.push_back(core);
 
-   if(!core->isGhost() && U32(team) < U32(getGame()->getTeamCount()))
+   if(!core->isGhost() && U32(team) < U32(getGame()->getTeamCount()) && getGame()->isServer()) // No EditorTeam
    {
-      TNLAssert(static_cast<Team *>(getGame()->getTeam(team)), "Bad team pointer or bad type");
+      TNLAssert(dynamic_cast<Team *>(getGame()->getTeam(team)), "Bad team pointer or bad type");
       static_cast<Team *>(getGame()->getTeam(team))->addScore(1);
    }
 }
