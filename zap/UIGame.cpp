@@ -1630,20 +1630,25 @@ void GameUserInterface::renderScoreboard()
       return;
 
    static const U32 gap = 3;  // Small gap for use between various UI elements
+   static const U32 bottomSpace = 0;  // Space for any message below the scoreboard
 
-   const U32 drawableWidth = gScreenInfo.getGameCanvasWidth() - horizMargin * 2;
+   const U32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   const U32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+
+   const U32 drawableWidth = canvasWidth - horizMargin * 2;
    const U32 columnCount = min(teams, 2);
    const U32 teamWidth = drawableWidth / columnCount;
    const U32 teamAreaHeight = isTeamGame ? 40 : 0;
 
    const U32 numTeamRows = (teams + 1) >> 1;
-   const U32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   const U32 desiredHeight = (canvasHeight - vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
+   const U32 desiredHeight = ((canvasHeight - vertMargin * 2) - bottomSpace) / numTeamRows;
    const U32 maxHeight = MIN(30, (desiredHeight - teamAreaHeight) / maxTeamPlayers);
 
    const U32 sectionHeight = teamAreaHeight + (maxHeight * maxTeamPlayers) + (2 * gap);
-   const U32 totalHeight = sectionHeight * numTeamRows + (numTeamRows - 1) * 2;
+   const U32 totalHeight = sectionHeight * numTeamRows;
+
+   const U32 scoreboardTop = ((canvasHeight - totalHeight) - bottomSpace) / 2;
 
    // Vertical scale ratio to maximum line height
    const F32 scaleRatio = ((F32)maxHeight) / 30.f;
@@ -1653,12 +1658,12 @@ void GameUserInterface::renderScoreboard()
    const char *adminSymbol = "@";
 
    const S32 playerFontSize = S32(maxHeight * 0.75f);
-   const S32 teamFontSize = 26;
+   const S32 teamFontSize = 24;
    const S32 symbolFontSize = S32(playerFontSize * 0.75f);
 
    // Outer scoreboard box
-   renderFancyBox(horizMargin - gap, (canvasHeight - totalHeight)/2 - (2 * gap),
-                  (gScreenInfo.getGameCanvasWidth() - horizMargin) + gap, (canvasHeight - totalHeight)/2 + totalHeight + 20,
+   renderFancyBox(horizMargin - gap, scoreboardTop - (2 * gap),
+                  (canvasWidth - horizMargin) + gap, scoreboardTop + totalHeight + 20,
                   13, Colors::black, 0.85f, Colors::blue);
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
@@ -1667,7 +1672,7 @@ void GameUserInterface::renderScoreboard()
 
    for(S32 i = 0; i < teams; i++)
    {
-      const S32 yt = (canvasHeight - totalHeight) / 2 + (i >> 1) * sectionHeight;  // y-top
+      const S32 yt = scoreboardTop + (i >> 1) * sectionHeight;  // y-top
 //      const S32 yb = yt + sectionHeight;     // y-bottom
       const S32 xl = horizMargin + gap + (i & 1) * teamWidth;
       const S32 xr = (xl + teamWidth) - (2 * gap);
@@ -1753,7 +1758,7 @@ void GameUserInterface::renderScoreboard()
    const S32 legendGap  =  3;    // Space between scoreboard and legend
 
    const S32 humans     = getGame()->getPlayerCount();
-   const S32 legendPos  = (canvasHeight - totalHeight) / 2 + totalHeight + legendGap;   
+   const S32 legendPos  = scoreboardTop + totalHeight + legendGap;
 
    string legend = itos(humans) + " Human" + (humans != 1 ? "s" : "") + " | " + adminSymbol + "= Admin | " + 
                    levelChangerSymbol + "= Can Change Levels | " + botSymbol + "= Bot |";
