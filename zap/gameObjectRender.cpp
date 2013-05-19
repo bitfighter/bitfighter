@@ -1996,9 +1996,13 @@ void renderAsteroidSpawn(const Point &pos, S32 time)
 
    F32 harmonicTime = sin(FloatTau * (F32(time & (period - 1)) * invPeriod));
 
-   F32 alpha = (harmonicTime + 1) / 2.f;
+   F32 alpha = (harmonicTime + 1) * .333f;
 
-   renderAsteroid(pos, 2, .1f, &Colors::white, alpha);
+   renderAsteroid(pos, 2, .1f, &Colors::green80, alpha);
+
+   glColor(Colors::green80, 0.3f);
+   drawRoundedRect(pos, 24, 24, 4);
+   drawRoundedRect(pos, 32, 32, 4);
 }
 
 
