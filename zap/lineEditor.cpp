@@ -123,7 +123,7 @@ const string *LineEditor::getStringPtr() const
 
 string LineEditor::getDisplayString() const
 {
-   S32 offsetCharacters = floor(mCursorOffset / mDisplayedCharacters) * mDisplayedCharacters;
+   U32 offsetCharacters = mCursorOffset / mDisplayedCharacters * mDisplayedCharacters;
    return mMasked ? string(mLine.length() - offsetCharacters, MASK_CHAR) : mLine.substr(offsetCharacters, MIN(mDisplayedCharacters, mLine.length() - offsetCharacters));
 }
 
@@ -230,7 +230,7 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
    }
    else
    {
-      S32 offsetCharacters = floor(mCursorOffset / mDisplayedCharacters) * mDisplayedCharacters;
+      U32 offsetCharacters = mCursorOffset / mDisplayedCharacters * mDisplayedCharacters;
       offset = getStringWidth(fontSize, mLine.substr(offsetCharacters, mCursorOffset - offsetCharacters).c_str());
    }
 
