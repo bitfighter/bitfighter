@@ -109,12 +109,15 @@ namespace Zap
 
 
 const S32 ChatHelper::chatCmdSize = ARRAYSIZE(chatCmds); // So instructions will now how big chatCmds is
-
+static const S32 CHAT_COMPOSE_FONT_SIZE = 12;
 
 static void makeCommandCandidateList();      // Forward delcaration
 
-ChatHelper::ChatHelper() : mLineEditor(200)
+ChatHelper::ChatHelper()
 {
+   S32 characterWidth = getStringWidth(CHAT_COMPOSE_FONT_SIZE, "_");
+   mLineEditor = LineEditor(200, "", 50);
+
    mCurrentChatType = NoChat;
    makeCommandCandidateList();
 
@@ -173,7 +176,6 @@ void ChatHelper::render()
       return;
 
    // Size of chat composition elements
-   static const S32 CHAT_COMPOSE_FONT_SIZE = 12;
 //   static const S32 CHAT_COMPOSE_FONT_GAP = CHAT_COMPOSE_FONT_SIZE / 4;
 
    static const S32 BOX_HEIGHT = CHAT_COMPOSE_FONT_SIZE + 10;
@@ -234,15 +236,8 @@ void ChatHelper::render()
    drawString(xPos + 3, ypos, CHAT_COMPOSE_FONT_SIZE, promptStr);  // draw prompt
 
    // Display typed text
-   string displayString = mLineEditor.getString();
+   string displayString = mLineEditor.getDisplayString();
    S32 displayWidth = getStringWidth(CHAT_COMPOSE_FONT_SIZE, displayString.c_str());
-
-   // If the string goes too far out of bounds, display it chopped off at the front to give more room to type
-   while (displayWidth > boxWidth - promptWidth - 16)  // 16 -> Account for margin and cursor
-   {
-      displayString = displayString.substr(25, string::npos);  // 25 -> # chars to chop off displayed text if overflow
-      displayWidth = getStringWidth(CHAT_COMPOSE_FONT_SIZE, displayString.c_str());
-   }
 
    drawString(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE, displayString.c_str());
 
@@ -277,7 +272,7 @@ void ChatHelper::render()
    }
 
    glColor(baseColor);
-   mLineEditor.drawCursor(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE, displayWidth);
+   mLineEditor.drawCursor(xStartPos, top, CHAT_COMPOSE_FONT_SIZE);
 
    // Restore scissors settings -- only used during scrolling
    scissorsManager.disable();
@@ -365,14 +360,10 @@ bool ChatHelper::processInputCode(InputCode inputCode)
 {
    // Check for backspace before processing parent because parent will use backspace to close helper, but we want to use
    // it as a, well, a backspace key!
-   if(inputCode == KEY_BACKSPACE)
-      mLineEditor.backspacePressed();
-   else if(Parent::processInputCode(inputCode))
+   if(Parent::processInputCode(inputCode))
       return true;
    else if(inputCode == KEY_ENTER)
       issueChat();
-   else if(inputCode == KEY_DELETE)
-      mLineEditor.deletePressed();
    else if(inputCode == KEY_TAB)      // Auto complete any commands
    {
       if(isCmdChat())     // It's a command!  Complete!  Complete!
@@ -444,7 +435,7 @@ bool ChatHelper::processInputCode(InputCode inputCode)
       }
    }
    else
-      return false;
+      return mLineEditor.handleKey(inputCode);
 
    return true;
 }

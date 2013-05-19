@@ -35,7 +35,7 @@ namespace Zap
 {
 
 // Constructor
-LineEditor::LineEditor(U32 maxLength, string value)
+LineEditor::LineEditor(U32 maxLength, string value, U32 displayedCharacters)
 {
    mMaxLen     = maxLength;
    mLine       = value;
@@ -44,6 +44,7 @@ LineEditor::LineEditor(U32 maxLength, string value)
    mMasked     = false;
    mMatchIndex = -1;
    mCursorOffset = mLine.length();
+   mDisplayedCharacters = displayedCharacters;
 }
 
 LineEditor::~LineEditor()
@@ -85,6 +86,7 @@ void LineEditor::deletePressed()
 void LineEditor::clear()
 {
    mLine.clear();
+   mCursorOffset = 0;
    mMatchIndex = -1;
 }
 
@@ -121,12 +123,18 @@ const string *LineEditor::getStringPtr() const
 
 string LineEditor::getDisplayString() const
 {
-   return mMasked ? string(mLine.length(), MASK_CHAR) : mLine;
+   S32 offsetCharacters = floor(mCursorOffset / mDisplayedCharacters) * mDisplayedCharacters;
+   return mMasked ? string(mLine.length() - offsetCharacters, MASK_CHAR) : mLine.substr(offsetCharacters, MIN(mDisplayedCharacters, mLine.length() - offsetCharacters));
 }
 
 string LineEditor::getStringBeforeCursor() const
 {
    return mMasked ? string(mCursorOffset, MASK_CHAR) : mLine.substr(0, mCursorOffset);
+}
+
+S32 LineEditor::getCursorOffset() const
+{
+   return mCursorOffset;
 }
 
 
@@ -217,9 +225,14 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
    S32 offset;
    
    if(mMasked)
-      offset= getStringWidth(fontSize, string(mCursorOffset, MASK_CHAR).c_str());
+   {
+      offset = getStringWidth(fontSize, string(mCursorOffset, MASK_CHAR).c_str());
+   }
    else
-      offset = getStringWidth(fontSize, mLine.substr(0, mCursorOffset).c_str());
+   {
+      S32 offsetCharacters = floor(mCursorOffset / mDisplayedCharacters) * mDisplayedCharacters;
+      offset = getStringWidth(fontSize, mLine.substr(offsetCharacters, mCursorOffset - offsetCharacters).c_str());
+   }
 
    drawCursorAngle(x, y + fontSize, fontSize, offset, 0);
 }

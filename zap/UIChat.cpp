@@ -84,7 +84,7 @@ std::map<string, Color> AbstractChat::mFromColors;       // Map nicknames to col
 AbstractChat::AbstractChat(ClientGame *game)
 {
    mGame = game;
-   mLineEditor = LineEditor(200);
+   mLineEditor = LineEditor(200, "", 50);
    mChatCursorPos = 0;
 }
 
@@ -319,15 +319,7 @@ void AbstractChat::renderMessageComposition(S32 ypos)
    const S32 promptWidth = getStringWidth(CHAT_FONT_SIZE, PROMPT_STR);
    const S32 xStartPos = UserInterface::horizMargin + promptWidth;
 
-   string displayString = mLineEditor.getString();
-   S32 width = getStringWidth(CHAT_FONT_SIZE, displayString.c_str());
-
-   // If the string goes too far out of bounds, display it chopped off at the front to give room to type more
-   while (width > gScreenInfo.getGameCanvasWidth() - (2 * UserInterface::horizMargin) - promptWidth)
-   {
-      displayString = displayString.substr(MESSAGE_OVERFLOW_SHIFT, string::npos);
-      width = getStringWidth(CHAT_FONT_SIZE, displayString.c_str());
-   }
+   string displayString = mLineEditor.getDisplayString();
 
    glColor(Colors::cyan);
    drawString(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, PROMPT_STR);
@@ -335,7 +327,7 @@ void AbstractChat::renderMessageComposition(S32 ypos)
    glColor(Colors::white);
    drawString(xStartPos, ypos, CHAT_FONT_SIZE, displayString.c_str());
 
-   mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE, width);
+   mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE);
 }
 
 

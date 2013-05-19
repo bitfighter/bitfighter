@@ -65,9 +65,10 @@ private:
 
 public:
    U32 mMaxLen;
+   U32 mDisplayedCharacters;
    U32 mCursorOffset;
 
-   LineEditor(U32 maxLength = 256, string value = "");   // Constructor
+   LineEditor(U32 maxLength = 256, string value = "", U32 displayedCharacters = 0xFFFF);   // Constructor
    virtual ~LineEditor();
 
    U32 length();                                // Returns line length in chars
@@ -88,6 +89,7 @@ public:
    const string *getStringPtr() const;
    string getDisplayString() const;
    string getStringBeforeCursor() const;
+   S32 getCursorOffset() const;
 
    void setString(const string &str);           // Set the string
    void setPrompt(const string &prompt);

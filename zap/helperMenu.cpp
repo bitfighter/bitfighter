@@ -355,8 +355,7 @@ bool HelperMenu::processInputCode(InputCode inputCode)
    // First, check navigation keys.  When in keyboard mode, we allow the loadout key to toggle menu on and off...
    // we can't do this in joystick mode because it is likely that the loadout key is also used to select items
    // from the loadout menu.
-   if(inputCode == KEY_ESCAPE  || inputCode == KEY_BACKSPACE    ||
-      inputCode == KEY_LEFT    || inputCode == BUTTON_DPAD_LEFT ||
+   if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_DPAD_LEFT ||
       inputCode == BUTTON_BACK || 
       (getGame()->getInputMode() == InputModeKeyboard && inputCode == getActivationKey()) )
    {
