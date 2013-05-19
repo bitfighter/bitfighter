@@ -115,7 +115,6 @@ static void makeCommandCandidateList();      // Forward delcaration
 
 ChatHelper::ChatHelper()
 {
-   S32 characterWidth = getStringWidth(CHAT_COMPOSE_FONT_SIZE, "_");
    mLineEditor = LineEditor(200, "", 50);
 
    mCurrentChatType = NoChat;

@@ -414,8 +414,6 @@ void ClientGame::undelaySpawn()
    if(!isSpawnDelayed())                        // Already undelayed, nothing to do
       return;
 
-   UserInterface *ui = getUIManager()->getUI<GameUserInterface>();
-
    if(mClientInfo->getReturnToGameTime() > 0)   // Waiting for post /idle rejoin timer to wind down, nothing to do
       return;
 
@@ -1080,6 +1078,7 @@ void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
       case EngineerEventForceFieldBuilt:
          if(ship)
             ship->creditEnergy(-energyCost);    // Deduct energy from engineer
+         break;
       case EngineerEventTeleporterExitBuilt:
          mUi->exitHelper();
          break;
@@ -1092,6 +1091,7 @@ void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
 
       default:
          TNLAssert(false, "Do something in ClientGame::gotEngineerResponseEvent");
+         break;
    }
 
 }
