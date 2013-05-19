@@ -2093,7 +2093,7 @@ void Worm::setPosAng(Point pos, F32 ang)
    if(mTailLength != 0)
       setExtent(Rect(*getCollisionPoly()));
    else
-      setExtent(Rect(mPoints[mHeadIndex]));
+      setExtent(Rect(mPoints[mHeadIndex], 1));
 }
 
 
@@ -2271,7 +2271,7 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(mTailLength != 0)
       setExtent(Rect(*getCollisionPoly()));
 	else
-      setExtent(Rect(mPoints[mHeadIndex]));
+      setExtent(Rect(mPoints[mHeadIndex], 1));
 #endif
 }
 
