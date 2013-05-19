@@ -1725,7 +1725,7 @@ void GameUserInterface::renderScoreboard()
 
          S32 nameWidth = drawStringAndGetWidth(x, curRowY, playerFontSize, playerScores[j]->getName().getString());
 
-         renderBadges(playerScores[j], x + nameWidth + 8, curRowY + (maxHeight / 2), scaleRatio);
+         renderBadges(playerScores[j], x + nameWidth + 10 + gap, curRowY + (maxHeight / 2), scaleRatio);
          
          glColor(nameColor);
          static char buff[255] = "";
@@ -1793,7 +1793,10 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
             hasBBBBadge = true;
          }
 
-         drawFilledRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, Colors::black, Colors::black, 3.f);
+         // Draw badge border
+         glColor(Colors::gray20);
+         drawRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, 3.f);
+
          renderBadge((F32)x, (F32)y, badgeRadius, badge);
          x += badgeOffset;
       }
