@@ -461,7 +461,8 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
 
       // Finally, deduct energy cost
       S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
-      ship->creditEnergy(-energyCost);    // Deduct energy from engineer
+      if(objectType != EngineeredTeleporterExit)
+         ship->creditEnergy(-energyCost);    // Deduct energy from engineer
 
       return true;
    }

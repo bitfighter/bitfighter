@@ -747,7 +747,7 @@ void ClientGame::gotChatPM(const StringTableEntry &fromName, const StringTableEn
 
 void ClientGame::gotAnnouncement(const string &announcement)
 {
-	mUi->setAnnouncement(announcement);
+   mUi->setAnnouncement(announcement);
 }
 
 
@@ -1071,21 +1071,29 @@ bool ClientGame::hasLevelChange(const char *failureMessage)
 
 void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
 {
+   S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
+   Ship *ship = getLocalPlayerShip();
+
    switch(event)
    {
       case EngineerEventTurretBuilt:         // fallthrough ok
       case EngineerEventForceFieldBuilt:
+         if(ship)
+            ship->creditEnergy(-energyCost);    // Deduct energy from engineer
       case EngineerEventTeleporterExitBuilt:
          mUi->exitHelper();
          break;
 
       case EngineerEventTeleporterEntranceBuilt:
+         if(ship)
+            ship->creditEnergy(-energyCost);    // Deduct energy from engineer
          setSelectedEngineeredObject(EngineeredTeleporterExit);
          break;
 
       default:
-         break;
+         TNLAssert(false, "Do something in ClientGame::gotEngineerResponseEvent");
    }
+
 }
 
 

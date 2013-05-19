@@ -175,10 +175,8 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
          // but server will only handle likely valid placements
          if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, engineerItemInfo[mSelectedIndex].itemIndex))
          {
-            // Send command to server to deploy, and deduct energy
+            // Send command to server to deploy
             getGame()->getConnectionToServer()->c2sEngineerDeployObject(engineerItemInfo[mSelectedIndex].itemIndex);
-            S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
-            ship->creditEnergy(-energyCost);    // Deduct energy from engineer
          }
          // If location is bad, show error message
          else
