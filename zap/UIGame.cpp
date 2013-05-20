@@ -184,8 +184,6 @@ void GameUserInterface::onActivate()
 
 void GameUserInterface::onReactivate()
 {
-   getGame()->undelaySpawn();
-
    mDisableShipKeyboardInput = false;
    Cursor::disableCursor();    // Turn off cursor
 
@@ -862,16 +860,21 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    // Kind of hacky, but this will unsuspend and swallow the keystroke, which is what we want
    if(!mHelperManager.isHelperActive() && getGame()->isSpawnDelayed())
    {
-      getGame()->undelaySpawn();
-      if(inputCode != KEY_ESCAPE)  // Lagged out and can't un-idle to bring up the menu?
-         return true;
+      // Allow scoreboard and the various chats while idle
+      if(!checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode) &&
+            !checkInputCode(settings, InputCodeManager::BINDING_GLOBCHAT, inputCode) &&
+            !checkInputCode(settings, InputCodeManager::BINDING_TEAMCHAT, inputCode) &&
+            !checkInputCode(settings, InputCodeManager::BINDING_CMDCHAT, inputCode) &&
+            !checkInputCode(settings, InputCodeManager::BINDING_SCRBRD, inputCode))
+      {
+         getGame()->undelaySpawn();
+         if(inputCode != KEY_ESCAPE)  // Lagged out and can't un-idle to bring up the menu?
+            return true;
+      }
    }
 
    if(checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
       getGame()->setBusyChatting(true);
-
-   if(!mHelperManager.isHelperActive()) 
-      getGame()->undelaySpawn();
 
    if(Parent::onKeyDown(inputCode))    // Let parent try handling the key
       return true;
