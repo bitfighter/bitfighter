@@ -286,6 +286,32 @@ bool LineEditor::addChar(const char c)
 
 bool LineEditor::handleKey(InputCode inputCode)
 {
+   if(inputCode == KEY_U && InputCodeManager::checkModifier(KEY_CTRL))
+   {
+      setString(mLine.substr(mCursorOffset, mLine.length() - mCursorOffset));
+      mCursorOffset = 0;
+      return true;
+   }
+
+   if(inputCode == KEY_W && InputCodeManager::checkModifier(KEY_CTRL))
+   {
+      U32 spacePos = mLine.rfind(" ", mCursorOffset - 2);
+      if(spacePos == string::npos)
+      {
+         spacePos = 0;
+      }
+      else
+      {
+         spacePos += 1;
+      }
+
+      string left = mLine.substr(0, spacePos);
+      string right = mLine.substr(mCursorOffset, mLine.length() - mCursorOffset);
+      setString(left + right);
+      mCursorOffset = left.length();
+      return true;
+   }
+
    switch(inputCode)
    {
       case KEY_BACKSPACE:
