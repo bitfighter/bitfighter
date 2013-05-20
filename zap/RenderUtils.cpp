@@ -644,7 +644,7 @@ void renderUpArrow(const Point &center, S32 size)
                       center.x, top,     center.x + capHeight, top + capHeight
                     };
 
-   renderVertexArray(vertices, ARRAYSIZE(vertices), GL_LINES);
+   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
 }
 
 
@@ -660,7 +660,7 @@ void renderDownArrow(const Point &center, S32 size)
                       center.x, bot,     center.x + capHeight, bot - capHeight
                     };
 
-   renderVertexArray(vertices, ARRAYSIZE(vertices), GL_LINES);
+   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
 }
 
 
@@ -676,7 +676,7 @@ void renderLeftArrow(const Point &center, S32 size)
                       left, center.y,     left + capHeight, center.y + capHeight
                     };
 
-   renderVertexArray(vertices, ARRAYSIZE(vertices), GL_LINES);
+   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
 }
 
 
@@ -692,7 +692,7 @@ void renderRightArrow(const Point &center, S32 size)
                       right, center.y,     right - capHeight, center.y + capHeight
                     };
 
-   renderVertexArray(vertices, ARRAYSIZE(vertices), GL_LINES);
+   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
 
 }
 

@@ -1100,8 +1100,6 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
       Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
    }
-   else if (inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)       // Do backspacey things
-      mLineEditor.handleBackspace(inputCode);
 
    // The following keys only make sense if there are some servers to browse through
    else if(servers.size() != 0)
@@ -1130,11 +1128,11 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
          selectedId = servers[currentIndex].id;
       }
       else
-         return false;
+         return mLineEditor.handleKey(inputCode);
    }
    // If no key is handled
    else
-      return false;
+      return mLineEditor.handleKey(inputCode);
 
    // A key was handled
    return true;

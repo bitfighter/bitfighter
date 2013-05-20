@@ -386,7 +386,7 @@ public:
    virtual void changeClientTeam(ClientInfo *client, S32 team);     // Change player to team indicated, -1 = cycle teams
 
 #ifndef ZAP_DEDICATED
-   virtual void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
+   virtual void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
    virtual void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
    virtual S32 renderTimeLeftSpecial(S32 right, S32 bottom) const;
 
@@ -469,7 +469,7 @@ public:
    TNL_DECLARE_RPC(s2cSetPlayerScore, (U16 index, S32 score));
 
    TNL_DECLARE_RPC(c2sRequestScoreboardUpdates, (bool updates));
-   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<SignedFloat<8> > ratings));
+   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedFloat<8> > ratings));
 
    void updateClientScoreboard(ClientInfo *clientInfo);
 
@@ -490,7 +490,10 @@ public:
 #endif
 
    void sendChatFromRobot(bool global, const StringPtr &message, ClientInfo *botClientInfo);
-   void sendChatFromController(const StringPtr &message);
+   void sendGlobalChatFromController(const StringPtr &message);
+   void sendTeamChatFromController(const StringPtr &message, S32 teamIndex);
+   void sendPrivateChatFromController(const StringPtr &message, const StringPtr &playerName);
+   void sendAnnouncementFromController(const StringPtr &message);
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams

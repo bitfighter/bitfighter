@@ -102,7 +102,7 @@ public:
    void releaseFlag(const Point &pos, const Point &vel = Point(0,0), S32 count = 1);
 
 #ifndef ZAP_DEDICATED
-   void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
+   void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
    S32 renderTimeLeftSpecial(S32 right, S32 bottom) const;
 #endif
 

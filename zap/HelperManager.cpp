@@ -286,7 +286,8 @@ void HelperManager::doExitHelper(S32 index)
    mHelperStack.erase(index);
    mGame->unsuspendGame();
 
-   if(mHelperStack.size() == 0)
+   // Undelay spawn for any helper except chat helper - people may want to type while idled
+   if(mHelperStack.size() == 0 && mOffDeckHelper->getType() != HelperMenu::ChatHelperType)
       mGame->undelaySpawn();
 
    // If animation is disabled for this helper, immediately call doneClosingHelper()

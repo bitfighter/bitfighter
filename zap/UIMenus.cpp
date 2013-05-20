@@ -142,6 +142,7 @@ void MenuUserInterface::sortMenuItems()
 void MenuUserInterface::addMenuItem(MenuItem *menuItem)
 {
    menuItem->setMenu(this);
+   menuItem->disableLuaAutoDelete();
    mMenuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
 }
 

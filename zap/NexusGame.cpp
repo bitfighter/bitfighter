@@ -706,9 +706,9 @@ S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom) const
 }
 
 
-void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
+void NexusGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
 {
-   Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
+   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
       renderObjectiveArrow(mYardSaleWaypoints[i].pos, &Colors::white, canvasWidth, canvasHeight);

@@ -159,7 +159,7 @@ public:
 
    void gameTypeIsAboutToBeDeleted();
    void activatePlayerMenuUi();
-   void renderBasicInterfaceOverlay(bool scoreboardVisible);
+   void renderBasicInterfaceOverlay();
 
 
    void onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool playAlert, bool showMessage);

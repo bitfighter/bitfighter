@@ -499,6 +499,7 @@ inline int luaW_new(lua_State* L, int args)
     T* obj = LuaWrapper<T>::allocator(L);
     luaW_push<T>(L, obj);
 //    luaW_hold<T>(L, obj);
+    obj->mLuaProxy->mDeleteObject = true;
     luaW_postconstructor<T>(L, args);
     return 1;
 }
@@ -1055,6 +1056,7 @@ private:
     T *mProxiedObject;
 
 public:
+    bool mDeleteObject;
     // Default constructor
     LuaProxy() { TNLAssert(false, "Not used"); }
 
@@ -1065,13 +1067,18 @@ public:
       obj->setLuaProxy(this);
       mDefunct = false;
       mUseCount = 0;
+      mDeleteObject = false;
     }
 
    // Destructor
    ~LuaProxy()
    {
       if(!mDefunct)
+      {
          mProxiedObject->mLuaProxy = NULL;
+         if(mDeleteObject)
+            delete mProxiedObject;
+      }
    }
 
 
@@ -1116,6 +1123,7 @@ public:
 #define  LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(className) \
    LuaProxy<className> *mLuaProxy; \
    LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \
+   virtual void disableLuaAutoDelete() { if(mLuaProxy) mLuaProxy->mDeleteObject = false;} \
    virtual void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
    virtual void push(lua_State *L) { luaW_push(L, this); }
 

@@ -46,7 +46,7 @@ public:
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
    void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
-   void renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const;
+   void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
 
    bool teamHasFlag(S32 teamIndex) const;
    void onFlagMounted(S32 teamIndex);

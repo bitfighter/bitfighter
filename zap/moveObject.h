@@ -496,9 +496,11 @@ public:
    void render();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
+   void onGeomChanged();
 
    F32 getEditorRadius(F32 currentScale);
 
+   void computeCollisionPoly();
    const Vector<Point> *getCollisionPoly() const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(BfObject *otherObject);

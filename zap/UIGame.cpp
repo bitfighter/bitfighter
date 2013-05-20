@@ -97,8 +97,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
 
    mMessageDisplayMode = ShortTimeout;
 
-   mInScoreboardMode = false;
-
    // Some debugging settings
    mDebugShowShipCoords   = false;
    mDebugShowObjectIds    = false;
@@ -186,8 +184,6 @@ void GameUserInterface::onActivate()
 
 void GameUserInterface::onReactivate()
 {
-   getGame()->undelaySpawn();
-
    mDisableShipKeyboardInput = false;
    Cursor::disableCursor();    // Turn off cursor
 
@@ -415,7 +411,7 @@ void GameUserInterface::render()
    GameType *gameType = getGame()->getGameType();
 
    if(gameType)
-      gameType->renderInterfaceOverlay(mInScoreboardMode, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
+      gameType->renderInterfaceOverlay(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
 
    renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
    
@@ -864,16 +860,21 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    // Kind of hacky, but this will unsuspend and swallow the keystroke, which is what we want
    if(!mHelperManager.isHelperActive() && getGame()->isSpawnDelayed())
    {
-      getGame()->undelaySpawn();
-      if(inputCode != KEY_ESCAPE)  // Lagged out and can't un-idle to bring up the menu?
-         return true;
+      // Allow scoreboard and the various chats while idle
+      if(!checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode) &&
+            !checkInputCode(settings, InputCodeManager::BINDING_GLOBCHAT, inputCode) &&
+            !checkInputCode(settings, InputCodeManager::BINDING_TEAMCHAT, inputCode) &&
+            !checkInputCode(settings, InputCodeManager::BINDING_CMDCHAT, inputCode) &&
+            !checkInputCode(settings, InputCodeManager::BINDING_SCRBRD, inputCode))
+      {
+         getGame()->undelaySpawn();
+         if(inputCode != KEY_ESCAPE)  // Lagged out and can't un-idle to bring up the menu?
+            return true;
+      }
    }
 
    if(checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
       getGame()->setBusyChatting(true);
-
-   if(!mHelperManager.isHelperActive()) 
-      getGame()->undelaySpawn();
 
    if(Parent::onKeyDown(inputCode))    // Let parent try handling the key
       return true;
@@ -1632,20 +1633,25 @@ void GameUserInterface::renderScoreboard()
       return;
 
    static const U32 gap = 3;  // Small gap for use between various UI elements
+   static const U32 bottomSpace = 0;  // Space for any message below the scoreboard
 
-   const U32 drawableWidth = gScreenInfo.getGameCanvasWidth() - horizMargin * 2;
+   const U32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   const U32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+
+   const U32 drawableWidth = canvasWidth - horizMargin * 2;
    const U32 columnCount = min(teams, 2);
    const U32 teamWidth = drawableWidth / columnCount;
    const U32 teamAreaHeight = isTeamGame ? 40 : 0;
 
    const U32 numTeamRows = (teams + 1) >> 1;
-   const U32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   const U32 desiredHeight = (canvasHeight - vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
+   const U32 desiredHeight = ((canvasHeight - vertMargin * 2) - bottomSpace) / numTeamRows;
    const U32 maxHeight = MIN(30, (desiredHeight - teamAreaHeight) / maxTeamPlayers);
 
    const U32 sectionHeight = teamAreaHeight + (maxHeight * maxTeamPlayers) + (2 * gap);
-   const U32 totalHeight = sectionHeight * numTeamRows + (numTeamRows - 1) * 2;
+   const U32 totalHeight = sectionHeight * numTeamRows;
+
+   const U32 scoreboardTop = ((canvasHeight - totalHeight) - bottomSpace) / 2;
 
    // Vertical scale ratio to maximum line height
    const F32 scaleRatio = ((F32)maxHeight) / 30.f;
@@ -1655,12 +1661,12 @@ void GameUserInterface::renderScoreboard()
    const char *adminSymbol = "@";
 
    const S32 playerFontSize = S32(maxHeight * 0.75f);
-   const S32 teamFontSize = 26;
+   const S32 teamFontSize = 24;
    const S32 symbolFontSize = S32(playerFontSize * 0.75f);
 
    // Outer scoreboard box
-   renderFancyBox(horizMargin - gap, (canvasHeight - totalHeight)/2 - (2 * gap),
-                  (gScreenInfo.getGameCanvasWidth() - horizMargin) + gap, (canvasHeight - totalHeight)/2 + totalHeight + 20,
+   renderFancyBox(horizMargin - gap, scoreboardTop - (2 * gap),
+                  (canvasWidth - horizMargin) + gap, scoreboardTop + totalHeight + 20,
                   13, Colors::black, 0.85f, Colors::blue);
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
@@ -1669,7 +1675,7 @@ void GameUserInterface::renderScoreboard()
 
    for(S32 i = 0; i < teams; i++)
    {
-      const S32 yt = (canvasHeight - totalHeight) / 2 + (i >> 1) * sectionHeight;  // y-top
+      const S32 yt = scoreboardTop + (i >> 1) * sectionHeight;  // y-top
 //      const S32 yb = yt + sectionHeight;     // y-bottom
       const S32 xl = horizMargin + gap + (i & 1) * teamWidth;
       const S32 xr = (xl + teamWidth) - (2 * gap);
@@ -1725,7 +1731,7 @@ void GameUserInterface::renderScoreboard()
 
          S32 nameWidth = drawStringAndGetWidth(x, curRowY, playerFontSize, playerScores[j]->getName().getString());
 
-         renderBadges(playerScores[j], x + nameWidth + 8, curRowY + (maxHeight / 2), scaleRatio);
+         renderBadges(playerScores[j], x + nameWidth + 10 + gap, curRowY + (maxHeight / 2), scaleRatio);
          
          glColor(nameColor);
          static char buff[255] = "";
@@ -1755,7 +1761,7 @@ void GameUserInterface::renderScoreboard()
    const S32 legendGap  =  3;    // Space between scoreboard and legend
 
    const S32 humans     = getGame()->getPlayerCount();
-   const S32 legendPos  = (canvasHeight - totalHeight) / 2 + totalHeight + legendGap;   
+   const S32 legendPos  = scoreboardTop + totalHeight + legendGap;
 
    string legend = itos(humans) + " Human" + (humans != 1 ? "s" : "") + " | " + adminSymbol + "= Admin | " + 
                    levelChangerSymbol + "= Can Change Levels | " + botSymbol + "= Bot |";
@@ -1793,7 +1799,10 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
             hasBBBBadge = true;
          }
 
-         drawFilledRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, Colors::black, Colors::black, 3.f);
+         // Draw badge border
+         glColor(Colors::gray20);
+         drawRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, 3.f);
+
          renderBadge((F32)x, (F32)y, badgeRadius, badge);
          x += badgeOffset;
       }
@@ -1801,14 +1810,14 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
 }
 
 
-void GameUserInterface::renderBasicInterfaceOverlay(bool scoreboardVisible)
+void GameUserInterface::renderBasicInterfaceOverlay()
 {
    GameType *gameType = getGame()->getGameType();
    
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
       renderInputModeChangeAlert();
 
-   bool showScore = gameType->isGameOver() || scoreboardVisible;
+   bool showScore = gameType->isGameOver() || mInScoreboardMode;
 
    if(showScore && getGame()->getTeamCount() > 0)      // How could teamCount be 0?
       renderScoreboard();

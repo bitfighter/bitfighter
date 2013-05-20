@@ -110,6 +110,10 @@ public:
       mIndex = theString.mIndex;
       incRef();
    }
+   inline ~StringTableEntry()
+   {
+      decRef();
+   }
    StringTableEntry &operator= (const StringTableEntry &s)
    {
       decRef();

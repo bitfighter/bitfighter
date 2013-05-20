@@ -414,8 +414,6 @@ void ClientGame::undelaySpawn()
    if(!isSpawnDelayed())                        // Already undelayed, nothing to do
       return;
 
-   UserInterface *ui = getUIManager()->getUI<GameUserInterface>();
-
    if(mClientInfo->getReturnToGameTime() > 0)   // Waiting for post /idle rejoin timer to wind down, nothing to do
       return;
 
@@ -747,7 +745,7 @@ void ClientGame::gotChatPM(const StringTableEntry &fromName, const StringTableEn
 
 void ClientGame::gotAnnouncement(const string &announcement)
 {
-	mUi->setAnnouncement(announcement);
+   mUi->setAnnouncement(announcement);
 }
 
 
@@ -771,9 +769,9 @@ void ClientGame::activatePlayerMenuUi()
 }
 
 
-void ClientGame::renderBasicInterfaceOverlay(bool scoreboardVisible)
+void ClientGame::renderBasicInterfaceOverlay()
 {
-   mUi->renderBasicInterfaceOverlay(scoreboardVisible);
+   mUi->renderBasicInterfaceOverlay();
 }
 
 
@@ -1071,21 +1069,31 @@ bool ClientGame::hasLevelChange(const char *failureMessage)
 
 void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
 {
+   S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
+   Ship *ship = getLocalPlayerShip();
+
    switch(event)
    {
       case EngineerEventTurretBuilt:         // fallthrough ok
       case EngineerEventForceFieldBuilt:
+         if(ship)
+            ship->creditEnergy(-energyCost);    // Deduct energy from engineer
+         break;
       case EngineerEventTeleporterExitBuilt:
          mUi->exitHelper();
          break;
 
       case EngineerEventTeleporterEntranceBuilt:
+         if(ship)
+            ship->creditEnergy(-energyCost);    // Deduct energy from engineer
          setSelectedEngineeredObject(EngineeredTeleporterExit);
          break;
 
       default:
+         TNLAssert(false, "Do something in ClientGame::gotEngineerResponseEvent");
          break;
    }
+
 }
 
 

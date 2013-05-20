@@ -2142,7 +2142,11 @@ void EditorUserInterface::renderDockPlugins()
          S32 y = 1.5 * vertMargin + PLUGIN_LINE_SPACING * i;
          drawHollowRect(x + horizMargin / 3, y, x + mDockWidth - horizMargin / 3, y + PLUGIN_LINE_SPACING, Colors::white);
       }
-      renderDockItemLabel(Point(gScreenInfo.getGameCanvasWidth() - mDockWidth / 2 - horizMargin, 1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 0.33)), mPluginInfos[i].prettyName.c_str());
+
+      glColor(Colors::white);
+      drawString((S32) (gScreenInfo.getGameCanvasWidth() - mDockWidth - horizMargin / 2), (S32) (1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 0.33)), DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
+      S32 bindingWidth = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
+      drawString((S32) (gScreenInfo.getGameCanvasWidth() - bindingWidth - horizMargin * 1.5), (S32) (1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 0.33)), DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
    }
 }
 
@@ -3923,14 +3927,8 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputString == "F9")
    {
-      U32 maxWidth = 0;
-      for(S32 i = 0; i < mPluginInfos.size(); i++)
-      {
-         U32 width = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
-         maxWidth = max(maxWidth, width);
-      }
       mDockMode = DOCKMODE_PLUGINS;
-      mDockWidth = maxWidth + horizMargin;
+      mDockWidth = findPluginDockWidth();
    }
    else if(checkPluginKeyBindings(inputString))
    {
@@ -4205,14 +4203,8 @@ bool EditorUserInterface::textEntryInputCodeHandler(InputCode inputCode)
       entryMode = EntryNone;
       return true;
    }
-   else if(inputCode == KEY_BACKSPACE || inputCode == KEY_DELETE)
-   {
-      mEntryBox.handleBackspace(inputCode);
-      return true;
-   }
 
-   // Else ignore keystroke
-   return false;
+   return mEntryBox.handleKey(inputCode);
 }
 
 
@@ -4747,12 +4739,54 @@ void EditorUserInterface::findPlugins()
    string extension = ".lua";
    getFilesFromFolder(dirName, plugins, &extension, 1);
 
+   const Vector<PluginBinding> &bindings = *getGame()->getSettings()->getPluginBindings();
    for(S32 i = 0; i < plugins.size(); i++)
    {
-      mPluginInfos.push_back(PluginInfo(plugins[i], plugins[i]));
+      // Try to find the title
+      string title;
+      Vector<MenuItem*> menu;
+      EditorPlugin plugin(dirName + "/" + plugins[i], Vector<string>(), getGame()->getGridSize(), mLoadTarget, getGame());
+      if(plugin.prepareEnvironment() && plugin.loadScript(false))
+      {
+         plugin.runGetArgsMenu(title, menu);
+      }
+
+      // if the title is blank or couldn't be found, use the file name
+      if(title == "")
+      {
+         title = plugins[i];
+      }
+
+      PluginInfo info(title, plugins[i]);
+
+      // check for a binding
+      for(S32 j = 0; j < bindings.size(); j++)
+      {
+         if(bindings[j].script == plugins[i])
+         {
+            info.binding = bindings[j].key;
+            break;
+         }
+      }
+
+      mPluginInfos.push_back(info);
    }
 
    mPluginInfos.sort(pluginInfoSort);
+}
+
+U32 EditorUserInterface::findPluginDockWidth()
+{
+   U32 maxNameWidth = 0;
+   U32 maxBindingWidth = 0;
+   for(S32 i = 0; i < mPluginInfos.size(); i++)
+   {
+      U32 nameWidth = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
+      U32 bindingWidth = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
+      maxNameWidth = max(maxNameWidth, nameWidth);
+      maxBindingWidth = max(maxBindingWidth, bindingWidth);
+   }
+   return maxNameWidth + maxBindingWidth + 2 * horizMargin;
 }
 
 

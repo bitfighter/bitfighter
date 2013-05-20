@@ -161,11 +161,11 @@ void CTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
 }
 
 
-void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible, S32 canvasWidth, S32 canvasHeight) const
+void CTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
 {
 #ifndef ZAP_DEDICATED
    // Render basic overlay
-   Parent::renderInterfaceOverlay(scoreboardVisible, canvasWidth, canvasHeight);
+   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
 
    // Add some objective arrows...
    // ...but rendering objective arrows makes no sense if there is no ship at the moment

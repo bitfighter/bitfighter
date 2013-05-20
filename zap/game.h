@@ -463,7 +463,11 @@ public:
    string getScriptName() const;
    bool levelHasLoadoutZone();
    void updateShipLoadout(BfObject *shipObject);
-   void sendChatFromController(const StringPtr &message);
+   void sendGlobalChatFromController(const StringPtr &message);
+   void sendTeamChatFromController(const StringPtr &message, S32 teamIndex);
+   void sendPrivateChatFromController(const StringPtr &message, const StringPtr &playerName);
+   void sendAnnouncementFromController(const StringPtr &message);
+
    void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName);
    bool objectCanDamageObject(BfObject *damager, BfObject *victim);
 

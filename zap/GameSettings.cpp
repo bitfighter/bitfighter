@@ -188,6 +188,8 @@ GameSettings::GameSettings()
 GameSettings::~GameSettings()
 {
    delete mBanList;
+   if(mFolderManager)
+      delete mFolderManager;
 }
 
 

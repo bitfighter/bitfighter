@@ -26,6 +26,7 @@
 #include "lineEditor.h"
 #include "UI.h"
 
+#include "MathUtils.h"
 #include "RenderUtils.h"
 
 #include <math.h>
@@ -34,7 +35,7 @@ namespace Zap
 {
 
 // Constructor
-LineEditor::LineEditor(U32 maxLength, string value)
+LineEditor::LineEditor(U32 maxLength, string value, U32 displayedCharacters)
 {
    mMaxLen     = maxLength;
    mLine       = value;
@@ -42,6 +43,8 @@ LineEditor::LineEditor(U32 maxLength, string value)
    mPrompt     = "";
    mMasked     = false;
    mMatchIndex = -1;
+   mCursorOffset = mLine.length();
+   mDisplayedCharacters = displayedCharacters;
 }
 
 LineEditor::~LineEditor()
@@ -57,21 +60,33 @@ U32 LineEditor::length()
 
 void LineEditor::backspacePressed()
 {
-   if (length() > 0)
-      mLine.erase(mLine.size() - 1);
+   if(mCursorOffset == 0)
+   {
+      return;
+   }
+
+   mLine = mLine.substr(0, mCursorOffset - 1) + mLine.substr(mCursorOffset, mLine.length() - mCursorOffset);
+   mCursorOffset -= 1;
    mMatchIndex = -1;
 }
 
 
 void LineEditor::deletePressed()
 {
-   backspacePressed();
+   if(mCursorOffset >= mLine.length())
+   {
+      return;
+   }
+
+   mLine = mLine.substr(0, mCursorOffset) + mLine.substr(mCursorOffset + 1, mLine.length() - mCursorOffset);
+   mMatchIndex = -1;
 }
 
 
 void LineEditor::clear()
 {
    mLine.clear();
+   mCursorOffset = 0;
    mMatchIndex = -1;
 }
 
@@ -108,13 +123,25 @@ const string *LineEditor::getStringPtr() const
 
 string LineEditor::getDisplayString() const
 {
-   return mMasked ? string(mLine.length(), MASK_CHAR) : mLine;
+   U32 offsetCharacters = mCursorOffset / mDisplayedCharacters * mDisplayedCharacters;
+   return mMasked ? string(mLine.length() - offsetCharacters, MASK_CHAR) : mLine.substr(offsetCharacters, MIN(mDisplayedCharacters, mLine.length() - offsetCharacters));
+}
+
+string LineEditor::getStringBeforeCursor() const
+{
+   return mMasked ? string(mCursorOffset, MASK_CHAR) : mLine.substr(0, mCursorOffset);
+}
+
+S32 LineEditor::getCursorOffset() const
+{
+   return mCursorOffset;
 }
 
 
 void LineEditor::setString(const string &str)
 {
    mLine.assign(str.substr(0, mMaxLen));
+   mCursorOffset = mLine.length();
 }
 
 
@@ -195,14 +222,19 @@ void LineEditor::completePartial(const Vector<string> *candidates, const string 
 // Draw our cursor, assuming string is drawn at x,y  (vert spacing works differently than on the angle version
 void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
 {
-   S32 width;
+   S32 offset;
    
    if(mMasked)
-      width = getStringWidth(fontSize, string(mLine.size(), MASK_CHAR).c_str());
+   {
+      offset = getStringWidth(fontSize, string(mCursorOffset, MASK_CHAR).c_str());
+   }
    else
-      width = getStringWidth(fontSize, mLine.c_str());
-    
-   drawCursorAngle(x, y + fontSize, fontSize, width, 0);
+   {
+      U32 offsetCharacters = mCursorOffset / mDisplayedCharacters * mDisplayedCharacters;
+      offset = getStringWidth(fontSize, mLine.substr(offsetCharacters, mCursorOffset - offsetCharacters).c_str());
+   }
+
+   drawCursorAngle(x, y + fontSize, fontSize, offset, 0);
 }
 
 
@@ -232,9 +264,8 @@ void LineEditor::drawCursorAngle(S32 x, S32 y, F32 fontSize, S32 width, F32 angl
 {
    if((Platform::getRealMilliseconds() / 100) % 2)
    {
-      const F32 gap = fontSize / 6;
-      F32 xpos = x + (((F32)width + gap) * cos(angle)); 
-      F32 ypos = y + (((F32)width + gap) * sin(angle)); 
+      F32 xpos = x + ((F32) width  * cos(angle));
+      F32 ypos = y + ((F32) width  * sin(angle));
 
       drawAngleString(xpos, ypos, (F32)fontSize, angle, "_");
    }
@@ -265,20 +296,42 @@ bool LineEditor::addChar(const char c)
       break;
    }
 
-   if(length() < mMaxLen) mLine += c; 
+   if(length() < mMaxLen)
+   {
+      mLine = mLine.substr(0, mCursorOffset) + c + mLine.substr(mCursorOffset, mLine.length() - mCursorOffset);
+      mCursorOffset += 1;
+   }
    mMatchIndex = -1;
    return true;
 }
 
 
-void LineEditor::handleBackspace(InputCode inputCode)
+bool LineEditor::handleKey(InputCode inputCode)
 {
-   TNLAssert(inputCode == KEY_BACKSPACE || inputCode == KEY_DELETE, "Unexpected inputCode!");
-
-   if(inputCode == KEY_BACKSPACE)
-      backspacePressed();
-   else       // KEY_DELETE
-      deletePressed();
+   switch(inputCode)
+   {
+      case KEY_BACKSPACE:
+         backspacePressed();
+         break;
+      case KEY_DELETE:
+         deletePressed();
+         break;
+      case KEY_HOME:
+         mCursorOffset = 0;
+         break;
+      case KEY_END:
+         mCursorOffset = mLine.length();
+         break;
+      case KEY_LEFT:
+         mCursorOffset = max(0, (int) mCursorOffset - 1);
+         break;
+      case KEY_RIGHT:
+         mCursorOffset = min((int) mLine.length(), (int) mCursorOffset + 1);
+         break;
+      default:
+         return false;
+   }
+   return true;
 }
 
 

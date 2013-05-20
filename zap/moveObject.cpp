@@ -2009,6 +2009,7 @@ F32 Worm::getRadius()
 
 void Worm::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
+   mPoints[mHeadIndex] = getPos();
    render();
 }
 
@@ -2024,6 +2025,10 @@ F32 Worm::getEditorRadius(F32 currentScale)
    return 10;     // Or something... who knows??
 }
 
+void Worm::onGeomChanged()
+{
+   setPosAng(getPos(), mAngle);
+}
 
 bool Worm::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
@@ -2032,10 +2037,30 @@ bool Worm::getCollisionCircle(U32 state, Point &center, F32 &radius) const
    return false;
 }
 
+void Worm::computeCollisionPoly()
+{
+   S32 i = mHeadIndex;
+   mPolyPoints.clear();
+
+   for(S32 count = 0; count < mTailLength; count++)
+   {
+      mPolyPoints.push_back(mPoints[i]);
+      i--;
+      if(i < 0)
+         i = MaxTailLength - 1;
+   }
+   for(S32 count = 0; count < mTailLength; count++)
+   {
+      mPolyPoints.push_back(mPoints[i]);
+      i++;
+      if(i >= MaxTailLength)
+         i = 0;
+   }
+}
 
 const Vector<Point> *Worm::getCollisionPoly() const
 {
-   if(mPolyPoints.size() > 0)
+   if(mPolyPoints.size() != 0)
       return &mPolyPoints;
    else
       return NULL;
@@ -2064,7 +2089,11 @@ void Worm::setPosAng(Point pos, F32 ang)
    else
       setMaskBits(TailPointPartsMask << mHeadIndex);
 
-   setExtent(Rect(*getCollisionPoly()));
+   computeCollisionPoly();
+   if(mTailLength != 0)
+      setExtent(Rect(*getCollisionPoly()));
+   else
+      setExtent(Rect(mPoints[mHeadIndex], 1));
 }
 
 
@@ -2078,8 +2107,11 @@ void Worm::damageObject(DamageInfo *damageInfo)
    if(mTailLength < 2)
    {
       hasExploded = true;
+      disableCollision();
       deleteObject(500);
    }
+   else
+      computeCollisionPoly();
    setMaskBits(ExplodeOrTailLengthMask);
 }
 
@@ -2166,26 +2198,7 @@ void Worm::idle(BfObject::IdleCallPath path)
       mDirTimer.reset(TNL::Random::readI(300, 400));
    }
 
-   Parent::idle(path);
-
-   // Recompute mPolyPoints
-   S32 i = mHeadIndex;
-   mPolyPoints.clear();
-
-   for(S32 count = 0; count < mTailLength; count++)
-   {
-      mPolyPoints.push_back(mPoints[i]);
-      i--;
-      if(i < 0)
-         i = MaxTailLength - 1;
-   }
-   for(S32 count = 0; count < mTailLength; count++)
-   {
-      mPolyPoints.push_back(mPoints[i]);
-      i++;
-      if(i >= MaxTailLength)
-         i = 0;
-   }
+   //Parent::idle(path);
 }
 
 
@@ -2235,6 +2248,7 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
          }
       }
 
+
    if(stream->readFlag())
    {
       bool explode = (stream->readFlag());     // Exploding!  Take cover!!
@@ -2253,7 +2267,11 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
    }
 
-   setExtent(Rect(*getCollisionPoly()));
+   computeCollisionPoly();
+   if(mTailLength != 0)
+      setExtent(Rect(*getCollisionPoly()));
+	else
+      setExtent(Rect(mPoints[mHeadIndex], 1));
 #endif
 }
 
