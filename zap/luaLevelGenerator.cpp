@@ -127,9 +127,48 @@ static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char
 }
 
 
+// Register our connector types with Lua
+void LuaLevelGenerator::registerClasses()
+{
+   // General classes
+   LuaScriptRunner::registerClasses();    // LuaScriptRunner is a parent class
+}
+
+
+/////
+// Lua interface
+/**
+  *  @luaclass LuaLevelGenerator
+  *  @brief Supervisor class of a levelgen with various utilities.
+  */
+//               Fn name    Param profiles         Profile count
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, addWall,           ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, addItem,           ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, addLevelLine,      ARRAYDEF({{ STR, END }}), 1 )                        \
+   METHOD(CLASS, findObjectById,    ARRAYDEF({{ INT, END }}), 1 )                        \
+   METHOD(CLASS, findGlobalObjects, ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
+   METHOD(CLASS, getGridSize,       ARRAYDEF({{ END }}), 1 )                             \
+   METHOD(CLASS, getPlayerCount,    ARRAYDEF({{ END }}), 1 )                             \
+   METHOD(CLASS, setGameTime,       ARRAYDEF({{ NUM, END }}), 1 )                        \
+   METHOD(CLASS, pointCanSeePoint,  ARRAYDEF({{ PT, PT, END }}), 1 )                     \
+   METHOD(CLASS, globalMsg,         ARRAYDEF({{ STR, END }}), 1 )                        \
+   METHOD(CLASS, subscribe,         ARRAYDEF({{ EVENT, END }}), 1 )                      \
+   METHOD(CLASS, unsubscribe,       ARRAYDEF({{ EVENT, END }}), 1 )                      \
+
+GENERATE_LUA_METHODS_TABLE(LuaLevelGenerator, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(LuaLevelGenerator, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *LuaLevelGenerator::luaClassName = "LuaLevelGenerator";
+REGISTER_LUA_CLASS(LuaLevelGenerator);
+
+
 // Deprecated 
 // TODO: Needs documentation
-S32 LuaLevelGenerator::addWall(lua_State *L)
+S32 LuaLevelGenerator::lua_addWall(lua_State *L)
 {
    static const char *methodName = "LevelGeneratorEditor:addWall()";
 
@@ -166,7 +205,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
 // this involves packing everything into an array of char strings, which is frightfully prone to programmer
 // error and buffer overflows and such...
 // TODO: Needs documentation
-S32 LuaLevelGenerator::addItem(lua_State *L)
+S32 LuaLevelGenerator::lua_addItem(lua_State *L)
 {
    static const char *methodName = "LevelGenerator:addItem()";
 
@@ -221,14 +260,11 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
  *             add it to the game using the addItem() method.
  * @param      levelLine - string containing the line of levelcode.
  */
-S32 LuaLevelGenerator::addLevelLine(lua_State *L)
+S32 LuaLevelGenerator::lua_addLevelLine(lua_State *L)
 {
-   static const char *methodName = "LevelGenerator:addLevelLine()";
+   checkArgList(L, functionArgs, "LuaLevelGenerator", "addLevelLine");
 
-   checkArgCount(L, 1, methodName);
-   const char *line = getCheckedString(L, 1, methodName);
-
-   mGame->parseLevelLine(line, mGridDatabase, "Levelgen script: " + mScriptName);
+   mGame->parseLevelLine(getString(L, 1), mGridDatabase, "Levelgen script: " + mScriptName);
 
    return 0;
 }
@@ -239,36 +275,29 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
  * @brief      Sets the time remaining in the current game to the specified value
  * @param      num timeInMinutes - Time, in minutes, that the game should continue.  Can be fractional.
  */
-S32 LuaLevelGenerator::setGameTime(lua_State *L)
+S32 LuaLevelGenerator::lua_setGameTime(lua_State *L)
 {
-   static const char *methodName = "Levelgen:setGameTime()";
+   checkArgList(L, functionArgs, "LuaLevelGenerator", "setGameTime");
 
-   checkArgCount(L, 1, methodName);
-   F32 time = getCheckedFloat(L, 1, methodName);
-
-   mGame->setGameTime(time);
+   mGame->setGameTime(getFloat(L, 1));
 
    return 0;
 }
 
 
 /**
- * @luafunc Levelgen::pointCanSeePoint(object1, object2)
- * @brief   Returns true if the two specified objects can see one another.
- * @param   \e BfObject object1 - First object.
- * @param   \e BfObject object2 - Second object.
+ * @luafunc Levelgen::pointCanSeePoint(point1, point2)
+ * @brief   Returns true if the two specified points can see one another.
+ * @param   \e point point1 - First point.
+ * @param   \e point point2 - Second point.
  * @return  \e bool - True if objects have LOS from one to the other.
  */
-S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
+S32 LuaLevelGenerator::lua_pointCanSeePoint(lua_State *L)
 {
-   static const char *methodName = "Levelgen:pointCanSeePoint()";
+   checkArgList(L, functionArgs, "LuaLevelGenerator", "pointCanSeePoint");
 
-   checkArgCount(L, 2, methodName);
-
-   // Still need mGridSize because we deal with the coordinates used in the level file, which have to be multiplied by
-   // GridSize to get in-game coordinates
-   Point p1 = LuaBase::getCheckedVec(L, 1, methodName) *= mGridSize;   // Only use of getCheckedVec is here -- if remove here, can delete function 
-   Point p2 = LuaBase::getCheckedVec(L, 2, methodName) *= mGridSize;
+   Point p1 = getPointOrXY(L, 1);
+   Point p2 = getPointOrXY(L, 2);
 
    return returnBool(L, mGridDatabase->pointCanSeePoint(p1, p2));
 }
@@ -283,7 +312,7 @@ S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
  *  \endcode
  * @param      \e string text - Message to write.
  */
-S32 LuaLevelGenerator::logprint(lua_State *L)
+S32 LuaLevelGenerator::lua_logprint(lua_State *L)
 {
    static const char *methodName = "Levelgen:logprint()";
    checkArgCount(L, 1, methodName);
@@ -305,7 +334,7 @@ S32 LuaLevelGenerator::logprint(lua_State *L)
  * @param      id - int id to search for.
  * @return     \e BfObject - Found object, or nil if no objects with the specified id could be found.
  */
-S32 LuaLevelGenerator::findObjectById(lua_State *L)
+S32 LuaLevelGenerator::lua_findObjectById(lua_State *L)
 {
    checkArgList(L, functionArgs, "Levelgen", "findObjectById");
 
@@ -335,7 +364,7 @@ S32 LuaLevelGenerator::findObjectById(lua_State *L)
   *           print(#items)                                    -- Print the number of items found to the console
   *         end
   */
-S32 LuaLevelGenerator::findGlobalObjects(lua_State *L)
+S32 LuaLevelGenerator::lua_findGlobalObjects(lua_State *L)
 {
    checkArgList(L, functionArgs, "Levelgen", "findGlobalObjects");
 
@@ -349,9 +378,22 @@ S32 LuaLevelGenerator::findGlobalObjects(lua_State *L)
  * @descr   Note that non-default gridSizes are rare in modern level design.
  * @return  \e num - Current gridSize.
  */
-S32 LuaLevelGenerator::getGridSize(lua_State *L)
+S32 LuaLevelGenerator::lua_getGridSize(lua_State *L)
 {
    return returnFloat(L, mGridSize);
+}
+
+
+/**
+ * @luafunc Levelgen::getMachineTime()
+ * @brief   Returns current machine time as an integer.
+ * @descr   Machine time is given in milliseconds.  This may be inaccurate because machine time is
+ *          usually stored as a long instead of an integer
+ * @return  \e num - Current gridSize.
+ */
+S32 LuaLevelGenerator::lua_getMachineTime(lua_State *L)
+{
+   return returnInt(L, Platform::getRealMilliseconds());
 }
 
 
@@ -360,7 +402,7 @@ S32 LuaLevelGenerator::getGridSize(lua_State *L)
  * @brief   Returns current number of players.
  * @return  \e int - Current number of players.
  */
-S32 LuaLevelGenerator::getPlayerCount(lua_State *L)
+S32 LuaLevelGenerator::lua_getPlayerCount(lua_State *L)
 {
    return returnInt(L, mGame ? mGame->getPlayerCount() : 1 );
 }
@@ -371,12 +413,11 @@ S32 LuaLevelGenerator::getPlayerCount(lua_State *L)
  * @brief   Broadcast a message to all players.
  * @param   \e string message - Message to broadcast.
  */
-S32 LuaLevelGenerator::globalMsg(lua_State *L)
+S32 LuaLevelGenerator::lua_globalMsg(lua_State *L)
 {
-   static const char *methodName = "Levelgen:globalMsg()";
-   checkArgCount(L, 1, methodName);
+   checkArgList(L, functionArgs, "LuaLevelGenerator", "globalMsg");
 
-   const char *message = getCheckedString(L, 1, methodName);
+   const char *message = getString(L, 1);
 
    mGame->sendChatFromController(message);
 
@@ -387,50 +428,17 @@ S32 LuaLevelGenerator::globalMsg(lua_State *L)
 }
 
 
-// Register our connector types with Lua
-void LuaLevelGenerator::registerClasses()
+S32 LuaLevelGenerator::lua_subscribe(lua_State *L)
 {
-   // General classes
-   LuaScriptRunner::registerClasses();    // LuaScriptRunner is a parent class
+   return doSubscribe(L, LevelgenContext);
 }
 
 
-//// Lua methods
-const char *LuaLevelGenerator::luaClassName = "LuaLevelGenerator";
-
-const luaL_reg LuaLevelGenerator::luaMethods[] =
+S32 LuaLevelGenerator::lua_unsubscribe(lua_State *L)
 {
-   { "addWall",          luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::addWall>          },
-   { "addItem",          luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::addItem>          },
-   { "addLevelLine",     luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::addLevelLine>     },
+   return doUnsubscribe(L);
+}
 
-   { "findObjectById",   luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::findObjectById>   },
-   { "findGlobalObjects",luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::findGlobalObjects>},
-                                                                                                
-   { "getGridSize",      luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::getGridSize>      },
-   { "getPlayerCount",   luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::getPlayerCount>   },
-   { "setGameTime",      luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::setGameTime>      },
-   { "pointCanSeePoint", luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::pointCanSeePoint> },
-
-   { "globalMsg",        luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::globalMsg>        },
-
-   { "subscribe",        luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::subscribe>        },
-   { "unsubscribe",      luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::unsubscribe>      },
-
-   { NULL, NULL }   
-};
-
-
-S32 LuaLevelGenerator::subscribe(lua_State *L)   { return doSubscribe(L, LevelgenContext);   }
-S32 LuaLevelGenerator::unsubscribe(lua_State *L) { return doUnsubscribe(L); }
-
-
-const LuaFunctionProfile LuaLevelGenerator::functionArgs[] =
-{
-      { NULL, {{{ }}, 0 } }
-};
-
-REGISTER_LUA_CLASS(LuaLevelGenerator);
 
 };
 

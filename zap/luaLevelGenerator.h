@@ -69,25 +69,25 @@ public:
    // Lua methods
 
    // Handle events
-   S32 subscribe(lua_State *L); 
-   S32 unsubscribe(lua_State *L); 
+   S32 lua_subscribe(lua_State *L); 
+   S32 lua_unsubscribe(lua_State *L); 
 
-   virtual S32 addWall(lua_State *L);           // Add a wall
-   virtual S32 addItem(lua_State *L);           // Add item using a series of parameters
-   virtual S32 addLevelLine(lua_State *L);      // Add raw level line
-   virtual S32 setGameTime(lua_State *L);       // Set the time for this level
-   virtual S32 pointCanSeePoint(lua_State *L);  // Returns if a point has LOS to another point, given what's on the map so far
+   virtual S32 lua_addWall(lua_State *L);           // Add a wall
+   virtual S32 lua_addItem(lua_State *L);           // Add item using a series of parameters
+   virtual S32 lua_addLevelLine(lua_State *L);      // Add raw level line
+   virtual S32 lua_setGameTime(lua_State *L);       // Set the time for this level
+   virtual S32 lua_pointCanSeePoint(lua_State *L);  // Returns if a point has LOS to another point, given what's on the map so far
 
-   S32 findObjectById(lua_State *L);            // Retrieve object with the specified id
-   S32 findGlobalObjects(lua_State *L);            // Retrieve object with the specified id
+   S32 lua_findObjectById(lua_State *L);            // Retrieve object with the specified id
+   S32 lua_findGlobalObjects(lua_State *L);            // Retrieve object with the specified id
 
-   S32 logprint(lua_State *L);
-   S32 getMachineTime(lua_State *L) { return returnInt(L, Platform::getRealMilliseconds()); }
-   S32 getGridSize(lua_State *L);
-   S32 getPlayerCount(lua_State *L);
+   S32 lua_logprint(lua_State *L);
+   S32 lua_getMachineTime(lua_State *L);
+   S32 lua_getGridSize(lua_State *L);
+   S32 lua_getPlayerCount(lua_State *L);
 
-   S32 globalMsg(lua_State *L);
-   S32 teamMsg(lua_State *L);
+   S32 lua_globalMsg(lua_State *L);
+   S32 lua_teamMsg(lua_State *L);
 
    // Implement LevelLoader abstract method
    void processLevelLoadLine(S32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName);
