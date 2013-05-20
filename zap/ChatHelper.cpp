@@ -273,7 +273,7 @@ void ChatHelper::render()
    }
 
    glColor(baseColor);
-   mLineEditor.drawCursor(xStartPos, top, CHAT_COMPOSE_FONT_SIZE);
+   mLineEditor.drawCursor(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE);
 
    // Restore scissors settings -- only used during scrolling
    scissorsManager.disable();
