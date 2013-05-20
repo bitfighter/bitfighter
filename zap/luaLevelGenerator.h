@@ -88,6 +88,8 @@ public:
 
    S32 lua_globalMsg(lua_State *L);
    S32 lua_teamMsg(lua_State *L);
+   S32 lua_privateMsg(lua_State *L);
+   S32 lua_announce(lua_State *L);
 
    // Implement LevelLoader abstract method
    void processLevelLoadLine(S32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName);

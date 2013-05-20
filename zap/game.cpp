@@ -1360,10 +1360,31 @@ void Game::updateShipLoadout(BfObject *shipObject)
 }
 
 
-void Game::sendChatFromController(const StringPtr &message)
+void Game::sendGlobalChatFromController(const StringPtr &message)
 {
    if(mGameType)
-      mGameType->sendChatFromController(message);
+      mGameType->sendGlobalChatFromController(message);
+}
+
+
+void Game::sendTeamChatFromController(const StringPtr &message, S32 teamIndex)
+{
+   if(mGameType)
+      mGameType->sendTeamChatFromController(message, teamIndex);
+}
+
+
+void Game::sendPrivateChatFromController(const StringPtr &message, const StringPtr &playerName)
+{
+   if(mGameType)
+      mGameType->sendPrivateChatFromController(message, playerName);
+}
+
+
+void Game::sendAnnouncementFromController(const StringPtr &message)
+{
+   if(mGameType)
+      mGameType->sendAnnouncementFromController(message);
 }
 
 

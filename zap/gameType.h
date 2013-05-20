@@ -490,7 +490,10 @@ public:
 #endif
 
    void sendChatFromRobot(bool global, const StringPtr &message, ClientInfo *botClientInfo);
-   void sendChatFromController(const StringPtr &message);
+   void sendGlobalChatFromController(const StringPtr &message);
+   void sendTeamChatFromController(const StringPtr &message, S32 teamIndex);
+   void sendPrivateChatFromController(const StringPtr &message, const StringPtr &playerName);
+   void sendAnnouncementFromController(const StringPtr &message);
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams

@@ -3486,10 +3486,57 @@ void GameType::sendChatFromRobot(bool global, const StringPtr &message, ClientIn
 }
 
 
-// For the moment, all Controller chats are global
-void GameType::sendChatFromController(const StringPtr &message)
+// Send global chat from Controller
+void GameType::sendGlobalChatFromController(const StringPtr &message)
 {
    sendChat("LevelController", NULL, message, true);
+}
+
+
+// Send team chat from Controller
+void GameType::sendTeamChatFromController(const StringPtr &message, S32 teamIndex)
+{
+   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatMessage, (false, "LevelController", message));
+
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = mGame->getClientInfo(i);
+
+      if(clientInfo->getTeamIndex() == teamIndex)
+         if(clientInfo->getConnection())
+            clientInfo->getConnection()->postNetEvent(theEvent);
+   }
+}
+
+
+// Send private chat from Controller
+void GameType::sendPrivateChatFromController(const StringPtr &message, const StringPtr &playerName)
+{
+   ClientInfo *clientInfo = mGame->findClientInfo(playerName.getString());
+
+   if(clientInfo == NULL)  // Player not found
+      return;
+
+   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatPM, ("LevelController", clientInfo->getName(), message));
+
+   clientInfo->getConnection()->postNetEvent(theEvent);
+}
+
+
+// Send private chat from Controller
+void GameType::sendAnnouncementFromController(const StringPtr &message)
+{
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = mGame->getClientInfo(i);
+
+      if(clientInfo->isRobot())
+         continue;
+
+      RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayAnnouncement, (message.getString()));
+
+      clientInfo->getConnection()->postNetEvent(theEvent);
+   }
 }
 
 

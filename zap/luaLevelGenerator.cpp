@@ -153,6 +153,9 @@ void LuaLevelGenerator::registerClasses()
    METHOD(CLASS, setGameTime,       ARRAYDEF({{ NUM, END }}), 1 )                        \
    METHOD(CLASS, pointCanSeePoint,  ARRAYDEF({{ PT, PT, END }}), 1 )                     \
    METHOD(CLASS, globalMsg,         ARRAYDEF({{ STR, END }}), 1 )                        \
+   METHOD(CLASS, teamMsg,           ARRAYDEF({{ STR, TEAM_INDX, END }}), 1 )             \
+   METHOD(CLASS, privateMsg,        ARRAYDEF({{ STR, STR, END }}), 1 )                   \
+   METHOD(CLASS, announce,          ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS, subscribe,         ARRAYDEF({{ EVENT, END }}), 1 )                      \
    METHOD(CLASS, unsubscribe,       ARRAYDEF({{ EVENT, END }}), 1 )                      \
 
@@ -419,10 +422,70 @@ S32 LuaLevelGenerator::lua_globalMsg(lua_State *L)
 
    const char *message = getString(L, 1);
 
-   mGame->sendChatFromController(message);
+   mGame->sendGlobalChatFromController(message);
 
    // Fire our event handler
    EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, NULL, true);
+
+   return 0;
+}
+
+
+/**
+ * @luafunc Levelgen::teamMsg(message)
+ * @brief   Broadcast a message to players of a team.
+ * @param   \e string message - Message to broadcast.
+ * @param   \e int team index - Index of team to which to send a message.
+ */
+S32 LuaLevelGenerator::lua_teamMsg(lua_State *L)
+{
+   checkArgList(L, functionArgs, "LuaLevelGenerator", "teamMsg");
+
+   const char *message = getString(L, 1);
+   S32 teamIndex = getTeamIndex(L, 2);
+
+   mGame->sendTeamChatFromController(message, teamIndex);
+
+   // Fire our event handler
+   EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, NULL, true);
+
+   return 0;
+}
+
+
+/**
+ * @luafunc Levelgen::teamMsg(message)
+ * @brief   Broadcast a private message to a player.
+ * @param   \e string message - Message to broadcast.
+ * @param   \e string player name - Name of player to which to send a message.
+ */
+S32 LuaLevelGenerator::lua_privateMsg(lua_State *L)
+{
+   checkArgList(L, functionArgs, "LuaLevelGenerator", "privateMsg");
+
+   const char *message = getString(L, 1);
+   const char *playerName = getString(L, 2);
+
+   mGame->sendPrivateChatFromController(message, playerName);
+
+   // No event fired for private message
+
+   return 0;
+}
+
+
+/**
+ * @luafunc Levelgen::announce(message)
+ * @brief   Broadcast an announcement.
+ * @param   \e string message - Message to broadcast.
+ */
+S32 LuaLevelGenerator::lua_announce(lua_State *L)
+{
+   checkArgList(L, functionArgs, "LuaLevelGenerator", "announce");
+
+   const char *message = getString(L, 1);
+
+   mGame->sendAnnouncementFromController(message);
 
    return 0;
 }
