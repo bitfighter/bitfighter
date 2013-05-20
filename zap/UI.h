@@ -117,7 +117,7 @@ public:
    virtual void renderMasterStatus();     // Render master server connection status
 
    // Helpers to simplify dealing with key bindings
-   InputCode getInputCode(GameSettings *settings, InputCodeManager::BindingName binding);
+   static InputCode getInputCode(GameSettings *settings, InputCodeManager::BindingName binding);
    void setInputCode(GameSettings *settings, InputCodeManager::BindingName binding, InputCode inputCode);
    bool checkInputCode(GameSettings *settings, InputCodeManager::BindingName, InputCode inputCode);
    const char *getInputCodeString(GameSettings *settings, InputCodeManager::BindingName binding);

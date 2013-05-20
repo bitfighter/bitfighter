@@ -2139,7 +2139,7 @@ void EditorUserInterface::renderDockPlugins()
       if(hoveredPlugin == i)
       {
          S32 x = gScreenInfo.getGameCanvasWidth() - mDockWidth - horizMargin;
-         S32 y = 1.5 * vertMargin + PLUGIN_LINE_SPACING*i;
+         S32 y = 1.5 * vertMargin + PLUGIN_LINE_SPACING * i;
          drawHollowRect(x + horizMargin / 3, y, x + mDockWidth - horizMargin / 3, y + PLUGIN_LINE_SPACING, Colors::white);
       }
       renderDockItemLabel(Point(gScreenInfo.getGameCanvasWidth() - mDockWidth / 2 - horizMargin, 1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 0.33)), mPluginInfos[i].prettyName.c_str());

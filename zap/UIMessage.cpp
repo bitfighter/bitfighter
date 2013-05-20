@@ -142,11 +142,11 @@ void MessageUserInterface::idle(U32 timeDelta)
 
 void MessageUserInterface::render()
 {
-   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   const F32 canvasWidth  = (F32)gScreenInfo.getGameCanvasWidth();
+   const F32 canvasHeight = (F32)gScreenInfo.getGameCanvasHeight();
 
-   U32 hInset = (canvasHeight - mHeight) / 2;
-   U32 wInset = (canvasWidth - mWidth) / 2;
+   F32 hInset = F32(canvasHeight - mHeight) / 2;
+   F32 wInset = F32(canvasWidth - mWidth) / 2;
 
    // Fade effect
    F32 fadeFactor;
@@ -160,21 +160,21 @@ void MessageUserInterface::render()
    if(mBox)
    {
       F32 vertices[] = {
-            wInset + mVertOffset, hInset,
+            wInset + mVertOffset,               hInset,
             canvasWidth - wInset + mVertOffset, hInset,
             canvasWidth - wInset + mVertOffset, canvasHeight - hInset,
-            wInset + mVertOffset, canvasHeight - hInset
+            wInset + mVertOffset,               canvasHeight - hInset
       };
 
-      glColor4f(.3f, 0, 0, fadeFactor * 0.95f);    // Draw a box
+      glColor(Colors::red30, fadeFactor * 0.95f);  // Draw a box
       renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
-      glColor4f(1, 1, 1, fadeFactor);              // Add a border
+      glColor(Colors::white, fadeFactor);          // Add a border
       renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
    }
 
    // Draw title, message, and footer
-   glColor4f(mMessageColor.r, mMessageColor.g, mMessageColor.b, fadeFactor);
+   glColor(mMessageColor, fadeFactor);
 
    if(strcmp(mTitle, ""))  // If they are different
       drawCenteredString(vertMargin + hInset + mVertOffset, 30, mTitle);

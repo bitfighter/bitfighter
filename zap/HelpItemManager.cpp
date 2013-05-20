@@ -143,6 +143,9 @@ void HelpItemManager::idle(U32 timeDelta)
 }
 
 
+static const S32 FontSize = 18;
+static const S32 FontGap  = 6;
+
 // DON'T PANIC!!! THIS IS A ROUGH INTERMEDIATE FORM THAT WILL BE SIMPLIFIED AND STREAMLINED!!!
 
 void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbolName, Vector<SymbolShapePtr> &symbols)
@@ -173,11 +176,8 @@ void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symb
 
    else if(symbolName == "MODULE_CTRLS") {}
 
-
-   
-
    else 
-      symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName)));
+      symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, FontSize, HelpItemContext)));
 }
 
 
@@ -193,11 +193,11 @@ static void symbolParse(const InputCodeManager *inputCodeManager, string &str, V
       if(startPos == string::npos || endPos == string::npos)
       {
          // No further symbols herein, convert the rest to text symbol and exit
-         symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset))));
+         symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset), FontSize, HelpItemContext)));
          return;
       }
 
-      symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset))));
+      symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset), FontSize, HelpItemContext)));
 
       getSymbolShape(inputCodeManager, str.substr(startPos + 2, endPos - startPos - 2), symbols);    // + 2 to advance past the "[["
 
@@ -208,9 +208,6 @@ static void symbolParse(const InputCodeManager *inputCodeManager, string &str, V
 
 static S32 doRenderMessages(const InputCodeManager *inputCodeManager, const char **messages, S32 yPos)
 {
-   static const S32 FontSize = 18;
-   static const S32 FontGap  = 6;
-
    // Final item in messages array will be NULL; loop until we hit that
    for(S32 i = 0; messages[i]; i++)
    {
@@ -223,7 +220,7 @@ static S32 doRenderMessages(const InputCodeManager *inputCodeManager, const char
       symbolParse(inputCodeManager, renderStr, symbols);
 
       UI::SymbolString symbolString(symbols, FontSize, HUDContext);
-      symbolString.renderCC(Point(400, yPos));
+      symbolString.render(400, yPos, AlignmentCenter);
 
       yPos += FontSize + FontGap;
    }

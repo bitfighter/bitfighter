@@ -76,7 +76,10 @@ static const S32 FontGap = 8;
 
 // Constructor
 InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game),
-                                                                         mControls(FontSize, FontGap)
+                                                                         mSpecialKeysInstrLeft(FontGap), 
+                                                                         mSpecialKeysBindingsLeft(FontGap), 
+                                                                         mSpecialKeysInstrRight(FontGap), 
+                                                                         mSpecialKeysBindingsRight(FontGap)
 {
    // Quick sanity check...
    TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum IntructionPages!!!");
@@ -99,6 +102,22 @@ InstructionsUserInterface::~InstructionsUserInterface()
 }
 
 
+struct ControlString
+{
+   const char *controlDescr;
+   InputCodeManager::BindingName primaryControlIndex;    // Not really a good name
+};
+
+
+enum LeftRight { Left, Right };
+
+struct HelpBind { 
+   LeftRight leftRight;
+   const char *help;
+   InputCodeManager::BindingName binding;
+};
+
+
 void InstructionsUserInterface::onActivate()
 {
    mCurPage = 0;
@@ -108,25 +127,8 @@ void InstructionsUserInterface::onActivate()
 
    GameSettings *settings = getGame()->getSettings();
 
-   mControls.clear();
-
-   if(getGame()->getInputMode() != InputModeKeyboard)
-   {
-      symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_UP)));
-      mControls.add(SymbolString(symbols, FontSize, HelpContext));
-
-      symbols.clear();
-      symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_LEFT)));
-      symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_DOWN)));
-      symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_RIGHT)));
-   }
-   else
-   {
-      symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_DUMMY_STICK_LEFT)));
-      symbols.push_back(SymbolString::getControlSymbol(getInputCode(settings, InputCodeManager::BINDING_DUMMY_STICK_RIGHT)));
-   }
-
-   mControls.add(SymbolString(symbols, FontSize, HelpContext));
+   initNormalKeys_page1();
+   initSpecialKeys_page1();
 }
 
 
@@ -142,14 +144,217 @@ static ControlStringsEditor consoleCommands1[] = {
 };
 
 
+static const Color txtColor = Colors::cyan;
+static const Color keyColor = Colors::white;     
+static const Color secColor = Colors::yellow;
+
+
+static void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBindings, 
+                 UI::SymbolStringSet &rightInstrs, UI::SymbolStringSet &rightBindings,
+                 const HelpBind *helpBindings, S32 bindingCount, GameSettings *settings)
+{
+   UI::SymbolStringSet *instr, *bindings;
+   Vector<SymbolShapePtr> symbols;
+
+   for(S32 i = 0; i < bindingCount; i++)
+   {
+      if(helpBindings[i].leftRight == Left)
+      {
+         instr    = &leftInstrs;
+         bindings = &leftBindings;
+      }
+      else
+      {
+         instr    = &rightInstrs;
+         bindings = &rightBindings;
+      }
+
+      if(strcmp(helpBindings[i].help, "-") == 0)
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
+         instr->add(SymbolString(symbols, FontSize, HelpContext));
+
+         symbols.clear();
+         symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
+         bindings->add(SymbolString(symbols, FontSize, HelpContext));
+      }
+      else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_U)
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].help, FontSize, HelpContext, &txtColor));
+         instr->add(SymbolString(symbols, FontSize, HelpContext));
+
+         symbols.clear();
+         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_UP), &keyColor));
+         bindings->add(SymbolString(symbols, FontSize, HelpContext));
+      }
+      else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LDR)
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].help, FontSize, HelpContext, &txtColor));
+         instr->add(SymbolString(symbols, FontSize, HelpContext));
+
+         symbols.clear();
+         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LEFT),  &keyColor));
+         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_DOWN),  &keyColor));
+         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_RIGHT), &keyColor));
+
+         bindings->add(SymbolString(symbols, FontSize, HelpContext));
+      }
+      else
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].help, FontSize, HelpContext, &txtColor));
+         instr->add(SymbolString(symbols, FontSize, HelpContext));
+
+         symbols.clear();
+         symbols.push_back(SymbolString::getControlSymbol(UserInterface::getInputCode(settings, helpBindings[i].binding), &keyColor));
+         bindings->add(SymbolString(symbols, FontSize, HelpContext));
+      }
+   }
+}
+
+
+static const S32 HeaderFontSize = 20;
+
+
+// Initialize the special keys section of the first page of help
+void InstructionsUserInterface::initNormalKeys_page1()
+{
+    HelpBind controlsKeyboard[] = {
+         { Left, "Move ship",             InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_U },
+         { Left, " ",                     InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LDR },
+         { Left, "Aim ship",              InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE },
+         { Left, "Fire weapon",           InputCodeManager::BINDING_FIRE },
+         { Left, "Activate module 1",     InputCodeManager::BINDING_MOD1 },
+         { Left, "Activate module 2",     InputCodeManager::BINDING_MOD2 },
+         { Left, "-",                     InputCodeManager::BINDING_NONE },
+         { Left, "Open ship config menu", InputCodeManager::BINDING_LOADOUT },
+         { Left, "Toggle map view",       InputCodeManager::BINDING_CMDRMAP },
+         { Left, "Drop flag",             InputCodeManager::BINDING_DROPITEM },
+         { Left, "Show scoreboard",       InputCodeManager::BINDING_SCRBRD },
+
+         { Right, "Cycle current weapon", InputCodeManager::BINDING_ADVWEAP },
+         { Right, "Select weapon 1",      InputCodeManager::BINDING_SELWEAP1 },
+         { Right, "Select weapon 2",      InputCodeManager::BINDING_SELWEAP2 },
+         { Right, "Select weapon 3",      InputCodeManager::BINDING_SELWEAP3 },
+         { Right, "-",                    InputCodeManager::BINDING_NONE },
+         { Right, "Chat to everyone",     InputCodeManager::BINDING_GLOBCHAT },
+         { Right, "Chat to team",         InputCodeManager::BINDING_TEAMCHAT },
+         { Right, "Open QuickChat menu",  InputCodeManager::BINDING_QUICKCHAT },
+         { Right, "Record voice chat",    InputCodeManager::BINDING_TOGVOICE },
+         { Right, "Message display mode", InputCodeManager::BINDING_DUMMY_MSG_MODE },
+         { Right, "Save screenshot",      InputCodeManager::BINDING_DUMMY_SS_MODE },
+      };
+
+   static HelpBind controlsGamepad[] = {
+         { Left, "Move Ship",             InputCodeManager::BINDING_DUMMY_STICK_LEFT },
+         { Left, "Aim Ship/Fire Weapon",  InputCodeManager::BINDING_DUMMY_STICK_RIGHT },
+         { Left, "Activate module 1",     InputCodeManager::BINDING_MOD1 },
+         { Left, "Activate module 2",     InputCodeManager::BINDING_MOD2 },
+         { Left, "-",                     InputCodeManager::BINDING_NONE },
+         { Left, "Open ship config menu", InputCodeManager::BINDING_LOADOUT },
+         { Left, "Toggle map view",       InputCodeManager::BINDING_CMDRMAP },
+         { Left, "Drop flag",             InputCodeManager::BINDING_DROPITEM },
+         { Left, "Show scoreboard",       InputCodeManager::BINDING_SCRBRD },
+
+         { Right, "Cycle current weapon", InputCodeManager::BINDING_ADVWEAP },
+         { Right, "Select weapon 1",      InputCodeManager::BINDING_SELWEAP1 },
+         { Right, "Select weapon 2",      InputCodeManager::BINDING_SELWEAP2 },
+         { Right, "Select weapon 3",      InputCodeManager::BINDING_SELWEAP3 },
+         { Right, "-",                    InputCodeManager::BINDING_NONE },
+         { Right, "Open QuickChat menu",  InputCodeManager::BINDING_QUICKCHAT },
+         { Right, "Chat to team",         InputCodeManager::BINDING_TEAMCHAT },
+         { Right, "Chat to everyone",     InputCodeManager::BINDING_GLOBCHAT },
+         { Right, "Record voice chat",    InputCodeManager::BINDING_TOGVOICE },
+      };
+
+   HelpBind *helpBind;
+   S32 helpBindCount;
+
+   if(getGame()->getInputMode() == InputModeKeyboard)
+   {
+      helpBind = controlsKeyboard;
+      helpBindCount = ARRAYSIZE(controlsKeyboard);
+   }
+   else
+   {
+      helpBind = controlsGamepad;
+      helpBindCount = ARRAYSIZE(controlsGamepad);
+   }
+
+   UI::SymbolStringSet keysInstrLeft(FontGap),  keysBindingsLeft(FontGap), 
+                       keysInstrRight(FontGap), keysBindingsRight(FontGap);
+
+   Vector<SymbolShapePtr> symbols;
+
+   // Add some headers to our 4 columns
+   symbols.clear();
+   symbols.push_back(SymbolString::getSymbolText("Action", HeaderFontSize, HelpContext, &secColor));
+   keysInstrLeft.add(SymbolString(symbols, FontSize, HelpContext));
+   keysInstrRight.add(SymbolString(symbols, FontSize, HelpContext));
+
+   symbols.clear();
+   symbols.push_back(SymbolString::getSymbolText("Control", HeaderFontSize, HelpContext, &secColor));
+   keysBindingsLeft.add(SymbolString(symbols, FontSize, HelpContext));
+   keysBindingsRight.add(SymbolString(symbols, FontSize, HelpContext));
+
+   // Add horizontal line to first column (will draw across all)
+   symbols.clear();
+   symbols.push_back(SymbolString::getHorizLine(735, -14, 8, &Colors::gray70));
+   keysInstrLeft.add(SymbolString(symbols, FontSize, HelpContext));
+
+   // Need to add a blank symbol to keep columns in sync
+   symbols.clear();
+   symbols.push_back(SymbolString::getBlankSymbol(0,0));
+   keysBindingsLeft.add(SymbolString(symbols, FontSize, HelpContext));
+   keysInstrRight.add(SymbolString(symbols, FontSize, HelpContext));
+   keysBindingsRight.add(SymbolString(symbols, FontSize, HelpContext));
+
+   pack(keysInstrLeft,  keysBindingsLeft, 
+        keysInstrRight, keysBindingsRight, 
+        helpBind, helpBindCount, getGame()->getSettings());
+
+   S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;  //(= 33)
+
+   mSymbolSets.clear();
+
+   mSymbolSets.addSymbolStringSet(keysInstrLeft,     AlignmentLeft,   col1);
+   mSymbolSets.addSymbolStringSet(keysBindingsLeft,  AlignmentCenter, col2 + centeringOffset);
+   mSymbolSets.addSymbolStringSet(keysInstrRight,    AlignmentLeft,   col3);
+   mSymbolSets.addSymbolStringSet(keysBindingsRight, AlignmentCenter, col4 + centeringOffset);
+}
+
+
+// Initialize the special keys section of the first page of help
+void InstructionsUserInterface::initSpecialKeys_page1()
+{
+   HelpBind helpBind[] = { 
+      { Left,  "Help",              InputCodeManager::BINDING_HELP },
+      { Left,  "Mission",           InputCodeManager::BINDING_MISSION },
+      { Right, "Universal Chat",    InputCodeManager::BINDING_OUTGAMECHAT },
+      { Right, "Display FPS / Lag", InputCodeManager::BINDING_FPS },
+      { Right, "Diagnostics",       InputCodeManager::BINDING_DIAG }
+   };
+
+   mSpecialKeysInstrLeft.clear();      mSpecialKeysBindingsLeft.clear();
+   mSpecialKeysInstrRight.clear();     mSpecialKeysBindingsRight.clear();
+
+   pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
+        mSpecialKeysInstrRight, mSpecialKeysBindingsRight, 
+        helpBind, ARRAYSIZE(helpBind), getGame()->getSettings());
+}
+
+
 void InstructionsUserInterface::render()
 {
    glColor(Colors::red);
-   drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeaders[mCurPage]);
+   drawStringf(  3, 3, 25, "INSTRUCTIONS - %s", pageHeaders[mCurPage]);
    drawStringf(625, 3, 25, "PAGE %d/%d", mCurPage + 1, InstructionMaxPages);  // We +1 to be natural
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
 
-   glColor(0.7f);
+   glColor(Colors::gray70);
    drawHorizLine(0, 800, 32);
    drawHorizLine(0, 800, 569);
 
@@ -221,73 +426,6 @@ void InstructionsUserInterface::activatePage(IntructionPages pageIndex)
 }
 
 
-struct ControlString
-{
-   const char *controlString;
-   InputCodeManager::BindingName primaryControlIndex;    // Not really a good name
-};
-
-InputCode dummyMouse = MOUSE;
-InputCode dummyStickLeft = LEFT_JOYSTICK;
-InputCode dummyStickRight = RIGHT_JOYSTICK;
-InputCode dummyMoveShipKeysUD = KEYS_UP_DOWN;
-InputCode dummyMoveShipKeysLR = KEYS_LEFT_RIGHT;
-InputCode dummyMsgMode = KEY_CTRL_M;
-InputCode dummySSMode = KEY_CTRL_Q;
-
-static ControlString controlsKeyboard[] = {
-         { "Move ship",             InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_UD},
-         { " ",                     InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LR},
-         { "Aim ship",              InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE },
-         { "Fire weapon",           InputCodeManager::BINDING_FIRE },
-         { "Activate module 1",     InputCodeManager::BINDING_MOD1 },
-         { "Activate module 2",     InputCodeManager::BINDING_MOD2 },
-         { "-",                     InputCodeManager::BINDING_NONE },
-         { "Open ship config menu", InputCodeManager::BINDING_LOADOUT },
-         { "Toggle map view",       InputCodeManager::BINDING_CMDRMAP },
-         { "Drop flag",             InputCodeManager::BINDING_DROPITEM },
-         { "Show scoreboard",       InputCodeManager::BINDING_SCRBRD },
-         { NULL, InputCodeManager::BINDING_NONE }, // End col 1
-
-         { "Cycle current weapon",  InputCodeManager::BINDING_ADVWEAP },
-         { "Select weapon 1",       InputCodeManager::BINDING_SELWEAP1 },
-         { "Select weapon 2",       InputCodeManager::BINDING_SELWEAP2 },
-         { "Select weapon 3",       InputCodeManager::BINDING_SELWEAP3 },
-         { "-",                     InputCodeManager::BINDING_NONE },
-         { "Chat to everyone",      InputCodeManager::BINDING_GLOBCHAT },
-         { "Chat to team",          InputCodeManager::BINDING_TEAMCHAT },
-         { "Open QuickChat menu",   InputCodeManager::BINDING_QUICKCHAT },
-         { "Record voice chat",     InputCodeManager::BINDING_TOGVOICE },
-         { "Message display mode",  InputCodeManager::BINDING_DUMMY_MSG_MODE },
-         { "Save screenshot",       InputCodeManager::BINDING_DUMMY_SS_MODE },
-         { NULL, InputCodeManager::BINDING_NONE }, // End col 2
-      };
-
-static ControlString controlsGamepad[] = {
-         { "Move Ship",             InputCodeManager::BINDING_DUMMY_STICK_LEFT },
-         { "Aim Ship/Fire Weapon",  InputCodeManager::BINDING_DUMMY_STICK_RIGHT },
-         { "Activate module 1",     InputCodeManager::BINDING_MOD1 },
-         { "Activate module 2",     InputCodeManager::BINDING_MOD2 },
-         { "-",                     InputCodeManager::BINDING_NONE },
-         { "Open ship config menu", InputCodeManager::BINDING_LOADOUT },
-         { "Toggle map view",       InputCodeManager::BINDING_CMDRMAP },
-         { "Drop flag",             InputCodeManager::BINDING_DROPITEM },
-         { "Show scoreboard",       InputCodeManager::BINDING_SCRBRD },
-         { NULL, InputCodeManager::BINDING_NONE }, // End col 1
-
-         { "Cycle current weapon",  InputCodeManager::BINDING_ADVWEAP },
-         { "Select weapon 1",       InputCodeManager::BINDING_SELWEAP1 },
-         { "Select weapon 2",       InputCodeManager::BINDING_SELWEAP2 },
-         { "Select weapon 3",       InputCodeManager::BINDING_SELWEAP3 },
-         { "-",                     InputCodeManager::BINDING_NONE },
-         { "Open QuickChat menu",   InputCodeManager::BINDING_QUICKCHAT },
-         { "Chat to team",          InputCodeManager::BINDING_TEAMCHAT },
-         { "Chat to everyone",      InputCodeManager::BINDING_GLOBCHAT },
-         { "Record voice chat",     InputCodeManager::BINDING_TOGVOICE },
-         { NULL, InputCodeManager::BINDING_NONE }, // End col 2
-      };
-
-
 bool InstructionsUserInterface::usingArrowKeys()
 {
    GameSettings *settings = getGame()->getSettings();
@@ -299,116 +437,37 @@ bool InstructionsUserInterface::usingArrowKeys()
 }
 
 
-static const Color txtColor = Colors::cyan;
-static const Color keyColor = Colors::white;     
-static const Color secColor = Colors::yellow;
-
-void InstructionsUserInterface::renderKeyBindingQuad(S32 y, const char *str1, InputCodeManager::BindingName binding1, 
-                                                            const char *str2, InputCodeManager::BindingName binding2)
-{
-   GameSettings *settings = getGame()->getSettings();
-   
-   glColor(txtColor);
-   drawString(col1, y, FontSize, str1);
-
-   if(binding1 != InputCodeManager::BINDING_NONE)
-   {
-      glColor(keyColor);
-      drawStringf(col2, y, FontSize, "[%s]",  getInputCodeString(settings, binding1));
-   }
-
-   glColor(txtColor);
-   drawString(col3, y, FontSize, str2);
-
-   if(binding2 != InputCodeManager::BINDING_NONE)
-   {
-      glColor(keyColor);
-      drawStringf(col4, y, FontSize, "[%s]",  getInputCodeString(settings, binding2));
-   }
-}
-
-
 // This has become rather ugly and inelegant.  Sorry!
 void InstructionsUserInterface::renderPage1()
 {
-   S32 starty = 75;
+   S32 starty = 65;
    S32 y;
    S32 actCol = col1;      // Action column
    S32 contCol = col2;     // Control column
-
-   S32 HeaderFontSize = 20;
 
    GameSettings *settings = getGame()->getSettings();
 
    bool firstCol = true;
    bool done = false;
 
-   drawHorizLine(col1, 750, starty + 26);
+   y = starty;
 
-   ControlString *controls = (getGame()->getInputMode() == InputModeKeyboard) ? controlsKeyboard : controlsGamepad;
+   y += mSymbolSets.render(y);
 
+   y += 35;
    glColor(secColor);
-   drawString(col1, starty, HeaderFontSize, "Action");
-   drawString(col2, starty, HeaderFontSize, "Control");
-   drawString(col3, starty, HeaderFontSize, "Action");
-   drawString(col4, starty, HeaderFontSize, "Control");
+   drawCenteredString_fixed(y, 20, "These special keys are also usually active:");
 
-   y = starty + 28;
+   y += 36;
+   glColor(txtColor);
+   mSpecialKeysInstrLeft.render (col1, y, AlignmentLeft);
+   mSpecialKeysInstrRight.render(col3, y, AlignmentLeft);
 
-   for(S32 i = 0; !done; i++)              // Iterate over ControlStrings above
-   {
-      if(!controls[i].controlString)
-      {
-         if(!firstCol)
-            done = true;
-         else
-         {  // Start second column
-            firstCol = false;
-            y = starty + 2;
-            actCol = col3;
-            contCol = col4;
+   S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
-            glColor(secColor);
-         }
-      }
-      else if(!strcmp(controls[i].controlString, "-"))      // Horiz spacer
-      {
-         glColor(Colors::gray40);
-         drawHorizLine(actCol, actCol + 335, y + 13);
-      }
-      else
-      {
-         glColor(txtColor);
-         drawString(actCol, y, FontSize, controls[i].controlString);      // Textual description of function (1st arg in lists above)
-
-         glColor(keyColor);
-
-
-         if(controls[i].primaryControlIndex == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_UD)
-         {
-            // Do nothing
-         }
-         else if (controls[i].primaryControlIndex == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LR)
-            mControls.renderCL(col2 + getStringWidth(HelpContext, HeaderFontSize, "Control") / 2, y - FontSize + 4);
-
-         else
-            JoystickRender::renderControllerButton((F32)contCol, F32(y + 4), Joystick::SelectedPresetIndex,
-                                                   getInputCode(settings, controls[i].primaryControlIndex), false);
-      }
-
-      y += 26;
-   }
-
-   y += 10;
-   glColor(secColor);
-   drawCenteredString(y, 20, "These special keys are also usually active:");
-
-   y += 40;
-   renderKeyBindingQuad(y, "Help",    InputCodeManager::BINDING_HELP,    "Universal Chat",    InputCodeManager::BINDING_OUTGAMECHAT);
-   y += 26;                                                                                   
-   renderKeyBindingQuad(y, "Mission", InputCodeManager::BINDING_MISSION, "Display FPS / Lag", InputCodeManager::BINDING_FPS);
-   y += 26;                                                                                   
-   renderKeyBindingQuad(y, "",        InputCodeManager::BINDING_NONE,    "Diagnostics",       InputCodeManager::BINDING_DIAG);
+   glColor(keyColor);
+   mSpecialKeysBindingsLeft.render (col2 + centeringOffset, y, AlignmentCenter);
+   mSpecialKeysBindingsRight.render(col4 + centeringOffset, y, AlignmentCenter);
 }
 
 

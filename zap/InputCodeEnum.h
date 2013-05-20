@@ -123,18 +123,20 @@ enum InputCode {
    BUTTON_BACK, BUTTON_START,                // Sometimes 9 & 10
 
 
-   BUTTON_DPAD_UP, BUTTON_DPAD_DOWN,
+   BUTTON_DPAD_UP,   BUTTON_DPAD_DOWN,
    BUTTON_DPAD_LEFT, BUTTON_DPAD_RIGHT,
 
    STICK_1_LEFT, STICK_1_RIGHT,              // Joystick moves,
-   STICK_1_UP, STICK_1_DOWN,                 // for menu navigation
+   STICK_1_UP,   STICK_1_DOWN,               // for menu navigation
    STICK_2_LEFT, STICK_2_RIGHT,
-   STICK_2_UP, STICK_2_DOWN,
+   STICK_2_UP,   STICK_2_DOWN,
 
    MAX_INPUT_CODES,
    MOUSE, LEFT_JOYSTICK, RIGHT_JOYSTICK,     // Not exactly keys, but helpful to have in here!
-   KEYS_UP_DOWN, KEYS_LEFT_RIGHT,            // These are here because we need a dummy InputCode item in the instructions
+
+   // Keep these together -- needed for isCtrlKey().  Note that M and S are used as markers of the bounds of ctrl keys.
    KEY_CTRL_M, KEY_CTRL_Q, KEY_CTRL_S,
+   
    KEY_COUNT,
    KEY_UNKNOWN, KEY_NONE,
    BUTTON_UNKNOWN
@@ -142,6 +144,9 @@ enum InputCode {
 
 static const U32 FIRST_KEYBOARD_KEY = (U32)KEY_0;
 static const U32 LAST_KEYBOARD_KEY  = (U32)KEY_KEYPAD_EQUALS;
+
+static const U32 FIRST_CTRL_KEY = (U32)KEY_CTRL_M;
+static const U32 LAST_CTRL_KEY  = (U32)KEY_CTRL_S;
 
 };
 

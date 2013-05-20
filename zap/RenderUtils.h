@@ -97,6 +97,7 @@ S32 drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *format, ...);
 // we've created a new drawAngleString function without the bug, called xx_fixed.  Actual work now moved to doDrawAngleString,
 // which is marked private.  I think all usage of broken function has been removed, and _fixed can be renamed to something better.
 void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string);
+void drawAngleString_fixed(F32 x, F32 y, F32 size, F32 angle, const char *string);
 void drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...);
 
 // Center text between two points
@@ -104,7 +105,10 @@ void drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *
 
 // Draw text centered on screen (normal and formatted versions)  --> now return starting location
 S32 drawCenteredString(S32 y, S32 size, const char *str);
+S32 drawCenteredString_fixed(S32 y, S32 size, const char *str);
 S32 drawCenteredString(S32 x, S32 y, S32 size, const char *str);
+S32 drawCenteredString_fixed(S32 x, S32 y, S32 size, const char *str);
+
 F32 drawCenteredString(F32 x, F32 y, S32 size, const char *str);
 F32 drawCenteredString(F32 x, F32 y, F32 size, const char *str);
 S32 drawCenteredStringf(S32 y, S32 size, const char *format, ...);

@@ -39,6 +39,10 @@ Color::Color(const Color &c)
 
 Color::Color(const Color *c)
 {
+   // Protect against NULLs
+   if(!c)
+      return;
+
    r = c->r;
    g = c->g;
    b = c->b;

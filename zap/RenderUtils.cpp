@@ -109,10 +109,16 @@ void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 }
 
 
+void drawString_fixed(S32 x, S32 y, S32 size, const char *string)
+{
+   drawAngleString(F32(x), F32(y), F32(size), 0, string);
+}
+
+
 void drawString(S32 x, S32 y, S32 size, const char *string)
 {
    y += size;     // TODO: Adjust all callers so we can get rid of this!
-   drawAngleString(F32(x), F32(y), F32(size), 0, string);
+   drawString_fixed(x, y, size, string);
 }
 
 
@@ -236,6 +242,13 @@ S32 drawCenteredString(S32 y, S32 size, const char *string)
 }
 
 
+S32 drawCenteredString_fixed(S32 y, S32 size, const char *string)
+{
+   return drawCenteredString_fixed(gScreenInfo.getGameCanvasWidth() / 2, y, size, string);
+}
+
+
+
 // For now, not very fault tolerant...  assumes well balanced []
 void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const Color &bodyColor, const Color &keyColor)
 {
@@ -281,6 +294,14 @@ S32 drawCenteredString(S32 x, S32 y, S32 size, const char *string)
 {
    S32 xpos = x - getStringWidth(size, string) / 2;
    drawString(xpos, y, size, string);
+   return xpos;
+}
+
+
+S32 drawCenteredString_fixed(S32 x, S32 y, S32 size, const char *string)
+{
+   S32 xpos = x - getStringWidth(size, string) / 2;
+   drawString_fixed(xpos, y, size, string);
    return xpos;
 }
 

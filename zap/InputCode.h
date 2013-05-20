@@ -95,8 +95,8 @@ public:
       BINDING_DEFINEABLE_KEY_COUNT,
       
       BINDING_NONE,
-      BINDING_DUMMY_MOVE_SHIP_KEYS_UD,
-      BINDING_DUMMY_MOVE_SHIP_KEYS_LR,
+      BINDING_DUMMY_MOVE_SHIP_KEYS_U,
+      BINDING_DUMMY_MOVE_SHIP_KEYS_LDR,
       BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE,
       BINDING_DUMMY_STICK_LEFT,
       BINDING_DUMMY_STICK_RIGHT,
@@ -156,7 +156,12 @@ public:
    static bool isKeypadKey(InputCode inputCode);               // Is inputCode on the numeric keypad?
    static bool isMouseAction(InputCode inputCode);             // Is inputCode related to the mouse?
    static bool isKeyboardKey(InputCode inputCode);             // Is inputCode a key on the keyboard?
+   static bool isCtrlKey(InputCode inputCode);                 // Is inputCode modified with ctrl (e.e. KEY_CTRL_M)?
    static bool isModifier(InputCode inputCode);                // Is inputCode a modifier key?
+
+   // For dealing with special cases, such as Ctrl-M
+   static string getModifierString(InputCode inputCode);
+   static string getBaseKeyString(InputCode inputCode);
 
    static JoystickButton inputCodeToJoystickButton(InputCode inputCode);
 

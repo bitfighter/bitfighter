@@ -129,10 +129,6 @@ InputCode BindingSet::getBinding(InputCodeManager::BindingName bindingName) cons
       // Some special hacky cases for helping us with displaying instructions:
       case InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE:
          return MOUSE;
-      case InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_UD:
-         return KEYS_UP_DOWN;
-      case InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LR:
-         return KEYS_LEFT_RIGHT;
       case InputCodeManager::BINDING_DUMMY_STICK_LEFT:
          return LEFT_JOYSTICK;
       case InputCodeManager::BINDING_DUMMY_STICK_RIGHT:
@@ -1771,9 +1767,49 @@ bool InputCodeManager::isKeyboardKey(InputCode inputCode)
 }
 
 
+bool InputCodeManager::isCtrlKey(InputCode inputCode)
+{
+   return inputCode >= FIRST_CTRL_KEY && inputCode <= LAST_CTRL_KEY;
+}
+
+
 bool InputCodeManager::isModifier(InputCode inputCode)
 {
    return inputCode >= KEY_SHIFT && inputCode <= KEY_SUPER;
+}
+
+
+// Array tying InputCodes to string representations; used for translating one to the other 
+static const char *keyNames[KEY_COUNT];
+
+string InputCodeManager::getModifierString(InputCode inputCode)
+{
+   if(isCtrlKey(inputCode))
+      return keyNames[S32(KEY_CTRL)];
+   else
+      return "";
+
+   // TODO: Add other modifiers here as needed
+}
+
+
+string InputCodeManager::getBaseKeyString(InputCode inputCode)
+{
+   switch(inputCode)
+   {
+      case KEY_CTRL_M:
+         return keyNames[S32(KEY_M)];
+
+      case KEY_CTRL_Q:
+         return keyNames[S32(KEY_Q)];
+
+      case KEY_CTRL_S:
+         return keyNames[S32(KEY_S)];
+
+      default:
+         TNLAssert(false, "Unknown input code!");
+         return "";
+   }
 }
 
 
@@ -1817,12 +1853,6 @@ InputCode InputCodeManager::getKeyBoundToBindingCodeName(const string &name) con
 
    return KEY_UNKNOWN;
 }
-
-
-// Array tying InputCodes to string representations; used for translating one to the other 
-
-
-static const char *keyNames[KEY_COUNT];
 
 
 void InputCodeManager::initializeKeyNames()
@@ -1948,9 +1978,9 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(MOUSE)]               = "Mouse";            
    keyNames[S32(LEFT_JOYSTICK)]       = "Left joystick";    
    keyNames[S32(RIGHT_JOYSTICK)]      = "Right joystick";   
-   keyNames[S32(KEY_CTRL_M)]          = "Ctrl-M";           
+   keyNames[S32(KEY_CTRL_M)]          = "Ctrl-M";                 // First ctrl key
    keyNames[S32(KEY_CTRL_Q)]          = "Ctrl-Q";           
-   keyNames[S32(KEY_CTRL_S)]          = "Ctrl-S";           
+   keyNames[S32(KEY_CTRL_S)]          = "Ctrl-S";                 // Last ctrl key
    keyNames[S32(KEY_BACKQUOTE)]       = "`";                
    keyNames[S32(KEY_MENU)]            = "Menu";             
    keyNames[S32(KEY_KEYPAD_DIVIDE)]   = "Keypad /";         

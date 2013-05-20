@@ -408,7 +408,7 @@ void FxManager::emitBurst(const Point &pos, const Point &scale, const Color &col
             pos + Point(cos(th)*scale.x, sin(th)*scale.y),        // pos
             Point(cos(th)*scale.x*f, sin(th)*scale.y*f),          // vel
             color,                                                // color
-            TNL::Random::readI(0, 1000) * scale.len() * 3 + S32(1000.f * scale.len())  // ttl
+            S32(TNL::Random::readI(0, 1000) * scale.len() * 3 + 1000.f * scale.len())  // ttl
       );
    }
 }

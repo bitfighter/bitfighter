@@ -57,12 +57,16 @@ private:
    void nextPage();
    void prevPage();
 
-   void renderKeyBindingQuad(S32 y, const char *str1, InputCodeManager::BindingName binding1, 
-                                    const char *str2, InputCodeManager::BindingName binding2);
-
    Vector<Point> mResourceItemPoints, mTestItemPoints;
 
-   UI::SymbolStringSet mControls;
+   UI::SymbolStringSetCollection mSymbolSets;
+
+   UI::SymbolStringSet 
+         mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
+         mSpecialKeysInstrRight, mSpecialKeysBindingsRight;
+
+   void initNormalKeys_page1();
+   void initSpecialKeys_page1();
 
 public:
 
