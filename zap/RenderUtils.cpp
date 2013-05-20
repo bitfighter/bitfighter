@@ -406,6 +406,16 @@ S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor,
    return drawStringPair(xpos2, ypos, size, leftColor, rightColor, leftStr, rightStr);
 }
 
+S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, FontContext leftContext, FontContext rightContext, const Color &leftColor, const Color &rightColor,
+                                          const char *leftStr, const char *rightStr)
+{
+   S32 leftWidth = getStringWidth(leftContext, size, leftStr);
+   S32 spaceWidth = getStringWidth(leftContext, size, " ");
+   S32 rightWidth = getStringWidth(rightContext, size, rightStr);
+
+   return drawStringPair(xpos - (leftWidth + spaceWidth + rightWidth) / 2, ypos, size, leftContext, rightContext, leftColor, rightColor, string(leftStr).append(" ").c_str(), rightStr);
+}
+
 
 S32 drawStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
                                          const char *leftStr, const char *rightStr)
@@ -417,6 +427,24 @@ S32 drawStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const C
 
    glColor(rightColor);
    drawString(xpos, ypos, size, rightStr);
+
+   return xpos;
+}
+
+
+S32 drawStringPair(S32 xpos, S32 ypos, S32 size, FontContext leftContext,
+      FontContext rightContext, const Color& leftColor, const Color& rightColor,
+      const char* leftStr, const char* rightStr)
+{
+   FontManager::pushFontContext(leftContext);
+   glColor(leftColor);
+   xpos += drawStringAndGetWidth((F32)xpos, (F32)ypos, size, leftStr);
+   FontManager::popFontContext();
+
+   FontManager::pushFontContext(rightContext);
+   glColor(rightColor);
+   drawString(xpos, ypos, size, rightStr);
+   FontManager::popFontContext();
 
    return xpos;
 }
@@ -763,7 +791,6 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
 
    return wrappedLines;
 }
-
 
 // Returns the number of lines our msg consumed during rendering
 U32 drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end,

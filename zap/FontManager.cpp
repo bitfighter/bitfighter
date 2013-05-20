@@ -152,6 +152,7 @@ void FontManager::initialize(GameSettings *settings)
    fontList[FontPrimeRegular]   = new BfFont(FontPrimeRegular,  "prime_regular.ttf",   settings);
    fontList[FontTenby5]         = new BfFont(FontTenby5,        "tenbyfive.ttf",       settings);
    fontList[KeyCaps]            = new BfFont(KeyCaps,           "tenbyfive.ttf",       settings);     // DavysBigKeyCaps2
+   fontList[FontDroidSansMono]  = new BfFont(FontDroidSansMono, "DroidSansMono.ttf",   settings);
 
    // set texture blending function
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -228,6 +229,10 @@ void FontManager::setFontContext(FontContext fontContext)
 
       case TextEffectContext:
          setFont(FontOrbitronLightStroke);
+         return;
+
+      case InputContext:
+         setFont(FontDroidSansMono);
          return;
 
       default:

@@ -1234,18 +1234,24 @@ void TextEntryMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected
    else
       textColor.set(Colors::cyan);
 
-   S32 xpos2 = drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), textColor, 
+   S32 xpos2 = drawCenteredStringPair(xpos, ypos, textsize, MenuContext, InputContext, *getColor(isSelected), textColor,
                                       getPrompt().c_str(), getOptionText().c_str());
 
    glColor(Colors::red);      // Cursor is always red
    if(isSelected)
+   {
+      FontManager::pushFontContext(InputContext);
       mLineEditor.drawCursor(xpos2, ypos, textsize);
+      FontManager::popFontContext();
+   }
 }
 
 
 S32 TextEntryMenuItem::getWidth(S32 textsize)
 {
-   return getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
+   S32 leftWidth = getStringWidth(MenuContext, textsize, getPrompt().c_str());
+   S32 rightWidth = getStringWidth(InputContext, textsize, getOptionText().c_str());
+   return leftWidth + rightWidth;
 }
 
 

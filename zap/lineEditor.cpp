@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "lineEditor.h"
+#include "Colors.h"
 #include "UI.h"
 
 #include "MathUtils.h"
@@ -234,41 +235,18 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
       offset = getStringWidth(fontSize, mLine.substr(offsetCharacters, mCursorOffset - offsetCharacters).c_str());
    }
 
-   drawCursorAngle(x, y + fontSize, fontSize, offset, 0);
+   drawCursor(x, y, fontSize, offset);
 }
 
 
-// Draw our cursor, assuming string is drawn at x,y with starting width
-void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth)
+// Draw our cursor, assuming string is drawn at x,y and cursor should be offset to the right
+void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 offset)
 {
-   drawCursorAngle(x, y + fontSize, fontSize, startingWidth, 0);
-}
+   if(Platform::getRealMilliseconds() / 500 % 2)
+      return;
 
-
-// Draw our cursor, assuming string is drawn at x,y at specified angle 
-void LineEditor::drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle)
-{
-   S32 width = S32(getStringWidth(fontSize, mLine.c_str()));
-   drawCursorAngle(S32(x), S32(y), fontSize, width, angle);
-}
-
-
-void LineEditor::drawCursorAngle(S32 x, S32 y, S32 fontSize, S32 width, F32 angle)
-{
-   drawCursorAngle(x, y, F32(fontSize), width, angle);
-}
-
-
-// static
-void LineEditor::drawCursorAngle(S32 x, S32 y, F32 fontSize, S32 width, F32 angle)
-{
-   if((Platform::getRealMilliseconds() / 100) % 2)
-   {
-      F32 xpos = x + ((F32) width  * cos(angle));
-      F32 ypos = y + ((F32) width  * sin(angle));
-
-      drawAngleString(xpos, ypos, (F32)fontSize, angle, "_");
-   }
+   S32 width = MAX(2, getStringWidth(fontSize, mLine.substr(mCursorOffset, 1).c_str()));
+   drawFilledRect(x + offset, y, x + offset + width, y + fontSize + 3, Colors::white, 0.3f);
 }
 
 

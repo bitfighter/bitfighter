@@ -40,10 +40,12 @@ namespace Zap
       OverlayMenuContext,      // For Loadout Menus and such
       TextEffectContext,       // Yard Sale!!! text and the like
       ScoreboardContext,       // In-game scoreboard font
+      InputContext,            // Input value font
    };
 
 
    enum FontId {
+      FontDroidSansMono,
       FontRoman,
       FontOrbitronLightStroke,
       FontOrbitronMedStroke,

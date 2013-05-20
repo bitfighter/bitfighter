@@ -25,6 +25,7 @@
 
 #include "ChatHelper.h"
 
+#include "FontManager.h"
 #include "UIManager.h"
 #include "ChatCommands.h"
 #include "ClientGame.h"
@@ -150,6 +151,7 @@ bool ChatHelper::isCmdChat()
 
 void ChatHelper::render()
 {
+   FontManager::pushFontContext(InputContext);
    const char *promptStr;
 
    Color baseColor;
@@ -275,6 +277,7 @@ void ChatHelper::render()
 
    // Restore scissors settings -- only used during scrolling
    scissorsManager.disable();
+   FontManager::popFontContext();
 }
 
 

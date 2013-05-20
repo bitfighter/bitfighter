@@ -25,6 +25,7 @@
 
 #include "UIChat.h"
 
+#include "FontManager.h"
 #include "UIQueryServers.h"      // For menuID
 #include "UIGame.h"              // For putting private messages into game console
 #include "UIManager.h"
@@ -319,6 +320,7 @@ void AbstractChat::renderMessageComposition(S32 ypos)
    const S32 promptWidth = getStringWidth(CHAT_FONT_SIZE, PROMPT_STR);
    const S32 xStartPos = UserInterface::horizMargin + promptWidth;
 
+   FontManager::pushFontContext(InputContext);
    string displayString = mLineEditor.getDisplayString();
 
    glColor(Colors::cyan);
@@ -328,6 +330,7 @@ void AbstractChat::renderMessageComposition(S32 ypos)
    drawString(xStartPos, ypos, CHAT_FONT_SIZE, displayString.c_str());
 
    mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE);
+   FontManager::popFontContext();
 }
 
 
@@ -378,7 +381,10 @@ void AbstractChat::clearChat()
 void AbstractChat::renderChatters(S32 xpos, S32 ypos)
 {
    if(mPlayersInGlobalChat.size() == 0)
+   {
+      glColor(Colors::white);
       drawString(xpos, ypos, CHAT_NAMELIST_SIZE, "No other players currently in lobby/chat room");
+   }
    else
       for(S32 i = 0; i < mPlayersInGlobalChat.size(); i++)
       {
