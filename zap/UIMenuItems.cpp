@@ -411,14 +411,14 @@ string ToggleMenuItem::getOptionText()
 
 void ToggleMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), 
+   drawCenteredStringPair(xpos, ypos, textsize, MenuContext, InputContext, *getColor(isSelected), *getValueColor(isSelected),
                           getPrompt().c_str(), getOptionText().c_str());
 }
 
 
 S32 ToggleMenuItem::getWidth(S32 textsize)
 {
-   return getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
+   return getStringPairWidth(textsize, MenuContext, InputContext, getPrompt().c_str(), getOptionText().c_str());
 }
 
 
@@ -801,14 +801,14 @@ string CounterMenuItem::getOptionText()
 
 void CounterMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), 
+   drawCenteredStringPair(xpos, ypos, textsize, MenuContext, InputContext, *getColor(isSelected), *getValueColor(isSelected),
                           getPrompt().c_str(), getOptionText().c_str());
 }
 
 
 S32 CounterMenuItem::getWidth(S32 textsize)
 {
-   return getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
+   return getStringPairWidth(textsize, MenuContext, InputContext, getPrompt().c_str(), getOptionText().c_str());
 }
 
 
@@ -1249,9 +1249,7 @@ void TextEntryMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected
 
 S32 TextEntryMenuItem::getWidth(S32 textsize)
 {
-   S32 leftWidth = getStringWidth(MenuContext, textsize, getPrompt().c_str());
-   S32 rightWidth = getStringWidth(InputContext, textsize, getOptionText().c_str());
-   return leftWidth + rightWidth;
+   return getStringPairWidth(textsize, MenuContext, InputContext, getPrompt().c_str(), getOptionText().c_str());
 }
 
 

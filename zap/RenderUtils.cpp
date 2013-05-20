@@ -409,11 +409,8 @@ S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor,
 S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, FontContext leftContext, FontContext rightContext, const Color &leftColor, const Color &rightColor,
                                           const char *leftStr, const char *rightStr)
 {
-   S32 leftWidth = getStringWidth(leftContext, size, leftStr);
-   S32 spaceWidth = getStringWidth(leftContext, size, " ");
-   S32 rightWidth = getStringWidth(rightContext, size, rightStr);
-
-   return drawStringPair(xpos - (leftWidth + spaceWidth + rightWidth) / 2, ypos, size, leftContext, rightContext, leftColor, rightColor, string(leftStr).append(" ").c_str(), rightStr);
+   S32 width = getStringPairWidth(size, leftContext, rightContext, leftStr, rightStr);
+   return drawStringPair(xpos - width / 2, ypos, size, leftContext, rightContext, leftColor, rightColor, string(leftStr).append(" ").c_str(), rightStr);
 }
 
 
@@ -790,6 +787,16 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
    }
 
    return wrappedLines;
+}
+
+S32 getStringPairWidth(S32 size, FontContext leftContext,
+      FontContext rightContext, const char* leftStr, const char* rightStr)
+{
+   S32 leftWidth = getStringWidth(leftContext, size, leftStr);
+   S32 spaceWidth = getStringWidth(leftContext, size, " ");
+   S32 rightWidth = getStringWidth(rightContext, size, rightStr);
+
+   return leftWidth + spaceWidth + rightWidth;
 }
 
 // Returns the number of lines our msg consumed during rendering
