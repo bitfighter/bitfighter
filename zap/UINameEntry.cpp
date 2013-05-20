@@ -25,6 +25,7 @@
 
 #include "UINameEntry.h"
 
+#include "FontManager.h"
 #include "UIGame.h"
 #include "UIEditor.h"      // Only used once, could probably be refactored out
 #include "UIManager.h"
@@ -90,6 +91,7 @@ void TextEntryUserInterface::render()
 
    glColor(Colors::white);
 
+   FontManager::pushFontContext(InputContext);
    // this will have an effect of shrinking the text to fit on-screen when text get very long
    S32 w = getStringWidthf(fontSizeBig, lineEditor.getDisplayString().c_str());
    if(w > 750)
@@ -99,6 +101,7 @@ void TextEntryUserInterface::render()
 
    S32 x = drawCenteredString(y, w, lineEditor.getDisplayString().c_str());
    lineEditor.drawCursor(x, y, fontSizeBig);
+   FontManager::popFontContext();
 }
 
 
@@ -228,7 +231,7 @@ bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode)
    { 
       // Do nothing -- key handled
    }
-   else if(inputCode == KEY_RIGHT || inputCode == KEY_DOWN || inputCode == MOUSE_WHEEL_DOWN)
+   else if(inputCode == KEY_DOWN || inputCode == MOUSE_WHEEL_DOWN)
    {
       if(mLevels.size() == 0)
          return true;
@@ -247,7 +250,7 @@ bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode)
       lineEditor.setString(mLevels[mLevelIndex]);
    }
 
-   else if(inputCode == KEY_LEFT || inputCode == KEY_UP || inputCode == MOUSE_WHEEL_UP)
+   else if(inputCode == KEY_UP || inputCode == MOUSE_WHEEL_UP)
    {
       if(mLevels.size() == 0)
          return true;
@@ -268,7 +271,7 @@ bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode)
    else                                // Normal typed key - not handled
    {
       mFoundLevel = setLevelIndex();   // Update levelIndex to reflect current level
-      return false;
+      return lineEditor.handleKey(inputCode);
    }
 
    // Something was handled!
