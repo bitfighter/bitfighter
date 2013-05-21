@@ -2763,6 +2763,30 @@ void GameType::balanceTeams()
 
    S32 minimumPlayersNeeded = getGame()->getSettings()->getIniSettings()->minBalancedPlayers;
 
+   // If bots are always set to balance, then adjust minimum players needed to fill up all teams
+   if(getGame()->getSettings()->getIniSettings()->botsAlwaysBalanceTeams && isTeamGame())
+   {
+      // Update player count
+      getGame()->countTeamPlayers();
+
+      S32 largestTeamHumanCount = 0;
+      S32 teamCount = mGame->getTeamCount();
+
+      // Find team with most human players
+      for(S32 i = 0; i < teamCount; i++)
+      {
+         TNLAssert(dynamic_cast<Team *>(mGame->getTeam(i)), "Invalid team");
+         S32 currentHumanCount = static_cast<Team *>(mGame->getTeam(i))->getPlayerCount();
+
+         if(currentHumanCount > largestTeamHumanCount)
+            largestTeamHumanCount = currentHumanCount;
+      }
+
+      // Alter minimum players needed if a balanced team total is greater
+      if(largestTeamHumanCount * teamCount > minimumPlayersNeeded)
+         minimumPlayersNeeded = largestTeamHumanCount * teamCount;
+   }
+
    // Not enough players!  Add bots until we're balanced
    if(currentClientCount < minimumPlayersNeeded)
    {
