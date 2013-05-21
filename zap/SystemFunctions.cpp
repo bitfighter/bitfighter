@@ -42,6 +42,10 @@
 #  include <io.h>
 #endif
 
+#if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
+#  include "Directory.h"
+#endif
+
 #include "tnlAssert.h"
 
 using namespace TNL;

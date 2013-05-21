@@ -47,6 +47,10 @@
 #  include <dirent.h>        // Need standard copy for *NIXes
 #endif
 
+#if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
+#  include "Directory.h"
+#endif
+
 
 namespace Zap
 {
