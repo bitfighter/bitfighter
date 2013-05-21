@@ -34,6 +34,7 @@
 #include "Colors.h"
 
 #include <stdarg.h>        // For va_args
+#include <stdio.h>         // For vsnprintf
 
 
 namespace Zap {

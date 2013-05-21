@@ -26,17 +26,23 @@ if(MSVC)
 	set(LinkerFlags
 		CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
 	)
-	message(${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO})
+	
 	foreach(LinkerFlag ${LinkerFlags})
 		# Handle both /INCREMENTAL:YES and /INCREMENTAL
 		string(REPLACE "INCREMENTAL:YES" "INCREMENTAL" ${LinkerFlag} "${${LinkerFlag}}")
 		string(REPLACE "INCREMENTAL" "INCREMENTAL:NO" ${LinkerFlag} "${${LinkerFlag}}")
 	endforeach()
-	message(${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO})
 	
 else()
+	# MinGW won't statically compile in Microsofts c/c++ library routines
+	if(MINGW)
+		set(BF_LINK_FLAGS "-Wl,--as-needed -static-libstdc++ -static-libgcc")
+	else()
+		set(BF_LINK_FLAGS "-Wl,--as-needed")
+	endif()
+	
 	# Only link in what is absolutely necessary
-	set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
+	set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
 endif()
 
 # 
@@ -46,7 +52,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
 	set(CMAKE_C_FLAGS_DEBUG "-g -Wall")
 	set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
 	set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELEASE} -g")
-	set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -Wno-narrowing")
+	set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall")
 	set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELEASE} -g")
 endif()
@@ -70,6 +76,12 @@ if(MSVC)
 	# Enable 'Edit and Continue' debugging support
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /ZI")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
+endif()
+
+if(MINGW)
+	set(CMAKE_RC_COMPILER_INIT windres)
+	enable_language(RC)
+	set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -i <SOURCE> -o <OBJECT>")
 endif()
 
 
@@ -103,8 +115,8 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif()
 
-# ALURE is not compiled on visual studio presently
-if(NOT MSVC)
+# ALURE is not compiled on Windows presently
+if(NOT WIN32)
 	add_subdirectory(alure)
 endif()
 

@@ -10,7 +10,7 @@ else()
 		set(SDL_LIBRARY ${SDL2_LIBRARY})
 	endif()
 endif()
-if(MSVC)
+if(WIN32)
 	find_package(ALURE)
 else()
 	set(ALURE_LIBRARIES alure)
@@ -211,7 +211,7 @@ file(GLOB OTHER_HEADERS
 	../poly2tri/sweep/*.h
 )
 
-if(MSVC)
+if(WIN32)
 	set(EXTRA_LIBS ws2_32 winmm)
 	# Add icon resource in Visual Studio
 	list(APPEND CLIENT_SOURCES ZAP.rc)
@@ -394,18 +394,28 @@ set(ALL_DEBUG_DEFS
 	"TNL_DEBUG"
 )
 
-# Visual Studio only settings
-if(MSVC)
+if(WIN32)
 	# Install windows libraries and resources
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
-
-	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
-		COMMAND xcopy /e /d /y ${resDir}* ${exeDir} 
-		COMMAND xcopy /d /y ${libDir}*.dll ${exeDir}
-	)
 	
+	if(UNIX OR NOT $ENV{MSYSTEM} STREQUAL "")  # Hacky way to detect cygwin or MSYS
+		set(RES_COPY_CMD cp -r ${resDir}* ${exeDir})
+		set(LIB_COPY_CMD cp ${libDir}*.dll ${exeDir})
+	else()
+		set(RES_COPY_CMD xcopy /e /d /y ${resDir}* ${exeDir})
+		set(LIB_COPY_CMD xcopy /d /y ${libDir}*.dll ${exeDir})
+	endif()
+	
+	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
+		COMMAND ${RES_COPY_CMD}
+		COMMAND ${LIB_COPY_CMD}
+	)
+endif()
+
+# Visual Studio only settings
+if(MSVC)
 	# Work around the "Debug", "Release", etc. directories Visual Studio tries to add
 	foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
 		string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
