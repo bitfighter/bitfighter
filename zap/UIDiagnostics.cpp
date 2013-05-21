@@ -657,14 +657,11 @@ void DiagnosticUserInterface::render()
 
       for(S32 i = 0; i < 2; i++)
       {
-         F32 x;
-         F32 y;
-
-         x = horizMargin + 10;
-         y = 500 + 20 * i;
+         F32 x = (F32)horizMargin + 10;
+         F32 y = 500.0f + 20.0f * i;
 
          F32 rad = 10;
-         F32 smallSize = .6;
+         F32 smallSize = .6f;
             
          glPushMatrix();
          glScale(i ? smallSize : 1);
@@ -672,11 +669,11 @@ void DiagnosticUserInterface::render()
 
          
          F32 rm2 = rad - 2;
-         F32 r3 = rad * .333;
-         F32 rm23 = rm2 * .333;
+         F32 r3 = rad * .333f;
+         F32 rm23 = rm2 * .333f;
 
          glColor(Colors::white);
-         drawPolygon(Point(x,y), rad *.666, rm2, 0);
+         drawPolygon(Point(x,y), 6, rm2, 0);
          glColor(Colors::red);
          drawCircle(Point(x, y), rad);
 
@@ -732,9 +729,9 @@ void DiagnosticUserInterface::render()
 
          x += 3*rad;
          glColor(Colors::paleBlue);
-         drawPolygon(Point(x,y + r3), 3, rad * 1.2, FloatTau/12);
+         drawPolygon(Point(x,y + r3), 3, rad * 1.2f, FloatTau/12);
          glColor(Colors::cyan);
-         drawPolygon(Point(x,y + r3), 3, rad * .6, FloatTau/4);
+         drawPolygon(Point(x,y + r3), 3, rad * .6f, FloatTau/4);
 
 
          x += 3*rad;
@@ -777,7 +774,7 @@ void DiagnosticUserInterface::render()
          renderWallFill(&points, Colors::wallFillColor, false);
          renderPolygonOutline(&points, &Colors::blue);
          glColor(Colors::yellow);
-         drawStar(Point(x,y), 5, rad * .5, rad * .25);
+         drawStar(Point(x,y), 5, rad * .5f, rad * .25f);
 
          ///// After all badge rendering
          glPopMatrix();

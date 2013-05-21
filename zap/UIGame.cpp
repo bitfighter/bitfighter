@@ -1275,13 +1275,67 @@ bool GameUserInterface::isInScoreboardMode()
 }
 
 
+static void joystickUpdateMove(ClientGame *game, GameSettings *settings, Move *theMove)
+{
+   // One of each of left/right axis and up/down axis should be 0 by this point
+   // but let's guarantee it..   why?
+   theMove->x = game->mJoystickInputs[JoystickMoveAxesRight] - 
+                game->mJoystickInputs[JoystickMoveAxesLeft];
+   theMove->x = MAX(theMove->x, -1);
+   theMove->x = MIN(theMove->x, 1);
+   theMove->y =  game->mJoystickInputs[JoystickMoveAxesDown] - 
+                 game->mJoystickInputs[JoystickMoveAxesUp];
+   theMove->y = MAX(theMove->y, -1);
+   theMove->y = MIN(theMove->y, 1);
+
+   //logprintf(
+   //      "Joystick axis values. Move: Left: %f, Right: %f, Up: %f, Down: %f\nShoot: Left: %f, Right: %f, Up: %f, Down: %f ",
+   //      mJoystickInputs[MoveAxesLeft],  mJoystickInputs[MoveAxesRight],
+   //      mJoystickInputs[MoveAxesUp],    mJoystickInputs[MoveAxesDown],
+   //      mJoystickInputs[ShootAxesLeft], mJoystickInputs[ShootAxesRight],
+   //      mJoystickInputs[ShootAxesUp],   mJoystickInputs[ShootAxesDown]
+   //      );
+
+   //logprintf(
+   //         "Move values. Move: Left: %f, Right: %f, Up: %f, Down: %f",
+   //         theMove->left, theMove->right,
+   //         theMove->up, theMove->down
+   //         );
+
+
+   //logprintf("XY from shoot axes. x: %f, y: %f", x, y);
+
+
+   Point p(game->mJoystickInputs[JoystickShootAxesRight] - 
+           game->mJoystickInputs[JoystickShootAxesLeft], 
+                             game->mJoystickInputs[JoystickShootAxesDown]  - 
+                             game->mJoystickInputs[JoystickShootAxesUp]);
+
+   F32 fact =  p.len();
+
+   if(fact > 0.66f)        // It requires a large movement to actually fire...
+   {
+      theMove->angle = atan2(p.y, p.x);
+      theMove->fire = true;
+   }
+   else if(fact > 0.25)    // ...but you can change aim with a smaller one
+   {
+      theMove->angle = atan2(p.y, p.x);
+      theMove->fire = false;
+   }
+   else
+      theMove->fire = false;
+}
+
+
 // Return current move (actual move processing in ship.cpp)
 // Will also transform move into "relative" mode if needed
-// Note that all input supplied here will be overwritten if
-// we are using a game controller. 
-// Runs only on client
+// At the end, all input supplied here will be overwritten if
+// we are using a game controller.  What a mess!
 Move *GameUserInterface::getCurrentMove()
 {
+   Move *move = &mCurrentMove;
+
    if(!mDisableShipKeyboardInput && !gConsole.isVisible())
    {
       // Some helpers (like TeamShuffle) like to disable movement when they are active
@@ -1328,12 +1382,11 @@ Move *GameUserInterface::getCurrentMove()
       }
    }
 
-   if(!getGame()->getSettings()->getIniSettings()->controlsRelative)
-      return &mCurrentMove;
-
-   else     // Using relative controls -- all turning is done relative to the direction of the ship.
+   // Using relative controls -- all turning is done relative to the direction of the ship, so
+   // we need to udate the move a little
+   if(getGame()->getSettings()->getIniSettings()->controlsRelative)
    {
-      mTransformedMove = mCurrentMove;
+      mTransformedMove = mCurrentMove;    // Copy move
 
       Point moveDir(mCurrentMove.x, -mCurrentMove.y);
 
@@ -1351,8 +1404,17 @@ Move *GameUserInterface::getCurrentMove()
       mTransformedMove.x = max(-1.0f, mTransformedMove.x);
       mTransformedMove.y = max(-1.0f, mTransformedMove.y);
 
-      return &mTransformedMove;
+      move = &mTransformedMove;
    }
+
+   // But wait! There's more!
+   // Overwrite theMove if we're using joystick (also does some other essential joystick stuff)
+   // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
+   // kill the joystick.  The design of combining joystick input and move updating really sucks.
+   if(getGame()->getInputMode() == InputModeJoystick || getUIManager()->isCurrentUI<OptionsMenuUserInterface>())
+      joystickUpdateMove(getGame(), getGame()->getSettings(), move);
+
+   return move;
 }
 
 
@@ -2412,61 +2474,6 @@ void GameUserInterface::renderSuspended()
    ypos += 2 * (textHeight + textGap);
    drawCenteredString(ypos, textHeight, "Press <SPACE> to resume playing now");
 }
-
-
-SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, F32 gain) const
-{
-   return SoundSystem::playSoundEffect(profileIndex, gain);
-}
-
-
-SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, const Point &position) const
-{
-   return SoundSystem::playSoundEffect(profileIndex, position);
-}
-
-
-SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain) const
-{
-   return SoundSystem::playSoundEffect(profileIndex, position, velocity, gain);
-}
-
-
-void GameUserInterface::setMovementParams(SFXHandle &effect, const Point &position, const Point &velocity) const
-{
-   SoundSystem::setMovementParams(effect, position, velocity);
-}
-
-
-void GameUserInterface::stopSoundEffect(SFXHandle &effect) const
-{
-   SoundSystem::stopSoundEffect(effect);
-}
-
-
-void GameUserInterface::setListenerParams(const Point &position, const Point &velocity) const
-{
-   SoundSystem::setListenerParams(position, velocity);
-}
-
-
-void GameUserInterface::playNextTrack() const
-{
-   SoundSystem::playNextTrack();
-}
-
-
-void GameUserInterface::playPrevTrack() const
-{
-   SoundSystem::playPrevTrack();
-}
-
-
-void GameUserInterface::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const
-{
-   SoundSystem::queueVoiceChatBuffer(effect, p);
-}
-
 
 
 ////////////////////////////////////////

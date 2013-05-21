@@ -1943,14 +1943,14 @@ void GameConnection::onStartGhosting()
 
 // Gets run when game is really and truly over, after post-game scoreboard is displayed.  Over.
 // Some keywords to help find this function again: level over, change level, game over, onGameOver
-// Client only
+// Client only, isConnectionToServer() is always true
 void GameConnection::onEndGhosting()
 {
 #ifndef ZAP_DEDICATED
    TNLAssert(isConnectionToServer() && mClientGame, "when else is this called?");
    
    Parent::onEndGhosting();
-   mClientGame->onGameOver();
+   mClientGame->onGameReallyAndTrullyOver();
 #endif
 }
 

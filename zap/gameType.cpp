@@ -1225,7 +1225,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver
 
    if(gameOver)
    {
-      static_cast<ClientGame *>(mGame)->setGameOver();
+      static_cast<ClientGame *>(mGame)->setEnteringGameOverScoreboardPhase();
 
       // Tell timer it's all over
       mGameTimer.setGameIsOver();

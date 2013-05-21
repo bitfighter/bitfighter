@@ -38,6 +38,7 @@
 
 #include "tnlVector.h"
 #include "tnlNetStringTable.h"
+#include "tnlNetConnection.h"
 #include "tnlUDP.h"
 #include "tnlNonce.h"
 
@@ -48,42 +49,6 @@ using namespace TNL;
 
 namespace Zap
 {
-
-//class ChatUserInterface; 
-//class CreditsUserInterface;
-//class DiagnosticUserInterface;
-//class EditorInstructionsUserInterface;
-//class EditorMenuUserInterface;
-//class EditorUserInterface;
-//class ErrorMessageUserInterface;
-//class GameMenuUserInterface;
-//class GameParamUserInterface;
-//class GameUserInterface;
-//class HighScoresUserInterface;
-//class HostMenuUserInterface;
-//class InputOptionsMenuUserInterface;
-//class InstructionsUserInterface;
-//class KeyDefMenuUserInterface;
-//class LevelChangeOrAdminPasswordEntryUserInterface;
-//class LevelMenuSelectUserInterface;
-//class LevelMenuUserInterface;
-//class LevelNameEntryUserInterface;
-//class MainMenuUserInterface;
-//class MessageUserInterface;
-//class NameEntryUserInterface;
-//class OptionsMenuUserInterface;
-//class PlayerMenuUserInterface;
-//class SoundOptionsMenuUserInterface;
-//class QueryServersUserInterface;
-//class ServerPasswordEntryUserInterface;
-//class ServerPasswordEntryUserInterface;
-//class SplashUserInterface;
-//class SuspendedUserInterface;
-//class TeamDefUserInterface;
-//class TeamDefUserInterface;
-//class TeamMenuUserInterface;
-//class UserInterface;
-//class YesNoUserInterface;
 
 class Game;
 class ClientGame;
@@ -97,6 +62,7 @@ class UIManager
 private:
    ClientGame *mGame;
    GameSettings *mSettings;
+   bool mUserHasSeenTimeoutMessage;
 
    UserInterface *mCurrentInterface;
 
@@ -158,7 +124,6 @@ public:
    void renderCurrent();
    UserInterface *getCurrentUI();
    UserInterface *getPrevUI();
-   //void activate(UIID menuID, bool save = true);
 
    template <typename T>
    void activate(bool save = true)
@@ -172,7 +137,30 @@ public:
 
    void renderAndDimGameUserInterface();
 
-   void onConnectionTerminated();
+   // Connecting and disconnecting
+   void onConnectedToMaster();
+   void onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected);
+   void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr);
+   void onConnectionToServerRejected(const char *reason);
+
+   void onPlayerQuit(const char *name);
+   void displayMessage(const Color &msgColor, const char *format, ...);
+
+   void onGameOver();
+
+
+
+   // Sounds and music
+   SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const;
+   SFXHandle playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain) const;
+   SFXHandle playSoundEffect(U32 profileIndex, F32 gain) const;
+   void setMovementParams(SFXHandle& effect, const Point &position, const Point &velocity) const;
+   void stopSoundEffect(SFXHandle &effect) const;
+   void setListenerParams(const Point &position, const Point &velocity) const;
+   void playNextTrack() const;
+   void playPrevTrack() const;
+   void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const;
+
 
    // Some passthroughs
 
@@ -227,12 +215,6 @@ public:
    void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType);
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitTeleportInEffect(const Point &pos, U32 type);
-   SFXHandle playSoundEffect(U32 profileIndex, F32 gain);
-   SFXHandle playSoundEffect(U32 profileIndex, const Point &position);
-   SFXHandle playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain);
-   void playNextTrack();
-   void playPrevTrack();
-   void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p);
 
    // EditorUI
    void readRobotLine(const string &robotLine);

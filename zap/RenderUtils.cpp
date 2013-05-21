@@ -36,6 +36,10 @@
 #include <stdarg.h>        // For va_args
 #include <stdio.h>         // For vsnprintf
 
+// Kill some warnings
+#ifdef TNL_COMPILER_VISUALC
+#  define vsnprintf vsnprintf_s
+#endif
 
 namespace Zap {
 
@@ -188,7 +192,7 @@ S32 drawStringr(S32 x, S32 y, S32 size, const char *string)
    F32 len = getStringWidth((F32)size, string);
    doDrawAngleString((F32)x - len, (F32)y + size, (F32)size, 0, string);
 
-   return len;
+   return (S32)len;
 }
 
    
@@ -233,7 +237,7 @@ S32 drawStringc(F32 x, F32 y, F32 size, const char *string)
    F32 len = getStringWidth(size, string);
    drawAngleString(x - len / 2, y, size, 0, string);
 
-   return len;
+   return (S32)len;
 }
 
 
@@ -530,7 +534,7 @@ void drawTime(S32 x, S32 y, S32 size, S32 timeInMs, const char *prefixString)
 S32 getStringWidth(FontContext fontContext, S32 size, const char *string)
 {
    FontManager::pushFontContext(fontContext);
-   F32 width = getStringWidth(size, string);
+   S32 width = getStringWidth(size, string);
    FontManager::popFontContext();
 
    return width;
@@ -555,7 +559,7 @@ S32 getStringWidth(S32 size, const char *string)
 
 F32 getStringWidth(F32 size, const char *string)
 {
-   return F32( FontManager::getStringLength(string) ) * size / 120.f;
+   return F32(FontManager::getStringLength(string)) * size / 120;
 }
 
 
@@ -634,27 +638,14 @@ void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 
 
 void drawHollowRect(const Point &center, S32 width, S32 height)
 {
-   drawHollowRect(S32(center.x - (F32)width / 2), S32(center.y - (F32)height / 2),
-                  S32(center.x + (F32)width / 2), S32(center.y + (F32)height / 2));
+   drawHollowRect(center.x - (F32)width / 2, center.y - (F32)height / 2,
+                  center.x + (F32)width / 2, center.y + (F32)height / 2);
 }
 
 
 void drawHollowRect(const Point &p1, const Point &p2)
 {
-   drawHollowRect((S32)p1.x, (S32)p1.y, (S32)p2.x, (S32)p2.y);
-}
-
-
-void drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &outlineColor)
-{
-   glColor(outlineColor);
-   drawRect(x1, y1, x2, y2, GL_LINE_LOOP);
-}
-
-
-void drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2)
-{
-   drawRect(x1, y1, x2, y2, GL_LINE_LOOP);
+   drawHollowRect(p1.x, p1.y, p2.x, p2.y);
 }
 
 

@@ -398,18 +398,6 @@ public:
    bool isInScoreboardMode();
 
    Move *getCurrentMove();
-
-   // Sound related
-   SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const;
-   SFXHandle playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain) const;
-   SFXHandle playSoundEffect(U32 profileIndex, F32 gain) const;
-   void setMovementParams(SFXHandle& effect, const Point &position, const Point &velocity) const;
-   void stopSoundEffect(SFXHandle &effect) const;
-   void setListenerParams(const Point &position, const Point &velocity) const;
-   void playNextTrack() const;
-   void playPrevTrack() const;
-   void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const;
-
 };
 
 

@@ -72,8 +72,6 @@ private:
 
    bool mGameIsRunning;             // True if a suspended game is being played without us, false if it's full stop for everyone
 
-   bool mSeenTimeOutMessage;
-
    GameUserInterface *mUi;
 
    string mEnteredServerPermsPassword;
@@ -133,8 +131,8 @@ public:
    void setInCommanderMap(bool inCommanderMap);
    F32 getCommanderZoomFraction() const;
 
-   void setGameOver();     // Post-game scoreboard is about to be displayed
-   void onGameOver();      // Post-game scoreboard has already been displayed
+   void setEnteringGameOverScoreboardPhase();   // Post-game scoreboard is about to be displayed
+   void onGameReallyAndTrullyOver();            // Post-game scoreboard has already been displayed
 
    Point worldToScreenPoint(const Point *p, S32 canvasWidth, S32 canvasHeight) const;
 

@@ -34,6 +34,12 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
+#ifdef TNL_OS_MOBILE
+#  include "SDL_opengles.h"
+#else
+#  include "SDL_opengl.h"
+#endif
+
 using namespace TNL;
 
 
@@ -49,8 +55,23 @@ void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 
 
 void drawHollowRect(const Point &center, S32 width, S32 height);
 void drawHollowRect(const Point &p1, const Point &p2);
-void drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2);
-void drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &outlineColor);
+
+
+// Allow any numeric arguments for drawHollowRect... getting sick of casting!
+template<typename T, typename U, typename V, typename W>
+void drawHollowRect(T x1, U y1, V x2, W y2)
+{
+   drawRect(static_cast<F32>(x1), static_cast<F32>(y1), static_cast<F32>(x2), static_cast<F32>(y2), GL_LINE_LOOP);
+}
+
+
+template<typename T, typename U, typename V, typename W>
+void drawHollowRect(T x1, U y1, V x2, W y2, const Color &outlineColor)
+{
+   glColor(outlineColor);
+   drawHollowRect(x1, y1, x2, y2);
+}
+
 
 void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode);
 void drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode);

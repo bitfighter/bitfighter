@@ -1,4 +1,3 @@
-//-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
@@ -33,8 +32,6 @@
 #include "gameType.h"
 
 #include "UIGame.h"
-#include "UIMenus.h"
-#include "UINameEntry.h"
 #include "UIManager.h"
 
 #include "EditorTeam.h"
@@ -66,7 +63,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mInCommanderMap        = false;
    mGameIsRunning         = true;      // Only matters when game is suspended
-   mSeenTimeOutMessage    = false;
 
    // Transition time between regular map and commander's map; in ms, higher = slower
    mCommanderZoomDelta.setPeriod(350);
@@ -172,7 +168,7 @@ void ClientGame::closeConnectionToGameServer()
 
    getUIManager()->disableLevelLoadDisplay(false);
 
-   onGameOver();  
+   onGameReallyAndTrullyOver();  
 }
 
 
@@ -180,11 +176,11 @@ void ClientGame::onConnectedToMaster()
 {
    Parent::onConnectedToMaster();
 
+   getUIManager()->onConnectedToMaster();
+
    // Clear old player list that might be there from client's lost connection to master while in game lobby
    Vector<StringTableEntry> emptyPlayerList;
    setPlayersInGlobalChat(emptyPlayerList);
-
-   mSeenTimeOutMessage = false;     // Reset display of connection error
 
    logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
 }
@@ -371,7 +367,7 @@ void ClientGame::updateModuleSounds(const Point &pos, const Point &vel, const Lo
       if(loadout.isModulePrimaryActive(ShipModule(i)) && moduleSFXs[i] != SFXNone)
       {
          if(mModuleSound[i].isValid())
-            mUi->setMovementParams(mModuleSound[i], pos, vel);
+            getUIManager()->setMovementParams(mModuleSound[i], pos, vel);
          else if(moduleSFXs[i] != -1)
             mModuleSound[i] = playSoundEffect(moduleSFXs[i], pos, vel);
       }
@@ -379,7 +375,7 @@ void ClientGame::updateModuleSounds(const Point &pos, const Point &vel, const Lo
       {
          if(mModuleSound[i].isValid())
          {
-            mUi->stopSoundEffect(mModuleSound[i]);
+            getUIManager()->stopSoundEffect(mModuleSound[i]);
             mModuleSound[i] = NULL;
          }
       }
@@ -514,59 +510,6 @@ void ClientGame::deleteLevelGen(LuaLevelGenerator *levelgen)
 }
 
 
-static void joystickUpdateMove(ClientGame *game, GameSettings *settings, Move *theMove)
-{
-   // One of each of left/right axis and up/down axis should be 0 by this point
-   // but let's guarantee it..   why?
-   theMove->x = game->mJoystickInputs[JoystickMoveAxesRight] - 
-                game->mJoystickInputs[JoystickMoveAxesLeft];
-   theMove->x = MAX(theMove->x, -1);
-   theMove->x = MIN(theMove->x, 1);
-   theMove->y =  game->mJoystickInputs[JoystickMoveAxesDown] - 
-                 game->mJoystickInputs[JoystickMoveAxesUp];
-   theMove->y = MAX(theMove->y, -1);
-   theMove->y = MIN(theMove->y, 1);
-
-   //logprintf(
-   //      "Joystick axis values. Move: Left: %f, Right: %f, Up: %f, Down: %f\nShoot: Left: %f, Right: %f, Up: %f, Down: %f ",
-   //      mJoystickInputs[MoveAxesLeft],  mJoystickInputs[MoveAxesRight],
-   //      mJoystickInputs[MoveAxesUp],    mJoystickInputs[MoveAxesDown],
-   //      mJoystickInputs[ShootAxesLeft], mJoystickInputs[ShootAxesRight],
-   //      mJoystickInputs[ShootAxesUp],   mJoystickInputs[ShootAxesDown]
-   //      );
-
-   //logprintf(
-   //         "Move values. Move: Left: %f, Right: %f, Up: %f, Down: %f",
-   //         theMove->left, theMove->right,
-   //         theMove->up, theMove->down
-   //         );
-
-
-   //logprintf("XY from shoot axes. x: %f, y: %f", x, y);
-
-
-   Point p(game->mJoystickInputs[JoystickShootAxesRight] - 
-           game->mJoystickInputs[JoystickShootAxesLeft], 
-                             game->mJoystickInputs[JoystickShootAxesDown]  - 
-                             game->mJoystickInputs[JoystickShootAxesUp]);
-
-   F32 fact =  p.len();
-
-   if(fact > 0.66f)        // It requires a large movement to actually fire...
-   {
-      theMove->angle = atan2(p.y, p.x);
-      theMove->fire = true;
-   }
-   else if(fact > 0.25)    // ...but you can change aim with a smaller one
-   {
-      theMove->angle = atan2(p.y, p.x);
-      theMove->fire = false;
-   }
-   else
-      theMove->fire = false;
-}
-
-
 bool ClientGame::isServer()
 {
    return false;
@@ -596,12 +539,6 @@ void ClientGame::idle(U32 timeDelta)
 
 
    Move *theMove = mUi->getCurrentMove();       // Get move from keyboard input
-
-   // Overwrite theMove if we're using joystick (also does some other essential joystick stuff)
-   // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
-   // kill the joystick.  The design of combining joystick input and move updating really sucks.
-   if(getInputMode() == InputModeJoystick || getUIManager()->getCurrentUI() == getUIManager()->getUI<OptionsMenuUserInterface>())
-      joystickUpdateMove(this, mSettings, theMove);
 
    theMove->time = timeDelta + prevTimeDelta;
 
@@ -653,7 +590,7 @@ void ClientGame::idle(U32 timeDelta)
          mGameType->idle(BfObject::ClientIdlingNotLocalShip, timeDelta);
 
       if(controlObject)
-         mUi->setListenerParams(controlObject->getPos(), controlObject->getVel());
+         getUIManager()->setListenerParams(controlObject->getPos(), controlObject->getVel());
 
 
       // Check to see if there are any items near the ship we need to display help for
@@ -859,24 +796,20 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
 void ClientGame::onPlayerQuit(const StringTableEntry &name)
 {
    removeFromClientList(name);
-
-   displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());     // SysMsg
-   playSoundEffect(SFXPlayerLeft, 1);
-
-   mUIManager->getUI<GameUserInterface>()->onPlayerQuit();
+   mUIManager->onPlayerQuit(name.getString());
 }
 
 
 // Server tells the GameType that the game is now over.  We in turn tell the UI, which in turn notifies its helpers.
 // This begins the phase of showing the post-game scoreboard.
-void ClientGame::setGameOver()
+void ClientGame::setEnteringGameOverScoreboardPhase()
 {
-   mUi->onGameOver();
+   getUIManager()->onGameOver();
 }
 
 
 // Gets run when game is really and truly over, after post-game scoreboard is displayed.  Over.
-void ClientGame::onGameOver()
+void ClientGame::onGameReallyAndTrullyOver()
 {
    clearClientList();                   // Erase all info we have about fellow clients
 
@@ -884,7 +817,7 @@ void ClientGame::onGameOver()
    getGameObjDatabase()->removeEverythingFromDatabase();    
 
    // Inform the UI
-   getUIManager()->getUI<GameUserInterface>()->onGameOver();
+   getUIManager()->onGameOver();
 }
 
 
@@ -918,23 +851,7 @@ bool ClientGame::isShowingDebugShipCoords()
 void ClientGame::connectionToServerRejected(const char *reason)
 {
    UIManager *uiManager = getUIManager();
-
-   uiManager->activate<MainMenuUserInterface>();
-
-   const char *title = "Connection Terminated";
-   const char *instr = "";
-   
-   Vector<string> messages;
-
-   messages.push_back("");
-   messages.push_back("Error when trying to punch through firewall.");
-   messages.push_back("Server did not respond or rejected you.");
-   messages.push_back("Unable to join game.  Please try a different server.");
-
-   if(reason[0])
-      messages.push_back(reason);
-
-   getUIManager()->displayMessageBox(title, instr, messages);
+   uiManager->onConnectionToServerRejected(reason);
 
    closeConnectionToGameServer();
 }
@@ -969,7 +886,7 @@ void ClientGame::displayCmdChatMessage(const char *format, ...) const
    vsnprintf(message, sizeof(message), format, args); 
    va_end(args);
 
-   mUi->displayMessage(Colors::cmdChatColor, message);
+   getUIManager()->displayMessage(Colors::cmdChatColor, message);
 }
 
 
@@ -982,7 +899,7 @@ void ClientGame::displayMessage(const Color &msgColor, const char *format, ...) 
    vsnprintf(message, sizeof(message), format, args); 
    va_end(args);
     
-   mUi->displayMessage(msgColor, message);
+   getUIManager()->displayMessage(msgColor, message);
 }
 
 
@@ -1298,232 +1215,18 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
    // Calling clearClientList can fix cases of extra names appearing on score board when connecting to server 
    // after getting disconnected for reasons other then "SelfDisconnect"
    clearClientList();  
-
-   getUIManager()->onConnectionTerminated();    // Let the UI know
-
    unsuspendGame();
 
-   // Display a context-appropriate error message
-   const char *title = "Connection Terminated";
-   const char *instr = "";
-
-   Vector<string> messages;
-
-   switch(reason)
-   {
-      case NetConnection::ReasonTimedOut:
-         messages.push_back("");
-         messages.push_back("Your connection timed out.  Please try again later.");
-
-         getUIManager()->displayMessageBox(title, instr, messages);
-         break;
-
-      case NetConnection::ReasonIdle:
-         messages.push_back("");
-         messages.push_back("The server kicked you because you were idle too long.");
-         messages.push_back("");
-         messages.push_back("Feel free to rejoin the game when you are ready.");
-
-         getUIManager()->displayMessageBox(title, instr, messages);
-         break;
-
-      case NetConnection::ReasonPuzzle:
-         messages.push_back("");
-         messages.push_back("Unable to connect to the server.  Received message:");
-         messages.push_back("Invalid puzzle solution");
-         messages.push_back("");
-         messages.push_back("Please try a different game server, or try again later.");
-
-         getUIManager()->displayMessageBox(title, instr, messages);
-         break;
-
-      case NetConnection::ReasonKickedByAdmin:
-         messages.push_back("");
-         messages.push_back("You were kicked off the server by an admin.");
-         messages.push_back("");
-         messages.push_back("You can try another server, host your own,");
-         messages.push_back("or try the server that kicked you again later.");
-
-         getUIManager()->activate<NameEntryUserInterface>();
-         getUIManager()->displayMessageBox(title, instr, messages);
-         break;
-
-      case NetConnection::ReasonBanned:
-         messages.push_back("");
-         messages.push_back("You are banned from playing on this server");
-         messages.push_back("Contact the server administrator if you think");
-         messages.push_back("this was in error.");
-
-         getUIManager()->displayMessageBox(title, instr, messages);
-         break;
-
-      case NetConnection::ReasonFloodControl:
-         messages.push_back("");
-         messages.push_back("Your connection was rejected by the server");
-         messages.push_back("because you sent too many connection requests.");
-         messages.push_back("");
-         messages.push_back("Please try a different game server, or try again later.");
-
-         getUIManager()->activate<NameEntryUserInterface>();
-         getUIManager()->displayMessageBox(title, instr, messages);
-         break;
-
-      case NetConnection::ReasonShutdown:
-         messages.push_back("");
-         messages.push_back("Remote server shut down.");
-         messages.push_back("");
-         messages.push_back("Please try a different server,");
-         messages.push_back("or host a game of your own!");
-
-         getUIManager()->displayMessageBox(title, instr, messages);
-         break;
-
-      case NetConnection::ReasonNeedServerPassword:
-      {
-         // We have the wrong password, let's make sure it's not saved
-         string serverName = getUIManager()->getLastSelectedServerName();
-         GameSettings::deleteServerPassword(serverName);
-   
-         getUIManager()->setConnectAddressAndActivatePasswordEntryUI(Address(serverAddress));
-
-         break;
-      }
-
-      case NetConnection::ReasonServerFull:
-         messages.push_back("");
-         messages.push_back("Could not connect to server");
-         messages.push_back("because server is full.");
-         messages.push_back("");
-         messages.push_back("Please try a different server, or try again later.");
-
-         getUIManager()->displayMessageBox("Connection Terminated", instr, messages);
-         break;
-
-      case NetConnection::ReasonSelfDisconnect:
-            // We get this when we terminate our own connection.  Since this is intentional behavior,
-            // we don't want to display any message to the user.
-         break;
-
-      default:
-         if(reasonStr[0])
-         {
-            messages.push_back("Disconnected for this reason:");
-            messages.push_back(reasonStr);
-         }
-         else
-         {
-            messages.push_back("Disconnected for unknown reason:");
-            messages.push_back("");
-            messages.push_back("Error number: " + itos(reason));
-         }
-
-         getUIManager()->displayMessageBox(title, instr, messages);
-         break;
-   }
+   getUIManager()->onConnectionTerminated(serverAddress, reason, reasonStr);    // Let the UI know
 }
 
 
 void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected)
 {
-   const char *title = "Connection Terminated";
-   const char *instr = "";
+   getUIManager()->onConnectionToMasterTerminated(reason, reasonStr, wasFullyConnected);    // Let the UI know
 
-   Vector<string> messages;
-
-   switch(reason)
-   {
-      case NetConnection::ReasonDuplicateId:
-         messages.push_back("");
-         messages.push_back("Your connection was rejected by the server");
-         messages.push_back("because you sent a duplicate player id. Player ids are");
-         messages.push_back("generated randomly, and collisions are extremely rare.");
-         messages.push_back("Please restart Bitfighter and try again.  Statistically");
-         messages.push_back("speaking, you should never see this message again!");
-
-         getUIManager()->displayMessageBox(title, instr, messages);
-
-         getClientInfo()->getId()->getRandom();        // Get a different ID and retry to successfully connect to master
-         break;
-
-      case NetConnection::ReasonBadLogin:
-         messages.push_back("");
-         messages.push_back("Unable to log you in with the username/password you");
-         messages.push_back("provided. If you have an account, please verify your");
-         messages.push_back("password. Otherwise, you chose a reserved name; please");
-         messages.push_back("try another.");
-         messages.push_back("");
-         messages.push_back("Please check your credentials and try again.");
-
-         getUIManager()->activate<NameEntryUserInterface>();
-         getUIManager()->displayMessageBox(title, instr, messages);
-         break;
-
-      case NetConnection::ReasonInvalidUsername:
-         messages.push_back("");
-         messages.push_back("Your connection was rejected by the server because");
-         messages.push_back("you sent an username that contained illegal characters.");
-         messages.push_back("");
-         messages.push_back("Please try a different name.");
-
-         getUIManager()->activate<NameEntryUserInterface>();
-         getUIManager()->displayMessageBox(title, instr, messages);
-         break;
-
-      case NetConnection::ReasonError:
-         messages.push_back("");
-         messages.push_back("Unable to connect to the server.  Received message:");
-         messages.push_back(string(reasonStr));
-         messages.push_back("");
-         messages.push_back("Please try a different game server, or try again later.");
-
-         getUIManager()->displayMessageBox(title, instr, messages);
-         break;
-
-      case NetConnection::ReasonTimedOut:
-         // Avoid spamming the player if they are not connected to the Internet
-         if(reason == NetConnection::ReasonTimedOut && mSeenTimeOutMessage)
-            break;
-         if(wasFullyConnected)
-            break;
-
-         messages.push_back("");
-         messages.push_back("My attempt to connect to the Master Server failed because");
-         messages.push_back("the server did not respond.  Either the server is down,");
-         messages.push_back("or, more likely, you are either not connected to the internet");
-         messages.push_back("or your firewall is blocking the connection.");
-         messages.push_back("");
-         messages.push_back("I will continue to try connecting, but you will not see this");
-         messages.push_back("message again until you successfully connect or restart Bitfighter.");
-
-         getUIManager()->displayMessageBox(title, instr, messages);
-
-         mSeenTimeOutMessage = true;
-         break;
-
-      case NetConnection::ReasonSelfDisconnect:
-         // No errors when client disconnect (this happens when quitting bitfighter normally)
-      case NetConnection::ReasonAnonymous:
-         // Anonymous connections are disconnected quickly, usually after retrieving some data
-         break;
-
-      default:  // Not handled
-         messages.push_back("");
-         messages.push_back("Unable to connect to the master server, with error code:");
-
-         if(reasonStr[0])
-            messages.push_back(itos(reason) + " " + reasonStr);
-         else
-            messages.push_back("MasterServer Error #" + itos(reason));
-
-         messages.push_back("");
-         messages.push_back("Check your Internet Connection and firewall settings.");
-         messages.push_back("");
-         messages.push_back("Please report this error code to the");
-         messages.push_back("Bitfighter developers.");
-
-         getUIManager()->displayMessageBox(title, instr, messages);
-         break;
-   }
+   if(reason == NetConnection::ReasonDuplicateId)
+      getClientInfo()->getId()->getRandom();        // Get a different ID and retry to successfully connect to master
 }
 
 
@@ -1700,8 +1403,8 @@ Point ClientGame::worldToScreenPoint(const Point *point,  S32 canvasWidth, S32 c
    {
       F32 zoomFrac = getCommanderZoomFraction();
       Point worldExtents = mWorldExtents.getExtents();
-      worldExtents.x *= canvasWidth / F32(canvasWidth - (UserInterface::horizMargin * 2));
-      worldExtents.y *= canvasHeight / F32(canvasHeight - (UserInterface::vertMargin * 2));
+      worldExtents.x *= canvasWidth  / F32(canvasWidth  - (UserInterface::horizMargin * 2));
+      worldExtents.y *= canvasHeight / F32(canvasHeight - (UserInterface::vertMargin  * 2));
 
       F32 aspectRatio = worldExtents.x / worldExtents.y;
       F32 screenAspectRatio = F32(canvasWidth) / F32(canvasHeight);
