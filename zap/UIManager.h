@@ -32,6 +32,9 @@
 #include "SparkTypesEnum.h"
 #include "PlayerActionEnum.h"
 
+#include "HelpItemManager.h"     // For HelpItem def
+#include "LoadoutTracker.h"
+
 #include "Color.h"
 #include "Point.h"
 #include "Timer.h"
@@ -143,12 +146,11 @@ public:
    void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr);
    void onConnectionToServerRejected(const char *reason);
 
+   void onPlayerJoined(const char *playerName, bool isLocalClient, bool playAlert, bool showMessage);
    void onPlayerQuit(const char *name);
    void displayMessage(const Color &msgColor, const char *format, ...);
 
    void onGameOver();
-
-
 
    // Sounds and music
    SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const;
@@ -198,7 +200,7 @@ public:
    void showPlayerActionMenu(PlayerAction action);
 
    // TeamMenuUI
-   void showMenuToChangeNameForPlayer(const string &playerName);
+   void showMenuToChangeTeamForPlayer(const string &playerName);
 
    // ErrorMessageUI
    void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &messages);
@@ -215,6 +217,13 @@ public:
    void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType);
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitTeleportInEffect(const Point &pos, U32 type);
+   void addInlineHelpItem(HelpItem item);
+   void onChatMessageReceived(const Color &msgColor, const char *format, ...);
+   void gotAnnouncement(const string &announcement);
+   bool isInScoreboardMode();
+   void newLoadoutHasArrived(const LoadoutTracker &loadout);
+   void setActiveWeapon(U32 weaponIndex);
+   bool isShowingDebugShipCoords();
 
    // EditorUI
    void readRobotLine(const string &robotLine);

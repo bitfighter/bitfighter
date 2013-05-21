@@ -117,7 +117,7 @@ public:
 
    void queueHelpItem(HelpItem item);  
    void removeHelpItemFromQueue(HelpItem item, U8 weight = 0xFF);
-   void addHelpItem(HelpItem item);
+   void addInlineHelpItem(HelpItem item);
 
    void enable();
    void disable();

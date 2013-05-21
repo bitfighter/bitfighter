@@ -136,7 +136,7 @@ public:
 
    Point worldToScreenPoint(const Point *p, S32 canvasWidth, S32 canvasHeight) const;
 
-   void render();          // Delegates to renderNormal, renderCommander, or renderSuspended, as appropriate
+   bool inCmdrMode();      // Return true if we should render the commander's map, false otherwise
 
    bool isServer();
    void idle(U32 timeDelta);
@@ -144,7 +144,7 @@ public:
 
    Ship *findShip(const StringTableEntry &clientName);
 
-   void addHelpItem(HelpItem item);
+   void addInlineHelpItem(HelpItem item);
 
    void gotServerListFromMaster(const Vector<IPAddress> &serverList);
 

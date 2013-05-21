@@ -2384,7 +2384,8 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    }
 
    // The new ClientInfo will be deleted in s2cRemoveClient   
-   ClientInfo *clientInfo = new RemoteClientInfo(clientGame, name, isAuthenticated, badges, isRobot, (ClientInfo::ClientRole)role.value, isSpawnDelayed, isBusy);
+   ClientInfo *clientInfo = new RemoteClientInfo(clientGame, name, isAuthenticated, badges, isRobot, 
+                                                (ClientInfo::ClientRole)role.value, isSpawnDelayed, isBusy);
 
    clientGame->onPlayerJoined(clientInfo, isMyClient, playAlert, showMessage);
 

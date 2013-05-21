@@ -1493,7 +1493,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
             static_cast<ClientGame *>(getGame())->newLoadoutHasArrived(mLoadout);
 
          if(!wasInitialUpdate)
-            static_cast<ClientGame *>(getGame())->addHelpItem(LoadoutFinishedItem);
+            static_cast<ClientGame *>(getGame())->addInlineHelpItem(LoadoutFinishedItem);
       }
    }
 

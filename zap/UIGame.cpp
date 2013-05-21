@@ -388,7 +388,12 @@ void GameUserInterface::render()
       drawCenteredString(346, 20, "Press <ESC> to abort");
    }
 
-   getGame()->render();
+   TNLAssert(getUIManager()->isCurrentUI<GameUserInterface>() || getUIManager()->cameFrom<GameUserInterface>(), "Then why are we rendering???");
+
+   if(getGame()->inCmdrMode())
+      renderGameCommander();
+   else
+      renderGameNormal();
 
    if(getGame()->isSpawnDelayed())
       renderSuspendedMessage();
@@ -439,9 +444,9 @@ if(mGotControlUpdate)
 }
 
 
-void GameUserInterface::addHelpItem(HelpItem item)
+void GameUserInterface::addInlineHelpItem(HelpItem item)
 {
-   mHelpItemManager.addHelpItem(item);
+   mHelpItemManager.addInlineHelpItem(item);
 }
 
 
@@ -2090,7 +2095,7 @@ static S32 QSORT_CALLBACK renderSortCompare(BfObject **a, BfObject **b)
 }
 
 
-void GameUserInterface::renderNormal(ClientGame *game)
+void GameUserInterface::renderGameNormal()
 {
    // Start of the level, we only show progress bar
    if(mShowProgressBar)
@@ -2101,7 +2106,7 @@ void GameUserInterface::renderNormal(ClientGame *game)
    Ship *ship = getGame()->getLocalPlayerShip();
 
    if(ship)
-      visExt = game->computePlayerVisArea(ship);
+      visExt = getGame()->computePlayerVisArea(ship);
 
    // TODO: This should not be needed here -- mPos is set elsewhere, but appears to be lagged by a frame, which 
    //       creates a weird slightly off-center effect when moving.  This is harmless for the moment, but should be removed.
@@ -2128,7 +2133,7 @@ void GameUserInterface::renderNormal(ClientGame *game)
 
    // Fill rawRenderObjects with anything within extentRect (our visibility extent)
    rawRenderObjects.clear();
-   game->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, rawRenderObjects, extentRect);    
+   getGame()->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, rawRenderObjects, extentRect);    
 
    // Cast objects in rawRenderObjects and put them in renderObjects
    renderObjects.clear();
@@ -2142,15 +2147,15 @@ void GameUserInterface::renderNormal(ClientGame *game)
       populateRenderZones(extentRect);
 
    if(mShowDebugBots)
-      for(S32 i = 0; i < game->getBotCount(); i++)
-         renderObjects.push_back(game->getBot(i));
+      for(S32 i = 0; i < getGame()->getBotCount(); i++)
+         renderObjects.push_back(getGame()->getBot(i));
 
    renderObjects.sort(renderSortCompare);
 
    // Render in three passes, to ensure some objects are drawn above others
    for(S32 i = -1; i < 2; i++)
    {
-      Barrier::renderEdges(i, *game->getSettings()->getWallOutlineColor());    // Render wall edges
+      Barrier::renderEdges(i, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
 
       if(mDebugShowMeshZones)
          for(S32 j = 0; j < renderZones.size(); j++)
@@ -2159,7 +2164,7 @@ void GameUserInterface::renderNormal(ClientGame *game)
       for(S32 j = 0; j < renderObjects.size(); j++)
          renderObjects[j]->renderLayer(i);
 
-      mFxManager.render(i, game->getCommanderZoomFraction());
+      mFxManager.render(i, getGame()->getCommanderZoomFraction());
    }
 
 
@@ -2219,7 +2224,7 @@ void GameUserInterface::renderNormal(ClientGame *game)
 }
 
 
-void GameUserInterface::renderCommander(ClientGame *game)
+void GameUserInterface::renderGameCommander()
 {
    // Start of the level, we only show progress bar
    if(mShowProgressBar)
@@ -2230,7 +2235,7 @@ void GameUserInterface::renderCommander(ClientGame *game)
 
    GameType *gameType = getGame()->getGameType();
    Point worldExtents = mShowProgressBar ? mViewBoundsWhileLoading.getExtents() : 
-                                           game->getWorldExtents()->getExtents();
+                                           getGame()->getWorldExtents()->getExtents();
 
    worldExtents.x *= canvasWidth  / F32(canvasWidth  - 2 * horizMargin);
    worldExtents.y *= canvasHeight / F32(canvasHeight - 2 * vertMargin);
@@ -2247,7 +2252,7 @@ void GameUserInterface::renderCommander(ClientGame *game)
    Ship *ship = getGame()->getLocalPlayerShip();
 
    //mShipPos = ship ? ship->getRenderPos()                 : Point(0,0);
-   visSize = ship ? game->computePlayerVisArea(ship) * 2 : worldExtents;
+   visSize = ship ? getGame()->computePlayerVisArea(ship) * 2 : worldExtents;
 
 
    glPushMatrix();
@@ -2255,12 +2260,12 @@ void GameUserInterface::renderCommander(ClientGame *game)
    // Put (0,0) at the center of the screen
    glTranslatef(gScreenInfo.getGameCanvasWidth() * 0.5f, gScreenInfo.getGameCanvasHeight() * 0.5f, 0);    
 
-   F32 zoomFrac = game->getCommanderZoomFraction();
+   F32 zoomFrac = getGame()->getCommanderZoomFraction();
 
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
    glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
 
-   Point offset = (game->getWorldExtents()->getCenter() - mShipPos) * zoomFrac + mShipPos;
+   Point offset = (getGame()->getWorldExtents()->getCenter() - mShipPos) * zoomFrac + mShipPos;
    glTranslatef(-offset.x, -offset.y, 0);
 
    // zoomFrac == 1.0 when fully zoomed out to cmdr's map
@@ -2273,9 +2278,9 @@ void GameUserInterface::renderCommander(ClientGame *game)
    rawRenderObjects.clear();
 
    if(ship && ship->hasModule(ModuleSensor))
-      game->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
+      getGame()->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
    else
-      game->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
+      getGame()->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
 
    renderObjects.clear();
 
@@ -2285,8 +2290,8 @@ void GameUserInterface::renderCommander(ClientGame *game)
 
    // Add extra bots if we're showing them
    if(mShowDebugBots)
-      for(S32 i = 0; i < game->getBotCount(); i++)
-         renderObjects.push_back(game->getBot(i));
+      for(S32 i = 0; i < getGame()->getBotCount(); i++)
+         renderObjects.push_back(getGame()->getBot(i));
 
    // If we're drawing bot zones, get them now (put them in the renderZones vector)
    if(mDebugShowMeshZones)
@@ -2314,7 +2319,7 @@ void GameUserInterface::renderCommander(ClientGame *game)
                if((otherShipTeam == playerTeam && gameType->isTeamGame()) || otherShip == ship)  // On our team (in team game) || the ship is us
                {
                   Point p = otherShip->getRenderPos();
-                  Point visExt = game->computePlayerVisArea(otherShip);
+                  Point visExt = getGame()->computePlayerVisArea(otherShip);
 
                   glColor(teamColor * zoomFrac * 0.35f);
                   drawFilledRect(p.x - visExt.x, p.y - visExt.y, p.x + visExt.x, p.y + visExt.y);
@@ -2322,7 +2327,7 @@ void GameUserInterface::renderCommander(ClientGame *game)
             }
          }
 
-         const Vector<DatabaseObject *> *spyBugs = game->getGameObjDatabase()->findObjects_fast(SpyBugTypeNumber);
+         const Vector<DatabaseObject *> *spyBugs = getGame()->getGameObjDatabase()->findObjects_fast(SpyBugTypeNumber);
 
          // Render spy bug visibility range second, so ranges appear above ship scanner range
          for(S32 i = 0; i < spyBugs->size(); i++)
@@ -2351,7 +2356,7 @@ void GameUserInterface::renderCommander(ClientGame *game)
       renderObjects[i]->renderLayer(0);
 
    // Second pass
-   Barrier::renderEdges(1, *game->getSettings()->getWallOutlineColor());    // Render wall edges
+   Barrier::renderEdges(1, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
 
    if(mDebugShowMeshZones)
       for(S32 i = 0; i < renderZones.size(); i++)

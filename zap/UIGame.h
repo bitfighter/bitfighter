@@ -322,7 +322,7 @@ public:
    void toggleShowingMeshZones();  
    void toggleShowDebugBots();
 
-   void addHelpItem(HelpItem item);
+   void addInlineHelpItem(HelpItem item);
 
    bool isShowingDebugShipCoords() const;
 
@@ -385,11 +385,11 @@ public:
    void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd = false);  
    void exitHelper();
 
-   void renderNormal(ClientGame *game);    // Render game in normal play mode
-   void renderCommander(ClientGame *game); // Render game in commander's map mode
-   void renderSuspended();             // Render suspended game
+   void renderGameNormal();         // Render game in normal play mode
+   void renderGameCommander();      // Render game in commander's map mode
+   void renderSuspended();          // Render suspended game
 
-   void renderOverlayMap();            // Render the overlay map in normal play mode
+   void renderOverlayMap();         // Render the overlay map in normal play mode
 
    void renderEngineeredItemDeploymentMarker(Ship *ship);
 

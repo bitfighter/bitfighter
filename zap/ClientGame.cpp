@@ -383,7 +383,7 @@ void ClientGame::updateModuleSounds(const Point &pos, const Point &vel, const Lo
 }
 
 
-// User selected Switch Teams meunu item
+// User selected Switch Teams menu item
 void ClientGame::switchTeams()
 {
    if(!mGameType)    // I think these GameType checks are not needed
@@ -400,7 +400,7 @@ void ClientGame::switchTeams()
       getUIManager()->reactivate(getUIManager()->getUI<GameUserInterface>());   // Jump back into the game (this option takes place immediately)
    }
    else     // More than 2 teams, need to present menu to choose
-      getUIManager()->showMenuToChangeNameForPlayer(getPlayerName());  
+      getUIManager()->showMenuToChangeTeamForPlayer(getPlayerName());  
 }
 
 
@@ -608,11 +608,11 @@ void ClientGame::idle(U32 timeDelta)
       for(S32 i = 0; i < fillVector.size(); i++)
       {
          if(fillVector[i]->getObjectTypeNumber() == RepairItemTypeNumber)
-            addHelpItem(RepairItemSpottedItem);
+            addInlineHelpItem(RepairItemSpottedItem);
          else if(fillVector[i]->getObjectTypeNumber() == TestItemTypeNumber)
-            addHelpItem(TestItemSpottedItem);
+            addInlineHelpItem(TestItemSpottedItem);
          else if(fillVector[i]->getObjectTypeNumber() == ResourceItemTypeNumber)
-            addHelpItem(ResourceItemSpottedItem);
+            addInlineHelpItem(ResourceItemSpottedItem);
       }
    }
 
@@ -630,9 +630,9 @@ void ClientGame::idle(U32 timeDelta)
 }
 
 
-void ClientGame::addHelpItem(HelpItem item)
+void ClientGame::addInlineHelpItem(HelpItem item)
 {
-   mUi->addHelpItem(item);
+   mUIManager->addInlineHelpItem(item);
 }
 
 
@@ -667,22 +667,16 @@ void ClientGame::gotChatPM(const StringTableEntry &fromName, const StringTableEn
    Color color = Colors::yellow;
 
    if(fullClientInfo->getName() == toName && toName == fromName)      // Message sent to self
-      mUi->onChatMessageReceived(color, "%s: %s", toName.getString(), message.getString());
+      getUIManager()->onChatMessageReceived(color, "%s: %s", toName.getString(), message.getString());
 
    else if(fullClientInfo->getName() == toName)                       // To this player
-      mUi->onChatMessageReceived(color, "from %s: %s", fromName.getString(), message.getString());
+      getUIManager()->onChatMessageReceived(color, "from %s: %s", fromName.getString(), message.getString());
 
    else if(fullClientInfo->getName() == fromName)                     // From this player
-      mUi->onChatMessageReceived(color, "to %s: %s", toName.getString(), message.getString());
+      getUIManager()->onChatMessageReceived(color, "to %s: %s", toName.getString(), message.getString());
 
    else  
       TNLAssert(false, "Should never get here... shouldn't be able to see PM that is not from or not to you"); 
-}
-
-
-void ClientGame::gotAnnouncement(const string &announcement)
-{
-   mUi->setAnnouncement(announcement);
 }
 
 
@@ -714,7 +708,7 @@ void ClientGame::renderBasicInterfaceOverlay()
 
 void ClientGame::gameTypeIsAboutToBeDeleted()
 {
-   // Quit EngineerHelper when level changes, or when current GameType get removed
+   // Quit EngineerHelper when level changes, or when current GameType gets removed
    mUi->quitEngineerHelper();
 }
 
@@ -765,28 +759,14 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
    addToClientList(clientInfo);
 
    // Find which client is us
-   mLocalRemoteClientInfo = findClientInfo(mClientInfo->getName());
+   mLocalRemoteClientInfo = findClientInfo(mClientInfo->getName());     // why is this here?
 
-   if(isLocalClient)    // i.e. if this is us
-   {
-      // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
-      // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
-      if(mUi->isInScoreboardMode())
-         mGameType->c2sRequestScoreboardUpdates(true);
+   // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
+   // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
+   if(isLocalClient && getUIManager()->isInScoreboardMode())
+      mGameType->c2sRequestScoreboardUpdates(true);
 
-      if(showMessage)
-         displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");     // SysMsg
-   }
-   else     // A remote player has joined the fray
-   {
-      if(showMessage) // Might as well not display when no sound being played, prevents message flood of many players join loading new GameType
-         displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", clientInfo->getName().getString()); // SysMsg
-
-   }
-   if(playAlert)
-      playSoundEffect(SFXPlayerJoined, 1);
-
-   mUIManager->getUI<GameUserInterface>()->onPlayerJoined();
+   getUIManager()->onPlayerJoined(clientInfo->getName().getString(), isLocalClient, playAlert, showMessage);
 
    mGameType->updateLeadingPlayerAndScore();
 }
@@ -828,22 +808,22 @@ void ClientGame::quitEngineerHelper()
 
 
 // Called by Ship::unpack() -- loadouts are transmitted via the ship object
-// Data flow: Ship->ClientGame->GameUserInterface->LoadoutIndicator
+// Data flow: Ship->ClientGame->UIManager->GameUserInterface->LoadoutIndicator
 void ClientGame::newLoadoutHasArrived(const LoadoutTracker &loadout)
 {
-   mUi->newLoadoutHasArrived(loadout);
+   getUIManager()->newLoadoutHasArrived(loadout);
 }
 
 
 void ClientGame::setActiveWeapon(U32 weaponIndex)
 {
-   mUi->setActiveWeapon(weaponIndex);
+   getUIManager()->setActiveWeapon(weaponIndex);
 }
 
 
 bool ClientGame::isShowingDebugShipCoords()
 {
-   return mUi->isShowingDebugShipCoords();
+   return getUIManager()->isShowingDebugShipCoords();
 }
 
 
@@ -1433,24 +1413,11 @@ Point ClientGame::worldToScreenPoint(const Point *point,  S32 canvasWidth, S32 c
 }
 
 
-void ClientGame::render()
+bool ClientGame::inCmdrMode()
 {
-   UserInterface *currentUI = mUIManager->getCurrentUI();
-
-   // Not in the Game UI (or one of its submenus)...
-   if(currentUI != mUIManager->getUI<GameUserInterface>() && !mUIManager->cameFrom<GameUserInterface>())
-      return;
-
-   // We render the cmdrs map during the transition
-   if(mInCommanderMap || mCommanderZoomDelta.getCurrent() > 0)
-      mUi->renderCommander(this);
-   else
-      mUi->renderNormal(this);
+   return mInCommanderMap || mCommanderZoomDelta.getCurrent() > 0;   // Render the cmdrs map during the transition
 }
 
-
-////////////////////////////////////////
-////////////////////////////////////////
 
 bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id)
 {
@@ -1592,6 +1559,13 @@ InputMode ClientGame::getInputMode()
 {
    return mSettings->getInputMode();
 }
+
+
+void ClientGame::gotAnnouncement(const string &announcement)
+{
+   getUIManager()->gotAnnouncement(announcement);
+}
+
 
 };
 

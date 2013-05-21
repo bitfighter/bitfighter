@@ -119,7 +119,7 @@ void HelpItemManager::idle(U32 timeDelta)
       HelpItem queuedMessage = mQueuedItems[0].helpItem;
       mQueuedItems.erase(0);
 
-      addHelpItem(queuedMessage);
+      addInlineHelpItem(queuedMessage);
       mPacedTimer.reset();
    }
 
@@ -340,7 +340,7 @@ void HelpItemManager::setAlreadySeenString(const string &vals)
 }
 
 
-void HelpItemManager::addHelpItem(HelpItem msg)
+void HelpItemManager::addInlineHelpItem(HelpItem msg)
 {
    // Nothing to do if we are disabled
    if(mDisabled)

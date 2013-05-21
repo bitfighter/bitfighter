@@ -444,6 +444,23 @@ void UIManager::onConnectionToServerRejected(const char *reason)
 }
 
 
+void UIManager::onPlayerJoined(const char *playerName, bool isLocalClient, bool playAlert, bool showMessage)
+{
+   if(showMessage)
+   {
+      if(isLocalClient)    
+         displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");            // SysMsg
+      else   
+         displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", playerName); // SysMsg
+   }
+
+   if(playAlert)
+      playSoundEffect(SFXPlayerJoined, 1);
+
+   getUI<GameUserInterface>()->onPlayerJoined();      // Notifies the helpers
+}
+
+
 // Another player has just left the game
 void UIManager::onPlayerQuit(const char *name)
 {
@@ -725,7 +742,7 @@ void UIManager::showPlayerActionMenu(PlayerAction action)
 };
 
 
-void UIManager::showMenuToChangeNameForPlayer(const string &playerName)
+void UIManager::showMenuToChangeTeamForPlayer(const string &playerName)
 {
    TeamMenuUserInterface *ui = getUI<TeamMenuUserInterface>();
    ui->nameToChange = playerName;
@@ -830,6 +847,59 @@ void UIManager::emitTeleportInEffect(const Point &pos, U32 type)
 {
    getUI<GameUserInterface>()->emitTeleportInEffect(pos, type);
 }
+
+
+void UIManager::addInlineHelpItem(HelpItem item)
+{
+   getUI<GameUserInterface>()->addInlineHelpItem(item);
+}
+
+
+void UIManager::onChatMessageReceived(const Color &msgColor, const char *format, ...)
+{
+   static char buffer[MAX_CHAT_MSG_LENGTH];
+
+   va_list args;
+
+   va_start(args, format);
+   vsnprintf(buffer, sizeof(buffer), format, args);
+   va_end(args);
+
+   getUI<GameUserInterface>()->onChatMessageReceived(msgColor, buffer);
+}
+
+
+void UIManager::gotAnnouncement(const string &announcement)
+{
+   getUI<GameUserInterface>()->setAnnouncement(announcement);
+}
+
+
+bool UIManager::isInScoreboardMode()
+{
+   return getUI<GameUserInterface>()->isInScoreboardMode();
+}
+
+
+// Called by Ship::unpack() -- loadouts are transmitted via the ship object
+// Data flow: Ship->ClientGame->UIManager->GameUserInterface->LoadoutIndicator
+void UIManager::newLoadoutHasArrived(const LoadoutTracker &loadout)
+{
+   getUI<GameUserInterface>()->newLoadoutHasArrived(loadout);
+}
+
+
+void UIManager::setActiveWeapon(U32 weaponIndex)
+{
+   getUI<GameUserInterface>()->setActiveWeapon(weaponIndex);
+}
+
+
+bool UIManager::isShowingDebugShipCoords()
+{
+   return getUI<GameUserInterface>()->isShowingDebugShipCoords();
+}
+
 
 
 };

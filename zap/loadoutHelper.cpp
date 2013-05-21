@@ -226,7 +226,7 @@ void LoadoutHelper::activateHelp(UIManager *uiManager)
 void LoadoutHelper::onWidgetClosed()
 {
    bool hasLoadout = getGame()->levelHasLoadoutZone();
-   getGame()->getUi()->addHelpItem(hasLoadout ?  LoadoutChangedZoneItem : LoadoutChangedNoZoneItem);
+   getGame()->getUi()->addInlineHelpItem(hasLoadout ?  LoadoutChangedZoneItem : LoadoutChangedNoZoneItem);
 }
 
 
