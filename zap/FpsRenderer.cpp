@@ -25,8 +25,10 @@
 
 #include "FpsRenderer.h"
 
+#include "ScreenInfo.h"
 #include "ClientGame.h"
 #include "FontManager.h"
+#include "barrier.h"
 
 #include "Colors.h"
 
@@ -106,6 +108,26 @@ void FpsRenderer::render(S32 canvasWidth) const
    if(!mFPSVisible && !isClosing())
       return;
 
+   U32 visibleVertices = 0;
+   if(mGame->getLocalPlayerShip())
+   {
+      Point shipPos = mGame->getLocalPlayerShip()->getPos();
+      Point vis(gScreenInfo.getDrawAreaWidth(), gScreenInfo.getDrawAreaHeight());
+      Rect visibleRect(
+         shipPos.x - vis.x / 2,
+         shipPos.y - vis.y / 2,
+         shipPos.x + vis.x / 2,
+         shipPos.y + vis.y / 2
+      );
+
+      // increment by two because each segment is two points
+      for(S32 i = 0; i < Barrier::mRenderLineSegments.size(); i += 2)
+      {
+         if(visibleRect.contains(Barrier::mRenderLineSegments[i]))
+            visibleVertices++;
+      }
+   }
+
    FontManager::pushFontContext(HUDContext);
 
    static const S32 horizMargin = 10;
@@ -119,6 +141,10 @@ void FpsRenderer::render(S32 canvasWidth) const
    drawStringfr(xpos, vertMargin,                      fontSize, "%1.0f fps", mFPSAvg);
    glColor(Colors::yellow);
    drawStringfr(xpos, vertMargin + fontSize + fontGap, fontSize, "%1.0f ms",  mPingAvg);
+
+   // vertex display is green at zero and red at 1000 or more visible vertices
+   glColor3f(visibleVertices / 1000.0f, 1.0f - visibleVertices / 1000.0f, 0.0f);
+   drawStringfr(xpos, vertMargin + 2 * (fontSize + fontGap), fontSize, "%d vts",  visibleVertices);
    
    FontManager::popFontContext();
 }
