@@ -46,15 +46,13 @@ namespace Zap
 {
 
 // Needed on OS X, but cause link errors in VC++
-#ifndef WIN32
-   const U16 SpeedZone::minSpeed;
-   const U16 SpeedZone::maxSpeed;
-   const U16 SpeedZone::defaultSpeed;
-#endif
-
 TNL_IMPLEMENT_NETOBJECT(SpeedZone);
 
 // Statics:
+const U16 SpeedZone::minSpeed = 500;
+const U16 SpeedZone::maxSpeed = 5000;
+const U16 SpeedZone::defaultSpeed = 2000;
+
 #ifndef ZAP_DEDICATED
    EditorAttributeMenuUI *SpeedZone::mAttributeMenuUI = NULL;
 #endif

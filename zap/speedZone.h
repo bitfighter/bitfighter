@@ -70,9 +70,9 @@ public:
       
    SpeedZone *clone() const;
 
-   static const U16 minSpeed = 500;       // How slow can you go?
-   static const U16 maxSpeed = 5000;      // Max speed for the goFast
-   static const U16 defaultSpeed = 2000;  // Default speed if none specified
+   static const U16 minSpeed;      // How slow can you go?
+   static const U16 maxSpeed;      // Max speed for the goFast
+   static const U16 defaultSpeed;  // Default speed if none specified
 
    U16 getSpeed();
    void setSpeed(U16 speed);
