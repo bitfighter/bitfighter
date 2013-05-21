@@ -18,65 +18,75 @@ Bitfighter README
       * openal
       * libvorbis
       * libspeex
-      * readline (Linux-only)
-      * ncurses (Linux-only)
+      * libmodplug
 
-   These dependencies are provided for you on Windows/Mac, with the exception
-   of SDL on Mac which can be obtained from:
-
-    http://www.libsdl.org/download-1.2.php
+   These dependencies are provided for you on Windows and OSX.
 
    On Linux, you must install them using your distribution's preferred method.
 
       
 2) COMPILING
 
+   The CMake build system is used for compiling on Windows and Linux.  You
+   will need to download and install CMake for these platforms.  
+   
+   On OSX, there is an Xcode project available.
+
  a) Linux
 
    You will need the development headers of the above dependencies installed 
    as well as the following software to compile:
-      * gcc / g++
+      * cmake
       * make
+      * gcc / g++
 
-   To compile run 'make' in the root directory of the project.  
+   Open a terminal and change to the 'build' directory within the extracted
+   bitfighter sources.  Then run the following commands:
 
-   To build a dedicated server run 'make dedicated'.
+   1) cmake ..
+   2) make
 
-   More options available in the Makefile
+   To set up a debugging build do:  cmake -DCMAKE_BUILD_TYPE=Debug ..
+   
+   To build a dedicated server run 'make bitfighterd'.
 
 
  b) Windows
 
-   Bitfighter is built with the Visual Studio 2010 IDE
+   Bitfighter can be built with at least the following build systems:
+      * Visual Studio C++ IDE 
+      * MingW/MSYS
 
-   Install Visual C++ 2010 Express  -- this is a free download from Microsoft.
+   To generate the proper project files with CMake, go into the 'build' directory
+   and type:
+      * cmake -G "Visual Studio 10" ..
+    OR
+      * cmake -G "MSYS Makefiles" ..
+      
+   To see a list of generators for CMake, see here:
+   
+    http://www.cmake.org/cmake/help/v2.8.11/cmake.html#section_Generators
+    
+   Different versions of Visual Studio are known to work, but you need to use the
+   correct generator with CMake.
+   
+   
+   Microsoft Visual Studio:
+   
+   Start Visual C++.  Select Open Project, then navigate to the 'build' folder, 
+   and open the bitfighter solution file.
 
-   Start Visual C++.  Select Open Project, then navigate to the source folder, and open
-   the Bitfighter solution file.
-
-   Select Debug > Build Solution (or press F7) to compile the game.  This will take a 
-   few minutes the first time.
+   Right-click on the 'bitfighter' target and select 'build' to compile the game.  This 
+   will take a few minutes the first time.
 
    To run:
-   
-   Select bitfighter from the Solution Explorer pane on the left of theGUI, right click, 
-   and select Properties > Debugging. Under Command Arguments add "-rootdatadir XXX" 
-   (without quotes) where XXX is the folder containing your levels, sounds, etc., 
-   perhaps pointing to an existing install of Bitfighter.
 
    Click Debug > Start Debugging (or press F5) to run the game.
 
- c) Windows Mingw
+   
+   MinGW / MSYS
 
-   Bitfighter can also be compiled using Mingw for windows.
-
-   Install Mingw, available as free download at www.mingw.org
-
-   Run "cmd" to open command, then enter these command:
-
-   PATH = C:\MinGW\bin;%PATH%
-   cd C:\Program Files\Bitfighter
-   mingw32-make
+   After generating the "MSYS Makefiles".  All you have to do is run 'make' to compile
 
 
  d) MacOS X (10.4 - 10.7)
