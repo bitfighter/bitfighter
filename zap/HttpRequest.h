@@ -26,8 +26,6 @@
 #ifndef HTTPREQUEST_H_
 #define HTTPREQUEST_H_
 
-#include "gtest/gtest_prod.h"
-
 #include "boost/shared_ptr.hpp"
 #include <tnl.h>
 #include <tnlNetBase.h>
