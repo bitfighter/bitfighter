@@ -721,33 +721,6 @@ void GameType::idle_server(U32 deltaT)
       mBotBalanceAnalysisTimer.reset();
    }
 
-
-   //if(mTestTimer.update(deltaT))
-   //{
-   //   Worm *worm = new Worm();
-   //   F32 ang = TNL::Random::readF() * Float2Pi;
-   //   worm->setPosAng(Point(0,0), ang);
-   //   worm->addToGame(gServerGame);
-   //   mTestTimer.reset(10000);
-   //}
-   //{
-   //   on = !on;
-
-   //   if(!on)
-   //   {
-   //      Vector<F32> v;
-   //      s2cAddBarriers(v, 0, false);
-   //   }
-   //   else
-   //   {
-   //      for(S32 i = 0; i < mBarriers.size(); i++)
-   //         s2cAddBarriers(mBarriers[i].verts, mBarriers[i].width, mBarriers[i].solid);
-   //   }
-
-   //   mTestTimer.reset();
-   //}
-  
-
    // Process any pending Robot events
    EventManager::get()->update();
 
@@ -2790,6 +2763,30 @@ void GameType::balanceTeams()
    S32 currentBotCount = getGame()->getBotCount();
 
    S32 minimumPlayersNeeded = getGame()->getSettings()->getIniSettings()->minBalancedPlayers;
+
+   // If bots are always set to balance, then adjust minimum players needed to fill up all teams
+   if(getGame()->getSettings()->getIniSettings()->botsAlwaysBalanceTeams && isTeamGame())
+   {
+      // Update player count
+      getGame()->countTeamPlayers();
+
+      S32 largestTeamHumanCount = 0;
+      S32 teamCount = mGame->getTeamCount();
+
+      // Find team with most human players
+      for(S32 i = 0; i < teamCount; i++)
+      {
+         TNLAssert(dynamic_cast<Team *>(mGame->getTeam(i)), "Invalid team");
+         S32 currentHumanCount = static_cast<Team *>(mGame->getTeam(i))->getPlayerCount();
+
+         if(currentHumanCount > largestTeamHumanCount)
+            largestTeamHumanCount = currentHumanCount;
+      }
+
+      // Alter minimum players needed if a balanced team total is greater
+      if(largestTeamHumanCount * teamCount > minimumPlayersNeeded)
+         minimumPlayersNeeded = largestTeamHumanCount * teamCount;
+   }
 
    // Not enough players!  Add bots until we're balanced
    if(currentClientCount < minimumPlayersNeeded)

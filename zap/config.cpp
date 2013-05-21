@@ -96,6 +96,7 @@ IniSettings::IniSettings()
    maxBots = 10;
    botsBalanceTeams = false;
    minBalancedPlayers = 6;
+   botsAlwaysBalanceTeams = true;
    enableServerVoiceChat = true;
    allowTeamChanging = true;
    serverPassword = "";               // Passwords empty by default
@@ -611,6 +612,7 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->maxBots             = ini->GetValueI(section, "MaxBots", iniSettings->maxBots);
    iniSettings->botsBalanceTeams    = ini->GetValueYN(section, "BotsBalanceTeams", iniSettings->botsBalanceTeams);
    iniSettings->minBalancedPlayers  = ini->GetValueI(section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
+   iniSettings->botsAlwaysBalanceTeams   = ini->GetValueYN(section, "BotsAlwaysBalanceTeams", iniSettings->botsAlwaysBalanceTeams);
    iniSettings->enableServerVoiceChat = ini->GetValueYN (section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
 
    iniSettings->alertsVolLevel = (float) ini->GetValueI(section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10)) / 10.0f;
@@ -1685,6 +1687,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValueI (section, "MaxBots", iniSettings->maxBots);
    ini->setValueYN(section, "BotsBalanceTeams", iniSettings->botsBalanceTeams);
    ini->SetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
+   ini->setValueYN(section, "BotsAlwaysBalanceTeams", iniSettings->botsAlwaysBalanceTeams);
    ini->setValueYN(section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
    ini->setValueYN(section, "AllowTeamChanging", iniSettings->allowTeamChanging);
    ini->SetValueI (section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10));
