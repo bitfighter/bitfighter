@@ -721,33 +721,6 @@ void GameType::idle_server(U32 deltaT)
       mBotBalanceAnalysisTimer.reset();
    }
 
-
-   //if(mTestTimer.update(deltaT))
-   //{
-   //   Worm *worm = new Worm();
-   //   F32 ang = TNL::Random::readF() * Float2Pi;
-   //   worm->setPosAng(Point(0,0), ang);
-   //   worm->addToGame(gServerGame);
-   //   mTestTimer.reset(10000);
-   //}
-   //{
-   //   on = !on;
-
-   //   if(!on)
-   //   {
-   //      Vector<F32> v;
-   //      s2cAddBarriers(v, 0, false);
-   //   }
-   //   else
-   //   {
-   //      for(S32 i = 0; i < mBarriers.size(); i++)
-   //         s2cAddBarriers(mBarriers[i].verts, mBarriers[i].width, mBarriers[i].solid);
-   //   }
-
-   //   mTestTimer.reset();
-   //}
-  
-
    // Process any pending Robot events
    EventManager::get()->update();
 
