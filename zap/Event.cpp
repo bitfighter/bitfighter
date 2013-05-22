@@ -296,10 +296,6 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
                break;
 
             case SDL_WINDOWEVENT_FOCUS_LOST:
-               // Released all modifier keys when we lose focus so they don't stick.  This
-               // happens with SDL2 on Windows Vista/7 with Aero themes enabled
-               SDL_SetModState(KMOD_NONE);
-
                // Released all keys when we lose focus.  No more stickies!
                InputCodeManager::resetStates();
                break;
