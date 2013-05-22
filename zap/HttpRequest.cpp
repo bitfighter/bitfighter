@@ -77,10 +77,7 @@ bool HttpRequest::send()
    }
 
    // initiate the connection. this will block if DNS resolution is required
-   if(mSocket->connect(*mRemoteAddress) != UnknownError)
-   {
-      return false;
-   }
+   mSocket->connect(*mRemoteAddress);
 
    buildRequest();
    if(!sendRequest(mRequest))
