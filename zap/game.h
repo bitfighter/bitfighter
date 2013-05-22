@@ -347,6 +347,7 @@ public:
    void removeBot(Robot *robot);
    void deleteBot(const StringTableEntry &name);  // Delete by name 
    void deleteBot(S32 i);                         // Delete by index
+   void deleteBotFromTeam(S32 teamIndex);         // Delete by teamIndex
    void deleteAllBots();                          // Delete 'em all, let God sort 'em out!
 
 

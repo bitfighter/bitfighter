@@ -252,6 +252,18 @@ void Game::deleteBot(S32 i)
 }
 
 
+// Delete bot from a given team
+void Game::deleteBotFromTeam(S32 teamIndex)
+{
+   for(S32 i = 0; i < mRobots.size(); i++)
+      if(mRobots[i]->getTeam() == teamIndex)
+      {
+         deleteBot(i);
+         return;        // Only one!
+      }
+}
+
+
 // Delete 'em all, let got sort 'em out!
 void Game::deleteAllBots()
 {

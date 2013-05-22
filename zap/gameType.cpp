@@ -2758,83 +2758,80 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
 // Server only
 void GameType::balanceTeams()
 {
-   // All clients, players + bots
-   S32 currentClientCount = getGame()->getClientCount();
-   S32 currentBotCount = getGame()->getBotCount();
+   // Evaluate team counts
+   getGame()->countTeamPlayers();
 
+   S32 teamCount = mGame->getTeamCount();
+
+   // Grab our balancing options
    S32 minimumPlayersNeeded = getGame()->getSettings()->getIniSettings()->minBalancedPlayers;
+   bool botsAlwaysBalance = getGame()->getSettings()->getIniSettings()->botsAlwaysBalanceTeams;
 
-   // If bots are always set to balance, then adjust minimum players needed to fill up all teams
-   if(getGame()->getSettings()->getIniSettings()->botsAlwaysBalanceTeams && isTeamGame())
+   // If teams were balanced, how many players would the largest team have?
+   S32 maxPlayersPerBalancedTeam = ceil(F32(minimumPlayersNeeded) / F32(teamCount));
+
+   // Find team with most human players
+   S32 largestTeamHumanCount = 0;
+
+   for(S32 i = 0; i < teamCount; i++)
    {
-      // Update player count
-      getGame()->countTeamPlayers();
+      TNLAssert(dynamic_cast<Team *>(mGame->getTeam(i)), "Invalid team");
+      S32 currentHumanCount = static_cast<Team *>(mGame->getTeam(i))->getPlayerCount();
 
-      S32 largestTeamHumanCount = 0;
-      S32 teamCount = mGame->getTeamCount();
-
-      // Find team with most human players
-      for(S32 i = 0; i < teamCount; i++)
-      {
-         TNLAssert(dynamic_cast<Team *>(mGame->getTeam(i)), "Invalid team");
-         S32 currentHumanCount = static_cast<Team *>(mGame->getTeam(i))->getPlayerCount();
-
-         if(currentHumanCount > largestTeamHumanCount)
-            largestTeamHumanCount = currentHumanCount;
-      }
-
-      // Alter minimum players needed if a balanced team total is greater
-      if(largestTeamHumanCount * teamCount > minimumPlayersNeeded)
-         minimumPlayersNeeded = largestTeamHumanCount * teamCount;
+      if(currentHumanCount > largestTeamHumanCount)
+         largestTeamHumanCount = currentHumanCount;
    }
 
-   // Not enough players!  Add bots until we're balanced
+   // If bots are always set to balance, then adjust minimum players needed to fill up all teams
+   if(botsAlwaysBalance && isTeamGame())
+   {
+      // If all teams were balanced to the largest human team, then adjust the minimum players
+      if(largestTeamHumanCount * teamCount > minimumPlayersNeeded)
+         minimumPlayersNeeded = largestTeamHumanCount * teamCount;
+
+      // If all humans are spread out and still don't meet the minimum players, adjust so minimum
+      // is met and all teams would be balanced
+      else if(largestTeamHumanCount * teamCount < minimumPlayersNeeded)
+         minimumPlayersNeeded = maxPlayersPerBalancedTeam * teamCount;
+   }
+
+   // Kick bots on any weirdly balanced teams
+   // Re-adjust our max players per team based on our new minimum that is needed
+   maxPlayersPerBalancedTeam = ceil(F32(minimumPlayersNeeded) / F32(teamCount));
+
+   for(S32 i = 0; i < teamCount; i++)
+   {
+      Team *currentTeam = static_cast<Team *>(mGame->getTeam(i));
+      S32 currentTeamBotCount = currentTeam->getBotCount();
+      S32 currentTeamPlayerBotCount = currentTeam->getPlayerBotCount();  // All players
+
+      // If the current team has bots and has more players than the calculated balance should have
+      if(currentTeamBotCount > 0 && currentTeamPlayerBotCount > maxPlayersPerBalancedTeam)
+      {
+         // Find the difference
+         S32 difference = currentTeamPlayerBotCount - maxPlayersPerBalancedTeam;
+
+         // Kick as many bots as we need, or, only up to how many we have
+         S32 numBotsToKick = difference;
+         if(currentTeamBotCount < difference)
+            numBotsToKick = currentTeamBotCount;
+
+         for(S32 j = 0; j < numBotsToKick; j++)
+            getGame()->deleteBotFromTeam(i);
+      }
+   }
+
+   // Re-evaluate team counts
+   getGame()->countTeamPlayers();
+
+   // Not enough players!  Add bots until we're balanced.  This assumes adding a bot will go
+   // to the team with fewest players
+   S32 currentClientCount = getGame()->getClientCount();  // Need to save this, it could be adjusted when adding bots
    if(currentClientCount < minimumPlayersNeeded)
    {
       Vector<StringTableEntry> dummy;
       for(S32 i = 0; i < minimumPlayersNeeded - currentClientCount; i++)
          addBot(dummy);
-   }
-
-   // We have more than enough players, kick bots to keep balance
-   if(currentClientCount > minimumPlayersNeeded && currentBotCount > 0)
-   {
-      // Re-evaluate teams.  For some reason getPlayerBotCount() isn't correct unless this is done
-      getGame()->countTeamPlayers();
-
-      for(S32 i = 0; i < currentBotCount; i++)
-      {
-         // Find the team with the most players on it
-         S32 mostPlayersTeamIndex = 0;
-         S32 mostPlayers = 0;
-
-         for(S32 i = 0; i < mGame->getTeamCount(); i++)
-         {
-            TNLAssert(dynamic_cast<Team *>(mGame->getTeam(i)), "Invalid team");
-            S32 currentCount = static_cast<Team *>(mGame->getTeam(i))->getPlayerBotCount();
-
-            if(currentCount > mostPlayers)
-            {
-               mostPlayers = currentCount;
-               mostPlayersTeamIndex = i;
-            }
-         }
-
-         // Now kick a bot from that team.  Is there a better / more efficent way to do this?
-         for(S32 i = 0; i < mGame->getClientCount(); i++)
-         {
-            ClientInfo *clientInfo = mGame->getClientInfo(i);
-            if(clientInfo->isRobot() && clientInfo->getTeamIndex() == mostPlayersTeamIndex)
-            {
-               getGame()->deleteBot(clientInfo->getName());
-               break;  // Just one!
-            }
-         }
-
-         // Re-evaluate client count; don't kick any more bots than we need to
-         if(getGame()->getClientCount() <= minimumPlayersNeeded)
-            break;
-      }
    }
 }
 
