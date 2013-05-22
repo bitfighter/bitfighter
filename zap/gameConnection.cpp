@@ -1777,7 +1777,7 @@ void GameConnection::onConnectionEstablished_client()
    // This is a new connection, server is expecting the new client to not show idling message.
    getClientInfo()->setSpawnDelayed(false);
    mClientGame->setSpawnDelayed(false);
-   mClientGame->setInCommanderMap(false);       // Start game in regular mode
+   mClientGame->resetCommandersMap();       // Start game in regular mode
 
 
    string lastServerName = mClientGame->getRequestedServerName();

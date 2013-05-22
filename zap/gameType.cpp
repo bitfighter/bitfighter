@@ -34,6 +34,7 @@
 #include "Spawn.h"
 #include "loadoutZone.h"      // For LoadoutZone
 #include "LineEditorFilterEnum.h"
+#include "game.h"
 
 #ifndef ZAP_DEDICATED
 #  include "gameObjectRender.h"
@@ -743,19 +744,13 @@ bool GameType::advanceGameClock(U32 deltaT)
 }
 
 
-//// Sorts teams by player counts, high to low
-//S32 QSORT_CALLBACK teamSizeSort(Team *a, Team *b)
-//{
-//   return (b->numPlayers + b->numBots) - (a->numPlayers + a->numBots);
-//}
+void GameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
+{
+   mGame->renderBasicInterfaceOverlay();
+}
 
 
 #ifndef ZAP_DEDICATED
-void GameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
-{
-   static_cast<ClientGame *>(mGame)->renderBasicInterfaceOverlay();
-}
-
 
 // Client only
 void GameType::renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32 canvasHeight) const
@@ -801,22 +796,20 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *color, 
          targetPoint.y = r.min.y;
    }
 
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-   Point p = clientGame->worldToScreenPoint(&targetPoint, canvasWidth, canvasHeight);
-   drawObjectiveArrow(p, clientGame->getCommanderZoomFraction(), color, canvasWidth, canvasHeight, alphaMod);
+   Point p = mGame->worldToScreenPoint(&targetPoint, canvasWidth, canvasHeight);
+
+   drawObjectiveArrow(p, mGame->getCommanderZoomFraction(), color, canvasWidth, canvasHeight, alphaMod);
 }
 
 
 void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outlineColor, S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
 {
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-
    Ship *ship = getGame()->getLocalPlayerShip();
 
    if(!ship)
       return;
 
-   drawObjectiveArrow(nearestPoint, clientGame->getCommanderZoomFraction(), outlineColor, canvasWidth, canvasHeight, alphaMod);
+   drawObjectiveArrow(nearestPoint, mGame->getCommanderZoomFraction(), outlineColor, canvasWidth, canvasHeight, alphaMod);
 }
 
 #endif

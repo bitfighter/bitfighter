@@ -1509,6 +1509,26 @@ bool Game::isDedicated() const
 }
 
 
+Point Game::worldToScreenPoint(const Point *p, S32 canvasWidth, S32 canvasHeight) const
+{
+   TNLAssert(false, "Not implemented for this class!");
+   return Point(0,0);
+}
+
+
+F32 Game::getCommanderZoomFraction() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+   return 0;
+}
+
+
+void Game::renderBasicInterfaceOverlay() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
 };
 
 

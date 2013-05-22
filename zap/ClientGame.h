@@ -57,9 +57,6 @@ class ClientGame : public Game
 private:
    SafePtr<GameConnection> mConnectionToServer; // If this is a client game, this is the connection to the server
 
-   bool mInCommanderMap;
-   Timer mCommanderZoomDelta;
-
    Timer mScreenSaverTimer;
    void supressScreensaver();
 
@@ -71,8 +68,6 @@ private:
    Vector<string> mVoiceMuteList;   // List of players we mute because they are abusing voice chat
 
    bool mGameIsRunning;             // True if a suspended game is being played without us, false if it's full stop for everyone
-
-   GameUserInterface *mUi;
 
    string mEnteredServerPermsPassword;
    string mEnteredServerAccessPassword;
@@ -122,13 +117,11 @@ public:
    void doneLoadingLevel();
 
    UIManager *getUIManager() const;
-   GameUserInterface *getUi() const;
 
    // A place to store input from the joysticks while we are composing our moves
    F32 mJoystickInputs[JoystickAxesDirectionCount];
 
-   bool getInCommanderMap();
-   void setInCommanderMap(bool inCommanderMap);
+   void resetCommandersMap();
    F32 getCommanderZoomFraction() const;
 
    void setEnteringGameOverScoreboardPhase();   // Post-game scoreboard is about to be displayed
@@ -136,11 +129,9 @@ public:
 
    Point worldToScreenPoint(const Point *p, S32 canvasWidth, S32 canvasHeight) const;
 
-   bool inCmdrMode();      // Return true if we should render the commander's map, false otherwise
-
    bool isServer();
    void idle(U32 timeDelta);
-   void toggleCommanderMap();
+   void setUsingCommandersMap(bool usingCommandersMap);
 
    Ship *findShip(const StringTableEntry &clientName);
 
@@ -157,7 +148,7 @@ public:
 
    void gameTypeIsAboutToBeDeleted();
    void activatePlayerMenuUi();
-   void renderBasicInterfaceOverlay();
+   void renderBasicInterfaceOverlay() const;
 
 
    void onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool playAlert, bool showMessage);
@@ -286,8 +277,6 @@ public:
 
    void addPolyWall(BfObject *polyWall, GridDatabase *database);     // Add polyWall item to game
    void addWallItem(BfObject *wallItem, GridDatabase *database);     // Add wallItem item to game
-
-   void setSelectedEngineeredObject(U32 objectType);
 
    Ship *getLocalPlayerShip() const;
 

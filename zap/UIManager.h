@@ -32,6 +32,8 @@
 #include "SparkTypesEnum.h"
 #include "PlayerActionEnum.h"
 
+#include "UIGame.h"
+
 #include "HelpItemManager.h"     // For HelpItem def
 #include "LoadoutTracker.h"
 
@@ -39,11 +41,12 @@
 #include "Point.h"
 #include "Timer.h"
 
-#include "tnlVector.h"
 #include "tnlNetStringTable.h"
 #include "tnlNetConnection.h"
-#include "tnlUDP.h"
 #include "tnlNonce.h"
+#include "tnlString.h"
+#include "tnlUDP.h"
+#include "tnlVector.h"
 
 #include <memory>
 
@@ -53,6 +56,7 @@ using namespace TNL;
 namespace Zap
 {
 
+class Move;
 class Game;
 class ClientGame;
 class GameSettings;
@@ -116,6 +120,9 @@ public:
  
    void reactivatePrevUI();
    void reactivate(const UserInterface *ui);
+   
+   void activateGameUI();
+   void reactivateGameUI(); 
 
    bool hasPrevUI();
    void clearPrevUIs();
@@ -224,6 +231,19 @@ public:
    void newLoadoutHasArrived(const LoadoutTracker &loadout);
    void setActiveWeapon(U32 weaponIndex);
    bool isShowingDebugShipCoords();
+   Point worldToScreenPoint(const Point *point, S32 canvasWidth, S32 canvasHeight);
+   void resetCommandersMap();
+   F32 getCommanderZoomFraction();
+   void renderBasicInterfaceOverlay();
+   void quitEngineerHelper();
+   void exitHelper();
+   void shutdownInitiated(U16 time, const StringTableEntry &name, const StringPtr &reason, bool originator);
+   void cancelShutdown();
+   void setSelectedEngineeredObject(U32 objectType);
+   Move *getCurrentMove();
+   void displayErrorMessage(const char *message);
+   void displaySuccessMessage(const char *message);
+
 
    // EditorUI
    void readRobotLine(const string &robotLine);

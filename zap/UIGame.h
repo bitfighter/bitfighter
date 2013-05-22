@@ -132,7 +132,6 @@ public:
 ////////////////////////////////////////
 
 class Move;
-class SoundEffect;
 class VoiceEncoder;
 
 using namespace Zap::UI;
@@ -164,6 +163,9 @@ private:
    LevelListDisplayer mLevelListDisplayer;
 
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
+
+   bool mInCommanderMap;
+   Timer mCommanderZoomDelta;
 
    Timer mShutdownTimer;
 
@@ -276,6 +278,10 @@ private:
    bool processPlayModeKey(InputCode inputCode);
    void checkForKeyboardMovementKeysInJoystickMode(InputCode inputCode);
 
+   bool renderWithCommanderMap() const;
+
+   SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0) const;
+
 public:
    explicit GameUserInterface(ClientGame *game);  // Constructor
    virtual ~GameUserInterface();                  // Destructor
@@ -316,6 +322,8 @@ public:
 
    bool isChatting() const;               // Returns true if player is composing a chat message
 
+   void resetCommandersMap();             // Turn off commander's map when connecting to server
+   F32 getCommanderZoomFraction() const; 
 
    void toggleShowingShipCoords();
    void toggleShowingObjectIds();  
@@ -351,6 +359,9 @@ public:
    // Mouse handling
    void onMouseDragged();
    void onMouseMoved();
+
+   Point worldToScreenPoint(const Point *point,  S32 canvasWidth, S32 canvasHeight) const;
+   void toggleCommanderMap();
 
    void onActivate();                 // Gets run when interface is first activated
    void onReactivate();               // Gets run when interface is subsequently reactivated

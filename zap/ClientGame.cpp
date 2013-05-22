@@ -24,6 +24,7 @@
 
 #include "ClientGame.h"
 
+#include "ChatHelper.h"
 #include "masterConnection.h"
 #include "gameNetInterface.h"
 #include "IniFile.h"             // For CIniFile def
@@ -31,7 +32,6 @@
 #include "barrier.h"
 #include "gameType.h"
 
-#include "UIGame.h"
 #include "UIManager.h"
 
 #include "EditorTeam.h"
@@ -61,11 +61,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 {
    //mUserInterfaceData = new UserInterfaceData();
 
-   mInCommanderMap        = false;
    mGameIsRunning         = true;      // Only matters when game is suspended
-
-   // Transition time between regular map and commander's map; in ms, higher = slower
-   mCommanderZoomDelta.setPeriod(350);
 
    mRemoteLevelDownloadFilename = "downloaded.level";
 
@@ -74,8 +70,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    mClientInfo = new FullClientInfo(this, NULL, mSettings->getPlayerName(), false);  // Will be deleted in destructor
 
    mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
-
-   mUi = mUIManager->getUI<GameUserInterface>();
 
    for(S32 i = 0; i < JoystickAxesDirectionCount; i++)
       mJoystickInputs[i] = 0;
@@ -105,7 +99,7 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
 
    mClientInfo->setRole(ClientInfo::RoleOwner);       // Local connection is always owner
 
-   getUIManager()->activate<GameUserInterface>();
+   getUIManager()->activateGameUI();
    GameConnection *gameConnection = new GameConnection(this);
  
    setConnectionToServer(gameConnection);
@@ -312,7 +306,6 @@ void ClientGame::emitShipExplosion(const Point &pos)
  }
 
 
-
 SFXHandle ClientGame::playSoundEffect(U32 profileIndex, F32 gain) const
 {
    return getUIManager()->playSoundEffect(profileIndex, gain);
@@ -397,7 +390,7 @@ void ClientGame::switchTeams()
          return;
 
       changeOwnTeam(1 - ship->getTeam());    // If two teams, team will either be 0 or 1, so "1 - team" will toggle
-      getUIManager()->reactivate(getUIManager()->getUI<GameUserInterface>());   // Jump back into the game (this option takes place immediately)
+      getUIManager()->reactivateGameUI();    // Jump back into the game (this option takes place immediately)
    }
    else     // More than 2 teams, need to present menu to choose
       getUIManager()->showMenuToChangeTeamForPlayer(getPlayerName());  
@@ -532,13 +525,7 @@ void ClientGame::idle(U32 timeDelta)
 
    computeWorldObjectExtents();
 
-   if(mCommanderZoomDelta.getCurrent() > 0)               
-      mUi->onMouseMoved();     // Keep ship pointed towards mouse cmdrs map zoom transition
-
-   mCommanderZoomDelta.update(timeDelta);
-
-
-   Move *theMove = mUi->getCurrentMove();       // Get move from keyboard input
+   Move *theMove = getUIManager()->getCurrentMove();       // Get move from keyboard input
 
    theMove->time = timeDelta + prevTimeDelta;
 
@@ -575,14 +562,14 @@ void ClientGame::idle(U32 timeDelta)
          if(obj == controlObject)      // That is, if we are idling the local ship
          {
             obj->setCurrentMove(*theMove);
-            obj->idle(BfObject::ClientIdlingLocalShip);  // on client, object is our control object
+            obj->idle(BfObject::ClientIdlingLocalShip);     // on client, object is our control object
          }
          else
          {
             Move m = obj->getCurrentMove();
             m.time = timeDelta;
             obj->setCurrentMove(m);
-            obj->idle(BfObject::ClientIdlingNotLocalShip);    // on client, object is not our control object
+            obj->idle(BfObject::ClientIdlingNotLocalShip);  // on client, object is not our control object
          }
       }
 
@@ -656,7 +643,7 @@ void ClientGame::gotChatMessage(const StringTableEntry &clientName, const String
       return;
 
    const Color *color = global ? &Colors::globalChatColor : &Colors::teamChatColor;
-   mUi->onChatMessageReceived(*color, "%s: %s", clientName.getString(), message.getString());
+   getUIManager()->onChatMessageReceived(*color, "%s: %s", clientName.getString(), message.getString());
 }
 
 
@@ -700,16 +687,16 @@ void ClientGame::activatePlayerMenuUi()
 }
 
 
-void ClientGame::renderBasicInterfaceOverlay()
+void ClientGame::renderBasicInterfaceOverlay() const
 {
-   mUi->renderBasicInterfaceOverlay();
+   getUIManager()->renderBasicInterfaceOverlay();
 }
 
 
 void ClientGame::gameTypeIsAboutToBeDeleted()
 {
    // Quit EngineerHelper when level changes, or when current GameType gets removed
-   mUi->quitEngineerHelper();
+   quitEngineerHelper();
 }
 
 
@@ -803,7 +790,7 @@ void ClientGame::onGameReallyAndTrullyOver()
 
 void ClientGame::quitEngineerHelper()
 {
-   mUi->quitEngineerHelper();
+   getUIManager()->quitEngineerHelper();
 }
 
 
@@ -921,13 +908,13 @@ void ClientGame::gotQueryResponse(const Address &address, const Nonce &nonce, co
 
 void ClientGame::shutdownInitiated(U16 time, const StringTableEntry &name, const StringPtr &reason, bool originator)
 {
-   mUi->shutdownInitiated(time, name, reason, originator);
+   getUIManager()->shutdownInitiated(time, name, reason, originator);
 }
 
 
 void ClientGame::cancelShutdown() 
 { 
-   mUi->cancelShutdown(); 
+   getUIManager()->cancelShutdown(); 
 }
 
 
@@ -971,26 +958,27 @@ void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
 
    switch(event)
    {
-      case EngineerEventTurretBuilt:         // fallthrough ok
+      case EngineerEventTurretBuilt:            // fallthrough ok
       case EngineerEventForceFieldBuilt:
          if(ship)
             ship->creditEnergy(-energyCost);    // Deduct energy from engineer
          break;
+
       case EngineerEventTeleporterExitBuilt:
-         mUi->exitHelper();
+         getUIManager()->exitHelper();
          break;
 
       case EngineerEventTeleporterEntranceBuilt:
          if(ship)
             ship->creditEnergy(-energyCost);    // Deduct energy from engineer
-         setSelectedEngineeredObject(EngineeredTeleporterExit);
+
+         getUIManager()->setSelectedEngineeredObject(EngineeredTeleporterExit);
          break;
 
       default:
          TNLAssert(false, "Do something in ClientGame::gotEngineerResponseEvent");
          break;
    }
-
 }
 
 
@@ -1252,7 +1240,7 @@ void ClientGame::displayErrorMessage(const char *format, ...)
    vsnprintf(message, sizeof(message), format, args);
    va_end(args);
 
-   mUi->displayErrorMessage(message);
+   getUIManager()->displayErrorMessage(message);
 }
 
 
@@ -1266,7 +1254,7 @@ void ClientGame::displaySuccessMessage(const char *format, ...)
    vsnprintf(message, sizeof(message), format, args);
    va_end(args);
 
-   mUi->displaySuccessMessage(message);
+   getUIManager()->displaySuccessMessage(message);
 }
 
 // Fire keyboard event to suppress screen saver
@@ -1314,23 +1302,14 @@ Ship *ClientGame::findShip(const StringTableEntry &clientName)
 }
 
 
-// Toggles commander's map activation status
-void ClientGame::toggleCommanderMap()
+// We need to let the server know we are in cmdrs map because it needs to send extra data
+void ClientGame::setUsingCommandersMap(bool usingCommandersMap)
 {
-   mInCommanderMap = !mInCommanderMap;
-   mCommanderZoomDelta.invert();
-
-   if(mInCommanderMap)
-      playSoundEffect(SFXUICommUp);
-   else
-      playSoundEffect(SFXUICommDown);
-
-
    GameConnection *conn = getConnectionToServer();
 
    if(conn)
    {
-      if(mInCommanderMap)
+      if(usingCommandersMap)
          conn->c2sRequestCommanderMap();
       else
          conn->c2sReleaseCommanderMap();
@@ -1344,78 +1323,23 @@ UIManager *ClientGame::getUIManager() const
 }
 
 
-GameUserInterface *ClientGame::getUi() const
+// Only called my gameConnection when connection to game server is established
+void ClientGame::resetCommandersMap()
 {
-   return mUi;
-}
-
-
-bool ClientGame::getInCommanderMap()
-{
-   return mInCommanderMap;
-}
-
-
-void ClientGame::setInCommanderMap(bool inCommanderMap)
-{
-   mInCommanderMap = inCommanderMap;
-   mCommanderZoomDelta.clear();
+   getUIManager()->resetCommandersMap();
 }
 
 
 F32 ClientGame::getCommanderZoomFraction() const
 {
-   return mInCommanderMap ? 1 - mCommanderZoomDelta.getFraction() : mCommanderZoomDelta.getFraction();
+   return getUIManager()->getCommanderZoomFraction();
 }
 
 
 // Called from renderObjectiveArrow() & ship's onMouseMoved() when in commander's map
-Point ClientGame::worldToScreenPoint(const Point *point,  S32 canvasWidth, S32 canvasHeight) const
+Point ClientGame::worldToScreenPoint(const Point *point, S32 canvasWidth, S32 canvasHeight) const
 {
-   Ship *ship = getLocalPlayerShip();
-
-   if(!ship)
-      return Point(0,0);
-
-   Point position = ship->getRenderPos();    // Ship's location (which will be coords of screen's center)
-   
-   if(mInCommanderMap || mCommanderZoomDelta.getCurrent() > 0)    // In commander's map, or zooming in/out
-   {
-      F32 zoomFrac = getCommanderZoomFraction();
-      Point worldExtents = mWorldExtents.getExtents();
-      worldExtents.x *= canvasWidth  / F32(canvasWidth  - (UserInterface::horizMargin * 2));
-      worldExtents.y *= canvasHeight / F32(canvasHeight - (UserInterface::vertMargin  * 2));
-
-      F32 aspectRatio = worldExtents.x / worldExtents.y;
-      F32 screenAspectRatio = F32(canvasWidth) / F32(canvasHeight);
-      if(aspectRatio > screenAspectRatio)
-         worldExtents.y *= aspectRatio / screenAspectRatio;
-      else
-         worldExtents.x *= screenAspectRatio / aspectRatio;
-
-      Point offset = (mWorldExtents.getCenter() - position) * zoomFrac + position;
-      Point visSize = computePlayerVisArea(ship) * 2;
-      Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
-
-      Point visScale(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y );
-
-      Point ret = (*point - offset) * visScale + Point((canvasWidth / 2), (canvasHeight / 2));
-      return ret;
-   }
-   else                       // Normal map view
-   {
-      Point visExt = computePlayerVisArea(ship);
-      Point scaleFactor((canvasWidth / 2) / visExt.x, (canvasHeight / 2) / visExt.y);
-
-      Point ret = (*point - position) * scaleFactor + Point((canvasWidth / 2), (canvasHeight / 2));
-      return ret;
-   }
-}
-
-
-bool ClientGame::inCmdrMode()
-{
-   return mInCommanderMap || mCommanderZoomDelta.getCurrent() > 0;   // Render the cmdrs map during the transition
+   return getUIManager()->worldToScreenPoint(point, canvasWidth, canvasHeight);
 }
 
 
@@ -1511,12 +1435,6 @@ void ClientGame::addWallItem(BfObject *wallItem, GridDatabase *database)
 AbstractTeam *ClientGame::getNewTeam()
 {
    return new EditorTeam;
-}
-
-
-void ClientGame::setSelectedEngineeredObject(U32 objectType)
-{
-   mUi->setSelectedEngineeredObject(objectType);
 }
 
 

@@ -56,6 +56,8 @@
 
 #include "tnlEndian.h"
 
+#include "Rect.h"
+
 #include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
@@ -120,6 +122,10 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
    mShowProgressBar = false;
    mProgressBarFadeTimer.setPeriod(1000);
 
+   // Transition time between regular map and commander's map; in ms, higher = slower
+   mCommanderZoomDelta.setPeriod(350);
+   mInCommanderMap = false;
+
    prepareStars();
 }
 
@@ -135,6 +141,7 @@ void GameUserInterface::onPlayerJoined()     { mHelperManager.onPlayerJoined(); 
 void GameUserInterface::onPlayerQuit()       { mHelperManager.onPlayerQuit();       }
 void GameUserInterface::onGameOver()         { mHelperManager.onGameOver();         }
 void GameUserInterface::quitEngineerHelper() { mHelperManager.quitEngineerHelper(); }  // When ship dies engineering
+void GameUserInterface::exitHelper()         { mHelperManager.exitHelper();         }
 
 
 void GameUserInterface::setAnnouncement(const string &message)
@@ -268,7 +275,7 @@ void GameUserInterface::idle(U32 timeDelta)
    mInputModeChangeAlertDisplayTimer.update(timeDelta);
    mWrongModeMsgDisplay.update(timeDelta);
    mProgressBarFadeTimer.update(timeDelta);
-
+   mCommanderZoomDelta.update(timeDelta);
    mLevelInfoDisplayer.idle(timeDelta);
 
    if(mAnnouncementTimer.update(timeDelta))
@@ -300,6 +307,10 @@ void GameUserInterface::idle(U32 timeDelta)
 
    if(ship)
       mShipPos.set(ship->getRenderPos());     // Get the player's ship position
+
+   // Keep ship pointed towards mouse cmdrs map zoom transition
+   if(mCommanderZoomDelta.getCurrent() > 0)               
+      onMouseMoved();     
 }
 
 
@@ -327,6 +338,20 @@ bool GameUserInterface::isShowingDebugShipCoords() const { return mDebugShowShip
 void GameUserInterface::clearSparks()
 {
    mFxManager.clearSparks();
+}
+
+
+F32 GameUserInterface::getCommanderZoomFraction() const
+{
+   return mInCommanderMap ? 1 - mCommanderZoomDelta.getFraction() : mCommanderZoomDelta.getFraction();
+}
+
+
+// Make sure we are not in commander's map when connection to game server is established
+void GameUserInterface::resetCommandersMap()
+{
+   mInCommanderMap = false;
+   mCommanderZoomDelta.clear();
 }
 
 
@@ -390,7 +415,7 @@ void GameUserInterface::render()
 
    TNLAssert(getUIManager()->isCurrentUI<GameUserInterface>() || getUIManager()->cameFrom<GameUserInterface>(), "Then why are we rendering???");
 
-   if(getGame()->inCmdrMode())
+   if(renderWithCommanderMap())
       renderGameCommander();
    else
       renderGameNormal();
@@ -710,7 +735,7 @@ void GameUserInterface::onMouseMoved()
    mMousePoint.set(gScreenInfo.getMousePos()->x - gScreenInfo.getGameCanvasWidth()  / 2,
                    gScreenInfo.getMousePos()->y - gScreenInfo.getGameCanvasHeight() / 2);
 
-   if(getGame()->getInCommanderMap())     // Ship not in center of the screen in cmdrs map.  Where is it?
+   if(mInCommanderMap)     // Ship not in center of the screen in cmdrs map.  Where is it?
    {
       Ship *ship = getGame()->getLocalPlayerShip();
 
@@ -718,13 +743,69 @@ void GameUserInterface::onMouseMoved()
          return;
 
       Point o = ship->getRenderPos();  // To avoid taking address of temporary
-      Point p = getGame()->worldToScreenPoint(&o, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
+      Point p = worldToScreenPoint(&o, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
+
       mCurrentMove.angle = atan2(mMousePoint.y + gScreenInfo.getGameCanvasHeight() / 2 - p.y, 
                                  mMousePoint.x + gScreenInfo.getGameCanvasWidth()  / 2 - p.x);
    }
 
    else     // Ship is at center of the screen
       mCurrentMove.angle = atan2(mMousePoint.y, mMousePoint.x);
+}
+
+
+// Called from renderObjectiveArrow() & ship's onMouseMoved() when in commander's map
+Point GameUserInterface::worldToScreenPoint(const Point *point,  S32 canvasWidth, S32 canvasHeight) const
+{
+   Ship *ship = getGame()->getLocalPlayerShip();
+
+   if(!ship)
+      return Point(0,0);
+
+   Point position = ship->getRenderPos();    // Ship's location (which will be coords of screen's center)
+   
+   if(renderWithCommanderMap())              
+   {
+      F32 zoomFrac = getCommanderZoomFraction();
+      const Rect *worldExtentRect = getGame()->getWorldExtents();
+
+      Point worldExtents = worldExtentRect->getExtents();
+      worldExtents.x *= canvasWidth  / F32(canvasWidth  - (UserInterface::horizMargin * 2));
+      worldExtents.y *= canvasHeight / F32(canvasHeight - (UserInterface::vertMargin  * 2));
+
+
+      F32 aspectRatio = worldExtents.x / worldExtents.y;
+      F32 screenAspectRatio = F32(canvasWidth) / F32(canvasHeight);
+      if(aspectRatio > screenAspectRatio)
+         worldExtents.y *= aspectRatio / screenAspectRatio;
+      else
+         worldExtents.x *= screenAspectRatio / aspectRatio;
+
+
+      Point offset = (worldExtentRect->getCenter() - position) * zoomFrac + position;
+      Point visSize = getGame()->computePlayerVisArea(ship) * 2;
+      Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
+
+      Point visScale(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y );
+
+      Point ret = (*point - offset) * visScale + Point((canvasWidth / 2), (canvasHeight / 2));
+      return ret;
+   }
+   else                       // Normal map view
+   {
+      Point visExt = getGame()->computePlayerVisArea(ship);
+      Point scaleFactor((canvasWidth / 2) / visExt.x, (canvasHeight / 2) / visExt.y);
+
+      Point ret = (*point - position) * scaleFactor + Point((canvasWidth / 2), (canvasHeight / 2));
+      return ret;
+   }
+}
+
+
+// Returns true if we are either in the cmdrs map, or are transitioning
+bool GameUserInterface::renderWithCommanderMap() const
+{
+   return mInCommanderMap || mCommanderZoomDelta.getCurrent() > 0;
 }
 
 
@@ -745,12 +826,6 @@ void GameUserInterface::activateHelper(HelperMenu::HelperMenuType helperType, bo
 {
    mHelperManager.activateHelper(helperType, activatedWithChatCmd);
    playBoop();
-}
-
-
-void GameUserInterface::exitHelper()
-{
-   mHelperManager.exitHelper();
 }
 
 
@@ -1131,8 +1206,10 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    }     
    else if(checkInputCode(settings, InputCodeManager::BINDING_CMDRMAP, inputCode))
    {
-      getGame()->toggleCommanderMap();
-      mHelpItemManager.removeHelpItemFromQueue(CmdrsMapItem);          
+      toggleCommanderMap();
+      
+      // Now that we've demonstrated use of cmdrs map, no need to tell player about it
+      mHelpItemManager.removeHelpItemFromQueue(CmdrsMapItem);  
    }
 
    else if(checkInputCode(settings, InputCodeManager::BINDING_SCRBRD, inputCode))
@@ -1175,6 +1252,27 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       return false;
 
    return true;
+}
+
+
+// Toggles commander's map activation status
+void GameUserInterface::toggleCommanderMap()
+{
+   mInCommanderMap = !mInCommanderMap;
+   mCommanderZoomDelta.invert();
+
+   if(mInCommanderMap)
+      playSoundEffect(SFXUICommUp);
+   else
+      playSoundEffect(SFXUICommDown);
+
+   getGame()->setUsingCommandersMap(mInCommanderMap);
+}
+
+
+SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, F32 gain) const
+{
+   return getUIManager()->playSoundEffect(profileIndex, gain);
 }
 
 
@@ -2164,7 +2262,7 @@ void GameUserInterface::renderGameNormal()
       for(S32 j = 0; j < renderObjects.size(); j++)
          renderObjects[j]->renderLayer(i);
 
-      mFxManager.render(i, getGame()->getCommanderZoomFraction());
+      mFxManager.render(i, getCommanderZoomFraction());
    }
 
 
@@ -2260,7 +2358,7 @@ void GameUserInterface::renderGameCommander()
    // Put (0,0) at the center of the screen
    glTranslatef(gScreenInfo.getGameCanvasWidth() * 0.5f, gScreenInfo.getGameCanvasHeight() * 0.5f, 0);    
 
-   F32 zoomFrac = getGame()->getCommanderZoomFraction();
+   F32 zoomFrac = getCommanderZoomFraction();
 
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
    glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);

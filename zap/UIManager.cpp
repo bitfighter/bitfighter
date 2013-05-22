@@ -385,11 +385,11 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
          messages.push_back("");
          messages.push_back("My attempt to connect to the Master Server failed because");
          messages.push_back("the server did not respond.  Either the server is down,");
-         messages.push_back("or, more likely, you are not connected to the internet");
+         messages.push_back("or, more likely, you are not connected to the Internet");
          messages.push_back("or your firewall is blocking the connection.");
          messages.push_back("");
-         messages.push_back("I will continue to try connecting, but you will not see this");
-         messages.push_back("message again until you successfully connect or restart Bitfighter.");
+         messages.push_back("I will continue trying, but you will not see this message");
+         messages.push_back("again until you successfully connect or restart Bitfighter.");
 
          displayMessageBox(title, instr, messages);
          mUserHasSeenTimeoutMessage = true;
@@ -750,6 +750,18 @@ void UIManager::showMenuToChangeTeamForPlayer(const string &playerName)
 }
 
 
+void UIManager::activateGameUI()
+{
+   getUI<GameUserInterface>();
+}
+
+
+void UIManager::reactivateGameUI()
+{
+   reactivate(getUI<GameUserInterface>());
+}
+
+
 void UIManager::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, 
                                   const Vector<StringTableEntry> &messages)
 {
@@ -901,5 +913,77 @@ bool UIManager::isShowingDebugShipCoords()
 }
 
 
+// Called from renderObjectiveArrow() & ship's onMouseMoved() when in commander's map
+Point UIManager::worldToScreenPoint(const Point *point, S32 canvasWidth, S32 canvasHeight)
+{
+   return getUI<GameUserInterface>()->worldToScreenPoint(point, canvasWidth, canvasHeight);
+}
+
+
+// Only called my gameConnection when connection to game server is established
+void UIManager::resetCommandersMap()
+{
+   getUI<GameUserInterface>()->resetCommandersMap();
+}
+
+
+F32 UIManager::getCommanderZoomFraction()
+{
+   return getUI<GameUserInterface>()->getCommanderZoomFraction();
+}
+
+
+void UIManager::renderBasicInterfaceOverlay()
+{
+   getUI<GameUserInterface>()->renderBasicInterfaceOverlay();
+}
+
+
+void UIManager::quitEngineerHelper()
+{
+   getUI<GameUserInterface>()->quitEngineerHelper();
+}
+
+
+void UIManager::exitHelper()
+{
+   getUI<GameUserInterface>()->exitHelper();
+}
+
+
+void UIManager::shutdownInitiated(U16 time, const StringTableEntry &name, const StringPtr &reason, bool originator)
+{
+   getUI<GameUserInterface>()->shutdownInitiated(time, name, reason, originator);
+}
+
+
+void UIManager::cancelShutdown() 
+{ 
+   getUI<GameUserInterface>()->cancelShutdown(); 
+}
+
+
+void UIManager::setSelectedEngineeredObject(U32 objectType)
+{
+   getUI<GameUserInterface>()->setSelectedEngineeredObject(objectType);
+}
+
+
+Move *UIManager::getCurrentMove()
+{
+   return getUI<GameUserInterface>()->getCurrentMove();
+}
+
+
+void UIManager::displayErrorMessage(const char *message)
+{
+   getUI<GameUserInterface>()->displayErrorMessage(message);
+}
+
+
+void UIManager::displaySuccessMessage(const char *message)
+{
+   getUI<GameUserInterface>()->displaySuccessMessage(message);
+}
 
 };
