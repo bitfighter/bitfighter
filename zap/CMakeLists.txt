@@ -400,7 +400,7 @@ if(WIN32)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
 	
-	if(UNIX OR NOT $ENV{MSYSTEM} STREQUAL "")  # Hacky way to detect cygwin or MSYS
+	if(MSYS OR CYGWIN)
 		set(RES_COPY_CMD cp -r ${resDir}* ${exeDir})
 		set(LIB_COPY_CMD cp ${libDir}*.dll ${exeDir})
 	else()
