@@ -57,6 +57,10 @@ void drawHollowRect(const Point &center, S32 width, S32 height);
 void drawHollowRect(const Point &p1, const Point &p2);
 
 
+void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode);
+void drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode);
+
+
 // Allow any numeric arguments for drawHollowRect... getting sick of casting!
 template<typename T, typename U, typename V, typename W>
 void drawHollowRect(T x1, U y1, V x2, W y2)
@@ -68,13 +72,9 @@ void drawHollowRect(T x1, U y1, V x2, W y2)
 template<typename T, typename U, typename V, typename W>
 void drawHollowRect(T x1, U y1, V x2, W y2, const Color &outlineColor)
 {
-   glColor(outlineColor);
+   glColor4f(outlineColor.r, outlineColor.g, outlineColor.b, 1.0);
    drawHollowRect(x1, y1, x2, y2);
 }
-
-
-void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode);
-void drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode);
 
 
 void renderUpArrow(const Point &center, S32 size);
