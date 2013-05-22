@@ -135,7 +135,11 @@ bool Joystick::initJoystick(GameSettings *settings)
    logprintf("%d joystick(s) detected:", joystickCount);
    for (S32 i = 0; i < joystickCount; i++)
    {
+#if SDL_VERSION_ATLEAST(2,0,0)
+      const char *joystickName = SDL_JoystickNameForIndex(i);
+#else
       const char *joystickName = SDL_JoystickName(i);
+#endif
       logprintf("%d.) Autodetect string = \"%s\"", i + 1, joystickName);
       GameSettings::DetectedJoystickNameList.push_back(joystickName);
    }
@@ -158,11 +162,18 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
    sdlJoystick = SDL_JoystickOpen(GameSettings::UseJoystickNumber);
    if(sdlJoystick == NULL)
    {
+#if SDL_VERSION_ATLEAST(2,0,0)
+      logprintf("Error opening joystick %d [%s]", GameSettings::UseJoystickNumber + 1, SDL_JoystickNameForIndex(GameSettings::UseJoystickNumber));
+#else
       logprintf("Error opening joystick %d [%s]", GameSettings::UseJoystickNumber + 1, SDL_JoystickName(GameSettings::UseJoystickNumber));
+#endif
       return false;
    }
+#if SDL_VERSION_ATLEAST(2,0,0)
+   logprintf("Using joystick %d - %s", GameSettings::UseJoystickNumber + 1, SDL_JoystickNameForIndex(GameSettings::UseJoystickNumber));
+#else
    logprintf("Using joystick %d - %s", GameSettings::UseJoystickNumber + 1, SDL_JoystickName(GameSettings::UseJoystickNumber));
-
+#endif
 
    // Now try and autodetect the joystick and update the game settings
    string joystickType = Joystick::autodetectJoystick(settings);

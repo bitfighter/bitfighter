@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -28,7 +28,7 @@
 
 #if !defined(_STDINT_H_) && (!defined(HAVE_STDINT_H) || !_HAVE_STDINT_H)
 #if defined(__GNUC__) || defined(__DMC__) || defined(__WATCOMC__)
-#define HAVE_STDINT_H	1
+#define HAVE_STDINT_H   1
 #elif defined(_MSC_VER)
 typedef signed __int8 int8_t;
 typedef unsigned __int8 uint8_t;
@@ -85,9 +85,7 @@ typedef unsigned int uintptr_t;
 #define HAVE_STRING_H 1
 #define HAVE_CTYPE_H 1
 #define HAVE_MATH_H 1
-#ifndef _WIN32_WCE
 #define HAVE_SIGNAL_H 1
-#endif
 
 /* C library functions */
 #define HAVE_MALLOC 1
@@ -138,62 +136,49 @@ typedef unsigned int uintptr_t;
 #define HAVE_SINF 1
 #define HAVE_SQRT 1
 #else
-#define HAVE_STDARG_H	1
-#define HAVE_STDDEF_H	1
+#define HAVE_STDARG_H   1
+#define HAVE_STDDEF_H   1
 #endif
 
 /* Enable various audio drivers */
-#ifndef _WIN32_WCE
-#define SDL_AUDIO_DRIVER_DSOUND	1
-#define SDL_AUDIO_DRIVER_XAUDIO2	1
+#define SDL_AUDIO_DRIVER_DSOUND 1
+#ifndef __GNUC__
+#define SDL_AUDIO_DRIVER_XAUDIO2    1
 #endif
-#define SDL_AUDIO_DRIVER_WINMM	1
-#define SDL_AUDIO_DRIVER_DISK	1
-#define SDL_AUDIO_DRIVER_DUMMY	1
+#define SDL_AUDIO_DRIVER_WINMM  1
+#define SDL_AUDIO_DRIVER_DISK   1
+#define SDL_AUDIO_DRIVER_DUMMY  1
 
 /* Enable various input drivers */
-#ifdef _WIN32_WCE
-#define SDL_JOYSTICK_DISABLED	1
-#define SDL_HAPTIC_DUMMY	1
-#else
-#define SDL_JOYSTICK_DINPUT	1
-#define SDL_HAPTIC_DINPUT	1
-#endif
+#define SDL_JOYSTICK_DINPUT 1
+#define SDL_HAPTIC_DINPUT   1
 
 /* Enable various shared object loading systems */
-#define SDL_LOADSO_WINDOWS	1
+#define SDL_LOADSO_WINDOWS  1
 
 /* Enable various threading systems */
-#define SDL_THREAD_WINDOWS	1
+#define SDL_THREAD_WINDOWS  1
 
 /* Enable various timer systems */
-#ifdef _WIN32_WCE
-#define SDL_TIMER_WINCE	1
-#else
-#define SDL_TIMER_WINDOWS	1
-#endif
+#define SDL_TIMER_WINDOWS   1
 
 /* Enable various video drivers */
-#define SDL_VIDEO_DRIVER_DUMMY	1
-#define SDL_VIDEO_DRIVER_WINDOWS	1
+#define SDL_VIDEO_DRIVER_DUMMY  1
+#define SDL_VIDEO_DRIVER_WINDOWS    1
 
-#ifndef _WIN32_WCE
 #ifndef SDL_VIDEO_RENDER_D3D
-#define SDL_VIDEO_RENDER_D3D	1
-#endif
+#define SDL_VIDEO_RENDER_D3D    1
 #endif
 
 /* Enable OpenGL support */
-#ifndef _WIN32_WCE
 #ifndef SDL_VIDEO_OPENGL
-#define SDL_VIDEO_OPENGL	1
+#define SDL_VIDEO_OPENGL    1
 #endif
 #ifndef SDL_VIDEO_OPENGL_WGL
-#define SDL_VIDEO_OPENGL_WGL	1
+#define SDL_VIDEO_OPENGL_WGL    1
 #endif
 #ifndef SDL_VIDEO_RENDER_OGL
-#define SDL_VIDEO_RENDER_OGL	1
-#endif
+#define SDL_VIDEO_RENDER_OGL    1
 #endif
 
 /* Enable system power support */
@@ -201,7 +186,7 @@ typedef unsigned int uintptr_t;
 
 /* Enable assembly routines (Win64 doesn't have inline asm) */
 #ifndef _WIN64
-#define SDL_ASSEMBLY_ROUTINES	1
+#define SDL_ASSEMBLY_ROUTINES   1
 #endif
 
 #endif /* _SDL_config_windows_h */
