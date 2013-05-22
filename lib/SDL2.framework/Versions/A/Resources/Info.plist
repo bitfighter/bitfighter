@@ -4,12 +4,10 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>SDL</string>
 	<key>CFBundleGetInfoString</key>
 	<string>http://www.libsdl.org</string>
 	<key>CFBundleIdentifier</key>
-	<string>SDL</string>
+	<string>org.libsdl.SDL2</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

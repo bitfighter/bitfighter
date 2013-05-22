@@ -20,37 +20,19 @@
 */
 
 /**
- *  \file SDL_blendmode.h
+ *  \file SDL_opengles.h
  *
- *  Header file declaring the SDL_BlendMode enumeration
+ *  This is a simple file to encapsulate the OpenGL ES 2.0 API headers.
  */
 
-#ifndef _SDL_blendmode_h
-#define _SDL_blendmode_h
-
-#include "begin_code.h"
-/* Set up for C function definitions, even when using C++ */
-#ifdef __cplusplus
-extern "C" {
+#ifdef __IPHONEOS__
+#include <OpenGLES/ES2/gl.h>
+#include <OpenGLES/ES2/glext.h>
+#else
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #endif
 
-/**
- *  \brief The blend mode used in SDL_RenderCopy() and drawing operations.
- */
-typedef enum
-{
-    SDL_BLENDMODE_NONE = 0x00000000,     /**< No blending */
-    SDL_BLENDMODE_BLEND = 0x00000001,    /**< dst = (src * A) + (dst * (1-A)) */
-    SDL_BLENDMODE_ADD = 0x00000002,      /**< dst = (src * A) + dst */
-    SDL_BLENDMODE_MOD = 0x00000004       /**< dst = src * dst */
-} SDL_BlendMode;
-
-/* Ends C function definitions when using C++ */
-#ifdef __cplusplus
-}
+#ifndef APIENTRY
+#define APIENTRY
 #endif
-#include "close_code.h"
-
-#endif /* _SDL_video_h */
-
-/* vi: set ts=4 sw=4 expandtab: */
