@@ -36,7 +36,7 @@ if(MSVC)
 else()
 	# MinGW won't statically compile in Microsofts c/c++ library routines
 	if(MINGW)
-		set(BF_LINK_FLAGS "-Wl,--as-needed -static-libstdc++ -static-libgcc")
+		set(BF_LINK_FLAGS "-Wl,--as-needed -static-libgcc")
 	else()
 		set(BF_LINK_FLAGS "-Wl,--as-needed")
 	endif()
@@ -87,7 +87,7 @@ endif()
 
 # Now search for dependencies
 # Set up Windows specific locations for libraries and headers
-if(WIN32)
+if(WIN32 OR XCOMPILE)
 	set(SDL2_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libsdl)
 	set(OGG_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libogg)
 	set(VORBIS_SEARCH_PATHS	${CMAKE_SOURCE_DIR}/lib	${CMAKE_SOURCE_DIR}/libvorbis)

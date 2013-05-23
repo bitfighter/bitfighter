@@ -214,7 +214,9 @@ file(GLOB OTHER_HEADERS
 if(WIN32)
 	set(EXTRA_LIBS ws2_32 winmm)
 	# Add icon resource in Visual Studio
-	list(APPEND CLIENT_SOURCES ZAP.rc)
+	if(NOT XCOMPILE)
+		list(APPEND CLIENT_SOURCES ZAP.rc)
+	endif()
 else()
 	set(EXTRA_LIBS dl m)
 endif()
@@ -222,10 +224,10 @@ endif()
 # libraries used by both client and server
 set(SHARED_LIBS
 	${CMAKE_THREAD_LIBS_INIT}
-	${EXTRA_LIBS}
 	lua-vec
 	tnl
 	tomcrypt
+	${EXTRA_LIBS}
 )
 
 # libraries used only on the client
@@ -263,8 +265,8 @@ if(SDL_FOUND OR SDL2_FOUND)
 	)
 
 	target_link_libraries(bitfighter
-		${SHARED_LIBS}
 		${CLIENT_LIBS}
+		${SHARED_LIBS}
 	)
 
 	include_directories(
@@ -400,7 +402,7 @@ if(WIN32)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
 	
-	if(MSYS OR CYGWIN)
+	if(MSYS OR CYGWIN OR XCOMPILE)
 		set(RES_COPY_CMD cp -r ${resDir}* ${exeDir})
 		set(LIB_COPY_CMD cp ${libDir}*.dll ${exeDir})
 	else()

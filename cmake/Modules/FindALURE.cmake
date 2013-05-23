@@ -30,7 +30,7 @@ find_path(ALURE_INCLUDE_DIR
 )
 
 find_library(ALURE_LIBRARY NAMES 
-	NAMES alure libalure alure32 libalure32
+	NAMES alure libalure alure32 libalure32 ALURE32
 	HINTS ENV ALUREDIR
 	PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
 	PATHS ${ALURE_SEARCH_PATHS}

@@ -29,7 +29,7 @@
 #include "tnlPlatform.h"
 
 #ifdef TNL_OS_WIN32 
-#  include <Windows.h>        // For ARRAYSIZE def
+#  include <windows.h>        // For ARRAYSIZE def
 #endif
 
 #include "SDL_mouse.h"     
