@@ -384,9 +384,9 @@ public:
    virtual void spawnRobot(Robot *robot);
 
    virtual void changeClientTeam(ClientInfo *client, S32 team);     // Change player to team indicated, -1 = cycle teams
+   virtual void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
 
 #ifndef ZAP_DEDICATED
-   virtual void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
    virtual void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
    virtual S32 renderTimeLeftSpecial(S32 right, S32 bottom) const;
 
