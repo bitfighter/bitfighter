@@ -752,7 +752,7 @@ void UIManager::showMenuToChangeTeamForPlayer(const string &playerName)
 
 void UIManager::activateGameUI()
 {
-   getUI<GameUserInterface>();
+   activate(getUI<GameUserInterface>());
 }
 
 
