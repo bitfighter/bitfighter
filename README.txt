@@ -8,9 +8,6 @@ Bitfighter README
 
 1) DEPENDENCIES
 
-   Bitfighter's dependencies have changed drastically from version 015a to 
-   016.  The following are needed for 016 and later.
-
    Bitfighter has several common, open source dependencies:
       * SDL
       * zlib
