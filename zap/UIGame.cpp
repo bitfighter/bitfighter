@@ -2096,6 +2096,11 @@ void GameUserInterface::renderObjectIds() const
       BfObject *obj = static_cast<BfObject *>(objects->get(i));
       static const S32 height = 13;
 
+      // ForceFields don't have a geometry.  When I gave them one, they just rendered the ID at the
+      // exact same location as their owning projector - so we'll just skip them
+      if(obj->getObjectTypeNumber() == ForceFieldTypeNumber)
+         continue;
+
       S32 id = obj->getUserAssignedId();
       S32 width = getStringWidthf(height, "[%d]", id);
 
