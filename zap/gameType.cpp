@@ -4276,7 +4276,7 @@ void GameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode
 
 // These methods will be overridden by some game types
 void GameType::shipTouchFlag(Ship *ship, FlagItem *flag) { /* Do nothing */ }
-void GameType::releaseFlag(const Point &pos, const Point &vel, S32 count) { TNLAssert(false, "Override if you want to use this method!"); }
+void GameType::releaseFlag(const Point &pos, const Point &vel, S32 count) { /* Do nothing */ }
 void GameType::shipTouchZone(Ship *ship, GoalZone *zone) { /* Do nothing */ }
 void GameType::majorScoringEventOcurred(S32 team)        { /* Do nothing */ }
 
