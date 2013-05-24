@@ -432,9 +432,11 @@ string EngineerModuleDeployer::getErrorMessage()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+const F32 EngineeredItem::EngineeredItemRadius = 7.f;
+
 
 // Constructor
-EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Engineerable(), mAnchorNormal(anchorNormal)
+EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Parent(EngineeredItemRadius), Engineerable(), mAnchorNormal(anchorNormal)
 {
    mHealth = 1.0f;
    setTeam(team);
@@ -445,8 +447,6 @@ EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &
    mSnapped = false;
 
    Parent::setPos(anchorPoint);  // Must be parent, or else... TNLAssert!!!
-
-   mRadius = 7;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }

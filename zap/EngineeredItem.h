@@ -41,6 +41,8 @@ class EngineeredItem : public Item, public Engineerable
 private:
    typedef Item Parent;
 
+   static const F32 EngineeredItemRadius;
+
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;    // Menu for text editing; since it's static, don't bother with smart pointer
 #endif   
