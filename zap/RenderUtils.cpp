@@ -36,10 +36,6 @@
 #include <stdarg.h>        // For va_args
 #include <stdio.h>         // For vsnprintf
 
-// Kill some warnings
-#ifdef TNL_COMPILER_VISUALC
-#  define vsnprintf vsnprintf_s
-#endif
 
 namespace Zap {
 

@@ -113,6 +113,10 @@ endif()
 if(MSVC)
 	# Add parallel build to Visual Studio
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+
+	# Disable deprecated warnings (fopen, vsnprintf), some alternative function may not exist on other compilers including gcc.
+	set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
 endif()
 
 # ALURE is not compiled on Windows presently

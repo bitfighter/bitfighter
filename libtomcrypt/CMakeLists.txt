@@ -53,7 +53,7 @@ file(GLOB TOMCRYPT_HEADERS "*.h")
 
 add_library(tomcrypt ${TOMCRYPT_SOURCES} ${TOMCRYPT_HEADERS})
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if(CMAKE_BUILD_TYPE STREQUAL "Release" AND NOT MSVC)
 	set_target_properties(tomcrypt
 		PROPERTIES COMPILE_FLAGS "-funroll-loops -O3"
 	)
