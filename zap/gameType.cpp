@@ -744,13 +744,13 @@ bool GameType::advanceGameClock(U32 deltaT)
 }
 
 
+#ifndef ZAP_DEDICATED
+
 void GameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
 {
    mGame->renderBasicInterfaceOverlay();
 }
 
-
-#ifndef ZAP_DEDICATED
 
 // Client only
 void GameType::renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32 canvasHeight) const
