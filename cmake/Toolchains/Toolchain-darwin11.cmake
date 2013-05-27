@@ -14,9 +14,9 @@ SET(CMAKE_C_FLAGS "-I/usr/${TARGET}/usr/include -I/usr/${TARGET}/usr/lib/gcc/${T
 
 SET(CMAKE_CXX_FLAGS "-I/usr/${TARGET}/usr/include -I/usr/${TARGET}/usr/lib/gcc/${TARGET}/${GCC_VER}/include/ -I/usr/${TARGET}/SDKs/${OSX_SDK_VER}.sdk/usr/include/c++/${GCC_VER} -I/usr/${TARGET}/SDKs/${OSX_SDK_VER}.sdk/usr/include/c++/${GCC_VER}/i686-apple-darwin10/" CACHE STRING "")
 
-SET(CMAKE_C_COMPILER ${TARGET}-gcc)
-SET(CMAKE_CXX_COMPILER ${TARGET}-g++)
-SET(CMAKE_LINKER ${TARGET}-ld64)
+SET(CMAKE_C_COMPILER ${_CMAKE_TOOLCHAIN_LOCATION}/${TARGET}-gcc)
+SET(CMAKE_CXX_COMPILER ${_CMAKE_TOOLCHAIN_LOCATION}/${TARGET}-g++)
+SET(CMAKE_LINKER ${_CMAKE_TOOLCHAIN_LOCATION}/${TARGET}-ld64)
 SET(CMAKE_CXX_COMPILER_ENV_VAR CXX)
 
 # search for libs and include files in the cross environment
