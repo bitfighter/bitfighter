@@ -1,7 +1,3 @@
-find_package(Threads)
-find_package(MySQL)
-
-
 set(MASTER_SOURCES
 	master.cpp
 	masterInterface.cpp

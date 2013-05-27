@@ -1,31 +1,3 @@
-# Search for our dependencies
-# SDL on Linux, SDL2 on others
-if("${CMAKE_SYSTEM}" MATCHES "Linux")
-	find_package(SDL REQUIRED)
-else()
-	find_package(SDL2 REQUIRED)
-	
-	if(SDL2_FOUND)
-		set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
-		set(SDL_LIBRARY ${SDL2_LIBRARY})
-	endif()
-endif()
-if(WIN32)
-	find_package(ALURE)
-else()
-	set(ALURE_LIBRARIES alure)
-endif()
-find_package(OpenAL REQUIRED)
-find_package(OpenGL)
-find_package(Threads REQUIRED)
-find_package(PNG)
-find_package(OGG)
-find_package(Vorbis)
-find_package(VorbisFile)
-find_package(Speex)
-find_package(ModPlug)
-
-
 # Define the Linux data dir if not defined in a packaging build script already
 if("${CMAKE_SYSTEM}" MATCHES "Linux")
 	if(NOT LINUX_DATA_DIR)
@@ -211,12 +183,19 @@ file(GLOB OTHER_HEADERS
 	../poly2tri/sweep/*.h
 )
 
+if(WIN32 AND NOT XCOMPILE)
+	# Add icon resource in Visual Studio
+	list(APPEND CLIENT_SOURCES ZAP.rc)
+endif()
+
+if(APPLE)
+	list(APPEND SHARED_SOURCES Directory.mm)
+endif()
+
+
+# Library stuff
 if(WIN32)
 	set(EXTRA_LIBS ws2_32 winmm)
-	# Add icon resource in Visual Studio
-	if(NOT XCOMPILE)
-		list(APPEND CLIENT_SOURCES ZAP.rc)
-	endif()
 else()
 	set(EXTRA_LIBS dl m)
 endif()
@@ -243,6 +222,10 @@ set(CLIENT_LIBS
 	${VORBIS_LIBRARIES}
 	${VORBISFILE_LIBRARIES}
 )
+
+if(APPLE)
+	list(APPEND CLIENT_LIBS ${SPARKLE_LIBRARIES})
+endif()
 
 
 ##
@@ -275,6 +258,7 @@ if(SDL_FOUND OR SDL2_FOUND)
 		${PNG_INCLUDE_DIR}
 		${SDL_INCLUDE_DIR}
 		${SPEEX_INCLUDE_DIR}
+		${SPARKLE_INCLUDE_DIR}
 	)
 
 	# Where to put the executable

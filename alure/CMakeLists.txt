@@ -1,4 +1,3 @@
-
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/exe)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(ALURE_SOURCES
@@ -22,4 +21,7 @@ include_directories(
 	${VORBISFILE_INCLUDE_DIR} 
 	${MODPLUG_INCLUDE_DIR}
 )
-target_link_libraries(alure vorbisfile modplug dl)
+target_link_libraries(alure 
+	${MODPLUG_LIBRARIES}
+	${VORBIS_LIBRARIES}
+	dl)
