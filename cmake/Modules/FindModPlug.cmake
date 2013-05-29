@@ -21,7 +21,7 @@ set(MODPLUG_SEARCH_PATHS
 find_path(MODPLUG_INCLUDE_DIR 
 	NAMES libmodplug/modplug.h
 	HINTS ENV MODPLUGDIR
-	PATH_SUFFIXES include include/libmodplug
+	PATH_SUFFIXES include include/libmodplug libmodplug
 	PATHS ${MODPLUG_SEARCH_PATHS}
 )
 

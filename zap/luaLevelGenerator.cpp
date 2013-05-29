@@ -158,6 +158,7 @@ void LuaLevelGenerator::registerClasses()
    METHOD(CLASS, announce,          ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS, subscribe,         ARRAYDEF({{ EVENT, END }}), 1 )                      \
    METHOD(CLASS, unsubscribe,       ARRAYDEF({{ EVENT, END }}), 1 )                      \
+   METHOD(CLASS, getMachineTime,    ARRAYDEF({{ END }}), 1 )                             \
 
 GENERATE_LUA_METHODS_TABLE(LuaLevelGenerator, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(LuaLevelGenerator, LUA_METHODS);

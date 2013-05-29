@@ -1,4 +1,3 @@
-find_package(MySQL)
 if(MYSQL_FOUND)
 	set(MYSQLPP_SOURCES
 		beemutex.cpp

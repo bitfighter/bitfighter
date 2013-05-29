@@ -246,6 +246,24 @@ public:
    void onActivate();
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class RobotOptionsMenuUserInterface : public MenuUserInterface
+{
+   typedef MenuUserInterface Parent;
+
+public:
+   explicit RobotOptionsMenuUserInterface(ClientGame *game);        // Constructor
+   virtual ~RobotOptionsMenuUserInterface();
+
+   void onEscape();
+   void setupMenus();
+   void onActivate();
+   void saveSettings();
+};
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 

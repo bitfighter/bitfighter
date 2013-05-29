@@ -30,7 +30,7 @@ find_path(SPEEX_INCLUDE_DIR
 )
 
 find_library(SPEEX_LIBRARY NAMES 
-	NAMES speex libspeex
+	NAMES speex libspeex Speex
 	HINTS ENV SPEEXDIR
 	PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
 	PATHS ${SPEEX_SEARCH_PATHS}

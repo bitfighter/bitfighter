@@ -1656,6 +1656,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment(" MaxBots - The max number of bots allowed on this server.");
       addComment(" BotsBalanceTeams - Enable bot auto-balancing in each level.");
       addComment(" MinBalancedPlayers - The minimum number of players ensured in each map.  Bots will be added up to this number.");
+      addComment(" BotsAlwaysBalanceTeams - If set to true, the teams will always be balanced, even if the minimum number of players has been met.");
       addComment(" EnableServerVoiceChat - If false, prevents any voice chat in a server.");
       addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
       addComment(" MaxFPS - Maximum FPS the dedicaetd server will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
