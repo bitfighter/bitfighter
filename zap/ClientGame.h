@@ -157,8 +157,6 @@ public:
    void setSpawnDelayed(bool spawnDelayed);
    bool isSpawnDelayed() const;
    void undelaySpawn();
-   F32 getUIFadeFactor() const;
-
 
    // Chat related
    void sendChat(bool isGlobal, const StringPtr &message);

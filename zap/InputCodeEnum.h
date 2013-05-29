@@ -145,6 +145,9 @@ enum InputCode {
 static const U32 FIRST_KEYBOARD_KEY = (U32)KEY_0;
 static const U32 LAST_KEYBOARD_KEY  = (U32)KEY_KEYPAD_EQUALS;
 
+static const U32 FIRST_CONTROLLER_BUTTON = (U32)BUTTON_1;
+static const U32 LAST_CONTROLLER_BUTTON  = (U32)BUTTON_START;               
+
 static const U32 FIRST_CTRL_KEY = (U32)KEY_CTRL_M;
 static const U32 LAST_CTRL_KEY  = (U32)KEY_CTRL_S;
 

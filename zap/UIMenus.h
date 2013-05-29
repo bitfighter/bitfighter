@@ -222,6 +222,8 @@ public:
    explicit InputOptionsMenuUserInterface(ClientGame *game);        // Constructor
    virtual ~InputOptionsMenuUserInterface();
 
+   void render();
+
    void onEscape();
    void setupMenus();
    void onActivate();

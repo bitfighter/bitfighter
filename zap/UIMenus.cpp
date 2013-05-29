@@ -1208,6 +1208,26 @@ void InputOptionsMenuUserInterface::onActivate()
 }
 
 
+void InputOptionsMenuUserInterface::render()
+{
+   Parent::render();
+
+   // In debug builds, show the current suite of joystick buttons at the bottom of the screen
+#  ifdef TNL_DEBUG
+      Vector<SymbolShapePtr> symbols;
+
+      for(U32 i = FIRST_CONTROLLER_BUTTON; i <= LAST_CONTROLLER_BUTTON; i++)
+      {
+         symbols.push_back(SymbolString::getControlSymbol(InputCode(i)));
+         if(i < LAST_CONTROLLER_BUTTON)
+            symbols.push_back(SymbolString::getBlankSymbol(8));      // Provide a little breathing room
+      }
+
+      SymbolString(symbols, 10, HelpContext).render(Point(gScreenInfo.getGameCanvasWidth() / 2, 440), 10, HelpContext);
+
+#  endif
+}
+
 //////////
 // Callbacks for InputOptions menu
 static void setControlsCallback(ClientGame *game, U32 val)

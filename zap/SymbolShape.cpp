@@ -312,7 +312,7 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape)
          return SymbolShapePtr(new SymbolRightTriangle(rightTriangleWidth));
 
       default:
-         TNLAssert(false, "Unknown button shape!");
+         //TNLAssert(false, "Unknown button shape!");
          return getSymbol(KEY_UNKNOWN, &Colors::red);
    }
 }

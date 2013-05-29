@@ -61,7 +61,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 {
    //mUserInterfaceData = new UserInterfaceData();
 
-   mGameIsRunning         = true;      // Only matters when game is suspended
+   mGameIsRunning = true;      // Only matters when game is suspended
 
    mRemoteLevelDownloadFilename = "downloaded.level";
 
@@ -192,13 +192,13 @@ GameConnection *ClientGame::getConnectionToServer() const
 }
 
 
-void ClientGame::setConnectionToServer(GameConnection *theConnection)
+void ClientGame::setConnectionToServer(GameConnection *connectionToServer)
 {
-   TNLAssert(theConnection, "Passing null connection.  Bah!");
+   TNLAssert(connectionToServer, "Passing null connection.  Bah!");
    TNLAssert(mConnectionToServer.isNull(), "Error, a connection already exists here.");
 
-   mConnectionToServer = theConnection;
-   theConnection->setClientGame(this);
+   mConnectionToServer = connectionToServer;
+   mConnectionToServer->setClientGame(this);
 }
 
 
@@ -342,6 +342,7 @@ void ClientGame::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferP
 }
 
 
+// TODO: This should be moved to ship or UIManager or something... doesn't really belong here
 void ClientGame::updateModuleSounds(const Point &pos, const Point &vel, const LoadoutTracker &loadout)
 {
    const S32 moduleSFXs[ModuleCount] =
@@ -361,7 +362,7 @@ void ClientGame::updateModuleSounds(const Point &pos, const Point &vel, const Lo
       {
          if(mModuleSound[i].isValid())
             getUIManager()->setMovementParams(mModuleSound[i], pos, vel);
-         else if(moduleSFXs[i] != -1)
+         else
             mModuleSound[i] = playSoundEffect(moduleSFXs[i], pos, vel);
       }
       else
@@ -407,12 +408,6 @@ void ClientGame::undelaySpawn()
       return;
 
    getConnectionToServer()->c2sPlayerSpawnUndelayed();
-}
-
-
-F32 ClientGame::getUIFadeFactor() const
-{
-   return 1 - mTimeToSuspend.getFraction();     
 }
 
 
@@ -469,11 +464,9 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
    if(!getConnectionToServer())
       return;
 
-   BfObject *object = getConnectionToServer()->getControlObject();
-   if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
+   Ship *ship = getLocalPlayerShip();
+   if(!ship)
       return;
-
-   Ship *ship = static_cast<Ship *>(object);
 
    // If we're in a loadout zone, don't show any message -- new loadout will become active immediately, 
    // and we'll get a different msg from the server.  Avoids unnecessary messages.
@@ -532,7 +525,7 @@ void ClientGame::idle(U32 timeDelta)
    if(mConnectionToServer.isValid())      // i.e. if we're connected to a game server
    {
       // Disable controls if we are going too fast (usually by being blasted around by a GoFast or mine or whatever)
-      BfObject *controlObject = mConnectionToServer->getControlObject();
+      BfObject *localPlayerShip = getLocalPlayerShip();
 
       // Don't saturate server with moves...
       if(theMove->time < 6)     // Why 6?  Can this be related to some other factor?
@@ -559,7 +552,7 @@ void ClientGame::idle(U32 timeDelta)
          if(obj->isDeleted())
             continue;
 
-         if(obj == controlObject)      // That is, if we are idling the local ship
+         if(obj == localPlayerShip)
          {
             obj->setCurrentMove(*theMove);
             obj->idle(BfObject::ClientIdlingLocalShip);     // on client, object is our control object
@@ -576,16 +569,16 @@ void ClientGame::idle(U32 timeDelta)
       if(mGameType)
          mGameType->idle(BfObject::ClientIdlingNotLocalShip, timeDelta);
 
-      if(controlObject)
-         getUIManager()->setListenerParams(controlObject->getPos(), controlObject->getVel());
+      if(localPlayerShip)
+         getUIManager()->setListenerParams(localPlayerShip->getPos(), localPlayerShip->getVel());
 
 
       // Check to see if there are any items near the ship we need to display help for
       bool mShowingHelp = true;     // TODO: Set elsewhere
-      if(mShowingHelp && controlObject)
+      if(mShowingHelp && localPlayerShip != NULL)
       {
          static const S32 HelpSearchRadius = 200;
-         Rect searchRect = Rect(controlObject->getPos(), HelpSearchRadius);
+         Rect searchRect = Rect(localPlayerShip->getPos(), HelpSearchRadius);
          fillVector.clear();
          mGameObjDatabase->findObjects(RepairItemTypeNumber,   fillVector, searchRect);
          mGameObjDatabase->findObjects(TestItemTypeNumber,     fillVector, searchRect);

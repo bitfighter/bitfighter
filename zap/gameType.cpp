@@ -2153,16 +2153,15 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
                                                 levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled, levelDatabaseId))
 {
 #ifndef ZAP_DEDICATED
-   mLevelName = levelName;
+   mLevelName        = levelName;
    mLevelDescription = levelDesc;
-   mLevelCredits = levelCreds;
+   mLevelCredits     = levelCreds;
 
-   mWinningScore = teamScoreLimit;
-   mObjectsExpected = objectCount;
+   mWinningScore     = teamScoreLimit;
+   mObjectsExpected  = objectCount;
 
-   mEngineerEnabled = engineerEnabled;
+   mEngineerEnabled             = engineerEnabled;
    mEngineerUnrestrictedEnabled = engineerAbuseEnabled;
-
 
    // Need to send this to the client because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
    mLevelHasLoadoutZone = levelHasLoadoutZone;        

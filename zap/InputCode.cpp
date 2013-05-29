@@ -1751,7 +1751,7 @@ InputCode InputCodeManager::joyHatToInputCode(int hatDirectionMask)
 // We'll also treat controller buttons like simulated keystrokes
 bool InputCodeManager::isControllerButton(InputCode inputCode)
 {
-   return inputCode >= BUTTON_1 && inputCode <= BUTTON_START;
+   return inputCode >= FIRST_CONTROLLER_BUTTON && inputCode <= LAST_CONTROLLER_BUTTON;
 }       
 
 
