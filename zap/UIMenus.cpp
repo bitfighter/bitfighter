@@ -1088,6 +1088,7 @@ static void setFullscreenCallback(ClientGame *game, U32 mode)
 MenuItem *getWindowModeMenuItem(U32 displayMode)
 {
    Vector<string> opts;   
+   // These options are aligned with the DisplayMode enum
    opts.push_back("WINDOWED");
    opts.push_back("FULLSCREEN STRETCHED");
    opts.push_back("FULLSCREEN");
@@ -1455,6 +1456,78 @@ void SoundOptionsMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
+RobotOptionsMenuUserInterface::RobotOptionsMenuUserInterface(ClientGame *game) : Parent(game)
+{
+   mMenuTitle = "ROBOT OPTIONS:";
+}
+
+
+// Destructor
+RobotOptionsMenuUserInterface::~RobotOptionsMenuUserInterface()
+{
+   // Do nothing
+}
+
+
+void RobotOptionsMenuUserInterface::onActivate()
+{
+   Parent::onActivate();
+   setupMenus();
+}
+
+
+//////////
+// Callbacks for RobotOptions menu
+static void robotOptionsAcceptCallback(ClientGame *game, U32 index)
+{
+   game->getUIManager()->getUI<RobotOptionsMenuUserInterface>()->saveSettings();
+   game->getUIManager()->reactivatePrevUI();
+}
+
+
+void RobotOptionsMenuUserInterface::setupMenus()
+{
+   clearMenuItems();
+
+   IniSettings *iniSettings = getGame()->getSettings()->getIniSettings();
+
+   addMenuItem(new YesNoMenuItem("ROBOT BALANCING:", iniSettings->botsBalanceTeams,
+         "Toggle to have robots automatically added to the game and balance the teams",  KEY_B));
+
+    // This doesn't have a callback so we'll handle it in onEscape - make sure to set the correct index!
+   addMenuItem(new CounterMenuItem("MINIMUM PLAYERS:", iniSettings->minBalancedPlayers,
+         1, 2, 32, "bots", "", "Bots will be added until total player count meets this value", KEY_M));
+
+   addMenuItem(new YesNoMenuItem("FORCE TEAM BALANCE:", iniSettings->botsAlwaysBalanceTeams,
+         "Force teams to balance, even if the minimum player count has been met",  KEY_F));
+
+   addMenuItem(new MenuItem("OK", robotOptionsAcceptCallback, ""));
+}
+
+
+// Save options to INI file
+void RobotOptionsMenuUserInterface::onEscape()
+{
+   saveSettings();
+   getUIManager()->reactivatePrevUI();
+}
+
+
+void RobotOptionsMenuUserInterface::saveSettings()
+{
+   // Save our minimum players, get the correct index of the appropriate menu item
+   getGame()->getSettings()->getIniSettings()->botsBalanceTeams = getMenuItem(0)->getIntValue() == 1;
+   getGame()->getSettings()->getIniSettings()->minBalancedPlayers = getMenuItem(1)->getIntValue();
+   getGame()->getSettings()->getIniSettings()->botsAlwaysBalanceTeams = getMenuItem(2)->getIntValue() == 1;
+
+   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
 NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : Parent(game)
 {
    mMenuTitle = "";
@@ -1607,6 +1680,11 @@ static void startHostingCallback(ClientGame *game, U32 unused)
    initHosting(settings, settings->getLevelList(), false, false);
 }
 
+static void robotOptionsSelectedCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate<RobotOptionsMenuUserInterface>();
+}
+
 
 void HostMenuUserInterface::setupMenus()
 {
@@ -1633,9 +1711,8 @@ void HostMenuUserInterface::setupMenus()
 
    addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
 
-   //addMenuItem(new CounterMenuItem("MAXIMUM PLAYERS:",   settings->getIniSettings()->maxplayers, 1, 2, MAX_PLAYERS, "", "", "", KEY_P));
-   //addMenuItem(new TextEntryMenuItem("PORT:",             itos(GameSettings::DEFAULT_GAME_PORT),  "Use default of " + itos(DEFAULT_GAME_PORT), 
-   //                                         "", 10, KEY_P));
+   addMenuItem(new MenuItem(getMenuItemCount(), "SETUP ROBOTS", robotOptionsSelectedCallback,
+         "Add robots and adjust their settings", KEY_R));
 }
 
 
