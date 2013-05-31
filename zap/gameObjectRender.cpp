@@ -660,7 +660,7 @@ void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime)
 {
    static const U32 BlinkStartTime = 1500;
    static const U32 BlinkCycleDuration = 300;
-   static const U32 BlinkDuration = BlinkCycleDuration * 0.5f;       // Time shield is yellow or green during
+   static const U32 BlinkDuration = BlinkCycleDuration / 2;       // Time shield is yellow or green during
 
    if(shieldTime > BlinkStartTime || shieldTime % BlinkCycleDuration > BlinkDuration)
       glColor(Colors::green65);  
@@ -1354,14 +1354,14 @@ void renderLoadoutZone(const Color *color, const Vector<Point> *outline, const V
 void renderLoadoutZoneIcon(const Point &center, S32 outerRadius)
 {
    // Pos, teeth, outer rad, inner rad, ang span of outer teeth, ang span of inner teeth, circle rad
-   drawGear(center, 7, outerRadius, 0.75f * outerRadius, 20.0f, 18.0f, 0.4 * outerRadius);   
+   drawGear(center, 7, outerRadius, 0.75f * outerRadius, 20.0f, 18.0f, 0.4f * outerRadius);   
 }
 
 
 void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill, const Point &centroid,
                        S32 zoneId)
 {
-   renderPolygon(fill, outline, &Colors::green50, &Colors::green, .4f);
+   renderPolygon(fill, outline, &Colors::green50, &Colors::green, 0.4f);
 
    char buf[6];  // Can't have more than 65535 zones
    dSprintf(buf, 24, "%d", zoneId);
@@ -2192,7 +2192,7 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Color *color, bo
 
    if(healRate > 0)
    {
-      glColor(c * 0.8f, MAX(0, 0.9f - (F32) healRate * 0.01));
+      glColor(c * 0.8f, MAX(0, 0.9f - (F32) healRate * 0.01f));
       renderPointVector(geom, GL_POLYGON);
    }
 
