@@ -2747,6 +2747,16 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
       clientInfo->getConnection()->s2cDisplayErrorMessage("!!! Invalid Command");
 }
 
+
+S32 GameType::getMaxPlayersPerBalancedTeam(S32 players, S32 teams)
+{
+   if(players % teams == 0)
+      return players / teams;
+
+   return players / teams + 1;
+}
+
+
 // Server only
 void GameType::balanceTeams()
 {
@@ -2757,10 +2767,10 @@ void GameType::balanceTeams()
 
    // Grab our balancing options
    S32 minimumPlayersNeeded = getGame()->getSettings()->getIniSettings()->minBalancedPlayers;
-   bool botsAlwaysBalance = getGame()->getSettings()->getIniSettings()->botsAlwaysBalanceTeams;
+   bool botsAlwaysBalance   = getGame()->getSettings()->getIniSettings()->botsAlwaysBalanceTeams;
 
    // If teams were balanced, how many players would the largest team have?
-   S32 maxPlayersPerBalancedTeam = ceil(F32(minimumPlayersNeeded) / F32(teamCount));
+   S32 maxPlayersPerBalancedTeam = getMaxPlayersPerBalancedTeam(minimumPlayersNeeded, teamCount);
 
    // Find team with most human players
    S32 largestTeamHumanCount = 0;
@@ -2789,7 +2799,7 @@ void GameType::balanceTeams()
 
    // Kick bots on any weirdly balanced teams
    // Re-adjust our max players per team based on our new minimum that is needed
-   maxPlayersPerBalancedTeam = ceil(F32(minimumPlayersNeeded) / F32(teamCount));
+   maxPlayersPerBalancedTeam = getMaxPlayersPerBalancedTeam(minimumPlayersNeeded, teamCount);
 
    for(S32 i = 0; i < teamCount; i++)
    {

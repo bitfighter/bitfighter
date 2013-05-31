@@ -552,6 +552,7 @@ public:
    void addBotFromClient(Vector<StringTableEntry> args);
 
    string addBot(Vector<StringTableEntry> args);
+   S32 getMaxPlayersPerBalancedTeam(S32 minPlayersNeeded, S32 teamCount);
    void balanceTeams();
 
    map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots

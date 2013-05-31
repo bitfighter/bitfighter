@@ -199,6 +199,20 @@ TEST_F(BfTest, MoveTests)
 } 
 
 
+TEST_F(BfTest, GameTypeTests)
+{
+   GameType gt;
+
+   // Check the maxPlayersPerTeam fn
+   //                                players--v  v--teams
+   ASSERT_EQ(gt.getMaxPlayersPerBalancedTeam( 1, 1), 1);
+   ASSERT_EQ(gt.getMaxPlayersPerBalancedTeam( 1, 2), 1);
+   ASSERT_EQ(gt.getMaxPlayersPerBalancedTeam(10, 5), 2);
+   ASSERT_EQ(gt.getMaxPlayersPerBalancedTeam(11, 5), 3);
+    ASSERT_EQ(gt.getMaxPlayersPerBalancedTeam(11, 5), 0); //<< should fail... delete this test
+}
+
+
 TEST_F(BfTest, LittleStory) 
 {
    Address addr;
