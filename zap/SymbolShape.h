@@ -59,11 +59,10 @@ public:
    SymbolShape(S32 width = 0, S32 height = 0);
    virtual ~SymbolShape();
 
-   virtual void render(const Point &pos, S32 fontSize, FontContext fontContext) const = 0;
-   virtual void updateWidth(S32 fontSize, FontContext fontContext);
+   virtual void render(const Point &pos) const = 0;
 
-   S32 getWidth() const;
-   S32 getHeight() const;
+   virtual S32 getWidth() const;
+   virtual S32 getHeight() const;
    virtual bool getHasGap() const;  // Returns true if we automatically render a vertical blank space after this item
 };
 
@@ -79,7 +78,7 @@ public:
    SymbolBlank(S32 width = -1, S32 height = -1);   // Constructor
    virtual ~SymbolBlank();
 
-   void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
+   void render(const Point &pos) const;
 };
 
 
@@ -97,7 +96,7 @@ public:
    SymbolHorizLine(S32 width, S32 vertOffset, S32 height, const Color *color);   // Constructor
    virtual ~SymbolHorizLine();
 
-   void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
+   void render(const Point &pos) const;
 };
 
 
@@ -112,7 +111,7 @@ public:
    SymbolRoundedRect(S32 width, S32 height, S32 radius);   // Constructor
    virtual ~SymbolRoundedRect();
 
-   void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
+   void render(const Point &pos) const;
 };
 
 
@@ -124,7 +123,7 @@ public:
    SymbolHorizEllipse(S32 width, S32 height); // Constructor
    virtual ~SymbolHorizEllipse();
 
-   void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
+   void render(const Point &pos) const;
 };
 
 
@@ -136,7 +135,7 @@ public:
    SymbolRightTriangle(S32 width); // Constructor
    virtual ~SymbolRightTriangle();
 
-   void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
+   void render(const Point &pos) const;
 };
 
 
@@ -148,7 +147,7 @@ public:
    SymbolCircle(S32 radius); // Constructor
    virtual ~SymbolCircle();
 
-   virtual void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
+   virtual void render(const Point &pos) const;
 };
 
 
@@ -160,11 +159,10 @@ private:
    F32 mSizeFactor;
 
 public:
-   SymbolGear();  // Constructor
+   SymbolGear(S32 fontSize);  // Constructor, fontSize is size of surrounding text
    virtual ~SymbolGear();
 
-   void updateWidth(S32 fontSize, FontContext fontContext);
-   void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
+   void render(const Point &pos) const;
 };
 
 
@@ -178,13 +176,15 @@ protected:
    S32 mFontSize;
    Color mColor;
    bool mUseColor;
+   S32 mVertOffset;
 
 public:
    SymbolText(const string &text, S32 fontSize, FontContext context, const Color *color = NULL);
+   SymbolText(const string &text, S32 fontSize, FontContext context, S32 vertOffset, const Color *color = NULL);
    virtual ~SymbolText();
 
-   virtual void updateWidth(S32 fontSize, FontContext fontContext);
-   virtual void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
+   virtual void render(const Point &pos) const;
+   S32 getHeight() const;
 
    bool getHasGap() const;
 };
@@ -198,25 +198,8 @@ public:
    SymbolKey(const string &text, const Color *color = NULL);
    virtual ~SymbolKey();
 
-   void updateWidth(S32 fontSize, FontContext fontContext);
-   void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
+   void render(const Point &pos) const;
 };
-
-
-//class SymbolModifiedKey : public SymbolKey
-//{
-//   typedef SymbolKey Parent;
-//
-//private:
-//   string mBaseKey, mModifier;
-//
-//public:
-//   SymbolModifiedKey(const string &text, const Color *color = NULL);
-//   virtual ~SymbolModifiedKey();
-//
-//   void updateWidth(S32 fontSize, FontContext fontContext);
-//   void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
-//};
 
 
 // Symbol to be used when we don't know what symbol to use
@@ -239,7 +222,9 @@ public:
 
 class SymbolString : public SymbolShape      // So a symbol string can hold other symbol strings
 {
-private:
+   typedef SymbolShape Parent;
+
+protected:
    S32 mWidth;
    S32 mFontSize;
    S32 mReady;
@@ -256,22 +241,36 @@ public:
    void setSymbols(const Vector<boost::shared_ptr<SymbolShape> > &symbols);
 
    // Dimensions
-   S32 getWidth() const;
+   virtual S32 getWidth() const;
    S32 getHeight() const;
 
    // Drawing
-   void render(S32 x, S32 y, Alignment alignment) const;
+   virtual void render(S32 x, S32 y, Alignment alignment) const;
    void render(const Point &center, Alignment alignment) const;
-   void render(const Point &pos, S32 fontSize, FontContext fontContext) const;
+   void render(const Point &pos) const;
 
    bool getHasGap() const;
 
+   // Statics to make creating things a bit easier
    static SymbolShapePtr getControlSymbol(InputCode inputCode, const Color *color = NULL);
-   static SymbolShapePtr getSymbolGear();
+   static SymbolShapePtr getSymbolGear(S32 fontSize);
    static SymbolShapePtr getSymbolText(const string &text, S32 fontSize, FontContext context, const Color *color = NULL);
    static SymbolShapePtr getBlankSymbol(S32 width = -1, S32 height = -1);
    static SymbolShapePtr getHorizLine(S32 length, S32 height, const Color *color);
    static SymbolShapePtr getHorizLine(S32 length, S32 vertOffset, S32 height, const Color *color);
+};
+
+
+// As above, but all sumbols are layered atop one another, to create compound symbols like controller buttons
+class LayeredSymbolString : public SymbolString
+{
+   typedef SymbolString Parent;
+
+public:
+   LayeredSymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, S32 fontSize, FontContext fontContext);   // Constructor
+   virtual ~LayeredSymbolString();     // Destructor
+
+   void render(S32 x, S32 y, Alignment alignment) const;
 };
 
 

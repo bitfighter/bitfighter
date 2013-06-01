@@ -148,17 +148,45 @@ S32 SymbolStringSet::renderLine(S32 line, S32 x, S32 y, Alignment alignment) con
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Width is the sum of the widths of all elements in the symbol list
 static S32 computeWidth(const Vector<SymbolShapePtr> &symbols, S32 fontSize, FontContext fontContext)
 {
    S32 width = 0;
 
    for(S32 i = 0; i < symbols.size(); i++)
-   {
-      symbols[i]->updateWidth(fontSize, fontContext);
       width += symbols[i]->getWidth();
+
+   return width;
+}
+
+
+// Width of a layered item is the widest of the widths of all elements in the symbol list
+static S32 computeLayeredWidth(const Vector<SymbolShapePtr> &symbols, S32 fontSize, FontContext fontContext)
+{
+   S32 width = 0;
+
+   for(S32 i = 0; i < symbols.size(); i++)
+   {
+      S32 w = symbols[i]->getWidth();
+
+      width = max(w, width);
    }
 
    return width;
+}
+
+// Height is the height of the tallest element in the symbol list
+static S32 computeHeight(const Vector<SymbolShapePtr> &symbols, S32 fontSize, FontContext fontContext)
+{
+   S32 height = 0;
+
+   for(S32 i = 0; i < symbols.size(); i++)
+   {
+      S32 h = symbols[i]->getHeight();
+      height = max(h, height);
+   }
+
+   return height;
 }
 
 
@@ -170,6 +198,7 @@ SymbolString::SymbolString(const Vector<SymbolShapePtr> &symbols, S32 fontSize, 
    mReady = true;
 
    mWidth = computeWidth(symbols, fontSize, fontContext);
+   mHeight = computeHeight(symbols, fontSize, fontContext);
 }
 
 
@@ -221,7 +250,7 @@ S32 SymbolString::getHeight() const
 
 
 // Here to make class non-virtual
-void SymbolString::render(const Point &pos, S32 fontSize, FontContext fontContext) const
+void SymbolString::render(const Point &pos) const
 {
    render(pos, AlignmentCenter);
 }
@@ -237,18 +266,16 @@ void SymbolString::render(S32 x, S32 y, Alignment alignment) const
 {
    TNLAssert(mReady, "Not ready!");
 
+   // Alignment of overall symbol string
    if(alignment == AlignmentCenter)
-      x -= mWidth / 2;
-
-   FontManager::pushFontContext(mFontContext);
+      x -= mWidth / 2;     // x is now at the left edge of the render area
 
    for(S32 i = 0; i < mSymbols.size(); i++)
    {
-      mSymbols[i]->render(Point(x + mSymbols[i]->getWidth() / 2, y), mFontSize, mFontContext);
-      x += mSymbols[i]->getWidth();
+      S32 w = mSymbols[i]->getWidth();
+      mSymbols[i]->render(Point(x + w / 2, y));
+      x += w;
    }
-
-   FontManager::popFontContext();
 }
 
 
@@ -318,6 +345,17 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape)
 }
 
 
+static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label)
+{
+   Vector<SymbolShapePtr> symbols;
+      
+   symbols.push_back(getSymbol(shape));
+   symbols.push_back(SymbolShapePtr(new SymbolText(label, 13, KeyContext)));
+
+   return SymbolShapePtr(new LayeredSymbolString(symbols, 13, KeyContext));
+}
+
+
 static S32 KeyFontSize = 13;     // Size of characters used for rendering key bindings
 
 // Color is ignored for controller buttons
@@ -346,7 +384,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
       return SymbolString::getSymbolText("Mouse", KeyFontSize, KeyContext, color);
    else if(InputCodeManager::isCtrlKey(inputCode))
    {
-      Vector<SymbolShapePtr>symbols;
+      Vector<SymbolShapePtr> symbols;
       
       symbols.push_back(SymbolShapePtr(new SymbolKey(InputCodeManager::getModifierString(inputCode), color)));
       symbols.push_back(SymbolShapePtr(new SymbolText(" + ", 13, KeyContext, color)));
@@ -369,7 +407,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
       // This gets us the button shape index, which will tell us what to draw... something like ButtonShapeRound
       Joystick::ButtonShape buttonShape = buttonInfo.buttonShape;
 
-      SymbolShapePtr symbol = getSymbol(buttonShape);
+      SymbolShapePtr symbol = getSymbol(buttonShape, buttonInfo.label);
 
       //const char *label = buttonInfo.label.c_str();
       //Color *buttonColor = &buttonInfo.color;
@@ -396,9 +434,9 @@ SymbolShapePtr SymbolString::getControlSymbol(InputCode inputCode, const Color *
 
 
 // Static method
-SymbolShapePtr SymbolString::getSymbolGear()
+SymbolShapePtr SymbolString::getSymbolGear(S32 fontSize)
 {
-   return SymbolShapePtr(new SymbolGear());
+   return SymbolShapePtr(new SymbolGear(fontSize));
 }
 
 
@@ -432,6 +470,44 @@ SymbolShapePtr SymbolString::getHorizLine(S32 length, S32 vertOffset, S32 height
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+// Constructor
+LayeredSymbolString::LayeredSymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, S32 fontSize, FontContext fontContext) :
+                  Parent(symbols, fontSize, fontContext)
+{
+   mWidth = computeLayeredWidth(symbols, fontSize, fontContext);
+}
+
+
+// Destructor
+LayeredSymbolString::~LayeredSymbolString()
+{
+   // Do nothing
+}
+
+
+// Each layer is rendered atop the previous, creating a layered effect
+void LayeredSymbolString::render(S32 x, S32 y, Alignment alignment) const
+{
+   TNLAssert(mReady, "Not ready!");
+
+   // Alignment of overall symbol string
+   //if(alignment == AlignmentCenter)
+   //   x -= mWidth / 2;
+
+   FontManager::pushFontContext(mFontContext);
+
+   for(S32 i = 0; i < mSymbols.size(); i++)
+      mSymbols[i]->render(Point(x, y));
+
+   FontManager::popFontContext();
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 SymbolShape::SymbolShape(S32 width, S32 height)
 {
    mWidth = width;
@@ -464,12 +540,6 @@ bool SymbolShape::getHasGap() const
 }
 
 
-void SymbolShape::updateWidth(S32 fontSize, FontContext fontContext)
-{
-   // Do nothing (is overridden)
-}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -488,7 +558,7 @@ SymbolBlank::~SymbolBlank()
 }
 
 
-void SymbolBlank::render(const Point &center, S32 fontSize, FontContext fontContext) const
+void SymbolBlank::render(const Point &center) const
 {
    // Do nothing -- it's blank, remember?
 }
@@ -523,7 +593,7 @@ SymbolHorizLine::~SymbolHorizLine()
 }
 
 
-void SymbolHorizLine::render(const Point &center, S32 fontSize, FontContext fontContext) const
+void SymbolHorizLine::render(const Point &center) const
 {
    if(mUseColor)
       glColor(mColor);
@@ -534,6 +604,8 @@ void SymbolHorizLine::render(const Point &center, S32 fontSize, FontContext font
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+static const S32 BorderDecorationVertCenteringOffset = 2;   // Offset the border of keys and buttons to better center them in the flow of text
 
 
 // Constructor
@@ -550,9 +622,12 @@ SymbolRoundedRect::~SymbolRoundedRect()
 }
 
 
-void SymbolRoundedRect::render(const Point &center, S32 fontSize, FontContext fontContext) const
+void SymbolRoundedRect::render(const Point &center) const
 {
-   drawRoundedRect(center, mWidth, mHeight, mRadius);
+   // This / 16 bit below is super hacky... trying to make it look like it's not a fudge factor... but really it is.
+   // The goal is to raise the border of larger rounded rects by one pixel without affecting smaller ones.  The 16 falls between
+   // the two sizes and thus affects the two differently.  This is really bogus, but not sure how else to address it.
+   drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - mHeight / 16), mWidth, mHeight, mRadius);
 }
 
 
@@ -574,14 +649,16 @@ SymbolHorizEllipse::~SymbolHorizEllipse()
 }
 
 
-void SymbolHorizEllipse::render(const Point &center, S32 fontSize, FontContext fontContext) const
+void SymbolHorizEllipse::render(const Point &center) const
 {
+   Point cen = center - Point(0, mHeight / 2);
+
    // First the fill
-   drawFilledEllipse(center, mWidth, mHeight, 0);
+   drawFilledEllipse(cen, mWidth, mHeight, 0);
 
    // Outline in white
    glColor(Colors::white);
-   drawEllipse(center, mWidth, mHeight, 0);
+   drawEllipse(cen, mWidth, mHeight, 0);
 }
 
 
@@ -618,7 +695,7 @@ static void drawButtonRightTriangle(const Point &center)
 }
 
 
-void SymbolRightTriangle::render(const Point &center, S32 fontSize, FontContext fontContext) const
+void SymbolRightTriangle::render(const Point &center) const
 {
    Point cen(center.x -mWidth / 4, center.y);  // Need to off-center the label slightly for this button
    drawButtonRightTriangle(cen);
@@ -643,9 +720,9 @@ SymbolCircle::~SymbolCircle()
 }
 
 
-void SymbolCircle::render(const Point &center, S32 fontSize, FontContext fontContext) const
+void SymbolCircle::render(const Point &center) const
 {
-   drawCircle(center, (F32)mWidth / 2);
+   drawCircle(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - 1), (F32)mWidth / 2);
 }
 
 
@@ -654,9 +731,10 @@ void SymbolCircle::render(const Point &center, S32 fontSize, FontContext fontCon
 
 
 // Constructor
-SymbolGear::SymbolGear() : Parent(0)
+SymbolGear::SymbolGear(S32 fontSize) : Parent(0)
 {
-   // Do nothing
+   mWidth = S32(1.333f * fontSize);    // mWidth is effectively a diameter; we'll use mWidth / 2 for our rendering radius
+   mHeight = mWidth;
 }
 
 
@@ -667,14 +745,7 @@ SymbolGear::~SymbolGear()
 }
 
 
-void SymbolGear::updateWidth(S32 fontSize, FontContext fontContext)
-{
-   mWidth = S32(1.333f * fontSize);    // mWidth is effectively a diameter; we'll use mWidth / 2 for our rendering radius
-   mHeight = mWidth;
-}
-
-
-void SymbolGear::render(const Point &center, S32 fontSize, FontContext fontContext) const
+void SymbolGear::render(const Point &center) const
 {
    renderLoadoutZoneIcon(center + Point(0,2), mWidth / 2);    // Slight downward adjustment to position to better align with text
 }
@@ -684,15 +755,33 @@ void SymbolGear::render(const Point &center, S32 fontSize, FontContext fontConte
 ////////////////////////////////////////
 
 
-SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Color *color) : Parent(-1, fontSize),
-                                                                                                    mColor(color)
+// Constructor with no vertical offset
+SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Color *color) : 
+                              Parent(getStringWidth(context, fontSize, text.c_str()), fontSize),
+                              mColor(color)
 {
    mText = text;
    mFontContext = context;
    mFontSize = fontSize;
-   mWidth = -1;
+   mVertOffset = 0;
 
    mUseColor = (color != NULL);
+}
+
+
+// Constructor with vertical offset -- not used?
+SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, S32 vertOffset, const Color *color) : 
+                                       Parent(getStringWidth(context, fontSize, text.c_str()), fontSize),
+                                       mColor(color)
+{
+   mText = text;
+   mFontContext = context;
+   mFontSize = fontSize;
+   mVertOffset = vertOffset;
+
+   mUseColor = (color != NULL);
+
+   mHeight = fontSize;
 }
 
 
@@ -703,21 +792,20 @@ SymbolText::~SymbolText()
 }
 
 
-void SymbolText::updateWidth(S32 fontSize, FontContext fontContext)
-{
-   mWidth = getStringWidth(fontContext, fontSize, mText.c_str());
-   mHeight = fontSize;
-}
-
-
-void SymbolText::render(const Point &center, S32 fontSize, FontContext fontContext) const
+void SymbolText::render(const Point &center) const
 {
    if(mUseColor)
       glColor(mColor);
 
    FontManager::pushFontContext(mFontContext);
-   drawStringc(center.x, center.y, (F32)mFontSize, mText.c_str());
+   drawStringc(center.x, center.y + mVertOffset, (F32)mFontSize, mText.c_str());
    FontManager::popFontContext();
+}
+
+
+S32 SymbolText::getHeight() const
+{
+   return Parent::getHeight() + mVertOffset;
 }
 
 
@@ -733,7 +821,6 @@ bool SymbolText::getHasGap() const
 
 static S32 Margin = 3;              // Buffer within key around text
 static S32 Gap = 3;                 // Distance between keys
-static S32 VertAdj = 2;             // To help with vertical centering
 static S32 TotalHeight = KeyFontSize + 2 * Margin;
 
 
@@ -745,7 +832,7 @@ static S32 getKeyWidth(const string &text, S32 height)
    else
       width = getStringWidth(KeyContext, KeyFontSize, text.c_str()) + Margin * 2;
 
-   return max(width, height) + VertAdj * Gap;
+   return max(width, height) + BorderDecorationVertCenteringOffset * Gap;
 }
 
 
@@ -763,17 +850,11 @@ SymbolKey::~SymbolKey()
 }
 
 
-void SymbolKey::updateWidth(S32 fontSize, FontContext fontContext)
-{
-   // Do nothing
-}
-
-
 // Note: passed font size and context will be ignored
-void SymbolKey::render(const Point &center, S32 fontSize, FontContext fontContext) const
+void SymbolKey::render(const Point &center) const
 {
-   const Point textVertAdj(0, VertAdj);
-   const Point boxVertAdj(0, VertAdj - KeyFontSize / 2);   // Compensate for the fact that boxes draw from center
+   const Point textVertAdj(0, BorderDecorationVertCenteringOffset + mVertOffset);
+   const Point boxVertAdj(0, BorderDecorationVertCenteringOffset - KeyFontSize / 2 + mVertOffset);   // Compensate for the fact that boxes draw from center
 
    if(mUseColor)
       glColor(mColor);
@@ -788,7 +869,7 @@ void SymbolKey::render(const Point &center, S32 fontSize, FontContext fontContex
    else if(mText == "Right Arrow")
       renderRightArrow(center + textVertAdj, KeyFontSize);
    else
-      Parent::render(center + textVertAdj, KeyFontSize, KeyContext);
+      Parent::render(center + textVertAdj);
 
    S32 width =  max(mWidth - 2 * Gap, mHeight);
 

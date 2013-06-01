@@ -157,7 +157,7 @@ void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symb
       symbols.push_back(SymbolString::getControlSymbol(inputCode));
 
    else if(symbolName == "LOADOUT_ICON")
-      symbols.push_back(SymbolString::getSymbolGear());
+      symbols.push_back(SymbolString::getSymbolGear(14));
    
    else if(symbolName == "CHANGEWEP")
    {
