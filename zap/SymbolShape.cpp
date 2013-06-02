@@ -317,9 +317,9 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape)
                                                      RectRadius));
 
       case Joystick::ButtonShapeSmallRect:
-         return SymbolShapePtr(new SymbolRoundedRect(smallRectButtonWidth, 
-                                                     smallRectButtonHeight, 
-                                                     RectRadius));
+         return SymbolShapePtr(new SymbolSmallRoundedRect(smallRectButtonWidth, 
+                                                          smallRectButtonHeight, 
+                                                          RectRadius));
 
       case Joystick::ButtonShapeRoundedRect:
          return SymbolShapePtr(new SymbolRoundedRect(rectButtonWidth, 
