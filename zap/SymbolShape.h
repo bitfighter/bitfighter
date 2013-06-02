@@ -55,6 +55,7 @@ class SymbolShape
 protected:
    S32 mWidth, mHeight;
    Point mLabelOffset;
+   S32 mLabelSizeAdjustor;
 
 public:
    SymbolShape(S32 width = 0, S32 height = 0);
@@ -66,6 +67,7 @@ public:
    virtual S32 getHeight() const;
    virtual bool getHasGap() const;  // Returns true if we automatically render a vertical blank space after this item
    Point getLabelOffset();
+   S32 getLabelSizeAdjustor();
 };
 
 

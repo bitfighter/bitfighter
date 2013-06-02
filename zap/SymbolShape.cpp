@@ -353,7 +353,7 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label
    SymbolShapePtr shapePtr = getSymbol(shape);
 
    symbols.push_back(shapePtr);
-   symbols.push_back(SymbolShapePtr(new SymbolText(label, 13, KeyContext, shapePtr->getLabelOffset())));
+   symbols.push_back(SymbolShapePtr(new SymbolText(label, 13 + shapePtr->getLabelSizeAdjustor(), KeyContext, shapePtr->getLabelOffset())));
 
    return SymbolShapePtr(new LayeredSymbolString(symbols, 13, KeyContext));
 }
@@ -513,6 +513,7 @@ SymbolShape::SymbolShape(S32 width, S32 height)
 {
    mWidth = width;
    mHeight = height;
+   mLabelSizeAdjustor = 0;
 }
 
 
@@ -544,6 +545,12 @@ bool SymbolShape::getHasGap() const
 Point SymbolShape::getLabelOffset()
 {
    return mLabelOffset;
+}
+
+
+S32 SymbolShape::getLabelSizeAdjustor()
+{
+   return mLabelSizeAdjustor;
 }
 
 
@@ -696,7 +703,8 @@ void SymbolHorizEllipse::render(const Point &center) const
 // Constructor
 SymbolRightTriangle::SymbolRightTriangle(S32 width) : Parent(width, 19)
 {
-   // Do nothing
+   mLabelOffset.set(-5, -1);
+   mLabelSizeAdjustor = -3;
 }
 
 
@@ -709,9 +717,9 @@ SymbolRightTriangle::~SymbolRightTriangle()
 
 static void drawButtonRightTriangle(const Point &center)
 {
-   Point p1(center + Point(-15, -9));
-   Point p2(center + Point(-15, 10));
-   Point p3(center + Point(12, 0));
+   Point p1(center + Point(-6, -15));
+   Point p2(center + Point(-6,   4));
+   Point p3(center + Point(21,  -6));
 
    F32 vertices[] = {
          p1.x, p1.y,
