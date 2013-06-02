@@ -237,6 +237,12 @@ S32 drawStringc(F32 x, F32 y, F32 size, const char *string)
 }
 
 
+S32 drawStringc(const Point &cen, F32 size, const char *string)
+{
+   return drawStringc(cen.x, cen.y, size, string);
+}
+
+
 S32 drawCenteredString(S32 y, S32 size, const char *string)
 {
    return drawCenteredString(gScreenInfo.getGameCanvasWidth() / 2, y, size, string);
