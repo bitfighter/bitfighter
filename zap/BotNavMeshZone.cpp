@@ -437,7 +437,7 @@ bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<Da
    // Merge bot zone buffers from barriers, turrets, and forcefield projectors
    // The Clipper library is the work horse here.  Its output is essential for the
    // triangulation.  The output contains the upscaled Clipper points (you will need to downscale)
-   if(!mergeBotZoneBuffers(barrierList, turretList, forceFieldProjectorList, BufferRadius, solution))
+   if(!mergeBotZoneBuffers(barrierList, turretList, forceFieldProjectorList, (F32)BufferRadius, solution))
       return false;
 
 
