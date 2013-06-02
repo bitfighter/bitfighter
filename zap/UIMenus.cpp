@@ -406,7 +406,7 @@ void MenuUserInterface::render()
       // Render a special instruction line
       if(mRenderSpecialInstructions)
       {
-         glColor(Colors::menuHelpColor);  
+         glColor(Colors::menuHelpColor);
          drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getSpecialEditingInstructions());
       }
 
@@ -1518,7 +1518,7 @@ void RobotOptionsMenuUserInterface::setupMenus()
 
    IniSettings *iniSettings = getGame()->getSettings()->getIniSettings();
 
-   addMenuItem(new YesNoMenuItem("ROBOT BALANCING:", iniSettings->botsBalanceTeams,
+   addMenuItem(new YesNoMenuItem("ROBOTS BALANCE TEAMS:", iniSettings->botsBalanceTeams,
          "Toggle to have robots automatically added to the game and balance the teams",  KEY_B));
 
     // This doesn't have a callback so we'll handle it in onEscape - make sure to set the correct index!
@@ -1721,6 +1721,9 @@ void HostMenuUserInterface::setupMenus()
 
    addMenuItem(new MenuItem("START HOSTING", startHostingCallback, "", KEY_H));
 
+   addMenuItem(new MenuItem(getMenuItemCount(), "ROBOTS", robotOptionsSelectedCallback,
+         "Add robots and adjust their settings", KEY_R));
+
    addMenuItem(new TextEntryMenuItem("SERVER NAME:", settings->getHostName(), 
                                      "<Bitfighter Host>", "", MaxServerNameLen,  KEY_N));
 
@@ -1737,9 +1740,6 @@ void HostMenuUserInterface::setupMenus()
                                      MAX_PASSWORD_LENGTH, KEY_C));
 
    addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
-
-   addMenuItem(new MenuItem(getMenuItemCount(), "SETUP ROBOTS", robotOptionsSelectedCallback,
-         "Add robots and adjust their settings", KEY_R));
 }
 
 

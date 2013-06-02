@@ -96,7 +96,7 @@ IniSettings::IniSettings()
    maxBots = 10;
    botsBalanceTeams = false;
    minBalancedPlayers = 6;
-   botsAlwaysBalanceTeams = true;
+   botsAlwaysBalanceTeams = false;
    enableServerVoiceChat = true;
    allowTeamChanging = true;
    serverPassword = "";               // Passwords empty by default
