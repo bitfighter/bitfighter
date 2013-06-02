@@ -1593,15 +1593,15 @@ void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaini
       glRotatef(angleRadians * 360.f / FloatTau, 0, 0, 1.0);
 
       // The flames first!
-      F32 speedRatio = speed / WeaponInfo::getWeaponInfo(WeaponSeeker).projVelocity + (S32(timeRemaining) % 200)/ 400.0;  
-      glColor(Colors::yellow, 0.5);
+      F32 speedRatio = speed / WeaponInfo::getWeaponInfo(WeaponSeeker).projVelocity + (S32(timeRemaining) % 200)/ 400.0f;  
+      glColor(Colors::yellow, 0.5f);
       F32 innerFlame[] = {
             -8, -1,
             -8 - (4 * speedRatio), 0,
             -8, 1,
       };
       renderVertexArray(innerFlame, 3, GL_LINE_STRIP);
-      glColor(Colors::orange50, 0.6);
+      glColor(Colors::orange50, 0.6f);
       F32 outerFlame[] = {
             -8, -3,
             -8 - (8 * speedRatio), 0,
