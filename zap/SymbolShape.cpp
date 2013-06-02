@@ -327,9 +327,9 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape)
                                                      RoundedRectRadius));
 
       case Joystick::ButtonShapeSmallRoundedRect:
-         return SymbolShapePtr(new SymbolRoundedRect(smallRectButtonWidth, 
-                                                     smallRectButtonHeight, 
-                                                     RoundedRectRadius));
+         return SymbolShapePtr(new SymbolSmallRoundedRect(smallRectButtonWidth, 
+                                                          smallRectButtonHeight, 
+                                                          RoundedRectRadius));
                                                      
       case Joystick::ButtonShapeHorizEllipse:
          return SymbolShapePtr(new SymbolHorizEllipse(horizEllipseButtonRadiusX, 
@@ -348,9 +348,12 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape)
 static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label)
 {
    Vector<SymbolShapePtr> symbols;
-      
-   symbols.push_back(getSymbol(shape));
-   symbols.push_back(SymbolShapePtr(new SymbolText(label, 13, KeyContext)));
+   
+   // Get the button outline
+   SymbolShapePtr shapePtr = getSymbol(shape);
+
+   symbols.push_back(shapePtr);
+   symbols.push_back(SymbolShapePtr(new SymbolText(label, 13, KeyContext, shapePtr->getLabelOffset())));
 
    return SymbolShapePtr(new LayeredSymbolString(symbols, 13, KeyContext));
 }
@@ -408,8 +411,6 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
       Joystick::ButtonShape buttonShape = buttonInfo.buttonShape;
 
       SymbolShapePtr symbol = getSymbol(buttonShape, buttonInfo.label);
-
-      //const char *label = buttonInfo.label.c_str();
       //Color *buttonColor = &buttonInfo.color;
 
       return symbol;
@@ -540,6 +541,12 @@ bool SymbolShape::getHasGap() const
 }
 
 
+Point SymbolShape::getLabelOffset()
+{
+   return mLabelOffset;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -624,10 +631,30 @@ SymbolRoundedRect::~SymbolRoundedRect()
 
 void SymbolRoundedRect::render(const Point &center) const
 {
-   // This / 16 bit below is super hacky... trying to make it look like it's not a fudge factor... but really it is.
-   // The goal is to raise the border of larger rounded rects by one pixel without affecting smaller ones.  The 16 falls between
-   // the two sizes and thus affects the two differently.  This is really bogus, but not sure how else to address it.
-   drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - mHeight / 16), mWidth, mHeight, mRadius);
+   drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - 1), mWidth, mHeight, mRadius);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+SymbolSmallRoundedRect::SymbolSmallRoundedRect(S32 width, S32 height, S32 radius) : Parent(width, height, radius)
+{
+   mLabelOffset.set(0,-1);
+}
+
+
+// Destructor
+SymbolSmallRoundedRect::~SymbolSmallRoundedRect()
+{
+   // Do nothing
+}
+
+
+void SymbolSmallRoundedRect::render(const Point &center) const
+{
+   drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset + 2), mWidth, mHeight, mRadius);
 }
 
 
@@ -763,21 +790,20 @@ SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, co
    mText = text;
    mFontContext = context;
    mFontSize = fontSize;
-   mVertOffset = 0;
 
    mUseColor = (color != NULL);
 }
 
 
 // Constructor with vertical offset -- not used?
-SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, S32 vertOffset, const Color *color) : 
+SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Point &labelOffset, const Color *color) : 
                                        Parent(getStringWidth(context, fontSize, text.c_str()), fontSize),
                                        mColor(color)
 {
    mText = text;
    mFontContext = context;
    mFontSize = fontSize;
-   mVertOffset = vertOffset;
+   mLabelOffset = labelOffset;
 
    mUseColor = (color != NULL);
 
@@ -798,14 +824,14 @@ void SymbolText::render(const Point &center) const
       glColor(mColor);
 
    FontManager::pushFontContext(mFontContext);
-   drawStringc(center.x, center.y + mVertOffset, (F32)mFontSize, mText.c_str());
+   drawStringc(center + mLabelOffset, (F32)mFontSize, mText.c_str());
    FontManager::popFontContext();
 }
 
 
 S32 SymbolText::getHeight() const
 {
-   return Parent::getHeight() + mVertOffset;
+   return Parent::getHeight() + (S32)mLabelOffset.y;
 }
 
 
@@ -853,8 +879,9 @@ SymbolKey::~SymbolKey()
 // Note: passed font size and context will be ignored
 void SymbolKey::render(const Point &center) const
 {
-   const Point textVertAdj(0, BorderDecorationVertCenteringOffset + mVertOffset);
-   const Point boxVertAdj(0, BorderDecorationVertCenteringOffset - KeyFontSize / 2 + mVertOffset);   // Compensate for the fact that boxes draw from center
+   // Compensate for the fact that boxes draw from center
+   const Point boxVertAdj  = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - KeyFontSize / 2);   
+   const Point textVertAdj = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset);
 
    if(mUseColor)
       glColor(mColor);

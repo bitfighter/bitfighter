@@ -54,6 +54,7 @@ class SymbolShape
 {
 protected:
    S32 mWidth, mHeight;
+   Point mLabelOffset;
 
 public:
    SymbolShape(S32 width = 0, S32 height = 0);
@@ -64,6 +65,7 @@ public:
    virtual S32 getWidth() const;
    virtual S32 getHeight() const;
    virtual bool getHasGap() const;  // Returns true if we automatically render a vertical blank space after this item
+   Point getLabelOffset();
 };
 
 
@@ -104,12 +106,25 @@ class SymbolRoundedRect : public SymbolShape
 {
    typedef SymbolShape Parent;
 
-private:
+protected:
    S32 mRadius;
 
 public:
    SymbolRoundedRect(S32 width, S32 height, S32 radius);   // Constructor
    virtual ~SymbolRoundedRect();
+
+   virtual void render(const Point &pos) const;
+};
+
+
+// As above, but with slightly different rendering
+class SymbolSmallRoundedRect : public SymbolRoundedRect
+{
+   typedef SymbolRoundedRect Parent;
+
+public:
+   SymbolSmallRoundedRect(S32 width, S32 height, S32 radius);   // Constructor
+   virtual ~SymbolSmallRoundedRect();
 
    void render(const Point &pos) const;
 };
@@ -176,11 +191,10 @@ protected:
    S32 mFontSize;
    Color mColor;
    bool mUseColor;
-   S32 mVertOffset;
 
 public:
    SymbolText(const string &text, S32 fontSize, FontContext context, const Color *color = NULL);
-   SymbolText(const string &text, S32 fontSize, FontContext context, S32 vertOffset, const Color *color = NULL);
+   SymbolText(const string &text, S32 fontSize, FontContext context, const Point &labelOffset, const Color *color = NULL);
    virtual ~SymbolText();
 
    virtual void render(const Point &pos) const;
