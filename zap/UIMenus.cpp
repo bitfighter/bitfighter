@@ -958,8 +958,10 @@ void MainMenuUserInterface::render()
 {
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
+   // Draw our Message-Of-The-Day, if we have one
    if(strcmp(mMOTD, ""))
    {
+      // Draw message, scrolling
       U32 width = getStringWidth(20, mMOTD);
       glColor(Colors::white);
       U32 totalWidth = width + canvasWidth;
@@ -967,7 +969,12 @@ void MainMenuUserInterface::render()
       U32 delta = getGame()->getCurrentTime() - motdArriveTime;
       delta = U32(delta * pixelsPerSec * 0.001) % totalWidth;
 
-      drawString(canvasWidth - delta, MOTD_POS, 20, mMOTD);
+      S32 xPos = canvasWidth - delta;
+      S32 motdWidth = drawStringAndGetWidth(xPos, MOTD_POS, 20, mMOTD);
+
+      // Draw lines
+      drawFadingHorizontalLine(xPos+(motdWidth)/2,           xPos, MOTD_POS + 25, Colors::green50);
+      drawFadingHorizontalLine(xPos+(motdWidth)/2, xPos+motdWidth, MOTD_POS + 25, Colors::green50);
    }
 
    // Parent renderer might dim what we've drawn so far, so run it last so it can have access to everything
@@ -1002,7 +1009,7 @@ bool MainMenuUserInterface::getNeedToUpgrade()
 void MainMenuUserInterface::renderExtras()
 {
    glColor(Colors::white);
-   const S32 size = 20;
+   const S32 size = 16;
    drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - size, size, "join us @ www.bitfighter.org");
 }
 
