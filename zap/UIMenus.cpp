@@ -406,7 +406,7 @@ void MenuUserInterface::render()
       // Render a special instruction line
       if(mRenderSpecialInstructions)
       {
-         glColor(Colors::menuHelpColor);
+         glColor(Colors::menuHelpColor, 0.6f);
          drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getSpecialEditingInstructions());
       }
 
