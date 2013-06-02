@@ -406,7 +406,7 @@ void MenuUserInterface::render()
       // Render a special instruction line
       if(mRenderSpecialInstructions)
       {
-         glColor(Colors::menuHelpColor);  
+         glColor(Colors::menuHelpColor, 0.6f);
          drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getSpecialEditingInstructions());
       }
 
@@ -958,8 +958,10 @@ void MainMenuUserInterface::render()
 {
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
+   // Draw our Message-Of-The-Day, if we have one
    if(strcmp(mMOTD, ""))
    {
+      // Draw message, scrolling
       U32 width = getStringWidth(20, mMOTD);
       glColor(Colors::white);
       U32 totalWidth = width + canvasWidth;
@@ -967,7 +969,12 @@ void MainMenuUserInterface::render()
       U32 delta = getGame()->getCurrentTime() - motdArriveTime;
       delta = U32(delta * pixelsPerSec * 0.001) % totalWidth;
 
-      drawString(canvasWidth - delta, MOTD_POS, 20, mMOTD);
+      S32 xPos = canvasWidth - delta;
+      S32 motdWidth = drawStringAndGetWidth(xPos, MOTD_POS, 20, mMOTD);
+
+      // Draw lines
+      drawFadingHorizontalLine(xPos+(motdWidth)/2,           xPos, MOTD_POS + 25, Colors::green50);
+      drawFadingHorizontalLine(xPos+(motdWidth)/2, xPos+motdWidth, MOTD_POS + 25, Colors::green50);
    }
 
    // Parent renderer might dim what we've drawn so far, so run it last so it can have access to everything
@@ -1002,7 +1009,7 @@ bool MainMenuUserInterface::getNeedToUpgrade()
 void MainMenuUserInterface::renderExtras()
 {
    glColor(Colors::white);
-   const S32 size = 20;
+   const S32 size = 16;
    drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - size, size, "join us @ www.bitfighter.org");
 }
 
@@ -1518,7 +1525,7 @@ void RobotOptionsMenuUserInterface::setupMenus()
 
    IniSettings *iniSettings = getGame()->getSettings()->getIniSettings();
 
-   addMenuItem(new YesNoMenuItem("ROBOT BALANCING:", iniSettings->botsBalanceTeams,
+   addMenuItem(new YesNoMenuItem("ROBOTS BALANCE TEAMS:", iniSettings->botsBalanceTeams,
          "Toggle to have robots automatically added to the game and balance the teams",  KEY_B));
 
     // This doesn't have a callback so we'll handle it in onEscape - make sure to set the correct index!
@@ -1719,7 +1726,11 @@ void HostMenuUserInterface::setupMenus()
 
    GameSettings *settings = getGame()->getSettings();
 
+   // These menu items MUST align with the MenuItems enum
    addMenuItem(new MenuItem("START HOSTING", startHostingCallback, "", KEY_H));
+
+   addMenuItem(new MenuItem(getMenuItemCount(), "ROBOTS", robotOptionsSelectedCallback,
+         "Add robots and adjust their settings", KEY_R));
 
    addMenuItem(new TextEntryMenuItem("SERVER NAME:", settings->getHostName(), 
                                      "<Bitfighter Host>", "", MaxServerNameLen,  KEY_N));
@@ -1737,9 +1748,6 @@ void HostMenuUserInterface::setupMenus()
                                      MAX_PASSWORD_LENGTH, KEY_C));
 
    addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
-
-   addMenuItem(new MenuItem(getMenuItemCount(), "SETUP ROBOTS", robotOptionsSelectedCallback,
-         "Add robots and adjust their settings", KEY_R));
 }
 
 
