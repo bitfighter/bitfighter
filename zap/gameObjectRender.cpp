@@ -1861,12 +1861,12 @@ void renderEnergyItem(const Point &pos, bool forEditor)
    glPushMatrix();
       glTranslate(pos);
 
-      S32 size = 18;
+      F32 size = 18;
       drawHollowSquare(Point(0,0), size, &Colors::white);
       glLineWidth(gDefaultLineWidth);
 
       // Scale down the symbol a little so it fits in the box
-      glScale(scaleFactor * .7f);
+      glScale(scaleFactor * 0.7f);
       renderEnergySymbol();
 
    glPopMatrix();
@@ -2726,7 +2726,7 @@ void render25FlagsBadge(F32 x, F32 y, F32 rad)
 {
    glPushMatrix();
       glTranslate(x, y, 0);
-      glScale(.05 * rad);
+      glScale(.05f * rad);
       glColor(Colors::gray40);
       drawEllipse(Point(-16, 15), 6, 2, 0);
 
