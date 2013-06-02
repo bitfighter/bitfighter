@@ -1726,6 +1726,7 @@ void HostMenuUserInterface::setupMenus()
 
    GameSettings *settings = getGame()->getSettings();
 
+   // These menu items MUST align with the MenuItems enum
    addMenuItem(new MenuItem("START HOSTING", startHostingCallback, "", KEY_H));
 
    addMenuItem(new MenuItem(getMenuItemCount(), "ROBOTS", robotOptionsSelectedCallback,

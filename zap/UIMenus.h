@@ -272,6 +272,7 @@ class HostMenuUserInterface : public MenuUserInterface
 {
    enum MenuItems {
       OPT_HOST,
+      OPT_ROBOTS,
       OPT_NAME,
       OPT_DESCR,
       OPT_LVL_PASS,
