@@ -154,6 +154,8 @@ private:
    void idle_client(U32 deltaT);
    void idle_server(U32 deltaT);
 
+   S32 findLargestTeamWithBots() const;
+
 protected:
    Timer mScoreboardUpdateTimer;
 

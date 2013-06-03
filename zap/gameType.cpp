@@ -1113,6 +1113,9 @@ void GameType::achievementAchieved(U8 achievement, const StringTableEntry &playe
 }
 
 
+static Vector<StringTableEntry> messageVals;     // Reusable container
+
+
 // Handle the end-of-game...  handles all games... not in any subclasses
 // Can be overridden for any game-specific game over stuff
 // Server only
@@ -1122,7 +1125,7 @@ void GameType::onGameOver()
    static StringTableEntry emptyString;
 
    bool tied = false;
-   Vector<StringTableEntry> e;
+   messageVals.clear();
 
    if(isTeamGame())   // Team game -> find top team
    {
@@ -1141,8 +1144,8 @@ void GameType::onGameOver()
       }
       if(!tied)
       {
-         e.push_back(teamString);
-         e.push_back(mGame->getTeam(teamWinner)->getName());
+         messageVals.push_back(teamString);
+         messageVals.push_back(mGame->getTeam(teamWinner)->getName());
       }
    }
    else                    // Individual game -> find player with highest score
@@ -1165,8 +1168,8 @@ void GameType::onGameOver()
 
          if(!tied)
          {
-            e.push_back(emptyString);
-            e.push_back(winningClient->getName());
+            messageVals.push_back(emptyString);
+            messageVals.push_back(winningClient->getName());
          }
       }
    }
@@ -1177,7 +1180,7 @@ void GameType::onGameOver()
    if(tied)
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, tieMessage);
    else
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, winMessage, e);
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, winMessage, messageVals);
 }
 
 
@@ -2219,10 +2222,10 @@ void GameType::processClientRequestForChangingGameTime(S32 time, bool isUnlimite
    broadcastNewRemainingTime();
 
    static const StringTableEntry msg("%e0 has changed the game time");
-   Vector<StringTableEntry> e;
-   e.push_back(clientInfo->getName());
+   messageVals.clear();
+   messageVals.push_back(clientInfo->getName());
 
-   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, messageVals);
 }
 
 
@@ -2916,12 +2919,40 @@ void GameType::addBotFromClient(Vector<StringTableEntry> args)
          mBotBalancingDisabled = true;
 
          StringTableEntry msg = StringTableEntry("Robot added by %e0");
-         Vector<StringTableEntry> e;
-         e.push_back(clientInfo->getName());
+         messageVals.clear();
+         messageVals.push_back(clientInfo->getName());
 
-         broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, messageVals);
       }
    }
+}
+
+
+// Assumes we have already verified that at least one team has a bot
+S32 GameType::findLargestTeamWithBots() const
+{
+   // Find team with bots that has the most players
+   getGame()->countTeamPlayers();
+
+   S32 largestTeamCount = 0;
+   S32 largestTeamIndex = -1;
+
+   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+   {
+      TNLAssert(dynamic_cast<Team *>(getGame()->getTeam(i)), "Invalid team");
+      Team *team = static_cast<Team *>(getGame()->getTeam(i));
+
+      // Must have at least one bot!
+      if(team->getPlayerBotCount() > largestTeamCount && team->getBotCount() > 0)
+      {
+         largestTeamCount = team->getPlayerBotCount();
+         largestTeamIndex = i;
+      }
+   }
+
+   TNLAssert(largestTeamIndex != -1, "No teams had a bot here!");
+
+   return largestTeamIndex;
 }
 
 
@@ -3026,10 +3057,10 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
    }
 
    StringTableEntry msg("%e0 has reset the score of the game");
-   Vector<StringTableEntry> e;
-   e.push_back(clientInfo->getName());
+   messageVals.clear();
+   messageVals.push_back(clientInfo->getName());
 
-   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, messageVals);
 }
 
 
@@ -3041,28 +3072,25 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
    if(!clientInfo->isLevelChanger())
       return;  // Error message handled client-side
 
-   GameConnection *conn = clientInfo->getConnection();
-   TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
-
    S32 botCount = getGame()->getBotCount();
 
    if(botCount == 0)
    {
-      conn->s2cDisplayErrorMessage("!!! There are no robots to kick");
+      source->s2cDisplayErrorMessage("!!! There are no robots to kick");
       return;
    }
 
-   // Only delete one robot - the most recently added
-   getGame()->deleteBot(botCount - 1);
+   // Delete one robot from our largest team
+   getGame()->deleteBotFromTeam(findLargestTeamWithBots());
 
    // Disable bot balancing
    mBotBalancingDisabled = true;
 
    StringTableEntry msg = StringTableEntry("Robot kicked by %e0");
-   Vector<StringTableEntry> e;
-   e.push_back(clientInfo->getName());
+   messageVals.clear();
+   messageVals.push_back(clientInfo->getName());
 
-   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, messageVals);
 }
 
 
@@ -3090,10 +3118,10 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBots, (), ())
    mBotBalancingDisabled = true;
 
    StringTableEntry msg = StringTableEntry("All robots kicked by %e0");
-   Vector<StringTableEntry> e;
-   e.push_back(clientInfo->getName());
+   messageVals.clear();
+   messageVals.push_back(clientInfo->getName());
 
-   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, messageVals);
 }
 
 
@@ -3116,10 +3144,10 @@ GAMETYPE_RPC_C2S(GameType, c2sShowBots, (), ())
    else
    {
       StringTableEntry msg = mShowAllBots ? StringTableEntry("Show all robots option enabled by %e0") : StringTableEntry("Show all robots option disabled by %e0");
-      Vector<StringTableEntry> e;
-      e.push_back(clientInfo->getName());
+      messageVals.clear();
+      messageVals.push_back(clientInfo->getName());
 
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, messageVals);
    }
 }
 
@@ -3142,9 +3170,9 @@ GAMETYPE_RPC_C2S(GameType, c2sSetMaxBots, (S32 count), (count))
    GameConnection *conn = clientInfo->getConnection();
    TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
 
-   Vector<StringTableEntry> e;
-   e.push_back(itos(count));
-   conn->s2cDisplayMessageE(GameConnection::ColorRed, SFXNone, "Maximum bots was changed to %e0", e);
+   messageVals.clear();
+   messageVals.push_back(itos(count));
+   conn->s2cDisplayMessageE(GameConnection::ColorRed, SFXNone, "Maximum bots was changed to %e0", messageVals);
 }
 
 
@@ -3387,11 +3415,11 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickee
    // Get rid of robots that have the to-be-kicked name
    getGame()->deleteBot(kickeeName);
 
-   Vector<StringTableEntry> e;
-   e.push_back(kickeeName);                     
-   e.push_back(sourceClientInfo->getName());    // --> Name of player doing the administering
+   messageVals.clear();
+   messageVals.push_back(kickeeName);                     
+   messageVals.push_back(sourceClientInfo->getName());    // --> Name of player doing the administering
 
-   broadcastMessage(GameConnection::ColorAqua, SFXIncomingMessage, "%e0 was kicked from the game by %e1.", e);
+   broadcastMessage(GameConnection::ColorAqua, SFXIncomingMessage, "%e0 was kicked from the game by %e1.", messageVals);
 }
 
 
