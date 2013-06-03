@@ -2221,7 +2221,7 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
    else
       gc->c2sRequestLevelChange(index, false);           // The selection index is the level to load
 
-   getUIManager()->reactivate(getUIManager()->getUI<GameMenuUserInterface>());  // Back to the game menu
+   getUIManager()->reactivate(getUIManager()->getUI<GameUserInterface>());  // Back to the game
 }
 
 
