@@ -384,6 +384,23 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class RobotsMenuUserInterface : public MenuUserInterface
+{
+private:
+   typedef MenuUserInterface Parent;
+
+public:
+   explicit RobotsMenuUserInterface(ClientGame *game);        // Constructor
+   virtual ~RobotsMenuUserInterface();
+
+   void onActivate();
+   void onEscape();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class LevelMenuSelectUserInterface : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;

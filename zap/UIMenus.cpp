@@ -1866,6 +1866,12 @@ static void restartGameCallback(ClientGame *game, U32 unused)
 }
 
 
+static void robotsGameCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate<RobotsMenuUserInterface>();
+}
+
+
 static void levelChangeOrAdminPWCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->activate<LevelChangeOrAdminPasswordEntryUserInterface>();
@@ -1905,6 +1911,7 @@ void GameMenuUserInterface::buildMenu()
    {
       if(gc->getClientInfo()->isLevelChanger())
       {
+         addMenuItem(new MenuItem("ROBOTS",               robotsGameCallback,     "", KEY_B));
          addMenuItem(new MenuItem("PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L, KEY_P));
          addMenuItem(new MenuItem("ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2));
          addMenuItem(new MenuItem("RESTART LEVEL",        restartGameCallback,    "", KEY_R));
@@ -2037,6 +2044,138 @@ void LevelMenuUserInterface::onActivate()
 
 
 void LevelMenuUserInterface::onEscape()
+{
+   getUIManager()->reactivatePrevUI();    // to mGameUserInterface
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+RobotsMenuUserInterface::RobotsMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
+{
+   // Do nothing
+}
+
+
+// Destructor
+RobotsMenuUserInterface::~RobotsMenuUserInterface()
+{
+   // Do nothing
+}
+
+
+static void moreRobotsAcceptCallback(ClientGame *game, U32 index)
+{
+   game->countTeamPlayers();
+
+   S32 teamCount = game->getTeamCount();
+
+   // Find largest team player count
+   S32 largestTeamCount = 0;
+   for(S32 i = 0; i < teamCount; i++)
+   {
+      TNLAssert(dynamic_cast<Team *>(game->getTeam(i)), "Invalid team");
+      S32 currentCount = static_cast<Team *>(game->getTeam(i))->getPlayerBotCount();
+
+      if(currentCount > largestTeamCount)
+         largestTeamCount = currentCount;
+   }
+
+   // Determine if there are uneven teams; if so, count up the bots we'll need to add.  We'll
+   // add bots until all teams are even
+   S32 neededBotCount = 0;
+   for(S32 i = 0; i < teamCount; i++)
+   {
+      Team *team = static_cast<Team *>(game->getTeam(i));
+      if(team->getPlayerBotCount() < largestTeamCount)
+         neededBotCount += largestTeamCount - team->getPlayerBotCount();
+   }
+
+   // Add bots to fill up the teams
+   if(neededBotCount != 0)
+      game->getGameType()->c2sAddBots(neededBotCount, Vector<StringTableEntry>());
+   // Else add a bot to every team
+   else
+      game->getGameType()->c2sAddBots(teamCount, Vector<StringTableEntry>());
+
+   // Back to the game!
+   game->getUIManager()->reactivate(game->getUIManager()->getUI<GameUserInterface>());
+}
+
+
+static void fewerRobotsAcceptCallback(ClientGame *game, U32 index)
+{
+   game->countTeamPlayers();
+
+   S32 teamCount = game->getTeamCount();
+
+   // Find smallest team player count
+   S32 smallestTeamCount = S32_MAX;
+   for(S32 i = 0; i < teamCount; i++)
+   {
+      TNLAssert(dynamic_cast<Team *>(game->getTeam(i)), "Invalid team");
+      S32 currentCount = static_cast<Team *>(game->getTeam(i))->getPlayerBotCount();
+
+      if(currentCount < smallestTeamCount)
+         smallestTeamCount = currentCount;
+   }
+
+   // Determine if we should remove some bots because teams are uneven
+   S32 numBotsToRemove = 0;
+   for(S32 i = 0; i < teamCount; i++)
+   {
+      Team *team = static_cast<Team *>(game->getTeam(i));
+
+      // Determine how many bots we can remove from this team if it more players than
+      // the smallest team
+      S32 surplus = team->getPlayerBotCount() - smallestTeamCount;
+      if(surplus > team->getBotCount())
+         surplus = team->getBotCount();
+
+      if(surplus > 0)
+         numBotsToRemove += surplus;
+   }
+
+   // Now remove bots.  Note that this assumes bots will be removed from the team with
+   // the greatest amount
+   //
+   // Remove bots if uneven teams
+   if(numBotsToRemove != 0)
+      for(S32 i = 0; i < numBotsToRemove; i++)
+         game->getGameType()->c2sKickBot();
+
+   // Else remove a bot from every team that has one.  This isn't perfect, but it'll do
+   else
+      for(S32 i = 0; i < teamCount; i++)
+         if(static_cast<Team *>(game->getTeam(i))->getBotCount() > 0)
+            game->getGameType()->c2sKickBot();
+
+   game->getUIManager()->reactivate(game->getUIManager()->getUI<GameUserInterface>());
+}
+
+
+static void removeRobotsAcceptCallback(ClientGame *game, U32 index)
+{
+   game->getGameType()->c2sKickBots();
+   game->getUIManager()->reactivate(game->getUIManager()->getUI<GameUserInterface>());
+}
+
+
+void RobotsMenuUserInterface::onActivate()
+{
+   Parent::onActivate();
+
+   clearMenuItems();
+
+   addMenuItem(new MenuItem("MORE ROBOTS", moreRobotsAcceptCallback, "Add a robot to each team", KEY_M));
+   addMenuItem(new MenuItem("FEWER ROBOTS", fewerRobotsAcceptCallback, "Remove a robot from each team", KEY_F));
+   addMenuItem(new MenuItem("REMOVE ALL ROBOTS", removeRobotsAcceptCallback, "Remove all robots from the game", KEY_R));
+}
+
+
+void RobotsMenuUserInterface::onEscape()
 {
    getUIManager()->reactivatePrevUI();    // to mGameUserInterface
 }
