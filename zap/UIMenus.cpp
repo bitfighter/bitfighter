@@ -1861,7 +1861,7 @@ static void chooseNewLevelCallback(ClientGame *game, U32 unused)
 
 static void restartGameCallback(ClientGame *game, U32 unused)
 {
-   game->getConnectionToServer()->c2sRequestLevelChange(-2, false);
+   game->getConnectionToServer()->c2sRequestLevelChange(REPLAY_LEVEL, false);
    game->getUIManager()->reactivatePrevUI();     // And back to our regularly scheduled programming! 
 }
 
