@@ -810,10 +810,10 @@ void SymbolButtonSymbol::render(const Point &pos) const
          JoystickRender::drawPlaystationTriangle(renderPos);
          break;
       case Joystick::ButtonSymbolSmallLeftTriangle:
-         JoystickRender::drawSmallLeftTriangle(renderPos);
+         JoystickRender::drawSmallLeftTriangle(renderPos + Point(0, -1));
          break;
       case Joystick::ButtonSymbolSmallRightTriangle:
-         JoystickRender::drawSmallRightTriangle(renderPos);
+         JoystickRender::drawSmallRightTriangle(renderPos + Point(0, -1));
          break;
       case Joystick::ButtonSymbolNone:
       default:
