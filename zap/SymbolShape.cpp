@@ -28,6 +28,7 @@
 #include "FontManager.h"
 #include "InputCode.h"
 #include "Joystick.h"
+#include "JoystickRender.h"
 
 #include "gameObjectRender.h"
 #include "Colors.h"
@@ -347,15 +348,24 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape)
 
 static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label)
 {
+   static const S32 LabelSize = 13;
    Vector<SymbolShapePtr> symbols;
    
    // Get the button outline
    SymbolShapePtr shapePtr = getSymbol(shape);
 
    symbols.push_back(shapePtr);
-   symbols.push_back(SymbolShapePtr(new SymbolText(label, 13 + shapePtr->getLabelSizeAdjustor(), KeyContext, shapePtr->getLabelOffset())));
 
-   return SymbolShapePtr(new LayeredSymbolString(symbols, 13, KeyContext));
+   // Handle some special cases -- there are some button labels that refer to special glyphs
+   Joystick::ButtonSymbol buttonSymbol = Joystick::stringToButtonSymbol(label);
+
+   if(buttonSymbol == Joystick::ButtonSymbolNone)
+      symbols.push_back(SymbolShapePtr(new SymbolText(label, LabelSize + shapePtr->getLabelSizeAdjustor(), 
+                                                      KeyContext, shapePtr->getLabelOffset())));
+   else
+      symbols.push_back(SymbolShapePtr(new SymbolButtonSymbol(buttonSymbol)));
+
+   return SymbolShapePtr(new LayeredSymbolString(symbols, LabelSize, KeyContext));
 }
 
 
@@ -761,6 +771,54 @@ SymbolCircle::~SymbolCircle()
 void SymbolCircle::render(const Point &center) const
 {
    drawCircle(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - 1), (F32)mWidth / 2);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+SymbolButtonSymbol::SymbolButtonSymbol(Joystick::ButtonSymbol glyph)
+{
+   mGlyph = glyph;
+}
+
+
+SymbolButtonSymbol::~SymbolButtonSymbol()
+{
+   // Do nothing
+}
+
+
+void SymbolButtonSymbol::render(const Point &pos) const
+{
+   // Get symbol in the proper position for rendering -- it's either this or change all the render methods
+   Point renderPos = pos + Point(0, -6);   
+
+   switch(mGlyph)
+   {
+      case Joystick::ButtonSymbolPsCircle:
+         JoystickRender::drawPlaystationCircle(renderPos);
+         break;
+      case Joystick::ButtonSymbolPsCross:
+         JoystickRender::drawPlaystationCross(renderPos);
+         break;
+      case Joystick::ButtonSymbolPsSquare:
+         JoystickRender::drawPlaystationSquare(renderPos);
+         break;
+      case Joystick::ButtonSymbolPsTriangle:
+         JoystickRender::drawPlaystationTriangle(renderPos);
+         break;
+      case Joystick::ButtonSymbolSmallLeftTriangle:
+         JoystickRender::drawSmallLeftTriangle(renderPos);
+         break;
+      case Joystick::ButtonSymbolSmallRightTriangle:
+         JoystickRender::drawSmallRightTriangle(renderPos);
+         break;
+      case Joystick::ButtonSymbolNone:
+      default:
+         TNLAssert(false, "Shouldn't be here!");
+   }
 }
 
 

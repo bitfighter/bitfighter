@@ -29,6 +29,8 @@
 #include "FontContextEnum.h"
 #include "InputCodeEnum.h"
 
+#include "Joystick.h"      // For ButtonSymbol enum
+
 #include "Color.h"
 #include "Point.h"
 #include "tnlVector.h"
@@ -165,6 +167,22 @@ public:
    virtual ~SymbolCircle();
 
    virtual void render(const Point &pos) const;
+};
+
+
+// Small glyphs for rendering on joystick buttons
+class SymbolButtonSymbol : public SymbolShape
+{
+   typedef SymbolShape Parent;
+
+private:
+   Joystick::ButtonSymbol mGlyph;
+
+public:
+      SymbolButtonSymbol(Joystick::ButtonSymbol glyph);
+      ~SymbolButtonSymbol();
+
+      void render(const Point &pos) const;
 };
 
 
