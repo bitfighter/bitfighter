@@ -294,8 +294,8 @@ static const S32 rectButtonWidth = 24;
 static const S32 rectButtonHeight = 18;
 static const S32 smallRectButtonWidth = 19;
 static const S32 smallRectButtonHeight = 15;
-static const S32 horizEllipseButtonRadiusX = 14;
-static const S32 horizEllipseButtonRadiusY = 8;
+static const S32 horizEllipseButtonDiameterX = 28;
+static const S32 horizEllipseButtonDiameterY = 16;
 static const S32 rightTriangleWidth = 28;
 static const S32 rightTriangleHeight = 18;
 static const S32 RectRadius = 3;
@@ -332,8 +332,8 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape)
                                                           RoundedRectRadius));
                                                      
       case Joystick::ButtonShapeHorizEllipse:
-         return SymbolShapePtr(new SymbolHorizEllipse(horizEllipseButtonRadiusX, 
-                                                      horizEllipseButtonRadiusY));
+         return SymbolShapePtr(new SymbolHorizEllipse(horizEllipseButtonDiameterX, 
+                                                      horizEllipseButtonDiameterY));
 
       case Joystick::ButtonShapeRightTriangle:
          return SymbolShapePtr(new SymbolRightTriangle(rightTriangleWidth));
@@ -670,9 +670,9 @@ void SymbolSmallRoundedRect::render(const Point &center) const
 
 
 // Constructor
-SymbolHorizEllipse::SymbolHorizEllipse(S32 width, S32 height) : Parent(width, height)
+SymbolHorizEllipse::SymbolHorizEllipse(S32 width, S32 height) : Parent(width + 2, height)
 {
-   // Do nothing
+   mLabelOffset.set(0, -1);
 }
 
 
@@ -685,14 +685,17 @@ SymbolHorizEllipse::~SymbolHorizEllipse()
 
 void SymbolHorizEllipse::render(const Point &center) const
 {
-   Point cen = center - Point(0, mHeight / 2);
+   S32 w = mWidth / 2;
+   S32 h = mHeight / 2;
+
+   Point cen = center - Point(0, h - 1);
 
    // First the fill
-   drawFilledEllipse(cen, mWidth, mHeight, 0);
+   drawFilledEllipse(cen, w, h, 0);
 
    // Outline in white
    glColor(Colors::white);
-   drawEllipse(cen, mWidth, mHeight, 0);
+   drawEllipse(cen, w, h, 0);
 }
 
 

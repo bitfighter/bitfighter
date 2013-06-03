@@ -1232,7 +1232,7 @@ void InputOptionsMenuUserInterface::render()
          if(i < LAST_CONTROLLER_BUTTON)
          {
             //symbols.push_back(SymbolString::getBlankSymbol(8));      // Provide a little breathing room
-            symbols.push_back(SymbolString::getSymbolText("A", 16, MenuContext, &Colors::cyan));
+            symbols.push_back(SymbolString::getSymbolText("H", 16, MenuContext, &Colors::cyan));
          }
       }
 
