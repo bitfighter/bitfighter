@@ -3052,8 +3052,28 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
       return;
    }
 
-   // Only delete one robot - the most recently added
-   getGame()->deleteBot(botCount - 1);
+
+   // Find team with bots that has the most players
+   getGame()->countTeamPlayers();
+
+   S32 largestTeamCount = 0;
+   S32 largestTeamIndex = 0;
+
+   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+   {
+      TNLAssert(dynamic_cast<Team *>(getGame()->getTeam(i)), "Invalid team");
+      Team *team = static_cast<Team *>(getGame()->getTeam(i));
+
+      // Must have at least one bot!
+      if(team->getPlayerBotCount() > largestTeamCount && team->getBotCount() > 0)
+      {
+         largestTeamCount = team->getPlayerBotCount();
+         largestTeamIndex = i;
+      }
+   }
+
+   // Delete one robot from our largest team
+   getGame()->deleteBotFromTeam(largestTeamIndex);
 
    // Disable bot balancing
    mBotBalancingDisabled = true;
