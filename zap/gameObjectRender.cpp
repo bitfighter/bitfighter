@@ -2735,7 +2735,6 @@ void drawGear(const Point &center, S32 teeth, F32 radius1, F32 radius2, F32 ang1
 }
 
 
-
 void render25FlagsBadge(F32 x, F32 y, F32 rad)
 {
    glPushMatrix();
