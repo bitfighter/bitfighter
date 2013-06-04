@@ -70,8 +70,8 @@ public:
    virtual S32 getWidth() const;
    virtual S32 getHeight() const;
    virtual bool getHasGap() const;  // Returns true if we automatically render a vertical blank space after this item
-   Point getLabelOffset() const;
-   S32 getLabelSizeAdjustor() const;
+   virtual Point getLabelOffset(const string &label, S32 labelSize) const;
+   virtual S32 getLabelSizeAdjustor(const string &label, S32 labelSize) const;
 };
 
 
@@ -167,6 +167,8 @@ public:
    virtual ~SymbolCircle();
 
    virtual void render(const Point &pos) const;
+   S32 getLabelSizeAdjustor(const string &label, S32 labelSize) const;
+   Point getLabelOffset(const string &label, S32 labelSize) const;
 };
 
 

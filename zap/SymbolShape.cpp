@@ -365,8 +365,8 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label
    Joystick::ButtonSymbol buttonSymbol = Joystick::stringToButtonSymbol(label);
 
    if(buttonSymbol == Joystick::ButtonSymbolNone)
-      symbols.push_back(SymbolShapePtr(new SymbolText(label, LabelSize + shapePtr->getLabelSizeAdjustor(), 
-                                                      KeyContext, shapePtr->getLabelOffset())));
+      symbols.push_back(SymbolShapePtr(new SymbolText(label, LabelSize + shapePtr->getLabelSizeAdjustor(label, LabelSize), 
+                                                      KeyContext, shapePtr->getLabelOffset(label, LabelSize))));
    else
       symbols.push_back(SymbolShapePtr(new SymbolButtonSymbol(buttonSymbol)));
 
@@ -557,13 +557,13 @@ bool SymbolShape::getHasGap() const
 }
 
 
-Point SymbolShape::getLabelOffset() const
+Point SymbolShape::getLabelOffset(const string &label, S32 labelSize) const
 {
    return mLabelOffset;
 }
 
 
-S32 SymbolShape::getLabelSizeAdjustor() const
+S32 SymbolShape::getLabelSizeAdjustor(const string &label, S32 labelSize) const
 {
    return mLabelSizeAdjustor;
 }
@@ -787,6 +787,27 @@ void SymbolCircle::render(const Point &center) const
       glColor(mColor);
 
    drawCircle(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - 1), (F32)mWidth / 2);
+}
+
+
+static const S32 LabelAutoShrinkThreshold = 15;
+
+S32 SymbolCircle::getLabelSizeAdjustor(const string &label, S32 labelSize) const
+{
+   // Shrink labels a little when the text is uncomfortably big for the button
+   if(getStringWidth(labelSize, label.c_str()) > LabelAutoShrinkThreshold)
+      return mLabelSizeAdjustor - 2;
+   
+   return mLabelSizeAdjustor;
+}
+
+
+Point SymbolCircle::getLabelOffset(const string &label, S32 labelSize) const
+{
+   if(getStringWidth(labelSize, label.c_str()) > LabelAutoShrinkThreshold)
+      return mLabelOffset + Point(0, -1);
+
+   return mLabelOffset;
 }
 
 
