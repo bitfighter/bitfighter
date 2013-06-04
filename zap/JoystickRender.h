@@ -35,6 +35,7 @@ using namespace TNL;
 namespace Zap
 {
 
+class Color;
 
 class JoystickRender
 {
@@ -71,7 +72,7 @@ public:
    static void drawSmallRightTriangle(const Point & center);
    static void drawButtonRightTriangle(const Point & center);
 
-   static inline void setButtonColor(bool activated);
+   static inline const Color *getButtonColor(bool activated);
 };
 
 } /* namespace Zap */

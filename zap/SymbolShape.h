@@ -58,9 +58,11 @@ protected:
    S32 mWidth, mHeight;
    Point mLabelOffset;
    S32 mLabelSizeAdjustor;
+   bool mHasColor;
+   Color mColor;
 
 public:
-   SymbolShape(S32 width = 0, S32 height = 0);
+   SymbolShape(S32 width = 0, S32 height = 0, const Color *color = NULL);
    virtual ~SymbolShape();
 
    virtual void render(const Point &pos) const = 0;
@@ -68,8 +70,8 @@ public:
    virtual S32 getWidth() const;
    virtual S32 getHeight() const;
    virtual bool getHasGap() const;  // Returns true if we automatically render a vertical blank space after this item
-   Point getLabelOffset();
-   S32 getLabelSizeAdjustor();
+   Point getLabelOffset() const;
+   S32 getLabelSizeAdjustor() const;
 };
 
 
@@ -93,8 +95,6 @@ class SymbolHorizLine : public SymbolShape
    typedef SymbolShape Parent;
 
 private:
-   Color mColor;
-   bool mUseColor;
    S32 mVertOffset;
 
 public:
@@ -114,7 +114,7 @@ protected:
    S32 mRadius;
 
 public:
-   SymbolRoundedRect(S32 width, S32 height, S32 radius);   // Constructor
+   SymbolRoundedRect(S32 width, S32 height, S32 radius, const Color *color);   // Constructor
    virtual ~SymbolRoundedRect();
 
    virtual void render(const Point &pos) const;
@@ -127,7 +127,7 @@ class SymbolSmallRoundedRect : public SymbolRoundedRect
    typedef SymbolRoundedRect Parent;
 
 public:
-   SymbolSmallRoundedRect(S32 width, S32 height, S32 radius);   // Constructor
+   SymbolSmallRoundedRect(S32 width, S32 height, S32 radius, const Color *color);   // Constructor
    virtual ~SymbolSmallRoundedRect();
 
    void render(const Point &pos) const;
@@ -139,7 +139,7 @@ class SymbolHorizEllipse : public SymbolShape
    typedef SymbolShape Parent;
 
 public:
-   SymbolHorizEllipse(S32 width, S32 height); // Constructor
+   SymbolHorizEllipse(S32 width, S32 height, const Color *color); // Constructor
    virtual ~SymbolHorizEllipse();
 
    void render(const Point &pos) const;
@@ -151,7 +151,7 @@ class SymbolRightTriangle : public SymbolShape
    typedef SymbolShape Parent;
 
 public:
-   SymbolRightTriangle(S32 width); // Constructor
+   SymbolRightTriangle(S32 width, const Color *color); // Constructor
    virtual ~SymbolRightTriangle();
 
    void render(const Point &pos) const;
@@ -163,7 +163,7 @@ class SymbolCircle : public SymbolShape
    typedef SymbolShape Parent;
 
 public:
-   SymbolCircle(S32 radius); // Constructor
+   SymbolCircle(S32 radius, const Color *color); // Constructor
    virtual ~SymbolCircle();
 
    virtual void render(const Point &pos) const;
@@ -209,8 +209,6 @@ protected:
    string mText;
    FontContext mFontContext;
    S32 mFontSize;
-   Color mColor;
-   bool mUseColor;
 
 public:
    SymbolText(const string &text, S32 fontSize, FontContext context, const Color *color = NULL);
@@ -240,9 +238,6 @@ public:
 class SymbolUnknown : public SymbolKey
 {
    typedef SymbolKey Parent;
-
-private:
-   bool mUseColor;
 
 public:
    SymbolUnknown(const Color *color);

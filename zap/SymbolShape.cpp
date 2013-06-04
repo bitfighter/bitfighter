@@ -305,39 +305,44 @@ static const S32 RoundedRectRadius = 5;
 
 static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color);
 
-static SymbolShapePtr getSymbol(Joystick::ButtonShape shape)
+static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const Color *color)
 {
    switch(shape)
    {
       case Joystick::ButtonShapeRound:
-         return SymbolShapePtr(new SymbolCircle(buttonHalfHeight));
+         return SymbolShapePtr(new SymbolCircle(buttonHalfHeight, color));
 
       case Joystick::ButtonShapeRect:
          return SymbolShapePtr(new SymbolRoundedRect(rectButtonWidth, 
                                                      rectButtonHeight, 
-                                                     RectRadius));
+                                                     RectRadius,
+                                                     color));
 
       case Joystick::ButtonShapeSmallRect:
          return SymbolShapePtr(new SymbolSmallRoundedRect(smallRectButtonWidth, 
                                                           smallRectButtonHeight, 
-                                                          RectRadius));
+                                                          RectRadius,
+                                                          color));
 
       case Joystick::ButtonShapeRoundedRect:
          return SymbolShapePtr(new SymbolRoundedRect(rectButtonWidth, 
                                                      rectButtonHeight, 
-                                                     RoundedRectRadius));
+                                                     RoundedRectRadius,
+                                                     color));
 
       case Joystick::ButtonShapeSmallRoundedRect:
          return SymbolShapePtr(new SymbolSmallRoundedRect(smallRectButtonWidth, 
                                                           smallRectButtonHeight, 
-                                                          RoundedRectRadius));
+                                                          RoundedRectRadius,
+                                                          color));
                                                      
       case Joystick::ButtonShapeHorizEllipse:
          return SymbolShapePtr(new SymbolHorizEllipse(horizEllipseButtonDiameterX, 
-                                                      horizEllipseButtonDiameterY));
+                                                      horizEllipseButtonDiameterY,
+                                                      color));
 
       case Joystick::ButtonShapeRightTriangle:
-         return SymbolShapePtr(new SymbolRightTriangle(rightTriangleWidth));
+         return SymbolShapePtr(new SymbolRightTriangle(rightTriangleWidth, color));
 
       default:
          //TNLAssert(false, "Unknown button shape!");
@@ -346,13 +351,13 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape)
 }
 
 
-static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label)
+static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label, const Color *color)
 {
    static const S32 LabelSize = 13;
    Vector<SymbolShapePtr> symbols;
    
    // Get the button outline
-   SymbolShapePtr shapePtr = getSymbol(shape);
+   SymbolShapePtr shapePtr = getSymbol(shape, color);
 
    symbols.push_back(shapePtr);
 
@@ -420,8 +425,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
       // This gets us the button shape index, which will tell us what to draw... something like ButtonShapeRound
       Joystick::ButtonShape buttonShape = buttonInfo.buttonShape;
 
-      SymbolShapePtr symbol = getSymbol(buttonShape, buttonInfo.label);
-      //Color *buttonColor = &buttonInfo.color;
+      SymbolShapePtr symbol = getSymbol(buttonShape, buttonInfo.label, &buttonInfo.color);
 
       return symbol;
 
@@ -519,10 +523,11 @@ void LayeredSymbolString::render(S32 x, S32 y, Alignment alignment) const
 ////////////////////////////////////////
 
 
-SymbolShape::SymbolShape(S32 width, S32 height)
+SymbolShape::SymbolShape(S32 width, S32 height, const Color *color) : mColor(color)
 {
    mWidth = width;
    mHeight = height;
+   mHasColor = color != NULL;
    mLabelSizeAdjustor = 0;
 }
 
@@ -552,13 +557,13 @@ bool SymbolShape::getHasGap() const
 }
 
 
-Point SymbolShape::getLabelOffset()
+Point SymbolShape::getLabelOffset() const
 {
    return mLabelOffset;
 }
 
 
-S32 SymbolShape::getLabelSizeAdjustor()
+S32 SymbolShape::getLabelSizeAdjustor() const
 {
    return mLabelSizeAdjustor;
 }
@@ -569,7 +574,7 @@ S32 SymbolShape::getLabelSizeAdjustor()
 
 
 // Constructor
-SymbolBlank::SymbolBlank(S32 width, S32 height) : Parent(width, height)
+SymbolBlank::SymbolBlank(S32 width, S32 height) : Parent(width, height, NULL)
 {
    // Do nothing
 }
@@ -593,19 +598,15 @@ void SymbolBlank::render(const Point &center) const
 
 
 // Constructor
-SymbolHorizLine::SymbolHorizLine(S32 length, S32 height, const Color *color) : Parent(length, height),
-                                                                               mColor(color)
+SymbolHorizLine::SymbolHorizLine(S32 length, S32 height, const Color *color) : Parent(length, height, color)
 {
-   mUseColor = (color != NULL);
    mVertOffset = 0;
 }
 
 
 // Constructor
-SymbolHorizLine::SymbolHorizLine(S32 length, S32 vertOffset, S32 height, const Color *color) : Parent(length, height),
-                                                                                               mColor(color)
+SymbolHorizLine::SymbolHorizLine(S32 length, S32 vertOffset, S32 height, const Color *color) : Parent(length, height, color)
 {
-   mUseColor = (color != NULL);
    mVertOffset = vertOffset;
 }
 
@@ -619,7 +620,7 @@ SymbolHorizLine::~SymbolHorizLine()
 
 void SymbolHorizLine::render(const Point &center) const
 {
-   if(mUseColor)
+   if(mHasColor)
       glColor(mColor);
 
    drawHorizLine(center.x - mWidth / 2, center.x + mWidth / 2, center.y - mHeight / 2 + mVertOffset);
@@ -633,7 +634,7 @@ static const S32 BorderDecorationVertCenteringOffset = 2;   // Offset the border
 
 
 // Constructor
-SymbolRoundedRect::SymbolRoundedRect(S32 width, S32 height, S32 radius) : Parent(width, height)
+SymbolRoundedRect::SymbolRoundedRect(S32 width, S32 height, S32 radius, const Color *color) : Parent(width, height, color)
 {
    mRadius = radius;
 }
@@ -648,6 +649,9 @@ SymbolRoundedRect::~SymbolRoundedRect()
 
 void SymbolRoundedRect::render(const Point &center) const
 {
+   if(mHasColor)
+      glColor(mColor);
+
    drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - 1), mWidth, mHeight, mRadius);
 }
 
@@ -656,9 +660,9 @@ void SymbolRoundedRect::render(const Point &center) const
 ////////////////////////////////////////
 
 // Constructor
-SymbolSmallRoundedRect::SymbolSmallRoundedRect(S32 width, S32 height, S32 radius) : Parent(width, height, radius)
+SymbolSmallRoundedRect::SymbolSmallRoundedRect(S32 width, S32 height, S32 radius, const Color *color) : Parent(width, height, radius, color)
 {
-   mLabelOffset.set(0,-1);
+   mLabelOffset.set(0, -1);
 }
 
 
@@ -671,6 +675,9 @@ SymbolSmallRoundedRect::~SymbolSmallRoundedRect()
 
 void SymbolSmallRoundedRect::render(const Point &center) const
 {
+   if(mHasColor)
+      glColor(mColor);
+
    drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset + 2), mWidth, mHeight, mRadius);
 }
 
@@ -680,7 +687,7 @@ void SymbolSmallRoundedRect::render(const Point &center) const
 
 
 // Constructor
-SymbolHorizEllipse::SymbolHorizEllipse(S32 width, S32 height) : Parent(width + 2, height)
+SymbolHorizEllipse::SymbolHorizEllipse(S32 width, S32 height, const Color *color) : Parent(width + 2, height, color)
 {
    mLabelOffset.set(0, -1);
 }
@@ -698,6 +705,9 @@ void SymbolHorizEllipse::render(const Point &center) const
    S32 w = mWidth / 2;
    S32 h = mHeight / 2;
 
+   if(mHasColor)
+      glColor(mColor);
+
    Point cen = center - Point(0, h - 1);
 
    // First the fill
@@ -714,7 +724,7 @@ void SymbolHorizEllipse::render(const Point &center) const
 
 
 // Constructor
-SymbolRightTriangle::SymbolRightTriangle(S32 width) : Parent(width, 19)
+SymbolRightTriangle::SymbolRightTriangle(S32 width, const Color *color) : Parent(width, 19, color)
 {
    mLabelOffset.set(-5, -1);
    mLabelSizeAdjustor = -3;
@@ -745,6 +755,9 @@ static void drawButtonRightTriangle(const Point &center)
 
 void SymbolRightTriangle::render(const Point &center) const
 {
+   if(mHasColor)
+      glColor(mColor);
+
    Point cen(center.x -mWidth / 4, center.y);  // Need to off-center the label slightly for this button
    drawButtonRightTriangle(cen);
 }
@@ -755,7 +768,7 @@ void SymbolRightTriangle::render(const Point &center) const
 
 
 // Constructor
-SymbolCircle::SymbolCircle(S32 radius) : Parent(radius * 2, radius * 2)
+SymbolCircle::SymbolCircle(S32 radius, const Color *color) : Parent(radius * 2, radius * 2, color)
 {
    // Do nothing
 }
@@ -770,6 +783,9 @@ SymbolCircle::~SymbolCircle()
 
 void SymbolCircle::render(const Point &center) const
 {
+   if(mHasColor)
+      glColor(mColor);
+
    drawCircle(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - 1), (F32)mWidth / 2);
 }
 
@@ -827,7 +843,7 @@ void SymbolButtonSymbol::render(const Point &pos) const
 
 
 // Constructor
-SymbolGear::SymbolGear(S32 fontSize) : Parent(0)
+SymbolGear::SymbolGear(S32 fontSize) : Parent(0, NULL)
 {
    mWidth = S32(1.333f * fontSize);    // mWidth is effectively a diameter; we'll use mWidth / 2 for our rendering radius
    mHeight = mWidth;
@@ -853,28 +869,22 @@ void SymbolGear::render(const Point &center) const
 
 // Constructor with no vertical offset
 SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Color *color) : 
-                              Parent(getStringWidth(context, fontSize, text.c_str()), fontSize),
-                              mColor(color)
+                              Parent(getStringWidth(context, fontSize, text.c_str()), fontSize, color)
 {
    mText = text;
    mFontContext = context;
    mFontSize = fontSize;
-
-   mUseColor = (color != NULL);
 }
 
 
 // Constructor with vertical offset -- not used?
 SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Point &labelOffset, const Color *color) : 
-                                       Parent(getStringWidth(context, fontSize, text.c_str()), fontSize),
-                                       mColor(color)
+                                       Parent(getStringWidth(context, fontSize, text.c_str()), fontSize, color)
 {
    mText = text;
    mFontContext = context;
    mFontSize = fontSize;
    mLabelOffset = labelOffset;
-
-   mUseColor = (color != NULL);
 
    mHeight = fontSize;
 }
@@ -889,7 +899,7 @@ SymbolText::~SymbolText()
 
 void SymbolText::render(const Point &center) const
 {
-   if(mUseColor)
+   if(mHasColor)
       glColor(mColor);
 
    FontManager::pushFontContext(mFontContext);
@@ -952,7 +962,7 @@ void SymbolKey::render(const Point &center) const
    const Point boxVertAdj  = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - KeyFontSize / 2);   
    const Point textVertAdj = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset);
 
-   if(mUseColor)
+   if(mHasColor)
       glColor(mColor);
 
    // Handle some special cases:
@@ -980,12 +990,9 @@ void SymbolKey::render(const Point &center) const
 // Symbol to be used when we don't know what symbol to use
 
 // Constructor
-SymbolUnknown::SymbolUnknown(const Color *color) : Parent("~?~")
+SymbolUnknown::SymbolUnknown(const Color *color) : Parent("~?~", &Colors::red)
 {
-   if(color)
-      mColor = Colors::red;
-
-   mUseColor = (color != NULL);
+   // Do nothing
 }
 
 

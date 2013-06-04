@@ -49,12 +49,12 @@ JoystickRender::~JoystickRender()
 }
 
 
-inline void JoystickRender::setButtonColor(bool activated)
+inline const Color *JoystickRender::getButtonColor(bool activated)
 {
    if(activated)
-      glColor(Colors::red);
-   else
-      glColor(Colors::white);
+      return &Colors::red;
+
+   return &Colors::white;
 }
 
 
@@ -74,7 +74,7 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    Point point7;
 
    // Up arrow
-   setButtonColor(upActivated);
+   glColor(getButtonColor(upActivated));
    point1 = (center + Point(-1, -2) * radius);
    point2 = (center + Point(-1, -4) * radius);
    point3 = (center + Point(-3, -4) * radius);
@@ -94,7 +94,7 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    renderVertexArray(vertices, 7, GL_LINE_LOOP);
 
    // Down arrow
-   setButtonColor(downActivated);
+   glColor(getButtonColor(downActivated));
    point1 = (center + Point(-1, 2) * radius);
    point2 = (center + Point(-1, 4) * radius);
    point3 = (center + Point(-3, 4) * radius);
@@ -114,7 +114,7 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    renderVertexArray(vertices2, 7, GL_LINE_LOOP);
 
    // Left arrow
-   setButtonColor(leftActivated);
+   glColor(getButtonColor(leftActivated));
    point1 = (center + Point(-2, -1) * radius);
    point2 = (center + Point(-4, -1) * radius);
    point3 = (center + Point(-4, -3) * radius);
@@ -134,7 +134,7 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    renderVertexArray(vertices3, 7, GL_LINE_LOOP);
 
    // Right arrow
-   setButtonColor(rightActivated);
+   glColor(getButtonColor(rightActivated));
    point1 = (center + Point(2, -1) * radius);
    point2 = (center + Point(4, -1) * radius);
    point3 = (center + Point(4, -3) * radius);
@@ -259,18 +259,16 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
    Point location(x,y);
    Point center = location + Point(0, buttonHalfHeight);
 
-   // Change button outline color if activated
-   setButtonColor(activated);
+   const Color *color = getButtonColor(activated);
 
-
-      // Create some shape objects to help us draw our buttons
-   UI::SymbolRoundedRect   shapeRect(rectButtonWidth, rectButtonHeight, 3);
-   UI::SymbolRoundedRect   shapeSmallRect(smallRectButtonWidth, smallRectButtonHeight, 3);
-   UI::SymbolRoundedRect   shapeRoundedRect(rectButtonWidth, rectButtonHeight, 5);
-   UI::SymbolRoundedRect   shapeSmallRoundedRect(smallRectButtonWidth, smallRectButtonHeight, 5);
-   UI::SymbolHorizEllipse  shapeHorizEllipse(horizEllipseButtonRadiusX, horizEllipseButtonRadiusY);
-   UI::SymbolRightTriangle shapeRightTriangle(rightTriangleWidth);
-   UI::SymbolCircle        shapeCircle(buttonHalfHeight);
+   // Create some shape objects to help us draw our buttons
+   UI::SymbolRoundedRect   shapeRect(rectButtonWidth, rectButtonHeight, 3, color);
+   UI::SymbolRoundedRect   shapeSmallRect(smallRectButtonWidth, smallRectButtonHeight, 3, color);
+   UI::SymbolRoundedRect   shapeRoundedRect(rectButtonWidth, rectButtonHeight, 5, color);
+   UI::SymbolRoundedRect   shapeSmallRoundedRect(smallRectButtonWidth, smallRectButtonHeight, 5, color);
+   UI::SymbolHorizEllipse  shapeHorizEllipse(horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, color);
+   UI::SymbolRightTriangle shapeRightTriangle(rightTriangleWidth, color);
+   UI::SymbolCircle        shapeCircle(buttonHalfHeight, color);
 
 
    // Render joystick button shape

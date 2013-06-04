@@ -1228,7 +1228,7 @@ void InputOptionsMenuUserInterface::render()
 
       for(U32 i = FIRST_CONTROLLER_BUTTON; i <= LAST_CONTROLLER_BUTTON; i++)
       {
-         symbols.push_back(SymbolString::getControlSymbol(InputCode(i)));
+         symbols.push_back(SymbolString::getControlSymbol(InputCode(i), &Colors::blue40));
          if(i < LAST_CONTROLLER_BUTTON)
          {
             //symbols.push_back(SymbolString::getBlankSymbol(8));      // Provide a little breathing room
