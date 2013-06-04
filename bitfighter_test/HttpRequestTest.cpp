@@ -64,7 +64,6 @@ TEST_F(HttpRequestTest, postData)
    req.setMethod(HttpRequest::PostMethod);
 
    string result = req.buildRequest();
-   cout << result << endl;
    EXPECT_NE(string::npos, result.find("Content-Disposition: form-data; name=\"testKey\"\r\n\r\ntestValue\r\n--"));
    EXPECT_NE(string::npos, result.find("Content-Disposition: form-data; name=\"fieldName\"; filename=\"filename.txt\""));
 }
