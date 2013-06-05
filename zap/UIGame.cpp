@@ -443,6 +443,8 @@ void GameUserInterface::render()
    if(gameType)
       gameType->renderInterfaceOverlay(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
 
+   renderLevelInfo();
+
    renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
    
    renderShutdownMessage();
@@ -2322,8 +2324,6 @@ void GameUserInterface::renderGameNormal()
       renderEnergyGuage(ship->mEnergy);   
 
    //renderOverlayMap();     // Draw a floating overlay map
-
-   renderLevelInfo();
 }
 
 
@@ -2475,8 +2475,6 @@ void GameUserInterface::renderGameCommander()
    getUIManager()->getUI<GameUserInterface>()->renderEngineeredItemDeploymentMarker(ship);
 
    glPopMatrix();
-
-   renderLevelInfo();
 }
 
 
