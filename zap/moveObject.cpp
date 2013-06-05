@@ -1242,7 +1242,9 @@ void MountableItem::dismount(DismountMode dismountMode)
    if(isServer())
       getGame()->itemDropped(ship, this, dismountMode);      // Server-only method; generally broadcasts message and things like that
 
-   mDroppedTimer.reset();
+   // Allow immediate pickup of the flag only if the carrier was killed
+   if(dismountMode != DISMOUNT_MOUNT_WAS_KILLED)
+      mDroppedTimer.reset();
 }
 
 
