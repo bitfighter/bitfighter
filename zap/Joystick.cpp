@@ -150,6 +150,10 @@ bool Joystick::initJoystick(GameSettings *settings)
 
 bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 {
+   // Check that there is a joystick available
+   if(SDL_NumJoysticks() == 0)
+      return false;
+
    if(settings->getInputMode() == InputModeKeyboard &&
         (hasBeenOpenedBefore || settings->getIniSettings()->alwaysStartInKeyboardMode)) // Don't enable joystick at all in keyboard mode
          return true;
