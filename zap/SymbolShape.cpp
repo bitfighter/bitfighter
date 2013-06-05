@@ -781,12 +781,13 @@ SymbolCircle::~SymbolCircle()
 }
 
 
-void SymbolCircle::render(const Point &center) const
+void SymbolCircle::render(const Point &pos) const
 {
    if(mHasColor)
       glColor(mColor);
 
-   drawCircle(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - 1), (F32)mWidth / 2);
+   // Adjust our position's y coordinate to be the center of the circle
+   drawCircle(pos - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - 1), (F32)mWidth / 2);
 }
 
 
@@ -878,9 +879,11 @@ SymbolGear::~SymbolGear()
 }
 
 
-void SymbolGear::render(const Point &center) const
+void SymbolGear::render(const Point &pos) const
 {
-   renderLoadoutZoneIcon(center + Point(0,2), mWidth / 2);    // Slight downward adjustment to position to better align with text
+   // We are given the bottom y position of the line, but the icon expects the center
+   Point center(pos.x, (pos.y - mHeight/2) + 2); // Slight downward adjustment to position to better align with text
+   renderLoadoutZoneIcon(center, mWidth / 2);
 }
 
 
