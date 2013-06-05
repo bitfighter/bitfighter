@@ -631,10 +631,12 @@ void SymbolHorizLine::render(const Point &center) const
 ////////////////////////////////////////
 
 static const S32 BorderDecorationVertCenteringOffset = 2;   // Offset the border of keys and buttons to better center them in the flow of text
+static const S32 SpacingAdjustor = 2;
 
 
 // Constructor
-SymbolRoundedRect::SymbolRoundedRect(S32 width, S32 height, S32 radius, const Color *color) : Parent(width, height, color)
+SymbolRoundedRect::SymbolRoundedRect(S32 width, S32 height, S32 radius, const Color *color) : 
+                                                                  Parent(width + SpacingAdjustor, height + SpacingAdjustor, color)
 {
    mRadius = radius;
 }
@@ -652,7 +654,8 @@ void SymbolRoundedRect::render(const Point &center) const
    if(mHasColor)
       glColor(mColor);
 
-   drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - 1), mWidth, mHeight, mRadius);
+   drawRoundedRect(center - Point(0, (mHeight - SpacingAdjustor) / 2 - BorderDecorationVertCenteringOffset - 1), 
+                   mWidth - SpacingAdjustor, mHeight - SpacingAdjustor, mRadius);
 }
 
 
@@ -660,7 +663,8 @@ void SymbolRoundedRect::render(const Point &center) const
 ////////////////////////////////////////
 
 // Constructor
-SymbolSmallRoundedRect::SymbolSmallRoundedRect(S32 width, S32 height, S32 radius, const Color *color) : Parent(width, height, radius, color)
+SymbolSmallRoundedRect::SymbolSmallRoundedRect(S32 width, S32 height, S32 radius, const Color *color) : 
+                                                               Parent(width + SpacingAdjustor, height + SpacingAdjustor, radius, color)
 {
    mLabelOffset.set(0, -1);
 }
@@ -678,7 +682,8 @@ void SymbolSmallRoundedRect::render(const Point &center) const
    if(mHasColor)
       glColor(mColor);
 
-   drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset + 2), mWidth, mHeight, mRadius);
+   drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor + 2), 
+                   mWidth - SpacingAdjustor, mHeight - SpacingAdjustor, mRadius);
 }
 
 
@@ -768,7 +773,7 @@ void SymbolRightTriangle::render(const Point &center) const
 
 
 // Constructor
-SymbolCircle::SymbolCircle(S32 radius, const Color *color) : Parent(radius * 2, radius * 2, color)
+SymbolCircle::SymbolCircle(S32 radius, const Color *color) : Parent(radius * 2 + SpacingAdjustor, radius * 2 + SpacingAdjustor, color)
 {
    // Do nothing
 }
@@ -787,7 +792,7 @@ void SymbolCircle::render(const Point &pos) const
       glColor(mColor);
 
    // Adjust our position's y coordinate to be the center of the circle
-   drawCircle(pos - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - 1), (F32)mWidth / 2);
+   drawCircle(pos - Point(0, (mHeight) / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor), F32(mWidth - SpacingAdjustor) / 2);
 }
 
 
