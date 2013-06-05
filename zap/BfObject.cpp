@@ -774,6 +774,9 @@ ClientInfo *BfObject::getOwner()
 
 void BfObject::deleteObject(U32 deleteTimeInterval)  // interval defaults to 0
 {
+   if(mObjectTypeNumber == DeletedTypeNumber)
+      return;
+
    mOriginalTypeNumber = mObjectTypeNumber;
    mObjectTypeNumber = DeletedTypeNumber;
 
