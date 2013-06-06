@@ -1224,19 +1224,12 @@ void InputOptionsMenuUserInterface::render()
 #  ifdef TNL_DEBUG
       Vector<SymbolShapePtr> symbols;
 
-      symbols.push_back(SymbolString::getSymbolText("XYZZY", 16, MenuContext, &Colors::red));
-
       for(U32 i = FIRST_CONTROLLER_BUTTON; i <= LAST_CONTROLLER_BUTTON; i++)
       {
-         symbols.push_back(SymbolString::getControlSymbol(InputCode(i), &Colors::blue40));
+         symbols.push_back(SymbolString::getControlSymbol(InputCode(i)));
          if(i < LAST_CONTROLLER_BUTTON)
-         {
-            //symbols.push_back(SymbolString::getBlankSymbol(8));      // Provide a little breathing room
-            symbols.push_back(SymbolString::getSymbolText("H", 16, MenuContext, &Colors::cyan));
-         }
+            symbols.push_back(SymbolString::getBlankSymbol(8));      // Provide a little breathing room
       }
-
-      symbols.push_back(SymbolString::getSymbolText("XYZZY", 16, MenuContext, &Colors::green));
 
       SymbolString(symbols, 10, HelpContext).render(Point(gScreenInfo.getGameCanvasWidth() / 2, 440));
 
