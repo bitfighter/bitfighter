@@ -89,6 +89,7 @@ public:
 
 
    struct ButtonInfo {
+      ButtonInfo() { sdlButton = FakeRawButton; }
       JoystickButton button;
       U8 sdlButton;
       string label;
@@ -115,7 +116,7 @@ public:
 
    static const S32 rawAxisCount = 32;   // Maximum raw axis to detect
    static const U32 MaxSdlButtons = 32;  // Maximum raw buttons to detect
-   static const U8 FakeRawButton = 254;  // A button that can't possible be real (must fit within U8)
+   static const U8 FakeRawButton = 254;  // A button that can't possibly be real (must fit within U8)
 
    static U32 ButtonMask;    // Holds what buttons are current pressed down - can support up to 32
    static F32 rawAxis[rawAxisCount];
@@ -147,6 +148,8 @@ public:
    static Color stringToColor(const string &colorString);
    static U32 getJoystickIndex(const string &joystickIndex);
    static JoystickInfo *getJoystickInfo(const string &joystickIndex);
+
+   static bool isButtonDefined(S32 presetIndex, S32 buttonIndex);
 
    static JoystickButton remapSdlButtonToJoystickButton(U8 button);
 };

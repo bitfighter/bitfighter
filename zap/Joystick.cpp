@@ -421,6 +421,14 @@ Joystick::JoystickInfo *Joystick::getJoystickInfo(const string &joystickType)
 }
 
 
+bool Joystick::isButtonDefined(S32 presetIndex, S32 buttonIndex) 
+{
+   TNLAssert(buttonIndex >= 0 && buttonIndex < JoystickButtonCount, "Button index out of range!");
+
+   return Joystick::JoystickPresetList[presetIndex].buttonMappings[buttonIndex].sdlButton != Joystick::FakeRawButton;
+}
+
+
 Joystick::JoystickInfo Joystick::getGenericJoystickInfo()
 {
    JoystickInfo joystickInfo;
@@ -446,10 +454,16 @@ Joystick::JoystickInfo Joystick::getGenericJoystickInfo()
 
    // Add some labels
    for(S32 i = 0; i < 8; i++)
-      joystickInfo.buttonMappings[i].label = itos(i);
+   {
+      joystickInfo.buttonMappings[i].label = itos(i + 1);
+      joystickInfo.buttonMappings[i].sdlButton = i;
+   }
 
    joystickInfo.buttonMappings[JoystickButtonBack].label = "9";
+   joystickInfo.buttonMappings[JoystickButtonBack].sdlButton = 9;
+
    joystickInfo.buttonMappings[JoystickButtonStart].label = "10";
+   joystickInfo.buttonMappings[JoystickButtonStart].sdlButton = 10;
    
    return joystickInfo;
 }
@@ -468,26 +482,30 @@ U32 Joystick::getJoystickIndex(const string &joystickType)
 
 void Joystick::loadJoystickPresets(GameSettings *settings)
 {
-
    // Load up the joystick presets INI
    joystickPresetsINI.SetPath(joindir(settings->getFolderManager()->iniDir, "joystick_presets.ini"));
    joystickPresetsINI.ReadFile();
 
-   // Loop through each section (joystick) and parse
+   // Loop through each section (each section is a joystick) and parse
    for (S32 sectionId = 0; sectionId < joystickPresetsINI.GetNumSections(); sectionId++)
    {
       JoystickInfo joystickInfo;
 
       // Names names names
-      joystickInfo.identifier = joystickPresetsINI.sectionName(sectionId).c_str();
-      joystickInfo.name = joystickPresetsINI.GetValue(sectionId, "Name").c_str();
-      joystickInfo.searchString = joystickPresetsINI.GetValue(sectionId, "SearchString").c_str();
-      joystickInfo.isSearchStringSubstring =
-            lcase(joystickPresetsINI.GetValue(sectionId, "SearchStringIsSubstring")) == "yes";
+      joystickInfo.identifier              = joystickPresetsINI.sectionName(sectionId).c_str();
+      joystickInfo.name                    = joystickPresetsINI.GetValue   (sectionId, "Name").c_str();
+      joystickInfo.searchString            = joystickPresetsINI.GetValue   (sectionId, "SearchString").c_str();
+      joystickInfo.isSearchStringSubstring = joystickPresetsINI.GetValueYN (sectionId, "SearchStringIsSubstring", false);
+
+      TNLAssert(
+            (lcase(joystickPresetsINI.GetValue(sectionId, "SearchStringIsSubstring")) == "yes") ==
+            joystickPresetsINI.GetValueYN(sectionId, "SearchStringIsSubstring", false),
+            "Should be equal... can delete this assert after a mid June 2013 or so...");
+
 
       // Axis of evil
-      joystickInfo.moveAxesSdlIndex[0] = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisLeftRight"));
-      joystickInfo.moveAxesSdlIndex[1] = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisUpDown"));
+      joystickInfo.moveAxesSdlIndex[0]  = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisLeftRight"));
+      joystickInfo.moveAxesSdlIndex[1]  = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisUpDown"));
       joystickInfo.shootAxesSdlIndex[0] = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisLeftRight"));
       joystickInfo.shootAxesSdlIndex[1] = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisUpDown"));
 
@@ -495,6 +513,7 @@ void Joystick::loadJoystickPresets(GameSettings *settings)
       joystickPresetsINI.GetAllKeys(sectionId, sectionKeys);
 
       // Start the search for Button-related keys
+      // Button4=Raw:3;Label:4;Color:White;Shape:Round
       Vector<string> buttonKeyNames;
       string buttonName;
       for(S32 i = 0; i < sectionKeys.size(); i++)
@@ -513,16 +532,16 @@ void Joystick::loadJoystickPresets(GameSettings *settings)
 
          ButtonInfo buttonInfo;
 
-         buttonInfo.button = stringToJoystickButton(buttonKeyNames[i]);
+         buttonInfo.button = stringToJoystickButton(buttonKeyNames[i]); // Converts "Button3" to JoystickButton3
 
          // Our button was not detected properly (misspelling?)
          if(buttonInfo.button == JoystickButtonUnknown)
          {
             string message = "Joystick preset button not found: " + buttonKeyNames[i];
             settings->addConfigurationError(message);
-            logprintf(message.c_str());
+            logprintf(LogConsumer::ConfigurationError, message.c_str());
 
-            continue;
+            continue;      // On to the next button
          }
 
          buttonInfo.label = buttonInfoMap["Label"];

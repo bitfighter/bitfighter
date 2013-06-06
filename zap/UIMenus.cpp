@@ -1224,10 +1224,15 @@ void InputOptionsMenuUserInterface::render()
 #  ifdef TNL_DEBUG
       Vector<SymbolShapePtr> symbols;
 
-      for(U32 i = FIRST_CONTROLLER_BUTTON; i <= LAST_CONTROLLER_BUTTON; i++)
+      // Cycle through all possibe controller buttons
+      S32 buttonCount = LAST_CONTROLLER_BUTTON - FIRST_CONTROLLER_BUTTON + 1;
+      for(U32 i = 0; i < buttonCount; i++)
       {
-         symbols.push_back(SymbolString::getControlSymbol(InputCode(i)));
-         if(i < LAST_CONTROLLER_BUTTON)
+         if(!Joystick::isButtonDefined(Joystick::SelectedPresetIndex, i))
+            continue;
+
+         symbols.push_back(SymbolString::getControlSymbol(InputCode(i + FIRST_CONTROLLER_BUTTON)));
+         if(i < buttonCount - 1)
             symbols.push_back(SymbolString::getBlankSymbol(8));      // Provide a little breathing room
       }
 

@@ -128,10 +128,12 @@ public:
    void GetAllKeys(S32 const sectionId, Vector<string> &keyList);
    void GetAllKeys(const string &section, Vector<string> &keyList);
 
-   S32    GetValueI(const string &section, const string &key, S32 const defValue = 0) const;
-   bool   GetValueB(const string &section, const string &key, bool const defValue = false) const;
-   F64   GetValueF(const string &section, const string& key, F64 const defValue = 0.0) const;
-   bool     GetValueYN(const string &section, const string &key, bool defValue) const;
+   S32  GetValueI(const string &section,  const string &key, S32 const defValue = 0) const;
+   bool GetValueB(const string &section,  const string &key, bool const defValue = false) const;
+   F64  GetValueF(const string &section,  const string& key, F64 const defValue = 0.0) const;
+   bool GetValueYN(const string &section, const string &key, bool defValue) const;
+   bool GetValueYN(S32 const sectionId,   const string &keyName, const bool &defValue) const;
+
 
    // This is a variable length formatted GetValue routine. All these voids
    // are required because there is no vsscanf() like there is a vsprintf().

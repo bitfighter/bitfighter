@@ -405,11 +405,28 @@ int CIniFile::GetValueI(const string &section, const string &key, S32 const defV
 }
 
 
+bool valueIsYes(const string &val)
+{
+   return lcase(val) == "yes";
+}
+
+
 // Returns true for "Yes" (case insensitive), false otherwise
 bool CIniFile::GetValueYN(const string &section, const string &key, bool defValue) const
 {
-   return lcase(GetValue(section, key, defValue ? "Yes" : "No")) == "yes";
+   return valueIsYes(GetValue(section, key, defValue ? "Yes" : "No"));
 }
+
+
+bool CIniFile::GetValueYN(S32 const sectionId, const string &keyName, const bool &defValue) const
+{
+   S32 valueID = FindValue(sectionId, keyName);
+   if(valueID == noID)
+      return defValue;
+
+   return valueIsYes(sections[sectionId].values[valueID]);
+}
+
 
 
 F64 CIniFile::GetValueF(const string &section, const string &key, F64 const defValue) const
