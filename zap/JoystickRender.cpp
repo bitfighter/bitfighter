@@ -245,7 +245,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
    JoystickButton button = InputCodeManager::inputCodeToJoystickButton(inputCode);
 
    // Don't render if button doesn't exist
-   if(Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].sdlButton == Joystick::FakeRawButton)
+   if(!Joystick::isButtonDefined(joystickIndex, button))
       return;
 
    Joystick::ButtonShape buttonShape =

@@ -418,8 +418,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
       // Now we need to figure out which symbol to use for this button, depending on controller make/model
       Joystick::ButtonInfo buttonInfo = Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].buttonMappings[button];
 
-      // Don't render if button doesn't exist... what is this about???
-      if(buttonInfo.sdlButton == Joystick::FakeRawButton)
+      if(!Joystick::isButtonDefined(Joystick::SelectedPresetIndex, button))
          return getSymbol(KEY_UNKNOWN, color);
 
       // This gets us the button shape index, which will tell us what to draw... something like ButtonShapeRound

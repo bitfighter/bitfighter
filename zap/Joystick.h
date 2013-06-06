@@ -89,7 +89,7 @@ public:
 
 
    struct ButtonInfo {
-      ButtonInfo() { sdlButton = FakeRawButton; }
+      ButtonInfo() { sdlButton = FakeRawButton; }     // Quickie constructor slipped in to header file... shhhh!
       JoystickButton button;
       U8 sdlButton;
       string label;

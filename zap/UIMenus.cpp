@@ -1226,7 +1226,7 @@ void InputOptionsMenuUserInterface::render()
 
       // Cycle through all possibe controller buttons
       S32 buttonCount = LAST_CONTROLLER_BUTTON - FIRST_CONTROLLER_BUTTON + 1;
-      for(U32 i = 0; i < buttonCount; i++)
+      for(S32 i = 0; i < buttonCount; i++)
       {
          if(!Joystick::isButtonDefined(Joystick::SelectedPresetIndex, i))
             continue;
