@@ -734,10 +734,9 @@ bool writeFile(const string& path, const string& contents, bool append)
 const string readFile(const string& path)
 {
    ifstream file(path.c_str());
+
    if(!file.is_open())
-   {
       return "";
-   }
 
    // make a string and resize it to hold the file contents
    string result;

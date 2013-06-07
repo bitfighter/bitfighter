@@ -876,31 +876,45 @@ S32 LuaScriptRunner::findFile(lua_State *L)
 }
 
 
+/**
+  * @luafunc readFromFile(filename)
+  * @brief   Reads in a file from our sandboxed IO directory
+  * @descr   Reads an entire file from the filesystem into a string
+  * @param   \str filename - the file to read
+  * @return  \str contents of the file as a string
+  */
 S32 LuaScriptRunner::readFromFile(lua_State *L)
 {
    checkArgList(L, functionArgs, "", "readFromFile");
 
-   // TODO: TODO
+   string filename = extractFilename(getString(L, 1, ""));
 
-   return 0;
+   if(filename == "")
+      returnNil(L);
+
+   FolderManager *folderManager = GameSettings::getFolderManager();
+
+   return returnString(L, readFile(folderManager->screenshotDir + getFileSeparator() + filename).c_str());
 }
 
 
-// Use like this:
-//    writeToFile("test1.txt", "contents")
-//
-// Or, to append
-//    writeToFile("test1.txt", "contents", true)
-//
+/**
+  * @luafunc writeToFile(filename, contents, append)
+  * @brief   Write or append to a file on the filesystem
+  * @descr   This is in a sandboxed environment and will only allow writing to a specific directory
+  * @param   \str filename - the file to read
+  * @param   \str contents - the contents to save to the file
+  * @param   \bool append (optional) - if true, append to the file instead of creating anew
+  */
 S32 LuaScriptRunner::writeToFile(lua_State *L)
 {
    S32 profile = checkArgList(L, functionArgs, "", "writeToFile");
 
    // Sanitize the path.  Only a file name is allowed!
    string filename = extractFilename(getString(L, 1, ""));
-   string contents = extractFilename(getString(L, 2, ""));
-   bool append = false;
+   string contents = getString(L, 2, "");
 
+   bool append = false;
    if(profile == 1)
       append = getBool(L, 3);
    
