@@ -765,6 +765,8 @@ S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
    METHOD(CLASS, print,           ARRAYDEF({{ ANY,   END }}), 1 ) \
    METHOD(CLASS, getMachineTime,  ARRAYDEF({{        END }}), 1 ) \
    METHOD(CLASS, findFile,        ARRAYDEF({{ STR,   END }}), 1 ) \
+   METHOD(CLASS, writeToFile,     ARRAYDEF({{ STR, STR, END }, { STR, STR, BOOL, END }}), 2 ) \
+   METHOD(CLASS, readFromFile,    ARRAYDEF({{ STR,   END }}), 1 ) \
 
 
 GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);    
@@ -871,6 +873,47 @@ S32 LuaScriptRunner::findFile(lua_State *L)
    }
 
    return returnString(L, fullname.c_str());
+}
+
+
+S32 LuaScriptRunner::readFromFile(lua_State *L)
+{
+   checkArgList(L, functionArgs, "", "readFromFile");
+
+   // TODO: TODO
+
+   return 0;
+}
+
+
+// Use like this:
+//    writeToFile("test1.txt", "contents")
+//
+// Or, to append
+//    writeToFile("test1.txt", "contents", true)
+//
+S32 LuaScriptRunner::writeToFile(lua_State *L)
+{
+   S32 profile = checkArgList(L, functionArgs, "", "writeToFile");
+
+   // Sanitize the path.  Only a file name is allowed!
+   string filename = extractFilename(getString(L, 1, ""));
+   string contents = extractFilename(getString(L, 2, ""));
+   bool append = false;
+
+   if(profile == 1)
+      append = getBool(L, 3);
+   
+   if(filename != "" && contents != "")
+   {
+      FolderManager *folderManager = GameSettings::getFolderManager();
+
+      string filePath = folderManager->screenshotDir + getFileSeparator() + filename;
+
+      writeFile(filePath, contents, append);
+   }
+
+   return 0;
 }
 
 

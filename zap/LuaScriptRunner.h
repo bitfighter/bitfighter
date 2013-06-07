@@ -177,6 +177,8 @@ public:
    static S32 getMachineTime(lua_State *L);
    static S32 getRandomNumber(lua_State *L);
    static S32 findFile(lua_State *L);
+   static S32 readFromFile(lua_State *L);
+   static S32 writeToFile(lua_State *L);
 
    S32 doSubscribe(lua_State *L, ScriptContext context);
    S32 doUnsubscribe(lua_State *L);
