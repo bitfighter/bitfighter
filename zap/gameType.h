@@ -138,6 +138,8 @@ private:
    bool mBotsAllowed;
    bool mBotBalancingDisabled;
 
+   static const U32 mBotBalanceTimerPeriod;
+
    // Info about current level
    StringTableEntry mLevelName;
    StringTableEntry mLevelDescription;

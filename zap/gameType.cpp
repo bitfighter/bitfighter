@@ -185,8 +185,10 @@ void GameTimer::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
+const U32 GameType::mBotBalanceTimerPeriod = 10000;
+
 // Constructor
-GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(3000), mGameTimeUpdateTimer(30000), mBotBalanceAnalysisTimer(10000)
+GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(3000), mGameTimeUpdateTimer(30000), mBotBalanceAnalysisTimer(mBotBalanceTimerPeriod)
 {
    mNetFlags.set(Ghostable);
    mBetweenLevels = true;
@@ -218,6 +220,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(3000), mGameTimeUp
    mBotBalancingDisabled = false;
 
    mGameTimer.reset(DefaultGameTime);
+   mBotBalanceAnalysisTimer.update(mBotBalanceTimerPeriod - 2000);  // Add bots closer to game start
 
    mObjectsExpected = 0;
    mGame = NULL;
