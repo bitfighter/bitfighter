@@ -1077,6 +1077,13 @@ static void soundOptionsSelectedCallback(ClientGame *game, U32 unused)
 }
 
 
+static void inGameHelpSelectedCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate<InGameHelpOptionsUserInterface>();
+}
+
+
+
 static void setFullscreenCallback(ClientGame *game, U32 mode)
 {
    GameSettings *settings = game->getSettings();
@@ -1117,6 +1124,9 @@ void OptionsMenuUserInterface::setupMenus()
 
    addMenuItem(new MenuItem(getMenuItemCount(), "SOUNDS & MUSIC", soundOptionsSelectedCallback, 
                         "Change sound and music related options", KEY_S));
+
+   addMenuItem(new MenuItem(getMenuItemCount(), "IN-GAME HELP", inGameHelpSelectedCallback, 
+                        "Change settings related to in-game tutorial/help", KEY_H));
 
    addMenuItem(new YesNoMenuItem("AUTOLOGIN:", !settings->shouldShowNameEntryScreenOnStartup(), 
                                  "If selected, you will automatically log in "
@@ -1480,6 +1490,64 @@ void SoundOptionsMenuUserInterface::setupMenus()
 void SoundOptionsMenuUserInterface::onEscape()
 {
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
+   getUIManager()->reactivatePrevUI();      //mGameUserInterface
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+InGameHelpOptionsUserInterface::InGameHelpOptionsUserInterface(ClientGame *game) : Parent(game)
+{
+   mMenuTitle = "IN-GAME HELP OPTIONS:";
+}
+
+
+// Destructor
+InGameHelpOptionsUserInterface::~InGameHelpOptionsUserInterface()
+{
+   // Do nothing
+}
+
+
+void InGameHelpOptionsUserInterface::onActivate()
+{
+   Parent::onActivate();
+   setupMenus();
+}
+
+
+static void resetMessagesCallback(ClientGame *game, U32 val)
+{
+   game->getSettings()->resetInGameHelpMessages();
+}
+
+
+void InGameHelpOptionsUserInterface::setupMenus()
+{
+   clearMenuItems();
+
+   GameSettings *settings = getGame()->getSettings();
+
+   bool showingInGameHelp = settings->getShowingInGameHelp();
+   addMenuItem(new YesNoMenuItem("SHOW IN-GAME HELP:", showingInGameHelp, "Show help/tutorial messages in game", KEY_H));
+
+   addMenuItem(new MenuItem(getMenuItemCount(), "RESET HELP MESSAGES", resetMessagesCallback, 
+                           "Reset all help/tutorial messages to their unseen state", KEY_R));
+}
+
+
+// Save options to INI file, and return to our regularly scheduled program
+void InGameHelpOptionsUserInterface::onEscape()
+{
+   bool show = getMenuItem(0)->getIntValue() == 1;    // 1 ==> Yes
+
+   getGame()->setShowingInGameHelp(show);
+   
+   getGame()->getSettings()->setShowingInGameHelp(show);
+   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
+
    getUIManager()->reactivatePrevUI();      //mGameUserInterface
 }
 

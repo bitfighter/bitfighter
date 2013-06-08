@@ -250,6 +250,21 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class InGameHelpOptionsUserInterface : public MenuUserInterface
+{
+   typedef MenuUserInterface Parent;
+
+public:
+   explicit InGameHelpOptionsUserInterface(ClientGame *game);        // Constructor
+   virtual ~InGameHelpOptionsUserInterface();
+
+   void onEscape();
+   void setupMenus();
+   void onActivate();
+};
+////////////////////////////////////////
+////////////////////////////////////////
+
 class RobotOptionsMenuUserInterface : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;

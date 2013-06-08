@@ -281,6 +281,8 @@ public:
    // Settings related
    InputMode getInputMode();
 
+   void setShowingInGameHelp(bool showing);
+
 };
 
 ////////////////////////////////////////

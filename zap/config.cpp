@@ -81,6 +81,8 @@ IniSettings::IniSettings()
    allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
    allowGetMap = false;               // Disabled by default -- many admins won't want this
 
+   showInGameHelp = true;             // This is on by default, but messages will not be repeated
+
    maxDedicatedFPS = 100;             // Max FPS on dedicated server
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
 
@@ -424,12 +426,16 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
    iniSettings->oldDisplayMode = iniSettings->displayMode;
 
-   iniSettings->controlsRelative = (lcase(ini->GetValue(section, "ControlMode", (iniSettings->controlsRelative ? "Relative" : "Absolute"))) == "relative");
+   iniSettings->controlsRelative = (lcase(ini->GetValue(section, "ControlMode", 
+                                        (iniSettings->controlsRelative ? "Relative" : "Absolute"))) == "relative");
 
    iniSettings->echoVoice            = ini->GetValueYN(section, "VoiceEcho", iniSettings->echoVoice);
    iniSettings->showWeaponIndicators = ini->GetValueYN(section, "LoadoutIndicators", iniSettings->showWeaponIndicators);
    iniSettings->verboseHelpMessages  = ini->GetValueYN(section, "VerboseHelpMessages", iniSettings->verboseHelpMessages);
    iniSettings->showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
+
+   iniSettings->showInGameHelp       = ini->GetValueYN(section, "ShowInGameHelp", iniSettings->showInGameHelp);
+
 
 #ifndef ZAP_DEDICATED
    iniSettings->joystickType = ini->GetValue(section, "JoystickType", iniSettings->joystickType);
@@ -1564,6 +1570,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
       ini->sectionComment(section, " VerboseHelpMessages - Display additional on-screen messages while learning the game?  Yes/No");
       ini->sectionComment(section, " ShowKeyboardKeysInStickMode - If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus");
+      ini->sectionComment(section, " ShowInGameHelp - Show tutorial style messages in-game?  Yes/No");
       ini->sectionComment(section, " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
       ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
       ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
@@ -1589,9 +1596,10 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
    // inputMode is not saved, but rather determined at runtime by whether a joystick is attached
 
-   ini->setValueYN(section, "LoadoutIndicators", iniSettings->showWeaponIndicators);
-   ini->setValueYN(section, "VerboseHelpMessages", iniSettings->verboseHelpMessages);
+   ini->setValueYN(section, "LoadoutIndicators",           iniSettings->showWeaponIndicators);
+   ini->setValueYN(section, "VerboseHelpMessages",         iniSettings->verboseHelpMessages);
    ini->setValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
+   ini->setValueYN(section, "ShowInGameHelp",              iniSettings->showInGameHelp);
 
 #ifndef ZAP_DEDICATED
    ini->SetValue  (section, "JoystickType", iniSettings->joystickType);

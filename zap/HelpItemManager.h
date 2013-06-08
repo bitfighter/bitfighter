@@ -56,6 +56,7 @@ namespace Zap {
 
 
 class InputCodeManager;
+class GameSettings;
 
 namespace UI {
 
@@ -100,14 +101,15 @@ private:
    Timer mPacedTimer;
    Timer mInitialDelayTimer;
 
-   bool mDisabled;
+   bool mEnabled;
+   GameSettings *mGameSettings;
 
    Timer mFloodControl;
 
    void buildItemsToHighlightList();
 
 public:
-   HelpItemManager(InputCodeManager *inputCodeManager);   // Constructor
+   HelpItemManager(GameSettings *settings);   // Constructor
    virtual ~HelpItemManager();
 
    void reset();
@@ -119,8 +121,9 @@ public:
    void removeHelpItemFromQueue(HelpItem item, U8 weight = 0xFF);
    void addInlineHelpItem(HelpItem item);
 
-   void enable();
-   void disable();
+   void setEnabled(bool enabled);
+   bool isEnabled();
+
 
    void clearAlreadySeenList();
 

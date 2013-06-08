@@ -194,6 +194,8 @@ public:
    bool verboseHelpMessages;        // If true, we'll show more handholding messages
    bool showKeyboardKeys;           // True if we show the keyboard shortcuts in joystick mode
 
+   bool showInGameHelp;             // If true, we'll show help/tutorial messages in game
+
    bool allowGetMap;                // allow '/GetMap' command
    bool allowDataConnections;       // Specify whether data connections are allowed on this computer
 

@@ -285,6 +285,11 @@ public:
 
    // InputCode related
    InputMode getInputMode();
+
+   // In-game help messages
+   void resetInGameHelpMessages();
+   void setShowingInGameHelp(bool show);
+   bool getShowingInGameHelp();
 };
 
 

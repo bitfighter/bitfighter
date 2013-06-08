@@ -89,7 +89,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
                   mChatMessageDisplayer2 (game,  5, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mChatMessageDisplayer3 (game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mFpsRenderer(game),
-                  mHelpItemManager(game->getSettings()->getInputCodeManager())
+                  mHelpItemManager(game->getSettings())
 {
    mInScoreboardMode = false;
    displayInputModeChangeAlert = false;
@@ -474,6 +474,15 @@ if(mGotControlUpdate)
 void GameUserInterface::addInlineHelpItem(HelpItem item)
 {
    mHelpItemManager.addInlineHelpItem(item);
+}
+
+
+void GameUserInterface::setShowingInGameHelp(bool showing)
+{
+   if(showing == mHelpItemManager.isEnabled())
+      return;
+
+   mHelpItemManager.setEnabled(showing);
 }
 
 

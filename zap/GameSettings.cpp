@@ -1209,5 +1209,22 @@ InputMode GameSettings::getInputMode()
 }
 
 
+void GameSettings::resetInGameHelpMessages()
+{
+   // Do something here!  // TODO!!!!  XYZZY
+}
+
+
+void GameSettings::setShowingInGameHelp(bool show)
+{
+   mIniSettings.showInGameHelp = show;
+}
+
+
+bool GameSettings::getShowingInGameHelp()
+{
+   return mIniSettings.showInGameHelp;
+}
+
 
 };

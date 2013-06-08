@@ -28,6 +28,7 @@
 #include "BfObject.h"      // For TypeNumbers
 #include "InputCode.h"     // For InputCodeManager
 #include "FontManager.h"
+#include "GameSettings.h"
 
 #include "SymbolShape.h"
 #include "Colors.h"
@@ -68,15 +69,18 @@ static HelpItems helpItems[] = {
 
 
 // Constructor
-HelpItemManager::HelpItemManager(InputCodeManager *inputCodeManager)
+HelpItemManager::HelpItemManager(GameSettings *settings)
 {
-   mInputCodeManager = inputCodeManager;
+   mGameSettings = settings;
+   mInputCodeManager = settings->getInputCodeManager();
 
    mFloodControl.setPeriod     (10 * 1000);  // Generally, don't show items more frequently than this, in ms
    mPacedTimer.setPeriod       (15 * 1000);  // How often to show a new paced message
    mInitialDelayTimer.setPeriod( 4 * 1000);  // Show nothing until this timer has expired
 
-   mDisabled = false;
+   mGameSettings = settings;
+
+   mEnabled = true;
 
 #ifdef TNL_DEBUG
    mTestingCtr = -1;
@@ -101,6 +105,9 @@ void HelpItemManager::reset()
 
 void HelpItemManager::idle(U32 timeDelta)
 {
+   if(!mEnabled)
+      return;
+
    mInitialDelayTimer.update(timeDelta);
 
    if(mInitialDelayTimer.getCurrent() > 0)
@@ -231,6 +238,9 @@ static S32 doRenderMessages(const InputCodeManager *inputCodeManager, const char
 
 void HelpItemManager::renderMessages(S32 yPos) const
 {
+   if(!mEnabled)
+      return;
+
 #  ifdef TNL_DEBUG
       // This bit is for displaying our help messages one-by-one so we can see how they look on-screen
       if(mTestingTimer.getCurrent() > 0)
@@ -343,7 +353,7 @@ void HelpItemManager::setAlreadySeenString(const string &vals)
 void HelpItemManager::addInlineHelpItem(HelpItem msg)
 {
    // Nothing to do if we are disabled
-   if(mDisabled)
+   if(!mEnabled)
       return;
 
    // Only display a message once
@@ -393,15 +403,15 @@ void HelpItemManager::buildItemsToHighlightList()
 }
 
 
-void HelpItemManager::enable()
+void HelpItemManager::setEnabled(bool isEnabled)
 {
-   mDisabled = false;
+   mEnabled = isEnabled;
 }
 
 
-void HelpItemManager::disable()
+bool HelpItemManager::isEnabled()
 {
-   mDisabled = true;
+   return mEnabled;
 }
 
 
