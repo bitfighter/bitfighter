@@ -37,12 +37,24 @@ class HTFGameType : public GameType
    static StringTableEntry aString;
    static StringTableEntry theString;
 
-   enum {
-      ScoreTime = 5000,    // Time flag is in your zone to get points for your team
-   };
+   U32 mFlagScoreTime;     // Time flag is in your zone to get points for your team
+
 public:
    HTFGameType();    // Constructor
    virtual ~HTFGameType();
+
+   bool processArguments(S32 argc, const char **argv, Game *game);
+   string toLevelCode() const;
+
+#ifndef ZAP_DEDICATED
+   // Editor menu
+   Vector<string> getGameParameterMenuKeys();
+   boost::shared_ptr<MenuItem> getMenuItem(const string &key);
+   bool saveMenuItem(const MenuItem *menuItem, const string &key);
+#endif
+
+   void setFlagScore(S32 pointsPerMinute);
+   S32 getFlagScore() const;
 
    bool isFlagGame() const;
 
