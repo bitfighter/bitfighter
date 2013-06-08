@@ -712,13 +712,15 @@ string writeLevelString(const char *in)
 
 bool writeFile(const string& path, const string& contents, bool append)
 {
-   ofstream file(path.c_str(), ios::out);
+   ios_base::openmode mode = append ? ios_base::out | ios_base::app : ios_base::out;
+
+   ofstream file(path.c_str(), mode);
+
    if(!file.is_open())
-   {
       return false;
-   }
 
    file << contents;
+
    if(!file.good())
    {
       file.close();
@@ -732,10 +734,9 @@ bool writeFile(const string& path, const string& contents, bool append)
 const string readFile(const string& path)
 {
    ifstream file(path.c_str());
+
    if(!file.is_open())
-   {
       return "";
-   }
 
    // make a string and resize it to hold the file contents
    string result;

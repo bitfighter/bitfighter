@@ -29,6 +29,12 @@
 
 #include "game.h"
 
+#ifndef ZAP_DEDICATED
+#  include "UIMenuItems.h"
+#endif
+
+#include "stringUtils.h"
+
 
 namespace Zap
 {
@@ -36,13 +42,92 @@ namespace Zap
 // Constructor
 HTFGameType::HTFGameType()
 {
-   // Do nothing
+   mFlagScoreTime = 5000;  // Default 5 seconds per point (12 points-per-minute)
 }
 
 // Destructor
 HTFGameType::~HTFGameType()
 {
    // Do nothing
+}
+
+
+bool HTFGameType::processArguments(S32 argc, const char **argv, Game *game)
+{
+   if (argc < 2)
+      return false;
+
+   if(!Parent::processArguments(argc, argv, game))
+      return false;
+
+   // Third arg is points-per-minute
+   if(argc > 2)
+      setFlagScore(atoi(argv[2]));
+
+   // Handle old rabbit games that had no points-per-minute option (default to 12)
+   else
+      setFlagScore(12);
+
+   return true;
+}
+
+
+string HTFGameType::toLevelCode() const
+{
+   return Parent::toLevelCode() + " " + itos(getFlagScore());
+}
+
+
+#ifndef ZAP_DEDICATED
+// Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
+Vector<string> HTFGameType::getGameParameterMenuKeys()
+{
+   Vector<string> items = Parent::getGameParameterMenuKeys();
+
+   // Use "Win Score" as an indicator of where to insert our specific menu items
+   for(S32 i = 0; i < items.size(); i++)
+      if(items[i] == "Win Score")
+      {
+         items.insert(i + 2, "Point Earn Rate");
+         break;
+      }
+
+   return items;
+}
+
+
+// Definitions for those items
+boost::shared_ptr<MenuItem> HTFGameType::getMenuItem(const string &key)
+{
+   if(key == "Point Earn Rate")
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Point Earn Rate:", getFlagScore(), 1, 1, 99,
+                                                             "points per minute", "", "Rate zone holding the flag accrues points"));
+   else
+      return Parent::getMenuItem(key);
+}
+
+
+bool HTFGameType::saveMenuItem(const MenuItem *menuItem, const string &key)
+{
+   if(key == "Point Earn Rate")
+      setFlagScore(menuItem->getIntValue());
+   else
+      return Parent::saveMenuItem(menuItem, key);
+
+   return true;
+}
+#endif
+
+
+void HTFGameType::setFlagScore(S32 pointsPerMinute)
+{
+   mFlagScoreTime = U32((1.0f / F32(pointsPerMinute)) * 60 * 1000);   // Convert to ms per point
+}
+
+
+S32 HTFGameType::getFlagScore() const
+{
+   return S32(1.0f / (F32(mFlagScoreTime) / (60 * 1000)));            // Convert to points per minute
 }
 
 
@@ -182,7 +267,7 @@ void HTFGameType::shipTouchZone(Ship *ship, GoalZone *zone)
    mountedFlag->dismount(DISMOUNT_SILENT);
 
    mountedFlag->setZone(zone);                                 // Assign zone to the flag
-   mountedFlag->mTimer.reset(ScoreTime);                       // Start countdown 'til scorin' time!  // TODO: Should this timer be on the zone instead?
+   mountedFlag->mTimer.reset(mFlagScoreTime);                  // Start countdown 'til scorin' time!  // TODO: Should this timer be on the zone instead?
    mountedFlag->setActualPos(zone->getExtent().getCenter());   // Put flag smartly in center of capture zone
 
    updateScore(ship, ReturnFlagToZone);

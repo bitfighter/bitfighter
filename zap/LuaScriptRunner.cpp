@@ -765,6 +765,8 @@ S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
    METHOD(CLASS, print,           ARRAYDEF({{ ANY,   END }}), 1 ) \
    METHOD(CLASS, getMachineTime,  ARRAYDEF({{        END }}), 1 ) \
    METHOD(CLASS, findFile,        ARRAYDEF({{ STR,   END }}), 1 ) \
+   METHOD(CLASS, writeToFile,     ARRAYDEF({{ STR, STR, END }, { STR, STR, BOOL, END }}), 2 ) \
+   METHOD(CLASS, readFromFile,    ARRAYDEF({{ STR,   END }}), 1 ) \
 
 
 GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);    
@@ -871,6 +873,61 @@ S32 LuaScriptRunner::findFile(lua_State *L)
    }
 
    return returnString(L, fullname.c_str());
+}
+
+
+/**
+  * @luafunc readFromFile(filename)
+  * @brief   Reads in a file from our sandboxed IO directory
+  * @descr   Reads an entire file from the filesystem into a string
+  * @param   \str filename - the file to read
+  * @return  \str contents of the file as a string
+  */
+S32 LuaScriptRunner::readFromFile(lua_State *L)
+{
+   checkArgList(L, functionArgs, "", "readFromFile");
+
+   string filename = extractFilename(getString(L, 1, ""));
+
+   if(filename == "")
+      returnNil(L);
+
+   FolderManager *folderManager = GameSettings::getFolderManager();
+
+   return returnString(L, readFile(folderManager->screenshotDir + getFileSeparator() + filename).c_str());
+}
+
+
+/**
+  * @luafunc writeToFile(filename, contents, append)
+  * @brief   Write or append to a file on the filesystem
+  * @descr   This is in a sandboxed environment and will only allow writing to a specific directory
+  * @param   \str filename - the file to read
+  * @param   \str contents - the contents to save to the file
+  * @param   \bool append (optional) - if true, append to the file instead of creating anew
+  */
+S32 LuaScriptRunner::writeToFile(lua_State *L)
+{
+   S32 profile = checkArgList(L, functionArgs, "", "writeToFile");
+
+   // Sanitize the path.  Only a file name is allowed!
+   string filename = extractFilename(getString(L, 1, ""));
+   string contents = getString(L, 2, "");
+
+   bool append = false;
+   if(profile == 1)
+      append = getBool(L, 3);
+   
+   if(filename != "" && contents != "")
+   {
+      FolderManager *folderManager = GameSettings::getFolderManager();
+
+      string filePath = folderManager->screenshotDir + getFileSeparator() + filename;
+
+      writeFile(filePath, contents, append);
+   }
+
+   return 0;
 }
 
 
