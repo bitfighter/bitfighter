@@ -282,6 +282,7 @@ public:
    InputMode getInputMode();
 
    void setShowingInGameHelp(bool showing);
+   void resetInGameHelpMessages();
 
 };
 

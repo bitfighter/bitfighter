@@ -1176,6 +1176,12 @@ void ClientGame::setShowingInGameHelp(bool showing)
 }
 
 
+void ClientGame::resetInGameHelpMessages()
+{
+   getUIManager()->getUI<GameUserInterface>()->resetInGameHelpMessages();
+}
+
+
 // Established connection is terminated.  Compare to onConnectTerminate() below.
 void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected)
 {

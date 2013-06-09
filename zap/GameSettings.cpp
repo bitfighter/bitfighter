@@ -1209,9 +1209,9 @@ InputMode GameSettings::getInputMode()
 }
 
 
-void GameSettings::resetInGameHelpMessages()
+void GameSettings::saveHelpItemAlreadySeenList(const string &saveString)
 {
-   // Do something here!  // TODO!!!!  XYZZY
+   mIniSettings.helpItemSeenList = saveString;
 }
 
 

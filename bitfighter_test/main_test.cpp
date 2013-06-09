@@ -8,6 +8,7 @@
 #include "../zap/LoadoutTracker.h"
 #include "../zap/ServerGame.h"
 #include "../zap/ship.h"
+#include "../zap/HelpItemManager.h"
 
 
 #include "tnlNetObject.h"
@@ -209,6 +210,119 @@ TEST_F(BfTest, GameTypeTests)
    ASSERT_EQ(gt.getMaxPlayersPerBalancedTeam( 1, 2), 1);
    ASSERT_EQ(gt.getMaxPlayersPerBalancedTeam(10, 5), 2);
    ASSERT_EQ(gt.getMaxPlayersPerBalancedTeam(11, 5), 3);
+}
+
+
+static void checkQueues(const UI::HelpItemManager &himgr, S32 highSize, S32 lowSize, S32 displaySize, HelpItem displayItem = UnknownHelpItem)
+{
+   ASSERT_EQ(himgr.getHighPriorityQueue()->size(), highSize);
+   ASSERT_EQ(himgr.getLowPriorityQueue()->size(), lowSize);
+   ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), displaySize);
+
+   if(displayItem != UnknownHelpItem && himgr.getHelpItemDisplayList()->size() > 0)
+      ASSERT_EQ(himgr.getHelpItemDisplayList()->get(0), displayItem);
+}
+
+
+TEST_F(BfTest, HelpItemManagerTests)
+{
+   GameSettings settings;
+
+   HelpItem helpItem = NexusSpottedItem;
+
+   /////
+   // Here we verify that displayed help items are corretly stored in the INI
+
+   UI::HelpItemManager himgr(&settings);
+   ASSERT_EQ(himgr.getAlreadySeenString()[helpItem], 'N');        // Item not marked as seen originally
+
+   himgr.addInlineHelpItem(helpItem);        // Add up a help item -- should not get added during initial delay period
+   ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);    // Verify no help item is being displayed
+
+   himgr.idle(himgr.InitialDelayPeriod);     // Idle out of initial delay period
+
+   himgr.addInlineHelpItem(helpItem);        // Requeue helpItem -- initial delay period has expired, so should get added
+   ASSERT_EQ(himgr.getHelpItemDisplayList()->get(0), helpItem);
+
+   ASSERT_EQ(himgr.getAlreadySeenString()[helpItem], 'Y');        // Item marked as seen
+   ASSERT_EQ(settings.getIniSettings()->helpItemSeenList, himgr.getAlreadySeenString());  // Verify changes made it to the INI
+
+   // Idle until item has expired
+   himgr.idle(himgr.HelpItemDisplayPeriod);        // Can't combine these periods... needs to be two different idle cycles
+   himgr.idle(himgr.HelpItemDisplayFadeTime);      // First cycle to enter fade mode, second to exhaust fade timer
+   
+   ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);    // Verify help item is no longer displayed
+   himgr.addInlineHelpItem(TeleporterSpotedItem);
+   ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);    // Still in flood control period, new item not added
+
+   himgr.idle(himgr.FloodControlPeriod - himgr.HelpItemDisplayPeriod - himgr.HelpItemDisplayFadeTime);
+   himgr.addInlineHelpItem(helpItem);                       // We've already added this item, so it should not be displayed again
+   ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);    // Verify help item is not displayed again
+   himgr.addInlineHelpItem(TeleporterSpotedItem);           // Now, new item should be added (we tried adding this above, and it didn't go)
+   ASSERT_EQ(himgr.getHelpItemDisplayList()->get(0), TeleporterSpotedItem);   // Verify help item is now visible
+
+   /////
+   // Test that high priority queued items are displayed before lower priority items
+
+   himgr = UI::HelpItemManager(&settings);      // Get a new, clean manager
+   
+   HelpItem highPriorityItem = ControlsKBItem;
+   HelpItem lowPriorityItem  = CmdrsMapItem;
+
+   ASSERT_EQ(himgr.getItemPriority(highPriorityItem), UI::HelpItemManager::PacedHigh);    // Prove that these items
+   ASSERT_EQ(himgr.getItemPriority(lowPriorityItem),  UI::HelpItemManager::PacedLow);     // have the expected priority
+
+   himgr.addInlineHelpItem(lowPriorityItem);    // Queue both items up
+   himgr.addInlineHelpItem(highPriorityItem);
+
+   // Verify that both have been queued -- one item in each queue, and there are no items in the display list
+   checkQueues(himgr, 1, 1, 0);
+
+   himgr.idle(himgr.InitialDelayPeriod - 1);
+   ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);
+
+   himgr.idle(1);    // InitialDelayPeriod has expired
+
+   // Verify that our high priority item has been moved to the active display list
+   checkQueues(himgr, 0, 1, 1, highPriorityItem);
+
+   himgr.idle(himgr.HelpItemDisplayPeriod); himgr.idle(himgr.HelpItemDisplayFadeTime - 1);  // (can't combine)
+
+   // Verify nothing has changed
+   checkQueues(himgr, 0, 1, 1, highPriorityItem);
+   
+   himgr.idle(1);    // Now, help item should no longer be displayed
+   checkQueues(himgr, 0, 1, 0);
+
+   himgr.idle(himgr.PacedTimerPeriod - himgr.HelpItemDisplayPeriod - himgr.HelpItemDisplayFadeTime - 1); // Idle to cusp of pacedTimer expiring
+
+   // Verify nothing has changed
+   checkQueues(himgr, 0, 1, 0);
+
+   himgr.idle(1);    // pacedTimer has expired, a new pacedItem will be added to the display list
+
+   // Second message should now be moved from the lowPriorityQueue to the active display list, and will be visible
+   checkQueues(himgr, 0, 0, 1, lowPriorityItem);
+
+   // Idle until list is clear
+   himgr.idle(himgr.HelpItemDisplayPeriod); himgr.idle(himgr.HelpItemDisplayFadeTime);  // (can't combine)
+   ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);       // No items displayed
+
+   // Verify bug with two high priority paced items preventing the first from being displayed
+   himgr = UI::HelpItemManager(&settings);
+   // Verify they have HighPaced priority, then queue them up
+   ASSERT_EQ(himgr.getItemPriority(ControlsKBItem), UI::HelpItemManager::PacedHigh);
+   ASSERT_EQ(himgr.getItemPriority(ControlsModulesItem), UI::HelpItemManager::PacedHigh);
+   himgr.addInlineHelpItem(ControlsKBItem);
+   himgr.addInlineHelpItem(ControlsModulesItem);
+   checkQueues(himgr, 2, 0, 0);                       // Two high priority items queued, none displayed
+
+   himgr.idle(himgr.InitialDelayPeriod);
+   checkQueues(himgr, 1, 0, 1, ControlsKBItem);       // One item queued, one displayed
+
+   himgr.idle(himgr.HelpItemDisplayPeriod); himgr.idle(himgr.HelpItemDisplayFadeTime);  // (can't combine)
+   himgr.idle(himgr.PacedTimerPeriod - himgr.HelpItemDisplayPeriod - himgr.HelpItemDisplayFadeTime);
+   checkQueues(himgr, 0, 0, 1, ControlsModulesItem);  // No items queued, one displayed
 }
 
 

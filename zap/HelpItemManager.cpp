@@ -41,28 +41,18 @@ using namespace TNL;
 
 namespace Zap { namespace UI {
 
-
-
-enum Priority {
-   Paced,   // These will be doled out in drips and drabs
-   Low,
-   High,
-   Now      // Add regardless of flood control
-};
-
-
 static const S32 MAX_LINES = 8;     // Excluding sentinel item
 
 struct HelpItems {
    U8 associatedItem;
    HighlightItem::Whose whose;
-   Priority priority;
+   HelpItemManager::Priority priority;
    const char *helpMessages[MAX_LINES + 1];
 };
 
 
 static HelpItems helpItems[] = {
-#  define HELP_TABLE_ITEM(a, assItem, whose, priority, msgs) { assItem, HighlightItem::whose, priority, msgs},
+#  define HELP_TABLE_ITEM(a, assItem, whose, priority, items) { assItem, HighlightItem::whose, HelpItemManager::priority, items},
       HELP_ITEM_TABLE
 #  undef HELP_TABLE_ITEM
 };
@@ -74,9 +64,9 @@ HelpItemManager::HelpItemManager(GameSettings *settings)
    mGameSettings = settings;
    mInputCodeManager = settings->getInputCodeManager();
 
-   mFloodControl.setPeriod     (10 * 1000);  // Generally, don't show items more frequently than this, in ms
-   mPacedTimer.setPeriod       (15 * 1000);  // How often to show a new paced message
-   mInitialDelayTimer.setPeriod( 4 * 1000);  // Show nothing until this timer has expired
+   mFloodControl.setPeriod(FloodControlPeriod);       // Generally, don't show items more frequently than this, in ms
+   mPacedTimer.setPeriod(PacedTimerPeriod);           // How often to show a new paced message
+   mInitialDelayTimer.setPeriod(InitialDelayPeriod);  // Show nothing until this timer has expired
 
    mGameSettings = settings;
 
@@ -87,6 +77,7 @@ HelpItemManager::HelpItemManager(GameSettings *settings)
    mTestingTimer.setPeriod(8 * 1000);
 #endif
 
+   reset();    // Mostly does nothing that is not already done, but good for consistency
    clearAlreadySeenList();
 }
 
@@ -97,9 +88,26 @@ HelpItemManager::~HelpItemManager()
 }
 
 
+// Called when UIGame is activated
 void HelpItemManager::reset()
 {
-   mInitialDelayTimer.reset();               // Provide a short breather before displaying any help items
+   mInitialDelayTimer.reset();   // Provide a short breather before displaying any help items
+   mPacedTimer.clear();
+   mFloodControl.clear();
+
+   mHighPriorityQueuedItems.clear();
+   mLowPriorityQueuedItems.clear();
+
+   mHelpItems.clear();
+   mHelpFading.clear();
+   mHelpTimer.clear();
+
+#ifdef TNL_DEBUG
+   mTestingTimer.clear();
+#endif
+
+
+   mItemsToHighlight.clear();
 }
 
 
@@ -120,16 +128,10 @@ void HelpItemManager::idle(U32 timeDelta)
    mTestingTimer.update(timeDelta);
 #endif
 
-   // Add queued items
-   if(mPacedTimer.getCurrent() == 0 && mQueuedItems.size() > 0)
-   {
-      HelpItem queuedMessage = mQueuedItems[0].helpItem;
-      mQueuedItems.erase(0);
-
-      addInlineHelpItem(queuedMessage);
-      mPacedTimer.reset();
-   }
-
+   // Check if we can move an item from the queue to the active list
+   if(mPacedTimer.getCurrent() == 0 && mFloodControl.getCurrent() == 0)
+      moveItemFromQueueToActiveList();
+      
    for(S32 i = 0; i < mHelpTimer.size(); i++)
       if(mHelpTimer[i].update(timeDelta))
       {
@@ -144,9 +146,27 @@ void HelpItemManager::idle(U32 timeDelta)
          else
          {
             mHelpFading[i] = true;
-            mHelpTimer[i].reset(500);
+            mHelpTimer[i].reset(HelpItemDisplayFadeTime);
          }
       }
+}
+
+
+void HelpItemManager::moveItemFromQueueToActiveList()
+{
+   TNLAssert(mPacedTimer.getCurrent() == 0 && mFloodControl.getCurrent() == 0, "Expected timers to be clear!");
+
+   Vector<WeightedHelpItem> *items;
+   items = mHighPriorityQueuedItems.size() > 0 ? &mHighPriorityQueuedItems : &mLowPriorityQueuedItems;
+  
+   if(items->size() == 0)
+      return;
+
+   HelpItem queuedMessage = items->get(0).helpItem;
+   items->erase(0);
+
+   addInlineHelpItem(queuedMessage, true);
+   mPacedTimer.reset();
 }
 
 
@@ -241,20 +261,20 @@ void HelpItemManager::renderMessages(S32 yPos) const
    if(!mEnabled)
       return;
 
-#  ifdef TNL_DEBUG
-      // This bit is for displaying our help messages one-by-one so we can see how they look on-screen
-      if(mTestingTimer.getCurrent() > 0)
-      {
-         FontManager::pushFontContext(HelpItemContext);
-         glColor(Colors::red);
+#ifdef TNL_DEBUG
+   // This bit is for displaying our help messages one-by-one so we can see how they look on-screen
+   if(mTestingTimer.getCurrent() > 0)
+   {
+      FontManager::pushFontContext(HelpItemContext);
+      glColor(Colors::red);
 
-         const char **messages = helpItems[mTestingCtr % HelpItemCount].helpMessages;
-         doRenderMessages(mInputCodeManager, messages, yPos);
+      const char **messages = helpItems[mTestingCtr % HelpItemCount].helpMessages;
+      doRenderMessages(mInputCodeManager, messages, yPos);
 
-         FontManager::popFontContext();
-         return;
-      }
-#  endif
+      FontManager::popFontContext();
+      return;
+   }
+#endif
 
    if(mInitialDelayTimer.getCurrent() > 0)
       return;
@@ -283,23 +303,38 @@ void HelpItemManager::debugShowNextHelpItem()
 #endif
 
 
+// Queues up items that are not specific to a particular item or event, such as a tip on how to activate the cmdrs map
+// This is not used for things like "This is a soccer ball"
+// Now only used internally
 void HelpItemManager::queueHelpItem(HelpItem item)
 {
+   TNLAssert(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow, "This method is only for paced items!");
+
+   // Don't queue items we've already seen
+   if(mAlreadySeen[item])
+       return;
+
    WeightedHelpItem weightedItem;
    weightedItem.helpItem = item;
    weightedItem.removalWeight = 0;
 
-   mQueuedItems.push_back(weightedItem);
+   if(helpItems[item].priority == PacedHigh)
+      mHighPriorityQueuedItems.push_back(weightedItem);
+   else
+      mLowPriorityQueuedItems.push_back(weightedItem);
 }
 
 
 // The weight factor allows us to require several events to "vote" for removing an item before 
 // it happens... basically once the weights OR to 0xFF, the item is toast.
-void HelpItemManager::removeHelpItemFromQueue(HelpItem msg, U8 weight)
+void HelpItemManager::removeHelpItemFromQueue(HelpItem item, U8 weight)
 {
+   TNLAssert(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow, "This method is only for paced items!");
+
+   Vector<WeightedHelpItem> *queue = helpItems[item].priority == PacedHigh ? &mHighPriorityQueuedItems : &mLowPriorityQueuedItems;
    S32 index = -1;
-   for(S32 i = 0; i < mQueuedItems.size(); i++)
-      if(mQueuedItems[i].helpItem == msg)
+   for(S32 i = 0; i < queue->size(); i++)
+      if(queue->get(i).helpItem == item)
       {
          index = i;
          break;
@@ -307,17 +342,33 @@ void HelpItemManager::removeHelpItemFromQueue(HelpItem msg, U8 weight)
 
     if(index != -1)
     {
-       mQueuedItems[index].removalWeight |= weight;
-       if(mQueuedItems[index].removalWeight == 0xFF)
-         mQueuedItems.erase(index);
+       queue->get(index).removalWeight |= weight;
+       if(queue->get(index).removalWeight == 0xFF)
+         queue->erase(index);
     }
 }
 
 
+// Clears all message-seen status flags, then writes to the INI
+void HelpItemManager::resetInGameHelpMessages()
+{
+   clearAlreadySeenList();
+   saveAlreadySeenList();
+}
+
+
+// Clears all flags; does not save to INI
 void HelpItemManager::clearAlreadySeenList()
 {
    for(S32 i = 0; i < HelpItemCount; i++)
       mAlreadySeen[i] = false;
+}
+
+
+// Write seen status to INI
+void HelpItemManager::saveAlreadySeenList()
+{
+   mGameSettings->saveHelpItemAlreadySeenList(getAlreadySeenString());
 }
 
 
@@ -350,30 +401,47 @@ void HelpItemManager::setAlreadySeenString(const string &vals)
 }
 
 
-void HelpItemManager::addInlineHelpItem(HelpItem msg)
+// Called whenever some item somewhere thinks it would be a good time to add a help message.
+// Items added here are immediately displayed.
+void HelpItemManager::addInlineHelpItem(HelpItem item, bool messageCameFromQueue)
 {
-   // Nothing to do if we are disabled
-   if(!mEnabled)
+   // Nothing to do if we are disabled, and only display messages once
+   if(!mEnabled || mAlreadySeen[item])
       return;
 
-   // Only display a message once
-   if(mAlreadySeen[msg])
+   // If the item has a priority of paced, we should queue the item rather than display it immediately (unless,
+   // of course, it came from the queue!)
+   if(!messageCameFromQueue && (helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow))
+   {
+      queueHelpItem(item);
       return;
+   }
 
-   // Limit the pacing of new items added -- don't add if there are queued items waiting, or priority is Now
-   if((mFloodControl.getCurrent() > 0 || mQueuedItems.size() > 0) && 
-      (helpItems[msg].priority != Now && helpItems[msg].priority != Paced))
-      return;
+   // Skip the timer and queued item checks for Now priority items
+   if(helpItems[item].priority != Now)
+   {
+      // Ignore messages while floodControl or initialDelay timers are active
+      if((mFloodControl.getCurrent() > 0 || mInitialDelayTimer.getCurrent() > 0))
+         return;
 
-   mHelpItems.push_back(msg);
-   mHelpTimer.push_back(Timer(7 * 1000));    // Display time
+      // Don't add if there are high priority queued items waiting
+      if(mHighPriorityQueuedItems.size() > 0 && !messageCameFromQueue)  
+         return;
+   }
+
+   mHelpItems.push_back(item);
+   mHelpTimer.push_back(Timer(HelpItemDisplayPeriod));    // Display time
    mHelpFading.push_back(false);
 
-   mAlreadySeen[msg] = true;
+   // Items gets marked as seen after it first flashes on the screen... is this really what we want?
+   mAlreadySeen[item] = true;
+   saveAlreadySeenList();
 
    mFloodControl.reset();
 
    buildItemsToHighlightList();
+
+   return;
 }
 
 
@@ -413,6 +481,20 @@ bool HelpItemManager::isEnabled()
 {
    return mEnabled;
 }
+
+
+// Access for testing
+const Vector<HelpItem>                          *HelpItemManager::getHelpItemDisplayList() const { return &mHelpItems;               }
+const Vector<HelpItemManager::WeightedHelpItem> *HelpItemManager::getHighPriorityQueue()   const { return &mHighPriorityQueuedItems; }
+const Vector<HelpItemManager::WeightedHelpItem> *HelpItemManager::getLowPriorityQueue()    const { return &mLowPriorityQueuedItems;  }
+
+
+HelpItemManager::Priority HelpItemManager::getItemPriority(HelpItem item) const
+{
+   return helpItems[item].priority;
+}
+
+
 
 
 

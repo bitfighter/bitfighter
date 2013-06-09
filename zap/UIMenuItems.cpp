@@ -239,8 +239,8 @@ string      MenuItem::getValueForDisplayingInMenu()   { return ""; }
 S32         MenuItem::getIntValue() const             { return 0;  }
 
 
-void MenuItem::setValue(const string &val)                    { /* Do nothing */ }
-void MenuItem::setIntValue(S32 val)                           { /* Do nothing */ }
+void MenuItem::setValue(const string &val)        { /* Do nothing */ }
+void MenuItem::setIntValue(S32 val)               { /* Do nothing */ }
 void MenuItem::setFilter(LineEditorFilter filter) { /* Do nothing */ }
 
 

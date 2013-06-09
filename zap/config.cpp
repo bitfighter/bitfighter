@@ -82,6 +82,7 @@ IniSettings::IniSettings()
    allowGetMap = false;               // Disabled by default -- many admins won't want this
 
    showInGameHelp = true;             // This is on by default, but messages will not be repeated
+   helpItemSeenList = "";             // By default, no messages will have been seen 
 
    maxDedicatedFPS = 100;             // Max FPS on dedicated server
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
@@ -435,6 +436,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
 
    iniSettings->showInGameHelp       = ini->GetValueYN(section, "ShowInGameHelp", iniSettings->showInGameHelp);
+   iniSettings->helpItemSeenList     = ini->GetValue  (section, "HelpItemsAlreadySeenList", "");
 
 
 #ifndef ZAP_DEDICATED
@@ -1571,6 +1573,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " VerboseHelpMessages - Display additional on-screen messages while learning the game?  Yes/No");
       ini->sectionComment(section, " ShowKeyboardKeysInStickMode - If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus");
       ini->sectionComment(section, " ShowInGameHelp - Show tutorial style messages in-game?  Yes/No");
+      ini->sectionComment(section, " HelpItemsAlreadySeenList - Tracks which in-game help items have already been seen; let the game manage this");
       ini->sectionComment(section, " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
       ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
       ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
@@ -1582,7 +1585,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
       ini->sectionComment(section, " LastEditorName - Last edited file name");
       ini->sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
-      ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game ");
+      ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
       ini->sectionComment(section, " Version - Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!");
       ini->sectionComment(section, "----------------");
    }
@@ -1600,6 +1603,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    ini->setValueYN(section, "VerboseHelpMessages",         iniSettings->verboseHelpMessages);
    ini->setValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
    ini->setValueYN(section, "ShowInGameHelp",              iniSettings->showInGameHelp);
+   ini->SetValue  (section, "HelpItemsAlreadySeenList",    iniSettings->helpItemSeenList);
 
 #ifndef ZAP_DEDICATED
    ini->SetValue  (section, "JoystickType", iniSettings->joystickType);

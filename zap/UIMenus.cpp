@@ -1520,7 +1520,7 @@ void InGameHelpOptionsUserInterface::onActivate()
 
 static void resetMessagesCallback(ClientGame *game, U32 val)
 {
-   game->getSettings()->resetInGameHelpMessages();
+   game->resetInGameHelpMessages();
 }
 
 

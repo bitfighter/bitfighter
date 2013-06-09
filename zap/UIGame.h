@@ -332,6 +332,7 @@ public:
 
    void addInlineHelpItem(HelpItem item);
    void setShowingInGameHelp(bool showing);
+   void resetInGameHelpMessages();
 
    bool isShowingDebugShipCoords() const;
 

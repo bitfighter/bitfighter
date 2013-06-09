@@ -166,16 +166,16 @@ void GameUserInterface::onActivate()
    mChatMessageDisplayer3.reset();
 
    mHelpItemManager.reset();
-   mHelpItemManager.queueHelpItem(WelcomeItem);
+   mHelpItemManager.addInlineHelpItem(WelcomeItem);
 
    // Queue up some initial help messages for the new users
 //   GameSettings *settings = getGame()->getSettings();
 
-   mHelpItemManager.queueHelpItem(ControlsKBItem);
+   mHelpItemManager.addInlineHelpItem(ControlsKBItem);
 
-   mHelpItemManager.queueHelpItem(ChangeWeaponsItem);
-   mHelpItemManager.queueHelpItem(CmdrsMapItem);
-   mHelpItemManager.queueHelpItem(ChangeConfigItem);
+   mHelpItemManager.addInlineHelpItem(ChangeWeaponsItem);
+   mHelpItemManager.addInlineHelpItem(CmdrsMapItem);
+   mHelpItemManager.addInlineHelpItem(ChangeConfigItem);
    
    mHelperManager.reset();
 
@@ -483,6 +483,12 @@ void GameUserInterface::setShowingInGameHelp(bool showing)
       return;
 
    mHelpItemManager.setEnabled(showing);
+}
+
+
+void GameUserInterface::resetInGameHelpMessages()
+{
+   mHelpItemManager.resetInGameHelpMessages();
 }
 
 

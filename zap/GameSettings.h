@@ -287,7 +287,7 @@ public:
    InputMode getInputMode();
 
    // In-game help messages
-   void resetInGameHelpMessages();
+   void saveHelpItemAlreadySeenList(const string &saveString);
    void setShowingInGameHelp(bool show);
    bool getShowingInGameHelp();
 };
