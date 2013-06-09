@@ -261,16 +261,6 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
 
    const Color *color = getButtonColor(activated);
 
-   // Create some shape objects to help us draw our buttons
-   //UI::SymbolRoundedRect   shapeRect(rectButtonWidth, rectButtonHeight, 3, color);
-   //UI::SymbolRoundedRect   shapeSmallRect(smallRectButtonWidth, smallRectButtonHeight, 3, color);
-   //UI::SymbolRoundedRect   shapeRoundedRect(rectButtonWidth, rectButtonHeight, 5, color);
-   //UI::SymbolRoundedRect   shapeSmallRoundedRect(smallRectButtonWidth, smallRectButtonHeight, 5, color);
-   //UI::SymbolHorizEllipse  shapeHorizEllipse(horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, color);
-   //UI::SymbolRightTriangle shapeRightTriangle(rightTriangleWidth, color);
-   //UI::SymbolCircle        shapeCircle(buttonHalfHeight, color);
-
-
    // Render joystick button shape
    switch(buttonShape)
    {
@@ -299,13 +289,13 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
          break;
       case Joystick::ButtonShapeRightTriangle:
          //shapeRightTriangle.render(center);
-         location = location + Point(-rightTriangleWidth/4, 0);  // Need to off-center the label slightly for this button
+         location = location + Point(-rightTriangleWidth / 4.0f, 0);  // Need to off-center the label slightly for this button
          drawButtonRightTriangle(center);
          break;
       case Joystick::ButtonShapeRound:
       default:
          //shapeCircle.render(center);
-         drawCircle(center, (F32)buttonHalfHeight);
+         drawCircle(center, buttonHalfHeight);
          break;
    }
 

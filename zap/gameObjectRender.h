@@ -113,6 +113,7 @@ extern void drawFadingHorizontalLine(F32 x1, F32 x2, F32 yPos, const Color &colo
 
 extern void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *letterColor, char letter);
 
+extern void drawCircle(const Point &pos, S32 radius, const Color *color = NULL, F32 alpha = 1.0);
 extern void drawCircle(const Point &pos, F32 radius, const Color *color = NULL, F32 alpha = 1.0);
 extern void drawCircle(F32 x, F32 y,     F32 radius, const Color *color = NULL, F32 alpha = 1.0);
 

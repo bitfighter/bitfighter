@@ -1354,7 +1354,7 @@ void renderLoadoutZone(const Color *color, const Vector<Point> *outline, const V
 void renderLoadoutZoneIcon(const Point &center, S32 outerRadius)
 {
    // Pos, teeth, outer rad, inner rad, ang span of outer teeth, ang span of inner teeth, circle rad
-   drawGear(center, 7, outerRadius, 0.75f * outerRadius, 20.0f, 18.0f, 0.4f * outerRadius);   
+   drawGear(center, 7, (F32)outerRadius, 0.75f * outerRadius, 20.0f, 18.0f, 0.4f * outerRadius);   
 }
 
 
@@ -1566,22 +1566,22 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
       glColor(pi->projColors[1]);
 
       Point p(0,0);
-      drawCircle(p, (F32)innerR);
+      drawCircle(p, innerR);
       p.set(0,-dist);
 
-      drawCircle(p, (F32)outerR);
+      drawCircle(p, outerR);
       p.set(0,-dist);
-      drawCircle(p, (F32)outerR);
+      drawCircle(p, outerR);
       p.set(cos(dr(30)), -sin(dr(30)));
-      drawCircle(p*dist, (F32)outerR);
+      drawCircle(p*dist, outerR);
       p.set(cos(dr(30)), sin(dr(30)));
-      drawCircle(p * dist, (F32)outerR);
+      drawCircle(p * dist, outerR);
       p.set(0, dist);
-      drawCircle(p, (F32)outerR);
+      drawCircle(p, outerR);
       p.set(-cos(dr(30)), sin(dr(30)));
-      drawCircle(p*dist, (F32)outerR);
+      drawCircle(p*dist, outerR);
       p.set(-cos(dr(30)), -sin(dr(30)));
-      drawCircle(p*dist, (F32)outerR);
+      drawCircle(p*dist, outerR);
    }
 }
 
@@ -1932,7 +1932,7 @@ void renderSpeedZone(const Vector<Point> &points, U32 time)
 void renderTestItem(const Point &pos, S32 size, F32 alpha)
 {
    Vector<Point> pts;
-   calcPolygonVerts(pos, TestItem::TEST_ITEM_SIDES, size, 0, pts);
+   calcPolygonVerts(pos, TestItem::TEST_ITEM_SIDES, (F32)size, 0, pts);
    renderTestItem(pts, alpha);
 }
 
@@ -2138,7 +2138,7 @@ void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width)
    drawPolygon(pos, 10, (F32)width / 2, 0);
 
    glColor(coreColor);
-   drawCircle(pos, (F32)width / 5);
+   drawCircle(pos, width / 5.0f);
 }
 
 
@@ -2649,6 +2649,12 @@ void drawCircle(F32 x, F32 y, F32 radius, const Color *color, F32 alpha)
    }
 
    renderVertexArray(vertexArray, 32, GL_LINE_LOOP);
+}
+
+
+void drawCircle(const Point &pos, S32 radius, const Color *color, F32 alpha)
+{
+   drawCircle(pos.x, pos.y, (F32)radius, color, alpha);
 }
 
 
