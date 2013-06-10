@@ -987,8 +987,8 @@ SymbolKey::~SymbolKey()
 void SymbolKey::render(const Point &center) const
 {
    // Compensate for the fact that boxes draw from center
-   const Point boxVertAdj  = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - KeyFontSize / 2);   
-   const Point textVertAdj = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset);
+   const Point boxVertAdj  = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - KeyFontSize / 2 - 3);   
+   const Point textVertAdj = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - 3);
 
    if(mHasColor)
       glColor(mColor);
