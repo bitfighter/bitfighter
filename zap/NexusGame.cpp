@@ -86,7 +86,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
 
       Ship *ship = clientGame->findShip(clientName);
       if(ship && score >= 100)
-         clientGame->emitTextEffect(itos(score) + " POINTS!", Colors::red80, ship->getRenderPos());
+         getGame()->emitTextEffect(itos(score) + " POINTS!", Colors::red80, ship->getRenderPos());
    }
    else if(msgIndex == NexusMsgYardSale)
    {
@@ -95,7 +95,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
 
       Ship *ship = clientGame->findShip(clientName);
       if(ship)
-         clientGame->emitTextEffect("YARD SALE!", Colors::red80, ship->getRenderPos());
+         getGame()->emitTextEffect("YARD SALE!", Colors::red80, ship->getRenderPos());
    }
    else if(msgIndex == NexusMsgGameOverWin)
    {

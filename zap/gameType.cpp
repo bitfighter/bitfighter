@@ -3755,7 +3755,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
 
    Ship *ship = clientGame->findShip(clientName);
    if(ship)
-      clientGame->emitTextEffect(textEffectText, Colors::yellow, ship->getRenderPos() + Point(0, 150));
+      mGame->emitTextEffect(textEffectText, Colors::yellow, ship->getRenderPos() + Point(0, 150));
 #endif
 }
 

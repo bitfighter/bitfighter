@@ -259,7 +259,7 @@ void ClientGame::emitDebrisChunk(const Vector<Point> &points, const Color &color
 }
 
 
-void ClientGame::emitTextEffect(const string &text, const Color &color, const Point &pos)
+void ClientGame::emitTextEffect(const string &text, const Color &color, const Point &pos) const
 {
    getUIManager()->emitTextEffect(text, color, pos);
 }
