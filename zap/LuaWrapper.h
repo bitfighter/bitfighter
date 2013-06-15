@@ -318,8 +318,11 @@ void luaW_push(lua_State* L, T* obj)
       // Here: retrieves and pushes cache_table[id]
       lua_gettable(L, -2);                            // -- cache_table, userdata
 
-//      TNLAssert(lua_isuserdata(L, -1) || dumpStack(L, "Expect table, userdata"), "Expected userdata!");
-//      TNLAssert(proxy == luaW_toProxy<T>(L, -1), "Cached object is not the one we expect!");
+      // FIXME:  If there is more than one robot in a level with a proxy, this userdata will almost
+      // always be nil because the cache table is only holding one userdata at a time - that of the
+      // last robot added (see also the FIXME note in the block below)
+      TNLAssert(lua_isuserdata(L, -1) || LuaBase::dumpStack(L, "Expect table, userdata"), "Expected userdata!");
+      TNLAssert(proxy == luaW_toProxy<T>(L, -1), "Cached object is not the one we expect!");
 
       // Clean up the stack
       lua_remove(L, -2);                              // -- userdata
@@ -333,6 +336,9 @@ void luaW_push(lua_State* L, T* obj)
       // Note that from here on down, we'll fall back on the normal LuaW push code, except for the bit at the end where
       // we add it to the table.
 
+      // FIXME:  Cache table is empty here when a second bot is added, why??
+      // With only one bot in a level, the cache table is good.  With 5 bots, the cache will only have
+      // the userdata of the last bot that was added.
       LuaWrapper<T>::identifier(L, obj);                 // -- id
       luaW_wrapperfield<T>(L, LUAW_CACHE_KEY);           // -- id, cache_table
 
@@ -354,7 +360,7 @@ void luaW_push(lua_State* L, T* obj)
 
       // Cleanup
       lua_pop(L, 1); // ... obj
-//      TNLAssert(lua_isuserdata(L, -1) || dumpStack(L, "Expect userdata"), "Expected userdata!");
+      TNLAssert(lua_isuserdata(L, -1) || LuaBase::dumpStack(L, "Expect userdata"), "Expected userdata!");
 
       luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
    }
@@ -880,7 +886,7 @@ private:
    // Sort vector of classes so parents of each class are listed before their children
    static void sortClassList()
    {
-      size_t itemsRemainingInList;
+      std::size_t itemsRemainingInList;
 
       itemsRemainingInList = getUnorderedClassList().size();     
 
