@@ -130,7 +130,6 @@ public:
    void setSize(MenuItemSize size);
    
    virtual const char *getSpecialEditingInstructions();
-   virtual string getValueForDisplayingInMenu();
    virtual S32 getIntValue() const;
    virtual string getValueForWritingToLevelFile();
    virtual string getValue() const;      // Basic menu item returns its text when selected... overridden by other types
@@ -222,7 +221,6 @@ public:
    virtual ~ToggleMenuItem();  // Destructor
 
    virtual MenuItemTypes getItemType();
-   virtual string getValueForDisplayingInMenu();
    virtual const char *getSpecialEditingInstructions();
    virtual S32 getValueIndex();
    virtual void setValueIndex(U32 index);
@@ -264,7 +262,6 @@ public:
    YesNoMenuItem(string title, bool currOption, const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    virtual ~YesNoMenuItem();  // Destructor
 
-   virtual string getValueForDisplayingInMenu();
    virtual string getValueForWritingToLevelFile();
    virtual void setValue(const string &val);
    virtual S32 getIntValue() const;
@@ -288,7 +285,7 @@ class CounterMenuItem : public ValueMenuItem
    typedef ValueMenuItem Parent;
 
 private:
-   string getOptionText();     // Helper function
+   virtual string getOptionText();     // Helper function, overridden in TimeCounterMenuItem
    virtual void initialize();
 
 protected:
@@ -314,7 +311,6 @@ public:
    virtual S32 getWidth(S32 textsize);
 
    virtual MenuItemTypes getItemType();
-   virtual string getValueForDisplayingInMenu();
    virtual S32 getIntValue() const;
    virtual void setValue(const string &val);
    virtual void setIntValue(S32 val);
@@ -343,6 +339,9 @@ public:
 
 class TimeCounterMenuItem : public CounterMenuItem
 {
+private:
+   string getOptionText();
+
 protected:
    virtual S32 getBigIncrement();
 
@@ -355,7 +354,6 @@ public:
 
    virtual MenuItemTypes getItemType();
    virtual void setValue (const string &val);
-   virtual string getValueForDisplayingInMenu();
    virtual string getValueForWritingToLevelFile();
 };
 
@@ -417,7 +415,6 @@ public:
    void setLineEditor(LineEditor editor);
 
    virtual string getValueForWritingToLevelFile();
-   virtual string getValueForDisplayingInMenu();
 
    virtual string getValue() const;
    void setValue(const string &val);
