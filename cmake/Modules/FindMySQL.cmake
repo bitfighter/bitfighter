@@ -27,7 +27,7 @@ find_path(MYSQL_INCLUDE_DIR
 find_library(MYSQL_LIBRARY
 	NAMES libmysqlclient mysqlclient libmysqlclient_r mysqlclient_r
 	HINTS ENV MYSQLDIR
-	PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
+	PATH_SUFFIXES lib64 lib lib64/mysql lib/mysql libs64 libs libs/Win32 libs/Win64
 	PATHS ${MYSQL_SEARCH_PATHS}
 )
 
