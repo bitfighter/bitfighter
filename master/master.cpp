@@ -1030,6 +1030,9 @@ public:
          MasterServerConnection::highScores.groupNames.push_back("Games Played This Week, So Far");
          databaseWriter.getTopPlayers("v_current_week_top_player_games",         "game_count", scoresPerGroup, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
 
+         MasterServerConnection::highScores.groupNames.push_back("Latest BBB Winners");
+         databaseWriter.getTopPlayers("v_latest_bbb_winners",         "rank", scoresPerGroup, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
+
          MasterServerConnection::highScores.scoresPerGroup = scoresPerGroup;
       }
       void finish()
