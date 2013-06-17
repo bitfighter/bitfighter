@@ -897,7 +897,7 @@ void MoveItem::setActualPos(const Point &pos)
    if(pos != MoveObject::getActualPos()) // Skip MountableItem, for client side
    {
       setPos(ActualState, pos);
-      setMaskBits(WarpPositionMask | PositionMask);
+      setMaskBits(WarpPositionMask | PositionMask);  // <=== I think we don't want WarpPositionMask here...
    }
 }
 
@@ -998,6 +998,15 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       Point pt;
 
       ((GameConnection *) connection)->readCompressedPoint(pt, stream);
+
+      // Here, we need to set the renderPos BEFORE setting actualPos -- setting actualPos triggers a 
+      // recalculation of the object's extent, which, for whatever reason, will extend from the renderPos
+      // to the actualPos plus a buffer.  If renderPos is not initialized, we get a weird bounding box which,
+      // under certain circumstances (player has sensor, fires burst, is in level with no walls, etc.), 
+      // can cause a flickery effect on the client.  Not pleasant!
+      if(mInitial)
+         setRenderPos(pt);
+
       setActualPos(pt);
 
       readCompressedVelocity(pt, VEL_POINT_SEND_BITS, stream);   
@@ -1009,20 +1018,23 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(positionChanged)
    {
-      if(warpToNewPosition)
+      if(warpToNewPosition)      // --> Why do we interpolate this when we're warping, but not when we're not?
       {
          mInterpolating = true;
          move(connection->getOneWayTime() * 0.001f, ActualState, false);
       }
       else
       {
-         // Not interpolating here... just warp the object to its reported location
+         // We get here during the initial object transfer, probably other times as well.
+
+         // Not interpolating... just warp the object to its reported location
          mInterpolating = false;
 
-         setRenderPos(MoveObject::getActualPos()); // Skip MountableItem, for client side
+         setRenderPos(MoveObject::getActualPos()); 
          setRenderVel(MoveObject::getActualVel());
          setRenderAngle(getActualAngle());
       }
+
       copyMoveState(ActualState, LastUnpackUpdateState);
       mWaitingForMoveToUpdate = false;
       updateTimer = (getActualVel().lenSquared() < 0.0001f) ? 0.5f : 5.f;
