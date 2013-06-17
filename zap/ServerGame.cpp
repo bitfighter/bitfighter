@@ -883,15 +883,9 @@ void ServerGame::unsuspendGame(bool remoteRequest)
       return;
 
    mGameSuspended = false;
+
    if(mSuspendor && !remoteRequest)     // If the request is from remote server, don't need to alert that server!
       mSuspendor->s2cUnsuspend();
-
-
-   // Alert any spawn-delayed clients that the game has resumed without them...
-   for(S32 i = 0; i < getClientCount(); i++)
-      if(getClientInfo(i)->isSpawnDelayed())
-         if(mSuspendor != getClientInfo(i)->getConnection())
-            getClientInfo(i)->getConnection()->s2cSuspendGame(true);
 
    mSuspendor = NULL;
 }
@@ -925,6 +919,7 @@ void ServerGame::suspendIfNoActivePlayers()
          return;
    }
 
+
    // If this is not a dedicated server, the only way we'd get to 0 players is if the locally hosted player
    // has quit... which means we're shutting down.  In which case we don't want to suspend.
    if(getPlayerCount() == 0 && isDedicated())
@@ -934,7 +929,7 @@ void ServerGame::suspendIfNoActivePlayers()
       // Alert any connected players
       for(S32 i = 0; i < getClientCount(); i++)
          if(!getClientInfo(i)->isRobot())  
-            getClientInfo(i)->getConnection()->s2cSuspendGame(false);
+            getClientInfo(i)->getConnection()->s2cSuspendGame();
 
       mTimeToSuspend.reset();    // Game will suspend when this timer expires
    }

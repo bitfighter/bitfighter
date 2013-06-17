@@ -133,9 +133,9 @@ endif()
 # Search for our dependencies
 # SDL on Linux, SDL2 on others
 if("${CMAKE_SYSTEM}" MATCHES "Linux")
-	find_package(SDL REQUIRED)
+	find_package(SDL)
 else()
-	find_package(SDL2 REQUIRED)
+	find_package(SDL2)
 	
 	if(SDL2_FOUND)
 		set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
@@ -147,7 +147,7 @@ if(WIN32)
 else()
 	set(ALURE_LIBRARIES alure)
 endif()
-find_package(OpenAL REQUIRED)
+find_package(OpenAL)
 find_package(OpenGL)
 find_package(Threads REQUIRED)
 find_package(PNG)
@@ -163,17 +163,32 @@ else()
 endif()
 find_package(Speex)
 find_package(ModPlug)
+find_package(MySQL)
 
+
+# Disable certain sub-projects based on dependency search
+set(COMPILE_ALURE 1)
+set(COMPILE_ZAP 1)
+
+if(NOT OPENAL_FOUND OR NOT VORBIS_FOUND OR NOT MODPLUG_FOUND)
+	set(COMPILE_ALURE 0)
+endif()
+
+if( NOT COMPILE_ALURE OR (NOT SDL2_FOUND AND NOT SDL_FOUND) )
+	set(COMPILE_ZAP 0)
+endif()
 
 
 # Add our sub-projects
 add_subdirectory(tnl)
 add_subdirectory(lua/lua-vec)
-if(NOT WIN32)  # ALURE is not compiled on Windows presently
+if(NOT WIN32 AND COMPILE_ALURE)  # ALURE is not compiled on Windows presently
 	add_subdirectory(alure)
 endif()
 add_subdirectory(mysql++)
 add_subdirectory(libtomcrypt)
 add_subdirectory(master)
-add_subdirectory(gtest)
-add_subdirectory(zap)
+if(COMPILE_ZAP)
+	add_subdirectory(zap)
+	add_subdirectory(gtest)
+endif()

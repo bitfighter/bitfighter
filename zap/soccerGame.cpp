@@ -30,6 +30,8 @@
 #include "goalZone.h"
 #include "Spawn.h"      // For AbstractSpawn def
 
+#include "Colors.h"
+
 #include "gameObjectRender.h"
 
 
@@ -52,13 +54,14 @@ SoccerGameType::~SoccerGameType()
 TNL_IMPLEMENT_NETOBJECT(SoccerGameType);
 
 TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
-   (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex), (msgIndex, clientName, teamIndex),
+   (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex, Point scorePos), (msgIndex, clientName, teamIndex, scorePos),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    // Before calling this RPC, we subtracted gFirstTeamNumber, so we need to add it back here...
    S32 teamIndexAdjusted = (S32) teamIndex + GameType::gFirstTeamNumber;      
    string msg;
    getGame()->playSoundEffect(SFXFlagCapture);
+   getGame()->emitTextEffect("GOAL!", Colors::red80, scorePos);
 
    // Compose the message
 
@@ -121,11 +124,11 @@ void SoccerGameType::updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent
 }
 
 
-void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scoringTeam, S32 goalTeamIndex, S32 score)
+void SoccerGameType::scoreGoal(Ship *ship, const StringTableEntry &scorerName, S32 scoringTeam, const Point &scorePos, S32 goalTeamIndex, S32 score)
 {
    if(scoringTeam == NO_TEAM)
    {
-      s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));
+      s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber), scorePos);
       return;
    }
 
@@ -134,7 +137,7 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
       updateSoccerScore(ship, scoringTeam, ScoreGoalOwnTeam, score);
 
       // Subtract gFirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container
-      s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));
+      s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber), scorePos);
    }
    else     // Goal on someone else's goal
    {
@@ -143,7 +146,7 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
       else
          updateSoccerScore(ship, scoringTeam, ScoreGoalEnemyTeam, score);
 
-      s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));      // See comment above
+      s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber), scorePos);      // See comment above
    }
 }
 
@@ -538,7 +541,7 @@ bool SoccerBallItem::collide(BfObject *hitObject)
       {
          GameType *gameType = getGame()->getGameType();
          if(gameType && gameType->getGameTypeId() == SoccerGame)
-            static_cast<SoccerGameType *>(gameType)->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam(), goal->getScore());
+            static_cast<SoccerGameType *>(gameType)->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, getActualPos(), goal->getTeam(), goal->getScore());
 
          mSendHomeTimer.reset();
       }

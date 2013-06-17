@@ -539,8 +539,6 @@ void BfObject::addToGame(Game *game, GridDatabase *database)
    setCreationTime(game->getCurrentTime());
    onAddedToGame(game);
    //linkToIdleList(&game->idlingObjects);
-
-   disableLuaAutoDelete(); // Will delete without LUA help after addedToGame.
 }
 
 

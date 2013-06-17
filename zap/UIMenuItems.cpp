@@ -235,7 +235,6 @@ void MenuItem::setEnterAdvancesItem(bool enterAdvancesItem)
 
 // Default implementations will be overridden by child classes
 const char *MenuItem::getSpecialEditingInstructions() { return ""; } 
-string      MenuItem::getValueForDisplayingInMenu()   { return ""; }
 S32         MenuItem::getIntValue() const             { return 0;  }
 
 
@@ -539,12 +538,6 @@ MenuItemTypes ToggleMenuItem::getItemType()
 }
 
 
-string ToggleMenuItem::getValueForDisplayingInMenu()
-{
-   return "";
-}
-
-
 const char *ToggleMenuItem::getSpecialEditingInstructions()
 {
    return "Use [<-] and [->] keys or mouse wheel to change value.";
@@ -660,13 +653,6 @@ YesNoMenuItem::YesNoMenuItem(lua_State *L) : Parent("", Vector<string>(), 0, tru
 YesNoMenuItem::~YesNoMenuItem()
 {
    LUAW_DESTRUCTOR_CLEANUP;
-}
-
-
-string YesNoMenuItem::getValueForDisplayingInMenu()
-{
-   TNLAssert(false, "Is this used?  If not, remove it!");
-   return mIndex ? " Engineer" : "";
 }
 
 
@@ -795,7 +781,7 @@ void CounterMenuItem::setIntValue(S32 val)
 
 string CounterMenuItem::getOptionText()
 {
-   return (mValue == mMinValue && mMinMsg != "") ? mMinMsg : getValueForDisplayingInMenu() + " " + getUnits();
+   return (mValue == mMinValue && mMinMsg != "") ? mMinMsg : itos(mValue) + " " + getUnits();
 }
 
 
@@ -864,12 +850,6 @@ S32 CounterMenuItem::getBigIncrement()
 MenuItemTypes CounterMenuItem::getItemType()
 {
    return CounterMenuItemType;
-}
-
-
-string CounterMenuItem::getValueForDisplayingInMenu()
-{
-   return itos(mValue);
 }
 
 
@@ -1023,9 +1003,13 @@ void TimeCounterMenuItem::setValue(const string &val)
 }
 
 
-string TimeCounterMenuItem::getValueForDisplayingInMenu()
+string TimeCounterMenuItem::getOptionText()
 {
-   return (mValue < 60) ? itos(mValue) : itos(mValue / 60) + ":" + ((mValue % 60) < 10 ? "0" : "") + itos(mValue % 60);
+   return (mValue == mMinValue && mMinMsg != "") ?
+         mMinMsg :
+         // If not minimum, make sure we return min/seconds
+         ((mValue < 60) ? itos(mValue) : itos(mValue / 60) + ":" + ((mValue % 60) < 10 ? "0" : "") + itos(mValue % 60)) +
+         " " + getUnits();
 }
 
 
@@ -1302,12 +1286,6 @@ void TextEntryMenuItem::setLineEditor(LineEditor editor)
 string TextEntryMenuItem::getValueForWritingToLevelFile()
 {
    return mLineEditor.getString() != "" ? mLineEditor.getString() : mEmptyVal;
-}
-
-
-string TextEntryMenuItem::getValueForDisplayingInMenu()
-{
-   return mLineEditor.getString();
 }
 
 
