@@ -409,11 +409,11 @@ void GameConnection::submitPassword(const char *password)
 
 
 // If the server thinks everyone is alseep, it will suspend the game
-TNL_IMPLEMENT_RPC(GameConnection, s2cSuspendGame, (bool gameIsRunning), (gameIsRunning), 
+TNL_IMPLEMENT_RPC(GameConnection, s2cSuspendGame, (), (),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-   mClientGame->suspendGame(gameIsRunning);       
+   mClientGame->suspendGame();
 #endif
 }
   

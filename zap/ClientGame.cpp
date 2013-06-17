@@ -61,8 +61,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 {
    //mUserInterfaceData = new UserInterfaceData();
 
-   mGameIsRunning = true;      // Only matters when game is suspended
-
    mRemoteLevelDownloadFilename = "downloaded.level";
 
    mUIManager = new UIManager(this);               // Gets deleted in destructor
@@ -1221,15 +1219,17 @@ string ClientGame::getEnteredServerAccessPassword()
 }
 
 
-void ClientGame::suspendGame(bool gameIsRunning)
+void ClientGame::suspendGame()
 {
-   mGameIsRunning = gameIsRunning;
    mTimeToSuspend.reset();
 }
 
 
 void ClientGame::unsuspendGame()
 {
+   if(!mGameSuspended)
+      return;
+
    mGameSuspended = false;
    mTimeToSuspend.clear();
 }

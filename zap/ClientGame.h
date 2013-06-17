@@ -67,8 +67,6 @@ private:
    Vector<string> mMuteList;        // List of players we aren't listening to anymore because they've annoyed us!
    Vector<string> mVoiceMuteList;   // List of players we mute because they are abusing voice chat
 
-   bool mGameIsRunning;             // True if a suspended game is being played without us, false if it's full stop for everyone
-
    string mEnteredServerPermsPassword;
    string mEnteredServerAccessPassword;
 
@@ -267,7 +265,7 @@ public:
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);
 
-   void suspendGame(bool gameIsRunning);
+   void suspendGame();
    void unsuspendGame();
 
    // For loading levels in editor
