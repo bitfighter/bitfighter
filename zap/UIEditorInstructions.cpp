@@ -417,9 +417,9 @@ void EditorInstructionsUserInterface::renderPageWalls()
 
    glColor(mAnimStage <= 11 ? Colors::yellow : Colors::NeutralTeamColor);
 
-   glLineWidth(WALL_SPINE_WIDTH);
+   glLineWidth(gLineWidth3);
 
-   renderPointVector(&points, WALL_SPINE_WIDTH);
+   renderPointVector(&points, GL_LINES);
 
    glLineWidth(gDefaultLineWidth);
 

@@ -306,9 +306,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Width of line representing centerline of barriers
-#define WALL_SPINE_WIDTH gLineWidth3
-
 
 class WallEdge : public DatabaseObject
 {
