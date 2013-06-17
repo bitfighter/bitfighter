@@ -916,16 +916,6 @@ static void loadQuickChatMessages(CIniFile *ini)
 
 static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
 {
-   // Are there any QuickChatMessageGroups?  If not, we'll write the defaults.
-   S32 keys = ini->GetNumSections();
-
-   for(S32 i = 0; i < keys; i++)
-   {
-      string keyName = ini->getSectionName(i);
-      if(keyName.substr(0, 22) == "QuickChatMessagesGroup" && keyName.find("_") == string::npos)
-         return;
-   }
-
    const char *section = "QuickChatMessages";
 
    ini->addSection(section);
@@ -964,6 +954,17 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
       addComment(" use this functionality to assign commonly used commands to joystick buttons or short keyboard");
       addComment(" sequences.");
       addComment("----------------");
+   }
+
+
+   // Are there any QuickChatMessageGroups?  If not, we'll write the defaults.
+   S32 keys = ini->GetNumSections();
+
+   for(S32 i = 0; i < keys; i++)
+   {
+      string keyName = ini->getSectionName(i);
+      if(keyName.substr(0, 22) == "QuickChatMessagesGroup" && keyName.find("_") == string::npos)
+         return;
    }
 
    ini->SetValue("QuickChatMessagesGroup1", "Key", InputCodeManager::inputCodeToString(KEY_G));
