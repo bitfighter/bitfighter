@@ -1250,23 +1250,26 @@ Point findCentroid(const Vector<Point> &polyPoints)
    if(polyPoints.size() == 0)
       return Point(0,0);
 
-   F32 area6 = area(polyPoints) * 6;
    F32 x = 0;
    F32 y = 0;
+   F32 sArea = 0;  // Signed area
+   F32 area = 0;   // Partial signed area
 
    for(S32 i = 0; i < polyPoints.size(); i++)
    {
       Point p1 = polyPoints[i];
       Point p2 = polyPoints[(i < polyPoints.size() - 1) ? i + 1 : 0];
 
-      F32 z = (p1.x * p2.y - p2.x * p1.y);
+      area = (p1.x * p2.y - p2.x * p1.y);
+      sArea += area;
 
-      x += (p1.x + p2.x) * z;
-      y += (p1.y + p2.y) * z;
+      x += (p1.x + p2.x) * area;
+      y += (p1.y + p2.y) * area;
    }
 
-   x /= area6;
-   y /= area6;
+   sArea *= 3.0;  // 0.5 * 6  (from area6)
+   x /= sArea;
+   y /= sArea;
 
    return Point(x,y);
 }
