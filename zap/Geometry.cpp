@@ -633,7 +633,7 @@ const Vector<Point> *SimpleLineGeometry::getFill() const
 
 Point SimpleLineGeometry::getCentroid() const
 {
-   return (mFromPos + mToPos) / 2; // Returns midpoint of line
+   return (mFromPos + mToPos) * 0.5f; // Returns midpoint of line
 }
 
 
@@ -998,7 +998,10 @@ void PolylineGeometry::onPointsChanged()
 {
    Parent::onPointsChanged();
 
-   mCentroid = findCentroid(mPolyBounds); 
+   if(mPolyBounds.size() == 2)
+      mCentroid = (mPolyBounds[0] + mPolyBounds[1]) * 0.5f;
+   else
+      mCentroid = findCentroid(mPolyBounds);
 }
 
 
