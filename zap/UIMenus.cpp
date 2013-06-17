@@ -142,7 +142,6 @@ void MenuUserInterface::sortMenuItems()
 void MenuUserInterface::addMenuItem(MenuItem *menuItem)
 {
    menuItem->setMenu(this);
-   menuItem->disableLuaAutoDelete();
    mMenuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
 }
 
@@ -973,8 +972,8 @@ void MainMenuUserInterface::render()
       S32 motdWidth = drawStringAndGetWidth(xPos, MOTD_POS, 20, mMOTD);
 
       // Draw lines
-      drawFadingHorizontalLine(xPos+(motdWidth)/2,           xPos, MOTD_POS + 25, Colors::green50);
-      drawFadingHorizontalLine(xPos+(motdWidth)/2, xPos+motdWidth, MOTD_POS + 25, Colors::green50);
+      drawFadingHorizontalLine(xPos + (motdWidth / 2),             xPos, MOTD_POS + 25, Colors::green50);
+      drawFadingHorizontalLine(xPos + (motdWidth / 2), xPos + motdWidth, MOTD_POS + 25, Colors::green50);
    }
 
    // Parent renderer might dim what we've drawn so far, so run it last so it can have access to everything
