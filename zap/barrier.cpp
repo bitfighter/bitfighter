@@ -435,6 +435,7 @@ void WallItem::onGeomChanged()
    if(db)
       db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
 
+   onPointsChanged();        // Recalculates centroid
    Parent::onGeomChanged();
 }
 
