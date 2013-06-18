@@ -131,6 +131,7 @@ S32 drawCenteredString(S32 y, S32 size, const char *str);
 S32 drawCenteredString_fixed(S32 y, S32 size, const char *str);
 S32 drawCenteredString(S32 x, S32 y, S32 size, const char *str);
 S32 drawCenteredString_fixed(S32 x, S32 y, S32 size, const char *str);
+S32 drawCenteredString_fixed(F32 x, F32 y, S32 size, FontContext fontContext, const char *string);
 
 F32 drawCenteredString(F32 x, F32 y, S32 size, const char *str);
 F32 drawCenteredString(F32 x, F32 y, F32 size, const char *str);

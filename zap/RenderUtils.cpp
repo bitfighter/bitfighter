@@ -313,6 +313,19 @@ S32 drawCenteredString_fixed(S32 x, S32 y, S32 size, const char *string)
 }
 
 
+S32 drawCenteredString_fixed(F32 x, F32 y, S32 size, FontContext fontContext, const char *string)
+{
+   FontManager::pushFontContext(fontContext);
+
+   F32 xpos = x - getStringWidth(size, string) / 2.0f;
+   drawString_fixed(xpos, y, size, string);
+
+   FontManager::popFontContext();
+
+   return (S32)xpos;
+}
+
+
 F32 drawCenteredString(F32 x, F32 y, S32 size, const char *string)
 {
    return drawCenteredString(x, y, F32(size), string);

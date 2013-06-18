@@ -1262,7 +1262,7 @@ void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *
       glScale(scaleFact);
       glTranslate(centroid);
       glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
-      renderCenteredString(Point(0,0), size,  text);
+      renderCenteredString(Point(0,0), size, text);
    glPopMatrix();
 }
 
@@ -1358,6 +1358,13 @@ void renderLoadoutZoneIcon(const Point &center, S32 outerRadius)
 }
 
 
+void renderGoalZoneIcon(const Point &center, S32 size)
+{
+   drawCircle(center, size / 2);
+   drawCenteredString_fixed(center.x, center.y + size / 3.0f, size, GoalZoneIconContext, "G");
+}
+
+
 void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill, const Point &centroid,
                        S32 zoneId)
 {
@@ -1448,7 +1455,8 @@ void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<P
 
 
    renderPolygon(fill, outline, &fillColor, &outlineColor);
-   renderPolygonLabel(centroid, labelAngle, 25, "GOAL");
+   //renderPolygonLabel(centroid, labelAngle, 25, "GOAL");
+   renderGoalZoneIcon(centroid, 40);
 }
 
 

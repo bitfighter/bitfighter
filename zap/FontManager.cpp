@@ -235,6 +235,10 @@ void FontManager::setFontContext(FontContext fontContext)
          setFont(FontDroidSansMono);
          return;
 
+      case GoalZoneIconContext:
+         setFont(FontOrbitronMedStroke);
+         return;
+
       default:
          TNLAssert(false, "Unknown font context!");
          break;
@@ -247,7 +251,7 @@ void FontManager::setFontContext(FontContext fontContext)
 // FontOrbitronLight,
 // FontOrbitronMedium,
 // FontPrimeRegular
-// Tenby5
+// FontTenby5
 
 
 static Vector<FontId> contextStack;
