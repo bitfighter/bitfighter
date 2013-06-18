@@ -1360,8 +1360,11 @@ void renderLoadoutZoneIcon(const Point &center, S32 outerRadius)
 
 void renderGoalZoneIcon(const Point &center, S32 size)
 {
-   drawCircle(center, size / 2);
-   drawCenteredString_fixed(center.x, center.y + size / 3.0f, size, GoalZoneIconContext, "G");
+   //drawCircle(center, size / 2);
+   drawStar(center, 5, size/2, size/4); 
+   drawStar(center, 5, size/4, size/8); 
+
+   //drawCenteredString_fixed(center.x, center.y + size / 3.0f, size, GoalZoneIconContext, "G");
 }
 
 
