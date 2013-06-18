@@ -104,7 +104,8 @@ S32 QSORT_CALLBACK pluginInfoSort(EditorUserInterface::PluginInfo *a, EditorUser
 
 enum EntryMode {
    EntryID,          // Entering an objectID
-   EntryAngle,       // Entering an angle
+   EntryOriginAngle, // Entering an angle for rotating about the origin
+   EntrySpinAngle,   // Entering an angle for spinning
    EntryScale,       // Entering a scale
    EntryNone         // Not in a special entry mode
 };
@@ -2387,7 +2388,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
 
 
 // Rotate selected objects around their center point by angle
-void EditorUserInterface::rotateSelection(F32 angle)
+void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 {
    GridDatabase *database = getDatabase();
 
@@ -2398,14 +2399,38 @@ void EditorUserInterface::rotateSelection(F32 angle)
 
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
+   Point center(0,0);
 
+   // If we're not going to use the origin, we're going to use the 'center of mass' of the total
+   if(!useOrigin)
+   {
+      // Add all object centroids to a list.  We'll get the centroid of that
+      Vector<Point> centroidPoly;
+      for(S32 i = 0; i < objList->size(); i++)
+      {
+         BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+         if(obj->isSelected())
+            centroidPoly.push_back(obj->getCentroid());
+      }
+
+      // If we have only 1 or 2 selected objects, the centroid is calculated differently
+      if(centroidPoly.size() == 1)
+         center = centroidPoly[0];
+      else if(centroidPoly.size() == 2)
+         center = (centroidPoly[0] + centroidPoly[1]) * 0.5f;  // midpoint
+      else
+         center = findCentroid(centroidPoly);
+   }
+
+   // Now do the actual rotation
    for(S32 i = 0; i < objList->size(); i++)
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
       if(obj->isSelected())
       {
-         obj->rotateAboutPoint(Point(0,0), angle);
+         obj->rotateAboutPoint(center, angle);
          obj->onGeomChanged();
       }
    }
@@ -3805,15 +3830,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputString == "Z")            // Reset veiw
       centerView();
-   else if(inputString == "Ctrl+Shift+R") // Rotate by arbitrary amount
-   {
-      if(!anyItemsSelected(getDatabase()))
-         return true;
-
-      mEntryBox = getNewEntryBox("", "Rotation angle:", 10, numericFilter);
-      entryMode = EntryAngle;
-   }
-   else if(inputString == "Ctrl+R")       // Run levelgen script, or clear last results
+   else if(inputString == "Ctrl+K")       // Run levelgen script, or clear last results
    {
       // Ctrl+R is a toggle -- we either add items or clear them
       if(mLevelGenDatabase.getObjectCount() == 0)
@@ -3821,10 +3838,30 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       else
          clearLevelGenItems();
    }
-   else if(inputString == "R")            // Rotate CCW
-      rotateSelection(-15.f); 
-   else if(inputString == "Shift+R")      // Rotate CW
-      rotateSelection(15.f); 
+   else if(inputString == "Alt+R")         // Spin by arbitrary amount
+   {
+      if(!anyItemsSelected(getDatabase()))
+         return true;
+
+      mEntryBox = getNewEntryBox("", "Spin angle:", 10, numericFilter);
+      entryMode = EntrySpinAngle;
+   }
+   else if(inputString == "Ctrl+Alt+R")    // Rotate by arbitrary amount
+   {
+      if(!anyItemsSelected(getDatabase()))
+         return true;
+
+      mEntryBox = getNewEntryBox("", "Rotation angle:", 10, numericFilter);
+      entryMode = EntryOriginAngle;
+   }
+   else if(inputString == "R")             // Spin CCW
+      rotateSelection(-15.f, false);
+   else if(inputString == "Shift+R")       // Spin CW
+      rotateSelection(15.f, false);
+   else if(inputString == "Ctrl+R")        // Rotate CCW about origin
+      rotateSelection(-15.f, true);
+   else if(inputString == "Ctrl+Shift+R")  // Rotate CW about origin
+      rotateSelection(15.f, true);
 
    else if(inputString == "Ctrl+I")       // Insert items generated with script into editor
       copyScriptItemsToEditor();
@@ -4184,10 +4221,15 @@ bool EditorUserInterface::textEntryInputCodeHandler(InputCode inputCode)
             }
          }
       }
-      else if(entryMode == EntryAngle)
+      else if(entryMode == EntrySpinAngle)
       {
          F32 angle = (F32) atof(mEntryBox.c_str());
-         rotateSelection(-angle);      // Positive angle should rotate CW, negative makes that happen
+         rotateSelection(-angle, false);      // Positive angle should rotate CW, negative makes that happen
+      }
+      else if(entryMode == EntryOriginAngle)
+      {
+         F32 angle = (F32) atof(mEntryBox.c_str());
+         rotateSelection(-angle, true);       // Positive angle should rotate CW, negative makes that happen
       }
       else if(entryMode == EntryScale)
       {

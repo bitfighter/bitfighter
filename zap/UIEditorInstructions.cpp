@@ -200,7 +200,7 @@ static ControlStringsEditor gControls1[] = {
          { "Zoom In", "E or Ctrl-Up" },
          { "Zoom Out", "C or Ctrl-Dwn" },
          { "Center Display", "Z" },
-         { "Toggle Script Results", "Ctrl-R" },
+         { "Toggle Script Results", "Ctrl-K" },
          { "Copy Results Into Editor", "Ctrl-I" },
       { "-", "" },         // Horiz. line
    { "Editing", "HEADER" },
@@ -232,8 +232,10 @@ static ControlStringsEditor gControls1[] = {
 static ControlStringsEditor gControls2[] = {
    { "Size & Rotation", "HEADER" },
          { "Flip Horiz/Vertical", "H, V" },
-         { "Rotate about (0,0)", "R, Shift-R" },
-         { "Arbitrary rotate", "Ctrl-Shift-R" },
+         { "Spin", "R, Shift-R" },
+         { "Arbitrary spin", "Alt-R" },
+         { "Rotate about (0,0)", "Ctrl-R, Ctrl-Shift-R" },
+         { "Arbitrary rotate about (0,0)", "Ctrl-Alt-R" },
          { "Scale selection", "Ctrl-Shift-X" },
 
          { "-", "" },      // Horiz. line

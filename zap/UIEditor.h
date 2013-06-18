@@ -368,7 +368,7 @@ public:
    void flipSelection(F32 center, bool isHoriz); // Do the actual flipping for the above
 
    void scaleSelection(F32 scale);               // Scale selection by scale
-   void rotateSelection(F32 angle);              // Rotate selecton by angle
+   void rotateSelection(F32 angle, bool useOrigin); // Rotate selecton by angle
 
    void validateLevel();               // Check level for things that will make the game crash!
    void validateTeams();               // Check that each item has a valid team (and fix any errors found)
