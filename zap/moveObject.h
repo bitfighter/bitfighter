@@ -89,8 +89,8 @@ protected:
 	bool mWaitingForMoveToUpdate;  // client only
 
    enum MaskBits {
-      PositionMask     = Parent::FirstFreeMask << 0,     // <-- Indicates position has changed and needs to be updated
-      WarpPositionMask = Parent::FirstFreeMask << 1,
+      PositionMask     = Parent::FirstFreeMask << 0,     // Position has changed and needs to be updated
+      WarpPositionMask = Parent::FirstFreeMask << 1,     // A large change in position not requiring client-side "smoothing"
       FirstFreeMask    = Parent::FirstFreeMask << 2
    };
 

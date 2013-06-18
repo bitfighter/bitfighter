@@ -892,12 +892,14 @@ void MoveItem::renderItem(const Point &pos)                 { TNLAssert(false, "
 void MoveItem::renderItemAlpha(const Point &pos, F32 alpha) { TNLAssert(false, "Unimplemented function!"); }
 
 
+// Note that I could only get this function to run on the client, and only from unpackUpdate... so I'm not sure
+// if setting the mask bits matters one whit
 void MoveItem::setActualPos(const Point &pos)
 {
-   if(pos != MoveObject::getActualPos()) // Skip MountableItem, for client side
+   if(pos != MoveObject::getActualPos()) 
    {
       setPos(ActualState, pos);
-      setMaskBits(WarpPositionMask | PositionMask);  // <=== I think we don't want WarpPositionMask here...
+      setMaskBits(PositionMask);  
    }
 }
 
@@ -1013,17 +1015,13 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       setActualVel(pt);
 
       positionChanged = true;
-      warpToNewPosition = !stream->readFlag();     // WarpPositionMask
+      warpToNewPosition = stream->readFlag();     // WarpPositionMask
    }
 
+   // Note that in order for WarpPositionMask to work, we also need to set PositionMask flag
    if(positionChanged)
    {
-      if(warpToNewPosition)      // --> Why do we interpolate this when we're warping, but not when we're not?
-      {
-         mInterpolating = true;
-         move(connection->getOneWayTime() * 0.001f, ActualState, false);
-      }
-      else
+      if(warpToNewPosition)
       {
          // We get here during the initial object transfer, probably other times as well.
 
@@ -1033,6 +1031,11 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          setRenderPos(MoveObject::getActualPos()); 
          setRenderVel(MoveObject::getActualVel());
          setRenderAngle(getActualAngle());
+      }
+      else
+      {
+         mInterpolating = true;
+         move(connection->getOneWayTime() * 0.001f, ActualState, false);
       }
 
       copyMoveState(ActualState, LastUnpackUpdateState);
