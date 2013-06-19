@@ -321,7 +321,9 @@ void luaW_push(lua_State* L, T* obj)
       // FIXME:  If there is more than one robot in a level with a proxy, this userdata will almost
       // always be nil because the cache table is only holding one userdata at a time - that of the
       // last robot added (see also the FIXME note in the block below)
-      TNLAssert(lua_isuserdata(L, -1) || LuaBase::dumpStack(L, "Expect table, userdata"), "Expected userdata!");
+      TNLAssert(lua_isuserdata(L, -1) || 
+                     LuaBase::dumpStack(L, "Expect table, userdata") || LuaBase::dumpTable(L, 1, "Cached Userdatas"), 
+                "Expected userdata!");
       TNLAssert(proxy == luaW_toProxy<T>(L, -1), "Cached object is not the one we expect!");
 
       // Clean up the stack

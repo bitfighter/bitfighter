@@ -437,7 +437,7 @@ static string stringify(lua_State *L, S32 index)
 
 
 // May interrupt a table traversal if this is called in the middle
-void LuaBase::dumpTable(lua_State *L, S32 tableIndex, const char *msg)
+bool LuaBase::dumpTable(lua_State *L, S32 tableIndex, const char *msg)
 {
    bool hasMsg = (strcmp(msg, "") != 0);
    logprintf("Dumping table at index %d %s%s%s", tableIndex, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
@@ -457,6 +457,8 @@ void LuaBase::dumpTable(lua_State *L, S32 tableIndex, const char *msg)
       logprintf("%s - %s", key.c_str(), val.c_str());        
       lua_pop(L, 1);                                        // -- ... table key (Pop value; keep key for next iter.)
    }
+
+   return false;
 }
 
 

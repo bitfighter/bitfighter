@@ -185,8 +185,8 @@ public:
    static string prettyPrintParamList(const LuaFunctionArgList &functionInfo);
 
    /////
-   // Debugging helpers
-   static void dumpTable(lua_State *L, S32 tableIndex, const char *msg = "");
+   // Debugging helpers -- both return false so they can be jammed into an assert
+   static bool dumpTable(lua_State *L, S32 tableIndex, const char *msg = "");
    static bool dumpStack(lua_State* L, const char *msg = "");
 };
 
