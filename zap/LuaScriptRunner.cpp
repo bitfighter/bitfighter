@@ -409,7 +409,7 @@ void LuaScriptRunner::configureNewLuaInstance()
 
    // Register all our classes in the global namespace... they will be copied below when we copy the environment
 
-   registerClasses();            // Register classes -- needs to be differentiated by script type
+   registerClasses();            // Perform class and global function registration once per lua_State
    registerLooseFunctions(L);    // Register some functions not associated with a particular class
 
    // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
