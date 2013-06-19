@@ -448,6 +448,27 @@ bool Socket::isValid()
    return mPlatformSocket != INVALID_SOCKET;
 }
 
+bool Socket::isWritable(U32 timeoutMillis)
+{
+   // make a socket "set" with just this socket
+   fd_set fds;
+   FD_ZERO(&fds);
+   FD_SET(mPlatformSocket, &fds);
+
+   // create the timeval structure as needed
+   timeval timeoutval;
+   timeoutval.tv_sec = 0;
+   timeoutval.tv_usec = timeoutMillis * 1000;
+
+   // passing NULL to select means to block indefinitely
+   timeval *timeout = timeoutMillis == NULL ? NULL : &timeoutval;
+
+   select(fds.fd_count, 0, &fds, 0, timeout);
+
+   // select writes a new set to fds consisting of all writable sockets in the original set
+   return fds.fd_count > 0;
+}
+
 #if defined ( TNL_OS_WIN32 )
 void Socket::getInterfaceAddresses(Vector<Address> *addressVector)
 {

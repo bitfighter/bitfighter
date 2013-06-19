@@ -76,9 +76,17 @@ bool HttpRequest::send()
       return false;
    }
 
-   // initiate the connection. this will block if DNS resolution is required
-   mSocket->connect(*mRemoteAddress);
-
+   S32 connectError = mSocket->connect(*mRemoteAddress);
+   if(connectError == UnknownError)
+   {
+	   return false;
+   }
+   
+   if(!mSocket->isWritable())
+   {
+	   return false;
+   }
+ 
    buildRequest();
    if(!sendRequest(mRequest))
    {
@@ -258,9 +266,9 @@ bool HttpRequest::sendRequest(string request)
 
    while(Platform::getRealMilliseconds() - startTime < mTimeout)
    {
-      memcpy(sendBuffer, request.c_str() + bytesSent, min(bytesTotal - bytesSent, bytesAtOnce));
-
       Platform::sleep(PollInterval);
+
+      memcpy(sendBuffer, request.c_str() + bytesSent, min(bytesTotal - bytesSent, bytesAtOnce));
       NetError sendError;
       sendError = mSocket->send(sendBuffer, min(bytesTotal - bytesSent, bytesAtOnce));
 
