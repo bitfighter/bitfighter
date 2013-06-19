@@ -733,7 +733,7 @@ bool writeFile(const string& path, const string& contents, bool append)
 
 const string readFile(const string& path)
 {
-   ifstream file(path.c_str());
+   ifstream file(path.c_str(), ios_base::in | ios_base::binary);
 
    if(!file.is_open())
       return "";
