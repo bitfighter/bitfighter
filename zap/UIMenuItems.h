@@ -383,8 +383,7 @@ public:
 
 class TextEntryMenuItem : public ValueMenuItem
 {
-
-typedef ValueMenuItem Parent;
+   typedef ValueMenuItem Parent;
 
 private:
    string mEmptyVal;
@@ -411,7 +410,7 @@ public:
    virtual bool handleKey(InputCode inputCode);
    virtual void handleTextInput(char ascii);
 
-   LineEditor getLineEditor();
+   LineEditor *getLineEditor();
    void setLineEditor(LineEditor editor);
 
    virtual string getValueForWritingToLevelFile();
@@ -443,10 +442,36 @@ public:
 
 class MaskedTextEntryMenuItem : public TextEntryMenuItem
 {
+   typedef TextEntryMenuItem Parent;
+
+public:
    MaskedTextEntryMenuItem(string title, string val, string emptyVal, const string &help, U32 maxLen, 
                           InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    virtual ~MaskedTextEntryMenuItem();
 };
+
+////////////////////////////////////
+////////////////////////////////////
+
+class SimpleTextEntryMenuItem : public TextEntryMenuItem
+{
+   typedef TextEntryMenuItem Parent;
+
+private:
+   bool mHasError;
+
+public:
+   SimpleTextEntryMenuItem(string title, U32 length, void (*callback)(ClientGame *, U32));
+   virtual ~SimpleTextEntryMenuItem();
+
+   void setHelp(string help);
+   void setHasError(bool hasError);
+
+   virtual bool handleKey(InputCode inputCode);
+
+   virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
+};
+
 
 
 ////////////////////////////////////

@@ -55,6 +55,7 @@ class EditorTeam;
 class LuaLevelGenerator;
 class EditorAttributeMenuUI;
 class PluginMenuUI;
+class SimpleTextEntryMenuUI;
 class DatabaseObject;
 class GameType;
 struct FolderManager;
@@ -107,6 +108,13 @@ private:
    enum DockMode {
       DOCKMODE_ITEMS,
       DOCKMODE_PLUGINS
+   };
+
+   enum SimpleTextEntryType {
+      SimpleTextEntryID,              // Entering an objectID
+      SimpleTextEntryRotateOrigin,    // Entering an angle for rotating about the origin
+      SimpleTextEntryRotateCentroid,  // Entering an angle for spinning
+      SimpleTextEntryScale,           // Entering a scale
    };
 
    DockMode mDockMode;
@@ -171,7 +179,6 @@ private:
    void renderInfoPanel();
    void renderPanelInfoLine(S32 line, const char *format, ...);
 
-   void renderTextEntryOverlay();
    void renderItemInfoPanel();
 
    void renderReferenceShip();
@@ -189,7 +196,6 @@ private:
    bool mAddingVertex;
    bool mPreviewMode;
    bool mScreenshotMode;
-   LineEditor mEntryBox;
 
    boost::shared_ptr<EditorPlugin> mPluginRunner;
 
@@ -260,6 +266,7 @@ private:
 
    void resnapAllEngineeredItems(GridDatabase *database);
 
+   boost::scoped_ptr<SimpleTextEntryMenuUI> mSimpleTextEntryMenu;
    boost::scoped_ptr<PluginMenuUI> mPluginMenu;      
    map<string, Vector<string> > mPluginMenuValues;
 
@@ -308,8 +315,6 @@ public:
    F32 getCurrentScale();
    Point getCurrentOffset();
 
-   void doneEditingAttributes(EditorAttributeMenuUI *editor, BfObject *object);   // Gets run when user exits attribute editor
-
    void clearUndoHistory();        // Wipe undo/redo history
 
    Vector<TeamInfo> mOldTeams;     // Team list from before we run team editor, so we can see what changed
@@ -338,10 +343,12 @@ public:
    bool onKeyDown(InputCode inputCode);                         // Handle all keyboard inputs, mouse clicks, and button presses
    void onTextInput(char ascii);                                // Handle all text input characters
    bool checkPluginKeyBindings(string inputString);             // Handle keys bound to plugins
-   bool textEntryInputCodeHandler(InputCode inputCode);         // Handle keyboard activity when we're editing an item's attributes
-   void textEntryTextInputHandler(char ascii);                  // Handle text input when we're editing an item's attributes
    void specialAttributeKeyHandler(InputCode inputCode, char ascii);
    void startAttributeEditor();
+   void doneEditingAttributes(EditorAttributeMenuUI *editor, BfObject *object);   // Gets run when user exits attribute editor
+
+   void startSimpleTextEntryMenu(SimpleTextEntryType entryType);
+   void doneWithSimpleTextEntryMenu(SimpleTextEntryMenuUI *menu, S32 entryType);
 
    void zoom(F32 zoomAmount);
 
@@ -369,6 +376,7 @@ public:
 
    void scaleSelection(F32 scale);               // Scale selection by scale
    void rotateSelection(F32 angle, bool useOrigin); // Rotate selecton by angle
+   void setSelectionId(S32 id);
 
    void validateLevel();               // Check level for things that will make the game crash!
    void validateTeams();               // Check that each item has a valid team (and fix any errors found)
