@@ -158,6 +158,8 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
+   bool collided(BfObject *hitObject, U32 stateIndex);
+
    TNL_DECLARE_CLASS(Burst);
 
    //// Lua interface

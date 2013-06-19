@@ -73,6 +73,7 @@ bool isGrenadeType(U8 x)
 }
 
 // If we add something here that is not an Item, need to check where this is used to make sure everything is ok
+// This is used to determine if bursts should explode on impact or not.
 bool isWithHealthType(U8 x)      
 {
    return

@@ -657,6 +657,24 @@ void Burst::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+bool Burst::collided(BfObject *hitObject, U32 stateIndex)
+{
+   if(isGhost())
+      return false;
+
+   // If a burst hits a ship (or turret, or ff proj), it should explode immediately.  But we can't have 
+   // it explode on contact with the shooter because the way a burst shows down, it is really quite 
+   // difficult to use without injuring oneself.  So we must make an exception for the shooter.
+   if(isWithHealthType(hitObject->getObjectTypeNumber()) && mShooter != hitObject)
+   {
+      explode(getActualPos());
+      return true;
+   }
+
+   return false;
+}
+
+
 void Burst::damageObject(DamageInfo *damageInfo)
 {
    // If we're being damaged by another burst, explode...
@@ -691,7 +709,8 @@ void Burst::doExplosion(const Point &pos)
 // Server only
 void Burst::explode(const Point &pos)
 {
-   if(exploded) return;
+   if(exploded) 
+      return;
 
    // Must set exploded to true immediately here or we risk a stack overflow when two
    // bursts hit each other and call radiusDamage on each other over and over

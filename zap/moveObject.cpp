@@ -385,7 +385,7 @@ F32 MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector
          objectHit->disableCollision();
          tryCount--;   // Don't count as tryCount
       }
-      else if(objectHit->isMoveObject())     // Collided with a MoveObject
+      else if(objectHit->isMoveObject())     // Collided with a MoveObject (including a ship)
       {
          TNLAssert(dynamic_cast<MoveObject *>(objectHit), "Not a MoveObject");
          MoveObject *moveObjectThatWasHit = static_cast<MoveObject *>(objectHit);
