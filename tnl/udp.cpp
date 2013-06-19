@@ -463,10 +463,10 @@ bool Socket::isWritable(U32 timeoutMillis)
    // passing NULL to select means to block indefinitely
    timeval *timeout = timeoutMillis == NULL ? NULL : &timeoutval;
 
-   select(fds.fd_count, 0, &fds, 0, timeout);
+   select(mPlatformSocket + 1, 0, &fds, 0, timeout);
 
    // select writes a new set to fds consisting of all writable sockets in the original set
-   return fds.fd_count > 0;
+   return FD_ISSET(mPlatformSocket, &fds);
 }
 
 #if defined ( TNL_OS_WIN32 )
