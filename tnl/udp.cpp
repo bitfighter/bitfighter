@@ -461,7 +461,7 @@ bool Socket::isWritable(U32 timeoutMillis)
    timeoutval.tv_usec = timeoutMillis * 1000;
 
    // passing NULL to select means to block indefinitely
-   timeval *timeout = timeoutMillis == NULL ? NULL : &timeoutval;
+   timeval *timeout = timeoutMillis ? NULL : &timeoutval;
 
    select(mPlatformSocket + 1, 0, &fds, 0, timeout);
 
