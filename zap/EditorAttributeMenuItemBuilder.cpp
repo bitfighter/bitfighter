@@ -248,6 +248,7 @@ void EditorAttributeMenuItemBuilder::startEditingAttrs(EditorAttributeMenuUI *at
 
       default:
          obj->startEditingAttrs(attributeMenu);
+         break;
    }
 }
 
@@ -276,6 +277,7 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
       case TurretTypeNumber:
       case ForceFieldProjectorTypeNumber:
          static_cast<EngineeredItem *>(obj)->setHealRate(attributeMenu->getMenuItem(0)->getIntValue());
+         break;
 
       case RepairItemTypeNumber:
       case EnergyItemTypeNumber:
@@ -288,6 +290,7 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
 
       default:
          obj->doneEditingAttrs(attributeMenu);
+         break;
    }
 }
 

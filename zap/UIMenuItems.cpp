@@ -1271,9 +1271,9 @@ MenuItemTypes TextEntryMenuItem::getItemType()
 }
 
 
-LineEditor TextEntryMenuItem::getLineEditor()
+LineEditor *TextEntryMenuItem::getLineEditor()
 {
-   return mLineEditor;
+   return &mLineEditor;
 }
 
 
@@ -1368,7 +1368,7 @@ TextEntryMenuItem::TextEntryMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NO
 
 MaskedTextEntryMenuItem::MaskedTextEntryMenuItem(string title, string val, string emptyVal, const string &help, 
                                                  U32 maxLen, InputCode k1, InputCode k2) :
-   TextEntryMenuItem(title, val, emptyVal, help, maxLen, k1, k2)
+   Parent(title, val, emptyVal, help, maxLen, k1, k2)
 {
    mLineEditor.setSecret(true);
 }
@@ -1378,6 +1378,72 @@ MaskedTextEntryMenuItem::~MaskedTextEntryMenuItem()
 {
    // Do nothing
 }
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+SimpleTextEntryMenuItem::SimpleTextEntryMenuItem(string title, U32 length, void (*callback)(ClientGame *, U32)) :
+   Parent(title, "", "", "", length)
+{
+   mCallback = callback;
+   mHasError = false;
+}
+
+// Destructor
+SimpleTextEntryMenuItem::~SimpleTextEntryMenuItem()
+{
+   // Do nothing
+}
+
+
+void SimpleTextEntryMenuItem::setHelp(string help)
+{
+   mHelp = help;
+}
+
+
+void SimpleTextEntryMenuItem::setHasError(bool hasError)
+{
+   mHasError = hasError;
+}
+
+
+bool SimpleTextEntryMenuItem::handleKey(InputCode inputCode)
+{
+   if(inputCode == KEY_ENTER)
+   {
+      // Call the menu item main callback unless we have an error
+      if(mCallback && !mHasError)
+         mCallback(getMenu()->getGame(), 0);  // 0 is unused
+
+      return true;
+   }
+
+   bool handled = mLineEditor.handleKey(inputCode);
+
+   // Call this menu item's callback if the lineEditor handled the key (it is also run in hasTextInput() )
+   if(mTextEditedCallback && handled)
+      mTextEditedCallback(mLineEditor.getString(), static_cast<SimpleTextEntryMenuUI *>(mMenu)->getObject());
+
+   return handled;
+}
+
+
+void SimpleTextEntryMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
+{
+   Color textColor(Colors::cyan);
+
+   S32 xpos2 = drawCenteredStringPair(xpos, ypos, textsize, MenuContext, InputContext, *getColor(false), textColor,
+         getPrompt().c_str(), mLineEditor.getDisplayString().c_str());
+
+   glColor(Colors::red);      // Cursor is always red
+
+   FontManager::pushFontContext(InputContext);
+   mLineEditor.drawCursor(xpos2, ypos, textsize);
+   FontManager::popFontContext();
+}
+
 
 };
 

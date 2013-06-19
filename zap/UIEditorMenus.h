@@ -56,6 +56,8 @@ private:
    S32 mTopOfFirstMenuItem;       
 
 protected:
+   bool mDisableHighlight;   // Disable highlighting of selected menu item
+
    virtual S32 getSelectedMenuItem();
    bool usesEditorScreenMode();
 
@@ -116,6 +118,28 @@ public:
 
    void setTitle(const string &title);
    virtual void doneEditing();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class SimpleTextEntryMenuUI : public QuickMenuUI
+{
+   typedef QuickMenuUI Parent;
+
+private:
+   S32 mData;          // See SimpleTextEntryType in UIEditor.h
+   BfObject *mObject;  // Object who is being manipulated
+
+public:
+   SimpleTextEntryMenuUI(ClientGame *game, const string &title, S32 data);    // Constructor
+   virtual ~SimpleTextEntryMenuUI();                                // Destructor
+
+   virtual void doneEditing();
+
+   BfObject *getObject();
+   void setObject(BfObject *obj);
 };
 
 

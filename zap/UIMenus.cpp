@@ -376,7 +376,7 @@ void MenuUserInterface::render()
       S32 gap = getGap(size);
       
       // Highlight selected item
-      if(selectedIndex == i + offset)  
+      if(selectedIndex == i + offset)
          drawMenuItemHighlight(0,           y - gap / 2 + shrinkfact, 
                                canvasWidth, y + textsize + gap / 2 - shrinkfact);
 

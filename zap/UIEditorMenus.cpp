@@ -60,6 +60,7 @@ QuickMenuUI::~QuickMenuUI()
 void QuickMenuUI::initialize()
 {
    mTopOfFirstMenuItem = -1;    
+   mDisableHighlight = false;
 }
 
 
@@ -172,7 +173,7 @@ void QuickMenuUI::render()
       }
 
       // Draw background highlight if this item's selected
-      if(selectedIndex == i)
+      if(selectedIndex == i && !mDisableHighlight)
          drawMenuItemHighlight(left,  y - specialCaseFix, right, y + itemTextSize + 5);
 
       getMenuItem(i)->render(cenX, y, itemTextSize, selectedIndex == i);
@@ -403,6 +404,47 @@ void PluginMenuUI::doneEditing()
    responses.erase(responses.size() - 1);    // Remove last arg, which corresponds to our "save and quit" menu item
 
    getGame()->getUIManager()->getUI<EditorUserInterface>()->onPluginMenuClosed(responses);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// Constructor
+SimpleTextEntryMenuUI::SimpleTextEntryMenuUI(ClientGame *game, const string &title, S32 data) :
+      Parent(game, title)
+{
+   mData = data;
+   mObject = NULL;
+
+   mDisableHighlight = true;  // No text highlighting
+
+   setMenuCenterPoint(Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2));
+}
+
+
+SimpleTextEntryMenuUI::~SimpleTextEntryMenuUI()
+{
+   // Do nothing
+}
+
+
+void SimpleTextEntryMenuUI::doneEditing()
+{
+   getGame()->getUIManager()->getUI<EditorUserInterface>()->doneWithSimpleTextEntryMenu(this, mData);
+}
+
+
+void SimpleTextEntryMenuUI::setObject(BfObject *obj)
+{
+   mObject = obj;
+}
+
+
+BfObject *SimpleTextEntryMenuUI::getObject()
+{
+   return mObject;
 }
 
 

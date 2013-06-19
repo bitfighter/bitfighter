@@ -102,16 +102,6 @@ S32 QSORT_CALLBACK pluginInfoSort(EditorUserInterface::PluginInfo *a, EditorUser
 
 //Vector<string> EditorUserInterface::robots;        // List of robot lines in the level file
 
-enum EntryMode {
-   EntryID,          // Entering an objectID
-   EntryOriginAngle, // Entering an angle for rotating about the origin
-   EntrySpinAngle,   // Entering an angle for spinning
-   EntryScale,       // Entering a scale
-   EntryNone         // Not in a special entry mode
-};
-
-
-static EntryMode entryMode;
 
 static void saveLevelCallback(ClientGame *game)
 {
@@ -1222,7 +1212,6 @@ void EditorUserInterface::onActivate()
    mPreviewMode = false;
    mDragCopying = false;
    mJustInsertedVertex = false;
-   entryMode = EntryNone;
 
    Cursor::enableCursor();
 
@@ -1792,66 +1781,6 @@ void EditorUserInterface::renderItemInfoPanel()
 }
 
 
-void EditorUserInterface::renderTextEntryOverlay()
-{
-   // Render id-editing overlay
-   if(entryMode != EntryNone)
-   {
-      static const S32 fontsize = 16;
-      static const S32 inset = 9;
-      static const S32 boxheight = fontsize + 2 * inset;
-      static const Color color(0.9, 0.9, 0.9);
-      static const Color errorColor(Colors::red);
-
-      bool errorFound = false;
-
-      // Check for duplicate IDs if we're in ID entry mode
-      if(entryMode == EntryID)
-      {
-         S32 id = atoi(mEntryBox.c_str());      // mEntryBox has digits only filter applied; ids can only be positive ints
-
-         if(id != 0)    // Check for duplicates
-         {
-            const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-
-            for(S32 i = 0; i < objList->size(); i++)
-            {
-               BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-               if(obj->getUserAssignedId() == id && !obj->isSelected())
-               {
-                  errorFound = true;
-                  break;
-               }
-            }
-         }
-      }
-
-      // Calculate box width
-      S32 boxwidth = 2 * inset + getStringWidth(fontsize, mEntryBox.getPrompt().c_str()) + 
-          mEntryBox.getMaxLen() * getStringWidth(fontsize, "-") + 25;
-
-      // Render entry box
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
-      S32 xpos = (gScreenInfo.getGameCanvasWidth()  - boxwidth) / 2;
-      S32 ypos = (gScreenInfo.getGameCanvasHeight() - boxheight) / 2;
-
-      Color boxColor = Color(.3f,.6f,.3f);
-      drawFilledRect(xpos, ypos, xpos + boxwidth, ypos + boxheight, boxColor, .85f, boxColor);
-
-      xpos += inset;
-      ypos += inset;
-
-      glColor(errorFound ? errorColor : color);
-      xpos += drawStringAndGetWidthf(xpos, ypos, fontsize, "%s ", mEntryBox.getPrompt().c_str());
-      drawString(xpos, ypos, fontsize, mEntryBox.c_str());
-
-      mEntryBox.drawCursor(xpos, ypos, fontsize);
-   }
-}
-
-
 void EditorUserInterface::renderReferenceShip()
 {
    // Render ship at cursor to show scale
@@ -1980,8 +1909,6 @@ void EditorUserInterface::render()
 
    renderSaveMessage();
    renderWarnings();
-
-   renderTextEntryOverlay();
 
    renderConsole();        // Rendered last, so it's always on top
 }
@@ -2437,6 +2364,27 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 
    setNeedToSave(true);
    autoSave();
+}
+
+
+void EditorUserInterface::setSelectionId(S32 id)
+{
+   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+      if(obj->isSelected())               // Should only be one
+      {
+         if(obj->getUserAssignedId() != id)     // Did the id actually change?
+         {
+            obj->setUserAssignedId(id, true);
+            mAllUndoneUndoLevel = -1;     // If so, it can't be undone
+         }
+         break;
+      }
+   }
 }
 
 
@@ -3553,17 +3501,6 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 }
 
 
-static LineEditor getNewEntryBox(string value, string prompt, S32 length, LineEditorFilter filter)
-{
-   LineEditor entryBox(length);
-   entryBox.setPrompt(prompt);
-   entryBox.setString(value);
-   entryBox.setFilter(filter);
-
-   return entryBox;
-}
-
-
 void EditorUserInterface::centerView()
 {
 //   const Vector<BfObject *> *objList = getDatabase()->getObjectList();
@@ -3654,27 +3591,6 @@ Point EditorUserInterface::getCurrentOffset()
 }
 
 
-// Gets run when user exits special-item editing mode, called from attribute editors
-void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, BfObject *object)
-{
-   object->onAttrsChanged();
-
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-
-   // Find any other selected items of the same type of the item we just edited, and update their attributes too
-   for(S32 i = 0; i < objList->size(); i++)
-   {
-      BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-      if(obj != object && obj->isSelected() && obj->getObjectTypeNumber() == object->getObjectTypeNumber())
-      {
-         editor->doneEditingAttrs(obj);  // Transfer attributes from editor to object
-         obj->onAttrsChanged();          // And notify the object that its attributes have changed
-      }
-   }
-}
-
-
 void EditorUserInterface::zoom(F32 zoomAmount)
 {
    Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
@@ -3697,44 +3613,6 @@ void EditorUserInterface::onTextInput(char ascii)
    // Pass the key on to the console for processing
    if(gConsole.onKeyDown(ascii))
       return;
-
-   if(entryMode != EntryNone)
-      textEntryTextInputHandler(ascii);
-
-   else if(ascii == '#' || ascii == '!')
-   {
-      S32 selected = NONE;
-
-      const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-
-      // Find first selected item, and work with that.  Unselect the rest.
-      for(S32 i = 0; i < objList->size(); i++)
-      {
-         BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-         if(obj->isSelected())
-         {
-            if(selected == NONE)
-            {
-               selected = i;
-               continue;
-            }
-            else
-               obj->setSelected(false);
-         }
-      }
-
-      onSelectionChanged();
-
-      if(selected == NONE)      // Nothing selected, nothing to do!
-         return ;
-
-      BfObject *selectedObj = static_cast<BfObject *>(objList->get(selected));
-
-      S32 id = selectedObj->getUserAssignedId();
-      mEntryBox = getNewEntryBox( id <= 0 ? "" : itos(id), "Item ID:", 10, digitsOnlyFilter);
-      entryMode = EntryID;
-   }
 }
 
 
@@ -3754,13 +3632,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
 
 
-   // TODO: Make this stuff work like the attribute entry stuff; use a real menu and not this ad-hoc code
-   // This is where we handle entering things like rotation angle and other data that requires a special entry box.
-   // NOT for editing an item's attributes.  Still used, but untested in refactor.
-   if(entryMode != EntryNone)
-      return textEntryInputCodeHandler(inputCode);
-
-   else if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)       // Enter - Edit props
+   if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)       // Enter - Edit props
       startAttributeEditor();
 
    // Mouse wheel zooms in and out
@@ -3838,22 +3710,12 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       else
          clearLevelGenItems();
    }
+   else if(inputString == "Shift+1" || inputString == "Shift+3")  // '!' or '#'
+      startSimpleTextEntryMenu(SimpleTextEntryID);
    else if(inputString == "Alt+R")         // Spin by arbitrary amount
-   {
-      if(!anyItemsSelected(getDatabase()))
-         return true;
-
-      mEntryBox = getNewEntryBox("", "Spin angle:", 10, numericFilter);
-      entryMode = EntrySpinAngle;
-   }
+      startSimpleTextEntryMenu(SimpleTextEntryRotateCentroid);
    else if(inputString == "Ctrl+Alt+R")    // Rotate by arbitrary amount
-   {
-      if(!anyItemsSelected(getDatabase()))
-         return true;
-
-      mEntryBox = getNewEntryBox("", "Rotation angle:", 10, numericFilter);
-      entryMode = EntryOriginAngle;
-   }
+      startSimpleTextEntryMenu(SimpleTextEntryRotateOrigin);
    else if(inputString == "R")             // Spin CCW
       rotateSelection(-15.f, false);
    else if(inputString == "Shift+R")       // Spin CW
@@ -3897,13 +3759,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    else if(inputString == "Ctrl+A")       // Select everything
       selectAll(getDatabase());
    else if(inputString == "Ctrl+Shift+X") // Resize selection
-   {
-      if(anyItemsSelected(getDatabase()))
-      {
-         mEntryBox = getNewEntryBox("", "Resize factor:", 10, numericFilter);
-         entryMode = EntryScale;
-      }
-   }
+      startSimpleTextEntryMenu(SimpleTextEntryScale);
    else if(inputString == "Ctrl+X")     // Cut selection
    {
       copySelection();
@@ -4190,63 +4046,193 @@ bool EditorUserInterface::checkPluginKeyBindings(string inputString)
 }
 
 
-void EditorUserInterface::textEntryTextInputHandler(char ascii)
+static void simpleTextEntryMenuCallback(ClientGame *game, U32 unused)
 {
-   mEntryBox.addChar(ascii);
+   SimpleTextEntryMenuUI *ui = dynamic_cast<SimpleTextEntryMenuUI *>(game->getUIManager()->getCurrentUI());
+   TNLAssert(ui, "Unexpected UI here -- expected a SimpleTextEntryMenuUI!");
+
+   ui->doneEditing();
+   ui->getUIManager()->reactivatePrevUI();
 }
 
 
-// Handle keyboard activity when we're editing an item's attributes
-bool EditorUserInterface::textEntryInputCodeHandler(InputCode inputCode)
+void idEntryCallback(string text, BfObject *unused)
 {
-   if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)
+   // Grab ClientGame from our 'unused' object
+   ClientGame *clientGame = static_cast<ClientGame *>(unused->getGame());
+
+
+   // Check for duplicate IDs
+   S32 id = atoi(text.c_str());
+   bool duplicateFound = false;
+
+   if(id != 0)
    {
-      if(entryMode == EntryID)
+      const Vector<DatabaseObject *> *objList = clientGame->getUIManager()->getUI<EditorUserInterface>()->getDatabase()->findObjects_fast();
+
+      for(S32 i = 0; i < objList->size(); i++)
       {
-         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+         BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
-         for(S32 i = 0; i < objList->size(); i++)
+         if(obj->getUserAssignedId() == id && !obj->isSelected())
          {
-            BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-            if(obj->isSelected())               // Should only be one
-            {
-               S32 id = atoi(mEntryBox.c_str());
-               if(obj->getUserAssignedId() != id)     // Did the id actually change?
-               {
-                  obj->setUserAssignedId(id, true);
-                  mAllUndoneUndoLevel = -1;     // If so, it can't be undone
-               }
-               break;
-            }
+            duplicateFound = true;
+            break;
          }
       }
-      else if(entryMode == EntrySpinAngle)
-      {
-         F32 angle = (F32) atof(mEntryBox.c_str());
-         rotateSelection(-angle, false);      // Positive angle should rotate CW, negative makes that happen
-      }
-      else if(entryMode == EntryOriginAngle)
-      {
-         F32 angle = (F32) atof(mEntryBox.c_str());
-         rotateSelection(-angle, true);       // Positive angle should rotate CW, negative makes that happen
-      }
-      else if(entryMode == EntryScale)
-      {
-         F32 scale = (F32) atof(mEntryBox.c_str());
-         scaleSelection(scale);
-      }
-
-      entryMode = EntryNone;
-      return true;
    }
-   else if(inputCode == KEY_ESCAPE)
+
+
+   SimpleTextEntryMenuUI *ui = dynamic_cast<SimpleTextEntryMenuUI *>(clientGame->getUIManager()->getCurrentUI());
+   TNLAssert(ui, "Should be in SimpleTextEntryMenuUI!");
+
+   SimpleTextEntryMenuItem *menuItem = static_cast<SimpleTextEntryMenuItem*>(ui->getMenuItem(0));
+
+   // Show a message if we've detected a duplicate ID is being entered
+   if(duplicateFound)
    {
-      entryMode = EntryNone;
-      return true;
+      menuItem->setHasError(true);
+      menuItem->setHelp("ERROR: Duplicate ID detected!");
+   }
+   else
+   {
+      menuItem->setHasError(false);
+      menuItem->setHelp("");
+   }
+}
+
+
+void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType)
+{
+   // No items selected?  Abort!
+   if(!anyItemsSelected(getDatabase()))
+      return;
+
+   string menuTitle = "Some Interesting Title";
+   string menuItemTitle = "Another Interesting Title";
+   string lineValue = "";
+
+   LineEditorFilter filter = numericFilter;
+   void(*callback)(string, BfObject *) = NULL;  // Our input callback; triggers on input change
+
+   static U32 inputLength = 9;   // Less than S32_MAX
+
+
+   // Find first selected item, and work with that
+   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+
+   S32 selectedIndex = NONE;
+   BfObject *selectedObject = NULL;
+   BfObject *obj = NULL;
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      obj = static_cast<BfObject *>(objList->get(i));
+
+      if(obj->isSelected())
+      {
+         selectedIndex = i;
+         selectedObject = obj;
+         break;
+      }
    }
 
-   return mEntryBox.handleKey(inputCode);
+
+   // Adjust our UI depending on which type was requested
+   switch(entryType)
+   {
+      case SimpleTextEntryID:
+      {
+         menuTitle = "Add Item ID";
+         menuItemTitle = "ID:";
+         filter = digitsOnlyFilter;
+         callback = idEntryCallback;
+
+         // We need to assure that we only assign an ID to ONE object
+         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+
+         // Unselect all objects but our first selected one
+         for(S32 i = 0; i < objList->size(); i++)
+         {
+            if(i != selectedIndex)
+               static_cast<BfObject *>(objList->get(i))->setSelected(false);
+         }
+
+         onSelectionChanged();
+
+         S32 currentId = selectedObject->getUserAssignedId();  // selectedObject should never be NULL here
+
+         lineValue = currentId <= 0 ? "" : itos(currentId);
+
+         break;
+      }
+      case SimpleTextEntryRotateOrigin:
+         menuTitle = "Rotate object(s) about (0,0)";
+         menuItemTitle = "Angle:";
+         break;
+      case SimpleTextEntryRotateCentroid:
+         menuTitle = "Spin object(s)";
+         menuItemTitle = "Angle:";
+         break;
+      case SimpleTextEntryScale:
+         menuTitle = "Resize";
+         menuItemTitle = "Resize Factor:";
+         break;
+      default:
+         break;
+   }
+
+   // Create our menu item
+   SimpleTextEntryMenuItem *menuItem = new SimpleTextEntryMenuItem(menuItemTitle, inputLength, simpleTextEntryMenuCallback);
+   menuItem->getLineEditor()->setFilter(filter);
+
+   if(lineValue != "")   // This object has an ID already
+      menuItem->getLineEditor()->setString(lineValue);
+
+   if(callback != NULL)  // Add a callback for IDs to check for duplicates
+      menuItem->setTextEditedCallback(callback);
+
+   // Create our menu, use scoped_ptr since we only need once instance of this menu
+   mSimpleTextEntryMenu.reset(new SimpleTextEntryMenuUI(getGame(), menuTitle, entryType));
+   mSimpleTextEntryMenu->addMenuItem(menuItem);      // addMenuItem wraps the menu item in a smart pointer
+   mSimpleTextEntryMenu->setObject(selectedObject);  // Add our object for usage in the menu item callback
+
+   getUIManager()->activate(mSimpleTextEntryMenu.get());
+}
+
+
+void EditorUserInterface::doneWithSimpleTextEntryMenu(SimpleTextEntryMenuUI *menu, S32 data)
+{
+   SimpleTextEntryType entryType = (SimpleTextEntryType) data;
+
+   string value = menu->getMenuItem(0)->getValue();
+
+   switch(entryType)
+   {
+      case SimpleTextEntryID:
+         setSelectionId(stoi(value));
+         break;
+
+      case SimpleTextEntryRotateOrigin:
+      {
+         F32 angle = stof(value);
+         rotateSelection(-angle, true);       // Positive angle should rotate CW, negative makes that happen
+         break;
+      }
+
+      case SimpleTextEntryRotateCentroid:
+      {
+         F32 angle = stof(value);
+         rotateSelection(-angle, false);      // Positive angle should rotate CW, negative makes that happen
+         break;
+      }
+
+      case SimpleTextEntryScale:
+         scaleSelection(stof(value));
+         break;
+
+      default:
+         break;
+   }
 }
 
 
@@ -4283,6 +4269,27 @@ void EditorUserInterface::startAttributeEditor()
          }
 
          break;
+      }
+   }
+}
+
+
+// Gets run when user exits special-item editing mode, called from attribute editors
+void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, BfObject *object)
+{
+   object->onAttrsChanged();
+
+   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+
+   // Find any other selected items of the same type of the item we just edited, and update their attributes too
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+      if(obj != object && obj->isSelected() && obj->getObjectTypeNumber() == object->getObjectTypeNumber())
+      {
+         editor->doneEditingAttrs(obj);  // Transfer attributes from editor to object
+         obj->onAttrsChanged();          // And notify the object that its attributes have changed
       }
    }
 }
