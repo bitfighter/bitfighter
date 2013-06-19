@@ -82,7 +82,7 @@ bool HttpRequest::send()
 	   return false;
    }
    
-   if(!mSocket->isWritable())
+   if(!mSocket->isWritable(5000))
    {
 	   return false;
    }
