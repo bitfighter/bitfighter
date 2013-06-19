@@ -60,7 +60,6 @@ public:
 
    bool prepareEnvironment();
    
-   virtual void registerClasses();
    void onScriptInitialized();
    string getScriptName();
 

@@ -100,7 +100,6 @@ public:
    bool start();
 
    bool prepareEnvironment();
-   void registerClasses();
    string runGetName();                // Run bot's getName() function
 
    void clearMove();                   // Reset bot's move to do nothing
