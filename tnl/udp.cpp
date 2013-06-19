@@ -898,7 +898,7 @@ NetError getLastError()
          return UnknownError;
    }
 #else
-   if(errno == EAGAIN)
+   if(errno == EAGAIN || errno == EINPROGRESS)
       return WouldBlock;
    return UnknownError;
 #endif
