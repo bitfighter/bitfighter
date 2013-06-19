@@ -406,6 +406,16 @@ void LuaScriptRunner::configureNewLuaInstance()
    loadCompileSaveHelper("lua_helper_functions.lua",      LUA_HELPER_FUNCTIONS_KEY);
    loadCompileSaveHelper("robot_helper_functions.lua",    ROBOT_HELPER_FUNCTIONS_KEY);
    loadCompileSaveHelper("levelgen_helper_functions.lua", LEVELGEN_HELPER_FUNCTIONS_KEY);
+
+   // Register all our classes in the global namespace... they will be copied below when we copy the environment
+
+   registerClasses();            // Register classes -- needs to be differentiated by script type
+   registerLooseFunctions(L);    // Register some functions not associated with a particular class
+
+   // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
+   // These will be copied into the script's environment when we run createEnvironment.
+   setEnums(L);
+   setGlobalObjectArrays(L);
 }
 
 
@@ -508,16 +518,6 @@ bool LuaScriptRunner::prepareEnvironment()
    luaL_dostring(L, sandbox_env);
    lua_getglobal(L, "sandbox_e");                        // -- environment sandbox_e
    lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // -- <<empty stack>>
-
-   // Register all our classes in the global namespace... they will be copied below when we copy the environment
-
-   registerClasses();            // Register classes -- needs to be differentiated by script type
-   registerLooseFunctions(L);    // Register some functions not associated with a particular class
-
-   // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
-   // These will be copied into the script's environment when we run createEnvironment.
-   setEnums(L);    
-   setGlobalObjectArrays(L);
 
    luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create a local scripting environment
    lua_getglobal(L, "e");                                //                                        -- environment e   
