@@ -4056,11 +4056,12 @@ static void simpleTextEntryMenuCallback(ClientGame *game, U32 unused)
 }
 
 
-void idEntryCallback(string text, BfObject *unused)
+void idEntryCallback(string text, BfObject *object)
 {
-   // Grab ClientGame from our 'unused' object
-   ClientGame *clientGame = static_cast<ClientGame *>(unused->getGame());
+   TNLAssert(object, "Expected an object here!");
 
+   // Grab ClientGame from our object
+   ClientGame *clientGame = static_cast<ClientGame *>(object->getGame());
 
    // Check for duplicate IDs
    S32 id = atoi(text.c_str());
