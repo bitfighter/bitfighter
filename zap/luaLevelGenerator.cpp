@@ -127,14 +127,6 @@ static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char
 }
 
 
-// Register our connector types with Lua
-void LuaLevelGenerator::registerClasses()
-{
-   // General classes
-   LuaScriptRunner::registerClasses();    // LuaScriptRunner is a parent class
-}
-
-
 /////
 // Lua interface
 /**

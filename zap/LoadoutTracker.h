@@ -26,11 +26,14 @@
 #ifndef _LOADOUT_TRACKER_H_
 #define _LOADOUT_TRACKER_H_
 
+#include "tnlTypes.h"
+#include "tnlVector.h"
+
 #include "shipItems.h"
 #include "WeaponInfo.h"
 
-#include "tnlTypes.h"
-#include "tnlVector.h"
+#include "LuaScriptRunner.h"
+
 #include <string>
 
 using namespace TNL;
@@ -39,9 +42,7 @@ using namespace std;
 namespace Zap 
 {
 
-class LuaLoadout;
-
-class LoadoutTracker
+class LoadoutTracker : public LuaBase
 {
 private:
    ShipModule mModules[ShipModuleCount];     // Modules player's ship is carrying
@@ -102,6 +103,21 @@ public:
 
    Vector<U8> toU8Vector() const;
    string toString() const;
+
+
+   // Lua interface
+   LUAW_DECLARE_CLASS(LoadoutTracker);
+
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
+
+   S32 lua_setWeapon(lua_State *L);     // setWeapon(i, mod) ==> Set weapon at index i
+   S32 lua_setModule(lua_State *L);     // setModule(i, mod) ==> Set module at index i
+   S32 lua_isValid(lua_State *L);       // isValid() ==> Is loadout config valid?
+   S32 lua_equals(lua_State *L);        // equals(Loadout) ==> is loadout the same as Loadout?
+   S32 lua_getWeapon(lua_State *L);     // getWeapon(i) ==> return weapon at index i
+   S32 lua_getModule(lua_State *L);     // getModule(i) ==> return module at index i
 };
 
 

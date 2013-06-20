@@ -243,14 +243,6 @@ string Robot::runGetName()
 }
 
 
-// Register our connector types with Lua
-void Robot::registerClasses()
-{
-   // General classes 
-   LuaScriptRunner::registerClasses();    // LuaScriptRunner is a parent class
-}
-
-
 // This only runs the very first time the robot is added to the level
 // Note that level may not yet be ready, so the bot can't spawn yet
 // Runs on client and server 

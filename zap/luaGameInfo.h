@@ -72,35 +72,6 @@ public:
 };
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-class LuaLoadout : public LuaBase
-{
-private:
-   U8 mLoadout[ShipModuleCount + ShipWeaponCount];
-
-public:
-   explicit LuaLoadout(const Vector<U8> &loadout = LoadoutTracker(DefaultLoadout).toU8Vector());  // C++ constructor
-   virtual ~LuaLoadout();                                                                         // Destructor
-
-   LUAW_DECLARE_CLASS(LuaLoadout);
-
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
-   static const LuaFunctionProfile functionArgs[];
-
-   S32 lua_setWeapon(lua_State *L);     // setWeapon(i, mod) ==> Set weapon at index i
-   S32 lua_setModule(lua_State *L);     // setModule(i, mod) ==> Set module at index i
-   S32 lua_isValid(lua_State *L);       // isValid() ==> Is loadout config valid?
-   S32 lua_equals(lua_State *L);        // equals(Loadout) ==> is loadout the same as Loadout?
-   S32 lua_getWeapon(lua_State *L);     // getWeapon(i) ==> return weapon at index i
-   S32 lua_getModule(lua_State *L);     // getModule(i) ==> return module at index i
-
-   U8 getLoadoutItem(S32 indx) const;   // Helper function, not accessible from Lua
-};
-
-
 };
 
 #endif

@@ -91,8 +91,8 @@ private:
    void pushStackTracer();      // Put error handler function onto the stack
 
 
-   void setEnums(lua_State *L);                       // Set a whole slew of enum values that we want the scripts to have access to
-   void setGlobalObjectArrays(lua_State *L);          // And some objects
+   static void setEnums(lua_State *L);                       // Set a whole slew of enum values that we want the scripts to have access to
+   static void setGlobalObjectArrays(lua_State *L);          // And some objects
    static void logErrorHandler(const char *msg, const char *prefix);
 
 protected:
@@ -109,12 +109,12 @@ protected:
    void setSelf(lua_State *L, LuaScriptRunner *self, const char *name);
 
    static int luaPanicked(lua_State *L);  // Handle a total freakout by Lua
-   virtual void registerClasses();
+   static void registerClasses();
    void setEnvironment();                 // Sets the environment for the function on the top of the stack to that associated with name
 
    static void deleteScript(const char *name);  // Remove saved script from the Lua registry
 
-   void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
+   static void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
 
    S32 findObjectById(lua_State *L, const Vector<DatabaseObject *> *objects);
    S32 findObjects(lua_State *L, GridDatabase *database, Rect *scope = NULL, Ship *caller = NULL);

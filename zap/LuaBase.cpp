@@ -244,7 +244,7 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
          return false;
 
       case LOADOUT:
-         return luaW_is<LuaLoadout>(L, stackPos);
+         return luaW_is<LoadoutTracker>(L, stackPos);
 
       case ITEM:
          return luaW_is<Item>(L, stackPos);

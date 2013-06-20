@@ -37,6 +37,8 @@ namespace Zap
 LoadoutTracker::LoadoutTracker()
 {
    resetLoadout();
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -45,6 +47,8 @@ LoadoutTracker::LoadoutTracker(const string &loadoutStr)
 {
    resetLoadout();
    setLoadout(loadoutStr);
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -53,12 +57,14 @@ LoadoutTracker::LoadoutTracker(const Vector<U8> &loadout)
 {
    resetLoadout();
    setLoadout(loadout);
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 // Destructor
 LoadoutTracker::~LoadoutTracker()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -366,6 +372,131 @@ string LoadoutTracker::toString() const
 
    return listToString(loadoutStrings, ',');
 }
+
+
+
+/**
+ *  @luaclass Loadout
+ *  @brief    Get and set ship Loadout properties
+ *  @descr    Use the %Loadout object to modify a ship or robots current loadout
+ *
+ *  You only need get this object once, then you can use it as often as you like. It will
+ *  always reflect the latest data.
+ */
+//                Fn name                  Param profiles            Profile count
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, setWeapon,      ARRAYDEF({{ WEAP_SLOT, WEAP_ENUM, END }}), 1 )  \
+   METHOD(CLASS, setModule,      ARRAYDEF({{ MOD_SLOT, MOD_ENUM, END }}), 1 )    \
+   METHOD(CLASS, isValid,        ARRAYDEF({{ END }}), 1 )                        \
+   METHOD(CLASS, equals,         ARRAYDEF({{ LOADOUT, END }}), 1 )               \
+   METHOD(CLASS, getWeapon,      ARRAYDEF({{ WEAP_SLOT, END }}), 1 )             \
+   METHOD(CLASS, getModule,      ARRAYDEF({{ MOD_SLOT, END }}), 1 )              \
+
+GENERATE_LUA_FUNARGS_TABLE(LoadoutTracker, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(LoadoutTracker, LUA_METHODS);
+
+#undef LUA_METHODS
+
+const char *LoadoutTracker::luaClassName = "Loadout";     // Class name as it appears to Lua scripts
+REGISTER_LUA_CLASS(LoadoutTracker);
+
+
+S32 LoadoutTracker::lua_setWeapon(lua_State *L)     // setWeapon(i, wep) ==> Set weapon at index i
+{
+   checkArgList(L, functionArgs, "Loadout", "setWeapon");
+
+   U32 index = (U32) getInt(L, 1);
+   WeaponType weapon = (WeaponType) getInt(L, 2);
+
+   mWeapons[index - 1] = weapon;
+
+   return 0;
+}
+
+
+S32 LoadoutTracker::lua_setModule(lua_State *L)     // setModule(i, mod) ==> Set module at index i
+{
+   checkArgList(L, functionArgs, "Loadout", "setModule");
+
+   U32 index = (U32) getInt(L, 1);
+   ShipModule module  = (ShipModule) getInt(L, 2);
+
+   mModules[index - 1] = module;
+
+   return 0;
+}
+
+
+S32 LoadoutTracker::lua_isValid(lua_State *L)       // isValid() ==> Is loadout config valid?
+{
+   bool hasSensor = false;
+
+   U32 mod[ShipModuleCount];
+   for(S32 i = 0; i < ShipModuleCount; i++)
+   {
+      for(S32 j = 0; j < i; j++)
+         if(mod[j] == mModules[i])     // Duplicate entry!
+            return returnBool(L, false);
+
+      mod[i] = mModules[i];
+
+      if(mModules[i] == ModuleSensor)
+         hasSensor = true;
+   }
+
+   bool hasSpyBug = false;
+
+   U32 weap[ShipWeaponCount];
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+   {
+      for(S32 j = 0; j < i; j++)
+         if(weap[j] == mWeapons[i])     // Duplicate entry!
+            return returnBool(L, false);
+      weap[i] = mWeapons[i];
+      if(mWeapons[i] == WeaponSpyBug)
+         hasSpyBug = true;
+   }
+
+   // Make sure we don't have any invalid combos
+   if(hasSpyBug && !hasSensor)
+      return returnBool(L, false);
+
+   return returnBool(L, true);
+}
+
+
+S32 LoadoutTracker::lua_equals(lua_State *L)        // equals(Loadout) ==> is loadout the same as Loadout?
+{
+   checkArgList(L, functionArgs, "Loadout", "equals");
+
+   LoadoutTracker *loadout = luaW_check<LoadoutTracker>(L, 1);
+
+   if(*this == *loadout)
+      return returnBool(L, true);
+
+   return returnBool(L, false);
+}
+
+
+S32 LoadoutTracker::lua_getWeapon(lua_State *L)     // getWeapon(i) ==> return weapon at index i (1, 2, 3)
+{
+   checkArgList(L, functionArgs, "Loadout", "getWeapon");
+
+   WeaponType weapon = (WeaponType) getInt(L, 1);
+
+   return returnInt(L, mWeapons[weapon - 1]);
+}
+
+
+S32 LoadoutTracker::lua_getModule(lua_State *L)     // getModule(i) ==> return module at index i (1, 2)
+{
+   checkArgList(L, functionArgs, "Loadout", "getModule");
+
+   ShipModule module = (ShipModule) getInt(L, 1);
+
+   return returnInt(L, mModules[module - 1]);
+}
+
 
 
 }
