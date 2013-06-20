@@ -2365,10 +2365,7 @@ S32 Ship::lua_getMountedItems(lua_State *L)
 // Return current loadout
 S32 Ship::lua_getCurrLoadout(lua_State *L)
 {
-   // Not a memory leak -- lauW_hold tells Lua to delete this object when it is finshed with it
-   LuaLoadout *loadout = new LuaLoadout(mLoadout.toU8Vector());
-   luaW_push<LuaLoadout>(L, loadout);
-   luaW_hold<LuaLoadout>(L, loadout);
+   luaW_push<LoadoutTracker>(L, &mLoadout);
 
    return 1;
 }
@@ -2377,31 +2374,16 @@ S32 Ship::lua_getCurrLoadout(lua_State *L)
 // Return requested loadout
 S32 Ship::lua_getReqLoadout(lua_State *L)
 {
-   ClientInfo *clientInfo = getOwner();
-   LoadoutTracker requestedLoadout;
+   LoadoutTracker requestedLoadout = getOwner()->getOnDeckLoadout();
 
-    if(clientInfo) 
-       requestedLoadout = clientInfo->getOnDeckLoadout();
+   if(requestedLoadout.isValid())
+   {
+      luaW_push<LoadoutTracker>(L, &requestedLoadout);
+      return 1;
+   }
 
-    if(!requestedLoadout.isValid()) 
-      return lua_getCurrLoadout(L);
-
-   // Not a memory leak -- lauW_hold tells Lua to delete this object when it is finshed with it
-   LuaLoadout *loadout = new LuaLoadout(requestedLoadout.toU8Vector());
-   luaW_push<LuaLoadout>(L, loadout);
-   luaW_hold<LuaLoadout>(L, loadout);
-
-   return 1;
-}
-
-
-static LoadoutTracker getLoadout(const LuaLoadout *luaLoadout)
-{
-   Vector<U8> vec;
-   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      vec.push_back(luaLoadout->getLoadoutItem(i));
-   
-   return LoadoutTracker(vec);
+    // Return current loadout if the on-deck loadout was invalid
+    return lua_getCurrLoadout(L);
 }
 
 
@@ -2410,7 +2392,9 @@ S32 Ship::lua_setReqLoadout(lua_State *L)
 {
    checkArgList(L, functionArgs, "Ship", "setReqLoadout");
 
-   getOwner()->requestLoadout(getLoadout(luaW_check<LuaLoadout>(L, 1)));
+   LoadoutTracker *loadout = luaW_check<LoadoutTracker>(L, 1);
+
+   getOwner()->requestLoadout(*loadout);
 
    return 0;
 }
@@ -2421,10 +2405,10 @@ S32 Ship::lua_setCurrLoadout(lua_State *L)
 {
    checkArgList(L, functionArgs, "Ship", "setCurrLoadout");
 
-   LoadoutTracker loadout = getLoadout(luaW_check<LuaLoadout>(L, 1));
+   LoadoutTracker *loadout = luaW_check<LoadoutTracker>(L, 1);
 
-   if(getClientInfo()->isLoadoutValid(loadout, getGame()->getGameType()->isEngineerEnabled()))
-      setLoadout(loadout);
+   if(getClientInfo()->isLoadoutValid(*loadout, getGame()->getGameType()->isEngineerEnabled()))
+      setLoadout(*loadout);
 
    return 0;
 }
