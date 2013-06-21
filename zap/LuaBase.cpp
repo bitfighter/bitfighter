@@ -430,8 +430,10 @@ static string stringify(lua_State *L, S32 index)
          return "boolean: " + lua_toboolean(L, index) ? "true" : "false";
       case LUA_TNUMBER:    
          return "number: " + itos(S32(lua_tonumber(L, index)));
-      default:             
-         return lua_typename(L, t);
+      default:
+         char outString[32];
+         dSprintf(outString, sizeof(outString), "%s: %p", luaL_typename(L, 1), lua_topointer(L, 1));
+         return string(outString);
    }
 }
 
@@ -464,19 +466,19 @@ bool LuaBase::dumpTable(lua_State *L, S32 tableIndex, const char *msg)
 
 bool LuaBase::dumpStack(lua_State* L, const char *msg)
 {
-    int top = lua_gettop(L);
+   int top = lua_gettop(L);
 
-    bool hasMsg = (strcmp(msg, "") != 0);
-    logprintf(LogConsumer::LogError, "\nTotal in stack: %d %s%s%s", top, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
+   bool hasMsg = (strcmp(msg, "") != 0);
+   logprintf(LogConsumer::LogError, "\nTotal in stack: %d %s%s%s", top, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
 
-    for(S32 i = 1; i <= top; i++)
-    {
+   for(S32 i = 1; i <= top; i++)
+   {
       string val = stringify(L, i);
       logprintf(LogConsumer::LogError, "%d : %s", i, val.c_str());
-    }
+   }
 
-    return false;
- }
+   return false;
+}
 
 
 // Pop integer off stack, check its type, do bounds checking, and return it
