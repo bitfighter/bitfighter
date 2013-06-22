@@ -26,6 +26,7 @@
 #include "luaLevelGenerator.h"
 #include "gameLoader.h"
 #include "game.h"
+#include "ServerGame.h"
 #include "barrier.h"             // For PolyWall def
 
 #include "stringUtils.h"         // fileExists
@@ -151,6 +152,7 @@ static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char
    METHOD(CLASS, subscribe,         ARRAYDEF({{ EVENT, END }}), 1 )                      \
    METHOD(CLASS, unsubscribe,       ARRAYDEF({{ EVENT, END }}), 1 )                      \
    METHOD(CLASS, getMachineTime,    ARRAYDEF({{ END }}), 1 )                             \
+   METHOD(CLASS, getGameInfo,       ARRAYDEF({{ END }}), 1 )                             \
 
 GENERATE_LUA_METHODS_TABLE(LuaLevelGenerator, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(LuaLevelGenerator, LUA_METHODS);
@@ -390,6 +392,19 @@ S32 LuaLevelGenerator::lua_getGridSize(lua_State *L)
 S32 LuaLevelGenerator::lua_getMachineTime(lua_State *L)
 {
    return returnInt(L, Platform::getRealMilliseconds());
+}
+
+
+/**
+ * @luafunc Levelgen::getGameInfo()
+ * @brief   Returns the GameInfo object.
+ * @descr   GameInfo can be used to grab information about the currently running game, including the GameType
+ * @return  \e GameInfo - The GameInfo object
+ */
+S32 LuaLevelGenerator::lua_getGameInfo(lua_State *L)
+{
+   TNLAssert(dynamic_cast<ServerGame*>(mGame), "Not ServerGame??");
+   return returnGameInfo(L, static_cast<ServerGame*>(mGame));
 }
 
 

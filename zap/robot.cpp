@@ -32,6 +32,8 @@
 #include "MathUtils.h"           // For findLowestRootIninterval()
 #include "GeomUtils.h"
 
+#include "ServerGame.h"
+
 
 #define hypot _hypot    // Kill some warnings
 
@@ -552,6 +554,7 @@ U16 Robot::findClosestZone(const Point &point)
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS,  getCPUTime,           ARRAYDEF({{ END }}), 1 )                             \
    METHOD(CLASS,  getTime,              ARRAYDEF({{ END }}), 1 )                             \
+   METHOD(CLASS,  getGameInfo,          ARRAYDEF({{ END }}), 1 )                             \
                                                                                              \
    METHOD(CLASS,  setAngle,             ARRAYDEF({{ PT, END }, { NUM, END }}), 2 )           \
    METHOD(CLASS,  getAnglePt,           ARRAYDEF({{ PT, END }              }), 1 )           \
@@ -613,6 +616,19 @@ S32 Robot::lua_getCPUTime(lua_State *L)
 S32 Robot::lua_getTime(lua_State *L)
 {
    return returnInt(L, getCurrentMove().time);
+}
+
+
+/**
+ * @luafunc bot::getGameInfo()
+ * @brief   Returns the GameInfo object.
+ * @descr   GameInfo can be used to grab information about the currently running game, including the GameType
+ * @return  \e GameInfo - The GameInfo object
+ */
+S32 Robot::lua_getGameInfo(lua_State *L)
+{
+   TNLAssert(dynamic_cast<ServerGame*>(mGame), "Not ServerGame??");
+   return returnGameInfo(L, static_cast<ServerGame*>(mGame));
 }
 
 

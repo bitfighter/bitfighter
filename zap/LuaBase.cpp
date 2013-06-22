@@ -25,8 +25,10 @@
 
 #include "LuaBase.h"          // Header
 #include "playerInfo.h"       // For access to PlayerInfo's push function
+#include "luaGameInfo.h"
 #include "LuaWrapper.h"
 #include "game.h"
+#include "ServerGame.h"
 
 #include "stringUtils.h"      // For itos
 
@@ -735,6 +737,20 @@ S32 LuaBase::returnPlayerInfo(lua_State *L, Ship *ship)
 S32 LuaBase::returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo)
 {
    playerInfo->push(L);
+   return 1;
+}
+
+
+S32 LuaBase::returnGameInfo(lua_State *L, ServerGame *serverGame)
+{
+   if(!serverGame)
+   {
+      lua_pushnil(L);
+      return 0;
+   }
+
+
+   serverGame->getGameInfo()->push(L);
    return 1;
 }
 
