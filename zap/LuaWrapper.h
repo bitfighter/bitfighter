@@ -458,7 +458,7 @@ inline int luaW_new(lua_State* L, int args)
 {
     T* obj = LuaWrapper<T>::allocator(L);
     luaW_push<T>(L, obj);
-    luaW_hold<T>(L, obj);
+//    luaW_hold<T>(L, obj);  // luaW_hold is called in luaW_push with our proxy system in place
     luaW_postconstructor<T>(L, args);
     return 1;
 }
@@ -549,20 +549,25 @@ int luaW_gc(lua_State* L)
    LuaProxy<T>* proxy = luaW_toProxy<T>(L, 1);
    TNLAssert(proxy, "Expected a proxy!");
 
-   // See if object is a proxy, which it most likely will be
-   if(proxy)     // If the object is a proxy, which if always will be at the moment...
+   // NOTE
+   //
+   // We have hijacked the upstream luaW_gc() method to only clean-up proxies. This
+   // means that *any* c++ object created through luaW_new() (e.g. calling .new() in
+   // a Lua script) MUST be cleaned up in c++ also, otherwise it will leak.
+   //
+   // Right now all TNL game objects (e.g. Asteroid, TestItem, etc.) are cleaned up
+   // automatically at the end of a game.  Other objects, like LuaPlayerInfo, are
+   // deleted when its owning ClientInfo object is cleaned up.  This pattern must be
+   // followed
+   if(proxy)
    {
       delete proxy;
       return 0;
    }
     
-    // Otherwise object is not a proxy -- try popping again
+/* Upstream code:
     // obj
     T* obj = luaW_to<T>(L, 1);
-
-    TNLAssert(obj, "Obj is NULL!");
-    // If obj is NULL here, it may have been deleted from the C++ side already
-
     LuaWrapper<T>::identifier(L, obj); // obj key value storage id
     luaW_wrapperfield<T>(L, LUAW_HOLDS_KEY); // obj id counts count holds
     lua_pushvalue(L, 2); // obj id counts count holds id
@@ -579,6 +584,7 @@ int luaW_gc(lua_State* L)
     
     luaW_release<T>(L, 2);
     return 0;
+*/
 }
 
 // Takes two tables and registers them with Lua to the table on the top of the
