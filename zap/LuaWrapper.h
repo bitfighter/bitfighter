@@ -560,10 +560,9 @@ int luaW_gc(lua_State* L)
    // deleted when its owning ClientInfo object is cleaned up.  This pattern must be
    // followed
    if(proxy)
-   {
       delete proxy;
-      return 0;
-   }
+
+   return 0;
     
 /* Upstream code:
     // obj
