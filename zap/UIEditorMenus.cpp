@@ -327,6 +327,7 @@ EditorAttributeMenuUI::EditorAttributeMenuUI(ClientGame *game) : Parent(game)
    // Do nothing
 }
 
+
 // Destructor
 EditorAttributeMenuUI::~EditorAttributeMenuUI()
 {
