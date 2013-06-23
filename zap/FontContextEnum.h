@@ -45,18 +45,24 @@ namespace Zap
    };
 
 
+   // Please keep internal fonts separate at the top, away from the externally defined fonts
    enum FontId {
-      FontDroidSansMono,
-      FontRoman,              // Our stroke font
+      // Internal fonts:
+      FontRoman,                 // Our classic stroke font
       FontOrbitronLightStroke,
       FontOrbitronMedStroke,
+
+      // External fonts:
+      FontDroidSansMono,
       FontOcrA,
       FontOrbitronLight,
       FontOrbitronMedium,
       FontPrimeRegular,
       FontTenby5,
       KeyCaps,
-      FontCount
+
+      FontCount,
+      FirstExternalFont = FontDroidSansMono
    };
 
 };

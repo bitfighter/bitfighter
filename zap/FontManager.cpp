@@ -129,15 +129,17 @@ S32 BfFont::getStashFontId()
 
 
 static FontId currentFontId;
-static bool mUseRomanForEverything = false;
+static bool mUsingExternalFonts = true;
 
 static BfFont *fontList[FontCount];
 
 sth_stash *FontManager::mStash = NULL;
 
 // This must be run after VideoSystem::actualizeScreenMode()
-void FontManager::initialize(GameSettings *settings)
+void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 {
+   mUsingExternalFonts = useExternalFonts;
+
    if(mStash == NULL)
       mStash = sth_create(512, 512);
 
@@ -146,7 +148,7 @@ void FontManager::initialize(GameSettings *settings)
    fontList[FontOrbitronLightStroke] = new BfFont(FontOrbitronLightStroke, &fgStrokeOrbitronLight);
    fontList[FontOrbitronMedStroke]   = new BfFont(FontOrbitronMedStroke,   &fgStrokeOrbitronMed);
 
-   if(!mUseRomanForEverything)
+   if(mUsingExternalFonts)
    {
       // Our TTF fonts
       fontList[FontOcrA]           = new BfFont(FontOcrA,          "Digital.ttf",         settings);
@@ -174,12 +176,6 @@ void FontManager::cleanup()
       sth_delete(mStash);
       mStash = NULL;
    }
-}
-
-
-void FontManager::useOnlyRomanFont()
-{
-   mUseRomanForEverything = true;
 }
 
 
@@ -332,10 +328,10 @@ void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
 
 BfFont *FontManager::getFont(FontId currentFontId)
 {
-   if(mUseRomanForEverything)
-      return fontList[FontRoman];
-   else
+   if(mUsingExternalFonts || currentFontId < FirstExternalFont)
       return fontList[currentFontId];
+   else
+     return fontList[FontRoman]; 
 }
 
 

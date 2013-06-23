@@ -337,8 +337,7 @@ TEST_F(BfTest, VerifyVeryStrangeErrorWithMenu)
 {
    Address addr;
    GameSettings settings;
-   FontManager::useOnlyRomanFont();
-   FontManager::initialize(&settings);     // Need to find a way to get rid of this...
+   FontManager::initialize(&settings, false); 
 
    ClientGame game(addr, &settings);
    SimpleTextEntryMenuUI ui(&game, "Title", 123);

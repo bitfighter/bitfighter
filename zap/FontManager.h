@@ -60,10 +60,8 @@ private:
    static S32 getTtfFontStringLength(BfFont *font, const char* string);
 
 public:
-   static void initialize(GameSettings *settings);
+   static void initialize(GameSettings *settings, bool useExternalFonts = true);
    static void cleanup();
-
-   static void useOnlyRomanFont();
 
    static sth_stash *getStash();
 
