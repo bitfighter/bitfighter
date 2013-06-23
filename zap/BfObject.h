@@ -439,7 +439,7 @@ public:
 
    ///// Lua interface
    // Top level Lua methods
-   LUAW_DECLARE_CLASS(BfObject);
+   LUAW_DECLARE_NON_INSTANTIABLE_CLASS(BfObject);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];

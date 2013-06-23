@@ -39,7 +39,7 @@ public:
    virtual ~LuaPlayerInfo();
 
    ///// Lua interface
-   LUAW_DECLARE_CLASS(LuaPlayerInfo);
+   LUAW_DECLARE_NON_INSTANTIABLE_CLASS(LuaPlayerInfo);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];

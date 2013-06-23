@@ -29,6 +29,7 @@
 #include "gameNetInterface.h"
 #include "masterConnection.h"
 #include "SoundSystem.h"
+#include "luaGameInfo.h"
 #include "luaLevelGenerator.h"
 #include "robot.h"
 #include "teleporter.h"
@@ -90,6 +91,8 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 
    mSuspendor = NULL;
 
+   mGameInfo = NULL;
+
 #ifdef ZAP_DEDICATED
    TNLAssert(dedicated, "Dedicated should be true here!");
 #endif
@@ -116,6 +119,8 @@ ServerGame::~ServerGame()
    cleanUp();
 
    clearAddTarget();
+
+   delete mGameInfo;
 }
 
 
@@ -1614,7 +1619,15 @@ void ServerGame::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferP
 }
 
 
+LuaGameInfo *ServerGame::getGameInfo()
+{
+   // Lazily initialize
+   if(!mGameInfo)
+      mGameInfo = new LuaGameInfo(this);   // Deleted in destructor
+
+   return mGameInfo;
+}
+
 
 };
-
 

@@ -36,6 +36,7 @@ namespace Zap
 {
 
 class LuaLevelGenerator;
+class LuaGameInfo;
 class Robot;
 class PolyWall;
 class WallItem;
@@ -103,6 +104,8 @@ private:
    void clearBotMoves();
 
    Timer botControlTickTimer;
+
+   LuaGameInfo *mGameInfo;
 
 public:
    ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated);    // Constructor
@@ -217,6 +220,8 @@ string getLastLevelLoadName();                     // For updating the UI
    SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const;
    SFXHandle playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain = 1.0f) const;
    void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const;
+
+   LuaGameInfo *getGameInfo();
 };
 
 ////////////////////////////////////////

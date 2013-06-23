@@ -49,6 +49,7 @@ class Team;
 class LuaPlayerInfo;
 class MenuItem;
 class BfObject;
+class ServerGame;
 struct LuaFunctionProfile;    // Defined below
 struct LuaFunctionArgList;    // Defined below
 
@@ -148,6 +149,7 @@ public:
 
    static S32 returnPlayerInfo(lua_State *L, Ship *ship);
    static S32 returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo);
+   static S32 returnGameInfo(lua_State *L, ServerGame *serverGame);
 
    static void clearStack(lua_State *L);
 

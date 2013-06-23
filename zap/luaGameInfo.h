@@ -27,17 +27,23 @@
 #define _LUAGAME_H_
 
 
-#include "LuaScriptRunner.h"
-#include "LoadoutTracker.h"
-#include "shipItems.h"     // For module defs
+#include "LuaBase.h"
+#include "LuaWrapper.h"
 
 namespace Zap
 {
 
+// Forward declarations
+class ServerGame;
+
+
 class LuaGameInfo : public LuaBase
 {
+private:
+   ServerGame *mServerGame;
+
 public:
-   explicit LuaGameInfo(lua_State *L);     // Constructor
+   explicit LuaGameInfo(ServerGame *serverGame);     // Constructor
    virtual ~LuaGameInfo();                 // Destructor
 
    S32 lua_getGameType(lua_State *L);
@@ -64,7 +70,7 @@ public:
 
    ///// Lua interface
    // Top level Lua methods
-   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(LuaGameInfo);
+   LUAW_DECLARE_NON_INSTANTIABLE_CLASS(LuaGameInfo);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
