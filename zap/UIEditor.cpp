@@ -740,7 +740,7 @@ static void showPluginError(const ClientGame *game, const char *msg)
 }
 
 
-// Try to create some sort of uniqeish signature for the plugin
+// Try to create some sort of unique-ish signature for the plugin
 string EditorUserInterface::getPluginSignature()
 {
    string key = mPluginRunner->getScriptName();
@@ -783,7 +783,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    }
 
    string title;
-   Vector<MenuItem *> menuItems;
+   Vector<boost::shared_ptr<MenuItem> > menuItems;
 
    bool error = plugin->runGetArgsMenu(title, menuItems);     // Fills menuItems
 
@@ -808,7 +808,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    mPluginMenu.reset(new PluginMenuUI(getGame(), title));      // Using a smart pointer here, for auto deletion
 
    for(S32 i = 0; i < menuItems.size(); i++)
-      mPluginMenu->addMenuItem(menuItems[i]);
+      mPluginMenu->addWrappedMenuItem(menuItems[i]);
 
    
    mPluginMenu->addSaveAndQuitMenuItem("Run plugin", "Saves values and runs plugin");
@@ -4793,18 +4793,16 @@ void EditorUserInterface::findPlugins()
    {
       // Try to find the title
       string title;
-      Vector<MenuItem*> menu;
+      Vector<boost::shared_ptr<MenuItem> > menuItems;  // Unused
+
       EditorPlugin plugin(dirName + "/" + plugins[i], Vector<string>(), getGame()->getGridSize(), mLoadTarget, getGame());
+
       if(plugin.prepareEnvironment() && plugin.loadScript(false))
-      {
-         plugin.runGetArgsMenu(title, menu);
-      }
+         plugin.runGetArgsMenu(title, menuItems);
 
       // if the title is blank or couldn't be found, use the file name
       if(title == "")
-      {
          title = plugins[i];
-      }
 
       PluginInfo info(title, plugins[i]);
 
