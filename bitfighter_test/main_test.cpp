@@ -337,9 +337,13 @@ TEST_F(BfTest, VerifyVeryStrangeErrorWithMenu)
 {
    Address addr;
    GameSettings settings;
-   FontManager::initialize(&settings, false); 
 
+   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
+   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
+   FontManager::initialize(&settings, false);   
    ClientGame game(addr, &settings);
+
+
    SimpleTextEntryMenuUI ui(&game, "Title", 123);
 
    ASSERT_EQ(NULL, ui.getObject());    // Object is NULL by default
