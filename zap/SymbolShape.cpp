@@ -379,27 +379,30 @@ static S32 KeyFontSize = 13;     // Size of characters used for rendering key bi
 // Color is ignored for controller buttons
 static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
 {
+
    if(InputCodeManager::isKeyboardKey(inputCode))
-   {
-      const char *str = InputCodeManager::inputCodeToString(inputCode);
-      return SymbolShapePtr(new SymbolKey(str, color));
-   }
+      return SymbolShapePtr(new SymbolKey(InputCodeManager::inputCodeToString(inputCode), color));
+
+   // These items are rendered as just plain old text... for no particular reason, but it seems to work at the moment
    else if(inputCode == LEFT_JOYSTICK)
       return SymbolString::getSymbolText("Left Joystick", KeyFontSize, KeyContext, color);
    else if(inputCode == RIGHT_JOYSTICK)
       return SymbolString::getSymbolText("Right Joystick", KeyFontSize, KeyContext, color);
-   else if(inputCode == MOUSE_LEFT)
-      return SymbolString::getSymbolText("Left Mouse Button", KeyFontSize, KeyContext, color);
-   else if(inputCode == MOUSE_MIDDLE)
-      return SymbolString::getSymbolText("Middle Mouse Button", KeyFontSize, KeyContext, color);
-   else if(inputCode == MOUSE_RIGHT)
-      return SymbolString::getSymbolText("Right Mouse Button", KeyFontSize, KeyContext, color);
-   else if(inputCode == MOUSE_WHEEL_UP)
-      return SymbolString::getSymbolText("Mouse Wheel Up", KeyFontSize, KeyContext, color);
-   else if(inputCode == MOUSE_WHEEL_DOWN)
-      return SymbolString::getSymbolText("Mouse Wheel Down", KeyFontSize, KeyContext, color);
    else if(inputCode == MOUSE)
       return SymbolString::getSymbolText("Mouse", KeyFontSize, KeyContext, color);
+
+   // The following items are rendered like keys, with boxes around the text -- they are often mixed with other keys
+   // and look weird if they are just bare text
+   else if(inputCode == MOUSE_LEFT)
+      return SymbolShapePtr(new SymbolKey("Left Mouse Button", color));
+   else if(inputCode == MOUSE_MIDDLE)
+      return SymbolShapePtr(new SymbolKey("Middle Mouse Button", color));
+   else if(inputCode == MOUSE_RIGHT)
+      return SymbolShapePtr(new SymbolKey("Right Mouse Button", color));
+   else if(inputCode == MOUSE_WHEEL_UP)
+      return SymbolShapePtr(new SymbolKey("Mouse Wheel Up", color));
+   else if(inputCode == MOUSE_WHEEL_DOWN)
+      return SymbolShapePtr(new SymbolKey("Mouse Wheel Down", color));
    else if(InputCodeManager::isCtrlKey(inputCode))
    {
       Vector<SymbolShapePtr> symbols;

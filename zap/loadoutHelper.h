@@ -73,6 +73,7 @@ private:
    Vector<OverlayMenuItem> mWeaponMenuItems;
 
    bool mEngineerEnabled;
+   bool mLoadoutChanged;      // Tracks if most recent loadout entry actually changed anything
 
    const char *getCancelMessage() const;
    InputCode getActivationKey();

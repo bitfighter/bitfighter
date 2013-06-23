@@ -170,7 +170,6 @@ void EditorUserInterface::setDatabase(boost::shared_ptr<GridDatabase> database)
 }
 
 
-
 // Really quitting... no going back!
 void EditorUserInterface::onQuitted()
 {

@@ -103,6 +103,8 @@ void LoadoutHelper::onActivated()
    mWeaponMenuItems = Vector<OverlayMenuItem>(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems));
 
    mModuleMenuItems[moduleEngineerIndex].showOnMenu = mEngineerEnabled;    // Can't delete this or other arrays will become unaligned
+
+   mLoadoutChanged = false;
 }
 
 
@@ -180,6 +182,8 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       for(S32 i = 0; i < ShipWeaponCount; i++)
          loadout.setWeapon(i, WeaponType(loadoutWeaponMenuItems[mWeapon[i]].itemIndex));
 
+      mLoadoutChanged = !getGame()->getLocalPlayerShip()->isLoadoutSameAsCurrent(loadout);
+
       GameConnection *conn = getGame()->getConnectionToServer();
 
       if(conn)
@@ -225,8 +229,12 @@ void LoadoutHelper::activateHelp(UIManager *uiManager)
 
 void LoadoutHelper::onWidgetClosed()
 {
-   bool hasLoadout = getGame()->levelHasLoadoutZone();
-   getGame()->getUIManager()->addInlineHelpItem(hasLoadout ?  LoadoutChangedZoneItem : LoadoutChangedNoZoneItem);
+   // We only want to display this help item if the loadout actually changed
+   if(mLoadoutChanged)
+   {
+      bool hasLoadout = getGame()->levelHasLoadoutZone();
+      getGame()->getUIManager()->addInlineHelpItem(hasLoadout ?  LoadoutChangedZoneItem : LoadoutChangedNoZoneItem);
+   }
 }
 
 

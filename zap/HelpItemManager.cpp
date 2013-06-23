@@ -25,8 +25,8 @@
 
 #include "HelpItemManager.h"
 
-#include "BfObject.h"      // For TypeNumbers
-#include "InputCode.h"     // For InputCodeManager
+#include "BfObject.h"            // For TypeNumbers
+#include "InputCode.h"           // For InputCodeManager
 #include "FontManager.h"
 #include "GameSettings.h"
 
@@ -34,7 +34,8 @@
 #include "Colors.h"
 #include "OpenglUtils.h"
 #include "RenderUtils.h"
-#include "MathUtils.h"     // For min()
+#include "gameObjectRender.h"    // For drawHorizLine
+#include "MathUtils.h"           // For min()
 
 
 using namespace TNL;
@@ -201,7 +202,11 @@ void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symb
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_RIGHT)));
    }
 
-   else if(symbolName == "MODULE_CTRLS") {}
+   else if(symbolName == "MODULE_CTRL1")
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1)));
+
+   else if(symbolName == "MODULE_CTRL2")
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2)));
 
    else 
       symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, FontSize, HelpItemContext)));
@@ -233,8 +238,23 @@ static void symbolParse(const InputCodeManager *inputCodeManager, string &str, V
 }
 
 
-static S32 doRenderMessages(const InputCodeManager *inputCodeManager, const char **messages, S32 yPos)
+// Do some special rendering required by just a couple of items
+static void doRenderMessageDoodads(HelpItem helpItem, S32 topY, S32 bottomY)
 {
+   if(helpItem == ModulesAndWeaponsItem)
+   {
+      drawHorizLine(100, 500, topY);
+      drawHorizLine(100, 500, bottomY);
+   }
+}
+
+
+static S32 doRenderMessages(const InputCodeManager *inputCodeManager, HelpItem helpItem, S32 yPos)
+{
+   const char **messages = helpItems[helpItem].helpMessages;
+
+   S32 lines = 0;
+
    // Final item in messages array will be NULL; loop until we hit that
    for(S32 i = 0; messages[i]; i++)
    {
@@ -250,7 +270,10 @@ static S32 doRenderMessages(const InputCodeManager *inputCodeManager, const char
       symbolString.render(400, yPos, AlignmentCenter);
 
       yPos += FontSize + FontGap;
+      lines++;
    }
+
+   doRenderMessageDoodads(helpItem, yPos - (lines + 1) * (FontSize + FontGap), yPos - FontSize + 4);
 
    return yPos;
 }
@@ -262,14 +285,13 @@ void HelpItemManager::renderMessages(S32 yPos) const
       return;
 
 #ifdef TNL_DEBUG
-   // This bit is for displaying our help messages one-by-one so we can see how they look on-screen
+   // This bit is for displaying our help messages one-by-one so we can see how they look on-screen, cycle with CTRL+H
    if(mTestingTimer.getCurrent() > 0)
    {
       FontManager::pushFontContext(HelpItemContext);
       glColor(Colors::red);
 
-      const char **messages = helpItems[mTestingCtr % HelpItemCount].helpMessages;
-      doRenderMessages(mInputCodeManager, messages, yPos);
+      doRenderMessages(mInputCodeManager, (HelpItem)(mTestingCtr % HelpItemCount), yPos);
 
       FontManager::popFontContext();
       return;
@@ -286,8 +308,7 @@ void HelpItemManager::renderMessages(S32 yPos) const
       F32 alpha = mHelpFading[i] ? mHelpTimer[i].getFraction() : 1;
       glColor(Colors::green, alpha);
 
-      const char **messages = helpItems[mHelpItems[i]].helpMessages;
-      yPos += doRenderMessages(mInputCodeManager, messages, yPos) + 15;  // Gap between messages
+      yPos += doRenderMessages(mInputCodeManager, mHelpItems[i], yPos) + 15;  // Gap between messages
    }
 
    FontManager::popFontContext();

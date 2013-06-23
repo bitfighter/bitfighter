@@ -175,6 +175,9 @@ void GameUserInterface::onActivate()
    else
       mHelpItemManager.addInlineHelpItem(ControlsJSItem);
 
+   mHelpItemManager.addInlineHelpItem(ModulesAndWeaponsItem);
+
+   mHelpItemManager.addInlineHelpItem(ControlsModulesItem);
    mHelpItemManager.addInlineHelpItem(ChangeWeaponsItem);
    mHelpItemManager.addInlineHelpItem(CmdrsMapItem);
    mHelpItemManager.addInlineHelpItem(ChangeConfigItem);
