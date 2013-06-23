@@ -169,9 +169,11 @@ void GameUserInterface::onActivate()
    mHelpItemManager.addInlineHelpItem(WelcomeItem);
 
    // Queue up some initial help messages for the new users
-//   GameSettings *settings = getGame()->getSettings();
 
-   mHelpItemManager.addInlineHelpItem(ControlsKBItem);
+   if(getGame()->getInputMode() == InputModeKeyboard)
+      mHelpItemManager.addInlineHelpItem(ControlsKBItem);
+   else
+      mHelpItemManager.addInlineHelpItem(ControlsJSItem);
 
    mHelpItemManager.addInlineHelpItem(ChangeWeaponsItem);
    mHelpItemManager.addInlineHelpItem(CmdrsMapItem);
