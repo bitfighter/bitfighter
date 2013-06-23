@@ -134,6 +134,7 @@ void renderPointVector(const Vector<Point> *points, U32 geomType)
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
+
 void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
 {
    glPushMatrix();

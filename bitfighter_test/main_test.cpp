@@ -333,8 +333,6 @@ TEST_F(BfTest, HelpItemManagerTests)
 }
 
 
-
-
 TEST_F(BfTest, ClientGameTests) 
 {
    Address addr;
