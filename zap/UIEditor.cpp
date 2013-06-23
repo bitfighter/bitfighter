@@ -741,7 +741,7 @@ static void showPluginError(const ClientGame *game, const char *msg)
 }
 
 
-// Try to create some sort of uniqeish signature for the plugin
+// Try to create some sort of unique-ish signature for the plugin
 string EditorUserInterface::getPluginSignature()
 {
    string key = mPluginRunner->getScriptName();
