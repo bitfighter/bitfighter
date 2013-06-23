@@ -1260,7 +1260,10 @@ void TextEntryMenuItem::handleTextInput(char ascii)
       mLineEditor.addChar(ascii);
 
       if(mTextEditedCallback)
+      {
+         TNLAssert(dynamic_cast<EditorAttributeMenuUI *>(mMenu), "Expect a EditorAttributeMenuUI here!");
          mTextEditedCallback(mLineEditor.getString(), static_cast<EditorAttributeMenuUI *>(mMenu)->getObject());
+      }
    }
 }
 
