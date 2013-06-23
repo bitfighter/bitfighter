@@ -47,7 +47,7 @@ namespace Zap
 
    enum FontId {
       FontDroidSansMono,
-      FontRoman,
+      FontRoman,              // Our stroke font
       FontOrbitronLightStroke,
       FontOrbitronMedStroke,
       FontOcrA,

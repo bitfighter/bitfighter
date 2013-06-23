@@ -9,6 +9,13 @@
 #include "../zap/ServerGame.h"
 #include "../zap/ship.h"
 #include "../zap/HelpItemManager.h"
+#include "../zap/ClientGame.h"
+#include "../zap/FontManager.h"
+
+#include "SDL.h"
+#include "../zap/VideoSystem.h"
+
+#include "../zap/UIEditorMenus.h"
 
 
 #include "tnlNetObject.h"
@@ -323,6 +330,25 @@ TEST_F(BfTest, HelpItemManagerTests)
    himgr.idle(himgr.HelpItemDisplayPeriod); himgr.idle(himgr.HelpItemDisplayFadeTime);  // (can't combine)
    himgr.idle(himgr.PacedTimerPeriod - himgr.HelpItemDisplayPeriod - himgr.HelpItemDisplayFadeTime);
    checkQueues(himgr, 0, 0, 1, ControlsModulesItem);  // No items queued, one displayed
+}
+
+
+TEST_F(BfTest, VerifyVeryStrangeErrorWithMenu) 
+{
+   Address addr;
+   GameSettings settings;
+   FontManager::useOnlyRomanFont();
+   FontManager::initialize(&settings);     // Need to find a way to get rid of this...
+
+   ClientGame game(addr, &settings);
+   SimpleTextEntryMenuUI ui(&game, "Title", 123);
+
+   ASSERT_EQ(NULL, ui.getObject());    // Object is NULL by default
+
+   BfObject obj;
+   ui.setObject(&obj);
+
+   ASSERT_EQ(&obj, ui.getObject());
 }
 
 

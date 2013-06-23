@@ -40,6 +40,7 @@ HelperManager::HelperManager()
    mGame = NULL;
 }
 
+
 // Destructor
 HelperManager::~HelperManager()
 {

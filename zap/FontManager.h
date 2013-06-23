@@ -54,12 +54,16 @@ class FontManager
 private:
    static sth_stash *mStash;
 
+   static BfFont *getFont(FontId currentFontId);
+
    static S32 getStrokeFontStringLength(const SFG_StrokeFont *font, const char* string);
    static S32 getTtfFontStringLength(BfFont *font, const char* string);
 
 public:
    static void initialize(GameSettings *settings);
-   static void cleanup();   
+   static void cleanup();
+
+   static void useOnlyRomanFont();
 
    static sth_stash *getStash();
 
