@@ -90,14 +90,9 @@ class EditorAttributeMenuUI : public QuickMenuUI
 private:
    string getTitle();
 
-protected:
-   BfObject *mObject;         // Object whose attributes are being edited
-
 public:
    explicit EditorAttributeMenuUI(ClientGame *game);    // Constructor
    virtual ~EditorAttributeMenuUI();                    // Destructor
-
-   BfObject *getObject();
 
    virtual void startEditingAttrs(BfObject *object);
    virtual void doneEditing();
@@ -130,16 +125,12 @@ class SimpleTextEntryMenuUI : public QuickMenuUI
 
 private:
    S32 mData;          // See SimpleTextEntryType in UIEditor.h
-   BfObject *mObject;  // Object who is being manipulated
 
 public:
    SimpleTextEntryMenuUI(ClientGame *game, const string &title, S32 data);    // Constructor
-   virtual ~SimpleTextEntryMenuUI();                                // Destructor
+   virtual ~SimpleTextEntryMenuUI();                                          // Destructor
 
    virtual void doneEditing();
-
-   BfObject *getObject();
-   void setObject(BfObject *obj);
 };
 
 

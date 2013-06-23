@@ -315,7 +315,7 @@ void QuickMenuUI::addSaveAndQuitMenuItem(const char *menuText, const char *helpT
 // Constructor
 EditorAttributeMenuUI::EditorAttributeMenuUI(ClientGame *game) : Parent(game)
 {
-   mObject = NULL;
+   // Do nothing
 }
 
 // Destructor
@@ -325,29 +325,23 @@ EditorAttributeMenuUI::~EditorAttributeMenuUI()
 }
 
 
-BfObject *EditorAttributeMenuUI::getObject()
-{
-   return mObject;
-}
-
-
 string EditorAttributeMenuUI::getTitle()
 {
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    S32 selectedObjCount = ui->getItemSelectedCount();
-   return string("Attributes for ") + (selectedObjCount != 1 ? itos(selectedObjCount) + " " + mObject->getPrettyNamePlural() : 
-                                                               mObject->getOnScreenName());
+   return string("Attributes for ") + (selectedObjCount != 1 ? itos(selectedObjCount) + " " + mAssociatedObject->getPrettyNamePlural() : 
+                                                               mAssociatedObject->getOnScreenName());
 }
 
 
 void EditorAttributeMenuUI::startEditingAttrs(BfObject *object) 
 { 
-   mObject = object; 
+   mAssociatedObject = object; 
 
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
-   Point center = (mObject->getVert(0) + mObject->getVert(1)) * ui->getCurrentScale() / 2 + ui->getCurrentOffset();
+   Point center = (mAssociatedObject->getVert(0) + mAssociatedObject->getVert(1)) * ui->getCurrentScale() / 2 + ui->getCurrentOffset();
    setMenuCenterPoint(center);  
 
    EditorAttributeMenuItemBuilder::startEditingAttrs(this, object);
@@ -356,20 +350,20 @@ void EditorAttributeMenuUI::startEditingAttrs(BfObject *object)
 
 void EditorAttributeMenuUI::doneEditing() 
 {
-   doneEditingAttrs(mObject);
+   doneEditingAttrs(mAssociatedObject);
 }
 
 
 void EditorAttributeMenuUI::doneEditingAttrs(BfObject *object) 
 {
-   // Has to be object, not mObject... this gets run once for every selected item of same type as mObject, and we need to make
-   // sure that those objects (passed in as object), get updated.
+   // Has to be object, not mAssociatedObject... this gets run once for every selected item of same type as mAssociatedObject, 
+   // and we need to make sure that those objects (passed in as object), get updated
    EditorAttributeMenuItemBuilder::doneEditingAttrs(this, object);     
 
    // Only run on object that is the subject of this editor.  See TextItemEditorAttributeMenuUI::doneEditingAttrs() for explanation
    // of why this may be run on objects that are not actually the ones being edited (hence the need for passing an object in).
-   if(object == mObject)   
-      getUIManager()->getUI<EditorUserInterface>()->doneEditingAttributes(this, mObject); 
+   if(object == mAssociatedObject)   
+      getUIManager()->getUI<EditorUserInterface>()->doneEditingAttributes(this, mAssociatedObject); 
 }
 
 
@@ -416,7 +410,6 @@ SimpleTextEntryMenuUI::SimpleTextEntryMenuUI(ClientGame *game, const string &tit
       Parent(game, title)
 {
    mData = data;
-   mObject = NULL;
 
    mDisableHighlight = true;  // No text highlighting
 
@@ -433,18 +426,6 @@ SimpleTextEntryMenuUI::~SimpleTextEntryMenuUI()
 void SimpleTextEntryMenuUI::doneEditing()
 {
    getGame()->getUIManager()->getUI<EditorUserInterface>()->doneWithSimpleTextEntryMenu(this, mData);
-}
-
-
-void SimpleTextEntryMenuUI::setObject(BfObject *obj)
-{
-   mObject = obj;
-}
-
-
-BfObject *SimpleTextEntryMenuUI::getObject()
-{
-   return mObject;
 }
 
 

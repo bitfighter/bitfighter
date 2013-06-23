@@ -1241,7 +1241,7 @@ bool TextEntryMenuItem::handleKey(InputCode inputCode)
 { 
    bool handled = mLineEditor.handleKey(inputCode);
    if(mTextEditedCallback)
-      mTextEditedCallback(mLineEditor.getString(), static_cast<EditorAttributeMenuUI *>(mMenu)->getObject());
+      mTextEditedCallback(mLineEditor.getString(), mMenu->getAssociatedObject());
 
    return handled;
 }
@@ -1260,10 +1260,7 @@ void TextEntryMenuItem::handleTextInput(char ascii)
       mLineEditor.addChar(ascii);
 
       if(mTextEditedCallback)
-      {
-         TNLAssert(dynamic_cast<EditorAttributeMenuUI *>(mMenu), "Expect a EditorAttributeMenuUI here!");
-         mTextEditedCallback(mLineEditor.getString(), static_cast<EditorAttributeMenuUI *>(mMenu)->getObject());
-      }
+         mTextEditedCallback(mLineEditor.getString(), mMenu->getAssociatedObject());
    }
 }
 
@@ -1427,7 +1424,7 @@ bool SimpleTextEntryMenuItem::handleKey(InputCode inputCode)
 
    // Call this menu item's callback if the lineEditor handled the key (it is also run in hasTextInput() )
    if(mTextEditedCallback && handled)
-      mTextEditedCallback(mLineEditor.getString(), static_cast<SimpleTextEntryMenuUI *>(mMenu)->getObject());
+      mTextEditedCallback(mLineEditor.getString(), mMenu->getAssociatedObject());
 
    return handled;
 }

@@ -107,6 +107,8 @@ void MenuUserInterface::initialize()
    mRenderSpecialInstructions = true;
    mIgnoreNextMouseEvent = false;
 
+   mAssociatedObject = NULL;
+
    // Max number of menu items we show on screen before we go into scrolling mode -- won't work with mixed size menus
    mMaxMenuSize = S32((gScreenInfo.getGameCanvasHeight() - 150) / (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)));
 }
@@ -761,6 +763,18 @@ void MenuUserInterface::advanceItem()
 void MenuUserInterface::onEscape()
 {
    // Do nothing
+}
+
+
+BfObject *MenuUserInterface::getAssociatedObject()
+{
+   return mAssociatedObject;
+}
+
+
+void MenuUserInterface::setAssociatedObject(BfObject *obj)
+{
+   mAssociatedObject = obj;
 }
 
 

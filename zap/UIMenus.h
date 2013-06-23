@@ -89,6 +89,8 @@ protected:
    MenuItem *getLastMenuItem();
    S32 getMaxFirstItemIndex();      // Calculates maximum index that the first item can have -- on non scrolling menus, this will be 0
 
+   BfObject *mAssociatedObject;     // Some menus can have an associated object... this is it
+
 public:
    // Constructor
    explicit MenuUserInterface(ClientGame *game);
@@ -127,6 +129,9 @@ public:
    virtual void onActivate();
    virtual void onReactivate();
    virtual void onEscape();
+
+   BfObject *getAssociatedObject();
+   void setAssociatedObject(BfObject *obj);
 };
 
 

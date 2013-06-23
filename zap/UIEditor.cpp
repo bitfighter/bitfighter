@@ -4194,8 +4194,8 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
 
    // Create our menu, use scoped_ptr since we only need once instance of this menu
    mSimpleTextEntryMenu.reset(new SimpleTextEntryMenuUI(getGame(), menuTitle, entryType));
-   mSimpleTextEntryMenu->addMenuItem(menuItem);      // addMenuItem wraps the menu item in a smart pointer
-   mSimpleTextEntryMenu->setObject(selectedObject);  // Add our object for usage in the menu item callback
+   mSimpleTextEntryMenu->addMenuItem(menuItem);                // addMenuItem wraps the menu item in a smart pointer
+   mSimpleTextEntryMenu->setAssociatedObject(selectedObject);  // Add our object for usage in the menu item callback
 
    getUIManager()->activate(mSimpleTextEntryMenu.get());
 }
