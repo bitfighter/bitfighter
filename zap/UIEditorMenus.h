@@ -76,6 +76,8 @@ public:
    void setMenuCenterPoint(const Point &location);    // Sets the point at which the menu will be centered about
    virtual void doneEditing() = 0;
 
+   void cleanupAndQuit();                             // Delete our menu items and reactivate the underlying UI
+
    void onDisplayModeChange();
 };
 

@@ -273,7 +273,15 @@ S32 QuickMenuUI::getMenuWidth()
 // Escape cancels without saving
 void QuickMenuUI::onEscape()
 {
-   getUIManager()->reactivatePrevUI();     // Back to the editor!
+   cleanupAndQuit();
+}
+
+
+// Delete our menu items and reactivate the underlying UI
+void QuickMenuUI::cleanupAndQuit()
+{
+   getUIManager()->reactivatePrevUI();    // Back to the editor!
+   clearMenuItems();    // Not really needed, will be cleaned up eventually, but we might as well get our memory back now
 }
 
 
@@ -285,11 +293,12 @@ void QuickMenuUI::setMenuCenterPoint(const Point &location)
 
 static void saveAndQuit(ClientGame *game, U32 unused)
 {
-   QuickMenuUI *ui = dynamic_cast<QuickMenuUI *>(game->getUIManager()->getCurrentUI());
-   TNLAssert(ui, "Unexpected UI here -- expected a QuickMenuUI or child class!");
+   TNLAssert(dynamic_cast<QuickMenuUI *>(game->getUIManager()->getCurrentUI()), "Expected a QuickMenuUI here!");
+   QuickMenuUI *ui = static_cast<QuickMenuUI *>(game->getUIManager()->getCurrentUI());
 
    ui->doneEditing();
-   ui->getUIManager()->reactivatePrevUI();
+
+   ui->cleanupAndQuit();
 }
 
 

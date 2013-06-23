@@ -64,7 +64,6 @@ private:
 
    virtual void initialize();
 
-
 protected:
    S32 getOffset();                             // Calculates index of topmost visible item         
    virtual S32 getYStart();                     // Get vert pos of first menu item
