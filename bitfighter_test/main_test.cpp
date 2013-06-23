@@ -333,7 +333,9 @@ TEST_F(BfTest, HelpItemManagerTests)
 }
 
 
-TEST_F(BfTest, VerifyVeryStrangeErrorWithMenu) 
+
+
+TEST_F(BfTest, ClientGameTests) 
 {
    Address addr;
    GameSettings settings;
@@ -343,15 +345,7 @@ TEST_F(BfTest, VerifyVeryStrangeErrorWithMenu)
    FontManager::initialize(&settings, false);   
    ClientGame game(addr, &settings);
 
-
-   SimpleTextEntryMenuUI ui(&game, "Title", 123);
-
-   ASSERT_EQ(NULL, ui.getObject());    // Object is NULL by default
-
-   BfObject obj;
-   ui.setObject(&obj);
-
-   ASSERT_EQ(&obj, ui.getObject());
+   // TODO: Add some tests
 }
 
 
