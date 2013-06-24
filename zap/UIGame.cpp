@@ -429,7 +429,7 @@ void GameUserInterface::render()
       renderSuspendedMessage();
 
 
-   mHelpItemManager.renderMessages(gScreenInfo.getGameCanvasHeight() / 2 + 40);
+   mHelpItemManager.renderMessages(getGame(), gScreenInfo.getGameCanvasHeight() / 2 + 40);
 
    renderReticle();                       // Draw crosshairs if using mouse
    renderChatMsgs();                      // Render incoming chat and server msgs
@@ -950,6 +950,13 @@ void GameUserInterface::setModulePrimary(ShipModule module, bool isActive)
 void GameUserInterface::setModuleSecondary(ShipModule module, bool isActive)
 {
    mLoadoutIndicator.setModuleSecondary(module, isActive);
+}
+
+
+// Returns the width of the current loadout, as rendered
+S32 GameUserInterface::getLoadoutIndicatorWidth() const
+{
+   return mLoadoutIndicator.getWidth();
 }
 
 

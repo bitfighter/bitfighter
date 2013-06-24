@@ -30,6 +30,12 @@
 #include "FontManager.h"
 #include "GameSettings.h"
 
+#include "ClientGame.h"
+#include "UIGame.h"              // For obtaining loadout indicator width
+#include "UIManager.h"
+#include "LoadoutIndicator.h"    // For indicator static dimensions
+#include "ScreenInfo.h"          // For canvas width
+
 #include "SymbolShape.h"
 #include "Colors.h"
 #include "OpenglUtils.h"
@@ -40,7 +46,11 @@
 
 using namespace TNL;
 
-namespace Zap { namespace UI {
+namespace Zap { 
+
+   extern ScreenInfo gScreenInfo;
+
+namespace UI {
 
 static const S32 MAX_LINES = 8;     // Excluding sentinel item
 
@@ -239,21 +249,49 @@ static void symbolParse(const InputCodeManager *inputCodeManager, string &str, V
 
 
 // Do some special rendering required by just a couple of items
-static void doRenderMessageDoodads(HelpItem helpItem, S32 topY, S32 bottomY)
+static void doRenderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 leftX, S32 topY, S32 bottomY)
 {
+   // TODO: Remove game->getSettings()->getIniSettings()->showWeaponIndicators option
+
    if(helpItem == ModulesAndWeaponsItem)
    {
-      drawHorizLine(100, 500, topY);
-      drawHorizLine(100, 500, bottomY);
+      leftX -= 10;      // Provide some buffer
+
+      const S32 w = game->getUIManager()->getUI<GameUserInterface>()->getLoadoutIndicatorWidth();
+      const S32 x = UI::LoadoutIndicator::LoadoutIndicatorLeftPos;
+      const S32 y = UI::LoadoutIndicator::LoadoutIndicatorBottomPos;
+
+      const S32 gap = 10;
+      const S32 stubLen = 15;
+      const S32 riserTop = y + gap;
+      const S32 riserBot = (topY + bottomY) / 2;
+      const S32 riser = min(x + w / 2, leftX - 15);   // Some loadouts are long enough that we get a weird display... min fixes that
+      const S32 left = x - gap / 2;                   // Use half the gap here -- it just looks better
+      const S32 right = x + w + gap;
+
+      drawHorizLine(left,  right,    riserTop);    // Line under loadout indicator
+      drawHorizLine(riser, leftX,    riserBot);    // Main horizontal
+      drawVertLine (riser, riserTop, riserBot);    // Main riser
+      drawVertLine (leftX, topY,     bottomY);     // Vertical bar next to help text
+
+      // Little stubs on top beside indicator
+      drawVertLine(left,  riserTop, riserTop - stubLen); 
+      drawVertLine(right, riserTop, riserTop - stubLen);
+
+      // Little stubs above and below help text
+      drawHorizLine(leftX, leftX + stubLen, topY);
+      drawHorizLine(leftX, leftX + stubLen, bottomY);
    }
 }
 
 
-static S32 doRenderMessages(const InputCodeManager *inputCodeManager, HelpItem helpItem, S32 yPos)
+static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inputCodeManager, HelpItem helpItem, S32 yPos)
 {
    const char **messages = helpItems[helpItem].helpMessages;
 
    S32 lines = 0;
+   S32 maxw = 0;
+   S32 xPos = gScreenInfo.getGameCanvasWidth() / 2;
 
    // Final item in messages array will be NULL; loop until we hit that
    for(S32 i = 0; messages[i]; i++)
@@ -267,19 +305,22 @@ static S32 doRenderMessages(const InputCodeManager *inputCodeManager, HelpItem h
       symbolParse(inputCodeManager, renderStr, symbols);
 
       UI::SymbolString symbolString(symbols, FontSize, HUDContext);
-      symbolString.render(400, yPos, AlignmentCenter);
+      symbolString.render(xPos, yPos, AlignmentCenter);
+
+      S32 w = symbolString.getWidth();
+      maxw = max(maxw, w);
 
       yPos += FontSize + FontGap;
       lines++;
    }
 
-   doRenderMessageDoodads(helpItem, yPos - (lines + 1) * (FontSize + FontGap), yPos - FontSize + 4);
+   doRenderMessageDoodads(game, helpItem, xPos - maxw / 2, yPos - (lines + 1) * (FontSize + FontGap), yPos - FontSize + 4);
 
    return yPos;
 }
 
 
-void HelpItemManager::renderMessages(S32 yPos) const
+void HelpItemManager::renderMessages(const ClientGame *game, S32 yPos) const
 {
    if(!mEnabled)
       return;
@@ -291,7 +332,7 @@ void HelpItemManager::renderMessages(S32 yPos) const
       FontManager::pushFontContext(HelpItemContext);
       glColor(Colors::red);
 
-      doRenderMessages(mInputCodeManager, (HelpItem)(mTestingCtr % HelpItemCount), yPos);
+      doRenderMessages(game, mInputCodeManager, (HelpItem)(mTestingCtr % HelpItemCount), yPos);
 
       FontManager::popFontContext();
       return;
@@ -308,7 +349,7 @@ void HelpItemManager::renderMessages(S32 yPos) const
       F32 alpha = mHelpFading[i] ? mHelpTimer[i].getFraction() : 1;
       glColor(Colors::green, alpha);
 
-      yPos += doRenderMessages(mInputCodeManager, mHelpItems[i], yPos) + 15;  // Gap between messages
+      yPos += doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos) + 15;  // Gap between messages
    }
 
    FontManager::popFontContext();

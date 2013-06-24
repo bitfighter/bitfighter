@@ -89,9 +89,12 @@ const LoadoutTracker *LoadoutIndicator::getLoadout() const
 }
 
 
-static S32 getIndicatorHeight()
+static const S32 IndicatorHeight = indicatorFontSize + 2 * indicatorPadding + 1;
+
+
+static S32 getComponentRectWidth(S32 textWidth)
 {
-   return indicatorFontSize + 2 * indicatorPadding + 1;
+   return textWidth + 2 * indicatorPadding;
 }
 
 
@@ -101,14 +104,21 @@ static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
    // Draw the weapon or module name
    S32 textWidth = drawStringAndGetWidth(xPos + indicatorPadding, yPos + indicatorPadding, indicatorFontSize, name);
 
-   S32 rectWidth  = textWidth + 2 * indicatorPadding;
-   S32 rectHeight = getIndicatorHeight();
-
-   drawHollowRect(xPos, yPos, xPos + rectWidth, yPos + rectHeight);
+   S32 rectWidth = getComponentRectWidth(textWidth);
+ 
+   drawHollowRect(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight);
 
    return rectWidth;
 }
 
+
+static S32 getComponentIndicatorWidth(const char *name)
+{
+   return getComponentRectWidth(getStringWidth(indicatorFontSize, name));
+}
+
+
+static const S32 GapBetweenTheGroups = 20;
 
 static void doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 {
@@ -120,12 +130,12 @@ static void doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    static const Color *INDICATOR_ACTIVE_COLOR   = &Colors::red80;        
    static const Color *INDICATOR_PASSIVE_COLOR  = &Colors::yellow;
 
-   U32 xPos = 10;
+   S32 xPos = LoadoutIndicator::LoadoutIndicatorLeftPos;
 
    FontManager::pushFontContext(LoadoutIndicatorContext);
    
    // First, the weapons
-   for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
+   for(S32 i = 0; i < (U32)ShipWeaponCount; i++)
    {
       glColor(loadout.isWeaponActive(i) ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
 
@@ -134,10 +144,10 @@ static void doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
       xPos += width + indicatorPadding;
    }
 
-   xPos += 20;    // Small horizontal gap to seperate the weapon indicators from the module indicators
+   xPos += GapBetweenTheGroups;    // Small horizontal gap to separate the weapon indicators from the module indicators
 
    // Next, loadout modules
-   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
+   for(S32 i = 0; i < (U32)ShipModuleCount; i++)
    {
       ShipModule module = loadout.getModule(i);
 
@@ -167,6 +177,24 @@ static void doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 }
 
 
+S32 LoadoutIndicator::getWidth() const
+{
+   S32 width = 0;
+
+   for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
+      width += getComponentIndicatorWidth(WeaponInfo::getWeaponInfo(mCurrLoadout.getWeapon(i)).name.getString()) + indicatorPadding;
+
+   width += GapBetweenTheGroups;
+
+   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
+      width += getComponentIndicatorWidth(ModuleInfo::getModuleInfo(mCurrLoadout.getModule(i))->getName()) + indicatorPadding;
+
+   width -= 2 * indicatorPadding;
+
+   return width;
+}
+
+
 // Draw weapon indicators at top of the screen, runs on client
 void LoadoutIndicator::render(ClientGame *game)
 {
@@ -176,12 +204,10 @@ void LoadoutIndicator::render(ClientGame *game)
    if(!game->getConnectionToServer())     // Can happen when first joining a game.  This was XelloBlue's crash...
       return;
 
-   const S32 indicatorTop    = 10;      // Top of indicator y-pos
-   const S32 indicatorHeight = getIndicatorHeight();
    S32 top;
 
    // Old loadout
-   top = Parent::prepareToRenderFromDisplay(game->getSettings()->getIniSettings()->displayMode, indicatorTop - 1, indicatorHeight + 1);
+   top = Parent::prepareToRenderFromDisplay(game->getSettings()->getIniSettings()->displayMode, LoadoutIndicatorTopPos - 1, LoadoutIndicatorHeight + 1);
    if(top != NO_RENDER)
    {
       doRender(mPrevLoadout, game, top);
@@ -189,7 +215,7 @@ void LoadoutIndicator::render(ClientGame *game)
    }
 
    // Current loadout
-   top = Parent::prepareToRenderToDisplay(game->getSettings()->getIniSettings()->displayMode, indicatorTop, indicatorHeight);
+   top = Parent::prepareToRenderToDisplay(game->getSettings()->getIniSettings()->displayMode, LoadoutIndicatorTopPos, LoadoutIndicatorHeight);
    doRender(mCurrLoadout, game, top);
    doneRendering();
 }

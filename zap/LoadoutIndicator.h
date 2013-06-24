@@ -49,7 +49,10 @@ public:
    LoadoutIndicator();     // Constructor
    virtual ~LoadoutIndicator();
 
+   static const S32 LoadoutIndicatorTopPos = 10;    // Gap between top of screen and top of indicator
+   static const S32 LoadoutIndicatorLeftPos = 10;
    static const S32 LoadoutIndicatorHeight = indicatorFontSize + indicatorPadding * 2;
+   static const S32 LoadoutIndicatorBottomPos = LoadoutIndicatorTopPos + LoadoutIndicatorHeight + 1;  // 1 accounts for line widths and such
 
    void newLoadoutHasArrived(const LoadoutTracker &loadout);
    void setActiveWeapon(U32 weaponIndex);
@@ -60,6 +63,7 @@ public:
    const LoadoutTracker *getLoadout() const;
 
    void render(ClientGame *game);
+   S32 getWidth() const;
 };
 
 } } // Nested namespace

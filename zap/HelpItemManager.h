@@ -63,8 +63,8 @@
    HELP_TABLE_ITEM(ControlsJSItem,               UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Move your ship with the left joystick.",                                                    \
                                                                                                                   "Aim and fire with the right.", NULL }))                                                     \
                                                                                                                                                                                                                \
-   HELP_TABLE_ITEM(ModulesAndWeaponsItem,        UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Available weapons and modules are shown in the",                                            \
-                                                                                                                  "upper left corner of the screen.", NULL }))                                                 \
+   HELP_TABLE_ITEM(ModulesAndWeaponsItem,        UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Available weapons and modules are shown",                                            \
+                                                                                                                  "in the upper left corner of the screen.", NULL }))                                                 \
                                                                                                                                                                                                                \
                                                                                                                                                                                                                \
    HELP_TABLE_ITEM(ControlsModulesItem,          UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Activate ship modules with",                                                                \
@@ -131,6 +131,7 @@ namespace Zap {
 
 class InputCodeManager;
 class GameSettings;
+class ClientGame;
 
 namespace UI {
 
@@ -186,7 +187,6 @@ private:
    void queueHelpItem(HelpItem item);  
    void moveItemFromQueueToActiveList();
 
-
 public:
    enum Priority {
       // The paced items will be doled out in drips and drabs
@@ -212,7 +212,7 @@ public:
    void reset();
 
    void idle(U32 timeDelta);
-   void renderMessages(S32 yPos) const;
+   void renderMessages(const ClientGame *game, S32 yPos) const;
 
    void addInlineHelpItem(HelpItem item, bool messageCameFromQueue = false);   
    void removeHelpItemFromQueue(HelpItem item, U8 weight = 0xFF);

@@ -393,6 +393,7 @@ public:
    void setActiveWeapon(U32 weaponIndex);
    void setModulePrimary(ShipModule module, bool isActive);
    void setModuleSecondary(ShipModule module, bool isActive);
+   S32 getLoadoutIndicatorWidth() const;
 
 
    void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd = false);  
