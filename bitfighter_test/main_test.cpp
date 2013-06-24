@@ -16,7 +16,7 @@
 #include "../zap/VideoSystem.h"
 
 #include "../zap/UIEditorMenus.h"
-
+#include "../zap/LoadoutIndicator.h"
 
 #include "tnlNetObject.h"
 #include "tnlGhostConnection.h"
@@ -150,6 +150,12 @@ TEST_F(BfTest, LoadoutManagementTests)
    s.setLoadout(LoadoutTracker("Turbo,Shield,Triple,Mine,Bouncer"), true);    // Ship does not have engineer
    ASSERT_FALSE(s.isCarryingItem(ResourceItemTypeNumber));
    ASSERT_TRUE(s.isCarryingItem(FlagTypeNumber));
+}
+
+
+TEST_F(BfTest, LoadoutIndicatorTests)
+{
+   // TODO: Add test to confirm caluated and rendered sizes are the same
 }
 
 
