@@ -62,7 +62,7 @@ public:
 
    const LoadoutTracker *getLoadout() const;
 
-   void render(ClientGame *game);
+   S32 render(ClientGame *game) const;
    S32 getWidth() const;
 };
 

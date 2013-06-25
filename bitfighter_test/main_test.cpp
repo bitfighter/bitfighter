@@ -155,7 +155,19 @@ TEST_F(BfTest, LoadoutManagementTests)
 
 TEST_F(BfTest, LoadoutIndicatorTests)
 {
-   // TODO: Add test to confirm caluated and rendered sizes are the same
+   Address addr;
+   GameSettings settings;
+
+   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
+   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
+   FontManager::initialize(&settings, false);   
+   ClientGame game(addr, &settings);
+
+   UI::LoadoutIndicator indicator;
+   indicator.newLoadoutHasArrived(LoadoutTracker("Turbo,Shield,Triple,Mine,Bouncer"));     // Sets the loadout
+
+   // Make sure the calculated width matches the rendered width
+   ASSERT_EQ(indicator.render(&game), indicator.getWidth());
 }
 
 

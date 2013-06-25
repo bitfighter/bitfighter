@@ -94,7 +94,7 @@ bool AToBScroller::isActive() const
 
 
 // Returns the y-pos that the caller should render its display for the scrolling effect, or NO_RENDER if the caller shouldn't bother
-S32 AToBScroller::prepareToRenderFromDisplay(DisplayMode displayMode, S32 top, S32 fromHeight, S32 toHeight)
+S32 AToBScroller::prepareToRenderFromDisplay(DisplayMode displayMode, S32 top, S32 fromHeight, S32 toHeight) const
 {
    if(mScrollTimer.getCurrent() == 0)
       return NO_RENDER;
@@ -109,7 +109,7 @@ S32 AToBScroller::prepareToRenderFromDisplay(DisplayMode displayMode, S32 top, S
 
 
 // Returns the y-pos that the caller should render its display for the scrolling effect
-S32 AToBScroller::prepareToRenderToDisplay(DisplayMode displayMode, S32 top, S32 fromHeight, S32 toHeight)
+S32 AToBScroller::prepareToRenderToDisplay(DisplayMode displayMode, S32 top, S32 fromHeight, S32 toHeight) const
 {
    if(mScrollTimer.getCurrent() == 0)
       return top;
@@ -124,7 +124,7 @@ S32 AToBScroller::prepareToRenderToDisplay(DisplayMode displayMode, S32 top, S32
 }
 
 
-void AToBScroller::doneRendering()
+void AToBScroller::doneRendering() const
 {
    scissorsManager.disable();
 }

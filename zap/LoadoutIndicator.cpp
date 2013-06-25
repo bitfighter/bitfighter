@@ -120,11 +120,12 @@ static S32 getComponentIndicatorWidth(const char *name)
 
 static const S32 GapBetweenTheGroups = 20;
 
-static void doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
+// Returns width
+static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 {
    // If if we have no module, then this loadout has never been set, and there is nothing to render
    if(!loadout.isValid())  
-      return;
+      return 0;
 
    static const Color *INDICATOR_INACTIVE_COLOR = &Colors::green80;      
    static const Color *INDICATOR_ACTIVE_COLOR   = &Colors::red80;        
@@ -174,6 +175,8 @@ static void doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    }
 
    FontManager::popFontContext();
+
+   return xPos - LoadoutIndicator::LoadoutIndicatorLeftPos - indicatorPadding;
 }
 
 
@@ -189,20 +192,20 @@ S32 LoadoutIndicator::getWidth() const
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
       width += getComponentIndicatorWidth(ModuleInfo::getModuleInfo(mCurrLoadout.getModule(i))->getName()) + indicatorPadding;
 
-   width -= 2 * indicatorPadding;
+   width -= indicatorPadding;
 
    return width;
 }
 
 
 // Draw weapon indicators at top of the screen, runs on client
-void LoadoutIndicator::render(ClientGame *game)
+S32 LoadoutIndicator::render(ClientGame *game) const
 {
    if(!game->getSettings()->getIniSettings()->showWeaponIndicators)      // If we're not drawing them, we've got nothing to do
-      return;
+      return 0;
 
-   if(!game->getConnectionToServer())     // Can happen when first joining a game.  This was XelloBlue's crash...
-      return;
+   //if(!game->getConnectionToServer())     // Can happen when first joining a game.  This was XelloBlue's crash...
+   //   return 0;
 
    S32 top;
 
@@ -216,8 +219,10 @@ void LoadoutIndicator::render(ClientGame *game)
 
    // Current loadout
    top = Parent::prepareToRenderToDisplay(game->getSettings()->getIniSettings()->displayMode, LoadoutIndicatorTopPos, LoadoutIndicatorHeight);
-   doRender(mCurrLoadout, game, top);
+   S32 width = doRender(mCurrLoadout, game, top);
    doneRendering();
+
+   return width;
 }
 
 
