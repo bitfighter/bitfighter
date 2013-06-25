@@ -416,7 +416,7 @@ public:
    void runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);  
 
    string getPluginSignature();                 // Try to create some sort of uniqeish signature for the plugin
-   void onPluginMenuClosed(const Vector<string> &args);
+   void onPluginExecuted(const Vector<string> &args);
    void runLevelGenScript();              // Run associated levelgen script
    void copyScriptItemsToEditor();        // Insert these items into the editor as first class items that can be manipulated or saved
    void clearLevelGenItems();             // Clear any previously created levelgen items

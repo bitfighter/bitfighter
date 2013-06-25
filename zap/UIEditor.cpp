@@ -797,7 +797,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
    if(menuItems.size() == 0)
    {
-      onPluginMenuClosed(Vector<string>());        // No menu items?  Let's run the script directly!
+      onPluginExecuted(Vector<string>());        // No menu items?  Let's run the script directly!
       mPluginRunner.reset();
       return;     
    }
@@ -826,7 +826,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 }
 
 
-void EditorUserInterface::onPluginMenuClosed(const Vector<string> &args)
+void EditorUserInterface::onPluginExecuted(const Vector<string> &args)
 {
    TNLAssert(mPluginRunner, "NULL PluginRunner!");
    
