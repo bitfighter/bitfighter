@@ -15,7 +15,7 @@ class LevelLoaderTest: public testing::Test
 
 TEST_F(LevelLoaderTest, longLine)
 {
-   U32 TEST_POINTS = 0xFFFF;
+   U32 TEST_POINTS = 0xFFF;            //0xFFFF takes a wicked long time to run
 
    Address addr;
    GameSettings settings;
@@ -25,11 +25,9 @@ TEST_F(LevelLoaderTest, longLine)
    GameType gt;
    gt.addToGame(&serverGame, serverGame.getGameObjDatabase());
 
-   Vector<Point> geom;
+   Vector<Point> geom(TEST_POINTS);    // Preallocate for speed
    for(U32 i = 0; i < TEST_POINTS; i++)
-   {
       geom.push_back(Point(i, i % 2));
-   }
 
    WallItem wall;
    wall.GeomObject::setGeom(geom);
