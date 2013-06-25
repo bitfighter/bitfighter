@@ -919,14 +919,13 @@ void PolylineGeometry::setGeom(const Vector<Point> &points)
    S32 size = points.size();
 
    mPolyBounds.clear();
+   mPolyBounds.reserve(size);
 
    for(S32 i = 0; i < size; i++)
    {
       // filter out points with NaN values
       if(points[i] == points[i])
-      {
          mPolyBounds.push_back(points[i]);
-      }
    }
 
    mVertSelected.resize(mPolyBounds.size());
