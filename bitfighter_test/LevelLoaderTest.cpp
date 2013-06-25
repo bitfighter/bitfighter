@@ -25,9 +25,10 @@ TEST_F(LevelLoaderTest, longLine)
    GameType gt;
    gt.addToGame(&serverGame, serverGame.getGameObjDatabase());
 
-   Vector<Point> geom(TEST_POINTS);    // Preallocate for speed
+   Vector<Point> geom;    
+   geom.resize(TEST_POINTS);     // Preallocate for speed
    for(U32 i = 0; i < TEST_POINTS; i++)
-      geom.push_back(Point(i, i % 2));
+      geom[i].set(i, i % 2);
 
    WallItem wall;
    wall.GeomObject::setGeom(geom);
