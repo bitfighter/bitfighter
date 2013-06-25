@@ -318,9 +318,6 @@ void luaW_push(lua_State* L, T* obj)
       // Here: retrieves and pushes cache_table[id]
       lua_gettable(L, -2);                            // -- cache_table, userdata
 
-      // FIXME:  If there is more than one robot in a level with a proxy, this userdata will almost
-      // always be nil because the cache table is only holding one userdata at a time - that of the
-      // last robot added (see also the FIXME note in the block below)
       TNLAssert(lua_isuserdata(L, -1) || 
                      LuaBase::dumpStack(L, "Expect table, userdata") || LuaBase::dumpTable(L, -2, "Cached Userdatas"), 
                 "Expected userdata!");
@@ -337,10 +334,6 @@ void luaW_push(lua_State* L, T* obj)
       // Add a new entry to our cache table (a weak table; more about those here: http://lua-users.org/wiki/WeakTablesTutorial).
       // Note that from here on down, we'll fall back on the normal LuaW push code, except for the bit at the end where
       // we add it to the table.
-
-      // FIXME:  Cache table is empty here when a second bot is added, why??
-      // With only one bot in a level, the cache table is good.  With 5 bots, the cache will only have
-      // the userdata of the last bot that was added.
       LuaWrapper<T>::identifier(L, obj);                 // -- id
       luaW_wrapperfield<T>(L, LUAW_CACHE_KEY);           // -- id, cache_table
 
@@ -1080,7 +1073,7 @@ public:
 
 // This is the same as the CUSTOM_CONSTRUCTOR variant, except it sets up a constructor for you.  It
 // allows instantiation and access from Lua
-// TODO- Convert everything to use the above, rename it, and get rid of this one -- what? i don't understand - raptor
+// TODO- Convert everything to use the above, rename it, and get rid of this one -- what? i don't understand ~raptor
 #define  LUAW_DECLARE_CLASS(className) \
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(className) \
    className(lua_State *L) { LUAW_CONSTRUCTOR_INITIALIZATIONS; } 
