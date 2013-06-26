@@ -27,6 +27,7 @@
 #define _TIME_LEFT_RENDERER
 
 #include "tnlTypes.h"
+#include "Point.h"
 
 using namespace TNL;
 
@@ -42,13 +43,17 @@ namespace UI
 class TimeLeftRenderer
 {
 private:
-   S32  renderTimeLeft        (const GameType *gameType) const;
+   Point renderTimeLeft       (const GameType *gameType, bool render = true) const;     // Returns width and height
    S32  renderHeadlineScores  (const Game *game, S32 ypos) const;
    void renderTeamScores      (const GameType *gameType, S32 bottom) const;
    void renderIndividualScores(const GameType *gameType, S32 bottom) const;
 
 public:
+   static const S32 TimeLeftIndicatorMargin = 7;
+
    void render                (const GameType *gameType, bool scoreboardVisible) const;
+   S32 getWidth               (const GameType *gameType) const;
+
 };
 
 } } // Nested namespace

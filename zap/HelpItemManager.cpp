@@ -253,17 +253,19 @@ static void doRenderMessageDoodads(const ClientGame *game, HelpItem helpItem, S3
 {
    // TODO: Remove game->getSettings()->getIniSettings()->showWeaponIndicators option
 
+   leftX -= 10;      // Provide some buffer
+
+   const S32 stubLen = 15;
+
+
    if(helpItem == ModulesAndWeaponsItem)
    {
-      leftX -= 10;      // Provide some buffer
-
       const S32 w = game->getUIManager()->getUI<GameUserInterface>()->getLoadoutIndicatorWidth();
       const S32 x = UI::LoadoutIndicator::LoadoutIndicatorLeftPos;
       const S32 y = UI::LoadoutIndicator::LoadoutIndicatorBottomPos;
 
       const S32 gap = 10;
       const S32 indicatorHorizontalGap = 5;           // Space between indicator and vertical stubs
-      const S32 stubLen = 15;
       const S32 riserTop = y + gap;
       const S32 riserBot = (topY + bottomY) / 2;
       const S32 riser = min(x + w / 2, leftX - 15);   // Some loadouts are long enough that we get a weird display... min fixes that
@@ -271,18 +273,47 @@ static void doRenderMessageDoodads(const ClientGame *game, HelpItem helpItem, S3
       const S32 left  = x -     indicatorHorizontalGap;                   
       const S32 right = x + w + indicatorHorizontalGap;
 
-      drawHorizLine(left,  right,    riserTop);    // Line under loadout indicator
-      drawHorizLine(riser, leftX,    riserBot);    // Main horizontal
-      drawVertLine (riser, riserTop, riserBot);    // Main riser
-      drawVertLine (leftX, topY,     bottomY);     // Vertical bar next to help text
-
-      // Little stubs on top beside indicator
-      drawVertLine(left,  riserTop, riserTop - stubLen); 
-      drawVertLine(right, riserTop, riserTop - stubLen);
-
-      // Little stubs above and below help text
+      // Bracket around help text, left side
+      drawVertLine (leftX, topY,            bottomY); 
       drawHorizLine(leftX, leftX + stubLen, topY);
       drawHorizLine(leftX, leftX + stubLen, bottomY);
+
+
+      drawHorizLine(riser, leftX,    riserBot);    // Main horizontal
+      drawVertLine (riser, riserTop, riserBot);    // Main riser
+
+      // Bracket around indicator
+      drawHorizLine(left,  right,    riserTop);   
+      drawVertLine (left,  riserTop, riserTop - stubLen); 
+      drawVertLine (right, riserTop, riserTop - stubLen);
+   }
+
+   else if(helpItem == GameTypeAndTimer)
+   {
+      const S32 w = gScreenInfo.getGameCanvasWidth() - game->getUIManager()->getUI<GameUserInterface>()->getTimeLeftIndicatorWidth();
+      const S32 x = game->getUIManager()->getUI<GameUserInterface>()->getTimeLeftIndicatorWidth() - UI::TimeLeftRenderer::TimeLeftIndicatorMargin;
+
+      //drawHorizLine(x - w, x, 500);
+
+      //const S32 y = UI::LoadoutIndicator::LoadoutIndicatorBottomPos;
+
+      const S32 rightX = gScreenInfo.getGameCanvasWidth() - leftX;
+      //const S32 left   = x -     indicatorHorizontalGap;                   
+      //const S32 right  = x + w + indicatorHorizontalGap;
+
+      // Bracket around help text, right side
+      drawVertLine (rightX, topY,             bottomY);  // Vertical bar next to help text
+      drawHorizLine(rightX, rightX - stubLen, topY);     // Little stubs on top beside indicator
+      drawHorizLine(rightX, rightX - stubLen, bottomY);
+
+      //// Bracket around indicator
+      //drawHorizLine(left,  right,    riserTop);    // Line under loadout indicator
+      //drawHorizLine(riser, leftX,    riserBot);    // Main horizontal
+      //drawVertLine (riser, riserTop, riserBot);    // Main riser
+
+
+
+
    }
 }
 

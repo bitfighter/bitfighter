@@ -79,7 +79,7 @@
    HELP_TABLE_ITEM(GameModesItem,                UnknownTypeNumber,             Any,        PacedLow,  ARRAYDEF({ "Bitfighter has several game modes.",                                                        \
                                                                                                                   "You can see the objective of the current game by pressing [[Mission]].", NULL }))           \
                                                                                                                                                                                                                \
-   HELP_TABLE_ITEM(LowerLeftItem,                UnknownTypeNumber,             Any,        PacedLow,  ARRAYDEF({ "The current game type, time left, and winning score",                                       \
+   HELP_TABLE_ITEM(GameTypeAndTimer,             UnknownTypeNumber,             Any,        PacedLow,  ARRAYDEF({ "The current game type, time left, and winning score",                                       \
                                                                                                                   "are shown in the lower-right of the screen.", NULL }))                                      \
                                                                                                                                                                                                                \
    HELP_TABLE_ITEM(ObjectiveArrowItem,           UnknownTypeNumber,             Any,        PacedLow,  ARRAYDEF({ "Objective arrows point the way to critical objects.", NULL }))                              \

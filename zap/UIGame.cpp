@@ -165,23 +165,24 @@ void GameUserInterface::onActivate()
    mChatMessageDisplayer2.reset();
    mChatMessageDisplayer3.reset();
 
-   mHelpItemManager.reset();
-   mHelpItemManager.addInlineHelpItem(WelcomeItem);
-
    // Queue up some initial help messages for the new users
 
-   if(getGame()->getInputMode() == InputModeKeyboard)
+   mHelpItemManager.reset();
+   mHelpItemManager.addInlineHelpItem(WelcomeItem);            // Hello, my name is Clippy!     
+
+   if(getGame()->getInputMode() == InputModeKeyboard)          // Show help related to basic movement and shooting
       mHelpItemManager.addInlineHelpItem(ControlsKBItem);
    else
       mHelpItemManager.addInlineHelpItem(ControlsJSItem);
 
-   mHelpItemManager.addInlineHelpItem(ModulesAndWeaponsItem);
+   mHelpItemManager.addInlineHelpItem(ModulesAndWeaponsItem);  // Point out loadout indicators
 
-   mHelpItemManager.addInlineHelpItem(ControlsModulesItem);    // Basic controls overview
+   mHelpItemManager.addInlineHelpItem(ControlsModulesItem);    // Show how to activate modules
    mHelpItemManager.addInlineHelpItem(ChangeWeaponsItem);      // Explain how to toggle weapons
    mHelpItemManager.addInlineHelpItem(CmdrsMapItem);           // Suggest viewing cmdrs map
    mHelpItemManager.addInlineHelpItem(ChangeConfigItem);       // Changing loadouts
    mHelpItemManager.addInlineHelpItem(GameModesItem);          // Use F2 to see current mission
+   mHelpItemManager.addInlineHelpItem(GameTypeAndTimer);        // Point out clock and score in LR
    
    mHelperManager.reset();
 
@@ -964,6 +965,12 @@ void GameUserInterface::setModuleSecondary(ShipModule module, bool isActive)
 S32 GameUserInterface::getLoadoutIndicatorWidth() const
 {
    return mLoadoutIndicator.getWidth();
+}
+
+
+S32 GameUserInterface::getTimeLeftIndicatorWidth() const
+{
+   return mTimeLeftRenderer.getWidth(getGame()->getGameType());
 }
 
 
