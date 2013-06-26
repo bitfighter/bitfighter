@@ -262,12 +262,14 @@ static void doRenderMessageDoodads(const ClientGame *game, HelpItem helpItem, S3
       const S32 y = UI::LoadoutIndicator::LoadoutIndicatorBottomPos;
 
       const S32 gap = 10;
+      const S32 indicatorHorizontalGap = 5;           // Space between indicator and vertical stubs
       const S32 stubLen = 15;
       const S32 riserTop = y + gap;
       const S32 riserBot = (topY + bottomY) / 2;
       const S32 riser = min(x + w / 2, leftX - 15);   // Some loadouts are long enough that we get a weird display... min fixes that
-      const S32 left = x - gap / 2;                   // Use half the gap here -- it just looks better
-      const S32 right = x + w + gap;
+
+      const S32 left  = x -     indicatorHorizontalGap;                   
+      const S32 right = x + w + indicatorHorizontalGap;
 
       drawHorizLine(left,  right,    riserTop);    // Line under loadout indicator
       drawHorizLine(riser, leftX,    riserBot);    // Main horizontal

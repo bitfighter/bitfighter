@@ -180,6 +180,7 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 }
 
 
+// This should return the same width as doRender()
 S32 LoadoutIndicator::getWidth() const
 {
    S32 width = 0;
