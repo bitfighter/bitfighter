@@ -63,19 +63,18 @@
    HELP_TABLE_ITEM(ControlsJSItem,               UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Move your ship with the left joystick.",                                                    \
                                                                                                                   "Aim and fire with the right.", NULL }))                                                     \
                                                                                                                                                                                                                \
-   HELP_TABLE_ITEM(ModulesAndWeaponsItem,        UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Available weapons and modules are shown",                                            \
-                                                                                                                  "in the upper left corner of the screen.", NULL }))                                                 \
-                                                                                                                                                                                                               \
+   HELP_TABLE_ITEM(ModulesAndWeaponsItem,        UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Available weapons and modules are shown",                                                   \
+                                                                                                                  "in the upper left corner of the screen.", NULL }))                                          \
                                                                                                                                                                                                                \
    HELP_TABLE_ITEM(ControlsModulesItem,          UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Activate ship modules with",                                                                \
-                                                                                                                  "[[MODULE_CTRL1]] and [[MODULE_CTRL2]].", NULL }))                                                            \
+                                                                                                                  "[[MODULE_CTRL1]] and [[MODULE_CTRL2]].", NULL }))                                           \
                                                                                                                                                                                                                \
    HELP_TABLE_ITEM(CmdrsMapItem,                 UnknownTypeNumber,             Any,        PacedLow,  ARRAYDEF({ "Feeling lost?  See the commander's map by pressing [[ShowCmdrMap]].", NULL }))              \
                                                                                                                                                                                                                \
-   HELP_TABLE_ITEM(ChangeWeaponsItem,            UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Change weapons with [[CHANGEWEP]].", NULL }))                                               \
+   HELP_TABLE_ITEM(ChangeWeaponsItem,            UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Switch weapons with [[CHANGEWEP]].", NULL }))                                               \
                                                                                                                                                                                                                \
-   HELP_TABLE_ITEM(ChangeConfigItem,             UnknownTypeNumber,             Any,        PacedLow,  ARRAYDEF({ "You can change your ship configuration",                                                    \
-                                                                                                                  "by pressing the [[ShowLoadoutMenu]] key.", NULL }))                                         \
+   HELP_TABLE_ITEM(ChangeConfigItem,             UnknownTypeNumber,             Any,        PacedLow,  ARRAYDEF({ "Change your ship configuration",                                                            \
+                                                                                                                  "by pressing [[ShowLoadoutMenu]].", NULL }))                                                 \
                                                                                                                                                                                                                \
    HELP_TABLE_ITEM(GameModesItem,                UnknownTypeNumber,             Any,        PacedLow,  ARRAYDEF({ "Bitfighter has several game modes.",                                                        \
                                                                                                                   "You can see the objective of the current game by pressing [[Mission]].", NULL }))           \
@@ -215,7 +214,7 @@ public:
    void renderMessages(const ClientGame *game, S32 yPos) const;
 
    void addInlineHelpItem(HelpItem item, bool messageCameFromQueue = false);   
-   void removeHelpItemFromQueue(HelpItem item, U8 weight = 0xFF);
+   void removeInlineHelpItem(HelpItem item, U8 weight = 0xFF);
 
    void setEnabled(bool enabled);
    bool isEnabled();

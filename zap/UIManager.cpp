@@ -867,6 +867,12 @@ void UIManager::addInlineHelpItem(HelpItem item)
 }
 
 
+void UIManager::removeInlineHelpItem(HelpItem item)
+{
+   getUI<GameUserInterface>()->removeInlineHelpItem(item);
+}
+
+
 void UIManager::onChatMessageReceived(const Color &msgColor, const char *format, ...)
 {
    static char buffer[MAX_CHAT_MSG_LENGTH];

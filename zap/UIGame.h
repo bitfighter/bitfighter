@@ -331,6 +331,8 @@ public:
    void toggleShowDebugBots();
 
    void addInlineHelpItem(HelpItem item);
+   void removeInlineHelpItem(HelpItem item);
+
    void setShowingInGameHelp(bool showing);
    void resetInGameHelpMessages();
 

@@ -224,7 +224,10 @@ public:
    void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType);
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitTeleportInEffect(const Point &pos, U32 type);
+   
    void addInlineHelpItem(HelpItem item);
+   void removeInlineHelpItem(HelpItem item);
+
    void onChatMessageReceived(const Color &msgColor, const char *format, ...);
    void gotAnnouncement(const string &announcement);
    bool isInScoreboardMode();
