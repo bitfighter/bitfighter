@@ -189,7 +189,6 @@ private:
    bool mInScoreboardMode;
    ShutdownMode mShutdownMode;
 
-
    bool mDebugShowShipCoords;       // Show coords on ship?
    bool mDebugShowObjectIds;        // Show object ids?
    bool mDebugShowMeshZones;        // Show bot nav mesh zones?
@@ -200,6 +199,10 @@ private:
 
    // Some rendering routines
    void renderScoreboard();
+
+   // Some key press/release handler helpers
+   void onMissionKeyPressed();
+   void onMissionKeyReleased();
 
    StringTableEntry mShutdownName;  // Name of user who iniated the shutdown
    StringPtr mShutdownReason;       // Reason user provided for the shutdown

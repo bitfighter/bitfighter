@@ -177,10 +177,11 @@ void GameUserInterface::onActivate()
 
    mHelpItemManager.addInlineHelpItem(ModulesAndWeaponsItem);
 
-   mHelpItemManager.addInlineHelpItem(ControlsModulesItem);
-   mHelpItemManager.addInlineHelpItem(ChangeWeaponsItem);
-   mHelpItemManager.addInlineHelpItem(CmdrsMapItem);
-   mHelpItemManager.addInlineHelpItem(ChangeConfigItem);
+   mHelpItemManager.addInlineHelpItem(ControlsModulesItem);    // Basic controls overview
+   mHelpItemManager.addInlineHelpItem(ChangeWeaponsItem);      // Explain how to toggle weapons
+   mHelpItemManager.addInlineHelpItem(CmdrsMapItem);           // Suggest viewing cmdrs map
+   mHelpItemManager.addInlineHelpItem(ChangeConfigItem);       // Changing loadouts
+   mHelpItemManager.addInlineHelpItem(GameModesItem);          // Use F2 to see current mission
    
    mHelperManager.reset();
 
@@ -1021,16 +1022,9 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       return true;
    }
 
-   if(checkInputCode(settings, InputCodeManager::BINDING_MISSION, inputCode)) // F2
+   if(checkInputCode(settings, InputCodeManager::BINDING_MISSION, inputCode))    // F2
    {
-      if(!mMissionOverlayActive)
-      {
-         mMissionOverlayActive = true;
-         if(!mLevelInfoDisplayer.isDisplayTimerActive())
-            mLevelInfoDisplayer.onActivated();
-
-         mLevelInfoDisplayer.clearDisplayTimer();   // Clear level-start display timer so releasing F2 always hides display
-      }
+      onMissionKeyPressed();
 
       return true;
    }
@@ -1084,6 +1078,29 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    }
 
    return false;
+}
+
+
+// User has pressed F2
+void GameUserInterface::onMissionKeyPressed()
+{
+   if(!mMissionOverlayActive)
+   {
+      mMissionOverlayActive = true;
+
+      if(!mLevelInfoDisplayer.isDisplayTimerActive())
+         mLevelInfoDisplayer.onActivated();
+
+      mLevelInfoDisplayer.clearDisplayTimer();              // Clear timer so releasing F2 will hide the display
+      mHelpItemManager.removeInlineHelpItem(GameModesItem); // User seems to know about F2, unqueue help message
+   }
+}
+
+
+void GameUserInterface::onMissionKeyReleased()
+{
+   mMissionOverlayActive = false;
+   mLevelInfoDisplayer.onDeactivated();
 }
 
 
@@ -1366,11 +1383,9 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
 
    GameSettings *settings = getGame()->getSettings();
 
-   if(checkInputCode(settings, InputCodeManager::BINDING_MISSION, inputCode))
-   {
-      mMissionOverlayActive = false;
-      mLevelInfoDisplayer.onDeactivated();
-   }
+   if(checkInputCode(settings, InputCodeManager::BINDING_MISSION, inputCode))    // F2
+      onMissionKeyReleased();
+
    else if(checkInputCode(settings, InputCodeManager::BINDING_MOD1, inputCode))
    {
       mModPrimaryActivated[0] = false;
