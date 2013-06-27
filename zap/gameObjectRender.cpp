@@ -1788,62 +1788,6 @@ void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideCol
 }
 
 
-void renderEnergyGuage(S32 energy)
-{
-   const S32 GAUGE_WIDTH = 200;
-   const S32 GUAGE_HEIGHT = 20;
-   const S32 SAFTEY_LINE_EXTEND = 4;      // How far the safety line extends above/below the main bar
-
-   // Coorinates of upper left corner of main guage bar
-   const F32 xul = F32(                                    UserInterface::horizMargin);
-   const F32 yul = F32(gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - GUAGE_HEIGHT);
-
-   F32 full = F32(energy) / F32(Ship::EnergyMax) * GAUGE_WIDTH;
-
-   // Main bar outline
-   F32 vertices[] = {
-         xul,        yul,
-         xul,        yul + GUAGE_HEIGHT,
-         xul + full, yul + GUAGE_HEIGHT,
-         xul + full, yul,
-   };
-
-   // For readability
-   const Color blue = Colors::blue;
-   const Color cyan = Colors::cyan;
-
-   // Create blue-cyan fade
-   static const F32 colors[] = {
-         blue.r, blue.g, blue.b, 1,   // Fade from
-         blue.r, blue.g, blue.b, 1,
-         cyan.r, cyan.g, cyan.b, 1,   // Fade to
-         cyan.r, cyan.g, cyan.b, 1,
-   };
-   renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
-
-   // Guage outline
-   glColor(Colors::white);
-   drawVertLine(xul,               yul, yul + GUAGE_HEIGHT);
-   drawVertLine(xul + GAUGE_WIDTH, yul, yul + GUAGE_HEIGHT);
-
-   // Show safety line
-   S32 cutoffx = Ship::EnergyCooldownThreshold * GAUGE_WIDTH / Ship::EnergyMax;
-
-   glColor(Colors::yellow);
-   drawVertLine(xul + cutoffx, yul - SAFTEY_LINE_EXTEND - 1, yul + GUAGE_HEIGHT + SAFTEY_LINE_EXTEND);
-
-#ifdef SHOW_SERVER_SITUATION
-   if((gServerGame && gServerGame->getClientInfo(0)->getConnection()->getControlObject()))
-   {
-      S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy();
-      S32 p = F32(actDiff) / Ship::EnergyMax * GAUGE_WIDTH;
-      glColor(Colors::magenta);
-      drawVertLine(xul + p, yul - SAFTEY_LINE_EXTEND - 1, yul + GUAGE_HEIGHT + SAFTEY_LINE_EXTEND);
-   }
-#endif
-}
-
-
 void renderEnergySymbol(const Point &pos, F32 scaleFactor)
 {
    glPushMatrix();

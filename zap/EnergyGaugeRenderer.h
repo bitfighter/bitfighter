@@ -23,35 +23,24 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _TIME_LEFT_RENDERER
-#define _TIME_LEFT_RENDERER
+#ifndef _ENERGY_GAUGE_RENDERER_
+#define _ENERGY_GAUGE_RENDERER_
 
 #include "tnlTypes.h"
-#include "Point.h"
 
 using namespace TNL;
 
-namespace Zap 
+namespace Zap {   namespace UI
 {
 
-class GameType;
-class Game;
-
-namespace UI
+class EnergyGaugeRenderer
 {
-
-class TimeLeftRenderer
-{
-private:
-   Point renderTimeLeft      (const GameType *gameType, bool render = true) const;     // Returns width and height
-   S32 renderHeadlineScores  (const Game *game, S32 ypos) const;
-   S32 renderTeamScores      (const GameType *gameType, S32 bottom, bool render) const;
-   S32 renderIndividualScores(const GameType *gameType, S32 bottom, bool render) const;
-
 public:
-   static const S32 TimeLeftIndicatorMargin = 7;
+   static const S32 GAUGE_WIDTH = 200;
+   static const S32 GUAGE_HEIGHT = 20;
+   static const S32 SAFTEY_LINE_EXTEND = 4;      // How far the safety line extends above/below the main bar
 
-   Point render(const GameType *gameType, bool scoreboardVisible, bool render) const;
+   static void render(S32 energy);
 };
 
 } } // Nested namespace

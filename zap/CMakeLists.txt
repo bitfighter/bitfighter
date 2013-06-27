@@ -113,6 +113,7 @@ set(CLIENT_SOURCES
 	Cursor.cpp
 	EditorAttributeMenuItemBuilder.cpp
 	EditorTeam.cpp
+	EnergyGaugeRenderer.cpp
 	engineerHelper.cpp
 	Event.cpp
 	FontManager.cpp
