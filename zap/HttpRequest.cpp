@@ -238,8 +238,8 @@ string HttpRequest::buildRequest()
 
       encodedData << "--" + HttpRequestBoundary + "\r\n";
 
-      char contentLengthHeaderBuffer[1024];
-      dSprintf(contentLengthHeaderBuffer, 1024, "\r\nContent-Length: %d", encodedData.tellp());
+      char contentLengthHeaderBuffer[1024] = { 0 };
+      dSprintf(contentLengthHeaderBuffer, 1024, "\r\nContent-Length: %d", (U32) encodedData.tellp());
 
       mRequest += contentLengthHeaderBuffer;
       mRequest += "\r\nUser-Agent: Bitfighter";
