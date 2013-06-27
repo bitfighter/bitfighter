@@ -401,7 +401,8 @@ public:
 
    // Get UI element dimensions
    S32 getLoadoutIndicatorWidth() const;
-   S32 getTimeLeftIndicatorWidth() const;
+   Point getTimeLeftIndicatorWidthAndHeight() const;
+   bool scoreboardIsVisible() const;
 
    void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd = false);  
    void exitHelper();

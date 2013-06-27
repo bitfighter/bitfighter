@@ -392,7 +392,7 @@ public:
 #ifndef ZAP_DEDICATED
    virtual void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
    virtual void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
-   virtual S32 renderTimeLeftSpecial(S32 right, S32 bottom) const;
+   virtual S32 renderTimeLeftSpecial(S32 right, S32 bottom, bool render) const;
 
    void renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32 canvasHeigh) const;
    void renderObjectiveArrow(const BfObject *target, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;

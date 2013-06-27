@@ -50,16 +50,23 @@ const S32 bigScoreTextSize = 28;
 const S32 bigScoreTextGap = 5;
 
 
-void TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible) const
+// When render param is true, will render as expected; when false, will simply return dimensions
+Point TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible, bool render) const
 {
    FontManager::pushFontContext(LoadoutIndicatorContext);
 
-   Point corner = renderTimeLeft(gameType);
+   Point corner = renderTimeLeft(gameType, render);
    S32 timeLeft = (S32)corner.x;
-   S32 timeTop = (S32)corner.y;
+   S32 timeTop  = (S32)corner.y;
+
+   // Convert the coordinates we got above into dimensions
+   corner.x = gScreenInfo.getGameCanvasWidth()  - corner.x - TimeLeftIndicatorMargin;    // Width
+   corner.y = gScreenInfo.getGameCanvasHeight() - corner.y - TimeLeftIndicatorMargin;    // Height
 
    // Some game types *ahem* Nexus *ahem* require an extra line for the scoreboard... a "special" if you will
-   timeTop -= gameType->renderTimeLeftSpecial(rightAlignCoord, timeTop);
+   const S32 timeLeftSpecialHeight = gameType->renderTimeLeftSpecial(rightAlignCoord, timeTop, render);
+   timeTop  -= timeLeftSpecialHeight;
+   corner.y += timeLeftSpecialHeight;
 
    if(!scoreboardVisible)
    {
@@ -67,40 +74,40 @@ void TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible) 
       S32 teamCount = game->getTeamCount();
 
       if(teamCount > 1 && gameType->isTeamGame())
-         renderTeamScores(gameType, timeTop);
+         corner.y += renderTeamScores(gameType, timeTop, render);
 
       else if(teamCount > 0 && !gameType->isTeamGame())     // For single team games like rabbit and bitmatch
-         renderIndividualScores(gameType, timeTop);
+         corner.y += renderIndividualScores(gameType, timeTop, render);
    }
 
    FontManager::popFontContext();
-}
 
-
-S32 TimeLeftRenderer::getWidth(const GameType *gameType) const
-{
-   return (S32)renderTimeLeft(gameType, false).x;
+   return corner;
 }
 
 
 // Draw the scores for each team, with an adjacent flag
-void TimeLeftRenderer::renderTeamScores(const GameType *gameType, S32 bottom) const
+S32 TimeLeftRenderer::renderTeamScores(const GameType *gameType, S32 bottom, bool render) const
 {
    Game *game = gameType->getGame();
 //   bool core = gameType->getGameTypeId() == CoreGame;
 
    S32 ypos = bottom - bigScoreTextSize;      
 
-   S32 maxWidth = renderHeadlineScores(game, ypos);   // Use max score width to vertically align symbols
+   S32 maxWidth = render ? renderHeadlineScores(game, ypos) : 0;   // Use max score width to vertically align symbols
    S32 xpos = rightAlignCoord - maxWidth - 18;
 
    S32 teamCount = game->getTeamCount();
 
    for(S32 i = teamCount - 1; i >= 0; i--)
    {
-      gameType->renderScoreboardOrnament(i, xpos, ypos);
-      ypos -= bigScoreTextSize + bigScoreTextGap;
+      if(render)
+         gameType->renderScoreboardOrnament(i, xpos, ypos);
+
+      ypos -= (bigScoreTextSize + bigScoreTextGap);
    }
+
+   return bottom - ypos - (bigScoreTextSize + bigScoreTextGap);
 }
 
 
@@ -145,17 +152,17 @@ static void drawStringDigitByDigit(S32 x, S32 y, S32 textsize, const string &s)
 // Render 1 or 2 scores: Either render the current client on the bottom (if only one player); 
 // or renders player on top and the 2nd player on the bottom (if player is winning);
 // or leader on top and player second (if player is losing)
-void TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 bottom) const
+S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 bottom, bool render) const
 {
    Game *game = gameType->getGame();
    ClientGame *clientGame = static_cast<ClientGame *>(game);
 
    // We can get here before we get the first unpackUpdate packet arrives -- if so, return
    if(clientGame->getLocalRemoteClientInfo() == NULL)
-      return;
+      return 0;
 
    if(gameType->getLeadingPlayer() < 0)
-      return;
+      return 0;
 
    const S32 textsize = 12;
    const S32 textgap = 4;
@@ -182,8 +189,6 @@ void TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 bott
 
    // Slide the first entry up if there will be a second entry
    S32 firstNameOffset = renderTwoNames ? (textsize + textgap) : 0;    
-
-   glColor(winnerColor);
 
    topName  = game->getClientInfo(gameType->getLeadingPlayer())->getName().getString();
    topScore = gameType->getLeadingPlayerScore();
@@ -220,20 +225,27 @@ void TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 bott
    // 5 here is the gap between the names and the scores
    S32 maxWidth = max(topScoreLen, botScoreLen) + 5;
 
-   drawStringDigitByDigit(rightAlignCoord - topOneFixFactor, ypos - firstNameOffset, textsize, topScoreStr);
-   drawStringr           (rightAlignCoord - maxWidth,        ypos - firstNameOffset, textsize, topName);
-
-   // Render bottom score if we have one
-   if(renderTwoNames)
+   if(render)
    {
-      if(topScore == botScore)      // If players are tied, render both with winner's color
-         glColor(winnerColor);
-      else
-         glColor(loserColor);
+      glColor(winnerColor);
 
-      drawStringDigitByDigit(rightAlignCoord - botOneFixFactor, ypos, textsize, botScoreStr);
-      drawStringr           (rightAlignCoord - maxWidth,        ypos, textsize, botName);
+      drawStringDigitByDigit(rightAlignCoord - topOneFixFactor, ypos - firstNameOffset, textsize, topScoreStr);
+      drawStringr           (rightAlignCoord - maxWidth,        ypos - firstNameOffset, textsize, topName);
+
+      // Render bottom score if we have one
+      if(renderTwoNames)
+      {
+         if(topScore == botScore)      // If players are tied, render both with winner's color
+            glColor(winnerColor);
+         else
+            glColor(loserColor);
+
+         drawStringDigitByDigit(rightAlignCoord - botOneFixFactor, ypos, textsize, botScoreStr);
+         drawStringr           (rightAlignCoord - maxWidth,        ypos, textsize, botName);
+      }
    }
+
+   return firstNameOffset + textsize;
 }
 
 
@@ -302,16 +314,17 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
 
    const S32 leftLineOverhangAmount = 4;
    const S32 visualVerticalTextAlignmentHackyFacty = 3;
-   const S32 farRightCoord = smallTextRPos - max(wt, wb) - leftLineOverhangAmount;
+   const S32 farLeftCoord = smallTextRPos - max(wt, wb) - leftLineOverhangAmount;
+   const S32 topCoord = timeTop - 2 * grayLineVertPadding - (S32)gDefaultLineWidth - 3;
 
    if(render)
    {
       glColor(Colors::gray40);
-      drawHorizLine(farRightCoord, rightAlignCoord, timeTop - grayLineVertPadding);
+      drawHorizLine(farLeftCoord, rightAlignCoord, timeTop - grayLineVertPadding);
       drawVertLine(grayLinePos, timeTop + visualVerticalTextAlignmentHackyFacty, timeTop + timeTextSize);
    }
 
-   return Point(farRightCoord, timeTop - 2 * grayLineVertPadding - (S32)gDefaultLineWidth - 3);
+   return Point(farLeftCoord, topCoord);
 }
 
 

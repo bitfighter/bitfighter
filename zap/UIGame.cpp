@@ -968,9 +968,15 @@ S32 GameUserInterface::getLoadoutIndicatorWidth() const
 }
 
 
-S32 GameUserInterface::getTimeLeftIndicatorWidth() const
+bool GameUserInterface::scoreboardIsVisible() const
 {
-   return mTimeLeftRenderer.getWidth(getGame()->getGameType());
+   return mInScoreboardMode || getGame()->getGameType()->isGameOver();
+}
+
+
+Point GameUserInterface::getTimeLeftIndicatorWidthAndHeight() const
+{
+   return mTimeLeftRenderer.render(getGame()->getGameType(), scoreboardIsVisible(), false);
 }
 
 
@@ -2039,13 +2045,13 @@ void GameUserInterface::renderBasicInterfaceOverlay()
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
       renderInputModeChangeAlert();
 
-   bool showScore = gameType->isGameOver() || mInScoreboardMode;
+   bool showScore = scoreboardIsVisible();
 
    if(showScore && getGame()->getTeamCount() > 0)      // How could teamCount be 0?
       renderScoreboard();
    
    // Render timer and associated doodads in the lower-right corner
-   mTimeLeftRenderer.render(gameType, showScore);
+   mTimeLeftRenderer.render(gameType, showScore, true);
 
    renderTalkingClients();
    renderDebugStatus();

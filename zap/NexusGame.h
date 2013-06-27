@@ -103,7 +103,7 @@ public:
 
 #ifndef ZAP_DEDICATED
    void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
-   S32 renderTimeLeftSpecial(S32 right, S32 bottom) const;
+   S32 renderTimeLeftSpecial(S32 right, S32 bottom, bool render) const;
 #endif
 
    void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);

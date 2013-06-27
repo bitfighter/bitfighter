@@ -668,38 +668,42 @@ bool NexusGameType::canBeIndividualGame() const { return true;  }
 
 #ifndef ZAP_DEDICATED
 
-S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom) const
+// If render is false, will return height, but not actually draw
+S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom, bool render) const
 {
    const S32 size = 20;
    const S32 gap = 4;
    const S32 x = right;
    const S32 y = bottom;
 
-   glColor(mNexusIsOpen ? Colors::NexusOpenColor : Colors::NexusClosedColor);      // Display timer in appropriate color
-
-   if(mNexusIsOpen && mNexusOpenTime == 0)
-      drawStringfr(x, y - size, size, "Nexus never closes");
-   else if(!mNexusIsOpen && mNexusClosedTime == 0)
-      drawStringfr(x, y - size, size, "Nexus never opens");
-   else if(!mNexusIsOpen && mNexusChangeAtTime <= 0)
-      drawStringfr(x, y - size, size, "Nexus closed until end of game");
-   else if(!isGameOver())
+   if(render)
    {
-      static const U32 w0      = getStringWidth(size, "0");
-      static const U32 wCloses = getStringWidth(size, "Nexus closes: ");
-      static const U32 wOpens  = getStringWidth(size, "Nexus opens: ");
+      glColor(mNexusIsOpen ? Colors::NexusOpenColor : Colors::NexusClosedColor);      // Display timer in appropriate color
 
-      S32 timeLeft = MIN(getNexusTimeLeft() * 1000, (S32)mGameTimer.getCurrent());
+      if(mNexusIsOpen && mNexusOpenTime == 0)
+         drawStringfr(x, y - size, size, "Nexus never closes");
+      else if(!mNexusIsOpen && mNexusClosedTime == 0)
+         drawStringfr(x, y - size, size, "Nexus never opens");
+      else if(!mNexusIsOpen && mNexusChangeAtTime <= 0)
+         drawStringfr(x, y - size, size, "Nexus closed until end of game");
+      else if(!isGameOver())
+      {
+         static const U32 w0      = getStringWidth(size, "0");
+         static const U32 wCloses = getStringWidth(size, "Nexus closes: ");
+         static const U32 wOpens  = getStringWidth(size, "Nexus opens: ");
 
-      // Get the width of the minutes and 10 seconds digit(s), account for two leading 0s (00:45)
-      const U32 minsRemaining = timeLeft / (60 * 1000);
-      const U32 tenSecsRemaining = timeLeft / 1000 % 60 / 10;
-      string timestr = itos(minsRemaining) + ":" + itos(tenSecsRemaining);
-      const U32 minsWidth = getStringWidth(size, timestr.c_str()) + (minsRemaining < 10 ? w0 : 0);
+         S32 timeLeft = MIN(getNexusTimeLeft() * 1000, (S32)mGameTimer.getCurrent());
 
-      S32 w = minsWidth + w0 + (mNexusIsOpen ? wCloses : wOpens);
+         // Get the width of the minutes and 10 seconds digit(s), account for two leading 0s (00:45)
+         const U32 minsRemaining = timeLeft / (60 * 1000);
+         const U32 tenSecsRemaining = timeLeft / 1000 % 60 / 10;
+         string timestr = itos(minsRemaining) + ":" + itos(tenSecsRemaining);
+         const U32 minsWidth = getStringWidth(size, timestr.c_str()) + (minsRemaining < 10 ? w0 : 0);
 
-      drawTime(x - w, y - size, size, timeLeft, mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
+         S32 w = minsWidth + w0 + (mNexusIsOpen ? wCloses : wOpens);
+
+         drawTime(x - w, y - size, size, timeLeft, mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
+      }
    }
 
    return size + gap;

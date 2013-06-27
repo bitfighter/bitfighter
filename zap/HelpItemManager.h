@@ -63,7 +63,7 @@
    HELP_TABLE_ITEM(ControlsJSItem,               UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Move your ship with the left joystick.",                                                    \
                                                                                                                   "Aim and fire with the right.", NULL }))                                                     \
                                                                                                                                                                                                                \
-   HELP_TABLE_ITEM(ModulesAndWeaponsItem,        UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Available weapons and modules are shown",                                                   \
+   HELP_TABLE_ITEM(ModulesAndWeaponsItem,        UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Your weapons and modules are shown",                                                   \
                                                                                                                   "in the upper left corner of the screen.", NULL }))                                          \
                                                                                                                                                                                                                \
    HELP_TABLE_ITEM(ControlsModulesItem,          UnknownTypeNumber,             Any,        PacedHigh, ARRAYDEF({ "Activate ship modules with",                                                                \
