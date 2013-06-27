@@ -34,6 +34,7 @@
 #include "UIGame.h"              // For obtaining loadout indicator width
 #include "UIManager.h"
 #include "LoadoutIndicator.h"    // For indicator static dimensions
+#include "EnergyGaugeRenderer.h"
 #include "ScreenInfo.h"          // For canvas width
 
 #include "SymbolShape.h"
@@ -46,11 +47,7 @@
 
 using namespace TNL;
 
-namespace Zap { 
-
-   extern ScreenInfo gScreenInfo;
-
-namespace UI {
+namespace Zap {   namespace UI {
 
 static const S32 MAX_LINES = 8;     // Excluding sentinel item
 
@@ -265,11 +262,11 @@ static void renderIndicatorBracket(S32 left, S32 right, S32 top, S32 stubLen)
 
 
 // Do some special rendering required by just a couple of items
-static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 leftX, S32 topY, S32 bottomY)
+static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 textLeft, S32 textTop, S32 textBottom)
 {
    // TODO: Remove game->getSettings()->getIniSettings()->showWeaponIndicators option
 
-   leftX -= 10;      // Provide some buffer between vertical bar and help text
+   textLeft -= 10;      // Provide some buffer between vertical bar and help text
 
    const S32 stubLen = 15;
    const S32 indicatorHorizontalGap = 5;     // Space between indicator and vertical stubs
@@ -281,19 +278,22 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
       const S32 x = UI::LoadoutIndicator::LoadoutIndicatorLeftPos;
       const S32 y = UI::LoadoutIndicator::LoadoutIndicatorBottomPos;
 
-      const S32 riserTop = y + indicatorVerticalGap;
-      const S32 riserBot = (topY + bottomY) / 2;
-      const S32 riserX   = min(x + w / 2, leftX - 15);   // Some loadouts are long enough that we get a weird display... min fixes that
-                                                         // (This may no longer be a problem now that the help text was shortened)
-      const S32 left  = x -     indicatorHorizontalGap;                   
-      const S32 right = x + w + indicatorHorizontalGap;
+      const S32 indicatorTop = y + indicatorVerticalGap;
+      const S32 riserBot = (textTop + textBottom) / 2;
 
-      renderIndicatorBracket(left, right, riserTop, -stubLen);
-      renderHelpTextBracket(leftX, topY, bottomY, stubLen);
+      // Some loadouts are long enough that we get a weird display... min fixes that.
+      // (This may no longer be a problem now that the help text was shortened.)
+      const S32 indicatorMiddle   = min(x + w / 2, textLeft - 15);   
+
+      const S32 indicatorLeft  = x -     indicatorHorizontalGap;                   
+      const S32 indicatorRight = x + w + indicatorHorizontalGap;
+
+      renderHelpTextBracket(textLeft, textTop, textBottom, stubLen);
+      renderIndicatorBracket(indicatorLeft, indicatorRight, indicatorTop, -stubLen);
 
       // Lines connecting the two
-      drawHorizLine(riserX, leftX,    riserBot);    // Main horizontal
-      drawVertLine (riserX, riserTop, riserBot);    // Main riser
+      drawHorizLine(indicatorMiddle, textLeft,    riserBot);    // Main horizontal
+      drawVertLine (indicatorMiddle, indicatorTop, riserBot);    // Main riser
    }
 
    else if(helpItem == GameTypeAndTimer)
@@ -301,23 +301,43 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
       const Point widthAndHeight = game->getUIManager()->getUI<GameUserInterface>()->getTimeLeftIndicatorWidthAndHeight();
       const S32 w = (S32)widthAndHeight.x;
       const S32 h = (S32)widthAndHeight.y;
-      const S32 x = gScreenInfo.getGameCanvasWidth()  - UI::TimeLeftRenderer::TimeLeftIndicatorMargin - w;
-      const S32 y = gScreenInfo.getGameCanvasHeight() - UI::TimeLeftRenderer::TimeLeftIndicatorMargin - h - indicatorVerticalGap;
+      const S32 x = gScreenInfo.getGameCanvasWidth() - UI::TimeLeftRenderer::TimeLeftIndicatorMargin - w;
+      const S32 indicatorTop = gScreenInfo.getGameCanvasHeight() - UI::TimeLeftRenderer::TimeLeftIndicatorMargin - h - indicatorVerticalGap;
 
-      const S32 left  = x + w + indicatorHorizontalGap;
-      const S32 right = x - indicatorHorizontalGap;
+      const S32 indicatorLeft  = x + w + indicatorHorizontalGap;
+      const S32 indicatorRight = x - indicatorHorizontalGap;
 
-      const S32 riserX = (left + right) / 2;
-      const S32 riserTop = (topY + bottomY) / 2;
+      const S32 indicatorMiddle = (indicatorLeft + indicatorRight) / 2;
+      const S32 textMiddle = (textTop + textBottom) / 2;
 
-      const S32 rightX = gScreenInfo.getGameCanvasWidth() - leftX;
+      const S32 textRight = gScreenInfo.getGameCanvasWidth() - textLeft;
 
-      renderHelpTextBracket(rightX, topY, bottomY, -stubLen);
-      renderIndicatorBracket(left, right, y, stubLen);
+      renderHelpTextBracket(textRight, textTop, textBottom, -stubLen);
+      renderIndicatorBracket(indicatorLeft, indicatorRight, indicatorTop, stubLen);
 
       // Lines connecting the two
-      drawHorizLine(rightX, riserX, riserTop);
-      drawVertLine(riserX, riserTop, y);
+      drawHorizLine(textRight, indicatorMiddle, textMiddle);
+      drawVertLine(indicatorMiddle, textMiddle, indicatorTop);
+   }
+   else if(helpItem == EnergyGaugeItem)
+   {
+      const S32 indicatorLeft  = UI::EnergyGaugeRenderer::GaugeLeftMargin - indicatorHorizontalGap;
+      const S32 indicatorRight = UI::EnergyGaugeRenderer::GaugeLeftMargin + UI::EnergyGaugeRenderer::GuageWidth + indicatorHorizontalGap;
+      const S32 indicatorTop   = gScreenInfo.getGameCanvasHeight() - 
+                                          (UI::EnergyGaugeRenderer::GaugeBottomMargin + 
+                                           UI::EnergyGaugeRenderer::GaugeHeight + 
+                                           UI::EnergyGaugeRenderer::SafetyLineExtend + 
+                                           indicatorVerticalGap);
+
+      const S32 textMiddle = (textTop + textBottom) / 2;
+      const S32 indicatorMiddle = (indicatorLeft + indicatorRight) / 2;
+
+      renderHelpTextBracket(textLeft, textTop, textBottom, stubLen);
+      renderIndicatorBracket(indicatorLeft, indicatorRight, indicatorTop, stubLen);
+
+      // Lines connecting the two
+      drawHorizLine(textLeft, indicatorMiddle, textMiddle);
+      drawVertLine(indicatorMiddle, textMiddle, indicatorTop);
    }
 }
 

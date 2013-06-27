@@ -39,16 +39,16 @@ namespace Zap {   namespace UI {
 void EnergyGaugeRenderer::render(S32 energy)
 {
    // Coorinates of upper left corner of main guage bar
-   const F32 xul = F32(                                    UserInterface::horizMargin);
-   const F32 yul = F32(gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - GUAGE_HEIGHT);
+   const F32 xul = F32(                                    GaugeLeftMargin);
+   const F32 yul = F32(gScreenInfo.getGameCanvasHeight() - GaugeBottomMargin - GaugeHeight);
 
-   F32 full = F32(energy) / F32(Ship::EnergyMax) * GAUGE_WIDTH;
+   F32 full = F32(energy) / F32(Ship::EnergyMax) * GuageWidth;
 
    // Main bar outline
    F32 vertices[] = {
          xul,        yul,
-         xul,        yul + GUAGE_HEIGHT,
-         xul + full, yul + GUAGE_HEIGHT,
+         xul,        yul + GaugeHeight,
+         xul + full, yul + GaugeHeight,
          xul + full, yul,
    };
 
@@ -67,22 +67,22 @@ void EnergyGaugeRenderer::render(S32 energy)
 
    // Guage outline
    glColor(Colors::white);
-   drawVertLine(xul,               yul, yul + GUAGE_HEIGHT);
-   drawVertLine(xul + GAUGE_WIDTH, yul, yul + GUAGE_HEIGHT);
+   drawVertLine(xul,              yul, yul + GaugeHeight);
+   drawVertLine(xul + GuageWidth, yul, yul + GaugeHeight);
 
    // Show safety line
-   S32 cutoffx = Ship::EnergyCooldownThreshold * GAUGE_WIDTH / Ship::EnergyMax;
+   S32 cutoffx = Ship::EnergyCooldownThreshold * GuageWidth / Ship::EnergyMax;
 
    glColor(Colors::yellow);
-   drawVertLine(xul + cutoffx, yul - SAFTEY_LINE_EXTEND - 1, yul + GUAGE_HEIGHT + SAFTEY_LINE_EXTEND);
+   drawVertLine(xul + cutoffx, yul - SafetyLineExtend - 1, yul + GaugeHeight + SafetyLineExtend);
 
 #ifdef SHOW_SERVER_SITUATION
    if((gServerGame && gServerGame->getClientInfo(0)->getConnection()->getControlObject()))
    {
       S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy();
-      S32 p = F32(actDiff) / Ship::EnergyMax * GAUGE_WIDTH;
+      S32 p = F32(actDiff) / Ship::EnergyMax * GuageWidth;
       glColor(Colors::magenta);
-      drawVertLine(xul + p, yul - SAFTEY_LINE_EXTEND - 1, yul + GUAGE_HEIGHT + SAFTEY_LINE_EXTEND);
+      drawVertLine(xul + p, yul - SafetyLineExtend - 1, yul + GaugeHeight + SafetyLineExtend);
    }
 #endif
 }

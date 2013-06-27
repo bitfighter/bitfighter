@@ -53,14 +53,6 @@ using namespace TNL;
 namespace Zap
 {
 
-#ifdef TNL_OS_XBOX
-   S32 UserInterface::horizMargin = 50;
-   S32 UserInterface::vertMargin = 38;
-#else
-   S32 UserInterface::horizMargin = 15;
-   S32 UserInterface::vertMargin = 15;
-#endif
-
 S32 UserInterface::messageMargin = UserInterface::vertMargin + UI::LoadoutIndicator::LoadoutIndicatorHeight + 5;
 
 extern Vector<ClientGame *> gClientGames;
@@ -467,20 +459,20 @@ void UserInterface::renderDiagnosticKeysOverlay()
 ////////////////////////////////////////
 
 
-void UserInterfaceData::get()
-{
-   vertMargin  = UserInterface::vertMargin;
-   horizMargin = UserInterface::horizMargin;
-   chatMargin  = UserInterface::messageMargin;
-}
-
-
-void UserInterfaceData::set()
-{
-   UserInterface::vertMargin  = vertMargin;
-   UserInterface::horizMargin = horizMargin;
-   UserInterface::messageMargin = chatMargin;
-}
+//void UserInterfaceData::get()
+//{
+//   vertMargin  = UserInterface::vertMargin;
+//   horizMargin = UserInterface::horizMargin;
+//   chatMargin  = UserInterface::messageMargin;
+//}
+//
+//
+//void UserInterfaceData::set()
+//{
+//   UserInterface::vertMargin  = vertMargin;
+//   UserInterface::horizMargin = horizMargin;
+//   UserInterface::messageMargin = chatMargin;
+//}
 
 
 };

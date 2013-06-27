@@ -92,14 +92,18 @@ public:
    static const S32 MaxServerNameLen = 40;
    static const S32 MaxServerDescrLen = 254;
 
-   //UIID getMenuID() const;                   // Retrieve interface's name
-   //UIID getPrevMenuID() const;               // Retrieve previous interface's name
-
    ClientGame *getGame() const;
 
    UIManager *getUIManager() const;
 
-   static S32 vertMargin, horizMargin;
+#ifdef TNL_OS_XBOX
+   static const S32 horizMargin = 50;
+   static const S32 vertMargin = 38;
+#else
+   static const S32 horizMargin = 15;
+   static const S32 vertMargin = 15;
+#endif
+
    static S32 messageMargin;
 
    U32 getTimeSinceLastInput();
@@ -152,8 +156,8 @@ struct UserInterfaceData
    S32 vertMargin, horizMargin;
    S32 chatMargin;
 
-   void get();
-   void set();
+   //void get();
+   //void set();
 };
 
 };

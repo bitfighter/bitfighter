@@ -184,7 +184,8 @@ void GameUserInterface::onActivate()
    mHelpItemManager.addInlineHelpItem(CmdrsMapItem);           // Suggest viewing cmdrs map
    mHelpItemManager.addInlineHelpItem(ChangeConfigItem);       // Changing loadouts
    mHelpItemManager.addInlineHelpItem(GameModesItem);          // Use F2 to see current mission
-   mHelpItemManager.addInlineHelpItem(GameTypeAndTimer);        // Point out clock and score in LR
+   mHelpItemManager.addInlineHelpItem(GameTypeAndTimer);       // Point out clock and score in LR
+   mHelpItemManager.addInlineHelpItem(EnergyGaugeItem);        // Show user the energy gauge
    
    mHelperManager.reset();
 

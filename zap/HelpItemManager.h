@@ -82,6 +82,9 @@
    HELP_TABLE_ITEM(GameTypeAndTimer,             UnknownTypeNumber,             Any,        PacedLow,  ARRAYDEF({ "The current game type, time left, and winning score",                                       \
                                                                                                                   "are shown in the lower-right of the screen.", NULL }))                                      \
                                                                                                                                                                                                                \
+   HELP_TABLE_ITEM(EnergyGaugeItem,              UnknownTypeNumber,             Any,        PacedLow,  ARRAYDEF({ "This is your energy.  You will",                                                            \
+                                                                                                                  "need it for shooting and modules.", NULL }))                                                \
+                                                                                                                                                                                                               \
    HELP_TABLE_ITEM(ObjectiveArrowItem,           UnknownTypeNumber,             Any,        PacedLow,  ARRAYDEF({ "Objective arrows point the way to critical objects.", NULL }))                              \
    HELP_TABLE_ITEM(AddBotsItem,                  UnknownTypeNumber,             Any,        PacedLow,  ARRAYDEF({ "Feeling lonely?  Playing with others is better, but you",                                   \
                                                                                                                   "can add some bots from the Bots options menu.", NULL }))                                    \
