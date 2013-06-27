@@ -414,6 +414,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
    deployedObject->addToGame(ship->getGame(), ship->getGame()->getGameObjDatabase());
 
    MountableItem *resource = ship->dismountFirst(ResourceItemTypeNumber);
+   ship->resetFastRecharge();
 
    engineerable->setResource(resource);
    engineerable->onConstructed();
