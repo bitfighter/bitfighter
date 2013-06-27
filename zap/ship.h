@@ -263,6 +263,7 @@ public:
    void processWeaponFire();
    void processModules();
    void rechargeEnergy();
+   void resetFastRecharge();
 
    void updateModuleSounds();
    void emitMovementSparks();

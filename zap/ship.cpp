@@ -1085,8 +1085,7 @@ void Ship::rechargeEnergy()
       // Recharge energy very fast if we're completely idle for a given amount of time
       if(mCurrentMove.x != 0 || mCurrentMove.y != 0 || mCurrentMove.fire || mCurrentMove.isAnyModActive())
       {
-         mFastRechargeTimer.reset();
-         mFastRecharging = false;
+         resetFastRecharge();
       }
 
       if(mFastRecharging)
@@ -1107,6 +1106,13 @@ void Ship::rechargeEnergy()
    // Cap energy at max
    else if(mEnergy >= EnergyMax)
       mEnergy = EnergyMax;
+}
+
+
+void Ship::resetFastRecharge()
+{
+   mFastRechargeTimer.reset();
+   mFastRecharging = false;
 }
 
 

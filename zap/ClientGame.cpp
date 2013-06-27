@@ -952,7 +952,10 @@ void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
       case EngineerEventTurretBuilt:            // fallthrough ok
       case EngineerEventForceFieldBuilt:
          if(ship)
+         {
             ship->creditEnergy(-energyCost);    // Deduct energy from engineer
+            ship->resetFastRecharge();
+         }
          break;
 
       case EngineerEventTeleporterExitBuilt:
@@ -961,7 +964,10 @@ void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
 
       case EngineerEventTeleporterEntranceBuilt:
          if(ship)
+         {
             ship->creditEnergy(-energyCost);    // Deduct energy from engineer
+            ship->resetFastRecharge();
+         }
 
          getUIManager()->setSelectedEngineeredObject(EngineeredTeleporterExit);
          break;
