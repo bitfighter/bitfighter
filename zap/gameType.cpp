@@ -4320,5 +4320,10 @@ void GameType::releaseFlag(const Point &pos, const Point &vel, S32 count) { /* D
 void GameType::shipTouchZone(Ship *ship, GoalZone *zone) { /* Do nothing */ }
 void GameType::majorScoringEventOcurred(S32 team)        { /* Do nothing */ }
 
+GameTimer* GameType::getTimer()
+{
+   return &mGameTimer;
+}
+
 };
 
