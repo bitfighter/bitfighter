@@ -138,19 +138,14 @@ TEST_F(HttpRequestTest, receiveTimeout)
 }
 
 
-/*
- * Disabled due to a TNL bug
- *
-
 TEST_F(HttpRequestTest, connectError)
 {
    plantMocks();
    sock->data = "HTTP/1.1 200 OK\r\n\r\nresponse";
-   // XXX: connect returns UnknownError on a successful call on linux
-   sock->connectError = NoError;
+   sock->connectError = UnknownError;
    EXPECT_FALSE(req.send());
 }
-*/
+
 
 
 TEST_F(HttpRequestTest, sendError)

@@ -28,7 +28,7 @@ class MockSocket : public Socket
    MockSocket()
       : Socket(Address(), 0, 0, false, true),
         dataSent(false),
-        connectError(UnknownError),
+        connectError(NoError),
         sendError(NoError),
         receiveError(NoError)
    { }
