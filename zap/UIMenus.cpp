@@ -2179,8 +2179,14 @@ static void moreRobotsAcceptCallback(ClientGame *game, U32 index)
    else
       game->getGameType()->c2sAddBots(teamCount, Vector<StringTableEntry>());
 
+
+   GameUserInterface *gameUI = game->getUIManager()->getUI<GameUserInterface>();
+
+   // Player has demonstrated ability to add bots... no need to show help item
+   gameUI->removeInlineHelpItem(AddBotsItem);
+
    // Back to the game!
-   game->getUIManager()->reactivate(game->getUIManager()->getUI<GameUserInterface>());
+   game->getUIManager()->reactivate(gameUI);
 }
 
 

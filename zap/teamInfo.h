@@ -71,6 +71,8 @@ public:
    void alterRed(F32 amt);
    void alterGreen(F32 amt);
    void alterBlue(F32 amt);
+
+   virtual S32 getBotCount() const = 0;
 };
 
 
@@ -125,9 +127,9 @@ public:
    // Players & bots on each team:
    // Note that these values need to be precalulated before they are ready for use;
    // they are not dynamically updated!
-   S32 getPlayerCount();      // Get number of human players on team
-   S32 getBotCount();         // Get number of bots on team
-   S32 getPlayerBotCount();   // Get total number of players/bots on team
+   S32 getPlayerCount() const;      // Get number of human players on team
+   S32 getBotCount() const;         // Get number of bots on team
+   S32 getPlayerBotCount() const;   // Get total number of players/bots on team
 
    void incrementPlayerCount();
    void incrementBotCount();
@@ -169,6 +171,8 @@ public:
    void addTeam(AbstractTeam *team, S32 index);
    void replaceTeam(AbstractTeam *team, S32 index);
    void clearTeams();
+
+   S32 getBotCount() const;
 
    // Access to mTeamHasFlagList
    bool getTeamHasFlag(S32 teamIndex) const;

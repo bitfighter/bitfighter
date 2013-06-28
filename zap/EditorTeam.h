@@ -52,6 +52,7 @@ public:
    LineEditor *getLineEditor();
    void setName(const char *name);
    StringTableEntry getName() const;  // Wrap in STE to make signatures match
+   S32 getBotCount() const;
 };
 
 

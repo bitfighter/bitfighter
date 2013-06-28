@@ -786,6 +786,9 @@ void addBotsHandler(ClientGame *game, const Vector<string> &words)
 
       if(game->getGameType())
          game->getGameType()->c2sAddBots(count, args);
+         
+      // Player has demonstrated ability to add bots... no need to show help item
+      game->getUIManager()->getUI<GameUserInterface>()->removeInlineHelpItem(AddBotsItem);
    }
 }
 

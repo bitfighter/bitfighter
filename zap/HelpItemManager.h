@@ -186,8 +186,9 @@ private:
    Timer mFloodControl;
 
    void buildItemsToHighlightList();
-   void queueHelpItem(HelpItem item);  
-   void moveItemFromQueueToActiveList();
+   void queueHelpItem(HelpItem item);
+   void moveItemFromQueueToActiveList(const ClientGame *game);
+
 
 public:
    enum Priority {
@@ -213,7 +214,7 @@ public:
 
    void reset();
 
-   void idle(U32 timeDelta);
+   void idle(U32 timeDelta, const ClientGame *game);
    void renderMessages(const ClientGame *game, S32 yPos) const;
 
    void addInlineHelpItem(HelpItem item, bool messageCameFromQueue = false);   

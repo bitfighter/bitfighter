@@ -35,8 +35,6 @@
 namespace Zap
 {
 
-//U32 Team::mNextId = 0; // ???  when does it go back to zero?
-
 // Constructor
 AbstractTeam::AbstractTeam()
 {
@@ -207,19 +205,19 @@ void Team::addRating(F32 rating)
 }
 
 
-S32 Team::getPlayerCount()
+S32 Team::getPlayerCount() const
 {
    return mPlayerCount;
 }
 
 
-S32 Team::getBotCount()
+S32 Team::getBotCount() const
 {
    return mBotCount;
 }
 
 
-S32 Team::getPlayerBotCount()
+S32 Team::getPlayerBotCount() const
 {
    return mPlayerCount + mBotCount;
 }
@@ -231,6 +229,7 @@ void Team::incrementPlayerCount()
 }
 
 
+// This should definitely NOT be a public method... 
 void Team::incrementBotCount()
 {
    mBotCount++;
@@ -415,11 +414,24 @@ void TeamManager::replaceTeam(AbstractTeam *team, S32 index)
 }
 
 
+// Because Teams are RefPtrs, clearing them here will trigger their deletion
 void TeamManager::clearTeams()
 {
    mTeams.clear();
    mTeamHasFlagList.clear();
 }
+
+
+S32 TeamManager::getBotCount() const
+{
+   S32 bots = 0;
+
+   for(S32 i = 0; i < mTeams.size(); i++)
+      bots += mTeams[i]->getBotCount();
+
+   return bots;
+}
+
 
 
 };

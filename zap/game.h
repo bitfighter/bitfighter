@@ -346,9 +346,9 @@ public:
 
    // Manage bot lists
    Robot *getBot(S32 index);
-   S32 getBotCount();
+   virtual S32 getBotCount() const;
    Robot *findBot(const char *id);                // Find bot with specified script id
-   void addBot(Robot *robot);
+   virtual void addBot(Robot *robot);
    void removeBot(Robot *robot);
    void deleteBot(const StringTableEntry &name);  // Delete by name 
    void deleteBot(S32 i);                         // Delete by index
@@ -383,7 +383,7 @@ public:
    void setGridSize(F32 gridSize);
 
    U32 getCurrentTime();
-   virtual bool isServer() = 0;              // Will be overridden by either clientGame (return false) or serverGame (return true)
+   virtual bool isServer() const = 0;        // Implemented by ClientGame (returns false) and ServerGame (returns true)
 
    void checkConnectionToMaster(U32 timeDelta);
    MasterServerConnection *getConnectionToMaster();
@@ -413,7 +413,7 @@ public:
    S32 getTeamIndex(const StringTableEntry &playerName);
    S32 getTeamIndexFromTeamName(const char *teamName) const;
 
-   void countTeamPlayers();      // Makes sure that the mTeams[] structure has the proper player counts
+   void countTeamPlayers() const;      // Makes sure that the mTeams[] structure has the proper player counts
 
    void addTeam(AbstractTeam *team);
    void addTeam(AbstractTeam *team, S32 index);

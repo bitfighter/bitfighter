@@ -201,9 +201,9 @@ Robot *Game::getBot(S32 index)
 }
 
 
-S32 Game::getBotCount()
+S32 Game::getBotCount() const
 {
-   return mRobots.size();
+   TNLAssert(false, "Not implemented for this class!");
 }
 
 
@@ -220,7 +220,7 @@ Robot *Game::findBot(const char *id)
 
 void Game::addBot(Robot *robot)
 {
-   mRobots.push_back(robot);  
+   TNLAssert(false, "Not implemented for this class!");  
 }
 
 
@@ -387,7 +387,7 @@ void Game::removeFromClientList(ClientInfo *clientInfo)
 
 void Game::clearClientList() 
 { 
-   mClientInfos.clear(); 
+   mClientInfos.clear();   // ClientInfos are refPtrs, so this will delete them
 
    mRobotCount = 0;
    mPlayerCount = 0;
@@ -538,8 +538,9 @@ S32 Game::getTeamIndexFromTeamName(const char *teamName) const
 
 // Makes sure that the mTeams[] structure has the proper player counts
 // Needs to be called manually before accessing the structure
+// Bot counts do work on client.  Yay!
 // Rating may only work on server... not tested on client
-void Game::countTeamPlayers()
+void Game::countTeamPlayers() const
 {
    for(S32 i = 0; i < getTeamCount(); i++)
    {
@@ -549,7 +550,7 @@ void Game::countTeamPlayers()
 
    for(S32 i = 0; i < getClientCount(); i++)
    {
-      ClientInfo *clientInfo =  getClientInfo(i);
+      ClientInfo *clientInfo = getClientInfo(i);
 
       S32 teamIndex = clientInfo->getTeamIndex();
 
@@ -1210,7 +1211,7 @@ const char *LevelInfo::getLevelTypeName()
 void Game::cleanUp()
 {
    mGameObjDatabase->removeEverythingFromDatabase();
-   mActiveTeamManager->clearTeams();
+   mActiveTeamManager->clearTeams();      // Will in effect delete any teams herein
 
    while(idlingObjects.nextList != NULL)  // Remove any remainder objects idling that wasn't in gridDB
       delete idlingObjects.nextList;

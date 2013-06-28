@@ -81,7 +81,7 @@ ClientGame::~ClientGame()
       getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
    closeConnectionToGameServer();      // I just added this for good measure... not really sure it's needed
-   cleanUp();
+   cleanUp();                          // Among other things, will delete all teams
 
    //delete mUserInterfaceData;
    delete mUIManager; 
@@ -494,7 +494,7 @@ void ClientGame::deleteLevelGen(LuaLevelGenerator *levelgen)
 }
 
 
-bool ClientGame::isServer()
+bool ClientGame::isServer() const
 {
    return false;
 }
@@ -939,6 +939,13 @@ bool ClientGame::hasLevelChange(const char *failureMessage)
    
    displayErrorMessage(failureMessage);
    return false;
+}
+
+
+S32 ClientGame::getBotCount() const
+{
+   countTeamPlayers();
+   return mTeamManager.getBotCount();
 }
 
 

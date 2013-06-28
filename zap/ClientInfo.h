@@ -67,9 +67,9 @@ public:
    };
 
 private:
-   LuaPlayerInfo *mPlayerInfo;   // Lua access to this class
-   Statistics mStatistics;       // Statistics tracker
-   SafePtr<Ship> mShip;          // SafePtr will return NULL if ship object is deleted
+   LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
+   Statistics mStatistics;          // Statistics tracker
+   SafePtr<Ship> mShip;             // SafePtr will return NULL if ship object is deleted
    LoadoutTracker mOnDeckLoadout;
    LoadoutTracker mActiveLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
 

@@ -127,7 +127,7 @@ public:
 
    Point worldToScreenPoint(const Point *p, S32 canvasWidth, S32 canvasHeight) const;
 
-   bool isServer();
+   bool isServer() const;
    void idle(U32 timeDelta);
    void setUsingCommandersMap(bool usingCommandersMap);
 
@@ -267,6 +267,9 @@ public:
 
    void suspendGame();
    void unsuspendGame();
+
+   S32 getBotCount() const;
+
 
    // For loading levels in editor
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);

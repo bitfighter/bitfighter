@@ -160,11 +160,11 @@ public:
    void resetLevelLoadIndex();
    string loadNextLevelInfo();
    bool getLevelInfo(const string &fullFilename, LevelInfo &levelInfo); // Populates levelInfo with data from fullFilename
-string getLastLevelLoadName();                     // For updating the UI
+   string getLastLevelLoadName();                        // For updating the UI
 
-   bool loadLevel(const string &fileName);            // Load a level
-   void runLevelGenScript(const string &scriptName);  // Run any levelgens specified by the level or in the INI
-   void deleteLevelGen(LuaLevelGenerator *levelgen);   // Add misbehaved levelgen to the kill list
+   bool loadLevel(const string &fileName);               // Load a level
+   void runLevelGenScript(const string &scriptName);     // Run any levelgens specified by the level or in the INI
+   void deleteLevelGen(LuaLevelGenerator *levelgen);     // Add misbehaved levelgen to the kill list
 
 
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);
@@ -178,6 +178,8 @@ string getLastLevelLoadName();                     // For updating the UI
    void onConnectedToMaster();
 
    void startAllBots();                         // Loop through all our bots and run thier main() functions
+   void addBot(Robot *robot);
+   S32 getBotCount() const;
 
    StringTableEntry getLevelNameFromIndex(S32 indx);
    S32 getAbsoluteLevelIndex(S32 indx);         // Figures out the level index if the input is a relative index
@@ -188,7 +190,7 @@ string getLastLevelLoadName();                     // For updating the UI
    GameTypeId getCurrentLevelType();            // Return type of level currently in play
    StringTableEntry getCurrentLevelTypeName();  // Return name of type of level currently in play
 
-   bool isServer();
+   bool isServer() const;
    void idle(U32 timeDelta);
    bool isReadyToShutdown(U32 timeDelta);
    void gameEnded();

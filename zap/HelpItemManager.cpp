@@ -119,7 +119,7 @@ void HelpItemManager::reset()
 }
 
 
-void HelpItemManager::idle(U32 timeDelta)
+void HelpItemManager::idle(U32 timeDelta, const ClientGame *game)
 {
    if(!mEnabled)
       return;
@@ -138,7 +138,7 @@ void HelpItemManager::idle(U32 timeDelta)
 
    // Check if we can move an item from the queue to the active list
    if(mPacedTimer.getCurrent() == 0 && mFloodControl.getCurrent() == 0)
-      moveItemFromQueueToActiveList();
+      moveItemFromQueueToActiveList(game);
       
    for(S32 i = 0; i < mHelpTimer.size(); i++)
       if(mHelpTimer[i].update(timeDelta))
@@ -160,18 +160,47 @@ void HelpItemManager::idle(U32 timeDelta)
 }
 
 
-void HelpItemManager::moveItemFromQueueToActiveList()
+void HelpItemManager::moveItemFromQueueToActiveList(const ClientGame *game)
 {
    TNLAssert(mPacedTimer.getCurrent() == 0 && mFloodControl.getCurrent() == 0, "Expected timers to be clear!");
+   S32 itemToShow = 0;
 
-   Vector<WeightedHelpItem> *items;
-   items = mHighPriorityQueuedItems.size() > 0 ? &mHighPriorityQueuedItems : &mLowPriorityQueuedItems;
+   Vector<WeightedHelpItem> *items = NULL;
+   
+   bool useHighPriorityQueue = true;
+
+   while(true)
+   {
+      items = useHighPriorityQueue ? &mHighPriorityQueuedItems : &mLowPriorityQueuedItems;
+
+      if(items->size() <= itemToShow)
+      {
+         if(useHighPriorityQueue)      // High priority queue exhausted; switch to low priority queue
+         {
+            itemToShow = 0;
+            useHighPriorityQueue = false;
+            continue;
+         }
+         else                          // Low priority queue exhausted; nothing to show... go home
+         {
+            mPacedTimer.reset();       // Set this just so we don't keep hammering this function all day
+            return;
+         }
+      }
   
-   if(items->size() == 0)
-      return;
+      // Handle special case -- want to suppress, but not delete, this item if there are bots in the game
+      if(items->get(itemToShow).helpItem == AddBotsItem && game->getBotCount() > 0)
+      {
+         itemToShow += 1;
+         continue;
+      }
 
-   HelpItem queuedMessage = items->get(0).helpItem;
-   items->erase(0);
+      break;      // Exit our loop... we have our item list (items) and our itemToShow
+   }
+
+
+   HelpItem queuedMessage = items->get(itemToShow).helpItem;
+   items->erase(itemToShow);
 
    addInlineHelpItem(queuedMessage, true);
    mPacedTimer.reset();
@@ -381,6 +410,8 @@ void HelpItemManager::renderMessages(const ClientGame *game, S32 yPos) const
 {
    if(!mEnabled)
       return;
+
+   logprintf("%d",game->getBotCount());  //{P{P
 
 #ifdef TNL_DEBUG
    // This bit is for displaying our help messages one-by-one so we can see how they look on-screen, cycle with CTRL+H

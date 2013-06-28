@@ -186,7 +186,10 @@ void GameUserInterface::onActivate()
    mHelpItemManager.addInlineHelpItem(GameModesItem);          // Use F2 to see current mission
    mHelpItemManager.addInlineHelpItem(GameTypeAndTimer);       // Point out clock and score in LR
    mHelpItemManager.addInlineHelpItem(EnergyGaugeItem);        // Show user the energy gauge
-   
+
+   if(getGame()->getBotCount() == 0)
+      mHelpItemManager.addInlineHelpItem(AddBotsItem);         // Add some bots?
+  
    mHelperManager.reset();
 
    for(S32 i = 0; i < ShipModuleCount; i++)
@@ -310,7 +313,7 @@ void GameUserInterface::idle(U32 timeDelta)
 
    mFxManager.idle(timeDelta);      // Processes sparks and teleporter effects
 
-   mHelpItemManager.idle(timeDelta);
+   mHelpItemManager.idle(timeDelta, getGame());
 
    // Update mShipPos... track this so that we can keep a fix on the ship location even if it subsequently dies
    Ship *ship = getGame()->getLocalPlayerShip();

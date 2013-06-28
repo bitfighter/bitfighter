@@ -1102,6 +1102,18 @@ void ServerGame::startAllBots()
 }
 
 
+void ServerGame::addBot(Robot *robot)
+{
+   mRobots.push_back(robot);  
+}
+
+
+S32 ServerGame::getBotCount() const
+{
+   return mRobots.size();
+}
+
+
 U32 ServerGame::getMaxPlayers() const
 {
    return mSettings->getMaxPlayers();
@@ -1139,7 +1151,7 @@ bool ServerGame::isReadyToShutdown(U32 timeDelta)
 }
 
 
-bool ServerGame::isServer()
+bool ServerGame::isServer() const
 {
    return true;
 }
