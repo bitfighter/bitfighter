@@ -3874,7 +3874,11 @@ void EditorUserInterface::onMouseClicked_left()
             break;
 
          case DOCKMODE_PLUGINS:
-            runPlugin(getGame()->getSettings()->getFolderManager(), mPluginInfos[findHitPlugin()].fileName, Vector<string>());
+            S32 hitPlugin = findHitPlugin();
+            if(hitPlugin >= 0 && hitPlugin < mPluginInfos.size())
+            {
+               runPlugin(getGame()->getSettings()->getFolderManager(), mPluginInfos[hitPlugin].fileName, Vector<string>());
+            }
             break;
       }
    }

@@ -78,7 +78,7 @@ HelpItemManager::HelpItemManager(GameSettings *settings)
 
    mGameSettings = settings;
 
-   mEnabled = true;
+   mEnabled = settings->getShowingInGameHelp();
 
 #ifdef TNL_DEBUG
    mTestingCtr = -1;

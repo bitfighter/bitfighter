@@ -987,6 +987,19 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cCreditEnergy, (RangedU32<0, Ship::EnergyMax
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetFastRechargeTime, (U32 time), (time), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+{
+   U32 interval = getClientGame()->getGameType()->getTimer()->getCurrent() - time;
+   Ship *ship = static_cast<Ship *>(getControlObject());
+   if(ship)
+   {
+      ship->resetFastRecharge();
+      // manually set the time remaining, but keep the same period
+      ship->mFastRechargeTimer.reset(interval, ship->mFastRechargeTimer.getPeriod());
+   }
+}
+
+
 // Client has changed his loadout configuration.  This gets run on the server as soon as the loadout is entered.
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLoadout, (Vector<U8> loadout), (loadout), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
