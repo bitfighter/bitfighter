@@ -56,6 +56,15 @@ Vector<ClientGame *> gClientGames;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Create an array of help items related to item types -- only good when there is a strict 1-to-1 correspondence (such as for Teleporter).
+// Not used when there are multiple help items for a particular type (such as Mines). 
+static const HelpItem helpItemsForObjects[] = {
+#define TYPE_NUMBER(a, b, c, d, helpItem) helpItem,
+   TYPE_NUMBER_TABLE
+#undef TYPE_NUMBER
+};
+
+
 // Constructor
 ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Game(bindAddress, settings)
 {
@@ -500,6 +509,12 @@ bool ClientGame::isServer() const
 }
 
 
+bool hasRelatedHelpItem(U8 x)
+{
+   return helpItemsForObjects[x] != UnknownHelpItem;
+}
+
+
 U32 prevTimeDelta = 0;
 
 void ClientGame::idle(U32 timeDelta)
@@ -572,25 +587,16 @@ void ClientGame::idle(U32 timeDelta)
 
 
       // Check to see if there are any items near the ship we need to display help for
-      bool mShowingHelp = true;     // TODO: Set elsewhere
-      if(mShowingHelp && localPlayerShip != NULL)
+      if(getUIManager()->isShowingInGameHelp() && localPlayerShip != NULL)
       {
          static const S32 HelpSearchRadius = 200;
          Rect searchRect = Rect(localPlayerShip->getPos(), HelpSearchRadius);
          fillVector.clear();
-         mGameObjDatabase->findObjects(RepairItemTypeNumber,   fillVector, searchRect);
-         mGameObjDatabase->findObjects(TestItemTypeNumber,     fillVector, searchRect);
-         mGameObjDatabase->findObjects(ResourceItemTypeNumber, fillVector, searchRect);
-      }
+         mGameObjDatabase->findObjects((TestFunc)hasRelatedHelpItem, fillVector, searchRect);
 
-      for(S32 i = 0; i < fillVector.size(); i++)
-      {
-         if(fillVector[i]->getObjectTypeNumber() == RepairItemTypeNumber)
-            addInlineHelpItem(RepairItemSpottedItem);
-         else if(fillVector[i]->getObjectTypeNumber() == TestItemTypeNumber)
-            addInlineHelpItem(TestItemSpottedItem);
-         else if(fillVector[i]->getObjectTypeNumber() == ResourceItemTypeNumber)
-            addInlineHelpItem(ResourceItemSpottedItem);
+         if(getUIManager()->isShowingInGameHelp())
+            for(S32 i = 0; i < fillVector.size(); i++)
+               addInlineHelpItem(helpItemsForObjects[fillVector[i]->getObjectTypeNumber()]);
       }
    }
 

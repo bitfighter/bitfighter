@@ -505,6 +505,12 @@ void GameUserInterface::setShowingInGameHelp(bool showing)
 }
 
 
+bool GameUserInterface::isShowingInGameHelp() const
+{
+   return mHelpItemManager.isEnabled();
+}
+
+
 void GameUserInterface::resetInGameHelpMessages()
 {
    mHelpItemManager.resetInGameHelpMessages();

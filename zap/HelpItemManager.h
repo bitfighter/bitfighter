@@ -120,15 +120,14 @@ using namespace TNL;
 using namespace std;
 
 namespace Zap { 
-   
 
    enum HelpItem {
 #define HELP_TABLE_ITEM(value, b, c, d, e) value,
-   HELP_ITEM_TABLE
+      HELP_ITEM_TABLE
 #undef HELP_TABLE_ITEM
-   HelpItemCount,
-   UnknownHelpItem
-};
+      HelpItemCount,
+      UnknownHelpItem
+   };
 
 
 class InputCodeManager;
@@ -221,7 +220,7 @@ public:
    void removeInlineHelpItem(HelpItem item, U8 weight = 0xFF);
 
    void setEnabled(bool enabled);
-   bool isEnabled();
+   bool isEnabled() const;
 
    void clearAlreadySeenList();
    void saveAlreadySeenList();

@@ -631,7 +631,7 @@ void HelpItemManager::setEnabled(bool isEnabled)
 }
 
 
-bool HelpItemManager::isEnabled()
+bool HelpItemManager::isEnabled() const
 {
    return mEnabled;
 }

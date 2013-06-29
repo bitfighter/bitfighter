@@ -227,6 +227,7 @@ public:
    
    void addInlineHelpItem(HelpItem item);
    void removeInlineHelpItem(HelpItem item);
+   bool isShowingInGameHelp();
 
    void onChatMessageReceived(const Color &msgColor, const char *format, ...);
    void gotAnnouncement(const string &announcement);

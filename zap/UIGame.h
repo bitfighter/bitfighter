@@ -336,6 +336,7 @@ public:
    void addInlineHelpItem(HelpItem item);
    void removeInlineHelpItem(HelpItem item);
 
+   bool isShowingInGameHelp() const;
    void setShowingInGameHelp(bool showing);
    void resetInGameHelpMessages();
 
