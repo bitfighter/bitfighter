@@ -472,7 +472,7 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
    getConnection()->s2cCreditEnergy(energyCost);
    getConnection()->s2cSetFastRechargeTime(gameType->getTimer()->getCurrent() - ship->mFastRechargeTimer.getCurrent());
 
-   // And depart quietly
+   // Depart quietly
    return false;
 }
 
