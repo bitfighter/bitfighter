@@ -877,11 +877,11 @@ S32 LuaScriptRunner::findFile(lua_State *L)
 
 
 /**
-  * @luafunc readFromFile(filename)
+  * @luafunc readFromFile(string filename)
   * @brief   Reads in a file from our sandboxed IO directory
   * @descr   Reads an entire file from the filesystem into a string
-  * @param   \str filename - the file to read
-  * @return  \str contents of the file as a string
+  * @param   filename - the file to read
+  * @return  contents of the file as a string
   */
 S32 LuaScriptRunner::readFromFile(lua_State *L)
 {
@@ -899,12 +899,12 @@ S32 LuaScriptRunner::readFromFile(lua_State *L)
 
 
 /**
-  * @luafunc writeToFile(filename, contents, append)
+  * @luafunc writeToFile(string filename, string contents, bool append)
   * @brief   Write or append to a file on the filesystem
   * @descr   This is in a sandboxed environment and will only allow writing to a specific directory
-  * @param   \str filename - the file to read
-  * @param   \str contents - the contents to save to the file
-  * @param   \bool append (optional) - if true, append to the file instead of creating anew
+  * @param   filename - the file to read
+  * @param   contents - the contents to save to the file
+  * @param   append (optional) - if true, append to the file instead of creating anew
   */
 S32 LuaScriptRunner::writeToFile(lua_State *L)
 {
