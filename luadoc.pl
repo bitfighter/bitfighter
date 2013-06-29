@@ -280,7 +280,9 @@ foreach my $file (@files) {
 
          # Skip blank lines, or those that look like they are starting with a comment
          unless( $line =~ m|^\s*$| or $line =~ m|^\s*//| or $line =~ m|\s*/\*| ) {
-            my @words = split(/\s*,\s*/, $line);   # Line looks like this:  WEAPON_ITEM(WeaponTriple, "Triple", "Triple",    ...
+            $line =~ m/[^(]+\((.+)\)/;
+            my $string = $1;
+            my @words = $string =~ m/("[^"]+"|[^,]+)(?:,\s*)?/g;
 
             # Skip items marked as not to be shared with Lua... see #define TYPE_NUMBER_TABLE for example
             next if($enumIgnoreColumn != -1 && $words[$enumIgnoreColumn] eq "false");     
@@ -301,7 +303,7 @@ foreach my $file (@files) {
 
             # next unless $enumval;      # Skip empty enumvals... should never happen, but does
 
-            push(@enums, " * * \%" . $enumName . ".\%" . $enumval . " \%" . $enumDescr."<br>\n");    # Produces:  * * %Weapon.Triple  Triple
+            push(@enums, " * * \%" . $enumName . ".\%" . $enumval . " <br>\n `" . $enumDescr."` <br>\n");    # Produces:  * * %Weapon.Triple  Triple
             # no next here, always want to do the termination check below
          }
 

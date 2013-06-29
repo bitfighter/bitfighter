@@ -1095,7 +1095,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
    // Event handler events -- not sure if we need this one
    add_enum_to_lua(L, "Event",
-   #  define EVENT(value, luaEnumName, c) luaEnumName, true, EventManager::value,
+   #  define EVENT(value, luaEnumName, c, d) luaEnumName, true, EventManager::value,
          EVENT_TABLE
    #  undef EVENT
       (char*)NULL);

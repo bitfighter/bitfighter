@@ -48,31 +48,31 @@ struct Subscription;
 class EventManager
 {
 /**
- * @luaenum Event(1,1)
+ * @luaenum Event(1,3)
  * The Event enum represents different events that the game fires that scripts might want to handle.
  */
 
 // See http://stackoverflow.com/questions/6635851/real-world-use-of-x-macros
-//          Enum                 Name               Lua event handler 
+//          Enum                 Name                 Lua event handler      Lua event handler signature (documentation only)
 #define EVENT_TABLE \
-   EVENT(TickEvent,              "Tick",              "onTick"             ) \
-   EVENT(ShipSpawnedEvent,       "ShipSpawned",       "onShipSpawned"      ) \
-   EVENT(ShipKilledEvent,        "ShipKilled",        "onShipKilled"       ) \
-   EVENT(PlayerJoinedEvent,      "PlayerJoined",      "onPlayerJoined"     ) \
-   EVENT(PlayerLeftEvent,        "PlayerLeft",        "onPlayerLeft"       ) \
-   EVENT(PlayerTeamChangedEvent, "PlayerTeamChanged", "onPlayerTeamChanged") \
-   EVENT(MsgReceivedEvent,       "MsgReceived",       "onMsgReceived"      ) \
-   EVENT(NexusOpenedEvent,       "NexusOpened",       "onNexusOpened"      ) \
-   EVENT(NexusClosedEvent,       "NexusClosed",       "onNexusClosed"      ) \
-   EVENT(ShipEnteredZoneEvent,   "ShipEnteredZone",   "onShipEnteredZone"  ) \
-   EVENT(ShipLeftZoneEvent,      "ShipLeftZone",      "onShipLeftZone"     ) \
-   EVENT(ScoreChangedEvent,      "ScoreChanged",      "onScoreChanged"     ) \
+   EVENT(TickEvent,              "Tick",              "onTick",              "onTick()") \
+   EVENT(ShipSpawnedEvent,       "ShipSpawned",       "onShipSpawned",       "onShipSpawned(Ship ship)") \
+   EVENT(ShipKilledEvent,        "ShipKilled",        "onShipKilled",        "onShipKilled(Ship ship)") \
+   EVENT(PlayerJoinedEvent,      "PlayerJoined",      "onPlayerJoined",      "onPlayerJoined(PlayerInfo player)") \
+   EVENT(PlayerLeftEvent,        "PlayerLeft",        "onPlayerLeft",        "onPlayerLeft(PlayerInfo player)") \
+   EVENT(PlayerTeamChangedEvent, "PlayerTeamChanged", "onPlayerTeamChanged", "onPlayerTeamChanged(PlayerInfo player)") \
+   EVENT(MsgReceivedEvent,       "MsgReceived",       "onMsgReceived",       "onMsgReceived(string message, PlayerInfo sender, bool messageIsGlobal)") \
+   EVENT(NexusOpenedEvent,       "NexusOpened",       "onNexusOpened",       "onNexusOpened()") \
+   EVENT(NexusClosedEvent,       "NexusClosed",       "onNexusClosed",       "onNexusClosed()") \
+   EVENT(ShipEnteredZoneEvent,   "ShipEnteredZone",   "onShipEnteredZone",   "onShipEnteredZone(Ship ship, Zone zone)") \
+   EVENT(ShipLeftZoneEvent,      "ShipLeftZone",      "onShipLeftZone",      "onShipLeftZone(Ship ship, Zone zone)") \
+   EVENT(ScoreChangedEvent,      "ScoreChanged",      "onScoreChanged",      "onScoreChanged(num scoreChange, num teamIndex, PlayerInfo player)") \
 
 public:
 
 // Define an enum from the first values in EVENT_TABLE
 enum EventType {
-#define EVENT(a, b, c) a,
+#define EVENT(a, b, c, d) a,
     EVENT_TABLE
 #undef EVENT
     EventTypes

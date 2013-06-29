@@ -68,7 +68,7 @@ struct EventDef {
 static const EventDef eventDefs[] = {
    // The following expands to a series of lines like this, based on values in EVENT_TABLE
    //   { "Tick",  "onTick"  },
-#define EVENT(a, b, c) { b, c },
+#define EVENT(a, b, c, d) { b, c },
    EVENT_TABLE
 #undef EVENT
 };
