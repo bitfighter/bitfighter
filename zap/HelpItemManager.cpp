@@ -136,10 +136,14 @@ void HelpItemManager::idle(U32 timeDelta, const ClientGame *game)
    mTestingTimer.update(timeDelta);
 #endif
 
-   // Check if we can move an item from the queue to the active list
-   if(mPacedTimer.getCurrent() == 0 && mFloodControl.getCurrent() == 0)
+   // Check if we can move an item from the queue to the active list -- but don't do it in the final
+   // 20 seconds of a game!
+   if(mPacedTimer.getCurrent() == 0 && mFloodControl.getCurrent() == 0 && 
+            game->getRemainingGameTime() > 20)
+
       moveItemFromQueueToActiveList(game);
       
+   // Expire displayed items
    for(S32 i = 0; i < mHelpTimer.size(); i++)
       if(mHelpTimer[i].update(timeDelta))
       {

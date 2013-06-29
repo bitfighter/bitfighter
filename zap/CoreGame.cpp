@@ -340,9 +340,7 @@ void CoreItem::renderItem(const Point &pos)
    if(!mHasExploded)
    {
       GameType *gameType = getGame()->getGameType();
-
       S32 time = gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset();
-
       renderCore(pos, getColor(), time, getPanelGeom(), mPanelHealth, mStartingPanelHealth);
    }
 #endif

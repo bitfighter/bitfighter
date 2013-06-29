@@ -159,7 +159,7 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, VoteType type, S32 number)
       if(getGameType()->isGameOver())
          return true;   // Don't allow trying to start votes during game over, except level changing.
 
-      if((U32) getGameType()->getRemainingGameTimeInMs() - 1 < VoteTimer)  // handles unlimited GameType time, by forcing the U32 range.
+      if((U32)getGameType()->getRemainingGameTimeInMs() - 1 < VoteTimer)  // handles unlimited GameType time, by forcing the U32 range.
       {
          conn->s2cDisplayErrorMessage("Not enough time");
          return true;
@@ -761,7 +761,7 @@ void ServerGame::sendLevelStatsToMaster()
                                 hasLevelGen, 
                                 (U8)teamCountU8, 
                                 mGameType->getWinningScore(), 
-                                mGameType->getRemainingGameTime());
+                                getRemainingGameTime());
 
    mSendLevelInfoDelayCount.reset(6000);  // set time left to send
 

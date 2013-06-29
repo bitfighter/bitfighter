@@ -1535,6 +1535,13 @@ void Game::emitTextEffect(const string &text, const Color &color, const Point &p
    TNLAssert(false, "Not implemented for this class!");
 }
 
+
+// In seconds
+S32 Game::getRemainingGameTime() const
+{
+   return mGameType->getRemainingGameTime();
+}
+
 };
 
 

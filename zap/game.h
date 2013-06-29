@@ -473,6 +473,7 @@ public:
    void sendTeamChatFromController(const StringPtr &message, S32 teamIndex);
    void sendPrivateChatFromController(const StringPtr &message, const StringPtr &playerName);
    void sendAnnouncementFromController(const StringPtr &message);
+   S32 getRemainingGameTime() const;        // In seconds
 
    void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName);
    bool objectCanDamageObject(BfObject *damager, BfObject *victim);
