@@ -186,6 +186,8 @@ void GameUserInterface::onActivate()
    mHelpItemManager.addInlineHelpItem(GameModesItem);          // Use F2 to see current mission
    mHelpItemManager.addInlineHelpItem(GameTypeAndTimer);       // Point out clock and score in LR
    mHelpItemManager.addInlineHelpItem(EnergyGaugeItem);        // Show user the energy gauge
+   mHelpItemManager.addInlineHelpItem(TryCloakItem);           // Recommend cloaking
+   
 
    if(getGame()->getBotCount() == 0)
       mHelpItemManager.addInlineHelpItem(AddBotsItem);         // Add some bots?
@@ -951,6 +953,9 @@ void GameUserInterface::activateModule(S32 index)
 
    // Player figured out how to activate their modules... skip related help
    mHelpItemManager.removeInlineHelpItem(ControlsModulesItem);           
+
+   if(getGame()->getLocalPlayerShip()->getModule(index) == ModuleCloak)
+      mHelpItemManager.removeInlineHelpItem(TryCloakItem);     // Already tried it!
 }
 
 
@@ -967,6 +972,7 @@ void GameUserInterface::setActiveWeapon(U32 weaponIndex)
 }
 
 
+// Used?
 void GameUserInterface::setModulePrimary(ShipModule module, bool isActive)
 {
    mLoadoutIndicator.setModulePrimary(module, isActive);
