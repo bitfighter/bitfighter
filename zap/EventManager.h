@@ -57,18 +57,18 @@ class EventManager
 // See http://stackoverflow.com/questions/6635851/real-world-use-of-x-macros
 //          Enum                 Name                 Lua event handler      Lua event handler signature (documentation only)
 #define EVENT_TABLE \
-   EVENT(TickEvent,              "Tick",              "onTick",              "onTick()") \
-   EVENT(ShipSpawnedEvent,       "ShipSpawned",       "onShipSpawned",       "onShipSpawned(Ship ship)") \
-   EVENT(ShipKilledEvent,        "ShipKilled",        "onShipKilled",        "onShipKilled(Ship ship)") \
-   EVENT(PlayerJoinedEvent,      "PlayerJoined",      "onPlayerJoined",      "onPlayerJoined(PlayerInfo player)") \
-   EVENT(PlayerLeftEvent,        "PlayerLeft",        "onPlayerLeft",        "onPlayerLeft(PlayerInfo player)") \
-   EVENT(PlayerTeamChangedEvent, "PlayerTeamChanged", "onPlayerTeamChanged", "onPlayerTeamChanged(PlayerInfo player)") \
-   EVENT(MsgReceivedEvent,       "MsgReceived",       "onMsgReceived",       "onMsgReceived(string message, PlayerInfo sender, bool messageIsGlobal)") \
-   EVENT(NexusOpenedEvent,       "NexusOpened",       "onNexusOpened",       "onNexusOpened()") \
-   EVENT(NexusClosedEvent,       "NexusClosed",       "onNexusClosed",       "onNexusClosed()") \
-   EVENT(ShipEnteredZoneEvent,   "ShipEnteredZone",   "onShipEnteredZone",   "onShipEnteredZone(Ship ship, Zone zone)") \
-   EVENT(ShipLeftZoneEvent,      "ShipLeftZone",      "onShipLeftZone",      "onShipLeftZone(Ship ship, Zone zone)") \
-   EVENT(ScoreChangedEvent,      "ScoreChanged",      "onScoreChanged",      "onScoreChanged(num scoreChange, num teamIndex, PlayerInfo player)") \
+   EVENT(TickEvent,              "Tick",              "onTick",              "onTick()"                                                               ) \
+   EVENT(ShipSpawnedEvent,       "ShipSpawned",       "onShipSpawned",       "onShipSpawned(Ship ship)"                                               ) \
+   EVENT(ShipKilledEvent,        "ShipKilled",        "onShipKilled",        "onShipKilled(Ship ship)"                                                ) \
+   EVENT(PlayerJoinedEvent,      "PlayerJoined",      "onPlayerJoined",      "onPlayerJoined(PlayerInfo player)"                                      ) \
+   EVENT(PlayerLeftEvent,        "PlayerLeft",        "onPlayerLeft",        "onPlayerLeft(PlayerInfo player)"                                        ) \
+   EVENT(PlayerTeamChangedEvent, "PlayerTeamChanged", "onPlayerTeamChanged", "onPlayerTeamChanged(PlayerInfo player)"                                 ) \
+   EVENT(MsgReceivedEvent,       "MsgReceived",       "onMsgReceived",       "onMsgReceived(string message, PlayerInfo sender, bool messageIsGlobal)" ) \
+   EVENT(NexusOpenedEvent,       "NexusOpened",       "onNexusOpened",       "onNexusOpened()"                                                        ) \
+   EVENT(NexusClosedEvent,       "NexusClosed",       "onNexusClosed",       "onNexusClosed()"                                                        ) \
+   EVENT(ShipEnteredZoneEvent,   "ShipEnteredZone",   "onShipEnteredZone",   "onShipEnteredZone(Ship ship, Zone zone)"                                ) \
+   EVENT(ShipLeftZoneEvent,      "ShipLeftZone",      "onShipLeftZone",      "onShipLeftZone(Ship ship, Zone zone)"                                   ) \
+   EVENT(ScoreChangedEvent,      "ScoreChanged",      "onScoreChanged",      "onScoreChanged(num scoreChange, num teamIndex, PlayerInfo player)"      ) \
 
 public:
 
