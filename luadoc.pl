@@ -164,7 +164,6 @@ foreach my $file (@files) {
          if( $line =~ m|\@luafunc\s+(.*)$| ) {     # Line looks like:  * @luafunc  retval BfObject::getClassID(p1, p2); retval and p1/p2 are optional
             # In C++ code, we use "::" to separate classes from functions (class::func); in Lua, we use "." (class.func).
             my $sep = ($file =~ m|\.lua$|) ? "[.:]" : "::";
-	    print("$file\n");
 
             #                          $1          $2         $3     $4     (warning: $1 grabs extra spaces, trimmed below)
             $line =~ m|.*?\@luafunc\s+(\w+\s+)?(?:(\w+)$sep)?(.+?)\((.*)\)|;    # Grab retval, class, method, and args from $line
