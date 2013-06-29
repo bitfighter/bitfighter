@@ -989,6 +989,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cCreditEnergy, (RangedU32<0, Ship::EnergyMax
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetFastRechargeTime, (U32 time), (time), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    U32 interval = getClientGame()->getGameType()->getTimer()->getCurrent() - time;
    Ship *ship = static_cast<Ship *>(getControlObject());
    if(ship)
@@ -997,6 +998,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetFastRechargeTime, (U32 time), (time), Ne
       // manually set the time remaining, but keep the same period
       ship->mFastRechargeTimer.reset(interval, ship->mFastRechargeTimer.getPeriod());
    }
+#endif
 }
 
 
