@@ -54,6 +54,7 @@ foreach my $file (@files) {
    my $enumDescr;
 
    my @methods = ();
+   my @globalfunctions = ();
    my @comments = ();
    my %classes = ();        # Will be a hash of arrays
 
@@ -164,20 +165,20 @@ foreach my $file (@files) {
             # In C++ code, we use "::" to separate classes from functions (class::func); in Lua, we use "." (class.func).
             my $sep = ($file =~ m|\.lua$|) ? "[.:]" : "::";
 
-            #               $1      $2      $3    $4     (warning: $1 grabs extra spaces, trimmed below)
-            $line =~ m|\s(\w+\s+)?(\w+)$sep(.+?)\((.*)\)|;    # Grab retval, class, method, and args from $line
+            #                          $1          $2         $3     $4     (warning: $1 grabs extra spaces, trimmed below)
+            $line =~ m|.*?\@luafunc\s+(\w+\s+)?(?:(\w+)$sep)?(.+?)\((.*)\)|;    # Grab retval, class, method, and args from $line
 
             my $retval = $1 eq "" ? "void" : $1;                              # Retval is optional, use void if omitted            
             my $voidlessRetval = $1;
-            my $class  = $2  || die "Couldn't get class name from $line\n";   # Must have a class
-            my $method = $3  || die "Couldn't get method name from $line\n";  # Must have a method
+            my $class  = $2; # If no class is given the function is assumed to be global
+            my $method = $3 || die "Couldn't get method name from $line\n";  # Must have a method
             my $args   = $4;                                                  # Args are optional
 
             $retval =~ s|\s+$||;     # Trim any trailing spaces from $retval
 
             # Use voidlessRetval to avoid having "void" show up where we'd rather omit the return type altogether
-            push(@comments, " \\fn $voidlessRetval $class" . "::" . "$method($args)\n");
-
+            my $prefix = $class || "global";
+            push(@comments, " \\fn $voidlessRetval $prefix" . "::" . "$method($args)\n");
 
             # Find the original class definition and delete it (if it still exists)
             my $index = first { ${$classes{$class}}[$_] eq "void $method() { }\n" } 0..$#{$classes{$class}};
@@ -185,11 +186,16 @@ foreach my $file (@files) {
                splice(@{$classes{$class}}, $index, 1);       # Delete element at $index
             }
 
-
             chomp($line);     # Remove trailing \n
 
             # Add our new sig to the list
-            push(@{$classes{$class}}, "$retval $method($args) { /* From '$line' */ }\n");
+            if($class) {
+               push(@{$classes{$class}}, "$retval $method($args) { /* From '$line' */ }\n");
+            } else {
+               push(@globalfunctions, "$retval $method($args) { /* From '$line' */ }\n");
+            }
+
+            $writeFile = 1;
 
             $encounteredDoxygenCmd = 1;
 
@@ -274,7 +280,9 @@ foreach my $file (@files) {
 
          # Skip blank lines, or those that look like they are starting with a comment
          unless( $line =~ m|^\s*$| or $line =~ m|^\s*//| or $line =~ m|\s*/\*| ) {
-            my @words = split(/\s*,\s*/, $line);   # Line looks like this:  WEAPON_ITEM(WeaponTriple, "Triple", "Triple",    ...
+            $line =~ m/[^(]+\((.+)\)/;
+            my $string = $1;
+            my @words = $string =~ m/("[^"]+"|[^,]+)(?:,\s*)?/g;
 
             # Skip items marked as not to be shared with Lua... see #define TYPE_NUMBER_TABLE for example
             next if($enumIgnoreColumn != -1 && $words[$enumIgnoreColumn] eq "false");     
@@ -295,7 +303,7 @@ foreach my $file (@files) {
 
             # next unless $enumval;      # Skip empty enumvals... should never happen, but does
 
-            push(@enums, " * * \%" . $enumName . ".\%" . $enumval . " \%" . $enumDescr."<br>\n");    # Produces:  * * %Weapon.Triple  Triple
+            push(@enums, " * * \%" . $enumName . ".\%" . $enumval . " <br>\n `" . $enumDescr."` <br>\n");    # Produces:  * * %Weapon.Triple  Triple
             # no next here, always want to do the termination check below
          }
 
@@ -324,9 +332,18 @@ foreach my $file (@files) {
       print $OUT "// This file was generated automatically from the C++ source to feed doxygen.  It will be overwritten.\n\n\n";
 
       foreach my $key ( keys %classes ) {
-         print $OUT @{$classes{$key}};    # Main body of class
-         print $OUT "}; // $key\n";       # Close the class
+         if(@{$classes{$key}}) {
+            print $OUT @{$classes{$key}};    # Main body of class
+            print $OUT "}; // $key\n";       # Close the class
+         }
       }
+
+      print $OUT "namespace global {\n";
+      foreach ( @globalfunctions ) {
+         # print each global function declaration
+         print $OUT $_;
+      }
+      print $OUT "}\n";
 
       print $OUT @comments;
       

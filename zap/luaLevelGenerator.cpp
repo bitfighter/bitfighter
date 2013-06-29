@@ -199,10 +199,14 @@ S32 LuaLevelGenerator::lua_addWall(lua_State *L)
 }
 
 
+/**
+ * @luafunc LuaLevelGenerator::addItem(BfObject)
+ * @brief Add an Item to the game. Any Item constructed in a levelgen will not
+ * appear in the game world until this method is called on it.
+ */
 // Simply grabs parameters from the Lua stack, and passes them off to processLevelLoadLine().  Unfortunately,
 // this involves packing everything into an array of char strings, which is frightfully prone to programmer
 // error and buffer overflows and such...
-// TODO: Needs documentation
 S32 LuaLevelGenerator::lua_addItem(lua_State *L)
 {
    static const char *methodName = "LevelGenerator:addItem()";
@@ -252,11 +256,11 @@ S32 LuaLevelGenerator::lua_addItem(lua_State *L)
 
 
 /**
- * @luafunc    Levelgen::addLevelLine(levelLine)
+ * @luafunc    LuaLevelGenerator::addLevelLine(string levelLine)
  * @brief      Adds an object to the editor by passing a line from a level file.
  * @deprecated This method is deprecated and will be removed in the future.  As an alternative, construct a BfObject directly and 
  *             add it to the game using the addItem() method.
- * @param      levelLine - string containing the line of levelcode.
+ * @param      levelLine string containing the line of levelcode.
  */
 S32 LuaLevelGenerator::lua_addLevelLine(lua_State *L)
 {
@@ -269,9 +273,9 @@ S32 LuaLevelGenerator::lua_addLevelLine(lua_State *L)
 
 
 /**
- * @luafunc    Levelgen::setGameTime(timeInMinutes)
+ * @luafunc    LuaLevelGenerator::setGameTime(num timeInMinutes)
  * @brief      Sets the time remaining in the current game to the specified value
- * @param      num timeInMinutes - Time, in minutes, that the game should continue.  Can be fractional.
+ * @param      timeInMinutes Time, in minutes, that the game should continue.  Can be fractional.
  */
 S32 LuaLevelGenerator::lua_setGameTime(lua_State *L)
 {
@@ -284,11 +288,11 @@ S32 LuaLevelGenerator::lua_setGameTime(lua_State *L)
 
 
 /**
- * @luafunc Levelgen::pointCanSeePoint(point1, point2)
+ * @luafunc bool LuaLevelGenerator::pointCanSeePoint(point point1, point point2)
  * @brief   Returns true if the two specified points can see one another.
- * @param   \e point point1 - First point.
- * @param   \e point point2 - Second point.
- * @return  \e bool - True if objects have LOS from one to the other.
+ * @param   point1 First point.
+ * @param   point2 Second point.
+ * @return  `true` if objects have LOS from one to the other, `false` otherwise
  */
 S32 LuaLevelGenerator::lua_pointCanSeePoint(lua_State *L)
 {
@@ -302,13 +306,13 @@ S32 LuaLevelGenerator::lua_pointCanSeePoint(lua_State *L)
 
 
 /**
- * @luafunc    Levelgen::logprint(text)
+ * @luafunc    LuaLevelGenerator::logprint(string message)
  * @brief      Writes a line of text to the console and the system log.
  * @descr      Function can be called without Levelgen: prefix;  For example:
- *  \code
+ * @code
  *    logprint("Hello world!")
- *  \endcode
- * @param      \e string text - Message to write.
+ * @endcode
+ * @param      message Message to write.
  */
 S32 LuaLevelGenerator::lua_logprint(lua_State *L)
 {
@@ -321,7 +325,7 @@ S32 LuaLevelGenerator::lua_logprint(lua_State *L)
 
 
 /**
- * @luafunc    Levelgen::findObjectById(id)
+ * @luafunc    BfObject LuaLevelGenerator::findObjectById(num id)
  * @brief      Returns an object with the given id, or nil if none exists.
  * @descr      Finds an object with the specified user-assigned id.  If there are multiple objects with the same id (shouldn't happen, 
  *             but could, especially if the passed id is 0), this method will return the first object it finds with the given id.  
@@ -329,8 +333,8 @@ S32 LuaLevelGenerator::lua_logprint(lua_State *L)
  *
  * Note that ids can be assigned in the editor using the ! or # keys.
  *
- * @param      id - int id to search for.
- * @return     \e BfObject - Found object, or nil if no objects with the specified id could be found.
+ * @param      id id to search for.
+ * @return     The found BfObject, or `nil` if no objects with the specified id could be found.
  */
 S32 LuaLevelGenerator::lua_findObjectById(lua_State *L)
 {
@@ -341,7 +345,7 @@ S32 LuaLevelGenerator::lua_findObjectById(lua_State *L)
 
 
 /**
-  *   @luafunc Levelgen::findGlobalObjects(table, itemType, ...)
+  *   @luafunc table LuaLevelGenerator::findGlobalObjects(table results, ObjType objType, ...)
   *   @brief   Finds all items of the specified type anywhere on the level.
   *   @descr   Can specify multiple types.  The \e table argument is optional, but levelgens that call this function frequently will perform
   *            better if they provide a reusable table in which found objects can be stored.  By providing a table, you will avoid
@@ -349,18 +353,20 @@ S32 LuaLevelGenerator::lua_findObjectById(lua_State *L)
   *
   *   If a table is not provided, the function will create a table and return it on the stack.
   *
-  *   @param  table - (Optional) Reusable table into which results can be written.
-  *   @param  itemType - One or more itemTypes specifying what types of objects to find.
-  *   @return resultsTable - Will either be a reference back to the passed \e table, or a new table if one was not provided.
+  *   @param  results (Optional) Reusable table into which results can be written.
+  *   @param  objType One or more ObjTypes specifying what types of objects to find.
+  *   @return A reference back to the passed table, or a new table if one was not provided.
   *
-  *   @code items = { }     -- Reusable container for findGlobalObjects.  Because it is defined outside
-  *                         -- any functions, it will have global scope.
+  *   @code
+  *   items = { }     -- Reusable container for findGlobalObjects.  Because it is defined outside
+  *                   -- any functions, it will have global scope.
   *
-  *         function countObjects(objType, ...)                -- Pass one or more object types
-  *           table.clear(items)                               -- Remove any items in table from previous use
-  *           levelgen:findGlobalObjects(items, objType, ...)  -- Put all items of specified type(s) into items table
-  *           print(#items)                                    -- Print the number of items found to the console
-  *         end
+  *   function countObjects(objType, ...)                -- Pass one or more object types
+  *     table.clear(items)                               -- Remove any items in table from previous use
+  *     levelgen:findGlobalObjects(items, objType, ...)  -- Put all items of specified type(s) into items table
+  *     print(#items)                                    -- Print the number of items found to the console
+  *   end
+  *   @endcode
   */
 S32 LuaLevelGenerator::lua_findGlobalObjects(lua_State *L)
 {
@@ -371,10 +377,10 @@ S32 LuaLevelGenerator::lua_findGlobalObjects(lua_State *L)
 
 
 /**
- * @luafunc Levelgen::getGridSize()
+ * @luafunc num LuaLevelGenerator::getGridSize()
  * @brief   Returns current gridSize setting.
  * @descr   Note that non-default gridSizes are rare in modern level design.
- * @return  \e num - Current gridSize.
+ * @return  Current gridSize.
  */
 S32 LuaLevelGenerator::lua_getGridSize(lua_State *L)
 {
@@ -383,11 +389,11 @@ S32 LuaLevelGenerator::lua_getGridSize(lua_State *L)
 
 
 /**
- * @luafunc Levelgen::getMachineTime()
+ * @luafunc num LuaLevelGenerator::getMachineTime()
  * @brief   Returns current machine time as an integer.
  * @descr   Machine time is given in milliseconds.  This may be inaccurate because machine time is
  *          usually stored as a long instead of an integer
- * @return  \e num - Current gridSize.
+ * @return  Current machine time in milliseconds
  */
 S32 LuaLevelGenerator::lua_getMachineTime(lua_State *L)
 {
@@ -396,10 +402,10 @@ S32 LuaLevelGenerator::lua_getMachineTime(lua_State *L)
 
 
 /**
- * @luafunc Levelgen::getGameInfo()
+ * @luafunc GameInfo LuaLevelGenerator::getGameInfo()
  * @brief   Returns the GameInfo object.
  * @descr   GameInfo can be used to grab information about the currently running game, including the GameType
- * @return  \e GameInfo - The GameInfo object
+ * @return  The GameInfo object
  */
 S32 LuaLevelGenerator::lua_getGameInfo(lua_State *L)
 {
@@ -409,9 +415,9 @@ S32 LuaLevelGenerator::lua_getGameInfo(lua_State *L)
 
 
 /**
- * @luafunc Levelgen::getPlayerCount()
+ * @luafunc num LuaLevelGenerator::getPlayerCount()
  * @brief   Returns current number of players.
- * @return  \e int - Current number of players.
+ * @return  Current number of players.
  */
 S32 LuaLevelGenerator::lua_getPlayerCount(lua_State *L)
 {
@@ -420,9 +426,9 @@ S32 LuaLevelGenerator::lua_getPlayerCount(lua_State *L)
 
 
 /**
- * @luafunc Levelgen::globalMsg(message)
+ * @luafunc LuaLevelGenerator::globalMsg(string message)
  * @brief   Broadcast a message to all players.
- * @param   \e string message - Message to broadcast.
+ * @param   message Message to broadcast.
  */
 S32 LuaLevelGenerator::lua_globalMsg(lua_State *L)
 {
@@ -440,10 +446,10 @@ S32 LuaLevelGenerator::lua_globalMsg(lua_State *L)
 
 
 /**
- * @luafunc Levelgen::teamMsg(message)
+ * @luafunc LuaLevelGenerator::teamMsg(string message, num teamIndex)
  * @brief   Broadcast a message to players of a team.
- * @param   \e string message - Message to broadcast.
- * @param   \e int team index - Index of team to which to send a message.
+ * @param   message Message to broadcast.
+ * @param   teamIndex Index of team to which to send a message.
  */
 S32 LuaLevelGenerator::lua_teamMsg(lua_State *L)
 {
@@ -462,10 +468,10 @@ S32 LuaLevelGenerator::lua_teamMsg(lua_State *L)
 
 
 /**
- * @luafunc Levelgen::teamMsg(message)
+ * @luafunc LuaLevelGenerator::privateMsg(string message, string playerName)
  * @brief   Broadcast a private message to a player.
- * @param   \e string message - Message to broadcast.
- * @param   \e string player name - Name of player to which to send a message.
+ * @param   message Message to broadcast.
+ * @param   playerName Name of player to which to send a message.
  */
 S32 LuaLevelGenerator::lua_privateMsg(lua_State *L)
 {
@@ -483,9 +489,9 @@ S32 LuaLevelGenerator::lua_privateMsg(lua_State *L)
 
 
 /**
- * @luafunc Levelgen::announce(message)
+ * @luafunc LuaLevelGenerator::announce(string message)
  * @brief   Broadcast an announcement.
- * @param   \e string message - Message to broadcast.
+ * @param   message Message to broadcast.
  */
 S32 LuaLevelGenerator::lua_announce(lua_State *L)
 {
@@ -499,12 +505,20 @@ S32 LuaLevelGenerator::lua_announce(lua_State *L)
 }
 
 
+/**
+ * @luafunc LuaLevelGenerator::subscribe(Event event)
+ * @brief Manually subscribe to the specified Event
+ */
 S32 LuaLevelGenerator::lua_subscribe(lua_State *L)
 {
    return doSubscribe(L, LevelgenContext);
 }
 
 
+/**
+ * @luafunc LuaLevelGenerator::unsubscribe(Event event)
+ * @brief Manually unsubscribe to the specified Event
+ */
 S32 LuaLevelGenerator::lua_unsubscribe(lua_State *L)
 {
    return doUnsubscribe(L);
