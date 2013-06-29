@@ -52,6 +52,9 @@ class EventManager
  * The Event enum represents different events that the game fires that scripts might want to handle.  Below
  * are the signatures of methods you can implement to respond to these events.  Note that you will also have
  * to subscribe to the event to be notified of it.
+ *
+ * See the \e subscribe methods for \link Robot::subscribe bots\endlink and \link LuaLevelGenerator::subscribe levelGens \endlink, and the 
+ * \e Events section of the scripting overview page.
  */
 
 // See http://stackoverflow.com/questions/6635851/real-world-use-of-x-macros
