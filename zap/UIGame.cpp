@@ -490,6 +490,12 @@ void GameUserInterface::addInlineHelpItem(HelpItem item)
 }
 
 
+void GameUserInterface::addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam)
+{
+   mHelpItemManager.addInlineHelpItem(objectType, objectTeam, playerTeam);
+}
+
+
 void GameUserInterface::removeInlineHelpItem(HelpItem item)
 {
    mHelpItemManager.removeInlineHelpItem(item);

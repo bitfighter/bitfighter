@@ -52,18 +52,30 @@ namespace Zap {   namespace UI {
 static const S32 MAX_LINES = 8;     // Excluding sentinel item
 
 struct HelpItems {
-   U8 associatedItem;
+   U8 associatedObjectTypeNumber;
+   bool autoAdd;   
    HighlightItem::Whose whose;
    HelpItemManager::Priority priority;
    const char *helpMessages[MAX_LINES + 1];
 };
 
 
-static HelpItems helpItems[] = {
-#  define HELP_TABLE_ITEM(a, assItem, whose, priority, items) { assItem, HighlightItem::whose, HelpItemManager::priority, items},
+static const HelpItems helpItems[] = {
+#  define HELP_TABLE_ITEM(a, assItem, autoAdd, whose, priority, items) \
+             { assItem, autoAdd, HighlightItem::whose, HelpItemManager::priority, items},
       HELP_ITEM_TABLE
 #  undef HELP_TABLE_ITEM
 };
+
+// Provide very specific access to above structure (static method)
+// Only used for intializing hasHelpItemForObjects[] array in ClientGame
+U8 HelpItemManager::getAssociatedObjectType(HelpItem helpItem)
+{
+   if(helpItems[helpItem].autoAdd)
+      return helpItems[helpItem].associatedObjectTypeNumber;
+   else
+      return UnknownTypeNumber;
+}
 
 
 // Constructor
@@ -377,7 +389,7 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
 
 static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inputCodeManager, HelpItem helpItem, S32 yPos)
 {
-   const char **messages = helpItems[helpItem].helpMessages;
+   const char * const *messages = helpItems[helpItem].helpMessages;
 
    S32 lines = 0;
    S32 maxw = 0;
@@ -555,12 +567,72 @@ void HelpItemManager::setAlreadySeenString(const string &vals)
 }
 
 
+static inline bool isNeut(S32 objectTeam)                  { return objectTeam == TEAM_NEUTRAL; }
+static inline bool isHost(S32 objectTeam)                  { return objectTeam == TEAM_HOSTILE; }
+static inline bool isTeam(S32 objectTeam, S32 playerTeam)  { return objectTeam == playerTeam;   }
+static inline bool isEnemy(S32 objectTeam, S32 playerTeam) { return objectTeam >= 0 && objectTeam != playerTeam; }
+
+static bool checkWhose(HighlightItem::Whose whose, S32 objectTeam, S32 playerTeam)
+{
+   switch(whose)
+   {
+      case HighlightItem::Any:
+         return true;
+
+      case HighlightItem::Team:
+         return isTeam(objectTeam, playerTeam);
+
+      case HighlightItem::TorNeut:
+         return isTeam(objectTeam, playerTeam) || isNeut(objectTeam);
+
+      case HighlightItem::Enemy:
+         return isEnemy(objectTeam, playerTeam);
+
+      case HighlightItem::Hostile:
+         return isHost(objectTeam);
+
+      case HighlightItem::EorHostile:
+         return isEnemy(objectTeam, playerTeam) || isHost(objectTeam);
+
+      case HighlightItem::EorHorN:
+         return isEnemy(objectTeam, playerTeam) || isHost(objectTeam) || isNeut(objectTeam);
+
+      case HighlightItem::Neutral:
+         return isNeut(objectTeam);
+
+      default:
+         TNLAssert(false, "Unknown value of whose!");
+   }
+}
+
+
+// This signature gets used when the player encounters an object for which we have an associated help item...
+void HelpItemManager::addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam)
+{
+   // Nothing to do if we are disabled
+   if(!mEnabled)
+      return;
+
+   // Figure out which help item to show for this object
+   for(S32 i = 0; i < HelpItemCount; i++)
+      if(helpItems[i].associatedObjectTypeNumber == objectType && checkWhose(helpItems[i].whose, objectTeam, playerTeam))
+      {
+         addInlineHelpItem(HelpItem(i));
+         return;
+      }
+}
+
+
 // Called whenever some item somewhere thinks it would be a good time to add a help message.
 // Items added here are immediately displayed.
 void HelpItemManager::addInlineHelpItem(HelpItem item, bool messageCameFromQueue)
 {
-   // Nothing to do if we are disabled, and only display messages once
-   if(!mEnabled || mAlreadySeen[item])
+   // Nothing to do if we are disabled
+   if(!mEnabled)
+      return;
+
+   // Only display messages once
+   if(mAlreadySeen[item])
       return;
 
    // If the item has a priority of paced, we should queue the item rather than display it immediately (unless,
@@ -611,7 +683,7 @@ void HelpItemManager::buildItemsToHighlightList()
 
    for(S32 i = 0; i < mHelpItems.size(); i++)
    {
-      U8 itemType = helpItems[mHelpItems[i]].associatedItem;
+      U8 itemType = helpItems[mHelpItems[i]].associatedObjectTypeNumber;
 
       if(itemType != UnknownTypeNumber)
       {

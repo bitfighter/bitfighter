@@ -334,6 +334,8 @@ public:
    void toggleShowDebugBots();
 
    void addInlineHelpItem(HelpItem item);
+   void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);
+
    void removeInlineHelpItem(HelpItem item);
 
    bool isShowingInGameHelp() const;

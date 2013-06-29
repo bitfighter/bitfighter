@@ -58,11 +58,34 @@ Vector<ClientGame *> gClientGames;
 
 // Create an array of help items related to item types -- only good when there is a strict 1-to-1 correspondence (such as for Teleporter).
 // Not used when there are multiple help items for a particular type (such as Mines). 
-static const HelpItem helpItemsForObjects[] = {
-#define TYPE_NUMBER(a, b, c, d, helpItem) helpItem,
-   TYPE_NUMBER_TABLE
-#undef TYPE_NUMBER
-};
+//static const HelpItem helpItemsForObjects[] = {
+//#define TYPE_NUMBER(a, b, c, d, helpItem) helpItem,
+//   TYPE_NUMBER_TABLE
+//#undef TYPE_NUMBER
+//};
+
+
+static bool hasHelpItemForObjects[TypesNumbers];
+
+static void initializeHelpItemForObjects()
+{
+   static bool initialized = false;
+
+   if(initialized)
+      return;
+
+   for(S32 i = 0; i < TypesNumbers; i++)
+      hasHelpItemForObjects[i] = false;
+
+   for(S32 i = 0; i < HelpItemCount; i++)
+   {
+      U8 objectType = HelpItemManager::getAssociatedObjectType(HelpItem(i));
+      if(objectType != UnknownTypeNumber)
+         hasHelpItemForObjects[objectType] = true;
+   }
+
+   initialized = true;
+}
 
 
 // Constructor
@@ -80,6 +103,8 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    for(S32 i = 0; i < JoystickAxesDirectionCount; i++)
       mJoystickInputs[i] = 0;
+
+   initializeHelpItemForObjects();
 }
 
 
@@ -511,7 +536,7 @@ bool ClientGame::isServer() const
 
 bool hasRelatedHelpItem(U8 x)
 {
-   return helpItemsForObjects[x] != UnknownHelpItem;
+   return hasHelpItemForObjects[x];
 }
 
 
@@ -596,7 +621,10 @@ void ClientGame::idle(U32 timeDelta)
 
          if(getUIManager()->isShowingInGameHelp())
             for(S32 i = 0; i < fillVector.size(); i++)
-               addInlineHelpItem(helpItemsForObjects[fillVector[i]->getObjectTypeNumber()]);
+            {
+               BfObject *obj = static_cast<BfObject *>(fillVector[i]);
+               addInlineHelpItem(obj->getObjectTypeNumber(), obj->getTeam(), localPlayerShip->getTeam());
+            }
       }
    }
 
@@ -617,6 +645,12 @@ void ClientGame::idle(U32 timeDelta)
 void ClientGame::addInlineHelpItem(HelpItem item)
 {
    mUIManager->addInlineHelpItem(item);
+}
+
+
+void ClientGame::addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam)
+{
+   mUIManager->addInlineHelpItem(objectType, objectTeam, playerTeam);
 }
 
 

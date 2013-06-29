@@ -1055,7 +1055,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
    // Object types -- only push those with shareWithLua set to true
    add_enum_to_lua(L, "ObjType",
-   #  define TYPE_NUMBER(value, shareWithLua, luaEnumName, d, e)   luaEnumName, shareWithLua, value,
+   #  define TYPE_NUMBER(value, shareWithLua, luaEnumName, e)   luaEnumName, shareWithLua, value,
           TYPE_NUMBER_TABLE
    #  undef TYPE_NUMBER
       (char*)NULL); 

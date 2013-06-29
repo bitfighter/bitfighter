@@ -133,6 +133,7 @@ public:
 
    Ship *findShip(const StringTableEntry &clientName);
 
+   void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);
    void addInlineHelpItem(HelpItem item);
 
    void gotServerListFromMaster(const Vector<IPAddress> &serverList);

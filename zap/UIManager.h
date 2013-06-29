@@ -226,6 +226,7 @@ public:
    void emitTeleportInEffect(const Point &pos, U32 type);
    
    void addInlineHelpItem(HelpItem item);
+   void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);
    void removeInlineHelpItem(HelpItem item);
    bool isShowingInGameHelp();
 

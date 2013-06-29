@@ -867,6 +867,13 @@ void UIManager::addInlineHelpItem(HelpItem item)
 }
 
 
+void UIManager::addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam)
+{
+   getUI<GameUserInterface>()->addInlineHelpItem(objectType, objectTeam, playerTeam);
+}
+
+
+
 void UIManager::removeInlineHelpItem(HelpItem item)
 {
    getUI<GameUserInterface>()->removeInlineHelpItem(item);
