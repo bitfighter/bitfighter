@@ -1554,6 +1554,12 @@ void Game::removeInlineHelpItem(HelpItem item, bool markAsSeen) const
 }
 
 
+F32 Game::getObjectiveArrowHighlightAlpha() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
 // In seconds
 S32 Game::getRemainingGameTime() const
 {

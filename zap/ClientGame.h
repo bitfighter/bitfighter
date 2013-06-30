@@ -137,6 +137,7 @@ public:
    void addInlineHelpItem(HelpItem item) const;
    void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam) const;
    void removeInlineHelpItem(HelpItem item, bool markAsSeen) const;
+   F32 getObjectiveArrowHighlightAlpha() const;
 
    void gotServerListFromMaster(const Vector<IPAddress> &serverList);
 

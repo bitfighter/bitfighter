@@ -228,6 +228,7 @@ public:
    void addInlineHelpItem(HelpItem item);
    void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);
    void removeInlineHelpItem(HelpItem item, bool markAsSeen);
+   F32 getObjectiveArrowHighlightAlpha();
    bool isShowingInGameHelp();
 
    void onChatMessageReceived(const Color &msgColor, const char *format, ...);

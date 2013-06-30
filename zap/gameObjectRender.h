@@ -182,7 +182,7 @@ extern void renderNavMeshBorders(const Vector<NeighboringZone> &borders);
 extern void drawStars(const Point *stars, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent);
 
 extern void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color *outlineColor, 
-                               S32 canvasWidth, S32 canvasHeight, F32 alphaMod);
+                               S32 canvasWidth, S32 canvasHeight, F32 alphaMod, F32 highlightAlpha);
 
 extern void renderScoreboardOrnamentTeamFlags(S32 xpos, S32 ypos, const Color *color, bool teamHasFlag);
 

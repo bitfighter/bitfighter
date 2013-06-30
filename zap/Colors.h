@@ -115,9 +115,10 @@ namespace Colors
    const Color NexusOpenColor(0, 0.7, 0);
    const Color NexusClosedColor(0.85, 0.3, 0);
    const Color ErrorMessageTextColor(Colors::paleRed);
-   const Color NeutralTeamColor(Colors::gray80);        // Objects that are neutral (on team -1)
-   const Color HostileTeamColor(Colors::gray50);        // Objects that are "hostile-to-all" (on team -2)
-   const Color MasterServerBlue(0.8, 0.8, 1);           // Messages about successful master server statii
+   const Color NeutralTeamColor(Colors::gray80);         // Objects that are neutral (on team -1)
+   const Color HostileTeamColor(Colors::gray50);         // Objects that are "hostile-to-all" (on team -2)
+   const Color MasterServerBlue(0.8, 0.8, 1);            // Messages about successful master server statii
+   const Color HelpItemRenderColor(Colors::green);       // Render color for inline-help messages
 
 };
 

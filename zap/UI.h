@@ -51,6 +51,7 @@ extern F32 gDefaultLineWidth;
 extern F32 gLineWidth3;
 extern F32 gLineWidth4;
 
+static const S32 HIGHLIGHTED_OBJECT_BUFFER_WIDTH = 14;      // Width to buffer objects higlighted by inline help system
 
 ////////////////////////////////////////
 ////////////////////////////////////////

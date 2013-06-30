@@ -54,6 +54,7 @@ static const S32 MAX_LINES = 8;     // Excluding sentinel item
 struct HelpItems {
    U8 associatedObjectTypeNumber;
    bool autoAdd;   
+   bool highlightObjectiveArrows;
    HighlightItem::Whose whose;
    HelpItemManager::Priority priority;
    const char *helpMessages[MAX_LINES + 1];
@@ -61,8 +62,8 @@ struct HelpItems {
 
 
 static const HelpItems helpItems[] = {
-#  define HELP_TABLE_ITEM(a, assItem, autoAdd, whose, priority, items) \
-             { assItem, autoAdd, HighlightItem::whose, HelpItemManager::priority, items},
+#  define HELP_TABLE_ITEM(a, assItem, autoAdd, highlightObjArrows, whose, priority, items) \
+             { assItem, autoAdd, highlightObjArrows, HighlightItem::whose, HelpItemManager::priority, items},
       HELP_ITEM_TABLE
 #  undef HELP_TABLE_ITEM
 };
@@ -424,9 +425,6 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
 
 void HelpItemManager::renderMessages(const ClientGame *game, S32 yPos) const
 {
-   if(!mEnabled)
-      return;
-
 #ifdef TNL_DEBUG
    // This bit is for displaying our help messages one-by-one so we can see how they look on-screen, cycle with CTRL+H
    if(mTestingTimer.getCurrent() > 0)
@@ -441,7 +439,7 @@ void HelpItemManager::renderMessages(const ClientGame *game, S32 yPos) const
    }
 #endif
 
-   if(mInitialDelayTimer.getCurrent() > 0)
+   if(!mEnabled)
       return;
    
    FontManager::pushFontContext(HelpItemContext);
@@ -449,7 +447,7 @@ void HelpItemManager::renderMessages(const ClientGame *game, S32 yPos) const
    for(S32 i = 0; i < mHelpItems.size(); i++)
    {
       F32 alpha = mHelpFading[i] ? mHelpTimer[i].getFraction() : 1;
-      glColor(Colors::green, alpha);
+      glColor(Colors::HelpItemRenderColor, alpha);
 
       yPos += doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos) + 15;  // Gap between messages
    }
@@ -515,6 +513,21 @@ void HelpItemManager::removeInlineHelpItem(HelpItem item, bool markAsSeen, U8 we
 
    if(markAsSeen)
       mAlreadySeen[item] = true;
+}
+
+
+F32 HelpItemManager::getObjectiveArrowHighlightAlpha() const
+{
+   if(!mEnabled)
+      return 0;
+
+   F32 alpha = 0;
+
+   for(S32 i = 0; i < mHelpItems.size(); i++)
+      if(helpItems[mHelpItems[i]].highlightObjectiveArrows)
+         alpha = max(alpha, mHelpFading[i] ? mHelpTimer[i].getFraction() : 1);
+
+   return alpha;
 }
 
 

@@ -490,7 +490,7 @@ public:
 
    virtual void addInlineHelpItem(HelpItem item) const;
    virtual void removeInlineHelpItem(HelpItem item, bool markAsSeen) const;
-
+   virtual F32 getObjectiveArrowHighlightAlpha() const;
 };
 
 

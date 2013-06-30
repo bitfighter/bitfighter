@@ -1264,7 +1264,7 @@ void MountableItem::dismount(DismountMode dismountMode)
    if(dismountMode != DISMOUNT_MOUNT_WAS_KILLED)
       mDroppedTimer.reset();
 
-   if(isGhost())     // Client
+   if(isGhost() && mMount)     // Client, checking for mMount will cause us to skip this block during initial unpack
       if(ship->getMountedItemCount() == 0)
          getGame()->removeInlineHelpItem(TryDroppingItem, false);
 }

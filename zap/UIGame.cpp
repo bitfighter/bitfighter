@@ -509,6 +509,12 @@ void GameUserInterface::removeInlineHelpItem(HelpItem item, bool markAsSeen)
 }
 
 
+F32 GameUserInterface::getObjectiveArrowHighlightAlpha() const
+{
+   return mHelpItemManager.getObjectiveArrowHighlightAlpha();
+}
+
+
 void GameUserInterface::setShowingInGameHelp(bool showing)
 {
    if(showing == mHelpItemManager.isEnabled())
@@ -2399,7 +2405,7 @@ void GameUserInterface::renderGameNormal()
    {
       Vector<Vector<Point> > outlines;
 
-      offsetPolygons(polygons, outlines, 14);
+      offsetPolygons(polygons, outlines, HIGHLIGHTED_OBJECT_BUFFER_WIDTH);
 
       for(S32 j = 0; j < outlines.size(); j++)
          renderPolygonOutline(&outlines[j], &Colors::green);

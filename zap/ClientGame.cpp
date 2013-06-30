@@ -1552,5 +1552,11 @@ void ClientGame::removeInlineHelpItem(HelpItem item, bool markAsSeen) const
 }
 
 
+F32 ClientGame::getObjectiveArrowHighlightAlpha() const
+{
+   return mUIManager->getObjectiveArrowHighlightAlpha();
+}
+
+
 };
 

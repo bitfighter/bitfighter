@@ -3020,7 +3020,8 @@ void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const C
 }
 
 
-void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color *outlineColor, S32 canvasWidth, S32 canvasHeight, F32 alphaMod)
+void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color *outlineColor, 
+                        S32 canvasWidth, S32 canvasHeight, F32 alphaMod, F32 highlightAlpha)
 {
    Point center(canvasWidth / 2, canvasHeight / 2);
    Point arrowDir = nearestPoint - center;
@@ -3044,7 +3045,7 @@ void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color
 
    // Fade the arrows as we transition to/from commander's map
    F32 alpha = (1 - zoomFraction) * 0.6f * alphaMod;
-   if(!alpha)
+   if(alpha == 0)
       return;
 
    // Make indicator fade as we approach the target
@@ -3063,19 +3064,32 @@ void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-   F32 vertices[] = {
-         rp.x, rp.y,
-         p2.x, p2.y,
-         p3.x, p3.y
-   };
+   static Point vertices[3];     // Reusable array
+
+   vertices[0].set(rp.x, rp.y);
+   vertices[1].set(p2.x, p2.y);
+   vertices[2].set(p3.x, p3.y);
+
    // This loops twice: once to render the objective arrow, once to render the outline
    for(S32 i = 0; i < 2; i++)
    {
       glColor(i == 1 ? &fillColor : outlineColor, alpha);
-      renderVertexArray(vertices, 3, i == 1 ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
+      renderVertexArray((F32 *)(vertices), ARRAYSIZE(vertices), i == 1 ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
    }
 
-//   Point cen = rp - arrowDir * 12;
+   // Highlight the objective arrow, if need be.  This will be called rarely, so efficiency here is 
+   // not as important as above
+   if(highlightAlpha > 0)
+   {
+      Vector<Point> inPoly(vertices, ARRAYSIZE(vertices));
+      Vector<Point> outPoly;
+      offsetPolygon(&inPoly, outPoly, HIGHLIGHTED_OBJECT_BUFFER_WIDTH);
+
+      glColor(Colors::HelpItemRenderColor, highlightAlpha * alpha);
+      renderVertexArray((F32 *)(outPoly.address()), outPoly.size(), GL_LINE_LOOP);
+   }
+
+   //   Point cen = rp - arrowDir * 12;
 
    // Try labelling the objective arrows... kind of lame.
    //drawStringf(cen.x - UserInterface::getStringWidthf(10,"%2.1f", dist/100) / 2, cen.y - 5, 10, "%2.1f", dist/100);

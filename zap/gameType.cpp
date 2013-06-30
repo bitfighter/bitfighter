@@ -762,8 +762,10 @@ void GameType::renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32
 }
 
 
-// Client only
-void GameType::renderObjectiveArrow(const BfObject *target, const Color *color, S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
+// Client only -- all objective arrow drawing is funneled through here or the other 
+// renderObjectiveArrow() method we have (below)
+void GameType::renderObjectiveArrow(const BfObject *target, const Color *color, 
+                                    S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
 {
    if(!target)
       return;
@@ -799,20 +801,29 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *color, 
          targetPoint.y = r.min.y;
    }
 
-   Point p = mGame->worldToScreenPoint(&targetPoint, canvasWidth, canvasHeight);
+   Point point = mGame->worldToScreenPoint(&targetPoint, canvasWidth, canvasHeight);
+   F32 highlightAlpha ;
+   U32 t = Platform::getRealMicroseconds();
+   for(S32 i = 0; i < 10000; i++)
+   highlightAlpha = getGame()->getObjectiveArrowHighlightAlpha();
+   logprintf("%d", Platform::getRealMicroseconds() - t);
 
-   drawObjectiveArrow(p, mGame->getCommanderZoomFraction(), color, canvasWidth, canvasHeight, alphaMod);
+   drawObjectiveArrow(point, mGame->getCommanderZoomFraction(), color, 
+                      canvasWidth, canvasHeight, alphaMod, highlightAlpha);
 }
 
 
-void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outlineColor, S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
+void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outlineColor, 
+                                    S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
 {
    Ship *ship = getGame()->getLocalPlayerShip();
 
    if(!ship)
       return;
 
-   drawObjectiveArrow(nearestPoint, mGame->getCommanderZoomFraction(), outlineColor, canvasWidth, canvasHeight, alphaMod);
+   F32 highlightAlpha = getGame()->getObjectiveArrowHighlightAlpha();
+   drawObjectiveArrow(nearestPoint, mGame->getCommanderZoomFraction(), outlineColor, 
+                      canvasWidth, canvasHeight, alphaMod, highlightAlpha);
 }
 
 #endif
