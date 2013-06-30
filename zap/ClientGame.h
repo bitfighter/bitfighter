@@ -133,8 +133,10 @@ public:
 
    Ship *findShip(const StringTableEntry &clientName);
 
-   void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);
-   void addInlineHelpItem(HelpItem item);
+   // HelpItem related
+   void addInlineHelpItem(HelpItem item) const;
+   void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam) const;
+   void removeInlineHelpItem(HelpItem item) const;
 
    void gotServerListFromMaster(const Vector<IPAddress> &serverList);
 
@@ -270,11 +272,6 @@ public:
    void unsuspendGame();
 
    S32 getBotCount() const;
-
-   // HelpItem related
-   void addInlineHelpItem(HelpItem item) const;
-   void removeInlineHelpItem(HelpItem item) const;
-
 
    // For loading levels in editor
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);

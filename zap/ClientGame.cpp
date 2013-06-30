@@ -642,17 +642,6 @@ void ClientGame::idle(U32 timeDelta)
 }
 
 
-void ClientGame::addInlineHelpItem(HelpItem item)
-{
-   mUIManager->addInlineHelpItem(item);
-}
-
-
-void ClientGame::addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam)
-{
-   mUIManager->addInlineHelpItem(objectType, objectTeam, playerTeam);
-}
-
 
 void ClientGame::gotServerListFromMaster(const Vector<IPAddress> &serverList)
 {
@@ -675,6 +664,8 @@ void ClientGame::gotChatMessage(const StringTableEntry &clientName, const String
 
    const Color *color = global ? &Colors::globalChatColor : &Colors::teamChatColor;
    getUIManager()->onChatMessageReceived(*color, "%s: %s", clientName.getString(), message.getString());
+
+   addInlineHelpItem(HowToChatItem);
 }
 
 
@@ -1539,19 +1530,25 @@ InputMode ClientGame::getInputMode()
 
 void ClientGame::gotAnnouncement(const string &announcement)
 {
-   getUIManager()->gotAnnouncement(announcement);
+   mUIManager->gotAnnouncement(announcement);
 }
 
 
 void ClientGame::addInlineHelpItem(HelpItem item) const
 {
-   getUIManager()->getUI<GameUserInterface>()->addInlineHelpItem(item);
+   mUIManager->addInlineHelpItem(item);
+}
+
+
+void ClientGame::addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam) const
+{
+   mUIManager->addInlineHelpItem(objectType, objectTeam, playerTeam);
 }
 
 
 void ClientGame::removeInlineHelpItem(HelpItem item) const
 {
-   getUIManager()->getUI<GameUserInterface>()->removeInlineHelpItem(item);
+   mUIManager->removeInlineHelpItem(item);
 }
 
 
