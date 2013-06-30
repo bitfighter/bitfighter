@@ -101,7 +101,7 @@
                                                                                                                          "This level has no Loadout Zones,",                                                          \
                                                                                                                          "So you are basically screwed.", NULL }))                                                    \
    HELP_TABLE_ITEM(LoadoutFinishedItem,          UnknownTypeNumber,             true,  Any,        Now,       ARRAYDEF({ "Loadout updated.  Good job!", NULL }))                                                      \
-   HELP_TABLE_ITEM(TryChattingItem,              UnknownTypeNumber,             true,  Any,        High,      ARRAYDEF({ "Someone is sending chat messages.  Use [[TeamChat]] or [[GlobalChat]] to respond.",         \
+   HELP_TABLE_ITEM(HowToChatItem,                UnknownTypeNumber,             true,  Any,        High,      ARRAYDEF({ "Someone is sending chat messages.  Use [[TeamChat]] or [[GlobalChat]] to respond.",         \
                                                                                                                          "[[TeamChat]] sends a message to your team, [[GlobalChat]] sends one to everyone.", NULL })) \
    HELP_TABLE_ITEM(TryDroppingItem,              UnknownTypeNumber,             true,  Any,        PacedLow,  ARRAYDEF({ "You are carrying an object.  Hit [[DropItem]] to drop it.", NULL }))                        \
                                                                                                                                                                                                                       \
