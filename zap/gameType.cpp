@@ -802,11 +802,11 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *color,
    }
 
    Point point = mGame->worldToScreenPoint(&targetPoint, canvasWidth, canvasHeight);
-   F32 highlightAlpha ;
-   U32 t = Platform::getRealMicroseconds();
-   for(S32 i = 0; i < 10000; i++)
-   highlightAlpha = getGame()->getObjectiveArrowHighlightAlpha();
-   logprintf("%d", Platform::getRealMicroseconds() - t);
+
+   // Seems inefficient to do this every time we render an objective arrow, given that all objective arrows on a
+   // given fram will have the same value.  However, performance testing shows this takes less than a microsecond 
+   // to run, so even when we have 100 objective arrows, that's not very much time!  Usually we have just a handful.
+   F32 highlightAlpha = getGame()->getObjectiveArrowHighlightAlpha();
 
    drawObjectiveArrow(point, mGame->getCommanderZoomFraction(), color, 
                       canvasWidth, canvasHeight, alphaMod, highlightAlpha);
