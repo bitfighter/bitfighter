@@ -503,9 +503,9 @@ void GameUserInterface::addInlineHelpItem(U8 objectType, S32 objectTeam, S32 pla
 }
 
 
-void GameUserInterface::removeInlineHelpItem(HelpItem item)
+void GameUserInterface::removeInlineHelpItem(HelpItem item, bool markAsSeen)
 {
-   mHelpItemManager.removeInlineHelpItem(item);
+   mHelpItemManager.removeInlineHelpItem(item, markAsSeen);
 }
 
 
@@ -936,7 +936,7 @@ void GameUserInterface::selectWeapon(U32 indx)
    if(gameType)
       gameType->c2sSelectWeapon(indx);
 
-   mHelpItemManager.removeInlineHelpItem(ChangeWeaponsItem);
+   mHelpItemManager.removeInlineHelpItem(ChangeWeaponsItem, true);      // User has demonstrated this skill
 }
 
 
@@ -957,12 +957,12 @@ void GameUserInterface::activateModule(S32 index)
    mModuleDoubleTapTimer[index].reset();
 
    // Player figured out how to activate their modules... skip related help
-   mHelpItemManager.removeInlineHelpItem(ControlsModulesItem);           
+   mHelpItemManager.removeInlineHelpItem(ControlsModulesItem, true);           
 
    if(getGame()->getLocalPlayerShip()->getModule(index) == ModuleCloak)
-      mHelpItemManager.removeInlineHelpItem(TryCloakItem);     // Already tried it!
+      mHelpItemManager.removeInlineHelpItem(TryCloakItem, true);     // Already tried it!
    else if(getGame()->getLocalPlayerShip()->getModule(index) == ModuleBoost)
-      mHelpItemManager.removeInlineHelpItem(TryTurboItem);     // Already tried it!
+      mHelpItemManager.removeInlineHelpItem(TryTurboItem, true);     // Already tried it!
 
 }
 
@@ -1054,7 +1054,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       else
          getUIManager()->activate<InstructionsUserInterface>();
 
-      mHelpItemManager.removeInlineHelpItem(F1HelpItem);    // User knows how to access help
+      mHelpItemManager.removeInlineHelpItem(F1HelpItem, true);    // User knows how to access help
 
       return true;
    }
@@ -1138,8 +1138,8 @@ void GameUserInterface::onMissionKeyPressed()
       if(!mLevelInfoDisplayer.isDisplayTimerActive())
          mLevelInfoDisplayer.onActivated();
 
-      mLevelInfoDisplayer.clearDisplayTimer();              // Clear timer so releasing F2 will hide the display
-      mHelpItemManager.removeInlineHelpItem(GameModesItem); // User seems to know about F2, unqueue help message
+      mLevelInfoDisplayer.clearDisplayTimer();                    // Clear timer so releasing F2 will hide the display
+      mHelpItemManager.removeInlineHelpItem(GameModesItem, true); // User seems to know about F2, unqueue help message
    }
 }
 
@@ -1251,7 +1251,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    else if(checkInputCode(settings, InputCodeManager::BINDING_FIRE, inputCode))
    {
       mFiring = true;
-      mHelpItemManager.removeInlineHelpItem(ControlsKBItem, 0xFF - 1);
+      mHelpItemManager.removeInlineHelpItem(ControlsKBItem, true, 0xFF - 1);
    }
    else if(checkInputCode(settings, InputCodeManager::BINDING_SELWEAP1, inputCode))
       selectWeapon(0);
@@ -1308,7 +1308,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       toggleCommanderMap();
       
       // Now that we've demonstrated use of cmdrs map, no need to tell player about it
-      mHelpItemManager.removeInlineHelpItem(CmdrsMapItem);  
+      mHelpItemManager.removeInlineHelpItem(CmdrsMapItem, true);  
    }
 
    else if(checkInputCode(settings, InputCodeManager::BINDING_SCRBRD, inputCode))
@@ -1320,7 +1320,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          if(gameType)
             gameType->c2sRequestScoreboardUpdates(true);
 
-         mHelpItemManager.removeInlineHelpItem(ViewScoreboardItem);     // User found the tab key!
+         mHelpItemManager.removeInlineHelpItem(ViewScoreboardItem, true);  // User found the tab key!
       }
    }
    else if(checkInputCode(settings, InputCodeManager::BINDING_TOGVOICE, inputCode))
@@ -1559,7 +1559,7 @@ Move *GameUserInterface::getCurrentMove()
 
       // If player is moving, do not show move instructions
       if(mCurrentMove.y > 0 || mCurrentMove.x > 0)
-         mHelpItemManager.removeInlineHelpItem(ControlsKBItem, 1);
+         mHelpItemManager.removeInlineHelpItem(ControlsKBItem, true, 1);
 
 
       mCurrentMove.fire = mFiring;

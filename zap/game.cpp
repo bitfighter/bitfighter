@@ -1548,7 +1548,7 @@ void Game::addInlineHelpItem(HelpItem item) const
 }
 
 
-void Game::removeInlineHelpItem(HelpItem item) const
+void Game::removeInlineHelpItem(HelpItem item, bool markAsSeen) const
 {
    TNLAssert(false, "Not implemented for this class!");
 }

@@ -2183,7 +2183,7 @@ static void moreRobotsAcceptCallback(ClientGame *game, U32 index)
    GameUserInterface *gameUI = game->getUIManager()->getUI<GameUserInterface>();
 
    // Player has demonstrated ability to add bots... no need to show help item
-   gameUI->removeInlineHelpItem(AddBotsItem);
+   gameUI->removeInlineHelpItem(AddBotsItem, true);
 
    // Back to the game!
    game->getUIManager()->reactivate(gameUI);

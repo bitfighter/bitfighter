@@ -1546,9 +1546,9 @@ void ClientGame::addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam
 }
 
 
-void ClientGame::removeInlineHelpItem(HelpItem item) const
+void ClientGame::removeInlineHelpItem(HelpItem item, bool markAsSeen) const
 {
-   mUIManager->removeInlineHelpItem(item);
+   mUIManager->removeInlineHelpItem(item, markAsSeen);
 }
 
 

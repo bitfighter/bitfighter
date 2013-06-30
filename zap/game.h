@@ -489,7 +489,7 @@ public:
    static void seedRandomNumberGenerator(const string &name);
 
    virtual void addInlineHelpItem(HelpItem item) const;
-   virtual void removeInlineHelpItem(HelpItem item) const;
+   virtual void removeInlineHelpItem(HelpItem item, bool markAsSeen) const;
 
 };
 

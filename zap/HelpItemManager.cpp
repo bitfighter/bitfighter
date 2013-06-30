@@ -491,7 +491,7 @@ void HelpItemManager::queueHelpItem(HelpItem item)
 
 // The weight factor allows us to require several events to "vote" for removing an item before 
 // it happens... basically once the weights OR to 0xFF, the item is toast.
-void HelpItemManager::removeInlineHelpItem(HelpItem item, U8 weight)
+void HelpItemManager::removeInlineHelpItem(HelpItem item, bool markAsSeen, U8 weight)
 {
    TNLAssert(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow, "This method is only for paced items!");
 
@@ -510,6 +510,9 @@ void HelpItemManager::removeInlineHelpItem(HelpItem item, U8 weight)
        if(queue->get(index).removalWeight == 0xFF)
          queue->erase(index);
     }
+
+    if(markAsSeen)
+       mAlreadySeen[item] = true;
 }
 
 

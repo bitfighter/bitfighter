@@ -98,7 +98,7 @@ void LoadoutHelper::onActivated()
    Parent::onActivated();
 
    // Player has proven they know how to change loadouts, so no need to show a help message on how to do it
-   getGame()->getUIManager()->removeInlineHelpItem(ChangeConfigItem);
+   getGame()->getUIManager()->removeInlineHelpItem(ChangeConfigItem, true);
 
    mCurrentIndex = 0;
 

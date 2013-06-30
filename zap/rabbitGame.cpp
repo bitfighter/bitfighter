@@ -62,8 +62,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
          getGame()->playSoundEffect(SFXFlagDrop);
          getGame()->displayMessage(Colors::green, "%s DROPPED the Carrot!", clientName.getString());
 
-         if(messageIsForLocalPlayer)
-            getGame()->removeInlineHelpItem(RbLocalPlayerGrabbedFlagItem);
+         //if(messageIsForLocalPlayer)
+         //   getGame()->removeInlineHelpItem(RbLocalPlayerGrabbedFlagItem, false);
          break;
 
       case RabbitMsgRabbitDead:
