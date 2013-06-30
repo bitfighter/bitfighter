@@ -1543,5 +1543,17 @@ void ClientGame::gotAnnouncement(const string &announcement)
 }
 
 
+void ClientGame::addInlineHelpItem(HelpItem item) const
+{
+   getUIManager()->getUI<GameUserInterface>()->addInlineHelpItem(item);
+}
+
+
+void ClientGame::removeInlineHelpItem(HelpItem item) const
+{
+   getUIManager()->getUI<GameUserInterface>()->removeInlineHelpItem(item);
+}
+
+
 };
 

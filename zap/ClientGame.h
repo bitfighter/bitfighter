@@ -271,6 +271,10 @@ public:
 
    S32 getBotCount() const;
 
+   // HelpItem related
+   void addInlineHelpItem(HelpItem item) const;
+   void removeInlineHelpItem(HelpItem item) const;
+
 
    // For loading levels in editor
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);

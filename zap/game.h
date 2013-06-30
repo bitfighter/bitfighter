@@ -448,6 +448,8 @@ public:
    void setLevelDatabaseId(U32 id);
    U32 getLevelDatabaseId() const;
 
+   virtual string getPlayerName() const;
+
    // A couple of statics to keep gServerGame out of some classes
    static bool isLocalTestServer();
    static const GridDatabase *getServerGameObjectDatabase();
@@ -485,6 +487,10 @@ public:
 
    // Misc junk
    static void seedRandomNumberGenerator(const string &name);
+
+   virtual void addInlineHelpItem(HelpItem item) const;
+   virtual void removeInlineHelpItem(HelpItem item) const;
+
 };
 
 

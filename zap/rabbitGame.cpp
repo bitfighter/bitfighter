@@ -39,11 +39,17 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, StringTableEntry clientName), (msgIndex, clientName),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
+   bool messageIsForLocalPlayer = (clientName == getGame()->getPlayerName());
+      
+
    switch (msgIndex)
    {
       case RabbitMsgGrab:
          getGame()->playSoundEffect(SFXFlagCapture);
          getGame()->displayMessage(Colors::red, "%s GRABBED the Carrot!", clientName.getString());
+
+         if(messageIsForLocalPlayer)
+            getGame()->addInlineHelpItem(RbLocalPlayerGrabbedFlagItem);           
          break;
 
       case RabbitMsgRabbitKill:
@@ -54,6 +60,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
       case RabbitMsgDrop:
          getGame()->playSoundEffect(SFXFlagDrop);
          getGame()->displayMessage(Colors::green, "%s DROPPED the Carrot!", clientName.getString());
+
+         if(messageIsForLocalPlayer)
+            getGame()->removeInlineHelpItem(RbLocalPlayerGrabbedFlagItem);
          break;
 
       case RabbitMsgRabbitDead:
@@ -314,6 +323,7 @@ void RabbitGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObjec
 }
 
 
+// Runs on server only
 void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 {
    // See if the ship is already carrying a flag - can only carry one at a time
@@ -324,7 +334,7 @@ void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
       return;
 
    if(!ship->getClientInfo())
-            return;
+      return;
 
    if(!isGameOver())  // Avoid flooding messages when game is over
       s2cRabbitMessage(RabbitMsgGrab, ship->getClientInfo()->getName());

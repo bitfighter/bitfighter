@@ -1536,6 +1536,24 @@ void Game::emitTextEffect(const string &text, const Color &color, const Point &p
 }
 
 
+string Game::getPlayerName() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
+void Game::addInlineHelpItem(HelpItem item) const
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
+void Game::removeInlineHelpItem(HelpItem item) const
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
 // In seconds
 S32 Game::getRemainingGameTime() const
 {
