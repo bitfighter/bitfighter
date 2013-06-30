@@ -185,6 +185,7 @@
 		73A2B27113DE59030002EF92 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 73A2B1FF13DE57C40002EF92 /* libz.dylib */; };
 		73A2B2A713DE59740002EF92 /* ScreenShooter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B2A313DE59740002EF92 /* ScreenShooter.cpp */; };
 		73A2B2A813DE59740002EF92 /* UIManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B2A513DE59740002EF92 /* UIManager.cpp */; };
+		73A494941780E228008F3329 /* EnergyGaugeRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A494921780E228008F3329 /* EnergyGaugeRenderer.cpp */; };
 		73B0FC1C1370ABB70019AE4E /* ALURE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7386B9F7136FE3000094A660 /* ALURE.framework */; };
 		73B0FC341370ABE80019AE4E /* ALURE.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7386B9F7136FE3000094A660 /* ALURE.framework */; };
 		73B1C2FF171CEA830007207A /* fontstash.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B1C2FB171CEA830007207A /* fontstash.c */; };
@@ -769,50 +770,8 @@
 		73A2B2A513DE59740002EF92 /* UIManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UIManager.cpp; path = ../../../zap/UIManager.cpp; sourceTree = SOURCE_ROOT; };
 		73A2B2A613DE59740002EF92 /* UIManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UIManager.h; path = ../../../zap/UIManager.h; sourceTree = SOURCE_ROOT; };
 		73A4901513709B3400785E2E /* ALURE-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ALURE-Info.plist"; sourceTree = "<group>"; };
-		73B0FB771370AAD10019AE4E /* ALc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ALc.c; sourceTree = "<group>"; };
-		73B0FB781370AAD10019AE4E /* alcConfig.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcConfig.c; sourceTree = "<group>"; };
-		73B0FB791370AAD10019AE4E /* alcDedicated.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcDedicated.c; sourceTree = "<group>"; };
-		73B0FB7A1370AAD10019AE4E /* alcEcho.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcEcho.c; sourceTree = "<group>"; };
-		73B0FB7B1370AAD10019AE4E /* alcModulator.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcModulator.c; sourceTree = "<group>"; };
-		73B0FB7C1370AAD10019AE4E /* alcReverb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcReverb.c; sourceTree = "<group>"; };
-		73B0FB7D1370AAD10019AE4E /* alcRing.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcRing.c; sourceTree = "<group>"; };
-		73B0FB7E1370AAD10019AE4E /* alcThread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alcThread.c; sourceTree = "<group>"; };
-		73B0FB801370AAD10019AE4E /* ALu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ALu.c; sourceTree = "<group>"; };
-		73B0FB811370AAD10019AE4E /* bs2b.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bs2b.c; sourceTree = "<group>"; };
-		73B0FB821370AAD10019AE4E /* coreaudio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = coreaudio.c; sourceTree = "<group>"; };
-		73B0FB841370AAD10019AE4E /* loopback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = loopback.c; sourceTree = "<group>"; };
-		73B0FB851370AAD10019AE4E /* mixer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mixer.c; sourceTree = "<group>"; };
-		73B0FB861370AAD10019AE4E /* null.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = null.c; sourceTree = "<group>"; };
-		73B0FB881370AAD10019AE4E /* panning.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = panning.c; sourceTree = "<group>"; };
-		73B0FB8C1370AAD10019AE4E /* wave.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = wave.c; sourceTree = "<group>"; };
-		73B0FB961370AAD10019AE4E /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
-		73B0FB9B1370AAD10019AE4E /* al.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = al.h; sourceTree = "<group>"; };
-		73B0FB9C1370AAD10019AE4E /* alc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alc.h; sourceTree = "<group>"; };
-		73B0FB9D1370AAD10019AE4E /* alext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alext.h; sourceTree = "<group>"; };
-		73B0FB9E1370AAD10019AE4E /* efx-creative.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "efx-creative.h"; sourceTree = "<group>"; };
-		73B0FB9F1370AAD10019AE4E /* efx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = efx.h; sourceTree = "<group>"; };
-		73B0FBA21370AAD10019AE4E /* alAuxEffectSlot.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alAuxEffectSlot.c; sourceTree = "<group>"; };
-		73B0FBA31370AAD10019AE4E /* alBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alBuffer.c; sourceTree = "<group>"; };
-		73B0FBA51370AAD10019AE4E /* alEffect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alEffect.c; sourceTree = "<group>"; };
-		73B0FBA61370AAD10019AE4E /* alError.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alError.c; sourceTree = "<group>"; };
-		73B0FBA71370AAD10019AE4E /* alExtension.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alExtension.c; sourceTree = "<group>"; };
-		73B0FBA81370AAD10019AE4E /* alFilter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alFilter.c; sourceTree = "<group>"; };
-		73B0FBA91370AAD10019AE4E /* alListener.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alListener.c; sourceTree = "<group>"; };
-		73B0FBAA1370AAD10019AE4E /* alSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alSource.c; sourceTree = "<group>"; };
-		73B0FBAB1370AAD10019AE4E /* alState.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alState.c; sourceTree = "<group>"; };
-		73B0FBAC1370AAD10019AE4E /* alThunk.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alThunk.c; sourceTree = "<group>"; };
-		73B0FBAE1370AAD10019AE4E /* alAuxEffectSlot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alAuxEffectSlot.h; sourceTree = "<group>"; };
-		73B0FBAF1370AAD10019AE4E /* alBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alBuffer.h; sourceTree = "<group>"; };
-		73B0FBB11370AAD10019AE4E /* alEffect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alEffect.h; sourceTree = "<group>"; };
-		73B0FBB21370AAD10019AE4E /* alError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alError.h; sourceTree = "<group>"; };
-		73B0FBB31370AAD10019AE4E /* alFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alFilter.h; sourceTree = "<group>"; };
-		73B0FBB41370AAD10019AE4E /* alListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alListener.h; sourceTree = "<group>"; };
-		73B0FBB51370AAD10019AE4E /* alMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alMain.h; sourceTree = "<group>"; };
-		73B0FBB61370AAD10019AE4E /* alSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alSource.h; sourceTree = "<group>"; };
-		73B0FBB71370AAD10019AE4E /* alState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alState.h; sourceTree = "<group>"; };
-		73B0FBB81370AAD10019AE4E /* alThunk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alThunk.h; sourceTree = "<group>"; };
-		73B0FBB91370AAD10019AE4E /* alu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alu.h; sourceTree = "<group>"; };
-		73B0FBBA1370AAD10019AE4E /* bs2b.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bs2b.h; sourceTree = "<group>"; };
+		73A494921780E228008F3329 /* EnergyGaugeRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EnergyGaugeRenderer.cpp; path = ../../../zap/EnergyGaugeRenderer.cpp; sourceTree = SOURCE_ROOT; };
+		73A494931780E228008F3329 /* EnergyGaugeRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EnergyGaugeRenderer.h; path = ../../../zap/EnergyGaugeRenderer.h; sourceTree = SOURCE_ROOT; };
 		73B1C2FB171CEA830007207A /* fontstash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fontstash.c; sourceTree = "<group>"; };
 		73B1C2FC171CEA830007207A /* fontstash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fontstash.h; sourceTree = "<group>"; };
 		73B1C2FD171CEA830007207A /* stb_truetype.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = stb_truetype.c; sourceTree = "<group>"; };
@@ -847,8 +806,6 @@
 		73B1C326171CEAC40007207A /* UILevelInfoDisplayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UILevelInfoDisplayer.cpp; path = ../../../zap/UILevelInfoDisplayer.cpp; sourceTree = SOURCE_ROOT; };
 		73B1C327171CEAC40007207A /* UILevelInfoDisplayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UILevelInfoDisplayer.h; path = ../../../zap/UILevelInfoDisplayer.h; sourceTree = SOURCE_ROOT; };
 		73B1C365171CEFE40007207A /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = ../../../resource/fonts; sourceTree = SOURCE_ROOT; };
-		73B4390113B2403500CA0A7A /* hrtf_tables.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.pascal; name = hrtf_tables.inc; path = Alc/hrtf_tables.inc; sourceTree = "<group>"; };
-		73B4390213B2403500CA0A7A /* hrtf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = hrtf.c; path = Alc/hrtf.c; sourceTree = "<group>"; };
 		73B4BF00136A9D8600D5CAFF /* OpenAL-Soft-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OpenAL-Soft-Info.plist"; sourceTree = "<group>"; };
 		73BA22AD174BB7DE002ABB5B /* DismountModesEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DismountModesEnum.h; path = ../../../zap/DismountModesEnum.h; sourceTree = SOURCE_ROOT; };
 		73BA22AE174BB7DE002ABB5B /* EditorAttributeMenuItemBuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EditorAttributeMenuItemBuilder.cpp; path = ../../../zap/EditorAttributeMenuItemBuilder.cpp; sourceTree = SOURCE_ROOT; };
@@ -1196,7 +1153,6 @@
 		73D2F6B112E2E1D400EA5EBE /* lzio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lzio.c; path = "../../../lua/lua-vec/src/lzio.c"; sourceTree = SOURCE_ROOT; };
 		73D2F6B212E2E1D400EA5EBE /* lzio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lzio.h; path = "../../../lua/lua-vec/src/lzio.h"; sourceTree = SOURCE_ROOT; };
 		73D2F6B312E2E1D400EA5EBE /* print.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = print.c; path = "../../../lua/lua-vec/src/print.c"; sourceTree = SOURCE_ROOT; };
-		73D6B5051370C32B002ABC48 /* OpenAL-Soft_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "OpenAL-Soft_Prefix.pch"; path = "../../build/osx/xcode/OpenAL-Soft_Prefix.pch"; sourceTree = "<group>"; };
 		73D6B5081370C349002ABC48 /* ALURE_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ALURE_Prefix.pch; path = ../build/osx/xcode/ALURE_Prefix.pch; sourceTree = "<group>"; };
 		73DD59881753102000985BFA /* OpenAL-Soft.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "OpenAL-Soft.framework"; path = "/Users/geeko/temp/hg/bitfighter/lib/OpenAL-Soft.framework"; sourceTree = "<absolute>"; };
 		73EE611F13BA398D009931CD /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -1380,7 +1336,6 @@
 				7388F0EE139D6588003C6BB0 /* libspeex */,
 				7388F088139D5BB0003C6BB0 /* libogg */,
 				73D2F27E12E2D6D800EA5EBE /* zap */,
-				73B0FB751370AAD10019AE4E /* openal-soft */,
 				7386BA07136FE3520094A660 /* alure */,
 				73844F2513500C2F00033B85 /* clipper */,
 				73702882132A020B00397F99 /* recast */,
@@ -1791,109 +1746,6 @@
 			path = ../../../libpng;
 			sourceTree = SOURCE_ROOT;
 		};
-		73B0FB751370AAD10019AE4E /* openal-soft */ = {
-			isa = PBXGroup;
-			children = (
-				73B4390113B2403500CA0A7A /* hrtf_tables.inc */,
-				73B4390213B2403500CA0A7A /* hrtf.c */,
-				73D6B5051370C32B002ABC48 /* OpenAL-Soft_Prefix.pch */,
-				73B0FB761370AAD10019AE4E /* Alc */,
-				73B0FB961370AAD10019AE4E /* config.h */,
-				73B0FB991370AAD10019AE4E /* include */,
-				73B0FBA11370AAD10019AE4E /* OpenAL32 */,
-				73B0FBBC1370AAD10019AE4E /* utils */,
-			);
-			name = "openal-soft";
-			path = "../../../openal/openal-soft";
-			sourceTree = SOURCE_ROOT;
-		};
-		73B0FB761370AAD10019AE4E /* Alc */ = {
-			isa = PBXGroup;
-			children = (
-				73B0FB771370AAD10019AE4E /* ALc.c */,
-				73B0FB781370AAD10019AE4E /* alcConfig.c */,
-				73B0FB791370AAD10019AE4E /* alcDedicated.c */,
-				73B0FB7A1370AAD10019AE4E /* alcEcho.c */,
-				73B0FB7B1370AAD10019AE4E /* alcModulator.c */,
-				73B0FB7C1370AAD10019AE4E /* alcReverb.c */,
-				73B0FB7D1370AAD10019AE4E /* alcRing.c */,
-				73B0FB7E1370AAD10019AE4E /* alcThread.c */,
-				73B0FB801370AAD10019AE4E /* ALu.c */,
-				73B0FB811370AAD10019AE4E /* bs2b.c */,
-				73B0FB821370AAD10019AE4E /* coreaudio.c */,
-				73B0FB841370AAD10019AE4E /* loopback.c */,
-				73B0FB851370AAD10019AE4E /* mixer.c */,
-				73B0FB861370AAD10019AE4E /* null.c */,
-				73B0FB881370AAD10019AE4E /* panning.c */,
-				73B0FB8C1370AAD10019AE4E /* wave.c */,
-			);
-			path = Alc;
-			sourceTree = "<group>";
-		};
-		73B0FB991370AAD10019AE4E /* include */ = {
-			isa = PBXGroup;
-			children = (
-				73B0FB9A1370AAD10019AE4E /* AL */,
-			);
-			path = include;
-			sourceTree = "<group>";
-		};
-		73B0FB9A1370AAD10019AE4E /* AL */ = {
-			isa = PBXGroup;
-			children = (
-				73B0FB9B1370AAD10019AE4E /* al.h */,
-				73B0FB9C1370AAD10019AE4E /* alc.h */,
-				73B0FB9D1370AAD10019AE4E /* alext.h */,
-				73B0FB9E1370AAD10019AE4E /* efx-creative.h */,
-				73B0FB9F1370AAD10019AE4E /* efx.h */,
-			);
-			path = AL;
-			sourceTree = "<group>";
-		};
-		73B0FBA11370AAD10019AE4E /* OpenAL32 */ = {
-			isa = PBXGroup;
-			children = (
-				73B0FBA21370AAD10019AE4E /* alAuxEffectSlot.c */,
-				73B0FBA31370AAD10019AE4E /* alBuffer.c */,
-				73B0FBA51370AAD10019AE4E /* alEffect.c */,
-				73B0FBA61370AAD10019AE4E /* alError.c */,
-				73B0FBA71370AAD10019AE4E /* alExtension.c */,
-				73B0FBA81370AAD10019AE4E /* alFilter.c */,
-				73B0FBA91370AAD10019AE4E /* alListener.c */,
-				73B0FBAA1370AAD10019AE4E /* alSource.c */,
-				73B0FBAB1370AAD10019AE4E /* alState.c */,
-				73B0FBAC1370AAD10019AE4E /* alThunk.c */,
-				73B0FBAD1370AAD10019AE4E /* Include */,
-			);
-			path = OpenAL32;
-			sourceTree = "<group>";
-		};
-		73B0FBAD1370AAD10019AE4E /* Include */ = {
-			isa = PBXGroup;
-			children = (
-				73B0FBAE1370AAD10019AE4E /* alAuxEffectSlot.h */,
-				73B0FBAF1370AAD10019AE4E /* alBuffer.h */,
-				73B0FBB11370AAD10019AE4E /* alEffect.h */,
-				73B0FBB21370AAD10019AE4E /* alError.h */,
-				73B0FBB31370AAD10019AE4E /* alFilter.h */,
-				73B0FBB41370AAD10019AE4E /* alListener.h */,
-				73B0FBB51370AAD10019AE4E /* alMain.h */,
-				73B0FBB61370AAD10019AE4E /* alSource.h */,
-				73B0FBB71370AAD10019AE4E /* alState.h */,
-				73B0FBB81370AAD10019AE4E /* alThunk.h */,
-				73B0FBB91370AAD10019AE4E /* alu.h */,
-				73B0FBBA1370AAD10019AE4E /* bs2b.h */,
-			);
-			path = Include;
-			sourceTree = "<group>";
-		};
-		73B0FBBC1370AAD10019AE4E /* utils */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = utils;
-			sourceTree = "<group>";
-		};
 		73B1C2FA171CEA830007207A /* fontstash */ = {
 			isa = PBXGroup;
 			children = (
@@ -1909,6 +1761,8 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				73A494921780E228008F3329 /* EnergyGaugeRenderer.cpp */,
+				73A494931780E228008F3329 /* EnergyGaugeRenderer.h */,
 				73BA22D6174BBA91002ABB5B /* oglconsole.cpp */,
 				73BA22AD174BB7DE002ABB5B /* DismountModesEnum.h */,
 				73BA22AE174BB7DE002ABB5B /* EditorAttributeMenuItemBuilder.cpp */,
@@ -3071,6 +2925,7 @@
 				73BA22C6174BB7DE002ABB5B /* SymbolShape.cpp in Sources */,
 				73BA22C7174BB7DE002ABB5B /* SystemFunctions.cpp in Sources */,
 				73BA22D7174BBA91002ABB5B /* oglconsole.cpp in Sources */,
+				73A494941780E228008F3329 /* EnergyGaugeRenderer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
