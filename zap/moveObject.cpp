@@ -1218,15 +1218,18 @@ void MountableItem::mountToShip(Ship *ship)
    mIsMounted = true;
    setMaskBits(MountMask);
 
-    if(!isGhost()) // i.e. if this is the server
-    {
-       TNLAssert(getGame(), "NULL game!");
-       getGame()->onFlagMounted(ship->getTeam());
-    }
+   if(isGhost())     // client
+      getGame()->addInlineHelpItem(TryDroppingItem);
+
+   else              // server
+   {
+      TNLAssert(getGame(), "NULL game!");
+      getGame()->onFlagMounted(ship->getTeam());
+   }
 }
 
 
-// Client & server; Note we come through here on initial unpack for mountItem, for better or worse.  When
+// Client & Server; Note we come through here on initial unpack for mountItem, for better or worse.  When
 // we do, mMount is NULL.
 void MountableItem::dismount(DismountMode dismountMode)
 {
@@ -1239,7 +1242,7 @@ void MountableItem::dismount(DismountMode dismountMode)
    // On the server, we need to update the position of the mounted object to match the position of the ship carrying it.  
    // On client, we'll wait for a message from the server to set the pos, which may have already happened by the time
    // this code is executed.
-   if(!isGhost())
+   if(!isGhost())    // Server
    {
       setPos(mMount->getActualPos());  
       mIsMounted = false;     // For client, wait to set this in unpackUpdate
@@ -1260,10 +1263,12 @@ void MountableItem::dismount(DismountMode dismountMode)
    // Allow immediate pickup of the flag only if the carrier was killed
    if(dismountMode != DISMOUNT_MOUNT_WAS_KILLED)
       mDroppedTimer.reset();
+
+   if(isGhost())     // Client
+      if(ship->getMountedItemCount() == 0)
+         getGame()->removeInlineHelpItem(TryDroppingItem, false);
 }
 
-
-void MountableItem::setMountedMask()  { setMaskBits(MountMask); }
 
 bool MountableItem::isMounted() { return mIsMounted; }
 Ship *MountableItem::getMount() { return mMount;     }

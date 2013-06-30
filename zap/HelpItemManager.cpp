@@ -493,26 +493,28 @@ void HelpItemManager::queueHelpItem(HelpItem item)
 // it happens... basically once the weights OR to 0xFF, the item is toast.
 void HelpItemManager::removeInlineHelpItem(HelpItem item, bool markAsSeen, U8 weight)
 {
-   TNLAssert(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow, "This method is only for paced items!");
+   //TNLAssert(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow, "This method is only for paced items!");
+   if(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow)      // for now
+   {
+      Vector<WeightedHelpItem> *queue = helpItems[item].priority == PacedHigh ? &mHighPriorityQueuedItems : &mLowPriorityQueuedItems;
+      S32 index = -1;
+      for(S32 i = 0; i < queue->size(); i++)
+         if(queue->get(i).helpItem == item)
+         {
+            index = i;
+            break;
+         }
 
-   Vector<WeightedHelpItem> *queue = helpItems[item].priority == PacedHigh ? &mHighPriorityQueuedItems : &mLowPriorityQueuedItems;
-   S32 index = -1;
-   for(S32 i = 0; i < queue->size(); i++)
-      if(queue->get(i).helpItem == item)
-      {
-         index = i;
-         break;
-      }
+       if(index != -1)
+       {
+          queue->get(index).removalWeight |= weight;
+          if(queue->get(index).removalWeight == 0xFF)
+            queue->erase(index);
+       }
+   }
 
-    if(index != -1)
-    {
-       queue->get(index).removalWeight |= weight;
-       if(queue->get(index).removalWeight == 0xFF)
-         queue->erase(index);
-    }
-
-    if(markAsSeen)
-       mAlreadySeen[item] = true;
+   if(markAsSeen)
+      mAlreadySeen[item] = true;
 }
 
 

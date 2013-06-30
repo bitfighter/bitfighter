@@ -255,7 +255,6 @@ public:
    virtual void dismount(DismountMode dismountMode);
 
    virtual void mountToShip(Ship *theShip);
-   void setMountedMask();
 
    bool isMounted();
    virtual bool isItemThatMakesYouVisibleWhileCloaked();      // NexusFlagItem overrides to false
