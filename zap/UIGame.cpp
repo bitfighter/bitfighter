@@ -186,7 +186,12 @@ void GameUserInterface::onActivate()
    mHelpItemManager.addInlineHelpItem(GameModesItem);          // Use F2 to see current mission
    mHelpItemManager.addInlineHelpItem(GameTypeAndTimer);       // Point out clock and score in LR
    mHelpItemManager.addInlineHelpItem(EnergyGaugeItem);        // Show user the energy gauge
+   mHelpItemManager.addInlineHelpItem(ViewScoreboardItem);     // Show ow to get the score
    mHelpItemManager.addInlineHelpItem(TryCloakItem);           // Recommend cloaking
+   mHelpItemManager.addInlineHelpItem(TryTurboItem);           // Recommend turbo
+
+   // And finally...
+   mHelpItemManager.addInlineHelpItem(F1HelpItem);             // How to get Help
    
 
    if(getGame()->getBotCount() == 0)
@@ -956,6 +961,9 @@ void GameUserInterface::activateModule(S32 index)
 
    if(getGame()->getLocalPlayerShip()->getModule(index) == ModuleCloak)
       mHelpItemManager.removeInlineHelpItem(TryCloakItem);     // Already tried it!
+   else if(getGame()->getLocalPlayerShip()->getModule(index) == ModuleBoost)
+      mHelpItemManager.removeInlineHelpItem(TryTurboItem);     // Already tried it!
+
 }
 
 
@@ -1045,6 +1053,8 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
          mHelperManager.activateHelp(getUIManager());
       else
          getUIManager()->activate<InstructionsUserInterface>();
+
+      mHelpItemManager.removeInlineHelpItem(F1HelpItem);    // User knows how to access help
 
       return true;
    }
@@ -1309,6 +1319,8 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          GameType *gameType = getGame()->getGameType();
          if(gameType)
             gameType->c2sRequestScoreboardUpdates(true);
+
+         mHelpItemManager.removeInlineHelpItem(ViewScoreboardItem);     // User found the tab key!
       }
    }
    else if(checkInputCode(settings, InputCodeManager::BINDING_TOGVOICE, inputCode))
