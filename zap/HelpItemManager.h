@@ -42,7 +42,7 @@
 //                                                                                 |Highlight obj.|
 //                   HelpItem enum val           Related to this item         Auto-add|arrows|Team      Priority                Help text
 #define HELP_ITEM_TABLE                                                                                                                                                                                                      \
-   HELP_TABLE_ITEM(WelcomeItem,                  UnknownTypeNumber,             true,  true, Any,        Now,       ARRAYDEF({ "Wecome to Bitfighter.  I'll help you get",                                                  \
+   HELP_TABLE_ITEM(WelcomeItem,                  UnknownTypeNumber,             true,  false, Any,        Now,       ARRAYDEF({ "Wecome to Bitfighter.  I'll help you get",                                                  \
                                                                                                                                 "oriented and find your way around.",                                                        \
                                                                                                                                 "You can disable these messages in the Options menu.", NULL }))                              \
    HELP_TABLE_ITEM(ControlsKBItem,               UnknownTypeNumber,             true,  false, Any,        PacedHigh, ARRAYDEF({ "Move your ship with the [[MOVEMENT]] keys.",                                                \
@@ -65,11 +65,11 @@
                                                                                                                                 "need it for shooting and modules.", NULL }))                                                \
    HELP_TABLE_ITEM(ObjectiveArrowItem,           UnknownTypeNumber,             true,  false, Any,        PacedLow,  ARRAYDEF({ "Objective arrows point the way to critical objects.", NULL }))                              \
    HELP_TABLE_ITEM(AddBotsItem,                  UnknownTypeNumber,             true,  false, Any,        PacedLow,  ARRAYDEF({ "Feeling lonely?  Playing with others is better, but you",                                   \
-                                                                                                                                "can add some bots from the Bots options menu.", NULL }))                                    \
+                                                                                                                                "can add some bots from the Robots options menu.", NULL }))                                  \
    HELP_TABLE_ITEM(TryCloakItem,                 UnknownTypeNumber,             true,  false, Any,        PacedLow,  ARRAYDEF({ "Like to be sneaky?  Try the cloak module.", NULL }))                                        \
    HELP_TABLE_ITEM(ViewScoreboardItem,           UnknownTypeNumber,             true,  false, Any,        PacedLow,  ARRAYDEF({ "Who is winning?  Hit [[ShowScoreboard]] to see the scoreboard.", NULL }))                   \
    HELP_TABLE_ITEM(TryTurboItem,                 UnknownTypeNumber,             true,  false, Any,        PacedLow,  ARRAYDEF({ "You have the Boost module.  Try double-click the activation key.", NULL }))                 \
-   HELP_TABLE_ITEM(F1HelpItem,                   UnknownTypeNumber,             true,  false, Any,        PacedLow,  ARRAYDEF({ "F1 will give you more help if you need it.", NULL }))                                       \
+   HELP_TABLE_ITEM(F1HelpItem,                   UnknownTypeNumber,             true,  false, Any,        PacedLow,  ARRAYDEF({ "[[Help]] will give you more help if you need it.", NULL }))                                 \
                                                                                                                                                                                                                              \
    /* These items will be displayed automatically when these objects are encountered */                                                                                                                                      \
    HELP_TABLE_ITEM(RepairItemSpottedItem,        RepairItemTypeNumber,          true,  false, Any,        Low,       ARRAYDEF({ "Repair items heal your ship.", NULL }))                                                     \
@@ -87,7 +87,7 @@
    HELP_TABLE_ITEM(GoFastSpottedItem,            SpeedZoneTypeNumber,           true,  false, Any,        Low,       ARRAYDEF({ "Use GoFasts to move around quickly.", NULL }))                                              \
    HELP_TABLE_ITEM(FriendlyFFSpottedItem,        ForceFieldTypeNumber,          true,  false, Any,        Low,       ARRAYDEF({ "Friendly forcefields will let you pass freely.", NULL }))                                   \
    HELP_TABLE_ITEM(FriendlyDamagedFFSpottedItem, ForceFieldProjectorTypeNumber, true,  false, Any,        Low,       ARRAYDEF({ "Damaged forcefields can be repaired with the Repair module.", NULL }))                      \
-   HELP_TABLE_ITEM(EnemyFFSpottedItem,           ForceFieldProjectorTypeNumber, true,  false, EorHostile, Low,       ARRAYDEF({ "Disable enemy forcefields by damaging thier projector.", NULL }))                           \
+   HELP_TABLE_ITEM(EnemyFFSpottedItem,           ForceFieldProjectorTypeNumber, true,  false, EorHostile, Low,       ARRAYDEF({ "Disable enemy forcefields by damaging their projector.", NULL }))                           \
    HELP_TABLE_ITEM(AsteroidSpottedItem,          AsteroidTypeNumber,            true,  false, Any,        High,      ARRAYDEF({ "Careful!", NULL }))                                                                         \
    HELP_TABLE_ITEM(EnemyMineSpottedItem,         MineTypeNumber,                true,  false, EorHorN,    High,      ARRAYDEF({ "Enemy mines can be hard to see.  Watch out!", NULL }))                                      \
    HELP_TABLE_ITEM(FriendlyMineSpottedItem,      MineTypeNumber,                true,  false, Team,       High,      ARRAYDEF({ "Friendly mines are easy to see but dangerous.", NULL }))                                    \
