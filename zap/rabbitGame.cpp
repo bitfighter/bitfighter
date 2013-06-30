@@ -40,7 +40,6 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    bool messageIsForLocalPlayer = (clientName == getGame()->getPlayerName());
-      
 
    switch (msgIndex)
    {
