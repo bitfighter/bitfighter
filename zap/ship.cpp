@@ -1533,6 +1533,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          else
             mSpawnShield.reset(0);
       }
+
       if(stream->readFlag())     // Health
          mHealth = stream->readFloat(6);
    }
