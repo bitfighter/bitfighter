@@ -48,7 +48,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
          getGame()->displayMessage(Colors::red, "%s GRABBED the Carrot!", clientName.getString());
 
          if(messageIsForLocalPlayer)
-            getGame()->addInlineHelpItem(RbLocalPlayerGrabbedFlagItem);           
+            getGame()->addInlineHelpItem(RbLocalPlayerGrabbedFlagItem);
+         else
+            getGame()->addInlineHelpItem(RbOtherPlayerGrabbedFlagItem);
          break;
 
       case RabbitMsgRabbitKill:

@@ -119,6 +119,7 @@
    HELP_TABLE_ITEM(TryChattingItem,              UnknownTypeNumber,             true,  Any,        High,      ARRAYDEF({ "Someone is sending chat messages.  Use [[TeamChat]] or [[GlobalChat]] to respond.",         \
                                                                                                                          "[[TeamChat]] sends a message to your team, [[GlobalChat]] sends one to everyone.", NULL })) \
    HELP_TABLE_ITEM(RbLocalPlayerGrabbedFlagItem, UnknownTypeNumber,             true,  Any,        High,      ARRAYDEF({ "You have the flag (carrot)!  Keep it as long as you can!", NULL }))                         \
+   HELP_TABLE_ITEM(RbOtherPlayerGrabbedFlagItem, UnknownTypeNumber,             true,  Any,        High,      ARRAYDEF({ "Another player grabbed the flag (carrot)!  KILL THEM!", NULL }))                            \
 
 
 using namespace TNL;
