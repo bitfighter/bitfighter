@@ -427,8 +427,6 @@ void HelpItemManager::renderMessages(const ClientGame *game, S32 yPos) const
    if(!mEnabled)
       return;
 
-   logprintf("%d",game->getBotCount());  //{P{P
-
 #ifdef TNL_DEBUG
    // This bit is for displaying our help messages one-by-one so we can see how they look on-screen, cycle with CTRL+H
    if(mTestingTimer.getCurrent() > 0)
