@@ -1414,8 +1414,8 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
 #ifndef ZAP_DEDICATED
-   bool positionChanged = false;    // True when position changes a little
-   bool shipwarped = false;         // True when position changes a lot
+   bool positionChanged = false;    // True when position changes a little -- ship position will be interpolated
+   bool shipwarped = false;         // True when position changes a lot -- ship will be warped to new location
 
    bool wasInitialUpdate = false;
    bool playSpawnEffect  = false;
