@@ -70,6 +70,8 @@ Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),
    mShapeType = ShipShape::Normal;
 #endif
 
+   mScriptType = ScriptTypeRobot;
+
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 

@@ -40,6 +40,7 @@ EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scrip
 {
    mScriptName = scriptName;
    mScriptArgs = scriptArgs;
+   mScriptType = ScriptTypeEditorPlugin;
 
    mGridDatabase = gridDatabase;
 

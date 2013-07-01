@@ -96,11 +96,21 @@ private:
    static void logErrorHandler(const char *msg, const char *prefix);
 
 protected:
+   enum ScriptType {
+      ScriptTypeLevelgen,
+      ScriptTypeRobot,
+      ScriptTypeEditorPlugin,
+      ScriptTypeConsole,
+      MaxScriptTypes,
+      ScriptTypeInvalid,
+   };
+
    static lua_State *L;          // Main Lua state variable
    string mScriptName;           // Fully qualified script name, with path and everything
    Vector<string> mScriptArgs;   // List of arguments passed to the script
 
    string mScriptId;             // Unique id for this script
+   ScriptType mScriptType;
 
    bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
 

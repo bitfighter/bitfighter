@@ -50,6 +50,7 @@ Console::Console()
 {
    mConsole = NULL;
    mScriptId = "console";    // Overwrite default name with something custom
+   mScriptType = ScriptTypeConsole;
 };     
 
 

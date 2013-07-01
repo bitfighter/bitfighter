@@ -79,6 +79,7 @@ LuaScriptRunner::LuaScriptRunner()
       mSubscriptions[i] = false;
 
    mScriptId = "script" + itos(mNextScriptId++);
+   mScriptType = ScriptTypeInvalid;
 }
 
 
