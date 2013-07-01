@@ -187,6 +187,8 @@ const char *SoccerGameType::getShortName() const { return "S"; }
 static const char *instructions[] = { "Push the ball into the",  "opposing team's goal!" };
 const char **SoccerGameType::getInstructionString() const { return instructions; } 
 
+HelpItem SoccerGameType::getGameStartInlineHelpItem() const { return SGameStartItem; }
+
 bool SoccerGameType::canBeTeamGame()       const { return true;  }
 bool SoccerGameType::canBeIndividualGame() const { return true;  }
 

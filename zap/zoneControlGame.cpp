@@ -457,6 +457,8 @@ const char *ZoneControlGameType::getShortName() const { return "ZC"; }
 static const char *instructions[] = { "Capture all the zones by",  "carrying the flag into them!" };
 const char **ZoneControlGameType::getInstructionString() const { return instructions; }
 
+HelpItem ZoneControlGameType::getGameStartInlineHelpItem() const { return ZCGameStartItem; }
+
 bool ZoneControlGameType::isFlagGame()          const { return true;  }
 bool ZoneControlGameType::isTeamGame()          const { return true;  }
 bool ZoneControlGameType::canBeTeamGame()       const { return true;  }

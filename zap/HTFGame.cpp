@@ -464,6 +464,7 @@ const char *HTFGameType::getShortName() const { return "HTF"; }
 
 static const char *instructions[] = { "Hold the flags at",  "your capture zones!" };
 const char **HTFGameType::getInstructionString() const { return instructions; }
+HelpItem HTFGameType::getGameStartInlineHelpItem() const { return HTFGameStartItem; }
 
 bool HTFGameType::isTeamGame()          const { return true;  }
 bool HTFGameType::canBeTeamGame()       const { return true;  }

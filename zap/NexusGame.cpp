@@ -657,6 +657,7 @@ const char *NexusGameType::getShortName() const { return "Nex"; }
 
 static const char *instructions[] = { "Collect flags and deliver",  "them to the Nexus!" };
 const char **NexusGameType::getInstructionString() const { return instructions; }
+HelpItem NexusGameType::getGameStartInlineHelpItem() const { return NexGameStartItem; }
 
 bool NexusGameType::isFlagGame()          const { return true;  } // Well, technically not, but we'll pervert flags as we load the level
 bool NexusGameType::canBeTeamGame()       const { return true;  }

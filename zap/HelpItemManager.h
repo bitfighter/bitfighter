@@ -105,9 +105,32 @@
                                                                                                                                 "[[TeamChat]] sends a message to your team, [[GlobalChat]] sends one to everyone.", NULL })) \
    HELP_TABLE_ITEM(TryDroppingItem,              UnknownTypeNumber,             true,  false, Any,        PacedLow,  ARRAYDEF({ "You are carrying an object.  Hit [[DropItem]] to drop it.", NULL }))                        \
                                                                                                                                                                                                                              \
+   /* GameType specific help items shown at beginning of game */                                                                                                                                                             \
+   HELP_TABLE_ITEM(BMGameStartItem,              UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Bitmatch game.  Kill everyone!", NULL }))                                         \
+   HELP_TABLE_ITEM(TeamBMGameStartItem,          UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a team Bitmatch game.",                                                             \
+                                                                                                                                "Kill everyone not on your team!", NULL }))                                                  \
+   HELP_TABLE_ITEM(CoreGameStartItem,            UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Core game.",                                                                      \
+                                                                                                                                "Kill enemy cores and defend your own.", NULL }))                                            \
+   HELP_TABLE_ITEM(CTFGameStartItem,             UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Capture the Flag game.",                                                          \
+                                                                                                                                "Touch the enemy flag to yours to score.", NULL }))                                          \
+   HELP_TABLE_ITEM(HTFGameStartItem,             UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Hold the Flag game.",                                                             \
+                                                                                                                                "Keep enemy flags in your capture zones ([[GOAL_ICON]]) for points.", NULL }))               \
+   HELP_TABLE_ITEM(NexGameStartItem,             UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Nexus game.  Kill players, collect their flags,",                                 \
+                                                                                                                                "and return them to the Nexus when it turns green.", NULL }))                                \
+   HELP_TABLE_ITEM(RabGameStartItem,             UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Rabbit game.  You get points by holding the flag.", NULL }))                      \
+   HELP_TABLE_ITEM(TeamRabGameStartItem,         UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a team Rabbit game.",                                                               \
+                                                                                                                                "You get points when your team controls the flag.", NULL }))                                 \
+   HELP_TABLE_ITEM(RetGameStartItem,             UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Retrieve game.",                                                                  \
+                                                                                                                                "Collect your flags in your goal zones ([[GOAL_ICON]]) to score.", NULL }))                  \
+   HELP_TABLE_ITEM(SGameStartItem,               UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Soccer game.",                                                                    \
+                                                                                                                                "Score by getting the ball",                                                                 \
+                                                                                                                                "into an enemy goal ([[GOAL_ICON]]).", NULL }))                                              \
+   HELP_TABLE_ITEM(ZCGameStartItem,              UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Zone Control game.",                                                              \
+                                                                                                                                "Capture zones ([[GOAL_ICON]]) by carrying the flag into them.", NULL }))                    \
+                                                                                                                                                                                                                             \
    /* Some GameType specific help items */                                                                                                                                                                                   \
-   HELP_TABLE_ITEM(RbLocalPlayerGrabbedFlagItem, UnknownTypeNumber,             true,  false, Any,        High,      ARRAYDEF({ "You have the flag (carrot)!  Keep it as long as you can!", NULL }))                         \
-   HELP_TABLE_ITEM(RbOtherPlayerGrabbedFlagItem, UnknownTypeNumber,             true,  false, Any,        High,      ARRAYDEF({ "Another player grabbed the flag (carrot)!  KILL THEM!", NULL }))                            \
+   HELP_TABLE_ITEM(RabLocalPlayerGrabbedFlagItem, UnknownTypeNumber,            true,  false, Any,        High,      ARRAYDEF({ "You have the flag (carrot)!  Keep it as long as you can!", NULL }))                         \
+   HELP_TABLE_ITEM(RabOtherPlayerGrabbedFlagItem, UnknownTypeNumber,            true,  false, Any,        High,      ARRAYDEF({ "Another player grabbed the flag (carrot)!  KILL THEM!", NULL }))                            \
 
 
 using namespace TNL;
@@ -181,18 +204,20 @@ private:
    void buildItemsToHighlightList();
    void queueHelpItem(HelpItem item);
    void moveItemFromQueueToActiveList(const ClientGame *game);
+   void removeGameStartItemsFromQueue();
 
 
 public:
    enum Priority {
       // The paced items will be doled out in drips and drabs
       PacedHigh,     // These items will always be displayed first (welcome message, basic controls)
+      GameStart,     // High priority, will only be added to the queue if there are no PacedHigh items, displaces other GameStart items
       PacedLow,      // These items will be shown as time allows (cmdrs map, change ship config)
 
       // These are messages that are shown in response to events.  They get a higher priority than PacedLow.
       Low,
       High,
-      Now      // Add regardless of flood control
+      Now            // Add now, regardless of flood control
    };
 
    static const S32 InitialDelayPeriod      =  4 * 1000; // Time before first help message will be displayed

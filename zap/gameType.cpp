@@ -254,6 +254,7 @@ string GameType::toLevelCode() const
 
 // GameType object is the first to be added when a new game starts... 
 // therefore, this is a reasonable signifier that a new game is starting up.  I think.
+// Server only?
 void GameType::addToGame(Game *game, GridDatabase *database)
 {
    mGame = game;
@@ -261,7 +262,7 @@ void GameType::addToGame(Game *game, GridDatabase *database)
 }
 
 
-// Client only
+// Client only -- only gets run once per level (not once per object)
 bool GameType::onGhostAdd(GhostConnection *theConnection)
 {
 #ifndef ZAP_DEDICATED
@@ -269,6 +270,7 @@ bool GameType::onGhostAdd(GhostConnection *theConnection)
    TNLAssert(game && !game->isServer(), "Should only be client here!");
 
    addToGame(game, game->getGameObjDatabase());
+   game->addInlineHelpItem(getGameStartInlineHelpItem());
    return true;
 #else
    TNLAssert(false, "Should only be client here!");
@@ -3935,6 +3937,8 @@ const char *GameType::getShortName() const { return "BM"; }
 
 static const char *instructions[] = { "Blast as many ships",  "as you can!" };
 const char **GameType::getInstructionString() const { return instructions; }
+
+HelpItem GameType::getGameStartInlineHelpItem() const { return isTeamGame() ? TeamBMGameStartItem : BMGameStartItem; }
 
 
 bool GameType::isFlagGame()          const { return false; }

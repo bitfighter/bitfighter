@@ -239,7 +239,8 @@ void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symb
 
    else if(symbolName == "LOADOUT_ICON")
       symbols.push_back(SymbolString::getSymbolGear(14));
-   
+   else if(symbolName == "GOAL_ICON")
+      symbols.push_back(SymbolString::getSymbolGoal(14));
    else if(symbolName == "CHANGEWEP")
    {
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1)));
@@ -470,7 +471,8 @@ void HelpItemManager::debugShowNextHelpItem()
 // Now only used internally
 void HelpItemManager::queueHelpItem(HelpItem item)
 {
-   TNLAssert(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow, "This method is only for paced items!");
+   TNLAssert(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow || 
+             helpItems[item].priority == GameStart, "This method is only for Paced/GameStart items!");
 
    // Don't queue items we've already seen
    if(mAlreadySeen[item])
@@ -480,7 +482,7 @@ void HelpItemManager::queueHelpItem(HelpItem item)
    weightedItem.helpItem = item;
    weightedItem.removalWeight = 0;
 
-   if(helpItems[item].priority == PacedHigh)
+   if(helpItems[item].priority == PacedHigh || helpItems[item].priority == GameStart)
       mHighPriorityQueuedItems.push_back(weightedItem);
    else
       mLowPriorityQueuedItems.push_back(weightedItem);
@@ -653,10 +655,19 @@ void HelpItemManager::addInlineHelpItem(HelpItem item, bool messageCameFromQueue
 
    // If the item has a priority of paced, we should queue the item rather than display it immediately (unless,
    // of course, it came from the queue!)
-   if(!messageCameFromQueue && (helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow))
+   if(!messageCameFromQueue)
    {
-      queueHelpItem(item);
-      return;
+      if(helpItems[item].priority == GameStart)
+         removeGameStartItemsFromQueue();
+
+      Priority pr = helpItems[item].priority;
+
+      // GameStart means remove any GameStart items in queue, and add to high priority queue only if it is empty
+      if(pr == PacedHigh || pr == PacedLow || (pr == GameStart && mHighPriorityQueuedItems.size() == 0))
+         queueHelpItem(item);
+
+      if(pr == PacedHigh || pr == PacedLow || pr == GameStart)
+         return;
    }
 
    // Skip the timer and queued item checks for Now priority items
@@ -684,6 +695,14 @@ void HelpItemManager::addInlineHelpItem(HelpItem item, bool messageCameFromQueue
    buildItemsToHighlightList();
 
    return;
+}
+
+
+void HelpItemManager::removeGameStartItemsFromQueue()
+{
+   // Any GameStart items should be at the beginning of the queue, as they are only added if the queue is empty
+   while(mHighPriorityQueuedItems.size() > 0 && helpItems[mHighPriorityQueuedItems[0].helpItem].priority == GameStart)
+      mHighPriorityQueuedItems.erase(0);
 }
 
 

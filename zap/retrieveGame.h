@@ -75,6 +75,7 @@ public:
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char **getInstructionString() const;
+   HelpItem getGameStartInlineHelpItem() const;
    bool isTeamGame() const;
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;

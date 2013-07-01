@@ -112,6 +112,7 @@ public:
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char **getInstructionString() const;
+   HelpItem getGameStartInlineHelpItem() const;
 
    // Info about this game type:
    bool isFlagGame() const;

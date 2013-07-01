@@ -48,9 +48,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
          getGame()->displayMessage(Colors::red, "%s GRABBED the Carrot!", clientName.getString());
 
          if(messageIsForLocalPlayer)
-            getGame()->addInlineHelpItem(RbLocalPlayerGrabbedFlagItem);
+            getGame()->addInlineHelpItem(RabLocalPlayerGrabbedFlagItem);
          else
-            getGame()->addInlineHelpItem(RbOtherPlayerGrabbedFlagItem);
+            getGame()->addInlineHelpItem(RabOtherPlayerGrabbedFlagItem);
          break;
 
       case RabbitMsgRabbitKill:
@@ -61,9 +61,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
       case RabbitMsgDrop:
          getGame()->playSoundEffect(SFXFlagDrop);
          getGame()->displayMessage(Colors::green, "%s DROPPED the Carrot!", clientName.getString());
-
-         if(messageIsForLocalPlayer)
-            getGame()->removeInlineHelpItem(RbLocalPlayerGrabbedFlagItem, false);
+         getGame()->removeInlineHelpItem(RabLocalPlayerGrabbedFlagItem, false);
+         getGame()->removeInlineHelpItem(RabOtherPlayerGrabbedFlagItem, false);
          break;
 
       case RabbitMsgRabbitDead:
@@ -480,6 +479,8 @@ const char *RabbitGameType::getShortName() const { return "Rab"; }
 
 static const char *instructions[] = { "Grab the flag and hold it",  "for as long as you can!" };
 const char **RabbitGameType::getInstructionString() const { return instructions; }
+
+HelpItem RabbitGameType::getGameStartInlineHelpItem() const { return isTeamGame() ? TeamRabGameStartItem : RabGameStartItem; }
 
 bool RabbitGameType::isFlagGame()          const { return true; }
 bool RabbitGameType::canBeTeamGame()       const { return true;  }

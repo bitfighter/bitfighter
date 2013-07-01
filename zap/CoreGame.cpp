@@ -248,6 +248,7 @@ const char *CoreGameType::getShortName() const { return "Core"; }
 
 static const char *instructions[] = { "Destroy enemy Cores",  0 };
 const char **CoreGameType::getInstructionString() const { return instructions; }
+HelpItem CoreGameType::getGameStartInlineHelpItem() const { return CoreGameStartItem; }
 
 
 bool CoreGameType::canBeTeamGame()       const { return true;  }

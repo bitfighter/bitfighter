@@ -458,6 +458,13 @@ SymbolShapePtr SymbolString::getSymbolGear(S32 fontSize)
 
 
 // Static method
+SymbolShapePtr SymbolString::getSymbolGoal(S32 fontSize)
+{
+   return SymbolShapePtr(new SymbolGoal(fontSize));
+}
+
+
+// Static method
 SymbolShapePtr SymbolString::getSymbolText(const string &text, S32 fontSize, FontContext context, const Color *color)
 {
    return SymbolShapePtr(new SymbolText(text, fontSize, context, color));
@@ -893,6 +900,30 @@ void SymbolGear::render(const Point &pos) const
    renderLoadoutZoneIcon(center, mWidth / 2);
 }
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+SymbolGoal::SymbolGoal(S32 fontSize) : Parent(fontSize)
+{
+   // Do nothing
+}
+
+
+// Destructor
+SymbolGoal::~SymbolGoal()
+{
+   // Do nothing
+}
+
+
+void SymbolGoal::render(const Point &pos) const
+{
+   // We are given the bottom y position of the line, but the icon expects the center
+   Point center(pos.x, (pos.y - mHeight/2) + 2); // Slight downward adjustment to position to better align with text
+   renderGoalZoneIcon(center, mWidth);
+}
 
 ////////////////////////////////////////
 ////////////////////////////////////////

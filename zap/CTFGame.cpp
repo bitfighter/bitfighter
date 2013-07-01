@@ -291,6 +291,7 @@ const char *CTFGameType::getShortName() const { return "CTF"; }
 
 static const char *instructions[] = { "Take the enemy flag",  "and touch it to yours!" };
 const char **CTFGameType::getInstructionString() const { return instructions; }
+HelpItem CTFGameType::getGameStartInlineHelpItem() const { return CTFGameStartItem; }
 
 
 bool CTFGameType::isFlagGame()          const { return true; }

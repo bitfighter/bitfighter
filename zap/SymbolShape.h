@@ -192,12 +192,24 @@ class SymbolGear : public SymbolCircle
 {
    typedef SymbolCircle Parent;
 
-private:
+protected:
    F32 mSizeFactor;
 
 public:
    SymbolGear(S32 fontSize);  // Constructor, fontSize is size of surrounding text
    virtual ~SymbolGear();
+
+   virtual void render(const Point &pos) const;
+};
+
+
+class SymbolGoal : public SymbolGear
+{
+   typedef SymbolGear Parent;
+
+public:
+   SymbolGoal(S32 fontSize);  // Constructor, fontSize is size of surrounding text
+   virtual ~SymbolGoal();
 
    void render(const Point &pos) const;
 };
@@ -285,6 +297,7 @@ public:
    // Statics to make creating things a bit easier
    static SymbolShapePtr getControlSymbol(InputCode inputCode, const Color *color = NULL);
    static SymbolShapePtr getSymbolGear(S32 fontSize);
+   static SymbolShapePtr getSymbolGoal(S32 fontSize);
    static SymbolShapePtr getSymbolText(const string &text, S32 fontSize, FontContext context, const Color *color = NULL);
    static SymbolShapePtr getBlankSymbol(S32 width = -1, S32 height = -1);
    static SymbolShapePtr getHorizLine(S32 length, S32 height, const Color *color);

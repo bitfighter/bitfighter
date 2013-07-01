@@ -92,6 +92,7 @@ public:
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char **getInstructionString() const;
+   HelpItem getGameStartInlineHelpItem() const;
 
    bool isFlagGame() const;
    bool canBeTeamGame() const;
