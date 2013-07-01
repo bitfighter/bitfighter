@@ -4218,20 +4218,20 @@ void EditorUserInterface::doneWithSimpleTextEntryMenu(SimpleTextEntryMenuUI *men
 
       case SimpleTextEntryRotateOrigin:
       {
-         F32 angle = Zap::stof(value);
+         F32 angle = (F32)Zap::stof(value);
          rotateSelection(-angle, true);       // Positive angle should rotate CW, negative makes that happen
          break;
       }
 
       case SimpleTextEntryRotateCentroid:
       {
-         F32 angle = Zap::stof(value);
+         F32 angle = (F32)Zap::stof(value);
          rotateSelection(-angle, false);      // Positive angle should rotate CW, negative makes that happen
          break;
       }
 
       case SimpleTextEntryScale:
-         scaleSelection(Zap::stof(value));
+         scaleSelection((F32)Zap::stof(value));
          break;
 
       default:

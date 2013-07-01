@@ -2536,16 +2536,18 @@ void renderLine(const Vector<Point> *points, const Color *color)
 }
 
 
-void drawFadingHorizontalLine(F32 x1, F32 x2, F32 yPos, const Color &color)
+void drawFadingHorizontalLine(S32 x1, S32 x2, S32 yPos, const Color &color)
 {
    F32 vertices[] = {
-         x1, yPos,
-         x2, yPos
+         (F32)x1, (F32)yPos,
+         (F32)x2, (F32)yPos
    };
+
    F32 colors[] = {
          color.r, color.g, color.b, 1,
          color.r, color.g, color.b, 0,
    };
+
    renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
 }
 
