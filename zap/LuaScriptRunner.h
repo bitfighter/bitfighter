@@ -96,11 +96,21 @@ private:
    static void logErrorHandler(const char *msg, const char *prefix);
 
 protected:
+   enum ScriptType {
+      ScriptTypeLevelgen,
+      ScriptTypeRobot,
+      ScriptTypeEditorPlugin,
+      ScriptTypeConsole,
+      MaxScriptTypes,
+      ScriptTypeInvalid,
+   };
+
    static lua_State *L;          // Main Lua state variable
    string mScriptName;           // Fully qualified script name, with path and everything
    Vector<string> mScriptArgs;   // List of arguments passed to the script
 
    string mScriptId;             // Unique id for this script
+   ScriptType mScriptType;
 
    bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
 
@@ -169,21 +179,8 @@ public:
 
    void logError(const char *format, ...);
 
-
-   // What follows is a number of static functions, which will be registered directly with our Lua instance as functions
-   // that are not related to any particular object, but are just available locally.
-   static S32 logprint(lua_State *L);
-   static S32 print(lua_State *L);
-   static S32 getMachineTime(lua_State *L);
-   static S32 getRandomNumber(lua_State *L);
-   static S32 findFile(lua_State *L);
-   static S32 readFromFile(lua_State *L);
-   static S32 writeToFile(lua_State *L);
-
    S32 doSubscribe(lua_State *L, ScriptContext context);
    S32 doUnsubscribe(lua_State *L);
-
-   static const LuaFunctionProfile functionArgs[]; 
 
    // Consolidate code from bots and levelgens -- this tickTimer works for both!
    template <class T>
@@ -200,6 +197,19 @@ public:
       runCmd("_tickTimer", 0);
    }
 
+
+
+   //// Lua interface
+   static const char *luaClassName;
+   static const LuaFunctionProfile functionArgs[];
+
+   static S32 lua_logprint(lua_State *L);
+   static S32 lua_print(lua_State *L);
+   static S32 lua_getRandomNumber(lua_State *L);
+   static S32 lua_getMachineTime(lua_State *L);
+   static S32 lua_findFile(lua_State *L);
+   static S32 lua_readFromFile(lua_State *L);
+   static S32 lua_writeToFile(lua_State *L);
 };
 
 

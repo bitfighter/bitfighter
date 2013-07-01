@@ -40,6 +40,7 @@ EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scrip
 {
    mScriptName = scriptName;
    mScriptArgs = scriptArgs;
+   mScriptType = ScriptTypeEditorPlugin;
 
    mGridDatabase = gridDatabase;
 
@@ -227,9 +228,6 @@ GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
 
 #undef LUA_METHODS
 
-
-// These two methods are reproduced here because it is (probably) better to have the plugin object stand on its own rather than
-// appear to be a subclass of levelgen.  Therefore, we need to have these methods be members of the class that we expose to Lua.
 
 /**
  * @luafunc  num EditorPlugin::getGridSize()

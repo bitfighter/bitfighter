@@ -79,6 +79,7 @@ LuaScriptRunner::LuaScriptRunner()
       mSubscriptions[i] = false;
 
    mScriptId = "script" + itos(mNextScriptId++);
+   mScriptType = ScriptTypeInvalid;
 }
 
 
@@ -758,40 +759,6 @@ S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
 
 //////////////////////////////////////////////////////
 
-// Define 
-
-#define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, logprint,        ARRAYDEF({{ ANY,   END }}), 1 ) \
-   METHOD(CLASS, print,           ARRAYDEF({{ ANY,   END }}), 1 ) \
-   METHOD(CLASS, getMachineTime,  ARRAYDEF({{        END }}), 1 ) \
-   METHOD(CLASS, findFile,        ARRAYDEF({{ STR,   END }}), 1 ) \
-   METHOD(CLASS, writeToFile,     ARRAYDEF({{ STR, STR, END }, { STR, STR, BOOL, END }}), 2 ) \
-   METHOD(CLASS, readFromFile,    ARRAYDEF({{ STR,   END }}), 1 ) \
-
-
-GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);    
-   
-
-void LuaScriptRunner::registerLooseFunctions(lua_State *L)
-{
-   // Register the functions listed above by generating a series of lines that look like this:
-   // lua_register(L, "logprint", logprint);     
-
-#  define REGISTER_LINE(class_, name, profiles, profileCount) \
-   lua_register(L, #name, name );
-
-   LUA_METHODS("unused", REGISTER_LINE);
-
-#  undef REGISTER_LINE
-
-   // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented
-   // Ensure we have a good stream of random numbers until we figure out why Lua's randoms suck so bad (bug reported in 5.1, fixed in 5.2?)
-   lua_register(L, "getRandomNumber", getRandomNumber); 
-   luaL_dostring(L, "math.random = getRandomNumber");
-}
-
-#undef LUA_METHODS
-
 
 //////////
 // What follows is a number of static functions, which will be registered directly with our Lua instance as functions
@@ -821,146 +788,6 @@ static string buildPrintString(lua_State *L)
   }
 
   return out;
-}
-
-
-// Write a message to the server logfile
-S32 LuaScriptRunner::logprint(lua_State *L)
-{
-   string str = buildPrintString(L);
-
-   logprintf(LogConsumer::LuaBotMessage, "%s", str.c_str());
-
-   return 0;
-}
-
-
-// This code based directly on Lua's print function, try to replicate functionality
-S32 LuaScriptRunner::print(lua_State *L)
-{
-   string str = buildPrintString(L);
-   gConsole.output("%s\n", str.c_str());
-
-  return 0;
-}
-
-
-S32 LuaScriptRunner::getMachineTime(lua_State *L)
-{
-   return LuaBase::returnInt(L, Platform::getRealMilliseconds());
-}
-
-
-// Find the specified file, in preparation for loading
-S32 LuaScriptRunner::findFile(lua_State *L)
-{
-   static const char *methodName = "findFile()";
-   checkArgCount(L, 1, methodName);
-
-   string filename = getString(L, 1, "");
-
-   FolderManager *folderManager = GameSettings::getFolderManager();
-
-   string fullname = folderManager->findScriptFile(filename);     // Looks in luadir, levelgens dir, bots dir
-
-   lua_pop(L, 1);    // Remove passed arg from stack
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not cleared!");
-
-   if(fullname == "")
-   {
-      logprintf(LogConsumer::LogError, "Could not find script file \"%s\"...", filename.c_str());
-      return returnNil(L);
-   }
-
-   return returnString(L, fullname.c_str());
-}
-
-
-/**
-  * @luafunc readFromFile(string filename)
-  * @brief   Reads in a file from our sandboxed IO directory
-  * @descr   Reads an entire file from the filesystem into a string
-  * @param   filename - the file to read
-  * @return  contents of the file as a string
-  */
-S32 LuaScriptRunner::readFromFile(lua_State *L)
-{
-   checkArgList(L, functionArgs, "", "readFromFile");
-
-   string filename = extractFilename(getString(L, 1, ""));
-
-   if(filename == "")
-      returnNil(L);
-
-   FolderManager *folderManager = GameSettings::getFolderManager();
-
-   return returnString(L, readFile(folderManager->screenshotDir + getFileSeparator() + filename).c_str());
-}
-
-
-/**
-  * @luafunc writeToFile(string filename, string contents, bool append)
-  * @brief   Write or append to a file on the filesystem
-  * @descr   This is in a sandboxed environment and will only allow writing to a specific directory
-  * @param   filename - the file to read
-  * @param   contents - the contents to save to the file
-  * @param   append (optional) - if true, append to the file instead of creating anew
-  */
-S32 LuaScriptRunner::writeToFile(lua_State *L)
-{
-   S32 profile = checkArgList(L, functionArgs, "", "writeToFile");
-
-   // Sanitize the path.  Only a file name is allowed!
-   string filename = extractFilename(getString(L, 1, ""));
-   string contents = getString(L, 2, "");
-
-   bool append = false;
-   if(profile == 1)
-      append = getBool(L, 3);
-   
-   if(filename != "" && contents != "")
-   {
-      FolderManager *folderManager = GameSettings::getFolderManager();
-
-      string filePath = folderManager->screenshotDir + getFileSeparator() + filename;
-
-      writeFile(filePath, contents, append);
-   }
-
-   return 0;
-}
-
-
-// General structure and perculiar error messages taken from lua math lib.  Docs for that are as follows; we should adhere to them as well:
-//
-// This function is an interface to the simple pseudo-random generator function rand provided by ANSI C. (No guarantees can be given for its 
-// statistical properties.) When called without arguments, returns a uniform pseudo-random real number in the range [0,1). When called with 
-// an integer number m, math.random returns a uniform pseudo-random integer in the range [1, m]. When called with two integer numbers m and n, 
-// math.random returns a uniform pseudo-random integer in the range [m, n].
-S32 LuaScriptRunner::getRandomNumber(lua_State *L)
-{
-   S32 args = lua_gettop(L);
-
-   if(args == 0)
-      return returnFloat(L, TNL::Random::readF());
-
-   if(args == 1)
-   {
-      S32 max = luaL_checkint(L, 1);
-      luaL_argcheck(L, 1 <= max, 1, "interval is empty");
-      return returnInt(L, TNL::Random::readI(1, max));
-   }
-
-   if(args == 2)
-   {
-      int min = luaL_checkint(L, 1);
-      int max = luaL_checkint(L, 2);
-      luaL_argcheck(L, min <= max, 2, "interval is empty");
-      return returnInt(L, TNL::Random::readI(min, max));
-   }
-
-   else 
-      return luaL_error(L, "wrong number of arguments");
 }
 
 
@@ -1125,8 +952,6 @@ void LuaScriptRunner::setEnums(lua_State *L)
 #undef setEventEnum
 
 
-
-
 void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
 {
    // TODO:  Some how be more dynamic with the creation of these tables
@@ -1209,6 +1034,220 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
    lua_setglobal(L, "WeaponInfo");
 }
 
-};
 
+//// Lua interface
+/**
+ *  @luaclass LuaScriptRunner
+ *  @brief    Main class for holding global methods accessible by all script runners
+ *  @descr    Script runners include levelgens, robots, and editor plugins.  The methods here
+ *            can be run from all three.  However, some may be disabled for a particular
+ *            script runner.
+ */
+
+const char *LuaScriptRunner::luaClassName = "";
+
+//               Fn name    Param profiles         Profile count
+#define LUA_METHODS(CLASS, METHOD) \
+      METHOD(CLASS, logprint,        ARRAYDEF({{ ANY,   END }}), 1 ) \
+      METHOD(CLASS, print,           ARRAYDEF({{ ANY,   END }}), 1 ) \
+      METHOD(CLASS, getRandomNumber, ARRAYDEF({{        END }}), 1 ) \
+      METHOD(CLASS, getMachineTime,  ARRAYDEF({{        END }}), 1 ) \
+      METHOD(CLASS, findFile,        ARRAYDEF({{ STR,   END }}), 1 ) \
+      METHOD(CLASS, writeToFile,     ARRAYDEF({{ STR, STR, END }, { STR, STR, BOOL, END }}), 2 ) \
+      METHOD(CLASS, readFromFile,    ARRAYDEF({{ STR,   END }}), 1 ) \
+
+GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);
+
+
+void LuaScriptRunner::registerLooseFunctions(lua_State *L)
+{
+   // Register the functions listed above by generating a series of lines that look like this:
+   // lua_register(L, "logprint", logprint);
+#  define REGISTER_LINE(class_, name, profiles, profileCount) \
+   lua_register(L, #name, lua_##name );
+
+   LUA_METHODS("unused", REGISTER_LINE);
+
+#  undef REGISTER_LINE
+
+
+   // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented
+   // Ensure we have a good stream of random numbers until we figure out why Lua's randoms suck so bad (bug reported in 5.1, fixed in 5.2?)
+   luaL_dostring(L, "math.random = getRandomNumber");
+}
+
+#undef LUA_METHODS
+
+
+/**
+  * @luafunc logprint(any parameter)
+  * @brief   Print to bitfighter's logging engine
+  * @descr   This will (currently) print to the bitfighter log file as well as stdout
+  * @param   parameter - the object you wish to print
+  */
+S32 LuaScriptRunner::lua_logprint(lua_State *L)
+{
+   string str = buildPrintString(L);
+
+   logprintf(LogConsumer::LuaBotMessage, "%s", str.c_str());
+
+   return 0;
+}
+
+
+/**
+  * @luafunc print(any parameter)
+  * @brief   Print to the in-game console
+  * @descr   This hijacks Lua's normal 'print' command that goes to stdout and instead redirects it
+  *          to the in-game console
+  * @param   parameter - the object you wish to print
+  */
+S32 LuaScriptRunner::lua_print(lua_State *L)
+{
+   string str = buildPrintString(L);
+   gConsole.output("%s\n", str.c_str());
+
+  return 0;
+}
+
+
+/**
+  * @luafunc num getRandomNumber()
+  * @brief   Better random number generated than that included with Lua
+  * @descr   General structure and peculiar error messages taken from lua math lib.
+  *          Docs for that are as follows; we should adhere to them as well:
+  *
+  *          This function is an interface to the simple pseudo-random generator function
+  *          rand provided by ANSI C. (No guarantees can be given for its statistical properties.)
+  *          When called without arguments, returns a uniform pseudo-random real number in the
+  *          range [0,1). When called with an integer number m, math.random returns a uniform
+  *          pseudo-random integer in the range [1, m]. When called with two integer numbers
+  *          m and n, math.random returns a uniform pseudo-random integer in the range [m, n].
+  *
+  * @return  A random number
+  */
+S32 LuaScriptRunner::lua_getRandomNumber(lua_State *L)
+{
+   S32 args = lua_gettop(L);
+
+   if(args == 0)
+      return returnFloat(L, TNL::Random::readF());
+
+   if(args == 1)
+   {
+      S32 max = luaL_checkint(L, 1);
+      luaL_argcheck(L, 1 <= max, 1, "interval is empty");
+      return returnInt(L, TNL::Random::readI(1, max));
+   }
+
+   if(args == 2)
+   {
+      int min = luaL_checkint(L, 1);
+      int max = luaL_checkint(L, 2);
+      luaL_argcheck(L, min <= max, 2, "interval is empty");
+      return returnInt(L, TNL::Random::readI(min, max));
+   }
+
+   else
+      return luaL_error(L, "wrong number of arguments");
+}
+
+
+/**
+  * @luafunc int getMachineTime()
+  * @brief   Gets the machine time in milliseconds
+  * @return  machine time in milliseconds
+  */
+S32 LuaScriptRunner::lua_getMachineTime(lua_State *L)
+{
+   return LuaBase::returnInt(L, Platform::getRealMilliseconds());
+}
+
+
+/**
+  * @luafunc findFile(string filename)
+  * @brief   Finds a specific file to load from various Lua folders
+  * @descr   Scans our scripts, levels, and robots directories for a file, in preparation for loading
+  * @param   filename - the file you're looking for
+  * @return  path to the file in question
+  */
+S32 LuaScriptRunner::lua_findFile(lua_State *L)
+{
+   checkArgList(L, functionArgs, luaClassName, "findFile");
+
+   string filename = getString(L, 1, "");
+
+   FolderManager *folderManager = GameSettings::getFolderManager();
+
+   string fullname = folderManager->findScriptFile(filename);     // Looks in luadir, levelgens dir, bots dir
+
+   lua_pop(L, 1);    // Remove passed arg from stack
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not cleared!");
+
+   if(fullname == "")
+   {
+      logprintf(LogConsumer::LogError, "Could not find script file \"%s\"...", filename.c_str());
+      return returnNil(L);
+   }
+
+   return returnString(L, fullname.c_str());
+}
+
+
+/**
+  * @luafunc readFromFile(string filename)
+  * @brief   Reads in a file from our sandboxed IO directory
+  * @descr   Reads an entire file from the filesystem into a string
+  * @param   filename - the file to read
+  * @return  contents of the file as a string
+  */
+S32 LuaScriptRunner::lua_readFromFile(lua_State *L)
+{
+   checkArgList(L, functionArgs, luaClassName, "readFromFile");
+
+   string filename = extractFilename(getString(L, 1, ""));
+
+   if(filename == "")
+      returnNil(L);
+
+   FolderManager *folderManager = GameSettings::getFolderManager();
+
+   return returnString(L, readFile(folderManager->screenshotDir + getFileSeparator() + filename).c_str());
+}
+
+
+/**
+  * @luafunc writeToFile(string filename, string contents, bool append)
+  * @brief   Write or append to a file on the filesystem
+  * @descr   This is in a sandboxed environment and will only allow writing to a specific directory
+  * @param   filename - the file to read
+  * @param   contents - the contents to save to the file
+  * @param   append (optional) - if true, append to the file instead of creating anew
+  */
+S32 LuaScriptRunner::lua_writeToFile(lua_State *L)
+{
+   S32 profile = checkArgList(L, functionArgs, luaClassName, "writeToFile");
+
+   // Sanitize the path.  Only a file name is allowed!
+   string filename = extractFilename(getString(L, 1, ""));
+   string contents = getString(L, 2, "");
+
+   bool append = false;
+   if(profile == 1)
+      append = getBool(L, 3);
+
+   if(filename != "" && contents != "")
+   {
+      FolderManager *folderManager = GameSettings::getFolderManager();
+
+      string filePath = folderManager->screenshotDir + getFileSeparator() + filename;
+
+      writeFile(filePath, contents, append);
+   }
+
+   return 0;
+}
+
+
+};
 

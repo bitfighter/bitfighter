@@ -47,6 +47,7 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
 
    mScriptName = scriptName;
    mScriptArgs = scriptArgs;
+   mScriptType = ScriptTypeLevelgen;
 
    mGridDatabase = gridDatabase;
    mGame = game;

@@ -25,7 +25,7 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
--- These functions will be included with every robot and levelgen script automatically.
+-- These functions will be included with every script automatically.
 -- Do not tinker with these unless you are sure you know what you are doing!!
 -- And even then, be careful!
 -------------------------------------------------------------------------------
