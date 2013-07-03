@@ -305,6 +305,9 @@ TEST_F(BfTest, HelpItemManagerTests)
    // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
    FontManager::initialize(&settings, false);   
    ClientGame game(addr, &settings);
+   // Need to add a gameType because gameType is where the game timer is managed
+   GameType gameType;
+   gameType.addToGame(&game, game.getGameObjDatabase());
 
    HelpItem helpItem = NexusSpottedItem;
 
@@ -344,14 +347,20 @@ TEST_F(BfTest, HelpItemManagerTests)
    
    HelpItem highPriorityItem = ControlsKBItem;
    HelpItem lowPriorityItem  = CmdrsMapItem;
+   HelpItem gameStartPriorityItem = NexGameStartItem;
 
-   ASSERT_EQ(himgr.getItemPriority(highPriorityItem), UI::HelpItemManager::PacedHigh);    // Prove that these items
-   ASSERT_EQ(himgr.getItemPriority(lowPriorityItem),  UI::HelpItemManager::PacedLow);     // have the expected priority
+   ASSERT_EQ(himgr.getItemPriority(highPriorityItem),      UI::HelpItemManager::PacedHigh);    // Prove that these items
+   ASSERT_EQ(himgr.getItemPriority(lowPriorityItem),       UI::HelpItemManager::PacedLow);     // have the expected priority
+   ASSERT_EQ(himgr.getItemPriority(gameStartPriorityItem), UI::HelpItemManager::GameStart);     
 
    himgr.addInlineHelpItem(lowPriorityItem);    // Queue both items up
    himgr.addInlineHelpItem(highPriorityItem);
 
    // Verify that both have been queued -- one item in each queue, and there are no items in the display list
+   checkQueues(himgr, 1, 1, 0);
+
+   // Now queue the gameStartPriorityItem... it should not get queued, and things should remain as they were
+   himgr.addInlineHelpItem(gameStartPriorityItem);
    checkQueues(himgr, 1, 1, 0);
 
    himgr.idle(himgr.InitialDelayPeriod - 1, &game);
@@ -380,7 +389,29 @@ TEST_F(BfTest, HelpItemManagerTests)
 
    // Idle until list is clear
    idleUntilItemExpired(himgr, game);
-   ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);       // No items displayed
+   checkQueues(himgr, 0, 0, 0);       // No items displayed
+   idleRemainderOfFullCycle(himgr, game);
+
+   // Try adding our gameStartPriorityItem now... since there is nothing in the high priority queue, it should add fine
+   himgr.addInlineHelpItem(gameStartPriorityItem);
+   checkQueues(himgr, 1, 0, 0);
+   idleFullCycle(himgr, game);
+   checkQueues(himgr, 0, 0, 1);       // No items displayed
+   idleFullCycle(himgr, game);
+   checkQueues(himgr, 0, 0, 0);       // No items displayed
+
+   // Make sure an item in the low priority queue won't impede the addition of a gameStartPriorityItem
+   himgr.clearAlreadySeenList();    // Allows us to add these same items again
+   himgr.addInlineHelpItem(lowPriorityItem);
+   checkQueues(himgr, 0, 1, 0);
+   himgr.addInlineHelpItem(gameStartPriorityItem);
+   checkQueues(himgr, 1, 1, 0);
+   idleFullCycle(himgr, game);
+   checkQueues(himgr, 0, 1, 1, gameStartPriorityItem);       // gameStartPriority item displayed
+   idleFullCycle(himgr, game);
+   checkQueues(himgr, 0, 0, 1);
+   idleFullCycle(himgr, game);
+   checkQueues(himgr, 0, 0, 0);
 
    // Verify bug with two high priority paced items preventing the first from being displayed
    // Start fresh with a new HelpItemManager

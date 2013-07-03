@@ -211,14 +211,18 @@ public:
    bool hasFlagSpawns() const;      
    bool hasPredeployedFlags() const;
 
+   /////
+   // Time related -- these are all passthroughs to mGameTimer
    void setGameTime(F32 timeInSeconds);
+   void extendGameTime(S32 timeInMs);
 
    U32 getTotalGameTime() const;            // In seconds
    S32 getRemainingGameTime() const;        // In seconds
    S32 getRemainingGameTimeInMs() const;    // In ms
-   S32 getRenderingOffset() const;
    bool isTimeUnlimited() const;
-   void extendGameTime(S32 timeInMs);
+   S32 getRenderingOffset() const;
+   /////
+   
 
    S32 getLeadingScore() const;
    S32 getLeadingTeam() const;

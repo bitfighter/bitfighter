@@ -4027,6 +4027,13 @@ void GameType::setGameTime(F32 timeInSeconds)
 }
 
 
+// Only called by various voting codes, server only
+void GameType::extendGameTime(S32 timeInMs)
+{
+   setTimeRemaining(mGameTimer.getCurrent() + timeInMs, false); 
+}
+
+
 // Return time in seconds; returns 0 if game is unlimited
 U32 GameType::getTotalGameTime() const
 {
@@ -4047,22 +4054,15 @@ S32 GameType::getRemainingGameTimeInMs() const
 }
 
 
-S32 GameType::getRenderingOffset() const
-{
-   return mGameTimer.getRenderingOffset();
-}
-
-
 bool GameType::isTimeUnlimited() const
 {
    return mGameTimer.isUnlimited();
 }
 
 
-// Only called by various voting codes, server only
-void GameType::extendGameTime(S32 timeInMs)
+S32 GameType::getRenderingOffset() const
 {
-   setTimeRemaining(mGameTimer.getCurrent() + timeInMs, false); 
+   return mGameTimer.getRenderingOffset();
 }
 
 
