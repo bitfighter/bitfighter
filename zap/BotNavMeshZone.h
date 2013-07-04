@@ -114,7 +114,7 @@ public:
                                  const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones);
 
    static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
-   static void buildBotNavMeshZoneConnections(const Vector<pair<Point, const Vector<Point> *> > &teleporterData);
+   static void buildBotNavMeshZoneConnections();
    static void linkTeleportersBotNavMeshZoneConnections(const Vector<pair<Point, const Vector<Point> *> > &teleporterData);
 };
 

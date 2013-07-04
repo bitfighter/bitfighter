@@ -26,6 +26,7 @@
 #include "BotNavMeshZone.h"
 
 #include "ship.h"                   // For Ship::CollisionRadius
+#include "teleporter.h"             // For Teleporter::TELEPORTER_RADIUS
 #include "gameObjectRender.h"
 #include "barrier.h"                // For Barrier methods in generating zones
 #include "EngineeredItem.h"         // For Turret and ForceFieldProjector methods in generating zones
@@ -322,23 +323,24 @@ bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh,
 static Vector<DatabaseObject *> zones;
 
 // Returns index of zone containing specified point
-static BotNavMeshZone *findZoneContainingPoint(GridDatabase *botZoneDatabase, const Point &point)
+static BotNavMeshZone *findZoneTouchingCircle(GridDatabase *botZoneDatabase, const Point &centerPoint, F32 radius)
 {
-   Rect rect(point, 0.01f);
+   Rect rect(centerPoint, radius);
    zones.clear();
    botZoneDatabase->findObjects(BotNavMeshZoneTypeNumber, zones, rect);
 
-   // If there is more than one possible match, pick the first arbitrarily (could happen if dest is right on a zone border)
+   const Vector<Point> *poly;
+   Point c;
+
+   // Pick the first zone within our radius
    for(S32 i = 0; i < zones.size(); i++)
    {
       BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(zones[i]);
+      poly = zone->getOutline();
 
-      if(zone && polygonContainsPoint(zone->getOutline()->address(), zone->getOutline()->size(), point))
+      if(zone && polygonCircleIntersect(poly->address(), poly->size(), centerPoint, radius * radius, c))
          return zone;   
    }
-
-   if(zones.size() != 0)  // In case of point was close to polygon, but not inside the zone?
-      return static_cast<BotNavMeshZone *>(zones[0]);
 
    return NULL;
 }
@@ -565,7 +567,8 @@ bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<Da
          botzone->addToZoneDatabase();
       }
 
-      BotNavMeshZone::buildBotNavMeshZoneConnections(teleporterData);
+      BotNavMeshZone::buildBotNavMeshZoneConnections();
+      linkTeleportersBotNavMeshZoneConnections(teleporterData);
    }
 
 #ifdef LOG_TIMER
@@ -587,7 +590,7 @@ const Vector<BotNavMeshZone *> *BotNavMeshZone::getBotZones()
 
 // Only runs on server
 // TODO can be combined with buildBotNavMeshZoneConnectionsRecastStyle() ?
-void BotNavMeshZone::buildBotNavMeshZoneConnections(const Vector<pair<Point, const Vector<Point> *> > &teleporterData)    
+void BotNavMeshZone::buildBotNavMeshZoneConnections()
 {
    if(mAllZones.size() == 0)      // Nothing to do!
       return;
@@ -633,8 +636,6 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections(const Vector<pair<Point, con
          }
       }
    }
-
-   linkTeleportersBotNavMeshZoneConnections(teleporterData);
 }
 
 
@@ -645,16 +646,18 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(const Vector<pair<
    // Now create paths representing the teleporters
    Point origin, dest;
 
+   F32 triggerRadius = F32(Teleporter::TELEPORTER_RADIUS - Ship::CollisionRadius);
+
    for(S32 i = 0; i < teleporterData.size(); i++)
    {
       origin = teleporterData[i].first;
-      BotNavMeshZone *origZone = findZoneContainingPoint(botZoneDatabase, origin);
+      BotNavMeshZone *origZone = findZoneTouchingCircle(botZoneDatabase, origin, triggerRadius);
 
       if(origZone != NULL)
          for(S32 j = 0; j < teleporterData[i].second->size(); j++)     // Review each teleporter destination
          {
             dest = teleporterData[i].second->get(j);
-            BotNavMeshZone *destZone = findZoneContainingPoint(botZoneDatabase, dest);
+            BotNavMeshZone *destZone = findZoneTouchingCircle(botZoneDatabase, dest, triggerRadius);
 
             if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
             {
