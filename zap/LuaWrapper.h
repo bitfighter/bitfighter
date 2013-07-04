@@ -68,6 +68,8 @@ using namespace Zap;
 #define LUAW_CACHE_METATABLE_KEY "cachemetatable"
 #define LUAW_HOLDS_KEY     "holds"
 #define LUAW_WRAPPER_KEY   "LuaWrapper"
+#define LUAW_USING_PROXY_KEY "usingproxy"
+#define LUAW_USING_PROXY_METATABLE_KEY "usingproxymetatable"
 
 // A simple utility function to adjust a given index
 // Useful for when a parameter index needs to be adjusted
@@ -81,6 +83,15 @@ inline int luaW_correctindex(lua_State* L, int index, int correction)
 // Forward declaration
 template <class T> class LuaProxy;
 
+
+// Here we will specify whether to use our proxy system for objects managed in LuaW
+// or use (mostly) upstream behavior
+inline bool luaW_shouldCreateProxy(lua_State* L)
+{
+   // We don't want proxies with editor plugins because they end up creating dangling
+   // pointers to LuaProxy objects (when copying the GridDatabse in undo/redo)
+   return LuaBase::getScriptContext(L) != LuaBase::PluginContext;
+}
 
 
 // These are the default allocator and deallocator. If you would prefer an
@@ -203,6 +214,61 @@ bool luaW_is(lua_State *L, int index, bool strict = false)
     return equal;
 }
 
+
+// Check to see if an object is using a proxy or not.  The luaW_userdata is passed in here
+// and is looked up in the usingproxy table on whether or not it has a proxy associated
+template <typename T>
+inline bool luaW_isUsingProxy(lua_State* L, void *objptr)
+{
+   luaW_wrapperfield<T>(L, LUAW_USING_PROXY_KEY);     // -- ... usingproxy_table
+   lua_pushlightuserdata(L, objptr);                  // -- ... usingproxy_table, &luaW_Userdata
+   lua_rawget(L, -2);                                 // -- ... usingproxy_table, bool
+
+   TNLAssert(!lua_isnil(L, -1) || LuaBase::dumpStack(L), "Expected non-nil value!");
+   bool usingProxy = lua_toboolean(L, -1);            // -- ... usingproxy_table, bool
+
+   lua_pop(L, 2);                                     // -- ...
+
+   return usingProxy;
+}
+
+
+// Set whether or not our object uses a proxy
+template <typename T>
+void luaW_setUsingProxy(lua_State* L, T* obj, bool usingProxy)
+{
+   luaW_wrapperfield<T>(L, LUAW_USING_PROXY_KEY);     // -- ... usingproxy_table
+
+   // If we're using a proxy, then use that as the usingproxy table key.  This is because
+   // we use the luaW_Userdata to find out if an object is using a proxy.  luaW_Userdata
+   // will contain the proxy for proxied object otherwise it contains the object itself
+   if(usingProxy)
+   {
+      LuaProxy<T> *proxy = obj->getLuaProxy();
+      lua_pushlightuserdata(L, proxy);                // -- ... usingproxy_table, &proxy
+   }
+   else
+      lua_pushlightuserdata(L, obj);                  // -- ... usingproxy_table, &obj
+
+   lua_pushboolean(L, usingProxy);                    // -- ... usingproxy_table, &obj_or_proxy, bool
+   lua_rawset(L, -3);                                 // -- ... usingproxy_table
+   lua_pop(L, 1);                                     // -- ...
+}
+
+
+// Here we clean-up references in our usingproxy table
+template <typename T>
+inline void luaW_clearUsingProxy(lua_State* L, void *objptr)
+{
+   luaW_wrapperfield<T>(L, LUAW_USING_PROXY_KEY);     // -- ... usingproxy_table
+   lua_pushlightuserdata(L, objptr);                  // -- ... usingproxy_table, &luaW_Userdata
+   lua_pushnil(L);                                    // -- ... usingproxy_table, &luaW_Userdata, nil
+
+   lua_rawset(L, -3);                                 // -- ... usingproxy_table
+   lua_pop(L, 1);                                     // -- ...
+}
+
+
 // Analogous to lua_to(boolean|string|*)
 //
 // Converts the given acceptable index to a T*. That value must be of (or
@@ -220,11 +286,17 @@ T* luaW_to(lua_State* L, int index, bool strict = false)
             pud = &ud;
         }
 
-        LuaProxy<T> *proxy = static_cast<LuaProxy<T> *>(pud->data);
+        if(luaW_isUsingProxy<T>(L, pud->data))
+        {
+           LuaProxy<T> *proxy = static_cast<LuaProxy<T> *>(pud->data);
 
-        if(!proxy->isDefunct())
-           return proxy->getProxiedObject();
+           if(!proxy->isDefunct())
+              return proxy->getProxiedObject();
+        }
+        else
+           return static_cast<T*>(pud->data);
     }
+
     return NULL;
 }
 
@@ -244,6 +316,7 @@ LuaProxy<T>* luaW_toProxy(lua_State* L, int index, bool strict = false)
         }
         return static_cast<LuaProxy<T> *>(pud->data);
     }
+
     return NULL;
 }
 
@@ -265,10 +338,15 @@ T* luaW_check(lua_State* L, int index, bool strict = false)
             pud = &ud;
         }
 
-        LuaProxy<T> *proxy = static_cast<LuaProxy<T>*>(pud->data);
+        if(luaW_isUsingProxy<T>(L, pud->data))
+        {
+           LuaProxy<T> *proxy = static_cast<LuaProxy<T>*>(pud->data);
 
-        if(!proxy->isDefunct())
-           obj = proxy->getProxiedObject();
+           if(!proxy->isDefunct())
+              obj = proxy->getProxiedObject();
+        }
+        else
+           obj = static_cast<T*>(pud->data);
     }
     else
     {
@@ -305,61 +383,101 @@ void luaW_push(lua_State* L, T* obj)
       return;
    }
 
-   // Get the object's proxy, or create one if it doesn't yet exist
-   LuaProxy<T> *proxy = obj->getLuaProxy();
-
-   if(proxy)         // Retrieve the userdata for this proxy from our cache table
+   // Should we be using proxies for our objects?
+   if(luaW_shouldCreateProxy(L))
    {
-      luaW_wrapperfield<T>(L, LUAW_CACHE_KEY);        // -- cache_table
-      LuaWrapper<T>::identifier(L, obj);              // -- cache_table, id
+      // Get the object's proxy, or create one if it doesn't yet exist
+      LuaProxy<T> *proxy = obj->getLuaProxy();
 
-      // lua_gettable pushes onto the stack the value t[k], where t is the value at the given valid 
-      // index and k is the value at the top of the stack.  Pops k, triggers metamethods.
-      // Here: retrieves and pushes cache_table[id]
-      lua_gettable(L, -2);                            // -- cache_table, userdata
+      if(proxy)         // Retrieve the userdata for this proxy from our cache table
+      {
+         luaW_wrapperfield<T>(L, LUAW_CACHE_KEY);        // -- cache_table
+         LuaWrapper<T>::identifier(L, obj);              // -- cache_table, id
 
-      TNLAssert(lua_isuserdata(L, -1) || 
-                     LuaBase::dumpStack(L, "Expect table, userdata") || LuaBase::dumpTable(L, -2, "Cached Userdatas"), 
-                "Expected userdata!");
-      TNLAssert(proxy == luaW_toProxy<T>(L, -1), "Cached object is not the one we expect!");
+         // lua_gettable pushes onto the stack the value t[k], where t is the value at the given valid
+         // index and k is the value at the top of the stack.  Pops k, triggers metamethods.
+         // Here: retrieves and pushes cache_table[id]
+         lua_gettable(L, -2);                            // -- cache_table, userdata
 
-      // Clean up the stack
-      lua_remove(L, -2);                              // -- userdata
-   }
+         TNLAssert(lua_isuserdata(L, -1) ||
+               LuaBase::dumpStack(L, "Expect table, userdata") || LuaBase::dumpTable(L, -2, "Cached Userdatas"),
+               "Expected userdata!");
+         TNLAssert(proxy == luaW_toProxy<T>(L, -1), "Cached object is not the one we expect!");
+
+         // Clean up the stack
+         lua_remove(L, -2);                              // -- userdata
+      }
+      else
+      {
+         // Create a new proxy
+         proxy = new LuaProxy<T>(obj);
+
+         // Add a new entry to our cache table (a weak table; more about those here: http://lua-users.org/wiki/WeakTablesTutorial).
+         // Note that from here on down, we'll fall back on the normal LuaW push code, except for the bit at the end where
+         // we add it to the table.
+         LuaWrapper<T>::identifier(L, obj);                 // -- id
+         luaW_wrapperfield<T>(L, LUAW_CACHE_KEY);           // -- id, cache_table
+
+         lua_pushvalue(L, -2);                              // -- id, cache_table, id
+
+         // Create the new luaW_userdata and place it in the cache
+         lua_pop(L, 1); // ... id cache
+         lua_insert(L, -2); // ... cache id
+         luaW_Userdata* ud = static_cast<luaW_Userdata*>(lua_newuserdata(L, sizeof(luaW_Userdata))); // ... cache id obj
+         ud->data = proxy;
+         ud->cast = LuaWrapper<T>::cast;
+         lua_pushvalue(L, -1); // ... cache id obj obj
+         lua_insert(L, -4); // ... obj cache id obj
+         lua_settable(L, -3); // ... obj cache
+
+         // Set the class metatable on userdata
+         luaL_getmetatable(L, LuaWrapper<T>::classname); // ... obj cache mt
+         lua_setmetatable(L, -3); // ... obj cache
+
+         // Cleanup
+         lua_pop(L, 1); // ... obj
+         TNLAssert(lua_isuserdata(L, -1) || LuaBase::dumpStack(L, "Expect userdata"), "Expected userdata!");
+
+         luaW_setUsingProxy(L, obj, true);
+         luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
+      }
+   }  // useLuaProxy
+
+   // No proxy: Use upstream behavior
    else
    {
-      // Create a new proxy
-      proxy = new LuaProxy<T>(obj);
-   
-      // Add a new entry to our cache table (a weak table; more about those here: http://lua-users.org/wiki/WeakTablesTutorial).
-      // Note that from here on down, we'll fall back on the normal LuaW push code, except for the bit at the end where
-      // we add it to the table.
-      LuaWrapper<T>::identifier(L, obj);                 // -- id
-      luaW_wrapperfield<T>(L, LUAW_CACHE_KEY);           // -- id, cache_table
+      LuaWrapper<T>::identifier(L, obj); // ... id
+      luaW_wrapperfield<T>(L, LUAW_CACHE_KEY); // ... id cache
+      lua_pushvalue(L, -2); // ... id cache id
+      lua_gettable(L, -2); // ... id cache obj
+      if (lua_isnil(L, -1))
+      {
+          // Create the new luaW_userdata and place it in the cache
+          lua_pop(L, 1); // ... id cache
+          lua_insert(L, -2); // ... cache id
+          luaW_Userdata* ud = static_cast<luaW_Userdata*>(lua_newuserdata(L, sizeof(luaW_Userdata))); // ... cache id obj
+          ud->data = obj;
+          ud->cast = LuaWrapper<T>::cast;
+          lua_pushvalue(L, -1); // ... cache id obj obj
+          lua_insert(L, -4); // ... obj cache id obj
+          lua_settable(L, -3); // ... obj cache
 
-      lua_pushvalue(L, -2);                              // -- id, cache_table, id
+          luaL_getmetatable(L, LuaWrapper<T>::classname); // ... obj cache mt
+          lua_setmetatable(L, -3); // ... obj cache
 
-      // Create the new luaW_userdata and place it in the cache
-      lua_pop(L, 1); // ... id cache
-      lua_insert(L, -2); // ... cache id
-      luaW_Userdata* ud = static_cast<luaW_Userdata*>(lua_newuserdata(L, sizeof(luaW_Userdata))); // ... cache id obj
-      ud->data = proxy;
-      ud->cast = LuaWrapper<T>::cast;
-      lua_pushvalue(L, -1); // ... cache id obj obj
-      lua_insert(L, -4); // ... obj cache id obj
-      lua_settable(L, -3); // ... obj cache
+          lua_pop(L, 1); // ... obj
 
-      // Set the class metatable on userdata
-      luaL_getmetatable(L, LuaWrapper<T>::classname); // ... obj cache mt
-      lua_setmetatable(L, -3); // ... obj cache
-
-      // Cleanup
-      lua_pop(L, 1); // ... obj
-      TNLAssert(lua_isuserdata(L, -1) || LuaBase::dumpStack(L, "Expect userdata"), "Expected userdata!");
-
-      luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
+          luaW_setUsingProxy(L, obj, false);
+          luaW_hold<T>(L, obj);     // Tell luaW to manage this object
+      }
+      else
+      {
+          lua_replace(L, -3); // ... obj cache
+          lua_pop(L, 1); // ... obj
+      }
    }
 }
+
 
 // Instructs LuaWrapper that it owns the userdata, and can manage its memory.
 // When all references to the object are removed, Lua is free to garbage
@@ -539,9 +657,6 @@ int luaW_newindex(lua_State* L)
 template <typename T>
 int luaW_gc(lua_State* L)
 {
-   LuaProxy<T>* proxy = luaW_toProxy<T>(L, 1);
-   TNLAssert(proxy, "Expected a proxy!");
-
    // NOTE
    //
    // We have hijacked the upstream luaW_gc() method to only clean-up proxies. This
@@ -552,31 +667,45 @@ int luaW_gc(lua_State* L)
    // automatically at the end of a game.  Other objects, like LuaPlayerInfo, are
    // deleted when its owning ClientInfo object is cleaned up.  This pattern must be
    // followed
-   if(proxy)
-      delete proxy;
+   luaW_Userdata* pud = static_cast<luaW_Userdata*>(lua_touserdata(L, 1));
 
+   if(luaW_isUsingProxy<T>(L, pud->data))
+   {
+      LuaProxy<T>* proxy = luaW_toProxy<T>(L, 1);
+      TNLAssert(proxy, "Expected a proxy!");
+
+      if(proxy)
+         delete proxy;
+   }
+
+   // Else we're not using proxies, handle the object with the upstream code.
+   //
+   // NOTE
+   // The deallocator (delete) is disabled here because we've decided to manage object
+   // memory in the c++ classes themselves, not in the LuaW lifecycle.
+   else
+   {
+      // obj
+      T* obj = luaW_to<T>(L, 1);
+      LuaWrapper<T>::identifier(L, obj); // obj key value storage id
+      luaW_wrapperfield<T>(L, LUAW_HOLDS_KEY); // obj id counts count holds
+      lua_pushvalue(L, 2); // obj id counts count holds id
+      lua_gettable(L, -2); // obj id counts count holds hold
+//      if (lua_toboolean(L, -1) && LuaWrapper<T>::deallocator)
+//      {
+//          LuaWrapper<T>::deallocator(L, obj);
+//      }
+
+      luaW_wrapperfield<T>(L, LUAW_STORAGE_KEY); // obj id counts count holds hold storage
+      lua_pushvalue(L, 2); // obj id counts count holds hold storage id
+      lua_pushnil(L); // obj id counts count holds hold storage id nil
+      lua_settable(L, -3); // obj id counts count holds hold storage
+
+      luaW_release<T>(L, 2);
+   }
+
+   luaW_clearUsingProxy<T>(L, pud->data);
    return 0;
-    
-/* Upstream code:
-    // obj
-    T* obj = luaW_to<T>(L, 1);
-    LuaWrapper<T>::identifier(L, obj); // obj key value storage id
-    luaW_wrapperfield<T>(L, LUAW_HOLDS_KEY); // obj id counts count holds
-    lua_pushvalue(L, 2); // obj id counts count holds id
-    lua_gettable(L, -2); // obj id counts count holds hold
-    if (lua_toboolean(L, -1) && LuaWrapper<T>::deallocator)
-    {
-        LuaWrapper<T>::deallocator(L, obj);
-    }
-
-    luaW_wrapperfield<T>(L, LUAW_STORAGE_KEY); // obj id counts count holds hold storage
-    lua_pushvalue(L, 2); // obj id counts count holds hold storage id
-    lua_pushnil(L); // obj id counts count holds hold storage id nil
-    lua_settable(L, -3); // obj id counts count holds hold storage
-    
-    luaW_release<T>(L, 2);
-    return 0;
-*/
 }
 
 // Takes two tables and registers them with Lua to the table on the top of the
@@ -620,6 +749,15 @@ inline void luaW_initialize(lua_State* L)
         lua_newtable(L); // ... LuaWrapper {}
         lua_setfield(L, -2, LUAW_HOLDS_KEY); // ... nil LuaWrapper
         
+        // Create the usingProxy table -- make it a weak table
+        lua_newtable(L); // ... nil LuaWrapper {}
+        lua_setfield(L, -2, LUAW_USING_PROXY_KEY); // ... nil LuaWrapper
+
+        lua_newtable(L); // ... nil LuaWrapper {}
+        lua_pushstring(L, "v"); // ... nil LuaWrapper {} "v"
+        lua_setfield(L, -2, "__mode"); // ... nil LuaWrapper {}
+        lua_setfield(L, -2, LUAW_USING_PROXY_METATABLE_KEY); // ... nil LuaWrapper
+
         // Create a cache table, with weak values so that the userdata will not
         // be ref counted
         lua_newtable(L); // ... nil LuaWrapper {}
@@ -706,6 +844,13 @@ void luaW_setfuncs(lua_State* L, const char* classname, const luaL_Reg* table,
     luaW_wrapperfield<T>(L, LUAW_CACHE_METATABLE_KEY); // ... LuaWrapper LuaWrapper.cache {} cmt
     lua_setmetatable(L, -2); // ... LuaWrapper LuaWrapper.cache {}
     lua_setfield(L, -2, LuaWrapper<T>::classname); // ... LuaWrapper LuaWrapper.cache
+    lua_pop(L, 1); // ... LuaWrapper
+
+    lua_getfield(L, -1, LUAW_USING_PROXY_KEY); // ... LuaWrapper LuaWrapper.usingproxy
+    lua_newtable(L); // ... LuaWrapper LuaWrapper.usingproxy {}
+    luaW_wrapperfield<T>(L, LUAW_USING_PROXY_METATABLE_KEY); // ... LuaWrapper LuaWrapper.usingproxy {} upmt
+    lua_setmetatable(L, -2); // ... LuaWrapper LuaWrapper.usingproxy {}
+    lua_setfield(L, -2, LuaWrapper<T>::classname); // ... LuaWrapper LuaWrapper.usingproxy
 
     lua_pop(L, 2); // ...
 
@@ -771,6 +916,11 @@ void luaW_extend(lua_State* L)
     lua_getfield(L, -1, LUAW_CACHE_KEY); // ... LuaWrapper LuaWrapper.cache
     lua_getfield(L, -1, LuaWrapper<U>::classname); // ... LuaWrapper LuaWrapper.cache U
     lua_setfield(L, -2, LuaWrapper<T>::classname); // ... LuaWrapper LuaWrapper.cache
+    lua_pop(L, 1); // ... LuaWrapper
+
+    lua_getfield(L, -1, LUAW_USING_PROXY_KEY); // ... LuaWrapper LuaWrapper.usingproxy
+    lua_getfield(L, -1, LuaWrapper<U>::classname); // ... LuaWrapper LuaWrapper.usingproxy U
+    lua_setfield(L, -2, LuaWrapper<T>::classname); // ... LuaWrapper LuaWrapper.usingproxy
 
     lua_pop(L, 2); // ...
 
