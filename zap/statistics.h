@@ -60,6 +60,9 @@ private:
    U32 mTotalSuicides;     // Total suicides over the lifetime of this connection
    U32 mGamesPlayed;       // Number of games played, obviously
 
+   U32 mKillStreak;
+   U32 mLongestKillStreak;
+
    Vector<U32> mLoadouts;
 
 public:
@@ -106,6 +109,9 @@ public:
 
    void addDeath();     // Player got killed
    U32 getDeaths();     // Report cumulated deaths
+
+   U32 getKillStreak();
+   U32 getLongestKillStreak();
 
    void addSuicide();   // Player killed self
    U32 getSuicides();   // Report cumulated suicides

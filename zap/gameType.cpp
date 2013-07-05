@@ -1801,7 +1801,7 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 }
 
 
-// Handle scoring when ship is killed
+// Handle scoring when ship is killed; server only
 void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *clientObject, BfObject *killerObject)
 {
    if(isGameOver())  // Avoid flooding messages on game over
@@ -1812,7 +1812,7 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *client
    if(!victim)
       return;        // Do nothing; it's probably a "Ship 0 0 0" in a level, where there is no ClientInfo
 
-   victim->getStatistics()->addDeath();
+   victim->addDeath();
 
    StringTableEntry killerDescr = killerObject->getKillString();
 
@@ -1833,7 +1833,7 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *client
 
       else                                                                        // Different team, or not a team game
       {
-         killer->getStatistics()->addKill();
+         killer->addKill();
          updateScore(killer, KillEnemy);
       }
 

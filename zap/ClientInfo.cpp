@@ -558,6 +558,20 @@ Nonce *ClientInfo::getId()
 }
 
 
+// Server only
+void ClientInfo::addKill()
+{
+   mStatistics.addKill();
+}
+
+
+// Server only
+void ClientInfo::addDeath()
+{
+   mStatistics.addDeath();
+}
+
+
 // Methods to provide access to mReturnToGameTimer -- this is used on the server to enforce a post /idle delay
 // and used on the client to display the (approximate) time left in that delay.
 U32  ClientInfo::getReturnToGameTime()                  { return mReturnToGameTimer.getCurrent();      }

@@ -182,6 +182,9 @@ public:
    void setShipSystemsDisabled(bool disabled);
    bool isShipSystemsDisabled();
 
+   void addKill();
+   void addDeath();
+
    Nonce *getId();
 
    U32 getReturnToGameTime();
