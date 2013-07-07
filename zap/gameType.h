@@ -434,12 +434,15 @@ public:
    virtual void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
 
    virtual void onGhostAvailable(GhostConnection *theConnection);
-   TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, 
-                                     S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId));
+   TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, 
+                                     StringTableEntry levelCreds, S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, 
+                                     bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId));
    TNL_DECLARE_RPC(s2cAddWalls, (Vector<F32> barrier, F32 width, bool solid));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isAuthenticated, Int<BADGE_COUNT> badges, 
-                                  bool isMyClient, RangedU32<0, ClientInfo::MaxRoles> role, bool isRobot, bool isSpawnDelayed, bool isBusy, bool playAlert, bool showMessage));
+                                  RangedU32<0, ClientInfo::MaxKillStreakLength> killStreak,
+                                  bool isMyClient, RangedU32<0, ClientInfo::MaxRoles> role, bool isRobot, bool isSpawnDelayed, 
+                                  bool isBusy, bool playAlert, bool showMessage));
    TNL_DECLARE_RPC(s2cClientJoinedTeam, (StringTableEntry clientName, RangedU32<0, Game::MAX_TEAMS> teamIndex, bool showMessage));
 
    TNL_DECLARE_RPC(s2cClientChangedRoles, (StringTableEntry clientName, RangedU32<0, ClientInfo::MaxRoles> role));

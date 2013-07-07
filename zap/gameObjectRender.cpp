@@ -581,7 +581,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
                 U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
                 bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                 bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
-                bool hasArmor, bool engineeringTeleport)
+                bool hasArmor, bool engineeringTeleport, U32 killStreak)
    
 {
    glPushMatrix();
@@ -612,6 +612,8 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
          renderTeleporterOutline(Point(cos(angle), sin(angle)) * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS),
                (F32)Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
    }
+
+   drawStringf(0, 50, 15, "%d", killStreak); //{P{P
 
    if(showCoordinates && layerIndex == 1)
       renderShipCoords(actualPos, isLocalShip, alpha);
@@ -649,7 +651,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
       calcThrustComponents(vel, angle, deltaAngle, boostActive, thrusts);  
 
       renderShip(shape, color, alpha, thrusts, health, radius, renderTime,
-               shieldActive, sensorActive, repairActive, hasArmor);
+                 shieldActive, sensorActive, repairActive, hasArmor);
    }
 
    glPopMatrix();

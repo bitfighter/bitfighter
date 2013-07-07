@@ -1747,8 +1747,10 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
 
    // This message gets sent to all clients, even the client being added, though they presumably know most of this stuff already
    // This clientInfo belongs to the server; has no badge info for client...
-   s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), false,
-                clientInfo->getRole(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(), clientInfo->isBusy(), true, true);
+   s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), 
+      min(clientInfo->getKillStreak(), ClientInfo::MaxKillStreakLength), false,
+                clientInfo->getRole(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(), 
+                clientInfo->isBusy(), true, true);
 
 
    if(clientInfo->getTeamIndex() >= 0) 
@@ -2352,9 +2354,11 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 // This suggests that RemoteClientInfos are not retained from game to game, but are generated anew.
 // ** Note that this method is essentially a mechanism for passing clientInfos from server to client. **
 GAMETYPE_RPC_S2C(GameType, s2cAddClient, 
-                (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, bool isMyClient, 
-                 RangedU32<0, ClientInfo::MaxRoles> role, bool isRobot, bool isSpawnDelayed, bool isBusy, bool playAlert, bool showMessage),
-                (name, isAuthenticated, badges, isMyClient, role, isRobot, isSpawnDelayed, isBusy, playAlert, showMessage))
+                (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, 
+                 RangedU32<0, ClientInfo::MaxKillStreakLength> killStreak, bool isMyClient, 
+                 RangedU32<0, ClientInfo::MaxRoles> role, bool isRobot, bool isSpawnDelayed, 
+                 bool isBusy, bool playAlert, bool showMessage),
+                (name, isAuthenticated, badges, killStreak, isMyClient, role, isRobot, isSpawnDelayed, isBusy, playAlert, showMessage))
 {
 #ifndef ZAP_DEDICATED
 
@@ -2368,7 +2372,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    }
 
    // The new ClientInfo will be deleted in s2cRemoveClient   
-   ClientInfo *clientInfo = new RemoteClientInfo(clientGame, name, isAuthenticated, badges, isRobot, 
+   ClientInfo *clientInfo = new RemoteClientInfo(clientGame, name, isAuthenticated, badges, killStreak, isRobot, 
                                                 (ClientInfo::ClientRole)role.value, isSpawnDelayed, isBusy);
 
    clientGame->onPlayerJoined(clientInfo, isMyClient, playAlert, showMessage);
@@ -2653,7 +2657,8 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
       bool isLocalClient = (conn == theConnection);
 
-      s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), isLocalClient, 
+      s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), 
+         min(clientInfo->getKillStreak(), ClientInfo::MaxKillStreakLength), isLocalClient, 
                    clientInfo->getRole(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(),
                    clientInfo->isBusy(), false, false);
 
@@ -3842,17 +3847,29 @@ GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTable
          else
             mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", victim.getString());
       else
+      {
          if(killerDescr == "mine")
             mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by mine laid by %s", victim.getString(), killer.getString());
          else
             mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped %s", killer.getString(), victim.getString());
+
+         // Increment killer's kill streak length...
+         ClientInfo *killerInfo = mGame->findClientInfo(killer);
+         if(killerInfo)
+            killerInfo->incrementKillStreak();
+      }
    }
    else if(killerDescr == "mine")   // Killer was some object with its own kill description string
       mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got blown up by a mine", victim.getString());
    else if(killerDescr != "")
       mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s %s", victim.getString(), killerDescr.getString());
-   else         // Killer unknown
+   else         // killerDescr == "" --> Killer unknown
       mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
+
+   // Clear victim's kill streak length...
+   ClientInfo *victimInfo = mGame->findClientInfo(victim);
+   if(victimInfo)
+      victimInfo->clearKillStreak();
 }
 
 

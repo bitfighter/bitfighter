@@ -275,7 +275,6 @@ public:
 
    static const S32 MAX_TEAMS = 9;           // Max teams allowed -- careful changing this; used for RPC ranges
 
-
    static const S32 PLAYER_VISUAL_DISTANCE_HORIZONTAL = 600;    // How far player can see normally horizontally...
    static const S32 PLAYER_VISUAL_DISTANCE_VERTICAL = 450;      // ...and vertically
 

@@ -47,6 +47,7 @@ ClientInfo::ClientInfo()
    mTotalScore = 0;
    mTeamIndex = (NO_TEAM + 0);
    mPing = 0;
+   mCurrentKillStreak = 0;
    mRole = RoleNone;
    mIsRobot = false;
    mIsAuthenticated = false;
@@ -376,6 +377,16 @@ void ClientInfo::endOfGameScoringHandler()
 }
 
 
+void ClientInfo::incrementKillStreak() { mCurrentKillStreak++;   }
+void ClientInfo::clearKillStreak()     { mCurrentKillStreak = 0; }
+
+
+U32 ClientInfo::getKillStreak() const
+{
+   return mCurrentKillStreak;
+}
+
+
 LuaPlayerInfo *ClientInfo::getPlayerInfo()
 {
    // Lazily initialize
@@ -561,13 +572,15 @@ Nonce *ClientInfo::getId()
 // Server only
 void ClientInfo::addKill()
 {
-   mStatistics.addKill();
+   mCurrentKillStreak++;
+   mStatistics.addKill(mCurrentKillStreak);
 }
 
 
 // Server only
 void ClientInfo::addDeath()
 {
+   mCurrentKillStreak = 0;
    mStatistics.addDeath();
 }
 
@@ -575,7 +588,7 @@ void ClientInfo::addDeath()
 // Methods to provide access to mReturnToGameTimer -- this is used on the server to enforce a post /idle delay
 // and used on the client to display the (approximate) time left in that delay.
 U32  ClientInfo::getReturnToGameTime()                  { return mReturnToGameTimer.getCurrent();      }
-void ClientInfo::setReturnToGameTimer(U32 timeDelta) { mReturnToGameTimer.reset(timeDelta, mReturnToGameTimer.getPeriod()); }
+void ClientInfo::setReturnToGameTimer(U32 timeDelta)    {        mReturnToGameTimer.reset(timeDelta, mReturnToGameTimer.getPeriod()); }
 bool ClientInfo::updateReturnToGameTimer(U32 timeDelta) { return mReturnToGameTimer.update(timeDelta); }
 void ClientInfo::resetReturnToGameTimer()               {        mReturnToGameTimer.reset();           }
 
@@ -724,7 +737,8 @@ void FullClientInfo::setIsEngineeringTeleporter(bool isEngineeringTeleporter)
 #ifndef ZAP_DEDICATED
 // Constructor
 RemoteClientInfo::RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges, 
-                                   bool isRobot, ClientRole role, bool isSpawnDelayed, bool isBusy) : ClientInfo()
+                                   RangedU32<0, MaxKillStreakLength> killStreak, bool isRobot, ClientRole role, 
+                                   bool isSpawnDelayed, bool isBusy) : ClientInfo()
 {
    mGame = game;
    mName = name;
@@ -736,6 +750,7 @@ RemoteClientInfo::RemoteClientInfo(Game *game, const StringTableEntry &name, boo
    mBadges = badges;
    mSpawnDelayed = isSpawnDelayed;
    mIsBusy = isBusy;
+   mCurrentKillStreak = killStreak;
 
    // Initialize speech stuff
    mDecoder = new SpeexVoiceDecoder();                                  // Deleted in destructor

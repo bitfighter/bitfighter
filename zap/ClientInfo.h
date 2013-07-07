@@ -66,6 +66,8 @@ public:
       MaxRoles
    };
 
+   static const S32 MaxKillStreakLength = 4095;
+
 private:
    LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
    Statistics mStatistics;          // Statistics tracker
@@ -90,6 +92,7 @@ protected:
    bool mIsEngineeringTeleporter;
    bool mShipSystemsDisabled;
    Int<BADGE_COUNT> mBadges;
+   U32 mCurrentKillStreak;
    Game *mGame;
 
    Timer mReturnToGameTimer;
@@ -146,6 +149,9 @@ public:
    F32 getCalculatedRating();
    void endOfGameScoringHandler();     // Resets stats and the like
 
+   void incrementKillStreak();
+   void clearKillStreak();
+   U32 getKillStreak() const;
 
    S32 getPing();
    void setPing(S32 ping);
@@ -256,7 +262,8 @@ private:
 
 public:
    RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges,      // Constructor
-                    bool isRobot, ClientRole role, bool isSpawnDelayed, bool isBusy);
+                    RangedU32<0, MaxKillStreakLength> killStreak, bool isRobot, ClientRole role, 
+                    bool isSpawnDelayed, bool isBusy);
    virtual ~RemoteClientInfo();      
    // Destructor
    void initialize();

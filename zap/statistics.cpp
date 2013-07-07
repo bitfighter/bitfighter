@@ -37,7 +37,6 @@ Statistics::Statistics()
    mTotalDeaths = 0;     
    mTotalSuicides = 0; 
    mGamesPlayed = 0;
-   mKillStreak = 0;
    mLongestKillStreak = 0;
 
    resetStatistics();
@@ -166,11 +165,11 @@ void Statistics::addGamePlayed()
 
 
 // Player killed another player
-void Statistics::addKill()
+void Statistics::addKill(U32 killStreak)
 {
    mKills++;
    mTotalKills++;
-   mKillStreak++;
+   mLongestKillStreak = max(killStreak, mLongestKillStreak);
 }
 
 
@@ -186,9 +185,8 @@ void Statistics::addDeath()
 {
    mDeaths++;
    mTotalDeaths++;
-   mLongestKillStreak = max(mKillStreak, mLongestKillStreak);
-   mKillStreak = 0;
 }
+
 
 // Report cumulated deaths
 U32 Statistics::getDeaths()
@@ -197,13 +195,7 @@ U32 Statistics::getDeaths()
 }
 
 
-U32 Statistics::getKillStreak()
-{
-   return mKillStreak;
-}
-
-
-U32 Statistics::getLongestKillStreak()
+U32 Statistics::getLongestKillStreak() const
 {
    return mLongestKillStreak;
 }
