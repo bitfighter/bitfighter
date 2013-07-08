@@ -74,17 +74,13 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
    (U32 msgIndex, StringTableEntry clientName, U32 flagCount, U32 score), (msgIndex, clientName, flagCount, score),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
-#ifndef ZAP_DEDICATED
-
-   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-
    if(msgIndex == NexusMsgScore)
    {
       getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s returned %d flag%s to the Nexus for %d points!", 
                                  clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
       getGame()->playSoundEffect(SFXFlagCapture);
 
-      Ship *ship = clientGame->findShip(clientName);
+      Ship *ship = getGame()->findShip(clientName);
       if(ship && score >= 100)
          getGame()->emitTextEffect(itos(score) + " POINTS!", Colors::red80, ship->getRenderPos());
    }
@@ -93,7 +89,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
       getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s is having a YARD SALE!", clientName.getString());
       getGame()->playSoundEffect(SFXFlagSnatch);
 
-      Ship *ship = clientGame->findShip(clientName);
+      Ship *ship = getGame()->findShip(clientName);
       if(ship)
          getGame()->emitTextEffect("YARD SALE!", Colors::red80, ship->getRenderPos());
    }
@@ -107,7 +103,6 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
       getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), "The game ended in a tie.");
       getGame()->playSoundEffect(SFXFlagDrop);
    }
-#endif
 }
 
 

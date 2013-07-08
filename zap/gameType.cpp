@@ -3778,9 +3778,6 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
                             (U32 achievement, StringTableEntry clientName), (achievement, clientName),
                              NetClassGroupGameMask, RPCGuaranteed, RPCToGhost, 0)
 {
-#ifndef ZAP_DEDICATED
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-
    string message = "";
    string textEffectText = "";
 
@@ -3800,10 +3797,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
    mGame->displayMessage(Colors::yellow, message.c_str(), clientName.getString());
    mGame->playSoundEffect(SFXAchievementEarned);
 
-   Ship *ship = clientGame->findShip(clientName);
+   Ship *ship = mGame->findShip(clientName);
    if(ship)
       mGame->emitTextEffect(textEffectText, Colors::yellow, ship->getRenderPos() + Point(0, 150));
-#endif
 }
 
 
