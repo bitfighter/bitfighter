@@ -1748,7 +1748,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
    // This message gets sent to all clients, even the client being added, though they presumably know most of this stuff already
    // This clientInfo belongs to the server; has no badge info for client...
    s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), 
-      min(clientInfo->getKillStreak(), ClientInfo::MaxKillStreakLength), false,
+      min(clientInfo->getKillStreak(), (U32)ClientInfo::MaxKillStreakLength), false,
                 clientInfo->getRole(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(), 
                 clientInfo->isBusy(), true, true);
 
@@ -2658,7 +2658,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
       bool isLocalClient = (conn == theConnection);
 
       s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), 
-         min(clientInfo->getKillStreak(), ClientInfo::MaxKillStreakLength), isLocalClient, 
+         min(clientInfo->getKillStreak(), (U32)ClientInfo::MaxKillStreakLength), isLocalClient,
                    clientInfo->getRole(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(),
                    clientInfo->isBusy(), false, false);
 
