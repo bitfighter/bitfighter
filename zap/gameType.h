@@ -158,6 +158,8 @@ private:
 
    S32 findLargestTeamWithBots() const;
 
+   void launchKillStreakTextEffects(const ClientInfo *clientInfo) const;
+
 protected:
    Timer mScoreboardUpdateTimer;
 

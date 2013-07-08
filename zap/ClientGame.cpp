@@ -1331,26 +1331,6 @@ void ClientGame::supressScreensaver()
 }
 
 
-Ship *ClientGame::findShip(const StringTableEntry &clientName)
-{
-   fillVector.clear();
-
-   getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      Ship *ship = static_cast<Ship *>(fillVector[i]);
-      ClientInfo *clientInfo = ship->getClientInfo();
-      // Due to spybug scoping ships when not ready yet, we might not have ClientInfo yet
-      // Also clientInfo->getName() can be NULL here somehow?  Player leaves at the right moment?
-      if(clientInfo && clientInfo->getName() && clientInfo->getName() == clientName)
-         return ship;
-   }
-
-   return NULL;
-}
-
-
 // We need to let the server know we are in cmdrs map because it needs to send extra data
 void ClientGame::setUsingCommandersMap(bool usingCommandersMap)
 {

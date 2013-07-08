@@ -321,6 +321,7 @@ public:
 
 
    ClientInfo *findClientInfo(const StringTableEntry &name);      // Find client by name
+   Ship *findShip(const StringTableEntry &clientName);            // Find ship by name
    
    const Rect *getWorldExtents() const;
 

@@ -749,6 +749,35 @@ bool GameType::advanceGameClock(U32 deltaT)
 }
 
 
+// Client only
+void GameType::launchKillStreakTextEffects(const ClientInfo *clientInfo) const
+{
+   Ship *ship = mGame->findShip(clientInfo->getName());
+   if(!ship)
+      return;
+
+   Point pos = ship->getRenderPos() + Point(0, 150);
+
+   if(clientInfo->getKillStreak() == 5)
+      mGame->emitTextEffect("5 in a row!  Good job!", Colors::yellow, pos);
+
+   else if(clientInfo->getKillStreak() == 10)
+      mGame->emitTextEffect("10! Wow, that's just swell!", Colors::yellow, pos);
+
+   else if(clientInfo->getKillStreak() == 15)
+      mGame->emitTextEffect("15! Great job!", Colors::yellow, pos);
+
+   else if(clientInfo->getKillStreak() == 20)
+      mGame->emitTextEffect("20! Neat!", Colors::yellow, pos);
+
+   else if(clientInfo->getKillStreak() == 25)
+      mGame->emitTextEffect("25! Hooray!", Colors::yellow, pos);
+
+   else if(clientInfo->getKillStreak() > 0 && clientInfo->getKillStreak() % 5 == 0)
+      mGame->emitTextEffect(itos(clientInfo->getKillStreak()) + " Hang in there!", Colors::yellow, pos);
+}
+
+
 #ifndef ZAP_DEDICATED
 
 void GameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
@@ -3856,7 +3885,10 @@ GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTable
          // Increment killer's kill streak length...
          ClientInfo *killerInfo = mGame->findClientInfo(killer);
          if(killerInfo)
+         {
             killerInfo->incrementKillStreak();
+            launchKillStreakTextEffects(killerInfo);
+         }
       }
    }
    else if(killerDescr == "mine")   // Killer was some object with its own kill description string

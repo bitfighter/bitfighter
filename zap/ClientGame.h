@@ -131,8 +131,6 @@ public:
    void idle(U32 timeDelta);
    void setUsingCommandersMap(bool usingCommandersMap);
 
-   Ship *findShip(const StringTableEntry &clientName);
-
    // HelpItem related
    void addInlineHelpItem(HelpItem item) const;
    void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam) const;
