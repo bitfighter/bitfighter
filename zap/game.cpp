@@ -1563,7 +1563,10 @@ F32 Game::getObjectiveArrowHighlightAlpha() const
 // In seconds
 S32 Game::getRemainingGameTime() const
 {
-   return mGameType->getRemainingGameTime();
+   if(mGameType)     // Can be NULL at the end of a game
+      return mGameType->getRemainingGameTime();
+   else
+      return 0;
 }
 
 };

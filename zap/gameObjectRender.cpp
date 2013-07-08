@@ -593,12 +593,32 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
    {
       string renderName = isBusy ? "<<" + shipName + ">>" : shipName;
 
-      F32 textAlpha = 0.5f * alpha;
+      F32 textAlpha = alpha;
       S32 textSize = 14;
 
       glLineWidth(gLineWidth1);
 
-      glColor(Colors::white, textAlpha);
+      const U32 lowerThresh = 5;
+      const U32 upperThresh = 10;
+
+      const Color *lowerColor = &Colors::gray50;
+      const Color *upperColor = &Colors::red;
+
+      // Set name color based on killStreak length
+      if(killStreak < lowerThresh)              // 0 - 5, normal gray
+         glColor(lowerColor, textAlpha);    
+      else if(killStreak < upperThresh)         // 5 - 9, interpolated
+      {
+         static Color c;
+         c.interp(F32(killStreak - lowerThresh + 1)/F32(upperThresh - lowerThresh + 1), *upperColor, *lowerColor);
+         glColor(c, textAlpha);    
+      }
+      else                                      // >= 10, full-on red
+         glColor(upperColor, textAlpha);       
+
+      //drawStringf(0, 50, 15, "%d", killStreak);
+
+
       S32 len = drawStringc(0, 30 + textSize, textSize, renderName.c_str());
 
       // Underline name if player is authenticated
@@ -612,8 +632,6 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
          renderTeleporterOutline(Point(cos(angle), sin(angle)) * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS),
                (F32)Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
    }
-
-   drawStringf(0, 50, 15, "%d", killStreak); //{P{P
 
    if(showCoordinates && layerIndex == 1)
       renderShipCoords(actualPos, isLocalShip, alpha);
