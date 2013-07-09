@@ -1340,7 +1340,6 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
       // Player's name, team, and spawn location
       Ship *newShip = new Ship(clientInfo, teamIndex, spawnPoint);
       clientInfo->getConnection()->setControlObject(newShip);
-      clientInfo->setShip(newShip);
 
       newShip->setOwner(clientInfo);
       newShip->addToGame(mGame, mGame->getGameObjDatabase());

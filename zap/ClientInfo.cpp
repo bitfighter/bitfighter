@@ -142,6 +142,7 @@ void ClientInfo::setShip(Ship *ship)
 }
 
 
+// Could return NULL on client if ship is out of scope
 Ship *ClientInfo::getShip()
 {
    return mShip;

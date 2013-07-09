@@ -87,6 +87,7 @@ Ship::Ship(lua_State *L) : MoveObject(Point(0,0), (F32)CollisionRadius)
 Ship::~Ship()
 {
    dismountAll();
+   mClientInfo->setShip(NULL);   // Don't leave a dangling pointer
 
    LUAW_DESTRUCTOR_CLEANUP;
 }
@@ -122,6 +123,9 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
 #endif
 
    mClientInfo = clientInfo;     // Will be NULL if being created by TNL
+
+   if(mClientInfo)
+      mClientInfo->setShip(this);
 
    setTeam(team);
    mass = 1.0;            // Ship's mass, not used
@@ -1433,12 +1437,12 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       StringTableEntry playerName;
       stream->readStringTableEntry(&playerName);
 
+      // ClientInfo can be NULL if the ship has been added via level file, for example
       ClientInfo *clientInfo = getGame()->findClientInfo(playerName);
-
-      // A null player name is the tell-tale sign of a 'Ship' object in the level file
-      // TNLAssert(clientInfo || playerName.isNull(), "We need a clientInfo for this ship!");
-
+      
       mClientInfo = clientInfo;
+      if(mClientInfo)
+         mClientInfo->setShip(this);
 
       // Read mounted items:
       while(stream->readFlag())

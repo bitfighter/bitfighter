@@ -141,7 +141,7 @@ public:
    bool isBusy();
    void setIsBusy(bool isBusy);
 
-   Ship *getShip();                   // Will be NULL on client
+   Ship *getShip();
    void setShip(Ship *ship);
 
    virtual void setRating(F32 rating) = 0;

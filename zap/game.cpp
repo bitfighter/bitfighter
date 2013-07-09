@@ -403,8 +403,22 @@ ClientInfo *Game::findClientInfo(const StringTableEntry &name)
 }
 
 
+// Currently only used on client, for various effects
 Ship *Game::findShip(const StringTableEntry &clientName)
 {
+   // Test faster way to get ship than searching the db
+   ClientInfo *clientInfo = findClientInfo(clientName);
+   Ship *shipX = NULL;
+   
+   if(clientInfo)
+      shipX = clientInfo->getShip();
+
+   // Will return NULL if ship is out-of-scope... we have ClientInfos for all players, but not aways their ships
+   // return clientInfo->getShip();
+
+   // New way above -- returns Ship for bots
+   // Old way below -- returns NULL for bots
+
    fillVector.clear();
 
    getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
@@ -413,12 +427,16 @@ Ship *Game::findShip(const StringTableEntry &clientName)
    {
       Ship *ship = static_cast<Ship *>(fillVector[i]);
       ClientInfo *clientInfo = ship->getClientInfo();
-      // Due to spybug scoping ships when not ready yet, we might not have ClientInfo yet
+      // Due to spybug scoping ships before they are ready, we might not have ClientInfo yet
       // Also clientInfo->getName() can be NULL here somehow?  Player leaves at the right moment?
       if(clientInfo && clientInfo->getName() && clientInfo->getName() == clientName)
+      {
+         TNLAssert(ship == shipX, "Ships did not match!  New way does not work!");  // Added Jul 2013, can delete and just return shipX if this works
          return ship;
+      }
    }
 
+   //TNLAssert(NULL == shipX, "Ships did not match!  New way does not work!");  // Added Jul 2013, can delete and just return shipX if this works
    return NULL;
 }
 
