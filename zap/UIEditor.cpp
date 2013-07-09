@@ -2093,10 +2093,14 @@ void EditorUserInterface::renderSaveMessage()
 
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-      renderCenteredFancyBox(515, 40, 200, 10, Colors::black, 0.80f * alpha, Colors::blue);
+      const S32 textsize = 25;
+      const S32 len = getStringWidth(textsize, mSaveMsg.c_str()) + 20;
+      const S32 inset = min((gScreenInfo.getGameCanvasWidth() - len)  / 2, 200);
+
+      renderCenteredFancyBox(515, 40, inset, 10, Colors::black, 0.80f * alpha, Colors::blue);
 
       glColor(mSaveMsgColor, alpha);
-      drawCenteredString(520, 25, mSaveMsg.c_str());
+      drawCenteredString(520, textsize, mSaveMsg.c_str());
    }
 }
 
