@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
@@ -1381,10 +1381,10 @@ void renderLoadoutZoneIcon(const Point &center, S32 outerRadius)
 void renderGoalZoneIcon(const Point &center, S32 radius)
 {
    //drawCircle(center, radius / 2);
-   drawStar(center, 5, radius/2, radius/4); 
-   drawStar(center, 5, radius/4, radius/8); 
+   //drawStar(center, 5, radius/2, radius/4); 
+   //drawStar(center, 5, radius/4, radius/8); 
 
-   //drawCenteredString_fixed(center.x, center.y + radius / 3.0f, radius, GoalZoneIconContext, "G");
+   drawCenteredString_fixed(center.x, center.y + radius / 3.0f, radius, GoalZoneIconContext, "\uF21F");
 }
 
 

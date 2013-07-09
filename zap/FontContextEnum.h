@@ -59,6 +59,7 @@ namespace Zap
       FontOrbitronMedium,
       FontPrimeRegular,
       FontTenby5,
+      FontGlyphs,
       KeyCaps,
 
       FontCount,

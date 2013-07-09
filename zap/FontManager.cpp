@@ -158,6 +158,7 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       fontList[FontTenby5]         = new BfFont(FontTenby5,        "tenbyfive.ttf",       settings);
       fontList[KeyCaps]            = new BfFont(KeyCaps,           "tenbyfive.ttf",       settings);     // DavysBigKeyCaps2
       fontList[FontDroidSansMono]  = new BfFont(FontDroidSansMono, "DroidSansMono.ttf",   settings);
+      fontList[FontGlyphs]         = new BfFont(FontGlyphs,        "webhostinghub-glyphs.ttf", settings);
    }
 
    // set texture blending function
@@ -242,7 +243,7 @@ void FontManager::setFontContext(FontContext fontContext)
          return;
 
       case GoalZoneIconContext:
-         setFont(FontOrbitronMedStroke);
+         setFont(FontGlyphs);
          return;
 
       default:
