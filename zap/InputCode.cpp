@@ -1861,9 +1861,6 @@ void InputCodeManager::initializeKeyNames()
    for(S32 i = 0; i < KEY_COUNT; i++)
       keyNames[i] = "Unknown Key";
 
-   // Find the unicode in Character Map or similar utility, 
-   // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
-
    // Now keys we know with our locally defined names
    keyNames[S32(KEY_BACKSPACE)]       = "Backspace";        
    keyNames[S32(KEY_DELETE)]          = "Del";              
