@@ -153,7 +153,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mEditorAttributeMenuItemBuilder.initialize(game);
 
    mPreviewMode = false;
-   mScreenshotMode = false;
+   mNormalizedScreenshotMode = false;
 
    mSaveMsgTimer.setPeriod(5000);    // Display save message for 5 seconds
 }
@@ -1883,19 +1883,21 @@ void EditorUserInterface::render()
 
     glPopMatrix(); 
 
-
-   if(mPreviewMode && !mScreenshotMode)
-      renderReferenceShip();
-   else if(!mScreenshotMode)
+   if(!mNormalizedScreenshotMode)
    {
-      // The following items are hidden in preview mode:
-      renderDock();
+      if(mPreviewMode)
+         renderReferenceShip();
+      else
+      {
+         // The following items are hidden in preview mode:
+         renderDock();
 
-      renderInfoPanel();
-      renderItemInfoPanel();
+         renderInfoPanel();
+         renderItemInfoPanel();
 
-      if(mouseOnDock() && mDockItemHit)
-         mDockItemHit->setLitUp(true);       // Will trigger a selection highlight to appear around dock item
+         if(mouseOnDock() && mDockItemHit)
+            mDockItemHit->setLitUp(true);       // Will trigger a selection highlight to appear around dock item
+      }
    }
 
    renderDragSelectBox();
@@ -1906,7 +1908,7 @@ void EditorUserInterface::render()
       drawFourArrows(mScrollWithMouseLocation);
    }
 
-   if(!mScreenshotMode)
+   if(!mNormalizedScreenshotMode)
    {
       renderSaveMessage();
       renderWarnings();
@@ -4750,7 +4752,7 @@ void EditorUserInterface::testLevelStart()
 void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
 {
    mPreviewMode = true;
-   mScreenshotMode = true;
+   mNormalizedScreenshotMode = true;
 
    glClear(GL_COLOR_BUFFER_BIT);
    centerView();
@@ -4759,7 +4761,7 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
    ScreenShooter::saveScreenshot(game->getUIManager(), game->getSettings(), 
                                  LevelDatabaseUploadThread::UploadScreenshotFilename);
    mPreviewMode = false;
-   mScreenshotMode = false;
+   mNormalizedScreenshotMode = false;
 }
 
 

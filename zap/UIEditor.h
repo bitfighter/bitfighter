@@ -195,7 +195,7 @@ private:
    bool mDragSelecting;
    bool mAddingVertex;
    bool mPreviewMode;
-   bool mScreenshotMode;
+   bool mNormalizedScreenshotMode;
 
    boost::shared_ptr<EditorPlugin> mPluginRunner;
 
