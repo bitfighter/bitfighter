@@ -13,6 +13,7 @@ namespace Zap
 {
 
 const string LevelDatabaseUploadThread::UploadRequest = "bitfighter.org/pleiades/levels/upload";
+const string LevelDatabaseUploadThread::UploadScreenshotFilename = "upload_screenshot.png";
 
 LevelDatabaseUploadThread::LevelDatabaseUploadThread(ClientGame* game)
 {
@@ -37,14 +38,14 @@ U32 LevelDatabaseUploadThread::run()
       editor->setSaveMessage("Uploading New Level...", true);
    }
 
-   string fileData = readFile(joindir(mGame->getSettings()->getFolderManager()->screenshotDir, "upload_screenshot.png"));
+   string fileData = readFile(joindir(mGame->getSettings()->getFolderManager()->screenshotDir, UploadScreenshotFilename));
 
    HttpRequest req(UploadRequest);
    req.setMethod(HttpRequest::PostMethod);
    req.setData("data[User][username]",      mGame->getPlayerName());
    req.setData("data[User][user_password]", mGame->getPlayerPassword());
    req.setData("data[Level][content]", editor->getLevelText());
-   req.addFile("data[Level][screenshot]", "upload_screenshot.png", (const U8*) fileData.c_str(), fileData.length());
+   req.addFile("data[Level][screenshot]", UploadScreenshotFilename, (const U8*) fileData.c_str(), fileData.length());
 
    string levelgenFilename;
    levelgenFilename = mGame->getScriptName();

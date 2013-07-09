@@ -1388,7 +1388,7 @@ void renderGoalZoneIcon(const Point &center, S32 radius)
    // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
    // Use Hex UTF-8 bytes, represent in string like this: \xE2\x99\xA6
 
-   drawCenteredString_fixed(center.x, center.y + radius / 3.0f, radius, GoalZoneIconContext, "\xE2\x99\xA6");
+   drawCenteredString_fixed(center.x, center.y + radius / 3.0f, radius, GoalZoneIconContext, "\xEF\x84\xB1");
 }
 
 

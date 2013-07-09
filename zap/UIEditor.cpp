@@ -154,6 +154,8 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 
    mPreviewMode = false;
    mScreenshotMode = false;
+
+   mSaveMsgTimer.setPeriod(5000);    // Display save message for 5 seconds
 }
 
 
@@ -1214,8 +1216,6 @@ void EditorUserInterface::onActivate()
 
    Cursor::enableCursor();
 
-   mSaveMsgTimer.clear();
-
    getGame()->setAddTarget();    // When a Lua script does an addToGame(), objects should be added to this game
 
    VideoSystem::actualizeScreenMode(settings, true, usesEditorScreenMode());
@@ -1906,8 +1906,11 @@ void EditorUserInterface::render()
       drawFourArrows(mScrollWithMouseLocation);
    }
 
-   renderSaveMessage();
-   renderWarnings();
+   if(!mScreenshotMode)
+   {
+      renderSaveMessage();
+      renderWarnings();
+   }
 
    renderConsole();        // Rendered last, so it's always on top
 }
@@ -4556,7 +4559,7 @@ void EditorUserInterface::idle(U32 timeDelta)
 void EditorUserInterface::setSaveMessage(string msg, bool savedOK)
 {
    mSaveMsg = msg;
-   mSaveMsgTimer.reset(5000, 5000);    // Display for 5 seconds
+   mSaveMsgTimer.reset();
    mSaveMsgColor = (savedOK ? Colors::green : Colors::red);
 }
 
@@ -4751,9 +4754,10 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
 
    glClear(GL_COLOR_BUFFER_BIT);
    centerView();
-   render();
-   ScreenShooter::saveScreenshot(game->getUIManager(), game->getSettings(), "upload_screenshot");
 
+   render();
+   ScreenShooter::saveScreenshot(game->getUIManager(), game->getSettings(), 
+                                 LevelDatabaseUploadThread::UploadScreenshotFilename);
    mPreviewMode = false;
    mScreenshotMode = false;
 }

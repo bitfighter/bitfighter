@@ -14,6 +14,7 @@ class ClientGame;
 class LevelDatabaseUploadThread : public TNL::Thread
 {
 public:
+   static const string UploadScreenshotFilename;
    static const string UploadRequest;
 
    LevelDatabaseUploadThread(ClientGame* game);
