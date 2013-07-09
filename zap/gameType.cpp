@@ -752,29 +752,30 @@ bool GameType::advanceGameClock(U32 deltaT)
 // Client only
 void GameType::launchKillStreakTextEffects(const ClientInfo *clientInfo) const
 {
+   S32 killStreak = clientInfo->getKillStreak();
+   if(killStreak == 0)
+      return;
+
    Ship *ship = mGame->findShip(clientInfo->getName());
    if(!ship)
       return;
 
-   Point pos = ship->getRenderPos() + Point(0, 150);
+   string msg;
 
-   if(clientInfo->getKillStreak() == 5)
-      mGame->emitTextEffect("5 in a row!  Good job!", Colors::yellow, pos);
+   if(killStreak == 5)
+      msg = "5 in a row!";
+   else if(killStreak == 10)
+      msg = "10! Wow, Swell!";
+   else if(killStreak == 15)
+      msg = "15! Great job!";
+   else if(killStreak == 20)
+      msg = "20! Neat!";
+   else if(killStreak == 25)
+      msg = "25! Hooray!";
+   else if(killStreak % 5 == 0)
+      msg = itos(killStreak) + "! Hang in there!";
 
-   else if(clientInfo->getKillStreak() == 10)
-      mGame->emitTextEffect("10! Wow, that's just swell!", Colors::yellow, pos);
-
-   else if(clientInfo->getKillStreak() == 15)
-      mGame->emitTextEffect("15! Great job!", Colors::yellow, pos);
-
-   else if(clientInfo->getKillStreak() == 20)
-      mGame->emitTextEffect("20! Neat!", Colors::yellow, pos);
-
-   else if(clientInfo->getKillStreak() == 25)
-      mGame->emitTextEffect("25! Hooray!", Colors::yellow, pos);
-
-   else if(clientInfo->getKillStreak() > 0 && clientInfo->getKillStreak() % 5 == 0)
-      mGame->emitTextEffect(itos(clientInfo->getKillStreak()) + " Hang in there!", Colors::yellow, pos);
+   mGame->emitTextEffect(msg, Colors::yellow, ship->getRenderPos() + Point(0, -150));
 }
 
 

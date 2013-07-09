@@ -87,7 +87,11 @@ Ship::Ship(lua_State *L) : MoveObject(Point(0,0), (F32)CollisionRadius)
 Ship::~Ship()
 {
    dismountAll();
-   mClientInfo->setShip(NULL);   // Don't leave a dangling pointer
+
+   // It may be that mClientInfo has already been assigned a new ship; we only want to NULL it out
+   // in the event it hasn't.  At the end of a game, mClientInfo may disappear before the ship does.
+   if(mClientInfo && mClientInfo->getShip() == this)
+      mClientInfo->setShip(NULL);   // Don't leave a dangling pointer
 
    LUAW_DESTRUCTOR_CLEANUP;
 }
