@@ -538,7 +538,7 @@ void InstructionsUserInterface::initPage2()
    initPage2Block(loadoutInstructions1, ARRAYSIZE(loadoutInstructions1), &Colors::yellow, &Colors::white,
                   getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
 
-   // Add some space speparating the two sections
+   // Add some space separating the two sections
    symbols.push_back(SymbolString::getBlankSymbol(0, 30));
    mLoadoutInstructions.add(SymbolString(symbols, FontSize, HelpContext));
 
