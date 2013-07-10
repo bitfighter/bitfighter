@@ -79,7 +79,8 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
                                                                          mSpecialKeysInstrLeft(FontGap), 
                                                                          mSpecialKeysBindingsLeft(FontGap), 
                                                                          mSpecialKeysInstrRight(FontGap), 
-                                                                         mSpecialKeysBindingsRight(FontGap)
+                                                                         mSpecialKeysBindingsRight(FontGap),
+                                                                         mLoadoutInstructions(FontGap)
 {
    // Quick sanity check...
    TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum IntructionPages!!!");
@@ -94,6 +95,7 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
    calcPolygonVerts(Point(0,0), 7, (F32)TestItem::TEST_ITEM_RADIUS, 0, mTestItemPoints);
    ResourceItem::generateOutlinePoints(Point(0,0), 1.0, mResourceItemPoints);
 }
+
 
 // Destructor
 InstructionsUserInterface::~InstructionsUserInterface()
@@ -129,6 +131,7 @@ void InstructionsUserInterface::onActivate()
 
    initNormalKeys_page1();
    initSpecialKeys_page1();
+   initPage2();
 }
 
 
@@ -485,40 +488,68 @@ static const char *loadoutInstructions1[] = {
 static const char *loadoutInstructions2[] = {
    "PRESETS",
    "You can save your Loadout in a Preset for easy recall later.",
-   "To save your loadout, press [Ctrl-1], [Ctrl-2], or [Ctrl-3].",
-   "To recall the preset, press [Alt-1], [Alt-2], or [Alt-3].",
+   "To save your loadout, press [[SaveLoadoutPreset1]], [[SaveLoadoutPreset2]], or [[SaveLoadoutPreset3]].",
+   "To recall the preset, press [[LoadLoadoutPreset1]], [[LoadLoadoutPreset2]], or [[LoadLoadoutPreset3]].",
    "",
    "Loadout Presets will be saved when you quit the game, and",
    "will be available the next time you play."
 };
 
+
+
+// Converts the blocks of text above into SymbolStrings for nicer rendering
+static void initPage2Block(const char **block, S32 blockSize, const Color *headerColor, const Color *bodyColor, 
+                           const InputCodeManager *inputCodeManager, UI::SymbolStringSet &instrBlock)
+{
+   Vector<SymbolShapePtr> symbols;     
+
+   for(S32 i = 0; i < blockSize; i++)
+   {
+      if(i == 0)  // First line is a little different than the rest
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getSymbolText(block[i], HeaderFontSize, HelpContext, headerColor));
+         instrBlock.add(SymbolString(symbols, FontSize, HelpContext, AlignmentCenter));
+
+         // Provide a gap between header and body... when this is rendered, a gap equivalent to a line of text will be shown
+         symbols.clear();
+         symbols.push_back(SymbolString::getBlankSymbol());
+         instrBlock.add(SymbolString(symbols, FontSize, HelpContext));
+      }
+      else
+      {
+         symbols.clear();
+         //symbols.push_back(SymbolString::getSymbolText(block[i], HeaderFontSize, HelpContext, bodyColor));
+         string str(block[i]);
+         HelpItemManager::symbolParse(inputCodeManager, str, symbols,HelpContext, HeaderFontSize, bodyColor);
+
+         instrBlock.add(SymbolString(symbols, FontSize, HelpContext, AlignmentLeft));
+      }
+   }
+}
+
+
+void InstructionsUserInterface::initPage2()
+{
+   Vector<SymbolShapePtr> symbols;
+
+   mLoadoutInstructions.clear();
+
+   initPage2Block(loadoutInstructions1, ARRAYSIZE(loadoutInstructions1), &Colors::yellow, &Colors::white,
+                  getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
+
+   // Add some space speparating the two sections
+   symbols.push_back(SymbolString::getBlankSymbol(0, 30));
+   mLoadoutInstructions.add(SymbolString(symbols, FontSize, HelpContext));
+
+   initPage2Block(loadoutInstructions2, ARRAYSIZE(loadoutInstructions2), &Colors::yellow, &Colors::cyan, 
+               getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
+}
+
+
 void InstructionsUserInterface::renderPage2()
 {
-   S32 y = 45;
-   S32 gap = 40;
-
-   glColor(Colors::yellow);
-   for(U32 i = 0; i < ARRAYSIZE(loadoutInstructions1); i++)
-   {
-      drawCenteredString(y, 20, loadoutInstructions1[i]);
-      y += gap;
-      glColor(Colors::white);
-      gap = 26;
-   }
-
-   y += 40;
-   gap = 40;
-
-   glColor(Colors::yellow);
-   drawCenteredString(y, 20, loadoutInstructions2[0]);
-   y += gap;
-
-   gap = 26;
-   for(U32 i = 1; i < ARRAYSIZE(loadoutInstructions2); i++)
-   {
-      drawCenteredString_highlightKeys(y, 20, loadoutInstructions2[i], Colors::cyan, Colors::magenta);
-      y += gap;
-   }
+   mLoadoutInstructions.render(gScreenInfo.getGameCanvasWidth() / 2, 65, AlignmentCenter);    // Overall block is centered
 }
 
 

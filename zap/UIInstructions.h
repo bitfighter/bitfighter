@@ -62,11 +62,13 @@ private:
    UI::SymbolStringSetCollection mSymbolSets;
 
    UI::SymbolStringSet 
-         mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
-         mSpecialKeysInstrRight, mSpecialKeysBindingsRight;
+         mSpecialKeysInstrLeft,   mSpecialKeysBindingsLeft, 
+         mSpecialKeysInstrRight,  mSpecialKeysBindingsRight,
+         mLoadoutInstructions;
 
    void initNormalKeys_page1();
    void initSpecialKeys_page1();
+   void initPage2();
 
 public:
 

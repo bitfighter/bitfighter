@@ -58,6 +58,14 @@ BindingSet::BindingSet()
    keyFPS         = KEY_F6;      // Show FPS display
    keyDIAG        = KEY_F7;      // Show diagnostic overlay
    keyMISSION     = KEY_F2;      // Show current mission info
+
+   keyLoadPreset1 = KEY_ALT_1;
+   keyLoadPreset2 = KEY_ALT_2;
+   keyLoadPreset3 = KEY_ALT_3;
+
+   keySavePreset1 = KEY_CTRL_1;
+   keySavePreset2 = KEY_CTRL_2;
+   keySavePreset3 = KEY_CTRL_3;
 }
 
 // Destructor
@@ -125,7 +133,18 @@ InputCode BindingSet::getBinding(InputCodeManager::BindingName bindingName) cons
 	      return keyFPS;
       case InputCodeManager::BINDING_DIAG:
 	      return keyDIAG;
-
+      case InputCodeManager::BINDING_LOAD_PRESET_1:
+         return keyLoadPreset1;
+      case InputCodeManager::BINDING_LOAD_PRESET_2:
+         return keyLoadPreset2;
+      case InputCodeManager::BINDING_LOAD_PRESET_3:
+         return keyLoadPreset3;
+      case InputCodeManager::BINDING_SAVE_PRESET_1:
+         return keySavePreset1;
+      case InputCodeManager::BINDING_SAVE_PRESET_2:
+         return keySavePreset2;
+      case InputCodeManager::BINDING_SAVE_PRESET_3:
+         return keySavePreset3;
       // Some special hacky cases for helping us with displaying instructions:
       case InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE:
          return MOUSE;
@@ -233,6 +252,24 @@ void BindingSet::setBinding(InputCodeManager::BindingName bindingName, InputCode
       case InputCodeManager::BINDING_DIAG:
 	      keyDIAG = key;
          break;
+      case InputCodeManager::BINDING_LOAD_PRESET_1:
+         keyLoadPreset1 = key;
+         break;
+      case InputCodeManager::BINDING_LOAD_PRESET_2:
+	      keyLoadPreset2 = key;
+         break;
+      case InputCodeManager::BINDING_LOAD_PRESET_3:
+	      keyLoadPreset3 = key;
+         break;
+      case InputCodeManager::BINDING_SAVE_PRESET_1:
+	      keySavePreset1 = key;
+         break;
+      case InputCodeManager::BINDING_SAVE_PRESET_2:
+	      keySavePreset2 = key;
+         break;
+      case InputCodeManager::BINDING_SAVE_PRESET_3:
+	      keySavePreset3 = key;
+         break;
       default:
          TNLAssert(false, "Invalid key binding!");
          break;
@@ -261,33 +298,39 @@ bool BindingSet::hasKeypad()
 // Seems like a good xmacro candidate!
 static const string BINDING_STRINGS[] = 
 {
-   "SelWeapon1",		   // BINDING_SELWEAP1 
-   "SelWeapon2",		   // BINDING_SELWEAP2 
-   "SelWeapon3",		   // BINDING_SELWEAP3 
-   "SelNextWeapon",	   // BINDING_ADVWEAP 
-   "SelNextWeapon2",	   // BINDING_ADVWEAP2 
-   "SelPrevWeapon",	   // BINDING_PREVWEAP 
-   "ShowCmdrMap",		   // BINDING_CMDRMAP 
-   "TeamChat",		      // BINDING_TEAMCHAT 
-   "GlobalChat",		   // BINDING_GLOBCHAT 
-   "QuickChat",		   // BINDING_QUICKCHAT 
-   "Command",		      // BINDING_CMDCHAT 
-   "ShowLoadoutMenu",	// BINDING_LOADOUT 
-   "ActivateModule1",	// BINDING_MOD1 
-   "ActivateModule2",	// BINDING_MOD2 
-   "Fire",			      // BINDING_FIRE 
-   "DropItem",		      // BINDING_DROPITEM 
-   "VoiceChat",	      // BINDING_TOGVOICE 
-   "ShipUp",		      // BINDING_UP 
-   "ShipDown",		      // BINDING_DOWN 
-   "ShipLeft",		      // BINDING_LEFT 
-   "ShipRight",		   // BINDING_RIGHT 
-   "ShowScoreboard",	   // BINDING_SCRBRD 
-   "Help",			      // BINDING_HELP 
-   "OutOfGameChat",	   // BINDING_OUTGAMECHAT 
-   "Mission",		      // BINDING_MISSION 
-   "FPS",			      // BINDING_FPS 
-   "Diagnostics"		   // BINDING_DIAG 
+   "SelWeapon1",		     // BINDING_SELWEAP1 
+   "SelWeapon2",		     // BINDING_SELWEAP2 
+   "SelWeapon3",		     // BINDING_SELWEAP3 
+   "SelNextWeapon",	     // BINDING_ADVWEAP 
+   "SelNextWeapon2",	     // BINDING_ADVWEAP2 
+   "SelPrevWeapon",	     // BINDING_PREVWEAP 
+   "ShowCmdrMap",		     // BINDING_CMDRMAP 
+   "TeamChat",		        // BINDING_TEAMCHAT 
+   "GlobalChat",		     // BINDING_GLOBCHAT 
+   "QuickChat",		     // BINDING_QUICKCHAT 
+   "Command",		        // BINDING_CMDCHAT 
+   "ShowLoadoutMenu",	  // BINDING_LOADOUT 
+   "ActivateModule1",	  // BINDING_MOD1 
+   "ActivateModule2",	  // BINDING_MOD2 
+   "Fire",			        // BINDING_FIRE 
+   "DropItem",		        // BINDING_DROPITEM 
+   "VoiceChat",	        // BINDING_TOGVOICE 
+   "ShipUp",		        // BINDING_UP 
+   "ShipDown",		        // BINDING_DOWN 
+   "ShipLeft",		        // BINDING_LEFT 
+   "ShipRight",		     // BINDING_RIGHT 
+   "ShowScoreboard",	     // BINDING_SCRBRD 
+   "Help",			        // BINDING_HELP 
+   "OutOfGameChat",	     // BINDING_OUTGAMECHAT 
+   "Mission",		        // BINDING_MISSION 
+   "FPS",			        // BINDING_FPS 
+   "Diagnostics",	        // BINDING_DIAG 
+   "LoadLoadoutPreset1",  // BINDING_LOAD_PRESET_1
+   "LoadLoadoutPreset2",  // BINDING_LOAD_PRESET_2
+   "LoadLoadoutPreset3",  // BINDING_LOAD_PRESET_3
+   "SaveLoadoutPreset1",  // BINDING_SAVE_PRESET_1
+   "SaveLoadoutPreset2",  // BINDING_SAVE_PRESET_2
+   "SaveLoadoutPreset3"   // BINDING_SAVE_PRESET_3
 };
 
 
@@ -1747,7 +1790,6 @@ InputCode InputCodeManager::joyHatToInputCode(int hatDirectionMask)
 #endif
 
 
-
 // We'll also treat controller buttons like simulated keystrokes
 bool InputCodeManager::isControllerButton(InputCode inputCode)
 {
@@ -1773,6 +1815,18 @@ bool InputCodeManager::isCtrlKey(InputCode inputCode)
 }
 
 
+bool InputCodeManager::isAltKey(InputCode inputCode)
+{
+   return inputCode >= FIRST_ALT_KEY && inputCode <= LAST_ALT_KEY;
+}
+
+
+bool InputCodeManager::isModified(InputCode inputCode)
+{
+   return isCtrlKey(inputCode) || isAltKey(inputCode);
+}
+
+
 bool InputCodeManager::isModifier(InputCode inputCode)
 {
    return inputCode >= KEY_SHIFT && inputCode <= KEY_SUPER;
@@ -1782,34 +1836,60 @@ bool InputCodeManager::isModifier(InputCode inputCode)
 // Array tying InputCodes to string representations; used for translating one to the other 
 static const char *keyNames[KEY_COUNT];
 
-string InputCodeManager::getModifierString(InputCode inputCode)
+InputCode InputCodeManager::getModifier(InputCode inputCode)
 {
    if(isCtrlKey(inputCode))
-      return keyNames[S32(KEY_CTRL)];
+      return KEY_CTRL;
+   else if(isAltKey(inputCode))
+      return KEY_ALT;
    else
-      return "";
+      return KEY_NONE;
 
-   // TODO: Add other modifiers here as needed
+   // TODO: Add other modifiers here as needed, then also fix up isModified()
+}
+
+
+string InputCodeManager::getModifierString(InputCode inputCode)
+{
+   return inputCodeToString(getModifier(inputCode));
+}
+
+
+InputCode InputCodeManager::getBaseKey(InputCode inputCode)
+{
+   switch(inputCode)
+   {
+      case KEY_CTRL_M:
+         return KEY_M;
+
+      case KEY_CTRL_Q:
+         return KEY_Q;
+
+      case KEY_CTRL_S:
+         return KEY_S;
+
+      case KEY_CTRL_1:
+      case KEY_ALT_1:
+         return KEY_1;
+
+      case KEY_CTRL_2:
+      case KEY_ALT_2:
+         return KEY_2;
+
+      case KEY_CTRL_3:
+      case KEY_ALT_3:
+         return KEY_3;
+
+      default:
+         TNLAssert(false, "Unknown input code!");
+         return KEY_UNKNOWN;
+   }
 }
 
 
 string InputCodeManager::getBaseKeyString(InputCode inputCode)
 {
-   switch(inputCode)
-   {
-      case KEY_CTRL_M:
-         return keyNames[S32(KEY_M)];
-
-      case KEY_CTRL_Q:
-         return keyNames[S32(KEY_Q)];
-
-      case KEY_CTRL_S:
-         return keyNames[S32(KEY_S)];
-
-      default:
-         TNLAssert(false, "Unknown input code!");
-         return "";
-   }
+   return inputCodeToString(getBaseKey(inputCode));
 }
 
 
@@ -1935,17 +2015,20 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_F9)]              = "F9";               
    keyNames[S32(KEY_F10)]             = "F10";              
    keyNames[S32(KEY_F11)]             = "F11";              
-   keyNames[S32(KEY_F12)]             = "F12";              
+   keyNames[S32(KEY_F12)]             = "F12";  
+
    keyNames[S32(KEY_SHIFT)]           = "Shift";            
    keyNames[S32(KEY_ALT)]             = "Alt";              
    keyNames[S32(KEY_CTRL)]            = "Ctrl";             
    keyNames[S32(KEY_META)]            = "Meta";             
-   keyNames[S32(KEY_SUPER)]           = "Super";            
+   keyNames[S32(KEY_SUPER)]           = "Super";  
+
    keyNames[S32(MOUSE_LEFT)]          = "Left-mouse";       
    keyNames[S32(MOUSE_MIDDLE)]        = "Middle-mouse";     
    keyNames[S32(MOUSE_RIGHT)]         = "Right-mouse";      
    keyNames[S32(MOUSE_WHEEL_UP)]      = "Mouse wheel up";   
    keyNames[S32(MOUSE_WHEEL_DOWN)]    = "Mouse wheel down"; 
+
    keyNames[S32(BUTTON_1)]            = "Button 1";         
    keyNames[S32(BUTTON_2)]            = "Button 2";         
    keyNames[S32(BUTTON_3)]            = "Button 3";         
@@ -1971,13 +2054,23 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(STICK_2_LEFT)]        = "Stick 2 Left";     
    keyNames[S32(STICK_2_RIGHT)]       = "Stick 2 Right";    
    keyNames[S32(STICK_2_UP)]          = "Stick 2 Up";       
-   keyNames[S32(STICK_2_DOWN)]        = "Stick 2 Down";     
+   keyNames[S32(STICK_2_DOWN)]        = "Stick 2 Down";  
+
    keyNames[S32(MOUSE)]               = "Mouse";            
    keyNames[S32(LEFT_JOYSTICK)]       = "Left joystick";    
-   keyNames[S32(RIGHT_JOYSTICK)]      = "Right joystick";   
-   keyNames[S32(KEY_CTRL_M)]          = "Ctrl-M";                 // First ctrl key
-   keyNames[S32(KEY_CTRL_Q)]          = "Ctrl-Q";           
-   keyNames[S32(KEY_CTRL_S)]          = "Ctrl-S";                 // Last ctrl key
+   keyNames[S32(RIGHT_JOYSTICK)]      = "Right joystick"; 
+
+   keyNames[S32(KEY_CTRL_M)]          = "Ctrl+M";                 // First ctrl key
+   keyNames[S32(KEY_CTRL_Q)]          = "Ctrl+Q";      
+   keyNames[S32(KEY_CTRL_S)]          = "Ctrl+S";                 
+   keyNames[S32(KEY_CTRL_1)]          = "Ctrl+1";                 
+   keyNames[S32(KEY_CTRL_2)]          = "Ctrl+2";                 
+   keyNames[S32(KEY_CTRL_3)]          = "Ctrl+3";                 // Last ctrl key
+
+   keyNames[S32(KEY_ALT_1)]           = "Alt+1";                  // First alt key
+   keyNames[S32(KEY_ALT_2)]           = "Alt+2";                  
+   keyNames[S32(KEY_ALT_3)]           = "Alt+3";                  // Last alt key
+
    keyNames[S32(KEY_BACKQUOTE)]       = "`";                
    keyNames[S32(KEY_MENU)]            = "Menu";             
    keyNames[S32(KEY_KEYPAD_DIVIDE)]   = "Keypad /";         

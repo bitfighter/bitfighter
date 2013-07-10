@@ -26,6 +26,8 @@
 #ifndef _HELP_ITEM_MANAGER_H_
 #define _HELP_ITEM_MANAGER_H_
 
+#include "SymbolShape.h"
+
 #include "Timer.h"
 #include "tnlTypes.h"
 #include "tnlVector.h"
@@ -260,6 +262,11 @@ public:
 
    Priority getItemPriority(HelpItem item) const;
    static U8 getAssociatedObjectType(HelpItem helpItem);
+
+   // This also used by the Instructions... put somewhere more central?
+   static void symbolParse(const InputCodeManager *inputCodeManager, const string &str, Vector<SymbolShapePtr> &symbols,
+                           FontContext fontContext, S32 fontSize, const Color *color = NULL);
+
 
 #ifdef TNL_DEBUG
    // For displaying items in a test capacity

@@ -91,7 +91,13 @@ public:
       BINDING_OUTGAMECHAT,
       BINDING_MISSION,
       BINDING_FPS,
-      BINDING_DIAG,        // ...to here
+      BINDING_DIAG,        
+      BINDING_LOAD_PRESET_1,
+      BINDING_LOAD_PRESET_2,
+      BINDING_LOAD_PRESET_3,
+      BINDING_SAVE_PRESET_1,
+      BINDING_SAVE_PRESET_2,
+      BINDING_SAVE_PRESET_3,     // ...to here
       BINDING_DEFINEABLE_KEY_COUNT,
       
       BINDING_NONE,
@@ -156,11 +162,16 @@ public:
    static bool isKeypadKey(InputCode inputCode);               // Is inputCode on the numeric keypad?
    static bool isMouseAction(InputCode inputCode);             // Is inputCode related to the mouse?
    static bool isKeyboardKey(InputCode inputCode);             // Is inputCode a key on the keyboard?
-   static bool isCtrlKey(InputCode inputCode);                 // Is inputCode modified with ctrl (e.e. KEY_CTRL_M)?
+   static bool isCtrlKey(InputCode inputCode);                 // Is inputCode modified with ctrl (e.g. KEY_CTRL_M)?
+   static bool isAltKey(InputCode inputCode);                  // Is inputCode modified with alt (e.g. KEY_ALT_1)?
    static bool isModifier(InputCode inputCode);                // Is inputCode a modifier key?
+   static bool isModified(InputCode inputCode);                // Does inputCode have a modifier attached to it?
 
    // For dealing with special cases, such as Ctrl-M
+   static InputCode getModifier(InputCode inputCode);
    static string getModifierString(InputCode inputCode);
+
+   static InputCode getBaseKey(InputCode inputCode);
    static string getBaseKeyString(InputCode inputCode);
 
    static JoystickButton inputCodeToJoystickButton(InputCode inputCode);
@@ -212,6 +223,12 @@ struct BindingSet
    InputCode keyMISSION;
    InputCode keyFPS;
    InputCode keyDIAG;
+   InputCode keyLoadPreset1;
+   InputCode keyLoadPreset2;
+   InputCode keyLoadPreset3;
+   InputCode keySavePreset1;
+   InputCode keySavePreset2;
+   InputCode keySavePreset3;
 };
 
 

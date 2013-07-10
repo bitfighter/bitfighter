@@ -47,7 +47,8 @@ namespace Zap { namespace UI {
 enum Alignment {
    AlignmentLeft,
    AlignmentCenter,
-   AlignmentRight
+   AlignmentRight,
+   AlignmentNone     // Unspecified alignment
 };
 
 
@@ -271,13 +272,14 @@ protected:
    S32 mWidth;
    S32 mFontSize;
    S32 mReady;
+   Alignment mAlignment;
 
    FontContext mFontContext;
 
    Vector<boost::shared_ptr<SymbolShape> > mSymbols;
 
 public:
-   SymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, S32 fontSize, FontContext fontContext);   // Constructor
+   SymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, S32 fontSize, FontContext fontContext, Alignment alignment = AlignmentNone);
    SymbolString(S32 fontSize, FontContext fontContext);     // Constructor (can't use until you've setSymbols)
    virtual ~SymbolString();                                 // Destructor
 
@@ -288,7 +290,7 @@ public:
    S32 getHeight() const;
 
    // Drawing
-   virtual void render(S32 x, S32 y, Alignment alignment) const;
+   virtual S32 render(S32 x, S32 y, Alignment alignment, S32 blockWidth = -1) const;
    void render(const Point &center, Alignment alignment) const;
    void render(const Point &pos) const;
 
@@ -314,7 +316,7 @@ public:
    LayeredSymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, S32 fontSize, FontContext fontContext);   // Constructor
    virtual ~LayeredSymbolString();     // Destructor
 
-   void render(S32 x, S32 y, Alignment alignment) const;
+   S32 render(S32 x, S32 y, Alignment alignment, S32 blockWidth = -1) const;
 };
 
 
@@ -330,8 +332,9 @@ public:
    void clear();
    void add(const SymbolString &symbolString);
    S32 getHeight() const;
+   S32 getWidth() const;
    S32 getItemCount() const;
-   void render(S32 x, S32 y, Alignment alignment) const;
+   S32 render(S32 x, S32 y, Alignment alignment, S32 blockWidth = -1) const;
    S32 renderLine(S32 line, S32 x, S32 y, Alignment alignment) const;
 };
 

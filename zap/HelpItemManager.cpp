@@ -267,7 +267,8 @@ void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symb
 }
 
 
-static void symbolParse(const InputCodeManager *inputCodeManager, string &str, Vector<SymbolShapePtr > &symbols)
+void HelpItemManager::symbolParse(const InputCodeManager *inputCodeManager, const string &str, Vector<SymbolShapePtr > &symbols,
+                                  FontContext fontContext, S32 fontSize, const Color *fontColor)
 {
    std::size_t offset = 0;
 
@@ -279,11 +280,11 @@ static void symbolParse(const InputCodeManager *inputCodeManager, string &str, V
       if(startPos == string::npos || endPos == string::npos)
       {
          // No further symbols herein, convert the rest to text symbol and exit
-         symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset), FontSize, HelpItemContext)));
+         symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset), fontSize, fontContext, fontColor)));
          return;
       }
 
-      symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset), FontSize, HelpItemContext)));
+      symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset), fontSize, fontContext, fontColor)));
 
       getSymbolShape(inputCodeManager, str.substr(startPos + 2, endPos - startPos - 2), symbols);    // + 2 to advance past the "[["
 
@@ -406,7 +407,7 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
       string renderStr(messages[i]);
       
       Vector<SymbolShapePtr> symbols;
-      symbolParse(inputCodeManager, renderStr, symbols);
+      HelpItemManager::symbolParse(inputCodeManager, renderStr, symbols, HelpItemContext, FontSize);
 
       UI::SymbolString symbolString(symbols, FontSize, HUDContext);
       symbolString.render(xPos, yPos, AlignmentCenter);

@@ -119,19 +119,34 @@ S32 SymbolStringSet::getHeight() const
 }
 
 
+S32 SymbolStringSet::getWidth() const
+{
+   S32 width = 0;
+   for(S32 i = 0; i < mSymbolStrings.size(); i++)
+      width = max(mSymbolStrings[i].getWidth(), width);
+
+   return width;
+}
+
+
 S32 SymbolStringSet::getItemCount() const
 {
    return mSymbolStrings.size();
 }
 
 
-void SymbolStringSet::render(S32 x, S32 y, Alignment alignment) const
+S32 SymbolStringSet::render(S32 x, S32 yStart, Alignment alignment, S32 blockWidth) const
 {
+   S32 width = getWidth();
+   S32 y = 0;
+
    for(S32 i = 0; i < mSymbolStrings.size(); i++)
    {
-      mSymbolStrings[i].render(x, y, alignment);
+      mSymbolStrings[i].render(x, yStart + y, alignment, width);
       y += mSymbolStrings[i].getHeight() + mGap;
    }
+
+   return y;
 }
 
 
@@ -192,7 +207,7 @@ static S32 computeHeight(const Vector<SymbolShapePtr> &symbols, S32 fontSize, Fo
 
 
 // Constructor with symbols
-SymbolString::SymbolString(const Vector<SymbolShapePtr> &symbols, S32 fontSize, FontContext fontContext) : mSymbols(symbols)
+SymbolString::SymbolString(const Vector<SymbolShapePtr> &symbols, S32 fontSize, FontContext fontContext, Alignment alignment) : mSymbols(symbols)
 {
    mFontSize    = fontSize;
    mFontContext = fontContext;
@@ -200,6 +215,7 @@ SymbolString::SymbolString(const Vector<SymbolShapePtr> &symbols, S32 fontSize, 
 
    mWidth = computeWidth(symbols, fontSize, fontContext);
    mHeight = computeHeight(symbols, fontSize, fontContext);
+   mAlignment = alignment;
 }
 
 
@@ -211,6 +227,7 @@ SymbolString::SymbolString(S32 fontSize, FontContext fontContext)
    mReady = false;
 
    mWidth = 0;
+   mAlignment = AlignmentNone;
 }
 
 
@@ -263,13 +280,27 @@ void SymbolString::render(const Point &center, Alignment alignment) const
 }
 
 
-void SymbolString::render(S32 x, S32 y, Alignment alignment) const
+S32 SymbolString::render(S32 x, S32 y, Alignment blockAlignment, S32 blockWidth) const
 {
    TNLAssert(mReady, "Not ready!");
 
    // Alignment of overall symbol string
-   if(alignment == AlignmentCenter)
+   if(blockAlignment == AlignmentCenter)
       x -= mWidth / 2;     // x is now at the left edge of the render area
+
+   if(blockWidth > -1)
+   {
+      // Individual line alignment
+      Alignment lineAlignment;
+      if(mAlignment == AlignmentNone)
+         lineAlignment = blockAlignment;
+      else
+         lineAlignment = mAlignment;
+
+      // TODO: Need to handle more cases here...
+      if(lineAlignment == AlignmentLeft && blockAlignment == AlignmentCenter)
+         x -= (blockWidth - mWidth) / 2;
+   }
 
    for(S32 i = 0; i < mSymbols.size(); i++)
    {
@@ -277,6 +308,8 @@ void SymbolString::render(S32 x, S32 y, Alignment alignment) const
       mSymbols[i]->render(Point(x + w / 2, y));
       x += w;
    }
+
+   return mHeight;
 }
 
 
@@ -403,7 +436,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
       return SymbolShapePtr(new SymbolKey("Mouse Wheel Up", color));
    else if(inputCode == MOUSE_WHEEL_DOWN)
       return SymbolShapePtr(new SymbolKey("Mouse Wheel Down", color));
-   else if(InputCodeManager::isCtrlKey(inputCode))
+   else if(InputCodeManager::isCtrlKey(inputCode) || InputCodeManager::isAltKey(inputCode))
    {
       Vector<SymbolShapePtr> symbols;
       
@@ -511,7 +544,7 @@ LayeredSymbolString::~LayeredSymbolString()
 
 
 // Each layer is rendered atop the previous, creating a layered effect
-void LayeredSymbolString::render(S32 x, S32 y, Alignment alignment) const
+S32 LayeredSymbolString::render(S32 x, S32 y, Alignment alignment, S32 blockWidth) const
 {
    TNLAssert(mReady, "Not ready!");
 
@@ -525,6 +558,8 @@ void LayeredSymbolString::render(S32 x, S32 y, Alignment alignment) const
       mSymbols[i]->render(Point(x, y));
 
    FontManager::popFontContext();
+
+   return mHeight;
 }
 
 

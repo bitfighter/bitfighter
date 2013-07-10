@@ -1082,7 +1082,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       return true;
    }
 
-   if(inputCode == KEY_M && InputCodeManager::checkModifier(KEY_CTRL))        // Ctrl-M, for now, to cycle through message dispaly modes
+   if(inputCode == KEY_M && InputCodeManager::checkModifier(KEY_CTRL))        // Ctrl+M, for now, to cycle through message dispaly modes
    {
       toggleChatDisplayMode();
       return true;
@@ -1233,22 +1233,25 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
 
    // The following keys are allowed in both play mode and in loadout or
    // engineering menu modes if not used in the loadout menu above
+   // They are currently hardcoded, both here and in the instructions
    if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_ALT))          // Alt+] advances bots by one step if frozen
       EventManager::get()->addSteps(1);
    else if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl+] advances bots by 10 steps if frozen
       EventManager::get()->addSteps(10);
-   else if(inputCode == KEY_1 && InputCodeManager::checkModifier(KEY_CTRL))               // Ctrl+1 saves loadout preset in first slot
-      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 0);
-   else if(inputCode == KEY_1 && InputCodeManager::checkModifier(KEY_ALT))                // Alt+1 loads preset from first slot
+
+   else if(checkInputCode(settings, InputCodeManager::BINDING_LOAD_PRESET_1, inputCode))  // Loading loadout presets
       loadLoadoutPreset(getGame(), 0);
-   else if(inputCode == KEY_2 && InputCodeManager::checkModifier(KEY_CTRL))               // Ctrl+2
-      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 1);
-   else if(inputCode == KEY_2 && InputCodeManager::checkModifier(KEY_ALT))                // Alt+2
+   else if(checkInputCode(settings, InputCodeManager::BINDING_LOAD_PRESET_2, inputCode))
       loadLoadoutPreset(getGame(), 1);
-   else if(inputCode == KEY_3 && InputCodeManager::checkModifier(KEY_CTRL))               // Ctrl+3
-      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 2);
-   else if(inputCode == KEY_3 && InputCodeManager::checkModifier(KEY_ALT))                // Alt+3
+   else if(checkInputCode(settings, InputCodeManager::BINDING_LOAD_PRESET_3, inputCode))
       loadLoadoutPreset(getGame(), 2);
+
+   else if(checkInputCode(settings, InputCodeManager::BINDING_SAVE_PRESET_1, inputCode))  // Saving loadout presets
+      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 0);
+   else if(checkInputCode(settings, InputCodeManager::BINDING_SAVE_PRESET_2, inputCode))
+      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 1);
+   else if(checkInputCode(settings, InputCodeManager::BINDING_SAVE_PRESET_3, inputCode))
+      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 2);
 
    else if(checkInputCode(settings, InputCodeManager::BINDING_MOD1, inputCode))       
       activateModule(0);

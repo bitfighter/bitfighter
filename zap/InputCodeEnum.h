@@ -134,8 +134,12 @@ enum InputCode {
    MAX_INPUT_CODES,
    MOUSE, LEFT_JOYSTICK, RIGHT_JOYSTICK,     // Not exactly keys, but helpful to have in here!
 
-   // Keep these together -- needed for isCtrlKey().  Note that M and S are used as markers of the bounds of ctrl keys.
+   // Keep these together -- needed for isCtrlKey() -- M and 3 are used as markers of the bounds of ctrl keys.
    KEY_CTRL_M, KEY_CTRL_Q, KEY_CTRL_S,
+   KEY_CTRL_1, KEY_CTRL_2, KEY_CTRL_3,
+
+   // Keep these together for isAltKey() -- KEY_ALT_1 and KEY_ALT_3 are markers for bounds of alt keys
+   KEY_ALT_1, KEY_ALT_2, KEY_ALT_3,
    
    KEY_COUNT,
    KEY_UNKNOWN, KEY_NONE,
@@ -149,7 +153,10 @@ static const U32 FIRST_CONTROLLER_BUTTON = (U32)BUTTON_1;
 static const U32 LAST_CONTROLLER_BUTTON  = (U32)BUTTON_START;               
 
 static const U32 FIRST_CTRL_KEY = (U32)KEY_CTRL_M;
-static const U32 LAST_CTRL_KEY  = (U32)KEY_CTRL_S;
+static const U32 LAST_CTRL_KEY  = (U32)KEY_CTRL_3;
+
+static const U32 FIRST_ALT_KEY = (U32)KEY_ALT_1;
+static const U32 LAST_ALT_KEY  = (U32)KEY_ALT_3;
 
 };
 

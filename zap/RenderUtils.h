@@ -90,6 +90,7 @@ void drawString(S32 x, S32 y, F32 size, const char *string);
 void drawString(F32 x, F32 y, F32 size, const char *string);
 void drawString(F32 x, F32 y, S32 size, const char *string);
 void drawString(S32 x, S32 y, S32 size, const char *string);
+void drawString(const Point &left, S32 size, const char *string);
 
 void drawStringf(S32 x, S32 y, S32 size, const char *format, ...);
 void drawStringf(F32 x, F32 y, F32 size, const char *format, ...);

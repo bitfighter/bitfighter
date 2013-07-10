@@ -369,7 +369,16 @@ void UserInterface::setInputCode(GameSettings *settings, InputCodeManager::Bindi
 
 bool UserInterface::checkInputCode(GameSettings *settings, InputCodeManager::BindingName binding, InputCode inputCode)
 {
-   return getInputCode(settings, binding) == settings->getInputCodeManager()->filterInputCode(inputCode);
+   InputCode bindingCode = getInputCode(settings, binding);
+
+   // Handle modified keys
+   if(InputCodeManager::isModified(bindingCode))
+      return inputCode == InputCodeManager::getBaseKey(bindingCode) && 
+             InputCodeManager::checkModifier(InputCodeManager::getModifier(bindingCode));
+
+   // Else just do a simple key check.  filterInputCode deals with the numeric keypad.
+   else
+      return bindingCode == settings->getInputCodeManager()->filterInputCode(inputCode);
 }
 
 
