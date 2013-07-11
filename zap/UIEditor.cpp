@@ -907,7 +907,7 @@ static bool hasTeamFlags(GridDatabase *database)
 
    for(S32 i = 0; i < flags->size(); i++)
       if(static_cast<FlagItem *>(flags->get(i))->getTeam() > TEAM_NEUTRAL)
-         return false;
+         return true;
 
    return false;     
 }
