@@ -165,7 +165,7 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
       {
          static EditorAttributeMenuUI *attributeMenuUI = NULL;
 
-         if(!attributeMenuUI)
+         if(attributeMenuUI == NULL)
          {
             ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 

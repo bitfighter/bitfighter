@@ -281,7 +281,8 @@ void QuickMenuUI::onEscape()
 void QuickMenuUI::cleanupAndQuit()
 {
    getUIManager()->reactivatePrevUI();    // Back to the editor!
-   clearMenuItems();    // Not really needed, will be cleaned up eventually, but we might as well get our memory back now
+   //clearMenuItems();    // Don't do this now... will be cleaned up eventually, but if we delete now,
+                          // menu will crash if we try to reactivate it
 }
 
 
