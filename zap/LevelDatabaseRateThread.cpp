@@ -17,14 +17,17 @@ namespace Zap
 
 const string LevelDatabaseRateThread::LevelDatabaseRateUrl = "bitfighter.org/pleiades/levels/rate/";
 
-LevelDatabaseRateThread::LevelDatabaseRateThread(ClientGame* game, string rating)
-   : mGame(game), mRating(rating)
+LevelDatabaseRateThread::LevelDatabaseRateThread(ClientGame* game, string rating) : mGame(game), mRating(rating)
 {
+   // Do nothing
 }
+
 
 LevelDatabaseRateThread::~LevelDatabaseRateThread()
 {
+   // Do nothing
 }
+
 
 U32 LevelDatabaseRateThread::run()
 {
@@ -66,5 +69,6 @@ U32 LevelDatabaseRateThread::run()
    delete this;
    return 0;
 }
+
 
 } /* namespace Zap */
