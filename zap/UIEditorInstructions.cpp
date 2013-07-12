@@ -512,7 +512,7 @@ bool EditorInstructionsUserInterface::onKeyDown(InputCode inputCode)
       nextPage();
    }
    // F1 has dual use... advance page, then quit out of help when done
-   else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_HELP, inputCode))
+   else if(checkInputCode(InputCodeManager::BINDING_HELP, inputCode))
    {
       if(mCurPage != getPageCount())
          nextPage();

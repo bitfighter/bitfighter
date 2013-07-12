@@ -521,7 +521,7 @@ static void initPage2Block(const char **block, S32 blockSize, const Color *heade
          symbols.clear();
          //symbols.push_back(SymbolString::getSymbolText(block[i], HeaderFontSize, HelpContext, bodyColor));
          string str(block[i]);
-         HelpItemManager::symbolParse(inputCodeManager, str, symbols,HelpContext, HeaderFontSize, bodyColor);
+         HelpItemManager::symbolParse(inputCodeManager, str, symbols, HelpContext, HeaderFontSize, bodyColor);
 
          instrBlock.add(SymbolString(symbols, FontSize, HelpContext, AlignmentLeft));
       }
@@ -1230,7 +1230,7 @@ bool InstructionsUserInterface::onKeyDown(InputCode inputCode)
       nextPage();
    }
    // F1 has dual use... advance page, then quit out of help when done
-   else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_HELP, inputCode))
+   else if(checkInputCode(InputCodeManager::BINDING_HELP, inputCode))
    {
       if(mCurPage != InstructionMaxPages - 1)
          nextPage();

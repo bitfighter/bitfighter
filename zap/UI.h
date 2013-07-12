@@ -51,7 +51,7 @@ extern F32 gDefaultLineWidth;
 extern F32 gLineWidth3;
 extern F32 gLineWidth4;
 
-static const S32 HIGHLIGHTED_OBJECT_BUFFER_WIDTH = 14;      // Width to buffer objects higlighted by inline help system
+static const F32 HIGHLIGHTED_OBJECT_BUFFER_WIDTH = 14.0;      // Width to buffer objects higlighted by inline help system
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -124,7 +124,7 @@ public:
    // Helpers to simplify dealing with key bindings
    static InputCode getInputCode(GameSettings *settings, InputCodeManager::BindingName binding);
    void setInputCode(GameSettings *settings, InputCodeManager::BindingName binding, InputCode inputCode);
-   bool checkInputCode(GameSettings *settings, InputCodeManager::BindingName, InputCode inputCode);
+   bool checkInputCode(InputCodeManager::BindingName, InputCode inputCode);
    const char *getInputCodeString(GameSettings *settings, InputCodeManager::BindingName binding);
 
 

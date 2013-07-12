@@ -3805,7 +3805,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       insertNewItem(ForceFieldProjectorTypeNumber);
    else if(inputString == "Backspace" || inputString == "Del" || inputString == "Keypad .")     // Keypad . is the keypad's del key
       deleteSelection(false);
-   else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_HELP, inputCode)) // Turn on help screen
+   else if(checkInputCode(InputCodeManager::BINDING_HELP, inputCode)) // Turn on help screen
    {
       getGame()->getUIManager()->activate<EditorInstructionsUserInterface>();
       playBoop();

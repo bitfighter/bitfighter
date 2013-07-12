@@ -367,8 +367,10 @@ void UserInterface::setInputCode(GameSettings *settings, InputCodeManager::Bindi
 }
 
 
-bool UserInterface::checkInputCode(GameSettings *settings, InputCodeManager::BindingName binding, InputCode inputCode)
+bool UserInterface::checkInputCode(InputCodeManager::BindingName binding, InputCode inputCode)
 {
+   GameSettings *settings = getGame()->getSettings();
+
    InputCode bindingCode = getInputCode(settings, binding);
 
    // Handle modified keys
@@ -401,7 +403,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
    GameSettings *settings = getGame()->getSettings();
    UIManager *uiManager = getGame()->getUIManager();
 
-   if(checkInputCode(settings, InputCodeManager::BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
+   if(checkInputCode(InputCodeManager::BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
    { 
       if(uiManager->isCurrentUI<DiagnosticUserInterface>())
          return false;
@@ -412,7 +414,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
       
       handled = true;
    }
-   else if(checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode))  // Turn on Global Chat overlay
+   else if(checkInputCode(InputCodeManager::BINDING_OUTGAMECHAT, inputCode))  // Turn on Global Chat overlay
    {
       // Don't activate if we're already in chat or if we're on the Name Entry
       // screen (since we don't have a nick yet)

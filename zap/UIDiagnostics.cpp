@@ -107,13 +107,13 @@ void DiagnosticUserInterface::quit()
 
 bool DiagnosticUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_DIAG, inputCode))
+   if(checkInputCode(InputCodeManager::BINDING_DIAG, inputCode))
    {
       mCurPage++;
       if(mCurPage >= NUM_PAGES)
          quit();
    }
-   else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
+   else if(checkInputCode(InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
    {
       // Do nothing -- no global chat from diagnostics screen... it's perverse!
    }
