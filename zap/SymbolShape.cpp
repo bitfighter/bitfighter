@@ -27,7 +27,6 @@
 
 #include "FontManager.h"
 #include "InputCode.h"
-#include "Joystick.h"
 #include "JoystickRender.h"
 
 #include "gameObjectRender.h"
@@ -165,7 +164,7 @@ S32 SymbolStringSet::renderLine(S32 line, S32 x, S32 y, Alignment alignment) con
 ////////////////////////////////////////
 
 // Width is the sum of the widths of all elements in the symbol list
-static S32 computeWidth(const Vector<SymbolShapePtr> &symbols, S32 fontSize, FontContext fontContext)
+static S32 computeWidth(const Vector<SymbolShapePtr > &symbols, S32 fontSize, FontContext fontContext)
 {
    S32 width = 0;
 
@@ -177,7 +176,7 @@ static S32 computeWidth(const Vector<SymbolShapePtr> &symbols, S32 fontSize, Fon
 
 
 // Width of a layered item is the widest of the widths of all elements in the symbol list
-static S32 computeLayeredWidth(const Vector<SymbolShapePtr> &symbols, S32 fontSize, FontContext fontContext)
+static S32 computeLayeredWidth(const Vector<SymbolShapePtr > &symbols, S32 fontSize, FontContext fontContext)
 {
    S32 width = 0;
 
@@ -412,7 +411,6 @@ static S32 KeyFontSize = 13;     // Size of characters used for rendering key bi
 // Color is ignored for controller buttons
 static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
 {
-
    if(InputCodeManager::isKeyboardKey(inputCode))
       return SymbolShapePtr(new SymbolKey(InputCodeManager::inputCodeToString(inputCode), color));
 
@@ -523,6 +521,69 @@ SymbolShapePtr SymbolString::getHorizLine(S32 length, S32 vertOffset, S32 height
    return SymbolShapePtr(new SymbolHorizLine(length, vertOffset, height, color));
 }
 
+
+static void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbolName, Vector<SymbolShapePtr> &symbols)
+{
+   // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
+   InputCode inputCode = inputCodeManager->getKeyBoundToBindingCodeName(symbolName);
+   
+   if(inputCode != KEY_UNKNOWN)
+      symbols.push_back(SymbolString::getControlSymbol(inputCode));
+
+   else if(symbolName == "LOADOUT_ICON")
+      symbols.push_back(SymbolString::getSymbolGear(14));
+   else if(symbolName == "GOAL_ICON")
+      symbols.push_back(SymbolString::getSymbolGoal(14));
+   else if(symbolName == "CHANGEWEP")
+   {
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP2)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP3)));
+   }
+
+   else if(symbolName == "MOVEMENT")
+   {
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_UP)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_DOWN)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_LEFT)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_RIGHT)));
+   }
+
+   else if(symbolName == "MODULE_CTRL1")
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1)));
+
+   else if(symbolName == "MODULE_CTRL2")
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2)));
+
+   else 
+      symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, 12, HelpItemContext)));
+}
+
+
+void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const string &str, Vector<SymbolShapePtr> &symbols,
+                              FontContext fontContext, S32 fontSize, const Color *fontColor)
+{
+   std::size_t offset = 0;
+
+   while(true)
+   {
+      std::size_t startPos = str.find("[[", offset);      // If this isn't here, no further searching is necessary
+      std::size_t endPos   = str.find("]]", offset + 2);
+
+      if(startPos == string::npos || endPos == string::npos)
+      {
+         // No further symbols herein, convert the rest to text symbol and exit
+         symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset), fontSize, fontContext, fontColor)));
+         return;
+      }
+
+      symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset), fontSize, fontContext, fontColor)));
+
+      getSymbolShape(inputCodeManager, str.substr(startPos + 2, endPos - startPos - 2), symbols);    // + 2 to advance past the "[["
+
+      offset = endPos + 2;
+   }
+}
 
 ////////////////////////////////////////
 ////////////////////////////////////////

@@ -519,9 +519,8 @@ static void initPage2Block(const char **block, S32 blockSize, const Color *heade
       else
       {
          symbols.clear();
-         //symbols.push_back(SymbolString::getSymbolText(block[i], HeaderFontSize, HelpContext, bodyColor));
          string str(block[i]);
-         HelpItemManager::symbolParse(inputCodeManager, str, symbols, HelpContext, HeaderFontSize, bodyColor);
+         SymbolString::symbolParse(inputCodeManager, str, symbols, HelpContext, HeaderFontSize, bodyColor);
 
          instrBlock.add(SymbolString(symbols, FontSize, HelpContext, AlignmentLeft));
       }

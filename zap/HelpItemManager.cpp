@@ -227,70 +227,6 @@ void HelpItemManager::moveItemFromQueueToActiveList(const ClientGame *game)
 static const S32 FontSize = 18;
 static const S32 FontGap  = 6;
 
-// DON'T PANIC!!! THIS IS A ROUGH INTERMEDIATE FORM THAT WILL BE SIMPLIFIED AND STREAMLINED!!!
-
-void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbolName, Vector<SymbolShapePtr> &symbols)
-{
-   // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
-   InputCode inputCode = inputCodeManager->getKeyBoundToBindingCodeName(symbolName);
-   
-   if(inputCode != KEY_UNKNOWN)
-      symbols.push_back(SymbolString::getControlSymbol(inputCode));
-
-   else if(symbolName == "LOADOUT_ICON")
-      symbols.push_back(SymbolString::getSymbolGear(14));
-   else if(symbolName == "GOAL_ICON")
-      symbols.push_back(SymbolString::getSymbolGoal(14));
-   else if(symbolName == "CHANGEWEP")
-   {
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP2)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP3)));
-   }
-
-   else if(symbolName == "MOVEMENT")
-   {
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_UP)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_DOWN)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_LEFT)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_RIGHT)));
-   }
-
-   else if(symbolName == "MODULE_CTRL1")
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1)));
-
-   else if(symbolName == "MODULE_CTRL2")
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2)));
-
-   else 
-      symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, FontSize, HelpItemContext)));
-}
-
-
-void HelpItemManager::symbolParse(const InputCodeManager *inputCodeManager, const string &str, Vector<SymbolShapePtr > &symbols,
-                                  FontContext fontContext, S32 fontSize, const Color *fontColor)
-{
-   std::size_t offset = 0;
-
-   while(true)
-   {
-      std::size_t startPos = str.find("[[", offset);      // If this isn't here, no further searching is necessary
-      std::size_t endPos   = str.find("]]", offset + 2);
-
-      if(startPos == string::npos || endPos == string::npos)
-      {
-         // No further symbols herein, convert the rest to text symbol and exit
-         symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset), fontSize, fontContext, fontColor)));
-         return;
-      }
-
-      symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset), fontSize, fontContext, fontColor)));
-
-      getSymbolShape(inputCodeManager, str.substr(startPos + 2, endPos - startPos - 2), symbols);    // + 2 to advance past the "[["
-
-      offset = endPos + 2;
-   }
-}
 
 
 static void renderHelpTextBracket(S32 x, S32 top, S32 bot, S32 stubLen)
@@ -407,7 +343,7 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
       string renderStr(messages[i]);
       
       Vector<SymbolShapePtr> symbols;
-      HelpItemManager::symbolParse(inputCodeManager, renderStr, symbols, HelpItemContext, FontSize);
+      SymbolString::symbolParse(inputCodeManager, renderStr, symbols, HelpItemContext, FontSize);
 
       UI::SymbolString symbolString(symbols, FontSize, HUDContext);
       symbolString.render(xPos, yPos, AlignmentCenter);

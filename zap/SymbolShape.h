@@ -41,7 +41,11 @@
 
 using namespace TNL;
 
-namespace Zap { namespace UI {
+namespace Zap { 
+   
+class InputCodeManager;
+
+namespace UI {
 
 
 enum Alignment {
@@ -304,6 +308,11 @@ public:
    static SymbolShapePtr getBlankSymbol(S32 width = -1, S32 height = -1);
    static SymbolShapePtr getHorizLine(S32 length, S32 height, const Color *color);
    static SymbolShapePtr getHorizLine(S32 length, S32 vertOffset, S32 height, const Color *color);
+
+   //
+   static void symbolParse(const InputCodeManager *inputCodeManager, const string &str, Vector<SymbolShapePtr> &symbols,
+                           FontContext fontContext, S32 fontSize, const Color *color = NULL);
+
 };
 
 

@@ -26,11 +26,7 @@
 #ifndef WEAPONINFO_H_
 #define WEAPONINFO_H_
 
-//#include "Color.h"
-//#include "SoundSystem.h"
-
 #include "tnlNetStringTable.h"
-
 
 using namespace TNL;
 
