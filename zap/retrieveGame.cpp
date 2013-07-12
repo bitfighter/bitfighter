@@ -274,7 +274,7 @@ void RetrieveGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight)
    if(!ship)
       return;
 
-   bool uFlag = false;
+   bool uFlag = false;   // What does this mean?
    S32 team = ship->getTeam();
 
    const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
@@ -315,10 +315,14 @@ void RetrieveGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight)
       {
          GoalZone *gz = flag->getZone();
 
+         // If flag is on a team's zone, render the objective arrow as the team's color
          if(gz && gz->getTeam() != team)
             renderObjectiveArrow(flag, gz->getColor(), canvasWidth, canvasHeight);
-         else if(!gz)
-            renderObjectiveArrow(flag, getTeamColor(TEAM_NEUTRAL), canvasWidth, canvasHeight);
+
+         // Else if flag is not on a zone, render objective arrow as flag team's color (but only
+         // flags you can pick up, non-enemies')
+         else if(!gz && (flag->getTeam() == TEAM_NEUTRAL || flag->getTeam() == team))
+            renderObjectiveArrow(flag, getTeamColor(flag->getTeam()), canvasWidth, canvasHeight);
       }
       else
       {
