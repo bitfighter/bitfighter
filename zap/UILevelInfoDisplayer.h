@@ -31,10 +31,12 @@
 using namespace TNL; 
 
 
-namespace Zap
-{
+namespace Zap {
 
 class GameType;
+
+namespace UI {
+
 
 class LevelInfoDisplayer : public SlideOutWidget
 {
@@ -49,7 +51,7 @@ public:
 
    void resetDisplayTimer();
    void idle(U32 timeDelta);
-   void render(const GameType *gameType, S32 teamCount) const;
+   void render(const GameType *gameType, S32 teamCount, bool isInDatabase) const;
 
    void clearDisplayTimer();
    virtual bool isActive() const;
@@ -58,6 +60,6 @@ public:
 };
 
 
-}
+} } // Nested namespace
 
 #endif

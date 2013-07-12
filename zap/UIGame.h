@@ -156,7 +156,7 @@ private:
    Point mShipPos;      // Track ship pos, so we have something if the ship disappears for whatever reason
 
    HelperManager mHelperManager;
-   LevelInfoDisplayer mLevelInfoDisplayer;
+   UI::LevelInfoDisplayer mLevelInfoDisplayer;
    LoadoutIndicator mLoadoutIndicator;
    TimeLeftRenderer mTimeLeftRenderer;
 

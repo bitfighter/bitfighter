@@ -32,14 +32,18 @@
 #include "GameTypesEnum.h"
 #include "gameType.h"               // Can get rid of with a bunch of passthroughs
 #include "FontManager.h"
+#include "SymbolShape.h"
 
 #include "stringUtils.h"
 #include "OpenglUtils.h"               
 #include "RenderUtils.h"
 
 
-namespace Zap
-{
+namespace Zap { 
+   
+extern ScreenInfo gScreenInfo;
+
+namespace UI {
 
 // Constructor
 LevelInfoDisplayer::LevelInfoDisplayer()
@@ -74,9 +78,7 @@ void LevelInfoDisplayer::clearDisplayTimer()
 }
 
 
-extern ScreenInfo gScreenInfo;
-
-void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount) const
+void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool isInDatabase) const
 {
    FontManager::pushFontContext(LevelInfoContext);
 
@@ -87,9 +89,21 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount) const
    bool showCredits = gameType->getLevelCredits()->isNotNull();    
    bool showDescr   = gameType->getLevelDescription()->isNotNull();
 
-   const char *title           = gameType->getLevelName()->isNotNull() ? gameType->getLevelName()->getString() : "Unnamed Level";
-   const S32 titleSize         = 30;
-   const S32 titleHeight       = titleSize + 10;
+   const char *title   = gameType->getLevelName()->isNotNull() ? gameType->getLevelName()->getString() : "Unnamed Level";
+   const S32 titleSize = 30;
+   const S32 titleGap  = 10;
+
+   Vector<SymbolShapePtr> symbols;
+   symbols.push_back(SymbolString::getSymbolText(title, titleSize, LevelInfoContext));
+
+   if(isInDatabase)
+   {
+      symbols.push_back(SymbolString::getBlankSymbol(10));
+      symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, GoalZoneIconContext));
+   }
+
+   SymbolString titleSymbolString(symbols, titleSize, LevelInfoContext);
+
 
    const char *descr           = gameType->getLevelDescription()->getString();
    const S32 descriptionSize   = 20;
@@ -102,21 +116,22 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount) const
    
    const S32 frameMargin       = UserInterface::vertMargin;
 
-   const S32 totalHeight = frameMargin + titleHeight + descriptionHeight + creditsHeight + frameMargin;
+   const S32 totalHeight = frameMargin + titleSize + titleGap + descriptionHeight + creditsHeight + frameMargin;
    //const S32 totalWidth = max(getStringWidth(titleSize, title), 
    //                           max(getStringWidth(descriptionSize, descr), 
    //                              max(getStringPairWidth(creditsSize, designedBy, credits), 400))) +
    //                       frameMargin * 2;
 
    const S32 totalWidth = gScreenInfo.getGameCanvasWidth() - 60;
-   S32 yPos = frameMargin;
+   S32 yPos = frameMargin + titleSize;
 
    // Draw top info box
    renderSlideoutWidgetFrame((gScreenInfo.getGameCanvasWidth() - totalWidth) / 2, 0, totalWidth, totalHeight, Colors::blue);
 
    glColor(Colors::white);
-   drawCenteredString(yPos, titleSize, title);
-   yPos += titleHeight;
+   titleSymbolString.render(gScreenInfo.getGameCanvasWidth() / 2, yPos, AlignmentCenter);
+
+   yPos += titleGap;
 
    if(showDescr)
    {
@@ -212,4 +227,5 @@ bool LevelInfoDisplayer::isDisplayTimerActive() const
    return mDisplayTimer.getCurrent() > 0;
 }
 
-};
+
+} } // Nested namespace

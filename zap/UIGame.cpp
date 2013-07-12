@@ -2103,7 +2103,7 @@ void GameUserInterface::renderLevelInfo()
 
    if(mLevelInfoDisplayer.isActive() || mMissionOverlayActive)
    {
-      mLevelInfoDisplayer.render(getGame()->getGameType(), teamCount);
+      mLevelInfoDisplayer.render(getGame()->getGameType(), teamCount, getGame()->getLevelDatabaseId() > 0);
       mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
    }
 }
