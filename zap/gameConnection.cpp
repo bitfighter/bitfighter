@@ -1949,9 +1949,9 @@ void GameConnection::setWantsScoreboardUpdates(bool wantsUpdates)
 void GameConnection::onStartGhosting()
 {
    Parent::onStartGhosting();
+
 #ifndef ZAP_DEDICATED
-   // Shouldn't need to do this, but it will clear out forcefields lingering from level load
-   mClientGame->getGameObjDatabase()->removeEverythingFromDatabase();     
+   mClientGame->onGameStarting();
 #endif
 }
 

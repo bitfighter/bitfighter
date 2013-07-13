@@ -2196,10 +2196,10 @@ void GameType::addAdminGameMenuOptions(MenuUserInterface *menu)
 // Note that if we add another arg to this, we need to further expand FunctorDecl methods in tnlMethodDispatch.h
 // Also serves to tell the client we're on a new level.
 GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, 
-                                                StringTableEntry levelCreds, S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, 
+                                                StringTableEntry levelCreds, S32 objectCount, 
                                                 bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId),
                                             (levelName, levelDesc, teamScoreLimit, 
-                                                levelCreds, objectCount, lx, ly, ux, uy, 
+                                                levelCreds, objectCount,  
                                                 levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled, levelDatabaseId))
 {
 #ifndef ZAP_DEDICATED
@@ -2217,7 +2217,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    mLevelHasLoadoutZone = levelHasLoadoutZone;        
 
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-   clientGame->startLoadingLevel(lx, ly, ux, uy, engineerEnabled);
+   clientGame->startLoadingLevel(engineerEnabled);
    clientGame->setLevelDatabaseId(levelDatabaseId);
 #endif
 }
@@ -2665,7 +2665,6 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    Rect barrierExtents = mGame->computeBarrierExtents();
 
    s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, mGame->mObjectsLoaded, 
-                   barrierExtents.min.x, barrierExtents.min.y, barrierExtents.max.x, barrierExtents.max.y, 
                    mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId());
 
    for(S32 i = 0; i < mGame->getTeamCount(); i++)

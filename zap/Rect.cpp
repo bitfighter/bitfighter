@@ -150,6 +150,16 @@ void Rect::set(const Rect &r)
    max.y = r.max.y;
 }
 
+
+void Rect::set(const Rect *r)
+{
+   min.x = r->min.x;
+   min.y = r->min.y;
+
+   max.x = r->max.x;
+   max.y = r->max.y;
+}
+
 // Takes centerpoint and "diameter"
 void Rect::set(const Point &p, F32 radius)
 {

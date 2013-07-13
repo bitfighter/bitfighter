@@ -162,9 +162,8 @@ private:
 
    LevelListDisplayer mLevelListDisplayer;
 
-   // TODO: Can we combine these two?  They are conceptually similar and are never used at the same time
-   Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
    Rect mDispWorldExtents;          // Extents we display when we are in cmdrs map (usually the same as Game::mWorldExtents)
+   Timer mShrinkDelayTimer;
 
    bool mInCommanderMap;
    Timer mCommanderZoomDelta;
@@ -174,9 +173,9 @@ private:
    bool mMissionOverlayActive;      // Are game instructions (F2) visible?
 
    enum ShutdownMode {
-      None,                   // Nothing happening
-      ShuttingDown,           // Shutting down, obviously
-      Canceled                // Was shutting down, but are no longer
+      None,                         // Nothing happening
+      ShuttingDown,                 // Shutting down, obviously
+      Canceled                      // Was shutting down, but are no longer
    };
 
 
@@ -270,14 +269,16 @@ private:
    Timer mAnnouncementTimer;
    string mAnnouncement;
 
-   void dropItem();                       // User presses drop item key
+   void dropItem();                                // User presses drop item key
 
-   bool mFiring;                          // Are we firing?
+   bool mFiring;                                   // Are we firing?
    bool mModPrimaryActivated[ShipModuleCount];
    bool mModSecondaryActivated[ShipModuleCount];
 
-   Timer mModuleDoubleTapTimer[ShipModuleCount];  // Timer for detecting if a module key is double-tapped
-   static const S32 DoubleClickTimeout = 200;          // Timeout in milliseconds
+   void rectifyExtents(U32 timeDelta);
+
+   Timer mModuleDoubleTapTimer[ShipModuleCount];   // Timer for detecting if a module key is double-tapped
+   static const S32 DoubleClickTimeout = 200;      // Timeout in milliseconds
 
    // Some key event handlers
    bool processPlayModeKey(InputCode inputCode);
@@ -293,14 +294,15 @@ public:
 
    bool displayInputModeChangeAlert;
 
-   void toggleChatDisplayMode();            // Set which chat message display mode we're in (Ctrl-M)
+   void toggleChatDisplayMode();                  // Set which chat message display mode we're in (Ctrl-M)
 
-   bool isShowingMissionOverlay() const;    // Are game instructions (F2) visible?
+   bool isShowingMissionOverlay() const;          // Are game instructions (F2) visible?
 
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);
 
-   void startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled);
+   void onGameStarting();
+   void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
 
    void setAnnouncement(const string &announcement);
@@ -309,8 +311,6 @@ public:
    const char *getChatMessage();    // Return message being composed in in-game chat
 
    void resetInputModeChangeAlertDisplayTimer(U32 timeInMs);
-
-   void setViewBoundsWhileLoading(F32 lx, F32 ly, F32 ux, F32 uy);   
 
    void showLevelLoadDisplay(bool show, bool fade);
    void serverLoadedLevel(const string &levelName);

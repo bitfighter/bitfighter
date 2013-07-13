@@ -234,11 +234,11 @@ void ClientGame::setConnectionToServer(GameConnection *connectionToServer)
 }
 
 
-void ClientGame::startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled)
+void ClientGame::startLoadingLevel(bool engineerEnabled)
 {
    mObjectsLoaded = 0;                       // Reset item counter
 
-   getUIManager()->startLoadingLevel(lx, ly, ux, uy, engineerEnabled);
+   getUIManager()->startLoadingLevel(engineerEnabled);
 }
 
 
@@ -807,6 +807,14 @@ void ClientGame::onGameReallyAndTrullyOver()
 
    // Inform the UI
    getUIManager()->onGameOver();
+}
+
+
+void ClientGame::onGameStarting()
+{
+   // Shouldn't need to do this, but it will clear out forcefields lingering from level load
+   getGameObjDatabase()->removeEverythingFromDatabase();
+   getUIManager()->onGameStarting();
 }
 
 

@@ -111,7 +111,7 @@ public:
 
    void displayShipDesignChangedMessage(const LoadoutTracker &loadout, const char *msgToShowIfLoadoutsAreTheSame);
    
-   void startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled);
+   void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
 
    UIManager *getUIManager() const;
@@ -121,6 +121,8 @@ public:
 
    void resetCommandersMap();
    F32 getCommanderZoomFraction() const;
+
+   void onGameStarting();
 
    void setEnteringGameOverScoreboardPhase();   // Post-game scoreboard is about to be displayed
    void onGameReallyAndTrullyOver();            // Post-game scoreboard has already been displayed

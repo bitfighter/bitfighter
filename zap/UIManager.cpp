@@ -469,6 +469,12 @@ void UIManager::onPlayerQuit(const char *name)
 }
 
 
+void UIManager::onGameStarting()
+{
+   getUI<GameUserInterface>()->onGameStarting();
+}
+
+
 void UIManager::onGameOver()
 {
    getUI<GameUserInterface>()->onGameOver();    // Closes helpers and such
@@ -793,11 +799,11 @@ void UIManager::displayMessageBox(const char *title, const char *instr, const Ve
 }
 
 
-void UIManager::startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled)
+void UIManager::startLoadingLevel(bool engineerEnabled)
 {
    clearSparks();
    getUI<EditorUserInterface>()->clearRobotLines();
-   getUI<GameUserInterface>()->startLoadingLevel(lx, ly, ux, uy, engineerEnabled);
+   getUI<GameUserInterface>()->startLoadingLevel(engineerEnabled);
 }
 
 

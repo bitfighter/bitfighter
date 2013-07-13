@@ -157,6 +157,7 @@ public:
    void onPlayerQuit(const char *name);
    void displayMessage(const Color &msgColor, const char *format, ...);
 
+   void onGameStarting();
    void onGameOver();
 
    // Sounds and music
@@ -214,7 +215,7 @@ public:
    void displayMessageBox(const char *title, const char *instr, const Vector<string> &messages);
 
    // GameUI
-   void startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled);
+   void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
    void clearSparks();
    void emitBlast(const Point &pos, U32 size);

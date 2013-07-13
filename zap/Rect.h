@@ -81,6 +81,7 @@ public:
    void set(const Vector<Point> &p);     // Set to bounding box around multiple points
 
    void set(const Rect &r);
+   void set(const Rect *r);
 
    void set(const Point &p, F32 radius);   // Takes point and "radius"
 

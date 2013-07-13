@@ -107,6 +107,8 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
    mShowDebugBots         = false;
    mDebugShowMeshZones    = false;
 
+   mShrinkDelayTimer.setPeriod(500);
+
    mGotControlUpdate = false;
    
    mFiring = false;
@@ -227,9 +229,9 @@ void GameUserInterface::onReactivate()
 }
 
 
-bool GameUserInterface::isShowingMissionOverlay() const
+void GameUserInterface::onGameStarting()
 {
-   return mMissionOverlayActive;
+   mDispWorldExtents.set(Point(0,0), 0);
 }
 
 
@@ -269,10 +271,15 @@ void GameUserInterface::displayMessage(const Color &msgColor, const char *messag
 }
 
 
-void GameUserInterface::startLoadingLevel(F32 lx, F32 ly, F32 ux, F32 uy, bool engineerEnabled)
+bool GameUserInterface::isShowingMissionOverlay() const
+{
+   return mMissionOverlayActive;
+}
+
+
+void GameUserInterface::startLoadingLevel(bool engineerEnabled)
 {
    mShowProgressBar = true;             // Show progress bar
-   setViewBoundsWhileLoading(lx, ly, ux, uy);
 
    resetLevelInfoDisplayTimer();        // Start displaying the level info, now that we have it
    pregameSetup(engineerEnabled);       // Now we know all we need to initialize our loadout options
@@ -283,6 +290,53 @@ void GameUserInterface::doneLoadingLevel()
 {
    mShowProgressBar = false;
    mProgressBarFadeTimer.reset();
+   mDispWorldExtents.set(getGame()->getWorldExtents());
+}
+
+
+// Limit shrinkage of extent window to reduce jerky effect of some distant object disappearing from view
+static F32 rectify(F32 actual, F32 disp, bool isMax, bool waiting, bool loading, U32 timeDelta, Timer &shrinkDelayTimer)
+{
+   const F32 ShrinkRate = 2.0f;     // Pixels per ms
+
+   if(actual == disp || loading)
+      return actual;
+
+   // Extents are greater than the display -- grow immediately
+   if(abs(actual) > abs(disp))
+   {
+      shrinkDelayTimer.reset();
+      return actual;
+   }
+
+   // So if we are here, the actual extents are smaller than the display, and we need to contract.
+
+   // We have a timer that gives us a little breathing room before we start contracting.  If waiting is true, no contraction.
+   if(waiting)
+      return disp;
+   
+   // If the extends are close to the display, snap to the extents, to avoid overshooting
+   if(abs(disp - actual) <= ShrinkRate * timeDelta)
+      return actual;
+
+   // Finally, contract display extents by our ShrinkRate
+   return disp + (isMax ? -1 : 1) * ShrinkRate * timeDelta;
+}
+
+
+// Limit shrinkage of extent window to reduce jerky effect of some distant object disappearing from view
+void GameUserInterface::rectifyExtents(U32 timeDelta)
+{
+   const Rect *worldExtentRect = getGame()->getWorldExtents();
+
+   mShrinkDelayTimer.update(timeDelta);
+
+   bool waiting = mShrinkDelayTimer.getCurrent() > 0;
+
+   mDispWorldExtents.max.x = rectify(worldExtentRect->max.x, mDispWorldExtents.max.x, true,  waiting, mShowProgressBar, timeDelta, mShrinkDelayTimer);
+   mDispWorldExtents.max.y = rectify(worldExtentRect->max.y, mDispWorldExtents.max.y, true,  waiting, mShowProgressBar, timeDelta, mShrinkDelayTimer);
+   mDispWorldExtents.min.x = rectify(worldExtentRect->min.x, mDispWorldExtents.min.x, false, waiting, mShowProgressBar, timeDelta, mShrinkDelayTimer);
+   mDispWorldExtents.min.y = rectify(worldExtentRect->min.y, mDispWorldExtents.min.y, false, waiting, mShowProgressBar, timeDelta, mShrinkDelayTimer);
 }
 
 
@@ -330,7 +384,10 @@ void GameUserInterface::idle(U32 timeDelta)
 
    // Keep ship pointed towards mouse cmdrs map zoom transition
    if(mCommanderZoomDelta.getCurrent() > 0)               
-      onMouseMoved();     
+      onMouseMoved();
+
+   if(renderWithCommanderMap())
+      rectifyExtents(timeDelta);
 }
 
 
@@ -2254,12 +2311,6 @@ const char *GameUserInterface::getChatMessage()
 }
 
 
-void GameUserInterface::setViewBoundsWhileLoading(F32 lx, F32 ly, F32 ux, F32 uy)
-{
-   mViewBoundsWhileLoading = Rect(lx, ly, ux, uy);
-}
-
-
 // Some reusable containers
 static Point screenSize, visSize, visExt;
 static Vector<DatabaseObject *> rawRenderObjects;
@@ -2424,24 +2475,6 @@ void GameUserInterface::renderGameNormal()
 }
 
 
-// Limit shrinkage of extent window to reduce jerky effect of some distant object disappearing from view
-static F32 rectify(F32 actual, F32 disp, bool isMax)
-{
-   const F32 ShrinkRate = 10;
-
-   if(actual == disp)
-      return actual;
-
-   if((isMax && (actual > disp)) || (!isMax && actual < disp))
-      return actual;
-   
-   if(abs(disp - actual) <= ShrinkRate)
-      return actual;
-
-   return disp + (isMax ? -1 : 1) * ShrinkRate;
-}
-
-
 void GameUserInterface::renderGameCommander()
 {
    // Start of the level, we only show progress bar
@@ -2453,16 +2486,6 @@ void GameUserInterface::renderGameCommander()
 
    GameType *gameType = getGame()->getGameType();
    
-   const Rect *worldExtentRect = getGame()->getWorldExtents();
-
-   const F32 ShrinkRate = 1;     // Pixels/ms
-
-   // Limit shrinkage of extent window to reduce jerky effect of some distant object disappearing from view
-   mDispWorldExtents.max.x = rectify(worldExtentRect->max.x, mDispWorldExtents.max.x, true);
-   mDispWorldExtents.max.y = rectify(worldExtentRect->max.y, mDispWorldExtents.max.y, true);
-   mDispWorldExtents.min.x = rectify(worldExtentRect->min.x, mDispWorldExtents.min.x, false);
-   mDispWorldExtents.min.y = rectify(worldExtentRect->min.y, mDispWorldExtents.min.y, false);
-
    static Point worldExtents;    // Reuse this point to avoid construction/destruction cost
    worldExtents = mDispWorldExtents.getExtents();
 
