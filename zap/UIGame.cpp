@@ -2432,13 +2432,6 @@ static F32 rectify(F32 actual, F32 disp, bool isMax)
    if(actual == disp)
       return actual;
 
-   //if(!isMax)
-   //{
-   //   F32 temp = actual;
-   //   actual = disp;
-   //   disp = temp;
-   //}
-
    if((isMax && (actual > disp)) || (!isMax && actual < disp))
       return actual;
    
@@ -2451,11 +2444,6 @@ static F32 rectify(F32 actual, F32 disp, bool isMax)
 
 void GameUserInterface::renderGameCommander()
 {
-   TNLAssert(rectify(100.0f, 150.0f, true) == 140.0f, "Error!");
-   TNLAssert(rectify(100.0f, 100.0f, true) == 100.0f, "Error!");
-   TNLAssert(rectify(-100.0f, -110.0f, false) == -100.0f, "Error!");
-   TNLAssert(rectify(-100.0f, -150.0f, false) == -140.0f, "Error!");
-
    // Start of the level, we only show progress bar
    if(mShowProgressBar)
       return;
