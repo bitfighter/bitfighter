@@ -162,7 +162,9 @@ private:
 
    LevelListDisplayer mLevelListDisplayer;
 
+   // TODO: Can we combine these two?  They are conceptually similar and are never used at the same time
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
+   Rect mDispWorldExtents;          // Extents we display when we are in cmdrs map (usually the same as Game::mWorldExtents)
 
    bool mInCommanderMap;
    Timer mCommanderZoomDelta;

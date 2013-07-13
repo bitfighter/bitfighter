@@ -837,6 +837,7 @@ Point GameUserInterface::worldToScreenPoint(const Point *point,  S32 canvasWidth
 
       F32 aspectRatio = worldExtents.x / worldExtents.y;
       F32 screenAspectRatio = F32(canvasWidth) / F32(canvasHeight);
+
       if(aspectRatio > screenAspectRatio)
          worldExtents.y *= aspectRatio / screenAspectRatio;
       else
@@ -2423,8 +2424,38 @@ void GameUserInterface::renderGameNormal()
 }
 
 
+// Limit shrinkage of extent window to reduce jerky effect of some distant object disappearing from view
+static F32 rectify(F32 actual, F32 disp, bool isMax)
+{
+   const F32 ShrinkRate = 10;
+
+   if(actual == disp)
+      return actual;
+
+   //if(!isMax)
+   //{
+   //   F32 temp = actual;
+   //   actual = disp;
+   //   disp = temp;
+   //}
+
+   if((isMax && (actual > disp)) || (!isMax && actual < disp))
+      return actual;
+   
+   if(abs(disp - actual) <= ShrinkRate)
+      return actual;
+
+   return disp + (isMax ? -1 : 1) * ShrinkRate;
+}
+
+
 void GameUserInterface::renderGameCommander()
 {
+   TNLAssert(rectify(100.0f, 150.0f, true) == 140.0f, "Error!");
+   TNLAssert(rectify(100.0f, 100.0f, true) == 100.0f, "Error!");
+   TNLAssert(rectify(-100.0f, -110.0f, false) == -100.0f, "Error!");
+   TNLAssert(rectify(-100.0f, -150.0f, false) == -140.0f, "Error!");
+
    // Start of the level, we only show progress bar
    if(mShowProgressBar)
       return;
@@ -2433,8 +2464,19 @@ void GameUserInterface::renderGameCommander()
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    GameType *gameType = getGame()->getGameType();
-   Point worldExtents = mShowProgressBar ? mViewBoundsWhileLoading.getExtents() : 
-                                           getGame()->getWorldExtents()->getExtents();
+   
+   const Rect *worldExtentRect = getGame()->getWorldExtents();
+
+   const F32 ShrinkRate = 1;     // Pixels/ms
+
+   // Limit shrinkage of extent window to reduce jerky effect of some distant object disappearing from view
+   mDispWorldExtents.max.x = rectify(worldExtentRect->max.x, mDispWorldExtents.max.x, true);
+   mDispWorldExtents.max.y = rectify(worldExtentRect->max.y, mDispWorldExtents.max.y, true);
+   mDispWorldExtents.min.x = rectify(worldExtentRect->min.x, mDispWorldExtents.min.x, false);
+   mDispWorldExtents.min.y = rectify(worldExtentRect->min.y, mDispWorldExtents.min.y, false);
+
+   static Point worldExtents;    // Reuse this point to avoid construction/destruction cost
+   worldExtents = mDispWorldExtents.getExtents();
 
    worldExtents.x *= canvasWidth  / F32(canvasWidth  - 2 * horizMargin);
    worldExtents.y *= canvasHeight / F32(canvasHeight - 2 * vertMargin);
@@ -2446,7 +2488,6 @@ void GameUserInterface::renderGameCommander()
       worldExtents.y *= aspectRatio / screenAspectRatio;
    else
       worldExtents.x *= screenAspectRatio / aspectRatio;
-
 
    Ship *ship = getGame()->getLocalPlayerShip();
 
@@ -2464,7 +2505,7 @@ void GameUserInterface::renderGameCommander()
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
    glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
 
-   Point offset = (getGame()->getWorldExtents()->getCenter() - mShipPos) * zoomFrac + mShipPos;
+   Point offset = (mDispWorldExtents.getCenter() - mShipPos) * zoomFrac + mShipPos;
    glTranslatef(-offset.x, -offset.y, 0);
 
    // zoomFrac == 1.0 when fully zoomed out to cmdr's map
