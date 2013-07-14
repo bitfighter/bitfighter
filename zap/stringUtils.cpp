@@ -778,5 +778,20 @@ string getExecutableDir()
 }
 
 
+// Case sensitive -- pass string through tolower() to make case insensitive
+// See tests for examples of usage
+bool stringContainsAllTheSameCharacter(const string &str)
+{
+   if(str.size() <= 1)
+      return true;
+
+   for(S32 i = 1; i < str.size(); i++)
+      if(str[i] != str[0])
+         return false;
+
+   return true;
+}
+
+
 };
 

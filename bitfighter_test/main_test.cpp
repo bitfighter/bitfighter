@@ -19,6 +19,8 @@
 #include "../zap/UIEditorMenus.h"
 #include "../zap/LoadoutIndicator.h"
 
+#include "../zap/stringUtils.h"
+
 #include "tnlNetObject.h"
 #include "tnlGhostConnection.h"
 #include "tnlPlatform.h"
@@ -42,6 +44,18 @@ class BfTest : public testing::Test
 {
    // Config code can go here
 };
+
+
+TEST_F(BfTest, StringUtilsTests)
+{
+   ASSERT_TRUE(stringContainsAllTheSameCharacter("A"));
+   ASSERT_TRUE(stringContainsAllTheSameCharacter("AA"));
+   ASSERT_TRUE(stringContainsAllTheSameCharacter("AAA"));
+   ASSERT_TRUE(stringContainsAllTheSameCharacter(""));
+
+   ASSERT_FALSE(stringContainsAllTheSameCharacter("Aa"));
+   ASSERT_FALSE(stringContainsAllTheSameCharacter("AB"));
+}
 
 
 TEST_F(BfTest, LoadoutTrackerTests) 

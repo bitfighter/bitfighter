@@ -130,6 +130,7 @@ const string readFile(const string& path);
 
 string getExecutableDir();
 
+bool stringContainsAllTheSameCharacter(const string &str);
 
 };
 
