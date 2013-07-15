@@ -2445,7 +2445,6 @@ S32 LevelMenuSelectUserInterface::getIndexOfNext(const string &startingWithLc)
    bool first = true;
    bool multiChar = startingWithLc.length() > 1;
    S32 offset = multiChar ? 0 : 1;
-   //string startingWithLc = lcase(startingWith);
 
    // Loop until we hit the end of the list, or we hit an item that sorts > our startingString (meaning we overshot).
    // But we only care about overshoots in multiChar mode because there could well be single-char hits behind us in the list.

@@ -48,6 +48,9 @@ protected:
    bool resetOnActivate;
    LineEditor lineEditor;
 
+   F32 getFontSize();
+
+
    virtual void onAccept(const char *text) = 0;
    virtual void onEscape() = 0;
 
@@ -56,7 +59,7 @@ public:
    virtual ~TextEntryUserInterface();                  // Destructor
 
    virtual void onActivate();
-   void render();
+   virtual void render();
 
    void setSecret(bool secret);
 
@@ -93,6 +96,8 @@ public:
    virtual void onEscape();
 
    virtual void onActivate();
+
+   void render();
 };
 
 

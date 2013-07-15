@@ -72,15 +72,32 @@ void TextEntryUserInterface::onActivate()
 }
 
 
+static const S32 fontSize = 20;
+static const S32 fontSizeBig = 30;
+static const S32 TextEntryYPos = 325;
+
+
+F32 TextEntryUserInterface::getFontSize()
+{
+   F32 maxLineLength = 750.0f;      // Pixels
+
+   // Shrink the text to fit on-screen when text gets very long
+   F32 w = getStringWidthf(fontSizeBig, lineEditor.getDisplayString().c_str());
+   if(w > maxLineLength)
+      return maxLineLength * fontSizeBig / w;
+   else
+      return fontSizeBig;
+}
+
+
 void TextEntryUserInterface::render()
 {
    glColor(Colors::white);
 
-   const S32 fontSize = 20;
-   const S32 fontSizeBig = 30;
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   S32 y = (canvasHeight / 2) - fontSize;
+   // Center vertically
+   S32 y = TextEntryYPos - 45 ;
 
    drawCenteredString(y, fontSize, title);
    y += 45;
@@ -92,14 +109,10 @@ void TextEntryUserInterface::render()
    glColor(Colors::white);
 
    FontManager::pushFontContext(InputContext);
-   // this will have an effect of shrinking the text to fit on-screen when text get very long
-   S32 w = getStringWidthf(fontSizeBig, lineEditor.getDisplayString().c_str());
-   if(w > 750)
-      w = 750 * fontSizeBig / w;
-   else
-      w = fontSizeBig;
 
-   S32 x = drawCenteredString(y, w, lineEditor.getDisplayString().c_str());
+   TNLAssert(y == TextEntryYPos, "Something is off here!");
+
+   S32 x = drawCenteredString(y, getFontSize(), lineEditor.getDisplayString().c_str());
    lineEditor.drawCursor(x, y, fontSizeBig);
    FontManager::popFontContext();
 }
@@ -170,6 +183,7 @@ LevelNameEntryUserInterface::LevelNameEntryUserInterface(ClientGame *game) : Par
    mLevelIndex = 0;
    mFoundLevel = false;
 }
+
 
 // Destructor
 LevelNameEntryUserInterface::~LevelNameEntryUserInterface()
@@ -300,6 +314,23 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());             
    // Should be...
    //getGame()->getIniSettings()->saveSettingsToDisk();
+}
+
+extern void drawHorizLine(S32,S32,S32);
+
+void LevelNameEntryUserInterface::render()
+{
+   glColor(Colors::gray20);
+   for(S32 i = 0; i < mLevels.size(); i++)
+   {
+      if(i != mLevelIndex)
+         drawCenteredString(TextEntryYPos + F32(i - mLevelIndex) * ((F32)fontSize * 2.0f), getFontSize(), mLevels[i].c_str());
+      drawHorizLine(100, 700, TextEntryYPos + F32(i - mLevelIndex) * ((F32)fontSize * 2.0f));
+   }
+
+   drawHorizLine(100, 700, TextEntryYPos + F32(mLevels.size() - mLevelIndex) * ((F32)fontSize * 2.0f));
+
+   Parent::render();
 }
 
 
