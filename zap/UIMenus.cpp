@@ -2449,7 +2449,7 @@ S32 LevelMenuSelectUserInterface::getIndexOfNext(const string &startingWithLc)
 
    // Loop until we hit the end of the list, or we hit an item that sorts > our startingString (meaning we overshot).
    // But we only care about overshoots in multiChar mode because there could well be single-char hits behind us in the list.
-   while(offset != 0 || first)
+   while(true)
    {
       if(selectedIndex + offset >= getMenuItemCount())    // Hit end of list -- loop to beginning
          offset = -selectedIndex;
@@ -2458,6 +2458,9 @@ S32 LevelMenuSelectUserInterface::getIndexOfNext(const string &startingWithLc)
 
       if(prospectiveItem.substr(0, startingWithLc.size()) == startingWithLc)
          return selectedIndex + offset;
+
+      if(offset == 0 && !first)
+         break;
 
       offset++;
       first = false;
