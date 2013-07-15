@@ -2458,9 +2458,6 @@ S32 LevelMenuSelectUserInterface::getIndexOfNext(const string &startingWith)
       if(prospectiveItem.substr(0, startingWith.size()) == startingWithLc)
          return selectedIndex + offset;
 
-      //if(multiChar && prospectiveItem > startingWithLc) // Overshot -- no matches found
-      //   break;
-
       offset++;
       first = false;
    }
