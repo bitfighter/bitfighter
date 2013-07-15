@@ -303,7 +303,7 @@ static F32 rectify(F32 actual, F32 disp, bool isMax, bool waiting, bool loading,
       return actual;
 
    // Extents are greater than the display -- grow immediately
-   if(abs(actual) > abs(disp))
+   if(abs((S32)actual) > abs((S32)disp))
    {
       shrinkDelayTimer.reset();
       return actual;
@@ -316,7 +316,7 @@ static F32 rectify(F32 actual, F32 disp, bool isMax, bool waiting, bool loading,
       return disp;
    
    // If the extends are close to the display, snap to the extents, to avoid overshooting
-   if(abs(disp - actual) <= ShrinkRate * timeDelta)
+   if(abs(S32(disp - actual)) <= ShrinkRate * timeDelta)
       return actual;
 
    // Finally, contract display extents by our ShrinkRate
