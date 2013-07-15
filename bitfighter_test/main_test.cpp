@@ -17,6 +17,7 @@
 #include "../zap/VideoSystem.h"
 
 #include "../zap/UIEditorMenus.h"
+#include "../zap/UIMenus.h"
 #include "../zap/LoadoutIndicator.h"
 
 #include "../zap/stringUtils.h"
@@ -55,6 +56,84 @@ TEST_F(BfTest, StringUtilsTests)
 
    ASSERT_FALSE(stringContainsAllTheSameCharacter("Aa"));
    ASSERT_FALSE(stringContainsAllTheSameCharacter("AB"));
+} 
+
+TEST_F(BfTest, LevelMenuSelectUserInterfaceTests) 
+{
+   Address addr;
+   GameSettings settings;
+
+   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
+   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
+   FontManager::initialize(&settings, false);   
+   ClientGame game(addr, &settings);
+
+   // Want to test getIndexOfNext(), which is a slightly complex function.  Need to start by setting up a menu.
+   LevelMenuSelectUserInterface ui(&game);
+
+   // These should be alphabetically sorted
+   ui.addMenuItem(new MenuItem("Aardvark"));    //  0
+   ui.addMenuItem(new MenuItem("Assinine"));    //  1
+   ui.addMenuItem(new MenuItem("Bouy"));        //  2
+   ui.addMenuItem(new MenuItem("Boy"));         //  3
+   ui.addMenuItem(new MenuItem("C"));           //  4
+   ui.addMenuItem(new MenuItem("Cat"));         //  5
+   ui.addMenuItem(new MenuItem("Cc"));          //  6
+   ui.addMenuItem(new MenuItem("Chop"));        //  7
+   ui.addMenuItem(new MenuItem("Chump"));       //  8
+   ui.addMenuItem(new MenuItem("Dog"));         //  9
+   ui.addMenuItem(new MenuItem("Doug"));        // 10
+   ui.addMenuItem(new MenuItem("Eat"));         // 11
+   ui.addMenuItem(new MenuItem("Eating"));      // 12
+   ui.addMenuItem(new MenuItem("Eel"));         // 13
+   ui.addMenuItem(new MenuItem("Eels"));        // 14
+   ui.addMenuItem(new MenuItem("Eggs"));        // 15
+
+
+   // Some random checks
+   ui.selectedIndex = 1;
+   ASSERT_EQ(ui.getIndexOfNext("A"), 0);
+   ASSERT_EQ(ui.getIndexOfNext("Boy"), 3);
+   ASSERT_EQ(ui.getIndexOfNext("C"), 4);
+   ASSERT_EQ(ui.getIndexOfNext("Ch"), 7);
+   ASSERT_EQ(ui.getIndexOfNext("Cho"), 7);
+   ASSERT_EQ(ui.getIndexOfNext("Chop"), 7);
+
+   // Check cycling of the Cs
+   ui.selectedIndex = 3;
+   ASSERT_EQ(ui.getIndexOfNext("C"), 4);
+   ui.selectedIndex = 4;
+   ASSERT_EQ(ui.getIndexOfNext("C"), 5);
+   ui.selectedIndex = 5;
+   ASSERT_EQ(ui.getIndexOfNext("C"), 6);
+   ui.selectedIndex = 6;
+   ASSERT_EQ(ui.getIndexOfNext("C"), 7);
+   ui.selectedIndex = 7;
+   ASSERT_EQ(ui.getIndexOfNext("C"), 8);
+   ui.selectedIndex = 8;
+   ASSERT_EQ(ui.getIndexOfNext("C"), 4);
+
+   // Check wrapping
+   ui.selectedIndex = 9;
+   ASSERT_EQ(ui.getIndexOfNext("A"), 0);
+   ui.selectedIndex = 15;     // Last item
+   ASSERT_EQ(ui.getIndexOfNext("A"), 0);
+
+   // Check repeated hammering on current item
+   ui.selectedIndex = 12;
+   ASSERT_EQ(ui.getIndexOfNext("E"), 13);    // Single letter advances to next of that letter
+   ASSERT_EQ(ui.getIndexOfNext("Ea"), 12);
+   ASSERT_EQ(ui.getIndexOfNext("Eat"), 12);
+   ASSERT_EQ(ui.getIndexOfNext("Eati"), 12);
+   ASSERT_EQ(ui.getIndexOfNext("Eatin"), 12);
+   ASSERT_EQ(ui.getIndexOfNext("Eating"), 12);
+
+   // Check for not found items -- should return current index
+   ASSERT_EQ(ui.getIndexOfNext("EatingX"), 12); 
+   ASSERT_EQ(ui.getIndexOfNext("Flummoxed"), 12); 
+
+   ui.selectedIndex = 8;
+   ASSERT_EQ(ui.getIndexOfNext("Chop"), 7); 
 }
 
 

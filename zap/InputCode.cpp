@@ -1947,7 +1947,7 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_TAB)]             = "Tab";              
    keyNames[S32(KEY_ENTER)]           = "Enter";            
    keyNames[S32(KEY_ESCAPE)]          = "Esc";              
-   keyNames[S32(KEY_SPACE)]           = "Space";            
+   keyNames[S32(KEY_SPACE)]           = "Space";      // First keyboardchar          
    keyNames[S32(KEY_0)]               = "0";                
    keyNames[S32(KEY_1)]               = "1";                
    keyNames[S32(KEY_2)]               = "2";                
@@ -1994,7 +1994,7 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_QUOTE)]           = "'";                
    keyNames[S32(KEY_COMMA)]           = ",";                
    keyNames[S32(KEY_PERIOD)]          = ".";                
-   keyNames[S32(KEY_SLASH)]           = "/";                
+   keyNames[S32(KEY_SLASH)]           = "/";       // last keyboardchar              
    keyNames[S32(KEY_PAGEUP)]          = "Page Up";          
    keyNames[S32(KEY_PAGEDOWN)]        = "Page Down";        
    keyNames[S32(KEY_END)]             = "End";              
@@ -2117,6 +2117,15 @@ InputCode InputCodeManager::stringToInputCode(const char *inputName)
          return InputCode(i);
 
    return KEY_UNKNOWN;
+}
+
+
+const char *InputCodeManager::inputCodeToPrintableChar(InputCode inputCode)
+{
+   if(inputCode == KEY_SPACE || (inputCode >= FIRST_PRINTABLE_KEY && inputCode <= LAST_PRINTABLE_KEY))
+      return inputCodeToString(inputCode);
+
+   return "";
 }
 
 };

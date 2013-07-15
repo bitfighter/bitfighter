@@ -2273,8 +2273,11 @@ void RobotsMenuUserInterface::onEscape()
 // Constructor
 LevelMenuSelectUserInterface::LevelMenuSelectUserInterface(ClientGame *game) : Parent(game)
 {
-   // Do nothing
+   // When you start typing a name, any character typed within the mStillTypingNameTimer period will be considered
+   // to be the next character of the name, rather than a new entry
+   mStillTypingNameTimer.setPeriod(1000);
 }
+
 
 // Destructor
 LevelMenuSelectUserInterface::~LevelMenuSelectUserInterface()
@@ -2315,6 +2318,9 @@ void LevelMenuSelectUserInterface::onActivate()
 {
    Parent::onActivate();
    mMenuTitle = "CHOOSE LEVEL: [" + category + "]";
+
+   mNameSoFar = "";
+   mStillTypingNameTimer.clear();
 
    // Replace with a getLevelCount() method on Game?
    ClientGame *game = getGame();
@@ -2365,53 +2371,102 @@ void LevelMenuSelectUserInterface::onActivate()
 }
 
 
+void LevelMenuSelectUserInterface::idle(U32 timeDelta)
+{
+   if(mStillTypingNameTimer.update(timeDelta))
+      mNameSoFar = "";
+}
+
+
 // Override parent, and make keys simply go to first level with that letter, rather than selecting it automatically
 bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
 {
-   // First check for some shortcut keys
-   for(S32 i = 0; i < getMenuItemCount(); i++)
+   string inputString = InputCodeManager::inputCodeToPrintableChar(inputCode);
+
+   if(inputString == "")
+      return false;
+   
+   mNameSoFar.append(inputString);
+
+   string mNameSoFarLc = lcase(mNameSoFar);
+
+   if(stringContainsAllTheSameCharacter(mNameSoFarLc))
    {
-      // Lets us advance to next level with same starting letter  
-      S32 indx = selectedIndex + i + 1;
-      if(indx >= getMenuItemCount())
-         indx -= getMenuItemCount();
+      selectedIndex = getIndexOfNext(mNameSoFarLc.substr(0, 1));
 
-      if(inputCode == getMenuItem(indx)->key1 || inputCode == getMenuItem(indx)->key2)
-      {
-         selectedIndex = indx;
-         itemSelectedWithMouse = false;
+      if(mNameSoFar.size() > 1 && lcase(getMenuItem(selectedIndex)->getValue()).substr(0, mNameSoFar.length()) != mNameSoFarLc)
+         mNameSoFar = mNameSoFar.substr(0, mNameSoFar.length() - 1);    // Remove final char, the one we just added above
+   }
+   else
+      selectedIndex = getIndexOfNext(mNameSoFarLc);
 
-         // Move the mouse to the new selection to make things "feel better"
-         MenuItemSize size;
-         S32 y = getYStart();
 
-         for(S32 j = getOffset(); j < selectedIndex; j++)
-         {
-            size = getMenuItem(j)->getSize();
-            y += getTextSize(size) + getGap(size);
-         }
+   mStillTypingNameTimer.reset();
+   itemSelectedWithMouse = false;
 
-         y += getTextSize(size) / 2;
+   // Move the mouse to the new selection to make things "feel better"
+   MenuItemSize size = getMenuItem(getOffset())->getSize();
+   S32 y = getYStart();
 
-         // WarpMouse fires a mouse event, which will cause the cursor to become visible, which we don't want.  Therefore,
-         // we must resort to the kind of gimicky/hacky method of setting a flag, telling us that we should ignore the
-         // next mouse event that comes our way.  It might be better to handle this at the Event level, by creating a custom
-         // method called WarpMouse that adds the suppression.  At this point, however, the only place we care about this
-         // is here so...  well... this works.
-#if SDL_VERSION_ATLEAST(2,0,0)
-         SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, (S32)gScreenInfo.getMousePos()->x, y);
-#else
-         SDL_WarpMouse(gScreenInfo.getMousePos()->x, y);
-#endif
-         Cursor::disableCursor();
-         mIgnoreNextMouseEvent = true;
-         playBoop();
-
-         return true;
-      }
+   for(S32 j = getOffset(); j < selectedIndex; j++)
+   {
+      size = getMenuItem(j)->getSize();
+      y += getTextSize(size) + getGap(size);
    }
 
-   return false;
+   y += getTextSize(size) / 2;
+
+   // WarpMouse fires a mouse event, which will cause the cursor to become visible, which we don't want.  Therefore,
+   // we must resort to the kind of gimicky/hacky method of setting a flag, telling us that we should ignore the
+   // next mouse event that comes our way.  It might be better to handle this at the Event level, by creating a custom
+   // method called WarpMouse that adds the suppression.  At this point, however, the only place we care about this
+   // is here so...  well... this works.
+#if SDL_VERSION_ATLEAST(2,0,0)
+   SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, (S32)gScreenInfo.getMousePos()->x, y);
+#else
+   SDL_WarpMouse(gScreenInfo.getMousePos()->x, y);
+#endif
+   Cursor::disableCursor();
+   mIgnoreNextMouseEvent = true;
+   playBoop();
+
+   return true;
+}
+
+
+// Return index of next level starting with specified string; if none exists, returns current index.
+// If startingWith is only one character, the entry we're looking for could be behind us.  See tests
+// for examples of this.
+S32 LevelMenuSelectUserInterface::getIndexOfNext(const string &startingWith)
+{
+   TNLAssert(startingWith.length() > 0, "Did not expect an empty string here!");
+
+   bool first = true;
+   bool multiChar = startingWith.length() > 1;
+   S32 offset = multiChar ? 0 : 1;
+   string startingWithLc = lcase(startingWith);
+
+   // Loop until we hit the end of the list, or we hit an item that sorts > our startingString (meaning we overshot).
+   // But we only care about overshoots in multiChar mode because there could well be single-char hits behind us in the list.
+   while(offset != 0 || first)
+   {
+      if(selectedIndex + offset >= getMenuItemCount())    // Hit end of list -- loop to beginning
+         offset = -selectedIndex;
+
+      string prospectiveItem = lcase(getMenuItem(selectedIndex + offset)->getValue());
+
+      if(prospectiveItem.substr(0, startingWith.size()) == startingWithLc)
+         return selectedIndex + offset;
+
+      //if(multiChar && prospectiveItem > startingWithLc) // Overshot -- no matches found
+      //   break;
+
+      offset++;
+      first = false;
+   }
+
+   // Found no match; return current index
+   return selectedIndex;
 }
 
 

@@ -114,6 +114,7 @@ public:
    virtual ~InputCodeManager();
 
    static const char *inputCodeToString(InputCode inputCode);
+   static const char *inputCodeToPrintableChar(InputCode inputCode);
 
    static InputCode stringToInputCode(const char *inputName);
 

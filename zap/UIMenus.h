@@ -426,14 +426,20 @@ class LevelMenuSelectUserInterface : public MenuUserInterface
 
 private:
    Vector<string> mLevels;
+   Timer mStillTypingNameTimer;
+   string mNameSoFar;
 
 public:
    explicit LevelMenuSelectUserInterface(ClientGame *game);        // Constructor
    virtual ~LevelMenuSelectUserInterface();
 
+   void idle(U32 timeDelta);
+
    string category;
    void onActivate();
-   bool processMenuSpecificKeys(InputCode inputCode);  // Custom key handling for level selection menus
+   bool processMenuSpecificKeys(InputCode inputCode); // Custom key handling for level selection menus
+      
+   S32 getIndexOfNext(const string &startingWith);    // Public so tests can access this
 
    void processSelection(U32 index);
    void onEscape();
