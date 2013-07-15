@@ -2437,14 +2437,15 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
 // Return index of next level starting with specified string; if none exists, returns current index.
 // If startingWith is only one character, the entry we're looking for could be behind us.  See tests
 // for examples of this.
-S32 LevelMenuSelectUserInterface::getIndexOfNext(const string &startingWith)
+S32 LevelMenuSelectUserInterface::getIndexOfNext(const string &startingWithLc)
 {
-   TNLAssert(startingWith.length() > 0, "Did not expect an empty string here!");
+   TNLAssert(startingWithLc.length() > 0, "Did not expect an empty string here!");
+   TNLAssert(startingWithLc == lcase(startingWithLc), "Expected a lowercased string here");
 
    bool first = true;
-   bool multiChar = startingWith.length() > 1;
+   bool multiChar = startingWithLc.length() > 1;
    S32 offset = multiChar ? 0 : 1;
-   string startingWithLc = lcase(startingWith);
+   //string startingWithLc = lcase(startingWith);
 
    // Loop until we hit the end of the list, or we hit an item that sorts > our startingString (meaning we overshot).
    // But we only care about overshoots in multiChar mode because there could well be single-char hits behind us in the list.
@@ -2455,7 +2456,7 @@ S32 LevelMenuSelectUserInterface::getIndexOfNext(const string &startingWith)
 
       string prospectiveItem = lcase(getMenuItem(selectedIndex + offset)->getValue());
 
-      if(prospectiveItem.substr(0, startingWith.size()) == startingWithLc)
+      if(prospectiveItem.substr(0, startingWithLc.size()) == startingWithLc)
          return selectedIndex + offset;
 
       offset++;

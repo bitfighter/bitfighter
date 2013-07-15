@@ -92,48 +92,48 @@ TEST_F(BfTest, LevelMenuSelectUserInterfaceTests)
 
    // Some random checks
    ui.selectedIndex = 1;
-   ASSERT_EQ(ui.getIndexOfNext("A"), 0);
-   ASSERT_EQ(ui.getIndexOfNext("Boy"), 3);
-   ASSERT_EQ(ui.getIndexOfNext("C"), 4);
-   ASSERT_EQ(ui.getIndexOfNext("Ch"), 7);
-   ASSERT_EQ(ui.getIndexOfNext("Cho"), 7);
-   ASSERT_EQ(ui.getIndexOfNext("Chop"), 7);
+   ASSERT_EQ(ui.getIndexOfNext("a"), 0);
+   ASSERT_EQ(ui.getIndexOfNext("boy"), 3);
+   ASSERT_EQ(ui.getIndexOfNext("c"), 4);
+   ASSERT_EQ(ui.getIndexOfNext("ch"), 7);
+   ASSERT_EQ(ui.getIndexOfNext("cho"), 7);
+   ASSERT_EQ(ui.getIndexOfNext("chop"), 7);
 
    // Check cycling of the Cs
    ui.selectedIndex = 3;
-   ASSERT_EQ(ui.getIndexOfNext("C"), 4);
+   ASSERT_EQ(ui.getIndexOfNext("c"), 4);
    ui.selectedIndex = 4;
-   ASSERT_EQ(ui.getIndexOfNext("C"), 5);
+   ASSERT_EQ(ui.getIndexOfNext("c"), 5);
    ui.selectedIndex = 5;
-   ASSERT_EQ(ui.getIndexOfNext("C"), 6);
+   ASSERT_EQ(ui.getIndexOfNext("c"), 6);
    ui.selectedIndex = 6;
-   ASSERT_EQ(ui.getIndexOfNext("C"), 7);
+   ASSERT_EQ(ui.getIndexOfNext("c"), 7);
    ui.selectedIndex = 7;
-   ASSERT_EQ(ui.getIndexOfNext("C"), 8);
+   ASSERT_EQ(ui.getIndexOfNext("c"), 8);
    ui.selectedIndex = 8;
-   ASSERT_EQ(ui.getIndexOfNext("C"), 4);
+   ASSERT_EQ(ui.getIndexOfNext("c"), 4);
 
    // Check wrapping
    ui.selectedIndex = 9;
-   ASSERT_EQ(ui.getIndexOfNext("A"), 0);
-   ui.selectedIndex = 15;     // Last item
-   ASSERT_EQ(ui.getIndexOfNext("A"), 0);
+   ASSERT_EQ(ui.getIndexOfNext("a"), 0);
+   ui.selectedIndex = 15;     // last item
+   ASSERT_EQ(ui.getIndexOfNext("a"), 0);
 
    // Check repeated hammering on current item
    ui.selectedIndex = 12;
-   ASSERT_EQ(ui.getIndexOfNext("E"), 13);    // Single letter advances to next of that letter
-   ASSERT_EQ(ui.getIndexOfNext("Ea"), 12);
-   ASSERT_EQ(ui.getIndexOfNext("Eat"), 12);
-   ASSERT_EQ(ui.getIndexOfNext("Eati"), 12);
-   ASSERT_EQ(ui.getIndexOfNext("Eatin"), 12);
-   ASSERT_EQ(ui.getIndexOfNext("Eating"), 12);
+   ASSERT_EQ(ui.getIndexOfNext("e"), 13);    // Single letter advances to next of that letter
+   ASSERT_EQ(ui.getIndexOfNext("ea"), 12);
+   ASSERT_EQ(ui.getIndexOfNext("eat"), 12);
+   ASSERT_EQ(ui.getIndexOfNext("eati"), 12);
+   ASSERT_EQ(ui.getIndexOfNext("eatin"), 12);
+   ASSERT_EQ(ui.getIndexOfNext("eating"), 12);
 
    // Check for not found items -- should return current index
-   ASSERT_EQ(ui.getIndexOfNext("EatingX"), 12); 
-   ASSERT_EQ(ui.getIndexOfNext("Flummoxed"), 12); 
+   ASSERT_EQ(ui.getIndexOfNext("eatingx"), 12); 
+   ASSERT_EQ(ui.getIndexOfNext("flummoxed"), 12); 
 
    ui.selectedIndex = 8;
-   ASSERT_EQ(ui.getIndexOfNext("Chop"), 7); 
+   ASSERT_EQ(ui.getIndexOfNext("chop"), 7); 
 }
 
 
