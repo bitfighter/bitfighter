@@ -320,15 +320,21 @@ extern void drawHorizLine(S32,S32,S32);
 
 void LevelNameEntryUserInterface::render()
 {
+   static const S32 linesBefore = 6;
+   static const S32 linesAfter = 3;
+
+   S32 startIndex = MAX(0, mLevelIndex - linesBefore);
+   S32 endIndex = MIN(mLevels.size() - 1, mLevelIndex + linesAfter);
+
    glColor(Colors::gray20);
-   for(S32 i = 0; i < mLevels.size(); i++)
+   for(S32 i = startIndex; i <= endIndex; i++)
    {
       if(i != mLevelIndex)
          drawCenteredString(TextEntryYPos + F32(i - mLevelIndex) * ((F32)fontSize * 2.0f), getFontSize(), mLevels[i].c_str());
-      drawHorizLine(100, 700, TextEntryYPos + F32(i - mLevelIndex) * ((F32)fontSize * 2.0f));
+//      drawHorizLine(100, 700, TextEntryYPos + F32(i - mLevelIndex) * ((F32)fontSize * 2.0f));
    }
 
-   drawHorizLine(100, 700, TextEntryYPos + F32(mLevels.size() - mLevelIndex) * ((F32)fontSize * 2.0f));
+//   drawHorizLine(100, 700, TextEntryYPos + F32(mLevels.size() - mLevelIndex) * ((F32)fontSize * 2.0f));
 
    Parent::render();
 }
