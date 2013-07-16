@@ -90,6 +90,8 @@ protected:
 
    BfObject *mAssociatedObject;     // Some menus can have an associated object... this is it
 
+   S32 selectedIndex;               // Index of the currently highlighted menu item
+
 public:
    // Constructor
    explicit MenuUserInterface(ClientGame *game);
@@ -113,8 +115,6 @@ public:
    bool mMenuFooterContainsInstructions;
 
    void idle(U32 timeDelta); 
-
-   S32 selectedIndex;                                    // Index of the currently highlighted menu item
 
    void getMenuResponses(Vector<string> &responses);     // Fill responses with values from menu
 
