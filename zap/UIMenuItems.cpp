@@ -1177,7 +1177,7 @@ void TeamMenuItem::activatedWithShortcutKey()
 ////////////////////////////////////
 ////////////////////////////////////
 
-TextEntryMenuItem::TextEntryMenuItem(string title, string val, string emptyVal, const string &help, U32 maxLen, InputCode k1, InputCode k2) :
+TextEntryMenuItem::TextEntryMenuItem(const string &title, const string &val, const string &emptyVal, const string &help, U32 maxLen, InputCode k1, InputCode k2) :
          ValueMenuItem(title, NULL, help, k1, k2),
          mLineEditor(LineEditor(maxLen, val))
 {

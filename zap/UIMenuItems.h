@@ -397,7 +397,7 @@ protected:
 
 public:
    // Contstuctor
-   TextEntryMenuItem(string title, string val, string emptyVal, const string &help, U32 maxLen, 
+   TextEntryMenuItem(const string &title, const string &val, const string &emptyVal, const string &help, U32 maxLen, 
                      InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual ~TextEntryMenuItem();  // Destructor
