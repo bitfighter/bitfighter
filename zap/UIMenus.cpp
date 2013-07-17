@@ -1684,13 +1684,21 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
       uiManager->activate<MainMenuUserInterface>();
 
    string enteredName     = ui->getMenuItem(1)->getValueForWritingToLevelFile();
-   string enteredPassword = ui->getMenuItem(2)->getValueForWritingToLevelFile();
 
-   bool savePassword      = ui->getMenuItem(3)->getIntValue() != 0;
+   string enteredPassword;
+   bool savePassword = false;
+
+   if(ui->getMenuItemCount() > 2)
+   {
+      enteredPassword = ui->getMenuItem(2)->getValueForWritingToLevelFile();
+      savePassword    = ui->getMenuItem(3)->getIntValue() != 0;
+   }
 
    clientGame->userEnteredLoginCredentials(enteredName, enteredPassword, savePassword);
 }
 
+
+//static bool first = true;
 
 void NameEntryUserInterface::setupMenu()
 {
@@ -1700,15 +1708,21 @@ void NameEntryUserInterface::setupMenu()
    addMenuItem(new MenuItem("PLAY", nameAndPasswordAcceptCallback, ""));
    addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->lastName, 
                                     getGame()->getSettings()->getDefaultName(), "", MAX_PLAYER_NAME_LENGTH));
-   addMenuItem(new TextEntryMenuItem("PASSWORD:", getGame()->getSettings()->getPlayerPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
 
-   // If we have already saved a PW, this defaults to yes; to no otherwise
-   MenuItem *menuItem = new YesNoMenuItem("SAVE PASSWORD:", getGame()->getSettings()->getPlayerPassword() != "", "");
-   menuItem->setSize(MENU_ITEM_SIZE_SMALL);
-   addMenuItem(menuItem);
-   
    getMenuItem(1)->setFilter(nickNameFilter);  // Quotes are incompatible with PHPBB3 logins, %s are used for var substitution
-   getMenuItem(2)->setSecret(true);
+
+   //if(!first)
+   //{
+      addMenuItem(new TextEntryMenuItem("PASSWORD:", getGame()->getSettings()->getPlayerPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
+
+      // If we have already saved a PW, this defaults to yes; to no otherwise
+      MenuItem *menuItem = new YesNoMenuItem("SAVE PASSWORD:", getGame()->getSettings()->getPlayerPassword() != "", "");
+      menuItem->setSize(MENU_ITEM_SIZE_SMALL);
+      menuItem->setSecret(true);
+      addMenuItem(menuItem);
+   //}
+
+   //first = false;
 }
 
 
