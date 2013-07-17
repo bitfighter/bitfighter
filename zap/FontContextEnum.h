@@ -41,6 +41,7 @@ namespace Zap
       TextEffectContext,       // Yard Sale!!! text and the like
       ScoreboardContext,       // In-game scoreboard font
       InputContext,            // Input value font
+      ReleaseVersionContext,   // Version number on title screen
       GoalZoneIconContext      // Font for rendering GoalZone icon
    };
 

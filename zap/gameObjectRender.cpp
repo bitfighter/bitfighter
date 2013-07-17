@@ -38,6 +38,7 @@
 #include "ScreenInfo.h"
 #include "game.h"
 #include "VertexStylesEnum.h"
+#include "FontManager.h"
 
 #include "Colors.h"
 
@@ -2351,11 +2352,14 @@ pixLoc gLogoPoints[LetterLoc1 + LetterLoc2 + LetterLoc3 + LetterLoc4 + LetterLoc
 { 3475,61  }, { 3467,54  }, { 3457,51  }, { 3447,49  },
 };
 
+
 void renderStaticBitfighterLogo()
 {
    glColor4f(0, 1, 0, 1);
    renderBitfighterLogo(73, 1);
+   FontManager::pushFontContext(ReleaseVersionContext);
    drawCenteredStringf(120, 10, "Release %s", ZAP_GAME_RELEASE);
+   FontManager::popFontContext();
 }
 
 

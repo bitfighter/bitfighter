@@ -222,6 +222,7 @@ void FontManager::setFontContext(FontContext fontContext)
          return;
 
       case ScoreboardContext:
+      case ReleaseVersionContext:
       case HelpItemContext:
       case HUDContext:
       case LevelInfoContext:

@@ -1748,7 +1748,7 @@ void NameEntryUserInterface::renderExtras()
    }
 
    // Render logo at top, never faded
-   renderStaticBitfighterLogo();
+   //renderStaticBitfighterLogo();
 
 }
 
