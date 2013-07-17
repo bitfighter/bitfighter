@@ -1697,7 +1697,7 @@ void NameEntryUserInterface::setupMenu()
    clearMenuItems();
    mRenderSpecialInstructions = false;
 
-   addMenuItem(new MenuItem("OK", nameAndPasswordAcceptCallback, ""));
+   addMenuItem(new MenuItem("PLAY", nameAndPasswordAcceptCallback, ""));
    addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->lastName, 
                                     getGame()->getSettings()->getDefaultName(), "", MAX_PLAYER_NAME_LENGTH));
    addMenuItem(new TextEntryMenuItem("PASSWORD:", getGame()->getSettings()->getPlayerPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
@@ -1725,8 +1725,6 @@ void NameEntryUserInterface::renderExtras()
 
    glColor(Colors::menuHelpColor);
 
-   //drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size, 
-   //         "You can skip this screen by editing the [Settings] section of Bitfighter.ini");
    row++;
 
    drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size, 
@@ -1746,6 +1744,9 @@ void NameEntryUserInterface::renderExtras()
 
       renderMessageBox("Invalid Name or Password", "", message, 3, -190);
    }
+
+   //glColor(Colors::gray50);
+   //drawCenteredString(170, size, "First time playing?  Enter your nick and don't worry about the password!");
 
    // Render logo at top, never faded
    //renderStaticBitfighterLogo();
