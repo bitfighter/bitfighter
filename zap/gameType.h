@@ -179,8 +179,8 @@ protected:
 public:
    static const S32 MAX_GAME_TIME = S32_MAX;
 
-   static const S32 gFirstTeamNumber = -2;                              // First team is "Hostile to All" with index -2
-   static const U32 gMaxTeamCount = Game::MAX_TEAMS - gFirstTeamNumber; // Number of possible teams, including Neutral and Hostile to All
+   static const S32 FirstTeamNumber = -2;                               // First team is "Hostile to All" with index -2
+   static const U32 gMaxTeamCount = Game::MAX_TEAMS - FirstTeamNumber;  // Number of possible teams, including Neutral and Hostile to All
    static const char *validateGameType(const char *gtype);              // Returns a valid gameType, defaulting to base class if needed
 
    Game *getGame() const;

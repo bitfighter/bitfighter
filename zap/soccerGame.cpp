@@ -54,57 +54,66 @@ SoccerGameType::~SoccerGameType()
 TNL_IMPLEMENT_NETOBJECT(SoccerGameType);
 
 TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
-   (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex, Point scorePos), (msgIndex, clientName, teamIndex, scorePos),
+   (U32 msgIndex, StringTableEntry scorerName, RangedU32<0, GameType::gMaxTeamCount> rawTeamIndex, Point scorePos), 
+   (msgIndex, scorerName, rawTeamIndex, scorePos),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
-   // Before calling this RPC, we subtracted gFirstTeamNumber, so we need to add it back here...
-   S32 teamIndexAdjusted = (S32) teamIndex + GameType::gFirstTeamNumber;      
+   // Before calling this RPC, we subtracted FirstTeamNumber, so we need to add it back here...
+   S32 teamIndex = (S32)rawTeamIndex + GameType::FirstTeamNumber;      
    string msg;
+   S32 scorerTeam = TEAM_NEUTRAL;
    getGame()->playSoundEffect(SFXFlagCapture);
-   getGame()->emitTextEffect("GOAL!", Colors::red80, scorePos);
 
    // Compose the message
 
-   if(clientName.isNull())    // Unknown player scored
+   if(scorerName.isNull())    // Unknown player scored
    {
-      if(teamIndexAdjusted >= 0)
-         msg = "A goal was scored on team " + string(getGame()->getTeamName(teamIndexAdjusted).getString());
-      else if(teamIndexAdjusted == -1)
+      if(teamIndex >= 0)
+         msg = "A goal was scored on team " + string(getGame()->getTeamName(teamIndex).getString());
+      else if(teamIndex == -1)
          msg = "A goal was scored on a neutral goal!";
-      else if(teamIndexAdjusted == -2)
+      else if(teamIndex == -2)
          msg = "A goal was scored on a hostile goal!";
       else
          msg = "A goal was scored on an unknown goal!";
    }
-   else if(msgIndex == SoccerMsgScoreGoal)
+   else                       // Known scorer
    {
-      if(isTeamGame())
+      if(msgIndex == SoccerMsgScoreGoal)
       {
-         if(teamIndexAdjusted >= 0)
-            msg = string(clientName.getString()) + " scored a goal on team " + string(getGame()->getTeamName(teamIndexAdjusted).getString());
-         else if(teamIndexAdjusted == -1)
-            msg = string(clientName.getString()) + " scored a goal on a neutral goal!";
-         else if(teamIndexAdjusted == -2)
-            msg = string(clientName.getString()) + " scored a goal on a hostile goal (for negative points!)";
-         else
-            msg = string(clientName.getString()) + " scored a goal on an unknown goal!";
+         if(isTeamGame())
+         {
+            if(teamIndex >= 0)
+               msg = string(scorerName.getString()) + " scored a goal on team " + string(getGame()->getTeamName(teamIndex).getString());
+            else if(teamIndex == -1)
+               msg = string(scorerName.getString()) + " scored a goal on a neutral goal!";
+            else if(teamIndex == -2)
+               msg = string(scorerName.getString()) + " scored a goal on a hostile goal (for negative points!)";
+            else
+               msg = string(scorerName.getString()) + " scored a goal on an unknown goal!";
+         }
+         else  // every man for himself
+         {
+            if(teamIndex >= -1)      // including neutral goals
+               msg = string(scorerName.getString()) + " scored a goal!";
+            else if(teamIndex == -2)
+               msg = string(scorerName.getString()) + " scored a goal on a hostile goal (for negative points!)";
+         }
       }
-      else  // every man for himself
+      else if(msgIndex == SoccerMsgScoreOwnGoal)
       {
-         if(teamIndexAdjusted >= -1)      // including neutral goals
-            msg = string(clientName.getString()) + " scored a goal!";
-         else if(teamIndexAdjusted == -2)
-            msg = string(clientName.getString()) + " scored a goal on a hostile goal (for negative points!)";
+         msg = string(scorerName.getString()) + " scored an own-goal, giving the other team" + 
+                     (getGame()->getTeamCount() == 2 ? "" : "s") + " a point!";
       }
-   }
-   else if(msgIndex == SoccerMsgScoreOwnGoal)
-   {
-      msg = string(clientName.getString()) + " scored an own-goal, giving the other team" + 
-                  (getGame()->getTeamCount() == 2 ? "" : "s") + " a point!";
+
+      ClientInfo *scorer = getGame()->findClientInfo(scorerName);
+      if(scorer)
+         scorerTeam = scorer->getTeamIndex();
    }
 
-   // Print the message
+   // Print the message and emit the text effect
    getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
+   getGame()->emitTextEffect("GOAL!", *getTeamColor(scorerTeam), scorePos);
 }
 
 
@@ -128,7 +137,7 @@ void SoccerGameType::scoreGoal(Ship *ship, const StringTableEntry &scorerName, S
 {
    if(scoringTeam == NO_TEAM)
    {
-      s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber), scorePos);
+      s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - FirstTeamNumber), scorePos);
       return;
    }
 
@@ -136,8 +145,8 @@ void SoccerGameType::scoreGoal(Ship *ship, const StringTableEntry &scorerName, S
    {
       updateSoccerScore(ship, scoringTeam, ScoreGoalOwnTeam, score);
 
-      // Subtract gFirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container
-      s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber), scorePos);
+      // Subtract FirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container
+      s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, scorerName, (U32) (goalTeamIndex - FirstTeamNumber), scorePos);
    }
    else     // Goal on someone else's goal
    {
@@ -146,7 +155,7 @@ void SoccerGameType::scoreGoal(Ship *ship, const StringTableEntry &scorerName, S
       else
          updateSoccerScore(ship, scoringTeam, ScoreGoalEnemyTeam, score);
 
-      s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber), scorePos);      // See comment above
+      s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - FirstTeamNumber), scorePos);      // See comment above
    }
 }
 
