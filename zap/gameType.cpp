@@ -3480,8 +3480,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 }
 
 
-//Send an announcement
-
+// Send an announcement
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhostParent, 1)
 {
    GameConnection *source = (GameConnection *)getRPCSourceConnection();
