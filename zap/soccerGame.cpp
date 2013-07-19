@@ -112,7 +112,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
       {
          msg = string(scorerName.getString()) + " scored an own-goal, giving the other team" + 
                      (getGame()->getTeamCount() == 2 ? "" : "s") + " a point!";
-         txtEffect = "Own Goal!"
+         txtEffect = "Own Goal!";
       }
 
       ClientInfo *scorer = getGame()->findClientInfo(scorerName);
