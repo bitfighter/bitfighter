@@ -62,6 +62,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    S32 teamIndex = (S32)rawTeamIndex + GameType::FirstTeamNumber;      
    string msg;
    S32 scorerTeam = TEAM_NEUTRAL;
+   string txtEffect = "Goal!";      // Will work for most cases, may be changed below
+   static const string NegativePoints = "Negative Points!";
    getGame()->playSoundEffect(SFXFlagCapture);
 
    // Compose the message
@@ -88,7 +90,10 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
             else if(teamIndex == -1)
                msg = string(scorerName.getString()) + " scored a goal on a neutral goal!";
             else if(teamIndex == -2)
+            {
                msg = string(scorerName.getString()) + " scored a goal on a hostile goal (for negative points!)";
+               txtEffect = NegativePoints;
+            }
             else
                msg = string(scorerName.getString()) + " scored a goal on an unknown goal!";
          }
@@ -97,13 +102,17 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
             if(teamIndex >= -1)      // including neutral goals
                msg = string(scorerName.getString()) + " scored a goal!";
             else if(teamIndex == -2)
+            {
                msg = string(scorerName.getString()) + " scored a goal on a hostile goal (for negative points!)";
+               txtEffect = NegativePoints;
+            }
          }
       }
       else if(msgIndex == SoccerMsgScoreOwnGoal)
       {
          msg = string(scorerName.getString()) + " scored an own-goal, giving the other team" + 
                      (getGame()->getTeamCount() == 2 ? "" : "s") + " a point!";
+         txtEffect = "Own Goal!"
       }
 
       ClientInfo *scorer = getGame()->findClientInfo(scorerName);
@@ -113,7 +122,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
 
    // Print the message and emit the text effect
    getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
-   getGame()->emitTextEffect("GOAL!", *getTeamColor(scorerTeam), scorePos);
+   getGame()->emitTextEffect(txtEffect, *getTeamColor(scorerTeam), scorePos);
 }
 
 
