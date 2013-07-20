@@ -357,7 +357,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
       case NetConnection::ReasonInvalidUsername:
          messages.push_back("");
          messages.push_back("Your connection was rejected by the server because");
-         messages.push_back("you sent an username that contained illegal characters.");
+         messages.push_back("you sent a username that contained illegal characters.");
          messages.push_back("");
          messages.push_back("Please try a different name.");
 
