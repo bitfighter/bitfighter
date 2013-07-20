@@ -935,7 +935,7 @@ public:
    };
    void MasterServerConnection::writeStatisticsToDb(VersionedGameStats &stats)
    {
-      if(!checkActivityTime(6000))     // 6 seconds
+      if(!checkActivityTime(6 * 1000))     // 6 seconds
          return;
 
       if(!stats.valid)
@@ -974,7 +974,7 @@ public:
    };
    void MasterServerConnection::writeAchievementToDb(U8 achievementId, const StringTableEntry &playerNick)
    {
-      if(!checkActivityTime(6000))  // 6 seconds
+      if(!checkActivityTime(6 * 1000))  // 6 seconds
          return;
 
       // Basic sanity check
@@ -1045,19 +1045,29 @@ public:
          MasterServerConnection::highScores.scores.clear();
 
          MasterServerConnection::highScores.groupNames.push_back("Official Wins Last Week");
-         databaseWriter.getTopPlayers("v_last_week_top_player_official_wins",    "win_count",  scoresPerGroup, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
+         databaseWriter.getTopPlayers("v_last_week_top_player_official_wins", "win_count",  
+                                      scoresPerGroup, MasterServerConnection::highScores.names, 
+                                      MasterServerConnection::highScores.scores);
 
          MasterServerConnection::highScores.groupNames.push_back("Official Wins This Week, So Far");
-         databaseWriter.getTopPlayers("v_current_week_top_player_official_wins", "win_count",  scoresPerGroup, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
+         databaseWriter.getTopPlayers("v_current_week_top_player_official_wins", "win_count",  
+                                      scoresPerGroup, MasterServerConnection::highScores.names, 
+                                      MasterServerConnection::highScores.scores);
 
          MasterServerConnection::highScores.groupNames.push_back("Games Played Last Week");
-         databaseWriter.getTopPlayers("v_last_week_top_player_games",            "game_count", scoresPerGroup, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
+         databaseWriter.getTopPlayers("v_last_week_top_player_games", "game_count", 
+                                      scoresPerGroup, MasterServerConnection::highScores.names, 
+                                      MasterServerConnection::highScores.scores);
 
          MasterServerConnection::highScores.groupNames.push_back("Games Played This Week, So Far");
-         databaseWriter.getTopPlayers("v_current_week_top_player_games",         "game_count", scoresPerGroup, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
+         databaseWriter.getTopPlayers("v_current_week_top_player_games", "game_count", 
+                                      scoresPerGroup, MasterServerConnection::highScores.names,
+                                      MasterServerConnection::highScores.scores);
 
          MasterServerConnection::highScores.groupNames.push_back("Latest BBB Winners");
-         databaseWriter.getTopPlayers("v_latest_bbb_winners",         "rank", scoresPerGroup, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
+         databaseWriter.getTopPlayers("v_latest_bbb_winners", "rank", 
+                                      scoresPerGroup, MasterServerConnection::highScores.names, 
+                                      MasterServerConnection::highScores.scores);
 
          MasterServerConnection::highScores.scoresPerGroup = scoresPerGroup;
       }
@@ -1066,7 +1076,9 @@ public:
          MasterServerConnection::highScores.isBuzy = false;
          for(S32 i=0; i < MasterServerConnection::highScores.waitingClients.size(); i++)
             if(MasterServerConnection::highScores.waitingClients[i])
-               MasterServerConnection::highScores.waitingClients[i]->m2cSendHighScores(MasterServerConnection::highScores.groupNames, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
+               MasterServerConnection::highScores.waitingClients[i]->m2cSendHighScores(MasterServerConnection::highScores.groupNames, 
+                                                                                       MasterServerConnection::highScores.names, 
+                                                                                       MasterServerConnection::highScores.scores);
          MasterServerConnection::highScores.waitingClients.clear();
 
       }
