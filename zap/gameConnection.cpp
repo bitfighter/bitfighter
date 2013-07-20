@@ -486,15 +486,15 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (),
 
 
 // A client has changed it's authentication status -- Only fired when game::setAuthenticated() is run on the server
-TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges), 
-                                                       (name, isAuthenticated, badges), 
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed), 
+                                                       (name, isAuthenticated, badges, gamesPlayed), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
    ClientInfo *clientInfo = mClientGame->findClientInfo(name);
 
    if(clientInfo)
-      clientInfo->setAuthenticated(isAuthenticated, badges);
+      clientInfo->setAuthenticated(isAuthenticated, badges, gamesPlayed);
    //else
       // This can happen if we're hosting locally when we first join the game.  Not sure why, but it seems harmless...
 #endif
@@ -1351,7 +1351,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetC
 
 // Client connects to master after joining a game, authentication fails,
 // then client has changed name to non-reserved, or entered password.
-TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (newName), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
+TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (newName), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    StringTableEntry oldName = mClientInfo->getName();
    mClientInfo->setName("");     
@@ -1360,7 +1361,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (
    mClientInfo->setName(oldName);         // Restore name to properly get it updated to clients
    setClientNameNonUnique(newName);       // For correct authentication
    
-   mClientInfo->setAuthenticated(false, NO_BADGES);               // Prevents name from being underlined
+   mClientInfo->setAuthenticated(false, NO_BADGES, 0);            // Prevents name from being underlined
    mClientInfo->setNeedToCheckAuthenticationWithMaster(false);    // Do not inquire with master
 
    if(oldName != uniqueName)              // Did the name actually change?
@@ -1700,7 +1701,9 @@ void GameConnection::onLocalConnection()
 
    // Tell local host if we're authenticated... no need to verify
    GameConnection *gc = static_cast<GameConnection *>(getRemoteConnectionObject());
-   getClientInfo()->setAuthenticated(gc->getClientInfo()->isAuthenticated(), gc->getClientInfo()->getBadges());  
+   ClientInfo *clientInfo = gc->getClientInfo();
+   getClientInfo()->setAuthenticated(clientInfo->isAuthenticated(), clientInfo->getBadges(),
+                                     clientInfo->getGamesPlayed());  
 }
 
 

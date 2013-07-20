@@ -68,6 +68,9 @@ private:
    Int<BADGE_COUNT> mBadges;
    Int<BADGE_COUNT> getBadges();
 
+   U16 mGamesPlayed;
+   U16 getGamesPlayed();
+
    void sendMotd();
 
    MasterConnectionType mConnectionType;
@@ -182,7 +185,8 @@ public:
    static PHPBB3AuthenticationStatus verifyCredentials(string &username, string password);
 
    PHPBB3AuthenticationStatus checkAuthentication(const char *password, bool doNotDelay = false);
-   void processAutentication(StringTableEntry newName, PHPBB3AuthenticationStatus status, TNL::Int<32> badges);
+   void processAutentication(StringTableEntry newName, PHPBB3AuthenticationStatus status, TNL::Int<32> badges,
+                             U16 gamesPlayed);
 
    // Client has contacted us and requested a list of active servers
    // that match their criteria.

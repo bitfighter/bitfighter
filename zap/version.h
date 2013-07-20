@@ -28,12 +28,14 @@
 
 #define ZAP_GAME_NAME "Bitfighter"
 
-#define MASTER_PROTOCOL_VERSION 6  // Change this when releasing an incompatible cm/sm protocol (must be int)
+// Updated from 6 to 7 for 019
+#define MASTER_PROTOCOL_VERSION 7  // Change this when releasing an incompatible cm/sm protocol (must be int)
                                    // MASTER_PROTOCOL_VERSION = 4, client 015a and older (CS_PROTOCOL_VERSION <= 32) can not connect to our new master.
 #define CS_PROTOCOL_VERSION 37     // Change this when releasing an incompatible cs protocol (must be int)
 // 016 = 33 
 // 017[ab] = 35
 // 018[a] = 36
+// 019 = 37
 
 #define VERSION_016  3737
 #define VERSION_017  4252

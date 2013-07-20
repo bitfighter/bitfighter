@@ -76,6 +76,7 @@ private:
    LoadoutTracker mActiveLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
 
    bool mNeedToCheckAuthenticationWithMaster;
+   U16 mGamesPlayed;
 
 protected:
    StringTableEntry mName;
@@ -113,6 +114,8 @@ public:
    S32 getScore();
    void setScore(S32 score);
    void addScore(S32 score);
+
+   U16 getGamesPlayed() const;
 
    // Whole mess of loadout related functions
    const LoadoutTracker &getOnDeckLoadout() const;
@@ -159,7 +162,7 @@ public:
    S32 getTeamIndex();
    void setTeamIndex(S32 teamIndex);
 
-   virtual void setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges);
+   virtual void setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed);
    bool isAuthenticated();
 
    Int<BADGE_COUNT> getBadges();
@@ -226,7 +229,7 @@ public:
    GameConnection *getConnection();
    void setConnection(GameConnection *conn);
 
-   void setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges);
+   void setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed);
 
    void setSpawnDelayed(bool spawnDelayed);
    bool isPlayerInactive();

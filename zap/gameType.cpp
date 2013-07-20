@@ -1154,7 +1154,7 @@ void GameType::achievementAchieved(U8 achievement, const StringTableEntry &playe
       // everyone can see the badge in the scoreboard
       ClientInfo *clientInfo = mGame->findClientInfo(playerName);
       if(clientInfo)
-         clientInfo->setAuthenticated(clientInfo->isAuthenticated(), clientInfo->getBadges() | BIT(achievement));
+         clientInfo->setAuthenticated(clientInfo->isAuthenticated(), clientInfo->getBadges() | BIT(achievement), clientInfo->getGamesPlayed());
    }
 }
 
@@ -1776,7 +1776,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
 
    // This message gets sent to all clients, even the client being added, though they presumably know most of this stuff already
    // This clientInfo belongs to the server; has no badge info for client...
-   s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), 
+   s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), clientInfo->getGamesPlayed(),
       min(clientInfo->getKillStreak(), (U32)ClientInfo::MaxKillStreakLength), false,
                 clientInfo->getRole(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(), 
                 clientInfo->isBusy(), true, true);
@@ -2383,11 +2383,12 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 // This suggests that RemoteClientInfos are not retained from game to game, but are generated anew.
 // ** Note that this method is essentially a mechanism for passing clientInfos from server to client. **
 GAMETYPE_RPC_S2C(GameType, s2cAddClient, 
-                (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, 
+                (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed,
                  RangedU32<0, ClientInfo::MaxKillStreakLength> killStreak, bool isMyClient, 
                  RangedU32<0, ClientInfo::MaxRoles> role, bool isRobot, bool isSpawnDelayed, 
                  bool isBusy, bool playAlert, bool showMessage),
-                (name, isAuthenticated, badges, killStreak, isMyClient, role, isRobot, isSpawnDelayed, isBusy, playAlert, showMessage))
+                (name, isAuthenticated, badges, gamesPlayed, killStreak, 
+                 isMyClient, role, isRobot, isSpawnDelayed, isBusy, playAlert, showMessage))
 {
 #ifndef ZAP_DEDICATED
 
@@ -2484,7 +2485,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
       if(clientInfo->getName() == oldName)
       {
          clientInfo->setName(newName);
-         clientInfo->setAuthenticated(false, NO_BADGES);
+         clientInfo->setAuthenticated(false, NO_BADGES, 0);
          break;
       }
    }
@@ -2685,7 +2686,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
       bool isLocalClient = (conn == theConnection);
 
-      s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), 
+      s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), clientInfo->getGamesPlayed(),
          min(clientInfo->getKillStreak(), (U32)ClientInfo::MaxKillStreakLength), isLocalClient,
                    clientInfo->getRole(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(),
                    clientInfo->isBusy(), false, false);
@@ -3344,10 +3345,10 @@ GAMETYPE_RPC_C2S(GameType, c2sRenamePlayer, (StringTableEntry playerName, String
       return;  // Error message handled client-side
 
    StringTableEntry oldName = renamedClientInfo->getName();
-   renamedClientInfo->setName("");                          // Avoid unique self
+   renamedClientInfo->setName("");                             // Avoid unique self
    StringTableEntry uniqueName = getGame()->makeUnique(newName.getString()).c_str();  // New name
-   renamedClientInfo->setName(oldName);                     // Restore name to properly get it updated to clients
-   renamedClientInfo->setAuthenticated(false, NO_BADGES);   // Don't underline anymore because of rename
+   renamedClientInfo->setName(oldName);                        // Restore name to properly get it updated to clients
+   renamedClientInfo->setAuthenticated(false, NO_BADGES, 0);   // Don't underline anymore because of rename
    updateClientChangedName(renamedClientInfo, uniqueName);
 
    GameConnection *conn = clientInfo->getConnection();

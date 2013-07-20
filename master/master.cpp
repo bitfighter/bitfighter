@@ -377,9 +377,11 @@ public:
    {
       SafePtr<MasterServerConnection> client;
       Int<BADGE_COUNT> badges;
+      U16 gamesPlayed;
       MasterServerConnection::PHPBB3AuthenticationStatus stat;
       string playerName;
       char password[256];
+
       void run()
       {
          stat = MasterServerConnection::verifyCredentials(playerName, password);
@@ -387,15 +389,19 @@ public:
          {
             DatabaseWriter databaseWriter = getDatabaseWriter();
             badges = databaseWriter.getAchievements(playerName.c_str());
+            gamesPlayed = databaseWriter.getGamesPlayed(playerName.c_str());
          }
          else
+         {
             badges = NO_BADGES;
+            gamesPlayed = 0;
+         }
       }
       void finish()
       {
          StringTableEntry playerNameSTE(playerName.c_str());
-         if(client) // check for NULL, Sometimes, a client disconnects very fast
-            client->processAutentication(playerNameSTE, stat, badges);
+         if(client) // Check for NULL, Sometimes, a client disconnects very fast
+            client->processAutentication(playerNameSTE, stat, badges, gamesPlayed);
       }
    };
    MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::checkAuthentication(const char *password, bool doNotDelay)
@@ -422,7 +428,9 @@ public:
       return UnknownStatus;
    }
 
-   void MasterServerConnection::processAutentication(StringTableEntry newName, PHPBB3AuthenticationStatus stat, TNL::Int<32> badges)
+
+   void MasterServerConnection::processAutentication(StringTableEntry newName, PHPBB3AuthenticationStatus stat, 
+                                                     TNL::Int<32> badges, U16 gamesPlayed)
    {
       mBadges = NO_BADGES;
       if(stat == WrongPassword)
@@ -456,7 +464,10 @@ public:
          }
 
          mBadges = badges;
-         m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, badges, newName.getString());
+         if(mCMProtocolVersion <= 6)      // 018a ==> 6, 019 ==> 7
+            m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, badges, newName.getString());
+         else
+            m2cSetAuthenticated_019((U32)AuthenticationStatusAuthenticatedName, badges, gamesPlayed, newName.getString());
 
          for(S32 i=0; i < master_admins.size(); i++)  // check for master admin
             if(newName == master_admins[i])
@@ -466,11 +477,20 @@ public:
             }
       }
       else if(stat == UnknownUser || stat == Unsupported)
-         m2cSetAuthenticated(AuthenticationStatusUnauthenticatedName, NO_BADGES, "");
+      {
+         if(mCMProtocolVersion <= 6)
+            m2cSetAuthenticated(AuthenticationStatusUnauthenticatedName, NO_BADGES, "");
+         else
+            m2cSetAuthenticated_019(AuthenticationStatusUnauthenticatedName, NO_BADGES, 0, "");
+      }
 
       else  // stat == CantConnect || stat == UnknownStatus
-         m2cSetAuthenticated(AuthenticationStatusFailed, NO_BADGES, "");
-
+      {
+         if(mCMProtocolVersion <= 6)
+            m2cSetAuthenticated(AuthenticationStatusFailed, NO_BADGES, "");
+         else
+            m2cSetAuthenticated_019(AuthenticationStatusFailed, NO_BADGES, 0, "");
+      }
    }
 
 
@@ -880,6 +900,12 @@ public:
    }
 
 
+   U16 MasterServerConnection::getGamesPlayed()
+   {
+      return mGamesPlayed;
+   }
+
+
    void MasterServerConnection::processIsAuthenticated(GameStats *gameStats)
    {
       for(S32 i = 0; i < gameStats->teamStats.size(); i++)
@@ -1147,7 +1173,10 @@ public:
             else
                status = AuthenticationStatusUnauthenticatedName;
 
-            m2sSetAuthenticated(id, walk->mPlayerOrServerName, status, walk->getBadges());
+            if(mCMProtocolVersion <= 6)      // 018a ==> 6, 019 ==> 7
+               m2sSetAuthenticated(id, walk->mPlayerOrServerName, status, walk->getBadges());
+            else
+               m2sSetAuthenticated_019(id, walk->mPlayerOrServerName, status, walk->getBadges(), walk->getGamesPlayed());
             break;
          }
    }

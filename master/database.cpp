@@ -404,6 +404,21 @@ Int<BADGE_COUNT> DatabaseWriter::getAchievements(const char *name)
 }
 
 
+U16 DatabaseWriter::getGamesPlayed(const char *name)
+{
+   string sql = "SELECT count(*) FROM stats_player WHERE player_name = '" + string(name) + "';";
+
+   Vector<Vector<string> > results;
+
+   selectHandler(sql, 1, results);
+
+   if(results.size() == 0)
+      return 0;
+   else
+      return atoi(results[0][0].c_str());
+}
+
+
 void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<string> > &values)
 {
    DbQuery query(mDb, mServer, mUser, mPassword);

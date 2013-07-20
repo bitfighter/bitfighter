@@ -180,9 +180,16 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendHighScores,
 ////////////////////////////////////
 // Authentication RPCs
 
+// 018a version
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetAuthenticated, 
    (RangedU32<0, AuthenticationStatusCount> authStatus, Int<BADGE_COUNT> badges, StringPtr correctedName), 
    (authStatus, badges, correctedName),
+   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 0) {}
+
+// 019 version
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetAuthenticated_019, 
+   (RangedU32<0, AuthenticationStatusCount> authStatus, Int<BADGE_COUNT> badges, U16 gamesPlayed, StringPtr correctedName), 
+   (authStatus, badges, gamesPlayed, correctedName),
    NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mRequestAuthentication, 
@@ -190,10 +197,17 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mRequestAuthentication,
    (id, name),
    NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 0) {}
 
+// 018a version
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2sSetAuthenticated, 
    (Vector<U8> id, StringTableEntry name, RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges), 
    (id, name, status, badges),
    NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 0) {}
+
+// 019 version
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2sSetAuthenticated_019, 
+   (Vector<U8> id, StringTableEntry name, RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges, U16 gamesPlayed), 
+   (id, name, status, badges, gamesPlayed),
+   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 1) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mChangeName, 
    (StringTableEntry name), 

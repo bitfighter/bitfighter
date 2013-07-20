@@ -231,7 +231,7 @@ public:
    // Tell server that the client is (or claims to be) authenticated
    TNL_DECLARE_RPC(c2sSetAuthenticated, ());       
    // Tell clients a player is authenticated, and pass on some badge info while we're on the phone
-   TNL_DECLARE_RPC(s2cSetAuthenticated, (StringTableEntry, bool, Int<BADGE_COUNT>));   
+   TNL_DECLARE_RPC(s2cSetAuthenticated, (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed));   
 
    TNL_DECLARE_RPC(c2sSetParam, (StringPtr param, RangedU32<0, ParamTypeCount> paramType));
 

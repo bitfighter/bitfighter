@@ -44,6 +44,7 @@ ClientInfo::ClientInfo()
    mGame = NULL;
 
    mScore = 0;
+   mGamesPlayed = 0;
    mTotalScore = 0;
    mTeamIndex = (NO_TEAM + 0);
    mPing = 0;
@@ -73,11 +74,12 @@ ClientInfo::~ClientInfo()
 }
 
 
-void ClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
+void ClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed)
 {
    mNeedToCheckAuthenticationWithMaster = false;     // Once we get here, we'll treat the ruling as definitive
    mIsAuthenticated = isAuthenticated; 
    mBadges = badges;
+   mGamesPlayed = gamesPlayed;
 }
 
 
@@ -133,6 +135,12 @@ void ClientInfo::setScore(S32 score)
 void ClientInfo::addScore(S32 score)
 {
    mScore += score;
+}
+
+
+U16 ClientInfo::getGamesPlayed() const
+{
+   return mGamesPlayed;
 }
 
 
@@ -615,10 +623,11 @@ FullClientInfo::~FullClientInfo()
 }
 
 // Seems to run on both client and server, or at least with mGame as a ClientGame and a ServerGame
-void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
+void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed)
 {
-   TNLAssert(isAuthenticated || badges == NO_BADGES, "Unauthenticated players should never have badges!");
-   Parent::setAuthenticated(isAuthenticated, badges);
+   TNLAssert(isAuthenticated || badges == NO_BADGES || gamesPlayed == 0, 
+                  "Unauthenticated players should never have badges or gamesPlayed!");
+   Parent::setAuthenticated(isAuthenticated, badges, gamesPlayed);
 
    // This is to test the assumption that we can replace gServerGame with mGame in the block below.  We are testing the hypothesis
    // that if the first condition is true, mGame is a ServerGame, which would probably mean it is gServerGame.  In any event, 
@@ -629,7 +638,7 @@ void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> bad
    if(mClientConnection && mClientConnection->isConnectionToClient())      
       for(S32 i = 0; i < mGame->getClientCount(); i++)
          if(mGame->getClientInfo(i)->getName() != mName && mGame->getClientInfo(i)->getConnection())
-            mGame->getClientInfo(i)->getConnection()->s2cSetAuthenticated(mName, isAuthenticated, badges);
+            mGame->getClientInfo(i)->getConnection()->s2cSetAuthenticated(mName, isAuthenticated, badges, gamesPlayed);
 }
 
 

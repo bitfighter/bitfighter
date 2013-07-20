@@ -246,8 +246,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr master
 
 // The master server has looked at our name and password, and determined if we're in the database properly.  Here's its reply.
 // The ClientInfo that gets filled here is the FullClientInfo that lives on he client, and describes the player to themselves.
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated, 
-                                    (RangedU32<0, AuthenticationStatusCount> authStatus, Int<BADGE_COUNT> badges, StringPtr correctedName))
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated_019, 
+                                    (RangedU32<0, AuthenticationStatusCount> authStatus, Int<BADGE_COUNT> badges, 
+                                     U16 gamesPlayed, StringPtr correctedName))
 {
    if(mGame->isServer())
       return;
@@ -257,21 +258,21 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
    if((AuthenticationStatus)authStatus.value == AuthenticationStatusAuthenticatedName)
    {
       clientGame->correctPlayerName(correctedName.getString());
-      clientGame->getClientInfo()->setAuthenticated(true, badges);
+      clientGame->getClientInfo()->setAuthenticated(true, badges, gamesPlayed);
 
       GameConnection *gc = clientGame->getConnectionToServer();
       if(gc)
          gc->c2sSetAuthenticated();    // Tell server that the client is (or claims to be) authenticated
    }
    else 
-      clientGame->getClientInfo()->setAuthenticated(false, NO_BADGES);
+      clientGame->getClientInfo()->setAuthenticated(false, NO_BADGES, 0);
 }
 #endif
 
 
 // Now we know that player with specified id has an approved name
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name,
-         RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges))
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated_019, (Vector<U8> id, StringTableEntry name,
+         RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges, U16 gamesPlayed))
 {
    if(!mGame->isServer())
       return;
@@ -282,11 +283,12 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
 
-      if(clientInfo->getId()->isValid() && *clientInfo->getId() == clientId)    // Robots don't have valid clientId, so this will never match a bot
+      // Robots don't have valid clientId, so this will never match a bot
+      if(clientInfo->getId()->isValid() && *clientInfo->getId() == clientId)    
       {
          if(status == AuthenticationStatusAuthenticatedName)
          {
-            clientInfo->setAuthenticated(true, badges);     // Broadcasts status to other clients
+            clientInfo->setAuthenticated(true, badges, gamesPlayed);       // Broadcasts status to other clients
 
             // Auto-rename other non-authenticated clients to avoid stealing the authenticated name
             for(S32 j = 0; j < mGame->getClientCount(); j++)
@@ -314,8 +316,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
          }
          else if(status == AuthenticationStatusUnauthenticatedName)
          {  
-            if(clientInfo->getConnection()->getAuthenticationCounter() > 1)  // Client gets two bites at the apple, to cover rare race condition
-               clientInfo->setAuthenticated(false, NO_BADGES);
+            // Client gets two bites at the apple, to cover rare race condition
+            if(clientInfo->getConnection()->getAuthenticationCounter() > 1)  
+               clientInfo->setAuthenticated(false, NO_BADGES, 0);
             else
                clientInfo->getConnection()->resetAuthenticationTimer();
          }

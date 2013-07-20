@@ -140,7 +140,13 @@ public:
    TNL_DECLARE_RPC(m2cSetMOTD, (TNL::StringPtr masterName, TNL::StringPtr motdString));
 
    // If the user has a verified name, send this message back so they know the "correct spelling" of the name
-   TNL_DECLARE_RPC(m2cSetAuthenticated, (RangedU32<0, AuthenticationStatusCount> authStatus, Int<BADGE_COUNT> badges, StringPtr correctedName));
+   // 018a version
+   TNL_DECLARE_RPC(m2cSetAuthenticated, (RangedU32<0, AuthenticationStatusCount> authStatus, Int<BADGE_COUNT> badges,     
+                                         StringPtr correctedName));
+
+   // 019 version
+   TNL_DECLARE_RPC(m2cSetAuthenticated_019, (RangedU32<0, AuthenticationStatusCount> authStatus, Int<BADGE_COUNT> badges, 
+                                             U16 gamesPlayed, StringPtr correctedName));
 
 
    // c2mSendChat sends an out-of-game chat message from the client to the master server
@@ -149,7 +155,6 @@ public:
 
    // m2cSendChat relays a chat message back to any clients connected to master
    TNL_DECLARE_RPC(m2cSendChat, (StringTableEntry playerNick, bool isPrivate, TNL::StringPtr message));
-
 
 
    /// m2cSendUpdgradeStatus is sent to a client when the connection is established.  If
@@ -167,8 +172,13 @@ public:
 
 
    TNL_DECLARE_RPC(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));
+
+   // 018a version
    TNL_DECLARE_RPC(m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name, 
                                          RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges));
+   // 019 version
+   TNL_DECLARE_RPC(m2sSetAuthenticated_019, (Vector<U8> id, StringTableEntry name, 
+                                             RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges, U16 gamesPlayed));
 
    TNL_DECLARE_RPC(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));
