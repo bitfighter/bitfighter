@@ -1714,12 +1714,15 @@ void NameEntryUserInterface::setupMenu()
 
    //if(!first)
    //{
-      addMenuItem(new TextEntryMenuItem("PASSWORD:", getGame()->getSettings()->getPlayerPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
+      MenuItem *menuItem;
+
+      menuItem = new TextEntryMenuItem("PASSWORD:", getGame()->getSettings()->getPlayerPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH);
+      menuItem->setSecret(true);
+      addMenuItem(menuItem);
 
       // If we have already saved a PW, this defaults to yes; to no otherwise
-      MenuItem *menuItem = new YesNoMenuItem("SAVE PASSWORD:", getGame()->getSettings()->getPlayerPassword() != "", "");
+      menuItem = new YesNoMenuItem("SAVE PASSWORD:", getGame()->getSettings()->getPlayerPassword() != "", "");
       menuItem->setSize(MENU_ITEM_SIZE_SMALL);
-      menuItem->setSecret(true);
       addMenuItem(menuItem);
    //}
 
