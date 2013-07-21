@@ -583,7 +583,6 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
                 bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                 bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
                 bool hasArmor, bool engineeringTeleport, U32 killStreak)
-   
 {
    glPushMatrix();
    glTranslate(renderPos);
