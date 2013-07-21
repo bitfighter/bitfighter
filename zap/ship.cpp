@@ -2137,6 +2137,7 @@ void Ship::renderLayer(S32 layerIndex)
 
    const string shipName = clientInfo ? clientInfo->getName().getString() : "";
    const U32 killStreak  = clientInfo ? clientInfo->getKillStreak() : 0;
+   const U32 gamesPlayed  = clientInfo ? clientInfo->getGamesPlayed() : 0;
 
    const Color *color = getGame()->getGameType()->getTeamColor(this);
    F32 alpha = getShipVisibility(localShip);
@@ -2147,7 +2148,8 @@ void Ship::renderLayer(S32 layerIndex)
    renderShip(layerIndex, getRenderPos(), getActualPos(), vel, angle, deltaAngle,
               mShapeType, color, alpha, clientGame->getCurrentTime(), shipName, warpInScale, 
               isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(), 
-              boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport, killStreak);
+              boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport, killStreak, 
+              gamesPlayed);
 
    if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow 
       renderSpawnShield(getRenderPos(), mSpawnShield.getCurrent(), clientGame->getCurrentTime());

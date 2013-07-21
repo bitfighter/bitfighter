@@ -559,7 +559,7 @@ TEST_F(BfTest, HelpItemManagerTests)
    Team *team = new Team();         // Teams will be deleted by ClientGame destructor
    game.addTeam(team);
    // Create a ClientInfo for a robot -- it will be deleted by ClientGame destructor
-   RemoteClientInfo *clientInfo = new RemoteClientInfo(&game, "Robot", true, 0, 0, true, ClientInfo::RoleNone, false, false);
+   RemoteClientInfo *clientInfo = new RemoteClientInfo(&game, "Robot", true, 0, 0, 0, true, ClientInfo::RoleNone, false, false);
    clientInfo->setTeamIndex(0);        // Assign it to our team
    game.addToClientList(clientInfo);   // Add it to the game
    ASSERT_EQ(game.getBotCount(), 1);   // Confirm there is a bot in the game

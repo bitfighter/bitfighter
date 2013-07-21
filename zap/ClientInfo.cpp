@@ -747,7 +747,7 @@ void FullClientInfo::setIsEngineeringTeleporter(bool isEngineeringTeleporter)
 #ifndef ZAP_DEDICATED
 // Constructor
 RemoteClientInfo::RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges, 
-                                   RangedU32<0, MaxKillStreakLength> killStreak, bool isRobot, ClientRole role, 
+                                   U16 gamesPlayed, RangedU32<0, MaxKillStreakLength> killStreak, bool isRobot, ClientRole role, 
                                    bool isSpawnDelayed, bool isBusy) : ClientInfo()
 {
    mGame = game;
@@ -758,6 +758,7 @@ RemoteClientInfo::RemoteClientInfo(Game *game, const StringTableEntry &name, boo
    mTeamIndex = NO_TEAM;
    mRating = 0;
    mBadges = badges;
+   mGamesPlayed = gamesPlayed;
    mSpawnDelayed = isSpawnDelayed;
    mIsBusy = isBusy;
    mCurrentKillStreak = killStreak;

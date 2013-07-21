@@ -577,12 +577,53 @@ static void calcThrustComponents(const Point &velocity, F32 angle, F32 deltaAngl
 }
 
 
+static void renderShipName(const string &shipName, bool isAuthenticated, bool isBusy, U32 killStreak, U32 gamesPlayed, F32 alpha)
+{
+   string renderName = isBusy ? "<<" + shipName + ">>" : shipName;
+   renderName += " | " + itos(gamesPlayed);
+
+   F32 textAlpha = alpha;
+   S32 textSize = 14;
+
+   glLineWidth(gLineWidth1);
+
+   const U32 lowerThresh = 5;
+   const U32 upperThresh = 10;
+
+   const Color *lowerColor = &Colors::gray50;
+   const Color *upperColor = &Colors::red;
+
+   // Set name color based on killStreak length
+   if(killStreak < lowerThresh)              // 0 - 5, normal gray
+      glColor(lowerColor, textAlpha);    
+   else if(killStreak < upperThresh)         // 5 - 9, interpolated
+   {
+      static Color c;
+      c.interp(F32(killStreak - lowerThresh + 1)/F32(upperThresh - lowerThresh + 1), *upperColor, *lowerColor);
+      glColor(c, textAlpha);    
+   }
+   else                                      // >= 10, full-on red
+      glColor(upperColor, textAlpha);       
+
+   //drawStringf(0, 50, 15, "%d", killStreak);
+
+
+   S32 len = drawStringc(0, 30 + textSize, textSize, renderName.c_str());
+
+   // Underline name if player is authenticated
+   if(isAuthenticated)
+      drawHorizLine(-len/2, len/2, 33 + textSize);
+
+   glLineWidth(gDefaultLineWidth);
+}
+
+
 void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
                 F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, F32 alpha, 
                 U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
                 bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                 bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
-                bool hasArmor, bool engineeringTeleport, U32 killStreak)
+                bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed)
 {
    glPushMatrix();
    glTranslate(renderPos);
@@ -591,46 +632,16 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
    // Don't label the local ship.
    if(!isLocalShip && layerIndex == 1 && shipName != "")  
    {
-      string renderName = isBusy ? "<<" + shipName + ">>" : shipName;
-
-      F32 textAlpha = alpha;
-      S32 textSize = 14;
-
-      glLineWidth(gLineWidth1);
-
-      const U32 lowerThresh = 5;
-      const U32 upperThresh = 10;
-
-      const Color *lowerColor = &Colors::gray50;
-      const Color *upperColor = &Colors::red;
-
-      // Set name color based on killStreak length
-      if(killStreak < lowerThresh)              // 0 - 5, normal gray
-         glColor(lowerColor, textAlpha);    
-      else if(killStreak < upperThresh)         // 5 - 9, interpolated
-      {
-         static Color c;
-         c.interp(F32(killStreak - lowerThresh + 1)/F32(upperThresh - lowerThresh + 1), *upperColor, *lowerColor);
-         glColor(c, textAlpha);    
-      }
-      else                                      // >= 10, full-on red
-         glColor(upperColor, textAlpha);       
-
-      //drawStringf(0, 50, 15, "%d", killStreak);
-
-
-      S32 len = drawStringc(0, 30 + textSize, textSize, renderName.c_str());
-
-      // Underline name if player is authenticated
-      if(isAuthenticated)
-         drawHorizLine(-len/2, len/2, 33 + textSize);
-
-      glLineWidth(gDefaultLineWidth);
+      renderShipName(shipName, isAuthenticated, isBusy, killStreak, gamesPlayed, alpha);
 
       // Show if the player is engineering a teleport
       if(engineeringTeleport)
          renderTeleporterOutline(Point(cos(angle), sin(angle)) * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS),
                (F32)Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
+   }
+   else if(isLocalShip && layerIndex == 1)
+   {
+      drawStringc(0, 30 + 15, 15, itos(gamesPlayed).c_str());
    }
 
    if(showCoordinates && layerIndex == 1)

@@ -76,7 +76,6 @@ private:
    LoadoutTracker mActiveLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
 
    bool mNeedToCheckAuthenticationWithMaster;
-   U16 mGamesPlayed;
 
 protected:
    StringTableEntry mName;
@@ -93,6 +92,8 @@ protected:
    bool mIsEngineeringTeleporter;
    bool mShipSystemsDisabled;
    Int<BADGE_COUNT> mBadges;
+   U16 mGamesPlayed;
+
    U32 mCurrentKillStreak;
    Game *mGame;
 
@@ -265,7 +266,7 @@ private:
 
 public:
    RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges,      // Constructor
-                    RangedU32<0, MaxKillStreakLength> killStreak, bool isRobot, ClientRole role, 
+                    U16 gamesPlayed, RangedU32<0, MaxKillStreakLength> killStreak, bool isRobot, ClientRole role, 
                     bool isSpawnDelayed, bool isBusy);
    virtual ~RemoteClientInfo();      
    // Destructor

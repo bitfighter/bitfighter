@@ -464,6 +464,8 @@ public:
          }
 
          mBadges = badges;
+         mGamesPlayed = gamesPlayed;
+
          if(mCMProtocolVersion <= 6)      // 018a ==> 6, 019 ==> 7
             m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, badges, newName.getString());
          else

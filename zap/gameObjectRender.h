@@ -136,7 +136,7 @@ extern void renderShip(S32 layerIndex, const Point &renderPos, const Point &actu
                        U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
                        bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                        bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
-                       bool hasArmor, bool engineeringTeleport, U32 killStreak);
+                       bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed);
 
 extern void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime);
 
