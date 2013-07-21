@@ -791,6 +791,7 @@ MenuUserInterfaceWithIntroductoryAnimation::MenuUserInterfaceWithIntroductoryAni
    mShowingAnimation = false;
 }
 
+
 // Destructor
 MenuUserInterfaceWithIntroductoryAnimation::~MenuUserInterfaceWithIntroductoryAnimation()
 {
