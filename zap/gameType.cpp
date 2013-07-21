@@ -2399,6 +2399,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    {
       isAuthenticated = true;
       badges = clientGame->getClientInfo()->getBadges();
+      gamesPlayed = clientGame->getClientInfo()->getGamesPlayed();
    }
 
    // The new ClientInfo will be deleted in s2cRemoveClient   
