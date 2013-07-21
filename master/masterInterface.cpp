@@ -190,7 +190,7 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetAuthenticated,
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetAuthenticated_019, 
    (RangedU32<0, AuthenticationStatusCount> authStatus, Int<BADGE_COUNT> badges, U16 gamesPlayed, StringPtr correctedName), 
    (authStatus, badges, gamesPlayed, correctedName),
-   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 0) {}
+   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 1) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mRequestAuthentication, 
    (Vector<U8> id, StringTableEntry name), 
