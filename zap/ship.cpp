@@ -1506,8 +1506,11 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          if(isLocalPlayerShip(getGame()))
             static_cast<ClientGame *>(getGame())->newLoadoutHasArrived(mLoadout);
 
-         if(!wasInitialUpdate)
-            static_cast<ClientGame *>(getGame())->addInlineHelpItem(LoadoutFinishedItem);
+         // Looks like the user has successfully updated their loadout... we want to show a congratulations message.  However,
+         // we don't want to do this if it has changed because the level reset, nor if it changed due to a respawn.  If the
+         // level has a loadout zone, it means that the loadout was not changed due to a spawn event.
+         if(!wasInitialUpdate && getGame()->levelHasLoadoutZone())
+            getGame()->addInlineHelpItem(LoadoutFinishedItem);
       }
    }
 

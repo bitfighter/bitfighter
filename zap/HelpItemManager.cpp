@@ -333,6 +333,7 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
    S32 lines = 0;
    S32 maxw = 0;
    S32 xPos = gScreenInfo.getGameCanvasWidth() / 2;
+   S32 yOffset = 0;
 
    // Final item in messages array will be NULL; loop until we hit that
    for(S32 i = 0; messages[i]; i++)
@@ -346,18 +347,18 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
       SymbolString::symbolParse(inputCodeManager, renderStr, symbols, HelpItemContext, FontSize);
 
       UI::SymbolString symbolString(symbols, FontSize, HUDContext);
-      symbolString.render(xPos, yPos, AlignmentCenter);
+      symbolString.render(xPos, yPos + yOffset, AlignmentCenter);
 
       S32 w = symbolString.getWidth();
       maxw = max(maxw, w);
 
-      yPos += FontSize + FontGap;
+      yOffset += FontSize + FontGap;
       lines++;
    }
 
-   renderMessageDoodads(game, helpItem, xPos - maxw / 2, yPos - (lines + 1) * (FontSize + FontGap), yPos - FontSize + 4);
+   renderMessageDoodads(game, helpItem, xPos - maxw / 2, yPos + yOffset - (lines + 1) * (FontSize + FontGap), yPos - FontSize + 4);
 
-   return yPos;
+   return yOffset;
 }
 
 
