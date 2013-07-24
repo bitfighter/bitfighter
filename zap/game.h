@@ -432,7 +432,7 @@ public:
    void setGameType(GameType *theGameType);
    void processDeleteList(U32 timeDelta);
 
-   GameSettings *getSettings();
+   GameSettings *getSettings() const;
 
    bool isOrIsAboutToBeSuspended();
 

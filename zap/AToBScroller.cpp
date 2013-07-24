@@ -33,7 +33,7 @@ using namespace Zap;
 namespace Zap { namespace UI {
 
 
-static ScissorsManager scissorsManager;      // Could probably be static, practically...
+static ScissorsManager scissorsManager;
 
 
 // Constructor

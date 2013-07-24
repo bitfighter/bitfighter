@@ -294,7 +294,8 @@ public:
    S32 getHeight() const;
 
    // Drawing
-   virtual S32 render(S32 x, S32 y, Alignment alignment, S32 blockWidth = -1) const;
+   S32 render(S32 x, S32 y, Alignment alignment, S32 blockWidth = -1) const;
+   virtual S32 render(F32 x, F32 y, Alignment alignment, S32 blockWidth = -1) const;
    void render(const Point &center, Alignment alignment) const;
    void render(const Point &pos) const;
 
@@ -325,7 +326,7 @@ public:
    LayeredSymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, S32 fontSize, FontContext fontContext);   // Constructor
    virtual ~LayeredSymbolString();     // Destructor
 
-   S32 render(S32 x, S32 y, Alignment alignment, S32 blockWidth = -1) const;
+   S32 render(F32 x, F32 y, Alignment alignment, S32 blockWidth = -1) const;
 };
 
 
@@ -343,7 +344,7 @@ public:
    S32 getHeight() const;
    S32 getWidth() const;
    S32 getItemCount() const;
-   S32 render(S32 x, S32 y, Alignment alignment, S32 blockWidth = -1) const;
+   S32 render(F32 x, F32 y, Alignment alignment, S32 blockWidth = -1) const;
    S32 renderLine(S32 line, S32 x, S32 y, Alignment alignment) const;
 };
 

@@ -134,7 +134,7 @@ S32 SymbolStringSet::getItemCount() const
 }
 
 
-S32 SymbolStringSet::render(S32 x, S32 yStart, Alignment alignment, S32 blockWidth) const
+S32 SymbolStringSet::render(F32 x, F32 yStart, Alignment alignment, S32 blockWidth) const
 {
    S32 width = getWidth();
    S32 y = 0;
@@ -280,6 +280,12 @@ void SymbolString::render(const Point &center, Alignment alignment) const
 
 
 S32 SymbolString::render(S32 x, S32 y, Alignment blockAlignment, S32 blockWidth) const
+{
+   return render((F32)x, (F32)y, blockAlignment, blockWidth);
+}
+
+
+S32 SymbolString::render(F32 x, F32 y, Alignment blockAlignment, S32 blockWidth) const
 {
    TNLAssert(mReady, "Not ready!");
 
@@ -605,7 +611,7 @@ LayeredSymbolString::~LayeredSymbolString()
 
 
 // Each layer is rendered atop the previous, creating a layered effect
-S32 LayeredSymbolString::render(S32 x, S32 y, Alignment alignment, S32 blockWidth) const
+S32 LayeredSymbolString::render(F32 x, F32 y, Alignment alignment, S32 blockWidth) const
 {
    TNLAssert(mReady, "Not ready!");
 

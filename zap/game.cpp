@@ -183,7 +183,7 @@ Game *Game::getAddTarget()
 }
 
 
-GameSettings *Game::getSettings()
+GameSettings *Game::getSettings() const
 {
    return mSettings;
 }

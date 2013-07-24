@@ -28,6 +28,8 @@
 
 //#include "SymbolShape.h" <<<=== Can't include this here, contaminates dedicated build with joystick.h
 
+#include "AToBScroller.h"     // Parent class
+
 #include "Timer.h"
 #include "tnlTypes.h"
 #include "tnlVector.h"
@@ -173,8 +175,10 @@ struct HighlightItem
 };
 
 
-class HelpItemManager
+class HelpItemManager : public AToBScroller
 {
+
+typedef AToBScroller Parent;
 
 private:
    struct WeightedHelpItem {
@@ -226,7 +230,7 @@ public:
    static const S32 PacedTimerPeriod        = 15 * 1000; // Rate at which paced items are displayed
    static const S32 FloodControlPeriod      = 10 * 1000; // Generally, don't show items more frequently than this, in ms
    static const S32 HelpItemDisplayPeriod   =  7 * 1000; // Time for a help item to be visible
-   static const S32 HelpItemDisplayFadeTime = 500;       // Time for item to fade out
+   static const S32 HelpItemDisplayFadeTime = 200;       // Time for item to fade out
 
 
    HelpItemManager(GameSettings *settings);           // Constructor
@@ -235,7 +239,7 @@ public:
    void reset();
 
    void idle(U32 timeDelta, const ClientGame *game);
-   void renderMessages(const ClientGame *game, S32 yPos) const;
+   void renderMessages(const ClientGame *game, F32 yPos) const;
 
    void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);
    void addInlineHelpItem(HelpItem item, bool messageCameFromQueue = false);   

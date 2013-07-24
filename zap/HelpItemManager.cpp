@@ -36,6 +36,7 @@
 #include "LoadoutIndicator.h"    // For indicator static dimensions
 #include "EnergyGaugeRenderer.h"
 #include "ScreenInfo.h"          // For canvas width
+#include "ScissorsManager.h"
 
 #include "SymbolShape.h"
 #include "Colors.h"
@@ -326,13 +327,13 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
 }
 
 
-static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inputCodeManager, HelpItem helpItem, S32 yPos)
+static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inputCodeManager, HelpItem helpItem, F32 yPos)
 {
    const char * const *messages = helpItems[helpItem].helpMessages;
 
    S32 lines = 0;
    S32 maxw = 0;
-   S32 xPos = gScreenInfo.getGameCanvasWidth() / 2;
+   F32 xPos = gScreenInfo.getGameCanvasWidth() / 2.0f;
    S32 yOffset = 0;
 
    // Final item in messages array will be NULL; loop until we hit that
@@ -362,7 +363,9 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
 }
 
 
-void HelpItemManager::renderMessages(const ClientGame *game, S32 yPos) const
+static ScissorsManager scissorsManager;
+
+void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos) const
 {
 #ifdef TNL_DEBUG
    // This bit is for displaying our help messages one-by-one so we can see how they look on-screen, cycle with CTRL+H
@@ -386,9 +389,25 @@ void HelpItemManager::renderMessages(const ClientGame *game, S32 yPos) const
    for(S32 i = 0; i < mHelpItems.size(); i++)
    {
       F32 alpha = mHelpFading[i] ? mHelpTimer[i].getFraction() : 1;
-      glColor(Colors::HelpItemRenderColor, alpha);
+      glColor(Colors::HelpItemRenderColor);
 
-      yPos += doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos) + 15;  // Gap between messages
+      if(alpha < 1)
+         int x = 0;
+
+      S32 lines = 0;
+      while(helpItems[mHelpItems[i]].helpMessages[lines])
+         lines++;
+
+      F32 height = F32((lines * (FontSize + FontGap)) );
+      F32 dispHeight = alpha * height;
+
+      scissorsManager.enable(mHelpFading[i], game->getSettings()->getIniSettings()->displayMode, 
+                             0, yPos - FontSize, gScreenInfo.getGameCanvasWidth(), dispHeight);
+
+      yPos += doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos - (height - dispHeight)) + 15;  // Gap between messages
+      yPos -= (height - dispHeight);      // Make lower items slide up as upper items are removed
+
+      scissorsManager.disable();
    }
 
    FontManager::popFontContext();

@@ -45,6 +45,7 @@ LoadoutIndicator::LoadoutIndicator()
    mScrollTimer.setPeriod(200);
 }
 
+
 // Destructor
 LoadoutIndicator::~LoadoutIndicator()
 {
