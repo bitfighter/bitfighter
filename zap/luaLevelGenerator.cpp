@@ -51,6 +51,7 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
 
    mGridDatabase = gridDatabase;
    mGame = game;
+   mLuaGame = game;  // Set our parent member, too
 
    mGridSize = gridSize;
 
@@ -97,10 +98,14 @@ bool LuaLevelGenerator::prepareEnvironment()
    if(!LuaScriptRunner::prepareEnvironment())
       return false;
 
-   if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY, LevelgenContext) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY, LevelgenContext))
+   if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY, LevelgenContext))
       return false;
 
+   // Set this first so we have this object available in the helper functions in case we need overrides
    setSelf(L, this, "levelgen");
+
+   if(!loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY, LevelgenContext))
+      return false;
 
    return true;
 }
@@ -140,7 +145,6 @@ static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char
    METHOD(CLASS, addWall,           ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, addItem,           ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, addLevelLine,      ARRAYDEF({{ STR, END }}), 1 )                        \
-   METHOD(CLASS, findObjectById,    ARRAYDEF({{ INT, END }}), 1 )                        \
    METHOD(CLASS, findGlobalObjects, ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    METHOD(CLASS, getGridSize,       ARRAYDEF({{ END }}), 1 )                             \
    METHOD(CLASS, getPlayerCount,    ARRAYDEF({{ END }}), 1 )                             \
@@ -210,7 +214,7 @@ S32 LuaLevelGenerator::lua_addWall(lua_State *L)
 // error and buffer overflows and such...
 S32 LuaLevelGenerator::lua_addItem(lua_State *L)
 {
-   static const char *methodName = "LevelGenerator:addItem()";
+   static const char *methodName = "LuaLevelGenerator:addItem()";
 
    // First check to see if item is a BfObject
    BfObject *obj = luaW_check<BfObject>(L, 1);
@@ -265,7 +269,7 @@ S32 LuaLevelGenerator::lua_addItem(lua_State *L)
  */
 S32 LuaLevelGenerator::lua_addLevelLine(lua_State *L)
 {
-   checkArgList(L, functionArgs, "LuaLevelGenerator", "addLevelLine");
+   checkArgList(L, functionArgs, luaClassName, "addLevelLine");
 
    mGame->parseLevelLine(getString(L, 1), mGridDatabase, "Levelgen script: " + mScriptName);
 
@@ -280,7 +284,7 @@ S32 LuaLevelGenerator::lua_addLevelLine(lua_State *L)
  */
 S32 LuaLevelGenerator::lua_setGameTime(lua_State *L)
 {
-   checkArgList(L, functionArgs, "LuaLevelGenerator", "setGameTime");
+   checkArgList(L, functionArgs, luaClassName, "setGameTime");
 
    mGame->setGameTime(getFloat(L, 1));
 
@@ -297,7 +301,7 @@ S32 LuaLevelGenerator::lua_setGameTime(lua_State *L)
  */
 S32 LuaLevelGenerator::lua_pointCanSeePoint(lua_State *L)
 {
-   checkArgList(L, functionArgs, "LuaLevelGenerator", "pointCanSeePoint");
+   checkArgList(L, functionArgs, luaClassName, "pointCanSeePoint");
 
    Point p1 = getPointOrXY(L, 1);
    Point p2 = getPointOrXY(L, 2);
@@ -317,31 +321,11 @@ S32 LuaLevelGenerator::lua_pointCanSeePoint(lua_State *L)
  */
 S32 LuaLevelGenerator::lua_logprint(lua_State *L)
 {
-   static const char *methodName = "Levelgen:logprint()";
+   static const char *methodName = "LuaLevelGenerator:logprint()";
    checkArgCount(L, 1, methodName);
 
    logprintf(LogConsumer::LuaLevelGenerator, "Levelgen: %s", getCheckedString(L, 1, methodName));
    return 0;
-}
-
-
-/**
- * @luafunc    BfObject LuaLevelGenerator::findObjectById(num id)
- * @brief      Returns an object with the given id, or nil if none exists.
- * @descr      Finds an object with the specified user-assigned id.  If there are multiple objects with the same id (shouldn't happen, 
- *             but could, especially if the passed id is 0), this method will return the first object it finds with the given id.  
- *             Currently, all objects that have not been explicitly assigned an id have an id of 0.
- *
- * Note that ids can be assigned in the editor using the ! or # keys.
- *
- * @param      id id to search for.
- * @return     The found BfObject, or `nil` if no objects with the specified id could be found.
- */
-S32 LuaLevelGenerator::lua_findObjectById(lua_State *L)
-{
-   checkArgList(L, functionArgs, "Levelgen", "findObjectById");
-
-   return LuaScriptRunner::findObjectById(L, mGame->getGameObjDatabase()->findObjects_fast());
 }
 
 
@@ -371,7 +355,7 @@ S32 LuaLevelGenerator::lua_findObjectById(lua_State *L)
   */
 S32 LuaLevelGenerator::lua_findGlobalObjects(lua_State *L)
 {
-   checkArgList(L, functionArgs, "Levelgen", "findGlobalObjects");
+   checkArgList(L, functionArgs, luaClassName, "findGlobalObjects");
 
    return LuaScriptRunner::findObjects(L, mGame->getGameObjDatabase(), NULL, NULL);
 }
@@ -433,7 +417,7 @@ S32 LuaLevelGenerator::lua_getPlayerCount(lua_State *L)
  */
 S32 LuaLevelGenerator::lua_globalMsg(lua_State *L)
 {
-   checkArgList(L, functionArgs, "LuaLevelGenerator", "globalMsg");
+   checkArgList(L, functionArgs, luaClassName, "globalMsg");
 
    const char *message = getString(L, 1);
 
@@ -454,7 +438,7 @@ S32 LuaLevelGenerator::lua_globalMsg(lua_State *L)
  */
 S32 LuaLevelGenerator::lua_teamMsg(lua_State *L)
 {
-   checkArgList(L, functionArgs, "LuaLevelGenerator", "teamMsg");
+   checkArgList(L, functionArgs, luaClassName, "teamMsg");
 
    const char *message = getString(L, 1);
    S32 teamIndex = getTeamIndex(L, 2);
@@ -476,7 +460,7 @@ S32 LuaLevelGenerator::lua_teamMsg(lua_State *L)
  */
 S32 LuaLevelGenerator::lua_privateMsg(lua_State *L)
 {
-   checkArgList(L, functionArgs, "LuaLevelGenerator", "privateMsg");
+   checkArgList(L, functionArgs, luaClassName, "privateMsg");
 
    const char *message = getString(L, 1);
    const char *playerName = getString(L, 2);
@@ -496,7 +480,7 @@ S32 LuaLevelGenerator::lua_privateMsg(lua_State *L)
  */
 S32 LuaLevelGenerator::lua_announce(lua_State *L)
 {
-   checkArgList(L, functionArgs, "LuaLevelGenerator", "announce");
+   checkArgList(L, functionArgs, luaClassName, "announce");
 
    const char *message = getString(L, 1);
 

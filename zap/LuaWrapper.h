@@ -1206,14 +1206,14 @@ public:
    virtual void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
    virtual void push(lua_State *L) { luaW_push(L, this); }
 
-// This one is for an abstract class and cannot be instantiated or accessed from Lua
+// This one is for an abstract class and cannot be instantiated or returned as an object in Lua
 #define  LUAW_DECLARE_ABSTRACT_CLASS(className) \
    LuaProxy<className> *mLuaProxy; \
    LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \
    virtual void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
    className(lua_State *L) { throw LuaException("Illegal attempt to instantiate abstract class!"); }
 
-// This is used for a class that you want to access but NOT instantiated (like PlayerInfo)
+// This is used for a class that you want to access (return as an object) but NOT instantiated (like PlayerInfo)
 #define  LUAW_DECLARE_NON_INSTANTIABLE_CLASS(className) \
    LuaProxy<className> *mLuaProxy; \
    LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \

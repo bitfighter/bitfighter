@@ -34,11 +34,6 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
--- LUA stack overflow, logprint recursively calls itself?
--- function logprint(msg)
---     logprint("Levelgen", tostring(msg))
--- end
-
 --
 -- And two more
 --
@@ -50,25 +45,34 @@ function unsubscribe(event)
    levelgen:unsubscribe(event)
 end  
 
-
 function globalMsg(message)
    levelgen:globalMsg(message)
 end   
 
+
 --
--- Alias vec as Point for backwards compatibility
+-- Add backwards compatibility for some API changes
 --
-function Point(x, y)
-    logprint("WARNING: Use of Point(x,y) is deprecated!  This function will be removed in a future version of Bitfighter!  Please change your scripts to use point.new(x,y)!")  -- started warning in 018
-    return point.new(x, y)
+function printDeprecationWarning(oldFunction, newFunction)
+    logprint("WARNING: '" .. oldFunction .. "' is deprecated and will be removed in a future version of Bitfighter.  Please change your scripts to use '" .. newFunction .. "'")
 end
 
 --
--- Make sure this function exists for plugins.  Many plugins will overwrite this.
+-- Warnings started in 019
 --
-function getArgsMenu()
-    return nil
-end    
+function levelgen:findObjectById(id)
+    -- started warning in 019
+    printDeprecationWarning("levelgen:findObjectById(id)", "bf:findObjectById(id)")
+    return bf:findObjectById(id)
+end
+
+--
+-- Warnings started in 018
+--
+function Point(x, y)
+    printDeprecationWarning("Point(x,y)", "point.new(x,y)")
+    return point.new(x, y)
+end
 
 --
 -- Let the log know that this file was processed correctly

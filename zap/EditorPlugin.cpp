@@ -46,6 +46,7 @@ EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scrip
 
    mGridSize = gridSize;
    mGame = game;
+   mLuaGame = game;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
