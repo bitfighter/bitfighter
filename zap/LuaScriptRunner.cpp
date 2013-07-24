@@ -28,6 +28,7 @@
 #include "ship.h"
 #include "BotNavMeshZone.h"
 #include "Engineerable.h"
+#include "game.h"
 
 #include "GameTypesEnum.h"
 #include "TeamConstants.h"
@@ -72,6 +73,9 @@ void LuaScriptRunner::clearScriptCache()
 // Constructor
 LuaScriptRunner::LuaScriptRunner()
 {
+   // MUST be overriden in child classes
+   mLuaGame = NULL;
+
    static U32 mNextScriptId = 0;
 
    // Initialize all subscriptions to unsubscribed -- bits will automatically subscribe to onTick later
@@ -80,6 +84,8 @@ LuaScriptRunner::LuaScriptRunner()
 
    mScriptId = "script" + itos(mNextScriptId++);
    mScriptType = ScriptTypeInvalid;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -94,6 +100,8 @@ LuaScriptRunner::~LuaScriptRunner()
 
    // And delete the script's environment table from the Lua instance
    deleteScript(getScriptId());
+
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -526,7 +534,19 @@ bool LuaScriptRunner::prepareEnvironment()
    lua_pushnil(L);                                       //
    lua_setglobal(L, "e");                                //
 
+   // Make non-static Lua methods in this class available via "bf".  We have to static_cast here
+   // because it is possible for two 'setSelf' methods to be called from a subclass that calls
+   // its own prepareEnvironment() method and subsequently this one (its parent), e.g. in the
+   // case of bots.
+   setSelf(L, static_cast<LuaScriptRunner*>(this), "bf");
+
    return true;
+}
+
+
+void LuaScriptRunner::killScript()
+{
+   TNLAssert(false, "Not implemented for this class");
 }
 
 
@@ -1044,10 +1064,11 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
  *            script runner.
  */
 
-const char *LuaScriptRunner::luaClassName = "";
-
+/**
+ * These static methods are independent of gameplay and do not perform any actions on game objects
+ */
 //               Fn name    Param profiles         Profile count
-#define LUA_METHODS(CLASS, METHOD) \
+#define LUA_STATIC_METHODS(CLASS, METHOD) \
       METHOD(CLASS, logprint,        ARRAYDEF({{ ANY,   END }}), 1 ) \
       METHOD(CLASS, print,           ARRAYDEF({{ ANY,   END }}), 1 ) \
       METHOD(CLASS, getRandomNumber, ARRAYDEF({{        END }}), 1 ) \
@@ -1056,19 +1077,35 @@ const char *LuaScriptRunner::luaClassName = "";
       METHOD(CLASS, writeToFile,     ARRAYDEF({{ STR, STR, END }, { STR, STR, BOOL, END }}), 2 ) \
       METHOD(CLASS, readFromFile,    ARRAYDEF({{ STR,   END }}), 1 ) \
 
+/**
+ * These non-static methods work with in-game objects and can be dependent on script type and
+ * what 'Game' it's called from (i.e. ServerGame or ClientGame)
+ */
+//               Fn name    Param profiles         Profile count
+#define LUA_NON_STATIC_METHODS(CLASS, METHOD) \
+      METHOD(CLASS, findObjectById,  ARRAYDEF({{ INT, END }}), 1 )   \
+
+
+// Put both method types together so we can build our functionArgs table
+#define LUA_METHODS(CLASS, METHOD) \
+      LUA_STATIC_METHODS(CLASS, METHOD) \
+      LUA_NON_STATIC_METHODS(CLASS, METHOD) \
+
 GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);
 
+// Only for non-static methods do we register with LuaW
+GENERATE_LUA_METHODS_TABLE(LuaScriptRunner, LUA_NON_STATIC_METHODS);
 
 void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 {
-   // Register the functions listed above by generating a series of lines that look like this:
+   // Register the static functions listed above by generating a series of lines that look like this:
    // lua_register(L, "logprint", logprint);
-#  define REGISTER_LINE(class_, name, profiles, profileCount) \
+#  define REGISTER_STATIC_LINE(class_, name, profiles, profileCount) \
    lua_register(L, #name, lua_##name );
 
-   LUA_METHODS("unused", REGISTER_LINE);
+   LUA_STATIC_METHODS("unused", REGISTER_STATIC_LINE);
 
-#  undef REGISTER_LINE
+#  undef REGISTER_STATIC_LINE
 
 
    // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented
@@ -1076,7 +1113,13 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
    luaL_dostring(L, "math.random = getRandomNumber");
 }
 
+#undef LUA_STATIC_METHODS
+#undef LUA_NON_STATIC_METHODS
 #undef LUA_METHODS
+
+
+const char *LuaScriptRunner::luaClassName = "LuaScriptRunner";
+REGISTER_LUA_CLASS(LuaScriptRunner);
 
 
 /**
@@ -1173,7 +1216,7 @@ S32 LuaScriptRunner::lua_getMachineTime(lua_State *L)
   */
 S32 LuaScriptRunner::lua_findFile(lua_State *L)
 {
-   checkArgList(L, functionArgs, luaClassName, "findFile");
+   checkArgList(L, functionArgs, "", "findFile");
 
    string filename = getString(L, 1, "");
 
@@ -1203,7 +1246,7 @@ S32 LuaScriptRunner::lua_findFile(lua_State *L)
   */
 S32 LuaScriptRunner::lua_readFromFile(lua_State *L)
 {
-   checkArgList(L, functionArgs, luaClassName, "readFromFile");
+   checkArgList(L, functionArgs, "", "readFromFile");
 
    string filename = extractFilename(getString(L, 1, ""));
 
@@ -1226,7 +1269,7 @@ S32 LuaScriptRunner::lua_readFromFile(lua_State *L)
   */
 S32 LuaScriptRunner::lua_writeToFile(lua_State *L)
 {
-   S32 profile = checkArgList(L, functionArgs, luaClassName, "writeToFile");
+   S32 profile = checkArgList(L, functionArgs, "", "writeToFile");
 
    // Sanitize the path.  Only a file name is allowed!
    string filename = extractFilename(getString(L, 1, ""));
@@ -1246,6 +1289,28 @@ S32 LuaScriptRunner::lua_writeToFile(lua_State *L)
    }
 
    return 0;
+}
+
+
+/**
+ * @luafunc    BfObject LuaScriptRunner::findObjectById(num id)
+ * @brief      Returns an object with the given id, or nil if none exists.
+ * @descr      Finds an object with the specified user-assigned id.  If there are multiple objects with the same id (shouldn't happen,
+ *             but could, especially if the passed id is 0), this method will return the first object it finds with the given id.
+ *             Currently, all objects that have not been explicitly assigned an id have an id of 0.
+ *
+ * Note that ids can be assigned in the editor using the ! or # keys.
+ *
+ * @param      id id to search for.
+ * @return     The found BfObject, or `nil` if no objects with the specified id could be found.
+ */
+S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
+{
+   checkArgList(L, functionArgs, luaClassName, "findObjectById");
+
+   TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
+
+   return findObjectById(L, mLuaGame->getGameObjDatabase()->findObjects_fast());
 }
 
 

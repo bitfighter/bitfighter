@@ -49,6 +49,9 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
 Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),   
                              LuaScriptRunner() 
 {
+   // Our 'Game' pointer in LuaScriptRunner is the same as the one in this game object
+   mLuaGame = mGame;
+
    // For now...  In future we'll need to specify a script in our L object, then we can instantiate a bot
    if(L)
    {
@@ -180,10 +183,14 @@ bool Robot::prepareEnvironment()
       // Push a pointer to this Robot to the Lua stack, then set the name of this pointer in the protected environment.  
       // This is the name that we'll use to refer to this robot from our Lua code.  
 
-      if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY, RobotContext) || !loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY, RobotContext))
+      if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY, RobotContext))
          return false;
 
+      // Set this first so we have this object available in the helper functions in case we need overrides
       setSelf(L, this, "bot");
+
+      if(!loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY, RobotContext))
+         return false;
    }
    catch(LuaException &e)
    {
@@ -580,7 +587,6 @@ U16 Robot::findClosestZone(const Point &point)
                                                                                              \
    METHOD(CLASS,  findObjects,          ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    METHOD(CLASS,  findGlobalObjects,    ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
-   METHOD(CLASS,  findObjectById,       ARRAYDEF({{ INT, END }}), 1 )                        \
    METHOD(CLASS,  findClosestEnemy,     ARRAYDEF({{              END }, { NUM,  END }}), 2 ) \
                                                                                              \
    METHOD(CLASS,  getFiringSolution,    ARRAYDEF({{ BFOBJ, END }}), 1 )                      \
@@ -1126,26 +1132,6 @@ S32 Robot::lua_findGlobalObjects(lua_State *L)
    checkArgList(L, functionArgs, "Robot", "findGlobalObjects");
 
    return LuaScriptRunner::findObjects(L, getGame()->getGameObjDatabase(), NULL, this);
-}
-
-
-/**
- * @luafunc    Robot::findObjectById(id)
- * @brief      Returns an object with the given id, or nil if none exists.
- * @descr      Finds an object with the specified user-assigned id.  If there are multiple objects with the same id (shouldn't happen, 
- *             but could, especially if the passed id is 0), this method will return the first object it finds with the given id.  
- *             Currently, all objects that have not been explicitly assigned an id have an id of 0.
- *
- * Note that ids can be assigned in the editor using the ! or # keys.
- *
- * @param      id - int id to search for.
- * @return     \e BfObject - Found object, or nil if no objects with the specified id could be found.
-*/
-S32 Robot::lua_findObjectById(lua_State *L)
-{
-   checkArgList(L, functionArgs, "Robot", "findObjectById");
-
-   return LuaScriptRunner::findObjectById(L, mGame->getGameObjDatabase()->findObjects_fast());
 }
 
 

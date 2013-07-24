@@ -49,6 +49,7 @@ namespace Zap
 
 class BfObject;
 class DatabaseObject;
+class Game;
 class GridDatabase;
 class LuaPlayerInfo;
 class Rect;
@@ -105,6 +106,8 @@ protected:
       ScriptTypeInvalid,
    };
 
+   Game *mLuaGame;
+
    static lua_State *L;          // Main Lua state variable
    string mScriptName;           // Fully qualified script name, with path and everything
    Vector<string> mScriptArgs;   // List of arguments passed to the script
@@ -116,7 +119,7 @@ protected:
 
    // This method should be abstract, but luaW requires us to be able to instantiate this class
    virtual bool prepareEnvironment();
-   void setSelf(lua_State *L, LuaScriptRunner *self, const char *name);
+//   void setSelf(lua_State *L, LuaScriptRunner *self, const char *name);
 
    static int luaPanicked(lua_State *L);  // Handle a total freakout by Lua
    static void registerClasses();
@@ -126,8 +129,8 @@ protected:
 
    static void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
 
-   S32 findObjectById(lua_State *L, const Vector<DatabaseObject *> *objects);
-   S32 findObjects(lua_State *L, GridDatabase *database, Rect *scope = NULL, Ship *caller = NULL);
+   static S32 findObjectById(lua_State *L, const Vector<DatabaseObject *> *objects);
+   static S32 findObjects(lua_State *L, GridDatabase *database, Rect *scope = NULL, Ship *caller = NULL);
 
 
 // Sets a var in the script's environment to give access to the caller's "this" obj, with the var name "name".
@@ -148,7 +151,7 @@ void setSelf(lua_State *L, T *self, const char *name)
 
 
 protected:
-   virtual void killScript() = 0;
+   virtual void killScript();
 
 
 public:
@@ -198,10 +201,12 @@ public:
    }
 
 
-
    //// Lua interface
+   LUAW_DECLARE_ABSTRACT_CLASS(LuaScriptRunner);
+
    static const char *luaClassName;
    static const LuaFunctionProfile functionArgs[];
+   static const luaL_reg luaMethods[];              // Only used for non-static lua methods
 
    static S32 lua_logprint(lua_State *L);
    static S32 lua_print(lua_State *L);
@@ -210,6 +215,9 @@ public:
    static S32 lua_findFile(lua_State *L);
    static S32 lua_readFromFile(lua_State *L);
    static S32 lua_writeToFile(lua_State *L);
+
+   // Non-static methods
+   S32 lua_findObjectById(lua_State *L);
 };
 
 
