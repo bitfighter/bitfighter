@@ -79,6 +79,6 @@ function main()
    object:setGeom(geom)
 
    -- Now add item to the level
-   plugin:addItem(object)
+   bf:addItem(object)
 end   
 

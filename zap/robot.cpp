@@ -49,9 +49,6 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
 Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),   
                              LuaScriptRunner() 
 {
-   // Our 'Game' pointer in LuaScriptRunner is the same as the one in this game object
-   mLuaGame = mGame;
-
    // For now...  In future we'll need to specify a script in our L object, then we can instantiate a bot
    if(L)
    {
@@ -358,6 +355,13 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
    // to the string location subsequently, and our vals will change from under us.  That's bad!
    for(S32 i = 2; i < argc; i++)        // Does nothing if we have no args
       mScriptArgs.push_back(string(argv[i]));
+
+   // I'm not sure this goes here, but it needs to be set early in setting up the Robot, but after
+   // the constructor
+   //
+   // Our 'Game' pointer in LuaScriptRunner is the same as the one in this game object
+   mLuaGame = game;
+   mLuaGridDatabase = game->getGameObjDatabase();
 
    return true;
 }

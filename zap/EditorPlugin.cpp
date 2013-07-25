@@ -43,6 +43,7 @@ EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scrip
    mScriptType = ScriptTypeEditorPlugin;
 
    mGridDatabase = gridDatabase;
+   mLuaGridDatabase = gridDatabase;
 
    mGridSize = gridSize;
    mGame = game;
@@ -220,7 +221,6 @@ REGISTER_LUA_CLASS(EditorPlugin);
 //               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getGridSize,        ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, addItem,            ARRAYDEF({{ BFOBJ, END }}), 1 ) \
    METHOD(CLASS, getSelectedObjects, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getAllObjects,      ARRAYDEF({{ END }}), 1 ) \
 
@@ -238,36 +238,6 @@ GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
 S32 EditorPlugin::lua_getGridSize(lua_State *L)
 {
    return returnFloat(L, mGridSize);    
-}
-
-
-/**
- * @luafunc    EditorPlugin::addItem(BfObject)
- * @brief      Adds an object to the editor by using the levelgen:addItem() functionality
- * @param      BfObject - any BfObject to be added to the editor
-*/
-S32 EditorPlugin::lua_addItem(lua_State *L)
-{
-   checkArgList(L, functionArgs, "EditorPlugin", "addItem");
-
-   BfObject *obj = luaW_check<BfObject>(L, 1);
-
-   if(obj)
-   {
-      // Silently ignore illegal items when being run from the editor
-      if(obj->canAddToEditor())
-      {
-         // Some objects require special handling
-         if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
-            mGame->addPolyWall(obj, mGridDatabase);
-         else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
-            mGame->addWallItem(obj, mGridDatabase);
-         else
-            obj->addToGame(mGame, mGridDatabase);
-      }
-   }
-
-   return 0;
 }
 
 

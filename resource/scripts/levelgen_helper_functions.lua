@@ -58,16 +58,18 @@ function printDeprecationWarning(oldFunction, newFunction)
 end
 
 --
--- Warnings started in 019
+-- Deprecation started in 019.  No warnings for now..
 --
 function levelgen:findObjectById(id)
-    -- started warning in 019
-    printDeprecationWarning("levelgen:findObjectById(id)", "bf:findObjectById(id)")
     return bf:findObjectById(id)
 end
 
+function levelgen:addItem(object)
+    return bf:addItem(object)
+end
+
 --
--- Warnings started in 018
+-- Deprecation started in 018
 --
 function Point(x, y)
     printDeprecationWarning("Point(x,y)", "point.new(x,y)")

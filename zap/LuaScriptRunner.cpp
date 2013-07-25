@@ -73,8 +73,9 @@ void LuaScriptRunner::clearScriptCache()
 // Constructor
 LuaScriptRunner::LuaScriptRunner()
 {
-   // MUST be overriden in child classes
+   // These MUST be overriden in child classes
    mLuaGame = NULL;
+   mLuaGridDatabase = NULL;
 
    static U32 mNextScriptId = 0;
 
@@ -1084,6 +1085,7 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
 //               Fn name    Param profiles         Profile count
 #define LUA_NON_STATIC_METHODS(CLASS, METHOD) \
       METHOD(CLASS, findObjectById,  ARRAYDEF({{ INT, END }}), 1 )   \
+      METHOD(CLASS, addItem,         ARRAYDEF({{ BFOBJ, END }}), 1 ) \
 
 
 // Put both method types together so we can build our functionArgs table
@@ -1311,6 +1313,42 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
    TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
 
    return findObjectById(L, mLuaGame->getGameObjDatabase()->findObjects_fast());
+}
+
+
+/**
+ * @luafunc    LuaScriptRunner::addItem(BfObject)
+ * @brief      Add an BfObject to the game or editor. Any object constructed in a levelgen
+ *             will not appear in the game world or editor until this method is called on it.
+ * @param      BfObject - any BfObject to be added to the editor
+*/
+S32 LuaScriptRunner::lua_addItem(lua_State *L)
+{
+   checkArgList(L, functionArgs, luaClassName, "addItem");
+
+   TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
+   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
+
+   // First check to see if item is a BfObject
+   BfObject *obj = luaW_check<BfObject>(L, 1);
+
+   if(obj)
+   {
+      // Silently ignore illegal items when being run from the editor.  For the moment, if mGame is not a server, then
+      // we are running from the editor.  This could conceivably change, but for the moment it seems to hold true.
+      if(mLuaGame->isServer() || obj->canAddToEditor())
+      {
+         // Some objects require special handling
+         if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
+            mLuaGame->addPolyWall(obj, mLuaGridDatabase);
+         else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+            mLuaGame->addWallItem(obj, mLuaGridDatabase);
+         else
+            obj->addToGame(mLuaGame, mLuaGridDatabase);
+      }
+   }
+
+   return 0;
 }
 
 

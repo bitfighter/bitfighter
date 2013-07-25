@@ -50,6 +50,7 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
    mScriptType = ScriptTypeLevelgen;
 
    mGridDatabase = gridDatabase;
+   mLuaGridDatabase = gridDatabase;
    mGame = game;
    mLuaGame = game;  // Set our parent member, too
 
@@ -143,7 +144,6 @@ static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char
 //               Fn name    Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, addWall,           ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, addItem,           ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, addLevelLine,      ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS, findGlobalObjects, ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    METHOD(CLASS, getGridSize,       ARRAYDEF({{ END }}), 1 )                             \
@@ -199,62 +199,6 @@ S32 LuaLevelGenerator::lua_addWall(lua_State *L)
    }
 
    mGame->parseLevelLine(line.c_str(), mGridDatabase, "Levelgen script: " + mScriptName);
-
-   return 0;
-}
-
-
-/**
- * @luafunc LuaLevelGenerator::addItem(BfObject)
- * @brief Add an Item to the game. Any Item constructed in a levelgen will not
- * appear in the game world until this method is called on it.
- */
-// Simply grabs parameters from the Lua stack, and passes them off to processLevelLoadLine().  Unfortunately,
-// this involves packing everything into an array of char strings, which is frightfully prone to programmer
-// error and buffer overflows and such...
-S32 LuaLevelGenerator::lua_addItem(lua_State *L)
-{
-   static const char *methodName = "LuaLevelGenerator:addItem()";
-
-   // First check to see if item is a BfObject
-   BfObject *obj = luaW_check<BfObject>(L, 1);
-
-   if(obj)
-   {
-      // Silently ignore illegal items when being run from the editor.  For the moment, if mGame is not a server, then
-      // we are running from the editor.  This could conceivably change, but for the moment it seems to hold true.
-      if(mGame->isServer() || obj->canAddToEditor())
-      {
-         // Some objects require special handling
-         if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
-            mGame->addPolyWall(static_cast<PolyWall *>(obj), mGridDatabase);
-         else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
-            mGame->addWallItem(static_cast<WallItem *>(obj), mGridDatabase);
-         else
-         {
-            obj->addToGame(mGame, mGridDatabase);
-
-            mAddedObjects.push_back(obj);
-         }
-      }
-
-      return 0;
-   }
-
-   // Otherwise, try older method of converting stack items to params to be passed to processLevelLoadLine
-
-   S32 argc = min((S32)lua_gettop(L), (S32)LevelLoader::MAX_LEVEL_LINE_ARGS);     // Never more that MaxArgc args, please!
-
-   if(argc == 0)
-   {
-      logError("Object had no parameters, ignoring...");
-      return 0;
-   }
-
-   for(S32 i = 0; i < argc; i++)      // argc was already bounds checked above
-      argv[i] = getCheckedString(L, i + 1, methodName);
-
-   processLevelLoadLine(argc, 0, argv, mGridDatabase, "Levelgen script: " + mScriptName);      // For now, all ids are 0!
 
    return 0;
 }

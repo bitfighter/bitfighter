@@ -106,7 +106,9 @@ protected:
       ScriptTypeInvalid,
    };
 
-   Game *mLuaGame;
+   Game *mLuaGame;                  // Pointer to our current Game object, which could be ServerGame or
+                                    // ClientGame depending on where the script is called from
+   GridDatabase *mLuaGridDatabase;  // Pointer to our current grid database with objects to manipulate
 
    static lua_State *L;          // Main Lua state variable
    string mScriptName;           // Fully qualified script name, with path and everything
@@ -218,6 +220,7 @@ public:
 
    // Non-static methods
    S32 lua_findObjectById(lua_State *L);
+   S32 lua_addItem(lua_State *L);
 };
 
 
