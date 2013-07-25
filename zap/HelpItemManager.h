@@ -212,6 +212,8 @@ private:
    void moveItemFromQueueToActiveList(const ClientGame *game);
    void removeGameStartItemsFromQueue();
 
+   S32 getLinesInHelpItem(S32 item) const;
+
 
 public:
    enum Priority {

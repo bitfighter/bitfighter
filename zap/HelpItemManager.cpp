@@ -133,6 +133,12 @@ void HelpItemManager::reset()
 }
 
 
+// Display sizes for help items
+static const S32 FontSize = 18;
+static const S32 FontGap  = 6;
+static const S32 InterMsgGap = 15;     // Space btwn adjacent messages
+
+
 void HelpItemManager::idle(U32 timeDelta, const ClientGame *game)
 {
    if(!mEnabled)
@@ -152,29 +158,42 @@ void HelpItemManager::idle(U32 timeDelta, const ClientGame *game)
 
    // Check if we can move an item from the queue to the active list -- but don't do it in the final
    // 20 seconds of a game!
-   if(mPacedTimer.getCurrent() == 0 && mFloodControl.getCurrent() == 0 && 
-            game->getRemainingGameTime() > 20)
-
+   if(mPacedTimer.getCurrent() == 0 && mFloodControl.getCurrent() == 0 && game->getRemainingGameTime() > 20)
       moveItemFromQueueToActiveList(game);
       
    // Expire displayed items
    for(S32 i = 0; i < mHelpTimer.size(); i++)
-      if(mHelpTimer[i].update(timeDelta))
-      {
-         if(mHelpFading[i])
-         {
-            mHelpItems.erase(i);
-            mHelpFading.erase(i);
-            mHelpTimer.erase(i);
+   {
 
-            buildItemsToHighlightList();
-         }
-         else
-         {
-            mHelpFading[i] = true;
-            mHelpTimer[i].reset(HelpItemDisplayFadeTime);
-         }
+      if(mHelpTimer[i].getCurrent() == 0 && mHelpFading[i])
+      {
+         mHelpItems.erase(i);
+         mHelpFading.erase(i);
+         mHelpTimer.erase(i);
+
+         buildItemsToHighlightList();
+         i--;
+         continue;
       }
+
+      if(mHelpTimer[i].update(timeDelta) && !mHelpFading[i])
+      {
+         mHelpFading[i] = true;
+         // Reset the timer to a new value based on the number of lines in the item -- this
+         // will keep the rollup effect going at a constant speed 
+         mHelpTimer[i].reset((getLinesInHelpItem(i) * (FontSize + FontGap) + InterMsgGap) * 5);    // 5 ms per pixel height
+      }
+   }
+}
+
+
+S32 HelpItemManager::getLinesInHelpItem(S32 item) const
+{
+   S32 lines = 0;
+   while(helpItems[mHelpItems[item]].helpMessages[lines])
+      lines++;
+
+   return lines;
 }
 
 
@@ -225,11 +244,6 @@ void HelpItemManager::moveItemFromQueueToActiveList(const ClientGame *game)
 }
 
 
-static const S32 FontSize = 18;
-static const S32 FontGap  = 6;
-
-
-
 static void renderHelpTextBracket(S32 x, S32 top, S32 bot, S32 stubLen)
 {
    drawVertLine (x, top,         bot);    // Vertical bar
@@ -277,7 +291,7 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
       renderIndicatorBracket(indicatorLeft, indicatorRight, indicatorTop, -stubLen);
 
       // Lines connecting the two
-      drawHorizLine(indicatorMiddle, textLeft,    riserBot);    // Main horizontal
+      drawHorizLine(indicatorMiddle, textLeft,     riserBot);    // Main horizontal
       drawVertLine (indicatorMiddle, indicatorTop, riserBot);    // Main riser
    }
 
@@ -357,7 +371,11 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
       lines++;
    }
 
-   renderMessageDoodads(game, helpItem, xPos - maxw / 2, yPos + yOffset - (lines + 1) * (FontSize + FontGap), yPos - FontSize + 4);
+
+   S32 leftPos = xPos - maxw / 2;
+   S32 topPos  = yPos + yOffset - (lines + 1) * (FontSize + FontGap);
+   S32 botPos  = yPos + yOffset - FontSize + 4;    // 4.... just... because?
+   renderMessageDoodads(game, helpItem, leftPos, topPos, botPos);
 
    return yOffset;
 }
@@ -386,26 +404,23 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos) const
    
    FontManager::pushFontContext(HelpItemContext);
 
-   for(S32 i = 0; i < mHelpItems.size(); i++)
+   for(S32 i = 0; i < mHelpItems.size(); i++)      // Iterate over each message being displayed
    {
-      F32 alpha = mHelpFading[i] ? mHelpTimer[i].getFraction() : 1;
       glColor(Colors::HelpItemRenderColor);
 
-      if(alpha < 1)
-         int x = 0;
+      // Height of the message in pixels, including the gap before the next message (even if there isn't one)
+      F32 height = F32(getLinesInHelpItem(i) * (FontSize + FontGap)) + InterMsgGap;
 
-      S32 lines = 0;
-      while(helpItems[mHelpItems[i]].helpMessages[lines])
-         lines++;
-
-      F32 height = F32((lines * (FontSize + FontGap)) );
-      F32 dispHeight = alpha * height;
+      // Offset makes lower items slide up as upper items are rolled up -- when we're not fading, offset
+      // is 0; when we are, offset directs doRenderMessages to render with the top of the message higher
+      // than normal.  That, combined with scissors clipping, results in the rolling-up effect.
+      F32 offset = height * (mHelpFading[i] ? 1 - mHelpTimer[i].getFraction() : 0);
 
       scissorsManager.enable(mHelpFading[i], game->getSettings()->getIniSettings()->displayMode, 
-                             0, yPos - FontSize, gScreenInfo.getGameCanvasWidth(), dispHeight);
+                             0, yPos - FontSize, gScreenInfo.getGameCanvasWidth(), height);
 
-      yPos += doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos - (height - dispHeight)) + 15;  // Gap between messages
-      yPos -= (height - dispHeight);      // Make lower items slide up as upper items are removed
+      doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos - offset);
+      yPos += height - offset;      
 
       scissorsManager.disable();
    }
