@@ -126,7 +126,6 @@ public:
 
    S32 lua_getCPUTime(lua_State *L);
    S32 lua_getTime(lua_State *L);
-   S32 lua_getGameInfo(lua_State *L);
 
    S32 lua_setAngle(lua_State *L);
    S32 lua_getAnglePt(lua_State *L);

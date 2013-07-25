@@ -26,7 +26,6 @@
 #include "luaLevelGenerator.h"
 #include "gameLoader.h"
 #include "game.h"
-#include "ServerGame.h"
 #include "barrier.h"             // For PolyWall def
 
 #include "stringUtils.h"         // fileExists
@@ -142,7 +141,6 @@ static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char
    METHOD(CLASS, addWall,           ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, addLevelLine,      ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS, findGlobalObjects, ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
-   METHOD(CLASS, getPlayerCount,    ARRAYDEF({{ END }}), 1 )                             \
    METHOD(CLASS, setGameTime,       ARRAYDEF({{ NUM, END }}), 1 )                        \
    METHOD(CLASS, pointCanSeePoint,  ARRAYDEF({{ PT, PT, END }}), 1 )                     \
    METHOD(CLASS, globalMsg,         ARRAYDEF({{ STR, END }}), 1 )                        \
@@ -151,7 +149,6 @@ static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char
    METHOD(CLASS, announce,          ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS, subscribe,         ARRAYDEF({{ EVENT, END }}), 1 )                      \
    METHOD(CLASS, unsubscribe,       ARRAYDEF({{ EVENT, END }}), 1 )                      \
-   METHOD(CLASS, getGameInfo,       ARRAYDEF({{ END }}), 1 )                             \
 
 GENERATE_LUA_METHODS_TABLE(LuaLevelGenerator, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(LuaLevelGenerator, LUA_METHODS);
@@ -277,30 +274,6 @@ S32 LuaLevelGenerator::lua_findGlobalObjects(lua_State *L)
    checkArgList(L, functionArgs, luaClassName, "findGlobalObjects");
 
    return LuaScriptRunner::findObjects(L, mGame->getGameObjDatabase(), NULL, NULL);
-}
-
-
-/**
- * @luafunc GameInfo LuaLevelGenerator::getGameInfo()
- * @brief   Returns the GameInfo object.
- * @descr   GameInfo can be used to grab information about the currently running game, including the GameType
- * @return  The GameInfo object
- */
-S32 LuaLevelGenerator::lua_getGameInfo(lua_State *L)
-{
-   TNLAssert(dynamic_cast<ServerGame*>(mGame), "Not ServerGame??");
-   return returnGameInfo(L, static_cast<ServerGame*>(mGame));
-}
-
-
-/**
- * @luafunc num LuaLevelGenerator::getPlayerCount()
- * @brief   Returns current number of players.
- * @return  Current number of players.
- */
-S32 LuaLevelGenerator::lua_getPlayerCount(lua_State *L)
-{
-   return returnInt(L, mGame ? mGame->getPlayerCount() : 1 );
 }
 
 

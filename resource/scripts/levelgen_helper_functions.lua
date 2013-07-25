@@ -53,10 +53,6 @@ end
 --
 -- Add backwards compatibility for some API changes
 --
-function printDeprecationWarning(oldFunction, newFunction)
-    logprint("WARNING: '" .. oldFunction .. "' is deprecated and will be removed in a future version of Bitfighter.  Please change your scripts to use '" .. newFunction .. "'")
-end
-
 --
 -- Deprecation started in 019.  No warnings for now..
 --
@@ -66,6 +62,11 @@ end
 
 function levelgen:addItem(object)
     return bf:addItem(object)
+end
+
+function GameInfo()
+    printDeprecationWarning("GameInfo()", "bf:getGameInfo()")
+    return bf:getGameInfo()
 end
 
 --

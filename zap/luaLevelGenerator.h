@@ -76,9 +76,6 @@ public:
 
    S32 lua_findGlobalObjects(lua_State *L);         // Retrieve object with the specified id
 
-   S32 lua_getPlayerCount(lua_State *L);
-   S32 lua_getGameInfo(lua_State *L);
-
    S32 lua_globalMsg(lua_State *L);
    S32 lua_teamMsg(lua_State *L);
    S32 lua_privateMsg(lua_State *L);

@@ -220,7 +220,11 @@ public:
 
    // Non-static methods
    S32 lua_findObjectById(lua_State *L);
+
    S32 lua_addItem(lua_State *L);
+
+   S32 lua_getGameInfo(lua_State *L);
+   S32 lua_getPlayerCount(lua_State *L);
 };
 
 

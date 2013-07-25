@@ -102,3 +102,10 @@ function getFiringSolution(...)
 end
 
 
+--
+-- Add backwards compatibility for some API changes
+--
+function GameInfo()
+    printDeprecationWarning("GameInfo()", "bf:getGameInfo()")
+    return bf:getGameInfo()
+end

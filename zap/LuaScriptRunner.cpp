@@ -29,6 +29,7 @@
 #include "BotNavMeshZone.h"
 #include "Engineerable.h"
 #include "game.h"
+#include "ServerGame.h"
 
 #include "GameTypesEnum.h"
 #include "TeamConstants.h"
@@ -1086,6 +1087,8 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
 #define LUA_NON_STATIC_METHODS(CLASS, METHOD) \
       METHOD(CLASS, findObjectById,  ARRAYDEF({{ INT, END }}), 1 )   \
       METHOD(CLASS, addItem,         ARRAYDEF({{ BFOBJ, END }}), 1 ) \
+      METHOD(CLASS, getGameInfo,     ARRAYDEF({{ END }}), 1 )        \
+      METHOD(CLASS, getPlayerCount,  ARRAYDEF({{ END }}), 1 )        \
 
 
 // Put both method types together so we can build our functionArgs table
@@ -1349,6 +1352,41 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
    }
 
    return 0;
+}
+
+
+/**
+ * @luafunc GameInfo LuaScriptRunner::getGameInfo()
+ * @brief   Returns the GameInfo object.
+ * @descr   GameInfo can be used to grab information about the currently running game, including
+ *          the GameType.  This only works in-game, not with editor plugins
+ * @return  The GameInfo object
+ */
+S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
+{
+   if(!mLuaGame->isServer())
+   {
+      logprintf(LogConsumer::LuaBotMessage, "'getGameInfo' can only be called in-game");
+      returnNil(L);
+   }
+
+   TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
+   TNLAssert(dynamic_cast<ServerGame*>(mLuaGame), "Not ServerGame??");
+
+   return returnGameInfo(L, static_cast<ServerGame*>(mLuaGame));
+}
+
+
+/**
+ * @luafunc num LuaScriptRunner::getPlayerCount()
+ * @brief   Returns current number of players.
+ * @return  Current number of players.
+ */
+S32 LuaScriptRunner::lua_getPlayerCount(lua_State *L)
+{
+   TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
+
+   return returnInt(L, mLuaGame ? mLuaGame->getPlayerCount() : 1);
 }
 
 

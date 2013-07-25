@@ -145,3 +145,9 @@ function values(t)
         if i <= n then return t[i] end
     end
 end
+
+
+-- Wrapper for printing our standard deprecation warning
+function printDeprecationWarning(oldFunction, newFunction)
+    logprint("WARNING: '" .. oldFunction .. "' is deprecated and will be removed in a future version of Bitfighter.  Please change your scripts to use '" .. newFunction .. "'")
+end
