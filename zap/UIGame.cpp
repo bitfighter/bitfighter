@@ -2078,18 +2078,31 @@ void GameUserInterface::renderScoreboard()
    }
 
    // Render symbol legend 
-   const S32 legendSize = 12;     
-   const S32 legendGap  =  3;    // Space between scoreboard and legend
+   const S32 LegendSize = 12;     
+   const S32 LegendGap  =  3;    // Space between scoreboard and legend
 
    const S32 humans     = getGame()->getPlayerCount();
-   const S32 legendPos  = scoreboardTop + totalHeight + legendGap;
+   const S32 legendPos  = scoreboardTop + totalHeight + LegendGap + LegendSize;
 
-   string legend = itos(humans) + " Human" + (humans != 1 ? "s" : "") + " | " + adminSymbol + "= Admin | " + 
-                   levelChangerSymbol + "= Can Change Levels | " + botSymbol + "= Bot |";
+   string legend = itos(humans) + " Human" + (humans != 1 ? "s" : "") + " | " + adminSymbol + " = Admin | " + 
+                   levelChangerSymbol + " = Can Change Levels | " + botSymbol + " = Bot |";
 
+   // TODO: Can make nearly all of this static -- only need to swap out the symbol for the player count, which will be the first one...
+   static Vector<SymbolShapePtr> symbols;
+   symbols.clear();
+   symbols.push_back(SymbolShapePtr(new SymbolText(legend, LegendSize, ScoreboardContext, &Colors::standardPlayerScoreboardColor)));
+   symbols.push_back(SymbolShapePtr(new SymbolText(" Idle Player", LegendSize, ScoreboardContext, &Colors::idlePlayerScoreboardColor)));
+   symbols.push_back(SymbolShapePtr(new SymbolText(" | ", LegendSize, ScoreboardContext, &Colors::standardPlayerScoreboardColor)));
+   symbols.push_back(SymbolShapePtr(new SymbolText("Player on Kill Streak", LegendSize, ScoreboardContext, &Colors::streakPlayerNameColor)));
+
+   UI::SymbolString symbolString(symbols, LegendSize, ScoreboardContext);
+   symbolString.render(gScreenInfo.getGameCanvasWidth() / 2, legendPos, AlignmentCenter);
+
+
+   
    // Not quite the function's intended purpose, but it does the job
-   drawCenteredStringPair(legendPos, legendSize, Colors::standardPlayerScoreboardColor, 
-                          Colors::idlePlayerScoreboardColor, legend.c_str(), "Idle Player");
+   //drawCenteredStringPair(legendPos, legendSize, Colors::standardPlayerScoreboardColor, 
+   //                       Colors::idlePlayerScoreboardColor, legend.c_str(), "Idle Player");
 
    FontManager::popFontContext();
 }
