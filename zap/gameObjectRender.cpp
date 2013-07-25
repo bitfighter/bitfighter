@@ -591,21 +591,13 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
    const U32 upperThresh = 10;
 
    const Color *lowerColor = &Colors::gray50;
-   const Color *upperColor = &Colors::red;
+   const Color *upperColor = &Colors::red80;
 
    // Set name color based on killStreak length
-   if(killStreak < lowerThresh)              // 0 - 5, normal gray
+   if(killStreak < lowerThresh)              // 0 - 4, normal gray
       glColor(lowerColor, textAlpha);    
-   else if(killStreak < upperThresh)         // 5 - 9, interpolated
-   {
-      static Color c;
-      c.interp(F32(killStreak - lowerThresh + 1)/F32(upperThresh - lowerThresh + 1), *upperColor, *lowerColor);
-      glColor(c, textAlpha);    
-   }
-   else                                      // >= 10, full-on red
+   else                                      // Above that, red  
       glColor(upperColor, textAlpha);       
-
-   //drawStringf(0, 50, 15, "%d", killStreak);
 
 
    S32 len = drawStringc(0, 30 + textSize, textSize, renderName.c_str());
