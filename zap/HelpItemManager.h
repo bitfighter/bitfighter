@@ -232,8 +232,6 @@ public:
    static const S32 PacedTimerPeriod        = 15 * 1000; // Rate at which paced items are displayed
    static const S32 FloodControlPeriod      = 10 * 1000; // Generally, don't show items more frequently than this, in ms
    static const S32 HelpItemDisplayPeriod   =  7 * 1000; // Time for a help item to be visible
-   static const S32 HelpItemDisplayFadeTime = 200;       // Time for item to fade out
-
 
    HelpItemManager(GameSettings *settings);           // Constructor
    virtual ~HelpItemManager();
@@ -254,6 +252,8 @@ public:
    void clearAlreadySeenList();
    void saveAlreadySeenList();
    void resetInGameHelpMessages();
+   S32 getRollupPeriod(S32 index) const;     // Public so tests can get access
+
 
    // For loading/saving vals to the INI
    const string getAlreadySeenString() const;

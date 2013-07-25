@@ -164,8 +164,10 @@ void HelpItemManager::idle(U32 timeDelta, const ClientGame *game)
    // Expire displayed items
    for(S32 i = 0; i < mHelpTimer.size(); i++)
    {
+      if(!mHelpTimer[i].update(timeDelta))
+         continue;
 
-      if(mHelpTimer[i].getCurrent() == 0 && mHelpFading[i])
+      if(mHelpFading[i])   // Rollup period over... kill item
       {
          mHelpItems.erase(i);
          mHelpFading.erase(i);
@@ -173,24 +175,30 @@ void HelpItemManager::idle(U32 timeDelta, const ClientGame *game)
 
          buildItemsToHighlightList();
          i--;
-         continue;
       }
 
-      if(mHelpTimer[i].update(timeDelta) && !mHelpFading[i])
+      else                 // Display period over... enter rollup mode
       {
          mHelpFading[i] = true;
+
          // Reset the timer to a new value based on the number of lines in the item -- this
          // will keep the rollup effect going at a constant speed 
-         mHelpTimer[i].reset((getLinesInHelpItem(i) * (FontSize + FontGap) + InterMsgGap) * 5);    // 5 ms per pixel height
+         mHelpTimer[i].reset(getRollupPeriod(i));
       }
    }
 }
 
 
-S32 HelpItemManager::getLinesInHelpItem(S32 item) const
+S32 HelpItemManager::getRollupPeriod(S32 index) const
+{
+   return (getLinesInHelpItem(index) * (FontSize + FontGap) + InterMsgGap) * 5;    // 5 ms per pixel height
+}
+
+
+S32 HelpItemManager::getLinesInHelpItem(S32 index) const
 {
    S32 lines = 0;
-   while(helpItems[mHelpItems[item]].helpMessages[lines])
+   while(helpItems[mHelpItems[index]].helpMessages[lines])
       lines++;
 
    return lines;

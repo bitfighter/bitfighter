@@ -346,39 +346,42 @@ static void checkQueues(const UI::HelpItemManager &himgr, S32 highSize, S32 lowS
 
 
 // Full cycle is PacedTimerPeriod; that is, every PacedTimerPeriod ms, a new item is displayed
-// Within that cycle, and item is displayed for HelpItemDisplayPeriod, then faded for HelpItemDisplayFadeTime,
+// Within that cycle, and item is displayed for HelpItemDisplayPeriod, then faded for getRollupPeriod,
 // at which point it is expired and removed from the screen.  Then we must wait until the remainder of 
 // PacedTimerPeriod has elapsed before a new item will be shown.  The following methods try to makes sense of that.
-static void idleUntilItemExpiredMinusOne(UI::HelpItemManager &himgr, const ClientGame &game)
+static S32 idleUntilItemExpiredMinusOne(UI::HelpItemManager &himgr, const ClientGame &game)
 {
-   himgr.idle(himgr.HelpItemDisplayPeriod,       &game);        // Can't combine these periods... needs to be two different idle cycles
-   himgr.idle(himgr.HelpItemDisplayFadeTime - 1, &game);        // First cycle to enter fade mode, second to exhaust fade timer
+   S32 lastRollupPeriod = himgr.getRollupPeriod(0);
+   himgr.idle(himgr.HelpItemDisplayPeriod,  &game);   // Can't combine these periods... needs to be two different idle cycles
+   himgr.idle(lastRollupPeriod - 1, &game);   // First cycle to enter fade mode, second to exhaust fade timer
+   return lastRollupPeriod;
 }
 
 
-// Idles HelpItemDisplayPeriod + HelpItemDisplayFadeTime, long enough for a freshly displayed item to disappear
-static void idleUntilItemExpired(UI::HelpItemManager &himgr, const ClientGame &game)
+// Idles HelpItemDisplayPeriod + getRollupPeriod(), long enough for a freshly displayed item to disappear
+static S32 idleUntilItemExpired(UI::HelpItemManager &himgr, const ClientGame &game)
 {
-   idleUntilItemExpiredMinusOne(himgr, game);
+   S32 lastRollupPeriod = idleUntilItemExpiredMinusOne(himgr, game);
    himgr.idle(1, &game);
+   return lastRollupPeriod;
 }
 
-static void idleRemainderOfFullCycleMinusOne(UI::HelpItemManager &himgr, const ClientGame &game)
+static void idleRemainderOfFullCycleMinusOne(UI::HelpItemManager &himgr, const ClientGame &game, S32 lastRollupPeriod)
 {
-   himgr.idle(himgr.PacedTimerPeriod - himgr.HelpItemDisplayPeriod - himgr.HelpItemDisplayFadeTime - 1, &game);
+   himgr.idle(himgr.PacedTimerPeriod - himgr.HelpItemDisplayPeriod - lastRollupPeriod - 1, &game);
 }
 
-// Assumes we've idled HelpItemDisplayPeriod + HelpItemDisplayFadeTime, idles remainder of PacedTimerPeriod
-static void idleRemainderOfFullCycle(UI::HelpItemManager &himgr, const ClientGame &game)
+// Assumes we've idled HelpItemDisplayPeriod + getRollupPeriod(), idles remainder of PacedTimerPeriod
+static void idleRemainderOfFullCycle(UI::HelpItemManager &himgr, const ClientGame &game, S32 lastRollupPeriod)
 {
-   idleRemainderOfFullCycleMinusOne(himgr, game);
+   idleRemainderOfFullCycleMinusOne(himgr, game, lastRollupPeriod);
    himgr.idle(1, &game);
 }
 
 static void idleFullCycleMinusOne(UI::HelpItemManager &himgr, const ClientGame &game)
 {
-   idleUntilItemExpired(himgr, game);
-   idleRemainderOfFullCycleMinusOne(himgr, game);
+   S32 lastRollupPeriod = idleUntilItemExpired(himgr, game);
+   idleRemainderOfFullCycleMinusOne(himgr, game, lastRollupPeriod);
 }
 
 // Idles full PacedTimerPeriod, broken into strategic parts
@@ -404,6 +407,11 @@ TEST_F(BfTest, HelpItemManagerTests)
 
    HelpItem helpItem = NexusSpottedItem;
 
+   // Since different items take different times to rollup when their display period is over, and since we can only
+   // determine that time period when items are being displayed, we will grab that value when we can and store it for
+   // future use.  We'll always store it in lastRollupPeriod.
+   S32 lastRollupPeriod;
+
    /////
    // Here we verify that displayed help items are corretly stored in the INI
 
@@ -427,7 +435,7 @@ TEST_F(BfTest, HelpItemManagerTests)
    himgr.addInlineHelpItem(TeleporterSpotedItem);
    ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);    // Still in flood control period, new item not added
 
-   himgr.idle(himgr.FloodControlPeriod - himgr.HelpItemDisplayPeriod - himgr.HelpItemDisplayFadeTime, &game);
+   himgr.idle(himgr.FloodControlPeriod, &game);
    himgr.addInlineHelpItem(helpItem);                       // We've already added this item, so it should not be displayed again
    ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);    // Verify help item is not displayed again
    himgr.addInlineHelpItem(TeleporterSpotedItem);           // Now, new item should be added (we tried adding this above, and it didn't go)
@@ -464,7 +472,9 @@ TEST_F(BfTest, HelpItemManagerTests)
    // Verify that our high priority item has been moved to the active display list
    checkQueues(himgr, 0, 1, 1, highPriorityItem);
 
-   himgr.idle(himgr.HelpItemDisplayPeriod, &game); himgr.idle(himgr.HelpItemDisplayFadeTime - 1, &game);  // (can't combine)
+   S32 rollupPeriod;
+   rollupPeriod = himgr.getRollupPeriod(0);
+   himgr.idle(himgr.HelpItemDisplayPeriod, &game); himgr.idle(rollupPeriod - 1, &game);  // (can't combine)
 
    // Verify nothing has changed
    checkQueues(himgr, 0, 1, 1, highPriorityItem);
@@ -472,23 +482,24 @@ TEST_F(BfTest, HelpItemManagerTests)
    himgr.idle(1, &game);    // Now, help item should no longer be displayed
    checkQueues(himgr, 0, 1, 0);
 
-   himgr.idle(himgr.PacedTimerPeriod - himgr.HelpItemDisplayPeriod - himgr.HelpItemDisplayFadeTime - 1, &game); // Idle to cusp of pacedTimer expiring
+   himgr.idle(himgr.PacedTimerPeriod - himgr.HelpItemDisplayPeriod - rollupPeriod - 1, &game); // Idle to cusp of pacedTimer expiring
    // Verify nothing has changed
    checkQueues(himgr, 0, 1, 0);
    himgr.idle(1, &game);    // pacedTimer has expired, a new pacedItem will be added to the display list
 
    // Second message should now be moved from the lowPriorityQueue to the active display list, and will be visible
+   lastRollupPeriod = himgr.getRollupPeriod(0);
    checkQueues(himgr, 0, 0, 1, lowPriorityItem);
 
    // Idle until list is clear
    idleUntilItemExpired(himgr, game);
    checkQueues(himgr, 0, 0, 0);       // No items displayed
-   idleRemainderOfFullCycle(himgr, game);
+   idleRemainderOfFullCycle(himgr, game, lastRollupPeriod);
 
    // Try adding our gameStartPriorityItem now... since there is nothing in the high priority queue, it should add fine
    himgr.addInlineHelpItem(gameStartPriorityItem);
    checkQueues(himgr, 1, 0, 0);
-   idleFullCycle(himgr, game);
+   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, &game);
    checkQueues(himgr, 0, 0, 1);       // No items displayed
    idleFullCycle(himgr, game);
    checkQueues(himgr, 0, 0, 0);       // No items displayed
@@ -499,7 +510,7 @@ TEST_F(BfTest, HelpItemManagerTests)
    checkQueues(himgr, 0, 1, 0);
    himgr.addInlineHelpItem(gameStartPriorityItem);
    checkQueues(himgr, 1, 1, 0);
-   idleFullCycle(himgr, game);
+   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, &game);
    checkQueues(himgr, 0, 1, 1, gameStartPriorityItem);       // gameStartPriority item displayed
    idleFullCycle(himgr, game);
    checkQueues(himgr, 0, 0, 1);
@@ -521,11 +532,15 @@ TEST_F(BfTest, HelpItemManagerTests)
 
    idleUntilItemExpiredMinusOne(himgr, game);
    checkQueues(himgr, 1, 0, 1, ControlsKBItem);       // One item queued, one displayed
+
+   lastRollupPeriod = himgr.getRollupPeriod(0);
    himgr.idle(1, &game);
-   idleRemainderOfFullCycleMinusOne(himgr, game);
+   idleRemainderOfFullCycleMinusOne(himgr, game, lastRollupPeriod);
    checkQueues(himgr, 1, 0, 0);
    himgr.idle(1, &game);
    checkQueues(himgr, 0, 0, 1, ControlsModulesItem);  // No items queued, one displayed
+
+   lastRollupPeriod = himgr.getRollupPeriod(0);
 
    idleUntilItemExpired(himgr, game);                 // Clear the decks
    checkQueues(himgr, 0, 0, 0);
@@ -539,8 +554,8 @@ TEST_F(BfTest, HelpItemManagerTests)
    himgr.addInlineHelpItem(CmdrsMapItem);
    checkQueues(himgr, 0, 2, 0);  // Both items should be queued, but none displayed
 
-   idleRemainderOfFullCycle(himgr, game);             // *Cycle is completed, ready for a new item
-   checkQueues(himgr, 0, 1, 1, AddBotsItem);          // No bots are in game ==> AddBotsItem should be displayed
+   idleRemainderOfFullCycle(himgr, game, lastRollupPeriod); // Cycle is completed, ready for a new item
+   checkQueues(himgr, 0, 1, 1, AddBotsItem);                // No bots are in game ==> AddBotsItem should be displayed
 
    // Reset
    idleFullCycle(himgr, game);
@@ -569,15 +584,15 @@ TEST_F(BfTest, HelpItemManagerTests)
 
    idleUntilItemExpired(himgr, game);
    checkQueues(himgr, 0, 1, 0);              // Bot help still not showing
-   idleFullCycle(himgr, game);
+   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, &game);
    checkQueues(himgr, 0, 1, 0);              // Bot help still not showing
-   idleFullCycle(himgr, game);
+   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, &game);
    checkQueues(himgr, 0, 1, 0);              // And again!
 
    game.removeFromClientList(clientInfo);    // Remove the bot
    ASSERT_EQ(game.getBotCount(), 0);         // Confirm no bots in the game
 
-   idleFullCycleMinusOne(himgr, game);       // Not exact, just a big chunk of time
+   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, &game);      // Not exact, just a big chunk of time
    checkQueues(himgr, 0, 0, 1, AddBotsItem); // With no bot, AddBotsItem will be displayed, though not necessarily immediately
 }
 
