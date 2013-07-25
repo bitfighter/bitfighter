@@ -146,7 +146,6 @@ static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char
    METHOD(CLASS, addWall,           ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, addLevelLine,      ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS, findGlobalObjects, ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
-   METHOD(CLASS, getGridSize,       ARRAYDEF({{ END }}), 1 )                             \
    METHOD(CLASS, getPlayerCount,    ARRAYDEF({{ END }}), 1 )                             \
    METHOD(CLASS, setGameTime,       ARRAYDEF({{ NUM, END }}), 1 )                        \
    METHOD(CLASS, pointCanSeePoint,  ARRAYDEF({{ PT, PT, END }}), 1 )                     \
@@ -156,7 +155,6 @@ static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char
    METHOD(CLASS, announce,          ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS, subscribe,         ARRAYDEF({{ EVENT, END }}), 1 )                      \
    METHOD(CLASS, unsubscribe,       ARRAYDEF({{ EVENT, END }}), 1 )                      \
-   METHOD(CLASS, getMachineTime,    ARRAYDEF({{ END }}), 1 )                             \
    METHOD(CLASS, getGameInfo,       ARRAYDEF({{ END }}), 1 )                             \
 
 GENERATE_LUA_METHODS_TABLE(LuaLevelGenerator, LUA_METHODS);
@@ -255,25 +253,6 @@ S32 LuaLevelGenerator::lua_pointCanSeePoint(lua_State *L)
 
 
 /**
- * @luafunc    LuaLevelGenerator::logprint(string message)
- * @brief      Writes a line of text to the console and the system log.
- * @descr      Function can be called without Levelgen: prefix;  For example:
- * @code
- *    logprint("Hello world!")
- * @endcode
- * @param      message Message to write.
- */
-S32 LuaLevelGenerator::lua_logprint(lua_State *L)
-{
-   static const char *methodName = "LuaLevelGenerator:logprint()";
-   checkArgCount(L, 1, methodName);
-
-   logprintf(LogConsumer::LuaLevelGenerator, "Levelgen: %s", getCheckedString(L, 1, methodName));
-   return 0;
-}
-
-
-/**
   *   @luafunc table LuaLevelGenerator::findGlobalObjects(table results, ObjType objType, ...)
   *   @brief   Finds all items of the specified type anywhere on the level.
   *   @descr   Can specify multiple types.  The \e table argument is optional, but levelgens that call this function frequently will perform
@@ -302,31 +281,6 @@ S32 LuaLevelGenerator::lua_findGlobalObjects(lua_State *L)
    checkArgList(L, functionArgs, luaClassName, "findGlobalObjects");
 
    return LuaScriptRunner::findObjects(L, mGame->getGameObjDatabase(), NULL, NULL);
-}
-
-
-/**
- * @luafunc num LuaLevelGenerator::getGridSize()
- * @brief   Returns current gridSize setting.
- * @descr   Note that non-default gridSizes are rare in modern level design.
- * @return  Current gridSize.
- */
-S32 LuaLevelGenerator::lua_getGridSize(lua_State *L)
-{
-   return returnFloat(L, mGridSize);
-}
-
-
-/**
- * @luafunc num LuaLevelGenerator::getMachineTime()
- * @brief   Returns current machine time as an integer.
- * @descr   Machine time is given in milliseconds.  This may be inaccurate because machine time is
- *          usually stored as a long instead of an integer
- * @return  Current machine time in milliseconds
- */
-S32 LuaLevelGenerator::lua_getMachineTime(lua_State *L)
-{
-   return returnInt(L, Platform::getRealMilliseconds());
 }
 
 
