@@ -54,7 +54,7 @@ end
 -- Add backwards compatibility for some API changes
 --
 --
--- Deprecation started in 019.  No warnings for now..
+-- Deprecation started in 019
 --
 function levelgen:findObjectById(id)
     return bf:findObjectById(id)
@@ -67,6 +67,11 @@ end
 function GameInfo()
     printDeprecationWarning("GameInfo()", "bf:getGameInfo()")
     return bf:getGameInfo()
+end
+
+function TeamInfo(index)
+    printDeprecationWarning("TeamInfo(index)", "bf:getGameInfo():getTeam(index)")
+    return bf:getGameInfo():getTeam(index)
 end
 
 --
