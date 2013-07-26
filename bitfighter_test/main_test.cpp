@@ -282,6 +282,44 @@ TEST_F(BfTest, ShipTests)
 }
 
 
+// Create a new ClientGame with one dummy team -- delete with deleteGame()
+ClientGame *newClientGame()
+{
+   Address addr;
+   GameSettings *settings = new GameSettings();
+
+   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
+   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
+   FontManager::initialize(settings, false);   
+   ClientGame *game = new ClientGame(addr, settings);
+
+   game->addTeam(new Team());     // Teams will be deleted by ClientGame destructor
+
+   return game;
+}
+
+
+// Create a new ServerGame with one dummy team -- delete with deleteGame()
+ServerGame *newServerGame()
+{
+   Address addr;
+   GameSettings *settings = new GameSettings();
+   { ServerGame serverGame(addr, settings, false, false); }  // <== ??
+
+   ServerGame *game = new ServerGame(addr, settings, false, false);
+   game->addTeam(new Team());    // Team will be cleaned up when game is deleted
+
+   return game;
+}
+
+
+void deleteGame(Game *game)
+{
+   delete game->getSettings();
+   delete game;
+}
+
+
 TEST_F(BfTest, MoveTests)
 {
    Move move1, move2;
@@ -349,61 +387,56 @@ static void checkQueues(const UI::HelpItemManager &himgr, S32 highSize, S32 lowS
 // Within that cycle, and item is displayed for HelpItemDisplayPeriod, then faded for getRollupPeriod,
 // at which point it is expired and removed from the screen.  Then we must wait until the remainder of 
 // PacedTimerPeriod has elapsed before a new item will be shown.  The following methods try to makes sense of that.
-static S32 idleUntilItemExpiredMinusOne(UI::HelpItemManager &himgr, const ClientGame &game)
+static S32 idleUntilItemExpiredMinusOne(UI::HelpItemManager &himgr, const ClientGame *game)
 {
    S32 lastRollupPeriod = himgr.getRollupPeriod(0);
-   himgr.idle(himgr.HelpItemDisplayPeriod,  &game);   // Can't combine these periods... needs to be two different idle cycles
-   himgr.idle(lastRollupPeriod - 1, &game);   // First cycle to enter fade mode, second to exhaust fade timer
+   himgr.idle(himgr.HelpItemDisplayPeriod,  game);   // Can't combine these periods... needs to be two different idle cycles
+   himgr.idle(lastRollupPeriod - 1, game);   // First cycle to enter fade mode, second to exhaust fade timer
    return lastRollupPeriod;
 }
 
 
 // Idles HelpItemDisplayPeriod + getRollupPeriod(), long enough for a freshly displayed item to disappear
-static S32 idleUntilItemExpired(UI::HelpItemManager &himgr, const ClientGame &game)
+static S32 idleUntilItemExpired(UI::HelpItemManager &himgr, const ClientGame *game)
 {
    S32 lastRollupPeriod = idleUntilItemExpiredMinusOne(himgr, game);
-   himgr.idle(1, &game);
+   himgr.idle(1, game);
    return lastRollupPeriod;
 }
 
-static void idleRemainderOfFullCycleMinusOne(UI::HelpItemManager &himgr, const ClientGame &game, S32 lastRollupPeriod)
+static void idleRemainderOfFullCycleMinusOne(UI::HelpItemManager &himgr, const ClientGame *game, S32 lastRollupPeriod)
 {
-   himgr.idle(himgr.PacedTimerPeriod - himgr.HelpItemDisplayPeriod - lastRollupPeriod - 1, &game);
+   himgr.idle(himgr.PacedTimerPeriod - himgr.HelpItemDisplayPeriod - lastRollupPeriod - 1, game);
 }
 
 // Assumes we've idled HelpItemDisplayPeriod + getRollupPeriod(), idles remainder of PacedTimerPeriod
-static void idleRemainderOfFullCycle(UI::HelpItemManager &himgr, const ClientGame &game, S32 lastRollupPeriod)
+static void idleRemainderOfFullCycle(UI::HelpItemManager &himgr, const ClientGame *game, S32 lastRollupPeriod)
 {
    idleRemainderOfFullCycleMinusOne(himgr, game, lastRollupPeriod);
-   himgr.idle(1, &game);
+   himgr.idle(1, game);
 }
 
-static void idleFullCycleMinusOne(UI::HelpItemManager &himgr, const ClientGame &game)
+static void idleFullCycleMinusOne(UI::HelpItemManager &himgr, const ClientGame *game)
 {
    S32 lastRollupPeriod = idleUntilItemExpired(himgr, game);
    idleRemainderOfFullCycleMinusOne(himgr, game, lastRollupPeriod);
 }
 
 // Idles full PacedTimerPeriod, broken into strategic parts
-static void idleFullCycle(UI::HelpItemManager &himgr, const ClientGame &game)
+static void idleFullCycle(UI::HelpItemManager &himgr, const ClientGame *game)
 {
    idleFullCycleMinusOne(himgr, game);
-   himgr.idle(1, &game);
+   himgr.idle(1, game);
 }
 
 
 TEST_F(BfTest, HelpItemManagerTests)
 {
-   Address addr;
-   GameSettings settings;
+   ClientGame *game = newClientGame();
 
-   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
-   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
-   FontManager::initialize(&settings, false);   
-   ClientGame game(addr, &settings);
    // Need to add a gameType because gameType is where the game timer is managed
-   GameType gameType;
-   gameType.addToGame(&game, game.getGameObjDatabase());
+   GameType *gameType = new GameType();    // Will be deleted in game destructor
+   gameType->addToGame(game, game->getGameObjDatabase());
 
    HelpItem helpItem = NexusSpottedItem;
 
@@ -415,19 +448,19 @@ TEST_F(BfTest, HelpItemManagerTests)
    /////
    // Here we verify that displayed help items are corretly stored in the INI
 
-   UI::HelpItemManager himgr(&settings);
+   UI::HelpItemManager himgr(game->getSettings());
    ASSERT_EQ(himgr.getAlreadySeenString()[helpItem], 'N');  // Item not marked as seen originally
 
    himgr.addInlineHelpItem(helpItem);                       // Add up a help item -- should not get added during initial delay period
    ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);    // Verify no help item is being displayed
 
-   himgr.idle(himgr.InitialDelayPeriod, &game);             // Idle out of initial delay period
+   himgr.idle(himgr.InitialDelayPeriod, game);              // Idle out of initial delay period
 
    himgr.addInlineHelpItem(helpItem);                       // Requeue helpItem -- initial delay period has expired, so should get added
    ASSERT_EQ(himgr.getHelpItemDisplayList()->get(0), helpItem);
 
    ASSERT_EQ(himgr.getAlreadySeenString()[helpItem], 'Y');  // Item marked as seen
-   ASSERT_EQ(settings.getIniSettings()->helpItemSeenList, himgr.getAlreadySeenString());  // Verify changes made it to the INI
+   ASSERT_EQ(game->getSettings()->getIniSettings()->helpItemSeenList, himgr.getAlreadySeenString());  // Verify changes made it to the INI
 
    idleUntilItemExpired(himgr, game);
 
@@ -435,7 +468,7 @@ TEST_F(BfTest, HelpItemManagerTests)
    himgr.addInlineHelpItem(TeleporterSpotedItem);
    ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);    // Still in flood control period, new item not added
 
-   himgr.idle(himgr.FloodControlPeriod, &game);
+   himgr.idle(himgr.FloodControlPeriod, game);
    himgr.addInlineHelpItem(helpItem);                       // We've already added this item, so it should not be displayed again
    ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);    // Verify help item is not displayed again
    himgr.addInlineHelpItem(TeleporterSpotedItem);           // Now, new item should be added (we tried adding this above, and it didn't go)
@@ -444,7 +477,7 @@ TEST_F(BfTest, HelpItemManagerTests)
    /////
    // Test that high priority queued items are displayed before lower priority items
 
-   himgr = UI::HelpItemManager(&settings);      // Get a new, clean manager
+   himgr = UI::HelpItemManager(game->getSettings());        // Get a new, clean manager
    
    HelpItem highPriorityItem = ControlsKBItem;
    HelpItem lowPriorityItem  = CmdrsMapItem;
@@ -464,28 +497,28 @@ TEST_F(BfTest, HelpItemManagerTests)
    himgr.addInlineHelpItem(gameStartPriorityItem);
    checkQueues(himgr, 1, 1, 0);
 
-   himgr.idle(himgr.InitialDelayPeriod - 1, &game);
+   himgr.idle(himgr.InitialDelayPeriod - 1, game);
    ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 0);
 
-   himgr.idle(1, &game);    // InitialDelayPeriod has expired
+   himgr.idle(1, game);    // InitialDelayPeriod has expired
 
    // Verify that our high priority item has been moved to the active display list
    checkQueues(himgr, 0, 1, 1, highPriorityItem);
 
    S32 rollupPeriod;
    rollupPeriod = himgr.getRollupPeriod(0);
-   himgr.idle(himgr.HelpItemDisplayPeriod, &game); himgr.idle(rollupPeriod - 1, &game);  // (can't combine)
+   himgr.idle(himgr.HelpItemDisplayPeriod, game); himgr.idle(rollupPeriod - 1, game);  // (can't combine)
 
    // Verify nothing has changed
    checkQueues(himgr, 0, 1, 1, highPriorityItem);
    
-   himgr.idle(1, &game);    // Now, help item should no longer be displayed
+   himgr.idle(1, game);    // Now, help item should no longer be displayed
    checkQueues(himgr, 0, 1, 0);
 
-   himgr.idle(himgr.PacedTimerPeriod - himgr.HelpItemDisplayPeriod - rollupPeriod - 1, &game); // Idle to cusp of pacedTimer expiring
+   himgr.idle(himgr.PacedTimerPeriod - himgr.HelpItemDisplayPeriod - rollupPeriod - 1, game); // Idle to cusp of pacedTimer expiring
    // Verify nothing has changed
    checkQueues(himgr, 0, 1, 0);
-   himgr.idle(1, &game);    // pacedTimer has expired, a new pacedItem will be added to the display list
+   himgr.idle(1, game);    // pacedTimer has expired, a new pacedItem will be added to the display list
 
    // Second message should now be moved from the lowPriorityQueue to the active display list, and will be visible
    lastRollupPeriod = himgr.getRollupPeriod(0);
@@ -499,7 +532,7 @@ TEST_F(BfTest, HelpItemManagerTests)
    // Try adding our gameStartPriorityItem now... since there is nothing in the high priority queue, it should add fine
    himgr.addInlineHelpItem(gameStartPriorityItem);
    checkQueues(himgr, 1, 0, 0);
-   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, &game);
+   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, game);
    checkQueues(himgr, 0, 0, 1);       // No items displayed
    idleFullCycle(himgr, game);
    checkQueues(himgr, 0, 0, 0);       // No items displayed
@@ -510,7 +543,7 @@ TEST_F(BfTest, HelpItemManagerTests)
    checkQueues(himgr, 0, 1, 0);
    himgr.addInlineHelpItem(gameStartPriorityItem);
    checkQueues(himgr, 1, 1, 0);
-   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, &game);
+   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, game);
    checkQueues(himgr, 0, 1, 1, gameStartPriorityItem);       // gameStartPriority item displayed
    idleFullCycle(himgr, game);
    checkQueues(himgr, 0, 0, 1);
@@ -519,7 +552,7 @@ TEST_F(BfTest, HelpItemManagerTests)
 
    // Verify bug with two high priority paced items preventing the first from being displayed
    // Start fresh with a new HelpItemManager
-   himgr = UI::HelpItemManager(&settings);
+   himgr = UI::HelpItemManager(game->getSettings());
    // Verify they have HighPaced priority, then queue them up
    ASSERT_EQ(himgr.getItemPriority(ControlsKBItem),      UI::HelpItemManager::PacedHigh);
    ASSERT_EQ(himgr.getItemPriority(ControlsModulesItem), UI::HelpItemManager::PacedHigh);
@@ -527,17 +560,17 @@ TEST_F(BfTest, HelpItemManagerTests)
    himgr.addInlineHelpItem(ControlsModulesItem);
    checkQueues(himgr, 2, 0, 0);                       // Two high priority items queued, none displayed
 
-   himgr.idle(himgr.InitialDelayPeriod, &game);       // Wait past the intial delay period; first item will be displayed
+   himgr.idle(himgr.InitialDelayPeriod, game);        // Wait past the intial delay period; first item will be displayed
    checkQueues(himgr, 1, 0, 1, ControlsKBItem);       // One item queued, one displayed
 
    idleUntilItemExpiredMinusOne(himgr, game);
    checkQueues(himgr, 1, 0, 1, ControlsKBItem);       // One item queued, one displayed
 
    lastRollupPeriod = himgr.getRollupPeriod(0);
-   himgr.idle(1, &game);
+   himgr.idle(1, game);
    idleRemainderOfFullCycleMinusOne(himgr, game, lastRollupPeriod);
    checkQueues(himgr, 1, 0, 0);
-   himgr.idle(1, &game);
+   himgr.idle(1, game);
    checkQueues(himgr, 0, 0, 1, ControlsModulesItem);  // No items queued, one displayed
 
    lastRollupPeriod = himgr.getRollupPeriod(0);
@@ -570,68 +603,82 @@ TEST_F(BfTest, HelpItemManagerTests)
    himgr.addInlineHelpItem(CmdrsMapItem);
    checkQueues(himgr, 0, 2, 0);     // Both items should be queued, none yet displayed
 
-   // Add a bot -- requires us to first add a team
-   Team *team = new Team();         // Teams will be deleted by ClientGame destructor
-   game.addTeam(team);
    // Create a ClientInfo for a robot -- it will be deleted by ClientGame destructor
-   RemoteClientInfo *clientInfo = new RemoteClientInfo(&game, "Robot", true, 0, 0, 0, true, ClientInfo::RoleNone, false, false);
+   RemoteClientInfo *clientInfo = new RemoteClientInfo(game, "Robot", true, 0, 0, 0, true, ClientInfo::RoleNone, false, false);
    clientInfo->setTeamIndex(0);        // Assign it to our team
-   game.addToClientList(clientInfo);   // Add it to the game
-   ASSERT_EQ(game.getBotCount(), 1);   // Confirm there is a bot in the game
+   game->addToClientList(clientInfo);  // Add it to the game
+   ASSERT_EQ(game->getBotCount(), 1);  // Confirm there is a bot in the game
 
-   himgr.idle(1, &game);
+   himgr.idle(1, game);
    checkQueues(himgr, 0, 1, 1, CmdrsMapItem); // With bot in game, AddBotsItem should be bypassed, should see CmdrsMapItem
 
    idleUntilItemExpired(himgr, game);
    checkQueues(himgr, 0, 1, 0);              // Bot help still not showing
-   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, &game);
+   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, game);
    checkQueues(himgr, 0, 1, 0);              // Bot help still not showing
-   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, &game);
+   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, game);
    checkQueues(himgr, 0, 1, 0);              // And again!
 
-   game.removeFromClientList(clientInfo);    // Remove the bot
-   ASSERT_EQ(game.getBotCount(), 0);         // Confirm no bots in the game
+   game->removeFromClientList(clientInfo);   // Remove the bot
+   ASSERT_EQ(game->getBotCount(), 0);        // Confirm no bots in the game
 
-   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, &game);      // Not exact, just a big chunk of time
+   himgr.idle(UI::HelpItemManager::PacedTimerPeriod, game);      // Not exact, just a big chunk of time
    checkQueues(himgr, 0, 0, 1, AddBotsItem); // With no bot, AddBotsItem will be displayed, though not necessarily immediately
+
+   deleteGame(game);
 }
 
 
 TEST_F(BfTest, ClientGameTests) 
 {
-   Address addr;
-   GameSettings settings;
-
-   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
-   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
-   FontManager::initialize(&settings, false);   
-   ClientGame game(addr, &settings);
+   ClientGame *game = newClientGame();
 
    // TODO: Add some tests
+
+   deleteGame(game);
+}
+
+
+// Tests related to kill streaks
+TEST_F(BfTest, KillStreakTests)
+{
+   ServerGame *game = newServerGame();
+   GameType gt;
+   gt.addToGame(game, game->getGameObjDatabase());
+
+   FullClientInfo ci(game, NULL, "Noman", false);
+
+   game->addClient(&ci);
+   
+   game->setGameTime(1.0f / 60.0f);    // 1 second, in minutes
+
+   ASSERT_EQ(0, game->getClientInfo(0)->getKillStreak());
+   game->getClientInfo(0)->addKill();
+   ASSERT_EQ(1, game->getClientInfo(0)->getKillStreak());
+   game->idle(1);    // Game ends
+
+   deleteGame(game);
 }
 
 
 TEST_F(BfTest, LittleStory) 
 {
-   Address addr;
-   GameSettings settings;
-   { ServerGame serverGame(addr, &settings, false, false); }
-   ServerGame serverGame(addr, &settings, false, false);
+   ServerGame *serverGame = newServerGame();
 
-   GameType gt;
-   gt.addToGame(&serverGame, serverGame.getGameObjDatabase());
+   GameType *gt = new GameType();    // Will be deleted in serverGame destructor
+   gt->addToGame(serverGame, serverGame->getGameObjDatabase());
 
-   ASSERT_TRUE(serverGame.isSuspended());    // ServerGame starts suspended
-   serverGame.unsuspendGame(false);          
+   ASSERT_TRUE(serverGame->isSuspended());    // ServerGame starts suspended
+   serverGame->unsuspendGame(false);          
 
    // When adding objects to the game, use new and a pointer -- the game will 
    // delete defunct objects, so a reference will not work.
    SafePtr<Ship> ship = new Ship;
-   ship->addToGame(&serverGame, serverGame.getGameObjDatabase());
+   ship->addToGame(serverGame, serverGame->getGameObjDatabase());
 
    ASSERT_EQ(ship->getPos(), Point(0,0));     // By default, the ship starts at 0,0
    ship->setMove(Move(0,0));
-   serverGame.idle(10);
+   serverGame->idle(10);
    ASSERT_EQ(ship->getPos(), Point(0,0));     // When processing move of 0,0, we expect the ship to stay put
 
    ship->setMove(Move(1,0));                  // Length 1 = max speed; moves stay active until replaced
@@ -640,22 +687,22 @@ TEST_F(BfTest, LittleStory)
    for(S32 i = 0; i < 20; i++)
    {
       Point prevPos = ship->getPos();
-      serverGame.idle(10);                   // when i == 16 this locks up... why?
+      serverGame->idle(10);                   // when i == 16 this locks up... why?
       ASSERT_NE(ship->getPos(), prevPos);    
    }
 
    // Note -- ship is over near (71, 0)
 
 
-   // Uh oh, here comes a turret!
-   Turret t(2, Point(71, -100), Point(0, 1));    // Turret is below the ship, pointing up
-   t.addToGame(&serverGame, serverGame.getGameObjDatabase());
+   // Uh oh, here comes a turret!  (will be deleted in serverGame destructor)
+   Turret *t = new Turret(2, Point(71, -100), Point(0, 1));    // Turret is below the ship, pointing up
+   t->addToGame(serverGame, serverGame->getGameObjDatabase());
 
    bool shipDeleted = false;
    for(S32 i = 0; i < 100; i++)
    {
       ship->setMove(Move(0,0));
-      serverGame.idle(100);
+      serverGame->idle(100);
       if(!ship)
       {
          shipDeleted = true;
@@ -663,6 +710,8 @@ TEST_F(BfTest, LittleStory)
       }
    }
    ASSERT_TRUE(shipDeleted);     // Ship was killed, and object was cleaned up
+
+   deleteGame(serverGame);
 }
 
 
