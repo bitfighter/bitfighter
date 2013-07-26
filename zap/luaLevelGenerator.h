@@ -69,8 +69,6 @@ public:
    S32 lua_subscribe(lua_State *L); 
    S32 lua_unsubscribe(lua_State *L); 
 
-   virtual S32 lua_addWall(lua_State *L);           // Add a wall
-   virtual S32 lua_addLevelLine(lua_State *L);      // Add raw level line
    virtual S32 lua_setGameTime(lua_State *L);       // Set the time for this level
    virtual S32 lua_pointCanSeePoint(lua_State *L);  // Returns if a point has LOS to another point, given what's on the map so far
 

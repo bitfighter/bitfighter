@@ -114,22 +114,6 @@ void LuaLevelGenerator::killScript()
 }
 
 
-static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName)
-{
-   lua_rawgeti(L, tableIndex, key);    // Push Point onto stack
-   if(lua_isnil(L, -1))
-   {
-      lua_pop(L, 1);
-      return Point(0,0);
-   }
-
-   Point point = LuaBase::getCheckedVec(L, -1, methodName);
-   lua_pop(L, 1);    // Clear value from stack
-
-   return point;
-}
-
-
 /////
 // Lua interface
 /**
@@ -138,8 +122,6 @@ static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char
   */
 //               Fn name    Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, addWall,           ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, addLevelLine,      ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS, findGlobalObjects, ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    METHOD(CLASS, setGameTime,       ARRAYDEF({{ NUM, END }}), 1 )                        \
    METHOD(CLASS, pointCanSeePoint,  ARRAYDEF({{ PT, PT, END }}), 1 )                     \
@@ -158,58 +140,6 @@ GENERATE_LUA_FUNARGS_TABLE(LuaLevelGenerator, LUA_METHODS);
 
 const char *LuaLevelGenerator::luaClassName = "LuaLevelGenerator";
 REGISTER_LUA_CLASS(LuaLevelGenerator);
-
-
-// Deprecated 
-// TODO: Needs documentation
-S32 LuaLevelGenerator::lua_addWall(lua_State *L)
-{
-   static const char *methodName = "LevelGeneratorEditor:addWall()";
-
-   string line = "BarrierMaker";
-
-   try
-   {
-      F32 width = getCheckedFloat(L, 1, methodName);      // Width is first arg
-      line += " " + ftos(width, 1);
-
-      // Third arg is a table of coordinate values in "editor space" (i.e. these will be multiplied by gridsize before being used)
-      S32 points = (S32)lua_objlen(L, 3);    // Get the number of points in our table of points
-
-      for(S32 i = 1; i <= points; i++)       // Remember, Lua tables start with index 1
-      {
-         Point p = getPointFromTable(L, 3, i, methodName);
-         line = line + " " + ftos(p.x, 2) + " " + ftos(p.y, 2);
-      }
-   }
-
-   catch(LuaException &e)
-   {
-      logError(e.what());
-      LuaBase::clearStack(L);
-   }
-
-   mGame->parseLevelLine(line.c_str(), mGridDatabase, "Levelgen script: " + mScriptName);
-
-   return 0;
-}
-
-
-/**
- * @luafunc    LuaLevelGenerator::addLevelLine(string levelLine)
- * @brief      Adds an object to the editor by passing a line from a level file.
- * @deprecated This method is deprecated and will be removed in the future.  As an alternative, construct a BfObject directly and 
- *             add it to the game using the addItem() method.
- * @param      levelLine string containing the line of levelcode.
- */
-S32 LuaLevelGenerator::lua_addLevelLine(lua_State *L)
-{
-   checkArgList(L, functionArgs, luaClassName, "addLevelLine");
-
-   mGame->parseLevelLine(getString(L, 1), mGridDatabase, "Levelgen script: " + mScriptName);
-
-   return 0;
-}
 
 
 /**
