@@ -2033,7 +2033,7 @@ void GameUserInterface::renderScoreboard()
          S32 vertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;
 
          bool isDelayed = playerScores[j]->isSpawnDelayed();
-         const Color *nameColor = isDelayed ? &Colors::idlePlayerScoreboardColor : &Colors::standardPlayerScoreboardColor;
+         const Color *nameColor = isDelayed ? &Colors::idlePlayerNameColor : &Colors::standardPlayerNameColor;
 
 
          glColor(nameColor);
@@ -2090,19 +2090,13 @@ void GameUserInterface::renderScoreboard()
    // TODO: Can make nearly all of this static -- only need to swap out the symbol for the player count, which will be the first one...
    static Vector<SymbolShapePtr> symbols;
    symbols.clear();
-   symbols.push_back(SymbolShapePtr(new SymbolText(legend, LegendSize, ScoreboardContext, &Colors::standardPlayerScoreboardColor)));
-   symbols.push_back(SymbolShapePtr(new SymbolText(" Idle Player", LegendSize, ScoreboardContext, &Colors::idlePlayerScoreboardColor)));
-   symbols.push_back(SymbolShapePtr(new SymbolText(" | ", LegendSize, ScoreboardContext, &Colors::standardPlayerScoreboardColor)));
+   symbols.push_back(SymbolShapePtr(new SymbolText(legend, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
+   symbols.push_back(SymbolShapePtr(new SymbolText(" Idle Player", LegendSize, ScoreboardContext, &Colors::idlePlayerNameColor)));
+   symbols.push_back(SymbolShapePtr(new SymbolText(" | ", LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
    symbols.push_back(SymbolShapePtr(new SymbolText("Player on Kill Streak", LegendSize, ScoreboardContext, &Colors::streakPlayerNameColor)));
 
    UI::SymbolString symbolString(symbols, LegendSize, ScoreboardContext);
    symbolString.render(gScreenInfo.getGameCanvasWidth() / 2, legendPos, AlignmentCenter);
-
-
-   
-   // Not quite the function's intended purpose, but it does the job
-   //drawCenteredStringPair(legendPos, legendSize, Colors::standardPlayerScoreboardColor, 
-   //                       Colors::idlePlayerScoreboardColor, legend.c_str(), "Idle Player");
 
    FontManager::popFontContext();
 }

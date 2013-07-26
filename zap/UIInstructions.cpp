@@ -584,9 +584,9 @@ static S32 renderScoreboardMarks(S32 y, S32 textSize)
 
       // Draw sample nickname
       if(i == 3)  
-         glColor(Colors::idlePlayerScoreboardColor);
+         glColor(Colors::idlePlayerNameColor);
       else
-         glColor(Colors::standardPlayerScoreboardColor);
+         glColor(Colors::standardPlayerNameColor);
 
       drawString(x, y, textSize, scoreboardMarks[i][1]);
 
@@ -629,7 +629,7 @@ static S32 renderScoreboardMarks(S32 y, S32 textSize)
       }
 
       // Draw name
-      glColor(Colors::standardPlayerScoreboardColor);
+      glColor(Colors::standardPlayerNameColor);
       drawString(x, y, textSize, name.c_str());
 
       // Draw description

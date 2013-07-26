@@ -590,7 +590,7 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
    const U32 lowerThresh = 5;
    const U32 upperThresh = 10;
 
-   const Color *lowerColor = &Colors::idlePlayerScoreboardColor;
+   const Color *lowerColor = &Colors::idlePlayerNameColor;
    const Color *upperColor = &Colors::streakPlayerNameColor;
 
    // Set name color based on killStreak length

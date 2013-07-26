@@ -83,8 +83,8 @@ namespace Colors
 
    // Some special colors
    const Color menuHelpColor(green);
-   const Color idlePlayerScoreboardColor(gray50);
-   const Color standardPlayerScoreboardColor(white);
+   const Color idlePlayerNameColor(gray50);
+   const Color standardPlayerNameColor(white);
    const Color streakPlayerNameColor(red80);
 
    const Color overlayMenuSelectedItemColor   = Color(1.0f, 0.1f, 0.1f);
