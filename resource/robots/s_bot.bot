@@ -74,7 +74,7 @@ function shieldSelf()
             --logprint(angleDiff)
 
             local bulletFromTeam = false
-            if (game:isTeamGame() == true) and (bullet:getTeamIndx() == bot:getTeamIndx()) then -- If bullet is from team
+            if (game:isTeamGame() == true) and (bullet:getTeamIndex() == bot:getTeamIndex()) then -- If bullet is from team
                 bulletFromTeam = true                               -- bullet from team is true
             end
 
@@ -112,7 +112,7 @@ function fireAtObject(obj, weapon)
 
     if(classId == ObjType.Turret or classId == ObjType.ForceFieldProjector) then
         -- Ignore all same-team engineered objects...  even in single-team games
-        if obj:getTeamIndx() == bot:getTeamIndx() then
+        if obj:getTeamIndex() == bot:getTeamIndex() then
             return false                                 -- Cancel fireAtObject function
         end
 
@@ -123,8 +123,8 @@ function fireAtObject(obj, weapon)
     
     
     -- No shooting various team related objects
-    if (obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame()) or  -- Same team
-        obj:getTeamIndx() == Team.Neutral then                            -- Neutral team
+    if (obj:getTeamIndex() == bot:getTeamIndex() and game:isTeamGame()) or  -- Same team
+        obj:getTeamIndex() == Team.Neutral then                            -- Neutral team
         if (classId == ObjType.Ship    or   classId == ObjType.Robot   or    -- Turrets and FFs handled above
             classId == ObjType.Core    or   classId == ObjType.SpyBug) then
             return false
@@ -277,7 +277,7 @@ function getObjective(objType, team, onTeam)
     local currentIndex = 1
 
     for index, item in ipairs(items) do         -- Iterate through all found items
-        local itemTeamIndex = item:getTeamIndx()
+        local itemTeamIndex = item:getTeamIndex()
 
         if (objType == ObjType.Flag) and (gameType == GameType.Nexus) then
             if not item:isOnShip() then
@@ -287,8 +287,8 @@ function getObjective(objType, team, onTeam)
         elseif (objType == ObjType.Flag) and 
                ((gameType == GameType.HTF) or (gameType == GameType.Retrieve)) and 
                item:isInCaptureZone() then
-                --logprint(item:getCaptureZone():getTeamIndx());
-            if item:getCaptureZone():getTeamIndx() ~= bot:getTeamIndx() then
+                --logprint(item:getCaptureZone():getTeamIndex());
+            if item:getCaptureZone():getTeamIndex() ~= bot:getTeamIndex() then
                 itemsOnMyTeam[currentIndex] = item
                 currentIndex = currentIndex + 1
             end
@@ -365,27 +365,27 @@ function doObjective(closestEnemy)
     elseif(gameType == GameType.Rabbit) then
         --Grab a flag, or go after the flag.            
         if not bot:hasFlag() then
-            local otherFlag = getObjective(ObjType.Flag, bot:getTeamIndx(), true)       -- Find flags on our team
+            local otherFlag = getObjective(ObjType.Flag, bot:getTeamIndex(), true)       -- Find flags on our team
             gotoPosition(otherFlag:getLoc())
         end
     elseif(gameType == GameType.HTF or gameType == GameType.Retrieve) then
         -- Grab the flag and put it into goal zones
         -- Robot keeps trying to pick up the flags that is already in the goalZones
         if bot:hasFlag() then                                                           -- If the bot has the flag
-            local otherFlag = getObjective(ObjType.GoalZone, bot:getTeamIndx(), true)   -- Find an avalible GoalZone on our team
+            local otherFlag = getObjective(ObjType.GoalZone, bot:getTeamIndex(), true)   -- Find an avalible GoalZone on our team
             if otherFlag ~= nil then                                                    -- If there is an avalible GoalZone
                 gotoPosition(otherFlag:getLoc())                                        -- Go to it
             end
         else                                                                            -- If the bot doesn't have the flag
-            local otherFlag = getObjective(ObjType.Flag, bot:getTeamIndx(), true)       -- Find flags on our team
+            local otherFlag = getObjective(ObjType.Flag, bot:getTeamIndex(), true)       -- Find flags on our team
             if otherFlag ~= nil then                                                    -- If there is a flag avalible
                 gotoPosition(otherFlag:getLoc())                                        -- Go to it
             end
         end
     elseif(gameType == GameType.CTF) then
         --defend the flag
-        local myFlag    = getObjective(ObjType.Flag, bot:getTeamIndx(), true)    -- Find flags on our team
-        local otherFlag = getObjective(ObjType.Flag, bot:getTeamIndx(), false)   -- Find flags not on our team
+        local myFlag    = getObjective(ObjType.Flag, bot:getTeamIndex(), true)    -- Find flags on our team
+        local otherFlag = getObjective(ObjType.Flag, bot:getTeamIndex(), false)   -- Find flags not on our team
 
         if(defense < .5) then                                                    -- If bot doesn't defend allot (default is 0)
             if bot:hasFlag() then                                                -- If the bot has a flag
@@ -434,7 +434,7 @@ function doObjective(closestEnemy)
         --grab soccer and put into enemy goal
         -- How do we know if we are holding soccer ? (not supported when cannot pickup soccer (016)
         if bot:getMountedItems(ObjType.SoccerBallItem)[1] ~= nil then
-            local otherFlag = getObjective(ObjType.GoalZone, bot:getTeamIndx(), false)   -- Find GoalZones not on our team
+            local otherFlag = getObjective(ObjType.GoalZone, bot:getTeamIndex(), false)   -- Find GoalZones not on our team
             if otherFlag ~= nil then 
                 gotoPosition(otherFlag:getLoc()) 
             end           
@@ -447,7 +447,7 @@ function doObjective(closestEnemy)
     elseif(gameType == GameType.ZC) then
         -- Grab flag, then go after zones that is not ours.
         if not bot:hasFlag() then
-            local otherFlag = getObjective(ObjType.Flag, bot:getTeamIndx(), true)           -- Find flags on our team
+            local otherFlag = getObjective(ObjType.Flag, bot:getTeamIndex(), true)           -- Find flags on our team
             if otherFlag ~= nil then
                 if otherFlag:isOnShip() then
                     gotoAndOrbitPosition(otherFlag:getLoc())
@@ -456,14 +456,14 @@ function doObjective(closestEnemy)
                 end
             end
         else
-            local otherFlag = getObjective(ObjType.GoalZone, bot:getTeamIndx(), false)      -- Find GoalZones on our team
+            local otherFlag = getObjective(ObjType.GoalZone, bot:getTeamIndex(), false)      -- Find GoalZones on our team
             if otherFlag then
                 gotoPosition(otherFlag:getLoc())
             end
         end
 
     elseif(gameType == GameType.Core) then
-        local obj = getObjective(ObjType.Core, bot:getTeamIndx(), false)                    -- Find enemy Core
+        local obj = getObjective(ObjType.Core, bot:getTeamIndex(), false)                    -- Find enemy Core
         if obj ~= nil then
             gotoAndOrbitPosition(obj:getLoc())
         end

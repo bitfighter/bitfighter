@@ -45,9 +45,9 @@ end
 --
 -- Convenience function: find closest item in a list of items
 -- Will return nil if items has 0 elements
--- If teamIndx is specified, will only include items on team
+-- If teamIndex is specified, will only include items on team
 --
-function findClosest(items, teamIndx)
+function findClosest(items, teamIndex)
 
    local closest = nil
    local minDist = 999999999
@@ -55,8 +55,8 @@ function findClosest(items, teamIndx)
 
    for indx, item in ipairs(items) do              -- Iterate over our list
 
---logprint(tostring(teamIndx)..","..item:getTeamIndx())
-      if teamIndx == nil or item:getTeamIndx() == teamIndx then
+--logprint(tostring(teamIndex)..","..item:getTeamIndex())
+      if teamIndex == nil or item:getTeamIndex() == teamIndex then
 
          -- Use distSquared because it is less computationally expensive
          -- and works great for comparing distances 

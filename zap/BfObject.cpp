@@ -1291,6 +1291,7 @@ void BfObject::writeThisTeam(BitStream *stream)
    METHOD(CLASS, getLoc,         ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setLoc,         ARRAYDEF({{ PT,        END }               }), 1 ) \
    METHOD(CLASS, getTeamIndx,    ARRAYDEF({{            END }               }), 1 ) \
+   METHOD(CLASS, getTeamIndex,   ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setTeam,        ARRAYDEF({{ TEAM_INDX, END }               }), 1 ) \
    METHOD(CLASS, removeFromGame, ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setGeom,        ARRAYDEF({{ PT,        END }, { GEOM, END }}), 2 ) \
@@ -1348,18 +1349,34 @@ S32 BfObject::lua_getLoc(lua_State *L)
 }
 
 
+// TODO Remove after 019
 /**
  * @luafunc  index BfObject::getTeamIndx()
- * @brief    Gets the index of the object's team.
- * @descr    Many BfObjects (such as \link TestItem TestItems\endlink) are never part of any particular team.  For these objects, 
- *             this method will return NeutralTeamIndx.
- * @note     Remember that in Lua, indices start with 1!
+ * @brief    See BfObject::getTeamIndex()
+ * @deprecated This method is deprecated and will be removed
+ * @descr    Use BfObject::getTeamIndex() instead.  This method will be removed in the future
  * @return   \e int - Team index of the object.
 */
 S32 BfObject::lua_getTeamIndx(lua_State *L)
-{ 
+{
+   logprintf(LogConsumer::LuaBotMessage, "'getTeamIndx()' is deprecated and will be removed in the future.  Use 'getTeamIndex()', with an 'e', instead");
+
    return returnInt  (L, mTeam + 1); // + 1 because Lua indices start at 1
-}  
+}
+
+
+/**
+ * @luafunc  index BfObject::getTeamIndex()
+ * @brief    Gets the index of the object's team.
+ * @descr    Many BfObjects (such as \link TestItem TestItems\endlink) are never part of any particular team.  For these objects, 
+ *             this method will return Team.Neutral.
+ * @note     Remember that in Lua, indices start with 1!
+ * @return   \e int - Team index of the object.
+*/
+S32 BfObject::lua_getTeamIndex(lua_State *L)
+{
+   return returnInt  (L, mTeam + 1); // + 1 because Lua indices start at 1
+}
 
 
 /**
