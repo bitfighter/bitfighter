@@ -114,22 +114,6 @@ void LuaLevelGenerator::killScript()
 }
 
 
-static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName)
-{
-   lua_rawgeti(L, tableIndex, key);    // Push Point onto stack
-   if(lua_isnil(L, -1))
-   {
-      lua_pop(L, 1);
-      return Point(0,0);
-   }
-
-   Point point = LuaBase::getCheckedVec(L, -1, methodName);
-   lua_pop(L, 1);    // Clear value from stack
-
-   return point;
-}
-
-
 /////
 // Lua interface
 /**
@@ -138,8 +122,6 @@ static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char
   */
 //               Fn name    Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, addWall,           ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, addLevelLine,      ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS, findGlobalObjects, ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    METHOD(CLASS, setGameTime,       ARRAYDEF({{ NUM, END }}), 1 )                        \
    METHOD(CLASS, pointCanSeePoint,  ARRAYDEF({{ PT, PT, END }}), 1 )                     \
