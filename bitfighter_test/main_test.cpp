@@ -643,12 +643,14 @@ TEST_F(BfTest, ClientGameTests)
 TEST_F(BfTest, KillStreakTests)
 {
    ServerGame *game = newServerGame();
-   GameType gt;
-   gt.addToGame(game, game->getGameObjDatabase());
+   GameType *gt = new GameType();      // Cleaned up in game destructor
+   gt->addToGame(game, game->getGameObjDatabase());
 
-   FullClientInfo ci(game, NULL, "Noman", false);
+   GameConnection conn;
+   FullClientInfo *ci = new FullClientInfo(game, &conn, "Noman", false);      // Cleaned up somewhere
+   conn.setClientInfo(ci);
 
-   game->addClient(&ci);
+   game->addClient(ci);
    
    game->setGameTime(1.0f / 60.0f);    // 1 second, in minutes
 
