@@ -565,9 +565,6 @@ U16 Robot::findClosestZone(const Point &point)
 
 //                Fn name               Param profiles                  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS,  getCPUTime,           ARRAYDEF({{ END }}), 1 )                             \
-   METHOD(CLASS,  getTime,              ARRAYDEF({{ END }}), 1 )                             \
-                                                                                             \
    METHOD(CLASS,  setAngle,             ARRAYDEF({{ PT, END }, { NUM, END }}), 2 )           \
    METHOD(CLASS,  getAnglePt,           ARRAYDEF({{ PT, END }              }), 1 )           \
    METHOD(CLASS,  hasLosPt,             ARRAYDEF({{ PT, END }              }), 1 )           \
@@ -615,19 +612,6 @@ REGISTER_LUA_SUBCLASS(Robot, Ship);
 
 S32 Robot::lua_subscribe(lua_State *L)   { return doSubscribe(L, RobotContext);   }
 S32 Robot::lua_unsubscribe(lua_State *L) { return doUnsubscribe(L); }
-
-
-// Return CPU time... use for timing things
-S32 Robot::lua_getCPUTime(lua_State *L)
-{
-   return returnInt(L, getGame()->getCurrentTime());
-}
-
-
-S32 Robot::lua_getTime(lua_State *L)
-{
-   return returnInt(L, getCurrentMove().time);
-}
 
 
 // Turn to angle a (in radians, or toward a point)
