@@ -225,6 +225,9 @@ public:
 
    S32 lua_getGameInfo(lua_State *L);
    S32 lua_getPlayerCount(lua_State *L);
+
+   S32 lua_subscribe(lua_State *L);
+   S32 lua_unsubscribe(lua_State *L);
 };
 
 

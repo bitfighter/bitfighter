@@ -50,7 +50,7 @@ function onTick()
 
       targetType = ObjType.GoalZone             -- Set new destination
       haveFlag = true
-      team = bot:getTeamIndx()
+      team = bot:getTeamIndex()
 
    elseif(haveFlag and not bot:hasFlag()) then  -- Just lost flag
 

@@ -698,7 +698,7 @@ S32 LuaBase::returnShip(lua_State *L, Ship *ship)
 }
 
 
-// If we have a ship, return it, otherwise return nil
+// If we have a team, return it, otherwise return nil
 S32 LuaBase::returnTeam(lua_State *L, Team *team)
 {
    if(team)
@@ -708,6 +708,17 @@ S32 LuaBase::returnTeam(lua_State *L, Team *team)
    }
 
    return returnNil(L);
+}
+
+
+S32 LuaBase::returnTeamIndex(lua_State *L, S32 teamIndex)
+{
+   // Neutral and Hostile teams retain their c++ index
+   if(teamIndex <= TEAM_NEUTRAL)
+      return returnInt(L, teamIndex);
+
+   // All normal teams become 1-based for Lua
+   return returnInt(L, teamIndex + 1);
 }
 
 

@@ -225,7 +225,7 @@ void LoadoutTracker::setModulePrimary(ShipModule module, bool isActive)
 }
 
 
-void LoadoutTracker::setModuleIndxPrimary(U32 moduleIndex, bool isActive)
+void LoadoutTracker::setModuleIndexPrimary(U32 moduleIndex, bool isActive)
 {
    mModulePrimaryActive[mModules[moduleIndex]] = isActive;
 }
@@ -237,7 +237,7 @@ void LoadoutTracker::setModuleSecondary(ShipModule module, bool isActive)
 }
 
 
-void LoadoutTracker::setModuleIndxSecondary(U32 moduleIndex, bool isActive)
+void LoadoutTracker::setModuleIndexSecondary(U32 moduleIndex, bool isActive)
 {
    mModuleSecondaryActive[mModules[moduleIndex]] = isActive;
 }
@@ -297,7 +297,7 @@ WeaponType LoadoutTracker::getActiveWeapon() const
 }
 
 
-U32 LoadoutTracker::getActiveWeaponIndx() const
+U32 LoadoutTracker::getActiveWeaponIndex() const
 {
    return mActiveWeapon;
 }

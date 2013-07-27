@@ -453,8 +453,9 @@ public:
    virtual S32 lua_getLoc(lua_State *L);
    virtual S32 lua_setLoc(lua_State *L);
 
-   virtual S32 lua_getTeamIndx(lua_State *L);   
-   virtual S32 lua_setTeam(lua_State *L);   
+   virtual S32 lua_getTeamIndx(lua_State *L);
+   virtual S32 lua_getTeamIndex(lua_State *L);
+   virtual S32 lua_setTeam(lua_State *L);
 
    virtual S32 lua_removeFromGame(lua_State *L);
 

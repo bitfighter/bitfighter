@@ -54,6 +54,7 @@ LuaPlayerInfo::~LuaPlayerInfo()
    METHOD(CLASS, getName,             ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getShip,             ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getTeamIndx,         ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getTeamIndex,        ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getRating,               ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getScore,                ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, isRobot,                 ARRAYDEF({{ END }}), 1 ) \
@@ -84,6 +85,13 @@ S32 LuaPlayerInfo::lua_getShip(lua_State *L)
 
 
 S32 LuaPlayerInfo::lua_getTeamIndx(lua_State *L)
+{
+   TNLAssert(false, "Unimplemented method!");
+   return 0;
+}
+
+
+S32 LuaPlayerInfo::lua_getTeamIndex(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
    return 0;
@@ -149,8 +157,15 @@ S32 PlayerInfo::lua_getScriptName(lua_State *L)
 
 S32 PlayerInfo::lua_getTeamIndx(lua_State *L)
 {
-   // Lua indexes are 1-based
-   return returnInt(L, mClientInfo->getTeamIndex() + 1);
+   logprintf(LogConsumer::LuaBotMessage, "'getTeamIndx()' is deprecated and will be removed in the future.  Use 'getTeamIndex()', with an 'e', instead");
+
+   return lua_getTeamIndex(L);
+}
+
+
+S32 PlayerInfo::lua_getTeamIndex(lua_State *L)
+{
+   return returnTeamIndex(L, mClientInfo->getTeamIndex());
 }
 
 
@@ -214,7 +229,15 @@ S32 RobotPlayerInfo::lua_getScriptName(lua_State *L)
 
 S32 RobotPlayerInfo::lua_getTeamIndx(lua_State *L)
 {
-   return returnInt(L, mRobot->getTeam() + 1);
+   logprintf(LogConsumer::LuaBotMessage, "'getTeamIndx()' is deprecated and will be removed in the future.  Use 'getTeamIndex()', with an 'e', instead");
+
+   return lua_getTeamIndex(L);
+}
+
+
+S32 RobotPlayerInfo::lua_getTeamIndex(lua_State *L)
+{
+   return returnTeamIndex(L, mRobot->getTeam());
 }
 
 

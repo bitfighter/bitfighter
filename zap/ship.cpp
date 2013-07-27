@@ -449,13 +449,13 @@ Point Ship::getAimVector() const
 
 void Ship::selectNextWeapon()
 {
-   setActiveWeapon(mLoadout.getActiveWeaponIndx() + 1);
+   setActiveWeapon(mLoadout.getActiveWeaponIndex() + 1);
 }
 
 
 void Ship::selectPrevWeapon()
 {
-   setActiveWeapon(mLoadout.getActiveWeaponIndx() - 1);
+   setActiveWeapon(mLoadout.getActiveWeaponIndex() - 1);
 }
 
 
@@ -854,16 +854,16 @@ void Ship::processModules()
    {
       // If you have passive module, it's always active, no restrictions, but is off for energy consumption purposes
       if(ModuleInfo::getModuleInfo(mLoadout.getModule(i))->getPrimaryUseType() == ModulePrimaryUsePassive)
-         mLoadout.setModuleIndxPrimary(i, true);         // needs to be true to allow stats counting
+         mLoadout.setModuleIndexPrimary(i, true);         // needs to be true to allow stats counting
 
       // Set loaded module states to 'on' if detected as so, unless modules are disabled or we need to cooldown
       if(!mCooldownNeeded && (!getClientInfo() || (getClientInfo() && !getClientInfo()->isShipSystemsDisabled())))
       {
          if(mCurrentMove.modulePrimary[i])
-            mLoadout.setModuleIndxPrimary(i, true);
+            mLoadout.setModuleIndexPrimary(i, true);
 
          if(mCurrentMove.moduleSecondary[i])
-            mLoadout.setModuleIndxSecondary(i, true);
+            mLoadout.setModuleIndexSecondary(i, true);
       }
    }
 
@@ -1279,7 +1279,7 @@ void Ship::writeControlState(BitStream *stream)
    else
       stream->writeRangedU32(U32(mFireTimer), 0, MaxFireDelay + negativeFireDelay);
 
-   stream->writeRangedU32(mLoadout.getActiveWeaponIndx(), 0, ShipWeaponCount);
+   stream->writeRangedU32(mLoadout.getActiveWeaponIndex(), 0, ShipWeaponCount);
 }
 
 

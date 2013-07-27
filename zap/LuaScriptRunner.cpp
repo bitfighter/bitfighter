@@ -962,9 +962,10 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
    // Create a table at level run time that has team, indexed by name?
    // Team.blue, Team.red, Team.neutral, etc.
-   // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
-   add_enum_to_lua(L, "Team", "Neutral", true, (TEAM_NEUTRAL + 1),
-                              "Hostile", true, (TEAM_HOSTILE + 1),
+   // A few other misc constants -- in Lua, we reference the teams as first team == 1 (1-indexed)
+   // but we'll sent neutral (-1) and hostile (-2) as they are from c++
+   add_enum_to_lua(L, "Team", "Neutral", true, (TEAM_NEUTRAL),
+                              "Hostile", true, (TEAM_HOSTILE),
                               (char*)NULL);
 }
 
@@ -1089,6 +1090,8 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
       METHOD(CLASS, addItem,         ARRAYDEF({{ BFOBJ, END }}), 1 ) \
       METHOD(CLASS, getGameInfo,     ARRAYDEF({{ END }}), 1 )        \
       METHOD(CLASS, getPlayerCount,  ARRAYDEF({{ END }}), 1 )        \
+      METHOD(CLASS, subscribe,       ARRAYDEF({{ EVENT, END }}), 1 ) \
+      METHOD(CLASS, unsubscribe,     ARRAYDEF({{ EVENT, END }}), 1 ) \
 
 
 // Put both method types together so we can build our functionArgs table
@@ -1364,14 +1367,14 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
  */
 S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
 {
+   TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
+   TNLAssert(dynamic_cast<ServerGame*>(mLuaGame), "Not ServerGame??");
+
    if(!mLuaGame->isServer())
    {
       logprintf(LogConsumer::LuaBotMessage, "'getGameInfo' can only be called in-game");
       returnNil(L);
    }
-
-   TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
-   TNLAssert(dynamic_cast<ServerGame*>(mLuaGame), "Not ServerGame??");
 
    return returnGameInfo(L, static_cast<ServerGame*>(mLuaGame));
 }
@@ -1387,6 +1390,40 @@ S32 LuaScriptRunner::lua_getPlayerCount(lua_State *L)
    TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
 
    return returnInt(L, mLuaGame ? mLuaGame->getPlayerCount() : 1);
+}
+
+
+/**
+ * @luafunc LuaScriptRunner::subscribe(Event event)
+ * @brief Manually subscribe to the specified Event
+ */
+S32 LuaScriptRunner::lua_subscribe(lua_State *L)
+{
+   ScriptContext context = UnknownContext;
+
+   if(mScriptType == ScriptTypeRobot)
+      context = RobotContext;
+   else if (mScriptType == ScriptTypeLevelgen)
+      context = LevelgenContext;
+
+   // Subscribing is only allowed for bots and levelgens
+   else
+   {
+      logprintf(LogConsumer::LuaBotMessage, "Calling 'subscribe()' only allowed in-game.  Not subscribing..");
+      return 0;
+   }
+
+   return doSubscribe(L, context);
+}
+
+
+/**
+ * @luafunc LuaScriptRunner::unsubscribe(Event event)
+ * @brief Manually unsubscribe to the specified Event
+ */
+S32 LuaScriptRunner::lua_unsubscribe(lua_State *L)
+{
+   return doUnsubscribe(L);
 }
 
 

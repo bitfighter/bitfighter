@@ -38,11 +38,11 @@
 -- And two more
 --
 function subscribe(event)
-   levelgen:subscribe(event)
+   bf:subscribe(event)
 end   
 
 function unsubscribe(event)
-   levelgen:unsubscribe(event)
+   bf:unsubscribe(event)
 end  
 
 function globalMsg(message)

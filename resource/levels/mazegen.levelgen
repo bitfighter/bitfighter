@@ -5,7 +5,7 @@
 --    gridXSize, gridYSize --> Number of cells in the maze (defaults to 10, 10)
 --    ulCornerX, ulCornerY --> Coordinates of upper left corner of maze
 --                        (defaults to 0, 0)
---      cellsize --> Size of each maze cell (defaults to 1)
+--      cellsize --> Size of each maze cell (defaults to 255)
 --
 -------------------------------------------------------------------------------
 
@@ -104,9 +104,10 @@ function outputMaze()
    --  partially merged into longer lines to reduce vertices and therefore
    --  level transfer size.  .
 
-   local gridsize = levelgen:getGridSize() + 1 -- Add 1 to get a tiny bit of
-                                               -- overlap to make walls merge
-   local wallsize = gridsize * cellsize
+
+   -- Add 1 to get a tiny bit of
+   -- overlap to make walls merge
+   local wallsize = cellsize + 1
    local points
    local vwallstart = { }
    local vwallend = { }
@@ -142,7 +143,7 @@ function outputMaze()
             -- that portion will get covered by a vertical segment later.
             if(endx - xstart > cellsize) then
                local pts = { point.new(xstart, ceny - cellsize * 0.5), point.new(endx, ceny - cellsize * 0.5) }
-               levelgen:addWall(wallsize, false, pts)
+               addWall(wallsize, pts)
             end
 
             xstart = nil
@@ -160,7 +161,7 @@ function outputMaze()
             if(vwallstart[x]) then
                local pts = { vwallstart[x], vwallend[x] }
 
-               levelgen:addWall(wallsize, false, pts)
+               addWall(wallsize, pts)
                vwallstart[x] = nil
             end
          end
@@ -178,7 +179,7 @@ function outputMaze()
       if(vwallstart[x]) then
          local pts = { vwallstart[x], point.new(cenx - cellsize * 0.5, ceny + cellsize * 2) }
 
-         levelgen:addWall(wallsize, false, pts)
+         addWall(wallsize, pts)
          vwallstart[x] = nil
       end
    end
@@ -190,9 +191,17 @@ function outputMaze()
                        ulCornerY + 2 * gridYSize * cellsize + cellsize * 0.5),
                  point.new(ulCornerX + 2 * gridXSize * cellsize + cellsize * 0.5,
                        ulCornerY) }
-   levelgen:addWall(wallsize, false, pts)
+   addWall(wallsize, pts)
 end
 
+
+function addWall(size, pts)
+  local wall = WallItem.new()
+  wall:setWidth(size)
+  wall:setGeom(pts)
+
+  bf:addItem(wall)
+end
 
 
 -----------------------------------------------------------
@@ -216,7 +225,7 @@ gridXSize = tonumber(arg[1]) or 10
 gridYSize = tonumber(arg[2]) or 10
 ulCornerX = tonumber(arg[3]) or 0
 ulCornerY = tonumber(arg[4]) or 0
-cellsize = tonumber(arg[5]) or 1
+cellsize = tonumber(arg[5]) or 255
 
 
 cellStack = List:new()
