@@ -1383,9 +1383,21 @@ void renderLoadoutZoneIcon(const Point &center, S32 outerRadius)
 
 void renderGoalZoneIcon(const Point &center, S32 radius)
 {
-   drawCircle(center, radius / 2);
-   drawStar(center, 5, radius/2, radius/4); 
-   drawStar(center, 5, radius/4, radius/8); 
+   drawCircle(center, radius * 0.45f);
+   drawPolygon(center, 7, radius * 0.6, FloatPi);
+
+   glPushMatrix();
+      glTranslatef(center.x, center.y, 0);
+//      glScale(0.8);
+      static F32 flagPoints[] = { -8, 10,  -8,-10,  10, -3.333f,  -8, 3.333f, };
+      renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GL_LINE_STRIP);
+   glPopMatrix();
+
+
+   // circle circle star combo!
+//   drawCircle(center, radius / 2);
+//   drawStar(center, 5, radius/2, radius/4);
+//   drawStar(center, 5, radius/4, radius/8);
 
    // Find the unicode in Character Map or similar utility, 
    // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
