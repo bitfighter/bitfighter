@@ -1361,7 +1361,7 @@ S32 BfObject::lua_getTeamIndx(lua_State *L)
 {
    logprintf(LogConsumer::LuaBotMessage, "'getTeamIndx()' is deprecated and will be removed in the future.  Use 'getTeamIndex()', with an 'e', instead");
 
-   return returnInt  (L, mTeam + 1); // + 1 because Lua indices start at 1
+   return lua_getTeamIndex(L);
 }
 
 

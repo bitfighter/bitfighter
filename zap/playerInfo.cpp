@@ -159,8 +159,7 @@ S32 PlayerInfo::lua_getTeamIndx(lua_State *L)
 {
    logprintf(LogConsumer::LuaBotMessage, "'getTeamIndx()' is deprecated and will be removed in the future.  Use 'getTeamIndex()', with an 'e', instead");
 
-   // Lua indexes are 1-based
-   return returnInt(L, mClientInfo->getTeamIndex() + 1);
+   return lua_getTeamIndex(L);
 }
 
 
@@ -232,7 +231,7 @@ S32 RobotPlayerInfo::lua_getTeamIndx(lua_State *L)
 {
    logprintf(LogConsumer::LuaBotMessage, "'getTeamIndx()' is deprecated and will be removed in the future.  Use 'getTeamIndex()', with an 'e', instead");
 
-   return returnInt(L, mRobot->getTeam() + 1);
+   return lua_getTeamIndex(L);
 }
 
 
