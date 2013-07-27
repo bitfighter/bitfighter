@@ -13,7 +13,7 @@ namespace Zap
 {
 
 const string LevelDatabaseUploadThread::UploadRequest = "bitfighter.org/pleiades/levels/upload";
-const string LevelDatabaseUploadThread::UploadScreenshotFilename = "upload_screenshot.png";
+const string LevelDatabaseUploadThread::UploadScreenshotFilename = "upload_screenshot";
 
 LevelDatabaseUploadThread::LevelDatabaseUploadThread(ClientGame* game)
 {
@@ -38,14 +38,14 @@ U32 LevelDatabaseUploadThread::run()
       editor->setSaveMessage("Uploading New Level...", true);
    }
 
-   string fileData = readFile(joindir(mGame->getSettings()->getFolderManager()->screenshotDir, UploadScreenshotFilename));
+   string fileData = readFile(joindir(mGame->getSettings()->getFolderManager()->screenshotDir, UploadScreenshotFilename + string(".png")));
 
    HttpRequest req(UploadRequest);
    req.setMethod(HttpRequest::PostMethod);
    req.setData("data[User][username]",      mGame->getPlayerName());
    req.setData("data[User][user_password]", mGame->getPlayerPassword());
    req.setData("data[Level][content]", editor->getLevelText());
-   req.addFile("data[Level][screenshot]", UploadScreenshotFilename, (const U8*) fileData.c_str(), fileData.length());
+   req.addFile("data[Level][screenshot]", UploadScreenshotFilename + string(".png"), (const U8*) fileData.c_str(), fileData.length());
 
    string levelgenFilename;
    levelgenFilename = mGame->getScriptName();
@@ -67,9 +67,11 @@ U32 LevelDatabaseUploadThread::run()
    S32 responseCode = req.getResponseCode();
    if(responseCode != HttpRequest::OK && responseCode != HttpRequest::Found)
    {
+      editor->setSaveMessage("Error uploading level. See console for details", false);
+
       stringstream message;
-      message << "Error uploading level: " << responseCode;
-      editor->setSaveMessage(message.str(), false);
+      message << "Error " << responseCode << ": " << endl << req.getResponseBody() << endl;
+      logprintf(LogConsumer::LogError, "%s",  message.str().c_str());
 
       delete this;
       return 0;
