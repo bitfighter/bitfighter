@@ -129,8 +129,6 @@ void LuaLevelGenerator::killScript()
    METHOD(CLASS, teamMsg,           ARRAYDEF({{ STR, TEAM_INDX, END }}), 1 )             \
    METHOD(CLASS, privateMsg,        ARRAYDEF({{ STR, STR, END }}), 1 )                   \
    METHOD(CLASS, announce,          ARRAYDEF({{ STR, END }}), 1 )                        \
-   METHOD(CLASS, subscribe,         ARRAYDEF({{ EVENT, END }}), 1 )                      \
-   METHOD(CLASS, unsubscribe,       ARRAYDEF({{ EVENT, END }}), 1 )                      \
 
 GENERATE_LUA_METHODS_TABLE(LuaLevelGenerator, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(LuaLevelGenerator, LUA_METHODS);
@@ -284,26 +282,6 @@ S32 LuaLevelGenerator::lua_announce(lua_State *L)
    mGame->sendAnnouncementFromController(message);
 
    return 0;
-}
-
-
-/**
- * @luafunc LuaLevelGenerator::subscribe(Event event)
- * @brief Manually subscribe to the specified Event
- */
-S32 LuaLevelGenerator::lua_subscribe(lua_State *L)
-{
-   return doSubscribe(L, LevelgenContext);
-}
-
-
-/**
- * @luafunc LuaLevelGenerator::unsubscribe(Event event)
- * @brief Manually unsubscribe to the specified Event
- */
-S32 LuaLevelGenerator::lua_unsubscribe(lua_State *L)
-{
-   return doUnsubscribe(L);
 }
 
 

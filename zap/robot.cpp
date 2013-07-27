@@ -595,9 +595,6 @@ U16 Robot::findClosestZone(const Point &point)
    METHOD(CLASS,  engineerDeployObject, ARRAYDEF({{ INT,    END }}), 1 )                     \
    METHOD(CLASS,  dropItem,             ARRAYDEF({{         END }}), 1 )                     \
    METHOD(CLASS,  copyMoveFromObject,   ARRAYDEF({{ MOVOBJ, END }}), 1 )                     \
-                                                                                             \
-   METHOD(CLASS,  subscribe,            ARRAYDEF({{ EVENT, END }}), 1 )                      \
-   METHOD(CLASS,  unsubscribe,          ARRAYDEF({{ EVENT, END }}), 1 )                      \
 
 
 GENERATE_LUA_METHODS_TABLE(Robot, LUA_METHODS);
@@ -608,10 +605,6 @@ GENERATE_LUA_FUNARGS_TABLE(Robot, LUA_METHODS);
 
 const char *Robot::luaClassName = "Robot";
 REGISTER_LUA_SUBCLASS(Robot, Ship);
-
-
-S32 Robot::lua_subscribe(lua_State *L)   { return doSubscribe(L, RobotContext);   }
-S32 Robot::lua_unsubscribe(lua_State *L) { return doUnsubscribe(L); }
 
 
 // Turn to angle a (in radians, or toward a point)

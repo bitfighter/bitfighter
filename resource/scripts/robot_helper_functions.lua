@@ -78,11 +78,11 @@ end
 -- The following functions are provided so users don't need to run them with the bot: prefix
 --
 function subscribe(...)
-   return bot:subscribe(...)
+   return bf:subscribe(...)
 end   
 
 function unsubscribe(...)
-   return bot:unsubscribe(...)
+   return bf:unsubscribe(...)
 end  
 
 function globalMsg(...)

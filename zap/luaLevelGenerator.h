@@ -64,11 +64,6 @@ public:
    virtual const char *getErrorMessagePrefix();
 
    // Lua methods
-
-   // Handle events
-   S32 lua_subscribe(lua_State *L); 
-   S32 lua_unsubscribe(lua_State *L); 
-
    virtual S32 lua_setGameTime(lua_State *L);       // Set the time for this level
    virtual S32 lua_pointCanSeePoint(lua_State *L);  // Returns if a point has LOS to another point, given what's on the map so far
 
