@@ -5,7 +5,7 @@ LevelCredits Watusimoto
 GridSize 255
 MinPlayers 1
 MaxPlayers 6
-Script mazegen.levelgen 10 10 0 0 1
+Script mazegen.levelgen 10 10 0 0 255
 Team Blue 0 0 1
 Team Red 1 0 0
 GoalZone -1 19.2 19.8  19.5 19.8  19.7 19.7  19.8 19.5  19.8 19.2  19.9 19.1  19.9 19.9  19.1 19.9 
