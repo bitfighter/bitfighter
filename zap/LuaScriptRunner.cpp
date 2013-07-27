@@ -962,9 +962,10 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
    // Create a table at level run time that has team, indexed by name?
    // Team.blue, Team.red, Team.neutral, etc.
-   // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
-   add_enum_to_lua(L, "Team", "Neutral", true, (TEAM_NEUTRAL + 1),
-                              "Hostile", true, (TEAM_HOSTILE + 1),
+   // A few other misc constants -- in Lua, we reference the teams as first team == 1 (1-indexed)
+   // but we'll sent neutral (-1) and hostile (-2) as they are from c++
+   add_enum_to_lua(L, "Team", "Neutral", true, (TEAM_NEUTRAL),
+                              "Hostile", true, (TEAM_HOSTILE),
                               (char*)NULL);
 }
 

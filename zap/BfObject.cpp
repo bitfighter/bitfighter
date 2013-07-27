@@ -1375,7 +1375,7 @@ S32 BfObject::lua_getTeamIndx(lua_State *L)
 */
 S32 BfObject::lua_getTeamIndex(lua_State *L)
 {
-   return returnInt  (L, mTeam + 1); // + 1 because Lua indices start at 1
+   return returnTeamIndex(L, mTeam);
 }
 
 

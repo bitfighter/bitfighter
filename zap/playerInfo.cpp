@@ -166,8 +166,7 @@ S32 PlayerInfo::lua_getTeamIndx(lua_State *L)
 
 S32 PlayerInfo::lua_getTeamIndex(lua_State *L)
 {
-   // Lua indexes are 1-based
-   return returnInt(L, mClientInfo->getTeamIndex() + 1);
+   return returnTeamIndex(L, mClientInfo->getTeamIndex());
 }
 
 
@@ -239,7 +238,7 @@ S32 RobotPlayerInfo::lua_getTeamIndx(lua_State *L)
 
 S32 RobotPlayerInfo::lua_getTeamIndex(lua_State *L)
 {
-   return returnInt(L, mRobot->getTeam() + 1);
+   return returnTeamIndex(L, mRobot->getTeam());
 }
 
 
