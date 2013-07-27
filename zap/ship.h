@@ -65,7 +65,7 @@ private:
 
    F32 mLastProcessStateAngle;
 
-   void setActiveWeapon(U32 weaponIndex); // Setter for mActiveWeaponIndx
+   void setActiveWeapon(U32 weaponIndex);
 
    Teleporter *mEngineeredTeleporter;
 

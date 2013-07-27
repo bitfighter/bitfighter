@@ -75,8 +75,8 @@ public:
    void setModulePrimary(ShipModule module, bool isActive);
    void setModuleSecondary(ShipModule module, bool isActive);
 
-   void setModuleIndxPrimary(U32 moduleIndex, bool isActive);
-   void setModuleIndxSecondary(U32 moduleIndex, bool isActive);
+   void setModuleIndexPrimary(U32 moduleIndex, bool isActive);
+   void setModuleIndexSecondary(U32 moduleIndex, bool isActive);
 
    void deactivateAllModules();
 
@@ -87,7 +87,7 @@ public:
 
    WeaponType getWeapon(U32 weaponIndex) const;
    WeaponType getActiveWeapon() const;
-   U32 getActiveWeaponIndx() const;
+   U32 getActiveWeaponIndex() const;
 
    void resetLoadout();    // Reset this loadout to its factory settings
 
