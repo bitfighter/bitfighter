@@ -52,7 +52,6 @@ end
 -- Load some additional libraries
 include("geometry")   -- Load geometry functions into Geom namespace; call with Geom.function
 include("timer")
-include("list")
 
 -- Hookup our supercharged stacktrace util
 _stackTracer = include("stack_trace_plus").stacktrace
