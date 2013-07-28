@@ -20,6 +20,12 @@
 #ifndef FONTSTASH_H
 #define FONTSTASH_H
 
+#ifdef TNL_OS_MOBILE
+#  include "SDL_opengles.h"
+#else
+#  include "SDL_opengl.h"
+#endif
+
 struct sth_stash* sth_create(int cachew, int cacheh);
 
 int sth_add_font(struct sth_stash* stash, const char* path);

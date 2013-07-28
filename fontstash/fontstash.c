@@ -22,11 +22,7 @@
 #include <string.h>
 #include <math.h> /* @rlyeh: floorf() */
 
-#ifdef TNL_OS_MOBILE
-#  include "SDL_opengles.h"
-#else
-#  include "SDL_opengl.h"
-#endif
+#include "fontstash.h"
 
 /* @rlyeh: removed STB_TRUETYPE_IMPLENTATION. We link it externally */
 #include "stb_truetype.h"
