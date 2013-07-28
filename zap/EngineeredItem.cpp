@@ -1757,16 +1757,36 @@ Vector<Point> ForceField::computeGeom(const Point &start, const Point &end, F32 
 bool ForceField::findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal,  
                                    Point &end, DatabaseObject **collObj)
 {
-   F32 time;
+   F32 posTime;
+   F32 negTime;
    Point n;
 
    end.set(start.x + normal.x * MAX_FORCEFIELD_LENGTH, start.y + normal.y * MAX_FORCEFIELD_LENGTH);
 
-   *collObj = db->findObjectLOS((TestFunc)isWallType, ActualState, start, end, time, n);
+   Point norm(end.y - start.y, start.x - end.x);
+   norm.normalize(ForceFieldHalfWidth);
 
-   if(*collObj)
+   // Calculate two LOS's: one for each edge of the forcefield
+   DatabaseObject* posCollObj =
+      db->findObjectLOS((TestFunc)isWallType, ActualState, start + norm, end + norm, posTime, n);
+   DatabaseObject* negCollObj =
+      db->findObjectLOS((TestFunc)isWallType, ActualState, start - norm, end - norm, negTime, n);
+
+   if(negCollObj || posCollObj)
    {
-      end.set(start + (end - start) * time); 
+      // It's possible that two different objects will be collided with at the
+      // same "time". In this case, we'll arbitrarily prefer the object on the
+      // "positive" side of the forcefield
+      if(posTime <= negTime) {
+         *collObj = posCollObj;
+      }
+      else
+      {
+         *collObj = negCollObj;
+      }
+
+      end.set(start + (end - start) * MIN(posTime, negTime)); 
+
       return true;
    }
 

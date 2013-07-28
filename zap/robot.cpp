@@ -1140,7 +1140,9 @@ static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S
    // Make sure we can see it...
    Point n;
 
-   if(target->findObjectLOS(isFlagCollideableType, ActualState, aimPos, target->getPos(), t, n))
+   DatabaseObject* objectInTheWay = target->findObjectLOS(isFlagCollideableType, ActualState, aimPos, target->getPos(), t, n);
+
+   if(objectInTheWay && objectInTheWay != target)
       return false;
 
    // See if we're gonna clobber our own stuff...

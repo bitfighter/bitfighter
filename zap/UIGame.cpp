@@ -1215,6 +1215,8 @@ void GameUserInterface::onMissionKeyReleased()
 
 void GameUserInterface::onTextInput(char ascii)
 {
+   if(gConsole.isVisible())
+      gConsole.onKeyDown(ascii);
    mHelperManager.onTextInput(ascii);
 }
 
