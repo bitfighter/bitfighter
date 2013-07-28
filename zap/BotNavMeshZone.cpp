@@ -82,17 +82,21 @@ BotNavMeshZone::~BotNavMeshZone()
 }
 
 
+// Called when gServerGame is instantiated
 void BotNavMeshZone::createBotZoneDatabase()
 {
+   TNLAssert(botZoneDatabase == NULL, "Expected botZoneDatabase to be NULL here!");
    botZoneDatabase = new GridDatabase();
 }
 
 
+// Called when gServerGame is deleted
 void BotNavMeshZone::deleteBotZoneDatabase()
 {
    delete botZoneDatabase;
    botZoneDatabase = NULL;
 
+   mAllZones.clear();
 }
 
 

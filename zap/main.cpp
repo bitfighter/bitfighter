@@ -566,8 +566,6 @@ void shutdownBitfighter()
    LuaScriptRunner::shutdown();
    SoundSystem::shutdown();
 
-   BotNavMeshZone::deleteBotZoneDatabase();
-
    if(!settings->isDedicatedServer())
    {
 #ifndef ZAP_DEDICATED
@@ -1189,8 +1187,6 @@ int main(int argc, char **argv)
    SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->sfxDir, 
                      folderManager->musicDir, settings->getIniSettings()->getMusicVolLevel());  // Even dedicated server needs sound these days
    
-   BotNavMeshZone::createBotZoneDatabase();
-
    if(settings->isDedicatedServer())
       initHosting(settings, settings->getLevelList(), false, true);     // Figure out what levels we'll be playing with, and start hosting  
    else

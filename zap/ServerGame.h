@@ -48,7 +48,6 @@ class ServerGame : public Game
 
 private:
    enum {
-      LevelSwitchTime = 5000,
       UpdateServerStatusTime = 20000,    // How often we update our status on the master server (ms)
       CheckServerStatusTime = 5000,      // If it did not send updates, recheck after ms
       BotControlTickInterval = 33,       // Interval for how often should we let bots fire the onTick event (ms)
@@ -121,6 +120,12 @@ public:
       VoteChangeTeam,
       VoteResetScore,
    };
+
+   // These are public so this can be accessed by tests
+   static const U32 MaxTimeDelta = 2000;     
+   static const U32 LevelSwitchTime = 5000;
+
+
    U32 mVoteTimer;
    VoteType mVoteType;
    S32 mVoteYes;

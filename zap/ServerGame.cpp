@@ -46,11 +46,16 @@ namespace Zap
 {
 
 
+static bool instantiated;     // Just a little something to keep us from creating multiple ServerGames...
+
 // Constructor
 ServerGame::ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated) : 
       Game(address, settings)
 {
    //TNLAssert(settings, "Must have valid settings to create a ClientGame!");
+
+   TNLAssert(!instantiated, "Only one ServerGame at a time, please!");
+   instantiated = true;
 
    mVoteTimer = 0;
    mVoteYes = 0;
@@ -76,6 +81,8 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 
    mInfoFlags = 0;                  // Currently used to specify test mode and debug builds
    mCurrentLevelIndex = 0;
+
+   BotNavMeshZone::createBotZoneDatabase();
 
    if(testMode)
       mInfoFlags |= TestModeFlag;
@@ -108,6 +115,8 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
    mAccumulatedSleepTime = 0;
 
    botControlTickTimer.reset(BotControlTickInterval);
+
+   mLevelSwitchTimer.setPeriod(LevelSwitchTime);
 }
 
 
@@ -121,6 +130,9 @@ ServerGame::~ServerGame()
    clearAddTarget();
 
    delete mGameInfo;
+   instantiated = false;
+
+   BotNavMeshZone::deleteBotZoneDatabase();
 }
 
 
@@ -777,6 +789,9 @@ void ServerGame::resetAllClientTeams()
 }
 
 
+// Make sure level metadata fits with our current game situation; i.e. check playerCount against min/max players,
+// skip uploaded levels if the settings tell us to, etc.  Can expand this to incorporate other metadata as we 
+// develop it.
 static bool checkIfLevelIsOk(ServerGame *game, const LevelInfo &levelInfo, S32 playerCount)
 {
    S32 minPlayers = levelInfo.minRecPlayers;
@@ -795,7 +810,6 @@ static bool checkIfLevelIsOk(ServerGame *game, const LevelInfo &levelInfo, S32 p
          return false;
 
    return true;
-
 }
 
 
@@ -1178,7 +1192,7 @@ void ServerGame::idle(U32 timeDelta)
       /*if(getPlayerCount() == 0 && !mGameSuspended && mCurrentTime != 0)
          suspendGame();
    */
-   if(timeDelta > 2000)   // Prevents timeDelta from going too high, usually when after the server was frozen
+   if(timeDelta > MaxTimeDelta)   // Prevents timeDelta from going too high, usually when after the server was frozen
       timeDelta = 100;
 
    mNetInterface->checkIncomingPackets();
@@ -1564,7 +1578,7 @@ bool ServerGame::startHosting()
 
 void ServerGame::gameEnded()
 {
-   mLevelSwitchTimer.reset(LevelSwitchTime);
+   mLevelSwitchTimer.reset();
 }
 
 
