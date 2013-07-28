@@ -193,7 +193,7 @@ bool isAsteroidCollideableType(U8 x)
 bool isFlagCollideableType(U8 x)
 {
    return
-         x == BarrierTypeNumber   || x == ForceFieldTypeNumber || x == PolyWallTypeNumber;
+         x == BarrierTypeNumber   || x == ForceFieldProjectorTypeNumber || x == ForceFieldTypeNumber || x == PolyWallTypeNumber;
 }
 
 bool isFlagOrShipCollideableType(U8 x)
