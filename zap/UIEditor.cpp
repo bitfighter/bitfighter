@@ -4762,8 +4762,10 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
    centerView();
 
    render();
+#ifndef BF_NO_SCREENSHOTS
    ScreenShooter::saveScreenshot(game->getUIManager(), game->getSettings(), 
                                  LevelDatabaseUploadThread::UploadScreenshotFilename);
+#endif
    mPreviewMode = false;
    mNormalizedScreenshotMode = false;
 }
