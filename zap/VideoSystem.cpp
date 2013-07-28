@@ -455,7 +455,9 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
    glEnable(GL_BLEND);
 
+#ifndef BF_NO_CONSOLE
    gConsole.onScreenModeChanged();
+#endif
 
    // Now set the window position
    if(displayMode == DISPLAY_MODE_WINDOWED)

@@ -462,9 +462,11 @@ static void makeCommandCandidateList()
 
 void ChatHelper::onTextInput(char ascii)
 {
+#ifndef BF_NO_CONSOLE
    // Pass the key on to the console for processing
    if(gConsole.onKeyDown(ascii))
       return;
+#endif
 
    // Make sure we have a chat box open
    if(mCurrentChatType != NoChat)
