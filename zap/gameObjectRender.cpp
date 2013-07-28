@@ -587,17 +587,11 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
 
    glLineWidth(gLineWidth1);
 
-   const U32 lowerThresh = 5;
-   const U32 upperThresh = 10;
-
-   const Color *lowerColor = &Colors::idlePlayerNameColor;
-   const Color *upperColor = &Colors::streakPlayerNameColor;
-
    // Set name color based on killStreak length
-   if(killStreak < lowerThresh)              // 0 - 4, normal gray
-      glColor(lowerColor, textAlpha);    
-   else                                      // Above that, red  
-      glColor(upperColor, textAlpha);       
+   if(killStreak >= UserInterface::StreakingThreshold)      
+      glColor(Colors::streakPlayerNameColor, textAlpha);    
+   else                                      
+      glColor(Colors::idlePlayerNameColor, textAlpha);       
 
 
    S32 len = drawStringc(0, 30 + textSize, textSize, renderName.c_str());

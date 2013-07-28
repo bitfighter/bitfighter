@@ -93,6 +93,9 @@ public:
    static const S32 MaxServerNameLen = 40;
    static const S32 MaxServerDescrLen = 254;
 
+   static const S32 StreakingThreshold = 5;        // This many kills in a row makes you a streaker!
+
+
    ClientGame *getGame() const;
 
    UIManager *getUIManager() const;

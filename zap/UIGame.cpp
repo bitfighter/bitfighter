@@ -2021,7 +2021,6 @@ void GameUserInterface::renderScoreboard()
       gameType->getSortedPlayerScores(i, playerScores);     // Fills playerScores for team i
 #endif
 
-
       S32 curRowY = yt + teamAreaHeight + 1;
 
       // Use any symbol for an offset
@@ -2032,9 +2031,14 @@ void GameUserInterface::renderScoreboard()
          S32 x = xl + 40;
          S32 vertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;
 
-         bool isDelayed = playerScores[j]->isSpawnDelayed();
-         const Color *nameColor = isDelayed ? &Colors::idlePlayerNameColor : &Colors::standardPlayerNameColor;
-
+         const Color *nameColor;
+         
+         if(playerScores[j]->isSpawnDelayed())
+            nameColor = &Colors::idlePlayerNameColor;
+         else if(playerScores[j]->getKillStreak() >= StreakingThreshold)
+            nameColor = &Colors::streakPlayerNameColor;
+         else
+            nameColor = &Colors::standardPlayerNameColor;
 
          glColor(nameColor);
 
