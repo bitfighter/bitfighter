@@ -54,7 +54,9 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 {
    //TNLAssert(settings, "Must have valid settings to create a ClientGame!");
 
-   TNLAssert(!instantiated, "Only one ServerGame at a time, please!");
+   TNLAssert(!instantiated, "Only one ServerGame at a time, please!  If this trips while testing, "
+      "it is probably because a test failed before another instance could be deleted.  Try disabling "
+      "this assert, see what test fails, and fix it.  Then re-enable it, please!");
    instantiated = true;
 
    mVoteTimer = 0;
