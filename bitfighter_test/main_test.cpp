@@ -194,56 +194,92 @@ void packUnpack(T input, T &output, U32 mask = 0xFFFFFFFF)
 }
 
 
-TEST_F(BfTest, LoadoutManagementTests)
+// Create a new ClientGame with one dummy team -- delete with deleteGame()
+ClientGame *newClientGame()
 {
    Address addr;
-   GameSettings settings;
-   ServerGame serverGame(addr, &settings, false, false);
-   GameType gt;
-   gt.addToGame(&serverGame, serverGame.getGameObjDatabase());
+   GameSettings *settings = new GameSettings();
 
-   Ship s;
-   s.addToGame(&serverGame, serverGame.getGameObjDatabase());
+   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
+   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
+   FontManager::initialize(settings, false);   
+   ClientGame *game = new ClientGame(addr, settings);
+
+   game->addTeam(new Team());     // Teams will be deleted by ClientGame destructor
+
+   return game;
+}
+
+
+// Create a new ServerGame with one dummy team -- delete with deleteGame()
+ServerGame *newServerGame()
+{
+   Address addr;
+   GameSettings *settings = new GameSettings();
+   ServerGame *game = new ServerGame(addr, settings, false, false);
+   game->addTeam(new Team());    // Team will be cleaned up when game is deleted
+
+   return game;
+}
+
+
+void deleteGame(Game *game)
+{
+   delete game->getSettings();
+   delete game;
+}
+
+
+TEST_F(BfTest, LoadoutManagementTests)
+{
+   ServerGame *serverGame = newServerGame();
+   GameType *gt = new GameType();    // Cleaned up by database
+   gt->addToGame(serverGame, serverGame->getGameObjDatabase());
+
+   Ship *s = new Ship();             // Cleaned up by database
+   s->addToGame(serverGame, serverGame->getGameObjDatabase());
 
    // Tests to ensure that currently selected weapon stays the same when changing loadout
-   s.setLoadout(LoadoutTracker("Shield,Repair,Burst,Phaser,Bouncer"));        // Set initial loadout
-   s.selectWeapon(2);                                                         // Make bouncers active weapon
-   s.setLoadout(LoadoutTracker("Armor,Sensor,Phaser,Bouncer,Seeker"), false); // Set loadout in noisy mode
-   ASSERT_EQ(s.getActiveWeapon(), WeaponBounce);                              // Bouncer should still be active weapon
-   s.setLoadout(LoadoutTracker("Armor,Shield,Triple,Mine,Bouncer"), true);    // Set loadout in silent mode
-   ASSERT_EQ(s.getActiveWeapon(), WeaponBounce);                              // Bouncer should _still_ be active weapon
-   s.setLoadout(LoadoutTracker("Armor,Shield,Triple,Phaser,Mine"), false);    // Set loadout in noisy mode
-   ASSERT_EQ(s.getActiveWeapon(), WeaponTriple);                              // Bouncer not in loadout, should select first weap (Triple)
-   s.selectWeapon(2);                                                         // Select 3rd weapon, Mine
-   ASSERT_EQ(s.getActiveWeapon(), WeaponMine);                                // Confirm we've selected it
-   s.setLoadout(LoadoutTracker("Armor,Shield,Seeker,Phaser,Triple"), true);   // Set loadout in silent mode
-   ASSERT_EQ(s.getActiveWeapon(), WeaponSeeker);                              // Mine not in loadout, should select first weap (Seeker)
+   s->setLoadout(LoadoutTracker("Shield,Repair,Burst,Phaser,Bouncer"));        // Set initial loadout
+   s->selectWeapon(2);                                                         // Make bouncers active weapon
+   s->setLoadout(LoadoutTracker("Armor,Sensor,Phaser,Bouncer,Seeker"), false); // Set loadout in noisy mode
+   ASSERT_EQ(s->getActiveWeapon(), WeaponBounce);                              // Bouncer should still be active weapon
+   s->setLoadout(LoadoutTracker("Armor,Shield,Triple,Mine,Bouncer"), true);    // Set loadout in silent mode
+   ASSERT_EQ(s->getActiveWeapon(), WeaponBounce);                              // Bouncer should _still_ be active weapon
+   s->setLoadout(LoadoutTracker("Armor,Shield,Triple,Phaser,Mine"), false);    // Set loadout in noisy mode
+   ASSERT_EQ(s->getActiveWeapon(), WeaponTriple);                              // Bouncer not in loadout, should select first weap (Triple)
+   s->selectWeapon(2);                                                         // Select 3rd weapon, Mine
+   ASSERT_EQ(s->getActiveWeapon(), WeaponMine);                                // Confirm we've selected it
+   s->setLoadout(LoadoutTracker("Armor,Shield,Seeker,Phaser,Triple"), true);   // Set loadout in silent mode
+   ASSERT_EQ(s->getActiveWeapon(), WeaponSeeker);                              // Mine not in loadout, should select first weap (Seeker)
 
    // Tests to ensure that resource items get dropped when changing loadout away from engineer.  We'll also add a flag
-   // and verify that the flag is not similarly dropped.
-   ResourceItem r;
-   FlagItem f;
+   // and verify that the flag is not similarly dropped.  These cleaned up by database.
+   ResourceItem *r = new ResourceItem();
+   FlagItem     *f = new FlagItem();
 
-   r.addToGame(&serverGame, serverGame.getGameObjDatabase());
-   f.addToGame(&serverGame, serverGame.getGameObjDatabase());
+   r->addToGame(serverGame, serverGame->getGameObjDatabase());
+   f->addToGame(serverGame, serverGame->getGameObjDatabase());
 
-   s.setLoadout(LoadoutTracker("Engineer,Shield,Triple,Mine,Bouncer"));       // Ship has engineer
-   r.mountToShip(&s);
-   f.mountToShip(&s);
-   ASSERT_TRUE(s.isCarryingItem(ResourceItemTypeNumber));
-   ASSERT_TRUE(s.isCarryingItem(FlagTypeNumber));
-   s.setLoadout(LoadoutTracker("Turbo,Shield,Triple,Mine,Bouncer"), false);   // Ship does not have engineer
-   ASSERT_FALSE(s.isCarryingItem(ResourceItemTypeNumber));
-   ASSERT_TRUE(s.isCarryingItem(FlagTypeNumber));
+   s->setLoadout(LoadoutTracker("Engineer,Shield,Triple,Mine,Bouncer"));       // Ship has engineer
+   r->mountToShip(s);
+   f->mountToShip(s);
+   ASSERT_TRUE(s->isCarryingItem(ResourceItemTypeNumber));
+   ASSERT_TRUE(s->isCarryingItem(FlagTypeNumber));
+   s->setLoadout(LoadoutTracker("Turbo,Shield,Triple,Mine,Bouncer"), false);   // Ship does not have engineer
+   ASSERT_FALSE(s->isCarryingItem(ResourceItemTypeNumber));
+   ASSERT_TRUE(s->isCarryingItem(FlagTypeNumber));
 
    // Same test, in silent mode
-   s.setLoadout(LoadoutTracker("Engineer,Shield,Triple,Mine,Bouncer"));       // Ship has engineer
-   r.mountToShip(&s);
-   ASSERT_TRUE(s.isCarryingItem(ResourceItemTypeNumber));
-   ASSERT_TRUE(s.isCarryingItem(FlagTypeNumber));
-   s.setLoadout(LoadoutTracker("Turbo,Shield,Triple,Mine,Bouncer"), true);    // Ship does not have engineer
-   ASSERT_FALSE(s.isCarryingItem(ResourceItemTypeNumber));
-   ASSERT_TRUE(s.isCarryingItem(FlagTypeNumber));
+   s->setLoadout(LoadoutTracker("Engineer,Shield,Triple,Mine,Bouncer"));       // Ship has engineer
+   r->mountToShip(s);
+   ASSERT_TRUE(s->isCarryingItem(ResourceItemTypeNumber));
+   ASSERT_TRUE(s->isCarryingItem(FlagTypeNumber));
+   s->setLoadout(LoadoutTracker("Turbo,Shield,Triple,Mine,Bouncer"), true);    // Ship does not have engineer
+   ASSERT_FALSE(s->isCarryingItem(ResourceItemTypeNumber));
+   ASSERT_TRUE(s->isCarryingItem(FlagTypeNumber));
+
+   deleteGame(serverGame);
 }
 
 
@@ -281,43 +317,6 @@ TEST_F(BfTest, ShipTests)
    ASSERT_TRUE(serverShip.isServerCopyOf(clientShip));   // Ships should be equal again
 }
 
-
-// Create a new ClientGame with one dummy team -- delete with deleteGame()
-ClientGame *newClientGame()
-{
-   Address addr;
-   GameSettings *settings = new GameSettings();
-
-   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
-   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
-   FontManager::initialize(settings, false);   
-   ClientGame *game = new ClientGame(addr, settings);
-
-   game->addTeam(new Team());     // Teams will be deleted by ClientGame destructor
-
-   return game;
-}
-
-
-// Create a new ServerGame with one dummy team -- delete with deleteGame()
-ServerGame *newServerGame()
-{
-   Address addr;
-   GameSettings *settings = new GameSettings();
-   { ServerGame serverGame(addr, settings, false, false); }  // <== ??
-
-   ServerGame *game = new ServerGame(addr, settings, false, false);
-   game->addTeam(new Team());    // Team will be cleaned up when game is deleted
-
-   return game;
-}
-
-
-void deleteGame(Game *game)
-{
-   delete game->getSettings();
-   delete game;
-}
 
 
 TEST_F(BfTest, MoveTests)
@@ -647,17 +646,34 @@ TEST_F(BfTest, KillStreakTests)
    gt->addToGame(game, game->getGameObjDatabase());
 
    GameConnection conn;
+   conn.setObjectMovedThisGame(true);     // Hacky way to avoid getting disconnected when the game is over, which will 
+                                          // cause the tests to crash.  Will probably find a better way as we develop further.
    FullClientInfo *ci = new FullClientInfo(game, &conn, "Noman", false);      // Cleaned up somewhere
    conn.setClientInfo(ci);
 
+   LevelInfo levelInfo("Level", BitmatchGame);     // Need a levelInfo for when we change levels
+
    game->addClient(ci);
+   game->addLevelInfo(levelInfo);
    
-   game->setGameTime(1.0f / 60.0f);    // 1 second, in minutes
+   game->setGameTime(1.0f / 60.0f); // 1 second, in minutes
 
    ASSERT_EQ(0, game->getClientInfo(0)->getKillStreak());
    game->getClientInfo(0)->addKill();
    ASSERT_EQ(1, game->getClientInfo(0)->getKillStreak());
-   game->idle(1);    // Game ends
+   game->idle(1000);                // 1 second, in ms... game ends
+
+   U32 timeDelta = 1000;
+   TNLAssert(timeDelta < ServerGame::MaxTimeDelta, "Reduce timeDelta, please!");
+
+   S32 iters = (S32)ceil((F32)ServerGame::LevelSwitchTime / (F32)timeDelta) - 1;
+
+   // Idle for 4000ms more... in 1000 ms chunks because of timeDelta limitations in ServerGame
+   for(S32 i = 0; i < iters; i++)
+      game->idle(timeDelta);
+
+   // New game has begun... kill streak should be reset to 0
+   ASSERT_EQ(0, game->getClientInfo(0)->getKillStreak());
 
    deleteGame(game);
 }
@@ -671,7 +687,7 @@ TEST_F(BfTest, LittleStory)
    gt->addToGame(serverGame, serverGame->getGameObjDatabase());
 
    ASSERT_TRUE(serverGame->isSuspended());    // ServerGame starts suspended
-   serverGame->unsuspendGame(false);          
+   serverGame->unsuspendGame(false);         
 
    // When adding objects to the game, use new and a pointer -- the game will 
    // delete defunct objects, so a reference will not work.
