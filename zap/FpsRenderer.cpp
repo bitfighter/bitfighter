@@ -143,7 +143,7 @@ void FpsRenderer::render(S32 canvasWidth) const
    drawStringfr(xpos, vertMargin + fontSize + fontGap, fontSize, "%1.0f ms",  mPingAvg);
 
    // vertex display is green at zero and red at 1000 or more visible vertices
-   glColor3f(visibleVertices / 1000.0f, 1.0f - visibleVertices / 1000.0f, 0.0f);
+   glColor4f(visibleVertices / 1000.0f, 1.0f - visibleVertices / 1000.0f, 0.0f, 1);
    drawStringfr(xpos, vertMargin + 2 * (fontSize + fontGap), fontSize, "%d vts",  visibleVertices);
    
    FontManager::popFontContext();
