@@ -1388,17 +1388,10 @@ void Game::updateShipLoadout(BfObject *shipObject)
 }
 
 
-void Game::sendGlobalChatFromController(const StringPtr &message)
+void Game::sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global, S32 teamIndex)
 {
    if(mGameType)
-      mGameType->sendGlobalChatFromController(message);
-}
-
-
-void Game::sendTeamChatFromController(const StringPtr &message, S32 teamIndex)
-{
-   if(mGameType)
-      mGameType->sendTeamChatFromController(message, teamIndex);
+      mGameType->sendChat(senderName, senderClientInfo, message, global, teamIndex);
 }
 
 

@@ -3551,36 +3551,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (globa
    if(!source->checkMessage(message.getString(), global ? 0 : 1))
       return;
 
-   sendChat(sourceClientInfo->getName(), sourceClientInfo, message, global);
-}
-
-
-void GameType::sendChatFromRobot(bool global, const StringPtr &message, ClientInfo *botClientInfo)
-{
-   sendChat(botClientInfo->getName(), botClientInfo, message, global);
-}
-
-
-// Send global chat from Controller
-void GameType::sendGlobalChatFromController(const StringPtr &message)
-{
-   sendChat("LevelController", NULL, message, true);
-}
-
-
-// Send team chat from Controller
-void GameType::sendTeamChatFromController(const StringPtr &message, S32 teamIndex)
-{
-   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatMessage, (false, "LevelController", message));
-
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
-   {
-      ClientInfo *clientInfo = mGame->getClientInfo(i);
-
-      if(clientInfo->getTeamIndex() == teamIndex)
-         if(clientInfo->getConnection())
-            clientInfo->getConnection()->postNetEvent(theEvent);
-   }
+   sendChat(sourceClientInfo->getName(), sourceClientInfo, message, global, sourceClientInfo->getTeamIndex());
 }
 
 
@@ -3624,23 +3595,22 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatSTE, (bool global, StringTableEntry messag
       return;
 
    ClientInfo *sourceClientInfo = source->getClientInfo();
-   sendChat(sourceClientInfo->getName(), sourceClientInfo, message.getString(), global);
+   sendChat(sourceClientInfo->getName(), sourceClientInfo, message.getString(), global, sourceClientInfo->getTeamIndex());
 }
 
 
 // Send a chat message that will be displayed in-game
-// If not global, send message only to other players on team
+// If not global, send message only to other players on the specified teamIndex
 // Note that sender may be NULL, if the message has been sent by a LevelController script
-void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global)
+void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global, S32 teamIndex)
 {
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatMessage, (global, senderName, message));
 
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
-      S32 senderTeamIndex = senderClientInfo ? senderClientInfo->getTeamIndex() : NO_TEAM;
 
-      if(global || clientInfo->getTeamIndex() == senderTeamIndex)
+      if(global || clientInfo->getTeamIndex() == teamIndex)
       {
          if(clientInfo->getConnection())
             clientInfo->getConnection()->postNetEvent(theEvent);

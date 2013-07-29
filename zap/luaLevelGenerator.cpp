@@ -205,6 +205,9 @@ S32 LuaLevelGenerator::lua_findGlobalObjects(lua_State *L)
 }
 
 
+static const StringTableEntry levelControllerName = "LevelController";
+
+
 /**
  * @luafunc LuaLevelGenerator::globalMsg(string message)
  * @brief   Broadcast a message to all players.
@@ -216,7 +219,7 @@ S32 LuaLevelGenerator::lua_globalMsg(lua_State *L)
 
    const char *message = getString(L, 1);
 
-   mGame->sendGlobalChatFromController(message);
+   mGame->sendChat(levelControllerName, NULL, message, true, NO_TEAM);
 
    // Fire our event handler
    EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, NULL, true);
@@ -238,7 +241,7 @@ S32 LuaLevelGenerator::lua_teamMsg(lua_State *L)
    const char *message = getString(L, 1);
    S32 teamIndex = getTeamIndex(L, 2);
 
-   mGame->sendTeamChatFromController(message, teamIndex);
+   mGame->sendChat(levelControllerName, NULL, message, false, teamIndex);
 
    // Fire our event handler
    EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, NULL, true);
