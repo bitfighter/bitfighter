@@ -263,7 +263,7 @@ S32 LuaLevelGenerator::lua_privateMsg(lua_State *L)
    const char *message = getString(L, 1);
    const char *playerName = getString(L, 2);
 
-   mGame->sendPrivateChatFromController(message, playerName);
+   mGame->sendPrivateChat(levelControllerName, playerName, message);
 
    // No event fired for private message
 

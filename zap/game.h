@@ -473,7 +473,7 @@ public:
    void updateShipLoadout(BfObject *shipObject);
 
    void sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global, S32 teamIndex);
-   void sendPrivateChatFromController(const StringPtr &message, const StringPtr &playerName);
+   void sendPrivateChat(const StringTableEntry &senderName, const StringTableEntry &receiverName, const StringPtr &message);
    void sendAnnouncementFromController(const StringPtr &message);
 
    S32 getRemainingGameTime() const;        // In seconds

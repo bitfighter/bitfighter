@@ -502,8 +502,7 @@ public:
 
    // In-game chat message:
    void sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global, S32 teamIndex);
-
-   void sendPrivateChatFromController(const StringPtr &message, const StringPtr &playerName);
+   void sendPrivateChat(const StringTableEntry &senderName, const StringTableEntry &receiverName, const StringPtr &message);
    void sendAnnouncementFromController(const StringPtr &message);
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game

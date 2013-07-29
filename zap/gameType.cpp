@@ -3556,14 +3556,14 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (globa
 
 
 // Send private chat from Controller
-void GameType::sendPrivateChatFromController(const StringPtr &message, const StringPtr &playerName)
+void GameType::sendPrivateChat(const StringTableEntry &senderName, const StringTableEntry &receiverName, const StringPtr &message)
 {
-   ClientInfo *clientInfo = mGame->findClientInfo(playerName.getString());
+   ClientInfo *clientInfo = mGame->findClientInfo(receiverName.getString());
 
    if(clientInfo == NULL)  // Player not found
       return;
 
-   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatPM, ("LevelController", clientInfo->getName(), message));
+   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatPM, (senderName, clientInfo->getName(), message));
 
    clientInfo->getConnection()->postNetEvent(theEvent);
 }

@@ -1395,10 +1395,10 @@ void Game::sendChat(const StringTableEntry &senderName, ClientInfo *senderClient
 }
 
 
-void Game::sendPrivateChatFromController(const StringPtr &message, const StringPtr &playerName)
+void Game::sendPrivateChat(const StringTableEntry &senderName, const StringTableEntry &receiverName, const StringPtr &message)
 {
    if(mGameType)
-      mGameType->sendPrivateChatFromController(message, playerName);
+      mGameType->sendPrivateChat(senderName, receiverName, message);
 }
 
 
