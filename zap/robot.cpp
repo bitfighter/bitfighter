@@ -160,7 +160,7 @@ bool Robot::start()
    mSubscriptions[EventManager::TickEvent] = true;
 
    string name = runGetName();                                             // Run bot's getName function
-   getClientInfo()->setName(getGame()->makeUnique(name.c_str()).c_str());  // Make sure name is unique
+   mClientInfo->setName(getGame()->makeUnique(name.c_str()).c_str());  // Make sure name is unique
 
    mHasSpawned = true;
 
@@ -584,6 +584,7 @@ U16 Robot::findClosestZone(const Point &point)
                                                                                              \
    METHOD(CLASS,  globalMsg,            ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS,  teamMsg,              ARRAYDEF({{ STR, END }}), 1 )                        \
+   METHOD(CLASS,  privateMsg,           ARRAYDEF({{ STR, STR, END }}), 1 )                   \
                                                                                              \
    METHOD(CLASS,  findObjects,          ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    METHOD(CLASS,  findGlobalObjects,    ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
@@ -992,17 +993,21 @@ S32 Robot::lua_activateModuleIndex(lua_State *L)
 }
 
 
-// Send message to all players
+/**
+ * @luafunc Robot::globalMsg(string message)
+ * @brief   Send a message to all players.
+ * @param   message Message to send.
+ */
 S32 Robot::lua_globalMsg(lua_State *L)
 {
-   checkArgList(L, functionArgs, "Robot", "globalMsg");
+   checkArgList(L, functionArgs, luaClassName, "globalMsg");
 
    const char *message = getString(L, 1);
 
    GameType *gt = getGame()->getGameType();
    if(gt)
    {
-      gt->sendChatFromRobot(true, message, getClientInfo());
+      gt->sendChat(mClientInfo->getName(), mClientInfo, message, true, mClientInfo->getTeamIndex());
 
       // Fire our event handler
       EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, getPlayerInfo(), true);
@@ -1013,20 +1018,46 @@ S32 Robot::lua_globalMsg(lua_State *L)
 
 
 // Send message to team (what happens when neutral/hostile robot does this???)
+/**
+ * @luafunc Robot::teamMsg(string message)
+ * @brief   Send a message to this Robot's team.
+ * @param   message Message to send.
+ */
 S32 Robot::lua_teamMsg(lua_State *L)
 {
-   checkArgList(L, functionArgs, "Robot", "teamMsg");
+   checkArgList(L, functionArgs, luaClassName, "teamMsg");
 
    const char *message = getString(L, 1);
 
    GameType *gt = getGame()->getGameType();
    if(gt)
    {
-      gt->sendChatFromRobot(false, message, getClientInfo());
+      gt->sendChat(mClientInfo->getName(), mClientInfo, message, false, mClientInfo->getTeamIndex());
 
       // Fire our event handler
       EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, getPlayerInfo(), false);
    }
+
+   return 0;
+}
+
+
+/**
+ * @luafunc Robot::privateMsg(string message, string playerName)
+ * @brief   Send a private message to a player.
+ * @param   message Message to send.
+ * @param   playerName Name of player to which to send a message.
+ */
+S32 Robot::lua_privateMsg(lua_State *L)
+{
+   checkArgList(L, functionArgs, luaClassName, "privateMsg");
+
+   const char *message = getString(L, 1);
+   const char *playerName = getString(L, 2);
+
+   mGame->sendPrivateChat(mClientInfo->getName(), playerName, message);
+
+   // No event fired for private message
 
    return 0;
 }

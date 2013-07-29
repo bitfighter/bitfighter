@@ -471,10 +471,11 @@ public:
    string getScriptName() const;
    bool levelHasLoadoutZone();
    void updateShipLoadout(BfObject *shipObject);
-   void sendGlobalChatFromController(const StringPtr &message);
-   void sendTeamChatFromController(const StringPtr &message, S32 teamIndex);
-   void sendPrivateChatFromController(const StringPtr &message, const StringPtr &playerName);
+
+   void sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global, S32 teamIndex);
+   void sendPrivateChat(const StringTableEntry &senderName, const StringTableEntry &receiverName, const StringPtr &message);
    void sendAnnouncementFromController(const StringPtr &message);
+
    S32 getRemainingGameTime() const;        // In seconds
 
    void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName);

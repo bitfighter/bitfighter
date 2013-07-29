@@ -118,9 +118,6 @@ private:
 
    Vector<WallRec> mWalls;
 
-   // In-game chat message:
-   void sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global);
-
    S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
    S32 mLeadingTeam;                // Team with highest score
    S32 mLeadingTeamScore;           // Score of mLeadingTeam
@@ -503,10 +500,9 @@ public:
    virtual void addAdminGameMenuOptions(MenuUserInterface *menu);
 #endif
 
-   void sendChatFromRobot(bool global, const StringPtr &message, ClientInfo *botClientInfo);
-   void sendGlobalChatFromController(const StringPtr &message);
-   void sendTeamChatFromController(const StringPtr &message, S32 teamIndex);
-   void sendPrivateChatFromController(const StringPtr &message, const StringPtr &playerName);
+   // In-game chat message:
+   void sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global, S32 teamIndex);
+   void sendPrivateChat(const StringTableEntry &senderName, const StringTableEntry &receiverName, const StringPtr &message);
    void sendAnnouncementFromController(const StringPtr &message);
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game

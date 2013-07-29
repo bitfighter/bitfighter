@@ -1299,6 +1299,8 @@ void BfObject::writeThisTeam(BitStream *stream)
    METHOD(CLASS, clone,          ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, isSelected,     ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setSelected,    ARRAYDEF({{ BOOL,      END }               }), 1 ) \
+   METHOD(CLASS, getOwner,       ARRAYDEF({{            END }               }), 1 ) \
+   METHOD(CLASS, setOwner,       ARRAYDEF({{ STR,       END }               }), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(BfObject, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(BfObject, LUA_METHODS);
@@ -1490,6 +1492,54 @@ S32 BfObject::lua_setSelected(lua_State *L)
    checkArgList(L, functionArgs, "BfObject", "setSelected");
 
    setSelected(getBool(L, 1));
+
+   return 0;
+}
+
+
+/**
+ * @luafunc  Point BfObject::getOwner()
+ * @brief    Gets an object's owner as a PlayerInfo.
+ * @descr    Some objects (like projectiles) have an owning player associated.  This method returns
+ *           a PlayerInfo object if there is an owner.  Otherwise, returns nil.
+ * @return   A \e PlayerInfo representing the object's owner, or nil.
+*/
+S32 BfObject::lua_getOwner(lua_State *L)
+{
+   if(mOwner.isNull())
+      return returnNil(L);
+
+   return returnPlayerInfo(L, mOwner->getPlayerInfo());
+}
+
+
+/**
+  *  @luafunc Projectile::setOwner(player)
+  *  @brief   Sets the owner of the projectile.
+  *  @descr   As with other functions that take a point as an input, you can also specify the x and y components as numeric arguments.
+  *  @param   player - Name of player.
+  *  @note    This method only works if the item in question has already been added to the game via addItem(object).
+  *           The owner cannot be set beforehand
+  */
+S32 BfObject::lua_setOwner(lua_State *L)
+{
+   checkArgList(L, functionArgs, luaClassName, "setOwner");
+
+   const char *playerName = getString(L, 1);
+
+   // This is NULL if the owner was set *before* adding this object to the game
+   if(mGame == NULL)
+   {
+      logprintf(LogConsumer::LuaBotMessage, "You cannot call setOwner() on an object before it is added to the game.");
+      return 0;
+   }
+
+   ClientInfo *clientInfo = mGame->findClientInfo(StringTableEntry(playerName));
+
+   if(clientInfo == NULL)  // Player not found
+      return 0;
+
+   mOwner = clientInfo;
 
    return 0;
 }
