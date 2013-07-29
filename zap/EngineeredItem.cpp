@@ -1098,6 +1098,7 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
    else           // No suitable segments found
    {
       mSnapped = false;
+      setPos(pos);
       onGeomChanged();
 
       return pos;

@@ -1389,7 +1389,8 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
       if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
       {
          EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(mSnapObject.getPointer());
-         return engrObj->mountToWall(snapPointToLevelGrid(p), wallSegmentManager);
+         //return engrObj->mountToWall(snapPointToLevelGrid(p), wallSegmentManager);
+         return snapPointToLevelGrid(p);
       }
    }
 
@@ -2804,7 +2805,8 @@ void EditorUserInterface::onMouseMoved()
 // function looks at an object and determines if it has already been translated or not.
 static bool alreadyTranslated(BfObject *object)
 {
-   return isEngineeredType(object->getObjectTypeNumber()) && static_cast<EngineeredItem *>(object)->isSnapped();
+   return false;
+   //return isEngineeredType(object->getObjectTypeNumber()) && static_cast<EngineeredItem *>(object)->isSnapped();
 }
 
 
@@ -2848,6 +2850,12 @@ void EditorUserInterface::onMouseDragged()
       mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
 
       const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+
+      mMoveOrigins.resize(objList->size());
+
+      // Save the original location of each item pre-move, only used for snapping engineered items to walls
+      for(S32 i = 0; i < objList->size(); i++)
+         mMoveOrigins[i].set(objList->get(i)->getPos()); 
 
 #ifdef TNL_OS_MAC_OSX 
       bool ctrlDown = InputCodeManager::getState(KEY_META);
@@ -2897,12 +2905,12 @@ void EditorUserInterface::onMouseDragged()
          // Running onGeomChanged causes any copied walls to have a full body while we're dragging them 
          for(S32 i = 0; i < copiedObjects.size(); i++)   
             copiedObjects[i]->onGeomChanged(); 
-      }
+      }     // end if ctrlDown
 
       onSelectionChanged();
       mDraggingObjects = true; 
       mSnapDelta.set(0,0);
-   }
+   }  // end just started moving
 
 
    SDL_SetCursor(Cursor::getSpray());
@@ -2916,13 +2924,12 @@ void EditorUserInterface::onMouseDragged()
    else  // larger items
       mSnapDelta = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
-   // Update coordinates of dragged item -- unless it's a snapped engineered item, in which case its coordinates have already been updated
-   if(!alreadyTranslated(mSnapObject.getPointer()))
-      translateSelectedItems(getDatabase(), mSnapDelta - lastSnapDelta);
+   translateSelectedItems(mSnapDelta - lastSnapDelta);      // Nudge all selected objects by incremental move amount
+   snapSelectedEngineeredItems(mSnapDelta);                 // Snap all selected engr. objects if possible
 }
 
 
-void EditorUserInterface::translateSelectedItems(GridDatabase *database, const Point &offset)
+void EditorUserInterface::translateSelectedItems(const Point &offset)
 {
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
@@ -2950,6 +2957,26 @@ void EditorUserInterface::translateSelectedItems(GridDatabase *database, const P
 
          if(obj->isSelected())     
             obj->onItemDragging();      // Make sure this gets run after we've updated the item's location
+      }
+   }
+}
+
+
+void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOffset)
+{
+   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+
+   WallSegmentManager *wallSegmentManager = getDatabase()->getWallSegmentManager();
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      if(isEngineeredType(objList->get(i)->getObjectTypeNumber()))
+      {
+         EngineeredItem *engrObj = static_cast<EngineeredItem *>(objList->get(i));
+         if(!engrObj->isSelected())
+            continue;
+
+         engrObj->mountToWall(snapPointToLevelGrid(mMoveOrigins[i] + cumulativeOffset), wallSegmentManager);
       }
    }
 }
