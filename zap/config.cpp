@@ -131,6 +131,10 @@ IniSettings::IniSettings()
    voteNoStrength = -3;
    voteNothingStrength = -1;
 
+
+   queryServerSortColumn = 0;
+   queryServerSortAscending = true;
+
    useUpdater = true;
 
    // Game window location when in windowed mode
@@ -468,6 +472,10 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    if(fps >= 1) 
       iniSettings->maxFPS = fps;   // Otherwise, leave it at the default value
    // else warn?
+
+   iniSettings->queryServerSortColumn    = ini->GetValueI(section, "QueryServerSortColumn",    iniSettings->queryServerSortColumn);
+   iniSettings->queryServerSortAscending = ini->GetValueB(section, "QueryServerSortAscending", iniSettings->queryServerSortAscending);
+
 
 #ifndef ZAP_DEDICATED
    gDefaultLineWidth = (F32) ini->GetValueF(section, "LineWidth", 2);
@@ -1588,6 +1596,9 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
       ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
       ini->sectionComment(section, " Version - Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!");
+      ini->sectionComment(section, " QueryServerSortColumn - Index of column to sort by when in the Join Servers menu. (0 is first col.)  This value managed by game.");
+      ini->sectionComment(section, " QueryServerSortAscending - 1 for ascending sort, 0 for descending.  This value managed by game.");
+
       ini->sectionComment(section, "----------------");
    }
    saveWindowMode(ini, iniSettings);
@@ -1623,6 +1634,9 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
    ini->SetValueI (section, "ConnectionSpeed", iniSettings->connectionSpeed);  
    ini->SetValueI (section, "Version", BUILD_VERSION);
+
+   ini->SetValueI (section, "QueryServerSortColumn",    iniSettings->queryServerSortColumn);
+   ini->SetValueB (section, "QueryServerSortAscending", iniSettings->queryServerSortAscending);
 
 #ifndef ZAP_DEDICATED
    // Don't save new value if out of range, so it will go back to the old value. Just in case a user screw up with /linewidth command using value too big or too small
@@ -1718,15 +1732,15 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
 
 
    ini->setValueYN(section, "VoteEnable", S32(iniSettings->voteEnable) );
-   ini->SetValueI(section, "VoteLength", S32(iniSettings->voteLength) );
-   ini->SetValueI(section, "VoteLengthToChangeTeam", S32(iniSettings->voteLengthToChangeTeam) );
-   ini->SetValueI(section, "VoteRetryLength", S32(iniSettings->voteRetryLength) );
-   ini->SetValueI(section, "VoteYesStrength", iniSettings->voteYesStrength );
-   ini->SetValueI(section, "VoteNoStrength", iniSettings->voteNoStrength );
-   ini->SetValueI(section, "VoteNothingStrength", iniSettings->voteNothingStrength );
+   ini->SetValueI (section, "VoteLength", S32(iniSettings->voteLength) );
+   ini->SetValueI (section, "VoteLengthToChangeTeam", S32(iniSettings->voteLengthToChangeTeam) );
+   ini->SetValueI (section, "VoteRetryLength", S32(iniSettings->voteRetryLength) );
+   ini->SetValueI (section, "VoteYesStrength", iniSettings->voteYesStrength );
+   ini->SetValueI (section, "VoteNoStrength", iniSettings->voteNoStrength );
+   ini->SetValueI (section, "VoteNothingStrength", iniSettings->voteNothingStrength );
 
    ini->SetValue  (section, "DefaultRobotScript", iniSettings->defaultRobotScript);
-   ini->SetValue  (section, "GlobalLevelScript", iniSettings->globalLevelScript );
+   ini->SetValue  (section, "GlobalLevelScript", iniSettings->globalLevelScript);
 #ifdef BF_WRITE_TO_MYSQL
    if(iniSettings->mySqlStatsDatabaseServer == "" && iniSettings->mySqlStatsDatabaseName == "" && iniSettings->mySqlStatsDatabaseUser == "" && iniSettings->mySqlStatsDatabasePassword == "")
       ini->SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password");

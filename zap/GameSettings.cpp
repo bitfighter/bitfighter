@@ -430,6 +430,17 @@ string GameSettings::getPlayerName()
 }
 
 
+void GameSettings::setQueryServerSortColumn(S32 column, bool ascending)
+{
+   mIniSettings.queryServerSortColumn = column;
+   mIniSettings.queryServerSortAscending = ascending;
+}
+
+
+S32  GameSettings::getQueryServerSortColumn()    { return mIniSettings.queryServerSortColumn;    }
+bool GameSettings::getQueryServerSortAscending() { return mIniSettings.queryServerSortAscending; }
+
+
 // User has entered name and password, and has clicked Ok.  That's the only way to get here.
 void GameSettings::setLoginCredentials(const string &name, const string &password, bool save)
 {

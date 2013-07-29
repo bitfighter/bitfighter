@@ -119,6 +119,7 @@ QueryServersUserInterface::ColumnInfo::ColumnInfo(const char *nm, U32 xs)
    xStart = xs;
 }
 
+
 // Destructor
 QueryServersUserInterface::ColumnInfo::~ColumnInfo()
 {
@@ -130,10 +131,10 @@ QueryServersUserInterface::ColumnInfo::~ColumnInfo()
 QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInterface(game), ChatParent(game)
 {
    mLastUsedServerId = 0;
-   mSortColumn = 0;
-   mLastSortColumn = 0;
+   mSortColumn = getGame()->getSettings()->getQueryServerSortColumn();
+   mSortAscending = getGame()->getSettings()->getQueryServerSortAscending();
+   mLastSortColumn = mSortColumn;
    mHighlightColumn = 0;
-   mSortAscending = true;
    mReceivedListOfServersFromMaster = false;
    mouseScrollTimer.setPeriod(10 * MOUSE_SCROLL_INTERVAL);
 
@@ -176,11 +177,13 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInt
    buttons.push_back(nextButton);
 }
 
+
 // Destructor
 QueryServersUserInterface::~QueryServersUserInterface()
 {
    // Do nothing
 }
+
 
 // Initialize: Runs when "connect to server" screen is shown
 void QueryServersUserInterface::onActivate()
@@ -197,7 +200,6 @@ void QueryServersUserInterface::onActivate()
 
    mPage = 0;     // Start off showing the first page, as expected
 
-   
 #if 0
    // Populate server list with dummy data to see how it looks
    for(U32 i = 0; i < 512; i++)
@@ -215,17 +217,15 @@ void QueryServersUserInterface::onActivate()
       s.playerCount = Random::readF() * s.maxPlayers;
       s.pingTimedOut = false;
       s.everGotQueryResponse = false;
-      s.serverDescr = "Here is  description.  There are many like it, but this one is mine.";
+      s.serverDescr = "This is my description.  There are many like it, but this one is mine.";
       s.msgColor = Colors::yellow;
       servers.push_back(s);
    }
 #endif
    
-   mSortColumn = 0;
-   mHighlightColumn = 0;
+   mHighlightColumn = mSortColumn;
    pendingPings = 0;
    pendingQueries = 0;
-   mSortAscending = true;
    mNonce.getRandom();
 
    mPlayersInGlobalChat.clear();
@@ -566,6 +566,13 @@ void QueryServersUserInterface::idle(U32 timeDelta)
    while(getFirstServerIndexOnCurrentPage() >= servers.size() && mPage > 0)
        mPage--;
 
+
+   if(mShouldSort)
+   {
+      mShouldSort = false;
+      sort();
+   }
+
 }  // end idle
 
 
@@ -669,10 +676,6 @@ void QueryServersUserInterface::render()
    bool drawmsg2 = false;
 
    if(mShouldSort)
-   {
-      mShouldSort = false;
-      sort();
-   }
 
    renderTopBanner();
 
@@ -1219,6 +1222,9 @@ void QueryServersUserInterface::sortSelected()
    sort();   
 
    selectedId = servers[currentItem].id;
+
+   // Finally, save the current sort column to the INI
+   getGame()->getSettings()->setQueryServerSortColumn(mSortColumn, mSortAscending);
 }
 
 
@@ -1454,7 +1460,7 @@ Button::~Button()
 }
 
 
-bool Button::isMouseOver(F32 mouseX, F32 mouseY)
+bool Button::isMouseOver(F32 mouseX, F32 mouseY) const
 {
    return(mouseX >= mX && mouseX <= mX + mPadding * 2 + getStringWidth(mTextSize, mLabel) &&
           mouseY >= mY && mouseY <= mY + mTextSize + mPadding * 2);
@@ -1474,7 +1480,7 @@ bool Button::isActive() const
 }
 
 
-void Button::render(F32 mouseX, F32 mouseY)
+void Button::render(F32 mouseX, F32 mouseY) const
 {
    if(!isActive())
       return;

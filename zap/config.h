@@ -246,7 +246,10 @@ public:
 
    bool useUpdater;                 // Use updater system (windows only)
 
-
+   // Server display settings in join menu
+   S32 queryServerSortColumn;
+   bool queryServerSortAscending;
+      
    Vector<PluginBinding> pluginBindings;  // Keybindings for the editor plugins
 
    // Game window location when in windowed mode

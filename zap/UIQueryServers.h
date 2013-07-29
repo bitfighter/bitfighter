@@ -48,17 +48,17 @@ private:
    ClientGame *mGame;
    S32 mX, mY, mTextSize, mPadding;
    const char *mLabel;
-   void (*mOnClickCallback)(ClientGame *);
-   bool isMouseOver(F32 mouseX, F32 mouseY);
    Color mBgColor, mFgColor, mHlColor;
+   void (*mOnClickCallback)(ClientGame *);
 
    bool isActive() const;
+   bool isMouseOver(F32 mouseX, F32 mouseY) const;
 
 public:
    Button(ClientGame *game, S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void(*callback)(ClientGame *));   // Constructor
    virtual ~Button();
 
-   void render(F32 mouseX, F32 mouseY);
+   void render(F32 mouseX, F32 mouseY) const;
    void onClick(F32 mouseX, F32 mouseY);
 };
 

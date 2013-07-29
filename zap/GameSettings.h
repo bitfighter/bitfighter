@@ -232,6 +232,11 @@ public:
    const Color *getWallFillColor() const;
    const Color *getWallOutlineColor() const;
 
+   void setQueryServerSortColumn(S32 column, bool ascending);
+   S32  getQueryServerSortColumn();   
+   bool getQueryServerSortAscending();
+
+
    // Accessor methods
    U32 getSimulatedStutter();
    F32 getSimulatedLoss();
