@@ -457,6 +457,9 @@ public:
    virtual S32 lua_getTeamIndex(lua_State *L);
    virtual S32 lua_setTeam(lua_State *L);
 
+   virtual S32 lua_getOwner(lua_State *L);
+   virtual S32 lua_setOwner(lua_State *L);
+
    virtual S32 lua_removeFromGame(lua_State *L);
 
    virtual S32 lua_setGeom(lua_State *L);
