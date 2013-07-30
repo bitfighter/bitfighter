@@ -40,6 +40,7 @@ namespace Zap
       OverlayMenuContext,      // For Loadout Menus and such
       TextEffectContext,       // Yard Sale!!! text and the like
       ScoreboardContext,       // In-game scoreboard font
+      MotdContext,             // Scrolling MOTD on Main Menu
       InputContext,            // Input value font
       ReleaseVersionContext,   // Version number on title screen
       GoalZoneIconContext      // Font for rendering GoalZone icon
