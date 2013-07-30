@@ -267,6 +267,7 @@ public:
    TNL_DECLARE_RPC(s2cRemoveLevel, (S32 index));
 
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
+   TNL_DECLARE_RPC(c2sShowNextLevel, ());
    TNL_DECLARE_RPC(c2sRequestShutdown, (U16 time, StringPtr reason));
    TNL_DECLARE_RPC(c2sRequestCancelShutdown, ());
    TNL_DECLARE_RPC(s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator));

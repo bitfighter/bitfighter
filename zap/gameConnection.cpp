@@ -1235,6 +1235,16 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, c2sShowNextLevel, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
+{
+   Vector<StringTableEntry> e;
+   e.push_back(mServerGame->getLevelNameFromIndex(NEXT_LEVEL)); 
+
+   s2cDisplayMessageE(ColorAqua, SFXNone, "Next level will be \"%e0\"", e);
+}
+
+
+
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reason), (time, reason), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
