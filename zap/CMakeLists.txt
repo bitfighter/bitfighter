@@ -233,24 +233,37 @@ endif()
 ## Full client build
 ##
 if(SDL_FOUND OR SDL2_FOUND)
-	add_executable(bitfighter
+	add_library(bitfighter-client
 		${SHARED_SOURCES}
 		${CLIENT_SOURCES}
 		${BITFIGHTER_HEADERS}
 		${OTHER_HEADERS}
-		main.cpp
 	)
 
-	add_dependencies(bitfighter
+	add_dependencies(bitfighter-client
 		alure
 		lua-vec
 		tnl
 		tomcrypt
 	)
 
-	target_link_libraries(bitfighter
+	target_link_libraries(bitfighter-client
 		${CLIENT_LIBS}
 		${SHARED_LIBS}
+	)
+
+	set_target_properties(bitfighter-client PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe)
+
+	add_executable(bitfighter
+		main.cpp
+	)
+
+	target_link_libraries(bitfighter
+		bitfighter-client
+	)
+
+	add_dependencies(bitfighter
+		bitfighter-client
 	)
 
 	include_directories(
@@ -317,19 +330,16 @@ set(TEST_SOURCES
 )
 
 add_executable(test EXCLUDE_FROM_ALL
-	${CLIENT_SOURCES}
-	${SHARED_SOURCES}
 	${TEST_SOURCES}
-	${BITFIGHTER_HEADERS}
 )
 
 target_link_libraries(test
-	${SHARED_LIBS}
-	${CLIENT_LIBS}
+	bitfighter-client
 	gtest
 )
 
 add_dependencies(test
+	bitfighter-client
 	alure
 	lua-vec
 	tnl
