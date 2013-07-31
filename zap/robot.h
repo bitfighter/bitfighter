@@ -129,8 +129,7 @@ public:
    S32 lua_getWaypoint(lua_State *L);
 
    // Finding stuff
-   S32 lua_findObjects(lua_State *L);
-   S32 lua_findGlobalObjects(lua_State *L);
+   S32 lua_findVisibleObjects(lua_State *L);
 
    // Bad dudes
    S32 lua_findClosestEnemy(lua_State *L);

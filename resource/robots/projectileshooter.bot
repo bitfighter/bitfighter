@@ -33,7 +33,7 @@ function onTick()
 
     local loc = bot:getLoc()
     table.clear(items)
-    bot:findObjects(items, ObjType.Burst, ObjType.Seeker, ObjType.Mine, ObjType.SpyBug)   -- Find a suitable target
+    bot:findVisibleObjects(items, ObjType.Burst, ObjType.Seeker, ObjType.Mine, ObjType.SpyBug)   -- Find a suitable target
 
     local closestItem = findClosest(items)
 

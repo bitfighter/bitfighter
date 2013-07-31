@@ -586,8 +586,7 @@ U16 Robot::findClosestZone(const Point &point)
    METHOD(CLASS,  teamMsg,              ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS,  privateMsg,           ARRAYDEF({{ STR, STR, END }}), 1 )                   \
                                                                                              \
-   METHOD(CLASS,  findObjects,          ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
-   METHOD(CLASS,  findGlobalObjects,    ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
+   METHOD(CLASS,  findVisibleObjects,   ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    METHOD(CLASS,  findClosestEnemy,     ARRAYDEF({{              END }, { NUM,  END }}), 2 ) \
                                                                                              \
    METHOD(CLASS,  getFiringSolution,    ARRAYDEF({{ BFOBJ, END }}), 1 )                      \
@@ -1064,15 +1063,18 @@ S32 Robot::lua_privateMsg(lua_State *L)
 
 
 /**
-  *   @luafunc Robot::findObjects(table, itemType, ...)
+  *   @luafunc Robot::findVisibleObjects(table, itemType, ...)
   *   @brief   Finds all items of the specified type within ship's area of vision.
-  *   @descr   Can specify multiple types.  The \e table argument is optional, but bots that call this function frequently will perform
-  *            better if they provide a reusable table in which found objects can be stored.  By providing a table, you will avoid
-  *            incurring the overhead of construction and destruction of a new one.
+  *   @descr   This search will exclude the bot itself as well as other cloaked ships in the area (unless
+  *            this bot has sensor equipped)
+  *
+  *   Can specify multiple types.  The \e table argument is optional, but bots that call this function frequently will perform
+  *   better if they provide a reusable table in which found objects can be stored.  By providing a table, you will avoid
+  *   incurring the overhead of construction and destruction of a new one.
   *
   *   If a table is not provided, the function will create a table and return it on the stack.
   *
-  *   <i>Note that although this function is part of the Robot object, it can (and should) be called without a direct bot: reference.</i>  
+  *   <i>Note that although this function is part of the Robot object, it can (and should) be called without a direct bot: reference.</i>
   *   See the example below.
   *
   *   @param  table - (Optional) Reusable table into which results can be written.
@@ -1088,48 +1090,78 @@ S32 Robot::lua_privateMsg(lua_State *L)
   *           print(#items)                       -- Print the number of items found to the console
   *         end
   */
-S32 Robot::lua_findObjects(lua_State *L)
+S32 Robot::lua_findVisibleObjects(lua_State *L)
 {
-   checkArgList(L, functionArgs, "Robot", "findObjects");
+   checkArgList(L, functionArgs, "Robot", "findVisibleObjects");
 
    Point pos = getActualPos();
    Rect queryRect(pos, pos);
-   queryRect.expand(getGame()->computePlayerVisArea(this));  
+   queryRect.expand(getGame()->computePlayerVisArea(this));
 
-   return LuaScriptRunner::findObjects(L, getGame()->getGameObjDatabase(), &queryRect, this);
-}
+   fillVector.clear();
+   static Vector<U8> types;
+
+   types.clear();
+
+   // We expect the stack to look like this: -- [fillTable], objType1, objType2, ...
+   // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
+   // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
+   // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
+   while(lua_isnumber(L, -1))
+   {
+      U8 typenum = (U8)lua_tointeger(L, -1);
+
+      // Requests for botzones have to be handled separately; not a problem, we'll just do the search here, and add them to
+      // fillVector, where they'll be merged with the rest of our search results.
+      if(typenum != BotNavMeshZoneTypeNumber)
+         types.push_back(typenum);
+      else
+         BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, queryRect);
+
+      lua_pop(L, 1);
+   }
+
+   // Get other objects on screen-visible area only
+   getGame()->getGameObjDatabase()->findObjects(types, fillVector, queryRect);
 
 
-/**
-  *   @luafunc Robot::findGlobalObjects(table, itemType, ...)
-  *   @brief   Finds all items of the specified type anywhere on the level.
-  *   @descr   Can specify multiple types.  The \e table argument is optional, but bots that call this function frequently will perform
-  *            better if they provide a reusable table in which found objects can be stored.  By providing a table, you will avoid
-  *            incurring the overhead of construction and destruction of a new one.
-  *
-  *   If a table is not provided, the function will create a table and return it on the stack.
-  *
-  *   <i>Note that although this function is part of the Robot object, it can (and should) be called without a direct bot: reference.</i>  
-  *   See the example below.
-  *
-  *   @param  table - (Optional) Reusable table into which results can be written.
-  *   @param  itemType - One or more itemTypes specifying what types of objects to find.
-  *   @return resultsTable - Will either be a reference back to the passed \e table, or a new table if one was not provided.
-  *
-  *   @code items = { }     -- Reusable container for findGlobalObjects.  Because it is defined outside
-  *                         -- any functions, it will have global scope.
-  *
-  *         function countObjects(objType, ...)       -- Pass one or more object types
-  *           table.clear(items)                      -- Remove any items in table from previous use
-  *           findGlobalObjects(items, objType, ...)  -- Put all items of specified type(s) into items table, no bot reference
-  *           print(#items)                           -- Print the number of items found to the console
-  *         end
-  */
-S32 Robot::lua_findGlobalObjects(lua_State *L)
-{
-   checkArgList(L, functionArgs, "Robot", "findGlobalObjects");
+   // We are expecting a table to be on top of the stack when we get here.  If not, we can add one.
+   if(!lua_istable(L, -1))
+   {
+      TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not cleared!");
 
-   return LuaScriptRunner::findObjects(L, getGame()->getGameObjDatabase(), NULL, this);
+      logprintf(LogConsumer::LogWarning,
+                  "Finding objects will be far more efficient if your script provides a table -- see scripting docs for details!");
+      lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
+   }
+
+   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || LuaBase::dumpStack(L), "Should only have table!");
+
+
+   S32 pushed = 0;      // Count of items we put into our table
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      if(isShipType(fillVector[i]->getObjectTypeNumber()))
+      {
+         if(fillVector[i] == this)  // Don't add this bot to the list of found objects!
+            continue;
+
+         // Ignore ship/robot if it's dead or cloaked (unless bot has sensor)
+         Ship *ship = static_cast<Ship *>(fillVector[i]);
+         bool callerHasSensor = this->hasModule(ModuleSensor);
+         if(!ship->isVisible(callerHasSensor) || ship->hasExploded)
+            continue;
+      }
+
+      static_cast<BfObject *>(fillVector[i])->push(L);
+      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+      lua_rawseti(L, 1, pushed);
+   }
+
+   TNLAssert(lua_gettop(L) == 1 || LuaBase::dumpStack(L), "Stack has unexpected items on it!");
+
+   return 1;
 }
 
 
