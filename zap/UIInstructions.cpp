@@ -586,7 +586,7 @@ static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
 {
    // Heading
    glColor(Colors::cyan);
-   drawCenteredString(y, descSize, indicatorPageHeadings[1]);
+   drawCenteredString(y, descSize, indicatorPageHeadings[0]);
    y += 26;
 
    static const char *badgeHeadingDescription[] = {
@@ -624,12 +624,6 @@ void InstructionsUserInterface::renderPageGameIndicators()
    S32 y = 40;
    S32 descSize = 20;
    S32 textSize = 17;
-   S32 textGap = 9;
-
-
-   glColor(Colors::cyan);
-   drawCenteredString(y, descSize, indicatorPageHeadings[0]);
-   y += textSize + textGap;
 
    y = renderBadges(y, textSize, descSize);
 }
