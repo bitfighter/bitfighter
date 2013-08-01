@@ -26,14 +26,14 @@
 #ifndef _FONT_MANAGER_H_
 #define _FONT_MANAGER_H_
 
+#include "tnlTypes.h"
+
 #include "FontContextEnum.h"
 #include "freeglut_stroke.h"     // Our stroke font handler -- include here to resolve namespace grief
 
 extern "C" { 
 #  include "../fontstash/fontstash.h" 
 }
-
-#include "tnlTypes.h"
 
 #include <string>
 
