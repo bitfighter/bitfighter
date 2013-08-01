@@ -1102,7 +1102,7 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
    {
       F32 alpha = MAX(0, 0.9f - (F32) healRate * 0.01f);
       glColor(c * 0.8f, alpha);
-      renderPointVector(&vertexArray, GL_POLYGON);
+      renderPointVector(&vertexArray, GL_TRIANGLE_FAN);
    }
 
    glColor(c);
@@ -2182,7 +2182,7 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Color *color, bo
    if(healRate > 0)
    {
       glColor(c * 0.8f, MAX(0, 0.9f - (F32) healRate * 0.01f));
-      renderPointVector(geom, GL_POLYGON);
+      renderPointVector(geom, GL_TRIANGLE_FAN);
    }
 
    glColor(enabled ? c : (c * 0.6f));
