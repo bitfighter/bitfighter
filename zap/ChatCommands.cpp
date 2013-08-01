@@ -211,10 +211,17 @@ void restartLevelHandler(ClientGame *game, const Vector<string> &words)
       game->getConnectionToServer()->c2sRequestLevelChange(REPLAY_LEVEL, false);
 }
 
+
 void randomLevelHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasLevelChange("!!! You don't have permission to change levels"))
       game->getConnectionToServer()->c2sRequestLevelChange(RANDOM_LEVEL, false);
+}
+
+
+void showNextLevelHandler(ClientGame *game, const Vector<string> &words)
+{
+   game->getConnectionToServer()->c2sShowNextLevel();
 }
 
 

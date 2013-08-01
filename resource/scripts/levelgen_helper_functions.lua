@@ -64,6 +64,11 @@ function levelgen:addItem(object)
     return bf:addItem(object)
 end
 
+function levelgen:pointCanSeePoint(p1, p2)
+    printDeprecationWarning("levelgen:pointCanSeePoint(p1, p2)", "bf:pointCanSeePoint(p1, p2)")
+    return bf:pointCanSeePoint(p1, p2)
+end
+
 function GameInfo()
     printDeprecationWarning("GameInfo()", "bf:getGameInfo()")
     return bf:getGameInfo()

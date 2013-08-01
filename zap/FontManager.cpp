@@ -221,6 +221,7 @@ void FontManager::setFontContext(FontContext fontContext)
          setFont(FontRoman);
          return;
 
+      case MotdContext:
       case ScoreboardContext:
       case ReleaseVersionContext:
       case HelpItemContext:

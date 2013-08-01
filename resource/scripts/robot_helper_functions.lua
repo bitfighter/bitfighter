@@ -76,6 +76,8 @@ end
 
 --
 -- The following functions are provided so users don't need to run them with the bot: prefix
+-- 
+-- Why?  why is the bot: prefix so horrible??
 --
 function subscribe(...)
    return bf:subscribe(...)
@@ -89,12 +91,12 @@ function globalMsg(...)
    return bot:globalMsg(...)
 end
 
-function findObjects(...)
-  return bot:findObjects(...)
+function findVisibleObjects(...)
+  return bot:findVisibleObjects(...)
 end
 
-function findGlobalObjects(...)
-  return bot:findGlobalObjects(...)
+function findAllObjects(...)
+  return bot:findAllObjects(...)
 end
 
 function getFiringSolution(...)
@@ -116,4 +118,19 @@ end
 function TeamInfo(index)
     printDeprecationWarning("TeamInfo(index)", "bf:getGameInfo():getTeam(index)")
     return bf:getGameInfo():getTeam(index)
+end
+
+function findObjects(...)
+    printDeprecationWarning("findObjects(...)", "bot:findVisibleObjects(...)")
+    return bot:findVisibleObjects(...)
+end
+
+function bot:findObjects(...)
+    printDeprecationWarning("bot:findObjects(...)", "bot:findVisibleObjects(...)")
+    return bot:findVisibleObjects(...)
+end
+
+function bot:findGlobalObjects(...)
+    printDeprecationWarning("bot:findGlobalObjects(...)", "bot:findAllObjects(...)")
+    return bot:findAllObjects(...)
 end

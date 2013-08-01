@@ -127,6 +127,7 @@ private:
    Vector<boost::shared_ptr<GridDatabase> > mUndoItems;  // Undo/redo history 
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Point mSnapDelta;                            // For tracking how far from the snap point our cursor is
+   Vector<Point> mMoveOrigins;
 
    boost::shared_ptr<GridDatabase> mEditorDatabase;
 
@@ -273,7 +274,9 @@ private:
    void showCouldNotFindScriptMessage(const string &scriptName);
 
    GridDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
-   void translateSelectedItems(GridDatabase *database, const Point &offset);
+
+   void translateSelectedItems(const Point &offset);
+   void snapSelectedEngineeredItems(const Point &cumulativeOffset);
 
    void render();
    void renderObjects(GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay);

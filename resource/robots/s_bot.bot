@@ -58,12 +58,12 @@ function main()
 end
  
 
-items = { }     -- Global variable, reusable container for findGlobalObjects.  Reusing this table avoids costs of
-                -- constructing and destructing it every time we call findGlobalObjects().  Be sure to clear the
+items = { }     -- Global variable, reusable container for bot:findAllObjects.  Reusing this table avoids costs of
+                -- constructing and destructing it every time we call bot:findAllObjects().  Be sure to clear the
                 -- table before reusing it!
 function shieldSelf()
     table.clear(items)
-    findObjects(items, ObjType.Bullet, ObjType.Seeker, ObjType.Asteroid, ObjType.Mine)
+    bot:findVisibleObjects(items, ObjType.Bullet, ObjType.Seeker, ObjType.Asteroid, ObjType.Mine)
 
     local distToShieldAt = botRadius * 2 + (1 - difficulty) * 100
     if (items ~= nil) then
@@ -92,8 +92,8 @@ end
 
 function fireAtObjects()
     table.clear(items)
-    findObjects(items, ObjType.Robot,               ObjType.Turret, ObjType.Ship, ObjType.Asteroid, 
-                       ObjType.ForceFieldProjector, ObjType.SpyBug, ObjType.Core)
+    bot:findVisibleObjects(items, ObjType.Robot, ObjType.Turret, ObjType.Ship, ObjType.Asteroid, 
+        ObjType.ForceFieldProjector, ObjType.SpyBug, ObjType.Core)
 
     -- Cycle through list of potential items until we find one that we can attack
     for index, enemy in ipairs(items) do
@@ -248,7 +248,7 @@ function attackNearbyEnemies(target, agressionLevel)
         local myPow   = bot:getEnergy() + bot:getHealth()
 
         table.clear(items)
-        findObjects(items, ObjType.Ship, ObjType.Robot)
+        bot:findVisibleObjects(items, ObjType.Ship, ObjType.Robot)
       
         local otherPow = target:getEnergy() + target:getHealth() * #items
       
@@ -271,7 +271,7 @@ end
 function getObjective(objType, team, onTeam)
 
     table.clear(items)
-    bot:findGlobalObjects(items, objType)       -- Returns a list of all items of type objType in the game
+    bot:findAllObjects(items, objType)       -- Returns a list of all items of type objType in the game
 
     local itemsOnMyTeam = {}
     local currentIndex = 1

@@ -671,7 +671,7 @@ S32 LuaScriptRunner::findObjectById(lua_State *L, const Vector<DatabaseObject *>
 
 
 // If scope is NULL, we find all items
-S32 LuaScriptRunner::findObjects(lua_State *L, GridDatabase *database, Rect *scope, Ship *caller)
+S32 LuaScriptRunner::findObjects(lua_State *L, GridDatabase *database, Rect *scope)
 {
    fillVector.clear();
    static Vector<U8> types;
@@ -724,18 +724,6 @@ S32 LuaScriptRunner::findObjects(lua_State *L, GridDatabase *database, Rect *sco
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      if(isShipType(fillVector[i]->getObjectTypeNumber()))
-      {
-         if(fillVector[i] == caller)  // Don't add calling ship to the list of found objects!
-            continue;
-
-         // Ignore ship/robot if it's dead or cloaked (unless bot has sensor)
-         Ship *ship = static_cast<Ship *>(fillVector[i]);
-         bool callerHasSensor = (caller != NULL) ? caller->hasModule(ModuleSensor) : false;
-         if(!ship->isVisible(callerHasSensor) || ship->hasExploded)
-            continue;
-      }
-
       static_cast<BfObject *>(fillVector[i])->push(L);
       pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
@@ -1086,12 +1074,14 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
  */
 //               Fn name    Param profiles         Profile count
 #define LUA_NON_STATIC_METHODS(CLASS, METHOD) \
-      METHOD(CLASS, findObjectById,  ARRAYDEF({{ INT, END }}), 1 )   \
-      METHOD(CLASS, addItem,         ARRAYDEF({{ BFOBJ, END }}), 1 ) \
-      METHOD(CLASS, getGameInfo,     ARRAYDEF({{ END }}), 1 )        \
-      METHOD(CLASS, getPlayerCount,  ARRAYDEF({{ END }}), 1 )        \
-      METHOD(CLASS, subscribe,       ARRAYDEF({{ EVENT, END }}), 1 ) \
-      METHOD(CLASS, unsubscribe,     ARRAYDEF({{ EVENT, END }}), 1 ) \
+      METHOD(CLASS, pointCanSeePoint,  ARRAYDEF({{ PT, PT, END }}), 1 ) \
+      METHOD(CLASS, findObjectById,    ARRAYDEF({{ INT, END }}), 1 )    \
+      METHOD(CLASS, findAllObjects,    ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
+      METHOD(CLASS, addItem,           ARRAYDEF({{ BFOBJ, END }}), 1 )  \
+      METHOD(CLASS, getGameInfo,       ARRAYDEF({{ END }}), 1 )         \
+      METHOD(CLASS, getPlayerCount,    ARRAYDEF({{ END }}), 1 )         \
+      METHOD(CLASS, subscribe,         ARRAYDEF({{ EVENT, END }}), 1 )  \
+      METHOD(CLASS, unsubscribe,       ARRAYDEF({{ EVENT, END }}), 1 )  \
 
 
 // Put both method types together so we can build our functionArgs table
@@ -1301,6 +1291,26 @@ S32 LuaScriptRunner::lua_writeToFile(lua_State *L)
 
 
 /**
+ * @luafunc bool LuaScriptRunner::pointCanSeePoint(point point1, point point2)
+ * @brief   Returns true if the two specified points can see one another.
+ * @param   point1 First point.
+ * @param   point2 Second point.
+ * @return  `true` if objects have LOS from one to the other, `false` otherwise
+ */
+S32 LuaScriptRunner::lua_pointCanSeePoint(lua_State *L)
+{
+   checkArgList(L, functionArgs, luaClassName, "pointCanSeePoint");
+
+   Point p1 = getPointOrXY(L, 1);
+   Point p2 = getPointOrXY(L, 2);
+
+   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
+
+   return returnBool(L, mLuaGridDatabase->pointCanSeePoint(p1, p2));
+}
+
+
+/**
  * @luafunc    BfObject LuaScriptRunner::findObjectById(num id)
  * @brief      Returns an object with the given id, or nil if none exists.
  * @descr      Finds an object with the specified user-assigned id.  If there are multiple objects with the same id (shouldn't happen,
@@ -1319,6 +1329,40 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
    TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
 
    return findObjectById(L, mLuaGame->getGameObjDatabase()->findObjects_fast());
+}
+
+
+/**
+  *   @luafunc table LuaScriptRunner::findGlobalObjects(table results, ObjType objType, ...)
+  *   @brief   Finds all items of the specified type anywhere on the level.
+  *   @descr   Can specify multiple types.  The \e table argument is optional, but levelgens that call this function frequently will perform
+  *            better if they provide a reusable table in which found objects can be stored.  By providing a table, you will avoid
+  *            incurring the overhead of construction and destruction of a new one.
+  *
+  *   If a table is not provided, the function will create a table and return it on the stack.
+  *
+  *   @param  results (Optional) Reusable table into which results can be written.
+  *   @param  objType One or more ObjTypes specifying what types of objects to find.
+  *   @return A reference back to the passed table, or a new table if one was not provided.
+  *
+  *   @code
+  *   items = { }     -- Reusable container for findGlobalObjects.  Because it is defined outside
+  *                   -- any functions, it will have global scope.
+  *
+  *   function countObjects(objType, ...)                -- Pass one or more object types
+  *     table.clear(items)                               -- Remove any items in table from previous use
+  *     levelgen:findGlobalObjects(items, objType, ...)  -- Put all items of specified type(s) into items table
+  *     print(#items)                                    -- Print the number of items found to the console
+  *   end
+  *   @endcode
+  */
+S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
+{
+   checkArgList(L, functionArgs, luaClassName, "findGlobalObjects");
+
+   TNLAssert(mLuaGridDatabase != NULL, "Game must not be NULL!");
+
+   return findObjects(L, mLuaGridDatabase, NULL);
 }
 
 

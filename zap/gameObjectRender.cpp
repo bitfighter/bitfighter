@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
@@ -1394,7 +1394,7 @@ void renderGoalZoneIcon(const Point &center, S32 radius)
 //   drawStar(center, 5, radius/2, radius/4);
 //   drawStar(center, 5, radius/4, radius/8);
 
-   // Find the unicode in Character Map or similar utility, 
+   // Find the unicode in Character Map or similar utility,
    // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
    // Use Hex UTF-8 bytes, represent in string like this: \xE2\x99\xA6
 

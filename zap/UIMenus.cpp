@@ -967,7 +967,6 @@ void MainMenuUserInterface::setNeedToUpgrade(bool needToUpgrade)
       showUpgradeAlert();
 }
 
-static const S32 MOTD_POS = 540;
 
 void MainMenuUserInterface::render()
 {
@@ -976,6 +975,8 @@ void MainMenuUserInterface::render()
    // Draw our Message-Of-The-Day, if we have one
    if(strcmp(mMOTD, ""))
    {
+      static const S32 MOTD_POS = 540;
+
       // Draw message, scrolling
       U32 width = getStringWidth(20, mMOTD);
       glColor(Colors::white);
@@ -985,11 +986,14 @@ void MainMenuUserInterface::render()
       delta = U32(delta * pixelsPerSec * 0.001) % totalWidth;
 
       S32 xPos = canvasWidth - delta;
-      S32 motdWidth = drawStringAndGetWidth(xPos, MOTD_POS, 20, mMOTD);
 
-      // Draw lines
-      drawFadingHorizontalLine(xPos + (motdWidth / 2),             xPos, MOTD_POS + 25, Colors::green50);
-      drawFadingHorizontalLine(xPos + (motdWidth / 2), xPos + motdWidth, MOTD_POS + 25, Colors::green50);
+      FontManager::pushFontContext(MotdContext);
+      S32 motdWidth = drawStringAndGetWidth(xPos, MOTD_POS, 20, mMOTD);
+      FontManager::popFontContext();
+
+      //// Draw lines
+      //drawFadingHorizontalLine(xPos + (motdWidth / 2),             xPos, MOTD_POS + 25, Colors::green50);
+      //drawFadingHorizontalLine(xPos + (motdWidth / 2), xPos + motdWidth, MOTD_POS + 25, Colors::green50);
    }
 
    // Parent renderer might dim what we've drawn so far, so run it last so it can have access to everything
