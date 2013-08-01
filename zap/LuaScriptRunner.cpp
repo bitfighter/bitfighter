@@ -1156,12 +1156,7 @@ S32 LuaScriptRunner::lua_logprint(lua_State *L)
 S32 LuaScriptRunner::lua_print(lua_State *L)
 {
    string str = buildPrintString(L);
-
-#ifdef BF_NO_CONSOLE
-   fprintf(stderr, "%s\n", str.c_str());
-#else
    gConsole.output("%s\n", str.c_str());
-#endif
 
    return 0;
 }

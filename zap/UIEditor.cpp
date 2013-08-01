@@ -637,9 +637,7 @@ void EditorUserInterface::runLevelGenScript()
    if(scriptName == "")      // No script included!!
       return;
 
-#ifndef BF_NO_CONSOLE
    gConsole.output("Running script %s\n", gameType->getScriptLine().c_str());
-#endif
 
    const Vector<string> *scriptArgs = gameType->getScriptArgs();
 
@@ -657,10 +655,8 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
 
    if(name == "")
    {
-#ifndef BF_NO_CONSOLE
       gConsole.output("Could not find script %s; looked in folders: %s\n", 
                       scriptName.c_str(), concatenate(folderManager->getScriptFolderList()).c_str());
-#endif
       return;
    }
    
@@ -3623,9 +3619,7 @@ void EditorUserInterface::zoom(F32 zoomAmount)
 void EditorUserInterface::onTextInput(char ascii)
 {
    // Pass the key on to the console for processing
-#ifndef BF_NO_CONSOLE
    if(gConsole.onKeyDown(ascii))
-#endif
        return;
 }
 
@@ -3636,14 +3630,12 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    if(Parent::onKeyDown(inputCode))
       return true;
 
-#ifndef BF_NO_CONSOLE
    if(gConsole.onKeyDown(inputCode))      // Pass the key on to the console for processing
       return true;
 
    // If console is open, then we want to capture text, so return false
    if(gConsole.isVisible())
       return false;
-#endif
 
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
 
@@ -3697,11 +3689,9 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       flipSelectionVertical();
    else if(inputString == "/" || inputString == "Keypad /")
    {
-#ifndef BF_NO_CONSOLE
       if(gConsole.isOk())
          gConsole.show();
       //else do what???
-#endif
    }
    else if(inputString == "Ctrl+Shift+L") // Reload level
    {

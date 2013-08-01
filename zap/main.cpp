@@ -505,11 +505,7 @@ void dedicatedServerLoop()
 class OglConsoleLogConsumer : public LogConsumer    // Dumps to oglConsole
 {
 private:
-   void writeString(const char *string) {
-#ifndef BF_NO_CONSOLE
-      gConsole.output(string);
-#endif
-   }
+   void writeString(const char *string) { gConsole.output(string); }
 };
 
 
@@ -1228,9 +1224,7 @@ int main(int argc, char **argv)
       // of a string.  Which will crash if the fonts haven't been loaded, which happens as part of actualizeScreenMode.  So there.
       createClientGame(settings);         
 
-#ifndef BF_NO_CONSOLE
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
-#endif
 
       // Fonts are initialized in VideoSystem::actualizeScreenMode because of OpenGL + texture loss/creation
       FontManager::setFont(FontRoman);     // Default font

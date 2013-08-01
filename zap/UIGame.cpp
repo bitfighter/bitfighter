@@ -1102,10 +1102,8 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    if(Parent::onKeyDown(inputCode))    // Let parent try handling the key
       return true;
 
-#ifndef BF_NO_CONSOLE
    if(gConsole.onKeyDown(inputCode))   // Pass the key on to the console for processing
       return true;
-#endif
 
    if(checkInputCode(InputCodeManager::BINDING_HELP, inputCode))   // Turn on help screen
    {
@@ -1127,10 +1125,8 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    // Only open when there are no active helpers
    if(!mHelperManager.isHelperActive() && inputCode == KEY_SLASH && InputCodeManager::checkModifier(KEY_CTRL))
    {
-#ifndef BF_NO_CONSOLE
       if(gConsole.isOk())                 // Console is only not Ok if something bad has happened somewhere
          gConsole.toggleVisibility();
-#endif
 
       return true;
    }
@@ -1183,9 +1179,8 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       mHelpItemManager.debugShowNextHelpItem();
 #endif
 
-#ifndef BF_NO_CONSOLE
+
    if(!gConsole.isVisible())
-#endif
    {
       if(!isChatting())
          return processPlayModeKey(inputCode);
@@ -1220,10 +1215,8 @@ void GameUserInterface::onMissionKeyReleased()
 
 void GameUserInterface::onTextInput(char ascii)
 {
-#ifndef BF_NO_CONSOLE
    if(gConsole.isVisible())
       gConsole.onKeyDown(ascii);
-#endif
    mHelperManager.onTextInput(ascii);
 }
 
@@ -1603,13 +1596,8 @@ static void joystickUpdateMove(ClientGame *game, GameSettings *settings, Move *t
 Move *GameUserInterface::getCurrentMove()
 {
    Move *move = &mCurrentMove;
-   bool consoleVisibile = false;
 
-#ifndef BF_NO_CONSOLE
-   consoleVisibile = gConsole.isVisible();
-#endif
-
-   if(!mDisableShipKeyboardInput && !consoleVisibile)
+   if(!mDisableShipKeyboardInput && !gConsole.isVisible())
    {
       // Some helpers (like TeamShuffle) like to disable movement when they are active
       if(mHelperManager.isMovementDisabled())
