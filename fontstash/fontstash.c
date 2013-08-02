@@ -22,6 +22,11 @@
 #include <string.h>
 #include <math.h> /* @rlyeh: floorf() */
 
+// TNL isn't used here so we extract the relevant logic for GLES
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || defined (__ANDROID__)
+#  define TNL_OS_MOBILE
+#endif
+
 #ifdef TNL_OS_MOBILE
 #  include "SDL_opengles.h"
 #else

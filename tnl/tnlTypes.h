@@ -305,8 +305,10 @@ static const U32 S32_MAX_DIGITS = 11;                             ///< S16_MIN =
 #endif
 
 // Helper platform macros
+#ifndef TNL_OS_MOBILE
 #if defined(TNL_OS_ANDROID) || defined(TNL_OS_IOS)
 #  define TNL_OS_MOBILE
+#endif
 #endif
 
 

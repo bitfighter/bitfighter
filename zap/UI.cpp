@@ -248,7 +248,7 @@ void UserInterface::renderFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom,
 
    // Fill
    glColor(fillColor, fillAlpha);
-   renderPointVector(&points, GL_POLYGON);
+   renderPointVector(&points, GL_TRIANGLE_FAN);
 
    // Border
    glColor(borderColor, fillAlpha);

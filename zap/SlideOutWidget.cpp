@@ -186,7 +186,7 @@ void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 
 
    // Fill
    glColor(Colors::black, 0.70f);
-   renderPointVector(&points, GL_POLYGON);
+   renderPointVector(&points, GL_TRIANGLE_FAN);
 
    // Border
    glColor(borderColor);

@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
@@ -1102,7 +1102,7 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
    {
       F32 alpha = MAX(0, 0.9f - (F32) healRate * 0.01f);
       glColor(c * 0.8f, alpha);
-      renderPointVector(&vertexArray, GL_POLYGON);
+      renderPointVector(&vertexArray, GL_TRIANGLE_FAN);
    }
 
    glColor(c);
@@ -1394,7 +1394,7 @@ void renderGoalZoneIcon(const Point &center, S32 radius)
 //   drawStar(center, 5, radius/2, radius/4);
 //   drawStar(center, 5, radius/4, radius/8);
 
-   // Find the unicode in Character Map or similar utility, 
+   // Find the unicode in Character Map or similar utility,
    // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
    // Use Hex UTF-8 bytes, represent in string like this: \xE2\x99\xA6
 
@@ -2182,7 +2182,7 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Color *color, bo
    if(healRate > 0)
    {
       glColor(c * 0.8f, MAX(0, 0.9f - (F32) healRate * 0.01f));
-      renderPointVector(geom, GL_POLYGON);
+      renderPointVector(geom, GL_TRIANGLE_FAN);
    }
 
    glColor(enabled ? c : (c * 0.6f));

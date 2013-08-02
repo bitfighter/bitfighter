@@ -122,9 +122,7 @@ void LuaLevelGenerator::killScript()
   */
 //               Fn name    Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, findGlobalObjects, ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    METHOD(CLASS, setGameTime,       ARRAYDEF({{ NUM, END }}), 1 )                        \
-   METHOD(CLASS, pointCanSeePoint,  ARRAYDEF({{ PT, PT, END }}), 1 )                     \
    METHOD(CLASS, globalMsg,         ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS, teamMsg,           ARRAYDEF({{ STR, TEAM_INDX, END }}), 1 )             \
    METHOD(CLASS, privateMsg,        ARRAYDEF({{ STR, STR, END }}), 1 )                   \
@@ -152,56 +150,6 @@ S32 LuaLevelGenerator::lua_setGameTime(lua_State *L)
    mGame->setGameTime(getFloat(L, 1));
 
    return 0;
-}
-
-
-/**
- * @luafunc bool LuaLevelGenerator::pointCanSeePoint(point point1, point point2)
- * @brief   Returns true if the two specified points can see one another.
- * @param   point1 First point.
- * @param   point2 Second point.
- * @return  `true` if objects have LOS from one to the other, `false` otherwise
- */
-S32 LuaLevelGenerator::lua_pointCanSeePoint(lua_State *L)
-{
-   checkArgList(L, functionArgs, luaClassName, "pointCanSeePoint");
-
-   Point p1 = getPointOrXY(L, 1);
-   Point p2 = getPointOrXY(L, 2);
-
-   return returnBool(L, mGridDatabase->pointCanSeePoint(p1, p2));
-}
-
-
-/**
-  *   @luafunc table LuaLevelGenerator::findGlobalObjects(table results, ObjType objType, ...)
-  *   @brief   Finds all items of the specified type anywhere on the level.
-  *   @descr   Can specify multiple types.  The \e table argument is optional, but levelgens that call this function frequently will perform
-  *            better if they provide a reusable table in which found objects can be stored.  By providing a table, you will avoid
-  *            incurring the overhead of construction and destruction of a new one.
-  *
-  *   If a table is not provided, the function will create a table and return it on the stack.
-  *
-  *   @param  results (Optional) Reusable table into which results can be written.
-  *   @param  objType One or more ObjTypes specifying what types of objects to find.
-  *   @return A reference back to the passed table, or a new table if one was not provided.
-  *
-  *   @code
-  *   items = { }     -- Reusable container for findGlobalObjects.  Because it is defined outside
-  *                   -- any functions, it will have global scope.
-  *
-  *   function countObjects(objType, ...)                -- Pass one or more object types
-  *     table.clear(items)                               -- Remove any items in table from previous use
-  *     levelgen:findGlobalObjects(items, objType, ...)  -- Put all items of specified type(s) into items table
-  *     print(#items)                                    -- Print the number of items found to the console
-  *   end
-  *   @endcode
-  */
-S32 LuaLevelGenerator::lua_findGlobalObjects(lua_State *L)
-{
-   checkArgList(L, functionArgs, luaClassName, "findGlobalObjects");
-
-   return LuaScriptRunner::findObjects(L, mGame->getGameObjDatabase(), NULL, NULL);
 }
 
 

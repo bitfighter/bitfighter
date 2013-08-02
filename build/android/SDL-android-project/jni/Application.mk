@@ -4,7 +4,8 @@ APP_CPPFLAGS += -frtti -fexceptions
 # This is the normal requirement for c++ stl
 #APP_STL := stlport_static
 
-# Use the GNU stl instead because of boost problems
+# Use the GNU stl instead because of boost and other stl problems
 APP_STL := gnustl_static
 
 APP_ABI := armeabi
+APP_PLATFORM := android-10

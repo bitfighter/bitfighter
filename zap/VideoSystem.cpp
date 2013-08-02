@@ -40,13 +40,13 @@
 
 //#include "SDL.h"
 
-//#ifdef TNL_OS_MOBILE
-//#  include "SDL_opengles.h"
+#ifdef TNL_OS_MOBILE
+#  include "SDL_opengles.h"
 //   // Needed for GLES compatibility
-//#  define glOrtho glOrthof
+#  define glOrtho glOrthof
 //#else
 //#  include "SDL_opengl.h"
-//#endif
+#endif
 
 #if !SDL_VERSION_ATLEAST(2,0,0)
 #  include "SDL_syswm.h"

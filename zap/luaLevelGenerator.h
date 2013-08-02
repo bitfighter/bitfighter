@@ -65,9 +65,6 @@ public:
 
    // Lua methods
    virtual S32 lua_setGameTime(lua_State *L);       // Set the time for this level
-   virtual S32 lua_pointCanSeePoint(lua_State *L);  // Returns if a point has LOS to another point, given what's on the map so far
-
-   S32 lua_findGlobalObjects(lua_State *L);         // Retrieve object with the specified id
 
    S32 lua_globalMsg(lua_State *L);
    S32 lua_teamMsg(lua_State *L);

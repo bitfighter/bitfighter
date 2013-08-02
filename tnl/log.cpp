@@ -131,7 +131,7 @@ void LogConsumer::prepareAndLogString(std::string message)
    else
       message.append("\n");
 #ifdef TNL_OS_ANDROID
-   __android_log_print(ANDROID_LOG_DEBUG, "Bitfighter", message.c_str());
+   __android_log_print(ANDROID_LOG_DEBUG, "Bitfighter", "%s", message.c_str());
 #else
    writeString(message.c_str());    // <== each log class will have it's own way of doing this
 #endif

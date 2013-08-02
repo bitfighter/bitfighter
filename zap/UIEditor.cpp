@@ -3647,7 +3647,7 @@ void EditorUserInterface::onTextInput(char ascii)
 {
    // Pass the key on to the console for processing
    if(gConsole.onKeyDown(ascii))
-      return;
+       return;
 }
 
 
@@ -4789,8 +4789,10 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
    centerView();
 
    render();
+#ifndef BF_NO_SCREENSHOTS
    ScreenShooter::saveScreenshot(game->getUIManager(), game->getSettings(), 
                                  LevelDatabaseUploadThread::UploadScreenshotFilename);
+#endif
    mPreviewMode = false;
    mNormalizedScreenshotMode = false;
 }
