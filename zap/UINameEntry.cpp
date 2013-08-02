@@ -82,7 +82,7 @@ F32 TextEntryUserInterface::getFontSize()
    F32 maxLineLength = 750.0f;      // Pixels
 
    // Shrink the text to fit on-screen when text gets very long
-   F32 w = getStringWidthf(fontSizeBig, lineEditor.getDisplayString().c_str());
+   F32 w = (F32)getStringWidthf(fontSizeBig, lineEditor.getDisplayString().c_str());
    if(w > maxLineLength)
       return maxLineLength * fontSizeBig / w;
    else
