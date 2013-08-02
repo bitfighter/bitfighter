@@ -1,0 +1,43 @@
+/**
+
+@page plugin Plugin Overview
+@section intro Introduction
+Plugins run once when called, then exit.  The \e main() function is
+called.
+
+Since plugins do not linger after being called, they cannot subscribe to
+or respond to events.
+
+@section programming_plugins Programming Editor Plugins
+
+Editor plugins can be used to extend the functionality of the editor, and to add new or experimental geometry manipulation functions.
+
+When the user runs a plugin, the editor first tries to call a function called \e getArgsMenu().  If this function exists, it must
+return a table containing the menu name and the various items to be displayed on it.  The values that the user enters for these
+items will be passed to the script in the arg table, Lua's structure for passing command line arguments to a script.  If \e getArgsMenu()
+does not exist, the plugin will be run with no arguments.
+
+Unlike levelgen and bot scripts, plugins do not respond to events, and often consist of only a \e main() function, and, if they require 
+special inputs, a \e getArgsMenu() function.
+
+The following is the getArgsMenu() function from the draw_arcs plugin, which can be found in Bitfighter's \e editor_plugins folder. 
+\code
+function getArgsMenu()
+   
+   return "Create Arc",         -- Title shown on menu
+      {
+         CounterMenuItem.new("Angle",          90, 1,       0,   360, "deg.",       "", "Sweep of arc"),    
+         CounterMenuItem.new("Precision",      16, 1,       4,    62, "divisions",  "", "Number of sections per arc"),
+         CounterMenuItem.new("Radius of arc", 100, 1,       1,   500, "grid units", "", "Radius of the arc"),
+         CounterMenuItem.new("Start of arc",   90, 1,       0,   360, "degrees",    "", "Start angle of arc from the positive x axis"),
+
+         ToggleMenuItem.new ("Type", { "BarrierMaker", "LoadoutZone", "GoalZone" }, 1, true, "Type of item to insert"),
+         
+         CounterMenuItem.new("Barrier Width",  50, 1,       1,    50, "grid units", "", "Width of wall if BarrierMaker is selected above"),
+         CounterMenuItem.new("Center X",        0, 10, -10000, 10000, "",           "", "X coordinate of center of arc"),
+         CounterMenuItem.new("Center Y",        0, 10, -10000, 10000, "",           "", "Y coordinate of center of arc")
+      }
+end
+\endcode
+
+*/

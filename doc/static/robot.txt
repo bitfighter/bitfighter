@@ -1,0 +1,24 @@
+/**
+
+@page robot Robot Overview
+@section intro Introduction
+A robot's \e main() function gets run as soon as the bot is added to the
+game.  In the main function, the bot should subscribe to any events it
+wants to listen for (though it can always subscribe later).  By default,
+all bots are subscribed to the \e Tick event, though you can unsbscribe
+to that event if the bot only responds to events (\e eliza.bot works this
+way -- in its main function, it subscribes to the \e MsgRecieved event,
+and unsbscribes to \e Tick.)
+
+@section step1 Step 1: Opening the box
+
+When the bot is first started, Bitfighter will call the bot's getName() function.  This function should return a string which will be used as the bot's name.  If the function is not implemented, or returns a nil, the bot will be assigned a name.  If getName() returns any other value, an error will be logged, and the script will be terminated.  Once the bot's name has been specified, it cannot be changed.
+
+A very simple getName() function might look like this:
+\code
+function getName()
+     return("Asimov")
+end
+\endcode
+
+*/

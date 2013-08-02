@@ -1,0 +1,20 @@
+/**
+
+@mainpage Bitfighter Lua Documentation
+
+@section intro_sec Introduction
+
+Here is some info about scripting levels and robots in Bitfighter.
+
+All scripts must contain a \e main() function.  There are some subtle
+differences between how bots and levelgens use this function, but we can
+ignore those for the moment.  The important thing is the \e main()
+function is run when the script is loaded, and should contain any
+configuration code the script requires.  
+
+It is possible to specify a list of arguments to be passed to a robot or
+levelgen script.  These arguments will be placed in a table called \e
+arg, which is the standard Lua location for storing command line
+parameters.
+
+*/

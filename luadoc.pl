@@ -27,11 +27,12 @@ push(@files, <../zap/*.cpp>);                # Core .cpp files
 push(@files, <../zap/*.h>);                  # Core .h files
 push(@files, <../lua/lua-vec/src/*.c>);      # Lua-vec .c files
 push(@files, <../resource/scripts/*.lua>);   # Some Lua scripts
-push(@files, "./luadoc_static_text.txt");    # our static chunk of text which includes home page and some class defs
-
+push(@files, <./static/*.txt>);              # our static pages for general information and task-specific examples
 
 # Loop through all the files we found above...
 foreach my $file (@files) {
+   print($file);
+   print("\n");
 
    open my $IN, "<", $file || die "Could not open $file for reading: $!";
 
@@ -136,7 +137,7 @@ foreach my $file (@files) {
 
          # $line =~ s|^\ *\* *||;  # Strip off leading *s and spaces
 
-         if( $line =~ m|\@mainpage\s| ) {
+         if( $line =~ m|\@mainpage\s| or $line =~ m|\@page\s|) {
             push(@mainpage, $line);
             $collectingMainPage    = 1;
             $encounteredDoxygenCmd = 1;
@@ -361,7 +362,7 @@ print $OUT "// This file was generated automatically from the C++ source to feed
   
 print $OUT "/**\n";
 print $OUT @mainpage;
-# print $OUT "*/\n";
+print $OUT "*/\n";
 
 print $OUT @enums;
 
