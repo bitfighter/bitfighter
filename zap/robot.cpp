@@ -567,7 +567,7 @@ U16 Robot::findClosestZone(const Point &point)
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS,  setAngle,             ARRAYDEF({{ PT, END }, { NUM, END }}), 2 )           \
    METHOD(CLASS,  getAnglePt,           ARRAYDEF({{ PT, END }              }), 1 )           \
-   METHOD(CLASS,  hasLosPt,             ARRAYDEF({{ PT, END }              }), 1 )           \
+   METHOD(CLASS,  canSeePoint,          ARRAYDEF({{ PT, END }              }), 1 )           \
                                                                                              \
    METHOD(CLASS,  getWaypoint,          ARRAYDEF({{ PT, END }}), 1 )                         \
                                                                                              \
@@ -639,10 +639,17 @@ S32 Robot::lua_getAnglePt(lua_State *L)
 }
 
 
-// Can robot see point P?
-S32 Robot::lua_hasLosPt(lua_State *L)
+/**
+  * @luafunc Robot::canSeePoint(point pt)
+  * @brief   Does this robot have line-of-sight to the given point.
+  * @descr   Line-of-sight a straight path from the robot to the object without any stationary,
+  *          collideable objects in the way
+  * @param   pt - point to test
+  * @return  \e bool - true if this bot can see the given point, false otherwise
+  */
+S32 Robot::lua_canSeePoint(lua_State *L)
 {
-   checkArgList(L, functionArgs, "Robot", "hasLosPt");
+   checkArgList(L, functionArgs, "Robot", "canSeePoint");
 
    Point point = getPointOrXY(L, 1);
 

@@ -123,7 +123,7 @@ public:
 
    S32 lua_setAngle(lua_State *L);
    S32 lua_getAnglePt(lua_State *L);
-   S32 lua_hasLosPt(lua_State *L);
+   S32 lua_canSeePoint(lua_State *L);
 
    // Navigation
    S32 lua_getWaypoint(lua_State *L);
