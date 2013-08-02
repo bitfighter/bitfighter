@@ -785,7 +785,7 @@ bool stringContainsAllTheSameCharacter(const string &str)
    if(str.size() <= 1)
       return true;
 
-   for(S32 i = 1; i < str.size(); i++)
+   for(string::size_type i = 1; i < str.size(); i++)
       if(str[i] != str[0])
          return false;
 

@@ -600,6 +600,7 @@ static bool checkWhose(HighlightItem::Whose whose, S32 objectTeam, S32 playerTea
 
       default:
          TNLAssert(false, "Unknown value of whose!");
+         return false;
    }
 }
 
