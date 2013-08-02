@@ -204,6 +204,7 @@ Robot *Game::getBot(S32 index)
 S32 Game::getBotCount() const
 {
    TNLAssert(false, "Not implemented for this class!");
+   return 0;
 }
 
 
@@ -1547,6 +1548,7 @@ void Game::emitTextEffect(const string &text, const Color &color, const Point &p
 string Game::getPlayerName() const
 {
    TNLAssert(false, "Not implemented for this class!");
+   return "";
 }
 
 
@@ -1565,6 +1567,7 @@ void Game::removeInlineHelpItem(HelpItem item, bool markAsSeen) const
 F32 Game::getObjectiveArrowHighlightAlpha() const
 {
    TNLAssert(false, "Not implemented for this class!");
+   return 0;
 }
 
 
