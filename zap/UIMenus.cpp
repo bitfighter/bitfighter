@@ -1711,7 +1711,7 @@ void NameEntryUserInterface::setupMenu()
    mRenderSpecialInstructions = false;
 
    addMenuItem(new MenuItem("PLAY", nameAndPasswordAcceptCallback, ""));
-   addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->lastName, 
+   addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->mSettings.getVal<string>("LastName"), 
                                     getGame()->getSettings()->getDefaultName(), "", MAX_PLAYER_NAME_LENGTH));
 
    getMenuItem(1)->setFilter(nickNameFilter);  // Quotes are incompatible with PHPBB3 logins, %s are used for var substitution

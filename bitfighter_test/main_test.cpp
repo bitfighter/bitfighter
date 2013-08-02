@@ -12,6 +12,7 @@
 #include "../zap/ClientGame.h"
 #include "../zap/ClientInfo.h"
 #include "../zap/FontManager.h"
+#include "../zap/config.h"
 
 #include "SDL.h"
 #include "../zap/VideoSystem.h"
@@ -34,6 +35,8 @@
 
 
 using namespace Zap;
+using namespace std;
+
 namespace Zap
 {
 void exitToOs(S32 errcode) { TNLAssert(false, "Should never be called!"); }
@@ -57,6 +60,32 @@ TEST_F(BfTest, StringUtilsTests)
    ASSERT_FALSE(stringContainsAllTheSameCharacter("Aa"));
    ASSERT_FALSE(stringContainsAllTheSameCharacter("AB"));
 } 
+
+
+TEST_F(BfTest, SettingsTests)
+{
+   Settings settings;
+   settings.add(new Setting<string>("strName", "defval", "SettingName1", "Section", "description"));
+   settings.add(new Setting<S32>   ("S32Name", 123,      "SettingName2", "Section", "description"));
+
+   // Check default values
+   // Get a string representation of the value
+   ASSERT_EQ("defval", settings.getStrVal("strName"));
+   ASSERT_EQ("123",    settings.getStrVal("S32Name"));
+
+   // Get the raw values
+   ASSERT_EQ("defval", settings.getVal<string>("strName"));
+   ASSERT_EQ(123,      settings.getVal<S32>("S32Name"));
+
+   // Set some new values
+   settings.setVal("strName", string("newVal"));
+   settings.setVal("S32Name", 321);
+   ASSERT_EQ("newVal", settings.getVal<string>("strName"));
+   ASSERT_EQ(321,      settings.getVal<S32>("S32Name"));
+
+
+}
+
 
 TEST_F(BfTest, LevelMenuSelectUserInterfaceTests) 
 {

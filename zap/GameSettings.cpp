@@ -449,7 +449,7 @@ void GameSettings::setLoginCredentials(const string &name, const string &passwor
 
    if(save)
    {
-      mIniSettings.lastName = name;          
+      mIniSettings.mSettings.setVal("LastName", name);          
       mIniSettings.lastPassword = password;
    
       iniFile.WriteFile();
@@ -464,7 +464,7 @@ void GameSettings::updatePlayerName(const string &name)
 
    if(!mPlayerNameSpecifiedOnCmdLine)
    {
-      mIniSettings.lastName = name;             // Save new name to the INI
+      mIniSettings.mSettings.setVal("LastName", name);      // Save new name to the INI
       iniFile.WriteFile();
    }
 }
@@ -481,7 +481,7 @@ void GameSettings::setAutologin(bool autologin)
 {
    if(autologin)
    {
-      mIniSettings.name     = mIniSettings.lastName;
+      mIniSettings.name     = mIniSettings.mSettings.getVal<string>("LastName");
       mIniSettings.password = mIniSettings.lastPassword;
    }
    else
@@ -852,7 +852,7 @@ void GameSettings::onFinishedLoading()
    mPlayerNameSpecifiedOnCmdLine = (cmdLineVal!= "");
 
    //                                 Cmd Line value                    User must set manually in INI            Saved in INI based on last entry       
-   mPlayerName             = *choose( cmdLineVal,                       mIniSettings.name,                       mIniSettings.lastName);
+   mPlayerName             = *choose( cmdLineVal,                       mIniSettings.name,                       mIniSettings.mSettings.getVal<string>("LastName"));
    mPlayerPassword         = *choose( getString(LOGIN_PASSWORD),        mIniSettings.password,                   mIniSettings.lastPassword);
 
    cmdLineVal = getString(MASTER_ADDRESS);

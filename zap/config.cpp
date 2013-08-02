@@ -51,13 +51,140 @@
 namespace Zap
 {
 
+
+// TODO: Move these to stringutils
+static string toString(const string &val) { return val;       }
+static string toString(S32 val)           { return itos(val); }
+
+
+// Constructor
+AbstractSetting::AbstractSetting(const string &name) : mName(name) 
+{ 
+   // Do nothing
+}
+
+
+AbstractSetting::~AbstractSetting()
+{
+   // Do nothing
+}
+
+
+string AbstractSetting::getName() const 
+{ 
+   return mName; 
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// Destructor
+Settings::~Settings()
+{
+   mSettings.deleteAndClear();
+}
+
+
+AbstractSetting *Settings::getSetting(const string &name)
+{
+   TNLAssert(mKeyLookup.find(name) != mKeyLookup.end(), "Setting with specified name not found!");
+
+   return mSettings[mKeyLookup.at(name)];
+}
+
+
+void Settings::add(AbstractSetting *setting)
+{
+   mSettings.push_back(setting);
+   mKeyLookup[setting->getName()] = mSettings.size() - 1;
+}
+
+
+string Settings::getStrVal(const string &name) const
+{
+   return mSettings[mKeyLookup.at(name)]->getValueString();
+}
+
+
+//template <class T>
+//T Settings::getVal(const string &name) const
+//{
+//   AbstractSetting *absSet = mSettings[mKeyLookup.at(name)];
+//
+//   TNLAssert(dynamic_cast<Setting<T> *>(absSet), "Expected setting!");
+//
+//   return static_cast<Setting<T> *>(absSet)->getValue();
+//}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+template <class T>
+Setting<T>::Setting(const string &name, const T &defaultValue, const string &iniName, const string &iniSection, const string &description) :
+   Parent(name),
+   mDefaultValue(defaultValue),
+   mValue(defaultValue),
+   mIniName(iniName),
+   mIniSection(iniSection),
+   mDescription(description)
+{
+   // Do nothing
+}
+
+
+template <class T>
+Setting<T>::~Setting()
+{
+   // Do nothing
+}
+
+
+template <class T> 
+T Setting<T>::getValue() const
+{ 
+   return mValue; 
+}
+
+
+template <class T>
+void Setting<T>::setValue(const T &value)
+{
+   mValue = value;
+}
+
+
+template <class T>
+string Setting<T>::getValueString() const 
+{ 
+   return toString(mValue); 
+}
+
+
+// In order to keep the template definitions in the cpp file, we need to declare which template
+// parameters we will use:
+template Setting<string>;
+template Setting<S32>;
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 // bitfighter.org would soon be the same as 199.192.229.168
 const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955,bitfighter.org:25955";
 //const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955, bitfighter.net:25955";
 
+
 // Constructor: Set default values here
 IniSettings::IniSettings()
 {
+   // Name the user entered last time they ran the game
+   mSettings.add(new Setting<string>("LastName", "ChumpChange", "LastName", "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
+
+
    controlsRelative = false;          // Relative controls is lame!
    displayMode = DISPLAY_MODE_WINDOWED;
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
@@ -90,7 +217,7 @@ IniSettings::IniSettings()
    masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
    name = "";                         // Player name (none by default)
    defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
-   lastName = "ChumpChange";          // Name the user entered last time they ran the game
+   //lastName = "ChumpChange";          // Name the user entered last time they ran the game
    lastPassword = "";
    lastEditorName = "";               // No default editor level name
    hostname = "Bitfighter host";      // Default host name
@@ -460,7 +587,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->password       = ini->GetValue(section, "Password", iniSettings->password);
 
    iniSettings->defaultName    = ini->GetValue(section, "DefaultName", iniSettings->defaultName);
-   iniSettings->lastName       = ini->GetValue(section, "LastName", iniSettings->lastName);
+   iniSettings->mSettings.setVal("LastName", ini->GetValue(section, "LastName", iniSettings->mSettings.getVal<string>("LastName")));
    iniSettings->lastPassword   = ini->GetValue(section, "LastPassword", iniSettings->lastPassword);
    iniSettings->lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings->lastEditorName);
 
@@ -1626,7 +1753,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValue  (section, "DefaultName", iniSettings->defaultName);
    ini->SetValue  (section, "Nickname", iniSettings->name);
    ini->SetValue  (section, "Password", iniSettings->password);
-   ini->SetValue  (section, "LastName", iniSettings->lastName);
+   ini->SetValue  (section, "LastName", iniSettings->mSettings.getVal<string>("LastName"));
    ini->SetValue  (section, "LastPassword", iniSettings->lastPassword);
    ini->SetValue  (section, "LastEditorName", iniSettings->lastEditorName);
 

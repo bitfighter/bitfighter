@@ -39,7 +39,10 @@
 #include "tnlNetStringTable.h"
 #include "tnlVector.h"
 
+#include <boost/shared_ptr.hpp>
+
 #include <string>
+#include <map>
 
 using namespace std;
 using namespace TNL;
@@ -158,14 +161,102 @@ struct PluginBinding
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+class AbstractSetting
+{
+private:
+   string mName;
+
+public:
+   AbstractSetting(const string &name);     // Constructor
+   virtual ~AbstractSetting();              // Destructor
+
+   string getName() const;
+   virtual string getValueString() const = 0;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+template <class T>
+class Setting : public AbstractSetting
+{
+   typedef AbstractSetting Parent;
+
+private:
+   string mIniName;
+   string mIniSection;
+   string mDescription;
+
+   T mValue;
+   T mDefaultValue;
+
+public:
+   Setting<T>(const string &name, const T &defaultValue, const string &iniName, const string &iniSection, const string &description);
+   virtual ~Setting<T>();
+
+   T getValue() const;
+   void setValue(const T &value);
+   string getValueString() const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// Container for all our settings
+class Settings 
+{
+private:
+   map<string, S32> mKeyLookup;     // Maps string key to vector index; updated when item is added
+   Vector<AbstractSetting *> mSettings;
+
+public:
+   ~Settings();      // Destructor
+
+   AbstractSetting *getSetting(const string &name);
+   void add(AbstractSetting *setting);
+
+   template <class T>    
+   void setVal(const string &name, const T &value)
+   {
+      AbstractSetting *absSet = mSettings[mKeyLookup.at(name)];
+      TNLAssert(dynamic_cast<Setting<T> *>(absSet), "Expected setting!");
+
+      static_cast<Setting<T> *>(absSet)->setValue(value);
+   }
+
+   template <class T> 
+   T getVal(const string &name) const
+   {
+      AbstractSetting *absSet = mSettings[mKeyLookup.at(name)];
+      TNLAssert(dynamic_cast<Setting<T> *>(absSet), "Expected setting!");
+
+      return static_cast<Setting<T> *>(absSet)->getValue();
+   }
+
+
+   string getStrVal(const string &name) const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 struct IniSettings      // With defaults specified
 {
 private:
    F32 musicVolLevel;   // Use getter/setter!
 
+
 public:
    IniSettings();       // Constructor
    virtual ~IniSettings();
+
+   Settings mSettings;
 
    bool controlsRelative;
    DisplayMode displayMode;
@@ -208,7 +299,7 @@ public:
    string name;                     // Player name (none by default)    
    string password;                 // Player password (none by default) 
    string defaultName;              // Name used if user hits <enter> on name entry screen
-   string lastName;                 // Name user entered last time the game was run -- will be used as default on name entry screen
+   //string lastName;                 // Name user entered last time the game was run -- will be used as default on name entry screen
    string lastPassword;
    string lastEditorName;           // Name of file most recently edited by the user
 

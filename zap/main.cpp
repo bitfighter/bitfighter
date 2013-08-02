@@ -635,7 +635,7 @@ void createClientGame(GameSettings *settings)
        // Put any saved filename into the editor file entry thingy
       clientGame->getUIManager()->getUI<LevelNameEntryUserInterface>()->setString(settings->getIniSettings()->lastEditorName);
 
-      Game::seedRandomNumberGenerator(settings->getIniSettings()->lastName);
+      Game::seedRandomNumberGenerator(settings->getIniSettings()->mSettings.getVal<string>("LastName"));
       clientGame->getClientInfo()->getId()->getRandom();
 
       gClientGames.push_back(clientGame);
@@ -658,7 +658,7 @@ void createClientGame(GameSettings *settings)
          //   gClientGame = gClientGame1;
          //}
          //gClientGame->getUIManager()->getUI<NameEntryUserInterface>()->activate();     <-- won't work no more!
-         Game::seedRandomNumberGenerator(settings->getIniSettings()->lastName);
+         Game::seedRandomNumberGenerator(settings->getIniSettings()->mSettings.getVal<string>("LastName"));
       }
       else
       {
