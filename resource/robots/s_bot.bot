@@ -58,8 +58,8 @@ function main()
 end
  
 
-items = { }     -- Global variable, reusable container for bot:findAllObjects.  Reusing this table avoids costs of
-                -- constructing and destructing it every time we call bot:findAllObjects().  Be sure to clear the
+items = { }     -- Global variable, reusable container for bf:findAllObjects.  Reusing this table avoids costs of
+                -- constructing and destructing it every time we call bf:findAllObjects().  Be sure to clear the
                 -- table before reusing it!
 function shieldSelf()
     table.clear(items)
@@ -229,7 +229,7 @@ end
 function gotoAndOrbitPosition(pt)
     if pt ~= nil then
         gotoPositionWasNil = false
-        if not bot:hasLosPt(pt) then
+        if not bot:canSeePoint(pt) then
             gotoPositionWasNil = false
             gotoPosition(pt)
         else
@@ -271,7 +271,7 @@ end
 function getObjective(objType, team, onTeam)
 
     table.clear(items)
-    bot:findAllObjects(items, objType)       -- Returns a list of all items of type objType in the game
+    bf:findAllObjects(items, objType)       -- Returns a list of all items of type objType in the game
 
     local itemsOnMyTeam = {}
     local currentIndex = 1

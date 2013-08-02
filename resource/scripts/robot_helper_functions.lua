@@ -96,7 +96,7 @@ function findVisibleObjects(...)
 end
 
 function findAllObjects(...)
-  return bot:findAllObjects(...)
+  return bf:findAllObjects(...)
 end
 
 function getFiringSolution(...)
