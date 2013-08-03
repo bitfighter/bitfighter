@@ -377,7 +377,7 @@ void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    stream->readString(txt);
 
-   mText = txt;
+   setText(txt);
 
    if(mSize == 0)
       recalcTextSize();  // Do this after setting mText and mSize, levelgen could add Text and the server can't calculate text size.
@@ -395,6 +395,7 @@ void TextItem::onGeomChanging()  { onGeomChanged(); }
 void TextItem::onGeomChanged()
 {
    recalcTextSize();
+   setMaskBits(GeomMask);
    Parent::onGeomChanged();
 }
 
