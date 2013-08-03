@@ -132,7 +132,6 @@ protected:
    static void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
 
    static S32 findObjectById(lua_State *L, const Vector<DatabaseObject *> *objects);
-   static S32 findObjects(lua_State *L, GridDatabase *database, Rect *scope = NULL);
 
 
 // Sets a var in the script's environment to give access to the caller's "this" obj, with the var name "name".
@@ -222,6 +221,7 @@ public:
    S32 lua_pointCanSeePoint(lua_State *L);
 
    S32 lua_findAllObjects(lua_State *L);
+   S32 lua_findAllObjectsInArea(lua_State *L);
    S32 lua_findObjectById(lua_State *L);
 
    S32 lua_addItem(lua_State *L);
