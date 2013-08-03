@@ -323,8 +323,10 @@ public:
    S32 lua_getAngle(lua_State *L);
    S32 lua_hasFlag(lua_State *L);
 
-   S32 lua_getEnergy(lua_State *L);  // Return ship's energy as a fraction between 0 and 1
-   S32 lua_getHealth(lua_State *L);  // Return ship's health as a fraction between 0 and 1
+   S32 lua_getEnergy(lua_State *L);
+   S32 lua_setEnergy(lua_State *L);
+   S32 lua_getHealth(lua_State *L);
+   S32 lua_setHealth(lua_State *L);
 
    S32 lua_getFlagCount(lua_State *L);
 

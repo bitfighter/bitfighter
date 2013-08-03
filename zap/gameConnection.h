@@ -247,7 +247,7 @@ public:
    TNL_DECLARE_RPC(c2sReleaseCommanderMap, ());
 
    TNL_DECLARE_RPC(c2sDeploySpybug, ());                       // Client requests a spybug be placed at ship's current location
-   TNL_DECLARE_RPC(s2cCreditEnergy, (RangedU32<0, Ship::EnergyMax> energy));
+   TNL_DECLARE_RPC(s2cCreditEnergy, (SignedInt<18> energy));
    TNL_DECLARE_RPC(s2cSetFastRechargeTime, (U32 time));
 
    TNL_DECLARE_RPC(c2sRequestLoadout, (Vector<U8> loadout));   // Client has changed his loadout configuration

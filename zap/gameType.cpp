@@ -1845,7 +1845,7 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *client
 
    victim->addDeath();
 
-   StringTableEntry killerDescr = killerObject->getKillString();
+   StringTableEntry killerDescr = killerObject ? killerObject->getKillString() : "";
 
    if(killer)     // Known killer
    {
@@ -1872,7 +1872,9 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *client
    }
    else              // Unknown killer... not a scorable event.  Unless killer was an asteroid!
    {
-      if(killerObject->getObjectTypeNumber() == AsteroidTypeNumber)       // Asteroid
+      if(killerObject == NULL)  // Killed by levelgen perhaps?
+         updateScore(victim, KillSelf);
+      else if(killerObject->getObjectTypeNumber() == AsteroidTypeNumber)       // Asteroid
          updateScore(victim, KilledByAsteroid, 0);
       else if(U32(killerObject->getTeam()) < U32(getGame()->getTeamCount()) && isTeamGame()) // We may have a non-hostile killer team we can use to give credit.
       {

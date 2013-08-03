@@ -978,12 +978,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sDeploySpybug, (), (), NetClassGroupGameMask
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, s2cCreditEnergy, (RangedU32<0, Ship::EnergyMax> energy), (energy), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+// 18 bits == 262144, enough for -100000 to 100000  (Ship::EnergyMax is 100000)
+// This way we can credit negative energy as well
+TNL_IMPLEMENT_RPC(GameConnection, s2cCreditEnergy, (SignedInt<18> energy), (energy), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
    Ship *ship = static_cast<Ship *>(getControlObject());
 
    if(ship)
-      ship->creditEnergy((S32)energy);
+      ship->creditEnergy(energy);
 }
 
 
