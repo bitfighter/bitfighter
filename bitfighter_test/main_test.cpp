@@ -28,6 +28,7 @@
 #include "tnlPlatform.h"
 
 #include <string>
+#include <cmath>
 
 #ifdef TNL_OS_WIN32
 #  include <windows.h>   // For ARRAYSIZE
