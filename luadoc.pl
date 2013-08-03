@@ -309,7 +309,7 @@ foreach my $file (@files) {
          }
 
 
-         if( $line !~ m|\\$| ) {          # Line has no terminating \, it's the last of its kind!
+         if( $line !~ m|\\\r*$| ) {          # Line has no terminating \, it's the last of its kind!
             push(@enums, "\@\}\n");       # Close doxygen group block
             push(@enums, "*/\n\n");       # Close comment
 
