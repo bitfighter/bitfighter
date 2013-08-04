@@ -334,7 +334,6 @@ public:
    S32 lua_isModActive(lua_State *L);
    S32 lua_getMountedItems(lua_State *L);
    S32 lua_getCurrLoadout(lua_State *L);
-   S32 lua_getReqLoadout(lua_State *L);
 
    S32 lua_getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
 

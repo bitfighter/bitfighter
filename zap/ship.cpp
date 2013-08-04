@@ -2297,7 +2297,6 @@ bool Ship::isRobot()
    METHOD(CLASS, getActiveWeapon, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getMountedItems, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getCurrLoadout,  ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getReqLoadout,   ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, setReqLoadout,   ARRAYDEF({{ LOADOUT,  END }}), 1 ) \
    METHOD(CLASS, setCurrLoadout,  ARRAYDEF({{ LOADOUT,  END }}), 1 ) \
 
@@ -2472,22 +2471,6 @@ S32 Ship::lua_getCurrLoadout(lua_State *L)
    luaW_push<LoadoutTracker>(L, &mLoadout);
 
    return 1;
-}
-
-
-// Return requested loadout
-S32 Ship::lua_getReqLoadout(lua_State *L)
-{
-   LoadoutTracker requestedLoadout = getOwner()->getOnDeckLoadout();
-
-   if(requestedLoadout.isValid())
-   {
-      luaW_push<LoadoutTracker>(L, &requestedLoadout);
-      return 1;
-   }
-
-    // Return current loadout if the on-deck loadout was invalid
-    return lua_getCurrLoadout(L);
 }
 
 
