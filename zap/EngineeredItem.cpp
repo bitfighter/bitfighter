@@ -710,10 +710,6 @@ void EngineeredItem::damageObject(DamageInfo *di)
 
    mHealTimer.reset();     // Restart healing timer...
 
-   // No additional damage, nothing more to do (i.e. was already at 0)
-   if(prevHealth == mHealth)
-      return;
-
    setMaskBits(HealthMask);
 
    // Check if turret just died
@@ -760,12 +756,15 @@ void EngineeredItem::damageObject(DamageInfo *di)
       onEnabled();
    }
 
-   if(mHealth == 0 && mResource.isValid())
+   if(mHealth == 0 && mEngineered)
    {
       mIsDestroyed = true;
       onDestroyed();
 
-      releaseResource(getPos() + mAnchorNormal * mResource->getRadius(), getGame()->getGameObjDatabase());
+      if(mResource.isValid())
+      {
+         releaseResource(getPos() + mAnchorNormal * mResource->getRadius(), getGame()->getGameObjDatabase());
+      }
 
       deleteObject(500);
    }
@@ -1121,13 +1120,15 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
   */
 //               Fn name              Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, isActive,             ARRAYDEF({{      END }}), 1 ) \
-   METHOD(CLASS, getMountAngle,        ARRAYDEF({{      END }}), 1 ) \
-   METHOD(CLASS, getHealth,            ARRAYDEF({{      END }}), 1 ) \
-   METHOD(CLASS, setHealth,            ARRAYDEF({{ NUM, END }}), 1 ) \
-   METHOD(CLASS, getDisabledThreshold, ARRAYDEF({{      END }}), 1 ) \
-   METHOD(CLASS, getHealRate,          ARRAYDEF({{      END }}), 1 ) \
-   METHOD(CLASS, setHealRate,          ARRAYDEF({{ INT, END }}), 1 ) \
+   METHOD(CLASS, isActive,             ARRAYDEF({{       END }}), 1 ) \
+   METHOD(CLASS, getMountAngle,        ARRAYDEF({{       END }}), 1 ) \
+   METHOD(CLASS, getHealth,            ARRAYDEF({{       END }}), 1 ) \
+   METHOD(CLASS, setHealth,            ARRAYDEF({{ NUM,  END }}), 1 ) \
+   METHOD(CLASS, getDisabledThreshold, ARRAYDEF({{       END }}), 1 ) \
+   METHOD(CLASS, getHealRate,          ARRAYDEF({{       END }}), 1 ) \
+   METHOD(CLASS, setHealRate,          ARRAYDEF({{ INT,  END }}), 1 ) \
+   METHOD(CLASS, getEngineered,        ARRAYDEF({{       END }}), 1 ) \
+   METHOD(CLASS, setEngineered,        ARRAYDEF({{ BOOL, END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(EngineeredItem, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(EngineeredItem, LUA_METHODS);
@@ -1247,6 +1248,33 @@ S32 EngineeredItem::lua_setHealRate(lua_State *L)
    setHealRate(healRate);
 
    return returnInt(L, mHealRate);
+}
+
+
+/**
+ * @luafunc  bool EngineeredItem::getEngineered()
+ * @return   True if the item can be destroyed.
+*/
+S32 EngineeredItem::lua_getEngineered(lua_State *L)
+{
+   return returnBool(L, mEngineered);
+}
+
+
+/**
+ * @luafunc  EngineeredItem::setEngineered(engineered)
+ * @brief    Sets whether the item can be destroyed when its health reaches zero.
+ * @param    engineered `true` to make the item destructible, `false` to make it permanent
+ * @return
+ */
+S32 EngineeredItem::lua_setEngineered(lua_State *L)
+{
+   checkArgList(L, functionArgs, "EngineeredItem", "setEngineered");
+
+   mEngineered = getBool(L, 1);
+   setMaskBits(InitialMask);
+
+   return returnBool(L, mEngineered);
 }
 
 

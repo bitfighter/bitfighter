@@ -165,6 +165,8 @@ public:
    S32 lua_getDisabledThreshold(lua_State *L);
    S32 lua_getHealRate(lua_State *L);
    S32 lua_setHealRate(lua_State *L);
+   S32 lua_setEngineered(lua_State *L);
+   S32 lua_getEngineered(lua_State *L);
 
    // Some overrides
    S32 lua_setGeom(lua_State *L);
