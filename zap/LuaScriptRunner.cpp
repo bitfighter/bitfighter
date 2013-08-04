@@ -842,8 +842,9 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
 
    // Weapons
+   // Add ModuleCount as offset so we can tell weapons and modules apart when changing loadout
    add_enum_to_lua(L, "Weapon",
-   #  define WEAPON_ITEM(value, b, luaEnumName, d, e, f, g, h, i, j, k, l)  luaEnumName, true, value,
+   #  define WEAPON_ITEM(value, b, luaEnumName, d, e, f, g, h, i, j, k, l)  luaEnumName, true, value + ModuleCount,
          WEAPON_ITEM_TABLE
    #  undef WEAPON_ITEM
       (char*)NULL);  
