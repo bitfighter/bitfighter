@@ -1486,7 +1486,7 @@ void drawFilledStar(const Point &pos, S32 points, F32 radius, F32 innerRadius)
    pts.push_back(first);
 
    renderPointVector(&pts, GL_TRIANGLES);       // Points
-   renderPointVector(&core, GL_POLYGON);        // Inner pentagon
+   renderPointVector(&core, GL_TRIANGLE_FAN);        // Inner pentagon
    renderPointVector(&outline, GL_LINE_LOOP);   // Outline to make things look smoother, at least when star is small
 }
 
