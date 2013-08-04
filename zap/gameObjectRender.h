@@ -79,7 +79,9 @@ extern void drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle
 extern void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle);
 
 extern void drawStar(const Point &pos, S32 points, F32 radius, F32 innerRadius);
+extern void drawFilledStar(const Point &pos, S32 points, F32 radius, F32 innerRadius);
 
+extern void renderHexScale(const Point &center, F32 radius);
 
 extern void drawAngledRay(const Point &center, F32 innerRadius, F32 outerRadius, F32 angle);
 extern void drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 rayCount, F32 offsetAngle);
@@ -195,7 +197,7 @@ extern float gDefaultLineWidth;
 
 extern void renderPolygonOutline(const Vector<Point> *outline);
 extern void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outlineColor, F32 alpha = 1, F32 lineThickness = gDefaultLineWidth);
-extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color *fillColor, F32 alpha = 1);
+extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color *fillColor = NULL, F32 alpha = 1);
 extern void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outlinePoints,
                           const Color *fillColor, const Color *outlineColor, F32 alpha = 1);
 

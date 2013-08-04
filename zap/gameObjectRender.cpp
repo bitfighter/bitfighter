@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
@@ -577,10 +577,92 @@ static void calcThrustComponents(const Point &velocity, F32 angle, F32 deltaAngl
 }
 
 
+// Passed position is bottom of indicator
+static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
+{
+   S32 sym = Platform::getRealMilliseconds() / 2000 % 9;
+
+   FontManager::pushFontContext(HUDContext);
+
+
+   glLineWidth(gLineWidth1);
+
+   // Four square
+   S32 passedHeight = height;
+   height = (height + 3) & ~0x03;      // Round height up to next multiple of 4
+
+   // Adjust x and y to be center of rank icon
+   y -= height / 2 - (height - passedHeight) / 2;
+   x -= height / 2 + 4;    // 4 provides a margin
+
+   F32 rad = height / 4.0f;
+
+   switch(sym)
+   {
+      case 8:
+         glColor(Colors::yellow40);
+         drawFilledStar(Point(x,y), 5, height / 2, rad);
+         break;
+      case 7:
+         glColor(Colors::yellow40);
+         drawStar(Point(x,y), 5, height / 2, rad);
+         break;
+      case 6:
+      case 5:
+      case 4:
+         drawFilledSquare(Point(x - rad, y + rad), rad, &Colors::red);
+      case 3:
+         drawFilledSquare(Point(x + rad, y + rad), rad, &Colors::red);
+      case 2:
+         drawFilledSquare(Point(x + rad, y - rad), rad, &Colors::red);
+      case 1:
+         drawFilledSquare(Point(x - rad, y - rad), rad, &Colors::red);
+   }
+
+   if(sym > 0 && sym <= 6)
+   {
+      if(sym == 6)
+         glColor(Colors::yellow40);
+      else
+         glColor(Colors::gray20);
+
+      drawHollowSquare(Point(x,y), height / 2);
+
+      drawVertLine(x, y - height / 2, y + height / 2);
+      drawHorizLine(x - height / 2, x + height / 2, y);
+   }
+
+   if(sym == 5 || sym == 6)
+      drawFilledSquare(Point(x,y), rad, &Colors::yellow40);
+
+
+   glLineWidth(gDefaultLineWidth);
+
+
+   // Chevrons
+   //switch(sym)
+   //{
+   //   case 0:
+   //      drawStringr(x, y - height, height, "^");
+   //      break;
+   //   case 1:
+   //      drawStringr(x, y - height, height, "^");
+   //      drawStringr(x, y - height + 6, height, "^");
+   //      break;
+   //   case 2:
+   //      drawStringr(x, y, height, "^");
+   //      drawStringr(x, y - height / 3,     height, "^");
+   //      drawStringr(x, y - height * 2 / 3, height, "^");
+   //}
+
+
+   FontManager::popFontContext();
+}
+
+
 static void renderShipName(const string &shipName, bool isAuthenticated, bool isBusy, U32 killStreak, U32 gamesPlayed, F32 alpha)
 {
    string renderName = isBusy ? "<<" + shipName + ">>" : shipName;
-   renderName += " | " + itos(gamesPlayed);
 
    F32 textAlpha = alpha;
    S32 textSize = 14;
@@ -595,7 +677,10 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
       glColor(Colors::idlePlayerNameColor, textAlpha);         // <=== Probably wrong, not sure how to fix...  
 
 
-   S32 len = drawStringc(0, 30 + textSize, textSize, renderName.c_str());
+   S32 ypos = 30 + textSize;
+   S32 len = drawStringc(0, ypos, textSize, renderName.c_str());
+
+   renderGamesPlayedMark(-len / 2, ypos, textSize, gamesPlayed);
 
    // Underline name if player is authenticated
    if(isAuthenticated)
@@ -625,10 +710,6 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
       if(engineeringTeleport)
          renderTeleporterOutline(Point(cos(angle), sin(angle)) * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS),
                (F32)Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
-   }
-   else if(isLocalShip && layerIndex == 1)
-   {
-      drawStringc(0, 30 + 15, 15, itos(gamesPlayed).c_str());
    }
 
    if(showCoordinates && layerIndex == 1)
@@ -1313,7 +1394,9 @@ void renderPolygonFill(const Vector<Point> *triangulatedFillPoints, const Color 
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-   glColor(fillColor, alpha);
+   if(fillColor)
+      glColor(fillColor, alpha);
+
    renderTriangulatedPolygonFill(triangulatedFillPoints);
 }
 
@@ -1347,6 +1430,56 @@ void drawStar(const Point &pos, S32 points, F32 radius, F32 innerRadius)
    }
 
    renderPolygonOutline(&pts);
+}
+
+
+void drawFilledStar(const Point &pos, S32 points, F32 radius, F32 innerRadius)
+{
+   F32 ang = FloatTau / F32(points * 2);
+   F32 a = ang / 2;
+   F32 r = innerRadius;
+   bool inout = false;
+
+   static Point p;
+   static Point first;
+
+   static Vector<Point> pts;
+   static Vector<Point> core;
+   static Vector<Point> outline;
+
+   pts.clear();
+   core.clear();
+   outline.clear();
+
+   for(S32 i = 0; i < points * 2; i++)
+   {
+      p.set(r * cos(a) + pos.x, r * sin(a) + pos.y);
+
+      outline.push_back(p);
+
+      if(i == 0)
+      {
+         first = p;
+         core.push_back(p);
+      }
+      else if(i % 2 == 0)
+      {
+         pts.push_back(p);
+         core.push_back(p);
+      }
+
+      pts.push_back(p);
+
+      a += ang;
+      inout = !inout;
+      r = inout ? radius : innerRadius;
+   }
+
+   pts.push_back(first);
+
+   renderPointVector(&pts, GL_TRIANGLES);       // Points
+   renderPointVector(&core, GL_POLYGON);        // Inner pentagon
+   renderPointVector(&outline, GL_LINE_LOOP);   // Outline to make things look smoother, at least when star is small
 }
 
 
