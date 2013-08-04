@@ -30,8 +30,6 @@
 #include "Zone.h"
 #include "Colors.h"
 
-#include "luaGameInfo.h"   // For LuaLoadout
-
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #endif
@@ -2287,7 +2285,9 @@ bool Ship::isRobot()
                                                            \
    METHOD(CLASS, isModActive,     ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getEnergy,       ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, setEnergy,       ARRAYDEF({{ NUM, END }}), 1 ) \
    METHOD(CLASS, getHealth,       ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, setHealth,       ARRAYDEF({{ NUM, END }}), 1 ) \
    METHOD(CLASS, hasFlag,         ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getFlagCount,    ARRAYDEF({{ END }}), 1 ) \
                                                            \
@@ -2295,7 +2295,6 @@ bool Ship::isRobot()
    METHOD(CLASS, getActiveWeapon, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getMountedItems, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getCurrLoadout,  ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getReqLoadout,   ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, setReqLoadout,   ARRAYDEF({{ LOADOUT,  END }}), 1 ) \
    METHOD(CLASS, setCurrLoadout,  ARRAYDEF({{ LOADOUT,  END }}), 1 ) \
 
@@ -2330,10 +2329,91 @@ S32 Ship::lua_isModActive(lua_State *L) {
 
 S32 Ship::lua_getAngle(lua_State *L)        { return returnFloat(L, getCurrentMove().angle);     }  // Get angle ship is pointing at
 S32 Ship::lua_getActiveWeapon(lua_State *L) { return returnInt  (L, mLoadout.getActiveWeapon()); }  // Get WeaponIndex for current weapon
-                               
-// Ship status
-S32 Ship::lua_getEnergy(lua_State *L)       { return returnFloat(L, (F32)mEnergy / (F32)EnergyMax); } // Return ship's energy as a fraction between 0 and 1
-S32 Ship::lua_getHealth(lua_State *L)       { return returnFloat(L, getHealth()); }                   // Return ship's health as a fraction between 0 and 1
+
+
+/**
+ * @luafunc  num Ship::getEnergy()
+ * @brief    Returns the enegy of this ship.
+ * @descr    Energy is specified as a number between 0 and 1 where 0 means no energy and 1 means full energy.
+ * @return   Returns a value between 0 and 1 indicating the energy of the item.
+*/
+S32 Ship::lua_getEnergy(lua_State *L)
+{
+   // Return ship's energy as a fraction between 0 and 1
+   return returnFloat(L, (F32) mEnergy / (F32) EnergyMax);
+}
+
+
+/**
+ * @luafunc  setEnergy::setEnergy(energy)
+ * @brief    Set the current energy of this ship.
+ * @descr    Energy is specified as a number between 0 and 1 where 0 means no energy and 1 means full energy.
+ *           Values outside this range will be clamped to the valid range.
+ * @param    energy - A value between 0 and 1.
+*/
+S32 Ship::lua_setEnergy(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Ship", "setEnergy");
+
+   F32 param = getFloat(L, 1);
+   S32 newEnergy = S32(CLAMP(param, 0.0f, 1.0f) * (F32) EnergyMax);
+
+   // Determine our credit to be sent to the client, and send it
+   S32 credit = CLAMP(newEnergy - mEnergy, -Ship::EnergyMax, Ship::EnergyMax);
+
+   GameConnection *cc = getControllingClient();
+   if(cc)
+      cc->s2cCreditEnergy(credit);
+
+   // Now set the server-side energy to the new one
+   mEnergy = newEnergy;
+
+   return 0;
+}
+
+
+/**
+ * @luafunc  num Ship::getHealth()
+ * @brief    Returns the health of this ship.
+ * @descr    Health is specified as a number between 0 and 1 where 0 is completely dead and 1 is full health.
+ * @return   Returns a value between 0 and 1 indicating the health of the item.
+*/
+S32 Ship::lua_getHealth(lua_State *L)
+{
+   // Return ship's health as a fraction between 0 and 1
+   return returnFloat(L, getHealth());
+}
+
+
+/**
+ * @luafunc  Ship::setHealth(health)
+ * @brief    Set the current health of this ship.
+ * @descr    Health is specified as a number between 0 and 1 where 0 is completely dead and 1 is full health.
+ *           Values outside this range will be clamped to the valid range.
+ * @param    health - A value between 0 and 1.
+ * @note     A setting of 0 will kill the ship instantly
+*/
+S32 Ship::lua_setHealth(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Ship", "setHealth");
+
+   F32 param = getFloat(L, 1);
+
+   mHealth = CLAMP(param, 0.0f, 1.0f);
+
+   // Transmit with next packet
+   setMaskBits(HealthMask);
+
+   if(mHealth <= 0)
+   {
+      DamageInfo di;
+      di.damagingObject = NULL;
+      killAndScore(&di);
+   }
+
+   return 0;
+}
+
 
 S32 Ship::lua_getMountedItems(lua_State *L)
 {
@@ -2389,22 +2469,6 @@ S32 Ship::lua_getCurrLoadout(lua_State *L)
    luaW_push<LoadoutTracker>(L, &mLoadout);
 
    return 1;
-}
-
-
-// Return requested loadout
-S32 Ship::lua_getReqLoadout(lua_State *L)
-{
-   LoadoutTracker requestedLoadout = getOwner()->getOnDeckLoadout();
-
-   if(requestedLoadout.isValid())
-   {
-      luaW_push<LoadoutTracker>(L, &requestedLoadout);
-      return 1;
-   }
-
-    // Return current loadout if the on-deck loadout was invalid
-    return lua_getCurrLoadout(L);
 }
 
 

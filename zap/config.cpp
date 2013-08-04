@@ -166,8 +166,8 @@ string Setting<T>::getValueString() const
 
 // In order to keep the template definitions in the cpp file, we need to declare which template
 // parameters we will use:
-template Setting<string>;
-template Setting<S32>;
+template class Setting<string>;
+template class Setting<S32>;
 
 ////////////////////////////////////////
 ////////////////////////////////////////

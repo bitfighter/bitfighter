@@ -1,0 +1,15 @@
+/**
+
+@page timer Timer
+
+Timer is a utility class that makes it easier to manage timing periodic
+or delayed events.  The timer code is based on a very nice library
+written by Haywood Slap.
+
+A timer object that can be used to schedule arbitrary events to be
+executed at some time in the future.  All times are given in
+milliseconds.
+
+See the Timer class for more details.
+
+*/

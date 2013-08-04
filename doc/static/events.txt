@@ -1,0 +1,34 @@
+/**
+
+@page events Subscribing to Events
+@section Overview
+
+Robots and Levelgens can register to be notified of certain game events.
+When the event occurs, a specific function in the script (termed a "callback"
+function) is invoked. This lets a script perform some action in response to
+these events.
+
+For a complete list of Events and their callback signatures, see the \ref
+EventEnum page
+
+@section Example
+Subscribing to an event is the same for robots and levelgens: you call \link
+LuaScriptRunner::subscribe `bf:subscribe` \endlink. Here is a simple example using
+the MsgReceived Event which is available to both robots and levelgens:
+
+@code
+
+function main()
+  bf:subscribe(Event.MsgReceived)
+end
+
+-- Whenever an event occurs which a script is subscribed to, Bitfighter will
+-- run the function named after that Event.
+-- For the `MsgReceived` Event, the name must be `onMsgReceived`
+function onMsgReceived(msg, player, isGlobal)
+  print(player:getName(), " said: ", msg)
+end
+
+@endcode
+
+*/

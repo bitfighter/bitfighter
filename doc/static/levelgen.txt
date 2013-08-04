@@ -1,0 +1,21 @@
+/**
+
+@page levelgen Levelgen Overview
+Levelgens are a little different.  While the entire purupose of a bot is
+to actively participate in a game, many levelgens will not stick around
+after the level has been loaded. For a basic levelgen, the entire script
+might be contained in the main() function -- it might create some items,
+and do nothing more.
+
+If a level has a levelgen script, its main function is executed as the
+level is loaded, after all objects defined in the level file have been
+created.  Therefore a levelgen can act upon those objects, either
+altering them, deleting them, or by adding completely new objects.
+
+Levelgens can also subscribe to events; their event handlers will be
+called throughout the game as events are fired.
+
+Unlike robots, levelgens are not automatically subscribed to the \e Tick
+event.
+
+*/
