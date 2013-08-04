@@ -200,6 +200,8 @@ public:
    S32 lua_clearDests(lua_State *L);
    S32 lua_getDest(lua_State *L);
    S32 lua_getDestCount(lua_State *L);
+   S32 lua_setEngineered(lua_State *L);
+   S32 lua_getEngineered(lua_State *L);
 
    // Overrides
    S32 lua_setGeom(lua_State *L);

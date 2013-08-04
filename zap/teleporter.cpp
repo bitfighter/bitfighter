@@ -906,12 +906,14 @@ bool Teleporter::canBeNeutral() { return false; }
   */
 //               Fn name                       Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, addDest,      ARRAYDEF({ { PT,  END }                }), 1 ) \
-   METHOD(CLASS, delDest,      ARRAYDEF({ { INT, END }                }), 1 ) \
-   METHOD(CLASS, clearDests,   ARRAYDEF({ {      END }                }), 1 ) \
-   METHOD(CLASS, getDest,      ARRAYDEF({ { INT, END }                }), 1 ) \
-   METHOD(CLASS, getDestCount, ARRAYDEF({ {      END }                }), 1 ) \
-   METHOD(CLASS, setGeom,      ARRAYDEF({ { PT,  END }, { LINE, END } }), 2 ) \
+   METHOD(CLASS, addDest,       ARRAYDEF({ { PT,   END }                }), 1 ) \
+   METHOD(CLASS, delDest,       ARRAYDEF({ { INT,  END }                }), 1 ) \
+   METHOD(CLASS, clearDests,    ARRAYDEF({ {       END }                }), 1 ) \
+   METHOD(CLASS, getDest,       ARRAYDEF({ { INT,  END }                }), 1 ) \
+   METHOD(CLASS, getDestCount,  ARRAYDEF({ {       END }                }), 1 ) \
+   METHOD(CLASS, setGeom,       ARRAYDEF({ { PT,   END }, { LINE, END } }), 2 ) \
+   METHOD(CLASS, getEngineered, ARRAYDEF({ {       END }                }), 1 ) \
+   METHOD(CLASS, setEngineered, ARRAYDEF({ { BOOL, END }                }), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(Teleporter, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(Teleporter, LUA_METHODS);
@@ -1005,6 +1007,33 @@ S32 Teleporter::lua_getDest(lua_State *L)
 S32 Teleporter::lua_getDestCount(lua_State *L)
 {
    return returnInt(L, mDestManager.getDestCount());
+}
+
+
+/**
+ * @luafunc  bool Teleporter::getEngineered()
+ * @return   True if the item can be destroyed.
+*/
+S32 Teleporter::lua_getEngineered(lua_State *L)
+{
+   return returnBool(L, mEngineered);
+}
+
+
+/**
+ * @luafunc  Teleporter::setEngineered(engineered)
+ * @brief    Sets whether the item can be destroyed when its health reaches zero.
+ * @param    engineered `true` to make the item destructible, `false` to make it permanent
+ * @return
+ */
+S32 Teleporter::lua_setEngineered(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Teleporter", "setEngineered");
+
+   mEngineered = getBool(L, 1);
+   setMaskBits(InitMask);
+
+   return returnBool(L, mEngineered);
 }
 
 
