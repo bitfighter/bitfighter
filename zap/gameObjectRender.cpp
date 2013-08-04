@@ -584,7 +584,6 @@ static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
 
    FontManager::pushFontContext(HUDContext);
 
-
    glLineWidth(gLineWidth1);
 
    // Four square
@@ -592,49 +591,58 @@ static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
    height = (height + 3) & ~0x03;      // Round height up to next multiple of 4
 
    // Adjust x and y to be center of rank icon
-   y -= height / 2 - (height - passedHeight) / 2;
+   y -= height / 2 - (height - passedHeight) / 2 - 1;
    x -= height / 2 + 4;    // 4 provides a margin
 
    F32 rad = height / 4.0f;
+   S32 yoffset = 0;     // Tricky way to vertically align the squares when there are only 1 or 2
 
    switch(sym)
    {
       case 8:
-         glColor(Colors::yellow40);
+         glColor(Colors::yellow70);
          drawFilledStar(Point(x,y), 5, height / 2, rad);
          break;
       case 7:
-         glColor(Colors::yellow40);
+         glColor(Colors::yellow70);
          drawStar(Point(x,y), 5, height / 2, rad);
          break;
       case 6:
+         glColor(Colors::yellow70);
+         drawCircle(x,y, height / 2);
+         drawFilledSquare(Point(x,y), rad, &Colors::yellow70);
+         break;
       case 5:
+         drawHollowSquare(Point(x,y), passedHeight / 2, &Colors::red);
+         drawFilledSquare(Point(x,y), rad, &Colors::yellow70);
+         break;
       case 4:
-         drawFilledSquare(Point(x - rad, y + rad), rad, &Colors::red);
+         drawHollowSquare(Point(x,y), passedHeight / 2, &Colors::red);
+         drawFilledSquare(Point(x,y), rad, &Colors::red);
+         break;
       case 3:
-         drawFilledSquare(Point(x + rad, y + rad), rad, &Colors::red);
+         drawHollowSquare(Point(x,y), passedHeight / 2, &Colors::red);
+         break;
       case 2:
-         drawFilledSquare(Point(x + rad, y - rad), rad, &Colors::red);
+         drawFilledSquare(Point(x + rad, y), rad, &Colors::red);
+         break;
       case 1:
-         drawFilledSquare(Point(x - rad, y - rad), rad, &Colors::red);
+         drawHollowSquare(Point(x + rad, y), rad, &Colors::red);
+         break;
    }
 
    if(sym > 0 && sym <= 6)
    {
-      if(sym == 6)
-         glColor(Colors::yellow40);
-      else
-         glColor(Colors::gray20);
+      //if(sym == 6)
+      //   glColor(Colors::yellow40);
+      //else
+      //   glColor(Colors::gray20);
 
-      drawHollowSquare(Point(x,y), height / 2);
+      //drawHollowSquare(Point(x,y), height / 2);
 
-      drawVertLine(x, y - height / 2, y + height / 2);
-      drawHorizLine(x - height / 2, x + height / 2, y);
+      //drawVertLine(x, y - height / 2, y + height / 2);
+      //drawHorizLine(x - height / 2, x + height / 2, y);
    }
-
-   if(sym == 5 || sym == 6)
-      drawFilledSquare(Point(x,y), rad, &Colors::yellow40);
-
 
    glLineWidth(gDefaultLineWidth);
 

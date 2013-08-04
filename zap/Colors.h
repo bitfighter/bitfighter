@@ -54,6 +54,7 @@ namespace Colors
 
    // Yellow-oranges
    const Color yellow40(.40f, .40f, 0);
+   const Color yellow70(.70f, .70f, 0);
    const Color orange50(1, .50f, 0);      // Rabbit orange
    const Color orange67(1, .67f ,0);      // A more reddish orange
 
