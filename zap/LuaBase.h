@@ -33,6 +33,9 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
+#include "shipItems.h"
+#include "WeaponInfo.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -126,6 +129,9 @@ public:
    static void getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &points);
    static Point getPointOrXY(lua_State *L, S32 index);
    static Vector<Point> getPointsOrXYs(lua_State *L, S32 index);
+
+   static WeaponType getWeaponType(lua_State *L, S32 index);
+   static ShipModule getShipModule(lua_State *L, S32 index);
 
    // All of these return<T> functions work in the same way.  Include at the end of a child class method.
    // Usage: return returnInt(L, int);

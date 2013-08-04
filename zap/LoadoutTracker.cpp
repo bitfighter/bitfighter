@@ -406,7 +406,7 @@ S32 LoadoutTracker::lua_setWeapon(lua_State *L)     // setWeapon(i, wep) ==> Set
    checkArgList(L, functionArgs, "Loadout", "setWeapon");
 
    U32 index = (U32) getInt(L, 1);
-   WeaponType weapon = (WeaponType) getInt(L, 2);
+   WeaponType weapon = (WeaponType) getWeaponType(L, 2);
 
    mWeapons[index - 1] = weapon;
 
@@ -419,7 +419,7 @@ S32 LoadoutTracker::lua_setModule(lua_State *L)     // setModule(i, mod) ==> Set
    checkArgList(L, functionArgs, "Loadout", "setModule");
 
    U32 index = (U32) getInt(L, 1);
-   ShipModule module  = (ShipModule) getInt(L, 2);
+   ShipModule module  = getShipModule(L, 2);
 
    mModules[index - 1] = module;
 
@@ -482,7 +482,7 @@ S32 LoadoutTracker::lua_getWeapon(lua_State *L)     // getWeapon(i) ==> return w
 {
    checkArgList(L, functionArgs, "Loadout", "getWeapon");
 
-   WeaponType weapon = (WeaponType) getInt(L, 1);
+   WeaponType weapon = getWeaponType(L, 1);
 
    return returnInt(L, mWeapons[weapon - 1]);
 }

@@ -62,7 +62,7 @@ Projectile::Projectile(lua_State *L)
 
       if(checkArgList(L, constructorArgList, "Projectile", "constructor") == 1)
       {
-         WeaponType newType = (WeaponType)getInt(L, 1);
+         WeaponType newType = getWeaponType(L, 1);
 
          // Only allow projectile types that use this class
          if(WeaponInfo::getWeaponInfo(newType).projectileType != NotAProjectile)

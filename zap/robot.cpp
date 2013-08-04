@@ -926,7 +926,7 @@ S32 Robot::lua_setWeapon(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "setWeapon");
 
-   WeaponType weap = (WeaponType)getInt(L, 1);
+   WeaponType weap = getWeaponType(L, 1);
 
    // Check the weapons we have on board -- if any match the requested weapon, activate it
    for(S32 i = 0; i < ShipWeaponCount; i++)
@@ -957,7 +957,7 @@ S32 Robot::lua_setWeaponIndex(lua_State *L)
 S32 Robot::lua_hasWeapon(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "hasWeapon");
-   WeaponType weap = (WeaponType)getInt(L, 1);
+   WeaponType weap = getWeaponType(L, 1);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
       if(mLoadout.getWeapon(i) == weap)
@@ -973,7 +973,7 @@ S32 Robot::lua_activateModule(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "activateModule");
 
-   ShipModule mod = (ShipModule) getInt(L, 1);
+   ShipModule mod = getShipModule(L, 1);
 
    for(S32 i = 0; i < ShipModuleCount; i++)
       if(getModule(i) == mod)

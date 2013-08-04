@@ -258,7 +258,8 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
          if(lua_isnumber(L, stackPos))
          {
             lua_Integer i = lua_tointeger(L, stackPos);
-            return (i >= 0 && i < WeaponCount);
+            // Lua Weapon enum is offset from module count
+            return (i >= ModuleCount && i < ModuleCount + WeaponCount);
          }
          return false;
 
@@ -413,7 +414,20 @@ Vector<Point> LuaBase::getPointsOrXYs(lua_State *L, S32 index)
       getPointVectorFromTable(L, index, points);
 
    return points;
- }
+}
+
+
+WeaponType LuaBase::getWeaponType(lua_State *L, S32 index)
+{
+   // Lua Weapon enum is offset from modules so we reduce by ModuleCount to get the c++ values
+   return (WeaponType)(lua_tointeger(L, index) - ModuleCount);
+}
+
+
+ShipModule LuaBase::getShipModule(lua_State *L, S32 index)
+{
+   return (ShipModule)(lua_tointeger(L, index));
+}
 
 
 // Make a nice looking string representation of the object at the specified index
