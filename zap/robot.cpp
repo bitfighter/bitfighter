@@ -577,7 +577,7 @@ U16 Robot::findClosestZone(const Point &point)
    METHOD(CLASS,  fireWeapon,           ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
    METHOD(CLASS,  hasWeapon,            ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
                                                                                              \
-   METHOD(CLASS,  activateModule,       ARRAYDEF({{ MOD_ENUM, END }}), 1 )                   \
+   METHOD(CLASS,  fireModule,           ARRAYDEF({{ MOD_ENUM, END }}), 1 )                   \
                                                                                              \
    METHOD(CLASS,  globalMsg,            ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS,  teamMsg,              ARRAYDEF({{ STR, END }}), 1 )                        \
@@ -909,8 +909,8 @@ S32 Robot::lua_setThrustToPt(lua_State *L)
 
 /**
  * @luafunc Robot::fireWeapon(weapon)
- * @brief   Send a message to all players.
- * @param   message Message to send.
+ * @brief   Shoots the given weapon if it is equipped
+ * @param   weapon Weapon to fire
  */
 S32 Robot::lua_fireWeapon(lua_State *L)
 {
@@ -919,7 +919,7 @@ S32 Robot::lua_fireWeapon(lua_State *L)
    WeaponType weapon = getWeaponType(L, 1);
    bool hasWeapon = false;
 
-   // Check the weapons we have on board -- if any match the requested weapon, activate it
+   // Check the weapons we have on board -- if any match the requested weapon, select it
    for(S32 i = 0; i < ShipWeaponCount; i++)
       if(mLoadout.getWeapon(i) == weapon)
       {
@@ -956,20 +956,30 @@ S32 Robot::lua_hasWeapon(lua_State *L)
 }
 
 
-// Activate module this cycle --> takes module enum.
-// If specified module is not part of the loadout, does nothing.
-S32 Robot::lua_activateModule(lua_State *L)
+/**
+ * @luafunc Robot::fireModule(module)
+ * @brief   Activates/fires the given module if it is equipped
+ * @param   module Module to fire
+ */
+S32 Robot::lua_fireModule(lua_State *L)
 {
-   checkArgList(L, functionArgs, "Robot", "activateModule");
+   checkArgList(L, functionArgs, "Robot", "fireModule");
 
-   ShipModule mod = getShipModule(L, 1);
+   ShipModule module = getShipModule(L, 1);
 
+   bool hasModule = false;
+
+   // Check if module is equipped and fire it
    for(S32 i = 0; i < ShipModuleCount; i++)
-      if(getModule(i) == mod)
+      if(getModule(i) == module)
       {
+         hasModule = true;
          mCurrentMove.modulePrimary[i] = true;
          break;
       }
+
+   if(!hasModule)
+      throw LuaException("The weapon given to bot:fireWeapon(weapon) is not equipped!");
 
    return 0;
 }

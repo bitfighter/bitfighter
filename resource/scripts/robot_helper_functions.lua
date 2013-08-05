@@ -145,3 +145,8 @@ function bot:fire()
 	logprint("This method will now default to firing phaser if it is equipped")
 	return bot:fireWeapon(Weapon.Phaser)
 end
+
+function bot:activateModule(module)
+    printDeprecationWarning("bot:activateModule(module)", "bot:fireModule(module)")
+	return bot:fireModule(module)
+end
