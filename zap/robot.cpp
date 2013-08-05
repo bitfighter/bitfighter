@@ -574,8 +574,7 @@ U16 Robot::findClosestZone(const Point &point)
    METHOD(CLASS,  setThrust,            ARRAYDEF({{ NUM, NUM, END }, { NUM, PT, END}}), 2 )  \
    METHOD(CLASS,  setThrustToPt,        ARRAYDEF({{ PT,       END }                 }), 1 )  \
                                                                                              \
-   METHOD(CLASS,  fire,                 ARRAYDEF({{            END }}), 1 )                  \
-   METHOD(CLASS,  setWeapon,            ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
+   METHOD(CLASS,  fireWeapon,           ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
    METHOD(CLASS,  hasWeapon,            ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
                                                                                              \
    METHOD(CLASS,  activateModule,       ARRAYDEF({{ MOD_ENUM, END }}), 1 )                   \
@@ -908,33 +907,37 @@ S32 Robot::lua_setThrustToPt(lua_State *L)
 }
 
 
-// Fire current weapon if possible
-S32 Robot::lua_fire(lua_State *L)
+/**
+ * @luafunc Robot::fireWeapon(weapon)
+ * @brief   Send a message to all players.
+ * @param   message Message to send.
+ */
+S32 Robot::lua_fireWeapon(lua_State *L)
 {
-   Move move = getCurrentMove();
-   move.fire = true;
-   setCurrentMove(move);
+   checkArgList(L, functionArgs, luaClassName, "fireWeapon");
 
-   return 0;
-}
-
-
-// Set weapon to specified weapon, if we have it
-S32 Robot::lua_setWeapon(lua_State *L)
-{
-   checkArgList(L, functionArgs, "Robot", "setWeapon");
-
-   WeaponType weap = getWeaponType(L, 1);
+   WeaponType weapon = getWeaponType(L, 1);
+   bool hasWeapon = false;
 
    // Check the weapons we have on board -- if any match the requested weapon, activate it
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      if(mLoadout.getWeapon(i) == weap)
+      if(mLoadout.getWeapon(i) == weapon)
       {
+         hasWeapon = true;
          selectWeapon(i);
          break;
       }
 
-   // If we get here without having found our weapon, then nothing happens.  Better luck next time!
+   // If weapon was equipped, fire!
+   if(hasWeapon)
+   {
+      Move move = getCurrentMove();
+      move.fire = true;
+      setCurrentMove(move);
+   }
+   else
+      throw LuaException("The weapon given to bot:fireWeapon(weapon) is not equipped!");
+
    return 0;
 }
 

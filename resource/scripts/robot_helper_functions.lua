@@ -134,3 +134,14 @@ function bot:findGlobalObjects(...)
     printDeprecationWarning("bot:findGlobalObjects(...)", "bot:findAllObjects(...)")
     return bot:findAllObjects(...)
 end
+
+function bot:setWeapon(index, weapon)
+    printDeprecationWarning("bot:setWeapon(index, weapon)", "bot:fireWeapon(weapon) directly")
+	logprint("This method now effectively does nothing.")
+end
+
+function bot:fire()
+    printDeprecationWarning("bot:fire()", "bot:fireWeapon(weapon)")
+	logprint("This method will now default to firing phaser if it is equipped")
+	return bot:fireWeapon(Weapon.Phaser)
+end
