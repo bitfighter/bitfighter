@@ -576,11 +576,9 @@ U16 Robot::findClosestZone(const Point &point)
                                                                                              \
    METHOD(CLASS,  fire,                 ARRAYDEF({{            END }}), 1 )                  \
    METHOD(CLASS,  setWeapon,            ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
-   METHOD(CLASS,  setWeaponIndex,       ARRAYDEF({{ WEAP_SLOT, END }}), 1 )                  \
    METHOD(CLASS,  hasWeapon,            ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
                                                                                              \
    METHOD(CLASS,  activateModule,       ARRAYDEF({{ MOD_ENUM, END }}), 1 )                   \
-   METHOD(CLASS,  activateModuleIndex,  ARRAYDEF({{ MOD_SLOT, END }}), 1 )                   \
                                                                                              \
    METHOD(CLASS,  globalMsg,            ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS,  teamMsg,              ARRAYDEF({{ STR, END }}), 1 )                        \
@@ -941,18 +939,6 @@ S32 Robot::lua_setWeapon(lua_State *L)
 }
 
 
-// Set weapon to index of slot (i.e. 1, 2, or 3)
-S32 Robot::lua_setWeaponIndex(lua_State *L)
-{
-   checkArgList(L, functionArgs, "Robot", "setWeaponIndex");
-
-   U32 weap = (U32)getInt(L, 1); // Acceptable range = (1, ShipWeaponCount) -- has already been verified by checkArgList()
-   selectWeapon(weap - 1);       // Correct for the fact that index in C++ is 0 based
-
-   return 0;
-}
-
-
 // Do we have a given weapon in our current loadout?
 S32 Robot::lua_hasWeapon(lua_State *L)
 {
@@ -981,19 +967,6 @@ S32 Robot::lua_activateModule(lua_State *L)
          mCurrentMove.modulePrimary[i] = true;
          break;
       }
-
-   return 0;
-}
-
-
-// Activate module this cycle --> takes module index
-S32 Robot::lua_activateModuleIndex(lua_State *L)
-{
-   checkArgList(L, functionArgs, "Robot", "activateModuleIndex");
-
-   U32 indx = (U32)getInt(L, 1);
-
-   mCurrentMove.modulePrimary[indx] = true;
 
    return 0;
 }

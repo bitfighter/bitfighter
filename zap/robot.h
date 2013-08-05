@@ -143,7 +143,6 @@ public:
 
    S32 lua_fire(lua_State *L);
    S32 lua_setWeapon(lua_State *L);
-   S32 lua_setWeaponIndex(lua_State *L);
    S32 lua_hasWeapon(lua_State *L);  
 
    S32 lua_globalMsg(lua_State *L);
@@ -151,7 +150,6 @@ public:
    S32 lua_privateMsg(lua_State *L);
 
    S32 lua_activateModule(lua_State *L);       // Activate module this cycle --> takes module index
-   S32 lua_activateModuleIndex(lua_State *L);  // Activate module this cycle --> takes module enum
 
    S32 lua_engineerDeployObject(lua_State *L);
    S32 lua_dropItem(lua_State *L);
