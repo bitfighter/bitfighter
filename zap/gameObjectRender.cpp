@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
