@@ -79,7 +79,7 @@ function shieldSelf()
             end
 
             if (bulletFromTeam == false) and (point.distanceTo(bulletLoc, botLoc) < distToShieldAt + bullet:getRad() + point.distanceTo(o, bulletVel) * 50 and angleDiff < math.pi / 4) then
-                bot:activateModule(Module.Shield)
+                bot:fireModule(Module.Shield)
                 return(true)
             end
         end
@@ -142,9 +142,8 @@ function fireAtObject(obj, weapon)
     local angle = getFiringSolution(obj)
     if angle ~= nil and bot:hasWeapon(weapon) then
         bot:setAngle(angle + math.rad((math.random()-0.5)*20*(1-difficulty)))
-        bot:setWeapon(weapon)
-        bot:fire()
-        --logprint("bot:fire() called!");
+        bot:fireWeapon(weapon)
+        --logprint("bot:fireWeapon() called!");
         return(true)
     end
     --logprint("Firing solution not found.");
