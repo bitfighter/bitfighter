@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
@@ -694,17 +694,17 @@ static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
          break;
       case 3:
          glColor(Colors::silver);
-         glTranslate(x, y + 1, 0);
+         glTranslate(x, y, 0);
          renderVertexArray(barPoints, 2, GL_LINES);
          break;
       case 4:
          glColor(Colors::silver);
-         glTranslate(x, y - 2, 0);
+         glTranslate(x, y - 3, 0);
          renderVertexArray(barPoints, 4, GL_LINES);
          break;
       case 5:
          glColor(Colors::silver);
-         glTranslate(x, y - 5, 0);
+         glTranslate(x, y - 6, 0);
          renderVertexArray(barPoints, 6, GL_LINES);
          break;
       case 6:

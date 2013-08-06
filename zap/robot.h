@@ -141,17 +141,17 @@ public:
    S32 lua_getFiringSolution(lua_State *L);
    S32 lua_getInterceptCourse(lua_State *L);
 
-   S32 lua_fire(lua_State *L);
-   S32 lua_setWeapon(lua_State *L);
-   S32 lua_setWeaponIndex(lua_State *L);
+   S32 lua_fireWeapon(lua_State *L);
    S32 lua_hasWeapon(lua_State *L);  
+
+   S32 lua_fireModule(lua_State *L);
+
+   S32 lua_setLoadoutWeapon(lua_State *L);
+   S32 lua_setLoadoutModule(lua_State *L);
 
    S32 lua_globalMsg(lua_State *L);
    S32 lua_teamMsg(lua_State *L);
    S32 lua_privateMsg(lua_State *L);
-
-   S32 lua_activateModule(lua_State *L);       // Activate module this cycle --> takes module index
-   S32 lua_activateModuleIndex(lua_State *L);  // Activate module this cycle --> takes module enum
 
    S32 lua_engineerDeployObject(lua_State *L);
    S32 lua_dropItem(lua_State *L);

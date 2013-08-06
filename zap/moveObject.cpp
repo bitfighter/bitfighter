@@ -1730,28 +1730,34 @@ REGISTER_LUA_SUBCLASS(Asteroid, MoveObject);
 
 /**
  *  @luafunc Asteroid::getSizeIndex()
- *  @brief   Get %s asteroids current size index.
- *  @descr   Index 1 represents the %asteroid's initial size.  After it has been broken once, it's size index will be 2, and so on.
- *           This method will always return an integer between 1 and the value returned by the %getSizeCount() method (inclusive).
- *  @return  \e int - Index corresponding to the %asteroid's current size.
+ *  @brief Get this asteroid's current size index.
+ *
+ *  Index 1 represents the asteroid's initial size.  After it has been
+ *  broken once, its size index will be 2, and so on.  This method will always
+ *  return an integer between 1 and the value returned by the %getSizeCount()
+ *  method (inclusive).
+ *  @return  int Index corresponding to the asteroid's current size.
  */
 S32 Asteroid::lua_getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft + 1); }
 
 /**
  *  @luafunc Asteroid::getSizeCount()
- *  @brief   Returns size index of smallest asteroid.
- *  @descr   Remember, bigger indices mean smaller asteroids.
- *  @return  \e int - Index of the %asteroid's smallest size.
+ *  @brief Returns size index of smallest asteroid.
+ *
+ *  Remember, bigger indices mean smaller asteroids.
+ *  @return  int Index of the asteroid's smallest size.
  */
 S32 Asteroid::lua_getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT + 1); }
 
 /**
  *  @luafunc Asteroid::setSize(size)
- *  @brief   Set the size of the %Asteroid.
- *  @param   \e int size - The size the asteroid will be set to.
- *  @descr   Setting the size of an %Asteroid will give you (size - 1) levels you'll have to destroy.  Each
- *           level reduction will produce two more asteroids
- *  @note    Any size less than 1 will default to size 3.  Please be responsible with your size choices.
+ *  @brief Set the size of the %Asteroid.
+ *
+ *  Setting the size of an %Asteroid will give you (size - 1) levels you'll
+ *  have to destroy. Each level reduction will produce two more asteroids
+ *  @param int size The size the asteroid will be set to.
+ *  @note Any size less than 1 will default to size 3.  Please be responsible
+ *  with your size choices.
  */
 S32 Asteroid::lua_setSize(lua_State *L)
 {

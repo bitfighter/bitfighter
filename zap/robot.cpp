@@ -574,13 +574,13 @@ U16 Robot::findClosestZone(const Point &point)
    METHOD(CLASS,  setThrust,            ARRAYDEF({{ NUM, NUM, END }, { NUM, PT, END}}), 2 )  \
    METHOD(CLASS,  setThrustToPt,        ARRAYDEF({{ PT,       END }                 }), 1 )  \
                                                                                              \
-   METHOD(CLASS,  fire,                 ARRAYDEF({{            END }}), 1 )                  \
-   METHOD(CLASS,  setWeapon,            ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
-   METHOD(CLASS,  setWeaponIndex,       ARRAYDEF({{ WEAP_SLOT, END }}), 1 )                  \
+   METHOD(CLASS,  fireWeapon,           ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
    METHOD(CLASS,  hasWeapon,            ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
                                                                                              \
-   METHOD(CLASS,  activateModule,       ARRAYDEF({{ MOD_ENUM, END }}), 1 )                   \
-   METHOD(CLASS,  activateModuleIndex,  ARRAYDEF({{ MOD_SLOT, END }}), 1 )                   \
+   METHOD(CLASS,  fireModule,           ARRAYDEF({{ MOD_ENUM, END }}), 1 )                   \
+                                                                                             \
+   METHOD(CLASS,  setLoadoutWeapon,     ARRAYDEF({{ WEAP_SLOT, WEAP_ENUM, END }}), 1 )       \
+   METHOD(CLASS,  setLoadoutModule,     ARRAYDEF({{ MOD_SLOT,  MOD_ENUM,  END }}), 1 )       \
                                                                                              \
    METHOD(CLASS,  globalMsg,            ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS,  teamMsg,              ARRAYDEF({{ STR, END }}), 1 )                        \
@@ -910,44 +910,36 @@ S32 Robot::lua_setThrustToPt(lua_State *L)
 }
 
 
-// Fire current weapon if possible
-S32 Robot::lua_fire(lua_State *L)
+/**
+ * @luafunc Robot::fireWeapon(weapon)
+ * @brief   Shoots the given weapon if it is equipped
+ * @param   weapon Weapon to fire
+ */
+S32 Robot::lua_fireWeapon(lua_State *L)
 {
-   Move move = getCurrentMove();
-   move.fire = true;
-   setCurrentMove(move);
+   checkArgList(L, functionArgs, luaClassName, "fireWeapon");
 
-   return 0;
-}
+   WeaponType weapon = getWeaponType(L, 1);
+   bool hasWeapon = false;
 
-
-// Set weapon to specified weapon, if we have it
-S32 Robot::lua_setWeapon(lua_State *L)
-{
-   checkArgList(L, functionArgs, "Robot", "setWeapon");
-
-   WeaponType weap = getWeaponType(L, 1);
-
-   // Check the weapons we have on board -- if any match the requested weapon, activate it
+   // Check the weapons we have on board -- if any match the requested weapon, select it
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      if(mLoadout.getWeapon(i) == weap)
+      if(mLoadout.getWeapon(i) == weapon)
       {
+         hasWeapon = true;
          selectWeapon(i);
          break;
       }
 
-   // If we get here without having found our weapon, then nothing happens.  Better luck next time!
-   return 0;
-}
-
-
-// Set weapon to index of slot (i.e. 1, 2, or 3)
-S32 Robot::lua_setWeaponIndex(lua_State *L)
-{
-   checkArgList(L, functionArgs, "Robot", "setWeaponIndex");
-
-   U32 weap = (U32)getInt(L, 1); // Acceptable range = (1, ShipWeaponCount) -- has already been verified by checkArgList()
-   selectWeapon(weap - 1);       // Correct for the fact that index in C++ is 0 based
+   // If weapon was equipped, fire!
+   if(hasWeapon)
+   {
+      Move move = getCurrentMove();
+      move.fire = true;
+      setCurrentMove(move);
+   }
+   else
+      throw LuaException("The weapon given to bot:fireWeapon(weapon) is not equipped!");
 
    return 0;
 }
@@ -967,33 +959,82 @@ S32 Robot::lua_hasWeapon(lua_State *L)
 }
 
 
-// Activate module this cycle --> takes module enum.
-// If specified module is not part of the loadout, does nothing.
-S32 Robot::lua_activateModule(lua_State *L)
+/**
+ * @luafunc Robot::fireModule(module)
+ * @brief   Activates/fires the given module if it is equipped
+ * @param   module Module to fire
+ */
+S32 Robot::lua_fireModule(lua_State *L)
 {
-   checkArgList(L, functionArgs, "Robot", "activateModule");
+   checkArgList(L, functionArgs, "Robot", "fireModule");
 
-   ShipModule mod = getShipModule(L, 1);
+   ShipModule module = getShipModule(L, 1);
 
+   bool hasModule = false;
+
+   // Check if module is equipped and fire it
    for(S32 i = 0; i < ShipModuleCount; i++)
-      if(getModule(i) == mod)
+      if(getModule(i) == module)
       {
+         hasModule = true;
          mCurrentMove.modulePrimary[i] = true;
          break;
       }
+
+   if(!hasModule)
+      throw LuaException("The weapon given to bot:fireWeapon(weapon) is not equipped!");
 
    return 0;
 }
 
 
-// Activate module this cycle --> takes module index
-S32 Robot::lua_activateModuleIndex(lua_State *L)
+/**
+ * @luafunc Robot::setLoadoutWeapon(slot, weapon)
+ * @brief   Request a new loadout where the given weapon slot is changed to the given weapon.
+ *          This still requires the bot to change to its new loadout
+ * @param   slot Weapon slot to set
+ * @param   weapon Weapon to set
+ */
+S32 Robot::lua_setLoadoutWeapon(lua_State *L)
 {
-   checkArgList(L, functionArgs, "Robot", "activateModuleIndex");
+   checkArgList(L, functionArgs, "Ship", "setLoadoutWeapon");
 
-   U32 indx = (U32)getInt(L, 1);
+   // Slots start at index 1, but c++ wants 0
+   S32 slot = getInt(L, 1) - 1;
+   WeaponType weapon = getWeaponType(L, 2);
 
-   mCurrentMove.modulePrimary[indx] = true;
+   // Make a copy of our current loadout and adjust it
+   LoadoutTracker loadout = mLoadout;
+   loadout.setWeapon(slot, weapon);
+
+   // Now request the new one
+   getOwner()->requestLoadout(loadout);
+
+   return 0;
+}
+
+
+/**
+ * @luafunc Robot::setLoadoutModule(slot, module)
+ * @brief   Request a new loadout where the given module slot is changed to the given module.
+ *          This still requires the bot to change to its new loadout
+ * @param   slot Module slot to set
+ * @param   module Module to set
+ */
+S32 Robot::lua_setLoadoutModule(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Ship", "setLoadoutModule");
+
+   // Slots start at index 1, but c++ wants 0
+   S32 slot = getInt(L, 1) - 1;
+   ShipModule module = getShipModule(L, 2);
+
+   // Make a copy of our current loadout and adjust it
+   LoadoutTracker loadout = mLoadout;
+   loadout.setModule(slot, module);
+
+   // Now request the new one
+   getOwner()->requestLoadout(loadout);
 
    return 0;
 }
