@@ -352,7 +352,6 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
 
    getWindowParameters(settings, displayMode, sdlWindowWidth, sdlWindowHeight, orthoLeft, orthoRight, orthoTop, orthoBottom);
 
-
 #if SDL_VERSION_ATLEAST(2,0,0)
    // Change video modes based on selected display mode
    // Note:  going into fullscreen you have to do in order:
@@ -389,11 +388,11 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    switch (displayMode)
    {
       case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
-         sdlVideoFlags |= settings->getIniSettings()->useFakeFullscreen ? SDL_NOFRAME : SDL_FULLSCREEN;
+         sdlVideoFlags |= settings->getIniSettings()->mSettings.getVal("UseFakeFullscreen") ? SDL_NOFRAME : SDL_FULLSCREEN;
          break;
 
       case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
-         sdlVideoFlags |= settings->getIniSettings()->useFakeFullscreen ? SDL_NOFRAME : SDL_FULLSCREEN;
+         sdlVideoFlags |= settings->getIniSettings()->mSettings.getVal("UseFakeFullscreen")  ? SDL_NOFRAME : SDL_FULLSCREEN;
          break;
 
       case DISPLAY_MODE_WINDOWED:

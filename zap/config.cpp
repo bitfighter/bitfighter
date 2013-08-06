@@ -75,18 +75,30 @@ static string displayModeToString(DisplayMode mode)
 }
 
 
+static YesNo yesNoStringToBool(string yesNo)
+{
+   if(lcase(yesNo) == "yes")
+      return Yes;
+   else 
+      return No;
+}
+
+
 // TODO: Move these to stringutils ?
 static string toString(const string &val)       { return val;                              }
 static string toString(S32 val)                 { return itos(val);                        }
 static string toString(DisplayMode displayMode) { return displayModeToString(displayMode); }
+static string toString(YesNo yesNo)             { return yesNo == Yes ? "Yes" : "No";      }
 
 template<> static string      Settings::fromString<string>     (const string &val) { return val;                      }
 template<> static S32         Settings::fromString<S32>        (const string &val) { return atoi(val.c_str());        }
 template<> static DisplayMode Settings::fromString<DisplayMode>(const string &val) { return stringToDisplayMode(val); }
+template<> static YesNo       Settings::fromString<YesNo>      (const string &val) { return yesNoStringToBool(val);   }
 
 
 // Constructor
-AbstractSetting::AbstractSetting(const string &name) : mName(name) 
+AbstractSetting::AbstractSetting(const string &name, const string &key, const string &section) : 
+            mName(name), mIniKey(key), mIniSection(section) 
 { 
    // Do nothing
 }
@@ -101,6 +113,12 @@ AbstractSetting::~AbstractSetting()
 string AbstractSetting::getName() const 
 { 
    return mName; 
+}
+
+
+string AbstractSetting::getKey() const
+{
+   return mIniKey;
 }
 
 
@@ -136,17 +154,27 @@ string Settings::getStrVal(const string &name) const
 }
 
 
+string Settings::getDefaultStrVal(const string &name) const
+{
+   return mSettings[mKeyLookup.at(name)]->getDefaultValueString();
+}
+
+
+string Settings::getKey(const string &name) const
+{
+   return mSettings[mKeyLookup.at(name)]->getKey();
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 
 template <class T>
-Setting<T>::Setting(const string &name, const T &defaultValue, const string &iniName, const string &iniSection, const string &description) :
-   Parent(name),
+Setting<T>::Setting(const string &name, const T &defaultValue, const string &iniKey, const string &iniSection, const string &description) :
+   Parent(name, iniKey, iniSection),
    mDefaultValue(defaultValue),
    mValue(defaultValue),
-   mIniName(iniName),
-   mIniSection(iniSection),
    mDescription(description)
 {
    // Do nothing
@@ -181,6 +209,13 @@ string Setting<T>::getValueString() const
 }
 
 
+template <class T>
+string Setting<T>::getDefaultValueString() const 
+{ 
+   return toString(mDefaultValue); 
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -189,6 +224,10 @@ string Setting<T>::getValueString() const
 template class Setting<string>;
 template class Setting<S32>;
 template class Setting<DisplayMode>;
+template class Setting<YesNo>;
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 
 // bitfighter.org would soon be the same as 199.192.229.168
@@ -199,9 +238,10 @@ const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955,bitfighter.or
 // Constructor: Set default values here
 IniSettings::IniSettings()
 {
-   // Name the user entered last time they ran the game
-   mSettings.add(new Setting<string>     ("LastName",   "ChumpChange",         "LastName",   "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
-   mSettings.add(new Setting<DisplayMode>("WindowMode", DISPLAY_MODE_WINDOWED, "WindowMode", "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
+   // Name the user entered last time they ran the game                                                    
+   mSettings.add(new Setting<string>     ("LastName",          "ChumpChange",         "LastName",          "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
+   mSettings.add(new Setting<DisplayMode>("WindowMode",        DISPLAY_MODE_WINDOWED, "WindowMode",        "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
+   mSettings.add(new Setting<YesNo>      ("UseFakeFullscreen", Yes,                   "UseFakeFullscreen", "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
 
 
    controlsRelative = false;          // Relative controls is lame!
@@ -288,7 +328,7 @@ IniSettings::IniSettings()
    winYPos = 0;
    winSizeFact = 1.0;
 
-   useFakeFullscreen = true;
+   //useFakeFullscreen = true;
    musicMutedOnCmdLine = false;
 
    neverConnectDirect = false;
@@ -550,7 +590,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->mSettings.setVal("WindowMode", DISPLAY_MODE_FULL_SCREEN_STRETCHED);
 #else
    //iniSettings->mSettings.setVal("LastName", ini->GetValue(section, "LastName",   iniSettings->mSettings.getVal<string>("LastName")));
-   iniSettings->mSettings.setValFromString<DisplayMode>("WindowMode", ini->GetValue(section, "WindowMode", iniSettings->mSettings.getStrVal("WindowMode")));
+   iniSettings->mSettings.setValFromString<DisplayMode>("WindowMode", ini->GetValue(section, "WindowMode", iniSettings->mSettings.getDefaultStrVal("WindowMode")));
 #endif
 
    iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>("WindowMode");
@@ -572,7 +612,9 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->joystickLinuxUseOldDeviceSystem = ini->GetValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
    iniSettings->alwaysStartInKeyboardMode = ini->GetValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
 #endif
-   iniSettings->useFakeFullscreen = ini->GetValueYN(section, "UseFakeFullscreen", iniSettings->useFakeFullscreen);
+   //iniSettings->useFakeFullscreen = ini->GetValueYN(section, "UseFakeFullscreen", iniSettings->useFakeFullscreen);
+   iniSettings->mSettings.setValFromString<YesNo>("UseFakeFullscreen", ini->GetValue(section, "UseFakeFullscreen", iniSettings->mSettings.getDefaultStrVal("UseFakeFullscreen")));
+
 
    iniSettings->winXPos = max(ini->GetValueI(section, "WindowXPos", iniSettings->winXPos), 0);    // Restore window location
    iniSettings->winYPos = max(ini->GetValueI(section, "WindowYPos", iniSettings->winYPos), 0);
@@ -584,7 +626,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->password       = ini->GetValue(section, "Password", iniSettings->password);
 
    iniSettings->defaultName    = ini->GetValue(section, "DefaultName", iniSettings->defaultName);
-   iniSettings->mSettings.setValFromString<string>("LastName", ini->GetValue(section, "LastName", iniSettings->mSettings.getStrVal("LastName")));
+   iniSettings->mSettings.setValFromString<string>("LastName", ini->GetValue(section, "LastName", iniSettings->mSettings.getDefaultStrVal("LastName")));
    iniSettings->lastPassword   = ini->GetValue(section, "LastPassword", iniSettings->lastPassword);
    iniSettings->lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings->lastEditorName);
 
@@ -1720,11 +1762,11 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, "----------------");
    }
    //ini->SetValue("Settings",  "WindowMode", displayModeToString(iniSettings->displayMode));
-   ini->SetValue  (section, "WindowMode", iniSettings->mSettings.getStrVal("WindowMode"));
+   ini->SetValue  (section, iniSettings->mSettings.getKey("WindowMode"), iniSettings->mSettings.getStrVal("WindowMode"));
    
    saveWindowPosition(ini, iniSettings->winXPos, iniSettings->winYPos);
 
-   ini->setValueYN(section, "UseFakeFullscreen", iniSettings->useFakeFullscreen);
+   ini->SetValue  (section, iniSettings->mSettings.getKey("UseFakeFullscreen"), iniSettings->mSettings.getStrVal("UseFakeFullscreen"));
    ini->SetValueF (section, "WindowScalingFactor", iniSettings->winSizeFact);
    ini->setValueYN(section, "VoiceEcho", iniSettings->echoVoice );
    ini->SetValue  (section, "ControlMode", (iniSettings->controlsRelative ? "Relative" : "Absolute"));
@@ -1746,7 +1788,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValue  (section, "DefaultName", iniSettings->defaultName);
    ini->SetValue  (section, "Nickname", iniSettings->name);
    ini->SetValue  (section, "Password", iniSettings->password);
-   ini->SetValue  (section, "LastName", iniSettings->mSettings.getStrVal("LastName"));
+   ini->SetValue  (section, iniSettings->mSettings.getKey("LastName"), iniSettings->mSettings.getStrVal("LastName"));
    ini->SetValue  (section, "LastPassword", iniSettings->lastPassword);
    ini->SetValue  (section, "LastEditorName", iniSettings->lastEditorName);
 

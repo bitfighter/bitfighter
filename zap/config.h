@@ -59,6 +59,11 @@ extern const char *MASTER_SERVER_LIST_ADDRESS;
 class GameSettings;
 struct CmdLineSettings;
 
+enum YesNo {
+   Yes,
+   No
+};
+
 struct FolderManager 
 {
    // Constructors
@@ -165,14 +170,19 @@ struct PluginBinding
 class AbstractSetting
 {
 private:
-   string mName;
+   string mName;        // Value we use to look this item up
+   string mIniKey;      // INI key
+   string mIniSection;  // INI section
 
 public:
-   AbstractSetting(const string &name);     // Constructor
-   virtual ~AbstractSetting();              // Destructor
+   AbstractSetting(const string &name, const string &key, const string &section);   // Constructor
+   virtual ~AbstractSetting();                                                      // Destructor
 
-   string getName() const;
-   virtual string getValueString() const = 0;
+   string getName() const;   
+   string getKey() const;
+  
+   virtual string getValueString() const = 0;         // Returns current value, as a string
+   virtual string getDefaultValueString() const = 0;  // Returns default value, as a string
 };
 
 
@@ -186,20 +196,19 @@ class Setting : public AbstractSetting
    typedef AbstractSetting Parent;
 
 private:
-   string mIniName;
-   string mIniSection;
    string mDescription;
 
    T mValue;
    T mDefaultValue;
 
 public:
-   Setting<T>(const string &name, const T &defaultValue, const string &iniName, const string &iniSection, const string &description);
+   Setting<T>(const string &name, const T &defaultValue, const string &iniKey, const string &iniSection, const string &description);
    virtual ~Setting<T>();
 
    T getValue() const;
    void setValue(const T &value);
    string getValueString() const;
+   string getDefaultValueString() const;
 };
 
 
@@ -246,7 +255,6 @@ public:
       static_cast<Setting<T> *>(absSet)->setValue(fromString<T>(value));
    }
 
-
    template <class T> 
    T getVal(const string &name) const
    {
@@ -256,8 +264,9 @@ public:
       return static_cast<Setting<T> *>(absSet)->getValue();
    }
 
-
    string getStrVal(const string &name) const;
+   string getDefaultStrVal(const string &name) const;
+   string getKey(const string &name) const;
 };
 
 
@@ -368,7 +377,7 @@ public:
    bool musicMutedOnCmdLine;
 
    // Use 'fake fullscreen' vs real fullscreen
-   bool useFakeFullscreen;
+   //bool useFakeFullscreen;
 
    // Testing values
    bool neverConnectDirect;
