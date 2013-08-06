@@ -39,7 +39,7 @@ enum DisplayMode {
    DISPLAY_MODE_WINDOWED,
    DISPLAY_MODE_FULL_SCREEN_STRETCHED,
    DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED,
-   DISPLAY_MODE_UNKNOWN
+   DISPLAY_MODE_UNKNOWN    // <== Note: code depends on this being the first value that's not a real mode
 };
 
 };

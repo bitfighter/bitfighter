@@ -393,15 +393,15 @@ U32 GameSettings::getMaxPlayers()
 }
 
 
-extern void saveWindowMode(CIniFile *ini, IniSettings *iniSettings);
-
 // Write all our settings to bitfighter.ini
 void GameSettings::save()
 {
    //   BanList *bl = settings->getBanList();
    //   bl->writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
 
-   saveWindowMode(&iniFile, &mIniSettings);              
+   //saveWindowMode(&iniFile, &mIniSettings);
+   //getIniSettings()->mSettings.setVal("WindowMode", cmdLineDisplayMode);
+      //ini->SetValue("Settings",  "WindowMode", displayModeToString(iniSettings->displayMode));;
    saveSettingsToINI(&iniFile, this);        // Writes settings to iniFile, then writes it to disk
 }
 
@@ -886,7 +886,7 @@ void GameSettings::onFinishedLoading()
    // In all of these cases, if something was specified on the cmd line, write the result directly to the INI, clobbering whatever was there.
    // When we need the value, we'll get it from the INI.
    if(cmdLineDisplayMode != DISPLAY_MODE_UNKNOWN)
-      getIniSettings()->displayMode = cmdLineDisplayMode;
+      getIniSettings()->mSettings.setVal("WindowMode", cmdLineDisplayMode);
 
    if(xpos != S32_MIN)
    {

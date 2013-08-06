@@ -206,22 +206,22 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
 #endif
 
       case SDL_MOUSEMOTION:
-         onMouseMoved(currentUI, event->motion.x, event->motion.y, iniSettings->displayMode);
+         onMouseMoved(currentUI, event->motion.x, event->motion.y, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
          break;
 
       case SDL_MOUSEBUTTONDOWN:
          switch (event->button.button)
          {
             case SDL_BUTTON_LEFT:
-               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_LEFT, iniSettings->displayMode);
+               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_LEFT, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
                break;
 
             case SDL_BUTTON_RIGHT:
-               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_RIGHT, iniSettings->displayMode);
+               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_RIGHT, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
                break;
 
             case SDL_BUTTON_MIDDLE:
-               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->displayMode);
+               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
                break;
 #if !SDL_VERSION_ATLEAST(2,0,0)
             case SDL_BUTTON_WHEELUP:
@@ -248,15 +248,15 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
          switch (event->button.button)
          {
             case SDL_BUTTON_LEFT:
-               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_LEFT, iniSettings->displayMode);
+               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_LEFT, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
                break;
 
             case SDL_BUTTON_RIGHT:
-               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_RIGHT, iniSettings->displayMode);
+               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_RIGHT, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
                break;
 
             case SDL_BUTTON_MIDDLE:
-               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->displayMode);
+               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
                break;
          }
          break;
@@ -335,7 +335,7 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
 
       game->getUIManager()->getUI<OptionsMenuUserInterface>()->toggleDisplayMode();
 
-      gScreenInfo.setCanvasMousePos((S32)pos->x, (S32)pos->y, game->getSettings()->getIniSettings()->displayMode);
+      gScreenInfo.setCanvasMousePos((S32)pos->x, (S32)pos->y, game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"));
 
 #if SDL_VERSION_ATLEAST(2,0,0)
       SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, (S32)gScreenInfo.getWindowMousePos()->x, (S32)gScreenInfo.getWindowMousePos()->y);

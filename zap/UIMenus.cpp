@@ -1102,15 +1102,15 @@ static void inGameHelpSelectedCallback(ClientGame *game, U32 unused)
 }
 
 
-
+// User has clicked on Display Mode menu item -- switch screen mode
 static void setFullscreenCallback(ClientGame *game, U32 mode)
 {
    GameSettings *settings = game->getSettings();
 
    // Save existing setting
-   settings->getIniSettings()->oldDisplayMode = game->getSettings()->getIniSettings()->displayMode;     
+   settings->getIniSettings()->oldDisplayMode = game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");     
 
-   settings->getIniSettings()->displayMode = (DisplayMode)mode;
+   settings->getIniSettings()->mSettings.setVal("WindowMode", (DisplayMode)mode);
    VideoSystem::actualizeScreenMode(game->getSettings(), false, game->getUIManager()->getCurrentUI()->usesEditorScreenMode());
 }
 
@@ -1152,7 +1152,7 @@ void OptionsMenuUserInterface::setupMenus()
                                  "on start, bypassing the first screen", KEY_A));
 
 #ifndef TNL_OS_MOBILE
-   addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->displayMode));
+   addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode")));
 #endif
 
 #ifdef INCLUDE_CONN_SPEED_ITEM
@@ -1181,29 +1181,34 @@ void OptionsMenuUserInterface::toggleDisplayMode()
 
    DisplayMode oldMode = settings->getIniSettings()->oldDisplayMode;
 
-   settings->getIniSettings()->oldDisplayMode = settings->getIniSettings()->displayMode;     // Save current setting
+   // Save current setting
+   DisplayMode curMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
+   settings->getIniSettings()->oldDisplayMode = curMode;
+
+   DisplayMode mode;
 
    // When we're in the editor, and we toggle views, we'll skip one of the fullscreen modes, as they essentially do the same thing in that UI
    bool editorScreenMode = getGame()->getUIManager()->getCurrentUI()->usesEditorScreenMode();
    if(editorScreenMode)
    {
-      if(isFullScreen(settings->getIniSettings()->displayMode))
-         settings->getIniSettings()->displayMode = DISPLAY_MODE_WINDOWED;
+      if(isFullScreen(curMode))
+         mode = DISPLAY_MODE_WINDOWED;
 
       // If we know what the previous fullscreen mode was, use that
       else if(isFullScreen(oldMode))
-         settings->getIniSettings()->displayMode = oldMode;
+         mode = oldMode;
 
       // Otherwise, pick some sort of full-screen mode...
       else
-         settings->getIniSettings()->displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+         mode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
    }
    else  // Not in the editor, just advance to the next mode
    {
-      DisplayMode mode = DisplayMode((U32)settings->getIniSettings()->displayMode + 1);
-      settings->getIniSettings()->displayMode = (mode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : mode;    // Bounds check 
+      DisplayMode nextmode = DisplayMode(curMode + 1);
+      mode = (nextmode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : nextmode; // Bounds check
    }
 
+   settings->getIniSettings()->mSettings.setVal("WindowMode", mode);
    VideoSystem::actualizeScreenMode(settings, false, editorScreenMode);
 }
 

@@ -309,7 +309,7 @@ extern Vector<ClientGame *> gClientGames;
 // This has the unfortunate side-effect of triggering a mouse move event.
 void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInterfaces, bool currentUIUsesEditorScreenMode)
 {
-   DisplayMode displayMode = settings->getIniSettings()->displayMode;
+   DisplayMode displayMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
 
    gScreenInfo.resetGameCanvasSize();     // Set GameCanvasSize vars back to their default values
    gScreenInfo.setActualized();

@@ -87,7 +87,7 @@ void ScreenShooter::resizeViewportToCanvas(UIManager *uiManager)
 // Stolen from VideoSystem::actualizeScreenMode()
 void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 {
-   DisplayMode displayMode = settings->getIniSettings()->displayMode;
+   DisplayMode displayMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
 
    // Set up video/window flags amd parameters and get ready to change the window
    S32 sdlWindowWidth, sdlWindowHeight;

@@ -572,7 +572,7 @@ void shutdownBitfighter()
       Joystick::shutdownJoystick();
 
       // Save current window position if in windowed mode
-      if(settings->getIniSettings()->displayMode == DISPLAY_MODE_WINDOWED)
+      if(settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode") == DISPLAY_MODE_WINDOWED)
       {
          settings->getIniSettings()->winXPos = VideoSystem::getWindowPositionX();
          settings->getIniSettings()->winYPos = VideoSystem::getWindowPositionY();

@@ -424,7 +424,7 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos) const
       // than normal.  That, combined with scissors clipping, results in the rolling-up effect.
       F32 offset = height * (mHelpFading[i] ? 1 - mHelpTimer[i].getFraction() : 0);
 
-      scissorsManager.enable(mHelpFading[i], game->getSettings()->getIniSettings()->displayMode, 
+      scissorsManager.enable(mHelpFading[i], game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
                              0, yPos - FontSize, gScreenInfo.getGameCanvasWidth(), height);
 
       doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos - offset);

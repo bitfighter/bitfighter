@@ -235,9 +235,11 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
    S32 yPos;
 
    if(newItems)      // Draw the new items we're transitioning to
-      yPos = prepareToRenderToDisplay(getGame()->getSettings()->getIniSettings()->displayMode, top, oldHeight, height);
+      yPos = prepareToRenderToDisplay(getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
+                                      top, oldHeight, height);
    else              // Draw the old items we're transitioning away from
-      yPos = prepareToRenderFromDisplay(getGame()->getSettings()->getIniSettings()->displayMode, top, oldHeight, height);
+      yPos = prepareToRenderFromDisplay(getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
+                                      top, oldHeight, height);
 
    // Don't render if there is no point!
    if(top == NO_RENDER)

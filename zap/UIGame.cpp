@@ -2951,7 +2951,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
       S32 displayAreaHeight = (mMessages.size() - 1) * lineHeight;     
       S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
 
-      scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->displayMode, 
+      scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
                              0.0f, F32(displayAreaYPos - displayAreaHeight), F32(gScreenInfo.getGameCanvasWidth()), F32(displayAreaHeight));
    }
 

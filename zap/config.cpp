@@ -51,10 +51,38 @@
 namespace Zap
 {
 
+// Convert a string value to a DisplayMode enum value
+static DisplayMode stringToDisplayMode(string mode)
+{
+   if(lcase(mode) == "fullscreen-stretch")
+      return DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   else if(lcase(mode) == "fullscreen")
+      return DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
+   else 
+      return DISPLAY_MODE_WINDOWED;
+}
 
-// TODO: Move these to stringutils
-static string toString(const string &val) { return val;       }
-static string toString(S32 val)           { return itos(val); }
+
+// Convert a string value to our sfxSets enum
+static string displayModeToString(DisplayMode mode)
+{
+   if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
+      return "Fullscreen-Stretch";
+   else if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+      return "Fullscreen";
+   else
+      return "Window";
+}
+
+
+// TODO: Move these to stringutils ?
+static string toString(const string &val)       { return val;                              }
+static string toString(S32 val)                 { return itos(val);                        }
+static string toString(DisplayMode displayMode) { return displayModeToString(displayMode); }
+
+template<> static string      Settings::fromString<string>     (const string &val) { return val;                      }
+template<> static S32         Settings::fromString<S32>        (const string &val) { return atoi(val.c_str());        }
+template<> static DisplayMode Settings::fromString<DisplayMode>(const string &val) { return stringToDisplayMode(val); }
 
 
 // Constructor
@@ -108,17 +136,6 @@ string Settings::getStrVal(const string &name) const
 }
 
 
-//template <class T>
-//T Settings::getVal(const string &name) const
-//{
-//   AbstractSetting *absSet = mSettings[mKeyLookup.at(name)];
-//
-//   TNLAssert(dynamic_cast<Setting<T> *>(absSet), "Expected setting!");
-//
-//   return static_cast<Setting<T> *>(absSet)->getValue();
-//}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -164,13 +181,14 @@ string Setting<T>::getValueString() const
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 // In order to keep the template definitions in the cpp file, we need to declare which template
 // parameters we will use:
 template class Setting<string>;
 template class Setting<S32>;
-
-////////////////////////////////////////
-////////////////////////////////////////
+template class Setting<DisplayMode>;
 
 
 // bitfighter.org would soon be the same as 199.192.229.168
@@ -182,11 +200,12 @@ const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955,bitfighter.or
 IniSettings::IniSettings()
 {
    // Name the user entered last time they ran the game
-   mSettings.add(new Setting<string>("LastName", "ChumpChange", "LastName", "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
+   mSettings.add(new Setting<string>     ("LastName",   "ChumpChange",         "LastName",   "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
+   mSettings.add(new Setting<DisplayMode>("WindowMode", DISPLAY_MODE_WINDOWED, "WindowMode", "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
 
 
    controlsRelative = false;          // Relative controls is lame!
-   displayMode = DISPLAY_MODE_WINDOWED;
+   //displayMode = DISPLAY_MODE_WINDOWED;
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
    joystickType = "NoJoystick";
    joystickLinuxUseOldDeviceSystem = false;
@@ -515,30 +534,6 @@ void loadLevelSkipList(CIniFile *ini, GameSettings *settings)
 }
 
 
-// Convert a string value to a DisplayMode enum value
-static DisplayMode stringToDisplayMode(string mode)
-{
-   if(lcase(mode) == "fullscreen-stretch")
-      return DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-   else if(lcase(mode) == "fullscreen")
-      return DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
-   else 
-      return DISPLAY_MODE_WINDOWED;
-}
-
-
-// Convert a string value to our sfxSets enum
-static string displayModeToString(DisplayMode mode)
-{
-   if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
-      return "Fullscreen-Stretch";
-   else if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-      return "Fullscreen";
-   else
-      return "Window";
-}
-
-
 extern F32 gLineWidth1;
 extern F32 gDefaultLineWidth;
 extern F32 gLineWidth3;
@@ -551,12 +546,14 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
 #ifdef TNL_OS_MOBILE
    // Mobile usually have a single, fullscreen mode
-   iniSettings->displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   //iniSettings->displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   iniSettings->mSettings.setVal("WindowMode", DISPLAY_MODE_FULL_SCREEN_STRETCHED);
 #else
-   iniSettings->displayMode = stringToDisplayMode( ini->GetValue(section, "WindowMode", displayModeToString(iniSettings->displayMode)));
+   //iniSettings->mSettings.setVal("LastName", ini->GetValue(section, "LastName",   iniSettings->mSettings.getVal<string>("LastName")));
+   iniSettings->mSettings.setValFromString<DisplayMode>("WindowMode", ini->GetValue(section, "WindowMode", iniSettings->mSettings.getStrVal("WindowMode")));
 #endif
 
-   iniSettings->oldDisplayMode = iniSettings->displayMode;
+   iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>("WindowMode");
 
    iniSettings->controlsRelative = (lcase(ini->GetValue(section, "ControlMode", 
                                         (iniSettings->controlsRelative ? "Relative" : "Absolute"))) == "relative");
@@ -587,7 +584,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->password       = ini->GetValue(section, "Password", iniSettings->password);
 
    iniSettings->defaultName    = ini->GetValue(section, "DefaultName", iniSettings->defaultName);
-   iniSettings->mSettings.setVal("LastName", ini->GetValue(section, "LastName", iniSettings->mSettings.getVal<string>("LastName")));
+   iniSettings->mSettings.setValFromString<string>("LastName", ini->GetValue(section, "LastName", iniSettings->mSettings.getStrVal("LastName")));
    iniSettings->lastPassword   = ini->GetValue(section, "LastPassword", iniSettings->lastPassword);
    iniSettings->lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings->lastEditorName);
 
@@ -1677,12 +1674,6 @@ static void writeSounds(CIniFile *ini, IniSettings *iniSettings)
 }
 
 
-void saveWindowMode(CIniFile *ini, IniSettings *iniSettings)
-{
-   ini->SetValue("Settings",  "WindowMode", displayModeToString(iniSettings->displayMode));
-}
-
-
 void saveWindowPosition(CIniFile *ini, S32 x, S32 y)
 {
    ini->SetValueI("Settings", "WindowXPos", x);
@@ -1698,7 +1689,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    if (ini->numSectionComments(section) == 0)
    {
       ini->sectionComment(section, "----------------");
-      ini->sectionComment(section, " Settings entries contain a number of different options");
+      ini->sectionComment(section, " Settings entries contain a number of different options");//
       ini->sectionComment(section, " WindowMode - Fullscreen, Fullscreen-Stretch or Window");
       ini->sectionComment(section, " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
       ini->sectionComment(section, " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
@@ -1728,7 +1719,9 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
       ini->sectionComment(section, "----------------");
    }
-   saveWindowMode(ini, iniSettings);
+   //ini->SetValue("Settings",  "WindowMode", displayModeToString(iniSettings->displayMode));
+   ini->SetValue  (section, "WindowMode", iniSettings->mSettings.getStrVal("WindowMode"));
+   
    saveWindowPosition(ini, iniSettings->winXPos, iniSettings->winYPos);
 
    ini->setValueYN(section, "UseFakeFullscreen", iniSettings->useFakeFullscreen);
@@ -1753,7 +1746,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValue  (section, "DefaultName", iniSettings->defaultName);
    ini->SetValue  (section, "Nickname", iniSettings->name);
    ini->SetValue  (section, "Password", iniSettings->password);
-   ini->SetValue  (section, "LastName", iniSettings->mSettings.getVal<string>("LastName"));
+   ini->SetValue  (section, "LastName", iniSettings->mSettings.getStrVal("LastName"));
    ini->SetValue  (section, "LastPassword", iniSettings->lastPassword);
    ini->SetValue  (section, "LastEditorName", iniSettings->lastEditorName);
 
