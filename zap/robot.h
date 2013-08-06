@@ -146,6 +146,9 @@ public:
 
    S32 lua_fireModule(lua_State *L);
 
+   S32 lua_setLoadoutWeapon(lua_State *L);
+   S32 lua_setLoadoutModule(lua_State *L);
+
    S32 lua_globalMsg(lua_State *L);
    S32 lua_teamMsg(lua_State *L);
    S32 lua_privateMsg(lua_State *L);

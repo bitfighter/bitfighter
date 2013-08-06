@@ -579,6 +579,9 @@ U16 Robot::findClosestZone(const Point &point)
                                                                                              \
    METHOD(CLASS,  fireModule,           ARRAYDEF({{ MOD_ENUM, END }}), 1 )                   \
                                                                                              \
+   METHOD(CLASS,  setLoadoutWeapon,     ARRAYDEF({{ WEAP_SLOT, WEAP_ENUM, END }}), 1 )       \
+   METHOD(CLASS,  setLoadoutModule,     ARRAYDEF({{ MOD_SLOT,  MOD_ENUM,  END }}), 1 )       \
+                                                                                             \
    METHOD(CLASS,  globalMsg,            ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS,  teamMsg,              ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS,  privateMsg,           ARRAYDEF({{ STR, STR, END }}), 1 )                   \
@@ -980,6 +983,58 @@ S32 Robot::lua_fireModule(lua_State *L)
 
    if(!hasModule)
       throw LuaException("The weapon given to bot:fireWeapon(weapon) is not equipped!");
+
+   return 0;
+}
+
+
+/**
+ * @luafunc Robot::setLoadoutWeapon(slot, weapon)
+ * @brief   Request a new loadout where the given weapon slot is changed to the given weapon.
+ *          This still requires the bot to change to its new loadout
+ * @param   slot Weapon slot to set
+ * @param   weapon Weapon to set
+ */
+S32 Robot::lua_setLoadoutWeapon(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Ship", "setLoadoutWeapon");
+
+   // Slots start at index 1, but c++ wants 0
+   S32 slot = getInt(L, 1) - 1;
+   WeaponType weapon = getWeaponType(L, 2);
+
+   // Make a copy of our current loadout and adjust it
+   LoadoutTracker loadout = mLoadout;
+   loadout.setWeapon(slot, weapon);
+
+   // Now request the new one
+   getOwner()->requestLoadout(loadout);
+
+   return 0;
+}
+
+
+/**
+ * @luafunc Robot::setLoadoutModule(slot, module)
+ * @brief   Request a new loadout where the given module slot is changed to the given module.
+ *          This still requires the bot to change to its new loadout
+ * @param   slot Module slot to set
+ * @param   module Module to set
+ */
+S32 Robot::lua_setLoadoutModule(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Ship", "setLoadoutModule");
+
+   // Slots start at index 1, but c++ wants 0
+   S32 slot = getInt(L, 1) - 1;
+   ShipModule module = getShipModule(L, 2);
+
+   // Make a copy of our current loadout and adjust it
+   LoadoutTracker loadout = mLoadout;
+   loadout.setModule(slot, module);
+
+   // Now request the new one
+   getOwner()->requestLoadout(loadout);
 
    return 0;
 }
