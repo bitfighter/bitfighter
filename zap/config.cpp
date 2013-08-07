@@ -144,7 +144,7 @@ AbstractSetting *Settings::getSetting(const string &name)
 {
    TNLAssert(mKeyLookup.find(name) != mKeyLookup.end(), "Setting with specified name not found!");
 
-   return mSettings[mKeyLookup.at(name)];
+   return mSettings[mKeyLookup.find(name)->second];
 }
 
 
@@ -157,25 +157,25 @@ void Settings::add(AbstractSetting *setting)
 
 string Settings::getStrVal(const string &name) const
 {
-   return mSettings[mKeyLookup.at(name)]->getValueString();
+   return mSettings[mKeyLookup.find(name)->second]->getValueString();
 }
 
 
 string Settings::getDefaultStrVal(const string &name) const
 {
-   return mSettings[mKeyLookup.at(name)]->getDefaultValueString();
+   return mSettings[mKeyLookup.find(name)->second]->getDefaultValueString();
 }
 
 
 string Settings::getKey(const string &name) const
 {
-   return mSettings[mKeyLookup.at(name)]->getKey();
+   return mSettings[mKeyLookup.find(name)->second]->getKey();
 }
 
 
 string Settings::getSection(const string &name) const
 {
-   return mSettings[mKeyLookup.at(name)]->getSection();
+   return mSettings[mKeyLookup.find(name)->second]->getSection();
 }
 
 
