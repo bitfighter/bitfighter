@@ -1478,7 +1478,7 @@ static void setVoiceVolumeCallback(ClientGame *game, U32 vol)
 
 static void setVoiceEchoCallback(ClientGame *game, U32 val)
 {
-   game->getSettings()->getIniSettings()->echoVoice = (val == 1);
+   game->getSettings()->getIniSettings()->mSettings.setVal("VoiceEcho", YesNo(val));
 }
 
 
@@ -1504,9 +1504,9 @@ void SoundOptionsMenuUserInterface::setupMenus()
    addMenuItem(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((settings->getIniSettings()->voiceChatVolLevel + 0.05) * 10.0), false, 
                                   setVoiceVolumeCallback, "Set voice chat volume", KEY_V));
    opts.clear();
-   opts.push_back("DISABLED");
-   opts.push_back("ENABLED");
-   addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, settings->getIniSettings()->echoVoice ? 1 : 0, true, 
+   opts.push_back("DISABLED");      // No == 0
+   opts.push_back("ENABLED");       // Yes == 1
+   addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, (U32)settings->getIniSettings()->mSettings.getVal<YesNo>("VoiceEcho"), true, 
                                   setVoiceEchoCallback, "Toggle whether you hear your voice on voice chat",  KEY_E));
 }
 

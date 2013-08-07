@@ -277,7 +277,7 @@ public:
    string joystickType;
    bool joystickLinuxUseOldDeviceSystem;
    bool alwaysStartInKeyboardMode;
-   bool echoVoice;
+   //bool echoVoice;
 
    F32 sfxVolLevel;                 // SFX volume (0 = silent, 1 = full bore)
    F32 voiceChatVolLevel;           // Ditto

@@ -99,23 +99,9 @@ AbstractSetting::~AbstractSetting()
 }
 
 
-string AbstractSetting::getName() const 
-{ 
-   return mName; 
-}
-
-
-string AbstractSetting::getKey() const
-{
-   return mIniKey;
-}
-
-
-string AbstractSetting::getSection() const
-{
-   return mIniSection;
-}
-
+string AbstractSetting::getName()    const { return mName;       }
+string AbstractSetting::getKey()     const { return mIniKey;     }
+string AbstractSetting::getSection() const { return mIniSection; }
 
 
 ////////////////////////////////////////
@@ -254,6 +240,7 @@ IniSettings::IniSettings()
    mSettings.add(new Setting<DisplayMode>("WindowMode",        DISPLAY_MODE_WINDOWED, "WindowMode",        "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
    mSettings.add(new Setting<YesNo>      ("UseFakeFullscreen", Yes,                   "UseFakeFullscreen", "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
    mSettings.add(new Setting<RelAbs>     ("ControlMode",       Absolute,              "ControlMode",       "Settings", "Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)"));
+   mSettings.add(new Setting<YesNo>      ("VoiceEcho",         No,                    "VoiceEcho",         "Settings", "Play echo when recording a voice message? Yes/No"));
 
 
    //controlsRelative = false;          // Relative controls is lame!
@@ -262,7 +249,7 @@ IniSettings::IniSettings()
    joystickType = "NoJoystick";
    joystickLinuxUseOldDeviceSystem = false;
    alwaysStartInKeyboardMode = false;
-   echoVoice = false;
+   //echoVoice = false;
 
    sfxVolLevel       = 1.0;           // SFX volume (0 = silent, 1 = full bore)
    musicVolLevel     = 1.0;           // Music volume (range as above)
@@ -607,12 +594,13 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
    iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>("WindowMode");
 
-   iniSettings->mSettings.getSetting("ControlMode")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("ControlMode"), "ControlMode", iniSettings->mSettings.getDefaultStrVal("ControlMode")));
-
    //iniSettings->controlsRelative = (lcase(ini->GetValue(section, "ControlMode", 
    //                                     (iniSettings->controlsRelative ? "Relative" : "Absolute"))) == "relative");
+   iniSettings->mSettings.getSetting("ControlMode")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("ControlMode"), "ControlMode", iniSettings->mSettings.getDefaultStrVal("ControlMode")));
 
-   iniSettings->echoVoice            = ini->GetValueYN(section, "VoiceEcho", iniSettings->echoVoice);
+   //iniSettings->echoVoice            = ini->GetValueYN(section, "VoiceEcho", iniSettings->echoVoice);
+   iniSettings->mSettings.getSetting("VoiceEcho")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("VoiceEcho"), "VoiceEcho", iniSettings->mSettings.getDefaultStrVal("VoiceEcho")));
+
    iniSettings->showWeaponIndicators = ini->GetValueYN(section, "LoadoutIndicators", iniSettings->showWeaponIndicators);
    iniSettings->verboseHelpMessages  = ini->GetValueYN(section, "VerboseHelpMessages", iniSettings->verboseHelpMessages);
    iniSettings->showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
@@ -1783,7 +1771,9 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
    ini->SetValue  (section, iniSettings->mSettings.getKey("UseFakeFullscreen"), iniSettings->mSettings.getStrVal("UseFakeFullscreen"));
    ini->SetValueF (section, "WindowScalingFactor", iniSettings->winSizeFact);
-   ini->setValueYN(section, "VoiceEcho", iniSettings->echoVoice );
+   //ini->setValueYN(section, "VoiceEcho", iniSettings->echoVoice );
+   ini->SetValue  (section, iniSettings->mSettings.getKey("VoiceEcho"), iniSettings->mSettings.getStrVal("VoiceEcho"));
+
    //ini->SetValue  (section, "ControlMode", (iniSettings->controlsRelative ? "Relative" : "Absolute"));
    ini->SetValue  (section, iniSettings->mSettings.getKey("ControlMode"), iniSettings->mSettings.getStrVal("ControlMode"));
 
