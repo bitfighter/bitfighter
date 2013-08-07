@@ -649,7 +649,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->defaultName    = ini->GetValue(section, "DefaultName", iniSettings->defaultName);
    iniSettings->mSettings.getSetting("LastName")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("LastName"), "LastName", iniSettings->mSettings.getDefaultStrVal("LastName")));
 
-
    iniSettings->lastPassword   = ini->GetValue(section, "LastPassword", iniSettings->lastPassword);
    iniSettings->lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings->lastEditorName);
 
