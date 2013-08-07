@@ -977,14 +977,9 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       GameSettings::iniFile.SetValue("EditorPlugins", "Plugin0", "Ctrl+;|draw_arcs.lua|Make curves!");
    }
 
-   // 017:
-   if(previousVersion < VERSION_017a)
-   {
-#ifdef TNL_OS_MAC_OSX
-      settings->getIniSettings()->useFakeFullscreen = true;
-#endif
-   }
+   // 017:  nothing to update anymore
 
+   // 018:
    if(previousVersion < VERSION_018)  
    {
       FolderManager *folderManager = settings->getFolderManager();
@@ -998,6 +993,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
             logprintf(LogConsumer::LogWarning, "Could not remove game.ogg from music folder during upgrade process." );
    }
 
+   // 018a:
    if(previousVersion < VERSION_018a)
    {
       // Fix a previous evil bug that hurt connection speed.  Reset it to 0 here
