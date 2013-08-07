@@ -71,6 +71,7 @@ TEST_F(BfTest, SettingsTests)
    settings.add(new Setting<YesNo>      ("YesNoYes", Yes,                   "YesNoYes",     "Section", "description"));
    settings.add(new Setting<YesNo>      ("YesNoNo",  No,                    "YesNoNo",      "Section", "description"));
    settings.add(new Setting<DisplayMode>("DispMode", DISPLAY_MODE_WINDOWED, "DispMode",     "Section", "description"));
+   settings.add(new Setting<RelAbs>     ("RelAbs",   Relative,              "RelAbs",       "Section", "description"));
 
    // Check default values
    // Get a string representation of the value
@@ -113,6 +114,12 @@ TEST_F(BfTest, SettingsTests)
    settings.getSetting("YesNoNo")->setValFromString("No");
    ASSERT_EQ(true, settings.getVal<YesNo>("YesNoYes"));
    ASSERT_EQ(false, settings.getVal<YesNo>("YesNoNo"));
+
+   // Relative/Absolute
+   settings.getSetting("RelAbs")->setValFromString("absolute");
+   ASSERT_EQ(Absolute, settings.getVal<RelAbs>("RelAbs"));
+   settings.getSetting("RelAbs")->setValFromString("RELATIVE");
+   ASSERT_EQ(Relative, settings.getVal<RelAbs>("RelAbs"));
 }
 
 

@@ -78,25 +78,30 @@ static string displayModeToString(DisplayMode mode)
 }
 
 
-static YesNo yesNoStringToBool(string yesNo)
+static YesNo stringToYesNo(string yesNo)
 {
-   if(lcase(yesNo) == "yes")
-      return Yes;
-   else 
-      return No;
+   return lcase(yesNo) == "yes" ? Yes : No;
+}
+
+
+static RelAbs stringToRelAbs(string relAbs)
+{
+   return lcase(relAbs) == "relative" ? Relative : Absolute;
 }
 
 
 // TODO: Move these to stringutils?
-static string toString(const string &val)       { return val;                              }
-static string toString(S32 val)                 { return itos(val);                        }
-static string toString(DisplayMode displayMode) { return displayModeToString(displayMode); }
-static string toString(YesNo yesNo)             { return yesNo == Yes ? "Yes" : "No";      }
+static string toString(const string &val)       { return val;                                          }
+static string toString(S32 val)                 { return itos(val);                                    }
+static string toString(DisplayMode displayMode) { return displayModeToString(displayMode);             }
+static string toString(YesNo yesNo)             { return yesNo  == Yes      ? "Yes" :      "No";       }
+static string toString(RelAbs relAbs)           { return relAbs == Relative ? "Relative" : "Absolute"; }
 
 template<> string      Setting<string>::fromString     (const string &val) { return val;                      }
 template<> S32         Setting<S32>::fromString        (const string &val) { return atoi(val.c_str());        }
 template<> DisplayMode Setting<DisplayMode>::fromString(const string &val) { return stringToDisplayMode(val); }
-template<> YesNo       Setting<YesNo>::fromString      (const string &val) { return yesNoStringToBool(val);   }
+template<> YesNo       Setting<YesNo>::fromString      (const string &val) { return stringToYesNo(val);       }  
+template<> RelAbs      Setting<RelAbs>::fromString     (const string &val) { return stringToRelAbs(val);      }
 
 
 // Constructor
@@ -249,6 +254,7 @@ template class Setting<string>;
 template class Setting<S32>;
 template class Setting<DisplayMode>;
 template class Setting<YesNo>;
+template class Setting<RelAbs>;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -266,9 +272,10 @@ IniSettings::IniSettings()
    mSettings.add(new Setting<string>     ("LastName",          "ChumpChange",         "LastName",          "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
    mSettings.add(new Setting<DisplayMode>("WindowMode",        DISPLAY_MODE_WINDOWED, "WindowMode",        "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
    mSettings.add(new Setting<YesNo>      ("UseFakeFullscreen", Yes,                   "UseFakeFullscreen", "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
+   mSettings.add(new Setting<RelAbs>     ("ControlMode",       Absolute,              "ControlMode",       "Settings", "Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)"));
 
 
-   controlsRelative = false;          // Relative controls is lame!
+   //controlsRelative = false;          // Relative controls is lame!
    //displayMode = DISPLAY_MODE_WINDOWED;
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
    joystickType = "NoJoystick";
@@ -619,8 +626,10 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
    iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>("WindowMode");
 
-   iniSettings->controlsRelative = (lcase(ini->GetValue(section, "ControlMode", 
-                                        (iniSettings->controlsRelative ? "Relative" : "Absolute"))) == "relative");
+   iniSettings->mSettings.getSetting("ControlMode")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("ControlMode"), "ControlMode", iniSettings->mSettings.getDefaultStrVal("ControlMode")));
+
+   //iniSettings->controlsRelative = (lcase(ini->GetValue(section, "ControlMode", 
+   //                                     (iniSettings->controlsRelative ? "Relative" : "Absolute"))) == "relative");
 
    iniSettings->echoVoice            = ini->GetValueYN(section, "VoiceEcho", iniSettings->echoVoice);
    iniSettings->showWeaponIndicators = ini->GetValueYN(section, "LoadoutIndicators", iniSettings->showWeaponIndicators);
@@ -1794,7 +1803,8 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValue  (section, iniSettings->mSettings.getKey("UseFakeFullscreen"), iniSettings->mSettings.getStrVal("UseFakeFullscreen"));
    ini->SetValueF (section, "WindowScalingFactor", iniSettings->winSizeFact);
    ini->setValueYN(section, "VoiceEcho", iniSettings->echoVoice );
-   ini->SetValue  (section, "ControlMode", (iniSettings->controlsRelative ? "Relative" : "Absolute"));
+   //ini->SetValue  (section, "ControlMode", (iniSettings->controlsRelative ? "Relative" : "Absolute"));
+   ini->SetValue  (section, iniSettings->mSettings.getKey("ControlMode"), iniSettings->mSettings.getStrVal("ControlMode"));
 
    // inputMode is not saved, but rather determined at runtime by whether a joystick is attached
 

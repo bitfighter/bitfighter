@@ -1279,7 +1279,7 @@ void InputOptionsMenuUserInterface::render()
 // Callbacks for InputOptions menu
 static void setControlsCallback(ClientGame *game, U32 val)
 {
-   game->getSettings()->getIniSettings()->controlsRelative = (val == 1);
+   game->getSettings()->getIniSettings()->mSettings.setVal("ControlMode", RelAbs(val));
 }
 
 
@@ -1399,12 +1399,13 @@ void InputOptionsMenuUserInterface::setupMenus()
                             "Remap keyboard or joystick controls", KEY_D, KEY_K));
 
    opts.clear();
-   opts.push_back("ABSOLUTE");
    opts.push_back("RELATIVE");
+   opts.push_back("ABSOLUTE");
+   TNLAssert(Relative < Absolute, "Items added in wrong order!");
 
-   bool relative = settings->getIniSettings()->controlsRelative;
+   RelAbs mode = settings->getIniSettings()->mSettings.getVal<RelAbs>("ControlMode");
 
-   addMenuItem(new ToggleMenuItem("CONTROLS:", opts, relative ? 1 : 0, true, 
+   addMenuItem(new ToggleMenuItem("CONTROLS:", opts, (U32)mode, true, 
                                   setControlsCallback, "Set controls to absolute (normal) or relative (like a tank) mode", KEY_C));
 }
 

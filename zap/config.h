@@ -60,9 +60,15 @@ class GameSettings;
 struct CmdLineSettings;
 
 enum YesNo {
-   No,
-   Yes
+   No,      // ==> 0 ==> false
+   Yes      // ==> 1 ==> true
 };
+
+enum RelAbs{
+   Relative,
+   Absolute
+};
+
 
 struct FolderManager 
 {
@@ -214,15 +220,8 @@ public:
    string getDefaultValueString() const;
    void setValFromString(const string &value);
 
-   T fromString(const string &val); // { /* Do nothing, specialized below */ }
+   T fromString(const string &val);
 };
-
-
-// Declare tempate specializations
-//template<> inline string      Setting::fromString<string>     (const string &val);
-//template<> inline S32         Setting::fromString<S32>        (const string &val);
-//template<> inline DisplayMode Setting::fromString<DisplayMode>(const string &val);
-//template<> inline YesNo       Setting::fromString<YesNo>      (const string &val);
 
 
 ////////////////////////////////////////
@@ -282,7 +281,7 @@ public:
 
    Settings mSettings;
 
-   bool controlsRelative;
+   //bool controlsRelative;
    //DisplayMode displayMode;
    DisplayMode oldDisplayMode;
    string joystickType;

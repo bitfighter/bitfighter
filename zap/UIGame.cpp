@@ -501,7 +501,7 @@ void GameUserInterface::render()
       renderSuspendedMessage();
 
 
-   mHelpItemManager.renderMessages(getGame(), gScreenInfo.getGameCanvasHeight() / 2 + 40);
+   mHelpItemManager.renderMessages(getGame(), gScreenInfo.getGameCanvasHeight() / 2.0f + 40);
 
    renderReticle();                       // Draw crosshairs if using mouse
    renderChatMsgs();                      // Render incoming chat and server msgs
@@ -1645,7 +1645,7 @@ Move *GameUserInterface::getCurrentMove()
 
    // Using relative controls -- all turning is done relative to the direction of the ship, so
    // we need to udate the move a little
-   if(getGame()->getSettings()->getIniSettings()->controlsRelative)
+   if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<RelAbs>("ControlMode") == Relative)
    {
       mTransformedMove = mCurrentMove;    // Copy move
 
