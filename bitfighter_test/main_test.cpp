@@ -66,8 +66,11 @@ TEST_F(BfTest, StringUtilsTests)
 TEST_F(BfTest, SettingsTests)
 {
    Settings settings;
-   settings.add(new Setting<string>("strName", "defval", "SettingName1", "Section", "description"));
-   settings.add(new Setting<S32>   ("S32Name", 123,      "SettingName2", "Section", "description"));
+   settings.add(new Setting<string>     ("strName",  "defval",              "SettingName1", "Section", "description"));
+   settings.add(new Setting<S32>        ("S32Name",  123,                   "SettingName2", "Section", "description"));
+   settings.add(new Setting<YesNo>      ("YesNoYes", Yes,                   "YesNoYes",     "Section", "description"));
+   settings.add(new Setting<YesNo>      ("YesNoNo",  No,                    "YesNoNo",      "Section", "description"));
+   settings.add(new Setting<DisplayMode>("DispMode", DISPLAY_MODE_WINDOWED, "DispMode",     "Section", "description"));
 
    // Check default values
    // Get a string representation of the value
@@ -84,7 +87,26 @@ TEST_F(BfTest, SettingsTests)
    ASSERT_EQ("newVal", settings.getVal<string>("strName"));
    ASSERT_EQ(321,      settings.getVal<S32>("S32Name"));
 
+   // Check YesNo/DisplayMode conversions
 
+   // Check setting YesNo by string
+   settings.getSetting("YesNoYes")->setValFromString("No");
+   ASSERT_EQ(No, settings.getVal<YesNo>("YesNoYes"));
+   settings.getSetting("YesNoYes")->setValFromString("Yes");
+   ASSERT_EQ(Yes, settings.getVal<YesNo>("YesNoYes"));
+
+   // Different cases
+   settings.getSetting("YesNoYes")->setValFromString("NO");
+   ASSERT_EQ(No, settings.getVal<YesNo>("YesNoYes"));
+   settings.getSetting("YesNoYes")->setValFromString("yes");
+   ASSERT_EQ(Yes, settings.getVal<YesNo>("YesNoYes"));
+
+   // Unknwon values - should go to No
+   settings.getSetting("YesNoYes")->setValFromString("abcdefg");
+   ASSERT_EQ(No, settings.getVal<YesNo>("YesNoYes"));
+   // Empty string
+   settings.getSetting("YesNoYes")->setValFromString("");
+   ASSERT_EQ(No, settings.getVal<YesNo>("YesNoYes"));
 }
 
 
