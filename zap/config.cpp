@@ -66,18 +66,6 @@ static DisplayMode stringToDisplayMode(string mode)
 }
 
 
-// Convert a string value to our sfxSets enum
-static string displayModeToString(DisplayMode mode)
-{
-   if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
-      return "Fullscreen-Stretch";
-   else if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-      return "Fullscreen";
-   else
-      return "Window";
-}
-
-
 static YesNo stringToYesNo(string yesNo)
 {
    return lcase(yesNo) == "yes" ? Yes : No;
@@ -89,13 +77,6 @@ static RelAbs stringToRelAbs(string relAbs)
    return lcase(relAbs) == "relative" ? Relative : Absolute;
 }
 
-
-// TODO: Move these to stringutils?
-static string toString(const string &val)       { return val;                                          }
-static string toString(S32 val)                 { return itos(val);                                    }
-static string toString(DisplayMode displayMode) { return displayModeToString(displayMode);             }
-static string toString(YesNo yesNo)             { return yesNo  == Yes      ? "Yes" :      "No";       }
-static string toString(RelAbs relAbs)           { return relAbs == Relative ? "Relative" : "Absolute"; }
 
 template<> string      Setting<string>::fromString     (const string &val) { return val;                      }
 template<> S32         Setting<S32>::fromString        (const string &val) { return atoi(val.c_str());        }

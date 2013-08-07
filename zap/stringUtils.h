@@ -27,9 +27,11 @@
 #define STRING_UTILS_H
 
 #ifdef _MSC_VER
-#pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
+#  pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
 
+
+#include "ConfigEnum.h"
 #include "tnlVector.h"     // For Vector
 #include "tnlTypes.h"
 
@@ -131,6 +133,13 @@ const string readFile(const string& path);
 string getExecutableDir();
 
 bool stringContainsAllTheSameCharacter(const string &str);
+
+string toString(const string &val);      
+string toString(S32 val);                
+string toString(DisplayMode displayMode);
+string toString(YesNo yesNo);            
+string toString(RelAbs relAbs);          
+
 
 };
 

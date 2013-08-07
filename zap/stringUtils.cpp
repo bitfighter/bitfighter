@@ -710,7 +710,8 @@ string writeLevelString(const char *in)
    return string("\"") + out + "\"";
 }
 
-bool writeFile(const string& path, const string& contents, bool append)
+
+bool writeFile(const string &path, const string &contents, bool append)
 {
    ios_base::openmode mode = append ? ios_base::out | ios_base::app : ios_base::out;
 
@@ -731,7 +732,8 @@ bool writeFile(const string& path, const string& contents, bool append)
    return true;
 }
 
-const string readFile(const string& path)
+
+const string readFile(const string &path)
 {
    ifstream file(path.c_str(), ios_base::in | ios_base::binary);
 
@@ -791,6 +793,27 @@ bool stringContainsAllTheSameCharacter(const string &str)
 
    return true;
 }
+
+
+// Convert a string value to our sfxSets enum
+inline string displayModeToString(DisplayMode mode)
+{
+   if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
+      return "Fullscreen-Stretch";
+   else if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+      return "Fullscreen";
+   else
+      return "Window";
+}
+
+
+// Convert various things to strings -- needed by settings (which requires a consistent naming schema);
+// used elsewhere
+string toString(const string &val)       { return val;                                          }
+string toString(S32 val)                 { return itos(val);                                    }
+string toString(YesNo yesNo)             { return yesNo  == Yes      ? "Yes" :      "No";       }
+string toString(RelAbs relAbs)           { return relAbs == Relative ? "Relative" : "Absolute"; }
+string toString(DisplayMode displayMode) { return displayModeToString(displayMode);             }
 
 
 };

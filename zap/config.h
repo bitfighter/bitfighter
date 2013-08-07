@@ -59,16 +59,6 @@ extern const char *MASTER_SERVER_LIST_ADDRESS;
 class GameSettings;
 struct CmdLineSettings;
 
-enum YesNo {
-   No,      // ==> 0 ==> false
-   Yes      // ==> 1 ==> true
-};
-
-enum RelAbs{
-   Relative,
-   Absolute
-};
-
 
 struct FolderManager 
 {
