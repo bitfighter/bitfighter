@@ -107,6 +107,12 @@ TEST_F(BfTest, SettingsTests)
    // Empty string
    settings.getSetting("YesNoYes")->setValFromString("");
    ASSERT_EQ(No, settings.getVal<YesNo>("YesNoYes"));
+
+   // Reset and check boolean equality
+   settings.getSetting("YesNoYes")->setValFromString("Yes");
+   settings.getSetting("YesNoNo")->setValFromString("No");
+   ASSERT_EQ(true, settings.getVal<YesNo>("YesNoYes"));
+   ASSERT_EQ(false, settings.getVal<YesNo>("YesNoNo"));
 }
 
 

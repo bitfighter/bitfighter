@@ -60,8 +60,8 @@ class GameSettings;
 struct CmdLineSettings;
 
 enum YesNo {
-   Yes,
-   No
+   No,
+   Yes
 };
 
 struct FolderManager 
