@@ -180,7 +180,10 @@ public:
 
    string getName() const;   
    string getKey() const;
-  
+   string getSection() const;
+
+   virtual void setValFromString(const string &value) = 0;
+
    virtual string getValueString() const = 0;         // Returns current value, as a string
    virtual string getDefaultValueString() const = 0;  // Returns default value, as a string
 };
@@ -209,7 +212,17 @@ public:
    void setValue(const T &value);
    string getValueString() const;
    string getDefaultValueString() const;
+   void setValFromString(const string &value);
+
+   T fromString(const string &val); // { /* Do nothing, specialized below */ }
 };
+
+
+// Declare tempate specializations
+//template<> inline string      Setting::fromString<string>     (const string &val);
+//template<> inline S32         Setting::fromString<S32>        (const string &val);
+//template<> inline DisplayMode Setting::fromString<DisplayMode>(const string &val);
+//template<> inline YesNo       Setting::fromString<YesNo>      (const string &val);
 
 
 ////////////////////////////////////////
@@ -223,10 +236,6 @@ private:
    map<string, S32> mKeyLookup;     // Maps string key to vector index; updated when item is added
    Vector<AbstractSetting *> mSettings;
 
-   template<class T> T fromString(const string &val); // { /* Do nothing, specialized below */ }
-
-   //template<class T> static T fromString<T>(const string &val) { /* Do nothing, specialized below */ }
-
 public:
    ~Settings();      // Destructor
 
@@ -236,40 +245,27 @@ public:
    template <class T>    
    void setVal(const string &name, const T &value)
    {
-      AbstractSetting *absSet = mSettings[mKeyLookup.at(name)];
+      AbstractSetting *absSet = mSettings[mKeyLookup.find(name)->second];
       TNLAssert(dynamic_cast<Setting<T> *>(absSet), "Expected setting!");
 
       static_cast<Setting<T> *>(absSet)->setValue(value);
    }
 
-   template <class T>
-   void setValFromString(const string &name, const string &value)
-   {
-      AbstractSetting *absSet = mSettings[mKeyLookup.at(name)];
-      TNLAssert(dynamic_cast<Setting<T> *>(absSet), "Expected setting!");
-
-      static_cast<Setting<T> *>(absSet)->setValue(fromString<T>(value));
-   }
 
    template <class T> 
    T getVal(const string &name) const
    {
-      AbstractSetting *absSet = mSettings[mKeyLookup.at(name)];
+      AbstractSetting *absSet = mSettings[mKeyLookup.find(name)->second];
       TNLAssert(dynamic_cast<Setting<T> *>(absSet), "Expected setting!");
 
       return static_cast<Setting<T> *>(absSet)->getValue();
    }
 
-   string getStrVal(const string &name) const;
+   string getStrVal       (const string &name) const;
    string getDefaultStrVal(const string &name) const;
-   string getKey(const string &name) const;
+   string getKey          (const string &name) const;
+   string getSection      (const string &name) const;
 };
-
-
-template<> inline string      Settings::fromString<string>     (const string &val);
-template<> inline S32         Settings::fromString<S32>        (const string &val);
-template<> inline DisplayMode Settings::fromString<DisplayMode>(const string &val);
-template<> inline YesNo       Settings::fromString<YesNo>      (const string &val);
 
 
 ////////////////////////////////////////

@@ -84,16 +84,16 @@ static YesNo yesNoStringToBool(string yesNo)
 }
 
 
-// TODO: Move these to stringutils ?  -- Not even used?? ~raptor
+// TODO: Move these to stringutils?
 static string toString(const string &val)       { return val;                              }
 static string toString(S32 val)                 { return itos(val);                        }
 static string toString(DisplayMode displayMode) { return displayModeToString(displayMode); }
 static string toString(YesNo yesNo)             { return yesNo == Yes ? "Yes" : "No";      }
 
-template<> inline string      Settings::fromString<string>     (const string &val) { return val;                      }
-template<> inline S32         Settings::fromString<S32>        (const string &val) { return atoi(val.c_str());        }
-template<> inline DisplayMode Settings::fromString<DisplayMode>(const string &val) { return stringToDisplayMode(val); }
-template<> inline YesNo       Settings::fromString<YesNo>      (const string &val) { return yesNoStringToBool(val);   }
+template<> string      Setting<string>::fromString     (const string &val) { return val;                      }
+template<> S32         Setting<S32>::fromString        (const string &val) { return atoi(val.c_str());        }
+template<> DisplayMode Setting<DisplayMode>::fromString(const string &val) { return stringToDisplayMode(val); }
+template<> YesNo       Setting<YesNo>::fromString      (const string &val) { return yesNoStringToBool(val);   }
 
 
 // Constructor
@@ -120,6 +120,13 @@ string AbstractSetting::getKey() const
 {
    return mIniKey;
 }
+
+
+string AbstractSetting::getSection() const
+{
+   return mIniSection;
+}
+
 
 
 ////////////////////////////////////////
@@ -164,6 +171,13 @@ string Settings::getKey(const string &name) const
 {
    return mSettings[mKeyLookup.at(name)]->getKey();
 }
+
+
+string Settings::getSection(const string &name) const
+{
+   return mSettings[mKeyLookup.at(name)]->getSection();
+}
+
 
 
 ////////////////////////////////////////
@@ -213,6 +227,13 @@ template <class T>
 string Setting<T>::getDefaultValueString() const 
 { 
    return toString(mDefaultValue); 
+}
+
+
+template <class T>
+void Setting<T>::setValFromString(const string &value)
+{
+   setValue(fromString(value));
 }
 
 
@@ -590,7 +611,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->mSettings.setVal("WindowMode", DISPLAY_MODE_FULL_SCREEN_STRETCHED);
 #else
    //iniSettings->mSettings.setVal("LastName", ini->GetValue(section, "LastName",   iniSettings->mSettings.getVal<string>("LastName")));
-   iniSettings->mSettings.setValFromString<DisplayMode>("WindowMode", ini->GetValue(section, "WindowMode", iniSettings->mSettings.getDefaultStrVal("WindowMode")));
+   iniSettings->mSettings.getSetting("WindowMode")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("WindowMode"), "WindowMode", iniSettings->mSettings.getDefaultStrVal("WindowMode")));
 #endif
 
    iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>("WindowMode");
@@ -613,7 +634,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->alwaysStartInKeyboardMode = ini->GetValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
 #endif
    //iniSettings->useFakeFullscreen = ini->GetValueYN(section, "UseFakeFullscreen", iniSettings->useFakeFullscreen);
-   iniSettings->mSettings.setValFromString<YesNo>("UseFakeFullscreen", ini->GetValue(section, "UseFakeFullscreen", iniSettings->mSettings.getDefaultStrVal("UseFakeFullscreen")));
+   iniSettings->mSettings.getSetting("UseFakeFullscreen")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("UseFakeFullscreen"), "UseFakeFullscreen", iniSettings->mSettings.getDefaultStrVal("UseFakeFullscreen")));
 
 
    iniSettings->winXPos = max(ini->GetValueI(section, "WindowXPos", iniSettings->winXPos), 0);    // Restore window location
@@ -626,7 +647,9 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->password       = ini->GetValue(section, "Password", iniSettings->password);
 
    iniSettings->defaultName    = ini->GetValue(section, "DefaultName", iniSettings->defaultName);
-   iniSettings->mSettings.setValFromString<string>("LastName", ini->GetValue(section, "LastName", iniSettings->mSettings.getDefaultStrVal("LastName")));
+   iniSettings->mSettings.getSetting("LastName")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("LastName"), "LastName", iniSettings->mSettings.getDefaultStrVal("LastName")));
+
+
    iniSettings->lastPassword   = ini->GetValue(section, "LastPassword", iniSettings->lastPassword);
    iniSettings->lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings->lastEditorName);
 
