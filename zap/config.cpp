@@ -47,6 +47,9 @@
 #  include <windows.h>   // For ARRAYSIZE when using ZAP_DEDICATED
 #endif
 
+// Adding 3 newlines here
+// 
+// End adding newlines
 
 namespace Zap
 {
