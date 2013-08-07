@@ -223,13 +223,9 @@ private:
    map<string, S32> mKeyLookup;     // Maps string key to vector index; updated when item is added
    Vector<AbstractSetting *> mSettings;
 
-   template<class T> T fromString(const string &val) { /* Do nothing, specialized below */ }
+   template<class T> T fromString(const string &val); // { /* Do nothing, specialized below */ }
 
    //template<class T> static T fromString<T>(const string &val) { /* Do nothing, specialized below */ }
-
-   template<> string      fromString<string>     (const string &val);
-   template<> S32         fromString<S32>        (const string &val);
-   template<> DisplayMode fromString<DisplayMode>(const string &val);
 
 public:
    ~Settings();      // Destructor
@@ -268,6 +264,12 @@ public:
    string getDefaultStrVal(const string &name) const;
    string getKey(const string &name) const;
 };
+
+
+template<> inline string      Settings::fromString<string>     (const string &val);
+template<> inline S32         Settings::fromString<S32>        (const string &val);
+template<> inline DisplayMode Settings::fromString<DisplayMode>(const string &val);
+template<> inline YesNo       Settings::fromString<YesNo>      (const string &val);
 
 
 ////////////////////////////////////////

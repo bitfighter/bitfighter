@@ -388,11 +388,11 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    switch (displayMode)
    {
       case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
-         sdlVideoFlags |= settings->getIniSettings()->mSettings.getVal("UseFakeFullscreen") ? SDL_NOFRAME : SDL_FULLSCREEN;
+         sdlVideoFlags |= settings->getIniSettings()->mSettings.getVal<YesNo>("UseFakeFullscreen") ? SDL_NOFRAME : SDL_FULLSCREEN;
          break;
 
       case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
-         sdlVideoFlags |= settings->getIniSettings()->mSettings.getVal("UseFakeFullscreen")  ? SDL_NOFRAME : SDL_FULLSCREEN;
+         sdlVideoFlags |= settings->getIniSettings()->mSettings.getVal<YesNo>("UseFakeFullscreen")  ? SDL_NOFRAME : SDL_FULLSCREEN;
          break;
 
       case DISPLAY_MODE_WINDOWED:

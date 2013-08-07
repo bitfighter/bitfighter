@@ -84,16 +84,16 @@ static YesNo yesNoStringToBool(string yesNo)
 }
 
 
-// TODO: Move these to stringutils ?
+// TODO: Move these to stringutils ?  -- Not even used?? ~raptor
 static string toString(const string &val)       { return val;                              }
 static string toString(S32 val)                 { return itos(val);                        }
 static string toString(DisplayMode displayMode) { return displayModeToString(displayMode); }
 static string toString(YesNo yesNo)             { return yesNo == Yes ? "Yes" : "No";      }
 
-template<> static string      Settings::fromString<string>     (const string &val) { return val;                      }
-template<> static S32         Settings::fromString<S32>        (const string &val) { return atoi(val.c_str());        }
-template<> static DisplayMode Settings::fromString<DisplayMode>(const string &val) { return stringToDisplayMode(val); }
-template<> static YesNo       Settings::fromString<YesNo>      (const string &val) { return yesNoStringToBool(val);   }
+template<> inline string      Settings::fromString<string>     (const string &val) { return val;                      }
+template<> inline S32         Settings::fromString<S32>        (const string &val) { return atoi(val.c_str());        }
+template<> inline DisplayMode Settings::fromString<DisplayMode>(const string &val) { return stringToDisplayMode(val); }
+template<> inline YesNo       Settings::fromString<YesNo>      (const string &val) { return yesNoStringToBool(val);   }
 
 
 // Constructor
