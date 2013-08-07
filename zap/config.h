@@ -196,10 +196,10 @@ class Setting : public AbstractSetting
    typedef AbstractSetting Parent;
 
 private:
-   string mDescription;
-
-   T mValue;
    T mDefaultValue;
+   T mValue;
+
+   string mDescription;
 
 public:
    Setting<T>(const string &name, const T &defaultValue, const string &iniKey, const string &iniSection, const string &description);
