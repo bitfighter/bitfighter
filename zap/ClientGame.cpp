@@ -505,7 +505,7 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
    if(ship->isInZone(LoadoutZoneTypeNumber))
       return;
 
-   if(getSettings()->getIniSettings()->verboseHelpMessages)
+   if(getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
    {
       if(ship->isLoadoutSameAsCurrent(loadout))
          displayErrorMessage(msgToShowIfLoadoutsAreTheSame);

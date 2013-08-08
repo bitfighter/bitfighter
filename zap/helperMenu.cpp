@@ -363,7 +363,7 @@ bool HelperMenu::processInputCode(InputCode inputCode)
    {
       exitHelper();      
 
-      if(mClientGame->getSettings()->getIniSettings()->verboseHelpMessages)
+      if(mClientGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
          mClientGame->displayMessage(Colors::paleRed, getCancelMessage());
 
       return true;

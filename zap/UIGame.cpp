@@ -1249,7 +1249,7 @@ static void loadLoadoutPreset(ClientGame *game, S32 slot)
    if(!conn)
       return;
 
-   if(game->getSettings()->getIniSettings()->verboseHelpMessages)
+   if(game->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
       game->displayShipDesignChangedMessage(loadout, "Preset same as the current design");
 
    // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
