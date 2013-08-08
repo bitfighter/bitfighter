@@ -333,7 +333,7 @@ public:
    S32 lua_getPlayerInfo(lua_State *L);
    S32 lua_isModActive(lua_State *L);
    S32 lua_getMountedItems(lua_State *L);
-   S32 lua_getCurrLoadout(lua_State *L);
+   S32 lua_getLoadout(lua_State *L);
 
    S32 lua_getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
 

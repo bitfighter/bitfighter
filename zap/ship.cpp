@@ -2294,7 +2294,7 @@ bool Ship::isRobot()
    METHOD(CLASS, getAngle,        ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getActiveWeapon, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getMountedItems, ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getCurrLoadout,  ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getLoadout,      ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, setReqLoadout,   ARRAYDEF({{ LOADOUT,  END }}), 1 ) \
    METHOD(CLASS, setCurrLoadout,  ARRAYDEF({{ LOADOUT,  END }}), 1 ) \
 
@@ -2463,11 +2463,38 @@ S32 Ship::lua_getMountedItems(lua_State *L)
    return 1;
 }
 
-// Return current loadout
-S32 Ship::lua_getCurrLoadout(lua_State *L)
-{
-   luaW_push<LoadoutTracker>(L, &mLoadout);
 
+/**
+ * @luafunc Ship::getLoadout()
+ * @brief   Get the current loadout
+ * @descr   This method will return a table with the loadout in the following
+ *          order:
+ *
+ *             Module 1, Module 2, Weapon 1, Weapon 2, Weapon 3
+ *
+ * @return  table - Returns a table with the current loadout
+ */
+S32 Ship::lua_getLoadout(lua_State *L)
+{
+   // Create our loadout table
+   lua_createtable(L, ShipModuleCount + ShipWeaponCount, 0);
+
+   // Add current modules and weapons to the table
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+   {
+      // Modules
+      if(i < ShipModuleCount)
+         lua_pushinteger(L, (S32)mLoadout.getModule(i));
+
+      // Weapons are offset by total module type count
+      else
+         lua_pushinteger(L, (S32)mLoadout.getWeapon(i - ShipModuleCount) + ModuleCount);
+
+      // Lua uses 1-based arrays
+      lua_rawseti(L, 1, i + 1);
+   }
+
+   // Return our table
    return 1;
 }
 
