@@ -1303,12 +1303,6 @@ void Ship::readControlState(BitStream *stream)
 
    WeaponType previousWeapon = mLoadout.getActiveWeapon();
    setActiveWeapon(stream->readRangedU32(0, ShipWeaponCount));
-
-#ifndef ZAP_DEDICATED
-   if(previousWeapon != mLoadout.getActiveWeapon() && !getGame()->getSettings()->getIniSettings()->showWeaponIndicators)
-      getGame()->displayMessage(Colors::cyan, "%s selected.", 
-                         WeaponInfo::getWeaponInfo(mLoadout.getActiveWeapon()).name.getString());
-#endif
 }
 
 
