@@ -163,9 +163,8 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
 
    GameSettings *settings = getGame()->getSettings();
 
-   InputMode inputMode   = settings->getInputMode();
-   bool showKeyboardKeys = settings->getIniSettings()->showKeyboardKeys;
-
+   bool showKeys = settings->getInputMode() == InputModeKeyboard ||
+                   settings->getIniSettings()->mSettings.getVal<YesNo>("ShowKeyboardKeysInStickMode");
 
    // First get to the end...
    while(nodeTree[walk].depth >= matchLevel)
@@ -175,8 +174,7 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
    while(walk != mCurNode)
    {  
       // When we're using a controller, don't present options with no defined controller key
-      if(nodeTree[walk].depth == matchLevel && ( (inputMode == InputModeKeyboard) || showKeyboardKeys || 
-                                                       (nodeTree[walk].buttonCode != KEY_UNKNOWN) ))
+      if(nodeTree[walk].depth == matchLevel && (showKeys || nodeTree[walk].buttonCode != KEY_UNKNOWN) )
       {
          OverlayMenuItem item;
          item.button = nodeTree[walk].buttonCode;

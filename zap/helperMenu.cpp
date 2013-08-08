@@ -215,7 +215,9 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
 
    // Determine whether to show keys or joystick buttons on menu
    InputMode inputMode      = getGame()->getInputMode();
-   bool showKeys            = getGame()->getSettings()->getIniSettings()->showKeyboardKeys || inputMode == InputModeKeyboard;
+   bool showKeys            = inputMode == InputModeKeyboard ||
+                              getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("ShowKeyboardKeysInStickMode");
+
    bool showJoystickButtons = inputMode == InputModeJoystick;
 
    // For testing, cycle through all valid combinations of keyboard/joystick button display to make sure all render properly

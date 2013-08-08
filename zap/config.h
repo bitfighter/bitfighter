@@ -294,8 +294,6 @@ public:
 
    bool diagnosticKeyDumpMode;      // True if want to dump keystrokes to the screen
 
-   bool showKeyboardKeys;           // True if we show the keyboard shortcuts in joystick mode
-
    bool showInGameHelp;             // If true, we'll show help/tutorial messages in game
    string helpItemSeenList;         // Which items have we already seen?
 

@@ -238,12 +238,13 @@ IniSettings::IniSettings()
    // Can probably get rid of VerboseHelpMessages
 
    // Name the user entered last time they ran the game                                                    
-   mSettings.add(new Setting<string>     ("LastName",            "ChumpChange",         "LastName",            "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
-   mSettings.add(new Setting<DisplayMode>("WindowMode",          DISPLAY_MODE_WINDOWED, "WindowMode",          "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
-   mSettings.add(new Setting<YesNo>      ("UseFakeFullscreen",   Yes,                   "UseFakeFullscreen",   "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
-   mSettings.add(new Setting<RelAbs>     ("ControlMode",         Absolute,              "ControlMode",         "Settings", "Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)"));
-   mSettings.add(new Setting<YesNo>      ("VoiceEcho",           No,                    "VoiceEcho",           "Settings", "Play echo when recording a voice message? Yes/No"));
-   mSettings.add(new Setting<YesNo>      ("VerboseHelpMessages", Yes,                   "VerboseHelpMessages", "Settings", "Display all messages related to loadout management?  Yes/No"));
+   mSettings.add(new Setting<string>     ("LastName",                    "ChumpChange",         "LastName",                    "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
+   mSettings.add(new Setting<DisplayMode>("WindowMode",                  DISPLAY_MODE_WINDOWED, "WindowMode",                  "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
+   mSettings.add(new Setting<YesNo>      ("UseFakeFullscreen",           Yes,                   "UseFakeFullscreen",           "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
+   mSettings.add(new Setting<RelAbs>     ("ControlMode",                 Absolute,              "ControlMode",                 "Settings", "Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)"));
+   mSettings.add(new Setting<YesNo>      ("VoiceEcho",                   No,                    "VoiceEcho",                   "Settings", "Play echo when recording a voice message? Yes/No"));
+   mSettings.add(new Setting<YesNo>      ("VerboseHelpMessages",         Yes,                   "VerboseHelpMessages",         "Settings", "Display all messages related to loadout management?  Yes/No"));
+   mSettings.add(new Setting<YesNo>      ("ShowKeyboardKeysInStickMode", Yes,                   "ShowKeyboardKeysInStickMode", "Settings", "If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus"));
 
 
    //controlsRelative = false;          // Relative controls is lame!
@@ -263,7 +264,6 @@ IniSettings::IniSettings()
 
    diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
 
-   showKeyboardKeys = true;           // True if we show the keyboard shortcuts in joystick mode
    allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
    allowGetMap = false;               // Disabled by default -- many admins won't want this
 
@@ -602,8 +602,9 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->mSettings.getSetting("VoiceEcho")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("VoiceEcho"), "VoiceEcho", iniSettings->mSettings.getDefaultStrVal("VoiceEcho")));
 
    //iniSettings->verboseHelpMessages  = ini->GetValueYN(section, "VerboseHelpMessages", iniSettings->verboseHelpMessages);
+   //iniSettings->showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
    iniSettings->mSettings.getSetting("VerboseHelpMessages")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("VerboseHelpMessages"), "VerboseHelpMessages", iniSettings->mSettings.getDefaultStrVal("VerboseHelpMessages")));
-   iniSettings->showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
+   iniSettings->mSettings.getSetting("ShowKeyboardKeysInStickMode")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("ShowKeyboardKeysInStickMode"), "ShowKeyboardKeysInStickMode", iniSettings->mSettings.getDefaultStrVal("ShowKeyboardKeysInStickMode")));
 
    iniSettings->showInGameHelp       = ini->GetValueYN(section, "ShowInGameHelp", iniSettings->showInGameHelp);
    iniSettings->helpItemSeenList     = ini->GetValue  (section, "HelpItemsAlreadySeenList", "");
@@ -1742,7 +1743,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " VoiceEcho - Play echo when recording a voice message? Yes/No");
       ini->sectionComment(section, " ControlMode - Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)");
       ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
-      ini->sectionComment(section, " ShowKeyboardKeysInStickMode - If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus");
       ini->sectionComment(section, " ShowInGameHelp - Show tutorial style messages in-game?  Yes/No");
       ini->sectionComment(section, " HelpItemsAlreadySeenList - Tracks which in-game help items have already been seen; let the game manage this");
       ini->sectionComment(section, " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
@@ -1778,9 +1778,10 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    // inputMode is not saved, but rather determined at runtime by whether a joystick is attached
 
    //ini->setValueYN(section, "VerboseHelpMessages",         iniSettings->verboseHelpMessages);
+   //ini->setValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
    ini->SetValue  (section, iniSettings->mSettings.getKey("VerboseHelpMessages"), iniSettings->mSettings.getStrVal("VerboseHelpMessages"));
+   ini->SetValue  (section, iniSettings->mSettings.getKey("ShowKeyboardKeysInStickMode"), iniSettings->mSettings.getStrVal("ShowKeyboardKeysInStickMode"));
 
-   ini->setValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
    ini->setValueYN(section, "ShowInGameHelp",              iniSettings->showInGameHelp);
    ini->SetValue  (section, "HelpItemsAlreadySeenList",    iniSettings->helpItemSeenList);
 
