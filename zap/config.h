@@ -294,7 +294,6 @@ public:
 
    bool diagnosticKeyDumpMode;      // True if want to dump keystrokes to the screen
 
-   bool showWeaponIndicators;       // True if we show the weapon indicators on the top of the screen
    bool verboseHelpMessages;        // If true, we'll show more handholding messages
    bool showKeyboardKeys;           // True if we show the keyboard shortcuts in joystick mode
 

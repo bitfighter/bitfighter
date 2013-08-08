@@ -260,7 +260,6 @@ IniSettings::IniSettings()
 
    diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
 
-   showWeaponIndicators = true;       // True if we show the weapon indicators on the top of the screen
    verboseHelpMessages = true;        // If true, we'll show more handholding messages
    showKeyboardKeys = true;           // True if we show the keyboard shortcuts in joystick mode
    allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
@@ -588,7 +587,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    //iniSettings->displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
    iniSettings->mSettings.setVal("WindowMode", DISPLAY_MODE_FULL_SCREEN_STRETCHED);
 #else
-   //iniSettings->mSettings.setVal("LastName", ini->GetValue(section, "LastName",   iniSettings->mSettings.getVal<string>("LastName")));
    iniSettings->mSettings.getSetting("WindowMode")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("WindowMode"), "WindowMode", iniSettings->mSettings.getDefaultStrVal("WindowMode")));
 #endif
 
@@ -601,7 +599,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    //iniSettings->echoVoice            = ini->GetValueYN(section, "VoiceEcho", iniSettings->echoVoice);
    iniSettings->mSettings.getSetting("VoiceEcho")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("VoiceEcho"), "VoiceEcho", iniSettings->mSettings.getDefaultStrVal("VoiceEcho")));
 
-   iniSettings->showWeaponIndicators = ini->GetValueYN(section, "LoadoutIndicators", iniSettings->showWeaponIndicators);
    iniSettings->verboseHelpMessages  = ini->GetValueYN(section, "VerboseHelpMessages", iniSettings->verboseHelpMessages);
    iniSettings->showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
 
@@ -1779,7 +1776,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
    // inputMode is not saved, but rather determined at runtime by whether a joystick is attached
 
-   ini->setValueYN(section, "LoadoutIndicators",           iniSettings->showWeaponIndicators);
    ini->setValueYN(section, "VerboseHelpMessages",         iniSettings->verboseHelpMessages);
    ini->setValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
    ini->setValueYN(section, "ShowInGameHelp",              iniSettings->showInGameHelp);

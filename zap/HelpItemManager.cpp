@@ -271,8 +271,6 @@ static void renderIndicatorBracket(S32 left, S32 right, S32 top, S32 stubLen)
 // Do some special rendering required by just a couple of items
 static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 textLeft, S32 textTop, S32 textBottom)
 {
-   // TODO: Remove game->getSettings()->getIniSettings()->showWeaponIndicators option
-
    textLeft -= 10;      // Provide some buffer between vertical bar and help text
 
    const S32 stubLen = 15;

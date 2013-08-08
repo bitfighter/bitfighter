@@ -1466,8 +1466,7 @@ void GameUserInterface::renderChatMsgs() const
    else
       mChatMessageDisplayer3.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive, alpha);
 
-   F32 showIndicators = getGame()->getSettings()->getIniSettings()->showWeaponIndicators;
-   mServerMessageDisplayer.render(showIndicators ? messageMargin : vertMargin, chatDisabled, false, alpha);
+   mServerMessageDisplayer.render(messageMargin, chatDisabled, false, alpha);
 
    if(announcementActive)
       renderAnnouncement(IN_GAME_CHAT_DISPLAY_POS);
