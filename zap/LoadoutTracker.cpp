@@ -374,15 +374,6 @@ string LoadoutTracker::toString() const
 }
 
 
-
-/**
- *  @luaclass Loadout
- *  @brief    Get and set ship Loadout properties
- *  @descr    Use the %Loadout object to modify a ship or robots current loadout
- *
- *  You only need get this object once, then you can use it as often as you like. It will
- *  always reflect the latest data.
- */
 //                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, setWeapon,      ARRAYDEF({{ WEAP_SLOT, WEAP_ENUM, END }}), 1 )  \

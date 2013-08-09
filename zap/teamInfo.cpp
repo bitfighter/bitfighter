@@ -236,12 +236,6 @@ void Team::incrementBotCount()
 }
 
 
-/**
- *  @luaclass Team
- *  @brief    Get information about a team in the current game
- *  @descr    The %Team object contains data about each team in a game.
- *
- */
 //                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getIndex,          ARRAYDEF({{ END }}), 1 ) \
@@ -259,27 +253,61 @@ GENERATE_LUA_METHODS_TABLE(Team, LUA_METHODS);
 const char *Team::luaClassName = "Team";  // Class name as it appears to Lua scripts
 REGISTER_LUA_CLASS(Team);
 
+/**
+ * @luaclass Team
+ *
+ * @brief Get information about a team in the current game.
+ *
+ * @descr The Team object contains data about each team in a game.
+ */
 
 
-// We'll add 1 to the index to allow the first team in Lua to have index of 1, and the first team in C++ to have an index of 0
+/**
+ * @luafunc int Team::getIndex()
+ *
+ * @brief Get the numerical index of this Team.
+ *
+ * @return The numerical index of this Team.
+ */
 S32 Team::lua_getIndex(lua_State *L)
 {
    return returnInt(L, mTeamIndex + 1);
 }
 
 
+/**
+ * @luafunc string Team::getName()
+ *
+ * @brief Get the name of the Team
+ *
+ * @return The name of the Team
+ */
 S32 Team::lua_getName(lua_State *L)
 {
    return returnString(L, mName.getString());
 }
 
 
+/**
+ * @luafunc int Team::getScore()
+ *
+ * @brief Get the team's current score.
+ *
+ * @return The team's current score.
+ */
 S32 Team::lua_getScore(lua_State *L)
 {
    return returnInt(L, mScore);
 }
 
 
+/**
+ * @luafunc int Team::getPlayerCount()
+ *
+ * @brief Get the number of players currently on this team.
+ *
+ * @return The number of players currently on this team.
+ */
 S32 Team::lua_getPlayerCount(lua_State *L)
 {
    gServerGame->countTeamPlayers();    // Make sure player counts are up-to-date
@@ -287,7 +315,21 @@ S32 Team::lua_getPlayerCount(lua_State *L)
 }
 
 
-// Return a table listing all players on this team.  Is there a better way to do this?
+/**
+ * @luafunc table Team::getPlayers()
+ *
+ * @brief Get a table containing all players on a team.
+ *
+ * @code
+ *   local players = team:getPlayers()
+ *   for i, v in ipairs(players) do
+ *     print(v:getName())
+ *   end
+ * @endcode
+ *
+ * @return A table of \link LuaPlayerInfo LuaPlayerInfos \endlink currently on this
+ * team. 
+ */
 S32 Team::lua_getPlayers(lua_State *L)
 {
    ServerGame *game = gServerGame;

@@ -276,9 +276,9 @@ TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 static const F32 SOCCER_BALL_ITEM_MASS = 4;
 
 /**
-  *  @luaconst SoccerBallItem::SoccerBallItem()
-  *  @luaconst SoccerBallItem::SoccerBallItem(point)
-  */
+ * @luafunc SoccerBallItem::SoccerBallItem()
+ * @luafunc SoccerBallItem::SoccerBallItem(point)
+ */
 // Combined Lua / C++ default constructor
 SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, SOCCER_BALL_ITEM_MASS)
 {
@@ -587,8 +587,9 @@ void SoccerBallItem::unpackUpdate(GhostConnection *connection, BitStream *stream
 // Lua interface
 
 /**
- *  @luaclass SoccerBallItem
- *  @brief    Target object used in Soccer games
+ * @luaclass SoccerBallItem
+ * 
+ * @brief Target object used in Soccer games
  */
 // No soccerball specific methods!
 //                Fn name                  Param profiles            Profile count                           

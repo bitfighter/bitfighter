@@ -38,10 +38,10 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
 /**
-  *  @luaconst  FlagItem::FlagItem()
-  *  @luaconst  FlagItem::FlagItem(point)
-  *  @luaconst  FlagItem::FlagItem(point, team)
-  */
+ * @luafunc FlagItem::FlagItem()
+ * @luafunc FlagItem::FlagItem(point)
+ * @luafunc FlagItem::FlagItem(point, teamIndex)
+ */
 // Combined Lua / C++ default constructor
 FlagItem::FlagItem(lua_State *L) : Parent(Point(0,0), true, (F32)Ship::CollisionRadius) // radius was 20
 {
@@ -404,10 +404,13 @@ bool FlagItem::isAtHome()
 // Lua interface
 
 /**
-  *  @luaclass FlagItem
-  *  @brief    Flags are used in many games, such as Nexus and Capture The Flag (CTF).
-  *  @geom     The geometry of a %FlagItem is a point.
-  */
+ * @luaclass FlagItem
+ * 
+ * @brief Flags are used in many games, such as Nexus and Capture The Flag
+ * (CTF).
+ * 
+ * @geom The geometry of a FlagItem is a point.
+ */
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, isInInitLoc,  ARRAYDEF({{ END }}), 1 ) \
@@ -423,10 +426,13 @@ REGISTER_LUA_SUBCLASS(FlagItem, MountableItem);
 
 
 /**
-  *  @luafunc FlagItem::isInInitLoc()
-  *  @brief   Returns true if the flag is in its starting position, false if it has been moved.
-  *  @return  \e bool - True if flag is in its starting position, false if it has been moved.
-  */
+ * @luafunc bool FlagItem::isInInitLoc()
+ * 
+ * @brief Returns `true` if the flag is in its starting position, `false` if it
+ * has been moved.
+ * 
+ * @return `true` if the flag is "at home", `false` otherwise.
+ */
 S32 FlagItem::lua_isInInitLoc(lua_State *L)
 { 
    return returnBool(L, isAtHome()); 
@@ -434,11 +440,13 @@ S32 FlagItem::lua_isInInitLoc(lua_State *L)
 
 
 /**
- *  @luafunc FlagItem::getCaptureZone()
- *  @brief   Returns capture zone holding the %FlagItem, or nil if it is not in a capture zone.
- *  @return  \e GoalZone - The capture zone where the %FlagItem is, or nil if it is not in a capture zone.
+ * @luafunc Zone FlagItem::getCaptureZone()
+ * 
+ * @brief Get the zone which "holds" this flag (e.g. in the Retrieve game mode)
+ * 
+ * @return The zone where the FlagItem is held, or nil if it is not held in a
+ * zone.
  */
-
 // Override parent method
 S32 FlagItem::lua_getCaptureZone(lua_State *L)
 {

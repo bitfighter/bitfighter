@@ -160,12 +160,13 @@ bool Zone::collide(BfObject *hitObject)
 /////
 // Lua interface
 
-/** 
-  *  @luaconst Zone::Zone()
-  *  @luaconst Zone::Zone(geom)
-  *  @luaclass Zone
-  *  @brief Invisible objects, used mainly for generating events.
-  */
+/**
+ * @luafunc Zone::Zone()
+ * @luafunc Zone::Zone(geom)
+ * @luaclass Zone
+ * 
+ * @brief Invisible objects, used mainly for generating events.
+ */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
 

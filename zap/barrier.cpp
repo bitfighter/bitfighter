@@ -579,17 +579,22 @@ void WallItem::addToGame(Game *game, GridDatabase *database)
 /////
 // Lua interface
 /**
-  *  @luaconst WallItem::WallItem()
-  *  @luaconst WallItem::WallItem(geom, thickness)
-  *  @luaclass WallItem
-  *  @brief Traditional wall item.
-  *  @descr A %WallItem is a traditional wall consisting of a series of straight-line segments.  WallItems have a width setting that 
-  *         expands the walls outward on the edges, but not the ends.  The game may make slight adjustments to the interior vertices
-  *         of a wall to improve visual appearance.  Collinear vertices may be deleted to simplify wall geometry.
-  *
-  *  @geom %WallItem geometry consists of two or more points forming a linear sequence, each consecutive pair defining a straight-line 
-  *        segment.  %WallItem geometry can cross or form loops with no adverse consequences.
-  */
+ * @luafunc WallItem::WallItem()
+ * @luafunc WallItem::WallItem(geom geometry, int thickness)
+ * @luaclass WallItem
+ * 
+ * @brief Traditional wall item.
+ * 
+ * @descr A WallItem is a traditional wall consisting of a series of
+ * straight-line segments. WallItems have a width setting that expands the walls
+ * outward on the edges, but not the ends. The game may make slight adjustments
+ * to the interior vertices of a wall to improve visual appearance. Collinear
+ * vertices may be deleted to simplify wall geometry.
+ * 
+ * @geom WallItem geometry consists of two or more points forming a linear
+ * sequence, each consecutive pair defining a straight-line segment. WallItem
+ * geometry can cross or form loops with no adverse consequences.
+ */
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getWidth,     ARRAYDEF({{      END }}), 1 ) \
@@ -605,11 +610,14 @@ const char *WallItem::luaClassName = "WallItem";
 REGISTER_LUA_SUBCLASS(WallItem, BfObject);
 
 /**
-  *  @luafunc num WallItem::getWidth()
-  *  @brief   Returns %WallItem's width setting.
-  *  @descr   Walls have a default width of 50.
-  *  @return  \e width: \e Int representing %WallItem's width.
-  */
+ * @luafunc int WallItem::getWidth()
+ * 
+ * @brief Returns the WallItem's width setting.
+ * 
+ * @descr Walls have a default width of 50.
+ * 
+ * @return The WallItem's width.
+ */
 S32 WallItem::lua_getWidth(lua_State *L)     
 { 
    return returnInt(L, getWidth()); 
@@ -617,11 +625,14 @@ S32 WallItem::lua_getWidth(lua_State *L)
 
 
 /**
-  *  @luafunc WallItem::setWidth(width)
-  *  @brief   Sets %WallItem's width.
-  *  @descr   Walls have a default width of 50.
-  *  @param  \e width: \e Int representing %WallItem's width.
-  */
+ * @luafunc WallItem::setWidth(int width)
+ * 
+ * @brief Sets the WallItem's width.
+ * 
+ * @descr Walls have a default width of 50.
+ * 
+ * @param width The WallItem's new width.
+ */
 S32 WallItem::lua_setWidth(lua_State *L)     
 { 
    checkIfHasBeenAddedToTheGame(L);
@@ -672,8 +683,8 @@ S32 WallItem::lua_setGeom(lua_State *L)
 TNL_IMPLEMENT_NETOBJECT(PolyWall);
 
 /**
- *  @luaconst PolyWall::PolyWall()
- *  @luaconst PolyWall::PolyWall(polyGeom)
+ * @luafunc PolyWall::PolyWall()
+ * @luafunc PolyWall::PolyWall(polyGeom)
  */
 // Combined Lua/C++ constructor
 PolyWall::PolyWall(lua_State *L)
@@ -813,12 +824,14 @@ void PolyWall::onAddedToGame(Game *game)
 // Lua interface
 
 /**
-  *  @luaclass PolyWall
-  *  @brief Polygonal wall item.
-  *  @descr A %PolyWall is a wall consisting of a filled polygonal shape.  
-  *
-  *  @geom %PolyWall geometry is a typical polygon.
-  */
+ * @luaclass PolyWall
+ * 
+ * @brief Polygonal wall item.
+ * 
+ * @descr A PolyWall is a wall consisting of a filled polygonal shape. 
+ * 
+ * @geom PolyWall geometry is a typical polygon.
+ */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
 

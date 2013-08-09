@@ -44,10 +44,12 @@ LuaPlayerInfo::~LuaPlayerInfo()
 
 
 /**
- *  @luaclass PlayerInfo
- *  @brief    Get information about a specific player.
- *  @descr    The %PlayerInfo object contains data about each player, human or robot.
+ * @luaclass LuaPlayerInfo
  *
+ * @brief Contains information about a specific player.
+ *
+ * @descr The PlayerInfo object contains data about each player, including both
+ * humans and robots.
  */
 //                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
@@ -70,6 +72,11 @@ const char *LuaPlayerInfo::luaClassName = "PlayerInfo";  // Class name as it app
 REGISTER_LUA_CLASS(LuaPlayerInfo);
 
 
+/**
+ * @luafunc string LuaPlayerInfo::getName()
+ *
+ * @return The player's game-unique username (e.g. ChumpChange or S_bot.0).
+ */
 S32 LuaPlayerInfo::lua_getName(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
@@ -77,6 +84,11 @@ S32 LuaPlayerInfo::lua_getName(lua_State *L)
 }
 
 
+/**
+ * @luafunc Ship LuaPlayerInfo::getShip()
+ *
+ * @return The player's ship, or nil if the player is "dead".
+ */
 S32 LuaPlayerInfo::lua_getShip(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
@@ -84,6 +96,11 @@ S32 LuaPlayerInfo::lua_getShip(lua_State *L)
 }
 
 
+/**
+ * @luafunc int LuaPlayerInfo::getTeamIndx()
+ *
+ * @deprecated See getTeamIndex()
+ */
 S32 LuaPlayerInfo::lua_getTeamIndx(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
@@ -91,6 +108,11 @@ S32 LuaPlayerInfo::lua_getTeamIndx(lua_State *L)
 }
 
 
+/**
+ * @luafunc int LuaPlayerInfo::getTeamIndex()
+ *
+ * @return The index of the player's team.
+ */
 S32 LuaPlayerInfo::lua_getTeamIndex(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
@@ -98,6 +120,11 @@ S32 LuaPlayerInfo::lua_getTeamIndex(lua_State *L)
 }
 
 
+/**
+ * @luafunc num LuaPlayerInfo::getRating()
+ *
+ * @return The player's rating a shown on the scoreboard.
+ */
 S32 LuaPlayerInfo::lua_getRating(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
@@ -105,6 +132,11 @@ S32 LuaPlayerInfo::lua_getRating(lua_State *L)
 }
 
 
+/**
+ * @luafunc int LuaPlayerInfo::getScore()
+ *
+ * @return The number of points this player has scored this game.
+ */
 S32 LuaPlayerInfo::lua_getScore(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
@@ -112,6 +144,11 @@ S32 LuaPlayerInfo::lua_getScore(lua_State *L)
 }
 
 
+/**
+ * @luafunc bool LuaPlayerInfo::isRobot()
+ *
+ * @return `true` if the player is a Robot, false otherwise
+ */
 S32 LuaPlayerInfo::lua_isRobot(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
@@ -119,6 +156,11 @@ S32 LuaPlayerInfo::lua_isRobot(lua_State *L)
 }
 
 
+/**
+ * @luafunc string LuaPlayerInfo::getScriptName()
+ *
+ * @return The filename of the script (e.g. `s_bot.bot`)
+ */
 S32 LuaPlayerInfo::lua_getScriptName(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");

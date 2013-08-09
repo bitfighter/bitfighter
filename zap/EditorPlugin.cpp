@@ -209,11 +209,13 @@ void EditorPlugin::killScript()
 
 //// Lua methods
 /**
- *  @luaclass EditorPlugin
- *  @brief    Main object for running methods related to editor plugins.
- *  @descr    The current editor plugin is always available in a global variable called "plugin".
+ * @luaclass EditorPlugin
+ * 
+ * @brief Main object for running methods related to editor plugins.
+ * 
+ * @descr The current editor plugin is always available in a global variable
+ * called `plugin`.
  */
-
 const char *EditorPlugin::luaClassName = "EditorPlugin";
 
 REGISTER_LUA_CLASS(EditorPlugin);
@@ -231,10 +233,12 @@ GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
 
 
 /**
- * @luafunc  num EditorPlugin::getGridSize()
- * @brief    Returns the current Grid Size setting.
- * @return   \e num - Current GridSize setting in the editor.
-*/
+ * @luafunc num EditorPlugin::getGridSize()
+ * 
+ * @brief Returns the current Grid Size setting.
+ * 
+ * @return The current GridSize setting in the editor.
+ */
 S32 EditorPlugin::lua_getGridSize(lua_State *L)
 {
    return returnFloat(L, mGridSize);    
@@ -242,22 +246,26 @@ S32 EditorPlugin::lua_getGridSize(lua_State *L)
 
 
 /**
- * @luafunc  table EditorPlugin::getSelectedObjects()
- * @brief    Returns a list of all selected objects in the editor.
- * @descr    The following code sample shows how to visit each object selected in the editor.  Here, we 
- *           nudge every selected item 100 pixels to the right.
+ * @luafunc table EditorPlugin::getSelectedObjects()
+ * 
+ * @brief Returns a list of all selected objects in the editor.
+ * 
+ * @descr The following code sample shows how to visit each object selected in
+ * the editor. Here, we nudge every selected item 100 pixels to the right.
+ * 
  * @code
-   local t = plugin:getSelectedObjects()  -- Get every selected object
-
-   for i, v in ipairs(t) do               -- Iterate over list
-      local g = v:getGeom()               -- Get the object's geometry
-      g = Geom.translate(g, 100, 0)       -- Add 100 to the x-coords
-      v:setGeom(g)                        -- Save the new geometry
-   end
-
+ *   local t = plugin:getSelectedObjects()  -- Get every selected object
+ *
+ *   for i, v in ipairs(t) do               -- Iterate over list
+ *      local g = v:getGeom()               -- Get the object's geometry
+ *      g = Geom.translate(g, 100, 0)       -- Add 100 to the x-coords
+ *      v:setGeom(g)                        -- Save the new geometry
+ *   end
  * @endcode
- * @return   \e table - Lua table containing all the objects in the editor that are currently selected.
-*/
+ * 
+ * @return Lua table containing all the objects that are currently selected in
+ * the editor
+ */
 S32 EditorPlugin::lua_getSelectedObjects(lua_State *L)
 {
    S32 count = mGridDatabase->getObjectCount();
@@ -285,10 +293,12 @@ S32 EditorPlugin::lua_getSelectedObjects(lua_State *L)
 
 
 /**
- * @luafunc  table EditorPlugin::getAllObjects()
- * @brief    Returns a list of all objects in the editor.
- * @return   \e table - Lua table containing all the objects in the editor.
-*/
+ * @luafunc table EditorPlugin::getAllObjects()
+ * 
+ * @brief Returns a table of all objects in the editor.
+ * 
+ * @return Lua table containing all the objects in the editor.
+ */
 S32 EditorPlugin::lua_getAllObjects(lua_State *L)
 {
    S32 count = mGridDatabase->getObjectCount();

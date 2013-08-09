@@ -984,11 +984,13 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
 
 //// Lua interface
 /**
- *  @luaclass LuaScriptRunner
- *  @brief    Main class for holding global methods accessible by all script runners
- *  @descr    Script runners include levelgens, robots, and editor plugins.  The methods here
- *            can be run from all three.  However, some may be disabled for a particular
- *            script runner.
+ * @luaclass LuaScriptRunner
+ * 
+ * @brief Main class for holding global methods accessible by all script runners
+ * 
+ * @descr Script runners include levelgens, robots, and editor plugins. The
+ * methods here can be called from all three. However, some may be disabled for
+ * a particular script runner.
  */
 
 /**
@@ -1058,11 +1060,15 @@ REGISTER_LUA_CLASS(LuaScriptRunner);
 
 
 /**
-  * @luafunc logprint(any parameter)
-  * @brief   Print to bitfighter's logging engine
-  * @descr   This will (currently) print to the bitfighter log file as well as stdout
-  * @param   parameter - the object you wish to print
-  */
+ * @luafunc logprint(any val)
+ * 
+ * @brief Print to bitfighter's logging engine.
+ * 
+ * @descr This will (currently) print to the bitfighter log file as well as
+ * stdout.
+ * 
+ * @param val The value you wish to print.
+ */
 S32 LuaScriptRunner::lua_logprint(lua_State *L)
 {
    string str = buildPrintString(L);
@@ -1074,12 +1080,15 @@ S32 LuaScriptRunner::lua_logprint(lua_State *L)
 
 
 /**
-  * @luafunc print(any parameter)
-  * @brief   Print to the in-game console
-  * @descr   This hijacks Lua's normal 'print' command that goes to stdout and instead redirects it
-  *          to the in-game console
-  * @param   parameter - the object you wish to print
-  */
+ * @luafunc print(any val)
+ *
+ * @brief Print to the in-game console.
+ *
+ * @descr This hijacks Lua's normal 'print' command that goes to stdout and
+ * instead redirects it to the in-game console.
+ *
+ * @param val The value you wish to print.
+ */
 S32 LuaScriptRunner::lua_print(lua_State *L)
 {
    string str = buildPrintString(L);
@@ -1090,20 +1099,26 @@ S32 LuaScriptRunner::lua_print(lua_State *L)
 
 
 /**
-  * @luafunc num getRandomNumber()
-  * @brief   Better random number generated than that included with Lua
-  * @descr   General structure and peculiar error messages taken from lua math lib.
-  *          Docs for that are as follows; we should adhere to them as well:
-  *
-  *          This function is an interface to the simple pseudo-random generator function
-  *          rand provided by ANSI C. (No guarantees can be given for its statistical properties.)
-  *          When called without arguments, returns a uniform pseudo-random real number in the
-  *          range [0,1). When called with an integer number m, math.random returns a uniform
-  *          pseudo-random integer in the range [1, m]. When called with two integer numbers
-  *          m and n, math.random returns a uniform pseudo-random integer in the range [m, n].
-  *
-  * @return  A random number
-  */
+ * @luafunc num getRandomNumber(int m, int n)
+ *
+ * @brief Better random number generated than that included with Lua.
+ *
+ * @descr General structure and peculiar error messages taken from lua math lib.
+ * Docs for that are as follows; we should adhere to them as well:
+ *
+ * This function is an interface to the simple pseudo-random generator function
+ * rand provided by ANSI C. (No guarantees can be given for its statistical
+ * properties.) When called without arguments, returns a uniform pseudo-random
+ * real number in the range [0,1). When called with an integer number m,
+ * math.random returns a uniform pseudo-random integer in the range [1, m]. When
+ * called with two integer numbers m and n, math.random returns a uniform
+ * pseudo-random integer in the range [m, n].
+ *
+ * @param m (optional) Used for either [1, m] or [m, n] as described above.
+ * @param n (optional) Used for [m, n] as described above.
+ *
+ * @return A random number as described above
+ */
 S32 LuaScriptRunner::lua_getRandomNumber(lua_State *L)
 {
    S32 args = lua_gettop(L);
@@ -1132,10 +1147,12 @@ S32 LuaScriptRunner::lua_getRandomNumber(lua_State *L)
 
 
 /**
-  * @luafunc int getMachineTime()
-  * @brief   Gets the machine time in milliseconds
-  * @return  machine time in milliseconds
-  */
+ * @luafunc int getMachineTime()
+ *
+ * @brief Get the time according to the system clock.
+ *
+ * @return Machine time (i.e. wall clock time) in milliseconds.
+ */
 S32 LuaScriptRunner::lua_getMachineTime(lua_State *L)
 {
    return LuaBase::returnInt(L, Platform::getRealMilliseconds());
@@ -1143,12 +1160,17 @@ S32 LuaScriptRunner::lua_getMachineTime(lua_State *L)
 
 
 /**
-  * @luafunc findFile(string filename)
-  * @brief   Finds a specific file to load from various Lua folders
-  * @descr   Scans our scripts, levels, and robots directories for a file, in preparation for loading
-  * @param   filename - the file you're looking for
-  * @return  path to the file in question
-  */
+ * @luafunc string findFile(string filename)
+ *
+ * @brief Finds a specific file to load from various Lua folders.
+ *
+ * @descr Scans our scripts, levels, and robots directories for a file, in
+ * preparation for loading.
+ *
+ * @param filename The file you're looking for.
+ *
+ * @return The path to the file in question, or nil if it can not be found.
+ */
 S32 LuaScriptRunner::lua_findFile(lua_State *L)
 {
    checkArgList(L, functionArgs, "", "findFile");
@@ -1173,12 +1195,19 @@ S32 LuaScriptRunner::lua_findFile(lua_State *L)
 
 
 /**
-  * @luafunc readFromFile(string filename)
-  * @brief   Reads in a file from our sandboxed IO directory
-  * @descr   Reads an entire file from the filesystem into a string
-  * @param   filename - the file to read
-  * @return  contents of the file as a string
-  */
+ * @luafunc string readFromFile(string filename)
+ *
+ * @brief Reads in a file from our sandboxed IO directory.
+ *
+ * @descr Reads an entire file from the filesystem into a string.
+ *
+ * @param filename The filename to read.
+ *
+ * @return The contents of the file as a string.
+ *
+ * @note This function will only look for files in the `screenshot` directory of
+ * the Bitfighter resource folder.
+ */
 S32 LuaScriptRunner::lua_readFromFile(lua_State *L)
 {
    checkArgList(L, functionArgs, "", "readFromFile");
@@ -1195,13 +1224,21 @@ S32 LuaScriptRunner::lua_readFromFile(lua_State *L)
 
 
 /**
-  * @luafunc writeToFile(string filename, string contents, bool append)
-  * @brief   Write or append to a file on the filesystem
-  * @descr   This is in a sandboxed environment and will only allow writing to a specific directory
-  * @param   filename - the file to read
-  * @param   contents - the contents to save to the file
-  * @param   append (optional) - if true, append to the file instead of creating anew
-  */
+ * @luafunc writeToFile(string filename, string contents, bool append)
+ * 
+ * @brief Write or append to a file on the filesystem.
+ * 
+ * @descr This is in a sandboxed environment and will only allow writing to a
+ * specific directory.
+ * 
+ * @param filename The filename to write.
+ * @param contents The contents to save to the file.
+ * @param append (optional) If `true`, append to the file instead of creating
+ * a new one.
+ *
+ * @note This function will only write to files in the `screenshot` directory of
+ * the Bitfighter resource folder.
+ */
 S32 LuaScriptRunner::lua_writeToFile(lua_State *L)
 {
    S32 profile = checkArgList(L, functionArgs, "", "writeToFile");
@@ -1229,10 +1266,14 @@ S32 LuaScriptRunner::lua_writeToFile(lua_State *L)
 
 /**
  * @luafunc bool LuaScriptRunner::pointCanSeePoint(point point1, point point2)
- * @brief   Returns true if the two specified points can see one another.
- * @param   point1 First point.
- * @param   point2 Second point.
- * @return  `true` if objects have LOS from one to the other, `false` otherwise
+ * 
+ * @brief Returns `true` if the two specified points can see one another.
+ * 
+ * @param point1 First point.
+ * @param point2 Second point.
+ * 
+ * @return `true` if objects have a line of sight from one to the other,
+ * `false`otherwise.
  */
 S32 LuaScriptRunner::lua_pointCanSeePoint(lua_State *L)
 {
@@ -1248,16 +1289,22 @@ S32 LuaScriptRunner::lua_pointCanSeePoint(lua_State *L)
 
 
 /**
- * @luafunc    BfObject LuaScriptRunner::findObjectById(num id)
- * @brief      Returns an object with the given id, or nil if none exists.
- * @descr      Finds an object with the specified user-assigned id.  If there are multiple objects with the same id (shouldn't happen,
- *             but could, especially if the passed id is 0), this method will return the first object it finds with the given id.
- *             Currently, all objects that have not been explicitly assigned an id have an id of 0.
- *
+ * @luafunc BfObject LuaScriptRunner::findObjectById(num id)
+ * 
+ * @brief Returns an object with the given id, or nil if none exists.
+ * 
+ * @descr Finds an object with the specified user-assigned id. If there are
+ * multiple objects with the same id (shouldn't happen, but could, especially if
+ * the passed id is 0), this method will return the first object it finds with
+ * the given id. Currently, all objects that have not been explicitly assigned
+ * an id have an id of 0.
+ * 
  * Note that ids can be assigned in the editor using the ! or # keys.
- *
- * @param      id id to search for.
- * @return     The found BfObject, or `nil` if no objects with the specified id could be found.
+ * 
+ * @param id id to search for.
+ * 
+ * @return The found BfObject, or `nil` if no objects with the specified id
+ * could be found.
  */
 S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
 {
@@ -1286,29 +1333,36 @@ static void checkFillTable(lua_State *L, S32 size)
 
 
 /**
-  *   @luafunc table LuaScriptRunner::findAllObjects(table results, ObjType objType, ...)
-  *   @brief   Finds all items of the specified type anywhere on the level.
-  *   @descr   Can specify multiple types.  The \e table argument is optional, but levelgens that call this function frequently will perform
-  *            better if they provide a reusable table in which found objects can be stored.  By providing a table, you will avoid
-  *            incurring the overhead of construction and destruction of a new one.
-  *
-  *   If a table is not provided, the function will create a table and return it on the stack.
-  *
-  *   @param  results (Optional) Reusable table into which results can be written.
-  *   @param  objType One or more ObjTypes specifying what types of objects to find.
-  *   @return A reference back to the passed table, or a new table if one was not provided.
-  *
-  *   @code
-  *   items = { }     -- Reusable container for findAllObjects.  Because it is defined outside
-  *                   -- any functions, it will have global scope.
-  *
-  *   function countObjects(objType, ...)                -- Pass one or more object types
-  *     table.clear(items)                               -- Remove any items in table from previous use
-  *     levelgen:findGlobalObjects(items, objType, ...)  -- Put all items of specified type(s) into items table
-  *     print(#items)                                    -- Print the number of items found to the console
-  *   end
-  *   @endcode
-  */
+ * @luafunc table LuaScriptRunner::findAllObjects(table results, ObjType objType, ...)
+ *
+ * @brief Finds all items of the specified type anywhere on the level.
+ *
+ * @descr Can specify multiple types. The table argument is optional, but
+ * levelgens that call this function frequently will perform better if they
+ * provide a reusable table in which found objects can be stored. By providing a
+ * table, you will avoid incurring the overhead of construction and destruction
+ * of a new one.
+ *
+ * If a table is not provided, the function will create a table and return it on
+ * the stack.
+ *
+ * @param results (optional) Reusable table into which results can be written.
+ * @param objType One or more ObjTypes specifying what types of objects to find.
+ *
+ * @return A reference back to the passed table, or a new table if one was not
+ * provided.
+ *
+ * @code
+ * items = { } -- Reusable container for findAllObjects. Because it is defined outside
+ *             -- any functions, it will have global scope.
+ *
+ * function countObjects(objType, ...) -- Pass one or more object types
+ *   table.clear(items) -- Remove any items in table from previous use
+ *   levelgen:findGlobalObjects(items, objType, ...) -- Put all items of specified type(s) into items table
+ *   print(#items) -- Print the number of items found to the console
+ * end
+ * @endcode
+ */
 S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "findAllObjects");
@@ -1359,20 +1413,26 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
 
 
 /**
-  * @luafunc table LuaScriptRunner::findAllObjectsInArea(table results, point point1, point point2, ObjType objType, ...)
-  * @brief   Finds all items of the specified type(s) in a given search area.
-  * @descr   Multiple object types can be specified.  A search rectangle will be constructed from the
-  *          two points given, with each point positioned at opposite corners.  A reusable fill table
-  *          can be given to increase performance if this method is called frequently.
-  * @note    See LuaScriptRunner::findAllObjects for a code example with using a fill table
-  *
-  * @param   results - (Optional) A reusable fill table
-  * @param   point1 - one corner of a search rectangle
-  * @param   point2 - another corner of a search rectangle diagonally opposite to the first
-  * @param   objType - the object type to look for.  Multiple can be specified
-  *
-  * @return  A table with any found objects
-  */
+ * @luafunc table LuaScriptRunner::findAllObjectsInArea(table results, point point1, point point2, ObjType objType, ...)
+ *
+ * @brief Finds all items of the specified type(s) in a given search area.
+ *
+ * @descr Multiple object types can be specified. A search rectangle will be
+ * constructed from the two points given, with each point positioned at opposite
+ * corners. A reusable fill table can be given to increase performance if this
+ * method is called frequently.
+ *
+ * @note See LuaScriptRunner::findAllObjects for a code example with using a
+ * fill table.
+ *
+ * @param results (Optional) A reusable fill table.
+ * @param point1 One corner of a search rectangle.
+ * @param point2 Another corner of a search rectangle diagonally opposite to the
+ * first.
+ * @param objType The \ref ObjTypeEnum to look for. Multiple can be specified.
+ *
+ * @return A table with any found objects.
+ */
 S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "findAllObjectsInArea");
@@ -1433,11 +1493,14 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 
 
 /**
- * @luafunc    LuaScriptRunner::addItem(BfObject)
- * @brief      Add an BfObject to the game or editor. Any object constructed in a levelgen
- *             will not appear in the game world or editor until this method is called on it.
- * @param      BfObject - any BfObject to be added to the editor
-*/
+ * @luafunc LuaScriptRunner::addItem(BfObject obj)
+ *
+ * @brief Add a BfObject to the game or editor. Any object constructed in a
+ * levelgen will not appear in the game world or editor until this method is
+ * called on it.
+ *
+ * @param obj Any BfObject to be added to the editor
+ */
 S32 LuaScriptRunner::lua_addItem(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "addItem");
@@ -1469,11 +1532,15 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
 
 
 /**
- * @luafunc GameInfo LuaScriptRunner::getGameInfo()
- * @brief   Returns the GameInfo object.
- * @descr   GameInfo can be used to grab information about the currently running game, including
- *          the GameType.  This only works in-game, not with editor plugins
- * @return  The GameInfo object
+ * @luafunc LuaGameInfo LuaScriptRunner::getGameInfo()
+ *
+ * @brief Returns the LuaGameInfo object.
+ *
+ * @descr LuaGameInfo can be used to grab information about the currently running
+ * game, including the GameType. This only works in-game, not with editor
+ * plugins.
+ *
+ * @return The LuaGameInfo object.
  */
 S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
 {
@@ -1492,8 +1559,8 @@ S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
 
 /**
  * @luafunc num LuaScriptRunner::getPlayerCount()
- * @brief   Returns current number of players.
- * @return  Current number of players.
+ *
+ * @return Current number of connected players.
  */
 S32 LuaScriptRunner::lua_getPlayerCount(lua_State *L)
 {
@@ -1505,7 +1572,14 @@ S32 LuaScriptRunner::lua_getPlayerCount(lua_State *L)
 
 /**
  * @luafunc LuaScriptRunner::subscribe(Event event)
- * @brief Manually subscribe to the specified Event
+ *
+ * @brief Manually subscribe to notifications when the specified \ref EventEnum
+ * occurs.
+ *
+ * @param event The \ref EventEnum to subscribe to.
+ *
+ * @see The \ref EventEnum page for a list of events and their callback
+ * signatures.
  */
 S32 LuaScriptRunner::lua_subscribe(lua_State *L)
 {
@@ -1529,7 +1603,8 @@ S32 LuaScriptRunner::lua_subscribe(lua_State *L)
 
 /**
  * @luafunc LuaScriptRunner::unsubscribe(Event event)
- * @brief Manually unsubscribe to the specified Event
+ *
+ * @brief Manually unsubscribe to the specified \ref EventEnum.
  */
 S32 LuaScriptRunner::lua_unsubscribe(lua_State *L)
 {

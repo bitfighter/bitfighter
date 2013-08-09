@@ -1108,16 +1108,23 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
 /////
 // Lua interface
 /**
-  *  @luaclass EngineeredItem
-  *  @brief Parent class representing mountable items such as Turret and ForceFieldProjector.
-  *  @descr %EngineeredItem is a container class for wall-mountable items.  Currently, all EngineeredItems can be constructed with
-  *         the Engineering module, can be destroyed by enemy fire, and can be healed (and sometimes captured) with the Repair module.
-  *         All %EngineeredItems have a health value that ranges from 0 to 1, where 0 is completely dead and 1 is fully healthy.  When
-  *         health falls below a certain threshold (obtainable with getDisabledThrehold()), the item becomes inactive and must be repaired
-  *         or regenerate itself to be functional again.
-  *  
-  *         If an %EngineeredItem has a healRate > 0, it will slowly repair damage to iteself at a rate of 10% per healRate seconds.
-  */
+ * @luaclass EngineeredItem
+ * 
+ * @brief Parent class representing mountable items such as Turret and
+ * ForceFieldProjector.
+ * 
+ * @descr EngineeredItem is a container class for wall-mountable items.
+ * Currently, all EngineeredItems can be constructed with the Engineering
+ * module, can be destroyed by enemy fire, and can be healed (and sometimes
+ * captured) with the Repair module.  All EngineeredItems have a health value
+ * that ranges from 0 to 1, where 0 is completely dead and 1 is fully healthy.
+ * When health falls below a certain threshold (see getDisabledThrehold()), the
+ * item becomes inactive and must be repaired or regenerate itself to be
+ * functional again.
+ * 
+ * If an EngineeredItem has a heal rate greater than zero, it will slowly repair
+ * damage to iteself. For more info see setHealRate()
+ */
 //               Fn name              Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, isActive,             ARRAYDEF({{       END }}), 1 ) \
@@ -1140,11 +1147,16 @@ REGISTER_LUA_SUBCLASS(EngineeredItem, Item);
 
 
 /**
- * @luafunc  bool EngineeredItem::isActive()
- * @brief    Determine if the item is active (i.e. its health is above the disbaledThreshold).
- * @descr    A player can activate an inactive item by repairing it.
- * @return   Returns true if the item is "alive" and active, or false if it is dead.
-*/
+ * @luafunc bool EngineeredItem::isActive()
+ * 
+ * @brief Determine if the item is active (i.e. its health is above the
+ * disbaledThreshold).
+ * 
+ * @descr A player can activate an inactive item by repairing it. To set whether
+ * an EngineeredItem as active or disabled, use setHealth()
+ * 
+ * @return Returns `true` if the item is active, or `false` if it is disabled
+ */
 S32 EngineeredItem::lua_isActive(lua_State *L)
 { 
    return returnBool(L, isEnabled()); 
@@ -1152,10 +1164,12 @@ S32 EngineeredItem::lua_isActive(lua_State *L)
 
 
 /**
- * @luafunc  num EngineeredItem::getMountAngle()
- * @brief    Gets the angle (in radians) at which the item is mounted.
- * @return   Returns the mount angle, in radians.
-*/
+ * @luafunc num EngineeredItem::getMountAngle()
+ * 
+ * @brief Gets the angle (in radians) at which the item is mounted.
+ * 
+ * @return Returns the mount angle, in radians.
+ */
 S32 EngineeredItem::lua_getMountAngle(lua_State *L)
 { 
    return returnFloat(L, mAnchorNormal.ATAN2()); 
@@ -1163,11 +1177,15 @@ S32 EngineeredItem::lua_getMountAngle(lua_State *L)
 
 
 /**
- * @luafunc  num EngineeredItem::getHealth()
- * @brief    Returns health of the item. 
- * @descr    Health is specified as a number between 0 and 1 where 0 is completely dead and 1 is totally healthy.
- * @return   Returns a value between 0 and 1 indicating the health of the item.
-*/
+ * @luafunc num EngineeredItem::getHealth()
+ * 
+ * @brief Returns health of the item. 
+ * 
+ * @descr Health is specified as a number between 0 and 1 where 0 is completely
+ * dead and 1 is totally healthy.
+ * 
+ * @return Returns a value between 0 and 1 indicating the health of the item.
+ */
 S32 EngineeredItem::lua_getHealth(lua_State *L)
 { 
    return returnFloat(L, mHealth);     
@@ -1175,12 +1193,16 @@ S32 EngineeredItem::lua_getHealth(lua_State *L)
 
 
 /**
- * @luafunc  EngineeredItem::setHealth(health)
- * @brief    Set the current health of the item. 
- * @descr    Health is specified as a number between 0 and 1 where 0 is completely dead and 1 is totally healthy.
- *           Values outside this range will be clamped to the valid range.
- * @param    health - A value between 0 and 1.
-*/
+ * @luafunc EngineeredItem::setHealth(num health)
+ * 
+ * @brief Set the current health of the item. 
+ * 
+ * @descr Health is specified as a number between 0 and 1 where 0 is completely
+ * dead and 1 is totally healthy.  Values outside this range will be clamped to
+ * the valid range.
+ * 
+ * @param health The item's new health, between 0 and 1.
+ */
 S32 EngineeredItem::lua_setHealth(lua_State *L)
 { 
    checkArgList(L, functionArgs, "EngineeredItem", "setHealth");
@@ -1204,11 +1226,15 @@ S32 EngineeredItem::lua_setHealth(lua_State *L)
 
 
 /**
- * @luafunc  num EngineeredItem::getDisabledThreshold()
- * @brief    Gets the health threshold below which an %EngineeredItem is disabled. 
- * @descr    The value will always be between 0 and 1.  This value is constant and will be the same for all %EngineeredItems.
- * @return   Health threshold below which the item will be disabled.
-*/
+ * @luafunc num EngineeredItem::getDisabledThreshold()
+ * 
+ * @brief Gets the health threshold below which the item becomes disabled. 
+ * 
+ * @descr The value will always be between 0 and 1. This value is constant and
+ * will be the same for all \link EngineeredItem EngineeredItems \endlink.
+ * 
+ * @return Health threshold below which the item will be disabled.
+ */
 S32 EngineeredItem::lua_getDisabledThreshold(lua_State *L)
 {
    return returnFloat(L, disabledLevel);
@@ -1216,12 +1242,16 @@ S32 EngineeredItem::lua_getDisabledThreshold(lua_State *L)
 
 
 /**
- * @luafunc  int EngineeredItem::getHealRate()
- * @brief    Gets the item's healRate. 
- * @descr    The specified healRate will be the time, in seconds, it takes for the item to repair itself by 10%.  
- *           If an %EngineeredItem is assigned to the neutral team, it will not heal itself.
- * @return   healRate
-*/
+ * @luafunc int EngineeredItem::getHealRate()
+ * 
+ * @brief Gets the item's healRate. 
+ * 
+ * @descr The specified heal rate will be the time, in seconds, it takes for the
+ * item to repair itself by 10.  If an EngineeredItem is assigned to the neutral
+ * team, it will not heal itself.
+ * 
+ * @return The item's heal rate
+ */
 S32 EngineeredItem::lua_getHealRate(lua_State *L)
 {
    return returnInt(L, mHealRate);
@@ -1229,13 +1259,17 @@ S32 EngineeredItem::lua_getHealRate(lua_State *L)
 
 
 /**
- * @luafunc  EngineeredItem::setHealRate(healRate)
- * @brief    Sets the item's healRate. 
- * @descr    The specified healRate will be the time, in seconds, it takes for the item to repair itself by 10%.  In practice, a heal rate of 1 
- *           makes an item effectively unkillable.  If an %EngineeredItem is assigned to the neutral team, it will not heal itself.  
- *           Passing a negative value will generate an error.
- * @param    healRate - Time, in seconds, it takes an %EngineeredItem to heal itself by 10%.  Specify 0 to disable healing.
-*/
+ * @luafunc EngineeredItem::setHealRate(int healRate)
+ * 
+ * @brief Sets the item's heal rate. 
+ * 
+ * @descr The specified `healRate` will be the time, in seconds, it takes for
+ * the item to repair itself by 10. In practice, a heal rate of 1 makes an item
+ * effectively unkillable. If the item is assigned to the neutral team, it will
+ * not heal itself.  Passing a negative value will generate an error.
+ * 
+ * @param healRate The new heal rate. Specify 0 to disable healing.
+ */
 S32 EngineeredItem::lua_setHealRate(lua_State *L)
 {
    checkArgList(L, functionArgs, "EngineeredItem", "setHealRate");
@@ -1252,9 +1286,12 @@ S32 EngineeredItem::lua_setHealRate(lua_State *L)
 
 
 /**
- * @luafunc  bool EngineeredItem::getEngineered()
- * @return   True if the item can be destroyed.
-*/
+ * @luafunc bool EngineeredItem::getEngineered()
+ * 
+ * @breif Get whether the item can be totally destroyed
+ * 
+ * @return `true` if the item can be destroyed.
+ */
 S32 EngineeredItem::lua_getEngineered(lua_State *L)
 {
    return returnBool(L, mEngineered);
@@ -1262,10 +1299,12 @@ S32 EngineeredItem::lua_getEngineered(lua_State *L)
 
 
 /**
- * @luafunc  EngineeredItem::setEngineered(engineered)
- * @brief    Sets whether the item can be destroyed when its health reaches zero.
- * @param    engineered `true` to make the item destructible, `false` to make it permanent
- * @return
+ * @luafunc EngineeredItem::setEngineered(engineered)
+ * 
+ * @brief Sets whether the item can be destroyed when its health reaches zero.
+ * 
+ * @param engineered `true` to make the item destructible, `false` to make it
+ * permanent
  */
 S32 EngineeredItem::lua_setEngineered(lua_State *L)
 {
@@ -1295,8 +1334,9 @@ S32 EngineeredItem::lua_setGeom(lua_State *L)
 TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 
 /**
- *  @luaconst ForceFieldProjector::ForceFieldProjector()
- *  @luaconst ForceFieldProjector::ForceFieldProjector(point)
+ * @luafunc ForceFieldProjector::ForceFieldProjector()
+ * @luafunc ForceFieldProjector::ForceFieldProjector(point)
+ * @luafunc ForceFieldProjector::ForceFieldProjector(point, teamIndex)
  */
 // Combined Lua / C++ default constructor
 ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))
@@ -1856,9 +1896,9 @@ TNL_IMPLEMENT_NETOBJECT(Turret);
 
 // Combined Lua / C++ default constructor
 /**
-  *  @luaconst Turret::Turret()
-  *  @luaconst Turret::Turret(point, team)
-  */
+ * @luafunc Turret::Turret()
+ * @luafunc Turret::Turret(point, team)
+ */
 Turret::Turret(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))
 {
    if(L)
@@ -2221,9 +2261,10 @@ void Turret::onGeomChanged()
 /////
 // Lua interface
 /**
-  *  @luaclass Turret
-  *  @brief Mounted gun that shoots at enemy ships and other objects.
-  */
+ * @luaclass Turret
+ * 
+ * @brief Mounted gun that shoots at enemy ships and other objects.
+ */
 //               Fn name     Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getAimAngle,  ARRAYDEF({{      END }}), 1 ) \
@@ -2241,10 +2282,12 @@ REGISTER_LUA_SUBCLASS(Turret, EngineeredItem);
 
 
 /**
- * @luafunc  num Turret::getAimAngle()
- * @brief    Returns the angle (in radians) at which the Turret is aiming.
- * @return   The angle (in radians) at which the Turret is aiming.
-*/
+ * @luafunc num Turret::getAimAngle()
+ * 
+ * @brief Returns the angle (in radians) at which the Turret is aiming.
+ * 
+ * @return The angle (in radians) at which the Turret is aiming.
+ */
 S32 Turret::lua_getAimAngle(lua_State *L)
 {
    return returnFloat(L, mCurrentAngle);
@@ -2252,10 +2295,12 @@ S32 Turret::lua_getAimAngle(lua_State *L)
 
 
 /**
- * @luafunc  Turret::setAimAngle(angle)
- * @brief    Sets the angle (in radians) where the Turret should aim.
- * @param    angle - Angle (in radians) where the turret should aim.
-*/
+ * @luafunc Turret::setAimAngle(num angle)
+ * 
+ * @brief Sets the angle (in radians) where the Turret should aim.
+ * 
+ * @param angle Angle (in radians) where the turret should aim.
+ */
 S32 Turret::lua_setAimAngle(lua_State *L)
 {
    checkArgList(L, functionArgs, "Turret", "setAimAngle");

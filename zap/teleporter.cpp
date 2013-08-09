@@ -896,14 +896,16 @@ bool Teleporter::canBeNeutral() { return false; }
 //// Lua methods
 
 /**
-  *  @luaconst Teleporter::Teleporter()
-  *  @luaconst Teleporter::Teleporter(geom)
-  *  @luaclass Teleporter
-  *  @brief Instantly transports ships from here to there.
-  *  @descr A %Teleporter represents the basic teleporter object.  Every teleporter has an intake location
-  *         and one or more destinations.  When a ship enters the teleporter, a destination will be chosen 
-  *         randomly if there is more than one.   
-  */
+ * @luafunc Teleporter::Teleporter()
+ * @luafunc Teleporter::Teleporter(geom)
+ * @luaclass Teleporter
+ *
+ * @brief Instantly transports ships from here to there.
+ *
+ * @descr A Teleporter represents the basic teleporter object. Every teleporter
+ * has an intake location and one or more destinations. When a ship enters the
+ * teleporter, a destination will be chosen randomly if there is more than one. 
+ */
 //               Fn name                       Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, addDest,       ARRAYDEF({ { PT,   END }                }), 1 ) \
@@ -925,16 +927,19 @@ const char *Teleporter::luaClassName = "Teleporter";
 REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
 
 /** 
- *  @luafunc Teleporter::addDest(dest)
- *  @brief Adds a destination to the teleporter.
- *  @param dest - A point or coordinate pair representing the location of the destination.
+ * @luafunc Teleporter::addDest(dest)
  *
- *  Example:
- *  @code 
- *    t = Teleporter.new()
- *    t:addDest(100,150)
- *    levelgen:addItem(t)  -- or plugin:addItem(t) in a plugin
- *  @endcode
+ * @brief Adds a destination to the teleporter.
+ *
+ * @param dest A point or coordinate pair representing the location of the
+ * destination.
+ *
+ * Example:
+ * @code 
+ *   t = Teleporter.new()
+ *   t:addDest(100,150)
+ *   levelgen:addItem(t)  -- or plugin:addItem(t) in a plugin
+ * @endcode
  */
 S32 Teleporter::lua_addDest(lua_State *L)
 {
@@ -948,12 +953,15 @@ S32 Teleporter::lua_addDest(lua_State *L)
 
 
 /**
-  *  @luafunc Teleporter::delDest(index)
-  *  @brief Removes a destination from the teleporter.
-  *  @param index - The index of the destination to delete. If you specify
-  *         an invalid index, will generate an error.
-  *  @note  Remember that in Lua, indices start with 1!
-  */
+ * @luafunc Teleporter::delDest(int index)
+ * 
+ * @brief Removes a destination from the teleporter.
+ * 
+ * @param index The index of the destination to delete. If you specify an
+ * invalid index, will generate an error.
+ * 
+ * @note Remember that in Lua, indices start with 1!
+ */
 S32 Teleporter::lua_delDest(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "delDest");
@@ -969,9 +977,10 @@ S32 Teleporter::lua_delDest(lua_State *L)
 
 
 /**
-  *  @luafunc Teleporter::clearDests()
-  *  @brief Removes all destinations from the teleporter.
-  */
+ * @luafunc Teleporter::clearDests()
+ *
+ * @brief Removes all destinations from the teleporter.
+ */
 S32 Teleporter::lua_clearDests(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "clearDests");
@@ -982,11 +991,15 @@ S32 Teleporter::lua_clearDests(lua_State *L)
 
 
 /**
-  *  @luafunc point Teleporter::getDest(index)
-  *  @brief   Returns the specified destination.
-  *  @param   index - Index of the dest to return.  Will generate an error if index is invalid.
-  *  @return  A point object representing the requested destination.
-  */
+ * @luafunc point Teleporter::getDest(int index)
+ *
+ * @brief Returns the specified destination.
+ *
+ * @param index Index of the dest to return. Will generate an error if index is
+ * invalid.
+ *
+ * @return A point object representing the requested destination.
+ */
 S32 Teleporter::lua_getDest(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "getDest");
@@ -1000,10 +1013,12 @@ S32 Teleporter::lua_getDest(lua_State *L)
 
 
 /**
-  *  @luafunc int Teleporter::getDestCount()
-  *  @brief   Returns the number of destinations this teleporter has.
-  *  @return  The number of destinations this teleporter has.
-  */
+ * @luafunc int Teleporter::getDestCount()
+ *
+ * @brief Returns the number of destinations this teleporter has.
+ *
+ * @return The number of destinations this teleporter has.
+ */
 S32 Teleporter::lua_getDestCount(lua_State *L)
 {
    return returnInt(L, mDestManager.getDestCount());
@@ -1011,9 +1026,10 @@ S32 Teleporter::lua_getDestCount(lua_State *L)
 
 
 /**
- * @luafunc  bool Teleporter::getEngineered()
- * @return   True if the item can be destroyed.
-*/
+ * @luafunc bool Teleporter::getEngineered()
+ *
+ * @return `true` if the item can be destroyed, `false` otherwise.
+ */
 S32 Teleporter::lua_getEngineered(lua_State *L)
 {
    return returnBool(L, mEngineered);
@@ -1021,10 +1037,11 @@ S32 Teleporter::lua_getEngineered(lua_State *L)
 
 
 /**
- * @luafunc  Teleporter::setEngineered(engineered)
- * @brief    Sets whether the item can be destroyed when its health reaches zero.
- * @param    engineered `true` to make the item destructible, `false` to make it permanent
- * @return
+ * @luafunc Teleporter::setEngineered(bool engineered)
+ *
+ * @brief Sets whether the item can be destroyed when its health reaches zero.
+ *
+ * @param engineered `true` to make the item destructible, `false` to make it permanent.
  */
 S32 Teleporter::lua_setEngineered(lua_State *L)
 {
@@ -1040,19 +1057,23 @@ S32 Teleporter::lua_setEngineered(lua_State *L)
 // Overrides
 
 /**
-  *  @luafunc Teleporter::setGeom(geometry)
-  *  @brief   Sets teleporter geometry; differs from standard conventions.
-  *  @descr   In this case, geometry represents both %Teleporter's location and those of all destinations.
-  *           The first point specified will be used to set the location.  All existing destinations will be
-  *           deleted, and each subsequent point will be used to define a new destination.
-  *
-  *  Note that in the editor, teleporters can only have a single destination.  Since scripts can add or modify editor items,
-  *  when the script has finished running, all affected teleporters will be converted into a series of single destination 
-  *  items, all having the same location but with different destinations.
-  *
-  *  If the teleporter has no destinations, it will not be added to the editor.
-  *  @param   \e Geom geometry: New geometry for %Teleporter.
-  */
+ * @luafunc Teleporter::setGeom(geom geometry)
+ * @brief Sets teleporter geometry; differs from standard conventions.
+ * @descr In this case, geometry represents both Teleporter's location and those
+ * of all destinations.  The first point specified will be used to set the
+ * location. All existing destinations will be deleted, and each subsequent
+ * point will be used to define a new destination.
+ *
+ * Note that in the editor, teleporters can only have a single destination.
+ * Since scripts can add or modify editor items, when the script has finished
+ * running, all affected teleporters will be converted into a series of single
+ * destination items, all having the same location but with different
+ * destinations.
+ *
+ * If the teleporter has no destinations, it will not be added to the editor.
+ *
+ * @param geometry New geometry for Teleporter.
+ */
 S32 Teleporter::lua_setGeom(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "setGeom");
@@ -1089,15 +1110,18 @@ void Teleporter::doSetGeom(lua_State *L)
 
 
 /**
-  *  @luafunc Geom Teleporter::getGeom()
-  *  @brief   Gets teleporter geometry; differs from standard conventions.
-  *  @descr   In this case, geometry represents both %Teleporter's location and those of all destinations.
-  *           The first point in the Geom will be the %teleporter's intake location.  Each destination will be represented by
-  *           an additional point.
-  *
-  *  In the editor, all teleporters are simple lines, and will return geometries with two points -- an origin and a destination.
-  *  @param   \e Geom geometry: New geometry for %Teleporter.
-  */
+ * @luafunc Geom Teleporter::getGeom()
+ * 
+ * @brief Gets teleporter geometry; differs from standard conventions.
+ * 
+ * @descr In this case, geometry represents both Teleporter's location and those
+ * of all destinations. The first point in the Geom will be the teleporter's
+ * intake location. Each destination will be represented by an additional point.
+ * In the editor, all teleporters are simple lines, and will return geometries
+ * with two points -- an origin and a destination.
+ * 
+ * @param Geom geometry: New geometry for Teleporter.
+ */
 S32 Teleporter::lua_getGeom(lua_State *L)
 {
    Vector<Point> points;

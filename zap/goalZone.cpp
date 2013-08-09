@@ -36,11 +36,13 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(GoalZone);
 
 /**
-*  @luafunc GoalZone::GoalZone()
-*  @luafunc GoalZone::GoalZone(polyGeom team)
-*  @brief %GoalZone constructor.
-*  @descr Default team is Neutral.
-*/
+ * @luafunc GoalZone::GoalZone()
+ * @luafunc GoalZone::GoalZone(Geom geom, int teamIndex)
+ * 
+ * @brief GoalZone constructor.
+ * 
+ * @descr Default team is Neutral.
+ */
 // Combined Lua / C++ constructor
 GoalZone::GoalZone(lua_State *L)
 {
@@ -287,9 +289,10 @@ void GoalZone::idle(BfObject::IdleCallPath path)
 /////
 // Lua interface
 /**
-  *  @luaclass GoalZone
-  *  @brief Place to deposit flags or get the ball to, depending on game type.
-  */
+ * @luaclass GoalZone
+ * 
+ * @brief Place to deposit flags or get the ball to, depending on game type.
+ */
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, hasFlag,     ARRAYDEF({{ END }}), 1 ) \
@@ -304,12 +307,17 @@ REGISTER_LUA_SUBCLASS(GoalZone, Zone);
 
 
 /**
-  *  @luafunc bool GoalZone::hasFlag()
-  *  @brief Does the zone have a flag?
-  *  @descr GoalZones can hold flags in some game types.  If the current game type does not feature
-  *         zones that hold flags (e.g. Soccer, ZoneControl), then the function will return false.
-  *  @return \e bool - True if the %GoalZone is currently holding a flag, false otherwise.
-  */
+ * @luafunc bool GoalZone::hasFlag()
+ * 
+ * @brief Does the zone have a flag?
+ * 
+ * @descr GoalZones can hold flags in some game types. If the current game type
+ * does not feature zones that hold flags (e.g. Soccer, ZoneControl), then the
+ * function will return `false`.
+ * 
+ * @return `true` if the GoalZone is currently holding a flag, `false`
+ * otherwise.
+ */
 S32 GoalZone::lua_hasFlag(lua_State *L) { return returnBool(L, mHasFlag); }
 
 };

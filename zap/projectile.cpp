@@ -457,10 +457,12 @@ void Projectile::renderItem(const Point &pos)
 
 //// Lua methods
 /**
-  *  @luaclass Projectile
-  *  @brief Bullet or missile object.
-  *  @descr %Projectile represents most bullets or missile objects in Bitfighter.   
-  */
+ * @luaclass Projectile
+ *
+ * @brief Bullet or missile object.
+ *
+ * @descr Projectile represents most bullets or missile objects in Bitfighter. 
+ */
 //               Fn name    Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getRad,    ARRAYDEF({{ END }}), 1 ) \
@@ -478,10 +480,13 @@ const char *Projectile::luaClassName = "Projectile";
 REGISTER_LUA_SUBCLASS(Projectile, BfObject);
 
 /**
-  *  @luafunc num Projectile::getRad()
-  *  @brief Returns the radius of the projectile.  In the current version of Bitfighter, this may not be accurate.
-  *  @return The radius of the projectile.
-  */
+ * @luafunc num Projectile::getRad()
+ *
+ * @brief Returns the radius of the projectile. In the current version of
+ * Bitfighter, this may not be accurate.
+ *
+ * @return The radius of the projectile.
+ */
 S32 Projectile::lua_getRad(lua_State *L)
 { 
    return returnFloat(L, getRadius());
@@ -489,10 +494,10 @@ S32 Projectile::lua_getRad(lua_State *L)
 
 
 /**
-  *  @luafunc point Projectile::getVel()
-  *  @brief Returns the velocity of the projectile.
-  *  @return A point representing the projectile's velocity.
-  */
+ * @luafunc point Projectile::getVel()
+ *
+ * @return A point representing the projectile's velocity.
+ */
 S32 Projectile::lua_getVel(lua_State *L)
 { 
    return returnPoint(L, getActualVel()); 
@@ -500,10 +505,13 @@ S32 Projectile::lua_getVel(lua_State *L)
 
 
 /**
-  *  @luafunc int Projectile::getWeapon()
-  *  @brief Returns the index of the weapon used to fire the projectile.  See the \ref WeaponEnum enum for valid values.  
-  *  @return The index of the weapon used to fire the projectile.
-  */
+ * @luafunc WeaponEnum Projectile::getWeapon()
+ *
+ * @brief Returns the index of the weapon used to fire the projectile. See
+ * the \ref WeaponEnum enum for valid values. 
+ *
+ * @return The index of the weapon used to fire the projectile.
+ */
 S32 Projectile::lua_getWeapon(lua_State *L)
 { 
    return returnInt(L, mWeaponType);      
@@ -511,11 +519,12 @@ S32 Projectile::lua_getWeapon(lua_State *L)
 
 
 /**
-  *  @luafunc Projectile::setVel(vel)
-  *  @brief   Sets the projectile's velocity.
-  *  @descr   As with other functions that take a point as an input, you can also specify the x and y components as numeric arguments.
-  *  @param   vel - A point representing velocity.
-  */
+ * @luafunc Projectile::setVel(point vel)
+ *
+ * @brief Sets the projectile's velocity as a point.
+ *
+ * @param vel A point representing velocity.
+ */
 S32 Projectile::lua_setVel(lua_State *L)
 {
    checkArgList(L, functionArgs, "Projectile", "setVel");
@@ -759,12 +768,15 @@ void Burst::renderItem(const Point &pos)
 /////
 // Lua interface
 /**
-  *  @luaclass Burst
-  *  @brief Grenade-like exploding object.
-  *  @descr Note that Bursts explode when their velocity is too low.  Be sure to set the %Burst's velocity if you 
-  *         don't want it to explode immediately after it is created.   
-  */
-
+ * @luafunc Burst::Burst()
+ * @luaclass Burst
+ * 
+ * @brief Grenade-like exploding object.
+ * 
+ * @descr Note that Bursts explode when their velocity is too low. Be sure to
+ * set the Burst's velocity if you don't want it to explode immediately after it
+ * is created. 
+ */
 //               Fn name    Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getWeapon, ARRAYDEF({{ END }}), 1 ) \
@@ -799,8 +811,8 @@ Mine::Mine(const Point &pos, BfObject *planter) : Burst(pos, Point(0,0), planter
 }
 
 /**
- *   @luaconst Mine::Mine()
- *   @luaconst Mine::Mine(point)
+ * @luafunc Mine::Mine()
+ * @luafunc Mine::Mine(point)
  */
 // Combined Lua / C++ default constructor -- used in Lua and editor
 Mine::Mine(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL, BurstRadius)
@@ -1313,13 +1325,15 @@ bool SpyBug::isVisibleToPlayer(ClientInfo *clientInfo, bool isTeamGame)
 /////
 // Lua interface
 /**
-  *  @luaconst SpyBug::SpyBug()
-  *  @luaconst SpyBug::SpyBug(geom, team)
-  *  @luaclass SpyBug
-  *  @brief Monitors a section of the map and will show enemy ships there.
-  *  @descr Can only be used/created if the Sensor module is selected. 
-  *         Makes surrounding areas of the commander's map visible to player and teammates.
-  */
+ * @luafunc SpyBug::SpyBug()
+ * @luafunc SpyBug::SpyBug(geom, team)
+ * @luaclass SpyBug
+ * 
+ * @brief Monitors a section of the map and will show enemy ships there.
+ * 
+ * @descr Can only be used/created if the Sensor module is selected.  Makes
+ * surrounding areas of the commander's map visible to player and teammates.
+ */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
 
@@ -1802,8 +1816,10 @@ bool Seeker::canAddToEditor() { return false; }    // No seekers in the editor!
 /////
 // Lua interface
 /**
- *   @luaclass Seeker
- *   @brief    Guided projectile that homes in on enemy players.
+ * @luafunc Seeker::Seeker()
+ * @luaclass Seeker
+ * 
+ * @brief Guided projectile that homes in on enemy players.
  */
 //               Fn name    Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
@@ -1819,9 +1835,12 @@ const char *Seeker::luaClassName = "Seeker";
 REGISTER_LUA_SUBCLASS(Seeker, MoveObject);
 
 /**
- *  @luafunc Seeker::getWeapon()
- *  @brief   Returns the index of the weapon used to fire the projectile.  See the \ref WeaponEnum enum for valid values.  
- *  @return  \e int - The index of the weapon used to fire the projectile.
+ * @luafunc Seeker::getWeapon()
+ * 
+ * @brief Returns the index of the weapon used to fire the projectile. See the
+ * \ref WeaponEnum enum for valid values. 
+ * 
+ * @return int The index of the weapon used to fire the projectile.
  */
 S32 Seeker::lua_getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
 

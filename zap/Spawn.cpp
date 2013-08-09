@@ -172,10 +172,10 @@ Spawn::Spawn(const Point &pos) : AbstractSpawn(pos)
 }
 
 /**
-  *  @luaconst Spawn::Spawn()
-  *  @luaconst Spawn::Spawn(geom)
-  *  @luaconst Spawn::Spawn(geom, team)
-  */
+ * @luafunc Spawn::Spawn()
+ * @luafunc Spawn::Spawn(geom)
+ * @luafunc Spawn::Spawn(geom, team)
+ */
 // Lua constructor
 Spawn::Spawn(lua_State *L) : AbstractSpawn(Point(0,0))
 {
@@ -270,10 +270,12 @@ void Spawn::renderDock()
 /////
 // Lua interface
 /**
-  *  @luaclass Spawn
-  *  @brief Marks locations where ships and robots should spawn.
-  *  @geom  The geometry of Spawns is a single point.
-  */
+ * @luaclass Spawn
+ * 
+ * @brief Marks locations where ships and robots should spawn.
+ * 
+ * @geom The geometry of Spawns is a single point.
+ */
 //               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
 
@@ -338,10 +340,12 @@ void ItemSpawn::renderDock()                                                    
 /////
 // Lua interface
 /**
-  *  @luaclass ItemSpawn
-  *  @brief Class of Spawns that emit various objects at various times.
-  *  @geom  The geometry of all ItemSpawns is a single point.
-  */
+ * @luaclass ItemSpawn
+ *
+ * @brief Class of Spawns that emit various objects at various times.
+ *
+ * @geom The geometry of all ItemSpawns is a single point.
+ */
 //               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getSpawnTime, ARRAYDEF({{          END }}), 1 ) \
@@ -359,10 +363,12 @@ REGISTER_LUA_SUBCLASS(ItemSpawn, BfObject);
 
 
 /**
-  *  @luafunc time ItemSpawn::getSpawnTime()
-  *  @brief   Gets the item's spawn time.
-  *  @return   \e time: Number representing spawn time in seconds.
-  */
+ * @luafunc num ItemSpawn::getSpawnTime()
+ *
+ * @brief Get the interval between item emissions, in seconds.
+ *
+ * @return The spawn time in seconds.
+ */
 S32 ItemSpawn::lua_getSpawnTime(lua_State *L)
 {
    return returnFloat(L, mSpawnTime / 1000.0f);
@@ -370,11 +376,15 @@ S32 ItemSpawn::lua_getSpawnTime(lua_State *L)
 
 
 /**
-  *  @luafunc ItemSpawn::setSpawnTime(time)
-  *  @brief   Sets time between item emission events, in seconds.
-  *  @descr   Note that setting the spawn time also resets the timer, so that the next item will be spawned after \e time seconds.
-  *  @param   \e int seconds: Number representing spawn time in seconds.
-  */
+ * @luafunc ItemSpawn::setSpawnTime(num seconds)
+ * 
+ * @brief Sets time between item emission events, in seconds.
+ * 
+ * @descr Note that setting the spawn time also resets the timer, so that the
+ * next item will be spawned after time seconds.
+ * 
+ * @param seconds Spawn time in seconds.
+ */
 S32 ItemSpawn::lua_setSpawnTime(lua_State *L)
 {
    checkArgList(L, functionArgs, "ItemSpawn", "setSpawnTime");
@@ -386,10 +396,12 @@ S32 ItemSpawn::lua_setSpawnTime(lua_State *L)
 
 
 /**
-  *  @luafunc ItemSpawn::spawnNow()
-  *  @brief   Tell %ItemSpawn to spawn an item immediately.
-  *  @descr   This method also resets the spawn timer.
-  */
+ * @luafunc ItemSpawn::spawnNow()
+ * 
+ * @brief Force the ItemSpawn to spawn an item immediately.
+ * 
+ * @descr This method also resets the spawn timer.
+ */
 S32 ItemSpawn::lua_spawnNow(lua_State *L)
 {
    if(!getGame())
@@ -416,10 +428,10 @@ AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
 }
 
 /**
-  *  @luaconst AsteroidSpawn::AsteroidSpawn()
-  *  @luaconst AsteroidSpawn::AsteroidSpawn(geom)
-  *  @luaconst AsteroidSpawn::AsteroidSpawn(geom, time)
-  */
+ * @luafunc AsteroidSpawn::AsteroidSpawn()
+ * @luafunc AsteroidSpawn::AsteroidSpawn(geom)
+ * @luafunc AsteroidSpawn::AsteroidSpawn(geom, time)
+ */
 AsteroidSpawn::AsteroidSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
 {
    initialize();
@@ -545,10 +557,12 @@ void AsteroidSpawn::renderDock()
 /////
 // Lua interface
 /**
-  *  @luaclass AsteroidSpawn
-  *  @brief Spawns \link Asteroid Asteroids \endlink at regular intervals.
-  *  @geom  The geometry of AsteroidSpawns is a single point.
-  */
+ * @luaclass AsteroidSpawn
+ * 
+ * @brief Spawns \link Asteroid Asteroids \endlink at regular intervals.
+ * 
+ * @geom The geometry of AsteroidSpawns is a single point.
+ */
 //               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
 
@@ -576,10 +590,10 @@ CircleSpawn::CircleSpawn(const Point &pos, S32 time) : Parent(pos, time)
 
 // Lua constructor
 /**
-  *  @luaconst CircleSpawn::CircleSpawn()
-  *  @luaconst CircleSpawn::CircleSpawn(geom)
-  *  @luaconst CircleSpawn::CircleSpawn(geom, time)
-  */
+ * @luafunc CircleSpawn::CircleSpawn()
+ * @luafunc CircleSpawn::CircleSpawn(geom)
+ * @luafunc CircleSpawn::CircleSpawn(geom, time)
+ */
 CircleSpawn::CircleSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
 {
    initialize();
@@ -815,15 +829,22 @@ void FlagSpawn::renderDock()
 /////
 // Lua interface
 /**
-  *  @luaclass FlagSpawn
-  *  @brief Spawns \link FlagItem Flags \endlink at regular intervals during %Nexus games, serves as starting point for flags and soccer balls in other games.
-  *  @descr During Nexus games, %FlagSpawn acts like any other ItemSpawn, emitting flags at regular intervals.  During games that use flags (such as ZoneControl),
-  *         FlagSpawns mark locations where flags can be returned to when flags are "sent home".  In Soccer games, marks the location that the 
-  *         \link SoccerBallItem SoccerBall \endlink is returned to after a goal is scored.
-
-  *  Note that in flag games, any place a flag starts will become a %FlagSpawn, and in Soccer, the location the SoccerBall starts will become a %FlagSpawn.
-  *  @geom  The geometry of FlagSpawns is a single point.
-  */
+ * @luaclass FlagSpawn
+ * 
+ * @brief Spawns \link FlagItem Flags \endlink at regular intervals during Nexus
+ * games, serves as starting point for flags and soccer balls in other games.
+ * 
+ * @descr During Nexus games, FlagSpawn acts like any other ItemSpawn, emitting
+ * flags at regular intervals. During games that use flags (such as
+ * ZoneControl), FlagSpawns mark locations where flags can be returned to when
+ * flags are "sent home". In Soccer games, marks the location that the \link
+ * SoccerBallItem SoccerBall \endlink is returned to after a goal is scored.
+ * 
+ * Note that in flag games, any place a flag starts will become a FlagSpawn, and
+ * in Soccer, the location the SoccerBall starts will become a FlagSpawn.
+ * 
+ * @geom The geometry of FlagSpawns is a single point.
+ */
 //               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
 

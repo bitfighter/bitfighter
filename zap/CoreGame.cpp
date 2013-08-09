@@ -272,9 +272,9 @@ const F32 CoreItem::DamageReductionRatio = 1000.0f;
 const F32 CoreItem::PANEL_ANGLE = FloatTau / (F32) CORE_PANELS;
 
 /**
- * @luaconst CoreItem::CoreItem()
- * @luaconst CoreItem::CoreItem(geom, team)
- * @luaconst CoreItem::CoreItem(geom, team, health)
+ * @luafunc CoreItem::CoreItem()
+ * @luafunc CoreItem::CoreItem(geom, team)
+ * @luafunc CoreItem::CoreItem(geom, team, health)
  */
 // Combined Lua / C++ default constructor
 CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))    
@@ -1011,9 +1011,10 @@ bool CoreItem::canBeNeutral() { return false; }
 /////
 // Lua interface
 /**
-  *  @luaclass CoreItem
-  *  @brief Target of hate during Core game.
-  */
+ * @luaclass CoreItem
+ * 
+ * @brief Objective items in Core games
+ */
 //               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getCurrentHealth, ARRAYDEF({{          END }}), 1 ) \
@@ -1031,10 +1032,13 @@ REGISTER_LUA_SUBCLASS(CoreItem, Item);
 
 
 /**
-  *  @luafunc num CoreItem::getCurrentHealth()
-  *  @brief   Returns %CoreItem's current health.
-  *  @return   \e health: Number representing %CoreItem's current health 
-  */
+ * @luafunc num CoreItem::getCurrentHealth()
+ * 
+ * @brief Returns the item's current health. This will be between 0 and the
+ * result of getFullHealth().
+ * 
+ * @return The current health .
+ */
 S32 CoreItem::lua_getCurrentHealth(lua_State *L) 
 { 
    return returnFloat(L, getTotalCurrentHealth() * DamageReductionRatio);
@@ -1042,11 +1046,12 @@ S32 CoreItem::lua_getCurrentHealth(lua_State *L)
 
 
 /**
-  *  @luafunc num CoreItem::getFullHealth()
-  *  @brief   Returns %CoreItem's total health.
-  *  @descr   %CoreItem's full health represents the total health of all panels before they have suffered any damage.
-  *  @return   \e health: Number representing %CoreItem's total health 
-  */
+ * @luafunc num CoreItem::getFullHealth()
+ * 
+ * @brief Returns the item's full health.
+ * 
+ * @return The total full health.
+ */
 S32 CoreItem::lua_getFullHealth(lua_State *L) 
 { 
    return returnFloat(L, mStartingHealth * DamageReductionRatio);
@@ -1054,12 +1059,15 @@ S32 CoreItem::lua_getFullHealth(lua_State *L)
 
 
 /**
-  *  @luafunc CoreItem::setFullHealth(health)
-  *  @brief   Sets %CoreItem's full health.
-  *  @descr   %CoreItem's full health represents the total health of all panels before they have suffered any damage.  This method has no effect
-  *           on the CoreItem's current health
-  *  @param   \e health: Number representing %CoreItem's total health 
-  */
+ * @luafunc CoreItem::setFullHealth(num health)
+ * 
+ * @brief Sets the item's full health. Has no effect on current health.
+ *
+ * @desc The maximum health of each panel is the full health of the core divided
+ * by the number of panels.
+ * 
+ * @param health The item's new full health 
+ */
 S32 CoreItem::lua_setFullHealth(lua_State *L) 
 { 
    checkArgList(L, functionArgs, "CoreItem", "setFullHealth");

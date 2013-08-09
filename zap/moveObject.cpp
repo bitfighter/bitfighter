@@ -817,10 +817,10 @@ void MoveObject::computeImpulseDirection(DamageInfo *damageInfo)
 /////
 // Lua interface
 /**
- *   @luaclass MoveObject
- *   @brief    Parent class of most things that move (except bullets)
+ * @luaclass MoveObject
+ * 
+ * @brief Parent class of most things that move (except bullets).
  */
-
 //               Fn name Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getVel, ARRAYDEF({{     END }}), 1 ) \
@@ -837,19 +837,24 @@ REGISTER_LUA_SUBCLASS(MoveObject, Item);
 
 
 /**
- *   @luafunc MoveObject::getVel()
- *   @brief   Returns the items's velocity.
- *   @descr   Points are used to represent velocity; the x and y components represent the speed in the x and y directions respectively.
- *   @return  \e point representing the item's velocity.
+ * @luafunc point MoveObject::getVel()
+ * 
+ * @brief Get the items's velocity.
+ * 
+ * @return The velocity as an axis-aligned vector.
  */
 S32 MoveObject::lua_getVel(lua_State *L) { return returnPoint(L, getActualVel()); }
 
 
 /**
- * @luafunc MoveObject::setVel(vel)
- * @brief   Sets the item's velocity.
- * @descr   As with other functions that take a point as an input, you can also specify the x and y components as numeric arguments.
- * @param   vel - A point representing item's velocity.
+ * @luafunc MoveObject::setVel(point vel)
+ * 
+ * @brief Sets the item's velocity.
+ * 
+ * @descr As with other functions that take a point as an input, you can also
+ * specify the x and y components as numeric arguments.
+ * 
+ * @param vel A point representing item's velocity.
  */
 S32 MoveObject::lua_setVel(lua_State *L)
 {
@@ -1281,10 +1286,11 @@ bool MountableItem::isItemThatMakesYouVisibleWhileCloaked() { return true; }
 // Lua interface
 
 /**
- *   @luaclass MountableItem
- *   @brief    Class of items that can be mounted on ships (such as \link Flag Flags\endlink and \link ResourceItem ResourceItems \endlink).
+ * @luaclass MountableItem
+ * 
+ * @brief Class of items that can be mounted on ships (such as \link Flag Flags
+ * \endlink and \link ResourceItem ResourceItems \endlink).
  */
-
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getShip,  ARRAYDEF({{ END }}), 1 ) \
@@ -1300,9 +1306,9 @@ const char *MountableItem::luaClassName = "MountableItem";
 REGISTER_LUA_SUBCLASS(MountableItem, MoveObject);
 
 /**
- *  @luafunc ship MountableItem::getShip()
- *  @brief   Gets ship that item is mounted to.  If item is not mounted, returns nil.
- *  @return  \e ship - Ship item is mounted to, or nil if item is unmounted
+ * @luafunc Ship MountableItem::getShip()
+ * 
+ * @return The ship this item is mounted to, or nil if item is unmounted.
  */
 S32 MountableItem::lua_getShip(lua_State *L) 
 { 
@@ -1314,9 +1320,9 @@ S32 MountableItem::lua_getShip(lua_State *L)
 
 
 /**
- *  @luafunc bool MountableItem::isOnShip()
- *  @brief   Returns true if the item is mounted on a %ship, false otherwise.
- *  @return  \e bool - True if item is mounted on a %ship, false otherwise.
+ * @luafunc bool MountableItem::isOnShip()
+ *
+ * @return `true` if item is mounted on a ship, `false` otherwise.
  */
 S32 MountableItem::lua_isOnShip(lua_State *L)
 {
@@ -1708,10 +1714,10 @@ void Asteroid::fillAttributesVectors(Vector<string> &keys, Vector<string> &value
 // Lua interface
 
 /**
- *   @luaclass Asteroid
- *   @brief    Just like the arcade game!  Yo!
+ * @luaclass Asteroid
+ * 
+ * @brief Just like the arcade game! Yo!
  */
-
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getSizeIndex, ARRAYDEF({{ END }}), 1 ) \
@@ -1729,35 +1735,42 @@ REGISTER_LUA_SUBCLASS(Asteroid, MoveObject);
 
 
 /**
- *  @luafunc Asteroid::getSizeIndex()
- *  @brief Get this asteroid's current size index.
- *
- *  Index 1 represents the asteroid's initial size.  After it has been
- *  broken once, its size index will be 2, and so on.  This method will always
- *  return an integer between 1 and the value returned by the %getSizeCount()
- *  method (inclusive).
- *  @return  int Index corresponding to the asteroid's current size.
+ * @luafunc int Asteroid::getSizeIndex()
+ * 
+ * @brief Get this asteroid's current size index.
+ * 
+ * @desc Index 1 represents the asteroid's initial size. After it has been
+ * broken once, its size index will be 2, and so on. This method will always
+ * return an integer between 1 and the value returned by the getSizeCount()
+ * method (inclusive).
+ * 
+ * @return Index corresponding to the asteroid's current size.
  */
 S32 Asteroid::lua_getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft + 1); }
 
 /**
- *  @luafunc Asteroid::getSizeCount()
- *  @brief Returns size index of smallest asteroid.
- *
- *  Remember, bigger indices mean smaller asteroids.
- *  @return  int Index of the asteroid's smallest size.
+ * @luafunc int Asteroid::getSizeCount()
+ * 
+ * @brief Returns size index of smallest asteroid.
+ * 
+ * Remember, bigger indices mean smaller asteroids.
+ * 
+ * @return Index of the asteroid's smallest size.
  */
 S32 Asteroid::lua_getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT + 1); }
 
 /**
- *  @luafunc Asteroid::setSize(size)
- *  @brief Set the size of the %Asteroid.
- *
- *  Setting the size of an %Asteroid will give you (size - 1) levels you'll
- *  have to destroy. Each level reduction will produce two more asteroids
- *  @param int size The size the asteroid will be set to.
- *  @note Any size less than 1 will default to size 3.  Please be responsible
- *  with your size choices.
+ * @luafunc Asteroid::setSize(size)
+ * 
+ * @brief Set the size of the Asteroid.
+ * 
+ * Setting the size of an Asteroid will give you (size 1) levels you'll have to
+ * destroy. Each level reduction will produce two more asteroids
+ * 
+ * @param int size The size the asteroid will be set to.
+ * 
+ * @note Any size less than 1 will default to size 3. Please be responsible with
+ * your size choices.
  */
 S32 Asteroid::lua_setSize(lua_State *L)
 {
@@ -1936,11 +1949,16 @@ void Circle::playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit
 /////
 // Lua interface
 /**
-  *  @luaclass Circle
-  *  @brief Annoying circle that follows ships around.
-  *  @descr This is not really a supported object.  Just something we were playing around with.  Do not use this!
-  *  @geom  The geometry of %Circle is a single point.
-  */
+ * @luafunc Circle::Circle()
+ * @luaclass Circle
+ * 
+ * @brief Annoying circle that follows ships around.
+ * 
+ * @descr This is not really a supported object. Just something we were playing
+ * around with. Do not use this!
+ * 
+ * @geom The geometry of Circle is a single point.
+ */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
 
@@ -2406,10 +2424,11 @@ const Vector<Point> *TestItem::getCollisionPoly() const
 // Lua interface
 
 /**
- *  @luafunc  TestItem::TestItem()
- *  @luafunc  TestItem::TestItem(geom)
- *  @luaclass TestItem
- *  @brief    Large bouncy ball type item.
+ * @luafunc TestItem::TestItem()
+ * @luafunc TestItem::TestItem(geom)
+ * @luaclass TestItem
+ * 
+ * @brief Large bouncy ball type item.
  */
 #define LUA_METHODS(CLASS, METHOD) \
    
@@ -2561,11 +2580,12 @@ bool ResourceItem::isItemThatMakesYouVisibleWhileCloaked()
 // Lua interface
 
 /**
- *  @luafunc  ResourceItem::ResourceItem()
- *  @luafunc  ResourceItem::ResourceItem(geom)
- *  @luaclass ResourceItem
- *  @brief    Small bouncy ball type item.  In levels where Engineer module is allowed, ResourceItems can be collected and transformed
- *            into other items.
+ * @luafunc ResourceItem::ResourceItem()
+ * @luafunc ResourceItem::ResourceItem(geom)
+ * @luaclass ResourceItem
+ * 
+ * @brief Small bouncy ball type item. In levels where Engineer module is
+ * allowed, ResourceItems can be collected and transformed into other items.
  */
 #define LUA_METHODS(CLASS, METHOD) \
    

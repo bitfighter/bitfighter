@@ -290,11 +290,14 @@ void MenuItem::setUnselectedValueColor(const Color &color) { /* Override in chil
 
 
 /**
- *  @luaclass MenuItem
- *  @brief    Simple menu item that calls a method or opens a submenu when selected.
- *  @descr    %MenuItem is the parent class for all other MenuItems.  
- *
- *  Currently, you cannot instantiate a %MenuItem from Lua, though you can instatiate %MenuItem subclasses.
+ * @luaclass MenuItem
+ * 
+ * @brief Simple menu item that calls a method or opens a submenu when selected.
+ * 
+ * @descr MenuItem is the parent class for all other MenuItems. 
+ * 
+ * Currently, you cannot instantiate a MenuItem from Lua, though you can
+ * instatiate MenuItem subclasses.
  */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
@@ -566,26 +569,27 @@ string ToggleMenuItem::getValue() const
 // Lua interface
 
 /**
- *  @luaclass ToggleMenuItem
- *  @brief    Menu item that lets users choose one of several options.
- *  @descr    To create a %ToggleMenuItem from a plugin, use the following syntax:
- *
- *  \code
- * ToggleMenuItem.new(name, options, currentIndex, wrap, help)
- *  \endcode
- *
- *  @param name - A string representing the text shown on the menu item.
- *  @param options - A table of strings representing the options to be displayed.
- *  @param currentIndex - An integer representing the index of the item to be selected initially (1 = first item).
- *  @param wrap - bool, true if the items should wrap around when you reach the last index.
- *  @param help - A string with a bit of help text.
- *
- *  The %MenuItem will return the text of the item the user selected.
- *
- *  For example:
- *  \code
- *    m = ToggleMenuItem.new("Type", { "BarrierMaker", "LoadoutZone", "GoalZone" }, 1, true, "Type of item to insert")
- *  \endcode
+ * @luaclass ToggleMenuItem
+ * 
+ * @brief Menu item that lets users choose one of several options.
+ * 
+ * @luafunc ToggleMenuItem::ToggleMenuItem(string name, table options, int currentIndex, bool wrap, string help)
+ * 
+ * @param name The text shown on the menu item.
+ * @param options The options to be displayed.
+ * @param currentIndex The index of the item to be selected initially (1 = first
+ * item).
+ * @param wrap `true`if the items should wrap around when you reach the last
+ * index.
+ * @param help A bit of help text.
+ * 
+ * The MenuItem will return the text of the item the user selected.
+ * 
+ * For example:
+ * 
+ * @code
+ *   m = ToggleMenuItem.new("Type", { "BarrierMaker", "LoadoutZone", "GoalZone" }, 1, `true`, "Type of item to insert")
+ * @endcode
  */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
@@ -701,24 +705,26 @@ void YesNoMenuItem::setIndex(S32 index)
 // Lua interface
 
 /**
- *  @luaclass YesNoMenuItem
- *  @brief    A specialized ToggleMenuItem prepopulated with Yes and No.
- *  @descr    To create a %YesNoMenuItem from a plugin, use the following syntax:
- *
- *  \code
- * YesNoMenuItem.new(name, currentIndex, help)
- *  \endcode
- *
- *  @param name - A string representing the text shown on the menu item.
- *  @param currentIndex - An integer representing the index of the item to be selected initially (1 = Yes, 2 = No).
- *  @param help - A string with a bit of help text.
- *
- *  The %YesNoMenuItem will return 1 if the user selected Yes, 2 if No.
- *
- *  For example:
- *  \code
- *    m = YesNoMenuItem.new("Hostile", 1, "Should this turret be hostile?")
- *  \endcode
+ * @luaclass YesNoMenuItem
+ * 
+ * @brief A specialized ToggleMenuItem prepopulated with Yes and No.
+ * 
+ * @descr To create a YesNoMenuItem from a plugin, use the following syntax:
+ * 
+ * @luafunc YesNoMenuItem::YesNoMenuItem(string name, int currentIndex, string help)
+ * 
+ * @param name The text shown on the menu item.
+ * @param currentIndex The index of the item to be selected initially (1 = Yes,
+ * 2 = No).
+ * @param help A bit of help text.
+ * 
+ * The YesNoMenuItem will return 1 if the user selected Yes, 2 if No.
+ * 
+ * For example:
+ * 
+ * @code
+ *   m = YesNoMenuItem.new("Hostile", 1, "Should this turret be hostile?")
+ * @endcode
  */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
@@ -893,28 +899,32 @@ void CounterMenuItem::activatedWithShortcutKey()
 // Lua interface
 
 /**
- *  @luaclass CounterMenuItem
- *  @brief    Menu item for entering a numeric value, with increment and decrement controls.
+ * @luaclass CounterMenuItem
+ * 
+ * @brief Menu item for entering a numeric value, with increment and decrement
+ * controls.
  *
- *  \code
- * CounterMenuItem.new(name, startingVal, step, minVal, maxVal, units, minText, help)
- *  \endcode
- *
- *  @param name -        A string representing the text shown on the menu item.
- *  @param startingVal - A number representing the starting value of the menu item.     
- *  @param step -        A number specifying how much the value should increase or decrease when the arrow keys are used.
- *  @param minVal -      A number representing the minimum allowable value that can be entered.  
- *  @param maxVal -      A number representing the maximum allowable value that can be entered.  
- *  @param units -       A string representing the units to be shown alongside the numeric item.  Pass "" if you don't want to display units.
- *  @param minText -     A string representing the text shown on the menu item when the minimum value has been reached.  Pass "" to simply display the minimum value.  
- *  @param help -        A string with a bit of help text.
- *
- *  The %MenuItem will return the value entered.
- *
- *  For example:
- *  \code
- *    m = CounterMenuItem.new("Wall Thickness", 50, 1, 1, 50, "grid units", "", "Thickness of wall to be created")
- *  \endcode
+ * @luafunc CounterMenuItem::CounterMenuItem(string name, num startingVal, num step, num minVal, num maxVal, string units, string minText, string help)
+ * 
+ * @param name The text shown on the menu item.
+ * @param startingVal The starting value of the menu item. 
+ * @param step The amount by which to increase or decrease the value when the
+ * arrow keys are used.
+ * @param minVal The minimum allowable value that can be entered. 
+ * @param maxVal The maximum allowable value that can be entered. 
+ * @param units The units to be shown alongside the numeric item. Pass "" if you
+ * don't want to display units.
+ * @param minText The text shown on the menu item when the minimum value has
+ * been reached. Pass "" to simply display the minimum value. 
+ * @param help A bit of help text.
+ * 
+ * The MenuItem will return the value entered.
+ * 
+ * For example:
+ * 
+ * @code
+ *   m = CounterMenuItem.new("Wall Thickness", 50, 1, 1, 50, "grid units", "", "Thickness of wall to be created")
+ * @endcode
  */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
@@ -1329,8 +1339,25 @@ void TextEntryMenuItem::setSecret(bool secret)
 // Lua interface
 
 /**
- *  @luaclass TextEntryMenuItem
- *  @brief    Menu item allowing users to enter a text value.
+ * @luaclass TextEntryMenuItem
+ * 
+ * @brief Menu item allowing users to enter a text value.
+ * 
+ * @luafunc TextEntryMenuItem::TextEntryMenuItem(string name, string initial, string empty, int maxLength, string help)
+ * 
+ * @param name The text shown on the menu item.
+ * @param initial The initial text in the menu item.
+ * @param empty The text to display when the menu item is empty.
+ * @param maxLength The maximum number of characters to allow (default: 32)
+ * @param help A bit of help text.
+ * 
+ * The MenuItem will return the text which the user entered.
+ * 
+ * For example:
+ * 
+ * @code
+ *   m = TextEntryMenuItem.new("Player Name", "ChumpChange", "<no name entered>", 64, "The new player's name")
+ * @endcode
  */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \

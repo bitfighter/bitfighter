@@ -1313,13 +1313,20 @@ REGISTER_LUA_CLASS(BfObject);
 
 
 /**
- * @luafunc  classId BfObject::getClassId()
- * @brief    Gets an object's ClassId.
- * @code     classId = obj:getClassId()
+ * @luafunc ObjType BfObject::getClassId()
+ * 
+ * @brief Gets an object's ClassId.
+ * 
+ * @code
+ *   obj = TestItem.new()
+ *   -- prints `true`
+ *   print(obj:getClassId() == ObjType.TestItem)
  * @endcode
+ *
  * See \ref ObjTypeEnum for a list of possible return values.
- * @return The object's ClassId
-*/
+ * 
+ * @return The object's ObjType.
+ */
 S32 BfObject::lua_getClassId(lua_State *L)  
 { 
    return returnInt(L, mObjectTypeNumber); 
@@ -1327,12 +1334,17 @@ S32 BfObject::lua_getClassId(lua_State *L)
 
 
 /**
- * @luafunc  int BfObject::getId()
- * @brief    Gets an object's user assigned id.
- * @descr    Users can assign an id to elements in the editor with the ! or # keys.  Use this function to obtain this id.  If the user has
- *           not assigned an object an id, %getId() will return a negative id that will remain consistent throught the game.
- * @return \e int - The object's id.
-*/
+ * @luafunc int BfObject::getId()
+ * 
+ * @brief Gets an object's user assigned id.
+ * 
+ * @descr Users can assign an id to elements in the editor with the ! or # keys.
+ * Use this function to obtain this id. If the user has not assigned an object
+ * an id, getId() will return a negative id that will remain consistent throught
+ * the game.
+ * 
+ * @return The object's id.
+ */
 S32 BfObject::lua_getId(lua_State *L)  
 { 
    return returnInt(L, mUserAssignedId); 
@@ -1340,11 +1352,15 @@ S32 BfObject::lua_getId(lua_State *L)
 
 
 /**
- * @luafunc  Point BfObject::getLoc()
- * @brief    Gets an object's position.
- * @descr    For objects that are not points (such as a LoadoutZone), will return the object's centroid.
- * @return   A \e point representing the object's location.
-*/
+ * @luafunc Point BfObject::getLoc()
+ * 
+ * @brief Gets an object's position.
+ * 
+ * @descr For objects that are not points (such as a LoadoutZone), will return
+ * the object's centroid.
+ * 
+ * @return A Point representing the object's location.
+ */
 S32 BfObject::lua_getLoc(lua_State *L)      
 { 
    return returnPoint(L, getPos()); 
@@ -1353,12 +1369,17 @@ S32 BfObject::lua_getLoc(lua_State *L)
 
 // TODO Remove after 019
 /**
- * @luafunc  index BfObject::getTeamIndx()
- * @brief    See BfObject::getTeamIndex()
+ * @luafunc int BfObject::getTeamIndx()
+ * 
+ * @brief See BfObject::getTeamIndex()
+ * 
  * @deprecated This method is deprecated and will be removed
- * @descr    Use BfObject::getTeamIndex() instead.  This method will be removed in the future
- * @return   \e int - Team index of the object.
-*/
+ * 
+ * @descr Use BfObject::getTeamIndex() instead. This method will be removed in
+ * the future
+ * 
+ * @return Team index of the object.
+ */
 S32 BfObject::lua_getTeamIndx(lua_State *L)
 {
    logprintf(LogConsumer::LuaBotMessage, "'getTeamIndx()' is deprecated and will be removed in the future.  Use 'getTeamIndex()', with an 'e', instead");
@@ -1368,13 +1389,18 @@ S32 BfObject::lua_getTeamIndx(lua_State *L)
 
 
 /**
- * @luafunc  index BfObject::getTeamIndex()
- * @brief    Gets the index of the object's team.
- * @descr    Many BfObjects (such as \link TestItem TestItems\endlink) are never part of any particular team.  For these objects, 
- *             this method will return Team.Neutral.
- * @note     Remember that in Lua, indices start with 1!
- * @return   \e int - Team index of the object.
-*/
+ * @luafunc int BfObject::getTeamIndex()
+ * 
+ * @brief Gets the index of the object's team.
+ * 
+ * @descr Many BfObjects (such as \link TestItem TestItems\endlink) are never
+ * part of any particular team. For these objects, this method will return the
+ * Neutral Team index
+ * 
+ * @note Remember that in Lua, indices start with 1!
+ * 
+ * @return Team index of the object.
+ */
 S32 BfObject::lua_getTeamIndex(lua_State *L)
 {
    return returnTeamIndex(L, mTeam);
@@ -1382,13 +1408,18 @@ S32 BfObject::lua_getTeamIndex(lua_State *L)
 
 
 /**
- * @luafunc  BfObject::setTeam(teamIndex)
- * @brief    Assigns the object to a team.
- * @param    \e int teamIndex - Index of the team the object should be assigned to.
- * @descr    Use the special team constants to make an item neutral or hostile.  Will have no effect on items 
- *           that are inherently teamless (such as a NexusZone).
- * @note     Remember that in Lua, indices start with 1!
-*/
+ * @luafunc BfObject::setTeam(int teamIndex)
+ * 
+ * @brief Assigns the object to a team.
+ * 
+ * @param teamIndex Index of the team the object should be assigned to.
+ * 
+ * @descr Use the special team constants to make an item neutral or hostile.
+ * Will have no effect on items that are inherently teamless (such as a
+ * NexusZone).
+ * 
+ * @note Remember that in Lua, indices start with 1!
+ */
 S32 BfObject::lua_setTeam(lua_State *L) 
 { 
    checkArgList(L, functionArgs, "BfObject", "setTeam");
@@ -1398,10 +1429,14 @@ S32 BfObject::lua_setTeam(lua_State *L)
 
 
 /**
- * @luafunc  BfObject::setLoc(pos)
- * @brief    Set the object's location.
- * @descr    To set the full geometry of a more complex object, see the setGeom() method.
- * @param    \e point pos - Point (or coordinate pair) representing the location of the object. 
+ * @luafunc BfObject::setLoc(Point pos)
+ * 
+ * @brief Set the object's location.
+ * 
+ * @descr To set the full geometry of a more complex object, see the setGeom()
+ * method.
+ * 
+ * @param pos Point representing the location of the object. 
  */
 S32 BfObject::lua_setLoc(lua_State *L)
 {
@@ -1412,9 +1447,11 @@ S32 BfObject::lua_setLoc(lua_State *L)
 
 
 /**
- * @luafunc  BfObject::removeFromGame()
- * @brief    Removes the object from the current game or editor session.
- * @descr    May not be implemented for all objects.
+ * @luafunc BfObject::removeFromGame()
+ * 
+ * @brief Removes the object from the current game or editor session.
+ * 
+ * @descr May not be implemented for all objects.
  */
 S32 BfObject::lua_removeFromGame(lua_State *L)
 {
@@ -1424,10 +1461,14 @@ S32 BfObject::lua_removeFromGame(lua_State *L)
 
 
 /**
- * @luafunc  BfObject::setGeom(geometry)
- * @brief    Sets an object's geometry. 
- * @param    \e geometry - The object's geometry.  (See \ref datatypes for an explanation of geometry.) 
- * @descr    Note that not all objects support changing geometry if the object has already been added to a game.
+ * @luafunc BfObject::setGeom(Geom geometry)
+ * 
+ * @brief Sets an object's geometry. 
+ * 
+ * @param geometry The object's new geometry.
+ * 
+ * @descr Note that not all objects support changing geometry if the object has
+ * already been added to a game.
  */
 S32 BfObject::lua_setGeom(lua_State *L)
 {
@@ -1440,10 +1481,11 @@ S32 BfObject::lua_setGeom(lua_State *L)
 }
 
 /**
- * @luafunc  geom BfObject::getGeom()
- * @brief    Returns an object's geometry. 
- * @return   ObjectGeometry - For %point objects (such as a RepairItem or TestItem), this will be a single point. For more complex objects 
- *           (such as a WallItem or a Zone), this will be a Lua table containing a list of points.
+ * @luafunc Geom BfObject::getGeom()
+ * 
+ * @brief Returns an object's geometry. 
+ * 
+ * @return A geometry as described on the Geom page
  */
 S32 BfObject::lua_getGeom(lua_State *L)
 {
@@ -1457,10 +1499,16 @@ S32 BfObject::lua_getGeom(lua_State *L)
 
 
 /**
- * @luafunc  BfObject BfObject::clone()
- * @brief    Make an exact duplicate of an object.
- * @descr    Returned object will not be added to the current game, and will have a different id than the source object.
- * @return   Returns the clone.
+ * @luafunc BfObject BfObject::clone()
+ * 
+ * @brief Make an exact duplicate of an object.
+ * 
+ * @descr Returned object will not be added to the current game, and will have a
+ * different id than the source object.
+ * 
+ * @return Returns the new clone of the object.
+ *
+ * @note This function is not yet implemented.
  */
 S32 BfObject::lua_clone(lua_State *L)
 {
@@ -1470,10 +1518,13 @@ S32 BfObject::lua_clone(lua_State *L)
 
 
 /**
- * @luafunc  bool BfObject::isSelected()
- * @brief    Determine if an object is selected in the editor.
- * @descr    This is useful for editor plugins only.
- * @return   Returns true if the object is selected, false if not.
+ * @luafunc bool BfObject::isSelected()
+ * 
+ * @brief Determine if an object is selected in the editor.
+ * 
+ * @descr This is useful for editor plugins only.
+ * 
+ * @return Returns `true` if the object is selected, `false` if not.
  */
 S32 BfObject::lua_isSelected(lua_State *L)
 {
@@ -1482,10 +1533,13 @@ S32 BfObject::lua_isSelected(lua_State *L)
 
 
 /**
- * @luafunc  bool BfObject::setSelected()
- * @brief    Determine if an object is selected in the editor.
- * @descr    This is useful for editor plugins only.
- * @return   Returns true if the object is selected, false if not.
+ * @luafunc BfObject::setSelected(bool selected)
+ * 
+ * @brief Set whether an object is selected in the editor.
+ * 
+ * @descr This is useful for editor plugins only.
+ * 
+ * @param selected `true` to select the object, `false` to deselect it.
  */
 S32 BfObject::lua_setSelected(lua_State *L)
 {
@@ -1498,12 +1552,16 @@ S32 BfObject::lua_setSelected(lua_State *L)
 
 
 /**
- * @luafunc  Point BfObject::getOwner()
- * @brief    Gets an object's owner as a PlayerInfo.
- * @descr    Some objects (like projectiles) have an owning player associated.  This method returns
- *           a PlayerInfo object if there is an owner.  Otherwise, returns nil.
- * @return   A \e PlayerInfo representing the object's owner, or nil.
-*/
+ * @luafunc LuaPlayerInfo BfObject::getOwner()
+ * 
+ * @brief Gets an object's owner as a LuaPlayerInfo.
+ * 
+ * @descr Some objects (like projectiles) have an owning player associated. This
+ * method returns a LuaPlayerInfo object if there is an owner. Otherwise, returns
+ * nil.
+ * 
+ * @return A LuaPlayerInfo representing the object's owner, or nil.
+ */
 S32 BfObject::lua_getOwner(lua_State *L)
 {
    if(mOwner.isNull())
@@ -1514,13 +1572,17 @@ S32 BfObject::lua_getOwner(lua_State *L)
 
 
 /**
-  *  @luafunc Projectile::setOwner(player)
-  *  @brief   Sets the owner of the projectile.
-  *  @descr   As with other functions that take a point as an input, you can also specify the x and y components as numeric arguments.
-  *  @param   player - Name of player.
-  *  @note    This method only works if the item in question has already been added to the game via addItem(object).
-  *           The owner cannot be set beforehand
-  */
+ * @luafunc BfObject::setOwner(string playerName)
+ * 
+ * @brief Sets the owner of the object.
+ * 
+ * @param playerName Name of player as a string.
+ * 
+ * @note This method only works if the item in question has already been added
+ * to the game via addItem(object).  The owner cannot be set beforehand. Also,
+ * `playerName` must exactly match a the name of a player already in the game
+ * (case-sensitive).
+ */
 S32 BfObject::lua_setOwner(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "setOwner");

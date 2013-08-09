@@ -545,22 +545,27 @@ bool SpeedZone::canBeNeutral() { return false; }
 //// Lua methods
 
 /**
-  *  @luaconst SpeedZone::SpeedZone()
-  *  @luaconst SpeedZone::SpeedZone(lineGeom)
-  *  @luaconst SpeedZone::SpeedZone(lineGeom, speed)
-  *  @luaclass SpeedZone
-  *  @brief Propels ships at high speed.
-  *  @descr SpeedZones are game objects that propel ships around a level.  Each %SpeedZone has a direction point
-  *         that is only used for aiming the %SpeedZone.  The speed at which ships are flung can be set
-  *         with the \e setSpeed() method.  SpeedZones also have a \e snapping parameter which, when true,
-  *         will first move the ship to the %SpeedZone's center before propelling them.  This allows level
-  *         designers to control the exact path a ship will take, which can be useful if there is a target that
-  *         the ships should hit.
-  *
-  *         Note that a %SpeedZone's setGeom() method will take two points.  The first will be the %SpeedZone's location, 
-  *         the second represents its direction.  The distance between the two points is not important; only the 
-  *         angle between them matters.
-  */
+ * @luafunc SpeedZone::SpeedZone()
+ * @luafunc SpeedZone::SpeedZone(geom lineGeom)
+ * @luafunc SpeedZone::SpeedZone(geom lineGeom, int speed)
+ * 
+ * @luaclass SpeedZone
+ * 
+ * @brief Propels ships at high speed.
+ * 
+ * @descr SpeedZones are game objects that propel ships around a level. Each
+ * SpeedZone has a direction point that is only used for aiming the SpeedZone.
+ * The speed at which ships are flung can be set with the setSpeed() method.
+ * SpeedZones also have a snapping parameter which, when `true`, will first move
+ * the ship to the SpeedZone's center before propelling them. This allows level
+ * designers to control the exact path a ship will take, which can be useful if
+ * there is a target that the ships should hit.
+ * 
+ * Note that a SpeedZone's setGeom() method will take two points. The first will
+ * be the SpeedZone's location, the second represents its direction. The
+ * distance between the two points is not important; only the angle between them
+ * matters.
+ */
 //               Fn name     Param profiles       Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, setDir,      ARRAYDEF({{ PT,      END }}), 1 ) \
@@ -581,16 +586,18 @@ REGISTER_LUA_SUBCLASS(SpeedZone, BfObject);
 
 
 /** 
- *  @luafunc SpeedZone::setDir(dest)
- *  @brief Sets the direction of the SpeedZone.
- *  @param dest - A point or coordinate pair representing the location of the destination.
+ * @luafunc SpeedZone::setDir(point dest)
  *
- *  Example:
- *  @code 
- *    s = SpeedZone.new()
- *    s:setDir(100,150)
- *    levelgen:addItem(s)  -- or plugin:addItem(s) in a plugin
- *  @endcode
+ * @brief Sets the direction of the SpeedZone.
+ *
+ * @param dest A point which the speed zone should aim at
+ *
+ * Example:
+ * @code 
+ *   s = SpeedZone.new()
+ *   s:setDir(100,150)
+ *   levelgen:addItem(s)  -- or plugin:addItem(s) in a plugin
+ * @endcode
  */
 S32 SpeedZone::lua_setDir(lua_State *L)
 {
@@ -605,12 +612,15 @@ S32 SpeedZone::lua_setDir(lua_State *L)
 }
 
 /**
-  *  @luafunc point SpeedZone::getDir()
-  *  @brief   Returns the object's direction.
-  *  @descr   The distance between the returned point and the object's location is not important;
-  *           only the angle between them matters.
-  *  @return  A point object representing the %SpeedZone's direction.  
-  */
+ * @luafunc point SpeedZone::getDir()
+ *
+ * @brief Returns the object's direction.
+ *
+ * @descr The distance between the returned point and the object's location is
+ * not important; only the angle between them matters.
+ *
+ * @return A point object representing the SpeedZone's direction. 
+ */
 S32 SpeedZone::lua_getDir(lua_State *L)
 {
    // Calculate the direction point
@@ -622,11 +632,15 @@ S32 SpeedZone::lua_getDir(lua_State *L)
 
 
 /**
-  *  @luafunc SpeedZone::setSpeed(speed)
-  *  @brief   Sets the %SpeedZone's speed.
-  *  @descr   Speed must be a positive number, and will be limited to a maximum of 65536.  Default speed is 2000.
-  *  @param   speed - The speed that the %SpeedZone should propel ships.
-  */
+ * @luafunc SpeedZone::setSpeed(int speed)
+ *
+ * @brief Sets the SpeedZone's speed.
+ *
+ * @descr Speed must be a positive number, and will be limited to a maximum of
+ * 65536. Default speed is 2000.
+ *
+ * @param speed The speed that the SpeedZone should propel ships.
+ */
 S32 SpeedZone::lua_setSpeed(lua_State *L)
 {
    checkArgList(L, functionArgs, "SpeedZone", "setSpeed");
@@ -638,10 +652,12 @@ S32 SpeedZone::lua_setSpeed(lua_State *L)
 
 
 /**
-  *  @luafunc num SpeedZone::getSpeed()
-  *  @brief   Returns the %SpeedZone's speed.
-  *  @return  A number representing the %SpeedZone's speed.  Bigger is faster, obviously.
-  */
+ * @luafunc int SpeedZone::getSpeed()
+ *
+ * @brief Returns the SpeedZone's speed.
+ *
+ * @return A number representing the SpeedZone's speed. Bigger is faster.
+ */
 S32 SpeedZone::lua_getSpeed(lua_State *L)
 {
    return returnInt(L, mSpeed);
@@ -649,17 +665,22 @@ S32 SpeedZone::lua_getSpeed(lua_State *L)
 
 
 /**
-  *  @luafunc SpeedZone::setSnapping(snapping)
-  *  @brief   Sets the %SpeedZone's snapping parameter.
-  *  @descr   When a ship hits a %SpeedZone, it is flung at speed in the direction the %SpeedZone is pointing.  
-              Depending on exactly how the %ship approaches the %SpeedZone, its trajectory may differ slightly.
-              By enabling snapping, the %ship will first be moved to the center of the %SpeedZone before its
-              velocity is calculated.  This will cause the %ship to follow an exact and predictable path, which
-              may be important if there is a specific target you want the ship to hit.
-
-  *  Snapping is off by default.
-  *  @param   snapping - True if snapping should be enabled, false otherwise.
-  */
+ * @luafunc SpeedZone::setSnapping(bool snapping)
+ *
+ * @brief Sets the SpeedZone's snapping parameter.
+ *
+ * @descr When a ship hits a SpeedZone, it is flung at speed in the
+ * direction the SpeedZone is pointing. Depending on exactly how the ship
+ * approaches the SpeedZone, its trajectory may differ slightly. By enabling
+ * snapping, the ship will first be moved to the center of the SpeedZone
+ * before its velocity is calculated. This will cause the ship to follow an
+ * exact and predictable path, which may be important if there is a specific
+ * target you want the ship to hit.
+ *
+ * Snapping is off by default.
+ *
+ * @param snapping `true` if snapping should be enabled, `false` otherwise.
+ */
 S32 SpeedZone::lua_setSnapping(lua_State *L)
 {
    checkArgList(L, functionArgs, "SpeedZone", "setSnapping");
@@ -670,10 +691,12 @@ S32 SpeedZone::lua_setSnapping(lua_State *L)
 
 
 /**
-  *  @luafunc num SpeedZone::getSnapping()
-  *  @brief   Returns the %SpeedZone's snapping parameter.
-  *  @return  A boolean; true if snapping is enabled, false if not.
-  */
+ * @luafunc bool SpeedZone::getSnapping()
+ *
+ * @brief Returns the SpeedZone's snapping parameter.
+ *
+ * @return `true` if snapping is enabled, `false` if not.
+ */
 S32 SpeedZone::lua_getSnapping(lua_State *L)
 {
    return returnBool(L, mSnapLocation);

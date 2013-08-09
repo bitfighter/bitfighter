@@ -224,12 +224,16 @@ void PickupItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &val
 // Lua interface
 
 /**
-  *  @luaclass PickupItem
-  *  @brief Parent class representing items that can be picked up, such as RepairItem or EnergyItem.
-  *  @descr %PickupItems are items that can be picked up by ships to confer some benefit, such as increased health or energy.
-  *         When PickupItems are picked up, they will regenerate after a time, called the regenTime.  PickupItems continue to 
-  *         exist, even when they are not visible.
-  */
+ * @luaclass PickupItem
+ *
+ * @brief Parent class representing items that can be picked up, such as
+ * RepairItem or EnergyItem.
+ *
+ * @descr PickupItems are items that can be picked up by ships to confer some
+ * benefit, such as increased health or energy. When PickupItems are picked up,
+ * they will regenerate after a time, called the regenTime. PickupItems continue
+ * to exist, even when they are not visible.
+ */
 //               Fn name  Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, isVis,        ARRAYDEF({{          END }}), 1 ) \
@@ -249,17 +253,21 @@ REGISTER_LUA_SUBCLASS(PickupItem, Item);
 
 
 /**
- * @luafunc  bool PickupItem::isVis()
- * @brief    Returns true if item is currently visible, false if not. 
- * @return   \e bool - True if item is currently visible, false if not.
+ * @luafunc bool PickupItem::isVis()
+ *
+ * @return `true` if item is currently visible, `false` if not.
 */
 S32 PickupItem::lua_isVis(lua_State *L) { return returnBool(L, isVisible()); }
 
 
 /**
- * @luafunc  PickupItem::setVis(isVisible)
- * @brief    Show or hide the item.  Note that hiding an item will reset the timer that makes it visible again, just as if it had been picked up by a player.
- * @param    isVisible - Pass true to make the item visible, false to hide it.
+ * @luafunc PickupItem::setVis(visible)
+ *
+ * @brief Show or hide the item. Note that hiding an item will reset the
+ * timer that makes it visible again, just as if it had been picked up by a
+ * player.
+ *
+ * @param visibile Pass `true` to make the item visible, `false` to hide it.
 */
 S32 PickupItem::lua_setVis(lua_State *L)
 {
@@ -275,10 +283,14 @@ S32 PickupItem::lua_setVis(lua_State *L)
 
 
 /**
- * @luafunc  PickupItem::setRegenTime(int time)
- * @brief    Sets the time (in seconds) for the %PickupItem to regenerate itself.  Default is 20 seconds. Setting regen time to a negative value will produce an error.
- * @param    time - Time in seconds for the item to remain hidden.
-*/
+ * @luafunc PickupItem::setRegenTime(int time)
+ *
+ * @brief Sets the time (in seconds) for the PickupItem to regenerate itself.
+ * Default is 20 seconds. Setting regen time to a negative value will produce an
+ * error.
+ *
+ * @param time Time in seconds for the item to remain hidden.
+ */
 S32 PickupItem::lua_setRegenTime(lua_State *L)
 { 
    checkArgList(L, functionArgs, "PickupItem", "setRegenTime");
@@ -290,9 +302,11 @@ S32 PickupItem::lua_setRegenTime(lua_State *L)
 
 
 /**
- * @luafunc  PickupItem::getRegenTime()
- * @brief    Returns the time (in seconds) for the %PickupItem to regenerate itself.
- * @return   int - Time in seconds for the item will remain hidden.
+ * @luafunc int PickupItem::getRegenTime()
+ *
+ * @brief Returns the time (in seconds) for the PickupItem to regenerate itself.
+ *
+ * @return Time in seconds for the item will remain hidden.
 */
 S32 PickupItem::lua_getRegenTime(lua_State *L) { return returnInt(L, mRepopDelay); }
 
@@ -303,9 +317,9 @@ S32 PickupItem::lua_getRegenTime(lua_State *L) { return returnInt(L, mRepopDelay
 TNL_IMPLEMENT_NETOBJECT(RepairItem);
 
 /**
- *   @luaconst RepairItem::RepairItem()
- *   @luaconst RepairItem::RepairItem(point)
- *   @luaconst RepairItem::RepairItem(point, time)
+ * @luafunc RepairItem::RepairItem()
+ * @luafunc RepairItem::RepairItem(point)
+ * @luafunc RepairItem::RepairItem(point, time)
  */
 RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME)   // Combined Lua / C++ default constructor
 { 
@@ -400,10 +414,10 @@ F32 RepairItem::getEditorRadius(F32 currentScale)
 // Lua interface
 
 /**
- *   @luaclass RepairItem
- *   @brief    Adds health to ships that pick them up.
+ * @luaclass RepairItem
+ * 
+ * @brief Adds health to ships that pick them up.
  */
-
 // Only implements inherited methods
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
@@ -425,9 +439,9 @@ REGISTER_LUA_SUBCLASS(RepairItem, PickupItem);
 
 TNL_IMPLEMENT_NETOBJECT(EnergyItem);
 /**
- *   @luaconst EnergyItem::EnergyItem()
- *   @luaconst EnergyItem::EnergyItem(point)
- *   @luaconst EnergyItem::EnergyItem(point, time)
+ * @luafunc EnergyItem::EnergyItem()
+ * @luafunc EnergyItem::EnergyItem(point)
+ * @luafunc EnergyItem::EnergyItem(point, time)
  */
 EnergyItem::EnergyItem(lua_State *L) : Parent(20, DEFAULT_RESPAWN_TIME)    // Combined Lua / C++ default constructor
 {
@@ -516,10 +530,10 @@ const char *EnergyItem::getEditorHelpString() { return "Restores energy to ships
 // Lua interface
 
 /**
- *   @luaclass EnergyItem
- *   @brief    Adds energy to ships that pick them up.
+ * @luaclass EnergyItem
+ * 
+ * @brief Adds energy to ships that pick them up.
  */
-
 // Only implements inherited methods
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \

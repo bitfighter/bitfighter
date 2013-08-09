@@ -409,19 +409,23 @@ void TextItem::textEditedCallback(string text, BfObject *obj)
 //// Lua methods
 
 /**
-  *  @luaconst TextItem::TextItem()
-  *  @luaconst TextItem::TextItem(lineGeom, text)
-  *  @luaclass TextItem
-  *  @brief Display text message in level.
-  *  @descr A %TextItem displays text in a level.  If the %TextItem belongs to a team, it is only visible to players on that team.
-  *         If it is assigned to NeutralTeam (the default), it will be visible to all players.  Text is always displayed in the color
-  *         of the team it belongs to.
-  *
-  * Note that you will likely want to set the text of a new %TextItem (see setText()), as, by default, the display string is blank.
-  *
-  * Geometry for a %TextItem consists of two points representing the start and end points of the item.  Text will be scaled to
-  * fit between these points.
-  */
+ * @luafunc TextItem::TextItem()
+ * @luafunc TextItem::TextItem(lineGeom, string text)
+ * @luaclass TextItem
+ * 
+ * @brief Display text message in level.
+ * 
+ * @descr A TextItem displays text in a level. If the TextItem belongs to a
+ * team, it is only visible to players on that team. If it is assigned to
+ * NeutralTeam (the default), it will be visible to all players. Text is always
+ * displayed in the color of the team it belongs to.
+ * 
+ * Note that you will likely want to set the text of a new TextItem (see
+ * setText()), as, by default, the display string is blank.
+ * 
+ * Geometry for a TextItem consists of two points representing the start and end
+ * points of the item. Text will be scaled to fit between these points.
+ */
 //               Fn name     Param profiles       Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, setText,      ARRAYDEF({{ STR, END }}), 1 ) \
@@ -437,11 +441,13 @@ const char *TextItem::luaClassName = "TextItem";
 REGISTER_LUA_SUBCLASS(TextItem, BfObject);
 
 
-/** 
-  *  @luafunc TextItem::setText(text)
-  *  @brief Sets the text of a %TextItem.
-  *  @param text - A \e string specifying what the %TextItem should display.
-  */
+/**
+ * @luafunc TextItem::setText(string text)
+ * 
+ * @brief Sets the text of a TextItem.
+ * 
+ * @param text The text which the TextItem should display.
+ */
 S32 TextItem::lua_setText(lua_State *L)
 {
    checkArgList(L, functionArgs, "TextItem", "setText");
@@ -452,11 +458,13 @@ S32 TextItem::lua_setText(lua_State *L)
 }
 
 
-/** 
-  *  @luafunc text TextItem::getText()
-  *  @brief Sets the text of a %TextItem.
-  *  @return text - A \e string specifying what the %TextItem is currently displaying.
-  */
+/**
+ * @luafunc string TextItem::getText()
+ * 
+ * @brief Sets the text of a TextItem.
+ * 
+ * @return The text which the TextItem is currently displaying.
+ */
 S32 TextItem::lua_getText(lua_State *L)
 {
    return returnString(L, getText().c_str());

@@ -912,8 +912,10 @@ S32 Robot::lua_setThrustToPt(lua_State *L)
 
 /**
  * @luafunc Robot::fireWeapon(weapon)
- * @brief   Shoots the given weapon if it is equipped
- * @param   weapon Weapon to fire
+ *
+ * @brief Shoots the given weapon if it is equipped
+ *
+ * @param weapon Weapon to fire
  */
 S32 Robot::lua_fireWeapon(lua_State *L)
 {

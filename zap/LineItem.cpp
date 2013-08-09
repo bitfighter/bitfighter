@@ -59,6 +59,11 @@ const S32 LineItem::MAX_LINE_WIDTH = 255;
 #endif
 
 // Combined C++ / Lua constructor
+/**
+ * @luafunc LineItem::LineItem()
+ * @luafunc LineItem::LineItem(geom)
+ * @luafunc LineItem::LineItem(geom, teamIndex)
+ */
 LineItem::LineItem(lua_State *L)
 { 
    mNetFlags.set(Ghostable);
@@ -362,12 +367,18 @@ bool LineItem::canBeNeutral() { return true; }
 // Lua interface
 
 /**
-  *  @luaclass LineItem
-  *  @brief    Decorative line visible to one or all teams.  Has no specific game function.
-  *  @descr    If a %LineItem is assigned to a team, it will only be visible to players on that team.  If
-  *            the %LineItem is neutral (team == Team.Neutral, the default), it will be visible to all players regardless of team.
-  *  @geom     The geometry of a %LineItem is a polyline (i.e. 2 or more points)
-  */
+ * @luaclass LineItem
+ * 
+ * @brief Decorative line visible to one or all teams. Has no specific game
+ * function.
+ * 
+ * @descr If a non-global LineItem is assigned to a team, it will only be
+ * visible to players on that team. If the LineItem is neutral (that is, `team
+ * == Team.Neutral`, the default), it will be visible to all players regardless
+ * of team or globalness.
+ * 
+ * @geom The geometry of a LineItem is a polyline (i.e. 2 or more points)
+ */
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
       METHOD(CLASS, setGlobal, ARRAYDEF({{ BOOL,    END }}), 1 ) \
@@ -380,15 +391,17 @@ GENERATE_LUA_FUNARGS_TABLE(LineItem, LUA_METHODS);
 
 
 /**
-  *  @luafunc LineItem::setGlobal(global)
-  *  @brief   Sets the %LineItem's global parameter.
-  *  @descr   LineItems are normally viewable by all players in a game.  If you wish to only let the LineItem
-  *           be viewable to the owning team, set to false.  Make sure you call setTeam() on the LineItem
-  *           first.
-  *  Global is on by default.
-  *  @param   global - False if this %LineItem should be viewable only by the owning team, otherwise viewable
-  *           by all teams.
-  */
+ * @luafunc void LineItem::setGlobal(bool global)
+ *
+ * @brief Sets the LineItem's global parameter.
+ *
+ * @descr LineItems are normally viewable by all players in a game. If you wish
+ * to only let the LineItem be viewable to the owning team, set to `false`. Make
+ * sure you call setTeam() on the LineItem first. Global is on by default.
+ *
+ * @param global `false` if this LineItem should be viewable only by the owning
+ * team, otherwise viewable by all teams.
+ */
 S32 LineItem::lua_setGlobal(lua_State *L)
 {
    checkArgList(L, functionArgs, "LineItem", "setGlobal");
@@ -399,10 +412,12 @@ S32 LineItem::lua_setGlobal(lua_State *L)
 
 
 /**
-  *  @luafunc num LineItem::getSnapping()
-  *  @brief   Returns the %LineItem's global parameter.
-  *  @return  A boolean; true if global is enabled, false if not.
-  */
+ * @luafunc bool LineItem::getGlobal()
+ *
+ * @brief Returns the LineItem's global parameter.
+ *
+ * @return `true` if global is enabled, `false` if not.
+ */
 S32 LineItem::lua_getGlobal(lua_State *L)
 {
    return returnBool(L, mGlobal);
