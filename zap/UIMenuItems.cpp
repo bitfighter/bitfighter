@@ -640,8 +640,6 @@ YesNoMenuItem::YesNoMenuItem(lua_State *L) : Parent("", Vector<string>(), 0, tru
 {
    initialize();
 
-   dumpStack(L);
-
    const char *methodName = "YesNoMenuItem constructor";
 
    // Required items -- will throw if they are missing or misspecified
