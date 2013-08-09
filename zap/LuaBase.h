@@ -79,7 +79,6 @@ public:
    LUA_ARG_TYPE_ITEM( LINE,        "Two or more Lua points (singly or in table)"  ) \
    LUA_ARG_TYPE_ITEM( POLY,        "Three or more Lua points (singly or in table)") \
    LUA_ARG_TYPE_ITEM( TABLE,       "Lua table"                                    ) \
-   LUA_ARG_TYPE_ITEM( LOADOUT,     "Loadout Object"                               ) \
    LUA_ARG_TYPE_ITEM( ITEM,        "Item Object"                                  ) \
    LUA_ARG_TYPE_ITEM( WEAP_ENUM,   "WeaponEnum"                                   ) \
    LUA_ARG_TYPE_ITEM( WEAP_SLOT,   "Weapon slot #"                                ) \
