@@ -2289,8 +2289,8 @@ bool Ship::isRobot()
    METHOD(CLASS, getActiveWeapon, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getMountedItems, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getLoadout,      ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, setReqLoadout,   ARRAYDEF({{ LOADOUT,  END }}), 1 ) \
-   METHOD(CLASS, setCurrLoadout,  ARRAYDEF({{ LOADOUT,  END }}), 1 ) \
+   METHOD(CLASS, setLoadout,      ARRAYDEF({{ TABLE, END }, { INT, INT, INT, INT, INT, END }}), 2 ) \
+   METHOD(CLASS, setLoadoutNow,   ARRAYDEF({{ TABLE, END }, { INT, INT, INT, INT, INT, END }}), 2 ) \
 
 
 GENERATE_LUA_METHODS_TABLE(Ship, LUA_METHODS);
@@ -2459,14 +2459,14 @@ S32 Ship::lua_getMountedItems(lua_State *L)
 
 
 /**
- * @luafunc Ship::getLoadout()
+ * @luafunc table Ship::getLoadout()
  * @brief   Get the current loadout
  * @descr   This method will return a table with the loadout in the following
  *          order:
  *
  *             Module 1, Module 2, Weapon 1, Weapon 2, Weapon 3
  *
- * @return  table - Returns a table with the current loadout
+ * @return A table with the current loadout
  */
 S32 Ship::lua_getLoadout(lua_State *L)
 {
@@ -2493,28 +2493,123 @@ S32 Ship::lua_getLoadout(lua_State *L)
 }
 
 
-// Sets requested loadout to specified
-S32 Ship::lua_setReqLoadout(lua_State *L)
+LoadoutTracker &Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
 {
-   checkArgList(L, functionArgs, "Ship", "setReqLoadout");
+   S32 expectedSize = ShipModuleCount + ShipWeaponCount;
 
-   LoadoutTracker *loadout = luaW_check<LoadoutTracker>(L, 1);
+   Vector<S32> loadoutValues(expectedSize);
+   LoadoutTracker loadout;
 
-   getOwner()->requestLoadout(*loadout);
+   // A table
+   if(profile == 0)
+   {
+      // Test table length
+      if(lua_objlen(L, 1) != (U32)expectedSize)
+         throw LuaException("The loadout given must contain " + itos(expectedSize) + " elements");
+
+      lua_pushnil(L);                             // table, nil
+      while(lua_next(L, 1) != 0)                  // table, key, value
+      {
+         loadoutValues.push_back(getInt(L, -1));
+         lua_pop(L, 1);                           // table, key
+      }
+
+      TNLAssert(loadoutValues.size() == expectedSize, "Different size??");
+   }
+   // 5 paraments all integers
+   else
+   {
+      for(S32 i = 0; i < expectedSize; i++)
+         loadoutValues.push_back(getInt(L, i + 1));
+   }
+
+
+   // Now we verify and build up our loadout
+   S32 moduleCount = 0;
+   S32 weaponCount = 0;
+   for(S32 i = 0; i < expectedSize; i++)
+   {
+      S32 value = loadoutValues[i];
+
+      // Test if a weapon - the integer will be greater than ModuleCount
+      if(value >= (S32)ModuleCount)
+      {
+         if(weaponCount >= ShipWeaponCount)
+            throw LuaException("Too many weapons!  You must provide exactly " + itos(ShipWeaponCount) + " weapons.");
+
+         loadout.setWeapon(weaponCount, WeaponType(value - ModuleCount));
+         weaponCount++;
+      }
+      else
+      {
+         if(moduleCount >= ShipWeaponCount)
+            throw LuaException("Too many modules!  You must provide exactly " + itos(ShipModuleCount) + " modules.");
+
+         loadout.setModule(moduleCount, ShipModule(value));
+         moduleCount++;
+      }
+   }
+
+   // If we made it here without throwing an exception, then we have a loadout
+   // with proper number of weapons/modules!
+   return loadout;
+}
+
+
+/**
+ * @luafunc Ship::setLoadout(table loadout)
+ *
+ * @brief Sets the requested loadout for the ship.
+ *
+ * @descr When setting the loadout, normal rules apply for updating the
+ * loadout, e.g. moving over a loadout zone.
+ *
+ * This method will take a table with 5 entries in any order comprised of
+ * 2 modules and 3 weapons.
+ *
+ * @note This method will also take 5 parameters as a new loadout, instead
+ * of a table.
+ *
+ * @param loadout The new loadout to request.
+ *
+ * @see Ship::setLoadoutNow(loadout)
+ */
+S32 Ship::lua_setLoadout(lua_State *L)
+{
+   S32 profile = checkArgList(L, functionArgs, luaClassName, "setLoadout");
+
+   LoadoutTracker &loadout = checkAndBuildLoadout(L, profile);
+
+   getOwner()->requestLoadout(loadout);
 
    return 0;
 }
 
 
-// Sets loadout to specified
-S32 Ship::lua_setCurrLoadout(lua_State *L)
+/**
+ * @luafunc Ship::setLoadoutNow(table loadout)
+ *
+ * @brief Immediately sets the loadout for the ship.
+ *
+ * @descr This method does not require that you follow normal loadout-switching
+ * rules.
+ *
+ * The parameters for this method follow the same rules as Ship::setLoadout().
+ *
+ * @param loadout The new loadout to set.
+ *
+ * @see Ship::setLoadout(loadout)
+ */
+S32 Ship::lua_setLoadoutNow(lua_State *L)
 {
-   checkArgList(L, functionArgs, "Ship", "setCurrLoadout");
+   S32 profile = checkArgList(L, functionArgs, luaClassName, "setLoadoutNow");
 
-   LoadoutTracker *loadout = luaW_check<LoadoutTracker>(L, 1);
+   LoadoutTracker &loadout = checkAndBuildLoadout(L, profile);
 
-   if(getClientInfo()->isLoadoutValid(*loadout, getGame()->getGameType()->isEngineerEnabled()))
-      setLoadout(*loadout);
+   if(getClientInfo()->isLoadoutValid(loadout, getGame()->getGameType()->isEngineerEnabled()))
+      setLoadout(loadout);
+   else
+      throw LuaException("The loadout given is invalid");
 
    return 0;
 }

@@ -96,6 +96,7 @@ private:
    bool doesShipActivateSensor(const Ship *ship);
    F32 getShipVisibility(const Ship *localShip);
 
+   LoadoutTracker &checkAndBuildLoadout(lua_State *L, S32 profile);
 
 protected:
    SafePtr <ClientInfo> mClientInfo;
@@ -337,8 +338,8 @@ public:
 
    S32 lua_getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
 
-   S32 lua_setReqLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
-   S32 lua_setCurrLoadout(lua_State *L);       // Sets current loadout to specified --> takes Loadout object
+   S32 lua_setLoadout(lua_State *L);
+   S32 lua_setLoadoutNow(lua_State *L);
 };
 
 
