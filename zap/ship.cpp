@@ -2493,7 +2493,7 @@ S32 Ship::lua_getLoadout(lua_State *L)
 }
 
 
-LoadoutTracker &Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
+LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
 {
    S32 expectedSize = ShipModuleCount + ShipWeaponCount;
 
@@ -2578,7 +2578,7 @@ S32 Ship::lua_setLoadout(lua_State *L)
 {
    S32 profile = checkArgList(L, functionArgs, luaClassName, "setLoadout");
 
-   LoadoutTracker &loadout = checkAndBuildLoadout(L, profile);
+   LoadoutTracker loadout = checkAndBuildLoadout(L, profile);
 
    getOwner()->requestLoadout(loadout);
 
@@ -2604,7 +2604,7 @@ S32 Ship::lua_setLoadoutNow(lua_State *L)
 {
    S32 profile = checkArgList(L, functionArgs, luaClassName, "setLoadoutNow");
 
-   LoadoutTracker &loadout = checkAndBuildLoadout(L, profile);
+   LoadoutTracker loadout = checkAndBuildLoadout(L, profile);
 
    if(getClientInfo()->isLoadoutValid(loadout, getGame()->getGameType()->isEngineerEnabled()))
       setLoadout(loadout);

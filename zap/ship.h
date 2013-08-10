@@ -96,7 +96,7 @@ private:
    bool doesShipActivateSensor(const Ship *ship);
    F32 getShipVisibility(const Ship *localShip);
 
-   LoadoutTracker &checkAndBuildLoadout(lua_State *L, S32 profile);
+   LoadoutTracker checkAndBuildLoadout(lua_State *L, S32 profile);
 
 protected:
    SafePtr <ClientInfo> mClientInfo;
