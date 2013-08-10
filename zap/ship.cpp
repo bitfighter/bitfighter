@@ -2528,10 +2528,6 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
    // A table
    if(profile == 0)
    {
-      // Test table length
-      if(lua_objlen(L, 1) != (U32)expectedSize)
-         throw LuaException("The loadout given must contain " + itos(expectedSize) + " elements");
-
       lua_pushnil(L);                             // table, nil
       while(lua_next(L, 1) != 0)                  // table, key, value
       {
@@ -2539,7 +2535,7 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
          lua_pop(L, 1);                           // table, key
       }
    }
-   // 5 paraments all integers
+   // 5 parameters all integers, the argument list check guarantees 5 params here
    else
    {
       for(S32 i = 0; i < expectedSize; i++)
