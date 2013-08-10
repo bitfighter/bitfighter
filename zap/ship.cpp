@@ -569,9 +569,6 @@ void Ship::idle(IdleCallPath path)
       if(getActualVel().lenSquared() != 0 || getActualPos() != getRenderPos())
          setMaskBits(PositionMask);
 
-      mFastRechargeTimer.update(mCurrentMove.time);
-      mFastRecharging = mFastRechargeTimer.getCurrent() == 0;
-
       mSendSpawnEffectTimer.update(mCurrentMove.time);
    }
    else   // <=== do we really want this loop running if    path == ServerIdleMainLoop && NOT controllingClientIsValid() ??
@@ -584,13 +581,7 @@ void Ship::idle(IdleCallPath path)
       if((path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip) && 
                getActualVel().lenSquared() != 0 && 
                getControllingClient() && getControllingClient()->lostContact())
-         return;  
-
-      if(path == ClientIdlingLocalShip)
-      {
-         mFastRechargeTimer.update(mCurrentMove.time);
-         mFastRecharging = mFastRechargeTimer.getCurrent() == 0;
-      }
+         return;
 
       // Apply impulse vector and reset it
       setActualVel(getActualVel() + mImpulseVector);
@@ -683,6 +674,9 @@ void Ship::idle(IdleCallPath path)
    // Process weapons and modules on controlled objects; handles all the energy reductions as well
    if(path == ServerProcessingUpdatesFromClient || path == ClientIdlingLocalShip)
    {
+      mFastRechargeTimer.update(mCurrentMove.time);
+      mFastRecharging = mFastRechargeTimer.getCurrent() == 0;
+
       processWeaponFire();
       processModules();
       rechargeEnergy();
