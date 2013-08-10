@@ -2538,8 +2538,6 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
          loadoutValues.push_back(getInt(L, -1));
          lua_pop(L, 1);                           // table, key
       }
-
-      TNLAssert(loadoutValues.size() == expectedSize, "Different size??");
    }
    // 5 paraments all integers
    else
@@ -2547,6 +2545,10 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
       for(S32 i = 0; i < expectedSize; i++)
          loadoutValues.push_back(getInt(L, i + 1));
    }
+
+   // Make sure we have the appropriate number of loadout values
+   if(loadoutValues.size() != expectedSize)
+      throw LuaException("The loadout given must contain " + itos(expectedSize) + " elements");
 
 
    // Now we verify and build up our loadout
