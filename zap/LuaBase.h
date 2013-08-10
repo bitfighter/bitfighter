@@ -156,6 +156,8 @@ public:
    static S32 returnPlayerInfo(lua_State *L, Ship *ship);
    static S32 returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo);
    static S32 returnGameInfo(lua_State *L, ServerGame *serverGame);
+   static S32 returnShipModule(lua_State *L, ShipModule module);
+   static S32 returnWeaponType(lua_State *L, WeaponType weapon);
 
    static void clearStack(lua_State *L);
 

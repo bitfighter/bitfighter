@@ -777,6 +777,20 @@ S32 LuaBase::returnGameInfo(lua_State *L, ServerGame *serverGame)
 }
 
 
+S32 LuaBase::returnShipModule(lua_State *L, ShipModule module)
+{
+   lua_pushinteger(L, module);
+   return 1;
+}
+
+
+S32 LuaBase::returnWeaponType(lua_State *L, WeaponType weapon)
+{
+   lua_pushinteger(L, weapon + ModuleCount);
+   return 1;
+}
+
+
 // Assume that table is at the top of the stack
 void LuaBase::setfield (lua_State *L, const char *key, F32 value)
 {

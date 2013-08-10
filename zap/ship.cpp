@@ -2277,7 +2277,7 @@ bool Ship::isRobot()
    METHOD(CLASS, isAlive,         ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getPlayerInfo,   ARRAYDEF({{ END }}), 1 ) \
                                                            \
-   METHOD(CLASS, isModActive,     ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, isModActive,     ARRAYDEF({{ MOD_ENUM, END }}), 1 ) \
    METHOD(CLASS, getEnergy,       ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, setEnergy,       ARRAYDEF({{ NUM, END }}), 1 ) \
    METHOD(CLASS, getHealth,       ARRAYDEF({{ END }}), 1 ) \
@@ -2313,16 +2313,41 @@ S32 Ship::lua_getFlagCount(lua_State *L) { return returnInt(L, getFlagCount()); 
 
 S32 Ship::lua_getPlayerInfo(lua_State *L) { return returnPlayerInfo(L, this); }
 
+S32 Ship::lua_getAngle(lua_State *L)        { return returnFloat(L, getCurrentMove().angle);     }  // Get angle ship is pointing at
 
-S32 Ship::lua_isModActive(lua_State *L) {
-   static const char *methodName = "Ship:isModActive()";
-   checkArgCount(L, 1, methodName);
-   ShipModule module = (ShipModule) getInt(L, 1, methodName, 0, ModuleCount - 1);
-   return returnBool(L, mLoadout.isModulePrimaryActive(module) || mLoadout.isModuleSecondaryActive(module));
+
+/**
+ * @luafunc Ship::getActiveWeapon()
+ *
+ * @brief Checks if the given module is active.
+ *
+ * @descr This will return an item of the Weapon enum, e.g. Weapon.Phaser
+ *
+ * @return int The weapon that is currently active on this ship
+ */
+S32 Ship::lua_getActiveWeapon(lua_State *L)
+{
+   return returnWeaponType(L, mLoadout.getActiveWeapon());
 }
 
-S32 Ship::lua_getAngle(lua_State *L)        { return returnFloat(L, getCurrentMove().angle);     }  // Get angle ship is pointing at
-S32 Ship::lua_getActiveWeapon(lua_State *L) { return returnInt  (L, mLoadout.getActiveWeapon()); }  // Get WeaponIndex for current weapon
+
+/**
+ * @luafunc Ship::isModActive(int module)
+ *
+ * @brief Checks if the given module is active.
+ *
+ * @descr This method takes a Module enum item as a parameter, e.g.
+ * Module.Shield
+ *
+ * @param module The module to check
+ */
+S32 Ship::lua_isModActive(lua_State *L) {
+   checkArgList(L, functionArgs, luaClassName, "isModActive");
+
+   ShipModule module = getShipModule(L, 1);
+
+   return returnBool(L, mLoadout.isModulePrimaryActive(module) || mLoadout.isModuleSecondaryActive(module));
+}
 
 
 /**
