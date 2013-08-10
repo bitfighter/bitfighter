@@ -1288,6 +1288,7 @@ void BfObject::writeThisTeam(BitStream *stream)
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getClassId,     ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, getId,          ARRAYDEF({{            END }               }), 1 ) \
+   METHOD(CLASS, setId,          ARRAYDEF({{ INT,       END }               }), 1 ) \
    METHOD(CLASS, getLoc,         ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setLoc,         ARRAYDEF({{ PT,        END }               }), 1 ) \
    METHOD(CLASS, getTeamIndx,    ARRAYDEF({{            END }               }), 1 ) \
@@ -1348,6 +1349,24 @@ S32 BfObject::lua_getClassId(lua_State *L)
 S32 BfObject::lua_getId(lua_State *L)  
 { 
    return returnInt(L, mUserAssignedId); 
+}
+
+
+/**
+ * @luafunc BfObject::setId()
+ * 
+ * @brief Sets an object's user assigned id.
+ * 
+ * @descr Users can assign an id to elements in the editor with the ! or # keys.
+ * Use this function to set this id from Lua. When called from an editor plugin,
+ * the value passed will be displayed in the editor when the player presses ! or
+ * #.
+ * */
+S32 BfObject::lua_setId(lua_State *L)  
+{ 
+   checkArgList(L, functionArgs, "BfObject", "setId");
+   mUserAssignedId = getInt(L, 1);
+   return 0;            
 }
 
 

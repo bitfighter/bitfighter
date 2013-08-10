@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _BFOBJECT_H_
-#define _BFOBJECT_H_
+#ifndef BFOBJECT_H_
+#define BFOBJECT_H_
 
 #include "gridDB.h"           // Base class
 #include "LuaScriptRunner.h"  // Base class
@@ -448,6 +448,7 @@ public:
 
    S32 lua_getClassId(lua_State *L);
    S32 lua_getId(lua_State *L);
+   S32 lua_setId(lua_State *L);
 
    // Get/set object's position
    virtual S32 lua_getLoc(lua_State *L);
@@ -489,5 +490,5 @@ public:
 
 };
 
-#endif
+#endif /* BFOBJECT_H_ */
 
