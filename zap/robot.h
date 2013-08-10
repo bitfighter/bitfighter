@@ -145,6 +145,7 @@ public:
    S32 lua_hasWeapon(lua_State *L);  
 
    S32 lua_fireModule(lua_State *L);
+   S32 lua_hasModule(lua_State *L);
 
    S32 lua_setLoadoutWeapon(lua_State *L);
    S32 lua_setLoadoutModule(lua_State *L);

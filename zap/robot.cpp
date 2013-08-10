@@ -578,6 +578,7 @@ U16 Robot::findClosestZone(const Point &point)
    METHOD(CLASS,  hasWeapon,            ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
                                                                                              \
    METHOD(CLASS,  fireModule,           ARRAYDEF({{ MOD_ENUM, END }}), 1 )                   \
+   METHOD(CLASS,  hasModule,            ARRAYDEF({{ MOD_ENUM, END }}), 1 )                   \
                                                                                              \
    METHOD(CLASS,  setLoadoutWeapon,     ARRAYDEF({{ WEAP_SLOT, WEAP_ENUM, END }}), 1 )       \
    METHOD(CLASS,  setLoadoutModule,     ARRAYDEF({{ MOD_SLOT,  MOD_ENUM,  END }}), 1 )       \
@@ -947,7 +948,15 @@ S32 Robot::lua_fireWeapon(lua_State *L)
 }
 
 
-// Do we have a given weapon in our current loadout?
+/**
+ * @luafunc int Robot::hasModule(int weapon)
+ *
+ * @brief Does the robot have the given weapon.
+ *
+ * @param weapon The weapon to check
+ *
+ * @return True if the bot has the weapon, false if not.
+ */
 S32 Robot::lua_hasWeapon(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "hasWeapon");
@@ -984,9 +993,31 @@ S32 Robot::lua_fireModule(lua_State *L)
       }
 
    if(!hasModule)
-      throw LuaException("The weapon given to bot:fireWeapon(weapon) is not equipped!");
+      throw LuaException("The module given to bot:fireModule(module) is not equipped!");
 
    return 0;
+}
+
+
+/**
+ * @luafunc int Robot::hasModule(int module)
+ *
+ * @brief Does the robot have the given module.
+ *
+ * @param module The module to check
+ *
+ * @return True if the bot has the module, false if not.
+ */
+S32 Robot::lua_hasModule(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "hasModule");
+   ShipModule module = getShipModule(L, 1);
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      if(mLoadout.getModule(i) == module)
+         return returnBool(L, true);      // We have it!
+
+   return returnBool(L, false);           // We don't!
 }
 
 
