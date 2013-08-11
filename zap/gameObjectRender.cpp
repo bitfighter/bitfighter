@@ -1726,7 +1726,37 @@ void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point 
    renderNexus(outline, fill, open, glowFraction);
 
    glColor(getNexusBaseColor(open, glowFraction));
-   renderPolygonLabel(centroid, labelAngle, 25, "NEXUS", scaleFact);
+//   renderPolygonLabel(centroid, labelAngle, 25, "NEXUS", scaleFact);
+
+   static const F32 root3div2 = 0.866f;  // sqrt(3) / 2
+
+   static const F32 arcRadius = 14.f;
+   static const F32 vertRadius = 6.f;
+   static const F32 xRadius = 6.f;
+
+   static const F32 spokes[] = {
+         0, 0, 0, -xRadius,
+         0, 0, xRadius * root3div2, xRadius * 0.5f,
+         0, 0, -xRadius * root3div2, xRadius * 0.5f,
+   };
+
+   static const Point arcPoint1 = Point(0, -vertRadius);
+   static const Point arcPoint2 = Point(vertRadius * root3div2, vertRadius * 0.5f);
+   static const Point arcPoint3 = Point(-vertRadius * root3div2, vertRadius * 0.5f);
+
+   glPushMatrix();
+      glScale(scaleFact);
+      glTranslate(centroid);
+      glRotatef(labelAngle * RADIANS_TO_DEGREES, 0, 0, 1);
+
+      // Draw our center spokes
+      renderVertexArray(spokes, ARRAYSIZE(spokes) / 2, GL_LINES);
+
+      // Draw design
+      drawArc(arcPoint1, arcRadius, 0.583f * FloatTau, FloatTau * 1.25);
+      drawArc(arcPoint2, arcRadius, 0.917f * FloatTau, 1.583f * FloatTau);
+      drawArc(arcPoint3, arcRadius, 0.25f * FloatTau, 0.917f * FloatTau);
+   glPopMatrix();
 }
 
 
