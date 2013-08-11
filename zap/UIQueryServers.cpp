@@ -60,7 +60,7 @@ static const S32 SEL_SERVER_INSTR_SIZE = 18;    // Size of "UP, DOWN TO SELECT..
 static const S32 SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE = 10;
 
 // Positions of things on the screen
-static const U32 BANNER_HEIGHT = 76;  // Height of top green banner area
+static const U32 BANNER_HEIGHT = 64;  // Height of top green banner area
 static const U32 COLUMN_HEADER_TOP = BANNER_HEIGHT + 1;
 static const U32 COLUMN_HEADER_HEIGHT = COLUMN_HEADER_TEXTSIZE + 6;
 
@@ -675,8 +675,6 @@ void QueryServersUserInterface::render()
    bool drawmsg1 = false;
    bool drawmsg2 = false;
 
-   if(mShouldSort)
-
    renderTopBanner();
 
    // Render buttons
@@ -855,7 +853,7 @@ void QueryServersUserInterface::renderTopBanner()
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
    // Top banner
-   glColor(Colors::richGreen);
+   glColor(Colors::black);
    F32 vertices[] = {
          0,                0,
          (F32)canvasWidth, 0,
@@ -865,7 +863,7 @@ void QueryServersUserInterface::renderTopBanner()
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
    glColor(Colors::white);
-   drawCenteredString(vertMargin + 7, 35, "BITFIGHTER GAME LOBBY");
+   drawCenteredString(vertMargin + 12, 24, "BITFIGHTER GAME LOBBY");
 
    const S32 FONT_SIZE = 12;
    drawStringf(horizMargin, vertMargin, FONT_SIZE, "SERVERS: %d", servers.size());
@@ -1449,7 +1447,7 @@ Button::Button(ClientGame *game, S32 x, S32 y, S32 textSize, S32 padding, const 
    mLabel = label;
    mFgColor = fgColor;
    mHlColor = hlColor;
-   mBgColor = Colors::richGreen;
+   mBgColor = Colors::black;
    mOnClickCallback = onClickCallback;
 }
 
