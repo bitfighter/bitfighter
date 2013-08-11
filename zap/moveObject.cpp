@@ -685,8 +685,8 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
 
          ship->damageObject(&damageInfo);
 
-         // Damage asteroid unless shield is up
-         if(!ship->isModulePrimaryActive(ModuleShield))
+         // Damage asteroid unless a shield is up
+         if(!ship->isModulePrimaryActive(ModuleShield) && ship->mSpawnShield.getCurrent() == 0)
          {
             damageInfo.damagingObject = ship;
             asteroid->damageObject(&damageInfo);
