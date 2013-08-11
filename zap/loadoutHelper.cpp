@@ -47,7 +47,7 @@ static const OverlayMenuItem loadoutModuleMenuItems[] = {
    { KEY_3, BUTTON_3, true, ModuleRepair,   "Repair Module",         UNSEL_COLOR, "",               NULL       },
    { KEY_4, BUTTON_4, true, ModuleSensor,   "Enhanced Sensor",       UNSEL_COLOR, "",               NULL       },
    { KEY_5, BUTTON_5, true, ModuleCloak,    "Cloak Field Modulator", UNSEL_COLOR, "",               NULL       },
-   { KEY_6, BUTTON_6, true, ModuleArmor,    "Armor",                 UNSEL_COLOR, "(adds inertia)", HELP_COLOR },
+   { KEY_6, BUTTON_6, true, ModuleArmor,    "Armor",                 UNSEL_COLOR, "(adds mass)",    HELP_COLOR },
    { KEY_7, BUTTON_7, true, ModuleEngineer, "Engineer",              UNSEL_COLOR, "",               NULL       },
 };
 
