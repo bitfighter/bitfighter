@@ -60,7 +60,7 @@ static const S32 SEL_SERVER_INSTR_SIZE = 18;    // Size of "UP, DOWN TO SELECT..
 static const S32 SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE = 10;
 
 // Positions of things on the screen
-static const U32 BANNER_HEIGHT = 64;  // Height of top green banner area
+static const U32 BANNER_HEIGHT = 64;  // Height of top banner area
 static const U32 COLUMN_HEADER_TOP = BANNER_HEIGHT + 1;
 static const U32 COLUMN_HEADER_HEIGHT = COLUMN_HEADER_TEXTSIZE + 6;
 
@@ -893,7 +893,7 @@ void QueryServersUserInterface::renderColumnHeaders()
    else
       x2 = columns[mSortColumn+1].xStart - 5;
 
-   drawFilledRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, Color(.4, .4, 0), Colors::white);
+   drawFilledRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, Colors::gray20, Colors::white);
 
    // And now the column header text itself
    for(S32 i = 0; i < columns.size(); i++) 
