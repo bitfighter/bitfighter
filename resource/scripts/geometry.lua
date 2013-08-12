@@ -120,30 +120,31 @@ end
 
 
 -- Helper function
-local function rotatePoint(p, angleRadians)
+local function rotatePoint(p, angleRadians, center)
+    p = p - center
     local len = point.length(p)
     local pointAngle = math.atan2(p.y, p.x)
 
-    return point.new(len * math.cos(angleRadians + pointAngle), len * math.sin(angleRadians + pointAngle))
+    return point.new(len * math.cos(angleRadians + pointAngle), len * math.sin(angleRadians + pointAngle)) + center
 end
 
 --[[ 
 @luafunc Geom.rotate(geom, angle)
-@brief   Rotate \em geom about the point (0,0).
+@brief   Rotate \em geom about its centroid.
 @param   geom - The geometry to modify.  \em Geom can either be a point or a table of points.
 @param   angle - The angle (clockwise, in degrees) to rotate \em geom.
 @return  A geometry of the same type that was passed in.
  --]]
 function Geom.rotate(geom, angle)
-    local newPoints = {}
     local angleRadians = angle * math.pi / 180
-    
+
     if (type(geom) == 'point') then         -- Single point
-        return rotatePoint(geom, angleRadians)
+        return geom
     else                                    -- Table of points
+        local centroid = Geom.centroid(geom)
         local newPoints = {}
         for i = 1, #geom do
-            newPoints[i] = rotatePoint(geom[i], angleRadians)
+            newPoints[i] = rotatePoint(geom[i], angleRadians, centroid)
         end
         return newPoints
     end
