@@ -1474,7 +1474,7 @@ S32 BfObject::lua_setLoc(lua_State *L)
  */
 S32 BfObject::lua_removeFromGame(lua_State *L)
 {
-   deleteObject();
+   removeFromGame(true);
    return 0;
 }
 
