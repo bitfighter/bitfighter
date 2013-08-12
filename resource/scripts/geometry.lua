@@ -18,6 +18,19 @@ In all cases below, \em geom refers to either a single point or a table of point
 
 Geom = {}
 
+--[[ 
+@luafunc point Geom.centroid(geom)
+@brief   Find the centroid (center) of `geom`
+@param   geom The geometry to find the centroid of
+@return  The centroid, the average of all the points in geometry. This point has the property of minimizing the sum square distance to all points in `geom`
+ --]]
+function Geom.centroid(geom)
+    local sum = point.new()
+    for _, p in pairs(geom) do
+        sum = sum + p
+    end
+    return sum / #geom
+end
 
 -- Helper function
 local function flipPoint(p, horizontal)
@@ -75,21 +88,16 @@ function Geom.translate(geom, tx, ty)
     end
 end
 
-
-
 -- Helper function
-local function scalePoint(p, sx, sy)
-    return point.new(p.x * sx, p.y * sy)
+local function scalePoint(p, sx, sy, center)
+    return point.new((p.x - center.x) * sx, (p.y - center.y) * sy) + center
 end
 
 --[[ 
 @luafunc Geom.scale(geom, sx, sy)
 @brief   Scale \em geom by \em sx, \em sy, in reference to the x- and y-axes.
 @param   geom - The geometry to modify.  \em Geom can either be a point or a table of points.
-@descr   If \em geom is not centered on (0,0), scaling may cause an apparent shift in the location of the points.  To avoid this, you can translate
-         the %geom to the %point (0,0), perform the scaling, then tranlsate the points back to their original location.
-
-If \em sy is omitted, \em geom will be scaled evenly horizontally and vertically without distortion.
+@descr   If \em sy is omitted, \em geom will be scaled evenly horizontally and vertically without distortion.
 
 @param   sx - The amount to scale each point in \em geom horizontally.
 @param   sy - (Optional) The amount to scale each point in \em geom vertically.  Defaults to \em sx.
@@ -99,11 +107,12 @@ function Geom.scale(geom, sx, sy)
     sy = sy or sx   -- Passing only one param will scale same amount in x & y directions
 
     if (type(geom) == 'point') then         -- Single point
-        return scalePoint(geom, sx, sy)
+        return geom
     else                                    -- Table of points
         local newPoints = {}
+        local centroid = Geom.centroid(geom)
         for i = 1, #geom do
-            newPoints[i] = scalePoint(geom[i], sx, sy)
+            newPoints[i] = scalePoint(geom[i], sx, sy, centroid)
         end
         return newPoints
     end
