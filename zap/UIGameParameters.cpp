@@ -134,6 +134,9 @@ void GameParamUserInterface::clearCurrentGameTypeParams()
 
 static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
 {
+   if(game->getGameType() != NULL)
+      delete game->getGameType();
+
    // Instantiate our gameType object and cast it to GameType
    TNL::Object *theObject = TNL::Object::create(GameType::getGameTypeClassName((GameTypeId)gtIndex));  
    GameType *gt = dynamic_cast<GameType *>(theObject);   
