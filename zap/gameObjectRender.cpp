@@ -1396,12 +1396,14 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
 
 void renderFlagSpawn(const Point &pos, F32 currentScale, const Color *color)
 {
+   static const Point p(-4, 0);
+
    glPushMatrix();
       glTranslatef(pos.x + 1, pos.y, 0);
       glScalef(0.4f / currentScale, 0.4f / currentScale, 1);
       renderFlag(color);
 
-      drawCircle(-4, 0, 26, &Colors::white);
+      drawCircle(p, 26, &Colors::white);
    glPopMatrix();
 }
 
@@ -1577,13 +1579,12 @@ void renderLoadoutZoneIcon(const Point &center, S32 outerRadius)
 
 void renderGoalZoneIcon(const Point &center, S32 radius)
 {
-   drawCircle(center, radius * 0.45f);
-   drawPolygon(center, 7, radius * 0.6f, FloatPi);
+   static const F32 flagPoints[] = { -6, 10,  -6,-10,  12, -3.333f,  -6, 3.333f, };
+
+   drawPolygon(center, 4, radius * 0.6f, 0.f);
 
    glPushMatrix();
       glTranslatef(center.x, center.y, 0);
-//      glScale(0.8);
-      static F32 flagPoints[] = { -8, 10,  -8,-10,  10, -3.333f,  -8, 3.333f, };
       renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GL_LINE_STRIP);
    glPopMatrix();
 
