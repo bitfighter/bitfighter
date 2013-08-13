@@ -77,6 +77,7 @@ U32 LevelDatabaseUploadThread::run()
       return 0;
    }
 
+   editor->saveLevel(false, false);
    editor->setSaveMessage("Uploaded successfully", true);
    mGame->setLevelDatabaseId(atoi(req.getResponseBody().c_str()));
 
