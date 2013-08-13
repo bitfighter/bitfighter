@@ -363,20 +363,20 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    {
    case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
       SDL_SetWindowSize(gScreenInfo.sdlWindow, sdlWindowWidth, sdlWindowHeight);
-      SDL_SetWindowFullscreen(gScreenInfo.sdlWindow, SDL_TRUE);
+      SDL_SetWindowFullscreen(gScreenInfo.sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
       break;
 
    case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
       SDL_SetWindowSize(gScreenInfo.sdlWindow, sdlWindowWidth, sdlWindowHeight);
-      SDL_SetWindowFullscreen(gScreenInfo.sdlWindow, SDL_TRUE);
+      SDL_SetWindowFullscreen(gScreenInfo.sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
       break;
 
    case DISPLAY_MODE_WINDOWED:
    default:
       // Reverse order, leave fullscreen before setting size
-      SDL_SetWindowFullscreen(gScreenInfo.sdlWindow, SDL_FALSE);
+      SDL_SetWindowFullscreen(gScreenInfo.sdlWindow, 0);
       SDL_SetWindowSize(gScreenInfo.sdlWindow, sdlWindowWidth, sdlWindowHeight);
       break;
    }
