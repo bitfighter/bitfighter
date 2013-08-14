@@ -1222,7 +1222,7 @@ InputMode GameSettings::getInputMode()
 
 void GameSettings::saveHelpItemAlreadySeenList(const string &saveString)
 {
-   mIniSettings.helpItemSeenList = saveString;
+	mIniSettings.mSettings.setVal("HelpItemsAlreadySeenList", saveString);
 }
 
 
