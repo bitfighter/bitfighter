@@ -99,8 +99,9 @@ HelpItemManager::HelpItemManager(GameSettings *settings)
    mTestingTimer.setPeriod(8 * 1000);
 #endif
 
-   reset();    // Mostly does nothing that is not already done, but good for consistency
-   clearAlreadySeenList();
+   reset();					// Mostly does nothing that is not already done, but good for consistency
+   clearAlreadySeenList();	// Needed?  If not, mostly harmless.
+   loadAlreadySeenList();
 }
 
 // Destructor
