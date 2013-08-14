@@ -124,7 +124,18 @@ const string *LineEditor::getStringPtr() const
 
 string LineEditor::getDisplayString() const
 {
-   U32 offsetCharacters = mCursorOffset / mDisplayedCharacters * mDisplayedCharacters;
+   U32 offsetCharacters;
+   static const U32 chunkSize = 10;
+   if(mCursorOffset < mDisplayedCharacters)
+   {
+      offsetCharacters = 0;
+   }
+   else
+   {
+      offsetCharacters = (mCursorOffset - mDisplayedCharacters) / chunkSize + 1;
+      offsetCharacters *= chunkSize;
+   }
+
    return mMasked ? string(mLine.length() - offsetCharacters, MASK_CHAR) : mLine.substr(offsetCharacters, MIN(mDisplayedCharacters, mLine.length() - offsetCharacters));
 }
 
@@ -223,6 +234,7 @@ void LineEditor::completePartial(const Vector<string> *candidates, const string 
 // Draw our cursor, assuming string is drawn at x,y  (vert spacing works differently than on the angle version
 void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
 {
+   static const U32 chunkSize = 10;
    S32 offset;
    
    if(mMasked)
@@ -231,7 +243,17 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
    }
    else
    {
-      U32 offsetCharacters = mCursorOffset / mDisplayedCharacters * mDisplayedCharacters;
+      U32 offsetCharacters;
+      if(mCursorOffset < mDisplayedCharacters)
+      {
+         offsetCharacters = 0;
+      }
+      else
+      {
+         offsetCharacters = (mCursorOffset - mDisplayedCharacters) / chunkSize + 1;
+         offsetCharacters *= chunkSize;
+      }
+      
       offset = getStringWidth(fontSize, mLine.substr(offsetCharacters, mCursorOffset - offsetCharacters).c_str());
    }
 
