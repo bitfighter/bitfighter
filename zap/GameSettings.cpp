@@ -1228,13 +1228,13 @@ void GameSettings::saveHelpItemAlreadySeenList(const string &saveString)
 
 void GameSettings::setShowingInGameHelp(bool show)
 {
-   mIniSettings.showInGameHelp = show;
+   mIniSettings.mSettings.setVal("ShowInGameHelp", show ? Yes : No);
 }
 
 
 bool GameSettings::getShowingInGameHelp()
 {
-   return mIniSettings.showInGameHelp;
+   return mIniSettings.mSettings.getVal<YesNo>("ShowInGameHelp");
 }
 
 

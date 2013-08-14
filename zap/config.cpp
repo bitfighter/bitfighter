@@ -245,6 +245,7 @@ IniSettings::IniSettings()
    mSettings.add(new Setting<YesNo>      ("VoiceEcho",                   No,                    "VoiceEcho",                   "Settings", "Play echo when recording a voice message? Yes/No"));
    mSettings.add(new Setting<YesNo>      ("VerboseHelpMessages",         Yes,                   "VerboseHelpMessages",         "Settings", "Display all messages related to loadout management?  Yes/No"));
    mSettings.add(new Setting<YesNo>      ("ShowKeyboardKeysInStickMode", Yes,                   "ShowKeyboardKeysInStickMode", "Settings", "If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus"));
+   mSettings.add(new Setting<YesNo>      ("ShowInGameHelp",              Yes,                   "ShowInGameHelp",              "Settings", "Show tutorial style messages in-game?  Yes/No"));
 
 
    //controlsRelative = false;          // Relative controls is lame!
@@ -267,7 +268,7 @@ IniSettings::IniSettings()
    allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
    allowGetMap = false;               // Disabled by default -- many admins won't want this
 
-   showInGameHelp = true;             // This is on by default, but messages will not be repeated
+   //showInGameHelp = true;             // This is on by default, but messages will not be repeated
    helpItemSeenList = "";             // By default, no messages will have been seen 
 
    maxDedicatedFPS = 100;             // Max FPS on dedicated server
@@ -603,10 +604,11 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
    //iniSettings->verboseHelpMessages  = ini->GetValueYN(section, "VerboseHelpMessages", iniSettings->verboseHelpMessages);
    //iniSettings->showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
+   //iniSettings->showInGameHelp       = ini->GetValueYN(section, "ShowInGameHelp", iniSettings->showInGameHelp);
    iniSettings->mSettings.getSetting("VerboseHelpMessages")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("VerboseHelpMessages"), "VerboseHelpMessages", iniSettings->mSettings.getDefaultStrVal("VerboseHelpMessages")));
    iniSettings->mSettings.getSetting("ShowKeyboardKeysInStickMode")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("ShowKeyboardKeysInStickMode"), "ShowKeyboardKeysInStickMode", iniSettings->mSettings.getDefaultStrVal("ShowKeyboardKeysInStickMode")));
 
-   iniSettings->showInGameHelp       = ini->GetValueYN(section, "ShowInGameHelp", iniSettings->showInGameHelp);
+   iniSettings->mSettings.getSetting("ShowInGameHelp")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("ShowInGameHelp"), "ShowInGameHelp", iniSettings->mSettings.getDefaultStrVal("ShowInGameHelp")));
    iniSettings->helpItemSeenList     = ini->GetValue  (section, "HelpItemsAlreadySeenList", "");
 
 
@@ -1105,7 +1107,7 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
       addComment(" you start modifying these items. Messages are grouped, and each group has a Caption (short name");
       addComment(" shown on screen), a Key (the shortcut key used to select the group), and a Button (a shortcut button");
       addComment(" used when in joystick mode).  If the Button is \"Undefined key\", then that item will not be shown");
-      addComment(" in joystick mode, unless the ShowKeyboardKeysInStickMode setting is true.  Groups can be defined in");
+      addComment(" in joystick mode, unless the  setting is true.  Groups can be defined in");
       addComment(" any order, but will be displayed sorted by [section] name.  Groups are designated by the");
       addComment(" [QuickChatMessagesGroupXXX] sections, where XXX is a unique suffix, usually a number.");
       addComment(" ");
@@ -1743,7 +1745,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " VoiceEcho - Play echo when recording a voice message? Yes/No");
       ini->sectionComment(section, " ControlMode - Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)");
       ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
-      ini->sectionComment(section, " ShowInGameHelp - Show tutorial style messages in-game?  Yes/No");
       ini->sectionComment(section, " HelpItemsAlreadySeenList - Tracks which in-game help items have already been seen; let the game manage this");
       ini->sectionComment(section, " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
       ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
@@ -1779,10 +1780,11 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
    //ini->setValueYN(section, "VerboseHelpMessages",         iniSettings->verboseHelpMessages);
    //ini->setValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
+   //ini->setValueYN(section, "ShowInGameHelp",              iniSettings->showInGameHelp);
    ini->SetValue  (section, iniSettings->mSettings.getKey("VerboseHelpMessages"), iniSettings->mSettings.getStrVal("VerboseHelpMessages"));
    ini->SetValue  (section, iniSettings->mSettings.getKey("ShowKeyboardKeysInStickMode"), iniSettings->mSettings.getStrVal("ShowKeyboardKeysInStickMode"));
+   ini->SetValue  (section, iniSettings->mSettings.getKey("ShowInGameHelp"), iniSettings->mSettings.getStrVal("ShowInGameHelp"));
 
-   ini->setValueYN(section, "ShowInGameHelp",              iniSettings->showInGameHelp);
    ini->SetValue  (section, "HelpItemsAlreadySeenList",    iniSettings->helpItemSeenList);
 
 #ifndef ZAP_DEDICATED

@@ -294,7 +294,7 @@ public:
 
    bool diagnosticKeyDumpMode;      // True if want to dump keystrokes to the screen
 
-   bool showInGameHelp;             // If true, we'll show help/tutorial messages in game
+   //bool showInGameHelp;             // If true, we'll show help/tutorial messages in game
    string helpItemSeenList;         // Which items have we already seen?
 
    bool allowGetMap;                // allow '/GetMap' command
