@@ -40,6 +40,7 @@
 
 namespace Zap {
 
+
 // Linker needs these declared like this, why?
 // private
 SDL_Joystick *Joystick::sdlJoystick = NULL;
@@ -184,16 +185,16 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 
    // Set joystick type if we found anything
    // Otherwise, it makes more sense to remember what the user had last specified
-   if (!hasBeenOpenedBefore && joystickType != "NoJoystick")
+   if (!hasBeenOpenedBefore && joystickType != NoJoystick)
    {
-      settings->getIniSettings()->joystickType = joystickType;
+	  settings->getIniSettings()->mSettings.setVal("JoystickType", joystickType);
       setSelectedPresetIndex(Joystick::getJoystickIndex(joystickType));
    }
 
    // Set primary input to joystick if any controllers were found, even a generic one
    if(hasBeenOpenedBefore)
       return true;  // Do nothing when this was opened before
-   else if(joystickType == "NoJoystick")
+   else if(joystickType == NoJoystick)
       settings->getInputCodeManager()->setInputMode(InputModeKeyboard);
    else
       settings->getInputCodeManager()->setInputMode(InputModeJoystick);
@@ -243,7 +244,7 @@ S32 Joystick::checkJoystickString_partial_match(const string &controllerName)
 string Joystick::autodetectJoystick(GameSettings *settings)
 {
    if(GameSettings::DetectedJoystickNameList.size() == 0)  // No controllers detected
-      return "NoJoystick";
+      return NoJoystick;
 
    string controllerName = GameSettings::DetectedJoystickNameList[GameSettings::UseJoystickNumber];
 
@@ -260,7 +261,7 @@ string Joystick::autodetectJoystick(GameSettings *settings)
       return JoystickPresetList[match].identifier;
    
    // If we've made it here, let's try the value stored in the INI
-   string lastStickUsed = settings->getIniSettings()->joystickType;
+   string lastStickUsed = settings->getIniSettings()->mSettings.getVal<string>("JoystickType");
 
    // Let's validate that, shall we?
    for(S32 i = 0; i < JoystickPresetList.size(); i++)

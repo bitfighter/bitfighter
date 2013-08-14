@@ -247,12 +247,13 @@ IniSettings::IniSettings()
    mSettings.add(new Setting<YesNo>      ("ShowKeyboardKeysInStickMode", Yes,                   "ShowKeyboardKeysInStickMode", "Settings", "If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus"));
    mSettings.add(new Setting<YesNo>      ("ShowInGameHelp",              Yes,                   "ShowInGameHelp",              "Settings", "Show tutorial style messages in-game?  Yes/No"));
    mSettings.add(new Setting<string>     ("HelpItemsAlreadySeenList",    "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));
-
+   mSettings.add(new Setting<string>     ("JoystickType",                NoJoystick,            "JoystickType",                "Settings", "Type of joystick to use if auto-detect doesn't recognize your controller"));
+   
 
    //controlsRelative = false;          // Relative controls is lame!
    //displayMode = DISPLAY_MODE_WINDOWED;
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
-   joystickType = "NoJoystick";
+   //joystickType = "NoJoystick";
    joystickLinuxUseOldDeviceSystem = false;
    alwaysStartInKeyboardMode = false;
    //echoVoice = false;
@@ -614,7 +615,8 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
 
 #ifndef ZAP_DEDICATED
-   iniSettings->joystickType = ini->GetValue(section, "JoystickType", iniSettings->joystickType);
+   //iniSettings->joystickType = ini->GetValue(section, "JoystickType", iniSettings->joystickType);
+   iniSettings->mSettings.getSetting("JoystickType")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("JoystickType"), "JoystickType", iniSettings->mSettings.getDefaultStrVal("JoystickType")));
    iniSettings->joystickLinuxUseOldDeviceSystem = ini->GetValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
    iniSettings->alwaysStartInKeyboardMode = ini->GetValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
 #endif
@@ -1746,7 +1748,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " VoiceEcho - Play echo when recording a voice message? Yes/No");
       ini->sectionComment(section, " ControlMode - Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)");
       ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
-      ini->sectionComment(section, " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
       ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
       ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
       ini->sectionComment(section, " MasterServerAddressList - Comma seperated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
@@ -1789,7 +1790,9 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
 
 #ifndef ZAP_DEDICATED
-   ini->SetValue  (section, "JoystickType", iniSettings->joystickType);
+   //ini->SetValue  (section, "JoystickType", iniSettings->joystickType);
+   ini->SetValue  (section, iniSettings->mSettings.getKey("JoystickType"), iniSettings->mSettings.getStrVal("JoystickType"));
+
    ini->setValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
    ini->setValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
 #endif

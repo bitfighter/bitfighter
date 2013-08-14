@@ -274,7 +274,7 @@ public:
    //bool controlsRelative;
    //DisplayMode displayMode;
    DisplayMode oldDisplayMode;
-   string joystickType;
+   //string joystickType;
    bool joystickLinuxUseOldDeviceSystem;
    bool alwaysStartInKeyboardMode;
    //bool echoVoice;

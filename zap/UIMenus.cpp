@@ -1291,7 +1291,7 @@ static void defineKeysCallback(ClientGame *game, U32 unused)
 
 static void setControllerCallback(ClientGame *game, U32 joystickIndex)
 {
-   game->getSettings()->getIniSettings()->joystickType = Joystick::JoystickPresetList[joystickIndex].identifier;
+   game->getSettings()->getIniSettings()->mSettings.setVal("JoystickType", Joystick::JoystickPresetList[joystickIndex].identifier);
    Joystick::setSelectedPresetIndex(joystickIndex);
 }
 

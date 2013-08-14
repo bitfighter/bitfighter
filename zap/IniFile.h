@@ -24,6 +24,9 @@
 #define MAX_VALUENAME  128
 #define MAX_VALUEDATA 2048
 
+#define NoJoystick "NoJoystick"
+
+
 using namespace std;
 using namespace TNL;
 
