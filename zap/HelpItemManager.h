@@ -251,6 +251,7 @@ public:
 
    void clearAlreadySeenList();
    void saveAlreadySeenList();
+   void loadAlreadySeenList();
    void resetInGameHelpMessages();
    S32 getRollupPeriod(S32 index) const;     // Public so tests can get access
 

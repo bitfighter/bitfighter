@@ -1220,12 +1220,6 @@ InputMode GameSettings::getInputMode()
 }
 
 
-void GameSettings::saveHelpItemAlreadySeenList(const string &saveString)
-{
-	mIniSettings.mSettings.setVal("HelpItemsAlreadySeenList", saveString);
-}
-
-
 void GameSettings::setShowingInGameHelp(bool show)
 {
    mIniSettings.mSettings.setVal("ShowInGameHelp", show ? Yes : No);

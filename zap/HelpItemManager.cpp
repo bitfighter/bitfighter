@@ -530,7 +530,13 @@ void HelpItemManager::clearAlreadySeenList()
 // Write seen status to INI
 void HelpItemManager::saveAlreadySeenList()
 {
-   mGameSettings->saveHelpItemAlreadySeenList(getAlreadySeenString());
+   mGameSettings->getIniSettings()->mSettings.setVal("HelpItemsAlreadySeenList", getAlreadySeenString());
+}
+
+
+void HelpItemManager::loadAlreadySeenList()
+{
+   setAlreadySeenString(mGameSettings->getIniSettings()->mSettings.getVal<string>("HelpItemsAlreadySeenList"));
 }
 
 
