@@ -77,6 +77,10 @@ void drawHollowRect(T x1, U y1, V x2, W y2, const Color &outlineColor)
 }
 
 
+void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, S32 mode);
+void drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor);
+
+
 void renderUpArrow(const Point &center, S32 size);
 void renderDownArrow(const Point &center, S32 size);
 void renderLeftArrow(const Point &center, S32 size);

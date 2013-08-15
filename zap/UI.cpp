@@ -232,33 +232,9 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
 }
 
 
-// This renders a semi-transparent box with two corners angled.  A fancy UI element.
-void UserInterface::renderFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor)
-{
-   Point p[] = {
-         Point(xLeft, yTop),                                // Top
-         Point(xRight - cornerInset, yTop),
-         Point(xRight, yTop + cornerInset),    // Edge
-         Point(xRight, yBottom),      // Bottom
-         Point(xLeft + cornerInset, yBottom),
-         Point(xLeft, yBottom - cornerInset)     // Edge
-   };
-
-   Vector<Point> points(p, ARRAYSIZE(p));
-
-   // Fill
-   glColor(fillColor, fillAlpha);
-   renderPointVector(&points, GL_TRIANGLE_FAN);
-
-   // Border
-   glColor(borderColor, fillAlpha);
-   renderPointVector(&points, GL_LINE_LOOP);
-}
-
-
 void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor)
 {
-   renderFancyBox(inset, boxTop, gScreenInfo.getGameCanvasWidth() - inset, boxTop + boxHeight, cornerInset, fillColor, fillAlpha, borderColor);
+   drawFilledFancyBox(inset, boxTop, gScreenInfo.getGameCanvasWidth() - inset, boxTop + boxHeight, cornerInset, fillColor, fillAlpha, borderColor);
 }
 
 

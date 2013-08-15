@@ -1987,9 +1987,9 @@ void GameUserInterface::renderScoreboard()
    const S32 symbolFontSize = S32(playerFontSize * 0.75f);
 
    // Outer scoreboard box
-   renderFancyBox(horizMargin - gap, scoreboardTop - (2 * gap),
-                  (canvasWidth - horizMargin) + gap, scoreboardTop + totalHeight + 20,
-                  13, Colors::black, 0.85f, Colors::blue);
+   drawFilledFancyBox(horizMargin - gap, scoreboardTop - (2 * gap),
+                     (canvasWidth - horizMargin) + gap, scoreboardTop + totalHeight + 20,
+                     13, Colors::black, 0.85f, Colors::blue);
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
@@ -2006,7 +2006,7 @@ void GameUserInterface::renderScoreboard()
 
       if(isTeamGame)     
       {
-         renderFancyBox(xl, yt, xr, yt + teamFontSize + 2 * gap, 10, *teamColor, 0.6f, *teamColor);
+         drawFilledFancyBox(xl, yt, xr, yt + teamFontSize + 2 * gap, 10, *teamColor, 0.6f, *teamColor);
 
          glColor(Colors::white);
          drawString(xl + 40, yt + 2, teamFontSize, getGame()->getTeamName(i).getString());

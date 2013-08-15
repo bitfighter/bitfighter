@@ -664,6 +664,33 @@ void drawHollowRect(const Point &p1, const Point &p2)
 }
 
 
+void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, S32 mode)
+{
+   F32 vertices[] = {
+         xLeft, yTop,                   // Top
+         xRight - cornerInset, yTop,
+         xRight, yTop + cornerInset,    // Edge
+         xRight, yBottom,               // Bottom
+         xLeft + cornerInset, yBottom,
+         xLeft, yBottom - cornerInset   // Edge
+   };
+
+   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode);
+}
+
+
+void drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor)
+{
+   // Fill
+   glColor(fillColor, fillAlpha);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GL_TRIANGLE_FAN);
+
+   // Border
+   glColor(borderColor, 1.f);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GL_LINE_LOOP);
+}
+
+
 void renderUpArrow(const Point &center, S32 size)
 {
    F32 offset = (F32)size / 2;

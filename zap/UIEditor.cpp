@@ -1580,7 +1580,7 @@ void EditorUserInterface::renderDock()
 
    S32 dockHeight = getDockHeight();
 
-   renderFancyBox(canvasWidth - mDockWidth - horizMargin, canvasHeight - vertMargin - dockHeight,
+   drawFilledFancyBox(canvasWidth - mDockWidth - horizMargin, canvasHeight - vertMargin - dockHeight,
                   canvasWidth - horizMargin,              canvasHeight - vertMargin,
                   8, fillColor, .7f, (mouseOnDock() ? Colors::yellow : Colors::white));
 
@@ -1613,7 +1613,7 @@ void EditorUserInterface::renderInfoPanel()
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-   renderFancyBox(PanelLeft, PanelTop, PanelRight, PanelBottom, 6, Colors::richGreen, .7f, Colors::white);
+   drawFilledFancyBox(PanelLeft, PanelTop, PanelRight, PanelBottom, 6, Colors::richGreen, .7f, Colors::white);
 
 
    // Draw coordinates on panel -- if we're moving an item, show the coords of the snap vertex, otherwise show the coords of the
