@@ -643,11 +643,11 @@ void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, cons
 
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor)
 {
-   for(S32 i = 1; i >= 0; i--)
-   {
-      glColor(i ? fillColor : outlineColor, i ? fillAlpha : 1);
-      drawRect(x1, y1, x2, y2, i ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
-   }
+   glColor(fillColor, fillAlpha);
+   drawRect(x1, y1, x2, y2, GL_TRIANGLE_FAN);
+
+   glColor(outlineColor, 1);
+   drawRect(x1, y1, x2, y2, GL_LINE_LOOP);
 }
 
 
