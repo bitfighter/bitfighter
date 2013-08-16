@@ -4971,7 +4971,11 @@ void EditorMenuUserInterface::setupMenus()
    addMenuItem(new MenuItem("INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, getInputCode(settings, InputCodeManager::BINDING_HELP)));
    addMenuItem(new MenuItem("LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
    addMenuItem(new MenuItem("MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
-   addMenuItem(new MenuItem("UPLOAD TO DB",     uploadToDbCallback,          "", KEY_U));
+
+   // Only show the upload to database option if authenticated
+   if(getGame()->getClientInfo()->isAuthenticated())
+      addMenuItem(new MenuItem("UPLOAD TO DB",     uploadToDbCallback,          "", KEY_U));
+
    addMenuItem(new MenuItem("QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
 }
 
