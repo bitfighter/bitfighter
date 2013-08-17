@@ -86,8 +86,8 @@ template<> RelAbs      Setting<RelAbs>::fromString     (const string &val) { ret
 
 
 // Constructor
-AbstractSetting::AbstractSetting(const string &name, const string &key, const string &section) : 
-            mName(name), mIniKey(key), mIniSection(section) 
+AbstractSetting::AbstractSetting(const string &name, const string &key, const string &section, const string &comment) : 
+            mName(name), mIniKey(key), mIniSection(section), mComment(comment) 
 { 
    // Do nothing
 }
@@ -102,6 +102,7 @@ AbstractSetting::~AbstractSetting()
 string AbstractSetting::getName()    const { return mName;       }
 string AbstractSetting::getKey()     const { return mIniKey;     }
 string AbstractSetting::getSection() const { return mIniSection; }
+string AbstractSetting::getComment() const { return mComment;    }
 
 
 ////////////////////////////////////////
@@ -154,17 +155,31 @@ string Settings::getSection(const string &name) const
 }
 
 
+// There are much more efficient ways to do this!
+Vector<AbstractSetting *> Settings::getSettingsInSection(const string &section) const
+{
+   Vector<AbstractSetting *> settings;
+   for(S32 i = 0; i < mSettings.size(); i++)
+   {
+      if(mSettings[i]->getSection() == section)
+         settings.push_back(mSettings[i]);
+   }
+
+   return settings;
+}  
+
+
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 
 template <class T>
-Setting<T>::Setting(const string &name, const T &defaultValue, const string &iniKey, const string &iniSection, const string &description) :
-   Parent(name, iniKey, iniSection),
+Setting<T>::Setting(const string &name, const T &defaultValue, const string &iniKey, const string &iniSection, const string &comment) :
+   Parent(name, iniKey, iniSection, comment),
    mDefaultValue(defaultValue),
-   mValue(defaultValue),
-   mDescription(description)
+   mValue(defaultValue)
 {
    // Do nothing
 }
@@ -587,41 +602,34 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    string section = "Settings";
 
-#ifdef TNL_OS_MOBILE
-   // Mobile usually have a single, fullscreen mode
-   //iniSettings->displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-   iniSettings->mSettings.setVal("WindowMode", DISPLAY_MODE_FULL_SCREEN_STRETCHED);
-#else
-   iniSettings->mSettings.getSetting("WindowMode")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("WindowMode"), "WindowMode", iniSettings->mSettings.getDefaultStrVal("WindowMode")));
-#endif
-
-   iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>("WindowMode");
-
    //iniSettings->controlsRelative = (lcase(ini->GetValue(section, "ControlMode", 
    //                                     (iniSettings->controlsRelative ? "Relative" : "Absolute"))) == "relative");
-   iniSettings->mSettings.getSetting("ControlMode")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("ControlMode"), "ControlMode", iniSettings->mSettings.getDefaultStrVal("ControlMode")));
 
    //iniSettings->echoVoice            = ini->GetValueYN(section, "VoiceEcho", iniSettings->echoVoice);
-   iniSettings->mSettings.getSetting("VoiceEcho")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("VoiceEcho"), "VoiceEcho", iniSettings->mSettings.getDefaultStrVal("VoiceEcho")));
 
    //iniSettings->verboseHelpMessages  = ini->GetValueYN(section, "VerboseHelpMessages", iniSettings->verboseHelpMessages);
    //iniSettings->showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
    //iniSettings->showInGameHelp       = ini->GetValueYN(section, "ShowInGameHelp", iniSettings->showInGameHelp);
-   //iniSettings->helpItemSeenList     = ini->GetValue  (section, "HelpItemsAlreadySeenList", "");
-   iniSettings->mSettings.getSetting("VerboseHelpMessages")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("VerboseHelpMessages"), "VerboseHelpMessages", iniSettings->mSettings.getDefaultStrVal("VerboseHelpMessages")));
-   iniSettings->mSettings.getSetting("ShowKeyboardKeysInStickMode")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("ShowKeyboardKeysInStickMode"), "ShowKeyboardKeysInStickMode", iniSettings->mSettings.getDefaultStrVal("ShowKeyboardKeysInStickMode")));
-   iniSettings->mSettings.getSetting("ShowInGameHelp")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("ShowInGameHelp"), "ShowInGameHelp", iniSettings->mSettings.getDefaultStrVal("ShowInGameHelp")));
-   iniSettings->mSettings.getSetting("HelpItemsAlreadySeenList")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("HelpItemsAlreadySeenList"), "HelpItemsAlreadySeenList", iniSettings->mSettings.getDefaultStrVal("HelpItemsAlreadySeenList")));
+   //iniSettings->helpItemSeenList     = ini->GetValue  (section, "HelpItemsAlreadySeenList", "");              
 
+   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
+   for(S32 i = 0; i < settings.size(); i++)
+      settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
+
+#ifdef TNL_OS_MOBILE
+   // Mobile usually have a single, fullscreen mode
+   //iniSettings->displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   iniSettings->mSettings.setVal("WindowMode", DISPLAY_MODE_FULL_SCREEN_STRETCHED);
+#endif
+
+   iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>("WindowMode");
 
 #ifndef ZAP_DEDICATED
    //iniSettings->joystickType = ini->GetValue(section, "JoystickType", iniSettings->joystickType);
-   iniSettings->mSettings.getSetting("JoystickType")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("JoystickType"), "JoystickType", iniSettings->mSettings.getDefaultStrVal("JoystickType")));
    iniSettings->joystickLinuxUseOldDeviceSystem = ini->GetValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
    iniSettings->alwaysStartInKeyboardMode = ini->GetValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
 #endif
    //iniSettings->useFakeFullscreen = ini->GetValueYN(section, "UseFakeFullscreen", iniSettings->useFakeFullscreen);
-   iniSettings->mSettings.getSetting("UseFakeFullscreen")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("UseFakeFullscreen"), "UseFakeFullscreen", iniSettings->mSettings.getDefaultStrVal("UseFakeFullscreen")));
 
 
    iniSettings->winXPos = max(ini->GetValueI(section, "WindowXPos", iniSettings->winXPos), 0);    // Restore window location
@@ -634,7 +642,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->password       = ini->GetValue(section, "Password", iniSettings->password);
 
    iniSettings->defaultName    = ini->GetValue(section, "DefaultName", iniSettings->defaultName);
-   iniSettings->mSettings.getSetting("LastName")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("LastName"), "LastName", iniSettings->mSettings.getDefaultStrVal("LastName")));
+   //iniSettings->mSettings.getSetting("LastName")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("LastName"), "LastName", iniSettings->mSettings.getDefaultStrVal("LastName")));
 
    iniSettings->lastPassword   = ini->GetValue(section, "LastPassword", iniSettings->lastPassword);
    iniSettings->lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings->lastEditorName);
@@ -1737,10 +1745,17 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    const char *section = "Settings";
    ini->addSection(section);
 
-   if (ini->numSectionComments(section) == 0)
+   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
+
+   if(ini->numSectionComments(section) == 0)
    {
       ini->sectionComment(section, "----------------");
       ini->sectionComment(section, " Settings entries contain a number of different options");//
+
+      for(S32 i = 0; i < settings.size(); i++)
+         ini->sectionComment(section, " " + settings[i]->getKey() + " - " + settings[i]->getComment());
+
+
       ini->sectionComment(section, " WindowMode - Fullscreen, Fullscreen-Stretch or Window");
       ini->sectionComment(section, " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
       ini->sectionComment(section, " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
@@ -1765,15 +1780,17 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
       ini->sectionComment(section, "----------------");
    }
+
+   for(S32 i = 0; i < settings.size(); i++)
+      ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
+
+
    //ini->SetValue("Settings",  "WindowMode", displayModeToString(iniSettings->displayMode));
-   ini->SetValue  (section, iniSettings->mSettings.getKey("WindowMode"), iniSettings->mSettings.getStrVal("WindowMode"));
    
    saveWindowPosition(ini, iniSettings->winXPos, iniSettings->winYPos);
 
-   ini->SetValue  (section, iniSettings->mSettings.getKey("UseFakeFullscreen"), iniSettings->mSettings.getStrVal("UseFakeFullscreen"));
    ini->SetValueF (section, "WindowScalingFactor", iniSettings->winSizeFact);
    //ini->setValueYN(section, "VoiceEcho", iniSettings->echoVoice );
-   ini->SetValue  (section, iniSettings->mSettings.getKey("VoiceEcho"), iniSettings->mSettings.getStrVal("VoiceEcho"));
 
    //ini->SetValue  (section, "ControlMode", (iniSettings->controlsRelative ? "Relative" : "Absolute"));
 
@@ -1783,15 +1800,9 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    //ini->setValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
    //ini->setValueYN(section, "ShowInGameHelp",              iniSettings->showInGameHelp);
    //ini->SetValue  (section, "HelpItemsAlreadySeenList",    iniSettings->helpItemSeenList);
-   ini->SetValue  (section, iniSettings->mSettings.getKey("VerboseHelpMessages"), iniSettings->mSettings.getStrVal("VerboseHelpMessages"));
-   ini->SetValue  (section, iniSettings->mSettings.getKey("ShowKeyboardKeysInStickMode"), iniSettings->mSettings.getStrVal("ShowKeyboardKeysInStickMode"));
-   ini->SetValue  (section, iniSettings->mSettings.getKey("ShowInGameHelp"), iniSettings->mSettings.getStrVal("ShowInGameHelp"));
-   ini->SetValue  (section, iniSettings->mSettings.getKey("HelpItemsAlreadySeenList"), iniSettings->mSettings.getStrVal("HelpItemsAlreadySeenList"));
-
 
 #ifndef ZAP_DEDICATED
    //ini->SetValue  (section, "JoystickType", iniSettings->joystickType);
-   ini->SetValue  (section, iniSettings->mSettings.getKey("JoystickType"), iniSettings->mSettings.getStrVal("JoystickType"));
 
    ini->setValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
    ini->setValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
@@ -1800,7 +1811,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValue  (section, "DefaultName", iniSettings->defaultName);
    ini->SetValue  (section, "Nickname", iniSettings->name);
    ini->SetValue  (section, "Password", iniSettings->password);
-   ini->SetValue  (section, iniSettings->mSettings.getKey("LastName"), iniSettings->mSettings.getStrVal("LastName"));
    ini->SetValue  (section, "LastPassword", iniSettings->lastPassword);
    ini->SetValue  (section, "LastEditorName", iniSettings->lastEditorName);
 

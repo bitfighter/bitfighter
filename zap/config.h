@@ -169,10 +169,11 @@ private:
    string mName;        // Value we use to look this item up
    string mIniKey;      // INI key
    string mIniSection;  // INI section
+   string mComment;
 
 public:
-   AbstractSetting(const string &name, const string &key, const string &section);   // Constructor
-   virtual ~AbstractSetting();                                                      // Destructor
+   AbstractSetting(const string &name, const string &key, const string &section, const string &comment);   // Constructor
+   virtual ~AbstractSetting();                                                                             // Destructor
 
    string getName() const;   
    string getKey() const;
@@ -182,7 +183,9 @@ public:
 
    virtual string getValueString() const = 0;         // Returns current value, as a string
    virtual string getDefaultValueString() const = 0;  // Returns default value, as a string
+   virtual string getComment() const;
 };
+
 
 
 ////////////////////////////////////////
@@ -198,10 +201,8 @@ private:
    T mDefaultValue;
    T mValue;
 
-   string mDescription;
-
 public:
-   Setting<T>(const string &name, const T &defaultValue, const string &iniKey, const string &iniSection, const string &description);
+   Setting<T>(const string &name, const T &defaultValue, const string &iniKey, const string &iniSection, const string &comment);
    virtual ~Setting<T>();
 
    T getValue() const;
@@ -254,6 +255,8 @@ public:
    string getDefaultStrVal(const string &name) const;
    string getKey          (const string &name) const;
    string getSection      (const string &name) const;
+
+   Vector<AbstractSetting *> getSettingsInSection(const string &section) const;
 };
 
 
