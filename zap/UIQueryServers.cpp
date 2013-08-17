@@ -958,7 +958,9 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
    const S32 xpos1 = (canvasWidth - strwid) / 2 - msgboxMargin; 
    const S32 xpos2 = (canvasWidth + strwid) / 2 + msgboxMargin;
 
-   drawFilledRect(xpos1, ypos1, xpos2, ypos2, Color(.4, 0, 0), Colors::red);
+   static const S32 CORNER_INSET = 15;
+
+   drawFilledFancyBox(xpos1, ypos1, xpos2, ypos2, CORNER_INSET, Color(.4, 0, 0), 1.0, Colors::red);
 
    // Draw text
    glColor(Colors::white);
@@ -1495,7 +1497,9 @@ void Button::render(F32 mouseX, F32 mouseY) const
    else
       color = mFgColor;    
 
-   drawFilledRect(mX, mY, mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2, mBgColor, color);
+   static const S32 INSET = 4;
+
+   drawFilledFancyBox(mX, mY, mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2, INSET, mBgColor, 1.0f, color);
    drawString(mX + mPadding, mY + mPadding, mTextSize, mLabel);
 }
  
