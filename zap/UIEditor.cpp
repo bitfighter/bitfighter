@@ -1580,7 +1580,7 @@ void EditorUserInterface::renderDock()
 
    S32 dockHeight = getDockHeight();
 
-   renderFancyBox(canvasWidth - mDockWidth - horizMargin, canvasHeight - vertMargin - dockHeight,
+   drawFilledFancyBox(canvasWidth - mDockWidth - horizMargin, canvasHeight - vertMargin - dockHeight,
                   canvasWidth - horizMargin,              canvasHeight - vertMargin,
                   8, fillColor, .7f, (mouseOnDock() ? Colors::yellow : Colors::white));
 
@@ -1613,7 +1613,7 @@ void EditorUserInterface::renderInfoPanel()
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-   renderFancyBox(PanelLeft, PanelTop, PanelRight, PanelBottom, 6, Colors::richGreen, .7f, Colors::white);
+   drawFilledFancyBox(PanelLeft, PanelTop, PanelRight, PanelBottom, 6, Colors::richGreen, .7f, Colors::white);
 
 
    // Draw coordinates on panel -- if we're moving an item, show the coords of the snap vertex, otherwise show the coords of the
@@ -4971,7 +4971,11 @@ void EditorMenuUserInterface::setupMenus()
    addMenuItem(new MenuItem("INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, getInputCode(settings, InputCodeManager::BINDING_HELP)));
    addMenuItem(new MenuItem("LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
    addMenuItem(new MenuItem("MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
-   addMenuItem(new MenuItem("UPLOAD TO DB",     uploadToDbCallback,          "", KEY_U));
+
+   // Only show the upload to database option if authenticated
+   if(getGame()->getClientInfo()->isAuthenticated())
+      addMenuItem(new MenuItem("UPLOAD TO DB",     uploadToDbCallback,          "", KEY_U));
+
    addMenuItem(new MenuItem("QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
 }
 

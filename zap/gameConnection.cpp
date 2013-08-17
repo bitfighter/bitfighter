@@ -601,7 +601,16 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
                                                 mServerGame->getCurrentLevelFileName().getString());
    else
    {
-      const char *types[] = { "level change password", "admin password", "server password", "server name", "server description", "leveldir param" };
+      // Must be kept aligned with ParamType enum
+      const char *types[] = {
+            "level change password",
+            "admin password",
+            "owner password",
+            "server password",
+            "server name",
+            "server description",
+            "leveldir param"
+      };
       logprintf(LogConsumer::ServerFilter, "User [%s] %s to [%s]", mClientInfo->getName().getString(), 
                                                                    strcmp(param.getString(), "") ? "changed" : "cleared", types[type]);
    }
