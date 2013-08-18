@@ -175,9 +175,8 @@ void FxManager::TextEffect::render() const
    //glLineWidth(size);
    glPushMatrix();
       glTranslate(pos);
-      glScale(size);
       FontManager::pushFontContext(TextEffectContext);
-         drawStringc(0, 0, 12, text.c_str());
+         drawStringc(0.0f, 0.0f, 12.0f * size, text.c_str());
       FontManager::popFontContext();
    glPopMatrix();
    //glLineWidth(gDefaultLineWidth);
