@@ -416,20 +416,21 @@ void FontManager::renderString(F32 size, const char *string)
    }
    else
    {
-      // Flip upside down because y = -y
-      //
-      // Also invert any screen scaling we may be applying.  This is so we can draw the
-      // TTF font at the exact pixel size we want, instead of scaling it and risk it
-      // becoming fuzzy or blurry
-      glScalef(1 / gScreenInfo.getPixelRatio(), -1 / gScreenInfo.getPixelRatio(), 1);
-
       // Bonkers factor because we build the game around thinking the font size was 120
       // when it was really 152.381 (see bottom of FontStrokeRoman.h as well as magic scale
       // factor of 120.0f a few lines below).  This factor == 152.381 / 120
       static F32 legacyNormalizationFactor = legacyRomanSizeFactorThanksGlut / 120.0f;    // == 1.26984166667f
 
-      // Multiply the size by the pixel ratio so we have crisp-looking fonts
-      drawTTFString(font, string, size * legacyNormalizationFactor * gScreenInfo.getPixelRatio());
+      // In order to make TTF fonts crisp at all font and window sizes, we first
+      // correct for the pixelRatio scaling, and then generate a texture with twice
+      // the resolution we need. This produces crisp, anti-aliased text even after the
+      // texture is resampled.
+      F32 k = gScreenInfo.getPixelRatio() * 2.0;
+
+      // Flip upside down because y = -y
+      glScalef(1 / k, -1 / k, 1);
+      // `size * k` becomes `size` due to the glScale above
+      drawTTFString(font, string, size * k * legacyNormalizationFactor);
    }
 }
 
