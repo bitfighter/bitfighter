@@ -154,12 +154,14 @@ void FxManager::DebrisChunk::render() const
 }
 
 
+static const F32 MAX_TEXTEFFECT_SIZE = 10.0f;
+
 void FxManager::TextEffect::idle(U32 timeDelta)
 {
    F32 dTsecs = F32(timeDelta) * 0.001f;     // Convert timeDelta to seconds
 
    pos += vel * dTsecs;
-   if(size < 10)
+   if(size < MAX_TEXTEFFECT_SIZE)
       size += growthRate * dTsecs;
 
    ttl -= timeDelta;
@@ -175,8 +177,9 @@ void FxManager::TextEffect::render() const
    //glLineWidth(size);
    glPushMatrix();
       glTranslate(pos);
+      glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
       FontManager::pushFontContext(TextEffectContext);
-         drawStringc(0.0f, 0.0f, 12.0f * size, text.c_str());
+         drawStringc(0.0f, 0.0f, 120.0f, text.c_str());
       FontManager::popFontContext();
    glPopMatrix();
    //glLineWidth(gDefaultLineWidth);
