@@ -4928,7 +4928,15 @@ static void activateTeamDefCallback(ClientGame *game, U32 unused)
 void uploadToDbCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->reactivatePrevUI();
-   game->getUIManager()->getUI<EditorUserInterface>()->createNormalizedScreenshot(game);
+
+   EditorUserInterface* editor = game->getUIManager()->getUI<EditorUserInterface>();
+   editor->createNormalizedScreenshot(game);
+
+   if(game->getGameType()->getLevelName()->getString()[0] == '\0')
+   {
+      editor->setSaveMessage("You must give your map a name before uploading it", false);
+      return;
+   }
 
    static Thread* uploadThread;
    uploadThread = new LevelDatabaseUploadThread(game);
