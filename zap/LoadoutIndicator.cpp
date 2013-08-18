@@ -153,13 +153,9 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    {
       ShipModule module = loadout.getModule(i);
 
-      if(gModuleInfo[module].getPrimaryUseType() != ModulePrimaryUseActive)
+      if(gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUsePassive)
       {
-         if(gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUseHybrid &&
-               loadout.isModulePrimaryActive(module))
-            glColor(INDICATOR_ACTIVE_COLOR);
-         else
-            glColor(INDICATOR_PASSIVE_COLOR);
+         glColor(INDICATOR_PASSIVE_COLOR);
       }
       else if(loadout.isModulePrimaryActive(module))
          glColor(INDICATOR_ACTIVE_COLOR);

@@ -1012,6 +1012,7 @@ void GameUserInterface::activateModule(S32 index)
 
    // Activate module primary component
    mModPrimaryActivated[index] = true;
+   setModulePrimary(getGame()->getLocalPlayerShip()->getModule(index), true);
 
    // If the module secondary double-tap timer hasn't run out, activate the secondary component
    if(mModuleDoubleTapTimer[index].getCurrent() != 0)
@@ -1497,11 +1498,13 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
    {
       mModPrimaryActivated[0] = false;
       mModSecondaryActivated[0] = false;
+      setModulePrimary(getGame()->getLocalPlayerShip()->getModule(0), false);
    }
    else if(checkInputCode(InputCodeManager::BINDING_MOD2, inputCode))
    {
       mModPrimaryActivated[1] = false;
       mModSecondaryActivated[1] = false;
+      setModulePrimary(getGame()->getLocalPlayerShip()->getModule(1), false);
    }
    else if(checkInputCode(InputCodeManager::BINDING_FIRE, inputCode))
       mFiring = false;
