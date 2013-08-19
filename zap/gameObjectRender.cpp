@@ -1232,6 +1232,7 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
 // Renders turret!  --> note that anchor and normal can't be const &Points because of the point math
 void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
 {
+   static const F32 frontRadius = 15.f;
 
    Point cross(normal.y, -normal.x);
    Point aimCenter = anchor + normal * Turret::TURRET_OFFSET;
@@ -1242,26 +1243,39 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
    {
       F32 theta = x * FloatHalfPi * 0.1f;
       Point pos = normal * cos(theta) + cross * sin(theta);
-      vertexArray.push_back(aimCenter + pos * 15);
-   }
-
-   if(healRate > 0)
-   {
-      F32 alpha = MAX(0, 0.9f - (F32) healRate * 0.01f);
-      glColor(c * 0.8f, alpha);
-      renderPointVector(&vertexArray, GL_TRIANGLE_FAN);
+      vertexArray.push_back(aimCenter + pos * frontRadius);
    }
 
    glColor(c);
 
    renderPointVector(&vertexArray, GL_LINE_STRIP);
 
-   glLineWidth(gLineWidth3);
+   // Render symbol if it is a regenerating turret
+   if(healRate > 0)
+   {
+      F32 angle = anchor.angleTo(aimCenter);
+      Point centerPoint = (Point(cos(angle), sin(angle)) * frontRadius * 0.5f) + aimCenter;
+
+      static const F32 symbol[] = {
+            -3, 0,
+            3, 0,
+            0, 3,
+            0, -3,
+      };
+
+      glPushMatrix();
+         glTranslate(centerPoint);
+         glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
+         renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, GL_LINES);
+      glPopMatrix();
+   }
 
    // Render gun
+   glLineWidth(gLineWidth3);
+
    Point aimDelta(cos(barrelAngle), sin(barrelAngle));
-   Point aim1(aimCenter + aimDelta * 15);
-   Point aim2(aimCenter + aimDelta * 30);
+   Point aim1(aimCenter + aimDelta * frontRadius);
+   Point aim2(aimCenter + aimDelta * frontRadius * 2);
    F32 vertices[] = {
          aim1.x, aim1.y,
          aim2.x, aim2.y
@@ -2394,14 +2408,14 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
 
 
 // Only used by instructions... in-game uses the other signature
-void renderForceFieldProjector(Point pos, Point normal, const Color *color, bool enabled)
+void renderForceFieldProjector(const Point &pos, const Point &normal, const Color *color, bool enabled)
 {
    Vector<Point> geom = ForceFieldProjector::getForceFieldProjectorGeometry(pos, normal);
-   renderForceFieldProjector(&geom, color, enabled);
+   renderForceFieldProjector(&geom, pos, color, enabled);
 }
 
 
-void renderForceFieldProjector(const Vector<Point> *geom, const Color *color, bool enabled, S32 healRate)
+void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color *color, bool enabled, S32 healRate)
 {
    F32 ForceFieldBrightnessProjector = 0.50;
 
@@ -2409,13 +2423,29 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Color *color, bo
 
    c = c * (1 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
 
+   glColor(enabled ? c : (c * 0.6f));
+
+   // Draw a symbol in the project to show it is a regenerative projector
    if(healRate > 0)
    {
-      glColor(c * 0.8f, MAX(0, 0.9f - (F32) healRate * 0.01f));
-      renderPointVector(geom, GL_TRIANGLE_FAN);
-   }
+      // Point 0 is the where the forcefield comes out
+      // Use a point partly along the line from the position to FF (not midpoint, doesn't look so good)
+      Point centerPoint = ((geom->get(0) - pos) * 0.333f) + pos;
+      F32 angle = pos.angleTo(geom->get(0));
 
-   glColor(enabled ? c : (c * 0.6f));
+      static const F32 symbol[] = {
+            -3, 0,
+            3, 0,
+            0, 3,
+            0, -3,
+      };
+
+      glPushMatrix();
+         glTranslate(centerPoint);
+         glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
+         renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, GL_LINES);
+      glPopMatrix();
+   }
 
    renderPointVector(geom, GL_LINE_LOOP);
 }

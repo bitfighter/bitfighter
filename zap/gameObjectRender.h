@@ -275,9 +275,8 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
 extern void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScale);
 extern void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines);
 
-extern void renderForceFieldProjector(Point pos, Point normal);
-extern void renderForceFieldProjector(Point pos, Point normal, const Color *teamColor, bool enabled);
-extern void renderForceFieldProjector(const Vector<Point> *geom, const Color *teamColor, bool enabled, S32 healRate = 0);
+extern void renderForceFieldProjector(const Point &pos, const Point &normal, const Color *teamColor, bool enabled);
+extern void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color *teamColor, bool enabled, S32 healRate = 0);
 extern void renderForceField(Point start, Point end, const Color *c, bool fieldUp, F32 scale = 1);
 
 extern void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);

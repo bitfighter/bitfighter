@@ -1516,7 +1516,7 @@ void ForceFieldProjector::onAddedToGame(Game *theGame)
 
 void ForceFieldProjector::render()
 {
-   renderForceFieldProjector(&mCollisionPolyPoints, getColor(), isEnabled(), mHealRate);
+   renderForceFieldProjector(&mCollisionPolyPoints, getPos(), getColor(), isEnabled(), mHealRate);
 }
 
 
@@ -1536,7 +1536,7 @@ void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCorn
    {
       Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal, scaleFact);
 
-      renderForceFieldProjector(&mCollisionPolyPoints, color, true, mHealRate);
+      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, mHealRate);
       renderForceField(forceFieldStart, forceFieldEnd, color, true, scaleFact);
    }
    else
