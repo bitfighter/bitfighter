@@ -1253,21 +1253,14 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
    // Render symbol if it is a regenerating turret
    if(healRate > 0)
    {
-      F32 angle = anchor.angleTo(aimCenter);
-      Point centerPoint = (Point(cos(angle), sin(angle)) * frontRadius * 0.5f) + aimCenter;
-
-      static const F32 symbol[] = {
-            -3, 0,
-            3, 0,
-            0, 3,
-            0, -3,
-      };
-
-      glPushMatrix();
-         glTranslate(centerPoint);
-         glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
-         renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, GL_LINES);
-      glPopMatrix();
+      Vector<Point> pointArray;
+      for(S32 x = -4; x <= 4; x++)
+      {
+         F32 theta = x * FloatHalfPi * 0.2f;
+         Point pos = normal * cos(theta) + cross * sin(theta);
+         pointArray.push_back(aimCenter + pos * frontRadius * 0.667f);
+      }
+      renderPointVector(&pointArray, GL_LINE_STRIP);
    }
 
    // Render gun
@@ -2434,16 +2427,15 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
       F32 angle = pos.angleTo(geom->get(0));
 
       static const F32 symbol[] = {
-            -3, 0,
-            3, 0,
-            0, 3,
-            0, -3,
+            -2, 5,
+            4, 0,
+            -2, -5,
       };
 
       glPushMatrix();
          glTranslate(centerPoint);
          glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
-         renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, GL_LINES);
+         renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, GL_LINE_STRIP);
       glPopMatrix();
    }
 
