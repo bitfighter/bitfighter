@@ -2092,7 +2092,7 @@ void GameUserInterface::renderScoreboard()
    // Create a standard legend; only need to swap out the Humans count, which is the first chunk -- this should work even if
    // there are multiple players running in the same session -- the humans count should be the same regardless!
    static Vector<SymbolShapePtr> symbols;
-   static S32 lastHumans = -1;
+   static S32 lastHumans = S32_MIN;
    if(symbols.size() == 0)
    {
       string legend = " | " + string(adminSymbol) + " = Admin | " + 
@@ -2105,7 +2105,7 @@ void GameUserInterface::renderScoreboard()
       symbols.push_back(SymbolShapePtr(new SymbolText("Player on Kill Streak", LegendSize, ScoreboardContext, &Colors::streakPlayerNameColor)));
    }
 
-   // Rebuild the humans symbol, if needed
+   // Rebuild the humans symbol, if the number of humans has changed
    S32 humans = getGame()->getPlayerCount();
 
    if(humans != lastHumans)
