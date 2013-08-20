@@ -2089,9 +2089,9 @@ void GameUserInterface::renderScoreboard()
    const S32 LegendGap  =  3;    // Space between scoreboard and legend
    const S32 legendPos  = scoreboardTop + totalHeight + LegendGap + LegendSize;
 
-
    // Create a standard legend; only need to swap out the Humans count, which is the first chunk
    static Vector<SymbolShapePtr> symbols;
+   static S32 lastHumans = -1;
    if(symbols.size() == 0)
    {
       string legend = " | " + string(adminSymbol) + " = Admin | " + 
@@ -2104,9 +2104,15 @@ void GameUserInterface::renderScoreboard()
       symbols.push_back(SymbolShapePtr(new SymbolText("Player on Kill Streak", LegendSize, ScoreboardContext, &Colors::streakPlayerNameColor)));
    }
 
-   const string humans = itos(getGame()->getPlayerCount()) + " Human" + (getGame()->getPlayerCount() != 1 ? "s" : "");
-   symbols[0] = SymbolShapePtr(new SymbolText(humans, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor));
+   // Rebuild the humans symbol, if needed
+   S32 humans = getGame()->getPlayerCount();
 
+   if(humans != lastHumans)
+   {
+      const string humanStr = itos(humans) + " Human" + (humans != 1 ? "s" : "");
+      symbols[0] = SymbolShapePtr(new SymbolText(humanStr, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor));
+      lastHumans = humans;
+   }
 
    UI::SymbolString symbolString(symbols, LegendSize, ScoreboardContext);
    symbolString.render(gScreenInfo.getGameCanvasWidth() / 2, legendPos, AlignmentCenter);
