@@ -1498,13 +1498,17 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
    {
       mModPrimaryActivated[0] = false;
       mModSecondaryActivated[0] = false;
-      setModulePrimary(getGame()->getLocalPlayerShip()->getModule(0), false);
+
+      if(getGame()->getLocalPlayerShip())    // Sometimes false if in hit any key to continue mode
+         setModulePrimary(getGame()->getLocalPlayerShip()->getModule(0), false);
    }
    else if(checkInputCode(InputCodeManager::BINDING_MOD2, inputCode))
    {
       mModPrimaryActivated[1] = false;
       mModSecondaryActivated[1] = false;
-      setModulePrimary(getGame()->getLocalPlayerShip()->getModule(1), false);
+
+      if(getGame()->getLocalPlayerShip())    // Sometimes false if in hit any key to continue mode
+         setModulePrimary(getGame()->getLocalPlayerShip()->getModule(1), false);
    }
    else if(checkInputCode(InputCodeManager::BINDING_FIRE, inputCode))
       mFiring = false;
@@ -1899,7 +1903,7 @@ S32 getDummyTeamCount() { return 2; }     // Teams
 S32 getDummyMaxPlayers() { return 5; }    // Players per team
 
 // Create a set of fake player scores for testing the scoreboard -- fill scores
-void getDummyPlayerScores(Vector<ClientInfo *> &scores)
+void getDummyPlayerScores(ClientGame *game, Vector<ClientInfo *> &scores)
 {
    ClientInfo *clientInfo;
 
@@ -1909,11 +1913,10 @@ void getDummyPlayerScores(Vector<ClientInfo *> &scores)
    {
       string name = "PlayerName-" + itos(i);
 
-      clientInfo = new RemoteClientInfo(name, false, ((i+1) % 4) > 0);
+      clientInfo = new RemoteClientInfo(game, name, false, 0, ((i+1) % 4) > 0, i, i % 3, ClientInfo::ClientRole(i % 4), false, false);
 
       clientInfo->setScore(i * 3);
-      clientInfo->setAuthenticated((i % 3) > 0);
-      clientInfo->setIsLevelChanger(((i+1) % 2) > 0);
+      clientInfo->setAuthenticated((i % 2), 0, (i % 3) > 0);
       clientInfo->setPing(100 * i + 10);
       clientInfo->setTeamIndex(i % teams);
 
@@ -1923,10 +1926,50 @@ void getDummyPlayerScores(Vector<ClientInfo *> &scores)
 #endif
 
 
+static const char *botSymbol = "B";
+static const char *levelChangerSymbol = "+";
+static const char *adminSymbol = "@";
+
+static void renderScoreboardLegend(S32 humans, U32 scoreboardTop, U32 totalHeight)
+{
+   const S32 LegendSize = 12;     
+   const S32 LegendGap  =  3;    // Space between scoreboard and legend
+   const S32 legendPos  = scoreboardTop + totalHeight + LegendGap + LegendSize;
+
+   // Create a standard legend; only need to swap out the Humans count, which is the first chunk -- this should work even if
+   // there are multiple players running in the same session -- the humans count should be the same regardless!
+   static Vector<SymbolShapePtr> symbols;
+   static S32 lastHumans = S32_MIN;
+   if(symbols.size() == 0)
+   {
+      string legend = " | " + string(adminSymbol) + " = Admin | " + 
+                      levelChangerSymbol + " = Can Change Levels | " + botSymbol + " = Bot |";
+
+      symbols.push_back(SymbolShapePtr());    // Placeholder, will be replaced with humans count below
+      symbols.push_back(SymbolShapePtr(new SymbolText(legend, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
+      symbols.push_back(SymbolShapePtr(new SymbolText(" Idle Player", LegendSize, ScoreboardContext, &Colors::idlePlayerNameColor)));
+      symbols.push_back(SymbolShapePtr(new SymbolText(" | ", LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
+      symbols.push_back(SymbolShapePtr(new SymbolText("Player on Kill Streak", LegendSize, ScoreboardContext, &Colors::streakPlayerNameColor)));
+   }
+
+   // Rebuild the humans symbol, if the number of humans has changed
+   if(humans != lastHumans)
+   {
+      const string humanStr = itos(humans) + " Human" + (humans != 1 ? "s" : "");
+      symbols[0] = SymbolShapePtr(new SymbolText(humanStr, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor));
+      lastHumans = humans;
+   }
+
+   UI::SymbolString symbolString(symbols, LegendSize, ScoreboardContext);
+   symbolString.render(gScreenInfo.getGameCanvasWidth() / 2, legendPos, AlignmentCenter);
+}
+
+
 void GameUserInterface::renderScoreboard()
 {
    // This is probably not needed... if gameType were NULL, we'd have crashed and burned long ago
    GameType *gameType = getGame()->getGameType();
+   TNLAssert(gameType, "This assert added 8/20/2013; can probably be removed as gameType will never be NULL here!");
    if(!gameType)
       return;
 
@@ -1958,7 +2001,6 @@ void GameUserInterface::renderScoreboard()
       return;
 
    static const U32 gap = 3;  // Small gap for use between various UI elements
-   static const U32 bottomSpace = 0;  // Space for any message below the scoreboard
 
    const U32 canvasHeight = gScreenInfo.getGameCanvasHeight();
    const U32 canvasWidth = gScreenInfo.getGameCanvasWidth();
@@ -1970,20 +2012,20 @@ void GameUserInterface::renderScoreboard()
 
    const U32 numTeamRows = (teams + 1) >> 1;
 
-   const U32 desiredHeight = ((canvasHeight - vertMargin * 2) - bottomSpace) / numTeamRows;
-   const U32 maxHeight = MIN(30, (desiredHeight - teamAreaHeight) / maxTeamPlayers);
+   static const U32 SubheaderTextSize = 10;
 
-   const U32 sectionHeight = teamAreaHeight + (maxHeight * maxTeamPlayers) + (2 * gap);
-   const U32 totalHeight = sectionHeight * numTeamRows;
+   const U32 subheaderHeight = isTeamGame ? SubheaderTextSize - 3: 0;
 
-   const U32 scoreboardTop = ((canvasHeight - totalHeight) - bottomSpace) / 2;
+   const U32 desiredHeight = (canvasHeight - vertMargin * 2) / numTeamRows;
+   const U32 maxHeight     = min(30, (desiredHeight - teamAreaHeight) / maxTeamPlayers);
+
+   const U32 sectionHeight = teamAreaHeight + (maxHeight * maxTeamPlayers) + (2 * gap) + 10;
+   const U32 totalHeight   = sectionHeight * numTeamRows - 10;
+
+   const U32 scoreboardTop = (canvasHeight - totalHeight) / 2;
 
    // Vertical scale ratio to maximum line height
    const F32 scaleRatio = ((F32)maxHeight) / 30.f;
-
-   const char *botSymbol = "B";
-   const char *levelChangerSymbol = "+";
-   const char *adminSymbol = "@";
 
    const S32 playerFontSize = S32(maxHeight * 0.75f);
    const S32 teamFontSize = 24;
@@ -1991,10 +2033,8 @@ void GameUserInterface::renderScoreboard()
 
    // Outer scoreboard box
    drawFilledFancyBox(horizMargin - gap, scoreboardTop - (2 * gap),
-                     (canvasWidth - horizMargin) + gap, scoreboardTop + totalHeight + 20,
+                     (canvasWidth - horizMargin) + gap, scoreboardTop + totalHeight + 23,
                      13, Colors::black, 0.85f, Colors::blue);
-
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    FontManager::pushFontContext(ScoreboardContext);
 
@@ -2018,8 +2058,8 @@ void GameUserInterface::renderScoreboard()
       // Now for player scores.  First build a list, then sort it, then display it.
       Vector<ClientInfo *> playerScores;
 
-#ifdef USE_DUMMY_PLAYER_SCORES
-      getDummyPlayerScores(playerScores);
+#ifdef USE_DUMMY_PLAYER_SCORES      // For testing purposes only!
+      getDummyPlayerScores(getGame(), playerScores);
 #else
       gameType->getSortedPlayerScores(i, playerScores);     // Fills playerScores for team i
 #endif
@@ -2029,10 +2069,22 @@ void GameUserInterface::renderScoreboard()
       // Use any symbol for an offset
       const S32 symbolOffset = getStringWidth(symbolFontSize, adminSymbol) + gap;  // Use admin symbol as it's the widest
 
+      const S32 x = xl + 40;
+      const S32 subheaderYPos = curRowY + 3;    // 3 provides a little breathing room above
+      S32 maxkdlen = -1;
+      S32 maxpinglen = -1;
+
+      // Horiz offsets for rendering k/d ratio and pings in team game
+      static const S32 KdOff   = 85;
+      static const S32 PingOff = 60;
+
+      // Leave a gap for the subheader... not sure yet of the exact xpos... will figure that out and render in this slot later
+      if(playerScores.size() > 0)
+         curRowY += subheaderHeight;
+
       for(S32 j = 0; j < playerScores.size(); j++)
       {
-         S32 x = xl + 40;
-         S32 vertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;
+         static const S32 vertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;
 
          const Color *nameColor;
          
@@ -2074,9 +2126,26 @@ void GameUserInterface::renderScoreboard()
                dSprintf(buff, sizeof(buff), "%d  %2.2f", playerScores[j]->getScore(), playerScores[j]->getRating());
          }
 
-         drawString(xr - (85 + S32(getStringWidth(F32(playerFontSize), buff))), curRowY, playerFontSize, buff);
-         drawStringf(xr - 60, curRowY, playerFontSize, "%d", playerScores[j]->getPing());
+
+         // Horiz. position of the k/d ratio and ping columns; note k/d column will be right-justified
+         S32 kdXPos   = xr - KdOff;
+         S32 pingXPos = xr - PingOff;
+
+         S32 kdlen   = drawStringr(kdXPos,   curRowY, playerFontSize, buff);
+         S32 pinglen = drawStringAndGetWidthf(pingXPos, curRowY, playerFontSize, "%d", playerScores[j]->getPing());
+
          curRowY += maxHeight;
+         maxkdlen   = max(kdlen,   maxkdlen);
+         maxpinglen = max(pinglen, maxpinglen);
+      }
+
+      // Go back and render the subheader
+      if(playerScores.size() > 0)
+      {
+         glColor(Colors::gray50);
+         drawString_fixed( x,                         subheaderYPos, (S32)SubheaderTextSize, "Name");
+         drawStringc(xr - (KdOff   + maxkdlen   / 2), subheaderYPos, (S32)SubheaderTextSize, "Threat Level");
+         drawStringc(xr - (PingOff - maxpinglen / 2), subheaderYPos, (S32)SubheaderTextSize, "Ping");
       }
 
 #ifdef USE_DUMMY_PLAYER_SCORES
@@ -2084,39 +2153,7 @@ void GameUserInterface::renderScoreboard()
 #endif
    }
 
-   // Render symbol legend 
-   const S32 LegendSize = 12;     
-   const S32 LegendGap  =  3;    // Space between scoreboard and legend
-   const S32 legendPos  = scoreboardTop + totalHeight + LegendGap + LegendSize;
-
-   // Create a standard legend; only need to swap out the Humans count, which is the first chunk -- this should work even if
-   // there are multiple players running in the same session -- the humans count should be the same regardless!
-   static Vector<SymbolShapePtr> symbols;
-   static S32 lastHumans = S32_MIN;
-   if(symbols.size() == 0)
-   {
-      string legend = " | " + string(adminSymbol) + " = Admin | " + 
-                      levelChangerSymbol + " = Can Change Levels | " + botSymbol + " = Bot |";
-
-      symbols.push_back(SymbolShapePtr());    // Placeholder, will be replaced with humans count below
-      symbols.push_back(SymbolShapePtr(new SymbolText(legend, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
-      symbols.push_back(SymbolShapePtr(new SymbolText(" Idle Player", LegendSize, ScoreboardContext, &Colors::idlePlayerNameColor)));
-      symbols.push_back(SymbolShapePtr(new SymbolText(" | ", LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
-      symbols.push_back(SymbolShapePtr(new SymbolText("Player on Kill Streak", LegendSize, ScoreboardContext, &Colors::streakPlayerNameColor)));
-   }
-
-   // Rebuild the humans symbol, if the number of humans has changed
-   S32 humans = getGame()->getPlayerCount();
-
-   if(humans != lastHumans)
-   {
-      const string humanStr = itos(humans) + " Human" + (humans != 1 ? "s" : "");
-      symbols[0] = SymbolShapePtr(new SymbolText(humanStr, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor));
-      lastHumans = humans;
-   }
-
-   UI::SymbolString symbolString(symbols, LegendSize, ScoreboardContext);
-   symbolString.render(gScreenInfo.getGameCanvasWidth() / 2, legendPos, AlignmentCenter);
+   renderScoreboardLegend(getGame()->getPlayerCount(), scoreboardTop, totalHeight);
 
    FontManager::popFontContext();
 }

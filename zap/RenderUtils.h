@@ -100,6 +100,9 @@ void drawStringf(S32 x, S32 y, S32 size, const char *format, ...);
 void drawStringf(F32 x, F32 y, F32 size, const char *format, ...);
 void drawStringf(F32 x, F32 y, S32 size, const char *format, ...);
 
+void drawString_fixed(S32 x, S32 y, S32 size, const char *string);
+
+
 
 // Draw strings centered at point
 S32 drawStringfc(F32 x, F32 y, F32 size, const char *format, ...);

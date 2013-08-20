@@ -116,6 +116,7 @@ void drawString_fixed(S32 x, S32 y, S32 size, const char *string)
 }
 
 
+// Broken!
 void drawString(S32 x, S32 y, S32 size, const char *string)
 {
    y += size;     // TODO: Adjust all callers so we can get rid of this!
@@ -123,6 +124,7 @@ void drawString(S32 x, S32 y, S32 size, const char *string)
 }
 
 
+// Broken!
 void drawString(F32 x, F32 y, S32 size, const char *string)
 {
    y += size;     // TODO: Adjust all callers so we can get rid of this!
@@ -130,6 +132,7 @@ void drawString(F32 x, F32 y, S32 size, const char *string)
 }
 
 
+// Broken!
 void drawString(F32 x, F32 y, F32 size, const char *string)
 {
    y += size;     // TODO: Adjust all callers so we can get rid of this!
@@ -228,6 +231,7 @@ S32 drawStringc(S32 x, S32 y, S32 size, const char *string)
 }
 
 
+// Uses fixed drawAngleString()
 S32 drawStringc(F32 x, F32 y, F32 size, const char *string)
 {
    F32 len = getStringWidth(size, string);
