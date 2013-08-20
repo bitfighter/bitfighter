@@ -2001,7 +2001,6 @@ void GameUserInterface::renderScoreboard()
    for(S32 i = 0; i < teams; i++)
    {
       const S32 yt = scoreboardTop + (i >> 1) * sectionHeight;  // y-top
-//      const S32 yb = yt + sectionHeight;     // y-bottom
       const S32 xl = horizMargin + gap + (i & 1) * teamWidth;
       const S32 xr = (xl + teamWidth) - (2 * gap);
 
@@ -2088,20 +2087,26 @@ void GameUserInterface::renderScoreboard()
    // Render symbol legend 
    const S32 LegendSize = 12;     
    const S32 LegendGap  =  3;    // Space between scoreboard and legend
-
-   const S32 humans     = getGame()->getPlayerCount();
    const S32 legendPos  = scoreboardTop + totalHeight + LegendGap + LegendSize;
 
-   string legend = itos(humans) + " Human" + (humans != 1 ? "s" : "") + " | " + adminSymbol + " = Admin | " + 
-                   levelChangerSymbol + " = Can Change Levels | " + botSymbol + " = Bot |";
 
-   // TODO: Can make nearly all of this static -- only need to swap out the symbol for the player count, which will be the first one...
+   // Create a standard legend; only need to swap out the Humans count, which is the first chunk
    static Vector<SymbolShapePtr> symbols;
-   symbols.clear();
-   symbols.push_back(SymbolShapePtr(new SymbolText(legend, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
-   symbols.push_back(SymbolShapePtr(new SymbolText(" Idle Player", LegendSize, ScoreboardContext, &Colors::idlePlayerNameColor)));
-   symbols.push_back(SymbolShapePtr(new SymbolText(" | ", LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
-   symbols.push_back(SymbolShapePtr(new SymbolText("Player on Kill Streak", LegendSize, ScoreboardContext, &Colors::streakPlayerNameColor)));
+   if(symbols.size() == 0)
+   {
+      string legend = " | " + string(adminSymbol) + " = Admin | " + 
+                      levelChangerSymbol + " = Can Change Levels | " + botSymbol + " = Bot |";
+
+      symbols.push_back(SymbolShapePtr());    // Placeholder, will be replaced with humans count below
+      symbols.push_back(SymbolShapePtr(new SymbolText(legend, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
+      symbols.push_back(SymbolShapePtr(new SymbolText(" Idle Player", LegendSize, ScoreboardContext, &Colors::idlePlayerNameColor)));
+      symbols.push_back(SymbolShapePtr(new SymbolText(" | ", LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
+      symbols.push_back(SymbolShapePtr(new SymbolText("Player on Kill Streak", LegendSize, ScoreboardContext, &Colors::streakPlayerNameColor)));
+   }
+
+   const string humans = itos(getGame()->getPlayerCount()) + " Human" + (getGame()->getPlayerCount() != 1 ? "s" : "");
+   symbols[0] = SymbolShapePtr(new SymbolText(humans, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor));
+
 
    UI::SymbolString symbolString(symbols, LegendSize, ScoreboardContext);
    symbolString.render(gScreenInfo.getGameCanvasWidth() / 2, legendPos, AlignmentCenter);
