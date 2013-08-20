@@ -2014,7 +2014,7 @@ void GameUserInterface::renderScoreboard()
 
    static const U32 SubheaderTextSize = 10;
 
-   const U32 subheaderHeight = isTeamGame ? SubheaderTextSize - 3: 0;
+   const U32 subheaderHeight = isTeamGame ? SubheaderTextSize - 3: SubheaderTextSize;
 
    const U32 desiredHeight = (canvasHeight - vertMargin * 2) / numTeamRows;
    const U32 maxHeight     = min(30, (desiredHeight - teamAreaHeight) / maxTeamPlayers);
@@ -2070,7 +2070,7 @@ void GameUserInterface::renderScoreboard()
       const S32 symbolOffset = getStringWidth(symbolFontSize, adminSymbol) + gap;  // Use admin symbol as it's the widest
 
       const S32 x = xl + 40;
-      const S32 subheaderYPos = curRowY + 3;    // 3 provides a little breathing room above
+      const S32 subheaderYPos = isTeamGame ? curRowY + 3 : curRowY + 8;
       S32 maxkdlen = -1;
       S32 maxpinglen = -1;
 
