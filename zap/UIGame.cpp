@@ -2017,7 +2017,7 @@ void GameUserInterface::renderScoreboard()
    const U32 subheaderHeight = isTeamGame ? SubheaderTextSize - 3: SubheaderTextSize;
 
    const U32 desiredHeight = (canvasHeight - vertMargin * 2) / numTeamRows;
-   const U32 maxHeight     = min(30, (desiredHeight - teamAreaHeight) / maxTeamPlayers);
+   const U32 maxHeight     = MIN(30, (desiredHeight - teamAreaHeight) / maxTeamPlayers);
 
    const U32 sectionHeight = teamAreaHeight + (maxHeight * maxTeamPlayers) + (2 * gap) + 10;
    const U32 totalHeight   = sectionHeight * numTeamRows - 10;
