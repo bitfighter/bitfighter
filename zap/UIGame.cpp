@@ -2089,7 +2089,8 @@ void GameUserInterface::renderScoreboard()
    const S32 LegendGap  =  3;    // Space between scoreboard and legend
    const S32 legendPos  = scoreboardTop + totalHeight + LegendGap + LegendSize;
 
-   // Create a standard legend; only need to swap out the Humans count, which is the first chunk
+   // Create a standard legend; only need to swap out the Humans count, which is the first chunk -- this should work even if
+   // there are multiple players running in the same session -- the humans count should be the same regardless!
    static Vector<SymbolShapePtr> symbols;
    static S32 lastHumans = -1;
    if(symbols.size() == 0)
