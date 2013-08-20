@@ -228,7 +228,7 @@ ulCornerY = tonumber(arg[4]) or 0
 cellsize = tonumber(arg[5]) or 255
 
 
-cellStack = List:new()
+cellStack = {}
 
 cells = {}
 adjCells = {}
@@ -257,7 +257,7 @@ while visitedCells < totalCells do
           knockDownWallToCell(currCell, adjDirs[adj], adjCells[adj])
 
           -- Push current cell location on the cellStack; we'll revisit it later
-          cellStack:pushright(currCell)
+          table.insert(cellStack, currCell)
 
           -- Make the randomly selected adjacent cell the new current cell
           currCell = adjCells[adj]
@@ -265,7 +265,9 @@ while visitedCells < totalCells do
      visitedCells = visitedCells + 1
   else
      -- This cell has no neighbors, so let's grab one from the stack
-     currCell = cellStack:popright()
+     local last = #cellStack
+     currCell = cellStack[last]
+     table.remove(cellStack, last)
   end
 end
 
