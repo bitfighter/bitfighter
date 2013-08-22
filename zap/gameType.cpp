@@ -3850,7 +3850,7 @@ GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTable
          else
             mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped %s", killer.getString(), victim.getString());
 
-         // Increment killer's kill streak length...
+         // Increment killer's rampage length...
          ClientInfo *killerInfo = mGame->findClientInfo(killer);
          if(killerInfo)
          {
@@ -3866,7 +3866,7 @@ GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTable
    else         // killerDescr == "" --> Killer unknown
       mGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
 
-   // Clear victim's kill streak length...
+   // Clear victim's rampage length...
    ClientInfo *victimInfo = mGame->findClientInfo(victim);
    if(victimInfo)
       victimInfo->clearKillStreak();

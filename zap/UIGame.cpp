@@ -1949,7 +1949,7 @@ static void renderScoreboardLegend(S32 humans, U32 scoreboardTop, U32 totalHeigh
       symbols.push_back(SymbolShapePtr(new SymbolText(legend, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
       symbols.push_back(SymbolShapePtr(new SymbolText(" Idle Player", LegendSize, ScoreboardContext, &Colors::idlePlayerNameColor)));
       symbols.push_back(SymbolShapePtr(new SymbolText(" | ", LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
-      symbols.push_back(SymbolShapePtr(new SymbolText("Player on Kill Streak", LegendSize, ScoreboardContext, &Colors::streakPlayerNameColor)));
+      symbols.push_back(SymbolShapePtr(new SymbolText("Player on Rampage", LegendSize, ScoreboardContext, &Colors::streakPlayerNameColor)));
    }
 
    // Rebuild the humans symbol, if the number of humans has changed

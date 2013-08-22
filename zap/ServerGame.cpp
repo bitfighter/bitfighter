@@ -622,7 +622,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
       conn->switchedTeamCount = 0;
 
       clientInfo->setScore(0);         // Reset player scores, for non team game types
-      clientInfo->clearKillStreak();   // Clear any kill streaks the players have going... sorry, lads!
+      clientInfo->clearKillStreak();   // Clear any rampage the players have going... sorry, lads!
    }
 
    mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel); // Set mCurrentLevelIndex to refer to the next level we'll play
