@@ -577,152 +577,120 @@ static void calcThrustComponents(const Point &velocity, F32 angle, F32 deltaAngl
 }
 
 
-// Passed position is bottom of indicator
+// Passed position is lower left corner of player name
 static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
 {
-   S32 sym = Platform::getRealMilliseconds() / 2000 % 9;
+   S32 sym = Platform::getRealMilliseconds() / 2000 % 10;
 
-   FontManager::pushFontContext(HUDContext);
+   //FontManager::pushFontContext(HUDContext);
 
    glLineWidth(gLineWidth1);
 
-   // Four square
-   S32 passedHeight = height;
-   height = (height + 3) & ~0x03;      // Round height up to next multiple of 4
+   
+   if(sym > 0)
+   {
+      S32 cenx = x - height/2 - 3;
+      S32 ceny = y - height/4 - 3;
 
-   // Adjust x and y to be center of rank icon
-   y -= height / 2 - (height - passedHeight) / 2 - 1;
-   x -= height / 2 + 4;    // 4 provides a margin
+      drawHollowSquare(Point(cenx, ceny), height/2);
 
-   F32 rad = height / 4.0f;
-   S32 yoffset = 0;     // Tricky way to vertically align the squares when there are only 1 or 2
+      drawStringc(Point(cenx, ceny + height/2 - 3), height - 4, itos(sym).c_str());
+   }
 
-//   switch(sym)
-//   {
-//      case 8:
-//         glColor(Colors::yellow70);
-//         drawFilledStar(Point(x,y), 5, height / 2, rad);
-//         break;
-//      case 7:
-//         glColor(Colors::yellow70);
-//         drawStar(Point(x,y), 5, height / 2, rad);
-//         break;
-//      case 6:
-//         glColor(Colors::yellow70);
-//         drawCircle(x,y, height / 2);
-//         drawFilledSquare(Point(x,y), rad, &Colors::yellow70);
-//         break;
-//      case 5:
-//         drawHollowSquare(Point(x,y), passedHeight / 2, &Colors::red);
-//         drawFilledSquare(Point(x,y), rad, &Colors::yellow70);
-//         break;
-//      case 4:
-//         drawHollowSquare(Point(x,y), passedHeight / 2, &Colors::red);
-//         drawFilledSquare(Point(x,y), rad, &Colors::red);
-//         break;
-//      case 3:
-//         drawHollowSquare(Point(x,y), passedHeight / 2, &Colors::red);
-//         break;
-//      case 2:
-//         drawFilledSquare(Point(x + rad, y), rad, &Colors::red);
-//         break;
-//      case 1:
-//         drawHollowSquare(Point(x + rad, y), rad, &Colors::red);
-//         break;
-//   }
-//
-//   if(sym > 0 && sym <= 6)
-//   {
-//      if(sym == 6)
-//         glColor(Colors::yellow40);
-//      else
-//         glColor(Colors::gray20);
-//
-//      drawHollowSquare(Point(x,y), height / 2);
-//
-//      drawVertLine(x, y - height / 2, y + height / 2);
-//      drawHorizLine(x - height / 2, x + height / 2, y);
-//   }
+
+   //// Four square
+   //S32 passedHeight = height;
+   //height = (height + 3) & ~0x03;      // Round height up to next multiple of 4
+
+   //// Adjust x and y to be center of rank icon
+   //y -= height / 2 - (height - passedHeight) / 2 - 1;
+   //x -= height / 2 + 4;    // 4 provides a margin
+
+   //F32 rad = height / 4.0f;
+   //S32 yoffset = 0;     // Tricky way to vertically align the squares when there are only 1 or 2
+
+
 
    glLineWidth(gDefaultLineWidth);
 
 
-   // Chevrons
-   const F32 chevronPoints[] = {
-        -6,  0,
-        0, -3,
-        0, -3,
-        6,  0,
-        -6,  6,
-        0,  3,
-        0,  3,
-        6,  6,
-        -6,  12,
-        0,  9,
-        0,  9,
-        6,  12,
-   };
+   //// Chevrons
+   //const F32 chevronPoints[] = {
+   //     -6,  0,
+   //     0, -3,
+   //     0, -3,
+   //     6,  0,
+   //     -6,  6,
+   //     0,  3,
+   //     0,  3,
+   //     6,  6,
+   //     -6,  12,
+   //     0,  9,
+   //     0,  9,
+   //     6,  12,
+   //};
 
-   // Bars
-   const F32 barPoints[] = {
-        -6,  0,
-        6, 0,
-        -6,  6,
-        6, 6,
-        -6,  12,
-        6, 12,
-   };
+   //// Bars
+   //const F32 barPoints[] = {
+   //     -6,  0,
+   //     6, 0,
+   //     -6,  6,
+   //     6, 6,
+   //     -6,  12,
+   //     6, 12,
+   //};
 
 
-   glPushMatrix();
-   switch(sym)
-   {
-      case 0:
-         glColor(Colors::bronze);
-         glTranslate(x, y + 1, 0);
-         renderVertexArray(chevronPoints, 4, GL_LINES);
-         break;
-      case 1:
-         glColor(Colors::bronze);
-         glTranslate(x, y - 2, 0);
-         renderVertexArray(chevronPoints, 8, GL_LINES);
-         break;
-      case 2:
-         glColor(Colors::bronze);
-         glTranslate(x, y - 5, 0);
-         renderVertexArray(chevronPoints, 12, GL_LINES);
-         break;
-      case 3:
-         glColor(Colors::silver);
-         glTranslate(x, y, 0);
-         renderVertexArray(barPoints, 2, GL_LINES);
-         break;
-      case 4:
-         glColor(Colors::silver);
-         glTranslate(x, y - 3, 0);
-         renderVertexArray(barPoints, 4, GL_LINES);
-         break;
-      case 5:
-         glColor(Colors::silver);
-         glTranslate(x, y - 6, 0);
-         renderVertexArray(barPoints, 6, GL_LINES);
-         break;
-      case 6:
-         glLineWidth(gLineWidth1);
-         glColor(Colors::gold);
-         drawStar(Point(x,y), 5, height / 2.0f, rad);
-         glLineWidth(gDefaultLineWidth);
-         break;
-      case 7:
-         glLineWidth(gLineWidth1);
-         glColor(Colors::gold);
-         drawFilledStar(Point(x,y), 5, height / 2.0f, rad);
-         glLineWidth(gDefaultLineWidth);
-         break;
-   }
-   glPopMatrix();
+   //
+   //glPushMatrix();
+   //switch(sym)
+   //{
+   //   case 0:
+   //      glColor(Colors::bronze);
+   //      glTranslate(x, y + 1, 0);
+   //      renderVertexArray(chevronPoints, 4, GL_LINES);
+   //      break;
+   //   case 1:
+   //      glColor(Colors::bronze);
+   //      glTranslate(x, y - 2, 0);
+   //      renderVertexArray(chevronPoints, 8, GL_LINES);
+   //      break;
+   //   case 2:
+   //      glColor(Colors::bronze);
+   //      glTranslate(x, y - 5, 0);
+   //      renderVertexArray(chevronPoints, 12, GL_LINES);
+   //      break;
+   //   case 3:
+   //      glColor(Colors::silver);
+   //      glTranslate(x, y, 0);
+   //      renderVertexArray(barPoints, 2, GL_LINES);
+   //      break;
+   //   case 4:
+   //      glColor(Colors::silver);
+   //      glTranslate(x, y - 3, 0);
+   //      renderVertexArray(barPoints, 4, GL_LINES);
+   //      break;
+   //   case 5:
+   //      glColor(Colors::silver);
+   //      glTranslate(x, y - 6, 0);
+   //      renderVertexArray(barPoints, 6, GL_LINES);
+   //      break;
+   //   case 6:
+   //      glLineWidth(gLineWidth1);
+   //      glColor(Colors::gold);
+   //      drawStar(Point(x,y), 5, height / 2.0f, rad);
+   //      glLineWidth(gDefaultLineWidth);
+   //      break;
+   //   case 7:
+   //      glLineWidth(gLineWidth1);
+   //      glColor(Colors::gold);
+   //      drawFilledStar(Point(x,y), 5, height / 2.0f, rad);
+   //      glLineWidth(gDefaultLineWidth);
+   //      break;
+   //}
+   //glPopMatrix();
 
-   FontManager::popFontContext();
+   //FontManager::popFontContext();
 }
 
 
