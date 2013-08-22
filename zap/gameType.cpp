@@ -706,7 +706,7 @@ void GameType::idle_server(U32 deltaT)
                }
          }
 
-         conn->addTimeSinceLastMove(deltaT);             // Increment timer       
+         conn->addTimeSinceLastMove(deltaT);                // Increment timer       
       }
    }
 
