@@ -1965,6 +1965,34 @@ static void renderScoreboardLegend(S32 humans, U32 scoreboardTop, U32 totalHeigh
 }
 
 
+static void renderPlayerSymbolAndSetColor(ClientInfo *player, S32 x, S32 y, S32 size)
+{
+   // Figure out what color to use to render player name, and set it
+   if(player->isSpawnDelayed())
+      glColor(Colors::idlePlayerNameColor);
+   else if(player->getKillStreak() >= UserInterface::StreakingThreshold)
+      glColor(Colors::streakPlayerNameColor);
+   else
+      glColor(Colors::standardPlayerNameColor);
+
+
+   // Figure out how much room we need to leave for our player symbol (@, +, etc.)
+   x -= getStringWidth(size, adminSymbol) + 3;  // Use admin symbol as it's the widest; 3 provides a bit of whitespace
+
+   // Mark of the bot
+   if(player->isRobot())
+      drawString(x, y, size, botSymbol);
+
+   // Admin mark
+   else if(player->isAdmin())
+      drawString(x, y, size, adminSymbol);
+
+   // Level changer mark
+   else if(player->isLevelChanger())
+      drawString(x, y, size, levelChangerSymbol);
+}
+
+
 void GameUserInterface::renderScoreboard()
 {
    // This is probably not needed... if gameType were NULL, we'd have crashed and burned long ago
@@ -2008,19 +2036,19 @@ void GameUserInterface::renderScoreboard()
    const U32 drawableWidth = canvasWidth - horizMargin * 2;
    const U32 columnCount = min(teams, 2);
    const U32 teamWidth = drawableWidth / columnCount;
-   const U32 teamAreaHeight = isTeamGame ? 40 : 0;
+   const U32 teamHeaderHeight = isTeamGame ? 40 : 2;
 
    const U32 numTeamRows = (teams + 1) >> 1;
 
-   static const U32 SubheaderTextSize = 10;
+   static const U32 ColHeaderTextSize = 10;
 
-   const U32 subheaderHeight = isTeamGame ? SubheaderTextSize - 3: SubheaderTextSize;
+   const U32 colHeaderHeight = isTeamGame ? ColHeaderTextSize - 3: ColHeaderTextSize + 2;
 
    const U32 desiredHeight = (canvasHeight - vertMargin * 2) / numTeamRows;
-   const U32 maxHeight     = MIN(30, (desiredHeight - teamAreaHeight) / maxTeamPlayers);
+   const U32 maxHeight     = MIN(30, (desiredHeight - teamHeaderHeight) / maxTeamPlayers);
 
-   const U32 sectionHeight = teamAreaHeight + (maxHeight * maxTeamPlayers) + (2 * gap) + 10;
-   const U32 totalHeight   = sectionHeight * numTeamRows - 10;
+   const U32 sectionHeight = teamHeaderHeight + (maxHeight * maxTeamPlayers) + (2 * gap) + 10;
+   const U32 totalHeight   = sectionHeight * numTeamRows - 10  + (isTeamGame ? 0 : 4);    // 4 provides a gap btwn bottom name and legend
 
    const U32 scoreboardTop = (canvasHeight - totalHeight) / 2;
 
@@ -2040,22 +2068,25 @@ void GameUserInterface::renderScoreboard()
 
    for(S32 i = 0; i < teams; i++)
    {
-      const S32 yt = scoreboardTop + (i >> 1) * sectionHeight;  // y-top
-      const S32 xl = horizMargin + gap + (i & 1) * teamWidth;
-      const S32 xr = (xl + teamWidth) - (2 * gap);
+      const S32 yt = scoreboardTop + (i >> 1) * sectionHeight;    // Top edge of team render area
+      const S32 xl = horizMargin + gap + (i & 1) * teamWidth;     // Left edge of team render area
+      const S32 xr = (xl + teamWidth) - (2 * gap);                // Right edge of team render area
 
-      const Color *teamColor = getGame()->getTeamColor(i);
-
+      // Team header
       if(isTeamGame)     
       {
-         drawFilledFancyBox(xl, yt, xr, yt + teamFontSize + 2 * gap, 10, *teamColor, 0.6f, *teamColor);
+         // First the box
+         const Color *teamColor = getGame()->getTeamColor(i);
+         const S32 headerBoxHeight = teamFontSize + 2 * gap;
+         drawFilledFancyBox(xl, yt, xr, yt + headerBoxHeight, 10, *teamColor, 0.6f, *teamColor);
 
+         // Then the team name & score
          glColor(Colors::white);
-         drawString(xl + 40, yt + 2, teamFontSize, getGame()->getTeamName(i).getString());
+         drawString (xl + 40,  yt + 2, teamFontSize, getGame()->getTeamName(i).getString());
          drawStringf(xr - 140, yt + 2, teamFontSize, "%d", ((Team *)(getGame()->getTeam(i)))->getScore());
       }
 
-      // Now for player scores.  First build a list, then sort it, then display it.
+      // Now for player scores.  First build a list.  Then sort it.  Then display it.
       Vector<ClientInfo *> playerScores;
 
 #ifdef USE_DUMMY_PLAYER_SCORES      // For testing purposes only!
@@ -2064,88 +2095,75 @@ void GameUserInterface::renderScoreboard()
       gameType->getSortedPlayerScores(i, playerScores);     // Fills playerScores for team i
 #endif
 
-      S32 curRowY = yt + teamAreaHeight + 1;
+      S32 curRowY = yt + teamHeaderHeight + 1;              // Advance y coord to below team display, if there is one
 
-      // Use any symbol for an offset
-      const S32 symbolOffset = getStringWidth(symbolFontSize, adminSymbol) + gap;  // Use admin symbol as it's the widest
+      const S32 x = xl + 40;     // + 40 to align with team name in team game
+      const S32 colHeaderYPos = isTeamGame ? curRowY + 3 : curRowY + 8;
 
-      const S32 x = xl + 40;
-      const S32 subheaderYPos = isTeamGame ? curRowY + 3 : curRowY + 8;
-      S32 maxkdlen = -1;
-      S32 maxpinglen = -1;
+      S32 maxscorelen = -1;
+      S32 maxkdlen    = -1;
+      S32 maxpinglen  = -1;
 
-      // Horiz offsets for rendering k/d ratio and pings in team game
+      // Horiz offsets from the right for rendering score components
+      static const S32 ScoreOff = 160;    // Solo game only
       static const S32 KdOff   = 85;
       static const S32 PingOff = 60;
 
-      // Leave a gap for the subheader... not sure yet of the exact xpos... will figure that out and render in this slot later
+      // Leave a gap for the colHeader... not sure yet of the exact xpos... will figure that out and render in this slot later
       if(playerScores.size() > 0)
-         curRowY += subheaderHeight;
+         curRowY += colHeaderHeight;
 
       for(S32 j = 0; j < playerScores.size(); j++)
       {
          static const S32 vertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;
 
-         const Color *nameColor;
-         
-         if(playerScores[j]->isSpawnDelayed())
-            nameColor = &Colors::idlePlayerNameColor;
-         else if(playerScores[j]->getKillStreak() >= StreakingThreshold)
-            nameColor = &Colors::streakPlayerNameColor;
-         else
-            nameColor = &Colors::standardPlayerNameColor;
-
-         glColor(nameColor);
-
-         // Add the mark of the bot
-         if(playerScores[j]->isRobot())
-            drawString(x - symbolOffset, curRowY + vertAdjustFact + 2, symbolFontSize, botSymbol);
-
-         // Add level changer mark
-         if(playerScores[j]->isLevelChanger() && !playerScores[j]->isAdmin())
-            drawString(x - symbolOffset, curRowY + vertAdjustFact + 2, symbolFontSize, levelChangerSymbol);
-
-         // Add admin mark
-         if(playerScores[j]->isAdmin())
-            drawString(x - symbolOffset, curRowY + vertAdjustFact + 2, symbolFontSize, adminSymbol);
+         renderPlayerSymbolAndSetColor(playerScores[j], x, curRowY + vertAdjustFact + 2, symbolFontSize);
 
          S32 nameWidth = drawStringAndGetWidth(x, curRowY, playerFontSize, playerScores[j]->getName().getString());
 
-         renderBadges(playerScores[j], x + nameWidth + 10 + gap, curRowY + (maxHeight / 2), scaleRatio);
-         
-         glColor(nameColor);
-         static char buff[255] = "";
-
          if(isTeamGame)
-            dSprintf(buff, sizeof(buff), "%2.2f", playerScores[j]->getRating());
-         else
          {
-            if(playerScores[j]->getRating() < 0)
-               dSprintf(buff, sizeof(buff), "%d %2.2f", playerScores[j]->getScore(), playerScores[j]->getRating());
-            else
-               dSprintf(buff, sizeof(buff), "%d  %2.2f", playerScores[j]->getScore(), playerScores[j]->getRating());
+            S32 kdlen   = drawStringfr          (xr - KdOff,   curRowY, playerFontSize, "%2.2f", playerScores[j]->getRating());
+            S32 pinglen = drawStringAndGetWidthf(xr - PingOff, curRowY, playerFontSize, "%d",    playerScores[j]->getPing());
+
+            curRowY += maxHeight;
+            maxkdlen   = max(kdlen,   maxkdlen);
+            maxpinglen = max(pinglen, maxpinglen);
+         }
+         else
+         {            
+            S32 scorelen = drawStringfr(xr - ScoreOff,          curRowY, playerFontSize, "%d",    playerScores[j]->getScore());
+            S32 kdlen    = drawStringfr(xr - KdOff,             curRowY, playerFontSize, "%2.2f", playerScores[j]->getRating());
+            S32 pinglen  = drawStringAndGetWidthf(xr - PingOff, curRowY, playerFontSize, "%d",    playerScores[j]->getPing());
+
+            curRowY += maxHeight;
+            maxscorelen = max(scorelen, maxscorelen);
+            maxkdlen    = max(kdlen,   maxkdlen);
+            maxpinglen  = max(pinglen, maxpinglen);
          }
 
-
-         // Horiz. position of the k/d ratio and ping columns; note k/d column will be right-justified
-         S32 kdXPos   = xr - KdOff;
-         S32 pingXPos = xr - PingOff;
-
-         S32 kdlen   = drawStringr(kdXPos,   curRowY, playerFontSize, buff);
-         S32 pinglen = drawStringAndGetWidthf(pingXPos, curRowY, playerFontSize, "%d", playerScores[j]->getPing());
-
-         curRowY += maxHeight;
-         maxkdlen   = max(kdlen,   maxkdlen);
-         maxpinglen = max(pinglen, maxpinglen);
+         // Circle back and render the badges now that all the rendering with the name color is finished
+         renderBadges(playerScores[j], x + nameWidth + 10 + gap, curRowY + (maxHeight / 2), scaleRatio);
       }
 
-      // Go back and render the subheader
+      // Go back and render the column headers, now that we know the widths.  These will be different for team and solo games.
+
       if(playerScores.size() > 0)
       {
          glColor(Colors::gray50);
-         drawString_fixed( x,                         subheaderYPos, (S32)SubheaderTextSize, "Name");
-         drawStringc(xr - (KdOff   + maxkdlen   / 2), subheaderYPos, (S32)SubheaderTextSize, "Threat Level");
-         drawStringc(xr - (PingOff - maxpinglen / 2), subheaderYPos, (S32)SubheaderTextSize, "Ping");
+         if(isTeamGame)
+         {
+            drawString_fixed( x,                         colHeaderYPos, (S32)ColHeaderTextSize, "Name");
+            drawStringc(xr - (KdOff   + maxkdlen   / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Threat Level");
+            drawStringc(xr - (PingOff - maxpinglen / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Ping");
+         }
+         else
+         {
+            drawString_fixed( x,                           colHeaderYPos, (S32)ColHeaderTextSize, "Name");
+            drawStringc(xr - (ScoreOff + maxscorelen / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Score");
+            drawStringc(xr - (KdOff    + maxkdlen    / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Threat Level");
+            drawStringc(xr - (PingOff  - maxpinglen  / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Ping");
+         }
       }
 
 #ifdef USE_DUMMY_PLAYER_SCORES

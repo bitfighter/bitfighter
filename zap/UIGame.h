@@ -359,7 +359,7 @@ public:
    
    void renderBasicInterfaceOverlay();
    void renderLevelInfo();
-   void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
+   static void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
 
    void idle(U32 timeDelta);
 
