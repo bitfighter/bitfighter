@@ -2121,26 +2121,20 @@ void GameUserInterface::renderScoreboard()
 
          S32 nameWidth = drawStringAndGetWidth(x, curRowY, playerFontSize, playerScores[j]->getName().getString());
 
-         if(isTeamGame)
-         {
-            S32 kdlen   = drawStringfr          (xr - KdOff,   curRowY, playerFontSize, "%2.2f", playerScores[j]->getRating());
-            S32 pinglen = drawStringAndGetWidthf(xr - PingOff, curRowY, playerFontSize, "%d",    playerScores[j]->getPing());
+         S32 kdlen = drawStringfr(xr - KdOff, curRowY, playerFontSize, "%2.2f", playerScores[j]->getRating());
+         maxkdlen = max(kdlen, maxkdlen);
 
-            curRowY += maxHeight;
-            maxkdlen   = max(kdlen,   maxkdlen);
-            maxpinglen = max(pinglen, maxpinglen);
-         }
-         else
+         S32 pinglen = drawStringAndGetWidthf(xr - PingOff, curRowY, playerFontSize, "%d", playerScores[j]->getPing());
+         maxpinglen = max(pinglen, maxpinglen);
+
+         if(!isTeamGame)
          {            
-            S32 scorelen = drawStringfr(xr - ScoreOff,          curRowY, playerFontSize, "%d",    playerScores[j]->getScore());
-            S32 kdlen    = drawStringfr(xr - KdOff,             curRowY, playerFontSize, "%2.2f", playerScores[j]->getRating());
-            S32 pinglen  = drawStringAndGetWidthf(xr - PingOff, curRowY, playerFontSize, "%d",    playerScores[j]->getPing());
-
-            curRowY += maxHeight;
+            S32 scorelen = drawStringfr(xr - ScoreOff, curRowY, playerFontSize, "%d", playerScores[j]->getScore());
             maxscorelen = max(scorelen, maxscorelen);
-            maxkdlen    = max(kdlen,   maxkdlen);
-            maxpinglen  = max(pinglen, maxpinglen);
          }
+
+         curRowY += maxHeight;
+
 
          // Circle back and render the badges now that all the rendering with the name color is finished
          renderBadges(playerScores[j], x + nameWidth + 10 + gap, curRowY + (maxHeight / 2), scaleRatio);
@@ -2151,19 +2145,14 @@ void GameUserInterface::renderScoreboard()
       if(playerScores.size() > 0)
       {
          glColor(Colors::gray50);
-         if(isTeamGame)
-         {
-            drawString_fixed( x,                         colHeaderYPos, (S32)ColHeaderTextSize, "Name");
-            drawStringc(xr - (KdOff   + maxkdlen   / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Threat Level");
-            drawStringc(xr - (PingOff - maxpinglen / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Ping");
-         }
-         else
-         {
-            drawString_fixed( x,                           colHeaderYPos, (S32)ColHeaderTextSize, "Name");
+
+         drawString_fixed(x, colHeaderYPos, (S32)ColHeaderTextSize, "Name");
+         drawStringc(xr - (KdOff    + maxkdlen    / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Threat Level");
+         drawStringc(xr - (PingOff  - maxpinglen  / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Ping");
+
+         // Solo games need one more header
+         if(!isTeamGame)
             drawStringc(xr - (ScoreOff + maxscorelen / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Score");
-            drawStringc(xr - (KdOff    + maxkdlen    / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Threat Level");
-            drawStringc(xr - (PingOff  - maxpinglen  / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Ping");
-         }
       }
 
 #ifdef USE_DUMMY_PLAYER_SCORES
