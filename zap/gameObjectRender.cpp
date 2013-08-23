@@ -580,22 +580,22 @@ static void calcThrustComponents(const Point &velocity, F32 angle, F32 deltaAngl
 // Passed position is lower left corner of player name
 static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
 {
-   S32 sym = Platform::getRealMilliseconds() / 2000 % 10;
+   S32 sym = Platform::getRealMilliseconds() / 2000 % 9;
 
    //FontManager::pushFontContext(HUDContext);
 
-   glLineWidth(gLineWidth1);
-
-   
-   if(sym > 0)
-   {
-      S32 cenx = x - height/2 - 3;
-      S32 ceny = y - height/4 - 3;
-
-      drawHollowSquare(Point(cenx, ceny), height/2);
-
-      drawStringc(Point(cenx, ceny + height/2 - 3), height - 4, itos(sym).c_str());
-   }
+//   glLineWidth(gLineWidth1);
+//
+//
+//   if(sym > 0)
+//   {
+//      S32 cenx = x - height/2 - 3;
+//      S32 ceny = y - height/4 - 3;
+//
+//      drawHollowSquare(Point(cenx, ceny), height/2);
+//
+//      drawStringc(Point(cenx, ceny + height/2 - 3), height - 4, itos(sym).c_str());
+//   }
 
 
    //// Four square
@@ -609,9 +609,9 @@ static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
    //F32 rad = height / 4.0f;
    //S32 yoffset = 0;     // Tricky way to vertically align the squares when there are only 1 or 2
 
+//   glLineWidth(gDefaultLineWidth);
 
-
-   glLineWidth(gDefaultLineWidth);
+   //FontManager::popFontContext();
 
 
    //// Chevrons
@@ -629,7 +629,7 @@ static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
    //     0,  9,
    //     6,  12,
    //};
-
+   //
    //// Bars
    //const F32 barPoints[] = {
    //     -6,  0,
@@ -639,10 +639,13 @@ static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
    //     -6,  12,
    //     6, 12,
    //};
-
-
+   //
+   //
    //
    //glPushMatrix();
+   //// Changed position on me?
+   //x = x - 8;
+   //y = y - 6;
    //switch(sym)
    //{
    //   case 0:
@@ -690,7 +693,102 @@ static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
    //}
    //glPopMatrix();
 
-   //FontManager::popFontContext();
+
+   static const F32 rectPoints[] = {
+         -7, -7,
+         -1, -7,
+         -1, -1,
+         -7, -1,
+
+         1, -7,
+         7, -7,
+         7, -1,
+         1, -1,
+
+         -7,  7,
+         -1,  7,
+         -1,  1,
+         -7,  1,
+
+         1, 7,
+         7, 7,
+         7, 1,
+         1, 1,
+   };
+
+   static const F32 triPoints[] = {
+         -7, -7,
+         -1, -1,
+         -7, -1,
+
+         1, -7,
+         7, -1,
+         1, -1,
+
+         -7,  7,
+         -1,  7,
+         -7,  1,
+
+         1, 7,
+         7, 7,
+         1, 1,
+   };
+
+   glPushMatrix();
+
+   glTranslate(x - 10, y - 6, 0);
+
+   switch(sym)
+   {
+      case 0:
+         glColor(Colors::red);
+         renderVertexArray(triPoints, 3, GL_TRIANGLE_FAN);
+         break;
+      case 1:
+         glColor(Colors::green80);
+         renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
+         break;
+      case 2:
+         glColor(Colors::green80);
+         renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
+         glColor(Colors::red);
+         renderVertexArray(&triPoints[6], 3, GL_TRIANGLE_FAN);
+         break;
+      case 3:
+         glColor(Colors::green80);
+         renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
+         renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
+         break;
+      case 4:
+         glColor(Colors::green80);
+         renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
+         renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
+         glColor(Colors::red);
+         renderVertexArray(&triPoints[12], 3, GL_TRIANGLE_FAN);
+         break;
+      case 5:
+         glColor(Colors::green80);
+         renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
+         renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
+         renderVertexArray(&rectPoints[16], 4, GL_TRIANGLE_FAN);
+         break;
+      case 6:
+         glColor(Colors::green80);
+         renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
+         renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
+         renderVertexArray(&rectPoints[16], 4, GL_TRIANGLE_FAN);
+         glColor(Colors::red);
+         renderVertexArray(&triPoints[18], 3, GL_TRIANGLE_FAN);
+         break;
+      case 7:
+         glColor(Colors::green80);
+         renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
+         renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
+         renderVertexArray(&rectPoints[16], 4, GL_TRIANGLE_FAN);
+         renderVertexArray(&rectPoints[24], 4, GL_TRIANGLE_FAN);
+         break;
+   }
+   glPopMatrix();
 }
 
 
