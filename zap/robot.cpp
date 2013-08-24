@@ -1089,6 +1089,9 @@ S32 Robot::lua_globalMsg(lua_State *L)
    {
       gt->sendChat(mClientInfo->getName(), mClientInfo, message, true, mClientInfo->getTeamIndex());
 
+      // Clean up before firing event
+      lua_pop(L, 1);
+
       // Fire our event handler
       EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, getPlayerInfo(), true);
    }
@@ -1113,6 +1116,9 @@ S32 Robot::lua_teamMsg(lua_State *L)
    if(gt)
    {
       gt->sendChat(mClientInfo->getName(), mClientInfo, message, false, mClientInfo->getTeamIndex());
+
+      // Clean up before firing event
+      lua_pop(L, 1);
 
       // Fire our event handler
       EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, getPlayerInfo(), false);

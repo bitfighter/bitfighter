@@ -175,6 +175,9 @@ S32 LuaLevelGenerator::lua_globalMsg(lua_State *L)
 
    mGame->sendChat(levelControllerName, NULL, message, true, NO_TEAM);
 
+   // Clean up before firing event
+   lua_pop(L, 1);
+
    // Fire our event handler
    EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, NULL, true);
 
@@ -198,6 +201,9 @@ S32 LuaLevelGenerator::lua_teamMsg(lua_State *L)
    S32 teamIndex = getTeamIndex(L, 2);
 
    mGame->sendChat(levelControllerName, NULL, message, false, teamIndex);
+
+   // Clean up before firing event
+   lua_pop(L, 2);
 
    // Fire our event handler
    EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, NULL, true);
