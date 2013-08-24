@@ -271,6 +271,8 @@ void EventManager::fireEvent(EventType eventType)
 
    lua_State *L = LuaScriptRunner::getL();
 
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
+
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
       fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
 }
@@ -286,6 +288,8 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
       mStepCount--;   
 
    lua_State *L = LuaScriptRunner::getL();
+
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
@@ -303,6 +307,8 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
 
    lua_State *L = LuaScriptRunner::getL();
 
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
+
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       ship->push(L);                // -- ship
@@ -319,6 +325,8 @@ void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType, const
       return;
 
    lua_State *L = LuaScriptRunner::getL();
+
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
@@ -347,6 +355,8 @@ void EventManager::fireEvent(LuaScriptRunner *player, EventType eventType, LuaPl
 
    lua_State *L = LuaScriptRunner::getL();
 
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
+
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       if(player == subscriptions[eventType][i].subscriber)    // Don't trouble player with own joinage or leavage!
@@ -365,6 +375,8 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
       return;
 
    lua_State *L = LuaScriptRunner::getL();
+
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
@@ -395,6 +407,8 @@ void EventManager::fireEvent(EventType eventType, S32 score, S32 team, LuaPlayer
          return;
 
    lua_State *L = LuaScriptRunner::getL();
+
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
