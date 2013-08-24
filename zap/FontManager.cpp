@@ -240,6 +240,7 @@ void FontManager::setFontContext(FontContext fontContext)
          setFont(FontOrbitronLightStroke);
          return;
 
+      case ChatMessageContext:
       case InputContext:
          setFont(FontDroidSansMono);
          return;

@@ -43,7 +43,8 @@ namespace Zap
       MotdContext,             // Scrolling MOTD on Main Menu
       InputContext,            // Input value font
       ReleaseVersionContext,   // Version number on title screen
-      GoalZoneIconContext      // Font for rendering GoalZone icon
+      GoalZoneIconContext,     // Font for rendering GoalZone icon
+      ChatMessageContext,      // Font for rendering in-game chat messages
    };
 
 

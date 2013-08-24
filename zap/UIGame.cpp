@@ -3044,6 +3044,8 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
       y -= lineHeight;
    }
 
+   FontManager::pushFontContext(ChatMessageContext);
+
    // Draw message lines
    for(U32 i = mFirst; i != last - renderExtra; i--)
    {
@@ -3056,6 +3058,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
       y -= lineHeight;
    }
 
+   FontManager::popFontContext();
 
    // Restore scissors settings -- only used during scrolling
    scissorsManager.disable();
