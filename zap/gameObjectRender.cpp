@@ -2290,11 +2290,32 @@ void renderAsteroidSpawn(const Point &pos, S32 time)
 
    F32 alpha = (harmonicTime + 1) * .333f;
 
-   renderAsteroid(pos, 2, .1f, &Colors::green80, alpha);
+   renderAsteroid(pos, 2, .1f, &Colors::green, alpha);
 
-   glColor(Colors::green80, 0.3f);
-   drawRoundedRect(pos, 24, 24, 4);
-   drawRoundedRect(pos, 32, 32, 4);
+   static const F32 lines[] = {
+         // Inner
+         -8, -12, 8, -12,
+         12, -8, 12, 8,
+         8, 12, -8, 12,
+         -12, 8, -12, -8,
+
+         // Outer
+         -12, -16, 12, -16,
+         16, -12, 16, 12,
+         12, 16, -12, 16,
+         -16, 12, -16, -12,
+   };
+
+   glColor(Colors::green, 0.5f);
+
+   glPushMatrix();
+      glTranslate(pos);
+
+      // Inner
+      renderVertexArray(lines, 8, GL_LINE_LOOP);
+      // Outer
+      renderVertexArray(&lines[16], 8, GL_LINE_LOOP);
+   glPopMatrix();
 }
 
 
