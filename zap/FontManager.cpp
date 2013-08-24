@@ -403,8 +403,10 @@ void FontManager::renderString(F32 size, const char *string)
       static F32 modelview[16];
       glGetFloatv(GL_MODELVIEW_MATRIX, modelview);    // Fills modelview[]
 
-      F32 linewidth = MAX(MIN(size * gScreenInfo.getPixelRatio() * modelview[0] / 20, 1.0f), 0.5f)    // Clamp to range of 0.5 - 1
-                                                                           * gDefaultLineWidth;       // then multiply by line width (2 by default)
+      // Clamp to range of 0.5 - 1 then multiply by line width (2 by default)
+      F32 linewidth =
+            CLAMP(size * gScreenInfo.getPixelRatio() * modelview[0] * 0.05f, 0.5f, 1.0f) * gDefaultLineWidth;
+
       glLineWidth(linewidth);
 
       F32 scaleFactor = size / 120.0f;  // Where does this magic number come from?
