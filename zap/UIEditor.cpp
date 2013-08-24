@@ -523,6 +523,8 @@ void EditorUserInterface::cleanUp()
    mLoadTarget = getDatabase();
    mLoadTarget->removeEverythingFromDatabase();    // Deletes all objects   was clearDatabase(mLoadTarget);
 
+   mRobotLines.clear();    // Clear our special Robot lines
+
    game->clearTeams();
    
    clearSnapEnvironment();
@@ -4652,7 +4654,7 @@ string EditorUserInterface::getLevelText()
 
    // Next come the robots
    for(S32 i = 0; i < mRobotLines.size(); i++)
-      result += mRobotLines[i];
+      result += mRobotLines[i] + "\n";
 
    // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
