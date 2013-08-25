@@ -223,8 +223,6 @@ void SpeedZone::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
 
-   linkToIdleList(&game->idlingObjects);
-
    if(!isGhost())
       setScopeAlways();    // Runs on server
 }
@@ -294,9 +292,6 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
       setSpeed((U16)(atoi(argv[4])));
 
    preparePoints();
-
-   if(mRotateSpeed != 0)
-      linkToIdleList(&game->idlingObjects);
 
    return true;
 }

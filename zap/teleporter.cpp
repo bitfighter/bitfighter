@@ -229,7 +229,6 @@ Teleporter *Teleporter::clone() const
 void Teleporter::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
-   linkToIdleList(&theGame->idlingObjects);
 
    if(!isGhost())
       setScopeAlways();    // Always in scope!

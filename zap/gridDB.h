@@ -199,22 +199,6 @@ public:
 };
 
 
-class BfObject;
-
-struct IdleLinkedList // used by "Game" and "BfObject"
-{
-   IdleLinkedList *prevList;
-   BfObject *nextList;
-
-   IdleLinkedList();
-	IdleLinkedList(const IdleLinkedList &t);
-   virtual ~IdleLinkedList();
-
-   void linkToIdleList(IdleLinkedList *list);
-   void unlinkFromIdleList();
-};
-
-
 };
 
 

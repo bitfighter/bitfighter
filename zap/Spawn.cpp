@@ -316,7 +316,6 @@ void ItemSpawn::spawn()
 void ItemSpawn::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
-   linkToIdleList(&game->idlingObjects);
 }
 
 void ItemSpawn::idle(IdleCallPath path)

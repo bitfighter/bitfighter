@@ -1229,9 +1229,6 @@ void Game::cleanUp()
    mGameObjDatabase->removeEverythingFromDatabase();
    mActiveTeamManager->clearTeams();      // Will in effect delete any teams herein
 
-   while(idlingObjects.nextList != NULL)  // Remove any remainder objects idling that wasn't in gridDB
-      delete idlingObjects.nextList;
-
    // Delete any objects on the delete list
    processDeleteList(U32_MAX);
 

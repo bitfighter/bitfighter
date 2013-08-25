@@ -59,8 +59,6 @@ PickupItem::~PickupItem()
 void PickupItem::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
-   if(game->isServer())      // At the moment, PickupItem::idle does nothing for client side
-      linkToIdleList(&game->idlingObjects);
 }
 
 

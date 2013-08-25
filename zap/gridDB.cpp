@@ -971,48 +971,6 @@ DatabaseObject *DatabaseObject::clone() const
 }
 
 
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// IdleLinkedList: Used by both BfObject and Game, move this struct elsewhere?
-IdleLinkedList::IdleLinkedList() { prevList = NULL; nextList = NULL; }
-IdleLinkedList::~IdleLinkedList() { unlinkFromIdleList(); }
-IdleLinkedList::IdleLinkedList(const IdleLinkedList &t)
-{
-   prevList = NULL;
-   nextList = NULL;
-   if(t.prevList) 
-      linkToIdleList((IdleLinkedList *) &t);  // Link our copy to existing list?
-}
-
-
-void IdleLinkedList::linkToIdleList(IdleLinkedList *list)
-{
-   if(!prevList)
-   {
-      nextList = list->nextList;
-      prevList = list;
-      list->nextList = (BfObject*) this;
-      if(nextList)
-         nextList->prevList = this;
-   }
-}
-
-
-void IdleLinkedList::unlinkFromIdleList()
-{
-   if(prevList)
-      prevList->nextList = nextList;
-   if(nextList)
-   {
-      nextList->prevList = prevList;
-      nextList = NULL;
-   }
-   prevList = NULL;
-}
-
-
 };
 
 // Reusable container for searching gridDatabases

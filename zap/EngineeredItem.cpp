@@ -506,8 +506,6 @@ void EngineeredItem::onAddedToGame(Game *game)
 
    if(mHealth != 0)
       onEnabled();
-
-   linkToIdleList(&game->idlingObjects);
 }
 
 
@@ -1737,7 +1735,6 @@ const Vector<Point> *ForceField::getOutline() const
 void ForceField::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
-   linkToIdleList(&game->idlingObjects);
 }
 
 

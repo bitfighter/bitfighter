@@ -266,7 +266,6 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       mFlashTimer.reset(FlashDelay);
       mFlashCount = FlashCount;
-      linkToIdleList(&getGame()->idlingObjects); // Add to idle list to make GoalZone blink
    }
 }
 
@@ -280,8 +279,6 @@ void GoalZone::idle(BfObject::IdleCallPath path)
    {
       mFlashTimer.reset(FlashDelay);
       mFlashCount--;
-      if(mFlashCount == 0)
-         unlinkFromIdleList();  // Have nothing more to idle
    }
 }
 

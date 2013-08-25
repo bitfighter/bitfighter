@@ -230,7 +230,7 @@ class EditorAttributeMenuUI;
 class WallSegment;
 class ClientInfo;
 
-class BfObject : public DatabaseObject, public NetObject, public EditorObject, public LuaBase, public IdleLinkedList
+class BfObject : public DatabaseObject, public NetObject, public EditorObject, public LuaBase
 {
    typedef NetObject Parent;
 

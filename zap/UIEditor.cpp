@@ -2222,7 +2222,6 @@ void EditorUserInterface::copySelection()
       if(obj->isSelected())
       {
          BfObject *objcopy = obj->copy();
-         objcopy->unlinkFromIdleList();  // Prevents Game::cleanUp() and shared_ptr from trying to free this twice (double delete error)
          mClipboard.push_back(boost::shared_ptr<BfObject>(objcopy));
       }
    }
@@ -4771,9 +4770,6 @@ void EditorUserInterface::testLevelStart()
    else
    {
       mWasTesting = true;
-
-      if(getGame()->idlingObjects.nextList)           // to avoid Asteroids and a few other objects getting moved in editor...
-         getGame()->idlingObjects.unlinkFromIdleList();
 
       Vector<string> levelList;
       levelList.push_back(TestFileName);

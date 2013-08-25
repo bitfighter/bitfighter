@@ -339,7 +339,7 @@ bool TextItem::collide(BfObject *hitObject)
 
 void TextItem::idle(BfObject::IdleCallPath path)
 {
-   // Want to idle here? add this line in "onAddedToGame": linkToIdleList(&game->idlingObjects);
+   // Do nothing!
 }
 
 
