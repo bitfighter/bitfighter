@@ -3256,10 +3256,10 @@ void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 g
 }
 
 
-void drawStars(const Point *stars, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent)
+void drawStars(const Point *stars, const Color *colors, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent)
 {
-   const F32 starChunkSize = 1024;        // Smaller numbers = more dense stars
-   const F32 starDist = 3500;             // Bigger value = slower moving stars
+   static const F32 starChunkSize = 1024;        // Smaller numbers = more dense stars
+   static const F32 starDist = 3500;             // Bigger value = slower moving stars
 
    Point upperLeft  = cameraPos - visibleExtent * 0.5f;  // UL corner of screen in "world" coords
    Point lowerRight = cameraPos + visibleExtent * 0.5f;  // LR corner of screen in "world" coords
@@ -3283,9 +3283,11 @@ void drawStars(const Point *stars, S32 numStars, F32 alphaFrac, Point cameraPos,
 
    // Render some stars
    glPointSize( gLineWidth1 );
-   glColor(0.8f * alphaFrac, 0.8f * alphaFrac, alphaFrac);
 
    glEnableClientState(GL_VERTEX_ARRAY);
+   glEnableClientState(GL_COLOR_ARRAY);
+
+   glColorPointer(4, GL_FLOAT, sizeof(Color), &colors[0]);
    glVertexPointer(2, GL_FLOAT, sizeof(Point), &stars[0]);    // Each star is a pair of floats between 0 and 1
 
 
@@ -3320,6 +3322,7 @@ void drawStars(const Point *stars, S32 numStars, F32 alphaFrac, Point cameraPos,
 
    glEnable(GL_BLEND);
 
+   glDisableClientState(GL_COLOR_ARRAY);
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 

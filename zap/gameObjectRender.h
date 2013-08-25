@@ -181,7 +181,7 @@ extern void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> 
 class NeighboringZone;
 extern void renderNavMeshBorders(const Vector<NeighboringZone> &borders);
 
-extern void drawStars(const Point *stars, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent);
+extern void drawStars(const Point *stars, const Color *colors, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent);
 
 extern void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color *outlineColor, 
                                S32 canvasWidth, S32 canvasHeight, F32 alphaMod, F32 highlightAlpha);

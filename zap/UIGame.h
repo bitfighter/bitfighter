@@ -183,6 +183,7 @@ private:
 
    static const S32 NumStars = 256;    // 256 stars should be enough for anybody!   -- Bill Gates
    Point mStars[NumStars];
+   Color mStarColors[NumStars];
    void prepareStars();
 
    U32 mChatCursorPos;        // Position of composition cursor

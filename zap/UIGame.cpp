@@ -687,11 +687,37 @@ void GameUserInterface::renderShutdownMessage() const
 
 void GameUserInterface::prepareStars()
 {
+   static const Color starYellow(1.0f, 1.0f, 0.7f);
+   static const Color starBlue(0.7f, 0.7f, 1.0f);
+   static const Color starRed(1.0f, 0.7f, 0.7f);
+   static const Color starGreen(0.7f, 1.0f, 0.7f);
+   static const Color starOrange(1.0f, 0.7f, 0.4f);
+
+   // Default white-blue
+   static const Color starColor(0.8f, 0.8f, 1.0f);
+
    // Create some random stars
    for(S32 i = 0; i < NumStars; i++)
    {
+      // Positions
       mStars[i].x = TNL::Random::readF();    // Between 0 and 1
       mStars[i].y = TNL::Random::readF();
+
+      // Colors
+      S32 starSeed = TNL::Random::readI(0, 100);
+
+      if(starSeed < 2)
+         mStarColors[i] = starGreen;
+      else if(starSeed < 4)
+         mStarColors[i] = starBlue;
+      else if(starSeed < 6)
+         mStarColors[i] = starRed;
+      else if(starSeed < 8)
+         mStarColors[i] = starOrange;
+      else if(starSeed < 11)
+         mStarColors[i] = starYellow;
+      else
+         mStarColors[i] = starColor;
    }
 
    // //Create some random hexagons
@@ -2449,7 +2475,7 @@ void GameUserInterface::renderGameNormal()
    glScalef(scaleFactX, scaleFactY, 1);
    glTranslatef(-mShipPos.x, -mShipPos.y, 0);
 
-   drawStars(mStars, NumStars, 1.0, mShipPos, visExt * 2);
+   drawStars(mStars, mStarColors, NumStars, 1.0, mShipPos, visExt * 2);
 
    // Render all the objects the player can see
    screenSize.set(visExt);
@@ -2592,7 +2618,7 @@ void GameUserInterface::renderGameCommander()
 
    // zoomFrac == 1.0 when fully zoomed out to cmdr's map
    if(zoomFrac < 0.95)
-      drawStars(mStars, NumStars, 1 - zoomFrac, offset, modVisSize);
+      drawStars(mStars, mStarColors, NumStars, 1 - zoomFrac, offset, modVisSize);
  
 
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
