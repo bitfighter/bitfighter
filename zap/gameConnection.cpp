@@ -1096,15 +1096,20 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
-                  (RangedU32<0, NumSFXBuffers> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e),
-                  (sfx, team, formatString, e),
+                  (RangedU32<0, NumSFXBuffers> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e, Point scorePos),
+                  (sfx, team, formatString, e, scorePos),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
    if(formatString.getString()[0] != 0)
       displayMessageE(GameConnection::ColorNuclearGreen, sfx, formatString, e);
-   if(mClientGame->getGameType())
-      mClientGame->getGameType()->majorScoringEventOcurred(team);
+
+   GameType* gt = mClientGame->getGameType();
+   if(gt)
+   {
+      gt->majorScoringEventOcurred(team);
+      mClientGame->emitTextEffect("Touchdown!", *gt->getTeamColor(team), scorePos);
+   }
 #endif
 }
 

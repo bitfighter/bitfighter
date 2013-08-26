@@ -256,7 +256,7 @@ public:
                    StringTableEntry formatString, Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i));
    TNL_DECLARE_RPC(s2cDisplayMessageE, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx,
                    StringTableEntry formatString, Vector<StringTableEntry> e));
-   TNL_DECLARE_RPC(s2cTouchdownScored, (RangedU32<0, NumSFXBuffers> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e));
+   TNL_DECLARE_RPC(s2cTouchdownScored, (RangedU32<0, NumSFXBuffers> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e, Point scorePos));
 
    TNL_DECLARE_RPC(s2cDisplayMessage, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString));
    TNL_DECLARE_RPC(s2cDisplayErrorMessage, (StringTableEntry formatString));    

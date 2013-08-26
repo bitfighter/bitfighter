@@ -204,9 +204,9 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
             if(!getGame()->getClientInfo(i)->isRobot())
             {
                if(isGameOver())  // Avoid flooding messages on game over. (empty formatString)
-                  getGame()->getClientInfo(i)->getConnection()->s2cTouchdownScored(SFXNone, s->getTeam(), StringTableEntry(), e);
+                  getGame()->getClientInfo(i)->getConnection()->s2cTouchdownScored(SFXNone, s->getTeam(), StringTableEntry(), e, s->getPos());
                else
-                  getGame()->getClientInfo(i)->getConnection()->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e);
+                  getGame()->getClientInfo(i)->getConnection()->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e, s->getPos());
             }
       }
 

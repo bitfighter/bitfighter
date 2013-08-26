@@ -177,9 +177,9 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       if(gc)
       {
          if(isGameOver())  // Avoid flooding messages on game over. (empty formatString)
-            gc->s2cTouchdownScored(SFXNone, s->getTeam(), StringTableEntry(), e);
+            gc->s2cTouchdownScored(SFXNone, s->getTeam(), StringTableEntry(), e, s->getPos());
          else
-            gc->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
+            gc->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e, s->getPos());
       }
    }
 
