@@ -202,6 +202,7 @@ static ControlStringsEditor gControls1[] = {
          { "Center Display", "Z" },
          { "Toggle Script Results", "Ctrl-K" },
          { "Copy Results Into Editor", "Ctrl-I" },
+         { "Show/Hide Plugins Pane", "F9"},
       { "-", "" },         // Horiz. line
    { "Editing", "HEADER" },
          { "Cut/Copy/Paste", "Ctrl-X/C/V"},

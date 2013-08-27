@@ -3849,15 +3849,18 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       mSnapContext = NO_SNAPPING;
    else if(inputString == "Tab")             // Turn on preview mode
       mPreviewMode = true;
-   else if(inputString == "F8")
-   {
-      mDockMode = DOCKMODE_ITEMS;
-      mDockWidth = ITEMS_DOCK_WIDTH;
-   }
    else if(inputString == "F9")
    {
-      mDockMode = DOCKMODE_PLUGINS;
-      mDockWidth = findPluginDockWidth();
+	  if(mDockMode == DOCKMODE_ITEMS)
+	  {
+	      mDockMode = DOCKMODE_PLUGINS;
+	      mDockWidth = findPluginDockWidth();
+	  }
+	  else
+	  {
+	      mDockMode = DOCKMODE_ITEMS;
+	      mDockWidth = ITEMS_DOCK_WIDTH;
+	  }
    }
    else if(checkPluginKeyBindings(inputString))
    {
