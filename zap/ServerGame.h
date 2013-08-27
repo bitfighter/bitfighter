@@ -206,6 +206,7 @@ public:
    LevelInfo getLevelInfo(S32 index);
    void clearLevelInfos();
    void addLevelInfo(const LevelInfo &levelInfo);
+   void sendLevelListToLevelChangers();
 
    DataSender dataSender;
 

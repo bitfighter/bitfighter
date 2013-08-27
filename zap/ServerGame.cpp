@@ -267,6 +267,19 @@ void ServerGame::addLevelInfo(const LevelInfo &levelInfo)
 }
 
 
+void ServerGame::sendLevelListToLevelChangers()
+{
+	for(S32 i = 0; i < getClientCount(); i++)
+	{
+	   ClientInfo *clientInfo = getClientInfo(i);
+	   GameConnection *conn = clientInfo->getConnection();
+
+	   if(clientInfo->isLevelChanger() && conn)
+		  conn->sendLevelList();
+	}
+}
+
+
 bool ServerGame::isTestServer() const
 {
    return mTestMode;

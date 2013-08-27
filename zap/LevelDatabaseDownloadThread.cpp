@@ -26,6 +26,7 @@
 #include "LevelDatabaseDownloadThread.h"
 #include "HttpRequest.h"
 #include "ClientGame.h"
+#include "ServerGame.h"
 
 #include "stringUtils.h"
 
@@ -79,6 +80,14 @@ U32 LevelDatabaseDownloadThread::run()
    if(writeFile(filePath, levelCode))
    {
       mGame->displaySuccessMessage("Saved to %s", levelFileName.c_str());
+      if(gServerGame)
+      {
+    	  LevelInfo info;
+    	  info.mLevelFileName = levelFileName;
+    	  gServerGame->getLevelInfo(filePath, info);
+    	  gServerGame->addLevelInfo(info);
+    	  gServerGame->sendLevelListToLevelChangers();
+      }
    }
    else
    {
