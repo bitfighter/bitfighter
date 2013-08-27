@@ -73,7 +73,7 @@ U32 LevelDatabaseDownloadThread::run()
    }
 
    string levelCode = req.getResponseBody();
-   string levelFileName = "downloaded_" + mLevelId + ".level";
+   string levelFileName = "db_" + mLevelId + ".level";
 
    FolderManager *fm = mGame->getSettings()->getFolderManager();
    string filePath = joindir(fm->levelDir, levelFileName);
