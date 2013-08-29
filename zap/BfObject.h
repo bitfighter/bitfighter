@@ -79,7 +79,6 @@ class ClientInfo;
    TYPE_NUMBER( RepairItemTypeNumber,          true,              "RepairItem",          "RepairItem"          ) \
    TYPE_NUMBER( EnergyItemTypeNumber,          true,              "EnergyItem",          "EnergyItem"          ) \
    TYPE_NUMBER( SoccerBallItemTypeNumber,      true,              "SoccerBallItem",      "SoccerBallItem"      ) \
-   TYPE_NUMBER( WormTypeNumber,                true,              "Worm",                "Worm"                ) \
    TYPE_NUMBER( TurretTypeNumber,              true,              "Turret",              "Turret"              ) \
    TYPE_NUMBER( ForceFieldTypeNumber,          true,              "ForceField",          "ForceField"          ) \
    TYPE_NUMBER( ForceFieldProjectorTypeNumber, true,              "ForceFieldProjector", "ForceFieldProjector" ) \
@@ -88,7 +87,6 @@ class ClientInfo;
    TYPE_NUMBER( ShipSpawnTypeNumber,           true,              "ShipSpawn",           "ShipSpawn"           ) \
    TYPE_NUMBER( FlagSpawnTypeNumber,           true,              "FlagSpawn",           "FlagSpawn"           ) \
    TYPE_NUMBER( AsteroidSpawnTypeNumber,       true,              "AsteroidSpawn",       "AsteroidSpawn"       ) \
-   TYPE_NUMBER( CircleSpawnTypeNumber,         true,              "CircleSpawn",         "CircleSpawn"         ) \
    TYPE_NUMBER( WallItemTypeNumber,            true,              "WallItem",            "WallItem"            ) \
    TYPE_NUMBER( WallEdgeTypeNumber,            false,             "WallEdge",            "WallEdge"            ) \
    TYPE_NUMBER( WallSegmentTypeNumber,         false,             "WallSegment",         "WallSegment"         ) \
@@ -96,7 +94,6 @@ class ClientInfo;
    TYPE_NUMBER( SpyBugTypeNumber,              true,              "SpyBug",              "SpyBug"              ) \
    TYPE_NUMBER( CoreTypeNumber,                true,              "Core",                "Core"                ) \
    TYPE_NUMBER( ZoneTypeNumber,                true,              "Zone",                "Zone"                ) \
-   TYPE_NUMBER( CircleTypeNumber,              true,              "Circle",              "Circle"              ) \
    TYPE_NUMBER( SeekerTypeNumber,              true,              "Seeker",              "Seeker"              ) \
    TYPE_NUMBER( DeletedTypeNumber,             false,             "Deleted",             "Deleted Item"        ) \
    TYPE_NUMBER( UnknownTypeNumber,             false,             "Unknown",             "Unknown Item Type"   ) \

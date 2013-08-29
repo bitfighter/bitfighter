@@ -247,8 +247,6 @@ void renderTestItem(const Point &pos, S32 size, F32 alpha = 1);
 //void renderTestItem(const Point &pos, S32 size, F32 alpha = 1);
 void renderTestItem(const Vector<Point> &points, F32 alpha = 1);
 
-void renderWorm(const Point &pos);
-
 void renderAsteroid(const Point &pos, S32 design, F32 scaleFact);
 void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha = 1);
 
@@ -266,8 +264,6 @@ void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width);
 
 void renderSoccerBall(const Point &pos, F32 size);
 void renderSoccerBall(const Point &pos);
-
-void renderWorm(Point *points, S32 headIndex, S32 tailLength);
 
 void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color *color);
 
@@ -295,7 +291,6 @@ extern void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, 
                               F32 currentScale, bool snappingToWallCornersEnabled);
 
 extern void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha);
-extern void renderCircleSpawn(const Point &pos, F32 scale = 1.0);
 extern void renderSpawn(const Point &pos, F32 scale, const Color *color);
 extern void renderFlightPlan(const Point &from, const Point &to, const Vector<Point> &flightPlan);
 extern void renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color, bool isSelected, bool isLitUp);
@@ -328,7 +323,6 @@ extern void renderTeleporterEditorObject(const Point &pos, S32 radius, const Col
 #define renderEnergyItem
 #define renderAsteroid
 #define renderCore
-#define renderWorm
 #define renderTestItem
 #define renderResourceItem
 #define renderFlag
@@ -338,7 +332,6 @@ extern void renderTeleporterEditorObject(const Point &pos, S32 radius, const Col
 #define renderPolygonOutline
 #define drawCircle
 #define drawSquare
-#define renderCircleSpawn
 
 #endif
 #endif

@@ -96,12 +96,12 @@ bool isForceFieldDeactivatingType(U8 x)
 bool isDamageableType(U8 x)
 {
    return
-         x == PlayerShipTypeNumber   || x == RobotShipTypeNumber           || x == BurstTypeNumber    ||
-         x == BulletTypeNumber       || x == MineTypeNumber                || x == SpyBugTypeNumber   ||
-         x == ResourceItemTypeNumber || x == TestItemTypeNumber            || x == AsteroidTypeNumber ||
-         x == TurretTypeNumber       || x == ForceFieldProjectorTypeNumber || x == CoreTypeNumber     ||
-         x == FlagTypeNumber         || x == SoccerBallItemTypeNumber      || x == CircleTypeNumber   ||
-         x == TeleporterTypeNumber   || x == SeekerTypeNumber              || x == WormTypeNumber;
+         x == PlayerShipTypeNumber   || x == RobotShipTypeNumber           || x == BurstTypeNumber      ||
+         x == BulletTypeNumber       || x == MineTypeNumber                || x == SpyBugTypeNumber     ||
+         x == ResourceItemTypeNumber || x == TestItemTypeNumber            || x == AsteroidTypeNumber   ||
+         x == TurretTypeNumber       || x == ForceFieldProjectorTypeNumber || x == CoreTypeNumber       ||
+         x == FlagTypeNumber         || x == SoccerBallItemTypeNumber      || x == TeleporterTypeNumber ||
+         x == SeekerTypeNumber;
 }
 
 
@@ -127,8 +127,7 @@ bool isCollideableType(U8 x)
    return
          x == BarrierTypeNumber || x == PolyWallTypeNumber   ||
          x == TurretTypeNumber  || x == ForceFieldTypeNumber ||
-         x == CoreTypeNumber    || x == ForceFieldProjectorTypeNumber ||
-         x == WormTypeNumber;
+         x == CoreTypeNumber    || x == ForceFieldProjectorTypeNumber;
 }
 
 
@@ -175,9 +174,9 @@ bool isWeaponCollideableType(U8 x)
          x == SpyBugTypeNumber     || x == MineTypeNumber           || x == BulletTypeNumber              ||
          x == FlagTypeNumber       || x == SoccerBallItemTypeNumber || x == ForceFieldProjectorTypeNumber ||
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
-         x == TurretTypeNumber     || x == CircleTypeNumber         || x == CoreTypeNumber                ||
-         x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == ForceFieldTypeNumber          ||
-         x == TeleporterTypeNumber || x == SeekerTypeNumber         || x == WormTypeNumber;
+         x == TurretTypeNumber     || x == CoreTypeNumber           || x == BarrierTypeNumber             ||
+         x == PolyWallTypeNumber   || x == ForceFieldTypeNumber     || x == TeleporterTypeNumber          ||
+         x == SeekerTypeNumber;
 }
 
 bool isAsteroidCollideableType(U8 x)

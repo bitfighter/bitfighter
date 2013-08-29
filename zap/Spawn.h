@@ -215,50 +215,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class CircleSpawn : public ItemSpawn    
-{
-   typedef ItemSpawn Parent;
-
-private:
-   void initialize();
-
-public:
-   static const S32 DEFAULT_RESPAWN_TIME = 20;    // in seconds
-
-   CircleSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor
-   explicit CircleSpawn(lua_State *L);                                        // Lua constructor
-   virtual ~CircleSpawn();                                                    // Destructor
-
-   CircleSpawn *clone() const;
-
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
-
-   const char *getClassName() const;
-
-   S32 getDefaultRespawnTime();
-
-   void spawn();
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
-   void renderDock();
-
-   TNL_DECLARE_CLASS(CircleSpawn);
-
-
-   ///// Lua interface
-   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(CircleSpawn);
-
-   static const char *luaClassName;
-   static const luaL_reg luaMethods[];
-   static const LuaFunctionProfile functionArgs[];
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 static const S32 TeamNotSpecified = -99999;
 
 class FlagSpawn : public ItemSpawn

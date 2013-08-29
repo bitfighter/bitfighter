@@ -2236,26 +2236,6 @@ void renderTestItem(const Vector<Point> &points, F32 alpha)
 }
 
 
-void renderWorm(const Point &pos)
-{
-   glPushMatrix();
-   glTranslate(pos);
-
-   F32 size = (F32)Worm::WORM_RADIUS * .5f;
-
-   glColor(Color(.80f, .60f, .33f));
-   F32 vertices[] = {
-         0, -size,
-         size, 0,
-         0, size,
-         -size, 0
-   };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
-
-   glPopMatrix();
-}
-
-
 void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
 {
    glPushMatrix();
@@ -2543,61 +2523,6 @@ void renderForceField(Point start, Point end, const Color *color, bool fieldUp, 
 
    renderPointVector(&geom, GL_LINE_LOOP);
 }
-
-
-void renderWorm(Point *points, S32 headIndex, S32 tailLength)
-{
-   if(tailLength <= 1)
-   {
-      renderWorm(points[headIndex]);
-      return;
-   }
-   F32 p[Worm::MaxTailLength * 2];
-   S32 i = headIndex;
-   for(S32 count = 0; count <= tailLength; count++)
-   {
-      p[count * 2]     = points[i].x;
-      p[count * 2 + 1] = points[i].y;
-      i--;
-      if(i < 0)
-         i = Worm::MaxTailLength - 1;
-   }
-   glColor(Colors::white);
-
-   static const F32 WormColors[Worm::MaxTailLength * 4] = {
-      1,   1,   1,  1,
-   .90f,.80f,.66f,  1,
-   .80f,.60f,.33f,  1,
-   .70f,.40f,   0,  1,
-   .80f,.60f,.33f,  1,
-   .90f,.80f,.66f,  1,
-      1,   1,   1,  1,
-   .90f,.80f,.66f,  1,
-   .80f,.60f,.33f,  1,
-   .70f,.40f,   0,  1,
-   .80f,.60f,.33f,  1,
-   .90f,.80f,.66f,  1,
-      1,   1,   1,  1,
-   .90f,.80f,.66f,  1,
-   .80f,.60f,.33f,  1,
-   .70f,.40f,   0,  1,
-   .80f,.60f,.33f,  1,
-   .90f,.80f,.66f,  1,
-      1,   1,   1,  1,
-   .90f,.80f,.66f,  1,
-   .80f,.60f,.33f,  1,
-   .70f,.40f,   0,  1,
-   .80f,.60f,.33f,  1,
-   .90f,.80f,.66f,  1,
-      1,   1,   1,  1,
-   .90f,.80f,.66f,  1,
-   .80f,.60f,.33f,  1,
-   .70f,.40f,   0,  1,
-   };
-
-   renderColorVertexArray(p, WormColors, tailLength + 1, GL_LINE_STRIP);
-}
-
 
 
 struct pixLoc
@@ -3508,21 +3433,6 @@ void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
    F32 xpos = pos.x - getStringWidthf(15, "%c", letter) / 2;
 
    drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
-}
-
-
-void renderCircleSpawn(const Point &pos, F32 scale)
-{
-   scale *= 0.8f;
-   static const Point p(0,0);
-
-   glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(scale, scale, 1);
-      drawCircle(p, 8);
-
-      drawCircle(p, 13, &Colors::white);
-   glPopMatrix();  
 }
 
 

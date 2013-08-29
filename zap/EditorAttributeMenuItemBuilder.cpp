@@ -89,7 +89,6 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
       }
 
       case ShipSpawnTypeNumber:
-      case CircleSpawnTypeNumber:
       case AsteroidSpawnTypeNumber:
       case FlagSpawnTypeNumber:
       {
@@ -222,7 +221,6 @@ void EditorAttributeMenuItemBuilder::startEditingAttrs(EditorAttributeMenuUI *at
          break;
 
       case ShipSpawnTypeNumber:
-      case CircleSpawnTypeNumber:
       case AsteroidSpawnTypeNumber:
       case FlagSpawnTypeNumber:
          attributeMenu->getMenuItem(0)->setIntValue(static_cast<AbstractSpawn *>(obj)->getSpawnTime());
@@ -263,7 +261,6 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
          break;
 
       case ShipSpawnTypeNumber:
-      case CircleSpawnTypeNumber:
       case AsteroidSpawnTypeNumber:
       case FlagSpawnTypeNumber:
          static_cast<AbstractSpawn *>(obj)->setSpawnTime(attributeMenu->getMenuItem(0)->getIntValue());
