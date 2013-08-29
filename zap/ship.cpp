@@ -2298,26 +2298,63 @@ REGISTER_LUA_SUBCLASS(Ship, MoveObject);
 
 // Note: All of these methods will return nil if the ship in question has been deleted.
 
+/**
+ * @luafunc bool Ship::isAlive()
+ *
+ * @brief Check if this Ship is alive.
+ *
+ * @return `true` if the Ship is present in the game world and still alive,
+ * `false` otherwise.
+ */
 S32 Ship::lua_isAlive(lua_State *L)    { return returnBool(L, !isDestroyed()); }
+
+/**
+ * @luafunc bool Ship::hasFlag()
+ *
+ * @brief Check if this Ship is carrying a flag.
+ *
+ * @return `true` if the Ship is carrying at least one flag, `false` otherwise.
+ */
 S32 Ship::lua_hasFlag(lua_State *L)    { return returnBool (L, getFlagCount() > 0); }
 
-// Returns number of flags ship is carrying (most games will always be 0 or 1)
+/**
+ * @luafunc int Ship::getFlagCount()
+ *
+ * @brief Get the number of flags carried by this Ship.
+ *
+ * @return The number of flags carried by this Ship.
+ */
 S32 Ship::lua_getFlagCount(lua_State *L) { return returnInt(L, getFlagCount()); }
 
 
+/**
+ * @luafunc LuaPlayerInfo Ship::getPlayerInfo()
+ *
+ * @brief Get the LuaPlayerInfo for this Ship.
+ *
+ * @return The LuaPlayerInfo for this Ship.
+ */
 S32 Ship::lua_getPlayerInfo(lua_State *L) { return returnPlayerInfo(L, this); }
 
+/**
+ * @luafunc num Ship::getAngle()
+ *
+ * @brief Get the angle of Ship.
+ *
+ * @return The Ship's angle in radians.
+ */
 S32 Ship::lua_getAngle(lua_State *L)        { return returnFloat(L, getCurrentMove().angle);     }  // Get angle ship is pointing at
 
 
 /**
- * @luafunc Ship::getActiveWeapon()
+ * @luafunc Weapon Ship::getActiveWeapon()
  *
  * @brief Checks if the given module is active.
  *
- * @descr This will return an item of the Weapon enum, e.g. Weapon.Phaser
+ * @descr This will return an item of the \ref WeaponEnum enum, e.g.
+ * `Weapon.Phaser`.
  *
- * @return int The weapon that is currently active on this ship
+ * @return int The \ref WeaponEnum that is currently active on this ship.
  */
 S32 Ship::lua_getActiveWeapon(lua_State *L)
 {
@@ -2326,14 +2363,17 @@ S32 Ship::lua_getActiveWeapon(lua_State *L)
 
 
 /**
- * @luafunc Ship::isModActive(int module)
+ * @luafunc bool Ship::isModActive(Module module)
  *
  * @brief Checks if the given module is active.
  *
- * @descr This method takes a Module enum item as a parameter, e.g.
- * Module.Shield
+ * @descr This method takes a \ref ModuleEnum item as a parameter, e.g.
+ * `Module.Shield`
  *
- * @param module The module to check
+ * @param module The \ref ModuleEnum to check.
+ *
+ * @return `true` if the given \ref ModuleEnum is in active use, false
+ * otherwise.
  */
 S32 Ship::lua_isModActive(lua_State *L) {
    checkArgList(L, functionArgs, luaClassName, "isModActive");
@@ -2345,11 +2385,15 @@ S32 Ship::lua_isModActive(lua_State *L) {
 
 
 /**
- * @luafunc  num Ship::getEnergy()
- * @brief    Returns the enegy of this ship.
- * @descr    Energy is specified as a number between 0 and 1 where 0 means no energy and 1 means full energy.
- * @return   Returns a value between 0 and 1 indicating the energy of the item.
-*/
+ * @luafunc num Ship::getEnergy()
+ * 
+ * @brief Gets the enegy of this ship.
+ * 
+ * @descr Energy is specified as a number between 0 and 1 where 0 means no
+ * energy and 1 means full energy.
+ * 
+ * @return Returns a value between 0 and 1 indicating the energy of the item.
+ */
 S32 Ship::lua_getEnergy(lua_State *L)
 {
    // Return ship's energy as a fraction between 0 and 1
@@ -2358,12 +2402,16 @@ S32 Ship::lua_getEnergy(lua_State *L)
 
 
 /**
- * @luafunc  setEnergy::setEnergy(energy)
- * @brief    Set the current energy of this ship.
- * @descr    Energy is specified as a number between 0 and 1 where 0 means no energy and 1 means full energy.
- *           Values outside this range will be clamped to the valid range.
- * @param    energy - A value between 0 and 1.
-*/
+ * @luafunc Ship::setEnergy(num energy)
+ * 
+ * @brief Set the current energy of this ship.
+ * 
+ * @descr Energy is specified as a number between 0 and 1 where 0 means no
+ * energy and 1 means full energy.  Values outside this range will be clamped to
+ * the valid range.
+ * 
+ * @param energy A value between 0 and 1.
+ */
 S32 Ship::lua_setEnergy(lua_State *L)
 {
    checkArgList(L, functionArgs, "Ship", "setEnergy");
@@ -2386,11 +2434,15 @@ S32 Ship::lua_setEnergy(lua_State *L)
 
 
 /**
- * @luafunc  num Ship::getHealth()
- * @brief    Returns the health of this ship.
- * @descr    Health is specified as a number between 0 and 1 where 0 is completely dead and 1 is full health.
- * @return   Returns a value between 0 and 1 indicating the health of the item.
-*/
+ * @luafunc num Ship::getHealth()
+ * 
+ * @brief Returns the health of this ship.
+ * 
+ * @descr Health is specified as a number between 0 and 1 where 0 is completely
+ * dead and 1 is full health.
+ * 
+ * @return Returns a value between 0 and 1 indicating the health of the item.
+ */
 S32 Ship::lua_getHealth(lua_State *L)
 {
    // Return ship's health as a fraction between 0 and 1
@@ -2399,13 +2451,18 @@ S32 Ship::lua_getHealth(lua_State *L)
 
 
 /**
- * @luafunc  Ship::setHealth(health)
- * @brief    Set the current health of this ship.
- * @descr    Health is specified as a number between 0 and 1 where 0 is completely dead and 1 is full health.
- *           Values outside this range will be clamped to the valid range.
- * @param    health - A value between 0 and 1.
- * @note     A setting of 0 will kill the ship instantly
-*/
+ * @luafunc Ship::setHealth(num health)
+ * 
+ * @brief Set the current health of this ship.
+ * 
+ * @descr Health is specified as a number between 0 and 1 where 0 is completely
+ * dead and 1 is full health. Values outside this range will be clamped to the
+ * valid range.
+ * 
+ * @param health A value between 0 and 1.
+ * 
+ * @note A setting of 0 will kill the ship instantly.
+ */
 S32 Ship::lua_setHealth(lua_State *L)
 {
    checkArgList(L, functionArgs, "Ship", "setHealth");
@@ -2428,6 +2485,13 @@ S32 Ship::lua_setHealth(lua_State *L)
 }
 
 
+/**
+ * @luafunc table Ship::getMountedItems()
+ * 
+ * @brief Get all Items carried by this Ship.
+ * 
+ * @return A table of all Items mounted on ship (e.g. ResourceItems and Flags)
+ */
 S32 Ship::lua_getMountedItems(lua_State *L)
 {
    bool hasArgs = lua_isnumber(L, 1);
@@ -2479,13 +2543,15 @@ S32 Ship::lua_getMountedItems(lua_State *L)
 
 /**
  * @luafunc table Ship::getLoadout()
- * @brief   Get the current loadout
- * @descr   This method will return a table with the loadout in the following
- *          order:
- *
- *             Module 1, Module 2, Weapon 1, Weapon 2, Weapon 3
- *
- * @return A table with the current loadout
+ * 
+ * @brief Get the current loadout
+ * 
+ * @descr This method will return a table with the loadout in the following
+ * order:
+ * 
+ * `Module 1, Module 2, Weapon 1, Weapon 2, Weapon 3`
+ * 
+ * @return A table with the current loadout, as described above.
  */
 S32 Ship::lua_getLoadout(lua_State *L)
 {
@@ -2574,6 +2640,15 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
 
 
 /**
+ * @luafunc Ship::setLoadout(Weapon w1, Weapon w2, Module m1, Module m2, Module m3)
+ * @brief Convenience alias for setLoadout(table)
+ *
+ * @param w1 The new \ref WeaponEnum for slot 1.
+ * @param w2 The new \ref WeaponEnum for slot 2.
+ * @param m1 The new \ref ModuleEnum for slot 1.
+ * @param m2 The new \ref ModuleEnum for slot 2.
+ * @param m3 The new \ref ModuleEnum for slot 3.
+ *
  * @luafunc Ship::setLoadout(table loadout)
  *
  * @brief Sets the requested loadout for the ship.
@@ -2585,11 +2660,11 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
  * 2 modules and 3 weapons.
  *
  * @note This method will also take 5 parameters as a new loadout, instead
- * of a table.
+ * of a table. See setLoadout(Weapon, Weapon, Module, Module, Module)
  *
  * @param loadout The new loadout to request.
  *
- * @see Ship::setLoadoutNow(loadout)
+ * @see setLoadoutNow()
  */
 S32 Ship::lua_setLoadout(lua_State *L)
 {
@@ -2615,7 +2690,7 @@ S32 Ship::lua_setLoadout(lua_State *L)
  *
  * @param loadout The new loadout to set.
  *
- * @see Ship::setLoadout(loadout)
+ * @see setLoadout(loadout)
  */
 S32 Ship::lua_setLoadoutNow(lua_State *L)
 {
