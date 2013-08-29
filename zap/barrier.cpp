@@ -665,8 +665,15 @@ void WallItem::checkIfHasBeenAddedToTheGame(lua_State *L)
 
 S32 WallItem::lua_setLoc(lua_State *L)
 {
+   logprintf(LogConsumer::LuaBotMessage, "'setLoc()' is deprecated and will be removed in the future.  Use 'setPos()', instead");
+   return lua_setPos(L);
+}
+
+
+S32 WallItem::lua_setPos(lua_State *L)
+{
    checkIfHasBeenAddedToTheGame(L);
-   return Parent::lua_setLoc(L);
+   return Parent::lua_setPos(L);
 }
 
 
@@ -865,8 +872,15 @@ void PolyWall::checkIfHasBeenAddedToTheGame(lua_State *L)
 
 S32 PolyWall::lua_setLoc(lua_State *L)
 {
+   logprintf(LogConsumer::LuaBotMessage, "'setLoc()' is deprecated and will be removed in the future.  Use 'setPos()', instead");
+   return lua_setPos(L);
+}
+
+
+S32 PolyWall::lua_setPos(lua_State *L)
+{
    checkIfHasBeenAddedToTheGame(L);
-   return Parent::lua_setLoc(L);
+   return Parent::lua_setPos(L);
 }
 
 

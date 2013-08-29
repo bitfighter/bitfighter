@@ -300,6 +300,8 @@ public:
 
    S32 lua_getLoc(lua_State *L);
    S32 lua_setLoc(lua_State *L);
+   S32 lua_getPos(lua_State *L);
+   S32 lua_setPos(lua_State *L);
    S32 lua_setTeam(lua_State *L);
    S32 lua_removeFromGame(lua_State *L);
 };
@@ -383,6 +385,7 @@ public:
    // LuaItem methods
    S32 lua_getRad(lua_State *L);
    S32 lua_getLoc(lua_State *L);
+   S32 lua_getPos(lua_State *L);
    S32 lua_getAimAngle(lua_State *L);
    S32 lua_setAimAngle(lua_State *L);
 };

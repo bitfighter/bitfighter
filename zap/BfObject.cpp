@@ -1287,6 +1287,8 @@ void BfObject::writeThisTeam(BitStream *stream)
    METHOD(CLASS, setId,          ARRAYDEF({{ INT,       END }               }), 1 ) \
    METHOD(CLASS, getLoc,         ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setLoc,         ARRAYDEF({{ PT,        END }               }), 1 ) \
+   METHOD(CLASS, getPos,         ARRAYDEF({{            END }               }), 1 ) \
+   METHOD(CLASS, setPos,         ARRAYDEF({{ PT,        END }               }), 1 ) \
    METHOD(CLASS, getTeamIndx,    ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, getTeamIndex,   ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setTeam,        ARRAYDEF({{ TEAM_INDX, END }               }), 1 ) \
@@ -1367,20 +1369,31 @@ S32 BfObject::lua_setId(lua_State *L)
 
 
 /**
- * @luafunc Point BfObject::getLoc()
+ * @luafunc Point BfObject::getPos()
  * 
  * @brief Gets an object's position.
  * 
  * @descr For objects that are not points (such as a LoadoutZone), will return
  * the object's centroid.
  * 
- * @return A Point representing the object's location.
+ * @return A Point representing the object's position.
  */
-S32 BfObject::lua_getLoc(lua_State *L)      
+S32 BfObject::lua_getPos(lua_State *L)
 { 
    return returnPoint(L, getPos()); 
 }
 
+
+/**
+ * @luafunc Point BfObject::getLoc()
+ *
+ * @deprecated Use getPos() instead.
+ */
+S32 BfObject::lua_getLoc(lua_State *L)
+{ 
+   logprintf(LogConsumer::LuaBotMessage, "'getLoc()' is deprecated and will be removed in the future.  Use 'getPos()', instead");
+   return lua_getPos(L); 
+}
 
 // TODO Remove after 019
 /**
@@ -1444,20 +1457,32 @@ S32 BfObject::lua_setTeam(lua_State *L)
 
 
 /**
- * @luafunc BfObject::setLoc(Point pos)
+ * @luafunc BfObject::setPos(Point pos)
  * 
- * @brief Set the object's location.
+ * @brief Set the object's position.
  * 
  * @descr To set the full geometry of a more complex object, see the setGeom()
  * method.
  * 
- * @param pos Point representing the location of the object. 
+ * @param pos The new position of the object. 
+ */
+S32 BfObject::lua_setPos(lua_State *L)
+{
+   checkArgList(L, functionArgs, "BfObject", "setPos");
+   setPos(L, 1);
+   return 0;
+}
+
+
+/**
+ * @luafunc BfObject::setLoc(Point pos)
+ *
+ * @deprecated Use setPos() instead.
  */
 S32 BfObject::lua_setLoc(lua_State *L)
 {
-   checkArgList(L, functionArgs, "BfObject", "setLoc");
-   setPos(L, 1);
-   return 0;
+   logprintf(LogConsumer::LuaBotMessage, "'setLoc()' is deprecated and will be removed in the future.  Use 'setPos()', instead");
+   return lua_setPos(L);
 }
 
 
@@ -1635,11 +1660,25 @@ CentroidObject::~CentroidObject()
 // 2D objects need special handling when getting/setting location
 S32 CentroidObject::lua_getLoc(lua_State *L)
 {
-   return LuaBase::returnPoint(L, getCentroid());      // Do we want this to return a series of points?
+   logprintf(LogConsumer::LuaBotMessage, "'getLoc()' is deprecated and will be removed in the future.  Use 'getPos()', instead");
+   return lua_getPos(L);
 }
 
 
 S32 CentroidObject::lua_setLoc(lua_State *L)
+{
+   logprintf(LogConsumer::LuaBotMessage, "'setLoc()' is deprecated and will be removed in the future.  Use 'setPos()', instead");
+   return lua_setPos(L);
+}
+
+
+S32 CentroidObject::lua_getPos(lua_State *L)
+{
+   return LuaBase::returnPoint(L, getCentroid());      // Do we want this to return a series of points?
+}
+
+
+S32 CentroidObject::lua_setPos(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setLoc");
 
@@ -1647,7 +1686,5 @@ S32 CentroidObject::lua_setLoc(lua_State *L)
 
    return 0;
 }
-
-
 };
 

@@ -450,6 +450,8 @@ public:
    // Get/set object's position
    virtual S32 lua_getLoc(lua_State *L);
    virtual S32 lua_setLoc(lua_State *L);
+   virtual S32 lua_getPos(lua_State *L);
+   virtual S32 lua_setPos(lua_State *L);
 
    virtual S32 lua_getTeamIndx(lua_State *L);
    virtual S32 lua_getTeamIndex(lua_State *L);
@@ -481,6 +483,8 @@ public:
    // Provide special location handlers
    virtual S32 lua_getLoc(lua_State *L);
    virtual S32 lua_setLoc(lua_State *L);
+   virtual S32 lua_getPos(lua_State *L);
+   virtual S32 lua_setPos(lua_State *L);
 };
 
 

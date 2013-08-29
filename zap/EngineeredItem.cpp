@@ -1602,16 +1602,30 @@ const char *ForceFieldProjector::luaClassName = "ForceFieldProjector";
 REGISTER_LUA_SUBCLASS(ForceFieldProjector, EngineeredItem);
 
 // LuaItem methods -- override method in parent class
-S32 ForceFieldProjector::lua_getLoc(lua_State *L)
+S32 ForceFieldProjector::lua_getPos(lua_State *L)
 {
    return LuaBase::returnPoint(L, getPos() + mAnchorNormal * getRadius() );
 }
 
 
-S32 ForceFieldProjector::lua_setLoc(lua_State *L)
+S32 ForceFieldProjector::lua_setPos(lua_State *L)
 {
    // TODO
-   return Parent::lua_setLoc(L);
+   return Parent::lua_setPos(L);
+}
+
+
+S32 ForceFieldProjector::lua_getLoc(lua_State *L)
+{
+   logprintf(LogConsumer::LuaBotMessage, "'getLoc()' is deprecated and will be removed in the future.  Use 'getPos()', instead");
+   return lua_getPos(L);
+}
+
+
+S32 ForceFieldProjector::lua_setLoc(lua_State *L)
+{
+   logprintf(LogConsumer::LuaBotMessage, "'setLoc()' is deprecated and will be removed in the future.  Use 'setPos()', instead");
+   return lua_setPos(L);
 }
 
 
@@ -2315,6 +2329,13 @@ S32 Turret::lua_getRad(lua_State *L)
 
 
 S32 Turret::lua_getLoc(lua_State *L)
+{
+   logprintf(LogConsumer::LuaBotMessage, "'getLoc()' is deprecated and will be removed in the future.  Use 'getPos()', instead");
+   return lua_getPos(L);
+}
+
+
+S32 Turret::lua_getPos(lua_State *L)
 {
    return LuaBase::returnPoint(L, getPos() + mAnchorNormal * TURRET_OFFSET);
 }
