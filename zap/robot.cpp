@@ -608,7 +608,21 @@ const char *Robot::luaClassName = "Robot";
 REGISTER_LUA_SUBCLASS(Robot, Ship);
 
 
-// Turn to angle a (in radians, or toward a point)
+/**
+ * @luafunc Robot::setAngle(num angle)
+ *
+ * @brief Sets the Robot's angle to `angle`
+ *
+ * @param angle The desired angle in radians
+ */
+
+/**
+ * @luafunc Robot::setAngle(point p)
+ *
+ * @brief Sets the Robot's angle to point towards `p`
+ *
+ * @param p The point to point at
+ */
 S32 Robot::lua_setAngle(lua_State *L)
 {
    S32 profile = checkArgList(L, functionArgs, "Robot", "setAngle");
@@ -629,7 +643,13 @@ S32 Robot::lua_setAngle(lua_State *L)
 }
 
 
-// Get angle toward point
+/**
+ * @luafunc num Robot::getAnglePt(point p)
+ *
+ * @brief Gets the angle from the Robot to point `p`
+ *
+ * @return The angle in radians
+ */
 S32 Robot::lua_getAnglePt(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "getAnglePt");
@@ -641,13 +661,17 @@ S32 Robot::lua_getAnglePt(lua_State *L)
 
 
 /**
-  * @luafunc Robot::canSeePoint(point pt)
-  * @brief   Does this robot have line-of-sight to the given point.
-  * @descr   Line-of-sight a straight path from the robot to the object without any stationary,
-  *          collideable objects in the way
-  * @param   pt - point to test
-  * @return  \e bool - true if this bot can see the given point, false otherwise
-  */
+ * @luafunc bool Robot::canSeePoint(point pt)
+ * 
+ * @brief Does this robot have line-of-sight to the given point.
+ * 
+ * @descr Line-of-sight a straight path from the robot to the object without any
+ * stationary, collideable objects in the way
+ * 
+ * @param pt point to test
+ * 
+ * @return `true` if this bot can see the given point, `false` otherwise
+ */
 S32 Robot::lua_canSeePoint(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "canSeePoint");
@@ -658,7 +682,20 @@ S32 Robot::lua_canSeePoint(lua_State *L)
 }
 
 
-// Get next waypoint to head toward when traveling from current location to x,y
+/**
+ * @luafunc point Robot::getWaypoint(point p)
+ * 
+ * @brief Get next waypoint to head toward in order to move to `p`
+ * 
+ * @descr Finds a path from the current position to `p` using the built-in
+ * pathing utility. The algorithm will consider teleporters and tries to take
+ * the shortest route to `p`.
+ *
+ * @param p The destination point
+ * 
+ * @return The next point to head towards, or `nil` if no path can be found
+ */
+
 // Note that this function will be called frequently by various robots, so any
 // optimizations will be helpful.
 S32 Robot::lua_getWaypoint(lua_State *L)
@@ -790,14 +827,21 @@ S32 Robot::lua_getWaypoint(lua_State *L)
 
 
 /**
-  * @luafunc Robot::findClosestEnemy(range)
-  * @brief   Finds the closest enemy ship or robot that is within the specified distance.
-  * @descr   Finds closest enemy within specified distance of the bot.  If dist is omitted, this will use standard 
-  *          scanner range, taking into account whether the bot has the Sensor module.  To search the entire map,
-  *          specify -1 for the range.
-  * @param   range - (Optional) Radius in which to search.  Use -1 to search entire map.  If omitted, will use normal scanner range.
-  * @return  Ship object representing closest enemy, or nil if none were found.
-  */
+ * @luafunc Ship Robot::findClosestEnemy(num range)
+ * 
+ * @brief Finds the closest enemy ship or robot that is within the specified
+ * distance.
+ * 
+ * @descr Finds closest enemy within specified distance of the bot. If dist is
+ * omitted, this will use standard scanner range, taking into account whether
+ * the bot has the Sensor module. To search the entire map, specify -1 for the
+ * range.
+ * 
+ * @param range (Optional) Radius in which to search. Use -1 to search entire
+ * map. If omitted, will use normal scanner range.
+ * 
+ * @return Ship object representing closest enemy, or nil if none were found.
+ */
 S32 Robot::lua_findClosestEnemy(lua_State *L)
 {
    S32 profile = checkArgList(L, functionArgs, "Robot", "findClosestEnemy");
@@ -855,7 +899,23 @@ S32 Robot::lua_findClosestEnemy(lua_State *L)
 }
 
 
-// Thrust at velocity v toward angle a
+/**
+ * @luafunc Robot::setThrust(num speed, num angle)
+ *
+ * @brief Makes the Robot thrust at `speed` along `angle`.
+ *
+ * @param speed The desired speed in units per second.
+ * @param angle The desired angle in radians.
+ */
+
+/**
+ * @luafunc Robot::setThrust(num speed, point p)
+ *
+ * @brief Makes the Robot thrust at `speed` towards `p`.
+ *
+ * @param speed The desired speed in units per second.
+ * @param p The point move towards.
+ */
 S32 Robot::lua_setThrust(lua_State *L)
 {
    S32 profile = checkArgList(L, functionArgs, "Robot", "setThrust");
@@ -884,7 +944,13 @@ S32 Robot::lua_setThrust(lua_State *L)
 }
 
 
-// Thrust toward specified point, but slow speed so that we land directly on that point if it is within range
+/**
+ * @luafunc Robot::setThrustToPt(point p)
+ *
+ * @brief Makes the Robot thrust to `p`, stopping when it reaches that point.
+ *
+ * @param p The point move towards.
+ */
 S32 Robot::lua_setThrustToPt(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "setThrustToPt");
@@ -912,11 +978,11 @@ S32 Robot::lua_setThrustToPt(lua_State *L)
 
 
 /**
- * @luafunc Robot::fireWeapon(weapon)
+ * @luafunc Robot::fireWeapon(Weapon weapon)
  *
- * @brief Shoots the given weapon if it is equipped
+ * @brief Shoots the given weapon if it is equipped.
  *
- * @param weapon Weapon to fire
+ * @param weapon \ref WeaponEnum to fire.
  */
 S32 Robot::lua_fireWeapon(lua_State *L)
 {
@@ -949,13 +1015,13 @@ S32 Robot::lua_fireWeapon(lua_State *L)
 
 
 /**
- * @luafunc int Robot::hasModule(int weapon)
- *
- * @brief Does the robot have the given weapon.
- *
- * @param weapon The weapon to check
- *
- * @return True if the bot has the weapon, false if not.
+ * @luafunc bool Robot::hasWeapon(Weapon weapon)
+ * 
+ * @brief Does the robot have the given \ref WeaponEnum.
+ * 
+ * @param weapon The \ref WeaponEnum to check.
+ * 
+ * @return `true` if the bot has the weapon, `false` if not.
  */
 S32 Robot::lua_hasWeapon(lua_State *L)
 {
@@ -971,9 +1037,11 @@ S32 Robot::lua_hasWeapon(lua_State *L)
 
 
 /**
- * @luafunc Robot::fireModule(module)
- * @brief   Activates/fires the given module if it is equipped
- * @param   module Module to fire
+ * @luafunc Robot::fireModule(Module module)
+ * 
+ * @brief Activates/fires the given module if it is equipped
+ * 
+ * @param module \ref ModuleEnum to fire
  */
 S32 Robot::lua_fireModule(lua_State *L)
 {
@@ -1000,13 +1068,13 @@ S32 Robot::lua_fireModule(lua_State *L)
 
 
 /**
- * @luafunc int Robot::hasModule(int module)
- *
- * @brief Does the robot have the given module.
- *
- * @param module The module to check
- *
- * @return True if the bot has the module, false if not.
+ * @luafunc bool Robot::hasModule(Module module)
+ * 
+ * @brief Does the robot have the given \ref ModuleEnum.
+ * 
+ * @param module The \ref ModuleEnum to check
+ * 
+ * @return `true` if the bot has the \ref ModuleEnum, `false` if not.
  */
 S32 Robot::lua_hasModule(lua_State *L)
 {
@@ -1022,11 +1090,14 @@ S32 Robot::lua_hasModule(lua_State *L)
 
 
 /**
- * @luafunc Robot::setLoadoutWeapon(slot, weapon)
- * @brief   Request a new loadout where the given weapon slot is changed to the given weapon.
- *          This still requires the bot to change to its new loadout
- * @param   slot Weapon slot to set
- * @param   weapon Weapon to set
+ * @luafunc Robot::setLoadoutWeapon(int slot, Weapon weapon)
+ * 
+ * @brief Request a new loadout where the given weapon slot is changed to the
+ * given weapon. This still requires the bot to change to its new loadout.
+ * 
+ * @param slot Weapon slot to set.
+ * 
+ * @param weapon \ref WeaponEnum to set.
  */
 S32 Robot::lua_setLoadoutWeapon(lua_State *L)
 {
@@ -1048,11 +1119,14 @@ S32 Robot::lua_setLoadoutWeapon(lua_State *L)
 
 
 /**
- * @luafunc Robot::setLoadoutModule(slot, module)
- * @brief   Request a new loadout where the given module slot is changed to the given module.
- *          This still requires the bot to change to its new loadout
- * @param   slot Module slot to set
- * @param   module Module to set
+ * @luafunc Robot::setLoadoutModule(int slot, Module module)
+ * 
+ * @brief Request a new loadout where the given module slot is changed to the
+ * given module. This still requires the bot to change to its new loadout.
+ * 
+ * @param slot Module slot to set.
+ * 
+ * @param module \ref ModuleEnum to set.
  */
 S32 Robot::lua_setLoadoutModule(lua_State *L)
 {
@@ -1075,8 +1149,10 @@ S32 Robot::lua_setLoadoutModule(lua_State *L)
 
 /**
  * @luafunc Robot::globalMsg(string message)
- * @brief   Send a message to all players.
- * @param   message Message to send.
+ * 
+ * @brief Send a message to all players.
+ * 
+ * @param message Message to send.
  */
 S32 Robot::lua_globalMsg(lua_State *L)
 {
@@ -1103,8 +1179,10 @@ S32 Robot::lua_globalMsg(lua_State *L)
 // Send message to team (what happens when neutral/hostile robot does this???)
 /**
  * @luafunc Robot::teamMsg(string message)
- * @brief   Send a message to this Robot's team.
- * @param   message Message to send.
+ * 
+ * @brief Send a message to this Robot's team.
+ * 
+ * @param message Message to send.
  */
 S32 Robot::lua_teamMsg(lua_State *L)
 {
@@ -1130,9 +1208,12 @@ S32 Robot::lua_teamMsg(lua_State *L)
 
 /**
  * @luafunc Robot::privateMsg(string message, string playerName)
- * @brief   Send a private message to a player.
- * @param   message Message to send.
- * @param   playerName Name of player to which to send a message.
+ * 
+ * @brief Send a private message to a player.
+ * 
+ * @param message Message to send.
+ * 
+ * @param playerName Name of player to which to send a message.
  */
 S32 Robot::lua_privateMsg(lua_State *L)
 {
@@ -1150,33 +1231,42 @@ S32 Robot::lua_privateMsg(lua_State *L)
 
 
 /**
-  *   @luafunc Robot::findVisibleObjects(table, itemType, ...)
-  *   @brief   Finds all items of the specified type within ship's area of vision.
-  *   @descr   This search will exclude the bot itself as well as other cloaked ships in the area (unless
-  *            this bot has sensor equipped)
-  *
-  *   Can specify multiple types.  The \e table argument is optional, but bots that call this function frequently will perform
-  *   better if they provide a reusable table in which found objects can be stored.  By providing a table, you will avoid
-  *   incurring the overhead of construction and destruction of a new one.
-  *
-  *   If a table is not provided, the function will create a table and return it on the stack.
-  *
-  *   <i>Note that although this function is part of the Robot object, it can (and should) be called without a direct bot: reference.</i>
-  *   See the example below.
-  *
-  *   @param  table - (Optional) Reusable table into which results can be written.
-  *   @param  itemType - One or more itemTypes specifying what types of objects to find.
-  *   @return resultsTable - Will either be a reference back to the passed \e table, or a new table if one was not provided.
-  *
-  *   @code items = { }     -- Reusable container for findGlobalObjects.  Because it is defined outside
-  *                         -- any functions, it will have global scope.
-  *
-  *         function countObjects(objType, ...)   -- Pass one or more object types
-  *           table.clear(items)                  -- Remove any items in table from previous use
-  *           findObjects(items, objType, ...)    -- Put all items of specified type(s) into items table, no bot reference
-  *           print(#items)                       -- Print the number of items found to the console
-  *         end
-  */
+ * @luafunc table Robot::findVisibleObjects(table t, ObjType types, ...)
+ * 
+ * @brief Finds all items of the specified type within ship's area of vision.
+ * 
+ * @descr This search will exclude the bot itself as well as other cloaked ships
+ * in the area (unless this bot has sensor equipped)
+ * 
+ * Can specify multiple types. The table argument is optional, but bots that
+ * call this function frequently will perform better if they provide a reusable
+ * table in which found objects can be stored. By providing a table, you will
+ * avoid incurring the overhead of construction and destruction of a new one.
+ * 
+ * If a table is not provided, the function will create a table and return it on
+ * the stack.
+ * 
+ * @param t (Optional) Reusable table into which results can be written.
+ * 
+ * @param types One or more \ref ObjTypeEnum specifying what types of objects to
+ * find.
+ * 
+ * @return Either a reference back to the passed table, or a new table if one
+ * was not provided.
+ * 
+ * @code
+ *   -- Reusable container for findGlobalObjects. Because it is defined outside
+ *   -- any functions, it will have global scope.
+ *   items = { }
+ *
+ *   -- Pass one or more object types
+ *   function countObjects(objType, ...)
+ *     table.clear(items) -- Remove any items in table from previous use
+ *     bot:findVisibleObjects(items, objType, ...)
+ *     print(#items) -- Print the number of items found
+ *   end
+ * @endcode
+ */
 S32 Robot::lua_findVisibleObjects(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "findVisibleObjects");
@@ -1313,10 +1403,18 @@ static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S
 }
 
 
-// Given an object, which angle do we need to be at to fire to hit it?
-// Returns nil if a workable solution can't be found
-// Logic adapted from turret aiming algorithm
-// Note that bot WILL fire at teammates if you ask it to!
+/**
+ * @luafunc num Robot::getFiringSolution(BfObject obj)
+ *
+ * @brief Calculate the angle to fire at in order to hit `obj` with the current
+ * Weapon.
+ *
+ * @param obj The intended target.
+ *
+ * @return The angle to fire at, or `nil` if no solution can be found.
+ *
+ * @note The bot WILL fire at teammates if you ask it to!
+ */
 S32 Robot::lua_getFiringSolution(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "getFiringSolution");
@@ -1335,8 +1433,15 @@ S32 Robot::lua_getFiringSolution(lua_State *L)
 }
 
 
-// Given an object, what angle do we need to fly toward in order to collide with an object?  This
-// works a lot like getFiringSolution().
+/**
+ * @luafunc num Robot::getInterceptCourse(BfObject obj)
+ *
+ * @brief Calculate the angle to fly at in order to collide with `obj`.
+ *
+ * @param obj The intended target.
+ *
+ * @return The angle to fly at, or `nil` if no solution can be found.
+ */
 S32 Robot::lua_getInterceptCourse(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "getInterceptCourse");
@@ -1352,6 +1457,15 @@ S32 Robot::lua_getInterceptCourse(lua_State *L)
 }
 
 
+/**
+ * @luafunc bool Robot::engineerDeployObject(EngineerBuildObject which)
+ *
+ * @brief Deploy the an engineered object of type `which`
+ *
+ * @param which The \ref EngineerBuildObjectEnum to build.
+ *
+ * @return `true` if the item was successfully deployed, false otherwise.
+ */
 S32 Robot::lua_engineerDeployObject(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "engineerDeployObject");
@@ -1362,6 +1476,11 @@ S32 Robot::lua_engineerDeployObject(lua_State *L)
 }
 
 
+/**
+ * @luafunc void Robot::dropItem()
+ *
+ * @brief Drop all carried items.
+ */
 S32 Robot::lua_dropItem(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "dropItem");
@@ -1374,6 +1493,13 @@ S32 Robot::lua_dropItem(lua_State *L)
 }
 
 
+/**
+ * @luafunc void Robot::copyMoveFromObject(BfObject obj)
+ *
+ * @brief Move identically to `obj`.
+ *
+ * @param obj The BfObject to mimic.
+ */
 S32 Robot::lua_copyMoveFromObject(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "copyMoveFromObject");
