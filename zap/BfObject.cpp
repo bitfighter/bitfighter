@@ -1283,6 +1283,7 @@ void BfObject::writeThisTeam(BitStream *stream)
 //               Fn name         Param profiles     Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getClassId,     ARRAYDEF({{            END }               }), 1 ) \
+   METHOD(CLASS, getObjType,     ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, getId,          ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setId,          ARRAYDEF({{ INT,       END }               }), 1 ) \
    METHOD(CLASS, getLoc,         ARRAYDEF({{            END }               }), 1 ) \
@@ -1312,23 +1313,34 @@ REGISTER_LUA_CLASS(BfObject);
 
 
 /**
- * @luafunc ObjType BfObject::getClassId()
+ * @luafunc ObjType BfObject::getObjType()
  * 
- * @brief Gets an object's ClassId.
+ * @brief Gets an object's \ref ObjTypeEnum.
  * 
  * @code
  *   obj = TestItem.new()
  *   -- prints `true`
- *   print(obj:getClassId() == ObjType.TestItem)
+ *   print(obj:getObjType() == ObjType.TestItem)
  * @endcode
  *
  * See \ref ObjTypeEnum for a list of possible return values.
  * 
  * @return The object's ObjType.
  */
-S32 BfObject::lua_getClassId(lua_State *L)  
+S32 BfObject::lua_getObjType(lua_State *L)  
 { 
    return returnInt(L, mObjectTypeNumber); 
+}
+
+/**
+ * @luafunc ObjType BfObject::getClassId()
+ * 
+ * @deprecated Use getObjType()
+ */
+S32 BfObject::lua_getClassId(lua_State *L)  
+{ 
+   logprintf(LogConsumer::LuaBotMessage, "'getClassId()' is deprecated and will be removed in the future.  Use 'getObjType()', instead");
+   return lua_getObjType(L); 
 }
 
 

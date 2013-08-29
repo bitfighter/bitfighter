@@ -444,6 +444,7 @@ public:
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_getClassId(lua_State *L);
+   S32 lua_getObjType(lua_State *L);
    S32 lua_getId(lua_State *L);
    S32 lua_setId(lua_State *L);
 
