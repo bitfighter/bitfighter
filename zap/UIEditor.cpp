@@ -2789,8 +2789,14 @@ void EditorUserInterface::onMouseMoved()
    findHitItemAndEdge();      //  Sets mHitItem, mHitVertex, and mEdgeHit
    findHitItemOnDock();
 
+#ifdef TNL_OS_MAC_OSX 
+   bool ctrlDown = InputCodeManager::getState(KEY_META);
+#else
+   bool ctrlDown = InputCodeManager::getState(KEY_CTRL);
+#endif
+
    // We hit a vertex that wasn't already selected
-   if(mHitItem && mHitVertex != NONE && !mHitItem->vertSelected(mHitVertex))   
+   if(!ctrlDown && mHitItem && mHitVertex != NONE && !mHitItem->vertSelected(mHitVertex))   
       mHitItem->setVertexLitUp(mHitVertex);
 
    // Highlight currently selected item
@@ -3957,9 +3963,16 @@ void EditorUserInterface::onMouseClicked_left()
       }
       else                                            // ==> Shift key is NOT down
       {
+
+#ifdef TNL_OS_MAC_OSX 
+         bool ctrlDown = InputCodeManager::getState(KEY_META);
+#else
+         bool ctrlDown = InputCodeManager::getState(KEY_CTRL);
+#endif
+
          // If we hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection.
          // Note that in the case of a point item, we want to skip this step, as we don't select individual vertices.
-         if(mHitVertex != NONE && mHitItem && mHitItem->isSelected() && mHitItem->getGeomType() != geomPoint)
+         if(!ctrlDown && mHitVertex != NONE && mHitItem && mHitItem->isSelected() && mHitItem->getGeomType() != geomPoint)
          {
             clearSelection(getDatabase());
             mHitItem->selectVert(mHitVertex);
@@ -3976,7 +3989,7 @@ void EditorUserInterface::onMouseClicked_left()
             mHitItem->setSelected(true);
             onSelectionChanged();
          }
-         else if(mHitVertex != NONE && (mHitItem && !mHitItem->isSelected()))      // Hit a vertex of an unselected item
+         else if(!ctrlDown && mHitVertex != NONE && (mHitItem && !mHitItem->isSelected()))      // Hit a vertex of an unselected item
          {        // (braces required)
             if(!(mHitItem->vertSelected(mHitVertex)))
             {
