@@ -131,16 +131,14 @@ endif()
 
 
 # Search for our dependencies
-# SDL on Linux, SDL2 on others
-if("${CMAKE_SYSTEM}" MATCHES "Linux")
-	find_package(SDL)
+# SDL2 is default and should be found on all platforms except possibly Linux
+find_package(SDL2)
+if(SDL2_FOUND)
+	set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
+	set(SDL_LIBRARY ${SDL2_LIBRARY})
 else()
-	find_package(SDL2)
-	
-	if(SDL2_FOUND)
-		set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
-		set(SDL_LIBRARY ${SDL2_LIBRARY})
-	endif()
+	# Default back to SDL 1.2 (most likely Linux)
+	find_package(SDL)
 endif()
 if(WIN32)
 	find_package(ALURE)
