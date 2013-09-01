@@ -1,9 +1,3 @@
-//#ifdef TNL_OS_MOBILE
-//#  include "SDL_opengles.h"
-//#else
-//#  include "SDL_opengl.h"
-//#endif
-
 #include "freeglut_stroke.h"
 
 F32 fact = 0.10f;

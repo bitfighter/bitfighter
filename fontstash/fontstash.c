@@ -27,7 +27,7 @@
 #  define TNL_OS_MOBILE
 #endif
 
-#ifdef TNL_OS_MOBILE
+#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
 #  include "SDL_opengles.h"
 #else
 #  include "SDL_opengl.h"

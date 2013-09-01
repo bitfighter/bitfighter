@@ -40,7 +40,7 @@
 
 //#include "SDL.h"
 
-#ifdef TNL_OS_MOBILE
+#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
 #  include "SDL_opengles.h"
 //   // Needed for GLES compatibility
 #  define glOrtho glOrthof

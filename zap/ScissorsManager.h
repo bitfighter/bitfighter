@@ -30,8 +30,8 @@
 #include "ConfigEnum.h"          // For DisplayMode def
 #include "tnlTypes.h"
 
-// Need this ugliness to get GLint and GLboolean 
-#ifdef TNL_OS_MOBILE
+// Need this ugliness to get GLint and GLboolean
+#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
 #  include "SDL_opengles.h"
 #else
 #  include "SDL_opengl.h"

@@ -32,7 +32,7 @@
 #ifndef FREEGLUT_STROKE_H_
 #define FREEGLUT_STROKE_H_
 
-#ifdef TNL_OS_MOBILE
+#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
 #  include "SDL_opengles.h"
 #else
 #  include "SDL_opengl.h"
