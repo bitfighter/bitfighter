@@ -192,6 +192,7 @@ void HelpItemManager::idle(U32 timeDelta, const ClientGame *game)
 
 S32 HelpItemManager::getRollupPeriod(S32 index) const
 {
+   TNLAssert(mHelpItems.size() > index, "Index out of range!");
    return (getLinesInHelpItem(index) * (FontSize + FontGap) + InterMsgGap) * 5;    // 5 ms per pixel height
 }
 
