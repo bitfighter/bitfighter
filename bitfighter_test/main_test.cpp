@@ -524,7 +524,7 @@ TEST_F(BfTest, HelpItemManagerTests)
    ASSERT_EQ(himgr.getHelpItemDisplayList()->get(0), helpItem);
 
    ASSERT_EQ(himgr.getAlreadySeenString()[helpItem], 'Y');  // Item marked as seen
-   ASSERT_EQ(game->getSettings()->getIniSettings()->helpItemSeenList, himgr.getAlreadySeenString());  // Verify changes made it to the INI
+   ASSERT_EQ(game->getSettings()->getIniSettings()->mSettings.getVal<string>("HelpItemsAlreadySeenList"), himgr.getAlreadySeenString());  // Verify changes made it to the INI
 
    idleUntilItemExpired(himgr, game);
 
