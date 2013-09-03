@@ -643,7 +643,7 @@ TEST_F(BfTest, HelpItemManagerTests)
    checkQueues(himgr, 0, 0, 0);
    checkQueues(himgr, 0, 0, 0);
 
-   himgr.clearAlreadySeenList();    // Allows us to add these same items again
+   himgr.clearAlreadySeenList();    // Allows us to add the same items again
 
    // Check the increasingly complex logic inside moveItemFromQueueToActiveList()
    // We already know that the logic with high-priority and low-priority lists is working under ordinary circumstances
@@ -662,7 +662,7 @@ TEST_F(BfTest, HelpItemManagerTests)
    idleFullCycleMinusOne(himgr, game);
    checkQueues(himgr, 0, 0, 0);                             // No items dispalyed, queues are empty
 
-   himgr.clearAlreadySeenList();    // Allows us to add these same items again
+   himgr.clearAlreadySeenList();    // Allows us to add the same items again
 
    // Add the same two items again
    himgr.addInlineHelpItem(AddBotsItem);
