@@ -99,6 +99,10 @@ private:
    StringTableEntry mServerName;
    GameSettings *mSettings;
 
+   void markCurrentLevelAsDeleted();
+   string undeleteMostRecentlyDeletedLevel();               // Undoes above function
+   void saveSkipList(const Vector<string> *skipList) const; // Helper for above functions
+
 public:
    U16 switchedTeamCount;
 
@@ -140,7 +144,8 @@ public:
       LevelDir, 
 
       // Items not listed in c2sSetParam()::*types[] should be added here
-      DeleteLevel,            
+      DeleteLevel,  
+      UndeleteLevel,
 
       ParamTypeCount       // Must be last
    };

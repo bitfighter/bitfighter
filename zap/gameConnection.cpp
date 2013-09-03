@@ -580,7 +580,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
 }
 
 
-
 // Allow admins to change the passwords and other parameters on their systems
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> paramType), (param, paramType),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
@@ -599,9 +598,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    if(type == DeleteLevel)
       logprintf(LogConsumer::ServerFilter, "User [%s] added level [%s] to server skip list", mClientInfo->getName().getString(), 
                                                 mServerGame->getCurrentLevelFileName().getString());
+   else if(type == UndeleteLevel)
+      logprintf(LogConsumer::ServerFilter, "User [%s] removed level [%s] from the server skip list", mClientInfo->getName().getString(), 
+                                                mServerGame->getCurrentLevelFileName().getString());   
    else
    {
-      // Must be kept aligned with ParamType enum
+      // Must be kept aligned with ParamType enum --> move to xmacro?
       const char *types[] = {
             "level change password",
             "admin password",
@@ -711,28 +713,26 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    }  // end change leveldir
 
    else if(type == DeleteLevel)
+      markCurrentLevelAsDeleted();
+
+   else if(type == UndeleteLevel)
    {
-      // Avoid duplicates on skip list
-      bool found = false;
-      Vector<string> *skipList = mSettings->getLevelSkipList();
-
-      for(S32 i = 0; i < skipList->size(); i++)
-         if(skipList->get(i) == mServerGame->getCurrentLevelFileName().getString())    // Already on our list!
-         {
-            found = true;
-            break;
-         }
-
-      if(!found)
+      string level = undeleteMostRecentlyDeletedLevel();
+      if(level == "")
+         s2cDisplayErrorMessage("!!! No levels on delete list");
+      else
       {
-         // Add level to our skip list.  Deleting it from the active list of levels is more of a challenge...
-         skipList->push_back(mServerGame->getCurrentLevelFileName().getString());
-         writeSkipList(&GameSettings::iniFile, skipList);   // Write skipped levels to INI
-         GameSettings::iniFile.WriteFile();                 // Save new INI settings to disk
+         Vector<StringTableEntry> e;
+         e.push_back(level);
+
+         s2cDisplayMessageE(ColorAqua, SFXNone, "\"%e0\" removed from skip list", e);
       }
+
+      return;
    }
 
-   if(type != DeleteLevel && type != LevelDir)
+
+   if(type != DeleteLevel && type != UndeleteLevel && type != LevelDir)
    {
       const char *keys[] = { "LevelChangePassword", "AdminPassword", "ServerPassword", "ServerName", "ServerDescription" };
 
@@ -741,16 +741,16 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       GameSettings::iniFile.WriteFile();    // Save new INI settings to disk
    }
 
-   // Some messages we might show the user... should these just be inserted directly below?
-   static StringTableEntry levelPassChanged   = "Level change password changed";
-   static StringTableEntry levelPassCleared   = "Level change password cleared -- anyone can change levels";
-   static StringTableEntry adminPassChanged   = "Admin password changed";
-   static StringTableEntry ownerPassChanged   = "Owner password changed";
-   static StringTableEntry serverPassChanged  = "Server password changed -- only players with the password can connect";
-   static StringTableEntry serverPassCleared  = "Server password cleared -- anyone can connect";
-   static StringTableEntry serverNameChanged  = "Server name changed";
-   static StringTableEntry serverDescrChanged = "Server description changed";
-   static StringTableEntry serverLevelDeleted = "Level added to skip list; level will stay in rotation until server restarted";
+   // Some messages we might show the user... should these just be inserted directly below?   Yes.  TODO: <== do that!
+   static StringTableEntry levelPassChanged     = "Level change password changed";
+   static StringTableEntry levelPassCleared     = "Level change password cleared -- anyone can change levels";
+   static StringTableEntry adminPassChanged     = "Admin password changed";
+   static StringTableEntry ownerPassChanged     = "Owner password changed";
+   static StringTableEntry serverPassChanged    = "Server password changed -- only players with the password can connect";
+   static StringTableEntry serverPassCleared    = "Server password cleared -- anyone can connect";
+   static StringTableEntry serverNameChanged    = "Server name changed";
+   static StringTableEntry serverDescrChanged   = "Server description changed";
+   static StringTableEntry serverLevelDeleted   = "Level added to skip list; level will stay in rotation until server restarted";
 
    // Pick out just the right message
    StringTableEntry msg;
@@ -840,6 +840,44 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       msg = serverLevelDeleted;
 
    s2cDisplayMessage(ColorRed, SFXNone, msg);      // Notify user their bidding has been done
+}
+
+
+void GameConnection::markCurrentLevelAsDeleted()
+{
+   // Avoid duplicates on skip list
+   Vector<string> *skipList = mSettings->getLevelSkipList();
+
+   for(S32 i = 0; i < skipList->size(); i++)
+      if(skipList->get(i) == mServerGame->getCurrentLevelFileName().getString())    // Already on our list!
+         return;
+
+   // Add level to our skip list.  Deleting it from the active list of levels is more of a challenge...
+   skipList->push_back(mServerGame->getCurrentLevelFileName().getString());
+   saveSkipList(skipList);
+}
+
+
+string GameConnection::undeleteMostRecentlyDeletedLevel()
+{
+   Vector<string> *skipList = mSettings->getLevelSkipList();
+
+   if(skipList->size() == 0)     // No deleted items to undelete
+      return "";
+
+   string name = skipList->last();
+   skipList->erase(skipList->size() - 1);
+   saveSkipList(skipList);
+
+   return name;
+}
+
+
+// Do we still need to do this at this point?  This will get done when INI is saved through regular channels...
+void GameConnection::saveSkipList(const Vector<string> *skipList) const
+{
+   writeSkipList(&GameSettings::iniFile, skipList);   // Write skipped levels to INI
+   GameSettings::iniFile.WriteFile();                 // Save new INI settings to disk
 }
 
 

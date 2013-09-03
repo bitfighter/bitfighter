@@ -1179,8 +1179,8 @@ void ClientGame::changeServerParam(GameConnection::ParamType type, const Vector<
    // Concatenate all params into a single string
    string allWords = concatenate(words, 1);
 
-   // Did the user provide a name/description?
-   if(type != GameConnection::DeleteLevel && allWords == "")
+   // Did the user provide a name/description? (not needed for DeleteLevel/UndeleteLevel)
+   if(type != GameConnection::DeleteLevel && type != GameConnection::UndeleteLevel && allWords == "")
    {
       if(type == GameConnection::LevelDir)
          displayErrorMessage("!!! Need to supply a folder name");

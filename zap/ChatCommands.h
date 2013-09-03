@@ -122,6 +122,7 @@ void lineWidthHandler          (ClientGame *game, const Vector<string> &args);
 void idleHandler               (ClientGame *game, const Vector<string> &args);
 void showPresetsHandler        (ClientGame *game, const Vector<string> &args);
 void deleteCurrentLevelHandler (ClientGame *game, const Vector<string> &args);
+void undeleteLevelHandler      (ClientGame *game, const Vector<string> &args);
 void addTimeHandler            (ClientGame *game, const Vector<string> &args);
 void setTimeHandler            (ClientGame *game, const Vector<string> &args);
 void setWinningScoreHandler    (ClientGame *game, const Vector<string> &args);

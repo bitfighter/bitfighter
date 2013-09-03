@@ -421,6 +421,14 @@ void deleteCurrentLevelHandler(ClientGame *game, const Vector<string> &words)
 }
 
 
+// Undoes most recent delete action, unless a /purge has already happened
+void undeleteLevelHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! You don't have permission to use the undelete command"))
+      game->changeServerParam(GameConnection::UndeleteLevel, words);    // handles deletes too
+}
+
+
 void idleHandler(ClientGame *game, const Vector<string> &words)
 {
    // No sense entering idle if you're already delayed in some capactiy... just sit tight!
