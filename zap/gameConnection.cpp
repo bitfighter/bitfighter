@@ -839,7 +839,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    else if(type == DeleteLevel)
       msg = serverLevelDeleted;
 
-   s2cDisplayMessage(ColorRed, SFXNone, msg);      // Notify user their bidding has been done
+   s2cDisplayMessage(ColorAqua, SFXNone, msg);      // Notify user their bidding has been done
 }
 
 
