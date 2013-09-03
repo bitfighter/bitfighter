@@ -190,6 +190,8 @@ void HelpItemManager::idle(U32 timeDelta, const ClientGame *game)
 }
 
 
+// Time it will take for the displayed item at [index] to have its "roll up" animation play out.
+// (Longer items take longer to roll up, given a constant roll up rate.)
 S32 HelpItemManager::getRollupPeriod(S32 index) const
 {
    TNLAssert(mHelpItems.size() > index, "Index out of range!");

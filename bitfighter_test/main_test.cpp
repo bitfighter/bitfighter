@@ -643,6 +643,8 @@ TEST_F(BfTest, HelpItemManagerTests)
    checkQueues(himgr, 0, 0, 0);
    checkQueues(himgr, 0, 0, 0);
 
+   himgr.clearAlreadySeenList();    // Allows us to add these same items again
+
    // Check the increasingly complex logic inside moveItemFromQueueToActiveList()
    // We already know that the logic with high-priority and low-priority lists is working under ordinary circumstances
    // So let's ensure it is working for the special situation of AddBotsItem, which should be ignored if there are bots in the game 
@@ -656,9 +658,9 @@ TEST_F(BfTest, HelpItemManagerTests)
 
    // Reset
    idleFullCycle(himgr, game);
-   checkQueues(himgr, 0, 0, 1, CmdrsMapItem);
+   checkQueues(himgr, 0, 0, 1, CmdrsMapItem);               // One item displayed, none in the queues
    idleFullCycleMinusOne(himgr, game);
-   checkQueues(himgr, 0, 0, 0);
+   checkQueues(himgr, 0, 0, 0);                             // No items dispalyed, queues are empty
 
    himgr.clearAlreadySeenList();    // Allows us to add these same items again
 
