@@ -717,68 +717,93 @@ static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
    };
 
    static const F32 triPoints[] = {
-         -7, -7,
+         -6, -6,
          -1, -1,
-         -7, -1,
+         -6, -1,
 
-         1, -7,
-         7, -1,
+         1, -6,
+         6, -1,
          1, -1,
 
-         -7,  7,
-         -1,  7,
-         -7,  1,
+         -6,  6,
+         -1,  6,
+         -6,  1,
 
-         1, 7,
-         7, 7,
+         1, 6,
+         6, 6,
          1, 1,
    };
 
    glPushMatrix();
 
    glTranslate(x - 10, y - 6, 0);
+   
+   glLineWidth(gLineWidth1);
+
+   glColor(Colors::gray20);
+   renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
+   renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
+   renderVertexArray(&rectPoints[16], 4, GL_LINE_LOOP);
+   renderVertexArray(&rectPoints[24], 4, GL_LINE_LOOP);
 
    switch(sym)
    {
       case 0:
-         glColor(Colors::red);
-         renderVertexArray(triPoints, 3, GL_TRIANGLE_FAN);
+         //glColor(Colors::red);
+         //renderVertexArray(triPoints, 3, GL_TRIANGLE_FAN);
+         glColor(Colors::green80);
+         renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
          break;
       case 1:
          glColor(Colors::green80);
          renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
+         renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
          break;
       case 2:
          glColor(Colors::green80);
          renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
-         glColor(Colors::red);
-         renderVertexArray(&triPoints[6], 3, GL_TRIANGLE_FAN);
+         renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
+         //glColor(Colors::red);
+         //renderVertexArray(&triPoints[6], 3, GL_TRIANGLE_FAN);
+         renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
          break;
       case 3:
          glColor(Colors::green80);
          renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
          renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
+         renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
+         renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
          break;
       case 4:
          glColor(Colors::green80);
          renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
          renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
-         glColor(Colors::red);
-         renderVertexArray(&triPoints[12], 3, GL_TRIANGLE_FAN);
+         renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
+         renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
+         //glColor(Colors::red);
+         //renderVertexArray(&triPoints[12], 3, GL_TRIANGLE_FAN);
+         renderVertexArray(&rectPoints[16], 4, GL_LINE_LOOP);
          break;
       case 5:
          glColor(Colors::green80);
          renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
          renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
          renderVertexArray(&rectPoints[16], 4, GL_TRIANGLE_FAN);
+         renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
+         renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
+         renderVertexArray(&rectPoints[16], 4, GL_LINE_LOOP);
          break;
       case 6:
          glColor(Colors::green80);
          renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
          renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
          renderVertexArray(&rectPoints[16], 4, GL_TRIANGLE_FAN);
-         glColor(Colors::red);
-         renderVertexArray(&triPoints[18], 3, GL_TRIANGLE_FAN);
+         renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
+         renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
+         renderVertexArray(&rectPoints[16], 4, GL_LINE_LOOP);
+         //glColor(Colors::red);
+         //renderVertexArray(&triPoints[18], 3, GL_TRIANGLE_FAN);
+         renderVertexArray(&rectPoints[24], 4, GL_LINE_LOOP);
          break;
       case 7:
          glColor(Colors::green80);
@@ -786,9 +811,14 @@ static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
          renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
          renderVertexArray(&rectPoints[16], 4, GL_TRIANGLE_FAN);
          renderVertexArray(&rectPoints[24], 4, GL_TRIANGLE_FAN);
+         renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
+         renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
+         renderVertexArray(&rectPoints[16], 4, GL_LINE_LOOP);
+         renderVertexArray(&rectPoints[24], 4, GL_LINE_LOOP);
          break;
    }
    glPopMatrix();
+   glLineWidth(gDefaultLineWidth);
 }
 
 
