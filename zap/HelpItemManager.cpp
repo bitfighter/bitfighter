@@ -538,7 +538,7 @@ void HelpItemManager::loadAlreadySeenList()
 
 const string HelpItemManager::getAlreadySeenString() const
 {
-   return IniSettings::pack(mAlreadySeen, HelpItemCount);
+   return IniSettings::bitArrayToIniString(mAlreadySeen, HelpItemCount);
 }
 
 
@@ -552,7 +552,7 @@ void HelpItemManager::clearAlreadySeenList()
 // Takes a string; we'll mark a message as being seen every time we encounter a 'Y'
 void HelpItemManager::setAlreadySeenString(const string &vals)
 {
-   IniSettings::unpack(vals, mAlreadySeen, HelpItemCount);
+   IniSettings::iniStringToBitArray(vals, mAlreadySeen, HelpItemCount);
 
    // Probably should be drawn from a definition elsewhere, but some pairs of messages are dependent on one another.
    // If the first has already been shown, don't show the second

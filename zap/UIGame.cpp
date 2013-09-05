@@ -2386,14 +2386,14 @@ void GameUserInterface::loadAlreadySeenLevelupMessageList()
 
 const string GameUserInterface::getAlreadySeenLevelupMessageString() const
 {
-   return IniSettings::pack(mAlreadySeenLevelupMsg, LevelCount);
+   return IniSettings::bitArrayToIniString(mAlreadySeenLevelupMsg, LevelCount);
 }
 
 
 // Takes a string; we'll mark a message as being seen every time we encounter a 'Y'
 void GameUserInterface::setAlreadySeenLevelupMessageString(const string &vals)
 {
-   IniSettings::unpack(vals, mAlreadySeenLevelupMsg, LevelCount);
+   IniSettings::iniStringToBitArray(vals, mAlreadySeenLevelupMsg, LevelCount);
 }
 
 

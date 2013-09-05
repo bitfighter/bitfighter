@@ -73,7 +73,7 @@ TEST_F(BfTest, IniSettingsPackUnpack)
    ASSERT_FALSE(items[0] || items[1] || items[2] || items[3] || items[4]);
 
    // Set from proper length string
-   IniSettings::unpack("YYNNN", items, count);
+   IniSettings::iniStringToBitArray("YYNNN", items, count);
    ASSERT_TRUE(items[0] && items[1]);
    ASSERT_FALSE(items[2] || items[3] || items[4]);
 
@@ -82,19 +82,19 @@ TEST_F(BfTest, IniSettingsPackUnpack)
    ASSERT_FALSE(items[0] || items[1] || items[2] || items[3] || items[4]);
 
    // Set from short string
-   IniSettings::unpack("YNY", items, count);
+   IniSettings::iniStringToBitArray("YNY", items, count);
    ASSERT_TRUE(items[0] && items[2]);
    ASSERT_FALSE(items[1] || items[3] || items[4]);
 
    // Set from long string
    IniSettings::clearbits(items, count);
-   IniSettings::unpack("NNYYYYYYYYYY", items, count);
+   IniSettings::iniStringToBitArray("NNYYYYYYYYYY", items, count);
    ASSERT_TRUE(items[2] && items[3] && items[4]);
    ASSERT_FALSE(items[0] || items[1]);
 
    // Set from bogus string
    IniSettings::clearbits(items, count);
-   IniSettings::unpack("yyYXE", items, count);
+   IniSettings::iniStringToBitArray("yyYXE", items, count);
    ASSERT_TRUE(items[2]);
    ASSERT_FALSE(items[0] || items[1] || items[3] || items[4]);
 
@@ -102,8 +102,8 @@ TEST_F(BfTest, IniSettingsPackUnpack)
    IniSettings::clearbits(items, count);
    string vals = "YYNNY";
 
-   IniSettings::unpack(vals, items, count);
-   ASSERT_EQ(IniSettings::pack(items, count), vals);
+   IniSettings::iniStringToBitArray(vals, items, count);
+   ASSERT_EQ(IniSettings::bitArrayToIniString(items, count), vals);
 }
 
 

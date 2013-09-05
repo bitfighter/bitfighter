@@ -405,9 +405,8 @@ public:
 
    // Some static methods for converting between bit arrays and INI friendly strings
    static void clearbits(bool *items, S32 itemCount);
-   static string pack(const bool *items, S32 itemCount);
-   static void unpack(const string &vals, bool *items, S32 itemCount);
-
+   static string bitArrayToIniString(const bool *items, S32 itemCount);
+   static void iniStringToBitArray(const string &vals, bool *items, S32 itemCount);
 };
 
 
