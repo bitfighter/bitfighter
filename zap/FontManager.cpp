@@ -419,7 +419,7 @@ void FontManager::renderString(F32 size, const char *string)
    }
    else
    {
-      // Bonkers factor because we build the game around thinking the font size was 120
+      // Bonkers factor because we built the game around thinking the font size was 120
       // when it was really 152.381 (see bottom of FontStrokeRoman.h as well as magic scale
       // factor of 120.0f a few lines below).  This factor == 152.381 / 120
       static F32 legacyNormalizationFactor = legacyRomanSizeFactorThanksGlut / 120.0f;    // == 1.26984166667f
@@ -428,7 +428,7 @@ void FontManager::renderString(F32 size, const char *string)
       // correct for the pixelRatio scaling, and then generate a texture with twice
       // the resolution we need. This produces crisp, anti-aliased text even after the
       // texture is resampled.
-      F32 k = gScreenInfo.getPixelRatio() * 2.0;
+      F32 k = gScreenInfo.getPixelRatio() * 2.0f;
 
       // Flip upside down because y = -y
       glScalef(1 / k, -1 / k, 1);
