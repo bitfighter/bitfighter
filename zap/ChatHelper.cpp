@@ -238,10 +238,7 @@ void ChatHelper::render()
    drawString(xPos + 3, ypos, CHAT_COMPOSE_FONT_SIZE, promptStr);  // draw prompt
 
    // Display typed text
-   string displayString = mLineEditor.getDisplayString();
-   S32 displayWidth = getStringWidth(CHAT_COMPOSE_FONT_SIZE, displayString.c_str());
-
-   drawString(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE, displayString.c_str());
+   S32 displayWidth = drawStringAndGetWidth(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE, mLineEditor.getDisplayString().c_str());
 
    // If we've just finished entering a chat cmd, show next parameter
    if(isCmdChat())
