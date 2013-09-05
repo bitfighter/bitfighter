@@ -333,7 +333,6 @@ IniSettings::IniSettings()
    winYPos = 0;
    winSizeFact = 1.0;
 
-   //useFakeFullscreen = true;
    musicMutedOnCmdLine = false;
 
    neverConnectDirect = false;
@@ -596,19 +595,15 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
 #ifdef TNL_OS_MOBILE
    // Mobile usually have a single, fullscreen mode
-   //iniSettings->displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
    iniSettings->mSettings.setVal("WindowMode", DISPLAY_MODE_FULL_SCREEN_STRETCHED);
 #endif
 
    iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>("WindowMode");
 
 #ifndef ZAP_DEDICATED
-   //iniSettings->joystickType = ini->GetValue(section, "JoystickType", iniSettings->joystickType);
    iniSettings->joystickLinuxUseOldDeviceSystem = ini->GetValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
    iniSettings->alwaysStartInKeyboardMode = ini->GetValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
 #endif
-   //iniSettings->useFakeFullscreen = ini->GetValueYN(section, "UseFakeFullscreen", iniSettings->useFakeFullscreen);
-
 
    iniSettings->winXPos = max(ini->GetValueI(section, "WindowXPos", iniSettings->winXPos), 0);    // Restore window location
    iniSettings->winYPos = max(ini->GetValueI(section, "WindowYPos", iniSettings->winYPos), 0);
