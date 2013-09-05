@@ -187,9 +187,9 @@ void ChatHelper::render()
    S32 xPos = UserInterface::horizMargin;
 
    // Define some vars for readability:
-   S32 promptSize = getStringWidth(CHAT_COMPOSE_FONT_SIZE, promptStr);
+   S32 promptWidth = getStringWidth(CHAT_COMPOSE_FONT_SIZE, promptStr);
    S32 nameSize   = getStringWidthf(CHAT_COMPOSE_FONT_SIZE, "%s: ", getGame()->getClientInfo()->getName().getString());
-   S32 nameWidth  = max(nameSize, promptSize);
+   S32 nameWidth  = max(nameSize, promptWidth);
    // Above block repeated below...
 
 
@@ -202,7 +202,7 @@ void ChatHelper::render()
    if(isAnimating)
       ypos += S32((getFraction()) * BOX_HEIGHT);
 
-   S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * UserInterface::horizMargin - (nameWidth - promptSize) - 230;
+   S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * UserInterface::horizMargin - (nameWidth - promptWidth) - 230;
 
    // Reuse this to avoid startup and breakdown costs
    static ScissorsManager scissorsManager;
@@ -234,7 +234,6 @@ void ChatHelper::render()
    glColor(baseColor);
 
    // Display prompt
-   S32 promptWidth = getStringWidth(CHAT_COMPOSE_FONT_SIZE, promptStr);
    S32 xStartPos   = xPos + 3 + promptWidth;
 
    drawString(xPos + 3, ypos, CHAT_COMPOSE_FONT_SIZE, promptStr);  // draw prompt
