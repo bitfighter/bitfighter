@@ -169,8 +169,6 @@ Vector<AbstractSetting *> Settings::getSettingsInSection(const string &section) 
 }  
 
 
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -261,8 +259,9 @@ IniSettings::IniSettings()
    mSettings.add(new Setting<YesNo>      ("VerboseHelpMessages",         Yes,                   "VerboseHelpMessages",         "Settings", "Display all messages related to loadout management?  Yes/No"));
    mSettings.add(new Setting<YesNo>      ("ShowKeyboardKeysInStickMode", Yes,                   "ShowKeyboardKeysInStickMode", "Settings", "If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus"));
    mSettings.add(new Setting<YesNo>      ("ShowInGameHelp",              Yes,                   "ShowInGameHelp",              "Settings", "Show tutorial style messages in-game?  Yes/No"));
-   mSettings.add(new Setting<string>     ("HelpItemsAlreadySeenList",    "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));
    mSettings.add(new Setting<string>     ("JoystickType",                NoJoystick,            "JoystickType",                "Settings", "Type of joystick to use if auto-detect doesn't recognize your controller"));
+   mSettings.add(new Setting<string>     ("HelpItemsAlreadySeenList",    "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));
+   mSettings.add(new Setting<string>     ("LevelupItemsAlreadySeenList", "",                    "LevelupItemsAlreadySeenList", "Settings", "Tracks which level-up messages have already been seen; let the game manage this"));
    
 
    //controlsRelative = false;          // Relative controls is lame!
@@ -612,9 +611,12 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    //iniSettings->showInGameHelp       = ini->GetValueYN(section, "ShowInGameHelp", iniSettings->showInGameHelp);
    //iniSettings->helpItemSeenList     = ini->GetValue  (section, "HelpItemsAlreadySeenList", "");              
 
+   // Read all settings defined in the new modern manner
    Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
    for(S32 i = 0; i < settings.size(); i++)
       settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
+
+   // Now read the settings still defined all old school
 
 #ifdef TNL_OS_MOBILE
    // Mobile usually have a single, fullscreen mode
@@ -1750,8 +1752,9 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    if(ini->numSectionComments(section) == 0)
    {
       ini->sectionComment(section, "----------------");
-      ini->sectionComment(section, " Settings entries contain a number of different options");//
+      ini->sectionComment(section, " Settings entries contain a number of different options");
 
+      // Write all our section comments for items defined in the new manner
       for(S32 i = 0; i < settings.size(); i++)
          ini->sectionComment(section, " " + settings[i]->getKey() + " - " + settings[i]->getComment());
 
@@ -1781,8 +1784,13 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, "----------------");
    }
 
+
+   // Write all settings defined in the new modern manner
    for(S32 i = 0; i < settings.size(); i++)
       ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
+
+
+   // And the ones still to be ported to the new system
 
 
    //ini->SetValue("Settings",  "WindowMode", displayModeToString(iniSettings->displayMode));
