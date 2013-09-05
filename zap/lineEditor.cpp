@@ -122,6 +122,8 @@ const string *LineEditor::getStringPtr() const
 }
 
 
+// Has to return a string because if we return c_str, the string it's based on will be deleted when we exit this function
+// and our pointer will become invalid.  Sorry!
 string LineEditor::getDisplayString() const
 {
    U32 offsetCharacters;
@@ -136,13 +138,16 @@ string LineEditor::getDisplayString() const
       offsetCharacters *= chunkSize;
    }
 
-   return mMasked ? string(mLine.length() - offsetCharacters, MASK_CHAR) : mLine.substr(offsetCharacters, MIN(mDisplayedCharacters, mLine.length() - offsetCharacters));
+   return mMasked ? string(mLine.length() - offsetCharacters, MASK_CHAR) : 
+                    mLine.substr(offsetCharacters, MIN(mDisplayedCharacters, mLine.length() - offsetCharacters));
 }
+
 
 string LineEditor::getStringBeforeCursor() const
 {
    return mMasked ? string(mCursorOffset, MASK_CHAR) : mLine.substr(0, mCursorOffset);
 }
+
 
 S32 LineEditor::getCursorOffset() const
 {
