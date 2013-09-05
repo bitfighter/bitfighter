@@ -274,13 +274,9 @@ public:
 
    Settings mSettings;
 
-   //bool controlsRelative;
-   //DisplayMode displayMode;
    DisplayMode oldDisplayMode;
-   //string joystickType;
    bool joystickLinuxUseOldDeviceSystem;
    bool alwaysStartInKeyboardMode;
-   //bool echoVoice;
 
    F32 sfxVolLevel;                 // SFX volume (0 = silent, 1 = full bore)
    F32 voiceChatVolLevel;           // Ditto
@@ -297,9 +293,6 @@ public:
 
    bool diagnosticKeyDumpMode;      // True if want to dump keystrokes to the screen
 
-   //bool showInGameHelp;             // If true, we'll show help/tutorial messages in game
-   //string helpItemSeenList;         // Which items have we already seen?
-
    bool allowGetMap;                // allow '/GetMap' command
    bool allowDataConnections;       // Specify whether data connections are allowed on this computer
 
@@ -311,7 +304,6 @@ public:
    string name;                     // Player name (none by default)    
    string password;                 // Player password (none by default) 
    string defaultName;              // Name used if user hits <enter> on name entry screen
-   //string lastName;                 // Name user entered last time the game was run -- will be used as default on name entry screen
    string lastPassword;
    string lastEditorName;           // Name of file most recently edited by the user
 
@@ -361,9 +353,6 @@ public:
    F32 winSizeFact;
 
    bool musicMutedOnCmdLine;
-
-   // Use 'fake fullscreen' vs real fullscreen
-   //bool useFakeFullscreen;
 
    // Testing values
    bool neverConnectDirect;
