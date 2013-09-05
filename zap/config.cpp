@@ -1759,12 +1759,8 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
          ini->sectionComment(section, " " + settings[i]->getKey() + " - " + settings[i]->getComment());
 
 
-      ini->sectionComment(section, " WindowMode - Fullscreen, Fullscreen-Stretch or Window");
       ini->sectionComment(section, " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
       ini->sectionComment(section, " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
-      ini->sectionComment(section, " UseFakeFullscreen - Faster fullscreen switching; however, may not cover the taskbar");
-      ini->sectionComment(section, " VoiceEcho - Play echo when recording a voice message? Yes/No");
-      ini->sectionComment(section, " ControlMode - Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)");
       ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
       ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
       ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
