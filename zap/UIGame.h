@@ -160,6 +160,9 @@ private:
    LoadoutIndicator mLoadoutIndicator;
    TimeLeftRenderer mTimeLeftRenderer;
 
+   bool mAlreadySeenLevelupMsg[LevelCount];     // Tracks which levelup messages we've already seen
+
+
    LevelListDisplayer mLevelListDisplayer;
 
    Rect mDispWorldExtents;          // Extents we display when we are in cmdrs map (usually the same as Game::mWorldExtents)
@@ -271,6 +274,13 @@ private:
    string mAnnouncement;
 
    void dropItem();                                // User presses drop item key
+
+
+   void loadAlreadySeenLevelupMessageList();
+   void saveAlreadySeenLevelupMessageList();
+
+   const string getAlreadySeenLevelupMessageString() const;
+   void setAlreadySeenLevelupMessageString(const string &vals);
 
    bool mFiring;                                   // Are we firing?
    bool mModPrimaryActivated[ShipModuleCount];

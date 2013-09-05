@@ -2369,6 +2369,34 @@ void GameUserInterface::renderObjectIds() const
 }
 
 
+void GameUserInterface::saveAlreadySeenLevelupMessageList()
+{
+   getGame()->getSettings()->getIniSettings()->mSettings.setVal("LevelupItemsAlreadySeenList", 
+                                                                getAlreadySeenLevelupMessageString());
+}
+
+
+void GameUserInterface::loadAlreadySeenLevelupMessageList()
+{
+   setAlreadySeenLevelupMessageString(
+         getGame()->getSettings()->getIniSettings()->mSettings.getVal<string>("LevelupItemsAlreadySeenList")
+   );
+}
+
+
+const string GameUserInterface::getAlreadySeenLevelupMessageString() const
+{
+   return IniSettings::pack(mAlreadySeenLevelupMsg, LevelCount);
+}
+
+
+// Takes a string; we'll mark a message as being seen every time we encounter a 'Y'
+void GameUserInterface::setAlreadySeenLevelupMessageString(const string &vals)
+{
+   IniSettings::unpack(vals, mAlreadySeenLevelupMsg, LevelCount);
+}
+
+
 void GameUserInterface::onChatMessageReceived(const Color &msgColor, const char *format, ...)
 {
    // Ignore empty message

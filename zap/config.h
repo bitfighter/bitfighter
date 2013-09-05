@@ -402,6 +402,12 @@ public:
 
    Vector<string> prevServerListFromMaster;
    Vector<string> alwaysPingList;
+
+   // Some static methods for converting between bit arrays and INI friendly strings
+   static void clearbits(bool *items, S32 itemCount);
+   static string pack(const bool *items, S32 itemCount);
+   static void unpack(const string &vals, bool *items, S32 itemCount);
+
 };
 
 

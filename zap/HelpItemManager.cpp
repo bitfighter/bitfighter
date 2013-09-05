@@ -382,9 +382,9 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
    }
 
 
-   S32 leftPos = xPos - maxw / 2;
-   S32 topPos  = yPos + yOffset - (lines + 1) * (FontSize + FontGap);
-   S32 botPos  = yPos + yOffset - FontSize + 4;    // 4.... just... because?
+   S32 leftPos = (S32)xPos - maxw / 2;
+   S32 topPos  = (S32)yPos + yOffset - (lines + 1) * (FontSize + FontGap);
+   S32 botPos  = (S32)yPos + yOffset - FontSize + 4;    // 4.... just... because?
    renderMessageDoodads(game, helpItem, leftPos, topPos, botPos);
 
    return yOffset;
@@ -523,14 +523,6 @@ void HelpItemManager::resetInGameHelpMessages()
 }
 
 
-// Clears all flags; does not save to INI
-void HelpItemManager::clearAlreadySeenList()
-{
-   for(S32 i = 0; i < HelpItemCount; i++)
-      mAlreadySeen[i] = false;
-}
-
-
 // Write seen status to INI
 void HelpItemManager::saveAlreadySeenList()
 {
@@ -544,28 +536,23 @@ void HelpItemManager::loadAlreadySeenList()
 }
 
 
-// Produce a string of Ys and Ns based on which messages have been seen, suitable for storing in the INI
 const string HelpItemManager::getAlreadySeenString() const
 {
-   string s = "";
+   return IniSettings::pack(mAlreadySeen, HelpItemCount);
+}
 
-   for(S32 i = 0; i < HelpItemCount; i++)
-      s += mAlreadySeen[i] ? "Y" : "N";
 
-   return s;
+// Clears all flags; does not save to INI
+void HelpItemManager::clearAlreadySeenList()
+{
+   IniSettings::clearbits(mAlreadySeen, HelpItemCount);
 }
 
 
 // Takes a string; we'll mark a message as being seen every time we encounter a 'Y'
 void HelpItemManager::setAlreadySeenString(const string &vals)
 {
-   clearAlreadySeenList();
-
-   S32 count = MIN(vals.size(), HelpItemCount);
-
-   for(S32 i = 0; i < count; i++)
-      if(vals.at(i) == 'Y')
-         mAlreadySeen[i] = true;
+   IniSettings::unpack(vals, mAlreadySeen, HelpItemCount);
 
    // Probably should be drawn from a definition elsewhere, but some pairs of messages are dependent on one another.
    // If the first has already been shown, don't show the second

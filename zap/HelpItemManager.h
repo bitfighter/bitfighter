@@ -151,6 +151,13 @@ namespace Zap {
    };
 
 
+   // Not really an enum at the moment...
+   enum ExperienceLevels {
+      // 0-20, 20-50, 50-100, 100-200, 200-500, 500-1000, 1000-2000, 2000-5000, 5000+
+      LevelCount = 9
+   };
+
+
 class InputCodeManager;
 class GameSettings;
 class ClientGame;
@@ -252,6 +259,10 @@ public:
    void clearAlreadySeenList();
    void saveAlreadySeenList();
    void loadAlreadySeenList();
+   
+   void loadAlreadySeenLevelupMessageList();
+   void saveAlreadySeenLevelupMessageList();
+
    void resetInGameHelpMessages();
    S32 getRollupPeriod(S32 index) const;     // Public so tests can get access
 
