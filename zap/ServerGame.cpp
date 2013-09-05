@@ -209,7 +209,7 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, VoteType type, S32 number)
          getClientInfo(i)->getConnection()->mVote = 0;
 
    conn->mVote = 1;
-   conn->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, "Vote started, waiting for others to vote.");
+   conn->s2cDisplayMessage(GameConnection::ColorInfo, SFXNone, "Vote started, waiting for others to vote.");
    return true;
 }
 
@@ -1395,7 +1395,7 @@ void ServerGame::processVoting(U32 timeDelta)
                if(conn && conn->mVote == 0 && !clientInfo->isRobot())
                {
                   WaitingToVote = true;
-                  conn->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, msg, e, s, i);
+                  conn->s2cDisplayMessageESI(GameConnection::ColorInfo, SFXNone, msg, e, s, i);
                }
             }
 
@@ -1516,7 +1516,7 @@ void ServerGame::processVoting(U32 timeDelta)
 
             if(conn)
             {
-               conn->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 did not vote", e, s, i);
+               conn->s2cDisplayMessageESI(GameConnection::ColorInfo, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 did not vote", e, s, i);
 
                if(!votePass && clientInfo->getName() == mVoteClientName)
                   conn->mVoteTime = mSettings->getIniSettings()->voteRetryLength * 1000;

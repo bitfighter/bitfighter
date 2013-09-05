@@ -708,7 +708,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
             conn->sendLevelList();
       }
 
-      s2cDisplayMessage(ColorAqua, SFXNone, "Level folder changed");
+      s2cDisplaySuccessMessage("Level folder changed");
 
    }  // end change leveldir
 
@@ -725,7 +725,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          Vector<StringTableEntry> e;
          e.push_back(level);
 
-         s2cDisplayMessageE(ColorAqua, SFXNone, "\"%e0\" removed from skip list", e);
+         s2cDisplayMessageE(ColorSuccess, SFXNone, "\"%e0\" removed from skip list", e);
       }
 
       return;
@@ -839,7 +839,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    else if(type == DeleteLevel)
       msg = serverLevelDeleted;
 
-   s2cDisplayMessage(ColorAqua, SFXNone, msg);      // Notify user their bidding has been done
+   s2cDisplaySuccessMessage(msg);      // Notify user their bidding has been done
 }
 
 
@@ -1068,7 +1068,7 @@ Color colors[] =
    Colors::blue,           // ColorBlue
    Colors::cyan,           // ColorAqua
    Colors::yellow,         // ColorYellow
-   Color(0.6f, 1, 0.8f),   // ColorNuclearGreen
+   Color(0.6f, 1, 0.8f),   // ColorNuclearGreen, SuccessColor
 };
 
 
@@ -1205,6 +1205,17 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2cDisplaySuccessMessage,
+                  (StringTableEntry formatString),
+                  (formatString),
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+{
+#ifndef ZAP_DEDICATED
+   mClientGame->displaySuccessMessage(formatString.getString());
+#endif
+}
+
+
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayErrorMessage,
                   (StringTableEntry formatString),
                   (formatString),
@@ -1294,7 +1305,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sShowNextLevel, (), (), NetClassGroupGameMas
    Vector<StringTableEntry> e;
    e.push_back(mServerGame->getLevelNameFromIndex(NEXT_LEVEL)); 
 
-   s2cDisplayMessageE(ColorAqua, SFXNone, "Next level will be \"%e0\"", e);
+   s2cDisplayMessageE(ColorInfo, SFXNone, "Next level will be \"%e0\"", e);
 }
 
 

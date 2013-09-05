@@ -477,7 +477,7 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
       if(!isRobot())
          getConnection()->s2cEngineerResponseEvent(responseEvent);
 
-      gameType->broadcastMessage(GameConnection::ColorAqua, SFXNone, msg, e);
+      gameType->broadcastMessage(GameConnection::ColorInfo, SFXNone, msg, e);
 
       // Finally, deduct energy cost
       S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();

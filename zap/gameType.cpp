@@ -3472,7 +3472,7 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickee
    messageVals.push_back(kickeeName);                     
    messageVals.push_back(sourceClientInfo->getName());    // --> Name of player doing the administering
 
-   broadcastMessage(GameConnection::ColorAqua, SFXIncomingMessage, "%e0 was kicked from the game by %e1.", messageVals);
+   broadcastMessage(GameConnection::ColorInfo, SFXIncomingMessage, "%e0 was kicked from the game by %e1.", messageVals);
 }
 
 

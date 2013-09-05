@@ -128,7 +128,9 @@ public:
       ColorAqua,
       ColorYellow,
       ColorNuclearGreen,
-      ColorCount              // Must be last
+      ColorCount,                         // Must be last, except aliases
+      ColorSuccess = ColorNuclearGreen,   // Aliases for readability
+      ColorInfo = ColorAqua
    };
 
    enum ParamType             // Be careful changing the order of this list... c2sSetParam() expects this for message creation
@@ -264,7 +266,8 @@ public:
    TNL_DECLARE_RPC(s2cTouchdownScored, (RangedU32<0, NumSFXBuffers> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e, Point scorePos));
 
    TNL_DECLARE_RPC(s2cDisplayMessage, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString));
-   TNL_DECLARE_RPC(s2cDisplayErrorMessage, (StringTableEntry formatString));    
+   TNL_DECLARE_RPC(s2cDisplaySuccessMessage, (StringTableEntry formatString));    
+   TNL_DECLARE_RPC(s2cDisplayErrorMessage,   (StringTableEntry formatString));    
 
    TNL_DECLARE_RPC(s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message));
 

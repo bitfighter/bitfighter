@@ -1793,7 +1793,7 @@ bool Ship::setLoadout(const LoadoutTracker &loadout, bool silent)
       if(cc)
       {
          static StringTableEntry msg("Ship loadout configuration updated.");
-         cc->s2cDisplayMessage(GameConnection::ColorAqua, SFXUIBoop, msg);
+         cc->s2cDisplayMessage(GameConnection::ColorInfo, SFXUIBoop, msg);
       }
    }
 
