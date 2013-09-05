@@ -47,10 +47,6 @@
 #  include <windows.h>   // For ARRAYSIZE when using ZAP_DEDICATED
 #endif
 
-// Adding 3 newlines here
-// 
-// End adding newlines
-
 namespace Zap
 {
 
@@ -264,13 +260,9 @@ IniSettings::IniSettings()
    mSettings.add(new Setting<string>     ("LevelupItemsAlreadySeenList", "",                    "LevelupItemsAlreadySeenList", "Settings", "Tracks which level-up messages have already been seen; let the game manage this"));
    
 
-   //controlsRelative = false;          // Relative controls is lame!
-   //displayMode = DISPLAY_MODE_WINDOWED;
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
-   //joystickType = "NoJoystick";
    joystickLinuxUseOldDeviceSystem = false;
    alwaysStartInKeyboardMode = false;
-   //echoVoice = false;
 
    sfxVolLevel       = 1.0;           // SFX volume (0 = silent, 1 = full bore)
    musicVolLevel     = 1.0;           // Music volume (range as above)
@@ -284,16 +276,12 @@ IniSettings::IniSettings()
    allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
    allowGetMap = false;               // Disabled by default -- many admins won't want this
 
-   //showInGameHelp = true;             // This is on by default, but messages will not be repeated
-   //helpItemSeenList = "";             // By default, no messages will have been seen 
-
    maxDedicatedFPS = 100;             // Max FPS on dedicated server
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
 
    masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
    name = "";                         // Player name (none by default)
    defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
-   //lastName = "ChumpChange";          // Name the user entered last time they ran the game
    lastPassword = "";
    lastEditorName = "";               // No default editor level name
    hostname = "Bitfighter host";      // Default host name
@@ -467,7 +455,6 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
 
    ini->addSection(section);      // Create the key, then provide some comments for documentation purposes
 
-
    if(ini->numSectionComments(section) == 0)
    {
       addComment("----------------");
@@ -477,7 +464,6 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
       addComment(" The order is the same as you would enter them when defining a loadout in-game.");
       addComment("----------------");
    }
-
 
    for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
    {
@@ -601,16 +587,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    string section = "Settings";
 
-   //iniSettings->controlsRelative = (lcase(ini->GetValue(section, "ControlMode", 
-   //                                     (iniSettings->controlsRelative ? "Relative" : "Absolute"))) == "relative");
-
-   //iniSettings->echoVoice            = ini->GetValueYN(section, "VoiceEcho", iniSettings->echoVoice);
-
-   //iniSettings->verboseHelpMessages  = ini->GetValueYN(section, "VerboseHelpMessages", iniSettings->verboseHelpMessages);
-   //iniSettings->showKeyboardKeys     = ini->GetValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
-   //iniSettings->showInGameHelp       = ini->GetValueYN(section, "ShowInGameHelp", iniSettings->showInGameHelp);
-   //iniSettings->helpItemSeenList     = ini->GetValue  (section, "HelpItemsAlreadySeenList", "");              
-
    // Read all settings defined in the new modern manner
    Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
    for(S32 i = 0; i < settings.size(); i++)
@@ -644,7 +620,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->password       = ini->GetValue(section, "Password", iniSettings->password);
 
    iniSettings->defaultName    = ini->GetValue(section, "DefaultName", iniSettings->defaultName);
-   //iniSettings->mSettings.getSetting("LastName")->setValFromString(ini->GetValue(iniSettings->mSettings.getSection("LastName"), "LastName", iniSettings->mSettings.getDefaultStrVal("LastName")));
 
    iniSettings->lastPassword   = ini->GetValue(section, "LastPassword", iniSettings->lastPassword);
    iniSettings->lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings->lastEditorName);
@@ -1780,7 +1755,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, "----------------");
    }
 
-
    // Write all settings defined in the new modern manner
    for(S32 i = 0; i < settings.size(); i++)
       ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
@@ -1789,25 +1763,11 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    // And the ones still to be ported to the new system
 
 
-   //ini->SetValue("Settings",  "WindowMode", displayModeToString(iniSettings->displayMode));
-   
    saveWindowPosition(ini, iniSettings->winXPos, iniSettings->winYPos);
 
    ini->SetValueF (section, "WindowScalingFactor", iniSettings->winSizeFact);
-   //ini->setValueYN(section, "VoiceEcho", iniSettings->echoVoice );
-
-   //ini->SetValue  (section, "ControlMode", (iniSettings->controlsRelative ? "Relative" : "Absolute"));
-
-   // inputMode is not saved, but rather determined at runtime by whether a joystick is attached
-
-   //ini->setValueYN(section, "VerboseHelpMessages",         iniSettings->verboseHelpMessages);
-   //ini->setValueYN(section, "ShowKeyboardKeysInStickMode", iniSettings->showKeyboardKeys);
-   //ini->setValueYN(section, "ShowInGameHelp",              iniSettings->showInGameHelp);
-   //ini->SetValue  (section, "HelpItemsAlreadySeenList",    iniSettings->helpItemSeenList);
 
 #ifndef ZAP_DEDICATED
-   //ini->SetValue  (section, "JoystickType", iniSettings->joystickType);
-
    ini->setValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
    ini->setValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
 #endif
