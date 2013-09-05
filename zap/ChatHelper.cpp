@@ -192,7 +192,6 @@ void ChatHelper::render()
    S32 nameWidth  = max(nameSize, promptWidth);
    // Above block repeated below...
 
-
    S32 ypos = IN_GAME_CHAT_DISPLAY_POS + CHAT_COMPOSE_FONT_SIZE + 11;      // Top of the box when fully displayed
    S32 realYPos = ypos;
 
