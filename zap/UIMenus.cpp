@@ -1694,7 +1694,7 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
    else
       uiManager->activate<MainMenuUserInterface>();
 
-   string enteredName     = ui->getMenuItem(1)->getValueForWritingToLevelFile();
+   string enteredName = ui->getMenuItem(1)->getValueForWritingToLevelFile();
 
    string enteredPassword;
    bool savePassword = false;
