@@ -80,9 +80,9 @@ GameConnection::GameConnection(ClientGame *clientGame)
    mSettings = clientGame->getSettings();
    mClientInfo = clientGame->getClientInfo();      // Now have a FullClientInfo representing the local player
 
-   TNLAssert(mClientInfo->getName() != "", "Client has invalid name!");
-   if(mClientInfo->getName() == "")
-      mClientInfo->setName("Chump");
+   //TNLAssert(mClientInfo->getName() != "", "Client has invalid name!");
+   //if(mClientInfo->getName() == "")
+   //   mClientInfo->setName("Chump");
 
 
    setSimulatedNetParams(mSettings->getSimulatedLoss(), mSettings->getSimulatedLag());
