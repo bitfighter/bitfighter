@@ -245,7 +245,7 @@ bool CIniFile::SetValue(const string &keyname, const string &valuename, const st
    S32 sectionId = findSection(keyname);
    if(sectionId == noID) {
       if(create)
-         sectionId = S64(addSection(keyname));
+         sectionId = addSection(keyname);
       else
          return false;
 
