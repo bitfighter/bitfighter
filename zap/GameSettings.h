@@ -32,7 +32,9 @@
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
+
 #include <string>
+#include <map>
 
 using namespace std;
 using namespace TNL;
@@ -118,6 +120,8 @@ struct PluginBinding;
 
 class GameSettings
 {
+   typedef map<string,UserSettings> UserSettingsMap;
+
 private:
    // Some items will be passthroughs to the underlying INI object; however, if a value can differ from the INI setting 
    // (such as when it can be overridden from the cmd line, or is set remotely), then we'll need to store the working value locally.
@@ -146,6 +150,9 @@ private:
    // Store params read from the cmd line
    Vector<string> mCmdLineParams[CmdLineParams::PARAM_COUNT];
 
+   // User settings storage
+   UserSettingsMap mUserSettings;
+
    Vector<string> mMasterServerList;
    bool mMasterServerSpecifiedOnCmdLine;
 
@@ -166,6 +173,8 @@ public:
    virtual ~GameSettings();   // Destructor
 
    static CIniFile iniFile;
+   static CIniFile userPrefs;
+
    static const S32 LoadoutPresetCount = 3;     // How many presets do we save?
 
    static const U16 DEFAULT_GAME_PORT = 28000;
@@ -294,6 +303,10 @@ public:
    // In-game help messages
    void setShowingInGameHelp(bool show);
    bool getShowingInGameHelp();
+
+   // User settings
+   const UserSettings *addUserSettings(const UserSettings &userSettings);     // Returns pointer to inserted item
+   const UserSettings *getUserSettings(const string &name);
 };
 
 

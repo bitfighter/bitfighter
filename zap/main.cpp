@@ -660,12 +660,12 @@ void createClientGame(GameSettings *settings)
          //gClientGame->getUIManager()->getUI<NameEntryUserInterface>()->activate();     <-- won't work no more!
          Game::seedRandomNumberGenerator(settings->getIniSettings()->mSettings.getVal<string>("LastName"));
       }
-      else
+      else  // Skipping startup screen
       {
          for(S32 i = 0; i < gClientGames.size(); i++)
          {
             gClientGames[i]->getUIManager()->activate<MainMenuUserInterface>();
-            gClientGames[i]->setReadyToConnectToMaster(true);        
+            gClientGames[i]->setReadyToConnectToMaster(true);
          }
 
          //if(gClientGame2)
@@ -1156,9 +1156,13 @@ int main(int argc, char **argv)
 
    InputCodeManager::initializeKeyNames();      // Used by loadSettingsFromINI()
 
-   // Load our INI
+   // Load our primary settings file
    GameSettings::iniFile.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
    loadSettingsFromINI(&GameSettings::iniFile, settings);
+
+   // Load the user settings file
+   GameSettings::userPrefs.SetPath(joindir(folderManager->iniDir, "usersettings.ini"));
+   IniSettings::loadUserSettingsFromINI(&GameSettings::userPrefs, settings);
 
    // Time to check if there is an online update (for any relevant platforms)
    if(!isStandalone)

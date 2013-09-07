@@ -171,9 +171,11 @@ const char *helpTitles[] = {
 // Define statics
 FolderManager *GameSettings::mFolderManager = NULL;
 Vector<string> GameSettings::DetectedJoystickNameList;   // List of joysticks we found attached to this machine
-S32 GameSettings::UseJoystickNumber = 0;
-CIniFile GameSettings::iniFile("dummy");                 // Our INI file.  Real filename will be supplied later.
 
+S32 GameSettings::UseJoystickNumber = 0;
+
+CIniFile GameSettings::iniFile("dummy");                 // Our INI file.  Real filename will be supplied later.
+CIniFile GameSettings::userPrefs("dummy");               // Our INI file.  Real filename will be supplied later.
 
 
 // Constructor
@@ -1230,6 +1232,33 @@ bool GameSettings::getShowingInGameHelp()
 {
    return mIniSettings.mSettings.getVal<YesNo>("ShowInGameHelp");
 }
+
+
+// Returns pointer to inserted item
+const UserSettings *GameSettings::addUserSettings(const UserSettings &userSettings)
+{
+   // Man oh man, is this ugly and confusing!
+   return &mUserSettings.insert(pair<string,UserSettings>(userSettings.name, userSettings)).first->second;
+}
+
+
+// Retrieve settings for named user, create empty settings if we don't already have some
+const UserSettings *GameSettings::getUserSettings(const string &name)
+{
+   UserSettingsMap::iterator i = mUserSettings.find(name);
+
+   // If the settings don't already exist, create them here
+   if(i == mUserSettings.end())    
+   {
+      UserSettings newSettings;
+      newSettings.name = name;
+
+      return addUserSettings(newSettings);
+   }
+
+   return &i->second;
+}
+
 
 
 };

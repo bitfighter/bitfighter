@@ -236,6 +236,21 @@ template class Setting<RelAbs>;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+UserSettings::UserSettings()
+{
+   for(S32 i = 0; i < LevelCount; i++)
+      levelupItemsAlreadySeen[i] = false;
+}
+
+
+// Destructor
+UserSettings::~UserSettings() { /* Do nothing */ }
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 
 // bitfighter.org would soon be the same as 199.192.229.168
 const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955,bitfighter.org:25955";
@@ -258,10 +273,6 @@ IniSettings::IniSettings()
    mSettings.add(new Setting<YesNo>      ("ShowInGameHelp",              Yes,                   "ShowInGameHelp",              "Settings", "Show tutorial style messages in-game?  Yes/No"));
    mSettings.add(new Setting<string>     ("JoystickType",                NoJoystick,            "JoystickType",                "Settings", "Type of joystick to use if auto-detect doesn't recognize your controller"));
    mSettings.add(new Setting<string>     ("HelpItemsAlreadySeenList",    "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));
-
-
-   mSettings.add(new Setting<string>     ("LevelupItemsAlreadySeenList", "",                    "LevelupItemsAlreadySeenList", "Settings", "Tracks which level-up messages have already been seen; let the game manage this"));
-   
 
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
    joystickLinuxUseOldDeviceSystem = false;
@@ -1649,6 +1660,25 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 }
 
 
+void IniSettings::loadUserSettingsFromINI(CIniFile *ini, GameSettings *settings)
+{
+   UserSettings userSettings;
+
+   // Get a list of sections... we should have one per user
+   S32 sections = ini->GetNumSections();
+
+   for(S32 i = 0; i < sections; i++)
+   {
+      userSettings.name = ini->getSectionName(i);
+
+      string seenList = ini->GetValue(userSettings.name, "LevelupItemsAlreadySeenList", "");
+      IniSettings::iniStringToBitArray(seenList, userSettings.levelupItemsAlreadySeen, userSettings.LevelCount);
+
+      settings->addUserSettings(userSettings);
+   }
+}
+
+
 static void writeDiagnostics(CIniFile *ini, IniSettings *iniSettings)
 {
    const char *section = "Diagnostics";
@@ -2049,6 +2079,17 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    //writeJoystick();
    writeServerBanList(ini, settings->getBanList());
 
+   ini->WriteFile();
+}
+
+
+void IniSettings::saveUserSettingsToINI(const string &name, CIniFile *ini, GameSettings *settings)
+{
+   const UserSettings *userSettings = settings->getUserSettings(name);
+
+   string val = IniSettings::bitArrayToIniString(userSettings->levelupItemsAlreadySeen, userSettings->LevelCount);
+
+   ini->SetValue(name, "LevelupItemsAlreadySeenList", val, true);
    ini->WriteFile();
 }
 

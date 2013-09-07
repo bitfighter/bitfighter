@@ -34,6 +34,7 @@
 #include "FpsRenderer.h"
 #include "HelpItemManager.h"
 #include "move.h"
+#include "config.h"     // For UserSettings def
 
 #include "SoundEffect.h"
 #include "sparkManager.h"
@@ -160,7 +161,7 @@ private:
    LoadoutIndicator mLoadoutIndicator;
    TimeLeftRenderer mTimeLeftRenderer;
 
-   bool mAlreadySeenLevelupMsg[LevelCount];     // Tracks which levelup messages we've already seen
+   bool mAlreadySeenLevelupMsg[UserSettings::LevelCount];     // Tracks which levelup messages we've already seen
 
 
    LevelListDisplayer mLevelListDisplayer;
