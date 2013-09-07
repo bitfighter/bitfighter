@@ -240,27 +240,27 @@ bool CIniFile::SetValue(S32 const sectionId, S32 const valueID, const string val
 }
 
 // Will create key if it does not exist if create is set to true
-bool CIniFile::SetValue(const string &keyname, const string &valuename, const string &value, bool const create)
+bool CIniFile::SetValue(const string &section, const string &key, const string &value, bool const create)
 {
-   S32 sectionId = findSection(keyname);
+   S32 sectionId = findSection(section);
    if(sectionId == noID) {
       if(create)
-         sectionId = addSection(keyname);
+         sectionId = addSection(section);
       else
          return false;
 
       if(sectionId == noID)
-         sectionId = findSection(keyname);
+         sectionId = findSection(section);
 
       if(sectionId == noID)     // Fish in a tree?  This should not be.
          return false;
    }
 
-   S32 valueID = FindValue(sectionId, valuename);
+   S32 valueID = FindValue(sectionId, key);
    if(valueID == noID) {
       if(!create)
          return false;
-      sections[sectionId].keys.push_back(valuename);
+      sections[sectionId].keys.push_back(key);
       sections[sectionId].values.push_back(value);
    } else
       sections[sectionId].values[valueID] = value;
