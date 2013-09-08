@@ -1575,6 +1575,7 @@ void ServerGame::clearBotMoves()
 }
 
 
+// Returns true if things went well, false if we couldn't find any levels to host
 bool ServerGame::startHosting()
 {
    if(mSettings->getFolderManager()->levelDir == "")     // Never did resolve a leveldir... no hosting for you!
