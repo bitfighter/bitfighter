@@ -134,6 +134,12 @@ S32 SymbolStringSet::getItemCount() const
 }
 
 
+S32 SymbolStringSet::render(S32 x, S32 y, Alignment alignment, S32 blockWidth) const
+{
+   return render(F32(x), F32(y), alignment, blockWidth);
+}
+
+
 S32 SymbolStringSet::render(F32 x, F32 yStart, Alignment alignment, S32 blockWidth) const
 {
    S32 width = getWidth();

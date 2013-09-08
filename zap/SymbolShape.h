@@ -345,6 +345,7 @@ public:
    S32 getWidth() const;
    S32 getItemCount() const;
    S32 render(F32 x, F32 y, Alignment alignment, S32 blockWidth = -1) const;
+   S32 render(S32 x, S32 y, Alignment alignment, S32 blockWidth = -1) const;
    S32 renderLine(S32 line, S32 x, S32 y, Alignment alignment) const;
 };
 
