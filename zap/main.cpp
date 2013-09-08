@@ -206,9 +206,6 @@ void exitToOs()
 
 
 
-
-
-
 // GCC thinks min isn't defined, VC++ thinks it is
 #ifndef min
 #  define min(a,b) ((a) <= (b) ? (a) : (b))
