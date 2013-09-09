@@ -1722,8 +1722,8 @@ void Seeker::handleCollision(BfObject *hitObject, Point collisionPoint)
       damageInfo.damagingObject = this;
       damageInfo.damageSelfMultiplier = WeaponInfo::getWeaponInfo(mWeaponType).damageSelfMultiplier;
 
-      // impulseVector handled in radiusDamage
-      S32 hits = radiusDamage(collisionPoint, InnerBlastRadius, OuterBlastRadius, (TestFunc)isDamageableType, damageInfo);
+      // impulseVector handled in radiusDamage, set force to 0 here so we have no kickback
+      S32 hits = radiusDamage(collisionPoint, InnerBlastRadius, OuterBlastRadius, (TestFunc)isDamageableType, damageInfo, 0);
 
       if(getOwner())
          for(S32 i = 0; i < hits; i++)
