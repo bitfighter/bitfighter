@@ -1707,6 +1707,10 @@ void Seeker::handleCollision(BfObject *hitObject, Point collisionPoint)
    if(exploded)  // Rare, but can happen
       return;
 
+   // Must set exploded to true immediately here or we risk a stack overflow when two
+   // area-damage objects hit each other and call radiusDamage on each other over and over
+   exploded = true;
+
    // Damage the object we hit
    if(hitObject)
    {
@@ -1727,7 +1731,6 @@ void Seeker::handleCollision(BfObject *hitObject, Point collisionPoint)
    }
 
    mTimeRemaining = 0;
-   exploded = true;
    setMaskBits(ExplodedMask);
 
    disableCollision();
