@@ -312,6 +312,9 @@ private:
    static F32 MaximumAngleChangePerSecond;
    static F32 TargetSearchAngle;
 
+   static const S32 InnerBlastRadius;
+   static const S32 OuterBlastRadius;
+
    SafePtr<BfObject> mAcquiredTarget;
 
    S32 mTimeRemaining;
