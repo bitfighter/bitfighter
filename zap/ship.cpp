@@ -1159,17 +1159,8 @@ void Ship::damageObject(DamageInfo *theInfo)
       if(hasArmor)
       {
          static const F32 ArmorDamageReductionFactor = 0.4f;            // Having armor dramatically reduces damage
-         static const F32 ArmorDamageReductionFactorBouncers = 0.75f;   // But is less effective against bouncers
 
-         Projectile *projectile = NULL;
-         if(theInfo->damagingObject->getObjectTypeNumber() == BulletTypeNumber)
-            projectile = static_cast<Projectile *>(theInfo->damagingObject);
-
-         // Except for bouncers - they do a little more damage
-         if(projectile && projectile->mWeaponType == WeaponBounce)
-            damageAmount *= ArmorDamageReductionFactorBouncers;   // Damaged by a bouncer
-         else
-            damageAmount *= ArmorDamageReductionFactor;           // Any other damage, including asteroids
+         damageAmount *= ArmorDamageReductionFactor;           // Any other damage, including asteroids
       }
    }
 
