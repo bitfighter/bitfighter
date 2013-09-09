@@ -51,7 +51,7 @@ function findClosest(items, teamIndex)
 
    local closest = nil
    local minDist = 999999999
-   local loc = bot:getLoc()
+   local pos = bot:getPos()
 
    for indx, item in ipairs(items) do              -- Iterate over our list
 
@@ -60,7 +60,7 @@ function findClosest(items, teamIndex)
 
          -- Use distSquared because it is less computationally expensive
          -- and works great for comparing distances 
-         local d = point.distSquared(loc, item:getLoc())  -- Dist btwn robot and TestItem
+         local d = point.distSquared(pos, item:getPos())  -- Dist btwn robot and TestItem
 
          if d < minDist then                         -- Is it the closest yet?
             closest = item

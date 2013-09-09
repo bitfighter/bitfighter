@@ -39,14 +39,14 @@ function onTick(deltaTime)
 
     if(targetItem == nil) then
         table.clear(items)
-        targetItem = findClosest(bot:findAllObjects(items, ObjType.TestItem))
+        targetItem = findClosest(bf:findAllObjects(items, ObjType.TestItem))
     end
 
     if(targetItem == nil) then return end
 
 
-    local botLoc = bot:getLoc()
-    local itemLoc = targetItem:getLoc()
+    local botLoc = bot:getPos()
+    local itemLoc = targetItem:getPos()
 
     local distSq = point.distSquared( botLoc, itemLoc )
 

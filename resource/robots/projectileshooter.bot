@@ -31,7 +31,6 @@ items = {}       -- Reusable container for finding objects
 
 function onTick()
 
-    local loc = bot:getLoc()
     table.clear(items)
     bot:findVisibleObjects(items, ObjType.Burst, ObjType.Seeker, ObjType.Mine, ObjType.SpyBug)   -- Find a suitable target
 
@@ -48,11 +47,11 @@ function onTick()
     end
 
     bot:setAngle(angle)
-    bot:fire()
+    bot:fireWeapon(WeaponInfo.Phaser)
 
     local weap = closestItem:getWeapon()
-    local weapInfo = WeaponInfo(weap)
-    logprint("Targeting " .. weapInfo:getName())
+    local weapInfo = WeaponInfo[weap]
+    logprint("Targeting " .. weapInfo.name)
 
 end
 
