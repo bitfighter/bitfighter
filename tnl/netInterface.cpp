@@ -114,10 +114,13 @@ void NetInterface::sendtoDelayed(const Address *address, NetConnection *receiveT
    // allocate the send packet, with the data size added on
    DelaySendPacket *thePacket = (DelaySendPacket *) malloc(sizeof(DelaySendPacket) + dataSize);
    new(thePacket) DelaySendPacket(); // Initalizes SafePtr
-   if(thePacket->isReceive == (address == NULL))
+
+   thePacket->isReceive = (address == NULL);
+   if(thePacket->isReceive)
       thePacket->receiveTo = receiveTo;
    else
       thePacket->remoteAddress = *address;
+   
    thePacket->sendTime = getCurrentTime() + millisecondDelay;
    thePacket->packetSize = dataSize;
    memcpy(thePacket->packetData, stream->getBuffer(), dataSize);
