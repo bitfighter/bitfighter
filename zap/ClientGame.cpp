@@ -49,21 +49,6 @@ using namespace TNL;
 namespace Zap
 {
 
-// Global Game objects
-Vector<ClientGame *> gClientGames;
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Create an array of help items related to item types -- only good when there is a strict 1-to-1 correspondence (such as for Teleporter).
-// Not used when there are multiple help items for a particular type (such as Mines). 
-//static const HelpItem helpItemsForObjects[] = {
-//#define TYPE_NUMBER(a, b, c, d, helpItem) helpItem,
-//   TYPE_NUMBER_TABLE
-//#undef TYPE_NUMBER
-//};
-
 
 static bool hasHelpItemForObjects[TypesNumbers];
 
