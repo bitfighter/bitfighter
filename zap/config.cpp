@@ -898,7 +898,10 @@ static InputCode getInputCode(CIniFile *ini, const string &section, const string
 }
 
 
-#define LOAD_BINDING(binding, key) inputCodeManager->setBinding(binding, mode, getInputCode(ini, section, InputCodeManager::getBindingName(binding), key));
+// For readability
+#define LOAD_BINDING(binding, key) \
+          inputCodeManager->setBinding(binding, mode, \
+          getInputCode(ini, section, InputCodeManager::getBindingName(binding), key));
 
 // Remember: If you change any of these defaults, you'll need to rebuild your INI file to see the results!
 static void loadKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
