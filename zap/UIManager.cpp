@@ -540,6 +540,14 @@ void UIManager::idle(U32 timeDelta)
 {
    mMenuTransitionTimer.update(timeDelta);
    processAudio(timeDelta);
+
+   // Idle the currently active UI
+   if(getCurrentUI())
+      getCurrentUI()->idle(timeDelta);
+
+   // If we're in a UI and GameUI is still running, we need to idle that too
+   if(cameFrom<GameUserInterface>())
+      getUI<GameUserInterface>()->idle(timeDelta);
 }
 
 

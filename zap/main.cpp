@@ -288,23 +288,6 @@ void shutdownBitfighter(ServerGame *serverGame);    // Forward declaration
 
 void gameIdle(U32 integerTime)
 {
-#ifndef ZAP_DEDICATED
-
-   // If the main game interface is in the stack, idle that too to keep things current, update timers, etc.
-   for(S32 i = 0; i < gClientGames.size(); i++)
-   {
-      UIManager *uiManager = gClientGames[i]->getUIManager();
-
-      // Idle the currently active UI
-      if(uiManager->getCurrentUI())
-         uiManager->getCurrentUI()->idle(integerTime);
-
-      // If we're in a UI and GameUI is still running, we need to idle that too
-      if(uiManager->cameFrom<GameUserInterface>())
-         uiManager->getUI<GameUserInterface>()->idle(integerTime);
-   }
-#endif
-
    // Don't idle games during level load
    if(!(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels))    
    {
