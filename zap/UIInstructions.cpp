@@ -38,6 +38,7 @@
 #include "CoreGame.h"         // For coreItem rendering
 #include "ChatCommands.h"
 #include "ChatHelper.h"       // For ChatHelper::chatCmdSize
+#include "FontManager.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
@@ -352,10 +353,12 @@ void InstructionsUserInterface::initSpecialKeys_page1()
 
 void InstructionsUserInterface::render()
 {
+   FontManager::pushFontContext(HelpContext);
+
    glColor(Colors::red);
    drawStringf(  3, 3, 25, "INSTRUCTIONS - %s", pageHeaders[mCurPage]);
    drawStringf(625, 3, 25, "PAGE %d/%d", mCurPage + 1, InstructionMaxPages);  // We +1 to be natural
-   drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
+   drawCenteredString(571, 20, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits");
 
    glColor(Colors::gray70);
    drawHorizLine(0, 800, 32);
@@ -418,6 +421,8 @@ void InstructionsUserInterface::render()
       //   break;
 
       // When adding page, be sure to add item to pageHeaders array and InstructionPages enum
+
+         FontManager::popFontContext();
    }
 }
 
@@ -476,13 +481,11 @@ void InstructionsUserInterface::renderPage1()
 
 static const char *loadoutInstructions1[] = {
    "LOADOUTS",
-   "Players can outfit their ships with 3 weapons and 2 modules.",      // TODO: Replace 3 & 2 w/constants
-   "Pressing the ship configuration menu key brings up a menu that",
-   "allows the player to choose the next loadout for his or her ship.",
+   "Outfit your ship with 3 weapons and 2 modules.  Press [[ShowLoadoutMenu]] to",      // TODO: Replace 3 & 2 w/constants
+   "choose a new loadout for your ship.",
    "",
-   "This loadout will become active on the ship when the player",
-   "flies over a Loadout Zone area, or respawns on a level that",
-   "has no Loadout Zones.",
+   "This loadout will become active when you enter a Loadout Zone ([[LOADOUT_ICON]]),",
+   "or respawn on a level that has no Loadout Zones.",
 };
 
 static const char *loadoutInstructions2[] = {
@@ -590,8 +593,8 @@ static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
    y += 26;
 
    static const char *badgeHeadingDescription[] = {
-      "Badges may appear next to the players name on the scoreboard",
-      "More will be available in subsequent Bitfighter releases"
+      "Badges may appear next to player names on the scoreboard",
+      "More will be available in future Bitfighter releases"
    };
 
    // Description
@@ -665,7 +668,7 @@ void InstructionsUserInterface::renderModulesPage()
    y += textsize;
 
    glColor(Colors::cyan);
-   drawCenteredString(y, textsize, "LIST OF MODULES");
+   drawCenteredString(y, textsize, "THE MODULES");
 
    y += 35;
 
