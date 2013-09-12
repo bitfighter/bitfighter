@@ -394,38 +394,6 @@ void idle()
       settings = gClientGames[0]->getSettings();
 #endif
 
-/*
-   static S64 lastTimer = Platform::getHighPrecisionTimerValue(); // accurate, but possible wrong speed when overclocking or underclocking CPU
-   static U32 lastTimer2 = Platform::getRealMilliseconds();  // right speed
-   static F64 unusedFraction = 0;
-   static S32 timerElapsed2 = 0;
-
-   S64 currentTimer = Platform::getHighPrecisionTimerValue();
-   U32 currentTimer2 = Platform::getRealMilliseconds();
-
-   if(lastTimer > currentTimer) lastTimer=currentTimer; //Prevent freezing when currentTimer overflow -- seems very unlikely
-   if(lastTimer2 > currentTimer2) lastTimer2=currentTimer2;
-
-   F64 timeElapsed = Platform::getHighPrecisionMilliseconds(currentTimer - lastTimer) + unusedFraction;
-   S32 integerTime1 = S32(timeElapsed);
-
-   unusedFraction = timeElapsed - integerTime1;
-   lastTimer = currentTimer;
-   timerElapsed2 = timerElapsed2 + S32(currentTimer2 - lastTimer2) - integerTime1;
-   if(timerElapsed2 < 0)  // getHighPrecisionTimerValue going slower then getRealMilliseconds
-   {
-      integerTime1 += timerElapsed2;
-      timerElapsed2 = 0;
-   }
-   if(timerElapsed2 > 200)  // getHighPrecisionTimerValue going faster then getRealMilliseconds
-   {
-      integerTime1 += timerElapsed2 - 200;
-      timerElapsed2 = 200;
-   }
-   lastTimer2 = currentTimer2;
-   integerTime += integerTime1;
-   */
-
    static S32 integerTime = 0;   // static, as we need to keep holding the value that was set
    static U32 prevTimer = 0;
 
