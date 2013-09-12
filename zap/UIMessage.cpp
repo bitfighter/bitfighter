@@ -31,7 +31,6 @@
 #include "UIManager.h"
 
 #include "Colors.h"
-#include "ScreenInfo.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"

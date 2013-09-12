@@ -30,6 +30,7 @@
 #include "Point.h"
 #include "Color.h"
 #include "FontContextEnum.h"
+#include "ScreenInfo.h"
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
@@ -135,7 +136,13 @@ void drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...
 void drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...);
 
 // Draw text centered on screen (normal and formatted versions)  --> now return starting location
-S32 drawCenteredString(S32 y, S32 size, const char *str);
+template <typename T, typename U>
+F32 drawCenteredString(T y, U size, const char *str)
+{
+   return drawCenteredString((F32)gScreenInfo.getGameCanvasWidth() / 2.0f, (F32)y, (F32)size, str);
+}
+
+
 S32 drawCenteredString_fixed(S32 y, S32 size, const char *str);
 S32 drawCenteredString(S32 x, S32 y, S32 size, const char *str);
 S32 drawCenteredString_fixed(S32 x, S32 y, S32 size, const char *str);

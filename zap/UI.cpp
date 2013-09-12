@@ -57,7 +57,6 @@ S32 UserInterface::messageMargin = UserInterface::vertMargin + UI::LoadoutIndica
 
 extern Vector<ClientGame *> gClientGames;
 
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 

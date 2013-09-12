@@ -49,6 +49,9 @@ using namespace TNL;
 namespace Zap
 {
 
+// Our global ClientGame list
+Vector<ClientGame *> gClientGames;
+
 
 static bool hasHelpItemForObjects[TypesNumbers];
 
