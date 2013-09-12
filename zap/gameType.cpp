@@ -2785,7 +2785,7 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
       if(clientInfo->isAdmin())
       {
          bool prev_enableServerVoiceChat = serverGame->getSettings()->getIniSettings()->enableServerVoiceChat;
-         loadSettingsFromINI(&GameSettings::iniFile, serverGame->getSettings());
+         loadSettingsFromINI(&GameSettings::iniFile, serverGame->getSettings());    // Why??
 
          if(prev_enableServerVoiceChat != serverGame->getSettings()->getIniSettings()->enableServerVoiceChat)
             for(S32 i = 0; i < mGame->getClientCount(); i++)
