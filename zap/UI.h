@@ -76,9 +76,6 @@ private:
 
    U32 mTimeSinceLastInput;
 
-   // Activate menus via the UIManager, please!
-   void activate();
-   void reactivate();
 
 protected:
    bool mDisableShipKeyboardInput;           // Disable ship movement while user is in menus
@@ -111,6 +108,10 @@ public:
    static S32 messageMargin;
 
    U32 getTimeSinceLastInput();
+
+   // Activate menus via the UIManager, please!
+   void activate();
+   void reactivate();
 
    virtual void render();
    virtual void idle(U32 timeDelta);

@@ -18,8 +18,9 @@ TEST_F(LevelLoaderTest, longLine)
    U32 TEST_POINTS = 0xFFF;            //0xFFFF takes a wicked long time to run
 
    Address addr;
-   GameSettings settings;
-   ServerGame serverGame(addr, &settings, false, false);
+   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+
+   ServerGame serverGame(addr, settings, false, false);
    GridDatabase *db = serverGame.getGameObjDatabase();
 
    GameType gt;

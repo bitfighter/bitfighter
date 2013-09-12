@@ -182,7 +182,7 @@ bool CIniFile::WriteFile()
 S32 CIniFile::findSection(const string &sectionName) const
 {
    for(S32 sectionId = 0; sectionId < sectionNames.size(); ++sectionId)
-      if(CheckCase(sectionNames[sectionId], sectionName))
+      if(checkCase(sectionNames[sectionId], sectionName))
          return sectionId;
    return noID;
 }
@@ -193,7 +193,7 @@ S32 CIniFile::FindValue(S32 const sectionId, const string &keyName) const
       return noID;
 
    for(S32 keyID = 0; keyID < sections[sectionId].keys.size(); ++keyID)
-      if(CheckCase(sections[sectionId].keys[keyID], keyName))
+      if(checkCase(sections[sectionId].keys[keyID], keyName))
          return keyID;
    return noID;
 }
@@ -202,8 +202,10 @@ S32 CIniFile::addSection(const string keyname)
 {
    if(findSection(keyname) != noID)            // Don't create duplicate keys!
       return noID;
+
    sectionNames.push_back(keyname);
    sections.resize(sections.size() + 1);
+
    return sectionNames.size() - 1;
 }
 
@@ -240,27 +242,31 @@ bool CIniFile::SetValue(S32 const sectionId, S32 const valueID, const string val
 }
 
 // Will create key if it does not exist if create is set to true
-bool CIniFile::SetValue(const string &keyname, const string &valuename, const string &value, bool const create)
+bool CIniFile::SetValue(const string &section, const string &key, const string &value, bool const create)
 {
-   S32 sectionId = findSection(keyname);
-   if(sectionId == noID) {
+   S32 sectionId = findSection(section);
+
+   if(sectionId == noID) 
+   {
       if(create)
-         sectionId = S64(addSection(keyname));
+         sectionId = addSection(section);
       else
          return false;
 
       if(sectionId == noID)
-         sectionId = findSection(keyname);
+         sectionId = findSection(section);
 
       if(sectionId == noID)     // Fish in a tree?  This should not be.
          return false;
    }
 
-   S32 valueID = FindValue(sectionId, valuename);
-   if(valueID == noID) {
+   S32 valueID = FindValue(sectionId, key);
+
+   if(valueID == noID) 
+   {
       if(!create)
          return false;
-      sections[sectionId].keys.push_back(valuename);
+      sections[sectionId].keys.push_back(key);
       sections[sectionId].values.push_back(value);
    } else
       sections[sectionId].values[valueID] = value;
@@ -658,7 +664,7 @@ bool CIniFile::deleteAllSectionComments()
 }
 
 
-bool CIniFile::CheckCase(const string &s1, const string &s2) const
+bool CIniFile::checkCase(const string &s1, const string &s2) const
 {
    if(caseInsensitive)
       return stricmp(s1.c_str(), s2.c_str()) == 0;

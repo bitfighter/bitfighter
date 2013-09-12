@@ -32,8 +32,6 @@
 #include "SparkTypesEnum.h"
 #include "PlayerActionEnum.h"
 
-#include "UIGame.h"
-
 #include "HelpItemManager.h"     // For HelpItem def
 #include "LoadoutTracker.h"
 
@@ -59,43 +57,40 @@ namespace Zap
 class Move;
 class Game;
 class ClientGame;
-class GameSettings;
 class UserInterface;
-
+class GameSettings;
 
 class UIManager
 {
-
 private:
-   ClientGame *mGame;
-   GameSettings *mSettings;
-   bool mUserHasSeenTimeoutMessage;
+   typedef map<const char *, UserInterface *> UiMapType;
+   typedef UiMapType::iterator UiIterator;
 
+   map<const char *, UserInterface *> mUis;
+
+protected:
+   ClientGame *mGame;
+   Vector<UserInterface *> mPrevUIs;   // Previously active menus
    UserInterface *mCurrentInterface;
 
-   Vector<UserInterface *> mPrevUIs;   // Previously active menus
-
-   UserInterface *mLastUI;             // Menu most immediately active before mCurrentUI
-   bool mLastWasLower;                 // True if mLastUI was lower in the hierarchy than mCurrentUI
-
-   Timer mMenuTransitionTimer;
-
-   // Sounds
-   MusicLocation selectMusic();
-   void processAudio(U32 timeDelta);
-
-
 public:
-   explicit UIManager(ClientGame *clientGame);  // Constructor
-   virtual ~UIManager();                        // Destructor
+   UIManager();            // Constructor
+   virtual ~UIManager();   // Destructor
 
 
    template <typename T>
    T *getUI()
    {
-      static T ui(mGame);        // Uses lazy initialization
+      //static T ui(mGame);        // Uses lazy initialization
+      static const char *type = typeid(T).name();
 
-      return &ui;
+      T *ui = static_cast<T *>(mUis[type]);
+      if(!ui)
+         ui = new T(mGame);
+
+      mUis[type] = ui;
+
+      return ui;
    }
 
 
@@ -117,7 +112,29 @@ public:
       return false;
    }
 
- 
+
+   template <typename T>
+   void activate(bool save = true)
+   {
+      activate(getUI<T>(), save);
+   }
+
+
+private:
+   GameSettings *mSettings;
+   bool mUserHasSeenTimeoutMessage;
+
+   UserInterface *mLastUI;             // Menu most immediately active before mCurrentUI
+   bool mLastWasLower;                 // True if mLastUI was lower in the hierarchy than mCurrentUI
+
+   Timer mMenuTransitionTimer;
+
+   // Sounds
+   MusicLocation selectMusic();
+   void processAudio(U32 timeDelta);
+
+public:
+   void setClientGame(ClientGame *clientGame);
    void reactivatePrevUI();
    void reactivate(const UserInterface *ui);
    
@@ -134,12 +151,6 @@ public:
    void renderCurrent();
    UserInterface *getCurrentUI();
    UserInterface *getPrevUI();
-
-   template <typename T>
-   void activate(bool save = true)
-   {
-      activate(getUI<T>(), save);
-   }
 
    void activate(UserInterface *ui, bool save = true);
 
@@ -194,6 +205,7 @@ public:
    void setConnectAddressAndActivatePasswordEntryUI(const Address &serverAddress);
 
    // GameUI
+   void activateGameUserInterface();
    void renderLevelListDisplayer();
    void enableLevelLoadDisplay();
    void serverLoadedLevel(const string &levelName);
@@ -250,12 +262,14 @@ public:
    Move *getCurrentMove();
    void displayErrorMessage(const char *message);
    void displaySuccessMessage(const char *message);
-
+   void setShowingInGameHelp(bool showing);
+   void resetInGameHelpMessages();
 
    // EditorUI
    void readRobotLine(const string &robotLine);
 
 };
+
 
 };
 

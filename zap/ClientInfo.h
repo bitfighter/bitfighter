@@ -148,6 +148,9 @@ public:
    Ship *getShip();
    void setShip(Ship *ship);
 
+   virtual void setShowLevelUpMessage(S32 level);
+   virtual S32 getShowLevelUpMessage() const;
+
    virtual void setRating(F32 rating) = 0;
    virtual F32 getRating() = 0;
    F32 getCalculatedRating();
@@ -198,7 +201,7 @@ public:
    Nonce *getId();
 
    U32 getReturnToGameTime();
-   void setReturnToGameTimer(U32 timeDelta);
+   void setReturnToGameTimer(U32 time);
    bool updateReturnToGameTimer(U32 timeDelta);
    void resetReturnToGameTimer();
 
@@ -221,7 +224,8 @@ class FullClientInfo : public ClientInfo
 
 private:
    GameConnection *mClientConnection;
-   
+   S32 mShowLevelUpMessage;
+
 public:
    FullClientInfo(Game *game, GameConnection *clientConnection, const string &name, bool isRobot); // Constructor
    virtual ~FullClientInfo();                                                                      // Destructor
@@ -245,6 +249,8 @@ public:
 
    bool isEngineeringTeleporter();
    void setIsEngineeringTeleporter(bool isEngineeringTeleporter);
+   void setShowLevelUpMessage(S32 level);
+   S32 getShowLevelUpMessage() const;
 };
 
 

@@ -235,7 +235,8 @@ public:
    template <class T>    
    void setVal(const string &name, const T &value)
    {
-      AbstractSetting *absSet = mSettings[mKeyLookup.find(name)->second];
+      S32 key = mKeyLookup.find(name)->second;
+      AbstractSetting *absSet = mSettings[key];
       TNLAssert(dynamic_cast<Setting<T> *>(absSet), "Expected setting!");
 
       static_cast<Setting<T> *>(absSet)->setValue(value);
@@ -262,6 +263,29 @@ public:
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+// For holding user-specific settings
+struct UserSettings
+{
+   // Not really an enum at the moment...
+   enum ExperienceLevels {
+      // 0-20, 20-50, 50-100, 100-200, 200-500, 500-1000, 1000-2000, 2000-5000, 5000+
+      LevelCount = 9
+   };
+
+   UserSettings();      // Constructor
+   ~UserSettings();     // Destructor
+
+   string name;
+   bool levelupItemsAlreadySeen[LevelCount];
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class CIniFile;
+class InputCodeManager;
 
 struct IniSettings      // With defaults specified
 {
@@ -407,14 +431,14 @@ public:
    static void clearbits(bool *items, S32 itemCount);
    static string bitArrayToIniString(const bool *items, S32 itemCount);
    static void iniStringToBitArray(const string &vals, bool *items, S32 itemCount);
+
+   static void loadUserSettingsFromINI(CIniFile *ini, GameSettings *settings);    // Load user-specific settings
+   static void saveUserSettingsToINI(const string &name, CIniFile *ini, GameSettings *settings);
 };
 
 
-class CIniFile;
-class InputCodeManager;
-
 void saveSettingsToINI  (CIniFile *ini, GameSettings *settings);
-void loadSettingsFromINI(CIniFile *ini, GameSettings *settings);
+void loadSettingsFromINI(CIniFile *ini, GameSettings *settings);    // Load standard game settings
 
 void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList);
 

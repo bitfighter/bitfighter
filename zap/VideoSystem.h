@@ -42,7 +42,7 @@ public:
    VideoSystem();
    virtual ~VideoSystem();
 
-   static void init();
+   static bool init();
 
    static void setWindowPosition(S32 left, S32 top);
    static S32 getWindowPositionCoord(bool getX);

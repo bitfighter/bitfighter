@@ -32,7 +32,9 @@
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
+
 #include <string>
+#include <map>
 
 using namespace std;
 using namespace TNL;
@@ -100,11 +102,8 @@ using namespace CmdLineParams;
 namespace Zap
 {
 
-class GameSettings;
 class BanList;
-
-////////////////////////////////////////
-////////////////////////////////////////
+struct PluginBinding;
 
 
 enum SettingSource {
@@ -114,10 +113,10 @@ enum SettingSource {
 };
 
 
-struct PluginBinding;
-
 class GameSettings
 {
+   typedef map<string,UserSettings> UserSettingsMap;
+
 private:
    // Some items will be passthroughs to the underlying INI object; however, if a value can differ from the INI setting 
    // (such as when it can be overridden from the cmd line, or is set remotely), then we'll need to store the working value locally.
@@ -146,6 +145,9 @@ private:
    // Store params read from the cmd line
    Vector<string> mCmdLineParams[CmdLineParams::PARAM_COUNT];
 
+   // User settings storage
+   UserSettingsMap mUserSettings;
+
    Vector<string> mMasterServerList;
    bool mMasterServerSpecifiedOnCmdLine;
 
@@ -166,6 +168,8 @@ public:
    virtual ~GameSettings();   // Destructor
 
    static CIniFile iniFile;
+   static CIniFile userPrefs;
+
    static const S32 LoadoutPresetCount = 3;     // How many presets do we save?
 
    static const U16 DEFAULT_GAME_PORT = 28000;
@@ -198,6 +202,9 @@ public:
 
    Vector<string> *getLevelSkipList();
    Vector<string> *getSpecifiedLevels();
+
+   void setLoginCredentials(const string &name, const string &password, bool save);
+
 
    bool getSpecified(ParamId paramId);                      // Returns true if parameter was present, false if not
 
@@ -249,7 +256,6 @@ public:
    string getPlayerName();
 
    void updatePlayerName(const string &name);
-   void setLoginCredentials(const string &name, const string &password, bool save);
 
    void setAutologin(bool autologin);
 
@@ -294,7 +300,14 @@ public:
    // In-game help messages
    void setShowingInGameHelp(bool show);
    bool getShowingInGameHelp();
+
+   // User settings
+   const UserSettings *addUserSettings(const UserSettings &userSettings);     // Returns pointer to inserted item
+   const UserSettings *getUserSettings(const string &name);
 };
+
+
+typedef boost::shared_ptr<GameSettings> GameSettingsPtr;
 
 
 };

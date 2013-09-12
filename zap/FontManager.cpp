@@ -218,8 +218,8 @@ void FontManager::setFontContext(FontContext fontContext)
          return;
       
       case HelpContext:
-         setFont(FontRoman);
-         return;
+         //setFont(FontRoman);
+         //return;
 
       case MotdContext:
       case ScoreboardContext:

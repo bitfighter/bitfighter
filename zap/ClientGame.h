@@ -80,11 +80,12 @@ private:
    SafePtr<ClientInfo> mLocalRemoteClientInfo;  // ClientInfo pointer to the remote ClientInfo received from the server
 
    S32 findClientIndex(const StringTableEntry &name);
+   S32 getLevelThreshold(S32 val) const;        // Have we earned a levelup message?
 
    AbstractTeam *getNewTeam();
 
 public:
-   ClientGame(const Address &bindAddress, GameSettings *settings);
+   ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIManager *uiManager);
    virtual ~ClientGame();
 
    void joinLocalGame(GameNetInterface *remoteInterface);
@@ -125,7 +126,7 @@ public:
    void onGameStarting();
 
    void setEnteringGameOverScoreboardPhase();   // Post-game scoreboard is about to be displayed
-   void onGameReallyAndTrullyOver();            // Post-game scoreboard has already been displayed
+   void onGameReallyAndTrulyOver();             // Post-game scoreboard has already been displayed
 
    Point worldToScreenPoint(const Point *p, S32 canvasWidth, S32 canvasHeight) const;
 
@@ -202,7 +203,7 @@ public:
    bool isShowingDebugShipCoords();
 
 
-   void requestSpawnDelayed();
+   void requestSpawnDelayed(bool incursPenalty) const;
    U32 getReturnToGameDelay() const;
 
    void deleteLevelGen(LuaLevelGenerator *levelgen); 

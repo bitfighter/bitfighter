@@ -497,7 +497,13 @@ void GameUserInterface::render()
    else
       renderGameNormal();
 
-   if(getGame()->isSpawnDelayed())
+   S32 level = NONE;
+   //if(getGame()->getLocalRemoteClientInfo())    // Can happen when starting new level before all packets have arrived from server
+      level = getGame()->getClientInfo()->getShowLevelUpMessage();
+
+   if(level != NONE)
+      renderLevelUpMessage(level);
+   else if(getGame()->isSpawnDelayed())
       renderSuspendedMessage();
 
 
@@ -617,13 +623,30 @@ void GameUserInterface::renderSuspendedMessage() const
    static const S32 DisplayStyle = 2;
    static const S32 VertOffset = -30;
 
-   if(getGame()->getReturnToGameDelay() != 0)
+   if(getGame()->getReturnToGameDelay() > 0)
    {
       waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.0f)) + " SECONDS";
       renderMessageBox("", "", waitMsg,  ARRAYSIZE(waitMsg),  VertOffset, DisplayStyle);
    }
    else
       renderMessageBox("", "", readyMsg, ARRAYSIZE(readyMsg), VertOffset, DisplayStyle);
+}
+
+
+void GameUserInterface::renderLevelUpMessage(S32 newLevel) const
+{
+   static string msg[] = { "", 
+                           "CONGRATULATIONS!",
+                           "YOU HAVE BEEN PROMOTED TO",
+                           "LEVEL XXX",
+                           "PRESS ANY KEY TO CONTINUE"
+                           "" };
+
+   static const S32 DisplayStyle = 2;
+   static const S32 VertOffset = -30;
+
+   msg[3] = "LEVEL " + itos(newLevel);
+   renderMessageBox("", "", msg,  ARRAYSIZE(msg),  VertOffset, DisplayStyle);
 }
 
 
@@ -807,8 +830,8 @@ void GameUserInterface::renderProgressBar() const
 // Draw the reticle (i.e. the mouse cursor) if we are using keyboard/mouse
 void GameUserInterface::renderReticle() const
 {
-   bool shouldRender = getGame()->getInputMode() == InputModeKeyboard &&         // Reticle in keyboard mode only
-                       getUIManager()->isCurrentUI<GameUserInterface>();    // And not when a menu is active
+   bool shouldRender = getGame()->getInputMode() == InputModeKeyboard &&   // Reticle in keyboard mode only
+                       getUIManager()->isCurrentUI<GameUserInterface>();   // And not when a menu is active
    if(shouldRender)
    {
       Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
@@ -1108,18 +1131,27 @@ Point GameUserInterface::getTimeLeftIndicatorWidthAndHeight() const
 bool GameUserInterface::onKeyDown(InputCode inputCode)
 {
    // Kind of hacky, but this will unsuspend and swallow the keystroke, which is what we want
-   if(!mHelperManager.isHelperActive() && getGame()->isSpawnDelayed())
+   if(!mHelperManager.isHelperActive())
    {
-      // Allow scoreboard and the various chats while idle
-      if(!checkInputCode(InputCodeManager::BINDING_OUTGAMECHAT, inputCode) &&
-            !checkInputCode(InputCodeManager::BINDING_GLOBCHAT, inputCode) &&
-            !checkInputCode(InputCodeManager::BINDING_TEAMCHAT, inputCode) &&
-            !checkInputCode(InputCodeManager::BINDING_CMDCHAT, inputCode) &&
-            !checkInputCode(InputCodeManager::BINDING_SCRBRD, inputCode))
+      if(getGame()->getClientInfo()->getShowLevelUpMessage() != NONE)
       {
          getGame()->undelaySpawn();
-         if(inputCode != KEY_ESCAPE)  // Lagged out and can't un-idle to bring up the menu?
+         if(inputCode != KEY_ESCAPE)  // Don't swollow escape
             return true;
+      }
+      else if(getGame()->isSpawnDelayed())
+      {
+         // Allow scoreboard and the various chats while idle
+         if(!checkInputCode(InputCodeManager::BINDING_OUTGAMECHAT, inputCode) &&
+               !checkInputCode(InputCodeManager::BINDING_GLOBCHAT, inputCode) &&
+               !checkInputCode(InputCodeManager::BINDING_TEAMCHAT, inputCode) &&
+               !checkInputCode(InputCodeManager::BINDING_CMDCHAT, inputCode) &&
+               !checkInputCode(InputCodeManager::BINDING_SCRBRD, inputCode))
+         {
+            getGame()->undelaySpawn();
+            if(inputCode != KEY_ESCAPE)  // Don't swollow escape: Lagged out and can't un-idle to bring up the menu?
+               return true;
+         }
       }
    }
 
@@ -2386,14 +2418,14 @@ void GameUserInterface::loadAlreadySeenLevelupMessageList()
 
 const string GameUserInterface::getAlreadySeenLevelupMessageString() const
 {
-   return IniSettings::bitArrayToIniString(mAlreadySeenLevelupMsg, LevelCount);
+   return IniSettings::bitArrayToIniString(mAlreadySeenLevelupMsg, UserSettings::LevelCount);
 }
 
 
 // Takes a string; we'll mark a message as being seen every time we encounter a 'Y'
 void GameUserInterface::setAlreadySeenLevelupMessageString(const string &vals)
 {
-   IniSettings::iniStringToBitArray(vals, mAlreadySeenLevelupMsg, LevelCount);
+   IniSettings::iniStringToBitArray(vals, mAlreadySeenLevelupMsg, UserSettings::LevelCount);
 }
 
 
