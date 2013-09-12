@@ -135,14 +135,6 @@ void drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...
 // Center text between two points
 void drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...);
 
-// Draw text centered on screen (normal and formatted versions)  --> now return starting location
-template <typename T, typename U>
-F32 drawCenteredString(T y, U size, const char *str)
-{
-   return drawCenteredString((F32)gScreenInfo.getGameCanvasWidth() / 2.0f, (F32)y, (F32)size, str);
-}
-
-
 S32 drawCenteredString_fixed(S32 y, S32 size, const char *str);
 S32 drawCenteredString(S32 x, S32 y, S32 size, const char *str);
 S32 drawCenteredString_fixed(S32 x, S32 y, S32 size, const char *str);
@@ -152,6 +144,13 @@ F32 drawCenteredString(F32 x, F32 y, S32 size, const char *str);
 F32 drawCenteredString(F32 x, F32 y, F32 size, const char *str);
 S32 drawCenteredStringf(S32 y, S32 size, const char *format, ...);
 S32 drawCenteredStringf(S32 x, S32 y, S32 size, const char *format, ...);
+
+// Draw text centered on screen (normal and formatted versions)  --> now return starting location
+template <typename T, typename U>
+F32 drawCenteredString(T y, U size, const char *str)
+{
+   return drawCenteredString((F32)gScreenInfo.getGameCanvasWidth() / 2.0f, (F32)y, (F32)size, str);
+}
 
 void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const Color &bodyColor, const Color &keyColor);
 

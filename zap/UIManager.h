@@ -47,6 +47,7 @@
 #include "tnlVector.h"
 
 #include <memory>
+#include <typeinfo>
 
 using namespace std;
 using namespace TNL;
