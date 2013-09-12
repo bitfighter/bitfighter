@@ -904,7 +904,7 @@ static InputCode getInputCode(CIniFile *ini, const string &section, const string
           getInputCode(ini, section, InputCodeManager::getBindingName(binding), key));
 
 // Remember: If you change any of these defaults, you'll need to rebuild your INI file to see the results!
-static void loadKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
+static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {                                
    string section = "KeyboardKeyBindings";
    InputMode mode = InputModeKeyboard;
@@ -1648,7 +1648,7 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 
    loadTestSettings(ini, iniSettings);
 
-   loadKeyBindings(ini, inputCodeManager);
+   setDefaultKeyBindings(ini, inputCodeManager);
    loadForeignServerInfo(ini, iniSettings);     // Info about other servers
    loadLevels(ini, iniSettings);                // Read levels, if there are any
    loadLevelSkipList(ini, settings);            // Read level skipList, if there are any
