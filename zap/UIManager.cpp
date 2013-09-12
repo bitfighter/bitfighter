@@ -907,7 +907,7 @@ void UIManager::onChatMessageReceived(const Color &msgColor, const char *format,
    vsnprintf(buffer, sizeof(buffer), format, args);
    va_end(args);
 
-   getUI<GameUserInterface>()->onChatMessageReceived(msgColor, buffer);
+   getUI<GameUserInterface>()->onChatMessageReceived(msgColor, "%s", buffer);
 }
 
 
