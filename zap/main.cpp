@@ -288,61 +288,41 @@ void shutdownBitfighter(ServerGame *serverGame);    // Forward declaration
 
 
 // There is a lot of weird ickiness in this function
-void gameIdle(U32 integerTime)
+void gameIdle(U32 timeDelta)
 {
-   // Don't idle games during level load
+   // Don't idle games during level load... if gServerGame exists, it means we're hosting locally
    if(!(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels))    
    {
 #ifndef ZAP_DEDICATED
       for(S32 i = 0; i < gClientGames.size(); i++)
-      {
-         //if(gClientGame2)
-         //{
-         //   gClientGame2->getSettings()->getInputCodeManager()->setInputMode(InputModeJoystick);
-
-         //   gClientGame1->mUserInterfaceData->get();
-         //   gClientGame2->mUserInterfaceData->set();
-
-         //   gClientGame = gClientGame2;
-         //   gClientGame->idle(integerTime);
-
-         //   gClientGame->getSettings()->getInputCodeManager()->setInputMode(InputModeKeyboard);
-
-         //   gClientGame2->mUserInterfaceData->get();
-         //   gClientGame1->mUserInterfaceData->set();
-         //}
-         //if(gClientGame1)
-         //{
-         //   gClientGame = gClientGame1;
-         //   gClientGame->idle(integerTime);
-         //}
-
-         gClientGames[i]->idle(integerTime);
-      }
+         gClientGames[i]->idle(timeDelta);
 #endif
 
       if(gServerGame)
-      {
-         // This block has to be outside gServerGame because deleting an object from within is in rather poor form
-         if(!gServerGame->isReadyToShutdown(integerTime))         
-            gServerGame->idle(integerTime);
+         gServerGame->idle(timeDelta);
+   }
+}
 
-         else                                                     // gServerGame closing down so...
-         {
+
+// If the server game exists, and is shutting down, close any ClientGame connections we might have to it, then delete it.
+// If there are no client games, delete it and return to the OS.
+void checkIfServerGameIsShuttingDown(U32 timeDelta)
+{
+   if(gServerGame && gServerGame->isReadyToShutdown(timeDelta))         
+   {
 #ifndef ZAP_DEDICATED
-            for(S32 i = 0; i < gClientGames.size(); i++)
-               gClientGames[i]->closeConnectionToGameServer();    // ...disconnect any local clients
+      for(S32 i = 0; i < gClientGames.size(); i++)
+         gClientGames[i]->closeConnectionToGameServer();    // ...disconnect any local clients
 
-           if(gClientGames.size() > 0)          // If there are any clients running...
-            {
-               delete gServerGame;              // ...purge gServerGame (leaving the clients running)...
-               gServerGame = NULL;
-            }
-            else                                // ...otherwise...     
-#endif
-               shutdownBitfighter(gServerGame); // ...shut down the whole shebang!
-         }
+      if(gClientGames.size() > 0)          // If there are any clients running...
+      {
+         delete gServerGame;              // ...purge gServerGame (leaving the clients running)
+         gServerGame = NULL;
       }
+      else                                
+#endif
+         // Either we have no clients, or this is a dedicated build so...
+         shutdownBitfighter(gServerGame);    // ...shut down the whole shebang, return to OS, never come back
    }
 }
 
@@ -379,13 +359,14 @@ void idle()
       settings = gClientGames[0]->getSettings();
 #endif
 
-   static S32 integerTime = 0;   // static, as we need to keep holding the value that was set
+   static S32 integerTime = 0;   // static, as we need to keep holding the value that was set... probably some reason this is S32?
    static U32 prevTimer = 0;
 
    U32 currentTimer = Platform::getRealMilliseconds();
    integerTime += currentTimer - prevTimer;
    prevTimer = currentTimer;
 
+   // Do some sanity checks
    if(integerTime < -500 || integerTime > 5000)
       integerTime = 10;
 
@@ -393,10 +374,10 @@ void idle()
 
    bool dedicated = gServerGame && gServerGame->isDedicated();
 
-
    if( ( dedicated && integerTime >= S32(1000 / settings->getIniSettings()->maxDedicatedFPS)) || 
        (!dedicated && integerTime >= S32(1000 / settings->getIniSettings()->maxFPS)) )
    {
+      checkIfServerGameIsShuttingDown(U32(integerTime));
       gameIdle(U32(integerTime));
 
 #ifndef ZAP_DEDICATED
