@@ -85,6 +85,12 @@ if(MINGW)
 endif()
 
 
+#
+# CMake options
+#
+option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
+
+
 # Now search for dependencies
 # Set up Windows specific locations for libraries and headers
 if(WIN32 OR APPLE OR XCOMPILE)

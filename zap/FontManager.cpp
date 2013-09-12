@@ -242,6 +242,7 @@ void FontManager::setFontContext(FontContext fontContext)
 
       case ChatMessageContext:
       case InputContext:
+      case ConsoleContext:
          setFont(FontDroidSansMono);
          return;
 

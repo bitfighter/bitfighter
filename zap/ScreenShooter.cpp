@@ -37,6 +37,8 @@
 
 #if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
 #  include "SDL_opengles.h"
+   // Needed for GLES compatibility
+#  define glOrtho glOrthof
 #else
 #  include "SDL_opengl.h"
 #endif
@@ -180,7 +182,10 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
    glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
    // Grab the front buffer with the new viewport
+#ifndef BF_USE_GLES
+   // GLES doesn't need this?
    glReadBuffer(GL_BACK);
+#endif
 
    // Read pixels from buffer - slow operation
    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, screenBuffer);
