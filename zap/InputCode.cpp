@@ -353,6 +353,7 @@ InputCodeManager::InputCodeManager()
    TNLAssert(ARRAYSIZE(BINDING_STRINGS) == BINDING_DEFINEABLE_KEY_COUNT, "Problem somewhere!");
 }
 
+
 // Destructor
 InputCodeManager::~InputCodeManager()
 {
