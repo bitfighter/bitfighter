@@ -286,6 +286,8 @@ void display()
 
 void shutdownBitfighter(ServerGame *serverGame);    // Forward declaration
 
+
+// There is a lot of weird ickiness in this function
 void gameIdle(U32 integerTime)
 {
    // Don't idle games during level load
