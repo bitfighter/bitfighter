@@ -507,7 +507,7 @@ void DiagnosticUserInterface::render()
 
          U32 joystickIndex = Joystick::SelectedPresetIndex;
 
-         Vector<SymbolShapePtr> symbols;
+         Vector<UI::SymbolShapePtr> symbols;
 
          S32 buttonCount = LAST_CONTROLLER_BUTTON - FIRST_CONTROLLER_BUTTON + 1;
          for(S32 i = 0; i < buttonCount; i++)
@@ -515,15 +515,12 @@ void DiagnosticUserInterface::render()
             if(!Joystick::isButtonDefined(Joystick::SelectedPresetIndex, i))
                continue;
 
-            symbols.push_back(SymbolString::getControlSymbol(InputCode(i + FIRST_CONTROLLER_BUTTON)));
+            symbols.push_back(UI::SymbolString::getControlSymbol(InputCode(i + FIRST_CONTROLLER_BUTTON)));
             if(i < buttonCount - 1)
-               symbols.push_back(SymbolString::getBlankSymbol(8));      // Provide a little breathing room
+               symbols.push_back(UI::SymbolString::getBlankSymbol(8));      // Provide a little breathing room
          }
 
-         SymbolString(symbols, 10, HelpContext).render(Point(gScreenInfo.getGameCanvasWidth() / 2 + 100, ypos + 50));
-
-
-
+         UI::SymbolString(symbols, 10, HelpContext).render(Point(gScreenInfo.getGameCanvasWidth() / 2 + 100, ypos + 50));
 
          JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_1, InputCodeManager::getState(BUTTON_1));
          hpos += 40;

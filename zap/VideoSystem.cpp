@@ -73,12 +73,12 @@ VideoSystem::~VideoSystem()
 }
 
 
-extern void shutdownBitfighter();
 extern string getInstalledDataDir();
 
 static string WINDOW_TITLE = "Bitfighter " + string(ZAP_GAME_RELEASE);
 
-void VideoSystem::init()
+// Returns true if everything went ok, false otherwise
+bool VideoSystem::init()
 {
    // Make sure "SDL_Init(0)" was done before calling this function
 
@@ -87,7 +87,7 @@ void VideoSystem::init()
    {
       // Failed, exit
       logprintf(LogConsumer::LogFatalError, "SDL Video initialization failed: %s", SDL_GetError());
-      shutdownBitfighter();
+      return false;
    }
 
 
@@ -133,10 +133,10 @@ void VideoSystem::init()
    gScreenInfo.sdlWindow = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
          gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight(), flags);
 
-   if (!gScreenInfo.sdlWindow)
+   if(!gScreenInfo.sdlWindow)
    {
       logprintf(LogConsumer::LogFatalError, "SDL window creation failed: %s", SDL_GetError());
-      shutdownBitfighter();
+      return false;
    }
 
    // Create our OpenGL context; save it in case we ever need it
@@ -185,6 +185,8 @@ void VideoSystem::init()
       SDL_FreeSurface(icon);
 
    // We will set the resolution, position, and flags in actualizeScreenMode()
+
+   return true;
 }
 
 

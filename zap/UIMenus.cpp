@@ -69,7 +69,7 @@ S32 QSORT_CALLBACK menuItemValueSort(boost::shared_ptr<MenuItem> *a, boost::shar
 }
 
 
-extern void shutdownBitfighter();
+extern void shutdownBitfighter(ServerGame *serverGame);
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -897,9 +897,12 @@ static void creditsSelectedCallback(ClientGame *game, U32 unused)
    game->getUIManager()->activate<CreditsUserInterface>();
 }
 
+
+extern ServerGame *gServerGame;
+
 static void quitSelectedCallback(ClientGame *game, U32 unused)
 {
-   shutdownBitfighter();
+   shutdownBitfighter(gServerGame);
 }
 
 //////////
@@ -1053,7 +1056,7 @@ void MainMenuUserInterface::showUpgradeAlert()
 
 void MainMenuUserInterface::onEscape()
 {
-   shutdownBitfighter();    // Quit!
+   shutdownBitfighter(gServerGame);    // Quit!
 }
 
 
@@ -1784,7 +1787,7 @@ void NameEntryUserInterface::renderExtras()
 // Save options to INI file, and return to our regularly scheduled program
 void NameEntryUserInterface::onEscape()
 {
-   shutdownBitfighter();
+   shutdownBitfighter(gServerGame);
 }
 
 
@@ -1816,12 +1819,15 @@ void HostMenuUserInterface::onActivate()
 
 static void startHostingCallback(ClientGame *game, U32 unused)
 {
+   TNLAssert(!gServerGame, "already exists!");
+
    game->getUIManager()->getUI<HostMenuUserInterface>()->saveSettings();
 
-   GameSettings *settings = game->getSettings();
+   GameSettingsPtr settings = game->getSettingsPtr();
 
-   initHosting(settings, settings->getLevelList(), false, false);
+   gServerGame = initHosting(settings, settings->getLevelList(), false, false);
 }
+
 
 static void robotOptionsSelectedCallback(ClientGame *game, U32 unused)
 {

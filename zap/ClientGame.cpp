@@ -89,17 +89,18 @@ static void initializeHelpItemForObjects()
 
 
 // Constructor
-ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Game(bindAddress, settings)
+ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIManager *uiManager) : Game(bindAddress, settings)
 {
    //mUserInterfaceData = new UserInterfaceData();
 
    mRemoteLevelDownloadFilename = "downloaded.level";
 
-   mUIManager = new UIManager(this);               // Gets deleted in destructor
+   mUIManager = uiManager;                // Gets deleted in destructor
+   mUIManager->setClientGame(this);       // Need to do this before we can use it
 
    mClientInfo = new FullClientInfo(this, NULL, mSettings->getPlayerName(), false);  // Will be deleted in destructor
 
-   mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
+   mScreenSaverTimer.reset(59 * 1000);    // Fire screen saver supression every 59 seconds
 
    for(S32 i = 0; i < JoystickAxesDirectionCount; i++)
       mJoystickInputs[i] = 0;
@@ -132,6 +133,7 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
    mClientInfo->setRole(ClientInfo::RoleOwner);       // Local connection is always owner
 
    getUIManager()->activateGameUI();
+
    GameConnection *gameConnection = new GameConnection(this);
  
    setConnectionToServer(gameConnection);
@@ -164,7 +166,7 @@ void ClientGame::joinRemoteGame(Address remoteAddress, bool isFromMaster)
 
    bool useArrangedConnection = isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected;
 
-   getUIManager()->activate<GameUserInterface>();
+   getUIManager()->activateGameUserInterface();
 
    if(useArrangedConnection)  // Request arranged connection
       connToMaster->requestArrangedConnection(remoteAddress);
@@ -194,7 +196,7 @@ void ClientGame::closeConnectionToGameServer()
 
    getUIManager()->disableLevelLoadDisplay(false);
 
-   onGameReallyAndTrullyOver();  
+   onGameReallyAndTrulyOver();  
 }
 
 
@@ -450,10 +452,29 @@ bool ClientGame::isSpawnDelayed() const
 }
 
 
-// Tells the server to spawn delay us... server may incur a penalty when we unspawn
-void ClientGame::requestSpawnDelayed()
+// Returns NONE if we are not leveling up
+S32 ClientGame::getLevelThreshold(S32 val) const
 {
-   getConnectionToServer()->c2sPlayerRequestSpawnDelayed();
+   switch(val)
+   {
+      // This many games | Just achieved this level
+      case 20:             return 1;
+      case 50:             return 2;
+      case 100:            return 3;
+      case 200:            return 4;
+      case 500:            return 5;
+      case 1000:           return 6;
+      case 2000:           return 7;
+      case 5000:           return 8;
+      default:             return NONE;
+   }
+}
+
+
+// Tells the server to spawn delay us... server may incur a penalty when we unspawn
+void ClientGame::requestSpawnDelayed(bool incursPenalty) const
+{
+   getConnectionToServer()->c2sPlayerRequestSpawnDelayed(incursPenalty);
 }
 
 
@@ -769,8 +790,37 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
 {
    addToClientList(clientInfo);
 
-   // Find which client is us
-   mLocalRemoteClientInfo = findClientInfo(mClientInfo->getName());     // why is this here?
+   // Find which client is us (could return NULL if our clientInfo hasn't yet been sent)
+   mLocalRemoteClientInfo = findClientInfo(mClientInfo->getName()); 
+
+   // Testing 1-2-3
+   if(isLocalClient)
+   {
+      // If this assert never trips, we can get rid of the mLocalRemoteClientInfo assignment above and remove the assert.
+      // If it does trip, we can remove this block, with a note of some sort.
+      TNLAssert(clientInfo == findClientInfo(mClientInfo->getName()), "Not the same??");  // Added 8-Sep-2013
+      mLocalRemoteClientInfo = clientInfo;
+   }
+
+   if(isLocalClient)
+   {
+      // Added following assert 9/8/2013 -- if this never trips, we can delete it.  If it does trip, replace "getClientInfo()->getGamesPlayed()"
+      // in the level = line with getLocalRemoteClientInfo()->getGamesPlayed(), though it would be good to understand why they might differ
+      TNLAssert(getLocalRemoteClientInfo()->getGamesPlayed() == getClientInfo()->getGamesPlayed(), "Should be equal");
+
+      S32 level = getLevelThreshold(getClientInfo()->getGamesPlayed());
+
+      // True only if we are on a levelup threshold and we haven't already seen this message
+      bool showLevelUpMessage = level != NONE && 
+                                !mSettings->getUserSettings(getClientInfo()->getName().getString())->levelupItemsAlreadySeen[level];
+
+      mClientInfo->setShowLevelUpMessage(level); 
+
+      // We want to trigger the spawn delay mechanism to carve out time to show the levelup message
+      if(showLevelUpMessage)
+         requestSpawnDelayed(false);
+   }
+         
 
    // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
    // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
@@ -800,7 +850,7 @@ void ClientGame::setEnteringGameOverScoreboardPhase()
 
 
 // Gets run when game is really and truly over, after post-game scoreboard is displayed.  Over.
-void ClientGame::onGameReallyAndTrullyOver()
+void ClientGame::onGameReallyAndTrulyOver()
 {
    clearClientList();                   // Erase all info we have about fellow clients
 
@@ -1224,13 +1274,13 @@ void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTa
 
 void ClientGame::setShowingInGameHelp(bool showing)
 {
-   getUIManager()->getUI<GameUserInterface>()->setShowingInGameHelp(showing);
+   getUIManager()->setShowingInGameHelp(showing);
 }
 
 
 void ClientGame::resetInGameHelpMessages()
 {
-   getUIManager()->getUI<GameUserInterface>()->resetInGameHelpMessages();
+   getUIManager()->resetInGameHelpMessages();
 }
 
 

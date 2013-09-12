@@ -92,7 +92,7 @@ static Game *mObjectAddTarget = NULL;
 
 
 // Constructor
-Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjDatabase(new GridDatabase())  // New database will be deleted by boost
+Game::Game(const Address &theBindAddress, GameSettingsPtr settings) : mGameObjDatabase(new GridDatabase())  // New database will be deleted by boost
 {
    mGridSize = 255;
    mLevelDatabaseId = 0;
@@ -184,6 +184,12 @@ Game *Game::getAddTarget()
 
 
 GameSettings *Game::getSettings() const
+{
+   return mSettings.get();
+}
+
+
+GameSettingsPtr Game::getSettingsPtr() const
 {
    return mSettings;
 }

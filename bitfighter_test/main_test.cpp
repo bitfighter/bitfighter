@@ -1,5 +1,7 @@
 // Bitfighter Tests
 
+#define BF_TEST
+
 #include "gtest/gtest.h"
 
 #include "../zap/BfObject.h"
@@ -13,6 +15,8 @@
 #include "../zap/ClientInfo.h"
 #include "../zap/FontManager.h"
 #include "../zap/config.h"
+#include "../zap/SystemFunctions.h"
+#include "../zap/UIManager.h"
 
 #include "SDL.h"
 #include "../zap/VideoSystem.h"
@@ -34,14 +38,13 @@
 #  include <windows.h>   // For ARRAYSIZE
 #endif
 
-
 using namespace Zap;
 using namespace std;
 
 namespace Zap
 {
-void exitToOs(S32 errcode) { TNLAssert(false, "Should never be called!"); }
-void shutdownBitfighter()  { TNLAssert(false, "Should never be called!"); };
+void exitToOs(S32 errcode)                 { TNLAssert(false, "Should never be called!"); }
+void shutdownBitfighter(ServerGame *game)  { TNLAssert(false, "Should never be called!"); };
 }
 
 
@@ -170,79 +173,79 @@ TEST_F(BfTest, SettingsTests)
 TEST_F(BfTest, LevelMenuSelectUserInterfaceTests) 
 {
    Address addr;
-   GameSettings settings;
+   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
 
    // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
    // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
-   FontManager::initialize(&settings, false);   
-   ClientGame game(addr, &settings);
+   FontManager::initialize(settings.get(), false);   
+   ClientGame game(addr, settings, new UIManager());    // ClientGame destructor will clean up UIManager
 
    // Want to test getIndexOfNext(), which is a slightly complex function.  Need to start by setting up a menu.
-   LevelMenuSelectUserInterface ui(&game);
+   LevelMenuSelectUserInterface *ui = new LevelMenuSelectUserInterface(&game);      // Cleaned up when game goes out of scope
 
    // These should be alphabetically sorted
-   ui.addMenuItem(new MenuItem("Aardvark"));    //  0
-   ui.addMenuItem(new MenuItem("Assinine"));    //  1
-   ui.addMenuItem(new MenuItem("Bouy"));        //  2
-   ui.addMenuItem(new MenuItem("Boy"));         //  3
-   ui.addMenuItem(new MenuItem("C"));           //  4
-   ui.addMenuItem(new MenuItem("Cat"));         //  5
-   ui.addMenuItem(new MenuItem("Cc"));          //  6
-   ui.addMenuItem(new MenuItem("Chop"));        //  7
-   ui.addMenuItem(new MenuItem("Chump"));       //  8
-   ui.addMenuItem(new MenuItem("Dog"));         //  9
-   ui.addMenuItem(new MenuItem("Doug"));        // 10
-   ui.addMenuItem(new MenuItem("Eat"));         // 11
-   ui.addMenuItem(new MenuItem("Eating"));      // 12
-   ui.addMenuItem(new MenuItem("Eel"));         // 13
-   ui.addMenuItem(new MenuItem("Eels"));        // 14
-   ui.addMenuItem(new MenuItem("Eggs"));        // 15
+   ui->addMenuItem(new MenuItem("Aardvark"));    //  0
+   ui->addMenuItem(new MenuItem("Assinine"));    //  1
+   ui->addMenuItem(new MenuItem("Bouy"));        //  2
+   ui->addMenuItem(new MenuItem("Boy"));         //  3
+   ui->addMenuItem(new MenuItem("C"));           //  4
+   ui->addMenuItem(new MenuItem("Cat"));         //  5
+   ui->addMenuItem(new MenuItem("Cc"));          //  6
+   ui->addMenuItem(new MenuItem("Chop"));        //  7
+   ui->addMenuItem(new MenuItem("Chump"));       //  8
+   ui->addMenuItem(new MenuItem("Dog"));         //  9
+   ui->addMenuItem(new MenuItem("Doug"));        // 10
+   ui->addMenuItem(new MenuItem("Eat"));         // 11
+   ui->addMenuItem(new MenuItem("Eating"));      // 12
+   ui->addMenuItem(new MenuItem("Eel"));         // 13
+   ui->addMenuItem(new MenuItem("Eels"));        // 14
+   ui->addMenuItem(new MenuItem("Eggs"));        // 15
 
 
    // Some random checks
-   ui.selectedIndex = 1;
-   ASSERT_EQ(ui.getIndexOfNext("a"), 0);
-   ASSERT_EQ(ui.getIndexOfNext("boy"), 3);
-   ASSERT_EQ(ui.getIndexOfNext("c"), 4);
-   ASSERT_EQ(ui.getIndexOfNext("ch"), 7);
-   ASSERT_EQ(ui.getIndexOfNext("cho"), 7);
-   ASSERT_EQ(ui.getIndexOfNext("chop"), 7);
+   ui->selectedIndex = 1;
+   ASSERT_EQ(ui->getIndexOfNext("a"), 0);
+   ASSERT_EQ(ui->getIndexOfNext("boy"), 3);
+   ASSERT_EQ(ui->getIndexOfNext("c"), 4);
+   ASSERT_EQ(ui->getIndexOfNext("ch"), 7);
+   ASSERT_EQ(ui->getIndexOfNext("cho"), 7);
+   ASSERT_EQ(ui->getIndexOfNext("chop"), 7);
 
    // Check cycling of the Cs
-   ui.selectedIndex = 3;
-   ASSERT_EQ(ui.getIndexOfNext("c"), 4);
-   ui.selectedIndex = 4;
-   ASSERT_EQ(ui.getIndexOfNext("c"), 5);
-   ui.selectedIndex = 5;
-   ASSERT_EQ(ui.getIndexOfNext("c"), 6);
-   ui.selectedIndex = 6;
-   ASSERT_EQ(ui.getIndexOfNext("c"), 7);
-   ui.selectedIndex = 7;
-   ASSERT_EQ(ui.getIndexOfNext("c"), 8);
-   ui.selectedIndex = 8;
-   ASSERT_EQ(ui.getIndexOfNext("c"), 4);
+   ui->selectedIndex = 3;
+   ASSERT_EQ(ui->getIndexOfNext("c"), 4);
+   ui->selectedIndex = 4;
+   ASSERT_EQ(ui->getIndexOfNext("c"), 5);
+   ui->selectedIndex = 5;
+   ASSERT_EQ(ui->getIndexOfNext("c"), 6);
+   ui->selectedIndex = 6;
+   ASSERT_EQ(ui->getIndexOfNext("c"), 7);
+   ui->selectedIndex = 7;
+   ASSERT_EQ(ui->getIndexOfNext("c"), 8);
+   ui->selectedIndex = 8;
+   ASSERT_EQ(ui->getIndexOfNext("c"), 4);
 
    // Check wrapping
-   ui.selectedIndex = 9;
-   ASSERT_EQ(ui.getIndexOfNext("a"), 0);
-   ui.selectedIndex = 15;     // last item
-   ASSERT_EQ(ui.getIndexOfNext("a"), 0);
+   ui->selectedIndex = 9;
+   ASSERT_EQ(ui->getIndexOfNext("a"), 0);
+   ui->selectedIndex = 15;     // last item
+   ASSERT_EQ(ui->getIndexOfNext("a"), 0);
 
    // Check repeated hammering on current item
-   ui.selectedIndex = 12;
-   ASSERT_EQ(ui.getIndexOfNext("e"), 13);    // Single letter advances to next of that letter
-   ASSERT_EQ(ui.getIndexOfNext("ea"), 12);
-   ASSERT_EQ(ui.getIndexOfNext("eat"), 12);
-   ASSERT_EQ(ui.getIndexOfNext("eati"), 12);
-   ASSERT_EQ(ui.getIndexOfNext("eatin"), 12);
-   ASSERT_EQ(ui.getIndexOfNext("eating"), 12);
+   ui->selectedIndex = 12;
+   ASSERT_EQ(ui->getIndexOfNext("e"), 13);    // Single letter advances to next of that letter
+   ASSERT_EQ(ui->getIndexOfNext("ea"), 12);
+   ASSERT_EQ(ui->getIndexOfNext("eat"), 12);
+   ASSERT_EQ(ui->getIndexOfNext("eati"), 12);
+   ASSERT_EQ(ui->getIndexOfNext("eatin"), 12);
+   ASSERT_EQ(ui->getIndexOfNext("eating"), 12);
 
    // Check for not found items -- should return current index
-   ASSERT_EQ(ui.getIndexOfNext("eatingx"), 12); 
-   ASSERT_EQ(ui.getIndexOfNext("flummoxed"), 12); 
+   ASSERT_EQ(ui->getIndexOfNext("eatingx"), 12); 
+   ASSERT_EQ(ui->getIndexOfNext("flummoxed"), 12); 
 
-   ui.selectedIndex = 8;
-   ASSERT_EQ(ui.getIndexOfNext("chop"), 7); 
+   ui->selectedIndex = 8;
+   ASSERT_EQ(ui->getIndexOfNext("chop"), 7); 
 }
 
 
@@ -303,16 +306,16 @@ void packUnpack(T input, T &output, U32 mask = 0xFFFFFFFF)
 }
 
 
-// Create a new ClientGame with one dummy team -- delete with deleteGame()
+// Create a new ClientGame with one dummy team -- be sure to clean up settings somewhere!
 ClientGame *newClientGame()
 {
    Address addr;
-   GameSettings *settings = new GameSettings();
+   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
 
    // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
    // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
-   FontManager::initialize(settings, false);   
-   ClientGame *game = new ClientGame(addr, settings);
+   FontManager::initialize(settings.get(), false);   
+   ClientGame *game = new ClientGame(addr, settings, new UIManager());    // ClientGame destructor will clean up UIManager
 
    game->addTeam(new Team());     // Teams will be deleted by ClientGame destructor
 
@@ -320,11 +323,11 @@ ClientGame *newClientGame()
 }
 
 
-// Create a new ServerGame with one dummy team -- delete with deleteGame()
+// Create a new ServerGame with one dummy team
 ServerGame *newServerGame()
 {
    Address addr;
-   GameSettings *settings = new GameSettings();
+   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
    ServerGame *game = new ServerGame(addr, settings, false, false);
    game->addTeam(new Team());    // Team will be cleaned up when game is deleted
 
@@ -332,10 +335,32 @@ ServerGame *newServerGame()
 }
 
 
-void deleteGame(Game *game)
+// See if we can get some client-server interaction going on here
+TEST_F(BfTest, ClientServerInteraction)
 {
-   delete game->getSettings();
-   delete game;
+   ClientGame *clientGame = newClientGame();
+
+   GameSettingsPtr settings = clientGame->getSettingsPtr();
+
+   clientGame->userEnteredLoginCredentials("TestUser", "password", false);    // Simulates entry from NameEntryUserInterface
+
+   // Can't host without setting the leveldir
+   FolderManager *folderManager = settings->getFolderManager();
+   folderManager->levelDir = "levels";    // Will this always work??
+
+   TNLAssert(settings->getLevelList().size() > 0, 
+         "No levels found.  In VC++, you might need to set your working dir for the test project to \"$(TargetDir)\"");
+
+   ServerGame *serverGame = initHosting(settings, settings->getLevelList(), true, false);
+
+   bool ok = serverGame->startHosting();
+   clientGame->joinLocalGame(serverGame->getNetInterface());
+
+
+   
+   // Cleanup
+   delete clientGame;
+   delete serverGame;
 }
 
 
@@ -388,19 +413,19 @@ TEST_F(BfTest, LoadoutManagementTests)
    ASSERT_FALSE(s->isCarryingItem(ResourceItemTypeNumber));
    ASSERT_TRUE(s->isCarryingItem(FlagTypeNumber));
 
-   deleteGame(serverGame);
+   delete serverGame;
 }
 
 
 TEST_F(BfTest, LoadoutIndicatorTests)
 {
    Address addr;
-   GameSettings settings;
+   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
 
    // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
    // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
-   FontManager::initialize(&settings, false);   
-   ClientGame game(addr, &settings);
+   FontManager::initialize(settings.get(), false);   
+   ClientGame game(addr, settings, new UIManager());    // ClientGame destructor will clean up UIManager
 
    UI::LoadoutIndicator indicator;
    indicator.newLoadoutHasArrived(LoadoutTracker("Turbo,Shield,Triple,Mine,Bouncer"));     // Sets the loadout
@@ -456,7 +481,7 @@ TEST_F(BfTest, MoveTests)
    move1.angle = -Float2Pi;               move1.prepare();  ASSERT_EQ(move1.angle, 0);  // Wrap exactly once, neg. dir
 
    // Large angles
-   move1.angle = Float2Pi + FloatHalfPi;  move1.prepare();  ASSERT_EQ(move1.angle, FloatHalfPi);            // Wrap in pos. dir         
+   move1.angle =  Float2Pi + FloatHalfPi;  move1.prepare();  ASSERT_EQ(move1.angle, FloatHalfPi);            // Wrap in pos. dir         
    move1.angle = -Float2Pi - FloatHalfPi; move1.prepare();  ASSERT_EQ(move1.angle, FloatPi + FloatHalfPi);  // Wrap in neg. dir 
 
    // Really large angles -- we'll never see these in the game
@@ -735,7 +760,7 @@ TEST_F(BfTest, HelpItemManagerTests)
    himgr.idle(UI::HelpItemManager::PacedTimerPeriod, game);      // Not exact, just a big chunk of time
    checkQueues(himgr, 0, 0, 1, AddBotsItem); // With no bot, AddBotsItem will be displayed, though not necessarily immediately
 
-   deleteGame(game);
+   delete game;
 }
 
 
@@ -745,7 +770,7 @@ TEST_F(BfTest, ClientGameTests)
 
    // TODO: Add some tests
 
-   deleteGame(game);
+   delete game;
 }
 
 
@@ -786,7 +811,7 @@ TEST_F(BfTest, KillStreakTests)
    // New game has begun... kill streak should be reset to 0
    ASSERT_EQ(0, game->getClientInfo(0)->getKillStreak());
 
-   deleteGame(game);
+   delete game;
 }
 
 
@@ -840,7 +865,7 @@ TEST_F(BfTest, LittleStory)
    }
    ASSERT_TRUE(shipDeleted);     // Ship was killed, and object was cleaned up
 
-   deleteGame(serverGame);
+   delete serverGame;
 }
 
 

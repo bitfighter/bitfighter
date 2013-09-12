@@ -120,7 +120,6 @@ class GameType;
 class BfObject;
 class GameConnection;
 class Ship;
-class GameUserInterface;
 struct UserInterfaceData;
 class WallSegmentManager;
 class Robot;
@@ -252,7 +251,7 @@ protected:
 
    bool mGameSuspended;       // True if we're in "suspended animation" mode
 
-   GameSettings *mSettings;
+   GameSettingsPtr mSettings;
 
    S32 findClientIndex(const StringTableEntry &name);
 
@@ -282,8 +281,8 @@ public:
 
    static md5wrapper md5;
 
-   Game(const Address &theBindAddress, GameSettings *settings);   // Constructor
-   virtual ~Game();                                               // Destructor
+   Game(const Address &theBindAddress, GameSettingsPtr settings);   // Constructor
+   virtual ~Game();                                                 // Destructor
 
    void setActiveTeamManager(TeamManager *teamManager);
 
@@ -429,7 +428,9 @@ public:
    void setGameType(GameType *theGameType);
    void processDeleteList(U32 timeDelta);
 
-   GameSettings *getSettings() const;
+   GameSettings   *getSettings() const;
+   GameSettingsPtr getSettingsPtr() const;
+
 
    bool isOrIsAboutToBeSuspended();
 

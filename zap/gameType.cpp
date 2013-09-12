@@ -1731,7 +1731,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
       if(conn)
       {
          conn->setScopeObject(this);
-         conn->reset();
+         conn->resetConnectionStatus();
       }
    }
 

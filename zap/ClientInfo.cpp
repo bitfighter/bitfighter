@@ -330,6 +330,19 @@ void ClientInfo::setTeamIndex(S32 teamIndex)
 }
 
 
+void ClientInfo::setShowLevelUpMessage(S32 level)
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
+S32 ClientInfo::getShowLevelUpMessage() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+   return NONE;
+}
+
+
 bool ClientInfo::isAuthenticated()
 {
    return mIsAuthenticated;
@@ -597,7 +610,7 @@ void ClientInfo::addDeath()
 // Methods to provide access to mReturnToGameTimer -- this is used on the server to enforce a post /idle delay
 // and used on the client to display the (approximate) time left in that delay.
 U32  ClientInfo::getReturnToGameTime()                  { return mReturnToGameTimer.getCurrent();      }
-void ClientInfo::setReturnToGameTimer(U32 timeDelta)    {        mReturnToGameTimer.reset(timeDelta, mReturnToGameTimer.getPeriod()); }
+void ClientInfo::setReturnToGameTimer(U32 time)         {        mReturnToGameTimer.reset(time, mReturnToGameTimer.getPeriod()); }
 bool ClientInfo::updateReturnToGameTimer(U32 timeDelta) { return mReturnToGameTimer.update(timeDelta); }
 void ClientInfo::resetReturnToGameTimer()               {        mReturnToGameTimer.reset();           }
 
@@ -613,6 +626,8 @@ FullClientInfo::FullClientInfo(Game *game, GameConnection *gameConnection, const
 
    mClientConnection = gameConnection;
    mIsRobot = isRobot;
+
+   mShowLevelUpMessage = NONE;
 }
 
 
@@ -737,6 +752,18 @@ bool FullClientInfo::isEngineeringTeleporter()
 void FullClientInfo::setIsEngineeringTeleporter(bool isEngineeringTeleporter)
 {
    TNLAssert(false, "isEngineeringTeleporter shouldn't be set for this class!");
+}
+
+
+void FullClientInfo::setShowLevelUpMessage(S32 level)
+{
+   mShowLevelUpMessage = level;
+}
+
+
+S32 FullClientInfo::getShowLevelUpMessage() const
+{
+   return mShowLevelUpMessage;
 }
 
 

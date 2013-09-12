@@ -55,68 +55,58 @@ namespace Zap
 {
 
 
-extern ServerGame *gServerGame;
 extern Vector<ClientGame *> gClientGames;
 
 // Host a game (and maybe even play a bit, too!)
-void initHosting(GameSettings *settings, const Vector<string> &levelList, bool testMode, bool dedicatedServer)
+ServerGame *initHosting(GameSettingsPtr settings, const Vector<string> &levelList, bool testMode, bool dedicatedServer)
 {
-   TNLAssert(!gServerGame, "already exists!");
-   if(gServerGame)
-   {
-      delete gServerGame;
-      gServerGame = NULL;
-   }
-
    Address address(IPProtocol, Address::Any, GameSettings::DEFAULT_GAME_PORT);   // Equivalent to ("IP:Any:28000")
    address.set(settings->getHostAddress());                          // May overwrite parts of address, depending on what getHostAddress contains
 
-   gServerGame = new ServerGame(address, settings, testMode, dedicatedServer);
+   ServerGame *serverGame = new ServerGame(address, settings, testMode, dedicatedServer);
 
-   gServerGame->setReadyToConnectToMaster(true);
+   serverGame->setReadyToConnectToMaster(true);
    Game::seedRandomNumberGenerator(settings->getHostName());
 
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
    if(!testMode)
    {
       logprintf(LogConsumer::ServerFilter, "----------\nBitfighter server started [%s]", getTimeStamp().c_str());
-      logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", gServerGame->getSettings()->getHostName().c_str(), 
-                                                                            gServerGame->getSettings()->getHostDescr().c_str());
+      logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", serverGame->getSettings()->getHostName().c_str(), 
+                                                                            serverGame->getSettings()->getHostDescr().c_str());
 
       logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelList.size());
    }
 
-   if(levelList.size())
+   if(levelList.size() == 0)     // No levels!
    {
-      gServerGame->buildBasicLevelInfoList(levelList);     // Take levels in gLevelList and create a set of empty levelInfo records
-      gServerGame->resetLevelLoadIndex();
+      abortHosting_noLevels(serverGame);
+      delete serverGame;
+      return NULL;
+   }
+
+   serverGame->buildBasicLevelInfoList(levelList);     // Take levels in levelList and create a set of empty levelInfo records
+   serverGame->resetLevelLoadIndex();
 
 #ifndef ZAP_DEDICATED
-      for(S32 i = 0; i < gClientGames.size(); i++)
-         gClientGames[i]->getUIManager()->enableLevelLoadDisplay();
+   for(S32 i = 0; i < gClientGames.size(); i++)
+      gClientGames[i]->getUIManager()->enableLevelLoadDisplay();
 #endif
-   }
-   else  // No levels!
-   {
-      abortHosting_noLevels();
-      return;
-   }
+   
+   serverGame->hostingModePhase = ServerGame::LoadingLevels;
 
-   // Do this even if there are no levels, so hostGame error handling will be triggered
-   gServerGame->hostingModePhase = ServerGame::LoadingLevels;
+   return serverGame;
 }
 
 
-void shutdownBitfighter();    // Forward declaration
+void shutdownBitfighter(ServerGame *serverGame);    // Forward declaration
 
 // If we can't load any levels, here's the plan...
-void abortHosting_noLevels()
+void abortHosting_noLevels(ServerGame *serverGame)
 {
-   TNLAssert(gServerGame, "gServerGame should always exist here!");
-
-   if(gServerGame->isDedicated())  
+   if(serverGame->isDedicated())  
    {
-      FolderManager *folderManager = gServerGame->getSettings()->getFolderManager();
+      FolderManager *folderManager = serverGame->getSettings()->getFolderManager();
       const char *levelDir = folderManager->levelDir.c_str();
 
       logprintf(LogConsumer::LogError,     "No levels found in folder %s.  Cannot host a game.", levelDir);
@@ -125,13 +115,13 @@ void abortHosting_noLevels()
 
 
 #ifndef ZAP_DEDICATED
-   for(S32 i = 0; i < gClientGames.size(); i++)
+   for(S32 i = 0; i < gClientGames.size(); i++)    // <<=== Should probably only display this message on the clientGame that initiated hosting
    {
       UIManager *uiManager = gClientGames[i]->getUIManager();
 
       ErrorMessageUserInterface *errUI = uiManager->getUI<ErrorMessageUserInterface>();
 
-      FolderManager *folderManager = gServerGame->getSettings()->getFolderManager();
+      FolderManager *folderManager = serverGame->getSettings()->getFolderManager();
       string levelDir = folderManager->levelDir;
 
       errUI->reset();
@@ -149,13 +139,10 @@ void abortHosting_noLevels()
    }
 #endif
 
-   delete gServerGame;  // need gServerGame for above message
-   gServerGame = NULL;
-
 #ifndef ZAP_DEDICATED
    if(gClientGames.size() == 0)
 #endif
-      shutdownBitfighter();      // Quit in an orderly fashion
+      shutdownBitfighter(serverGame);      // Quit in an orderly fashion
 }
 
 ////////////////////////////////////////

@@ -235,7 +235,8 @@ public:
    template <class T>    
    void setVal(const string &name, const T &value)
    {
-      AbstractSetting *absSet = mSettings[mKeyLookup.find(name)->second];
+      S32 key = mKeyLookup.find(name)->second;
+      AbstractSetting *absSet = mSettings[key];
       TNLAssert(dynamic_cast<Setting<T> *>(absSet), "Expected setting!");
 
       static_cast<Setting<T> *>(absSet)->setValue(value);

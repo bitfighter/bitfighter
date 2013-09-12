@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _GAMECONNECTION_H_
-#define _GAMECONNECTION_H_
+#ifndef _GAME_CONNECTION_H_
+#define _GAME_CONNECTION_H_
 
 
 #include "ChatCheck.h"                 // Parent class
@@ -43,7 +43,6 @@
 #include "tnlNetConnection.h"
 
 #include <time.h>
-#include "boost/smart_ptr/shared_ptr.hpp"
 
 
 using namespace TNL;
@@ -52,15 +51,11 @@ using namespace std;
 namespace Zap
 {
 
-////////////////////////////////////////
-////////////////////////////////////////
-
 class ClientGame;
 class ServerGame;
 struct LevelInfo;
-class GameSettings;
 class LuaPlayerInfo;
-
+class GameSettings;
 
 class GameConnection: public ControlObjectConnection, public DataSendable, public ChatCheck
 {
@@ -184,7 +179,7 @@ public:
 
    string getServerName();
 
-   void reset();        // Clears/initializes some things between levels
+   void resetConnectionStatus();    // Clears/initializes some things between levels
 
    void submitPassword(const char *password);
 
@@ -220,7 +215,7 @@ public:
    TNL_DECLARE_RPC(s2cPlayerSpawnDelayed, (U8 waitTimeInOneTenthsSeconds));
    TNL_DECLARE_RPC(s2cPlayerSpawnUndelayed, ());
    TNL_DECLARE_RPC(c2sPlayerSpawnUndelayed, ());
-   TNL_DECLARE_RPC(c2sPlayerRequestSpawnDelayed, ());
+   TNL_DECLARE_RPC(c2sPlayerRequestSpawnDelayed, (bool incursPenalty));
 
 
    // Player using engineer module

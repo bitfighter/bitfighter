@@ -444,6 +444,7 @@ bool GameSettings::getQueryServerSortAscending() { return mIniSettings.queryServ
 
 
 // User has entered name and password, and has clicked Ok.  That's the only way to get here.
+// Do not call this function directly -- you probably want ClientGame::userEnteredLoginCredentials(), which will call this.
 void GameSettings::setLoginCredentials(const string &name, const string &password, bool save)
 {
    mPlayerName = name;

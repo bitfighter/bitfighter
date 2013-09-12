@@ -16,8 +16,9 @@ class ServerGameTest: public testing::Test
 TEST_F(ServerGameTest, processEmptyLevelLine)
 {
    Address addr;
-   GameSettings settings;
-   ServerGame g(addr, &settings, false, false);
+   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+
+   ServerGame g(addr, settings, false, false);
    GameType gt;
    gt.addToGame(&g, g.getGameObjDatabase());
    g.loadLevelFromString(g.toLevelCode() + "\r\n\r\n", g.getGameObjDatabase());

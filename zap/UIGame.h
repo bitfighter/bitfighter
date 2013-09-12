@@ -334,6 +334,7 @@ public:
    void renderShutdownMessage() const;    // Render an alert if server is shutting down
    void renderLostConnectionMessage() const; 
    void renderSuspendedMessage() const;
+   void renderLevelUpMessage(S32 newLevel) const;
    void renderObjectIds() const;          // Render server-side object ids on client
    void renderLevelListDisplayer() const;
 

@@ -48,8 +48,8 @@ namespace Zap
 
 static bool instantiated;     // Just a little something to keep us from creating multiple ServerGames...
 
-// Constructor
-ServerGame::ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated) : 
+// Constructor -- be sure to see Game constructor too!  Lots going on there!
+ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, bool testMode, bool dedicated) : 
       Game(address, settings)
 {
    //TNLAssert(settings, "Must have valid settings to create a ClientGame!");

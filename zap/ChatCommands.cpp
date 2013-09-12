@@ -435,7 +435,7 @@ void idleHandler(ClientGame *game, const Vector<string> &words)
    if(game->isSpawnDelayed())
       return;
 
-   game->requestSpawnDelayed();
+   game->requestSpawnDelayed(true);
 }
 
 

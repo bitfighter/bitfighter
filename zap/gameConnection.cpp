@@ -110,7 +110,7 @@ void GameConnection::initialize()
 
    mVoiceChatEnabled = true;
 
-   reset();
+   resetConnectionStatus();
 }
 
 // Destructor
@@ -159,7 +159,7 @@ void GameConnection::setClientGame(ClientGame *game)
 
 
 // Clears/initializes some things between levels
-void GameConnection::reset()
+void GameConnection::resetConnectionStatus()
 {  
    mReadyForRegularGhosts = false;
    mWantsScoreboardUpdates = false;
@@ -203,6 +203,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnUndelayed, (), (), NetClassGroup
 {
 #ifndef ZAP_DEDICATED
    getClientInfo()->setSpawnDelayed(false);
+   getClientInfo()->setShowLevelUpMessage(NONE);
    mClientGame->setSpawnDelayed(false);
 #endif
 }
@@ -238,7 +239,7 @@ void GameConnection::undelaySpawn()
    {
       clientInfo->setSpawnDelayed(false);       // ClientInfo here is a FullClientInfo
 
-      mServerGame->unsuspendGame(false);        // Does nothing if game isn't suspended
+      //mServerGame->unsuspendGame(false);        // Does nothing if game isn't suspended  <== already unsuspended above!
       mServerGame->getGameType()->spawnShip(clientInfo);
    }
 }
@@ -252,10 +253,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroup
 
 
 // Client requests that the server to spawn delay them... only called from /idle command
-TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
+TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (bool incursPenalty), (incursPenalty), 
+                  NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
    ClientInfo *clientInfo = getClientInfo();
-   
    
    // If we've just died, this will keep a second copy of ourselves from appearing
    clientInfo->respawnTimer.clear();
@@ -264,7 +265,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (), (), NetClass
    Ship *ship = clientInfo->getShip();
    if(ship)
    {
-      static_cast<FullClientInfo *>(clientInfo)->resetReturnToGameTimer();   // Client will have to wait to rejoin the game
+      if(incursPenalty)
+         static_cast<FullClientInfo *>(clientInfo)->resetReturnToGameTimer();   // Client will have to wait to rejoin the game
+
       ship->kill();
    }
 
@@ -2040,7 +2043,7 @@ void GameConnection::onEndGhosting()
    TNLAssert(isConnectionToServer() && mClientGame, "when else is this called?");
    
    Parent::onEndGhosting();
-   mClientGame->onGameReallyAndTrullyOver();
+   mClientGame->onGameReallyAndTrulyOver();
 #endif
 }
 

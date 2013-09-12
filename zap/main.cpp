@@ -217,7 +217,7 @@ void hostGame()
 {
    if(!gServerGame->startHosting())
    {
-      abortHosting_noLevels();
+      abortHosting_noLevels(gServerGame);
       return;
    }
 
@@ -284,7 +284,7 @@ void display()
 
 #endif // ZAP_DEDICATED
 
-void shutdownBitfighter();    // Forward declaration
+void shutdownBitfighter(ServerGame *serverGame);    // Forward declaration
 
 void gameIdle(U32 integerTime)
 {
@@ -348,14 +348,14 @@ void gameIdle(U32 integerTime)
             for(S32 i = 0; i < gClientGames.size(); i++)
                gClientGames[i]->closeConnectionToGameServer();    // ...disconnect any local clients
 
-           if(gClientGames.size() > 0)    // If there are any clients running...
+           if(gClientGames.size() > 0)          // If there are any clients running...
             {
-               delete gServerGame;        // ...purge gServerGame (leaving the clients running)...
+               delete gServerGame;              // ...purge gServerGame (leaving the clients running)...
                gServerGame = NULL;
             }
-            else                          // ...otherwise...     
+            else                                // ...otherwise...     
 #endif
-               shutdownBitfighter();      // ...shut down the whole shebang!
+               shutdownBitfighter(gServerGame); // ...shut down the whole shebang!
          }
       }
    }
@@ -466,7 +466,7 @@ void idle()
       TNLAssert(gClientGames.size() > 0, "Why are we here if there is no client game??");
 
       if(event.type == SDL_QUIT) // Handle quit here
-         shutdownBitfighter();
+         shutdownBitfighter(gServerGame);
 
       // Pass the event to all clientGames..
       for(S32 i = 0; i < gClientGames.size(); i++)
@@ -529,7 +529,7 @@ FileLogConsumer gServerLog;            // We'll apply a filter later on, in main
 // 6) Click the X on the window to close the game window   <=== NOTE: This scenario fails for me when running a dedicated server on windows.
 // and one illigitimate way
 // 7) Lua panics!!
-void shutdownBitfighter()
+void shutdownBitfighter(ServerGame *serverGame)
 {
    GameSettings *settings = NULL;
 
@@ -537,10 +537,10 @@ void shutdownBitfighter()
 #ifndef ZAP_DEDICATED
    if(gClientGames.size() == 0)
 #endif
-      if(!gServerGame)
+      if(!serverGame)
          exitToOs();
 
-// Grab a pointer to settings wherever we can.  Note that gClientGame and gServerGame refer to the same object.
+// Grab a pointer to settings wherever we can.  Note that gClientGame and serverGame refer to the same settings object.
 #ifndef ZAP_DEDICATED
    if(gClientGames.size() > 0)
       settings = gClientGames[0]->getSettings();
@@ -549,11 +549,11 @@ void shutdownBitfighter()
 
 #endif
 
-   if(gServerGame)
+   if(serverGame)
    {
-      settings = gServerGame->getSettings();
-      delete gServerGame;     // Destructor terminates connection to master
-      gServerGame = NULL;
+      settings = serverGame->getSettings();
+      delete serverGame;     // Destructor terminates connection to master
+      // gServerGame = NULL;  <== does nothing, really, as nothing below here refers to gServerGame...
    }
 
 
@@ -621,13 +621,14 @@ void setupLogging(IniSettings *iniSettings)
 }
 
 
-void createClientGame(GameSettings *settings)
+void createClientGame(GameSettingsPtr settings)
 {
 #ifndef ZAP_DEDICATED
    if(!settings->isDedicatedServer())                      // Create ClientGame object
    {
       // Create a new client, and let the system figure out IP address and assign a port
-      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, settings->getIniSettings()->clientPortNumber), settings);  
+      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, settings->getIniSettings()->clientPortNumber), 
+                                              settings, new UIManager());    // ClientGame destructor will clean up UIManager
 
        // Put any saved filename into the editor file entry thingy
       clientGame->getUIManager()->getUI<LevelNameEntryUserInterface>()->setString(settings->getIniSettings()->lastEditorName);
@@ -1109,7 +1110,7 @@ int main(int argc, char **argv)
    signal(SIGSEGV, exceptionHandler);   // install our handler
 #endif
 
-   GameSettings *settings = new GameSettings(); // Will be deleted in shutdownBitfighter()
+   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());      // Autodeleted
 
    // Put all cmd args into a Vector for easier processing
    Vector<string> argVector(argc - 1);
@@ -1155,20 +1156,20 @@ int main(int argc, char **argv)
 
    // Load our primary settings file
    GameSettings::iniFile.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
-   loadSettingsFromINI(&GameSettings::iniFile, settings);
+   loadSettingsFromINI(&GameSettings::iniFile, settings.get());
 
    // Load the user settings file
    GameSettings::userPrefs.SetPath(joindir(folderManager->iniDir, "usersettings.ini"));
-   IniSettings::loadUserSettingsFromINI(&GameSettings::userPrefs, settings);
+   IniSettings::loadUserSettingsFromINI(&GameSettings::userPrefs, settings.get());
 
    // Time to check if there is an online update (for any relevant platforms)
    if(!isStandalone)
-      checkOnlineUpdate(settings);
+      checkOnlineUpdate(settings.get());
 
    // Make any adjustments needed when we run for the first time after an upgrade
    // Skip if this is the first run
    if(!isFirstLaunchEver)
-      checkIfThisIsAnUpdate(settings, isStandalone);
+      checkIfThisIsAnUpdate(settings.get(), isStandalone);
 
    // Load Lua stuff
    LuaScriptRunner::setScriptingDir(folderManager->luaDir);    // Get this out of the way, shall we?
@@ -1192,17 +1193,18 @@ int main(int argc, char **argv)
 
       InputCodeManager::resetStates();    // Reset keyboard state mapping to show no keys depressed
 
-      Joystick::loadJoystickPresets(settings);     // Load joystick presets from INI first
-      SDL_Init(0);                                 // Allows Joystick and VideoSystem to work.
-      Joystick::initJoystick(settings);            // Initialize joystick system
-      Joystick::enableJoystick(settings, false);   // Initialize joystick system
+      Joystick::loadJoystickPresets(settings.get());     // Load joystick presets from INI first
+      SDL_Init(0);                                       // Allows Joystick and VideoSystem to work.
+      Joystick::initJoystick(settings.get());            // Initialize joystick system
+      Joystick::enableJoystick(settings.get(), false);   
 
 #ifdef TNL_OS_MAC_OSX
       // On OS X, make sure we're in the right directory (again)
       moveToAppPath();
 #endif
 
-      VideoSystem::init();                // Initialize video and window system
+      if(!VideoSystem::init())                // Initialize video and window system
+         shutdownBitfighter(gServerGame);
 
 #if SDL_VERSION_ATLEAST(2,0,0)
       SDL_StartTextInput();
@@ -1214,7 +1216,7 @@ int main(int argc, char **argv)
       Cursor::init();
 
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
-      VideoSystem::actualizeScreenMode(settings, false, false);            // Create a display window
+      VideoSystem::actualizeScreenMode(settings.get(), false, false);      // Create a display window
 
       // Instantiate ClietGame -- this should be done after actualizeScreenMode() because the client game in turn instantiates some of the
       // user interface code which triggers a long series of cascading events culminating in something somewhere determining the width

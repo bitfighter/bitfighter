@@ -102,11 +102,8 @@ using namespace CmdLineParams;
 namespace Zap
 {
 
-class GameSettings;
 class BanList;
-
-////////////////////////////////////////
-////////////////////////////////////////
+struct PluginBinding;
 
 
 enum SettingSource {
@@ -115,8 +112,6 @@ enum SettingSource {
    DEFAULT
 };
 
-
-struct PluginBinding;
 
 class GameSettings
 {
@@ -208,6 +203,9 @@ public:
    Vector<string> *getLevelSkipList();
    Vector<string> *getSpecifiedLevels();
 
+   void setLoginCredentials(const string &name, const string &password, bool save);
+
+
    bool getSpecified(ParamId paramId);                      // Returns true if parameter was present, false if not
 
    // Variations on generating a list of levels
@@ -258,7 +256,6 @@ public:
    string getPlayerName();
 
    void updatePlayerName(const string &name);
-   void setLoginCredentials(const string &name, const string &password, bool save);
 
    void setAutologin(bool autologin);
 
@@ -308,6 +305,9 @@ public:
    const UserSettings *addUserSettings(const UserSettings &userSettings);     // Returns pointer to inserted item
    const UserSettings *getUserSettings(const string &name);
 };
+
+
+typedef boost::shared_ptr<GameSettings> GameSettingsPtr;
 
 
 };
