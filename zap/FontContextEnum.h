@@ -65,6 +65,7 @@ namespace Zap
       FontTenby5,
       FontGlyphs,
       KeyCaps,
+      FontPlay,
 
       FontCount,
       FirstExternalFont = FontDroidSansMono

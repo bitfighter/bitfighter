@@ -159,6 +159,7 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       fontList[KeyCaps]            = new BfFont(KeyCaps,           "tenbyfive.ttf",       settings);     // DavysBigKeyCaps2
       fontList[FontDroidSansMono]  = new BfFont(FontDroidSansMono, "DroidSansMono.ttf",   settings);
       fontList[FontGlyphs]         = new BfFont(FontGlyphs,        "webhostinghub-glyphs.ttf", settings);
+      fontList[FontPlay]           = new BfFont(FontPlay,          "Play-Regular.ttf",    settings);
    }
 
    // set texture blending function
@@ -218,8 +219,8 @@ void FontManager::setFontContext(FontContext fontContext)
          return;
       
       case HelpContext:
-         //setFont(FontRoman);
-         //return;
+         setFont(FontPlay);
+         return;
 
       case MotdContext:
       case ScoreboardContext:
@@ -242,7 +243,6 @@ void FontManager::setFontContext(FontContext fontContext)
 
       case ChatMessageContext:
       case InputContext:
-      case ConsoleContext:
          setFont(FontDroidSansMono);
          return;
 
