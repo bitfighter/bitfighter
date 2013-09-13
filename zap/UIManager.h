@@ -47,6 +47,7 @@
 #include "tnlVector.h"
 
 #include <memory>
+#include <typeinfo>
 
 using namespace std;
 using namespace TNL;
@@ -63,10 +64,10 @@ class GameSettings;
 class UIManager
 {
 private:
-   typedef map<const char *, UserInterface *> UiMapType;
+   typedef map<const type_info *, UserInterface *> UiMapType;
    typedef UiMapType::iterator UiIterator;
 
-   map<const char *, UserInterface *> mUis;
+   UiMapType mUis;
 
 protected:
    ClientGame *mGame;
@@ -81,14 +82,13 @@ public:
    template <typename T>
    T *getUI()
    {
-      //static T ui(mGame);        // Uses lazy initialization
-      static const char *type = typeid(T).name();
+      static const std::type_info *typeinfo = &typeid(T);
 
-      T *ui = static_cast<T *>(mUis[type]);
+      T *ui = static_cast<T *>(mUis[typeinfo]);
       if(!ui)
          ui = new T(mGame);
 
-      mUis[type] = ui;
+      mUis[typeinfo] = ui;
 
       return ui;
    }
