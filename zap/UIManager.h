@@ -85,10 +85,13 @@ public:
       static const std::type_info *typeinfo = &typeid(T);
 
       T *ui = static_cast<T *>(mUis[typeinfo]);
-      if(!ui)
-         ui = new T(mGame);
 
-      mUis[typeinfo] = ui;
+      // Lazily initialize if UI has not yet been instantiated; store for later use
+      if(!ui)  
+      {
+         ui = new T(mGame);
+         mUis[typeinfo] = ui;
+      }
 
       return ui;
    }
