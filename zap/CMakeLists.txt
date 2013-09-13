@@ -264,6 +264,16 @@ if(SDL_FOUND OR SDL2_FOUND)
 
 	# Where to put the executable
 	set_target_properties(bitfighter PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe)
+	
+	if(USE_GLES AND SDL2_FOUND)
+		message(STATUS "Forcing usage of OpenGL ES")
+
+		get_property(CLIENT_DEFS TARGET bitfighter PROPERTY COMPILE_DEFINITIONS)
+		set_target_properties(bitfighter
+			PROPERTIES
+			COMPILE_DEFINITIONS "${CLIENT_DEFS};BF_USE_GLES"
+		)
+	endif()
 endif()
 
 
