@@ -110,12 +110,6 @@ void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 }
 
 
-void drawString_fixed(S32 x, S32 y, S32 size, const char *string)
-{
-   drawAngleString(F32(x), F32(y), F32(size), 0, string);
-}
-
-
 // Broken!
 void drawString(S32 x, S32 y, S32 size, const char *string)
 {

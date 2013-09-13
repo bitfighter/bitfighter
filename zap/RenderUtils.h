@@ -101,10 +101,6 @@ void drawStringf(S32 x, S32 y, S32 size, const char *format, ...);
 void drawStringf(F32 x, F32 y, F32 size, const char *format, ...);
 void drawStringf(F32 x, F32 y, S32 size, const char *format, ...);
 
-void drawString_fixed(S32 x, S32 y, S32 size, const char *string);
-
-
-
 // Draw strings centered at point
 S32 drawStringfc(F32 x, F32 y, F32 size, const char *format, ...);
 S32 drawStringc (F32 x, F32 y, F32 size, const char *string);
@@ -150,6 +146,13 @@ template <typename T, typename U>
 F32 drawCenteredString(T y, U size, const char *str)
 {
    return drawCenteredString((F32)gScreenInfo.getGameCanvasWidth() / 2.0f, (F32)y, (F32)size, str);
+}
+
+// Draw text at x,y --> fixes ye olde timee string rendering bug
+template <typename T, typename U, typename V>
+void drawString_fixed(T x, U y, V size, const char *string)
+{
+   drawAngleString(F32(x), F32(y), F32(size), 0, string);
 }
 
 void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const Color &bodyColor, const Color &keyColor);
