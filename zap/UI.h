@@ -30,7 +30,6 @@
 #  error "UI.h shouldn't be included in dedicated build"
 #endif
 
-//#include "UIManager.h"
 #include "lineEditor.h"
 #include "InputCode.h"
 
@@ -67,8 +66,6 @@ class UserInterface
    friend class UIManager;    // Give UIManager access to private and protected members
 
 private:
-   //UIID mInternalMenuID;                     // Unique interface ID
-
    static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
    static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
 
@@ -76,9 +73,8 @@ private:
 
    U32 mTimeSinceLastInput;
 
-
 protected:
-   bool mDisableShipKeyboardInput;           // Disable ship movement while user is in menus
+   bool mDisableShipKeyboardInput;                 // Disable ship movement while user is in menus
 
 public:
    explicit UserInterface(ClientGame *game);       // Constructor
@@ -122,7 +118,7 @@ public:
 
    virtual bool usesEditorScreenMode();   // Returns true if the UI attempts to use entire screen like editor, false otherwise
 
-   void renderConsole()const ;            // Render game console
+   void renderConsole()const;             // Render game console
    virtual void renderMasterStatus();     // Render master server connection status
 
    // Helpers to simplify dealing with key bindings
@@ -130,7 +126,6 @@ public:
    void setInputCode(GameSettings *settings, InputCodeManager::BindingName binding, InputCode inputCode);
    bool checkInputCode(InputCodeManager::BindingName, InputCode inputCode);
    const char *getInputCodeString(GameSettings *settings, InputCodeManager::BindingName binding);
-
 
    // Input event handlers
    virtual bool onKeyDown(InputCode inputCode);
