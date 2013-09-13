@@ -932,7 +932,7 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
    {
       WeaponInfo weaponInfo = WeaponInfo::getWeaponInfo(WeaponType(i));
 
-      lua_pushinteger(L, i);                       // table, index
+      lua_pushinteger(L, i + ModuleCount);         // table, index
       lua_newtable(L);                             // table, index, table
 
       lua_pushstring(L, "name");
