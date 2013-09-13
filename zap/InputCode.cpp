@@ -53,6 +53,34 @@ static bool inputCodeIsDown[MAX_INPUT_CODES];
 // Constructor
 BindingSet::BindingSet()
 {
+   // These bindings will be overwritten by config::setDefaultKeyBindings()...
+   // we provide default values here just for the sake of sanity.  And testing.
+   // Also remember that we have multiple BindingSets (one for keyboard, one for
+   // joystick, for example), so these defaults may not even apply in all cases.
+   inputSELWEAP1  = KEY_1;
+   inputSELWEAP2  = KEY_2;
+   inputSELWEAP3  = KEY_3;
+   inputADVWEAP   = KEY_E;
+   inputADVWEAP2  = MOUSE_WHEEL_UP;
+   inputPREVWEAP  = MOUSE_WHEEL_DOWN;
+   inputCMDRMAP   = KEY_C;
+   inputTEAMCHAT  = KEY_T;
+   inputGLOBCHAT  = KEY_G;
+   inputQUICKCHAT = KEY_V;
+   inputCMDCHAT   = KEY_SLASH;
+   inputLOADOUT   = KEY_Z;
+   inputMOD1      = KEY_SPACE;
+   inputMOD2      = MOUSE_RIGHT;
+   inputFIRE      = MOUSE_LEFT;
+   inputDROPITEM  = KEY_B;
+   inputTOGVOICE  = KEY_R;
+   inputUP        = KEY_W;
+   inputDOWN      = KEY_S;
+   inputLEFT      = KEY_A;
+   inputRIGHT     = KEY_D;
+   inputSCRBRD    = KEY_TAB;
+
+   // These are not currently overwridden, so what we set here is used in the game
    keyHELP        = KEY_F1;      // Display help
    keyOUTGAMECHAT = KEY_F5;      // Out of game chat
    keyFPS         = KEY_F6;      // Show FPS display
