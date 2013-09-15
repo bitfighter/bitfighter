@@ -34,7 +34,7 @@ string getLevelCode1()
       "LevelDescription This is for testing\n"
       "LevelCredits watusimoto\n"
       "GridSize 255\n"
-      "Team Blue 0 0 0.75\n"
+      "Team Bluey 0 0 0.75\n"
       "Specials\n"
       "MinPlayers\n"
       "MaxPlayers\n"
