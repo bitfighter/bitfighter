@@ -19,8 +19,9 @@ TEST_F(LevelLoaderTest, longLine)
 
    Address addr;
    GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+   LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(""));
 
-   ServerGame serverGame(addr, settings, false, false);
+   ServerGame serverGame(addr, settings, levelSource, false, false);
    GridDatabase *db = serverGame.getGameObjDatabase();
 
    GameType gt;

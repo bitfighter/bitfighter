@@ -27,6 +27,8 @@
 
 #include "../zap/stringUtils.h"
 
+#include "LevelFilesForTesting.h"      // Contains sample levelcode for testing purposes
+
 #include "tnlNetObject.h"
 #include "tnlGhostConnection.h"
 #include "tnlPlatform.h"
@@ -335,7 +337,9 @@ ServerGame *newServerGame()
 {
    Address addr;
    GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-   ServerGame *game = new ServerGame(addr, settings, false, false);
+   LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(""));
+
+   ServerGame *game = new ServerGame(addr, settings, levelSource, false, false);
    game->addTeam(new Team());    // Team will be cleaned up when game is deleted
 
    return game;
@@ -358,21 +362,14 @@ TEST_F(BfTest, ClientServerInteraction)
    TNLAssert(settings->getLevelList().size() > 0, 
          "No levels found.  In VC++, you might need to set your working dir for the test project to \"$(TargetDir)\"");
 
-   ServerGame *serverGame = initHosting(settings, settings->getLevelList(), true, false);
+   string code = getLevelCode1();
+   LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(code));
+   ServerGame *serverGame = initHosting(settings, levelSource, true, false);
 
 
    GameType *gt = new GameType();    // Cleaned up by database
    gt->addToGame(serverGame, serverGame->getGameObjDatabase());
 
-
-
-   Team *team = new Team;           // Will be deleted by TeamManager
-
-   team->setName("Test");
-   //team->setColor(r,g,b);
-   //team->setScore(score);
-
-   serverGame->addTeam(team);
 
    bool ok = serverGame->startHosting();     // This will load levels and wipe out any teams
    clientGame->joinLocalGame(serverGame->getNetInterface());
@@ -819,7 +816,7 @@ TEST_F(BfTest, KillStreakTests)
    LevelInfo levelInfo("Level", BitmatchGame);     // Need a levelInfo for when we change levels
 
    game->addClient(ci);
-   game->addLevelInfo(levelInfo);
+   game->addLevel(levelInfo);
    
    game->setGameTime(1.0f / 60.0f); // 1 second, in minutes
 

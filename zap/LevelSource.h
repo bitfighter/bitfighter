@@ -96,7 +96,8 @@ public:
    GameTypeId getLevelType(S32 index);
 
    virtual bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo) = 0;
-   virtual bool populateLevelInfoFromSource(const string &sourceName, S32 levelInfoIndex) = 0;
+
+   bool populateLevelInfoFromSource(const string &sourceName, S32 levelInfoIndex);
 
    static Vector<string> findAllLevelFilesInFolder(const string &levelDir);
    static void getLevelInfoFromCodeChunk(char *chunk, S32 size, LevelInfo &levelInfo);     // Populates levelInfo
@@ -111,6 +112,8 @@ struct FolderManager;
 
 class FolderLevelSource : public LevelSource
 {
+   typedef LevelSource Parent;
+
 public:
    FolderLevelSource(const Vector<string> &levelList, const string &folder);  // Constructor
    virtual ~FolderLevelSource();                                              // Destructor
@@ -118,8 +121,31 @@ public:
    bool loadLevels(FolderManager *folderManager);
 
    bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
-   bool populateLevelInfoFromSource(const string &fullFilename, S32 levelInfoIndex);
 };
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// This LevelSource only has one level, whose code is stored in mLevelCode
+class StringLevelSource : public LevelSource
+{
+   typedef LevelSource Parent;
+
+private:
+   string mLevelCode;
+
+public:
+   StringLevelSource(const string &levelCode);     // Constructor
+   virtual ~StringLevelSource();                   // Destructor
+
+   bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 typedef boost::shared_ptr<LevelSource> LevelSourcePtr;
 

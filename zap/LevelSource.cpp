@@ -262,10 +262,16 @@ Vector<string> LevelSource::findAllLevelFilesInFolder(const string &levelDir)
 }
 
 
+bool LevelSource::populateLevelInfoFromSource(const string &fullFilename, S32 index)
+{
+   return populateLevelInfoFromSource(fullFilename, mLevelInfos[index]);
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
+// Constructor -- pass in a list fo level names and a folder; create LevelInfos for each
 FolderLevelSource::FolderLevelSource(const Vector<string> &levelList, const string &folder)
 {
    for(S32 i = 0; i < levelList.size(); i++)
@@ -289,7 +295,7 @@ bool FolderLevelSource::loadLevels(FolderManager *folderManager)
    {
       string filename = folderManager->findLevelFile(mLevelInfos[i].folder, mLevelInfos[i].filename);
 
-      if(populateLevelInfoFromSource(filename, i))
+      if(Parent::populateLevelInfoFromSource(filename, i))
          anyLoaded = true;
       else
       {
@@ -299,12 +305,6 @@ bool FolderLevelSource::loadLevels(FolderManager *folderManager)
    }
 
    return anyLoaded;
-}
-
-
-bool FolderLevelSource::populateLevelInfoFromSource(const string &fullFilename, S32 index)
-{
-   return populateLevelInfoFromSource(fullFilename, mLevelInfos[index]);
 }
 
 
@@ -334,6 +334,36 @@ bool FolderLevelSource::populateLevelInfoFromSource(const string &fullFilename, 
    }
 }
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+StringLevelSource::StringLevelSource(const string &levelCode)
+{
+   mLevelCode = levelCode;
+
+   LevelInfo levelInfo;
+   mLevelInfos.push_back(levelInfo);
+}
+
+
+// Destructor
+StringLevelSource::~StringLevelSource()
+{
+   // Do nothing
+}
+
+
+bool StringLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
+{
+   char chunk[1024 * 4];
+
+   strncpy(chunk, mLevelCode.c_str(), sizeof(chunk));
+   getLevelInfoFromCodeChunk(chunk, strlen(chunk), levelInfo);
+
+   return true;
+}
 
 
 }
