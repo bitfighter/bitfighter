@@ -76,10 +76,10 @@ ServerGame *initHosting(GameSettingsPtr settings, LevelSource *levelSource, bool
       logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", serverGame->getSettings()->getHostName().c_str(), 
                                                                             serverGame->getSettings()->getHostDescr().c_str());
 
-      logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelSource->getLevelListSize());
+      logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelSource->getLevelCount());
    }
 
-   if(levelSource->getLevelListSize() == 0)     // No levels!
+   if(levelSource->getLevelCount() == 0)     // No levels!
    {
       abortHosting_noLevels(serverGame);
       delete serverGame;

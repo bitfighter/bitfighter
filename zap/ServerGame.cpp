@@ -240,7 +240,7 @@ S32 ServerGame::getCurrentLevelIndex()
 
 S32 ServerGame::getLevelCount()
 {
-   return mLevelSource->getLevelListSize();
+   return mLevelSource->getLevelCount();
 }
 
 
@@ -300,7 +300,7 @@ void ServerGame::resetLevelLoadIndex()
 // This is only used while we're building a list of levels to display on the host during loading
 //string ServerGame::getLastLevelLoadName()
 //{
-//   if(mLevelSource->getLevelListSize() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
+//   if(mLevelSource->getLevelCount() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
 //      return "";
 //   else if(mLevelLoadIndex == 0)    // Still not sure when this would happen
 //      return "";
@@ -376,7 +376,7 @@ string ServerGame::loadNextLevelInfo()
    else     // Failed to process level; remove it from the list
       mLevelSource->remove(mLevelLoadIndex);
 
-   if(mLevelLoadIndex == mLevelSource->getLevelListSize())
+   if(mLevelLoadIndex == mLevelSource->getLevelCount())
       hostingModePhase = DoneLoadingLevels;
 
    return levelName;
@@ -722,7 +722,7 @@ static bool checkIfLevelIsOk(bool skipUploads, const LevelInfo &levelInfo, S32 p
 S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
 {
    S32 currentLevelIndex = mCurrentLevelIndex;
-   S32 levelCount = mLevelSource->getLevelListSize();
+   S32 levelCount = mLevelSource->getLevelCount();
    bool skipUploads = getSettings()->getIniSettings()->skipUploads;
 
    if(levelCount == 1)
@@ -1487,7 +1487,7 @@ bool ServerGame::startHosting()
 
    hostingModePhase = Hosting;
 
-   S32 levelCount = mLevelSource->getLevelListSize();
+   S32 levelCount = mLevelSource->getLevelCount();
 
    for(S32 i = 0; i < levelCount; i++)
       logprintf(LogConsumer::ServerFilter, "\t%s [%s]", getLevelNameFromIndex(i).getString(), 
