@@ -294,6 +294,10 @@ public:
    static string getServerPassword(const string &serverName);
    static void deleteServerPassword(const string &serverName);
 
+   bool isLevelOnSkipList(const string &filename) const;
+   void addLevelToSkipList(const string &filename);
+   void saveSkipList() const;
+
    // InputCode related
    InputMode getInputMode();
 

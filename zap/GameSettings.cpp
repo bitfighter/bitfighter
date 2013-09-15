@@ -1209,6 +1209,32 @@ void GameSettings::deleteServerPassword(const string &serverName)
 }
 
 
+bool GameSettings::isLevelOnSkipList(const string &filename) const
+{
+   for(S32 i = 0; i < mLevelSkipList.size(); i++)
+      if(mLevelSkipList[i] == filename)    // Already on our list!
+         return true;
+
+   return false;
+}
+
+
+void GameSettings::addLevelToSkipList(const string &filename)
+{
+   mLevelSkipList.push_back(filename);
+   saveSkipList();
+}
+
+
+// Do we still need to do this at this point?  This will get done when INI is saved through regular channels...
+void GameSettings::saveSkipList() const
+{
+   writeSkipList(&iniFile, &mLevelSkipList);  // Write skipped levels to INI
+   iniFile.WriteFile();                       // Save new INI settings to disk
+}
+
+
+
 InputMode GameSettings::getInputMode()
 {
    return getInputCodeManager()->getInputMode();

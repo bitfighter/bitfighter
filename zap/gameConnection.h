@@ -96,7 +96,6 @@ private:
 
    void markCurrentLevelAsDeleted();
    string undeleteMostRecentlyDeletedLevel();               // Undoes above function
-   void saveSkipList(const Vector<string> *skipList) const; // Helper for above functions
 
 public:
    U16 switchedTeamCount;

@@ -836,15 +836,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 void GameConnection::markCurrentLevelAsDeleted()
 {
    // Avoid duplicates on skip list
-   Vector<string> *skipList = mSettings->getLevelSkipList();
-
-   for(S32 i = 0; i < skipList->size(); i++)
-      if(skipList->get(i) == mServerGame->getCurrentLevelFileName())    // Already on our list!
-         return;
+   if(mSettings->isLevelOnSkipList(mServerGame->getCurrentLevelFileName()))
+      return;
 
    // Add level to our skip list.  Deleting it from the active list of levels is more of a challenge...
-   skipList->push_back(mServerGame->getCurrentLevelFileName());
-   saveSkipList(skipList);
+   mSettings->addLevelToSkipList(mServerGame->getCurrentLevelFileName());
 }
 
 
@@ -857,17 +853,10 @@ string GameConnection::undeleteMostRecentlyDeletedLevel()
 
    string name = skipList->last();
    skipList->erase(skipList->size() - 1);
-   saveSkipList(skipList);
+
+   mSettings->saveSkipList();
 
    return name;
-}
-
-
-// Do we still need to do this at this point?  This will get done when INI is saved through regular channels...
-void GameConnection::saveSkipList(const Vector<string> *skipList) const
-{
-   writeSkipList(&GameSettings::iniFile, skipList);   // Write skipped levels to INI
-   GameSettings::iniFile.WriteFile();                 // Save new INI settings to disk
 }
 
 
