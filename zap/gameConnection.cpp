@@ -295,7 +295,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
       return;
    }
 
-   const char *filename = mServerGame->getCurrentLevelFileName();
+   string filename = mServerGame->getCurrentLevelFileName();
    
    // Initialize on the server to start sending requested file -- will return OK if everything is set up right
    FolderManager *folderManager = mSettings->getFolderManager();
@@ -598,10 +598,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    // Add a message to the server log
    if(type == DeleteLevel)
       logprintf(LogConsumer::ServerFilter, "User [%s] added level [%s] to server skip list", mClientInfo->getName().getString(), 
-                                                mServerGame->getCurrentLevelFileName());
+                                                mServerGame->getCurrentLevelFileName().c_str());
    else if(type == UndeleteLevel)
       logprintf(LogConsumer::ServerFilter, "User [%s] removed level [%s] from the server skip list", mClientInfo->getName().getString(), 
-                                                mServerGame->getCurrentLevelFileName());   
+                                                mServerGame->getCurrentLevelFileName().c_str());   
    else
    {
       // Must be kept aligned with ParamType enum --> move to xmacro?
@@ -835,12 +835,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
 void GameConnection::markCurrentLevelAsDeleted()
 {
+   string filename = mServerGame->getCurrentLevelFileName();
+
    // Avoid duplicates on skip list
-   if(mSettings->isLevelOnSkipList(mServerGame->getCurrentLevelFileName()))
+   if(mSettings->isLevelOnSkipList(filename))
       return;
 
    // Add level to our skip list.  Deleting it from the active list of levels is more of a challenge...
-   mSettings->addLevelToSkipList(mServerGame->getCurrentLevelFileName());
+   mSettings->addLevelToSkipList(filename);
 }
 
 

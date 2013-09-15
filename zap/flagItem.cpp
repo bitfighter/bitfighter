@@ -252,7 +252,7 @@ void FlagItem::sendHome()
    {
       TNLAssert(false, "No flag spawn points!");
       logprintf(LogConsumer::LogError, "LEVEL ERROR!! Level %s has no flag spawn points for team %d\n**Please submit this level to the devs!**", 
-         ((ServerGame *)getGame())->getCurrentLevelFileName(), getTeam());
+         ((ServerGame *)getGame())->getCurrentLevelFileName().c_str(), getTeam());
    }
    else
    {

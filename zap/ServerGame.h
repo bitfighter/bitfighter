@@ -194,7 +194,7 @@ public:
    StringTableEntry getLevelNameFromIndex(S32 indx);
    S32 getAbsoluteLevelIndex(S32 indx);         // Figures out the level index if the input is a relative index
 
-   const char * getCurrentLevelFileName();      // Return filename of level currently in play  
+   string getCurrentLevelFileName();            // Return filename of level currently in play  
    StringTableEntry getCurrentLevelName();      // Return name of level currently in play
    GameTypeId getCurrentLevelType();            // Return type of level currently in play
    StringTableEntry getCurrentLevelTypeName();  // Return name of type of level currently in play

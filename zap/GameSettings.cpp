@@ -1226,6 +1226,18 @@ void GameSettings::addLevelToSkipList(const string &filename)
 }
 
 
+void GameSettings::removeLevelFromSkipList(const string &filename)
+{
+   for(S32 i = 0; i < mLevelSkipList.size(); i++)
+      if(mLevelSkipList[i] == filename)
+      {
+         mLevelSkipList.erase(i);
+         saveSkipList();
+         break;
+      }
+}
+
+
 // Do we still need to do this at this point?  This will get done when INI is saved through regular channels...
 void GameSettings::saveSkipList() const
 {

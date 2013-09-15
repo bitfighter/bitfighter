@@ -296,6 +296,7 @@ public:
 
    bool isLevelOnSkipList(const string &filename) const;
    void addLevelToSkipList(const string &filename);
+   void removeLevelFromSkipList(const string &filename);
    void saveSkipList() const;
 
    // InputCode related
