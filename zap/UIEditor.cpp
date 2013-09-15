@@ -3363,7 +3363,7 @@ BfObject *EditorUserInterface::doMergePolygons(BfObject *firstItem, S32 firstIte
 
       // Add the new points
       for(S32 i = 0; i < outputPolygons[0].size(); i++)
-         ok &= firstItem->addVert(outputPolygons[0][i]);    // Will return false if polygon overflows
+         ok &= firstItem->addVert(outputPolygons[0][i], true);
 
       if(ok)
       {

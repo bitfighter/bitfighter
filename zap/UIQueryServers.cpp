@@ -862,10 +862,11 @@ void QueryServersUserInterface::renderTopBanner()
    };
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
-   glColor(Colors::white);
+   glColor(Colors::green);
    drawCenteredString(vertMargin + 12, 24, "BITFIGHTER GAME LOBBY");
 
    const S32 FONT_SIZE = 12;
+   glColor(Colors::white);
    drawStringf(horizMargin, vertMargin, FONT_SIZE, "SERVERS: %d", servers.size());
    drawStringfr(canvasWidth - horizMargin, vertMargin, FONT_SIZE, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
 }

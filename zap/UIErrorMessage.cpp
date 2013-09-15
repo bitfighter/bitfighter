@@ -101,7 +101,7 @@ void AbstractMessageUserInterface::render()
 {
    if(getUIManager()->getPrevUI() != this)
       getUIManager()->renderPrevUI(this);
-   
+
    if(mPresentationId == 0)      // Standard presentation
       renderMessageBox(mTitle, mInstr, mMessage, MAX_LINES);
    else if(mPresentationId == 1)

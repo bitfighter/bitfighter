@@ -772,7 +772,7 @@ void InstructionsUserInterface::renderModulesPage()
 const char *gGameObjectInfo[] = {
    /* 00 */   "Phaser",  "The default weapon",
    /* 01 */   "Bouncer", "Bounces off walls",
-   /* 03 */   "Triple",  "Fires three diverging shots",
+   /* 02 */   "Triple",  "Fires three diverging shots",
    /* 03 */   "Burst",   "Explosive projectile",
    /* 04 */   "Seeker",  "Homing projectile",
    /* 05 */   "", "",
@@ -795,13 +795,14 @@ const char *gGameObjectInfo[] = {
    /* 19 */   "Flag",         "Objective item in some game types",
    /* 20 */   "Loadout Zone", "Updates ship configuration",
    /* 21 */   "Nexus",        "Bring flags here in Nexus game",
-   /* 22 */   "Asteroid",     "Silent but deadly",
-   /* 23 */   "GoFast",       "Makes ship go fast",
+   /* 22 */   "Goal Zone",    "Put flags and Soccer balls here",
+   /* 23 */   "Asteroid",     "Silent but deadly",
 
    /* 24 */   "Test Item",     "Bouncy ball",
    /* 25 */   "Resource Item", "Use with engineer module",
    /* 26 */   "Soccer Ball",   "Push into enemy goal in Soccer game",
-   /* 27 */   "Core",          "Kill the enemy's; defend yours OR DIE!"
+   /* 27 */   "Core",          "Kill the enemy's; defend yours OR DIE!",
+   /* 28 */   "GoFast",        "Makes ship go fast"
 };
 
 static U32 GameObjectCount = ARRAYSIZE(gGameObjectInfo) / 2;   
@@ -932,19 +933,26 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             }
             break;
 
-         case 22:    // Asteroid... using goofball factor to keep out of sync with Nexus graphic
+         case 22:    // GoalZone
+            {
+               Vector<Point> o;     // outline
+               o.push_back(Point(-150, -30));
+               o.push_back(Point( 150, -30));
+               o.push_back(Point( 150,  30));
+               o.push_back(Point(-150,  30));
+
+               Vector<Point> f;     // fill
+               Triangulate::Process(o, f);
+
+               renderGoalZone(Color(0.5f, 0.5f, 0.5f), &o, &f, findCentroid(o), angleOfLongestSide(o), 
+                  false, 0, 0, 0, false);
+            }
+            break;
+
+         case 23:    // Asteroid... using goofball factor to keep out of sync with Nexus graphic
             renderAsteroid(Point(0,-10), 
                      (S32)(getGame()->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7f);    
             break;
-
-         case 23:    // SpeedZone
-         {
-            Vector<Point> speedZoneRenderPoints;
-            SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0), 1, speedZoneRenderPoints);
-
-            renderSpeedZone(speedZoneRenderPoints, getGame()->getCurrentTime());
-            break;
-         }
 
          case 24:    // TestItem
             renderTestItem(mTestItemPoints);
@@ -959,21 +967,32 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             break;
 
          case 27:    // Core
-            F32 health[] = { 1,1,1,1,1,1,1,1,1,1 };
-            
-            Point pos(0,0);
-            U32 time = U32(-1 * S32(Platform::getRealMilliseconds()));
+            {
+               F32 health[] = { 1,1,1,1,1,1,1,1,1,1 };
+               
+               Point pos(0,0);
+               U32 time = U32(-1 * S32(Platform::getRealMilliseconds()));
 
-            PanelGeom panelGeom;
-            CoreItem::fillPanelGeom(pos, time, panelGeom);
+               PanelGeom panelGeom;
+               CoreItem::fillPanelGeom(pos, time, panelGeom);
 
-            glPushMatrix();
-               glTranslate(pos);
-               glScale(.55f);
-               renderCore(pos, &Colors::blue, time, &panelGeom, health, 1.0f);
-            glPopMatrix();
-
+               glPushMatrix();
+                  glTranslate(pos);
+                  glScale(.55f);
+                  renderCore(pos, &Colors::blue, time, &panelGeom, health, 1.0f);
+               glPopMatrix();
+            }
             break;
+
+         case 28:    // SpeedZone
+            {
+               Vector<Point> speedZoneRenderPoints;
+               SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0), 1, speedZoneRenderPoints);
+
+               renderSpeedZone(speedZoneRenderPoints, getGame()->getCurrentTime());
+            }
+            break;
+
       }
       glPopMatrix();
       objStart.y += 75;

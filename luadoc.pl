@@ -157,7 +157,7 @@ foreach my $file (@files) {
             $enumIgnoreColumn = $6 eq "" ? -1 : $6;      # Optional
             $encounteredDoxygenCmd = 1;
 
-            push(@enums, "/**\n\@defgroup $enumName"."Enum $enumName\n");
+            push(@enums, "/**\n  * \@defgroup $enumName"."Enum $enumName\n");
 
             next;
          }

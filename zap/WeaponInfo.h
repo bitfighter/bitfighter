@@ -33,9 +33,35 @@ using namespace TNL;
 namespace Zap
 {
 /**
-  * @luaenum Weapon(2, 1)
-  * The Weapon enum can be used to represent a weapon in some functions.
-  */
+ * @luaenum Weapon(2, 1)
+ * The Weapon enum can be used to represent a weapon in some functions.
+ * It can also be used with the `WeaponInfo` table to provide data about a weapon's statistics:
+ * @code
+ * -- Get information like this:
+ * print(WeaponInfo[Weapon.Phaser].damage)
+ *
+ * -- This will print all info for all weapons
+ * for i = Weapon.Phaser, Weapon.SpyBug do
+ * 
+ *    print()
+ * 
+ *    for k, v in pairs(WeaponInfo[i]) do
+ *       print(k .. ": " .. tostring(v))
+ *    end
+ * end
+ * @endcode
+ * The elements of this table are tables with the following keys:
+ *   - `projectileVelocity`
+ *   - `fireDelay`
+ *   - `classId`
+ *   - `damageSelf`
+ *   - `name`
+ *   - `canDamageTeammate`
+ *   - `projectileLifeTime`
+ *   - `energyDrain`
+ *   - `minEnergy`
+ *   - `damage`
+ */
    //                                       Enum in Lua:   Fire  Min    Enrgy  Proj Proj. Dam-  Self-dam. Can dam.   Projectile
    //             Enum          Name        Weapon.Phaser  Delay Enrgy  Drain  Vel. Life  age    Factor   Teammate      Type
 #define WEAPON_ITEM_TABLE \
