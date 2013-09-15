@@ -1001,7 +1001,7 @@ void downloadMapHandler(ClientGame *game, const Vector<string> &args)
    static Thread* downloadThread;
    if(args.size() < 2)
    {
-      game->displayErrorMessage("You must specify a level");
+      game->displayErrorMessage("!!! You must specify a level");
       return;
    }
 
@@ -1013,7 +1013,7 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
 {
    if(args.size() < 2)
    {
-      game->displayErrorMessage("You must specify a rating (\"up\" or \"down\")");
+      game->displayErrorMessage("!!! You must specify a rating (\"up\" or \"down\")");
       return;
    }
 
