@@ -897,6 +897,7 @@ inline string getPathFromFilename(const string &filename)
 }
 
 
+// XYZZY =-= Needs to do some of this work in the LevelSource, as this doesn't work with StringLevelSource
 bool ServerGame::loadLevel(const string &levelFileName)
 {
    FolderManager *folderManager = getSettings()->getFolderManager();
