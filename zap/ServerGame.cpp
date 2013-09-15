@@ -399,7 +399,7 @@ StringTableEntry ServerGame::getLevelNameFromIndex(S32 index)
 // Return filename of level currently in play
 string ServerGame::getCurrentLevelFileName()
 {
-   return mLevelSource->getLevelName(mCurrentLevelIndex);
+   return mLevelSource->getLevelFileName(mCurrentLevelIndex);
 }
 
 
