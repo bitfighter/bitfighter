@@ -92,7 +92,6 @@ U32 LevelDatabaseDownloadThread::run()
     	  LevelInfo levelInfo;
     	  levelInfo.filename = levelFileName;
         levelInfo.folder = fm->levelDir;
-        gServerGame->addLevel(levelInfo);
 
     	  if(gServerGame->populateLevelInfoFromSource(filePath, levelInfo))
         {
