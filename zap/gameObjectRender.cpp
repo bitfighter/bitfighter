@@ -2658,7 +2658,7 @@ pixLoc gLogoPoints[LetterLoc1 + LetterLoc2 + LetterLoc3 + LetterLoc4 + LetterLoc
 
 void renderStaticBitfighterLogo()
 {
-   glColor4f(0, 1, 0, 1);
+   glColor(Colors::green);
    renderBitfighterLogo(73, 1);
    FontManager::pushFontContext(ReleaseVersionContext);
    drawCenteredStringf(120, 10, "Release %s", ZAP_GAME_RELEASE);
