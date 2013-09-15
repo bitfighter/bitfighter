@@ -901,7 +901,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
 {
    FolderManager *folderManager = getSettings()->getFolderManager();
 
-   resetLevelInfo();
+   resetLevelInfo();    // Resets info about the level, not a LevelInfo...  In case you were wondering.
 
    mObjectsLoaded = 0;
    setLevelDatabaseId(0);
