@@ -40,12 +40,13 @@ namespace Zap
 
 class GameSettings;
 class ServerGame;
+class LevelSource;
 
 // This is a duplicate def also found in GameSettings.h.  Need to get rid of this one!
 typedef boost::shared_ptr<GameSettings> GameSettingsPtr;
 
 
-extern ServerGame *initHosting(GameSettingsPtr settings, const Vector<string> &levelList, bool testMode, bool dedicatedServer);
+extern ServerGame *initHosting(GameSettingsPtr settings, LevelSource *levelSource, bool testMode, bool dedicatedServer);
 extern void abortHosting_noLevels(ServerGame *serverGame);
 extern bool writeToConsole();
 extern string getInstalledDataDir();

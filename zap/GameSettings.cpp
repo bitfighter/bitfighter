@@ -30,6 +30,7 @@
 #include "ScreenInfo.h"
 #include "stringUtils.h"      // For itos
 #include "LuaWrapper.h"       // For printing Lua class hiearchy
+#include "LevelSource.h"
 
 #include "tnlTypes.h"         // For TNL_OS_WIN32 def
 #include "tnlLog.h"           // For logprintf
@@ -632,18 +633,9 @@ Vector<string> GameSettings::getLevelList(const string &levelDir, bool ignoreCmd
    // If user specified a list of levels on the command line, use those, unless ignoreCmdLine was set to true
    if(!ignoreCmdLine && mCmdLineParams[CmdLineParams::LEVEL_LIST].size() > 0)
       levelList = mCmdLineParams[CmdLineParams::LEVEL_LIST];
-   else
-   {
-      // Build our level list by looking at the filesystem 
-      const string extList[] = {"level"};
-      if(!getFilesFromFolder(levelDir, levelList, extList, ARRAYSIZE(extList)))    // Returns true if error 
-      {
-         logprintf(LogConsumer::LogError, "Could not read any levels from the levels folder \"%s\".", levelDir.c_str());
-         return levelList;    // empty
-      }
+   else  // Build our level list by looking at the filesystem 
+      levelList = LevelSource::findAllLevelFilesInFolder(levelDir);
 
-      levelList.sort(alphaSort);   // Just to be sure...
-   }
 
    // Now, remove any levels listed in the skip list from levelList.  Not foolproof!
    for(S32 i = 0; i < levelList.size(); i++)

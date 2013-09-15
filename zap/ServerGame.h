@@ -41,6 +41,8 @@ class Robot;
 class PolyWall;
 class WallItem;
 class ItemSpawn;
+class LevelSource;
+struct LevelInfo;
 
 class ServerGame : public Game
 {
@@ -53,12 +55,11 @@ private:
       BotControlTickInterval = 33,       // Interval for how often should we let bots fire the onTick event (ms)
    };
 
-   bool mTestMode;           // True if being tested from editor
+   bool mTestMode;                        // True if being tested from editor
 
    GridDatabase mDatabaseForBotZones;     // Database especially for BotZones to avoid gumming up the regular database with too many objects
 
-   // Info about levels
-   Vector<LevelInfo> mLevelInfos;         // Info about the level
+   LevelSource *mLevelSource;
 
    U32 mCurrentLevelIndex;                // Index of level currently being played
    Timer mLevelSwitchTimer;               // Track how long after game has ended before we actually switch levels
@@ -88,6 +89,8 @@ private:
    void processVoting(U32 timeDelta);     // Manage any ongoing votes
    void processSimulatedStutter(U32 timeDelta);
 
+   string getLevelFileNameFromIndex(S32 indx);
+
 
    void resetAllClientTeams();            // Resets all player team assignments
 
@@ -107,7 +110,7 @@ private:
    LuaGameInfo *mGameInfo;
 
 public:
-   ServerGame(const Address &address, GameSettingsPtr settings, bool testMode, bool dedicated);    // Constructor
+   ServerGame(const Address &address, GameSettingsPtr settings, LevelSource *levelSource, bool testMode, bool dedicated);    // Constructor
    virtual ~ServerGame();   // Destructor
 
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
@@ -124,7 +127,6 @@ public:
    // These are public so this can be accessed by tests
    static const U32 MaxTimeDelta = 2000;     
    static const U32 LevelSwitchTime = 5000;
-
 
    U32 mVoteTimer;
    VoteType mVoteType;
@@ -161,11 +163,11 @@ public:
 
    void setShuttingDown(bool shuttingDown, U16 time, GameConnection *who, StringPtr reason);  
 
-   void buildBasicLevelInfoList(const Vector<string> &levelList);
    void resetLevelLoadIndex();
    string loadNextLevelInfo();
-   bool getLevelInfo(const string &fullFilename, LevelInfo &levelInfo); // Populates levelInfo with data from fullFilename
-   string getLastLevelLoadName();                        // For updating the UI
+   bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
+
+   //string getLastLevelLoadName();                        // For updating the UI
 
    bool loadLevel(const string &fileName);               // Load a level
    void runLevelGenScript(const string &scriptName);     // Run any levelgens specified by the level or in the INI
@@ -188,9 +190,8 @@ public:
 
    StringTableEntry getLevelNameFromIndex(S32 indx);
    S32 getAbsoluteLevelIndex(S32 indx);         // Figures out the level index if the input is a relative index
-   string getLevelFileNameFromIndex(S32 indx);
 
-   StringTableEntry getCurrentLevelFileName();  // Return filename of level currently in play  
+   const char * getCurrentLevelFileName();      // Return filename of level currently in play  
    StringTableEntry getCurrentLevelName();      // Return name of level currently in play
    GameTypeId getCurrentLevelType();            // Return type of level currently in play
    StringTableEntry getCurrentLevelTypeName();  // Return name of type of level currently in play
@@ -200,12 +201,10 @@ public:
    bool isReadyToShutdown(U32 timeDelta);
    void gameEnded();
 
-   S32 getLevelNameCount();
    S32 getCurrentLevelIndex();
    S32 getLevelCount();
    LevelInfo getLevelInfo(S32 index);
    void clearLevelInfos();
-   void addLevelInfo(const LevelInfo &levelInfo);
    void sendLevelListToLevelChangers();
 
    DataSender dataSender;
@@ -219,7 +218,7 @@ public:
 
    Ship *getLocalPlayerShip() const;
 
-   S32 addUploadedLevelInfo(const char *filename, LevelInfo &info);
+   S32 addLevel(const LevelInfo &info);
 
    HostingModePhases hostingModePhase;
 

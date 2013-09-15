@@ -142,6 +142,7 @@ using namespace TNL;
 #include "Console.h"       // For access to console
 #include "BotNavMeshZone.h"
 #include "ship.h"
+#include "LevelSource.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -337,14 +338,12 @@ void idle()
    {
       settings = gServerGame->getSettings();
 
-      string levelName;
-
       if(gServerGame->hostingModePhase == ServerGame::LoadingLevels)
       {
-         levelName = gServerGame->loadNextLevelInfo();
+         string levelName = gServerGame->loadNextLevelInfo();
 
 #ifndef ZAP_DEDICATED
-         // Notify any client UIs that the server has loaded a level
+         // Notify any client UIs on the hosting machine that the server has loaded a level
          if(levelName != "")
             for(S32 i = 0; i < gClientGames.size(); i++)
                gClientGames[i]->getUIManager()->serverLoadedLevel(levelName);
@@ -1120,7 +1119,10 @@ int main(int argc, char **argv)
                      folderManager->musicDir, settings->getIniSettings()->getMusicVolLevel());  // Even dedicated server needs sound these days
    
    if(settings->isDedicatedServer())
-      initHosting(settings, settings->getLevelList(), false, true);     // Figure out what levels we'll be playing with, and start hosting  
+   {
+      LevelSource *levelSource = new FolderLevelSource(settings->getLevelList(), settings->getFolderManager()->levelDir);
+      initHosting(settings, levelSource, false, true);     // Figure out what levels we'll be playing with, and start hosting  
+   }
    else
    {
 #ifndef ZAP_DEDICATED

@@ -32,6 +32,7 @@
 #include "BanList.h"
 #include "gameNetInterface.h"
 #include "gameType.h"
+#include "LevelSource.h"
 
 #include "SoundSystemEnums.h"
 
@@ -294,7 +295,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
       return;
    }
 
-   const char *filename = mServerGame->getCurrentLevelFileName().getString();
+   const char *filename = mServerGame->getCurrentLevelFileName();
    
    // Initialize on the server to start sending requested file -- will return OK if everything is set up right
    FolderManager *folderManager = mSettings->getFolderManager();
@@ -597,10 +598,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    // Add a message to the server log
    if(type == DeleteLevel)
       logprintf(LogConsumer::ServerFilter, "User [%s] added level [%s] to server skip list", mClientInfo->getName().getString(), 
-                                                mServerGame->getCurrentLevelFileName().getString());
+                                                mServerGame->getCurrentLevelFileName());
    else if(type == UndeleteLevel)
       logprintf(LogConsumer::ServerFilter, "User [%s] removed level [%s] from the server skip list", mClientInfo->getName().getString(), 
-                                                mServerGame->getCurrentLevelFileName().getString());   
+                                                mServerGame->getCurrentLevelFileName());   
    else
    {
       // Must be kept aligned with ParamType enum --> move to xmacro?
@@ -647,48 +648,34 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    else if(type == LevelDir)
    {
       FolderManager *folderManager = mSettings->getFolderManager();
-      string candidate = folderManager->resolveLevelDir(param.getString());
+      string folder = folderManager->resolveLevelDir(param.getString());
 
-      if(folderManager->levelDir == candidate)
+      if(folderManager->levelDir == folder)
       {
          s2cDisplayErrorMessage("!!! Specified folder is already the current level folder");
          return;
       }
 
       // Make sure the specified dir exists; hopefully it contains levels
-      if(candidate == "" || !fileExists(candidate))
+      if(folder == "" || !fileExists(folder))
       {
          s2cDisplayErrorMessage("!!! Could not find specified folder");
          return;
       }
 
-      Vector<string> newLevels = mSettings->getLevelList(candidate);
 
-      if(newLevels.size() == 0)
+      Vector<string> levelList = LevelSource::findAllLevelFilesInFolder(folder);
+
+      if(levelList.size() == 0)
       {
          s2cDisplayErrorMessage("!!! Specified folder contains no levels");
          return;
       }
 
-      mServerGame->buildBasicLevelInfoList(newLevels);      // Populates mLevelInfos on mServerGame with nearly empty LevelInfos 
 
-      bool anyLoaded = false;
+      FolderLevelSource *levelSource = new FolderLevelSource(levelList, folder);
 
-      for(S32 i = 0; i < newLevels.size(); i++)
-      {
-         string levelFile = folderManager->findLevelFile(candidate, newLevels[i]);
-
-         LevelInfo levelInfo(newLevels[i]);
-         if(mServerGame->getLevelInfo(levelFile, levelInfo))
-         {
-            if(!anyLoaded)    // i.e. we just found the first valid level; safe to clear out old list
-               mServerGame->clearLevelInfos();
-
-            anyLoaded = true;
-
-            mServerGame->addLevelInfo(levelInfo);
-         }
-      }
+      bool anyLoaded = levelSource->loadLevels(folderManager);    // Populates all our levelInfos by loading each file in turn
 
       if(!anyLoaded)
       {
@@ -696,7 +683,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          return;
       }
 
-      folderManager->levelDir = candidate;
+      // Folder contains some valid levels -- save it!
+      folderManager->levelDir = folder;
 
       // Send the new list of levels to all levelchangers
       for(S32 i = 0; i < mServerGame->getClientCount(); i++)
@@ -849,11 +837,11 @@ void GameConnection::markCurrentLevelAsDeleted()
    Vector<string> *skipList = mSettings->getLevelSkipList();
 
    for(S32 i = 0; i < skipList->size(); i++)
-      if(skipList->get(i) == mServerGame->getCurrentLevelFileName().getString())    // Already on our list!
+      if(skipList->get(i) == mServerGame->getCurrentLevelFileName())    // Already on our list!
          return;
 
    // Add level to our skip list.  Deleting it from the active list of levels is more of a challenge...
-   skipList->push_back(mServerGame->getCurrentLevelFileName().getString());
+   skipList->push_back(mServerGame->getCurrentLevelFileName());
    saveSkipList(skipList);
 }
 
@@ -1450,11 +1438,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
 }
 
 
-extern LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo);
-
-TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
+TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
-   if(!mSettings->getIniSettings()->allowMapUpload && !mClientInfo->isAdmin())  // Don't need it when not enabled, saves some memory. May remove this, it is checked again leter.
+   // Abort early if user can't upload
+   if( ! (mSettings->getIniSettings()->allowMapUpload || (mSettings->getIniSettings()->allowAdminMapUpload && mClientInfo->isAdmin())))
       return;
 
    if(mDataBuffer)
@@ -1468,23 +1456,19 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       mDataBuffer->takeOwnership();
    }
 
-   if(type == LevelFileTransmissionInProgress &&
-         (mSettings->getIniSettings()->allowMapUpload || (mSettings->getIniSettings()->allowAdminMapUpload && mClientInfo->isAdmin())) &&
-         !isInitiator() && mDataBuffer->getBufferSize() != 0)
+   if(type == LevelFileTransmissionInProgress && !isInitiator() && mDataBuffer->getBufferSize() != 0)
    {
       // Only server runs this part of code
       FolderManager *folderManager = mSettings->getFolderManager();
 
-      LevelInfo levelInfo("Transmitted Level");
-      getLevelInfoFromFileChunk((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), levelInfo);
-
-      //BitStream s(mDataBuffer.getBuffer(), mDataBuffer.getBufferSize());
-      char filename[128];
+      LevelInfo levelInfo;
+      LevelSource::getLevelInfoFromCodeChunk((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), levelInfo);
 
       string titleName = makeFilenameFromString(levelInfo.mLevelName.getString());
-      dSprintf(filename, sizeof(filename), "upload_%s.level", titleName.c_str());
+      string filename = "upload_" + titleName + ".level";
 
       string fullFilename = strictjoindir(folderManager->levelDir, filename);
+      levelInfo.mLevelFileName = filename;
 
       FILE *f = fopen(fullFilename.c_str(), "wb");
       if(f)
@@ -1492,14 +1476,15 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
          fwrite(mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), f);
          fclose(f);
          logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientInfo->getName().getString(), filename);
-         S32 id = mServerGame->addUploadedLevelInfo(filename, levelInfo);
+
+         S32 id = mServerGame->addLevel(levelInfo);
          c2sRequestLevelChange_remote(id, false);  // we are server (switching to it after fully uploaded)
       }
       else
          s2cDisplayErrorMessage("!!! Upload failed -- server can't write file");
    }
 
-   if(type != LevelFileTransmissionComplete)
+   if(type != LevelFileTransmissionComplete)       // i.e. == LevelFileTransmissionInProgress
    {
       delete mDataBuffer;
       mDataBuffer = NULL;

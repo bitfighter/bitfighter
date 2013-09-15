@@ -27,6 +27,7 @@
 
 #include "GameSettings.h"
 #include "ServerGame.h"
+#include "LevelSource.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -58,12 +59,12 @@ namespace Zap
 extern Vector<ClientGame *> gClientGames;
 
 // Host a game (and maybe even play a bit, too!)
-ServerGame *initHosting(GameSettingsPtr settings, const Vector<string> &levelList, bool testMode, bool dedicatedServer)
+ServerGame *initHosting(GameSettingsPtr settings, LevelSource *levelSource, bool testMode, bool dedicatedServer)
 {
    Address address(IPProtocol, Address::Any, GameSettings::DEFAULT_GAME_PORT);   // Equivalent to ("IP:Any:28000")
    address.set(settings->getHostAddress());                          // May overwrite parts of address, depending on what getHostAddress contains
 
-   ServerGame *serverGame = new ServerGame(address, settings, testMode, dedicatedServer);
+   ServerGame *serverGame = new ServerGame(address, settings, levelSource, testMode, dedicatedServer);
 
    serverGame->setReadyToConnectToMaster(true);
    Game::seedRandomNumberGenerator(settings->getHostName());
@@ -75,17 +76,16 @@ ServerGame *initHosting(GameSettingsPtr settings, const Vector<string> &levelLis
       logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", serverGame->getSettings()->getHostName().c_str(), 
                                                                             serverGame->getSettings()->getHostDescr().c_str());
 
-      logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelList.size());
+      logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelSource->getLevelListSize());
    }
 
-   if(levelList.size() == 0)     // No levels!
+   if(levelSource->getLevelListSize() == 0)     // No levels!
    {
       abortHosting_noLevels(serverGame);
       delete serverGame;
       return NULL;
    }
 
-   serverGame->buildBasicLevelInfoList(levelList);     // Take levels in levelList and create a set of empty levelInfo records
    serverGame->resetLevelLoadIndex();
 
 #ifndef ZAP_DEDICATED

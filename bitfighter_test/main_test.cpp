@@ -323,6 +323,13 @@ ClientGame *newClientGame()
 }
 
 
+void idleGames(ClientGame *clientGame, ServerGame *serverGame, U32 timeDelta)
+{
+   clientGame->idle(timeDelta);
+   serverGame->idle(timeDelta);
+}
+
+
 // Create a new ServerGame with one dummy team
 ServerGame *newServerGame()
 {
@@ -353,10 +360,32 @@ TEST_F(BfTest, ClientServerInteraction)
 
    ServerGame *serverGame = initHosting(settings, settings->getLevelList(), true, false);
 
-   bool ok = serverGame->startHosting();
+
+   GameType *gt = new GameType();    // Cleaned up by database
+   gt->addToGame(serverGame, serverGame->getGameObjDatabase());
+
+
+
+   Team *team = new Team;           // Will be deleted by TeamManager
+
+   team->setName("Test");
+   //team->setColor(r,g,b);
+   //team->setScore(score);
+
+   serverGame->addTeam(team);
+
+   bool ok = serverGame->startHosting();     // This will load levels and wipe out any teams
    clientGame->joinLocalGame(serverGame->getNetInterface());
 
+   for(S32 i = 0; i < 100; i++)
+   {
+      idleGames(clientGame, serverGame, 10);
+   }
 
+   const AbstractTeam *t = clientGame->getTeam(0);
+   const char *name = t->getName().getString();
+
+   clientGame->getGameType();
    
    // Cleanup
    delete clientGame;

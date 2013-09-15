@@ -60,6 +60,7 @@
 #include "EditorTeam.h"
 
 #include "gameLoader.h"          // For LevelLoadException def
+#include "LevelSource.h"
 
 #include "luaLevelGenerator.h"
 #include "LevelDatabaseUploadThread.h"
@@ -4784,9 +4785,11 @@ void EditorUserInterface::testLevelStart()
       Vector<string> levelList;
       levelList.push_back(TestFileName);
 
+      LevelSource *levelSource = new FolderLevelSource(levelList, getGame()->getSettings()->getFolderManager()->levelDir);
+
       TNLAssert(!gServerGame, "Already exists!");
 
-      gServerGame = initHosting(getGame()->getSettingsPtr(), levelList, true, false);
+      gServerGame = initHosting(getGame()->getSettingsPtr(), levelSource, true, false);
    }
 }
 

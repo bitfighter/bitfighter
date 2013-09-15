@@ -35,6 +35,7 @@
 #include "teleporter.h"
 #include "BanList.h"             // For banList kick duration
 #include "BotNavMeshZone.h"      // For zone clearing code
+#include "LevelSource.h"
 
 #include "gameObjectRender.h"
 #include "stringUtils.h"
@@ -49,15 +50,15 @@ namespace Zap
 static bool instantiated;     // Just a little something to keep us from creating multiple ServerGames...
 
 // Constructor -- be sure to see Game constructor too!  Lots going on there!
-ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, bool testMode, bool dedicated) : 
+ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSource *levelSource, bool testMode, bool dedicated) : 
       Game(address, settings)
 {
-   //TNLAssert(settings, "Must have valid settings to create a ClientGame!");
-
    TNLAssert(!instantiated, "Only one ServerGame at a time, please!  If this trips while testing, "
       "it is probably because a test failed before another instance could be deleted.  Try disabling "
       "this assert, see what test fails, and fix it.  Then re-enable it, please!");
    instantiated = true;
+
+   mLevelSource = levelSource;
 
    mVoteTimer = 0;
    mVoteYes = 0;
@@ -231,12 +232,6 @@ void ServerGame::voteClient(ClientInfo *clientInfo, bool voteYes)
 }
 
 
-S32 ServerGame::getLevelNameCount()
-{
-   return mLevelInfos.size();
-}
-
-
 S32 ServerGame::getCurrentLevelIndex()
 {
    return mCurrentLevelIndex;
@@ -245,26 +240,30 @@ S32 ServerGame::getCurrentLevelIndex()
 
 S32 ServerGame::getLevelCount()
 {
-   return mLevelInfos.size();
+   return mLevelSource->getLevelListSize();
 }
 
 
 LevelInfo ServerGame::getLevelInfo(S32 index)
 {
-   return mLevelInfos[index];
+   return mLevelSource->getLevelInfo(index);
 }
 
 
-void ServerGame::clearLevelInfos()
-{
-   mLevelInfos.clear();
-}
-
-
-void ServerGame::addLevelInfo(const LevelInfo &levelInfo)
-{
-   mLevelInfos.push_back(levelInfo);
-}
+// Creates a set of LevelInfos that are empty except for the filename.  They will be fleshed out later.
+// This gets called when you first load the host menu
+//void ServerGame::buildBasicLevelInfoList(const Vector<string> &levelList)
+//{
+//   mLevelInfos.clear();
+//
+//   for(S32 i = 0; i < levelList.size(); i++)
+//      mLevelInfos.push_back(LevelInfo(levelList[i]));
+//}
+//
+//void ServerGame::clearLevelInfos()
+//{
+//   mLevelInfos.clear();
+//}
 
 
 void ServerGame::sendLevelListToLevelChangers()
@@ -292,17 +291,6 @@ AbstractTeam *ServerGame::getNewTeam()
 }
 
 
-// Creates a set of LevelInfos that are empty except for the filename.  They will be fleshed out later.
-// This gets called when you first load the host menu
-void ServerGame::buildBasicLevelInfoList(const Vector<string> &levelList)
-{
-   mLevelInfos.clear();
-
-   for(S32 i = 0; i < levelList.size(); i++)
-      mLevelInfos.push_back(LevelInfo(levelList[i]));
-}
-
-
 void ServerGame::resetLevelLoadIndex()
 {
    mLevelLoadIndex = 0;
@@ -310,15 +298,15 @@ void ServerGame::resetLevelLoadIndex()
 
 
 // This is only used while we're building a list of levels to display on the host during loading
-string ServerGame::getLastLevelLoadName()
-{
-   if(mLevelInfos.size() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
-      return "";
-   else if(mLevelLoadIndex == 0)    // Still not sure when this would happen
-      return "";
-   else
-      return mLevelInfos.last().mLevelName.getString();
-}
+//string ServerGame::getLastLevelLoadName()
+//{
+//   if(mLevelSource->getLevelListSize() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
+//      return "";
+//   else if(mLevelLoadIndex == 0)    // Still not sure when this would happen
+//      return "";
+//   else
+//      return mLevelInfos.last().mLevelName.getString();
+//}
 
 
 // Return true if the only client connected is the one we passed; don't consider bots
@@ -363,163 +351,63 @@ void ServerGame::setShuttingDown(bool shuttingDown, U16 time, GameConnection *wh
 }
 
 
-// Parse through the chunk of data passed in and find parameters to populate levelInfo with
-// This is only used on the server to provide quick level information without having to load the level
-// (like with playlists or menus)
-// Warning: Mungs chunk!
-LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
+bool ServerGame::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
 {
-   S32 cur = 0;
-   S32 startingCur = 0;
-
-   bool foundGameType   = false;
-   bool foundLevelName  = false;
-   bool foundMinPlayers = false;
-   bool foundMaxPlayers = false;
-
-   while(cur < size && !(foundGameType && foundLevelName && foundMinPlayers && foundMaxPlayers))
-   {
-      if(chunk[cur] < 32)
-      {
-         if(cur - startingCur > 5)
-         {
-            char c = chunk[cur];
-            chunk[cur] = 0;
-            Vector<string> list = parseString(&chunk[startingCur]);
-            chunk[cur] = c;
-
-            if(list.size() >= 1 && list[0].find("GameType") != string::npos)
-            {
-               // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
-               TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(list[0].c_str()));
-
-               GameType *gt = dynamic_cast<GameType *>(theObject); 
-               if(gt)
-               {
-                  levelInfo.mLevelType = gt->getGameTypeId();
-                  foundGameType = true;
-               }
-
-               delete theObject;
-            }
-            else if(list.size() >= 2 && list[0] == "LevelName")
-            {
-               string levelName = list[1];
-
-               for(S32 i = 2; i < list.size(); i++)
-                  levelName += " " + list[i];
-
-               levelInfo.mLevelName = levelName;
-
-               foundLevelName = true;
-            }
-            else if(list.size() >= 2 && list[0] == "MinPlayers")
-            {
-               levelInfo.minRecPlayers = atoi(list[1].c_str());
-               foundMinPlayers = true;
-            }
-            else if(list.size() >= 2 && list[0] == "MaxPlayers")
-            {
-               levelInfo.maxRecPlayers = atoi(list[1].c_str());
-               foundMaxPlayers = true;
-            }
-         }
-         startingCur = cur + 1;
-      }
-      cur++;
-   }
-   return levelInfo;
+   return mLevelSource->populateLevelInfoFromSource(fullFilename, levelInfo);
 }
 
 
-// Returns name of level loaded
+// Returns name of level loaded, which will be displayed in the client window during level loading phase of hosting
 string ServerGame::loadNextLevelInfo()
 {
    FolderManager *folderManager = getSettings()->getFolderManager();
+
    string levelName;
+   string filename = folderManager->findLevelFile(mLevelSource->getLevelSourceNameFromIndex(mLevelLoadIndex));
 
-   string levelFile = folderManager->findLevelFile(mLevelInfos[mLevelLoadIndex].mLevelFileName.getString());
+   TNLAssert(filename != "", "Expected a filename here!");
 
-   if(getLevelInfo(levelFile, mLevelInfos[mLevelLoadIndex]))    // Populate mLevelInfos[i] with data from levelFile
+   // populateLevelInfoFromSource() will return true if the level was processed successfully
+   if(mLevelSource->populateLevelInfoFromSource(filename, mLevelLoadIndex))
    {
-      levelName = mLevelInfos[mLevelLoadIndex].mLevelName.getString();
+      levelName = mLevelSource->getLevelName(mLevelLoadIndex);    // This will be the name specified in the level file we just populated
       mLevelLoadIndex++;
    }
-   else
-      mLevelInfos.erase(mLevelLoadIndex);
+   else     // Failed to process level; remove it from the list
+      mLevelSource->remove(mLevelLoadIndex);
 
-   if(mLevelLoadIndex == mLevelInfos.size())
+   if(mLevelLoadIndex == mLevelSource->getLevelListSize())
       hostingModePhase = DoneLoadingLevels;
 
    return levelName;
 }
 
 
-// Populates levelInfo with data from fullFilename
-bool ServerGame::getLevelInfo(const string &fullFilename, LevelInfo &levelInfo)
-{
-   TNLAssert(levelInfo.mLevelFileName != "", "Invalid assumption");
-
-   FILE *f = fopen(fullFilename.c_str(), "rb");
-
-   if(f)
-   {
-      char data[1024 * 4];  // 4 kb should be enough to fit all parameters at the beginning of level; we don't need to read everything
-      S32 size = (S32)fread(data, 1, sizeof(data), f);
-      fclose(f);
-
-      getLevelInfoFromFileChunk(data, size, levelInfo);
-
-      // Provide a default levelname
-      if(levelInfo.mLevelName == "")
-         levelInfo.mLevelName = levelInfo.mLevelFileName;   
-
-      return true;
-   }
-   else
-   {
-      // was mLevelInfos[mLevelLoadIndex].levelFileName.getString()
-      logprintf(LogConsumer::LogWarning, "Could not load level %s [%s].  Skipping...", levelInfo.mLevelFileName.getString(), fullFilename.c_str());
-      return false;
-   }
-}
-
-
 // Get the level name, as defined in the level file
-StringTableEntry ServerGame::getLevelNameFromIndex(S32 indx)
+StringTableEntry ServerGame::getLevelNameFromIndex(S32 index)
 {
-   return mLevelInfos[getAbsoluteLevelIndex(indx)].mLevelName;
-}
-
-
-// Get the filename the level is saved under
-string ServerGame::getLevelFileNameFromIndex(S32 indx)
-{
-   if(indx < 0 || indx >= mLevelInfos.size())
-      return "";
-   else
-      return mLevelInfos[indx].mLevelFileName.getString();
+   return mLevelSource->getLevelInfo(getAbsoluteLevelIndex(index)).mLevelName;
 }
 
 
 // Return filename of level currently in play
-StringTableEntry ServerGame::getCurrentLevelFileName()
+const char *ServerGame::getCurrentLevelFileName()
 {
-   return mLevelInfos[mCurrentLevelIndex].mLevelFileName;
+   return mLevelSource->getLevelInfo(mCurrentLevelIndex).mLevelFileName.getString();
 }
 
 
 // Return name of level currently in play
 StringTableEntry ServerGame::getCurrentLevelName()
 {
-   return mLevelInfos[mCurrentLevelIndex].mLevelName;
+   return mLevelSource->getLevelInfo(mCurrentLevelIndex).mLevelName;
 }
 
 
 // Return type of level currently in play
 GameTypeId ServerGame::getCurrentLevelType()
 {
-   return mLevelInfos[mCurrentLevelIndex].mLevelType;
+   return mLevelSource->getLevelType(mCurrentLevelIndex);
 }
 
 
@@ -640,24 +528,24 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel); // Set mCurrentLevelIndex to refer to the next level we'll play
 
-   string levelFile = getLevelFileNameFromIndex(mCurrentLevelIndex);
+   string levelFileName = mLevelSource->getLevelSourceNameFromIndex(mCurrentLevelIndex);
 
-   logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", getLevelNameFromIndex(mCurrentLevelIndex).getString(), levelFile.c_str());
+   logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", getLevelNameFromIndex(mCurrentLevelIndex).getString(), levelFileName.c_str());
 
    // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
-   loadLevel(levelFile);
+   loadLevel(levelFileName);
 
    // Make sure we have a gameType... if we don't we'll add a default one here
    if(!getGameType())   // loadLevel can fail (missing file) and not create GameType
    {
-      logprintf(LogConsumer::LogLevelError, "Warning: Missing game type parameter in level \"%s\"", levelFile.c_str());
+      logprintf(LogConsumer::LogLevelError, "Warning: Missing game type parameter in level \"%s\"", levelFileName.c_str());
 
       GameType *gameType = new GameType;
       gameType->addToGame(this, getGameObjDatabase());
    }
 
    if(getGameType()->makeSureTeamCountIsNotZero())
-      logprintf(LogConsumer::LogLevelError, "Warning: Missing team in level \"%s\"", levelFile.c_str());
+      logprintf(LogConsumer::LogLevelError, "Warning: Missing team in level \"%s\"", levelFileName.c_str());
 
    logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
 
@@ -809,7 +697,7 @@ void ServerGame::resetAllClientTeams()
 // Make sure level metadata fits with our current game situation; i.e. check playerCount against min/max players,
 // skip uploaded levels if the settings tell us to, etc.  Can expand this to incorporate other metadata as we 
 // develop it.
-static bool checkIfLevelIsOk(ServerGame *game, const LevelInfo &levelInfo, S32 playerCount)
+static bool checkIfLevelIsOk(bool skipUploads, const LevelInfo &levelInfo, S32 playerCount)
 {
    S32 minPlayers = levelInfo.minRecPlayers;
    S32 maxPlayers = levelInfo.maxRecPlayers;
@@ -822,7 +710,7 @@ static bool checkIfLevelIsOk(ServerGame *game, const LevelInfo &levelInfo, S32 p
    if(playerCount > maxPlayers)
       return false;
 
-   if(game->getSettings()->getIniSettings()->skipUploads)
+   if(skipUploads)
       if(!strncmp(levelInfo.mLevelFileName.getString(), "upload_", 7))
          return false;
 
@@ -830,12 +718,18 @@ static bool checkIfLevelIsOk(ServerGame *game, const LevelInfo &levelInfo, S32 p
 }
 
 
-// Helps resolve meta-indices such as NEXT_LEVEL.  If you pass it a normal level index, you'll just get that back.
+// Helps resolve pseudo-indices such as NEXT_LEVEL.  If you pass it a normal level index, you'll just get that back.
 S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
 {
-   S32 CurrentLevelIndex = mCurrentLevelIndex;
-   if(nextLevel >= FIRST_LEVEL && nextLevel < mLevelInfos.size())          // Go to specified level
-      CurrentLevelIndex = (nextLevel < mLevelInfos.size()) ? nextLevel : FIRST_LEVEL;
+   S32 currentLevelIndex = mCurrentLevelIndex;
+   S32 levelCount = mLevelSource->getLevelListSize();
+   bool skipUploads = getSettings()->getIniSettings()->skipUploads;
+
+   if(levelCount == 1)
+      nextLevel = FIRST_LEVEL;
+
+   else if(nextLevel >= FIRST_LEVEL && nextLevel < levelCount)          // Go to specified level
+      currentLevelIndex = (nextLevel < levelCount) ? nextLevel : FIRST_LEVEL;
 
    else if(nextLevel == NEXT_LEVEL)      // Next level
    {
@@ -848,14 +742,14 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
       bool first = true;
       bool found = false;
 
-      S32 currLevel = CurrentLevelIndex;
+      S32 currLevel = currentLevelIndex;
 
       // Cycle through the levels looking for one that matches our player counts
-      while(first || CurrentLevelIndex != currLevel)
+      while(first || currentLevelIndex != currLevel)
       {
-         CurrentLevelIndex = (CurrentLevelIndex + 1) % mLevelInfos.size();
+         currentLevelIndex = (currentLevelIndex + 1) % levelCount;
 
-         if(checkIfLevelIsOk(this, mLevelInfos[CurrentLevelIndex], playerCount))
+         if(checkIfLevelIsOk(skipUploads, mLevelSource->getLevelInfo(currentLevelIndex), playerCount))
          {
             found = true;
             break;
@@ -868,40 +762,49 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
       // We didn't find a suitable level... just proceed to the next one in the list
       if(!found)
       {
-         CurrentLevelIndex++;
-         if(S32(CurrentLevelIndex) >= mLevelInfos.size())
-            CurrentLevelIndex = FIRST_LEVEL;
+         currentLevelIndex++;
+         if(S32(currentLevelIndex) >= levelCount)
+            currentLevelIndex = FIRST_LEVEL;
       }
    } 
    else if(nextLevel == PREVIOUS_LEVEL)
    {
-      CurrentLevelIndex--;
-      if(CurrentLevelIndex < 0)
-         CurrentLevelIndex = mLevelInfos.size() - 1;
+      currentLevelIndex--;
+      if(currentLevelIndex < 0)
+         currentLevelIndex = levelCount - 1;
    }
    else if(nextLevel == RANDOM_LEVEL)
    {
       S32 newLevel;
-      U32 RetryLeft = 200;
+      U32 retriesLeft = 200;
       S32 playerCount = getPlayerCount();
+
       if(mGameSuspended)
          playerCount++;
 
       do
       {
-         newLevel = TNL::Random::readI(0, mLevelInfos.size() - 1);
-         RetryLeft--;  // once we hit zero, this loop should exit to prevent endless loop.
+         newLevel = TNL::Random::readI(0, levelCount - 1);
+         retriesLeft--;  // Prevent endless loop
 
-      } while(RetryLeft != 0 && (CurrentLevelIndex == newLevel || !checkIfLevelIsOk(this, mLevelInfos[CurrentLevelIndex], playerCount)));
-      CurrentLevelIndex = newLevel;
+         if(retriesLeft == 0)
+            break;
+
+      } while(!(newLevel != currentLevelIndex && 
+                (retriesLeft < 100 || checkIfLevelIsOk(skipUploads, mLevelSource->getLevelInfo(currentLevelIndex), playerCount))));
+      // until (( level is not the current one ) && 
+      //          we're desperate  || level is ok ))
+
+      currentLevelIndex = newLevel;
    }
 
    //else if(nextLevel == REPLAY_LEVEL)    // Replay level, do nothing
-   //   CurrentLevelIndex += 0;
+   //   currentLevelIndex += 0;
 
-   if(CurrentLevelIndex >= mLevelInfos.size())  // some safety check in case of trying to replay the level that have just deleted
-      CurrentLevelIndex = 0;
-   return CurrentLevelIndex;
+   if(currentLevelIndex >= levelCount)  // Safety check in case of trying to replay level that was just deleted
+      currentLevelIndex = 0;
+
+   return currentLevelIndex;
 }
 
 // Enter suspended animation mode
@@ -1576,6 +1479,7 @@ void ServerGame::clearBotMoves()
 
 
 // Returns true if things went well, false if we couldn't find any levels to host
+// nly
 bool ServerGame::startHosting()
 {
    if(mSettings->getFolderManager()->levelDir == "")     // Never did resolve a leveldir... no hosting for you!
@@ -1583,11 +1487,13 @@ bool ServerGame::startHosting()
 
    hostingModePhase = Hosting;
 
-   for(S32 i = 0; i < getLevelNameCount(); i++)
-      logprintf(LogConsumer::ServerFilter, "\t%s [%s]", getLevelNameFromIndex(i).getString(), 
-                getLevelFileNameFromIndex(i).c_str());
+   S32 levelCount = mLevelSource->getLevelListSize();
 
-   if(!getLevelNameCount())      // No levels loaded... we'll crash if we try to start a game       
+   for(S32 i = 0; i < levelCount; i++)
+      logprintf(LogConsumer::ServerFilter, "\t%s [%s]", getLevelNameFromIndex(i).getString(), 
+                mLevelSource->getLevelSourceNameFromIndex(i).c_str());
+
+   if(!levelCount)      // No levels loaded... we'll crash if we try to start a game       
       return false;      
 
    cycleLevel(FIRST_LEVEL);      // Start with the first level
@@ -1609,32 +1515,25 @@ Ship *ServerGame::getLocalPlayerShip() const
 }
 
 
-S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &levelInfo)
+// levelInfo should arrive fully populated
+S32 ServerGame::addLevel(const LevelInfo &levelInfo)
 {
-   if(levelInfo.mLevelName == "")            // Make sure we have something in the name field
-      levelInfo.mLevelName = filename;
+   pair<S32, bool> ret = mLevelSource->addLevel(levelInfo);
 
-   levelInfo.mLevelFileName = filename; 
+   // ret.first is index of level, ret.second is true if the level was added, false if it already existed.
+   // Level won't always be last in the list; if the level was already in the list, the index could be different.
 
-   // Check if we already have this one
-   for(S32 i = 0; i < mLevelInfos.size(); i++)
-      if(mLevelInfos[i].mLevelFileName == levelInfo.mLevelFileName)
-         return i;
+   // Let levelChangers know about the new level if it was just added
+   if(ret.second)
+      for(S32 i = 0; i < getClientCount(); i++)
+      {
+         ClientInfo *clientInfo = getClientInfo(i);
 
-   // We don't... so add it!
-   mLevelInfos.push_back(levelInfo);
+         if(clientInfo->isLevelChanger())
+            clientInfo->getConnection()->s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
+      }
 
-   // Let levelChangers know about the new level
-
-   for(S32 i = 0; i < getClientCount(); i++)
-   {
-      ClientInfo *clientInfo = getClientInfo(i);
-
-      if(clientInfo->isLevelChanger())
-         clientInfo->getConnection()->s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
-   }
-
-   return mLevelInfos.size() - 1;
+   return ret.first;
 }
 
 

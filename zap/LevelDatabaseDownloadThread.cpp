@@ -27,6 +27,7 @@
 #include "HttpRequest.h"
 #include "ClientGame.h"
 #include "ServerGame.h"
+#include "LevelSource.h"
 
 #include "stringUtils.h"
 
@@ -41,14 +42,19 @@ namespace Zap
 string LevelDatabaseDownloadThread::LevelRequest = "bitfighter.org/pleiades/levels/raw/%s";
 string LevelDatabaseDownloadThread::LevelgenRequest = "bitfighter.org/pleiades/levels/raw/%s/levelgen";
 
+// Constructor
 LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(string levelId, ClientGame *game)
-   : mLevelId(levelId), mGame(game)
+   : mLevelId(levelId), 
+     mGame(game)
 {
+   // Do nothing
 }
 
 
-LevelDatabaseDownloadThread::~LevelDatabaseDownloadThread()
+// Destructor
+LevelDatabaseDownloadThread::~LevelDatabaseDownloadThread()    
 {
+   // Do nothing
 }
 
 
@@ -77,6 +83,7 @@ U32 LevelDatabaseDownloadThread::run()
 
    FolderManager *fm = mGame->getSettings()->getFolderManager();
    string filePath = joindir(fm->levelDir, levelFileName);
+
    if(writeFile(filePath, levelCode))
    {
       mGame->displaySuccessMessage("Saved to %s", levelFileName.c_str());
@@ -84,12 +91,16 @@ U32 LevelDatabaseDownloadThread::run()
       {
     	  LevelInfo info;
     	  info.mLevelFileName = levelFileName;
-    	  gServerGame->getLevelInfo(filePath, info);
-    	  gServerGame->addLevelInfo(info);
-    	  gServerGame->sendLevelListToLevelChangers();
+        gServerGame->addLevel(info);
+
+    	  if(gServerGame->populateLevelInfoFromSource(filePath, info))
+        {
+    	     gServerGame->addLevel(info);
+    	     gServerGame->sendLevelListToLevelChangers();
+        }
       }
    }
-   else
+   else  // File writing went bad
    {
       mGame->displayErrorMessage("Could not write to %s", levelFileName.c_str());
       delete this;

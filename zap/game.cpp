@@ -1174,61 +1174,6 @@ string Game::makeUnique(const char *name)
 }
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Constructor
-LevelInfo::LevelInfo()      
-{
-   initialize();
-}
-
-
-// Constructor, only used on client
-LevelInfo::LevelInfo(const StringTableEntry &name, GameTypeId type)
-{
-   initialize();
-
-   mLevelName = name;  
-   mLevelType = type; 
-}
-
-
-// Constructor
-LevelInfo::LevelInfo(const string &levelFile)
-{
-   initialize();
-
-   mLevelFileName = levelFile.c_str();
-}
-
-
-// Destructor
-LevelInfo::~LevelInfo()
-{
-   // Do nothing
-}
-
-
-void LevelInfo::initialize()
-{
-   mLevelName = "";
-   mLevelType = BitmatchGame;
-   mLevelFileName = "";
-   minRecPlayers = 0;
-   maxRecPlayers = 0;
-}
-
-
-const char *LevelInfo::getLevelTypeName()
-{
-   return GameType::getGameTypeName(mLevelType);
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 // Called when ClientGame and ServerGame are destructed, and new levels are loaded on the server
 void Game::cleanUp()
 {

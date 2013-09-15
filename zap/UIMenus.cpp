@@ -37,6 +37,8 @@
 #include "UINameEntry.h"
 #include "UIManager.h"
 
+#include "LevelSource.h"
+
 #include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
 #include "ClientGame.h"
 #include "ServerGame.h"
@@ -1825,7 +1827,9 @@ static void startHostingCallback(ClientGame *game, U32 unused)
 
    GameSettingsPtr settings = game->getSettingsPtr();
 
-   gServerGame = initHosting(settings, settings->getLevelList(), false, false);
+   LevelSource *levelSource = new FolderLevelSource(settings->getLevelList(), settings->getFolderManager()->levelDir);
+
+   gServerGame = initHosting(settings, levelSource, false, false);
 }
 
 
