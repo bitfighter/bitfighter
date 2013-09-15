@@ -670,6 +670,12 @@ void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset,
 }
 
 
+void drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset)
+{
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GL_LINE_LOOP);
+}
+
+
 void drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor)
 {
    // Fill

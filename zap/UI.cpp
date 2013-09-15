@@ -209,17 +209,9 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
 
 
    if(style == 1)       
-   {
-      // Solid red box with white border
-      glDisable(GL_BLEND);
-      drawFilledRect(inset, boxTop, canvasWidth - inset, boxTop + boxHeight, Colors::red30, Colors::white);
-      glEnable(GL_BLEND);
-      glColor(Colors::white);
-   }
+      renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::red30, 1.0f, Colors::white);
    else if(style == 2)
-   {
       renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::black, 0.70f, Colors::blue);
-   }
 
    // Draw title, message, and footer
    drawCenteredString(boxTop + vertMargin, titleSize, title);
@@ -279,7 +271,7 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
    drawCenteredString(boxTop + vertMargin, titleSize, title);
 
    S32 boxWidth = 500;
-   drawHollowRect((canvasWidth - boxWidth) / 2, boxTop - vertMargin, canvasWidth - ((canvasWidth - boxWidth) / 2), boxTop + boxHeight + vertMargin);
+   drawHollowFancyBox((canvasWidth - boxWidth) / 2, boxTop - vertMargin, canvasWidth - ((canvasWidth - boxWidth) / 2), boxTop + boxHeight + vertMargin, 15);
 
    for(S32 i = 0; i < msgLines; i++)
       drawCenteredString(boxTop + titleSpace + i * (textSize + textGap), textSize, message[i].c_str());

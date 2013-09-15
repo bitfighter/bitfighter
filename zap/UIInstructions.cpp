@@ -422,8 +422,9 @@ void InstructionsUserInterface::render()
 
       // When adding page, be sure to add item to pageHeaders array and InstructionPages enum
 
-         FontManager::popFontContext();
    }
+
+   FontManager::popFontContext();
 }
 
 
