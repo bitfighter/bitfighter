@@ -61,28 +61,38 @@ LevelDatabaseDownloadThread::~LevelDatabaseDownloadThread()
 U32 LevelDatabaseDownloadThread::run()
 {
    char url[UrlLength];
+
+   string levelFileName = "db_" + mLevelId + ".level";
+
+   FolderManager *fm = mGame->getSettings()->getFolderManager();
+   string filePath = joindir(fm->levelDir, levelFileName);
+
+   if(fileExists(filePath))
+   {
+      mGame->displayErrorMessage("!!! Already have a file called %s on the server.  Download aborted.", filePath.c_str());
+      return 0;
+   }
+
+
    mGame->displaySuccessMessage("Downloading %s", mLevelId.c_str());
    dSprintf(url, UrlLength, LevelRequest.c_str(), mLevelId.c_str());
    HttpRequest req(url);
+   
    if(!req.send())
    {
-      mGame->displayErrorMessage("Error connecting to server");
+      mGame->displayErrorMessage("!!! Error connecting to server");
       delete this;
       return 0;
    }
 
    if(req.getResponseCode() != HttpRequest::OK)
    {
-      mGame->displayErrorMessage("Server returned an error: %d", req.getResponseCode());
+      mGame->displayErrorMessage("!!! Server returned an error: %d", req.getResponseCode());
       delete this;
       return 0;
    }
 
    string levelCode = req.getResponseBody();
-   string levelFileName = "db_" + mLevelId + ".level";
-
-   FolderManager *fm = mGame->getSettings()->getFolderManager();
-   string filePath = joindir(fm->levelDir, levelFileName);
 
    if(writeFile(filePath, levelCode))
    {
@@ -102,7 +112,7 @@ U32 LevelDatabaseDownloadThread::run()
    }
    else  // File writing went bad
    {
-      mGame->displayErrorMessage("Could not write to %s", levelFileName.c_str());
+      mGame->displayErrorMessage("!!! Could not write to %s", levelFileName.c_str());
       delete this;
       return 0;
    }
@@ -111,14 +121,14 @@ U32 LevelDatabaseDownloadThread::run()
    req = HttpRequest(url);
    if(!req.send())
    {
-      mGame->displayErrorMessage("Error connecting to server");
+      mGame->displayErrorMessage("!!! Error connecting to server");
       delete this;
       return 0;
    }
 
    if(req.getResponseCode() != HttpRequest::OK)
    {
-      mGame->displayErrorMessage("Server returned an error: %d", req.getResponseCode());
+      mGame->displayErrorMessage("!!! Server returned an error: %d", req.getResponseCode());
       delete this;
       return 0;
    }
@@ -143,7 +153,7 @@ U32 LevelDatabaseDownloadThread::run()
       }
       else
       {
-         mGame->displayErrorMessage("Could not write to %s", levelgenFileName.c_str());
+         mGame->displayErrorMessage("!!! Could not write to %s", levelgenFileName.c_str());
       }
    }
    delete this;
