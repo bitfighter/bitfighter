@@ -266,15 +266,21 @@ LevelInfo ServerGame::getLevelInfo(S32 index)
 //}
 
 
-void ServerGame::sendLevelListToLevelChangers()
+void ServerGame::sendLevelListToLevelChangers(const string &message)
 {
 	for(S32 i = 0; i < getClientCount(); i++)
 	{
 	   ClientInfo *clientInfo = getClientInfo(i);
 	   GameConnection *conn = clientInfo->getConnection();
 
+      StringTableEntry msg(message);
+
 	   if(clientInfo->isLevelChanger() && conn)
+      {
 		  conn->sendLevelList();
+        if(message != "")
+           conn->s2cDisplayMessage(GameConnection::ColorInfo, SFXNone, message);
+      }
 	}
 }
 

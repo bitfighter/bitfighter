@@ -96,7 +96,7 @@ U32 LevelDatabaseDownloadThread::run()
     	  if(gServerGame->populateLevelInfoFromSource(filePath, levelInfo))
         {
     	     gServerGame->addLevel(levelInfo);
-    	     gServerGame->sendLevelListToLevelChangers();
+           gServerGame->sendLevelListToLevelChangers(string("Level ") + levelInfo.mLevelName.getString() + " added to server");
         }
       }
    }

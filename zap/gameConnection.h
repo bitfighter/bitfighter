@@ -125,7 +125,7 @@ public:
       ColorNuclearGreen,
       ColorCount,                         // Must be last, except aliases
       ColorSuccess = ColorNuclearGreen,   // Aliases for readability
-      ColorInfo = ColorAqua
+      ColorInfo = ColorAqua               // Info message
    };
 
    enum ParamType             // Be careful changing the order of this list... c2sSetParam() expects this for message creation
