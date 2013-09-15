@@ -369,7 +369,7 @@ string ServerGame::loadNextLevelInfo()
    FolderManager *folderManager = getSettings()->getFolderManager();
 
    string levelName;
-   string filename = folderManager->findLevelFile(mLevelSource->getLevelSourceNameFromIndex(mLevelLoadIndex));
+   string filename = folderManager->findLevelFile(mLevelSource->getLevelFileName(mLevelLoadIndex));
 
    TNLAssert(filename != "", "Expected a filename here!");
 
@@ -534,7 +534,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel); // Set mCurrentLevelIndex to refer to the next level we'll play
 
-   string levelFileName = mLevelSource->getLevelSourceNameFromIndex(mCurrentLevelIndex);
+   string levelFileName = mLevelSource->getLevelFileName(mCurrentLevelIndex);
 
    logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", getLevelNameFromIndex(mCurrentLevelIndex).getString(), levelFileName.c_str());
 
@@ -1497,7 +1497,7 @@ bool ServerGame::startHosting()
 
    for(S32 i = 0; i < levelCount; i++)
       logprintf(LogConsumer::ServerFilter, "\t%s [%s]", getLevelNameFromIndex(i).getString(), 
-                mLevelSource->getLevelSourceNameFromIndex(i).c_str());
+                mLevelSource->getLevelFileName(i).c_str());
 
    if(!levelCount)      // No levels loaded... we'll crash if we try to start a game       
       return false;      
