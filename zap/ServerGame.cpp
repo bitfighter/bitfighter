@@ -393,7 +393,7 @@ StringTableEntry ServerGame::getLevelNameFromIndex(S32 index)
 // Return filename of level currently in play
 const char *ServerGame::getCurrentLevelFileName()
 {
-   return mLevelSource->getLevelInfo(mCurrentLevelIndex).mLevelFileName.getString();
+   return mLevelSource->getLevelInfo(mCurrentLevelIndex).filename.c_str();
 }
 
 
@@ -710,8 +710,8 @@ static bool checkIfLevelIsOk(bool skipUploads, const LevelInfo &levelInfo, S32 p
    if(playerCount > maxPlayers)
       return false;
 
-   if(skipUploads)
-      if(!strncmp(levelInfo.mLevelFileName.getString(), "upload_", 7))
+   if(skipUploads)   // Skip levels starting with our upload prefix (currently "upload_")
+      if(!strncmp(levelInfo.filename.c_str(), UploadPrefix.c_str(), UploadPrefix.length()))
          return false;
 
    return true;

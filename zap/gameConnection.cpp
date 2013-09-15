@@ -1467,10 +1467,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       LevelSource::getLevelInfoFromCodeChunk((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), levelInfo);
 
       string titleName = makeFilenameFromString(levelInfo.mLevelName.getString());
-      string filename = "upload_" + titleName + ".level";
+      string filename = UploadPrefix + titleName + ".level";
 
       string fullFilename = strictjoindir(folderManager->levelDir, filename);
-      levelInfo.mLevelFileName = filename;
+      levelInfo.filename = filename;
+      levelInfo.folder   = folderManager->levelDir;
 
       FILE *f = fopen(fullFilename.c_str(), "wb");
       if(f)
@@ -1479,8 +1480,10 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
          fclose(f);
          logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientInfo->getName().getString(), filename);
 
-         S32 id = mServerGame->addLevel(levelInfo);
-         c2sRequestLevelChange_remote(id, false);  // we are server (switching to it after fully uploaded)
+         LevelSource::getLevelInfoFromCodeChunk((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), levelInfo);
+
+         S32 index = mServerGame->addLevel(levelInfo);
+         c2sRequestLevelChange_remote(index, false);  // we are server (switching to it after fully uploaded)
       }
       else
          s2cDisplayErrorMessage("!!! Upload failed -- server can't write file");

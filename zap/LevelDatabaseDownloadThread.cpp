@@ -89,13 +89,14 @@ U32 LevelDatabaseDownloadThread::run()
       mGame->displaySuccessMessage("Saved to %s", levelFileName.c_str());
       if(gServerGame)
       {
-    	  LevelInfo info;
-    	  info.mLevelFileName = levelFileName;
-        gServerGame->addLevel(info);
+    	  LevelInfo levelInfo;
+    	  levelInfo.filename = levelFileName;
+        levelInfo.folder = fm->levelDir;
+        gServerGame->addLevel(levelInfo);
 
-    	  if(gServerGame->populateLevelInfoFromSource(filePath, info))
+    	  if(gServerGame->populateLevelInfoFromSource(filePath, levelInfo))
         {
-    	     gServerGame->addLevel(info);
+    	     gServerGame->addLevel(levelInfo);
     	     gServerGame->sendLevelListToLevelChangers();
         }
       }

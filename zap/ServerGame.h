@@ -45,6 +45,8 @@ class WallItem;
 class ItemSpawn;
 struct LevelInfo;
 
+static const string UploadPrefix = "_upload";
+
 class ServerGame : public Game
 {
    typedef Game Parent;
