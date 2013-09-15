@@ -26,8 +26,10 @@
 #ifndef _SERVER_GAME_H_
 #define _SERVER_GAME_H_
 
-#include "game.h"       // Parent class def
+#include "game.h"                // Parent class
+
 #include "dataConnection.h"
+#include "LevelSource.h"         // For LevelSourcePtr def
 #include "LevelSpecifierEnum.h"
 
 using namespace std;
@@ -41,7 +43,6 @@ class Robot;
 class PolyWall;
 class WallItem;
 class ItemSpawn;
-class LevelSource;
 struct LevelInfo;
 
 class ServerGame : public Game
@@ -59,7 +60,7 @@ private:
 
    GridDatabase mDatabaseForBotZones;     // Database especially for BotZones to avoid gumming up the regular database with too many objects
 
-   LevelSource *mLevelSource;
+   LevelSourcePtr mLevelSource;
 
    U32 mCurrentLevelIndex;                // Index of level currently being played
    Timer mLevelSwitchTimer;               // Track how long after game has ended before we actually switch levels
@@ -110,7 +111,7 @@ private:
    LuaGameInfo *mGameInfo;
 
 public:
-   ServerGame(const Address &address, GameSettingsPtr settings, LevelSource *levelSource, bool testMode, bool dedicated);    // Constructor
+   ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated);    // Constructor
    virtual ~ServerGame();   // Destructor
 
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master

@@ -59,7 +59,7 @@ namespace Zap
 extern Vector<ClientGame *> gClientGames;
 
 // Host a game (and maybe even play a bit, too!)
-ServerGame *initHosting(GameSettingsPtr settings, LevelSource *levelSource, bool testMode, bool dedicatedServer)
+ServerGame *initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicatedServer)
 {
    Address address(IPProtocol, Address::Any, GameSettings::DEFAULT_GAME_PORT);   // Equivalent to ("IP:Any:28000")
    address.set(settings->getHostAddress());                          // May overwrite parts of address, depending on what getHostAddress contains

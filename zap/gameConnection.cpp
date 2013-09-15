@@ -673,15 +673,17 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       }
 
 
-      FolderLevelSource *levelSource = new FolderLevelSource(levelList, folder);
+      FolderLevelSource *newLevelSource = new FolderLevelSource(levelList, folder);
 
-      bool anyLoaded = levelSource->loadLevels(folderManager);    // Populates all our levelInfos by loading each file in turn
+      bool anyLoaded = newLevelSource->loadLevels(folderManager);    // Populates all our levelInfos by loading each file in turn
 
       if(!anyLoaded)
       {
          s2cDisplayErrorMessage("!!! Specified folder contains no valid levels.  See server log for details.");
          return;
       }
+
+      LevelSourcePtr levelSource = LevelSourcePtr(newLevelSource);
 
       // Folder contains some valid levels -- save it!
       folderManager->levelDir = folder;

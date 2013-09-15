@@ -1120,7 +1120,7 @@ int main(int argc, char **argv)
    
    if(settings->isDedicatedServer())
    {
-      LevelSource *levelSource = new FolderLevelSource(settings->getLevelList(), settings->getFolderManager()->levelDir);
+      LevelSourcePtr levelSource = LevelSourcePtr(new FolderLevelSource(settings->getLevelList(), settings->getFolderManager()->levelDir));
       initHosting(settings, levelSource, false, true);     // Figure out what levels we'll be playing with, and start hosting  
    }
    else

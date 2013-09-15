@@ -4785,7 +4785,7 @@ void EditorUserInterface::testLevelStart()
       Vector<string> levelList;
       levelList.push_back(TestFileName);
 
-      LevelSource *levelSource = new FolderLevelSource(levelList, getGame()->getSettings()->getFolderManager()->levelDir);
+      LevelSourcePtr levelSource = LevelSourcePtr(new FolderLevelSource(levelList, getGame()->getSettings()->getFolderManager()->levelDir));
 
       TNLAssert(!gServerGame, "Already exists!");
 
