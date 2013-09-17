@@ -29,6 +29,7 @@
 #include "gameType.h"
 #include "GameSettings.h"
 
+#include "md5wrapper.h"
 #include "stringUtils.h"
 
 #include "tnlAssert.h"
@@ -305,6 +306,38 @@ bool FolderLevelSource::loadLevels(FolderManager *folderManager)
    }
 
    return anyLoaded;
+}
+
+
+// Load specified level, put results in gameObjectDatabase.  Return md5 hash of level
+string FolderLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
+{
+   TNLAssert(index >= 0 && index < mLevelInfos.size(), "Index out of bounds!");
+
+   LevelInfo *levelInfo = &mLevelInfos[index];
+
+   string filename = FolderManager::findLevelFile(levelInfo->folder, levelInfo->filename);
+
+   if(filename == "")
+   {
+      logprintf("Unable to find level file \"%s\".  Skipping...", levelInfo->filename.c_str());
+      return "";
+   }
+
+   if(game->loadLevelFromFile(filename, gameObjectDatabase))
+      return Game::md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
+   else
+   {
+      logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
+      return "";
+   }
+}
+
+
+// Returns a textual level descriptor good for logging and error messages and such
+string FolderLevelSource::getLevelFileDescriptor(S32 index) const
+{
+   return "levelfile \"" + mLevelInfos[index].filename + "\"";
 }
 
 

@@ -185,7 +185,7 @@ class AbstractSpawn;
 struct WallRec;
 
 
-class Game : public LevelLoader
+class Game
 {
 private:
    F32 mGridSize;  
@@ -351,8 +351,11 @@ public:
    void deleteBotFromTeam(S32 teamIndex);         // Delete by teamIndex
    void deleteAllBots();                          // Delete 'em all, let God sort 'em out!
 
+   void loadLevelFromString(const string &contents, GridDatabase *database, const string& filename = "");
+   bool loadLevelFromFile(const string &filename, GridDatabase *database);
+   void parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName);
 
-   virtual void processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName);  
+   void processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName);  
    bool processLevelParam(S32 argc, const char **argv);
    string toLevelCode() const;
 

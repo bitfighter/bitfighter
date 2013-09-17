@@ -95,11 +95,14 @@ private:
    string getLevelFileNameFromIndex(S32 indx);
 
 
-   void resetAllClientTeams();            // Resets all player team assignments
+   void resetAllClientTeams();                        // Resets all player team assignments
 
    bool onlyClientIs(GameConnection *client);
 
    void cleanUp();
+   bool loadLevel();                                  // Load the level pointed to by mCurrentLevelIndex
+   void runLevelGenScript(const string &scriptName);  // Run any levelgens specified by the level or in the INI
+
 
    AbstractTeam *getNewTeam();
 
@@ -170,12 +173,7 @@ public:
    string loadNextLevelInfo();
    bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
 
-   //string getLastLevelLoadName();                        // For updating the UI
-
-   bool loadLevel(const string &fileName);               // Load a level
-   void runLevelGenScript(const string &scriptName);     // Run any levelgens specified by the level or in the INI
    void deleteLevelGen(LuaLevelGenerator *levelgen);     // Add misbehaved levelgen to the kill list
-
 
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);
 

@@ -81,11 +81,11 @@ string LuaLevelGenerator::getScriptName()
 
 
 
-// Let someone else do the work!
-void LuaLevelGenerator::processLevelLoadLine(S32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName)
-{
-   mGame->processLevelLoadLine(argc, id, argv, database, levelFileName);
-}
+//// Let someone else do the work!
+//void LuaLevelGenerator::processLevelLoadLine(S32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName)
+//{
+//   mGame->processLevelLoadLine(argc, id, argv, database, levelFileName);
+//}
 
 
 ///// Initialize levelgen specific stuff

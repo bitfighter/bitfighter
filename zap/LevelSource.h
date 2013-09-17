@@ -74,6 +74,9 @@ public:
 ////////////////////////////////////////
 
 
+class GridDatabase;
+class Game;
+
 class LevelSource
 {
 protected:
@@ -96,6 +99,8 @@ public:
    GameTypeId getLevelType(S32 index);
 
    virtual bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo) = 0;
+   virtual string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase) = 0;
+   virtual string getLevelFileDescriptor(S32 index) const = 0;
 
    bool populateLevelInfoFromSource(const string &sourceName, S32 levelInfoIndex);
 
@@ -119,6 +124,8 @@ public:
    virtual ~FolderLevelSource();                                              // Destructor
 
    bool loadLevels(FolderManager *folderManager);
+   string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
+   string getLevelFileDescriptor(S32 index) const;
 
    bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
 };

@@ -303,18 +303,6 @@ void ServerGame::resetLevelLoadIndex()
 }
 
 
-// This is only used while we're building a list of levels to display on the host during loading
-//string ServerGame::getLastLevelLoadName()
-//{
-//   if(mLevelSource->getLevelCount() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
-//      return "";
-//   else if(mLevelLoadIndex == 0)    // Still not sure when this would happen
-//      return "";
-//   else
-//      return mLevelInfos.last().mLevelName.getString();
-//}
-
-
 // Return true if the only client connected is the one we passed; don't consider bots
 bool ServerGame::onlyClientIs(GameConnection *client)
 {
@@ -532,31 +520,40 @@ void ServerGame::cycleLevel(S32 nextLevel)
       clientInfo->clearKillStreak();   // Clear any rampage the players have going... sorry, lads!
    }
 
-   mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel); // Set mCurrentLevelIndex to refer to the next level we'll play
+   bool loaded = false;
 
-   string levelFileName = mLevelSource->getLevelFileName(mCurrentLevelIndex);
-
-   logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", getLevelNameFromIndex(mCurrentLevelIndex).getString(), levelFileName.c_str());
-
-   // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
-   loadLevel(levelFileName);
-
-   // Make sure we have a gameType... if we don't we'll add a default one here
-   if(!getGameType())   // loadLevel can fail (missing file) and not create GameType
+   while(!loaded)
    {
-      logprintf(LogConsumer::LogLevelError, "Warning: Missing game type parameter in level \"%s\"", levelFileName.c_str());
+      mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel); // Set mCurrentLevelIndex to refer to the next level we'll play
+      S32 startingLevelIndex = mCurrentLevelIndex;
 
-      GameType *gameType = new GameType;
-      gameType->addToGame(this, getGameObjDatabase());
+      logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", getLevelNameFromIndex(mCurrentLevelIndex).getString(), 
+                                                                    mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
+
+      // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
+      if(loadLevel())
+      {
+         loaded = true;
+         logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
+      }
+      else
+      {
+         logprintf(LogConsumer::ServerFilter, "FAILED!");
+
+         // Level loading went bad... this code untested
+         getGameObjDatabase()->removeEverythingFromDatabase();    // Just in case
+         mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel);   // Set mCurrentLevelIndex to refer to the next level we'll play
+      
+         // If we get back to our starting index it means we can't find any levels to load...  quit?
+         if(mCurrentLevelIndex == startingLevelIndex)    
+         {
+            logprintf(LogConsumer::LogError, "All the levels I was asked to load are corrupt.  Exiting!");
+            // TODO: Do something ugly here
+         }
+      }
    }
 
-   if(getGameType()->makeSureTeamCountIsNotZero())
-      logprintf(LogConsumer::LogLevelError, "Warning: Missing team in level \"%s\"", levelFileName.c_str());
-
-   logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
-
    computeWorldObjectExtents();                       // Compute world Extents nice and early
-
 
 
    ////// This block could easily be moved off somewhere else   
@@ -897,8 +894,7 @@ inline string getPathFromFilename(const string &filename)
 }
 
 
-// XYZZY =-= Needs to do some of this work in the LevelSource, as this doesn't work with StringLevelSource
-bool ServerGame::loadLevel(const string &levelFileName)
+bool ServerGame::loadLevel()
 {
    FolderManager *folderManager = getSettings()->getFolderManager();
 
@@ -907,32 +903,23 @@ bool ServerGame::loadLevel(const string &levelFileName)
    mObjectsLoaded = 0;
    setLevelDatabaseId(0);
 
-   string filename = folderManager->findLevelFile(levelFileName);
+   mLevelFileHash = mLevelSource->loadLevel(mCurrentLevelIndex, this, getGameObjDatabase());
 
-   //cleanUp();
-   if(filename == "")
+   // Empty hash means file was not loaded.  Danger Will Robinson!
+   if(mLevelFileHash == "")
    {
-      logprintf("Unable to find level file \"%s\".  Skipping...", levelFileName.c_str());
-      return false;
-   }
-
-   if(loadLevelFromFile(filename, getGameObjDatabase()))
-      mLevelFileHash = md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
-   else
-   {
-      logprintf("Unable to process level file \"%s\".  Skipping...", levelFileName.c_str());
+      logprintf(LogConsumer::LogError, "Error: Cannot load %s", mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
       return false;
    }
 
    // We should have a gameType by the time we get here... but in case we don't, we'll add a default one now
    if(!getGameType())
    {
-      logprintf(LogConsumer::LogWarning, "Warning: Missing game type parameter in level \"%s\"", levelFileName.c_str());
+      logprintf(LogConsumer::LogWarning, "Warning: Missing GameType parameter in %s (defaulting to Bitmatch)", mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
       GameType *gameType = new GameType;
       gameType->addToGame(this, getGameObjDatabase());
    }
-
-
+   
    // Levelgens:
    // Run level's levelgen script (if any)
    runLevelGenScript(getGameType()->getScriptName());
@@ -949,7 +936,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
 
    // Check after script, script might add Teams
    if(getGameType()->makeSureTeamCountIsNotZero())
-      logprintf(LogConsumer::LogWarning, "Warning: Missing Team in level \"%s\"", levelFileName.c_str());
+      logprintf(LogConsumer::LogWarning, "Warning: Missing Team in %s", mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
 
    getGameType()->onLevelLoaded();
 

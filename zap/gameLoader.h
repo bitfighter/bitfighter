@@ -37,30 +37,6 @@ using namespace std;
 namespace Zap
 {
 
-class GridDatabase;
-
-class LevelLoader
-{
-public:
-   LevelLoader();           // Constructor
-   virtual ~LevelLoader();  // Destructor
-
-   // Must be public for the array initializations at the start of gameLoader.cpp
-   static const S32 MaxArgLen;            // Each at most MaxArgLen bytes long  (enforced in addCharToArg)
-   static const S32 MaxIdLen;             // Max 32-bit int is 10 digits, plus room for a null
-   static const S32 MaxLevelLineLength;   // Max total level line length we'll tolerate
-
-   // Put these in here so we can access them from luaLevelGenerator
-   static const S32 MAX_LEVEL_LINE_ARGS = 4096;  // Most args on a single line,
-
-   void loadLevelFromString(const string &contents, GridDatabase *database, const string& filename = "");
-   bool loadLevelFromFile(const string &filename, GridDatabase *database);
-   void parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName);
-
-   // Implementers of this class need to provide the following implementations:
-   virtual void processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName) = 0;
-   virtual void setGameTime(F32 time) = 0;
-};
 
 
 ////////////////////////////////////////

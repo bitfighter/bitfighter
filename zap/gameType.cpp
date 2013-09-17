@@ -2897,12 +2897,13 @@ void GameType::balanceTeams()
 string GameType::addBot(Vector<StringTableEntry> args)
 {
    Robot *robot = new Robot();
+   static const S32 MaxArgs = 4096;  // Most args on a single line
 
    S32 args_count = 0;
-   const char *args_char[LevelLoader::MAX_LEVEL_LINE_ARGS];  // Convert to a format processArgs will allow
+   const char *args_char[MaxArgs];  // Convert to a format processArgs will allow
 
    // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
-   for(S32 i = 0; i < args.size() && i < LevelLoader::MAX_LEVEL_LINE_ARGS; i++)
+   for(S32 i = 0; i < args.size() && i < MaxArgs; i++)
    {
       args_char[i] = args[i].getString();
       args_count++;

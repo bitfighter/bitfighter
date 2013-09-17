@@ -42,6 +42,8 @@
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>
 #include <cmath>
+#include <fstream>
+#include <sstream>
 
 
 using namespace TNL;
@@ -619,6 +621,71 @@ void Game::onConnectedToMaster()
 void Game::resetLevelInfo()
 {
    setGridSize((F32)DefaultGridSize);
+}
+
+
+// Each line of the file is handled separately by processLevelLoadLine in game.cpp or UIEditor.cpp
+
+void Game::parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName)
+{
+   Vector<string> args = parseString(string(line));
+   U32 argc = args.size();
+   S32 id = 0;
+   const char** argv = new const char* [argc];
+
+   if(argc >= 1)
+   {
+      size_t pos = args[0].find("!");
+      if(pos != string::npos)
+      {
+         id = atoi(args[0].substr(pos + 1, args[0].size() - pos - 1).c_str());
+         args[0] = args[0].substr(0, pos);
+      }
+   }
+
+   for(U32 i = 0; i < argc; i++)
+   {
+      argv[i] = args[i].c_str();
+   }
+
+   try
+   {
+      processLevelLoadLine(argc, id, (const char **) argv, database, levelFileName);
+   }
+   catch(LevelLoadException &e)
+   {
+      logprintf("Level Error: Can't parse %s: %s", line, e.what());  // TODO: fix "line" variable having hundreds of level lines
+   }
+
+   delete[] argv;
+}
+
+
+void Game::loadLevelFromString(const string &contents, GridDatabase* database, const string &filename)
+{
+   istringstream iss(contents);
+   string line;
+   while(std::getline(iss, line))
+   {
+      parseLevelLine(line.c_str(), database, filename);
+   }
+}
+
+
+bool Game::loadLevelFromFile(const string &filename, GridDatabase *database)
+{
+   string contents = readFile(filename);
+   if(contents == "")
+      return false;
+
+   loadLevelFromString(contents, database, filename);
+
+#ifdef SAM_ONLY
+   // In case the level crash the game trying to load, want to know which file is the problem. 
+   logprintf("Loading %s", filename.c_str());
+#endif
+
+   return true;
 }
 
 

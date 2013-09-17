@@ -2370,7 +2370,7 @@ string FolderManager::findLevelFile(const string &filename) const
 }
 
 
-string FolderManager::findLevelFile(const string &leveldir, const string &filename) const
+string FolderManager::findLevelFile(const string &leveldir, const string &filename)
 {
 #ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param
    const char *folders[] = { "d:\\media\\levels\\", "" };
