@@ -666,9 +666,7 @@ void Game::loadLevelFromString(const string &contents, GridDatabase* database, c
    istringstream iss(contents);
    string line;
    while(std::getline(iss, line))
-   {
       parseLevelLine(line.c_str(), database, filename);
-   }
 }
 
 

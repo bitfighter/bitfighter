@@ -399,4 +399,17 @@ bool StringLevelSource::populateLevelInfoFromSource(const string &fullFilename, 
 }
 
 
+string StringLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
+{
+   game->loadLevelFromString(mLevelCode, gameObjectDatabase, "");
+   return Game::md5.getHashFromString(mLevelCode); 
+}
+
+
+// Returns a textual level descriptor good for logging and error messages and such
+string StringLevelSource::getLevelFileDescriptor(S32 index) const
+{
+   return "string input (" + itos(mLevelCode.length()) + " chars)";
+}
+
 }

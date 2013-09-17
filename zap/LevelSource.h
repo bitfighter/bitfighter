@@ -147,6 +147,9 @@ public:
    StringLevelSource(const string &levelCode);     // Constructor
    virtual ~StringLevelSource();                   // Destructor
 
+   string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
+   string getLevelFileDescriptor(S32 index) const;
+
    bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
 };
 
