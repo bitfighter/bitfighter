@@ -1476,7 +1476,7 @@ void ServerGame::clearBotMoves()
 // nly
 bool ServerGame::startHosting()
 {
-   if(mSettings->getFolderManager()->levelDir == "")     // Never did resolve a leveldir... no hosting for you!
+   if(!mLevelSource->isEmptyLevelDirOk() && mSettings->getFolderManager()->levelDir == "")     // Never did resolve a leveldir... no hosting for you!
       return false;
 
    hostingModePhase = Hosting;

@@ -101,6 +101,7 @@ public:
    virtual bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo) = 0;
    virtual string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase) = 0;
    virtual string getLevelFileDescriptor(S32 index) const = 0;
+   virtual bool isEmptyLevelDirOk() const = 0;
 
    bool populateLevelInfoFromSource(const string &sourceName, S32 levelInfoIndex);
 
@@ -126,6 +127,7 @@ public:
    bool loadLevels(FolderManager *folderManager);
    string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
    string getLevelFileDescriptor(S32 index) const;
+   bool isEmptyLevelDirOk() const;
 
    bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
 };
@@ -149,6 +151,7 @@ public:
 
    string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
    string getLevelFileDescriptor(S32 index) const;
+   bool isEmptyLevelDirOk() const;
 
    bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
 };

@@ -356,17 +356,9 @@ TEST_F(BfTest, ClientServerInteraction)
 
    clientGame->userEnteredLoginCredentials("TestUser", "password", false);    // Simulates entry from NameEntryUserInterface
 
-   // Can't host without setting the leveldir
-   FolderManager *folderManager = settings->getFolderManager();
-   folderManager->levelDir = "levels";    // Will this always work??
-
-   TNLAssert(settings->getLevelList().size() > 0, 
-         "No levels found.  In VC++, you might need to set your working dir for the test project to \"$(TargetDir)\"");
-
    string code = getLevelCode1();
    LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(code));
    ServerGame *serverGame = initHosting(settings, levelSource, true, false);
-
 
    GameType *gt = new GameType();    // Cleaned up by database
    gt->addToGame(serverGame, serverGame->getGameObjDatabase());

@@ -368,6 +368,12 @@ bool FolderLevelSource::populateLevelInfoFromSource(const string &fullFilename, 
 }
 
 
+bool FolderLevelSource::isEmptyLevelDirOk() const
+{
+   return false;     // We need a folder to read from!
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -411,5 +417,12 @@ string StringLevelSource::getLevelFileDescriptor(S32 index) const
 {
    return "string input (" + itos(mLevelCode.length()) + " chars)";
 }
+
+
+bool StringLevelSource::isEmptyLevelDirOk() const
+{
+   return true;      // No folder needed -- level was passed into constructor!
+}
+
 
 }
