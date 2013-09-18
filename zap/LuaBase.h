@@ -128,6 +128,7 @@ public:
    static void getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &points);
    static Point getPointOrXY(lua_State *L, S32 index);
    static Vector<Point> getPointsOrXYs(lua_State *L, S32 index);
+   static Vector<Vector<Point> > getPolygons(lua_State *L, S32 index);
 
    static WeaponType getWeaponType(lua_State *L, S32 index);
    static ShipModule getShipModule(lua_State *L, S32 index);
@@ -147,6 +148,7 @@ public:
    // More complex objects:
    static S32 returnPoint(lua_State *L, const Point &point);
    static S32 returnPoints(lua_State *L, const Vector<Point> *);
+   static S32 returnPolygons(lua_State *L, const Vector<Vector<Point> > &polys);
    static S32 returnMenuItem(lua_State *L, MenuItem *menuItem);
    static S32 returnShip(lua_State *L, Ship *ship);                // Handles null references properly
    static S32 returnTeam(lua_State *L, Team *team);

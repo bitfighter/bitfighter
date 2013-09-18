@@ -30,6 +30,7 @@
 #include "Engineerable.h"
 #include "game.h"
 #include "ServerGame.h"
+#include "GeomUtils.h"
 
 #include "GameTypesEnum.h"
 #include "TeamConstants.h"
@@ -882,6 +883,13 @@ void LuaScriptRunner::setEnums(lua_State *L)
       (char*)NULL);
 
 
+   // Polygon boolean operations
+   add_enum_to_lua(L, "ClipType",
+   #  define CLIP_TYPE_ITEM(luaEnumName, value) #luaEnumName, true, value,
+         CLIP_TYPE_TABLE
+   #  undef CLIP_TYPE_ITEM
+      (char*)NULL);
+
    // TODO: Document this one!!
 
    // Create a table at level run time that has team, indexed by name?
@@ -1043,6 +1051,14 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
    LUA_STATIC_METHODS("unused", REGISTER_STATIC_LINE);
 
 #  undef REGISTER_STATIC_LINE
+
+
+   lua_pushcfunction(L, lua_clipPolygons);
+   lua_setglobal(L, "clipPolygons");
+   lua_pushcfunction(L, lua_polyganize);
+   lua_setglobal(L, "polyganize");
+   lua_pushcfunction(L, lua_triangulate);
+   lua_setglobal(L, "triangulate");
 
 
    // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented

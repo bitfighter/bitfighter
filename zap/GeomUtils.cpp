@@ -46,6 +46,7 @@
 
 #include "GeomUtils.h"
 #include "MathUtils.h"                    // For findLowestRootInInterval()
+#include "LuaBase.h"
 
 #include "../recast/Recast.h"
 #include "../recast/RecastAlloc.h"
@@ -954,6 +955,221 @@ Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons)
 }
 
 
+/**
+ * Traverse a Clipper PolyTree looking for holes.
+ */
+bool containsHoles(const PolyTree &tree)
+{
+   PolyNode *node = tree.GetFirst();
+   while(node)
+   {
+      if(node->IsHole())
+         return true;
+
+      node = node->GetNext();
+   }
+
+   return false;
+}
+
+
+/**
+ * Convert a flat list of triangles to a polygon list.
+ */
+void trianglesToPolygons(const Vector<Point> &triangles, Vector<Vector<Point> > &result)
+{
+   if(triangles.size() % 3 != 0)
+   {
+      TNLAssert(false, "triangles.size() is not a multiple of three");
+      return;
+   }
+
+   result.clear();
+   result.reserve(triangles.size() / 3);
+   for(S32 i = 0; i < triangles.size(); i += 3)
+   {
+      Vector<Point> poly;
+      poly.push_back(triangles[i]);
+      poly.push_back(triangles[i + 1]);
+      poly.push_back(triangles[i + 2]);
+      result.push_back(poly);
+   }
+}
+
+
+/**
+ * Convert a Recast poly mesh to a polygon list.
+ */
+void polyMeshToPolygons(const rcPolyMesh &mesh, Vector<Vector<Point> > &result)
+{
+   result.clear();
+   result.reserve(mesh.npolys);
+   for(S32 i = 0; i < mesh.npolys; i++)
+   {
+      Vector<Point> poly;
+      poly.reserve(mesh.nvp);
+      for(S32 j = 0; j < mesh.nvp; j++)
+      {
+         // index of the next vertex
+         U16 vertIndex = mesh.polys[i * mesh.nvp + j];
+
+         // RC_MESH_NULL_IDX marks the end of this polygon
+         if(vertIndex == RC_MESH_NULL_IDX)
+            break;
+
+         // otherwise, add a new point
+         const U16 *vert = &mesh.verts[vertIndex * 2];
+         poly.push_back(Point((S16) (vert[0] - mesh.offsetX), (S16) (vert[1] - mesh.offsetY)));
+      }
+
+      if(poly.size() > 0)
+         result.push_back(poly);
+   }
+}
+
+
+/**
+ * Perform a Clipper operation on two sets of polygons.
+ */
+bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge)
+{
+   Polygons upscaledSubject = upscaleClipperPoints(subject);
+   Polygons upscaledClip = upscaleClipperPoints(clip);
+   Clipper clipper;
+   bool success = false;
+
+   try  // there is a "throw" in AddPolygon
+   {
+      clipper.AddPolygons(upscaledSubject, ptSubject);
+      if(clip.size() > 0)
+      {
+         clipper.AddPolygons(upscaledClip, ptClip);
+      }
+   }
+   catch(...)
+   {
+      logprintf(LogConsumer::LogError, "Exception thrown by Clipper::AddPolygons");
+      return false;
+   }
+
+   // perform the requested operation
+   PolyTree solution;
+   success = clipper.Execute(operation, solution, pftNonZero, pftNonZero);
+
+   if(!success)
+   {
+      // clipper failed
+      return false;
+   }
+   else if(containsHoles(solution))
+   {
+      // if the solution has holes, then we resort to triangulating them away
+      Vector<Point> resultTriangles;
+      success = Triangulate::processComplex(resultTriangles, Rect(0, 0, 0, 0), solution, false, true);
+
+      if(!success)
+      {
+         // triangulation failed
+         return false;
+      }
+      else if(merge)
+      {
+         // if requested, we merge the triangles into convex polygons
+         rcPolyMesh mesh;
+         success = Triangulate::mergeTriangles(resultTriangles, mesh, 0xFF);
+
+         if(success)
+            polyMeshToPolygons(mesh, result);
+      }
+      else
+      {
+         // otherwise, just return a bunch of triangles
+         trianglesToPolygons(resultTriangles, result);
+      }
+   }
+   else
+   {
+      // otherwise no holes were found, so just downscale the result
+      Polygons convertedSolution;
+      PolyTreeToPolygons(solution, convertedSolution);
+      result = downscaleClipperPoints(convertedSolution);
+   }
+
+   return success;
+}
+
+
+/**
+ * Transforms a list of polygons into triangles
+ *
+ * Assumes the polygons have been cleaned through Clipper
+ */
+bool triangulate(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &result)
+{
+   Polygons upscaledInput = upscaleClipperPoints(input);
+   Clipper clipper;
+
+   try  // there is a "throw" in AddPolygon
+   {
+      clipper.AddPolygons(upscaledInput, ptSubject);
+   }
+   catch(...)
+   {
+      logprintf(LogConsumer::LogError, "Exception thrown by Clipper::AddPolygons");
+      return false;
+   }
+
+   // perform the requested operation
+   PolyTree solution;
+   bool success = clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
+
+   if(success)
+   {
+      Vector<Point> resultTriangles;
+      success = Triangulate::processComplex(resultTriangles, Rect(0, 0, U16_MAX, U16_MAX), solution, false, true);
+
+      if(success)
+      {
+         trianglesToPolygons(resultTriangles, result);
+      }
+   }
+
+   return success;
+}
+
+
+/**
+ * Transforms a list of triangles into convex polygons.
+ *
+ * Any non-triangle polygons will be ignored.
+ */
+bool polyganize(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &output)
+{
+   rcPolyMesh mesh;
+   Vector<Point> triangles;
+
+   for(S32 i = 0; i < input.size(); i++)
+   {
+      if(input[i].size() != 3)
+         continue;
+
+      for(S32 j = 0; j < input[i].size(); j++)
+      {
+         triangles.push_back(input[i][j]);
+      }
+   }
+
+   bool success = Triangulate::mergeTriangles(triangles, mesh, 0xFF);
+
+   if(!success)
+      return false;
+
+   polyMeshToPolygons(mesh, output);
+
+   return true;
+}
+
+
 // Use Clipper to merge inputPolygons, placing the result in outputPolygons
 bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vector<Point> > &outputPolygons)
 {
@@ -1102,7 +1318,7 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
 
 
 bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bounds,
-      const PolyTree &polyTree)
+      const PolyTree &polyTree, bool ignoreFills, bool ignoreHoles)
 {
    // First build our map extents outline polygon (polyline).  Clockwise into Clipper's format
    F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
@@ -1139,7 +1355,8 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
    {
       // A Clipper hole is actually what we want to build zones for; they become our bounding
       // polylines.  poly2tri holes are therefore the inverse
-      if(currentNode->IsHole())
+      if((!ignoreHoles && currentNode->IsHole()) ||
+         (!ignoreFills && !currentNode->IsHole()))
       {
          // Build up this polyline in poly2tri's format (downscale Clipper points)
          Vector<p2t::Point*> polyline;
@@ -1166,7 +1383,6 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
             cdt->AddHole(hole.getStlVector());
          }
 
-         // Do the work!
          cdt->Triangulate();
 
          // Add current output triangles to our total
@@ -1501,6 +1717,123 @@ void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, 
    cornerPoints.push_back(end   + crossVec);
    cornerPoints.push_back(end   - crossVec);
    cornerPoints.push_back(start - crossVec);
+}
+
+
+/**
+ * @luafunc table clipPolygons(ClipType op, mixed subject, mixed clip, bool mergeAfterTriangulating = false)
+ *
+ * @brief
+ * Perform a clipping operation on sets of polygons.
+ *
+ * @desc
+ * This function uses Bitfighter's polygon manipulation utilities to perform
+ * boolean operations on sets of polygons. While these utilities are generally robust,
+ * there are a few caveats and some inputs may cause failure.
+ *
+ * In particular, Bitfighter's engine does not support "holes" in polygons. Because
+ * of this, if the result of the requested operation would have holes, the *entire*
+ * solution is triangulated to remove them. The triangles may then be optionally
+ * merged into convex polygons. This way, the client code (or level designer)
+ * can select and manually join the result into the desired shape, rather than
+ * making Bitfighter guess (probably incorrectly) how it should look. When no holes
+ * are created in the output, this function produces the least number
+ * of polygons which represent it.
+ *
+ * @param op \ref ClipTypeEnum The polygon boolean operation to execute.
+ * @param subject A table of polygons or a single polygon to use as the subject.
+ * @param clip A table of polygons or a single polygon to use as the clip.
+ * @param mergeAfterTriangulating Merge triangles into convex polygons when forced to triangulate the result.
+ *
+ * @return A table of the solution polygons, or `nil` on failure.
+ */
+S32 lua_clipPolygons(lua_State* L)
+{
+   if(lua_gettop(L) < 3)
+      return 0;
+
+   // read the arguments
+   ClipType operation = static_cast<ClipType>(lua_tointeger(L, 1));
+   Vector<Vector<Point> > subject = LuaBase::getPolygons(L, 2);
+   Vector<Vector<Point> > clip = LuaBase::getPolygons(L, 3);
+
+   bool merge = true;
+   if(lua_gettop(L) >= 4)
+   {
+      merge = LuaBase::getBool(L, 4);
+      lua_pop(L, 1);
+   }
+
+   // pop the arguments
+   lua_pop(L, 3);
+
+   // try to execute the operation
+   Vector<Vector<Point> > output;
+   if(!clipPolys(operation, subject, clip, output, merge))
+      return LuaBase::returnNil(L);
+
+   // return the polygons if we're successful
+   return LuaBase::returnPolygons(L, output);
+}
+
+
+/**
+ * @luafunc table triangulate(mixed polygons)
+ * @brief
+ * Break up polygons into triangles.
+ *
+ * @desc
+ * Performs a Constrained Delauney Triangulation on the input. This function
+ * is meant to be used for breaking complex polygons into pieces which can then
+ * be manipulated either in the editor or through more processing.
+ *
+ * @param polygons Either a single polygon or a table of polygons.
+ *
+ * @return A table of triangles or nil on failure.
+ */
+S32 lua_triangulate(lua_State *L)
+{
+   Vector<Vector<Point> > input = LuaBase::getPolygons(L, 1);
+   lua_pop(L, 1);
+
+   // try to execute the operation
+   Vector<Vector<Point> > result;
+   if(!triangulate(input, result))
+      return LuaBase::returnNil(L);
+
+   // return the polygons if we're successful
+   return LuaBase::returnPolygons(L, result);
+}
+
+
+/**
+ * @luafunc table polyganize(mixed triangles)
+ * @brief
+ * Merge triangles into convex polygons
+ *
+ * @desc
+ * Merges triangles into convex polygons using the Recast library. This
+ * function is meant for use as a best-effort to clean up triangles
+ * output by geometric operations.
+ *
+ * @note
+ * Any non-triangle polygons in the input will be discarded.
+ *
+ * @param triangles Either a single triangle or a table of triangles.
+ *
+ * @return A table of convex polygons or nil on failure.
+ */
+S32 lua_polyganize(lua_State *L)
+{
+   Vector<Vector<Point> > input = LuaBase::getPolygons(L, 1);
+   lua_pop(L, 1);
+
+   Vector<Vector<Point> > result;
+   if(!polyganize(input, result))
+      return LuaBase::returnNil(L);
+
+   // return the polygons if we're successful
+   return LuaBase::returnPolygons(L, result);
 }
 
 

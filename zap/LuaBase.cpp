@@ -413,6 +413,25 @@ Vector<Point> LuaBase::getPointsOrXYs(lua_State *L, S32 index)
    return points;
 }
 
+/**
+ * Reads a list of polygons from the specified lua index
+ */
+Vector<Vector<Point> > LuaBase::getPolygons(lua_State *L, S32 index)
+{
+   Vector<Vector<Point> > result;
+   S32 count = 0;
+   lua_pushnil(L);                                       // table ... nil
+   while(lua_next(L, index))                             // table ... k, v
+   {
+      result.resize(count + 1);
+      Vector<Point > &poly = result[count];
+      LuaBase::getPointVectorFromTable(L, -1, poly);     // table ... k, v, v
+      lua_pop(L, 2);                                     // table ... k
+      count += 1;
+   }
+                                                         // table ...
+   return result;
+}
 
 WeaponType LuaBase::getWeaponType(lua_State *L, S32 index)
 {
@@ -682,6 +701,29 @@ S32 LuaBase::returnPoints(lua_State *L, const Vector<Point> *points)
    {
       lua_pushvec(L, points->get(i).x, points->get(i).y);  // Push point onto the stack      -- table, point
       lua_rawseti(L, tableIndex, i + 1);                   // + 1  => Lua indices 1-based    -- table[i + 1] = point                                      
+   }
+
+   return 1;
+}
+
+
+S32 LuaBase::returnPolygons(lua_State *L, const Vector<Vector<Point> > &polys)
+{
+   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not clean!");
+
+   lua_createtable(L, polys.size(), 0);            // polylist
+   for(S32 i = 0; i < polys.size(); i++)
+   {
+      Vector<Point> points = polys[i];
+      lua_createtable(L, points.size(), 0);        // polylist, poly
+
+      for(S32 j = 0; j < points.size(); j++)
+      {
+         lua_pushvec(L, points[j].x, points[j].y); // polylist, poly, point
+         lua_rawseti(L, -2, j + 1);                // polylist, poly
+      }
+
+      lua_rawseti(L, -2, i + 1);                   // polylist
    }
 
    return 1;

@@ -56,16 +56,10 @@
 #include <vector>
 
 #include "tnlTypes.h"
+#include "../clipper/clipper.hpp"
 
-// forward declarations
-namespace ClipperLib {
-   struct IntPoint;
-   typedef std::vector<IntPoint> Polygon;
-   typedef std::vector<Polygon> Polygons;
-   class PolyTree;
-};
 struct rcPolyMesh;
-
+struct lua_State;
 
 using namespace TNL;
 using namespace ClipperLib;
@@ -74,6 +68,19 @@ namespace Zap {
 
 class Point;
 class Rect;
+
+/**
+ * @luaenum ClipType(1,1)
+ * Supported operations for clipPolygon. For a description of the operations,
+ * and the roles of `subject` and `clip` in each, visit
+ * http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/ClipType.htm
+ */
+#define CLIP_TYPE_TABLE \
+   CLIP_TYPE_ITEM( Intersection, ctIntersection ) \
+   CLIP_TYPE_ITEM( Union,        ctUnion) \
+   CLIP_TYPE_ITEM( Difference,   ctDifference ) \
+   CLIP_TYPE_ITEM( Xor,          ctXor ) \
+
 
 // Test between a polygon and a swept sphere with radius inRadius moving from inBegin to inBegin + inDelta
 // If there is an intersection the intersection position is returned in outPoint and the center of the
@@ -130,6 +137,14 @@ Vector<Point> floatsToPoints(const Vector<F32> floats);
 // Use Clipper to merge inputPolygons, placing the result in solution
 bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vector<Point> > &outputPolygons);
 bool mergePolysToPolyTree(const Vector<Vector<Point> > &inputPolygons, PolyTree &solution);
+bool containsHoles(const PolyTree &tree);
+
+bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge);
+bool triangulate(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &result);
+bool polyganize(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &result);
+
+void trianglesToPolygons(const Vector<Point> &triangles, Vector<Vector<Point> > &result);
+void polyMeshToPolygons(const rcPolyMesh &mesh, Vector<Vector<Point> > &result);
 
 // Convert a Polygons to a list of points in a-b b-c c-d d-a format
 void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineSegmentPoints);
@@ -172,7 +187,7 @@ public:
    static bool Process(const Vector<Point> &contour, Vector<Point> &result);
 
    // Triangulate a bounded area with complex polygon holes
-   static bool processComplex(Vector<Point> &outputTriangles, const Rect& bounds, const PolyTree &polygonList);
+   static bool processComplex(Vector<Point> &outputTriangles, const Rect& bounds, const PolyTree &polygonList, bool ignoreFills = true, bool ignoreHoles = false);
 
    // Merge triangles into convex polygons
    static bool mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& mesh, S32 maxVertices = 6);
@@ -203,6 +218,9 @@ void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges);
 // Simply takes a segment and "puffs it out" to a rectangle of a specified width, filling cornerPoints.  Does not modify endpoints.
 void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints);
 
+S32 lua_clipPolygons(lua_State *L);
+S32 lua_triangulate(lua_State *L);
+S32 lua_polyganize(lua_State *L);
 
 };
 #endif // _GEOM_UTILS_
