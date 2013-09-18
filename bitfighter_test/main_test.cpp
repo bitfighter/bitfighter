@@ -374,13 +374,11 @@ TEST_F(BfTest, ClientServerInteraction)
    bool ok = serverGame->startHosting();     // This will load levels and wipe out any teams
    clientGame->joinLocalGame(serverGame->getNetInterface());
 
-   for(S32 i = 0; i < 100; i++)
-   {
+   // Idle for a while
+   for(S32 i = 0; i < 5; i++)
       idleGames(clientGame, serverGame, 10);
-   }
 
-   const AbstractTeam *t = clientGame->getTeam(0);
-   const char *name = t->getName().getString();
+   ASSERT_EQ("Bluey", string(clientGame->getTeam(0)->getName().getString()));      // Ensure team name propigates from server to client
 
    clientGame->getGameType();
    
