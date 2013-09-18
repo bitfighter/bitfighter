@@ -415,7 +415,7 @@ string StringLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObj
 // Returns a textual level descriptor good for logging and error messages and such
 string StringLevelSource::getLevelFileDescriptor(S32 index) const
 {
-   return "string input (" + itos(mLevelCode.length()) + " chars)";
+   return "string input (" + itos((U32) mLevelCode.length()) + " chars)";
 }
 
 
