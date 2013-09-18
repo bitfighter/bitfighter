@@ -80,7 +80,6 @@ public:
    // Collide always returns true for Barrier objects
    bool collide(BfObject *otherObject);
 
-
    void getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const;
 
    // Clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints

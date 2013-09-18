@@ -17,6 +17,7 @@
 #include "../zap/config.h"
 #include "../zap/SystemFunctions.h"
 #include "../zap/UIManager.h"
+#include "../zap/PickupItem.h"
 
 #include "SDL.h"
 #include "../zap/VideoSystem.h"
@@ -378,7 +379,35 @@ TEST_F(BfTest, ClientServerInteraction)
    for(S32 i = 0; i < 5; i++)
       idleGames(clientGame, serverGame, 10);
 
-   ASSERT_EQ("Bluey", string(clientGame->getTeam(0)->getName().getString()));      // Ensure team name propigates from server to client
+   Vector<DatabaseObject *> fillVector;
+
+   // Test level item propigation
+   // TestItem
+   clientGame->getGameObjDatabase()->findObjects(TestItemTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());
+   ASSERT_EQ(1, fillVector[0]->getCentroid() == Point(255,255));
+
+   // RepairItem
+   fillVector.clear();
+   clientGame->getGameObjDatabase()->findObjects(RepairItemTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());
+   ASSERT_EQ(1, fillVector[0]->getCentroid() == Point(0,255));
+   //ASSERT_EQ(10, static_cast<RepairItem *>(fillVector[0])->getRepopDelay()); <=== repopDelay is not sent to the client; on client will always be default
+
+   // Wall
+   fillVector.clear();
+   clientGame->getGameObjDatabase()->findObjects(BarrierTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());
+   Barrier *barrier = static_cast<Barrier *>(fillVector[0]);
+   ASSERT_EQ("-255, -255 | -255, 255", barrier->mPoints[0].toString() + " | " + barrier->mPoints[1].toString());
+   ASSERT_EQ(40, barrier->mWidth);
+
+   // Test metadata propigation
+   ASSERT_STREQ("Bluey", clientGame->getTeam(0)->getName().getString());                                       // Team name
+   ASSERT_STREQ("Test Level",                 clientGame->getGameType()->getLevelName()->getString());         // Quoted in level file
+   ASSERT_STREQ("This is a basic test level", clientGame->getGameType()->getLevelDescription()->getString());  // Quoted in level file
+   ASSERT_STREQ("level creator",              clientGame->getGameType()->getLevelCredits()->getString());      // Not quoted in level file
+   
 
    clientGame->getGameType();
    

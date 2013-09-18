@@ -30,15 +30,18 @@ string getLevelCode1()
 {
    return
       "GameType 10 8\n"
-      "LevelName TestLevelOne\n"
-      "LevelDescription This is for testing\n"
-      "LevelCredits watusimoto\n"
+      "LevelName \"Test Level\"\n"                             // Has quotes
+      "LevelDescription \"This is a basic test level\"\n"      // Has quotes
+      "LevelCredits level creator\n"                           // No quotes
       "GridSize 255\n"
-      "Team Bluey 0 0 0.75\n"
+      "Team Bluey 0 0 1\n"
       "Specials\n"
       "MinPlayers\n"
       "MaxPlayers\n"
-      "Spawn -1 0 0\n"
+      "BarrierMaker 40 -1 -1 -1 1\n"
+      "RepairItem 0 1 10\n"
+      "Spawn 0 -0.6 0\n"
+      "TestItem 1 1\n"
    ;
 }
 
