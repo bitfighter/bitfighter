@@ -1054,19 +1054,20 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 
 #  undef REGISTER_STATIC_LINE
 
-   std::map<string, vector<LuaStaticFunctionProfile> >::iterator it;
-   std::map<string, vector<LuaStaticFunctionProfile> > moduleProfiles = LuaModuleRegistrarBase::getModuleProfiles();
+   ProfileMap moduleProfiles = LuaModuleRegistrarBase::getModuleProfiles();
+
+   ProfileMap::iterator it;
    for(it = moduleProfiles.begin(); it != moduleProfiles.end(); it++)
    {
-      lua_createtable(L, 0, 0);                                                      // -- table
+      lua_createtable(L, 0, 0);                                  // -- table
       vector<LuaStaticFunctionProfile> &profiles = (*it).second;
       for(U32 i = 0; i < profiles.size(); i++)
       {
          LuaStaticFunctionProfile &profile = profiles[i];
-         lua_pushcfunction(L, profile.function);                                    // -- table, fn
-         lua_setfield(L, -2, profile.functionName);                                 // -- table
+         lua_pushcfunction(L, profile.function);                 // -- table, fn
+         lua_setfield(L, -2, profile.functionName);              // -- table
       }
-      lua_setglobal(L, (*it).first.c_str());                                       // --
+      lua_setglobal(L, (*it).first.c_str());                     // --
    }
 
 

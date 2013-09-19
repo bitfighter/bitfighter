@@ -193,6 +193,7 @@ public:
    // Documenting and help
    static S32 checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,   const char *className, const char *functionName);
    static S32 checkArgList(lua_State *L, const LuaFunctionArgList &functionArgList, const char *className, const char *functionName);
+   static S32 checkArgList(lua_State *L, const char *moduleName, const char *functionName);
 
    static bool checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stackPos);
 

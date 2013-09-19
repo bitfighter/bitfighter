@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "LuaBase.h"          // Header
+#include "LuaModule.h"
 #include "playerInfo.h"       // For access to PlayerInfo's push function
 #include "luaGameInfo.h"
 #include "LuaWrapper.h"
@@ -86,6 +87,29 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
       return -1;
 
    return checkArgList(L, functionInfo->functionArgList, className, functionName);
+}
+
+
+S32 LuaBase::checkArgList(lua_State *L, const char *moduleName, const char *functionName)
+{
+   ProfileMap profileMap = LuaModuleRegistrarBase::getModuleProfiles();
+
+   ProfileMap::iterator iter = profileMap.find(string(moduleName));
+   if(iter != profileMap.end())
+   {
+      vector<LuaStaticFunctionProfile> &profiles = (*iter).second;
+      for(U32 i = 0; i < profiles.size(); i++)
+      {
+         if(!strcmp(profiles[i].functionName, functionName))
+         {
+            return checkArgList(L, profiles[i].functionArgList, moduleName, functionName);
+         }
+      }
+   }
+
+   // No matching profile found
+   TNLAssert(false, "Function profile not found");
+   return -1;
 }
 
 

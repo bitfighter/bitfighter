@@ -15,15 +15,17 @@ namespace Zap
  * LuaScriptRunner::registerLooseFunctions.
  */
 
+typedef map<string, vector<LuaStaticFunctionProfile> > ProfileMap;
+
 /**
  * Static storage for mapping module names to profile vectors.
  * Gives the advantage of guaranteed pre-main initialization.
  */
 struct LuaModuleRegistrarBase
 {
-   static map<string, vector<LuaStaticFunctionProfile> > &getModuleProfiles()
+   static ProfileMap &getModuleProfiles()
    {
-      static map<string, vector<LuaStaticFunctionProfile> > profiles;
+      static ProfileMap profiles;
       return profiles;
    }
 };

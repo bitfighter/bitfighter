@@ -47,6 +47,8 @@
 #include "GeomUtils.h"
 #include "MathUtils.h"                    // For findLowestRootInInterval()
 #include "LuaModule.h"
+#include "LuaBase.h"
+
 
 #include "../recast/Recast.h"
 #include "../recast/RecastAlloc.h"
@@ -1758,6 +1760,8 @@ GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
  */
 S32 lua_clipPolygons(lua_State* L)
 {
+   LuaBase::checkArgList(L, "Geom", "clipPolygons");
+
    if(lua_gettop(L) < 3)
       return 0;
 
@@ -1802,6 +1806,8 @@ S32 lua_clipPolygons(lua_State* L)
  */
 S32 lua_triangulate(lua_State *L)
 {
+   LuaBase::checkArgList(L, "Geom", "triangulate");
+
    Vector<Vector<Point> > input = LuaBase::getPolygons(L, 1);
    lua_pop(L, 1);
 
@@ -1834,6 +1840,7 @@ S32 lua_triangulate(lua_State *L)
  */
 S32 lua_polyganize(lua_State *L)
 {
+   LuaBase::checkArgList(L, "Geom", "polyganize");
    Vector<Vector<Point> > input = LuaBase::getPolygons(L, 1);
    lua_pop(L, 1);
 
