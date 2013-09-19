@@ -1730,7 +1730,7 @@ GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
 
 
 /**
- * @luafunc table clipPolygons(ClipType op, mixed subject, mixed clip, bool mergeAfterTriangulating = false)
+ * @luafunc static table Geom::clipPolygons(ClipType op, mixed subject, mixed clip, bool mergeAfterTriangulating = false)
  *
  * @brief
  * Perform a clipping operation on sets of polygons.
@@ -1787,7 +1787,7 @@ S32 lua_clipPolygons(lua_State* L)
 
 
 /**
- * @luafunc table triangulate(mixed polygons)
+ * @luafunc static table Geom::triangulate(mixed polygons)
  * @brief
  * Break up polygons into triangles.
  *
@@ -1816,7 +1816,7 @@ S32 lua_triangulate(lua_State *L)
 
 
 /**
- * @luafunc table polyganize(mixed triangles)
+ * @luafunc static table Geom::polyganize(mixed triangles)
  * @brief
  * Merge triangles into convex polygons
  *

@@ -196,14 +196,15 @@ foreach my $file (@files) {
             # In C++ code, we use "::" to separate classes from functions (class::func); in Lua, we use "." (class.func).
             my $sep = ($file =~ m|\.lua$|) ? "[.:]" : "::";
 
-            #                          $1          $2         $3     $4     (warning: $1 grabs extra spaces, trimmed below)
-            $line =~ m|.*?\@luafunc\s+(\w+\s+)?(?:(\w+)$sep)?(.+?)\((.*)\)|;    # Grab retval, class, method, and args from $line
+            #                                      $1          $2         $3     $4     (warning: $1 grabs extra spaces, trimmed below)
+            $line =~ m|.*?\@luafunc\s+(static\s+)?(\w+\s+)?(?:(\w+)$sep)?(.+?)\((.*)\)|;    # Grab retval, class, method, and args from $line
 
-            my $retval = $1 eq "" ? "void" : $1;                              # Retval is optional, use void if omitted            
-            my $voidlessRetval = $1;
-            my $class  = $2; # If no class is given the function is assumed to be global
-            my $method = $3 || die "Couldn't get method name from $line\n";  # Must have a method
-            my $args   = $4;                                                  # Args are optional
+            my $staticness = $1;
+            my $retval = $2 eq "" ? "void" : $2;                              # Retval is optional, use void if omitted            
+            my $voidlessRetval = $2;
+            my $class  = $3; # If no class is given the function is assumed to be global
+            my $method = $4 || die "Couldn't get method name from $line\n";  # Must have a method
+            my $args   = $5;                                                  # Args are optional
 
             $retval =~ s|\s+$||;     # Trim any trailing spaces from $retval
 
@@ -212,7 +213,7 @@ foreach my $file (@files) {
             push(@comments, " \\fn $voidlessRetval $prefix" . "::" . "$method($args)\n");
 
             # Find the original class definition and delete it (if it still exists)
-            my $index = first { ${$classes{$class}}[$_] eq "void $method() { }\n" } 0..$#{$classes{$class}};
+            my $index = first { ${$classes{$class}}[$_] =~ m|(static\s+)?void $method\(| } 0..$#{$classes{$class}};
             if($index ne "") {
                splice(@{$classes{$class}}, $index, 1);       # Delete element at $index
             }
@@ -221,7 +222,7 @@ foreach my $file (@files) {
 
             # Add our new sig to the list
             if($class) {
-               push(@{$classes{$class}}, "$retval $method($args) { /* From '$line' */ }\n");
+               push(@{$classes{$class}}, "$staticness $retval $method($args) { /* From '$line' */ }\n");
             } else {
                push(@globalfunctions, "$retval $method($args) { /* From '$line' */ }\n");
             }
