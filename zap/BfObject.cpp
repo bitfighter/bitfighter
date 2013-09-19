@@ -351,9 +351,16 @@ bool EditorObject::isSelected()
 }
 
 
+U32 EditorObject::getSelectedTime()
+{
+   return mSelectedTime;
+}
+
+
 void EditorObject::setSelected(bool selected)
 {
    mSelected = selected;
+   mSelectedTime = Platform::getRealMilliseconds();
 }
 
 

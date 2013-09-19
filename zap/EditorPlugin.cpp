@@ -250,7 +250,8 @@ S32 EditorPlugin::lua_getGridSize(lua_State *L)
  * 
  * @brief Returns a list of all selected objects in the editor.
  * 
- * @descr The following code sample shows how to visit each object selected in
+ * @descr
+ * The following code sample shows how to visit each object selected in
  * the editor. Here, we nudge every selected item 100 pixels to the right.
  * 
  * @code
@@ -262,9 +263,13 @@ S32 EditorPlugin::lua_getGridSize(lua_State *L)
  *      v:setGeom(g)                        -- Save the new geometry
  *   end
  * @endcode
+ *
+ * This result is sorted by the time at which the objects was selected,
+ * so `t[1]` will always be the first selected object and `t[#t]` will
+ * always be the last.
  * 
- * @return Lua table containing all the objects that are currently selected in
- * the editor
+ * @return Table containing all the objects that are currently selected in
+ * the editor, ordered by selection time.
  */
 S32 EditorPlugin::lua_getSelectedObjects(lua_State *L)
 {
@@ -273,16 +278,22 @@ S32 EditorPlugin::lua_getSelectedObjects(lua_State *L)
    lua_createtable(L, 0, 0);    // Create a table with no slots --> we don't know how many selected items there will be!
 
    const Vector<DatabaseObject *> *objects = mGridDatabase->findObjects_fast();
-
-   S32 pushed = 0;
+   map<U32, BfObject*> orderedSelectedItems;
 
    for(S32 i = 0; i < count; i++)
    {
       BfObject *obj = static_cast<BfObject *>(objects->get(i));
          
-      if(!obj->isSelected())
-         continue;
+      if(obj && obj->isSelected())
+         orderedSelectedItems.insert(pair<U32, BfObject*>(obj->getSelectedTime(), obj));
+   }
 
+   S32 pushed = 0;
+
+   map<U32, BfObject*>::iterator it;
+   for(it = orderedSelectedItems.begin(); it != orderedSelectedItems.end(); it++)
+   {
+      BfObject *obj = (*it).second;
       obj->push(L);
       pushed++;         // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
