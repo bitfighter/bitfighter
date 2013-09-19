@@ -326,13 +326,6 @@ ClientGame *newClientGame()
 }
 
 
-void idleGames(ClientGame *clientGame, ServerGame *serverGame, U32 timeDelta)
-{
-   clientGame->idle(timeDelta);
-   serverGame->idle(timeDelta);
-}
-
-
 // Create a new ServerGame with one dummy team
 ServerGame *newServerGame()
 {
@@ -344,6 +337,13 @@ ServerGame *newServerGame()
    game->addTeam(new Team());    // Team will be cleaned up when game is deleted
 
    return game;
+}
+
+
+void idleGames(ClientGame *clientGame, ServerGame *serverGame, U32 timeDelta)
+{
+   clientGame->idle(timeDelta);
+   serverGame->idle(timeDelta);
 }
 
 
