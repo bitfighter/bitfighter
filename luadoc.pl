@@ -40,6 +40,7 @@ foreach my $file (@files) {
 
    # Various modes we could be in
    my $collectingMethods = 0;
+   my $collectingStaticMethods = 0;
    # my $collectingLongDescr = 0;
    my $collectingLongComment = 0;
    my $collectingMainPage = 0;
@@ -55,6 +56,7 @@ foreach my $file (@files) {
    my $enumDescr;
 
    my @methods = ();
+   my @staticMethods = ();
    my @globalfunctions = ();
    my @comments = ();
    my %classes = ();        # Will be a hash of arrays
@@ -112,6 +114,34 @@ foreach my $file (@files) {
 
             @methods = ();
             $collectingMethods = 0;
+            next;
+         }
+      }
+
+      if( $line =~ m|define +LUA_STATIC_METHODS *\( *METHOD *\)| ) {
+         $collectingStaticMethods = 1;
+         next;
+      }
+
+      if( $collectingStaticMethods ) {
+         if( $line =~ m|METHOD *\( *(.+?) *,| ) {                 # Signals class declaration... methods will follow
+            my $method = $1;
+            push(@staticMethods, $method);
+            next;
+         }
+
+         if( $line =~ m|GENERATE_LUA_STATIC_METHODS_TABLE *\( *(.+?) *,| ) {     # Signals we have all methods for this class, gives us class name; now generate code
+            my $class = $1;
+
+            unshift(@{$classes{$class}}, "$shortClassDescr\n$longClassDescr\nclass $class { \n public:\n");   # unshift adds element to beginning of array
+            $writeFile = 1;
+
+            foreach my $method (@staticMethods) {
+               push(@{$classes{$class}}, "static void $method() { }\n");
+            }
+
+            @staticMethods = ();
+            $collectingStaticMethods = 0;
             next;
          }
       }

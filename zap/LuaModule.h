@@ -47,7 +47,7 @@ LuaStaticFunctionProfile name##_profile = { #name, {profiles, profileCount }, lu
  * LuaModuleRegistrar<T> instance, which causes the registration to occur
  * before main (when the instance is consructed).
  */
-#define GENERATE_STATIC_MODULE(modname, table_)                                                                           \
+#define GENERATE_LUA_STATIC_METHODS_TABLE(modname, table_)                                                                \
 struct modname##_Profiles : public LuaBase                                                                                \
 {                                                                                                                         \
    using LuaBase::LuaArgType;                                                                                             \

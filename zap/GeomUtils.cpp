@@ -1724,7 +1724,7 @@ void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, 
    METHOD(triangulate,  ARRAYDEF({{ TABLE, END }}),                                               1 ) \
    METHOD(clipPolygons, ARRAYDEF({{ INT, TABLE, TABLE, END }, { INT, TABLE, TABLE, BOOL, END }}), 2 ) \
 
-GENERATE_STATIC_MODULE(Geom, LUA_STATIC_METHODS);
+GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
 
 #undef LUA_STATIC_METHODS
 
