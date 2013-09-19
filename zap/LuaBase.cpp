@@ -37,22 +37,11 @@
 namespace Zap
 {
 
-// Constructor
-LuaBase::LuaBase()
+namespace LuaBase
 {
-   // Do nothing
-}
-
-
-// Destructor
-LuaBase::~LuaBase()
-{
-   // Do nothing
-}
-
 
 // Make sure we got the number of args we wanted
-void LuaBase::checkArgCount(lua_State *L, S32 argsWanted, const char *methodName)
+void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName)
 {
    S32 args = lua_gettop(L);
 
@@ -71,7 +60,7 @@ void LuaBase::checkArgCount(lua_State *L, S32 argsWanted, const char *methodName
 // Returns index of matching parameter profile; throws error if it can't find one.  If you get a valid profile index back,
 // you can blindly convert the stack items with the confidence you'll get what you want; no further type checking is required.
 // In writing this function, I tried to be extra clear, perhaps at the expense of slight redundancy.
-S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos, const char *className, const char *functionName)
+S32 checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos, const char *className, const char *functionName)
 {
    const LuaFunctionProfile *functionInfo = NULL;
 
@@ -90,7 +79,7 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
 }
 
 
-S32 LuaBase::checkArgList(lua_State *L, const char *moduleName, const char *functionName)
+S32 checkArgList(lua_State *L, const char *moduleName, const char *functionName)
 {
    ProfileMap profileMap = LuaModuleRegistrarBase::getModuleProfiles();
 
@@ -113,14 +102,14 @@ S32 LuaBase::checkArgList(lua_State *L, const char *moduleName, const char *func
 }
 
 
-S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionArgList &functionArgList, const char *className, const char *functionName)
+S32 checkArgList(lua_State *L, const LuaFunctionArgList &functionArgList, const char *className, const char *functionName)
 {
    S32 stackDepth = lua_gettop(L);
    S32 profileCount = functionArgList.profileCount;
 
    for(S32 i = 0; i < profileCount; i++)
    {
-      const LuaBase::LuaArgType *candidateArgList = functionArgList.argList[i];     // argList is a 2D array
+      const LuaArgType *candidateArgList = functionArgList.argList[i];     // argList is a 2D array
       bool validProfile = true;
       S32 stackPos = 0;
 
@@ -189,7 +178,7 @@ static bool checkPoints(lua_State *L, S32 minNumberOfPoints, S32 &stackPos)
 
 
 // Warning... may alter stackPos!
-bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stackPos)
+bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
 {
    S32 stackDepth = lua_gettop(L);
 
@@ -355,7 +344,7 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
 
 
 // Assumes we have already checked that there is in fact table on the stack at position tableIndex
-bool LuaBase::isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable)
+bool isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable)
 {
    lua_rawgeti(L, tableIndex, indexWithinTable);   // Push point onto stack
    bool isPoint = lua_ispoint(L, -1);              // Check its type
@@ -382,7 +371,7 @@ bool LuaBase::isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinT
 
 
 // Pop a vec object off stack, check its type, and return it
-Point LuaBase::getCheckedVec(lua_State *L, S32 index, const char *methodName)
+Point getCheckedVec(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_ispoint(L, index))
    {
@@ -399,7 +388,7 @@ Point LuaBase::getCheckedVec(lua_State *L, S32 index, const char *methodName)
 
 
 // Pop a point object off stack, or grab two numbers and create a point from them
-Point LuaBase::getPointOrXY(lua_State *L, S32 index)
+Point getPointOrXY(lua_State *L, S32 index)
 {
    if(lua_ispoint(L, index))
    {
@@ -416,7 +405,7 @@ Point LuaBase::getPointOrXY(lua_State *L, S32 index)
 
 
 // Will retrieve a list of points in one of several formats: points, F32s, or a table of points or F32s
-Vector<Point> LuaBase::getPointsOrXYs(lua_State *L, S32 index)
+Vector<Point> getPointsOrXYs(lua_State *L, S32 index)
 {
    Vector<Point> points;
    S32 stackDepth = lua_gettop(L);
@@ -440,7 +429,7 @@ Vector<Point> LuaBase::getPointsOrXYs(lua_State *L, S32 index)
 /**
  * Reads a list of polygons from the specified lua index
  */
-Vector<Vector<Point> > LuaBase::getPolygons(lua_State *L, S32 index)
+Vector<Vector<Point> > getPolygons(lua_State *L, S32 index)
 {
    Vector<Vector<Point> > result;
    S32 count = 0;
@@ -449,7 +438,7 @@ Vector<Vector<Point> > LuaBase::getPolygons(lua_State *L, S32 index)
    {
       result.resize(count + 1);
       Vector<Point > &poly = result[count];
-      LuaBase::getPointVectorFromTable(L, -1, poly);     // table ... k, v, v
+      getPointVectorFromTable(L, -1, poly);     // table ... k, v, v
       lua_pop(L, 2);                                     // table ... k
       count += 1;
    }
@@ -457,14 +446,14 @@ Vector<Vector<Point> > LuaBase::getPolygons(lua_State *L, S32 index)
    return result;
 }
 
-WeaponType LuaBase::getWeaponType(lua_State *L, S32 index)
+WeaponType getWeaponType(lua_State *L, S32 index)
 {
    // Lua Weapon enum is offset from modules so we reduce by ModuleCount to get the c++ values
    return (WeaponType)(lua_tointeger(L, index) - ModuleCount);
 }
 
 
-ShipModule LuaBase::getShipModule(lua_State *L, S32 index)
+ShipModule getShipModule(lua_State *L, S32 index)
 {
    return (ShipModule)(lua_tointeger(L, index));
 }
@@ -495,7 +484,7 @@ static string stringify(lua_State *L, S32 index)
 
 
 // May interrupt a table traversal if this is called in the middle
-bool LuaBase::dumpTable(lua_State *L, S32 tableIndex, const char *msg)
+bool dumpTable(lua_State *L, S32 tableIndex, const char *msg)
 {
    bool hasMsg = (strcmp(msg, "") != 0);
    logprintf("Dumping table at index %d %s%s%s", tableIndex, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
@@ -520,7 +509,7 @@ bool LuaBase::dumpTable(lua_State *L, S32 tableIndex, const char *msg)
 }
 
 
-bool LuaBase::dumpStack(lua_State* L, const char *msg)
+bool dumpStack(lua_State* L, const char *msg)
 {
    int top = lua_gettop(L);
 
@@ -538,7 +527,7 @@ bool LuaBase::dumpStack(lua_State* L, const char *msg)
 
 
 // Pop integer off stack, check its type, do bounds checking, and return it
-lua_Integer LuaBase::getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal)
+lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal)
 {
    lua_Integer val = getInt(L, index);
 
@@ -556,7 +545,7 @@ lua_Integer LuaBase::getInt(lua_State *L, S32 index, const char *methodName, S32
 
 
 // Returns defaultVal if there is an invalid or missing value on the stack
-lua_Integer LuaBase::getInt(lua_State *L, S32 index, S32 defaultVal)
+lua_Integer getInt(lua_State *L, S32 index, S32 defaultVal)
 {
    if(!lua_isnumber(L, index))
       return defaultVal;
@@ -565,7 +554,7 @@ lua_Integer LuaBase::getInt(lua_State *L, S32 index, S32 defaultVal)
 }
 
 
-lua_Integer LuaBase::getInt(lua_State *L, S32 index)
+lua_Integer getInt(lua_State *L, S32 index)
 {
    return lua_tointeger(L, index);
 }
@@ -573,7 +562,7 @@ lua_Integer LuaBase::getInt(lua_State *L, S32 index)
 
 // Selectively adjust a value from Lua to account for it's stupid 1-index arrays.
 // Assumes that the value has already been checked, so this does no sanity checks whatsoever.
-S32 LuaBase::getTeamIndex(lua_State *L, S32 index)
+S32 getTeamIndex(lua_State *L, S32 index)
 {
    S32 teamIndex = getInt(L, index);
    if(teamIndex <= TEAM_NEUTRAL)
@@ -584,7 +573,7 @@ S32 LuaBase::getTeamIndex(lua_State *L, S32 index)
 
 
 // Pop integer off stack, check its type, and return it (no bounds check)
-lua_Integer LuaBase::getCheckedInt(lua_State *L, S32 index, const char *methodName)
+lua_Integer getCheckedInt(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isnumber(L, index))
    {
@@ -600,14 +589,14 @@ lua_Integer LuaBase::getCheckedInt(lua_State *L, S32 index, const char *methodNa
 
 
 // Pop a number off stack, convert to float, and return it (no bounds check)
-F32 LuaBase::getFloat(lua_State *L, S32 index)
+F32 getFloat(lua_State *L, S32 index)
 {
    return (F32)lua_tonumber(L, index);
 }
 
 
 // Pop a number off stack, convert to float, and return it (no bounds check)
-F32 LuaBase::getCheckedFloat(lua_State *L, S32 index, const char *methodName)
+F32 getCheckedFloat(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isnumber(L, index))
    {
@@ -623,14 +612,14 @@ F32 LuaBase::getCheckedFloat(lua_State *L, S32 index, const char *methodName)
 
 
 // Return a bool at the specified index
-bool LuaBase::getBool(lua_State *L, S32 index)
+bool getBool(lua_State *L, S32 index)
 {
     return (bool) lua_toboolean(L, index);
 }
 
 
 // Pop a boolean off stack, and return it
-bool LuaBase::getCheckedBool(lua_State *L, S32 index, const char *methodName, bool defaultVal)
+bool getCheckedBool(lua_State *L, S32 index, const char *methodName, bool defaultVal)
 {
    if(!lua_isboolean(L, index))
       return defaultVal;
@@ -640,7 +629,7 @@ bool LuaBase::getCheckedBool(lua_State *L, S32 index, const char *methodName, bo
 
 
 // Pop a string or string-like object off stack, check its type, and return it
-const char *LuaBase::getString(lua_State *L, S32 index, const char *defaultVal)
+const char *getString(lua_State *L, S32 index, const char *defaultVal)
 {
    if(!lua_isstring(L, index))
       return defaultVal;
@@ -650,14 +639,14 @@ const char *LuaBase::getString(lua_State *L, S32 index, const char *defaultVal)
 
 
 // Pop a string or string-like object off stack and return it
-const char *LuaBase::getString(lua_State *L, S32 index)
+const char *getString(lua_State *L, S32 index)
 {
    return lua_tostring(L, index);
 }
 
 
 // Pop a string or string-like object off stack, check its type, and return it
-const char *LuaBase::getCheckedString(lua_State *L, S32 index, const char *methodName)
+const char *getCheckedString(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isstring(L, index))
    {
@@ -673,7 +662,7 @@ const char *LuaBase::getCheckedString(lua_State *L, S32 index, const char *metho
 
 
 // Returns a float to a calling Lua function
-S32 LuaBase::returnFloat(lua_State *L, F32 num)
+S32 returnFloat(lua_State *L, F32 num)
 {
    lua_pushnumber(L, num);
    return 1;
@@ -681,7 +670,7 @@ S32 LuaBase::returnFloat(lua_State *L, F32 num)
 
 
 // Returns a boolean to a calling Lua function
-S32 LuaBase::returnBool(lua_State *L, bool boolean)
+S32 returnBool(lua_State *L, bool boolean)
 {
    lua_pushboolean(L, boolean);
    return 1;
@@ -689,7 +678,7 @@ S32 LuaBase::returnBool(lua_State *L, bool boolean)
 
 
 // Returns a string to a calling Lua function
-S32 LuaBase::returnString(lua_State *L, const char *str)
+S32 returnString(lua_State *L, const char *str)
 {
    lua_pushstring(L, str);
    return 1;
@@ -697,7 +686,7 @@ S32 LuaBase::returnString(lua_State *L, const char *str)
 
 
 // Returns nil to calling Lua function
-S32 LuaBase::returnNil(lua_State *L)
+S32 returnNil(lua_State *L)
 {
    lua_pushnil(L);
    return 1;
@@ -705,7 +694,7 @@ S32 LuaBase::returnNil(lua_State *L)
 
 
 // Returns a point to calling Lua function
-S32 LuaBase::returnPoint(lua_State *L, const Point &pt)
+S32 returnPoint(lua_State *L, const Point &pt)
 {
    lua_pushvec(L, pt.x, pt.y);
    return 1;
@@ -713,9 +702,9 @@ S32 LuaBase::returnPoint(lua_State *L, const Point &pt)
 
 
 // Return a table of points to calling Lua function
-S32 LuaBase::returnPoints(lua_State *L, const Vector<Point> *points)
+S32 returnPoints(lua_State *L, const Vector<Point> *points)
 {
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not clean!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not clean!");
 
    // Create an empty table with enough space reserved
    lua_createtable(L, points->size(), 0);                  //                                -- table                                                   
@@ -731,9 +720,9 @@ S32 LuaBase::returnPoints(lua_State *L, const Vector<Point> *points)
 }
 
 
-S32 LuaBase::returnPolygons(lua_State *L, const Vector<Vector<Point> > &polys)
+S32 returnPolygons(lua_State *L, const Vector<Vector<Point> > &polys)
 {
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not clean!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not clean!");
 
    lua_createtable(L, polys.size(), 0);            // polylist
    for(S32 i = 0; i < polys.size(); i++)
@@ -755,7 +744,7 @@ S32 LuaBase::returnPolygons(lua_State *L, const Vector<Vector<Point> > &polys)
 
 
 // Returns an int to a calling Lua function
-S32 LuaBase::returnInt(lua_State *L, S32 num)
+S32 returnInt(lua_State *L, S32 num)
 {
    lua_pushinteger(L, num);
    return 1;
@@ -763,7 +752,7 @@ S32 LuaBase::returnInt(lua_State *L, S32 num)
 
 
 // If we have a ship, return it, otherwise return nil
-S32 LuaBase::returnShip(lua_State *L, Ship *ship)
+S32 returnShip(lua_State *L, Ship *ship)
 {
    if(ship)
    {
@@ -776,7 +765,7 @@ S32 LuaBase::returnShip(lua_State *L, Ship *ship)
 
 
 // If we have a team, return it, otherwise return nil
-S32 LuaBase::returnTeam(lua_State *L, Team *team)
+S32 returnTeam(lua_State *L, Team *team)
 {
    if(team)
    {
@@ -788,7 +777,7 @@ S32 LuaBase::returnTeam(lua_State *L, Team *team)
 }
 
 
-S32 LuaBase::returnTeamIndex(lua_State *L, S32 teamIndex)
+S32 returnTeamIndex(lua_State *L, S32 teamIndex)
 {
    // Neutral and Hostile teams retain their c++ index
    if(teamIndex <= TEAM_NEUTRAL)
@@ -799,7 +788,7 @@ S32 LuaBase::returnTeamIndex(lua_State *L, S32 teamIndex)
 }
 
 
-S32 LuaBase::returnBfObject(lua_State *L, BfObject *bfObject)
+S32 returnBfObject(lua_State *L, BfObject *bfObject)
 {
    if(bfObject)
    {
@@ -811,7 +800,7 @@ S32 LuaBase::returnBfObject(lua_State *L, BfObject *bfObject)
 }
 
 
-S32 LuaBase::returnPlayerInfo(lua_State *L, Ship *ship)
+S32 returnPlayerInfo(lua_State *L, Ship *ship)
 {
    if(!ship || !ship->getClientInfo())
    {
@@ -822,14 +811,14 @@ S32 LuaBase::returnPlayerInfo(lua_State *L, Ship *ship)
 }
 
 
-S32 LuaBase::returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo)
+S32 returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo)
 {
    playerInfo->push(L);
    return 1;
 }
 
 
-S32 LuaBase::returnGameInfo(lua_State *L, ServerGame *serverGame)
+S32 returnGameInfo(lua_State *L, ServerGame *serverGame)
 {
    if(!serverGame)
    {
@@ -843,14 +832,14 @@ S32 LuaBase::returnGameInfo(lua_State *L, ServerGame *serverGame)
 }
 
 
-S32 LuaBase::returnShipModule(lua_State *L, ShipModule module)
+S32 returnShipModule(lua_State *L, ShipModule module)
 {
    lua_pushinteger(L, module);
    return 1;
 }
 
 
-S32 LuaBase::returnWeaponType(lua_State *L, WeaponType weapon)
+S32 returnWeaponType(lua_State *L, WeaponType weapon)
 {
    lua_pushinteger(L, weapon + ModuleCount);
    return 1;
@@ -858,21 +847,21 @@ S32 LuaBase::returnWeaponType(lua_State *L, WeaponType weapon)
 
 
 // Assume that table is at the top of the stack
-void LuaBase::setfield (lua_State *L, const char *key, F32 value)
+void setfield (lua_State *L, const char *key, F32 value)
 {
    lua_pushnumber(L, value);
    lua_setfield(L, -2, key);
 }
 
 
-void LuaBase::clearStack(lua_State *L)
+void clearStack(lua_State *L)
 {
    lua_settop(L, 0);
 }
 
 
 // Pulls values out of the table at specified index as strings, and puts them all into strings vector
-void LuaBase::getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &points)
+void getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &points)
 {
    // The following block loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
 
@@ -903,7 +892,7 @@ static const char *argTypeNames[] = {
 
 // Return a nicely formatted list of acceptable parameter types.  Use a string to avoid dangling pointer.
 // Only called when there's a problem, and a function needs explainin'
-string LuaBase::prettyPrintParamList(const Zap::LuaFunctionArgList &functionArgList)
+string prettyPrintParamList(const LuaFunctionArgList &functionArgList)
 {
    string msg;
 
@@ -913,7 +902,7 @@ string LuaBase::prettyPrintParamList(const Zap::LuaFunctionArgList &functionArgL
 
       bool none = true;
 
-      for(S32 j = 0; functionArgList.argList[i][j] != Zap::LuaBase::END; j++)
+      for(S32 j = 0; functionArgList.argList[i][j] != END; j++)
       {
          if(j > 0)
             msg += ", ";
@@ -934,7 +923,7 @@ string LuaBase::prettyPrintParamList(const Zap::LuaFunctionArgList &functionArgL
 
 #define SCRIPT_CONTEXT_KEY "running_script_context"
 
-LuaBase::ScriptContext LuaBase::getScriptContext(lua_State *L)
+ScriptContext getScriptContext(lua_State *L)
 {
    lua_getfield(L, LUA_REGISTRYINDEX, SCRIPT_CONTEXT_KEY);
    S32 context = lua_tointeger(L, -1);
@@ -948,12 +937,12 @@ LuaBase::ScriptContext LuaBase::getScriptContext(lua_State *L)
 }
 
 
-void LuaBase::setScriptContext(lua_State *L, ScriptContext context)
+void setScriptContext(lua_State *L, ScriptContext context)
 {
    lua_pushinteger(L, context);
    lua_setfield(L, LUA_REGISTRYINDEX, SCRIPT_CONTEXT_KEY);     // Pops the int we just pushed from the stack
 }
 
-
 };
 
+};

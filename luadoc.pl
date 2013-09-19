@@ -137,7 +137,12 @@ foreach my $file (@files) {
             $writeFile = 1;
 
             foreach my $method (@staticMethods) {
-               push(@{$classes{$class}}, "static void $method() { }\n");
+               my $index = first { ${$classes{$class}}[$_] =~ m|\s$method\(| } 0..$#{$classes{$class}};
+
+               # Ignore methods that already have explicit documentation
+               if($index eq "") {
+                  push(@{$classes{$class}}, "static void $method() { }\n");
+               }
             }
 
             @staticMethods = ();
@@ -196,7 +201,7 @@ foreach my $file (@files) {
             # In C++ code, we use "::" to separate classes from functions (class::func); in Lua, we use "." (class.func).
             my $sep = ($file =~ m|\.lua$|) ? "[.:]" : "::";
 
-            #                                      $1          $2         $3     $4     (warning: $1 grabs extra spaces, trimmed below)
+            #                          $1          $2          $3         $4     $5     (warning: $1 grabs extra spaces, trimmed below)
             $line =~ m|.*?\@luafunc\s+(static\s+)?(\w+\s+)?(?:(\w+)$sep)?(.+?)\((.*)\)|;    # Grab retval, class, method, and args from $line
 
             my $staticness = $1;

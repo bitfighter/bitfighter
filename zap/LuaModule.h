@@ -50,9 +50,8 @@ LuaStaticFunctionProfile name##_profile = { #name, {profiles, profileCount }, lu
  * before main (when the instance is consructed).
  */
 #define GENERATE_LUA_STATIC_METHODS_TABLE(modname, table_)                                                                \
-struct modname##_Profiles : public LuaBase                                                                                \
+struct modname##_Profiles                                                                                                 \
 {                                                                                                                         \
-   using LuaBase::LuaArgType;                                                                                             \
    static void registerFunctions()                                                                                        \
    {                                                                                                                      \
       string name(#modname);                                                                                              \

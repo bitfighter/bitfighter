@@ -37,7 +37,7 @@ namespace Zap
 class ServerGame;
 
 
-class LuaGameInfo : public LuaBase
+class LuaGameInfo
 {
 private:
    ServerGame *mServerGame;

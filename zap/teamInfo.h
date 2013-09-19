@@ -92,7 +92,7 @@ struct TeamInfo
 class FlagSpawn;
 
 // Class for managing teams in the game
-class Team : public AbstractTeam, public LuaBase
+class Team : public AbstractTeam
 {  
 private:
    StringTableEntry mName;

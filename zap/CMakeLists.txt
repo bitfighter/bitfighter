@@ -52,6 +52,7 @@ set(SHARED_SOURCES
 	LoadoutTracker.cpp
 	loadoutZone.cpp
 	LuaBase.cpp
+	LuaGlobals.cpp
 	luaGameInfo.cpp
 	luaLevelGenerator.cpp
 	LuaScriptRunner.cpp

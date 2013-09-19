@@ -38,6 +38,7 @@
 
 using namespace std;
 using namespace TNL;
+using namespace LuaBase;
 
 
 #define method(class, name)  { #name, &class::name }
@@ -56,11 +57,6 @@ class Rect;
 class Ship;
 class MenuItem;
 
-//////////////////////////////////////////
-////////////////////////////////////////
-
-typedef struct { LuaBase *objectPtr; } UserData;
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -69,10 +65,8 @@ typedef struct { LuaBase *objectPtr; } UserData;
 #define ROBOT_HELPER_FUNCTIONS_KEY    "robot_helper_functions"
 #define LEVELGEN_HELPER_FUNCTIONS_KEY "levelgen_helper_functions"
 
-class LuaScriptRunner : public LuaBase
+class LuaScriptRunner
 {
-
-typedef LuaBase Parent;
 
 private:
    static deque<string> mCachedScripts;
@@ -208,14 +202,6 @@ public:
    static const char *luaClassName;
    static const LuaFunctionProfile functionArgs[];
    static const luaL_reg luaMethods[];              // Only used for non-static lua methods
-
-   static S32 lua_logprint(lua_State *L);
-   static S32 lua_print(lua_State *L);
-   static S32 lua_getRandomNumber(lua_State *L);
-   static S32 lua_getMachineTime(lua_State *L);
-   static S32 lua_findFile(lua_State *L);
-   static S32 lua_readFromFile(lua_State *L);
-   static S32 lua_writeToFile(lua_State *L);
 
    // Non-static methods
    S32 lua_pointCanSeePoint(lua_State *L);

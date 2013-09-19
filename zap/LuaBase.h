@@ -63,10 +63,9 @@ typedef const char* ClassName;
 typedef map <ClassName, const LuaFunctionProfile *> ArgMap;      // Map of class name and arguments list, for documentation
 typedef pair<ClassName, vector<ClassName> > Node;
 
-class LuaBase
+namespace LuaBase
 {
 
-public:
    //                 Enum       Name
 #  define LUA_ARG_TYPE_TABLE \
    LUA_ARG_TYPE_ITEM( BOOL,        "Boolean"                                      ) \
@@ -104,7 +103,6 @@ public:
       END      // End of list sentinel value
    };
 
-public:
    enum ScriptContext {
       RobotContext,        // When a robot is running (usually during the init phase)
       LevelgenContext,     // When a levelgen is running (usually during the init phase)
@@ -114,26 +112,23 @@ public:
       UnknownContext
    };
 
-   LuaBase();           // Constuctor
-   virtual ~LuaBase();  // Destructor
+   void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName);
+   void setfield (lua_State *L, const char *key, F32 value);
 
-   static void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName);
-   static void setfield (lua_State *L, const char *key, F32 value);
-
-   static bool isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable);
-   static Point getCheckedVec(lua_State *L, S32 index, const char *methodName);      // TODO: Delete me
+   bool isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable);
+   Point getCheckedVec(lua_State *L, S32 index, const char *methodName);      // TODO: Delete me
 
 
 
    // This doesn't really need to be virtual, but something here does, to allow dynamic_casting to occur... I picked
    // this one pretty much arbitrarily...  it won't be overridden.
-   static void getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &points);
-   static Point getPointOrXY(lua_State *L, S32 index);
-   static Vector<Point> getPointsOrXYs(lua_State *L, S32 index);
-   static Vector<Vector<Point> > getPolygons(lua_State *L, S32 index);
+   void getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &points);
+   Point getPointOrXY(lua_State *L, S32 index);
+   Vector<Point> getPointsOrXYs(lua_State *L, S32 index);
+   Vector<Vector<Point> > getPolygons(lua_State *L, S32 index);
 
-   static WeaponType getWeaponType(lua_State *L, S32 index);
-   static ShipModule getShipModule(lua_State *L, S32 index);
+   WeaponType getWeaponType(lua_State *L, S32 index);
+   ShipModule getShipModule(lua_State *L, S32 index);
 
    // All of these return<T> functions work in the same way.  Include at the end of a child class method.
    // Usage: return returnInt(L, int);
@@ -141,68 +136,68 @@ public:
    //template<class T> S32 returnVal(lua_State *L, T value, bool letLuaDelete = true);
 
    // The basics:
-   static S32 returnInt(lua_State *L, S32 num);
-   static S32 returnFloat(lua_State *L, F32 num);
-   static S32 returnString(lua_State *L, const char *str);
-   static S32 returnBool(lua_State *L, bool boolean);
-   static S32 returnNil(lua_State *L);
+   S32 returnInt(lua_State *L, S32 num);
+   S32 returnFloat(lua_State *L, F32 num);
+   S32 returnString(lua_State *L, const char *str);
+   S32 returnBool(lua_State *L, bool boolean);
+   S32 returnNil(lua_State *L);
 
    // More complex objects:
-   static S32 returnPoint(lua_State *L, const Point &point);
-   static S32 returnPoints(lua_State *L, const Vector<Point> *);
-   static S32 returnPolygons(lua_State *L, const Vector<Vector<Point> > &polys);
-   static S32 returnMenuItem(lua_State *L, MenuItem *menuItem);
-   static S32 returnShip(lua_State *L, Ship *ship);                // Handles null references properly
-   static S32 returnTeam(lua_State *L, Team *team);
-   static S32 returnTeamIndex(lua_State *L, S32 teamIndex);
-   static S32 returnBfObject(lua_State *L, BfObject *bfObject);
+   S32 returnPoint(lua_State *L, const Point &point);
+   S32 returnPoints(lua_State *L, const Vector<Point> *);
+   S32 returnPolygons(lua_State *L, const Vector<Vector<Point> > &polys);
+   S32 returnMenuItem(lua_State *L, MenuItem *menuItem);
+   S32 returnShip(lua_State *L, Ship *ship);                // Handles null references properly
+   S32 returnTeam(lua_State *L, Team *team);
+   S32 returnTeamIndex(lua_State *L, S32 teamIndex);
+   S32 returnBfObject(lua_State *L, BfObject *bfObject);
 
-   static S32 returnPlayerInfo(lua_State *L, Ship *ship);
-   static S32 returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo);
-   static S32 returnGameInfo(lua_State *L, ServerGame *serverGame);
-   static S32 returnShipModule(lua_State *L, ShipModule module);
-   static S32 returnWeaponType(lua_State *L, WeaponType weapon);
+   S32 returnPlayerInfo(lua_State *L, Ship *ship);
+   S32 returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo);
+   S32 returnGameInfo(lua_State *L, ServerGame *serverGame);
+   S32 returnShipModule(lua_State *L, ShipModule module);
+   S32 returnWeaponType(lua_State *L, WeaponType weapon);
 
-   static void clearStack(lua_State *L);
+   void clearStack(lua_State *L);
 
-   static F32 getFloat(lua_State *L, S32 index);
-   static F32 getCheckedFloat(lua_State *L, S32 index, const char *methodName);
+   F32 getFloat(lua_State *L, S32 index);
+   F32 getCheckedFloat(lua_State *L, S32 index, const char *methodName);
 
-   static bool getBool(lua_State *L, S32 index);
-   static bool getCheckedBool(lua_State *L, S32 index, const char *methodName, bool defaultVal);
+   bool getBool(lua_State *L, S32 index);
+   bool getCheckedBool(lua_State *L, S32 index, const char *methodName, bool defaultVal);
 
-   static lua_Integer getInt(lua_State *L, S32 index);
-   static lua_Integer getInt(lua_State *L, S32 index, S32 defaultVal);
-   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal);
+   lua_Integer getInt(lua_State *L, S32 index);
+   lua_Integer getInt(lua_State *L, S32 index, S32 defaultVal);
+   lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal);
 
-   static S32 getTeamIndex(lua_State *L, S32 index);
+   S32 getTeamIndex(lua_State *L, S32 index);
 
-   static lua_Integer getCheckedInt(lua_State *L, S32 index, const char *methodName);
+   lua_Integer getCheckedInt(lua_State *L, S32 index, const char *methodName);
 
-   static const char *getString(lua_State *L, S32 index);
-   static const char *getCheckedString(lua_State *L, S32 index, const char *methodName);
+   const char *getString(lua_State *L, S32 index);
+   const char *getCheckedString(lua_State *L, S32 index, const char *methodName);
 
-   static const char *getString(lua_State *L, S32 index, const char *defaultVal);
+   const char *getString(lua_State *L, S32 index, const char *defaultVal);
 
    /////
    // Script context
-   static ScriptContext getScriptContext(lua_State *L);
-   static void setScriptContext(lua_State *L, ScriptContext context);
+   ScriptContext getScriptContext(lua_State *L);
+   void setScriptContext(lua_State *L, ScriptContext context);
 
    /////
    // Documenting and help
-   static S32 checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,   const char *className, const char *functionName);
-   static S32 checkArgList(lua_State *L, const LuaFunctionArgList &functionArgList, const char *className, const char *functionName);
-   static S32 checkArgList(lua_State *L, const char *moduleName, const char *functionName);
+   S32 checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,   const char *className, const char *functionName);
+   S32 checkArgList(lua_State *L, const LuaFunctionArgList &functionArgList, const char *className, const char *functionName);
+   S32 checkArgList(lua_State *L, const char *moduleName, const char *functionName);
 
-   static bool checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stackPos);
+   bool checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stackPos);
 
-   static string prettyPrintParamList(const LuaFunctionArgList &functionInfo);
+   string prettyPrintParamList(const LuaFunctionArgList &functionInfo);
 
    /////
    // Debugging helpers -- both return false so they can be jammed into an assert
-   static bool dumpTable(lua_State *L, S32 tableIndex, const char *msg = "");
-   static bool dumpStack(lua_State* L, const char *msg = "");
+   bool dumpTable(lua_State *L, S32 tableIndex, const char *msg = "");
+   bool dumpStack(lua_State* L, const char *msg = "");
 };
 
 
@@ -224,7 +219,7 @@ struct LuaFunctionProfile {
 };
 
 
-// Like a LuaFunctionProfile, but with a pointer to a static function
+// Like a LuaFunctionProfile, but with a pointer to a function
 struct LuaStaticFunctionProfile
 {
    const char         *functionName;

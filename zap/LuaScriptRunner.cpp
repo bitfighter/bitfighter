@@ -708,37 +708,6 @@ S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
 //////////////////////////////////////////////////////
 
 
-//////////
-// What follows is a number of static functions, which will be registered directly with our Lua instance as functions
-// that are not related to any particular object, but are just available locally.
-
-static string buildPrintString(lua_State *L)
-{
-  int n = lua_gettop(L);  /* number of arguments */
-  int i;
-  string out;
-
-  lua_getglobal(L, "tostring");
-  for(i = 1; i <= n; i++) 
-  {
-    const char *s;
-    lua_pushvalue(L, -1);  /* function to be called */
-    lua_pushvalue(L, i);   /* value to print */
-    lua_call(L, 1, 1);
-    s = lua_tostring(L, -1);  /* get result */
-    if (s == NULL)
-      luaL_error(L, LUA_QL("tostring") " must return a string to " LUA_QL("print"));
-    if(i > 1) 
-       out += "\t";
-
-    out += s;
-    lua_pop(L, 1);  /* pop result */
-  }
-
-  return out;
-}
-
-
 // Borrowed from http://tdistler.com/2010/09/13/c-enums-in-lua
 // Adds an enumerated type into Lua.
 //
@@ -1004,24 +973,11 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
  */
 
 /**
- * These static methods are independent of gameplay and do not perform any actions on game objects
- */
-//               Fn name    Param profiles         Profile count
-#define LUA_STATIC_METHODS(CLASS, METHOD) \
-      METHOD(CLASS, logprint,        ARRAYDEF({{ ANY,   END }}), 1 ) \
-      METHOD(CLASS, print,           ARRAYDEF({{ ANY,   END }}), 1 ) \
-      METHOD(CLASS, getRandomNumber, ARRAYDEF({{        END }}), 1 ) \
-      METHOD(CLASS, getMachineTime,  ARRAYDEF({{        END }}), 1 ) \
-      METHOD(CLASS, findFile,        ARRAYDEF({{ STR,   END }}), 1 ) \
-      METHOD(CLASS, writeToFile,     ARRAYDEF({{ STR, STR, END }, { STR, STR, BOOL, END }}), 2 ) \
-      METHOD(CLASS, readFromFile,    ARRAYDEF({{ STR,   END }}), 1 ) \
-
-/**
  * These non-static methods work with in-game objects and can be dependent on script type and
  * what 'Game' it's called from (i.e. ServerGame or ClientGame)
  */
 //               Fn name    Param profiles         Profile count
-#define LUA_NON_STATIC_METHODS(CLASS, METHOD) \
+#define LUA_METHODS(CLASS, METHOD) \
       METHOD(CLASS, pointCanSeePoint,  ARRAYDEF({{ PT, PT, END }}), 1 ) \
       METHOD(CLASS, findObjectById,    ARRAYDEF({{ INT, END }}), 1 )    \
       METHOD(CLASS, findAllObjects,    ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
@@ -1033,261 +989,52 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
       METHOD(CLASS, unsubscribe,       ARRAYDEF({{ EVENT, END }}), 1 )  \
 
 
-// Put both method types together so we can build our functionArgs table
-#define LUA_METHODS(CLASS, METHOD) \
-      LUA_STATIC_METHODS(CLASS, METHOD) \
-      LUA_NON_STATIC_METHODS(CLASS, METHOD) \
-
 GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);
-
-// Only for non-static methods do we register with LuaW
-GENERATE_LUA_METHODS_TABLE(LuaScriptRunner, LUA_NON_STATIC_METHODS);
+GENERATE_LUA_METHODS_TABLE(LuaScriptRunner, LUA_METHODS);
 
 void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 {
-   // Register the static functions listed above by generating a series of lines that look like this:
-   // lua_register(L, "logprint", logprint);
-#  define REGISTER_STATIC_LINE(class_, name, profiles, profileCount) \
-   lua_register(L, #name, lua_##name );
-
-   LUA_STATIC_METHODS("unused", REGISTER_STATIC_LINE);
-
-#  undef REGISTER_STATIC_LINE
-
    ProfileMap moduleProfiles = LuaModuleRegistrarBase::getModuleProfiles();
 
    ProfileMap::iterator it;
    for(it = moduleProfiles.begin(); it != moduleProfiles.end(); it++)
    {
-      lua_createtable(L, 0, 0);                                  // -- table
-      vector<LuaStaticFunctionProfile> &profiles = (*it).second;
-      for(U32 i = 0; i < profiles.size(); i++)
+      if((*it).first == "global")
       {
-         LuaStaticFunctionProfile &profile = profiles[i];
-         lua_pushcfunction(L, profile.function);                 // -- table, fn
-         lua_setfield(L, -2, profile.functionName);              // -- table
+         vector<LuaStaticFunctionProfile> &profiles = (*it).second;
+         for(U32 i = 0; i < profiles.size(); i++)
+         {
+            LuaStaticFunctionProfile &profile = profiles[i];
+            lua_pushcfunction(L, profile.function);                 // -- fn
+            lua_setglobal(L, profile.functionName);                 // --
+         }
       }
-      lua_setglobal(L, (*it).first.c_str());                     // --
-   }
+      else
+      {
+         lua_createtable(L, 0, 0);                                  // -- table
 
+         vector<LuaStaticFunctionProfile> &profiles = (*it).second;
+         for(U32 i = 0; i < profiles.size(); i++)
+         {
+            LuaStaticFunctionProfile &profile = profiles[i];
+            lua_pushcfunction(L, profile.function);                 // -- table, fn
+            lua_setfield(L, -2, profile.functionName);              // -- table
+         }
+         lua_setglobal(L, (*it).first.c_str());                     // --
+      }
+   }
 
    // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented
    // Ensure we have a good stream of random numbers until we figure out why Lua's randoms suck so bad (bug reported in 5.1, fixed in 5.2?)
    luaL_dostring(L, "math.random = getRandomNumber");
 }
 
-#undef LUA_STATIC_METHODS
 #undef LUA_NON_STATIC_METHODS
 #undef LUA_METHODS
 
 
 const char *LuaScriptRunner::luaClassName = "LuaScriptRunner";
 REGISTER_LUA_CLASS(LuaScriptRunner);
-
-
-/**
- * @luafunc logprint(any val)
- * 
- * @brief Print to bitfighter's logging engine.
- * 
- * @descr This will (currently) print to the bitfighter log file as well as
- * stdout.
- * 
- * @param val The value you wish to print.
- */
-S32 LuaScriptRunner::lua_logprint(lua_State *L)
-{
-   string str = buildPrintString(L);
-
-   logprintf(LogConsumer::LuaBotMessage, "%s", str.c_str());
-
-   return 0;
-}
-
-
-/**
- * @luafunc print(any val)
- *
- * @brief Print to the in-game console.
- *
- * @descr This hijacks Lua's normal 'print' command that goes to stdout and
- * instead redirects it to the in-game console.
- *
- * @param val The value you wish to print.
- */
-S32 LuaScriptRunner::lua_print(lua_State *L)
-{
-   string str = buildPrintString(L);
-   gConsole.output("%s\n", str.c_str());
-
-   return 0;
-}
-
-
-/**
- * @luafunc num getRandomNumber(int m, int n)
- *
- * @brief Better random number generated than that included with Lua.
- *
- * @descr General structure and peculiar error messages taken from lua math lib.
- * Docs for that are as follows; we should adhere to them as well:
- *
- * This function is an interface to the simple pseudo-random generator function
- * rand provided by ANSI C. (No guarantees can be given for its statistical
- * properties.) When called without arguments, returns a uniform pseudo-random
- * real number in the range [0,1). When called with an integer number m,
- * math.random returns a uniform pseudo-random integer in the range [1, m]. When
- * called with two integer numbers m and n, math.random returns a uniform
- * pseudo-random integer in the range [m, n].
- *
- * @param m (optional) Used for either [1, m] or [m, n] as described above.
- * @param n (optional) Used for [m, n] as described above.
- *
- * @return A random number as described above
- */
-S32 LuaScriptRunner::lua_getRandomNumber(lua_State *L)
-{
-   S32 args = lua_gettop(L);
-
-   if(args == 0)
-      return returnFloat(L, TNL::Random::readF());
-
-   if(args == 1)
-   {
-      S32 max = luaL_checkint(L, 1);
-      luaL_argcheck(L, 1 <= max, 1, "interval is empty");
-      return returnInt(L, TNL::Random::readI(1, max));
-   }
-
-   if(args == 2)
-   {
-      int min = luaL_checkint(L, 1);
-      int max = luaL_checkint(L, 2);
-      luaL_argcheck(L, min <= max, 2, "interval is empty");
-      return returnInt(L, TNL::Random::readI(min, max));
-   }
-
-   else
-      return luaL_error(L, "wrong number of arguments");
-}
-
-
-/**
- * @luafunc int getMachineTime()
- *
- * @brief Get the time according to the system clock.
- *
- * @return Machine time (i.e. wall clock time) in milliseconds.
- */
-S32 LuaScriptRunner::lua_getMachineTime(lua_State *L)
-{
-   return LuaBase::returnInt(L, Platform::getRealMilliseconds());
-}
-
-
-/**
- * @luafunc string findFile(string filename)
- *
- * @brief Finds a specific file to load from various Lua folders.
- *
- * @descr Scans our scripts, levels, and robots directories for a file, in
- * preparation for loading.
- *
- * @param filename The file you're looking for.
- *
- * @return The path to the file in question, or nil if it can not be found.
- */
-S32 LuaScriptRunner::lua_findFile(lua_State *L)
-{
-   checkArgList(L, functionArgs, "", "findFile");
-
-   string filename = getString(L, 1, "");
-
-   FolderManager *folderManager = GameSettings::getFolderManager();
-
-   string fullname = folderManager->findScriptFile(filename);     // Looks in luadir, levelgens dir, bots dir
-
-   lua_pop(L, 1);    // Remove passed arg from stack
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not cleared!");
-
-   if(fullname == "")
-   {
-      logprintf(LogConsumer::LogError, "Could not find script file \"%s\"...", filename.c_str());
-      return returnNil(L);
-   }
-
-   return returnString(L, fullname.c_str());
-}
-
-
-/**
- * @luafunc string readFromFile(string filename)
- *
- * @brief Reads in a file from our sandboxed IO directory.
- *
- * @descr Reads an entire file from the filesystem into a string.
- *
- * @param filename The filename to read.
- *
- * @return The contents of the file as a string.
- *
- * @note This function will only look for files in the `screenshot` directory of
- * the Bitfighter resource folder.
- */
-S32 LuaScriptRunner::lua_readFromFile(lua_State *L)
-{
-   checkArgList(L, functionArgs, "", "readFromFile");
-
-   string filename = extractFilename(getString(L, 1, ""));
-
-   if(filename == "")
-      returnNil(L);
-
-   FolderManager *folderManager = GameSettings::getFolderManager();
-
-   return returnString(L, readFile(folderManager->screenshotDir + getFileSeparator() + filename).c_str());
-}
-
-
-/**
- * @luafunc writeToFile(string filename, string contents, bool append)
- * 
- * @brief Write or append to a file on the filesystem.
- * 
- * @descr This is in a sandboxed environment and will only allow writing to a
- * specific directory.
- * 
- * @param filename The filename to write.
- * @param contents The contents to save to the file.
- * @param append (optional) If `true`, append to the file instead of creating
- * a new one.
- *
- * @note This function will only write to files in the `screenshot` directory of
- * the Bitfighter resource folder.
- */
-S32 LuaScriptRunner::lua_writeToFile(lua_State *L)
-{
-   S32 profile = checkArgList(L, functionArgs, "", "writeToFile");
-
-   // Sanitize the path.  Only a file name is allowed!
-   string filename = extractFilename(getString(L, 1, ""));
-   string contents = getString(L, 2, "");
-
-   bool append = false;
-   if(profile == 1)
-      append = getBool(L, 3);
-
-   if(filename != "" && contents != "")
-   {
-      FolderManager *folderManager = GameSettings::getFolderManager();
-
-      string filePath = folderManager->screenshotDir + getFileSeparator() + filename;
-
-      writeFile(filePath, contents, append);
-   }
-
-   return 0;
-}
 
 
 /**

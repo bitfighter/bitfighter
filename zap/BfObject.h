@@ -227,7 +227,7 @@ class EditorAttributeMenuUI;
 class WallSegment;
 class ClientInfo;
 
-class BfObject : public DatabaseObject, public NetObject, public EditorObject, public LuaBase
+class BfObject : public DatabaseObject, public NetObject, public EditorObject
 {
    typedef NetObject Parent;
 

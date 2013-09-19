@@ -68,6 +68,7 @@ using namespace ClipperLib;
 namespace Zap
 {
 
+using namespace LuaBase;
 
 Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 angle)
 {

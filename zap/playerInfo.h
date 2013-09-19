@@ -32,7 +32,7 @@ namespace Zap
 {
 
 // Interface class to describe players/robots
-class LuaPlayerInfo : public LuaBase
+class LuaPlayerInfo
 {
 public:
    LuaPlayerInfo();  // Constructor
