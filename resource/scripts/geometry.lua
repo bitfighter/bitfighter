@@ -16,8 +16,6 @@
 In all cases below, \em geom refers to either a single point or a table of points.
 --]]
 
-Geom = {}
-
 --[[ 
 @luafunc point Geom.centroid(geom)
 @brief   Find the centroid (center) of `geom`

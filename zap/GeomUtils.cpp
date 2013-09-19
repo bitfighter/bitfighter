@@ -46,7 +46,7 @@
 
 #include "GeomUtils.h"
 #include "MathUtils.h"                    // For findLowestRootInInterval()
-#include "LuaBase.h"
+#include "LuaModule.h"
 
 #include "../recast/Recast.h"
 #include "../recast/RecastAlloc.h"
@@ -1718,6 +1718,15 @@ void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, 
    cornerPoints.push_back(end   - crossVec);
    cornerPoints.push_back(start - crossVec);
 }
+
+#define LUA_STATIC_METHODS(METHOD) \
+   METHOD(polyganize,   ARRAYDEF({{ TABLE, END }}),                                               1 ) \
+   METHOD(triangulate,  ARRAYDEF({{ TABLE, END }}),                                               1 ) \
+   METHOD(clipPolygons, ARRAYDEF({{ INT, TABLE, TABLE, END }, { INT, TABLE, TABLE, BOOL, END }}), 2 ) \
+
+GENERATE_STATIC_MODULE(Geom, LUA_STATIC_METHODS);
+
+#undef LUA_STATIC_METHODS
 
 
 /**

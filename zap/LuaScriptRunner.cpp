@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "LuaScriptRunner.h"   // Header
+#include "LuaModule.h"
 #include "BfObject.h"
 #include "ship.h"
 #include "BotNavMeshZone.h"
@@ -46,6 +47,7 @@
 
 #include <iostream>            // For enum code
 #include <sstream>             // For enum code
+#include <string>
 
 
 namespace Zap
@@ -1052,13 +1054,20 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 
 #  undef REGISTER_STATIC_LINE
 
-
-   lua_pushcfunction(L, lua_clipPolygons);
-   lua_setglobal(L, "clipPolygons");
-   lua_pushcfunction(L, lua_polyganize);
-   lua_setglobal(L, "polyganize");
-   lua_pushcfunction(L, lua_triangulate);
-   lua_setglobal(L, "triangulate");
+   std::map<string, vector<LuaStaticFunctionProfile> >::iterator it;
+   std::map<string, vector<LuaStaticFunctionProfile> > moduleProfiles = LuaModuleRegistrarBase::getModuleProfiles();
+   for(it = moduleProfiles.begin(); it != moduleProfiles.end(); it++)
+   {
+      lua_createtable(L, 0, 0);                                                      // -- table
+      vector<LuaStaticFunctionProfile> &profiles = (*it).second;
+      for(U32 i = 0; i < profiles.size(); i++)
+      {
+         LuaStaticFunctionProfile &profile = profiles[i];
+         lua_pushcfunction(L, profile.function);                                    // -- table, fn
+         lua_setfield(L, -2, profile.functionName);                                 // -- table
+      }
+      lua_setglobal(L, (*it).first.c_str());                                       // --
+   }
 
 
    // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented

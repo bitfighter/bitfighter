@@ -40,6 +40,8 @@
 #include <vector>
 #include <map>
 
+#define ARRAYDEF(...) __VA_ARGS__                  // Wrap inline array definitions so they don't confuse the preprocessor   
+
 using namespace std;
 using namespace TNL;
 
@@ -210,7 +212,7 @@ static const int MAX_PROFILES = 4;              // Max used so far = 2
 // This is a list of possible arguments for a function, along with the number of arguments actually presented
 struct LuaFunctionArgList {
    LuaBase::LuaArgType argList[MAX_PROFILES][MAX_PROFILE_ARGS];
-   const int profileCount;
+   int profileCount;
 };
 
 
@@ -219,6 +221,16 @@ struct LuaFunctionProfile {
    const char         *functionName;
    LuaFunctionArgList  functionArgList;   
 };
+
+
+// Like a LuaFunctionProfile, but with a pointer to a static function
+struct LuaStaticFunctionProfile
+{
+   const char         *functionName;
+   LuaFunctionArgList  functionArgList;
+   lua_CFunction       function;
+};
+
 
 };
 
