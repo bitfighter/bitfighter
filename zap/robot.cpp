@@ -28,6 +28,7 @@
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "gameObjectRender.h"
+#include "GameSettings.h"
 
 #include "MathUtils.h"           // For findLowestRootIninterval()
 #include "GeomUtils.h"
@@ -45,15 +46,41 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(Robot);
 
-// Combined Lua / C++ default constructor, runs on client and server
+/**
+ * @luafunc Robot::Robot(point position, int teamIndex, string scriptName, string scriptArg)
+ *
+ * @param [position] Starting position of the Robot. Defaults to (0, 0)
+ * @param [teamIndex] Starting Team of the Robot. If unspecified, defaults
+ * to balancing teams.
+ * @param [scriptName] The bot script to use. Defaults to the server's default bot.
+ * @param [scriptArg] Zero or more string arguments to pass to the script.
+ */
 Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),   
                              LuaScriptRunner() 
 {
-   // For now...  In future we'll need to specify a script in our L object, then we can instantiate a bot
    if(L)
    {
-      luaL_error(L, "Currently cannot instantiate a Robot object from Lua.  This will be changed in the near future!");
-      return;
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, TEAM_INDX, END }, { PT, TEAM_INDX, STRS, END }}, 3 };
+      S32 profile = checkArgList(L, constructorArgList, "Robot", "constructor");
+      S32 i = 1;
+
+      if(profile >= 1) {
+         setPos(L, i++);
+         setTeam(L, i++);
+      }
+
+      if(profile == 2)
+      {
+         mScriptName = GameSettings::getFolderManager()->findBotFile(getString(L, i++));
+
+         while(i <= lua_gettop(L))
+         {
+            mScriptArgs.push_back(getString(L, i++));
+         }
+      }
+
+      lua_pop(L, i - 1);
+      TNLAssert(lua_gettop(L) == 0, "Stack dirty");
    }
 
    mHasSpawned = false;
@@ -104,7 +131,10 @@ Robot::~Robot()
 
    delete mPlayerInfo;
    if(mClientInfo.isValid())
-      delete mClientInfo.getPointer();
+   {
+      getGame()->removeFromClientList(mClientInfo.getPointer());
+	   delete mClientInfo.getPointer();
+   }
 
    // Even though a similar line gets called when parent classes are destructed, we need this here to set our very own personal copy
    // of luaProxy as defunct.  Each "level" of an object has their own private lauProxy object that needs to be individually marked.
@@ -271,13 +301,32 @@ void Robot::onAddedToGame(Game *game)
       return;
 
    // Server only from here on out
-
-   hasExploded = true;        // Becase we start off "dead", but will respawn real soon now...
+   hasExploded = true;        // Because we start off "dead", but will respawn real soon now...
    disableCollision();
 
    game->addBot(this);        // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
   
    EventManager::get()->fireEvent(this, EventManager::PlayerJoinedEvent, getPlayerInfo());
+
+   // Check whether a script file has been specified. If not, use the default
+   if(mScriptName == "")
+   {
+      string scriptName = game->getSettings()->getIniSettings()->defaultRobotScript;
+      mScriptName = GameSettings::getFolderManager()->findBotFile(scriptName);
+   }
+
+   mLuaGame = game;
+
+
+   if(!start())
+   {
+      deleteObject(0);
+      return;
+   }
+
+   disableCollision();
+   game->getGameType()->serverAddClient(mClientInfo.getPointer());
+   enableCollision();
 }
 
 

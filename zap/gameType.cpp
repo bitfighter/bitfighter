@@ -2918,14 +2918,6 @@ string GameType::addBot(Vector<StringTableEntry> args)
 
    robot->addToGame(mGame, mGame->getGameObjDatabase());
 
-   if(!robot->start())
-   {
-      delete robot;
-      return "!!! Could not start robot; please see server logs";
-   }
-
-   serverAddClient(robot->getClientInfo());
-
    return "";
 }
 

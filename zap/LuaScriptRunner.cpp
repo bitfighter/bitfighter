@@ -1283,6 +1283,7 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
 
    // First check to see if item is a BfObject
    BfObject *obj = luaW_check<BfObject>(L, 1);
+   lua_pop(L, 1);
 
    if(obj)
    {

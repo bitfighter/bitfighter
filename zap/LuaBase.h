@@ -75,6 +75,7 @@ namespace LuaBase
    LUA_ARG_TYPE_ITEM( NUM,         "Number"                                       ) \
    LUA_ARG_TYPE_ITEM( NUM_GE0,     "Number >= 0"                                  ) \
    LUA_ARG_TYPE_ITEM( STR,         "String"                                       ) \
+   LUA_ARG_TYPE_ITEM( STRS,        "One or more strings"                          ) \
    LUA_ARG_TYPE_ITEM( PT,          "Lua point"                                    ) \
    LUA_ARG_TYPE_ITEM( SIMPLE_LINE, "Pair of Lua points (singly or in table)"      ) \
    LUA_ARG_TYPE_ITEM( LINE,        "Two or more Lua points (singly or in table)"  ) \

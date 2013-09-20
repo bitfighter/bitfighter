@@ -214,6 +214,17 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
       case STR:               
          return lua_isstring(L, stackPos);
 
+      case STRS:
+      {
+         bool ok = lua_isstring(L, stackPos);
+
+         if(ok)
+            while(stackPos < stackDepth && lua_isstring(L, stackPos))
+               stackPos++;
+
+         return ok;
+      }
+
       case BOOL:               
          return lua_isboolean(L, stackPos);
 
