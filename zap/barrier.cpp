@@ -43,6 +43,8 @@ using namespace TNL;
 namespace Zap
 {
 
+using namespace LuaArgs;
+
 TNL_IMPLEMENT_NETOBJECT(Barrier);
 
 Vector<Point> Barrier::mRenderLineSegments;

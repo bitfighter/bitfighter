@@ -1604,7 +1604,7 @@ REGISTER_LUA_SUBCLASS(ForceFieldProjector, EngineeredItem);
 // LuaItem methods -- override method in parent class
 S32 ForceFieldProjector::lua_getPos(lua_State *L)
 {
-   return LuaBase::returnPoint(L, getPos() + mAnchorNormal * getRadius() );
+   return returnPoint(L, getPos() + mAnchorNormal * getRadius() );
 }
 
 
@@ -2337,7 +2337,7 @@ S32 Turret::lua_getLoc(lua_State *L)
 
 S32 Turret::lua_getPos(lua_State *L)
 {
-   return LuaBase::returnPoint(L, getPos() + mAnchorNormal * TURRET_OFFSET);
+   return returnPoint(L, getPos() + mAnchorNormal * TURRET_OFFSET);
 }
 
 

@@ -37,6 +37,8 @@
 namespace Zap
 {
 
+using namespace LuaArgs;
+
 // Statics:
 #ifndef ZAP_DEDICATED
    EditorAttributeMenuUI *AbstractSpawn::mAttributeMenuUI = NULL;

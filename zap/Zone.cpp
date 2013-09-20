@@ -33,6 +33,8 @@
 namespace Zap
 {
 
+using namespace LuaArgs;
+
 TNL_IMPLEMENT_CLASS(Zone);    // Allows classes to be autoconstructed by name
 
 

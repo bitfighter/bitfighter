@@ -40,6 +40,8 @@
 namespace Zap
 {
 
+using namespace LuaArgs;
+
 TNL_IMPLEMENT_NETOBJECT(LineItem);
 
 TNL_IMPLEMENT_NETOBJECT_RPC(LineItem, s2cSetGeom,

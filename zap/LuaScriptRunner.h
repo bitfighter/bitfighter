@@ -38,7 +38,6 @@
 
 using namespace std;
 using namespace TNL;
-using namespace LuaBase;
 
 
 #define method(class, name)  { #name, &class::name }
@@ -141,7 +140,7 @@ void setSelf(lua_State *L, T *self, const char *name)
                                                                                                     
    lua_pop(L, -1);                                          // Cleanup                                -- <<empty stack>>
 
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not cleared!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
 }
 
 
@@ -184,7 +183,7 @@ public:
    template <class T>
    void tickTimer(U32 deltaT)          
    {
-      TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
+      TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
       clearStack(L);
 
       luaW_push<T>(L, static_cast<T *>(this));           // -- this
@@ -267,11 +266,12 @@ const luaL_reg class_::luaMethods[] =              \
  
 
 #define GENERATE_LUA_FUNARGS_TABLE(class_, table_)  \
+using namespace LuaArgs;                            \
 const LuaFunctionProfile class_::functionArgs[] =   \
 {                                                   \
    table_(class_, LUA_FUNARGS_ITEM)                 \
    { NULL, {{{ }}, 0 } }                            \
-}
+}                                                   \
 
 // Generates something like the following (without the comment block, of course!):
 // const LuaFunctionProfile Teleporter::functionArgs[] =

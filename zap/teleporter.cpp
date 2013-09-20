@@ -47,6 +47,8 @@ using namespace TNL;
 namespace Zap
 {
 
+using namespace LuaArgs;
+
 S32 DestManager::getDestCount() const
 {
    return mDests.size();

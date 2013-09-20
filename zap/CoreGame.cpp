@@ -41,6 +41,7 @@
 
 namespace Zap {
 
+using namespace LuaArgs;
 
 CoreGameType::CoreGameType() : GameType(0)  // Winning score hard-coded to 0
 {

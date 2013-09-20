@@ -62,9 +62,12 @@ struct rcPolyMesh;
 struct lua_State;
 
 using namespace TNL;
-using namespace ClipperLib;
 
 namespace Zap {
+
+using ClipperLib::PolyTree;
+using ClipperLib::ClipType;
+using ClipperLib::Polygons;
 
 class Point;
 class Rect;
@@ -76,10 +79,10 @@ class Rect;
  * http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/ClipType.htm
  */
 #define CLIP_TYPE_TABLE \
-   CLIP_TYPE_ITEM( Intersection, ctIntersection ) \
-   CLIP_TYPE_ITEM( Union,        ctUnion) \
-   CLIP_TYPE_ITEM( Difference,   ctDifference ) \
-   CLIP_TYPE_ITEM( Xor,          ctXor ) \
+   CLIP_TYPE_ITEM( Intersection, ClipperLib::ctIntersection ) \
+   CLIP_TYPE_ITEM( Union,        ClipperLib::ctUnion) \
+   CLIP_TYPE_ITEM( Difference,   ClipperLib::ctDifference ) \
+   CLIP_TYPE_ITEM( Xor,          ClipperLib::ctXor ) \
 
 
 // Test between a polygon and a swept sphere with radius inRadius moving from inBegin to inBegin + inDelta

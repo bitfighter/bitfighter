@@ -45,6 +45,8 @@
 namespace Zap
 {
 
+using namespace LuaArgs;
+
 // Needed on OS X, but cause link errors in VC++
 TNL_IMPLEMENT_NETOBJECT(SpeedZone);
 

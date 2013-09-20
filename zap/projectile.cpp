@@ -44,6 +44,8 @@ TNL_IMPLEMENT_NETOBJECT(Projectile);
 namespace Zap 
 {
 
+using namespace LuaArgs;
+
 // Constructor -- used when weapon is fired  
 Projectile::Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter)
 {

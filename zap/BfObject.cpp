@@ -45,6 +45,7 @@ using namespace TNL;
 
 namespace Zap
 {
+using namespace LuaArgs;
 
 // Derived Object Type conditional methods
 bool isEngineeredType(U8 x)
@@ -1693,7 +1694,7 @@ S32 CentroidObject::lua_setLoc(lua_State *L)
 
 S32 CentroidObject::lua_getPos(lua_State *L)
 {
-   return LuaBase::returnPoint(L, getCentroid());      // Do we want this to return a series of points?
+   return returnPoint(L, getCentroid());      // Do we want this to return a series of points?
 }
 
 

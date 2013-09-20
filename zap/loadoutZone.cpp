@@ -32,6 +32,8 @@
 namespace Zap
 {
 
+using namespace LuaArgs;
+
 TNL_IMPLEMENT_NETOBJECT(LoadoutZone);
 
 /**

@@ -95,7 +95,7 @@ private:
    void removeFromPendingUnsubscribeList(LuaScriptRunner *subscriber, EventType eventType);
 
    void handleEventFiringError(lua_State *L, const Subscription &subscriber, EventType eventType, const char *errorMsg);
-   bool fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, LuaBase::ScriptContext context);
+   bool fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, ScriptContext context);
       
    bool mIsPaused;
    S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
@@ -116,7 +116,7 @@ public:
    //static Vector<pendingUnsubscriptions *> pendingUnsubscriptions[EventTypes];
    static bool anyPending;
 
-   void subscribe  (LuaScriptRunner *subscriber, EventType eventType, LuaBase::ScriptContext context, bool failSilently = false);
+   void subscribe  (LuaScriptRunner *subscriber, EventType eventType, ScriptContext context, bool failSilently = false);
    void unsubscribe(LuaScriptRunner *subscriber, EventType eventType);
 
     // Used when bot dies, and we know there won't be subscription conflicts

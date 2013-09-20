@@ -10,7 +10,11 @@
 
 
 using namespace TNL;
-using namespace LuaBase;
+
+namespace Zap
+{
+
+using namespace LuaArgs;
 
 // helper function
 static string buildPrintString(lua_State *L)
@@ -38,9 +42,6 @@ static string buildPrintString(lua_State *L)
 
   return out;
 }
-
-namespace Zap
-{
 
 /**
  * @luafunc static void global::logprint(any val)
@@ -138,7 +139,7 @@ S32 lua_getRandomNumber(lua_State *L)
  */
 S32 lua_getMachineTime(lua_State *L)
 {
-   return LuaBase::returnInt(L, Platform::getRealMilliseconds());
+   return returnInt(L, Platform::getRealMilliseconds());
 }
 
 
@@ -165,7 +166,7 @@ S32 lua_findFile(lua_State *L)
    string fullname = folderManager->findScriptFile(filename);     // Looks in luadir, levelgens dir, bots dir
 
    lua_pop(L, 1);    // Remove passed arg from stack
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not cleared!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
 
    if(fullname == "")
    {

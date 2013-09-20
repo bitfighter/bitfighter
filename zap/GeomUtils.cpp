@@ -68,7 +68,7 @@ using namespace ClipperLib;
 namespace Zap
 {
 
-using namespace LuaBase;
+using namespace LuaArgs;
 
 Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 angle)
 {
@@ -1761,20 +1761,20 @@ GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
  */
 S32 lua_clipPolygons(lua_State* L)
 {
-   LuaBase::checkArgList(L, "Geom", "clipPolygons");
+   checkArgList(L, "Geom", "clipPolygons");
 
    if(lua_gettop(L) < 3)
       return 0;
 
    // read the arguments
    ClipType operation = static_cast<ClipType>(lua_tointeger(L, 1));
-   Vector<Vector<Point> > subject = LuaBase::getPolygons(L, 2);
-   Vector<Vector<Point> > clip = LuaBase::getPolygons(L, 3);
+   Vector<Vector<Point> > subject = getPolygons(L, 2);
+   Vector<Vector<Point> > clip = getPolygons(L, 3);
 
    bool merge = true;
    if(lua_gettop(L) >= 4)
    {
-      merge = LuaBase::getBool(L, 4);
+      merge = getBool(L, 4);
       lua_pop(L, 1);
    }
 
@@ -1784,10 +1784,10 @@ S32 lua_clipPolygons(lua_State* L)
    // try to execute the operation
    Vector<Vector<Point> > output;
    if(!clipPolys(operation, subject, clip, output, merge))
-      return LuaBase::returnNil(L);
+      return returnNil(L);
 
    // return the polygons if we're successful
-   return LuaBase::returnPolygons(L, output);
+   return returnPolygons(L, output);
 }
 
 
@@ -1807,18 +1807,18 @@ S32 lua_clipPolygons(lua_State* L)
  */
 S32 lua_triangulate(lua_State *L)
 {
-   LuaBase::checkArgList(L, "Geom", "triangulate");
+   checkArgList(L, "Geom", "triangulate");
 
-   Vector<Vector<Point> > input = LuaBase::getPolygons(L, 1);
+   Vector<Vector<Point> > input = getPolygons(L, 1);
    lua_pop(L, 1);
 
    // try to execute the operation
    Vector<Vector<Point> > result;
    if(!triangulate(input, result))
-      return LuaBase::returnNil(L);
+      return returnNil(L);
 
    // return the polygons if we're successful
-   return LuaBase::returnPolygons(L, result);
+   return returnPolygons(L, result);
 }
 
 
@@ -1841,16 +1841,16 @@ S32 lua_triangulate(lua_State *L)
  */
 S32 lua_polyganize(lua_State *L)
 {
-   LuaBase::checkArgList(L, "Geom", "polyganize");
-   Vector<Vector<Point> > input = LuaBase::getPolygons(L, 1);
+   checkArgList(L, "Geom", "polyganize");
+   Vector<Vector<Point> > input = getPolygons(L, 1);
    lua_pop(L, 1);
 
    Vector<Vector<Point> > result;
    if(!polyganize(input, result))
-      return LuaBase::returnNil(L);
+      return returnNil(L);
 
    // return the polygons if we're successful
-   return LuaBase::returnPolygons(L, result);
+   return returnPolygons(L, result);
 }
 
 

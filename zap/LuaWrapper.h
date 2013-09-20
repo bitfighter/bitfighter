@@ -90,7 +90,7 @@ inline bool luaW_shouldCreateProxy(lua_State* L)
 {
    // We don't want proxies with editor plugins because they end up creating dangling
    // pointers to LuaProxy objects (when copying the GridDatabse in undo/redo)
-   return LuaBase::getScriptContext(L) != LuaBase::PluginContext;
+   return getScriptContext(L) != PluginContext;
 }
 
 
@@ -224,7 +224,7 @@ inline bool luaW_isUsingProxy(lua_State* L, void *objptr)
    lua_pushlightuserdata(L, objptr);                  // -- ... usingproxy_table, &luaW_Userdata
    lua_rawget(L, -2);                                 // -- ... usingproxy_table, bool
 
-   TNLAssert(!lua_isnil(L, -1) || LuaBase::dumpStack(L), "Expected non-nil value!");
+   TNLAssert(!lua_isnil(L, -1) || dumpStack(L), "Expected non-nil value!");
    bool usingProxy = lua_toboolean(L, -1);            // -- ... usingproxy_table, bool
 
    lua_pop(L, 2);                                     // -- ...
@@ -400,7 +400,7 @@ void luaW_push(lua_State* L, T* obj)
          lua_gettable(L, -2);                            // -- cache_table, userdata
 
          TNLAssert(lua_isuserdata(L, -1) ||
-               LuaBase::dumpStack(L, "Expect table, userdata") || LuaBase::dumpTable(L, -2, "Cached Userdatas"),
+               dumpStack(L, "Expect table, userdata") || dumpTable(L, -2, "Cached Userdatas"),
                "Expected userdata!");
          TNLAssert(proxy == luaW_toProxy<T>(L, -1), "Cached object is not the one we expect!");
 
@@ -436,7 +436,7 @@ void luaW_push(lua_State* L, T* obj)
 
          // Cleanup
          lua_pop(L, 1); // ... obj
-         TNLAssert(lua_isuserdata(L, -1) || LuaBase::dumpStack(L, "Expect userdata"), "Expected userdata!");
+         TNLAssert(lua_isuserdata(L, -1) || dumpStack(L, "Expect userdata"), "Expected userdata!");
 
          luaW_setUsingProxy(L, obj, true);
          luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it

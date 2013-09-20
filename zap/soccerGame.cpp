@@ -38,6 +38,8 @@
 namespace Zap
 {
 
+using namespace LuaArgs;
+
 // Constructor
 SoccerGameType::SoccerGameType()
 {

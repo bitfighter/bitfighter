@@ -46,7 +46,7 @@ namespace Zap
 
 struct Subscription {
    LuaScriptRunner *subscriber;
-   LuaBase::ScriptContext context;
+   ScriptContext context;
 };
 
 
@@ -120,7 +120,7 @@ EventManager *EventManager::get()
 }
 
 
-void EventManager::subscribe(LuaScriptRunner *subscriber, EventType eventType, LuaBase::ScriptContext context, bool failSilently)
+void EventManager::subscribe(LuaScriptRunner *subscriber, EventType eventType, ScriptContext context, bool failSilently)
 {
    // First, see if we're already subscribed
    if(isSubscribed(subscriber, eventType) || isPendingSubscribed(subscriber, eventType))
@@ -271,7 +271,7 @@ void EventManager::fireEvent(EventType eventType)
 
    lua_State *L = LuaScriptRunner::getL();
 
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
       fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
@@ -289,7 +289,7 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
 
    lua_State *L = LuaScriptRunner::getL();
 
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
@@ -307,7 +307,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
 
    lua_State *L = LuaScriptRunner::getL();
 
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
@@ -326,7 +326,7 @@ void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType, const
 
    lua_State *L = LuaScriptRunner::getL();
 
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
@@ -355,7 +355,7 @@ void EventManager::fireEvent(LuaScriptRunner *player, EventType eventType, LuaPl
 
    lua_State *L = LuaScriptRunner::getL();
 
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
@@ -376,7 +376,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
 
    lua_State *L = LuaScriptRunner::getL();
 
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
@@ -393,7 +393,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
       catch(LuaException &e)
       {
          handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
-         LuaBase::clearStack(L);
+         clearStack(L);
          return;
       }
    }
@@ -408,7 +408,7 @@ void EventManager::fireEvent(EventType eventType, S32 score, S32 team, LuaPlayer
 
    lua_State *L = LuaScriptRunner::getL();
 
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
@@ -427,16 +427,16 @@ void EventManager::fireEvent(EventType eventType, S32 score, S32 team, LuaPlayer
 
 // Actually fire the event, called by one of the fireEvent() methods above
 // Returns true if there was an error, false if everything ran ok
-bool EventManager::fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, LuaBase::ScriptContext context)
+bool EventManager::fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, ScriptContext context)
 {
-   LuaBase::setScriptContext(L, context);
+   setScriptContext(L, context);
    return scriptRunner->runCmd(function, 0);
 }
 
 
 void EventManager::handleEventFiringError(lua_State *L, const Subscription &subscriber, EventType eventType, const char *errorMsg)
 {
-   if(subscriber.context == LuaBase::RobotContext)
+   if(subscriber.context == RobotContext)
    {
       subscriber.subscriber->logError("Error handling event %s: %s. Shutting bot down.", eventDefs[eventType].name, errorMsg);
       delete subscriber.subscriber;
@@ -447,7 +447,7 @@ void EventManager::handleEventFiringError(lua_State *L, const Subscription &subs
       logprintf(LogConsumer::LogError, "Error firing event %s: %s", eventDefs[eventType].name, errorMsg);
    }
 
-   LuaBase::clearStack(L);
+   clearStack(L);
 }
 
 

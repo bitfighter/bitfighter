@@ -98,7 +98,7 @@ bool Console::prepareEnvironment()
    if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY, ConsoleContext) /*|| !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY, ConsoleContext)*/)
       return false;
 
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not cleared!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
 
    return true;
 }
@@ -184,7 +184,7 @@ void Console::processCommand(const char *cmdline)
       consoleCommand = "";    // Reset command
    }
 
-   LuaBase::clearStack(L);
+   clearStack(L);
 }
 
 

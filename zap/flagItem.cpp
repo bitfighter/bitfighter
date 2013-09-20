@@ -36,6 +36,8 @@
 namespace Zap
 {
 
+using namespace LuaArgs;
+
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
 /**
  * @luafunc FlagItem::FlagItem()

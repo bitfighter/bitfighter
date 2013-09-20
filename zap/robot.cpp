@@ -41,6 +41,8 @@
 namespace Zap
 {
 
+using namespace LuaArgs;
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -167,7 +169,7 @@ bool Robot::initialize(Point &pos)
    catch(LuaException &e)
    {
       logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
-      LuaBase::clearStack(L);
+      clearStack(L);
       return false;
    }
 
@@ -222,7 +224,7 @@ bool Robot::prepareEnvironment()
    catch(LuaException &e)
    {
       logError(e.what());
-      LuaBase::clearStack(L);
+      clearStack(L);
       return false;
    }
 
@@ -246,7 +248,7 @@ static string getNextName()
 // Run bot's getName function, return default name if fn isn't defined
 string Robot::runGetName()
 {
-   TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    // error will only be true if: 1) getName doesn't exist, which should never happen -- getName is stubbed out in robot_helper_functions.lua
    //                             2) getName generates an error
@@ -1354,14 +1356,14 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
    // We are expecting a table to be on top of the stack when we get here.  If not, we can add one.
    if(!lua_istable(L, -1))
    {
-      TNLAssert(lua_gettop(L) == 0 || LuaBase::dumpStack(L), "Stack not cleared!");
+      TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
 
       logprintf(LogConsumer::LogWarning,
                   "Finding objects will be far more efficient if your script provides a table -- see scripting docs for details!");
       lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
    }
 
-   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || LuaBase::dumpStack(L), "Should only have table!");
+   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || dumpStack(L), "Should only have table!");
 
 
    S32 pushed = 0;      // Count of items we put into our table
@@ -1385,7 +1387,7 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
       lua_rawseti(L, 1, pushed);
    }
 
-   TNLAssert(lua_gettop(L) == 1 || LuaBase::dumpStack(L), "Stack has unexpected items on it!");
+   TNLAssert(lua_gettop(L) == 1 || dumpStack(L), "Stack has unexpected items on it!");
 
    return 1;
 }

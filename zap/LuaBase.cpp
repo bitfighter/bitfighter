@@ -37,8 +37,7 @@
 namespace Zap
 {
 
-namespace LuaBase
-{
+using namespace LuaArgs;
 
 // Make sure we got the number of args we wanted
 void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName)
@@ -953,7 +952,5 @@ void setScriptContext(lua_State *L, ScriptContext context)
    lua_pushinteger(L, context);
    lua_setfield(L, LUA_REGISTRYINDEX, SCRIPT_CONTEXT_KEY);     // Pops the int we just pushed from the stack
 }
-
-};
 
 };
