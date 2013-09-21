@@ -1,12 +1,15 @@
 #ifndef _TEST_UTILS_H
 #define _TEST_UTILS_H
 
+#include <tnl.h>
+
 #include <string>
 
 namespace Zap
 {
 
 using namespace std;
+using namespace TNL;
 
 class ServerGame;
 class ClientGame;
@@ -21,6 +24,7 @@ struct GamePair
 {
 	GamePair(const string &levelCode = "");
 	~GamePair();
+	void idle(U32 timeDelta);
 	ClientGame* client;
 	ServerGame* server;
 };

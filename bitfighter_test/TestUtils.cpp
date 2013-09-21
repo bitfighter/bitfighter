@@ -70,4 +70,11 @@ GamePair::~GamePair()
 }
 
 
+void GamePair::idle(U32 timeDelta)
+{
+   client->idle(timeDelta);
+   server->idle(timeDelta);
+}
+
+
 };

@@ -313,10 +313,6 @@ void packUnpack(T input, T &output, U32 mask = 0xFFFFFFFF)
 }
 
 
-void idleGames(ClientGame *clientGame, ServerGame *serverGame, U32 timeDelta)
-{
-   clientGame->idle(timeDelta);
-   serverGame->idle(timeDelta);
 // See if we can get some client-server interaction going on here
 TEST_F(BfTest, ClientServerInteraction)
 {
@@ -326,7 +322,7 @@ TEST_F(BfTest, ClientServerInteraction)
 
    // Idle for a while
    for(S32 i = 0; i < 5; i++)
-      idleGames(clientGame, serverGame, 10);
+      gamePair.idle(10);
 
    Vector<DatabaseObject *> fillVector;
 
