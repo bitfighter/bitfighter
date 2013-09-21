@@ -326,6 +326,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/LevelLoaderTest.cpp	
 	${CMAKE_SOURCE_DIR}/bitfighter_test/PolylineGeometryTest.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/ServerGameTest.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
 )
 
 add_executable(test EXCLUDE_FROM_ALL

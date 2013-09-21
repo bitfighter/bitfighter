@@ -29,6 +29,7 @@
 #include "../zap/stringUtils.h"
 
 #include "LevelFilesForTesting.h"      // Contains sample levelcode for testing purposes
+#include "TestUtils.h"
 
 #include "tnlNetObject.h"
 #include "tnlGhostConnection.h"
@@ -309,34 +310,6 @@ void packUnpack(T input, T &output, U32 mask = 0xFFFFFFFF)
 }
 
 
-// Create a new ClientGame with one dummy team -- be sure to clean up settings somewhere!
-ClientGame *newClientGame()
-{
-   Address addr;
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-
-   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
-   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
-   FontManager::initialize(settings.get(), false);   
-   ClientGame *game = new ClientGame(addr, settings, new UIManager());    // ClientGame destructor will clean up UIManager
-
-   game->addTeam(new Team());     // Teams will be deleted by ClientGame destructor
-
-   return game;
-}
-
-
-// Create a new ServerGame with one dummy team
-ServerGame *newServerGame()
-{
-   Address addr;
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-   LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(""));
-
-   ServerGame *game = new ServerGame(addr, settings, levelSource, false, false);
-   game->addTeam(new Team());    // Team will be cleaned up when game is deleted
-
-   return game;
 }
 
 
@@ -344,28 +317,12 @@ void idleGames(ClientGame *clientGame, ServerGame *serverGame, U32 timeDelta)
 {
    clientGame->idle(timeDelta);
    serverGame->idle(timeDelta);
-}
-
-
 // See if we can get some client-server interaction going on here
 TEST_F(BfTest, ClientServerInteraction)
 {
-   ClientGame *clientGame = newClientGame();
-
-   GameSettingsPtr settings = clientGame->getSettingsPtr();
-
-   clientGame->userEnteredLoginCredentials("TestUser", "password", false);    // Simulates entry from NameEntryUserInterface
-
-   string code = getLevelCode1();
-   LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(code));
-   ServerGame *serverGame = initHosting(settings, levelSource, true, false);
-
-   GameType *gt = new GameType();    // Cleaned up by database
-   gt->addToGame(serverGame, serverGame->getGameObjDatabase());
-
-
-   bool ok = serverGame->startHosting();     // This will load levels and wipe out any teams
-   clientGame->joinLocalGame(serverGame->getNetInterface());
+   GamePair gamePair(getLevelCode1());
+   ClientGame* clientGame = gamePair.client;
+   ServerGame* serverGame = gamePair.server;
 
    // Idle for a while
    for(S32 i = 0; i < 5; i++)
@@ -399,13 +356,6 @@ TEST_F(BfTest, ClientServerInteraction)
    ASSERT_STREQ("Test Level",                 clientGame->getGameType()->getLevelName()->getString());         // Quoted in level file
    ASSERT_STREQ("This is a basic test level", clientGame->getGameType()->getLevelDescription()->getString());  // Quoted in level file
    ASSERT_STREQ("level creator",              clientGame->getGameType()->getLevelCredits()->getString());      // Not quoted in level file
-   
-
-   clientGame->getGameType();
-   
-   // Cleanup
-   delete clientGame;
-   delete serverGame;
 }
 
 
