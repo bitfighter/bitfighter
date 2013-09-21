@@ -560,7 +560,7 @@ void OGLCONSOLE_SetVisibility(int visible)
 
 int OGLCONSOLE_GetVisibility()
 {
-	return userConsole->visibility;
+	return userConsole && userConsole->visibility;
 }
 
 /* This routine is meant for applications with a single console, if you use
