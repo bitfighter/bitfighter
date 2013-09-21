@@ -310,9 +310,6 @@ void packUnpack(T input, T &output, U32 mask = 0xFFFFFFFF)
 }
 
 
-}
-
-
 // See if we can get some client-server interaction going on here
 TEST_F(BfTest, ClientServerInteraction)
 {
