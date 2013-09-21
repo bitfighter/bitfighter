@@ -50,8 +50,10 @@ GamePair::GamePair(const string &levelCode)
 
    GameSettingsPtr settings = client->getSettingsPtr();
 
-   client->userEnteredLoginCredentials("TestUser", "password", false);    // Simulates entry from NameEntryUserInterface
+   LuaScriptRunner::setScriptingDir(settings->getFolderManager()->luaDir);
+   LuaScriptRunner::startLua();
 
+   client->userEnteredLoginCredentials("TestUser", "password", false);    // Simulates entry from NameEntryUserInterface
    LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(levelCode));
    server = initHosting(settings, levelSource, true, false);
 
@@ -65,6 +67,7 @@ GamePair::GamePair(const string &levelCode)
 
 GamePair::~GamePair()
 {
+   LuaScriptRunner::shutdown();
 	delete client;
 	delete server;
 }

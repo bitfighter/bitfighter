@@ -2142,7 +2142,7 @@ void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList)
 // Constructor
 FolderManager::FolderManager()
 {
-   // Do nothing
+   resolveDirs(getExecutableDir());
 }
 
 
@@ -2215,6 +2215,26 @@ void FolderManager::resolveDirs(GameSettings *settings)
    gSqlite = folderManager->logDir + "stats";
 }
 
+
+void FolderManager::resolveDirs(const string &root)
+{
+   rootDataDir = root;
+
+   // root used to specify the following folders
+   robotDir      = joindir(root, "robots");
+   pluginDir     = joindir(root, "editor_plugins");
+   luaDir        = joindir(root, "scripts");
+   iniDir        = joindir(root, "");
+   logDir        = joindir(root, "");
+   screenshotDir = joindir(root, "screenshots");
+   musicDir      = joindir(root, "music");
+
+   // root not used for these folders
+   sfxDir        = joindir("", "sfx");
+   fontsDir      = joindir("", "fonts");
+
+   gSqlite = logDir + "stats";
+}
 
 // Figure out where the levels are.  This is exceedingly complex.
 //

@@ -83,6 +83,7 @@ struct FolderManager
    string fontsDir;
 
    void resolveDirs(GameSettings *settings);                                  
+   void resolveDirs(const string &root);
    void resolveLevelDir(GameSettings *settings);                                 
    string resolveLevelDir(const string &levelDir);
 
