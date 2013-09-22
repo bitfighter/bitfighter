@@ -961,8 +961,7 @@ void ServerGame::runLevelGenScript(const string &scriptName)
 
    // The script file will be the first argument, subsequent args will be passed on to the script -- 
    // will be deleted when level ends in ServerGame::cleanUp()
-   LuaLevelGenerator *levelgen = new LuaLevelGenerator(fullname, *getGameType()->getScriptArgs(), getGridSize(), 
-                                                       getGameObjDatabase(), this);
+   LuaLevelGenerator *levelgen = new LuaLevelGenerator(this, fullname, *getGameType()->getScriptArgs());
 
    if(!levelgen->runScript(!isTestServer()))    // Do not cache on test server
       delete levelgen;

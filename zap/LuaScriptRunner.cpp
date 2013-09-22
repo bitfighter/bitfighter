@@ -219,6 +219,9 @@ void LuaScriptRunner::pushStackTracer()
 // show up here.
 bool LuaScriptRunner::loadScript(bool cacheScript)
 {
+   if(mScriptName == "")
+      return true;
+
    static const S32 MAX_CACHE_SIZE = 16;
 
    // On a dedicated server, we'll always cache our scripts; on a regular server, we'll cache script except when the user is testing
@@ -291,6 +294,14 @@ bool LuaScriptRunner::loadScript(bool cacheScript)
 }
 
 
+bool LuaScriptRunner::runString(const string &code)
+{
+   luaL_loadstring(L, code.c_str());
+   setEnvironment();
+   return !lua_pcall(L, 0, 0, 0);
+}
+
+
 // Don't forget to update the eventManager after running a robot's main function!
 // Returns false if failed
 bool LuaScriptRunner::runMain()
@@ -302,6 +313,9 @@ bool LuaScriptRunner::runMain()
 // Takes the passed args, puts them into a Lua table called arg, pushes it on the stack, and runs the "main" function.
 bool LuaScriptRunner::runMain(const Vector<string> &args)
 {
+   if(mScriptName == "")
+      return true;
+
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    setLuaArgs(args);
@@ -460,7 +474,7 @@ void LuaScriptRunner::loadCompileScript(const char *filename)
    // LUA_ERRSYNTAX: syntax error during pre-compilation;  [[ err == 3 ]]
    // LUA_ERRMEM: memory allocation error.  [[ err == 4 ]]
 
-   if(luaL_loadfile(L, filename) != 0)
+   if(filename[0] != '\0' && luaL_loadfile(L, filename) != 0)
       throw LuaException("Error compiling script " + string(filename) + "\n" + string(lua_tostring(L, -1)));
 }
 

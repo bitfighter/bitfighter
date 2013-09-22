@@ -52,8 +52,7 @@ public:
    LuaLevelGenerator();                // Default constructor
 
    // Standard constructor
-   LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridsize, 
-                     GridDatabase *gridDatabase, Game *game);   
+   LuaLevelGenerator(Game *game, const string &scriptName = "", const Vector<string> &scriptArgs = Vector<string>(), GridDatabase *gridDatabase = NULL);
    virtual ~LuaLevelGenerator();       // Destructor
 
    bool prepareEnvironment();
