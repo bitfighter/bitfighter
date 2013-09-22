@@ -4,7 +4,6 @@
 #include "../zap/gameType.h"
 #include "../zap/luaLevelGenerator.h"
 #include "gtest/gtest.h"
-#include "lua.h"
 
 namespace Zap
 {
@@ -39,7 +38,6 @@ TEST(RobotTest, luaRobotNew)
 
 	LuaLevelGenerator levelgen(gamePair.server);
 	levelgen.runScript(false);
-	lua_State *L = levelgen.getL();
 
 	EXPECT_TRUE(levelgen.runString("bf:addItem(Robot.new())"));
 
