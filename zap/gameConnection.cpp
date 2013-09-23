@@ -253,7 +253,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroup
 }
 
 
-// Client requests that the server to spawn delay them... only called from /idle command
+// Client requests that the server to spawn delay them... only called from /idle command or when player levels up
 TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (bool incursPenalty), (incursPenalty), 
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
