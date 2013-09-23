@@ -674,7 +674,7 @@ void GameType::idle_server(U32 deltaT)
       ClientInfo *clientInfo = mGame->getClientInfo(i);
       // Respawn dead players
       if(clientInfo->respawnTimer.update(deltaT))           // Need to respawn?
-         spawnShip(clientInfo);                       
+         spawnShip(clientInfo); 
 
       if(!clientInfo->isRobot())
       {
@@ -1873,7 +1873,7 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *client
    else              // Unknown killer... not a scorable event.  Unless killer was an asteroid!
    {
       if(killerObject == NULL)  // Killed by levelgen perhaps?
-         updateScore(victim, KillSelf);
+         updateScore(victim, KillSelf);  //<== why Self???
       else if(killerObject->getObjectTypeNumber() == AsteroidTypeNumber)       // Asteroid
          updateScore(victim, KilledByAsteroid, 0);
       else if(U32(killerObject->getTeam()) < U32(getGame()->getTeamCount()) && isTeamGame()) // We may have a non-hostile killer team we can use to give credit.

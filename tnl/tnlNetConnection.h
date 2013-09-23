@@ -408,6 +408,8 @@ private:
    F32 mSimulatedSendPacketLoss; ///< Function to simulate packet loss on a network
    F32 mSimulatedReceivePacketLoss;
 
+   bool mUseZeroLatencyForTesting;  ///< Override packet SendPeriod for testing purposes ONLY 
+
    enum RateDefaults {
       DefaultFixedBandwidth  = 2500,  ///< The default send/receive bandwidth - 2.5 Kb per second.
       DefaultFixedSendPeriod = 96,    ///< The default delay between each packet send - approx 10 packets per second.
@@ -423,6 +425,7 @@ private:
       U32 maxSendBandwidth;    ///< Number of bytes per second we can send over the connection.
       U32 maxRecvBandwidth;    ///< Number of bytes per second max that the remote instance should send.
    };
+
    void computeNegotiatedRate(); ///< Called internally when the local or remote rate changes.
    NetRate mLocalRate;           ///< Current communications rate negotiated for this connection.
    NetRate mRemoteRate;          ///< Maximum allowable communications rate for this connection.
@@ -607,8 +610,11 @@ public:
    /// Calling this function enables this behavior.
    void setIsAdaptive();
 
-   /// sets the fixed rate send and receive data sizes, and sets the connection to not behave as an adaptive rate connection
+   /// Sets the fixed rate send and receive data sizes, and sets the connection to not behave as an adaptive rate connection
    void setFixedRateParameters( U32 minPacketSendPeriod, U32 minPacketRecvPeriod, U32 maxSendBandwidth, U32 maxRecvBandwidth );
+
+   /// Flag to override computed packet size limitations, used for testing to allow tests to run faster than they otherwise would
+   void useZeroLatencyForTesting();    ///< Only for testing purposes!!!
 
    /// Query the adaptive status of the connection.
    bool isAdaptive()    { return mTypeFlags.test(ConnectionAdaptive | ConnectionRemoteAdaptive); }

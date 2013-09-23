@@ -1118,7 +1118,9 @@ void Ship::resetFastRecharge()
 
 void Ship::damageObject(DamageInfo *theInfo)
 {
-   if(mHealth == 0 || hasExploded) return; // Stop multi-kill problem. Might stop robots from getting invincible.
+   TNLAssert(hasExploded || mHealth > 0, "One must be true!  If this never fires, remove mHealth == 0 from if below.");  // Added 22-Sep-2013 by Watusimoto
+   if(mHealth == 0 || hasExploded)  // Stop multi-kill problem;  might stop robots from becoming invincible
+      return; 
 
    bool hasArmor = hasModule(ModuleArmor);
 
@@ -1158,17 +1160,19 @@ void Ship::damageObject(DamageInfo *theInfo)
       // Having armor reduces damage
       if(hasArmor)
       {
-         static const F32 ArmorDamageReductionFactor = 0.4f;            // Having armor dramatically reduces damage
+         static const F32 ArmorDamageReductionFactor = 0.4f;   // Having armor reduces damage
 
          damageAmount *= ArmorDamageReductionFactor;           // Any other damage, including asteroids
       }
    }
 
-   ClientInfo *damagerOwner = theInfo->damagingObject->getOwner();
+   ClientInfo *damagerOwner = theInfo->damagingObject ? theInfo->damagingObject->getOwner() : NULL;
    ClientInfo *victimOwner = this->getOwner();
 
+   bool damageWasSelfInflicted = victimOwner && damagerOwner == victimOwner;
+
    // Healing things do negative damage, thus adding to health
-   mHealth -= damageAmount * ((victimOwner && damagerOwner == victimOwner) ? theInfo->damageSelfMultiplier : 1);
+   mHealth -= damageAmount * (damageWasSelfInflicted ? theInfo->damageSelfMultiplier : 1);
    setMaskBits(HealthMask);
 
    if(mHealth <= 0)
@@ -1180,7 +1184,8 @@ void Ship::damageObject(DamageInfo *theInfo)
       mHealth = 1;
 
 
-   if(getClientInfo()) // could be NULL <== could it?
+   // Do some stats related work
+   if(getClientInfo() && theInfo->damagingObject) // getClientInfo() could be NULL <== could it?... damagingObject could be NULL in testing
    {
       Projectile *projectile = NULL;
       if(theInfo->damagingObject->getObjectTypeNumber() == BulletTypeNumber)

@@ -24,7 +24,7 @@ struct GamePair
 {
 	GamePair(const string &levelCode = "");
 	~GamePair();
-	void idle(U32 timeDelta);
+	void idle(U32 timeDelta, U32 cycles = 1);
 	ClientGame* client;
 	ServerGame* server;
 };

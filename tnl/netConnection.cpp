@@ -90,6 +90,8 @@ NetConnection::NetConnection()
    mLocalRate.minPacketRecvPeriod = DefaultFixedSendPeriod;
    mLocalRate.minPacketSendPeriod = DefaultFixedSendPeriod;
 
+   mUseZeroLatencyForTesting = false;
+
    mRemoteRate = mLocalRate;
    mLocalRateChanged = true;
    computeNegotiatedRate();
@@ -527,6 +529,11 @@ void NetConnection::readPacketRateInfo(BitStream *bstream)
    }
 }
 
+void NetConnection::useZeroLatencyForTesting()
+{
+   mUseZeroLatencyForTesting = true;
+}
+
 void NetConnection::computeNegotiatedRate()
 {
    mCurrentPacketSendPeriod = getMax(mLocalRate.minPacketSendPeriod, mRemoteRate.minPacketRecvPeriod);
@@ -534,9 +541,12 @@ void NetConnection::computeNegotiatedRate()
    U32 maxBandwidth = getMin(mLocalRate.maxSendBandwidth, mRemoteRate.maxRecvBandwidth);
    mCurrentPacketSendSize = U32(maxBandwidth * mCurrentPacketSendPeriod * 0.001f);
 
-   // make sure we don't try to overwrite the maximum packet size
+   // Make sure we don't try to outgrow the maximum packet size
    if(mCurrentPacketSendSize > MaxPacketDataSize)
       mCurrentPacketSendSize = MaxPacketDataSize;
+
+   if(mUseZeroLatencyForTesting)
+      mCurrentPacketSendPeriod = 0;
 }
 
 void NetConnection::setIsAdaptive()

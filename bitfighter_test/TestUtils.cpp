@@ -44,6 +44,7 @@ ServerGame *newServerGame()
 }
 
 
+// Create a pair of games suitable for testing client/server interaction.  Provide some levelcode to get things started.
 GamePair::GamePair(const string &levelCode)
 {
    client = newClientGame();
@@ -62,6 +63,12 @@ GamePair::GamePair(const string &levelCode)
 
    server->startHosting();     // This will load levels and wipe out any teams
    client->joinLocalGame(server->getNetInterface());
+
+   // This is a bit hacky, but we need to turn off TNL's bandwidth controls so our tests can run faster.  FASTER!!@!
+   client->getConnectionToServer()->useZeroLatencyForTesting();
+
+   for(S32 i = 0; i < server->getClientCount(); i++)
+      server->getClientInfo(i)->getConnection()->useZeroLatencyForTesting();
 }
 
 
@@ -73,10 +80,15 @@ GamePair::~GamePair()
 }
 
 
-void GamePair::idle(U32 timeDelta)
+// Idle a pair of games for a specified number of cycles
+void GamePair::idle(U32 timeDelta, U32 cycles)
 {
-   client->idle(timeDelta);
-   server->idle(timeDelta);
+   for(U32 i = 0; i < cycles; i++)
+   {
+      //Platform::sleep(1);
+      client->idle(timeDelta);
+      server->idle(timeDelta);
+   }
 }
 
 

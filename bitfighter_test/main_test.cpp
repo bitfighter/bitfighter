@@ -318,15 +318,14 @@ TEST_F(BfTest, ClientServerInteraction)
    ServerGame* serverGame = gamePair.server;
 
    // Idle for a while
-   for(S32 i = 0; i < 5; i++)
-      gamePair.idle(10);
+   gamePair.idle(10, 5);
 
    Vector<DatabaseObject *> fillVector;
 
    // Test level item propigation
    // TestItem
    clientGame->getGameObjDatabase()->findObjects(TestItemTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size());
+   ASSERT_EQ(1, fillVector.size()) << "Looks like object propigation is broken!";
    ASSERT_EQ(1, fillVector[0]->getCentroid() == Point(255,255));
 
    // RepairItem
@@ -349,6 +348,71 @@ TEST_F(BfTest, ClientServerInteraction)
    ASSERT_STREQ("Test Level",                 clientGame->getGameType()->getLevelName()->getString());         // Quoted in level file
    ASSERT_STREQ("This is a basic test level", clientGame->getGameType()->getLevelDescription()->getString());  // Quoted in level file
    ASSERT_STREQ("level creator",              clientGame->getGameType()->getLevelCredits()->getString());      // Not quoted in level file
+
+   // Ship should have spawned by now... check for it on the client and server
+   fillVector.clear();
+   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());    // Ship should have spawned by now
+
+   Ship *ship = static_cast<Ship *>(fillVector[0]);      // Server's copy of the ship
+
+   fillVector.clear();
+   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());    // And it should be on the client, too
+
+
+   ASSERT_FALSE(clientGame->isSpawnDelayed());     // Should not be spawn-delayed at this point
+
+   // Kill the ship
+   DamageInfo killerDamage;
+   killerDamage.damageAmount = 1;
+   ship->damageObject(&killerDamage);
+
+   gamePair.idle(10, 5);      // 5 cycles
+
+   // Ship should have spawned by now... check for it on the client and server
+   fillVector.clear();
+   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());    //  Ship should have respawned and be available on the server...
+   fillVector.clear();
+   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());    // ...and also on the client
+
+
+   // Idle for a while -- ship should become spawn delayed.  GameConnection::SPAWN_DELAY_TIME is measured in ms.
+   gamePair.idle(10, GameConnection::SPAWN_DELAY_TIME / 10);
+
+   ASSERT_TRUE(serverGame->getClientInfo(0)->isPlayerInactive());    // No input from player, should be flagged as inactive
+   // Note that spawn delay does not get set until the delayed ship tries to spawn, even if player is marked as inactive
+
+   // Kill the ship again -- should be delayed when it tries to respawn because client has been inactive
+   ship->damageObject(&killerDamage);
+
+   gamePair.idle(10, GameType::RespawnDelay / 10 + 5);
+   // Since server has received no input from client for GameConnection::SPAWN_DELAY_TIME ms, and ship has attempted to respawn, should be spawn-delayed
+   ASSERT_TRUE(serverGame->getClientInfo(0)->isSpawnDelayed());
+   ASSERT_TRUE(clientGame->isSpawnDelayed());      // Status should have propigated to client by now
+
+
+   // At this point, client and server are both aware that the spawn is delayed due to player inactivity
+
+   gamePair.idle(10, 10);              // Idle 10x
+   // If spawn were not delayed, ship would have respawned.  Check for it on the server (dead ship may linger on client while exploding, so we won't check there).
+   fillVector.clear();
+   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(0, fillVector.size());    // Ship is spawn delayed and won't spawn... hence no ships
+
+   // Undelay spawn
+   clientGame->undelaySpawn();         // This is what gets run when player presses a key
+   gamePair.idle(10, 5);               // Idle 5x; give things time to propigate
+
+   ASSERT_FALSE(serverGame->getClientInfo(0)->isSpawnDelayed());
+   fillVector.clear();
+   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());    // Ship should have spawned and be available on client and server
+   fillVector.clear();
+   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());    // Ship should have spawned and be available on client and server
 }
 
 

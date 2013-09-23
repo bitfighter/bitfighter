@@ -685,7 +685,7 @@ bool FullClientInfo::hasReturnToGamePenalty()
 }
 
 
-// Server only -- RemoteClientInfo has a client-side override
+// Runs on server and client -- note that RemoteClientInfo has a client-side override for remote players
 void FullClientInfo::setSpawnDelayed(bool spawnDelayed)
 {
    if(spawnDelayed == mSpawnDelayed)                     // Already in requested state -- nothing to do
@@ -695,8 +695,8 @@ void FullClientInfo::setSpawnDelayed(bool spawnDelayed)
 
    if(mGame->isServer())
    {
-      if(spawnDelayed)                                      // Tell client their spawn has been delayed
-         getConnection()->s2cPlayerSpawnDelayed((getReturnToGameTime() + 99) / 100); // add for round up divide
+      if(spawnDelayed)                                   // Tell client their spawn has been delayed
+         getConnection()->s2cPlayerSpawnDelayed((getReturnToGameTime() + 99) / 100); // Add 99 for round up divide
 		else
 			getConnection()->s2cPlayerSpawnUndelayed();
 
