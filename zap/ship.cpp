@@ -1845,7 +1845,7 @@ void Ship::killAndScore(DamageInfo *theInfo)
 // Ship was killed
 void Ship::kill()
 {
-   if(isServer())    // Server only
+   if(isServer())    // Server only block
    {
       if(getOwner())
          getOwner()->saveActiveLoadout(mLoadout);      // Save current loadout in getOwner()->mActiveLoadout
