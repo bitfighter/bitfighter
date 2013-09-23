@@ -74,6 +74,7 @@ GamePair::GamePair(const string &levelCode)
 
 GamePair::~GamePair()
 {
+   LuaScriptRunner::clearScriptCache();
    LuaScriptRunner::shutdown();
 	delete client;
 	delete server;

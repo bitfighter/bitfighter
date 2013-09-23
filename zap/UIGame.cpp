@@ -2191,11 +2191,10 @@ void GameUserInterface::renderScoreboard()
             maxscorelen = max(scorelen, maxscorelen);
          }
 
-         curRowY += maxHeight;
-
-
          // Circle back and render the badges now that all the rendering with the name color is finished
          renderBadges(playerScores[j], x + nameWidth + 10 + gap, curRowY + (maxHeight / 2), scaleRatio);
+
+         curRowY += maxHeight;
       }
 
       // Go back and render the column headers, now that we know the widths.  These will be different for team and solo games.

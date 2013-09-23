@@ -162,6 +162,7 @@ public:
    static bool startLua();          // Create L
    static void shutdown();          // Delete L
 
+   bool runString(const string &code);
    bool runMain();                                    // Run a script's main() function
    bool runMain(const Vector<string> &args);          // Run a script's main() function, putting args into Lua's arg table
 
