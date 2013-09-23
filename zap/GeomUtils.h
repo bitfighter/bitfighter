@@ -142,6 +142,7 @@ bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vecto
 bool mergePolysToPolyTree(const Vector<Vector<Point> > &inputPolygons, PolyTree &solution);
 bool containsHoles(const PolyTree &tree);
 
+void splitSelfIntersectingPolys(const Vector<Vector<Point> > input, Vector<Vector<Point> > &result);
 bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge);
 bool triangulate(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &result);
 bool polyganize(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &result);

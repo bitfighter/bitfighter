@@ -1109,7 +1109,9 @@ bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const 
  */
 bool triangulate(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &result)
 {
-   Polygons upscaledInput = upscaleClipperPoints(input);
+   Vector<Vector<Point> > cleanedInput;
+   splitSelfIntersectingPolys(input, cleanedInput);
+   Polygons upscaledInput = upscaleClipperPoints(cleanedInput);
    Clipper clipper;
 
    try  // there is a "throw" in AddPolygon
@@ -1138,6 +1140,105 @@ bool triangulate(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &re
    }
 
    return success;
+}
+
+
+/**
+ * Gets a subset of a polygon from index `start` to `stop` inclusive.
+ * Wraps around the polygon as needed.
+ */
+Vector<Point> getSubPoly(const Vector<Point> input, U32 start, U32 stop)
+{
+   Vector<Point> result;
+   start %= input.size();
+   stop %= input.size();
+
+   if(start == stop)
+   {
+      // just return the whole thing
+      result = input;
+   }
+   else
+   {
+      // otherwise collect the vertices
+      for(U32 i = start; i != stop; i = (i + 1) % input.size())
+      {
+         result.push_back(input[i]);
+      }
+
+      result.push_back(input[stop]);
+   }
+
+   return result;
+}
+
+
+/**
+ */
+void splitSelfIntersectingPoly(const Vector<Point> input, Vector<Vector<Point> > &result)
+{
+   U32 size = input.size();
+
+   // do nothing for any input with fewer than three vertices
+   if(size < 3)
+      return;
+
+   bool polyWasSplit = false;
+   // for each segment as i
+   for(U32 i = 0; i < size && !polyWasSplit; i++)
+   {
+      // for each segment after after i as j
+      for(U32 j = i + 2; j < size && !polyWasSplit; j++)
+      {
+         // exclude segments adjacent to i
+         if(i == 0 && j == size - 1)
+            continue;
+
+         U32 i2 = i + 1;
+         U32 j2 = j + 1;
+         i2 = i2 < size ? i2 : i2 - size;
+         j2 = j2 < size ? j2 : j2 - size;
+
+         // see if i intersects j
+         Point intersection;
+         if(!findIntersection(input[i], input[i2], input[j], input[j2], intersection))
+         {
+            // if not, continue to the next segment
+            continue;
+         }
+
+         // otherwise, split into two polygons, one for each side of the intersection
+         Vector<Point> p1, p2;
+         p1 = getSubPoly(input, i2, j);
+         p2 = getSubPoly(input, j2, i);
+
+         // add a vertex at the intersection in between the newly connected vertices of each polygon
+         p1.push_back(intersection);
+         p2.push_back(intersection);
+
+         // perform this process on each of the newly created polygons, and return the combined output
+         splitSelfIntersectingPoly(p1, result);
+         splitSelfIntersectingPoly(p2, result);
+
+         // stop processing segment i
+         polyWasSplit = true;
+      }
+   }
+
+   // if no subdivision occured, return the input
+   if(!polyWasSplit)
+      result.push_back(input);
+}
+
+
+/**
+ */
+void splitSelfIntersectingPolys(const Vector<Vector<Point> > input, Vector<Vector<Point> > &result)
+{
+   for(S32 i = 0; i < input.size(); i++)
+   {
+      splitSelfIntersectingPoly(input[i], result);
+   }
 }
 
 
