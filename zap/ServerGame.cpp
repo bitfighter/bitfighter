@@ -1065,12 +1065,6 @@ bool ServerGame::isFull()
 }
 
 
-bool ServerGame::isSuspended()
-{
-   return mGameSuspended;
-}
-
-
 // Only called from outside ServerGame
 bool ServerGame::isReadyToShutdown(U32 timeDelta)
 {

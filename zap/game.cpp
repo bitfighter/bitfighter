@@ -185,6 +185,12 @@ Game *Game::getAddTarget()
 }
 
 
+bool Game::isSuspended() const
+{
+   return mGameSuspended;
+}
+
+
 GameSettings *Game::getSettings() const
 {
    return mSettings.get();

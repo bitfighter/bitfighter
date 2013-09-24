@@ -303,6 +303,9 @@ public:
    void clearAddTarget();
    static Game *getAddTarget();
 
+   bool isSuspended() const;
+
+
    virtual U32 getMaxPlayers() const;
    virtual bool isTestServer() const;
    virtual bool isDedicated() const;
