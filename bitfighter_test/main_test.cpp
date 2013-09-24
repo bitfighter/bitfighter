@@ -361,7 +361,6 @@ TEST_F(BfTest, SpawnDelayTests)
    clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());    // And it should be on the client, too
 
-
    ASSERT_FALSE(clientGame->isSpawnDelayed());     // Should not be spawn-delayed at this point
 
    // Kill the ship
