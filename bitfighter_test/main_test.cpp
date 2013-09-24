@@ -497,6 +497,7 @@ TEST_F(BfTest, SpawnDelayTests)
    /////
    // Scenario 3 -- Player enters /idle command, no other players, so server suspends itself
    // In this case, no returnToGame penalty should be levied
+   // In this scenario, player un-idles during the suspend game timer countdown (there is a 2 second delay after all players are idle)
    gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give things time to propagate
    fillVector.clear();
    serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
@@ -506,15 +507,15 @@ TEST_F(BfTest, SpawnDelayTests)
    ASSERT_EQ(1, fillVector.size());
 
    ChatCommands::idleHandler(clientGame, words);
-   gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give things time to propagate, timers to time out, etc.
+   gamePair.idle(10, 10);     // Idle; give things time to propagate, timers to time out, etc.
    ASSERT_TRUE(serverGame->getClientInfo(0)->isSpawnDelayed());
+   ASSERT_TRUE(serverGame->isOrIsAboutToBeSuspended());
    ASSERT_TRUE(clientGame->isSpawnDelayed());         // Status should have propagated to client by now
+   ASSERT_TRUE(clientGame->isOrIsAboutToBeSuspended());
    fillVector.clear();
    serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-   ASSERT_EQ(0, fillVector.size());                   // No ships remaining in game
+   ASSERT_EQ(0, fillVector.size());                   // No ships remaining in game -- don't check client as it may have exploding ship there
    fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-   ASSERT_EQ(0, fillVector.size());
 
    // ReturnToGame penalty has been set, but won't start to count down until ship attempts to spawn
    ASSERT_FALSE(clientGame->inReturnToGameCountdown());
@@ -522,11 +523,13 @@ TEST_F(BfTest, SpawnDelayTests)
    ASSERT_EQ(0, serverGame->getClientInfo(0)->getReturnToGameTime());
 
    // Player presses a key to rejoin the game; since game was suspended, player can resume without penalty
-   ASSERT_TRUE(serverGame->isSuspended()) << "Game should be suspended";
+   ASSERT_TRUE(serverGame->isOrIsAboutToBeSuspended()) << "Game should be suspended";
    clientGame->undelaySpawn();                                             // Simulate effects of key press
    gamePair.idle(10, 10);                                                  // Idle; give things time to propagate
    ASSERT_EQ(0, serverGame->getClientInfo(0)->getReturnToGameTime());      // No returnToGame penalty
    ASSERT_FALSE(clientGame->inReturnToGameCountdown());
+
+   gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give dead ships time to be cleaned up
 
    // Check to ensure ship spawned
    fillVector.clear();

@@ -222,7 +222,7 @@ void GameConnection::undelaySpawn()
 
    resetTimeSinceLastMove();
 
-   if(mServerGame->isSuspended())
+   if(mServerGame->isOrIsAboutToBeSuspended())
    {
       clientInfo->setReturnToGameTimer(0);    // No penalties when game is suspended
       clientInfo->requireReturnToGameTimer(false);
