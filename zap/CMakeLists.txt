@@ -328,6 +328,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/PolylineGeometryTest.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/RobotTest.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/ServerGameTest.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/SpawnDelayTest.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
 )
 
