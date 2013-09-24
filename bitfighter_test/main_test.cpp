@@ -422,7 +422,8 @@ TEST_F(BfTest, SpawnDelayTests)
    ASSERT_EQ(1, fillVector.size());    // Ship should have spawned and be available on client and server
 
    /////
-   // Scenario 2: Player enters /idle command, other players, so server does not suspend itself
+   // Scenario 2: Player enters /idle command, other players, so server does not suspend itself.  Since
+   // player used /idle command, a 5 second penalty will be levied against them.
 
    // Add a second player so server does not suspend itself
    ClientGame *clientGame2 = newClientGame();
@@ -433,7 +434,6 @@ TEST_F(BfTest, SpawnDelayTests)
 
    for(S32 i = 0; i < serverGame->getClientCount(); i++)
       serverGame->getClientInfo(i)->getConnection()->useZeroLatencyForTesting();
-
 
    // Should now be 2 ships in the game -- one belonging to clientGame and another belonging to clientGame2
    gamePair.idle(10, 5);               // Idle 5x; give things time to propagate
@@ -490,12 +490,13 @@ TEST_F(BfTest, SpawnDelayTests)
    clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(2, fillVector.size());
 
-
-   // Cleanup -- remove player 2 from game
+   // Cleanup -- remove second player from game
    clientGame2->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+
 
    /////
    // Scenario 3 -- Player enters /idle command, no other players, so server suspends itself
+   // In this case, no returnToGame penalty should be levied
    gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give things time to propagate
    fillVector.clear();
    serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
