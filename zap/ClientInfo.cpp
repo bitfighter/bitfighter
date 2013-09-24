@@ -690,6 +690,7 @@ void FullClientInfo::setSpawnDelayed(bool spawnDelayed)
 
    mSpawnDelayed = spawnDelayed;
 
+   // Notify client if we are the server
    if(mGame->isServer())
    {
       if(spawnDelayed)                                   // Tell client their spawn has been delayed
