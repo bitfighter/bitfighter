@@ -205,6 +205,8 @@ public:
 
    void requestSpawnDelayed(bool incursPenalty) const;
    U32 getReturnToGameDelay() const;
+   bool inReturnToGameCountdown() const;
+
 
    void deleteLevelGen(LuaLevelGenerator *levelgen); 
 

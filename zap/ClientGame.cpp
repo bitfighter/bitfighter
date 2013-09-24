@@ -472,6 +472,12 @@ U32 ClientGame::getReturnToGameDelay() const
 }
 
 
+bool ClientGame::inReturnToGameCountdown() const
+{
+   return getReturnToGameDelay() > 0;
+}
+
+
 string ClientGame::getPlayerName()     const { return mSettings->getPlayerName();     }
 string ClientGame::getPlayerPassword() const { return mSettings->getPlayerPassword(); }
 

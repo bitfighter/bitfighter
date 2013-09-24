@@ -67,6 +67,8 @@ public:
    };
 
    static const S32 MaxKillStreakLength = 4095;
+   // After canceling /idle command, this is the delay penalty
+   static const U32 SPAWN_UNDELAY_TIMER_DELAY = 5000;    // 5 secs
 
 private:
    LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
@@ -97,6 +99,7 @@ protected:
    U32 mCurrentKillStreak;
    Game *mGame;
 
+   bool mNeedReturnToGameTimer;
    Timer mReturnToGameTimer;
 
 public:
@@ -203,7 +206,7 @@ public:
    U32 getReturnToGameTime();
    void setReturnToGameTimer(U32 time);
    bool updateReturnToGameTimer(U32 timeDelta);
-   void resetReturnToGameTimer();
+   void requireReturnToGameTimer(bool required);
 
    virtual SoundEffect *getVoiceSFX() = 0;
    virtual VoiceDecoder *getVoiceDecoder() = 0;

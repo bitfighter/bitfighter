@@ -59,11 +59,8 @@ ClientInfo::ClientInfo()
    mIsEngineeringTeleporter = false;
    mShipSystemsDisabled = false;
 
-   // After canceling /idle command, this is the delay penalty
-   static const U32 SPAWN_UNDELAY_TIMER_DELAY = 5000;    // 5 secs
-
-   mReturnToGameTimer.clear();
    mReturnToGameTimer.setPeriod(SPAWN_UNDELAY_TIMER_DELAY);
+   mNeedReturnToGameTimer = false;
 }
 
 
@@ -609,10 +606,10 @@ void ClientInfo::addDeath()
 
 // Methods to provide access to mReturnToGameTimer -- this is used on the server to enforce a post /idle delay
 // and used on the client to display the (approximate) time left in that delay.
-U32  ClientInfo::getReturnToGameTime()                  { return mReturnToGameTimer.getCurrent();      }
-void ClientInfo::setReturnToGameTimer(U32 time)         {        mReturnToGameTimer.reset(time, mReturnToGameTimer.getPeriod()); }
-bool ClientInfo::updateReturnToGameTimer(U32 timeDelta) { return mReturnToGameTimer.update(timeDelta); }
-void ClientInfo::resetReturnToGameTimer()               {        mReturnToGameTimer.reset();           }
+U32  ClientInfo::getReturnToGameTime()                   { return mReturnToGameTimer.getCurrent();      }
+void ClientInfo::setReturnToGameTimer(U32 time)          {        mReturnToGameTimer.reset(time, mReturnToGameTimer.getPeriod()); }
+bool ClientInfo::updateReturnToGameTimer(U32 timeDelta)  { return mReturnToGameTimer.update(timeDelta); }
+void ClientInfo::requireReturnToGameTimer(bool required) {        mNeedReturnToGameTimer = required;    }
 
 
 ////////////////////////////////////////
@@ -681,7 +678,7 @@ bool FullClientInfo::isPlayerInactive()
 
 bool FullClientInfo::hasReturnToGamePenalty()
 {
-   return mReturnToGameTimer.getCurrent() != 0;
+   return mNeedReturnToGameTimer;
 }
 
 
@@ -696,7 +693,7 @@ void FullClientInfo::setSpawnDelayed(bool spawnDelayed)
    if(mGame->isServer())
    {
       if(spawnDelayed)                                   // Tell client their spawn has been delayed
-         getConnection()->s2cPlayerSpawnDelayed((getReturnToGameTime() + 99) / 100); // Add 99 for round up divide
+         getConnection()->s2cPlayerSpawnDelayed(0);      // Any penalty will be sent later
 		else
 			getConnection()->s2cPlayerSpawnUndelayed();
 

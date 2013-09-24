@@ -223,13 +223,18 @@ void GameConnection::undelaySpawn()
    resetTimeSinceLastMove();
 
    if(mServerGame->isSuspended())
-      getClientInfo()->setReturnToGameTimer(0); // timer freezes when game is suspended..
+   {
+      getClientInfo()->setReturnToGameTimer(0);    // Clear penalties when game is suspended
+      getClientInfo()->requireReturnToGameTimer(false);
+   }
 
    // Check if there is a penalty being applied to client (e.g. there is a 5 sec penalty for using the /idle command).
    // If so, start the timer clear the penalty flag, and leave.  We'll be back here again after the timer goes off.
-   if(clientInfo->hasReturnToGamePenalty() && !mServerGame->isSuspended())
+   else if(clientInfo->hasReturnToGamePenalty())
    {
-      s2cPlayerSpawnDelayed((getClientInfo()->getReturnToGameTime() + 99) / 100); // add for round up divide
+      getClientInfo()->setReturnToGameTimer(ClientInfo::SPAWN_UNDELAY_TIMER_DELAY);
+      clientInfo->requireReturnToGameTimer(false);
+      s2cPlayerSpawnDelayed(ClientInfo::SPAWN_UNDELAY_TIMER_DELAY / 100);
       return;
    }
 
@@ -267,7 +272,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (bool incursPena
    if(ship)
    {
       if(incursPenalty)
-         static_cast<FullClientInfo *>(clientInfo)->resetReturnToGameTimer();   // Client will have to wait to rejoin the game
+         static_cast<FullClientInfo *>(clientInfo)->requireReturnToGameTimer(true);   // Client will have to wait to rejoin the game
 
       ship->kill();
    }
@@ -1693,6 +1698,7 @@ S32 GameConnection::getAuthenticationCounter()
 }
 
 
+// Server only
 void GameConnection::updateTimers(U32 timeDelta)
 {
    if(mAuthenticationTimer.update(timeDelta))
@@ -1929,7 +1935,7 @@ void GameConnection::onConnectionEstablished_server()
 // Established connection is terminated.  Compare to onConnectTerminate() below.
 void GameConnection::onConnectionTerminated(NetConnection::TerminationReason reason, const char *reasonStr)
 {
-   TNLAssert(reason == NetConnection::ReasonSelfDisconnect || !isLocalConnection(), "local connection should not be disconnected");
+   TNLAssert(reason == NetConnection::ReasonSelfDisconnect || !isLocalConnection(), "Local connection should not be disconnected!");
 
    if(isInitiator())    // i.e. this is a client that connected to the server
    {

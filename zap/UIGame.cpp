@@ -623,7 +623,7 @@ void GameUserInterface::renderSuspendedMessage() const
    static const S32 DisplayStyle = 2;
    static const S32 VertOffset = -30;
 
-   if(getGame()->getReturnToGameDelay() > 0)
+   if(getGame()->inReturnToGameCountdown())
    {
       waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.0f)) + " SECONDS";
       renderMessageBox("", "", waitMsg,  ARRAYSIZE(waitMsg),  VertOffset, DisplayStyle);
