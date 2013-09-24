@@ -118,7 +118,7 @@ Game::Game(const Address &theBindAddress, GameSettingsPtr settings) : mGameObjDa
 
    mActiveTeamManager = &mTeamManager;
 
-   mTimeToSuspend.setPeriod(2000);           // Time for screen to fade when going /idle on client, time for things to settle down on server
+   mTimeToSuspend.setPeriod(PreSuspendSettlingPeriod);  
 
    mObjectsLoaded = 0;
 }

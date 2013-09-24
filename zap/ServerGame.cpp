@@ -821,6 +821,8 @@ void ServerGame::suspendGame()
 // Resume game after it is no longer suspended
 void ServerGame::unsuspendGame(bool remoteRequest)
 {
+   mTimeToSuspend.clear();
+
    if(!mGameSuspended)
       return;
 

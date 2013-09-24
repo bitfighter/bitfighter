@@ -1325,11 +1325,8 @@ void ClientGame::suspendGame()
 
 void ClientGame::unsuspendGame()
 {
-   if(!mGameSuspended)
-      return;
-
-   mGameSuspended = false;
    mTimeToSuspend.clear();
+   mGameSuspended = false;
 }
 
 

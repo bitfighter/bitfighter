@@ -311,12 +311,87 @@ void packUnpack(T input, T &output, U32 mask = 0xFFFFFFFF)
 }
 
 
+static void doScenario34(GamePair &gamePair, bool letGameSlipIntoFullSuspendMode)
+{
+   /////
+   // Scenario 3, 4 -- Player enters /idle command, no other players, so server suspends itself
+   // In this case, no returnToGame penalty should be levied
+   // In this scenario 3, player un-idles during the suspend game timer countdown (there is a 2 second delay after all players are idle)
+   // In scenario 4, player enters full suspend mode before unidling
+   ClientGame *clientGame = gamePair.client;
+   ServerGame *serverGame = gamePair.server;
+
+   // Make sure we start off in a "normal" state
+   ASSERT_FALSE(serverGame->isOrIsAboutToBeSuspended());
+   ASSERT_FALSE(clientGame->isSpawnDelayed());         
+
+   gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give things time to propagate
+   fillVector.clear();
+   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());                   // Now that player 2 has left, should only be one ship
+   fillVector.clear();
+   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());
+
+   Vector<string> words;
+   ChatCommands::idleHandler(clientGame, words);
+   gamePair.idle(10, 10);     // Idle; give things time to propagate, timers to time out, etc.
+   ASSERT_TRUE(serverGame->getClientInfo(0)->isSpawnDelayed());
+   ASSERT_TRUE(serverGame->isOrIsAboutToBeSuspended());
+   EXPECT_FALSE(serverGame->isSuspended());
+   ASSERT_TRUE(clientGame->isSpawnDelayed());         // Status should have propagated to client by now
+   ASSERT_TRUE(clientGame->isOrIsAboutToBeSuspended());
+   EXPECT_FALSE(clientGame->isSuspended());
+
+   fillVector.clear();
+   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(0, fillVector.size());                   // No ships remaining in game -- don't check client as it may have exploding ship there
+   fillVector.clear();
+
+   // ReturnToGame penalty has been set, but won't start to count down until ship attempts to spawn
+   ASSERT_FALSE(clientGame->inReturnToGameCountdown());
+   ASSERT_TRUE(static_cast<FullClientInfo *>(serverGame->getClientInfo(0))->hasReturnToGamePenalty()); // Penalty has been primed
+   ASSERT_EQ(0, serverGame->getClientInfo(0)->getReturnToGameTime());
+
+   if(letGameSlipIntoFullSuspendMode)
+      gamePair.idle(Game::PreSuspendSettlingPeriod / 20, 25);
+
+   // Player presses a key to rejoin the game; since game was suspended, player can resume without penalty
+   ASSERT_TRUE(serverGame->isOrIsAboutToBeSuspended()) << "Game should be suspended";
+
+   if(letGameSlipIntoFullSuspendMode)
+      EXPECT_TRUE(serverGame->isSuspended());
+   else
+      EXPECT_FALSE(serverGame->isSuspended());
+
+   clientGame->undelaySpawn();                                             // Simulate effects of key press
+   gamePair.idle(10, 5);                                                   // Idle; give things time to propagate
+      ASSERT_FALSE(serverGame->isOrIsAboutToBeSuspended());
+
+   ASSERT_EQ(0, serverGame->getClientInfo(0)->getReturnToGameTime());      // No returnToGame penalty
+   ASSERT_FALSE(clientGame->inReturnToGameCountdown());
+
+   gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give dead ships time to be cleaned up
+
+   // Check to ensure ship spawned
+   fillVector.clear();
+   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());   
+   fillVector.clear();
+   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size());
+
+   ASSERT_FALSE(serverGame->isOrIsAboutToBeSuspended());
+   ASSERT_FALSE(clientGame->isSpawnDelayed());         
+}
+
+
 // See if we can get some client-server interaction going on here
 TEST_F(BfTest, SpawnDelayTests)
 {
    GamePair gamePair(getLevelCode1());
-   ClientGame* clientGame = gamePair.client;
-   ServerGame* serverGame = gamePair.server;
+   ClientGame *clientGame = gamePair.client;
+   ServerGame *serverGame = gamePair.server;
 
    // Idle for a while
    gamePair.idle(10, 5);
@@ -494,53 +569,20 @@ TEST_F(BfTest, SpawnDelayTests)
 
 
    /////
-   // Scenario 3 -- Player enters /idle command, no other players, so server suspends itself
-   // In this case, no returnToGame penalty should be levied
-   // In this scenario, player un-idles during the suspend game timer countdown (there is a 2 second delay after all players are idle)
-   gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give things time to propagate
-   fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size());                   // Now that player 2 has left, should only be one ship
-   fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size());
+   // Scenarios 3 & 4 -- Player enters /idle command, no other players, so server suspends itself partially (3) or fully (4)
 
-   ChatCommands::idleHandler(clientGame, words);
-   gamePair.idle(10, 10);     // Idle; give things time to propagate, timers to time out, etc.
-   ASSERT_TRUE(serverGame->getClientInfo(0)->isSpawnDelayed());
-   ASSERT_TRUE(serverGame->isOrIsAboutToBeSuspended());
-   ASSERT_TRUE(clientGame->isSpawnDelayed());         // Status should have propagated to client by now
-   ASSERT_TRUE(clientGame->isOrIsAboutToBeSuspended());
-   fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-   ASSERT_EQ(0, fillVector.size());                   // No ships remaining in game -- don't check client as it may have exploding ship there
-   fillVector.clear();
-
-   // ReturnToGame penalty has been set, but won't start to count down until ship attempts to spawn
-   ASSERT_FALSE(clientGame->inReturnToGameCountdown());
-   ASSERT_TRUE(static_cast<FullClientInfo *>(serverGame->getClientInfo(0))->hasReturnToGamePenalty()); // Penalty has been primed
-   ASSERT_EQ(0, serverGame->getClientInfo(0)->getReturnToGameTime());
-
-   // Player presses a key to rejoin the game; since game was suspended, player can resume without penalty
-   ASSERT_TRUE(serverGame->isOrIsAboutToBeSuspended()) << "Game should be suspended";
-   clientGame->undelaySpawn();                                             // Simulate effects of key press
-   gamePair.idle(10, 10);                                                  // Idle; give things time to propagate
-   ASSERT_EQ(0, serverGame->getClientInfo(0)->getReturnToGameTime());      // No returnToGame penalty
-   ASSERT_FALSE(clientGame->inReturnToGameCountdown());
-
-   gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give dead ships time to be cleaned up
-
-   // Check to ensure ship spawned
-   fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size());   
-   fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size());
-
+   // See https://code.google.com/p/googletest/wiki/AdvancedGuide#Using_Assertions_in_Sub-routines for details on this technique
+   {
+      SCOPED_TRACE("Scenario 3, letGameSlipIntoFullSuspendMode is false");
+      doScenario34(gamePair, false);
+   }
+   {
+      SCOPED_TRACE("Scenario 4, letGameSlipIntoFullSuspendMode is true");
+      doScenario34(gamePair, true);
+   }
 
    /////
-   // Scenario 4 -- Player enters /idle when in punishment delay period for pervious /idle command
+   // Scenario 5 -- Player enters /idle when in punishment delay period for pervious /idle command
 
 
 }
