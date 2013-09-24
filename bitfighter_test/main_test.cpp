@@ -61,13 +61,13 @@ class BfTest : public testing::Test
 
 TEST_F(BfTest, StringUtilsTests)
 {
-   ASSERT_TRUE(stringContainsAllTheSameCharacter("A"));
-   ASSERT_TRUE(stringContainsAllTheSameCharacter("AA"));
-   ASSERT_TRUE(stringContainsAllTheSameCharacter("AAA"));
-   ASSERT_TRUE(stringContainsAllTheSameCharacter(""));
+   EXPECT_TRUE(stringContainsAllTheSameCharacter("A"));
+   EXPECT_TRUE(stringContainsAllTheSameCharacter("AA"));
+   EXPECT_TRUE(stringContainsAllTheSameCharacter("AAA"));
+   EXPECT_TRUE(stringContainsAllTheSameCharacter(""));
 
-   ASSERT_FALSE(stringContainsAllTheSameCharacter("Aa"));
-   ASSERT_FALSE(stringContainsAllTheSameCharacter("AB"));
+   EXPECT_FALSE(stringContainsAllTheSameCharacter("Aa"));
+   EXPECT_FALSE(stringContainsAllTheSameCharacter("AB"));
 } 
 
 
