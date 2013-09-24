@@ -584,6 +584,12 @@ TEST_F(BfTest, SpawnDelayTests)
    /////
    // Scenario 5 -- Player enters /idle when in punishment delay period for pervious /idle command
 
+   /////
+   // Scenario 6 -- Player is shown a new levelup screen
+
+   /////
+   // Scenario 7 -- Player is shown a levelup screen they have already seen
+
 
 }
 
