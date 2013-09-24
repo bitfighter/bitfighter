@@ -224,28 +224,24 @@ void GameConnection::undelaySpawn()
 
    if(mServerGame->isSuspended())
    {
-      getClientInfo()->setReturnToGameTimer(0);    // No penalties when game is suspended
-      getClientInfo()->requireReturnToGameTimer(false);
+      clientInfo->setReturnToGameTimer(0);    // No penalties when game is suspended
+      clientInfo->requireReturnToGameTimer(false);
+      mServerGame->unsuspendGame(true);
    }
 
    // Check if there is a penalty being applied to client (e.g. there is a 5 sec penalty for using the /idle command).
    // If so, start the timer clear the penalty flag, and leave.  We'll be back here again after the timer goes off.
    else if(clientInfo->hasReturnToGamePenalty())
    {
-      getClientInfo()->setReturnToGameTimer(ClientInfo::SPAWN_UNDELAY_TIMER_DELAY);
+      clientInfo->setReturnToGameTimer(ClientInfo::SPAWN_UNDELAY_TIMER_DELAY);
       clientInfo->requireReturnToGameTimer(false);
       s2cPlayerSpawnDelayed(ClientInfo::SPAWN_UNDELAY_TIMER_DELAY / 100);
       return;
    }
 
-   mServerGame->unsuspendGame(true);
-
-
    if(!clientInfo->getReturnToGameTime())
    {
       clientInfo->setSpawnDelayed(false);       // ClientInfo here is a FullClientInfo
-
-      //mServerGame->unsuspendGame(false);        // Does nothing if game isn't suspended  <== already unsuspended above!
       mServerGame->getGameType()->spawnShip(clientInfo);
    }
 }

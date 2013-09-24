@@ -54,7 +54,7 @@ GamePair::GamePair(const string &levelCode)
    LuaScriptRunner::setScriptingDir(settings->getFolderManager()->luaDir);
    LuaScriptRunner::startLua();
 
-   client->userEnteredLoginCredentials("TestUser", "password", false);    // Simulates entry from NameEntryUserInterface
+   client->userEnteredLoginCredentials("TestPlayerOne", "password", false);    // Simulates entry from NameEntryUserInterface
    LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(levelCode));
    server = initHosting(settings, levelSource, true, false);
 
