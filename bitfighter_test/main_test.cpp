@@ -176,6 +176,7 @@ TEST_F(BfTest, SettingsTests)
 
 
 // This test needs to be greatly expanded -- we should be testing all sorts of items here!
+// Things to test: other objects, comments, long names, missing lines, duplicate lines, garbage lines, ids
 TEST_F(BfTest, LevelReadingAndItemPropagation)
 {
    GamePair gamePair(getLevelCode1());
