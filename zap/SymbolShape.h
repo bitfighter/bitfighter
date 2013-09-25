@@ -280,9 +280,9 @@ protected:
    Vector<boost::shared_ptr<SymbolShape> > mSymbols;
 
 public:
-   SymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, S32 fontSize, FontContext fontContext, Alignment alignment = AlignmentNone);
-   SymbolString(S32 fontSize, FontContext fontContext);     // Constructor (can't use until you've setSymbols)
-   virtual ~SymbolString();                                 // Destructor
+   SymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, Alignment alignment = AlignmentNone);
+   SymbolString();                     // Constructor (can't use until you've setSymbols)
+   virtual ~SymbolString();            // Destructor
 
    void setSymbols(const Vector<boost::shared_ptr<SymbolShape> > &symbols);
 
@@ -320,8 +320,8 @@ class LayeredSymbolString : public SymbolString
    typedef SymbolString Parent;
 
 public:
-   LayeredSymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, S32 fontSize, FontContext fontContext);   // Constructor
-   virtual ~LayeredSymbolString();     // Destructor
+   LayeredSymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols);  // Constructor
+   virtual ~LayeredSymbolString();                                               // Destructor
 
    S32 render(F32 x, F32 y, Alignment alignment, S32 blockWidth = -1) const;
 };

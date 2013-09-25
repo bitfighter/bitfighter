@@ -88,7 +88,7 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : Parent(game),
                                  "For quick configuration, press [[ALT-1]] - [[ALT-9]] to specify number of teams", 
                                  symbols, MenuContext, 18, &Colors::white);
 
-   mMenuSubTitle.add(UI::SymbolString(symbols, 18, MenuContext, UI::AlignmentCenter));
+   mMenuSubTitle.add(UI::SymbolString(symbols, UI::AlignmentCenter));
 }
 
 

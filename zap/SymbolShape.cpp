@@ -182,7 +182,7 @@ static S32 computeWidth(const Vector<SymbolShapePtr > &symbols)
 
 
 // Width of a layered item is the widest of the widths of all elements in the symbol list
-static S32 computeLayeredWidth(const Vector<SymbolShapePtr > &symbols, FontContext fontContext)
+static S32 computeLayeredWidth(const Vector<SymbolShapePtr> &symbols)
 {
    S32 width = 0;
 
@@ -212,7 +212,7 @@ static S32 computeHeight(const Vector<SymbolShapePtr> &symbols)
 
 
 // Constructor with symbols
-SymbolString::SymbolString(const Vector<SymbolShapePtr> &symbols, S32 fontSize, FontContext fontContext, Alignment alignment) : mSymbols(symbols)
+SymbolString::SymbolString(const Vector<SymbolShapePtr> &symbols, Alignment alignment) : mSymbols(symbols)
 {
    mReady = true;
 
@@ -223,7 +223,7 @@ SymbolString::SymbolString(const Vector<SymbolShapePtr> &symbols, S32 fontSize, 
 
 
 // Constructor -- symbols will be provided later
-SymbolString::SymbolString(S32 fontSize, FontContext fontContext)
+SymbolString::SymbolString()
 {
    mReady = false;
 
@@ -410,7 +410,7 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label
    else
       symbols.push_back(SymbolShapePtr(new SymbolButtonSymbol(buttonSymbol)));
 
-   return SymbolShapePtr(new LayeredSymbolString(symbols, LabelSize, KeyContext));
+   return SymbolShapePtr(new LayeredSymbolString(symbols));
 }
 
 
@@ -450,7 +450,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
       symbols.push_back(SymbolShapePtr(new SymbolText(" + ", 13, KeyContext, color)));
       symbols.push_back(SymbolShapePtr(new SymbolKey(InputCodeManager::getBaseKeyString(inputCode), color)));
 
-      return SymbolShapePtr(new SymbolString(symbols, 10, KeyContext));
+      return SymbolShapePtr(new SymbolString(symbols));
    }
    else if(InputCodeManager::isControllerButton(inputCode))
    {
@@ -603,10 +603,10 @@ void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const s
 
 
 // Constructor
-LayeredSymbolString::LayeredSymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, S32 fontSize, FontContext fontContext) :
-                  Parent(symbols, fontSize, fontContext)
+LayeredSymbolString::LayeredSymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols) :
+                  Parent(symbols)
 {
-   mWidth = computeLayeredWidth(symbols, fontContext);
+   mWidth = computeLayeredWidth(symbols);
 }
 
 

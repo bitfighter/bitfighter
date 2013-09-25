@@ -2018,7 +2018,7 @@ static void renderScoreboardLegend(S32 humans, U32 scoreboardTop, U32 totalHeigh
       lastHumans = humans;
    }
 
-   UI::SymbolString symbolString(symbols, LegendSize, ScoreboardContext);
+   UI::SymbolString symbolString(symbols);
    symbolString.render(gScreenInfo.getGameCanvasWidth() / 2, legendPos, AlignmentCenter);
 }
 

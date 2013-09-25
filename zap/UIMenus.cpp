@@ -1275,7 +1275,7 @@ void InputOptionsMenuUserInterface::render()
             symbols.push_back(SymbolString::getBlankSymbol(8));      // Provide a little breathing room
       }
 
-      SymbolString(symbols, 10, HelpContext).render(Point(gScreenInfo.getGameCanvasWidth() / 2, 440));
+      SymbolString(symbols).render(Point(gScreenInfo.getGameCanvasWidth() / 2, 440));
 
 #  endif
 }

@@ -102,7 +102,7 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
       symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, GoalZoneIconContext));
    }
 
-   SymbolString titleSymbolString(symbols, titleSize, LevelInfoContext);
+   SymbolString titleSymbolString(symbols);
 
 
    const char *descr           = gameType->getLevelDescription()->getString();

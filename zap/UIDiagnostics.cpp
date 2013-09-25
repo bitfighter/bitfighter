@@ -520,7 +520,7 @@ void DiagnosticUserInterface::render()
                symbols.push_back(UI::SymbolString::getBlankSymbol(8));      // Provide a little breathing room
          }
 
-         UI::SymbolString(symbols, 10, HelpContext).render(Point(gScreenInfo.getGameCanvasWidth() / 2 + 100, ypos + 50));
+         UI::SymbolString(symbols).render(Point(gScreenInfo.getGameCanvasWidth() / 2 + 100, ypos + 50));
 
          JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_1, InputCodeManager::getState(BUTTON_1));
          hpos += 40;

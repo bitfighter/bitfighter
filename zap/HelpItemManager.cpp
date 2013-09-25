@@ -371,7 +371,7 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
       Vector<SymbolShapePtr> symbols;
       SymbolString::symbolParse(inputCodeManager, renderStr, symbols, HelpItemContext, FontSize);
 
-      UI::SymbolString symbolString(symbols, FontSize, HUDContext);
+      UI::SymbolString symbolString(symbols);
       symbolString.render(xPos, yPos + yOffset, AlignmentCenter);
 
       S32 w = symbolString.getWidth();

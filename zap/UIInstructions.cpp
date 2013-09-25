@@ -177,44 +177,44 @@ static void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBind
       {
          symbols.clear();
          symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
-         instr->add(SymbolString(symbols, FontSize, HelpContext));
+         instr->add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
-         bindings->add(SymbolString(symbols, FontSize, HelpContext));
+         bindings->add(SymbolString(symbols));
       }
       else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_U)
       {
          symbols.clear();
          symbols.push_back(SymbolString::getSymbolText(helpBindings[i].help, FontSize, HelpContext, &txtColor));
-         instr->add(SymbolString(symbols, FontSize, HelpContext));
+         instr->add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_UP), &keyColor));
-         bindings->add(SymbolString(symbols, FontSize, HelpContext));
+         bindings->add(SymbolString(symbols));
       }
       else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LDR)
       {
          symbols.clear();
          symbols.push_back(SymbolString::getSymbolText(helpBindings[i].help, FontSize, HelpContext, &txtColor));
-         instr->add(SymbolString(symbols, FontSize, HelpContext));
+         instr->add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LEFT),  &keyColor));
          symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_DOWN),  &keyColor));
          symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_RIGHT), &keyColor));
 
-         bindings->add(SymbolString(symbols, FontSize, HelpContext));
+         bindings->add(SymbolString(symbols));
       }
       else
       {
          symbols.clear();
          symbols.push_back(SymbolString::getSymbolText(helpBindings[i].help, FontSize, HelpContext, &txtColor));
-         instr->add(SymbolString(symbols, FontSize, HelpContext));
+         instr->add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getControlSymbol(UserInterface::getInputCode(settings, helpBindings[i].binding), &keyColor));
-         bindings->add(SymbolString(symbols, FontSize, HelpContext));
+         bindings->add(SymbolString(symbols));
       }
    }
 }
@@ -296,25 +296,25 @@ void InstructionsUserInterface::initNormalKeys_page1()
    // Add some headers to our 4 columns
    symbols.clear();
    symbols.push_back(SymbolString::getSymbolText("Action", HeaderFontSize, HelpContext, &secColor));
-   keysInstrLeft.add(SymbolString(symbols, FontSize, HelpContext));
-   keysInstrRight.add(SymbolString(symbols, FontSize, HelpContext));
+   keysInstrLeft.add(SymbolString(symbols));
+   keysInstrRight.add(SymbolString(symbols));
 
    symbols.clear();
    symbols.push_back(SymbolString::getSymbolText("Control", HeaderFontSize, HelpContext, &secColor));
-   keysBindingsLeft.add(SymbolString(symbols, FontSize, HelpContext));
-   keysBindingsRight.add(SymbolString(symbols, FontSize, HelpContext));
+   keysBindingsLeft.add(SymbolString(symbols));
+   keysBindingsRight.add(SymbolString(symbols));
 
    // Add horizontal line to first column (will draw across all)
    symbols.clear();
    symbols.push_back(SymbolString::getHorizLine(735, -14, 8, &Colors::gray70));
-   keysInstrLeft.add(SymbolString(symbols, FontSize, HelpContext));
+   keysInstrLeft.add(SymbolString(symbols));
 
    // Need to add a blank symbol to keep columns in sync
    symbols.clear();
    symbols.push_back(SymbolString::getBlankSymbol(0,0));
-   keysBindingsLeft.add(SymbolString(symbols, FontSize, HelpContext));
-   keysInstrRight.add(SymbolString(symbols, FontSize, HelpContext));
-   keysBindingsRight.add(SymbolString(symbols, FontSize, HelpContext));
+   keysBindingsLeft.add(SymbolString(symbols));
+   keysInstrRight.add(SymbolString(symbols));
+   keysBindingsRight.add(SymbolString(symbols));
 
    pack(keysInstrLeft,  keysBindingsLeft, 
         keysInstrRight, keysBindingsRight, 
@@ -513,12 +513,12 @@ static void initPage2Block(const char **block, S32 blockSize, const Color *heade
       {
          symbols.clear();
          symbols.push_back(SymbolString::getSymbolText(block[i], HeaderFontSize, HelpContext, headerColor));
-         instrBlock.add(SymbolString(symbols, FontSize, HelpContext, AlignmentCenter));
+         instrBlock.add(SymbolString(symbols, AlignmentCenter));
 
          // Provide a gap between header and body... when this is rendered, a gap equivalent to a line of text will be shown
          symbols.clear();
          symbols.push_back(SymbolString::getBlankSymbol());
-         instrBlock.add(SymbolString(symbols, FontSize, HelpContext));
+         instrBlock.add(SymbolString(symbols));
       }
       else
       {
@@ -526,7 +526,7 @@ static void initPage2Block(const char **block, S32 blockSize, const Color *heade
          string str(block[i]);
          SymbolString::symbolParse(inputCodeManager, str, symbols, HelpContext, HeaderFontSize, bodyColor);
 
-         instrBlock.add(SymbolString(symbols, FontSize, HelpContext, AlignmentLeft));
+         instrBlock.add(SymbolString(symbols, AlignmentLeft));
       }
    }
 }
@@ -543,7 +543,7 @@ void InstructionsUserInterface::initPage2()
 
    // Add some space separating the two sections
    symbols.push_back(SymbolString::getBlankSymbol(0, 30));
-   mLoadoutInstructions.add(SymbolString(symbols, FontSize, HelpContext));
+   mLoadoutInstructions.add(SymbolString(symbols));
 
    initPage2Block(loadoutInstructions2, ARRAYSIZE(loadoutInstructions2), &Colors::yellow, &Colors::cyan, 
                getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
