@@ -317,11 +317,12 @@ TEST(SpawnDelayTest, SpawnDelayTests)
    clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());    // ...and also on the client
 
-   // Scenario 1: Player is idle and gets suspended -- no other players in game
+   // Scenario 1: Player is idle and gets spawn delayed -- no other players in game
+   // TODO: Also need a scenario where palyer goes idle and gets spawn delayed, but game does not get suspended due to other players
    doScenario1(gamePair);
 
-   // Scenario 2: Player enters /idle command, other players, so server does not suspend itself.  Since
-   // player used /idle command, a 5 second penalty will be levied against them.
+   // Scenario 2: Player enters idle command, other players, so server does not suspend itself.  Since
+   // player used idle command, a 5 second penalty will be levied against them.
    doScenario2(gamePair);
 
    // Scenarios 3 & 4 -- Player enters /idle command, no other players, so server suspends itself partially (3) or fully (4)
@@ -335,7 +336,7 @@ TEST(SpawnDelayTest, SpawnDelayTests)
       doScenario34(gamePair, true);
    }
 
-   // Scenario 5 -- Player enters /idle when in punishment delay period for pervious /idle command
+   // Scenario 5 -- Player enters idle when in punishment delay period for pervious /idle command
    doScenario5(gamePair);
 
    // Scenario 6 -- Player is shown a new levelup screen
@@ -343,6 +344,12 @@ TEST(SpawnDelayTest, SpawnDelayTests)
 
    // Scenario 7 -- Player is shown a levelup screen they have already seen
    doScenario7(gamePair);
+
+   // Scenario 8 -- Player is shown (new) levelup screen while they are idle due to inaction
+
+   // Scenario 9 -- Player is shown (new) levelup screen while they are idle due to idle command
+
+   // Scenario 9 -- Player is shown (new) levelup screen while they are in penlaty phase of idle command
 }
 
 
