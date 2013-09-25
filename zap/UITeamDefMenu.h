@@ -45,6 +45,9 @@ class TeamDefUserInterface : public UserInterface
 private:
    Timer errorMsgTimer;
    string errorMsg;
+
+   UI::SymbolStringSet mMenuSubTitle;
+   UI::SymbolStringSet mBottomInstructions;
    
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
@@ -56,7 +59,6 @@ public:
    virtual ~TeamDefUserInterface();
 
    const char *mMenuTitle;
-   UI::SymbolStringSet mMenuSubTitle;
    const char *mMenuFooter;
 
    void render();              // Draw the menu

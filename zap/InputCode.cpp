@@ -2017,7 +2017,8 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_Y)]               = "Y";                
    keyNames[S32(KEY_Z)]               = "Z";                
    keyNames[S32(KEY_TILDE)]           = "~";                
-   keyNames[S32(KEY_MINUS)]           = "-";                
+   keyNames[S32(KEY_MINUS)]           = "-"; 
+   keyNames[S32(KEY_PLUS)]            = "+"; 
    keyNames[S32(KEY_EQUALS)]          = "=";                
    keyNames[S32(KEY_OPENBRACKET)]     = "[";                
    keyNames[S32(KEY_CLOSEBRACKET)]    = "]";                
