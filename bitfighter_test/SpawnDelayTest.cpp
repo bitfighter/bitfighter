@@ -201,6 +201,8 @@ static void doScenario34(GamePair &gamePair, bool letGameSlipIntoFullSuspendMode
 
    if(letGameSlipIntoFullSuspendMode)
    {
+      // In here, game is suspended
+
       EXPECT_TRUE(serverGame->isSuspended());
       EXPECT_TRUE(clientGame->isSuspended());
 
@@ -215,6 +217,9 @@ static void doScenario34(GamePair &gamePair, bool letGameSlipIntoFullSuspendMode
    }
    else
    {
+      // In here, game is not (yet) suspended, but is in the 2 second cooldown period that comes after 
+      // all players have left or are idle, but before full suspension
+
       EXPECT_FALSE(serverGame->isSuspended());
       EXPECT_FALSE(clientGame->isSuspended());
 
