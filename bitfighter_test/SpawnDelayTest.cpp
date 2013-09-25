@@ -200,12 +200,33 @@ static void doScenario34(GamePair &gamePair, bool letGameSlipIntoFullSuspendMode
    ASSERT_TRUE(serverGame->isOrIsAboutToBeSuspended()) << "Game should be suspended";
 
    if(letGameSlipIntoFullSuspendMode)
+   {
       EXPECT_TRUE(serverGame->isSuspended());
+      EXPECT_TRUE(clientGame->isSuspended());
+
+      // Check if server clocks are still counting down... should be stopped
+      S32 snow = serverGame->getGameType()->getRemainingGameTimeInMs();
+      S32 cnow = clientGame->getGameType()->getRemainingGameTimeInMs();
+      gamePair.idle(10, 10);
+      S32 slater = serverGame->getGameType()->getRemainingGameTimeInMs();
+      S32 clater = clientGame->getGameType()->getRemainingGameTimeInMs();
+      EXPECT_EQ(snow, slater) << "Looks like server clock is still running (should be stopped)!";
+      EXPECT_EQ(cnow, clater) << "Looks like client clock is still running (should be stopped)!";
+   }
    else
+   {
       EXPECT_FALSE(serverGame->isSuspended());
+      EXPECT_FALSE(clientGame->isSuspended());
 
-   // Check that clock on client has been frozen
-
+      // Check if clocks are still counting down... should be still running
+      S32 snow = serverGame->getGameType()->getRemainingGameTimeInMs();
+      S32 cnow = clientGame->getGameType()->getRemainingGameTimeInMs();
+      gamePair.idle(10, 10);
+      S32 slater = serverGame->getGameType()->getRemainingGameTimeInMs();
+      S32 clater = clientGame->getGameType()->getRemainingGameTimeInMs();
+      EXPECT_NE(snow, slater) << "Looks like server clock is stopped (should be running)!";
+      EXPECT_NE(cnow, clater) << "Looks like client clock is stopped (should be running)!";
+   }
 
    clientGame->undelaySpawn();                                          // Simulate effects of key press
    gamePair.idle(10, 5);                                                // Idle; give things time to propagate
