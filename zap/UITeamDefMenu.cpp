@@ -78,18 +78,26 @@ TeamPreset gTeamPresets[] = {
 
 
 // Constructor
-TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : Parent(game)
+TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : Parent(game),
+                                                               mMenuSubTitle(10)
 {
    mMenuTitle = "Configure Teams";
-   mMenuSubTitle = "For quick configuration, press [ALT-1] - [ALT-9] to specify number of teams";
-   mMenuSubTitleColor = Colors::white;
+   Vector<UI::SymbolShapePtr> symbols;
+
+   UI::SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), 
+                                 "For quick configuration, press [[ALT-1]] - [[ALT-9]] to specify number of teams", 
+                                 symbols, MenuContext, 18, &Colors::white);
+
+   mMenuSubTitle.add(UI::SymbolString(symbols, 18, MenuContext, UI::AlignmentCenter));
 }
+
 
 // Destructor
 TeamDefUserInterface::~TeamDefUserInterface()
 {
    // Do nothing
 }
+
 
 static const U32 errorMsgDisplayTime = 4000; // 4 seconds
 static const S32 fontsize = 19;
@@ -139,7 +147,8 @@ void TeamDefUserInterface::render()
 
    glColor(Colors::white);
    drawCenteredString(vertMargin, 30, mMenuTitle);
-   drawCenteredString(vertMargin + 35, 18, mMenuSubTitle);
+   
+   mMenuSubTitle.render(canvasWidth / 2, vertMargin + 65, UI::AlignmentCenter);
 
    glColor(Colors::menuHelpColor);
    drawCenteredString(canvasHeight - vertMargin - 115, 16, "[1] - [9] selects a team preset for current slot");

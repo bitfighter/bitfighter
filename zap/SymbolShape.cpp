@@ -567,6 +567,11 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
    else if(symbolName == "MODULE_CTRL2")
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2)));
 
+   else if(symbolName == "ALT-1")
+      symbols.push_back(SymbolString::getControlSymbol(KEY_ALT_1));
+   else if(symbolName == "ALT-9")
+      symbols.push_back(SymbolString::getControlSymbol(KEY_ALT_9));
+
    else 
       symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, 12, HelpItemContext)));
 }

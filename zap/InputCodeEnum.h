@@ -138,8 +138,8 @@ enum InputCode {
    KEY_CTRL_M, KEY_CTRL_Q, KEY_CTRL_S,
    KEY_CTRL_1, KEY_CTRL_2, KEY_CTRL_3,
 
-   // Keep these together for isAltKey() -- KEY_ALT_1 and KEY_ALT_3 are markers for bounds of alt keys
-   KEY_ALT_1, KEY_ALT_2, KEY_ALT_3,
+   // Keep these together for isAltKey() -- KEY_ALT_1 and KEY_ALT_9 are markers for bounds of alt keys
+   KEY_ALT_1, KEY_ALT_2, KEY_ALT_3, KEY_ALT_9,
    
    KEY_COUNT,
    KEY_UNKNOWN, KEY_NONE,
@@ -159,7 +159,7 @@ static const U32 FIRST_CTRL_KEY = (U32)KEY_CTRL_M;
 static const U32 LAST_CTRL_KEY  = (U32)KEY_CTRL_3;
 
 static const U32 FIRST_ALT_KEY = (U32)KEY_ALT_1;
-static const U32 LAST_ALT_KEY  = (U32)KEY_ALT_3;
+static const U32 LAST_ALT_KEY  = (U32)KEY_ALT_9;
 
 };
 

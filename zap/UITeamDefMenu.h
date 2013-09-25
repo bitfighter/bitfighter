@@ -30,6 +30,7 @@
 #include "InputModeEnum.h"
 #include "Color.h"
 #include "Timer.h"
+#include "SymbolShape.h"
 
 namespace Zap
 {
@@ -55,8 +56,7 @@ public:
    virtual ~TeamDefUserInterface();
 
    const char *mMenuTitle;
-   const char *mMenuSubTitle;
-   Color mMenuSubTitleColor;
+   UI::SymbolStringSet mMenuSubTitle;
    const char *mMenuFooter;
 
    void render();              // Draw the menu

@@ -1909,6 +1909,9 @@ InputCode InputCodeManager::getBaseKey(InputCode inputCode)
       case KEY_ALT_3:
          return KEY_3;
 
+      case KEY_ALT_9:
+         return KEY_9;
+
       default:
          TNLAssert(false, "Unknown input code!");
          return KEY_UNKNOWN;
@@ -2098,7 +2101,8 @@ void InputCodeManager::initializeKeyNames()
 
    keyNames[S32(KEY_ALT_1)]           = "Alt+1";                  // First alt key
    keyNames[S32(KEY_ALT_2)]           = "Alt+2";                  
-   keyNames[S32(KEY_ALT_3)]           = "Alt+3";                  // Last alt key
+   keyNames[S32(KEY_ALT_3)]           = "Alt+3";                  
+   keyNames[S32(KEY_ALT_9)]           = "Alt+9";                  // Last alt key
 
    keyNames[S32(KEY_BACKQUOTE)]       = "`";                
    keyNames[S32(KEY_MENU)]            = "Menu";             
