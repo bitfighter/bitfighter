@@ -30,6 +30,7 @@
 #include "../zap/stringUtils.h"
 
 #include "TestUtils.h"
+#include "LevelFilesForTesting.h"      // Contains sample levelcode for testing purposes
 
 #include "tnlNetObject.h"
 #include "tnlGhostConnection.h"
@@ -171,6 +172,50 @@ TEST_F(BfTest, SettingsTests)
    ASSERT_EQ(Absolute, settings.getVal<RelAbs>("RelAbs"));
    settings.getSetting("RelAbs")->setValFromString("RELATIVE");
    ASSERT_EQ(Relative, settings.getVal<RelAbs>("RelAbs"));
+}
+
+
+// This test needs to be greatly expanded -- we should be testing all sorts of items here!
+TEST_F(BfTest, LevelReadingAndItemPropagation)
+{
+   GamePair gamePair(getLevelCode1());
+   ClientGame *clientGame = gamePair.client;
+   ServerGame *serverGame = gamePair.server;
+
+   // Idle for a while
+   gamePair.idle(10, 5);
+
+   Vector<DatabaseObject *> fillVector;
+
+   // Test level item propigation
+   // TestItem
+   clientGame->getGameObjDatabase()->findObjects(TestItemTypeNumber, fillVector);
+   EXPECT_EQ(1, fillVector.size()) << "Looks like object propagation is broken!";
+   EXPECT_EQ(1, fillVector[0]->getCentroid() == Point(255,255));
+
+   // RepairItem
+   fillVector.clear();
+   clientGame->getGameObjDatabase()->findObjects(RepairItemTypeNumber, fillVector);
+   EXPECT_EQ(1, fillVector.size());
+   EXPECT_EQ(1, fillVector[0]->getCentroid() == Point(0,255));
+
+   fillVector.clear();
+   serverGame->getGameObjDatabase()->findObjects(RepairItemTypeNumber, fillVector);
+   EXPECT_EQ(10, static_cast<RepairItem *>(fillVector[0])->getRepopDelay()); // <=== repopDelay is not sent to the client; on client will always be default
+
+   // Wall
+   fillVector.clear();
+   clientGame->getGameObjDatabase()->findObjects(BarrierTypeNumber, fillVector);
+   EXPECT_EQ(1, fillVector.size());
+   Barrier *barrier = static_cast<Barrier *>(fillVector[0]);
+   EXPECT_EQ("-255, -255 | -255, 255", barrier->mPoints[0].toString() + " | " + barrier->mPoints[1].toString());
+   EXPECT_EQ(40, barrier->mWidth);
+
+   // Test metadata propigation
+   EXPECT_STREQ("Bluey", clientGame->getTeam(0)->getName().getString());                                       // Team name
+   EXPECT_STREQ("Test Level",                 clientGame->getGameType()->getLevelName()->getString());         // Quoted in level file
+   EXPECT_STREQ("This is a basic test level", clientGame->getGameType()->getLevelDescription()->getString());  // Quoted in level file
+   EXPECT_STREQ("level creator",              clientGame->getGameType()->getLevelCredits()->getString());      // Not quoted in level file
 }
 
 
