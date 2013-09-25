@@ -97,7 +97,7 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : Parent(game),
                                  symbols, MenuContext, 16, &Colors::menuHelpColor);
    mBottomInstructions.add(UI::SymbolString(symbols, UI::AlignmentCenter));
 
-      symbols.clear();
+   symbols.clear();
    UI::SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), 
                                  "[[Enter]] edits team name", 
                                  symbols, MenuContext, 16, &Colors::menuHelpColor);
