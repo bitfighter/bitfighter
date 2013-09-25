@@ -170,7 +170,7 @@ S32 SymbolStringSet::renderLine(S32 line, S32 x, S32 y, Alignment alignment) con
 ////////////////////////////////////////
 
 // Width is the sum of the widths of all elements in the symbol list
-static S32 computeWidth(const Vector<SymbolShapePtr > &symbols, S32 fontSize, FontContext fontContext)
+static S32 computeWidth(const Vector<SymbolShapePtr > &symbols)
 {
    S32 width = 0;
 
@@ -182,7 +182,7 @@ static S32 computeWidth(const Vector<SymbolShapePtr > &symbols, S32 fontSize, Fo
 
 
 // Width of a layered item is the widest of the widths of all elements in the symbol list
-static S32 computeLayeredWidth(const Vector<SymbolShapePtr > &symbols, S32 fontSize, FontContext fontContext)
+static S32 computeLayeredWidth(const Vector<SymbolShapePtr > &symbols, FontContext fontContext)
 {
    S32 width = 0;
 
@@ -197,7 +197,7 @@ static S32 computeLayeredWidth(const Vector<SymbolShapePtr > &symbols, S32 fontS
 }
 
 // Height is the height of the tallest element in the symbol list
-static S32 computeHeight(const Vector<SymbolShapePtr> &symbols, S32 fontSize, FontContext fontContext)
+static S32 computeHeight(const Vector<SymbolShapePtr> &symbols)
 {
    S32 height = 0;
 
@@ -214,12 +214,10 @@ static S32 computeHeight(const Vector<SymbolShapePtr> &symbols, S32 fontSize, Fo
 // Constructor with symbols
 SymbolString::SymbolString(const Vector<SymbolShapePtr> &symbols, S32 fontSize, FontContext fontContext, Alignment alignment) : mSymbols(symbols)
 {
-   mFontSize    = fontSize;
-   mFontContext = fontContext;
    mReady = true;
 
-   mWidth = computeWidth(symbols, fontSize, fontContext);
-   mHeight = computeHeight(symbols, fontSize, fontContext);
+   mWidth = computeWidth(symbols);
+   mHeight = computeHeight(symbols);
    mAlignment = alignment;
 }
 
@@ -227,8 +225,6 @@ SymbolString::SymbolString(const Vector<SymbolShapePtr> &symbols, S32 fontSize, 
 // Constructor -- symbols will be provided later
 SymbolString::SymbolString(S32 fontSize, FontContext fontContext)
 {
-   mFontSize    = fontSize;
-   mFontContext = fontContext;
    mReady = false;
 
    mWidth = 0;
@@ -247,7 +243,7 @@ void SymbolString::setSymbols(const Vector<SymbolShapePtr> &symbols)
 {
    mSymbols = symbols;
 
-   mWidth = computeWidth(symbols, mFontSize, mFontContext);
+   mWidth = computeWidth(symbols);
    mReady = true;
 }
 
@@ -610,7 +606,7 @@ void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const s
 LayeredSymbolString::LayeredSymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, S32 fontSize, FontContext fontContext) :
                   Parent(symbols, fontSize, fontContext)
 {
-   mWidth = computeLayeredWidth(symbols, fontSize, fontContext);
+   mWidth = computeLayeredWidth(symbols, fontContext);
 }
 
 
@@ -630,12 +626,12 @@ S32 LayeredSymbolString::render(F32 x, F32 y, Alignment alignment, S32 blockWidt
    //if(alignment == AlignmentCenter)
    //   x -= mWidth / 2;
 
-   FontManager::pushFontContext(mFontContext);
+   //FontManager::pushFontContext(mFontContext);
 
    for(S32 i = 0; i < mSymbols.size(); i++)
       mSymbols[i]->render(Point(x, y));
 
-   FontManager::popFontContext();
+   //FontManager::popFontContext();
 
    return mHeight;
 }

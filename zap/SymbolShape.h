@@ -274,11 +274,8 @@ class SymbolString : public SymbolShape      // So a symbol string can hold othe
 
 protected:
    S32 mWidth;
-   S32 mFontSize;
    S32 mReady;
    Alignment mAlignment;
-
-   FontContext mFontContext;
 
    Vector<boost::shared_ptr<SymbolShape> > mSymbols;
 
