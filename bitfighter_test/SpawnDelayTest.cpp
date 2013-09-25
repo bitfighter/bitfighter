@@ -204,11 +204,14 @@ static void doScenario34(GamePair &gamePair, bool letGameSlipIntoFullSuspendMode
    else
       EXPECT_FALSE(serverGame->isSuspended());
 
-   clientGame->undelaySpawn();                                             // Simulate effects of key press
-   gamePair.idle(10, 5);                                                   // Idle; give things time to propagate
+   // Check that clock on client has been frozen
+
+
+   clientGame->undelaySpawn();                                          // Simulate effects of key press
+   gamePair.idle(10, 5);                                                // Idle; give things time to propagate
    ASSERT_FALSE(serverGame->isOrIsAboutToBeSuspended());
 
-   ASSERT_EQ(0, serverGame->getClientInfo(0)->getReturnToGameTime());      // No returnToGame penalty
+   ASSERT_EQ(0, serverGame->getClientInfo(0)->getReturnToGameTime());   // No returnToGame penalty
    ASSERT_FALSE(clientGame->inReturnToGameCountdown());
 
    gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give dead ships time to be cleaned up

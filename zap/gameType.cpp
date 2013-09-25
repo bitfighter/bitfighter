@@ -653,9 +653,12 @@ void GameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 {
    mTotalGamePlay += deltaT;
 
-   if(path != BfObject::ServerIdleMainLoop)    
+   // Currently only called with path == ClientIdlingNotLocalShip or ServerIdleMainLoop
+   TNLAssert(path == BfObject::ServerIdleMainLoop || path == BfObject::ClientIdlingNotLocalShip, "Unexpected path!");
+
+   if(path == BfObject::ClientIdlingNotLocalShip)    
       idle_client(deltaT);
-   else
+   else 
       idle_server(deltaT);
 }
 
