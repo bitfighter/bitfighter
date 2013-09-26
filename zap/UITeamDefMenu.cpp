@@ -169,11 +169,6 @@ void TeamDefUserInterface::render()
    
    mMenuSubTitle.render      (canvasWidth / 2, vertMargin + 65,                 UI::AlignmentCenter);
    mBottomInstructions.render(canvasWidth / 2, canvasHeight - vertMargin - 115, UI::AlignmentCenter);
-   //glColor(Colors::menuHelpColor);
-   //drawCenteredString(canvasHeight - vertMargin - 115, 16, "[1] - [9] selects a team preset for current slot");
-   //drawCenteredString(canvasHeight - vertMargin - 92,  16, "[Enter] edits team name");
-   //drawCenteredString(canvasHeight - vertMargin - 69,  16, "[R] [G] [B] to change preset color (with or without [Shift])");
-   //drawCenteredString(canvasHeight - vertMargin - 46,  16, "[Ins] or [+] to insert team | [Del] or [-] to remove selected team");
 
    glColor(Colors::white);
    drawCenteredString(canvasHeight - vertMargin - 20, 18, "Arrow Keys to choose | ESC to exit");

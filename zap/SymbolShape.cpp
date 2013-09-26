@@ -620,16 +620,8 @@ S32 LayeredSymbolString::render(F32 x, F32 y, Alignment alignment, S32 blockWidt
 {
    TNLAssert(mReady, "Not ready!");
 
-   // Alignment of overall symbol string
-   //if(alignment == AlignmentCenter)
-   //   x -= mWidth / 2;
-
-   //FontManager::pushFontContext(mFontContext);
-
    for(S32 i = 0; i < mSymbols.size(); i++)
       mSymbols[i]->render(Point(x, y));
-
-   //FontManager::popFontContext();
 
    return mHeight;
 }
