@@ -223,9 +223,6 @@ void TeamDefUserInterface::render()
       }
    }
 
-   // Draw the help string
-   glColor(Colors::menuHelpColor);
-
    if(errorMsgTimer.getCurrent())
    {
       F32 alpha = 1.0;
@@ -238,6 +235,7 @@ void TeamDefUserInterface::render()
       drawCenteredString(canvasHeight - vertMargin - 141, fontsize, errorMsg.c_str());
    }
 }
+
 
 // Run this as we're exiting the menu
 void TeamDefUserInterface::onEscape()
@@ -255,8 +253,6 @@ void TeamDefUserInterface::onEscape()
 class Team;
 string origName;
 extern bool isPrintable(char c);
-
-
 
 void TeamDefUserInterface::onTextInput(char ascii)
 {

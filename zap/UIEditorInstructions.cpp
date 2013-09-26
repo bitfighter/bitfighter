@@ -365,24 +365,55 @@ void EditorInstructionsUserInterface::renderPageWalls()
    S32 textSize = 18;
 
    Vector<Point> points;
+
    points.push_back(Point(150, 100 + vertOffset));
    points.push_back(Point(220, 190 + vertOffset));
+
    if(mAnimStage > 0 && mAnimStage < 10)
+   {
+      points.push_back(points.last());
       points.push_back(Point(350, 80 + vertOffset));
+   }
    else if(mAnimStage == 10)
+   {
+      points.push_back(points.last());
       points.push_back(Point(350, 150 + vertOffset));
+   }
    else if(mAnimStage >= 11)
+   {
+      points.push_back(points.last());
       points.push_back(Point(350, 200 + vertOffset));
+   }
+
    if(mAnimStage > 1)
+   {
+      points.push_back(points.last());
       points.push_back(Point(470, 140 + vertOffset));
+   }
+
    if(mAnimStage > 2)
+   {
+      points.push_back(points.last());
       points.push_back(Point(550, 120 + vertOffset));
+   }
+
    if(mAnimStage == 4)
+   {
+      points.push_back(points.last());
       points.push_back(Point(650, 100 + vertOffset));
+   }
+
    else if(mAnimStage == 5)
+   {
+      points.push_back(points.last());
       points.push_back(Point(690, 130 + vertOffset));
+   }
+
    else if(mAnimStage >= 6)
+   {
+      points.push_back(points.last());
       points.push_back(Point(650, 170 + vertOffset));
+   }
 
    if(mAnimStage > 6)
    {
@@ -427,15 +458,17 @@ void EditorInstructionsUserInterface::renderPageWalls()
    glLineWidth(gDefaultLineWidth);
 
 
-   //tex(char style, const Point &v, S32 number, F32 alpha, S32 size, F32 scale);
-
    for(S32 i = 0; i < points.size(); i++)
+   {
+      S32 vertNum = ((F32)i  / 2) + 0.5;     // Ick!
+
       if(i < (points.size() - ((mAnimStage > 6) ? 0 : 1) ) && !(i == 2 && (mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)))
-         renderVertex(SelectedItemVertex, points[i], i, 1);
+         renderVertex(SelectedItemVertex, points[i], vertNum, 1);
       else if(mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)
-         renderVertex(SelectedVertex, points[i], i);
+         renderVertex(SelectedVertex, points[i], vertNum);
       else  // mAnimStage > 11, moving vertices about
          renderVertex(HighlightedVertex, points[i], -1, 1);
+   }
 
    // And now some written instructions
    S32 x = 50 + getStringWidth(textSize, "* ");
