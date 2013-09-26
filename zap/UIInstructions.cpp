@@ -148,9 +148,9 @@ static ControlStringsEditor consoleCommands1[] = {
 };
 
 
-static const Color txtColor = Colors::cyan;
-static const Color keyColor = Colors::white;     
-static const Color secColor = Colors::yellow;
+static const Color *txtColor = &Colors::cyan;
+static const Color *keyColor = &Colors::white;     
+static const Color *secColor = &Colors::yellow;
 
 
 static void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBindings, 
@@ -186,34 +186,34 @@ static void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBind
       else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_U)
       {
          symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, &txtColor));
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
          instr->add(SymbolString(symbols));
 
          symbols.clear();
-         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_UP), &keyColor));
+         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_UP), keyColor));
          bindings->add(SymbolString(symbols));
       }
       else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LDR)
       {
          symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, &txtColor));
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
          instr->add(SymbolString(symbols));
 
          symbols.clear();
-         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LEFT),  &keyColor));
-         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_DOWN),  &keyColor));
-         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_RIGHT), &keyColor));
+         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LEFT),  keyColor));
+         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_DOWN),  keyColor));
+         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_RIGHT), keyColor));
 
          bindings->add(SymbolString(symbols));
       }
       else
       {
          symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, &txtColor));
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
          instr->add(SymbolString(symbols));
 
          symbols.clear();
-         symbols.push_back(SymbolString::getControlSymbol(UserInterface::getInputCode(settings, helpBindings[i].binding), &keyColor));
+         symbols.push_back(SymbolString::getControlSymbol(UserInterface::getInputCode(settings, helpBindings[i].binding), keyColor));
          bindings->add(SymbolString(symbols));
       }
    }
@@ -295,12 +295,12 @@ void InstructionsUserInterface::initNormalKeys_page1()
 
    // Add some headers to our 4 columns
    symbols.clear();
-   symbols.push_back(SymbolString::getSymbolText("Action", HeaderFontSize, HelpContext, &secColor));
+   symbols.push_back(SymbolString::getSymbolText("Action", HeaderFontSize, HelpContext, secColor));
    keysInstrLeft.add(SymbolString(symbols));
    keysInstrRight.add(SymbolString(symbols));
 
    symbols.clear();
-   symbols.push_back(SymbolString::getSymbolText("Control", HeaderFontSize, HelpContext, &secColor));
+   symbols.push_back(SymbolString::getSymbolText("Control", HeaderFontSize, HelpContext, secColor));
    keysBindingsLeft.add(SymbolString(symbols));
    keysBindingsRight.add(SymbolString(symbols));
 
