@@ -28,6 +28,7 @@
 
 #include "UIAbstractInstructions.h"
 #include "WallSegmentManager.h"
+#include "SymbolShape.h"
 #include "Timer.h"
 
 namespace Zap
@@ -44,6 +45,9 @@ private:
    S32 mAnimStage;
    WallSegmentManager mWallSegmentManager;
 
+   UI::SymbolStringSetCollection mSymbolSets1;     // For page 1
+   UI::SymbolStringSetCollection mSymbolSets2;     // For page 2
+
 public:
    explicit EditorInstructionsUserInterface(ClientGame *game);      // Constructor
    virtual ~EditorInstructionsUserInterface();
@@ -55,7 +59,6 @@ public:
 
    S32 getPageCount();
  
-
    bool onKeyDown(InputCode inputCode);
 
    void nextPage();

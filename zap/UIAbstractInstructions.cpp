@@ -92,7 +92,7 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activa
          drawString(cmdCol, ypos, cmdSize, cmdList[i].command.c_str());      // Textual description of function (1st arg in lists above)
 
          glColor(descrColor);
-         drawString(descrCol, ypos, cmdSize, cmdList[i].descr.c_str());
+         drawString(descrCol, ypos, cmdSize, cmdList[i].binding.c_str());
       }
       ypos += cmdSize + cmdGap;
    }

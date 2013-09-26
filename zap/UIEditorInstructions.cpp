@@ -48,11 +48,203 @@ static Vector<Point> sample1o, sample2o, sample3o, sample4o, sample5o;     // ou
 static Vector<Point> sample1f, sample2f, sample3f, sample4f, sample5f;     // fill
 static Border border34;
 
+
+// For page 1 of general instructions
+static ControlStringsEditor controls1[] = {
+   { "Navigation", "HEADER" },
+         { "Pan Map", "[[W]]/[[A]]/[[S]]/[[D]] or"},
+         { " ", "Arrow Keys"},
+         { "Zoom In", "[[E]] or [[Ctrl-Up]]" },
+         { "Zoom Out", "[[C]] or [[Ctrl-Down]]" },
+         { "Center Display", "[[Z]]" },
+         { "Toggle Script Results", "[[Ctrl-K]]" },
+         { "Copy Results Into Editor", "[[Ctrl-I]]" },
+         { "Show/Hide Plugins Pane", "[[F9]]"},
+      { "-", "" },         // Horiz. line
+   { "Editing", "HEADER" },
+         { "Cut/Copy/Paste", "[[Ctrl-X]]/[[C]]/[[V]]"},
+         { "Delete Selection", "[[Del]]" },
+         { "Undo", "[[Ctrl-Z]]" },
+         { "Redo", "[[Ctrl-Shift-Z]]" },
+         { "", "" },       // End of col1
+   { "Object Shortcuts", "HEADER" },
+         { "Insert Teleporter", "[[T]]" },
+         { "Insert Spawn Point", "[[G]]" },
+         { "Insert Repair", "[[B]]" },
+         { "Insert Turret", "[[Y]]" },
+         { "Insert Force Field", "[[F]]" },
+         { "Insert Mine", "[[M]]" },
+      { "-", "" },         // Horiz. line
+   { "Assigning Teams", "HEADER" },
+         { "Set object's team", "[[1]]-[[9]]" },
+         { "Set object to neutral", "[[0]]" },
+         { "Set object to hostile", "[[Shift-0]]" },
+      { "-", "" },         // Horiz. line
+         { "Save", "[[Ctrl-S]]" },
+         { "Reload from file", "[[Ctrl-Shift-L]]" },
+         { "", "" },       // End of col2
+      };
+
+
+// For page 2 of general instructions
+static ControlStringsEditor controls2[] = {
+   { "Size & Rotation", "HEADER" },
+         { "Flip Horiz/Vertical", "[[H]], [[V]]" },
+         { "Spin", "[[R]], [[Shift-R]]" },
+         { "Arbitrary spin", "[[Alt-R]]" },
+         { "Rotate about (0,0)", "[[Ctrl-R]], [[Ctrl-Shift-R]]" },
+         { "Arbitrary rotate about (0,0)", "[[Ctrl-Alt-R]]" },
+         { "Scale selection", "[[Ctrl-Shift-X]]" },
+
+         { "-", "" },      // Horiz. line
+         { "Hold [[Space]] to suspend grid snapping",    "" },
+         { "[[Shift-Space]] to suspend vertex snapping", "" },
+         { "Hold [[Tab]] to view a reference ship",      "" },
+         { "", "" },       // End of col1
+
+         { "", "" },       // End of col2
+   };
+
+static const S32 HeaderFontSize = 20;
+static const S32 FontSize = 18;
+static const S32 FontGap = 8;
+
+static const Color *txtColor = &Colors::cyan;
+static const Color *keyColor = &Colors::white;     
+static const Color *secColor = &Colors::yellow;
+static const Color *groupHeaderColor = &Colors::red;
+
+
+static S32 col1 = UserInterface::horizMargin;
+static S32 col2 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 45;     // + 45 to make a little more room for Binding column
+static S32 col3 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.5);
+static S32 col4 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.75) + 45;
+
+
+static void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBindings, 
+                 UI::SymbolStringSet &rightInstrs, UI::SymbolStringSet &rightBindings,
+                 const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings)
+{
+   UI::SymbolStringSet *instr, *bindings;
+   Vector<UI::SymbolShapePtr> symbols;
+
+   bool left = false;
+
+   for(S32 i = 0; i < bindingCount; i++)
+   {
+      if(helpBindings[i].command == "" && helpBindings[i].binding == "")
+      {
+         left = !left;
+         continue;
+      }
+
+      if(left)
+      {
+         instr    = &leftInstrs;
+         bindings = &leftBindings;
+      }
+      else
+      {
+         instr    = &rightInstrs;
+         bindings = &rightBindings;
+      }
+
+
+      if(helpBindings[i].command == "-")
+      {
+         symbols.clear();
+         symbols.push_back(UI::SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
+         instr->add(UI::SymbolString(symbols));
+
+         symbols.clear();
+         symbols.push_back(UI::SymbolString::getBlankSymbol(0, FontSize));
+         bindings->add(UI::SymbolString(symbols));
+      }
+      else if(helpBindings[i].binding == "HEADER")
+      {
+         symbols.clear();
+         symbols.push_back(UI::SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, groupHeaderColor));
+         instr->add(UI::SymbolString(symbols));
+
+         symbols.clear();
+         symbols.push_back(UI::SymbolString::getBlankSymbol(0, FontSize));
+         bindings->add(UI::SymbolString(symbols));
+      }
+      else     // Normal line
+      {
+         symbols.clear();
+         UI::SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].command, 
+                                       symbols, HelpContext, FontSize, txtColor);
+
+         instr->add(UI::SymbolString(symbols));
+
+         symbols.clear();
+         UI::SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].binding, 
+                                       symbols, HelpContext, FontSize, keyColor);
+         bindings->add(UI::SymbolString(symbols));
+      }
+   }
+}
+
+
 // Constructor
 EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game)
 {
    mCurPage = 1;
    mAnimStage = 0;
+
+   Vector<UI::SymbolShapePtr> symbols;
+
+   // Two pages, two columns, two groups in each column
+   UI::SymbolStringSet keysInstrLeft1(FontGap),  keysBindingsLeft1(FontGap);
+   UI::SymbolStringSet keysInstrRight1(FontGap), keysBindingsRight1(FontGap);
+   UI::SymbolStringSet keysInstrLeft2(FontGap),  keysBindingsLeft2(FontGap);
+   UI::SymbolStringSet keysInstrRight2(FontGap), keysBindingsRight2(FontGap);
+
+
+   // Add some headers to our 4 columns
+   symbols.clear();
+   symbols.push_back(UI::SymbolString::getSymbolText("Action", HeaderFontSize, HelpContext, secColor));
+   keysInstrLeft1 .add(UI::SymbolString(symbols));
+   keysInstrRight1.add(UI::SymbolString(symbols));
+   keysInstrLeft2 .add(UI::SymbolString(symbols));
+   keysInstrRight2.add(UI::SymbolString(symbols));
+
+   symbols.clear();
+   symbols.push_back(UI::SymbolString::getSymbolText("Control", HeaderFontSize, HelpContext, secColor));
+   keysBindingsLeft1 .add(UI::SymbolString(symbols));
+   keysBindingsRight1.add(UI::SymbolString(symbols));
+   keysBindingsLeft2 .add(UI::SymbolString(symbols));
+   keysBindingsRight2.add(UI::SymbolString(symbols));
+
+   // Add horizontal line to first column (will draw across all)
+   symbols.clear();
+   symbols.push_back(UI::SymbolString::getHorizLine(735, -14, 8, &Colors::gray70));
+   keysInstrLeft1.add(UI::SymbolString(symbols));
+   keysInstrLeft2.add(UI::SymbolString(symbols));
+   keysInstrRight1.add(UI::SymbolString(symbols));
+   keysInstrRight2.add(UI::SymbolString(symbols));
+
+
+   pack(keysInstrLeft1,  keysBindingsLeft1, 
+        keysInstrRight1, keysBindingsRight1, 
+        controls1, ARRAYSIZE(controls1), getGame()->getSettings());
+
+   pack(keysInstrLeft2,  keysBindingsLeft2, 
+        keysInstrRight2, keysBindingsRight2, 
+        controls2, ARRAYSIZE(controls2), getGame()->getSettings());
+
+   S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
+
+   mSymbolSets1.addSymbolStringSet(keysInstrLeft1,     UI::AlignmentLeft,   col1);
+   mSymbolSets1.addSymbolStringSet(keysBindingsLeft1,  UI::AlignmentCenter, col2 + centeringOffset);
+   mSymbolSets1.addSymbolStringSet(keysInstrRight1,    UI::AlignmentLeft,   col3);
+   mSymbolSets1.addSymbolStringSet(keysBindingsRight1, UI::AlignmentCenter, col4 + centeringOffset);
+
+   mSymbolSets2.addSymbolStringSet(keysInstrLeft2,     UI::AlignmentLeft,   col1);
+   mSymbolSets2.addSymbolStringSet(keysBindingsLeft2,  UI::AlignmentCenter, col2 + centeringOffset);
+   mSymbolSets2.addSymbolStringSet(keysInstrRight2,    UI::AlignmentLeft,   col3);
+   mSymbolSets2.addSymbolStringSet(keysBindingsRight2, UI::AlignmentCenter, col4 + centeringOffset);
 }
 
 
@@ -178,13 +370,13 @@ void EditorInstructionsUserInterface::renderPluginCommands()
    for(S32 i = 0; i < plugins->size(); i++)
    {
       ctrl.command = plugins->get(i).key;
-      ctrl.descr   = plugins->get(i).help;
+      ctrl.binding   = plugins->get(i).help;
 
       ctrls[i] = ctrl;
    }
 
    ctrl.command = "";
-   ctrl.descr = "";
+   ctrl.binding = "";
 
    ctrls[plugins->size()] = ctrl;
 
@@ -192,75 +384,14 @@ void EditorInstructionsUserInterface::renderPluginCommands()
 }
 
 
-// For page 1 of general instructions
-static ControlStringsEditor gControls1[] = {
-   { "Navigation", "HEADER" },
-         { "Pan Map", "W/A/S/D or"},
-         { " ", "Arrow Keys"},
-         { "Zoom In", "E or Ctrl-Up" },
-         { "Zoom Out", "C or Ctrl-Dwn" },
-         { "Center Display", "Z" },
-         { "Toggle Script Results", "Ctrl-K" },
-         { "Copy Results Into Editor", "Ctrl-I" },
-         { "Show/Hide Plugins Pane", "F9"},
-      { "-", "" },         // Horiz. line
-   { "Editing", "HEADER" },
-         { "Cut/Copy/Paste", "Ctrl-X/C/V"},
-         { "Delete Selection", "Del" },
-         { "Undo", "Ctrl-Z" },
-         { "Redo", "Ctrl-Shift-Z" },
-         { "", "" },       // End of col1
-   { "Object Shortcuts", "HEADER" },
-         { "Insert Teleporter", "T" },
-         { "Insert Spawn Point", "G" },
-         { "Insert Repair", "B" },
-         { "Insert Turret", "Y" },
-         { "Insert Force Field", "F" },
-         { "Insert Mine", "M" },
-      { "-", "" },         // Horiz. line
-   { "Assigning Teams", "HEADER" },
-         { "Set object's team", "1-9" },
-         { "Set object to neutral", "0" },
-         { "Set object to hostile", "Shift-0" },
-      { "-", "" },         // Horiz. line
-         { "Save", "Ctrl-S" },
-         { "Reload from file", "Ctrl-Shift-L" },
-         { "", "" },       // End of col2
-      };
-
-
-// For page 2 of basic instructions
-static ControlStringsEditor gControls2[] = {
-   { "Size & Rotation", "HEADER" },
-         { "Flip Horiz/Vertical", "H, V" },
-         { "Spin", "R, Shift-R" },
-         { "Arbitrary spin", "Alt-R" },
-         { "Rotate about (0,0)", "Ctrl-R, Ctrl-Shift-R" },
-         { "Arbitrary rotate about (0,0)", "Ctrl-Alt-R" },
-         { "Scale selection", "Ctrl-Shift-X" },
-
-         { "-", "" },      // Horiz. line
-         { "Hold [Space] to suspend grid snapping", "" },
-         { "[Shift-Space] to suspend vertex snapping" },
-         { "Hold [Tab] to view a reference ship", "" },
-         { "", "" },       // End of col1
-
-         { "", "" },       // End of col2
-   };
-
-
 // This has become rather ugly and inelegant.  But you shuold see UIInstructions.cpp!!!
 void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 {
-   ControlStringsEditor *controls = (page == 1) ? gControls1 : gControls2;
+   ControlStringsEditor *controls = (page == 1) ? controls1 : controls2;
    GameSettings *settings = getGame()->getSettings();
 
    S32 starty = 50;
-   S32 y;
-   S32 col1 = horizMargin;
-   S32 col2 = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 45;     // + 45 to make a little more room for Action column
-   S32 col3 = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.5);
-   S32 col4 = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.75) + 45;
+   S32 y = starty;
    S32 actCol = col1;      // Action column
    S32 contCol = col2;     // Control column
    bool firstCol = true;
@@ -268,53 +399,54 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 
    drawHorizLine(col1, 750, starty + 26);
 
-   static const Color txtColor = Colors::cyan;
-   static const Color keyColor = Colors::white;
-   static const Color secColor = Colors::yellow;
-   static const Color groupHeaderColor = Colors::red;
+   if(page == 1)
+      y += mSymbolSets1.render(y);
+   else
+      y += mSymbolSets2.render(y);
 
-   glColor(secColor);
-   drawString(col1, starty, 20, "Action");
-   drawString(col2, starty, 20, "Control");
-   drawString(col3, starty, 20, "Action");
-   drawString(col4, starty, 20, "Control");
 
-   y = starty + 28;
-   for(S32 i = 0; !done; i++)
-   {
-      if(controls[i].command == "")
-      {
-         if(!firstCol)
-            done = true;
-         else
-         {  // Start second column
-            firstCol = false;
-            y = starty + 2;
-            actCol = col3;
-            contCol = col4;
+   //glColor(secColor);
+   //drawString(col1, starty, 20, "Action");
+   //drawString(col2, starty, 20, "Control");
+   //drawString(col3, starty, 20, "Action");
+   //drawString(col4, starty, 20, "Control");
 
-            glColor(secColor);
-         }
-      }
-      else if(controls[i].command == "-")      // Horiz spacer
-      {
-         glColor(Colors::gray40);
-         drawHorizLine(actCol, actCol + 335, y + 13);
-      }
-      else if(controls[i].descr == "HEADER")
-      {
-         glColor(groupHeaderColor);
-         drawString(actCol, y, 18, controls[i].command.c_str());
-      }
-      else
-      {
-         glColor(txtColor);
-         drawString(actCol, y, 18, controls[i].command.c_str());      // Textual description of function (1st arg in lists above)
-         glColor(keyColor);
-         drawString(contCol, y, 18, controls[i].descr.c_str());
-      }
-      y += 26;
-   }
+   //y = starty + 28;
+   //for(S32 i = 0; !done; i++)
+   //{
+   //   if(controls[i].command == "")
+   //   {
+   //      if(!firstCol)
+   //         done = true;
+   //      else
+   //      {  // Start second column
+   //         firstCol = false;
+   //         y = starty + 2;
+   //         actCol = col3;
+   //         contCol = col4;
+
+   //         glColor(secColor);
+   //      }
+   //   }
+   //   else if(controls[i].command == "-")      // Horiz spacer
+   //   {
+   //      glColor(Colors::gray40);
+   //      drawHorizLine(actCol, actCol + 335, y + 13);
+   //   }
+   //   else if(controls[i].descr == "HEADER")
+   //   {
+   //      glColor(groupHeaderColor);
+   //      drawString(actCol, y, 18, controls[i].command.c_str());
+   //   }
+   //   else
+   //   {
+   //      glColor(txtColor);
+   //      drawString(actCol, y, 18, controls[i].command.c_str());      // Textual description of function (1st arg in lists above)
+   //      glColor(keyColor);
+   //      drawString(contCol, y, 18, controls[i].descr.c_str());
+   //   }
+   //   y += 26;
+   //}
 
    y = 470;
    glColor(secColor);
@@ -359,7 +491,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
 {
    // Draw animated creation of walls
 
-   //drawStringf(400, 100, 25, "%d", mAnimStage);
+   //drawStringf(400, 100, 25, "%d", mAnimStage);     // Useful to have around when things go wrong!
 
    S32 vertOffset = 20;
    S32 textSize = 18;

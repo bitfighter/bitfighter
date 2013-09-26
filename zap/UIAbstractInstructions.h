@@ -36,7 +36,7 @@ namespace Zap {
 struct ControlStringsEditor
 {
    string command;
-   string descr;
+   string binding;
 };
 
 

@@ -252,7 +252,7 @@ void InstructionsUserInterface::initNormalKeys_page1()
          { Right, "Save screenshot",      InputCodeManager::BINDING_DUMMY_SS_MODE },
       };
 
-   static HelpBind controlsGamepad[] = {
+   HelpBind controlsGamepad[] = {
          { Left, "Move Ship",             InputCodeManager::BINDING_DUMMY_STICK_LEFT },
          { Left, "Aim Ship/Fire Weapon",  InputCodeManager::BINDING_DUMMY_STICK_RIGHT },
          { Left, "Activate module 1",     InputCodeManager::BINDING_MOD1 },
