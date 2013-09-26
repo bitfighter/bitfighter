@@ -116,7 +116,7 @@ enum LeftRight { Left, Right };
 
 struct HelpBind { 
    LeftRight leftRight;
-   const char *help;
+   string command;
    InputCodeManager::BindingName binding;
 };
 
@@ -173,7 +173,7 @@ static void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBind
          bindings = &rightBindings;
       }
 
-      if(strcmp(helpBindings[i].help, "-") == 0)
+      if(helpBindings[i].command == "-")
       {
          symbols.clear();
          symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
@@ -186,7 +186,7 @@ static void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBind
       else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_U)
       {
          symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].help, FontSize, HelpContext, &txtColor));
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, &txtColor));
          instr->add(SymbolString(symbols));
 
          symbols.clear();
@@ -196,7 +196,7 @@ static void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBind
       else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LDR)
       {
          symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].help, FontSize, HelpContext, &txtColor));
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, &txtColor));
          instr->add(SymbolString(symbols));
 
          symbols.clear();
@@ -209,7 +209,7 @@ static void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBind
       else
       {
          symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].help, FontSize, HelpContext, &txtColor));
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, &txtColor));
          instr->add(SymbolString(symbols));
 
          symbols.clear();
