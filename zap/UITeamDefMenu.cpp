@@ -77,44 +77,37 @@ TeamPreset gTeamPresets[] = {
 //Team Peach 1 0.7 0
 
 
+void addLineToSymbolStringSet(const string &text, const InputCodeManager *inputCodeManager, S32 size, const Color &color, UI::SymbolStringSet &symbolStringSet)
+{
+   Vector<UI::SymbolShapePtr> symbols;
+
+   UI::SymbolString::symbolParse(inputCodeManager, text, symbols, MenuContext, size, &color);
+   symbolStringSet.add(UI::SymbolString(symbols, UI::AlignmentCenter));
+}
+
+
 // Constructor
 TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : Parent(game),
                                                                mMenuSubTitle(8),
                                                                mBottomInstructions(8)
 {
    mMenuTitle = "Configure Teams";
-   Vector<UI::SymbolShapePtr> symbols;
 
-   UI::SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), 
-                                 "For quick configuration, press [[Alt+1]] - [[Alt+9]] to specify number of teams", 
-                                 symbols, MenuContext, 18, &Colors::menuHelpColor);
-   mMenuSubTitle.add(UI::SymbolString(symbols, UI::AlignmentCenter));
+   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
 
+   // Subtitle at the top of the screen
+   addLineToSymbolStringSet("For quick configuration, press [[Alt+1]] - [[Alt+9]] to specify number of teams",
+                            inputCodeManager, 18, Colors::menuHelpColor, mMenuSubTitle);
 
-   symbols.clear();
-   UI::SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), 
-                                 "[[1]] - [[9]] selects a team preset for current slot", 
-                                 symbols, MenuContext, 16, &Colors::menuHelpColor);
-   mBottomInstructions.add(UI::SymbolString(symbols, UI::AlignmentCenter));
-
-   symbols.clear();
-   UI::SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), 
-                                 "[[Enter]] edits team name", 
-                                 symbols, MenuContext, 16, &Colors::menuHelpColor);
-   mBottomInstructions.add(UI::SymbolString(symbols, UI::AlignmentCenter));
-
-
-   symbols.clear();
-   UI::SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), 
-                                 "[[R]] [[G]] [[B]] to change preset color (with or without [[Shift]])", 
-                                 symbols, MenuContext, 16, &Colors::menuHelpColor);
-   mBottomInstructions.add(UI::SymbolString(symbols, UI::AlignmentCenter));
-
-   symbols.clear();
-   UI::SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), 
-                                 "[[Insert]] or [[+]] to insert team | [[Del]] or [[-]] to remove selected team", 
-                                 symbols, MenuContext, 16, &Colors::menuHelpColor);
-   mBottomInstructions.add(UI::SymbolString(symbols, UI::AlignmentCenter));
+   // Text at the bottom of the screen
+   addLineToSymbolStringSet("[[1]] - [[9]] selects a team preset for current slot",
+                            inputCodeManager, 16, Colors::menuHelpColor, mBottomInstructions);
+   addLineToSymbolStringSet("[[Enter]] edits team name",
+                            inputCodeManager, 16, Colors::menuHelpColor, mBottomInstructions);
+   addLineToSymbolStringSet("[[R]] [[G]] [[B]] to change preset color (with or without [[Shift]])",
+                            inputCodeManager, 16, Colors::menuHelpColor, mBottomInstructions);
+   addLineToSymbolStringSet("[[Insert]] or [[+]] to insert team | [[Del]] or [[-]] to remove selected team",
+                            inputCodeManager, 16, Colors::menuHelpColor, mBottomInstructions);
 }
 
 
