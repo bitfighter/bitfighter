@@ -128,7 +128,7 @@ static void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBind
    UI::SymbolStringSet *instr, *bindings;
    Vector<UI::SymbolShapePtr> symbols;
 
-   bool left = false;
+   bool left = true;    // Left column first!
 
    for(S32 i = 0; i < bindingCount; i++)
    {
@@ -222,8 +222,15 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    symbols.push_back(UI::SymbolString::getHorizLine(735, -14, 8, &Colors::gray70));
    keysInstrLeft1.add(UI::SymbolString(symbols));
    keysInstrLeft2.add(UI::SymbolString(symbols));
-   keysInstrRight1.add(UI::SymbolString(symbols));
-   keysInstrRight2.add(UI::SymbolString(symbols));
+
+   symbols.clear();
+   symbols.push_back(UI::SymbolString::getBlankSymbol(0,20));
+   keysInstrRight1.add   (UI::SymbolString(symbols));
+   keysInstrRight2.add   (UI::SymbolString(symbols));
+   keysBindingsLeft1.add (UI::SymbolString(symbols));
+   keysBindingsLeft2.add (UI::SymbolString(symbols));
+   keysBindingsRight1.add(UI::SymbolString(symbols));
+   keysBindingsRight2.add(UI::SymbolString(symbols));
 
 
    pack(keysInstrLeft1,  keysBindingsLeft1, 
@@ -334,7 +341,7 @@ void EditorInstructionsUserInterface::render()
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
    glColor(0.7f);
 
-   drawHorizLine(0, 800, 31);
+   //drawHorizLine(0, 800, 31);
    drawHorizLine(0, 800, 569);
 
    switch(mCurPage)
@@ -397,7 +404,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    bool firstCol = true;
    bool done = false;
 
-   drawHorizLine(col1, 750, starty + 26);
+   //drawHorizLine(col1, 750, starty + 26);
 
    if(page == 1)
       y += mSymbolSets1.render(y);
@@ -592,7 +599,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
 
    for(S32 i = 0; i < points.size(); i++)
    {
-      S32 vertNum = ((F32)i  / 2) + 0.5;     // Ick!
+      S32 vertNum = S32(((F32)i  / 2) + 0.5);     // Ick!
 
       if(i < (points.size() - ((mAnimStage > 6) ? 0 : 1) ) && !(i == 2 && (mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)))
          renderVertex(SelectedItemVertex, points[i], vertNum, 1);
