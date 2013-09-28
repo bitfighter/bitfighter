@@ -375,13 +375,11 @@ void InstructionsUserInterface::renderPage1()
    drawCenteredString_fixed(y, 20, "These special keys are also usually active:");
 
    y += 36;
-   glColor(txtColor);
    mSpecialKeysInstrLeft.render (col1, y, AlignmentLeft);
    mSpecialKeysInstrRight.render(col3, y, AlignmentLeft);
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
-   glColor(keyColor);
    mSpecialKeysBindingsLeft.render (col2 + centeringOffset, y, AlignmentCenter);
    mSpecialKeysBindingsRight.render(col4 + centeringOffset, y, AlignmentCenter);
 }

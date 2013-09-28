@@ -355,13 +355,11 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 
    y += 45;
 
-   glColor(txtColor);
    mSpecialKeysInstrLeft.render (col1, y, UI::AlignmentLeft);
    mSpecialKeysInstrRight.render(col3, y, UI::AlignmentLeft);
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
-   glColor(keyColor);
    mSpecialKeysBindingsLeft.render (col2 + centeringOffset, y, UI::AlignmentCenter);
    mSpecialKeysBindingsRight.render(col4 + centeringOffset, y, UI::AlignmentCenter);
 }
