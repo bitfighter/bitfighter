@@ -49,61 +49,6 @@ static Vector<Point> sample1f, sample2f, sample3f, sample4f, sample5f;     // fi
 static Border border34;
 
 
-// For page 1 of general instructions
-static ControlStringsEditor controls1Left[] = {
-   { "Navigation", "HEADER" },
-         { "Pan Map", "[[W]]/[[A]]/[[S]]/[[D]] or"},
-         { " ", "Arrow Keys"},
-         { "Zoom In", "[[E]] or [[Ctrl+Up Arrow]]" },
-         { "Zoom Out", "[[C]] or [[Ctrl+Down Arrow]]" },
-         { "Center Display", "[[Z]]" },
-         { "Toggle Script Results", "[[Ctrl+K]]" },
-         { "Copy Results Into Editor", "[[Ctrl+I]]" },
-         { "Show/Hide Plugins Pane", "[[F9]]"},
-      { "-", "" },         // Horiz. line
-   { "Editing", "HEADER" },
-         { "Cut/Copy/Paste", "[[Ctrl+X]]/[[C]]/[[V]]"},
-         { "Delete Selection", "[[Del]]" },
-         { "Undo", "[[Ctrl+Z]]" },
-         { "Redo", "[[Ctrl+Shift+Z]]" }
-};
-
-static ControlStringsEditor controls1Right[] = {
-   { "Object Shortcuts", "HEADER" },
-         { "Insert Teleporter", "[[T]]" },
-         { "Insert Spawn Point", "[[G]]" },
-         { "Insert Repair", "[[B]]" },
-         { "Insert Turret", "[[Y]]" },
-         { "Insert Force Field", "[[F]]" },
-         { "Insert Mine", "[[M]]" },
-      { "-", "" },         // Horiz. line
-   { "Assigning Teams", "HEADER" },
-         { "Set object's team", "[[1]]-[[9]]" },
-         { "Set object to neutral", "[[0]]" },
-         { "Set object to hostile", "[[Shift+0]]" },
-      { "-", "" },         // Horiz. line
-         { "Save", "[[Ctrl+S]]" },
-         { "Reload from file", "[[Ctrl+Shift+L]]" }
-      };
-
-
-// For page 2 of general instructions
-static ControlStringsEditor controls2Left[] = {
-   { "Size & Rotation", "HEADER" },
-         { "Flip Horiz/Vertical", "[[H]], [[V]]" },
-         { "Spin", "[[R]], [[Shift+R]]" },
-         { "Arbitrary spin", "[[Alt+R]]" },
-         { "Rotate about (0,0)", "[[Ctrl+R]], [[Ctrl+Shift+R]]" },
-         { "Arbitrary rotate about (0,0)", "[[Ctrl+Alt+R]]" },
-         { "Scale selection", "[[Ctrl+Shift+X]]" },
-
-         { "-", "" },      // Horiz. line
-         { "Hold [[Space]] to suspend grid snapping",    "" },
-         { "[[Shift+Space]] to suspend vertex snapping", "" },
-         { "Hold [[Tab]] to view a reference ship",      "" }
-   };
-
-
 static S32 col1 = UserInterface::horizMargin;
 static S32 col2 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 45;     // + 45 to make a little more room for Binding column
 static S32 col3 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.5);
@@ -154,6 +99,61 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    keysBindingsLeft2.add (UI::SymbolString(symbols));
    keysBindingsRight1.add(UI::SymbolString(symbols));
    keysBindingsRight2.add(UI::SymbolString(symbols));
+
+
+   // For page 1 of general instructions
+   ControlStringsEditor controls1Left[] = {
+   { "HEADER", "Navigation" },
+         { "Pan Map", "[[W]]/[[A]]/[[S]]/[[D]] or"},
+         { " ", "Arrow Keys"},
+         { "Zoom In", "[[E]] or [[Ctrl+Up Arrow]]" },
+         { "Zoom Out", "[[C]] or [[Ctrl+Down Arrow]]" },
+         { "Center Display", "[[Z]]" },
+         { "Toggle Script Results", "[[Ctrl+K]]" },
+         { "Copy Results Into Editor", "[[Ctrl+I]]" },
+         { "Show/Hide Plugins Pane", "[[F9]]"},
+      { "-", "" },         // Horiz. line
+   { "HEADER", "Editing" },
+         { "Cut/Copy/Paste", "[[Ctrl+X]]/[[C]]/[[V]]"},
+         { "Delete Selection", "[[Del]]" },
+         { "Undo", "[[Ctrl+Z]]" },
+         { "Redo", "[[Ctrl+Shift+Z]]" }
+   };
+
+   ControlStringsEditor controls1Right[] = {
+   { "HEADER", "Object Shortcuts" },
+         { "Insert Teleporter", "[[T]]" },
+         { "Insert Spawn Point", "[[G]]" },
+         { "Insert Repair", "[[B]]" },
+         { "Insert Turret", "[[Y]]" },
+         { "Insert Force Field", "[[F]]" },
+         { "Insert Mine", "[[M]]" },
+      { "-", "" },         // Horiz. line
+   { "HEADER", "Assigning Teams" },
+         { "Set object's team", "[[1]]-[[9]]" },
+         { "Set object to neutral", "[[0]]" },
+         { "Set object to hostile", "[[Shift+0]]" },
+      { "-", "" },         // Horiz. line
+         { "Save", "[[Ctrl+S]]" },
+         { "Reload from file", "[[Ctrl+Shift+L]]" }
+      };
+
+
+   // For page 2 of general instructions
+   ControlStringsEditor controls2Left[] = {
+   { "HEADER", "Size & Rotation" },
+         { "Flip Horiz/Vertical", "[[H]], [[V]]" },
+         { "Spin", "[[R]], [[Shift+R]]" },
+         { "Arbitrary spin", "[[Alt+R]]" },
+         { "Rotate about (0,0)", "[[Ctrl+R]], [[Ctrl+Shift+R]]" },
+         { "Arbitrary rotate about (0,0)", "[[Ctrl+Alt+R]]" },
+         { "Scale selection", "[[Ctrl+Shift+X]]" },
+
+         { "-", "" },      // Horiz. line
+         { "Hold [[Space]] to suspend grid snapping",    "" },
+         { "[[Shift+Space]] to suspend vertex snapping", "" },
+         { "Hold [[Tab]] to view a reference ship",      "" }
+   };
 
 
    pack(keysInstrLeft1,  keysBindingsLeft1, 
@@ -264,12 +264,6 @@ const char *pageHeadersEditor[] = {
 };
 
 
-static ControlStringsEditor consoleCommands[] = {
-   { "Coming soon...", "Coming soon..." },
-   { "", "" },      // End of list
-};
-
-
 S32 EditorInstructionsUserInterface::getPageCount()
 {
    return 4 + (getGame()->getSettings()->getPluginBindings()->size() > 0 ? 1 : 0);
@@ -284,7 +278,12 @@ void EditorInstructionsUserInterface::render()
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
    glColor(0.7f);
 
-   //drawHorizLine(0, 800, 31);
+   static ControlStringsEditor consoleCommands[] = {
+      { "Coming soon...", "Coming soon..." },
+      { "", "" },      // End of list
+   };
+
+
    drawHorizLine(0, 800, 569);
 
    switch(mCurPage)

@@ -72,6 +72,14 @@ static const char *pageHeaders[] = {
 };
 
 
+//static ControlStringsEditor consoleCommands1[] = {
+//   { "a = Asteroid.new()", "Create an asteroid and set it to the variable 'a'" },
+//   { "a:setVel(100, 0)",   "Set the asteroid's velocity to move slowly to the right" },
+//   { "a:addToGame()",      "Insert the asteroid into the currently running game" },
+//   { "", "" },      // End of list
+//};
+
+
 // Constructor
 InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game),
                                                                          mLoadoutInstructions(LineGap)
@@ -141,15 +149,6 @@ void InstructionsUserInterface::onActivate()
 static const S32 FIRST_COMMAND_PAGE = InstructionsUserInterface::InstructionAdvancedCommands;
 static const S32 FIRST_OBJ_PAGE     = InstructionsUserInterface::InstructionWeaponProjectiles;
 
-
-static ControlStringsEditor consoleCommands1[] = {
-   { "a = Asteroid.new()", "Create an asteroid and set it to the variable 'a'" },
-   { "a:setVel(100, 0)",   "Set the asteroid's velocity to move slowly to the right" },
-   { "a:addToGame()",      "Insert the asteroid into the currently running game" },
-   { "", "" },      // End of list
-};
-
-
 static const Color *txtColor = &Colors::cyan;
 static const Color *keyColor = &Colors::white;     
 static const Color *secColor = &Colors::yellow;
@@ -157,7 +156,9 @@ static const Color *secColor = &Colors::yellow;
 // Initialize the special keys section of the first page of help
 void InstructionsUserInterface::initNormalKeys_page1()
 {
-    HelpBind controlsKeyboardLeft[] = {
+   // Needs to be here so if user changes their bindings, we'll see the new ones when we reload!
+
+   HelpBind controlsKeyboardLeft[] = {
          { "Move ship",             InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_U },
          { " ",                     InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LDR },
          { "Aim ship",              InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE },
@@ -169,9 +170,9 @@ void InstructionsUserInterface::initNormalKeys_page1()
          { "Toggle map view",       InputCodeManager::BINDING_CMDRMAP },
          { "Drop flag",             InputCodeManager::BINDING_DROPITEM },
          { "Show scoreboard",       InputCodeManager::BINDING_SCRBRD }
-    };
+   };
 
-    HelpBind controlsKeyboardRight[] = {
+   HelpBind controlsKeyboardRight[] = {
          { "Cycle current weapon", InputCodeManager::BINDING_ADVWEAP },
          { "Select weapon 1",      InputCodeManager::BINDING_SELWEAP1 },
          { "Select weapon 2",      InputCodeManager::BINDING_SELWEAP2 },

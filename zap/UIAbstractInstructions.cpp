@@ -141,10 +141,10 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
          symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
          bindings.add(SymbolString(symbols));
       }
-      else if(helpBindings[i].binding == "HEADER")
+      else if(helpBindings[i].command == "HEADER")
       {
          symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, groupHeaderColor));
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].binding, FontSize, HelpContext, groupHeaderColor));
          instrs.add(SymbolString(symbols));
 
          symbols.clear();
@@ -166,8 +166,6 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
       }
    }
 }
-
-
 
 
 void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activationCommand, const ControlStringsEditor *cmdList)

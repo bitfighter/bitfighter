@@ -34,24 +34,21 @@
 
 namespace Zap {
 
-struct ControlStringsEditor
-{
-   string command;
-   string binding;
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
 
 class AbstractInstructionsUserInterface : public UserInterface
 {
    typedef UserInterface Parent;
 
 public:
+
    struct HelpBind { 
       string command;
-      InputCodeManager::BindingName binding;
+      InputCodeManager::BindingName binding;    // Used to look up the appropriate key
+   };
+
+   struct ControlStringsEditor {
+      string command;
+      string binding;
    };
 
    static const S32 HeaderFontSize = 20;
