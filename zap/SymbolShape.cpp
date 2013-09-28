@@ -444,13 +444,13 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
       return SymbolShapePtr(new SymbolKey("Mouse Wheel Down", color));
    else if(InputCodeManager::isCtrlKey(inputCode) || InputCodeManager::isAltKey(inputCode))
    {
-      Vector<SymbolShapePtr> symbols;
+      Vector<string> modifiers(1);
+      if(InputCodeManager::isCtrlKey(inputCode))
+         modifiers.push_back(InputCodeManager::inputCodeToString(KEY_CTRL));
+      else // if(isAltKey(inputCode))
+         modifiers.push_back(InputCodeManager::inputCodeToString(KEY_ALT));
       
-      symbols.push_back(SymbolShapePtr(new SymbolKey(InputCodeManager::getModifierString(inputCode), color)));
-      symbols.push_back(SymbolShapePtr(new SymbolText(" + ", 13, KeyContext, color)));
-      symbols.push_back(SymbolShapePtr(new SymbolKey(InputCodeManager::getBaseKeyString(inputCode), color)));
-
-      return SymbolShapePtr(new SymbolString(symbols));
+      return SymbolString::getModifiedKeySymbol(InputCodeManager::getBaseKey(inputCode), modifiers, color);
    }
    else if(InputCodeManager::isControllerButton(inputCode))
    {
@@ -472,13 +472,28 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
 
    }
    else if(inputCode == KEY_UNKNOWN)
-   {
       return SymbolShapePtr(new SymbolUnknown(color));
-   }
+
    else
-   {
       return getSymbol(KEY_UNKNOWN, color);
+}
+
+
+SymbolShapePtr SymbolString::getModifiedKeySymbol(InputCode inputCode, const Vector<string> &modifiers, const Color *color)
+{
+   if(inputCode == KEY_UNKNOWN || modifiers.size() == 0)
+      return getSymbol(inputCode, color);
+
+   Vector<SymbolShapePtr> symbols;
+   for(S32 i = 0; i < modifiers.size(); i++)
+   {
+      symbols.push_back(SymbolShapePtr(new SymbolKey(modifiers[i], color)));
+      symbols.push_back(SymbolShapePtr(new SymbolText(" + ", 13, KeyContext, color)));
    }
+
+   symbols.push_back(SymbolShapePtr(new SymbolKey(InputCodeManager::inputCodeToString(inputCode), color)));
+
+   return SymbolShapePtr(new SymbolString(symbols));
 }
 
 
@@ -530,6 +545,7 @@ SymbolShapePtr SymbolString::getHorizLine(S32 length, S32 vertOffset, S32 height
 }
 
 
+// Parse special symbols enclosed inside [[ ]] in strings.  The passed symbolName is the bit inside the brackets.
 static void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbolName, Vector<SymbolShapePtr> &symbols)
 {
    // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
@@ -538,6 +554,40 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
    // Second chance -- maybe it's a key name instead of a control binding
    if(inputCode == KEY_UNKNOWN)
       inputCode = inputCodeManager->stringToInputCode(symbolName.c_str());
+
+
+   // Third chance -- see if there is a modifier key at the front
+   if(inputCode == KEY_UNKNOWN)
+   {
+      const Vector<string> *mods = InputCodeManager::getModifierNames();
+      Vector<string> foundMods;
+
+      bool found = true;
+      string sym = symbolName;
+
+      while(found)
+      {
+         for(S32 i = 0; i < mods->size(); i++)
+         {
+            string mod = mods->get(i) + "+";
+            found = false;
+            if(sym.compare(0, mod.size(), mod) == 0)     // Read as: sym.startsWith(mod)
+            {
+               foundMods.push_back(mods->get(i));
+               sym = sym.substr(mod.size());
+               found = true;
+               break;
+            }
+         }
+      }
+
+      inputCode = inputCodeManager->stringToInputCode(sym.c_str());     // Get the base inputCode
+      if(inputCode != KEY_UNKNOWN)                                   
+      {
+         symbols.push_back(SymbolString::getModifiedKeySymbol(InputCodeManager::stringToInputCode(sym.c_str()), foundMods));
+         return;
+      }
+   }
 
    if(inputCode != KEY_UNKNOWN)
       symbols.push_back(SymbolString::getControlSymbol(inputCode));

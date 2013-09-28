@@ -300,6 +300,7 @@ public:
 
    // Statics to make creating things a bit easier
    static SymbolShapePtr getControlSymbol(InputCode inputCode, const Color *color = NULL);
+   static SymbolShapePtr getModifiedKeySymbol(InputCode inputCode, const Vector<string> &modifiers, const Color *color = NULL);
    static SymbolShapePtr getSymbolGear(S32 fontSize);
    static SymbolShapePtr getSymbolGoal(S32 fontSize);
    static SymbolShapePtr getSymbolText(const string &text, S32 fontSize, FontContext context, const Color *color = NULL);

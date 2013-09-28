@@ -54,18 +54,18 @@ static ControlStringsEditor controls1[] = {
    { "Navigation", "HEADER" },
          { "Pan Map", "[[W]]/[[A]]/[[S]]/[[D]] or"},
          { " ", "Arrow Keys"},
-         { "Zoom In", "[[E]] or [[Ctrl-Up]]" },
-         { "Zoom Out", "[[C]] or [[Ctrl-Down]]" },
+         { "Zoom In", "[[E]] or [[Ctrl+Up Arrow]]" },
+         { "Zoom Out", "[[C]] or [[Ctrl+Down Arrow]]" },
          { "Center Display", "[[Z]]" },
-         { "Toggle Script Results", "[[Ctrl-K]]" },
-         { "Copy Results Into Editor", "[[Ctrl-I]]" },
+         { "Toggle Script Results", "[[Ctrl+K]]" },
+         { "Copy Results Into Editor", "[[Ctrl+I]]" },
          { "Show/Hide Plugins Pane", "[[F9]]"},
       { "-", "" },         // Horiz. line
    { "Editing", "HEADER" },
-         { "Cut/Copy/Paste", "[[Ctrl-X]]/[[C]]/[[V]]"},
+         { "Cut/Copy/Paste", "[[Ctrl+X]]/[[C]]/[[V]]"},
          { "Delete Selection", "[[Del]]" },
-         { "Undo", "[[Ctrl-Z]]" },
-         { "Redo", "[[Ctrl-Shift-Z]]" },
+         { "Undo", "[[Ctrl+Z]]" },
+         { "Redo", "[[Ctrl+Shift+Z]]" },
          { "", "" },       // End of col1
    { "Object Shortcuts", "HEADER" },
          { "Insert Teleporter", "[[T]]" },
@@ -78,10 +78,10 @@ static ControlStringsEditor controls1[] = {
    { "Assigning Teams", "HEADER" },
          { "Set object's team", "[[1]]-[[9]]" },
          { "Set object to neutral", "[[0]]" },
-         { "Set object to hostile", "[[Shift-0]]" },
+         { "Set object to hostile", "[[Shift+0]]" },
       { "-", "" },         // Horiz. line
-         { "Save", "[[Ctrl-S]]" },
-         { "Reload from file", "[[Ctrl-Shift-L]]" },
+         { "Save", "[[Ctrl+S]]" },
+         { "Reload from file", "[[Ctrl+Shift+L]]" },
          { "", "" },       // End of col2
       };
 
@@ -90,15 +90,15 @@ static ControlStringsEditor controls1[] = {
 static ControlStringsEditor controls2[] = {
    { "Size & Rotation", "HEADER" },
          { "Flip Horiz/Vertical", "[[H]], [[V]]" },
-         { "Spin", "[[R]], [[Shift-R]]" },
-         { "Arbitrary spin", "[[Alt-R]]" },
-         { "Rotate about (0,0)", "[[Ctrl-R]], [[Ctrl-Shift-R]]" },
-         { "Arbitrary rotate about (0,0)", "[[Ctrl-Alt-R]]" },
-         { "Scale selection", "[[Ctrl-Shift-X]]" },
+         { "Spin", "[[R]], [[Shift+R]]" },
+         { "Arbitrary spin", "[[Alt+R]]" },
+         { "Rotate about (0,0)", "[[Ctrl+R]], [[Ctrl+Shift+R]]" },
+         { "Arbitrary rotate about (0,0)", "[[Ctrl+Alt+R]]" },
+         { "Scale selection", "[[Ctrl+Shift+X]]" },
 
          { "-", "" },      // Horiz. line
          { "Hold [[Space]] to suspend grid snapping",    "" },
-         { "[[Shift-Space]] to suspend vertex snapping", "" },
+         { "[[Shift+Space]] to suspend vertex snapping", "" },
          { "Hold [[Tab]] to view a reference ship",      "" },
          { "", "" },       // End of col1
 

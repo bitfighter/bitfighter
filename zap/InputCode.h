@@ -172,6 +172,8 @@ public:
    static InputCode getModifier(InputCode inputCode);
    static string getModifierString(InputCode inputCode);
 
+   static const Vector<string> *getModifierNames();
+
    static InputCode getBaseKey(InputCode inputCode);
    static string getBaseKeyString(InputCode inputCode);
 

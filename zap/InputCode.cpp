@@ -1864,6 +1864,8 @@ bool InputCodeManager::isModifier(InputCode inputCode)
 
 // Array tying InputCodes to string representations; used for translating one to the other 
 static const char *keyNames[KEY_COUNT];
+static Vector<string> modifierNames;
+
 
 InputCode InputCodeManager::getModifier(InputCode inputCode)
 {
@@ -1881,6 +1883,13 @@ InputCode InputCodeManager::getModifier(InputCode inputCode)
 string InputCodeManager::getModifierString(InputCode inputCode)
 {
    return inputCodeToString(getModifier(inputCode));
+}
+
+
+const Vector<string> *InputCodeManager::getModifierNames()
+{
+   TNLAssert(modifierNames.size() > 0, "modifierNames has not been intialized!");
+   return &modifierNames;
 }
 
 
@@ -2126,7 +2135,15 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_KEYPAD0)]         = "Keypad 0";         
    keyNames[S32(KEY_KEYPAD_PERIOD)]   = "Keypad .";         
    keyNames[S32(KEY_KEYPAD_ENTER)]    = "Keypad Enter";     
-   keyNames[S32(KEY_LESS)]            = "Less";             
+   keyNames[S32(KEY_LESS)]            = "Less";    
+
+
+   modifierNames.push_back(keyNames[S32(KEY_SHIFT)]);            
+   modifierNames.push_back(keyNames[S32(KEY_ALT)]);            
+   modifierNames.push_back(keyNames[S32(KEY_CTRL)]);            
+   modifierNames.push_back(keyNames[S32(KEY_META)]);            
+   modifierNames.push_back(keyNames[S32(KEY_SUPER)]);  
+
 }
 
 
