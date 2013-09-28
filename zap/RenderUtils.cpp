@@ -691,6 +691,7 @@ void drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 corner
 void renderUpArrow(const Point &center, S32 size)
 {
    F32 offset = (F32)size / 2;
+
    F32 top = center.y - offset;
    F32 bot = center.y + offset;
    F32 capHeight = size * 0.39f;    // An artist need provide no explanation

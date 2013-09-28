@@ -1178,13 +1178,13 @@ void SymbolKey::render(const Point &center) const
 
    // Handle some special cases:
    if(mText == "Up Arrow")
-      renderUpArrow(center + textVertAdj, KeyFontSize);
+      renderUpArrow(center + textVertAdj + Point(0, -5.5), KeyFontSize);
    else if(mText == "Down Arrow")
-      renderDownArrow(center + textVertAdj, KeyFontSize);
+      renderDownArrow(center + textVertAdj + Point(0, -6), KeyFontSize);
    else if(mText == "Left Arrow")
-      renderLeftArrow(center + textVertAdj, KeyFontSize);
+      renderLeftArrow(center + textVertAdj + Point(0, -6), KeyFontSize);
    else if(mText == "Right Arrow")
-      renderRightArrow(center + textVertAdj, KeyFontSize);
+      renderRightArrow(center + textVertAdj + Point(0, -6), KeyFontSize);
    else
       Parent::render(center + textVertAdj);
 
