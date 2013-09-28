@@ -519,6 +519,13 @@ SymbolShapePtr SymbolString::getSymbolGoal(S32 fontSize)
 
 
 // Static method
+SymbolShapePtr SymbolString::getBullet()
+{
+   return SymbolShapePtr(new SymbolBullet());
+}
+
+
+// Static method
 SymbolShapePtr SymbolString::getSymbolText(const string &text, S32 fontSize, FontContext context, const Color *color)
 {
    return SymbolShapePtr(new SymbolText(text, fontSize, context, color));
@@ -615,6 +622,9 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
 
    else if(symbolName == "MODULE_CTRL2")
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2)));
+
+   else if(symbolName == "BULLET")
+      symbols.push_back(SymbolString::getBullet());
 
    else 
       symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, 12, HelpItemContext)));
@@ -1073,6 +1083,34 @@ void SymbolGoal::render(const Point &pos) const
    Point center(pos.x, (pos.y - mHeight/2) + 2); // Slight downward adjustment to position to better align with text
    renderGoalZoneIcon(center, mWidth);
 }
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+static const S32 BulletRad = 2;
+
+// Constructor
+SymbolBullet::SymbolBullet() : Parent(BulletRad * 2, BulletRad * 2)
+{
+   // Do nothing
+}
+
+
+// Destructor
+SymbolBullet::~SymbolBullet()
+{
+   // Do nothing
+}
+
+
+void SymbolBullet::render(const Point &pos) const
+{
+   // We are given the bottom y position of the line, but the icon expects the center
+   Point center(pos.x, (pos.y - 7));
+   drawFilledSquare(center, BulletRad);
+}
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

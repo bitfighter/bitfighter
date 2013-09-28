@@ -195,6 +195,19 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
    pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, 
         helpBindRight, ARRAYSIZE(helpBindRight), getGame()->getSettings());
+
+
+   ControlStringsEditor wallInstructions[] =
+   {
+      { "[[BULLET]] Create walls with right mouse button; hold [[~]] to create line", "" },
+      { "[[BULLET]] Finish wall by left-clicking", "" },
+      { "[[BULLET]] Drag and drop individual vertices or an entire wall", "" },
+      { "[[BULLET]] Split wall at selected vertex with [[\\]]", "" },
+      { "[[BULLET]] Join contiguous wall segments, polywalls, or zones with [[J]]", "" },
+      { "[[BULLET]] Change wall thickness with [[+]] & [[-]] (use [[Shift]] for smaller changes)", "" }
+   };
+
+   pack(mWallInstr, mWallBindings, wallInstructions, ARRAYSIZE(wallInstructions), getGame()->getSettings());
 }
 
 
@@ -366,17 +379,6 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 }
 
 
-static const char *wallInstructions[] =
-{
-   "Create walls with right mouse button; hold [~] to create line",
-   "Finish wall by left-clicking",
-   "Drag and drop individual vertices or an entire wall",
-   "Split wall at selected vertex with [\\]",
-   "Join contiguous wall segments, polywalls, or zones with [J]",
-   "Change wall thickness with [+] & [-] (use [Shift] for smaller changes)",
-};
-
-
 void EditorInstructionsUserInterface::renderPageWalls()
 {
    // Draw animated creation of walls
@@ -493,18 +495,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
    }
 
    // And now some written instructions
-   S32 x = 50 + getStringWidth(textSize, "* ");
-   S32 y = 300;
-
-   for(U32 i = 0; i < ARRAYSIZE(wallInstructions); i++)
-   {
-      glColor(Colors::red);  
-      drawString(50, y, textSize, "*");
-
-      glColor(Colors::white); 
-      drawString(x, y, textSize, wallInstructions[i]);
-      y += 26;
-   }
+   mWallInstr.render(50, 300, UI::AlignmentLeft);
 }
 
 

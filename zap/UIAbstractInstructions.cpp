@@ -57,7 +57,9 @@ AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame 
                                        mSpecialKeysInstrLeft(LineGap), 
                                        mSpecialKeysBindingsLeft(LineGap), 
                                        mSpecialKeysInstrRight(LineGap), 
-                                       mSpecialKeysBindingsRight(LineGap)
+                                       mSpecialKeysBindingsRight(LineGap),
+                                       mWallInstr(LineGap),  
+                                       mWallBindings(LineGap)
 {
    // Do nothing
 }

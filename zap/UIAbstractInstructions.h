@@ -65,7 +65,8 @@ protected:
 
    UI::SymbolStringSet 
          mSpecialKeysInstrLeft,   mSpecialKeysBindingsLeft, 
-         mSpecialKeysInstrRight,  mSpecialKeysBindingsRight;
+         mSpecialKeysInstrRight,  mSpecialKeysBindingsRight,
+         mWallInstr,              mWallBindings;
 
    // UIInstructions version
    void pack(UI::SymbolStringSet &Instrs,  UI::SymbolStringSet &Bindings, 

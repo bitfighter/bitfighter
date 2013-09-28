@@ -220,6 +220,18 @@ public:
 };
 
 
+class SymbolBullet : public SymbolShape
+{
+   typedef SymbolShape Parent;
+
+public:
+   SymbolBullet();            // Constructor
+   virtual ~SymbolBullet();
+
+   void render(const Point &pos) const;
+};
+
+
 class SymbolText : public SymbolShape
 {
    typedef SymbolShape Parent;
@@ -303,6 +315,7 @@ public:
    static SymbolShapePtr getModifiedKeySymbol(InputCode inputCode, const Vector<string> &modifiers, const Color *color = NULL);
    static SymbolShapePtr getSymbolGear(S32 fontSize);
    static SymbolShapePtr getSymbolGoal(S32 fontSize);
+   static SymbolShapePtr getBullet();
    static SymbolShapePtr getSymbolText(const string &text, S32 fontSize, FontContext context, const Color *color = NULL);
    static SymbolShapePtr getBlankSymbol(S32 width = -1, S32 height = -1);
    static SymbolShapePtr getHorizLine(S32 length, S32 height, const Color *color);
