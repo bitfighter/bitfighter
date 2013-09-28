@@ -49,10 +49,7 @@ class AbstractInstructionsUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 public:
-   enum LeftRight { Left, Right };
-
    struct HelpBind { 
-      LeftRight leftRight;
       string command;
       InputCodeManager::BindingName binding;
    };
@@ -74,9 +71,8 @@ protected:
          mSpecialKeysInstrRight,  mSpecialKeysBindingsRight;
 
    // UIInstructions version
-   void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBindings, 
-             UI::SymbolStringSet &rightInstrs, UI::SymbolStringSet &rightBindings,
-             const HelpBind *helpBindings, S32 bindingCount, GameSettings *settings);
+   void pack(UI::SymbolStringSet &Instrs,  UI::SymbolStringSet &Bindings, 
+             const HelpBind *helpBindings, S32 bindingCount, GameSettings *settings) const;
 
    // UIEditorInstructions version
    void pack(UI::SymbolStringSet &leftInstrs, UI::SymbolStringSet &leftBindings, 

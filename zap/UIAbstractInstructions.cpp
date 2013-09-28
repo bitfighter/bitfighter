@@ -70,68 +70,55 @@ AbstractInstructionsUserInterface::~AbstractInstructionsUserInterface()
 }
 
 
-void AbstractInstructionsUserInterface::pack(SymbolStringSet &leftInstrs,  SymbolStringSet &leftBindings, 
-                                             SymbolStringSet &rightInstrs, SymbolStringSet &rightBindings,
-                                             const HelpBind *helpBindings, S32 bindingCount, GameSettings *settings)
+void AbstractInstructionsUserInterface::pack(SymbolStringSet &instr,  SymbolStringSet &bindings,      // <== will be modified
+                                             const HelpBind *helpBindings, S32 bindingCount, GameSettings *settings) const
 {
-   SymbolStringSet *instr, *bindings;
    Vector<SymbolShapePtr> symbols;
 
    for(S32 i = 0; i < bindingCount; i++)
    {
-      if(helpBindings[i].leftRight == Left)
-      {
-         instr    = &leftInstrs;
-         bindings = &leftBindings;
-      }
-      else
-      {
-         instr    = &rightInstrs;
-         bindings = &rightBindings;
-      }
-
       if(helpBindings[i].command == "-")
       {
          symbols.clear();
          symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
-         instr->add(SymbolString(symbols));
+         instr.add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
-         bindings->add(SymbolString(symbols));
+         bindings.add(SymbolString(symbols));
       }
       else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_U)
       {
          symbols.clear();
          symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
-         instr->add(SymbolString(symbols));
+         instr.add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_UP), keyColor));
-         bindings->add(SymbolString(symbols));
+         bindings.add(SymbolString(symbols));
       }
       else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LDR)
       {
          symbols.clear();
          symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
-         instr->add(SymbolString(symbols));
+         instr.add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LEFT),  keyColor));
          symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_DOWN),  keyColor));
          symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_RIGHT), keyColor));
 
-         bindings->add(SymbolString(symbols));
+         bindings.add(SymbolString(symbols));
       }
       else
       {
          symbols.clear();
          symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
-         instr->add(SymbolString(symbols));
+         instr.add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getControlSymbol(UserInterface::getInputCode(settings, helpBindings[i].binding), keyColor));
-         bindings->add(SymbolString(symbols));
+         bindings.add(SymbolString(symbols));
       }
    }
 }
