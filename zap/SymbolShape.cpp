@@ -488,7 +488,7 @@ SymbolShapePtr SymbolString::getModifiedKeySymbol(InputCode inputCode, const Vec
    for(S32 i = 0; i < modifiers.size(); i++)
    {
       symbols.push_back(SymbolShapePtr(new SymbolKey(modifiers[i], color)));
-      symbols.push_back(SymbolShapePtr(new SymbolText(" + ", 13, KeyContext, color)));
+      symbols.push_back(SymbolShapePtr(new SymbolText("+", 13, KeyContext, color)));
    }
 
    symbols.push_back(SymbolShapePtr(new SymbolKey(InputCodeManager::inputCodeToString(inputCode), color)));
