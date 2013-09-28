@@ -33,6 +33,7 @@
 #include "gameObjectRender.h"
 #include "ScreenInfo.h"
 #include "VertexStylesEnum.h"
+#include "FontManager.h"
 
 #include "Colors.h"
 
@@ -285,6 +286,8 @@ S32 EditorInstructionsUserInterface::getPageCount()
 
 void EditorInstructionsUserInterface::render()
 {
+   FontManager::pushFontContext(HelpContext);
+
    glColor(Colors::white);
    drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeadersEditor[mCurPage - 1]);
    drawStringf(650, 3, 25, "PAGE %d/%d", mCurPage, getPageCount());
@@ -317,6 +320,8 @@ void EditorInstructionsUserInterface::render()
          renderPluginCommands();
          break;
    }
+
+   FontManager::popFontContext();
 }
 
 
@@ -379,10 +384,9 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 }
 
 
+// Draw animated creation of walls
 void EditorInstructionsUserInterface::renderPageWalls()
 {
-   // Draw animated creation of walls
-
    //drawStringf(400, 100, 25, "%d", mAnimStage);     // Useful to have around when things go wrong!
 
    S32 vertOffset = 20;
@@ -482,6 +486,8 @@ void EditorInstructionsUserInterface::renderPageWalls()
    glLineWidth(gDefaultLineWidth);
 
 
+   FontManager::pushFontContext(OldSkoolContext);
+
    for(S32 i = 0; i < points.size(); i++)
    {
       S32 vertNum = S32(((F32)i  / 2) + 0.5);     // Ick!
@@ -493,6 +499,8 @@ void EditorInstructionsUserInterface::renderPageWalls()
       else  // mAnimStage > 11, moving vertices about
          renderVertex(HighlightedVertex, points[i], -1, 1);
    }
+
+   FontManager::popFontContext();
 
    // And now some written instructions
    mWallInstr.render(50, 300, UI::AlignmentLeft);

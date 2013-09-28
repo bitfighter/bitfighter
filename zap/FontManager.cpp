@@ -215,6 +215,7 @@ void FontManager::setFontContext(FontContext fontContext)
          return;
 
       case MenuContext:
+      case OldSkoolContext:
          setFont(FontRoman);
          return;
       
