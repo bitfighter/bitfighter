@@ -488,7 +488,7 @@ SymbolShapePtr SymbolString::getModifiedKeySymbol(InputCode inputCode, const Vec
    for(S32 i = 0; i < modifiers.size(); i++)
    {
       symbols.push_back(SymbolShapePtr(new SymbolKey(modifiers[i], color)));
-      symbols.push_back(SymbolShapePtr(new SymbolText("+", 13, KeyContext, Point(0, -3), color)));
+      symbols.push_back(SymbolShapePtr(new SymbolText("+", 13, KeyContext, Point(0, -3), color))); // Use offset to vertically center "+"
    }
 
    symbols.push_back(SymbolShapePtr(new SymbolKey(InputCodeManager::inputCodeToString(inputCode), color)));
@@ -1088,7 +1088,7 @@ SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, co
 }
 
 
-// Constructor with vertical offset -- not used?
+// Constructor with vertical offset
 SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Point &labelOffset, const Color *color) : 
                                        Parent(getStringWidth(context, fontSize, text.c_str()), fontSize, color)
 {
