@@ -1277,6 +1277,8 @@ void InputOptionsMenuUserInterface::render()
 
       SymbolString(symbols).render(Point(gScreenInfo.getGameCanvasWidth() / 2, 440));
 
+      drawCenteredString(456, 12, "[Debug builds only]");
+
 #  endif
 }
 
