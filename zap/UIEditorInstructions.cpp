@@ -50,7 +50,7 @@ static Border border34;
 
 
 // For page 1 of general instructions
-static ControlStringsEditor controls1[] = {
+static ControlStringsEditor controls1Left[] = {
    { "Navigation", "HEADER" },
          { "Pan Map", "[[W]]/[[A]]/[[S]]/[[D]] or"},
          { " ", "Arrow Keys"},
@@ -65,8 +65,10 @@ static ControlStringsEditor controls1[] = {
          { "Cut/Copy/Paste", "[[Ctrl+X]]/[[C]]/[[V]]"},
          { "Delete Selection", "[[Del]]" },
          { "Undo", "[[Ctrl+Z]]" },
-         { "Redo", "[[Ctrl+Shift+Z]]" },
-         { "", "" },       // End of col1
+         { "Redo", "[[Ctrl+Shift+Z]]" }
+};
+
+static ControlStringsEditor controls1Right[] = {
    { "Object Shortcuts", "HEADER" },
          { "Insert Teleporter", "[[T]]" },
          { "Insert Spawn Point", "[[G]]" },
@@ -81,13 +83,12 @@ static ControlStringsEditor controls1[] = {
          { "Set object to hostile", "[[Shift+0]]" },
       { "-", "" },         // Horiz. line
          { "Save", "[[Ctrl+S]]" },
-         { "Reload from file", "[[Ctrl+Shift+L]]" },
-         { "", "" },       // End of col2
+         { "Reload from file", "[[Ctrl+Shift+L]]" }
       };
 
 
 // For page 2 of general instructions
-static ControlStringsEditor controls2[] = {
+static ControlStringsEditor controls2Left[] = {
    { "Size & Rotation", "HEADER" },
          { "Flip Horiz/Vertical", "[[H]], [[V]]" },
          { "Spin", "[[R]], [[Shift+R]]" },
@@ -99,10 +100,7 @@ static ControlStringsEditor controls2[] = {
          { "-", "" },      // Horiz. line
          { "Hold [[Space]] to suspend grid snapping",    "" },
          { "[[Shift+Space]] to suspend vertex snapping", "" },
-         { "Hold [[Tab]] to view a reference ship",      "" },
-         { "", "" },       // End of col1
-
-         { "", "" },       // End of col2
+         { "Hold [[Tab]] to view a reference ship",      "" }
    };
 
 
@@ -159,12 +157,14 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
 
    pack(keysInstrLeft1,  keysBindingsLeft1, 
-        keysInstrRight1, keysBindingsRight1, 
-        controls1, ARRAYSIZE(controls1), getGame()->getSettings());
+        controls1Left, ARRAYSIZE(controls1Left), getGame()->getSettings());
+
+   pack(keysInstrRight1, keysBindingsRight1, 
+        controls1Right, ARRAYSIZE(controls1Right), getGame()->getSettings());
 
    pack(keysInstrLeft2,  keysBindingsLeft2, 
-        keysInstrRight2, keysBindingsRight2, 
-        controls2, ARRAYSIZE(controls2), getGame()->getSettings());
+        controls2Left, ARRAYSIZE(controls2Left), getGame()->getSettings());
+
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
@@ -337,7 +337,6 @@ void EditorInstructionsUserInterface::renderPluginCommands()
 // This has become rather ugly and inelegant.  But you shuold see UIInstructions.cpp!!!
 void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 {
-   ControlStringsEditor *controls = (page == 1) ? controls1 : controls2;
    GameSettings *settings = getGame()->getSettings();
 
    S32 starty = 50;
@@ -346,8 +345,6 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    S32 contCol = col2;     // Control column
    bool firstCol = true;
    bool done = false;
-
-   //drawHorizLine(col1, 750, starty + 26);
 
    if(page == 1)
       y += mSymbolSets1.render(y);

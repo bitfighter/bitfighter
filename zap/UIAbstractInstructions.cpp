@@ -70,7 +70,7 @@ AbstractInstructionsUserInterface::~AbstractInstructionsUserInterface()
 }
 
 
-void AbstractInstructionsUserInterface::pack(SymbolStringSet &instr,  SymbolStringSet &bindings,      // <== will be modified
+void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStringSet &bindings,      // <== will be modified
                                              const HelpBind *helpBindings, S32 bindingCount, GameSettings *settings) const
 {
    Vector<SymbolShapePtr> symbols;
@@ -81,7 +81,7 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instr,  SymbolStri
       {
          symbols.clear();
          symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
-         instr.add(SymbolString(symbols));
+         instrs.add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
@@ -91,7 +91,7 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instr,  SymbolStri
       {
          symbols.clear();
          symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
-         instr.add(SymbolString(symbols));
+         instrs.add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_UP), keyColor));
@@ -101,7 +101,7 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instr,  SymbolStri
       {
          symbols.clear();
          symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
-         instr.add(SymbolString(symbols));
+         instrs.add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LEFT),  keyColor));
@@ -114,7 +114,7 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instr,  SymbolStri
       {
          symbols.clear();
          symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
-         instr.add(SymbolString(symbols));
+         instrs.add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getControlSymbol(UserInterface::getInputCode(settings, helpBindings[i].binding), keyColor));
@@ -124,54 +124,32 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instr,  SymbolStri
 }
 
 
-void AbstractInstructionsUserInterface::pack(SymbolStringSet &leftInstrs,  SymbolStringSet &leftBindings, 
-                                             SymbolStringSet &rightInstrs, SymbolStringSet &rightBindings,
+void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStringSet &bindings,      // <== will be modified
                                              const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings)
 {
-   SymbolStringSet *instr, *bindings;
    Vector<SymbolShapePtr> symbols;
-
-   bool left = true;    // Left column first!
 
    for(S32 i = 0; i < bindingCount; i++)
    {
-      if(helpBindings[i].command == "" && helpBindings[i].binding == "")
-      {
-         left = !left;
-         continue;
-      }
-
-      if(left)
-      {
-         instr    = &leftInstrs;
-         bindings = &leftBindings;
-      }
-      else
-      {
-         instr    = &rightInstrs;
-         bindings = &rightBindings;
-      }
-
-
       if(helpBindings[i].command == "-")
       {
          symbols.clear();
          symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
-         instr->add(SymbolString(symbols));
+         instrs.add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
-         bindings->add(SymbolString(symbols));
+         bindings.add(SymbolString(symbols));
       }
       else if(helpBindings[i].binding == "HEADER")
       {
          symbols.clear();
          symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, groupHeaderColor));
-         instr->add(SymbolString(symbols));
+         instrs.add(SymbolString(symbols));
 
          symbols.clear();
          symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
-         bindings->add(SymbolString(symbols));
+         bindings.add(SymbolString(symbols));
       }
       else     // Normal line
       {
@@ -179,12 +157,12 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &leftInstrs,  Symbo
          SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].command, 
                                        symbols, HelpContext, FontSize, txtColor);
 
-         instr->add(SymbolString(symbols));
+         instrs.add(SymbolString(symbols));
 
          symbols.clear();
          SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].binding, 
                                        symbols, HelpContext, FontSize, keyColor);
-         bindings->add(SymbolString(symbols));
+         bindings.add(SymbolString(symbols));
       }
    }
 }

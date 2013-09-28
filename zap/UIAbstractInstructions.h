@@ -75,8 +75,7 @@ protected:
              const HelpBind *helpBindings, S32 bindingCount, GameSettings *settings) const;
 
    // UIEditorInstructions version
-   void pack(UI::SymbolStringSet &leftInstrs, UI::SymbolStringSet &leftBindings, 
-            UI::SymbolStringSet &rightInstrs, UI::SymbolStringSet &rightBindings,
+   void pack(UI::SymbolStringSet &Instrs, UI::SymbolStringSet &Bindings, 
             const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings);
 
 public:
