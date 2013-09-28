@@ -173,6 +173,13 @@ InputCode BindingSet::getBinding(InputCodeManager::BindingName bindingName) cons
          return keySavePreset2;
       case InputCodeManager::BINDING_SAVE_PRESET_3:
          return keySavePreset3;
+
+      // Non-editable editor bindings:
+      case InputCodeManager::BINDING_TEAM_EDITOR:
+         return KEY_F2;
+      case InputCodeManager::BINDING_GAME_PARAMS_EDITOR:
+         return KEY_F3;
+
       // Some special hacky cases for helping us with displaying instructions:
       case InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE:
          return MOUSE;

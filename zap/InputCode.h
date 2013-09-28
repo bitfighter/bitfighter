@@ -99,6 +99,10 @@ public:
       BINDING_SAVE_PRESET_2,
       BINDING_SAVE_PRESET_3,     // ...to here
       BINDING_DEFINEABLE_KEY_COUNT,
+
+      // Editor Bindings... not sure if they belong here
+      BINDING_GAME_PARAMS_EDITOR,
+      BINDING_TEAM_EDITOR,
       
       BINDING_NONE,
       BINDING_DUMMY_MOVE_SHIP_KEYS_U,

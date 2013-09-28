@@ -72,16 +72,9 @@ static const char *pageHeaders[] = {
 };
 
 
-static const S32 FontSize = 18;
-static const S32 FontGap = 8;
-
 // Constructor
 InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game),
-                                                                         mSpecialKeysInstrLeft(FontGap), 
-                                                                         mSpecialKeysBindingsLeft(FontGap), 
-                                                                         mSpecialKeysInstrRight(FontGap), 
-                                                                         mSpecialKeysBindingsRight(FontGap),
-                                                                         mLoadoutInstructions(FontGap)
+                                                                         mLoadoutInstructions(LineGap)
 {
    // Quick sanity check...
    TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum IntructionPages!!!");
@@ -95,6 +88,21 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
 
    calcPolygonVerts(Point(0,0), 7, (F32)TestItem::TEST_ITEM_RADIUS, 0, mTestItemPoints);
    ResourceItem::generateOutlinePoints(Point(0,0), 1.0, mResourceItemPoints);
+
+
+
+   // Prepare special instructions
+   HelpBind helpBind[] = { 
+      { Left,  "Help",              InputCodeManager::BINDING_HELP },
+      { Left,  "Mission",           InputCodeManager::BINDING_MISSION },
+      { Right, "Universal Chat",    InputCodeManager::BINDING_OUTGAMECHAT },
+      { Right, "Display FPS / Lag", InputCodeManager::BINDING_FPS },
+      { Right, "Diagnostics",       InputCodeManager::BINDING_DIAG }
+   };
+
+   pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
+        mSpecialKeysInstrRight, mSpecialKeysBindingsRight, 
+        helpBind, ARRAYSIZE(helpBind), getGame()->getSettings());
 }
 
 
@@ -112,15 +120,6 @@ struct ControlString
 };
 
 
-enum LeftRight { Left, Right };
-
-struct HelpBind { 
-   LeftRight leftRight;
-   string command;
-   InputCodeManager::BindingName binding;
-};
-
-
 void InstructionsUserInterface::onActivate()
 {
    mCurPage = 0;
@@ -131,7 +130,6 @@ void InstructionsUserInterface::onActivate()
    GameSettings *settings = getGame()->getSettings();
 
    initNormalKeys_page1();
-   initSpecialKeys_page1();
    initPage2();
 }
 
@@ -151,77 +149,6 @@ static ControlStringsEditor consoleCommands1[] = {
 static const Color *txtColor = &Colors::cyan;
 static const Color *keyColor = &Colors::white;     
 static const Color *secColor = &Colors::yellow;
-
-
-static void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBindings, 
-                 UI::SymbolStringSet &rightInstrs, UI::SymbolStringSet &rightBindings,
-                 const HelpBind *helpBindings, S32 bindingCount, GameSettings *settings)
-{
-   UI::SymbolStringSet *instr, *bindings;
-   Vector<SymbolShapePtr> symbols;
-
-   for(S32 i = 0; i < bindingCount; i++)
-   {
-      if(helpBindings[i].leftRight == Left)
-      {
-         instr    = &leftInstrs;
-         bindings = &leftBindings;
-      }
-      else
-      {
-         instr    = &rightInstrs;
-         bindings = &rightBindings;
-      }
-
-      if(helpBindings[i].command == "-")
-      {
-         symbols.clear();
-         symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
-         instr->add(SymbolString(symbols));
-
-         symbols.clear();
-         symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
-         bindings->add(SymbolString(symbols));
-      }
-      else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_U)
-      {
-         symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
-         instr->add(SymbolString(symbols));
-
-         symbols.clear();
-         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_UP), keyColor));
-         bindings->add(SymbolString(symbols));
-      }
-      else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LDR)
-      {
-         symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
-         instr->add(SymbolString(symbols));
-
-         symbols.clear();
-         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LEFT),  keyColor));
-         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_DOWN),  keyColor));
-         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_RIGHT), keyColor));
-
-         bindings->add(SymbolString(symbols));
-      }
-      else
-      {
-         symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
-         instr->add(SymbolString(symbols));
-
-         symbols.clear();
-         symbols.push_back(SymbolString::getControlSymbol(UserInterface::getInputCode(settings, helpBindings[i].binding), keyColor));
-         bindings->add(SymbolString(symbols));
-      }
-   }
-}
-
-
-static const S32 HeaderFontSize = 20;
-
 
 // Initialize the special keys section of the first page of help
 void InstructionsUserInterface::initNormalKeys_page1()
@@ -288,8 +215,8 @@ void InstructionsUserInterface::initNormalKeys_page1()
       helpBindCount = ARRAYSIZE(controlsGamepad);
    }
 
-   UI::SymbolStringSet keysInstrLeft(FontGap),  keysBindingsLeft(FontGap), 
-                       keysInstrRight(FontGap), keysBindingsRight(FontGap);
+   UI::SymbolStringSet keysInstrLeft(LineGap),  keysBindingsLeft(LineGap), 
+                       keysInstrRight(LineGap), keysBindingsRight(LineGap);
 
    Vector<SymbolShapePtr> symbols;
 
@@ -328,26 +255,6 @@ void InstructionsUserInterface::initNormalKeys_page1()
    mSymbolSets.addSymbolStringSet(keysBindingsLeft,  AlignmentCenter, col2 + centeringOffset);
    mSymbolSets.addSymbolStringSet(keysInstrRight,    AlignmentLeft,   col3);
    mSymbolSets.addSymbolStringSet(keysBindingsRight, AlignmentCenter, col4 + centeringOffset);
-}
-
-
-// Initialize the special keys section of the first page of help
-void InstructionsUserInterface::initSpecialKeys_page1()
-{
-   HelpBind helpBind[] = { 
-      { Left,  "Help",              InputCodeManager::BINDING_HELP },
-      { Left,  "Mission",           InputCodeManager::BINDING_MISSION },
-      { Right, "Universal Chat",    InputCodeManager::BINDING_OUTGAMECHAT },
-      { Right, "Display FPS / Lag", InputCodeManager::BINDING_FPS },
-      { Right, "Diagnostics",       InputCodeManager::BINDING_DIAG }
-   };
-
-   mSpecialKeysInstrLeft.clear();      mSpecialKeysBindingsLeft.clear();
-   mSpecialKeysInstrRight.clear();     mSpecialKeysBindingsRight.clear();
-
-   pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
-        mSpecialKeysInstrRight, mSpecialKeysBindingsRight, 
-        helpBind, ARRAYSIZE(helpBind), getGame()->getSettings());
 }
 
 
@@ -502,7 +409,7 @@ static const char *loadoutInstructions2[] = {
 
 
 // Converts the blocks of text above into SymbolStrings for nicer rendering
-static void initPage2Block(const char **block, S32 blockSize, const Color *headerColor, const Color *bodyColor, 
+static void initPage2Block(const char **block, S32 blockSize, S32 fontSize, const Color *headerColor, const Color *bodyColor, 
                            const InputCodeManager *inputCodeManager, UI::SymbolStringSet &instrBlock)
 {
    Vector<SymbolShapePtr> symbols;     
@@ -512,7 +419,7 @@ static void initPage2Block(const char **block, S32 blockSize, const Color *heade
       if(i == 0)  // First line is a little different than the rest
       {
          symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(block[i], HeaderFontSize, HelpContext, headerColor));
+         symbols.push_back(SymbolString::getSymbolText(block[i], fontSize, HelpContext, headerColor));
          instrBlock.add(SymbolString(symbols, AlignmentCenter));
 
          // Provide a gap between header and body... when this is rendered, a gap equivalent to a line of text will be shown
@@ -524,7 +431,7 @@ static void initPage2Block(const char **block, S32 blockSize, const Color *heade
       {
          symbols.clear();
          string str(block[i]);
-         SymbolString::symbolParse(inputCodeManager, str, symbols, HelpContext, HeaderFontSize, bodyColor);
+         SymbolString::symbolParse(inputCodeManager, str, symbols, HelpContext, fontSize, bodyColor);
 
          instrBlock.add(SymbolString(symbols, AlignmentLeft));
       }
@@ -538,14 +445,14 @@ void InstructionsUserInterface::initPage2()
 
    mLoadoutInstructions.clear();
 
-   initPage2Block(loadoutInstructions1, ARRAYSIZE(loadoutInstructions1), &Colors::yellow, &Colors::white,
+   initPage2Block(loadoutInstructions1, ARRAYSIZE(loadoutInstructions1), HeaderFontSize, &Colors::yellow, &Colors::white,
                   getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
 
    // Add some space separating the two sections
    symbols.push_back(SymbolString::getBlankSymbol(0, 30));
    mLoadoutInstructions.add(SymbolString(symbols));
 
-   initPage2Block(loadoutInstructions2, ARRAYSIZE(loadoutInstructions2), &Colors::yellow, &Colors::cyan, 
+   initPage2Block(loadoutInstructions2, ARRAYSIZE(loadoutInstructions2), HeaderFontSize, &Colors::yellow, &Colors::cyan, 
                getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
 }
 

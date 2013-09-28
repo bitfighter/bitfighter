@@ -29,6 +29,7 @@
 
 
 #include "UI.h"
+#include "SymbolShape.h"
 
 
 namespace Zap {
@@ -47,12 +48,44 @@ class AbstractInstructionsUserInterface : public UserInterface
 {
    typedef UserInterface Parent;
 
+public:
+   enum LeftRight { Left, Right };
+
+   struct HelpBind { 
+      LeftRight leftRight;
+      string command;
+      InputCodeManager::BindingName binding;
+   };
+
+   static const S32 HeaderFontSize = 20;
+   static const S32 FontSize = 18;
+   static const S32 LineGap = 8;
+
+   static const Color *txtColor;
+   static const Color *keyColor;
+   static const Color *secColor;
+   static const Color *groupHeaderColor;
+
 protected:
    void renderConsoleCommands(const char *activationCommand, const ControlStringsEditor *cmdList);
 
+   UI::SymbolStringSet 
+         mSpecialKeysInstrLeft,   mSpecialKeysBindingsLeft, 
+         mSpecialKeysInstrRight,  mSpecialKeysBindingsRight;
+
+   // UIInstructions version
+   void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBindings, 
+             UI::SymbolStringSet &rightInstrs, UI::SymbolStringSet &rightBindings,
+             const HelpBind *helpBindings, S32 bindingCount, GameSettings *settings);
+
+   // UIEditorInstructions version
+   void pack(UI::SymbolStringSet &leftInstrs, UI::SymbolStringSet &leftBindings, 
+            UI::SymbolStringSet &rightInstrs, UI::SymbolStringSet &rightBindings,
+            const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings);
+
 public:
-   explicit AbstractInstructionsUserInterface(ClientGame *clientGame);      // Constructor
-   virtual ~AbstractInstructionsUserInterface();
+   explicit AbstractInstructionsUserInterface(ClientGame *clientGame);  // Constructor
+   virtual ~AbstractInstructionsUserInterface();                        // Destructor
 };
 
 }

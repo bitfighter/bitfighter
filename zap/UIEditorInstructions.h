@@ -28,7 +28,6 @@
 
 #include "UIAbstractInstructions.h"
 #include "WallSegmentManager.h"
-#include "SymbolShape.h"
 #include "Timer.h"
 
 namespace Zap

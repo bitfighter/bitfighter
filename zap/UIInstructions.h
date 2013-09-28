@@ -27,7 +27,6 @@
 #define _UIINSTRUCTIONS_H_
 
 #include "UIAbstractInstructions.h"
-#include "SymbolShape.h"
 #include "Point.h"
 
 namespace Zap
@@ -61,13 +60,9 @@ private:
 
    UI::SymbolStringSetCollection mSymbolSets;
 
-   UI::SymbolStringSet 
-         mSpecialKeysInstrLeft,   mSpecialKeysBindingsLeft, 
-         mSpecialKeysInstrRight,  mSpecialKeysBindingsRight,
-         mLoadoutInstructions;
+   UI::SymbolStringSet mLoadoutInstructions;
 
    void initNormalKeys_page1();
-   void initSpecialKeys_page1();
    void initPage2();
 
 public:

@@ -24,6 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "UIAbstractInstructions.h"
+
+#include "ClientGame.h"
+#include "GameSettings.h"
 #include "ScreenInfo.h"
 #include "Colors.h"
 
@@ -36,17 +39,170 @@ namespace Zap
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
 
+// Define static consts
+const Color *AbstractInstructionsUserInterface::txtColor = &Colors::cyan;
+const Color *AbstractInstructionsUserInterface::keyColor = &Colors::white;     
+const Color *AbstractInstructionsUserInterface::secColor = &Colors::yellow;
+const Color *AbstractInstructionsUserInterface::groupHeaderColor = &Colors::red;
+
+// Import some symbols to reduce typing
+using UI::SymbolString;
+using UI::SymbolShapePtr;
+using UI::SymbolStringSet;
+
+
 // Constructor
-AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame *clientGame) : Parent(clientGame)
+AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame *clientGame) : 
+                                       Parent(clientGame),
+                                       mSpecialKeysInstrLeft(LineGap), 
+                                       mSpecialKeysBindingsLeft(LineGap), 
+                                       mSpecialKeysInstrRight(LineGap), 
+                                       mSpecialKeysBindingsRight(LineGap)
 {
-   /* Do nothing */
+   // Do nothing
 }
+
 
 // Destructor
 AbstractInstructionsUserInterface::~AbstractInstructionsUserInterface()
 {
    // Do nothing
 }
+
+
+void AbstractInstructionsUserInterface::pack(SymbolStringSet &leftInstrs,  SymbolStringSet &leftBindings, 
+                                             SymbolStringSet &rightInstrs, SymbolStringSet &rightBindings,
+                                             const HelpBind *helpBindings, S32 bindingCount, GameSettings *settings)
+{
+   SymbolStringSet *instr, *bindings;
+   Vector<SymbolShapePtr> symbols;
+
+   for(S32 i = 0; i < bindingCount; i++)
+   {
+      if(helpBindings[i].leftRight == Left)
+      {
+         instr    = &leftInstrs;
+         bindings = &leftBindings;
+      }
+      else
+      {
+         instr    = &rightInstrs;
+         bindings = &rightBindings;
+      }
+
+      if(helpBindings[i].command == "-")
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
+         instr->add(SymbolString(symbols));
+
+         symbols.clear();
+         symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
+         bindings->add(SymbolString(symbols));
+      }
+      else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_U)
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
+         instr->add(SymbolString(symbols));
+
+         symbols.clear();
+         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_UP), keyColor));
+         bindings->add(SymbolString(symbols));
+      }
+      else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LDR)
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
+         instr->add(SymbolString(symbols));
+
+         symbols.clear();
+         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LEFT),  keyColor));
+         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_DOWN),  keyColor));
+         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_RIGHT), keyColor));
+
+         bindings->add(SymbolString(symbols));
+      }
+      else
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
+         instr->add(SymbolString(symbols));
+
+         symbols.clear();
+         symbols.push_back(SymbolString::getControlSymbol(UserInterface::getInputCode(settings, helpBindings[i].binding), keyColor));
+         bindings->add(SymbolString(symbols));
+      }
+   }
+}
+
+
+void AbstractInstructionsUserInterface::pack(SymbolStringSet &leftInstrs,  SymbolStringSet &leftBindings, 
+                                             SymbolStringSet &rightInstrs, SymbolStringSet &rightBindings,
+                                             const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings)
+{
+   SymbolStringSet *instr, *bindings;
+   Vector<SymbolShapePtr> symbols;
+
+   bool left = true;    // Left column first!
+
+   for(S32 i = 0; i < bindingCount; i++)
+   {
+      if(helpBindings[i].command == "" && helpBindings[i].binding == "")
+      {
+         left = !left;
+         continue;
+      }
+
+      if(left)
+      {
+         instr    = &leftInstrs;
+         bindings = &leftBindings;
+      }
+      else
+      {
+         instr    = &rightInstrs;
+         bindings = &rightBindings;
+      }
+
+
+      if(helpBindings[i].command == "-")
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
+         instr->add(SymbolString(symbols));
+
+         symbols.clear();
+         symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
+         bindings->add(SymbolString(symbols));
+      }
+      else if(helpBindings[i].binding == "HEADER")
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, groupHeaderColor));
+         instr->add(SymbolString(symbols));
+
+         symbols.clear();
+         symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
+         bindings->add(SymbolString(symbols));
+      }
+      else     // Normal line
+      {
+         symbols.clear();
+         SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].command, 
+                                       symbols, HelpContext, FontSize, txtColor);
+
+         instr->add(SymbolString(symbols));
+
+         symbols.clear();
+         SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].binding, 
+                                       symbols, HelpContext, FontSize, keyColor);
+         bindings->add(SymbolString(symbols));
+      }
+   }
+}
+
+
 
 
 void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activationCommand, const ControlStringsEditor *cmdList)

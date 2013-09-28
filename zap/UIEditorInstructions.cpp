@@ -105,86 +105,11 @@ static ControlStringsEditor controls2[] = {
          { "", "" },       // End of col2
    };
 
-static const S32 HeaderFontSize = 20;
-static const S32 FontSize = 18;
-static const S32 FontGap = 8;
-
-static const Color *txtColor = &Colors::cyan;
-static const Color *keyColor = &Colors::white;     
-static const Color *secColor = &Colors::yellow;
-static const Color *groupHeaderColor = &Colors::red;
-
 
 static S32 col1 = UserInterface::horizMargin;
 static S32 col2 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 45;     // + 45 to make a little more room for Binding column
 static S32 col3 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.5);
 static S32 col4 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.75) + 45;
-
-
-static void pack(UI::SymbolStringSet &leftInstrs,  UI::SymbolStringSet &leftBindings, 
-                 UI::SymbolStringSet &rightInstrs, UI::SymbolStringSet &rightBindings,
-                 const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings)
-{
-   UI::SymbolStringSet *instr, *bindings;
-   Vector<UI::SymbolShapePtr> symbols;
-
-   bool left = true;    // Left column first!
-
-   for(S32 i = 0; i < bindingCount; i++)
-   {
-      if(helpBindings[i].command == "" && helpBindings[i].binding == "")
-      {
-         left = !left;
-         continue;
-      }
-
-      if(left)
-      {
-         instr    = &leftInstrs;
-         bindings = &leftBindings;
-      }
-      else
-      {
-         instr    = &rightInstrs;
-         bindings = &rightBindings;
-      }
-
-
-      if(helpBindings[i].command == "-")
-      {
-         symbols.clear();
-         symbols.push_back(UI::SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
-         instr->add(UI::SymbolString(symbols));
-
-         symbols.clear();
-         symbols.push_back(UI::SymbolString::getBlankSymbol(0, FontSize));
-         bindings->add(UI::SymbolString(symbols));
-      }
-      else if(helpBindings[i].binding == "HEADER")
-      {
-         symbols.clear();
-         symbols.push_back(UI::SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, groupHeaderColor));
-         instr->add(UI::SymbolString(symbols));
-
-         symbols.clear();
-         symbols.push_back(UI::SymbolString::getBlankSymbol(0, FontSize));
-         bindings->add(UI::SymbolString(symbols));
-      }
-      else     // Normal line
-      {
-         symbols.clear();
-         UI::SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].command, 
-                                       symbols, HelpContext, FontSize, txtColor);
-
-         instr->add(UI::SymbolString(symbols));
-
-         symbols.clear();
-         UI::SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].binding, 
-                                       symbols, HelpContext, FontSize, keyColor);
-         bindings->add(UI::SymbolString(symbols));
-      }
-   }
-}
 
 
 // Constructor
@@ -196,10 +121,10 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    Vector<UI::SymbolShapePtr> symbols;
 
    // Two pages, two columns, two groups in each column
-   UI::SymbolStringSet keysInstrLeft1(FontGap),  keysBindingsLeft1(FontGap);
-   UI::SymbolStringSet keysInstrRight1(FontGap), keysBindingsRight1(FontGap);
-   UI::SymbolStringSet keysInstrLeft2(FontGap),  keysBindingsLeft2(FontGap);
-   UI::SymbolStringSet keysInstrRight2(FontGap), keysBindingsRight2(FontGap);
+   UI::SymbolStringSet keysInstrLeft1(LineGap),  keysBindingsLeft1(LineGap);
+   UI::SymbolStringSet keysInstrRight1(LineGap), keysBindingsRight1(LineGap);
+   UI::SymbolStringSet keysInstrLeft2(LineGap),  keysBindingsLeft2(LineGap);
+   UI::SymbolStringSet keysInstrRight2(LineGap), keysBindingsRight2(LineGap);
 
 
    // Add some headers to our 4 columns
@@ -224,7 +149,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    keysInstrLeft2.add(UI::SymbolString(symbols));
 
    symbols.clear();
-   symbols.push_back(UI::SymbolString::getBlankSymbol(0,20));
+   symbols.push_back(UI::SymbolString::getBlankSymbol(0, 5));
    keysInstrRight1.add   (UI::SymbolString(symbols));
    keysInstrRight2.add   (UI::SymbolString(symbols));
    keysBindingsLeft1.add (UI::SymbolString(symbols));
@@ -252,6 +177,19 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    mSymbolSets2.addSymbolStringSet(keysBindingsLeft2,  UI::AlignmentCenter, col2 + centeringOffset);
    mSymbolSets2.addSymbolStringSet(keysInstrRight2,    UI::AlignmentLeft,   col3);
    mSymbolSets2.addSymbolStringSet(keysBindingsRight2, UI::AlignmentCenter, col4 + centeringOffset);
+
+
+   // Prepare special instructions
+   HelpBind helpBind[] = { 
+      { Left,  "Help",               InputCodeManager::BINDING_HELP },
+      { Left,  "Team Editor",        InputCodeManager::BINDING_TEAM_EDITOR },
+      { Right, "Game Params Editor", InputCodeManager::BINDING_GAME_PARAMS_EDITOR},
+      { Right, "Universal Chat",     InputCodeManager::BINDING_OUTGAMECHAT }
+   };
+
+   pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
+        mSpecialKeysInstrRight, mSpecialKeysBindingsRight, 
+        helpBind, ARRAYSIZE(helpBind), getGame()->getSettings());
 }
 
 
@@ -411,75 +349,21 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    else
       y += mSymbolSets2.render(y);
 
-
-   //glColor(secColor);
-   //drawString(col1, starty, 20, "Action");
-   //drawString(col2, starty, 20, "Control");
-   //drawString(col3, starty, 20, "Action");
-   //drawString(col4, starty, 20, "Control");
-
-   //y = starty + 28;
-   //for(S32 i = 0; !done; i++)
-   //{
-   //   if(controls[i].command == "")
-   //   {
-   //      if(!firstCol)
-   //         done = true;
-   //      else
-   //      {  // Start second column
-   //         firstCol = false;
-   //         y = starty + 2;
-   //         actCol = col3;
-   //         contCol = col4;
-
-   //         glColor(secColor);
-   //      }
-   //   }
-   //   else if(controls[i].command == "-")      // Horiz spacer
-   //   {
-   //      glColor(Colors::gray40);
-   //      drawHorizLine(actCol, actCol + 335, y + 13);
-   //   }
-   //   else if(controls[i].descr == "HEADER")
-   //   {
-   //      glColor(groupHeaderColor);
-   //      drawString(actCol, y, 18, controls[i].command.c_str());
-   //   }
-   //   else
-   //   {
-   //      glColor(txtColor);
-   //      drawString(actCol, y, 18, controls[i].command.c_str());      // Textual description of function (1st arg in lists above)
-   //      glColor(keyColor);
-   //      drawString(contCol, y, 18, controls[i].descr.c_str());
-   //   }
-   //   y += 26;
-   //}
-
-   y = 470;
+   y = 480;
    glColor(secColor);
    drawCenteredString(y, 20, "These special keys are also usually active:");
 
-   y += 40;
-   glColor(txtColor);
-   drawString(col1, y, 18, "Help");
-   glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]", getInputCodeString(settings, InputCodeManager::BINDING_HELP));
+   y += 45;
 
    glColor(txtColor);
-   drawString(col3, y, 18, "Game Params Editor");
-   glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", InputCodeManager::inputCodeToString(KEY_F3));
+   mSpecialKeysInstrLeft.render (col1, y, UI::AlignmentLeft);
+   mSpecialKeysInstrRight.render(col3, y, UI::AlignmentLeft);
 
-   y += 26;
-   glColor(txtColor);
-   drawString(col1, y, 18, "Team Editor");
-   glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]", InputCodeManager::inputCodeToString(KEY_F2));
+   S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
-   glColor(txtColor);
-   drawString(col3, y, 18, "Universal Chat");
    glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", getInputCodeString(settings, InputCodeManager::BINDING_OUTGAMECHAT));
+   mSpecialKeysBindingsLeft.render (col2 + centeringOffset, y, UI::AlignmentCenter);
+   mSpecialKeysBindingsRight.render(col4 + centeringOffset, y, UI::AlignmentCenter);
 }
 
 
