@@ -135,13 +135,12 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
    {
       if(helpBindings[i].command == "-")
       {
-         S32 height = FontSize / 2;
          symbols.clear();
-         symbols.push_back(SymbolString::getHorizLine(335, height, &Colors::gray40));
+         symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
          instrs.add(SymbolString(symbols));
 
          symbols.clear();
-         symbols.push_back(SymbolString::getBlankSymbol(0, height));
+         symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
          bindings.add(SymbolString(symbols));
       }
       else if(helpBindings[i].command == "HEADER")

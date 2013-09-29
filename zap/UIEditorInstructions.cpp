@@ -164,15 +164,15 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
-   mSymbolSets1.addSymbolStringSet(keysInstrLeft1,     UI::AlignmentLeft,   col1);
-   mSymbolSets1.addSymbolStringSet(keysBindingsLeft1,  UI::AlignmentCenter, col2 + centeringOffset);
-   mSymbolSets1.addSymbolStringSet(keysInstrRight1,    UI::AlignmentLeft,   col3);
-   mSymbolSets1.addSymbolStringSet(keysBindingsRight1, UI::AlignmentCenter, col4 + centeringOffset);
+   mSymbolSets1Left.addSymbolStringSet(keysInstrLeft1,      UI::AlignmentLeft,   col1);
+   mSymbolSets1Left.addSymbolStringSet(keysBindingsLeft1,   UI::AlignmentCenter, col2 + centeringOffset);
+   mSymbolSets1Right.addSymbolStringSet(keysInstrRight1,    UI::AlignmentLeft,   col3);
+   mSymbolSets1Right.addSymbolStringSet(keysBindingsRight1, UI::AlignmentCenter, col4 + centeringOffset);
 
-   mSymbolSets2.addSymbolStringSet(keysInstrLeft2,     UI::AlignmentLeft,   col1);
-   mSymbolSets2.addSymbolStringSet(keysBindingsLeft2,  UI::AlignmentCenter, col2 + centeringOffset);
-   mSymbolSets2.addSymbolStringSet(keysInstrRight2,    UI::AlignmentLeft,   col3);
-   mSymbolSets2.addSymbolStringSet(keysBindingsRight2, UI::AlignmentCenter, col4 + centeringOffset);
+   mSymbolSets2Left.addSymbolStringSet(keysInstrLeft2,      UI::AlignmentLeft,   col1);
+   mSymbolSets2Left.addSymbolStringSet(keysBindingsLeft2,   UI::AlignmentCenter, col2 + centeringOffset);
+   mSymbolSets2Right.addSymbolStringSet(keysInstrRight2,    UI::AlignmentLeft,   col3);
+   mSymbolSets2Right.addSymbolStringSet(keysBindingsRight2, UI::AlignmentCenter, col4 + centeringOffset);
 
 
    // Prepare special instructions
@@ -310,9 +310,19 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    bool done = false;
 
    if(page == 1)
-      y += mSymbolSets1.render(y);
+   {
+      S32 yLeft  = mSymbolSets1Left.render(y);
+      S32 yRight = mSymbolSets1Right.render(y);
+      y += MAX(yLeft, yRight);
+   }
+      
    else
-      y += mSymbolSets2.render(y);
+   {      
+      S32 yLeft  = mSymbolSets2Left.render(y);
+      S32 yRight = mSymbolSets2Right.render(y);
+      y += MAX(yLeft, yRight);
+   }
+
 
    y = 486;
    glColor(secColor);
