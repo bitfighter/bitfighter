@@ -60,6 +60,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
                                                                                      mPluginInstructions(10),
                                                                                      mAnimTimer(1000)
 {
+   GameSettings *settings = getGame()->getSettings();
    mCurPage = 0;
    mAnimStage = 0;
 
@@ -159,13 +160,13 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
 
    pack(keysInstrLeft1,  keysBindingsLeft1, 
-        controls1Left, ARRAYSIZE(controls1Left), getGame()->getSettings());
+        controls1Left, ARRAYSIZE(controls1Left), settings);
 
    pack(keysInstrRight1, keysBindingsRight1, 
-        controls1Right, ARRAYSIZE(controls1Right), getGame()->getSettings());
+        controls1Right, ARRAYSIZE(controls1Right), settings);
 
    pack(keysInstrLeft2,  keysBindingsLeft2, 
-        controls2Left, ARRAYSIZE(controls2Left), getGame()->getSettings());
+        controls2Left, ARRAYSIZE(controls2Left), settings);
 
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
@@ -193,10 +194,10 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    };
 
    pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
-        helpBindLeft, ARRAYSIZE(helpBindLeft), getGame()->getSettings());
+        helpBindLeft, ARRAYSIZE(helpBindLeft), settings);
 
    pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, 
-        helpBindRight, ARRAYSIZE(helpBindRight), getGame()->getSettings());
+        helpBindRight, ARRAYSIZE(helpBindRight), settings);
 
 
    ControlStringsEditor wallInstructions[] =
@@ -209,23 +210,50 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
       { "[[BULLET]] Change wall thickness with [[+]] & [[-]] (use [[Shift]] for smaller changes)", "" }
    };
 
-   pack(mWallInstr, mWallBindings, wallInstructions, ARRAYSIZE(wallInstructions), getGame()->getSettings());
+   pack(mWallInstr, mWallBindings, wallInstructions, ARRAYSIZE(wallInstructions), settings);
 
    
    const S32 instrSize = 18;
 
    symbols.clear();
-   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), "Open the console by pressing [[/]]", 
+   SymbolString::symbolParse(settings->getInputCodeManager(), "Open the console by pressing [[/]]", 
                              symbols, HelpContext, FontSize, &Colors::green, keyColor);
 
    mConsoleInstructions.add(SymbolString(symbols));
 
+   ///// 
+
+   string tabstr = "[[TAB_STOP:200]]";
 
    symbols.clear();
-   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), "See the wiki for info on creating your own plugins", 
+   SymbolString::symbolParse(settings->getInputCodeManager(), "Plugins are scripts that can manipuate items in the editor.",
                              symbols, HelpContext, FontSize, &Colors::green, keyColor);
-
    mPluginInstructions.add(SymbolString(symbols));
+
+   symbols.clear();
+   SymbolString::symbolParse(settings->getInputCodeManager(), "See the Bitfighter wiki for info on creating your own.",
+                             symbols, HelpContext, FontSize, &Colors::green, keyColor);
+   mPluginInstructions.add(SymbolString(symbols));
+
+   symbols.clear();
+   symbols.push_back(SymbolString::getHorizLine(735, FontSize, FontSize + 4, &Colors::gray70));
+   SymbolString::symbolParse(settings->getInputCodeManager(), "[[TAB_STOP:0]]Key" + tabstr + "Description",
+                             symbols, HelpContext, FontSize, &Colors::yellow, keyColor);
+   mPluginInstructions.add(SymbolString(symbols));
+
+
+   const Vector<PluginBinding> *plugins = settings->getPluginBindings();
+
+   for(S32 i = 0; i < plugins->size(); i++)
+   {
+      string key   = "[[" + plugins->get(i).key + "]]";  // Add the [[ & ]] to make it parsable
+      string instr = plugins->get(i).help;
+
+      symbols.clear();
+      SymbolString::symbolParse(settings->getInputCodeManager(), key + tabstr + instr,
+                                symbols, HelpContext, FontSize, txtColor, keyColor);
+      mPluginInstructions.add(SymbolString(symbols));
+   }
 }
 
 
@@ -285,37 +313,11 @@ void EditorInstructionsUserInterface::render()
          renderConsoleCommands(mConsoleInstructions, consoleCommands);
          break;
       case 4:
-         renderPluginCommands();
+         mPluginInstructions.render(horizMargin, 60, UI::AlignmentLeft);
          break;
    }
 
    FontManager::popFontContext();
-}
-
-
-void EditorInstructionsUserInterface::renderPluginCommands()
-{
-   const Vector<PluginBinding> *plugins = getGame()->getSettings()->getPluginBindings();
-
-   Vector<ControlStringsEditor> ctrls;
-   ctrls.resize(plugins->size() + 1);
-
-   ControlStringsEditor ctrl;    // Reusable container
-
-   for(S32 i = 0; i < plugins->size(); i++)
-   {
-      ctrl.command = plugins->get(i).key;
-      ctrl.binding   = plugins->get(i).help;
-
-      ctrls[i] = ctrl;
-   }
-
-   ctrl.command = "";
-   ctrl.binding = "";
-
-   ctrls[plugins->size()] = ctrl;
-
-   renderConsoleCommands(mPluginInstructions, ctrls.address());
 }
 
 

@@ -185,31 +185,34 @@ void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32
 
 void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolStringSet &instructions, const ControlStringsEditor *cmdList)
 {
-   S32 ypos = 68;
+   const S32 headerSize = 20;
+   const S32 cmdSize = 16;
+   const S32 cmdGap = 10;
 
+   S32 ypos = 60;
    S32 cmdCol = horizMargin;                                                         // Action column
    S32 descrCol = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 55;   // Control column
 
-   instructions.render(cmdCol, ypos, UI::AlignmentLeft);
+   ypos += instructions.render(cmdCol, ypos, UI::AlignmentLeft);
 
-   ypos += 10;
+   ypos += 10 - cmdSize - cmdGap;
 
    Color cmdColor =   Colors::cyan;
    Color descrColor = Colors::white;
    Color secColor =   Colors::yellow;
 
-   const S32 headerSize = 20;
-   const S32 cmdSize = 16;
-   const S32 cmdGap = 10;
-
    glColor(secColor);
-   drawString(cmdCol, ypos, headerSize, "Code Example");
+   drawString(cmdCol,   ypos, headerSize, "Code Example");
    drawString(descrCol, ypos, headerSize, "Description");
 
+   Vector<SymbolShapePtr> symbols;
+
    ypos += cmdSize + cmdGap;
+   glColor(&Colors::gray70);
    drawHorizLine(cmdCol, 750, ypos);
 
-   ypos += 5;     // Small gap before cmds start
+   ypos += 10;     // Small gap before cmds start
+   ypos += cmdSize;
 
    for(S32 i = 0; cmdList[i].command != ""; i++)
    {
@@ -220,12 +223,21 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
       }
       else
       {
-         glColor(cmdColor);
-         drawString(cmdCol, ypos, cmdSize, cmdList[i].command.c_str());      // Textual description of function (1st arg in lists above)
+         symbols.clear();
+         SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), cmdList[i].command, 
+                                   symbols, HelpContext, cmdSize, txtColor, keyColor);
 
-         glColor(descrColor);
-         drawString(descrCol, ypos, cmdSize, cmdList[i].binding.c_str());
+         SymbolString instrs(symbols);
+         instrs.render(cmdCol, ypos, UI::AlignmentLeft);
+
+         symbols.clear();
+         SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), cmdList[i].binding, 
+                                   symbols, HelpContext, cmdSize, txtColor, keyColor);
+
+         SymbolString keys(symbols);
+         keys.render(descrCol, ypos, UI::AlignmentLeft);
       }
+
       ypos += cmdSize + cmdGap;
    }
 }

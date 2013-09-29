@@ -34,6 +34,7 @@
 
 #include "OpenglUtils.h"
 #include "RenderUtils.h"
+#include "stringUtils.h"
 
 using namespace TNL;
 
@@ -553,9 +554,14 @@ SymbolShapePtr SymbolString::getHorizLine(S32 length, S32 vertOffset, S32 height
 
 
 // Parse special symbols enclosed inside [[ ]] in strings.  The passed symbolName is the bit inside the brackets.
-static void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbolName, 
+static void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbol, 
                            const Color *color, Vector<SymbolShapePtr> &symbols)
 {
+   Vector<string> words;
+   parseString(symbol, words, ':');
+
+   string symbolName = words[0];
+
    // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
    InputCode inputCode = inputCodeManager->getKeyBoundToBindingCodeName(symbolName);
    
@@ -623,8 +629,20 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
    else if(symbolName == "MODULE_CTRL2")
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2)));
 
-   else if(symbolName == "BULLET")
+   else if(symbolName == "BULLET")                    // Square bullet point 
       symbols.push_back(SymbolString::getBullet());
+
+   else if(symbolName == "TAB_STOP")                  // Adds whitespace until width is equal to n
+   {
+      TNLAssert(words.size() == 2, "TAB_STOP:n has the wrong number of components!");
+      S32 width = atoi(words[1].c_str());
+
+      S32 w = 0;
+      for(S32 i = 0; i < symbols.size(); i++)
+         w += symbols[i]->getWidth();
+
+      symbols.push_back(SymbolShapePtr(new SymbolBlank(width - w)));
+   }
 
    else 
       symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, 12, HelpItemContext, &Colors::red)));

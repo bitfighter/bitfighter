@@ -57,7 +57,6 @@ public:
    void render();
    void renderPageCommands(S32 page);
    void renderPageWalls();
-   void renderPluginCommands();   
 
    S32 getPageCount();
  
