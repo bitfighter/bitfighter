@@ -99,19 +99,22 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
 
 
    // Prepare special instructions
-   const HelpBind helpBindLeft[] = { 
-      { "Help",              InputCodeManager::BINDING_HELP },
-      { "Mission",           InputCodeManager::BINDING_MISSION }
-   };
-
-   const HelpBind helpBindRight[] = { 
-      { "Universal Chat",    InputCodeManager::BINDING_OUTGAMECHAT },
-      { "Display FPS / Lag", InputCodeManager::BINDING_FPS },
-      { "Diagnostics",       InputCodeManager::BINDING_DIAG }
+   const ControlStringsEditor helpBindLeft[] = 
+   { 
+      { "Help",              "[[Help]]"    },
+      { "Mission",           "[[Mission]]" }
    };
 
    pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
         helpBindLeft, ARRAYSIZE(helpBindLeft), getGame()->getSettings());
+
+
+   const ControlStringsEditor helpBindRight[] = 
+   { 
+      { "Universal Chat",    "[[OutOfGameChat]]" },
+      { "Display FPS / Lag", "[[FPS]]"           },
+      { "Diagnostics",       "[[Diagnostics]]"   }
+   };
 
    pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, 
         helpBindRight, ARRAYSIZE(helpBindRight), getGame()->getSettings());
@@ -158,77 +161,68 @@ void InstructionsUserInterface::initNormalKeys_page1()
 {
    // Needs to be here so if user changes their bindings, we'll see the new ones when we reload!
 
-   HelpBind controlsKeyboardLeft[] = {
-         { "Move ship",             InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_U },
-         { " ",                     InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LDR },
-         { "Aim ship",              InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE },
-         { "Fire weapon",           InputCodeManager::BINDING_FIRE },
-         { "Activate module 1",     InputCodeManager::BINDING_MOD1 },
-         { "Activate module 2",     InputCodeManager::BINDING_MOD2 },
-         { "-",                     InputCodeManager::BINDING_NONE },
-         { "Open ship config menu", InputCodeManager::BINDING_LOADOUT },
-         { "Toggle map view",       InputCodeManager::BINDING_CMDRMAP },
-         { "Drop flag",             InputCodeManager::BINDING_DROPITEM },
-         { "Show scoreboard",       InputCodeManager::BINDING_SCRBRD }
+   ControlStringsEditor controlsKeyboardLeft[] = 
+   {
+         { "Move ship",             "[[ShipUp]]"          },
+         { " ",                     "[[MOVEMENT_LDR]]"    },
+         { "Aim ship",              "[[Mouse]]"           },
+         { "Fire weapon",           "[[Fire]]"            },
+         { "Activate module 1",     "[[ActivateModule1]]" },
+         { "Activate module 2",     "[[ActivateModule2]]" },
+         { "-",                     ""                    },
+         { "Open ship config menu", "[[ShowLoadoutMenu]]" },
+         { "Toggle map view",       "[[ShowCmdrMap]]"     },
+         { "Drop flag",             "[[DropItem]]"        },
+         { "Show scoreboard",       "[[ShowScoreboard]]"  }
    };
 
-   HelpBind controlsKeyboardRight[] = {
-         { "Cycle current weapon", InputCodeManager::BINDING_ADVWEAP },
-         { "Select weapon 1",      InputCodeManager::BINDING_SELWEAP1 },
-         { "Select weapon 2",      InputCodeManager::BINDING_SELWEAP2 },
-         { "Select weapon 3",      InputCodeManager::BINDING_SELWEAP3 },
-         { "-",                    InputCodeManager::BINDING_NONE },
-         { "Chat to everyone",     InputCodeManager::BINDING_GLOBCHAT },
-         { "Chat to team",         InputCodeManager::BINDING_TEAMCHAT },
-         { "Open QuickChat menu",  InputCodeManager::BINDING_QUICKCHAT },
-         { "Record voice chat",    InputCodeManager::BINDING_TOGVOICE },
-         { "Message display mode", InputCodeManager::BINDING_DUMMY_MSG_MODE },
-         { "Save screenshot",      InputCodeManager::BINDING_DUMMY_SS_MODE },
+   ControlStringsEditor controlsGamepadLeft[] = 
+   {
+         { "Move Ship",             "Left Joystick"   },
+         { "Aim Ship/Fire Weapon",  "Right Joystick"  },
+         { "Activate module 1",     "[[ActivateModule1]]" },
+         { "Activate module 2",     "[[ActivateModule2]]" },
+         { "-",                     ""                    },
+         { "Open ship config menu", "[[ShowLoadoutMenu]]" },
+         { "Toggle map view",       "[[ShowCmdrMap]]"     },
+         { "Drop flag",             "[[DropItem]]"        },
+         { "Show scoreboard",       "[[ShowScoreboard]]"  }
    };
 
-   HelpBind controlsGamepadLeft[] = {
-         { "Move Ship",             InputCodeManager::BINDING_DUMMY_STICK_LEFT },
-         { "Aim Ship/Fire Weapon",  InputCodeManager::BINDING_DUMMY_STICK_RIGHT },
-         { "Activate module 1",     InputCodeManager::BINDING_MOD1 },
-         { "Activate module 2",     InputCodeManager::BINDING_MOD2 },
-         { "-",                     InputCodeManager::BINDING_NONE },
-         { "Open ship config menu", InputCodeManager::BINDING_LOADOUT },
-         { "Toggle map view",       InputCodeManager::BINDING_CMDRMAP },
-         { "Drop flag",             InputCodeManager::BINDING_DROPITEM },
-         { "Show scoreboard",       InputCodeManager::BINDING_SCRBRD }
+   // These controls will work for both joystick and keyboard users
+   ControlStringsEditor controlsRight[] = 
+   {
+         { "Cycle current weapon", "[[SelNextWeapon]]" },
+         { "Select weapon 1",      "[[SelWeapon1]]"    },
+         { "Select weapon 2",      "[[SelWeapon2]]"    },
+         { "Select weapon 3",      "[[SelWeapon3]]"    },
+         { "-",                    ""                  },
+         { "Chat to everyone",     "[[GlobalChat]]"    },
+         { "Chat to team",         "[[TeamChat]]"      },
+         { "Open QuickChat menu",  "[[QuickChat]]"     },
+         { "Record voice chat",    "[[VoiceChat]]"     },
+         { "Message display mode", "[[Ctrl+M]]"        },
+         { "Save screenshot",      "[[Ctrl+Q]]"        }
    };
 
-   HelpBind controlsGamepadRight[] = {
-         { "Cycle current weapon", InputCodeManager::BINDING_ADVWEAP },
-         { "Select weapon 1",      InputCodeManager::BINDING_SELWEAP1 },
-         { "Select weapon 2",      InputCodeManager::BINDING_SELWEAP2 },
-         { "Select weapon 3",      InputCodeManager::BINDING_SELWEAP3 },
-         { "-",                    InputCodeManager::BINDING_NONE },
-         { "Open QuickChat menu",  InputCodeManager::BINDING_QUICKCHAT },
-         { "Chat to team",         InputCodeManager::BINDING_TEAMCHAT },
-         { "Chat to everyone",     InputCodeManager::BINDING_GLOBCHAT },
-         { "Record voice chat",    InputCodeManager::BINDING_TOGVOICE },
-   };
 
-   HelpBind *helpBindLeft,     *helpBindRight;
-   S32      helpBindLeftCount, helpBindRightCount;
+   ControlStringsEditor *helpBindLeft,     *helpBindRight;
+   S32                  helpBindLeftCount, helpBindRightCount;
 
    if(getGame()->getInputMode() == InputModeKeyboard)
    {
       helpBindLeft      = controlsKeyboardLeft;
       helpBindLeftCount = ARRAYSIZE(controlsKeyboardLeft);
-
-      helpBindRight      = controlsKeyboardRight;
-      helpBindRightCount = ARRAYSIZE(controlsKeyboardRight);
    }
    else
    {
       helpBindLeft      = controlsGamepadLeft;
       helpBindLeftCount = ARRAYSIZE(controlsGamepadLeft);
-
-      helpBindRight      = controlsGamepadRight;
-      helpBindRightCount = ARRAYSIZE(controlsGamepadRight);
    }
+
+   helpBindRight      = controlsRight;
+   helpBindRightCount = ARRAYSIZE(controlsRight);
+
 
    UI::SymbolStringSet keysInstrLeft(LineGap),  keysBindingsLeft(LineGap), 
                        keysInstrRight(LineGap), keysBindingsRight(LineGap);

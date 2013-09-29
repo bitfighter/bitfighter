@@ -40,12 +40,6 @@ class AbstractInstructionsUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 public:
-
-   struct HelpBind { 
-      string command;
-      InputCodeManager::BindingName binding;    // Used to look up the appropriate key
-   };
-
    struct ControlStringsEditor {
       string command;
       string binding;
@@ -69,11 +63,6 @@ protected:
          mSpecialKeysInstrRight,  mSpecialKeysBindingsRight,
          mWallInstr,              mWallBindings;
 
-   // UIInstructions version
-   void pack(UI::SymbolStringSet &Instrs,  UI::SymbolStringSet &Bindings, 
-             const HelpBind *helpBindings, S32 bindingCount, GameSettings *settings) const;
-
-   // UIEditorInstructions version
    void pack(UI::SymbolStringSet &Instrs, UI::SymbolStringSet &Bindings, 
             const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings);
 

@@ -183,18 +183,20 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
 
    // Prepare special instructions
-   HelpBind helpBindLeft[] = { 
-      { "Help",               InputCodeManager::BINDING_HELP },
-      { "Team Editor",        InputCodeManager::BINDING_TEAM_EDITOR },
-   };
-   
-   HelpBind helpBindRight[] = {
-      { "Game Params Editor", InputCodeManager::BINDING_GAME_PARAMS_EDITOR},
-      { "Universal Chat",     InputCodeManager::BINDING_OUTGAMECHAT }
+   ControlStringsEditor helpBindLeft[] = 
+   { 
+      { "Help",               "[[Help]]"       },
+      { "Team Editor",        "[[TeamEditor]]" }
    };
 
    pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
-        helpBindLeft, ARRAYSIZE(helpBindLeft), settings);
+   helpBindLeft, ARRAYSIZE(helpBindLeft), settings);
+   
+   ControlStringsEditor helpBindRight[] = 
+   {
+      { "Game Params Editor", "[[GameParameterEditor]]" },
+      { "Universal Chat",     "[[OutOfGameChat]]"       }
+   };
 
    pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, 
         helpBindRight, ARRAYSIZE(helpBindRight), settings);

@@ -331,6 +331,7 @@ bool BindingSet::hasKeypad()
 ////////////////////////////////////////
 
 // Seems like a good xmacro candidate!
+// Keep in sync with BindingName!
 static const string BINDING_STRINGS[] = 
 {
    "SelWeapon1",		     // BINDING_SELWEAP1 
@@ -365,7 +366,11 @@ static const string BINDING_STRINGS[] =
    "LoadLoadoutPreset3",  // BINDING_LOAD_PRESET_3
    "SaveLoadoutPreset1",  // BINDING_SAVE_PRESET_1
    "SaveLoadoutPreset2",  // BINDING_SAVE_PRESET_2
-   "SaveLoadoutPreset3"   // BINDING_SAVE_PRESET_3
+   "SaveLoadoutPreset3",  // BINDING_SAVE_PRESET_3
+
+   // Editor specific?
+   "TeamEditor",          // BINDING_TEAM_EDITOR
+   "GameParameterEditor", // BINDING_GAME_PARAMS_EDITOR
 };
 
 

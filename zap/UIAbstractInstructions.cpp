@@ -73,60 +73,6 @@ AbstractInstructionsUserInterface::~AbstractInstructionsUserInterface()
 
 
 void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStringSet &bindings,      // <== will be modified
-                                             const HelpBind *helpBindings, S32 bindingCount, GameSettings *settings) const
-{
-   Vector<SymbolShapePtr> symbols;
-
-   for(S32 i = 0; i < bindingCount; i++)
-   {
-      if(helpBindings[i].command == "-")
-      {
-         symbols.clear();
-         symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
-         instrs.add(SymbolString(symbols));
-
-         symbols.clear();
-         symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
-         bindings.add(SymbolString(symbols));
-      }
-      else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_U)
-      {
-         symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
-         instrs.add(SymbolString(symbols));
-
-         symbols.clear();
-         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_UP), keyColor));
-         bindings.add(SymbolString(symbols));
-      }
-      else if(helpBindings[i].binding == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LDR)
-      {
-         symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
-         instrs.add(SymbolString(symbols));
-
-         symbols.clear();
-         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LEFT),  keyColor));
-         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_DOWN),  keyColor));
-         symbols.push_back(SymbolString::getControlSymbol(settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_RIGHT), keyColor));
-
-         bindings.add(SymbolString(symbols));
-      }
-      else
-      {
-         symbols.clear();
-         symbols.push_back(SymbolString::getSymbolText(helpBindings[i].command, FontSize, HelpContext, txtColor));
-         instrs.add(SymbolString(symbols));
-
-         symbols.clear();
-         symbols.push_back(SymbolString::getControlSymbol(UserInterface::getInputCode(settings, helpBindings[i].binding), keyColor));
-         bindings.add(SymbolString(symbols));
-      }
-   }
-}
-
-
-void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStringSet &bindings,      // <== will be modified
                                              const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings)
 {
    Vector<SymbolShapePtr> symbols;
