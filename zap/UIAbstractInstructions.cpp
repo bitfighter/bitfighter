@@ -158,7 +158,7 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
       {
          symbols.clear();
          SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].command, 
-                                       symbols, HelpContext, FontSize, txtColor);
+                                       symbols, HelpContext, FontSize, txtColor, keyColor);
 
          instrs.add(SymbolString(symbols));
 

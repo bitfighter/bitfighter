@@ -553,7 +553,8 @@ SymbolShapePtr SymbolString::getHorizLine(S32 length, S32 vertOffset, S32 height
 
 
 // Parse special symbols enclosed inside [[ ]] in strings.  The passed symbolName is the bit inside the brackets.
-static void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbolName, Vector<SymbolShapePtr> &symbols)
+static void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbolName, 
+                           const Color *color, Vector<SymbolShapePtr> &symbols)
 {
    // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
    InputCode inputCode = inputCodeManager->getKeyBoundToBindingCodeName(symbolName);
@@ -561,7 +562,6 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
    // Second chance -- maybe it's a key name instead of a control binding
    if(inputCode == KEY_UNKNOWN)
       inputCode = inputCodeManager->stringToInputCode(symbolName.c_str());
-
 
    // Third chance -- see if there is a modifier key at the front
    if(inputCode == KEY_UNKNOWN)
@@ -591,13 +591,13 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
       inputCode = inputCodeManager->stringToInputCode(sym.c_str());     // Get the base inputCode
       if(inputCode != KEY_UNKNOWN)                                   
       {
-         symbols.push_back(SymbolString::getModifiedKeySymbol(InputCodeManager::stringToInputCode(sym.c_str()), foundMods));
+         symbols.push_back(SymbolString::getModifiedKeySymbol(InputCodeManager::stringToInputCode(sym.c_str()), foundMods, color));
          return;
       }
    }
 
    if(inputCode != KEY_UNKNOWN)
-      symbols.push_back(SymbolString::getControlSymbol(inputCode));
+      symbols.push_back(SymbolString::getControlSymbol(inputCode, color));
    else if(symbolName == "LOADOUT_ICON")
       symbols.push_back(SymbolString::getSymbolGear(14));
    else if(symbolName == "GOAL_ICON")
@@ -627,14 +627,17 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
       symbols.push_back(SymbolString::getBullet());
 
    else 
-      symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, 12, HelpItemContext)));
+      symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, 12, HelpItemContext, &Colors::red)));
 }
 
 
 void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const string &str, Vector<SymbolShapePtr> &symbols,
-                              FontContext fontContext, S32 fontSize, const Color *fontColor)
+                              FontContext fontContext, S32 fontSize, const Color *textColor, const Color *symbolColor)
 {
    std::size_t offset = 0;
+
+   if(!symbolColor)
+         symbolColor = textColor;
 
    while(true)
    {
@@ -644,13 +647,14 @@ void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const s
       if(startPos == string::npos || endPos == string::npos)
       {
          // No further symbols herein, convert the rest to text symbol and exit
-         symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset), fontSize, fontContext, fontColor)));
+         symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset), fontSize, fontContext, textColor)));
          return;
       }
 
-      symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset), fontSize, fontContext, fontColor)));
+      symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset), fontSize, fontContext, textColor)));
 
-      getSymbolShape(inputCodeManager, str.substr(startPos + 2, endPos - startPos - 2), symbols);    // + 2 to advance past the "[["
+      // Use + 2 to advance past the opening "[["
+      getSymbolShape(inputCodeManager, str.substr(startPos + 2, endPos - startPos - 2), symbolColor, symbols); 
 
       offset = endPos + 2;
    }
