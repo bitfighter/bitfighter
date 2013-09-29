@@ -82,7 +82,8 @@ static const char *pageHeaders[] = {
 
 // Constructor
 InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game),
-                                                                         mLoadoutInstructions(LineGap)
+                                                                         mLoadoutInstructions(LineGap),
+                                                                         mPageHeaders(LineGap)
 {
    // Quick sanity check...
    TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum IntructionPages!!!");
@@ -146,6 +147,7 @@ void InstructionsUserInterface::onActivate()
 
    initNormalKeys_page1();
    initPage2();
+   initPageHeaders();
 }
 
 
@@ -458,6 +460,24 @@ void InstructionsUserInterface::initPage2()
 
    initPage2Block(loadoutInstructions2, ARRAYSIZE(loadoutInstructions2), HeaderFontSize, &Colors::yellow, &Colors::cyan, 
                getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
+}
+
+
+void InstructionsUserInterface::initPageHeaders()
+{
+   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
+
+   Vector<SymbolShapePtr> symbols;
+
+   symbols.clear();
+   SymbolString::symbolParse(inputCodeManager, "Use [[Tab]] to expand a partially typed command", 
+                             symbols, HelpContext, FontSize, &Colors::green, &Colors::white);
+   mPageHeaders.add(SymbolString(symbols, AlignmentLeft));
+
+   symbols.clear();
+   SymbolString::symbolParse(inputCodeManager, "Enter a cmd by pressing [[Command]], or by typing one at the chat prompt", 
+                             symbols, HelpContext, FontSize, &Colors::green, &Colors::white);
+   mPageHeaders.add(SymbolString(symbols, AlignmentLeft));
 }
 
 
@@ -920,22 +940,17 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 {
    TNLAssert(page < COMMAND_CATEGORIES, "Page too high!");
 
-   S32 ypos = 50;
+   S32 ypos = 65;
 
    S32 cmdCol = horizMargin;                                                         // Action column
    S32 descrCol = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 55;   // Control column
 
-   const S32 instrSize = FontSize;
+   ypos += mPageHeaders.render(cmdCol, ypos, AlignmentLeft) - FontSize;    // Account for different positioning of SymbolStrings and drawString()
 
-   glColor(Colors::green);
-   drawStringf(cmdCol, ypos, instrSize, "Enter a cmd by pressing [%s], or by typing one at the chat prompt", 
-                                        getInputCodeString(getGame()->getSettings(), InputCodeManager::BINDING_CMDCHAT));
-   ypos += 28;
-   drawString(cmdCol, ypos, instrSize, "Use [TAB] to expand a partially typed command");
-   ypos += 28;
    if(strcmp(msg, ""))
    {
-      drawString(cmdCol, ypos, instrSize, msg);
+      glColor(Colors::magenta);
+      drawString(cmdCol, ypos, FontSize, msg);
       ypos += 28;
    }
 

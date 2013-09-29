@@ -60,10 +60,11 @@ private:
 
    UI::SymbolStringSetCollection mSymbolSets;
 
-   UI::SymbolStringSet mLoadoutInstructions;
+   UI::SymbolStringSet mLoadoutInstructions, mPageHeaders;
 
    void initNormalKeys_page1();
    void initPage2();
+   void initPageHeaders();
 
 public:
 
