@@ -288,20 +288,12 @@ void EditorInstructionsUserInterface::render()
 {
    FontManager::pushFontContext(HelpContext);
 
-   //glColor(Colors::white);
-   //drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeadersEditor[mCurPage - 1]);
-   //drawStringf(650, 3, 25, "PAGE %d/%d", mCurPage, getPageCount());
-   //drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
-   //glColor(0.7f);
-   //drawHorizLine(0, 800, 569);
-
    Parent::render(pageHeadersEditor[mCurPage - 1], mCurPage, getPageCount());
 
    static ControlStringsEditor consoleCommands[] = {
       { "Coming soon...", "Coming soon..." },
       { "", "" },      // End of list
    };
-
 
 
    switch(mCurPage)
