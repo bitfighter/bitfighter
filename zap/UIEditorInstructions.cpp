@@ -57,9 +57,10 @@ using UI::SymbolStringSet;
 // Constructor
 EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game), 
                                                                                      mConsoleInstructions(10),
-                                                                                     mPluginInstructions(10)
+                                                                                     mPluginInstructions(10),
+                                                                                     mAnimTimer(1000)
 {
-   mCurPage = 1;
+   mCurPage = 0;
    mAnimStage = 0;
 
    Vector<UI::SymbolShapePtr> symbols;
@@ -237,7 +238,8 @@ EditorInstructionsUserInterface::~EditorInstructionsUserInterface()
 
 void EditorInstructionsUserInterface::onActivate()
 {
-   mCurPage = 1;     // Start at the beginning, silly!
+   mCurPage = 0;     // Start at the beginning, silly!
+   onPageChanged();
 }
 
 
@@ -260,7 +262,7 @@ void EditorInstructionsUserInterface::render()
 {
    FontManager::pushFontContext(HelpContext);
 
-   Parent::render(pageHeadersEditor[mCurPage - 1], mCurPage, getPageCount());
+   Parent::render(pageHeadersEditor[mCurPage], mCurPage + 1, getPageCount());
 
    static ControlStringsEditor consoleCommands[] = {
       { "Coming soon...", "Coming soon..." },
@@ -270,19 +272,19 @@ void EditorInstructionsUserInterface::render()
 
    switch(mCurPage)
    {
-      case 1:
+      case 0:
          renderPageCommands(1);
          break;
-      case 2:
+      case 1:
          renderPageCommands(2);
          break;
-      case 3:
+      case 2:
          renderPageWalls();
          break;
-      case 4:
+      case 3:
          renderConsoleCommands(mConsoleInstructions, consoleCommands);
          break;
-      case 5:
+      case 4:
          renderPluginCommands();
          break;
    }
@@ -467,31 +469,34 @@ void EditorInstructionsUserInterface::renderPageWalls()
 
    FontManager::popFontContext();
 
-   // And now some written instructions
-   mWallInstr.render(50, 300, UI::AlignmentLeft);
+   mWallInstr.render(50, 300, UI::AlignmentLeft);     // The written instructions block
+}
+
+
+void EditorInstructionsUserInterface::onPageChanged()
+{
+   mAnimTimer.reset();
+   mAnimStage = 0;
 }
 
 
 void EditorInstructionsUserInterface::nextPage()
 {
    mCurPage++;
-   if(mCurPage > getPageCount())
-      mCurPage = 1;
+   if(mCurPage == getPageCount())
+      mCurPage = 0;
 
-   mAnimTimer.reset(1000);
-   mAnimStage = 0;
+   onPageChanged();
 }
 
 
 void EditorInstructionsUserInterface::prevPage()
 {
-   if(mCurPage > 1)
-      mCurPage--;
-   else
-      mCurPage = getPageCount();
+   mCurPage--;
+   if(mCurPage < 0)
+      mCurPage = getPageCount() - 1;
 
-   mAnimTimer.reset(1000);
-   mAnimStage = 0;
+   onPageChanged();
 }
 
 
@@ -501,7 +506,7 @@ void EditorInstructionsUserInterface::idle(U32 timeDelta)
 
    if(mAnimTimer.update(timeDelta))
    {
-      mAnimTimer.reset(1000);
+      mAnimTimer.reset();
       mAnimStage++;
       if(mAnimStage >= 18)
          mAnimStage = 0;
@@ -534,7 +539,7 @@ bool EditorInstructionsUserInterface::onKeyDown(InputCode inputCode)
    // F1 has dual use... advance page, then quit out of help when done
    else if(checkInputCode(InputCodeManager::BINDING_HELP, inputCode))
    {
-      if(mCurPage != getPageCount())
+      if(mCurPage < getPageCount())
          nextPage();
       else
          exitInstructions();

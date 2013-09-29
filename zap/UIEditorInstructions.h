@@ -48,6 +48,8 @@ private:
    UI::SymbolStringSetCollection mSymbolSets2Left,     mSymbolSets2Right;     // For page 2
    UI::SymbolStringSet           mConsoleInstructions, mPluginInstructions;
 
+   void onPageChanged();
+
 public:
    explicit EditorInstructionsUserInterface(ClientGame *game);      // Constructor
    virtual ~EditorInstructionsUserInterface();
