@@ -62,7 +62,7 @@ public:
 
 protected:
    void render(const char *header, S32 page, S32 pages);
-   void renderConsoleCommands(const char *activationCommand, const ControlStringsEditor *cmdList);
+   void renderConsoleCommands(const UI::SymbolStringSet &instructions, const ControlStringsEditor *cmdList);
 
    UI::SymbolStringSet 
          mSpecialKeysInstrLeft,   mSpecialKeysBindingsLeft, 

@@ -183,18 +183,18 @@ void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32
 }
 
 
-void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activationCommand, const ControlStringsEditor *cmdList)
+void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolStringSet &instructions, const ControlStringsEditor *cmdList)
 {
-   S32 ypos = 50;
+   S32 ypos = 68;
 
    S32 cmdCol = horizMargin;                                                         // Action column
    S32 descrCol = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 55;   // Control column
 
-   const S32 instrSize = 18;
+   instructions.render(cmdCol, ypos, UI::AlignmentLeft);
 
-   glColor(Colors::green);
-   drawStringf(cmdCol, ypos, instrSize, activationCommand);
-   ypos += 28;
+   //glColor(Colors::green);
+   //drawStringf(cmdCol, ypos, instrSize, activationCommand);
+   ypos += 10;
 
    Color cmdColor =   Colors::cyan;
    Color descrColor = Colors::white;

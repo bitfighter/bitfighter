@@ -51,8 +51,13 @@ static S32 col3 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidt
 static S32 col4 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.75) + 45;
 
 
+using UI::SymbolString;
+using UI::SymbolStringSet;
+
 // Constructor
-EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game)
+EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game), 
+                                                                                     mConsoleInstructions(10),
+                                                                                     mPluginInstructions(10)
 {
    mCurPage = 1;
    mAnimStage = 0;
@@ -60,41 +65,41 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    Vector<UI::SymbolShapePtr> symbols;
 
    // Two pages, two columns, two groups in each column
-   UI::SymbolStringSet keysInstrLeft1(LineGap),  keysBindingsLeft1(LineGap);
-   UI::SymbolStringSet keysInstrRight1(LineGap), keysBindingsRight1(LineGap);
-   UI::SymbolStringSet keysInstrLeft2(LineGap),  keysBindingsLeft2(LineGap);
-   UI::SymbolStringSet keysInstrRight2(LineGap), keysBindingsRight2(LineGap);
+   SymbolStringSet keysInstrLeft1(LineGap),  keysBindingsLeft1(LineGap);
+   SymbolStringSet keysInstrRight1(LineGap), keysBindingsRight1(LineGap);
+   SymbolStringSet keysInstrLeft2(LineGap),  keysBindingsLeft2(LineGap);
+   SymbolStringSet keysInstrRight2(LineGap), keysBindingsRight2(LineGap);
 
 
    // Add some headers to our 4 columns
    symbols.clear();
-   symbols.push_back(UI::SymbolString::getSymbolText("Action", HeaderFontSize, HelpContext, secColor));
-   keysInstrLeft1 .add(UI::SymbolString(symbols));
-   keysInstrRight1.add(UI::SymbolString(symbols));
-   keysInstrLeft2 .add(UI::SymbolString(symbols));
-   keysInstrRight2.add(UI::SymbolString(symbols));
+   symbols.push_back(SymbolString::getSymbolText("Action", HeaderFontSize, HelpContext, secColor));
+   keysInstrLeft1 .add(SymbolString(symbols));
+   keysInstrRight1.add(SymbolString(symbols));
+   keysInstrLeft2 .add(SymbolString(symbols));
+   keysInstrRight2.add(SymbolString(symbols));
 
    symbols.clear();
-   symbols.push_back(UI::SymbolString::getSymbolText("Control", HeaderFontSize, HelpContext, secColor));
-   keysBindingsLeft1 .add(UI::SymbolString(symbols));
-   keysBindingsRight1.add(UI::SymbolString(symbols));
-   keysBindingsLeft2 .add(UI::SymbolString(symbols));
-   keysBindingsRight2.add(UI::SymbolString(symbols));
+   symbols.push_back(SymbolString::getSymbolText("Control", HeaderFontSize, HelpContext, secColor));
+   keysBindingsLeft1 .add(SymbolString(symbols));
+   keysBindingsRight1.add(SymbolString(symbols));
+   keysBindingsLeft2 .add(SymbolString(symbols));
+   keysBindingsRight2.add(SymbolString(symbols));
 
    // Add horizontal line to first column (will draw across all)
    symbols.clear();
-   symbols.push_back(UI::SymbolString::getHorizLine(735, -14, 8, &Colors::gray70));
-   keysInstrLeft1.add(UI::SymbolString(symbols));
-   keysInstrLeft2.add(UI::SymbolString(symbols));
+   symbols.push_back(SymbolString::getHorizLine(735, -14, 8, &Colors::gray70));
+   keysInstrLeft1.add(SymbolString(symbols));
+   keysInstrLeft2.add(SymbolString(symbols));
 
    symbols.clear();
-   symbols.push_back(UI::SymbolString::getBlankSymbol(0, 5));
-   keysInstrRight1.add   (UI::SymbolString(symbols));
-   keysInstrRight2.add   (UI::SymbolString(symbols));
-   keysBindingsLeft1.add (UI::SymbolString(symbols));
-   keysBindingsLeft2.add (UI::SymbolString(symbols));
-   keysBindingsRight1.add(UI::SymbolString(symbols));
-   keysBindingsRight2.add(UI::SymbolString(symbols));
+   symbols.push_back(SymbolString::getBlankSymbol(0, 5));
+   keysInstrRight1.add   (SymbolString(symbols));
+   keysInstrRight2.add   (SymbolString(symbols));
+   keysBindingsLeft1.add (SymbolString(symbols));
+   keysBindingsLeft2.add (SymbolString(symbols));
+   keysBindingsRight1.add(SymbolString(symbols));
+   keysBindingsRight2.add(SymbolString(symbols));
 
 
    // For page 1 of general instructions
@@ -138,12 +143,12 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    // For page 2 of general instructions
    ControlStringsEditor controls2Left[] = {
    { "HEADER", "Size & Rotation" },
-         { "Flip Horiz/Vertical", "[[H]], [[V]]" },
-         { "Spin", "[[R]], [[Shift+R]]" },
-         { "Arbitrary spin", "[[Alt+R]]" },
-         { "Rotate about (0,0)", "[[Ctrl+R]], [[Ctrl+Shift+R]]" },
-         { "Arbitrary rotate about (0,0)", "[[Ctrl+Alt+R]]" },
-         { "Scale selection", "[[Ctrl+Shift+X]]" },
+         { "Flip horizontal/vertical", "[[H]], [[V]]" },
+         { "Rotate object",            "[[R]], [[Shift+R]]" },
+         { "Free rotate",              "[[Alt+R]]" },
+         { "Rotate about (0,0)",       "[[Ctrl+R]], [[Ctrl+Shift+R]]" },
+         { "Free rotate about (0,0)",  "[[Ctrl+Alt+R]]" },
+         { "Scale selection",          "[[Ctrl+Shift+X]]" },
 
       { "-", "" },      // Horiz. line
          { "Hold [[Space]] to suspend grid snapping",    "" },
@@ -205,6 +210,21 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
    pack(mWallInstr, mWallBindings, wallInstructions, ARRAYSIZE(wallInstructions), getGame()->getSettings());
 
+   
+   const S32 instrSize = 18;
+
+   symbols.clear();
+   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), "Open the console by pressing [[/]]", 
+                             symbols, HelpContext, FontSize, &Colors::green, keyColor);
+
+   mConsoleInstructions.add(SymbolString(symbols));
+
+
+   symbols.clear();
+   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), "See the wiki for info on creating your own plugins", 
+                             symbols, HelpContext, FontSize, &Colors::green, keyColor);
+
+   mPluginInstructions.add(SymbolString(symbols));
 }
 
 
@@ -260,7 +280,7 @@ void EditorInstructionsUserInterface::render()
          renderPageWalls();
          break;
       case 4:
-         renderConsoleCommands("Open the console by pressing [/]", consoleCommands);
+         renderConsoleCommands(mConsoleInstructions, consoleCommands);
          break;
       case 5:
          renderPluginCommands();
@@ -293,7 +313,7 @@ void EditorInstructionsUserInterface::renderPluginCommands()
 
    ctrls[plugins->size()] = ctrl;
 
-   renderConsoleCommands("See the wiki for info on creating your own plugins", ctrls.address());
+   renderConsoleCommands(mPluginInstructions, ctrls.address());
 }
 
 

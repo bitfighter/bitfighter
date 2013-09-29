@@ -44,8 +44,9 @@ private:
    S32 mAnimStage;
    WallSegmentManager mWallSegmentManager;
 
-   UI::SymbolStringSetCollection mSymbolSets1Left, mSymbolSets1Right;   // For page 1
-   UI::SymbolStringSetCollection mSymbolSets2Left, mSymbolSets2Right;   // For page 2
+   UI::SymbolStringSetCollection mSymbolSets1Left,     mSymbolSets1Right;     // For page 1
+   UI::SymbolStringSetCollection mSymbolSets2Left,     mSymbolSets2Right;     // For page 2
+   UI::SymbolStringSet           mConsoleInstructions, mPluginInstructions;
 
 public:
    explicit EditorInstructionsUserInterface(ClientGame *game);      // Constructor
