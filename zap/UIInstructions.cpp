@@ -967,7 +967,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
    const S32 cmdGap = 8;
 
    glColor(secColor);
-   drawString(cmdCol, ypos, headerSize, "Command");
+   drawString(cmdCol,   ypos, headerSize, "Command");
    drawString(descrCol, ypos, headerSize, "Description");
 
    ypos += cmdSize + cmdGap;
@@ -979,7 +979,6 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
 
    ypos += 5;     // Small gap before cmds start
-
 
    bool first = true;
    S32 section = -1;
