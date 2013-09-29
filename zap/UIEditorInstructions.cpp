@@ -320,29 +320,18 @@ void EditorInstructionsUserInterface::renderPluginCommands()
 // This has become rather ugly and inelegant.  But you shuold see UIInstructions.cpp!!!
 void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 {
-   GameSettings *settings = getGame()->getSettings();
-
-   S32 starty = 60;        // Is 65 in UIInstructions::render()...
-   S32 y = starty;
-   S32 actCol = col1;      // Action column
-   S32 contCol = col2;     // Control column
-   bool firstCol = true;
-   bool done = false;
+   S32 y = 60;             // Is 65 in UIInstructions::render()...
 
    if(page == 1)
    {
-      S32 yLeft  = mSymbolSets1Left.render(y);
-      S32 yRight = mSymbolSets1Right.render(y);
-      y += MAX(yLeft, yRight);
+      mSymbolSets1Left.render(y);
+      mSymbolSets1Right.render(y);
    }
-      
    else
    {      
-      S32 yLeft  = mSymbolSets2Left.render(y);
-      S32 yRight = mSymbolSets2Right.render(y);
-      y += MAX(yLeft, yRight);
+      mSymbolSets2Left.render(y);
+      mSymbolSets2Right.render(y);
    }
-
 
    y = 486;
    glColor(secColor);
