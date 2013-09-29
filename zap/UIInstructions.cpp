@@ -958,6 +958,9 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
    Color descrColor = Colors::white;
    Color secColor =   Colors::yellow;
 
+   Color argColor;
+   argColor.interp(.5, Colors::cyan, Colors::black);
+
    const S32 headerSize = 20;
    const S32 cmdSize = 16;
    const S32 cmdGap = 8;
@@ -1007,13 +1010,18 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
       
       // Assemble command & args from data in the chatCmds struct
       string cmdString = "/" + chatCmds[i].cmdName;
+      string args = "";
 
       for(S32 j = 0; j < chatCmds[i].cmdArgCount; j++)
-         cmdString += " " + chatCmds[i].helpArgString[j];
+         args += " " + chatCmds[i].helpArgString[j];
 
       if(chatCmds[i].lines == 1)    // Everything on one line, the normal case
       {
-         drawString(cmdCol, ypos, cmdSize, cmdString.c_str());      
+         S32 w = drawStringAndGetWidth(cmdCol, ypos, cmdSize, cmdString.c_str());
+
+         glColor(argColor);
+         drawString(cmdCol + w, ypos, cmdSize, args.c_str());
+         
          glColor(descrColor);
          drawString(descrCol, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
       }
