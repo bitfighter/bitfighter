@@ -105,38 +105,38 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    // For page 1 of general instructions
    ControlStringsEditor controls1Left[] = {
    { "HEADER", "Navigation" },
-         { "Pan Map", "[[W]]/[[A]]/[[S]]/[[D]] or"},
-         { " ", "Arrow Keys"},
-         { "Zoom In", "[[E]] or [[Ctrl+Up Arrow]]" },
-         { "Zoom Out", "[[C]] or [[Ctrl+Down Arrow]]" },
-         { "Center Display", "[[Z]]" },
-         { "Toggle Script Results", "[[Ctrl+K]]" },
+         { "Pan Map",                  "[[W]]/[[A]]/[[S]]/[[D]] or"},
+         { " ",                         "Arrow Keys"},
+         { "Zoom In",                  "[[E]] or [[Ctrl+Up Arrow]]" },
+         { "Zoom Out",                 "[[C]] or [[Ctrl+Down Arrow]]" },
+         { "Center Display",           "[[Z]]" },
+         { "Toggle Script Results",    "[[Ctrl+K]]" },
          { "Copy Results Into Editor", "[[Ctrl+I]]" },
-         { "Show/Hide Plugins Pane", "[[F9]]"},
+         { "Show/Hide Plugins Pane",   "[[F9]]"},
       { "-", "" },         // Horiz. line
    { "HEADER", "Editing" },
-         { "Cut/Copy/Paste", "[[Ctrl+X]]/[[C]]/[[V]]"},
-         { "Delete Selection", "[[Del]]" },
-         { "Undo", "[[Ctrl+Z]]" },
-         { "Redo", "[[Ctrl+Shift+Z]]" }
+         { "Cut/Copy/Paste",           "[[Ctrl+X]]/[[C]]/[[V]]"},
+         { "Delete Selection",         "[[Del]]" },
+         { "Undo",                     "[[Ctrl+Z]]" },
+         { "Redo",                     "[[Ctrl+Shift+Z]]" }
    };
 
    ControlStringsEditor controls1Right[] = {
    { "HEADER", "Object Shortcuts" },
-         { "Insert Teleporter", "[[T]]" },
-         { "Insert Spawn Point", "[[G]]" },
-         { "Insert Repair", "[[B]]" },
-         { "Insert Turret", "[[Y]]" },
-         { "Insert Force Field", "[[F]]" },
-         { "Insert Mine", "[[M]]" },
+         { "Insert Teleporter",     "[[T]]" },
+         { "Insert Spawn Point",    "[[G]]" },
+         { "Insert Repair",         "[[B]]" },
+         { "Insert Turret",         "[[Y]]" },
+         { "Insert Force Field",    "[[F]]" },
+         { "Insert Mine",           "[[M]]" },
       { "-", "" },         // Horiz. line
    { "HEADER", "Assigning Teams" },
-         { "Set object's team", "[[1]]-[[9]]" },
+         { "Set object's team",     "[[1]]-[[9]]" },
          { "Set object to neutral", "[[0]]" },
          { "Set object to hostile", "[[Shift+0]]" },
       { "-", "" },         // Horiz. line
-         { "Save", "[[Ctrl+S]]" },
-         { "Reload from file", "[[Ctrl+Shift+L]]" }
+         { "Save",                  "[[Ctrl+S]]" },
+         { "Reload from file",      "[[Ctrl+Shift+L]]" }
    };
 
 
