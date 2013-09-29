@@ -413,7 +413,6 @@ static const char *loadoutInstructions2[] = {
 };
 
 
-
 // Converts the blocks of text above into SymbolStrings for nicer rendering
 static void initPage2Block(const char **block, S32 blockSize, S32 fontSize, const Color *headerColor, const Color *bodyColor, 
                            const InputCodeManager *inputCodeManager, UI::SymbolStringSet &instrBlock)
@@ -437,7 +436,7 @@ static void initPage2Block(const char **block, S32 blockSize, S32 fontSize, cons
       {
          symbols.clear();
          string str(block[i]);
-         SymbolString::symbolParse(inputCodeManager, str, symbols, HelpContext, fontSize, bodyColor);
+         SymbolString::symbolParse(inputCodeManager, str, symbols, HelpContext, fontSize, bodyColor, keyColor);
 
          instrBlock.add(SymbolString(symbols, AlignmentLeft));
       }
@@ -451,7 +450,7 @@ void InstructionsUserInterface::initPage2()
 
    mLoadoutInstructions.clear();
 
-   initPage2Block(loadoutInstructions1, ARRAYSIZE(loadoutInstructions1), HeaderFontSize, &Colors::yellow, &Colors::white,
+   initPage2Block(loadoutInstructions1, ARRAYSIZE(loadoutInstructions1), HeaderFontSize, &Colors::yellow, &Colors::paleGreen,
                   getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
 
    // Add some space separating the two sections
@@ -593,6 +592,9 @@ void InstructionsUserInterface::renderModulesPage()
 
    for(U32 i = 0; i < ARRAYSIZE(moduleInstructions); i++)
    {
+      if(i == 2)
+         glColor(Colors::green);
+
       drawCenteredString(y, textsize, moduleInstructions[i]);
       y += textsize + textGap;
    }
@@ -949,7 +951,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 
    if(strcmp(msg, ""))
    {
-      glColor(Colors::magenta);
+      glColor(Colors::palePurple);
       drawString(cmdCol, ypos, FontSize, msg);
       ypos += 28;
    }
