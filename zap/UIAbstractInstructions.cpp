@@ -192,8 +192,6 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
 
    instructions.render(cmdCol, ypos, UI::AlignmentLeft);
 
-   //glColor(Colors::green);
-   //drawStringf(cmdCol, ypos, instrSize, activationCommand);
    ypos += 10;
 
    Color cmdColor =   Colors::cyan;
@@ -231,5 +229,6 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
       ypos += cmdSize + cmdGap;
    }
 }
+
 
 }
