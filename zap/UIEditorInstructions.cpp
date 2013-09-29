@@ -235,6 +235,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
                              symbols, HelpContext, FontSize, &Colors::green, keyColor);
    mPluginInstructions.add(SymbolString(symbols));
 
+   // Using TAB_STOP:0 below will cause the text and the horiz. line to be printed in the same space, creating a underline effect
    symbols.clear();
    symbols.push_back(SymbolString::getHorizLine(735, FontSize, FontSize + 4, &Colors::gray70));
    SymbolString::symbolParse(settings->getInputCodeManager(), "[[TAB_STOP:0]]Key" + tabstr + "Description",
