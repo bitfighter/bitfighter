@@ -180,20 +180,6 @@ InputCode BindingSet::getBinding(InputCodeManager::BindingName bindingName) cons
       case InputCodeManager::BINDING_GAME_PARAMS_EDITOR:
          return KEY_F3;
 
-      // Some special hacky cases for helping us with displaying instructions:
-      case InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE:
-         return MOUSE;
-      case InputCodeManager::BINDING_DUMMY_STICK_LEFT:
-         return LEFT_JOYSTICK;
-      case InputCodeManager::BINDING_DUMMY_STICK_RIGHT:
-         return RIGHT_JOYSTICK;
-      case InputCodeManager::BINDING_DUMMY_MSG_MODE:
-         return KEY_CTRL_M;
-      case InputCodeManager::BINDING_DUMMY_SS_MODE:
-         return KEY_CTRL_Q;
-      case InputCodeManager::BINDING_NONE:
-         return KEY_NONE;
-
       // Just in case:
       default:
          TNLAssert(false, "Invalid key binding!");
