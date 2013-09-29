@@ -45,11 +45,6 @@
 namespace Zap
 {
 
-static Vector<Point> sample1o, sample2o, sample3o, sample4o, sample5o;     // outline
-static Vector<Point> sample1f, sample2f, sample3f, sample4f, sample5f;     // fill
-static Border border34;
-
-
 static S32 col1 = UserInterface::horizMargin;
 static S32 col2 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 45;     // + 45 to make a little more room for Binding column
 static S32 col3 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.5);
@@ -209,6 +204,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    };
 
    pack(mWallInstr, mWallBindings, wallInstructions, ARRAYSIZE(wallInstructions), getGame()->getSettings());
+
 }
 
 
@@ -221,51 +217,7 @@ EditorInstructionsUserInterface::~EditorInstructionsUserInterface()
 
 void EditorInstructionsUserInterface::onActivate()
 {
-   mCurPage = 1;
-
-   // We really should be setting this up in the constructor, but... it doesn't seem to "stick".
-   // Do it here instead, but it will get run every time we load the instructions.  Better than every 
-   // draw cycle, for sure, but not really right.
-   sample1o.clear();
-   sample1o.push_back(Point(-70, -50));
-   sample1o.push_back(Point(70, -50));
-   sample1o.push_back(Point(70, 50));
-   sample1o.push_back(Point(-70, 50));
-
-   sample2o.clear();
-   sample2o.push_back(Point(-70, -50));
-   sample2o.push_back(Point(0, -10));   
-   sample2o.push_back(Point(70, -50));
-   sample2o.push_back(Point(70, 50));
-   sample2o.push_back(Point(-70, 50));
-
-   sample3o.clear();
-   sample3o.push_back(Point(-100, -50));
-   sample3o.push_back(Point(0, -50));
-   sample3o.push_back(Point(0, 50));
-   sample3o.push_back(Point(-100, 50));
-
-   sample4o.clear();
-   sample4o.push_back(Point(0, -50));
-   sample4o.push_back(Point(100, -50));
-   sample4o.push_back(Point(100, 50));
-   sample4o.push_back(Point(0, 50));
-
-   sample5o.clear();
-   sample5o.push_back(Point(-5, -50));
-   sample5o.push_back(Point(100, -50));
-   sample5o.push_back(Point(100, 50));
-   sample5o.push_back(Point(5, 50));
-
-   // Border between 3 and 4
-   border34.borderStart.set(0, -50);
-   border34.borderEnd.set(0, 50);
-
-   Triangulate::Process(sample1o, sample1f);
-   Triangulate::Process(sample2o, sample2f);
-   Triangulate::Process(sample3o, sample3f);
-   Triangulate::Process(sample4o, sample4f);
-   Triangulate::Process(sample5o, sample5f);
+   mCurPage = 1;     // Start at the beginning, silly!
 }
 
 
