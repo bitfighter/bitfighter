@@ -132,7 +132,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
       { "-", "" },         // Horiz. line
          { "Save", "[[Ctrl+S]]" },
          { "Reload from file", "[[Ctrl+Shift+L]]" }
-      };
+   };
 
 
    // For page 2 of general instructions
@@ -145,7 +145,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
          { "Arbitrary rotate about (0,0)", "[[Ctrl+Alt+R]]" },
          { "Scale selection", "[[Ctrl+Shift+X]]" },
 
-         { "-", "" },      // Horiz. line
+      { "-", "" },      // Horiz. line
          { "Hold [[Space]] to suspend grid snapping",    "" },
          { "[[Shift+Space]] to suspend vertex snapping", "" },
          { "Hold [[Tab]] to view a reference ship",      "" }
