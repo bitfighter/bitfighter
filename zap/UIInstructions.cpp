@@ -634,7 +634,6 @@ void InstructionsUserInterface::renderModulesPage()
       switch(i)
       {
          case 0:     // Boost
-
             renderShip(ShipShape::Normal, &Colors::blue, 1, thrustsBoost, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
             {
                F32 vertices[] = {
