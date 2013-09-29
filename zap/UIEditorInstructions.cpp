@@ -438,7 +438,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
    {
       S32 vertNum = S32(((F32)i  / 2) + 0.5);     // Ick!
 
-      if(i < (points.size() - ((mAnimStage > 6) ? 0 : 1) ) && !(i == 2 && (mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)))
+      if(i < (points.size() - ((mAnimStage > 6) ? 0 : 1) ) && !(i == 4 && (mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)))
          renderVertex(SelectedItemVertex, points[i], vertNum, 1);
       else if(mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)
          renderVertex(SelectedVertex, points[i], vertNum);
