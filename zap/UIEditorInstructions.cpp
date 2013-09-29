@@ -288,11 +288,14 @@ void EditorInstructionsUserInterface::render()
 {
    FontManager::pushFontContext(HelpContext);
 
-   glColor(Colors::white);
-   drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeadersEditor[mCurPage - 1]);
-   drawStringf(650, 3, 25, "PAGE %d/%d", mCurPage, getPageCount());
-   drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
-   glColor(0.7f);
+   //glColor(Colors::white);
+   //drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeadersEditor[mCurPage - 1]);
+   //drawStringf(650, 3, 25, "PAGE %d/%d", mCurPage, getPageCount());
+   //drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
+   //glColor(0.7f);
+   //drawHorizLine(0, 800, 569);
+
+   Parent::render(pageHeadersEditor[mCurPage - 1], mCurPage, getPageCount());
 
    static ControlStringsEditor consoleCommands[] = {
       { "Coming soon...", "Coming soon..." },
@@ -300,7 +303,6 @@ void EditorInstructionsUserInterface::render()
    };
 
 
-   drawHorizLine(0, 800, 569);
 
    switch(mCurPage)
    {
@@ -356,7 +358,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 {
    GameSettings *settings = getGame()->getSettings();
 
-   S32 starty = 50;
+   S32 starty = 60;        // Is 65 in UIInstructions::render()...
    S32 y = starty;
    S32 actCol = col1;      // Action column
    S32 contCol = col2;     // Control column
@@ -368,7 +370,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    else
       y += mSymbolSets2.render(y);
 
-   y = 480;
+   y = 486;
    glColor(secColor);
    drawCenteredString(y, 20, "These special keys are also usually active:");
 

@@ -135,12 +135,13 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
    {
       if(helpBindings[i].command == "-")
       {
+         S32 height = FontSize / 2;
          symbols.clear();
-         symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
+         symbols.push_back(SymbolString::getHorizLine(335, height, &Colors::gray40));
          instrs.add(SymbolString(symbols));
 
          symbols.clear();
-         symbols.push_back(SymbolString::getBlankSymbol(0, FontSize));
+         symbols.push_back(SymbolString::getBlankSymbol(0, height));
          bindings.add(SymbolString(symbols));
       }
       else if(helpBindings[i].command == "HEADER")
@@ -167,6 +168,19 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
          bindings.add(SymbolString(symbols));
       }
    }
+}
+
+
+void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32 pages)
+{
+   glColor(Colors::red);
+   drawStringf(  3, 3, 25, "INSTRUCTIONS - %s", header);
+   drawStringf(625, 3, 25, "PAGE %d/%d", page, pages); 
+   drawCenteredString(571, 20, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits");
+
+   glColor(Colors::gray70);
+   drawHorizLine(0, 800, 32);
+   drawHorizLine(0, 800, 569);
 }
 
 

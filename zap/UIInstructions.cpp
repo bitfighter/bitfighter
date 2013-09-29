@@ -280,14 +280,8 @@ void InstructionsUserInterface::render()
 {
    FontManager::pushFontContext(HelpContext);
 
-   glColor(Colors::red);
-   drawStringf(  3, 3, 25, "INSTRUCTIONS - %s", pageHeaders[mCurPage]);
-   drawStringf(625, 3, 25, "PAGE %d/%d", mCurPage + 1, InstructionMaxPages);  // We +1 to be natural
-   drawCenteredString(571, 20, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits");
 
-   glColor(Colors::gray70);
-   drawHorizLine(0, 800, 32);
-   drawHorizLine(0, 800, 569);
+   Parent::render(pageHeaders[mCurPage], mCurPage + 1, InstructionMaxPages);          // We +1 to be natural
 
    switch(mCurPage)
    {

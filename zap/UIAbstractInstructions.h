@@ -61,6 +61,7 @@ public:
    static const Color *groupHeaderColor;
 
 protected:
+   void render(const char *header, S32 page, S32 pages);
    void renderConsoleCommands(const char *activationCommand, const ControlStringsEditor *cmdList);
 
    UI::SymbolStringSet 
