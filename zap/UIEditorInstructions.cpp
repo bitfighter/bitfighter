@@ -201,7 +201,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    ControlStringsEditor wallInstructions[] =
    {
       { "[[BULLET]] Create walls with right mouse button; hold [[~]] to create line", "" },
-      { "[[BULLET]] Finish wall by left-clicking", "" },
+      { "[[BULLET]] Finish wall by left-clicking mouse", "" },
       { "[[BULLET]] Drag and drop individual vertices or an entire wall", "" },
       { "[[BULLET]] Split wall at selected vertex with [[\\]]", "" },
       { "[[BULLET]] Join contiguous wall segments, polywalls, or zones with [[J]]", "" },
