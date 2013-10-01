@@ -133,20 +133,22 @@ SpeedZone *SpeedZone::clone() const
 // vector (the three points of our triangle graphic), and compute its extent
 void SpeedZone::preparePoints()
 {
-   generatePoints(getVert(0), getVert(1), 1, mPolyBounds);
+   generatePoints(getVert(0), getVert(1), 1, mPolyBounds, mOutline);
 
    computeExtent();
 }
 
 
 // static method
-void SpeedZone::generatePoints(const Point &start, const Point &end, F32 gridSize, Vector<Point> &points)
+void SpeedZone::generatePoints(const Point &start, const Point &end, F32 gridSize, Vector<Point> &points, Vector<Point> &outline)
 {
    const S32 inset = 3;
    const F32 halfWidth = SpeedZone::halfWidth;
    const F32 height = SpeedZone::height;
 
+   // Presize to reduce allocation overhead
    points.resize(12);
+   outline.resize(5);
 
    Point parallel(end - start);
    parallel.normalize();
@@ -165,14 +167,22 @@ void SpeedZone::generatePoints(const Point &start, const Point &end, F32 gridSiz
    {
       F32 offset = halfWidth * 2 * i - (i * 4);
 
-      // Red chevron
-      points[index++] = start + parallel *  (chevronThickness + offset);
-      points[index++] = start + perpendic * (halfWidth-2*inset) + parallel * (inset + offset);                             //  2   3
-      points[index++] = start + perpendic * (halfWidth-2*inset) + parallel * (chevronThickness + inset + offset);          //    1    4
-      points[index++] = start + parallel *  (chevronDepth + chevronThickness + inset + offset);                            //  6    5
-      points[index++] = start - perpendic * (halfWidth-2*inset) + parallel * (chevronThickness + inset + offset);
-      points[index++] = start - perpendic * (halfWidth-2*inset) + parallel * (inset + offset);
+      // Red chevron -- iterate twice to generate pair
+      points[index++] = start + parallel *  (chevronThickness + offset);  // 0
+      points[index++] = start + perpendic * (halfWidth-2*inset) + parallel * (inset + offset);   // 1                      //  1   2
+      points[index++] = start + perpendic * (halfWidth-2*inset) + parallel * (chevronThickness + inset + offset);  // 2    //    0    3
+      points[index++] = start + parallel *  (chevronDepth + chevronThickness + inset + offset);  // 3                      //  5    4
+      points[index++] = start - perpendic * (halfWidth-2*inset) + parallel * (chevronThickness + inset + offset);  // 4
+      points[index++] = start - perpendic * (halfWidth-2*inset) + parallel * (inset + offset);  // 5
    }
+
+   // Pick a few selected points from those generated above to create an outline shape -- note that we need to reverse the winding
+   // in order to make buffering work.  We use buffering for generating the outlines shown in the inline help.
+   outline[4] = points[1];
+   outline[3] = points[8];
+   outline[2] = points[9];    // Front tip
+   outline[1] = points[10];
+   outline[0] = points[5];
 }
 
 
@@ -208,7 +218,7 @@ void SpeedZone::onGeomChanging()
 
 void SpeedZone::onGeomChanged()   
 {  
-   generatePoints(getVert(0), getVert(1), 1, mPolyBounds);
+   generatePoints(getVert(0), getVert(1), 1, mPolyBounds, mOutline);
    Parent::onGeomChanged();
 }
 
@@ -237,10 +247,16 @@ void SpeedZone::computeExtent()
 }
 
 
+const Vector<Point> *SpeedZone::getOutline() const
+{
+   return &mOutline;
+}
+
+
 // More precise boundary for more precise collision detection
 const Vector<Point> *SpeedZone::getCollisionPoly() const
 {
-   return &mPolyBounds;
+   return &mOutline;
 }
 
 

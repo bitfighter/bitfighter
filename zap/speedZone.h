@@ -41,7 +41,7 @@ class SpeedZone : public SimpleLine
    typedef SimpleLine Parent;
 
 private:
-   Vector<Point> mPolyBounds;
+   Vector<Point> mPolyBounds, mOutline;
    U16 mSpeed;             // Speed at which ship is propelled, defaults to defaultSpeed
    bool mSnapLocation;     // If true, ship will be snapped to center of speedzone before being ejected
    
@@ -83,7 +83,7 @@ public:
    F32 mRotateSpeed;
    U32 mUnpackInit;  // Some form of counter, to know that it is a rotating speed zone.
 
-   static void generatePoints(const Point &pos, const Point &dir, F32 gridSize, Vector<Point> &points);
+   static void generatePoints(const Point &pos, const Point &dir, F32 gridSize, Vector<Point> &points, Vector<Point> &outline);
    void render();
    S32 getRenderSortValue();
 
@@ -92,6 +92,7 @@ public:
 
    void onAddedToGame(Game *game);
 
+   virtual const Vector<Point> *getOutline() const;
    const Vector<Point> *getCollisionPoly() const;          // More precise boundary for precise collision detection
    bool collide(BfObject *hitObject);
    bool collided(BfObject *s, U32 stateIndex);

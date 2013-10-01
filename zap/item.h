@@ -76,9 +76,9 @@ public:
    virtual void setPos(lua_State *L, S32 stackIndex);
 
    virtual void setOutline();
-   const Vector<Point> *getOutline() const;
+   virtual const Vector<Point> *getOutline() const;   // Overridden by SpeedZones and Turrets
 
-   virtual void renderItem(const Point &pos);      // Generic renderer -- will be overridden
+   virtual void renderItem(const Point &pos);         // Generic renderer -- will be overridden
    virtual void render();
 
    U16 getItemId();
