@@ -2044,6 +2044,12 @@ const Vector<Point> *Turret::getCollisionPoly() const
 }
 
 
+const Vector<Point> *Turret::getOutline() const
+{
+   return getCollisionPoly();
+}
+
+
 F32 Turret::getEditorRadius(F32 currentScale)
 {
    if(mSnapped)

@@ -348,6 +348,7 @@ public:
    static Vector<Point> getTurretGeometry(const Point &anchor, const Point &normal);
    
    const Vector<Point> *getCollisionPoly() const;
+   const Vector<Point> *getOutline() const;
 
    F32 getEditorRadius(F32 currentScale);
 
