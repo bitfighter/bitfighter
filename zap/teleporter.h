@@ -96,6 +96,7 @@ private:
 
    bool mHasExploded;
    F32 mStartingHealth;
+   Vector<Point> mOutlinePoints;
 
    Timer mExplosionTimer;
    Timer mTeleportCooldown;
@@ -109,6 +110,7 @@ private:
    void initialize(const Point &pos, const Point &dest, Ship *engineeringShip);
    void doSetGeom(lua_State *L);    // Helper
    void computeExtent();
+   void generateOutlinePoints();
 
 public:
    explicit Teleporter(lua_State *L = NULL);                                  // Combined default C++/Lua constructor
@@ -144,8 +146,10 @@ public:
    void doTeleport();
    bool collide(BfObject *otherObject);
 
-   const Vector<Point> *getCollisionPoly() const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
+   const Vector<Point> *getCollisionPoly() const;
+   const Vector<Point> *getOutline() const;
+   const Vector<Point> *getEditorGrabPoly() const;
 
    void idle(BfObject::IdleCallPath path);
    void render();

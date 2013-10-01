@@ -442,6 +442,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mDestManager.read(i, stream);
       
       computeExtent();
+      generateOutlinePoints();
 
       if(stream->readFlag())
          mTeleporterCooldown = stream->readInt(32);
@@ -650,6 +651,35 @@ const Vector<Point> *Teleporter::getCollisionPoly() const
 {
    return NULL;
 }
+
+
+void Teleporter::generateOutlinePoints()
+{
+   static const S32 sides = 10;
+
+   mOutlinePoints.resize(sides);
+
+   F32 x = getVert(0).x;
+   F32 y = getVert(0).y;
+
+   for(S32 i = 0; i < sides; i++)    
+      mOutlinePoints[i] = Point(TELEPORTER_RADIUS * cos(i * Float2Pi / sides + FloatHalfPi) + x, 
+                                TELEPORTER_RADIUS * sin(i * Float2Pi / sides + FloatHalfPi) + y);
+}
+
+
+// Need a different outline here when in editor v when in game
+const Vector<Point> *Teleporter::getOutline() const
+{
+   return &mOutlinePoints;
+}
+
+
+const Vector<Point> *Teleporter::getEditorGrabPoly() const
+{
+   return Parent::getOutline();
+}
+
 
 
 void Teleporter::computeExtent()
@@ -880,6 +910,8 @@ void Teleporter::onGeomChanged()
 
    // Update the dest manager.  We need this for rendering in preview mode.
    mDestManager.setDest(0, getVert(1));
+
+   generateOutlinePoints();
 }   
 
 

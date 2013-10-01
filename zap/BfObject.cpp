@@ -1270,6 +1270,12 @@ bool BfObject::onGhostAdd(GhostConnection *theConnection)
 }
 
 
+const Vector<Point> *BfObject::getEditorGrabPoly() const
+{
+   return getOutline();
+}
+
+
 static const U8 TeamBits = 4;
 static const U8 TeamOffset = 2;     // To account for Neutral and Hostile teams
 

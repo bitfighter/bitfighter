@@ -92,7 +92,8 @@ public:
 
    void onAddedToGame(Game *game);
 
-   virtual const Vector<Point> *getOutline() const;
+   const Vector<Point> *getOutline() const;
+   const Vector<Point> *getEditorGrabPoly() const;
    const Vector<Point> *getCollisionPoly() const;          // More precise boundary for precise collision detection
    bool collide(BfObject *hitObject);
    bool collided(BfObject *s, U32 stateIndex);

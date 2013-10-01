@@ -253,6 +253,11 @@ const Vector<Point> *SpeedZone::getOutline() const
 }
 
 
+const Vector<Point> *SpeedZone::getEditorGrabPoly() const
+{
+   return Parent::getOutline();
+}
+
 // More precise boundary for more precise collision detection
 const Vector<Point> *SpeedZone::getCollisionPoly() const
 {

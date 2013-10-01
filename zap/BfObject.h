@@ -191,7 +191,6 @@ public:
    // For displaying object attributes in lower-left of editor:
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);   
 
-
    // Objects can be different sizes on the dock and in the editor.  We need to draw selection boxes in both locations,
    // and these functions specify how big those boxes should be.  Override if implementing a non-standard sized item.
    // (strictly speaking, only getEditorRadius needs to be public, but it make sense to keep these together organizationally.)
@@ -303,6 +302,9 @@ public:
 
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;
    void findObjects(TestFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;
+
+   virtual const Vector<Point> *getEditorGrabPoly() const;
+
 
    virtual S32 getRenderSortValue();
 
