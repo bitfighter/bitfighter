@@ -63,48 +63,49 @@ public:
    };
 
 
-   // TODO -- Hook into xmacro with BINDING_STRINGS
-   enum BindingName {
-      BINDING_SELWEAP1,    // Name def depends on these being in this order from here...
-      BINDING_SELWEAP2,
-      BINDING_SELWEAP3,
-      BINDING_ADVWEAP,
-      BINDING_ADVWEAP2,
-      BINDING_PREVWEAP,
-      BINDING_CMDRMAP,
-      BINDING_TEAMCHAT,
-      BINDING_GLOBCHAT,
-      BINDING_QUICKCHAT,
-      BINDING_CMDCHAT,
-      BINDING_LOADOUT,
-      BINDING_MOD1,
-      BINDING_MOD2,
-      BINDING_FIRE,
-      BINDING_DROPITEM,
-      BINDING_TOGVOICE,
-      BINDING_UP,
-      BINDING_DOWN,
-      BINDING_LEFT,
-      BINDING_RIGHT,
-      BINDING_SCRBRD,
-      BINDING_HELP,
-      BINDING_OUTGAMECHAT,
-      BINDING_MISSION,
-      BINDING_FPS,
-      BINDING_DIAG,        
-      BINDING_LOAD_PRESET_1,
-      BINDING_LOAD_PRESET_2,
-      BINDING_LOAD_PRESET_3,
-      BINDING_SAVE_PRESET_1,
-      BINDING_SAVE_PRESET_2,
-      BINDING_SAVE_PRESET_3, 
+/*          Enum                    Name in INI             */#define BINDING_TABLE \   BINDING(BINDING_SELWEAP1,           "SelWeapon1"          ) \
+   BINDING(BINDING_SELWEAP2,           "SelWeapon2"          ) \
+   BINDING(BINDING_SELWEAP3,           "SelWeapon3"          ) \
+   BINDING(BINDING_ADVWEAP,            "SelNextWeapon"       ) \
+   BINDING(BINDING_ADVWEAP2,           "SelNextWeapon2"      ) \
+   BINDING(BINDING_PREVWEAP,           "SelPrevWeapon"       ) \
+   BINDING(BINDING_CMDRMAP,            "ShowCmdrMap"         ) \
+   BINDING(BINDING_TEAMCHAT,           "TeamChat"            ) \
+   BINDING(BINDING_GLOBCHAT,           "GlobalChat"          ) \
+   BINDING(BINDING_QUICKCHAT,          "QuickChat"           ) \
+   BINDING(BINDING_CMDCHAT,            "Command"             ) \
+   BINDING(BINDING_LOADOUT,            "ShowLoadoutMenu"     ) \
+   BINDING(BINDING_MOD1,               "ActivateModule1"     ) \
+   BINDING(BINDING_MOD2,               "ActivateModule2"     ) \
+   BINDING(BINDING_FIRE,               "Fire"                ) \
+   BINDING(BINDING_DROPITEM,           "DropItem"            ) \
+   BINDING(BINDING_TOGVOICE,           "VoiceChat"           ) \
+   BINDING(BINDING_UP,                 "ShipUp"              ) \
+   BINDING(BINDING_DOWN,               "ShipDown"            ) \
+   BINDING(BINDING_LEFT,               "ShipLeft"            ) \
+   BINDING(BINDING_RIGHT,              "ShipRight"           ) \
+   BINDING(BINDING_SCRBRD,             "ShowScoreboard"      ) \
+   BINDING(BINDING_HELP,               "Help"                ) \
+   BINDING(BINDING_OUTGAMECHAT,        "OutOfGameChat"       ) \
+   BINDING(BINDING_MISSION,            "Mission"             ) \
+   BINDING(BINDING_FPS,                "FPS"                 ) \
+   BINDING(BINDING_DIAG,               "Diagnostics"         ) \
+   BINDING(BINDING_LOAD_PRESET_1,      "LoadLoadoutPreset1"  ) \
+   BINDING(BINDING_LOAD_PRESET_2,      "LoadLoadoutPreset2"  ) \
+   BINDING(BINDING_LOAD_PRESET_3,      "LoadLoadoutPreset3"  ) \
+   BINDING(BINDING_SAVE_PRESET_1,      "SaveLoadoutPreset1"  ) \
+   BINDING(BINDING_SAVE_PRESET_2,      "SaveLoadoutPreset2"  ) \
+   BINDING(BINDING_SAVE_PRESET_3,      "SaveLoadoutPreset3"  ) \                                                               \   /* Editor specific */                                       \                                                               \
+   BINDING(BINDING_TEAM_EDITOR,        "TeamEditor"          ) \
+   BINDING(BINDING_GAME_PARAMS_EDITOR, "GameParameterEditor" ) \
 
-      // Editor bindings...
-      BINDING_TEAM_EDITOR,
-      BINDING_GAME_PARAMS_EDITOR,   // ...to here
 
-      BINDING_DEFINEABLE_KEY_COUNT
-   };
+enum BindingName {
+#define BINDING(enumName, b) enumName,
+    BINDING_TABLE
+#undef BINDING
+    BINDING_DEFINEABLE_KEY_COUNT
+};
 
    InputCodeManager();     // Constructor
    virtual ~InputCodeManager();

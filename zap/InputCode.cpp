@@ -316,49 +316,11 @@ bool BindingSet::hasKeypad()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Seems like a good xmacro candidate!
-// Keep in sync with BindingName!
-static const string BINDING_STRINGS[] = 
-{
-   "SelWeapon1",		     // BINDING_SELWEAP1 
-   "SelWeapon2",		     // BINDING_SELWEAP2 
-   "SelWeapon3",		     // BINDING_SELWEAP3 
-   "SelNextWeapon",	     // BINDING_ADVWEAP 
-   "SelNextWeapon2",	     // BINDING_ADVWEAP2 
-   "SelPrevWeapon",	     // BINDING_PREVWEAP 
-   "ShowCmdrMap",		     // BINDING_CMDRMAP 
-   "TeamChat",		        // BINDING_TEAMCHAT 
-   "GlobalChat",		     // BINDING_GLOBCHAT 
-   "QuickChat",		     // BINDING_QUICKCHAT 
-   "Command",		        // BINDING_CMDCHAT 
-   "ShowLoadoutMenu",	  // BINDING_LOADOUT 
-   "ActivateModule1",	  // BINDING_MOD1 
-   "ActivateModule2",	  // BINDING_MOD2 
-   "Fire",			        // BINDING_FIRE 
-   "DropItem",		        // BINDING_DROPITEM 
-   "VoiceChat",	        // BINDING_TOGVOICE 
-   "ShipUp",		        // BINDING_UP 
-   "ShipDown",		        // BINDING_DOWN 
-   "ShipLeft",		        // BINDING_LEFT 
-   "ShipRight",		     // BINDING_RIGHT 
-   "ShowScoreboard",	     // BINDING_SCRBRD 
-   "Help",			        // BINDING_HELP 
-   "OutOfGameChat",	     // BINDING_OUTGAMECHAT 
-   "Mission",		        // BINDING_MISSION 
-   "FPS",			        // BINDING_FPS 
-   "Diagnostics",	        // BINDING_DIAG 
-   "LoadLoadoutPreset1",  // BINDING_LOAD_PRESET_1
-   "LoadLoadoutPreset2",  // BINDING_LOAD_PRESET_2
-   "LoadLoadoutPreset3",  // BINDING_LOAD_PRESET_3
-   "SaveLoadoutPreset1",  // BINDING_SAVE_PRESET_1
-   "SaveLoadoutPreset2",  // BINDING_SAVE_PRESET_2
-   "SaveLoadoutPreset3",  // BINDING_SAVE_PRESET_3
-
-   // Editor specific?
-   "TeamEditor",          // BINDING_TEAM_EDITOR
-   "GameParameterEditor", // BINDING_GAME_PARAMS_EDITOR
+static const string BINDING_STRINGS[] = {
+#define BINDING(a, bindingString) bindingString,
+    BINDING_TABLE
+#undef BINDING
 };
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
