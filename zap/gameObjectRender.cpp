@@ -187,7 +187,7 @@ void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 rad)
    Point p;
 
    // First the main body of the rect, start in UL, proceed CW
-   F32 width2 = width / 2;
+   F32 width2  = width  / 2;
    F32 height2 = height / 2;
 
    F32 vertices[] = {
@@ -2304,16 +2304,16 @@ void renderAsteroidSpawn(const Point &pos, S32 time)
 
    static const F32 lines[] = {
          // Inner
-         -8, -12, 8, -12,
-         12, -8, 12, 8,
-         8, 12, -8, 12,
-         -12, 8, -12, -8,
+          -8, -12,     8, -12,
+          12,  -8,    12,   8,
+           8,  12,    -8,  12,
+         -12,   8,   -12,  -8,
 
          // Outer
-         -12, -16, 12, -16,
-         16, -12, 16, 12,
-         12, 16, -12, 16,
-         -16, 12, -16, -12,
+         -12, -16,    12, -16,
+          16, -12,    16,  12,
+          12,  16,   -12,  16,
+         -16,  12,   -16, -12,
    };
 
    glColor(Colors::green, 0.5f);
