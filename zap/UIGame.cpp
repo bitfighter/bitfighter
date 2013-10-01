@@ -2577,7 +2577,6 @@ void GameUserInterface::renderGameNormal()
    }
 
 
-
    // Render a highlight/outline around any objects in our highlight type list, for help
    static Vector<const Vector<Point> *> polygons;
    polygons.clear();
