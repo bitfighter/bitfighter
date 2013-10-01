@@ -68,7 +68,7 @@ namespace Zap
    { "prev",        &ChatCommands::prevLevelHandler,       {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Replay previous level" },
    { "restart",     &ChatCommands::restartLevelHandler,    {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Restart current level" },
    { "random",      &ChatCommands::randomLevelHandler,     {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Start random level" },
-   { "shownextlevel",&ChatCommands::showNextLevelHandler,   {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Show the name of the next level" },
+   { "shownextlevel",&ChatCommands::showNextLevelHandler,  {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Show name of the next level" },
 
    { "settime",     &ChatCommands::setTimeHandler,         { xINT },                 1, LEVEL_COMMANDS,  0,  1,  {"<time in minutes>"},                      "Set play time for the level" },
    { "setscore",    &ChatCommands::setWinningScoreHandler, { xINT },                 1, LEVEL_COMMANDS,  0,  1,  {"<score>"},                                "Set score to win the level" },
@@ -101,13 +101,13 @@ namespace Zap
    { "showcoords", &ChatCommands::showCoordsHandler,    {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show ship coordinates" },
    { "showzones",  &ChatCommands::showZonesHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show bot nav mesh zones" },
    { "showids",    &ChatCommands::showIdsHandler,       {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show object ids" },
-   { "showpaths",  &ChatCommands::showPathsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show robot paths" },
+   { "showpaths",  &ChatCommands::showPathsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show robot navigation paths" },
    { "showbots",   &ChatCommands::showBotsHandler,      {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show all robots" },
-   { "pausebots",  &ChatCommands::pauseBotsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Pause all bots. Reissue to start again" },
+   { "pausebots",  &ChatCommands::pauseBotsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Pause all bots.  Reissue to start again." },
    { "stepbots",   &ChatCommands::stepBotsHandler,      { xINT },    1, DEBUG_COMMANDS, 1,  1, {"[steps]"},  "Advance bots by number of steps (default = 1)"},
    { "linewidth",  &ChatCommands::lineWidthHandler,     { xINT },    1, DEBUG_COMMANDS, 1,  1, {"[number]"}, "Change width of all lines (default = 2)" },
    { "maxfps",     &ChatCommands::maxFpsHandler,        { xINT },    1, DEBUG_COMMANDS, 1,  1, {"<number>"}, "Set maximum speed of game in frames per second" },
-   { "lag",        &ChatCommands::lagHandler, {xINT,xINT,xINT,xINT}, 4, DEBUG_COMMANDS, 1,  2, {"<send lag>", "[% of send drop packets]", "[receive lag]", "[% of receive drop packets]"}, "Set additional lag and percent of dropped packets" },
+   { "lag",        &ChatCommands::lagHandler, {xINT,xINT,xINT,xINT}, 4, DEBUG_COMMANDS, 1,  2, {"<send lag>", "[% of send drop packets]", "[receive lag]", "[% of receive drop packets]" }, "Set additional lag and dropped packets for testing bad networks" },
    { "clearcache", &ChatCommands::clearCacheHandler,    {  },        0, DEBUG_COMMANDS, 1,  1, { },          "Clear any cached scripts, forcing them to be reloaded" },
 };
 

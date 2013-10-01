@@ -1015,19 +1015,17 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
       for(S32 j = 0; j < chatCmds[i].cmdArgCount; j++)
          args += " " + chatCmds[i].helpArgString[j];
 
+      S32 w = drawStringAndGetWidth(cmdCol, ypos, cmdSize, cmdString.c_str());
+      glColor(argColor);
+      drawString(cmdCol + w, ypos, cmdSize, args.c_str());
+
       if(chatCmds[i].lines == 1)    // Everything on one line, the normal case
       {
-         S32 w = drawStringAndGetWidth(cmdCol, ypos, cmdSize, cmdString.c_str());
-
-         glColor(argColor);
-         drawString(cmdCol + w, ypos, cmdSize, args.c_str());
-         
          glColor(descrColor);
          drawString(descrCol, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
       }
       else                          // Draw the command on one line, explanation on the next, with a bit of indent
       {
-         drawString(cmdCol, ypos, cmdSize, cmdString.c_str());
          ypos += cmdSize + cmdGap;
          glColor(descrColor);
          drawString(cmdCol + 50, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
