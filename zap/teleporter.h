@@ -149,7 +149,7 @@ public:
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    const Vector<Point> *getCollisionPoly() const;
    const Vector<Point> *getOutline() const;
-   const Vector<Point> *getEditorGrabPoly() const;
+   const Vector<Point> *getEditorHitPoly() const;
 
    void idle(BfObject::IdleCallPath path);
    void render();

@@ -389,7 +389,7 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 {
    if(stream->writeFlag(updateMask & InitMask))
    {
-      getVert(0).write(stream);
+      getVert(0).write(stream);     // Location of intake
 
       stream->writeFlag(mEngineered);
 
@@ -430,7 +430,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       U32 count;
       Point pos;
       pos.read(stream);
-      setVert(pos, 0);
+      setVert(pos, 0);                    // Location of intake
       setVert(pos, 1);                    // Simulate a point geometry -- will be changed later when we add our first dest
 
       mEngineered = stream->readFlag();
@@ -675,7 +675,7 @@ const Vector<Point> *Teleporter::getOutline() const
 }
 
 
-const Vector<Point> *Teleporter::getEditorGrabPoly() const
+const Vector<Point> *Teleporter::getEditorHitPoly() const
 {
    return Parent::getOutline();
 }
@@ -910,8 +910,6 @@ void Teleporter::onGeomChanged()
 
    // Update the dest manager.  We need this for rendering in preview mode.
    mDestManager.setDest(0, getVert(1));
-
-   generateOutlinePoints();
 }   
 
 

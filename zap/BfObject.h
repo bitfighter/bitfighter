@@ -303,7 +303,12 @@ public:
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;
    void findObjects(TestFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;
 
-   virtual const Vector<Point> *getEditorGrabPoly() const;
+   // For a few objects, their renderable outline differs from where the user needs to grab them in the editor... 
+   // This primarily affects line items like gofasts and teleporters, where the main item is the outline, but
+   // in the editor users want to grab them along their axes/shafts.  The editorHitPoly lets us differentiate
+   // between these two uses of the polygons.  In most cases, the editorHitPoly will just be the object's 
+   // outline.
+   virtual const Vector<Point> *getEditorHitPoly() const;
 
 
    virtual S32 getRenderSortValue();

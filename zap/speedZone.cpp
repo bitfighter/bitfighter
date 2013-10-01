@@ -253,7 +253,7 @@ const Vector<Point> *SpeedZone::getOutline() const
 }
 
 
-const Vector<Point> *SpeedZone::getEditorGrabPoly() const
+const Vector<Point> *SpeedZone::getEditorHitPoly() const
 {
    return Parent::getOutline();
 }

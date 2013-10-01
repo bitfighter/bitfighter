@@ -1270,7 +1270,7 @@ bool BfObject::onGhostAdd(GhostConnection *theConnection)
 }
 
 
-const Vector<Point> *BfObject::getEditorGrabPoly() const
+const Vector<Point> *BfObject::getEditorHitPoly() const
 {
    return getOutline();
 }
