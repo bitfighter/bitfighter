@@ -55,6 +55,7 @@ enum HelpCategories {
    ADMIN_COMMANDS,
    OWNER_COMMANDS,
    DEBUG_COMMANDS,
+   DEVELOPER_COMMANDS,     // Only include in debug builds
    COMMAND_CATEGORIES
 };
 
@@ -140,6 +141,12 @@ void globalMuteHandler         (ClientGame *game, const Vector<string> &args);
 void shuffleTeams              (ClientGame *game, const Vector<string> &args);
 void downloadMapHandler        (ClientGame *game, const Vector<string> &args);
 void rateMapHandler            (ClientGame *game, const Vector<string> &args);
+
+
+// The following are only available in debug builds!
+#ifdef TNL_DEBUG
+   void showObjectOutlinesHandler(ClientGame *game, const Vector<string> &args);
+#endif
 
 
 };

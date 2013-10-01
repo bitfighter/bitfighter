@@ -85,6 +85,9 @@ public:
       InstructionAdminCommands,
       InstructionOwnerCommands,
       InstructionDebugCommands,
+#ifdef TNL_DEBUG
+      InstructionTestCommands,
+#endif
       //InstructionScriptingConsole,
       InstructionMaxPages
    };

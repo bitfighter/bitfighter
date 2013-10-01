@@ -51,7 +51,7 @@ namespace Zap
 {
 
 
-// This must be kept aligned with enum IntructionPages
+// This must be kept aligned with enum IntructionPages -- TODO put this into xmacro
 static const char *pageHeaders[] = {
    "CONTROLS",
    "LOADOUT SELECTION",
@@ -69,6 +69,10 @@ static const char *pageHeaders[] = {
    "OWNER COMMANDS",
    "DEBUG COMMANDS",
    //"SCRIPTING CONSOLE"
+
+#ifdef TNL_DEBUG
+   "TEST COMMANDS"
+#endif
 };
 
 
@@ -276,7 +280,6 @@ void InstructionsUserInterface::render()
 {
    FontManager::pushFontContext(HelpContext);
 
-
    Parent::render(pageHeaders[mCurPage], mCurPage + 1, InstructionMaxPages);          // We +1 to be natural
 
    switch(mCurPage)
@@ -331,12 +334,21 @@ void InstructionsUserInterface::render()
          renderPageCommands(InstructionDebugCommands - FIRST_COMMAND_PAGE);            // Debug commands
          break;
 
+#ifdef TNL_DEBUG
+      case InstructionTestCommands:
+         renderPageCommands(InstructionTestCommands  - FIRST_COMMAND_PAGE,
+                            "These commands only available in debug builds");          // Debug commands -- debug builds only
+         break;
+#endif
+
       //case InstructionScriptingConsole:
       //   renderConsoleCommands("Open the console by pressing [Ctrl-/] in game", consoleCommands1);   // Scripting console
       //   break;
 
       // When adding page, be sure to add item to pageHeaders array and InstructionPages enum
 
+      default:
+         TNLAssert(false, "Invalid value for mCurPage!");
    }
 
    FontManager::popFontContext();

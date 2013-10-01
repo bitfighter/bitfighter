@@ -2577,11 +2577,12 @@ void GameUserInterface::renderGameNormal()
    }
 
 
-   // Render a higlight around any objects in our highlight type list, for help
+
+   // Render a highlight/outline around any objects in our highlight type list, for help
    static Vector<const Vector<Point> *> polygons;
    polygons.clear();
 
-   const Vector<HighlightItem> *itemsToHighlight = mHelpItemManager.getItemsToHighlight();
+   const Vector<HighlightItem> *itemsToHighlight = mHelpItemManager.getItemsToHighlight();      
 
    for(S32 i = 0; i < itemsToHighlight->size(); i++)
       for(S32 j = 0; j < renderObjects.size(); j++)
@@ -2601,6 +2602,30 @@ void GameUserInterface::renderGameNormal()
 
                polygons.push_back(renderObjects[j]->getOutline());
          }
+
+
+#ifdef TNL_DEBUG
+   if(getGame()->showAllObjectOutlines())
+   {
+      static Vector<U8> itemTypes;     // List of all items that are highlighted by our help system
+
+      // Lazily initialize list
+      if(itemTypes.size() == 0)
+      {
+#define HELP_TABLE_ITEM(a, itemType, c, d, e, f, g) \
+         if(itemType != UnknownTypeNumber) \
+            itemTypes.push_back(itemType);
+         HELP_ITEM_TABLE
+#undef HELP_TABLE_ITEM
+      }
+
+      fillVector.clear();
+      getGame()->getGameObjDatabase()->findObjects(itemTypes, fillVector, *getGame()->getWorldExtents());
+      polygons.clear();
+      for(S32 i = 0; i < fillVector.size(); i++)
+         polygons.push_back(fillVector[i]->getOutline());
+   }
+#endif
 
    if(polygons.size() > 0)
    {

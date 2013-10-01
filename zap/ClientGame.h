@@ -63,6 +63,7 @@ private:
    UIManager *mUIManager;
 
    string mRemoteLevelDownloadFilename;
+   bool mShowAllObjectOutlines;     // For debugging purposes
 
    Vector<string> mMuteList;        // List of players we aren't listening to anymore because they've annoyed us!
    Vector<string> mVoiceMuteList;   // List of players we mute because they are abusing voice chat
@@ -116,6 +117,10 @@ public:
    void doneLoadingLevel();
 
    UIManager *getUIManager() const;
+
+   void toggleShowAllObjectOutlines();
+   bool showAllObjectOutlines() const;
+
 
    // A place to store input from the joysticks while we are composing our moves
    F32 mJoystickInputs[JoystickAxesDirectionCount];

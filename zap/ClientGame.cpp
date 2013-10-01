@@ -94,6 +94,8 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIM
       mJoystickInputs[i] = 0;
 
    initializeHelpItemForObjects();
+
+   mShowAllObjectOutlines = false;        // Will only be changed in debug builds... in production code will never be true
 }
 
 
@@ -1587,6 +1589,19 @@ F32 ClientGame::getObjectiveArrowHighlightAlpha() const
 {
    return mUIManager->getObjectiveArrowHighlightAlpha();
 }
+
+
+void ClientGame::toggleShowAllObjectOutlines()
+{
+   mShowAllObjectOutlines = !mShowAllObjectOutlines;
+}
+
+
+bool ClientGame::showAllObjectOutlines() const
+{
+   return mShowAllObjectOutlines;
+}
+
 
 
 };

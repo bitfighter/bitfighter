@@ -1022,4 +1022,14 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
    rateThread->start();
 }
 
+
+// The following are only available in debug builds!
+#ifdef TNL_DEBUG
+void showObjectOutlinesHandler(ClientGame *game, const Vector<string> &args)
+{
+   game->toggleShowAllObjectOutlines();
+}
+#endif
+
+
 };

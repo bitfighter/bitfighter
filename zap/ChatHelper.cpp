@@ -98,17 +98,22 @@ namespace Zap
    { "setadminpass",       &ChatCommands::setAdminPassHandler,       { STR },        1, OWNER_COMMANDS,  0,  1,  {"[passwd]"},            "Set admin password" },
    { "shutdown",           &ChatCommands::shutdownServerHandler,     { xINT, STR },  2, OWNER_COMMANDS,  0,  1,  {"[time]","[message]"},  "Start orderly shutdown of server (def. = 10 secs)" },
 
-   { "showcoords", &ChatCommands::showCoordsHandler,    {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show ship coordinates" },
-   { "showzones",  &ChatCommands::showZonesHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show bot nav mesh zones" },
-   { "showids",    &ChatCommands::showIdsHandler,       {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show object ids" },
-   { "showpaths",  &ChatCommands::showPathsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show robot navigation paths" },
-   { "showbots",   &ChatCommands::showBotsHandler,      {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show all robots" },
-   { "pausebots",  &ChatCommands::pauseBotsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Pause all bots.  Reissue to start again." },
-   { "stepbots",   &ChatCommands::stepBotsHandler,      { xINT },    1, DEBUG_COMMANDS, 1,  1, {"[steps]"},  "Advance bots by number of steps (default = 1)"},
-   { "linewidth",  &ChatCommands::lineWidthHandler,     { xINT },    1, DEBUG_COMMANDS, 1,  1, {"[number]"}, "Change width of all lines (default = 2)" },
-   { "maxfps",     &ChatCommands::maxFpsHandler,        { xINT },    1, DEBUG_COMMANDS, 1,  1, {"<number>"}, "Set maximum speed of game in frames per second" },
+   { "showcoords", &ChatCommands::showCoordsHandler,    {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show ship coordinates" },
+   { "showzones",  &ChatCommands::showZonesHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show bot nav mesh zones" },
+   { "showids",    &ChatCommands::showIdsHandler,       {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show object ids" },
+   { "showpaths",  &ChatCommands::showPathsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show robot navigation paths" },
+   { "showbots",   &ChatCommands::showBotsHandler,      {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show all robots" },
+   { "pausebots",  &ChatCommands::pauseBotsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Pause all bots.  Reissue to start again." },
+   { "stepbots",   &ChatCommands::stepBotsHandler,      { xINT },    1, DEBUG_COMMANDS, 1,  1, {"[steps]"},   "Advance bots by number of steps (default = 1)"},
+   { "linewidth",  &ChatCommands::lineWidthHandler,     { xINT },    1, DEBUG_COMMANDS, 1,  1, {"[number]"},  "Change width of all lines (default = 2)" },
+   { "maxfps",     &ChatCommands::maxFpsHandler,        { xINT },    1, DEBUG_COMMANDS, 1,  1, {"<number>"},  "Set maximum speed of game in frames per second" },
    { "lag",        &ChatCommands::lagHandler, {xINT,xINT,xINT,xINT}, 4, DEBUG_COMMANDS, 1,  2, {"<send lag>", "[% of send drop packets]", "[receive lag]", "[% of receive drop packets]" }, "Set additional lag and dropped packets for testing bad networks" },
-   { "clearcache", &ChatCommands::clearCacheHandler,    {  },        0, DEBUG_COMMANDS, 1,  1, { },          "Clear any cached scripts, forcing them to be reloaded" },
+   { "clearcache", &ChatCommands::clearCacheHandler,    {  },        0, DEBUG_COMMANDS, 1,  1, { },           "Clear any cached scripts, forcing them to be reloaded" },
+
+   // The following are only available in debug builds!
+#ifdef TNL_DEBUG
+   { "showobjectoutlines", &ChatCommands::showObjectOutlinesHandler, {  },  0, DEVELOPER_COMMANDS, 1, 1, { },         "Show HelpItem object outlines on all objects" },    
+#endif
 };
 
 
