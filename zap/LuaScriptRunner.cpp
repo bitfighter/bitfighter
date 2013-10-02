@@ -1042,6 +1042,7 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
    // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented
    // Ensure we have a good stream of random numbers until we figure out why Lua's randoms suck so bad (bug reported in 5.1, fixed in 5.2?)
    luaL_dostring(L, "math.random = getRandomNumber");
+   luaL_dostring(L, "math.tau = math.pi * 2");
 }
 
 #undef LUA_NON_STATIC_METHODS
