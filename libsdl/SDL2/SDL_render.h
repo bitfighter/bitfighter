@@ -37,9 +37,12 @@
  *  them, and may also be stretched with linear interpolation.
  *
  *  This API is designed to accelerate simple 2D operations. You may
- *  want more functionality such as rotation and particle effects and
+ *  want more functionality such as polygons and particle effects and
  *  in that case you should use SDL's OpenGL/Direct3D support or one
  *  of the many good 3D engines.
+ *
+ *  These functions must be called from the main thread.
+ *  See this bug for details: http://bugzilla.libsdl.org/show_bug.cgi?id=1995
  */
 
 #ifndef _SDL_render_h
@@ -210,6 +213,12 @@ extern DECLSPEC SDL_Renderer * SDLCALL SDL_GetRenderer(SDL_Window * window);
  */
 extern DECLSPEC int SDLCALL SDL_GetRendererInfo(SDL_Renderer * renderer,
                                                 SDL_RendererInfo * info);
+
+/**
+ *  \brief Get the output size of a rendering context.
+ */
+extern DECLSPEC int SDLCALL SDL_GetRendererOutputSize(SDL_Renderer * renderer,
+                                                      int *w, int *h);
 
 /**
  *  \brief Create a texture for a rendering context.
@@ -475,8 +484,7 @@ extern DECLSPEC void SDLCALL SDL_RenderGetLogicalSize(SDL_Renderer * renderer, i
  *
  *  \return 0 on success, or -1 on error
  *
- *  \note When the window is resized, the current viewport is automatically
- *        centered within the new window size.
+ *  \note If the window associated with the renderer is resized, the viewport is automatically reset.
  *
  *  \sa SDL_RenderGetViewport()
  *  \sa SDL_RenderSetLogicalSize()

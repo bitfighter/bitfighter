@@ -76,8 +76,7 @@ typedef unsigned int uintptr_t;
 # define SIZEOF_VOIDP 4
 #endif
 
-/* Enabled for SDL 1.2 (binary compatibility) */
-//#define HAVE_LIBC     1
+/* This is disabled by default to avoid C runtime dependencies and manifest requirements */
 #ifdef HAVE_LIBC
 /* Useful headers */
 #define HAVE_STDIO_H 1
@@ -142,9 +141,7 @@ typedef unsigned int uintptr_t;
 
 /* Enable various audio drivers */
 #define SDL_AUDIO_DRIVER_DSOUND 1
-#ifndef __GNUC__
 #define SDL_AUDIO_DRIVER_XAUDIO2    1
-#endif
 #define SDL_AUDIO_DRIVER_WINMM  1
 #define SDL_AUDIO_DRIVER_DISK   1
 #define SDL_AUDIO_DRIVER_DUMMY  1

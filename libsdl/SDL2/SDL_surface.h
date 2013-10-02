@@ -22,7 +22,7 @@
 /**
  *  \file SDL_surface.h
  *
- *  Header file for ::SDL_surface definition and management functions.
+ *  Header file for ::SDL_Surface definition and management functions.
  */
 
 #ifndef _SDL_surface_h
@@ -43,7 +43,7 @@ extern "C" {
 /**
  *  \name Surface flags
  *
- *  These are the currently supported flags for the ::SDL_surface.
+ *  These are the currently supported flags for the ::SDL_Surface.
  *
  *  \internal
  *  Used internally (read-only).
@@ -399,44 +399,42 @@ extern DECLSPEC int SDLCALL SDL_FillRects
  *
  *  The blit function should not be called on a locked surface.
  *
- *  The blit semantics for surfaces with and without alpha and colorkey
+ *  The blit semantics for surfaces with and without blending and colorkey
  *  are defined as follows:
  *  \verbatim
     RGBA->RGB:
-      SDL_SRCALPHA set:
-        alpha-blend (using alpha-channel).
+      Source surface blend mode set to SDL_BLENDMODE_BLEND:
+        alpha-blend (using the source alpha-channel and per-surface alpha)
         SDL_SRCCOLORKEY ignored.
-      SDL_SRCALPHA not set:
+      Source surface blend mode set to SDL_BLENDMODE_NONE:
         copy RGB.
         if SDL_SRCCOLORKEY set, only copy the pixels matching the
         RGB values of the source color key, ignoring alpha in the
         comparison.
 
     RGB->RGBA:
-      SDL_SRCALPHA set:
-        alpha-blend (using the source per-surface alpha value);
-        set destination alpha to opaque.
-      SDL_SRCALPHA not set:
+      Source surface blend mode set to SDL_BLENDMODE_BLEND:
+        alpha-blend (using the source per-surface alpha)
+      Source surface blend mode set to SDL_BLENDMODE_NONE:
         copy RGB, set destination alpha to source per-surface alpha value.
       both:
         if SDL_SRCCOLORKEY set, only copy the pixels matching the
         source color key.
 
     RGBA->RGBA:
-      SDL_SRCALPHA set:
-        alpha-blend (using the source alpha channel) the RGB values;
-        leave destination alpha untouched. [Note: is this correct?]
+      Source surface blend mode set to SDL_BLENDMODE_BLEND:
+        alpha-blend (using the source alpha-channel and per-surface alpha)
         SDL_SRCCOLORKEY ignored.
-      SDL_SRCALPHA not set:
+      Source surface blend mode set to SDL_BLENDMODE_NONE:
         copy all of RGBA to the destination.
         if SDL_SRCCOLORKEY set, only copy the pixels matching the
         RGB values of the source color key, ignoring alpha in the
-       comparison.
+        comparison.
 
     RGB->RGB:
-      SDL_SRCALPHA set:
-        alpha-blend (using the source per-surface alpha value).
-      SDL_SRCALPHA not set:
+      Source surface blend mode set to SDL_BLENDMODE_BLEND:
+        alpha-blend (using the source per-surface alpha)
+      Source surface blend mode set to SDL_BLENDMODE_NONE:
         copy RGB.
       both:
         if SDL_SRCCOLORKEY set, only copy the pixels matching the
