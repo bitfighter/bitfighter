@@ -123,11 +123,16 @@ public:
 
    U32 mTeleporterCooldown;
 
+   inline Point getOrigin() const;      // For clarity
    // Destination management
-   S32 getDestCount();
-   Point getDest(S32 index);
+   S32 getDestCount() const;
+   Point getDest(S32 index) const;
    void addDest(const Point &dest);
    void delDest(S32 index);
+
+   void clearDests();
+
+   void doSetGeom(const Vector<Point> &points);    // Public so tests can have access
 
 
    void newObjectFromDock(F32 gridSize);

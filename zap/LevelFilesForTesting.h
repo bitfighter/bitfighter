@@ -42,6 +42,7 @@ string getLevelCode1()
       "BarrierMaker 40 -1 -1 -1 1\n"
       "RepairItem 0 1 10\n"
       "Spawn 0 -0.6 0\n"
+      "Teleporter 5 5 10 10\n"
       "TestItem 1 1\n"
    ;
 }

@@ -285,7 +285,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
       for(S32 i = 0; i < foundObjects.size(); i++)
       {
          Teleporter *tel = static_cast<Teleporter *>(foundObjects[i]);
-         if(tel->getVert(0).distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
+         if(tel->getOrigin().distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
          {
             tel->addDest(dest);
 
@@ -314,14 +314,14 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
 TNL_IMPLEMENT_NETOBJECT_RPC(Teleporter, s2cAddDestination, (Point dest), (dest),
    NetClassGroupGameMask, RPCGuaranteed, RPCToGhost, 0)
 {
-   mDestManager.addDest(dest);
+   addDest(dest);
 }
 
 
 TNL_IMPLEMENT_NETOBJECT_RPC(Teleporter, s2cClearDestinations, (), (),
    NetClassGroupGameMask, RPCGuaranteed, RPCToGhost, 0)
 {
-   mDestManager.clear();
+   clearDests();
 }
 
 
@@ -389,16 +389,7 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 {
    if(stream->writeFlag(updateMask & InitMask))
    {
-      getVert(0).write(stream);     // Location of intake
-
       stream->writeFlag(mEngineered);
-
-      S32 dests = mDestManager.getDestCount();
-
-      stream->writeInt(dests, 16);
-
-      for(S32 i = 0; i < dests; i++)
-         getDest(i).write(stream);
 
       if(stream->writeFlag(mTeleporterCooldown != TeleporterCooldown))  // Most teleporter will have default timing
          stream->writeInt(mTeleporterCooldown, 32);
@@ -406,9 +397,22 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
       if(mTeleporterCooldown != 0 && stream->writeFlag(mTeleportCooldown.getCurrent() != 0))
          stream->writeInt(mTeleportCooldown.getCurrent(), 32);    // A player might join while this teleporter is in the middle of cooldown  // TODO: Make this a rangedInt
    }
-   else if(stream->writeFlag(updateMask & TeleportMask))          // Basically, this gets triggered if a ship passes through
+
+   if(stream->writeFlag(updateMask & (InitMask | GeomMask)))
    {
-      TNLAssert(U32(mLastDest) < U32(mDestManager.getDestCount()), "packUpdate out of range teleporter number");
+      getOrigin().write(stream);     // Location of intake
+      
+      S32 dests = getDestCount();
+
+      stream->writeInt(dests, 16);
+
+      for(S32 i = 0; i < dests; i++)
+         getDest(i).write(stream);
+   }
+   
+   if(stream->writeFlag(updateMask & TeleportMask))               // This gets triggered if a ship passes through
+   {
+      TNLAssert(U32(mLastDest) < U32(getDestCount()), "packUpdate out of range teleporter number");
       stream->write(mLastDest);                                   // Where ship is going
    }
 
@@ -427,13 +431,23 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    if(stream->readFlag())                 // InitMask
    {
+      mEngineered = stream->readFlag();
+
+      if(stream->readFlag())
+         mTeleporterCooldown = stream->readInt(32);
+
+      if(mTeleporterCooldown != 0 && stream->readFlag())
+         mTeleportCooldown.reset(stream->readInt(32));
+   }
+
+   if(stream->readFlag())                 // InitMask || GeomMask
+   {
       U32 count;
       Point pos;
+
       pos.read(stream);
       setVert(pos, 0);                    // Location of intake
       setVert(pos, 1);                    // Simulate a point geometry -- will be changed later when we add our first dest
-
-      mEngineered = stream->readFlag();
 
       count = stream->readInt(16);
       mDestManager.resize(count);         // Prepare the list for multiple additions
@@ -444,20 +458,16 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       computeExtent();
       generateOutlinePoints();
 
-      if(stream->readFlag())
-         mTeleporterCooldown = stream->readInt(32);
-
-      if(mTeleporterCooldown != 0 && stream->readFlag())
-         mTeleportCooldown.reset(stream->readInt(32));
    }
-   else if(stream->readFlag())         // TeleportMask
+
+   if(stream->readFlag())                 // TeleportMask
    {
       S32 dest;
       stream->read(&dest);
 
 #ifndef ZAP_DEDICATED
-      TNLAssert(U32(dest) < U32(mDestManager.getDestCount()), "unpackUpdate out of range teleporter number");
-      if(U32(dest) < U32(mDestManager.getDestCount()))
+      TNLAssert(U32(dest) < U32(getDestCount()), "unpackUpdate out of range teleporter number");
+      if(U32(dest) < U32(getDestCount()))
       {
          TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
          static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDestManager.getDest(dest), 0);
@@ -465,25 +475,24 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
          getGame()->playSoundEffect(SFXTeleportIn, mDestManager.getDest(dest));
       }
 
-      getGame()->playSoundEffect(SFXTeleportOut, getVert(0));
+      getGame()->playSoundEffect(SFXTeleportOut, getOrigin());
 #endif
       mTeleportCooldown.reset(mTeleporterCooldown);
    }
 
    if(stream->readFlag())     // mHasExploded
    {
-      if(!mHasExploded)
+      if(!mHasExploded)       // Protect against double explosions
       {
          mHasExploded = true;
          disableCollision();
          mExplosionTimer.reset(TeleporterExplosionTime);
-         getGame()->playSoundEffect(SFXTeleportExploding, getVert(0));
+         getGame()->playSoundEffect(SFXTeleportExploding, getOrigin());
          mFinalExplosionTriggered = false;
       }
    }
 
-   // HealthMask
-   else if(stream->readFlag())
+   else if(stream->readFlag())      // HealthMask -- only written when hasExploded is false
       mStartingHealth = stream->readFloat(6);
 }
 
@@ -513,7 +522,7 @@ void Teleporter::onDestroyed()
 {
    mHasExploded = true;
 
-   releaseResource(getVert(0), getGame()->getGameObjDatabase());
+   releaseResource(getOrigin(), getGame()->getGameObjDatabase());
 
    deleteObject(TeleporterExplosionTime + 500);  // Guarantee our explosion effect will complete
    setMaskBits(DestroyedMask);
@@ -536,17 +545,17 @@ void Teleporter::doTeleport()
    static const F32 TRIGGER_RADIUS  = F32(TELEPORTER_RADIUS - Ship::CollisionRadius);
    static const F32 TELEPORT_RADIUS = F32(TELEPORTER_RADIUS + Ship::CollisionRadius);
 
-   if(mDestManager.getDestCount() == 0)      // Ignore 0-dest teleporters -- where would you go??
+   if(getDestCount() == 0)      // Ignore 0-dest teleporters -- where would you go??
       return;
 
-   Rect queryRect(getVert(0), TRIGGER_RADIUS);     
+   Rect queryRect(getOrigin(), TRIGGER_RADIUS);     
 
    foundObjects.clear();
    findObjects((TestFunc)isShipType, foundObjects, queryRect);
 
    S32 dest = mDestManager.getRandomDest();
 
-   Point teleportCenter = getVert(0);
+   Point teleportCenter = getOrigin();
 
    bool isTriggered = false; // First, check if triggered, can come from idle timer.
    for(S32 i = 0; i < foundObjects.size(); i++)
@@ -586,7 +595,7 @@ void Teleporter::doTeleport()
    }
 
    Vector<DatabaseObject *> foundTeleporters; // Must be kept local, non static, because of possible recursive.
-   queryRect.set(getVert(0), TRIGGER_RADIUS);
+   queryRect.set(getOrigin(), TRIGGER_RADIUS);
    findObjects(TeleporterTypeNumber, foundTeleporters, queryRect);
    for(S32 i = 0; i < foundTeleporters.size(); i++)
       if(static_cast<Teleporter *>(foundTeleporters[i])->mTeleportCooldown.getCurrent() == 0)
@@ -608,7 +617,7 @@ bool Teleporter::collide(BfObject *otherObject)
       if(mTeleportCooldown.getCurrent() > 0)    // Ignore teleports in cooldown mode
          return false;
 
-      if(mDestManager.getDestCount() == 0)      // Ignore 0-dest teleporters -- where would you go??
+      if(getDestCount() == 0)      // Ignore 0-dest teleporters -- where would you go??
          return false;
 
       if(mHasExploded)                          // Destroyed teleports don't work so well anymore...
@@ -620,7 +629,7 @@ bool Teleporter::collide(BfObject *otherObject)
       // Check if the center of the ship is closer than TRIGGER_RADIUS -- this is equivalent to testing if
       // the ship is entirely within the outer radius of the teleporter.  Therefore, ships can almost entirely 
       // overlap the teleporter before triggering the teleport.
-      if((getVert(0) - ship->getActualPos()).lenSquared() > sq(TRIGGER_RADIUS))  
+      if((getOrigin() - ship->getActualPos()).lenSquared() > sq(TRIGGER_RADIUS))  
          return false;     // Too far -- teleport not activated!
 
       // Check for players within a square box around the teleporter.  Not all these ships will teleport; the actual determination is made
@@ -641,7 +650,7 @@ bool Teleporter::collide(BfObject *otherObject)
 
 bool Teleporter::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
-   center = getVert(0);
+   center = getOrigin();
    radius = TELEPORTER_RADIUS;
    return true;
 }
@@ -659,8 +668,8 @@ void Teleporter::generateOutlinePoints()
 
    mOutlinePoints.resize(sides);
 
-   F32 x = getVert(0).x;
-   F32 y = getVert(0).y;
+   F32 x = getOrigin().x;
+   F32 y = getOrigin().y;
 
    for(S32 i = 0; i < sides; i++)    
       mOutlinePoints[i] = Point(TELEPORTER_RADIUS * cos(i * Float2Pi / sides + FloatHalfPi) + x, 
@@ -684,17 +693,23 @@ const Vector<Point> *Teleporter::getEditorHitPoly() const
 
 void Teleporter::computeExtent()
 {
-   setExtent(Rect(getVert(0), TELEPORTER_RADIUS));    // This Rect constructor takes a diameter, not a radius
+   setExtent(Rect(getOrigin(), TELEPORTER_RADIUS));    // This Rect constructor takes a diameter, not a radius
 }
 
 
-S32 Teleporter::getDestCount()
+inline Point Teleporter::getOrigin() const
+{
+   return getVert(0);
+}
+
+
+S32 Teleporter::getDestCount() const
 {
    return mDestManager.getDestCount();
 }
 
 
-Point Teleporter::getDest(S32 index)
+Point Teleporter::getDest(S32 index) const
 {
    return mDestManager.getDest(index);
 }
@@ -712,6 +727,12 @@ void Teleporter::delDest(S32 index)
 }
 
 
+void Teleporter::clearDests()
+{
+   mDestManager.clear();
+}
+
+
 void Teleporter::onConstructed()
 {
    // Do nothing
@@ -720,7 +741,7 @@ void Teleporter::onConstructed()
 
 bool Teleporter::hasAnyDests() const
 {
-   return mDestManager.getDestCount() > 0;
+   return getDestCount() > 0;
 }
 
 
@@ -809,7 +830,7 @@ void Teleporter::render()
 
       F32 zoomFraction = getGame()->getCommanderZoomFraction();
       U32 renderStyle = mEngineered ? 2 : 0;
-      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, 
+      renderTeleporter(getOrigin(), renderStyle, true, mTime, zoomFraction, radiusFraction, 
                        (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), trackerCount);
    }
 
@@ -825,7 +846,7 @@ void Teleporter::render()
       F32 sizeFraction = mHasExploded ? F32(mExplosionTimer.getCurrent() - implosionOffset) / implosionTime : 1;
 
       if(sizeFraction > 0)
-         for(S32 i = mDestManager.getDestCount() - 1; i >= 0; i--)
+         for(S32 i = getDestCount() - 1; i >= 0; i--)
             renderTeleporterOutline(mDestManager.getDest(i), (F32)TELEPORTER_RADIUS * sizeFraction, Colors::richGreen);
    }
 #endif
@@ -874,7 +895,7 @@ void Teleporter::doExplosion()
 void Teleporter::renderEditorItem()
 {
 #ifndef ZAP_DEDICATED
-   renderTeleporterEditorObject(getVert(0), TELEPORTER_RADIUS, getEditorRenderColor());
+   renderTeleporterEditorObject(getOrigin(), TELEPORTER_RADIUS, getEditorRenderColor());
 #endif
 }
 
@@ -997,11 +1018,11 @@ S32 Teleporter::lua_delDest(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "delDest");
 
-   S32 index = getInt(L, 1, "Teleporter:delDest()", 1, mDestManager.getDestCount());
+   S32 index = getInt(L, 1, "Teleporter:delDest()", 1, getDestCount());
 
    index--;    // Adjust for Lua's 1-based index
 
-   mDestManager.delDest(index);
+   delDest(index);
 
    return 0;
 }
@@ -1016,7 +1037,7 @@ S32 Teleporter::lua_clearDests(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "clearDests");
 
-   mDestManager.clear();
+   clearDests();
    return 0;
 }
 
@@ -1036,7 +1057,7 @@ S32 Teleporter::lua_getDest(lua_State *L)
    checkArgList(L, functionArgs, "Teleporter", "getDest");
    S32 index = getInt(L, 1) - 1;    // - 1 corrects for Lua indices starting at 1
 
-   if(index < 0 || index >= mDestManager.getDestCount())
+   if(index < 0 || index >= getDestCount())
       throw LuaException("Index out of range (requested " + itos(index) + ")");
 
    return returnPoint(L, mDestManager.getDest(index));
@@ -1052,7 +1073,7 @@ S32 Teleporter::lua_getDest(lua_State *L)
  */
 S32 Teleporter::lua_getDestCount(lua_State *L)
 {
-   return returnInt(L, mDestManager.getDestCount());
+   return returnInt(L, getDestCount());
 }
 
 
@@ -1092,14 +1113,14 @@ S32 Teleporter::lua_setEngineered(lua_State *L)
  * @brief Sets teleporter geometry; differs from standard conventions.
  * @descr In this case, geometry represents both Teleporter's location and those
  * of all destinations.  The first point specified will be used to set the
- * location. All existing destinations will be deleted, and each subsequent
- * point will be used to define a new destination.
+ * location. If two or more points are supplied, all existing destinations will be deleted, 
+ * and the remaining points will be used to define new destinations.
  *
  * Note that in the editor, teleporters can only have a single destination.
  * Since scripts can add or modify editor items, when the script has finished
  * running, all affected teleporters will be converted into a series of single
  * destination items, all having the same location but with different
- * destinations.
+ * destinations.  (In a game, multi-destination teleporters will remain as created.)
  *
  * If the teleporter has no destinations, it will not be added to the editor.
  *
@@ -1111,7 +1132,6 @@ S32 Teleporter::lua_setGeom(lua_State *L)
 
    doSetGeom(L);
 
-   //clearStack(L);    // Why do we need this?
    return 0;
 }
 
@@ -1119,24 +1139,34 @@ S32 Teleporter::lua_setGeom(lua_State *L)
 // Helper for Lua constructor and setGeom(L) methods
 void Teleporter::doSetGeom(lua_State *L)
 {
-   mDestManager.clear();      // Any existing destinations are toast
+   doSetGeom(getPointsOrXYs(L, 1));
+}
 
-   Vector<Point> points = getPointsOrXYs(L, 1);
 
-   setVert(points[0], 0);     // Origin
+// If points only contains a single point, only the origin will change; destinations will
+// remain unaltered.
+void Teleporter::doSetGeom(const Vector<Point> &points)
+{
+   if(points.size() == 0)     // No points, no action
+      return;
 
-   if(points.size() >= 2)     
+   setVert(points[0], 0);     // First point is the origin
+
+   if(points.size() >= 2)     // Subsequent points are destinations
    {
-      setVert(points[1], 1);  // Dest
+      clearDests();
 
       // Notify destination manager about the new destinations
       for(S32 i = 1; i < points.size(); i++)
          addDest(points[i]);
+
+      TNLAssert(getDest(0) == points[1], "Should have been set by addDest()!");
    }
    else
-      setVert(Point(0,0), 1);  // Set default dest -- maybe not important to set this
+      setVert(points[0], 1);  // Set default dest -- maybe not important to set this
 
    computeExtent();
+   setMaskBits(GeomMask);
 }
 
 
@@ -1159,7 +1189,7 @@ S32 Teleporter::lua_getGeom(lua_State *L)
 
    points.push_back(getPos());
 
-   for(S32 i = 0; i < mDestManager.getDestCount(); i++)
+   for(S32 i = 0; i < getDestCount(); i++)
       points.push_back(mDestManager.getDest(i));
 
    return returnPoints(L, &points);
@@ -1167,4 +1197,3 @@ S32 Teleporter::lua_getGeom(lua_State *L)
 
    
 };
-
