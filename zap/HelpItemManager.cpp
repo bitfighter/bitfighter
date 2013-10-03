@@ -381,7 +381,6 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
       lines++;
    }
 
-
    S32 leftPos = (S32)xPos - maxw / 2;
    S32 topPos  = (S32)yPos + yOffset - (lines + 1) * (FontSize + FontGap);
    S32 botPos  = (S32)yPos + yOffset - FontSize + 4;    // 4.... just... because?
@@ -393,14 +392,14 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
 
 static ScissorsManager scissorsManager;
 
-void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos) const
+void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha) const
 {
 #ifdef TNL_DEBUG
    // This bit is for displaying our help messages one-by-one so we can see how they look on-screen, cycle with CTRL+H
    if(mTestingTimer.getCurrent() > 0)
    {
       FontManager::pushFontContext(HelpItemContext);
-      glColor(Colors::red);
+      glColor(Colors::red, alpha);
 
       doRenderMessages(game, mInputCodeManager, (HelpItem)(mTestingCtr % HelpItemCount), yPos);
 
@@ -416,7 +415,7 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos) const
 
    for(S32 i = 0; i < mHelpItems.size(); i++)      // Iterate over each message being displayed
    {
-      glColor(Colors::HelpItemRenderColor);
+      glColor(Colors::HelpItemRenderColor, alpha);
 
       // Height of the message in pixels, including the gap before the next message (even if there isn't one)
       F32 height = F32(getLinesInHelpItem(i) * (FontSize + FontGap)) + InterMsgGap;

@@ -99,7 +99,7 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    if(isInDatabase)
    {
       symbols.push_back(SymbolString::getBlankSymbol(10));
-      symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, GoalZoneIconContext));
+      symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, GoalZoneIconContext));  // Little database icon
    }
 
    SymbolString titleSymbolString(symbols);

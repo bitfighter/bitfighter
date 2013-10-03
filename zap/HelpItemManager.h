@@ -239,7 +239,7 @@ public:
    void reset();
 
    void idle(U32 timeDelta, const ClientGame *game);
-   void renderMessages(const ClientGame *game, F32 yPos) const;
+   void renderMessages(const ClientGame *game, F32 yPos, F32 alpha) const;
 
    void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);
    void addInlineHelpItem(HelpItem item, bool messageCameFromQueue = false);   

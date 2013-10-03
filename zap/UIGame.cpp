@@ -505,9 +505,8 @@ void GameUserInterface::render()
       renderLevelUpMessage(level);
    else if(getGame()->isSpawnDelayed())
       renderSuspendedMessage();
-
-
-   mHelpItemManager.renderMessages(getGame(), gScreenInfo.getGameCanvasHeight() / 2.0f + 40);
+   else
+      mHelpItemManager.renderMessages(getGame(), gScreenInfo.getGameCanvasHeight() / 2.0f + 40, mLevelInfoDisplayer.getFraction());
 
    renderReticle();                       // Draw crosshairs if using mouse
    renderChatMsgs();                      // Render incoming chat and server msgs
