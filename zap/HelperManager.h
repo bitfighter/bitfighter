@@ -69,6 +69,8 @@ public:
    void idle(U32 timeDelta);
 
    void render() const;
+   F32 getFraction() const;
+
    void renderEngineeredItemDeploymentMarker(const Ship *ship);
 
    bool isChatAllowed() const;

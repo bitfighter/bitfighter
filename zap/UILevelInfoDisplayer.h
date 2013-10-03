@@ -57,6 +57,7 @@ public:
    virtual bool isActive() const;
 
    bool isDisplayTimerActive() const;
+   bool isVisible() const;
 };
 
 

@@ -295,6 +295,7 @@ private:
    // Some key event handlers
    bool processPlayModeKey(InputCode inputCode);
    void checkForKeyboardMovementKeysInJoystickMode(InputCode inputCode);
+   bool shouldCountdownHelpItemTimer() const;
 
    bool renderWithCommanderMap() const;
 
@@ -372,6 +373,7 @@ public:
    
    void renderBasicInterfaceOverlay();
    void renderLevelInfo();
+   bool shouldRenderLevelInfo() const;
    static void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
 
    void idle(U32 timeDelta);

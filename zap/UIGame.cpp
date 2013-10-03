@@ -374,7 +374,8 @@ void GameUserInterface::idle(U32 timeDelta)
 
    mFxManager.idle(timeDelta);      // Processes sparks and teleporter effects
 
-   mHelpItemManager.idle(timeDelta, getGame());
+   if(shouldCountdownHelpItemTimer())
+      mHelpItemManager.idle(timeDelta, getGame());
 
    // Update mShipPos... track this so that we can keep a fix on the ship location even if it subsequently dies
    Ship *ship = getGame()->getLocalPlayerShip();
@@ -388,6 +389,18 @@ void GameUserInterface::idle(U32 timeDelta)
 
    if(renderWithCommanderMap())
       rectifyExtents(timeDelta);
+}
+
+
+// Returns true if we can show an inline help item
+bool GameUserInterface::shouldCountdownHelpItemTimer() const
+{
+   return getGame()->getClientInfo()->getShowLevelUpMessage() == NONE &&   // Levelup message not being shown
+          !getGame()->isSpawnDelayed() &&                                  // No spawn-delay stuff going on
+          getUIManager()->getCurrentUI() == this &&                        // No other UI being drawn on top
+          !shouldRenderLevelInfo() &&                                      // F2 levelinfo is not displayed...
+          !scoreboardIsVisible() &&                                        // Hide help when scoreboard is visible
+          !isChatting();                                                   // No help while chatting
 }
 
 
@@ -505,8 +518,11 @@ void GameUserInterface::render()
       renderLevelUpMessage(level);
    else if(getGame()->isSpawnDelayed())
       renderSuspendedMessage();
-   else
-      mHelpItemManager.renderMessages(getGame(), gScreenInfo.getGameCanvasHeight() / 2.0f + 40, mLevelInfoDisplayer.getFraction());
+   
+   // Fade inlineHelpItem in and out as chat widget appears or F2 levelInfo appears.
+   // Don't completely hide help item when chatting -- it's jarring.  
+   F32 helpItemAlpha = MIN(mHelperManager.getFraction() + .2f, mLevelInfoDisplayer.getFraction());
+   mHelpItemManager.renderMessages(getGame(), gScreenInfo.getGameCanvasHeight() / 2.0f + 40, helpItemAlpha);
 
    renderReticle();                       // Draw crosshairs if using mouse
    renderChatMsgs();                      // Render incoming chat and server msgs
@@ -1115,7 +1131,8 @@ S32 GameUserInterface::getLoadoutIndicatorWidth() const
 
 bool GameUserInterface::scoreboardIsVisible() const
 {
-   return mInScoreboardMode || getGame()->getGameType()->isGameOver();
+   // GameType can be NULL when first starting up
+   return mInScoreboardMode || (getGame()->getGameType() && getGame()->getGameType()->isGameOver());
 }
 
 
@@ -2278,7 +2295,13 @@ void GameUserInterface::renderBasicInterfaceOverlay()
 }
 
 
-void GameUserInterface::renderLevelInfo()
+bool GameUserInterface::shouldRenderLevelInfo() const 
+{
+   return mLevelInfoDisplayer.isActive() || mMissionOverlayActive;
+}
+
+
+void GameUserInterface::renderLevelInfo() 
 {
    // Level Info requires gametype.  It can be NULL when switching levels
    if(getGame()->getGameType() == NULL)
@@ -2286,7 +2309,7 @@ void GameUserInterface::renderLevelInfo()
 
    S32 teamCount = getGame()->getTeamCount();
 
-   if(mLevelInfoDisplayer.isActive() || mMissionOverlayActive)
+   if(shouldRenderLevelInfo())
    {
       mLevelInfoDisplayer.render(getGame()->getGameType(), teamCount, getGame()->getLevelDatabaseId() > 0);
       mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...

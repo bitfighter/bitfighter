@@ -117,6 +117,18 @@ void HelperManager::render() const
 }
 
 
+F32 HelperManager::getFraction() const
+{
+   if(mHelperStack.size() == 0)
+      return 1;
+
+   if(mHelperStack.last() == &mChatHelper)
+      return mChatHelper.getFraction();
+
+   return 1;      // Probably wrong, but will work for the moment
+}
+
+
 bool HelperManager::isHelperActive(HelperMenu::HelperMenuType helperType) const
 {
    return mHelperStack.size() > 0 && mHelperStack.last()->getType() == helperType;

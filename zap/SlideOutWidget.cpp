@@ -115,7 +115,7 @@ bool SlideOutWidget::isClosing() const
 }
 
 
-F32 SlideOutWidget::getFraction()
+F32 SlideOutWidget::getFraction() const
 {
    return mActivating ? mAnimationTimer.getFraction() : 1 - mAnimationTimer.getFraction();
 }
