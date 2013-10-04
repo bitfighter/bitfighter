@@ -86,7 +86,6 @@ private:
    void renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode);
    void renderLegend(S32 xPos, S32 yPos, const char **legendtext, const Color **legendColors, S32 legendCount);
 
-
 protected:
    static const S32 MENU_TOP = 175;    // Location of top of title of overlay menu frame
 

@@ -400,7 +400,7 @@ bool GameUserInterface::shouldCountdownHelpItemTimer() const
           getUIManager()->getCurrentUI() == this &&                        // No other UI being drawn on top
           !shouldRenderLevelInfo() &&                                      // F2 levelinfo is not displayed...
           !scoreboardIsVisible() &&                                        // Hide help when scoreboard is visible
-          !isChatting();                                                   // No help while chatting
+          !mHelperManager.isHelperActive();                                // Disable help helpers are active
 }
 
 
@@ -521,7 +521,7 @@ void GameUserInterface::render()
    
    // Fade inlineHelpItem in and out as chat widget appears or F2 levelInfo appears.
    // Don't completely hide help item when chatting -- it's jarring.  
-   F32 helpItemAlpha = MIN(mHelperManager.getFraction() + .2f, mLevelInfoDisplayer.getFraction());
+   F32 helpItemAlpha = getBackgroundTextDimFactor(false);
    mHelpItemManager.renderMessages(getGame(), gScreenInfo.getGameCanvasHeight() / 2.0f + 40, helpItemAlpha);
 
    renderReticle();                       // Draw crosshairs if using mouse
@@ -1526,13 +1526,25 @@ void GameUserInterface::checkForKeyboardMovementKeysInJoystickMode(InputCode inp
 }
 
 
+// This is a bit complicated to explain... basically, when chatRelated is true, it won't apply a dimming factor
+// when entering a chat message.  When false, it will.
+F32 GameUserInterface::getBackgroundTextDimFactor(bool chatRelated) const
+{
+   F32 helperManagerFactor = chatRelated ? 
+         mHelperManager.getDimFactor() : 
+         MAX(mHelperManager.getFraction(), UI::DIM_LEVEL);
+
+   return MIN(helperManagerFactor, mLevelInfoDisplayer.getFraction());
+}
+
+
 // Display proper chat queue based on mMessageDisplayMode.  These displayers are configured in the constructor. 
 void GameUserInterface::renderChatMsgs() const
 {
    bool chatDisabled = !mHelperManager.isChatAllowed();
    bool announcementActive = (mAnnouncementTimer.getCurrent() != 0);
 
-   F32 alpha = mHelperManager.getDimFactor();
+   F32 alpha = getBackgroundTextDimFactor(true);
 
    if(mMessageDisplayMode == ShortTimeout)
       mChatMessageDisplayer1.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive, alpha);

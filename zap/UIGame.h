@@ -230,6 +230,8 @@ private:
    void renderChatMsgs() const;
    void renderAnnouncement(S32 pos) const;
 
+   F32 getBackgroundTextDimFactor(bool chatRelated) const;
+
    struct VoiceRecorder
    {
       private:
