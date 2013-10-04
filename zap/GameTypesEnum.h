@@ -32,7 +32,7 @@ namespace Zap
  * @luaenum GameType(1,2)
  * The GameType enum represets the different types of game.
  */
-//                 Enum               GameType             LuaEnum     GameType Name                      
+//                 Enum              ClassName             LuaEnum     GameType Name                      
 #define GAME_TYPE_TABLE \
    GAME_TYPE_ITEM( BitmatchGame,    "GameType",            "Bitmatch", "Bitmatch"         ) \
    GAME_TYPE_ITEM( CTFGame,         "CTFGameType",         "CTF",      "Capture the Flag" ) \
