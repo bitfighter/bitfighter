@@ -407,6 +407,8 @@
 		73D2F56612E2DA1700EA5EBE /* xtea.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F52112E2DA1700EA5EBE /* xtea.c */; };
 		73D2F56712E2DA1700EA5EBE /* yarrow.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F52212E2DA1700EA5EBE /* yarrow.c */; };
 		73D2F5DF12E2DDD200EA5EBE /* libtomcrypt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
+		73D5926D1800798F0054244E /* LevelSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D592691800798F0054244E /* LevelSource.cpp */; };
+		73D5926E1800798F0054244E /* LuaGlobals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D5926B1800798F0054244E /* LuaGlobals.cpp */; };
 		73DD59891753102000985BFA /* OpenAL-Soft.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73DD59881753102000985BFA /* OpenAL-Soft.framework */; };
 		73DD5994175310FA00985BFA /* OpenAL-Soft.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73DD59881753102000985BFA /* OpenAL-Soft.framework */; };
 		73DD59D617531FF000985BFA /* OpenAL-Soft.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 73DD59881753102000985BFA /* OpenAL-Soft.framework */; };
@@ -1153,6 +1155,11 @@
 		73D2F6B112E2E1D400EA5EBE /* lzio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lzio.c; path = "../../../lua/lua-vec/src/lzio.c"; sourceTree = SOURCE_ROOT; };
 		73D2F6B212E2E1D400EA5EBE /* lzio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lzio.h; path = "../../../lua/lua-vec/src/lzio.h"; sourceTree = SOURCE_ROOT; };
 		73D2F6B312E2E1D400EA5EBE /* print.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = print.c; path = "../../../lua/lua-vec/src/print.c"; sourceTree = SOURCE_ROOT; };
+		73D592681800798F0054244E /* LevelFilesForTesting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LevelFilesForTesting.h; path = ../../../zap/LevelFilesForTesting.h; sourceTree = SOURCE_ROOT; };
+		73D592691800798F0054244E /* LevelSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LevelSource.cpp; path = ../../../zap/LevelSource.cpp; sourceTree = SOURCE_ROOT; };
+		73D5926A1800798F0054244E /* LevelSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LevelSource.h; path = ../../../zap/LevelSource.h; sourceTree = SOURCE_ROOT; };
+		73D5926B1800798F0054244E /* LuaGlobals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LuaGlobals.cpp; path = ../../../zap/LuaGlobals.cpp; sourceTree = SOURCE_ROOT; };
+		73D5926C1800798F0054244E /* LuaModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LuaModule.h; path = ../../../zap/LuaModule.h; sourceTree = SOURCE_ROOT; };
 		73D6B5081370C349002ABC48 /* ALURE_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ALURE_Prefix.pch; path = ../build/osx/xcode/ALURE_Prefix.pch; sourceTree = "<group>"; };
 		73DD59881753102000985BFA /* OpenAL-Soft.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "OpenAL-Soft.framework"; path = "/Users/geeko/temp/hg/bitfighter/lib/OpenAL-Soft.framework"; sourceTree = "<absolute>"; };
 		73EE611F13BA398D009931CD /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -1761,6 +1768,11 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				73D592681800798F0054244E /* LevelFilesForTesting.h */,
+				73D592691800798F0054244E /* LevelSource.cpp */,
+				73D5926A1800798F0054244E /* LevelSource.h */,
+				73D5926B1800798F0054244E /* LuaGlobals.cpp */,
+				73D5926C1800798F0054244E /* LuaModule.h */,
 				73A494921780E228008F3329 /* EnergyGaugeRenderer.cpp */,
 				73A494931780E228008F3329 /* EnergyGaugeRenderer.h */,
 				73BA22D6174BBA91002ABB5B /* oglconsole.cpp */,
@@ -2517,7 +2529,6 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Bitfighter" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -2927,6 +2938,8 @@
 				73BA22C7174BB7DE002ABB5B /* SystemFunctions.cpp in Sources */,
 				73BA22D7174BBA91002ABB5B /* oglconsole.cpp in Sources */,
 				73A494941780E228008F3329 /* EnergyGaugeRenderer.cpp in Sources */,
+				73D5926D1800798F0054244E /* LevelSource.cpp in Sources */,
+				73D5926E1800798F0054244E /* LuaGlobals.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
