@@ -1,0 +1,466 @@
+diff -r 70b305e09b4e build-scripts/g++-fat.sh
+--- a/build-scripts/g++-fat.sh	Sat Oct 05 00:29:57 2013 -0400
++++ b/build-scripts/g++-fat.sh	Sat Oct 05 11:06:26 2013 -0600
+@@ -7,13 +7,15 @@
+ DEVELOPER="`xcode-select -print-path`/Platforms/MacOSX.platform/Developer"
+ 
+ # Intel 32-bit compiler flags (10.6 runtime compatibility)
+-GCC_COMPILE_X86="g++ -arch i386 -mmacosx-version-min=10.5 \
++GCC_COMPILE_X86="g++ -arch i386 -mmacosx-version-min=10.6 \
++-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
+ -I/usr/local/include"
+ 
+-GCC_LINK_X86="-mmacosx-version-min=10.5"
++GCC_LINK_X86="-mmacosx-version-min=10.6"
+ 
+ # Intel 64-bit compiler flags (10.6 runtime compatibility)
+ GCC_COMPILE_X64="g++ -arch x86_64 -mmacosx-version-min=10.6 \
++-DMAC_OS_X_VERSION_MIN_REQUIRED=1050 \
+ -I/usr/local/include"
+ 
+ GCC_LINK_X64="-mmacosx-version-min=10.6"
+diff -r 70b305e09b4e build-scripts/gcc-fat.sh
+--- a/build-scripts/gcc-fat.sh	Sat Oct 05 00:29:57 2013 -0400
++++ b/build-scripts/gcc-fat.sh	Sat Oct 05 11:06:26 2013 -0600
+@@ -6,11 +6,12 @@
+ 
+ DEVELOPER="`xcode-select -print-path`/Platforms/MacOSX.platform/Developer"
+ 
+-# Intel 32-bit compiler flags (10.5 runtime compatibility)
+-GCC_COMPILE_X86="gcc -arch i386 -mmacosx-version-min=10.5 \
++# Intel 32-bit compiler flags (10.6 runtime compatibility)
++GCC_COMPILE_X86="gcc -arch i386 -mmacosx-version-min=10.6 \
++-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
+ -I/usr/local/include"
+ 
+-GCC_LINK_X86="-mmacosx-version-min=10.5"
++GCC_LINK_X86="-mmacosx-version-min=10.6"
+ 
+ # Intel 64-bit compiler flags (10.6 runtime compatibility)
+ GCC_COMPILE_X64="gcc -arch x86_64 -mmacosx-version-min=10.6 \
+diff -r 70b305e09b4e include/SDL_config_macosx.h
+--- a/include/SDL_config_macosx.h	Sat Oct 05 00:29:57 2013 -0400
++++ b/include/SDL_config_macosx.h	Sat Oct 05 11:06:26 2013 -0600
+@@ -36,7 +36,10 @@
+ #endif
+ 
+ /* Useful headers */
++/* If we specified an SDK or have a post-PowerPC chip, then alloca.h exists. */
++#if ( (MAC_OS_X_VERSION_MIN_REQUIRED >= 1030) || (!defined(__POWERPC__)) )
+ #define HAVE_ALLOCA_H       1
++#endif
+ #define HAVE_SYS_TYPES_H    1
+ #define HAVE_STDIO_H    1
+ #define STDC_HEADERS    1
+diff -r 70b305e09b4e include/SDL_platform.h
+--- a/include/SDL_platform.h	Sat Oct 05 00:29:57 2013 -0400
++++ b/include/SDL_platform.h	Sat Oct 05 11:06:26 2013 -0600
+@@ -83,12 +83,6 @@
+ /* if not compiling for iPhone */
+ #undef __MACOSX__
+ #define __MACOSX__  1
+-#if MAC_OS_X_VERSION_MIN_REQUIRED < 1050
+-# error SDL for Mac OS X only supports deploying on 10.5 and above.
+-#endif /* MAC_OS_X_VERSION_MIN_REQUIRED < 1050 */
+-#if MAC_OS_X_VERSION_MAX_ALLOWED < 1060
+-# error SDL for Mac OS X must be built with a 10.6 SDK or above.
+-#endif /* MAC_OS_X_VERSION_MAX_ALLOWED < 1060 */
+ #endif /* TARGET_OS_IPHONE */
+ #endif /* defined(__APPLE__) */
+ 
+diff -r 70b305e09b4e src/audio/coreaudio/SDL_coreaudio.h
+--- a/src/audio/coreaudio/SDL_coreaudio.h	Sat Oct 05 00:29:57 2013 -0400
++++ b/src/audio/coreaudio/SDL_coreaudio.h	Sat Oct 05 11:06:26 2013 -0600
+@@ -32,6 +32,9 @@
+ #if MACOSX_COREAUDIO
+ #include <CoreAudio/CoreAudio.h>
+ #include <CoreServices/CoreServices.h>
++#if MAC_OS_X_VERSION_MAX_ALLOWED <= 1050
++#include <AudioUnit/AUNTComponent.h>
++#endif
+ #else
+ #include <AudioToolbox/AudioToolbox.h>
+ #endif
+diff -r 70b305e09b4e src/video/cocoa/SDL_cocoaclipboard.m
+--- a/src/video/cocoa/SDL_cocoaclipboard.m	Sat Oct 05 00:29:57 2013 -0400
++++ b/src/video/cocoa/SDL_cocoaclipboard.m	Sat Oct 05 11:06:26 2013 -0600
+@@ -28,6 +28,7 @@
+ static NSString *
+ GetTextFormat(_THIS)
+ {
++#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+ 
+     if (data->osversion >= 0x1060) {
+@@ -35,6 +36,9 @@
+     } else {
+         return NSStringPboardType;
+     }
++#else
++    return NSStringPboardType;
++#endif
+ }
+ 
+ int
+diff -r 70b305e09b4e src/video/cocoa/SDL_cocoakeyboard.m
+--- a/src/video/cocoa/SDL_cocoakeyboard.m	Sat Oct 05 00:29:57 2013 -0400
++++ b/src/video/cocoa/SDL_cocoakeyboard.m	Sat Oct 05 11:06:26 2013 -0600
+@@ -172,9 +172,14 @@
+     return nil;
+ }
+ 
++/* Needs long instead of NSInteger for compilation on Mac OS X 10.4 */
++#if MAC_OS_X_VERSION_MIN_REQUIRED < 1050
++- (long) conversationIdentifier
++#else
+ - (NSInteger) conversationIdentifier
++#endif
+ {
+-    return (NSInteger) self;
++    return (long) self;
+ }
+ 
+ /* This method returns the index for character that is
+@@ -473,14 +478,22 @@
+ static void
+ UpdateKeymap(SDL_VideoData *data)
+ {
++#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+     TISInputSourceRef key_layout;
++#else
++    KeyboardLayoutRef key_layout;
++#endif
+     const void *chr_data;
+     int i;
+     SDL_Scancode scancode;
+     SDL_Keycode keymap[SDL_NUM_SCANCODES];
+ 
+     /* See if the keymap needs to be updated */
++#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+     key_layout = TISCopyCurrentKeyboardLayoutInputSource();
++#else
++    KLGetCurrentKeyboardLayout(&key_layout);
++#endif
+     if (key_layout == data->key_layout) {
+         return;
+     }
+@@ -488,13 +501,16 @@
+ 
+     SDL_GetDefaultKeymap(keymap);
+ 
+-    /* Try Unicode data first */
++    /* Try Unicode data first (preferred as of Mac OS X 10.5) */
++#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+     CFDataRef uchrDataRef = TISGetInputSourceProperty(key_layout, kTISPropertyUnicodeKeyLayoutData);
+     if (uchrDataRef)
+         chr_data = CFDataGetBytePtr(uchrDataRef);
+     else
+         goto cleanup;
+-
++#else
++    KLGetKeyboardLayoutProperty(key_layout, kKLuchrData, &chr_data);
++#endif
+     if (chr_data) {
+         UInt32 keyboard_type = LMGetKbdType();
+         OSStatus err;
+@@ -528,8 +544,60 @@
+         return;
+     }
+ 
++#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+ cleanup:
+     CFRelease(key_layout);
++#else
++    /* Fall back to older style key map data */
++    KLGetKeyboardLayoutProperty(key_layout, kKLKCHRData, &chr_data);
++    if (chr_data) {
++        for (i = 0; i < 128; i++) {
++            UInt32 c, state = 0;
++
++            /* Make sure this scancode is a valid character scancode */
++            scancode = darwin_scancode_table[i];
++            if (scancode == SDL_SCANCODE_UNKNOWN ||
++                (keymap[scancode] & SDLK_SCANCODE_MASK)) {
++                continue;
++            }
++
++            c = KeyTranslate (chr_data, i, &state) & 255;
++            if (state) {
++                /* Dead key, process key up */
++                c = KeyTranslate (chr_data, i | 128, &state) & 255;
++            }
++
++            if (c != 0 && c != 0x10) {
++                /* MacRoman to Unicode table, taken from X.org sources */
++                static const unsigned short macroman_table[128] = {
++                    0xc4, 0xc5, 0xc7, 0xc9, 0xd1, 0xd6, 0xdc, 0xe1,
++                    0xe0, 0xe2, 0xe4, 0xe3, 0xe5, 0xe7, 0xe9, 0xe8,
++                    0xea, 0xeb, 0xed, 0xec, 0xee, 0xef, 0xf1, 0xf3,
++                    0xf2, 0xf4, 0xf6, 0xf5, 0xfa, 0xf9, 0xfb, 0xfc,
++                    0x2020, 0xb0, 0xa2, 0xa3, 0xa7, 0x2022, 0xb6, 0xdf,
++                    0xae, 0xa9, 0x2122, 0xb4, 0xa8, 0x2260, 0xc6, 0xd8,
++                    0x221e, 0xb1, 0x2264, 0x2265, 0xa5, 0xb5, 0x2202, 0x2211,
++                    0x220f, 0x3c0, 0x222b, 0xaa, 0xba, 0x3a9, 0xe6, 0xf8,
++                    0xbf, 0xa1, 0xac, 0x221a, 0x192, 0x2248, 0x2206, 0xab,
++                    0xbb, 0x2026, 0xa0, 0xc0, 0xc3, 0xd5, 0x152, 0x153,
++                    0x2013, 0x2014, 0x201c, 0x201d, 0x2018, 0x2019, 0xf7, 0x25ca,
++                    0xff, 0x178, 0x2044, 0x20ac, 0x2039, 0x203a, 0xfb01, 0xfb02,
++                    0x2021, 0xb7, 0x201a, 0x201e, 0x2030, 0xc2, 0xca, 0xc1,
++                    0xcb, 0xc8, 0xcd, 0xce, 0xcf, 0xcc, 0xd3, 0xd4,
++                    0xf8ff, 0xd2, 0xda, 0xdb, 0xd9, 0x131, 0x2c6, 0x2dc,
++                    0xaf, 0x2d8, 0x2d9, 0x2da, 0xb8, 0x2dd, 0x2db, 0x2c7,
++                };
++
++                if (c >= 128) {
++                    c = macroman_table[c - 128];
++                }
++                keymap[scancode] = c;
++            }
++        }
++        SDL_SetKeymap(0, keymap, SDL_NUM_SCANCODES);
++        return;
++    }
++#endif
+ }
+ 
+ void
+diff -r 70b305e09b4e src/video/cocoa/SDL_cocoamodes.m
+--- a/src/video/cocoa/SDL_cocoamodes.m	Sat Oct 05 00:29:57 2013 -0400
++++ b/src/video/cocoa/SDL_cocoamodes.m	Sat Oct 05 11:06:26 2013 -0600
+@@ -30,9 +30,6 @@
+ /* we need this for ShowMenuBar() and HideMenuBar(). */
+ #include <Carbon/Carbon.h>
+ 
+-/* This gets us MAC_OS_X_VERSION_MIN_REQUIRED... */
+-#include <AvailabilityMacros.h>
+-
+ 
+ static void
+ Cocoa_ToggleMenuBar(const BOOL show)
+@@ -52,13 +49,33 @@
+ 
+ 
+ /* !!! FIXME: clean out the pre-10.6 code when it makes sense to do so. */
+-#define FORCE_OLD_API 0
++#define FORCE_OLD_API 0 || (MAC_OS_X_VERSION_MAX_ALLOWED < 1060)
+ 
+ #if FORCE_OLD_API
+ #undef MAC_OS_X_VERSION_MIN_REQUIRED
+ #define MAC_OS_X_VERSION_MIN_REQUIRED 1050
+ #endif
+ 
++#if MAC_OS_X_VERSION_MAX_ALLOWED < 1050
++/*
++    Add methods to get at private members of NSScreen.
++    Since there is a bug in Apple's screen switching code
++    that does not update this variable when switching
++    to fullscreen, we'll set it manually (but only for the
++    main screen).
++*/
++@interface NSScreen (NSScreenAccess)
++- (void) setFrame:(NSRect)frame;
++@end
++
++@implementation NSScreen (NSScreenAccess)
++- (void) setFrame:(NSRect)frame;
++{
++    _frame = frame;
++}
++@end
++#endif
++
+ static BOOL
+ IS_SNOW_LEOPARD_OR_LATER(_THIS)
+ {
+@@ -127,6 +144,7 @@
+     }
+     data->moderef = moderef;
+ 
++    #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+     if (IS_SNOW_LEOPARD_OR_LATER(_this)) {
+         CGDisplayModeRef vidmode = (CGDisplayModeRef) moderef;
+         CFStringRef fmt = CGDisplayModeCopyPixelEncoding(vidmode);
+@@ -146,6 +164,7 @@
+ 
+         CFRelease(fmt);
+     }
++    #endif
+ 
+     #if MAC_OS_X_VERSION_MIN_REQUIRED < 1060
+     if (!IS_SNOW_LEOPARD_OR_LATER(_this)) {
+@@ -184,17 +203,23 @@
+ static void
+ Cocoa_ReleaseDisplayMode(_THIS, const void *moderef)
+ {
++    /* We don't own moderef unless we use the 10.6+ APIs. */
++    #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+     if (IS_SNOW_LEOPARD_OR_LATER(_this)) {
+         CGDisplayModeRelease((CGDisplayModeRef) moderef);  /* NULL is ok */
+     }
++    #endif
+ }
+ 
+ static void
+ Cocoa_ReleaseDisplayModeList(_THIS, CFArrayRef modelist)
+ {
++    /* We don't own modelis unless we use the 10.6+ APIs. */
++    #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+     if (IS_SNOW_LEOPARD_OR_LATER(_this)) {
+         CFRelease(modelist);  /* NULL is ok */
+     }
++    #endif
+ }
+ 
+ static const char *
+@@ -257,9 +282,11 @@
+                 continue;
+             }
+ 
++            #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+             if (IS_SNOW_LEOPARD_OR_LATER(_this)) {
+                 moderef = CGDisplayCopyDisplayMode(displays[i]);
+             }
++            #endif
+ 
+             #if MAC_OS_X_VERSION_MIN_REQUIRED < 1060
+             if (!IS_SNOW_LEOPARD_OR_LATER(_this)) {
+@@ -319,9 +346,11 @@
+     SDL_DisplayData *data = (SDL_DisplayData *) display->driverdata;
+     CFArrayRef modes = NULL;
+ 
++    #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+     if (IS_SNOW_LEOPARD_OR_LATER(_this)) {
+         modes = CGDisplayCopyAllDisplayModes(data->display, NULL);
+     }
++    #endif
+ 
+     #if MAC_OS_X_VERSION_MIN_REQUIRED < 1060
+     if (!IS_SNOW_LEOPARD_OR_LATER(_this)) {
+@@ -337,9 +366,11 @@
+             const void *moderef = CFArrayGetValueAtIndex(modes, i);
+             SDL_DisplayMode mode;
+             if (GetDisplayMode(_this, moderef, &mode)) {
++                #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+                 if (IS_SNOW_LEOPARD_OR_LATER(_this)) {
+                     CGDisplayModeRetain((CGDisplayModeRef) moderef);
+                 }
++                #endif
+                 SDL_AddDisplayMode(display, &mode);
+             }
+         }
+@@ -351,10 +382,12 @@
+ static CGError
+ Cocoa_SwitchMode(_THIS, CGDirectDisplayID display, const void *mode)
+ {
++    #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+     if (IS_SNOW_LEOPARD_OR_LATER(_this)) {
+         return CGDisplaySetDisplayMode(display, (CGDisplayModeRef) mode, NULL);
+     }
+- 
++    #endif
++
+     #if MAC_OS_X_VERSION_MIN_REQUIRED < 1060
+     if (!IS_SNOW_LEOPARD_OR_LATER(_this)) {
+         return CGDisplaySwitchToMode(display, (CFDictionaryRef) mode);
+diff -r 70b305e09b4e src/video/cocoa/SDL_cocoashape.m
+--- a/src/video/cocoa/SDL_cocoashape.m	Sat Oct 05 00:29:57 2013 -0400
++++ b/src/video/cocoa/SDL_cocoashape.m	Sat Oct 05 11:06:26 2013 -0600
+@@ -33,11 +33,9 @@
+ Cocoa_CreateShaper(SDL_Window* window) {
+     SDL_WindowData* windata = (SDL_WindowData*)window->driverdata;
+     [windata->nswindow setOpaque:NO];
+-
+-    if ([windata->nswindow respondsToSelector:@selector(setStyleMask:)]) {
+-        [windata->nswindow setStyleMask:NSBorderlessWindowMask];
+-    }
+-
++#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
++    [windata->nswindow setStyleMask:NSBorderlessWindowMask];
++#endif
+     SDL_WindowShaper* result = result = malloc(sizeof(SDL_WindowShaper));
+     result->window = window;
+     result->mode.mode = ShapeModeDefault;
+diff -r 70b305e09b4e src/video/cocoa/SDL_cocoavideo.h
+--- a/src/video/cocoa/SDL_cocoavideo.h	Sat Oct 05 00:29:57 2013 -0400
++++ b/src/video/cocoa/SDL_cocoavideo.h	Sat Oct 05 11:06:26 2013 -0600
+@@ -39,6 +39,16 @@
+ #include "SDL_cocoaopengl.h"
+ #include "SDL_cocoawindow.h"
+ 
++#if MAC_OS_X_VERSION_MAX_ALLOWED < 1050
++#if __LP64__
++typedef long NSInteger;
++typedef unsigned long NSUInteger;
++#else
++typedef int NSInteger;
++typedef unsigned int NSUInteger;
++#endif
++#endif
++
+ /* Private display data */
+ 
+ @class SDLTranslatorResponder;
+diff -r 70b305e09b4e src/video/cocoa/SDL_cocoawindow.h
+--- a/src/video/cocoa/SDL_cocoawindow.h	Sat Oct 05 00:29:57 2013 -0400
++++ b/src/video/cocoa/SDL_cocoawindow.h	Sat Oct 05 11:06:26 2013 -0600
+@@ -27,7 +27,12 @@
+ 
+ typedef struct SDL_WindowData SDL_WindowData;
+ 
++/* *INDENT-OFF* */
++#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
+ @interface Cocoa_WindowListener : NSResponder <NSWindowDelegate> {
++#else
++@interface Cocoa_WindowListener : NSResponder {
++#endif
+     SDL_WindowData *_data;
+     BOOL observingVisible;
+     BOOL wasCtrlLeft;
+diff -r 70b305e09b4e src/video/cocoa/SDL_cocoawindow.m
+--- a/src/video/cocoa/SDL_cocoawindow.m	Sat Oct 05 00:29:57 2013 -0400
++++ b/src/video/cocoa/SDL_cocoawindow.m	Sat Oct 05 11:06:26 2013 -0600
+@@ -100,9 +100,11 @@
+ 
+     [view setNextResponder:self];
+ 
++#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+     if ([view respondsToSelector:@selector(setAcceptsTouchEvents:)]) {
+         [view setAcceptsTouchEvents:YES];
+     }
++#endif
+ }
+ 
+ - (void)observeValueForKeyPath:(NSString *)keyPath
+@@ -501,6 +503,7 @@
+ 
+ - (void)handleTouches:(cocoaTouchType)type withEvent:(NSEvent *)event
+ {
++#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+     NSSet *touches = 0;
+     NSEnumerator *enumerator;
+     NSTouch *touch;
+@@ -549,6 +552,7 @@
+ 
+         touch = (NSTouch*)[enumerator nextObject];
+     }
++#endif /* MAC_OS_X_VERSION_MAX_ALLOWED >= 1060 */
+ }
+ 
+ @end
+@@ -993,6 +997,8 @@
+ void
+ Cocoa_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
+ {
++    /* this message arrived in 10.6. You're out of luck on older OSes. */
++#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
+     if ([nswindow respondsToSelector:@selector(setStyleMask:)]) {
+@@ -1002,6 +1008,7 @@
+         }
+     }
+     [pool release];
++#endif
+ }
+ 
+ void
