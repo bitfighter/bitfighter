@@ -66,7 +66,7 @@
 #endif
 #if defined(ANDROID)
 #undef __ANDROID__
-#undef __LINUX__ /*do we need to do this?*/
+#undef __LINUX__ /* do we need to do this? */
 #define __ANDROID__ 1
 #endif
 
@@ -114,7 +114,7 @@
 #undef __SOLARIS__
 #define __SOLARIS__ 1
 #endif
-#if defined(WIN32) || defined(_WIN32)
+#if defined(WIN32) || defined(_WIN32) || defined(__CYGWIN__)
 #undef __WIN32__
 #define __WIN32__   1
 #endif
