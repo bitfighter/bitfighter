@@ -58,7 +58,7 @@ namespace Zap
 // List of valid game types -- these are the "official" names, not the more user-friendly names provided by getGameTypeName
 // All names are of the form xxxGameType, and have a corresponding class xxxGame
 static const char *gameTypeClassNames[] = {
-#  define GAME_TYPE_ITEM(a, type, c, d) type,
+#  define GAME_TYPE_ITEM(a, type, c, d, e) type,
        GAME_TYPE_TABLE
 #  undef GAME_TYPE_ITEM
 
@@ -4179,7 +4179,7 @@ bool GameType::isGameOver() const
 // themselves as StringTableEntries, which would be almost as efficient.
 // Expand GAME_TYPE_TABLE into an array of names
 const char *GameTypeNames[] = {
-#  define GAME_TYPE_ITEM(a, b, c, name) name,
+#  define GAME_TYPE_ITEM(a, b, c, name, e, f) name,
        GAME_TYPE_TABLE
 #  undef GAME_TYPE_ITEM
 };

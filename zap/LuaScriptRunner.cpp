@@ -839,7 +839,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
    // Game Types
    add_enum_to_lua(L, "GameType",
-   #  define GAME_TYPE_ITEM(value, b, luaEnumName, d)  luaEnumName, true, value,
+   #  define GAME_TYPE_ITEM(value, b, luaEnumName, d, e, f)  luaEnumName, true, value,
           GAME_TYPE_TABLE
    #  undef GAME_TYPE_ITEM
       (char*)NULL);  

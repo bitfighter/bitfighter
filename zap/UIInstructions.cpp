@@ -43,6 +43,7 @@
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 #include "GeomUtils.h"
+#include "stringUtils.h"
 
 #include "tnlAssert.h"
 
@@ -51,28 +52,24 @@ namespace Zap
 {
 
 
-// This must be kept aligned with enum IntructionPages -- TODO put this into xmacro
+// Extract the page headers from our xmacro
 static const char *pageHeaders[] = {
-   "CONTROLS",
-   "LOADOUT SELECTION",
-   "MODULES",
-   "WEAPON PROJECTILES",
-   "MINES & SPY BUGS",
-   "GAME OBJECTS",
-   "MORE GAME OBJECTS",
-   "MORE GAME OBJECTS",
-   "GAME INDICATORS",
-   "ADVANCED COMMANDS",
-   "SOUND AND MUSIC",
-   "LEVEL COMMANDS",
-   "ADMIN COMMANDS",
-   "OWNER COMMANDS",
-   "DEBUG COMMANDS",
-   //"SCRIPTING CONSOLE"
+#     define INSTR_ITEM(a, sectionName)  sectionName,
+         INSTR_TABLE
+#     undef INSTR_ITEM
+   };
 
-#ifdef TNL_DEBUG
-   "TEST COMMANDS"
-#endif
+
+struct TypeDescr {
+   string name;
+   bool isTeamGame;
+   string description;
+};
+
+static const TypeDescr typeDescriptions[] = {
+#  define GAME_TYPE_ITEM(a, b, c, name, isTeamGame, description)  { name, isTeamGame, description },
+         GAME_TYPE_TABLE
+#  undef GAME_TYPE_ITEM
 };
 
 
@@ -87,7 +84,8 @@ static const char *pageHeaders[] = {
 // Constructor
 InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game),
                                                                          mLoadoutInstructions(LineGap),
-                                                                         mPageHeaders(LineGap)
+                                                                         mPageHeaders(LineGap),
+                                                                         mGameTypeInstrs(5   )
 {
    // Quick sanity check...
    TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum IntructionPages!!!");
@@ -153,10 +151,6 @@ void InstructionsUserInterface::onActivate()
    initPage2();
    initPageHeaders();
 }
-
-
-static const S32 FIRST_COMMAND_PAGE = InstructionsUserInterface::InstructionAdvancedCommands;
-static const S32 FIRST_OBJ_PAGE     = InstructionsUserInterface::InstructionWeaponProjectiles;
 
 static const Color *txtColor = &Colors::cyan;
 static const Color *keyColor = &Colors::white;     
@@ -278,6 +272,10 @@ void InstructionsUserInterface::initNormalKeys_page1()
 
 void InstructionsUserInterface::render()
 {
+   static const S32 FIRST_COMMAND_PAGE = InstructionsUserInterface::InstructionAdvancedCommands;
+   static const S32 FIRST_OBJ_PAGE     = InstructionsUserInterface::InstructionWeaponProjectiles;
+
+
    FontManager::pushFontContext(HelpContext);
 
    Parent::render(pageHeaders[mCurPage], mCurPage + 1, InstructionMaxPages);          // We +1 to be natural
@@ -332,6 +330,14 @@ void InstructionsUserInterface::render()
          break;                                                                        
       case InstructionDebugCommands:                                                   
          renderPageCommands(InstructionDebugCommands - FIRST_COMMAND_PAGE);            // Debug commands
+         break;
+
+      case InstructionsGameTypes:
+         // JIT this, dude
+         if(mGameTypeInstrs.getItemCount() == 0)
+            initGameTypesPage();
+
+         renderPageGameTypes();
          break;
 
 #ifdef TNL_DEBUG
@@ -462,7 +468,7 @@ void InstructionsUserInterface::initPage2()
 
    mLoadoutInstructions.clear();
 
-   initPage2Block(loadoutInstructions1, ARRAYSIZE(loadoutInstructions1), HeaderFontSize, &Colors::yellow, &Colors::paleGreen,
+   initPage2Block(loadoutInstructions1, ARRAYSIZE(loadoutInstructions1), HeaderFontSize, &Colors::yellow, &Colors::green,
                   getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
 
    // Add some space separating the two sections
@@ -1045,6 +1051,67 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 
       ypos += cmdSize + cmdGap;
    }
+}
+
+
+void InstructionsUserInterface::initGameTypesPage()
+{
+   S32 tabStop = 160;
+   S32 cmdCol = horizMargin;
+   bool foundTeamGame = false;
+   
+   Vector<UI::SymbolShapePtr> symbols;
+
+   string header = "Bitfighter has " + itos(ARRAYSIZE(typeDescriptions)) + " primary game types.";
+   symbols.push_back(SymbolString::getSymbolText(header, HeaderFontSize, HelpContext, &Colors::green));
+   mGameTypeInstrs.add(SymbolString(symbols));
+
+   header = "The following games are usually played without teams:";
+   symbols.clear();
+   symbols.push_back(SymbolString::getSymbolText(header, HeaderFontSize, HelpContext, &Colors::yellow));
+   symbols.push_back(SymbolString::getBlankSymbol(0, 10));
+   mGameTypeInstrs.add(SymbolString(symbols));
+
+   for(S32 i = 0; i < ARRAYSIZE(typeDescriptions); i++)
+   {
+      if(typeDescriptions[i].isTeamGame && !foundTeamGame)
+      {
+         symbols.clear();
+         header = "The following games are team based:";
+         symbols.push_back(SymbolString::getSymbolText(header, HeaderFontSize, HelpContext, &Colors::yellow));
+         symbols.push_back(SymbolString::getBlankSymbol(0, 10));
+         mGameTypeInstrs.add(SymbolString(symbols));
+         foundTeamGame = true;
+      }
+
+      Vector<string> lines = wrapString(typeDescriptions[i].description, 600, FontSize, "");
+      for(S32 j = 0; j < lines.size(); j++)
+      {
+         symbols.clear();
+
+         if(j == 0)
+         {
+            symbols.push_back(SymbolString::getSymbolText(typeDescriptions[i].name, FontSize, HelpContext, &Colors::cyan));
+            symbols.push_back(SymbolShapePtr(new SymbolBlank(tabStop - symbols[0]->getWidth())));
+         }
+         else
+            symbols.push_back(SymbolShapePtr(new SymbolBlank(tabStop)));
+
+         symbols.push_back(SymbolString::getSymbolText(lines[j], FontSize, HelpContext, &Colors::white));
+         mGameTypeInstrs.add(SymbolString(symbols));
+      }
+
+      symbols.clear();
+      symbols.push_back(SymbolString::getBlankSymbol(0, 2));
+      mGameTypeInstrs.add(SymbolString(symbols));
+
+   }
+}
+
+
+void InstructionsUserInterface::renderPageGameTypes()
+{
+   mGameTypeInstrs.render(horizMargin, 60, AlignmentLeft);
 }
 
 
