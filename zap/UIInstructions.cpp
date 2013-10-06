@@ -1062,7 +1062,7 @@ void InstructionsUserInterface::initGameTypesPage()
    
    Vector<UI::SymbolShapePtr> symbols;
 
-   string header = "Bitfighter has " + itos(ARRAYSIZE(typeDescriptions)) + " primary game types.";
+   string header = "Bitfighter has " + itos(S32(ARRAYSIZE(typeDescriptions))) + " primary game types.";
    symbols.push_back(SymbolString::getSymbolText(header, HeaderFontSize, HelpContext, &Colors::green));
    mGameTypeInstrs.add(SymbolString(symbols));
 
