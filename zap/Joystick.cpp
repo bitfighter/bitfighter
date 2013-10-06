@@ -108,19 +108,23 @@ bool Joystick::initJoystick(GameSettings *settings)
 
    bool hasBeenOpenedBefore = (sdlJoystick != NULL);
 
-   // Close if already open.
+   // NOTE: Lines commented out with XX below were removed by watusimoto on 10/6/2013.  Removing these
+   //       lines will very likely cause a memory leak, but it also stops the crash that occurs when
+   //       plugging in/removing the joysticks.  A small memory leak may be preferable to a crash.
+
+   // Close if already open
    if(hasBeenOpenedBefore)
    {
-      SDL_JoystickClose(sdlJoystick);
+      //XX SDL_JoystickClose(sdlJoystick);
       sdlJoystick = NULL;
    }
 
    // Will need to shutdown and init, to allow SDL_NumJoysticks to count new joysticks
-   if(SDL_WasInit(SDL_INIT_JOYSTICK))
-      SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+   //XX if(SDL_WasInit(SDL_INIT_JOYSTICK))
+   //XX   SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 
    // Initialize the SDL subsystem
-   if (SDL_InitSubSystem(SDL_INIT_JOYSTICK))
+   if(SDL_InitSubSystem(SDL_INIT_JOYSTICK))
    {
       logprintf("Unable to initialize the joystick subsystem");
       return false;
