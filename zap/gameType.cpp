@@ -58,7 +58,7 @@ namespace Zap
 // List of valid game types -- these are the "official" names, not the more user-friendly names provided by getGameTypeName
 // All names are of the form xxxGameType, and have a corresponding class xxxGame
 static const char *gameTypeClassNames[] = {
-#  define GAME_TYPE_ITEM(a, type, c, d, e) type,
+#  define GAME_TYPE_ITEM(a, type, c, d, e, f) type,
        GAME_TYPE_TABLE
 #  undef GAME_TYPE_ITEM
 
