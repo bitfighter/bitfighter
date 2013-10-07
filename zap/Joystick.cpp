@@ -106,35 +106,37 @@ bool Joystick::initJoystick(GameSettings *settings)
 
    GameSettings::DetectedJoystickNameList.clear();
 
-   bool hasBeenOpenedBefore = (sdlJoystick != NULL);
+#  if SDL_VERSION_ATLEAST(2,0,0)
+      if(!SDL_WasInit(SDL_INIT_JOYSTICK) && SDL_InitSubSystem(SDL_INIT_JOYSTICK))
+      {
+         logprintf("Unable to initialize the joystick subsystem");
+         return false;
+      }
+#  else
+      // Close if already open
+      if(sdlJoystick)
+      {
+         SDL_JoystickClose(sdlJoystick);
+         sdlJoystick = NULL;
+      }
 
-   // NOTE: Lines commented out with XX below were removed by watusimoto on 10/6/2013.  Removing these
-   //       lines will very likely cause a memory leak, but it also stops the crash that occurs when
-   //       plugging in/removing the joysticks.  A small memory leak may be preferable to a crash.
+      // Will need to shutdown and init, to allow SDL_NumJoysticks to count new joysticks
+      if(SDL_WasInit(SDL_INIT_JOYSTICK))
+         SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 
-   // Close if already open
-   if(hasBeenOpenedBefore)
-   {
-      //XX SDL_JoystickClose(sdlJoystick);
-      sdlJoystick = NULL;
-   }
-
-   // Will need to shutdown and init, to allow SDL_NumJoysticks to count new joysticks
-   //XX if(SDL_WasInit(SDL_INIT_JOYSTICK))
-   //XX   SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
-
-   // Initialize the SDL subsystem
-   if(SDL_InitSubSystem(SDL_INIT_JOYSTICK))
-   {
-      logprintf("Unable to initialize the joystick subsystem");
-      return false;
-   }
+      // Initialize the SDL subsystem
+      if(SDL_InitSubSystem(SDL_INIT_JOYSTICK))
+      {
+         logprintf("Unable to initialize the joystick subsystem");
+         return false;
+      }
+#  endif
 
    // How many joysticks are there
    S32 joystickCount = SDL_NumJoysticks();
 
    // No joysticks found
-   if (joystickCount <= 0)
+   if(joystickCount <= 0)
       return false;
 
    logprintf("%d joystick(s) detected:", joystickCount);
@@ -189,7 +191,7 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 
    // Set joystick type if we found anything
    // Otherwise, it makes more sense to remember what the user had last specified
-   if (!hasBeenOpenedBefore && joystickType != NoJoystick)
+   if(!hasBeenOpenedBefore && joystickType != NoJoystick)
    {
 	  settings->getIniSettings()->mSettings.setVal("JoystickType", joystickType);
       setSelectedPresetIndex(Joystick::getJoystickIndex(joystickType));
@@ -209,7 +211,8 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 
 void Joystick::shutdownJoystick()
 {
-   if (sdlJoystick != NULL) {
+   if(sdlJoystick != NULL) {
+      TNLAssert(SDL_JoystickGetAttached(sdlJoystick), "xx");
       SDL_JoystickClose(sdlJoystick);
       sdlJoystick = NULL;
    }
@@ -341,17 +344,17 @@ Joystick::ButtonShape Joystick::buttonLabelToButtonShape(const string &label)
 {
    if(label == "Round")
       return ButtonShapeRound;
-   else if (label == "Rect")
+   else if(label == "Rect")
       return ButtonShapeRect;
-   else if (label == "SmallRect")
+   else if(label == "SmallRect")
       return ButtonShapeSmallRect;
-   else if (label == "RoundedRect")
+   else if(label == "RoundedRect")
       return ButtonShapeRoundedRect;
-   else if (label == "SmallRoundedRect")
+   else if(label == "SmallRoundedRect")
       return ButtonShapeSmallRoundedRect;
-   else if (label == "HorizEllipse")
+   else if(label == "HorizEllipse")
       return ButtonShapeHorizEllipse;
-   else if (label == "RightTriangle")
+   else if(label == "RightTriangle")
       return ButtonShapeRightTriangle;
 
    return ButtonShapeRound;  // Default
@@ -382,27 +385,27 @@ Color Joystick::stringToColor(const string &colorString)
    string lower = lcase(colorString);
    if(lower == "white")
       return Colors::white;
-   else if (lower == "green")
+   else if(lower == "green")
       return Colors::green;
-   else if (lower == "blue")
+   else if(lower == "blue")
       return Colors::blue;
-   else if (lower == "yellow")
+   else if(lower == "yellow")
       return Colors::yellow;
-   else if (lower == "cyan")
+   else if(lower == "cyan")
       return Colors::cyan;
-   else if (lower == "magenta")
+   else if(lower == "magenta")
       return Colors::magenta;
-   else if (lower == "black")
+   else if(lower == "black")
       return Colors::black;
-   else if (lower == "red")
+   else if(lower == "red")
       return Colors::red;
-   else if (lower == "paleRed")
+   else if(lower == "paleRed")
       return Colors::paleRed;
-   else if (lower == "paleBlue")
+   else if(lower == "paleBlue")
       return Colors::paleBlue;
-   else if (lower == "palePurple")
+   else if(lower == "palePurple")
       return Colors::palePurple;
-   else if (lower == "paleGreen")
+   else if(lower == "paleGreen")
       return Colors::paleGreen;
 
    return Colors::white;  // default

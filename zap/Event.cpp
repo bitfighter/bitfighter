@@ -182,7 +182,7 @@ bool Event::inputCodeDown(UserInterface *currentUI, InputCode inputCode)
 }
 
 
-void Event::onEvent(ClientGame *game, SDL_Event* event)
+void Event::onEvent(ClientGame *game, SDL_Event *event)
 {
    IniSettings *iniSettings = game->getSettings()->getIniSettings();
    UserInterface *currentUI = game->getUIManager()->getCurrentUI();
@@ -201,7 +201,14 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
       case SDL_TEXTINPUT:
          if(mAllowTextInput)
             onTextInput(currentUI, event->text.text[0]);
+         break;
 
+      case SDL_JOYDEVICEADDED:      // Joystick was plugged -- which is stick index
+         onStickAdded(event->jdevice.which);
+         break;
+
+      case SDL_JOYDEVICEREMOVED:    // Joystick was unplugged -- which is instance_id
+         onStickRemoved(event->jdevice.which);
          break;
 #endif
 
@@ -245,7 +252,7 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
 #endif
 
       case SDL_MOUSEBUTTONUP:
-         switch (event->button.button)
+         switch(event->button.button)
          {
             case SDL_BUTTON_LEFT:
                onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_LEFT, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
@@ -491,6 +498,25 @@ void Event::onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel)
 {
    // TODO:  Do we need joyball?
 //   logprintf("SDL Ball number: %u, relative x: %d, relative y: %d", ball, xrel, yrel);
+}
+
+
+Vector<S32> deviceIds;
+
+void Event::onStickAdded(S32 stickIndex)
+{
+   //S32 deviceId = SDL_SYS_GetInstanceIdOfDeviceIndex(stickIndex);
+   //const char *joystickName = SDL_JoystickNameForIndex(deviceId);
+
+   //JoystickInfo
+   //logprintf("Found %s", joystickName);
+}
+
+
+void Event::onStickRemoved(S32 deviceId)
+{
+ /*  joystickNames[deviceId];
+   logprintf("removing %s", joystickName);*/
 }
 
 

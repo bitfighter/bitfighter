@@ -65,6 +65,8 @@ private:
    static void onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel);
    static void onResize(ClientGame *game, S32 w, S32 h);
    static void onUser(U8 type, S32 code, void* data1, void* data2);
+   static void onStickAdded(S32 stickIndex);
+   static void onStickRemoved(S32 deviceId);
 
 public:
    Event();
