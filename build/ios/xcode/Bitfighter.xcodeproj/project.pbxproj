@@ -38,6 +38,7 @@
 		6150AF9C17A5D329000C836C /* cdt.cc in Sources */ = {isa = PBXBuildFile; fileRef = 6150AF9517A5D329000C836C /* cdt.cc */; };
 		6150AF9D17A5D329000C836C /* sweep_context.cc in Sources */ = {isa = PBXBuildFile; fileRef = 6150AF9717A5D329000C836C /* sweep_context.cc */; };
 		6150AF9E17A5D329000C836C /* sweep.cc in Sources */ = {isa = PBXBuildFile; fileRef = 6150AF9917A5D329000C836C /* sweep.cc */; };
+		616038EA180361DC00407C91 /* LevelSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 616038E8180361DC00407C91 /* LevelSource.cpp */; };
 		617D0250161B8A6F00DDCF78 /* BanList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B57681446185700F25FDF /* BanList.cpp */; };
 		617D0251161B8A6F00DDCF78 /* barrier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F28112E2D7E700EA5EBE /* barrier.cpp */; };
 		617D0252161B8A6F00DDCF78 /* BfObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738100E415C768B3001AD1D8 /* BfObject.cpp */; };
@@ -509,6 +510,8 @@
 		6150AF9917A5D329000C836C /* sweep.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sweep.cc; path = ../../../poly2tri/sweep/sweep.cc; sourceTree = SOURCE_ROOT; };
 		6150AF9A17A5D329000C836C /* sweep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sweep.h; path = ../../../poly2tri/sweep/sweep.h; sourceTree = SOURCE_ROOT; };
 		6150AF9F17A5D34B000C836C /* poly2tri.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = poly2tri.h; path = ../../../poly2tri/poly2tri.h; sourceTree = SOURCE_ROOT; };
+		616038E8180361DC00407C91 /* LevelSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LevelSource.cpp; path = ../../../zap/LevelSource.cpp; sourceTree = SOURCE_ROOT; };
+		616038E9180361DC00407C91 /* LevelSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LevelSource.h; path = ../../../zap/LevelSource.h; sourceTree = SOURCE_ROOT; };
 		617D0310161B8EC200DDCF78 /* liblibtomcrypt.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblibtomcrypt.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		617D0379161B8F7A00DDCF78 /* libtnl.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libtnl.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		617D03E4161B908200DDCF78 /* libluavec.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libluavec.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1494,6 +1497,8 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				616038E8180361DC00407C91 /* LevelSource.cpp */,
+				616038E9180361DC00407C91 /* LevelSource.h */,
 				61E88D1817A6FD2900BA8B28 /* AToBScroller.cpp */,
 				61E88D1917A6FD2900BA8B28 /* AToBScroller.h */,
 				6150AF3017A5CDE2000C836C /* fontstash.c */,
@@ -2438,6 +2443,7 @@
 				6150AF9D17A5D329000C836C /* sweep_context.cc in Sources */,
 				6150AF9E17A5D329000C836C /* sweep.cc in Sources */,
 				61E88D1A17A6FD2900BA8B28 /* AToBScroller.cpp in Sources */,
+				616038EA180361DC00407C91 /* LevelSource.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
