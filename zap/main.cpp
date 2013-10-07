@@ -435,7 +435,13 @@ void dedicatedServerLoop()
 class OglConsoleLogConsumer : public LogConsumer    // Dumps to oglConsole
 {
 private:
-   void writeString(const char *string) { gConsole.output(string); }
+   void writeString(const char *string) {
+#ifndef BF_NO_CONSOLE
+      gConsole.output(string);
+#else
+      fprintf(stderr, string, NULL);
+#endif
+   }
 };
 
 
@@ -514,8 +520,10 @@ void shutdownBitfighter(ServerGame *serverGame)
 #endif
    }
 
+#ifndef BF_NO_CONSOLE
    // Avoids annoying shutdown crashes when logging is still trying to output to oglconsole
    gOglConsoleLog.setMsgTypes(LogConsumer::LogNone);
+#endif
 
    settings->save();                                  // Write settings to bitfighter.ini
 
@@ -629,7 +637,9 @@ void setupLogging(const string &logDir)
    gMainLog.logprintf("------ Bitfighter Log File ------");
 
    gStdoutLog.setMsgTypes(events);              // writes to stdout
+#ifndef BF_NO_CONSOLE
    gOglConsoleLog.setMsgTypes(consoleEvents);   // writes to in-game console
+#endif
 
    gServerLog.init(joindir(logDir, "bitfighter_server.log"), "a");
    gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter | LogConsumer::StatisticsFilter); 
@@ -1159,7 +1169,9 @@ int main(int argc, char **argv)
       // of a string.  Which will crash if the fonts haven't been loaded, which happens as part of actualizeScreenMode.  So there.
       createClientGame(settings);         
 
+#ifndef BF_NO_CONSOLE
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
+#endif
 
       // Fonts are initialized in VideoSystem::actualizeScreenMode because of OpenGL + texture loss/creation
       FontManager::setFont(FontRoman);     // Default font
