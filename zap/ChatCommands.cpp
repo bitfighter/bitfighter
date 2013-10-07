@@ -320,7 +320,7 @@ void showIdsHandler(ClientGame *game, const Vector<string> &words)
 // Could possibly reveal out-of-scope turrets and forcefields and such; in any case uses illegal reachover and only works with local server
 void showZonesHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(isLocalTestServer(game, "!!! Zones can only be displayed on a local host"))
+   if(isLocalTestServer(game, "!!! Zones can only be displayed on a test server"))
       game->getUIManager()->getUI<GameUserInterface>()->toggleShowingMeshZones();
 }
 
