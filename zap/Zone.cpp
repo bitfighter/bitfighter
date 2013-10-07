@@ -27,6 +27,7 @@
 
 #include "game.h"
 #include "Colors.h"
+#include "GeomUtils.h"
 
 #include "gameObjectRender.h"
 
@@ -171,6 +172,7 @@ bool Zone::collide(BfObject *hitObject)
  */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS,  containsPoint,           ARRAYDEF({{ PT, END }}),              1 ) \
 
 GENERATE_LUA_FUNARGS_TABLE(Zone, LUA_METHODS);
 GENERATE_LUA_METHODS_TABLE(Zone, LUA_METHODS);
@@ -180,6 +182,32 @@ GENERATE_LUA_METHODS_TABLE(Zone, LUA_METHODS);
 const char *Zone::luaClassName = "Zone";
 REGISTER_LUA_SUBCLASS(Zone, BfObject);
 
+/**
+ * @luafunc bool Zone::containsPoint(point p)
+ * 
+ * @brief
+ * Check whether `p` lies inside of this Zone.
+ *
+ * @desc
+ * Determines if `p` is contained by this zone, according to the  winding
+ * number algorithm. Points which lie on boundary of the polygon are
+ * considered inside of it. If a polygon is self-intersecting, this method
+ * will return true as long as `p` lies within some non-self-intersection
+ * subpolygon.
+ *
+ * @param p The point to check.
+ * 
+ * @return `true` if `p` lies within the zone, `false` otherwise
+ */
+int Zone::lua_containsPoint(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "setAngle");
+
+   Point pt = getPointOrXY(L, 1);
+   const Vector<Point> *poly = getCollisionPoly();
+
+   return returnBool(L, polygonContainsPoint(poly->address(), poly->size(), pt));
+}
 
 
 ////////////////////////////////////////
