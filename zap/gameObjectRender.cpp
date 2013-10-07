@@ -842,7 +842,7 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
    S32 ypos = 30 + textSize;
    S32 len = drawStringc(0, ypos, textSize, renderName.c_str());
 
-   renderGamesPlayedMark(-len / 2, ypos, textSize, gamesPlayed);
+//   renderGamesPlayedMark(-len / 2, ypos, textSize, gamesPlayed);
 
    // Underline name if player is authenticated
    if(isAuthenticated)
