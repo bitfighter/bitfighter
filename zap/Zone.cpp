@@ -201,7 +201,7 @@ REGISTER_LUA_SUBCLASS(Zone, BfObject);
  */
 int Zone::lua_containsPoint(lua_State *L)
 {
-   checkArgList(L, functionArgs, "Robot", "setAngle");
+   checkArgList(L, functionArgs, "Zone", "containsPoint");
 
    Point pt = getPointOrXY(L, 1);
    const Vector<Point> *poly = getCollisionPoly();
