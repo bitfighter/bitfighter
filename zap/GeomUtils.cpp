@@ -1853,6 +1853,13 @@ GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
  * are created in the output, this function produces the least number
  * of polygons which represent it.
  *
+ * @note
+ * This function is highly experimental, and potentially very resource intensive.
+ * If the output must be triangulated (because you made a hole), then there is a
+ * possibility that **the program will crash abruptly**. Please use this function
+ * with great care, and make sure to constrain the inputs tightly so that users
+ * can not induce crashes.
+ *
  * @param op \ref ClipTypeEnum The polygon boolean operation to execute.
  * @param subject A table of polygons or a single polygon to use as the subject.
  * @param clip A table of polygons or a single polygon to use as the clip.
@@ -1935,6 +1942,12 @@ S32 lua_triangulate(lua_State *L)
  *
  * @note
  * Any non-triangle polygons in the input will be discarded.
+ *
+ * @note
+ * This function is highly experimental, and potentially very resource
+ * intensive. There is a possibility that **the program will crash abruptly**.
+ * Please use this function with great care, and make sure to constrain the
+ * inputs tightly so that users can not induce crashes.
  *
  * @param triangles Either a single triangle or a table of triangles.
  *
