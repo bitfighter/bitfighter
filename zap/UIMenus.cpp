@@ -924,7 +924,7 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
 
    addMenuItem(new MenuItem("JOIN LAN/INTERNET GAME", joinSelectedCallback,       "", KEY_J));
    addMenuItem(new MenuItem("HOST GAME",              hostSelectedCallback,       "", KEY_H));
-   addMenuItem(new MenuItem("INSTRUCTIONS",           helpSelectedCallback,       "", KEY_I, keyHelp));
+   addMenuItem(new MenuItem("SUPER SECRET",           helpSelectedCallback,       "", KEY_I, keyHelp));
    addMenuItem(new MenuItem("OPTIONS",                optionsSelectedCallback,    "", KEY_O));
    addMenuItem(new MenuItem("HIGH SCORES",            highScoresSelectedCallback, "", KEY_S));
    addMenuItem(new MenuItem("LEVEL EDITOR",           editorSelectedCallback,     "", KEY_L, KEY_E));
