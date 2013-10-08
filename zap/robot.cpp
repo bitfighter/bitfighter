@@ -148,6 +148,8 @@ Robot::~Robot()
 // Only runs on server!
 bool Robot::initialize(Point &pos)
 {
+   TNLAssert(!isGhost(), "Server only, dude!");
+
    try
    {
       flightPlan.clear();
@@ -156,14 +158,14 @@ bool Robot::initialize(Point &pos)
 
       Parent::initialize(pos);
 
+      // Robots added via robot.new() get intialized.  If the robot is added in a script's main() 
+      // function, the bot will be reinitialized when the game starts.  This check avoids that.
       if(!isCollisionEnabled())
          enableCollision();
 
       // WarpPositionMask triggers the spinny spawning visual effect
       setMaskBits(RespawnMask | HealthMask        | LoadoutMask         | PositionMask | 
                   MoveMask    | ModulePrimaryMask | ModuleSecondaryMask | WarpPositionMask);      // Send lots to the client
-
-      TNLAssert(!isGhost(), "Didn't expect ghost here... this is supposed to only run on the server!");
 
       EventManager::get()->update();   // Ensure registrations made during bot initialization are ready to go
    }
