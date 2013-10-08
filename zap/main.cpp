@@ -1044,6 +1044,15 @@ int zapmain(int argc, char **argv)
 int main(int argc, char **argv)
 #endif
 {
+   // The following will induce a crash when the silver joystick is plugged in
+   //SDL_Init(0);                               
+   //SDL_JoystickEventState(SDL_ENABLE);
+   //SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+   //SDL_Joystick *x = SDL_JoystickOpen(0);
+   //SDL_JoystickClose(x);
+   //
+   //SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+   //exit(0);
 
 // Enable some heap checking stuff for Windows... slow... do not include in release version!!
 //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF );
