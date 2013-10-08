@@ -288,7 +288,13 @@ S32 EditorPlugin::lua_getSelectedObjects(lua_State *L)
       BfObject *obj = static_cast<BfObject *>(objects->get(i));
          
       if(obj && obj->isSelected())
-         orderedSelectedItems.insert(pair<U32, BfObject*>(obj->getSelectedTime(), obj));
+      {
+         // This mask is a combination of the object's selection time (in the
+         // upper 16 bits) and its serial number (in the lower 16 bits). This
+         // orders objects by selection time, while also keeping objects which
+         // are selected simultaneously from clobbering each other
+         orderedSelectedItems.insert(pair<U32, BfObject*>((obj->getSelectedTime() << 16) | (obj->getSerialNumber() & 0xFFFF) , obj));
+      }
    }
 
    S32 pushed = 0;
