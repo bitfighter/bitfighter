@@ -24,7 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "EditorPlugin.h"     // Header
-#include "game.h"
+#include "ClientGame.h"
+#include "UIEditor.h"
+#include "UIManager.h"
 
 #include "tnlLog.h"
 
@@ -225,6 +227,7 @@ REGISTER_LUA_CLASS(EditorPlugin);
    METHOD(CLASS, getGridSize,        ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getSelectedObjects, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getAllObjects,      ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, showMessage,        ARRAYDEF({{ STR, END }, { STR, BOOL, END }}), 2 ) \
 
 GENERATE_LUA_METHODS_TABLE(EditorPlugin, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
@@ -285,7 +288,13 @@ S32 EditorPlugin::lua_getSelectedObjects(lua_State *L)
       BfObject *obj = static_cast<BfObject *>(objects->get(i));
          
       if(obj && obj->isSelected())
-         orderedSelectedItems.insert(pair<U32, BfObject*>(obj->getSelectedTime(), obj));
+      {
+         // This mask is a combination of the object's selection time (in the
+         // upper 16 bits) and its serial number (in the lower 16 bits). This
+         // orders objects by selection time, while also keeping objects which
+         // are selected simultaneously from clobbering each other
+         orderedSelectedItems.insert(pair<U32, BfObject*>((obj->getSelectedTime() << 16) | (obj->getSerialNumber() & 0xFFFF) , obj));
+      }
    }
 
    S32 pushed = 0;
@@ -330,6 +339,48 @@ S32 EditorPlugin::lua_getAllObjects(lua_State *L)
    }
 
    return 1;
+}
+
+
+/**
+ * @luafunc EditorPlugin::showMessage(string msg, bool good)
+ * 
+ * @brief
+ * Display a big message on-screen.
+ * @desc
+ *
+ * Display a message to the user like the message displayed when saving a
+ * file. Please be courteous and give the user some feedback about whether or
+ * not your plugin has run successfully.
+ *
+ * @note
+ * There is no guarantee that your message will fit onscreen.
+ *
+ * @param msg The text to display.
+ * @param good Controls the color of the displayed text as follows:
+ *  - `true`: green
+ *  - `false`: red
+ */
+S32 EditorPlugin::lua_showMessage(lua_State *L)
+{
+   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "showMessage");
+   const char* msg = getString(L, 1);
+
+   bool good = true;
+   if(profile >= 1)
+   {
+      good = lua_toboolean(L, -1);
+   }
+
+   ClientGame* cg = dynamic_cast<ClientGame*>(mGame);
+   if(cg)
+   {
+      cg->getUIManager()->getUI<EditorUserInterface>()->setSaveMessage(msg, good);
+   }
+
+   clearStack(L);
+
+   return 0;
 }
 
 

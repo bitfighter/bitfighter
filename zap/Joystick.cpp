@@ -203,6 +203,7 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 
 void Joystick::shutdownJoystick()
 {
+#if SDL_VERSION_ATLEAST(2,0,0)
    if(sdlJoystick != NULL) {
       SDL_JoystickClose(sdlJoystick);
       sdlJoystick = NULL;
@@ -210,6 +211,7 @@ void Joystick::shutdownJoystick()
 
    if(SDL_WasInit(SDL_INIT_JOYSTICK))
       SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+#endif
 }
 
 

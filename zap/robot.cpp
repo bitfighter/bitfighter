@@ -156,7 +156,8 @@ bool Robot::initialize(Point &pos)
 
       Parent::initialize(pos);
 
-      enableCollision();
+      if(!isCollisionEnabled())
+         enableCollision();
 
       // WarpPositionMask triggers the spinny spawning visual effect
       setMaskBits(RespawnMask | HealthMask        | LoadoutMask         | PositionMask | 
