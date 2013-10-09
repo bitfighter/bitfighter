@@ -5001,12 +5001,14 @@ void quitEditorCallback(ClientGame *game, U32 unused)
 void EditorMenuUserInterface::setupMenus()
 {
    GameSettings *settings = getGame()->getSettings();
+   InputCode keyHelp = getInputCode(settings, InputCodeManager::BINDING_HELP);
+
    clearMenuItems();
    addMenuItem(new MenuItem("RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
    addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode")));
    addMenuItem(new MenuItem("TEST LEVEL",       testLevelCallback,           "", KEY_T));
    addMenuItem(new MenuItem("SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
-   addMenuItem(new MenuItem("INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, getInputCode(settings, InputCodeManager::BINDING_HELP)));
+   addMenuItem(new MenuItem("SUPER SECRET",     activateHelpCallback,        "", KEY_I, keyHelp));
    addMenuItem(new MenuItem("LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
    addMenuItem(new MenuItem("MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
 
