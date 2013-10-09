@@ -4103,7 +4103,7 @@ bool EditorUserInterface::checkPluginKeyBindings(string inputString)
 
    for(S32 i = 0; i < mPluginInfos.size(); i++)
    {
-      if(inputString == mPluginInfos[i].binding)
+      if(mPluginInfos[i].binding != "" && inputString == mPluginInfos[i].binding)
       {
          runPlugin(settings->getFolderManager(), mPluginInfos[i].fileName, Vector<string>());
          return true;
