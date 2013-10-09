@@ -85,7 +85,8 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<boost::shared_ptr<Me
    // Function exists, and is on the stack.  Clear it away because it will be reloaded by runCmd().
    clearStack(L);
 
-   bool error = runCmd("getArgsMenu", 2);      // We're expecting getArgsMenu() to return 2 values
+   static const S32 numResults = 4;
+   bool error = runCmd("getArgsMenu", numResults);
 
    if(error)        
    {
@@ -93,9 +94,11 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<boost::shared_ptr<Me
       return true;     
    }
 
-   // We specified that we expect 2 items back; this means that even if the function returns nothing (legit), there
-   // will be 2 nils on the stack.  We'll check the top of the stack -- if that's nil, we'll assume that the script
-   // intended to return no menu items, which is totally legit. 
+   // We specified that we expect `numResults` items back; this means that
+   // even if the function returns nothing (legit), there will be `numResults`
+   // nils on the stack.  We'll check the top of the stack -- if that's nil,
+   // we'll assume that the script intended to return no menu items, which is
+   // totally legit.
    if(lua_isnil(L, 1))
    {
       clearStack(L);    // Get rid of the nils
@@ -105,9 +108,37 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<boost::shared_ptr<Me
    // There's something on the stack.  Look for what we expect, throw an exception if we get any guff.
    try
    {
-      // Both will throw if they don't find what they expect
-      menuTitle = getCheckedString(L, 1, "getArgsMenu");
-      getMenuItemVectorFromTable(L, 2, "getArgsMenu", menuItems); // <== fills menuItems with any items it finds
+      // We expect to find at most one table and three strings. There's no
+      // need to enforce a specific order, so we'll just interpret each result
+      // based on what we've found so far. This lets scripts using the new
+      // system to put the returned values in a human-readable order, while
+      // maintaining backwards-compatibility with old plugins.
+      for(S32 i = 1; i <= numResults; i++)
+      {
+         if(lua_istable(L, i))
+         {
+            // check any supplied tables for menu items and put them into menuItems
+            getMenuItemVectorFromTable(L, i, "getArgsMenu", menuItems);
+         }
+         else if(lua_isstring(L, i))
+         {
+            // Any strings found are interpretted as the menu title, plugin
+            // description, and requested keybinding (in that order), ignoring
+            // empty strings.
+            if(menuTitle == "")
+            {
+               menuTitle = getString(L, i);
+            }
+            else if(mDescription == "")
+            {
+               mDescription = getString(L, i);
+            }
+            else if(mRequestedBinding == "")
+            {
+               mRequestedBinding = getString(L, i);
+            }
+         }
+      }
    }
    catch(LuaException &e)
    {
@@ -126,6 +157,18 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<boost::shared_ptr<Me
 string EditorPlugin::getScriptName()
 {
    return mScriptName;
+}
+
+
+string EditorPlugin::getDescription()
+{
+   return mDescription;
+}
+
+
+string EditorPlugin::getRequestedBinding()
+{
+   return mRequestedBinding;
 }
 
 

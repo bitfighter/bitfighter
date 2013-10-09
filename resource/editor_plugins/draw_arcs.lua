@@ -11,7 +11,8 @@
 --
 function getArgsMenu()
    
-   return "Create Arc",         -- Title shown on menu
+   return "Create Arc",                          -- Title shown on menu
+          "Make an arced/circular wall or zone", -- Description shown when hovered
       {
          CounterMenuItem.new("Angle",          90, 1,       0,   360, "deg.",       "", "Sweep of arc"),    
          CounterMenuItem.new("Precision",      16, 1,       4,    62, "divisions",  "", "Number of sections per arc"),

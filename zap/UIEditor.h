@@ -67,10 +67,13 @@ class EditorUserInterface : public UserInterface
 public:
    struct PluginInfo
    {
-      PluginInfo(string prettyName, string fileName) : prettyName(prettyName), fileName(fileName) { }
+      PluginInfo(string prettyName, string fileName, string description, string requestedBinding)
+         : prettyName(prettyName), fileName(fileName), description(description), requestedBinding(requestedBinding) { }
       string prettyName;
       string fileName;
       string binding;
+      string description;
+      string requestedBinding;
    };
 
    enum SpecialAttribute   // Some items have special attributes.  These are the ones
@@ -83,6 +86,7 @@ public:
    };
 
 private:
+   string mInfoMsg;
    string mSaveMsg;
    Color mSaveMsgColor;
 

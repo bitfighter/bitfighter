@@ -41,7 +41,7 @@ function getArgsMenu()
 		ToggleMenuItem.new("Object", items, 1, true, "Object type"),
 	}
 
-	return "Select/deselect all items of the specified type", menuTable
+	return "Select/Deselect", "Select/deselect all items of the specified type", "Ctrl+L", menuTable
 end
 
 

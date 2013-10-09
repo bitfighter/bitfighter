@@ -45,6 +45,8 @@ private:
    GridDatabase *mGridDatabase;
    Game *mGame;
    F32 mGridSize;
+   string mDescription;
+   string mRequestedBinding;
 
 protected:
    void killScript();
@@ -59,6 +61,8 @@ public:
 
    bool prepareEnvironment();
    string getScriptName();
+   string getDescription();
+   string getRequestedBinding();
 
    const char *getErrorMessagePrefix();
      
