@@ -1693,7 +1693,7 @@ static void renderAttribText(S32 xpos, S32 ypos, S32 textsize,
 // Shows selected item attributes, or, if we're hovering over dock item, shows dock item info string
 void EditorUserInterface::renderItemInfoPanel()
 {
-   string attribsText, hoverText, itemName, attribs;     // All intialized to ""
+   string attribsText, itemName, attribs;     // All intialized to ""
 
    S32 hitCount = 0;
    bool multipleKindsOfObjectsSelected = false;
@@ -1744,8 +1744,8 @@ void EditorUserInterface::renderItemInfoPanel()
             hitCount++;
          }  // end if obj is selected
 
-         else if(obj->isLitUp())
-            hoverText = string("Hover: ") + obj->getOnScreenName();
+         else if(obj->isLitUp() && !mouseOnDock())
+            mInfoMsg = string("Hover: ") + obj->getOnScreenName();
       }
    }
 
@@ -1786,10 +1786,10 @@ void EditorUserInterface::renderItemInfoPanel()
    }
 
    ypos -= S32(upperLineTextSize * 1.3);
-   if(hoverText != "" && !mDockItemHit)
+   if(mInfoMsg != "" && !mDockItemHit)
    {
       glColor(Colors::white);
-      drawString(xpos, ypos, upperLineTextSize, hoverText.c_str());
+      drawString(xpos, ypos, upperLineTextSize, mInfoMsg.c_str());
    }
 }
 
@@ -1828,6 +1828,7 @@ static F32 getRenderingAlpha(bool isScriptItem)
 void EditorUserInterface::render()
 {
    GridDatabase *editorDb = getDatabase();
+   mInfoMsg = "";
 
    mouseIgnore = false;                // Avoid freezing effect from too many mouseMoved events without a render in between (sam)
 
@@ -2087,6 +2088,7 @@ void EditorUserInterface::renderDockPlugins()
          S32 x = gScreenInfo.getGameCanvasWidth() - mDockWidth - horizMargin;
          F32 y = 1.5f * vertMargin + PLUGIN_LINE_SPACING * i;
          drawHollowRect(x + horizMargin / 3, y, x + mDockWidth - horizMargin / 3, y + PLUGIN_LINE_SPACING, Colors::white);
+         mInfoMsg = mPluginInfos[i].description;
       }
 
       glColor(Colors::white);
@@ -4098,14 +4100,15 @@ void EditorUserInterface::onMouseClicked_right()
 bool EditorUserInterface::checkPluginKeyBindings(string inputString)
 {
    GameSettings *settings = getGame()->getSettings();
-   const Vector<PluginBinding> *bindings = settings->getPluginBindings(); 
 
-   for(S32 i = 0; i < bindings->size(); i++)
-      if(inputString == bindings->get(i).key)
+   for(S32 i = 0; i < mPluginInfos.size(); i++)
+   {
+      if(inputString == mPluginInfos[i].binding)
       {
-         runPlugin(settings->getFolderManager(), bindings->get(i).script, Vector<string>());
+         runPlugin(settings->getFolderManager(), mPluginInfos[i].fileName, Vector<string>());
          return true;
       }
+   }
 
    return false;
 }
@@ -4877,7 +4880,7 @@ void EditorUserInterface::findPlugins()
       if(title == "")
          title = plugins[i];
 
-      PluginInfo info(title, plugins[i]);
+      PluginInfo info(title, plugins[i], plugin.getDescription(), plugin.getRequestedBinding());
 
       // check for a binding
       for(S32 j = 0; j < bindings.size(); j++)
@@ -4886,6 +4889,38 @@ void EditorUserInterface::findPlugins()
          {
             info.binding = bindings[j].key;
             break;
+         }
+      }
+
+      // if no binding is configured, and the plugin specifies a requested binding
+      if(info.binding == "" && info.requestedBinding != "")
+      {
+         // use the requested binding if it is not currently in use
+         bool bindingInUse = false;
+
+         // check configured bindings
+         for(S32 j = 0; j < bindings.size(); j++)
+         {
+            if(bindings[j].key == info.requestedBinding)
+            {
+               bindingInUse = true;
+               break;
+            }
+         }
+
+         // check bindings for plugins loaded so far
+         for(S32 j = 0; j < mPluginInfos.size(); j++)
+         {
+            if(mPluginInfos[j].binding == info.requestedBinding)
+            {
+               bindingInUse = true;
+               break;
+            }
+         }
+
+         if(!bindingInUse)
+         {
+            info.binding = info.requestedBinding;
          }
       }
 
