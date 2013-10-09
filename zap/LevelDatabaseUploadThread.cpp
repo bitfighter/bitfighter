@@ -77,9 +77,10 @@ U32 LevelDatabaseUploadThread::run()
       return 0;
    }
 
+   // The server responds with the DBID of the level we just uploaded
+   mGame->setLevelDatabaseId(atoi(req.getResponseBody().c_str()));
    editor->saveLevel(false, false);
    editor->setSaveMessage("Uploaded successfully", true);
-   mGame->setLevelDatabaseId(atoi(req.getResponseBody().c_str()));
 
    delete this;
    return 0;
