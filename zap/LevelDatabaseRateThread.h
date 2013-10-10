@@ -1,5 +1,5 @@
-#ifndef LEVELDATABASERATETHREAD_H_
-#define LEVELDATABASERATETHREAD_H_
+#ifndef _LEVEL_DATABASE_RATE_THREAD_H_
+#define _LEVEL_DATABASE_RATE_THREAD_H_
 
 #include "tnlThread.h"
 #include <string>
@@ -39,4 +39,4 @@ public:
 };
 
 } /* namespace Zap */
-#endif /* LEVELDATABASERATETHREAD_H_ */
+#endif /* _LEVEL_DATABASE_RATE_THREAD_H_ */
