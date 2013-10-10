@@ -44,7 +44,7 @@ U32 LevelDatabaseRateThread::run()
 {
    if(!mGame->getLevelDatabaseId())
    {
-      mGame->displayErrorMessage("Level ID not found -- redownload the level from the DB to enable rating");
+      mGame->displayErrorMessage("!!! Level ID not found -- redownload the level from the DB to enable rating");
       return 1;
    }
 
@@ -59,7 +59,7 @@ U32 LevelDatabaseRateThread::run()
 
    if(!req.send())
    {
-      mGame->displayErrorMessage("Error connecting to server");
+      mGame->displayErrorMessage("!!! Error connecting to server");
 
       delete this;
       return 0;
