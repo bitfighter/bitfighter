@@ -173,20 +173,23 @@ void InstructionsUserInterface::initNormalKeys_page1()
          { "Open ship config menu", "[[ShowLoadoutMenu]]" },
          { "Toggle map view",       "[[ShowCmdrMap]]"     },
          { "Drop flag",             "[[DropItem]]"        },
-         { "Show scoreboard",       "[[ShowScoreboard]]"  }
+         { "Show scoreboard",       "[[ShowScoreboard]]"  },
+         { "Rate level",            "[[ToggleRating]]"    }
+
    };
 
    ControlStringsEditor controlsGamepadLeft[] = 
    {
-         { "Move Ship",             "Left Joystick"   },
-         { "Aim Ship/Fire Weapon",  "Right Joystick"  },
+         { "Move Ship",             "Left Joystick"       },
+         { "Aim Ship/Fire Weapon",  "Right Joystick"      },
          { "Activate module 1",     "[[ActivateModule1]]" },
          { "Activate module 2",     "[[ActivateModule2]]" },
          { "-",                     ""                    },
          { "Open ship config menu", "[[ShowLoadoutMenu]]" },
          { "Toggle map view",       "[[ShowCmdrMap]]"     },
          { "Drop flag",             "[[DropItem]]"        },
-         { "Show scoreboard",       "[[ShowScoreboard]]"  }
+         { "Show scoreboard",       "[[ShowScoreboard]]"  },
+         { "Rate level",            "[[ToggleRating]]"    }
    };
 
    // These controls will work for both joystick and keyboard users

@@ -935,6 +935,7 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
    LOAD_BINDING(InputCodeManager::BINDING_RIGHT,         KEY_D);
    LOAD_BINDING(InputCodeManager::BINDING_SCRBRD,        KEY_TAB);
    LOAD_BINDING(InputCodeManager::BINDING_TOGGLE_RATING, KEY_EQUALS);
+   LOAD_BINDING(InputCodeManager::BINDING_MISSION,       KEY_F2);
 
 
 
@@ -964,11 +965,12 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
    LOAD_BINDING(InputCodeManager::BINDING_RIGHT,         KEY_RIGHT);
    LOAD_BINDING(InputCodeManager::BINDING_SCRBRD,        BUTTON_5);
    LOAD_BINDING(InputCodeManager::BINDING_TOGGLE_RATING, KEY_EQUALS);
+   LOAD_BINDING(InputCodeManager::BINDING_MISSION,       KEY_F2);
+
 
    // The following key bindings are not user-defineable at the moment, mostly because we want consistency
    // throughout the game, and that would require some real constraints on what keys users could choose.
    //keyHELP = KEY_F1;
-   //keyMISSION = KEY_F2;
    //keyOUTGAMECHAT = KEY_F5;
    //keyFPS = KEY_F6;
    //keyDIAG = KEY_F7;
@@ -1007,6 +1009,7 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
    SAVE_BINDING(InputCodeManager::BINDING_RIGHT);
    SAVE_BINDING(InputCodeManager::BINDING_SCRBRD);
    SAVE_BINDING(InputCodeManager::BINDING_TOGGLE_RATING);
+   SAVE_BINDING(InputCodeManager::BINDING_MISSION);
 }
 
 

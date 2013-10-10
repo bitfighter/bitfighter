@@ -63,45 +63,45 @@ public:
    };
 
     
-/*            Enum                      Name in INI         BindingSet member name   */#define BINDING_TABLE \   BINDING( BINDING_SELWEAP1,           "SelWeapon1",          inputSELWEAP1   ) \
-   BINDING( BINDING_SELWEAP2,           "SelWeapon2",          inputSELWEAP2   ) \
-   BINDING( BINDING_SELWEAP3,           "SelWeapon3",          inputSELWEAP3   ) \
-   BINDING( BINDING_ADVWEAP,            "SelNextWeapon",       inputADVWEAP    ) \
-   BINDING( BINDING_ADVWEAP2,           "SelNextWeapon2",      inputADVWEAP2   ) \
-   BINDING( BINDING_PREVWEAP,           "SelPrevWeapon",       inputPREVWEAP   ) \
-   BINDING( BINDING_CMDRMAP,            "ShowCmdrMap",         inputCMDRMAP    ) \
-   BINDING( BINDING_TEAMCHAT,           "TeamChat",            inputTEAMCHAT   ) \
-   BINDING( BINDING_GLOBCHAT,           "GlobalChat",          inputGLOBCHAT   ) \
-   BINDING( BINDING_QUICKCHAT,          "QuickChat",           inputQUICKCHAT  ) \
-   BINDING( BINDING_CMDCHAT,            "Command",             inputCMDCHAT    ) \
-   BINDING( BINDING_LOADOUT,            "ShowLoadoutMenu",     inputLOADOUT    ) \
-   BINDING( BINDING_MOD1,               "ActivateModule1",     inputMOD1       ) \
-   BINDING( BINDING_MOD2,               "ActivateModule2",     inputMOD2       ) \
-   BINDING( BINDING_FIRE,               "Fire",                inputFIRE       ) \
-   BINDING( BINDING_DROPITEM,           "DropItem",            inputDROPITEM   ) \
-   BINDING( BINDING_TOGVOICE,           "VoiceChat",           inputTOGVOICE   ) \
-   BINDING( BINDING_UP,                 "ShipUp",              inputUP         ) \
-   BINDING( BINDING_DOWN,               "ShipDown",            inputDOWN       ) \
-   BINDING( BINDING_LEFT,               "ShipLeft",            inputLEFT       ) \
-   BINDING( BINDING_RIGHT,              "ShipRight",           inputRIGHT      ) \
-   BINDING( BINDING_SCRBRD,             "ShowScoreboard",      inputSCRBRD     ) \
-   BINDING( BINDING_HELP,               "Help",                keyHELP         ) \
-   BINDING( BINDING_OUTGAMECHAT,        "OutOfGameChat",       keyOUTGAMECHAT  ) \
-   BINDING( BINDING_MISSION,            "Mission",             keyMISSION      ) \
-   BINDING( BINDING_FPS,                "FPS",                 keyFPS          ) \
-   BINDING( BINDING_DIAG,               "Diagnostics",         keyDIAG         ) \
-   BINDING( BINDING_LOAD_PRESET_1,      "LoadLoadoutPreset1",  keyLoadPreset1  ) \
-   BINDING( BINDING_LOAD_PRESET_2,      "LoadLoadoutPreset2",  keyLoadPreset2  ) \
-   BINDING( BINDING_LOAD_PRESET_3,      "LoadLoadoutPreset3",  keyLoadPreset3  ) \
-   BINDING( BINDING_SAVE_PRESET_1,      "SaveLoadoutPreset1",  keySavePreset1  ) \
-   BINDING( BINDING_SAVE_PRESET_2,      "SaveLoadoutPreset2",  keySavePreset2  ) \
-   BINDING( BINDING_SAVE_PRESET_3,      "SaveLoadoutPreset3",  keySavePreset3  ) \
-   BINDING( BINDING_TOGGLE_RATING,      "ToggleRating",        keyToggleRating ) \
-                                                                                 \
-   /* Editor specific */                                                         \
-                                                                                 \
-   BINDING( BINDING_TEAM_EDITOR,        "TeamEditor",          KEY_F2          ) \
-   BINDING( BINDING_GAME_PARAMS_EDITOR, "GameParameterEditor", KEY_F3          ) \
+/*            Enum                      Name in INI         BindingSet member name   */#define BINDING_TABLE \   BINDING( BINDING_SELWEAP1,           "SelWeapon1",          inputSELWEAP1     ) \
+   BINDING( BINDING_SELWEAP2,           "SelWeapon2",          inputSELWEAP2     ) \
+   BINDING( BINDING_SELWEAP3,           "SelWeapon3",          inputSELWEAP3     ) \
+   BINDING( BINDING_ADVWEAP,            "SelNextWeapon",       inputADVWEAP      ) \
+   BINDING( BINDING_ADVWEAP2,           "SelNextWeapon2",      inputADVWEAP2     ) \
+   BINDING( BINDING_PREVWEAP,           "SelPrevWeapon",       inputPREVWEAP     ) \
+   BINDING( BINDING_CMDRMAP,            "ShowCmdrMap",         inputCMDRMAP      ) \
+   BINDING( BINDING_TEAMCHAT,           "TeamChat",            inputTEAMCHAT     ) \
+   BINDING( BINDING_GLOBCHAT,           "GlobalChat",          inputGLOBCHAT     ) \
+   BINDING( BINDING_QUICKCHAT,          "QuickChat",           inputQUICKCHAT    ) \
+   BINDING( BINDING_CMDCHAT,            "Command",             inputCMDCHAT      ) \
+   BINDING( BINDING_LOADOUT,            "ShowLoadoutMenu",     inputLOADOUT      ) \
+   BINDING( BINDING_MOD1,               "ActivateModule1",     inputMOD1         ) \
+   BINDING( BINDING_MOD2,               "ActivateModule2",     inputMOD2         ) \
+   BINDING( BINDING_FIRE,               "Fire",                inputFIRE         ) \
+   BINDING( BINDING_DROPITEM,           "DropItem",            inputDROPITEM     ) \
+   BINDING( BINDING_TOGVOICE,           "VoiceChat",           inputTOGVOICE     ) \
+   BINDING( BINDING_UP,                 "ShipUp",              inputUP           ) \
+   BINDING( BINDING_DOWN,               "ShipDown",            inputDOWN         ) \
+   BINDING( BINDING_LEFT,               "ShipLeft",            inputLEFT         ) \
+   BINDING( BINDING_RIGHT,              "ShipRight",           inputRIGHT        ) \
+   BINDING( BINDING_SCRBRD,             "ShowScoreboard",      inputSCRBRD       ) \
+   BINDING( BINDING_HELP,               "Help",                keyHELP           ) \
+   BINDING( BINDING_OUTGAMECHAT,        "OutOfGameChat",       keyOUTGAMECHAT    ) \
+   BINDING( BINDING_MISSION,            "Mission",             inputMISSION      ) \
+   BINDING( BINDING_FPS,                "FPS",                 keyFPS            ) \
+   BINDING( BINDING_DIAG,               "Diagnostics",         keyDIAG           ) \
+   BINDING( BINDING_LOAD_PRESET_1,      "LoadLoadoutPreset1",  keyLoadPreset1    ) \
+   BINDING( BINDING_LOAD_PRESET_2,      "LoadLoadoutPreset2",  keyLoadPreset2    ) \
+   BINDING( BINDING_LOAD_PRESET_3,      "LoadLoadoutPreset3",  keyLoadPreset3    ) \
+   BINDING( BINDING_SAVE_PRESET_1,      "SaveLoadoutPreset1",  keySavePreset1    ) \
+   BINDING( BINDING_SAVE_PRESET_2,      "SaveLoadoutPreset2",  keySavePreset2    ) \
+   BINDING( BINDING_SAVE_PRESET_3,      "SaveLoadoutPreset3",  keySavePreset3    ) \
+   BINDING( BINDING_TOGGLE_RATING,      "ToggleRating",        inputTOGGLERATING ) \
+                                                                                   \
+   /* Editor specific */                                                           \
+                                                                                   \
+   BINDING( BINDING_TEAM_EDITOR,        "TeamEditor",          KEY_F2            ) \
+   BINDING( BINDING_GAME_PARAMS_EDITOR, "GameParameterEditor", KEY_F3            ) \
 
 
 enum BindingNameEnum {
