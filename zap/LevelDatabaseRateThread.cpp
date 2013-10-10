@@ -40,10 +40,23 @@ LevelDatabaseRateThread::~LevelDatabaseRateThread()
 }
 
 
+// Level needs a dbid to continue.  Returns true if things are ok, false if there is a problem.
+// Static method
+bool LevelDatabaseRateThread::checkDbid(ClientGame *game)
+{
+   if(!game->getLevelDatabaseId())
+   {
+      game->displayErrorMessage("!!! Level ID not found -- redownload the level from the DB to enable rating");
+      return false;
+   }
+
+   return true;
+}
+
+
 U32 LevelDatabaseRateThread::run()
 {
-   // Should already have been checked, but just in case... we can fail silently
-   if(!mGame->getLevelDatabaseId())
+   if(!checkDbid(mGame))
    {
       delete this;
       return 1;

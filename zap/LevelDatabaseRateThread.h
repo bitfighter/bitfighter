@@ -33,6 +33,9 @@ public:
    virtual ~LevelDatabaseRateThread();
    virtual U32 run();
 
+   static bool checkDbid(ClientGame *game);
+
+
    ClientGame* mGame;
    string mLevelId;
    LevelRating mRating;

@@ -1013,12 +1013,8 @@ void downloadMapHandler(ClientGame *game, const Vector<string> &args)
 
 void rateMapHandler(ClientGame *game, const Vector<string> &args)
 {
-   // Level needs a dbid to continue
-   if(!game->getLevelDatabaseId())
-   {
-      game->displayErrorMessage("!!! Level ID not found -- redownload the level from the DB to enable rating");
+   if(!LevelDatabaseRateThread::checkDbid(game))
       return;
-   }
 
    S32 rating = NONE;
 
