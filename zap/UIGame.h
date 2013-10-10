@@ -420,6 +420,7 @@ public:
    void setActiveWeapon(U32 weaponIndex);
    void setModulePrimary(ShipModule module, bool isActive);
    void setModuleSecondary(ShipModule module, bool isActive);
+   void toggleLevelRating();
 
    // Get UI element dimensions
    S32 getLoadoutIndicatorWidth() const;

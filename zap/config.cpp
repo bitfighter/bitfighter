@@ -912,55 +912,58 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
    // Top line expands to this:
    // inputCodeManager->setBinding(InputCodeManager::BINDING_SELWEAP1,  
    //         mode, getInputCode(ini, section, InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1),  KEY_1));
-   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP1,  KEY_1);
-   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP2,  KEY_2);
-   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP3,  KEY_3);
-   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP,   KEY_E);
-   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP2,  MOUSE_WHEEL_UP);
-   LOAD_BINDING(InputCodeManager::BINDING_PREVWEAP,  MOUSE_WHEEL_DOWN);
-   LOAD_BINDING(InputCodeManager::BINDING_CMDRMAP,   KEY_C);
-   LOAD_BINDING(InputCodeManager::BINDING_TEAMCHAT,  KEY_T);
-   LOAD_BINDING(InputCodeManager::BINDING_GLOBCHAT,  KEY_G);
-   LOAD_BINDING(InputCodeManager::BINDING_QUICKCHAT, KEY_V);
-   LOAD_BINDING(InputCodeManager::BINDING_CMDCHAT,   KEY_SLASH);
-   LOAD_BINDING(InputCodeManager::BINDING_LOADOUT,   KEY_Z);
-   LOAD_BINDING(InputCodeManager::BINDING_MOD1,      KEY_SPACE);
-   LOAD_BINDING(InputCodeManager::BINDING_MOD2,      MOUSE_RIGHT);
-   LOAD_BINDING(InputCodeManager::BINDING_FIRE,      MOUSE_LEFT);
-   LOAD_BINDING(InputCodeManager::BINDING_DROPITEM,  KEY_B);
-   LOAD_BINDING(InputCodeManager::BINDING_TOGVOICE,  KEY_R);
-   LOAD_BINDING(InputCodeManager::BINDING_UP,        KEY_W);
-   LOAD_BINDING(InputCodeManager::BINDING_DOWN,      KEY_S);
-   LOAD_BINDING(InputCodeManager::BINDING_LEFT,      KEY_A);
-   LOAD_BINDING(InputCodeManager::BINDING_RIGHT,     KEY_D);
-   LOAD_BINDING(InputCodeManager::BINDING_SCRBRD,    KEY_TAB);
+   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP1,      KEY_1);
+   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP2,      KEY_2);
+   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP3,      KEY_3);
+   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP,       KEY_E);
+   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP2,      MOUSE_WHEEL_UP);
+   LOAD_BINDING(InputCodeManager::BINDING_PREVWEAP,      MOUSE_WHEEL_DOWN);
+   LOAD_BINDING(InputCodeManager::BINDING_CMDRMAP,       KEY_C);
+   LOAD_BINDING(InputCodeManager::BINDING_TEAMCHAT,      KEY_T);
+   LOAD_BINDING(InputCodeManager::BINDING_GLOBCHAT,      KEY_G);
+   LOAD_BINDING(InputCodeManager::BINDING_QUICKCHAT,     KEY_V);
+   LOAD_BINDING(InputCodeManager::BINDING_CMDCHAT,       KEY_SLASH);
+   LOAD_BINDING(InputCodeManager::BINDING_LOADOUT,       KEY_Z);
+   LOAD_BINDING(InputCodeManager::BINDING_MOD1,          KEY_SPACE);
+   LOAD_BINDING(InputCodeManager::BINDING_MOD2,          MOUSE_RIGHT);
+   LOAD_BINDING(InputCodeManager::BINDING_FIRE,          MOUSE_LEFT);
+   LOAD_BINDING(InputCodeManager::BINDING_DROPITEM,      KEY_B);
+   LOAD_BINDING(InputCodeManager::BINDING_TOGVOICE,      KEY_R);
+   LOAD_BINDING(InputCodeManager::BINDING_UP,            KEY_W);
+   LOAD_BINDING(InputCodeManager::BINDING_DOWN,          KEY_S);
+   LOAD_BINDING(InputCodeManager::BINDING_LEFT,          KEY_A);
+   LOAD_BINDING(InputCodeManager::BINDING_RIGHT,         KEY_D);
+   LOAD_BINDING(InputCodeManager::BINDING_SCRBRD,        KEY_TAB);
+   LOAD_BINDING(InputCodeManager::BINDING_TOGGLE_RATING, KEY_EQUALS);
+
 
 
    section = "JoystickKeyBindings";
    mode = InputModeJoystick;
 
-   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP1,  KEY_1);
-   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP2,  KEY_2);
-   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP3,  KEY_3);
-   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP,   BUTTON_1);
-   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP2,  MOUSE_WHEEL_UP);
-   LOAD_BINDING(InputCodeManager::BINDING_PREVWEAP,  MOUSE_WHEEL_DOWN);
-   LOAD_BINDING(InputCodeManager::BINDING_CMDRMAP,   BUTTON_2);
-   LOAD_BINDING(InputCodeManager::BINDING_TEAMCHAT,  KEY_T);
-   LOAD_BINDING(InputCodeManager::BINDING_GLOBCHAT,  KEY_G);
-   LOAD_BINDING(InputCodeManager::BINDING_QUICKCHAT, BUTTON_3);
-   LOAD_BINDING(InputCodeManager::BINDING_CMDCHAT,   KEY_SLASH);
-   LOAD_BINDING(InputCodeManager::BINDING_LOADOUT,   BUTTON_4);
-   LOAD_BINDING(InputCodeManager::BINDING_MOD1,      BUTTON_7);
-   LOAD_BINDING(InputCodeManager::BINDING_MOD2,      BUTTON_6);
-   LOAD_BINDING(InputCodeManager::BINDING_FIRE,      MOUSE_LEFT);
-   LOAD_BINDING(InputCodeManager::BINDING_DROPITEM,  KEY_B);
-   LOAD_BINDING(InputCodeManager::BINDING_TOGVOICE,  KEY_R);
-   LOAD_BINDING(InputCodeManager::BINDING_UP,        KEY_UP);
-   LOAD_BINDING(InputCodeManager::BINDING_DOWN,      KEY_DOWN);
-   LOAD_BINDING(InputCodeManager::BINDING_LEFT,      KEY_LEFT);
-   LOAD_BINDING(InputCodeManager::BINDING_RIGHT,     KEY_RIGHT);
-   LOAD_BINDING(InputCodeManager::BINDING_SCRBRD,    BUTTON_5);
+   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP1,      KEY_1);
+   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP2,      KEY_2);
+   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP3,      KEY_3);
+   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP,       BUTTON_1);
+   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP2,      MOUSE_WHEEL_UP);
+   LOAD_BINDING(InputCodeManager::BINDING_PREVWEAP,      MOUSE_WHEEL_DOWN);
+   LOAD_BINDING(InputCodeManager::BINDING_CMDRMAP,       BUTTON_2);
+   LOAD_BINDING(InputCodeManager::BINDING_TEAMCHAT,      KEY_T);
+   LOAD_BINDING(InputCodeManager::BINDING_GLOBCHAT,      KEY_G);
+   LOAD_BINDING(InputCodeManager::BINDING_QUICKCHAT,     BUTTON_3);
+   LOAD_BINDING(InputCodeManager::BINDING_CMDCHAT,       KEY_SLASH);
+   LOAD_BINDING(InputCodeManager::BINDING_LOADOUT,       BUTTON_4);
+   LOAD_BINDING(InputCodeManager::BINDING_MOD1,          BUTTON_7);
+   LOAD_BINDING(InputCodeManager::BINDING_MOD2,          BUTTON_6);
+   LOAD_BINDING(InputCodeManager::BINDING_FIRE,          MOUSE_LEFT);
+   LOAD_BINDING(InputCodeManager::BINDING_DROPITEM,      KEY_B);
+   LOAD_BINDING(InputCodeManager::BINDING_TOGVOICE,      KEY_R);
+   LOAD_BINDING(InputCodeManager::BINDING_UP,            KEY_UP);
+   LOAD_BINDING(InputCodeManager::BINDING_DOWN,          KEY_DOWN);
+   LOAD_BINDING(InputCodeManager::BINDING_LEFT,          KEY_LEFT);
+   LOAD_BINDING(InputCodeManager::BINDING_RIGHT,         KEY_RIGHT);
+   LOAD_BINDING(InputCodeManager::BINDING_SCRBRD,        BUTTON_5);
+   LOAD_BINDING(InputCodeManager::BINDING_TOGGLE_RATING, KEY_EQUALS);
 
    // The following key bindings are not user-defineable at the moment, mostly because we want consistency
    // throughout the game, and that would require some real constraints on what keys users could choose.
@@ -1003,6 +1006,7 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
    SAVE_BINDING(InputCodeManager::BINDING_LEFT);
    SAVE_BINDING(InputCodeManager::BINDING_RIGHT);
    SAVE_BINDING(InputCodeManager::BINDING_SCRBRD);
+   SAVE_BINDING(InputCodeManager::BINDING_TOGGLE_RATING);
 }
 
 

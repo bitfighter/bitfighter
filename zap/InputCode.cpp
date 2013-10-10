@@ -57,44 +57,46 @@ BindingSet::BindingSet()
    // we provide default values here just for the sake of sanity.  And testing.
    // Also remember that we have multiple BindingSets (one for keyboard, one for
    // joystick, for example), so these defaults may not even apply in all cases.
-   inputSELWEAP1  = KEY_1;
-   inputSELWEAP2  = KEY_2;
-   inputSELWEAP3  = KEY_3;
-   inputADVWEAP   = KEY_E;
-   inputADVWEAP2  = MOUSE_WHEEL_UP;
-   inputPREVWEAP  = MOUSE_WHEEL_DOWN;
-   inputCMDRMAP   = KEY_C;
-   inputTEAMCHAT  = KEY_T;
-   inputGLOBCHAT  = KEY_G;
-   inputQUICKCHAT = KEY_V;
-   inputCMDCHAT   = KEY_SLASH;
-   inputLOADOUT   = KEY_Z;
-   inputMOD1      = KEY_SPACE;
-   inputMOD2      = MOUSE_RIGHT;
-   inputFIRE      = MOUSE_LEFT;
-   inputDROPITEM  = KEY_B;
-   inputTOGVOICE  = KEY_R;
-   inputUP        = KEY_W;
-   inputDOWN      = KEY_S;
-   inputLEFT      = KEY_A;
-   inputRIGHT     = KEY_D;
-   inputSCRBRD    = KEY_TAB;
+   inputSELWEAP1   = KEY_1;
+   inputSELWEAP2   = KEY_2;
+   inputSELWEAP3   = KEY_3;
+   inputADVWEAP    = KEY_E;
+   inputADVWEAP2   = MOUSE_WHEEL_UP;
+   inputPREVWEAP   = MOUSE_WHEEL_DOWN;
+   inputCMDRMAP    = KEY_C;
+   inputTEAMCHAT   = KEY_T;
+   inputGLOBCHAT   = KEY_G;
+   inputQUICKCHAT  = KEY_V;
+   inputCMDCHAT    = KEY_SLASH;
+   inputLOADOUT    = KEY_Z;
+   inputMOD1       = KEY_SPACE;
+   inputMOD2       = MOUSE_RIGHT;
+   inputFIRE       = MOUSE_LEFT;
+   inputDROPITEM   = KEY_B;
+   inputTOGVOICE   = KEY_R;
+   inputUP         = KEY_W;
+   inputDOWN       = KEY_S;
+   inputLEFT       = KEY_A;
+   inputRIGHT      = KEY_D;
+   inputSCRBRD     = KEY_TAB;
 
    // These are not currently overwridden, so what we set here is used in the game
-   keyHELP        = KEY_F1;      // Display help
-   keyOUTGAMECHAT = KEY_F5;      // Out of game chat
-   keyFPS         = KEY_F6;      // Show FPS display
-   keyDIAG        = KEY_F7;      // Show diagnostic overlay
-   keyMISSION     = KEY_F2;      // Show current mission info
-
-   keyLoadPreset1 = KEY_ALT_1;
-   keyLoadPreset2 = KEY_ALT_2;
-   keyLoadPreset3 = KEY_ALT_3;
-
-   keySavePreset1 = KEY_CTRL_1;
-   keySavePreset2 = KEY_CTRL_2;
-   keySavePreset3 = KEY_CTRL_3;
+   keyHELP         = KEY_F1;      // Display help
+   keyOUTGAMECHAT  = KEY_F5;      // Out of game chat
+   keyFPS          = KEY_F6;      // Show FPS display
+   keyDIAG         = KEY_F7;      // Show diagnostic overlay
+   keyMISSION      = KEY_F2;      // Show current mission info
+                   
+   keyLoadPreset1  = KEY_ALT_1;
+   keyLoadPreset2  = KEY_ALT_2;
+   keyLoadPreset3  = KEY_ALT_3;
+                   
+   keySavePreset1  = KEY_CTRL_1;
+   keySavePreset2  = KEY_CTRL_2;
+   keySavePreset3  = KEY_CTRL_3;
+   keyToggleRating = KEY_EQUALS;
 }
+
 
 // Destructor
 BindingSet::~BindingSet()
@@ -103,198 +105,40 @@ BindingSet::~BindingSet()
 }
 
 
-InputCode BindingSet::getBinding(InputCodeManager::BindingName bindingName) const
+InputCode BindingSet::getBinding(InputCodeManager::BindingNameEnum bindingName) const
 {
-   switch(bindingName)
-   {
-      case InputCodeManager::BINDING_SELWEAP1:
-	      return inputSELWEAP1;
-      case InputCodeManager::BINDING_SELWEAP2:
-	      return inputSELWEAP2;
-      case InputCodeManager::BINDING_SELWEAP3:
-	      return inputSELWEAP3;
-      case InputCodeManager::BINDING_ADVWEAP:
-	      return inputADVWEAP;
-      case InputCodeManager::BINDING_ADVWEAP2:
-	      return inputADVWEAP2;
-      case InputCodeManager::BINDING_PREVWEAP:
-	      return inputPREVWEAP;
-      case InputCodeManager::BINDING_CMDRMAP:
-	      return inputCMDRMAP;
-      case InputCodeManager::BINDING_TEAMCHAT:
-	      return inputTEAMCHAT;
-      case InputCodeManager::BINDING_GLOBCHAT:
-	      return inputGLOBCHAT;
-      case InputCodeManager::BINDING_QUICKCHAT:
-	      return inputQUICKCHAT;
-      case InputCodeManager::BINDING_CMDCHAT:
-	      return inputCMDCHAT;
-      case InputCodeManager::BINDING_LOADOUT:
-	      return inputLOADOUT;
-      case InputCodeManager::BINDING_MOD1:
-	      return inputMOD1;
-      case InputCodeManager::BINDING_MOD2:
-	      return inputMOD2;
-      case InputCodeManager::BINDING_FIRE:
-	      return inputFIRE;
-      case InputCodeManager::BINDING_DROPITEM:
-	      return inputDROPITEM;
-      case InputCodeManager::BINDING_TOGVOICE:
-	      return inputTOGVOICE;
-      case InputCodeManager::BINDING_UP:
-	      return inputUP;
-      case InputCodeManager::BINDING_DOWN:
-	      return inputDOWN;
-      case InputCodeManager::BINDING_LEFT:
-	      return inputLEFT;
-      case InputCodeManager::BINDING_RIGHT:
-	      return inputRIGHT;
-      case InputCodeManager::BINDING_SCRBRD:
-	      return inputSCRBRD;
-      case InputCodeManager::BINDING_HELP:
-	      return keyHELP;
-      case InputCodeManager::BINDING_OUTGAMECHAT:
-	      return keyOUTGAMECHAT;
-      case InputCodeManager::BINDING_MISSION:
-	      return keyMISSION;
-      case InputCodeManager::BINDING_FPS:
-	      return keyFPS;
-      case InputCodeManager::BINDING_DIAG:
-	      return keyDIAG;
-      case InputCodeManager::BINDING_LOAD_PRESET_1:
-         return keyLoadPreset1;
-      case InputCodeManager::BINDING_LOAD_PRESET_2:
-         return keyLoadPreset2;
-      case InputCodeManager::BINDING_LOAD_PRESET_3:
-         return keyLoadPreset3;
-      case InputCodeManager::BINDING_SAVE_PRESET_1:
-         return keySavePreset1;
-      case InputCodeManager::BINDING_SAVE_PRESET_2:
-         return keySavePreset2;
-      case InputCodeManager::BINDING_SAVE_PRESET_3:
-         return keySavePreset3;
+   // This funny thing produces a block of code that looks like this:
+   // if(false) { }
+   // else if(bindingName == InputCodeManager::BINDING_SELWEAP1) return inputSELWEAP1;
+   // else if...
+   // TNLAssert(false);
+   // return KEY_NONE;
 
-      // Non-editable editor bindings:
-      case InputCodeManager::BINDING_TEAM_EDITOR:
-         return KEY_F2;
-      case InputCodeManager::BINDING_GAME_PARAMS_EDITOR:
-         return KEY_F3;
+    if(false) { }     // Dummy conditional to let us use else if below
+#define BINDING(enumName, b, memberName) else if(bindingName == InputCodeManager::enumName) return memberName;
+    BINDING_TABLE
+#undef BINDING
 
-      // Just in case:
-      default:
-         TNLAssert(false, "Invalid key binding!");
-         return KEY_NONE;
-   }
+   // Just in case:
+   TNLAssert(false, "Invalid key binding!");
+   return KEY_NONE;
 }
 
 
-void BindingSet::setBinding(InputCodeManager::BindingName bindingName, InputCode key)
+void BindingSet::setBinding(InputCodeManager::BindingNameEnum bindingName, InputCode key)
 {
-   switch(bindingName)
-   {
-      case InputCodeManager::BINDING_SELWEAP1:
-	      inputSELWEAP1 = key;
-         break;
-      case InputCodeManager::BINDING_SELWEAP2:
-	      inputSELWEAP2 = key;
-         break;
-      case InputCodeManager::BINDING_SELWEAP3:
-	      inputSELWEAP3 = key;
-         break;
-      case InputCodeManager::BINDING_ADVWEAP:
-	      inputADVWEAP = key;
-         break;
-      case InputCodeManager::BINDING_ADVWEAP2:
-	      inputADVWEAP2 = key;
-         break;
-      case InputCodeManager::BINDING_PREVWEAP:
-	      inputPREVWEAP = key;
-         break;
-      case InputCodeManager::BINDING_CMDRMAP:
-	      inputCMDRMAP = key;
-         break;
-      case InputCodeManager::BINDING_TEAMCHAT:
-	      inputTEAMCHAT = key;
-         break;
-      case InputCodeManager::BINDING_GLOBCHAT:
-	      inputGLOBCHAT = key;
-         break;
-      case InputCodeManager::BINDING_QUICKCHAT:
-	      inputQUICKCHAT = key;
-         break;
-      case InputCodeManager::BINDING_CMDCHAT:
-	      inputCMDCHAT = key;
-         break;
-      case InputCodeManager::BINDING_LOADOUT:
-	      inputLOADOUT = key;
-         break;
-      case InputCodeManager::BINDING_MOD1:
-	      inputMOD1 = key;
-         break;
-      case InputCodeManager::BINDING_MOD2:
-	      inputMOD2 = key;
-         break;
-      case InputCodeManager::BINDING_FIRE:
-	      inputFIRE = key;
-         break;
-      case InputCodeManager::BINDING_DROPITEM:
-	      inputDROPITEM = key;
-         break;
-      case InputCodeManager::BINDING_TOGVOICE:
-	      inputTOGVOICE = key;
-         break;
-      case InputCodeManager::BINDING_UP:
-	      inputUP = key;
-         break;
-      case InputCodeManager::BINDING_DOWN:
-	      inputDOWN = key;
-         break;
-      case InputCodeManager::BINDING_LEFT:
-	      inputLEFT = key;
-         break;
-      case InputCodeManager::BINDING_RIGHT:
-	      inputRIGHT = key;
-         break;
-      case InputCodeManager::BINDING_SCRBRD:
-	      inputSCRBRD = key;
-         break;
-      case InputCodeManager::BINDING_HELP:
-	      keyHELP = key;
-         break;
-      case InputCodeManager::BINDING_OUTGAMECHAT:
-	      keyOUTGAMECHAT = key;
-         break;
-      case InputCodeManager::BINDING_MISSION:
-	      keyMISSION = key;
-         break;
-      case InputCodeManager::BINDING_FPS:
-	      keyFPS = key;
-         break;
-      case InputCodeManager::BINDING_DIAG:
-	      keyDIAG = key;
-         break;
-      case InputCodeManager::BINDING_LOAD_PRESET_1:
-         keyLoadPreset1 = key;
-         break;
-      case InputCodeManager::BINDING_LOAD_PRESET_2:
-	      keyLoadPreset2 = key;
-         break;
-      case InputCodeManager::BINDING_LOAD_PRESET_3:
-	      keyLoadPreset3 = key;
-         break;
-      case InputCodeManager::BINDING_SAVE_PRESET_1:
-	      keySavePreset1 = key;
-         break;
-      case InputCodeManager::BINDING_SAVE_PRESET_2:
-	      keySavePreset2 = key;
-         break;
-      case InputCodeManager::BINDING_SAVE_PRESET_3:
-	      keySavePreset3 = key;
-         break;
-      default:
-         TNLAssert(false, "Invalid key binding!");
-         break;
-   }
+   // This funny thing produces a block of code that looks like this:
+   // if(false) { }
+   // else if(bindingName == InputCodeManager::BINDING_SELWEAP1) inputSELWEAP1 = key;
+   // else if...
+   // else TNLAssert(false);
+
+   if(false) { }     // Dummy conditional to let us use else if below
+#define BINDING(enumName, b, memberName) else if(bindingName == InputCodeManager::enumName) memberName = key;
+    BINDING_TABLE
+#undef BINDING
+   else 
+      TNLAssert(false, "Invalid key binding!");
 }
 
 
@@ -316,8 +160,9 @@ bool BindingSet::hasKeypad()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-static const string BINDING_STRINGS[] = {
-#define BINDING(a, bindingString) bindingString,
+
+static const string BindingNames[] = {
+#define BINDING(a, bindingName, c) bindingName, 
     BINDING_TABLE
 #undef BINDING
 };
@@ -338,7 +183,7 @@ InputCodeManager::InputCodeManager()
    mCurrentBindingSet = &mBindingSets[0];     
 
    // Check to make sure we haven't fouled things up somehow
-   TNLAssert(ARRAYSIZE(BINDING_STRINGS) == BINDING_DEFINEABLE_KEY_COUNT, "Problem somewhere!");
+   TNLAssert(ARRAYSIZE(BindingNames) == BINDING_DEFINEABLE_KEY_COUNT, "Problem somewhere!");
 }
 
 
@@ -486,7 +331,7 @@ bool isPrintable(char c)
 
 
 // It will be simpler if we translate joystick controls into keyboard actions here rather than check for them elsewhere.  
-// This is possibly marginally less efficient, but will reduce maintenance burdens over time.
+// This is possibly marginaly less efficient, but will reduce maintenance burdens over time.
 InputCode InputCodeManager::convertJoystickToKeyboard(InputCode inputCode)
 {
    switch((S32)inputCode)
@@ -643,14 +488,14 @@ char InputCodeManager::keyToAscii(int unicode, InputCode inputCode)
 
 
 // We'll be using this one most of the time
-InputCode InputCodeManager::getBinding(BindingName bindingName) const
+InputCode InputCodeManager::getBinding(BindingNameEnum bindingName) const
 {
    return getBinding(bindingName, mInputMode);
 }
 
 
 // Only used for saving to INI and such where we need to bulk-read bindings
-InputCode InputCodeManager::getBinding(BindingName bindingName, InputMode inputMode) const
+InputCode InputCodeManager::getBinding(BindingNameEnum bindingName, InputMode inputMode) const
 {
    S32 mode = (S32)inputMode;    // 0 or 1 at present
 
@@ -660,13 +505,13 @@ InputCode InputCodeManager::getBinding(BindingName bindingName, InputMode inputM
 }
 
 
-void InputCodeManager::setBinding(BindingName bindingName, InputCode key)
+void InputCodeManager::setBinding(BindingNameEnum bindingName, InputCode key)
 {
    setBinding(bindingName, mInputMode, key);
 }
 
 
-void InputCodeManager::setBinding(BindingName bindingName, InputMode inputMode, InputCode key)
+void InputCodeManager::setBinding(BindingNameEnum bindingName, InputMode inputMode, InputCode key)
 {
    S32 mode = (S32)inputMode;    // 0 or 1 at present
 
@@ -1907,18 +1752,12 @@ bool InputCodeManager::isMouseAction(InputCode inputCode)
 }
 
 
-//S32 InputCodeManager::getBindingCount()
-//{
-//   return ARRAYSIZE(BINDING_STRINGS);
-//}
-
-
-string InputCodeManager::getBindingName(BindingName bindingName)
+string InputCodeManager::getBindingName(BindingNameEnum bindingName)
 {
    U32 index = (U32)bindingName;
-   TNLAssert(index >= 0 && index < ARRAYSIZE(BINDING_STRINGS), "Invalid value for bindingName!");
+   TNLAssert(index >= 0 && index < ARRAYSIZE(BindingNames), "Invalid value for bindingName!");
 
-   return BINDING_STRINGS[index];
+   return BindingNames[index];
 
    return "";
 }
@@ -1928,9 +1767,9 @@ string InputCodeManager::getBindingName(BindingName bindingName)
 InputCode InputCodeManager::getKeyBoundToBindingCodeName(const string &name) const
 {
    // Linear search not at all efficient, but this will be called very infrequently, in non-performance sensitive area
-   for(U32 i = 0; i < ARRAYSIZE(BINDING_STRINGS); i++)
-      if(caseInsensitiveStringCompare(BINDING_STRINGS[i], name))
-         return this->getBinding(BindingName(i));
+   for(U32 i = 0; i < ARRAYSIZE(BindingNames); i++)
+      if(caseInsensitiveStringCompare(BindingNames[i], name))
+         return this->getBinding(BindingNameEnum(i));
 
    return KEY_UNKNOWN;
 }

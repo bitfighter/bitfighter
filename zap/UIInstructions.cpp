@@ -134,7 +134,7 @@ InstructionsUserInterface::~InstructionsUserInterface()
 struct ControlString
 {
    const char *controlDescr;
-   InputCodeManager::BindingName primaryControlIndex;    // Not really a good name
+   InputCodeManager::BindingNameEnum primaryControlIndex;    // Not really a good name
 };
 
 

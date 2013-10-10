@@ -46,7 +46,7 @@ namespace Zap
 {
 
 // Constructor
-KeyDefMenuItem::KeyDefMenuItem(const char *text, U32 index, U32 col, InputCodeManager::BindingName PC, string helpStr)
+KeyDefMenuItem::KeyDefMenuItem(const char *text, U32 index, U32 col, InputCodeManager::BindingNameEnum PC, string helpStr)
 {
    mText = text;
    mIndex = index;

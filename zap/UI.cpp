@@ -322,19 +322,19 @@ void UserInterface::onMouseMoved()
 void UserInterface::onMouseDragged()  { /* Do nothing */ }
 
 
-InputCode UserInterface::getInputCode(GameSettings *settings, InputCodeManager::BindingName binding)
+InputCode UserInterface::getInputCode(GameSettings *settings, InputCodeManager::BindingNameEnum binding)
 {
    return settings->getInputCodeManager()->getBinding(binding);
 }
 
 
-void UserInterface::setInputCode(GameSettings *settings, InputCodeManager::BindingName binding, InputCode inputCode)
+void UserInterface::setInputCode(GameSettings *settings, InputCodeManager::BindingNameEnum binding, InputCode inputCode)
 {
    settings->getInputCodeManager()->setBinding(binding, inputCode);
 }
 
 
-bool UserInterface::checkInputCode(InputCodeManager::BindingName binding, InputCode inputCode)
+bool UserInterface::checkInputCode(InputCodeManager::BindingNameEnum binding, InputCode inputCode)
 {
    GameSettings *settings = getGame()->getSettings();
 
@@ -351,7 +351,7 @@ bool UserInterface::checkInputCode(InputCodeManager::BindingName binding, InputC
 }
 
 
-const char *UserInterface::getInputCodeString(GameSettings *settings, InputCodeManager::BindingName binding)
+const char *UserInterface::getInputCodeString(GameSettings *settings, InputCodeManager::BindingNameEnum binding)
 {
    return InputCodeManager::inputCodeToString(getInputCode(settings, binding));
 }

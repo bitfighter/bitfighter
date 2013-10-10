@@ -49,10 +49,10 @@ struct KeyDefMenuItem
    const char *mText;
    U32 mIndex;
    U32 mColumn;
-   InputCodeManager::BindingName primaryControl;
+   InputCodeManager::BindingNameEnum primaryControl;
    string helpString;
 
-   KeyDefMenuItem(const char *text, U32 index, U32 col, InputCodeManager::BindingName PC, string helpStr);     // Constructor
+   KeyDefMenuItem(const char *text, U32 index, U32 col, InputCodeManager::BindingNameEnum PC, string helpStr);     // Constructor
    virtual ~KeyDefMenuItem();
 };
 

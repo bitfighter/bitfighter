@@ -39,7 +39,7 @@
 ///////// IMPORTANT!!  Do not change the order of these items.  Do not delete any of these items.  You can update their text
 /////////              or add new items, but changing the order will make a mess of the INI list that users have that records
 /////////              which items have already been seen.  Instead of deleting an item, mark it as unused somehow and ignore it.
-/////////              [[BindingNames]] mostly drawn from BINDING_STRINGS[] list in InputCode.cpp
+/////////              [[BindingNames]] mostly drawn from BindingInfos[] list in InputCode.cpp
 /////////              See getSymbolShape() (in .cpp) for a list of other symbol substitutions you can use here.
 
 // Note that the Auto-add column is only used when the Related-to column is not UnknownTypeNumber
@@ -103,12 +103,13 @@
    HELP_TABLE_ITEM(LoadoutChangedZoneItem,       LoadoutZoneTypeNumber,         false, false, TorNeut,    Now,       ARRAYDEF({ "You've selected a new ship configuration.",                                                 \
                                                                                                                                 "Find a Loadout Zone ([[LOADOUT_ICON]]) to make the changes.", NULL }))                      \
    HELP_TABLE_ITEM(LoadoutChangedNoZoneItem,     UnknownTypeNumber,             true,  false, Any,        Now,       ARRAYDEF({ "You've selected a new ship configuration.",                                                 \
-                                                                                                                                "This level has no Loadout Zones, so",                                                          \
-                                                                                                                                "you will get your new loadout when you respawn.", NULL }))                                                    \
+                                                                                                                                "This level has no Loadout Zones, so",                                                       \
+                                                                                                                                "you will get your new loadout when you respawn.", NULL }))                                  \
    HELP_TABLE_ITEM(LoadoutFinishedItem,          UnknownTypeNumber,             true,  false, Any,        Now,       ARRAYDEF({ "Loadout updated.  Good job!", NULL }))                                                      \
    HELP_TABLE_ITEM(HowToChatItem,                UnknownTypeNumber,             true,  false, Any,        High,      ARRAYDEF({ "Someone is sending chat messages.  Use [[TeamChat]] or [[GlobalChat]] to respond.",         \
                                                                                                                                 "[[TeamChat]] sends a message to your team, [[GlobalChat]] sends one to everyone.", NULL })) \
    HELP_TABLE_ITEM(TryDroppingItem,              UnknownTypeNumber,             true,  false, Any,        PacedLow,  ARRAYDEF({ "You are carrying an object.  Hit [[DropItem]] to drop it.", NULL }))                        \
+   HELP_TABLE_ITEM(RateThisLevel,                UnknownTypeNumber,             true,  false, Any,        PacedLow,  ARRAYDEF({ "Like this level?  Rate it with [[ToggleRating]].", NULL }))                                 \
                                                                                                                                                                                                                              \
    /* GameType specific help items shown at beginning of game */                                                                                                                                                             \
    HELP_TABLE_ITEM(BMGameStartItem,              UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Bitmatch game.  Kill everyone!", NULL }))                                         \

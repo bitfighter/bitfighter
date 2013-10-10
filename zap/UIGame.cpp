@@ -1092,7 +1092,13 @@ void GameUserInterface::activateModule(S32 index)
       mHelpItemManager.removeInlineHelpItem(TryCloakItem, true);     // Already tried it!
    else if(getGame()->getLocalPlayerShip()->getModule(index) == ModuleBoost)
       mHelpItemManager.removeInlineHelpItem(TryTurboItem, true);     // Already tried it!
+}
 
+
+void GameUserInterface::toggleLevelRating()
+{
+   displayErrorMessage("Rating not yet implemented!");
+   mHelpItemManager.removeInlineHelpItem(RateThisLevel, true);       // Knows how to rate a level!
 }
 
 
@@ -1161,8 +1167,8 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
          if(!checkInputCode(InputCodeManager::BINDING_OUTGAMECHAT, inputCode) &&
                !checkInputCode(InputCodeManager::BINDING_GLOBCHAT, inputCode) &&
                !checkInputCode(InputCodeManager::BINDING_TEAMCHAT, inputCode) &&
-               !checkInputCode(InputCodeManager::BINDING_CMDCHAT, inputCode) &&
-               !checkInputCode(InputCodeManager::BINDING_SCRBRD, inputCode))
+               !checkInputCode(InputCodeManager::BINDING_CMDCHAT,  inputCode) &&
+               !checkInputCode(InputCodeManager::BINDING_SCRBRD,   inputCode))
          {
             getGame()->undelaySpawn();
             if(inputCode != KEY_ESCAPE)  // Don't swollow escape: Lagged out and can't un-idle to bring up the menu?
@@ -1396,7 +1402,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    else if(checkInputCode(InputCodeManager::BINDING_FIRE, inputCode))
    {
       mFiring = true;
-      mHelpItemManager.removeInlineHelpItem(ControlsKBItem, true, 0xFF - 1);
+      mHelpItemManager.removeInlineHelpItem(ControlsKBItem, true, 0xFF - 1);     // Player has demonstrated knowledge of how to fire
    }
    else if(checkInputCode(InputCodeManager::BINDING_SELWEAP1, inputCode))
       selectWeapon(0);
@@ -1414,6 +1420,9 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       chooseNextWeapon();
    else if(checkInputCode(InputCodeManager::BINDING_PREVWEAP, inputCode))
       choosePrevWeapon();
+   else if(checkInputCode(InputCodeManager::BINDING_TOGGLE_RATING, inputCode))
+      toggleLevelRating();
+
 
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)
    {
