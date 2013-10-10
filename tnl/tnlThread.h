@@ -122,7 +122,7 @@ public:
    /// Thread constructor.
    Thread();
    /// Thread destructor.
-   ~Thread();
+   virtual ~Thread();
 
    /// starts the thread's main run function.
    void start();
