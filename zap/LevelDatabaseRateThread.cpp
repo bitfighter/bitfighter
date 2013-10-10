@@ -42,13 +42,12 @@ LevelDatabaseRateThread::~LevelDatabaseRateThread()
 
 U32 LevelDatabaseRateThread::run()
 {
+   // Should already have been checked, but just in case... we can fail silently
    if(!mGame->getLevelDatabaseId())
-   {
-      mGame->displayErrorMessage("!!! Level ID not found -- redownload the level from the DB to enable rating");
       return 1;
-   }
 
    mGame->displaySuccessMessage("Rating level...");
+
    stringstream id;
    id << mGame->getLevelDatabaseId();
 
@@ -59,7 +58,7 @@ U32 LevelDatabaseRateThread::run()
 
    if(!req.send())
    {
-      mGame->displayErrorMessage("!!! Error connecting to server");
+      mGame->displayErrorMessage("!!! Error rating level: Cannot connect to server");
 
       delete this;
       return 0;
@@ -68,7 +67,7 @@ U32 LevelDatabaseRateThread::run()
    S32 responseCode = req.getResponseCode();
    if(responseCode != HttpRequest::OK && responseCode != HttpRequest::Found)
    {
-      stringstream message("Error rating level: ");
+      stringstream message("!!! Error rating level: ");
       message << responseCode;
       mGame->displayErrorMessage(req.getResponseBody().c_str());
       delete this;
