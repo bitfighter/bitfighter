@@ -44,7 +44,10 @@ U32 LevelDatabaseRateThread::run()
 {
    // Should already have been checked, but just in case... we can fail silently
    if(!mGame->getLevelDatabaseId())
+   {
+      delete this;
       return 1;
+   }
 
    mGame->displaySuccessMessage("Rating level...");
 
@@ -70,6 +73,7 @@ U32 LevelDatabaseRateThread::run()
       stringstream message("!!! Error rating level: ");
       message << responseCode;
       mGame->displayErrorMessage(req.getResponseBody().c_str());
+
       delete this;
       return 0;
    }
