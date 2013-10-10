@@ -115,7 +115,7 @@ InputCode BindingSet::getBinding(InputCodeManager::BindingNameEnum bindingName) 
    // return KEY_NONE;
 
     if(false) { }     // Dummy conditional to let us use else if below
-#define BINDING(enumName, b, memberName) else if(bindingName == InputCodeManager::enumName) return memberName;
+#define BINDING(enumName, b, c, memberName) else if(bindingName == InputCodeManager::enumName) return memberName;
     BINDING_TABLE
 #undef BINDING
 
@@ -134,7 +134,7 @@ void BindingSet::setBinding(InputCodeManager::BindingNameEnum bindingName, Input
    // else TNLAssert(false);
 
    if(false) { }     // Dummy conditional to let us use else if below
-#define BINDING(enumName, b, memberName) else if(bindingName == InputCodeManager::enumName) memberName = key;
+#define BINDING(enumName, b, c, memberName) else if(bindingName == InputCodeManager::enumName) memberName = key;
     BINDING_TABLE
 #undef BINDING
    else 
@@ -162,7 +162,7 @@ bool BindingSet::hasKeypad()
 
 
 static const string BindingNames[] = {
-#define BINDING(a, bindingName, c) bindingName, 
+#define BINDING(a, bindingName, c, d) bindingName, 
     BINDING_TABLE
 #undef BINDING
 };

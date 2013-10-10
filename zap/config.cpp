@@ -985,32 +985,16 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section, InputMode mode)
 {
    // Top line evaluates to:
-   // ini->SetValue(section, "SelWeapon1", InputCodeManager::inputCodeToString(
-   //                               inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1, mode)));
-   SAVE_BINDING(InputCodeManager::BINDING_SELWEAP1);
-   SAVE_BINDING(InputCodeManager::BINDING_SELWEAP2);
-   SAVE_BINDING(InputCodeManager::BINDING_SELWEAP3);
-   SAVE_BINDING(InputCodeManager::BINDING_ADVWEAP);
-   SAVE_BINDING(InputCodeManager::BINDING_ADVWEAP2);
-   SAVE_BINDING(InputCodeManager::BINDING_PREVWEAP);
-   SAVE_BINDING(InputCodeManager::BINDING_CMDRMAP);
-   SAVE_BINDING(InputCodeManager::BINDING_TEAMCHAT);
-   SAVE_BINDING(InputCodeManager::BINDING_GLOBCHAT);
-   SAVE_BINDING(InputCodeManager::BINDING_QUICKCHAT);
-   SAVE_BINDING(InputCodeManager::BINDING_CMDCHAT);
-   SAVE_BINDING(InputCodeManager::BINDING_LOADOUT);
-   SAVE_BINDING(InputCodeManager::BINDING_MOD1);
-   SAVE_BINDING(InputCodeManager::BINDING_MOD2);
-   SAVE_BINDING(InputCodeManager::BINDING_FIRE);
-   SAVE_BINDING(InputCodeManager::BINDING_DROPITEM);
-   SAVE_BINDING(InputCodeManager::BINDING_TOGVOICE);
-   SAVE_BINDING(InputCodeManager::BINDING_UP);
-   SAVE_BINDING(InputCodeManager::BINDING_DOWN);
-   SAVE_BINDING(InputCodeManager::BINDING_LEFT);
-   SAVE_BINDING(InputCodeManager::BINDING_RIGHT);
-   SAVE_BINDING(InputCodeManager::BINDING_SCRBRD);
-   SAVE_BINDING(InputCodeManager::BINDING_TOGGLE_RATING);
-   SAVE_BINDING(InputCodeManager::BINDING_MISSION);
+   // if(true)
+   //    ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1),
+   //                           InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1, mode)));
+
+#define BINDING(enumVal, b, saveIt, d)  \
+      if(saveIt)                                                                                                                    \
+         ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::enumVal),                                        \
+                                InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::enumVal, mode))); 
+    BINDING_TABLE
+#undef BINDING
 }
 
 
