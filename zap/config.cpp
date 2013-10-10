@@ -985,7 +985,8 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section, InputMode mode)
 {
    // Top line evaluates to:
-   // ini->SetValue(section, "SelWeapon1", InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1,  mode)));
+   // ini->SetValue(section, "SelWeapon1", InputCodeManager::inputCodeToString(
+   //                               inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1, mode)));
    SAVE_BINDING(InputCodeManager::BINDING_SELWEAP1);
    SAVE_BINDING(InputCodeManager::BINDING_SELWEAP2);
    SAVE_BINDING(InputCodeManager::BINDING_SELWEAP3);
