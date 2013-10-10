@@ -995,6 +995,7 @@ void globalMuteHandler(ClientGame *game, const Vector<string> &words)
    }
 }
 
+
 void downloadMapHandler(ClientGame *game, const Vector<string> &args)
 {
    // the download thread deletes itself, so there is no memory leak
@@ -1009,21 +1010,46 @@ void downloadMapHandler(ClientGame *game, const Vector<string> &args)
    downloadThread->start();
 }
 
+
 void rateMapHandler(ClientGame *game, const Vector<string> &args)
 {
-   if(args.size() < 2)
-   {
-      game->displayErrorMessage("!!! You must specify a rating (\"up\" or \"down\")");
-      return;
-   }
+   S32 rating = NONE;
 
-   static Thread* rateThread;
-   rateThread = new LevelDatabaseRateThread(game, args[1]);
-   rateThread->start();
+   if(args.size() >= 2)
+      for(S32 i = 0; i < LevelDatabaseRateThread::RatingsCount; i++)
+         if(args[1] == LevelDatabaseRateThread::RatingStrings[i])
+         {
+            rating = i;
+            break;
+         }
+
+   if(rating == NONE)      // Error
+   {  
+      string msg = "!!! You must specify a rating (";
+
+      // Enumerate all valid ratings strings
+      for(S32 i = 0; i < LevelDatabaseRateThread::RatingsCount; i++)
+      {
+         msg += "\"" + LevelDatabaseRateThread::RatingStrings[i] + "\"";
+         if(i < LevelDatabaseRateThread::RatingsCount - 2)
+            msg += ", ";
+         else if(i < LevelDatabaseRateThread::RatingsCount - 1)
+            msg += ", or ";
+      }
+
+      msg += ")";
+ 
+      game->displayErrorMessage(msg.c_str());
+   }
+   else                    // Args look ok; release the kraken!
+   {
+      Thread *rateThread = new LevelDatabaseRateThread(game, LevelDatabaseRateThread::LevelRating(rating));
+      rateThread->start();
+   }
 }
 
 
-// The following are only available in debug builds!
+// The following are only available in debug builds
 #ifdef TNL_DEBUG
 void showObjectOutlinesHandler(ClientGame *game, const Vector<string> &args)
 {

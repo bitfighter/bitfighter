@@ -12,14 +12,25 @@
 
 #include <sstream>
 
+using namespace std;
+
 namespace Zap
 {
 
+// Define statics
 const string LevelDatabaseRateThread::LevelDatabaseRateUrl = "bitfighter.org/pleiades/levels/rate/";
 
-LevelDatabaseRateThread::LevelDatabaseRateThread(ClientGame* game, string rating) : mGame(game), mRating(rating)
+const string LevelDatabaseRateThread::RatingStrings[] = {
+#define LEVEL_RATING(a, strval) strval,
+   LEVEL_RATINGS_TABLE
+#undef LEVEL_RATING
+};
+
+
+LevelDatabaseRateThread::LevelDatabaseRateThread(ClientGame* game, LevelRating rating)
 {
-   // Do nothing
+   mGame   = game;
+   mRating = rating;
 }
 
 
@@ -41,7 +52,7 @@ U32 LevelDatabaseRateThread::run()
    stringstream id;
    id << mGame->getLevelDatabaseId();
 
-   HttpRequest req = HttpRequest(LevelDatabaseRateUrl + id.str() + "/" + mRating);
+   HttpRequest req = HttpRequest(LevelDatabaseRateUrl + id.str() + "/" + RatingStrings[mRating]);
    req.setMethod(HttpRequest::PostMethod);
    req.setData("data[User][username]",      mGame->getPlayerName());
    req.setData("data[User][user_password]", mGame->getPlayerPassword());
