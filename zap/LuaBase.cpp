@@ -582,8 +582,7 @@ S32 getTeamIndex(lua_State *L, S32 index)
 }
 
 
-// Pop integer off stack, check its type, and return it (no bounds check)
-lua_Integer getCheckedInt(lua_State *L, S32 index, const char *methodName)
+inline void checkForNumber(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isnumber(L, index))
    {
@@ -593,7 +592,13 @@ lua_Integer getCheckedInt(lua_State *L, S32 index, const char *methodName)
 
       throw LuaException(msg);
    }
+}
 
+
+// Pop integer off stack, check its type, and return it (no bounds check)
+lua_Integer getCheckedInt(lua_State *L, S32 index, const char *methodName)
+{
+   checkForNumber(L, index, methodName);
    return lua_tointeger(L, index);
 }
 
@@ -608,15 +613,7 @@ F32 getFloat(lua_State *L, S32 index)
 // Pop a number off stack, convert to float, and return it (no bounds check)
 F32 getCheckedFloat(lua_State *L, S32 index, const char *methodName)
 {
-   if(!lua_isnumber(L, index))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", methodName, index);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-
+   checkForNumber(L, index, methodName);
    return (F32) lua_tonumber(L, index);
 }
 
