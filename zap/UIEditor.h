@@ -51,13 +51,13 @@ using namespace std;
 namespace Zap
 {
 
-class EditorTeam;
-class LuaLevelGenerator;
+class DatabaseObject;
 class EditorAttributeMenuUI;
+class EditorTeam;
+class GameType;
+class LuaLevelGenerator;
 class PluginMenuUI;
 class SimpleTextEntryMenuUI;
-class DatabaseObject;
-class GameType;
 struct FolderManager;
 
 class EditorUserInterface : public UserInterface
@@ -76,13 +76,13 @@ public:
       string requestedBinding;
    };
 
-   enum SpecialAttribute   // Some items have special attributes.  These are the ones
-   {                       // we can edit in the editor
-      Text = 0,
+   // Some items have special attributes.  These are the ones we can edit in the editor.
+   enum SpecialAttribute {  
+      Text,
       RepopDelay,
       GoFastSpeed,
       GoFastSnap,
-      NoAttribute                 // Must be last
+      NoAttribute    // Must be last
    };
 
 private:
@@ -220,11 +220,10 @@ private:
    BfObject *doMergeLines   (BfObject *firstItem, S32 firstItemIndex);   
    BfObject *doMergePolygons(BfObject *firstItem, S32 firstItemIndex);
 
-   //S32 countSelectedVerts();
-   bool anyItemsSelected(GridDatabase *database);   // Are any items selected?
-   bool anythingSelected();                                 // Are any items/vertices selected?
+   bool anyItemsSelected(GridDatabase *database);  // Are any items selected?
+   bool anythingSelected();                        // Are any items/vertices selected?
 public:
-   S32 getItemSelectedCount();                              // How many are objects are selected?
+   S32 getItemSelectedCount();                     // How many are objects are selected?
 
 private:
    // Sets mHitItem and mEdgeHit -- findHitItemAndEdge calls one or more of the associated helper functions below
