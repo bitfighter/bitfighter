@@ -124,14 +124,16 @@ Vector<string> CoreGameType::getGameParameterMenuKeys()
 #endif
 
 
-void CoreGameType::addCore(CoreItem *core, S32 team)
+void CoreGameType::addCore(CoreItem *core, S32 teamIndex)
 {
    mCores.push_back(core);
 
-   if(!core->isGhost() && U32(team) < U32(getGame()->getTeamCount()) && getGame()->isServer()) // No EditorTeam
+   if(!core->isGhost() && U32(teamIndex) < U32(getGame()->getTeamCount()) && getGame()->isServer()) // No EditorTeam
    {
-      TNLAssert(dynamic_cast<Team *>(getGame()->getTeam(team)), "Bad team pointer or bad type");
-      static_cast<Team *>(getGame()->getTeam(team))->addScore(1);
+      Team * team = dynamic_cast<Team *>(getGame()->getTeam(teamIndex));
+      TNLAssert(team, "Bad team pointer or bad type");
+      team->addScore(1);
+      s2cSetTeamScore(teamIndex, team->getScore());
    }
 }
 
@@ -1006,6 +1008,30 @@ void CoreItem::onGeomChanged()
 
 bool CoreItem::canBeHostile() { return false; }
 bool CoreItem::canBeNeutral() { return false; }
+
+
+S32 CoreItem::lua_setTeam(lua_State *L)
+{
+   S32 oldTeamIndex = this->getTeam();
+   S32 results = Parent::lua_setTeam(L);
+   S32 newTeamIndex = this->getTeam();
+
+   if(oldTeamIndex >= 0)
+   {
+      Team* oldTeam = dynamic_cast<Team *>(getGame()->getTeam(oldTeamIndex));
+      oldTeam->addScore(-1);
+      getGame()->getGameType()->s2cSetTeamScore(oldTeamIndex, oldTeam->getScore());
+   }
+
+   if(newTeamIndex >= 0)
+   {
+      Team* newTeam = dynamic_cast<Team *>(getGame()->getTeam(newTeamIndex));
+      newTeam->addScore(1);
+      getGame()->getGameType()->s2cSetTeamScore(newTeamIndex, newTeam->getScore());
+   }
+
+   return results;
+}
 
 
 /////
