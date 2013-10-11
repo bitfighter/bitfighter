@@ -93,7 +93,7 @@ void KeyDefMenuUserInterface::onActivate()
 {
    mDisableShipKeyboardInput = true;      // Keep keystrokes from getting to game
    selectedIndex = 0;                     // First item selected when we begin
-   changingItem = -1;                     // Not changing anything at the moment...
+   changingItem = NONE;                   // Not changing anything at the moment...
 
    while(menuItems.size())                // Clear list, but for some reason .clear() method won't compile
       menuItems.pop_back();
@@ -306,13 +306,13 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
    if(Parent::onKeyDown(inputCode)) { /* Do nothing */ }
 
    // InputCode entry
-   else if(changingItem > -1)
+   else if(changingItem != NONE)
    {
       playBoop();
 
       if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)
       {
-         changingItem = -1;
+         changingItem = NONE;
          return true;
       }
 
@@ -336,7 +336,7 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
 
       // Assign key
       setInputCode(getGame()->getSettings(), menuItems[changingItem].primaryControl, inputCode);
-      changingItem = -1;
+      changingItem = NONE;
 
       if(inputCode == KEY_CTRL)
       {
