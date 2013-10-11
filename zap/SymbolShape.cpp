@@ -1211,7 +1211,7 @@ static S32 getKeyWidth(const string &text, S32 height)
 {
    S32 width = -1;
    if(text == "Up Arrow" || text == "Down Arrow" || text == "Left Arrow" || text == "Right Arrow")
-      width = 0;     // Make a square button; mWidth will be set to mHeight below
+      width = 0;     // Make a square button; will return height below (and since it's a square...)
    else
       width = getStringWidth(KeyContext, KeyFontSize, text.c_str()) + Margin * 2;
 

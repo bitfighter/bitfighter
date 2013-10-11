@@ -30,12 +30,16 @@
 #include "FontManager.h"
 #include "Colors.h"
 #include "gameObjectRender.h"
+#include "SymbolShape.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 
 namespace Zap
 {
+
+using namespace UI;
+
 
 JoystickRender::JoystickRender()
 {
@@ -175,7 +179,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
 {
    // Return keyboard key size, just in case
    if(!InputCodeManager::isControllerButton(inputCode))
-      return getStringWidthf(15, "[%s]", InputCodeManager::inputCodeToString(inputCode));
+      return SymbolKey(InputCodeManager::inputCodeToString(inputCode)).getWidth();
 
    // Get joystick button size
    JoystickButton button = InputCodeManager::inputCodeToJoystickButton(inputCode);
@@ -237,8 +241,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
    // Render keyboard keys, just in case
    if(!InputCodeManager::isControllerButton(inputCode))
    {
-      // Offset a bit in the x direction
-      drawStringf(x - 10, y, 15, "[%s]", InputCodeManager::inputCodeToString(inputCode));
+      SymbolKey(InputCodeManager::inputCodeToString(inputCode)).render(Point(x, y + 17));
       return;
    }
 
