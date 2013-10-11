@@ -68,105 +68,66 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
 {
    radius = radius * 0.143f;   // = 1/7  Correct for the fact that when radius = 1, graphic has 7 px radius
 
-   // Reusable
-   Point point1;
-   Point point2;
-   Point point3;
-   Point point4;
-   Point point5;
-   Point point6;
-   Point point7;
+   static Point points[7];
 
    // Up arrow
+   points[0] = (center + Point(-1, -2) * radius);
+   points[1] = (center + Point(-1, -4) * radius);
+   points[2] = (center + Point(-3, -4) * radius);
+   points[3] = (center + Point( 0, -7) * radius);
+   points[4] = (center + Point( 3, -4) * radius);
+   points[5] = (center + Point( 1, -4) * radius);
+   points[6] = (center + Point( 1, -2) * radius);
+
    glColor(getButtonColor(upActivated));
-   point1 = (center + Point(-1, -2) * radius);
-   point2 = (center + Point(-1, -4) * radius);
-   point3 = (center + Point(-3, -4) * radius);
-   point4 = (center + Point(0, -7) * radius);
-   point5 = (center + Point(3, -4) * radius);
-   point6 = (center + Point(1, -4) * radius);
-   point7 = (center + Point(1, -2) * radius);
-   F32 vertices[] = {
-         point1.x, point1.y,
-         point2.x, point2.y,
-         point3.x, point3.y,
-         point4.x, point4.y,
-         point5.x, point5.y,
-         point6.x, point6.y,
-         point7.x, point7.y
-   };
-   renderVertexArray(vertices, 7, GL_LINE_LOOP);
+   renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
 
    // Down arrow
+   points[0] = (center + Point(-1, 2) * radius);
+   points[1] = (center + Point(-1, 4) * radius);
+   points[2] = (center + Point(-3, 4) * radius);
+   points[3] = (center + Point( 0, 7) * radius);
+   points[4] = (center + Point( 3, 4) * radius);
+   points[5] = (center + Point( 1, 4) * radius);
+   points[6] = (center + Point( 1, 2) * radius);
+
    glColor(getButtonColor(downActivated));
-   point1 = (center + Point(-1, 2) * radius);
-   point2 = (center + Point(-1, 4) * radius);
-   point3 = (center + Point(-3, 4) * radius);
-   point4 = (center + Point(0, 7) * radius);
-   point5 = (center + Point(3, 4) * radius);
-   point6 = (center + Point(1, 4) * radius);
-   point7 = (center + Point(1, 2) * radius);
-   F32 vertices2[] = {
-         point1.x, point1.y,
-         point2.x, point2.y,
-         point3.x, point3.y,
-         point4.x, point4.y,
-         point5.x, point5.y,
-         point6.x, point6.y,
-         point7.x, point7.y
-   };
-   renderVertexArray(vertices2, 7, GL_LINE_LOOP);
+   renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
 
    // Left arrow
+   points[0] = (center + Point(-2, -1) * radius);
+   points[1] = (center + Point(-4, -1) * radius);
+   points[2] = (center + Point(-4, -3) * radius);
+   points[3] = (center + Point(-7,  0) * radius);
+   points[4] = (center + Point(-4,  3) * radius);
+   points[5] = (center + Point(-4,  1) * radius);
+   points[6] = (center + Point(-2,  1) * radius);
+
    glColor(getButtonColor(leftActivated));
-   point1 = (center + Point(-2, -1) * radius);
-   point2 = (center + Point(-4, -1) * radius);
-   point3 = (center + Point(-4, -3) * radius);
-   point4 = (center + Point(-7, 0) * radius);
-   point5 = (center + Point(-4, 3) * radius);
-   point6 = (center + Point(-4, 1) * radius);
-   point7 = (center + Point(-2, 1) * radius);
-   F32 vertices3[] = {
-         point1.x, point1.y,
-         point2.x, point2.y,
-         point3.x, point3.y,
-         point4.x, point4.y,
-         point5.x, point5.y,
-         point6.x, point6.y,
-         point7.x, point7.y
-   };
-   renderVertexArray(vertices3, 7, GL_LINE_LOOP);
+   renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
 
    // Right arrow
+   points[0] = (center + Point(2, -1) * radius);
+   points[1] = (center + Point(4, -1) * radius);
+   points[2] = (center + Point(4, -3) * radius);
+   points[3] = (center + Point(7,  0) * radius);
+   points[4] = (center + Point(4,  3) * radius);
+   points[5] = (center + Point(4,  1) * radius);
+   points[6] = (center + Point(2,  1) * radius);
+
    glColor(getButtonColor(rightActivated));
-   point1 = (center + Point(2, -1) * radius);
-   point2 = (center + Point(4, -1) * radius);
-   point3 = (center + Point(4, -3) * radius);
-   point4 = (center + Point(7, 0) * radius);
-   point5 = (center + Point(4, 3) * radius);
-   point6 = (center + Point(4, 1) * radius);
-   point7 = (center + Point(2, 1) * radius);
-   F32 vertices4[] = {
-         point1.x, point1.y,
-         point2.x, point2.y,
-         point3.x, point3.y,
-         point4.x, point4.y,
-         point5.x, point5.y,
-         point6.x, point6.y,
-         point7.x, point7.y
-   };
-   renderVertexArray(vertices4, 7, GL_LINE_LOOP);
+   renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
 
    // Label the graphic
-   glColor(1, 1, 1);
-   if(strcmp(msg1, ""))    // That is, != "".  Remember, kids, strcmp returns 0 when strings are identical!
+   glColor(Colors::white);
+   if(strcmp(msg1, "") == 0)    // That is, != "".  Remember, kids, strcmp returns 0 when strings are identical!
    {
       S32 size = 12;
       S32 width = getStringWidth(size, msg1);
       drawString(center.x - width / 2, center.y + 27, size, msg1);
    }
 
-   if(strcmp(msg2, ""))
+   if(strcmp(msg2, "") == 0)
    {
       S32 size = 10;
       S32 width = getStringWidth(size, msg2);
@@ -189,29 +150,14 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
 
    switch(buttonShape)
    {
-      case Joystick::ButtonShapeRound:
-         return buttonHalfHeight * 2;
-
-      case Joystick::ButtonShapeRect:
-         return rectButtonWidth;
-
-      case Joystick::ButtonShapeSmallRect:
-         return smallRectButtonWidth;
-
-      case Joystick::ButtonShapeRoundedRect:
-         return rectButtonWidth;
-
-      case Joystick::ButtonShapeSmallRoundedRect:
-         return smallRectButtonWidth;
-
-      case Joystick::ButtonShapeHorizEllipse:
-         return horizEllipseButtonRadiusX * 2;
-
-      case Joystick::ButtonShapeRightTriangle:
-         return rectButtonWidth;
-
-      default:
-         return rectButtonWidth;
+      case Joystick::ButtonShapeRound:             return buttonHalfHeight * 2;
+      case Joystick::ButtonShapeRect:              return rectButtonWidth;
+      case Joystick::ButtonShapeSmallRect:         return smallRectButtonWidth;
+      case Joystick::ButtonShapeRoundedRect:       return rectButtonWidth;
+      case Joystick::ButtonShapeSmallRoundedRect:  return smallRectButtonWidth;
+      case Joystick::ButtonShapeHorizEllipse:      return horizEllipseButtonRadiusX * 2;
+      case Joystick::ButtonShapeRightTriangle:     return rectButtonWidth;
+      default:                                     return rectButtonWidth;
    }
 
    return -1;     // Kill a useless warning
