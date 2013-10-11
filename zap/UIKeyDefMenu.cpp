@@ -135,7 +135,8 @@ void KeyDefMenuUserInterface::onActivate()
       menuItems.push_back(KeyDefMenuItem("Show Scoreboard",       1, InputCodeManager::BINDING_SCRBRD,  
                                          "Scoreboard will be visible while this key/button is held down"));
       // Col 2
-      firstItemInCol2 = 9;
+      firstItemInCol2 = menuItems.size();
+
       menuItems.push_back(KeyDefMenuItem("Select Weapon 1",       2, InputCodeManager::BINDING_SELWEAP1, 
                                          "Use as an alternative to Advance Weapon"));
       menuItems.push_back(KeyDefMenuItem("Select Weapon 2",       2, InputCodeManager::BINDING_SELWEAP2, 
@@ -171,7 +172,8 @@ void KeyDefMenuUserInterface::onActivate()
                                          "Scoreboard will be visible while this key/button is held down"));
 
       // Col 2
-      firstItemInCol2 = 11;
+      firstItemInCol2 = menuItems.size();
+
       menuItems.push_back(KeyDefMenuItem("Select Weapon 1",         2, InputCodeManager::BINDING_SELWEAP1, 
                                          "Use as an alternative to Advance Weapon"));
       menuItems.push_back(KeyDefMenuItem("Select Weapon 2",         2, InputCodeManager::BINDING_SELWEAP2, 
