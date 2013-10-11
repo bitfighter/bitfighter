@@ -48,9 +48,9 @@ namespace Zap
 // Constructor
 KeyDefMenuItem::KeyDefMenuItem(const char *text, U32 index, U32 col, InputCodeManager::BindingNameEnum PC, string helpStr)
 {
-   mText = text;
-   mIndex = index;
-   mColumn = col;
+   this->text = text;
+   this->index = index;    // used?
+   column = col;
    primaryControl = PC;
    helpString = helpStr;
 }
@@ -249,7 +249,7 @@ void KeyDefMenuUserInterface::render()
       S32 y = yStart + (i - ((i < firstItemInCol2) ? 0 : firstItemInCol2)) * height;
 
 		S32 Column_Width = canvasWidth / 2 - horizMargin;
-		S32 xPos = (menuItems[i].mColumn - 1) * Column_Width + horizMargin * 2;
+		S32 xPos = (menuItems[i].column - 1) * Column_Width + horizMargin * 2;
 
       if(selectedIndex == i)       // Highlight selected item
          drawFilledRect(xPos - horizMargin, y, 
@@ -258,7 +258,7 @@ void KeyDefMenuUserInterface::render()
 
       // Draw item text
       glColor(Colors::cyan);
-      drawString(xPos, y + offset, 15, menuItems[i].mText);
+      drawString(xPos, y + offset, 15, menuItems[i].text);
 
 		xPos += Column_Width * 11 / 20;
 
@@ -359,12 +359,12 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
    {
       playBoop();
 
-      if(menuItems[selectedIndex].mColumn == 1)    // Switching to right column
+      if(menuItems[selectedIndex].column == 1)     // Switching to right column
          selectedIndex += firstItemInCol2;
       else                                         // Switching to left column
       {
          selectedIndex -= firstItemInCol2;
-         while(menuItems[selectedIndex].mColumn == 2)
+         while(menuItems[selectedIndex].column == 2)
             selectedIndex--;
       }
 
@@ -422,13 +422,13 @@ void KeyDefMenuUserInterface::onMouseMoved()
 
    // If we're in the wrong column, get back to the right one.  This can happen if there are more
    // items in the right column than the left.  Note that our column numbering scheme is different
-   // between col and the mColumn field.  Also corrects for that dummy null item in the joystick
+   // between col and the column field.  Also corrects for that dummy null item in the joystick
    // section of the controls.
    if(col == 0)
-      while(menuItems[selectedIndex].mColumn == 2)
+      while(menuItems[selectedIndex].column == 2)
          selectedIndex--;
    else
-      while(menuItems[selectedIndex].mColumn == 1)
+      while(menuItems[selectedIndex].column == 1)
          selectedIndex++;
 }
 

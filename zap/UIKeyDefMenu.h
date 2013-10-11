@@ -46,9 +46,9 @@ using namespace std;
 
 struct KeyDefMenuItem
 {
-   const char *mText;
-   U32 mIndex;
-   U32 mColumn;
+   const char *text;
+   U32 index;
+   U32 column;
    InputCodeManager::BindingNameEnum primaryControl;
    string helpString;
 
