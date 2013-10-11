@@ -940,10 +940,6 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
 }
 
 
-#define SAVE_BINDING(binding) ini->SetValue(section, InputCodeManager::getBindingName(binding), \
-                                           InputCodeManager::inputCodeToString(inputCodeManager->getBinding(binding,  mode)));
-
-
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section, InputMode mode)
 {
    // Top line evaluates to:
@@ -952,7 +948,7 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
    //                           InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1, mode)));
 
 #define BINDING(enumVal, b, savedInIni, d, e, f)  \
-      if(savedInIni)                                                                                                                    \
+      if(savedInIni)                                                                                                                \
          ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::enumVal),                                        \
                                 InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::enumVal, mode))); 
     BINDING_TABLE
