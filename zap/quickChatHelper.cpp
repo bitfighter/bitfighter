@@ -163,8 +163,7 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
 
    GameSettings *settings = getGame()->getSettings();
 
-   bool showKeys = settings->getInputMode() == InputModeKeyboard ||
-                   settings->getIniSettings()->mSettings.getVal<YesNo>("ShowKeyboardKeysInStickMode");
+   bool showKeys = (settings->getInputMode() == InputModeKeyboard);
 
    // First get to the end...
    while(nodeTree[walk].depth >= matchLevel)

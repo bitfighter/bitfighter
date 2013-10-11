@@ -215,24 +215,12 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
 
    // Determine whether to show keys or joystick buttons on menu
    InputMode inputMode      = getGame()->getInputMode();
-   bool showKeys            = inputMode == InputModeKeyboard ||
-                              getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("ShowKeyboardKeysInStickMode");
 
-   bool showJoystickButtons = inputMode == InputModeJoystick;
-
-   // For testing, cycle through all valid combinations of keyboard/joystick button display to make sure all render properly
-   // S32 mode = Platform::getRealMilliseconds() / 1000 % 3;
-   // if(mode == 0) { showKeys = false; showJoystickButtons = true;  }
-   // if(mode == 1) { showKeys = true;  showJoystickButtons = false; }
-   // if(mode == 2) { showKeys = true;  showJoystickButtons = true;  }
-
-   S32 keyIndent  = showKeys ? (showJoystickButtons ? 28 : 20) : 0;
-   S32 jsIndent   = showJoystickButtons ? 20 : 0;
-   S32 itemIndent = jsIndent + keyIndent + 19;
+   S32 itemIndent = 20;
 
    // If draw is false, this was just a dry run to get itemIndent
    if(!draw)
-      return itemIndent;
+      return itemIndent + 19;
 
    S32 yPos;
 
@@ -258,15 +246,15 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
       // Draw key controls for selecting the object to be created
       U32 joystickIndex = Joystick::SelectedPresetIndex;
 
-      if(showJoystickButtons)     // Only draw joystick buttons when in joystick mode
-         JoystickRender::renderControllerButton(F32(jsIndent), (F32)yPos, 
+      if(inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
+         JoystickRender::renderControllerButton((F32)itemIndent, (F32)yPos, 
                                                 joystickIndex, items[i].button, false);
 
-      if(showKeys)
+      else
       {
          // Render key in white, or, if there is a legend, in the color of the adjacent item
          glColor(renderKeysWithItemColor ? items[i].itemColor : &Colors::white); 
-         JoystickRender::renderControllerButton((F32)keyIndent + jsIndent, (F32)yPos, 
+         JoystickRender::renderControllerButton((F32)itemIndent, (F32)yPos, 
                                                 joystickIndex, items[i].key, false);
       }
 
