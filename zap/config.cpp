@@ -898,83 +898,45 @@ static InputCode getInputCode(CIniFile *ini, const string &section, const string
 }
 
 
-// For readability
-#define LOAD_BINDING(binding, key) \
-          inputCodeManager->setBinding(binding, mode, \
-          getInputCode(ini, section, InputCodeManager::getBindingName(binding), key));
 
 // Remember: If you change any of these defaults, you'll need to rebuild your INI file to see the results!
 static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {                                
-   string section = "KeyboardKeyBindings";
-   InputMode mode = InputModeKeyboard;
+   ///// KEYBOARD
 
-   // Top line expands to this:
-   // inputCodeManager->setBinding(InputCodeManager::BINDING_SELWEAP1,  
-   //         mode, getInputCode(ini, section, InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1),  KEY_1));
-   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP1,      KEY_1);
-   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP2,      KEY_2);
-   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP3,      KEY_3);
-   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP,       KEY_E);
-   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP2,      MOUSE_WHEEL_UP);
-   LOAD_BINDING(InputCodeManager::BINDING_PREVWEAP,      MOUSE_WHEEL_DOWN);
-   LOAD_BINDING(InputCodeManager::BINDING_CMDRMAP,       KEY_C);
-   LOAD_BINDING(InputCodeManager::BINDING_TEAMCHAT,      KEY_T);
-   LOAD_BINDING(InputCodeManager::BINDING_GLOBCHAT,      KEY_G);
-   LOAD_BINDING(InputCodeManager::BINDING_QUICKCHAT,     KEY_V);
-   LOAD_BINDING(InputCodeManager::BINDING_CMDCHAT,       KEY_SLASH);
-   LOAD_BINDING(InputCodeManager::BINDING_LOADOUT,       KEY_Z);
-   LOAD_BINDING(InputCodeManager::BINDING_MOD1,          KEY_SPACE);
-   LOAD_BINDING(InputCodeManager::BINDING_MOD2,          MOUSE_RIGHT);
-   LOAD_BINDING(InputCodeManager::BINDING_FIRE,          MOUSE_LEFT);
-   LOAD_BINDING(InputCodeManager::BINDING_DROPITEM,      KEY_B);
-   LOAD_BINDING(InputCodeManager::BINDING_TOGVOICE,      KEY_R);
-   LOAD_BINDING(InputCodeManager::BINDING_UP,            KEY_W);
-   LOAD_BINDING(InputCodeManager::BINDING_DOWN,          KEY_S);
-   LOAD_BINDING(InputCodeManager::BINDING_LEFT,          KEY_A);
-   LOAD_BINDING(InputCodeManager::BINDING_RIGHT,         KEY_D);
-   LOAD_BINDING(InputCodeManager::BINDING_SCRBRD,        KEY_TAB);
-   LOAD_BINDING(InputCodeManager::BINDING_TOGGLE_RATING, KEY_EQUALS);
-   LOAD_BINDING(InputCodeManager::BINDING_MISSION,       KEY_F2);
+   // Generates a block of code that looks like this:
+   // if(true)
+   //    inputCodeManager->setBinding(InputCodeManager::BINDING_SELWEAP1, InputModeKeyboard, 
+   //          getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1), 
+   //                       KEY_1));
+
+#define BINDING(enumVal, b, savedInIni, d, defaultKeyboardBinding, f)                                             \
+      if(savedInIni)                                                                                              \
+         inputCodeManager->setBinding(InputCodeManager::enumVal, InputModeKeyboard,                               \
+            getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(InputCodeManager::enumVal), \
+                         defaultKeyboardBinding));
+    BINDING_TABLE
+#undef BINDING
 
 
+   ///// JOYSTICK
 
-   section = "JoystickKeyBindings";
-   mode = InputModeJoystick;
-
-   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP1,      KEY_1);
-   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP2,      KEY_2);
-   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP3,      KEY_3);
-   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP,       BUTTON_1);
-   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP2,      MOUSE_WHEEL_UP);
-   LOAD_BINDING(InputCodeManager::BINDING_PREVWEAP,      MOUSE_WHEEL_DOWN);
-   LOAD_BINDING(InputCodeManager::BINDING_CMDRMAP,       BUTTON_2);
-   LOAD_BINDING(InputCodeManager::BINDING_TEAMCHAT,      KEY_T);
-   LOAD_BINDING(InputCodeManager::BINDING_GLOBCHAT,      KEY_G);
-   LOAD_BINDING(InputCodeManager::BINDING_QUICKCHAT,     BUTTON_3);
-   LOAD_BINDING(InputCodeManager::BINDING_CMDCHAT,       KEY_SLASH);
-   LOAD_BINDING(InputCodeManager::BINDING_LOADOUT,       BUTTON_4);
-   LOAD_BINDING(InputCodeManager::BINDING_MOD1,          BUTTON_7);
-   LOAD_BINDING(InputCodeManager::BINDING_MOD2,          BUTTON_6);
-   LOAD_BINDING(InputCodeManager::BINDING_FIRE,          MOUSE_LEFT);
-   LOAD_BINDING(InputCodeManager::BINDING_DROPITEM,      KEY_B);
-   LOAD_BINDING(InputCodeManager::BINDING_TOGVOICE,      KEY_R);
-   LOAD_BINDING(InputCodeManager::BINDING_UP,            KEY_UP);
-   LOAD_BINDING(InputCodeManager::BINDING_DOWN,          KEY_DOWN);
-   LOAD_BINDING(InputCodeManager::BINDING_LEFT,          KEY_LEFT);
-   LOAD_BINDING(InputCodeManager::BINDING_RIGHT,         KEY_RIGHT);
-   LOAD_BINDING(InputCodeManager::BINDING_SCRBRD,        BUTTON_5);
-   LOAD_BINDING(InputCodeManager::BINDING_TOGGLE_RATING, KEY_EQUALS);
-   LOAD_BINDING(InputCodeManager::BINDING_MISSION,       KEY_F2);
+   // Basically the same, except that we use the default joystick binding column... generated code will look pretty much the same
+#define BINDING(enumVal, b, savedInIni, d, e, defaultJoystickBinding)                                             \
+      if(savedInIni)                                                                                              \
+         inputCodeManager->setBinding(InputCodeManager::enumVal, InputModeJoystick,                               \
+            getInputCode(ini, "JoystickKeyBindings", InputCodeManager::getBindingName(InputCodeManager::enumVal), \
+                         defaultJoystickBinding));
+    BINDING_TABLE
+#undef BINDING
 
 
-   // The following key bindings are not user-defineable at the moment, mostly because we want consistency
+   // Keys where savedInIni is false are not user-defineable at the moment, mostly because we want consistency
    // throughout the game, and that would require some real constraints on what keys users could choose.
-   //keyHELP = KEY_F1;
-   //keyOUTGAMECHAT = KEY_F5;
-   //keyFPS = KEY_F6;
-   //keyDIAG = KEY_F7;
-   // These were moved to main.cpp to get them defined before the menus
+   // keyHELP = KEY_F1;
+   // keyOUTGAMECHAT = KEY_F5;
+   // keyFPS = KEY_F6;
+   // keyDIAG = KEY_F7;
 }
 
 
@@ -989,8 +951,8 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
    //    ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1),
    //                           InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1, mode)));
 
-#define BINDING(enumVal, b, saveIt, d)  \
-      if(saveIt)                                                                                                                    \
+#define BINDING(enumVal, b, savedInIni, d, e, f)  \
+      if(savedInIni)                                                                                                                    \
          ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::enumVal),                                        \
                                 InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::enumVal, mode))); 
     BINDING_TABLE

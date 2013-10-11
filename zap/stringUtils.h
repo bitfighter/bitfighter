@@ -138,7 +138,9 @@ string toString(const string &val);
 string toString(S32 val);                
 string toString(DisplayMode displayMode);
 string toString(YesNo yesNo);            
-string toString(RelAbs relAbs);          
+string toString(RelAbs relAbs);  
+
+bool isPrintable(char c);
 
 
 };

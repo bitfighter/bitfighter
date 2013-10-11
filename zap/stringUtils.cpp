@@ -816,5 +816,10 @@ string toString(RelAbs relAbs)           { return relAbs == Relative ? "Relative
 string toString(DisplayMode displayMode) { return displayModeToString(displayMode);             }
 
 
+bool isPrintable(char c)
+{
+   return c >= 32 && c <= 126;
+}
+
 };
 

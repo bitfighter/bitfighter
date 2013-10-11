@@ -26,7 +26,7 @@
 #include "InputCode.h"
 #include "GameSettings.h"        // For access to UseJoystickNumber static
 
-#include "stringUtils.h"         // For itos
+#include "stringUtils.h"         // For itos, isPrintable
 
 #include "tnlLog.h"              // For logprintf
 
@@ -55,46 +55,20 @@ BindingSet::BindingSet()
 {
    // These bindings will be overwritten by config::setDefaultKeyBindings()...
    // we provide default values here just for the sake of sanity.  And testing.
+   // Sanity and testing.  And just because.  Sanity, testing, and just because.
    // Also remember that we have multiple BindingSets (one for keyboard, one for
    // joystick, for example), so these defaults may not even apply in all cases.
-   inputSELWEAP1     = KEY_1;
-   inputSELWEAP2     = KEY_2;
-   inputSELWEAP3     = KEY_3;
-   inputADVWEAP      = KEY_E;
-   inputADVWEAP2     = MOUSE_WHEEL_UP;
-   inputPREVWEAP     = MOUSE_WHEEL_DOWN;
-   inputCMDRMAP      = KEY_C;
-   inputTEAMCHAT     = KEY_T;
-   inputGLOBCHAT     = KEY_G;
-   inputQUICKCHAT    = KEY_V;
-   inputCMDCHAT      = KEY_SLASH;
-   inputLOADOUT      = KEY_Z;
-   inputMOD1         = KEY_SPACE;
-   inputMOD2         = MOUSE_RIGHT;
-   inputFIRE         = MOUSE_LEFT;
-   inputDROPITEM     = KEY_B;
-   inputTOGVOICE     = KEY_R;
-   inputUP           = KEY_W;
-   inputDOWN         = KEY_S;
-   inputLEFT         = KEY_A;
-   inputRIGHT        = KEY_D;
-   inputSCRBRD       = KEY_TAB;
-   inputTOGGLERATING = KEY_EQUALS;
-   inputMISSION      = KEY_F2;      // Show current mission info
 
-   // These are not currently overwridden, so what we set here is used in the game
-   keyHELP         = KEY_F1;        // Display help
-   keyOUTGAMECHAT  = KEY_F5;        // Out of game chat
-   keyFPS          = KEY_F6;        // Show FPS display
-   keyDIAG         = KEY_F7;        // Show diagnostic overlay
-                   
-   keyLoadPreset1  = KEY_ALT_1;
-   keyLoadPreset2  = KEY_ALT_2;
-   keyLoadPreset3  = KEY_ALT_3;
-                   
-   keySavePreset1  = KEY_CTRL_1;
-   keySavePreset2  = KEY_CTRL_2;
-   keySavePreset3  = KEY_CTRL_3;
+
+   // Generates a block of code that looks like this:
+   // inputSELWEAP1 = KEY_1;
+   // inputSELWEAP2 = KEY_2;
+   // ...
+
+#define BINDING(a, b, c, memberName, defaultKeyboardBinding, f)  memberName = defaultKeyboardBinding;
+    BINDING_TABLE
+#undef BINDING
+
 }
 
 
@@ -107,7 +81,7 @@ BindingSet::~BindingSet()
 
 InputCode BindingSet::getBinding(InputCodeManager::BindingNameEnum bindingName) const
 {
-   // This funny thing produces a block of code that looks like this:
+   // Produces a block of code that looks like this:
    // if(false) { }
    // else if(bindingName == InputCodeManager::BINDING_SELWEAP1) return inputSELWEAP1;
    // else if...
@@ -115,7 +89,7 @@ InputCode BindingSet::getBinding(InputCodeManager::BindingNameEnum bindingName) 
    // return KEY_NONE;
 
     if(false) { }     // Dummy conditional to let us use else if below
-#define BINDING(enumName, b, c, memberName) else if(bindingName == InputCodeManager::enumName) return memberName;
+#define BINDING(enumName, b, c, memberName, e, f) else if(bindingName == InputCodeManager::enumName) return memberName;
     BINDING_TABLE
 #undef BINDING
 
@@ -127,14 +101,14 @@ InputCode BindingSet::getBinding(InputCodeManager::BindingNameEnum bindingName) 
 
 void BindingSet::setBinding(InputCodeManager::BindingNameEnum bindingName, InputCode key)
 {
-   // This funny thing produces a block of code that looks like this:
+   // Produces a block of code that looks like this:
    // if(false) { }
    // else if(bindingName == InputCodeManager::BINDING_SELWEAP1) inputSELWEAP1 = key;
    // else if...
    // else TNLAssert(false);
 
    if(false) { }     // Dummy conditional to let us use else if below
-#define BINDING(enumName, b, c, memberName) else if(bindingName == InputCodeManager::enumName) memberName = key;
+#define BINDING(enumName, b, c, memberName, e, f) else if(bindingName == InputCodeManager::enumName) memberName = key;
     BINDING_TABLE
 #undef BINDING
    else 
@@ -142,30 +116,32 @@ void BindingSet::setBinding(InputCodeManager::BindingNameEnum bindingName, Input
 }
 
 
+// Return true if any bound keys are explicitly mapped to the numeric keypad
 bool BindingSet::hasKeypad()
 {
+   // Generates a statement that looks like:
+   // return InputCodeManager::isKeypadKey(inputSELWEAP1) || 
+   //        InputCodeManager::isKeypadKey(inputSELWEAP2) || 
+   //        ...
+   //        false;
    return 
-      InputCodeManager::isKeypadKey(inputSELWEAP1)  || InputCodeManager::isKeypadKey(inputSELWEAP2)     || InputCodeManager::isKeypadKey(inputSELWEAP3) ||
-      InputCodeManager::isKeypadKey(inputADVWEAP)   || InputCodeManager::isKeypadKey(inputCMDRMAP)      || InputCodeManager::isKeypadKey(inputTEAMCHAT) ||
-      InputCodeManager::isKeypadKey(inputGLOBCHAT)  || InputCodeManager::isKeypadKey(inputQUICKCHAT)    || InputCodeManager::isKeypadKey(inputCMDCHAT)  ||
-      InputCodeManager::isKeypadKey(inputLOADOUT)   || InputCodeManager::isKeypadKey(inputMOD1)         || InputCodeManager::isKeypadKey(inputMOD2)     ||
-      InputCodeManager::isKeypadKey(inputFIRE)      || InputCodeManager::isKeypadKey(inputDROPITEM)     || InputCodeManager::isKeypadKey(inputTOGVOICE) ||
-      InputCodeManager::isKeypadKey(inputUP)        || InputCodeManager::isKeypadKey(inputDOWN)         || InputCodeManager::isKeypadKey(inputLEFT)     ||
-      InputCodeManager::isKeypadKey(inputRIGHT)     || InputCodeManager::isKeypadKey(inputSCRBRD)       || InputCodeManager::isKeypadKey(keyHELP)       ||
-      InputCodeManager::isKeypadKey(keyDIAG)        || InputCodeManager::isKeypadKey(inputMISSION)      || InputCodeManager::isKeypadKey(keyFPS)        ||
-      InputCodeManager::isKeypadKey(keyOUTGAMECHAT) || InputCodeManager::isKeypadKey(inputTOGGLERATING); 
+#define BINDING(a, b, c, memberName, e, f) InputCodeManager::isKeypadKey(memberName) ||
+    BINDING_TABLE
+#undef BINDING
+    false;
 }
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
+// Generates an array of bindingNames
 static const string BindingNames[] = {
-#define BINDING(a, bindingName, c, d) bindingName, 
+#define BINDING(a, bindingName, c, d, e, f) bindingName, 
     BINDING_TABLE
 #undef BINDING
 };
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -320,13 +296,6 @@ bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2, InputCode m
       }
 
    return foundCount == 3;
-}
-
-
-// Not static -- used externally
-bool isPrintable(char c)
-{
-   return c >= 32 && c <= 126;
 }
 
 
