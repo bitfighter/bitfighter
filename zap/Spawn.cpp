@@ -322,11 +322,10 @@ void ItemSpawn::onAddedToGame(Game *game)
 
 void ItemSpawn::idle(IdleCallPath path)
 {
-   // Only on server
-   if(path != BfObject::ServerIdleMainLoop)
-      return;
+   bool triggered = mTimer.update(mCurrentMove.time);
 
-   if(mTimer.update(mCurrentMove.time))
+   // Only spawn on server
+   if(triggered && path == BfObject::ServerIdleMainLoop)
       spawn();
 }
 
@@ -458,6 +457,12 @@ AsteroidSpawn::~AsteroidSpawn()
 }
 
 
+void AsteroidSpawn::onGhostAvailable(GhostConnection *theConnection)
+{
+   s2cSetTimeUntilSpawn(mTimer.getCurrent());
+}
+
+
 void AsteroidSpawn::initialize()
 {
    mNetFlags.set(Ghostable);   // So we can render on the client
@@ -486,6 +491,16 @@ S32 AsteroidSpawn::getDefaultRespawnTime()
 }
 
 
+void AsteroidSpawn::setRespawnTime(S32 spawnTime)
+{
+   Parent::setRespawnTime(spawnTime);
+
+   // let clients know about the new spawn time
+   if(!isGhost())
+      s2cSetTimeUntilSpawn(mTimer.getCurrent());
+}
+
+
 void AsteroidSpawn::spawn()
 {
    Parent::spawn();
@@ -499,6 +514,7 @@ void AsteroidSpawn::spawn()
    asteroid->setPosAng(getPos(), ang);
 
    asteroid->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+   s2cSetTimeUntilSpawn(mTimer.getCurrent());
 }
 
 
@@ -532,9 +548,7 @@ void AsteroidSpawn::renderLayer(S32 layerIndex)
    if(layerIndex != -1)
       return;
 
-   S32 time = getGame()->getRenderTime();
-
-   renderAsteroidSpawn(getPos(), time);
+   renderAsteroidSpawn(getPos(), mTimer.getCurrent());
 #endif
 }
 
@@ -554,6 +568,12 @@ void AsteroidSpawn::renderDock()
 #endif
 }
 
+
+TNL_IMPLEMENT_NETOBJECT_RPC(AsteroidSpawn, s2cSetTimeUntilSpawn, (S32 millis), (millis),
+                            NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
+{
+   mTimer.reset(millis);
+}
 
 /////
 // Lua interface

@@ -52,7 +52,7 @@ protected:
       InitialMask     = Parent::FirstFreeMask << 0,
    };
 
-   void setRespawnTime(S32 time);
+   virtual void setRespawnTime(S32 time);
 
 public:
    AbstractSpawn(const Point &pos = Point(), S32 time = 0); // Constructor
@@ -180,6 +180,8 @@ public:
    explicit AsteroidSpawn(lua_State *L);                                        // Lua constructor
    virtual ~AsteroidSpawn();
 
+   virtual void onGhostAvailable(GhostConnection *theConnection);
+
    AsteroidSpawn *clone() const;
 
    const char *getEditorHelpString();
@@ -191,6 +193,7 @@ public:
 
    S32 getDefaultRespawnTime();
 
+   virtual void setRespawnTime(S32 spawnTime);
    void spawn();
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
@@ -201,6 +204,7 @@ public:
    void renderDock();
 
    TNL_DECLARE_CLASS(AsteroidSpawn);
+   TNL_DECLARE_RPC(s2cSetTimeUntilSpawn, (S32 millis));
 
 
    ///// Lua interface

@@ -2296,9 +2296,7 @@ void renderAsteroidSpawn(const Point &pos, S32 time)
    static const S32 period = 4096;  // Power of 2 please
    static const F32 invPeriod = 1 / F32(period);
 
-   F32 harmonicTime = sin(FloatTau * (F32(time & (period - 1)) * invPeriod));
-
-   F32 alpha = (harmonicTime + 1) * .333f;
+   F32 alpha = max(0.0, 1.0 - time * invPeriod);
 
    renderAsteroid(pos, 2, .1f, &Colors::green, alpha);
 
