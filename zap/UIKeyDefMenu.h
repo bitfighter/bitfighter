@@ -64,7 +64,6 @@ class KeyDefMenuUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 private:
-   S32 itemsPerCol;           // Approx. half of the items we have
    Timer errorMsgTimer;
    string errorMsg;
    static const S32 errorMsgDisplayTime = 6000;

@@ -115,8 +115,6 @@ void KeyDefMenuUserInterface::onActivate()
 
    if(inputMode == InputModeJoystick)
    {
-      itemsPerCol = 7;           // Approx. half of the items we have
-
       // Col 1
       menuItems.push_back(KeyDefMenuItem("Advance Weapon",        1, InputCodeManager::BINDING_ADVWEAP, 
                                          "Toggles your weapons, use as an alternative to Select Weapon commands"));
@@ -151,8 +149,6 @@ void KeyDefMenuUserInterface::onActivate()
    }
    else     // Keyboard mode
    {
-      itemsPerCol = 9;           // Approx. half of the items we have
-
       // Col 1
       menuItems.push_back(KeyDefMenuItem("Ship Up",           1, InputCodeManager::BINDING_UP, ""));
       menuItems.push_back(KeyDefMenuItem("Ship Down",         1, InputCodeManager::BINDING_DOWN, ""));
