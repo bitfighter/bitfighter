@@ -70,6 +70,8 @@ public:
    SymbolShape(S32 width = 0, S32 height = 0, const Color *color = NULL);
    virtual ~SymbolShape();
 
+   void render(F32 x, F32 y, Alignment alignment) const;
+   void render(F32 x, F32 y) const;
    virtual void render(const Point &pos) const = 0;
 
    virtual S32 getWidth() const;
@@ -88,6 +90,8 @@ class SymbolBlank : public SymbolShape
    typedef SymbolShape Parent;
 
 public:
+   using Parent::render;      // http://stackoverflow.com/questions/72010/c-overload-resolution
+
    SymbolBlank(S32 width = -1, S32 height = -1);   // Constructor
    virtual ~SymbolBlank();
 
@@ -103,6 +107,8 @@ private:
    S32 mVertOffset;
 
 public:
+   using Parent::render;
+
    SymbolHorizLine(S32 width, S32 height, const Color *color);                   // Constructor
    SymbolHorizLine(S32 width, S32 vertOffset, S32 height, const Color *color);   // Constructor
    virtual ~SymbolHorizLine();
@@ -119,6 +125,8 @@ protected:
    S32 mRadius;
 
 public:
+   using Parent::render;
+
    SymbolRoundedRect(S32 width, S32 height, S32 radius, const Color *color);   // Constructor
    virtual ~SymbolRoundedRect();
 
@@ -132,6 +140,8 @@ class SymbolSmallRoundedRect : public SymbolRoundedRect
    typedef SymbolRoundedRect Parent;
 
 public:
+   using Parent::render;
+
    SymbolSmallRoundedRect(S32 width, S32 height, S32 radius, const Color *color);   // Constructor
    virtual ~SymbolSmallRoundedRect();
 
@@ -144,6 +154,8 @@ class SymbolHorizEllipse : public SymbolShape
    typedef SymbolShape Parent;
 
 public:
+   using Parent::render;
+
    SymbolHorizEllipse(S32 width, S32 height, const Color *color); // Constructor
    virtual ~SymbolHorizEllipse();
 
@@ -156,6 +168,8 @@ class SymbolRightTriangle : public SymbolShape
    typedef SymbolShape Parent;
 
 public:
+   using Parent::render;
+
    SymbolRightTriangle(S32 width, const Color *color); // Constructor
    virtual ~SymbolRightTriangle();
 
@@ -168,6 +182,8 @@ class SymbolCircle : public SymbolShape
    typedef SymbolShape Parent;
 
 public:
+   using Parent::render;
+
    SymbolCircle(S32 radius, const Color *color); // Constructor
    virtual ~SymbolCircle();
 
@@ -186,10 +202,12 @@ private:
    Joystick::ButtonSymbol mGlyph;
 
 public:
-      SymbolButtonSymbol(Joystick::ButtonSymbol glyph);
-      ~SymbolButtonSymbol();
+   using Parent::render;
 
-      void render(const Point &pos) const;
+   SymbolButtonSymbol(Joystick::ButtonSymbol glyph);
+   ~SymbolButtonSymbol();
+
+   void render(const Point &pos) const;
 };
 
 
@@ -201,6 +219,8 @@ protected:
    F32 mSizeFactor;
 
 public:
+   using Parent::render;
+
    SymbolGear(S32 fontSize);  // Constructor, fontSize is size of surrounding text
    virtual ~SymbolGear();
 
@@ -213,6 +233,8 @@ class SymbolGoal : public SymbolGear
    typedef SymbolGear Parent;
 
 public:
+   using Parent::render;
+
    SymbolGoal(S32 fontSize);  // Constructor, fontSize is size of surrounding text
    virtual ~SymbolGoal();
 
@@ -225,6 +247,8 @@ class SymbolBullet : public SymbolShape
    typedef SymbolShape Parent;
 
 public:
+   using Parent::render;
+
    SymbolBullet();            // Constructor
    virtual ~SymbolBullet();
 
@@ -242,6 +266,8 @@ protected:
    S32 mFontSize;
 
 public:
+   using Parent::render;
+
    SymbolText(const string &text, S32 fontSize, FontContext context, const Color *color = NULL);
    SymbolText(const string &text, S32 fontSize, FontContext context, const Point &labelOffset, const Color *color = NULL);
    virtual ~SymbolText();
@@ -258,6 +284,8 @@ class SymbolKey : public SymbolText
    typedef SymbolText Parent;
 
 public:
+   using Parent::render;
+
    SymbolKey(const string &text, const Color *color = NULL);
    virtual ~SymbolKey();
 
@@ -271,6 +299,8 @@ class SymbolUnknown : public SymbolKey
    typedef SymbolKey Parent;
 
 public:
+   using Parent::render;
+
    SymbolUnknown(const Color *color);
    virtual ~SymbolUnknown();
 };

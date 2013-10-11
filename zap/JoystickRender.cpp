@@ -135,6 +135,7 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    }
 }
 
+static S32 SymbolPadding = 6;       // Just some padding we throw around our symbols to make them look hot
 
 S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode inputCode)
 {
@@ -150,17 +151,17 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
 
    switch(buttonShape)
    {
-      case Joystick::ButtonShapeRound:             return buttonHalfHeight * 2;
-      case Joystick::ButtonShapeRect:              return rectButtonWidth;
-      case Joystick::ButtonShapeSmallRect:         return smallRectButtonWidth;
-      case Joystick::ButtonShapeRoundedRect:       return rectButtonWidth;
-      case Joystick::ButtonShapeSmallRoundedRect:  return smallRectButtonWidth;
-      case Joystick::ButtonShapeHorizEllipse:      return horizEllipseButtonRadiusX * 2;
-      case Joystick::ButtonShapeRightTriangle:     return rectButtonWidth;
-      default:                                     return rectButtonWidth;
+      case Joystick::ButtonShapeRound:             return buttonHalfHeight * 2          + SymbolPadding;
+      case Joystick::ButtonShapeRect:              return rectButtonWidth               + SymbolPadding;
+      case Joystick::ButtonShapeSmallRect:         return smallRectButtonWidth          + SymbolPadding;
+      case Joystick::ButtonShapeRoundedRect:       return rectButtonWidth               + SymbolPadding;
+      case Joystick::ButtonShapeSmallRoundedRect:  return smallRectButtonWidth          + SymbolPadding;
+      case Joystick::ButtonShapeHorizEllipse:      return horizEllipseButtonRadiusX * 2 + SymbolPadding;
+      case Joystick::ButtonShapeRightTriangle:     return rectButtonWidth               + SymbolPadding;
+      default:                                     return rectButtonWidth               + SymbolPadding;
    }
 
-   return -1;     // Kill a useless warning
+   return -1;     // Kill a useless warning -- can never get here!
 }
 
 // Thinking...
@@ -181,13 +182,13 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
 
 
 // Renders something resembling a controller button or keyboard key
-// Note:  buttons are with the given x coordinate as their center
+// Note:  buttons are with the given x coordinate as their _center_
 void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, InputCode inputCode, bool activated)
 {
    // Render keyboard keys, just in case
    if(!InputCodeManager::isControllerButton(inputCode))
    {
-      SymbolKey(InputCodeManager::inputCodeToString(inputCode)).render(Point(x, y + 17));
+      SymbolKey(InputCodeManager::inputCodeToString(inputCode)).render(x, y + 17, AlignmentCenter);
       return;
    }
 

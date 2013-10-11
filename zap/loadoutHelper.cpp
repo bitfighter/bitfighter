@@ -72,8 +72,8 @@ static const OverlayMenuItem loadoutWeaponMenuItems[] = {
 LoadoutHelper::LoadoutHelper()
 {
    mCurrentIndex = 0;
-   mItemWidth = max(getMaxItemWidth(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems)),
-                    getMaxItemWidth(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems)));
+   mTextPortionOfItemWidth = max(getMaxItemWidth(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems)),
+                                 getMaxItemWidth(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems)));
 }
 
 // Destructor

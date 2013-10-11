@@ -736,6 +736,22 @@ SymbolShape::~SymbolShape()
 }
 
 
+void SymbolShape::render(F32 x, F32 y) const
+{
+   render(Point(x,y));
+}
+
+
+void SymbolShape::render(F32 x, F32 y, Alignment alignment) const
+{
+   if(alignment == AlignmentLeft)
+      x += mWidth / 2;
+
+   render(Point(x, y));
+}
+
+
+
 S32 SymbolShape::getWidth() const
 {
    return mWidth;
@@ -1205,6 +1221,7 @@ bool SymbolText::getHasGap() const
 static S32 Margin = 3;              // Buffer within key around text
 static S32 Gap = 3;                 // Distance between keys
 static S32 TotalHeight = KeyFontSize + 2 * Margin;
+static S32 SymbolPadding = 6;       // Just some padding we throw around our symbols to make them look hot
 
 
 static S32 getKeyWidth(const string &text, S32 height)
@@ -1215,7 +1232,7 @@ static S32 getKeyWidth(const string &text, S32 height)
    else
       width = getStringWidth(KeyContext, KeyFontSize, text.c_str()) + Margin * 2;
 
-   return max(width, height) + BorderDecorationVertCenteringOffset * Gap;
+   return max(width, height) + SymbolPadding;
 }
 
 

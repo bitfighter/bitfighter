@@ -71,7 +71,7 @@ Vector<QuickChatNode> QuickChatHelper::nodeTree;      // Holds our tree of Quick
 QuickChatHelper::QuickChatHelper()
 {
    mCurNode = 0;
-   mItemWidth = -1;
+   mTextPortionOfItemWidth = -1;
    mMenuItems1IsCurrent = true;
 }
 
@@ -130,13 +130,13 @@ void QuickChatHelper::onActivated()
    updateChatMenuItems(0);
 
   
-   if(mItemWidth == -1)
+   if(mTextPortionOfItemWidth == -1)
    {
       for(S32 i = 0; i < nodeTree.size(); i++)
       {
          S32 width = getStringWidth(MENU_FONT_SIZE, nodeTree[i].caption.c_str());
-         if(width > mItemWidth)
-            mItemWidth = width;
+         if(width > mTextPortionOfItemWidth)
+            mTextPortionOfItemWidth = width;
       }
    }
 }

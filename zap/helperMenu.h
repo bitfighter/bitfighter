@@ -105,7 +105,7 @@ protected:
    static const S32 MENU_PADDING          =  9;    // Padding around outer edge of overlay
    static const S32 TITLE_FONT_SIZE       = 20;    // Size of title of menu
 
-   S32 mItemWidth;    // Calculated width of menu items
+   S32 mTextPortionOfItemWidth;    // Calculated width of the text portion of the menu items
 
 public:
    HelperMenu();

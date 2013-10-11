@@ -148,10 +148,11 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    FontManager::pushFontContext(OverlayMenuContext);
 
    // First do a dry run with the menu items to get their indent level (draw == false).  Later
-   // we'll draw them for real.
+   // we'll draw them for real.  This will return the left edge of where the text portion of the menu items
+   // should be rendered.
    S32 itemIndent = drawMenuItems(false, items, count, 0, menuBottom, true, hasLegend);
 
-   S32 interiorEdge = mItemWidth + itemIndent + MENU_PADDING;
+   S32 interiorEdge = mTextPortionOfItemWidth + itemIndent + MENU_PADDING;
 
    S32 grayLineLeft   = 20;
    S32 grayLineRight  = interiorEdge - 20;
@@ -214,13 +215,31 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
    S32 oldHeight = (MENU_FONT_SIZE + MENU_FONT_SPACING) * mOldCount;
 
    // Determine whether to show keys or joystick buttons on menu
-   InputMode inputMode      = getGame()->getInputMode();
+   InputMode inputMode = getGame()->getInputMode();
+   U32 joystickIndex   = Joystick::SelectedPresetIndex;
 
-   S32 itemIndent = 20;
+   // For testing purposes -- toggles between keyboard and joystick renders
+   //if(Platform::getRealMilliseconds() % 2000 > 1000)
+   //   inputMode = InputModeJoystick;
 
-   // If draw is false, this was just a dry run to get itemIndent
+   S32 buttonWidth = 0;
+   for(S32 i = 0; i < count; i++)
+   {
+      if(!items[i].showOnMenu)
+         continue;
+
+      InputCode code = (inputMode == InputModeJoystick) ? items[i].button : items[i].key;
+      S32 w = JoystickRender::getControllerButtonRenderedSize(joystickIndex, code);
+
+      buttonWidth = MAX(buttonWidth, w);
+   }
+
+   S32 leftMargin = 8;
+   S32 gap = 9;      // Space between button/key rendering and menu item
+
+   // If draw is false, this was just a dry run to get itemIndent.  This is the left edge of where the text of items is drawn.
    if(!draw)
-      return itemIndent + 19;
+      return leftMargin + buttonWidth + gap;
 
    S32 yPos;
 
@@ -232,8 +251,9 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
                                       top, oldHeight, height);
 
    // Don't render if there is no point!
-   if(top == NO_RENDER)
-      return itemIndent;      // Or whatever...
+   TNLAssert(top != NO_RENDER, "Better uncomment the following!");   // Added 12-Oct-2013 by watusimoto... remove if never trips
+   //if(top == NO_RENDER)
+   //   return leftMargin + buttonWidth + gap; 
 
    yPos += 2;    // Aesthetics
 
@@ -242,31 +262,24 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
       // Don't show an option that shouldn't be shown!
       if(!items[i].showOnMenu)
          continue;
+
+      InputCode code = (inputMode == InputModeJoystick) ? items[i].button : items[i].key;
+
+      // Render key in white, or, if there is a legend, in the color of the adjacent item
+      glColor(renderKeysWithItemColor ? items[i].itemColor : &Colors::white); 
       
-      // Draw key controls for selecting the object to be created
-      U32 joystickIndex = Joystick::SelectedPresetIndex;
-
-      if(inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
-         JoystickRender::renderControllerButton((F32)itemIndent, (F32)yPos, 
-                                                joystickIndex, items[i].button, false);
-
-      else
-      {
-         // Render key in white, or, if there is a legend, in the color of the adjacent item
-         glColor(renderKeysWithItemColor ? items[i].itemColor : &Colors::white); 
-         JoystickRender::renderControllerButton((F32)itemIndent, (F32)yPos, 
-                                                joystickIndex, items[i].key, false);
-      }
+      // Need to add buttonWidth / 2 because renderControllerButton() centers on passed coords
+      JoystickRender::renderControllerButton(leftMargin + buttonWidth / 2, (F32)yPos - 1, joystickIndex, code, false); 
 
       glColor(items[i].itemColor);  
 
-      S32 x = drawStringAndGetWidth(itemIndent, yPos, MENU_FONT_SIZE, items[i].name); 
+      S32 textWidth = drawStringAndGetWidth(leftMargin + buttonWidth + gap, yPos, MENU_FONT_SIZE, items[i].name); 
 
       // Render help string, if one is available
       if(strcmp(items[i].help, "") != 0)
       {
          glColor(items[i].helpColor);    
-         drawString(itemIndent + x + 5, yPos, MENU_FONT_SIZE, items[i].help);
+         drawString(leftMargin + buttonWidth + gap + textWidth + gap, yPos, MENU_FONT_SIZE, items[i].help);
       }
 
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
@@ -274,7 +287,7 @@ S32 HelperMenu::drawMenuItems(bool draw, const OverlayMenuItem *items, S32 count
 
    doneRendering();
 
-   return itemIndent;
+   return leftMargin + buttonWidth + gap;    // Or whatever... nothing uses this
 }
 
 
