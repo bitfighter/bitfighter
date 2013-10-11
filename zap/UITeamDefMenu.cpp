@@ -259,12 +259,8 @@ void TeamDefUserInterface::onTextInput(char ascii)
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    if(mEditing)
-   {
       if(isPrintable(ascii))
-      {
          ui->getTeam(selectedIndex)->getLineEditor()->addChar(ascii);
-      }
-   }
 }
 
 
