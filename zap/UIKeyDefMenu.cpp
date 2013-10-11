@@ -86,7 +86,7 @@ KeyDefMenuUserInterface::~KeyDefMenuUserInterface()
 static S32 offset = 5; 
 static S32 yStart = UserInterface::vertMargin + 115;
 static S32 height = 30; 
-static S32 firstItemInCol2 = 0;     // Set later
+static S32 firstItemInCol2 = 0;     // Set in onActivate()
 
 
 void KeyDefMenuUserInterface::onActivate()
