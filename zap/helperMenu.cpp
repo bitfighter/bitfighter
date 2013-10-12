@@ -94,6 +94,10 @@ void HelperMenu::exitHelper()
 }
 
 
+static S32 LeftMargin = 8;          // Left margin where controller symbols/keys are rendered
+static S32 ButtonLabelGap = 9;      // Space between button/key rendering and menu item
+
+
 extern void drawVertLine  (S32 x,  S32 y1, S32 y2);
 extern void drawHorizLine (S32 x1, S32 x2, S32 y );
 
@@ -147,8 +151,8 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    FontManager::pushFontContext(OverlayMenuContext);
 
-   // Get n the left edge of where the text portion of the menu items should be rendered
-   S32 itemIndent = calcLeftMarginForTextPortionOfEntry(items, count);
+   // Get the left edge of where the text portion of the menu items should be rendered
+   S32 itemIndent = calcLeftMarginForTextPortionOfEntry(items, count) + LeftMargin + ButtonLabelGap;
 
    S32 interiorEdge = mTextPortionOfItemWidth + itemIndent + MENU_PADDING;
 
@@ -244,9 +248,6 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 
    S32 buttonWidth = calcLeftMarginForTextPortionOfEntry(items, count);
 
-   S32 leftMargin = 8;
-   S32 gap = 9;      // Space between button/key rendering and menu item
-
    S32 yPos;
 
    if(newItems)      // Draw the new items we're transitioning to
@@ -270,17 +271,17 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
       glColor(renderKeysWithItemColor ? items[i].itemColor : &Colors::white); 
       
       // Need to add buttonWidth / 2 because renderControllerButton() centers on passed coords
-      JoystickRender::renderControllerButton(leftMargin + buttonWidth / 2, (F32)yPos - 1, Joystick::SelectedPresetIndex, code, false); 
+      JoystickRender::renderControllerButton(LeftMargin + buttonWidth / 2, (F32)yPos - 1, Joystick::SelectedPresetIndex, code, false); 
 
       glColor(items[i].itemColor);  
 
-      S32 textWidth = drawStringAndGetWidth(leftMargin + buttonWidth + gap, yPos, MENU_FONT_SIZE, items[i].name); 
+      S32 textWidth = drawStringAndGetWidth(LeftMargin + buttonWidth + ButtonLabelGap, yPos, MENU_FONT_SIZE, items[i].name); 
 
       // Render help string, if one is available
       if(strcmp(items[i].help, "") != 0)
       {
          glColor(items[i].helpColor);    
-         drawString(leftMargin + buttonWidth + gap + textWidth + gap, yPos, MENU_FONT_SIZE, items[i].help);
+         drawString(LeftMargin + buttonWidth + ButtonLabelGap + textWidth + ButtonLabelGap, yPos, MENU_FONT_SIZE, items[i].help);
       }
 
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
