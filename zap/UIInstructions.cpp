@@ -488,6 +488,7 @@ void InstructionsUserInterface::initPageHeaders()
    InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
 
    Vector<SymbolShapePtr> symbols;
+   mPageHeaders.clear();
 
    symbols.clear();
    SymbolString::symbolParse(inputCodeManager, "Use [[Tab]] to expand a partially typed command", 
