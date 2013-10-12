@@ -1445,10 +1445,10 @@ void GameType::updateShipLoadout(BfObject *shipObject)
 }
 
 
-// Set the "on-deck" loadout for a ship, and make it effective immediately if we're in a loadout zone
+// Make loadout effective immediately if we're in a loadout zone
 // clientInfo already has the loadout; we only get here from ClientInfo::requestLoadout
 // Server only, called in direct response to request from client via c2sRequestLoadout()
-void GameType::clientRequestLoadout(ClientInfo *clientInfo, const LoadoutTracker &loadout)
+void GameType::makeRequestedLoadoutActiveIfShipIsInLoadoutZone(ClientInfo *clientInfo, const LoadoutTracker &loadout)
 {
    Ship *ship = clientInfo->getShip();
 

@@ -565,7 +565,7 @@ void ClientInfo::requestLoadout(const LoadoutTracker &loadout)
    GameType *gt = mGame->getGameType();
 
    if(gt)
-      gt->clientRequestLoadout(this, loadout);    // This will set loadout if ship is in loadout zone
+      gt->makeRequestedLoadoutActiveIfShipIsInLoadoutZone(this, loadout);
 }
 
 
