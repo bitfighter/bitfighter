@@ -349,7 +349,7 @@ TEST(SpawnDelayTest, SpawnDelayTests)
 
    // Scenario 9 -- Player is shown (new) levelup screen while they are idle due to idle command
 
-   // Scenario 9 -- Player is shown (new) levelup screen while they are in penlaty phase of idle command
+   // Scenario 9 -- Player is shown (new) levelup screen while they are in penalty phase of idle command
 }
 
 
