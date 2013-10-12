@@ -984,15 +984,15 @@ void Game::onReadLevelCreditsParam(S32 argc, const char **argv)
 
 
 // Only used during level load process...  actually, used at all?  If so, should be combined with similar code in gameType
-// Not used during normal game load... perhaps by lua loader?
-void Game::setGameTime(F32 time)
+// Not used during normal game load... used by tests and lua_setGameTime()
+void Game::setGameTime(F32 timeInMinutes)
 {
    GameType *gt = getGameType();
 
    TNLAssert(gt, "Null gametype!");
 
    if(gt)
-      gt->setGameTime(time * 60);
+      gt->setGameTime(timeInMinutes * 60);
 }
 
 

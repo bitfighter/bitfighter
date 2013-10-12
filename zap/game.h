@@ -377,7 +377,7 @@ public:
 
    virtual Ship *getLocalPlayerShip() const = 0;
 
-   void setGameTime(F32 time);                                          // Only used during level load process
+   void setGameTime(F32 timeInMinutes);      // Used by test and lua
 
    void addToDeleteList(BfObject *theObject, U32 delay);
 
