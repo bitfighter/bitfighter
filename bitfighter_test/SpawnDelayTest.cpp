@@ -4,6 +4,8 @@
 #include "../zap/ServerGame.h"
 #include "../zap/ClientGame.h"
 #include "../zap/ChatCommands.h"
+#include "../zap/UIGame.h"
+#include "../zap/UIManager.h"
 
 #include "gtest/gtest.h"
 
@@ -279,6 +281,54 @@ static void doScenario7(GamePair &gamePair)
 }
 
 
+// Scenario 11 -- Player is editing loadout when level changes --> TEST NOT COMPLETE!!!!
+static void doScenario11(GamePair &gamePair)
+{
+   ClientGame *clientGame = gamePair.client;
+   ServerGame *serverGame = gamePair.server;
+
+   serverGame->setGameTime(.5);     // 30 seconds
+
+   GameUserInterface *gameUI = clientGame->getUIManager()->getUI<GameUserInterface>();
+   ASSERT_FALSE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
+   gameUI->activateHelper(HelperMenu::LoadoutHelperType);
+   ASSERT_TRUE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
+
+   ASSERT_EQ("", serverGame->getClientInfo(0)->getOnDeckLoadout().toString());   // Prove there's no on deck loadout
+
+   // See static const OverlayMenuItem loadoutModuleMenuItems[] in loadoutHelper.cpp
+   gameUI->onKeyDown(KEY_1);  // Feed the UI some keys... like we're configuring a loadout!  First 2 modules...
+   gameUI->onKeyDown(KEY_3);
+   gameUI->onKeyDown(KEY_1);  // ...then 3 weapons
+   gameUI->onKeyDown(KEY_2); 
+   gameUI->onKeyDown(KEY_3);
+
+   ASSERT_FALSE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
+
+   gamePair.idle(10, 10);
+
+   // Check the on deck loadout on server -- does not get set on the client
+   ASSERT_EQ("Turbo,Repair,Phaser,Bouncer,Triple", serverGame->getClientInfo(0)->getOnDeckLoadout().toString());
+
+   gameUI->activateHelper(HelperMenu::LoadoutHelperType);
+   ASSERT_TRUE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
+
+   gamePair.idle(100, 350);        // Idle until game ends
+
+   gameUI->onKeyDown(KEY_1);  
+   gameUI->onKeyDown(KEY_4);
+   gameUI->onKeyDown(KEY_1);  
+   gameUI->onKeyDown(KEY_2); 
+   gameUI->onKeyDown(KEY_3);
+
+   ASSERT_FALSE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
+
+   gamePair.idle(10, 10);   
+   ASSERT_EQ("Turbo,Sensor,Phaser,Bouncer,Triple", serverGame->getClientInfo(0)->getOnDeckLoadout().toString());
+
+}
+
+
 // The spawnDelay mechansim is complex and interacts with other weird things like levelUp messages and server suspension
 TEST(SpawnDelayTest, SpawnDelayTests)
 {
@@ -337,19 +387,22 @@ TEST(SpawnDelayTest, SpawnDelayTests)
    }
 
    // Scenario 5 -- Player enters idle when in punishment delay period for pervious /idle command
-   doScenario5(gamePair);
+   doScenario5(gamePair);  // Not complete
 
    // Scenario 6 -- Player is shown a new levelup screen
-   doScenario6(gamePair);
+   doScenario6(gamePair);  // Not complete
 
    // Scenario 7 -- Player is shown a levelup screen they have already seen
-   doScenario7(gamePair);
+   doScenario7(gamePair);  // Not complete
 
    // Scenario 8 -- Player is shown (new) levelup screen while they are idle due to inaction
 
    // Scenario 9 -- Player is shown (new) levelup screen while they are idle due to idle command
 
-   // Scenario 9 -- Player is shown (new) levelup screen while they are in penalty phase of idle command
+   // Scenario 10 -- Player is shown (new) levelup screen while they are in penalty phase of idle command
+
+   // Scenario 11 -- Player is changing their loadout when the level changes.  This triggers a delayed spawn.
+   doScenario11(gamePair);
 }
 
 

@@ -185,7 +185,8 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       for(S32 i = 0; i < ShipWeaponCount; i++)
          loadout.setWeapon(i, WeaponType(loadoutWeaponMenuItems[mWeapon[i]].itemIndex));
 
-      mLoadoutChanged = !getGame()->getLocalPlayerShip()->isLoadoutSameAsCurrent(loadout);
+      Ship *ship = getGame()->getLocalPlayerShip();      // Can be NULL if game has ended while we're here
+      mLoadoutChanged = !ship || !getGame()->getLocalPlayerShip()->isLoadoutSameAsCurrent(loadout);
 
       GameConnection *conn = getGame()->getConnectionToServer();
 
