@@ -2695,7 +2695,14 @@ S32 Ship::lua_setLoadoutNow(lua_State *L)
    LoadoutTracker loadout = checkAndBuildLoadout(L, profile);
 
    if(getClientInfo()->isLoadoutValid(loadout, getGame()->getGameType()->isEngineerEnabled()))
+   {
+      // Set requested loadout so we don't revert if going to a loadout zone
+      // (this may set the loadout now if the ship is in a loadout zone)
+      getClientInfo()->requestLoadout(loadout);
+
+      // Set current loadout
       setLoadout(loadout);
+   }
    else
       throw LuaException("The loadout given is invalid");
 
