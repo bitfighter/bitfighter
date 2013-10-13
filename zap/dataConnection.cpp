@@ -363,7 +363,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    if(!goodOwnerPW && !goodAdminPW)
    {
       logprintf("Incorrect password!");
-      disconnect(ReasonBadLogin, "Incorrect pasword");
+      disconnect(ReasonBadLogin, "Incorrect password");
       return;
    }
 
