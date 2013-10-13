@@ -428,6 +428,7 @@ public:
    bool scoreboardIsVisible() const;
 
    void activateHelper(HelperMenu::HelperMenuType helperType, bool activatedWithChatCmd = false);  
+   bool isHelperActive(HelperMenu::HelperMenuType helperType) const;
    void exitHelper();
 
    void renderGameNormal();         // Render game in normal play mode

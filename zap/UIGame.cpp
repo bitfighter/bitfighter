@@ -1012,6 +1012,14 @@ void GameUserInterface::activateHelper(HelperMenu::HelperMenuType helperType, bo
 }
 
 
+// Used only for testing
+bool GameUserInterface::isHelperActive(HelperMenu::HelperMenuType helperType) const
+{
+   return mHelperManager.isHelperActive(helperType);
+}
+
+
+
 void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
 {
    mHelperManager.renderEngineeredItemDeploymentMarker(ship);
