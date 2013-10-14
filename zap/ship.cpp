@@ -1817,6 +1817,13 @@ WeaponType Ship::getActiveWeapon() const
 }
 
 
+// Used by tests
+string Ship::getLoadoutString() const
+{
+   return mLoadout.toString();
+}
+
+
 bool Ship::isModulePrimaryActive(ShipModule mod)
 {
    return mLoadout.isModulePrimaryActive(mod);

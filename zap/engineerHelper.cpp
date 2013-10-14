@@ -263,5 +263,18 @@ bool EngineerHelper::isChatDisabled() const
    return isMenuBeingDisplayed();
 }
 
+
+// For testing
+InputCode EngineerHelper::getInputCodeForOption(U32 index, bool keyBut) const
+{
+   for(S32 i = 0; i < ARRAYSIZE(engineerItemInfo); i++)
+   {
+      if(engineerItemInfo[i].itemIndex == index)
+         return keyBut ? engineerItemInfo[i].key : engineerItemInfo[i].button;
+   }
+
+   TNLAssert(false, "Index not found!");
+}
+
 };
 

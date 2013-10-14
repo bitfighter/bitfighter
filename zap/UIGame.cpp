@@ -1019,6 +1019,13 @@ bool GameUserInterface::isHelperActive(HelperMenu::HelperMenuType helperType) co
 }
 
 
+// Used only for testing
+const HelperMenu *GameUserInterface::getActiveHelper() const
+{
+   return mHelperManager.getActiveHelper();
+}
+
+
 
 void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
 {
@@ -1237,7 +1244,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       return true;
    }
 
-   if(mHelperManager.processInputCode(inputCode))   // Will return true if key was processed
+   if(mHelperManager.isHelperActive() && mHelperManager.processInputCode(inputCode))   // Will return true if key was processed
    {
       // Experimental, to keep ship from moving after entering a quick chat that has the same shortcut as a movement key
       InputCodeManager::setState(inputCode, false);
@@ -1357,7 +1364,6 @@ static void loadLoadoutPreset(ClientGame *game, S32 slot)
 
 bool checkInputCode(InputCode codeUserEntered, InputCode codeToActivateCommand)
 {
-   // Look for some common synonyms, like keypad_4 and 4
    return codeUserEntered == codeToActivateCommand;
 }
 

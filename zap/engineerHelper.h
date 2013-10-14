@@ -43,7 +43,6 @@ private:
    const char *getCancelMessage() const;
    S32 mSelectedIndex;
 
-   bool isMenuBeingDisplayed() const;
    void exitHelper();
 
 public:
@@ -61,6 +60,10 @@ public:
 
    bool isChatDisabled() const;
    S32 getAnimationTime() const;
+   InputCode getInputCodeForOption(U32 index, bool keyBut) const;  // For testing
+   bool isMenuBeingDisplayed() const;     // Used internally, public for testing
+
+
 };
 
 };

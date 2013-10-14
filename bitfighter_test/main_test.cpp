@@ -24,6 +24,8 @@
 #include "SDL.h"
 #include "../zap/VideoSystem.h"
 
+#include "../zap/UIGame.h"
+#include "../zap/UIManager.h"
 #include "../zap/UIEditorMenus.h"
 #include "../zap/UIMenus.h"
 #include "../zap/LoadoutIndicator.h"
@@ -31,8 +33,11 @@
 #include "../zap/GeomUtils.h"
 #include "../zap/stringUtils.h"
 
+#include "../zap/Event.h"
+
 #include "TestUtils.h"
 #include "LevelFilesForTesting.h"      // Contains sample levelcode for testing purposes
+#include "EventKeyDefs.h"              // One big ugly macro for defining a bunch of vars related to key input events
 
 #include "tnlNetObject.h"
 #include "tnlGhostConnection.h"
@@ -617,6 +622,63 @@ TEST_F(BfTest, ShipTests)
    ASSERT_TRUE(serverShip.isServerCopyOf(clientShip));   // Ships should be equal again
 }
 
+
+TEST_F(BfTest, EngineerTests)
+{
+   GamePair gamePair(getLevelCodeForTestingEngineer1()); // See def for description of level
+   ClientGame *clientGame       = gamePair.client;
+   ServerGame *serverGame       = gamePair.server;
+   GameSettings *clientSettings = clientGame->getSettings();
+   GameUserInterface *gameUI    = clientGame->getUIManager()->getUI<GameUserInterface>();
+
+   DEFINE_SDL_EVENTS(clientSettings);
+
+   // Idle for a while, let things settle
+   gamePair.idle(10, 5);
+
+   // Verify that engineer is enabled
+   ASSERT_TRUE(serverGame->getGameType()->isEngineerEnabled());
+   ASSERT_TRUE(clientGame->getGameType()->isEngineerEnabled());
+
+   ASSERT_TRUE(serverGame->getClientInfo(0)->getShip()->isInZone(LoadoutZoneTypeNumber)); // Check level is as we expected
+
+   // Add engineer to current loadout
+   ASSERT_FALSE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
+   gameUI->activateHelper(HelperMenu::LoadoutHelperType);
+   ASSERT_TRUE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
+
+   // See static const OverlayMenuItem loadoutModuleMenuItems[] in loadoutHelper.cpp
+   gameUI->onKeyDown(KEY_7);     gameUI->onKeyDown(KEY_3);                                // First 2 modules...
+   gameUI->onKeyDown(KEY_1);     gameUI->onKeyDown(KEY_2);     gameUI->onKeyDown(KEY_3);  // ...then 3 weapons
+
+   // On this level, the ship spawn is inside a loadout zone, so loadout should take effect immediately
+   gamePair.idle(10, 5);
+   ASSERT_EQ("Engineer,Repair,Phaser,Bouncer,Triple", serverGame->getClientInfo(0)->getShip()->getLoadoutString());
+   ASSERT_EQ("Engineer,Repair,Phaser,Bouncer,Triple", clientGame->getLocalPlayerShip()->getLoadoutString());
+
+   // Fly down to pick up resource item -- to get flying to work, need to create events at a very basic level
+   Point startPos = clientGame->getLocalPlayerShip()->getActualPos();
+   Event::onEvent(clientGame, &EventDownPressed);
+   gamePair.idle(100, 5);
+   Event::onEvent(clientGame, &EventDownReleased);
+   Point endPos = clientGame->getLocalPlayerShip()->getActualPos();
+   ASSERT_TRUE(startPos.distSquared(endPos) > 0) << "Ship did not move!!";
+   ASSERT_TRUE(clientGame->getLocalPlayerShip()->isCarryingItem(ResourceItemTypeNumber));
+
+   // Time to engineer!
+   gameUI->onKeyDown(KEY_MOD1);
+   ASSERT_TRUE(gameUI->isHelperActive(HelperMenu::EngineerHelperType)) << "Expect engineer helper menu to be active!";
+
+   InputCode key = gameUI->getActiveHelper()->getInputCodeForOption(EngineeredTeleporterEntrance, true);
+   gameUI->onKeyDown(key);
+   ASSERT_FALSE(static_cast<const EngineerHelper *>(gameUI->getActiveHelper())->isMenuBeingDisplayed());
+   gameUI->onKeyDown(KEY_MOD1);     // Place entrance
+   gameUI->onKeyDown(KEY_MOD1);     // Place exit
+   gamePair.idle(100, 5);           // Let things mellow
+   Vector<DatabaseObject *> fillVector;
+   clientGame->getGameObjDatabase()->findObjects(TeleporterTypeNumber, fillVector);
+   EXPECT_EQ(1, fillVector.size()) << "Expected a teleporter!";
+}
 
 
 TEST_F(BfTest, MoveTests)

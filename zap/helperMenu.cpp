@@ -66,6 +66,14 @@ void HelperMenu::initialize(ClientGame *game, HelperManager *manager)
 }
 
 
+// For testing
+InputCode HelperMenu::getInputCodeForOption(U32 index, bool keyBut) const
+{
+   TNLAssert(false, "Not yet implemented!");
+}
+
+
+
 void HelperMenu::onActivated()    
 {
    // Activate parent classes

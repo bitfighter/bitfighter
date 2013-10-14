@@ -30,6 +30,8 @@
 #include "InputCodeEnum.h"
 #include "JoystickButtonEnum.h"
 
+#include "SDL_keycode.h"
+
 #include "tnlVector.h"
 #include <string>
 
@@ -156,8 +158,8 @@ public:
    string getInputModeString() const;  // Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
 
    #ifndef ZAP_DEDICATED
-      static InputCode sdlKeyToInputCode(int key);             // Convert SDL keys to InputCode
-      static int inputCodeToSDLKey(InputCode inputCode);       // Take a InputCode and return the SDL equivalent
+      static InputCode sdlKeyToInputCode(SDL_Keycode key);        // Convert SDL keys to InputCode
+      static SDL_Keycode inputCodeToSDLKey(InputCode inputCode);  // Take a InputCode and return the SDL equivalent
    #endif
 
    static char keyToAscii(int unicode, InputCode inputCode);   // Return a printable ascii char, if possible

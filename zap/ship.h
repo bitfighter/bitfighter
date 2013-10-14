@@ -182,7 +182,10 @@ public:
    void selectNextWeapon();                   
    void selectPrevWeapon();
    void selectWeapon(S32 weaponIndex);    // Select weapon by index
+
+   // For testing purposes
    WeaponType getActiveWeapon() const;
+   string getLoadoutString() const;
 
 
    Timer mSensorEquipZoomTimer;

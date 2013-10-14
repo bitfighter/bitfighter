@@ -525,7 +525,7 @@ string InputCodeManager::getInputModeString() const
 
 #ifndef ZAP_DEDICATED
 // Translate SDL standard keys to our InputCodes
-InputCode InputCodeManager::sdlKeyToInputCode(int key)
+InputCode InputCodeManager::sdlKeyToInputCode(SDL_Keycode key)
 {
    switch(key)
    {
@@ -1056,7 +1056,7 @@ InputCode InputCodeManager::sdlKeyToInputCode(int key)
 }
 
 
-S32 InputCodeManager::inputCodeToSDLKey(InputCode inputCode)
+SDL_Keycode InputCodeManager::inputCodeToSDLKey(InputCode inputCode)
 {
    switch(inputCode)
    {

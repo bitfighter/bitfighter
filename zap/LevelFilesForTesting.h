@@ -48,4 +48,24 @@ string getLevelCode1()
 }
 
 
+// This level has a spawn in a LoadoutZone, with a ResourceItem directly south of the spawn
+string getLevelCodeForTestingEngineer1()
+{
+   return
+      "GameType 10 92\n"
+      "LevelName Engineer Test Bed One\n"
+      "LevelDescription Level for testing Engineer\n"
+      "LevelCredits Bitfighter Test Engineer #42445\n"
+      "GridSize 255\n"
+      "Team Blue 0 0 1\n"
+      "Specials Engineer\n"
+      "MinPlayers\n"
+      "MaxPlayers\n"
+      "LoadoutZone 0   1 0   1 1   0 1   0 0\n"
+      "Spawn 0   .5 .5\n"
+      "ResourceItem   0.5 1\n"
+   ;
+}
+
+
 #endif

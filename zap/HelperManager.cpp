@@ -173,10 +173,8 @@ void HelperManager::setSelectedEngineeredObject(U32 objectType)
 // Returns true if key was handled, false if it should be further processed
 bool HelperManager::processInputCode(InputCode inputCode)
 {
-   if(isHelperActive())
-      return mHelperStack.last()->processInputCode(inputCode);
-
-   return false;
+   TNLAssert(isHelperActive(), "Should be active!");
+   return mHelperStack.last()->processInputCode(inputCode);
 }
 
 
@@ -318,6 +316,13 @@ void HelperManager::renderEngineeredItemDeploymentMarker(const Ship *ship)
 const char *HelperManager::getChatMessage() const
 {
    return mChatHelper.getChatMessage();
+}
+
+
+// For testing
+const HelperMenu *HelperManager::getActiveHelper() const
+{
+   return mHelperStack.last();
 }
 
 

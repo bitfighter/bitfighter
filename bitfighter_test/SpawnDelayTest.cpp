@@ -297,11 +297,9 @@ static void doScenario11(GamePair &gamePair)
    ASSERT_EQ("", serverGame->getClientInfo(0)->getOnDeckLoadout().toString());   // Prove there's no on deck loadout
 
    // See static const OverlayMenuItem loadoutModuleMenuItems[] in loadoutHelper.cpp
-   gameUI->onKeyDown(KEY_1);  // Feed the UI some keys... like we're configuring a loadout!  First 2 modules...
-   gameUI->onKeyDown(KEY_3);
-   gameUI->onKeyDown(KEY_1);  // ...then 3 weapons
-   gameUI->onKeyDown(KEY_2); 
-   gameUI->onKeyDown(KEY_3);
+   // Feed the UI some keys... like we're configuring a loadout!  
+   gameUI->onKeyDown(KEY_1);     gameUI->onKeyDown(KEY_3);                                // First 2 modules...
+   gameUI->onKeyDown(KEY_1);     gameUI->onKeyDown(KEY_2);     gameUI->onKeyDown(KEY_3);  // ...then 3 weapons
 
    ASSERT_FALSE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
 
@@ -315,11 +313,8 @@ static void doScenario11(GamePair &gamePair)
 
    gamePair.idle(100, 350);        // Idle until game ends
 
-   gameUI->onKeyDown(KEY_1);  
-   gameUI->onKeyDown(KEY_4);
-   gameUI->onKeyDown(KEY_1);  
-   gameUI->onKeyDown(KEY_2); 
-   gameUI->onKeyDown(KEY_3);
+   gameUI->onKeyDown(KEY_1);     gameUI->onKeyDown(KEY_4);
+   gameUI->onKeyDown(KEY_1);     gameUI->onKeyDown(KEY_2);     gameUI->onKeyDown(KEY_3);
 
    ASSERT_FALSE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
 

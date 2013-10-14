@@ -128,6 +128,8 @@ public:
    virtual bool isMovementDisabled() const;           // Is ship movement disabled while this helper is active?
    virtual bool isChatDisabled() const;               // Returns true if chat and friends should be disabled while this is active
 
+   virtual InputCode getInputCodeForOption(U32 index, bool keyBut) const;   // For testing
+
    S32 getMaxItemWidth(const OverlayMenuItem *items, S32 count);
 
    virtual HelperMenuType getType() = 0;
