@@ -1336,6 +1336,9 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
    if(clientInfo->isRobot())
    {
       Robot *robot = (Robot *) clientInfo->getShip();
+      TNLAssert(robot, "Expected robot here!");
+      if(!robot)
+         return false;
       robot->setTeam(teamIndex);
       spawnRobot(robot);
    }
@@ -1769,7 +1772,11 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
    {
       Ship *robot = clientInfo->getShip();
 
-      if(clientInfo->getShip()->getTeam() >= 0 && robot->getTeam() < mGame->getTeamCount())   // No neutral or hostile bots -- why not?
+      TNLAssert(robot, "Expected robot here!");
+      if(!robot)
+         return;
+
+      if(robot->getTeam() >= 0 && robot->getTeam() < mGame->getTeamCount())   // No neutral or hostile bots -- why not?
          minTeamIndex = robot->getTeam();
 
       robot->setChangeTeamMask();            // Needed to avoid gray robot ships when using /addbot

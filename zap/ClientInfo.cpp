@@ -540,7 +540,12 @@ void ClientInfo::sEngineerDeploymentInterrupted(U32 objectType)
 {
    if(objectType == EngineeredTeleporterExit)
    {
-      getShip()->destroyPartiallyDeployedTeleporter();
+      Ship *ship = getShip();
+
+      TNLAssert(ship, "Expected a ship here!");
+
+      if(ship)
+         ship->destroyPartiallyDeployedTeleporter();
       sTeleporterCleanup();
    }
 }
@@ -743,6 +748,12 @@ void FullClientInfo::playVoiceChat(const ByteBufferPtr &voiceBuffer)
 
 bool FullClientInfo::isEngineeringTeleporter()
 {
+   Ship *ship = getShip();
+   TNLAssert(ship, "Expected ship here!");
+
+   if(!ship)
+      return false;
+
    return getShip()->getEngineeredTeleporter() != NULL;
 }
 

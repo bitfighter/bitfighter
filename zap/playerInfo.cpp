@@ -231,7 +231,7 @@ S32 PlayerInfo::lua_isRobot(lua_State *L)
 
 S32 PlayerInfo::lua_getShip(lua_State *L)
 {
-	return returnShip(L, mClientInfo->getShip());
+	return returnShip(L, mClientInfo->getShip());      // Handles NULL ship
 }
 
 
