@@ -54,6 +54,7 @@ struct OverlayMenuItem
    const Color *itemColor;
    const char *help;          // An additional bit of help text, also displayed on menu
    const Color *helpColor;    // Pointer to color with which to render the item
+   const Color *buttonOverrideColor;
 };
 
 

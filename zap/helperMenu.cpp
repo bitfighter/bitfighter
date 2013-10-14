@@ -177,8 +177,8 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
 
    // Draw menu items (below gray line)
-   drawMenuItems(prevItems, prevCount, yPos + 2, menuBottom, false, hasLegend);
-   drawMenuItems(items, count, yPos, menuBottom, true, hasLegend);      
+   drawMenuItems(prevItems, prevCount, yPos + 2, menuBottom, false, false);
+   drawMenuItems(items,     count,     yPos,     menuBottom, true,  false);      
 
    // itemsHeight includes grayLineBuffer, transitionOffset accounts for potentially changing menu height during transition
    yPos += itemsHeight; 
@@ -242,9 +242,13 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
    //// Determine whether to show keys or joystick buttons on menu
    InputMode inputMode = getGame()->getInputMode();
 
-   //// For testing purposes -- toggles between keyboard and joystick renders
-   ////if(Platform::getRealMilliseconds() % 2000 > 1000)
-   ////   inputMode = InputModeJoystick;
+   //// For testing purposes -- toggles between keyboard and joystick renders --> Comment this out when not testing
+//   if(Platform::getRealMilliseconds() % 2000 > 1000)
+//      inputMode = InputModeJoystick;
+//#  ifndef TNL_DEBUG
+//#     error "This block must be removed in any production builds"
+//#  endif
+   /////
 
    S32 buttonWidth = calcLeftMarginForTextPortionOfEntry(items, count);
 
@@ -265,15 +269,17 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
       if(!items[i].showOnMenu)
          continue;
 
-      InputCode code = (inputMode == InputModeJoystick) ? items[i].button : items[i].key;
+      InputCode code = (inputMode == InputModeJoystick) ? items[i].button : items[i].key;    // Get the input code for the thing we want to render
 
       // Render key in white, or, if there is a legend, in the color of the adjacent item
-      glColor(renderKeysWithItemColor ? items[i].itemColor : &Colors::white); 
+      const Color *buttonOverrideColor = items[i].buttonOverrideColor;  // renderKeysWithItemColor ? items[i].itemColor : NULL; 
       
-      // Need to add buttonWidth / 2 because renderControllerButton() centers on passed coords
-      JoystickRender::renderControllerButton(LeftMargin + buttonWidth / 2, (F32)yPos - 1, Joystick::SelectedPresetIndex, code, false); 
+      const Color *itemColor = items[i].itemColor;
 
-      glColor(items[i].itemColor);  
+      // Need to add buttonWidth / 2 because renderControllerButton() centers on passed coords
+      JoystickRender::renderControllerButton(LeftMargin + (F32)buttonWidth / 2, (F32)yPos - 1, Joystick::SelectedPresetIndex, code, buttonOverrideColor); 
+
+      glColor(itemColor);  
 
       S32 textWidth = drawStringAndGetWidth(LeftMargin + buttonWidth + ButtonLabelGap, yPos, MENU_FONT_SIZE, items[i].name); 
 
@@ -304,7 +310,7 @@ void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &base
       S32 butSize = JoystickRender::getControllerButtonRenderedSize(Joystick::SelectedPresetIndex, BUTTON_BACK);
 
       xPos += drawStringAndGetWidth(xPos, yPos, MENU_LEGEND_FONT_SIZE, "Press ") + 4;
-      JoystickRender::renderControllerButton(F32(xPos + 4), F32(yPos), Joystick::SelectedPresetIndex, BUTTON_BACK, false);
+      JoystickRender::renderControllerButton(F32(xPos + 4), F32(yPos), Joystick::SelectedPresetIndex, BUTTON_BACK);
       xPos += butSize;
       glColor(baseColor);
       drawString(xPos, yPos, MENU_LEGEND_FONT_SIZE, "to cancel");

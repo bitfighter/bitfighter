@@ -270,10 +270,10 @@ static void renderMenuInstructions(GameSettings *settings)
 
       S32 x = canvasWidth / 2 - UserInterface::horizMargin - totalWidth / 2;
 
-      JoystickRender::renderControllerButton((F32)x, (F32)y, joystickIndex, BUTTON_DPAD_UP, false);
+      JoystickRender::renderControllerButton((F32)x, (F32)y, joystickIndex, BUTTON_DPAD_UP);
       x += upWidth + getStringWidth(size, " ");
 
-      JoystickRender::renderControllerButton((F32)x, (F32)y, joystickIndex, BUTTON_DPAD_DOWN, false);
+      JoystickRender::renderControllerButton((F32)x, (F32)y, joystickIndex, BUTTON_DPAD_DOWN);
       x += downWidth + getStringWidth(size, " ");
 
       glColor(Colors::white);
@@ -281,14 +281,14 @@ static void renderMenuInstructions(GameSettings *settings)
 
       x += drawStringAndGetWidth(x, y, size, msg1);
 
-      JoystickRender::renderControllerButton((F32)x, F32(y + 4), joystickIndex, BUTTON_START, false);
+      JoystickRender::renderControllerButton((F32)x, F32(y + 4), joystickIndex, BUTTON_START);
       x += startWidth;
 
       glColor(Colors::white);
       static const char *msg2 = "to select | ";
       x += drawStringAndGetWidth(x, y, size, msg2);
 
-      JoystickRender::renderControllerButton(F32(x + 4), F32(y + 4), joystickIndex, BUTTON_BACK, false);
+      JoystickRender::renderControllerButton(F32(x + 4), F32(y + 4), joystickIndex, BUTTON_BACK);
       x += backWidth;
 
       glColor(Colors::white);

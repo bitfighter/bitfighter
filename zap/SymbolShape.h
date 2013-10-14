@@ -315,7 +315,6 @@ class SymbolString : public SymbolShape      // So a symbol string can hold othe
    typedef SymbolShape Parent;
 
 protected:
-   S32 mWidth;
    S32 mReady;
    Alignment mAlignment;
 
@@ -343,6 +342,7 @@ public:
    // Statics to make creating things a bit easier
    static SymbolShapePtr getControlSymbol(InputCode inputCode, const Color *color = NULL);
    static SymbolShapePtr getModifiedKeySymbol(InputCode inputCode, const Vector<string> &modifiers, const Color *color = NULL);
+   static SymbolShapePtr getModifiedKeySymbol(const string &symbolName, const Color *color);
    static SymbolShapePtr getSymbolGear(S32 fontSize);
    static SymbolShapePtr getSymbolGoal(S32 fontSize);
    static SymbolShapePtr getBullet();

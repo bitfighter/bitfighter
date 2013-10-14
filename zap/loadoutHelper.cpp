@@ -42,24 +42,24 @@ namespace Zap
 #define HELP_COLOR  &Colors::overlayMenuHelpColor
 
 static const OverlayMenuItem loadoutModuleMenuItems[] = {
-   { KEY_1, BUTTON_1, true, ModuleBoost,    "Turbo Boost",           UNSEL_COLOR, "",               NULL       },
-   { KEY_2, BUTTON_2, true, ModuleShield,   "Shield Generator",      UNSEL_COLOR, "",               NULL       },
-   { KEY_3, BUTTON_3, true, ModuleRepair,   "Repair Module",         UNSEL_COLOR, "",               NULL       },
-   { KEY_4, BUTTON_4, true, ModuleSensor,   "Enhanced Sensor",       UNSEL_COLOR, "",               NULL       },
-   { KEY_5, BUTTON_5, true, ModuleCloak,    "Cloak Field Modulator", UNSEL_COLOR, "",               NULL       },
-   { KEY_6, BUTTON_6, true, ModuleArmor,    "Armor",                 UNSEL_COLOR, "(adds mass)",    HELP_COLOR },
-   { KEY_7, BUTTON_7, true, ModuleEngineer, "Engineer",              UNSEL_COLOR, "",               NULL       },
+   { KEY_1, BUTTON_1, true, ModuleBoost,    "Turbo Boost",           UNSEL_COLOR, "",               NULL,       NULL },
+   { KEY_2, BUTTON_2, true, ModuleShield,   "Shield Generator",      UNSEL_COLOR, "",               NULL,       NULL },
+   { KEY_3, BUTTON_3, true, ModuleRepair,   "Repair Module",         UNSEL_COLOR, "",               NULL,       NULL },
+   { KEY_4, BUTTON_4, true, ModuleSensor,   "Enhanced Sensor",       UNSEL_COLOR, "",               NULL,       NULL },
+   { KEY_5, BUTTON_5, true, ModuleCloak,    "Cloak Field Modulator", UNSEL_COLOR, "",               NULL,       NULL },
+   { KEY_6, BUTTON_6, true, ModuleArmor,    "Armor",                 UNSEL_COLOR, "(adds mass)",    HELP_COLOR, NULL },
+   { KEY_7, BUTTON_7, true, ModuleEngineer, "Engineer",              UNSEL_COLOR, "",               NULL,       NULL },
 };
 
 static const S32 moduleEngineerIndex = 6;
 
 static const OverlayMenuItem loadoutWeaponMenuItems[] = {
-   { KEY_1, BUTTON_1, true, WeaponPhaser, "Phaser",     UNSEL_COLOR, "", NULL },
-   { KEY_2, BUTTON_2, true, WeaponBounce, "Bouncer",    UNSEL_COLOR, "", NULL },
-   { KEY_3, BUTTON_3, true, WeaponTriple, "Triple",     UNSEL_COLOR, "", NULL },
-   { KEY_4, BUTTON_4, true, WeaponBurst,  "Burster",    UNSEL_COLOR, "", NULL },
-   { KEY_5, BUTTON_5, true, WeaponMine,   "Mine Layer", UNSEL_COLOR, "", NULL },
-   { KEY_6, BUTTON_6, true, WeaponSeeker, "Seeker",     UNSEL_COLOR, "", NULL },
+   { KEY_1, BUTTON_1, true, WeaponPhaser, "Phaser",     UNSEL_COLOR, "", NULL, NULL },
+   { KEY_2, BUTTON_2, true, WeaponBounce, "Bouncer",    UNSEL_COLOR, "", NULL, NULL },
+   { KEY_3, BUTTON_3, true, WeaponTriple, "Triple",     UNSEL_COLOR, "", NULL, NULL },
+   { KEY_4, BUTTON_4, true, WeaponBurst,  "Burster",    UNSEL_COLOR, "", NULL, NULL },
+   { KEY_5, BUTTON_5, true, WeaponMine,   "Mine Layer", UNSEL_COLOR, "", NULL, NULL },
+   { KEY_6, BUTTON_6, true, WeaponSeeker, "Seeker",     UNSEL_COLOR, "", NULL, NULL },
 };                                                  
 
 #undef UNSEL_COLOR
@@ -164,8 +164,9 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    if(!alreadyUsed)
    {
-      menuItems->get(index).itemColor = &Colors::overlayMenuSelectedItemColor;
-      menuItems->get(index).helpColor = &Colors::overlayMenuSelectedItemColor;
+      menuItems->get(index).itemColor           = &Colors::overlayMenuSelectedItemColor;
+      menuItems->get(index).helpColor           = &Colors::overlayMenuSelectedItemColor;
+      menuItems->get(index).buttonOverrideColor = &Colors::overlayMenuSelectedItemColor;
 
       mModule[mCurrentIndex] = ShipModule(index);
       mCurrentIndex++;

@@ -480,6 +480,40 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
 }
 
 
+SymbolShapePtr SymbolString::getModifiedKeySymbol(const string &symbolName, const Color *color)
+{
+   const Vector<string> *mods = InputCodeManager::getModifierNames();
+   Vector<string> foundMods;
+
+   bool found = true;
+   string sym = symbolName;      // Make working copy
+
+   while(found)
+   {
+      for(S32 i = 0; i < mods->size(); i++)
+      {
+         string mod = mods->get(i) + "+";
+         found = false;
+         if(sym.compare(0, mod.size(), mod) == 0)     // Read as: sym.startsWith(mod)
+         {
+            foundMods.push_back(mods->get(i));
+            sym = sym.substr(mod.size());
+            found = true;
+            break;
+         }
+      }
+   }
+
+   InputCode inputCode = InputCodeManager::stringToInputCode(sym.c_str());     // Get the base inputCode
+
+   if(inputCode == KEY_UNKNOWN) 
+       return SymbolShapePtr();
+
+   SymbolShapePtr s = SymbolString::getModifiedKeySymbol(inputCode, foundMods, color);
+   return s;
+}
+
+
 SymbolShapePtr SymbolString::getModifiedKeySymbol(InputCode inputCode, const Vector<string> &modifiers, const Color *color)
 {
    if(inputCode == KEY_UNKNOWN || modifiers.size() == 0)
@@ -494,7 +528,9 @@ SymbolShapePtr SymbolString::getModifiedKeySymbol(InputCode inputCode, const Vec
 
    symbols.push_back(SymbolShapePtr(new SymbolKey(InputCodeManager::inputCodeToString(inputCode), color)));
 
-   return SymbolShapePtr(new SymbolString(symbols));
+   SymbolShape *s = new SymbolString(symbols);
+
+   return SymbolShapePtr(s);
 }
 
 
@@ -572,32 +608,10 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
    // Third chance -- see if there is a modifier key at the front
    if(inputCode == KEY_UNKNOWN)
    {
-      const Vector<string> *mods = InputCodeManager::getModifierNames();
-      Vector<string> foundMods;
-
-      bool found = true;
-      string sym = symbolName;
-
-      while(found)
+      SymbolShapePtr modifiedKey = SymbolString::getModifiedKeySymbol(symbolName, color);
+      if(modifiedKey.get() != NULL)
       {
-         for(S32 i = 0; i < mods->size(); i++)
-         {
-            string mod = mods->get(i) + "+";
-            found = false;
-            if(sym.compare(0, mod.size(), mod) == 0)     // Read as: sym.startsWith(mod)
-            {
-               foundMods.push_back(mods->get(i));
-               sym = sym.substr(mod.size());
-               found = true;
-               break;
-            }
-         }
-      }
-
-      inputCode = inputCodeManager->stringToInputCode(sym.c_str());     // Get the base inputCode
-      if(inputCode != KEY_UNKNOWN)                                   
-      {
-         symbols.push_back(SymbolString::getModifiedKeySymbol(InputCodeManager::stringToInputCode(sym.c_str()), foundMods, color));
+         symbols.push_back(modifiedKey);
          return;
       }
    }
@@ -749,7 +763,6 @@ void SymbolShape::render(F32 x, F32 y, Alignment alignment) const
 
    render(Point(x, y));
 }
-
 
 
 S32 SymbolShape::getWidth() const

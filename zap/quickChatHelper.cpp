@@ -182,6 +182,7 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
          item.name = nodeTree[walk].caption.c_str();
          item.help = "";
          item.itemColor = nodeTree[walk].teamOnly ? &Colors::teamChatColor : &Colors::globalChatColor;
+         item.buttonOverrideColor = item.itemColor;
 
          menuItems->push_back(item);
       }

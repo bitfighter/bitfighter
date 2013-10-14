@@ -183,35 +183,40 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
 
 // Renders something resembling a controller button or keyboard key
 // Note:  buttons are with the given x coordinate as their _center_
-void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, InputCode inputCode, bool activated)
+bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, U32 joystickIndex, InputCode inputCode, const Color *overrideRenderColor)
 {
+   // Set the basic color, could be overridden later
+   if(overrideRenderColor)
+      glColor(overrideRenderColor);
+   else
+      glColor(Colors::white);
+
+
    // Render keyboard keys, just in case
    if(!InputCodeManager::isControllerButton(inputCode))
    {
-      SymbolKey(InputCodeManager::inputCodeToString(inputCode)).render(x, y + 17, AlignmentCenter);
-      return;
+      SymbolKey(InputCodeManager::inputCodeToString(inputCode)).render(centerX, centerY + 17, AlignmentCenter);
+      return true;
    }
 
    JoystickButton button = InputCodeManager::inputCodeToJoystickButton(inputCode);
 
    // Don't render if button doesn't exist
    if(!Joystick::isButtonDefined(joystickIndex, button))
-      return;
+      return false;
 
    Joystick::ButtonShape buttonShape =
          Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].buttonShape;
 
    const char *label = Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].label.c_str();
-   Color *buttonColor = &Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].color;
-
+   const Color *buttonColor = &Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].color;
 
    // Note:  the x coordinate is already at the center
-   Point location(x,y);
+   Point location(centerX, centerY);
    Point center = location + Point(0, buttonHalfHeight);
 
-   const Color *color = getButtonColor(activated);
-
-   // Render joystick button shape
+   /////
+   // 1. Render joystick button shape
    switch(buttonShape)
    {
       case Joystick::ButtonShapeRect:
@@ -231,7 +236,8 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
          drawRoundedRect(center, smallRectButtonWidth, smallRectButtonHeight, 5);
          break;
       case Joystick::ButtonShapeHorizEllipse:
-         glColor(buttonColor);
+         if(!overrideRenderColor)
+            glColor(buttonColor);
          //shapeHorizEllipse.render(center);
          drawFilledEllipse(center, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
          glColor(Colors::white);
@@ -249,14 +255,17 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
          break;
    }
 
-   // Now render joystick label or symbol
-   Joystick::ButtonSymbol buttonSymbol =
-         Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].buttonSymbol;
+   /////
+   // 2. Render joystick label or symbol
 
    // Change color of label to the preset (default white)
-   glColor(buttonColor);
+   if(overrideRenderColor)
+      glColor(overrideRenderColor);
+   else
+      glColor(buttonColor);
 
-   switch(buttonSymbol)
+
+   switch(Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].buttonSymbol)
    {
       case Joystick::ButtonSymbolPsCircle:
          drawPlaystationCircle(center);
@@ -281,6 +290,8 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
          drawString(location.x - getStringWidth(labelSize, label) / 2, location.y + 2, labelSize, label);
          break;
    }
+
+   return true;
 }
 
 

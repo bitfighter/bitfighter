@@ -42,6 +42,7 @@
 
 #include "Colors.h"
 #include "gameObjectRender.h"    // For drawCircle in badge rendering below
+#include "SymbolShape.h"
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
@@ -447,8 +448,16 @@ void DiagnosticUserInterface::render()
 
       glColor(Colors::red);
       for(U32 i = 0; i < MAX_INPUT_CODES; i++)
-         if(InputCodeManager::getState((InputCode) i))
-            hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "[%s]", InputCodeManager::inputCodeToString(InputCode(i)) ) + 5;
+      {
+         InputCode inputCode = InputCode(i);
+         if(InputCodeManager::getState(inputCode))
+         {
+            UI::SymbolKey key = UI::SymbolKey(InputCodeManager::inputCodeToString(inputCode));
+            key.render(hpos, ypos + textsize, UI::AlignmentLeft);
+            hpos += key.getWidth() + 5;
+         }
+      }
+
 
       glColor(Colors::cyan);
       hpos += drawStringAndGetWidth(hpos, ypos, textsize, " | ");
@@ -461,7 +470,13 @@ void DiagnosticUserInterface::render()
       string in = InputCodeManager::getCurrentInputString(KEY_NONE);
 
       if(in != "")
-         hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "[%s]", in.c_str() ) + 5;
+      {
+         UI::SymbolShapePtr key = UI::SymbolString::getModifiedKeySymbol(in, NULL);
+
+         key->render(hpos, ypos + textsize, UI::AlignmentLeft);
+         hpos += key->getWidth() + 5;
+      }
+
 
       if(joystickDetected)
       {
@@ -522,29 +537,15 @@ void DiagnosticUserInterface::render()
 
          UI::SymbolString(symbols).render(Point(gScreenInfo.getGameCanvasWidth() / 2 + 100, ypos + 50));
 
-         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_1, InputCodeManager::getState(BUTTON_1));
-         hpos += 40;
-         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_2, InputCodeManager::getState(BUTTON_2));
-         hpos += 40;
-         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_3, InputCodeManager::getState(BUTTON_3));
-         hpos += 40;
-         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_4, InputCodeManager::getState(BUTTON_4));
-         hpos += 40;
-         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_5, InputCodeManager::getState(BUTTON_5));
-         hpos += 40;
-         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_6, InputCodeManager::getState(BUTTON_6));
-         hpos += 40;
-         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_7, InputCodeManager::getState(BUTTON_7));
-         hpos += 40;
-         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_8, InputCodeManager::getState(BUTTON_8));
-         hpos += 40;
-         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_BACK, InputCodeManager::getState(BUTTON_BACK));
-         hpos += 40;
-         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_START, InputCodeManager::getState(BUTTON_START));
-         hpos += 40;
-         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_9, InputCodeManager::getState(BUTTON_9));
-         hpos += 40;
-         JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, BUTTON_10, InputCodeManager::getState(BUTTON_10));
+         for(S32 i = FIRST_CONTROLLER_BUTTON; i <= LAST_CONTROLLER_BUTTON; i++)
+         {
+            InputCode code = InputCode(i);
+            const Color *color = InputCodeManager::getState(code) ? &Colors::red : NULL;
+
+            // renderControllerButton() returns false if nothing is rendered
+            if(JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, code, color))
+               hpos += 40;
+         }
       }
    }
    else if(mCurPage == 1)
