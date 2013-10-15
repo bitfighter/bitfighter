@@ -30,11 +30,11 @@
 #include "InputCodeEnum.h"
 #include "JoystickButtonEnum.h"
 
-#include "SDL_keycode.h"
-
 #include "tnlVector.h"
 #include <string>
 
+// Until we move completely to SDL2
+typedef S32 SDL_Keycode;
 
 using namespace std;
 
@@ -55,7 +55,7 @@ private:
    InputMode mInputMode;             // Joystick or Keyboard
 
    BindingSet *mCurrentBindingSet;     
-   TNL::Vector<BindingSet> mBindingSets;
+   Vector<BindingSet> mBindingSets;
 
 public:
    enum JoystickJoysticks {
