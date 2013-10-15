@@ -1475,6 +1475,8 @@ public:
          // Master Admin-only commands
          if(mIsMasterAdmin)
          {
+            bool adminCommand = true;  // Assume admin command
+
             if(command == "dropserver")
             {
                bool droppedServer = false;
@@ -1490,8 +1492,6 @@ public:
 
                if(!droppedServer)
                   m2cSendChat(mPlayerOrServerName, true, "dropserver: address not found");
-
-               return;
             }
             else if(command == "restoreservers")
             {
@@ -1505,7 +1505,6 @@ public:
                   }
                if(!broughtBackServer)
                   m2cSendChat(mPlayerOrServerName, true, "No server was hidden");
-               return;
             }
             else if(command == "hideplayer")
             {
@@ -1544,40 +1543,42 @@ public:
                m2cSendChat(mPlayerOrServerName, true, "cleared IP hidden list");
             }
             else
-               badCommand = true;  // Don't relay bad commands as chat messages
+               adminCommand = false;  // Wasn't an admin command after all
+
+            // We've done our job if a command was run.  Let's leave
+            if(adminCommand)
+               return;
          }
-         // Not admin command
-         else
+
+         // If we made it here then an admin command wasn't sent
+         if(command == "pm")
          {
-            if(command == "pm")
+            if(words.size() < 3)  // No message?
             {
-               if(words.size() < 3)  // No message?
+               logprintf(LogConsumer::LogError, "Malformed private message: %s", message.getString());
+               m2cSendChat(mPlayerOrServerName, true, "Malformed private message");
+               return;
+            }
+
+            isPrivate = true;
+
+            pmRecipient = words[1];
+
+            S32 argCount = 2 + countCharInString(words[1], ' ');  // Set pointer after 2 args + number of spaces in player name
+            strippedMessage = findPointerOfArg(message, argCount);
+
+            // Now relay the message and only send to client with the specified nick
+            for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+            {
+               if(stricmp(walk->mPlayerOrServerName.getString(), pmRecipient.c_str()) == 0)
                {
-                  logprintf(LogConsumer::LogError, "Malformed private message: %s", message.getString());
-                  m2cSendChat(mPlayerOrServerName, true, "Malformed private message");
-                  return;
-               }
-
-               isPrivate = true;
-
-               pmRecipient = words[1];
-
-               S32 argCount = 2 + countCharInString(words[1], ' ');  // Set pointer after 2 args + number of spaces in player name
-               strippedMessage = findPointerOfArg(message, argCount);
-
-               // Now relay the message and only send to client with the specified nick
-               for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
-               {
-                  if(stricmp(walk->mPlayerOrServerName.getString(), pmRecipient.c_str()) == 0)
-                  {
-                     walk->m2cSendChat(mPlayerOrServerName, isPrivate, strippedMessage);
-                     break;
-                  }
+                  walk->m2cSendChat(mPlayerOrServerName, isPrivate, strippedMessage);
+                  break;
                }
             }
-            else
-               badCommand = true;  // Don't relay bad commands as chat messages
          }
+         else
+            badCommand = true;  // Don't relay bad commands as chat messages
       }
 
 
