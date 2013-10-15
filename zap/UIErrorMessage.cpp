@@ -120,6 +120,7 @@ ErrorMessageUserInterface::ErrorMessageUserInterface(ClientGame *game) : Parent(
    // Do nothing
 }
 
+
 // Destructor
 ErrorMessageUserInterface::~ErrorMessageUserInterface()
 {
