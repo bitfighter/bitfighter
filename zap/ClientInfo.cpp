@@ -444,7 +444,7 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
    if(deployer.deployEngineeredItem(ship->getClientInfo(), objectType))
    {
       // Announce the build
-      StringTableEntry msg( "%e0 has engineered a %e1." );
+      StringTableEntry msg("%e0 has engineered a %e1.");
 
       U32 responseEvent;
 
