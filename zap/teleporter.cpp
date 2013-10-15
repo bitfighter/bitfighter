@@ -508,7 +508,7 @@ void Teleporter::damageObject(DamageInfo *theInfo)
 
    // Reduce damage to 1/4 to match other engineered items
    if(theInfo->damageAmount > 0)
-      mStartingHealth -= theInfo->damageAmount * .25f;
+      mStartingHealth -= theInfo->damageAmount * .5f;
 
    setMaskBits(HealthMask);
 
