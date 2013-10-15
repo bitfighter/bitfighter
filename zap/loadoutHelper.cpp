@@ -243,5 +243,27 @@ void LoadoutHelper::onWidgetClosed()
 }
 
 
+// Static method, for testing
+InputCode LoadoutHelper::getInputCodeForWeaponOption(WeaponType index, bool keyBut)
+{
+   InputCode code = Parent::getInputCodeForOption(&loadoutWeaponMenuItems[0], ARRAYSIZE(loadoutWeaponMenuItems), index, keyBut);
+
+   TNLAssert(code != KEY_UNKNOWN, "InputCode not found!");
+
+   return code;
+}
+
+
+// Static method, for testing
+InputCode LoadoutHelper::getInputCodeForModuleOption(ShipModule index, bool keyBut)
+{
+   InputCode code = Parent::getInputCodeForOption(&loadoutModuleMenuItems[0], ARRAYSIZE(loadoutModuleMenuItems), index, keyBut);
+
+   TNLAssert(code != KEY_UNKNOWN, "InputCode not found!");
+
+   return code;
+}
+
+
 };
 

@@ -134,7 +134,7 @@ public:
 
 
    // For testing
-   static InputCode getInputCodeForOption(OverlayMenuItem *items, S32 itemCount, U32 index, bool keyBut);  
+   static InputCode getInputCodeForOption(const OverlayMenuItem *items, S32 itemCount, U32 index, bool keyBut);  
 };
 
 

@@ -265,11 +265,11 @@ bool EngineerHelper::isChatDisabled() const
 
 
 // Static method, for testing
-InputCode EngineerHelper::getInputCodeForOption(U32 index, bool keyBut)
+InputCode EngineerHelper::getInputCodeForOption(EngineerBuildObjects obj, bool keyBut)
 {
-   InputCode code = Parent::getInputCodeForOption(engineerItemInfo, ARRAYSIZE(engineerItemInfo), index, keyBut);
+   InputCode code = Parent::getInputCodeForOption(&engineerItemInfo[0], ARRAYSIZE(engineerItemInfo), obj, keyBut);
 
-   TNLAssert(code != KEY_NONE, "InputCode not found!");
+   TNLAssert(code != KEY_UNKNOWN, "InputCode not found!");
 
    return code;
 }

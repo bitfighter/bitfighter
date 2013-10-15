@@ -21,7 +21,6 @@
 #include "../zap/ChatCommands.h"
 #include "../zap/teleporter.h"
 
-#include "SDL.h"
 #include "../zap/VideoSystem.h"
 
 #include "../zap/UIGame.h"
@@ -32,8 +31,6 @@
 
 #include "../zap/GeomUtils.h"
 #include "../zap/stringUtils.h"
-
-#include "../zap/Event.h"
 
 #include "TestUtils.h"
 #include "LevelFilesForTesting.h"      // Contains sample levelcode for testing purposes
@@ -631,7 +628,7 @@ TEST_F(BfTest, EngineerTests)
    GameSettings *clientSettings = clientGame->getSettings();
    GameUserInterface *gameUI    = clientGame->getUIManager()->getUI<GameUserInterface>();
 
-   DEFINE_SDL_EVENTS(clientSettings);
+   DEFINE_KEYS_AND_EVENTS(clientSettings);
 
    // Idle for a while, let things settle
    gamePair.idle(10, 5);
@@ -647,9 +644,8 @@ TEST_F(BfTest, EngineerTests)
    gameUI->activateHelper(HelperMenu::LoadoutHelperType);
    ASSERT_TRUE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
 
-   // See static const OverlayMenuItem loadoutModuleMenuItems[] in loadoutHelper.cpp
-   gameUI->onKeyDown(KEY_7);     gameUI->onKeyDown(KEY_3);                                // First 2 modules...
-   gameUI->onKeyDown(KEY_1);     gameUI->onKeyDown(KEY_2);     gameUI->onKeyDown(KEY_3);  // ...then 3 weapons
+   gameUI->onKeyDown(LOADOUT_KEY_ENGR);      gameUI->onKeyDown(LOADOUT_KEY_REPAIR);                                           // First 2 modules...
+   gameUI->onKeyDown(LOADOUT_KEY_PHASER);    gameUI->onKeyDown(LOADOUT_KEY_BOUNCE);    gameUI->onKeyDown(LOADOUT_KEY_TRIPLE); // ...then 3 weapons
 
    // On this level, the ship spawn is inside a loadout zone, so loadout should take effect immediately
    gamePair.idle(10, 5);

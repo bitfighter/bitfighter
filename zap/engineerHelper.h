@@ -27,6 +27,7 @@
 #define _ENGINEERHELPER_H_
 
 #include "helperMenu.h"    // Parent
+#include "Engineerable.h"  // For EngineerBuildObjects enum
 
 using namespace TNL;
 
@@ -60,10 +61,8 @@ public:
 
    bool isChatDisabled() const;
    S32 getAnimationTime() const;
-   static InputCode getInputCodeForOption(U32 index, bool keyBut);  // For testing
+   static InputCode getInputCodeForOption(EngineerBuildObjects obj, bool keyBut);  // For testing
    bool isMenuBeingDisplayed() const;     // Used internally, public for testing
-
-
 };
 
 };
