@@ -103,7 +103,6 @@ public:
    F32 getDimFactor() const;
    const char *getChatMessage() const;
 
-   // For testing
    const HelperMenu *getActiveHelper() const;
 };
 

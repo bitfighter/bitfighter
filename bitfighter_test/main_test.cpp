@@ -669,7 +669,7 @@ TEST_F(BfTest, EngineerTests)
    gameUI->onKeyDown(KEY_MOD1);
    ASSERT_TRUE(gameUI->isHelperActive(HelperMenu::EngineerHelperType)) << "Expect engineer helper menu to be active!";
 
-   InputCode key = gameUI->getActiveHelper()->getInputCodeForOption(EngineeredTeleporterEntrance, true);
+   InputCode key = EngineerHelper::getInputCodeForOption(EngineeredTeleporterEntrance, true);
    gameUI->onKeyDown(key);
    ASSERT_FALSE(static_cast<const EngineerHelper *>(gameUI->getActiveHelper())->isMenuBeingDisplayed());
    gameUI->onKeyDown(KEY_MOD1);     // Place entrance

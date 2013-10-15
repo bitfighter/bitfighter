@@ -60,7 +60,7 @@ public:
 
    bool isChatDisabled() const;
    S32 getAnimationTime() const;
-   InputCode getInputCodeForOption(U32 index, bool keyBut) const;  // For testing
+   static InputCode getInputCodeForOption(U32 index, bool keyBut);  // For testing
    bool isMenuBeingDisplayed() const;     // Used internally, public for testing
 
 

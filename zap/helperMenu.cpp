@@ -66,12 +66,15 @@ void HelperMenu::initialize(ClientGame *game, HelperManager *manager)
 }
 
 
-// For testing
-InputCode HelperMenu::getInputCodeForOption(U32 index, bool keyBut) const
+// Static method, for testing
+InputCode HelperMenu::getInputCodeForOption(OverlayMenuItem *items, S32 itemCount, U32 index, bool keyBut)
 {
-   TNLAssert(false, "Not yet implemented!");
-}
+   for(S32 i = 0; i < itemCount; i++)
+      if(items[i].itemIndex == index)
+         return keyBut ? items[i].key : items[i].button;
 
+   return KEY_NONE;
+}
 
 
 void HelperMenu::onActivated()    

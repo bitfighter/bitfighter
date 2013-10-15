@@ -1026,7 +1026,6 @@ const HelperMenu *GameUserInterface::getActiveHelper() const
 }
 
 
-
 void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
 {
    mHelperManager.renderEngineeredItemDeploymentMarker(ship);

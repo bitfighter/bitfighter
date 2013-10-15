@@ -264,16 +264,14 @@ bool EngineerHelper::isChatDisabled() const
 }
 
 
-// For testing
-InputCode EngineerHelper::getInputCodeForOption(U32 index, bool keyBut) const
+// Static method, for testing
+InputCode EngineerHelper::getInputCodeForOption(U32 index, bool keyBut)
 {
-   for(S32 i = 0; i < ARRAYSIZE(engineerItemInfo); i++)
-   {
-      if(engineerItemInfo[i].itemIndex == index)
-         return keyBut ? engineerItemInfo[i].key : engineerItemInfo[i].button;
-   }
+   InputCode code = Parent::getInputCodeForOption(engineerItemInfo, ARRAYSIZE(engineerItemInfo), index, keyBut);
 
-   TNLAssert(false, "Index not found!");
+   TNLAssert(code != KEY_NONE, "InputCode not found!");
+
+   return code;
 }
 
 };
