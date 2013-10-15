@@ -91,6 +91,10 @@ public:
 
    void activateHelp(UIManager *uiManager);  // Open help to an appropriate page
    void onWidgetClosed();
+
+   // For testing:
+   static InputCode getInputCodeForWeaponOption(WeaponType index, bool keyBut);
+   static InputCode getInputCodeForModuleOption(ShipModule index, bool keyBut);
 };
 
 };
