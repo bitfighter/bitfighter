@@ -398,6 +398,12 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
          stream->writeInt(mTeleportCooldown.getCurrent(), 32);    // A player might join while this teleporter is in the middle of cooldown  // TODO: Make this a rangedInt
    }
 
+   else if(stream->writeFlag(updateMask & TeleportMask))          // This gets triggered if a ship passes through
+   {
+      TNLAssert(U32(mLastDest) < U32(getDestCount()), "packUpdate out of range teleporter number");
+      stream->write(mLastDest);                                   // Where ship is going
+   }
+
    if(stream->writeFlag(updateMask & (InitMask | GeomMask)))
    {
       getOrigin().write(stream);     // Location of intake
@@ -410,12 +416,6 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
          getDest(i).write(stream);
    }
    
-   if(stream->writeFlag(updateMask & TeleportMask))               // This gets triggered if a ship passes through
-   {
-      TNLAssert(U32(mLastDest) < U32(getDestCount()), "packUpdate out of range teleporter number");
-      stream->write(mLastDest);                                   // Where ship is going
-   }
-
    // If we're not destroyed and health has changed
    if(!stream->writeFlag(mHasExploded))
    {
@@ -439,6 +439,25 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       if(mTeleporterCooldown != 0 && stream->readFlag())
          mTeleportCooldown.reset(stream->readInt(32));
    }
+   else  if(stream->readFlag())                 // TeleportMask
+   {
+      S32 dest;
+      stream->read(&dest);
+
+#ifndef ZAP_DEDICATED
+      TNLAssert(U32(dest) < U32(getDestCount()), "unpackUpdate out of range teleporter number");
+      if(U32(dest) < U32(getDestCount()))
+      {
+         TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+         static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDestManager.getDest(dest), 0);
+
+         getGame()->playSoundEffect(SFXTeleportIn, mDestManager.getDest(dest));
+      }
+
+      getGame()->playSoundEffect(SFXTeleportOut, getOrigin());
+#endif
+      mTeleportCooldown.reset(mTeleporterCooldown);
+   }
 
    if(stream->readFlag())                 // InitMask || GeomMask
    {
@@ -458,26 +477,6 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       computeExtent();
       generateOutlinePoints();
 
-   }
-
-   if(stream->readFlag())                 // TeleportMask
-   {
-      S32 dest;
-      stream->read(&dest);
-
-#ifndef ZAP_DEDICATED
-      TNLAssert(U32(dest) < U32(getDestCount()), "unpackUpdate out of range teleporter number");
-      if(U32(dest) < U32(getDestCount()))
-      {
-         TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-         static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDestManager.getDest(dest), 0);
-
-         getGame()->playSoundEffect(SFXTeleportIn, mDestManager.getDest(dest));
-      }
-
-      getGame()->playSoundEffect(SFXTeleportOut, getOrigin());
-#endif
-      mTeleportCooldown.reset(mTeleporterCooldown);
    }
 
    if(stream->readFlag())     // mHasExploded
