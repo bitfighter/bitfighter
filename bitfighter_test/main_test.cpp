@@ -706,7 +706,7 @@ TEST_F(BfTest, MoveTests)
 
    // Large angles
    move1.angle =  Float2Pi + FloatHalfPi;  move1.prepare();  ASSERT_EQ(move1.angle, FloatHalfPi);            // Wrap in pos. dir         
-   move1.angle = -Float2Pi - FloatHalfPi; move1.prepare();  ASSERT_EQ(move1.angle, FloatPi + FloatHalfPi);  // Wrap in neg. dir 
+   move1.angle = -Float2Pi - FloatHalfPi; move1.prepare();   ASSERT_EQ(move1.angle, FloatPi + FloatHalfPi);  // Wrap in neg. dir 
 
    // Really large angles -- we'll never see these in the game
    move1.angle = 432 * Float2Pi;          move1.prepare();  ASSERT_EQ(move1.angle, 0);  // Big angles 
