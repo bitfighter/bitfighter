@@ -1478,8 +1478,8 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
             PolyNode *childNode = currentNode->Childs[j];
 
             Vector<p2t::Point*> hole;
-            for(U32 j = 0; j < childNode->Contour.size(); j++)
-               hole.push_back(new p2t::Point(F64(childNode->Contour[j].X) * CLIPPER_SCALE_FACT_INVERSE, F64(childNode->Contour[j].Y) * CLIPPER_SCALE_FACT_INVERSE));
+            for(U32 k = 0; k < childNode->Contour.size(); k++)
+               hole.push_back(new p2t::Point(F64(childNode->Contour[k].X) * CLIPPER_SCALE_FACT_INVERSE, F64(childNode->Contour[k].Y) * CLIPPER_SCALE_FACT_INVERSE));
 
             holesRegistry.push_back(hole);  // Memory
 
