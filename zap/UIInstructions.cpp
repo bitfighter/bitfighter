@@ -699,7 +699,7 @@ void InstructionsUserInterface::renderModulesPage()
 
          // skip 6 for 2nd line of sensor
 
-         case 7: // Cloak
+         case 7:     // Cloak
             {
                U32 time = getGame()->getCurrentTime();
                F32 frac = F32(time & 0x3FF);

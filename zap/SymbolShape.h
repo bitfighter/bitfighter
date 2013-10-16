@@ -56,6 +56,9 @@ enum Alignment {
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 // Parent for various Shape classes below
 class SymbolShape 
 {
@@ -70,7 +73,9 @@ public:
    SymbolShape(S32 width = 0, S32 height = 0, const Color *color = NULL);
    virtual ~SymbolShape();
 
+   void render(S32 x, S32 y, Alignment alignment) const;
    void render(F32 x, F32 y, Alignment alignment) const;
+
    void render(F32 x, F32 y) const;
    virtual void render(const Point &pos) const = 0;
 
@@ -82,8 +87,15 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 typedef boost::shared_ptr<SymbolShape> SymbolShapePtr;
 
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class SymbolBlank : public SymbolShape
 {
@@ -98,6 +110,9 @@ public:
    void render(const Point &pos) const;
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class SymbolHorizLine : public SymbolShape
 {
@@ -117,6 +132,9 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class SymbolRoundedRect : public SymbolShape
 {
    typedef SymbolShape Parent;
@@ -134,6 +152,9 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 // As above, but with slightly different rendering
 class SymbolSmallRoundedRect : public SymbolRoundedRect
 {
@@ -149,6 +170,9 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class SymbolHorizEllipse : public SymbolShape
 {
    typedef SymbolShape Parent;
@@ -163,6 +187,9 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class SymbolRightTriangle : public SymbolShape
 {
    typedef SymbolShape Parent;
@@ -176,6 +203,9 @@ public:
    void render(const Point &pos) const;
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class SymbolCircle : public SymbolShape
 {
@@ -192,6 +222,9 @@ public:
    Point getLabelOffset(const string &label, S32 labelSize) const;
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Small glyphs for rendering on joystick buttons
 class SymbolButtonSymbol : public SymbolShape
@@ -211,6 +244,9 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class SymbolGear : public SymbolCircle
 {
    typedef SymbolCircle Parent;
@@ -228,6 +264,9 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class SymbolGoal : public SymbolGear
 {
    typedef SymbolGear Parent;
@@ -242,6 +281,26 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+class SymbolSpinner : public SymbolCircle
+{
+   typedef SymbolCircle Parent;
+
+public:
+   using Parent::render;
+
+   SymbolSpinner(S32 fontSize, const Color *color = NULL);  // Constructor, fontSize is size of surrounding text
+   virtual ~SymbolSpinner();
+
+   void render(const Point &pos) const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class SymbolBullet : public SymbolShape
 {
    typedef SymbolShape Parent;
@@ -255,6 +314,9 @@ public:
    void render(const Point &pos) const;
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class SymbolText : public SymbolShape
 {
@@ -279,6 +341,9 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class SymbolKey : public SymbolText
 {
    typedef SymbolText Parent;
@@ -292,6 +357,9 @@ public:
    void render(const Point &pos) const;
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Symbol to be used when we don't know what symbol to use
 class SymbolUnknown : public SymbolKey
@@ -345,6 +413,7 @@ public:
    static SymbolShapePtr getModifiedKeySymbol(const string &symbolName, const Color *color);
    static SymbolShapePtr getSymbolGear(S32 fontSize);
    static SymbolShapePtr getSymbolGoal(S32 fontSize);
+   static SymbolShapePtr getSymbolSpinner(S32 fontSize, const Color *color);
    static SymbolShapePtr getBullet();
    static SymbolShapePtr getSymbolText(const string &text, S32 fontSize, FontContext context, const Color *color = NULL);
    static SymbolShapePtr getBlankSymbol(S32 width = -1, S32 height = -1);
@@ -358,6 +427,9 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 // As above, but all sumbols are layered atop one another, to create compound symbols like controller buttons
 class LayeredSymbolString : public SymbolString
 {
@@ -370,6 +442,9 @@ public:
    S32 render(F32 x, F32 y, Alignment alignment, S32 blockWidth = -1) const;
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class SymbolStringSet 
 {

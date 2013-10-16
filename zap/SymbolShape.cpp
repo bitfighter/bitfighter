@@ -556,6 +556,13 @@ SymbolShapePtr SymbolString::getSymbolGoal(S32 fontSize)
 
 
 // Static method
+SymbolShapePtr SymbolString::getSymbolSpinner(S32 fontSize, const Color *color)
+{
+   return SymbolShapePtr(new SymbolSpinner(fontSize, color));
+}
+
+
+// Static method
 SymbolShapePtr SymbolString::getBullet()
 {
    return SymbolShapePtr(new SymbolBullet());
@@ -622,6 +629,8 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
       symbols.push_back(SymbolString::getSymbolGear(14));
    else if(symbolName == "GOAL_ICON")
       symbols.push_back(SymbolString::getSymbolGoal(14));
+   else if(symbolName == "SPINNER")
+      symbols.push_back(SymbolString::getSymbolSpinner(14, color));
    else if(symbolName == "CHANGEWEP")
    {
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1)));
@@ -699,9 +708,9 @@ void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const s
    }
 }
 
-////////////////////////////////////////
-////////////////////////////////////////
 
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Constructor
 LayeredSymbolString::LayeredSymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols) :
@@ -733,7 +742,6 @@ S32 LayeredSymbolString::render(F32 x, F32 y, Alignment alignment, S32 blockWidt
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
 SymbolShape::SymbolShape(S32 width, S32 height, const Color *color) : mColor(color)
 {
    mWidth = width;
@@ -753,6 +761,12 @@ SymbolShape::~SymbolShape()
 void SymbolShape::render(F32 x, F32 y) const
 {
    render(Point(x,y));
+}
+
+
+void SymbolShape::render(S32 x, S32 y, Alignment alignment) const
+{
+   render((F32)x, (F32)y, alignment);
 }
 
 
@@ -798,7 +812,6 @@ S32 SymbolShape::getLabelSizeAdjustor(const string &label, S32 labelSize) const
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
 // Constructor
 SymbolBlank::SymbolBlank(S32 width, S32 height) : Parent(width, height, NULL)
 {
@@ -821,7 +834,6 @@ void SymbolBlank::render(const Point &center) const
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
 
 // Constructor
 SymbolHorizLine::SymbolHorizLine(S32 length, S32 height, const Color *color) : Parent(length, height, color)
@@ -1140,6 +1152,51 @@ void SymbolGoal::render(const Point &pos) const
    // We are given the bottom y position of the line, but the icon expects the center
    Point center(pos.x, (pos.y - mHeight/2) + 2); // Slight downward adjustment to position to better align with text
    renderGoalZoneIcon(center, mWidth);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+SymbolSpinner::SymbolSpinner(S32 fontSize, const Color *color) : Parent(fontSize, color)
+{
+   // Do nothing
+}
+
+
+// Destructor
+SymbolSpinner::~SymbolSpinner()
+{
+   // Do nothing
+}
+
+
+void SymbolSpinner::render(const Point &pos) const
+{
+   S32 charindx = Platform::getRealMilliseconds() / 200 % 4;
+
+   const char *charstr;
+
+   switch(charindx)
+   {
+      case 0:
+         charstr = "|";
+         break;
+      case 1:
+         charstr = "/";
+         break;
+      case 2:
+         charstr = "--";
+         break;
+      case 3:
+         charstr = "\\";
+         break;
+      default: 
+         TNLAssert(false, "Unexpected value of charindx");
+   }
+
+   drawStringc(pos, mHeight, charstr);
 }
 
 
