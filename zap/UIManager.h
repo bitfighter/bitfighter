@@ -63,6 +63,9 @@ class GameSettings;
 
 class UIManager
 {
+public:
+   static const S32 MessageBoxWrapWidth = 500;
+
 private:
    typedef map<const type_info *, UserInterface *> UiMapType;
    typedef UiMapType::iterator UiIterator;
@@ -226,6 +229,7 @@ public:
    void showMenuToChangeTeamForPlayer(const string &playerName);
 
    // ErrorMessageUI
+   void displayMessageBoxWrap(const char *title, const char *instr, const Vector<string> &messages);
    void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &messages);
    void displayMessageBox(const char *title, const char *instr, const Vector<string> &messages);
 

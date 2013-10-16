@@ -750,7 +750,18 @@ void renderRightArrow(const Point &center, S32 size)
                     };
 
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+}
 
+
+// Given a string, break it up such that no part is wider than width.  
+void wrapString(const string &str, S32 wrapWidth, S32 fontSize, FontContext context, Vector<string> &lines)
+{
+   FontManager::pushFontContext(context);
+   Vector<string> wrapped = wrapString(str, wrapWidth, fontSize, "");
+   FontManager::popFontContext();
+
+   for(S32 i = 0; i < wrapped.size(); i++)
+      lines.push_back(wrapped[i]);
 }
 
 
@@ -765,10 +776,10 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
    Vector<U32> separator;           // Collection of character indexes at which to split the message
    Vector<string> wrappedLines;
 
+   S32 indentWidth = getStringWidth(fontSize, indentPrefix.c_str());
+
    while(lineEndIndex < text.length())
    {
-      S32 indentWidth = getStringWidth(fontSize, indentPrefix.c_str());
-
       string substr = text.substr(lineStartIndex, lineEndIndex - lineStartIndex);
 
       // Does this char put us over the width limit?
@@ -820,6 +831,7 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
 
    return wrappedLines;
 }
+
 
 S32 getStringPairWidth(S32 size, FontContext leftContext,
       FontContext rightContext, const char* leftStr, const char* rightStr)

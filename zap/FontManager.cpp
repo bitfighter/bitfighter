@@ -220,6 +220,7 @@ void FontManager::setFontContext(FontContext fontContext)
          return;
       
       case HelpContext:
+      case ErrorMsgContext:
          setFont(FontPlay);
          return;
 

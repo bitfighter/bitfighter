@@ -218,7 +218,9 @@ S32 getStringWidthf(S32 size, const char *format, ...);
 
 S32 getStringPairWidth(S32 size, FontContext leftContext, FontContext rightContext, const char* leftStr, const char* rightStr);
 
+void wrapString(const string &str, S32 wrapWidth, S32 fontSize, FontContext context, Vector<string> &lines);
 Vector<string> wrapString(const string &str, S32 width, S32 fontSize, const string &indentPrefix);
+
 
 U32 drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
       S32 lineHeight, S32 fontSize, S32 multiLineIndentation = 0, bool alignBottom = false, bool draw = true);

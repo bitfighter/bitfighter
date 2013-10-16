@@ -153,9 +153,13 @@ void HighScoresUserInterface::renderWaitingForScores()
    {
       errUI->setTitle("");
 
-      errUI->setMessage(1, "Retrieving scores");
-      errUI->setMessage(2, "from Master Server");   
-      errUI->setMessage(4, "[[SPINNER]]");   
+      Vector<string> lines;
+      wrapString("Retrieving scores from Master Server", UIManager::MessageBoxWrapWidth, 18, ErrorMsgContext, lines);
+
+      for(S32 i = 0; i < lines.size(); i++)
+         errUI->setMessage(i + 2, lines[i]);
+
+      errUI->setMessage(lines.size() + 2, "[[SPINNER]]");   
 
       errUI->setPresentation(1);
 
@@ -163,15 +167,15 @@ void HighScoresUserInterface::renderWaitingForScores()
    else     // Let the user know they are not connected to master and shouldn't wait
    {
       errUI->setTitle("NO CONNECTION TO MASTER");
+      string msg = "High Scores are currently unavailable because there is no connection to the Bitfighter Master Server.";
+      Vector<string> lines;
+      wrapString(msg, UIManager::MessageBoxWrapWidth, 18, ErrorMsgContext, lines);
 
-      errUI->setMessage(1, "");
-      errUI->setMessage(2, "High Scores are currently unavailable");
-      errUI->setMessage(3, "because there is no connection");
-      errUI->setMessage(4, "to the Bitfighter Master Server.");
-      errUI->setMessage(6, "");
-      errUI->setMessage(7, "Firewall issues?  Do you have the latest version?");
-      errUI->setMessage(8, "");
-      errUI->setMessage(9, "");
+      // First line is blank
+      for(S32 i = 0; i < lines.size(); i++)
+         errUI->setMessage(i + 2, lines[i]);
+
+      errUI->setMessage(lines.size() + 4, "Firewall issues?  Do you have the latest version?");
 
       errUI->setPresentation(0);
    }      

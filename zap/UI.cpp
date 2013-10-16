@@ -42,6 +42,8 @@
 #include "OpenglUtils.h"
 #include "LoadoutIndicator.h"    // For LoadoutIndicatorHeight
 
+#include "FontManager.h"
+
 #include "MathUtils.h"           // For RADIANS_TO_DEGREES def
 #include "RenderUtils.h"
 
@@ -238,9 +240,10 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
    const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   S32 inset = 100;                    // Inset for left and right edges of box
+   S32 inset = 80;                     // Inset for left and right edges of box
    const S32 titleSize = 30;           // Size of title
    const S32 titleGap = titleSize / 3; // Spacing between title and first line of text
+   const S32 titleTextGap = 15;
 
    S32 textSize;
 
@@ -253,7 +256,7 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
    const S32 instrGap = 15;            // Gap between last line of text and instruction line
 
    S32 titleSpace = titleSize + titleGap;
-   S32 boxHeight  = titleSpace + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap;
+   S32 boxHeight  = titleSpace + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap + titleTextGap;
 
    if(strcmp(instr, "") == 0)
       boxHeight -= (instrGap + textSize);
@@ -277,19 +280,20 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
    if(canvasWidth - 2 * inset < maxLen)
       inset = (canvasWidth - maxLen) / 2;
 
-
    if(style == 1)       
       renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::red30, 1.0f, Colors::white);
    else if(style == 2)
       renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::black, 0.70f, Colors::blue);
 
    // Draw title, message, and footer
+   FontManager::pushFontContext(ErrorMsgContext);
    drawCenteredString(boxTop + vertMargin, titleSize, title);
    drawCenteredString(boxTop + boxHeight - vertMargin - textSize, textSize, instr);
+   FontManager::popFontContext();
 
 
    // Render the messages
-   S32 y = boxTop + titleSpace + textSize;
+   S32 y = boxTop + titleSpace + titleTextGap + textSize;
 
    for(S32 i = 0; i < msgLines; i++)
    {
@@ -297,7 +301,6 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
       y += message[i]->getHeight() + textGap;
    }
 }
-
 
 
 // This function could use some further cleaning; currently only used for the delayed spawn notification

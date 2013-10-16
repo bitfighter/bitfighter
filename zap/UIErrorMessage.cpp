@@ -59,7 +59,7 @@ void AbstractMessageUserInterface::setMessage(S32 id, string message)
 
    Vector<UI::SymbolShapePtr> symbols;
    SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), message, 
-                             symbols, HelpContext, 18);
+                             symbols, ErrorMsgContext, 18);
 
    mMessage[id - 1] = SymbolShapePtr(new SymbolString(symbols));
 }

@@ -35,6 +35,7 @@ namespace Zap
       MenuContext,             // Menu font (main game menus)
       HUDContext,              // General HUD text
       HelpContext,             // For Help screens
+      ErrorMsgContext,         // For big red boxes and such
       KeyContext,              // For keyboard keys
       LoadoutIndicatorContext, // For the obvious
       OverlayMenuContext,      // For Loadout Menus and such
