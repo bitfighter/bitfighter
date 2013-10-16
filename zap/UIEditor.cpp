@@ -3080,8 +3080,7 @@ void EditorUserInterface::findSnapVertex()
 
          // Find closer vertex: v1 or v2
          mSnapVertexIndex = (mHitItem->getVert(v1).distSquared(mouseLevelCoord) < 
-                          mHitItem->getVert(v2).distSquared(mouseLevelCoord)) ? v1 : v2;
-
+                             mHitItem->getVert(v2).distSquared(mouseLevelCoord)) ? v1 : v2;
          return;
       }
 
