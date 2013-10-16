@@ -28,8 +28,14 @@
 
 #include "UI.h"   // Parent class
 
+#include "SymbolShape.h"
+
+
+
 namespace Zap
 {
+
+using namespace UI;
 
 class AbstractMessageUserInterface : public UserInterface
 {
@@ -43,9 +49,10 @@ public:
    virtual ~AbstractMessageUserInterface();                      // Destructor
 
    static const S32 MAX_LINES = 9;
+   SymbolShapePtr mMessage[MAX_LINES];
+
    const char *mTitle;
    const char *mInstr;
-   string mMessage[MAX_LINES];
    void onActivate();
    void setMessage (S32 id, string message);
    void setTitle(const char *message);

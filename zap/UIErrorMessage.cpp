@@ -26,6 +26,8 @@
 #include "UIErrorMessage.h"
 
 #include "UIManager.h"
+#include "ClientGame.h"
+//#include "Colors.h"
 
 
 namespace Zap
@@ -54,7 +56,12 @@ void AbstractMessageUserInterface::onActivate()
 void AbstractMessageUserInterface::setMessage(S32 id, string message)
 {
    TNLAssert(id >= 1 && id <= MAX_LINES, "Invalid line id!");
-   mMessage[id - 1] = message;
+
+   Vector<UI::SymbolShapePtr> symbols;
+   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), message, 
+                             symbols, HelpContext, 18);
+
+   mMessage[id - 1] = SymbolShapePtr(new SymbolString(symbols));
 }
 
 
@@ -72,7 +79,7 @@ void AbstractMessageUserInterface::setInstr(const char *message)
 
 void AbstractMessageUserInterface::quit()
 {
-   getUIManager()->reactivatePrevUI();      // to gMainMenuUserInterface
+   getUIManager()->reactivatePrevUI();
 }
 
 
@@ -87,7 +94,7 @@ void AbstractMessageUserInterface::reset()
    mPresentationId = 0;
 
    for(S32 i = 0; i < MAX_LINES; i++)
-      mMessage[i] = "";
+      mMessage[i] =  SymbolShapePtr(new SymbolBlank());
 }
 
 

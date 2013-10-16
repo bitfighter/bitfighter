@@ -53,7 +53,11 @@ using namespace TNL;
 namespace Zap
 {
 
+using namespace UI;
+
+// Define statics
 S32 UserInterface::messageMargin = UserInterface::vertMargin + UI::LoadoutIndicator::LoadoutIndicatorHeight + 5;
+
 
 extern Vector<ClientGame *> gClientGames;
 
@@ -229,8 +233,75 @@ void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset,
 }
 
 
+void UserInterface::renderMessageBox(const char *title, const char *instr, SymbolShapePtr *message, S32 msgLines, S32 vertOffset, S32 style) const
+{
+   const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
+   S32 inset = 100;                    // Inset for left and right edges of box
+   const S32 titleSize = 30;           // Size of title
+   const S32 titleGap = titleSize / 3; // Spacing between title and first line of text
+
+   S32 textSize;
+
+   if(style == 1)
+      textSize = 18;            // Size of text and instructions
+   else if(style == 2)
+      textSize = 30;
+
+   const S32 textGap = textSize / 3;   // Spacing between text lines
+   const S32 instrGap = 15;            // Gap between last line of text and instruction line
+
+   S32 titleSpace = titleSize + titleGap;
+   S32 boxHeight  = titleSpace + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap;
+
+   if(strcmp(instr, "") == 0)
+      boxHeight -= (instrGap + textSize);
+
+   if(strcmp(title, "") == 0)
+   {
+      boxHeight -= titleSpace;
+      titleSpace = 0;
+   }
+
+   S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
+
+   S32 maxLen = 0;
+   for(S32 i = 0; i < msgLines; i++)
+   {
+      S32 len = message[i]->getWidth() + 20;     // 20 gives a little breathing room on the edges
+      if(len > maxLen)
+         maxLen = len;
+   }
+
+   if(canvasWidth - 2 * inset < maxLen)
+      inset = (canvasWidth - maxLen) / 2;
+
+
+   if(style == 1)       
+      renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::red30, 1.0f, Colors::white);
+   else if(style == 2)
+      renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::black, 0.70f, Colors::blue);
+
+   // Draw title, message, and footer
+   drawCenteredString(boxTop + vertMargin, titleSize, title);
+   drawCenteredString(boxTop + boxHeight - vertMargin - textSize, textSize, instr);
+
+
+   // Render the messages
+   S32 y = boxTop + titleSpace + textSize;
+
+   for(S32 i = 0; i < msgLines; i++)
+   {
+      message[i]->render(gScreenInfo.getGameCanvasWidth() / 2, y, AlignmentCenter);
+      y += message[i]->getHeight() + textGap;
+   }
+}
+
+
+
 // This function could use some further cleaning; currently only used for the delayed spawn notification
-void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset) const
+void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr, SymbolShapePtr *message, S32 msgLines, S32 vertOffset) const
 {
    dimUnderlyingUI();
 
@@ -245,12 +316,11 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
 
    S32 actualLines = 0;
    for(S32 i = msgLines - 1; i >= 0; i--)
-      if(message[i] != "")
+      if(!message[i].get())
       {
          actualLines = i + 1;
          break;
       }
-
 
    S32 titleSpace = titleSize + titleGap;
    S32 boxHeight = titleSpace + actualLines * (textSize + textGap) + instrGap;
@@ -272,11 +342,16 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
 
    S32 boxWidth = 500;
    drawHollowFancyBox((canvasWidth - boxWidth) / 2, boxTop - vertMargin, canvasWidth - ((canvasWidth - boxWidth) / 2), boxTop + boxHeight + vertMargin, 15);
+   drawCenteredString(boxTop + boxHeight / 2 - textSize, textSize, instr);
+
+   // Render the messages
+   S32 y = boxTop + titleSpace;
 
    for(S32 i = 0; i < msgLines; i++)
-      drawCenteredString(boxTop + titleSpace + i * (textSize + textGap), textSize, message[i].c_str());
-
-   drawCenteredString(boxTop + boxHeight / 2 - textSize, textSize, instr);
+   {
+      message[i]->render(gScreenInfo.getGameCanvasWidth() / 2, y, AlignmentCenter);
+      y += message[i]->getHeight() + textGap;
+   }
 }
 
 

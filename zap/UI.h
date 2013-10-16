@@ -32,6 +32,7 @@
 
 #include "lineEditor.h"
 #include "InputCode.h"
+#include "SymbolShape.h"
 
 #include "Timer.h"
 #include "tnl.h"
@@ -44,6 +45,8 @@ using namespace std;
 
 namespace Zap
 {
+
+using namespace UI;
 
 extern F32 gLineWidth1;
 extern F32 gDefaultLineWidth;
@@ -134,8 +137,12 @@ public:
    virtual void onMouseMoved();
    virtual void onMouseDragged();
 
+   // Old school
    void renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0, S32 style = 1) const;
-   void renderUnboxedMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0) const;
+
+   // New school
+   void renderMessageBox(       const char *title, const char *instr, SymbolShapePtr *message, S32 msgLines, S32 vertOffset = 0, S32 style = 1) const;
+   void renderUnboxedMessageBox(const char *title, const char *instr, SymbolShapePtr *message, S32 msgLines, S32 vertOffset = 0) const;
 
    static void renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor);
 

@@ -154,7 +154,8 @@ void HighScoresUserInterface::renderWaitingForScores()
       errUI->setTitle("");
 
       errUI->setMessage(1, "Retrieving scores");
-      errUI->setMessage(2, "from Master Server...");   
+      errUI->setMessage(2, "from Master Server");   
+      errUI->setMessage(4, "[[SPINNER]]");   
 
       errUI->setPresentation(1);
 
