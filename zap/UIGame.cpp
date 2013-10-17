@@ -702,7 +702,7 @@ void GameUserInterface::renderShutdownMessage() const
       if(mShutdownInitiator)     // Local client intitiated the shutdown
       {
          string msg[] = { "", timemsg, "", "Shutdown sequence intitated by you.", "", mShutdownReason.getString(), "" };
-         renderMessageBox("SERVER SHUTDOWN INITIATED", "Press <ESC> to cancel shutdown", msg, 7);
+         renderMessageBox("SERVER SHUTDOWN INITIATED", "Press [ESC] to cancel shutdown", msg, 7);
       }
       else                       // Remote user intiated the shutdown
       {
@@ -710,7 +710,7 @@ void GameUserInterface::renderShutdownMessage() const
          dSprintf(whomsg, sizeof(whomsg), "Shutdown sequence initiated by %s.", mShutdownName.getString());
 
          string msg[] = { "", timemsg, "", whomsg, "", mShutdownReason.getString(), "" };
-         renderMessageBox("SHUTDOWN INITIATED", "Press <ESC> to dismiss", msg, 7);
+         renderMessageBox("SHUTDOWN INITIATED", "Press [ESC] to dismiss", msg, 7);
       }
    }
    else if(mShutdownMode == Canceled)
@@ -718,7 +718,7 @@ void GameUserInterface::renderShutdownMessage() const
       // Keep same number of messages as above, so if message changes, it will be a smooth transition
       string msg[] = { "", "", "Server shutdown sequence canceled.", "", "Play on!", "", "" };     
 
-      renderMessageBox("SHUTDOWN CANCELED", "Press <ESC> to dismiss", msg, 7);
+      renderMessageBox("SHUTDOWN CANCELED", "Press [ESC] to dismiss", msg, 7);
    }
 }
 
