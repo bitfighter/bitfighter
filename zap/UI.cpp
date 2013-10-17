@@ -239,7 +239,7 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
    const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   const S32 titleTextGap = 15;
+   const S32 titleTextGap = 30;        // Space between title and rest of message
 
    S32 textSize;
 
