@@ -64,10 +64,6 @@ void YesNoUserInterface::reset()
    Parent::reset();
 
    mTitle = "YES OR NO";    // Default title
-
-   for(S32 i = 0; i < MAX_LINES; i++)
-      mMessage[i] = SymbolShapePtr();
-
    mInstr = "Press [Y] or [N]";
 
    mYesFunction = NULL;
