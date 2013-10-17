@@ -229,7 +229,7 @@ public:
    void showMenuToChangeTeamForPlayer(const string &playerName);
 
    // ErrorMessageUI
-   void displayMessageBoxWrap(const char *title, const char *instr, const Vector<string> &messages);
+   void displayMessageBoxWrap(const char *title, const char *instr, const string &message);
    void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &messages);
    void displayMessageBox(const char *title, const char *instr, const Vector<string> &messages);
 
