@@ -136,6 +136,7 @@ static BfFont *fontList[FontCount];
 sth_stash *FontManager::mStash = NULL;
 
 // This must be run after VideoSystem::actualizeScreenMode()
+// If useExternalFonts is false, settings can be NULL
 void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 {
    mUsingExternalFonts = useExternalFonts;
@@ -150,6 +151,8 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 
    if(mUsingExternalFonts)
    {
+      TNLAssert(settings, "Settings can't be NULL if we are using external fonts!");
+
       // Our TTF fonts
       fontList[FontOcrA]           = new BfFont(FontOcrA,          "Digital.ttf",         settings);
       fontList[FontOrbitronLight]  = new BfFont(FontOrbitronLight, "Orbitron Light.ttf",  settings);
@@ -335,10 +338,16 @@ void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
 
 BfFont *FontManager::getFont(FontId currentFontId)
 {
+   BfFont *font;
+
    if(mUsingExternalFonts || currentFontId < FirstExternalFont)
-      return fontList[currentFontId];
+      font = fontList[currentFontId];
    else
-     return fontList[FontRoman]; 
+     font = fontList[FontRoman]; 
+
+   TNLAssert(font, "Font is NULL... Did the FontManager get initialized?");
+
+   return font;
 }
 
 

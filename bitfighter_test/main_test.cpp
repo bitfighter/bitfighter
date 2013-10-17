@@ -31,6 +31,7 @@
 
 #include "../zap/GeomUtils.h"
 #include "../zap/stringUtils.h"
+#include "../zap/RenderUtils.h"
 
 #include "TestUtils.h"
 #include "LevelFilesForTesting.h"      // Contains sample levelcode for testing purposes
@@ -393,6 +394,89 @@ TEST_F(BfTest, LevelReadingAndItemPropagation)
    EXPECT_STREQ("Test Level",                 clientGame->getGameType()->getLevelName()->getString());         // Quoted in level file
    EXPECT_STREQ("This is a basic test level", clientGame->getGameType()->getLevelDescription()->getString());  // Quoted in level file
    EXPECT_STREQ("level creator",              clientGame->getGameType()->getLevelCredits()->getString());      // Not quoted in level file
+}
+
+
+static void testLines(const Vector<string> &lines, S32 maxLen, S32 fontSize)
+{
+   for(S32 i = 0; i < lines.size(); i++)    
+   {
+      EXPECT_TRUE(getStringWidth(fontSize, lines[i].c_str()) <= maxLen) << 
+            "Failed on iteration " << i <<"; len = " << getStringWidth(10, lines[i].c_str());
+
+      // Make sure there is no leading or trailing whitespace
+      EXPECT_NE(lines[i][0], ' ')                     << "Leading space on iter "  << i <<"; str = \"" << lines[i] << "\"";
+      EXPECT_NE(lines[i][lines[i].length() - 1], ' ') << "Trailing space on iter " << i <<"; str = \"" << lines[i] << "\"";
+   }
+}
+
+
+// Here make sure that just one more character would make the line too long
+static void wouldOneMoreCharMakeTheLineTooLong(const Vector<string> &lines, S32 maxLen, S32 fontSize)
+{
+   for(S32 i = 0; i < lines.size() - 1; i++)    
+   {
+      string line = lines[i] + lines[i + 1][0];    // Add first char of next item
+
+      EXPECT_TRUE(getStringWidth(fontSize, line.c_str()) > maxLen) << 
+            "Failed on iteration " << i <<"; len = " << getStringWidth(10, lines[i].c_str());
+   }
+}
+
+TEST_F(BfTest, StringWrappingTests)
+{
+   Vector<string> lines, lines2;
+   FontManager::initialize(NULL, false);
+
+   lines = wrapString("", 200, 10);
+   EXPECT_EQ(0, lines.size());
+
+   lines = wrapString("A", 200, 10);
+   EXPECT_EQ(1, lines.size());
+
+   lines = wrapString("Short string", 200, 10);
+   ASSERT_EQ(1, lines.size());
+   EXPECT_TRUE(lines[0] == "Short string");
+
+   lines = wrapString("Three\nShort\nLines", 200, 10);
+   ASSERT_EQ(3, lines.size());
+   EXPECT_TRUE(lines[0] == "Three" && lines[1] == "Short" && lines[2] == "Lines");
+
+   lines = wrapString("Three\n\nShort\n\nDouble spaced lines", 200, 10);
+   ASSERT_EQ(5, lines.size());
+   EXPECT_TRUE(lines[0] == "Three" && lines[1] == "" && lines[2] == "Short" && lines[3] == "" && lines[4] == "Double spaced lines");
+
+   lines = wrapString("One longer line that will require wrapping due to short length", 50, 10);
+   EXPECT_EQ(9, lines.size());
+   {
+      SCOPED_TRACE("Scenario 1");
+      testLines(lines, 50, 10);
+   }
+
+   // Forcing the linebreaks where they would normally fall should produce same result
+   lines2 = wrapString("One\nlonger\nline that\nwill\nrequire\nwrapping\ndue to\nshort\nlength", 50, 10);
+   EXPECT_EQ(lines.size(), lines2.size());
+   for(S32 i = 0; i < lines.size(); i++)
+      EXPECT_EQ(lines[i], lines2[i]) << "Failed on iter " << i << "; \"" << lines[i] << "\" != \"" << lines2[i] << "\"!";
+   {
+      SCOPED_TRACE("Scenario 1A");
+      testLines(lines2, 50, 10);
+   }
+
+   // Check wrapping where there are no spaces or newlines
+   string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+   lines = wrapString(alphabet, 50, 10);
+
+   string line;
+   for(S32 i = 0; i < lines.size(); i++)
+      line += lines[i];
+
+   EXPECT_EQ(line, alphabet) << "Merge failed... expected " << alphabet << " got " << line;
+   {
+      SCOPED_TRACE("Scenario 2");
+      testLines(lines, 50, 10);
+      wouldOneMoreCharMakeTheLineTooLong(lines, 50, 10);
+   }
 }
 
 

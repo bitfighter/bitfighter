@@ -169,50 +169,49 @@ void UserInterface::renderConsole() const
 
 extern ScreenInfo gScreenInfo;
 
+static const S32 MessageBoxPadding = 10;  
+static const S32 TitleSize = 30;
+static const S32 TitleGap = 10;           // Spacing between title and first line of message box
+static const S32 TitleHeight = TitleSize + TitleGap;
+static const S32 TextSize = 18;
+static const S32 TextSizeBig = 30;
+
+
 void UserInterface::renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset, S32 style) const
 {
    const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   S32 inset = 100;                    // Inset for left and right edges of box
-   const S32 titleSize = 30;           // Size of title
-   const S32 titleGap = titleSize / 3; // Spacing between title and first line of text
-
    S32 textSize;
 
    if(style == 1)
-      textSize = 18;            // Size of text and instructions
+      textSize = TextSize;             // Size of text and instructions
    else if(style == 2)
-      textSize = 30;
+      textSize = TextSizeBig;
 
    const S32 textGap = textSize / 3;   // Spacing between text lines
    const S32 instrGap = 15;            // Gap between last line of text and instruction line
 
-   S32 titleSpace = titleSize + titleGap;
-   S32 boxHeight = titleSpace + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap;
+   S32 boxHeight  = TitleHeight + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap;
 
    if(strcmp(instr, "") == 0)
       boxHeight -= (instrGap + textSize);
 
    if(strcmp(title, "") == 0)
-   {
-      boxHeight -= titleSpace;
-      titleSpace = 0;
-   }
+      boxHeight -= TitleHeight;
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
 
    S32 maxLen = 0;
    for(S32 i = 0; i < msgLines; i++)
    {
-      S32 len = getStringWidth(textSize, message[i].c_str()) + 20;     // 20 gives a little breathing room on the edges
+      S32 len = getStringWidth(textSize, message[i].c_str()) + MessageBoxPadding * 2; 
       if(len > maxLen)
          maxLen = len;
    }
 
-   if(canvasWidth - 2 * inset < maxLen)
-      inset = (canvasWidth - maxLen) / 2;
-
+   S32 boxwidth = max(UIManager::MessageBoxWrapWidth, maxLen);
+   S32 inset = (canvasWidth - boxwidth) / 2;                            // Inset for left and right edges of box
 
    if(style == 1)       
       renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::red30, 1.0f, Colors::white);
@@ -220,10 +219,10 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
       renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::black, 0.70f, Colors::blue);
 
    // Draw title, message, and footer
-   drawCenteredString(boxTop + vertMargin, titleSize, title);
+   drawCenteredString(boxTop + vertMargin, TitleSize, title);
 
    for(S32 i = 0; i < msgLines; i++)
-      drawCenteredString(boxTop + vertMargin + titleSpace + i * (textSize + textGap), textSize, message[i].c_str());
+      drawCenteredString(boxTop + vertMargin + TitleHeight + i * (textSize + textGap), textSize, message[i].c_str());
 
    drawCenteredString(boxTop + boxHeight - vertMargin - textSize, textSize, instr);
 }
@@ -240,31 +239,28 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
    const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   S32 inset = 80;                     // Inset for left and right edges of box
-   const S32 titleSize = 30;           // Size of title
-   const S32 titleGap = titleSize / 3; // Spacing between title and first line of text
    const S32 titleTextGap = 15;
 
    S32 textSize;
 
    if(style == 1)
-      textSize = 18;            // Size of text and instructions
+      textSize = TextSize;             // Size of text and instructions
    else if(style == 2)
-      textSize = 30;
+      textSize = TextSizeBig;
 
    const S32 textGap = textSize / 3;   // Spacing between text lines
    const S32 instrGap = 15;            // Gap between last line of text and instruction line
 
-   S32 titleSpace = titleSize + titleGap;
-   S32 boxHeight  = titleSpace + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap + titleTextGap;
+   S32 boxHeight  = TitleHeight + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap + titleTextGap;
 
    if(strcmp(instr, "") == 0)
       boxHeight -= (instrGap + textSize);
 
+   S32 titleHeight = TitleHeight;
    if(strcmp(title, "") == 0)
    {
-      boxHeight -= titleSpace;
-      titleSpace = 0;
+      boxHeight -= TitleHeight;
+      titleHeight = 0;
    }
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
@@ -272,13 +268,14 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
    S32 maxLen = 0;
    for(S32 i = 0; i < msgLines; i++)
    {
-      S32 len = message[i]->getWidth() + 20;     // 20 gives a little breathing room on the edges
+      S32 len = message[i]->getWidth() + MessageBoxPadding * 2;
       if(len > maxLen)
          maxLen = len;
    }
 
-   if(canvasWidth - 2 * inset < maxLen)
-      inset = (canvasWidth - maxLen) / 2;
+
+   S32 boxwidth = max(UIManager::MessageBoxWrapWidth, maxLen);
+   S32 inset = (canvasWidth - boxwidth) / 2;   // Inset for left and right edges of box
 
    if(style == 1)       
       renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::red30, 1.0f, Colors::white);
@@ -287,13 +284,13 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
 
    // Draw title, message, and footer
    FontManager::pushFontContext(ErrorMsgContext);
-   drawCenteredString(boxTop + vertMargin, titleSize, title);
+   drawCenteredString(boxTop + vertMargin, TitleSize, title);
    drawCenteredString(boxTop + boxHeight - vertMargin - textSize, textSize, instr);
    FontManager::popFontContext();
 
 
    // Render the messages
-   S32 y = boxTop + titleSpace + titleTextGap + textSize;
+   S32 y = boxTop + titleHeight + titleTextGap + textSize;
 
    for(S32 i = 0; i < msgLines; i++)
    {
@@ -308,12 +305,10 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
 {
    dimUnderlyingUI();
 
-   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   static const S32 titleSize = 30;              // Size of title
-   static const S32 titleGap = titleSize / 3;    // Spacing between title and first line of text
-   static const S32 textSize = 36;               // Size of text and instructions
+   static const S32 textSize = TextSizeBig;      // Size of text and instructions
    static const S32 textGap = textSize / 3;      // Spacing between text lines
    static const S32 instrGap = 15;               // Gap between last line of text and instruction line
 
@@ -325,30 +320,31 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
          break;
       }
 
-   S32 titleSpace = titleSize + titleGap;
-   S32 boxHeight = titleSpace + actualLines * (textSize + textGap) + instrGap;
+   S32 boxHeight  = TitleHeight + actualLines * (textSize + textGap) + instrGap;
 
    if(strcmp(instr, "") == 0)
       boxHeight -= instrGap;
 
+   S32 titleHeight = TitleHeight;
+
    if(strcmp(title, "") == 0)
    {
-      boxHeight -= titleSpace;
-      titleSpace = 0;
+      boxHeight -= titleHeight;
+      titleHeight = 0;
    }
 
    S32 boxTop = (canvasHeight - boxHeight) / 2;
 
    // Draw title, message, and footer
    glColor(Colors::blue);
-   drawCenteredString(boxTop + vertMargin, titleSize, title);
+   drawCenteredString(boxTop + vertMargin, TitleSize, title);
 
    S32 boxWidth = 500;
    drawHollowFancyBox((canvasWidth - boxWidth) / 2, boxTop - vertMargin, canvasWidth - ((canvasWidth - boxWidth) / 2), boxTop + boxHeight + vertMargin, 15);
    drawCenteredString(boxTop + boxHeight / 2 - textSize, textSize, instr);
 
    // Render the messages
-   S32 y = boxTop + titleSpace;
+   S32 y = boxTop + titleHeight;
 
    for(S32 i = 0; i < msgLines; i++)
    {
@@ -369,10 +365,11 @@ void UserInterface::dimUnderlyingUI(F32 amount)
 }
 
 
+// Draw blue rectangle around selected menu item
 void UserInterface::drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool disabled)
 {
    if(disabled)
-      drawFilledRect(x1, y1, x2, y2, Color(0.4), Color(0.8));
+      drawFilledRect(x1, y1, x2, y2, Colors::gray40, Colors::gray80);
    else
       drawFilledRect(x1, y1, x2, y2, Colors::blue40, Colors::blue);
 }
