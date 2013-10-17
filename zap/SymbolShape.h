@@ -390,6 +390,7 @@ protected:
 
 public:
    SymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, Alignment alignment = AlignmentNone);
+   SymbolString(const        boost::shared_ptr<SymbolShape>   &symbol,  Alignment alignment = AlignmentNone);
    SymbolString();                     // Constructor (can't use until you've setSymbols)
    virtual ~SymbolString();            // Destructor
 

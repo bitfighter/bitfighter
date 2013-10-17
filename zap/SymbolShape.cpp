@@ -223,6 +223,17 @@ SymbolString::SymbolString(const Vector<SymbolShapePtr> &symbols, Alignment alig
 }
 
 
+SymbolString::SymbolString(const SymbolShapePtr &symbol, Alignment alignment)
+{
+   mSymbols.push_back(symbol);
+
+   mReady = true;
+   mWidth = symbol->getWidth();
+   mHeight = symbol->getHeight();
+   mAlignment = alignment;
+}
+
+
 // Constructor -- symbols will be provided later
 SymbolString::SymbolString()
 {
@@ -1159,7 +1170,7 @@ void SymbolGoal::render(const Point &pos) const
 ////////////////////////////////////////
 
 // Constructor
-SymbolSpinner::SymbolSpinner(S32 fontSize, const Color *color) : Parent(fontSize, color)
+SymbolSpinner::SymbolSpinner(S32 fontSize, const Color *color) : Parent(fontSize / 2, color)
 {
    // Do nothing
 }

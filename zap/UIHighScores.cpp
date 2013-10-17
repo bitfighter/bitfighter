@@ -33,6 +33,7 @@
 #include "masterConnection.h"   
 #include "ScreenInfo.h"          // For canvas dimensions
 
+#include "FontManager.h"
 #include "Colors.h"
 
 #include "RenderUtils.h"
@@ -72,6 +73,8 @@ extern ScreenInfo gScreenInfo;
 
 void HighScoresUserInterface::renderScores()
 {
+   FontManager::pushFontContext(HelpContext);
+
    S32 y = vertMargin;
    S32 headerSize = 32;
    S32 titleSize = 20;
@@ -135,6 +138,8 @@ void HighScoresUserInterface::renderScores()
    glColor(Colors::red80);
 
    drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - titleSize, titleSize, "The week ends Sunday/Monday at 0:00:00 UTC Time");
+
+   FontManager::popFontContext();
 }
 
 
@@ -151,18 +156,18 @@ void HighScoresUserInterface::renderWaitingForScores()
 
    if(masterConn && masterConn->isEstablished())
    {
-      errUI->setTitle("");
+      SymbolStringSet symbolSet(10);
 
       Vector<string> lines;
       wrapString("Retrieving scores from Master Server", UIManager::MessageBoxWrapWidth, 18, ErrorMsgContext, lines);
 
       for(S32 i = 0; i < lines.size(); i++)
-         errUI->setMessage(i + 2, lines[i]);
+         symbolSet.add(SymbolString::getSymbolText(lines[i], 30, ErrorMsgContext, &Colors::blue));
 
-      errUI->setMessage(lines.size() + 2, "[[SPINNER]]");   
+      symbolSet.add(SymbolString(SymbolString::getBlankSymbol(0, 10)));   
+      symbolSet.add(SymbolString(SymbolString::getSymbolSpinner(18, &Colors::cyan)));   
 
-      errUI->setPresentation(1);
-
+      symbolSet.render(gScreenInfo.getGameCanvasWidth() / 2, (gScreenInfo.getGameCanvasHeight() - symbolSet.getHeight()) / 2, AlignmentCenter);
    }
    else     // Let the user know they are not connected to master and shouldn't wait
    {
@@ -177,11 +182,9 @@ void HighScoresUserInterface::renderWaitingForScores()
 
       errUI->setMessage(lines.size() + 4, "Firewall issues?  Do you have the latest version?");
 
-      errUI->setPresentation(0);
+      // Only render, don't activate so we don't have to deactivate when we get the high scores
+      errUI->render();
    }      
-
-   // Only render, don't activate so we don't have to deactivate when we get the high scores
-   errUI->render();
 }
 
 
@@ -209,7 +212,7 @@ void HighScoresUserInterface::setHighScores(Vector<StringTableEntry> groupNames,
       for(S32 j = 0; j < scoresPerGroup; j++)    
       {
          currNames .push_back(names [i * scoresPerGroup + j]);    
-         currScores.push_back(scores[i  *scoresPerGroup + j]);                      
+         currScores.push_back(scores[i * scoresPerGroup + j]);                      
       }
 
       scoreGroup.names = currNames;

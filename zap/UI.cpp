@@ -273,7 +273,6 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
          maxLen = len;
    }
 
-
    S32 boxwidth = max(UIManager::MessageBoxWrapWidth, maxLen);
    S32 inset = (canvasWidth - boxwidth) / 2;   // Inset for left and right edges of box
 
@@ -314,13 +313,13 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
 
    S32 actualLines = 0;
    for(S32 i = msgLines - 1; i >= 0; i--)
-      if(!message[i].get())
+      if(message[i])
       {
          actualLines = i + 1;
          break;
       }
 
-   S32 boxHeight  = TitleHeight + actualLines * (textSize + textGap) + instrGap;
+   S32 boxHeight = TitleHeight + actualLines * (textSize + textGap) + instrGap;
 
    if(strcmp(instr, "") == 0)
       boxHeight -= instrGap;
