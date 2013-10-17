@@ -51,7 +51,7 @@ struct is_volatile_rval_filter
    BOOST_STATIC_CONSTANT(bool, value = ::boost::detail::cv_traits_imp<T*>::is_volatile);
 #endif
 };
-#ifndef BOOST_NO_RVALUE_REFERENCES
+#ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
 //
 // We can't filter out rvalue_references at the same level as
 // references or we get ambiguities from msvc:
@@ -94,7 +94,7 @@ no_type is_volatile_tester(void const*);
 
 template <bool is_ref, bool array>
 struct is_volatile_helper
-    : ::boost::type_traits::false_result
+    : public ::boost::type_traits::false_result
 {
 };
 
@@ -124,7 +124,7 @@ struct is_volatile_helper<false,true>
 
 template <typename T>
 struct is_volatile_impl
-    : is_volatile_helper<
+    : public is_volatile_helper<
           is_reference<T>::value
         , is_array<T>::value
         >::template result_<T>
