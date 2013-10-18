@@ -397,12 +397,17 @@ TEST_F(BfTest, LevelReadingAndItemPropagation)
 }
 
 
-static void testLines(const Vector<string> &lines, S32 maxLen, S32 fontSize)
+static void testThatLinesAreNotLongerThanMax(const Vector<string> &lines, S32 maxLen, S32 fontSize)
 {
    for(S32 i = 0; i < lines.size(); i++)    
    {
+      if(getStringWidth(fontSize, lines[i].c_str()) > maxLen)
+      {
+         int x = getStringWidth(fontSize, lines[i].c_str());
+         int y = 0;
+      }
       EXPECT_TRUE(getStringWidth(fontSize, lines[i].c_str()) <= maxLen) << 
-            "Failed on iteration " << i <<"; len = " << getStringWidth(10, lines[i].c_str());
+            "TestThatLinesAreNotLongerThanMax failed on iteration " << i <<"; strlen=" << getStringWidth(10, lines[i].c_str());
 
       // Make sure there is no leading or trailing whitespace
       EXPECT_NE(lines[i][0], ' ')                     << "Leading space on iter "  << i <<"; str = \"" << lines[i] << "\"";
@@ -419,9 +424,24 @@ static void wouldOneMoreCharMakeTheLineTooLong(const Vector<string> &lines, S32 
       string line = lines[i] + lines[i + 1][0];    // Add first char of next item
 
       EXPECT_TRUE(getStringWidth(fontSize, line.c_str()) > maxLen) << 
-            "Failed on iteration " << i <<"; len = " << getStringWidth(10, lines[i].c_str());
+            "WouldOneMoreCharMakeTheLineTooLong failed on iteration " << i <<"; len = " << getStringWidth(10, line.c_str());
    }
 }
+
+
+static void wouldOneMoreWordMakeTheLineTooLong(const Vector<string> &lines, S32 maxLen, S32 fontSize)
+{
+   Vector<string> words;
+   for(S32 i = 0; i < lines.size() - 1; i++)
+   {
+      parseString(lines[i + 1], words);
+      string line = lines[i] + ' ' + words[0];
+
+      EXPECT_TRUE(getStringWidth(fontSize, line.c_str()) > maxLen) <<
+         "WouldOneMoreWordMakeTheLineTooLong failed on iteration " << i << "; len = " << getStringWidth(10, line.c_str());
+   }
+}
+
 
 TEST_F(BfTest, StringWrappingTests)
 {
@@ -450,7 +470,7 @@ TEST_F(BfTest, StringWrappingTests)
    EXPECT_EQ(9, lines.size());
    {
       SCOPED_TRACE("Scenario 1");
-      testLines(lines, 50, 10);
+      testThatLinesAreNotLongerThanMax(lines, 50, 10);
    }
 
    // Forcing the linebreaks where they would normally fall should produce same result
@@ -460,7 +480,7 @@ TEST_F(BfTest, StringWrappingTests)
       EXPECT_EQ(lines[i], lines2[i]) << "Failed on iter " << i << "; \"" << lines[i] << "\" != \"" << lines2[i] << "\"!";
    {
       SCOPED_TRACE("Scenario 1A");
-      testLines(lines2, 50, 10);
+      testThatLinesAreNotLongerThanMax(lines2, 50, 10);
    }
 
    // Check wrapping where there are no spaces or newlines
@@ -474,8 +494,33 @@ TEST_F(BfTest, StringWrappingTests)
    EXPECT_EQ(line, alphabet) << "Merge failed... expected " << alphabet << " got " << line;
    {
       SCOPED_TRACE("Scenario 2");
-      testLines(lines, 50, 10);
+      testThatLinesAreNotLongerThanMax(lines, 50, 10);
       wouldOneMoreCharMakeTheLineTooLong(lines, 50, 10);
+   }
+
+   // Ok, one big pressure test to ensure everything is copacetic
+   string longLine =
+      "Now is the winter of our discontent "
+      "Made glorious summer by this sun of York; "
+      "And all the clouds that lour'd upon our house "
+      "In the deep bosom of the ocean buried. "
+      "Now are our brows bound with victorious wreaths; "
+      "Our bruised arms hung up for monuments; "
+      "Our stern alarums changed to merry meetings, "
+      "Our dreadful marches to delightful measures.";
+
+   for(S32 i = 0; i < 50; i++)
+   {
+      S32 width = 150 + i * 10;
+      for(S32 j = 0; j < 5; j++)
+      {
+         S32 size = 10 + 2 * j;
+         lines = wrapString(longLine, 300, 14);
+
+         SCOPED_TRACE("Pressure Test ==> width=" + itos(width) + ", size=" + itos(size));
+         testThatLinesAreNotLongerThanMax(lines, 300, 14);
+         wouldOneMoreWordMakeTheLineTooLong(lines, 300, 14);
+      }
    }
 }
 

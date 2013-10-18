@@ -773,88 +773,38 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
    if(str == "")
       return wrappedLines;
 
-   string text = str;               // Make local working copy that we can alter
+   S32 start = 0;
+   S32 potentialBreakPoint = start;
 
-   U32 lineStartIndex = 0;
-   U32 lineEndIndex = 1;
-   U32 lineBreakCandidateIndex = 0;
-   Vector<U32> separator;           // Collection of character indexes at which to split the message
-
-   S32 indentWidth = getStringWidth(fontSize, indentPrefix.c_str());
-
-   bool newLineEncountered = false;
-   bool overWidthLimit = false;
-
-   while(lineEndIndex < text.length())
+   for(U32 i = 0; i < str.length(); i++)
    {
-      string substr = text.substr(lineStartIndex, lineEndIndex - lineStartIndex);
-
-      // If char is a newline, convert it to space (to mesh better with normal wrapping) and break here
-      if(text[lineEndIndex] == '\n')
+      if(str[i] == '\n')
       {
-         text[lineEndIndex] = ' ';
-         lineBreakCandidateIndex = lineEndIndex + 1;
-         newLineEncountered = true;
+         wrappedLines.push_back(str.substr(start, i - start));
+         start = i + 1;
+         potentialBreakPoint = start + 1;  
       }
-      else
+      else if(str[i] == ' ')
+         potentialBreakPoint = i;
+      else if(getStringWidth(fontSize, str.substr(start, i - start + 1).c_str()) > wrapWidth)
       {
-         // Does this char put us over the width limit?
-         S32 len = getStringWidth(fontSize, substr.c_str());
-         overWidthLimit = len > (wrapWidth - indentWidth);
-
-         // If this character is a space, keep track in case we need to split here
-         if(!overWidthLimit && text[lineEndIndex] == ' ')
-            lineBreakCandidateIndex = lineEndIndex + 1;
+         if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
+         {
+            wrappedLines.push_back(str.substr(start, i - start));
+            start = i;
+            potentialBreakPoint = start;
+         }
+         else
+         {
+            wrappedLines.push_back(str.substr(start, potentialBreakPoint - start));
+            potentialBreakPoint++;
+            start = potentialBreakPoint;
+         }
       }
-
-      if(overWidthLimit || newLineEncountered)
-      {
-         // If no spaces were found, we need to force a line break at this character.  We'll do this by inserting a space.
-         if(lineBreakCandidateIndex == lineStartIndex && !newLineEncountered)
-            lineBreakCandidateIndex = lineEndIndex;
-
-         if(text[lineBreakCandidateIndex - 1] != ' ')
-            text.insert(lineBreakCandidateIndex - 1, 1, ' ');  // Add a space if there's not already one there
-
-         separator.push_back(lineBreakCandidateIndex - 1);     // Add this index to line split list
-
-
-         lineStartIndex = lineBreakCandidateIndex;             // Skip over the space
-         lineBreakCandidateIndex = lineStartIndex;             // Reset line break index to start of list
-
-         if(text[lineEndIndex] == ' ')
-            lineBreakCandidateIndex = lineEndIndex + 1;
-
-         newLineEncountered = false;
-         overWidthLimit = false;
-      }
-
-      lineEndIndex++;
    }
 
-   // Handle lines that need to wrap
-   lineStartIndex = 0;
-
-   for(S32 i = 0; i < separator.size(); i++)
-   {
-      lineEndIndex = separator[i];
-
-      if(i == 0)           
-         wrappedLines.push_back(               text.substr(lineStartIndex, lineEndIndex - lineStartIndex)); 
-      else
-         wrappedLines.push_back(indentPrefix + text.substr(lineStartIndex, lineEndIndex - lineStartIndex));
-
-      lineStartIndex = lineEndIndex + 1;  // Skip a char which is a space
-   }
-
-   // Handle any remaining characters
-   if(lineStartIndex != lineEndIndex)
-   {
-      if(separator.size() == 0)           // Don't draw the extra margin if it is the first and only line
-         wrappedLines.push_back(               text.substr(lineStartIndex));
-      else
-         wrappedLines.push_back(indentPrefix + text.substr(lineStartIndex));
-   }
+   if(start != str.length())
+      wrappedLines.push_back(str.substr(start));
 
    return wrappedLines;
 }
