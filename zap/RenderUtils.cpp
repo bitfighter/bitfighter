@@ -872,93 +872,63 @@ S32 getStringPairWidth(S32 size, FontContext leftContext,
 
 
 // Returns the number of lines our msg consumed during rendering
-U32 drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
-                                S32 lineHeight, S32 fontSize, S32 multiLineIndentation, bool alignBottom, bool draw)
+U32 drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end, S32 lineHeight, S32 fontSize, bool draw)
 {
-   string text = msg;               // Make local working copy that we can alter
+   S32 linesDrawn = 0;
+   Vector<string> lines = wrapString(msg, width, fontSize);
 
-   U32 lines = 0;
-   U32 lineStartIndex = 0;
-   U32 lineEndIndex = 0;
-   U32 lineBreakCandidateIndex = 0;
-   Vector<U32> separator;           // Collection of character indexes at which to split the message
+   //string text = msg;               // Make local working copy that we can alter
+
+   //U32 lines = 0;
+   //U32 lineStartIndex = 0;
+   //U32 lineEndIndex = 0;
+   //U32 lineBreakCandidateIndex = 0;
+   //Vector<U32> separator;           // Collection of character indexes at which to split the message
 
 
-   while(lineEndIndex < text.length())
-   {
-      bool overWidthLimit = getStringWidth(fontSize, text.substr(lineStartIndex, lineEndIndex - lineStartIndex).c_str()) > (width - multiLineIndentation);
+   //while(lineEndIndex < text.length())
+   //{
+   //   bool overWidthLimit = getStringWidth(fontSize, text.substr(lineStartIndex, lineEndIndex - lineStartIndex).c_str()) > (width - multiLineIndentation);
 
-      // If this character is a space, keep track in case we need to split here
-      if(text[lineEndIndex] == ' ')
-         lineBreakCandidateIndex = lineEndIndex;
+   //   // If this character is a space, keep track in case we need to split here
+   //   if(text[lineEndIndex] == ' ')
+   //      lineBreakCandidateIndex = lineEndIndex;
 
-      if(overWidthLimit)
-      {
-         // If no spaces were found, we need to force a line break at this character; game will freeze otherwise
-         if(lineBreakCandidateIndex == lineStartIndex)
-            lineBreakCandidateIndex = lineEndIndex;
+   //   if(overWidthLimit)
+   //   {
+   //      // If no spaces were found, we need to force a line break at this character; game will freeze otherwise
+   //      if(lineBreakCandidateIndex == lineStartIndex)
+   //         lineBreakCandidateIndex = lineEndIndex;
 
-         separator.push_back(lineBreakCandidateIndex);    // Add this index to line split list
-         if(text[lineBreakCandidateIndex] != ' ')
-            text.insert(lineBreakCandidateIndex, 1, ' '); // Add a space if there's not already one there
-         lineStartIndex = lineBreakCandidateIndex + 1;    // Skip a char which is a space
-         lineBreakCandidateIndex = lineStartIndex;        // Reset line break index to start of list
-      }
+   //      separator.push_back(lineBreakCandidateIndex);    // Add this index to line split list
+   //      if(text[lineBreakCandidateIndex] != ' ')
+   //         text.insert(lineBreakCandidateIndex, 1, ' '); // Add a space if there's not already one there
+   //      lineStartIndex = lineBreakCandidateIndex + 1;    // Skip a char which is a space
+   //      lineBreakCandidateIndex = lineStartIndex;        // Reset line break index to start of list
+   //   }
 
-      lineEndIndex++;
-   }
+   //   lineEndIndex++;
+   //}
 
    // Align the y position, if alignBottom is enabled
-   if(alignBottom)
-   {
-      ypos -= separator.size() * lineHeight;  // Align according to number of wrapped lines
-      if(lineStartIndex != lineEndIndex)      // Align the remaining line
-         ypos -= lineHeight;
-   }
+   ypos -= lines.size() * lineHeight;     // Align according to number of wrapped lines
+   //if(lineStartIndex != lineEndIndex)     // Align the remaining line
+   //   ypos -= lineHeight;
 
    // Draw lines that need to wrap
-   lineStartIndex = 0;
-   for(S32 i = 0; i < separator.size(); i++)
+   for(S32 i = 0; i < lines.size(); i++)
    {
-      lineEndIndex = separator[i];
-      if(ypos >= ypos_end || !alignBottom)      // If there is room to draw some lines at top when aligned bottom
+      if(ypos >= ypos_end)      // If there is room to draw some lines at top when aligned bottom
       {
          if(draw)
-         {
-            if(i == 0)                          // Don't draw the extra margin if it is the first line
-               drawString(xpos, ypos, fontSize, text.substr(lineStartIndex, lineEndIndex - lineStartIndex).c_str());
-            else
-               drawString(xpos + multiLineIndentation, ypos, fontSize, text.substr(lineStartIndex, lineEndIndex - lineStartIndex).c_str());
-         }
-         lines++;
-         if(ypos < ypos_end && !alignBottom)    // If drawing from align top, and ran out of room, then stop and return
-         {
-            return lines;
-         }
+            drawString(xpos, ypos, fontSize, lines[i].c_str());
+
+         linesDrawn++;
       }
       ypos += lineHeight;
-
-      lineStartIndex = lineEndIndex + 1;        // Skip a char which is a space
    }
 
-   // Draw any remaining characters
-   if(lineStartIndex != lineEndIndex)
-   {
-      if(ypos >= ypos_end || !alignBottom)
-      {
-         if(draw)
-         {
-            if (separator.size() == 0)          // Don't draw the extra margin if it is the only line
-               drawString(xpos, ypos, fontSize, text.substr(lineStartIndex).c_str());
-            else
-               drawString(xpos + multiLineIndentation, ypos, fontSize, text.substr(lineStartIndex).c_str());
-         }
-
-         lines++;
-      }
-   }
-
-   return lines;
+   return linesDrawn;
 }
 
 

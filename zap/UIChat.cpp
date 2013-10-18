@@ -280,8 +280,6 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is 
             U32 lineCount = drawWrapText(msg.message, xpos, ypos, allowedWidth, ypos_top,
                AbstractChat::CHAT_FONT_SIZE + AbstractChat::CHAT_FONT_MARGIN,  // line height
                AbstractChat::CHAT_FONT_SIZE, // font size
-               0, // how much to indent if the message is multi-line - not needed here because we already indent message
-               true, // alignBottom, new messages appear below, at the bottom
                renderLoop);
 
             ypos -= (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) * lineCount;
