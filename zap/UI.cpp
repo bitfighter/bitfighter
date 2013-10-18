@@ -299,60 +299,6 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
 }
 
 
-// This function could use some further cleaning; currently only used for the delayed spawn notification
-void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr, SymbolShapePtr *message, S32 msgLines, S32 vertOffset) const
-{
-   dimUnderlyingUI();
-
-   const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-
-   static const S32 textSize = TextSizeBig;      // Size of text and instructions
-   static const S32 textGap = textSize / 3;      // Spacing between text lines
-   static const S32 instrGap = 15;               // Gap between last line of text and instruction line
-
-   S32 actualLines = 0;
-   for(S32 i = msgLines - 1; i >= 0; i--)
-      if(message[i])
-      {
-         actualLines = i + 1;
-         break;
-      }
-
-   S32 boxHeight = TitleHeight + actualLines * (textSize + textGap) + instrGap;
-
-   if(strcmp(instr, "") == 0)
-      boxHeight -= instrGap;
-
-   S32 titleHeight = TitleHeight;
-
-   if(strcmp(title, "") == 0)
-   {
-      boxHeight -= titleHeight;
-      titleHeight = 0;
-   }
-
-   S32 boxTop = (canvasHeight - boxHeight) / 2;
-
-   // Draw title, message, and footer
-   glColor(Colors::blue);
-   drawCenteredString(boxTop + vertMargin, TitleSize, title);
-
-   S32 boxWidth = 500;
-   drawHollowFancyBox((canvasWidth - boxWidth) / 2, boxTop - vertMargin, canvasWidth - ((canvasWidth - boxWidth) / 2), boxTop + boxHeight + vertMargin, 15);
-   drawCenteredString(boxTop + boxHeight / 2 - textSize, textSize, instr);
-
-   // Render the messages
-   S32 y = boxTop + titleHeight;
-
-   for(S32 i = 0; i < msgLines; i++)
-   {
-      message[i]->render(gScreenInfo.getGameCanvasWidth() / 2, y, AlignmentCenter);
-      y += message[i]->getHeight() + textGap;
-   }
-}
-
-
 // Static method
 void UserInterface::dimUnderlyingUI(F32 amount)
 {

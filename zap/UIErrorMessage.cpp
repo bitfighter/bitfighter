@@ -81,16 +81,8 @@ void AbstractMessageUserInterface::quit()
 }
 
 
-void AbstractMessageUserInterface::setPresentation(S32 presentationId)
-{
-   mPresentationId = presentationId;
-}
-
-
 void AbstractMessageUserInterface::reset()
 {
-   mPresentationId = 0;
-
    for(S32 i = 0; i < MAX_LINES; i++)
       mMessage[i] =  SymbolShapePtr(new SymbolBlank());
 }
@@ -107,12 +99,7 @@ void AbstractMessageUserInterface::render()
    if(getUIManager()->getPrevUI() != this)
       getUIManager()->renderPrevUI(this);
 
-   if(mPresentationId == 0)      // Standard presentation
-      renderMessageBox(mTitle, mInstr, mMessage, MAX_LINES);
-   else if(mPresentationId == 1)
-       renderUnboxedMessageBox(mTitle, mInstr, mMessage, MAX_LINES);
-   else
-      TNLAssert(false, "Unknown value of mPresentationId!");
+   renderMessageBox(mTitle, mInstr, mMessage, MAX_LINES);
 }
 
 

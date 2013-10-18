@@ -41,9 +41,6 @@ class AbstractMessageUserInterface : public UserInterface
 {
    typedef UserInterface Parent;
 
-private:
-   S32 mPresentationId;
-
 public:
    explicit AbstractMessageUserInterface(ClientGame *game);      // Constructor
    virtual ~AbstractMessageUserInterface();                      // Destructor
@@ -59,7 +56,6 @@ public:
    void setInstr(const char *message);
    void render();
    void quit();
-   void setPresentation(S32 presentationId);
    virtual void reset();
    virtual bool onKeyDown(InputCode inputCode);
 };
