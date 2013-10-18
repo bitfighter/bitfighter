@@ -322,13 +322,13 @@ option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and 
 
 set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/GeomUtilsTest.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/HttpRequestTest.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/LevelLoaderTest.cpp	
-	${CMAKE_SOURCE_DIR}/bitfighter_test/PolylineGeometryTest.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/RobotTest.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/ServerGameTest.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/SpawnDelayTest.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomUtils.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestHttpRequest.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelLoader.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPolylineGeometry.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRobot.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestServerGame.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSpawnDelay.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
 )
 
