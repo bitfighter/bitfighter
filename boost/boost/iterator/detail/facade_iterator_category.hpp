@@ -162,7 +162,7 @@ struct iterator_category_with_traversal
 template <class Traversal, class ValueParam, class Reference>
 struct facade_iterator_category_impl
 {
-# if !BOOST_WORKAROUND(BOOST_MSVC, <= 1300)
+#if _MSC_VER < 1800 && (_MSC_FULL_VER < 170051025 || !defined(BOOST_MSVC_ENABLE_2012_NOV_CTP))
     BOOST_MPL_ASSERT_NOT((is_iterator_category<Traversal>));
 # endif 
     
