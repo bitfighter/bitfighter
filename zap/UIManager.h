@@ -64,7 +64,7 @@ class GameSettings;
 class UIManager
 {
 public:
-   static const S32 MessageBoxWrapWidth = 500;
+   static const S32 MessageBoxWrapWidth;
 
 private:
    typedef map<const type_info *, UserInterface *> UiMapType;

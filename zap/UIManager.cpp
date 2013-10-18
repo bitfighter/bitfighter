@@ -62,9 +62,14 @@
 namespace Zap
 {
 
+const S32 UIManager::MessageBoxWrapWidth = 500;
+
 // Constructor
 UIManager::UIManager() 
 { 
+   mGame = NULL;
+   mSettings = NULL;
+
    mCurrentInterface = NULL;
 
    mLastUI = NULL;
