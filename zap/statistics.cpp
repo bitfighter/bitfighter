@@ -26,6 +26,8 @@
 #include "statistics.h"
 #include "gameWeapons.h"
 
+#include "MathUtils.h"
+
 namespace Zap
 {
 
@@ -169,7 +171,7 @@ void Statistics::addKill(U32 killStreak)
 {
    mKills++;
    mTotalKills++;
-   mLongestKillStreak = max(killStreak, mLongestKillStreak);
+   mLongestKillStreak = MAX(killStreak, mLongestKillStreak);
 }
 
 

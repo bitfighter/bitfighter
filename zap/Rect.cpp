@@ -26,6 +26,7 @@
 #include "tnlVector.h"
 #include "Rect.h"
 #include "GeomUtils.h"
+#include "MathUtils.h"
 
 #include <math.h>
 
@@ -47,10 +48,10 @@ IntRect::IntRect(S32 x1, S32 y1, S32 x2, S32 y2)
 
 void IntRect::set(S32 x1, S32 y1, S32 x2, S32 y2)
 {
-   minx = min(x1, x2);
-   miny = min(y1, y2);
-   maxx = max(x1, x2);
-   maxy = max(y1, y2);
+   minx = MIN(x1, x2);
+   miny = MIN(y1, y2);
+   maxx = MAX(x1, x2);
+   maxy = MAX(y1, y2);
 }
 
 
