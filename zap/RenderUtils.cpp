@@ -827,43 +827,8 @@ U32 drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
    S32 linesDrawn = 0;
    Vector<string> lines = wrapString(msg, width, fontSize);
 
-   //string text = msg;               // Make local working copy that we can alter
-
-   //U32 lines = 0;
-   //U32 lineStartIndex = 0;
-   //U32 lineEndIndex = 0;
-   //U32 lineBreakCandidateIndex = 0;
-   //Vector<U32> separator;           // Collection of character indexes at which to split the message
-
-
-   //while(lineEndIndex < text.length())
-   //{
-   //   bool overWidthLimit = getStringWidth(fontSize, text.substr(lineStartIndex, lineEndIndex - lineStartIndex).c_str()) > (width - multiLineIndentation);
-
-   //   // If this character is a space, keep track in case we need to split here
-   //   if(text[lineEndIndex] == ' ')
-   //      lineBreakCandidateIndex = lineEndIndex;
-
-   //   if(overWidthLimit)
-   //   {
-   //      // If no spaces were found, we need to force a line break at this character; game will freeze otherwise
-   //      if(lineBreakCandidateIndex == lineStartIndex)
-   //         lineBreakCandidateIndex = lineEndIndex;
-
-   //      separator.push_back(lineBreakCandidateIndex);    // Add this index to line split list
-   //      if(text[lineBreakCandidateIndex] != ' ')
-   //         text.insert(lineBreakCandidateIndex, 1, ' '); // Add a space if there's not already one there
-   //      lineStartIndex = lineBreakCandidateIndex + 1;    // Skip a char which is a space
-   //      lineBreakCandidateIndex = lineStartIndex;        // Reset line break index to start of list
-   //   }
-
-   //   lineEndIndex++;
-   //}
-
    // Align the y position, if alignBottom is enabled
    ypos -= lines.size() * lineHeight;     // Align according to number of wrapped lines
-   //if(lineStartIndex != lineEndIndex)     // Align the remaining line
-   //   ypos -= lineHeight;
 
    // Draw lines that need to wrap
    for(S32 i = 0; i < lines.size(); i++)
