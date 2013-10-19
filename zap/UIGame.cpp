@@ -1573,7 +1573,7 @@ void GameUserInterface::renderChatMsgs() const
    bool chatDisabled = !mHelperManager.isChatAllowed();
    bool announcementActive = (mAnnouncementTimer.getCurrent() != 0);
 
-   F32 alpha = getBackgroundTextDimFactor(true);
+   F32 alpha = 1; // getBackgroundTextDimFactor(true);
 
    if(mMessageDisplayMode == ShortTimeout)
       mChatMessageDisplayer1.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive, alpha);
