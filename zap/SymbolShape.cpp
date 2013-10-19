@@ -619,11 +619,11 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
    // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
    InputCode inputCode = inputCodeManager->getKeyBoundToBindingCodeName(symbolName);
    
-   // Second chance -- maybe it's a key name instead of a control binding
+   // Second chance -- maybe it's a key name instead of a control binding (like "K")
    if(inputCode == KEY_UNKNOWN)
       inputCode = inputCodeManager->stringToInputCode(symbolName.c_str());
 
-   // Third chance -- see if there is a modifier key at the front
+   // Third chance -- see if there is a modifier key at the front (like "Ctrl+K")
    if(inputCode == KEY_UNKNOWN)
    {
       SymbolShapePtr modifiedKey = SymbolString::getModifiedKeySymbol(symbolName, color);
