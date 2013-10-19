@@ -262,7 +262,7 @@ F32 HelperManager::getDimFactor() const
 
    if(fromDim)
    {
-      if(toDim)         // Transitioning from a dim interfact to another one... should just stay dim
+      if(toDim)         // Transitioning from a dim interface to another one... should just stay dim
          return DIM;    
       else
          return mOffDeckHelper->getFraction() * (1 - DIM) + DIM;
@@ -271,7 +271,7 @@ F32 HelperManager::getDimFactor() const
    {
       if(toDim)
          return mHelperStack.last()->getFraction() * (1 - DIM) + DIM;
-      else              // Transitioning from a bright interfact to another one... should just stay bright
+      else              // Transitioning from a bright interface to another one... should just stay bright
          return BRIGHT;
    }
 }
