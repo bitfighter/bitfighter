@@ -28,6 +28,8 @@
 #include "UIManager.h"
 #include "ClientGame.h"
 
+#include "RenderUtils.h"
+
 namespace Zap
 {
 
@@ -51,17 +53,38 @@ void AbstractMessageUserInterface::onActivate()
 
 
 static const S32 TextHeight = 18;
+static const FontContext Context = ErrorMsgContext;
 
 // First line is 1
-void AbstractMessageUserInterface::setMessage(S32 id, string message)
+//void AbstractMessageUserInterface::setMessage(S32 id, const string &message)
+//{
+//   TNLAssert(id >= 1 && id <= MAX_LINES, "Invalid line id!");
+//
+//   Vector<UI::SymbolShapePtr> symbols;
+//   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), message, 
+//                             symbols, Context, TextHeight);
+//
+//   mMessage[id - 1] = SymbolShapePtr(new SymbolString(symbols));
+//}
+
+
+void AbstractMessageUserInterface::setMessage(const string &message)
 {
-   TNLAssert(id >= 1 && id <= MAX_LINES, "Invalid line id!");
+   Vector<string> wrappedLines;
+   wrapString(message, UIManager::MessageBoxWrapWidth, TextHeight, Context, wrappedLines);
 
    Vector<UI::SymbolShapePtr> symbols;
-   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), message, 
-                             symbols, ErrorMsgContext, TextHeight);
 
-   mMessage[id - 1] = SymbolShapePtr(new SymbolString(symbols));
+   for(S32 i = 0; i < wrappedLines.size(); i++)
+   {
+      symbols.clear();
+      SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), wrappedLines[i],
+                                symbols, Context, TextHeight);
+
+      mMessage[i] = SymbolShapePtr(new SymbolString(symbols));
+   }
+
+   mMaxLines = wrappedLines.size();
 }
 
 
@@ -94,7 +117,7 @@ void AbstractMessageUserInterface::quit()
 void AbstractMessageUserInterface::reset()
 {
    for(S32 i = 0; i < MAX_LINES; i++)
-      mMessage[i] = SymbolShapePtr(new SymbolBlank(10, TextHeight));
+      mMessage[i] =  SymbolShapePtr(new SymbolBlank());
 
    mMaxLines = MAX_LINES;
 }

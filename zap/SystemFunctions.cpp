@@ -126,13 +126,13 @@ void abortHosting_noLevels(ServerGame *serverGame)
 
       errUI->reset();
       errUI->setTitle("HOUSTON, WE HAVE A PROBLEM");
-      errUI->setMessage(1, "No levels were loaded.  Cannot host a game.");
-      errUI->setMessage(3, "Check the LevelDir parameter in your INI file,");
-      errUI->setMessage(4, "or your command-line parameters to make sure");
-      errUI->setMessage(5, "you have correctly specified a folder containing");
-      errUI->setMessage(6, "valid level files.");
-      errUI->setMessage(8, "Trying to load levels from folder:");
-      errUI->setMessage(9, levelDir == "" ? "<<Unresolvable>>" : levelDir.c_str());
+      errUI->setMessage("No levels were loaded.  Cannot host a game."
+                        "Check the LevelDir parameter in your INI file,"
+                        "or your command-line parameters to make sure"
+                        "you have correctly specified a folder containing"
+                        "valid level files.\n\n"
+                        "Trying to load levels from folder:\n" +
+                     levelDir == "" ? "<<Unresolvable>>" : levelDir);
 
       uiManager->activate<ErrorMessageUserInterface>();
       uiManager->disableLevelLoadDisplay(false); 

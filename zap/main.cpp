@@ -1195,11 +1195,12 @@ int main(int argc, char **argv)
 
             ui->reset();
             ui->setTitle("CONFIGURATION ERROR");
+
+            string msg = "";
             for(S32 i = 0; i < configurationErrors.size(); i++)
-            {
-               string message = itos(i + 1) + ". " + configurationErrors[i];
-               ui->setMessage(i + 2, message);
-            }
+               msg += itos(i + 1) + ".  " + configurationErrors[i] + "\n";
+
+            ui->setMessage(msg);
 
             uiManager->activate(ui);
          }

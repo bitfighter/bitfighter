@@ -172,15 +172,10 @@ void HighScoresUserInterface::renderWaitingForScores()
    else     // Let the user know they are not connected to master and shouldn't wait
    {
       errUI->setTitle("NO CONNECTION TO MASTER");
-      string msg = "High Scores are currently unavailable because there is no connection to the Bitfighter Master Server.";
-      Vector<string> lines;
-      wrapString(msg, UIManager::MessageBoxWrapWidth, 18, ErrorMsgContext, lines);
+      string msg = "High Scores are currently unavailable because there is no connection to the Bitfighter Master Server.\n\n"
+                   "Firewall issues?  Do you have the latest version?";
 
-      // First line is blank
-      for(S32 i = 0; i < lines.size(); i++)
-         errUI->setMessage(i + 2, lines[i]);
-
-      errUI->setMessage(lines.size() + 4, "Firewall issues?  Do you have the latest version?");
+      errUI->setMessage(msg);
 
       // Only render, don't activate so we don't have to deactivate when we get the high scores
       errUI->render();

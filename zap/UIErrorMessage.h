@@ -54,7 +54,9 @@ public:
    const char *mTitle;
    const char *mInstr;
    void onActivate();
-   void setMessage(S32 id, string message);
+   //void setMessage(S32 id, const string &message);
+   void setMessage(const string &message);
+
    void setMaxLines(S32 lines);     // Display no more than this number of lines
    void setTitle(const char *message);
    void setInstr(const char *message);

@@ -685,8 +685,8 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
 
       ui->reset();
       ui->setTitle("SCRIPT ERROR");
-      ui->setMessage(2, "The levelgen script you ran threw an error.");
-      ui->setMessage(4, "See the console (press [/]) or the logfile for details.");
+      ui->setMessage("The levelgen script you ran threw an error.\n\n"
+                     "See the console (press [/]) or the logfile for details.");
       getUIManager()->activate(ui);
    }
 
@@ -1180,11 +1180,9 @@ void EditorUserInterface::onActivate()
       ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
       ui->reset();
       ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
-      ui->setMessage(1, "No valid level folder was found..."); 
-      ui->setMessage(2, "cannot start the level editor");
-      ui->setMessage(4, "Check the LevelDir parameter in your INI file,");
-      ui->setMessage(5, "or your command-line parameters to make sure");
-      ui->setMessage(6, "you have correctly specified a valid folder.");
+      ui->setMessage("No valid level folder was found, so I cannot start the level editor.\n\n"
+                     "Check the LevelDir parameter in your INI file, or your command-line parameters to make sure"
+                     "you have correctly specified a valid folder.");
 
       getUIManager()->activate(ui);
 
@@ -4649,9 +4647,9 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 
       ui->reset();
       ui->setTitle("INVALID FILE NAME");
-      ui->setMessage(1, "The level file name is invalid or empty.  The level cannot be saved.");
-      ui->setMessage(2, "To correct the problem, please change the file name using the");
-      ui->setMessage(3, "Game Parameters menu, which you can access by pressing [F3].");
+      ui->setMessage("The level file name is invalid or empty.  The level cannot be saved.  "
+                     "To correct the problem, please change the file name using the "
+                     "Game Parameters menu, which you can access by pressing [[GameParameterEditor]].");
 
       getUIManager()->activate(ui);
 
@@ -4759,20 +4757,22 @@ void EditorUserInterface::testLevel()
       ui->reset();
       ui->setTitle("LEVEL HAS PROBLEMS");
 
-      S32 line = 1;
+      string msg = "";
+
       for(S32 i = 0; i < mLevelErrorMsgs.size(); i++)
-         ui->setMessage(line++, mLevelErrorMsgs[i].c_str());
+         msg += mLevelErrorMsgs[i] + "\n";
 
       for(S32 i = 0; i < mLevelWarnings.size(); i++)
-         ui->setMessage(line++, mLevelWarnings[i].c_str());
+         msg += mLevelWarnings[i] + "\n";
 
       if(gameTypeError)
       {
-         ui->setMessage(line++, "ERROR: GameType is invalid.");
-         ui->setMessage(line++, "(Fix in Level Parameters screen [F3])");
+         msg += "ERROR: GameType is invalid.\n";
+         msg += "(Fix in Level Parameters screen [[GameParameterEditor]])";
       }
 
-      ui->setInstr("Press [Y] to start, [ESC] to cancel");
+      ui->setMessage(msg);
+      ui->setInstr("Press [Y] to start,  [ESC] to cancel");
       ui->registerYesFunction(testLevelStart_local);   // testLevelStart_local() just calls testLevelStart() below
 
       getUIManager()->activate(ui);
@@ -5018,10 +5018,9 @@ void quitEditorCallback(ClientGame *game, U32 unused)
 
       ui->reset();
       ui->setTitle("SAVE YOUR EDITS?");
-      ui->setMessage(1, "You have not saved your changes to this level.");
-      ui->setMessage(3, "Do you want to?");
+      ui->setMessage("You have not saved your changes to this level.\n\n"
+                     "Do you want to?");
       ui->setInstr("Press [Y] to save,  [N] to quit,  [ESC] to cancel");
-      ui->setMaxLines(4);
 
       ui->registerYesFunction(saveLevelCallback);
       ui->registerNoFunction(backToMainMenuCallback);

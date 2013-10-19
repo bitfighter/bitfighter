@@ -746,8 +746,11 @@ void UIManager::displayMessageBox(const StringTableEntry &title, const StringTab
    ui->setTitle(title.getString());
    ui->setInstr(instr.getString());
 
+   string msg = "";
    for(S32 i = 0; i < messages.size(); i++)
-      ui->setMessage(i + 1, messages[i].getString());      // UIErrorMsgInterface ==> first line = 1
+      msg += string(messages[i].getString()) + "\n";
+
+   ui->setMessage(msg);      // UIErrorMsgInterface ==> first line = 1
 
    activate(ui);
 }
@@ -761,8 +764,12 @@ void UIManager::displayMessageBox(const char *title, const char *instr, const Ve
    ui->setTitle(title);
    ui->setInstr(instr);
 
+   string msg = "";
+
    for(S32 i = 0; i < messages.size(); i++)
-      ui->setMessage(i + 1, messages[i]);      // UIErrorMsgInterface ==> first line = 1
+      msg += messages[i] + "\n";
+
+   ui->setMessage(msg);
 
    activate(ui);
 }
