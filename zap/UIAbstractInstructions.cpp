@@ -118,9 +118,18 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
 
 void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32 pages)
 {
+   static const char* prefix = "INSTRUCTIONS - ";
+   static S32 fontSize = 25;
+   static S32 prefixWidth = getStringWidth(fontSize, prefix);
+
+   // Draw header first as different color, then everything else
+   glColor(Colors::cyan);
+   drawString(3 + prefixWidth, 3, fontSize, header);
+
    glColor(Colors::red);
-   drawStringf(  3, 3, 25, "INSTRUCTIONS - %s", header);
-   drawStringf(625, 3, 25, "PAGE %d/%d", page, pages); 
+   drawString(3, 3, fontSize, prefix);
+
+   drawStringf(625, 3, fontSize, "PAGE %d/%d", page, pages);
    drawCenteredString(571, 20, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits");
 
    glColor(Colors::gray70);
