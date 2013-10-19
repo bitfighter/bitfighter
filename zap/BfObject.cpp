@@ -94,7 +94,7 @@ bool isForceFieldDeactivatingType(U8 x)
          x == AsteroidTypeNumber;
 }
 
-bool isDamageableType(U8 x)
+bool isRadiusDamageAffectableType(U8 x)
 {
    return
          x == PlayerShipTypeNumber   || x == RobotShipTypeNumber           || x == BurstTypeNumber      ||

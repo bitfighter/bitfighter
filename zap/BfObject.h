@@ -115,7 +115,7 @@ bool isProjectileType(U8 x);
 bool isGrenadeType(U8 x);
 bool isWithHealthType(U8 x);
 bool isForceFieldDeactivatingType(U8 x);
-bool isDamageableType(U8 x);
+bool isRadiusDamageAffectableType(U8 x);
 bool isMotionTriggerType(U8 x);
 bool isTurretTargetType(U8 x);
 bool isCollideableType(U8 x);                  // Move objects bounce off of these
