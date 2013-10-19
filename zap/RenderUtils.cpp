@@ -757,7 +757,7 @@ void renderRightArrow(const Point &center, S32 size)
 void wrapString(const string &str, S32 wrapWidth, S32 fontSize, FontContext context, Vector<string> &lines)
 {
    FontManager::pushFontContext(context);
-   Vector<string> wrapped = wrapString(str, wrapWidth, fontSize, "");
+   Vector<string> wrapped = wrapString(str, wrapWidth, fontSize);
    FontManager::popFontContext();
 
    for(S32 i = 0; i < wrapped.size(); i++)
@@ -773,6 +773,9 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
    if(str == "")
       return wrappedLines;
 
+   S32 indent = 0;
+   string prefix = "";
+
    S32 start = 0;
    S32 potentialBreakPoint = start;
 
@@ -780,23 +783,23 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
    {
       if(str[i] == '\n')
       {
-         wrappedLines.push_back(str.substr(start, i - start));
+         wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
          start = i + 1;
          potentialBreakPoint = start + 1;  
       }
       else if(str[i] == ' ')
          potentialBreakPoint = i;
-      else if(getStringWidth(fontSize, str.substr(start, i - start + 1).c_str()) > wrapWidth)
+      else if(getStringWidth(fontSize, str.substr(start, i - start + 1).c_str()) > wrapWidth - (wrappedLines.size() > 0 ? indent : 0))
       {
          if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
          {
-            wrappedLines.push_back(str.substr(start, i - start));
+            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
             start = i;
             potentialBreakPoint = start;
          }
          else
          {
-            wrappedLines.push_back(str.substr(start, potentialBreakPoint - start));
+            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, potentialBreakPoint - start));
             potentialBreakPoint++;
             start = potentialBreakPoint;
          }
@@ -804,7 +807,7 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
    }
 
    if(start != str.length())
-      wrappedLines.push_back(str.substr(start));
+      wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start));
 
    return wrappedLines;
 }

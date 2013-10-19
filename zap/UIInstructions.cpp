@@ -1087,7 +1087,7 @@ void InstructionsUserInterface::initGameTypesPage()
          foundTeamGame = true;
       }
 
-      Vector<string> lines = wrapString(typeDescriptions[i].description, 600, FontSize, "");
+      Vector<string> lines = wrapString(typeDescriptions[i].description, 600, FontSize);
       for(S32 j = 0; j < lines.size(); j++)
       {
          symbols.clear();
