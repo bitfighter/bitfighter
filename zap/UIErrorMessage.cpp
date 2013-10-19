@@ -50,6 +50,8 @@ void AbstractMessageUserInterface::onActivate()
 }
 
 
+static const S32 TextHeight = 18;
+
 // First line is 1
 void AbstractMessageUserInterface::setMessage(S32 id, string message)
 {
@@ -57,9 +59,17 @@ void AbstractMessageUserInterface::setMessage(S32 id, string message)
 
    Vector<UI::SymbolShapePtr> symbols;
    SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), message, 
-                             symbols, ErrorMsgContext, 18);
+                             symbols, ErrorMsgContext, TextHeight);
 
    mMessage[id - 1] = SymbolShapePtr(new SymbolString(symbols));
+}
+
+
+// Use this to limit the size of the box
+void AbstractMessageUserInterface::setMaxLines(S32 lines)
+{
+   TNLAssert(lines <= MAX_LINES, "Invalid value for lines!");
+   mMaxLines = lines - 1;
 }
 
 
@@ -84,7 +94,9 @@ void AbstractMessageUserInterface::quit()
 void AbstractMessageUserInterface::reset()
 {
    for(S32 i = 0; i < MAX_LINES; i++)
-      mMessage[i] =  SymbolShapePtr(new SymbolBlank());
+      mMessage[i] = SymbolShapePtr(new SymbolBlank(10, TextHeight));
+
+   mMaxLines = MAX_LINES;
 }
 
 
@@ -99,7 +111,7 @@ void AbstractMessageUserInterface::render()
    if(getUIManager()->getPrevUI() != this)
       getUIManager()->renderPrevUI(this);
 
-   renderMessageBox(mTitle, mInstr, mMessage, MAX_LINES);
+   renderMessageBox(mTitle, mInstr, mMessage, mMaxLines);
 }
 
 

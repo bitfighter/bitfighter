@@ -228,7 +228,8 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
 }
 
 
-void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor)
+void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, const Color &fillColor, 
+                                           F32 fillAlpha, const Color &borderColor)
 {
    drawFilledFancyBox(inset, boxTop, gScreenInfo.getGameCanvasWidth() - inset, boxTop + boxHeight, cornerInset, fillColor, fillAlpha, borderColor);
 }
@@ -251,17 +252,12 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
    const S32 textGap = textSize / 3;   // Spacing between text lines
    const S32 instrGap = 15;            // Gap between last line of text and instruction line
 
-   S32 boxHeight  = TitleHeight + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap + titleTextGap;
+   S32 titleHeight = strcmp(title, "") != 0 ? TitleHeight : 0;
+
+   S32 boxHeight = titleHeight + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap + titleTextGap;
 
    if(strcmp(instr, "") == 0)
       boxHeight -= (instrGap + textSize);
-
-   S32 titleHeight = TitleHeight;
-   if(strcmp(title, "") == 0)
-   {
-      boxHeight -= TitleHeight;
-      titleHeight = 0;
-   }
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
 

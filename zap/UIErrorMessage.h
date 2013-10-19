@@ -41,6 +41,9 @@ class AbstractMessageUserInterface : public UserInterface
 {
    typedef UserInterface Parent;
 
+private:
+   S32 mMaxLines;
+
 public:
    explicit AbstractMessageUserInterface(ClientGame *game);      // Constructor
    virtual ~AbstractMessageUserInterface();                      // Destructor
@@ -51,7 +54,8 @@ public:
    const char *mTitle;
    const char *mInstr;
    void onActivate();
-   void setMessage (S32 id, string message);
+   void setMessage(S32 id, string message);
+   void setMaxLines(S32 lines);     // Display no more than this number of lines
    void setTitle(const char *message);
    void setInstr(const char *message);
    void render();
