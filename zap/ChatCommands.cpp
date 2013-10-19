@@ -892,8 +892,16 @@ void banPlayerHandler(ClientGame *game, const Vector<string> &words)
          return;
       }
 
+      // This must be done before the admin check below
+      if(bannedClientInfo->isOwner())
+      {
+         game->displayErrorMessage("!!! Cannot ban a server owner");
+         return;
+      }
+
       if(bannedClientInfo->isAdmin())
       {
+         // Owners can ban admins
          if(!game->hasOwner("!!! Cannot ban an admin"))
             return;
       }
@@ -984,8 +992,16 @@ void globalMuteHandler(ClientGame *game, const Vector<string> &words)
          return;
       }
 
+      // This must be done before the admin check below
+      if(clientInfo->isOwner())
+      {
+         game->displayErrorMessage("!!! Cannot mute a server owner");
+         return;
+      }
+
       if(clientInfo->isAdmin())
       {
+         // Owners can mute admins
          if(!game->hasOwner("!!! Cannot mute an admin"))
             return;
       }
