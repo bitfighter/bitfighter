@@ -382,7 +382,6 @@ bool InstructionsUserInterface::usingArrowKeys()
 }
 
 
-// This has become rather ugly and inelegant.  Sorry!
 void InstructionsUserInterface::renderPage1()
 {
    S32 starty = 65;
