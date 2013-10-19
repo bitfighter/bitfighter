@@ -463,7 +463,6 @@ TEST_F(BfTest, StringWrappingTests)
    ASSERT_EQ(1, lines.size());
    EXPECT_TRUE(lines[0] == "Short string");
 
-
    lines = wrapString("Three\nShort\nLines", 200, 10);
    ASSERT_EQ(3, lines.size());
    EXPECT_TRUE(lines[0] == "Three" && lines[1] == "Short" && lines[2] == "Lines");

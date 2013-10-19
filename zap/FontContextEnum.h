@@ -44,7 +44,7 @@ namespace Zap
       MotdContext,             // Scrolling MOTD on Main Menu
       InputContext,            // Input value font
       ReleaseVersionContext,   // Version number on title screen
-      GoalZoneIconContext,     // Font for rendering GoalZone icon
+      WebDingContext,          // Font for rendering database icon
       ChatMessageContext,      // Font for rendering in-game chat messages
       OldSkoolContext          // Render things like in the good ol' days
    };
@@ -59,12 +59,10 @@ namespace Zap
 
       // External fonts:
       FontDroidSansMono,
-      FontOcrA,
       FontOrbitronLight,
       FontOrbitronMedium,
-      FontPrimeRegular,
-      FontTenby5,
-      FontGlyphs,
+      HUD,
+      FontWebDings,
       KeyCaps,
       FontPlay,
 

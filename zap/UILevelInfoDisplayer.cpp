@@ -96,10 +96,14 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    Vector<SymbolShapePtr> symbols;
    symbols.push_back(SymbolString::getSymbolText(title, titleSize, LevelInfoContext));
 
+   // Find the unicode in Character Map or similar utility,
+   // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
+   // Use Hex UTF-8 bytes, represent in string like this: \xE2\x99\xA6
+
    if(isInDatabase)
    {
       symbols.push_back(SymbolString::getBlankSymbol(10));
-      symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, GoalZoneIconContext));  // Little database icon
+      symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext));  // Little database icon
    }
 
    SymbolString titleSymbolString(symbols);

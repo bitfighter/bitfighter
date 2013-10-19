@@ -154,14 +154,12 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       TNLAssert(settings, "Settings can't be NULL if we are using external fonts!");
 
       // Our TTF fonts
-      fontList[FontOcrA]           = new BfFont(FontOcrA,          "Digital.ttf",         settings);
       fontList[FontOrbitronLight]  = new BfFont(FontOrbitronLight, "Orbitron Light.ttf",  settings);
       fontList[FontOrbitronMedium] = new BfFont(FontOrbitronLight, "Orbitron Medium.ttf", settings);
-      fontList[FontPrimeRegular]   = new BfFont(FontPrimeRegular,  "prime_regular.ttf",   settings);
-      fontList[FontTenby5]         = new BfFont(FontTenby5,        "tenbyfive.ttf",       settings);
-      fontList[KeyCaps]            = new BfFont(KeyCaps,           "tenbyfive.ttf",       settings);     // DavysBigKeyCaps2
+      fontList[HUD]                = new BfFont(HUD, "hud.ttf", settings);
+      fontList[KeyCaps]            = new BfFont(KeyCaps,           "hud.ttf",             settings);     
       fontList[FontDroidSansMono]  = new BfFont(FontDroidSansMono, "DroidSansMono.ttf",   settings);
-      fontList[FontGlyphs]         = new BfFont(FontGlyphs,        "webhostinghub-glyphs.ttf", settings);
+      fontList[FontWebDings]       = new BfFont(FontWebDings,      "webhostinghub-glyphs.ttf", settings);
       fontList[FontPlay]           = new BfFont(FontPlay,          "Play-Regular.ttf",    settings);
    }
 
@@ -235,7 +233,7 @@ void FontManager::setFontContext(FontContext fontContext)
       case LevelInfoContext:
       case LoadoutIndicatorContext:
       case OverlayMenuContext:
-         setFont(FontTenby5);
+         setFont(FontPlay);
          return;
 
       case KeyContext:
@@ -251,8 +249,8 @@ void FontManager::setFontContext(FontContext fontContext)
          setFont(FontDroidSansMono);
          return;
 
-      case GoalZoneIconContext:
-         setFont(FontGlyphs);
+      case WebDingContext:
+         setFont(FontWebDings);
          return;
 
       default:
@@ -263,11 +261,8 @@ void FontManager::setFontContext(FontContext fontContext)
 // FontRoman,
 // FontOrbitronLightStroke,
 // FontOrbitronMedStroke,
-// FontOcrA,
 // FontOrbitronLight,
 // FontOrbitronMedium,
-// FontPrimeRegular
-// FontTenby5
 
 
 static Vector<FontId> contextStack;

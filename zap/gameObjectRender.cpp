@@ -1690,18 +1690,6 @@ void renderGoalZoneIcon(const Point &center, S32 radius)
       glTranslatef(center.x, center.y, 0);
       renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GL_LINE_STRIP);
    glPopMatrix();
-
-
-   // circle circle star combo!
-//   drawCircle(center, radius / 2);
-//   drawStar(center, 5, radius/2, radius/4);
-//   drawStar(center, 5, radius/4, radius/8);
-
-   // Find the unicode in Character Map or similar utility,
-   // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
-   // Use Hex UTF-8 bytes, represent in string like this: \xE2\x99\xA6
-
-   //drawCenteredString_fixed(center.x, center.y + radius / 3.0f, radius, GoalZoneIconContext, "\xEF\x84\xB1");
 }
 
 
