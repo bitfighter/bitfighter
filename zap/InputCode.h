@@ -67,7 +67,9 @@ public:
 // Note that the BindingSet member name referenced below doesn't actually appear anywhere else... it could be any aribtrary and unique token
 
 /*                                                            Saved    BindingSet        Def. kb           Def. js           */
-/*            Enum                      Name in INI           in INI   member name       binding           binding           */#define BINDING_TABLE \   BINDING( BINDING_SELWEAP1,           "SelWeapon1",          true,  inputSELWEAP1,     KEY_1,            KEY_1            ) \
+/*            Enum                      Name in INI           in INI   member name       binding           binding           */
+#define BINDING_TABLE \
+   BINDING( BINDING_SELWEAP1,           "SelWeapon1",          true,  inputSELWEAP1,     KEY_1,            KEY_1            ) \
    BINDING( BINDING_SELWEAP2,           "SelWeapon2",          true,  inputSELWEAP2,     KEY_2,            KEY_2            ) \
    BINDING( BINDING_SELWEAP3,           "SelWeapon3",          true,  inputSELWEAP3,     KEY_3,            KEY_3            ) \
    BINDING( BINDING_ADVWEAP,            "SelNextWeapon",       true,  inputADVWEAP,      KEY_E,            BUTTON_1         ) \
@@ -104,8 +106,8 @@ public:
                                                                                                                               \
    /* Editor specific */                                                                                                      \
                                                                                                                               \
-   BINDING( BINDING_TEAM_EDITOR,        "TeamEditor",          false, KEY_F2,            KEY_F2,           KEY_F2           ) \
-   BINDING( BINDING_GAME_PARAMS_EDITOR, "GameParameterEditor", false, KEY_F3,            KEY_F3,           KEY_F3           ) \
+   BINDING( BINDING_TEAM_EDITOR,        "TeamEditor",          false, keyTeamEditor,      KEY_F2,           KEY_F2          ) \
+   BINDING( BINDING_GAME_PARAMS_EDITOR, "GameParameterEditor", false, keyGameParamEditor, KEY_F3,           KEY_F3          ) \
 
 enum BindingNameEnum {
 #define BINDING(enumName, b, c, d, e, f) enumName,

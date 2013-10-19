@@ -68,7 +68,6 @@ BindingSet::BindingSet()
 #define BINDING(a, b, c, memberName, defaultKeyboardBinding, f)  memberName = defaultKeyboardBinding;
     BINDING_TABLE
 #undef BINDING
-
 }
 
 
@@ -1736,9 +1735,12 @@ string InputCodeManager::getBindingName(BindingNameEnum bindingName)
 InputCode InputCodeManager::getKeyBoundToBindingCodeName(const string &name) const
 {
    // Linear search not at all efficient, but this will be called very infrequently, in non-performance sensitive area
+   // Note that for some reason the { }s are needed below... without them this code does not work right.
    for(U32 i = 0; i < ARRAYSIZE(BindingNames); i++)
+   {
       if(caseInsensitiveStringCompare(BindingNames[i], name))
          return this->getBinding(BindingNameEnum(i));
+   }
 
    return KEY_UNKNOWN;
 }
