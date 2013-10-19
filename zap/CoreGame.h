@@ -164,7 +164,7 @@ public:
    void setStartingHealth(F32 health);
    F32 getStartingHealth() const;
    F32 getTotalCurrentHealth() const;     // Returns total current health of all panels
-   F32 getHealth() const;                       // Returns overall current health of item as a ratio between 0 and 1
+   F32 getHealth() const;                 // Returns overall current health of item as a ratio between 0 and 1
    bool isPanelDamaged(S32 panelIndex);
    bool isPanelInRepairRange(const Point &origin, S32 panelIndex);
 

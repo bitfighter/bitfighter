@@ -29,6 +29,7 @@
 #include "gameType.h"
 #include "Zone.h"
 #include "Colors.h"
+#include "teleporter.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -775,9 +776,7 @@ void Ship::findRepairTargets()
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      TNLAssert(dynamic_cast<Item *>(foundObjects[i]), "Expected to find an item!");      
-
-      Item *item = static_cast<Item *>(foundObjects[i]);
+      BfObject *item = static_cast<BfObject*>(foundObjects[i]);
 
       // Don't repair dead or fully healed objects...
       if(item->isDestroyed() || item->getHealth() >= 1)
@@ -787,8 +786,18 @@ void Ship::findRepairTargets()
       if(item->getTeam() != TEAM_NEUTRAL && item->getTeam() != getTeam())
          continue;
 
+      // Find the radius of the repairable.  Handle teleporter special case
+      F32 itemRadius = 0;
+      if(item->getObjectTypeNumber() == TeleporterTypeNumber)
+         itemRadius = Teleporter::TELEPORTER_RADIUS;
+      else
+      {
+         TNLAssert(dynamic_cast<Item*>(item), "Expected to find an item!");
+         itemRadius = static_cast<Item*>(item)->getRadius();
+      }
+
       // Only repair items within a circle around the ship since we did an object search with a rectangle
-      if((item->getPos() - pos).lenSquared() > sq(RepairRadius + CollisionRadius + item->getRadius()))
+      if((item->getPos() - pos).lenSquared() > sq(RepairRadius + CollisionRadius + itemRadius))
          continue;
 
       // In case of CoreItem, don't repair if no repair locations are returned

@@ -52,6 +52,8 @@ private:
    virtual F32 getSelectionOffsetMagnitude();         // Provides base magnitude for getEditorSelectionOffset()
 
 protected:
+   static const F32 DamageReductionFactor;
+
    F32 mHealth;
    Point mAnchorNormal;
    bool mIsDestroyed;

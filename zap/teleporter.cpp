@@ -164,6 +164,7 @@ TNL_IMPLEMENT_NETOBJECT(Teleporter);
 
 static Vector<DatabaseObject *> foundObjects;      // Reusable container
 
+const F32 Teleporter::DamageReductionFactor = 0.5f;
 
 // Combined default C++/Lua constructor
 Teleporter::Teleporter(lua_State *L)
@@ -211,7 +212,7 @@ void Teleporter::initialize(const Point &pos, const Point &dest, Ship *engineeri
 
    mHasExploded = false;
    mFinalExplosionTriggered = false;
-   mStartingHealth = 1.0f;
+   mHealth = 1.0f;
 
    mLastDest = 0;
    mDestManager.setOwner(this);
@@ -420,7 +421,7 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    if(!stream->writeFlag(mHasExploded))
    {
       if(stream->writeFlag(updateMask & HealthMask))
-         stream->writeFloat(mStartingHealth, 6);
+         stream->writeFloat(mHealth, 6);
    }
 
    return 0;
@@ -492,7 +493,13 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
 
    else if(stream->readFlag())      // HealthMask -- only written when hasExploded is false
-      mStartingHealth = stream->readFloat(6);
+      mHealth = stream->readFloat(6);
+}
+
+
+F32 Teleporter::getHealth() const
+{
+   return mHealth;
 }
 
 
@@ -505,15 +512,29 @@ void Teleporter::damageObject(DamageInfo *theInfo)
    if(mHasExploded)
       return;
 
-   // Reduce damage to 1/4 to match other engineered items
+   // Do the damage
    if(theInfo->damageAmount > 0)
-      mStartingHealth -= theInfo->damageAmount * .5f;
+      mHealth -= theInfo->damageAmount * DamageReductionFactor;
+   else  // For repair
+      mHealth -= theInfo->damageAmount;
+
+   // Check bounds
+   if(mHealth < 0)
+      mHealth = 0;
+   else if(mHealth > 1)
+      mHealth = 1;
 
    setMaskBits(HealthMask);
 
    // Destroyed!
-   if(mStartingHealth <= 0)
+   if(mHealth <= 0)
       onDestroyed();
+}
+
+
+bool Teleporter::isDestroyed()
+{
+   return mHasExploded;
 }
 
 
@@ -824,8 +845,8 @@ void Teleporter::render()
    if(radiusFraction != 0)
    {
       U32 trackerCount = 100;    // Trackers are the swirling bits in a teleporter.  100 gives the "classic" appearance.
-      if(mStartingHealth < 1.f)
-         trackerCount = U32(mStartingHealth * 75.f) + 25;
+      if(mHealth < 1.f)
+         trackerCount = U32(mHealth * 75.f) + 25;
 
       F32 zoomFraction = getGame()->getCommanderZoomFraction();
       U32 renderStyle = mEngineered ? 2 : 0;
