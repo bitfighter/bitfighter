@@ -1158,14 +1158,9 @@ bool InstructionsUserInterface::onKeyDown(InputCode inputCode)
       playBoop();
       nextPage();
    }
-   // F1 has dual use... advance page, then quit out of help when done
+   
    else if(checkInputCode(InputCodeManager::BINDING_HELP, inputCode))
-   {
-      if(mCurPage != InstructionMaxPages - 1)
-         nextPage();
-      else
-         exitInstructions();
-   }
+      nextPage();
    else if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
       exitInstructions();
    else
