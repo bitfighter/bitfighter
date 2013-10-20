@@ -149,7 +149,6 @@ private:
 
    Vector<string> mRobotLines;         // A list of robot lines read from a level file when loading from the editor
 
-
    void clearSnapEnvironment();
 
    static const U32 UNDO_STATES = 128;
@@ -314,6 +313,8 @@ public:
    void removeUndoState();    // Remove and discard the most recently saved undo state 
 
    Vector<string> mGameTypeArgs;
+
+   static const string UnnamedFile;
 
    bool saveLevel(bool showFailMessages, bool showSuccessMessages);   // Public because called from callbacks
    string getLevelText();

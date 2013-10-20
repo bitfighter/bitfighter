@@ -450,7 +450,7 @@ S32 ClientGame::getLevelThreshold(S32 val) const
    //switch(val)
    //{
    //   // This many games | Just achieved this level
-   //   case 20:             return 1;
+   //   case 20:             return 1;         
    //   case 50:             return 2;
    //   case 100:            return 3;
    //   case 200:            return 4;

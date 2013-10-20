@@ -96,6 +96,9 @@ const F32 STARTING_SCALE = 0.5;
 
 static GridDatabase *mLoadTarget;
 
+const string EditorUserInterface::UnnamedFile = "unnamed_file";      // When a file has no name, this is its name!
+
+
 S32 QSORT_CALLBACK pluginInfoSort(EditorUserInterface::PluginInfo *a, EditorUserInterface::PluginInfo *b)
 {
    return stricmp((a)->prettyName.c_str(), (b)->prettyName.c_str());
@@ -499,7 +502,6 @@ void EditorUserInterface::setLevelFileName(string name)
    else
       if(name.find('.') == string::npos)      // Append extension, if one is needed
          mEditFileName = name + ".level";
-      // else... what?
 }
 
 
@@ -544,12 +546,15 @@ void EditorUserInterface::cleanUp()
 // Loads a level
 void EditorUserInterface::loadLevel()
 {
+   string filename = getLevelFileName();
+   TNLAssert(filename != "", "Need file name here!");
+
    ClientGame *game = getGame();
 
    cleanUp();
 
    FolderManager *folderManager = game->getSettings()->getFolderManager();
-   string fileName = joindir(folderManager->levelDir, mEditFileName).c_str();
+   string fileName = joindir(folderManager->levelDir, filename).c_str();
 
 
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
@@ -1109,7 +1114,7 @@ void EditorUserInterface::teamsHaveChanged()
 
 string EditorUserInterface::getLevelFileName()
 {
-   return mEditFileName;
+   return mEditFileName != "" ? mEditFileName : UnnamedFile;
 }
 
 
@@ -1190,7 +1195,7 @@ void EditorUserInterface::onActivate()
    }
 
    // Check if we have a level name:
-   if(getLevelFileName() == "")         // We need to take a detour to get a level name
+   if(getLevelFileName() == UnnamedFile)     // We need to take a detour to get a level name
    {
       // Don't save this menu (false, below).  That way, if the user escapes out, and is returned to the "previous"
       // UI, they will get back to where they were before (prob. the main menu system), not back to here.
@@ -1649,7 +1654,8 @@ void EditorUserInterface::renderInfoPanel()
    glColor(mNeedToSave ? Colors::red : Colors::green);     // Color level name by whether it needs to be saved or not
 
    // Filename without extension
-   renderPanelInfoLine(4, "Filename: %s%s", mNeedToSave ? "*" : "", mEditFileName.substr(0, mEditFileName.find_last_of('.')).c_str());
+   string filename = getLevelFileName();
+   renderPanelInfoLine(4, "Filename: %s%s", mNeedToSave ? "*" : "", filename.substr(0, filename.find_last_of('.')).c_str());
 }
 
 
@@ -4640,23 +4646,11 @@ void EditorUserInterface::autoSave()
 
 bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessages)
 {
-   // Check if we have a valid (i.e. non-null) filename ==> should never happen!
-   if(mEditFileName == "")
-   {
-      ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
+   string filename = getLevelFileName();
+   TNLAssert(filename != "", "Need file name here!");
 
-      ui->reset();
-      ui->setTitle("INVALID FILE NAME");
-      ui->setMessage("The level file name is invalid or empty.  The level cannot be saved.  "
-                     "To correct the problem, please change the file name using the "
-                     "Game Parameters menu, which you can access by pressing [[GameParameterEditor]].");
 
-      getUIManager()->activate(ui);
-
-      return false;
-   }
-
-   if(!doSaveLevel(mEditFileName, showFailMessages))
+   if(!doSaveLevel(filename, showFailMessages))
       return false;
 
    mNeedToSave = false;

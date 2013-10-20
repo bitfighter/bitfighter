@@ -186,9 +186,12 @@ void GameParamUserInterface::updateMenuItems()
 
 
    string fn = stripExtension(getUIManager()->getUI<EditorUserInterface>()->getLevelFileName());
+   if(fn == EditorUserInterface::UnnamedFile)
+      fn = "";
+
    addMenuItem(new TextEntryMenuItem("Filename:",                         // name
                                      fn,                                  // val
-                                     "",                                  // empty val
+                                     EditorUserInterface::UnnamedFile,    // empty val
                                      "File where this level is stored",   // help
                                      MAX_FILE_NAME_LEN));
 
