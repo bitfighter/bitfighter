@@ -233,7 +233,7 @@ void FontManager::setFontContext(FontContext fontContext)
       case LevelInfoContext:
       case LoadoutIndicatorContext:
       case OverlayMenuContext:
-         setFont(FontPlay);
+         setFont(HUD);
          return;
 
       case KeyContext:
