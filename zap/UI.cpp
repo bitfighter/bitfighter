@@ -192,13 +192,12 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
    const S32 textGap = textSize / 3;   // Spacing between text lines
    const S32 instrGap = 15;            // Gap between last line of text and instruction line
 
-   S32 boxHeight  = TitleHeight + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap;
+   S32 titleHeight = strcmp(title, "") != 0 ? TitleHeight : 0;
+
+   S32 boxHeight  = titleHeight + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap;
 
    if(strcmp(instr, "") == 0)
       boxHeight -= (instrGap + textSize);
-
-   if(strcmp(title, "") == 0)
-      boxHeight -= TitleHeight;
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
 
@@ -222,7 +221,7 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
    drawCenteredString(boxTop + vertMargin, TitleSize, title);
 
    for(S32 i = 0; i < msgLines; i++)
-      drawCenteredString(boxTop + vertMargin + TitleHeight + i * (textSize + textGap), textSize, message[i].c_str());
+      drawCenteredString(boxTop + vertMargin + titleHeight + i * (textSize + textGap), textSize, message[i].c_str());
 
    drawCenteredString(boxTop + boxHeight - vertMargin - textSize, textSize, instr);
 }
