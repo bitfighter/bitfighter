@@ -1682,12 +1682,13 @@ void renderLoadoutZoneIcon(const Point &center, S32 outerRadius)
 
 void renderGoalZoneIcon(const Point &center, S32 radius)
 {
-   static const F32 flagPoints[] = { -6, 10,  -6,-10,  12, -3.333f,  -6, 3.333f, };
-
    drawPolygon(center, 4, radius * 0.6f, 0.f);
+
+   static const F32 flagPoints[] = { -6, 10,  -6,-10,  12, -3.333f,  -6, 3.333f, };
 
    glPushMatrix();
       glTranslatef(center.x, center.y, 0);
+      glScale(radius * 0.025f);  // 1 / 40 since we drew it to in-game radius of 40
       renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GL_LINE_STRIP);
    glPopMatrix();
 }
