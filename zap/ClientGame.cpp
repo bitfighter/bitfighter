@@ -445,19 +445,21 @@ bool ClientGame::isSpawnDelayed() const
 // Returns NONE if we are not leveling up
 S32 ClientGame::getLevelThreshold(S32 val) const
 {
-   switch(val)
-   {
-      // This many games | Just achieved this level
-      case 20:             return 1;
-      case 50:             return 2;
-      case 100:            return 3;
-      case 200:            return 4;
-      case 500:            return 5;
-      case 1000:           return 6;
-      case 2000:           return 7;
-      case 5000:           return 8;
-      default:             return NONE;
-   }
+   return NONE;      // Disabled for the time being...
+
+   //switch(val)
+   //{
+   //   // This many games | Just achieved this level
+   //   case 20:             return 1;
+   //   case 50:             return 2;
+   //   case 100:            return 3;
+   //   case 200:            return 4;
+   //   case 500:            return 5;
+   //   case 1000:           return 6;
+   //   case 2000:           return 7;
+   //   case 5000:           return 8;
+   //   default:             return NONE;
+   //}
 }
 
 
