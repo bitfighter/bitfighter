@@ -734,7 +734,7 @@ void Burst::explode(const Point &pos)
    damageInfo.damageType           = DamageTypeArea;
    damageInfo.damageSelfMultiplier = WeaponInfo::getWeaponInfo(mWeaponType).damageSelfMultiplier;
 
-   S32 hits = radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, (TestFunc)isDamageableType, damageInfo);
+   S32 hits = radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, (TestFunc)isRadiusDamageAffectableType, damageInfo);
 
    if(getOwner())
       for(S32 i = 0; i < hits; i++)
@@ -1725,7 +1725,7 @@ void Seeker::handleCollision(BfObject *hitObject, Point collisionPoint)
       damageInfo.damageSelfMultiplier = WeaponInfo::getWeaponInfo(mWeaponType).damageSelfMultiplier;
 
       // impulseVector handled in radiusDamage, set force to 0 here so we have no kickback
-      S32 hits = radiusDamage(collisionPoint, InnerBlastRadius, OuterBlastRadius, (TestFunc)isDamageableType, damageInfo, 0);
+      S32 hits = radiusDamage(collisionPoint, InnerBlastRadius, OuterBlastRadius, (TestFunc)isRadiusDamageAffectableType, damageInfo, 0);
 
       if(getOwner())
          for(S32 i = 0; i < hits; i++)

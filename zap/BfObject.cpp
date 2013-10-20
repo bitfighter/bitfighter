@@ -73,14 +73,14 @@ bool isGrenadeType(U8 x)
          x == MineTypeNumber || x == SpyBugTypeNumber || x == BurstTypeNumber;
 }
 
-// If we add something here that is not an Item, need to check where this is used to make sure everything is ok
+// Ship::findRepairTargets uses this and expects everything to be a sub-class of Item (except for teleporter)
 // This is used to determine if bursts should explode on impact or not.
 bool isWithHealthType(U8 x)      
 {
    return
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber           ||
          x == TurretTypeNumber     || x == ForceFieldProjectorTypeNumber ||
-         x == CoreTypeNumber;
+         x == CoreTypeNumber       || x == TeleporterTypeNumber;
 }
 
 bool isForceFieldDeactivatingType(U8 x)
@@ -94,7 +94,7 @@ bool isForceFieldDeactivatingType(U8 x)
          x == AsteroidTypeNumber;
 }
 
-bool isDamageableType(U8 x)
+bool isRadiusDamageAffectableType(U8 x)
 {
    return
          x == PlayerShipTypeNumber   || x == RobotShipTypeNumber           || x == BurstTypeNumber      ||

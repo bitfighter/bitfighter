@@ -92,10 +92,12 @@ public:
    static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter -- this is in fact a radius!
 
 private:
+   static const F32 DamageReductionFactor;
+
    S32 mLastDest;    // Destination of last ship through
 
    bool mHasExploded;
-   F32 mStartingHealth;
+   F32 mHealth;
    Vector<Point> mOutlinePoints;
 
    Timer mExplosionTimer;
@@ -145,6 +147,9 @@ public:
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   F32 getHealth() const;
+   bool isDestroyed();
 
    void damageObject(DamageInfo *theInfo);
    void onDestroyed();

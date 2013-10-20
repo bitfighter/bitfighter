@@ -434,7 +434,7 @@ string EngineerModuleDeployer::getErrorMessage()
 ////////////////////////////////////////
 
 const F32 EngineeredItem::EngineeredItemRadius = 7.f;
-
+const F32 EngineeredItem::DamageReductionFactor = 0.25f;
 
 // Constructor
 EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Parent(EngineeredItemRadius), Engineerable(), mAnchorNormal(anchorNormal)
@@ -700,7 +700,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
    F32 prevHealth = mHealth;
 
    if(di->damageAmount > 0)
-      mHealth -= di->damageAmount * .25f; // ???
+      mHealth -= di->damageAmount * DamageReductionFactor;
    else
       mHealth -= di->damageAmount;
 
