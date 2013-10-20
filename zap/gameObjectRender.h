@@ -120,7 +120,7 @@ extern void drawCircle(const Point &pos, F32 radius, const Color *color = NULL, 
 extern void drawCircle(F32 x, F32 y,     F32 radius, const Color *color = NULL, F32 alpha = 1.0);
 
 extern void drawDivetedTriangle(F32 height, F32 len);
-extern void drawGear(const Point &center, S32 teeth, F32 r1, F32 r2, F32 ang1, F32 ang2, F32 innerCircleRadius);
+extern void drawGear(const Point &center, S32 teeth, F32 r1, F32 r2, F32 ang1, F32 ang2, F32 innerCircleRadius, F32 angleRadians = 0.0f);
 
 
 //////////
@@ -173,7 +173,7 @@ extern void renderZone(const Color *c, const Vector<Point> *outline, const Vecto
 extern void renderLoadoutZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, 
                               const Point &centroid, F32 angle, F32 scaleFact = 1);
 
-extern void renderLoadoutZoneIcon(const Point &center, S32 outerRadius = 20);
+extern void renderLoadoutZoneIcon(const Point &center, S32 outerRadius, F32 angleRadians = 0.0f);
 
 extern void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill,
                               const Point &centroid, S32 zoneId);
@@ -204,13 +204,14 @@ extern void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *
 extern void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill);     // No label version
 extern void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,
                            bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, bool useOldStyle);
-extern void renderGoalZoneIcon(const Point &center, S32 radius);
+extern void renderGoalZoneIcon(const Point &center, S32 radius, F32 angleRadians = 0.0f);
 
 
 extern void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
-                        bool open, F32 glowFraction, F32 scaleFact = 1);
+                        bool open, F32 glowFraction);
 
 extern void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, bool open, F32 glowFraction);
+extern void renderNexusIcon(const Point &center, S32 radius, F32 angleRadians = 0.0f);
 
 
 
