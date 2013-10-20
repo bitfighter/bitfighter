@@ -100,7 +100,6 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
    calcPolygonVerts(Point(0,0), 7, (F32)TestItem::TEST_ITEM_RADIUS, 0, mTestItemPoints);
    ResourceItem::generateOutlinePoints(Point(0,0), 1.0, mResourceItemPoints);
 
-
    // Prepare special instructions
    const ControlStringsEditor helpBindLeft[] = 
    { 
@@ -600,7 +599,7 @@ static const char *moduleDescriptions[][2] = {
    { "Sensor: ",   "See further and reveal hidden objects (P)" },
    { "",           "Deploy spy bugs (A)" },
    { "Cloak: ",    "Make ship invisible to enemies (A)" },
-   { "Engineer: ", "Collect resources to build turrets and forcefields (A)" }
+   { "Engineer: ", "Collect resources to build special objects (A)" }
 };
 
 void InstructionsUserInterface::renderModulesPage()
@@ -740,10 +739,10 @@ const char *gGameObjectInfo[] = {
 
    /* 12 */   "Repair Item",         "Repairs damage to ship",
    /* 13 */   "Energy Item",         "Restores ship's energy",
-   /* 14 */   "Neutral Turret",      "Repair to take team ownership",
-   /* 15 */   "Active Turret",       "Fires at enemy team",
-   /* 16 */   "Neutral Emitter",     "Repair to take team ownership",
-   /* 17 */   "Force Field Emitter", "Allows only one team to pass",
+   /* 14 */   "Active Turret",       "Fires at enemy team\n(regular & self-repairing)",
+   /* 15 */   "Neutral Turret",      "Repair to take team ownership",
+   /* 16 */   "Force Field Emitter", "Only allows owners to pass\n(regular & self-repairing)",
+   /* 17 */   "Neutral Emitter",     "Repair to take team ownership",
 
    /* 18 */   "Teleporter",   "Warps ship to another location",
    /* 19 */   "Flag",         "Objective item in some game types",
@@ -771,10 +770,13 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
    if(endIndex > GameObjectCount)
       endIndex = GameObjectCount;
 
+   static const S32 FontSize = 20;
+
    for(U32 i = startIndex; i < endIndex; i++)
    {
       const char *text = gGameObjectInfo[i * 2];
-      const char *desc = gGameObjectInfo[i * 2 + 1];
+      Vector<string> desc = wrapString(gGameObjectInfo[i * 2 + 1], 350, FontSize);
+
       S32 index = i - startIndex;
 
       Point objStart((index & 1) * 400, (index >> 1) * 165);
@@ -782,15 +784,17 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       Point start = objStart + Point(0, 55);
 
       glColor(Colors::yellow);
-      renderCenteredString(start, (S32)20, text);
+      renderCenteredString(start, FontSize, text);
 
       glColor(Colors::white);
-      renderCenteredString(start + Point(0, 25), (S32)17, desc);
+      for(S32 i = 0; i < desc.size(); i++)
+         renderCenteredString(start + Point(0, 25 + i * FontSize * 1.2), 17, desc[i].c_str());
 
       glPushMatrix();
       glTranslate(objStart);
       glScale(0.7f);
 
+      S32 x, y;
 
       switch(i)
       {
@@ -833,18 +837,27 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderEnergyItem(Point(0,0));
             break;
          case 14:
-            renderTurret(Colors::white, Point(0, 15), Point(0, -1), false, 0, 0);
+            x = -40;
+            renderTurret(Colors::blue, Point(x, 15), Point(0, -1), true, 1, 0, 0);
+            x = -x;
+            renderTurret(Colors::blue, Point(x, 15), Point(0, -1), true, 1, 0, 1);
             break;
          case 15:
-            renderTurret(Colors::blue, Point(0, 15), Point(0, -1), true, 1, 0);
+            renderTurret(Colors::white, Point(0, 15), Point(0, -1), false, 0, 0);
             break;
 
          case 16:
-            renderForceFieldProjector(Point(-7.5, 0), Point(1, 0), &Colors::white, false);
+            y = -25;
+            renderForceFieldProjector(Point(-50, y), Point(1, 0), &Colors::red, true, 0);
+            renderForceField(Point(-35, y), Point(50, y), &Colors::red, true);
+
+            y = -y;
+            renderForceFieldProjector(Point(-50, y), Point(1, 0), &Colors::red, true, 1);
+            renderForceField(Point(-35, y), Point(50, y), &Colors::red, true);
+
             break;
          case 17:
-            renderForceFieldProjector(Point(-50, 0), Point(1, 0), &Colors::red, true);
-            renderForceField(Point(-35, 0), Point(50, 0), &Colors::red, true);
+            renderForceFieldProjector(Point(-7.5, 0), Point(1, 0), &Colors::white, false, 0);
             break;
          case 18:
             {
