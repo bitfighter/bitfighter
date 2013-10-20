@@ -251,9 +251,6 @@ class SymbolGear : public SymbolCircle
 {
    typedef SymbolCircle Parent;
 
-protected:
-   F32 mSizeFactor;
-
 public:
    using Parent::render;
 
@@ -276,6 +273,23 @@ public:
 
    SymbolGoal(S32 fontSize);  // Constructor, fontSize is size of surrounding text
    virtual ~SymbolGoal();
+
+   void render(const Point &pos) const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class SymbolNexus : public SymbolGear
+{
+   typedef SymbolGear Parent;
+
+public:
+   using Parent::render;
+
+   SymbolNexus(S32 fontSize);  // Constructor, fontSize is size of surrounding text
+   virtual ~SymbolNexus();
 
    void render(const Point &pos) const;
 };
@@ -414,6 +428,7 @@ public:
    static SymbolShapePtr getModifiedKeySymbol(const string &symbolName, const Color *color);
    static SymbolShapePtr getSymbolGear(S32 fontSize);
    static SymbolShapePtr getSymbolGoal(S32 fontSize);
+   static SymbolShapePtr getSymbolNexus(S32 fontSize);
    static SymbolShapePtr getSymbolSpinner(S32 fontSize, const Color *color);
    static SymbolShapePtr getBullet();
    static SymbolShapePtr getSymbolText(const string &text, S32 fontSize, FontContext context, const Color *color = NULL);

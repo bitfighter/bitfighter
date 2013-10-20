@@ -567,6 +567,13 @@ SymbolShapePtr SymbolString::getSymbolGoal(S32 fontSize)
 
 
 // Static method
+SymbolShapePtr SymbolString::getSymbolNexus(S32 fontSize)
+{
+   return SymbolShapePtr(new SymbolNexus(fontSize));
+}
+
+
+// Static method
 SymbolShapePtr SymbolString::getSymbolSpinner(S32 fontSize, const Color *color)
 {
    return SymbolShapePtr(new SymbolSpinner(fontSize, color));
@@ -640,6 +647,8 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
       symbols.push_back(SymbolString::getSymbolGear(14));
    else if(symbolName == "GOAL_ICON")
       symbols.push_back(SymbolString::getSymbolGoal(14));
+   else if(symbolName == "NEXUS_ICON")
+      symbols.push_back(SymbolString::getSymbolNexus(14));
    else if(symbolName == "SPINNER")
       symbols.push_back(SymbolString::getSymbolSpinner(14, color));
    else if(symbolName == "CHANGEWEP")
@@ -1110,6 +1119,7 @@ void SymbolButtonSymbol::render(const Point &pos) const
       case Joystick::ButtonSymbolNone:
       default:
          TNLAssert(false, "Shouldn't be here!");
+         break;
    }
 }
 
@@ -1162,7 +1172,32 @@ void SymbolGoal::render(const Point &pos) const
 {
    // We are given the bottom y position of the line, but the icon expects the center
    Point center(pos.x, (pos.y - mHeight/2) + 2); // Slight downward adjustment to position to better align with text
-   renderGoalZoneIcon(center, mWidth);
+   renderGoalZoneIcon(center, mWidth/2);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+SymbolNexus::SymbolNexus(S32 fontSize) : Parent(fontSize)
+{
+   // Do nothing
+}
+
+
+// Destructor
+SymbolNexus::~SymbolNexus()
+{
+   // Do nothing
+}
+
+
+void SymbolNexus::render(const Point &pos) const
+{
+   // We are given the bottom y position of the line, but the icon expects the center
+   Point center(pos.x, (pos.y - mHeight/2) + 2); // Slight downward adjustment to position to better align with text
+   renderNexusIcon(center, mWidth/2);
 }
 
 
@@ -1205,6 +1240,7 @@ void SymbolSpinner::render(const Point &pos) const
          break;
       default: 
          TNLAssert(false, "Unexpected value of charindx");
+         break;
    }
 
    drawStringc(pos, mHeight, charstr);

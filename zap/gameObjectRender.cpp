@@ -1667,28 +1667,28 @@ void renderLoadoutZone(const Color *color, const Vector<Point> *outline, const V
                        const Point &centroid, F32 angle, F32 scaleFact)
 {
    renderZone(color, outline, fill);
-   //renderPolygonLabel(centroid, angle, 25, "LOADOUT ZONE", scaleFact);
-   renderLoadoutZoneIcon(centroid);
+   renderLoadoutZoneIcon(centroid, 20, angle);
 }
 
 
 // In normal usage, outerRadius is 20, which is the default if no radius is specified
-void renderLoadoutZoneIcon(const Point &center, S32 outerRadius)
+void renderLoadoutZoneIcon(const Point &center, S32 outerRadius, F32 angleRadians)
 {
    // Pos, teeth, outer rad, inner rad, ang span of outer teeth, ang span of inner teeth, circle rad
-   drawGear(center, 7, (F32)outerRadius, 0.75f * outerRadius, 20.0f, 18.0f, 0.4f * outerRadius);   
+   drawGear(center, 7, (F32)outerRadius, 0.75f * outerRadius, 20.0f, 18.0f, 0.4f * outerRadius, angleRadians);
 }
 
 
-void renderGoalZoneIcon(const Point &center, S32 radius)
+void renderGoalZoneIcon(const Point &center, S32 radius, F32 angleRadians)
 {
-   drawPolygon(center, 4, radius * 0.6f, 0.f);
+   drawPolygon(center, 4, radius, 0.f);
 
    static const F32 flagPoints[] = { -6, 10,  -6,-10,  12, -3.333f,  -6, 3.333f, };
 
    glPushMatrix();
       glTranslatef(center.x, center.y, 0);
-      glScale(radius * 0.025f);  // 1 / 40 since we drew it to in-game radius of 40
+      glRotatef(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
+      glScale(radius * 0.041667f);  // 1 / 24 since we drew it to in-game radius of 24 (a ship's radius)
       renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GL_LINE_STRIP);
    glPopMatrix();
 }
@@ -1785,7 +1785,7 @@ void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<P
 
    renderPolygon(fill, outline, &fillColor, &outlineColor);
    //renderPolygonLabel(centroid, labelAngle, 25, "GOAL");
-   renderGoalZoneIcon(centroid, 40);
+   renderGoalZoneIcon(centroid, 24);
 }
 
 
@@ -1802,25 +1802,8 @@ static Color getNexusBaseColor(bool open, F32 glowFraction)
 }
 
 
-void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, bool open, F32 glowFraction)
+void renderNexusIcon(const Point &center, S32 radius, F32 angleRadians)
 {
-   Color baseColor = getNexusBaseColor(open, glowFraction);
-
-   Color fillColor = Color(baseColor * (glowFraction * glowFraction  + (1 - glowFraction * glowFraction) * 0.5f));
-   Color outlineColor = fillColor * 0.7f;
-
-   renderPolygon(fill, outline, &fillColor, &outlineColor);
-}
-
-
-void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, bool open, 
-                 F32 glowFraction, F32 scaleFact)
-{
-   renderNexus(outline, fill, open, glowFraction);
-
-   glColor(getNexusBaseColor(open, glowFraction));
-//   renderPolygonLabel(centroid, labelAngle, 25, "NEXUS", scaleFact);
-
    static const F32 root3div2 = 0.866f;  // sqrt(3) / 2
 
    static const F32 arcRadius = 14.f;
@@ -1838,9 +1821,9 @@ void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point 
    static const Point arcPoint3 = Point(-vertRadius * root3div2, vertRadius * 0.5f);
 
    glPushMatrix();
-      glScale(scaleFact);
-      glTranslate(centroid);
-      glRotatef(labelAngle * RADIANS_TO_DEGREES, 0, 0, 1);
+      glTranslate(center);
+      glScale(radius * 0.05);  // 1/20.  Default radius is 20 in-game
+      glRotatef(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
 
       // Draw our center spokes
       renderVertexArray(spokes, ARRAYSIZE(spokes) / 2, GL_LINES);
@@ -1850,6 +1833,28 @@ void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point 
       drawArc(arcPoint2, arcRadius, 0.917f * FloatTau, 1.583f * FloatTau);
       drawArc(arcPoint3, arcRadius, 0.25f * FloatTau, 0.917f * FloatTau);
    glPopMatrix();
+}
+
+
+void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, bool open, F32 glowFraction)
+{
+   Color baseColor = getNexusBaseColor(open, glowFraction);
+
+   Color fillColor = Color(baseColor * (glowFraction * glowFraction  + (1 - glowFraction * glowFraction) * 0.5f));
+   Color outlineColor = fillColor * 0.7f;
+
+   renderPolygon(fill, outline, &fillColor, &outlineColor);
+}
+
+
+void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, bool open,
+                 F32 glowFraction)
+{
+   renderNexus(outline, fill, open, glowFraction);
+
+   glColor(getNexusBaseColor(open, glowFraction));
+
+   renderNexusIcon(centroid, 20.f, labelAngle);
 }
 
 
@@ -2977,7 +2982,7 @@ void drawDivetedTriangle(F32 height, F32 len)
 }
 
 
-void drawGear(const Point &center, S32 teeth, F32 radius1, F32 radius2, F32 ang1, F32 ang2, F32 innerCircleRadius)
+void drawGear(const Point &center, S32 teeth, F32 radius1, F32 radius2, F32 ang1, F32 ang2, F32 innerCircleRadius, F32 angleRadians)
 {
    static Vector<Point> pts;
    pts.clear();
@@ -3005,8 +3010,7 @@ void drawGear(const Point &center, S32 teeth, F32 radius1, F32 radius2, F32 ang1
 
    glPushMatrix();
       glTranslate(center.x, center.y, 0);
-     // glRotatef(Platform::getRealMilliseconds() / 10 % 360,0,0,1);
-      //glScale(6);
+      glRotatef(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
 
       renderPolygonOutline(&pts);
 
