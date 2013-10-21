@@ -30,13 +30,9 @@ U32 LevelDatabaseUploadThread::run()
    EditorUserInterface* editor = mGame->getUIManager()->getUI<EditorUserInterface>();
 
    if(mGame->getLevelDatabaseId())
-   {
       editor->setSaveMessage("Updating Level...", true);
-   }
    else
-   {
       editor->setSaveMessage("Uploading New Level...", true);
-   }
 
    string fileData = readFile(joindir(mGame->getSettings()->getFolderManager()->screenshotDir, UploadScreenshotFilename + string(".png")));
 
