@@ -4481,33 +4481,37 @@ void EditorUserInterface::onFinishedDragging()
    // Mouse is over the dock and we dragged something to the dock (probably a delete)
    if(mouseOnDock() && !mDraggingDockItem)
    {
-      const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-      bool deletedSomething = false, deletedWall = false;
-
-      for(S32 i = 0; i < objList->size(); i++)    //  Delete all selected items
+      // Only delete items in normal dock mode
+      if(mDockMode == DOCKMODE_ITEMS)
       {
-         BfObject *obj = static_cast<BfObject *>(objList->get(i));
+         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+         bool deletedSomething = false, deletedWall = false;
 
-         if(obj->isSelected())
+         for(S32 i = 0; i < objList->size(); i++)    //  Delete all selected items
          {
-            if(isWallType(obj->getObjectTypeNumber()))
-               deletedWall = true;
+            BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
-            deleteItem(i, true);
-            i--;
-            deletedSomething = true;
+            if(obj->isSelected())
+            {
+               if(isWallType(obj->getObjectTypeNumber()))
+                  deletedWall = true;
+
+               deleteItem(i, true);
+               i--;
+               deletedSomething = true;
+            }
          }
-      }
 
-      // We deleted something, do some clean up and our job is done
-      if(deletedSomething)
-      {
-         if(deletedWall)
-            doneDeleteingWalls();
+         // We deleted something, do some clean up and our job is done
+         if(deletedSomething)
+         {
+            if(deletedWall)
+               doneDeleteingWalls();
 
-         doneDeleting();
+            doneDeleting();
 
-         return;
+            return;
+         }
       }
    }
 
