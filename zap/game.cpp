@@ -884,16 +884,14 @@ string Game::toLevelCode() const
 
    str = gameType->toLevelCode() + "\n";
 
-   str += string("LevelName ") + writeLevelString(gameType->getLevelName()->getString()) + "\n";
+   str += string("LevelName ")        + writeLevelString(gameType->getLevelName()->getString()) + "\n";
    str += string("LevelDescription ") + writeLevelString(gameType->getLevelDescription()->getString()) + "\n";
-   str += string("LevelCredits ") + writeLevelString(gameType->getLevelCredits()->getString()) + "\n";
+   str += string("LevelCredits ")     + writeLevelString(gameType->getLevelCredits()->getString()) + "\n";
 
    str += string("GridSize ") + ftos(mGridSize) + "\n";
 
    if(getLevelDatabaseId())
-   {
       str += string("LevelDatabaseId ") + itos(getLevelDatabaseId()) + "\n";
-   }
 
    for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); i++)
       str += mActiveTeamManager->getTeam(i)->toLevelCode() + "\n";
