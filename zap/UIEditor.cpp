@@ -524,7 +524,7 @@ void EditorUserInterface::cleanUp()
    mDockItems.clear();     // Free a little more -- dock will be rebuilt when editor restarts
    
    mLoadTarget = getDatabase();
-   mLoadTarget->removeEverythingFromDatabase();    // Deletes all objects   was clearDatabase(mLoadTarget);
+   mLoadTarget->removeEverythingFromDatabase();    // Deletes all objects
 
    mRobotLines.clear();    // Clear our special Robot lines
 
