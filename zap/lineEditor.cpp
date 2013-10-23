@@ -248,6 +248,7 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
    }
    else
    {
+      // FIXME: I need to be documented!
       U32 offsetCharacters;
       if(mCursorOffset < mDisplayedCharacters)
       {
@@ -272,7 +273,12 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 offset)
    if(Platform::getRealMilliseconds() / 500 % 2)
       return;
 
-   S32 width = MAX(2, getStringWidth(fontSize, mLine.substr(mCursorOffset, 1).c_str()));
+   // Cursor width.  We just draw as a bar because all we support is insert mode
+   static const S32 width = 2;
+
+   // This would be used for overwrite mode, if we supported it
+//   S32 width = MAX(2, getStringWidth(fontSize, mLine.substr(mCursorOffset, 1).c_str()));
+
    drawFilledRect(x + offset, y, x + offset + width, y + fontSize + 3, Colors::white, 0.3f);
 }
 
