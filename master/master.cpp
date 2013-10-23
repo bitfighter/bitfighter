@@ -1954,7 +1954,8 @@ int main(int argc, const char **argv)
 
    gDatabaseAccessThread.start();  // start a thread that handles some of slow task with database.
 
-    // And until infinity, process whatever comes our way.
+
+   // Essentially an idle loop follows:
    while(true)     // To infinity and beyond!!
    {
       gNetInterface->checkIncomingPackets();
