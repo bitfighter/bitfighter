@@ -28,6 +28,7 @@
 #include "tnlVector.h"
 #include "../zap/ChatCheck.h"
 
+#include <map>
 
 class GameConnectRequest;  // at the botton of master.h
 class DatabaseWriter;
@@ -38,19 +39,51 @@ namespace Zap {
 }
 
 class MasterServerConnection;
-struct HighScores
+
+struct ThreadingStruct
+{
+   bool isValid;
+   bool isBusy;     // For multithreading
+   U32 lastClock;   // Data can get old
+
+   Vector<SafePtr<MasterServerConnection> > waitingClients;
+
+   ThreadingStruct() { isValid = false; }     // Quickie constructor
+   bool isExpired() { return Platform::getRealMilliseconds() - lastClock > getCacheExpiryTime(); }
+   virtual U32 getCacheExpiryTime() = 0;
+};
+
+
+static const S32 TWO_HOURS = 2 * 60 * 1000;
+
+
+struct HighScores : public ThreadingStruct
 {
     Vector<StringTableEntry> groupNames;
     Vector<string> names;
     Vector<string> scores;
     S32 scoresPerGroup;
 
-    bool isValid;
-    bool isBuzy;  // for multithreading
-    U32 lastClock; // High scores can get old
-    Vector<SafePtr<MasterServerConnection> > waitingClients;
+    U32 getCacheExpiryTime() { return TWO_HOURS; }
+};
 
-    HighScores() { isValid = false; }
+
+struct TotalLevelRating : public ThreadingStruct
+{
+   U32 databaseId;
+   S16 rating;
+
+   U32 getCacheExpiryTime() { return TWO_HOURS; }
+};
+
+
+struct PlayerLevelRating : public ThreadingStruct
+{
+   U32 databaseId;
+   StringTableEntry playerName;
+   S32 rating;
+
+   U32 getCacheExpiryTime() { return TWO_HOURS; }
 };
 
 
@@ -62,7 +95,8 @@ private:
 	string mLoggingStatus;
 
 public:
-   static HighScores highScores;    // Cached high scores
+   static HighScores  highScores;    // Cached high scores
+   static map<U32, TotalLevelRating> totalLevelRatings;
 
 private:
    Int<BADGE_COUNT> mBadges;
@@ -248,7 +282,14 @@ public:
                            const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds);
 
 
-   HighScores *getHighScores(S32 scoresPerGroup);
+   HighScores   *getHighScores(S32 scoresPerGroup);
+   TotalLevelRating *getLevelRating(U32 databaseId);
+   PlayerLevelRating *getLevelRating(U32 databaseId, const StringTableEntry &mPlayerOrServerName);
+
+   static void removeOldEntriesFromRatingsCache();          // Keep our caches from growing too large
+
+
+   void sendPlayerLevelRating(U32 databaseId, S32 rating);  // Helper that wraps m2cSendPlayerLevelRating
 
    TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC_OVERRIDE(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));
@@ -260,6 +301,10 @@ public:
 
    // Send high scores stats to client
    TNL_DECLARE_RPC_OVERRIDE(c2mRequestHighScores, ());
+
+   // Send level rating to client
+   TNL_DECLARE_RPC_OVERRIDE(c2mRequestLevelRating, (U32 databaseId));
+
 
    // Game server wants to know if user name has been verified
    TNL_DECLARE_RPC_OVERRIDE(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));

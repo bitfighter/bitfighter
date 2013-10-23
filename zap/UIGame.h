@@ -148,7 +148,18 @@ private:
       LongFixed,               // Long form: Display MessageStoreCount messages, no timout
       MessageDisplayModes
    };
+
+
+   enum RatingRating
+   {
+      RatingGood = 1,
+      RatingNeutral = 0,
+      RatingBad = -1,
+      Unrated = -2,
+      RetrievingRating = -3
+   };
 	
+
    MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
 
    Move mCurrentMove;
@@ -173,6 +184,7 @@ private:
    Timer mCommanderZoomDelta;
 
    Timer mShutdownTimer;
+
 
    bool mMissionOverlayActive;      // Are game instructions (F2) visible?
 
@@ -209,6 +221,9 @@ private:
    // Some key press/release handler helpers
    void onMissionKeyPressed();
    void onMissionKeyReleased();
+
+   S32 mMyRating;       // -1, 0, or 1
+   F32 mOverallRating;
 
    StringTableEntry mShutdownName;  // Name of user who iniated the shutdown
    StringPtr mShutdownReason;       // Reason user provided for the shutdown
@@ -319,6 +334,9 @@ public:
    void onGameStarting();
    void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
+
+   void setLevelRating(S32 playerRating, F32 overallRating);
+
 
    void setAnnouncement(const string &announcement);
    void displayMessage(const Color &msgColor, const char *message);

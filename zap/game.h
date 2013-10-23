@@ -105,8 +105,8 @@ using namespace std;
 namespace Zap
 {
 
-const U32 MAX_GAME_NAME_LEN = 32;     // Any longer, and it won't fit on-screen
-const U32 MAX_GAME_DESCR_LEN = 60;    // Any longer, and it won't fit on-screen; also limits max length of credits string
+const U32 MAX_GAME_NAME_LEN = 32;      // Any longer, and it won't fit on-screen
+const U32 MAX_GAME_DESCR_LEN = 60;     // Any longer, and it won't fit on-screen; also limits max length of credits string
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -452,7 +452,7 @@ public:
 
    string makeUnique(const char *name);
 
-   void setLevelDatabaseId(U32 id);
+   virtual void setLevelDatabaseId(U32 id);
    U32 getLevelDatabaseId() const;
 
    virtual string getPlayerName() const;

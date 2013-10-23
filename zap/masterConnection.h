@@ -37,6 +37,7 @@ namespace Zap
 
 class Game;
 
+
 class MasterServerConnection : public MasterServerInterface
 {
    typedef MasterServerInterface Parent;
@@ -98,6 +99,12 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks));
    TNL_DECLARE_RPC_OVERRIDE(m2cSendHighScores, (Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores));
+   TNL_DECLARE_RPC_OVERRIDE(m2cSendPlayerLevelRating,  (U32 databaseId, RangedU32<0, 2> rating));
+   TNL_DECLARE_RPC_OVERRIDE(m2cSendTotalLevelRating, (U32 databaseId, S16 rating));
+
+   // Some helpers
+   void sendTotalLevelRating(S32 databaseId, S16 rating);
+   void sendPlayerLevelRating(S32 databaseId, S32 rating);
 #endif
 
    void requestAuthentication(StringTableEntry mClientName, Nonce mClientId);
@@ -105,7 +112,6 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(m2sSetAuthenticated_019, (Vector<U8> id, StringTableEntry name, 
                                                       RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges,
                                                       U16 gamesPlayed));
-
    void writeConnectRequest(BitStream *bstream);
    virtual void onConnectionEstablished();
    void onConnectionTerminated(TerminationReason r, const char *string); // An existing connection has been terminated

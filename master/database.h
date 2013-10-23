@@ -135,6 +135,9 @@ public:
 
    void getTopPlayers(const string &table, const string &col2, S32 count, Vector<string> &names, Vector<string> &scores);
 
+   S16 getLevelRating(U32 databaseId);                                  // Returns average rating of the specified level
+   S32 getLevelRating(U32 databaseId, const StringTableEntry &name);    // Returns player's rating of the specified level
+
    Int<BADGE_COUNT> getAchievements(const char *name);
    U16 getGamesPlayed(const char *name);
 };

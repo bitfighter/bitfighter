@@ -54,6 +54,8 @@ class ClientGame : public Game
 {
    typedef Game Parent;
 
+   static const S32 RATING_NOT_KNOWN = S32_MIN;
+
 private:
    SafePtr<GameConnection> mConnectionToServer; // If this is a client game, this is the connection to the server
 
@@ -71,7 +73,12 @@ private:
    string mEnteredServerPermsPassword;
    string mEnteredServerAccessPassword;
 
+
    SFXHandle mModuleSound[ModuleCount];
+
+   S32 mPlayerLevelRating, mTotalLevelRating;
+
+   bool needsRating();
 
    // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
    // about the local player.  When a player connects to a server, all players (including the connecting player) are sent a much briefer
@@ -115,6 +122,11 @@ public:
    
    void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
+
+   void gotTotalLevelRating(S16 rating);
+   void gotPlayerLevelRating(RangedU32<0, 2> rating);
+
+   void setLevelDatabaseId(U32 id);
 
    UIManager *getUIManager() const;
 

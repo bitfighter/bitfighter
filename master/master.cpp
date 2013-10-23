@@ -34,6 +34,8 @@
 #include "tnlAsymmetricKey.h"
 #include "tnlThread.h"
 
+#include "../boost/boost/shared_ptr.hpp"
+
 #include <stdio.h>
 #include <string>
 #include <stdarg.h>     // For va_args
@@ -193,9 +195,10 @@ public:
    class BasicEntry : public RefPtrData
    {
    public:
-      virtual void run() = 0;  // runs on seperate thread
-      virtual void finish() {}; // finishes the entry on primary thread after "run()" is done to avoid 2 threads crashing in to the same network TNL and others.
+      virtual void run() = 0;    // runs on seperate thread
+      virtual void finish() {};  // finishes the entry on primary thread after "run()" is done to avoid 2 threads crashing in to the same network TNL and others.
    };
+
 private:
    U32 mEntryStart;
    U32 mEntryThread;
@@ -212,6 +215,7 @@ public:
       mEntryEnd = 0;
    }
 
+
    void addEntry(BasicEntry *entry)
    {
       U32 entryEnd = mEntryEnd + 1;
@@ -225,6 +229,7 @@ public:
       mEntry[mEntryEnd] = entry;
       mEntryEnd = entryEnd;
    }
+
 
    U32 run()
    {
@@ -241,6 +246,8 @@ public:
       }
       return 0;
    }
+
+
    void runAtMainThread()
    {
       while(mEntryStart != mEntryThread)
@@ -253,9 +260,6 @@ public:
       }
    }
 } gDatabaseAccessThread;
-
-
-
 
 
    /// Constructor initializes the linked list info with "safe" values
@@ -1036,6 +1040,12 @@ public:
    struct HighScoresReader : public DatabaseAccessThread::BasicEntry
    {
       S32 scoresPerGroup;
+
+      HighScoresReader(S32 scoresPerGroup)      // Constructor
+      {
+         this->scoresPerGroup = scoresPerGroup;
+      }
+
       void run()
       {
          DatabaseWriter databaseWriter = getDatabaseWriter();
@@ -1073,39 +1083,182 @@ public:
 
          MasterServerConnection::highScores.scoresPerGroup = scoresPerGroup;
       }
+
+
       void finish()
       {
-         MasterServerConnection::highScores.isBuzy = false;
-         for(S32 i=0; i < MasterServerConnection::highScores.waitingClients.size(); i++)
+         MasterServerConnection::highScores.isBusy = false;
+
+         for(S32 i = 0; i < MasterServerConnection::highScores.waitingClients.size(); i++)
             if(MasterServerConnection::highScores.waitingClients[i])
                MasterServerConnection::highScores.waitingClients[i]->m2cSendHighScores(MasterServerConnection::highScores.groupNames, 
                                                                                        MasterServerConnection::highScores.names, 
                                                                                        MasterServerConnection::highScores.scores);
          MasterServerConnection::highScores.waitingClients.clear();
-
       }
    };
+
+
+   ////////////////////////////////////////
+   ////////////////////////////////////////
+
+   typedef map<U32, boost::shared_ptr<TotalLevelRating> > TotalLevelRatingsMap;
+   static TotalLevelRatingsMap totalLevelRatingsCache;
+
+   
+   struct TotalLevelRatingsReader : public DatabaseAccessThread::BasicEntry
+   {
+      U32 dbId;
+      S16 rating;
+
+      TotalLevelRatingsReader(U32 databaseId)    // Constructor
+      {
+         dbId = databaseId;
+      }
+
+      void run()
+      {
+         rating = getDatabaseWriter().getLevelRating(dbId);
+      }
+
+
+      void finish()
+      {
+         boost::shared_ptr<TotalLevelRating> rating = totalLevelRatingsCache[dbId];
+         rating->isBusy = false;
+
+         for(S32 i = 0; i < rating->waitingClients.size(); i++)
+            if(rating->waitingClients[i])
+               rating->waitingClients[i]->m2cSendTotalLevelRating(dbId, rating->rating);
+
+            rating->waitingClients.clear();
+      }
+   };
+
+
+   ////////////////////////////////////////
+   ////////////////////////////////////////
+
+   typedef pair<U32, StringTableEntry> DbIdPlayerNamePair;
+   typedef map<DbIdPlayerNamePair, boost::shared_ptr<PlayerLevelRating> > PlayerLevelRatingsMap;
+   static PlayerLevelRatingsMap playerLevelRatingsCache;
+
+
+   struct PlayerLevelRatingsReader : public DatabaseAccessThread::BasicEntry
+   {
+      U32 dbId;
+      StringTableEntry playerName;
+      S32 rating;
+
+      PlayerLevelRatingsReader(U32 databaseId, const StringTableEntry &playerName)    // Constructor
+      {
+         dbId = databaseId;
+         this->playerName = playerName;
+      }
+
+      void run()
+      {
+         rating = getDatabaseWriter().getLevelRating(dbId, playerName);
+      }
+
+      void finish()
+      {
+         boost::shared_ptr<PlayerLevelRating> rating = playerLevelRatingsCache[DbIdPlayerNamePair(dbId, playerName)];
+         rating->isBusy = false;
+
+         for(S32 i = 0; i < rating->waitingClients.size(); i++)
+            if(rating->waitingClients[i])
+               rating->waitingClients[i]->m2cSendPlayerLevelRating(dbId, rating->rating);
+
+         rating->waitingClients.clear();
+      }
+   };
+
+
+   ////////////////////////////////////////
+   ////////////////////////////////////////
+
    HighScores *MasterServerConnection::getHighScores(S32 scoresPerGroup)
    {
-      // Check if we have the scores cached and not outdated
-      U32 currentTime = Platform::getRealMilliseconds();
-      if(currentTime - highScores.lastClock > 2 * 60 * 1000  // 2 hours
-          || !highScores.isValid || scoresPerGroup != highScores.scoresPerGroup)     // Remember... highScores is static!
-         if(!highScores.isBuzy)
-      {
-         highScores.isBuzy = true;
-         highScores.isValid = true;
-         highScores.lastClock = currentTime;
-         RefPtr<HighScoresReader> highScoreReader = new HighScoresReader();
-         highScoreReader->scoresPerGroup = scoresPerGroup;
-         gDatabaseAccessThread.addEntry(highScoreReader);
-      }
+      // Remember... highScores is static!
+      if(!highScores.isValid || highScores.isExpired() || scoresPerGroup != highScores.scoresPerGroup)
+         if(!highScores.isBusy)
+         {
+            highScores.isBusy = true;
+            highScores.isValid = true;
+            highScores.lastClock = Platform::getRealMilliseconds();
+
+            RefPtr<HighScoresReader> highScoreReader = new HighScoresReader(scoresPerGroup);
+            gDatabaseAccessThread.addEntry(highScoreReader);
+         }
       
       return &highScores;
    }
 
 
-   //////////
+   TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
+   {
+      boost::shared_ptr<TotalLevelRating> rating = totalLevelRatingsCache[databaseId];   // Inserts record if one doesn't exist
+
+      if(!rating->isValid || rating->isExpired())
+         if(!rating->isBusy)
+         {
+            rating->isBusy = true;
+            rating->isValid = true;
+            rating->lastClock = Platform::getRealMilliseconds();
+
+            RefPtr<TotalLevelRatingsReader> totalLevelRatingsReader = new TotalLevelRatingsReader(databaseId);
+            gDatabaseAccessThread.addEntry(totalLevelRatingsReader);
+         }
+
+      return rating.get();
+   }
+
+
+   // Cycle through and remove expired cache entries -- static method
+   void MasterServerConnection::removeOldEntriesFromRatingsCache()
+   {
+      {
+         TotalLevelRatingsMap::iterator it;
+
+         for(TotalLevelRatingsMap::iterator it = totalLevelRatingsCache.begin(); it != totalLevelRatingsCache.end(); it++)
+         if(it->second->isValid && !it->second->isBusy && it->second->isExpired())
+            totalLevelRatingsCache.erase(it);
+      }
+
+      {
+         PlayerLevelRatingsMap::iterator it;
+
+         for(PlayerLevelRatingsMap::iterator it = playerLevelRatingsCache.begin(); it != playerLevelRatingsCache.end(); it++)
+         if(it->second->isValid && !it->second->isBusy && it->second->isExpired())
+            playerLevelRatingsCache.erase(it);
+      }
+   }
+
+
+   // Send this connection the level rating for the specified player
+   PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const StringTableEntry &playerName)
+   {
+      boost::shared_ptr<PlayerLevelRating> rating = playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, playerName)];
+
+      if(!rating->isValid || rating->isExpired())
+         if(!rating->isBusy)
+         {
+            rating->isBusy = true;
+            rating->isValid = true;
+            rating->lastClock = Platform::getRealMilliseconds();
+
+            RefPtr<TotalLevelRatingsReader> totalLevelRatingsReader = new TotalLevelRatingsReader(databaseId);
+            gDatabaseAccessThread.addEntry(totalLevelRatingsReader);
+         }
+
+      return rating.get();
+   }
+
+
+   ////////////////////////////////////////
+   ////////////////////////////////////////
+
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendStatistics, (VersionedGameStats stats))
    {
@@ -1140,23 +1293,94 @@ public:
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestHighScores, ())
    {
-      Vector<StringTableEntry> groupNames;
-      Vector<string> names;
-      Vector<string> scores;
 
-      HighScores *hightScores = getHighScores(3);     
-
-      if(highScores.isBuzy)
+      if(!highScores.isBusy)     // Not busy, so value must be cached.  Send the scores now.
       {
-         bool exists = false;
-            for(S32 i = 0; i < highScores.waitingClients.size(); i++)
-               if(highScores.waitingClients[i] == this)
-                  exists = true;
-         if(!exists)
-            highScores.waitingClients.push_back(this);
+         HighScores *highScoreGroup = getHighScores(3);
+         m2cSendHighScores(highScoreGroup->groupNames, highScoreGroup->names, highScoreGroup->scores);
       }
+
+      else                       // In the process of retrieving... highScores will send later when retrieval is complete
+      {
+         bool alreadyOnList = false;
+         for(S32 i = 0; i < highScores.waitingClients.size(); i++)
+            if(highScores.waitingClients[i] == this)
+            {
+               alreadyOnList = true;
+               break;
+            }
+
+            if(!alreadyOnList)
+               highScores.waitingClients.push_back(this);
+      }
+   }
+
+
+   // We got a request to send the server's rating for the current level.  We will send two messages in response, one with the
+   // individual rating, on with the overall average rating.
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 databaseId))
+   {
+      // Do nothing if client sent us an invalid id
+      if(databaseId == NOT_IN_DATABASE)
+         return;
+
+      // totalLevelRatingsCache[databaseId] was created in getLevelRating() if it didn't already exist
+      boost::shared_ptr<TotalLevelRating> avgRating = totalLevelRatingsCache[databaseId];
+      if(!avgRating->isBusy)     // Not busy, so value must be cached.  Send it now.
+      {
+         TotalLevelRating *totalRating = getLevelRating(databaseId);
+         m2cSendTotalLevelRating(databaseId, totalRating->rating);
+      }
+
+      else                    // Otherwise, add it to the list to send when the database request is complete
+      {
+         bool alreadyOnList = false;
+         for(S32 i = 0; i < avgRating->waitingClients.size(); i++)
+         if(avgRating->waitingClients[i] == this)
+            {
+               alreadyOnList = true;
+               break;
+            }
+
+         if(!alreadyOnList)
+            avgRating->waitingClients.push_back(this);
+      }
+
+      boost::shared_ptr<PlayerLevelRating> plyrRating = playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, mPlayerOrServerName)];
+
+      if(!plyrRating->isBusy)
+      {
+         PlayerLevelRating *playerRating = getLevelRating(databaseId, mPlayerOrServerName);
+         sendPlayerLevelRating(databaseId, playerRating->rating);
+      }
+
       else
-         m2cSendHighScores(hightScores->groupNames, hightScores->names, hightScores->scores);
+      {
+         bool alreadyOnList = false;
+
+         for(S32 i = 0; i < plyrRating->waitingClients.size(); i++)
+         if(plyrRating->waitingClients[i] == this)
+            {
+               alreadyOnList = true;
+               break;
+            }
+
+         if(!alreadyOnList)
+            plyrRating->waitingClients.push_back(this);
+      }
+   }
+
+
+   void MasterServerConnection::sendPlayerLevelRating(U32 databaseId, S32 rating)
+   {
+      // Make sure ranges are ok... none of these conditions should ever occur.  But this is Bitfighter...
+      if(rating < -1)      rating = -1;
+      else if(rating > 1)  rating = 1;
+
+      // Normalize to the datatype needed for sending
+      RangedU32<0, 2>   normalizedRating = rating + 1;
+
+      m2cSendPlayerLevelRating(databaseId, normalizedRating);
    }
 
 
@@ -1196,7 +1420,8 @@ public:
    }
 
 
-   string MasterServerConnection::cleanName(string name)
+   // Remove leading/trailing spaces, provide default if name is empty
+   string MasterServerConnection::cleanName(string name)    // Makes copy of name that we can alter
    {
       trim(name);
       if(name == "")
@@ -1806,8 +2031,8 @@ int main(int argc, const char **argv)
    gStdoutLogConsumer.logprintf("Master Server %s started - listening on port %d", gMasterName.c_str(), gMasterPort);
 
    const U32 REWRITE_TIME = 5000;        // Rewrite status file at most this often (in ms)
-   const U32 REREAD_TIME  = 5000;        // How often to we re-read our config file? (in ms)
 
+   U32 lastCleanupTime = Platform::getRealMilliseconds();
    U32 lastConfigReadTime = Platform::getRealMilliseconds();
    U32 lastWroteStatusTime = lastConfigReadTime - REWRITE_TIME;    // So we can do a write right off the bat
 
@@ -1820,11 +2045,22 @@ int main(int argc, const char **argv)
       gNetInterface->processConnections();
       U32 currentTime = Platform::getRealMilliseconds();
 
+      const U32 REREAD_TIME = 5000;             // 5 seconds
+
       if(currentTime - lastConfigReadTime > REREAD_TIME)     // Reread the config file every 5000ms
       {
          lastConfigReadTime = currentTime;
          readConfigFile(&gMasterINI);
       }
+
+      // Periodic cleanup
+      const U32 CLEANUP_TIME = 10 * 60 * 1000;  // 10 Minutes
+      if(currentTime - lastCleanupTime > CLEANUP_TIME)    
+      {
+         MasterServerConnection::removeOldEntriesFromRatingsCache();
+         lastCleanupTime = currentTime;
+      }
+
 
       if(gNeedToWriteStatusDelayed != 0)
          if(currentTime - gNeedToWriteStatusDelayed > REWRITE_TIME)

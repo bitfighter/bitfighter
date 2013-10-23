@@ -903,7 +903,7 @@ bool ServerGame::loadLevel()
    resetLevelInfo();    // Resets info about the level, not a LevelInfo...  In case you were wondering.
 
    mObjectsLoaded = 0;
-   setLevelDatabaseId(0);
+   setLevelDatabaseId(NOT_IN_DATABASE);
 
    mLevelFileHash = mLevelSource->loadLevel(mCurrentLevelIndex, this, getGameObjDatabase());
 

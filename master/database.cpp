@@ -387,6 +387,50 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
 }
 
 
+// Returns rating of the specified level 
+S16 DatabaseWriter::getLevelRating(U32 databaseId)
+{
+   string sql = "SELECT levels.rating from pleiades.levels WHERE id=" + itos(databaseId) + "; ";
+
+   Vector<Vector<string> > results;
+
+   selectHandler(sql, 1, results);
+
+   if(results.size() == 0)
+      return 0;
+
+   S32 rating = atoi(results[0][0].c_str());
+
+   if(rating > S16_MAX)
+      return S16_MAX;
+   else if(rating < S16_MIN)
+      return S16_MIN;
+
+   return rating;
+} 
+
+
+// Returns player's rating of the specified level -- should be -1, 0, or +1
+S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
+{
+   string sql =
+      "SELECT ratings.value FROM pleiades.ratings "
+      "INNER JOIN phpbb_users "
+      "WHERE ratings.level_id = " + itos(databaseId) + " AND "
+         "ratings.user_id = phpbb_users.user_id AND "
+         "phpbb_users.username = '" + name.getString() + "';";
+
+   Vector<Vector<string> > results;
+
+   selectHandler(sql, 1, results);
+
+   if(results.size() == 0)
+      return 0;
+   else
+      return atoi(results[0][0].c_str());
+}
+
+
 Int<BADGE_COUNT> DatabaseWriter::getAchievements(const char *name)
 {
    string sql = "SELECT achievement_id FROM player_achievements WHERE player_name = '" + string(name) + "';";

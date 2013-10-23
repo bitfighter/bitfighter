@@ -229,9 +229,22 @@ void GameUserInterface::onReactivate()
 }
 
 
+// Called when level just beginning (called from GameConnection::onStartGhosting)
+// We probably don't have a GameType yet, so we don't know what our level name will be
 void GameUserInterface::onGameStarting()
 {
    mDispWorldExtents.set(Point(0,0), 0);
+
+   // Reset ratings
+   mMyRating      = RetrievingRating;
+   mOverallRating = RetrievingRating;
+}
+
+
+void GameUserInterface::setLevelRating(S32 playerRating, F32 overallRating)
+{
+   mMyRating      = playerRating;
+   mOverallRating = overallRating;
 }
 
 

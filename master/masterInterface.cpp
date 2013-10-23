@@ -166,15 +166,33 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendLevelInfo,
 
 // Send high score stats to client
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mRequestHighScores, 
-   (), 
-   (),
-   NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 1) {}
+                  (), 
+                  (),
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 1) {}
 
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendHighScores, 
-   (Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores),
-   (groupNames, names, scores),
-   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 1) {}
+                  (Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores),
+                  (groupNames, names, scores),
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 1) {}
+
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, c2mRequestLevelRating,
+                  (U32 databaseId), 
+                  (databaseId),
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 2) {}
+
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendPlayerLevelRating,
+                  (U32 databaseId, RangedU32<0, 2> rating),
+                  (databaseId, rating),
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 2) {}
+
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendTotalLevelRating,
+                  (U32 databaseId, S16 rating),
+                  (databaseId, rating),
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 2) {}
 
 
 ////////////////////////////////////

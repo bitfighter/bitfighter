@@ -200,6 +200,10 @@ void ClientGame::onConnectedToMaster()
    Vector<StringTableEntry> emptyPlayerList;
    setPlayersInGlobalChat(emptyPlayerList);
 
+   // Request ratings for current level if we don't already have them
+   if(needsRating())
+      mConnectionToMaster->c2mRequestLevelRating(getLevelDatabaseId());
+
    logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
 }
 
@@ -484,6 +488,39 @@ bool ClientGame::inReturnToGameCountdown() const
 
 string ClientGame::getPlayerName()     const { return mSettings->getPlayerName();     }
 string ClientGame::getPlayerPassword() const { return mSettings->getPlayerPassword(); }
+
+
+bool ClientGame::needsRating()
+{
+   // We don't need ratings for levels not in the database
+   bool inDatabase = getLevelDatabaseId() != NOT_IN_DATABASE;
+   return inDatabase && (mPlayerLevelRating == RATING_NOT_KNOWN || mTotalLevelRating == RATING_NOT_KNOWN);
+}
+
+
+// On the client, this is called when we are in the editor, or when we've just begun a new game and the server has sent
+// us the latest 411 on the level we're about to play
+void ClientGame::setLevelDatabaseId(U32 id)
+{
+   Parent::setLevelDatabaseId(id);  // (just does mLevelDatabaseId = id)
+
+   // If we are in a game, and connected to master,then we can request that the master server send us the current level ratings.
+   // If we are connected to a game server, then we are not in the editor (though we could be testing a level).
+   if(mConnectionToMaster && isConnectedToServer() && needsRating())
+      mConnectionToMaster->c2mRequestLevelRating(id);
+}
+
+
+void ClientGame::gotTotalLevelRating(S16 rating)
+{
+   mTotalLevelRating = rating;
+}
+
+
+void ClientGame::gotPlayerLevelRating(RangedU32<0, 2> rating)
+{
+   mPlayerLevelRating = (S32)rating;
+}
 
 
 void ClientGame::userEnteredLoginCredentials(const string &name, const string &password, bool savePassword)
@@ -865,6 +902,9 @@ void ClientGame::onGameStarting()
    // Shouldn't need to do this, but it will clear out forcefields lingering from level load
    getGameObjDatabase()->removeEverythingFromDatabase();
    getUIManager()->onGameStarting();
+
+   mPlayerLevelRating = RATING_NOT_KNOWN;
+   mTotalLevelRating = RATING_NOT_KNOWN;
 }
 
 

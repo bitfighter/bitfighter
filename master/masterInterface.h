@@ -189,6 +189,9 @@ public:
    TNL_DECLARE_RPC(c2mRequestHighScores, ());
    TNL_DECLARE_RPC(m2cSendHighScores, (Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores));
 
+   TNL_DECLARE_RPC(c2mRequestLevelRating, (U32 databaseId));
+   TNL_DECLARE_RPC(m2cSendPlayerLevelRating, (U32 databaseId, RangedU32<0, 2> rating));
+   TNL_DECLARE_RPC(m2cSendTotalLevelRating,  (U32 databaseId, S16 rating));
 
    TNL_DECLARE_RPC(s2mChangeName, (StringTableEntry name));         // when server changes name using /setservname
    TNL_DECLARE_RPC(s2mServerDescription, (StringTableEntry descr)); // when server changes using /setservdescr

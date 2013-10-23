@@ -1291,10 +1291,13 @@ void Game::setActiveTeamManager(TeamManager *teamManager)
    mActiveTeamManager = teamManager;
 }
 
+
+// Overridden on client
 void Game::setLevelDatabaseId(U32 id)
 {
    mLevelDatabaseId = id;
 }
+
 
 U32 Game::getLevelDatabaseId() const
 {

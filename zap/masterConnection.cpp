@@ -386,13 +386,37 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerLeftGlobalChat, (Str
 }
 
 
-
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendHighScores, (Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores))
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendHighScores, (Vector<StringTableEntry> groupNames, 
+                           Vector<string> names, Vector<string> scores))
 {
    if(mGame->isServer())
       return;
 
    static_cast<ClientGame *>(mGame)->setHighScores(groupNames, names, scores);
+}
+
+
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendPlayerLevelRating, (U32 databaseId, RangedU32<0,2> rating))
+{
+   TNLAssert(databaseId != NOT_IN_DATABASE, "Should not have received a rating for this level!");
+
+   // Verify that these ratings are for the current level (and that it hasn't somehow changed from underneath us)
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+
+   if(databaseId == clientGame->getLevelDatabaseId())
+      clientGame->gotPlayerLevelRating(rating);
+}
+
+
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendTotalLevelRating, (U32 databaseId, S16 rating))
+{
+   TNLAssert(databaseId != NOT_IN_DATABASE, "Should not have received a rating for this level!");
+
+   // Verify that these ratings are for the current level (and that it hasn't somehow changed from underneath us)
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+
+   if(databaseId == clientGame->getLevelDatabaseId())
+      clientGame->gotTotalLevelRating(rating);
 }
 #endif
 
