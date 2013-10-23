@@ -246,6 +246,91 @@ bool isInteger(const char *str)
 }
 
 
+// Sanitize strings before inclusion into JSON
+const char *sanitizeForJson(const char *value)
+{
+   unsigned maxsize = strlen(value) * 2 + 3; // allescaped+quotes+NULL
+   std::string result;
+   result.reserve(maxsize);  // memory management
+
+   // Return if no escaping needed
+   if(strpbrk(value, "\"\\\b\f\n\r\t<>&") == NULL && !containsControlCharacter(value))
+      return value;
+
+   // If any of the above exist then do some escaping
+   for(const char* c = value; *c != 0; ++c)
+   {
+      switch(*c)
+      {
+         // For JSON
+         case '\"':
+            result += "\\\"";
+            break;
+         case '\\':
+            result += "\\\\";
+            break;
+         case '\b':
+            result += "\\b";
+            break;
+         case '\f':
+            result += "\\f";
+            break;
+         case '\n':
+            result += "\\n";
+            break;
+         case '\r':
+            result += "\\r";
+            break;
+         case '\t':
+            result += "\\t";
+            break;
+
+            // For html markup entities
+         case '&':
+            result += "&amp;";
+            break;
+         case '<':
+            result += "&lt;";
+            break;
+         case '>':
+            result += "&gt;";
+            break;
+         default:
+            if(isControlCharacter(*c))
+            {
+               // Do nothing for the moment -- there shouldn't be any control chars here, and if there are we don't really care.
+               // However, some day we might want to support this, so we'll leave the code in place.
+               //std::ostringstream oss;
+               //oss << "\\u" << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << static_cast<int>(*c);
+               //result += oss.str();
+            }
+            else
+               result += *c;
+
+            break;
+      }
+   }
+
+   return result.c_str();
+}
+
+
+bool isControlCharacter(char ch)
+{
+   return ch > 0 && ch <= 0x1F;
+}
+
+
+bool containsControlCharacter(const char* str)
+{
+   while(*str)
+   if(isControlCharacter(*(str++)))
+      return true;
+
+   return false;
+}
+
+
 // TODO: Merge this with the one following
 // Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=320087
 // Parses a string on whitespace, except when inside "s

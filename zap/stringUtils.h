@@ -95,6 +95,10 @@ string ucase(string strToConvert);
 
 bool isInteger(const char *str);
 
+const char *sanitizeForJson(const char *value);
+bool isControlCharacter(char ch);
+bool containsControlCharacter(const char* str);
+
 void s_fprintf(FILE *stream, const char *format, ...);      // throws SaveException
 
 bool caseInsensitiveStringCompare(const string &str1, const string &str2);
