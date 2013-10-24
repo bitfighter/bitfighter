@@ -23,9 +23,10 @@
 //------------------------------------------------------------------------------------
 
 #include "masterInterface.h"
-
 #include "tnlNetInterface.h"
 #include "tnlVector.h"
+
+#include "../zap/Intervals.h"
 #include "../zap/ChatCheck.h"
 
 #include <map>
@@ -52,9 +53,6 @@ struct ThreadingStruct
    bool isExpired() { return Platform::getRealMilliseconds() - lastClock > getCacheExpiryTime(); }
    virtual U32 getCacheExpiryTime() = 0;
 };
-
-
-static const S32 TWO_HOURS = 2 * 60 * 1000;
 
 
 struct HighScores : public ThreadingStruct

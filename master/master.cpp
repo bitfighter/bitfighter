@@ -1946,7 +1946,7 @@ int main(int argc, const char **argv)
    gFileLogConsumer.logprintf("[%s] Master Server %s started - listening on port %d", getTimeStamp().c_str(), gMasterName.c_str(), gMasterPort);
    gStdoutLogConsumer.logprintf("Master Server %s started - listening on port %d", gMasterName.c_str(), gMasterPort);
 
-   const U32 REWRITE_TIME = 5000;        // Rewrite status file at most this often (in ms)
+   const U32 REWRITE_TIME = FIVE_SECONDS;        // Rewrite status file at most this often (in ms)
 
    U32 lastCleanupTime = Platform::getRealMilliseconds();
    U32 lastConfigReadTime = Platform::getRealMilliseconds();
@@ -1962,7 +1962,7 @@ int main(int argc, const char **argv)
       gNetInterface->processConnections();
       U32 currentTime = Platform::getRealMilliseconds();
 
-      const U32 REREAD_TIME = 5000;             // 5 seconds
+      const U32 REREAD_TIME = FIVE_SECONDS;             // 5 seconds
 
       if(currentTime - lastConfigReadTime > REREAD_TIME)     // Reread the config file every 5000ms
       {
@@ -1971,7 +1971,7 @@ int main(int argc, const char **argv)
       }
 
       // Periodic cleanup
-      const U32 CLEANUP_TIME = 10 * 60 * 1000;  // 10 Minutes
+      const U32 CLEANUP_TIME = TEN_MINUTES;  // 10 Minutes
       if(currentTime - lastCleanupTime > CLEANUP_TIME)    
       {
          MasterServerConnection::removeOldEntriesFromRatingsCache();
