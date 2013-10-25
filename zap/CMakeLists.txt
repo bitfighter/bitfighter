@@ -74,6 +74,7 @@ set(SHARED_SOURCES
 	robot.cpp
 	ScreenInfo.cpp
 	ServerGame.cpp
+   Settings.cpp
 	ship.cpp
 	shipItems.cpp
 	SimpleLine.cpp
