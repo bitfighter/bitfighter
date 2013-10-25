@@ -52,8 +52,6 @@ using namespace Zap;
 
 map<U32, string> gMOTDClientMap;
 
-U32 gServerStartTime;
-
 MasterServer *MasterServerConnection::mMaster = NULL;
 
 Vector<string> master_admins;  // --> move to settings struct
@@ -1259,7 +1257,7 @@ DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
 
             // If server just restarted, clients will need to reauthenticate, and that may take some time.
             // We'll give them 90 seconds.
-            else if(Platform::getRealMilliseconds() - gServerStartTime < 90 * 1000)
+            else if(Platform::getRealMilliseconds() - mMaster->getStartTime() < 90 * 1000)
                status = AuthenticationStatusTryAgainLater;
             else
                status = AuthenticationStatusUnauthenticatedName;
