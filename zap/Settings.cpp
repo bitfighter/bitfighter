@@ -59,9 +59,20 @@ static RelAbs stringToRelAbs(string relAbs)
 
 template<> string      Setting<string>     ::fromString(const string &val) { return val; }
 template<> S32         Setting<S32>        ::fromString(const string &val) { return atoi(val.c_str()); }
+template<> U32         Setting<U32>        ::fromString(const string &val) { return atoi(val.c_str()); }
 template<> DisplayMode Setting<DisplayMode>::fromString(const string &val) { return stringToDisplayMode(val); }
 template<> YesNo       Setting<YesNo>      ::fromString(const string &val) { return stringToYesNo(val); }
 template<> RelAbs      Setting<RelAbs>     ::fromString(const string &val) { return stringToRelAbs(val); }
+
+
+// In order to keep the template definitions in the cpp file, we need to declare which template
+// parameters we will use:
+template class Setting<string>;
+template class Setting<S32>;
+template class Setting<U32>;
+template class Setting<DisplayMode>;
+template class Setting<YesNo>;
+template class Setting<RelAbs>;
 
 
 ////////////////////////////////////////
@@ -207,16 +218,5 @@ void Setting<T>::setValFromString(const string &value)
 }
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-// In order to keep the template definitions in the cpp file, we need to declare which template
-// parameters we will use:
-template class Setting<string>;
-template class Setting<S32>;
-template class Setting<DisplayMode>;
-template class Setting<YesNo>;
-template class Setting<RelAbs>;
-
-
 }
+
