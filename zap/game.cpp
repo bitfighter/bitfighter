@@ -1456,19 +1456,19 @@ const GridDatabase *Game::getServerGameObjectDatabase()
 // Static method
 void Game::seedRandomNumberGenerator(const string &name)
 {
-   U32 seconds = Platform::getRealMilliseconds();
+   U32 time = Platform::getRealMilliseconds();
    const S32 timeByteCount = 4;
    const S32 totalByteCount = 16;
 
    S32 nameBytes = min((S32)name.length(), totalByteCount - timeByteCount);     // # of bytes we get from the provided name
 
-   unsigned char buf[totalByteCount] = {0};  // Should be initialized for libtomcrypt
+   unsigned char buf[totalByteCount]; 
 
    // Bytes from the time
-   buf[0] = U8(seconds);
-   buf[1] = U8(seconds >> 8);
-   buf[2] = U8(seconds >> 16);
-   buf[3] = U8(seconds >> 24);
+   buf[0] = U8(time);
+   buf[1] = U8(time >> 8);
+   buf[2] = U8(time >> 16);
+   buf[3] = U8(time >> 24);
 
    // Bytes from the name
    for(S32 i = 0; i < nameBytes; i++)
