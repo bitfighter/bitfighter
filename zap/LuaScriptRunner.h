@@ -40,7 +40,6 @@ using namespace std;
 using namespace TNL;
 
 
-#define method(class, name)  { #name, &class::name }
 #define ARRAYDEF(...) __VA_ARGS__                  // Wrap inline array definitions so they don't confuse the preprocessor   
 
 

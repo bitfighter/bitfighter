@@ -195,7 +195,7 @@ typedef unsigned long long  U64;  ///< Compiler independent unsigned 64-bit inte
 #  define TNL_COMPILER_STRING "GCC (Cygwin)"
 #  define TNL_COMPILER_MINGW
 #else
-#  define TNL_COMPILER_STRING "GCC "
+#  define TNL_COMPILER_STRING "GCC"
 #endif
 
 #else

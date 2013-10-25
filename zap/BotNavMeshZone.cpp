@@ -31,6 +31,7 @@
 #include "barrier.h"                // For Barrier methods in generating zones
 #include "EngineeredItem.h"         // For Turret and ForceFieldProjector methods in generating zones
 #include "GeomUtils.h"
+#include "MathUtils.h"
 
 #include "tnlLog.h"
 
@@ -59,6 +60,10 @@ namespace Zap
 // Declare our statics
 static const S32 MAX_ZONES = 10000;                              // Don't make this go above S16 max - 1 (32,766), AStar::findPath is limited
 const S32 BotNavMeshZone::BufferRadius = Ship::CollisionRadius;  // Radius to buffer objects when creating the holes for zones
+
+// Extra padding around the game extents to allow outsize zones to be created.
+// Make sure we always have 50 for good measure
+const S32 BotNavMeshZone::LevelZoneBuffer = MAX(BufferRadius * 2, 50);
 
 Vector<BotNavMeshZone *> BotNavMeshZone::mAllZones;
 
@@ -428,7 +433,7 @@ bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<Da
    Rect bounds(worldExtents);      // Modifiable copy
    mAllZones.deleteAndClear();
 
-   bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
+   bounds.expandToInt(Point(LevelZoneBuffer, LevelZoneBuffer));      // Provide a little breathing room
 
    // Make sure level isn't too big for zone generation, which uses 16 bit ints
    if(bounds.getHeight() >= (F32)U16_MAX || bounds.getWidth() >= (F32)U16_MAX)

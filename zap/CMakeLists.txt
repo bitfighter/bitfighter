@@ -25,7 +25,6 @@ set(SHARED_SOURCES
 	CoreGame.cpp
 	CTFGame.cpp
 	dataConnection.cpp
-	EditorPlugin.cpp
 	EngineeredItem.cpp
 	EventManager.cpp
 	flagItem.cpp
@@ -115,6 +114,7 @@ set(CLIENT_SOURCES
 	ClientGame.cpp
 	Cursor.cpp
 	EditorAttributeMenuItemBuilder.cpp
+	EditorPlugin.cpp
 	EditorTeam.cpp
 	EnergyGaugeRenderer.cpp
 	engineerHelper.cpp

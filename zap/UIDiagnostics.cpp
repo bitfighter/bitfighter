@@ -227,12 +227,18 @@ static S32 showFoldersBlock(FolderManager *folderManager, F32 textsize, S32 ypos
 }
 
 
+// This should be calculated only once, on build time
+static const string buildDate = __DATE__;
+
+// This is too long to use right now
+//static const string buildDate = __DATE__ " " __TIME__;
+
 static S32 showVersionBlock(S32 ypos, S32 textsize, S32 gap)
 {
    glColor(Colors::white);
 
-   S32 x = getCenteredStringStartingPosf(textsize, "M/C Ver: %d | C/S Ver: %d | Build: %s/%d | CPU: %s | OS: %s | Cmplr: %s",
-           MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, ZAP_GAME_RELEASE, BUILD_VERSION, TNL_CPU_STRING, TNL_OS_STRING, TNL_COMPILER_STRING);
+   S32 x = getCenteredStringStartingPosf(textsize, "M/C Ver: %d | C/S Ver: %d | Build: %s/%d | Date: %s | CPU: %s | OS: %s | Cmplr: %s",
+           MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, ZAP_GAME_RELEASE, BUILD_VERSION, TNL_CPU_STRING, TNL_OS_STRING, TNL_COMPILER_STRING, buildDate.c_str());
 
    glColor(Colors::white);
    x += drawStringAndGetWidthf(x, ypos, textsize, "M/C Ver: ");
@@ -252,6 +258,11 @@ static S32 showVersionBlock(S32 ypos, S32 textsize, S32 gap)
    x += drawStringAndGetWidthf(x, ypos, textsize, "/");
    glColor(Colors::yellow);
    x += drawStringAndGetWidthf(x, ypos, textsize, "%s", ZAP_GAME_RELEASE);
+
+   glColor(Colors::white);
+   x += drawStringAndGetWidthf(x, ypos, textsize, " | Date: ");
+   glColor(Colors::yellow);
+   x += drawStringAndGetWidthf(x, ypos, textsize, "%s", buildDate.c_str());
 
    glColor(Colors::white);
    x += drawStringAndGetWidthf(x, ypos, textsize, " | CPU: ");
@@ -357,7 +368,7 @@ void DiagnosticUserInterface::render()
 
       const S32 gap = 5;
 
-      S32 ypos = showVersionBlock(120, textsize, gap);
+      S32 ypos = showVersionBlock(120, textsize - 2, gap);
 
       glColor(Colors::white);
 
