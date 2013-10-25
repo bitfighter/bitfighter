@@ -1,6 +1,7 @@
 set(MASTER_SOURCES
 	master.cpp
 	masterInterface.cpp
+   MasterServerConnection.cpp
 	config.cpp
 	database.cpp
 	../zap/ChatCheck.cpp

@@ -26,6 +26,7 @@
 #define _GAME_CONNECT_REQUEST_H_
 
 #include "tnlTypes.h"
+#include "tnlNetBase.h"
 
 using namespace TNL;
 

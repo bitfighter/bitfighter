@@ -27,15 +27,22 @@
 #define _MASTER_SERVER_CONNECTION_H_
 
 #include "GameConnectRequest.h"
+#include "masterInterface.h"
 
 #include "../zap/ChatCheck.h"
 #include "../zap/Intervals.h"
 
+#include "tnlVector.h"
+#include "tnlNetStringTable.h"
+
 #include <map>
+#include <string>
 
 
 class MasterServerConnection;
 class MasterServer;
+
+using namespace std;
 
 struct ThreadingStruct
 {
