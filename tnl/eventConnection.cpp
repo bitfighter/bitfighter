@@ -146,11 +146,17 @@ bool EventConnection::readConnectAccept(BitStream *stream, NetConnection::Termin
    stream->read(&mEventClassCount);                                                      // Number of RPCs the remote server is willing to support
    U32 myCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent);   // Number we, the client, support
 
-   if(mEventClassCount > myCount)      // Normally, these should be equal.  If the server is not willing to support as many RPCs as we want to use,
-      return false;                    // then bail.
+   if(mEventClassCount > myCount)      // Normally, these should be equal.  If the server is not willing to support
+   {                                   // as many RPCs as we want to use, then bail.
+      logprintf(LogConsumer::LogConnection, "Connection to master failed due to a disagreement on the number of RPCs supported.");
+      return false;                    
+   }
 
    if(!NetClassRep::isVersionBorderCount(getNetClassGroup(), NetClassTypeEvent, mEventClassCount))
+   {
+      logprintf(LogConsumer::LogConnection, "Connection to master failed due to incompatible versions.");
       return false;
+   }
 
    mEventClassBitSize = getNextBinLog2(mEventClassCount);
    return true;
