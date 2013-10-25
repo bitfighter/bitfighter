@@ -152,7 +152,7 @@ void LogConsumer::prepareAndLogString(std::string message)
 // Constructor -- open the file
 FileLogConsumer::FileLogConsumer()    // Constructor
 {
-   // Do nothing
+   f = NULL;
 }
 
 
