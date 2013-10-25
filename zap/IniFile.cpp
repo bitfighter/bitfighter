@@ -15,10 +15,15 @@
 // Also added a check to ensure duplicate keys aren't created
 ////////////////////////
 
+// Terminology used throughout:
+// [Section]
+// Key=Value   ; Comment
+
+
 #include "IniFile.h"
 
 #include "tnlJournal.h"       // For journaling support
-#include "stringUtils.h"      // for lcase
+#include "stringUtils.h"      // for lcase, itos, etc.
 #include "zapjournal.h"
 #include "tnlTypes.h"
 
@@ -143,6 +148,7 @@ void CIniFile::processLine(string line)
    }
 }
 
+
 bool CIniFile::WriteFile()
 {
    S32 commentID, sectionId, keyID;
@@ -179,6 +185,7 @@ bool CIniFile::WriteFile()
    return true;
 }
 
+
 S32 CIniFile::findSection(const string &sectionName) const
 {
    for(S32 sectionId = 0; sectionId < sectionNames.size(); ++sectionId)
@@ -186,6 +193,7 @@ S32 CIniFile::findSection(const string &sectionName) const
          return sectionId;
    return noID;
 }
+
 
 S32 CIniFile::FindValue(S32 const sectionId, const string &keyName) const
 {
@@ -198,6 +206,7 @@ S32 CIniFile::FindValue(S32 const sectionId, const string &keyName) const
    return noID;
 }
 
+
 S32 CIniFile::addSection(const string keyname)
 {
    if(findSection(keyname) != noID)            // Don't create duplicate keys!
@@ -208,6 +217,7 @@ S32 CIniFile::addSection(const string keyname)
 
    return sectionNames.size() - 1;
 }
+
 
 string CIniFile::sectionName(S32 const sectionId) const
 {
@@ -225,6 +235,7 @@ string CIniFile::ValueName(S32 const sectionId, S32 const valueID) const
    return "";
 }
 
+
 string CIniFile::ValueName(const string keyname, S32 const valueID) const
 {
    S32 sectionId = findSection(keyname);
@@ -233,6 +244,7 @@ string CIniFile::ValueName(const string keyname, S32 const valueID) const
    return ValueName(sectionId, valueID);
 }
 
+
 bool CIniFile::SetValue(S32 const sectionId, S32 const valueID, const string value)
 {
    if(sectionId < sections.size() && valueID < sections[sectionId].keys.size())
@@ -240,6 +252,7 @@ bool CIniFile::SetValue(S32 const sectionId, S32 const valueID, const string val
 
    return false;
 }
+
 
 // Will create key if it does not exist if create is set to true
 bool CIniFile::SetValue(const string &section, const string &key, const string &value, bool const create)
@@ -291,38 +304,38 @@ bool CIniFile::SetAllValues(const string &section, const string &prefix, const V
 
 bool CIniFile::SetValueI(const string &section, const string &key, S32 const value, bool const create)
 {
-   char svalue[MAX_VALUEDATA];
-   dSprintf(svalue, sizeof(svalue), "%d", value);
-   const string x(svalue);
+   string val = itos(value);
 
-   return SetValue(section, key, x);
+   return SetValue(section, key, val);
 }
 
 
 bool CIniFile::SetValueF(const string &section, const string &key, F64 const value, bool const create)
 {
-   char svalue[MAX_VALUEDATA];
+   string val = ftos(value);
 
-   dSprintf(svalue, sizeof(svalue), "%f", value);
-   return SetValue(section, key, string(svalue));
+   return SetValue(section, key, val);
 }
 
-bool CIniFile::SetValueV(const string &section, const string &key, char *format, ...)
-{
-   va_list args;
-   char value[MAX_VALUEDATA];
 
-   va_start(args, format);
-   dSprintf(value, sizeof(value), format, args);
-   va_end(args);
-   return SetValue(section, key, value);
-}
+//bool CIniFile::SetValueV(const string &section, const string &key, char *format, ...)
+//{
+//   va_list args;
+//   char value[2048];
+//
+//   va_start(args, format);
+//   dSprintf(value, sizeof(value), format, args);
+//   va_end(args);
+//
+//   return SetValue(section, key, value);
+//}
 
 
 string CIniFile::GetValue(S32 const sectionId, S32 const keyID, const string &defValue) const
 {
    if(sectionId < sections.size() && keyID < sections[sectionId].keys.size())
       return sections[sectionId].values[keyID];
+
    return defValue;
 }
 
@@ -352,7 +365,7 @@ string CIniFile::GetValue(const string &section, const string &keyName, const st
 
 
 // Fill valueList with values from all keys in the specified section.  Key names will be discarded.
-void CIniFile::GetAllValues(S32 const sectionId, Vector<string> &valueList)
+void CIniFile::GetAllValues(S32 const sectionId, Vector<string> &valueList) const
 {
    for(S32 i = 0; i < sections[sectionId].keys.size(); i++)
       // Only return non-empty values
@@ -362,7 +375,7 @@ void CIniFile::GetAllValues(S32 const sectionId, Vector<string> &valueList)
 
 
 // Fill valueList with values from all keys in the specified section.  Key names will be discarded.
-void CIniFile::GetAllValues(const string &section, Vector<string> &valueList)
+void CIniFile::GetAllValues(const string &section, Vector<string> &valueList) const
 {
    S32 sectionId = findSection(section);
    if(sectionId == noID)
@@ -372,7 +385,7 @@ void CIniFile::GetAllValues(const string &section, Vector<string> &valueList)
 }
 
 
-void CIniFile::GetAllKeys(S32 const sectionId, Vector<string> &keyList)
+void CIniFile::GetAllKeys(S32 const sectionId, Vector<string> &keyList) const
 {
    if(GetNumEntries(sectionId) == 0)
       return;
@@ -382,7 +395,7 @@ void CIniFile::GetAllKeys(S32 const sectionId, Vector<string> &keyList)
 }
 
 
-void CIniFile::GetAllKeys(const string &section, Vector<string> &keyList)
+void CIniFile::GetAllKeys(const string &section, Vector<string> &keyList) const
 {
    S32 sectionId = findSection(section);
    if(sectionId == noID)
@@ -394,20 +407,9 @@ void CIniFile::GetAllKeys(const string &section, Vector<string> &keyList)
 
 int CIniFile::GetValueI(const string &section, const string &key, S32 const defValue) const
 {
-   char svalue[MAX_VALUEDATA];
+   string val = GetValue(section, key, itos(defValue));
 
-   dSprintf(svalue, sizeof(svalue), "%d", defValue);
-
-   string val = GetValue(section, key, string(svalue));
-
-   std::size_t len = val.size();
-   string s;
-   s.resize(len);
-   for(std::size_t i = 0; i < len; i++)
-      s[i] = static_cast<char>(val[i]);
-   S32 i = atoi(s.c_str());
-
-   return i;
+   return atoi(val.c_str());
 }
 
 
@@ -434,53 +436,13 @@ bool CIniFile::GetValueYN(S32 const sectionId, const string &keyName, const bool
 }
 
 
-
 F64 CIniFile::GetValueF(const string &section, const string &key, F64 const defValue) const
 {
-   char svalue[MAX_VALUEDATA];
+   string val = GetValue(section, key, ftos(defValue));
 
-   dSprintf(svalue, sizeof(svalue), "%f", defValue);
-
-   string val = GetValue(section, key, string(svalue));
-   std::size_t len = val.size();
-   string s;
-   s.resize(len);
-   for(std::size_t i = 0; i < len; i++)
-      s[i] = static_cast<char>(val[i]);
-
-   return atof(s.c_str());
+   return atof(val.c_str());
 }
 
-/*
-// 16 variables may be a bit of over kill, but hey, it's only code.
-S32 CIniFile::GetValueV(const string keyname, const string valuename, char *format,
-               void *v1, void *v2, void *v3, void *v4,
-               void *v5, void *v6, void *v7, void *v8,
-               void *v9, void *v10, void *v11, void *v12,
-               void *v13, void *v14, void *v15, void *v16)
-{
-  string   value;
-  // va_list  args;
-  S32 nVals;
-
-
-  value = GetValue(keyname, valuename);
-  if(!value.length())
-    return false;
-  // Why is there not vsscanf() function. Linux man pages say that there is
-  // but no compiler I've seen has it defined. Bummer!
-  //
-  // va_start(args, format);
-  // nVals = vsscanf(value.c_str(), format, args);
-  // va_end(args);
-
-  nVals = sscanf(value.c_str(), format,
-        v1, v2, v3, v4, v5, v6, v7, v8,
-        v9, v10, v11, v12, v13, v14, v15, v16);
-
-  return nVals;
-}
- */
 
 bool CIniFile::deleteKey(const string &section, const string &key)
 {
@@ -519,6 +481,7 @@ void CIniFile::Erase()
    sections.clear();
    headerComments.clear();
 }
+
 
 void CIniFile::headerComment(const string comment)
 {
@@ -586,7 +549,7 @@ bool CIniFile::sectionComment(const string section, const string comment, bool c
          return false;
 
       // I think this should never happen -CE 1/8/2011
-      // If addsection only returns noID if section exists
+      // addsection only returns noID if section exists
       // if section exists, then it would have been found at top of function
 
       //if(sectionId == noID)
@@ -734,7 +697,7 @@ string CIniFile::getSectionName( S32 const sectionId) const
 }
 
 
-S32 CIniFile::GetNumEntries(S32 const sectionId)
+S32 CIniFile::GetNumEntries(S32 const sectionId) const
 {
    if(sectionId < sections.size())
       return sections[sectionId].keys.size();
@@ -743,7 +706,7 @@ S32 CIniFile::GetNumEntries(S32 const sectionId)
 }
 
 
-S32 CIniFile::GetNumEntries(const string &keyName)
+S32 CIniFile::GetNumEntries(const string &keyName) const
 {
    S32 sectionId = findSection(keyName);
 
@@ -754,9 +717,9 @@ S32 CIniFile::GetNumEntries(const string &keyName)
 }
 
 
-string CIniFile::GetValueName( S32 const sectionID, S32 const keyID) const
+string CIniFile::GetValueName(S32 const sectionID, S32 const keyID) const
 {
-   return ValueName( sectionID, keyID);
+   return ValueName(sectionID, keyID);
 }
 
 

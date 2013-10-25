@@ -22,7 +22,6 @@
 
 #define MAX_KEYNAME    128
 #define MAX_VALUENAME  128
-#define MAX_VALUEDATA 2048
 
 #define NoJoystick "NoJoystick"
 
@@ -107,8 +106,8 @@ public:
    string getSectionName( S32 const sectionId) const;
 
    // Returns number of values stored for specified section.
-   S32 GetNumEntries(S32 const sectionId);
-   S32 GetNumEntries(const string &keyName);
+   S32 GetNumEntries(S32 const sectionId) const;
+   S32 GetNumEntries(const string &keyName) const;
 
    // Returns value name by index for a given keyname or sectionId.
    string ValueName( S32 const sectionID, S32 const keyID) const;
@@ -124,12 +123,12 @@ public:
    string GetValue(const string &section, const string &keyName, const string &defValue = "") const;
 
    // Load up valueList with all values from the section
-   void GetAllValues(const string &section, Vector<string> &valueList);
-   void GetAllValues(S32 const sectionId, Vector<string> &valueList);
+   void GetAllValues(const string &section, Vector<string> &valueList) const;
+   void GetAllValues(S32 const sectionId, Vector<string> &valueList) const;
 
    // Load up keyList with all keys from the section
-   void GetAllKeys(S32 const sectionId, Vector<string> &keyList);
-   void GetAllKeys(const string &section, Vector<string> &keyList);
+   void GetAllKeys(S32 const sectionId, Vector<string> &keyList) const;
+   void GetAllKeys(const string &section, Vector<string> &keyList) const;
 
    S32  GetValueI(const string &section,  const string &key, S32 const defValue = 0) const;
    bool GetValueB(const string &section,  const string &key, bool const defValue = false) const;
@@ -157,7 +156,7 @@ public:
    bool SetValueB(const string &section, const string &key, bool const value, bool const create = true);
    bool setValueYN(const string section, const string key, bool const value, bool const create = true);
    bool SetValueF(const string &section, const string &key, F64 const value, bool const create = true);
-   bool SetValueV(const string &section, const string &key, char *format, ...);
+   //bool SetValueV(const string &section, const string &key, char *format, ...);
    bool SetValue(S32 const sectionId, S32 const valueID, const string value);
 
    // Deletes specified value.
