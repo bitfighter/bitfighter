@@ -203,8 +203,8 @@ private:
    T mValue;
 
 public:
-   Setting<T>(const string &name, const T &defaultValue, const string &iniKey, const string &iniSection, const string &comment);
-   virtual ~Setting<T>();
+   Setting<T>(const string &name, const T &defaultValue, const string &iniKey, const string &iniSection, const string &comment = "");  // Constructor
+   virtual ~Setting<T>();                                                                                                              // Destructor
 
    T getValue() const;
    void setValue(const T &value);

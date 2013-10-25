@@ -262,7 +262,7 @@ IniSettings::IniSettings()
 {
    // Can probably get rid of VerboseHelpMessages
 
-   // Name the user entered last time they ran the game                                                    
+   //                       Data type     Setting name                   Default value           INI Key                      INI Section  INI Comment                                               
    mSettings.add(new Setting<string>     ("LastName",                    "ChumpChange",         "LastName",                    "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
    mSettings.add(new Setting<DisplayMode>("WindowMode",                  DISPLAY_MODE_WINDOWED, "WindowMode",                  "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
    mSettings.add(new Setting<YesNo>      ("UseFakeFullscreen",           Yes,                   "UseFakeFullscreen",           "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
