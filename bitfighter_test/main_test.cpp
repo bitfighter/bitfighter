@@ -210,6 +210,14 @@ static void checkTeleporter(Game *game, const string &geomString, S32 expectedDe
 }
 
 
+static void checkMaster()
+{
+   // First off, can we get a master server going here?
+
+
+}
+
+
 static void checkTeleporter(GamePair &gamePair, Teleporter *teleporter, Point *pts, S32 pointCount)
 {
    TNLAssert(pointCount > 1, "This method only for use when testing 1 or more destinations!");
