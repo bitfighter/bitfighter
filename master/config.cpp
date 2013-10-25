@@ -27,12 +27,15 @@
 #  pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
 
+#include "master.h"     
 
 #include "../zap/SharedConstants.h"
 #include "../zap/stringUtils.h"
+#include "../zap/IniFile.h"
 
 #include "tnl.h"
 #include "tnlLog.h"
+
 #include <stdio.h>
 #include <string>
 #include <map>
@@ -41,37 +44,14 @@ using namespace TNL;
 using namespace std;
 using namespace Zap;
 
-extern U32 gMasterPort;
-extern string gMasterName;
-extern string gJasonOutFile;
-
-// Variables for managing access to MySQL
-extern string gMySqlAddress;
-extern string gDbUsername;
-extern string gDbPassword;
-
-// Variables for verifying usernames/passwords in PHPBB3
-extern string gPhpbb3Database;
-extern string gPhpbb3TablePrefix;
-
-extern string gStatsDatabaseAddress;
-extern string gStatsDatabaseName;
-extern string gStatsDatabaseUsername;
-extern string gStatsDatabasePassword;
-extern bool gWriteStatsToMySql;
-
 extern Vector<string> master_admins;
 
 namespace Zap {
    extern string gSqlite;
 }
 
-extern U32 gLatestReleasedCSProtocol;
-extern U32 gLatestReleasedBuildVersion;
-
 extern map <U32, string> gMOTDClientMap;
 
-#include "../zap/IniFile.h"
 
 
 void getCurrentMOTDFromFile(const string &filename, string &fillMessage)
@@ -95,31 +75,30 @@ void getCurrentMOTDFromFile(const string &filename, string &fillMessage)
 }
 
 
-void loadSettingsFromINI(CIniFile *ini)
+void loadSettingsFromINI(const CIniFile *ini, MasterSettings *masterSettings)
 {
-   // [host] section
-   gMasterPort = (U32) ini->GetValueI("host", "port", gMasterPort);
-   gMasterName = ini->GetValue("host", "name", gMasterName);
-   gLatestReleasedCSProtocol = (U32) ini->GetValueI("host", "latest_released_cs_protocol", gLatestReleasedCSProtocol);
-   gLatestReleasedBuildVersion = (U32) ini->GetValueI("host", "latest_released_client_build_version", gLatestReleasedBuildVersion);
-   gJasonOutFile = ini->GetValue("host", "json_file", gJasonOutFile);
-   string str1 = ini->GetValue("host", "master_admin", gJasonOutFile);
+   // Read all settings defined in the new modern manner
+   string sections[] = { "host", "phpbb", "stats", "motd" };
+
+   for(S32 i = 0; i < ARRAYSIZE(sections); i++)
+   {
+      string section = sections[i];
+
+      // Enumerate all settings we've defined for [section]
+      Vector<AbstractSetting *> settings = masterSettings->mSettings.getSettingsInSection(section);   
+
+      for(S32 j = 0; j < settings.size(); j++)
+         settings[j]->setValFromString(ini->GetValue(section, settings[j]->getKey(), settings[j]->getDefaultValueString()));
+   }
+
+
+   // Got to do something about this!
+   string str1 = ini->GetValue("host", "master_admin", "");
    parseString(str1.c_str(), master_admins, ',');
 
-   // [phpbb] section
-   gMySqlAddress = ini->GetValue("phpbb", "phpbb_database_address", gMySqlAddress);
-   gPhpbb3Database = ini->GetValue("phpbb", "phpbb3_database_name", gPhpbb3Database);
-   gPhpbb3TablePrefix = ini->GetValue("phpbb", "phpbb3_table_prefix", gPhpbb3TablePrefix);
-   gDbUsername = ini->GetValue("phpbb", "phpbb3_database_username", gDbUsername);
-   gDbPassword = ini->GetValue("phpbb", "phpbb3_database_password", gDbPassword);
 
 
-   // [stats] section
-   gStatsDatabaseAddress = ini->GetValue("stats", "stats_database_addr", gStatsDatabaseAddress);
-   gStatsDatabaseName = ini->GetValue("stats", "stats_database_name", gStatsDatabaseName);
-   gStatsDatabaseUsername = ini->GetValue("stats", "stats_database_username", gStatsDatabaseUsername);
-   gStatsDatabasePassword = ini->GetValue("stats", "stats_database_password", gStatsDatabasePassword);
-   gWriteStatsToMySql = ini->GetValueYN("stats", "write_stats_to_mysql", gWriteStatsToMySql);
+   // [stats] section --> most has been modernized
    Zap::gSqlite = ini->GetValue("stats", "sqlite_file_basename", Zap::gSqlite);
 
 
@@ -151,11 +130,11 @@ void loadSettingsFromINI(CIniFile *ini)
    getCurrentMOTDFromFile(motdFilename, fillMessage);
 
    // Add it to the map as the most recently released build
-   gMOTDClientMap[gLatestReleasedBuildVersion] = fillMessage;
+   gMOTDClientMap[masterSettings->getVal<U32>("LatestReleasedBuildVersion")] = fillMessage;
 }
 
 
-void readConfigFile(CIniFile *ini)
+void readConfigFile(CIniFile *ini, MasterSettings *masterSettings) 
 {
    // First clear
    ini->Clear();
@@ -163,11 +142,12 @@ void readConfigFile(CIniFile *ini)
    // Now read
    ini->ReadFile();
 
-   // Now set up variables
-   loadSettingsFromINI(ini);
+   // Now set up variables -- copies data from ini to settings
+   loadSettingsFromINI(ini, masterSettings);
 
    // Not sure if this should go here...
-   if(gLatestReleasedCSProtocol == 0 && gLatestReleasedBuildVersion == 0)
+   if(masterSettings->getVal<U32>("LatestReleasedCSProtocol")   == 0 && 
+      masterSettings->getVal<U32>("LatestReleasedBuildVersion") == 0)
        logprintf(LogConsumer::LogError, "Unable to find a valid protocol line or build_version in config file... disabling update checks!");
 }
 

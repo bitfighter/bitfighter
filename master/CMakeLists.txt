@@ -7,7 +7,9 @@ set(MASTER_SOURCES
 	../zap/Color.cpp
 	../zap/gameStats.cpp
 	../zap/IniFile.cpp
+   ../zap/Settings.cpp
 	../zap/stringUtils.cpp
+   ../zap/Timer.cpp
 	../zap/WeaponInfo.cpp
 	../sqlite/sqlite3.c
 )
