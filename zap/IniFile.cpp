@@ -50,7 +50,7 @@ namespace Zap
 // Constructor
 CIniFile::CIniFile(const string &iniPath)
 {
-   Path(iniPath);
+   SetPath(iniPath);
    caseInsensitive = true;        // Case sensitivity creates confusion!
 }
 
@@ -648,22 +648,16 @@ void CIniFile::CaseInsensitive()
 }
 
 
-// Sets path of ini file to read and write from.
-void CIniFile::Path(const string &newPath)
-{
-   path = newPath;
-}
-
-
-string CIniFile::Path() const
+string CIniFile::getPath() const
 {
    return path;
 }
 
 
+// Sets path of ini file to read and write from
 void CIniFile::SetPath(const string &newPath)
 {
-   Path(newPath);
+   path = newPath;
 }
 
 
