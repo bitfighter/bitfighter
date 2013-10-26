@@ -88,9 +88,9 @@ MasterServerConnection::~MasterServerConnection()
    }
    else if(mConnectionType == MasterConnectionTypeServer)
    {
-      S32 index = mMaster->getClientList()->getIndex(this);
+      S32 index = mMaster->getServerList()->getIndex(this);
       if(index > -1)
-         mMaster->removeClient(index);
+         mMaster->removeServer (index);
    }
 
    if(mLoggingStatus != "")
@@ -459,15 +459,17 @@ static bool listClient(MasterServerConnection *client)
 // This gets updated whenever we gain or lose a server, at most every 5 seconds (currently)
 void MasterServerConnection::writeClientServerList_JSON()
 {
+   string jsonfile = mMaster->getSetting<string>("JsonOutfile");
+
    // Don't write if we don't have a file
-   if(mMaster->getSetting<string>("JsonOutfile") == "")
+   if(jsonfile == "")
       return;
 
    bool first = true;
    S32 playerCount = 0;
    S32 serverCount = 0;
 
-   FILE *f = fopen(mMaster->getSetting<string>("JsonOutfile").c_str(), "w");
+   FILE *f = fopen(jsonfile.c_str(), "w");
    if(f)
    {
       // First the servers
@@ -525,7 +527,7 @@ void MasterServerConnection::writeClientServerList_JSON()
       fclose(f);
    }
    else
-      logprintf(LogConsumer::LogError, "Could not write to JSON file \"%s\"", mMaster->getSetting<string>("JsonOutfile").c_str());
+      logprintf(LogConsumer::LogError, "Could not write to JSON file \"%s\"", jsonfile.c_str());
 }
 
 /*  Resulting JSON data should look like this:
