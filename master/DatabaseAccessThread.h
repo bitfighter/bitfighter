@@ -36,6 +36,7 @@ class MasterSettings;
 class DatabaseAccessThread : public TNL::Thread
 {
 public:
+
    class BasicEntry : public RefPtrData
    {
    protected:
@@ -52,6 +53,9 @@ private:
    U32 mEntryStart;
    U32 mEntryThread;
    U32 mEntryEnd;
+
+   bool mRunning;
+
    static const U32 mEntrySize = 32;
 
    RefPtr<BasicEntry> mEntry[mEntrySize];
@@ -62,19 +66,24 @@ public:
       mEntryStart = 0;
       mEntryThread = 0;
       mEntryEnd = 0;
+
+      mRunning = true;
    }
 
 
    void addEntry(BasicEntry *entry)
    {
       U32 entryEnd = mEntryEnd + 1;
+
       if(entryEnd >= mEntrySize)
          entryEnd = 0;
-      if(entryEnd == mEntryStart) // too many entries
+
+      if(entryEnd == mEntryStart)      // Too many entries
       {
          logprintf(LogConsumer::LogError, "Database thread overloaded - database access too slow?");
          return;
       }
+
       mEntry[mEntryEnd] = entry;
       mEntryEnd = entryEnd;
    }
@@ -82,7 +91,7 @@ public:
 
    U32 run()
    {
-      while(true)
+      while(mRunning)
       {
          Platform::sleep(50);
          while(mEntryThread != mEntryEnd)
@@ -93,6 +102,9 @@ public:
                mEntryThread = 0;
          }
       }
+
+      delete this;
+
       return 0;
    }
 
@@ -108,6 +120,11 @@ public:
          if(mEntryStart >= mEntrySize)
             mEntryStart = 0;
       }
+   }
+
+   void terminate()
+   {
+      mRunning = false;
    }
 };
 

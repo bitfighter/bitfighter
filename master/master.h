@@ -25,7 +25,6 @@
 #include "masterInterface.h"
 
 #include "MasterServerConnection.h"
-#include "DatabaseAccessThread.h"
 
 #include "../zap/IniFile.h"
 
@@ -73,6 +72,8 @@ public:
 };
 
 
+class DatabaseAccessThread;
+
 class MasterServer 
 {
 private:
@@ -86,7 +87,7 @@ private:
    Timer mJsonWriteTimer;
    bool mJsonWritingSuspended;
 
-   DatabaseAccessThread mDatabaseAccessThread;
+   DatabaseAccessThread *mDatabaseAccessThread;
 
    Vector<MasterServerConnection *> mServerList;
    Vector<MasterServerConnection *> mClientList;

@@ -25,6 +25,7 @@
 
 #include "master.h"
 #include "database.h"            // For writing to the database
+#include "DatabaseAccessThread.h"
 
 #include "../zap/stringUtils.h"  // For itos, replaceString
 #include "../zap/IniFile.h"      // For INI reading/writing
@@ -187,7 +188,8 @@ MasterServer::MasterServer(MasterSettings *settings)
    mJsonWriteTimer.reset(0, FIVE_SECONDS);   // Max frequency for writing JSON files -- set current to 0 so we'll write immediately
    mJsonWritingSuspended = false;
    
-   mDatabaseAccessThread.start();            // Start a thread to handle database interaction
+   mDatabaseAccessThread = new DatabaseAccessThread();    // Deleted in destructor
+   mDatabaseAccessThread->start();            
 
    MasterServerConnection::setMasterServer(this);
 }
@@ -197,6 +199,11 @@ MasterServer::MasterServer(MasterSettings *settings)
 MasterServer::~MasterServer()
 {
    delete mNetInterface;
+
+   // Turn off the database access thread
+   mDatabaseAccessThread->terminate();
+   //delete mDatabaseAccessThread;
+   //mDatabaseAccessThread = NULL;
 }
 
 
@@ -366,13 +373,13 @@ void MasterServer::idle(U32 timeDelta)
       }
    }
 
-   mDatabaseAccessThread.idle();
+   mDatabaseAccessThread->idle();
 }
 
 
 DatabaseAccessThread *MasterServer::getDatabaseAccessThread()
 {
-   return &mDatabaseAccessThread;
+   return mDatabaseAccessThread;
 }
 
 }  // namespace

@@ -28,6 +28,7 @@
 
 #include "master.h"
 #include "database.h"
+#include "DatabaseAccessThread.h"
 
 #include "../zap/version.h"
 #include "../zap/stringUtils.h"
