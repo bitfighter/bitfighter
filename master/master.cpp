@@ -202,8 +202,6 @@ MasterServer::~MasterServer()
 
    // Turn off the database access thread
    mDatabaseAccessThread->terminate();
-   //delete mDatabaseAccessThread;
-   //mDatabaseAccessThread = NULL;
 }
 
 
