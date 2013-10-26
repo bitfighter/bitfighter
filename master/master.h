@@ -27,6 +27,8 @@
 #include "MasterServerConnection.h"
 #include "DatabaseAccessThread.h"
 
+#include "../zap/IniFile.h"
+
 #include "tnlNetInterface.h"
 #include "tnlVector.h"
 
@@ -50,8 +52,14 @@ namespace Master
 
 class MasterSettings
 {
+private:
+   void loadSettingsFromINI();
+   string getCurrentMOTDFromFile(const string &filename) const;
+
+
 public:
-   MasterSettings();     // Constructor --> here all the keys, vals, and defaults are defined
+   MasterSettings(const string &iniFile);     // Constructor --> here all the keys, vals, and defaults are defined
+   void readConfigFile();
 
    // Simplify access
    template <typename T>
@@ -61,6 +69,7 @@ public:
    }
 
    Settings mSettings;
+   CIniFile ini;
 };
 
 

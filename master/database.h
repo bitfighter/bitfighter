@@ -79,6 +79,7 @@ class DbQuery
 #ifdef BF_WRITE_TO_MYSQL
    Connection conn;
 #endif
+
 public:
    Query *query;
    sqlite3 *sqliteDb;
@@ -148,5 +149,6 @@ public:
 
 
 }
+
 
 #endif

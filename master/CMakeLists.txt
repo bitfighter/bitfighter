@@ -1,9 +1,9 @@
 set(MASTER_SOURCES
+   database.cpp
+   main.cpp
 	master.cpp
 	masterInterface.cpp
    MasterServerConnection.cpp
-	config.cpp
-	database.cpp
 	../zap/ChatCheck.cpp
 	../zap/Color.cpp
 	../zap/gameStats.cpp
