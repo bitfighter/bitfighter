@@ -95,7 +95,6 @@ set(SHARED_SOURCES
 	Zone.cpp
 	zoneControlGame.cpp
 	../clipper/clipper.cpp
-   ../master/config.cpp
 	../master/database.cpp
    ../master/master.cpp
 	../master/masterInterface.cpp

@@ -126,7 +126,7 @@ using namespace Master;
 TEST_F(BfTest, MasterTests)
 {
    // First off, can we get a master server going here?
-   MasterSettings settings;
+   MasterSettings settings("");     // Don't read from an INI file
    MasterServer master(&settings);
 
 }
