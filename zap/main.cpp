@@ -213,11 +213,11 @@ void exitToOs()
 
 
 // All levels loaded, we're ready to go
-void hostGame()
+void hostGame(ServerGame *serverGame)
 {
-   if(!gServerGame->startHosting())
+   if(!serverGame->startHosting())
    {
-      abortHosting_noLevels(gServerGame);
+      abortHosting_noLevels(serverGame);
       return;
    }
 
@@ -225,7 +225,7 @@ void hostGame()
    for(S32 i = 0; i < gClientGames.size(); i++)      // Should be true if this isn't a dedicated server...
    {
       gClientGames[i]->getUIManager()->disableLevelLoadDisplay(true);
-      gClientGames[i]->joinLocalGame(gServerGame->getNetInterface());  // ...then we'll play, too!
+      gClientGames[i]->joinLocalGame(serverGame->getNetInterface());  // ...then we'll play, too!
    }
 #endif
 }
@@ -350,7 +350,7 @@ void idle()
       }
 
       else if(gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels)
-         hostGame();
+         hostGame(gServerGame);
    }
 #ifndef ZAP_DEDICATED
    else     // If there is no server game, and this code is running, there *MUST* be a client game.
