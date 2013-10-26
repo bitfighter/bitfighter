@@ -48,8 +48,6 @@ namespace Master
 {
 
 
-#define MASTER_SETTINGS_TABLE
-
 class MasterSettings
 {
 public:
