@@ -327,7 +327,7 @@ void checkIfServerGameIsShuttingDown(U32 timeDelta)
 }
 
 
-// This is the master idle loop that gets registered with GLUT and is called on every game tick.
+// This is the master idle loop that is called on every game tick.
 // This in turn calls the idle functions for all other objects in the game.
 void idle()
 {
