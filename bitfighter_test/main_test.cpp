@@ -37,6 +37,8 @@
 #include "LevelFilesForTesting.h"      // Contains sample levelcode for testing purposes
 #include "EventKeyDefs.h"              // One big ugly macro for defining a bunch of vars related to key input events
 
+#include "../master/master.h"
+
 #include "tnlNetObject.h"
 #include "tnlGhostConnection.h"
 #include "tnlPlatform.h"
@@ -210,10 +212,12 @@ static void checkTeleporter(Game *game, const string &geomString, S32 expectedDe
 }
 
 
+using namespace Master;
 static void checkMaster()
 {
    // First off, can we get a master server going here?
-
+   MasterSettings settings;
+   MasterServer master(&settings);
 
 }
 

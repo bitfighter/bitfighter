@@ -31,6 +31,7 @@
 #include <string>
 
 using namespace std;
+using namespace Master;
 
 namespace Zap
 {
