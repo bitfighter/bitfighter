@@ -1465,7 +1465,7 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
          // Build up this polyline in poly2tri's format (downscale Clipper points)
          Vector<p2t::Point*> polyline;
          for(U32 j = 0; j < currentNode->Contour.size(); j++)
-            polyline.push_back(new p2t::Point(F64(currentNode->Contour[j].X) * CLIPPER_SCALE_FACT_INVERSE, F64(currentNode->Contour[j].Y) * CLIPPER_SCALE_FACT_INVERSE));
+            polyline.push_back(new p2t::Point(F64(currentNode->Contour[j].X), F64(currentNode->Contour[j].Y)));
 
          polylinesRegistry.push_back(polyline);  // Memory
 
@@ -1479,7 +1479,7 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
 
             Vector<p2t::Point*> hole;
             for(U32 k = 0; k < childNode->Contour.size(); k++)
-               hole.push_back(new p2t::Point(F64(childNode->Contour[k].X) * CLIPPER_SCALE_FACT_INVERSE, F64(childNode->Contour[k].Y) * CLIPPER_SCALE_FACT_INVERSE));
+               hole.push_back(new p2t::Point(F64(childNode->Contour[k].X), F64(childNode->Contour[k].Y)));
 
             holesRegistry.push_back(hole);  // Memory
 
@@ -1497,9 +1497,9 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
          for(U32 j = 0; j < currentOutput.size(); j++)
          {
             currentTriangle = currentOutput[j];
-            outputTriangles.push_back(Point(currentTriangle->GetPoint(0)->x, currentTriangle->GetPoint(0)->y));
-            outputTriangles.push_back(Point(currentTriangle->GetPoint(1)->x, currentTriangle->GetPoint(1)->y));
-            outputTriangles.push_back(Point(currentTriangle->GetPoint(2)->x, currentTriangle->GetPoint(2)->y));
+            outputTriangles.push_back(Point(currentTriangle->GetPoint(0)->x * CLIPPER_SCALE_FACT_INVERSE, currentTriangle->GetPoint(0)->y * CLIPPER_SCALE_FACT_INVERSE));
+            outputTriangles.push_back(Point(currentTriangle->GetPoint(1)->x * CLIPPER_SCALE_FACT_INVERSE, currentTriangle->GetPoint(1)->y * CLIPPER_SCALE_FACT_INVERSE));
+            outputTriangles.push_back(Point(currentTriangle->GetPoint(2)->x * CLIPPER_SCALE_FACT_INVERSE, currentTriangle->GetPoint(2)->y * CLIPPER_SCALE_FACT_INVERSE));
          }
       }
 
