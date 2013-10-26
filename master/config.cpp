@@ -44,14 +44,16 @@ using namespace TNL;
 using namespace std;
 using namespace Zap;
 
-extern Vector<string> master_admins;
 
 namespace Zap {
    extern string gSqlite;
 }
 
-extern map <U32, string> gMOTDClientMap;
+namespace Master 
+{
 
+extern map <U32, string> gMOTDClientMap;
+extern Vector<string> master_admins;
 
 
 void getCurrentMOTDFromFile(const string &filename, string &fillMessage)
@@ -149,5 +151,8 @@ void readConfigFile(CIniFile *ini, MasterSettings *masterSettings)
    if(masterSettings->getVal<U32>("LatestReleasedCSProtocol")   == 0 && 
       masterSettings->getVal<U32>("LatestReleasedBuildVersion") == 0)
        logprintf(LogConsumer::LogError, "Unable to find a valid protocol line or build_version in config file... disabling update checks!");
+}
+
+
 }
 

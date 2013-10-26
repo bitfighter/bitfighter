@@ -28,6 +28,8 @@
 
 #include "tnlThread.h"
 
+namespace Master
+{
 
 class MasterSettings;
 
@@ -109,5 +111,7 @@ public:
    }
 };
 
+
+}
 
 #endif

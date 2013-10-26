@@ -38,6 +38,8 @@ using namespace std;
 using namespace TNL;
 
 
+namespace DbWriter
+{
 
 // Default constructor -- don't use this one!
 DatabaseWriter::DatabaseWriter()
@@ -778,4 +780,7 @@ string DatabaseWriter::getSqliteSchema() {
       "   CREATE UNIQUE INDEX player_achievements_accomplishment_id on player_achievements(achievement_id, player_name COLLATE BINARY);";
 
    return schema;
+}
+
+
 }

@@ -34,6 +34,11 @@
 
 #include "../boost/boost/shared_ptr.hpp"
 
+using namespace DbWriter;
+
+namespace Master 
+{
+
 
 // Define some statics
 HighScores MasterServerConnection::highScores;
@@ -1741,3 +1746,6 @@ TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, true);
 
 Vector< GameConnectRequest* > MasterServerConnection::gConnectList;
 Vector<SafePtr<MasterServerConnection> > MasterServerConnection::gLeaveChatTimerList;
+
+
+}

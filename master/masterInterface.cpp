@@ -26,7 +26,10 @@
 #include "masterInterface.h"
 #include "../zap/gameStats.h"
 
-//struct VersionedGameStats;
+using namespace TNL;
+
+namespace Master 
+{
 
 // Since this is an interface, we implement a bunch of stubs.  These will be overridden on the
 // client, server, or master end as needed.  This interface will be compiled into both the
@@ -236,3 +239,6 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mServerDescription,
    (StringTableEntry descr), 
    (descr),
    NetClassGroupMasterMask, RPCGuaranteedOrderedBigData, RPCDirClientToServer, 0) {}
+
+
+}

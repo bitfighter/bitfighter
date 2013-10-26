@@ -35,8 +35,6 @@
 
 #include <map>
 
-class DatabaseWriter;
-
 using namespace TNL;
 using namespace Zap;
 
@@ -44,6 +42,10 @@ namespace Zap {
    struct VersionedGameStats;       // gameStats.h
    struct GameStats;
 }
+
+
+namespace Master 
+{
 
 
 #define MASTER_SETTINGS_TABLE
@@ -116,5 +118,5 @@ public:
    void idle(U32 timeDelta);
 };
 
-
+}
 

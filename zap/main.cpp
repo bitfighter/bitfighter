@@ -134,7 +134,6 @@ using namespace TNL;
 #include "ScreenInfo.h"
 #include "stringUtils.h"
 #include "BanList.h"
-//#include "dataConnection.h"
 #include "game.h"
 #include "SoundSystem.h"
 #include "InputCode.h"     // initializeKeyNames()

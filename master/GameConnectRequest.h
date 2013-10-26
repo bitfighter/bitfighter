@@ -30,6 +30,8 @@
 
 using namespace TNL;
 
+namespace Master {
+
 class MasterServerConnection;
 
 class GameConnectRequest
@@ -43,5 +45,7 @@ public:
    U32 requestTime;
 };
 
+
+}
 
 #endif

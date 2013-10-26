@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef DATABASE_H
-#define DATABASE_H
+#ifndef _DATABASE_H_
+#define _DATABASE_H_
 
 #include "../zap/gameWeapons.h"     // For WeaponType enum
 #include "../zap/gameStats.h"
@@ -36,14 +36,18 @@
 #include "../sqlite/sqlite3.h"
 #include <string>
 
+namespace DbWriter
+{
+
+
 #ifdef BF_WRITE_TO_MYSQL
-#include "mysql++.h"
-using namespace mysqlpp;
+#  include "mysql++.h"
+   using namespace mysqlpp;
 #endif
 
 
 #ifndef BF_WRITE_TO_MYSQL
-struct Query {};  // Dummy object for SQLite
+   struct Query {};  // Dummy object for SQLite
 #endif
 
 using namespace TNL;
@@ -142,5 +146,7 @@ public:
    U16 getGamesPlayed(const char *name);
 };
 
+
+}
 
 #endif

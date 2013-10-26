@@ -39,6 +39,10 @@
 #include <string>
 
 
+namespace Master 
+{
+
+
 class MasterServerConnection;
 class MasterServer;
 
@@ -113,16 +117,9 @@ private:
 
 public:
 
-   /// @}
-
-   /// @name Globals
-   /// @{
-
    ///
 public:
    static Vector<GameConnectRequest *> gConnectList;
-
-   /// @}
 
 
    /// @name Connection Info
@@ -312,5 +309,8 @@ public:
 
    TNL_DECLARE_NETCONNECTION(MasterServerConnection);
 };
+
+
+}
 
 #endif

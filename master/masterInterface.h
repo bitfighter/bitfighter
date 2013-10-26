@@ -34,6 +34,8 @@
 
 using namespace TNL;
 
+namespace Master
+{
 
 // Useful string constants...
 static const char USED_EXTERNAL *MasterNoSuchHost = "No Such Host";
@@ -198,5 +200,6 @@ public:
 
 };
 
+}
 
 #endif

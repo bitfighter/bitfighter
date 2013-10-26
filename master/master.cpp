@@ -49,6 +49,8 @@ using namespace TNL;
 using namespace std;
 using namespace Zap;
 
+namespace Master 
+{
 
 CIniFile gMasterINI("dummy");  //  --> move to settings struct
 
@@ -75,7 +77,7 @@ void seedRandomNumberGenerator()
 // Create a test database and write some records to it.  Return exit code.
 S32 testDb(const char *dbName)
 {
-   DatabaseWriter databaseWriter(dbName);
+   DbWriter::DatabaseWriter databaseWriter(dbName);
    databaseWriter.setDumpSql(true);
 
    databaseWriter.insertAchievement(1, "ChumpChange", "Achievement Server", "99.99.99.99:9999");
@@ -393,6 +395,10 @@ DatabaseAccessThread *MasterServer::getDatabaseAccessThread()
    return &mDatabaseAccessThread;
 }
 
+}  // namespace
+
+
+using namespace Master;
 
 int main(int argc, const char **argv)
 {

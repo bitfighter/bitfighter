@@ -33,7 +33,7 @@
 
 using namespace TNL;
 using namespace Zap;
-
+using namespace DbWriter;
 
 U32 calculateChecksum(BitStream &s, U32 length, U32 bitStart = 0)
 {
@@ -203,8 +203,7 @@ void logGameStats(VersionedGameStats *stats)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-namespace Types
-{
+namespace Types {
 
 U8  readU8(TNL::BitStream &s)  { U8  val; read(s, &val); return val; }
 S8  readS8(TNL::BitStream &s)  { S8  val; read(s, &val); return val; }
