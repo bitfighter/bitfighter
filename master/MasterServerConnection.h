@@ -22,9 +22,9 @@
 //
 //------------------------------------------------------------------------------------
 
-
 #ifndef _MASTER_SERVER_CONNECTION_H_
 #define _MASTER_SERVER_CONNECTION_H_
+
 
 #include "GameConnectRequest.h"
 #include "masterInterface.h"
@@ -120,7 +120,7 @@ public:
 
    ///
 public:
-   static Vector<GameConnectRequest *>       gConnectList;
+   static Vector<GameConnectRequest *> gConnectList;
 
    /// @}
 
@@ -179,7 +179,7 @@ public:
    /// @}
 
 public:
-   static Vector<SafePtr<MasterServerConnection> >       gLeaveChatTimerList;
+   static Vector<SafePtr<MasterServerConnection> > gLeaveChatTimerList;
    U32 mLeaveGlobalChatTimer;
    bool mChatTooFast;
 
