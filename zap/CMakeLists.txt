@@ -73,7 +73,7 @@ set(SHARED_SOURCES
 	robot.cpp
 	ScreenInfo.cpp
 	ServerGame.cpp
-   Settings.cpp
+	Settings.cpp
 	ship.cpp
 	shipItems.cpp
 	SimpleLine.cpp
@@ -96,9 +96,7 @@ set(SHARED_SOURCES
 	zoneControlGame.cpp
 	../clipper/clipper.cpp
 	../master/database.cpp
-   ../master/master.cpp
 	../master/masterInterface.cpp
-   ../master/MasterServerConnection.cpp
 	../recast/RecastAlloc.cpp
 	../recast/RecastMesh.cpp
 	../sqlite/sqlite3.c
