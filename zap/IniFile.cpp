@@ -649,7 +649,7 @@ void CIniFile::CaseInsensitive()
 
 
 // Sets path of ini file to read and write from.
-void CIniFile::Path(const string newPath)
+void CIniFile::Path(const string &newPath)
 {
    path = newPath;
 }
@@ -661,9 +661,9 @@ string CIniFile::Path() const
 }
 
 
-void CIniFile::SetPath(const string newPath)
+void CIniFile::SetPath(const string &newPath)
 {
-   Path( newPath);
+   Path(newPath);
 }
 
 

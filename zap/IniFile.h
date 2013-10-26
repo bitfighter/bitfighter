@@ -72,9 +72,9 @@ public:
    void CaseInsensitive();
 
    // Sets path of ini file to read and write from.
-   void Path(const string newPath);
+   void Path(const string &newPath);
    string Path() const;
-   void SetPath(const string newPath);
+   void SetPath(const string &newPath);
 
    // Reads ini file specified using path.
    // Returns true if successful, false otherwise.
