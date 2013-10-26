@@ -122,6 +122,16 @@ TEST_F(BfTest, IniSettingsPackUnpack)
 }
 
 
+using namespace Master;
+TEST_F(BfTest, MasterTests)
+{
+   // First off, can we get a master server going here?
+   MasterSettings settings;
+   MasterServer master(&settings);
+
+}
+
+
 TEST_F(BfTest, SettingsTests)
 {
    Settings settings;
@@ -211,15 +221,6 @@ static void checkTeleporter(Game *game, const string &geomString, S32 expectedDe
    }
 }
 
-
-using namespace Master;
-static void checkMaster()
-{
-   // First off, can we get a master server going here?
-   MasterSettings settings;
-   MasterServer master(&settings);
-
-}
 
 
 static void checkTeleporter(GamePair &gamePair, Teleporter *teleporter, Point *pts, S32 pointCount)
