@@ -36,9 +36,6 @@
 #include "../sqlite/sqlite3.h"
 #include <string>
 
-namespace DbWriter
-{
-
 
 #ifdef BF_WRITE_TO_MYSQL
 #  include "mysql++.h"
@@ -54,6 +51,9 @@ using namespace TNL;
 using namespace Zap;
 using namespace std;
 
+
+namespace DbWriter
+{
 
 struct ServerInfo
 {

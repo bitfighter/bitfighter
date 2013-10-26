@@ -126,8 +126,17 @@ using namespace Master;
 TEST_F(BfTest, MasterTests)
 {
    // First off, can we get a master server going here?
-   MasterSettings settings("");     // Don't read from an INI file
-   MasterServer master(&settings);
+   MasterSettings masterSettings("");     // Don't read from an INI file
+   MasterServer master(&masterSettings);
+
+   Address addr;
+   GameSettingsPtr gameSettings = GameSettingsPtr(new GameSettings());
+
+   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
+   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
+   FontManager::initialize(gameSettings.get(), false);
+   ClientGame clientGame(addr, gameSettings, new UIManager());    // ClientGame destructor will clean up UIManager
+
 
 }
 
