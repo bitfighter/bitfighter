@@ -951,14 +951,16 @@ struct TotalLevelRatingsReader : public DatabaseAccessThread::BasicEntry
 
    void finish()
    {
-      TotalLevelRating *rating = totalLevelRatingsCache[dbId].get();
-      rating->isBusy = false;
+      TotalLevelRating *totalRating = totalLevelRatingsCache[dbId].get();
+      totalRating->rating = rating;
+      totalRating->isBusy = false;
 
-      for(S32 i = 0; i < rating->waitingClients.size(); i++)
-         if(rating->waitingClients[i])
-            rating->waitingClients[i]->m2cSendTotalLevelRating(dbId, rating->rating);
+      for(S32 i = 0; i < totalRating->waitingClients.size(); i++)
+         if(totalRating->waitingClients[i])
+            totalRating->waitingClients[i]->m2cSendTotalLevelRating(dbId, rating);
 
-         rating->waitingClients.clear();
+         totalRating->waitingClients.clear();
+         
    }
 };
 
@@ -992,14 +994,15 @@ struct PlayerLevelRatingsReader : public DatabaseAccessThread::BasicEntry
 
    void finish()
    {
-      PlayerLevelRating *rating = playerLevelRatingsCache[DbIdPlayerNamePair(dbId, playerName)].get();
-      rating->isBusy = false;
+      PlayerLevelRating *playerRating = playerLevelRatingsCache[DbIdPlayerNamePair(dbId, playerName)].get();
+      playerRating->rating = rating;
+      playerRating->isBusy = false;
 
-      for(S32 i = 0; i < rating->waitingClients.size(); i++)
-         if(rating->waitingClients[i])
-            rating->waitingClients[i]->m2cSendPlayerLevelRating(dbId, rating->rating);
+      for(S32 i = 0; i < playerRating->waitingClients.size(); i++)
+         if(playerRating->waitingClients[i])
+            playerRating->waitingClients[i]->m2cSendPlayerLevelRating(dbId, rating);
 
-      rating->waitingClients.clear();
+      playerRating->waitingClients.clear();
    }
 };
 
@@ -1189,7 +1192,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 d
    if(!totalRating->isBusy)     // Not busy, so value must be cached.  Send it now.
    {
       logprintf("Using cached value of total rating!");
-      TotalLevelRating *totalRating = getLevelRating(databaseId);
       m2cSendTotalLevelRating(databaseId, totalRating->rating);
    }
 
@@ -1208,13 +1210,12 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 d
    }
 
 
-   PlayerLevelRating *plyrRating = getLevelRating(databaseId, mPlayerOrServerName);
+   PlayerLevelRating *playerRating = getLevelRating(databaseId, mPlayerOrServerName);
 
-   TNLAssert(plyrRating, "plyrRating should not be NULL!");
+   TNLAssert(playerRating, "plyrRating should not be NULL!");
 
-   if(!plyrRating->isBusy)
+   if(!playerRating->isBusy)
    {
-      PlayerLevelRating *playerRating = getLevelRating(databaseId, mPlayerOrServerName);
       sendPlayerLevelRating(databaseId, playerRating->rating);
    }
 
@@ -1222,15 +1223,15 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 d
    {
       bool alreadyOnList = false;
 
-      for(S32 i = 0; i < plyrRating->waitingClients.size(); i++)
-      if(plyrRating->waitingClients[i] == this)
+      for(S32 i = 0; i < playerRating->waitingClients.size(); i++)
+      if(playerRating->waitingClients[i] == this)
          {
             alreadyOnList = true;
             break;
          }
 
       if(!alreadyOnList)
-         plyrRating->waitingClients.push_back(this);
+         playerRating->waitingClients.push_back(this);
    }
 }
 
