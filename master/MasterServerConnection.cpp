@@ -1027,7 +1027,16 @@ HighScores *MasterServerConnection::getHighScores(S32 scoresPerGroup)
 
 TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
 {
-   TotalLevelRating *rating = totalLevelRatingsCache[databaseId].get();   // Inserts record if one doesn't exist
+   // Note that while map[xxx] will create an entry if it does not exist, in this case, it will create a boost::shared_ptr
+   // wrapping a NULL object.  So rating, which points to that object, will also be NULL.  Viva la confusion!
+   TotalLevelRating *rating = totalLevelRatingsCache[databaseId].get();
+
+   if(!rating)
+   {
+      boost::shared_ptr<TotalLevelRating> newRating = boost::shared_ptr<TotalLevelRating>(new TotalLevelRating());
+      totalLevelRatingsCache[databaseId] = newRating;
+      rating = newRating.get();
+   }
 
    if(!rating->isValid || rating->isExpired())
       if(!rating->isBusy)

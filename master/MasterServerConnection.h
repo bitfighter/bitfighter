@@ -56,7 +56,8 @@ struct ThreadingStruct
 
    Vector<SafePtr<MasterServerConnection> > waitingClients;
 
-   ThreadingStruct() { isValid = false; }     // Quickie constructor
+   ThreadingStruct() { isValid = false; isBusy = false; }     // Quickie constructor
+
    bool isExpired() { return Platform::getRealMilliseconds() - lastClock > getCacheExpiryTime(); }
    virtual U32 getCacheExpiryTime() = 0;
 };
@@ -79,6 +80,8 @@ struct TotalLevelRating : public ThreadingStruct
    S16 rating;
 
    U32 getCacheExpiryTime() { return TWO_HOURS; }
+
+   TotalLevelRating() { databaseId = NOT_IN_DATABASE; rating = 0; }     // Quickie constructor
 };
 
 
