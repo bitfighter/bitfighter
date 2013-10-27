@@ -1156,9 +1156,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 d
       return;
 
    // totalLevelRatingsCache[databaseId] was created in getLevelRating() if it didn't already exist
-   TotalLevelRating *avgRating = totalLevelRatingsCache[databaseId].get();
+   TotalLevelRating *totalRating = totalLevelRatingsCache[databaseId].get();
 
-   if(!avgRating->isBusy)     // Not busy, so value must be cached.  Send it now.
+   if(!totalRating->isBusy)     // Not busy, so value must be cached.  Send it now.
    {
       TotalLevelRating *totalRating = getLevelRating(databaseId);
       m2cSendTotalLevelRating(databaseId, totalRating->rating);
@@ -1167,15 +1167,15 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 d
    else                    // Otherwise, add it to the list to send when the database request is complete
    {
       bool alreadyOnList = false;
-      for(S32 i = 0; i < avgRating->waitingClients.size(); i++)
-      if(avgRating->waitingClients[i] == this)
+      for(S32 i = 0; i < totalRating->waitingClients.size(); i++)
+      if(totalRating->waitingClients[i] == this)
          {
             alreadyOnList = true;
             break;
          }
 
       if(!alreadyOnList)
-         avgRating->waitingClients.push_back(this);
+         totalRating->waitingClients.push_back(this);
    }
 
    PlayerLevelRating *plyrRating = playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, mPlayerOrServerName)].get();
