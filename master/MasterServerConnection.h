@@ -74,24 +74,28 @@ struct HighScores : public ThreadingStruct
 };
 
 
-struct TotalLevelRating : public ThreadingStruct
+struct LevelRating : public ThreadingStruct
 {
    U32 databaseId;
    S16 rating;
 
-   U32 getCacheExpiryTime() { return TWO_HOURS; }
+   virtual U32 getCacheExpiryTime() = 0;
 
-   TotalLevelRating() { databaseId = NOT_IN_DATABASE; rating = 0; }     // Quickie constructor
+   LevelRating() { databaseId = NOT_IN_DATABASE; rating = 0; }     // Quickie constructor
 };
 
 
-struct PlayerLevelRating : public ThreadingStruct
+struct TotalLevelRating : public LevelRating
 {
-   U32 databaseId;
-   StringTableEntry playerName;
-   S32 rating;
+   U32 getCacheExpiryTime() { return TEN_MINUTES; }
+};
 
-   U32 getCacheExpiryTime() { return TWO_HOURS; }
+
+struct PlayerLevelRating : public LevelRating
+{
+   StringTableEntry playerName;
+
+   U32 getCacheExpiryTime() { return TEN_MINUTES; }
 };
 
 

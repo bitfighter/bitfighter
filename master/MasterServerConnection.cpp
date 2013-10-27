@@ -1025,8 +1025,12 @@ HighScores *MasterServerConnection::getHighScores(S32 scoresPerGroup)
 }
 
 
+// Note: Will return NULL if databaseId == NOT_IN_DATABASE.  Otherwise, will not.
 TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
 {
+   if(databaseId == NOT_IN_DATABASE)
+      return NULL;
+
    // Note that while map[xxx] will create an entry if it does not exist, in this case, it will create a boost::shared_ptr
    // wrapping a NULL object.  So rating, which points to that object, will also be NULL.  Viva la confusion!
    TotalLevelRating *rating = totalLevelRatingsCache[databaseId].get();
@@ -1053,31 +1057,23 @@ TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
 }
 
 
-// Cycle through and remove expired cache entries -- static method
-void MasterServerConnection::removeOldEntriesFromRatingsCache()
-{
-   {
-      TotalLevelRatingsMap::iterator it;
-
-      for(TotalLevelRatingsMap::iterator it = totalLevelRatingsCache.begin(); it != totalLevelRatingsCache.end(); it++)
-      if(it->second->isValid && !it->second->isBusy && it->second->isExpired())
-         totalLevelRatingsCache.erase(it);
-   }
-
-   {
-      PlayerLevelRatingsMap::iterator it;
-
-      for(PlayerLevelRatingsMap::iterator it = playerLevelRatingsCache.begin(); it != playerLevelRatingsCache.end(); it++)
-      if(it->second->isValid && !it->second->isBusy && it->second->isExpired())
-         playerLevelRatingsCache.erase(it);
-   }
-}
-
-
 // Send this connection the level rating for the specified player
+// Note: Will return NULL if databaseId == NOT_IN_DATABASE.  Otherwise, will not.
 PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const StringTableEntry &playerName)
 {
+   if(databaseId == NOT_IN_DATABASE)
+      return NULL;
+
+   // Note that while map[xxx] will create an entry if it does not exist, in this case, it will create a boost::shared_ptr
+   // wrapping a NULL object.  So rating, which points to that object, will also be NULL.  Viva la confusion!
    PlayerLevelRating *rating = playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, playerName)].get();
+
+   if(!rating)
+   {
+      boost::shared_ptr<PlayerLevelRating> newRating = boost::shared_ptr<PlayerLevelRating>(new PlayerLevelRating());
+      playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, playerName)] = newRating;
+      rating = newRating.get();
+   }
 
    if(!rating->isValid || rating->isExpired())
       if(!rating->isBusy)
@@ -1091,6 +1087,28 @@ PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const 
       }
 
    return rating;
+}
+
+
+
+// Cycle through and remove expired cache entries -- static method
+void MasterServerConnection::removeOldEntriesFromRatingsCache()
+{
+   {
+      TotalLevelRatingsMap::iterator it;
+
+      for(TotalLevelRatingsMap::iterator it = totalLevelRatingsCache.begin(); it != totalLevelRatingsCache.end(); it++)
+         if(it->second->isValid && !it->second->isBusy && it->second->isExpired())
+            totalLevelRatingsCache.erase(it);
+   }
+
+   {
+   PlayerLevelRatingsMap::iterator it;
+
+   for(PlayerLevelRatingsMap::iterator it = playerLevelRatingsCache.begin(); it != playerLevelRatingsCache.end(); it++)
+      if(it->second->isValid && !it->second->isBusy && it->second->isExpired())
+         playerLevelRatingsCache.erase(it);
+   }
 }
 
 
@@ -1164,7 +1182,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 d
    if(databaseId == NOT_IN_DATABASE)
       return;
 
-   // totalLevelRatingsCache[databaseId] will be created in getLevelRating() if it doesn't already exist
    TotalLevelRating *totalRating = getLevelRating(databaseId);
 
    TNLAssert(totalRating, "totalRating should not be NULL!");
@@ -1190,7 +1207,10 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 d
          totalRating->waitingClients.push_back(this);
    }
 
-   PlayerLevelRating *plyrRating = playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, mPlayerOrServerName)].get();
+
+   PlayerLevelRating *plyrRating = getLevelRating(databaseId, mPlayerOrServerName);
+
+   TNLAssert(plyrRating, "plyrRating should not be NULL!");
 
    if(!plyrRating->isBusy)
    {
