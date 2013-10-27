@@ -989,7 +989,6 @@ struct PlayerLevelRatingsReader : public DatabaseAccessThread::BasicEntry
 
    void run()
    {
-      logprintf("Running player level rating"); // xyzzy
       rating = getDatabaseWriter(mSettings).getLevelRating(dbId, playerName);
    }
 
@@ -998,8 +997,6 @@ struct PlayerLevelRatingsReader : public DatabaseAccessThread::BasicEntry
       PlayerLevelRating *playerRating = playerLevelRatingsCache[DbIdPlayerNamePair(dbId, playerName)].get();
       playerRating->rating = rating;
       playerRating->isBusy = false;
-
-      logprintf("Sending player level rating of %d", rating);// xyzzy
 
       for(S32 i = 0; i < playerRating->waitingClients.size(); i++)
          if(playerRating->waitingClients[i])
@@ -1248,7 +1245,7 @@ void MasterServerConnection::sendPlayerLevelRating(U32 databaseId, S32 rating)
    else if(rating > 1)  rating = 1;
 
    // Normalize to the datatype needed for sending
-   RangedU32<0, 2>   normalizedRating = rating + 1;
+   RangedU32<0, 2> normalizedRating = rating + 1;
 
    m2cSendPlayerLevelRating(databaseId, normalizedRating);
 }
