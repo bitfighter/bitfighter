@@ -56,6 +56,18 @@ class ClientGame : public Game
 
    static const S32 RATING_NOT_KNOWN = S32_MIN;
 
+public:
+   enum PersonalRating     // These need to be able to fit into S16 for totalRating
+   {
+      RatingGood = 1,
+      RatingNeutral = 0,
+      RatingBad = -1,
+      Unrated = S16_MIN,                  // -32768       
+      RetrievingRating = S16_MIN + 2,     // -32766
+      UnknownRating = S16_MIN + 1         // -32767
+   };
+
+
 private:
    SafePtr<GameConnection> mConnectionToServer; // If this is a client game, this is the connection to the server
 
@@ -76,9 +88,11 @@ private:
 
    SFXHandle mModuleSound[ModuleCount];
 
-   S32 mPlayerLevelRating, mTotalLevelRating;
+   PersonalRating mPlayerLevelRating;
+   S16 mTotalLevelRating;
 
    bool needsRating();
+   static PersonalRating getNextRating(PersonalRating currentRating);
 
    // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
    // about the local player.  When a player connects to a server, all players (including the connecting player) are sent a much briefer
@@ -124,7 +138,7 @@ public:
    void doneLoadingLevel();
 
    void gotTotalLevelRating(S16 rating);
-   void gotPlayerLevelRating(RangedU32<0, 2> rating);
+   void gotPlayerLevelRating(S32 rating);
 
    void setLevelDatabaseId(U32 id);
 
@@ -132,6 +146,11 @@ public:
 
    void toggleShowAllObjectOutlines();
    bool showAllObjectOutlines() const;
+
+   PersonalRating toggleLevelRating();
+   static string getRatingString(PersonalRating rating);
+   S16 getTotalLevelRating() const;
+   PersonalRating getPersonalLevelRating() const;
 
 
    // A place to store input from the joysticks while we are composing our moves

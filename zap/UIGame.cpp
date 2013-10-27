@@ -234,17 +234,6 @@ void GameUserInterface::onReactivate()
 void GameUserInterface::onGameStarting()
 {
    mDispWorldExtents.set(Point(0,0), 0);
-
-   // Reset ratings
-   mMyRating      = RetrievingRating;
-   mOverallRating = RetrievingRating;
-}
-
-
-void GameUserInterface::setLevelRating(S32 playerRating, F32 overallRating)
-{
-   mMyRating      = playerRating;
-   mOverallRating = overallRating;
 }
 
 
@@ -1124,8 +1113,12 @@ void GameUserInterface::activateModule(S32 index)
 
 void GameUserInterface::toggleLevelRating()
 {
-   displayErrorMessage("Rating not yet implemented!");
-   mHelpItemManager.removeInlineHelpItem(RateThisLevel, true);       // Knows how to rate a level!
+   ClientGame::PersonalRating newRating = getGame()->toggleLevelRating();
+
+   string msg = "Level rated as " + ClientGame::getRatingString(newRating);
+   displaySuccessMessage(msg.c_str());
+
+   mHelpItemManager.removeInlineHelpItem(RateThisLevel, true);       // Demonstrated ability to rate a level!
 }
 
 

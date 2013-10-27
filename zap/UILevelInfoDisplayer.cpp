@@ -28,6 +28,7 @@
 #include "ScreenInfo.h"
 #include "Colors.h"
 #include "game.h"
+#include "ClientGame.h"
 #include "UI.h"                     // Only here for the margins
 #include "GameTypesEnum.h"
 #include "gameType.h"               // Can get rid of with a bunch of passthroughs
@@ -102,8 +103,16 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
 
    if(isInDatabase)
    {
+      ClientGame::PersonalRating myRating = static_cast<ClientGame *>(gameType->getGame())->getPersonalLevelRating();
+      S16 totalRating                     = static_cast<ClientGame *>(gameType->getGame())->getTotalLevelRating();
+
+      string myRatingStr    = (myRating    > 0 ? "+" : "") + itos(myRating);
+      string totalRatingStr = (totalRating > 0 ? "+" : "") + itos(totalRating);
+
       symbols.push_back(SymbolString::getBlankSymbol(10));
       symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext));  // Little database icon
+      symbols.push_back(SymbolString::getBlankSymbol(8));                                  // Padding
+      symbols.push_back(SymbolString::getSymbolText(myRatingStr + " / " + totalRatingStr, 12, LevelInfoContext));
    }
 
    SymbolString titleSymbolString(symbols);

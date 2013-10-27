@@ -150,16 +150,6 @@ private:
    };
 
 
-   enum RatingRating
-   {
-      RatingGood = 1,
-      RatingNeutral = 0,
-      RatingBad = -1,
-      Unrated = -2,
-      RetrievingRating = -3
-   };
-	
-
    MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
 
    Move mCurrentMove;
@@ -215,15 +205,13 @@ private:
    Timer mProgressBarFadeTimer;     // For fading out progress bar after level is loaded
    bool mShowProgressBar;
 
+
    // Some rendering routines
    void renderScoreboard();
 
    // Some key press/release handler helpers
    void onMissionKeyPressed();
    void onMissionKeyReleased();
-
-   S32 mMyRating;       // -1, 0, or 1
-   F32 mOverallRating;
 
    StringTableEntry mShutdownName;  // Name of user who iniated the shutdown
    StringPtr mShutdownReason;       // Reason user provided for the shutdown
@@ -335,9 +323,6 @@ public:
    void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
 
-   void setLevelRating(S32 playerRating, F32 overallRating);
-
-
    void setAnnouncement(const string &announcement);
    void displayMessage(const Color &msgColor, const char *message);
    void onChatMessageReceived(const Color &msgColor, const char *format, ...);
@@ -438,6 +423,7 @@ public:
    void setActiveWeapon(U32 weaponIndex);
    void setModulePrimary(ShipModule module, bool isActive);
    void setModuleSecondary(ShipModule module, bool isActive);
+
    void toggleLevelRating();
 
    // Get UI element dimensions

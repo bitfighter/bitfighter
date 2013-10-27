@@ -31,13 +31,12 @@
 
 #include "barrier.h"
 #include "gameType.h"
-
 #include "UIManager.h"
-
 #include "EditorTeam.h"
 
-#include "Colors.h"
+#include "LevelDatabaseRateThread.h"
 
+#include "Colors.h"
 #include "stringUtils.h"
 
 #include <boost/shared_ptr.hpp>
@@ -202,6 +201,7 @@ void ClientGame::onConnectedToMaster()
    setPlayersInGlobalChat(emptyPlayerList);
 
    // Request ratings for current level if we don't already have them
+
    if(needsRating())
       mConnectionToMaster->c2mRequestLevelRating(getLevelDatabaseId());
 
@@ -495,7 +495,32 @@ bool ClientGame::needsRating()
 {
    // We don't need ratings for levels not in the database
    bool inDatabase = getLevelDatabaseId() != NOT_IN_DATABASE;
-   return inDatabase && (mPlayerLevelRating == RATING_NOT_KNOWN || mTotalLevelRating == RATING_NOT_KNOWN);
+   return inDatabase && (mPlayerLevelRating == UnknownRating || mTotalLevelRating == UnknownRating);
+}
+
+
+// static method
+ClientGame::PersonalRating ClientGame::getNextRating(PersonalRating currentRating)
+{
+   if(currentRating == RatingGood)     return RatingBad;
+   if(currentRating == RatingNeutral)  return RatingGood;
+   if(currentRating == RatingBad)      return RatingNeutral;
+   if(currentRating == Unrated)        return RatingNeutral;
+
+   TNLAssert(false, "Expected valid rating here!");
+   return RatingNeutral;
+}
+
+
+void ClientGame::gotTotalLevelRating(S16 rating)
+{
+   mTotalLevelRating = rating;
+}
+
+
+void ClientGame::gotPlayerLevelRating(S32 rating)
+{
+   mPlayerLevelRating = PersonalRating(rating);
 }
 
 
@@ -509,18 +534,6 @@ void ClientGame::setLevelDatabaseId(U32 id)
    // If we are connected to a game server, then we are not in the editor (though we could be testing a level).
    if(mConnectionToMaster && isConnectedToServer() && needsRating())
       mConnectionToMaster->c2mRequestLevelRating(id);
-}
-
-
-void ClientGame::gotTotalLevelRating(S16 rating)
-{
-   mTotalLevelRating = rating;
-}
-
-
-void ClientGame::gotPlayerLevelRating(RangedU32<0, 2> rating)
-{
-   mPlayerLevelRating = (S32)rating;
 }
 
 
@@ -904,8 +917,43 @@ void ClientGame::onGameStarting()
    getGameObjDatabase()->removeEverythingFromDatabase();
    getUIManager()->onGameStarting();
 
-   mPlayerLevelRating = RATING_NOT_KNOWN;
-   mTotalLevelRating = RATING_NOT_KNOWN;
+   mPlayerLevelRating = UnknownRating;
+   mTotalLevelRating  = UnknownRating;
+}
+
+
+// Static method
+string ClientGame::getRatingString(PersonalRating rating)
+{
+   if(rating == RatingGood)     return "Good";
+   if(rating == RatingNeutral)  return "Neutral";
+   if(rating == RatingBad)      return "Bad";
+
+   TNLAssert(false, "Expected valid rating here!");
+   return "";
+}
+
+
+S16 ClientGame::getTotalLevelRating() const
+{
+   return mTotalLevelRating;
+}
+
+
+ClientGame::PersonalRating ClientGame::getPersonalLevelRating() const
+{
+   return mPlayerLevelRating;
+}
+
+
+ClientGame::PersonalRating ClientGame::toggleLevelRating()
+{
+   mPlayerLevelRating = getNextRating(mPlayerLevelRating);
+
+   Thread *rateThread = new LevelDatabaseRateThread(this, LevelDatabaseRateThread::LevelRating(mPlayerLevelRating));
+   rateThread->start();
+
+   return mPlayerLevelRating;
 }
 
 
