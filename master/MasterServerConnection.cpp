@@ -1155,11 +1155,14 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 d
    if(databaseId == NOT_IN_DATABASE)
       return;
 
-   // totalLevelRatingsCache[databaseId] was created in getLevelRating() if it didn't already exist
-   TotalLevelRating *totalRating = totalLevelRatingsCache[databaseId].get();
+   // totalLevelRatingsCache[databaseId] will be created in getLevelRating() if it doesn't already exist
+   TotalLevelRating *totalRating = getLevelRating(databaseId);
+
+   TNLAssert(totalRating, "totalRating should not be NULL!");
 
    if(!totalRating->isBusy)     // Not busy, so value must be cached.  Send it now.
    {
+      logprintf("Using cached value of total rating!");
       TotalLevelRating *totalRating = getLevelRating(databaseId);
       m2cSendTotalLevelRating(databaseId, totalRating->rating);
    }
