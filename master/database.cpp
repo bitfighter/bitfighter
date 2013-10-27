@@ -469,42 +469,50 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
 {
    DbQuery query(mDb, mServer, mUser, mPassword);
 
-#ifdef BF_WRITE_TO_MYSQL
-   if(query.query)
+   try
    {
-      //S32 serverId_int = -1;
-      StoreQueryResult results = query.query->store(sql.c_str(), sql.length());
 
-      S32 rows = results.num_rows();
-
-      for(S32 i = 0; i < rows; i++)
+#ifdef BF_WRITE_TO_MYSQL
+      if(query.query)
       {
-         values.push_back(Vector<string>());     // Add another row
+         //S32 serverId_int = -1;
+         StoreQueryResult results = query.query->store(sql.c_str(), sql.length());
 
-         for(S32 j = 0; j < cols; j++)
-            values[i].push_back(string(results[i][j]));
+         S32 rows = results.num_rows();
+
+         for(S32 i = 0; i < rows; i++)
+         {
+            values.push_back(Vector<string>());     // Add another row
+
+            for(S32 j = 0; j < cols; j++)
+               values[i].push_back(string(results[i][j]));
+         }
+      }
+      else
+#endif
+      if(query.sqliteDb)
+      {
+         char *err = 0;
+         char **results;
+         int rows, cols;
+
+         sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
+
+         // results[0]...results[cols] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
+         for(S32 i = 0; i < rows * cols; i += cols)
+         {
+            values.push_back(Vector<string>());     // Add another row
+
+            for(S32 j = 0; j < cols; j++)
+               values[i].push_back(results[cols + i + j]);
+         }
+
+         sqlite3_free_table(results);
       }
    }
-   else
-#endif
-   if(query.sqliteDb)
+   catch(exception &ex)
    {
-      char *err = 0;
-      char **results;
-      int rows, cols;
-
-      sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
-
-      // results[0]...results[cols] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
-      for(S32 i = 0; i < rows * cols; i += cols)
-      {
-         values.push_back(Vector<string>());     // Add another row
-
-         for(S32 j = 0; j < cols; j++)
-            values[i].push_back(results[cols + i + j]);
-      }
-
-      sqlite3_free_table(results);
+      logprintf(LogConsumer::LogError, "Error \"%s\" encountered when executing sql: %s", ex.what(), sql.c_str());
    }
 }
 
