@@ -512,7 +512,8 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
    }
    catch(exception &ex)
    {
-      logprintf(LogConsumer::LogError, "SQL Execution Error \"%s\"\n\trunning sql: %s", ex.what(), sql.c_str());
+      logprintf(LogConsumer::LogError, "[%s]SQL Execution Error \"%s\"\n\trunning sql: %s", 
+                getTimeStamp().c_str(), ex.what(), sql.c_str());
    }
 }
 
