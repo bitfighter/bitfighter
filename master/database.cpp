@@ -293,9 +293,9 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          insertStatsGame(query, &gameStats, serverId);
       }
    }
-   catch (const Exception &ex) 
+   catch(const Exception &ex) 
    {
-      logprintf("Failure writing stats to database: %s", ex.what());
+      logprintf("[%s] Failure writing stats to database: %s", getTimeStamp().c_str(), ex.what());
    }
 }
 
@@ -316,9 +316,9 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
          query.runQuery(sql);
       }
    }
-   catch (const Exception &ex) 
+   catch(const Exception &ex) 
    {
-      logprintf("Failure writing achievement to database: %s", ex.what());
+      logprintf("[%s] Failure writing achievement to database: %s", getTimeStamp().c_str(), ex.what());
    }
 }
 
@@ -359,7 +359,7 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
    }
    catch (const Exception &ex) 
    {
-      logprintf("Failure writing level info to database: %s", ex.what());
+      logprintf("[%s] Failure writing level info to database: %s", getTimeStamp().c_str(), ex.what());
    }
 }
 
