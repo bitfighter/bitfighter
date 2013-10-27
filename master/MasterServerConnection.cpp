@@ -1168,11 +1168,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 d
    {
       bool alreadyOnList = false;
       for(S32 i = 0; i < totalRating->waitingClients.size(); i++)
-      if(totalRating->waitingClients[i] == this)
-         {
-            alreadyOnList = true;
-            break;
-         }
+         if(totalRating->waitingClients[i] == this)
+            {
+               alreadyOnList = true;
+               break;
+            }
 
       if(!alreadyOnList)
          totalRating->waitingClients.push_back(this);
