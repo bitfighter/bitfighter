@@ -989,6 +989,7 @@ struct PlayerLevelRatingsReader : public DatabaseAccessThread::BasicEntry
 
    void run()
    {
+      logprintf("Running player level rating"); // xyzzy
       rating = getDatabaseWriter(mSettings).getLevelRating(dbId, playerName);
    }
 
@@ -998,7 +999,7 @@ struct PlayerLevelRatingsReader : public DatabaseAccessThread::BasicEntry
       playerRating->rating = rating;
       playerRating->isBusy = false;
 
-      logprintf("Sending player level rating of %d", rating);
+      logprintf("Sending player level rating of %d", rating);// xyzzy
 
       for(S32 i = 0; i < playerRating->waitingClients.size(); i++)
          if(playerRating->waitingClients[i])
@@ -1054,7 +1055,8 @@ TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
          rating->isValid = true;
          rating->lastClock = Platform::getRealMilliseconds();
 
-         RefPtr<TotalLevelRatingsReader> totalLevelRatingsReader = new TotalLevelRatingsReader(mMaster->getSettings(), databaseId);
+         RefPtr<TotalLevelRatingsReader> totalLevelRatingsReader = 
+                           new TotalLevelRatingsReader(mMaster->getSettings(), databaseId);
          mMaster->getDatabaseAccessThread()->addEntry(totalLevelRatingsReader);
       }
 
@@ -1087,8 +1089,9 @@ PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const 
          rating->isValid = true;
          rating->lastClock = Platform::getRealMilliseconds();
 
-         RefPtr<TotalLevelRatingsReader> totalLevelRatingsReader = new TotalLevelRatingsReader(mMaster->getSettings(), databaseId);
-         mMaster->getDatabaseAccessThread()->addEntry(totalLevelRatingsReader);
+         RefPtr<PlayerLevelRatingsReader> playerLevelRatingsReader =
+                        new PlayerLevelRatingsReader(mMaster->getSettings(), databaseId, playerName);
+         mMaster->getDatabaseAccessThread()->addEntry(playerLevelRatingsReader);
       }
 
    return rating;
