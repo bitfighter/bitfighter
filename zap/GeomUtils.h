@@ -225,6 +225,7 @@ void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, 
 S32 lua_clipPolygons(lua_State *L);
 S32 lua_triangulate(lua_State *L);
 S32 lua_polyganize(lua_State *L);
+S32 lua_segmentsIntersect(lua_State *L);
 
 };
 #endif // _GEOM_UTILS_
