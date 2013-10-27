@@ -357,7 +357,7 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
          query.runQuery(sql);
       }
    }
-   catch (const Exception &ex) 
+   catch(const Exception &ex) 
    {
       logprintf("[%s] Failure writing level info to database: %s", getTimeStamp().c_str(), ex.what());
    }
@@ -510,7 +510,7 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
          sqlite3_free_table(results);
       }
    }
-   catch(exception &ex)
+   catch(const Exception &ex)
    {
       logprintf(LogConsumer::LogError, "[%s]SQL Execution Error \"%s\"\n\trunning sql: %s", 
                 getTimeStamp().c_str(), ex.what(), sql.c_str());
@@ -573,7 +573,7 @@ DbQuery::DbQuery(const char *db, const char *server, const char *user, const cha
          conn.connect(db, server, user, password);    // Will throw error if it fails
          query = new Query(&conn);
       }
-      catch (const Exception &ex) 
+      catch(const Exception &ex) 
       {
          logprintf("Failure opening mysql database: %s", ex.what());
          isValid = false;
