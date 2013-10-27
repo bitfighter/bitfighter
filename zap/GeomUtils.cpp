@@ -1824,9 +1824,10 @@ void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, 
 }
 
 #define LUA_STATIC_METHODS(METHOD) \
-   METHOD(polyganize,   ARRAYDEF({{ TABLE, END }}),                                               1 ) \
-   METHOD(triangulate,  ARRAYDEF({{ TABLE, END }}),                                               1 ) \
-   METHOD(clipPolygons, ARRAYDEF({{ INT, TABLE, TABLE, END }, { INT, TABLE, TABLE, BOOL, END }}), 2 ) \
+   METHOD(polyganize,        ARRAYDEF({{ TABLE, END }}),                                               1 ) \
+   METHOD(triangulate,       ARRAYDEF({{ TABLE, END }}),                                               1 ) \
+   METHOD(clipPolygons,      ARRAYDEF({{ INT, TABLE, TABLE, END }, { INT, TABLE, TABLE, BOOL, END }}), 2 ) \
+   METHOD(segmentsIntersect, ARRAYDEF({{ PT, PT, PT, PT, END }}),                                           1 ) \
 
 GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
 
@@ -1967,5 +1968,44 @@ S32 lua_polyganize(lua_State *L)
    return returnPolygons(L, result);
 }
 
+
+/**
+ * @luafunc static mixed Geom::segmentsIntersect(point a1, point a2, point b1, point b2)
+ * @brief Finds intersection of the linesegments (a1, a2) and (b1, b2)
+ *
+ * @desc Determines if and "when" the line segments a and b intersect. The
+ * boolean return value is `true` if the segments intersect. The number return
+ * value is a "time" `t` along the line a corresponding to where they intersect.
+ * When the first return value is `true` if and only if the second return value
+ * is in the range [0, 1].
+ *
+ * To find the actual point of intersection, just use
+ * @code
+ *   local ok, t = Geom.segmentsIntersect(a1, a2, b1, b2)
+ *   if ok == true then
+ *     local intersection = a1 + (a2 - a1) * t
+ *   end
+ * @endcode
+ * 
+ * @return ok,t Returns true if the segments intersect, and a time t
+ * along a when the intersect.
+ */
+S32 lua_segmentsIntersect(lua_State *L)
+{
+   checkArgList(L, "Geom", "segmentsIntersect");
+   Point p1 = getPointOrXY(L, 1);
+   Point p2 = getPointOrXY(L, 2);
+   Point p3 = getPointOrXY(L, 3);
+   Point p4 = getPointOrXY(L, 4);
+   lua_pop(L, 4);
+
+   F32 intersectionTime;
+   if(segmentsIntersect(p1, p2, p3, p4, intersectionTime))
+   {
+      return returnBool(L, true) + returnFloat(L, intersectionTime);
+   }
+
+   return returnNil(L);
+}
 
 };
