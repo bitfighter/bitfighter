@@ -998,9 +998,11 @@ struct PlayerLevelRatingsReader : public DatabaseAccessThread::BasicEntry
       playerRating->rating = rating;
       playerRating->isBusy = false;
 
+      logprintf("Sending player level rating of %d", rating);
+
       for(S32 i = 0; i < playerRating->waitingClients.size(); i++)
          if(playerRating->waitingClients[i])
-            playerRating->waitingClients[i]->m2cSendPlayerLevelRating(dbId, rating);
+            playerRating->waitingClients[i]->sendPlayerLevelRating(dbId, rating);
 
       playerRating->waitingClients.clear();
    }
