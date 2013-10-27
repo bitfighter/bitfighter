@@ -417,7 +417,7 @@ S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
 {
    string sql =
       "SELECT ratings.value FROM pleiades.ratings "
-      "INNER JOIN phpbb_users "
+      "INNER JOIN bf_phpbb.phpbb_users "
       "WHERE ratings.level_id = " + itos(databaseId) + " AND "
          "ratings.user_id = phpbb_users.user_id AND "
          "phpbb_users.username = '" + name.getString() + "';";
