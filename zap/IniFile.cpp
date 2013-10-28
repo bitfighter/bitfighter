@@ -310,7 +310,7 @@ bool CIniFile::SetValueI(const string &section, const string &key, S32 const val
 }
 
 
-bool CIniFile::SetValueF(const string &section, const string &key, F64 const value, bool const create)
+bool CIniFile::SetValueF(const string &section, const string &key, F32 const value, bool const create)
 {
    string val = ftos(value);
 
@@ -436,11 +436,11 @@ bool CIniFile::GetValueYN(S32 const sectionId, const string &keyName, const bool
 }
 
 
-F64 CIniFile::GetValueF(const string &section, const string &key, F64 const defValue) const
+F32 CIniFile::GetValueF(const string &section, const string &key, F32 const defValue) const
 {
    string val = GetValue(section, key, ftos(defValue));
 
-   return atof(val.c_str());
+   return (F32)atof(val.c_str());
 }
 
 

@@ -131,7 +131,7 @@ public:
 
    S32  GetValueI(const string &section,  const string &key, S32 const defValue = 0) const;
    bool GetValueB(const string &section,  const string &key, bool const defValue = false) const;
-   F64  GetValueF(const string &section,  const string& key, F64 const defValue = 0.0) const;
+   F32  GetValueF(const string &section, const string &key, F32 const defValue = 0.0f) const;
    bool GetValueYN(const string &section, const string &key, bool defValue) const;
    bool GetValueYN(S32 const sectionId,   const string &keyName, const bool &defValue) const;
 
@@ -154,7 +154,7 @@ public:
    bool SetValueI(const string &section, const string &key, int const value, bool const create = true);
    bool SetValueB(const string &section, const string &key, bool const value, bool const create = true);
    bool setValueYN(const string section, const string key, bool const value, bool const create = true);
-   bool SetValueF(const string &section, const string &key, F64 const value, bool const create = true);
+   bool SetValueF(const string &section, const string &key, F32 const value, bool const create = true);
    //bool SetValueV(const string &section, const string &key, char *format, ...);
    bool SetValue(S32 const sectionId, S32 const valueID, const string value);
 

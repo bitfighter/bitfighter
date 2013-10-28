@@ -828,7 +828,7 @@ const string readFile(const string &path)
    // make a string and resize it to hold the file contents
    string result;
    file.seekg(0, ios::end);
-   result.resize(file.tellg());
+   result.resize((string::size_type)file.tellg());
    file.seekg(0, ios::beg);
 
    file.read(&result[0], result.size());

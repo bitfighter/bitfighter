@@ -66,8 +66,8 @@ string itos(S32 i);
 string itos(U32 i);
 string itos(U64 i);
 string itos(S64 i);
-string ftos(float f, int digits);
-string ftos(float f);
+string ftos(F32 f, int digits);
+string ftos(F32 f);
 
 S32 stoi(const string &s);
 F64 stof(const string &s);

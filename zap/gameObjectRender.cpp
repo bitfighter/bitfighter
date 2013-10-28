@@ -1829,7 +1829,7 @@ void renderNexusIcon(const Point &center, S32 radius, F32 angleRadians)
       renderVertexArray(spokes, ARRAYSIZE(spokes) / 2, GL_LINES);
 
       // Draw design
-      drawArc(arcPoint1, arcRadius, 0.583f * FloatTau, FloatTau * 1.25);
+      drawArc(arcPoint1, arcRadius, 0.583f * FloatTau, FloatTau * 1.25f);
       drawArc(arcPoint2, arcRadius, 0.917f * FloatTau, 1.583f * FloatTau);
       drawArc(arcPoint3, arcRadius, 0.25f * FloatTau, 0.917f * FloatTau);
    glPopMatrix();
@@ -1854,7 +1854,7 @@ void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point 
 
    glColor(getNexusBaseColor(open, glowFraction));
 
-   renderNexusIcon(centroid, 20.f, labelAngle);
+   renderNexusIcon(centroid, 20, labelAngle);
 }
 
 
@@ -2290,9 +2290,9 @@ void renderAsteroidSpawn(const Point &pos, S32 time)
    static const S32 period = 4096;  // Power of 2 please
    static const F32 invPeriod = 1 / F32(period);
 
-   F32 alpha = max(0.0, 1.0 - time * invPeriod);
+   F32 alpha = max(0.0f, 1.0f - time * invPeriod);
 
-   renderAsteroid(pos, 2, .1f, &Colors::green, alpha);
+   renderAsteroid(pos, 2, 0.1f, &Colors::green, alpha);
 
    static const F32 lines[] = {
          // Inner
@@ -2973,7 +2973,7 @@ void drawDivetedTriangle(F32 height, F32 len)
    
    glPushMatrix();
       glTranslate(200, 200, 0);
-      glRotatef(Platform::getRealMilliseconds() / 10 % 360,0,0,1);
+      glRotatef(GLfloat(Platform::getRealMilliseconds() / 10 % 360), 0, 0, 1);
       glScale(6);
 
       renderPolygonOutline(&pts, &Colors::red);

@@ -565,7 +565,7 @@ S32 getStringWidth(S32 size, const char *string)
 
 F32 getStringWidth(F32 size, const char *string)
 {
-   return F32(FontManager::getStringLength(string)) * size / 120;
+   return F32(FontManager::getStringLength(string)) * size / 120.0f;
 }
 
 

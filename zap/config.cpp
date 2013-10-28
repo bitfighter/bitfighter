@@ -473,8 +473,8 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->winXPos = max(ini->GetValueI(section, "WindowXPos", iniSettings->winXPos), 0);    // Restore window location
    iniSettings->winYPos = max(ini->GetValueI(section, "WindowYPos", iniSettings->winYPos), 0);
 
-   iniSettings->winSizeFact = (F32) ini->GetValueF(section, "WindowScalingFactor", iniSettings->winSizeFact);
-   iniSettings->masterAddress = ini->GetValue(section, "MasterServerAddressList", iniSettings->masterAddress);
+   iniSettings->winSizeFact   = ini->GetValueF(section, "WindowScalingFactor", iniSettings->winSizeFact);
+   iniSettings->masterAddress = ini->GetValue (section, "MasterServerAddressList", iniSettings->masterAddress);
    
    iniSettings->name           = ini->GetValue(section, "Nickname", iniSettings->name);
    iniSettings->password       = ini->GetValue(section, "Password", iniSettings->password);
@@ -498,7 +498,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
 
 #ifndef ZAP_DEDICATED
-   gDefaultLineWidth = (F32) ini->GetValueF(section, "LineWidth", 2);
+   gDefaultLineWidth = ini->GetValueF(section, "LineWidth", 2);
    gLineWidth1 = gDefaultLineWidth * 0.5f;
    gLineWidth3 = gDefaultLineWidth * 1.5f;
    gLineWidth4 = gDefaultLineWidth * 2;

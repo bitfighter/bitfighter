@@ -73,7 +73,7 @@ void TextEntryUserInterface::onActivate()
 
 
 static const S32 fontSize = 20;
-static const S32 fontSizeBig = 30;
+static const F32 fontSizeBig = 30.0f;
 static const S32 TextEntryYPos = 325;
 
 
@@ -112,8 +112,8 @@ void TextEntryUserInterface::render()
 
    TNLAssert(y == TextEntryYPos, "Something is off here!");
 
-   S32 x = drawCenteredString(y, getFontSize(), lineEditor.getDisplayString().c_str());
-   lineEditor.drawCursor(x, y, fontSizeBig);
+   S32 x = (S32)drawCenteredString(y, getFontSize(), lineEditor.getDisplayString().c_str());
+   lineEditor.drawCursor(x, y, (S32)fontSizeBig);
    FontManager::popFontContext();
 }
 
