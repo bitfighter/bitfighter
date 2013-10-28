@@ -61,6 +61,8 @@ public:
    static const S32 PollInterval = 20;
    static const string HttpRequestBoundary;
 
+   static const string LevelDatabaseBaseUrl;
+
    static string urlEncodeChar(char c);
    static string urlEncode(const string& str);
 

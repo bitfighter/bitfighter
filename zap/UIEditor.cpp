@@ -64,6 +64,7 @@
 
 #include "luaLevelGenerator.h"
 #include "LevelDatabaseUploadThread.h"
+#include "HttpRequest.h"
 #include "gameObjectRender.h"
 #include "SystemFunctions.h"
 
@@ -5047,7 +5048,7 @@ void EditorMenuUserInterface::setupMenus()
 
    // Only show the upload to database option if authenticated
    if(getGame()->getClientInfo()->isAuthenticated())
-      addMenuItem(new MenuItem("UPLOAD TO DB",     uploadToDbCallback,          "", KEY_U));
+      addMenuItem(new MenuItem("UPLOAD TO DB",     uploadToDbCallback, "Levels posted at " + HttpRequest::LevelDatabaseBaseUrl, KEY_U));
 
    addMenuItem(new MenuItem("QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
 }

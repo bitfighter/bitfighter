@@ -12,7 +12,7 @@
 namespace Zap
 {
 
-const string LevelDatabaseUploadThread::UploadRequest = "bitfighter.org/pleiades/levels/upload";
+const string LevelDatabaseUploadThread::UploadRequest = HttpRequest::LevelDatabaseBaseUrl + "/levels/upload";
 const string LevelDatabaseUploadThread::UploadScreenshotFilename = "upload_screenshot";
 
 LevelDatabaseUploadThread::LevelDatabaseUploadThread(ClientGame* game)
