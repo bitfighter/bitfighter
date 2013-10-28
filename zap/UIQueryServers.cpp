@@ -961,7 +961,7 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
 
    static const S32 CORNER_INSET = 15;
 
-   drawFilledFancyBox(xpos1, ypos1, xpos2, ypos2, CORNER_INSET, Color(.4, 0, 0), 1.0, Colors::red);
+   drawFilledFancyBox(xpos1, ypos1, xpos2, ypos2, CORNER_INSET, Colors::red40, 1.0, Colors::red);
 
    // Draw text
    glColor(Colors::white);
