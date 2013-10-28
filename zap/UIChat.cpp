@@ -423,7 +423,7 @@ void ChatUserInterface::setRenderUnderlyingUI(bool render)
 
 
 static const S32 VERT_FOOTER_SIZE   = 20;
-static const S32 MENU_TITLE_SIZE    = 30;
+static const S32 MENU_TITLE_SIZE    = 24;
 static const S32 TITLE_SUBTITLE_GAP = 5;
 static const S32 MENU_SUBTITLE_SIZE = 18;
 
@@ -466,9 +466,28 @@ void ChatUserInterface::render()
    MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
    if(!(masterConn && masterConn->getConnectionState() == NetConnection::Connected))
    {
-      glColor(Colors::red);
-      drawCenteredString(200, 20, "Not connected to Master Server");
-      drawCenteredString(230, 20, "Your chat messages cannot be relayed");
+      static const S32 fontsize = 20;
+      static const S32 fontgap = 5;
+      static const S32 margin = 20;
+
+      static const char* line1 = "Not connected to Master Server";
+      static const char* line2 = "Your chat messages cannot be relayed";
+
+      static const S32 CORNER_INSET = 15;
+      static const S32 yPos1 = 200;
+      static const S32 yPos2 = yPos1 + (2 * (fontsize + fontgap + margin));
+
+      const S32 width = getStringWidth(fontsize, line2);
+
+      S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+      S32 xPos1 = (canvasWidth - width) / 2 - margin;
+      S32 xPos2 = xPos1 + width + (2 * margin);
+
+      drawFilledFancyBox(xPos1, yPos1, xPos2, yPos2, CORNER_INSET, Colors::red40, 1.0, Colors::red);
+
+      glColor(Colors::white);
+      drawCenteredString(yPos1 + margin, fontsize, line1);
+      drawCenteredString(yPos1 + margin + fontsize + fontgap, fontsize, line2);
    }
 
    glPopMatrix();
@@ -478,13 +497,15 @@ void ChatUserInterface::render()
 void ChatUserInterface::renderHeader()
 {
    // Draw title, subtitle, and footer
-   glColor(Colors::white);
-   drawCenteredString(vertMargin, MENU_TITLE_SIZE, "GameLobby / Global Chat");
+   glColor(Colors::green);
+   drawCenteredString(vertMargin, MENU_TITLE_SIZE, "GAME LOBBY / GLOBAL CHAT");
 
+   glColor(Colors::red);
    string subtitle = "Not currently connected to any game server";
 
    if(getGame()->getConnectionToServer())
    {
+      glColor(Colors::yellow);
       string name = getGame()->getConnectionToServer()->getServerName();
       if(name == "")
          subtitle = "Connected to game server with no name";
@@ -492,7 +513,6 @@ void ChatUserInterface::renderHeader()
          subtitle = "Connected to game server \"" + name + "\"";
    }
 
-   glColor(Colors::green);
    drawCenteredString(vertMargin + MENU_TITLE_SIZE + TITLE_SUBTITLE_GAP, MENU_SUBTITLE_SIZE, subtitle.c_str());
 }
 

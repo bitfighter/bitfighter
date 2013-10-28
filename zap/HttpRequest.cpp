@@ -40,6 +40,8 @@ const string HttpRequest::GetMethod = "GET";
 const string HttpRequest::PostMethod = "POST";
 const string HttpRequest::HttpRequestBoundary = "---REQUEST---BOUNDARY---";
 
+const string HttpRequest::LevelDatabaseBaseUrl = "bitfighter.org/pleiades";
+
 HttpRequest::HttpRequest(string url)
    : mUrl(url), mMethod("GET"), mResponseCode(0), mTimeout(30000)
 {

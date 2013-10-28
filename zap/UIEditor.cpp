@@ -64,6 +64,7 @@
 
 #include "luaLevelGenerator.h"
 #include "LevelDatabaseUploadThread.h"
+#include "HttpRequest.h"
 #include "gameObjectRender.h"
 #include "SystemFunctions.h"
 
@@ -5041,13 +5042,13 @@ void EditorMenuUserInterface::setupMenus()
    addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode")));
    addMenuItem(new MenuItem("TEST LEVEL",       testLevelCallback,           "", KEY_T));
    addMenuItem(new MenuItem("SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
-   addMenuItem(new MenuItem("SUPER SECRET",     activateHelpCallback,        "", KEY_I, keyHelp));
+   addMenuItem(new MenuItem("EDITOR SECRETS",     activateHelpCallback,        "", KEY_I, keyHelp));
    addMenuItem(new MenuItem("LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
    addMenuItem(new MenuItem("MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
 
    // Only show the upload to database option if authenticated
    if(getGame()->getClientInfo()->isAuthenticated())
-      addMenuItem(new MenuItem("UPLOAD TO DB",     uploadToDbCallback,          "", KEY_U));
+      addMenuItem(new MenuItem("UPLOAD TO DB",     uploadToDbCallback, "Levels posted at " + HttpRequest::LevelDatabaseBaseUrl, KEY_U));
 
    addMenuItem(new MenuItem("QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
 }

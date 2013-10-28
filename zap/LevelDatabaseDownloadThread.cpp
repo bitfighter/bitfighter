@@ -39,8 +39,8 @@
 namespace Zap
 {
 
-string LevelDatabaseDownloadThread::LevelRequest = "bitfighter.org/pleiades/levels/raw/%s";
-string LevelDatabaseDownloadThread::LevelgenRequest = "bitfighter.org/pleiades/levels/raw/%s/levelgen";
+string LevelDatabaseDownloadThread::LevelRequest = HttpRequest::LevelDatabaseBaseUrl + "/levels/raw/%s";
+string LevelDatabaseDownloadThread::LevelgenRequest = HttpRequest::LevelDatabaseBaseUrl + "/levels/raw/%s/levelgen";
 
 // Constructor
 LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(string levelId, ClientGame *game)
