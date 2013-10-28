@@ -1032,14 +1032,14 @@ void polyMeshToPolygons(const rcPolyMesh &mesh, Vector<Vector<Point> > &result)
 
 
 /**
- * Perform a Clipper operation on two sets of polygons.
+ * Performs a clipper operation on two sets of polygons, giving the result
+ * as a Clipper::PolyTree
  */
-bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge)
+bool clipPolygonsAsTree(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, PolyTree &solution)
 {
    Polygons upscaledSubject = upscaleClipperPoints(subject);
    Polygons upscaledClip = upscaleClipperPoints(clip);
    Clipper clipper;
-   bool success = false;
 
    try  // there is a "throw" in AddPolygon
    {
@@ -1056,8 +1056,18 @@ bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const 
    }
 
    // perform the requested operation
+   return clipper.Execute(operation, solution, pftNonZero, pftNonZero);
+}
+
+
+/**
+ * Perform a Clipper operation on two sets of polygons, giving the result as a
+ * Vector<Vector<Point> >
+ */
+bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge)
+{
    PolyTree solution;
-   success = clipper.Execute(operation, solution, pftNonZero, pftNonZero);
+   bool success = clipPolygonsAsTree(operation, subject, clip, solution);
 
    if(!success)
    {
@@ -1823,11 +1833,51 @@ void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, 
    cornerPoints.push_back(start - crossVec);
 }
 
+
+void pushPolyNode(lua_State *L, const PolyNode *node)
+{
+   if(!node)
+   {
+      lua_pushnil(L);
+      return;
+   }
+
+   // create our result
+   lua_createtable(L, 0, 3);                      // -- node
+
+   // set whether this is a hole
+   lua_pushboolean(L, node->IsHole());            // -- node, isHole
+   lua_setfield(L, -2, "hole");                   // -- node
+
+   // set the points
+   lua_createtable(L, node->Contour.size(), 0);   // -- node, points
+   for(U32 i = 1; i <= node->Contour.size(); i++)
+   {
+      const Polygon &poly = node->Contour;
+      lua_pushnumber(L, i);                       // -- node, points, i
+      lua_pushvec(L, poly[i-1].X * CLIPPER_SCALE_FACT_INVERSE, poly[i-1].Y * CLIPPER_SCALE_FACT_INVERSE);
+                                                  // -- node, points, i, p
+      lua_settable(L, -3);                        // -- node, points
+   }
+   lua_setfield(L, -2, "points");                 // -- node
+
+   // set the children
+   lua_createtable(L, node->Childs.size(), 0);    // -- node, childs
+   for(U32 i = 1; i <= node->Childs.size(); i++)
+   {
+      lua_pushnumber(L, i);                       // -- node, childs, i
+      pushPolyNode(L, node->Childs[i-1]);         // -- node, childs, i, child
+      lua_settable(L, -3);                        // -- node, childs
+   }
+   lua_setfield(L, -2, "children");               // -- node
+}
+
 #define LUA_STATIC_METHODS(METHOD) \
-   METHOD(polyganize,        ARRAYDEF({{ TABLE, END }}),                                               1 ) \
-   METHOD(triangulate,       ARRAYDEF({{ TABLE, END }}),                                               1 ) \
-   METHOD(clipPolygons,      ARRAYDEF({{ INT, TABLE, TABLE, END }, { INT, TABLE, TABLE, BOOL, END }}), 2 ) \
-   METHOD(segmentsIntersect, ARRAYDEF({{ PT, PT, PT, PT, END }}),                                           1 ) \
+   METHOD(polyganize,         ARRAYDEF({{ TABLE, END }}),                                               1 ) \
+   METHOD(triangulate,        ARRAYDEF({{ TABLE, END }}),                                               1 ) \
+   METHOD(clipPolygons,       ARRAYDEF({{ INT, TABLE, TABLE, END }, { INT, TABLE, TABLE, BOOL, END }}), 2 ) \
+   METHOD(clipPolygonsAsTree, ARRAYDEF({{ INT, TABLE, TABLE, END }}),                                   1 ) \
+   METHOD(segmentsIntersect,  ARRAYDEF({{ PT, PT, PT, PT, END }}),                                      1 ) \
 
 GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
 
@@ -1837,34 +1887,34 @@ GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
 /**
  * @luafunc static table Geom::clipPolygons(ClipType op, mixed subject, mixed clip, bool mergeAfterTriangulating = false)
  *
- * @brief
- * Perform a clipping operation on sets of polygons.
+ * @brief Perform a clipping operation on sets of polygons.
  *
  * @desc
  * This function uses Bitfighter's polygon manipulation utilities to perform
- * boolean operations on sets of polygons. While these utilities are generally robust,
- * there are a few caveats and some inputs may cause failure.
+ * boolean operations on sets of polygons. While these utilities are generally
+ * robust, there are a few caveats and some inputs may cause failure.
  *
- * In particular, Bitfighter's engine does not support "holes" in polygons. Because
- * of this, if the result of the requested operation would have holes, the *entire*
- * solution is triangulated to remove them. The triangles may then be optionally
- * merged into convex polygons. This way, the client code (or level designer)
- * can select and manually join the result into the desired shape, rather than
- * making Bitfighter guess (probably incorrectly) how it should look. When no holes
- * are created in the output, this function produces the least number
- * of polygons which represent it.
+ * In particular, Bitfighter's engine does not support "holes" in polygons.
+ * Because of this, if the result of the requested operation would have holes,
+ * the *entire* solution is triangulated to remove them. The triangles may then
+ * be optionally merged into convex polygons. This way, the client code (or
+ * level designer) can select and manually join the result into the desired
+ * shape, rather than making Bitfighter guess (probably incorrectly) how it
+ * should look. When no holes are created in the output, this function produces
+ * the least number of polygons which represent it.
  *
  * @note
- * This function is highly experimental, and potentially very resource intensive.
- * If the output must be triangulated (because you made a hole), then there is a
- * possibility that **the program will crash abruptly**. Please use this function
- * with great care, and make sure to constrain the inputs tightly so that users
- * can not induce crashes.
+ * This function is highly experimental, and potentially very resource
+ * intensive. If the output must be triangulated (because you made a hole), then
+ * there is a possibility that **the program will crash abruptly**. Please use
+ * this function with great care, and make sure to constrain the inputs tightly
+ * so that users can not induce crashes.
  *
  * @param op \ref ClipTypeEnum The polygon boolean operation to execute.
  * @param subject A table of polygons or a single polygon to use as the subject.
  * @param clip A table of polygons or a single polygon to use as the clip.
- * @param mergeAfterTriangulating Merge triangles into convex polygons when forced to triangulate the result.
+ * @param mergeAfterTriangulating Merge triangles into convex polygons when
+ *     forced to triangulate the result.
  *
  * @return A table of the solution polygons, or `nil` on failure.
  */
@@ -1897,6 +1947,64 @@ S32 lua_clipPolygons(lua_State* L)
 
    // return the polygons if we're successful
    return returnPolygons(L, output);
+}
+
+
+/**
+ * @luafunc static table Geom::clipPolygonsAsTree(ClipType op, mixed subject, mixed clip)
+ *
+ * @brief
+ * Perform a clipping operation on sets of polygons, keeping holes.
+ *
+ * @desc
+ * This function uses Bitfighter's polygon manipulation utilities to perform
+ * boolean operations on sets of polygons, keeping holes, and returning the
+ * result as a tree of polygons and holes. This is useful when performing
+ * repeated operations on the results of a clipping operation, or when you need
+ * to know which polygon is contained in which hole or vice versa.
+ *
+ * @note This function is highly experimental, and potentially very resource
+ * intensive. The algorithm runs in O(n) = n*log(n) time, with respect to the
+ * number of vertices.
+ *
+ * @param op \ref ClipTypeEnum The polygon boolean operation to execute.
+ * @param subject A table of polygons or a single polygon to use as the subject.
+ * @param clip A table of polygons or a single polygon to use as the clip.
+ *
+ * @return A tree representing the solution, in the following format:
+ * @code
+ *   {
+ *     points = { p1, p2, ...},
+ *     children = { child1, child2, ... }
+ *     hole = false -- True if this is a hole.
+ *   }
+ * @endcode
+ * Where each child is a another table with the same structure, representing the
+ * holes or polygons contained by this node. Note that all of a polygon's
+ * children will be holes, and vice versa.
+ */
+S32 lua_clipPolygonsAsTree(lua_State* L)
+{
+   checkArgList(L, "Geom", "clipPolygonsAsTree");
+
+   if(lua_gettop(L) < 3)
+      return 0;
+
+   // read the arguments
+   ClipType operation = static_cast<ClipType>(lua_tointeger(L, 1));
+   Vector<Vector<Point> > subject = getPolygons(L, 2);
+   Vector<Vector<Point> > clip = getPolygons(L, 3);
+
+   // pop the arguments
+   lua_pop(L, 3);
+
+   // try to execute the operation
+   PolyTree solution;
+   if(!clipPolygonsAsTree(operation, subject, clip, solution))
+      return returnNil(L);
+
+   pushPolyNode(L, solution.GetFirst());
+   return 1;
 }
 
 

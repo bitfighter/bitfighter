@@ -143,7 +143,8 @@ bool mergePolysToPolyTree(const Vector<Vector<Point> > &inputPolygons, PolyTree 
 bool containsHoles(const PolyTree &tree);
 
 void splitSelfIntersectingPolys(const Vector<Vector<Point> > input, Vector<Vector<Point> > &result);
-bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge);
+bool clipPolygons(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge);
+bool clipPolygonsAsTree(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, PolyTree &solution);
 bool triangulate(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &result);
 bool polyganize(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &result);
 
@@ -223,6 +224,7 @@ void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges);
 void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints);
 
 S32 lua_clipPolygons(lua_State *L);
+S32 lua_clipPolygonsAsTree(lua_State *L);
 S32 lua_triangulate(lua_State *L);
 S32 lua_polyganize(lua_State *L);
 S32 lua_segmentsIntersect(lua_State *L);
