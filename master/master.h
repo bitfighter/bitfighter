@@ -123,7 +123,7 @@ public:
    void removeServer(S32 index);
    void removeClient(S32 index);
 
-   void idle(U32 timeDelta);
+   void idle(const U32 timeDelta);
 };
 
 }

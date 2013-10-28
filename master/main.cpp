@@ -201,8 +201,8 @@ int main(int argc, const char **argv)
       U32 timeDelta = currentTime - lastTime;
       lastTime = currentTime;
 
-      // Sanity check
-      if(timeDelta < -500 || timeDelta > 5000)
+      // Sane sanity check
+      if(timeDelta > 5000)
          timeDelta = 10;
 
       masterServer.idle(timeDelta);

@@ -290,7 +290,7 @@ NetInterface *MasterServer::getNetInterface() const
 }
 
 
-void MasterServer::idle(U32 timeDelta)
+void MasterServer::idle(const U32 timeDelta)
 {
    mNetInterface->checkIncomingPackets();
    mNetInterface->processConnections();
@@ -325,9 +325,9 @@ void MasterServer::idle(U32 timeDelta)
    // Process connections -- cycle through them and check if any have timed out
    U32 currentTime = Platform::getRealMilliseconds();
 
-   for(S32 i = MasterServerConnection::gConnectList.size() - 1; i >= 0; i--)     //< Get rid of global here
+   for(S32 i = MasterServerConnection::gConnectList.size() - 1; i >= 0; i--)    
    {
-      GameConnectRequest *request = MasterServerConnection::gConnectList[i];     //< Get rid of global here
+      GameConnectRequest *request = MasterServerConnection::gConnectList[i];    
 
       if(currentTime - request->requestTime > FIVE_SECONDS)  
       {
@@ -350,10 +350,10 @@ void MasterServer::idle(U32 timeDelta)
    // Process any delayed disconnects; we use this to avoid repeating and flooding join / leave messages
    for(S32 i = MasterServerConnection::gLeaveChatTimerList.size() - 1; i >= 0; i--)
    {
-      MasterServerConnection *c = MasterServerConnection::gLeaveChatTimerList[i];      //< Get rid of global here
+      MasterServerConnection *c = MasterServerConnection::gLeaveChatTimerList[i];      
 
       if(!c || c->mLeaveGlobalChatTimer == 0)
-         MasterServerConnection::gLeaveChatTimerList.erase(i);                         //< Get rid of global here
+         MasterServerConnection::gLeaveChatTimerList.erase(i);                         
       else
       {
          if(currentTime - c->mLeaveGlobalChatTimer > ONE_SECOND)
