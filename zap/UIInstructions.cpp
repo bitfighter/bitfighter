@@ -787,8 +787,8 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       renderCenteredString(start, FontSize, text);
 
       glColor(Colors::white);
-      for(S32 i = 0; i < desc.size(); i++)
-         renderCenteredString(start + Point(0, 25 + i * FontSize * 1.2), 17, desc[i].c_str());
+      for(S32 j = 0; j < desc.size(); j++)
+         renderCenteredString(start + Point(0, 25 + j * FontSize * 1.2), 17, desc[j].c_str());
 
       glPushMatrix();
       glTranslate(objStart);
