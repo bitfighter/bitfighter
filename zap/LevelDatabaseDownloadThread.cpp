@@ -77,6 +77,7 @@ U32 LevelDatabaseDownloadThread::run()
       else     // File exists and is not on the skip list... show an error message
       {
          mGame->displayErrorMessage("!!! Already have a file called %s on the server.  Download aborted.", filePath.c_str());
+         delete this;
          return 0;
       }
    }
