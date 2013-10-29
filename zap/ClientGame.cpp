@@ -532,7 +532,7 @@ void ClientGame::setLevelDatabaseId(U32 id)
 
    // If we are in a game, and connected to master,then we can request that the master server send us the current level ratings.
    // If we are connected to a game server, then we are not in the editor (though we could be testing a level).
-   if(mConnectionToMaster->isEstablished() && isConnectedToServer() && needsRating())
+   if(mConnectionToMaster && mConnectionToMaster->isEstablished() && isConnectedToServer() && needsRating())
       mConnectionToMaster->c2mRequestLevelRating(id);
 }
 
