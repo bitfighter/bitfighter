@@ -92,6 +92,7 @@ private:
    S16 mTotalLevelRating;
 
    bool needsRating();
+
    static PersonalRating getNextRating(PersonalRating currentRating);
 
    // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
@@ -151,6 +152,7 @@ public:
    S16 getTotalLevelRating() const;
    PersonalRating getPersonalLevelRating() const;
 
+   bool isLevelInDatabase();
 
    // A place to store input from the joysticks while we are composing our moves
    F32 mJoystickInputs[JoystickAxesDirectionCount];

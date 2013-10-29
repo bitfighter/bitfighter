@@ -1113,9 +1113,15 @@ void GameUserInterface::activateModule(S32 index)
 
 void GameUserInterface::toggleLevelRating()
 {
+   if(!getGame()->isLevelInDatabase())
+   {
+      displayErrorMessage("!!! Level is not in database, so it cannot be rated (upload via editor)");
+      return;
+   }
+
    ClientGame::PersonalRating newRating = getGame()->toggleLevelRating();  // Change rating and get new value
 
-   string msg = "Level rated as " + getPersonalRatingString(newRating);
+   string msg = "Your rating: " + getPersonalRatingString(newRating);
    displaySuccessMessage(msg.c_str());
 
    mHelpItemManager.removeInlineHelpItem(RateThisLevel, true);             // Demonstrated ability to rate a level!

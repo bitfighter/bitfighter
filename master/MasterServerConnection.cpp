@@ -1031,7 +1031,7 @@ HighScores *MasterServerConnection::getHighScores(S32 scoresPerGroup)
 // Note: Will return NULL if databaseId == NOT_IN_DATABASE.  Otherwise, will not.
 TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
 {
-   if(databaseId == NOT_IN_DATABASE)
+   if(!LevelDatabase::isLevelInDatabase(databaseId))
       return NULL;
 
    // Note that while map[xxx] will create an entry if it does not exist, in this case, it will create a boost::shared_ptr
@@ -1065,7 +1065,7 @@ TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
 // Note: Will return NULL if databaseId == NOT_IN_DATABASE.  Otherwise, will not.
 PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const StringTableEntry &playerName)
 {
-   if(databaseId == NOT_IN_DATABASE)
+   if(!LevelDatabase::isLevelInDatabase(databaseId))
       return NULL;
 
    // Note that while map[xxx] will create an entry if it does not exist, in this case, it will create a boost::shared_ptr
@@ -1184,7 +1184,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestHighScores, ())
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 databaseId))
 {
    // Do nothing if client sent us an invalid id
-   if(databaseId == NOT_IN_DATABASE)
+   if(!LevelDatabase::isLevelInDatabase(databaseId))
       return;
 
    TotalLevelRating *totalRating = getLevelRating(databaseId);

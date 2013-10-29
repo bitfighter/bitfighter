@@ -44,7 +44,7 @@ LevelDatabaseRateThread::~LevelDatabaseRateThread()
 // Static method
 bool LevelDatabaseRateThread::checkDbid(ClientGame *game)
 {
-   if(game->getLevelDatabaseId() == NOT_IN_DATABASE)
+   if(game->isLevelInDatabase())
    {
       game->displayErrorMessage("!!! Level ID not found -- Either level is not in the database, or needs to be redownloaded");
       return false;

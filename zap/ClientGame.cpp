@@ -491,11 +491,16 @@ string ClientGame::getPlayerName()     const { return mSettings->getPlayerName()
 string ClientGame::getPlayerPassword() const { return mSettings->getPlayerPassword(); }
 
 
+bool ClientGame::isLevelInDatabase()
+{
+   return LevelDatabase::isLevelInDatabase(getLevelDatabaseId());
+}
+
+
 bool ClientGame::needsRating()
 {
    // We don't need ratings for levels not in the database
-   bool inDatabase = getLevelDatabaseId() != NOT_IN_DATABASE;
-   return inDatabase && (mPlayerLevelRating == UnknownRating || mTotalLevelRating == UnknownRating);
+   return isLevelInDatabase() && (mPlayerLevelRating == UnknownRating || mTotalLevelRating == UnknownRating);
 }
 
 

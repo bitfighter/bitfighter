@@ -44,6 +44,10 @@ using namespace TNL;
 
 static const U32 NOT_IN_DATABASE = 0;
 
+// Not a shared constant, but like an old friend.  That's static.  And in its own namespace.
+namespace LevelDatabase { static bool isLevelInDatabase(U32 databaseId) { return databaseId != NOT_IN_DATABASE; } }
+
+
 static const U32 MOTD_LEN = 256;
 static const U32 MAX_PLAYERS = 127;    // Absolute maximum players ever allowed in a game  --> should not be more than U8_MAX
 
