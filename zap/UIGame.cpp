@@ -1591,6 +1591,10 @@ F32 GameUserInterface::getBackgroundTextDimFactor(bool chatRelated) const
          mHelperManager.getDimFactor() : 
          MAX(mHelperManager.getFraction(), UI::DIM_LEVEL);
 
+   // Hide help message when scoreboard is visible
+   if(mInScoreboardMode)
+      helperManagerFactor = 0;
+
    return MIN(helperManagerFactor, mLevelInfoDisplayer.getFraction());
 }
 
