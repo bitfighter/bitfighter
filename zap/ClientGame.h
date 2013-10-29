@@ -148,7 +148,7 @@ public:
    bool showAllObjectOutlines() const;
 
    PersonalRating toggleLevelRating();
-   static string getRatingString(PersonalRating rating);
+   static string getRatingString(S16 rating, bool isForPersonal);
    S16 getTotalLevelRating() const;
    PersonalRating getPersonalLevelRating() const;
 

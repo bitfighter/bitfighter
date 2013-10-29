@@ -106,13 +106,17 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
       ClientGame::PersonalRating myRating = static_cast<ClientGame *>(gameType->getGame())->getPersonalLevelRating();
       S16 totalRating                     = static_cast<ClientGame *>(gameType->getGame())->getTotalLevelRating();
 
-      string myRatingStr    = (myRating    > 0 ? "+" : "") + itos(myRating);
-      string totalRatingStr = (totalRating > 0 ? "+" : "") + itos(totalRating);
-
       symbols.push_back(SymbolString::getBlankSymbol(10));
       symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext));  // Little database icon
-      symbols.push_back(SymbolString::getBlankSymbol(8));                                  // Padding
-      symbols.push_back(SymbolString::getSymbolText(myRatingStr + " / " + totalRatingStr, 12, LevelInfoContext));
+
+      if(myRating != ClientGame::UnknownRating && totalRating != ClientGame::UnknownRating)
+      {
+         string myRatingStr    = ClientGame::getRatingString(myRating, true);
+         string totalRatingStr = ClientGame::getRatingString(totalRating, false);
+
+         symbols.push_back(SymbolString::getBlankSymbol(8));                                  // Padding
+         SymbolString::symbolParse(NULL, myRatingStr + " / " + totalRatingStr, symbols, LevelInfoContext, 12, &Colors::red);
+      }
    }
 
    SymbolString titleSymbolString(symbols);

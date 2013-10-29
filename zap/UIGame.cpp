@@ -1113,12 +1113,12 @@ void GameUserInterface::activateModule(S32 index)
 
 void GameUserInterface::toggleLevelRating()
 {
-   ClientGame::PersonalRating newRating = getGame()->toggleLevelRating();
+   ClientGame::PersonalRating newRating = getGame()->toggleLevelRating();  // Change rating and get new value
 
-   string msg = "Level rated as " + ClientGame::getRatingString(newRating);
+   string msg = "Level rated as " + ClientGame::getRatingString(newRating, true);
    displaySuccessMessage(msg.c_str());
 
-   mHelpItemManager.removeInlineHelpItem(RateThisLevel, true);       // Demonstrated ability to rate a level!
+   mHelpItemManager.removeInlineHelpItem(RateThisLevel, true);             // Demonstrated ability to rate a level!
 }
 
 

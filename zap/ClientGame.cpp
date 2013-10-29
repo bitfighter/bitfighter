@@ -532,7 +532,7 @@ void ClientGame::setLevelDatabaseId(U32 id)
 
    // If we are in a game, and connected to master,then we can request that the master server send us the current level ratings.
    // If we are connected to a game server, then we are not in the editor (though we could be testing a level).
-   if(mConnectionToMaster && isConnectedToServer() && needsRating())
+   if(mConnectionToMaster->isEstablished() && isConnectedToServer() && needsRating())
       mConnectionToMaster->c2mRequestLevelRating(id);
 }
 
@@ -922,12 +922,23 @@ void ClientGame::onGameStarting()
 }
 
 
-// Static method
-string ClientGame::getRatingString(PersonalRating rating)
+// Static method -- pass true if this is personal rating, false if total rating
+string ClientGame::getRatingString(S16 rating, bool isForPersonal)
 {
-   if(rating == RatingGood)     return "Good";
-   if(rating == RatingNeutral)  return "Neutral";
-   if(rating == RatingBad)      return "Bad";
+   if(rating == UnknownRating)      return "";
+   if(rating == RetrievingRating)   return "[[SPINNER]]";
+   if(rating == Unrated)            return "Unrated";
+
+   if(isForPersonal)
+   {
+      if(rating == RatingGood)         return "+1";
+      if(rating == RatingNeutral)      return "0";
+      if(rating == RatingBad)          return "-1";
+
+      TNLAssert(false, "Unexpected rating!");
+   }
+   else return (rating > 0 ? "+" : "") + itos(rating);
+
 
    TNLAssert(false, "Expected valid rating here!");
    return "";
