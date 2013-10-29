@@ -27,6 +27,7 @@ const string LevelDatabaseRateThread::RatingStrings[] = {
 };
 
 
+// Constructor
 LevelDatabaseRateThread::LevelDatabaseRateThread(ClientGame* game, LevelRating rating)
 {
    mGame   = game;
@@ -34,35 +35,21 @@ LevelDatabaseRateThread::LevelDatabaseRateThread(ClientGame* game, LevelRating r
 }
 
 
+// Destructor
 LevelDatabaseRateThread::~LevelDatabaseRateThread()
 {
    // Do nothing
 }
 
 
-// Level needs a dbid to continue.  Returns true if things are ok, false if there is a problem.
-// Static method
-bool LevelDatabaseRateThread::checkDbid(ClientGame *game)
-{
-   if(game->isLevelInDatabase())
-   {
-      game->displayErrorMessage("!!! Level ID not found -- Either level is not in the database, or needs to be redownloaded");
-      return false;
-   }
-
-   return true;
-}
-
-
 U32 LevelDatabaseRateThread::run()
 {
-   if(!checkDbid(mGame))
+   TNLAssert(mGame->isLevelInDatabase(), "Level should already have been checked by now!");
+   if(mGame->isLevelInDatabase())
    {
       delete this;
       return 1;
    }
-
-   mGame->displaySuccessMessage("Rating level...");
 
    stringstream id;
    id << mGame->getLevelDatabaseId();
@@ -90,8 +77,6 @@ U32 LevelDatabaseRateThread::run()
       delete this;
       return 0;
    }
-
-   mGame->displaySuccessMessage(req.getResponseBody().c_str());
 
    delete this;
    return 0;
