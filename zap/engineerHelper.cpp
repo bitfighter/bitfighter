@@ -49,7 +49,7 @@ static OverlayMenuItem engineerItemInfo[] = {
    { KEY_4, BUTTON_4, false, EngineeredTeleporterExit,     "Teleporter Exit", &Colors::overlayMenuUnselectedItemColor, "", NULL },
 };                                                         
                                                            
-                                                           
+                                    
 static const char *engineerInstructions[] = {
    "Aim at a spot on a wall, and activate the module again.",
    "Aim at a spot on a wall, and activate the module again.",
