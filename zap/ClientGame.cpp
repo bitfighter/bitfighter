@@ -491,13 +491,13 @@ string ClientGame::getPlayerName()     const { return mSettings->getPlayerName()
 string ClientGame::getPlayerPassword() const { return mSettings->getPlayerPassword(); }
 
 
-bool ClientGame::isLevelInDatabase()
+bool ClientGame::isLevelInDatabase() const
 {
    return LevelDatabase::isLevelInDatabase(getLevelDatabaseId());
 }
 
 
-bool ClientGame::needsRating()
+bool ClientGame::needsRating() const
 {
    // We don't need ratings for levels not in the database
    return isLevelInDatabase() && (mPlayerLevelRating == UnknownRating || mTotalLevelRating == UnknownRating);
@@ -526,6 +526,25 @@ void ClientGame::gotTotalLevelRating(S16 rating)
 void ClientGame::gotPlayerLevelRating(S32 rating)
 {
    mPlayerLevelRating = PersonalRating(rating);
+}
+
+
+bool ClientGame::canRateLevel() const
+{
+
+   if(!isLevelInDatabase())
+   {
+      displayErrorMessage("!!! Level is not in database, so it cannot be rated (upload via editor)");
+      return false;
+   }
+
+   if(!getClientInfo()->isAuthenticated())
+   {
+      displayErrorMessage("!!! Only registered players can rate levels (register in forums)");
+      return false;
+   }
+
+   return true;
 }
 
 
@@ -1416,7 +1435,7 @@ void ClientGame::unsuspendGame()
 }
 
 
-void ClientGame::displayErrorMessage(const char *format, ...)
+void ClientGame::displayErrorMessage(const char *format, ...) const
 {
    static char message[256];
 
@@ -1430,7 +1449,7 @@ void ClientGame::displayErrorMessage(const char *format, ...)
 }
 
 
-void ClientGame::displaySuccessMessage(const char *format, ...)
+void ClientGame::displaySuccessMessage(const char *format, ...) const
 {
    static char message[256];
 

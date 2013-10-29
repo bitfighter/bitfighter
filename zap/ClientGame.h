@@ -91,7 +91,7 @@ private:
    PersonalRating mPlayerLevelRating;
    S16 mTotalLevelRating;
 
-   bool needsRating();
+   bool needsRating() const;
 
    static PersonalRating getNextRating(PersonalRating currentRating);
 
@@ -141,6 +141,9 @@ public:
    void gotTotalLevelRating(S16 rating);
    void gotPlayerLevelRating(S32 rating);
 
+   bool canRateLevel() const;
+
+
    void setLevelDatabaseId(U32 id);
 
    UIManager *getUIManager() const;
@@ -152,7 +155,7 @@ public:
    S16 getTotalLevelRating() const;
    PersonalRating getPersonalLevelRating() const;
 
-   bool isLevelInDatabase();
+   bool isLevelInDatabase() const;
 
    // A place to store input from the joysticks while we are composing our moves
    F32 mJoystickInputs[JoystickAxesDirectionCount];
@@ -306,8 +309,8 @@ public:
    void setServerPassword(const string &password);
    string getEnteredServerAccessPassword();
 
-   void displayErrorMessage(const char *format, ...);
-   void displaySuccessMessage(const char *format, ...);
+   void displayErrorMessage(const char *format, ...) const;
+   void displaySuccessMessage(const char *format, ...) const;
 
    void suspendGame();
    void unsuspendGame();
