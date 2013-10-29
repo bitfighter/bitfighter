@@ -1115,10 +1115,32 @@ void GameUserInterface::toggleLevelRating()
 {
    ClientGame::PersonalRating newRating = getGame()->toggleLevelRating();  // Change rating and get new value
 
-   string msg = "Level rated as " + ClientGame::getRatingString(newRating, true);
+   string msg = "Level rated as " + getPersonalRatingString(newRating);
    displaySuccessMessage(msg.c_str());
 
    mHelpItemManager.removeInlineHelpItem(RateThisLevel, true);             // Demonstrated ability to rate a level!
+}
+
+
+// Static method
+string GameUserInterface::getPersonalRatingString(ClientGame::PersonalRating rating)
+{
+   if(rating == ClientGame::RatingGood)      return "+1";
+   if(rating == ClientGame::RatingNeutral)   return "0";
+   if(rating == ClientGame::RatingBad)       return "-1";
+
+   return getTotalRatingString((S16)rating);    // Handles UnknownRating, RetrievingRating, Unrated
+}
+
+
+// Static method
+string GameUserInterface::getTotalRatingString(S16 rating)
+{
+   if(rating == ClientGame::UnknownRating)      return "";
+   if(rating == ClientGame::RetrievingRating)   return "[[SPINNER]]";
+   if(rating == ClientGame::Unrated)            return "Unrated";
+
+   return (rating > 0 ? "+" : "") + itos(rating);
 }
 
 

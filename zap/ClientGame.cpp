@@ -922,29 +922,6 @@ void ClientGame::onGameStarting()
 }
 
 
-// Static method -- pass true if this is personal rating, false if total rating
-string ClientGame::getRatingString(S16 rating, bool isForPersonal)
-{
-   if(rating == UnknownRating)      return "";
-   if(rating == RetrievingRating)   return "[[SPINNER]]";
-   if(rating == Unrated)            return "Unrated";
-
-   if(isForPersonal)
-   {
-      if(rating == RatingGood)         return "+1";
-      if(rating == RatingNeutral)      return "0";
-      if(rating == RatingBad)          return "-1";
-
-      TNLAssert(false, "Unexpected rating!");
-   }
-   else return (rating > 0 ? "+" : "") + itos(rating);
-
-
-   TNLAssert(false, "Expected valid rating here!");
-   return "";
-}
-
-
 S16 ClientGame::getTotalLevelRating() const
 {
    return mTotalLevelRating;

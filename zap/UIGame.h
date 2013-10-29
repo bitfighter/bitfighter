@@ -35,6 +35,7 @@
 #include "HelpItemManager.h"
 #include "move.h"
 #include "config.h"     // For UserSettings def
+#include "ClientGame.h"
 
 #include "SoundEffect.h"
 #include "sparkManager.h"
@@ -425,6 +426,9 @@ public:
    void setModuleSecondary(ShipModule module, bool isActive);
 
    void toggleLevelRating();
+   
+   static string getPersonalRatingString(ClientGame::PersonalRating rating);
+   static string getTotalRatingString(S16 rating);
 
    // Get UI element dimensions
    S32 getLoadoutIndicatorWidth() const;

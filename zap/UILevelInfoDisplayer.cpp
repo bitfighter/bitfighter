@@ -34,6 +34,7 @@
 #include "gameType.h"               // Can get rid of with a bunch of passthroughs
 #include "FontManager.h"
 #include "SymbolShape.h"
+#include "UIGame.h"
 
 #include "stringUtils.h"
 #include "OpenglUtils.h"               
@@ -103,16 +104,18 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
 
    if(isInDatabase)
    {
-      ClientGame::PersonalRating myRating = static_cast<ClientGame *>(gameType->getGame())->getPersonalLevelRating();
-      S16 totalRating                     = static_cast<ClientGame *>(gameType->getGame())->getTotalLevelRating();
+      ClientGame *clientGame = static_cast<ClientGame *>(gameType->getGame());
+
+      ClientGame::PersonalRating myRating    = clientGame->getPersonalLevelRating();
+      S16                        totalRating = clientGame->getTotalLevelRating();
 
       symbols.push_back(SymbolString::getBlankSymbol(10));
       symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext));  // Little database icon
 
       if(myRating != ClientGame::UnknownRating && totalRating != ClientGame::UnknownRating)
       {
-         string myRatingStr    = ClientGame::getRatingString(myRating, true);
-         string totalRatingStr = ClientGame::getRatingString(totalRating, false);
+         string myRatingStr    = GameUserInterface::getPersonalRatingString(myRating);
+         string totalRatingStr = GameUserInterface::getTotalRatingString(totalRating);
 
          symbols.push_back(SymbolString::getBlankSymbol(8));                                  // Padding
          SymbolString::symbolParse(NULL, myRatingStr + " / " + totalRatingStr, symbols, LevelInfoContext, 12, &Colors::red);
