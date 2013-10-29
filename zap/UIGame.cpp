@@ -1113,11 +1113,8 @@ void GameUserInterface::activateModule(S32 index)
 
 void GameUserInterface::toggleLevelRating()
 {
-   if(!getGame()->isLevelInDatabase())
-   {
-      displayErrorMessage("!!! Level is not in database, so it cannot be rated (upload via editor)");
+   if(!getGame()->canRateLevel())      // Will display any appropriate error messages
       return;
-   }
 
    ClientGame::PersonalRating newRating = getGame()->toggleLevelRating();  // Change rating and get new value
 

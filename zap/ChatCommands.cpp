@@ -1029,7 +1029,7 @@ void downloadMapHandler(ClientGame *game, const Vector<string> &args)
 
 void rateMapHandler(ClientGame *game, const Vector<string> &args)
 {
-   if(!LevelDatabaseRateThread::checkDbid(game))
+   if(!game->canRateLevel())      // Will display any appropriate error messages
       return;
 
    S32 rating = NONE;
