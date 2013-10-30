@@ -45,7 +45,7 @@ LevelDatabaseRateThread::~LevelDatabaseRateThread()
 U32 LevelDatabaseRateThread::run()
 {
    TNLAssert(mGame->isLevelInDatabase(), "Level should already have been checked by now!");
-   if(mGame->isLevelInDatabase())
+   if(!mGame->isLevelInDatabase())
    {
       delete this;
       return 1;
