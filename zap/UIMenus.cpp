@@ -2033,7 +2033,7 @@ void GameMenuUserInterface::buildMenu()
          addMenuItem(new MenuItem("ROBOTS",               robotsGameCallback,     "", KEY_B, KEY_R));
          addMenuItem(new MenuItem("PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L, KEY_P));
          addMenuItem(new MenuItem("ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2));
-         addMenuItem(new MenuItem("RESTART LEVEL",        restartGameCallback,    "", KEY_S));
+         addMenuItem(new MenuItem("RESTART LEVEL",        restartGameCallback,    "", ""));
       }
 
       if(gc->getClientInfo()->isAdmin())
