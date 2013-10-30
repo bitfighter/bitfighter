@@ -960,10 +960,19 @@ ClientGame::PersonalRating ClientGame::getPersonalLevelRating() const
 
 ClientGame::PersonalRating ClientGame::toggleLevelRating()
 {
-   mPlayerLevelRating = getNextRating(mPlayerLevelRating);
+   S32 oldRating = mPlayerLevelRating;
 
+   mPlayerLevelRating = getNextRating(mPlayerLevelRating);     // Update the player's rating of this level
+   mTotalLevelRating += mPlayerLevelRating - oldRating;        // We can predict the total level rating as well!
+
+   // For now, do two things, one of which should not be necessary
+   // 1) Alert the master with a c2m message
+   getConnectionToMaster()->c2mSetLevelRating(mLevelDatabaseId, mPlayerLevelRating);
+
+   // 2) Alert Pleiades with an http request
    Thread *rateThread = new LevelDatabaseRateThread(this, LevelDatabaseRateThread::LevelRating(mPlayerLevelRating));
    rateThread->start();
+
 
    return mPlayerLevelRating;
 }

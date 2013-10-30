@@ -53,12 +53,15 @@ struct ThreadingStruct
    bool isValid;
    bool isBusy;     // For multithreading
    U32 lastClock;   // Data can get old
-
    Vector<SafePtr<MasterServerConnection> > waitingClients;
 
+public:
    ThreadingStruct() { isValid = false; isBusy = false; }     // Quickie constructor
 
+   void resetClock() { lastClock = Platform::getRealMilliseconds(); }
    bool isExpired() { return Platform::getRealMilliseconds() - lastClock > getCacheExpiryTime(); }
+   void addClientToWaitingList(MasterServerConnection *connection);
+
    virtual U32 getCacheExpiryTime() = 0;
 };
 
@@ -78,10 +81,13 @@ struct LevelRating : public ThreadingStruct
 {
    U32 databaseId;
    S16 rating;
+   bool receivedUpdateByClientWhileBusy;  // Flag signaling that something changed while this thread was working
+
 
    virtual U32 getCacheExpiryTime() = 0;
 
-   LevelRating() { databaseId = NOT_IN_DATABASE; rating = 0; }     // Quickie constructor
+   // Quickie constructor:
+   LevelRating() { databaseId = NOT_IN_DATABASE; rating = 0; receivedUpdateByClientWhileBusy = false; }       
 };
 
 
@@ -297,6 +303,7 @@ public:
 
    // Send level rating to client
    TNL_DECLARE_RPC_OVERRIDE(c2mRequestLevelRating, (U32 databaseId));
+   TNL_DECLARE_RPC_OVERRIDE(c2mSetLevelRating, (U32 databaseId, RangedU32<0, 2> rating));
 
 
    // Game server wants to know if user name has been verified

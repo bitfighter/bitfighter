@@ -180,6 +180,12 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendHighScores,
                   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 1) {}
 
 
+// Level rating related
+TNL_IMPLEMENT_RPC(MasterServerInterface, c2mSetLevelRating,
+                  (U32 databaseId, RangedU32<0, 2> rating),
+                  (databaseId, rating),
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 2) {}
+
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mRequestLevelRating,
                   (U32 databaseId), 
                   (databaseId),

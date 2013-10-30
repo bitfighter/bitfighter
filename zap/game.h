@@ -209,8 +209,6 @@ private:
 
    NameToAddressThread *mNameToAddressThread;
 
-   U32 mLevelDatabaseId;
-
 protected:
    U32 mNextMasterTryTime;
 
@@ -239,6 +237,8 @@ protected:
    Vector<DeleteRef> mPendingDeleteObjects;
    Vector<SafePtr<BfObject> > mScopeAlwaysList;
    U32 mCurrentTime;
+
+   U32 mLevelDatabaseId;
 
    RefPtr<GameNetInterface> mNetInterface;
 

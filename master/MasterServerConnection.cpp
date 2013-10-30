@@ -943,15 +943,26 @@ struct TotalLevelRatingsReader : public DatabaseAccessThread::BasicEntry
       dbId = databaseId;
    }
 
+   // If, while we are running, we get some updated data from the client, receivedUpdateByClientWhileBusy 
+   // will be set to true.  If that happens, we need to re-run the database query to get 
+   // the latest data.
    void run()
    {
-      rating = getDatabaseWriter(mSettings).getLevelRating(dbId);
+      TotalLevelRating *totalRating = totalLevelRatingsCache[dbId].get();
+      
+      do 
+      {
+         totalRating->receivedUpdateByClientWhileBusy = false;
+         rating = getDatabaseWriter(mSettings).getLevelRating(dbId);
+      } 
+      while(totalRating->receivedUpdateByClientWhileBusy);
    }
 
 
    void finish()
    {
       TotalLevelRating *totalRating = totalLevelRatingsCache[dbId].get();
+
       totalRating->rating = rating;
       totalRating->isBusy = false;
 
@@ -981,10 +992,10 @@ struct PlayerLevelRatingsReader : public DatabaseAccessThread::BasicEntry
 
    // Constructor
    PlayerLevelRatingsReader(const MasterSettings *settings, U32 databaseId, const StringTableEntry &playerName) : 
-         DatabaseAccessThread::BasicEntry(settings)   
+         DatabaseAccessThread::BasicEntry(settings), 
+         playerName(playerName)
    {
       dbId = databaseId;
-      this->playerName = playerName;
    }
 
    void run()
@@ -995,7 +1006,15 @@ struct PlayerLevelRatingsReader : public DatabaseAccessThread::BasicEntry
    void finish()
    {
       PlayerLevelRating *playerRating = playerLevelRatingsCache[DbIdPlayerNamePair(dbId, playerName)].get();
-      playerRating->rating = rating;
+
+      TNLAssert(playerRating, "playerRating should not be NULL!");
+
+      // If this rating item was updated by the client while we were retrieving data fom the database,
+      // we'll treat that as authoritative and not overwrite it with (likely) stale data from the database.
+      if(!playerRating->receivedUpdateByClientWhileBusy)
+         playerRating->rating = rating;
+
+      playerRating->receivedUpdateByClientWhileBusy = false;
       playerRating->isBusy = false;
 
       for(S32 i = 0; i < playerRating->waitingClients.size(); i++)
@@ -1018,7 +1037,7 @@ HighScores *MasterServerConnection::getHighScores(S32 scoresPerGroup)
       {
          highScores.isBusy = true;
          highScores.isValid = true;
-         highScores.lastClock = Platform::getRealMilliseconds();
+         highScores.resetClock();
 
          RefPtr<HighScoresReader> highScoreReader = new HighScoresReader(mMaster->getSettings(), scoresPerGroup);
          mMaster->getDatabaseAccessThread()->addEntry(highScoreReader);
@@ -1050,12 +1069,28 @@ TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
       {
          rating->isBusy = true;
          rating->isValid = true;
-         rating->lastClock = Platform::getRealMilliseconds();
+         rating->resetClock();
 
+         // Queue the request!
          RefPtr<TotalLevelRatingsReader> totalLevelRatingsReader = 
                            new TotalLevelRatingsReader(mMaster->getSettings(), databaseId);
          mMaster->getDatabaseAccessThread()->addEntry(totalLevelRatingsReader);
       }
+
+   return rating;
+}
+
+
+static PlayerLevelRating *createNewPlayerRating(U32 databaseId, const StringTableEntry &playerName)
+{
+   boost::shared_ptr<PlayerLevelRating> newRating = boost::shared_ptr<PlayerLevelRating>(new PlayerLevelRating());
+   playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, playerName)] = newRating;
+
+   PlayerLevelRating *rating = newRating.get();
+
+   rating->databaseId = databaseId;
+   rating->playerName = playerName;
+   rating->rating = 0;
 
    return rating;
 }
@@ -1073,19 +1108,16 @@ PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const 
    PlayerLevelRating *rating = playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, playerName)].get();
 
    if(!rating)
-   {
-      boost::shared_ptr<PlayerLevelRating> newRating = boost::shared_ptr<PlayerLevelRating>(new PlayerLevelRating());
-      playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, playerName)] = newRating;
-      rating = newRating.get();
-   }
-
+      rating = createNewPlayerRating(databaseId, playerName);
+   
    if(!rating->isValid || rating->isExpired())
       if(!rating->isBusy)
       {
          rating->isBusy = true;
          rating->isValid = true;
-         rating->lastClock = Platform::getRealMilliseconds();
+         rating->resetClock();
 
+         // Queue the request
          RefPtr<PlayerLevelRatingsReader> playerLevelRatingsReader =
                         new PlayerLevelRatingsReader(mMaster->getSettings(), databaseId, playerName);
          mMaster->getDatabaseAccessThread()->addEntry(playerLevelRatingsReader);
@@ -1097,6 +1129,7 @@ PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const 
 
 
 // Cycle through and remove expired cache entries -- static method
+// Items are deleted if they are expired and are not busy
 void MasterServerConnection::removeOldEntriesFromRatingsCache()
 {
    {
@@ -1164,18 +1197,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestHighScores, ())
    }
 
    else                       // In the process of retrieving... highScores will send later when retrieval is complete
-   {
-      bool alreadyOnList = false;
-      for(S32 i = 0; i < highScores.waitingClients.size(); i++)
-         if(highScores.waitingClients[i] == this)
-         {
-            alreadyOnList = true;
-            break;
-         }
-
-         if(!alreadyOnList)
-            highScores.waitingClients.push_back(this);
-   }
+      highScores.addClientToWaitingList(this);
 }
 
 
@@ -1191,50 +1213,74 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 d
 
    TNLAssert(totalRating, "totalRating should not be NULL!");
 
-   if(!totalRating->isBusy)     // Not busy, so value must be cached.  Send it now.
-   {
-      logprintf("Using cached value of total rating!");
+   if(!totalRating->isBusy)   // Not busy, so value must be cached.  Send it now.
       m2cSendTotalLevelRating(databaseId, totalRating->rating);
-   }
+   else                       // Otherwise, add it to the list to send when the database request is complete
+      totalRating->addClientToWaitingList(this);
 
-   else                    // Otherwise, add it to the list to send when the database request is complete
-   {
-      bool alreadyOnList = false;
-      for(S32 i = 0; i < totalRating->waitingClients.size(); i++)
-         if(totalRating->waitingClients[i] == this)
-            {
-               alreadyOnList = true;
-               break;
-            }
 
-      if(!alreadyOnList)
-         totalRating->waitingClients.push_back(this);
-   }
-
+   /////
 
    PlayerLevelRating *playerRating = getLevelRating(databaseId, mPlayerOrServerName);
 
-   TNLAssert(playerRating, "plyrRating should not be NULL!");
+   TNLAssert(playerRating, "playerRating should not be NULL!");
 
+   // If playerRating is not busy, it means we have the value at hand and can send it immediately
    if(!playerRating->isBusy)
-   {
       sendPlayerLevelRating(databaseId, playerRating->rating);
-   }
 
+   // Otherwise, it is busy, and we need to add ourselves to the list of clients waiting for it to
+   // finish its work, at which time the rating value will be available.  Note we check here to make
+   // sure that the same client isn't added twice.
    else
+      playerRating->addClientToWaitingList(this);
+}
+
+
+void ThreadingStruct::addClientToWaitingList(MasterServerConnection *connection)
+{
+   for(S32 i = 0; i < waitingClients.size(); i++)
+      if(waitingClients[i] == connection)
+         return;     // Already on the list!
+
+   waitingClients.push_back(connection);
+}
+
+
+// The client has rated the level and sent it to us
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSetLevelRating, (U32 databaseId, RangedU32<0, 2> rating))
+{
+   // Do nothing if client sent us an invalid id
+   if(!LevelDatabase::isLevelInDatabase(databaseId))
+      return;
+
+   // Update the cache -- there could be some weirdness if at the same time, the player were requesting a rating and the database
+   // thread was busy... but that seems unlikely, as the player would have to be logged in multiple times.  In any event, this 
+   // situation is handled by setting the receivedUpdateByClientWhileBusy flag
+   PlayerLevelRating *playerRating = playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, mPlayerOrServerName)].get();
+
+   // If item is not in the cache, we'll need to create an entry for it
+   if(!playerRating)
    {
-      bool alreadyOnList = false;
-
-      for(S32 i = 0; i < playerRating->waitingClients.size(); i++)
-      if(playerRating->waitingClients[i] == this)
-         {
-            alreadyOnList = true;
-            break;
-         }
-
-      if(!alreadyOnList)
-         playerRating->waitingClients.push_back(this);
+      playerRating = createNewPlayerRating(databaseId, mPlayerOrServerName);
+      playerRating->isValid = true;
    }
+
+   S32 oldRating = playerRating->rating;
+   playerRating->resetClock();
+   playerRating->rating = rating;
+
+   if(playerRating->isBusy)
+      playerRating->receivedUpdateByClientWhileBusy = true;
+
+   // Adjust the total level rating while we're at it
+   totalLevelRatingsCache[databaseId]->rating += rating - oldRating;
+
+   if(totalLevelRatingsCache[databaseId]->isBusy)
+      totalLevelRatingsCache[databaseId]->receivedUpdateByClientWhileBusy = true;
+
+   // If we wanted to alert the other players that the level has just been rated, this would be the place to do it
+   // ==>  <== Right here
 }
 
 
@@ -1301,6 +1347,7 @@ string MasterServerConnection::cleanName(string name)    // Makes copy of name t
 
    return name;
 }
+
 
 map<U32, string> gMOTDClientMap;
 
