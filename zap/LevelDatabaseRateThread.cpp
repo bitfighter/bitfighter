@@ -42,6 +42,20 @@ LevelDatabaseRateThread::~LevelDatabaseRateThread()
 }
 
 
+// temp, hacky solution
+static string getRatingString(S32 rating)
+{
+   if(rating == -1)   return "down";
+   if(rating ==  0)   return "neutral";
+   if(rating ==  1)   return "up";
+
+   TNLAssert(false, "Argh!");
+
+   return "";
+
+}
+
+
 U32 LevelDatabaseRateThread::run()
 {
    TNLAssert(mGame->isLevelInDatabase(), "Level should already have been checked by now!");
@@ -54,7 +68,7 @@ U32 LevelDatabaseRateThread::run()
    stringstream id;
    id << mGame->getLevelDatabaseId();
 
-   HttpRequest req = HttpRequest(LevelDatabaseRateUrl + id.str() + "/" + RatingStrings[mRating]);
+   HttpRequest req = HttpRequest(LevelDatabaseRateUrl + id.str() + "/" + getRatingString(mRating));
    req.setMethod(HttpRequest::PostMethod);
    req.setData("data[User][username]",      mGame->getPlayerName());
    req.setData("data[User][user_password]", mGame->getPlayerPassword());
