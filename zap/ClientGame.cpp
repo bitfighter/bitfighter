@@ -977,7 +977,6 @@ ClientGame::PersonalRating ClientGame::toggleLevelRating()
    Thread *rateThread = new LevelDatabaseRateThread(this, LevelDatabaseRateThread::LevelRating(mPlayerLevelRating));
    rateThread->start();
 
-
    return mPlayerLevelRating;
 }
 

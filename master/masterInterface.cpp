@@ -184,24 +184,24 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendHighScores,
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mSetLevelRating,
                   (U32 databaseId, RangedU32<0, 2> rating),
                   (databaseId, rating),
-                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 2) {}
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 3) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mRequestLevelRating,
                   (U32 databaseId), 
                   (databaseId),
-                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 2) {}
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 3) {}
 
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendPlayerLevelRating,
                   (U32 databaseId, RangedU32<0, 2> rating),
                   (databaseId, rating),
-                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 2) {}
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 3) {}
 
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendTotalLevelRating,
                   (U32 databaseId, S16 rating),
                   (databaseId, rating),
-                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 2) {}
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 3) {}
 
 
 ////////////////////////////////////
