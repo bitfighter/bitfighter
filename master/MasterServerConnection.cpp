@@ -1254,6 +1254,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSetLevelRating, (U32 datab
    if(!LevelDatabase::isLevelInDatabase(databaseId))
       return;
 
+   S32 denormalizedPlayerRating = rating - 1;
+
    // Update the cache -- there could be some weirdness if at the same time, the player were requesting a rating and the database
    // thread was busy... but that seems unlikely, as the player would have to be logged in multiple times.  In any event, this 
    // situation is handled by setting the receivedUpdateByClientWhileBusy flag
@@ -1268,13 +1270,13 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSetLevelRating, (U32 datab
 
    S32 oldRating = playerRating->rating;
    playerRating->resetClock();
-   playerRating->rating = rating;
+   playerRating->rating = denormalizedPlayerRating;
 
    if(playerRating->isBusy)
       playerRating->receivedUpdateByClientWhileBusy = true;
 
    // Adjust the total level rating while we're at it
-   totalLevelRatingsCache[databaseId]->rating += rating - oldRating;
+   totalLevelRatingsCache[databaseId]->rating += denormalizedPlayerRating - oldRating;
 
    if(totalLevelRatingsCache[databaseId]->isBusy)
       totalLevelRatingsCache[databaseId]->receivedUpdateByClientWhileBusy = true;
