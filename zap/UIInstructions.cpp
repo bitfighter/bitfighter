@@ -556,11 +556,12 @@ static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
    S32 radius = descSize / 2;
 
    static BadgeDescr badgeDescrs[] = {
-      { DEVELOPER_BADGE,           "Developer",       "Have code accepted into the codebase" },
-      { BADGE_TWENTY_FIVE_FLAGS,   "25 Flags",        "Return 25 flags to the Nexus" },
-      { BADGE_BBB_SILVER,          "BBB Medal",       "Earn gold, silver, or bronze in a Big Bitfighter Battle" },
-      { BADGE_LEVEL_DESIGN_WINNER, "Level Design",    "Win a level design contest" },
-      { BADGE_ZONE_CONTROLLER,     "Zone Controller", "Capture all zones to win a Zone Control game" }
+      { DEVELOPER_BADGE,           "Developer",          "Have code accepted into the codebase" },
+      { BADGE_TWENTY_FIVE_FLAGS,   "25 Flags",           "Return 25 flags to the Nexus" },
+      { BADGE_BBB_SILVER,          "BBB Medal",          "Earn gold, silver, or bronze in a Big Bitfighter Battle" },
+      { BADGE_LEVEL_DESIGN_WINNER, "Level Design",       "Win a level design contest" },
+      { BADGE_ZONE_CONTROLLER,     "Zone Controller",    "Capture all zones to win a Zone Control game" },
+      { BADGE_RABID_RABID_RABBIT,  "Rabid Rabid Rabbit", "Gain a kill streak while holding the carrot in a Rabbit game" }
    };
 
    for(U32 i = 0; i < ARRAYSIZE(badgeDescrs); i++)
