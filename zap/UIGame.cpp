@@ -301,11 +301,14 @@ static F32 rectify(F32 actual, F32 disp, bool isMax, bool waiting, bool loading,
 {
    const F32 ShrinkRate = 2.0f;     // Pixels per ms
 
-   if(actual == disp || loading)
+   F32 delta = actual - disp;
+
+   // When loading or really close to actual, just return the actual extent
+   if(fabs(delta) < 0.1 || loading)
       return actual;
 
-   // Extents are greater than the display -- grow immediately
-   if(fabs(actual) > fabs(disp))
+   // If the display needs to grow, we do that without delay
+   if((delta < 0 && !isMax) || (delta > 0 && isMax))
    {
       shrinkDelayTimer.reset();
       return actual;
@@ -317,12 +320,12 @@ static F32 rectify(F32 actual, F32 disp, bool isMax, bool waiting, bool loading,
    if(waiting)
       return disp;
    
-   // If the extends are close to the display, snap to the extents, to avoid overshooting
+   // If the extents are close to the display, snap to the extents, to avoid overshooting
    if(fabs(disp - actual) <= ShrinkRate * timeDelta)
       return actual;
 
    // Finally, contract display extents by our ShrinkRate
-   return disp + (isMax ? -1 : 1) * ShrinkRate * timeDelta;
+   return disp + (delta > 0 ? 1 : -1) * ShrinkRate * timeDelta;
 }
 
 
