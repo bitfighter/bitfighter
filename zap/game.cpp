@@ -348,6 +348,13 @@ const Vector<RefPtr<ClientInfo> > *Game::getClientInfos()
 // ClientInfo will be a RemoteClientInfo in ClientGame and a FullClientInfo in ServerGame
 void Game::addToClientList(ClientInfo *clientInfo) 
 { 
+   // Adding the same ClientInfo twice is never The Right Thing To Do
+   for(S32 i = 0; i < mClientInfos.size(); i++)
+   {
+      if(mClientInfos[i] == clientInfo)
+         return;
+   }
+
    mClientInfos.push_back(clientInfo);
 
    if(clientInfo->isRobot())
