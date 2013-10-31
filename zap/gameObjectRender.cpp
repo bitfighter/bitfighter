@@ -3124,6 +3124,53 @@ void renderZoneControllerBadge(F32 x, F32 y, F32 rad)
 }
 
 
+void renderRabidRabidRabbitBadge(F32 x, F32 y, F32 rad)
+{
+   static const F32 rabbit[] = {
+         -3.70, -6.46,
+         -3.71, -7.78,
+         -3.13, -8.28,
+         -2.18, -8.37,
+          0.10, -5.04,
+          1.44, -1.37,
+          3.77, -1.08,
+          8.37,  3.77,
+          8.15,  4.91,
+          5.58,  7.23,
+          4.48,  7.72,
+          5.,    9.,
+         -4.,    8.,
+         -3.68,  3.93,
+         -4.14,  0.36,
+         -7.13, -3.14,
+         -7.90, -7.62,
+         -7.63, -7.95,
+         -6.76, -8.32,
+         -4.50, -7.19,
+   };
+
+   static const F32 eye[] = {
+         1.18, 0.68,
+         3.18, 1.68,
+         3.18, 2.68,
+         2.00, 2.88,
+         0.78, 1.20,
+   };
+
+
+   glPushMatrix();
+      glTranslate(x, y, 0);
+      glScale(.1f * rad);
+
+      glColor(Colors::gray50);
+      renderVertexArray(rabbit, ARRAYSIZE(rabbit) / 2, GL_LINE_LOOP);
+
+      glColor(Colors::red);
+      renderVertexArray(eye, ARRAYSIZE(eye) / 2, GL_LINE_LOOP);
+   glPopMatrix();
+}
+
+
 void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
 {
    switch(S32(badge))
@@ -3151,6 +3198,9 @@ void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
          break;
       case BADGE_ZONE_CONTROLLER:
          renderZoneControllerBadge(x, y, rad);
+         break;
+      case BADGE_RABID_RABID_RABBIT:
+         renderRabidRabidRabbitBadge(x, y, rad);
          break;
       default:
          TNLAssert(false, "Unknown Badge!");

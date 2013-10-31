@@ -55,7 +55,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
 
       case RabbitMsgRabbitKill:
          getGame()->playSoundEffect(SFXShipHeal);
-         getGame()->displayMessage(Colors::red, "%s is a rabbid rabbit!", clientName.getString());
+         getGame()->displayMessage(Colors::red, "%s is a rabid rabbit!", clientName.getString());
          break;
 
       case RabbitMsgDrop:
@@ -402,9 +402,22 @@ void RabbitGameType::addFlag(FlagItem *flag)
 // Rabbit killed another ship
 void RabbitGameType::onFlaggerKill(Ship *rabbitShip)
 {
+   ClientInfo *clientInfo = rabbitShip->getClientInfo();
+
    if(!isGameOver())  // Avoid flooding messages on game over.
-      s2cRabbitMessage(RabbitMsgRabbitKill, rabbitShip->getClientInfo()->getName());
-   updateScore(rabbitShip, RabbitKills);  
+      s2cRabbitMessage(RabbitMsgRabbitKill, clientInfo->getName());
+
+   // See if we've acheived our rabid rabid rabbit badge
+   if(clientInfo->isAuthenticated() &&                      // Player must be authenticated
+      clientInfo->getKillStreak() >= 5 &&                   // Player must have a kill streak of 5 or more
+      !clientInfo->hasBadge(BADGE_RABID_RABID_RABBIT) &&    // Player doesn't already have the badge
+      getGame()->getPlayerCount() >= 4 &&                   // Game must have 4+ human players
+      getGame()->getAuthenticatedPlayerCount() >= 2)        // Two of whom must be authenticated
+   {
+      achievementAchieved(BADGE_RABID_RABID_RABBIT, clientInfo->getName());
+   }
+
+   updateScore(rabbitShip, RabbitKills);
 }
 
 

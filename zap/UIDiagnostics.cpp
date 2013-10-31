@@ -792,6 +792,9 @@ void DiagnosticUserInterface::render()
          x += 3*rad;
          renderBadge(x, y, rad, BADGE_ZONE_CONTROLLER);
 
+         x += 3*rad;
+         renderBadge(x, y, rad, BADGE_RABID_RABID_RABBIT);
+
          // Level design contest winner badge
          x += 3*rad;
          Vector<Point> points;

@@ -3766,6 +3766,11 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
       message = "%s has earned the ZONE CONTROLLER badge!";
       textEffectText = "ZONE CONTROLLER";
    }
+   else if(achievement == BADGE_RABID_RABID_RABBIT)
+   {
+      message = "%s has earned the RABID RABID RABBIT badge!";
+      textEffectText = "RABID RABID RABBIT";
+   }
    else
       return;
 
