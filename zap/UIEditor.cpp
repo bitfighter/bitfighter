@@ -2117,8 +2117,17 @@ void EditorUserInterface::renderSaveMessage()
       const S32 textsize = 25;
       const S32 len = getStringWidth(textsize, mSaveMsg.c_str()) + 20;
       const S32 inset = min((gScreenInfo.getGameCanvasWidth() - len)  / 2, 200);
+      const S32 boxTop = 515;
+      const S32 boxBottom = 555;
+      const S32 cornerInset = 10;
 
-      renderCenteredFancyBox(515, 40, inset, 10, Colors::black, 0.80f * alpha, Colors::blue);
+      // Fill
+      glColor(Colors::black, alpha * 0.80f);
+      drawFancyBox(inset, boxTop, gScreenInfo.getGameCanvasWidth() - inset, boxBottom, cornerInset, GL_TRIANGLE_FAN);
+
+      // Border
+      glColor(Colors::blue, alpha);
+      drawFancyBox(inset, boxTop, gScreenInfo.getGameCanvasWidth() - inset, boxBottom, cornerInset, GL_LINE_LOOP);
 
       glColor(mSaveMsgColor, alpha);
       drawCenteredString(520, textsize, mSaveMsg.c_str());
