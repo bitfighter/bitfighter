@@ -349,6 +349,9 @@ const Vector<RefPtr<ClientInfo> > *Game::getClientInfos()
 void Game::addToClientList(ClientInfo *clientInfo) 
 { 
    // Adding the same ClientInfo twice is never The Right Thing To Do
+   //
+   // NOTE - This can happen when a Robot line is found in a level file.  For some reason
+   // it tries to get added twice to the game
    for(S32 i = 0; i < mClientInfos.size(); i++)
    {
       if(mClientInfos[i] == clientInfo)
