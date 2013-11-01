@@ -1190,15 +1190,16 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendLevelInfo,
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestHighScores, ())
 {
-   if(!highScores.isBusy)     // Not busy, so value must be cached.  Send the scores now.
+   HighScores *highScoreGroup = getHighScores(3);
+
+   if(!highScoreGroup->isBusy)     // Not busy, so value must be cached.  Send the scores now.
    {
-      HighScores *highScoreGroup = getHighScores(3);
       logprintf("Sending cached scores");  //xyzzy
       m2cSendHighScores(highScoreGroup->groupNames, highScoreGroup->names, highScoreGroup->scores);
    }
 
    else                       // In the process of retrieving... highScores will send later when retrieval is complete
-      highScores.addClientToWaitingList(this);
+      highScoreGroup->addClientToWaitingList(this);
 }
 
 
