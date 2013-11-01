@@ -370,7 +370,7 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
    string sql = "SELECT player_name, " + col2 + " FROM " + table + " " +
                 "LIMIT " + itos(count) + ";";
 
-   Vector<Vector<string> > results;
+   Vector<Vector<string> > results(count);
 
    selectHandler(sql, 2, results);
 
