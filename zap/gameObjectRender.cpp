@@ -1681,7 +1681,7 @@ void renderLoadoutZoneIcon(const Point &center, S32 outerRadius, F32 angleRadian
 
 void renderGoalZoneIcon(const Point &center, S32 radius, F32 angleRadians)
 {
-   drawPolygon(center, 4.0f, radius, 0.0f);
+   drawPolygon(center, 4, (F32)radius, 0.0f);
 
    static const F32 flagPoints[] = { -6, 10,  -6,-10,  12, -3.333f,  -6, 3.333f, };
 
