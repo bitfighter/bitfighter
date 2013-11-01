@@ -107,8 +107,10 @@ public:
    //UserInterfaceData *mUserInterfaceData;
 
    bool isConnectedToServer() const;
+   bool isConnectedToMaster() const;
 
    GameConnection *getConnectionToServer() const;
+   
    void setConnectionToServer(GameConnection *connection);
 
    ClientInfo *getClientInfo() const;

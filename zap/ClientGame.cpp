@@ -211,7 +211,13 @@ void ClientGame::onConnectedToMaster()
 
 bool ClientGame::isConnectedToServer() const
 {
-   return mConnectionToServer.isValid() && mConnectionToServer->getConnectionState() == NetConnection::Connected;
+   return mConnectionToServer.isValid() && mConnectionToServer->isEstablished();
+}
+
+
+bool ClientGame::isConnectedToMaster() const
+{
+   return mConnectionToMaster.isValid() && mConnectionToMaster->isEstablished();
 }
 
 
@@ -529,12 +535,24 @@ void ClientGame::gotPlayerLevelRating(S32 rating)
 }
 
 
+// We get here when the player toggles a rating or uses the /rating command
 bool ClientGame::canRateLevel() const
 {
-
    if(!isLevelInDatabase())
    {
       displayErrorMessage("!!! Level is not in database, so it cannot be rated (upload via editor)");
+      return false;
+   }
+
+   if(!isConnectedToMaster())
+   {
+      displayErrorMessage("!!! You can't rate levels until we've connected to the master server");
+      return false;
+   }
+
+   if(mPlayerLevelRating == UnknownRating)
+   {
+      displayErrorMessage("!!! Sorry - there's a problem communicating ratings to the master");
       return false;
    }
 
@@ -556,7 +574,7 @@ void ClientGame::setLevelDatabaseId(U32 id)
 
    // If we are in a game, and connected to master,then we can request that the master server send us the current level ratings.
    // If we are connected to a game server, then we are not in the editor (though we could be testing a level).
-   if(mConnectionToMaster && mConnectionToMaster->isEstablished() && isConnectedToServer() && needsRating())
+   if(isConnectedToMaster() && isConnectedToServer() && needsRating())
       mConnectionToMaster->c2mRequestLevelRating(id);
 }
 
