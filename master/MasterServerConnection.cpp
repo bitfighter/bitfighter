@@ -1090,7 +1090,7 @@ static PlayerLevelRating *createNewPlayerRating(U32 databaseId, const StringTabl
 
    rating->databaseId = databaseId;
    rating->playerName = playerName;
-   rating->rating = 0;
+   rating->rating = UnknownRating;
 
    return rating;
 }

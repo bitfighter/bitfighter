@@ -399,7 +399,7 @@ S16 DatabaseWriter::getLevelRating(U32 databaseId)
    selectHandler(sql, 1, results);
 
    if(results.size() == 0)
-      return 0;
+      return UnknownRating;
 
    S32 rating = atoi(results[0][0].c_str());
 
@@ -427,7 +427,7 @@ S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
    selectHandler(sql, 1, results);
 
    if(results.size() == 0)
-      return 0;
+      return UnknownRating;
    else
       return atoi(results[0][0].c_str());
 }
