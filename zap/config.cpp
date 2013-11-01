@@ -70,7 +70,7 @@ UserSettings::~UserSettings() { /* Do nothing */ }
 
 // bitfighter.org would soon be the same as 199.192.229.168
 // Nov 1 2013: bitfighter.org ip address changed to 209.148.88.166
-const char *MASTER_SERVER_LIST_ADDRESS = "IP:209.148.88.166:25955,bitfighter.org:25955,bitfighter.net:25955";
+const char *MASTER_SERVER_LIST_ADDRESS = "bitfighter.org:25955,bitfighter.net:25955,IP:209.148.88.166:25955";
 //const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955, bitfighter.net:25955";
 
 
