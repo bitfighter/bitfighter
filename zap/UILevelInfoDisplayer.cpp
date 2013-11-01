@@ -39,6 +39,7 @@
 #include "stringUtils.h"
 #include "OpenglUtils.h"               
 #include "RenderUtils.h"
+#include "gameObjectRender.h"
 
 
 namespace Zap { 
@@ -102,6 +103,12 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
    // Use Hex UTF-8 bytes, represent in string like this: \xE2\x99\xA6
 
+   // These variables are for rendering the gray legend below
+   S32 totalSignlessRatingWidth = 0;
+   S32 totalSignWidth = 0;
+   S32 dividerWidth = 0;
+   S32 mySignlessRatingWidth = 0;
+
    if(isInDatabase)
    {
       ClientGame *clientGame = static_cast<ClientGame *>(gameType->getGame());
@@ -112,14 +119,55 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
       symbols.push_back(SymbolString::getBlankSymbol(10));
       symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext));  // Little database icon
 
-      string myRatingStr    = GameUserInterface::getPersonalRatingString(myRating);
+      static const S32 RatingSize = 12;
+      
+      S32 pos;
+      
+      string myRatingStr = GameUserInterface::getPersonalRatingString(myRating);
+      pos = (myRatingStr[0] == '+' || myRatingStr[0] == '-') ? 1 : 0;
+      mySignlessRatingWidth = getStringWidth(LevelInfoContext, RatingSize, myRatingStr.c_str() + pos);
+
       string totalRatingStr = GameUserInterface::getTotalRatingString(totalRating);
+      pos = (totalRatingStr[0] == '+' || totalRatingStr[0] == '-') ? 1 : 0;
+      totalSignlessRatingWidth = getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.c_str() + pos);
+      totalSignWidth = getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.substr(0, pos).c_str());
+
+      static const string divider = " / ";
+      dividerWidth = getStringWidth(LevelInfoContext, RatingSize, divider.c_str());
 
       symbols.push_back(SymbolString::getBlankSymbol(8));                                  // Padding
-      SymbolString::symbolParse(NULL, myRatingStr + " / " + totalRatingStr, symbols, LevelInfoContext, 12, &Colors::red);
+      SymbolString::symbolParse(NULL, myRatingStr + divider + totalRatingStr, symbols, LevelInfoContext, RatingSize, &Colors::red);
    }
 
    SymbolString titleSymbolString(symbols);
+
+   if(isInDatabase)
+   {
+      // Figure out where the ratings will be rendered
+      const S32 rightEdge = (gScreenInfo.getGameCanvasWidth() + titleSymbolString.getWidth()) / 2;
+
+      const S32 x1 = rightEdge - totalSignlessRatingWidth - totalSignWidth - dividerWidth - mySignlessRatingWidth / 2;
+      const S32 y1 = 10;
+      const S32 ybot = 30;
+      const S32 xright = x1 + 35;
+      const S32 legendSize = 10;
+      const S32 textleft = xright + 5;
+
+      // Draw a legend for the ratings
+      glColor(Colors::gray70);
+
+      drawVertLine(x1, y1, ybot);
+      drawHorizLine(x1, xright, y1);
+      drawString_fixed(textleft, y1 + legendSize / 2, legendSize, "Your rating");
+
+      const S32 x2 = rightEdge - totalSignlessRatingWidth / 2;
+      const S32 y2 = 22;
+
+      drawVertLine(x2, y2, ybot);
+      drawHorizLine(x2, xright, y2);
+      drawString_fixed(textleft, y2 + legendSize / 2, legendSize, "Total rating");
+   }
+
 
 
    const char *descr           = gameType->getLevelDescription()->getString();
@@ -134,11 +182,6 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    const S32 frameMargin       = UserInterface::vertMargin;
 
    const S32 totalHeight = frameMargin + titleSize + titleGap + descriptionHeight + creditsHeight + frameMargin;
-   //const S32 totalWidth = max(getStringWidth(titleSize, title), 
-   //                           max(getStringWidth(descriptionSize, descr), 
-   //                              max(getStringPairWidth(creditsSize, designedBy, credits), 400))) +
-   //                       frameMargin * 2;
-
    const S32 totalWidth = gScreenInfo.getGameCanvasWidth() - 60;
    S32 yPos = frameMargin + titleSize;
 
