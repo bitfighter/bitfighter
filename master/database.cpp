@@ -415,18 +415,25 @@ S16 DatabaseWriter::getLevelRating(U32 databaseId)
 // Returns player's rating of the specified level -- should be -1, 0, or +1
 S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
 {
+   // Here, we'll use a UNION to create a dummy record of 0.  That way, if there is a database error,
+   // and no records are returned, we'll be able to differentiate that from the situation where the 
+   // user is not in the database and no records are returned.  With the UNION, we'll get back at least
+   // one record with 0, the default rating for a player who hasn't rated a level, even if that player
+   // has not rated it.
    string sql =
       "SELECT ratings.value FROM pleiades.ratings "
       "INNER JOIN bf_phpbb.phpbb_users "
       "WHERE ratings.level_id = " + itos(databaseId) + " AND "
          "ratings.user_id = phpbb_users.user_id AND "
-         "phpbb_users.username = '" + name.getString() + "';";
+         "phpbb_users.username = '" + name.getString() + "'"
+       "UNION"
+       "SELECT 0;";
 
    Vector<Vector<string> > results;
 
    selectHandler(sql, 1, results);
 
-   if(results.size() == 0)
+   if(results.size() == 0)    // <== signifies an error getting the rating
       return UnknownRating;
    else
       return atoi(results[0][0].c_str());
