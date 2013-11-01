@@ -87,7 +87,7 @@ struct LevelRating : public ThreadingStruct
    virtual U32 getCacheExpiryTime() = 0;
 
    // Quickie constructor:
-   LevelRating() { databaseId = NOT_IN_DATABASE; rating = 0; receivedUpdateByClientWhileBusy = false; }       
+   LevelRating() { databaseId = NOT_IN_DATABASE; rating = UnknownRating; receivedUpdateByClientWhileBusy = false; }       
 };
 
 

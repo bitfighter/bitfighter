@@ -56,18 +56,6 @@ class ClientGame : public Game
 
    static const S32 RATING_NOT_KNOWN = S32_MIN;
 
-public:
-   enum PersonalRating     // These need to be able to fit into S16 for totalRating
-   {
-      RatingGood = 1,
-      RatingNeutral = 0,
-      RatingBad = -1,
-      Unrated = S16_MIN,                  // -32768       
-      RetrievingRating = S16_MIN + 2,     // -32766
-      UnknownRating = S16_MIN + 1         // -32767
-   };
-
-
 private:
    SafePtr<GameConnection> mConnectionToServer; // If this is a client game, this is the connection to the server
 

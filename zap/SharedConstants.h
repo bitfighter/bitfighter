@@ -44,6 +44,17 @@ using namespace TNL;
 
 static const U32 NOT_IN_DATABASE = 0;
 
+enum PersonalRating     // These need to be able to fit into S16 for totalRating
+{
+   RatingGood = 1,
+   RatingNeutral = 0,
+   RatingBad = -1,
+   Unrated = S16_MIN,                  // -32768       
+   RetrievingRating = S16_MIN + 2,     // -32766
+   UnknownRating = S16_MIN + 1         // -32767
+};
+
+
 // Not a shared constant, but like an old friend.  That's static.  And in its own namespace.
 namespace LevelDatabase { static bool isLevelInDatabase(U32 databaseId) { return databaseId != NOT_IN_DATABASE; } }
 

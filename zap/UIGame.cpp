@@ -1119,7 +1119,7 @@ void GameUserInterface::toggleLevelRating()
    if(!getGame()->canRateLevel())      // Will display any appropriate error messages
       return;
 
-   ClientGame::PersonalRating newRating = getGame()->toggleLevelRating();  // Change rating and get new value
+   PersonalRating newRating = getGame()->toggleLevelRating();  // Change rating and get new value
 
    string msg = "Your rating: " + getPersonalRatingString(newRating);
    displaySuccessMessage(msg.c_str());
@@ -1129,11 +1129,11 @@ void GameUserInterface::toggleLevelRating()
 
 
 // Static method
-string GameUserInterface::getPersonalRatingString(ClientGame::PersonalRating rating)
+string GameUserInterface::getPersonalRatingString(PersonalRating rating)
 {
-   if(rating == ClientGame::RatingGood)      return "+1";
-   if(rating == ClientGame::RatingNeutral)   return "0";
-   if(rating == ClientGame::RatingBad)       return "-1";
+   if(rating == RatingGood)      return "+1";
+   if(rating == RatingNeutral)   return "0";
+   if(rating == RatingBad)       return "-1";
 
    return getTotalRatingString((S16)rating);    // Handles UnknownRating, RetrievingRating, Unrated
 }
@@ -1142,9 +1142,9 @@ string GameUserInterface::getPersonalRatingString(ClientGame::PersonalRating rat
 // Static method
 string GameUserInterface::getTotalRatingString(S16 rating)
 {
-   if(rating == ClientGame::UnknownRating)      return "";
-   if(rating == ClientGame::RetrievingRating)   return "[[SPINNER]]";
-   if(rating == ClientGame::Unrated)            return "Unrated";
+   if(rating == UnknownRating)      return "";
+   if(rating == RetrievingRating)   return "[[SPINNER]]";
+   if(rating == Unrated)            return "Unrated";
 
    return (rating > 0 ? "+" : "") + itos(rating);
 }

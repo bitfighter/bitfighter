@@ -427,7 +427,7 @@ public:
 
    void toggleLevelRating();
    
-   static string getPersonalRatingString(ClientGame::PersonalRating rating);
+   static string getPersonalRatingString(PersonalRating rating);
    static string getTotalRatingString(S16 rating);
 
    // Get UI element dimensions

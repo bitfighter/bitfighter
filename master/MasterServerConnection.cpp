@@ -1064,7 +1064,7 @@ TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
       rating = newRating.get();
    }
 
-   if(!rating->isValid || rating->isExpired())
+   if(!rating->isValid || rating->isExpired() || rating->rating == UnknownRating)
       if(!rating->isBusy)
       {
          rating->isBusy = true;
@@ -1110,7 +1110,7 @@ PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const 
    if(!rating)
       rating = createNewPlayerRating(databaseId, playerName);
    
-   if(!rating->isValid || rating->isExpired())
+   if(!rating->isValid || rating->isExpired() || rating->rating == UnknownRating)
       if(!rating->isBusy)
       {
          rating->isBusy = true;

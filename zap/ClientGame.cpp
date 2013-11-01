@@ -505,7 +505,7 @@ bool ClientGame::needsRating() const
 
 
 // static method
-ClientGame::PersonalRating ClientGame::getNextRating(PersonalRating currentRating)
+PersonalRating ClientGame::getNextRating(PersonalRating currentRating)
 {
    if(currentRating == RatingGood)     return RatingBad;
    if(currentRating == RatingNeutral)  return RatingGood;
@@ -952,13 +952,13 @@ S16 ClientGame::getTotalLevelRating() const
 }
 
 
-ClientGame::PersonalRating ClientGame::getPersonalLevelRating() const
+PersonalRating ClientGame::getPersonalLevelRating() const
 {
    return mPlayerLevelRating;
 }
 
 
-ClientGame::PersonalRating ClientGame::toggleLevelRating()
+PersonalRating ClientGame::toggleLevelRating()
 {
    S32 oldRating = mPlayerLevelRating;
 

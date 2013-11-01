@@ -106,13 +106,13 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    {
       ClientGame *clientGame = static_cast<ClientGame *>(gameType->getGame());
 
-      ClientGame::PersonalRating myRating    = clientGame->getPersonalLevelRating();
-      S16                        totalRating = clientGame->getTotalLevelRating();
+      PersonalRating myRating    = clientGame->getPersonalLevelRating();
+      S16            totalRating = clientGame->getTotalLevelRating();
 
       symbols.push_back(SymbolString::getBlankSymbol(10));
       symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext));  // Little database icon
 
-      if(myRating != ClientGame::UnknownRating && totalRating != ClientGame::UnknownRating)
+      if(myRating != UnknownRating && totalRating != UnknownRating)
       {
          string myRatingStr    = GameUserInterface::getPersonalRatingString(myRating);
          string totalRatingStr = GameUserInterface::getTotalRatingString(totalRating);
