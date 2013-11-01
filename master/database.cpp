@@ -425,8 +425,8 @@ S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
       "INNER JOIN bf_phpbb.phpbb_users "
       "WHERE ratings.level_id = " + itos(databaseId) + " AND "
          "ratings.user_id = phpbb_users.user_id AND "
-         "phpbb_users.username = '" + name.getString() + "'"
-       "UNION"
+         "phpbb_users.username = '" + name.getString() + "' "
+       "UNION "
        "SELECT 0;";
 
    Vector<Vector<string> > results;
