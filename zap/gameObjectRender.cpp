@@ -1681,7 +1681,7 @@ void renderLoadoutZoneIcon(const Point &center, S32 outerRadius, F32 angleRadian
 
 void renderGoalZoneIcon(const Point &center, S32 radius, F32 angleRadians)
 {
-   drawPolygon(center, 4, radius, 0.f);
+   drawPolygon(center, 4.0f, radius, 0.0f);
 
    static const F32 flagPoints[] = { -6, 10,  -6,-10,  12, -3.333f,  -6, 3.333f, };
 
@@ -1822,7 +1822,7 @@ void renderNexusIcon(const Point &center, S32 radius, F32 angleRadians)
 
    glPushMatrix();
       glTranslate(center);
-      glScale(radius * 0.05);  // 1/20.  Default radius is 20 in-game
+      glScale(radius * 0.05f);  // 1/20.  Default radius is 20 in-game
       glRotatef(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
 
       // Draw our center spokes
