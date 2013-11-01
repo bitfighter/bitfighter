@@ -55,6 +55,10 @@ private:
    S32 checkMenuIndexBounds(S32 index);   // Returns corrected index
    Timer mScrollTimer;
 
+   Timer mFadingNoticeTimer;
+   S32 mFadingNoticeVerticalPosition;
+   string mFadingNoticeMessage;
+
    // For detecting keys being held down
    bool mRepeatMode;
    bool mKeyDown;
@@ -132,6 +136,8 @@ public:
 
    BfObject *getAssociatedObject();
    void setAssociatedObject(BfObject *obj);
+
+   void setFadingNotice(U32 time, S32 top, const string &message);  // Set a fading notice on a menu
 };
 
 

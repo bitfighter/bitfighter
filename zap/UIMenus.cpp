@@ -184,6 +184,8 @@ void MenuUserInterface::idle(U32 timeDelta)
    // Controls rate of scrolling long menus with mouse
    mScrollTimer.update(timeDelta);
 
+   mFadingNoticeTimer.update(timeDelta);
+
    // Call mouse handler so users can scroll scrolling menus just by holding mouse in position
    // (i.e. we don't want to limit scrolling action only to times when user moves mouse)
    if(itemSelectedWithMouse)
@@ -417,6 +419,29 @@ void MenuUserInterface::render()
       ypos -= helpFontSize + 5;
       glColor(Colors::yellow);
       drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getHelp().c_str());
+   }
+
+   // If we have a fading notice to show
+   if(mFadingNoticeTimer.getCurrent() != 0)
+   {
+      F32 alpha = 1.0;
+      if(mFadingNoticeTimer.getCurrent() < 1000)
+         alpha = (F32) mFadingNoticeTimer.getCurrent() * 0.001f;
+
+      const S32 textsize = 25;
+      const S32 padding = 10;
+      const S32 width = getStringWidth(textsize, mFadingNoticeMessage.c_str()) + (4 * padding);  // Extra padding to not collide with bevels
+      const S32 left = (gScreenInfo.getGameCanvasWidth() - width) / 2;
+      const S32 top = mFadingNoticeVerticalPosition;
+      const S32 bottom = top + textsize + (2 * padding);
+      const S32 cornerInset = 10;
+
+      // Border
+      glColor(Colors::blue, alpha);
+      drawFancyBox(left, top, gScreenInfo.getGameCanvasWidth() - left, bottom, cornerInset, GL_LINE_LOOP);
+
+      glColor(Colors::yellow, alpha);
+      drawCenteredString(top + padding, textsize, mFadingNoticeMessage.c_str());
    }
 
    renderExtras();  // Draw something unique on a menu
@@ -778,6 +803,15 @@ BfObject *MenuUserInterface::getAssociatedObject()
 void MenuUserInterface::setAssociatedObject(BfObject *obj)
 {
    mAssociatedObject = obj;
+}
+
+
+// Set a fading notice on a menu
+void MenuUserInterface::setFadingNotice(U32 time, S32 top, const string &message)
+{
+   mFadingNoticeTimer.reset(time);
+   mFadingNoticeVerticalPosition = top;
+   mFadingNoticeMessage = message;
 }
 
 
@@ -1551,6 +1585,8 @@ void InGameHelpOptionsUserInterface::onActivate()
 static void resetMessagesCallback(ClientGame *game, U32 val)
 {
    game->resetInGameHelpMessages();
+
+   game->getUIManager()->getUI<InGameHelpOptionsUserInterface>()->setFadingNotice(4000, 400, "RESET");
 }
 
 
