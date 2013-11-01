@@ -1135,15 +1135,14 @@ string GameUserInterface::getPersonalRatingString(PersonalRating rating)
    if(rating == RatingNeutral)   return "0";
    if(rating == RatingBad)       return "-1";
 
-   return getTotalRatingString((S16)rating);    // Handles UnknownRating, RetrievingRating, Unrated
+   return getTotalRatingString((S16)rating);    // Handles UnknownRating, Unrated
 }
 
 
 // Static method
 string GameUserInterface::getTotalRatingString(S16 rating)
 {
-   if(rating == UnknownRating)      return "";
-   if(rating == RetrievingRating)   return "[[SPINNER]]";
+   if(rating == UnknownRating)      return "?";
    if(rating == Unrated)            return "Unrated";
 
    return (rating > 0 ? "+" : "") + itos(rating);

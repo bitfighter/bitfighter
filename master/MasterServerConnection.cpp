@@ -1288,9 +1288,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSetLevelRating, (U32 datab
 
 void MasterServerConnection::sendPlayerLevelRating(U32 databaseId, S32 rating)
 {
-   // Make sure ranges are ok... none of these conditions should ever occur.  But this is Bitfighter...
-   if(rating < -1)      rating = -1;
-   else if(rating > 1)  rating = 1;
+   // Don't send ratings outside the -1 -> 1 range.  This means that "rating unknown" will not be sent.
+   if(rating < -1)      return;
+   else if(rating > 1)  return;
 
    // Normalize to the datatype needed for sending
    RangedU32<0, 2> normalizedRating = rating + 1;
