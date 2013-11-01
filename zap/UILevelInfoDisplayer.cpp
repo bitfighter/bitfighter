@@ -104,10 +104,15 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    // Use Hex UTF-8 bytes, represent in string like this: \xE2\x99\xA6
 
    // These variables are for rendering the gray legend below
-   S32 totalSignlessRatingWidth = 0;
-   S32 totalSignWidth = 0;
-   S32 dividerWidth = 0;
-   S32 mySignlessRatingWidth = 0;
+   static const F32 RatingSize = 12;
+
+   F32 totalSignlessRatingWidth = 0;
+   F32 totalSignWidth = 0;
+   F32 mySignlessRatingWidth = 0;
+
+   static const string divider = " / ";
+   static const F32 dividerWidth = getStringWidth(LevelInfoContext, RatingSize, divider.c_str());
+
 
    if(isInDatabase)
    {
@@ -119,8 +124,6 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
       symbols.push_back(SymbolString::getBlankSymbol(10));
       symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext));  // Little database icon
 
-      static const S32 RatingSize = 12;
-      
       S32 pos;
       
       string myRatingStr = GameUserInterface::getPersonalRatingString(myRating);
@@ -132,11 +135,8 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
       totalSignlessRatingWidth = getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.c_str() + pos);
       totalSignWidth = getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.substr(0, pos).c_str());
 
-      static const string divider = " / ";
-      dividerWidth = getStringWidth(LevelInfoContext, RatingSize, divider.c_str());
-
       symbols.push_back(SymbolString::getBlankSymbol(8));                                  // Padding
-      SymbolString::symbolParse(NULL, myRatingStr + divider + totalRatingStr, symbols, LevelInfoContext, RatingSize, &Colors::red);
+      SymbolString::symbolParse(NULL, myRatingStr + divider + totalRatingStr, symbols, LevelInfoContext, (S32)RatingSize, &Colors::red);
    }
 
    SymbolString titleSymbolString(symbols);
@@ -144,14 +144,14 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    if(isInDatabase)
    {
       // Figure out where the ratings will be rendered
-      const S32 rightEdge = (gScreenInfo.getGameCanvasWidth() + titleSymbolString.getWidth()) / 2;
+      const F32 rightEdge = (gScreenInfo.getGameCanvasWidth() + titleSymbolString.getWidth()) / 2;
 
-      const S32 x1 = rightEdge - totalSignlessRatingWidth - totalSignWidth - dividerWidth - mySignlessRatingWidth / 2;
-      const S32 y1 = 10;
-      const S32 ybot = 30;
-      const S32 xright = x1 + 35;
-      const S32 legendSize = 10;
-      const S32 textleft = xright + 5;
+      const F32 x1 = rightEdge - totalSignlessRatingWidth - totalSignWidth - dividerWidth - mySignlessRatingWidth / 2;
+      const F32 y1 = 10;
+      const F32 ybot = 30;
+      const F32 xright = x1 + 35;
+      const F32 legendSize = 10;
+      const F32 textleft = xright + 5;
 
       // Draw a legend for the ratings
       glColor(Colors::gray70);
@@ -160,8 +160,8 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
       drawHorizLine(x1, xright, y1);
       drawString_fixed(textleft, y1 + legendSize / 2, legendSize, "Your rating");
 
-      const S32 x2 = rightEdge - totalSignlessRatingWidth / 2;
-      const S32 y2 = 22;
+      const F32 x2 = rightEdge - totalSignlessRatingWidth / 2;
+      const F32 y2 = 22;
 
       drawVertLine(x2, y2, ybot);
       drawHorizLine(x2, xright, y2);
