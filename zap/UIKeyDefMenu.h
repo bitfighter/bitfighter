@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _UIKEYDEFMENUS_H_
-#define _UIKEYDEFMENUS_H_
+#ifndef _UI_KEY_DEF_MENUS_H_
+#define _UI_KEY_DEF_MENUS_H_
 
 
 #include "UI.h"               // Parent
@@ -66,15 +66,10 @@ class KeyDefMenuUserInterface : public UserInterface
 private:
    Timer errorMsgTimer;
    string errorMsg;
-   static const S32 errorMsgDisplayTime = 6000;
-
-   bool isDuplicate(S32 key, const Vector<KeyDefMenuItem> &menuItems);
-
-public:
-   explicit KeyDefMenuUserInterface(ClientGame *game);   // Constructor
-   virtual ~KeyDefMenuUserInterface();
 
    Vector<KeyDefMenuItem> menuItems;      // Array of menu items
+   S32 maxMenuItemsInAnyCol;
+
    const char *mMenuTitle;
    const char *mMenuSubTitle;
    Color mMenuSubTitleColor;
@@ -83,6 +78,12 @@ public:
 
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
+
+   bool isDuplicate(S32 key, const Vector<KeyDefMenuItem> &menuItems);
+
+public:
+   explicit KeyDefMenuUserInterface(ClientGame *game);   // Constructor
+   virtual ~KeyDefMenuUserInterface();
 
    void render();              // Draw the menu
    void idle(U32 timeDelta);

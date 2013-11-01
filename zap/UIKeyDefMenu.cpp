@@ -34,6 +34,7 @@
 #include "Cursor.h"
 
 #include "Colors.h"
+#include "Intervals.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
@@ -72,6 +73,8 @@ KeyDefMenuUserInterface::KeyDefMenuUserInterface(ClientGame *game) : Parent(game
    mMenuTitle = "Define Keys";
    mMenuSubTitle = "";
    mMenuFooter = "UP, DOWN, LEFT, RIGHT to choose | ENTER to select | ESC exits menu";
+
+   errorMsgTimer.setPeriod(SIX_SECONDS);
 }
 
 
@@ -95,11 +98,8 @@ void KeyDefMenuUserInterface::onActivate()
    selectedIndex = 0;                     // First item selected when we begin
    changingItem = NONE;                   // Not changing anything at the moment...
 
-   while(menuItems.size())                // Clear list, but for some reason .clear() method won't compile
-      menuItems.pop_back();
-
    // Display an intitial message to users
-   errorMsgTimer.reset(errorMsgDisplayTime);
+   errorMsgTimer.clear();
    errorMsg = "";
 
    GameSettings *settings = getGame()->getSettings();
@@ -112,6 +112,8 @@ void KeyDefMenuUserInterface::onActivate()
       mMenuTitle = "Define Keys: [Keyboard]";
 
    mMenuSubTitleColor = Colors::white;   
+
+   menuItems.clear();
 
    if(inputMode == InputModeJoystick)
    {
@@ -132,6 +134,8 @@ void KeyDefMenuUserInterface::onActivate()
       menuItems.push_back(KeyDefMenuItem("Toggle Map Mode",       1, InputCodeManager::BINDING_CMDRMAP, ""));
       menuItems.push_back(KeyDefMenuItem("Show Scoreboard",       1, InputCodeManager::BINDING_SCRBRD,  
                                          "Scoreboard will be visible while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Toggle Level Rating",   1, InputCodeManager::BINDING_TOGGLE_RATING, ""));
+
       // Col 2
       firstItemInCol2 = menuItems.size();
 
@@ -166,6 +170,7 @@ void KeyDefMenuUserInterface::onActivate()
       menuItems.push_back(KeyDefMenuItem("Toggle Map Mode",   1, InputCodeManager::BINDING_CMDRMAP, ""));
       menuItems.push_back(KeyDefMenuItem("Show Scoreboard",   1, InputCodeManager::BINDING_SCRBRD, 
                                          "Scoreboard will be visible while this key/button is held down"));
+      menuItems.push_back(KeyDefMenuItem("Toggle Level Rating", 1, InputCodeManager::BINDING_TOGGLE_RATING, ""));
 
       // Col 2
       firstItemInCol2 = menuItems.size();
@@ -189,6 +194,13 @@ void KeyDefMenuUserInterface::onActivate()
 
       menuItems.push_back(KeyDefMenuItem("Record Voice Msg",        2, InputCodeManager::BINDING_TOGVOICE,  ""));
    }
+
+   S32 itemCount[] = { 0, 0 };
+
+   for(S32 i = 0; i < menuItems.size(); i++)
+      itemCount[menuItems[i].column - 1]++;
+
+   maxMenuItemsInAnyCol = MAX(itemCount[0], itemCount[1]);
 }
 
 
@@ -273,30 +285,37 @@ void KeyDefMenuUserInterface::render()
                                Joystick::SelectedPresetIndex, getInputCode(getGame()->getSettings(), menuItems[i].primaryControl), color);
       }
    }
-   
 
-   // Draw some suggestions
-   glColor(Colors::yellow);
-   if(getGame()->getInputMode() == InputModeJoystick)
-      drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the left joystick to steer, the right to fire");
-   else 
-      drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the mouse to aim, so make good use of your mouse buttons");
+
+   S32 yPos = yStart + maxMenuItemsInAnyCol * height + 10;
 
 
    // Draw the help string
    glColor(Colors::green);
-   drawCenteredString(canvasHeight - vertMargin - 110, 15, menuItems[selectedIndex].helpString.c_str());
+   drawCenteredString(yPos, 15, menuItems[selectedIndex].helpString.c_str());
+
+
+   yPos += 20;
+
+   // Draw some suggestions
+   glColor(Colors::yellow);
+   if(getGame()->getInputMode() == InputModeJoystick)
+      drawCenteredString(yPos, 15, "HINT: You will be using the left joystick to steer, the right to fire");
+   else
+      drawCenteredString(yPos, 15, "HINT: You will be using the mouse to aim, so make good use of your mouse buttons");
+
 
    if(errorMsgTimer.getCurrent())
    {
+      yPos += 20;
       F32 alpha = 1.0;
-      if (errorMsgTimer.getCurrent() < 1000)
+      if(errorMsgTimer.getCurrent() < 1000)
          alpha = (F32) errorMsgTimer.getCurrent() / 1000;
 
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(Colors::red, alpha);
-      drawCenteredString(canvasHeight - vertMargin - 65, 15, errorMsg.c_str());
+      drawCenteredString(yPos, 15, errorMsg.c_str());
    }
 }
 
@@ -319,13 +338,13 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
       // Check for reserved keys (F1-F12, Ctrl, Esc, Button_Back)
       if(inputCode >= KEY_F1 && inputCode <= KEY_F12)
       {
-         errorMsgTimer.reset(errorMsgDisplayTime);
+         errorMsgTimer.reset();
          errorMsg = "Keys F1 - F12 are reserved.  You cannot redefine them.  Sorry!";
          return true;
       }
       else if(inputCode == KEY_CTRL)
       {
-         errorMsgTimer.reset(errorMsgDisplayTime);
+         errorMsgTimer.reset();
          errorMsg = "Control key is reserved.  You cannot use it for binding.  Sorry!";
          return true;
       }
@@ -340,7 +359,7 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
 
       if(inputCode == KEY_CTRL)
       {
-         errorMsgTimer.reset(errorMsgDisplayTime);
+         errorMsgTimer.reset();
          errorMsg = "Be careful when using the Ctrl key -- some keys will not work when Ctrl is pressed";
       }
       return true;
