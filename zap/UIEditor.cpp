@@ -2648,7 +2648,8 @@ bool EditorUserInterface::checkForEdgeHit(const Point &point, BfObject *object)
       return false;
 
    const Vector<Point> &verts = *object->getEditorHitPoly(); 
-   TNLAssert(verts.size() > 0, "Empty vertex problem");     // <== should never happen, but it does
+   TNLAssert(verts.size() > 0, "Empty vertex problem -- if debugging, check what kind of object 'object' is, and see "
+                               "if you can figure out why it has no verts"); 
    if(verts.size() == 0)
       return false;
 
