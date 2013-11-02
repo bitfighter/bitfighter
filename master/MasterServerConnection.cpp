@@ -914,7 +914,6 @@ struct HighScoresReader : public DatabaseAccessThread::BasicEntry
 
    void finish()
    {
-      logprintf("sending fresh scores!");//xyzzy
       MasterServerConnection::highScores.isBusy = false;
 
       for(S32 i = 0; i < MasterServerConnection::highScores.waitingClients.size(); i++)
@@ -1193,10 +1192,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestHighScores, ())
    HighScores *highScoreGroup = getHighScores(3);
 
    if(!highScoreGroup->isBusy)     // Not busy, so value must be cached.  Send the scores now.
-   {
-      logprintf("Sending cached scores");  //xyzzy
       m2cSendHighScores(highScoreGroup->groupNames, highScoreGroup->names, highScoreGroup->scores);
-   }
 
    else                       // In the process of retrieving... highScores will send later when retrieval is complete
       highScoreGroup->addClientToWaitingList(this);
