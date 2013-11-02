@@ -2885,8 +2885,8 @@ void EditorUserInterface::onMouseDragged()
    else  // larger items
       mSnapDelta = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
-   translateSelectedItems(mSnapDelta - lastSnapDelta);      // Nudge all selected objects by incremental move amount
-   snapSelectedEngineeredItems(mSnapDelta);                 // Snap all selected engr. objects if possible
+   translateSelectedItems(mMoveOrigins, mSnapDelta, lastSnapDelta);  // Nudge all selected objects by incremental move amount
+   snapSelectedEngineeredItems(mSnapDelta);                          // Snap all selected engr. objects if possible
 }
 
 
@@ -2896,14 +2896,8 @@ void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndo
       saveUndoState(true);       // Save undo state before we clear the selection
 
    mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
-
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
-   mMoveOrigins.resize(objList->size());
-
-   // Save the original location of each item pre-move, only used for snapping engineered items to walls
-   for(S32 i = 0; i < objList->size(); i++)
-      mMoveOrigins[i].set(objList->get(i)->getPos()); 
 
 #ifdef TNL_OS_MAC_OSX 
    bool ctrlDown = InputCodeManager::getState(KEY_META);
@@ -2912,16 +2906,24 @@ void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndo
 #endif
 
    if(ctrlDown)     // Ctrl+Drag ==> copy and drag (except for Mac)
-      onMouseDragged_CtrlPlusDrag(objList);
+      onMouseDragged_CopyAndDrag(objList);
 
    onSelectionChanged();
    mDraggingObjects = true; 
    mSnapDelta.set(0,0);
+
+
+   mMoveOrigins.resize(objList->size());
+
+   // Save the original location of each item pre-move, only used for snapping engineered items to walls
+   // Saves location of every item, selected or not
+   for(S32 i = 0; i < objList->size(); i++)
+      mMoveOrigins[i].set(objList->get(i)->getPos());
 }
 
 
 // Copy objects and start dragging the copies
-void EditorUserInterface::onMouseDragged_CtrlPlusDrag(const Vector<DatabaseObject *> *objList)
+void EditorUserInterface::onMouseDragged_CopyAndDrag(const Vector<DatabaseObject *> *objList)
 {
    Vector<DatabaseObject *> copiedObjects;
 
@@ -2966,11 +2968,12 @@ void EditorUserInterface::onMouseDragged_CtrlPlusDrag(const Vector<DatabaseObjec
 }
 
 
-void EditorUserInterface::translateSelectedItems(const Point &offset)
+void EditorUserInterface::translateSelectedItems(const Vector<Point> &origins, const Point &offset, const Point &lastOffset)
 {
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
-   S32 count = 0;
+   //mMoveOrigins[i].set(objList->get(i)->getPos());
+   TNLAssert(mMoveOrigins.size() == objList->size(), "Expected these to be the same size!");
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2978,22 +2981,29 @@ void EditorUserInterface::translateSelectedItems(const Point &offset)
 
       if(obj->isSelected() || obj->anyVertsSelected())
       {
+         //obj->setPos(mMoveOrigins[i] + offset);
          Point newVert;    // Reusable container
 
-         for(S32 j = 0; j < obj->getVertCount(); j++)
-            if(obj->isSelected() || obj->vertSelected(j))
+         for(S32 j = obj->getVertCount() - 1; j >= 0;  j--)
+            if(obj->isSelected())            // ==> Dragging whole object
             {
-               newVert = obj->getVert(j) + offset;
+               //          Offset from vertex @ getPos()   +  New position for vertex @ getPos()  
+               //F64 x = ((F64)obj->getVert(j).x - (F64)obj->getPos().x) + ((F64)mMoveOrigins[i].x + (F64)offset.x);
+               //F64 y = ((F64)obj->getVert(j).y - (F64)obj->getPos().y) + (F64)(mMoveOrigins[i].y + (F64)offset.y);
+               //newVert = Point((F32)x, (F32)y);
+
+               newVert = (obj->getVert(j) - obj->getPos()) + (mMoveOrigins[i] + offset);
                obj->setVert(newVert, j);
-               count++;
+
+               obj->onItemDragging();        // Let the item know it's being dragged
             }
-
-         // If we are dragging a vertex, and not the entire item, we are changing the geom, so notify the item
-         if(obj->anyVertsSelected())
-            obj->onGeomChanging();  
-
-         if(obj->isSelected())     
-            obj->onItemDragging();      // Make sure this gets run after we've updated the item's location
+            else if(obj->vertSelected(j))    // ==> Dragging individual vertex
+            { 
+               // Pos of vert at last tick + Offset from last tick
+               newVert = obj->getVert(j) + (offset - lastOffset);
+               obj->setVert(newVert, j);
+               obj->onGeomChanging();        // Because, well, the geom is changing
+            }
       }
    }
 }

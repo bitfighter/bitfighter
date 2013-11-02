@@ -277,7 +277,7 @@ private:
 
    GridDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
 
-   void translateSelectedItems(const Point &offset);
+   void translateSelectedItems(const Vector<Point> &origins, const Point &offset, const Point &lastOffset);
    void snapSelectedEngineeredItems(const Point &cumulativeOffset);
 
    void render();
@@ -363,7 +363,7 @@ public:
    void onMouseMoved();
    void onMouseDragged();
    void onMouseDragged_StartDragging(const bool needToSaveUndoState);
-   void onMouseDragged_CtrlPlusDrag(const Vector<DatabaseObject *> *objList);
+   void onMouseDragged_CopyAndDrag(const Vector<DatabaseObject *> *objList);
    void startDraggingDockItem();
    BfObject *copyDockItem(BfObject *source);
    bool mouseIgnore;
