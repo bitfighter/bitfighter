@@ -2648,7 +2648,9 @@ bool EditorUserInterface::checkForEdgeHit(const Point &point, BfObject *object)
       return false;
 
    const Vector<Point> &verts = *object->getEditorHitPoly(); 
-   TNLAssert(verts.size(), "Empty vertex problem");
+   TNLAssert(verts.size() > 0, "Empty vertex problem");     // <== should never happen, but it does
+   if(verts.size() == 0)
+      return false;
 
    bool loop = (object->getGeomType() == geomPolygon);
 
