@@ -2921,7 +2921,7 @@ void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndo
    // Save the original location of each item pre-move, only used for snapping engineered items to walls
    // Saves location of every item, selected or not
    for(S32 i = 0; i < objList->size(); i++)
-      mMoveOrigins[i].set(objList->get(i)->getPos());
+      mMoveOrigins[i].set(objList->get(i)->getVert(0));
 }
 
 
@@ -2995,7 +2995,7 @@ void EditorUserInterface::translateSelectedItems(const Vector<Point> &origins, c
                //F64 y = ((F64)obj->getVert(j).y - (F64)obj->getPos().y) + (F64)(mMoveOrigins[i].y + (F64)offset.y);
                //newVert = Point((F32)x, (F32)y);
 
-               newVert = (obj->getVert(j) - obj->getPos()) + (mMoveOrigins[i] + offset);
+               newVert = (obj->getVert(j) - obj->getVert(0)) + (mMoveOrigins[i] + offset);
                obj->setVert(newVert, j);
 
                obj->onItemDragging();        // Let the item know it's being dragged
