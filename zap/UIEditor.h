@@ -362,6 +362,8 @@ public:
    void onKeyUp(InputCode inputCode);
    void onMouseMoved();
    void onMouseDragged();
+   void onMouseDragged_StartDragging(const bool needToSaveUndoState);
+   void onMouseDragged_CtrlPlusDrag(const Vector<DatabaseObject *> *objList);
    void startDraggingDockItem();
    BfObject *copyDockItem(BfObject *source);
    bool mouseIgnore;

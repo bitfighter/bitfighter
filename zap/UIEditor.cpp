@@ -2871,77 +2871,8 @@ void EditorUserInterface::onMouseDragged()
    if(!mSnapObject || mSnapVertexIndex == NONE)    // If we've just started dragging a dock item, this will be it
       return;
 
-
-   if(!mDraggingObjects)            // Just started dragging
-   {
-      if(needToSaveUndoState)
-         saveUndoState(true);                 // Save undo state before we clear the selection
-
-      mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
-
-      const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-
-      mMoveOrigins.resize(objList->size());
-
-      // Save the original location of each item pre-move, only used for snapping engineered items to walls
-      for(S32 i = 0; i < objList->size(); i++)
-         mMoveOrigins[i].set(objList->get(i)->getPos()); 
-
-#ifdef TNL_OS_MAC_OSX 
-      bool ctrlDown = InputCodeManager::getState(KEY_META);
-#else
-      bool ctrlDown = InputCodeManager::getState(KEY_CTRL);
-#endif
-
-      if(ctrlDown)     // Ctrl+Drag ==> copy and drag (except for Mac)
-      {
-         Vector<DatabaseObject *> copiedObjects;
-
-         for(S32 i = 0; i < objList->size(); i++)
-         {
-            BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-            if(obj->isSelected())
-            {
-               BfObject *newObject = obj->newCopy();   
-               newObject->setSelected(true);
-               newObject->addToGame(getGame(), NULL);    // NULL keeps object out of database... will be added in bulk below 
-               
-               copiedObjects.push_back(newObject);
-
-               // Make mHitItem be the new copy of the old mHitItem
-               if(mHitItem == obj)
-                  mHitItem = newObject;
-
-               if(mSnapObject == obj)
-                  mSnapObject = newObject;
-            }
-         }
-
-         mDragCopying = true;
-
-         // Now mark source objects as unselected
-         for(S32 i = 0; i < objList->size(); i++)
-         {
-            BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-            obj->setSelected(false);
-            obj->setLitUp(false);
-         }
-
-         // Now add copied objects to our database; these were marked as selected when they were created
-         getDatabase()->addToDatabase(copiedObjects);
-
-         // Running onGeomChanged causes any copied walls to have a full body while we're dragging them 
-         for(S32 i = 0; i < copiedObjects.size(); i++)   
-            copiedObjects[i]->onGeomChanged(); 
-      }     // end if ctrlDown
-
-      onSelectionChanged();
-      mDraggingObjects = true; 
-      mSnapDelta.set(0,0);
-   }  // end just started moving
-
+   if(!mDraggingObjects) 
+      onMouseDragged_StartDragging(needToSaveUndoState);
 
    SDL_SetCursor(Cursor::getSpray());
 
@@ -2956,6 +2887,82 @@ void EditorUserInterface::onMouseDragged()
 
    translateSelectedItems(mSnapDelta - lastSnapDelta);      // Nudge all selected objects by incremental move amount
    snapSelectedEngineeredItems(mSnapDelta);                 // Snap all selected engr. objects if possible
+}
+
+
+void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndoState)
+{
+   if(needToSaveUndoState)
+      saveUndoState(true);       // Save undo state before we clear the selection
+
+   mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
+
+   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+
+   mMoveOrigins.resize(objList->size());
+
+   // Save the original location of each item pre-move, only used for snapping engineered items to walls
+   for(S32 i = 0; i < objList->size(); i++)
+      mMoveOrigins[i].set(objList->get(i)->getPos()); 
+
+#ifdef TNL_OS_MAC_OSX 
+   bool ctrlDown = InputCodeManager::getState(KEY_META);
+#else
+   bool ctrlDown = InputCodeManager::getState(KEY_CTRL);
+#endif
+
+   if(ctrlDown)     // Ctrl+Drag ==> copy and drag (except for Mac)
+      onMouseDragged_CtrlPlusDrag(objList);
+
+   onSelectionChanged();
+   mDraggingObjects = true; 
+   mSnapDelta.set(0,0);
+}
+
+
+// Copy objects and start dragging the copies
+void EditorUserInterface::onMouseDragged_CtrlPlusDrag(const Vector<DatabaseObject *> *objList)
+{
+   Vector<DatabaseObject *> copiedObjects;
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+      if(obj->isSelected())
+      {
+         BfObject *newObject = obj->newCopy();
+         newObject->setSelected(true);
+         newObject->addToGame(getGame(), NULL);    // NULL keeps object out of database... will be added in bulk below 
+
+         copiedObjects.push_back(newObject);
+
+         // Make mHitItem be the new copy of the old mHitItem
+         if(mHitItem == obj)
+            mHitItem = newObject;
+
+         if(mSnapObject == obj)
+            mSnapObject = newObject;
+      }
+   }
+
+   mDragCopying = true;
+
+   // Now mark source objects as unselected
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+      obj->setSelected(false);
+      obj->setLitUp(false);
+   }
+
+   // Now add copied objects to our database; these were marked as selected when they were created
+   getDatabase()->addToDatabase(copiedObjects);
+
+   // Running onGeomChanged causes any copied walls to have a full body while we're dragging them 
+   for(S32 i = 0; i < copiedObjects.size(); i++)
+      copiedObjects[i]->onGeomChanged();
 }
 
 
