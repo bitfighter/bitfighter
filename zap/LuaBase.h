@@ -65,7 +65,7 @@ typedef pair<ClassName, vector<ClassName> > Node;
 
 /**
  * Because windef.h (which is included by windows.h) typedefs BOOL and INT types,
- * we have to put this enum in a namespace. The `using namespace Luargs` statements
+ * we have to put this enum in a namespace. The `using namespace LuaArgs` statements
  * could be removed entirely if constructor arguments could be checked using the
  * FUNARG system.
  */
