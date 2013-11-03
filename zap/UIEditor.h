@@ -438,7 +438,7 @@ public:
    void clearLevelGenItems();             // Clear any previously created levelgen items
 
    void addToEditor(BfObject *obj);
-   void showUploadErrorMessage();
+   void showUploadErrorMessage(S32 errorCode, const string &errorBody);
 
 
    void createNormalizedScreenshot(ClientGame* game);

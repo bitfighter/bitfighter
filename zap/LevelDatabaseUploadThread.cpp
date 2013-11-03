@@ -66,7 +66,7 @@ U32 LevelDatabaseUploadThread::run()
    S32 responseCode = req.getResponseCode();
    if(responseCode != HttpRequest::OK && responseCode != HttpRequest::Found)
    {
-      editor->showUploadErrorMessage();
+      editor->showUploadErrorMessage(responseCode, req.getResponseBody());
       editor->clearSaveMessage();
 
       stringstream message;

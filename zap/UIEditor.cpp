@@ -890,13 +890,14 @@ void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName
 }
 
 
-void EditorUserInterface::showUploadErrorMessage()
+void EditorUserInterface::showUploadErrorMessage(S32 errorCode, const string &errorBody)
 {
    Vector<string> messages;
    messages.push_back("Error Uploading Level");
    messages.push_back("Press any key to return to the editor");
 
-   messages.push_back("Error uploading level.  See console for details.");
+   messages.push_back("Error uploading level.  Server responded with error code " + itos(errorCode) + "." +
+                      (errorBody != "" ? "\n\n\"" + errorBody + "\"" : ""));
 
    mMessageBoxQueue.push_back(messages);
 }
