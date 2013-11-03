@@ -57,8 +57,6 @@ LuaLevelGenerator::LuaLevelGenerator(Game *game, const string &scriptName, const
    mGame = game;
    mLuaGame = game;  // Set our parent member, too
 
-   mGridSize = game->getGridSize();
-
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 

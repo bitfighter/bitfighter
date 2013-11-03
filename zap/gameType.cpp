@@ -302,7 +302,6 @@ Vector<string> GameType::getGameParameterMenuKeys()
       "Levelgen Script",
       "Game Time",
       "Win Score",
-      "Grid Size",
       "Min Players",
       "Max Players",
       "Allow Engr",
@@ -348,15 +347,6 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
    }
    else if(key == "Win Score")
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 1, 1, 99, "points", "", "Game ends when one team gets this score"));
-   else if(key == "Grid Size")
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Grid Size:",       
-                                                             (S32)getGame()->getGridSize(),
-                                                             Game::MIN_GRID_SIZE,      // increment
-                                                             Game::MIN_GRID_SIZE,      // min val
-                                                             Game::MAX_GRID_SIZE,      // max val
-                                                             "pixels",                 // units
-                                                             "", 
-                                                             "\"Magnification factor.\" Larger values lead to larger levels.  Default is 255."));
    else if(key == "Min Players")
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Min Players:",       
                                                              mMinRecPlayers,     // value
@@ -405,8 +395,6 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const string &key)
       setGameTime((F32)menuItem->getIntValue());
    else if(key == "Win Score")
       setWinningScore(menuItem->getIntValue());
-   else if(key == "Grid Size")
-      mGame->setGridSize((F32)menuItem->getIntValue());
    else if(key == "Min Players")
        setMinRecPlayers(menuItem->getIntValue());
    else if(key == "Max Players")

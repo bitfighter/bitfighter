@@ -220,7 +220,7 @@ void Geometry::setGeom(const Vector<Point> &points)
 }
 
 
-string Geometry::geomToLevelCode(F32 gridSize) const
+string Geometry::geomToLevelCode() const
 {
    TNLAssert(false, "Not implemented");
    return string();
@@ -481,10 +481,10 @@ Rect PointGeometry::calcExtents()
 }
 
 
-string PointGeometry::geomToLevelCode(F32 gridSize) const
+string PointGeometry::geomToLevelCode() const
 {
    Point pos = getVert(0); 
-   return (pos / gridSize).toLevelCode();
+   return pos.toLevelCode();
 }
 
 
@@ -683,12 +683,12 @@ Rect SimpleLineGeometry::calcExtents()
 }
 
 
-string SimpleLineGeometry::geomToLevelCode(F32 gridSize) const
+string SimpleLineGeometry::geomToLevelCode() const
 {
    Point fromPos = mFromPos;
    Point toPos = mToPos;
 
-   return (fromPos / gridSize).toLevelCode() + " " + (toPos / gridSize).toLevelCode();
+   return fromPos.toLevelCode() + " " + toPos.toLevelCode();
 }
 
 
@@ -940,7 +940,7 @@ Rect PolylineGeometry::calcExtents()
 }
 
 
-string PolylineGeometry::geomToLevelCode(F32 gridSize) const
+string PolylineGeometry::geomToLevelCode() const
 {
    string bounds = "";
    S32 size = mPolyBounds.size();
@@ -949,7 +949,6 @@ string PolylineGeometry::geomToLevelCode(F32 gridSize) const
    for(S32 i = 0; i < size; i++)
    {
       p = mPolyBounds[i];
-      p /= gridSize;
       bounds += p.toLevelCode() + (i < size - 1 ? " " : "");
    }
 

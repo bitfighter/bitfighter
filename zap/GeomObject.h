@@ -52,7 +52,7 @@ public:
    const Vector<Point> *getFill() const;
    
    Point getVert(S32 index) const;
-   string geomToLevelCode(F32 gridSize) const; 
+   string geomToLevelCode() const;
 };
 
 
@@ -116,7 +116,7 @@ public:
    void unpackGeom(GhostConnection *connection, BitStream *stream);
 
    // Saving/loading
-   string geomToLevelCode(F32 gridSize) const;
+   string geomToLevelCode() const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
    virtual void onPointsChanged();

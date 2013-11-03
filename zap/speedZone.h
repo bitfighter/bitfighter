@@ -83,12 +83,12 @@ public:
    F32 mRotateSpeed;
    U32 mUnpackInit;  // Some form of counter, to know that it is a rotating speed zone.
 
-   static void generatePoints(const Point &pos, const Point &dir, F32 gridSize, Vector<Point> &points, Vector<Point> &outline);
+   static void generatePoints(const Point &pos, const Point &dir, Vector<Point> &points, Vector<Point> &outline);
    void render();
    S32 getRenderSortValue();
 
    bool processArguments(S32 argc, const char **argv, Game *game);  // Create objects from parameters stored in level file
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
    void onAddedToGame(Game *game);
 

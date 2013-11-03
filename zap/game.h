@@ -188,7 +188,7 @@ struct WallRec;
 class Game
 {
 private:
-   F32 mGridSize;  
+   F32 mLegacyGridSize;
 
    U32 mTimeUnconnectedToMaster;          // Time that we've been disconnected to the master
    bool mHaveTriedToConnectToMaster;
@@ -265,10 +265,6 @@ protected:
    virtual AbstractTeam *getNewTeam() = 0;
 
 public:
-   static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
-   static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
-   static const S32 MAX_GRID_SIZE = 1000;    // A bit ridiculous too...  250-300 seems about right for normal use.  But we'll let folks experiment.
-
    static const S32 MAX_TEAMS = 9;           // Max teams allowed -- careful changing this; used for RPC ranges
 
    static const S32 PLAYER_VISUAL_DISTANCE_HORIZONTAL = 600;    // How far player can see normally horizontally...
@@ -384,8 +380,7 @@ public:
    void deleteObjects(U8 typeNumber);
    void deleteObjects(TestFunc testFunc);
 
-   F32 getGridSize() const;
-   void setGridSize(F32 gridSize);
+   F32 getLegacyGridSize() const;
 
    U32 getCurrentTime();
    virtual bool isServer() const = 0;        // Implemented by ClientGame (returns false) and ServerGame (returns true)

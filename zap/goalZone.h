@@ -100,7 +100,7 @@ public:
    bool canBeNeutral(); 
 
 
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();

@@ -60,7 +60,7 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 

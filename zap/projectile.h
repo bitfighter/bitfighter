@@ -223,7 +223,7 @@ public:
 
    virtual bool canAddToEditor();
 
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Mine);
@@ -285,7 +285,7 @@ public:
 
    virtual bool canAddToEditor();
 
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(SpyBug);

@@ -111,7 +111,7 @@ protected:
    void initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
 public:
    enum MaskBits {

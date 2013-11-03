@@ -472,7 +472,7 @@ bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
    
    Point pos;
    pos.read(argv + 1);
-   pos *= game->getGridSize();
+   pos *= game->getLegacyGridSize();
 
    if(argc >= 4)
    {
@@ -509,9 +509,9 @@ void EngineeredItem::onAddedToGame(Game *game)
 }
 
 
-string EngineeredItem::toLevelCode(F32 gridSize) const
+string EngineeredItem::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode(gridSize) + " " + itos(mHealRate);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode() + " " + itos(mHealRate);
 }
 
 
@@ -2002,9 +2002,9 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
-string Turret::toLevelCode(F32 gridSize) const
+string Turret::toLevelCode() const
 {
-   string out = Parent::toLevelCode(gridSize);
+   string out = Parent::toLevelCode();
 
    if(mWeaponFireType != WeaponTurret)
       out = out + " " + writeLevelString((string("W=") + WeaponInfo::getWeaponInfo(mWeaponFireType).name.getString()).c_str());

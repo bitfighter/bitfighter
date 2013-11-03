@@ -72,7 +72,7 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
 
    Point pos;
    pos.read(argv);
-   pos *= game->getGridSize();
+   pos *= game->getLegacyGridSize();
 
    setPos(pos);      // Needed by game
 
@@ -80,9 +80,9 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string Item::toLevelCode(F32 gridSize) const
+string Item::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + geomToLevelCode(gridSize);
+   return string(appendId(getClassName())) + " " + geomToLevelCode();
 }
 
 

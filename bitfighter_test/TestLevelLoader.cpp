@@ -38,7 +38,7 @@ TEST_F(LevelLoaderTest, longLine)
    serverGame.unsuspendGame(false);
 
    EXPECT_EQ(0, serverGame.getGameObjDatabase()->findObjects_fast()->size());
-   string code = serverGame.toLevelCode() + wall.toLevelCode(serverGame.getGridSize());
+   string code = serverGame.toLevelCode() + wall.toLevelCode();
    serverGame.loadLevelFromString(code, db);
 
    const Vector<DatabaseObject*> *objects = db->findObjects_fast();

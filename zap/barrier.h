@@ -137,7 +137,7 @@ public:
    WallItem *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
    Vector<Point> extendedEndPoints;
    virtual Rect calcExtents();
@@ -236,7 +236,7 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
    F32 getEditorRadius(F32 currentScale);
 

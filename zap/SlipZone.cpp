@@ -102,10 +102,10 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2, Game *game)
    if(argc & 1)   // Odd number of arg count (7,9,11) to allow optional slipAmount arg
    {
       slipAmount = (F32)atof(argv[0]);
-      readGeom(argc, argv, 1, game->getGridSize());
+      readGeom(argc, argv, 1, game->getLegacyGridSize());
    }
    else           // Even number of arg count (6,8,10)
-      readGeom(argc, argv, 0, game->getGridSize());
+      readGeom(argc, argv, 0, game->getLegacyGridSize());
 
    updateExtentInDatabase();
 
@@ -137,9 +137,9 @@ const char *SlipZone::getOnScreenName()
 }
 
 
-string SlipZone::toLevelCode(F32 gridSize) const
+string SlipZone::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + ftos(slipAmount, 3) + " " + geomToLevelCode(gridSize);
+   return string(appendId(getClassName())) + " " + ftos(slipAmount, 3) + " " + geomToLevelCode();
 }
 
 

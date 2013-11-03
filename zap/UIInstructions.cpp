@@ -955,7 +955,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
          case 28:    // SpeedZone
             {
                Vector<Point> speedZoneRenderPoints, outlinePoints;
-               SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0), 1, speedZoneRenderPoints, outlinePoints);
+               SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0), speedZoneRenderPoints, outlinePoints);
 
                renderSpeedZone(speedZoneRenderPoints, getGame()->getCurrentTime());
             }

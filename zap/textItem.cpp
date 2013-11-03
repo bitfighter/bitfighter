@@ -205,10 +205,10 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
    Point pos, dir;
 
    pos.read(argv + 1);
-   pos *= game->getGridSize();
+   pos *= game->getLegacyGridSize();
 
    dir.read(argv + 3);
-   dir *= game->getGridSize();
+   dir *= game->getLegacyGridSize();
 
    setSize((F32)atof(argv[5]));
 
@@ -250,9 +250,9 @@ void TextItem::setGeom(lua_State *L, S32 index)
 }
 
 
-string TextItem::toLevelCode(F32 gridSize) const
+string TextItem::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode(gridSize) + " " + ftos(mSize, 3) + " " + writeLevelString(mText.c_str());
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode() + " " + ftos(mSize, 3) + " " + writeLevelString(mText.c_str());
 }
 
 

@@ -400,7 +400,7 @@ public:
    virtual void removeFromGame(bool deleteObject);
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game);
-   virtual string toLevelCode(F32 gridSize) const;    // Generates levelcode line for object 
+   virtual string toLevelCode() const;    // Generates levelcode line for object
    string appendId(const string &objName) const;
 
    void onPointsChanged();

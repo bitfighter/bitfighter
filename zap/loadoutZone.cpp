@@ -139,9 +139,9 @@ bool LoadoutZone::canBeHostile() { return true; }
 bool LoadoutZone::canBeNeutral() { return true; }
 
 
-string LoadoutZone::toLevelCode(F32 gridSize) const
+string LoadoutZone::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode();
 }
 
 

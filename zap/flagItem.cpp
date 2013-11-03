@@ -173,9 +173,9 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string FlagItem::toLevelCode(F32 gridSize) const
+string FlagItem::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode();
 }
 
 

@@ -438,7 +438,7 @@ bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<Da
    // Make sure level isn't too big for zone generation, which uses 16 bit ints
    if(bounds.getHeight() >= (F32)U16_MAX || bounds.getWidth() >= (F32)U16_MAX)
    {
-      logprintf(LogConsumer::LogLevelError, "Level too big for zone generation! (max allowed dimension, after gridSize expansion, is %d)", U16_MAX);
+      logprintf(LogConsumer::LogLevelError, "Level too big for zone generation! (max allowed dimension is %d)", U16_MAX);
       return false;
    }
 

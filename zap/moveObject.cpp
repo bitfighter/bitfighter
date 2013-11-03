@@ -115,9 +115,9 @@ bool MoveObject::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string MoveObject::toLevelCode(F32 gridSize) const
+string MoveObject::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + geomToLevelCode(gridSize);
+   return string(appendId(getClassName())) + " " + geomToLevelCode();
 }
 
 
@@ -1652,12 +1652,12 @@ bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
-string Asteroid::toLevelCode(F32 gridSize) const
+string Asteroid::toLevelCode() const
 {
    if(mSizeLeft != ASTEROID_INITIAL_SIZELEFT)
-      return Parent::toLevelCode(gridSize) + " Size=" + itos(mSizeLeft);
+      return Parent::toLevelCode() + " Size=" + itos(mSizeLeft);
    else
-      return Parent::toLevelCode(gridSize);
+      return Parent::toLevelCode();
 }
 
 

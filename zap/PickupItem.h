@@ -56,7 +56,7 @@ public:
    virtual ~PickupItem();                               // Destructor
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
    void onAddedToGame(Game *game);
    void idle(BfObject::IdleCallPath path);

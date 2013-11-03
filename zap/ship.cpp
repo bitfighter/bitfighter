@@ -224,7 +224,7 @@ bool Ship::processArguments(S32 argc, const char **argv, Game *game)
 
    Point pos;
    pos.read(argv + 1);
-   pos *= game->getGridSize();
+   pos *= game->getLegacyGridSize();
    for(U32 i = 0; i < MoveStateCount; i++)
    {
       setPos(i, pos);
@@ -235,9 +235,9 @@ bool Ship::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string Ship::toLevelCode(F32 gridSize) const
+string Ship::toLevelCode() const
 {
-   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToLevelCode(gridSize);
+   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToLevelCode();
 }
 
 

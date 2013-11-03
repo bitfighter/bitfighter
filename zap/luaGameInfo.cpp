@@ -61,7 +61,6 @@ LuaGameInfo::~LuaGameInfo()
    METHOD(CLASS, getLeadingTeam,       ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getTeamCount,         ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getLevelName,         ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getGridSize,          ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, isTeamGame,           ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getEventScore,        ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getPlayers,           ARRAYDEF({{ END }}), 1 ) \
@@ -197,16 +196,6 @@ S32 LuaGameInfo::lua_getTeamCount(lua_State *L) { return returnInt (L, mServerGa
  * @return A string representing the level's name.
  */
 S32 LuaGameInfo::lua_getLevelName(lua_State *L) { return returnString(L, mServerGame->getGameType()->getLevelName()->getString()); }
-
-
-/**
- * @luafunc num LuaGameInfo::getGridSize()
- *
- * @brief Get the level's grid size as set in the editor.
- *
- * @return The level's grid size.
- */
-S32 LuaGameInfo::lua_getGridSize(lua_State *L) { return returnFloat (L, mServerGame->getGridSize()); }
 
 
 /**

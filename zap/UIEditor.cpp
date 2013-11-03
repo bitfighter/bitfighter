@@ -161,6 +161,8 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mNormalizedScreenshotMode = false;
 
    mSaveMsgTimer.setPeriod(5000);    // Display save message for 5 seconds
+
+   mGridSize = game->getSettings()->getIniSettings()->mSettings.getVal<U32>("EditorGridSize");
 }
 
 
@@ -789,7 +791,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
 
    // Create new plugin, will be deleted by boost
-   EditorPlugin *plugin = new EditorPlugin(fullName, args, getGame()->getGridSize(), mLoadTarget, getGame());
+   EditorPlugin *plugin = new EditorPlugin(fullName, args, mGridSize, mLoadTarget, getGame());
 
    mPluginRunner = boost::shared_ptr<EditorPlugin>(plugin);
 
@@ -1374,7 +1376,7 @@ Point EditorUserInterface::snapPointToLevelGrid(Point const &p)
       return p;
 
    // First, find a snap point based on our grid
-   F32 factor = (showMinorGridLines() ? 0.1f : 0.5f) * getGame()->getGridSize();     // Tenths or halves -- major gridlines are gridsize pixels apart
+   F32 factor = (showMinorGridLines() ? 0.1f : 0.5f) * mGridSize;     // Tenths or halves -- major gridlines are gridsize pixels apart
 
    return Point(floor(p.x / factor + 0.5) * factor, floor(p.y / factor + 0.5) * factor);
 }
@@ -1844,7 +1846,7 @@ void EditorUserInterface::render()
       renderTurretAndSpyBugRanges(editorDb);    // Render range of all turrets and spybugs in editorDb
    else
       renderGrid(mCurrentScale, mCurrentOffset, convertLevelToCanvasCoord(Point(0,0)), 
-                 getGame()->getGridSize(), mSnapContext == FULL_SNAPPING, showMinorGridLines());                    
+                 mGridSize, mSnapContext == FULL_SNAPPING, showMinorGridLines());
 
    glPushMatrix();
       glTranslate(getCurrentOffset());
@@ -2320,7 +2322,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
    database->computeSelectionMinMax(min, max);
    Point ctr = (min + max) * 0.5;
 
-   if(scale > 1 && min.distanceTo(max) * scale  > 50 * getGame()->getGridSize())    // If walls get too big, they'll bog down the db
+   if(scale > 1 && min.distanceTo(max) * scale > 50 * mGridSize)    // If walls get too big, they'll bog down the db
       return;
 
    bool modifiedWalls = false;
@@ -3036,7 +3038,7 @@ BfObject *EditorUserInterface::copyDockItem(BfObject *source)
 {
    // Instantiate object so we are essentially dragging a non-dock item
    BfObject *newObject = source->newCopy();
-   newObject->newObjectFromDock(getGame()->getGridSize());     // Do things particular to creating an object that came from dock
+   newObject->newObjectFromDock(mGridSize);     // Do things particular to creating an object that came from dock
 
    return newObject;
 }
@@ -3050,7 +3052,7 @@ void EditorUserInterface::startDraggingDockItem()
    BfObject *item = copyDockItem(mDraggingDockItem);
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   Point pos = convertCanvasToLevelCoord(mMousePos) - item->getInitialPlacementOffset(getGame()->getGridSize());
+   Point pos = convertCanvasToLevelCoord(mMousePos) - item->getInitialPlacementOffset(mGridSize);
    item->moveTo(pos);
       
    GridDatabase *database = getDatabase();
@@ -4711,8 +4713,6 @@ string EditorUserInterface::getLevelText()
    // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
-   F32 gridSize = getGame()->getGridSize();
-
    for(S32 j = 0; j < 2; j++)
    {
       for(S32 i = 0; i < objList->size(); i++)
@@ -4721,7 +4721,7 @@ string EditorUserInterface::getLevelText()
 
          // Writing wall items on first pass, non-wall items next -- that will make sure mountable items have something to grab onto
          if((j == 0 && isWallType(obj->getObjectTypeNumber())) || (j == 1 && ! isWallType(obj->getObjectTypeNumber())) )
-            result += obj->toLevelCode(gridSize) + "\n";
+            result += obj->toLevelCode() + "\n";
       }
    }
 
@@ -4898,7 +4898,7 @@ void EditorUserInterface::findPlugins()
       string title;
       Vector<boost::shared_ptr<MenuItem> > menuItems;  // Unused
 
-      EditorPlugin plugin(dirName + "/" + plugins[i], Vector<string>(), getGame()->getGridSize(), mLoadTarget, getGame());
+      EditorPlugin plugin(dirName + "/" + plugins[i], Vector<string>(), mGridSize, mLoadTarget, getGame());
 
       if(plugin.prepareEnvironment() && plugin.loadScript(false))
          plugin.runGetArgsMenu(title, menuItems);

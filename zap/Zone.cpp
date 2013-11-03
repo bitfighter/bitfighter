@@ -122,7 +122,7 @@ bool Zone::processArguments(S32 argc2, const char **argv2, Game *game)
    if(argc < 6)
       return false;
 
-   readGeom(argc, argv, 0, game->getGridSize());
+   readGeom(argc, argv, 0, game->getLegacyGridSize());
    if(getExtent().getHeight() == 0 && getExtent().getWidth() == 0)
       return false;
 
@@ -132,9 +132,9 @@ bool Zone::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
-string Zone::toLevelCode(F32 gridSize) const
+string Zone::toLevelCode() const
 {
-   return appendId("Zone") + " " + geomToLevelCode(gridSize);
+   return appendId("Zone") + " " + geomToLevelCode();
 }
 
 

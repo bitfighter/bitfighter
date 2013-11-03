@@ -57,7 +57,6 @@ public:
    S32 lua_getTeamCount(lua_State *L);
 
    S32 lua_getLevelName(lua_State *L);
-   S32 lua_getGridSize(lua_State *L);
    S32 lua_isTeamGame(lua_State *L);
 
    S32 lua_getEventScore(lua_State *L);

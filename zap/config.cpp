@@ -89,6 +89,7 @@ IniSettings::IniSettings()
    mSettings.add(new Setting<YesNo>      ("ShowInGameHelp",              Yes,                   "ShowInGameHelp",              "Settings", "Show tutorial style messages in-game?  Yes/No"));
    mSettings.add(new Setting<string>     ("JoystickType",                NoJoystick,            "JoystickType",                "Settings", "Type of joystick to use if auto-detect doesn't recognize your controller"));
    mSettings.add(new Setting<string>     ("HelpItemsAlreadySeenList",    "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));
+   mSettings.add(new Setting<U32>        ("EditorGridSize",              255,                   "EditorGridSize",              "Settings", "Grid size used in the editor, mostly for snapping purposes"));
 
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
    joystickLinuxUseOldDeviceSystem = false;

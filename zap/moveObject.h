@@ -100,7 +100,7 @@ public:
    virtual ~MoveObject();                                                                // Destructor
       
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
-   virtual string toLevelCode(F32 gridSize) const;
+   virtual string toLevelCode() const;
 
 
    void onAddedToGame(Game *game);
@@ -355,7 +355,7 @@ public:
    void onItemExploded(Point pos);
 
    bool processArguments(S32 argc2, const char **argv2, Game *game);
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
 //#ifndef ZAP_DEDICATED
 //private:

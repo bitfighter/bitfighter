@@ -176,7 +176,7 @@ bool LineItem::processArguments(S32 argc, const char **argv, Game *game)
    else
       mGlobal = false;
 
-   readGeom(argc, argv, firstCoord, game->getGridSize());
+   readGeom(argc, argv, firstCoord, game->getLegacyGridSize());
 
    computeExtent();
 
@@ -184,14 +184,14 @@ bool LineItem::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string LineItem::toLevelCode(F32 gridSize) const
+string LineItem::toLevelCode() const
 {
    string out = string(appendId(getClassName())) + " " + itos(getTeam()) + " " + itos(getWidth());
 
    if(mGlobal)
       out += " Global";
 
-   out += " " + geomToLevelCode(gridSize);
+   out += " " + geomToLevelCode();
 
    return out;
 }

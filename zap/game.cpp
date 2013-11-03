@@ -96,7 +96,7 @@ static Game *mObjectAddTarget = NULL;
 // Constructor
 Game::Game(const Address &theBindAddress, GameSettingsPtr settings) : mGameObjDatabase(new GridDatabase())  // New database will be deleted by boost
 {
-   mGridSize = 255;
+   mLegacyGridSize = 1.f;
    mLevelDatabaseId = 0;
    mSettings = settings;
 
@@ -132,15 +132,9 @@ Game::~Game()
 }
 
 
-F32 Game::getGridSize() const
+F32 Game::getLegacyGridSize() const
 {
-   return mGridSize;
-}
-
-
-void Game::setGridSize(F32 gridSize) 
-{ 
-   mGridSize = max(min(gridSize, F32(MAX_GRID_SIZE)), F32(MIN_GRID_SIZE));
+   return mLegacyGridSize;
 }
 
 
@@ -636,7 +630,7 @@ void Game::onConnectedToMaster()
 
 void Game::resetLevelInfo()
 {
-   setGridSize((F32)DefaultGridSize);
+   mLegacyGridSize = 1.0f;
 }
 
 
@@ -651,7 +645,7 @@ void Game::parseLevelLine(const char *line, GridDatabase *database, const string
 
    if(argc >= 1)
    {
-      size_t pos = args[0].find("!");
+      std::size_t pos = args[0].find("!");
       if(pos != string::npos)
       {
          id = atoi(args[0].substr(pos + 1, args[0].size() - pos - 1).c_str());
@@ -719,12 +713,21 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
    if(!stricmp(argv[0], "BotsPerTeam"))
       return;
 
-   else if(!stricmp(argv[0], "GridSize"))      // GridSize requires a single parameter (an int specifiying how many pixels in a grid cell)
+   // Legacy Gridsize handling - levels used to have a 'GridSize' line that could be used to
+   // multiply all points found in the level file.  Since version 019 this is no longer used
+   // and all points are saved as the real spacial coordinates.
+   //
+   // If a level file contains this setting, we will use it to multiply all points found in
+   // the level file.  However, once it is loaded and resaved in the editor, this setting will
+   // disappear and all points will reflect their true, absolute nature.
+   else if(!stricmp(argv[0], "GridSize"))
    {                                           
       if(argc < 2)
          logprintf(LogConsumer::LogLevelError, "Improperly formed GridSize parameter");
-      else
-         setGridSize((F32)atof(argv[1]));
+      else {
+         mLegacyGridSize = (F32)atof(argv[1]);
+         logprintf("Legacy 'GridSize' line with value %f found. This is no longer used.  Please re-save level in the editor to update level.", mLegacyGridSize);
+      }
 
       return;
    }
@@ -897,8 +900,6 @@ string Game::toLevelCode() const
    str += string("LevelName ")        + writeLevelString(gameType->getLevelName()->getString()) + "\n";
    str += string("LevelDescription ") + writeLevelString(gameType->getLevelDescription()->getString()) + "\n";
    str += string("LevelCredits ")     + writeLevelString(gameType->getLevelCredits()->getString()) + "\n";
-
-   str += string("GridSize ") + ftos(mGridSize) + "\n";
 
    if(getLevelDatabaseId())
       str += string("LevelDatabaseId ") + itos(getLevelDatabaseId()) + "\n";

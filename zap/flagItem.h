@@ -69,7 +69,7 @@ public:
    void initialize();      // Set inital values of things
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
-   virtual string toLevelCode(F32 gridSize) const;
+   virtual string toLevelCode() const;
 
    virtual void onAddedToGame(Game *theGame);
    virtual void renderItem(const Point &pos);

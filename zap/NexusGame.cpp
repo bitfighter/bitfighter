@@ -1046,7 +1046,7 @@ bool NexusZone::processArguments(S32 argc2, const char **argv2, Game *game)
       return false;
 
    if(argc <= 4)     // Archaic Zap! format
-      processArguments_ArchaicZapFormat(argc, argv, game->getGridSize());
+      processArguments_ArchaicZapFormat(argc, argv, game->getLegacyGridSize());
    else              // Sleek, modern Bitfighter format
       Parent::processArguments(argc, argv, game);
 
@@ -1086,9 +1086,9 @@ bool NexusZone::canBeHostile() { return false; }
 bool NexusZone::canBeNeutral() { return false; }
 
 
-string NexusZone::toLevelCode(F32 gridSize) const
+string NexusZone::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + geomToLevelCode(gridSize);
+   return string(appendId(getClassName())) + " " + geomToLevelCode();
 }
 
 

@@ -967,9 +967,9 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string CoreItem::toLevelCode(F32 gridSize) const
+string CoreItem::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToLevelCode(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToLevelCode();
 }
 
 

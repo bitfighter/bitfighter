@@ -133,14 +133,14 @@ SpeedZone *SpeedZone::clone() const
 // vector (the three points of our triangle graphic), and compute its extent
 void SpeedZone::preparePoints()
 {
-   generatePoints(getVert(0), getVert(1), 1, mPolyBounds, mOutline);
+   generatePoints(getVert(0), getVert(1), mPolyBounds, mOutline);
 
    computeExtent();
 }
 
 
 // static method
-void SpeedZone::generatePoints(const Point &start, const Point &end, F32 gridSize, Vector<Point> &points, Vector<Point> &outline)
+void SpeedZone::generatePoints(const Point &start, const Point &end, Vector<Point> &points, Vector<Point> &outline)
 {
    const S32 inset = 3;
    const F32 halfWidth = SpeedZone::halfWidth;
@@ -218,7 +218,7 @@ void SpeedZone::onGeomChanging()
 
 void SpeedZone::onGeomChanged()   
 {  
-   generatePoints(getVert(0), getVert(1), 1, mPolyBounds, mOutline);
+   generatePoints(getVert(0), getVert(1), mPolyBounds, mOutline);
    Parent::onGeomChanged();
 }
 
@@ -302,10 +302,10 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
    Point start, end;
 
    start.read(argv);
-   start *= game->getGridSize();
+   start *= game->getLegacyGridSize();
 
    end.read(argv + 2);
-   end *= game->getGridSize();
+   end *= game->getLegacyGridSize();
 
    // Save the points we read into our geometry
    setVert(start, 0);
@@ -321,9 +321,9 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
 
 
 // Editor
-string SpeedZone::toLevelCode(F32 gridSize) const
+string SpeedZone::toLevelCode() const
 {
-   string out = string(appendId(getClassName())) + " " + geomToLevelCode(gridSize) + " " + itos(mSpeed);
+   string out = string(appendId(getClassName())) + " " + geomToLevelCode() + " " + itos(mSpeed);
    if(mSnapLocation)
       out += " SnapEnabled";
    if(mRotateSpeed != 0)

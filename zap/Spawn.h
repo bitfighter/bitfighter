@@ -70,7 +70,7 @@ public:
    void setSpawnTime(S32 spawnTime);
    S32 getSpawnTime() const;
 
-   virtual string toLevelCode(F32 gridSize) const;
+   virtual string toLevelCode() const;
 
    F32 getRadius();
    F32 getEditorRadius(F32 currentScale);
@@ -108,7 +108,7 @@ public:
 
    const char *getClassName() const;
 
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
    bool processArguments(S32 argc, const char **argv, Game *game);
 
    S32 getDefaultRespawnTime();    // Somewhat meaningless in this context
@@ -258,7 +258,7 @@ public:
    void renderDock();
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(FlagSpawn);

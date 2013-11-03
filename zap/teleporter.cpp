@@ -270,8 +270,8 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    pos.read(argv);
    dest.read(argv + 2);
 
-   pos  *= game->getGridSize();
-   dest *= game->getGridSize();
+   pos  *= game->getLegacyGridSize();
+   dest *= game->getLegacyGridSize();
 
    setVert(pos,  0);
    setVert(dest, 1);
@@ -326,9 +326,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(Teleporter, s2cClearDestinations, (), (),
 }
 
 
-string Teleporter::toLevelCode(F32 gridSize) const
+string Teleporter::toLevelCode() const
 {
-   string out = string(appendId(getClassName())) + " " + geomToLevelCode(gridSize);
+   string out = string(appendId(getClassName())) + " " + geomToLevelCode();
 
    if(mTeleporterCooldown != TeleporterCooldown)
       out += " Delay=" + ftos(mTeleporterCooldown / 1000.f, 3);

@@ -230,7 +230,7 @@ public:
    const char *getOnDockName();
    const char *getOnScreenName();
 
-   string toLevelCode(F32 gridSiz) const;
+   string toLevelCode() const;
 
    bool hasTeam();     
    bool canBeHostile();

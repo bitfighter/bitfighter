@@ -192,7 +192,7 @@ public:
    void idle(BfObject::IdleCallPath path);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
    TNL_DECLARE_CLASS(CoreItem);
 

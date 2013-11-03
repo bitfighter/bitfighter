@@ -860,9 +860,9 @@ Mine *Mine::clone() const
 
 
 // ProcessArguments() used is the one in item
-string Mine::toLevelCode(F32 gridSize) const
+string Mine::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + geomToLevelCode(gridSize);
+   return string(appendId(getClassName())) + " " + geomToLevelCode();
 }
 
 
@@ -1161,9 +1161,9 @@ bool SpyBug::processArguments(S32 argc, const char **argv, Game *game)
 
 
 // ProcessArguments() used is the one in item
-string SpyBug::toLevelCode(F32 gridSize) const
+string SpyBug::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode();
 }
 
 

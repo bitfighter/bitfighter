@@ -148,15 +148,7 @@ static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
 }
 
 
-
-#ifndef WIN32
-extern const S32 Game::MIN_GRID_SIZE;     // Needed by gcc, cause errors in VC++... and for Mac?
-extern const S32 Game::MAX_GRID_SIZE;
-#endif
-
-
 extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
-
 
 void GameParamUserInterface::updateMenuItems()
 {

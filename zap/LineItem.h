@@ -73,7 +73,7 @@ public:
  
    /////
    // Editor methods
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    virtual const Color *getEditorRenderColor();
 

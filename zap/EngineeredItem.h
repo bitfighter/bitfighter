@@ -149,7 +149,7 @@ public:
 
    /////
    // Editor stuff
-   virtual string toLevelCode(F32 gridSize) const;
+   virtual string toLevelCode() const;
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
 
 	///// Lua interface
@@ -334,7 +334,7 @@ public:
    WeaponType mWeaponFireType;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toLevelCode(F32 gridSize) const;
+   string toLevelCode() const;
 
    static const S32 defaultRespawnTime = 0;
 

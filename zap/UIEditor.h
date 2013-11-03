@@ -174,6 +174,8 @@ private:
    bool mAutoScrollWithMouse;       // Make use of scrolling using middle mouse position
    bool mAutoScrollWithMouseReady;
    Point mScrollWithMouseLocation;
+
+   U32 mGridSize;                   // Our editor gridsize
    bool showMinorGridLines();
 
    // Helper drawing methods

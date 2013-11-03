@@ -42,7 +42,6 @@ class LuaLevelGenerator: public LuaScriptRunner
 
 private:
    Game *mGame;
-   F32 mGridSize;
    GridDatabase *mGridDatabase;
 
 protected:

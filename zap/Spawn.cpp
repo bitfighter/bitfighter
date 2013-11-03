@@ -94,7 +94,7 @@ bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
 
    Point pos;
    pos.read(argv);
-   pos *= game->getGridSize();
+   pos *= game->getLegacyGridSize();
 
    setPos(pos);
 
@@ -108,10 +108,10 @@ bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string AbstractSpawn::toLevelCode(F32 gridSize) const
+string AbstractSpawn::toLevelCode() const
 {
    // <<spawn class name>> <x> <y> <spawn timer>
-   return string(appendId(getClassName())) + " " + geomToLevelCode(gridSize) + " " + itos(mSpawnTime);
+   return string(appendId(getClassName())) + " " + geomToLevelCode() + " " + itos(mSpawnTime);
 }
 
 
@@ -234,10 +234,10 @@ bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string Spawn::toLevelCode(F32 gridSize) const
+string Spawn::toLevelCode() const
 {
    // Spawn <team> <x> <y> 
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode();
 }
 
 
@@ -662,10 +662,10 @@ bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string FlagSpawn::toLevelCode(F32 gridSize) const
+string FlagSpawn::toLevelCode() const
 {
    // FlagSpawn <team> <x> <y> <spawn timer for nexus> -- Need to insert the team into the string we get from AbstractSpawn()
-   string str1 = Parent::toLevelCode(gridSize);
+   string str1 = Parent::toLevelCode();
    std::size_t firstarg = str1.find(' ');
    return str1.substr(0, firstarg) + " " + itos(getTeam()) + str1.substr(firstarg);
 }

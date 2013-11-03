@@ -382,7 +382,7 @@ bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
 
    setWidth(atoi(argv[1]));
 
-   readGeom(argc, argv, 2, game->getGridSize());
+   readGeom(argc, argv, 2, game->getLegacyGridSize());
 
    updateExtentInDatabase();
 
@@ -390,9 +390,9 @@ bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string WallItem::toLevelCode(F32 gridSize) const
+string WallItem::toLevelCode() const
 {
-   return appendId("BarrierMaker") + " " + itos(getWidth()) + " " + geomToLevelCode(gridSize);
+   return appendId("BarrierMaker") + " " + itos(getWidth()) + " " + geomToLevelCode();
 }
 
 
@@ -754,15 +754,15 @@ bool PolyWall::processArguments(S32 argc, const char **argv, Game *game)
       offset = 1;
    }
 
-   readGeom(argc, argv, 1 + offset, game->getGridSize());
+   readGeom(argc, argv, 1 + offset, game->getLegacyGridSize());
 
    return true;
 }
 
 
-string PolyWall::toLevelCode(F32 gridSize) const
+string PolyWall::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + geomToLevelCode(gridSize);
+   return string(appendId(getClassName())) + " " + geomToLevelCode();
 }
 
 
