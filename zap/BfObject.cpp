@@ -1146,7 +1146,7 @@ bool BfObject::collisionPolyPointIntersect(Point center, F32 radius)
    Point c;
    const Vector<Point> *polyPoints = getCollisionPoly();
 
-   if(polyPoints)
+   if(polyPoints && polyPoints->size())
       return polygonCircleIntersect(&polyPoints->first(), polyPoints->size(), center, radius * radius, c);
 
    F32 r;

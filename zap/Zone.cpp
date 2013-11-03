@@ -123,6 +123,8 @@ bool Zone::processArguments(S32 argc2, const char **argv2, Game *game)
       return false;
 
    readGeom(argc, argv, 0, game->getGridSize());
+   if(getExtent().getHeight() == 0 && getExtent().getWidth() == 0)
+      return false;
 
    updateExtentInDatabase();
 

@@ -889,6 +889,8 @@ F32 PolylineGeometry::getLabelAngle() const
 
 void PolylineGeometry::packGeom(GhostConnection *connection, BitStream *stream)
 {
+   TNLAssert(mPolyBounds.size() > 0, "Invalid geometry!");
+
    // - 1 because writeEnum ranges from 0 to n-1; mPolyBounds.size() ranges from 1 to n
    stream->writeEnum(mPolyBounds.size() - 1, Geometry::MAX_POLY_POINTS);  
    for(S32 i = 0; i < mPolyBounds.size(); i++)
