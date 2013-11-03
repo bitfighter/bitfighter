@@ -174,7 +174,7 @@ bool Zone::collide(BfObject *hitObject)
  */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS,  containsPoint,           ARRAYDEF({{ PT, END }}),              1 ) \
+   METHOD(CLASS,  containsPoint,           ARRAYDEF({{ PT, END }}),        1 ) \
 
 GENERATE_LUA_FUNARGS_TABLE(Zone, LUA_METHODS);
 GENERATE_LUA_METHODS_TABLE(Zone, LUA_METHODS);
