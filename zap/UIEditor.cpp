@@ -639,7 +639,7 @@ void EditorUserInterface::addToEditor(BfObject *obj)
 }
 
 
-// User has pressed Ctrl+R -- run the levelgen script and insert any resulting items into the editor in a separate database
+// User has pressed Ctrl+K -- run the levelgen script and insert any resulting items into the editor in a separate database
 void EditorUserInterface::runLevelGenScript()
 {
    GameType *gameType = getGame()->getGameType();
@@ -694,8 +694,10 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
       ui->reset();
       ui->setTitle("SCRIPT ERROR");
       ui->setMessage("The levelgen script you ran threw an error.\n\n"
-                     "See the console (press [/]) or the logfile for details.");
+                     "See the console (press [[/]]) or the logfile for details.");
       getUIManager()->activate(ui);
+
+      return;
    }
 
    // Even if we had an error, continue on so we can process what does work -- this will make it more consistent with how the script will 
