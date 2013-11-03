@@ -57,6 +57,7 @@
 #include "config.h"
 #include "Cursor.h"              // For various editor cursor
 #include "Colors.h"
+#include "Intervals.h"
 #include "EditorTeam.h"
 
 #include "gameLoader.h"          // For LevelLoadException def
@@ -160,7 +161,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mPreviewMode = false;
    mNormalizedScreenshotMode = false;
 
-   mSaveMsgTimer.setPeriod(5000);    // Display save message for 5 seconds
+   mSaveMsgTimer.setPeriod(FIVE_SECONDS);    
 
    mGridSize = game->getSettings()->getIniSettings()->mSettings.getVal<U32>("EditorGridSize");
 }
@@ -687,7 +688,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    // Error reporting handled within -- we won't cache these scripts for easier development   
    bool error = !levelGen.runScript(false);      
 
-   if(error)
+   if(!error)
    {
       ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
 
@@ -696,8 +697,6 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
       ui->setMessage("The levelgen script you ran threw an error.\n\n"
                      "See the console (press [[/]]) or the logfile for details.");
       getUIManager()->activate(ui);
-
-      return;
    }
 
    // Even if we had an error, continue on so we can process what does work -- this will make it more consistent with how the script will 
@@ -752,16 +751,17 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
 }
 
 
-static void showPluginError(const ClientGame *game, const char *msg)
+void EditorUserInterface::showPluginError(const string &msg)
 {
-   Vector<StringTableEntry> messages;
-   messages.push_back("");
-   messages.push_back(string("This plugin encountered an error ") + msg + ".");
-   messages.push_back("It has probably been misconfigured.");
-   messages.push_back("");
-   messages.push_back("See the Bitfighter logfile or console for details.");
+   Vector<string> messages;
+   messages.push_back("Problem With Plugin");
+   messages.push_back("Press any key to return to the editor");
 
-   game->displayMessageBox("Problem With Plugin", "Press any key to return to the editor", messages);
+   messages.push_back("This plugin encountered an error " + msg + ".\n"
+                      "It has probably been misconfigured.\n\n"
+                      "See the Bitfighter logfile or console ([[/]]) for details.");
+
+   mMessageBoxQueue.push_back(messages);
 }
 
 
@@ -802,7 +802,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    // make it easier to develop them.  If circumstances change, we might want to start caching.
    if(!mPluginRunner->prepareEnvironment() || !mPluginRunner->loadScript(false)) 
    {
-      showPluginError(getGame(), "during loading");
+      showPluginError("during loading");
       mPluginRunner.reset();
       return;
    }
@@ -814,7 +814,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
    if(error)
    {
-      showPluginError(getGame(), "configuring its options menu.");
+      showPluginError("configuring its options menu.");
       mPluginRunner.reset();
       return;
    }
@@ -878,15 +878,27 @@ void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName
 {
    string pluginDir = getGame()->getSettings()->getFolderManager()->pluginDir;
 
-   Vector<StringTableEntry> messages;
-   messages.push_back("");
-   messages.push_back("Could not find the plugin called " + scriptName);
-   messages.push_back("I looked in the " + pluginDir + " folder.");
-   messages.push_back("");
-   messages.push_back("You likely have a typo in the [EditorPlugins]");
-   messages.push_back("section of your INI file.");
+   Vector<string> messages;
+   messages.push_back("Plugin not Found");
+   messages.push_back("Press any key to return to the editor");
 
-   getGame()->displayMessageBox("Plugin not Found", "Press any key to return to the editor", messages);
+   messages.push_back("Could not find the plugin called " + scriptName + "\n"
+                      "I looked in the " + pluginDir + " folder.\n\n"
+                      "You likely have a typo in the [EditorPlugins] section of your INI file.");
+
+   mMessageBoxQueue.push_back(messages);
+}
+
+
+void EditorUserInterface::showUploadErrorMessage()
+{
+   Vector<string> messages;
+   messages.push_back("Error Uploading Level");
+   messages.push_back("Press any key to return to the editor");
+
+   messages.push_back("Error uploading level.  See console for details.");
+
+   mMessageBoxQueue.push_back(messages);
 }
 
 
@@ -2113,7 +2125,7 @@ void EditorUserInterface::renderSaveMessage()
    if(mSaveMsgTimer.getCurrent())
    {
       F32 alpha = 1.0;
-      if(mSaveMsgTimer.getCurrent() < 1000)
+      if(mSaveMsgTimer.getCurrent() < ONE_SECOND)
          alpha = (F32) mSaveMsgTimer.getCurrent() / 1000;
 
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
@@ -4656,6 +4668,20 @@ void EditorUserInterface::idle(U32 timeDelta)
 
    mSaveMsgTimer.update(timeDelta);
    mWarnMsgTimer.update(timeDelta);
+
+   // Process the messageBoxQueue
+   if(mMessageBoxQueue.size() > 0)
+   {
+      ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
+
+      ui->reset();
+      ui->setTitle(mMessageBoxQueue[0][0]);
+      ui->setInstr(mMessageBoxQueue[0][1]);
+      ui->setMessage(mMessageBoxQueue[0][2]);  
+      getUIManager()->activate(ui);
+
+      mMessageBoxQueue.erase(0);
+   }
 }
 
 
@@ -4667,11 +4693,17 @@ void EditorUserInterface::setSaveMessage(string msg, bool savedOK)
 }
 
 
+void EditorUserInterface::clearSaveMessage()
+{
+   mSaveMsgTimer.clear();
+}
+
+
 void EditorUserInterface::setWarnMessage(string msg1, string msg2)
 {
    mWarnMsg1 = msg1;
    mWarnMsg2 = msg2;
-   mWarnMsgTimer.reset(4000, 4000);    // Display for 4 seconds
+   mWarnMsgTimer.reset(FOUR_SECONDS);    // Display for 4 seconds
    mWarnMsgColor = Colors::ErrorMessageTextColor;
 }
 

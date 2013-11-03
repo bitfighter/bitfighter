@@ -283,7 +283,7 @@ void UIManager::onConnectionTerminated(const Address &serverAddress, NetConnecti
          break;
    }
 
-   displayMessageBoxWrap("Connection Terminated", "", message);
+   displayMessageBox("Connection Terminated", "", message);
 }
 
 
@@ -368,7 +368,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
          break;
    }
 
-   displayMessageBoxWrap("Connection Terminated", "", message);
+   displayMessageBox("Connection Terminated", "", message);
 }
 
 
@@ -385,7 +385,7 @@ void UIManager::onConnectionToServerRejected(const char *reason)
    if(reason[0])
       message += "\n\n" + string(reason);
    
-   displayMessageBoxWrap("Connection Terminated", "", message);
+   displayMessageBox("Connection Terminated", "", message);
 }
 
 
@@ -727,49 +727,36 @@ void UIManager::reactivateGameUI()
 }
 
 
-// Ideally, we'll be able to get rid of one of these and they'll all work the same way
-void UIManager::displayMessageBoxWrap(const char *title, const char *instr, const string &message)
-{
-   Vector<string> wrappedLines;
-   wrapString(message, UIManager::MessageBoxWrapWidth, 18, ErrorMsgContext, wrappedLines);
-
-   displayMessageBox(title, instr, wrappedLines);
-}
-
-
 void UIManager::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, 
                                   const Vector<StringTableEntry> &messages)
 {
-   ErrorMessageUserInterface *ui = getUI<ErrorMessageUserInterface>();
-
-   ui->reset();
-   ui->setTitle(title.getString());
-   ui->setInstr(instr.getString());
-
    string msg = "";
    for(S32 i = 0; i < messages.size(); i++)
       msg += string(messages[i].getString()) + "\n";
 
-   ui->setMessage(msg);      // UIErrorMsgInterface ==> first line = 1
-
-   activate(ui);
+   displayMessageBox(title.getString(), instr.getString(), msg);
 }
 
 
-void UIManager::displayMessageBox(const char *title, const char *instr, const Vector<string> &messages)
+void UIManager::displayMessageBox(const string &title, const string &instr, const Vector<string> &messages)
+{
+   string msg = "";
+
+   for(S32 i = 0; i < messages.size(); i++)
+      msg += messages[i] + "\n";   
+   
+   displayMessageBox(title, instr, msg);
+}
+
+
+void UIManager::displayMessageBox(const string &title, const string &instr, const string &message)
 {
    ErrorMessageUserInterface *ui = getUI<ErrorMessageUserInterface>();
 
    ui->reset();
    ui->setTitle(title);
    ui->setInstr(instr);
-
-   string msg = "";
-
-   for(S32 i = 0; i < messages.size(); i++)
-      msg += messages[i] + "\n";
-
-   ui->setMessage(msg);
+   ui->setMessage(message);
 
    activate(ui);
 }

@@ -51,15 +51,15 @@ public:
    static const S32 MAX_LINES = 9;
    SymbolShapePtr mMessage[MAX_LINES];
 
-   const char *mTitle;
-   const char *mInstr;
+   string mTitle;
+   string mInstr;
    void onActivate();
    //void setMessage(S32 id, const string &message);
    void setMessage(const string &message);
 
    void setMaxLines(S32 lines);     // Display no more than this number of lines
-   void setTitle(const char *message);
-   void setInstr(const char *message);
+   void setTitle(const string &title);
+   void setInstr(const string &instr);
    void render();
    void quit();
    virtual void reset();

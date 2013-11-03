@@ -139,6 +139,8 @@ private:
 
    Vector<boost::shared_ptr<BfObject> > mDockItems;    // Items sitting in the dock
 
+   Vector<Vector<string> > mMessageBoxQueue;
+
    U32 mFirstUndoIndex;
    U32 mLastUndoIndex;
    U32 mLastRedoIndex;
@@ -276,6 +278,8 @@ private:
    map<string, Vector<string> > mPluginMenuValues;
 
    void showCouldNotFindScriptMessage(const string &scriptName);
+   void showPluginError(const string &msg);
+
 
    GridDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
 
@@ -401,6 +405,7 @@ public:
    void testLevel();
    void testLevelStart();
    void setSaveMessage(string msg, bool savedOK);
+   void clearSaveMessage();
    void setWarnMessage(string msg1, string msg2);
 
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
@@ -433,6 +438,8 @@ public:
    void clearLevelGenItems();             // Clear any previously created levelgen items
 
    void addToEditor(BfObject *obj);
+   void showUploadErrorMessage();
+
 
    void createNormalizedScreenshot(ClientGame* game);
 

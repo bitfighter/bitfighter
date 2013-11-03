@@ -4,6 +4,7 @@
 #include "HttpRequest.h"
 #include "ClientGame.h"
 #include "UIEditor.h"
+#include "UIErrorMessage.h"
 #include "ScreenShooter.h"
 #include "stringUtils.h"
 
@@ -20,10 +21,12 @@ LevelDatabaseUploadThread::LevelDatabaseUploadThread(ClientGame* game)
    mGame = game;
 }
 
+
 LevelDatabaseUploadThread::~LevelDatabaseUploadThread()
 {
    // Do nothing
 }
+
 
 U32 LevelDatabaseUploadThread::run()
 {
@@ -63,7 +66,8 @@ U32 LevelDatabaseUploadThread::run()
    S32 responseCode = req.getResponseCode();
    if(responseCode != HttpRequest::OK && responseCode != HttpRequest::Found)
    {
-      editor->setSaveMessage("Error uploading level. See console for details", false);
+      editor->showUploadErrorMessage();
+      editor->clearSaveMessage();
 
       stringstream message;
       message << "Error " << responseCode << ": " << endl << req.getResponseBody() << endl;

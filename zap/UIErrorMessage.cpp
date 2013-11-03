@@ -55,19 +55,6 @@ void AbstractMessageUserInterface::onActivate()
 static const S32 TextHeight = 18;
 static const FontContext Context = ErrorMsgContext;
 
-// First line is 1
-//void AbstractMessageUserInterface::setMessage(S32 id, const string &message)
-//{
-//   TNLAssert(id >= 1 && id <= MAX_LINES, "Invalid line id!");
-//
-//   Vector<UI::SymbolShapePtr> symbols;
-//   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), message, 
-//                             symbols, Context, TextHeight);
-//
-//   mMessage[id - 1] = SymbolShapePtr(new SymbolString(symbols));
-//}
-
-
 void AbstractMessageUserInterface::setMessage(const string &message)
 {
    Vector<string> wrappedLines;
@@ -96,15 +83,15 @@ void AbstractMessageUserInterface::setMaxLines(S32 lines)
 }
 
 
-void AbstractMessageUserInterface::setTitle(const char *message)
+void AbstractMessageUserInterface::setTitle(const string &title)
 {
-   mTitle = message;
+   mTitle = title;
 }
 
 
-void AbstractMessageUserInterface::setInstr(const char *message)
+void AbstractMessageUserInterface::setInstr(const string &instr)
 {
-   mInstr = message;
+   mInstr = instr;
 }
 
 
@@ -134,7 +121,7 @@ void AbstractMessageUserInterface::render()
    if(getUIManager()->getPrevUI() != this)
       getUIManager()->renderPrevUI(this);
 
-   renderMessageBox(mTitle, mInstr, mMessage, mMaxLines);
+   renderMessageBox(mTitle.c_str(), mInstr.c_str(), mMessage, mMaxLines);
 }
 
 

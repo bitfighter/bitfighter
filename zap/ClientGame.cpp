@@ -1394,6 +1394,7 @@ bool ClientGame::checkName(const string &name)
 }
 
 
+// Pass this request on to the UIManager
 void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, 
                                    const Vector<StringTableEntry> &messages) const
 {
