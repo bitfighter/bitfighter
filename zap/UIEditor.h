@@ -293,6 +293,8 @@ private:
    void autoSave();                    // Hope for the best, prepare for the worst
    bool doSaveLevel(const string &saveName, bool showFailMessages);
 
+   void onActivateReactivate();
+
 protected:
    void onActivate();
    void onReactivate();

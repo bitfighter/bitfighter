@@ -1238,7 +1238,8 @@ void EditorUserInterface::onActivate()
 
    // Reset display parameters...
    mDragSelecting = false;
-   mUp = mDown = mLeft = mRight = mIn = mOut = false;
+   onActivateReactivate();
+
    mCreatingPoly = false;
    mCreatingPolyline = false;
    mDraggingObjects = false;
@@ -1271,10 +1272,18 @@ bool EditorUserInterface::usesEditorScreenMode()
 }
 
 
+void EditorUserInterface::onActivateReactivate()
+{
+   mUp = mDown = mLeft = mRight = mIn = mOut = false;
+}
+
+
 void EditorUserInterface::onReactivate()     // Run when user re-enters the editor after testing, among other things
 {
    mDraggingObjects = false;  
    Cursor::enableCursor();
+
+   onActivateReactivate();
 
    if(mWasTesting)
    {
