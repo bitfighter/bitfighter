@@ -419,15 +419,16 @@ S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
    // and no records are returned, we'll be able to differentiate that from the situation where the 
    // user is not in the database and no records are returned.  With the UNION, we'll get back at least
    // one record with 0, the default rating for a player who hasn't rated a level, even if that player
-   // has not rated it.
+   // has not rated it.  Add a sort column to ensure that we get results in the order we expect.
    string sql =
-      "SELECT ratings.value FROM pleiades.ratings "
+      "SELECT 1 as sort, ratings.value FROM pleiades.ratings "
       "INNER JOIN bf_phpbb.phpbb_users "
       "WHERE ratings.level_id = " + itos(databaseId) + " AND "
          "ratings.user_id = phpbb_users.user_id AND "
          "phpbb_users.username = '" + name.getString() + "' "
-       "UNION "
-       "SELECT 0;";
+       "UNION ALL "
+       "SELECT 2 as sort, 0 "
+       "ORDER BY sort;";
 
    Vector<Vector<string> > results;
 
@@ -436,7 +437,7 @@ S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
    if(results.size() == 0)    // <== signifies an error getting the rating
       return UnknownRating;
    else
-      return atoi(results[0][0].c_str());
+      return atoi(results[0][1].c_str());
 }
 
 
