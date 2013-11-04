@@ -82,6 +82,7 @@ enum MeritBadges {
    BADGE_LEVEL_DESIGN_WINNER = 7,
    BADGE_ZONE_CONTROLLER = 8,
    BADGE_RABID_RABID_RABBIT = 9,
+   BADGE_HAT_TRICK = 10,
    //...
    BADGE_COUNT = 32              // Changing this value will require updating master server and protocol version
 };

@@ -3759,6 +3759,11 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
       message = "%s has earned the RABID RABID RABBIT badge!";
       textEffectText = "RABID RABID RABBIT";
    }
+   else if(achievement == BADGE_HAT_TRICK)
+   {
+      message = "%s has earned the HAT TRICK badge!";
+      textEffectText = "HAT TRICK";
+   }
    else
       return;
 

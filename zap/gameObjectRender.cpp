@@ -3171,6 +3171,78 @@ void renderRabidRabidRabbitBadge(F32 x, F32 y, F32 rad)
 }
 
 
+void renderHatTrickBadge(F32 x, F32 y, F32 rad)
+{
+   static const F32 outline[] = {
+         7.13f,  3.96f,
+         5.84f,  4.35f,
+         1.86f,  4.86f,
+        -4.59f,  4.58f,
+        -6.81f,  3.85f,
+        -6.64f, -0.04f,
+        -6.05f, -2.69f,
+        -4.2f,  -4.7f,
+        -1.14f, -4.69f,
+         2.77f, -2.61f,
+         5.66f,  0.50f,
+   };
+
+   static const F32 brim[] = {
+         -8.27f, 6.44f,
+         -7.12f, 7.38f,
+         -3.07f, 8.06f,
+          2.98f, 8.17f,
+          8.03f, 7.10f,
+          8.87f, 5.87f,
+          8.53f, 3.57f,
+          5.84f, 4.35f,
+          1.86f, 4.86f,
+         -4.59f, 4.58f,
+         -8.41f, 3.35f,
+   };
+
+   static const F32 pompom[] = {
+         -4.60f, -9.16f,
+         -5.89f, -4.33f,
+
+         -7.66f, -6.10f,
+         -2.83f, -7.39f,
+
+         -7.01f, -8.51f,
+         -3.48f, -4.98f,
+   };
+
+   static const F32 stripe[] = {
+          -6.62f,  0.54f,
+          -3.45f,  1.96f,
+           2.11f,  1.84f,
+           5.66f,  0.50f,
+   };
+
+
+   // Waldo?
+   glPushMatrix();
+      glTranslate(x, y, 0);
+      glScale(.1f * rad);
+
+      // GL_TRIANGLE_FAN, then GL_LINE_LOOP for anti-aliasing
+      glColor(Colors::red);
+      renderVertexArray(brim, ARRAYSIZE(brim) / 2, GL_TRIANGLE_FAN);
+      renderVertexArray(brim, ARRAYSIZE(brim) / 2, GL_LINE_LOOP);
+
+      glColor(Colors::white);
+      renderVertexArray(outline, ARRAYSIZE(outline) / 2, GL_TRIANGLE_FAN);
+      renderVertexArray(outline, ARRAYSIZE(outline) / 2, GL_LINE_LOOP);
+
+      glColor(Colors::red);
+      renderVertexArray(stripe, ARRAYSIZE(stripe) / 2, GL_LINE_STRIP);
+
+      glColor(Colors::red);
+      renderVertexArray(pompom, ARRAYSIZE(pompom) / 2, GL_LINES);
+   glPopMatrix();
+}
+
+
 void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
 {
    switch(S32(badge))
@@ -3201,6 +3273,9 @@ void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
          break;
       case BADGE_RABID_RABID_RABBIT:
          renderRabidRabidRabbitBadge(x, y, rad);
+         break;
+      case BADGE_HAT_TRICK:
+         renderHatTrickBadge(x, y, rad);
          break;
       default:
          TNLAssert(false, "Unknown Badge!");

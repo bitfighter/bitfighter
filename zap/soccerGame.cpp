@@ -43,7 +43,8 @@ using namespace LuaArgs;
 // Constructor
 SoccerGameType::SoccerGameType()
 {
-   // Do nothing
+   mPossibleHatTrickPlayer = NULL;
+   mHatTrickCounter = 0;
 }
 
 // Destructor
@@ -146,13 +147,16 @@ void SoccerGameType::updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent
 
 void SoccerGameType::scoreGoal(Ship *ship, const StringTableEntry &scorerName, S32 scoringTeam, const Point &scorePos, S32 goalTeamIndex, S32 score)
 {
+   // How can this ever be triggered?
    if(scoringTeam == NO_TEAM)
    {
       s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - FirstTeamNumber), scorePos);
       return;
    }
 
-   if(isTeamGame() && (scoringTeam == TEAM_NEUTRAL || scoringTeam == goalTeamIndex))    // Own-goal
+
+   bool isOwnGoal = scoringTeam == TEAM_NEUTRAL || scoringTeam == goalTeamIndex;
+   if(isTeamGame() && isOwnGoal)    // Own-goal
    {
       updateSoccerScore(ship, scoringTeam, ScoreGoalOwnTeam, score);
 
@@ -167,6 +171,38 @@ void SoccerGameType::scoreGoal(Ship *ship, const StringTableEntry &scorerName, S
          updateSoccerScore(ship, scoringTeam, ScoreGoalEnemyTeam, score);
 
       s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - FirstTeamNumber), scorePos);      // See comment above
+   }
+
+   // Check for Hat trick badge
+   ClientInfo *clientInfo = ship->getClientInfo();
+   if(clientInfo != NULL)
+   {
+      // If our current scorer was the last scorer and is wasn't an own-goal
+      if(clientInfo == mPossibleHatTrickPlayer && !isOwnGoal)
+      {
+         mHatTrickCounter++;
+
+         // Now test if we got the badge!
+         if(mHatTrickCounter == 3 &&                              // Must have scored 3 in a row !
+            mPossibleHatTrickPlayer->isAuthenticated() &&         // Player must be authenticated
+            getGame()->getPlayerCount() >= 4 &&                   // Game must have 4+ human players
+            getGame()->getAuthenticatedPlayerCount() >= 2 &&      // Two of whom must be authenticated
+            !mPossibleHatTrickPlayer->hasBadge(BADGE_HAT_TRICK))  // Player doesn't already have the badge
+         {
+            achievementAchieved(BADGE_HAT_TRICK, mPossibleHatTrickPlayer->getName());
+         }
+      }
+
+      // Else keep track of the new scorer and reset the counter
+      else
+      {
+         mPossibleHatTrickPlayer = clientInfo;
+
+         if(isOwnGoal)
+            mHatTrickCounter = 0;
+         else
+            mHatTrickCounter = 1;
+      }
    }
 }
 

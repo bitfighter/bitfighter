@@ -41,6 +41,9 @@ class SoccerGameType : public GameType
 private:
    SafePtr<SoccerBallItem> mBall;
 
+   U32 mHatTrickCounter;
+   ClientInfo *mPossibleHatTrickPlayer;
+
 public:
    SoccerGameType();
    virtual ~SoccerGameType();
