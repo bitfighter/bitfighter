@@ -51,10 +51,9 @@ public:
    static const S32 MAX_LINES = 9;
    SymbolShapePtr mMessage[MAX_LINES];
 
-   string mTitle;
-   string mInstr;
+   SymbolShapePtr mTitle;
+   SymbolShapePtr mInstr;
    void onActivate();
-   //void setMessage(S32 id, const string &message);
    void setMessage(const string &message);
 
    void setMaxLines(S32 lines);     // Display no more than this number of lines
@@ -77,7 +76,6 @@ class ErrorMessageUserInterface : public AbstractMessageUserInterface
 public:
    explicit ErrorMessageUserInterface(ClientGame *game);      // Constructor
    virtual ~ErrorMessageUserInterface();
-   void reset();
 
    bool onKeyDown(InputCode inputCode);
 };

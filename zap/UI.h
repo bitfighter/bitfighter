@@ -141,7 +141,7 @@ public:
    void renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0, S32 style = 1) const;
 
    // New school
-   void renderMessageBox(const char *title, const char *instr, SymbolShapePtr *message, S32 msgLines, S32 vertOffset = 0, S32 style = 1) const;
+   void renderMessageBox(const SymbolShapePtr &title, const SymbolShapePtr &instr, SymbolShapePtr *message, S32 msgLines, S32 vertOffset = 0, S32 style = 1) const;
 
    static void renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor);
 

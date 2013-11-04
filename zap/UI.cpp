@@ -234,7 +234,8 @@ void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset,
 }
 
 
-void UserInterface::renderMessageBox(const char *title, const char *instr, SymbolShapePtr *message, S32 msgLines, S32 vertOffset, S32 style) const
+void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolShapePtr &instr, 
+                                           SymbolShapePtr *message, S32 msgLines, S32 vertOffset, S32 style) const
 {
    const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
@@ -251,12 +252,15 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
    const S32 textGap = textSize / 3;   // Spacing between text lines
    const S32 instrGap = 15;            // Gap between last line of text and instruction line
 
-   S32 titleHeight = strcmp(title, "") != 0 ? TitleHeight : 0;
+   S32 titleHeight = title->getHeight();
+   if(titleHeight > 0)
+      titleHeight += TitleGap;
 
-   S32 boxHeight = titleHeight + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap + titleTextGap;
+   S32 instrHeight = instr->getHeight();
+   if(instrHeight > 0)
+      instrHeight += instrGap;
 
-   if(strcmp(instr, "") == 0)
-      boxHeight -= (instrGap + textSize);
+   S32 boxHeight = titleHeight + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrHeight;
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
 
@@ -276,14 +280,10 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
    else if(style == 2)
       renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::black, 0.70f, Colors::blue);
 
-   // Draw title, message, and footer
-   FontManager::pushFontContext(ErrorMsgContext);
-   drawCenteredString(boxTop + vertMargin, TitleSize, title);
-   drawCenteredString(boxTop + boxHeight - vertMargin - textSize, textSize, instr);
-   FontManager::popFontContext();
+   // Draw title
+   title->render(gScreenInfo.getGameCanvasWidth() / 2, boxTop + vertMargin + TitleSize, AlignmentCenter);
 
-
-   // Render the messages
+   // Draw messages
    S32 y = boxTop + titleHeight + titleTextGap + textSize;
 
    for(S32 i = 0; i < msgLines; i++)
@@ -291,6 +291,9 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, Symbo
       message[i]->render(gScreenInfo.getGameCanvasWidth() / 2, y, AlignmentCenter);
       y += message[i]->getHeight() + textGap;
    }
+
+   // And footer
+   instr->render(gScreenInfo.getGameCanvasWidth() / 2, boxTop + boxHeight - vertMargin, AlignmentCenter);
 }
 
 

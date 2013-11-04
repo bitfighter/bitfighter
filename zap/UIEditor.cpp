@@ -755,7 +755,7 @@ void EditorUserInterface::showPluginError(const string &msg)
 {
    Vector<string> messages;
    messages.push_back("Problem With Plugin");
-   messages.push_back("Press any key to return to the editor");
+   messages.push_back("Press [[Esc]] to return to the editor");
 
    messages.push_back("This plugin encountered an error " + msg + ".\n"
                       "It has probably been misconfigured.\n\n"
@@ -880,7 +880,7 @@ void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName
 
    Vector<string> messages;
    messages.push_back("Plugin not Found");
-   messages.push_back("Press any key to return to the editor");
+   messages.push_back("Press [[Esc]] to return to the editor");
 
    messages.push_back("Could not find the plugin called " + scriptName + "\n"
                       "I looked in the " + pluginDir + " folder.\n\n"
@@ -894,9 +894,9 @@ void EditorUserInterface::showUploadErrorMessage(S32 errorCode, const string &er
 {
    Vector<string> messages;
    messages.push_back("Error Uploading Level");
-   messages.push_back("Press any key to return to the editor");
+   messages.push_back("Press [[Esc]] to return to the editor");
 
-   messages.push_back("Error uploading level.  Server responded with error code " + itos(errorCode) + "." +
+   messages.push_back("Error uploading level.\n\nServer responded with error code " + itos(errorCode) + "." +
                       (errorBody != "" ? "\n\n\"" + errorBody + "\"" : ""));
 
    mMessageBoxQueue.push_back(messages);
@@ -4835,7 +4835,7 @@ void EditorUserInterface::testLevel()
       }
 
       ui->setMessage(msg);
-      ui->setInstr("Press [Y] to start,  [ESC] to cancel");
+      ui->setInstr("Press [[Y]] to start,  [[Esc]] to cancel");
       ui->registerYesFunction(testLevelStart_local);   // testLevelStart_local() just calls testLevelStart() below
 
       getUIManager()->activate(ui);
@@ -5083,7 +5083,7 @@ void quitEditorCallback(ClientGame *game, U32 unused)
       ui->setTitle("SAVE YOUR EDITS?");
       ui->setMessage("You have not saved your changes to this level.\n\n"
                      "Do you want to?");
-      ui->setInstr("Press [Y] to save,  [N] to quit,  [ESC] to cancel");
+      ui->setInstr("Press [[Y]] to save,  [[N]] to quit,  [[Esc]] to cancel");
 
       ui->registerYesFunction(saveLevelCallback);
       ui->registerNoFunction(backToMainMenuCallback);

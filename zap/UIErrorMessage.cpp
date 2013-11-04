@@ -52,7 +52,10 @@ void AbstractMessageUserInterface::onActivate()
 }
 
 
+// TODO: These are repeated in UI.cpp... bad!
 static const S32 TextHeight = 18;
+static const S32 TitleSize = 30;
+
 static const FontContext Context = ErrorMsgContext;
 
 void AbstractMessageUserInterface::setMessage(const string &message)
@@ -85,13 +88,21 @@ void AbstractMessageUserInterface::setMaxLines(S32 lines)
 
 void AbstractMessageUserInterface::setTitle(const string &title)
 {
-   mTitle = title;
+   Vector<UI::SymbolShapePtr> symbols;
+
+   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), title, symbols, Context, TitleSize);
+
+   mTitle = SymbolShapePtr(new SymbolString(symbols));
 }
 
 
 void AbstractMessageUserInterface::setInstr(const string &instr)
 {
-   mInstr = instr;
+   Vector<UI::SymbolShapePtr> symbols;
+
+   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), instr, symbols, Context, TextHeight);
+
+   mInstr = SymbolShapePtr(new SymbolString(symbols));
 }
 
 
@@ -121,7 +132,7 @@ void AbstractMessageUserInterface::render()
    if(getUIManager()->getPrevUI() != this)
       getUIManager()->renderPrevUI(this);
 
-   renderMessageBox(mTitle.c_str(), mInstr.c_str(), mMessage, mMaxLines);
+   renderMessageBox(mTitle, mInstr, mMessage, mMaxLines);
 }
 
 
@@ -142,21 +153,16 @@ ErrorMessageUserInterface::~ErrorMessageUserInterface()
 }
 
 
-void ErrorMessageUserInterface::reset()
-{
-   Parent::reset();
-
-   mTitle = "WE HAVE A PROBLEM";          // Default title
-   mInstr = "Hit any key to continue";
-}
-
-
+// Return true if key handled
 bool ErrorMessageUserInterface::onKeyDown(InputCode inputCode)
 {
    if(Parent::onKeyDown(inputCode))
       return true;
-   else
-      quit();     // Quit the interface when any key is pressed...  any key at all.  Mostly.
+   else if(inputCode == KEY_ESCAPE)
+   {
+      quit();     // Quit the interface when any key is pressed...  any key at all.  Mostly.  Well, if that key was Escape.
+      return true;
+   }
 
    return false;
 }

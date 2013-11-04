@@ -63,9 +63,6 @@ void YesNoUserInterface::reset()
 {
    Parent::reset();
 
-   mTitle = "YES OR NO";    // Default title
-   mInstr = "Press [Y] or [N]";
-
    mYesFunction = NULL;
    mNoFunction = NULL;
 }
