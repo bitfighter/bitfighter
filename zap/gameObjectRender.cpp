@@ -3232,7 +3232,9 @@ void renderHatTrickBadge(F32 x, F32 y, F32 rad)
 
       glColor(Colors::white);
       renderVertexArray(outline, ARRAYSIZE(outline) / 2, GL_TRIANGLE_FAN);
+      glLineWidth(gLineWidth1);
       renderVertexArray(outline, ARRAYSIZE(outline) / 2, GL_LINE_LOOP);
+      glLineWidth(gDefaultLineWidth);
 
       glColor(Colors::red);
       renderVertexArray(stripe, ARRAYSIZE(stripe) / 2, GL_LINE_STRIP);
