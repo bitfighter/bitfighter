@@ -3124,7 +3124,7 @@ void renderZoneControllerBadge(F32 x, F32 y, F32 rad)
 }
 
 
-void renderRabidRabidRabbitBadge(F32 x, F32 y, F32 rad)
+void renderRagingRabidRabbitBadge(F32 x, F32 y, F32 rad)
 {
    static const F32 rabbit[] = {
          -3.70f, -6.46f,
@@ -3271,8 +3271,8 @@ void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
       case BADGE_ZONE_CONTROLLER:
          renderZoneControllerBadge(x, y, rad);
          break;
-      case BADGE_RABID_RABID_RABBIT:
-         renderRabidRabidRabbitBadge(x, y, rad);
+      case BADGE_RAGING_RABID_RABBIT:
+         renderRagingRabidRabbitBadge(x, y, rad);
          break;
       case BADGE_HAT_TRICK:
          renderHatTrickBadge(x, y, rad);

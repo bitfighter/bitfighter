@@ -793,7 +793,7 @@ void DiagnosticUserInterface::render()
          renderBadge(x, y, rad, BADGE_ZONE_CONTROLLER);
 
          x += 3*rad;
-         renderBadge(x, y, rad, BADGE_RABID_RABID_RABBIT);
+         renderBadge(x, y, rad, BADGE_RAGING_RABID_RABBIT);
 
          x += 3*rad;
          renderBadge(x, y, rad, BADGE_HAT_TRICK);
