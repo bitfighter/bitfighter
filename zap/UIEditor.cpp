@@ -1229,8 +1229,6 @@ void EditorUserInterface::onActivate()
 
    mGameTypeArgs.clear();
 
-   getGame()->setActiveTeamManager(&mTeamManager);
-
    loadLevel();
    setCurrentTeam(0);
 
@@ -1242,16 +1240,11 @@ void EditorUserInterface::onActivate()
 
    mCreatingPoly = false;
    mCreatingPolyline = false;
-   mDraggingObjects = false;
    mDraggingDockItem = NULL;
    mCurrentTeam = 0;
    mPreviewMode = false;
    mDragCopying = false;
    mJustInsertedVertex = false;
-
-   Cursor::enableCursor();
-
-   getGame()->setAddTarget();    // When a Lua script does an addToGame(), objects should be added to this game
 
    VideoSystem::actualizeScreenMode(settings, true, usesEditorScreenMode());
 
@@ -1272,17 +1265,21 @@ bool EditorUserInterface::usesEditorScreenMode()
 }
 
 
+// Stuff to do when activating or reactivating
 void EditorUserInterface::onActivateReactivate()
 {
+   mDraggingObjects = false;
    mUp = mDown = mLeft = mRight = mIn = mOut = false;
+   getGame()->setActiveTeamManager(&mTeamManager);
+   getGame()->setAddTarget();    // When a Lua script does an addToGame(), objects should be added to this game
+   mDockItemHit = NULL;
+
+   Cursor::enableCursor();
 }
 
 
 void EditorUserInterface::onReactivate()     // Run when user re-enters the editor after testing, among other things
 {
-   mDraggingObjects = false;  
-   Cursor::enableCursor();
-
    onActivateReactivate();
 
    if(mWasTesting)
@@ -1296,17 +1293,11 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
    }
 
 
-   getGame()->setAddTarget();    // When a Lua script does an addToGame(), objects should be added to this game
-
-   getGame()->setActiveTeamManager(&mTeamManager);
-
    if(mCurrentTeam >= getTeamCount())
       mCurrentTeam = 0;
 
    if(UserInterface::getUIManager()->getPrevUI()->usesEditorScreenMode() != usesEditorScreenMode())
       VideoSystem::actualizeScreenMode(getGame()->getSettings(), true, usesEditorScreenMode());
-
-   mDockItemHit = NULL;
 }
 
 
