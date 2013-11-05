@@ -120,9 +120,9 @@ ParamInfo paramDefs[] = {
 { "fontsdir",              ONE_REQUIRED,   FONTS_DIR,             3, "<path>",                "Folder where fonts are stored",              "You must specify your fonts folder with the -fontsdir option" },
 
 // Developer-oriented options
-{ "loss",                  ONE_REQUIRED,   SIMULATED_LOSS,        4, "<float>",   "Simulate the specified amount of packet loss, from 0 (no loss) to 1 (all packets lost)", "You must specify a loss rate between 0 and 1 with the -loss option" },
-{ "lag",                   ONE_REQUIRED,   SIMULATED_LAG,         4, "<int>",     "Simulate the specified amount of server lag (in milliseconds)",                          "You must specify a lag (in ms) with the -lag option" },
-{ "stutter",               ONE_REQUIRED,   SIMULATED_STUTTER,     4, "<int>",     "Simulate VPS CPU stutter (in milliseconds/second)",                                      "You must specify a value (in ms) with the -stutter option.  Values clamped to 0-1000" },
+{ "loss",                  ONE_REQUIRED,   SIMULATED_LOSS,        4, "<float>",   "Simulate the specified amount of packet loss, from 0 (no loss) to 1 (all packets lost) Note: Client only!", "You must specify a loss rate between 0 and 1 with the -loss option" },
+{ "lag",                   ONE_REQUIRED,   SIMULATED_LAG,         4, "<int>",     "Simulate the specified amount of server lag (in milliseconds) Note: Client only!",                          "You must specify a lag (in ms) with the -lag option" },
+{ "stutter",               ONE_REQUIRED,   SIMULATED_STUTTER,     4, "<int>",     "Simulate VPS CPU stutter (in milliseconds/second) Note: Server only!",                                      "You must specify a value (in ms) with the -stutter option.  Values clamped to 0-1000" },
 { "forceupdate",           NO_PARAMETERS,  FORCE_UPDATE,          4, "",          "Trick game into thinking it needs to update",                                            "" },
 
 // Also, see the directives section below!
