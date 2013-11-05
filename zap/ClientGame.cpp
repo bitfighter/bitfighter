@@ -959,6 +959,9 @@ void ClientGame::onGameUIActivated()
    resetCommandersMap();       // Start game in regular mode
 
    getGameObjDatabase()->removeEverythingFromDatabase();
+   mClientInfo->setSpawnDelayed(false);
+
+   logprintf("Hi raptor!");
 }
 
 
