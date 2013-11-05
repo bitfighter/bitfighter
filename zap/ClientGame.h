@@ -153,6 +153,7 @@ public:
    void resetCommandersMap();
    F32 getCommanderZoomFraction() const;
 
+   void onGameUIActivated();     // Gets run when the GameUI is first activated (from main menu)
    void onGameStarting();
 
    void setEnteringGameOverScoreboardPhase();   // Post-game scoreboard is about to be displayed

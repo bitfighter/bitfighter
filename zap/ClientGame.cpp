@@ -78,8 +78,6 @@ static void initializeHelpItemForObjects()
 // Constructor
 ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIManager *uiManager) : Game(bindAddress, settings)
 {
-   //mUserInterfaceData = new UserInterfaceData();
-
    mRemoteLevelDownloadFilename = "downloaded.level";
 
    mUIManager = uiManager;                // Gets deleted in destructor
@@ -953,6 +951,17 @@ void ClientGame::onGameReallyAndTrulyOver()
 }
 
 
+// This gets called when the GameUI is activated from the Main Menu.  This almost always gets run before
+// GameConnection::onConnectionEstablished_client(), but serves a similar function.
+void ClientGame::onGameUIActivated()
+{
+   setSpawnDelayed(false);
+   resetCommandersMap();       // Start game in regular mode
+   mClientInfo->setSpawnDelayed(false);
+}
+
+
+// This gets called at the beginning of a new game
 void ClientGame::onGameStarting()
 {
    // Shouldn't need to do this, but it will clear out forcefields lingering from level load

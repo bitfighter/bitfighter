@@ -208,6 +208,8 @@ void GameUserInterface::onActivate()
    }
 
    mShutdownMode = None;
+
+   getGame()->onGameUIActivated();
 }
 
 

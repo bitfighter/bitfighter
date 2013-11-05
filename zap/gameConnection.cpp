@@ -68,7 +68,6 @@ GameConnection::GameConnection()
 #ifndef ZAP_DEDICATED
    mClientGame = NULL;
 #endif
-
 }
 
 
@@ -1842,6 +1841,8 @@ void GameConnection::onConnectionEstablished()
 }
 
 
+// This gets run when we've connected to the game server
+// See also void ClientGame::onGameUIActivated() for other game startup stuff
 void GameConnection::onConnectionEstablished_client()
 {
 #ifndef ZAP_DEDICATED
@@ -1852,9 +1853,6 @@ void GameConnection::onConnectionEstablished_client()
 
    // This is a new connection, server is expecting the new client to not show idling message.
    getClientInfo()->setSpawnDelayed(false);
-   mClientGame->setSpawnDelayed(false);
-   mClientGame->resetCommandersMap();       // Start game in regular mode
-
 
    string lastServerName = mClientGame->getRequestedServerName();
 
