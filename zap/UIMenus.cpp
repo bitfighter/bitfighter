@@ -436,11 +436,15 @@ void MenuUserInterface::render()
       const S32 bottom = top + textsize + (2 * padding);
       const S32 cornerInset = 10;
 
+      // Fill
+      glColor(Colors::red40, alpha);
+      drawFancyBox(left, top, gScreenInfo.getGameCanvasWidth() - left, bottom, cornerInset, GL_TRIANGLE_FAN);
+
       // Border
-      glColor(Colors::blue, alpha);
+      glColor(Colors::red, alpha);
       drawFancyBox(left, top, gScreenInfo.getGameCanvasWidth() - left, bottom, cornerInset, GL_LINE_LOOP);
 
-      glColor(Colors::yellow, alpha);
+      glColor(Colors::white, alpha);
       drawCenteredString(top + padding, textsize, mFadingNoticeMessage.c_str());
    }
 
