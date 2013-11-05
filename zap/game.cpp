@@ -726,7 +726,8 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
          logprintf(LogConsumer::LogLevelError, "Improperly formed GridSize parameter");
       else {
          mLegacyGridSize = (F32)atof(argv[1]);
-         logprintf("Legacy 'GridSize' line with value %f found. This is no longer used.  Please re-save level in the editor to update level.", mLegacyGridSize);
+         logprintf("Legacy 'GridSize' parameter found in level \"%s\".  Load and save level in the editor to get rid of this message.", 
+                    levelFileName.c_str());
       }
 
       return;
