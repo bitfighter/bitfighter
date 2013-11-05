@@ -508,6 +508,8 @@ void GameUserInterface::render()
 
       glColor(Colors::white);
       drawCenteredString(346, 20, "Press <ESC> to abort");
+
+      return;
    }
 
    TNLAssert(getUIManager()->isCurrentUI<GameUserInterface>() || getUIManager()->cameFrom<GameUserInterface>(), "Then why are we rendering???");
