@@ -957,6 +957,8 @@ void ClientGame::onGameUIActivated()
 {
    setSpawnDelayed(false);
    resetCommandersMap();       // Start game in regular mode
+
+   getGameObjDatabase()->removeEverythingFromDatabase();
 }
 
 
