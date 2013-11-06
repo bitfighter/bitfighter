@@ -1067,7 +1067,6 @@ void ClientGame::setNeedToUpgrade(bool needToUpgrade)
 }
 
 
-
 void ClientGame::displayCmdChatMessage(const char *format, ...) const
 {
    va_list args;
