@@ -1229,6 +1229,8 @@ void EditorUserInterface::onActivate()
 
    mGameTypeArgs.clear();
 
+   onActivateReactivate();
+
    loadLevel();
    setCurrentTeam(0);
 
@@ -1236,7 +1238,6 @@ void EditorUserInterface::onActivate()
 
    // Reset display parameters...
    mDragSelecting = false;
-   onActivateReactivate();
 
    mCreatingPoly = false;
    mCreatingPolyline = false;
@@ -1270,9 +1271,10 @@ void EditorUserInterface::onActivateReactivate()
 {
    mDraggingObjects = false;
    mUp = mDown = mLeft = mRight = mIn = mOut = false;
-   getGame()->setActiveTeamManager(&mTeamManager);
    getGame()->setAddTarget();    // When a Lua script does an addToGame(), objects should be added to this game
    mDockItemHit = NULL;
+
+   getGame()->setActiveTeamManager(&mTeamManager);
 
    Cursor::enableCursor();
 }
