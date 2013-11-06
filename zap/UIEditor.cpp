@@ -5108,7 +5108,7 @@ void EditorMenuUserInterface::setupMenus()
    addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode")));
    addMenuItem(new MenuItem("TEST LEVEL",       testLevelCallback,           "", KEY_T));
    addMenuItem(new MenuItem("SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
-   addMenuItem(new MenuItem("EDITOR SECRETS",     activateHelpCallback,        "", KEY_I, keyHelp));
+   addMenuItem(new MenuItem("EDITOR SECRETS",     activateHelpCallback,        "", KEY_E, keyHelp));
    addMenuItem(new MenuItem("LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
    addMenuItem(new MenuItem("MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
 
