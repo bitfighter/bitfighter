@@ -5114,7 +5114,13 @@ void EditorMenuUserInterface::setupMenus()
 
    // Only show the upload to database option if authenticated
    if(getGame()->getClientInfo()->isAuthenticated())
-      addMenuItem(new MenuItem("UPLOAD TO DB", uploadToDbCallback, "Levels posted at " + HttpRequest::LevelDatabaseBaseUrl, KEY_U));
+   {
+      string title = LevelDatabase::isLevelInDatabase(getGame()->getLevelDatabaseId()) ?
+         "UPDATE LEVEL IN DB" :
+         "UPLOAD LEVEL TO DB";
+
+      addMenuItem(new MenuItem(title, uploadToDbCallback, "Levels posted at " + HttpRequest::LevelDatabaseBaseUrl, KEY_U));
+   }
    else
       addMenuItem(new MessageMenuItem("MUST BE LOGGED IN TO UPLOAD LEVELS TO DB", Colors::gray40));
 
