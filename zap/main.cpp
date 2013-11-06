@@ -940,6 +940,13 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       settings->getIniSettings()->connectionSpeed = 0;
    }
 
+   if(previousVersion < VERSION_019)
+   {
+      // Don't enable in-game help
+      settings->setShowingInGameHelp(false);
+   }
+
+
    // Now copy over resources to user's preference directory.  This will overwrite the previous
    // resources with same names.  Dont do this if it is a standalone bundle
    if(!isStandalone)
