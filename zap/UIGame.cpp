@@ -2204,6 +2204,8 @@ void GameUserInterface::renderScoreboard()
                      (canvasWidth - horizMargin) + gap, scoreboardTop + totalHeight + 23,
                      13, Colors::black, 0.85f, Colors::blue);
 
+   FontManager::pushFontContext(ScoreboardContext);
+
    for(S32 i = 0; i < teams; i++)
    {
       const S32 yt = scoreboardTop + (i >> 1) * sectionHeight;    // Top edge of team render area
@@ -2223,6 +2225,7 @@ void GameUserInterface::renderScoreboard()
          glColor(Colors::white);
          drawString (xl + 40,  yt + 2, teamFontSize, getGame()->getTeamName(i).getString());
          drawStringf(xr - 140, yt + 2, teamFontSize, "%d", ((Team *)(getGame()->getTeam(i)))->getScore());
+         FontManager::popFontContext();
       }
 
       // Now for player scores.  First build a list.  Then sort it.  Then display it.
@@ -2278,6 +2281,7 @@ void GameUserInterface::renderScoreboard()
 
          curRowY += maxHeight;
       }
+      FontManager::popFontContext();
 
       // Go back and render the column headers, now that we know the widths.  These will be different for team and solo games.
 
