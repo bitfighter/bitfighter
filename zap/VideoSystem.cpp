@@ -383,6 +383,10 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
       break;
    }
 
+   if(settings->getIniSettings()->disableScreenSaver)
+      SDL_DisableScreenSaver();
+   else
+      SDL_EnableScreenSaver();
 #else
    // Set up sdl video flags according to display mode
    S32 sdlVideoFlags = SDL_OPENGL;

@@ -59,9 +59,6 @@ class ClientGame : public Game
 private:
    SafePtr<GameConnection> mConnectionToServer; // If this is a client game, this is the connection to the server
 
-   Timer mScreenSaverTimer;
-   void supressScreensaver();
-
    UIManager *mUIManager;
 
    string mRemoteLevelDownloadFilename;

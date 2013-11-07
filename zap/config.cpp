@@ -138,6 +138,7 @@ IniSettings::IniSettings()
    wallFillColor.set(0,0,.15);
    wallOutlineColor.set(Colors::blue);
    clientPortNumber = 0;
+   disableScreenSaver = true;
 
    randomLevels = false;
    skipUploads = false;
@@ -545,6 +546,7 @@ static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString()));
    iniSettings->oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
    iniSettings->clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
+   iniSettings->clientPortNumber = ini->GetValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
 }
 
 
@@ -1769,6 +1771,7 @@ static void writeTesting(CIniFile *ini, GameSettings *settings)
       ini->sectionComment("Testing", " WallOutlineColor - Color used locally for rendering wall outlines (r,g,b), (values between 0 and 1)");
       ini->sectionComment("Testing", " WallFillColor - Color used locally for rendering wall fill (r,g,b), (values between 0 and 1)");
       ini->sectionComment("Testing", " ClientPortNumber - Only helps when punching through firewall when using router's port forwarded for client port number");
+      ini->sectionComment("Testing", " DisableScreenSaver - Disable ScreenSaver from having no input from keyboard/mouse, useful when using joystick");
       ini->sectionComment("Testing", "----------------");
    }
 
@@ -1780,6 +1783,7 @@ static void writeTesting(CIniFile *ini, GameSettings *settings)
 
    ini->setValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
    ini->SetValueI ("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
+   ini->setValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
 }
 
 

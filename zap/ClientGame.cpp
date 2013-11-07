@@ -85,8 +85,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIM
 
    mClientInfo = new FullClientInfo(this, NULL, mSettings->getPlayerName(), false);  // Will be deleted in destructor
 
-   mScreenSaverTimer.reset(59 * 1000);    // Fire screen saver supression every 59 seconds
-
    for(S32 i = 0; i < JoystickAxesDirectionCount; i++)
       mJoystickInputs[i] = 0;
 
@@ -743,12 +741,6 @@ void ClientGame::idle(U32 timeDelta)
    processDeleteList(timeDelta);                         // Delete any objects marked for deletion
    
    mNetInterface->processConnections();                  // Pass updated ship info to the server
-
-   if(mScreenSaverTimer.update(timeDelta))               // Attempt, vainly, I'm afraid, to suppress screensavers
-   {
-      supressScreensaver();
-      mScreenSaverTimer.reset();
-   }
 
    mUIManager->idle(timeDelta);
 }
@@ -1504,31 +1496,6 @@ void ClientGame::displaySuccessMessage(const char *format, ...) const
 
    getUIManager()->displaySuccessMessage(message);
 }
-
-// Fire keyboard event to suppress screen saver
-void ClientGame::supressScreensaver()
-{
-
-#if defined(TNL_OS_WIN32) && (_WIN32_WINNT > 0x0400)     // Windows only for now, sadly...
-   // _WIN32_WINNT is needed in case of compiling for old windows 98 (this code won't work for windows 98)
-
-   // Code from Tom Revell's Caffeine screen saver suppression product
-
-   // Build keypress
-   tagKEYBDINPUT keyup;
-   keyup.wVk = VK_MENU;     // Some key that GLUT doesn't recognize
-   keyup.wScan = NULL;
-   keyup.dwFlags = KEYEVENTF_KEYUP;
-   keyup.time = NULL;
-   keyup.dwExtraInfo = NULL;
-
-   tagINPUT array[1];
-   array[0].type = INPUT_KEYBOARD;
-   array[0].ki = keyup;
-   SendInput(1, array, sizeof(INPUT));
-#endif
-}
-
 
 // We need to let the server know we are in cmdrs map because it needs to send extra data
 void ClientGame::setUsingCommandersMap(bool usingCommandersMap)

@@ -283,6 +283,7 @@ public:
    Color wallFillColor;
    Color wallOutlineColor;
    U16 clientPortNumber;
+   bool disableScreenSaver;
 
    // Logging options   --   true will enable logging these events, false will disable
    bool logConnectionProtocol;
