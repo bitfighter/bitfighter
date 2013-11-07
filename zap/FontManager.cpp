@@ -28,10 +28,8 @@ namespace Zap {
 
 
 // Stroke font constructor
-BfFont::BfFont(FontId fontId, const ::SFG_StrokeFont *strokeFont)
+BfFont::BfFont(const ::SFG_StrokeFont *strokeFont)
 {
-   mFontId = fontId;
-   
    mIsStrokeFont = true;
    mOk = true;
    mStrokeFont = strokeFont;
@@ -42,10 +40,8 @@ BfFont::BfFont(FontId fontId, const ::SFG_StrokeFont *strokeFont)
 
 
 // TTF font constructor
-BfFont::BfFont(FontId fontId, const string &fontFile, GameSettings *settings)
+BfFont::BfFont(const string &fontFile, GameSettings *settings)
 {
-   mFontId = fontId;
-      
    mIsStrokeFont = false;
    mStrokeFont = NULL;     // Stroke font only
 
@@ -92,12 +88,6 @@ bool BfFont::isStrokeFont()
 }
 
 
-FontId BfFont::getId()
-{
-   return mFontId;
-}
-
-
 S32 BfFont::getStashFontId()
 {
    return mStashFontId;
@@ -125,22 +115,24 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       mStash = sth_create(512, 512);
 
    // Our stroke fonts
-   fontList[FontRoman]               = new BfFont(FontRoman,               &fgStrokeRoman);
-   fontList[FontOrbitronLightStroke] = new BfFont(FontOrbitronLightStroke, &fgStrokeOrbitronLight);
-   fontList[FontOrbitronMedStroke]   = new BfFont(FontOrbitronMedStroke,   &fgStrokeOrbitronMed);
+   fontList[FontRoman]               = new BfFont(&fgStrokeRoman);
+   fontList[FontOrbitronLightStroke] = new BfFont(&fgStrokeOrbitronLight);
+   fontList[FontOrbitronMedStroke]   = new BfFont(&fgStrokeOrbitronMed);
 
    if(mUsingExternalFonts)
    {
       TNLAssert(settings, "Settings can't be NULL if we are using external fonts!");
 
       // Our TTF fonts
-      fontList[FontOrbitronLight]  = new BfFont(FontOrbitronLight, "Orbitron Light.ttf",  settings);
-      fontList[FontOrbitronMedium] = new BfFont(FontOrbitronLight, "Orbitron Medium.ttf", settings);
-      fontList[FontDroidSansMono]  = new BfFont(FontDroidSansMono, "DroidSansMono.ttf",   settings);
-      fontList[FontWebDings]       = new BfFont(FontWebDings,      "webhostinghub-glyphs.ttf", settings);
-      fontList[FontPlay]           = new BfFont(FontPlay,          "Play-Regular.ttf",    settings);
-      fontList[FontPlayBold]       = new BfFont(FontPlay,          "Play-Bold.ttf",       settings);
-      fontList[FontModernVision]   = new BfFont(FontPlay,          "Modern-Vision.ttf",   settings);
+      fontList[FontOrbitronLight]  = new BfFont("Orbitron Light.ttf",  settings);
+      fontList[FontOrbitronMedium] = new BfFont("Orbitron Medium.ttf", settings);
+      fontList[HUD]                = new BfFont("hud.ttf",             settings);
+      fontList[KeyCaps]            = new BfFont("hud.ttf",             settings);     
+      fontList[FontDroidSansMono]  = new BfFont("DroidSansMono.ttf",   settings);
+      fontList[FontWebDings]       = new BfFont("webhostinghub-glyphs.ttf", settings);
+      fontList[FontPlay]           = new BfFont("Play-Regular.ttf",    settings);
+      fontList[FontPlayBold]       = new BfFont("Play-Bold.ttf",       settings);
+      fontList[FontModernVision]   = new BfFont("Modern-Vision.ttf",   settings);
    }
 
    // set texture blending function

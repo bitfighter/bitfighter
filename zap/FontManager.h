@@ -68,18 +68,16 @@ class BfFont
 private:
    bool mIsStrokeFont;
    bool mOk;
-   FontId mFontId;
 
    S32 mStashFontId;
 
    const SFG_StrokeFont *mStrokeFont;     // Will be NULL for TTF fonts
 
 public:
-   BfFont(FontId fontId, const ::SFG_StrokeFont *strokeFont);              // Stroke font constructor
-   BfFont(FontId fontId, const string &fontFile, GameSettings *settings);  // TTF font constructor
-   virtual ~BfFont();                                                                   // Destructor
+   BfFont(const ::SFG_StrokeFont *strokeFont);              // Stroke font constructor
+   BfFont(const string &fontFile, GameSettings *settings);  // TTF font constructor
+   virtual ~BfFont();                                       // Destructor
 
-   FontId getId();
    const SFG_StrokeFont *getStrokeFont();
    bool isStrokeFont();
    S32 getStashFontId();
