@@ -546,7 +546,7 @@ static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString()));
    iniSettings->oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
    iniSettings->clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
-   iniSettings->clientPortNumber = ini->GetValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
+   iniSettings->disableScreenSaver = ini->GetValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
 }
 
 
