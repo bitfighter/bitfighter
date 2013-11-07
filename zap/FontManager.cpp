@@ -136,8 +136,6 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       // Our TTF fonts
       fontList[FontOrbitronLight]  = new BfFont(FontOrbitronLight, "Orbitron Light.ttf",  settings);
       fontList[FontOrbitronMedium] = new BfFont(FontOrbitronLight, "Orbitron Medium.ttf", settings);
-      fontList[HUD]                = new BfFont(HUD,               "hud.ttf",             settings);
-      fontList[KeyCaps]            = new BfFont(KeyCaps,           "hud.ttf",             settings);     
       fontList[FontDroidSansMono]  = new BfFont(FontDroidSansMono, "DroidSansMono.ttf",   settings);
       fontList[FontWebDings]       = new BfFont(FontWebDings,      "webhostinghub-glyphs.ttf", settings);
       fontList[FontPlay]           = new BfFont(FontPlay,          "Play-Regular.ttf",    settings);
