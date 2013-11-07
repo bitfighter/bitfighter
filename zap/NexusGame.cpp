@@ -903,7 +903,9 @@ void NexusFlagItem::dismount(DismountMode dismountMode)
 {
    if(isGhost())      // Server only
       return;
-  
+   if(getDatabase() == NULL)  // must be in database, switching levels makes database NULL
+      return;
+
    if(dismountMode == DISMOUNT_MOUNT_WAS_KILLED)
    {
       // Should getting shot up count as a flag drop event for statistics purposes?
