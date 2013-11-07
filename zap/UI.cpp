@@ -256,7 +256,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
    if(titleHeight > 0)
       titleHeight += TitleGap;
 
-   S32 instrHeight = instr->getHeight();
+   S32 instrHeight = instr == NULL ? 0 : instr->getHeight();
    if(instrHeight > 0)
       instrHeight += instrGap;
 
@@ -293,7 +293,8 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
    }
 
    // And footer
-   instr->render(gScreenInfo.getGameCanvasWidth() / 2, boxTop + boxHeight - vertMargin, AlignmentCenter);
+   if(instr)
+      instr->render(gScreenInfo.getGameCanvasWidth() / 2, boxTop + boxHeight - vertMargin, AlignmentCenter);
 }
 
 
