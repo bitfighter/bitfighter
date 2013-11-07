@@ -34,6 +34,7 @@
 
 #include "SDL.h"
 #include "SDL_joystick.h"
+#include "SDL_stdinc.h"
 
 #include <map>
 
@@ -107,6 +108,9 @@ bool Joystick::initJoystick(GameSettings *settings)
    GameSettings::DetectedJoystickNameList.clear();
 
 #  if SDL_VERSION_ATLEAST(2,0,0)
+      // Allows multiple joysticks with each using a copy of Bitfighter
+      SDL_setenv("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1", 0);
+
       if(!SDL_WasInit(SDL_INIT_JOYSTICK) && SDL_InitSubSystem(SDL_INIT_JOYSTICK))
       {
          logprintf("Unable to initialize the joystick subsystem");
