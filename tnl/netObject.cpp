@@ -45,6 +45,17 @@ NetObject::NetObject()
    mDirtyMaskBits = 0;
 }
 
+// Copy constructor
+NetObject::NetObject(const NetObject &t)
+{  
+   mNetIndex = U32(-1);
+   mFirstObjectRef = NULL;
+   mPrevDirtyList = NULL;
+   mNextDirtyList = NULL;
+   mDirtyMaskBits = 0;
+}
+
+
 NetObject::~NetObject()
 {
    while(mFirstObjectRef)
