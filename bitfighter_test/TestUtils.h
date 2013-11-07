@@ -1,3 +1,8 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 #ifndef _TEST_UTILS_H
 #define _TEST_UTILS_H
 

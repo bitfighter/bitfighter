@@ -1,8 +1,9 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 /*
- * OpenglUtils.h
- *
- *  Created on: Jun 8, 2011
- *
  *  Most of this was taken directly from freeglut sources
  */
 

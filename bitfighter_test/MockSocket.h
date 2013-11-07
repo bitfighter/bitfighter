@@ -1,3 +1,8 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 #ifndef MOCKSOCKET_H_
 #define MOCKSOCKET_H_
 

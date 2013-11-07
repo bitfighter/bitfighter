@@ -1,3 +1,8 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 #ifndef LEVELDATABASEUPLOADTHREAD_H
 #define LEVELDATABASEUPLOADTHREAD_H
 

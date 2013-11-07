@@ -1,3 +1,8 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 #include "../zap/GeomUtils.h"
 #include "gtest/gtest.h"
 #include <tnl.h>

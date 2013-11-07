@@ -1,1 +1,0 @@
-RabbitGameType <game time in minutes> <team max score> <flag return timer in secs> <seconds per point>

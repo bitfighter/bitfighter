@@ -1,3 +1,8 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 /*
  *	This is my wrapper-class to create
  *	a MD5 Hash from a string and a file.

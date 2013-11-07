@@ -1,3 +1,8 @@
+#------------------------------------------------------------------------------
+# Copyright Chris Eykamp
+# See LICENSE.txt for full copyright information
+#------------------------------------------------------------------------------
+
 # Define the Linux data dir if not defined in a packaging build script already
 if("${CMAKE_SYSTEM}" MATCHES "Linux")
 	if(NOT LINUX_DATA_DIR)

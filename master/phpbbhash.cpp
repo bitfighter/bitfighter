@@ -1,6 +1,5 @@
 /*
 Copyright (c) 2009, William M Brandt (aka 'Taekvideo')
-[[Minor modifications for Bitfighter usage by Chris Eykamp]]
 
 All rights reserved.
 Email: taekvideo@gmail.com (feel free to contact me with any questions, concerns, or suggestions)

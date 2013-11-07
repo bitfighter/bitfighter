@@ -1,4 +1,7 @@
-/* oglconsole -- gpl license here */
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
 
 #ifndef _OGLCONSOLE_H
 #define _OGLCONSOLE_H

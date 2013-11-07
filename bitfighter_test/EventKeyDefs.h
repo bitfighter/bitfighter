@@ -1,3 +1,8 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 #ifndef _EVENT_KEY_DEFS_H
 #define _EVENT_KEY_DEFS_H
 

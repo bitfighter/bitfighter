@@ -1,3 +1,8 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 // IniFile.cpp:  Implementation of the CIniFile class.
 // Written by:   Adam Clauss
 // Email: cabadam@tamu.edu

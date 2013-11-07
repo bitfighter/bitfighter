@@ -1,5 +1,7 @@
-/* oglconsole -- gpl license here */
-
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
 
 #ifdef WIN32
 #  define _CRT_SECURE_NO_DEPRECATE    // Avoid warnings about fopen and vsnprintf

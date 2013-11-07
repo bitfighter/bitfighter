@@ -1,3 +1,7 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
 
 #ifndef _LUAMODULE_H_
 #define _LUAMODULE_H_

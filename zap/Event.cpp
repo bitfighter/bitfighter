@@ -1,9 +1,7 @@
-/*
- * Input.cpp
- *
- *  Created on: Jun 12, 2011
- *      Author: noonespecial
- */
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
 
 #include "Event.h"
 

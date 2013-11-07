@@ -1,3 +1,8 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 #ifndef _LEVEL_DATABASE_RATE_THREAD_H_
 #define _LEVEL_DATABASE_RATE_THREAD_H_
 

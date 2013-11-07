@@ -1,9 +1,7 @@
-/*
- * LevelDatabaseRateThread.cpp
- *
- *  Created on: May 14, 2013
- *      Author: charon
- */
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
 
 #include "LevelDatabaseRateThread.h"
 

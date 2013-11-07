@@ -1,3 +1,8 @@
+#------------------------------------------------------------------------------
+# Copyright Chris Eykamp
+# See LICENSE.txt for full copyright information
+#------------------------------------------------------------------------------
+
 set(MASTER_SOURCES
    database.cpp
    main.cpp
