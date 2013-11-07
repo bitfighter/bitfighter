@@ -188,7 +188,7 @@ public:
    virtual NetError recv(U8 *buffer, S32 bufferSize, S32 *bytesRead);
    virtual NetError send(const U8 *buffer, S32 bufferSize);
 
-   bool isWritable(U32 timeout = NULL);
+   bool isWritable(U32 timeout = 0);
 };
 
 //inline void read(BitStream &s, IPAddress *val)

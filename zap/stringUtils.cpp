@@ -605,12 +605,8 @@ bool copyFile(const string &sourceFilename, const string &destFilename)
       {
          std::size_t writtenChunk = fwrite(buffer, 1, readChunk, destFile);
 
-         // Error writing file
-         if(writtenChunk < 0)
-            success = false;
-
          // Error writing file, Disk probably full
-         else if(writtenChunk < readChunk)
+         if(writtenChunk < readChunk || ferror(destFile))
             success = false;
 
          if(!success)

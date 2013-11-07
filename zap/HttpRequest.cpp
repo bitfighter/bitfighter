@@ -111,7 +111,7 @@ S32 HttpRequest::getResponseCode()
 
 void HttpRequest::parseResponse(string response)
 {
-   U32 seperatorIndex = response.find("\r\n\r\n");
+   size_t seperatorIndex = response.find("\r\n\r\n");
    if(seperatorIndex == string::npos || response == "")
    {
       // seperator not found, this response isn't valid
@@ -123,8 +123,8 @@ void HttpRequest::parseResponse(string response)
    U32 bodyIndex = seperatorIndex + 4;
    mResponseBody = response.substr(bodyIndex, response.length());
 
-   U32 responseCodeStart = mResponseHead.find(" ") + 1;
-   U32 responseCodeEnd = mResponseHead.find("\r\n", responseCodeStart);
+   size_t responseCodeStart = mResponseHead.find(" ") + 1;
+   size_t responseCodeEnd = mResponseHead.find("\r\n", responseCodeStart);
    string responseCode = mResponseHead.substr(responseCodeStart, responseCodeEnd - responseCodeStart);
    mResponseCode = atoi(responseCode.c_str());
 }

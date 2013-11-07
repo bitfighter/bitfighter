@@ -462,7 +462,7 @@ static string stringify(lua_State *L, S32 index)
       case LUA_TSTRING:   
          return "string: " + string(lua_tostring(L, index));
       case LUA_TBOOLEAN:  
-         return "boolean: " + lua_toboolean(L, index) ? "true" : "false";
+         return "boolean: " + string(lua_toboolean(L, index) ? "true" : "false");
       case LUA_TNUMBER:    
          return "number: " + itos(S32(lua_tonumber(L, index)));
       default:

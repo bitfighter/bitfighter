@@ -181,6 +181,7 @@ void EventConnection::packetDropped(PacketNotify *pnotify)
    {
       switch(walk->mEvent->mGuaranteeType)
       {
+         case NetEvent::GuaranteedOrderedBigData:
          case NetEvent::GuaranteedOrdered:
             // It was a guaranteed ordered packet, reinsert it back into
             // mSendEventQueueHead in the right place (based on seq numbers)
