@@ -134,10 +134,10 @@ Vector<string> RabbitGameType::getGameParameterMenuKeys()
 boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(const string &key)
 {
    if(key == "Flag Return Time")
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Flag Return Timer:", mFlagReturnTimer / 1000, 1, 1, 99, 
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Flag Return Timer:", mFlagReturnTimer / 1000, 1, 1, MaxMenuScore,
                                                              "secs", "", "Time it takes for an uncaptured flag to return home"));
    else if(key == "Point Earn Rate")
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Point Earn Rate:", getFlagScore(), 1, 1, 99, 
+      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Point Earn Rate:", getFlagScore(), 1, 1, MaxMenuScore,
                                                              "points per minute", "", "Rate player holding the flag accrues points"));
    else 
       return Parent::getMenuItem(key);
