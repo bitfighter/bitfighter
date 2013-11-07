@@ -240,7 +240,7 @@ public:
    NetObject();
    ~NetObject();
    // Copy constructor
-   NetObject::NetObject(const NetObject &t);
+   NetObject(const NetObject &t);
 
    /// collapseDirtyList pushes all the mDirtyMaskBits down into
    /// the GhostInfo's for each object, and clears out the dirty
