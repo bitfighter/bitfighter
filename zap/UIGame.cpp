@@ -2224,8 +2224,6 @@ void GameUserInterface::renderScoreboard()
                      (canvasWidth - horizMargin) + gap, scoreboardTop + totalHeight + 23,
                      13, Colors::black, 0.85f, Colors::blue);
 
-   FontManager::pushFontContext(ScoreboardContext);
-
    for(S32 i = 0; i < teams; i++)
    {
       const S32 yt = scoreboardTop + (i >> 1) * sectionHeight;    // Top edge of team render area
@@ -2241,6 +2239,7 @@ void GameUserInterface::renderScoreboard()
          drawFilledFancyBox(xl, yt, xr, yt + headerBoxHeight, 10, *teamColor, 0.6f, *teamColor);
 
          // Then the team name & score
+         FontManager::pushFontContext(ScoreboardHeadlineContext);
          glColor(Colors::white);
          drawString (xl + 40,  yt + 2, teamFontSize, getGame()->getTeamName(i).getString());
          drawStringf(xr - 140, yt + 2, teamFontSize, "%d", ((Team *)(getGame()->getTeam(i)))->getScore());
@@ -2273,6 +2272,7 @@ void GameUserInterface::renderScoreboard()
       if(playerScores.size() > 0)
          curRowY += colHeaderHeight;
 
+      FontManager::pushFontContext(ScoreboardContext);
       for(S32 j = 0; j < playerScores.size(); j++)
       {
          static const S32 vertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;

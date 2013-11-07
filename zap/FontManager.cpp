@@ -161,6 +161,8 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       fontList[FontDroidSansMono]  = new BfFont(FontDroidSansMono, "DroidSansMono.ttf",   settings);
       fontList[FontWebDings]       = new BfFont(FontWebDings,      "webhostinghub-glyphs.ttf", settings);
       fontList[FontPlay]           = new BfFont(FontPlay,          "Play-Regular.ttf",    settings);
+      fontList[FontPlayBold]       = new BfFont(FontPlay,          "Play-Bold.ttf",       settings);
+      fontList[FontModernVision]   = new BfFont(FontPlay,          "Modern-Vision.ttf",   settings);
    }
 
    // set texture blending function
@@ -222,22 +224,28 @@ void FontManager::setFontContext(FontContext fontContext)
       
       case HelpContext:
       case ErrorMsgContext:
+      case ReleaseVersionContext:
+      case LevelInfoContext:
+      case ScoreboardContext:
          setFont(FontPlay);
          return;
 
       case MotdContext:
-      case ScoreboardContext:
-      case ReleaseVersionContext:
-      case HelpItemContext:
-      case HUDContext:
-      case LevelInfoContext:
+      case FPSContext:
+      case LevelInfoHeadlineContext:
       case LoadoutIndicatorContext:
-      case OverlayMenuContext:
-         setFont(HUD);
+      case ScoreboardHeadlineContext:
+      case HelperMenuHeadlineContext:
+        setFont(FontModernVision);
+         return;
+
+      case HelperMenuContext:
+      case HelpItemContext:
+         setFont(FontPlay);
          return;
 
       case KeyContext:
-         setFont(KeyCaps);
+         setFont(FontPlay);
          return;
 
       case TextEffectContext:
@@ -251,6 +259,11 @@ void FontManager::setFontContext(FontContext fontContext)
 
       case WebDingContext:
          setFont(FontWebDings);
+         return;
+
+      case TimeLeftHeadlineContext:
+      case TimeLeftIndicatorContext:
+         setFont(FontPlayBold);
          return;
 
       default:

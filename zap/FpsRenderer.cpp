@@ -128,7 +128,7 @@ void FpsRenderer::render(S32 canvasWidth) const
       }
    }
 
-   FontManager::pushFontContext(HUDContext);
+   FontManager::pushFontContext(FPSContext);
 
    static const S32 horizMargin = 10;
    static const S32 vertMargin = 10;

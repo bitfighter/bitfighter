@@ -83,10 +83,10 @@ void LevelInfoDisplayer::clearDisplayTimer()
 
 void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool isInDatabase) const
 {
-   FontManager::pushFontContext(LevelInfoContext);
-
    glPushMatrix();
    glTranslate(0, getInsideEdge(), 0);
+
+   FontManager::pushFontContext(LevelInfoContext);
 
     // Only render these when they are not empty
    bool showCredits = gameType->getLevelCredits()->isNotNull();    
@@ -97,7 +97,7 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    const S32 titleGap  = 10;
 
    Vector<SymbolShapePtr> symbols;
-   symbols.push_back(SymbolString::getSymbolText(title, titleSize, LevelInfoContext));
+   symbols.push_back(SymbolString::getSymbolText(title, titleSize, LevelInfoHeadlineContext));
 
    // Find the unicode in Character Map or similar utility,
    // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
@@ -224,35 +224,45 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    const S32 gameTypeHeight    = gameTypeTextSize + gameTypeMargin;
 
    const S32 instructionSize   = 13;
-   const S32 instructionMargin =  8;
+   const S32 instructionMargin =  5;
+   const S32 postInstructionMargin = 8 - instructionMargin;
    const S32 instructionHeight = instructionSize + instructionMargin;
 
    const S32 scoreToWinSize    = 20;
-   const S32 scoreToWinMargin  =  8;
+   const S32 scoreToWinMargin  =  6;
    const S32 scoreToWinHeight  = scoreToWinSize  + scoreToWinMargin;
 
    const S32 sideBoxTotalHeight = frameMargin + gameTypeHeight + instructionHeight * (showTwoLinesOfInstructions ? 2 : 1) + 
-                                  scoreToWinHeight + frameMargin;
+                                  postInstructionMargin + scoreToWinHeight + frameMargin;
 
    const S32 instrWidth = max(getStringWidth(instructionSize, gameType->getInstructionString()[0]), 
                               showTwoLinesOfInstructions ? getStringWidth(instructionSize, gameType->getInstructionString()[1]) : 0); 
-      
+
    // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
    bool team = gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && teamCount > 1;
    string gt  = string(team ? "Team " : "") + gameType->getGameTypeName();
    string sgt = string("[") + gameType->getShortName() + "]";
 
+   const S32 gameTypeWidth = getStringPairWidth(gameTypeTextSize, LevelInfoHeadlineContext, 
+                                                LevelInfoHeadlineContext, gt.c_str(), sgt.c_str());
+
+
    static const char *scoreToWinStr = "Score to Win:";
+   
+   FontManager::pushFontContext(LevelInfoHeadlineContext);
    const S32 scoreToWinWidth = getStringWidthf(scoreToWinSize, "%s%d", scoreToWinStr, gameType->getWinningScore()) + 5;
-   const S32 sideBoxWidth    = max(instrWidth, max(getStringPairWidth(gameTypeTextSize, gt.c_str(), sgt.c_str()), scoreToWinWidth)) + 
-                               sideMargin * 2;
-   const S32 sideBoxCen      = gScreenInfo.getGameCanvasWidth() - sideBoxWidth / 2;
+   FontManager::popFontContext();
+
+   const S32 sideBoxWidth = max(instrWidth, max(gameTypeWidth, scoreToWinWidth)) + sideMargin * 2;
+   const S32 sideBoxCen   = gScreenInfo.getGameCanvasWidth() - sideBoxWidth / 2;
    
    renderSlideoutWidgetFrame(gScreenInfo.getGameCanvasWidth() - sideBoxWidth, sideBoxY, sideBoxWidth, sideBoxTotalHeight, Colors::blue);
 
    yPos = sideBoxY + frameMargin;
 
-   drawCenteredStringPair(sideBoxCen, yPos, gameTypeTextSize, Colors::white, Colors::cyan, gt.c_str(), sgt.c_str());
+   drawCenteredStringPair(sideBoxCen, yPos, gameTypeTextSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext,
+                          Colors::white, Colors::cyan, gt.c_str(), sgt.c_str());
+
    yPos += gameTypeHeight;
 
    glColor(Colors::yellow);
@@ -266,8 +276,10 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
       yPos += instructionHeight;
    }
 
-   drawCenteredStringPair(sideBoxCen, yPos, scoreToWinSize, Colors::cyan, Colors::red, 
-                  scoreToWinStr, itos(gameType->getWinningScore()).c_str());
+   yPos += postInstructionMargin;
+
+   drawCenteredStringPair(sideBoxCen, yPos, scoreToWinSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext, 
+                          Colors::cyan, Colors::red, scoreToWinStr, itos(gameType->getWinningScore()).c_str());
    yPos += scoreToWinHeight;
 
    glPopMatrix();

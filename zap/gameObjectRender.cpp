@@ -582,7 +582,7 @@ static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
 {
    S32 sym = Platform::getRealMilliseconds() / 2000 % 9;
 
-   //FontManager::pushFontContext(HUDContext);
+   //FontManager::pushFontContext(FPSContext);
 
 //   glLineWidth(gLineWidth1);
 //

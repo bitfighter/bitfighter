@@ -53,7 +53,7 @@ const S32 bigScoreTextGap = 5;
 // When render param is true, will render as expected; when false, will simply return dimensions
 Point TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible, bool render) const
 {
-   FontManager::pushFontContext(LoadoutIndicatorContext);
+   FontManager::pushFontContext(TimeLeftHeadlineContext);
 
    Point corner = renderTimeLeft(gameType, render);
    S32 timeLeft = (S32)corner.x;

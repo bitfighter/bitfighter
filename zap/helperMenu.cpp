@@ -160,7 +160,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
       mOldCount = displayItems;
    }
 
-   FontManager::pushFontContext(OverlayMenuContext);
+   FontManager::pushFontContext(HelperMenuContext);
 
    // Get the left edge of where the text portion of the menu items should be rendered
    S32 itemIndent = calcLeftMarginForTextPortionOfEntry(items, count) + LeftMargin + ButtonLabelGap;
@@ -176,7 +176,11 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    // Draw the title (above gray line)
    glColor(baseColor);
+   
+   FontManager::pushFontContext(HelperMenuHeadlineContext);
    drawCenteredString(grayLineCenter, yPos, TITLE_FONT_SIZE, title);
+   FontManager::popFontContext();
+
    yPos += titleHeight;
 
    // Gray line
@@ -356,7 +360,7 @@ S32 HelperMenu::getMaxItemWidth(const OverlayMenuItem *items, S32 count)
    S32 width = -1;
    for(S32 i = 0; i < count; i++)
    {
-      S32 w = getStringWidth(OverlayMenuContext, MENU_FONT_SIZE, items[i].name) + getStringWidth(MENU_FONT_SIZE, items[i].help);
+      S32 w = getStringWidth(HelperMenuContext, MENU_FONT_SIZE, items[i].name) + getStringWidth(MENU_FONT_SIZE, items[i].help);
       if(w > width)
          width = w;
    }

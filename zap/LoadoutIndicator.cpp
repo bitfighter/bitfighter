@@ -32,6 +32,7 @@
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
+#include "stringUtils.h"
 
 
 using namespace Zap;
@@ -90,12 +91,12 @@ const LoadoutTracker *LoadoutIndicator::getLoadout() const
 }
 
 
-static const S32 IndicatorHeight = indicatorFontSize + 2 * indicatorPadding + 1;
+static const S32 IndicatorHeight = indicatorFontSize + 2 * indicatorVertPadding + 1;
 
 
 static S32 getComponentRectWidth(S32 textWidth)
 {
-   return textWidth + 2 * indicatorPadding;
+   return textWidth + 2 * indicatorHorizPadding;
 }
 
 
@@ -103,11 +104,12 @@ static S32 getComponentRectWidth(S32 textWidth)
 static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 {
    // Draw the weapon or module name
-   S32 textWidth = drawStringAndGetWidth(xPos + indicatorPadding, yPos + indicatorPadding, indicatorFontSize, name);
+   S32 textWidth = drawStringAndGetWidth(xPos + indicatorHorizPadding, yPos + indicatorVertPadding - 1, 
+                                         indicatorFontSize, lcase(name).c_str());
 
    S32 rectWidth = getComponentRectWidth(textWidth);
 
-   drawFancyBox(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight, indicatorPadding, GL_LINE_LOOP);
+   drawFancyBox(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight, indicatorVertPadding, GL_LINE_LOOP);
 
    return rectWidth;
 }
@@ -143,7 +145,7 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 
       S32 width = renderComponentIndicator(xPos, top, WeaponInfo::getWeaponInfo(loadout.getWeapon(i)).name.getString());
 
-      xPos += width + indicatorPadding;
+      xPos += width + indicatorHorizPadding;
    }
 
    xPos += GapBetweenTheGroups;    // Small horizontal gap to separate the weapon indicators from the module indicators
@@ -168,12 +170,12 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 
       S32 width = renderComponentIndicator(xPos, top, ModuleInfo::getModuleInfo(module)->getName());
 
-      xPos += width + indicatorPadding;
+      xPos += width + indicatorHorizPadding;
    }
 
    FontManager::popFontContext();
 
-   return xPos - LoadoutIndicator::LoadoutIndicatorLeftPos - indicatorPadding;
+   return xPos - LoadoutIndicator::LoadoutIndicatorLeftPos - indicatorHorizPadding;
 }
 
 
@@ -183,14 +185,14 @@ S32 LoadoutIndicator::getWidth() const
    S32 width = 0;
 
    for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
-      width += getComponentIndicatorWidth(WeaponInfo::getWeaponInfo(mCurrLoadout.getWeapon(i)).name.getString()) + indicatorPadding;
+      width += getComponentIndicatorWidth(WeaponInfo::getWeaponInfo(mCurrLoadout.getWeapon(i)).name.getString()) + indicatorHorizPadding;
 
    width += GapBetweenTheGroups;
 
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-      width += getComponentIndicatorWidth(ModuleInfo::getModuleInfo(mCurrLoadout.getModule(i))->getName()) + indicatorPadding;
+      width += getComponentIndicatorWidth(ModuleInfo::getModuleInfo(mCurrLoadout.getModule(i))->getName()) + indicatorHorizPadding;
 
-   width -= indicatorPadding;
+   width -= indicatorHorizPadding;
 
    return width;
 }

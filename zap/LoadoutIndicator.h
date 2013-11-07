@@ -34,7 +34,8 @@ using namespace TNL;
 namespace Zap { namespace UI {
 
 static const S32 indicatorFontSize = 15;
-static const S32 indicatorPadding = 3;       // Gap between text and box
+static const S32 indicatorHorizPadding = 5;       // Gap between text and box
+static const S32 indicatorVertPadding = 3;
 
 
 class LoadoutIndicator : public AToBScroller
@@ -51,7 +52,7 @@ public:
 
    static const S32 LoadoutIndicatorTopPos = 10;    // Gap between top of screen and top of indicator
    static const S32 LoadoutIndicatorLeftPos = 10;
-   static const S32 LoadoutIndicatorHeight = indicatorFontSize + indicatorPadding * 2;
+   static const S32 LoadoutIndicatorHeight = indicatorFontSize + indicatorVertPadding * 2;
    static const S32 LoadoutIndicatorBottomPos = LoadoutIndicatorTopPos + LoadoutIndicatorHeight + 1;  // 1 accounts for line widths and such
 
    void newLoadoutHasArrived(const LoadoutTracker &loadout);
