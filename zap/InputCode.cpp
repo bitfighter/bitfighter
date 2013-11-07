@@ -1587,9 +1587,7 @@ bool InputCodeManager::isKeypadKey(InputCode inputCode)
 
 bool InputCodeManager::isKeyboardKey(InputCode inputCode)
 {
-   // inputCode is unsigned, and FIRST_KEYBOARD_KEY is zero, so
-   // inputCode >= FIRST_KEYBOARD_KEY is always true
-   return inputCode <= LAST_KEYBOARD_KEY;
+   return inputCode >= FIRST_KEYBOARD_KEY && inputCode <= LAST_KEYBOARD_KEY;
 }
 
 
@@ -1925,9 +1923,7 @@ InputCode InputCodeManager::stringToInputCode(const char *inputName)
 
 const char *InputCodeManager::inputCodeToPrintableChar(InputCode inputCode)
 {
-   // inputCode is unsigned, and FIRST_PRINTABLE_KEY is zero, so
-   // inputCode >= FIRST_PRINTABLE_KEY is always true
-   if(inputCode == KEY_SPACE || inputCode <= LAST_PRINTABLE_KEY)
+   if(inputCode == KEY_SPACE || (inputCode >= FIRST_PRINTABLE_KEY && inputCode <= LAST_PRINTABLE_KEY))
       return inputCodeToString(inputCode);
 
    return "";
