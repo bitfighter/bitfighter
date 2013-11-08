@@ -668,7 +668,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    // Error reporting handled within -- we won't cache these scripts for easier development   
    bool error = !levelGen.runScript(false);      
 
-   if(!error)
+   if(error)
    {
       ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
 
