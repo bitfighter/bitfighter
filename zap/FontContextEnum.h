@@ -44,8 +44,8 @@ namespace Zap
 
       // External fonts:
       FontDroidSansMono,
-      FontOrbitronLight,
-      FontOrbitronMedium,
+      //FontOrbitronLight,
+      //FontOrbitronMedium,
       FontWebDings,
       FontPlay,
       FontPlayBold,

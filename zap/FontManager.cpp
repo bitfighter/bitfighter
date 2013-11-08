@@ -124,11 +124,11 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       TNLAssert(settings, "Settings can't be NULL if we are using external fonts!");
 
       // Our TTF fonts
-      fontList[FontOrbitronLight]  = new BfFont("Orbitron Light.ttf",  settings);
-      fontList[FontOrbitronMedium] = new BfFont("Orbitron Medium.ttf", settings);
+      //fontList[FontOrbitronLight]  = new BfFont("Orbitron Light.ttf",  settings);
+      //fontList[FontOrbitronMedium] = new BfFont("Orbitron Medium.ttf", settings);
       fontList[FontDroidSansMono]  = new BfFont("DroidSansMono.ttf",   settings);
       fontList[FontWebDings]       = new BfFont("webhostinghub-glyphs.ttf", settings);
-      fontList[FontPlay]           = new BfFont("Play-Regular.ttf",    settings);
+      fontList[FontPlay]           = new BfFont("Play-Regular-hinting.ttf", settings);
       fontList[FontPlayBold]       = new BfFont("Play-Bold.ttf",       settings);
       fontList[FontModernVision]   = new BfFont("Modern-Vision.ttf",   settings);
    }
