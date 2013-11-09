@@ -1310,7 +1310,7 @@ REGISTER_LUA_CLASS(BfObject);
  * 
  * @code
  *   obj = TestItem.new()
- *   -- prints `true`
+ *   -- prints 'true'
  *   print(obj:getObjType() == ObjType.TestItem)
  * @endcode
  *
