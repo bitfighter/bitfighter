@@ -133,7 +133,7 @@ ErrorMessageUserInterface::~ErrorMessageUserInterface()
 }
 
 
-bool ErrorMessageUserInterface::usesEditorScreenMode()
+bool ErrorMessageUserInterface::usesEditorScreenMode() const
 {
    return getUIManager()->getCurrentUI()->usesEditorScreenMode();
 }

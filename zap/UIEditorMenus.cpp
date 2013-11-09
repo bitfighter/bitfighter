@@ -216,7 +216,7 @@ S32 QuickMenuUI::getSelectedMenuItem()
 }
 
 
-bool QuickMenuUI::usesEditorScreenMode()                 // TODO: Rename this stupidly named method!!
+bool QuickMenuUI::usesEditorScreenMode() const     // TODO: Rename this stupidly named method!!
 {
    return true;
 }

@@ -58,7 +58,7 @@ public:
    virtual ~ErrorMessageUserInterface();
 
    bool onKeyDown(InputCode inputCode);
-   bool usesEditorScreenMode();
+   bool usesEditorScreenMode() const;
 };
 
 

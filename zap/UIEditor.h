@@ -281,7 +281,7 @@ protected:
 
    void renderMasterStatus();
 
-   bool usesEditorScreenMode();
+   bool usesEditorScreenMode() const;
 
 public:
    explicit EditorUserInterface(ClientGame *game);    // Constructor

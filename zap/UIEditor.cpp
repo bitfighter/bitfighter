@@ -1240,7 +1240,7 @@ void EditorUserInterface::renderMasterStatus()
 }
 
 
-bool EditorUserInterface::usesEditorScreenMode()
+bool EditorUserInterface::usesEditorScreenMode() const
 {
    return true;
 }

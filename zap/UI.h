@@ -99,7 +99,7 @@ public:
    virtual void onReactivate();
    virtual void onDisplayModeChange();
 
-   virtual bool usesEditorScreenMode();   // Returns true if the UI attempts to use entire screen like editor, false otherwise
+   virtual bool usesEditorScreenMode() const;   // Returns true if the UI attempts to use entire screen like editor, false otherwise
 
    void renderConsole()const;             // Render game console
    virtual void renderMasterStatus();     // Render master server connection status

@@ -39,7 +39,7 @@ protected:
    bool mDisableHighlight;   // Disable highlighting of selected menu item
 
    virtual S32 getSelectedMenuItem();
-   bool usesEditorScreenMode();
+   bool usesEditorScreenMode() const;
 
 public:
    // Constructors

@@ -74,7 +74,7 @@ UIManager *UserInterface::getUIManager() const
 }
 
 
-bool UserInterface::usesEditorScreenMode()
+bool UserInterface::usesEditorScreenMode() const
 {
    return false;
 }
