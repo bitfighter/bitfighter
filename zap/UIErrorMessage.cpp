@@ -133,6 +133,12 @@ ErrorMessageUserInterface::~ErrorMessageUserInterface()
 }
 
 
+bool ErrorMessageUserInterface::usesEditorScreenMode()
+{
+   return getUIManager()->getCurrentUI()->usesEditorScreenMode();
+}
+
+
 // Return true if key handled
 bool ErrorMessageUserInterface::onKeyDown(InputCode inputCode)
 {
