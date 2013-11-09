@@ -87,8 +87,6 @@ S32 QSORT_CALLBACK pluginInfoSort(EditorUserInterface::PluginInfo *a, EditorUser
    return stricmp((a)->prettyName.c_str(), (b)->prettyName.c_str());
 }
 
-//Vector<string> EditorUserInterface::robots;        // List of robot lines in the level file
-
 
 static void saveLevelCallback(ClientGame *game)
 {
