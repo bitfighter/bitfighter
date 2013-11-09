@@ -4714,7 +4714,6 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
    string filename = getLevelFileName();
    TNLAssert(filename != "", "Need file name here!");
 
-
    if(!doSaveLevel(filename, showFailMessages))
       return false;
 
