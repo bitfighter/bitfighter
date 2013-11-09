@@ -674,7 +674,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
 
       ui->reset();
       ui->setTitle("SCRIPT ERROR");
-      ui->setMessage("The levelgen script you ran threw an error.\n\n"
+      ui->setMessage("The levelgen script you ran encountered an error.\n\n"
                      "See the console (press [[/]]) or the logfile for details.");
       getUIManager()->activate(ui);
    }
