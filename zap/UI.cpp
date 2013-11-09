@@ -366,7 +366,6 @@ bool UserInterface::onKeyDown(InputCode inputCode)
 
    bool handled = false;
 
-   GameSettings *settings = getGame()->getSettings();
    UIManager *uiManager = getGame()->getUIManager();
 
    if(checkInputCode(InputCodeManager::BINDING_DIAG, inputCode))              // Turn on diagnostic overlay

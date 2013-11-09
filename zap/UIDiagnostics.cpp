@@ -528,7 +528,7 @@ void DiagnosticUserInterface::render()
 
          UI::SymbolString(symbols).render(Point(gScreenInfo.getGameCanvasWidth() / 2 + 100, ypos + 50));
 
-         for(S32 i = FIRST_CONTROLLER_BUTTON; i <= LAST_CONTROLLER_BUTTON; i++)
+         for(U32 i = FIRST_CONTROLLER_BUTTON; i <= LAST_CONTROLLER_BUTTON; i++)
          {
             InputCode code = InputCode(i);
             const Color *color = InputCodeManager::getState(code) ? &Colors::red : NULL;

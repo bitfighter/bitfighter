@@ -2645,8 +2645,6 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
 
-   Rect barrierExtents = mGame->computeBarrierExtents();
-
    s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, mGame->mObjectsLoaded, 
                    mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId());
 

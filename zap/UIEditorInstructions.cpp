@@ -35,10 +35,10 @@ using UI::SymbolString;
 using UI::SymbolStringSet;
 
 // Constructor
-EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game), 
+EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game),
+                                                                                     mAnimTimer(1000),
                                                                                      mConsoleInstructions(10),
-                                                                                     mPluginInstructions(10),
-                                                                                     mAnimTimer(1000)
+                                                                                     mPluginInstructions(10)
 {
    GameSettings *settings = getGame()->getSettings();
    mCurPage = 0;
@@ -195,8 +195,6 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    pack(mWallInstr, mWallBindings, wallInstructions, ARRAYSIZE(wallInstructions), settings);
 
    
-   const S32 instrSize = 18;
-
    symbols.clear();
    SymbolString::symbolParse(settings->getInputCodeManager(), "Open the console by pressing [[/]]", 
                              symbols, HelpContext, FontSize, &Colors::green, keyColor);
@@ -342,7 +340,6 @@ void EditorInstructionsUserInterface::renderPageWalls()
    //drawStringf(400, 100, 25, "%d", mAnimStage);     // Useful to have around when things go wrong!
 
    S32 vertOffset = 20;
-   S32 textSize = 18;
 
    Vector<Point> points;
 

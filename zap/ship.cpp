@@ -1276,11 +1276,7 @@ void Ship::readControlState(BitStream *stream)
    //bool rrrmFastRecharging = stream->readFlag();
 
    mCooldownNeeded = stream->readFlag();
-   int xmFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));     // TODO: Remove for 019
-   //if(mFireTimer > S32(MaxFireDelay))
-   //   mFireTimer =  S32(MaxFireDelay) - mFireTimer;
 
-   WeaponType previousWeapon = mLoadout.getActiveWeapon();
    setActiveWeapon(stream->readRangedU32(0, ShipWeaponCount));
 }
 

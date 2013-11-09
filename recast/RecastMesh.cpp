@@ -463,7 +463,7 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
 
    // + 1 reserves a bit of space at the end for a temp workspace
 	//rcScopedDelete<unsigned short> polys = (unsigned short*)rcAlloc(sizeof(unsigned short)*(ntris + 1)*nvp, RC_ALLOC_TEMP);
-	unsigned short *polys = polys = mesh.polys;
+	unsigned short *polys = mesh.polys;
    //	rcScopedDelete<unsigned short> tmpPoly = (unsigned short*)rcAlloc(sizeof(unsigned short)*nvp, RC_ALLOC_TEMP);
 	if (!polys)
 	{

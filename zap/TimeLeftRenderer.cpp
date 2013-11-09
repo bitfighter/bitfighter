@@ -36,7 +36,6 @@ Point TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible,
    FontManager::pushFontContext(TimeLeftHeadlineContext);
 
    Point corner = renderTimeLeft(gameType, render);
-   S32 timeLeft = (S32)corner.x;
    S32 timeTop  = (S32)corner.y;
 
    // Convert the coordinates we got above into dimensions

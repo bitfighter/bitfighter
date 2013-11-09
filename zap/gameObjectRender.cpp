@@ -558,7 +558,8 @@ static void calcThrustComponents(const Point &velocity, F32 angle, F32 deltaAngl
 
 
 // Passed position is lower left corner of player name
-static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
+//static
+void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
 {
    S32 sym = Platform::getRealMilliseconds() / 2000 % 9;
 
@@ -696,23 +697,23 @@ static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
          1, 1,
    };
 
-   static const F32 triPoints[] = {
-         -6, -6,
-         -1, -1,
-         -6, -1,
-
-         1, -6,
-         6, -1,
-         1, -1,
-
-         -6,  6,
-         -1,  6,
-         -6,  1,
-
-         1, 6,
-         6, 6,
-         1, 1,
-   };
+//   static const F32 triPoints[] = {
+//         -6, -6,
+//         -1, -1,
+//         -6, -1,
+//
+//         1, -6,
+//         6, -1,
+//         1, -1,
+//
+//         -6,  6,
+//         -1,  6,
+//         -6,  1,
+//
+//         1, 6,
+//         6, 6,
+//         1, 1,
+//   };
 
    glPushMatrix();
 
