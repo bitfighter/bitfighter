@@ -42,6 +42,7 @@
 
 #include "gameLoader.h"          // For LevelLoadException def
 #include "LevelSource.h"
+#include "LevelDatabase.h"
 
 #include "luaLevelGenerator.h"
 #include "LevelDatabaseUploadThread.h"
@@ -1422,8 +1423,6 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice, regardless of whether snapping is on or off
       if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
       {
-         EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(mSnapObject.getPointer());
-         //return engrObj->mountToWall(snapPointToLevelGrid(p), wallSegmentManager);
          return snapPointToLevelGrid(p);
       }
    }
@@ -2126,7 +2125,7 @@ void EditorUserInterface::renderSaveMessage()
    if(mSaveMsgTimer.getCurrent())
    {
       F32 alpha = 1.0;
-      if(mSaveMsgTimer.getCurrent() < ONE_SECOND)
+      if(mSaveMsgTimer.getCurrent() < (U32)ONE_SECOND)
          alpha = (F32) mSaveMsgTimer.getCurrent() / 1000;
 
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
@@ -2848,15 +2847,6 @@ void EditorUserInterface::onMouseMoved()
 
    findSnapVertex();
    Cursor::enableCursor();
-}
-
-
-// During the snapping process, when an engineered item is snapped to the wall, it is translated over to its new position.  This
-// function looks at an object and determines if it has already been translated or not.
-static bool alreadyTranslated(BfObject *object)
-{
-   return false;
-   //return isEngineeredType(object->getObjectTypeNumber()) && static_cast<EngineeredItem *>(object)->isSnapped();
 }
 
 

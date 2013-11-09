@@ -1162,15 +1162,15 @@ void Game::computeWorldObjectExtents()
 
 Rect Game::computeBarrierExtents()
 {
-   Rect theRect;
+   Rect extents;
 
    fillVector.clear();
    mGameObjDatabase->findObjects((TestFunc)isWallType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
-      theRect.unionRect(fillVector[i]->getExtent());
+      extents.unionRect(fillVector[i]->getExtent());
 
-   return theRect;
+   return extents;
 }
 
 

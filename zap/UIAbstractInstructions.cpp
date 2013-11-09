@@ -132,8 +132,6 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
 
    ypos += 10 - cmdSize - cmdGap;
 
-   Color cmdColor =   Colors::cyan;
-   Color descrColor = Colors::white;
    Color secColor =   Colors::yellow;
 
    glColor(secColor);

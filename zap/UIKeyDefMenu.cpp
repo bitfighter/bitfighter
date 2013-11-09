@@ -211,9 +211,6 @@ bool KeyDefMenuUserInterface::isDuplicate(S32 key, const Vector<KeyDefMenuItem> 
 
 void KeyDefMenuUserInterface::render()
 {
-   S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
-   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(getGame()->getConnectionToServer())
       getUIManager()->renderAndDimGameUserInterface();
@@ -237,7 +234,7 @@ void KeyDefMenuUserInterface::render()
    {
       S32 y = yStart + (i - ((i < firstItemInCol2) ? 0 : firstItemInCol2)) * height;
 
-		S32 Column_Width = canvasWidth / 2 - horizMargin;
+		S32 Column_Width = gScreenInfo.getGameCanvasWidth() / 2 - horizMargin;
 		S32 xPos = (menuItems[i].column - 1) * Column_Width + horizMargin * 2;
 
       if(selectedIndex == i)       // Highlight selected item

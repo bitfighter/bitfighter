@@ -13,6 +13,7 @@
 
 #include "../zap/version.h"
 #include "../zap/stringUtils.h"
+#include "../zap/LevelDatabase.h"
 
 #include "../boost/boost/shared_ptr.hpp"
 
@@ -96,6 +97,9 @@ MasterServerConnection::~MasterServerConnection()
 
    mMaster->writeJsonNow();
 }
+
+
+bool MasterServerConnection::isAuthenticated() { return mAuthenticated; }
 
 
 // Check username & password against database
@@ -1215,6 +1219,35 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 d
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+ThreadingStruct::ThreadingStruct()
+{
+   isValid = false;
+   isBusy = false;
+   lastClock = 0;
+} // Quickie constructor
+
+
+ThreadingStruct::~ThreadingStruct()
+{
+   // Do nothing
+}
+
+
+void ThreadingStruct::resetClock()
+{
+   lastClock = Platform::getRealMilliseconds();
+}
+
+
+bool ThreadingStruct::isExpired()
+{
+   return Platform::getRealMilliseconds() - lastClock > getCacheExpiryTime();
+}
+
+
 void ThreadingStruct::addClientToWaitingList(MasterServerConnection *connection)
 {
    for(S32 i = 0; i < waitingClients.size(); i++)
@@ -1224,6 +1257,23 @@ void ThreadingStruct::addClientToWaitingList(MasterServerConnection *connection)
    waitingClients.push_back(connection);
 }
 
+
+LevelRating::LevelRating()
+{
+   databaseId = LevelDatabase::NOT_IN_DATABASE;
+   rating = UnknownRating;
+   receivedUpdateByClientWhileBusy = false;
+}
+
+
+U32 HighScores::getCacheExpiryTime() { return TWO_HOURS; }
+
+U32 TotalLevelRating::getCacheExpiryTime() { return TEN_MINUTES; }
+
+U32 PlayerLevelRating::getCacheExpiryTime() { return TEN_MINUTES; }
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 // The client has rated the level and sent it to us
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSetLevelRating, (U32 databaseId, RangedU32<0, 2> rating))

@@ -119,7 +119,7 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    FontManager::pushFontContext(LoadoutIndicatorContext);
    
    // First, the weapons
-   for(S32 i = 0; i < (U32)ShipWeaponCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; i++)
    {
       glColor(loadout.isWeaponActive(i) ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
 
@@ -131,7 +131,7 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    xPos += GapBetweenTheGroups;    // Small horizontal gap to separate the weapon indicators from the module indicators
 
    // Next, loadout modules
-   for(S32 i = 0; i < (U32)ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount; i++)
    {
       ShipModule module = loadout.getModule(i);
 

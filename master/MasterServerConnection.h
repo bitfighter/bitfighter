@@ -37,10 +37,11 @@ struct ThreadingStruct
    Vector<SafePtr<MasterServerConnection> > waitingClients;
 
 public:
-   ThreadingStruct() { isValid = false; isBusy = false; }     // Quickie constructor
+   ThreadingStruct();
+   virtual ~ThreadingStruct();
 
-   void resetClock() { lastClock = Platform::getRealMilliseconds(); }
-   bool isExpired() { return Platform::getRealMilliseconds() - lastClock > getCacheExpiryTime(); }
+   void resetClock();
+   bool isExpired();
    void addClientToWaitingList(MasterServerConnection *connection);
 
    virtual U32 getCacheExpiryTime() = 0;
@@ -54,7 +55,7 @@ struct HighScores : public ThreadingStruct
    Vector<string> scores;
    S32 scoresPerGroup;
 
-   U32 getCacheExpiryTime() { return TWO_HOURS; }
+   U32 getCacheExpiryTime();
 };
 
 
@@ -64,17 +65,16 @@ struct LevelRating : public ThreadingStruct
    S16 rating;
    bool receivedUpdateByClientWhileBusy;  // Flag signaling that something changed while this thread was working
 
-
    virtual U32 getCacheExpiryTime() = 0;
 
-   // Quickie constructor:
-   LevelRating() { databaseId = NOT_IN_DATABASE; rating = UnknownRating; receivedUpdateByClientWhileBusy = false; }       
+   // Constructor:
+   LevelRating();
 };
 
 
 struct TotalLevelRating : public LevelRating
 {
-   U32 getCacheExpiryTime() { return TEN_MINUTES; }
+   U32 getCacheExpiryTime();
 };
 
 
@@ -82,7 +82,7 @@ struct PlayerLevelRating : public LevelRating
 {
    StringTableEntry playerName;
 
-   U32 getCacheExpiryTime() { return TEN_MINUTES; }
+   U32 getCacheExpiryTime();
 };
 
 
@@ -230,7 +230,7 @@ public:
    // This gets updated whenver we gain or lose a server, at most every 5 seconds (currently)
    static void writeClientServerList_JSON();
 
-   bool isAuthenticated() { return mAuthenticated; }
+   bool isAuthenticated();
 
    // This is called when a client wishes to arrange a connection with a server
    TNL_DECLARE_RPC_OVERRIDE(c2mRequestArrangedConnection, (U32 requestId, IPAddress remoteAddress, IPAddress internalAddress,

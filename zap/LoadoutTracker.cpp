@@ -279,7 +279,7 @@ U32 LoadoutTracker::getActiveWeaponIndex() const
 
 ShipModule LoadoutTracker::getModule(U32 modIndex) const
 {
-   TNLAssert(modIndex < ShipModuleCount, "Invalid modIndex!");
+   TNLAssert(modIndex < (U32)ShipModuleCount, "Invalid modIndex!");
    return mModules[modIndex];
 }
 

@@ -124,16 +124,11 @@ void InstructionsUserInterface::onActivate()
 
    Vector<SymbolShapePtr> symbols;
 
-   GameSettings *settings = getGame()->getSettings();
-
    initNormalKeys_page1();
    initPage2();
    initPageHeaders();
 }
 
-static const Color *txtColor = &Colors::cyan;
-static const Color *keyColor = &Colors::white;     
-static const Color *secColor = &Colors::yellow;
 
 // Initialize the special keys section of the first page of help
 void InstructionsUserInterface::initNormalKeys_page1()
@@ -337,6 +332,7 @@ void InstructionsUserInterface::render()
 
       default:
          TNLAssert(false, "Invalid value for mCurPage!");
+         break;
    }
 
    FontManager::popFontContext();
@@ -365,13 +361,6 @@ void InstructionsUserInterface::renderPage1()
 {
    S32 starty = 65;
    S32 y;
-   S32 actCol = col1;      // Action column
-   S32 contCol = col2;     // Control column
-
-   GameSettings *settings = getGame()->getSettings();
-
-   bool firstCol = true;
-   bool done = false;
 
    y = starty;
 
@@ -435,7 +424,7 @@ static void initPage2Block(const char **block, S32 blockSize, S32 fontSize, cons
       {
          symbols.clear();
          string str(block[i]);
-         SymbolString::symbolParse(inputCodeManager, str, symbols, HelpContext, fontSize, bodyColor, keyColor);
+         SymbolString::symbolParse(inputCodeManager, str, symbols, HelpContext, fontSize, bodyColor, &Colors::white);
 
          instrBlock.add(SymbolString(symbols, AlignmentLeft));
       }
@@ -951,7 +940,6 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 
 
 extern CommandInfo chatCmds[];
-extern const S32 chatCmdSize;
 
 void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 {
@@ -1055,7 +1043,6 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 void InstructionsUserInterface::initGameTypesPage()
 {
    S32 tabStop = 160;
-   S32 cmdCol = horizMargin;
    bool foundTeamGame = false;
    
    Vector<UI::SymbolShapePtr> symbols;
@@ -1070,7 +1057,7 @@ void InstructionsUserInterface::initGameTypesPage()
    symbols.push_back(SymbolString::getBlankSymbol(0, 10));
    mGameTypeInstrs.add(SymbolString(symbols));
 
-   for(S32 i = 0; i < ARRAYSIZE(typeDescriptions); i++)
+   for(U32 i = 0; i < ARRAYSIZE(typeDescriptions); i++)
    {
       if(typeDescriptions[i].isTeamGame && !foundTeamGame)
       {

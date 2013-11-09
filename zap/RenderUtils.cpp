@@ -786,7 +786,7 @@ Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const 
       }
    }
 
-   if(start != str.length())
+   if(start != (S32)str.length())
       wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start));
 
    return wrappedLines;

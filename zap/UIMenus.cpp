@@ -18,6 +18,7 @@
 #include "UIManager.h"
 
 #include "LevelSource.h"
+#include "LevelDatabase.h"
 
 #include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
 #include "ClientGame.h"
@@ -907,7 +908,7 @@ static void highScoresSelectedCallback(ClientGame *game, U32 unused)
 
 static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->setLevelDatabaseId(NOT_IN_DATABASE);
+   game->setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);
    game->getUIManager()->getUI<EditorUserInterface>()->setLevelFileName("");      // Reset this so we get the level entry screen
    game->getUIManager()->activate<EditorUserInterface>();
 }
@@ -998,8 +999,6 @@ void MainMenuUserInterface::render()
    // Draw our Message-Of-The-Day, if we have one
    if(strcmp(mMOTD, ""))
    {
-      static const S32 MOTD_POS = 540;
-
       // Draw message, scrolling
       U32 width = getStringWidth(20, mMOTD);
       glColor(Colors::white);
@@ -1008,15 +1007,8 @@ void MainMenuUserInterface::render()
       U32 delta = getGame()->getCurrentTime() - motdArriveTime;
       delta = U32(delta * pixelsPerSec * 0.001) % totalWidth;
 
-      S32 xPos = canvasWidth - delta;
-
       FontManager::pushFontContext(MotdContext);
-      S32 motdWidth = drawStringAndGetWidth(xPos, MOTD_POS, 20, mMOTD);
       FontManager::popFontContext();
-
-      //// Draw lines
-      //drawFadingHorizontalLine(xPos + (motdWidth / 2),             xPos, MOTD_POS + 25, Colors::green50);
-      //drawFadingHorizontalLine(xPos + (motdWidth / 2), xPos + motdWidth, MOTD_POS + 25, Colors::green50);
    }
 
    // Parent renderer might dim what we've drawn so far, so run it last so it can have access to everything

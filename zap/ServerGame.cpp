@@ -16,6 +16,7 @@
 #include "BanList.h"             // For banList kick duration
 #include "BotNavMeshZone.h"      // For zone clearing code
 #include "LevelSource.h"
+#include "LevelDatabase.h"
 
 #include "gameObjectRender.h"
 #include "stringUtils.h"
@@ -505,7 +506,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    while(!loaded)
    {
       mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel); // Set mCurrentLevelIndex to refer to the next level we'll play
-      S32 startingLevelIndex = mCurrentLevelIndex;
+      U32 startingLevelIndex = mCurrentLevelIndex;
 
       logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", getLevelNameFromIndex(mCurrentLevelIndex).getString(), 
                                                                     mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
@@ -878,12 +879,10 @@ inline string getPathFromFilename(const string &filename)
 
 bool ServerGame::loadLevel()
 {
-   FolderManager *folderManager = getSettings()->getFolderManager();
-
    resetLevelInfo();    // Resets info about the level, not a LevelInfo...  In case you were wondering.
 
    mObjectsLoaded = 0;
-   setLevelDatabaseId(NOT_IN_DATABASE);
+   setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);
 
    mLevelFileHash = mLevelSource->loadLevel(mCurrentLevelIndex, this, getGameObjDatabase());
 

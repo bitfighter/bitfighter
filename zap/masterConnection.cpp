@@ -8,6 +8,7 @@
 #include "version.h"
 #include "ServerGame.h"
 #include "gameConnection.h"
+#include "LevelDatabase.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"

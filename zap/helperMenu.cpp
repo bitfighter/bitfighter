@@ -29,7 +29,12 @@ using namespace UI;
 // Constuctor
 HelperMenu::HelperMenu()
 {
-   // Do nothing
+   mClientGame = NULL;
+   mHelperManager = NULL;
+
+   mOldBottom = 0;
+   mOldCount = 0;
+   mTextPortionOfItemWidth = 0;
 }
 
 // Destructor
@@ -89,8 +94,7 @@ static S32 LeftMargin = 8;          // Left margin where controller symbols/keys
 static S32 ButtonLabelGap = 9;      // Space between button/key rendering and menu item
 
 
-extern void drawVertLine  (S32 x,  S32 y1, S32 y2);
-extern void drawHorizLine (S32 x1, S32 x2, S32 y );
+extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
 void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, const OverlayMenuItem *prevItems, S32 prevCount,
                               const char **legendText, const Color **legendColors, S32 legendCount)
@@ -197,8 +201,6 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
 S32 HelperMenu::calcLeftMarginForTextPortionOfEntry(const OverlayMenuItem *items, S32 itemCount)
 {
-   S32 displayItems = 0;
-
    // Determine whether to show keys or joystick buttons on menu
    InputMode inputMode = getGame()->getInputMode();
 

@@ -30,9 +30,9 @@ namespace Zap
    INSTR_ITEM(InstructionOwnerCommands,      "OWNER COMMANDS")      \
    INSTR_ITEM(InstructionDebugCommands,      "DEBUG COMMANDS")      \
    BUILD_DEPENDENT_ITEMS         
-   //                                                    
-   // INSTR_ITEM(InstructionScriptingConsole,   "SCRIPTING CONSOLE") \
-
+   /*
+   INSTR_ITEM(InstructionScriptingConsole,   "SCRIPTING CONSOLE") \
+   */
 #ifdef TNL_DEBUG                                                    
 #  define BUILD_DEPENDENT_ITEMS\
       INSTR_ITEM(InstructionTestCommands,        "TEST COMMANDS")      
