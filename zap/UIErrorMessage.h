@@ -10,6 +10,7 @@
 
 #include "SymbolShape.h"
 
+#include <map>
 
 
 namespace Zap
@@ -23,6 +24,7 @@ class AbstractMessageUserInterface : public UserInterface
 
 private:
    S32 mMaxLines;
+   map<InputCode, void(*)(void)> mKeyRegistrations;
 
 public:
    explicit AbstractMessageUserInterface(ClientGame *game);      // Constructor
@@ -41,8 +43,12 @@ public:
    void setInstr(const string &instr);
    void render();
    void quit();
+
+   void registerKey(InputCode key, void(*callback)(void));
+
    virtual void reset();
    virtual bool onKeyDown(InputCode inputCode);
+
 };
 
 

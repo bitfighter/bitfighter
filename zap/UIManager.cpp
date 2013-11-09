@@ -147,7 +147,13 @@ void UIManager::renderPrevUI(const UserInterface *ui)
    //if(mPrevUIs.size() > 0)
    //   mPrevUIs.last()->render();
 
-   for(S32 i = mPrevUIs.size() - 1; i > 0; i--)    // NOT >= 0!
+   if(mCurrentInterface == ui)
+   {
+      mPrevUIs.last()->render();
+      return;
+   }
+
+   for(S32 i = mPrevUIs.size() - 1; i > 0; i--)    // Not >= 0, because of the [i-1] below
       if(mPrevUIs[i] == ui)
       {
          mPrevUIs[i-1]->render();

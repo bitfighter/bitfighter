@@ -98,12 +98,31 @@ void AbstractMessageUserInterface::reset()
       mMessage[i] =  SymbolShapePtr(new SymbolBlank());
 
    mMaxLines = MAX_LINES;
+   mKeyRegistrations.clear();
+}
+
+
+void AbstractMessageUserInterface::registerKey(InputCode key, void(*callback)(void))
+{
+   mKeyRegistrations[key] = callback;
 }
 
 
 bool AbstractMessageUserInterface::onKeyDown(InputCode inputCode)
 {
-   return Parent::onKeyDown(inputCode);
+   bool handled = Parent::onKeyDown(inputCode);
+
+   if(handled)
+      return true;
+
+   if(mKeyRegistrations.find(inputCode) != mKeyRegistrations.end())
+   {
+      mKeyRegistrations[inputCode]();
+      quit();
+      return true;
+   }
+
+   return false;
 }
 
 
@@ -135,7 +154,11 @@ ErrorMessageUserInterface::~ErrorMessageUserInterface()
 
 bool ErrorMessageUserInterface::usesEditorScreenMode() const
 {
-   return getUIManager()->getCurrentUI()->usesEditorScreenMode();
+   if(getUIManager()->getCurrentUI() == this)
+      return getUIManager()->getPrevUI()->usesEditorScreenMode();
+   else
+      return getUIManager()->getCurrentUI()->usesEditorScreenMode();
+
 }
 
 
