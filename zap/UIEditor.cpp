@@ -42,6 +42,7 @@
 
 #include "gameLoader.h"          // For LevelLoadException def
 #include "LevelSource.h"
+#include "LevelDatabase.h"
 
 #include "luaLevelGenerator.h"
 #include "LevelDatabaseUploadThread.h"

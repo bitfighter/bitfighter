@@ -18,6 +18,7 @@
 #include "UIManager.h"
 
 #include "LevelSource.h"
+#include "LevelDatabase.h"
 
 #include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
 #include "ClientGame.h"
@@ -907,7 +908,7 @@ static void highScoresSelectedCallback(ClientGame *game, U32 unused)
 
 static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->setLevelDatabaseId(NOT_IN_DATABASE);
+   game->setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);
    game->getUIManager()->getUI<EditorUserInterface>()->setLevelFileName("");      // Reset this so we get the level entry screen
    game->getUIManager()->activate<EditorUserInterface>();
 }

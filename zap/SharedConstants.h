@@ -22,7 +22,6 @@ using namespace TNL;
 #define MAX_PLAYER_NAME_LENGTH 32      // Max length of a player name
 #define MAX_PLAYER_PASSWORD_LENGTH 32
 
-static const U32 NOT_IN_DATABASE = 0;
 
 enum PersonalRating     // These need to be able to fit into S16 for totalRating
 {
@@ -32,10 +31,6 @@ enum PersonalRating     // These need to be able to fit into S16 for totalRating
    Unrated = S16_MIN,                  // -32768       
    UnknownRating = S16_MIN + 1         // -32767
 };
-
-
-// Not a shared constant, but like an old friend.  That's static.  And in its own namespace.
-namespace LevelDatabase { static bool isLevelInDatabase(U32 databaseId) { return databaseId != NOT_IN_DATABASE; } }
 
 
 static const U32 MOTD_LEN = 256;

@@ -16,6 +16,7 @@
 #include "BanList.h"             // For banList kick duration
 #include "BotNavMeshZone.h"      // For zone clearing code
 #include "LevelSource.h"
+#include "LevelDatabase.h"
 
 #include "gameObjectRender.h"
 #include "stringUtils.h"
@@ -883,7 +884,7 @@ bool ServerGame::loadLevel()
    resetLevelInfo();    // Resets info about the level, not a LevelInfo...  In case you were wondering.
 
    mObjectsLoaded = 0;
-   setLevelDatabaseId(NOT_IN_DATABASE);
+   setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);
 
    mLevelFileHash = mLevelSource->loadLevel(mCurrentLevelIndex, this, getGameObjDatabase());
 
