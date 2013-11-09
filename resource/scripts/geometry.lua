@@ -204,9 +204,7 @@ end
 @brief   Convert a table of coordinates into a table of points.
 @desc    Parse a list of coordinates and generate points for every pair.  An even number of coordinates 
          should be provided.  If an odd number is supplied, 0 will be used for the missing coordinate.
-
 @code    pts = Geom.coordsToPoints({ 0,0,  100,0,  100,100,  0,100 })
-
 @param   coordList - The list of coordinates to be used for creating points
 @return  A table of points that can be used as input for other functions requring a multi-point geometry
  --]]
