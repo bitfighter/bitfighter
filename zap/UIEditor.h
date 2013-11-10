@@ -263,6 +263,7 @@ private:
    void showCouldNotFindScriptMessage(const string &scriptName);
    void showPluginError(const string &msg);
 
+   string mLingeringMessageQueue;      // Ok, not much of a queue, but we can only have one of these, so this is enough
 
    GridDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
 
@@ -392,6 +393,8 @@ public:
    void setSaveMessage(const string &msg, bool savedOK);
    void clearSaveMessage();
    void setWarnMessage(const string &msg1, const string &msg2);
+
+   void queueSetLingeringMessage(const string &msg);
    void setLingeringMessage(const string &msg);
    void clearLingeringMessage();
 

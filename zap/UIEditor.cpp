@@ -4674,6 +4674,20 @@ void EditorUserInterface::idle(U32 timeDelta)
 
       mMessageBoxQueue.erase(0);
    }
+
+   if(mLingeringMessageQueue != "")
+   {
+      setLingeringMessage(mLingeringMessageQueue);
+      mLingeringMessageQueue = "";
+   }
+}
+
+
+// This may seem redundant, but... this gets around errors stemming from trying to run setLingeringMessage() from
+// the LevelDatabaseUploadThread::run() method.  It seems there are some concurrency issues... blech.
+void EditorUserInterface::queueSetLingeringMessage(const string &msg)
+{
+   mLingeringMessageQueue = msg;
 }
 
 

@@ -38,9 +38,9 @@ U32 LevelDatabaseUploadThread::run()
    EditorUserInterface* editor = mGame->getUIManager()->getUI<EditorUserInterface>();
 
    if(mGame->getLevelDatabaseId())
-      editor->setLingeringMessage("Updating Level in Pleiades [[SPINNER]]");
+      editor->queueSetLingeringMessage("Updating Level in Pleiades [[SPINNER]]");
    else
-      editor->setLingeringMessage("Uploading New Level to Pleiades [[SPINNER]]");
+      editor->queueSetLingeringMessage("Uploading New Level to Pleiades [[SPINNER]]");
 
 
    string fileData = readFile(joindir(mGame->getSettings()->getFolderManager()->screenshotDir, UploadScreenshotFilename + string(".png")));
