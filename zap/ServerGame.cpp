@@ -506,7 +506,6 @@ void ServerGame::cycleLevel(S32 nextLevel)
    while(!loaded)
    {
       mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel); // Set mCurrentLevelIndex to refer to the next level we'll play
-      U32 startingLevelIndex = mCurrentLevelIndex;
 
       logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", getLevelNameFromIndex(mCurrentLevelIndex).getString(), 
                                                                     mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());

@@ -1487,7 +1487,6 @@ bool GameConnection::TransferLevelFile(const char *filename)
       U32 size = partsSize;
       const U32 DATAARRAYSIZE = 8192;
       U8 *data = new U8[DATAARRAYSIZE];
-      U32 datasize = 0;
       U32 totalTransferSize = 0;
       size = fread(data, 1, DATAARRAYSIZE, f);
 
@@ -1576,8 +1575,8 @@ F32 GameConnection::getFileProgressMeter()
    if(mPendingTransferData.size())
    {
       // Sent data becomes NULL, which we can use to see the upload progress.
-      U32 numberOfNull = 0;
-      for(U32 i = 0; i < mPendingTransferData.size(); i++)
+      S32 numberOfNull = 0;
+      for(S32 i = 0; i < mPendingTransferData.size(); i++)
          if(mPendingTransferData[i].isNull())
             numberOfNull++;
       if(numberOfNull == mPendingTransferData.size())
