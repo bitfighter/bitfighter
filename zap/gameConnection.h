@@ -37,7 +37,7 @@ struct LevelInfo;
 class LuaPlayerInfo;
 class GameSettings;
 
-class GameConnection: public ControlObjectConnection, public DataSendable, public ChatCheck
+class GameConnection: public ControlObjectConnection, public ChatCheck
 {
 private:
    typedef ControlObjectConnection Parent;
@@ -132,11 +132,6 @@ public:
 #endif
    GameConnection();                      // Constructor for ServerGame
    virtual ~GameConnection();             // Destructor
-
-
-   // These from the DataSendable interface class
-   TNL_DECLARE_RPC(s2rSendLine, (StringPtr line));
-   TNL_DECLARE_RPC(s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status));
 
 
 #ifndef ZAP_DEDICATED
@@ -276,8 +271,10 @@ public:
    };
 
    U8 mSendableFlags;
+private:
    ByteBuffer *mDataBuffer;
    ByteBuffer *mDataBufferLevelGen;
+public:
 
    TNL_DECLARE_RPC(s2rSendableFlags, (U8 flags));
    TNL_DECLARE_RPC(s2rSendDataParts, (U8 type, ByteBufferPtr data));

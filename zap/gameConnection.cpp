@@ -272,117 +272,21 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
 {
    if(!mSettings->getIniSettings()->allowGetMap)
    {
-      s2rCommandComplete(COMMAND_NOT_ALLOWED);  
+      s2cDisplayErrorMessage("!!! Getmap command is disabled on this server");
       return;
    }
 
 
    string filename = mServerGame->getCurrentLevelFileName();
-#if 1
    filename = strictjoindir(mSettings->getFolderManager()->levelDir, filename);
    if(!TransferLevelFile(filename.c_str()))
       s2cDisplayErrorMessage("!!! Server Error, unable to download");
    return;
-#else
-   // Initialize on the server to start sending requested file -- will return OK if everything is set up right
-   FolderManager *folderManager = mSettings->getFolderManager();
-   SenderStatus stat = mServerGame->dataSender.initialize(this, folderManager, filename, LEVEL_TYPE);
-
-   if(stat != STATUS_OK)
-   {
-      const char *msg = DataConnection::getErrorMessage(stat, filename).c_str();
-
-      logprintf(LogConsumer::LogError, "%s", msg);
-      s2rCommandComplete(COULD_NOT_OPEN_FILE);
-      return;
-   }
-#endif
 }
 
 
 const U32 maxDataBufferSize = 1024*1024*8;  // 8 MB
 
-// << DataSendable >>
-// Send a chunk of the file -- this gets run on the receiving end       
-TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
-//void s2rSendLine2(StringPtr line)
-{
-   if(!isInitiator()) // make it client only.
-      return;
-   //// server might need mOutputFile, if the server were to receive files. Currently, server don't receive files in-game.
-   //TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
-
-   //if(mClientGame && mClientGame->getUserInterface()->mOutputFile)
-   //   fwrite(line.getString(), 1, strlen(line.getString()), mClientGame->getUserInterface()->mOutputFile);
-      //mOutputFile.write(line.getString(), strlen(line.getString()));
-   // else... what?
-   if(mDataBuffer)
-   {
-      // Limit memory consumption:
-      if(mDataBuffer->getBufferSize() < maxDataBufferSize)                                   
-         mDataBuffer->appendBuffer((U8 *)line.getString(), (U32)strlen(line.getString()));
-   }
-   else
-   {
-      mDataBuffer = new ByteBuffer((U8 *)line.getString(), (U32)strlen(line.getString()));
-      mDataBuffer->takeOwnership();
-   }
-}
-
-
-// << DataSendable >>
-// When sender is finished, it sends a commandComplete message
-TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
-{
-   if(!isInitiator()) // Make it client only
-      return;
-
-#ifndef ZAP_DEDICATED
-   // Server might need mOutputFile, if the server were to receive files.  Currently, server doesn't receive files in-game.
-   TNLAssert(mClientGame != NULL, "We need a clientGame to proceed...");
-
-   if(mClientGame)
-   {
-      string levelDir = mSettings->getFolderManager()->levelDir;
-      string outputFilenameString = strictjoindir(levelDir, mClientGame->getRemoteLevelDownloadFilename());
-      const char *outputFilename = outputFilenameString.c_str(); // when outputFilenameString goes out of scope or deleted, then pointer to outputFilename becomes invalid
-
-      if(strcmp(outputFilename, ""))
-      {
-         if(status.value == STATUS_OK && mDataBuffer)
-         {
-            FILE *outputFile = fopen(outputFilename, "wb");
-
-            if(!outputFile)
-            {
-               logprintf("Problem opening file %s for writing", outputFilename);
-               mClientGame->displayErrorMessage("!!! Problem opening file %s for writing", outputFilename);
-            }
-            else
-            {
-               fwrite((char *)mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), outputFile);
-               fclose(outputFile);
-
-               mClientGame->displaySuccessMessage("Level downloaded to %s", mClientGame->getRemoteLevelDownloadFilename().c_str());
-            }
-         }
-         else if(status.value == COMMAND_NOT_ALLOWED)
-            mClientGame->displayErrorMessage("!!! Getmap command is disabled on this server");
-         else
-            mClientGame->displayErrorMessage("Error downloading level");
-
-         // mClientGame->setOutputFilename("");   <=== what is this for??  
-      }
-   }
-#endif
-   if(mDataBuffer)
-   {
-      delete mDataBuffer;
-      mDataBuffer = NULL;
-   }
-}
 
 
 void GameConnection::submitPassword(const char *password)
