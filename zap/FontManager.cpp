@@ -238,11 +238,6 @@ void FontManager::setFontContext(FontContext fontContext)
          break;
    }
 }
-// FontRoman,
-// FontOrbitronLightStroke,
-// FontOrbitronMedStroke,
-// FontOrbitronLight,
-// FontOrbitronMedium,
 
 
 static Vector<FontId> contextStack;

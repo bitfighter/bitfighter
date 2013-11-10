@@ -18,7 +18,7 @@
 namespace Zap
 {
 
-const string LevelDatabaseUploadThread::UploadRequest = HttpRequest::LevelDatabaseBaseUrl + "/levels/upload";
+const string LevelDatabaseUploadThread::UploadRequest = "/levels/upload";
 const string LevelDatabaseUploadThread::UploadScreenshotFilename = "upload_screenshot";
 
 LevelDatabaseUploadThread::LevelDatabaseUploadThread(ClientGame* game)
@@ -38,13 +38,14 @@ U32 LevelDatabaseUploadThread::run()
    EditorUserInterface* editor = mGame->getUIManager()->getUI<EditorUserInterface>();
 
    if(mGame->getLevelDatabaseId())
-      editor->setSaveMessage("Updating Level...", true);
+      editor->setLingeringMessage("Updating Level in Pleiades [[SPINNER]]");
    else
-      editor->setSaveMessage("Uploading New Level...", true);
+      editor->setLingeringMessage("Uploading New Level to Pleiades [[SPINNER]]");
+
 
    string fileData = readFile(joindir(mGame->getSettings()->getFolderManager()->screenshotDir, UploadScreenshotFilename + string(".png")));
 
-   HttpRequest req(UploadRequest);
+   HttpRequest req(HttpRequest::LevelDatabaseBaseUrl + UploadRequest);
    req.setMethod(HttpRequest::PostMethod);
    req.setData("data[User][username]",      mGame->getPlayerName());
    req.setData("data[User][user_password]", mGame->getPlayerPassword());
@@ -63,6 +64,7 @@ U32 LevelDatabaseUploadThread::run()
    if(!req.send())
    {
       editor->setSaveMessage(string("Error connecting to server"), false);
+      editor->clearLingeringMessage();
 
       delete this;
       return 0;
@@ -73,6 +75,7 @@ U32 LevelDatabaseUploadThread::run()
    {
       editor->showUploadErrorMessage(responseCode, req.getResponseBody());
       editor->clearSaveMessage();
+      editor->clearLingeringMessage();
 
       stringstream message;
       message << "Error " << responseCode << ": " << endl << req.getResponseBody() << endl;
@@ -86,6 +89,7 @@ U32 LevelDatabaseUploadThread::run()
    mGame->setLevelDatabaseId(atoi(req.getResponseBody().c_str()));
    editor->saveLevel(false, false);
    editor->setSaveMessage("Uploaded successfully", true);
+   editor->clearLingeringMessage();
 
    delete this;
    return 0;

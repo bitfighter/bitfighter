@@ -99,12 +99,19 @@ void AbstractMessageUserInterface::reset()
 
    mMaxLines = MAX_LINES;
    mKeyRegistrations.clear();
+   mRenderUnderlyingUi = true;
 }
 
 
-void AbstractMessageUserInterface::registerKey(InputCode key, void(*callback)(void))
+void AbstractMessageUserInterface::registerKey(InputCode key, void(*callback)(ClientGame *))
 {
    mKeyRegistrations[key] = callback;
+}
+
+
+void AbstractMessageUserInterface::setRenderUnderlyingUi(bool render)
+{
+   mRenderUnderlyingUi = render;
 }
 
 
@@ -117,7 +124,7 @@ bool AbstractMessageUserInterface::onKeyDown(InputCode inputCode)
 
    if(mKeyRegistrations.find(inputCode) != mKeyRegistrations.end())
    {
-      mKeyRegistrations[inputCode]();
+      mKeyRegistrations[inputCode](getGame());
       quit();
       return true;
    }
@@ -128,7 +135,7 @@ bool AbstractMessageUserInterface::onKeyDown(InputCode inputCode)
 
 void AbstractMessageUserInterface::render()
 {
-   if(getUIManager()->getPrevUI() != this)
+   if(mRenderUnderlyingUi && getUIManager()->getPrevUI() != this)
       getUIManager()->renderPrevUI(this);
 
    renderMessageBox(mTitle, mInstr, mMessage, mMaxLines);

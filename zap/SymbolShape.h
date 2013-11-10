@@ -389,6 +389,9 @@ public:
    virtual ~SymbolString();            // Destructor
 
    void setSymbols(const Vector<boost::shared_ptr<SymbolShape> > &symbols);
+   void setSymbolsFromString(const string &string, InputCodeManager *inputCodeManager,
+                             FontContext fontContext, S32 textSize, const Color *color);
+   void clear();
 
    // Dimensions
    virtual S32 getWidth() const;

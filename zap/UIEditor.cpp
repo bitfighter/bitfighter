@@ -644,7 +644,8 @@ void EditorUserInterface::runLevelGenScript()
 }
 
 
-static void openConsole()
+// game is an unused parameter needed to make the method fit the signature of the callbacks used by UIMenus
+static void openConsole(ClientGame *game)
 {
 #ifndef BF_NO_CONSOLE
    if(gConsole.isOk())
@@ -1946,6 +1947,7 @@ void EditorUserInterface::render()
    {
       renderSaveMessage();
       renderWarnings();
+      renderLingeringMessage();
    }
 
    renderConsole();        // Rendered last, so it's always on top
@@ -2118,7 +2120,7 @@ void EditorUserInterface::renderDockPlugins()
 }
 
 
-void EditorUserInterface::renderSaveMessage()
+void EditorUserInterface::renderSaveMessage() const
 {
    if(mSaveMsgTimer.getCurrent())
    {
@@ -2149,7 +2151,7 @@ void EditorUserInterface::renderSaveMessage()
 }
 
 
-void EditorUserInterface::renderWarnings()
+void EditorUserInterface::renderWarnings() const
 {
    if(mWarnMsgTimer.getCurrent())
    {
@@ -2185,6 +2187,13 @@ void EditorUserInterface::renderWarnings()
       }
    }
 }
+
+
+void EditorUserInterface::renderLingeringMessage() const
+{
+   mLingeringMessage.render(horizMargin, vertMargin + mLingeringMessage.getHeight(), AlignmentLeft);
+}
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -3773,7 +3782,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    else if(inputString == "V")            // Flip vertical
       flipSelectionVertical();
    else if(inputString == "/" || inputString == "Keypad /")
-      openConsole();
+      openConsole(NULL);
    else if(inputString == "Ctrl+Shift+L") // Reload level
    {
       loadLevel();                        
@@ -4668,7 +4677,19 @@ void EditorUserInterface::idle(U32 timeDelta)
 }
 
 
-void EditorUserInterface::setSaveMessage(string msg, bool savedOK)
+void EditorUserInterface::setLingeringMessage(const string &msg)
+{
+   mLingeringMessage.setSymbolsFromString(msg, NULL, HelpContext, 12, &Colors::red);
+}
+
+
+void EditorUserInterface::clearLingeringMessage()
+{
+   mLingeringMessage.clear();
+}
+
+
+void EditorUserInterface::setSaveMessage(const string &msg, bool savedOK)
 {
    mSaveMsg = msg;
    mSaveMsgTimer.reset();
@@ -4682,7 +4703,7 @@ void EditorUserInterface::clearSaveMessage()
 }
 
 
-void EditorUserInterface::setWarnMessage(string msg1, string msg2)
+void EditorUserInterface::setWarnMessage(const string &msg1, const string &msg2)
 {
    mWarnMsg1 = msg1;
    mWarnMsg2 = msg2;
@@ -5066,8 +5087,12 @@ void quitEditorCallback(ClientGame *game, U32 unused)
                      "Do you want to?");
       ui->setInstr("Press [[Y]] to save,  [[N]] to quit,  [[Esc]] to cancel");
 
-      ui->registerYesFunction(saveLevelCallback);
-      ui->registerNoFunction(backToMainMenuCallback);
+      //ui->registerYesFunction(saveLevelCallback);
+      //ui->registerNoFunction(backToMainMenuCallback);
+
+      ui->registerKey(KEY_Y, saveLevelCallback);
+      ui->registerKey(KEY_N, backToMainMenuCallback);
+      ui->setRenderUnderlyingUi(false);
 
       game->getUIManager()->activate(ui);
    }

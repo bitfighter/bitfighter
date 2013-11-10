@@ -112,7 +112,7 @@ void abortHosting_noLevels(ServerGame *serverGame)
                         "you have correctly specified a folder containing"
                         "valid level files.\n\n"
                         "Trying to load levels from folder:\n" +
-                     levelDir == "" ? "<<Unresolvable>>" : levelDir);
+                     (levelDir == "" ? string("<<Unresolvable>>") : levelDir));
 
       uiManager->activate<ErrorMessageUserInterface>();
       uiManager->disableLevelLoadDisplay(false); 

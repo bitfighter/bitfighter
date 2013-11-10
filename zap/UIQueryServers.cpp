@@ -1070,20 +1070,6 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
       if(inputCode == BUTTON_DPAD_RIGHT)
          sortSelected();
    }
-   else if(inputCode == KEY_PAGEUP)
-   {
-      backPage();
-
-      Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
-      mItemSelectedWithMouse = false;
-   }
-   else if(inputCode == KEY_PAGEDOWN) 
-   {
-      advancePage();
-
-      Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
-      mItemSelectedWithMouse = false;
-   }
 
    // The following keys only make sense if there are some servers to browse through
    else if(servers.size() != 0)
@@ -1110,6 +1096,20 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
          Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
          mItemSelectedWithMouse = false;
          selectedId = servers[currentIndex].id;
+      }
+      else if(inputCode == KEY_PAGEUP)
+      {
+         backPage();
+
+         Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
+         mItemSelectedWithMouse = false;
+      }
+      else if(inputCode == KEY_PAGEDOWN) 
+      {
+         advancePage();
+
+         Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
+         mItemSelectedWithMouse = false;
       }
       else
          return mLineEditor.handleKey(inputCode);

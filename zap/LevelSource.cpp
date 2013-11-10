@@ -120,8 +120,9 @@ void LevelSource::getLevelInfoFromCodeChunk(char *chunk, S32 size, LevelInfo &le
    bool foundLevelName  = false;
    bool foundMinPlayers = false;
    bool foundMaxPlayers = false;
+   bool foundScriptFileName = false;
 
-   while(cur < size && !(foundGameType && foundLevelName && foundMinPlayers && foundMaxPlayers))
+   while(cur < size && !(foundGameType && foundLevelName && foundMinPlayers && foundMaxPlayers && foundScriptFileName))
    {
       if(chunk[cur] < 32)
       {
@@ -167,6 +168,11 @@ void LevelSource::getLevelInfoFromCodeChunk(char *chunk, S32 size, LevelInfo &le
             {
                levelInfo.maxRecPlayers = atoi(list[1].c_str());
                foundMaxPlayers = true;
+            }
+            else if(list.size() >= 2 && list[0] == "Script")
+            {
+               levelInfo.mScriptFileName = list[1];
+               foundScriptFileName = true;
             }
          }
          startingCur = cur + 1;

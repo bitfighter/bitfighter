@@ -195,8 +195,6 @@ static S32 computeHeight(const Vector<SymbolShapePtr> &symbols)
 // Constructor with symbols
 SymbolString::SymbolString(const Vector<SymbolShapePtr> &symbols, Alignment alignment) : mSymbols(symbols)
 {
-   mReady = true;
-
    mWidth = computeWidth(symbols);
    mHeight = computeHeight(symbols);
    mAlignment = alignment;
@@ -207,7 +205,6 @@ SymbolString::SymbolString(const SymbolShapePtr &symbol, Alignment alignment)
 {
    mSymbols.push_back(symbol);
 
-   mReady = true;
    mWidth = symbol->getWidth();
    mHeight = symbol->getHeight();
    mAlignment = alignment;
@@ -217,9 +214,8 @@ SymbolString::SymbolString(const SymbolShapePtr &symbol, Alignment alignment)
 // Constructor -- symbols will be provided later
 SymbolString::SymbolString()
 {
-   mReady = false;
-
    mWidth = 0;
+   mHeight = 0;
    mAlignment = AlignmentNone;
 }
 
@@ -236,23 +232,35 @@ void SymbolString::setSymbols(const Vector<SymbolShapePtr> &symbols)
    mSymbols = symbols;
 
    mWidth = computeWidth(symbols);
-   mReady = true;
+}
+
+
+void SymbolString::setSymbolsFromString(const string &string, InputCodeManager *inputCodeManager, 
+                                        FontContext fontContext, S32 textSize, const Color *color)
+{
+   Vector<SymbolShapePtr> symbols;
+   symbolParse(inputCodeManager, string, symbols, fontContext, textSize, color);
+   setSymbols(symbols);
+}
+
+
+void SymbolString::clear()
+{
+   mSymbols.clear();
+   mWidth = 0;
+   mHeight = 0;
 }
 
 
 S32 SymbolString::getWidth() const
 { 
-   TNLAssert(mReady, "Not ready!");
-
    return mWidth;
 }
 
 
 S32 SymbolString::getHeight() const
 { 
-   TNLAssert(mReady, "Not ready!");
-
-   S32 height = -1;
+   S32 height = 0;
    for(S32 i = 0; i < mSymbols.size(); i++)
       height = max(height, mSymbols[i]->getHeight());
 
@@ -281,11 +289,12 @@ S32 SymbolString::render(S32 x, S32 y, Alignment blockAlignment, S32 blockWidth)
 
 S32 SymbolString::render(F32 x, F32 y, Alignment blockAlignment, S32 blockWidth) const
 {
-   TNLAssert(mReady, "Not ready!");
+   if(mSymbols.size() == 0)   // Nothing to render!
+      return mHeight;
 
    // Alignment of overall symbol string
    if(blockAlignment == AlignmentCenter)
-      x -= mWidth / 2;     // x is now at the left edge of the render area
+      x -= mWidth / 2;        // x is now at the left edge of the render area
 
    if(blockWidth > -1)
    {
@@ -703,7 +712,7 @@ void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const s
    std::size_t offset = 0;
 
    if(!symbolColor)
-         symbolColor = textColor;
+      symbolColor = textColor;
 
    while(true)
    {
@@ -748,8 +757,6 @@ LayeredSymbolString::~LayeredSymbolString()
 // Each layer is rendered atop the previous, creating a layered effect
 S32 LayeredSymbolString::render(F32 x, F32 y, Alignment alignment, S32 blockWidth) const
 {
-   TNLAssert(mReady, "Not ready!");
-
    for(S32 i = 0; i < mSymbols.size(); i++)
       mSymbols[i]->render(Point(x, y));
 

@@ -205,7 +205,10 @@ bool LevelNameEntryUserInterface::setLevelIndex()
          mLevelIndex = i;
          return true;
       }
-      
+   }
+   // is mLevels sorted correctly?
+   for(S32 i = 0; i < mLevels.size(); i++)
+   {
       // No exact match, but we just passed the item and have selected the closest one alphabetically following
       if(mLevels[i] > lineEditor.getString())
       {

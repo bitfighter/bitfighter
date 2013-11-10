@@ -24,7 +24,9 @@ class AbstractMessageUserInterface : public UserInterface
 
 private:
    S32 mMaxLines;
-   map<InputCode, void(*)(void)> mKeyRegistrations;
+   map<InputCode, void(*)(ClientGame *)> mKeyRegistrations;
+
+   bool mRenderUnderlyingUi;
 
 public:
    explicit AbstractMessageUserInterface(ClientGame *game);      // Constructor
@@ -44,7 +46,8 @@ public:
    void render();
    void quit();
 
-   void registerKey(InputCode key, void(*callback)(void));
+   void registerKey(InputCode key, void(*callback)(ClientGame *));
+   void setRenderUnderlyingUi(bool render);
 
    virtual void reset();
    virtual bool onKeyDown(InputCode inputCode);

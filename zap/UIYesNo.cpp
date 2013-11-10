@@ -52,7 +52,7 @@ bool YesNoUserInterface::onKeyDown(InputCode inputCode)
 {
    if(Parent::onKeyDown(inputCode))
       return true;
-
+/*
    if(inputCode == KEY_Y)
    {
       if(mYesFunction)
@@ -71,9 +71,9 @@ bool YesNoUserInterface::onKeyDown(InputCode inputCode)
       quit();
    else
       return false;
-
+*/
    // A key was handled
-   return true;
+   return false;
 }
 
 

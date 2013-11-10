@@ -108,6 +108,8 @@ private:
    Timer mSaveMsgTimer;
    Timer mWarnMsgTimer;
 
+   SymbolString mLingeringMessage;
+
    Vector<boost::shared_ptr<GridDatabase> > mUndoItems;  // Undo/redo history 
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Point mSnapDelta;                            // For tracking how far from the snap point our cursor is
@@ -173,8 +175,9 @@ private:
    void renderDragSelectBox();      // Render box when selecting a group of items
    void renderDockItems();          // Render all items on the dock
    void renderDockPlugins();
-   void renderSaveMessage();
-   void renderWarnings();
+   void renderSaveMessage() const;
+   void renderWarnings() const;
+   void renderLingeringMessage() const;
 
    EditorAttributeMenuItemBuilder mEditorAttributeMenuItemBuilder;
 
@@ -386,9 +389,11 @@ public:
 
    void testLevel();
    void testLevelStart();
-   void setSaveMessage(string msg, bool savedOK);
+   void setSaveMessage(const string &msg, bool savedOK);
    void clearSaveMessage();
-   void setWarnMessage(string msg1, string msg2);
+   void setWarnMessage(const string &msg1, const string &msg2);
+   void setLingeringMessage(const string &msg);
+   void clearLingeringMessage();
 
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
 

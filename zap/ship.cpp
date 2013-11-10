@@ -1250,11 +1250,6 @@ void Ship::writeControlState(BitStream *stream)
    //stream->writeRangedU32(mEnergy, 0, EnergyMax);
    //stream->writeFlag(mFastRecharging);
    stream->writeFlag(mCooldownNeeded);
-   if(mFireTimer < 0)   // mFireTimer could be negative
-      stream->writeRangedU32(MaxFireDelay + (mFireTimer < -S32(negativeFireDelay) ? negativeFireDelay : U32(-mFireTimer)), 
-                             0, MaxFireDelay + negativeFireDelay);
-   else
-      stream->writeRangedU32(U32(mFireTimer), 0, MaxFireDelay + negativeFireDelay);
 
    stream->writeRangedU32(mLoadout.getActiveWeaponIndex(), 0, ShipWeaponCount);
 }
@@ -1276,9 +1271,6 @@ void Ship::readControlState(BitStream *stream)
    //bool rrrmFastRecharging = stream->readFlag();
 
    mCooldownNeeded = stream->readFlag();
-   int xmFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay)); // TODO: Remove for 019
-   //if(mFireTimer > S32(MaxFireDelay))
-   // mFireTimer = S32(MaxFireDelay) - mFireTimer;
 
    setActiveWeapon(stream->readRangedU32(0, ShipWeaponCount));
 }

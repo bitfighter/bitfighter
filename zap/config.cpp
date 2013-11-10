@@ -125,6 +125,7 @@ IniSettings::IniSettings()
 
    allowMapUpload = false;
    allowAdminMapUpload = true;
+   allowLevelgenUpload = true;
 
    voteEnable = false;     // Voting disabled by default
    voteLength = 12;
@@ -655,6 +656,7 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
 
    iniSettings->allowMapUpload         = (U32) ini->GetValueYN(section, "AllowMapUpload", S32(iniSettings->allowMapUpload) );
    iniSettings->allowAdminMapUpload    = (U32) ini->GetValueYN(section, "AllowAdminMapUpload", S32(iniSettings->allowAdminMapUpload) );
+   iniSettings->allowLevelgenUpload    = (U32) ini->GetValueYN(section, "AllowLevelgenUpload", S32(iniSettings->allowLevelgenUpload) );
 
    iniSettings->voteEnable             = (U32) ini->GetValueYN(section, "VoteEnable", S32(iniSettings->voteEnable) );
    iniSettings->voteLength             = (U32) ini->GetValueI (section, "VoteLength", S32(iniSettings->voteLength) );
@@ -1694,6 +1696,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
 
    ini->setValueYN(section, "AllowMapUpload", S32(iniSettings->allowMapUpload) );
    ini->setValueYN(section, "AllowAdminMapUpload", S32(iniSettings->allowAdminMapUpload) );
+   ini->setValueYN(section, "AllowLevelgenUpload", S32(iniSettings->allowLevelgenUpload) );
 
 
    ini->setValueYN(section, "VoteEnable", S32(iniSettings->voteEnable) );
