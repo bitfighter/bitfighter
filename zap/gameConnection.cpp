@@ -1427,6 +1427,12 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
    // Only server runs this part of code
    FolderManager *folderManager = mSettings->getFolderManager();
 
+   if(isServer && levelgensize != 0 && !mSettings->getIniSettings()->allowLevelgenUpload)
+   {
+      s2cDisplayErrorMessage("!!! Server does not allow levelgen upload");
+      return;
+   }
+
    LevelInfo levelInfo;
    LevelSource::getLevelInfoFromCodeChunk((char *)leveldata, levelsize, levelInfo);
 

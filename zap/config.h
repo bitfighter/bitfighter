@@ -234,6 +234,7 @@ public:
 
    bool allowMapUpload;
    bool allowAdminMapUpload;
+   bool allowLevelgenUpload;
 
    bool voteEnable;
    U32 voteLength;
