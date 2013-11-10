@@ -148,9 +148,9 @@ void getMapHandler(ClientGame *game, const Vector<string> &words)
 {
    GameConnection *gc = game->getConnectionToServer();
 
-   //if(gc->isLocalConnection())
-   //   game->displayErrorMessage("!!! Can't download levels from a local server");
-   //else
+   if(gc->isLocalConnection())
+      game->displayErrorMessage("!!! Can't download levels from a local server");
+   else
    {
       string filename;
 

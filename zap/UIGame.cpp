@@ -130,8 +130,8 @@ void GameUserInterface::exitHelper()         { mHelperManager.exitHelper();     
 
 void GameUserInterface::setAnnouncement(const string &message)
 {
-	mAnnouncement = message;
-	mAnnouncementTimer.reset();
+   mAnnouncement = message;
+   mAnnouncementTimer.reset();
 }
 
 
@@ -2348,6 +2348,18 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
 void GameUserInterface::renderBasicInterfaceOverlay()
 {
    GameType *gameType = getGame()->getGameType();
+
+   // Progress meter for file upload and download
+   if(getGame()->getConnectionToServer())
+   {
+      F32 progress = getGame()->getConnectionToServer()->getFileProgressMeter();
+      if(progress != 0)
+      {
+         glColor(Colors::yellow);
+         drawRect(25.f, 200.f, progress * (gScreenInfo.getGameCanvasWidth()-50) + 25.f, 210.f, GL_TRIANGLE_FAN);
+         drawRect(25, 200, gScreenInfo.getGameCanvasWidth()-25, 210, GL_LINE_LOOP);
+      }
+   }
    
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
       renderInputModeChangeAlert();

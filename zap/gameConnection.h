@@ -281,8 +281,13 @@ public:
 
    TNL_DECLARE_RPC(s2rSendableFlags, (U8 flags));
    TNL_DECLARE_RPC(s2rSendDataParts, (U8 type, ByteBufferPtr data));
+   TNL_DECLARE_RPC(s2rTransferFileSize, (U32 size));
    bool TransferLevelFile(const char *filename);
    void ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const U8 *levelgendata, U32 levelgensize);
+   F32 getFileProgressMeter();
+
+   Vector<SafePtr<ByteBuffer> > mPendingTransferData; // Only used for progress meter
+   U32 mReceiveTotalSize;
 
    bool mVoiceChatEnabled;  // server side: false when this client have set the voice volume to zero, which means don't send voice to this client
                             // client side: this can allow or disallow sending voice to server

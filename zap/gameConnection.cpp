@@ -278,12 +278,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
 
 
    string filename = mServerGame->getCurrentLevelFileName();
-   
+#if 1
    filename = strictjoindir(mSettings->getFolderManager()->levelDir, filename);
    if(!TransferLevelFile(filename.c_str()))
       s2cDisplayErrorMessage("!!! Server Error, unable to download");
    return;
-
+#else
    // Initialize on the server to start sending requested file -- will return OK if everything is set up right
    FolderManager *folderManager = mSettings->getFolderManager();
    SenderStatus stat = mServerGame->dataSender.initialize(this, folderManager, filename, LEVEL_TYPE);
@@ -296,6 +296,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
       s2rCommandComplete(COULD_NOT_OPEN_FILE);
       return;
    }
+#endif
 }
 
 
@@ -1468,10 +1469,10 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
                c++;
             bool isInQuote = false; // to ignore spaces while in quotoation marks
             while(c < levelsize && leveldata[c] >= 32 && (isInQuote || leveldata[c] != 32)) // Go to end of second arg
-				{
+            {
                isInQuote = isInQuote != (leveldata[c] == '"');
                c++;
-				}
+            }
          }
          else
             c=0;
@@ -1558,6 +1559,12 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2rTransferFileSize, (U32 size), (size), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
+{
+   mReceiveTotalSize = size;
+}
+
 bool GameConnection::TransferLevelFile(const char *filename)
 {
    BitStream s;
@@ -1571,7 +1578,10 @@ bool GameConnection::TransferLevelFile(const char *filename)
       const U32 DATAARRAYSIZE = 8192;
       U8 *data = new U8[DATAARRAYSIZE];
       U32 datasize = 0;
+      U32 totalTransferSize = 0;
       size = fread(data, 1, DATAARRAYSIZE, f);
+
+      mPendingTransferData.resize(0);
 
       if(size <= 0 || size > DATAARRAYSIZE)
       {
@@ -1588,7 +1598,8 @@ bool GameConnection::TransferLevelFile(const char *filename)
       {
          ByteBuffer *bytebuffer = new ByteBuffer(&data[i], min(partsSize, size-i));
          bytebuffer->takeOwnership();
-         s2rSendDataParts(TransmissionLevelFile, ByteBufferPtr(bytebuffer));
+         mPendingTransferData.push_back(bytebuffer);
+         totalTransferSize += bytebuffer->getBufferSize();
       }
       delete[] data;
 
@@ -1602,9 +1613,12 @@ bool GameConnection::TransferLevelFile(const char *filename)
          if(size != partsSize)
             bytebuffer->resize(size);
 
-         s2rSendDataParts(TransmissionLevelFile, ByteBufferPtr(bytebuffer));
+         mPendingTransferData.push_back(bytebuffer);
+         totalTransferSize += size;
       }
       fclose(f);
+
+      U32 pendingleveltransfer = mPendingTransferData.size();
 
       if(levelInfo.mScriptFileName.c_str()[0] != 0)
       {
@@ -1626,11 +1640,19 @@ bool GameConnection::TransferLevelFile(const char *filename)
 
             if(size != partsSize)
                bytebuffer->resize(size);
-   
-            s2rSendDataParts(TransmissionLevelGenFile, ByteBufferPtr(bytebuffer));
+
+            mPendingTransferData.push_back(bytebuffer);
+            totalTransferSize += size;
          }
          fclose(f);
       }
+
+      s2rTransferFileSize(totalTransferSize);
+      for(U32 i=0; i < pendingleveltransfer; i++)
+         s2rSendDataParts(TransmissionLevelFile, ByteBufferPtr(mPendingTransferData[i]));
+      for(U32 i=pendingleveltransfer; i < U32(mPendingTransferData.size()); i++)
+         s2rSendDataParts(TransmissionLevelGenFile, ByteBufferPtr(mPendingTransferData[i]));
+
       s2rSendDataParts(TransmissionDone, ByteBufferPtr(new ByteBuffer(0)));
       return true;
    }
@@ -1638,6 +1660,30 @@ bool GameConnection::TransferLevelFile(const char *filename)
    return false;
 }
 
+
+F32 GameConnection::getFileProgressMeter()
+{
+   if(mPendingTransferData.size())
+   {
+      // Sent data becomes NULL, which we can use to see the upload progress.
+      U32 numberOfNull = 0;
+      for(U32 i = 0; i < mPendingTransferData.size(); i++)
+         if(mPendingTransferData[i].isNull())
+            numberOfNull++;
+      if(numberOfNull == mPendingTransferData.size())
+         mPendingTransferData.resize(0); // Everything is now NULL, zero size the Vector.
+      else
+         return F32(numberOfNull+1) / (mPendingTransferData.size()+1);
+   }
+   if(mDataBuffer && mReceiveTotalSize != 0)
+   {
+      U32 size = mDataBuffer->getBufferSize();
+      if(mDataBufferLevelGen)
+         size += mDataBufferLevelGen->getBufferSize();
+      return F32(size) / mReceiveTotalSize;
+   }
+   return 0;
+}
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2rVoiceChatEnable, (bool enable), (enable), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
