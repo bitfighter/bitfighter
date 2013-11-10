@@ -50,13 +50,13 @@ private:
    Timer mMasterUpdateTimer;              // Periodically let the master know how we're doing
    bool mShuttingDown;
    Timer mShutdownTimer;
-   GameConnection *mShutdownOriginator;   // Who started the shutdown?
+   SafePtr<GameConnection> mShutdownOriginator;   // Who started the shutdown?
 
    bool mDedicated;
 
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
-   GameConnection *mSuspendor;            // Player requesting suspension if game suspended by request
+   SafePtr<GameConnection> mSuspendor;            // Player requesting suspension if game suspended by request
 
    // For simulating CPU stutter
    Timer mStutterTimer;                   
@@ -199,6 +199,7 @@ public:
    Ship *getLocalPlayerShip() const;
 
    S32 addLevel(const LevelInfo &info);
+   void removeLevel(S32 index);
 
    HostingModePhases hostingModePhase;
 

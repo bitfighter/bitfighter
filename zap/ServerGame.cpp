@@ -249,20 +249,20 @@ LevelInfo ServerGame::getLevelInfo(S32 index)
 
 void ServerGame::sendLevelListToLevelChangers(const string &message)
 {
-	for(S32 i = 0; i < getClientCount(); i++)
-	{
-	   ClientInfo *clientInfo = getClientInfo(i);
-	   GameConnection *conn = clientInfo->getConnection();
+   for(S32 i = 0; i < getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = getClientInfo(i);
+      GameConnection *conn = clientInfo->getConnection();
 
       StringTableEntry msg(message);
 
-	   if(clientInfo->isLevelChanger() && conn)
+      if(clientInfo->isLevelChanger() && conn)
       {
-		  conn->sendLevelList();
+        conn->sendLevelList();
         if(message != "")
            conn->s2cDisplayMessage(GameConnection::ColorInfo, SFXNone, message);
       }
-	}
+   }
 }
 
 
@@ -521,15 +521,24 @@ void ServerGame::cycleLevel(S32 nextLevel)
       {
          logprintf(LogConsumer::ServerFilter, "FAILED!");
 
-         // Level loading went bad... this code untested
-         getGameObjDatabase()->removeEverythingFromDatabase();    // Just in case
-         mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel);   // Set mCurrentLevelIndex to refer to the next level we'll play
-      
-         // If we get back to our starting index it means we can't find any levels to load...  quit?
-         if(mCurrentLevelIndex == startingLevelIndex)    
+         if(mLevelSource->getLevelCount() > 1)
+            removeLevel(mCurrentLevelIndex);
+         else
          {
+            // No more working levels to load...  quit?
             logprintf(LogConsumer::LogError, "All the levels I was asked to load are corrupt.  Exiting!");
-            // TODO: Do something ugly here
+            mShutdownTimer.reset(1); // nothing to load...
+            mShuttingDown = true;
+
+            // To avoid crashing...
+            if(!getGameType())
+            {
+               GameType *gameType = new GameType();
+               gameType->addToGame(this, getGameObjDatabase());
+            }
+            getGameType()->makeSureTeamCountIsNotZero();
+
+            break;  // exit out of loop
          }
       }
    }
@@ -970,8 +979,9 @@ void ServerGame::addClient(ClientInfo *clientInfo)
 
    // If we're shutting down, display a notice to the user... but still let them connect normally
    if(mShuttingDown)
-      conn->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000, mShutdownOriginator->getClientInfo()->getName(), 
-                                         "Sorry -- server shutting down", false);
+      conn->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000,
+            mShutdownOriginator.isNull() ? StringTableEntry() : mShutdownOriginator->getClientInfo()->getName(), 
+            "Sorry -- server shutting down", false);
    if(mGameType.isValid())
    {
       mGameType->serverAddClient(clientInfo);
@@ -1502,6 +1512,24 @@ S32 ServerGame::addLevel(const LevelInfo &levelInfo)
       }
 
    return ret.first;
+}
+
+void ServerGame::removeLevel(S32 index)
+{
+   if(index < 0)
+   {
+      while(mLevelSource->getLevelCount())
+         mLevelSource->remove(0);
+   }
+   else
+      mLevelSource->remove(index);
+
+   for(S32 i = 0; i < getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = getClientInfo(i);
+      if(clientInfo->isLevelChanger())
+         clientInfo->getConnection()->s2cRemoveLevel(index);
+   }
 }
 
 
