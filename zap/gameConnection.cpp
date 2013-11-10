@@ -85,6 +85,7 @@ void GameConnection::initialize()
    switchedTeamCount = 0;
    mSendableFlags = 0;
    mDataBuffer = NULL;
+   mDataBufferLevelGen = NULL;
 
    mWrongPasswordCount = 0;
 
@@ -275,8 +276,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
       return;
    }
 
+
    string filename = mServerGame->getCurrentLevelFileName();
    
+   filename = strictjoindir(mSettings->getFolderManager()->levelDir, filename);
+   if(!TransferLevelFile(filename.c_str()))
+      s2cDisplayErrorMessage("!!! Server Error, unable to download");
+   return;
+
    // Initialize on the server to start sending requested file -- will return OK if everything is set up right
    FolderManager *folderManager = mSettings->getFolderManager();
    SenderStatus stat = mServerGame->dataSender.initialize(this, folderManager, filename, LEVEL_TYPE);
@@ -292,7 +299,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
 }
 
 
-const U32 maxDataBufferSize = 1024*256;
+const U32 maxDataBufferSize = 1024*1024*8;  // 8 MB
 
 // << DataSendable >>
 // Send a chunk of the file -- this gets run on the receiving end       
@@ -1411,64 +1418,147 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
 }
 
 
+
+void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const U8 *levelgendata, U32 levelgensize)
+{
+   bool isServer = !isInitiator();
+
+   // Only server runs this part of code
+   FolderManager *folderManager = mSettings->getFolderManager();
+
+   LevelInfo levelInfo;
+   LevelSource::getLevelInfoFromCodeChunk((char *)leveldata, levelsize, levelInfo);
+
+   string titleName = makeFilenameFromString(levelInfo.mLevelName.getString());
+   string filename = (isServer ? UploadPrefix : DownloadPrefix) + titleName + ".level";
+   string filenameLevelgen = (isServer ? UploadPrefix : DownloadPrefix) + titleName + ".levelgen";
+
+   string fullFilename = strictjoindir(folderManager->levelDir, filename);
+   levelInfo.filename = filename;
+   levelInfo.folder   = folderManager->levelDir;
+
+   FILE *f = fopen(fullFilename.c_str(), "wb");
+   if(f)
+   {
+      if(levelgensize != 0)
+      {
+         // Modify the "Script" line so it points to new uploaded script filename
+         U32 c=0;
+         bool foundscript = false;
+         // First, find a line that says "Script"
+         while(c < levelsize - 10)
+         {  // Make sure the previous char is a new line (c < 32), and compare "Script " with only 7 chars
+            if((c == 0 || leveldata[c-1] < 32) && strncmp("Script ", (char*)&leveldata[c], 7) == 0)
+            {
+               foundscript = true;
+               break;
+            }
+            c++;
+         }
+         if(foundscript)
+         {  // Found a line, write a modified Script filename we will soon write to.
+            // Could use more work here to better handle spaces and quotes
+            if(c != 0)
+               fwrite(leveldata, 1, c, f);
+            fwrite("Script ", 1, 7, f); // Using quotation marks to handle filename with spaces
+            fwrite(filenameLevelgen.c_str(), 1, strlen(filenameLevelgen.c_str()), f);
+            //fputc('"', f);  // End with quotation mark
+            c += 6;
+            while(c < levelsize && leveldata[c] == 32) // First one or more spaces.
+               c++;
+            bool isInQuote = false; // to ignore spaces while in quotoation marks
+            while(c < levelsize && leveldata[c] >= 32 && (isInQuote || leveldata[c] != 32)) // Go to end of second arg
+				{
+               isInQuote = isInQuote != (leveldata[c] == '"');
+               c++;
+				}
+         }
+         else
+            c=0;
+         if(c < levelsize)
+            fwrite(&leveldata[c], 1, levelsize-c, f); // Write the rest of level
+      }
+      else
+         fwrite(leveldata, 1, levelsize, f);
+      fclose(f);
+
+      if(isServer)
+         logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientInfo->getName().getString(), filename.c_str());
+      else
+         // _remote works so well when we are already client and not sending through network, avoids messy #define ZAP_DEDICATED
+         s2cDisplaySuccessMessage_remote("Level download completed");
+
+      if(levelgensize != 0)  // next, write levelgen if we have one.
+      {
+         string str1 = strictjoindir(folderManager->levelDir, filenameLevelgen);
+         f = fopen(str1.c_str(), "wb");
+         if(f)
+         {
+            fwrite(levelgendata, 1, levelgensize, f);
+            fclose(f);
+         }
+         else if(isServer)
+            s2cDisplayErrorMessage("!!! Levelgen Upload failed -- server can't write file");
+         else
+            s2cDisplayErrorMessage_remote("!!! Unable to save levelgen");
+      }
+
+      if(isServer)
+      {
+         
+         S32 index = mServerGame->addLevel(levelInfo);
+         c2sRequestLevelChange_remote(index, false);  // Might as well switch to it after done with upload
+      }
+   }
+   else if(isServer)
+      s2cDisplayErrorMessage("!!! Upload failed -- server can't write file");
+   else
+      s2cDisplayErrorMessage_remote("!!! Unable to save level");
+
+}
+
+
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    // Abort early if user can't upload
-   if( ! (mSettings->getIniSettings()->allowMapUpload || (mSettings->getIniSettings()->allowAdminMapUpload && mClientInfo->isAdmin())))
+   if(!isInitiator() && !(mSettings->getIniSettings()->allowMapUpload || (mSettings->getIniSettings()->allowAdminMapUpload && mClientInfo->isAdmin())))
       return;
 
-   if(mDataBuffer)
+   ByteBuffer *&dataBuffer = (type & 2 ? mDataBufferLevelGen : mDataBuffer);
+
+   if(dataBuffer)
    {
-      if(mDataBuffer->getBufferSize() < maxDataBufferSize)  // Limit memory consumption
-         mDataBuffer->appendBuffer(*data.getPointer());
+      if(dataBuffer->getBufferSize() < maxDataBufferSize)  // Limit memory consumption
+         dataBuffer->appendBuffer(*data.getPointer());
    }
    else
    {
-      mDataBuffer = new ByteBuffer(*data.getPointer());
-      mDataBuffer->takeOwnership();
+      dataBuffer = new ByteBuffer(*data.getPointer());
+      dataBuffer->takeOwnership();
    }
 
-   if(type == LevelFileTransmissionInProgress && !isInitiator() && mDataBuffer->getBufferSize() != 0)
+   if(type & TransmissionDone && mDataBuffer && mDataBuffer->getBufferSize() != 0)
    {
-      // Only server runs this part of code
-      FolderManager *folderManager = mSettings->getFolderManager();
-
-      LevelInfo levelInfo;
-      LevelSource::getLevelInfoFromCodeChunk((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), levelInfo);
-
-      string titleName = makeFilenameFromString(levelInfo.mLevelName.getString());
-      string filename = UploadPrefix + titleName + ".level";
-
-      string fullFilename = strictjoindir(folderManager->levelDir, filename);
-      levelInfo.filename = filename;
-      levelInfo.folder   = folderManager->levelDir;
-
-      FILE *f = fopen(fullFilename.c_str(), "wb");
-      if(f)
-      {
-         fwrite(mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), f);
-         fclose(f);
-         logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientInfo->getName().getString(), filename.c_str());
-
-         LevelSource::getLevelInfoFromCodeChunk((char *)mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), levelInfo);
-
-         S32 index = mServerGame->addLevel(levelInfo);
-         c2sRequestLevelChange_remote(index, false);  // we are server (switching to it after fully uploaded)
-      }
+      if(mDataBufferLevelGen)
+         ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), mDataBufferLevelGen->getBuffer(), mDataBufferLevelGen->getBufferSize());
       else
-         s2cDisplayErrorMessage("!!! Upload failed -- server can't write file");
+         ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), NULL, 0);
    }
 
-   if(type != LevelFileTransmissionComplete)       // i.e. == LevelFileTransmissionInProgress
+   if(type & TransmissionDone)
    {
-      delete mDataBuffer;
+      if(mDataBuffer)
+         delete mDataBuffer;
       mDataBuffer = NULL;
+      if(mDataBufferLevelGen)
+         delete mDataBufferLevelGen;
+      mDataBufferLevelGen = NULL;
    }
 }
 
 
-bool GameConnection::s2rUploadFile(const char *filename, U8 type)
+bool GameConnection::TransferLevelFile(const char *filename)
 {
    BitStream s;
    const U32 partsSize = 512;   // max 1023, limited by ByteBufferSizeBitSize value of 10
@@ -1478,6 +1568,31 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
    if(f)
    {
       U32 size = partsSize;
+      const U32 DATAARRAYSIZE = 8192;
+      U8 *data = new U8[DATAARRAYSIZE];
+      U32 datasize = 0;
+      size = fread(data, 1, DATAARRAYSIZE, f);
+
+      if(size <= 0 || size > DATAARRAYSIZE)
+      {
+         fclose(f);
+         delete[] data;
+         return false;
+      }
+
+      LevelInfo levelInfo;
+      LevelSource::getLevelInfoFromCodeChunk((char*)data, size, levelInfo);
+
+
+      for(U32 i=0; i<size; i+=partsSize)
+      {
+         ByteBuffer *bytebuffer = new ByteBuffer(&data[i], min(partsSize, size-i));
+         bytebuffer->takeOwnership();
+         s2rSendDataParts(TransmissionLevelFile, ByteBufferPtr(bytebuffer));
+      }
+      delete[] data;
+
+      size = (size == DATAARRAYSIZE ? partsSize : 0);
       while(size == partsSize)
       {
          ByteBuffer *bytebuffer = new ByteBuffer(512);
@@ -1487,9 +1602,36 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
          if(size != partsSize)
             bytebuffer->resize(size);
 
-         s2rSendDataParts(size == partsSize ? LevelFileTransmissionComplete : type, ByteBufferPtr(bytebuffer));
+         s2rSendDataParts(TransmissionLevelFile, ByteBufferPtr(bytebuffer));
       }
       fclose(f);
+
+      if(levelInfo.mScriptFileName.c_str()[0] != 0)
+      {
+         FolderManager *folderManager = mSettings->getFolderManager();
+         string filename1 = strictjoindir(folderManager->levelDir, levelInfo.mScriptFileName);
+         f = fopen(filename1.c_str(), "rb");
+      }
+      else
+         f = NULL;
+
+      if(f)
+      {
+         U32 size = partsSize;
+         while(size == partsSize)
+         {
+            ByteBuffer *bytebuffer = new ByteBuffer(512);
+
+            size = (U32)fread(bytebuffer->getBuffer(), 1, bytebuffer->getBufferSize(), f);
+
+            if(size != partsSize)
+               bytebuffer->resize(size);
+   
+            s2rSendDataParts(TransmissionLevelGenFile, ByteBufferPtr(bytebuffer));
+         }
+         fclose(f);
+      }
+      s2rSendDataParts(TransmissionDone, ByteBufferPtr(new ByteBuffer(0)));
       return true;
    }
 

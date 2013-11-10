@@ -23,13 +23,14 @@ namespace Zap
 {
 
 struct LevelInfo
-{   
+{
 private:
    void initialize();      // Called by constructors
 
 public:
    string filename;                 // File level is stored in
    string folder;                   // File's folder
+   string mScriptFileName;
    StringTableEntry mLevelName;     // Level "in-game" names
    
    GameTypeId mLevelType;      

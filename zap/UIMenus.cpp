@@ -2355,7 +2355,7 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
       FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
       string filename = strictjoindir(folderManager->levelDir, mLevels[index & (~UPLOAD_LEVELS_BIT)]);
 
-      if(!gc->s2rUploadFile(filename.c_str(), GameConnection::LevelFileTransmissionInProgress))
+      if(!gc->TransferLevelFile(filename.c_str()))
          getGame()->displayErrorMessage("!!! Can't upload level: unable to read file");
    }
    else

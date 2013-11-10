@@ -269,17 +269,20 @@ public:
       // U8 max!
    };
 
-   enum LevelFileTransmissionStage {
-      LevelFileTransmissionInProgress,
-      LevelFileTransmissionComplete
+   enum LevelFileTransmissionStage { // for s2rSendDataParts only
+      TransmissionLevelFile = 1,
+      TransmissionLevelGenFile = 2,
+      TransmissionDone = 4
    };
 
    U8 mSendableFlags;
    ByteBuffer *mDataBuffer;
+   ByteBuffer *mDataBufferLevelGen;
 
    TNL_DECLARE_RPC(s2rSendableFlags, (U8 flags));
    TNL_DECLARE_RPC(s2rSendDataParts, (U8 type, ByteBufferPtr data));
-   bool s2rUploadFile(const char *filename, U8 type);
+   bool TransferLevelFile(const char *filename);
+   void ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const U8 *levelgendata, U32 levelgensize);
 
    bool mVoiceChatEnabled;  // server side: false when this client have set the voice volume to zero, which means don't send voice to this client
                             // client side: this can allow or disallow sending voice to server

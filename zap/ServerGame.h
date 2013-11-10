@@ -25,7 +25,8 @@ class WallItem;
 class ItemSpawn;
 struct LevelInfo;
 
-static const string UploadPrefix = "_upload";
+static const string UploadPrefix = "upload_";
+static const string DownloadPrefix = "download_";
 
 class ServerGame : public Game
 {
