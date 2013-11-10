@@ -18,7 +18,7 @@
 namespace Zap
 {
 
-const string LevelDatabaseUploadThread::UploadRequest = HttpRequest::LevelDatabaseBaseUrl + "/levels/upload";
+const string LevelDatabaseUploadThread::UploadRequest = "/levels/upload";
 const string LevelDatabaseUploadThread::UploadScreenshotFilename = "upload_screenshot";
 
 LevelDatabaseUploadThread::LevelDatabaseUploadThread(ClientGame* game)
@@ -44,7 +44,7 @@ U32 LevelDatabaseUploadThread::run()
 
    string fileData = readFile(joindir(mGame->getSettings()->getFolderManager()->screenshotDir, UploadScreenshotFilename + string(".png")));
 
-   HttpRequest req(UploadRequest);
+   HttpRequest req(HttpRequest::LevelDatabaseBaseUrl + UploadRequest);
    req.setMethod(HttpRequest::PostMethod);
    req.setData("data[User][username]",      mGame->getPlayerName());
    req.setData("data[User][user_password]", mGame->getPlayerPassword());

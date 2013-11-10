@@ -1037,7 +1037,7 @@ void putCursorAtEndOfLine(_OGLCONSOLE_Console *userConsole)
 int OGLCONSOLE_KeyEvent(int sym, int mod)
 {
     /* If the terminal is hidden we only check for show/hide key */
-    if (userConsole->visibility < 1)
+    if (userConsole && userConsole->visibility < 1)
     {
         if (sym == SHOW_CONSOLE_KEY)
         {  

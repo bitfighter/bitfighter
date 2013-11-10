@@ -19,8 +19,8 @@
 namespace Zap
 {
 
-string LevelDatabaseDownloadThread::LevelRequest = HttpRequest::LevelDatabaseBaseUrl + "/levels/raw/%s";
-string LevelDatabaseDownloadThread::LevelgenRequest = HttpRequest::LevelDatabaseBaseUrl + "/levels/raw/%s/levelgen";
+string LevelDatabaseDownloadThread::LevelRequest = "/levels/raw/%s";
+string LevelDatabaseDownloadThread::LevelgenRequest = "/levels/raw/%s/levelgen";
 
 // Constructor
 LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(string levelId, ClientGame *game)
@@ -64,7 +64,7 @@ U32 LevelDatabaseDownloadThread::run()
 
 
    mGame->displaySuccessMessage("Downloading %s", mLevelId.c_str());
-   dSprintf(url, UrlLength, LevelRequest.c_str(), mLevelId.c_str());
+   dSprintf(url, UrlLength, (HttpRequest::LevelDatabaseBaseUrl + LevelRequest).c_str(), mLevelId.c_str());
    HttpRequest req(url);
    
    if(!req.send())
@@ -106,7 +106,7 @@ U32 LevelDatabaseDownloadThread::run()
       return 0;
    }
 
-   dSprintf(url, UrlLength, LevelgenRequest.c_str(), mLevelId.c_str());
+   dSprintf(url, UrlLength, (HttpRequest::LevelDatabaseBaseUrl + LevelgenRequest).c_str(), mLevelId.c_str());
    req = HttpRequest(url);
    if(!req.send())
    {
