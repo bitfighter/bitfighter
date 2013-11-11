@@ -4852,8 +4852,8 @@ void EditorUserInterface::testLevel()
 
       ui->setMessage(msg);
       ui->setInstr("Press [[Y]] to start,  [[Esc]] to cancel");
-      ui->registerYesFunction(testLevelStart_local);   // testLevelStart_local() just calls testLevelStart() below
-
+      //ui->registerYesFunction(testLevelStart_local);   
+      ui->registerKey(KEY_Y, testLevelStart_local);      // testLevelStart_local() just calls testLevelStart() below
       getUIManager()->activate(ui);
 
       return;
