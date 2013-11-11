@@ -1248,7 +1248,7 @@ void SymbolSpinner::render(const Point &pos) const
          break;
    }
 
-   drawStringc(pos, mHeight / 2.0f, charstr);
+   drawStringc(pos - Point(0, SpacingAdjustor / 2), mHeight / 2.0f, charstr);
 }
 
 
