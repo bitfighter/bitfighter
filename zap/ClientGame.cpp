@@ -934,8 +934,6 @@ void ClientGame::onGameUIActivated()
 
    getGameObjDatabase()->removeEverythingFromDatabase();
    mClientInfo->setSpawnDelayed(false);
-
-   logprintf("Hi raptor!");
 }
 
 
