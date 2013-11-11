@@ -173,7 +173,6 @@ set(CLIENT_SOURCES
 	UINameEntry.cpp
 	UIQueryServers.cpp
 	UITeamDefMenu.cpp
-	UIYesNo.cpp
 	VideoSystem.cpp
 	voiceCodec.cpp
 	../fontstash/stb_truetype.c
