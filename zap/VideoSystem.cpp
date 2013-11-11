@@ -367,6 +367,8 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
       SDL_DisableScreenSaver();
    else
       SDL_EnableScreenSaver();
+
+   SDL_FlushEvent(SDL_WINDOWEVENT); // Get rid of pending window events, fixes giant window size after switching from fullscreen
 #else
    // Set up sdl video flags according to display mode
    S32 sdlVideoFlags = SDL_OPENGL;
