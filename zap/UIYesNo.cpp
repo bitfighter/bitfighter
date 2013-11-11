@@ -15,8 +15,7 @@ namespace Zap
 // Constructor
 YesNoUserInterface::YesNoUserInterface(ClientGame *game) : Parent(game)
 {
-   mYesFunction = NULL;
-   mNoFunction = NULL;
+   // Do nothing
 }
 
 
@@ -27,24 +26,11 @@ YesNoUserInterface::~YesNoUserInterface()
 }
 
 
-void YesNoUserInterface::registerYesFunction(void(*ptr)(ClientGame *game))
-{
-   mYesFunction = ptr;
-}
-
-
-void YesNoUserInterface::registerNoFunction(void(*ptr)(ClientGame *game))
-{
-   mNoFunction = ptr;
-}
 
 
 void YesNoUserInterface::reset()
 {
    Parent::reset();
-
-   mYesFunction = NULL;
-   mNoFunction = NULL;
 }
 
 

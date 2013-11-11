@@ -4831,7 +4831,7 @@ void EditorUserInterface::testLevel()
    validateLevel();
    if(mLevelErrorMsgs.size() || mLevelWarnings.size() || gameTypeError)
    {
-      YesNoUserInterface *ui = getUIManager()->getUI<YesNoUserInterface>();
+      ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
 
       ui->reset();
       ui->setTitle("LEVEL HAS PROBLEMS");
@@ -4852,7 +4852,6 @@ void EditorUserInterface::testLevel()
 
       ui->setMessage(msg);
       ui->setInstr("Press [[Y]] to start,  [[Esc]] to cancel");
-      //ui->registerYesFunction(testLevelStart_local);   
       ui->registerKey(KEY_Y, testLevelStart_local);      // testLevelStart_local() just calls testLevelStart() below
       getUIManager()->activate(ui);
 
@@ -5093,16 +5092,13 @@ void quitEditorCallback(ClientGame *game, U32 unused)
 
    if(editorUI->getNeedToSave())
    {
-      YesNoUserInterface *ui = game->getUIManager()->getUI<YesNoUserInterface>();
+      ErrorMessageUserInterface *ui = game->getUIManager()->getUI<ErrorMessageUserInterface>();
 
       ui->reset();
       ui->setTitle("SAVE YOUR EDITS?");
       ui->setMessage("You have not saved your changes to this level.\n\n"
                      "Do you want to?");
       ui->setInstr("Press [[Y]] to save,  [[N]] to quit,  [[Esc]] to cancel");
-
-      //ui->registerYesFunction(saveLevelCallback);
-      //ui->registerNoFunction(backToMainMenuCallback);
 
       ui->registerKey(KEY_Y, saveLevelCallback);
       ui->registerKey(KEY_N, backToMainMenuCallback);

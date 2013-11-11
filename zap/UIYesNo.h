@@ -16,8 +16,6 @@ class YesNoUserInterface : public AbstractMessageUserInterface
    typedef AbstractMessageUserInterface Parent;
 
 private:
-   void (*mYesFunction)(ClientGame *game);
-   void (*mNoFunction)(ClientGame *game);
 
 public:
    explicit YesNoUserInterface(ClientGame *game);      // Constructor
@@ -25,8 +23,6 @@ public:
 
    void reset();
    bool onKeyDown(InputCode inputCode);
-   void registerYesFunction(void(*ptr)(ClientGame *));
-   void registerNoFunction(void(*ptr)(ClientGame *));
 };
 
 }
