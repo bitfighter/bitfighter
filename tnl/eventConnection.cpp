@@ -616,7 +616,7 @@ NetEvent *EventConnection::unpackNetEvent(BitStream *bstream)
 
    if(mConnectionParameters.mDebugObjectSizes)
    {
-      TNLAssert((endingPosition - bstream->getBitPosition() & ~(~0 << BitStreamPosBitSize)) == 0,
+      TNLAssert(((endingPosition - bstream->getBitPosition()) & ~(~0 << BitStreamPosBitSize)) == 0,
                 avar("Unpack did not match pack for event of class %s.", evt->getClassName()) );
    }
    return evt;

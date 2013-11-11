@@ -43,6 +43,7 @@ namespace TNL {
 static bool processing = false;
 
 //--------------------------------------
+#ifdef WIN32
 static bool displayMessageBox(const char *title, const char *message, bool retry)
 {
    if (retry)
@@ -51,6 +52,7 @@ static bool displayMessageBox(const char *title, const char *message, bool retry
    Platform::AlertOK(title, message);
    return false;
 }   
+#endif
 
 //--------------------------------------
 

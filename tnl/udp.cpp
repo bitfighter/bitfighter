@@ -294,6 +294,7 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
          U32 notblock = nonblockingIO;
          S32 error;
          error = ioctl(mPlatformSocket, FIONBIO, &notblock);
+	 TNLAssert(error == 0, "Could not set non-blocking IO state");
 #endif
       }
       else
@@ -575,16 +576,12 @@ void Socket::getInterfaceAddresses(Vector<Address> *addressVector)
       close(sfd);
       return;
    }
-   char *ret;  // Only used to suppress warnings on cpp
-   char buf[1024];
-   ret = fgets(buf, 1024, f);
-   ret = fgets(buf, 1024, f);
 
    struct ifreq ifr;
    struct sockaddr_in *sin = (struct sockaddr_in *) &ifr.ifr_addr;
    memset(&ifr, 0, sizeof(ifr));
 
-
+   char buf[1024] = { 0 };
    while(fgets(buf, 1024, f))
    {
       char *s = buf;
