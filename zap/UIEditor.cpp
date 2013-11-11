@@ -143,6 +143,8 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mSaveMsgTimer.setPeriod(FIVE_SECONDS);    
 
    mGridSize = game->getSettings()->getIniSettings()->mSettings.getVal<U32>("EditorGridSize");
+
+   mQuitLocked = false;
 }
 
 
@@ -4750,6 +4752,32 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 }
 
 
+void EditorUserInterface::lockQuit(const string &message)
+{
+   mQuitLocked = true;
+   mQuitLockedMessage = message;
+}
+
+
+void EditorUserInterface::unlockQuit()
+{
+   mQuitLocked = false;
+   getUIManager()->getUI<EditorMenuUserInterface>()->unlockQuit();
+}
+
+
+bool EditorUserInterface::isQuitLocked()
+{
+   return mQuitLocked;
+}
+
+
+string EditorUserInterface::getQuitLockedMessage()
+{
+   return mQuitLockedMessage;
+}
+
+
 string EditorUserInterface::getLevelText() 
 {
    string result;
@@ -4932,6 +4960,7 @@ void EditorMenuUserInterface::onActivate()
    Parent::onActivate();
    setupMenus();
 }
+
 
 void EditorUserInterface::findPlugins()
 {
@@ -5138,7 +5167,26 @@ void EditorMenuUserInterface::setupMenus()
    else
       addMenuItem(new MessageMenuItem("MUST BE LOGGED IN TO UPLOAD LEVELS TO DB", Colors::gray40));
 
-   addMenuItem(new MenuItem("QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
+   if(getUIManager()->getUI<EditorUserInterface>()->isQuitLocked())
+      addMenuItem(new MessageMenuItem(getUIManager()->getUI<EditorUserInterface>()->getQuitLockedMessage(), Colors::red));
+   else
+      addStandardQuitItem();
+}
+
+
+void EditorMenuUserInterface::addStandardQuitItem()
+{
+   addMenuItem(new MenuItem("QUIT", quitEditorCallback, "", KEY_Q, KEY_UNKNOWN));
+}
+
+
+void EditorMenuUserInterface::unlockQuit()
+{
+   if(mMenuItems.size() > 0)
+   {
+      mMenuItems.erase(mMenuItems.size() - 1);     // Remove last item
+      addStandardQuitItem();                       // Replace it with QUIT
+   }
 }
 
 

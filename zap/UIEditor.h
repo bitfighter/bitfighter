@@ -188,6 +188,9 @@ private:
    bool mPreviewMode;
    bool mNormalizedScreenshotMode;
 
+   bool mQuitLocked;
+   string mQuitLockedMessage;
+
    boost::shared_ptr<EditorPlugin> mPluginRunner;
 
    Vector<string> mLevelErrorMsgs, mLevelWarnings;
@@ -309,6 +312,13 @@ public:
    static const string UnnamedFile;
 
    bool saveLevel(bool showFailMessages, bool showSuccessMessages);   // Public because called from callbacks
+
+   void lockQuit(const string &message);
+   void unlockQuit();
+
+   string getQuitLockedMessage();
+   bool isQuitLocked();
+
    string getLevelText();
 
    F32 getCurrentScale();
@@ -450,6 +460,7 @@ private:
    void processSelection(U32 index);
    void processShiftSelection(U32 index);
    void onEscape();
+   void addStandardQuitItem();
 
 protected:
    void onActivate();
@@ -457,6 +468,8 @@ protected:
 public:
    explicit EditorMenuUserInterface(ClientGame *game);    // Constructor
    virtual ~EditorMenuUserInterface();
+
+   void unlockQuit();
 };
 
 

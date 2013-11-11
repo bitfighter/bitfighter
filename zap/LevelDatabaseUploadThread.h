@@ -16,8 +16,17 @@ namespace Zap
 {
 
 class ClientGame;
+class EditorUserInterface;
+
 class LevelDatabaseUploadThread : public TNL::Thread
 {
+private:
+   string mLevelCode;
+   string mLevelgenCode;
+   ClientGame* mGame;
+
+   S32 done(EditorUserInterface* editor, const string &message, bool success);
+
 public:
    static const string UploadScreenshotFilename;
    static const string UploadRequest;
@@ -26,11 +35,6 @@ public:
    virtual ~LevelDatabaseUploadThread();
 
    U32 run();
-
-private:
-   string mLevelCode;
-   string mLevelgenCode;
-   ClientGame* mGame;
 };
 
 }

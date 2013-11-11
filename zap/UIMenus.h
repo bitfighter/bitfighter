@@ -30,8 +30,6 @@ class MenuUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 private:
-   Vector<boost::shared_ptr<MenuItem> > mMenuItems;
-
    S32 checkMenuIndexBounds(S32 index);   // Returns corrected index
    Timer mScrollTimer;
 
@@ -49,6 +47,8 @@ private:
    virtual void initialize();
 
 protected:
+   Vector<boost::shared_ptr<MenuItem> > mMenuItems;
+
    S32 getOffset();                             // Calculates index of topmost visible item         
    virtual S32 getYStart();                     // Get vert pos of first menu item
    virtual S32 getTextSize(MenuItemSize size);  // Let menus set their own text size
