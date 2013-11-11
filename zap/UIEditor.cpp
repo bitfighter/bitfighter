@@ -6,8 +6,8 @@
 #include "UIEditor.h"
 
 #include "UIEditorMenus.h"       // For access to menu methods such as setObject
-#include "UIYesNo.h"
 #include "UIEditorInstructions.h"
+#include "UIErrorMessage.h"
 #include "UIGameParameters.h"
 #include "UINameEntry.h"         // For LevelnameEntryUI
 #include "UITeamDefMenu.h"

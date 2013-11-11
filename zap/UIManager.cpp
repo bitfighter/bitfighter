@@ -11,7 +11,6 @@
 #include "UIMenus.h"
 #include "UINameEntry.h"
 #include "UIMessage.h"
-#include "UIYesNo.h"
 #include "UIQueryServers.h"
 #include "UIEditor.h"            // For EditorUserInterface def
 #include "UIInstructions.h"
@@ -20,6 +19,7 @@
 #include "UIGameParameters.h"
 #include "UICredits.h"
 #include "UIEditorInstructions.h"
+#include "UIErrorMessage.h"
 #include "UIChat.h"
 #include "UITeamDefMenu.h"
 #include "UIGame.h"
