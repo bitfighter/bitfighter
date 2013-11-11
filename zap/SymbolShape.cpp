@@ -605,7 +605,7 @@ SymbolShapePtr SymbolString::getHorizLine(S32 length, S32 vertOffset, S32 height
 
 // Parse special symbols enclosed inside [[ ]] in strings.  The passed symbolName is the bit inside the brackets.
 // Pass in NULL for inputCodeManager only if you double-pinky-promise that the string your parsing doesn't need it.
-static void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbol, 
+static void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbol, S32 fontSize,
                            const Color *color, Vector<SymbolShapePtr> &symbols)
 {
    Vector<string> words;
@@ -645,7 +645,7 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
    else if(symbolName == "NEXUS_ICON")
       symbols.push_back(SymbolString::getSymbolNexus(14));
    else if(symbolName == "SPINNER")
-      symbols.push_back(SymbolString::getSymbolSpinner(14, color));
+      symbols.push_back(SymbolString::getSymbolSpinner(fontSize, color));
    else if(symbolName == "CHANGEWEP")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
@@ -701,7 +701,7 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
    else
    {
       // Note that we might get here with an otherwise usable symbol if we passed NULL for the inputCodeManager
-      symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, 12, HelpItemContext, &Colors::red)));
+      symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, fontSize, HelpItemContext, &Colors::red)));
    }
 }
 
@@ -729,7 +729,7 @@ void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const s
       symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset), fontSize, fontContext, textColor)));
 
       // Use + 2 to advance past the opening "[["
-      getSymbolShape(inputCodeManager, str.substr(startPos + 2, endPos - startPos - 2), symbolColor, symbols); 
+      getSymbolShape(inputCodeManager, str.substr(startPos + 2, endPos - startPos - 2), fontSize, symbolColor, symbols); 
 
       offset = endPos + 2;
    }
@@ -1248,7 +1248,7 @@ void SymbolSpinner::render(const Point &pos) const
          break;
    }
 
-   drawStringc(pos, mHeight, charstr);
+   drawStringc(pos, mHeight / 2.0f, charstr);
 }
 
 
