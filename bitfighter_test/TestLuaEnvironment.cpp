@@ -16,20 +16,37 @@ namespace Zap
 using namespace std;
 using namespace TNL;
 
+class LuaEnvironmentTest : public testing::Test {
+protected:
+   ServerGame *serverGame;
+   GameSettingsPtr settings;
 
-TEST(LuaEnvironmentTest, EnvironmentSetup)
+   virtual void SetUp() {
+      serverGame = newServerGame();
+
+      settings = serverGame->getSettingsPtr();
+
+      LuaScriptRunner::setScriptingDir(settings->getFolderManager()->luaDir);
+      EXPECT_TRUE(LuaScriptRunner::startLua());
+   }
+
+
+   virtual void TearDown()
+   {
+      LuaScriptRunner::shutdown();
+
+      delete serverGame;
+      serverGame = NULL;
+   }
+};
+
+
+TEST_F(LuaEnvironmentTest, BasicTests)
 {
-   ServerGame *serverGame = newServerGame();
-   GameSettingsPtr settings = serverGame->getSettingsPtr();
+	LuaLevelGenerator levelgen(serverGame);
+	levelgen.runScript(false);
 
-   LuaScriptRunner::setScriptingDir(settings->getFolderManager()->luaDir);
-	EXPECT_TRUE(LuaScriptRunner::startLua());
-
-
-//	LuaLevelGenerator levelgen(serverGame);
-//	levelgen.runScript(false);
-//
-//	EXPECT_TRUE(levelgen.runString("bf:addItem(Robot.new())"));
+	EXPECT_FALSE(levelgen.runString("a = b.b"));
 
 }
 
