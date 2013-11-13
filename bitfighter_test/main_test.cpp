@@ -568,7 +568,7 @@ TEST_F(BfTest, LevelMenuSelectUserInterfaceTests)
    ClientGame game(addr, settings, new UIManager());    // ClientGame destructor will clean up UIManager
 
    // Want to test getIndexOfNext(), which is a slightly complex function.  Need to start by setting up a menu.
-   LevelMenuSelectUserInterface *ui = new LevelMenuSelectUserInterface(&game);      // Cleaned up when game goes out of scope
+   LevelMenuSelectUserInterface *ui = game.getUIManager()->getUI<LevelMenuSelectUserInterface>();      // Cleaned up when game goes out of scope
 
    // These should be alphabetically sorted
    ui->addMenuItem(new MenuItem("Aardvark"));    //  0
@@ -1256,8 +1256,10 @@ TEST_F(BfTest, LittleStory)
 
 int main(int argc, char **argv) 
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+   testing::InitGoogleTest(&argc, argv);
+   int returnvalue = RUN_ALL_TESTS();
+   FontManager::cleanup();
+   return returnvalue;
 }
 
 

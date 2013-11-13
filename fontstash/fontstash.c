@@ -196,6 +196,8 @@ error:
 		free(stash);
 	if (texture != NULL)
 		free(texture);
+	if (empty_data != NULL)
+		free(empty_data);
 	return NULL;
 }
 

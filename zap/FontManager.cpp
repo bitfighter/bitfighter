@@ -101,7 +101,7 @@ S32 BfFont::getStashFontId()
 static FontId currentFontId;
 static bool mUsingExternalFonts = true;
 
-static BfFont *fontList[FontCount];
+static BfFont *fontList[FontCount] = {NULL};
 
 sth_stash *FontManager::mStash = NULL;
 
@@ -109,6 +109,8 @@ sth_stash *FontManager::mStash = NULL;
 // If useExternalFonts is false, settings can be NULL
 void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 {
+   cleanup();  // Makes sure its been cleaned up first, many tests call init without cleanup..
+
    mUsingExternalFonts = useExternalFonts;
 
    if(mStash == NULL)
@@ -142,7 +144,10 @@ void FontManager::cleanup()
 {
    for(S32 i = 0; i < FontCount; i++)
       if(fontList[i] != NULL)
+      {
          delete fontList[i];
+         fontList[i] == NULL;
+      }
 
    if(mStash != NULL)
    {

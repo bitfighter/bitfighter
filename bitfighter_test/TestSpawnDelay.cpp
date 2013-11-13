@@ -156,6 +156,7 @@ static void doScenario2(GamePair &gamePair)
 
    // Cleanup -- remove second player from game
    clientGame2->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+   delete clientGame2;
 }
 
 
