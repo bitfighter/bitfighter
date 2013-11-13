@@ -105,6 +105,14 @@ static BfFont *fontList[FontCount] = {NULL};
 
 sth_stash *FontManager::mStash = NULL;
 
+
+FontManager::FontManager()
+{
+   for(S32 i = 0; i < FontCount; i++)
+      fontList[i] = NULL;
+}
+
+
 // This must be run after VideoSystem::actualizeScreenMode()
 // If useExternalFonts is false, settings can be NULL
 void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
@@ -146,7 +154,7 @@ void FontManager::cleanup()
       if(fontList[i] != NULL)
       {
          delete fontList[i];
-         fontList[i] == NULL;
+         fontList[i] = NULL;
       }
 
    if(mStash != NULL)

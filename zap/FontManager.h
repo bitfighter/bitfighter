@@ -40,6 +40,8 @@ private:
    static S32 getTtfFontStringLength(BfFont *font, const char* string);
 
 public:
+   FontManager();    // Constructor
+
    static void initialize(GameSettings *settings, bool useExternalFonts = true);
    static void cleanup();
 
