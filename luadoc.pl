@@ -197,7 +197,8 @@ foreach my $file (@files) {
             next;
          }
 
-         if( $line =~ m|\@luafunc\s+(.*)$| ) {     # Line looks like:  * @luafunc  retval BfObject::getClassID(p1, p2); retval and p1/p2 are optional
+         # Look for:  * @luafunc  retval BfObject::getClassID(p1, p2); retval and p1/p2 are optional
+         if( $line =~ m|\@luafunc\s+(.*)$| ) {     
             # In C++ code, we use "::" to separate classes from functions (class::func); in Lua, we use "." (class.func).
             my $sep = ($file =~ m|\.lua$|) ? "[.:]" : "::";
 
@@ -213,14 +214,22 @@ foreach my $file (@files) {
 
             $retval =~ s|\s+$||;     # Trim any trailing spaces from $retval
 
+            # if($class eq $method) {
+            #    print "Found constructor for $class!\n";
+            # }
+
             # Use voidlessRetval to avoid having "void" show up where we'd rather omit the return type altogether
             my $prefix = $class || "global";
             push(@comments, " \\fn $voidlessRetval $prefix" . "::" . "$method($args)\n");
 
-            # Find the original class definition and delete it (if it still exists)
-            my $index = first { ${$classes{$class}}[$_] =~ m|(static\s+)?void $method\(| } 0..$#{$classes{$class}};
-            if($index ne "") {
-               splice(@{$classes{$class}}, $index, 1);       # Delete element at $index
+            # Find the original class definition and delete it (if it still exists); but not if it's a constructor.
+            # We do this in order to provide more complete method descriptions if they are found subsequently.
+            # We can detect constructors because they come in the form of $class::$method where class and method are the same.
+            if($class ne $method) {
+               my $index = first { ${$classes{$class}}[$_] =~ m|(static\s+)?void $method\(| } 0..$#{$classes{$class}};
+               if($index ne "") {
+                  splice(@{$classes{$class}}, $index, 1);       # Delete element at $index
+               }
             }
 
             chomp($line);     # Remove trailing \n
@@ -265,6 +274,7 @@ foreach my $file (@files) {
             $encounteredDoxygenCmd = 1;
             next;
          }
+
 
          # Otherwise keep the line unaltered and put it in the appropriate array
          if($collectingMainPage) {
