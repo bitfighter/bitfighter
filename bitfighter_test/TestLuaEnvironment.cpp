@@ -19,35 +19,62 @@ using namespace TNL;
 class LuaEnvironmentTest : public testing::Test {
 protected:
    ServerGame *serverGame;
-   GameSettingsPtr settings;
+   GameSettingsPtr settings;  // Will be cleaned up automatically
+
+   lua_State *L;
+
+   LuaLevelGenerator *levelgen;
+
 
    virtual void SetUp() {
       serverGame = newServerGame();
-
       settings = serverGame->getSettingsPtr();
 
+      // Set-up our environment
       LuaScriptRunner::setScriptingDir(settings->getFolderManager()->luaDir);
       EXPECT_TRUE(LuaScriptRunner::startLua());
+
+      // Set up a levelgen object, with no script
+      levelgen = new LuaLevelGenerator(serverGame);
+
+      // Ensure environment set-up
+      EXPECT_TRUE(levelgen->prepareEnvironment());
+
+      // Grab our Lua state
+      L = LuaScriptRunner::getL();
+      EXPECT_TRUE(L);
    }
 
 
    virtual void TearDown()
    {
+      delete levelgen;
+
       LuaScriptRunner::shutdown();
 
       delete serverGame;
-      serverGame = NULL;
    }
+
+
+   bool existsFunctionInEnvironment(const string &functionName)
+   {
+      return LuaScriptRunner::loadFunction(L, levelgen->getScriptId(), functionName.c_str());
+   }
+
 };
 
 
 TEST_F(LuaEnvironmentTest, BasicTests)
 {
-	LuaLevelGenerator levelgen(serverGame);
-	levelgen.runScript(false);
+   // Test exception throwing
+   EXPECT_FALSE(levelgen->runString("a = b.b"));
+}
 
-	EXPECT_FALSE(levelgen.runString("a = b.b"));
 
+TEST_F(LuaEnvironmentTest, SandboxTests)
+{
+   // Test that our sandbox is working, try to load an evil function
+   EXPECT_FALSE(existsFunctionInEnvironment("setfenv"));
 }
 
 
