@@ -214,16 +214,17 @@ foreach my $file (@files) {
 
             $retval =~ s|\s+$||;     # Trim any trailing spaces from $retval
 
-            # if($class eq $method) {
-            #    print "Found constructor for $class!\n";
-            # }
-
             # Use voidlessRetval to avoid having "void" show up where we'd rather omit the return type altogether
             my $prefix = $class || "global";
             push(@comments, " \\fn $voidlessRetval $prefix" . "::" . "$method($args)\n");
+            if($class eq $method) {
+               my $lcClass = lc $class;
+               push(@comments, "\\brief Constructor.\n\nExample:\@code\n$lcClass = $class.new($args)\n...\nlevelgen:addItem($lcClass)\@endcode\n\n");
+            }
+
 
             # Find the original class definition and delete it (if it still exists); but not if it's a constructor.
-            # We do this in order to provide more complete method descriptions if they are found subsequently.
+            # We do this in order to provide more complete method descriptions if they are found subsequently.  I think.
             # We can detect constructors because they come in the form of $class::$method where class and method are the same.
             if($class ne $method) {
                my $index = first { ${$classes{$class}}[$_] =~ m|(static\s+)?void $method\(| } 0..$#{$classes{$class}};
@@ -385,6 +386,8 @@ foreach my $file (@files) {
          }
       }
 
+      print $OUT "\n\n// What follows is a dump of the \@globalfunctions varaible\n\n";
+
       print $OUT "namespace global {\n";
       foreach ( @globalfunctions ) {
          # print each global function declaration
@@ -392,6 +395,7 @@ foreach my $file (@files) {
       }
       print $OUT "}\n";
 
+      print $OUT "\n\n// What follows is a dump of the \@comments varaible\n\n";
       print $OUT @comments;
       
       close $OUT;           
