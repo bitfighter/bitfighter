@@ -946,7 +946,8 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
    
    bounds.clear();
 
-   for(S32 i = firstCoord; i < argc; i += 2)
+   // Make sure we don't crash with firstCoord = 0; argc = 7; or some uneven number
+   for(S32 i = firstCoord; i < argc - 1; i += 2)
    {
       p.set( (F32) atof(argv[i]) * gridSize, (F32) atof(argv[i+1]) * gridSize );
 

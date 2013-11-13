@@ -535,7 +535,8 @@ void BfObject::removeFromGame(bool deleteObject)
 
 bool BfObject::processArguments(S32 argc, const char**argv, Game *game)
 {
-   return true;
+   logprintf(LogConsumer::LogError, "Missing processArguments for %s", getClassName());
+   return false;
 }
 
 

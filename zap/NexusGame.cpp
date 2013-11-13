@@ -1030,7 +1030,7 @@ bool NexusZone::processArguments(S32 argc2, const char **argv2, Game *game)
    if(argc <= 4)     // Archaic Zap! format
       processArguments_ArchaicZapFormat(argc, argv, game->getLegacyGridSize());
    else              // Sleek, modern Bitfighter format
-      Parent::processArguments(argc, argv, game);
+      return Parent::processArguments(argc, argv, game);
 
    return true;
 }

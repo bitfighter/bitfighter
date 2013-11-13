@@ -11,6 +11,8 @@
 
 
 #if SDL_VERSION_ATLEAST(2,0,0)
+#  define SDLKey SDL_Keycode
+#  define SDLMod SDL_Keymod
 #else
    typedef S32 SDL_Keycode;
 #endif

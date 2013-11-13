@@ -333,6 +333,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelLoader.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLuaEnvironment.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPolylineGeometry.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestObjects.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRobot.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestServerGame.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSpawnDelay.cpp

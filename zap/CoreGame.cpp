@@ -300,9 +300,12 @@ CoreItem::~CoreItem()
    LUAW_DESTRUCTOR_CLEANUP;
 
    // Alert the gameType, if it still exists (it might not when the game is over)
-   GameType *gameType = getGame()->getGameType();
-   if(gameType && gameType->getGameTypeId() == CoreGame)
-      static_cast<CoreGameType *>(gameType)->removeCore(this);
+   if(getGame())
+   {
+      GameType *gameType = getGame()->getGameType();
+      if(gameType && gameType->getGameTypeId() == CoreGame)
+         static_cast<CoreGameType *>(gameType)->removeCore(this);
+   }
 }
 
 
