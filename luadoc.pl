@@ -4,6 +4,7 @@
 use strict;            # Require vars to be declared!
 use File::Basename;
 use List::Util 'first';
+use IO::Handle;
 
 # Need to be in the doc directory
 chdir "doc" || die "Could not change to doc folder: $!";
@@ -422,3 +423,36 @@ close $OUT;
 chdir("doc");
 system("doxygen luadocs.doxygen");
 
+
+# Post-process the generated doxygen stuff
+# Let's try this with Tie::File... it looks pretty neat!
+# Chcek the docs at http://search.cpan.org/~toddr/Tie-File-0.98/lib/Tie/File.pm
+
+print "Fixing doxygen output...\n";
+@files = ();
+
+push(@files, <./html/class_*.html>);    # Files containing the offending character
+
+# Loop through all the files we found above...
+foreach my $file (@files) {
+   my @outlines;
+   STDOUT->printflush(".");
+   open my $IN, "<", $file || die "Could not open $file for reading: $!";
+
+   # Remove the offending &nbsp that makes some )s appear in the wrong place
+   foreach my $line (<$IN>) {
+      $line =~ s|(<td class="paramtype">.+)&#160;(</td>)|\1\2|;
+      push(@outlines, $line);
+   }
+
+   close $IN;
+
+   open my $OUT, '>', $file || die "Can't open $file for writing: $!";
+   foreach my $line (@outlines) {
+      print $OUT $line;
+   }
+
+   close $OUT;
+}
+
+print "\n";
