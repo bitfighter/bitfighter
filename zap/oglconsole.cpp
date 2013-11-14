@@ -113,17 +113,17 @@ int OGLCONSOLE_CreateFont()
 		{
 			for (x = 0; x < OGLCONSOLE_FontData.width; ++x)
 			{
-				if (OGLCONSOLE_FontData.pixel_data[(y*OGLCONSOLE_FontData.width+x)*OGLCONSOLE_FontData.bytes_per_pixel])
+				if(OGLCONSOLE_FontData.pixel_data[(y*OGLCONSOLE_FontData.width+x)*OGLCONSOLE_FontData.bytes_per_pixel])
 					*dst|=(1<<(x&7));
 				else
 					*dst&=~(1<<(x&7));
-				if ((x&7) == 7)
+				if((x&7) == 7)
 					++dst;
 			}
 		}
 
 		file = fopen("packedfont.c", "w");
-		if (file != NULL)
+		if(file != NULL)
 		{
 			fprintf(file, 
 				"static const struct\n"
@@ -141,14 +141,14 @@ int OGLCONSOLE_CreateFont()
 			//OutputDebugStringA("  \"");
 			for (x = 0; x < dst - buf; ++x)
 			{
-				if ((x & 15) == 0)
+				if((x & 15) == 0)
 					fputs("\t", file);
 				fprintf(file, "0x%02x, ", buf[x]);
-				if ((x & 15) == 15)
+				if((x & 15) == 15)
 					fputs("\n", file);
 			}
 			//OutputDebugStringA("\"\n");
-			if ((x & 15) != 0)
+			if((x & 15) != 0)
 				fputs("\n", file);
 			fputs("};\n", file);
 		}
@@ -186,7 +186,7 @@ int OGLCONSOLE_CreateFont()
 			{
 				for (b = 0; b < 8; ++b)
 				{
-					if ((*src >> b) & 1)
+					if((*src >> b) & 1)
 					{
 #     ifndef OGLCONSOLE_USE_ALPHA_TEXT
 						*dst++ = 255;
@@ -371,7 +371,7 @@ void OGLCONSOLE_Resize(_OGLCONSOLE_Console *console)
       /* This is the total number of screen lines in memory (start blank) */
       console->maxLines = DEFAULT_MAX_LINES;
       /* Allocate space for text */
-      //if (console->lines)
+      //if(console->lines)
       //    free(console->lines);
       console->lines = (char*)malloc(console->maxLines*(console->textWidth+1));
       /* Initialize to empty strings */
@@ -471,8 +471,8 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
     console->visibility = 0;
 
     /* If no consoles existed before, we select this one for convenience */
-    if (!programConsole) programConsole = console;
-    if (!userConsole) userConsole = console;
+    if(!programConsole) programConsole = console;
+    if(!userConsole) userConsole = console;
 
 
 
@@ -503,22 +503,22 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
  * programmer, end-user refers to the real end-user) */
 static void OGLCONSOLE_DestroyReal(OGLCONSOLE_Console C, int safe)
 {
-	if (C)
+	if(C)
 	{
 		free(C->lines);
 	}
     free(C);
 
-    if (safe)
+    if(safe)
     {
-        if (programConsole == C)
+        if(programConsole == C)
         {
             fprintf(stderr, 
             "Warning: OGLCONSOLE you just destroyed the programConsole!\n");
             programConsole = NULL;
         }
 
-        if (userConsole == C)
+        if(userConsole == C)
         {
             fprintf(stderr,
             "Warning: OGLCONSOLE you just destroyed the userConsole!\n");
@@ -544,10 +544,10 @@ void OGLCONSOLE_Destroy(OGLCONSOLE_Console console)
  * count on it because that may change; no warnings are issued by this function */
 void OGLCONSOLE_Quit()
 {
-    if (programConsole)
+    if(programConsole)
         OGLCONSOLE_DestroyReal(programConsole, 0);
 
-    if (programConsole != userConsole && userConsole)
+    if(programConsole != userConsole && userConsole)
         OGLCONSOLE_DestroyReal(userConsole, 0);
     programConsole = NULL;
     userConsole = NULL;
@@ -613,13 +613,13 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
     /* Render hiding / showing console in a special manner. Zero means hidden. 1
      * means visible. All other values are traveling toward zero or one. TODO:
      * Make this time dependent */
-    if (C->visibility != 1)
+    if(C->visibility != 1)
     {
         double d; /* bra size */
         int v = C->visibility;
 
         /* Count down in both directions */
-        if (v < 0)
+        if(v < 0)
         {
             v ^= -1;
             C->visibility++;
@@ -680,12 +680,12 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
                     0);
 
             /* Grab next line of text using wheel-queue wrapping */
-            if (++tLine >= C->maxLines) tLine = 0;
+            if(++tLine >= C->maxLines) tLine = 0;
         }
 
         /* Here we draw the current commandline, it will either be a line from
          * the command history or the line being edited atm */
-        if (C->historyScrollIndex >= 0)
+        if(C->historyScrollIndex >= 0)
         {
             glColor3d(1,0,0);    // red
             OGLCONSOLE_DrawString(
@@ -753,7 +753,7 @@ void OGLCONSOLE_DrawWrapString(char *s, double x, double y, double w, double h,
         s++;
         X += w;
 
-        if (++pos >= wrap)
+        if(++pos >= wrap)
         {
             pos = 0;
             y += h;
@@ -769,7 +769,7 @@ void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
 //  static int message = 0;
     double cx, cy, cX, cY;
     
-//    if (c < FIRST_CHARACTER || c > LAST_CHARACTER)
+//    if(c < FIRST_CHARACTER || c > LAST_CHARACTER)
 //        c = (c - FIRST_CHARACTER) % (LAST_CHARACTER - FIRST_CHARACTER);
 //    else c -= FIRST_CHARACTER;
 
@@ -789,7 +789,7 @@ void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
 
 
 
-/*  if (message != c)
+/*  if(message != c)
     {
         printf("For %i we got %f, %f\n", c, x, y);
         message = c;
@@ -848,12 +848,12 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
              //puts("incrementing to the next line");
  
              /* Inrement text-line index, with wrapping */
-             if (++lineQueueIndex >= maxLines)
+             if(++lineQueueIndex >= maxLines)
                  lineQueueIndex = 0;
  
              /* Scroll the console display one line TODO: Don't scroll if the console is
               * currently scrolled away from the end of output? */
-             if (++lineScrollIndex >= maxLines)
+             if(++lineScrollIndex >= maxLines)
                  lineScrollIndex = 0;
  
              /* Reposition the cursor at the beginning of the new line */
@@ -871,7 +871,7 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
           * and thus we needn't suffer through a needless blank line between
           * console output and the command line, wasting precious screen
           * real-estate */
-         if (*outputCursor == '\n')
+         if(*outputCursor == '\n')
          {
              C->outputNewline = 1;
              outputCursor++;
@@ -880,7 +880,7 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
  
          /* If we encounter a tab character we must expand that character
           * appropriately */
-         if (*outputCursor == '\t')
+         if(*outputCursor == '\t')
          {
              const int TAB_WIDTH = 8;
  
@@ -888,7 +888,7 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
              //printf("column: %i\n", n);
  
              /* Are we indenting our way off the edge of the screen? */
-             if (textWidth - n <= TAB_WIDTH)
+             if(textWidth - n <= TAB_WIDTH)
              {
                  /* Switch on the console's newline bit, and advance through the
                   * string output we've been given */
@@ -913,7 +913,7 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
  
      /* Unless we're at the very end of our current line, we finish up by capping
       * a NULL terminator on the current line */
-     if (consoleCursor != C->lines + (lineQueueIndex+1) *C->textWidth -1)
+     if(consoleCursor != C->lines + (lineQueueIndex+1) *C->textWidth -1)
          *consoleCursor = '\0';
  
      /* Restore cached values */
@@ -955,20 +955,20 @@ void OGLCONSOLE_AddHistory(OGLCONSOLE_Console C, char *s)
 
     C->maxHistoryIndex++;
 
-    if (C->maxHistoryIndex >= MAX_HISTORY_COUNT)
+    if(C->maxHistoryIndex >= MAX_HISTORY_COUNT)
         C->maxHistoryIndex = MAX_HISTORY_COUNT;
 
 
     C->historyQueueIndex++;
 
-    if (C->historyQueueIndex >= MAX_HISTORY_COUNT)
+    if(C->historyQueueIndex >= MAX_HISTORY_COUNT)
         C->historyQueueIndex = 0;
 }
 
 void OGLCONSOLE_YankHistory(_OGLCONSOLE_Console *console)
 {
     /* First we have to see if we are browsing our command history */
-    if (console->historyScrollIndex != -1)
+    if(console->historyScrollIndex != -1)
     {
         /* Copy the selected command into the current input line */
         strcpy(console->inputLine,
@@ -1037,9 +1037,9 @@ void putCursorAtEndOfLine(_OGLCONSOLE_Console *userConsole)
 int OGLCONSOLE_KeyEvent(int sym, int mod)
 {
     /* If the terminal is hidden we only check for show/hide key */
-    if (userConsole && userConsole->visibility < 1)
+    if(userConsole && userConsole->visibility < 1)
     {
-        if (sym == SHOW_CONSOLE_KEY)
+        if(sym == SHOW_CONSOLE_KEY)
         {  
             OGLCONSOLE_ShowConsole();
             return 1;
@@ -1049,7 +1049,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     /* Check for hide key */
-    if (sym == HIDE_CONSOLE_KEY)
+    if(sym == HIDE_CONSOLE_KEY)
     {
         /* Tell console to slide into closing */
         OGLCONSOLE_HideConsole();
@@ -1058,11 +1058,11 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
    /* The operation for delete and backspace keys are very similar */
-    else if (sym == Zap::KEY_DELETE
+    else if(sym == Zap::KEY_DELETE
          ||  sym == Zap::KEY_BACKSPACE)
     {
         /* If string is not empty */
-        if (getCurrentLineLength(userConsole))
+        if(getCurrentLineLength(userConsole))
         {
             char *end, *c;
 
@@ -1070,11 +1070,11 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
             OGLCONSOLE_YankHistory(userConsole);
 
             /* Is this a backspace? */
-            if (sym == Zap::KEY_BACKSPACE)
+            if(sym == Zap::KEY_BACKSPACE)
             {
                /* Backspace operations bail if the cursor is at the beginning
                  * of the input line */
-                if (userConsole->inputCursorPos == 0)
+                if(userConsole->inputCursorPos == 0)
                     return 1;
 
                 /* This is all that differentiates the backspace from the delete
@@ -1084,7 +1084,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
 
             /* Delete key operations bail if the cursor is at the end of the
              * input line */
-            else if (userConsole->inputCursorPos == userConsole->inputLineLength)
+            else if(userConsole->inputCursorPos == userConsole->inputLineLength)
                 return 1;
 
             /* Last we shift affected text to the left, overlapping the
@@ -1102,7 +1102,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
         return 1;
     }
 
-    else if (sym == KEY_RETURN)
+    else if(sym == KEY_RETURN)
     {
          /* Yank the command history if necessary */
          OGLCONSOLE_YankHistory(userConsole);
@@ -1125,28 +1125,28 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Page up key
-    else if (sym == Zap::KEY_PAGEUP)
+    else if(sym == Zap::KEY_PAGEUP)
     {
         userConsole->lineScrollIndex -= userConsole->textHeight / 2;
 
-        if (userConsole->lineScrollIndex < 0)
+        if(userConsole->lineScrollIndex < 0)
             userConsole->lineScrollIndex += userConsole->maxLines;
 
         return 1;
     }
 
     // Page down key
-    else if (sym == Zap::KEY_PAGEDOWN)
+    else if(sym == Zap::KEY_PAGEDOWN)
     {
         userConsole->lineScrollIndex += userConsole->textHeight / 2;
-
-        if (userConsole->lineScrollIndex >= userConsole->maxLines)
+      
+        if(userConsole->lineScrollIndex >= userConsole->maxLines)
             userConsole->lineScrollIndex -= userConsole->maxLines;
 
         return 1;
     }
      // Home key
-     else if (sym == Zap::KEY_HOME)
+     else if(sym == Zap::KEY_HOME)
      {
          /* Yank the command history if necessary */
          OGLCONSOLE_YankHistory(userConsole);
@@ -1156,7 +1156,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
      }
 
      // End key
-     else if (sym == Zap::KEY_END)
+     else if(sym == Zap::KEY_END)
      {
          /* Yank the command history if necessary */
          OGLCONSOLE_YankHistory(userConsole);
@@ -1167,12 +1167,12 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
 
 
     // Arrow key up
-    else if (sym == Zap::KEY_UP)
+    else if(sym == Zap::KEY_UP)
     {
         // Shift key is for scrolling the output display
-        if (mod & KMOD_SHIFT)
+        if(mod & KMOD_SHIFT)
         {
-            if (--userConsole->lineScrollIndex < 0)
+            if(--userConsole->lineScrollIndex < 0)
                 userConsole->lineScrollIndex = userConsole->maxLines-1;
         }
 
@@ -1180,7 +1180,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
         else
         {
             // -1 means we aren't looking at history yet
-            if (userConsole->historyScrollIndex == -1)
+            if(userConsole->historyScrollIndex == -1)
             {
                 userConsole->historyScrollIndex = wrap(userConsole, userConsole->historyQueueIndex - 1);
                 putCursorAtEndOfLine(userConsole);
@@ -1201,12 +1201,12 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Arrow key down
-    else if (sym == Zap::KEY_DOWN)
+    else if(sym == Zap::KEY_DOWN)
     {
         // Shift key is for scrolling the output display
-        if (mod & KMOD_SHIFT)
+        if(mod & KMOD_SHIFT)
         {
-            if (++userConsole->lineScrollIndex >= userConsole->maxLines)
+            if(++userConsole->lineScrollIndex >= userConsole->maxLines)
             {
                 userConsole->lineScrollIndex = 0;
                 putCursorAtEndOfLine(userConsole);
@@ -1217,14 +1217,14 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
         else
         {
             // -1 means we aren't look at history yet
-            if (userConsole->historyScrollIndex != -1)
+            if(userConsole->historyScrollIndex != -1)
             {
                 // Wrap our history scrolling
                userConsole->historyScrollIndex = wrap(userConsole, userConsole->historyScrollIndex + 1);
 
                 // If we've returned to our current position in the command
                 // history, we'll just drop out of history mode
-                if (userConsole->historyScrollIndex == 
+                if(userConsole->historyScrollIndex == 
                            (userConsole->maxHistoryIndex == MAX_HISTORY_COUNT ? userConsole->historyQueueIndex : 0))
                      userConsole->historyScrollIndex = -1;
 
@@ -1235,24 +1235,24 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Arrow key left
-    else if (sym == Zap::KEY_LEFT)
+    else if(sym == Zap::KEY_LEFT)
     {
         /* Yank the command history if necessary */
         OGLCONSOLE_YankHistory(userConsole);
 
-        if (userConsole->inputCursorPos > 0)
+        if(userConsole->inputCursorPos > 0)
             userConsole->inputCursorPos--;
 
         return 1;
     }
 
     // Arrow key right
-    else if (sym == Zap::KEY_RIGHT)
+    else if(sym == Zap::KEY_RIGHT)
     {
         /* Yank the command history if necessary */
         OGLCONSOLE_YankHistory(userConsole);
 
-        if (userConsole->inputCursorPos <
+        if(userConsole->inputCursorPos <
             userConsole->inputLineLength)
             userConsole->inputCursorPos++;
 
@@ -1265,18 +1265,18 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
 int OGLCONSOLE_CharEvent(int unicode)
 {
     /* If the terminal is hidden, no need to process input */
-    if (userConsole->visibility < 1)
+    if(userConsole->visibility < 1)
     {
         return 0;
     }
 
-    if (unicode == 0)
+    if(unicode == 0)
     {
        return 0;
     }
 
    /* Only insert the char if there is room */
-   if (userConsole->inputLineLength < MAX_INPUT_LENGTH - 1)
+   if(userConsole->inputLineLength < MAX_INPUT_LENGTH - 1)
    {
       char *c, *d;
 
