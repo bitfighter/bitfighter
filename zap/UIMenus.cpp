@@ -2023,7 +2023,6 @@ void GameMenuUserInterface::buildMenu()
    // Save input mode so we can see if we need to display alert if it changes
    lastInputMode = settings->getInputMode();  
 
-
    addMenuItem(new MenuItem("OPTIONS",      optionsSelectedCallback, "", KEY_O));
    addMenuItem(new MenuItem("INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, getInputCode(settings, InputCodeManager::BINDING_HELP)));
 
