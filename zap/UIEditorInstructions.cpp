@@ -125,10 +125,10 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    // For page 2 of general instructions
    ControlStringsEditor controls2Left[] = {
    { "HEADER", "Size & Rotation" },
-         { "Flip horizontal/vertical", "[[H]], [[V]]" },
-         { "Rotate object",            "[[R]], [[Shift+R]]" },
-         { "Free rotate",              "[[Alt+R]]" },
-         { "Rotate about (0,0)",       "[[Ctrl+R]], [[Ctrl+Shift+R]]" },
+         { "Flip horizontal/vertical", "[[H]],  [[V]]" },
+         { "Rotate object in place",   "[[R]],  [[Shift+R]]" },
+         { "Rotate about (0,0)",       "[[Ctrl+R]],  [[Ctrl+Shift+R]]" },
+         { "Free rotate in place",     "[[Alt+R]]" },
          { "Free rotate about (0,0)",  "[[Ctrl+Alt+R]]" },
          { "Scale selection",          "[[Ctrl+Shift+X]]" },
 
