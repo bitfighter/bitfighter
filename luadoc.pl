@@ -218,6 +218,8 @@ foreach my $file (@files) {
             # Use voidlessRetval to avoid having "void" show up where we'd rather omit the return type altogether
             my $prefix = $class || "global";
             push(@comments, " \\fn $voidlessRetval $prefix" . "::" . "$method($args)\n");
+
+            # Here we generate some boilerplate standard code and such
             if($class eq $method) {
                my $lcClass = lc $class;
                push(@comments, "\\brief Constructor.\n\nExample:\@code\n$lcClass = $class.new($args)\n...\nlevelgen:addItem($lcClass)\@endcode\n\n");
