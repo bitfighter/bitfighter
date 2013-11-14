@@ -112,13 +112,15 @@ void GameParamUserInterface::clearCurrentGameTypeParams()
 }
 
 
+static Vector<string> gameTypes;
+
 static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
 {
    if(game->getGameType() != NULL)
       delete game->getGameType();
 
    // Instantiate our gameType object and cast it to GameType
-   TNL::Object *theObject = TNL::Object::create(GameType::getGameTypeClassName((GameTypeId)gtIndex));  
+   TNL::Object *theObject = TNL::Object::create(GameType::getGameTypeClassName(gameTypes[gtIndex]));
    GameType *gt = dynamic_cast<GameType *>(theObject);   
 
    gt->addToGame(game, NULL);    // GameType::addToGame() ignores database (and what would it do with one, anyway?), so we can pass NULL
@@ -132,8 +134,6 @@ extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
 void GameParamUserInterface::updateMenuItems()
 {
-   static Vector<string> gameTypes;
-
    GameType *gameType = getGame()->getGameType();
    TNLAssert(gameType, "Missing game type!");
 

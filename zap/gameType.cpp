@@ -4186,6 +4186,19 @@ const char *GameType::getGameTypeClassName(GameTypeId gameType)
 
 
 // static
+const char *GameType::getGameTypeClassName(const string &gameTypeName)
+{
+   for(S32 i = 0; i < ARRAYSIZE(GameTypeNames); i++)
+   {
+      if(strcmp(GameTypeNames[i], gameTypeName.c_str()) == 0)
+         return gameTypeClassNames[i];
+   }
+
+   TNLAssert(false, "Could not find gameTypeName!");
+}
+
+
+// static
 Vector<string> GameType::getGameTypeNames()
 {
    Vector<string> gameTypes;

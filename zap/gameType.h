@@ -260,6 +260,7 @@ public:
 
    static const char *getGameTypeName(GameTypeId gameType);       // Return string like "Capture The Flag"
    static const char *getGameTypeClassName(GameTypeId gameType);  // Return string like "CTFGameType"
+   static const char *getGameTypeClassName(const string &gameTypeName);
 
    static Vector<string> getGameTypeNames();
 
