@@ -231,6 +231,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
 
    const S32 textGap = textSize / 3;   // Spacing between text lines
    const S32 instrGap = 15;            // Gap between last line of text and instruction line
+   const S32 instrGapBottom = 5;       // A bit of extra gap below the instr. line
 
    S32 titleHeight = title->getHeight();
    if(titleHeight > 0)
@@ -238,7 +239,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
 
    S32 instrHeight = instr == NULL ? 0 : instr->getHeight();
    if(instrHeight > 0)
-      instrHeight += instrGap;
+      instrHeight += instrGap + instrGapBottom;
 
    S32 boxHeight = titleHeight + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrHeight;
 
@@ -274,7 +275,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
 
    // And footer
    if(instr)
-      instr->render(gScreenInfo.getGameCanvasWidth() / 2, boxTop + boxHeight - vertMargin, AlignmentCenter);
+      instr->render(gScreenInfo.getGameCanvasWidth() / 2, boxTop + boxHeight - vertMargin - instrGapBottom, AlignmentCenter);
 }
 
 
