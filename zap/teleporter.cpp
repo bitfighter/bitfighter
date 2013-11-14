@@ -950,6 +950,7 @@ bool Teleporter::canBeNeutral() { return false; }
 /**
  * @luafunc Teleporter::Teleporter()
  * @luafunc Teleporter::Teleporter(geom)
+ * @descr         Note that teleporter geom is a strange beast and should be documented here!
  * @luaclass Teleporter
  *
  * @brief Instantly transports ships from here to there.
