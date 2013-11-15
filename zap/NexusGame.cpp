@@ -758,7 +758,7 @@ void NexusGameType::shipTouchFlag(Ship *ship, FlagItem *touchedFlag)
 
    // Now that the touchedFlag has been absorbed into the ship, remove it from the game.  Be sure to use deleteObject, as having the database
    // delete the object directly leads to memory corruption errors.
-   touchedFlag->removeFromDatabase(false);
+   // Not using RemoveFromDatabase, causes problems with idle loop when Database Vector size changes, idle loop just points to Database's Vector through findObjects_fast
    touchedFlag->setCollideable(false);
    touchedFlag->deleteObject();
 
