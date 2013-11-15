@@ -122,10 +122,16 @@ bool AbstractMessageUserInterface::onKeyDown(InputCode inputCode)
    if(handled)
       return true;
 
+   if(inputCode == KEY_ESCAPE)
+   {
+      quit();
+      return true;
+   }
+
+
    if(mKeyRegistrations.find(inputCode) != mKeyRegistrations.end())
    {
       mKeyRegistrations[inputCode](getGame());
-      quit();
       return true;
    }
 

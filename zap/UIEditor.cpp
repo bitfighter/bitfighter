@@ -88,23 +88,23 @@ S32 QSORT_CALLBACK pluginInfoSort(EditorUserInterface::PluginInfo *a, EditorUser
 }
 
 
+static void backToMainMenuCallback(ClientGame *game)
+{
+   UIManager *uiManager = game->getUIManager();
+
+   uiManager->getUI<EditorUserInterface>()->onQuitted();
+   uiManager->reactivate(uiManager->getUI<MainMenuUserInterface>());
+}
+
+
 static void saveLevelCallback(ClientGame *game)
 {
    UIManager *uiManager = game->getUIManager();
 
    if(uiManager->getUI<EditorUserInterface>()->saveLevel(true, true))
-      uiManager->reactivate(uiManager->getUI<MainMenuUserInterface>());   
+      backToMainMenuCallback(game);
    else
       uiManager->reactivate(uiManager->getUI<EditorUserInterface>());
-}
-
-
-void backToMainMenuCallback(ClientGame *game)
-{   
-   UIManager *uiManager = game->getUIManager();
-
-   uiManager->getUI<EditorUserInterface>()->onQuitted();
-   uiManager->reactivate(uiManager->getUI<MainMenuUserInterface>());    
 }
 
 
