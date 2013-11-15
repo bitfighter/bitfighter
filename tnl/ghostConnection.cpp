@@ -60,7 +60,10 @@ GhostConnection::~GhostConnection()
 void GhostConnection::setGhostTo(bool ghostTo)
 {
    if(!ghostTo)
+   {
       deleteLocalGhosts();
+      mGhostTo = false;
+   }
    else
       mGhostTo = true;
 }
@@ -68,15 +71,21 @@ void GhostConnection::setGhostTo(bool ghostTo)
 void GhostConnection::setGhostFrom(bool ghostFrom)
 {
    if(!ghostFrom)
+   {
       clearGhostInfo();
+      ghostFrom = false;
+   }
    else if(ghostFrom && !mGhostFrom)
    {
       mGhostFrom = true;
       S32 i;
       mGhostFreeIndex = mGhostZeroUpdateIndex = 0;
-      mGhostLookupTable = new GhostInfo *[GhostLookupTableSize];
-      for(i = 0; i < GhostLookupTableSize; i++)
-         mGhostLookupTable[i] = 0;
+      if(!mGhostLookupTable)
+      {
+         mGhostLookupTable = new GhostInfo *[GhostLookupTableSize];
+         for(i = 0; i < GhostLookupTableSize; i++)
+            mGhostLookupTable[i] = 0;
+      }
    }
 }
 
@@ -767,7 +776,7 @@ void GhostConnection::deleteLocalGhosts()
 {
    if(!mGhostTo)
       return;
-   mGhostTo = false;
+
    // just delete all the local ghosts,
    // and delete all the ghosts in the current save list
    for(S32 i = 0; i < mLocalGhosts.size(); i++)
@@ -785,7 +794,6 @@ void GhostConnection::clearGhostInfo()
 {
    if(!mGhostFrom)
       return;
-   mGhostFrom = false;
 
    // gotta clear out the ghosts...
    for(PacketNotify *walk = mNotifyQueueHead; walk; walk = walk->nextPacket)
