@@ -34,6 +34,9 @@
 #ifndef _TNL_RPC_H_
 #  include "tnlRPC.h"
 #endif
+#ifndef _TNL_RPC_H_
+#  include "tnlVector.h"
+#endif
 
 namespace TNL {
 
@@ -127,7 +130,7 @@ protected:
 //----------------------------------------------------------------
 
 protected:
-   GhostInfo **mGhostArray;   ///< Array of GhostInfo structures used to track all the objects ghosted by this side of the connection.
+   Vector<GhostInfo *> mGhostArray;   ///< Array of GhostInfo structures used to track all the objects ghosted by this side of the connection.
                               ///
                               ///  For efficiency, ghosts are stored in three segments - the first segment contains GhostInfos
                               ///  that have pending updates, the second ghostrefs that need no updating, and last, free
@@ -140,9 +143,9 @@ protected:
    bool mScoping;          ///< Am I currently allowing objects to be scoped?
    U32  mGhostingSequence; ///< Sequence number describing this ghosting session.
 
-   NetObject **mLocalGhosts;        ///< Local ghost array for remote objects, or NULL if mGhostTo is false.
+   Vector<NetObject *> mLocalGhosts;        ///< Local ghost array for remote objects, or NULL if mGhostTo is false.
 
-   GhostInfo *mGhostRefs;           ///< Allocated array of ghostInfos, or NULL if mGhostFrom is false.
+   Vector<GhostInfo *> mGhostRefs;           ///< Allocated array of ghostInfos, or NULL if mGhostFrom is false.
    GhostInfo **mGhostLookupTable;   ///< Table indexed by object id->GhostInfo, or NULL if mGhostFrom is false.
 
    SafePtr<NetObject> mScopeObject; ///< The local NetObject that performs scoping queries to determine what
@@ -160,6 +163,8 @@ protected:
    /// Notifies subclasses that the server has stopped ghosting objects on this connection.
    virtual void onEndGhosting();
 
+   bool mGhostFrom;
+   bool mGhostTo;
 public:
    GhostConnection();
    ~GhostConnection();
@@ -167,15 +172,18 @@ public:
    void setGhostFrom(bool ghostFrom); ///< Sets whether ghosts transmit from this side of the connection.
    void setGhostTo(bool ghostTo);     ///< Sets whether ghosts are allowed from the other side of the connection.
 
-   bool doesGhostFrom() { return mGhostArray != NULL; } ///< Does this GhostConnection ghost NetObjects to the remote host?
-   bool doesGhostTo() { return mLocalGhosts != NULL; }  ///< Does this GhostConnection receive ghosts from the remote host?
+   bool doesGhostFrom() { return mGhostFrom; } ///< Does this GhostConnection ghost NetObjects to the remote host?
+   bool doesGhostTo() { return mGhostTo; }  ///< Does this GhostConnection receive ghosts from the remote host?
 
    /// Returns the sequence number of this ghosting session.
    U32 getGhostingSequence() { return mGhostingSequence; }
 
    enum GhostConstants {
-      GhostIdBitSize = 12,            ///< Size, in bits, of the integer used to transmit ghost IDs
-      GhostLookupTableSizeShift = 12, ///< The size of the hash table used to lookup source NetObjects by remote ghost ID is 1 << GhostLookupTableSizeShift.
+      ID_BIT_SIZE = 4,
+      ID_BIT_OFFSET = 3,
+
+      GhostIdBitSize = ((1 << ID_BIT_SIZE) + ID_BIT_OFFSET - 1), ///< Size, in bits, of the integer used to transmit ghost IDs
+      GhostLookupTableSizeShift = 12,          ///< The size of the hash table used to lookup source NetObjects by remote ghost ID is 1 << GhostLookupTableSizeShift.
 
       MaxGhostCount = (1 << GhostIdBitSize),   ///< Maximum number of ghosts that can be active at any one time.
       GhostCountBitSize = GhostIdBitSize + 1,  ///< Size of the field needed to transmit the total number of ghosts.
