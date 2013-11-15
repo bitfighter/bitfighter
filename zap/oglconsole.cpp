@@ -1130,21 +1130,22 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
         userConsole->lineScrollIndex -= userConsole->textHeight / 2;
 
         if(userConsole->lineScrollIndex < 0)
-            userConsole->lineScrollIndex += userConsole->maxLines;
+           userConsole->lineScrollIndex = 0;
 
         return 1;
     }
 
-    // Page down key
-    else if(sym == Zap::KEY_PAGEDOWN)
-    {
-        userConsole->lineScrollIndex += userConsole->textHeight / 2;
+   // Page down key
+   else if(sym == Zap::KEY_PAGEDOWN)
+   {
+      userConsole->lineScrollIndex += userConsole->textHeight / 2;
       
-        if(userConsole->lineScrollIndex >= userConsole->maxLines)
-            userConsole->lineScrollIndex -= userConsole->maxLines;
+      if(userConsole->lineScrollIndex >= userConsole->maxLines - userConsole->textHeight)
+         userConsole->lineScrollIndex = userConsole->maxLines - userConsole->textHeight;
 
-        return 1;
+      return 1;
     }
+
      // Home key
      else if(sym == Zap::KEY_HOME)
      {
