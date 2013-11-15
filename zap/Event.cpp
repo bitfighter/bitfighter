@@ -292,11 +292,11 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
 #if SDL_VERSION_ATLEAST(2,0,0)
       case SDL_WINDOWEVENT:
          switch (event->window.event) {
+            // This event should only be triggered in windowed mode.  SDL 2.0, however,
+            // triggers this on any window change.  We have therefore flushed window events
+            // in VideoSystem::actualizeScreenMode so this is only triggered by manual
+            // resizing of a window
             case SDL_WINDOWEVENT_RESIZED:
-               // Ignore window resize events if we are in fullscreen mode
-               if(SDL_GetWindowFlags(gScreenInfo.sdlWindow) & SDL_WINDOW_FULLSCREEN)
-                  break;
-
                onResize(game, event->window.data1, event->window.data2);
                break;
 
@@ -311,6 +311,8 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
          break;
 
 #else
+      // In SDL 1.2, this event is only triggered when in windowed mode and you 
+      // adjust the window yourself
       case SDL_VIDEORESIZE:
          onResize(game, event->resize.w, event->resize.h);
          break;
@@ -518,7 +520,10 @@ void Event::onStickRemoved(S32 deviceId)
 }
 
 
-// We don't need to worry about this event in fullscreen modes because it is never fired with SDL
+// This method should never be run in fullscreen mode, impossible with SDL 1.2, but probable 
+// with SDL 2.0.  It is used to adjust window settings when resizing a windowed-window.
+// This can be re-engineered when we move to SDL 2.0-only; we can then make use of the
+// SDL_WINDOWEVENT_SIZE_CHANGED and merge this and VideoSystem::actualizeScreenMode
 void Event::onResize(ClientGame *game, S32 width, S32 height)
 {
    IniSettings *iniSettings = game->getSettings()->getIniSettings();
@@ -537,6 +542,9 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
 
 #if SDL_VERSION_ATLEAST(2,0,0)
    SDL_SetWindowSize(gScreenInfo.sdlWindow, newWidth, newHeight);
+
+   // Flush window events because SDL2 triggers another resize event with SDL_SetWindowSize
+   SDL_FlushEvent(SDL_WINDOWEVENT);
 #else
    S32 flags = SDL_OPENGL | SDL_RESIZABLE;
    SDL_SetVideoMode(newWidth, newHeight, 0, flags);
