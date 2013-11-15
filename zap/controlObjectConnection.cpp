@@ -221,7 +221,9 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
          {
             U32 ghostIndex = bstream->readInt(GhostConnection::GhostIdBitSize);
             controlObject = (BfObject *) resolveGhost(ghostIndex);
-            controlObject->readControlState(bstream);
+            TNLAssert(controlObject, "controlObject is NULL, bstream will be broken");
+            if(controlObject)
+               controlObject->readControlState(bstream);
             mServerPosition = controlObject->getPos();
             replayControlObjectMoves = true;
          }
