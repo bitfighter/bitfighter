@@ -1047,6 +1047,8 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
 
    logprintf(LogConsumer::LogNetInterface, "Received punch packet from %s - %s", theAddress.toString(), b.encodeBase64()->getBuffer());
 
+   U32 streamPos = stream->getBitPosition();
+
    for(i = 0; i < mPendingConnections.size(); i++)
    {
       conn = mPendingConnections[i];
@@ -1065,83 +1067,81 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
          if(theAddress == theParams.mPossibleAddresses[j])
             break;
 
-      // if there was an exact match, just exit the loop, or
-      // continue on to the next pending if this is not an initiator:
-      if(j != theParams.mPossibleAddresses.size())
-      {
-         if(theParams.mIsInitiator)
-            break;
-         else
-            continue;
-      }
-
       // if there was no exact match, we may have a funny NAT in the
       // middle.  But since a packet got through from the remote host
       // we'll want to send a punch to the address it came from, as long
       // as only the port is not an exact match:
-      for(j = 0; j < theParams.mPossibleAddresses.size(); j++)
-         if(theAddress.isEqualAddress(theParams.mPossibleAddresses[j]))
-            break;
+      if(j == theParams.mPossibleAddresses.size())
+         for(j = 0; j < theParams.mPossibleAddresses.size(); j++)
+            if(theAddress.isEqualAddress(theParams.mPossibleAddresses[j]))
+            {
+               // as long as we don't have too many ping addresses,
+               // add this one to the list:
+               if(theParams.mPossibleAddresses.size() < 5)
+                  theParams.mPossibleAddresses.push_back(theAddress);
+               break;
+            }
 
       // if the address wasn't even partially in the list, just exit out
-      if(j == theParams.mPossibleAddresses.size())
-         continue;
-
-      // otherwise, as long as we don't have too many ping addresses,
-      // add this one to the list:
-      if(theParams.mPossibleAddresses.size() < 5)
-         theParams.mPossibleAddresses.push_back(theAddress);
+      // Problem: some NAT problem could remap IP address differently that none of possibleAddresses matches
+      //if(j == theParams.mPossibleAddresses.size())
+         //continue;
 
       // if this is the initiator of the arranged connection, then
       // process the punch packet from the remote host by issuing a
       // connection request.
-      if(theParams.mIsInitiator)
-         break;
+      if(!theParams.mIsInitiator)
+         continue;
+
+      stream->setBitPosition(streamPos);
+
+      SymmetricCipher theCipher(theParams.mArrangedSecret);
+
+      if(!stream->decryptAndCheckHash(NetConnection::MessageSignatureBytes, stream->getBytePosition(), &theCipher))
+         continue;
+
+      Nonce nextNonce;
+      nextNonce.read(stream);
+
+      if(nextNonce != theParams.mNonce)
+         continue;
+
+      // see if the connection needs to be authenticated or uses key exchange
+      if(stream->readFlag())
+      {
+         if(stream->readFlag())
+         {
+            theParams.mCertificate = new Certificate(stream);
+            if(!theParams.mCertificate->isValid() || !conn->validateCertficate(theParams.mCertificate, true))
+               continue;
+
+            theParams.mPublicKey = theParams.mCertificate->getPublicKey();
+         }
+         else
+         {
+            theParams.mPublicKey = new AsymmetricKey(stream);
+            if(!theParams.mPublicKey->isValid() || !conn->validatePublicKey(theParams.mPublicKey, true))
+               continue;
+         }
+         if(mPrivateKey.isNull() || mPrivateKey->getKeySize() != theParams.mPublicKey->getKeySize())
+         {
+            // we don't have a private key, so generate one for this connection
+            theParams.mPrivateKey = new AsymmetricKey(theParams.mPublicKey->getKeySize());
+         }
+         else
+            theParams.mPrivateKey = mPrivateKey;
+         theParams.mSharedSecret = theParams.mPrivateKey->computeSharedSecretKey(theParams.mPublicKey);
+
+         Random::read(theParams.mSymmetricKey, SymmetricCipher::KeySize);
+         theParams.mUsingCrypto = true;
+      }
+
+
+      break;
    }
    if(i == mPendingConnections.size())
       return;
 
-   ConnectionParameters &theParams = conn->getConnectionParameters();
-   SymmetricCipher theCipher(theParams.mArrangedSecret);
-
-   if(!stream->decryptAndCheckHash(NetConnection::MessageSignatureBytes, stream->getBytePosition(), &theCipher))
-      return;
-
-   Nonce nextNonce;
-   nextNonce.read(stream);
-
-   if(nextNonce != theParams.mNonce)
-      return;
-
-   // see if the connection needs to be authenticated or uses key exchange
-   if(stream->readFlag())
-   {
-      if(stream->readFlag())
-      {
-         theParams.mCertificate = new Certificate(stream);
-         if(!theParams.mCertificate->isValid() || !conn->validateCertficate(theParams.mCertificate, true))
-            return;
-
-         theParams.mPublicKey = theParams.mCertificate->getPublicKey();
-      }
-      else
-      {
-         theParams.mPublicKey = new AsymmetricKey(stream);
-         if(!theParams.mPublicKey->isValid() || !conn->validatePublicKey(theParams.mPublicKey, true))
-            return;
-      }
-      if(mPrivateKey.isNull() || mPrivateKey->getKeySize() != theParams.mPublicKey->getKeySize())
-      {
-         // we don't have a private key, so generate one for this connection
-         theParams.mPrivateKey = new AsymmetricKey(theParams.mPublicKey->getKeySize());
-      }
-      else
-         theParams.mPrivateKey = mPrivateKey;
-      theParams.mSharedSecret = theParams.mPrivateKey->computeSharedSecretKey(theParams.mPublicKey);
-
-      Random::read(theParams.mSymmetricKey, SymmetricCipher::KeySize);
-      theParams.mUsingCrypto = true;
-   }
    conn->setNetAddress(theAddress);
    logprintf(LogConsumer::LogNetInterface, "Punch from %s matched nonces - connecting...", theAddress.toString());
 
