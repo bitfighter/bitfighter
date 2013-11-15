@@ -849,6 +849,8 @@ NetObject *GhostConnection::resolveGhost(S32 id)
 
 NetObject *GhostConnection::resolveGhostParent(S32 id)
 {
+   if(U32(id) >= U32(mGhostRefs.size()))
+      return NULL;
    return mGhostRefs[id]->obj;
 }
 
