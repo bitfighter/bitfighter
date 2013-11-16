@@ -83,7 +83,7 @@ static S32 getComponentRectWidth(S32 textWidth)
 // Returns width of indicator component
 static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 {
-   // Draw the weapon or module name
+   // Draw the weapon or module name (n.b.: If you change the lcase, do the same in getComponentIndicatorWidth)
    S32 textWidth = drawStringAndGetWidth(xPos + IndicatorHorizPadding, yPos + IndicatorVertPadding - 1, 
                                          IndicatorFontSize, lcase(name).c_str());
 
