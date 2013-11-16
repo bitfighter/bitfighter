@@ -97,7 +97,7 @@ static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 
 static S32 getComponentIndicatorWidth(const char *name)
 {
-   return getComponentRectWidth(getStringWidth(indicatorFontSize, name));
+   return getComponentRectWidth(getStringWidth(indicatorFontSize, lcase(name).c_str()));
 }
 
 
