@@ -23,7 +23,7 @@ namespace Zap { namespace UI {
 // Constructor
 LoadoutIndicator::LoadoutIndicator()
 {
-   mScrollTimer.setPeriod(200);
+   mScrollTimer.setPeriod(200);     // Transition time between old and new loadout after loadout changes
 }
 
 
