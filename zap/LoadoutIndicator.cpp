@@ -71,12 +71,12 @@ const LoadoutTracker *LoadoutIndicator::getLoadout() const
 }
 
 
-static const S32 IndicatorHeight = indicatorFontSize + 2 * indicatorVertPadding + 1;
+static const S32 IndicatorHeight = IndicatorFontSize + 2 * IndicatorVertPadding + 1;
 
 
 static S32 getComponentRectWidth(S32 textWidth)
 {
-   return textWidth + 2 * indicatorHorizPadding;
+   return textWidth + 2 * IndicatorHorizPadding;
 }
 
 
@@ -84,12 +84,12 @@ static S32 getComponentRectWidth(S32 textWidth)
 static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 {
    // Draw the weapon or module name
-   S32 textWidth = drawStringAndGetWidth(xPos + indicatorHorizPadding, yPos + indicatorVertPadding - 1, 
-                                         indicatorFontSize, lcase(name).c_str());
+   S32 textWidth = drawStringAndGetWidth(xPos + IndicatorHorizPadding, yPos + IndicatorVertPadding - 1, 
+                                         IndicatorFontSize, lcase(name).c_str());
 
    S32 rectWidth = getComponentRectWidth(textWidth);
 
-   drawFancyBox(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight, indicatorVertPadding, GL_LINE_LOOP);
+   drawFancyBox(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight, IndicatorVertPadding, GL_LINE_LOOP);
 
    return rectWidth;
 }
@@ -97,7 +97,7 @@ static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 
 static S32 getComponentIndicatorWidth(const char *name)
 {
-   return getComponentRectWidth(getStringWidth(indicatorFontSize, lcase(name).c_str()));
+   return getComponentRectWidth(getStringWidth(IndicatorFontSize, lcase(name).c_str()));
 }
 
 
@@ -125,7 +125,7 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 
       S32 width = renderComponentIndicator(xPos, top, WeaponInfo::getWeaponInfo(loadout.getWeapon(i)).name.getString());
 
-      xPos += width + indicatorHorizPadding;
+      xPos += width + IndicatorHorizPadding;
    }
 
    xPos += GapBetweenTheGroups;    // Small horizontal gap to separate the weapon indicators from the module indicators
@@ -150,12 +150,12 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 
       S32 width = renderComponentIndicator(xPos, top, ModuleInfo::getModuleInfo(module)->getName());
 
-      xPos += width + indicatorHorizPadding;
+      xPos += width + IndicatorHorizPadding;
    }
 
    FontManager::popFontContext();
 
-   return xPos - LoadoutIndicator::LoadoutIndicatorLeftPos - indicatorHorizPadding;
+   return xPos - LoadoutIndicator::LoadoutIndicatorLeftPos - IndicatorHorizPadding;
 }
 
 
@@ -165,14 +165,14 @@ S32 LoadoutIndicator::getWidth() const
    S32 width = 0;
 
    for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
-      width += getComponentIndicatorWidth(WeaponInfo::getWeaponInfo(mCurrLoadout.getWeapon(i)).name.getString()) + indicatorHorizPadding;
+      width += getComponentIndicatorWidth(WeaponInfo::getWeaponInfo(mCurrLoadout.getWeapon(i)).name.getString()) + IndicatorHorizPadding;
 
    width += GapBetweenTheGroups;
 
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-      width += getComponentIndicatorWidth(ModuleInfo::getModuleInfo(mCurrLoadout.getModule(i))->getName()) + indicatorHorizPadding;
+      width += getComponentIndicatorWidth(ModuleInfo::getModuleInfo(mCurrLoadout.getModule(i))->getName()) + IndicatorHorizPadding;
 
-   width -= indicatorHorizPadding;
+   width -= IndicatorHorizPadding;
 
    return width;
 }
