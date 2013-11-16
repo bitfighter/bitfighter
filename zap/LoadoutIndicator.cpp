@@ -181,10 +181,6 @@ S32 LoadoutIndicator::getWidth() const
 // Draw weapon indicators at top of the screen, runs on client
 S32 LoadoutIndicator::render(ClientGame *game) const
 {
-   // I think this doesn't matter anymore because we don't use the connection here...
-   //if(!game->getConnectionToServer())     // Can happen when first joining a game.  This was XelloBlue's crash...
-   //   return 0;
-
    S32 top;
 
    // Old loadout
