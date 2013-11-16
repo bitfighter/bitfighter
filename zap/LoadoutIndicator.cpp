@@ -183,9 +183,10 @@ S32 LoadoutIndicator::render(ClientGame *game) const
 {
    S32 top;
 
+   DisplayMode windowMode = game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
+
    // Old loadout
-   top = Parent::prepareToRenderFromDisplay(game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                                            LoadoutIndicatorTopPos - 1, LoadoutIndicatorHeight + 1);
+   top = Parent::prepareToRenderFromDisplay(windowMode, LoadoutIndicatorTopPos - 1, LoadoutIndicatorHeight + 1);
    if(top != NO_RENDER)
    {
       doRender(mPrevLoadout, game, top);
@@ -193,8 +194,7 @@ S32 LoadoutIndicator::render(ClientGame *game) const
    }
 
    // Current loadout
-   top = Parent::prepareToRenderToDisplay(game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                                          LoadoutIndicatorTopPos, LoadoutIndicatorHeight);
+   top = Parent::prepareToRenderToDisplay(windowMode, LoadoutIndicatorTopPos, LoadoutIndicatorHeight);
    S32 width = doRender(mCurrLoadout, game, top);
    doneRendering();
 
