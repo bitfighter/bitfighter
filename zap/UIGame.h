@@ -317,6 +317,7 @@ public:
    void render();                         // Render game screen
   
    void renderReticle() const;            // Render crosshairs
+   void renderWrongModeIndicator() const;
    void renderProgressBar() const;        // Render level-load progress bar
    void renderShutdownMessage() const;    // Render an alert if server is shutting down
    void renderLostConnectionMessage() const; 

@@ -514,6 +514,7 @@ void GameUserInterface::render()
    mHelpItemManager.renderMessages(getGame(), gScreenInfo.getGameCanvasHeight() / 2.0f + 40, helpItemAlpha);
 
    renderReticle();                       // Draw crosshairs if using mouse
+   renderWrongModeIndicator();            // Try to avert confusion after player has changed btwn joystick and keyboard modes
    renderChatMsgs();                      // Render incoming chat and server msgs
    mLoadoutIndicator.render(getGame());   // Draw indicators for the various loadout items
 
@@ -887,13 +888,18 @@ void GameUserInterface::renderReticle() const
 
       renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
    }
+}
 
+
+void GameUserInterface::renderWrongModeIndicator() const
+{
    if(mWrongModeMsgDisplay.getCurrent())
    {
       glColor(Colors::paleRed);
       drawCenteredString(225, 20, "You are in joystick mode.");
       drawCenteredString(250, 20, "You can change to Keyboard input with the Options menu.");
    }
+
 }
 
 
