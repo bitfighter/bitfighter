@@ -2288,14 +2288,14 @@ static void fewerRobotsAcceptCallback(ClientGame *game, U32 index)
          if(static_cast<Team *>(game->getTeam(i))->getBotCount() > 0)
             game->getGameType()->c2sKickBot();
 
-   game->getUIManager()->reactivate(game->getUIManager()->getUI<GameUserInterface>());
+   game->getUIManager()->reactivateGameUI();
 }
 
 
 static void removeRobotsAcceptCallback(ClientGame *game, U32 index)
 {
    game->getGameType()->c2sKickBots();
-   game->getUIManager()->reactivate(game->getUIManager()->getUI<GameUserInterface>());
+   game->getUIManager()->reactivateGameUI();
 }
 
 
@@ -2358,9 +2358,9 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
          getGame()->displayErrorMessage("!!! Can't upload level: unable to read file");
    }
    else
-      gc->c2sRequestLevelChange(index, false);           // The selection index is the level to load
+      gc->c2sRequestLevelChange(index, false);     // The selection index is the level to load
 
-   getUIManager()->reactivate(getUIManager()->getUI<GameUserInterface>());  // Back to the game
+   getUIManager()->reactivateGameUI();             // Back to the game
 }
 
 
@@ -2574,8 +2574,8 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
       gt->c2sKickPlayer(getMenuItem(index)->getPrompt());
 
 
-   if(action != PlayerActionChangeTeam)                 // Unless we need to move on to the change team screen...
-      getUIManager()->reactivate(getUIManager()->getUI<GameUserInterface>());  // ...it's back to the game!
+   if(action != PlayerActionChangeTeam)      // Unless we need to move on to the change team screen...
+      getUIManager()->reactivateGameUI();    // ...it's back to the game!
 }
 
 
@@ -2655,13 +2655,13 @@ void TeamMenuUserInterface::processSelection(U32 index)
       if(getUIManager()->getPrevUI() == getUIManager()->getUI<PlayerMenuUserInterface>())        
       {
          StringTableEntry e(nameToChange.c_str());
-         getGame()->changePlayerTeam(e, index);       // Index will be the team index
+         getGame()->changePlayerTeam(e, index);    // Index will be the team index
       }
-      else                                            // Came from player changing own team
+      else                                         // Came from player changing own team
          getGame()->changeOwnTeam(index); 
    }
 
-   getUIManager()->reactivate(getUIManager()->getUI<GameUserInterface>());   // Back to the game!
+   getUIManager()->reactivateGameUI();             // Back to the game!
 }
 
 
