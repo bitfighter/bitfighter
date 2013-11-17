@@ -612,7 +612,7 @@ void GameUserInterface::renderSuspendedMessage() const
 {
    static string waitMsg[] = { "", 
                                "WILL RESPAWN",
-                               "IN BLAH BLAH SECONDS",
+                               "IN BLAH BLAH SECONDS",    // <== This line will be updated below
                                "",
                                "" };
 
