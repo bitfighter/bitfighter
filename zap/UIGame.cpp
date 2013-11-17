@@ -859,24 +859,28 @@ void GameUserInterface::renderReticle() const
             offsetMouse.x, (F32)gScreenInfo.getGameCanvasHeight(),
       };
 
+#define GREEN 0.0f, 1.0f, 0.0f      // Colors::green
+
       static F32 colors[] = {
-            0.0f, 1.0f, 0.0f, 0.7f,  //Colors::green
-            0.0f, 1.0f, 0.0f, 0.7f,
-            0.0f, 1.0f, 0.0f, 0.7f,
-            0.0f, 1.0f, 0.0f, 0.7f,
+            GREEN, 0.7f,  
+            GREEN, 0.7f,
+            GREEN, 0.7f,
+            GREEN, 0.7f,
 
-            0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.7f,
+            GREEN, 0.0f,
+            GREEN, 0.7f,
 
-            0.0f, 1.0f, 0.0f, 0.7f,
-            0.0f, 1.0f, 0.0f, 0.0f,
+            GREEN, 0.7f,
+            GREEN, 0.0f,
 
-            0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.7f,
+            GREEN, 0.0f,
+            GREEN, 0.7f,
 
-            0.0f, 1.0f, 0.0f, 0.7f,
-            0.0f, 1.0f, 0.0f, 0.0f,
+            GREEN, 0.7f,
+            GREEN, 0.0f,
       };
+
+#undef GREEN
 
       renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
    }
