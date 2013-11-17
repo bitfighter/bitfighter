@@ -863,6 +863,7 @@ void GameUserInterface::renderReticle() const
 #define COLOR_RGB RETICLE_COLOR.r, RETICLE_COLOR.g, RETICLE_COLOR.b      
 
       static F32 colors[] = {
+      //    R,G,B   aplha
          COLOR_RGB, 0.7f,
          COLOR_RGB, 0.7f,
          COLOR_RGB, 0.7f,
