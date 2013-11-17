@@ -171,14 +171,16 @@ void UIManager::activate(UserInterface *ui, bool save)  // save defaults to true
    {
       if(save)
          saveUI(mCurrentInterface);
-
-      // Deactivate the UI we're no longer using
-      mCurrentInterface->onDeactivate(ui->usesEditorScreenMode());
    }
 
    mLastUI = mCurrentInterface;
    mLastWasLower = false;
    mCurrentInterface = ui;
+
+   // Deactivate the UI we're no longer using
+   if(mLastUI)
+      mLastUI->onDeactivate(ui->usesEditorScreenMode());
+
    mCurrentInterface->activate();
 
    mMenuTransitionTimer.reset();
@@ -187,6 +189,8 @@ void UIManager::activate(UserInterface *ui, bool save)  // save defaults to true
 
 void UIManager::saveUI(UserInterface *ui)
 {
+   TNLAssert(!ui || mPrevUIs.size() == 0 || ui != mPrevUIs.last(), "Pushing duplicate UI onto mPrevUIs stack.  Intentional?");
+
    if(ui)
       mPrevUIs.push_back(ui);
 }
