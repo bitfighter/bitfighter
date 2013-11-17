@@ -297,6 +297,11 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
             // in VideoSystem::actualizeScreenMode so this is only triggered by manual
             // resizing of a window
             case SDL_WINDOWEVENT_RESIZED:
+               // Ignore window resize events if we are in fullscreen mode.  This actually does
+               // occur when you ALT-TAB away and back to the window
+               if(SDL_GetWindowFlags(gScreenInfo.sdlWindow) & SDL_WINDOW_FULLSCREEN)
+                  break;
+
                onResize(game, event->window.data1, event->window.data2);
                break;
 
