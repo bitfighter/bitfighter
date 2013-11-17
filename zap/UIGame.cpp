@@ -905,7 +905,6 @@ void GameUserInterface::renderWrongModeIndicator() const
       drawCenteredString(250, 20, "You can change to Keyboard input with the Options menu.");
       FontManager::popFontContext();
    }
-
 }
 
 
