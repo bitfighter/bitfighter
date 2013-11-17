@@ -35,6 +35,7 @@
 #include "voiceCodec.h"
 #include "SoundSystem.h"
 #include "FontManager.h"
+#include "Intervals.h"
 
 #include "tnlEndian.h"
 
@@ -895,7 +896,10 @@ void GameUserInterface::renderWrongModeIndicator() const
 {
    if(mWrongModeMsgDisplay.getCurrent())
    {
-      glColor(Colors::paleRed);
+      // Fade for last half second
+      F32 alpha = mWrongModeMsgDisplay.getCurrent() < 500 ? mWrongModeMsgDisplay.getCurrent() / 500.0f : 1.0;
+
+      glColor(Colors::red, alpha);
       FontManager::pushFontContext(HelperMenuContext);
       drawCenteredString(225, 20, "You are in joystick mode.");
       drawCenteredString(250, 20, "You can change to Keyboard input with the Options menu.");
@@ -1542,7 +1546,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          else if(checkInputCode(InputCodeManager::BINDING_DROPITEM, inputCode))
             dropItem();
          // Check if the user is trying to use keyboard to move when in joystick mode
-         else if(getGame()->getInputMode() == InputModeJoystick)      
+         else if(getGame()->getInputMode() == InputModeKeyboard)      
             checkForKeyboardMovementKeysInJoystickMode(inputCode);
       }
    }
@@ -1581,7 +1585,7 @@ void GameUserInterface::checkForKeyboardMovementKeysInJoystickMode(InputCode inp
       checkInputCode(InputCodeManager::BINDING_DOWN,  inputCode) ||
       checkInputCode(InputCodeManager::BINDING_LEFT,  inputCode) ||
       checkInputCode(InputCodeManager::BINDING_RIGHT, inputCode))
-         mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
+         mWrongModeMsgDisplay.reset(THREE_SECONDS);
 }
 
 

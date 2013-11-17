@@ -200,8 +200,6 @@ private:
 
    bool mGotControlUpdate;
 
-   static const S32 WRONG_MODE_MSG_DISPLAY_TIME = 2500;
-
    Timer mWrongModeMsgDisplay;               // Help if user is trying to use keyboard in joystick mode
    Timer mInputModeChangeAlertDisplayTimer;  // Remind user that they just changed input modes
 
