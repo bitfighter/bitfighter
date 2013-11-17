@@ -640,7 +640,7 @@ void GameUserInterface::renderLevelUpMessage(S32 newLevel) const
    static string msg[] = { "", 
                            "CONGRATULATIONS!",
                            "YOU HAVE BEEN PROMOTED TO",
-                           "LEVEL XXX",
+                           "LEVEL XXX",                     // <== This line will be updated below
                            "PRESS ANY KEY TO CONTINUE"
                            "" };
 
