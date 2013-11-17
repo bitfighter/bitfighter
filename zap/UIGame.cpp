@@ -896,8 +896,10 @@ void GameUserInterface::renderWrongModeIndicator() const
    if(mWrongModeMsgDisplay.getCurrent())
    {
       glColor(Colors::paleRed);
+      FontManager::pushFontContext(HelperMenuContext);
       drawCenteredString(225, 20, "You are in joystick mode.");
       drawCenteredString(250, 20, "You can change to Keyboard input with the Options menu.");
+      FontManager::popFontContext();
    }
 
 }
