@@ -69,6 +69,7 @@ public:
    static bool unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vector<Point> > &solution);
 
    static void prepareRenderingGeometry(Game *game);
+   static void clearRenderItems();
 
    TNL_DECLARE_CLASS(Barrier);
 };

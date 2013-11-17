@@ -241,6 +241,12 @@ void Barrier::getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const
 }
 
 
+void Barrier::clearRenderItems()
+{
+   mRenderLineSegments.clear();
+}
+
+
 // Merges wall outlines together, client only
 // This is used for barriers and polywalls
 void Barrier::prepareRenderingGeometry(Game *game)    // static

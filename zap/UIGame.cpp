@@ -150,6 +150,10 @@ void GameUserInterface::onActivate()
    mChatMessageDisplayer2.reset();
    mChatMessageDisplayer3.reset();
 
+   // Clear out any walls we were using in a previous run
+   Barrier::clearRenderItems();           // TODO: Should really go in an onDeactivate method, which we don't really have
+   mLevelInfoDisplayer.clearDisplayTimer();
+
    // Queue up some initial help messages for the new users
 
    mHelpItemManager.reset();
