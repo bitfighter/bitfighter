@@ -879,29 +879,6 @@ TEST_F(BfTest, GameTypeTests)
 }
 
 
-namespace Zap
-{
-   TEST_F(BfTest, UIManagerTests)
-   {
-      //// Test prevUIs while cycling in and out of UIQueryServers
-      //ClientGame *game = newClientGame();
-      //UIManager *uiManager = game->getUIManager();
-
-      //uiManager->activate<MainMenuUserInterface>();
-      //U32 prevCt = uiManager->mPrevUIs.size();     // 1
-      //uiManager->activate<EditorUserInterface>();
-      //uiManager->reactivate(uiManager->getUI<MainMenuUserInterface>());
-      //U32 prevCt2 = uiManager->mPrevUIs.size();    // 0 --> why not 1?
-
-      //uiManager->activate<QueryServersUserInterface>();
-      //uiManager->reactivate(uiManager->getUI<MainMenuUserInterface>());
-      //U32 prevCt3 = uiManager->mPrevUIs.size();    // 0 --> why not 1?
-
-      //delete game;
-   }
-}
-
-
 static void checkQueues(const UI::HelpItemManager &himgr, S32 highSize, S32 lowSize, S32 displaySize, HelpItem displayItem = UnknownHelpItem)
 {
    // Check that queue sizes match what we specified

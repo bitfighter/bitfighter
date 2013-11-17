@@ -26,8 +26,6 @@
 #include "tnlUDP.h"
 #include "tnlVector.h"
 
-#include "gtest/gtest_prod.h"
-
 #include <memory>
 #include <typeinfo>
 
@@ -56,7 +54,6 @@ private:
 
 protected:
    ClientGame *mGame;
-   FRIEND_TEST(BfTest, UIManagerTests);      // Accesses mPrevUIs
    Vector<UserInterface *> mPrevUIs;         // Previously active menus
    UserInterface *mCurrentInterface;
 
