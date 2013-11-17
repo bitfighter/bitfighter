@@ -1549,7 +1549,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          else if(checkInputCode(InputCodeManager::BINDING_DROPITEM, inputCode))
             dropItem();
          // Check if the user is trying to use keyboard to move when in joystick mode
-         else if(getGame()->getInputMode() == InputModeKeyboard)      
+         else if(getGame()->getInputMode() == InputModeJoystick)
             checkForKeyboardMovementKeysInJoystickMode(inputCode);
       }
    }
