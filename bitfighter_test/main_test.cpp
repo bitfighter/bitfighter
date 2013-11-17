@@ -21,7 +21,6 @@
 #include "FontManager.h"
 #include "config.h"
 #include "SystemFunctions.h"
-#include "UIManager.h"
 #include "PickupItem.h"
 #include "ChatCommands.h"
 #include "teleporter.h"
@@ -30,8 +29,10 @@
 
 #include "UIGame.h"
 #include "UIManager.h"
+#include "UIEditor.h"
 #include "UIEditorMenus.h"
 #include "UIMenus.h"
+
 #include "LoadoutIndicator.h"
 
 #include "GeomUtils.h"
@@ -60,10 +61,9 @@ using namespace std;
 
 namespace Zap
 {
-void exitToOs(S32 errcode)                 { TNLAssert(false, "Should never be called!"); }
-void shutdownBitfighter(ServerGame *game)  { TNLAssert(false, "Should never be called!"); };
+void exitToOs(S32 errcode)                { TNLAssert(false, "Should never be called!"); }
+void shutdownBitfighter(ServerGame *game) { TNLAssert(false, "Should never be called!"); };
 }
-
 
 class BfTest : public testing::Test
 {
@@ -141,8 +141,6 @@ TEST_F(BfTest, MasterTests)
    // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
    FontManager::initialize(gameSettings.get(), false);
    ClientGame clientGame(addr, gameSettings, new UIManager());    // ClientGame destructor will clean up UIManager
-
-
 }
 
 
@@ -559,16 +557,10 @@ TEST_F(BfTest, StringWrappingTests)
 
 TEST_F(BfTest, LevelMenuSelectUserInterfaceTests) 
 {
-   Address addr;
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-
-   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
-   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
-   FontManager::initialize(settings.get(), false);   
-   ClientGame game(addr, settings, new UIManager());    // ClientGame destructor will clean up UIManager
+   ClientGame *game = newClientGame();
 
    // Want to test getIndexOfNext(), which is a slightly complex function.  Need to start by setting up a menu.
-   LevelMenuSelectUserInterface *ui = game.getUIManager()->getUI<LevelMenuSelectUserInterface>();      // Cleaned up when game goes out of scope
+   LevelMenuSelectUserInterface *ui = game->getUIManager()->getUI<LevelMenuSelectUserInterface>();      // Cleaned up when game goes out of scope
 
    // These should be alphabetically sorted
    ui->addMenuItem(new MenuItem("Aardvark"));    //  0
@@ -632,7 +624,9 @@ TEST_F(BfTest, LevelMenuSelectUserInterfaceTests)
    ASSERT_EQ(ui->getIndexOfNext("flummoxed"), 12); 
 
    ui->selectedIndex = 8;
-   ASSERT_EQ(ui->getIndexOfNext("chop"), 7); 
+   ASSERT_EQ(ui->getIndexOfNext("chop"), 7);
+
+   delete game;
 }
 
 
@@ -748,19 +742,15 @@ TEST_F(BfTest, LoadoutManagementTests)
 
 TEST_F(BfTest, LoadoutIndicatorTests)
 {
-   Address addr;
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-
-   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
-   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
-   FontManager::initialize(settings.get(), false);   
-   ClientGame game(addr, settings, new UIManager());    // ClientGame destructor will clean up UIManager
+   ClientGame *game = newClientGame();
 
    UI::LoadoutIndicator indicator;
    indicator.newLoadoutHasArrived(LoadoutTracker("Turbo,Shield,Triple,Mine,Bouncer"));     // Sets the loadout
 
    // Make sure the calculated width matches the rendered width
-   ASSERT_EQ(indicator.render(&game), indicator.getWidth());
+   ASSERT_EQ(indicator.render(game), indicator.getWidth());
+
+   delete game;
 }
 
 
@@ -885,6 +875,25 @@ TEST_F(BfTest, GameTypeTests)
    ASSERT_EQ(gt.getMaxPlayersPerBalancedTeam( 1, 2), 1);
    ASSERT_EQ(gt.getMaxPlayersPerBalancedTeam(10, 5), 2);
    ASSERT_EQ(gt.getMaxPlayersPerBalancedTeam(11, 5), 3);
+}
+
+
+namespace Zap
+{
+   TEST_F(BfTest, UIManagerTests)
+   {
+      // Test prevUIs while cycling in and out of UIQueryServers
+      ClientGame *game = newClientGame();
+      UIManager *uiManager = game->getUIManager();
+
+      uiManager->activate<MainMenuUserInterface>();
+      U32 prevCt = uiManager->mPrevUIs.size();
+      uiManager->activate<EditorUserInterface>();
+      uiManager->reactivate(uiManager->getUI<MainMenuUserInterface>());
+      U32 prevCt2 = uiManager->mPrevUIs.size();
+
+      delete game;
+   }
 }
 
 
@@ -1261,5 +1270,4 @@ int main(int argc, char **argv)
    FontManager::cleanup();
    return returnvalue;
 }
-
 
