@@ -1051,7 +1051,7 @@ void GameUserInterface::dropItem()
 
    if(!gt->isCarryingItems(ship))
    {
-      displayMessage(Colors::paleRed, "You don't have any items to drop!");
+      displayMessage(Colors::red, "You don't have any items to drop!");
       return;
    }
 
