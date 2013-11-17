@@ -43,6 +43,7 @@ public:
    FontManager();    // Constructor
 
    static void initialize(GameSettings *settings, bool useExternalFonts = true);
+   static void reinitialize(GameSettings *settings);
    static void cleanup();
 
    static sth_stash *getStash();

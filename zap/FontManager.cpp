@@ -113,16 +113,23 @@ FontManager::FontManager()
 }
 
 
+// Runs intialize preserving mUsingExternalFonts
+void FontManager::reinitialize(GameSettings *settings)
+{
+   initialize(settings, mUsingExternalFonts);
+}
+
+
 // This must be run after VideoSystem::actualizeScreenMode()
 // If useExternalFonts is false, settings can be NULL
 void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 {
-   cleanup();  // Makes sure its been cleaned up first, many tests call init without cleanup..
+   cleanup();  // Makes sure its been cleaned up first, many tests call init without cleanup
 
    mUsingExternalFonts = useExternalFonts;
 
-   if(mStash == NULL)
-      mStash = sth_create(512, 512);
+   TNLAssert(mStash == NULL, "This should be NULL, or else we'll have a memory leak!");
+   mStash = sth_create(512, 512);
 
    // Our stroke fonts
    fontList[FontRoman]               = new BfFont(&fgStrokeRoman);
@@ -151,17 +158,13 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 void FontManager::cleanup()
 {
    for(S32 i = 0; i < FontCount; i++)
-      if(fontList[i] != NULL)
-      {
-         delete fontList[i];
-         fontList[i] = NULL;
-      }
-
-   if(mStash != NULL)
    {
-      sth_delete(mStash);
-      mStash = NULL;
+      delete fontList[i];
+      fontList[i] = NULL;
    }
+
+   sth_delete(mStash);
+   mStash = NULL;
 }
 
 

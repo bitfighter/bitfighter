@@ -464,10 +464,8 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
          gClientGames[i]->getUIManager()->getCurrentUI()->onDisplayModeChange();
 
    // Re-initialize our fonts because OpenGL textures can be lost upon screen change
-   FontManager::cleanup();
-   FontManager::initialize(settings);
+   FontManager::reinitialize(settings);
 }
-
 
 
 void VideoSystem::getWindowParameters(GameSettings *settings, DisplayMode displayMode, 

@@ -164,12 +164,14 @@ void UIManager::renderPrevUI(const UserInterface *ui)
 
 void UIManager::activate(UserInterface *ui, bool save)  // save defaults to true
 {
-   if(save)
-      saveUI(mCurrentInterface);
+   if(mCurrentInterface)
+   {
+      if(save)
+         saveUI(mCurrentInterface);
 
-   // Deactivate the UI we're no longer using
-   if(mCurrentInterface)             
-     mCurrentInterface->onDeactivate(ui->usesEditorScreenMode());
+      // Deactivate the UI we're no longer using
+      mCurrentInterface->onDeactivate(ui->usesEditorScreenMode());
+   }
 
    mLastUI = mCurrentInterface;
    mLastWasLower = false;
