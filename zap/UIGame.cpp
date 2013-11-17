@@ -859,28 +859,30 @@ void GameUserInterface::renderReticle() const
             offsetMouse.x, (F32)gScreenInfo.getGameCanvasHeight(),
       };
 
-#define GREEN 0.0f, 1.0f, 0.0f      // Colors::green
+#define RETICLE_COLOR Colors::green
+#define COLOR_RGB RETICLE_COLOR.r, RETICLE_COLOR.g, RETICLE_COLOR.b      
 
       static F32 colors[] = {
-            GREEN, 0.7f,  
-            GREEN, 0.7f,
-            GREEN, 0.7f,
-            GREEN, 0.7f,
+         COLOR_RGB, 0.7f,
+         COLOR_RGB, 0.7f,
+         COLOR_RGB, 0.7f,
+         COLOR_RGB, 0.7f,
 
-            GREEN, 0.0f,
-            GREEN, 0.7f,
+         COLOR_RGB, 0.0f,
+         COLOR_RGB, 0.7f,
 
-            GREEN, 0.7f,
-            GREEN, 0.0f,
+         COLOR_RGB, 0.7f,
+         COLOR_RGB, 0.0f,
 
-            GREEN, 0.0f,
-            GREEN, 0.7f,
+         COLOR_RGB, 0.0f,
+         COLOR_RGB, 0.7f,
 
-            GREEN, 0.7f,
-            GREEN, 0.0f,
+         COLOR_RGB, 0.7f,
+         COLOR_RGB, 0.0f,
       };
 
-#undef GREEN
+#undef COLOR_RGB
+#undef RETICLE_COLOR
 
       renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
    }
