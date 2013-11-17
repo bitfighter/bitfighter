@@ -4863,6 +4863,7 @@ void EditorUserInterface::testLevel()
 
       ui->reset();
       ui->setTitle("LEVEL HAS PROBLEMS");
+      ui->setRenderUnderlyingUi(false);      // Use black background... it's comforting
 
       string msg = "";
 
