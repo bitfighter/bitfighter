@@ -18,7 +18,7 @@ using namespace std;
 namespace Zap
 {
 
-// Create a new ClientGame with one dummy team -- be sure to clean up settings somewhere!
+// Create a new ClientGame with one dummy team -- be sure to delete this somewhere!
 ClientGame *newClientGame()
 {
    Address addr;
