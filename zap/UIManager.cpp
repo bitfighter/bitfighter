@@ -94,7 +94,10 @@ void UIManager::reactivatePrevUI()
       mCurrentInterface->reactivate();
    }
    else
+   {
+      TNLAssert(false, "There has been a failure in previous UI queuing!");
       getUI<MainMenuUserInterface>()->reactivate();      // Fallback if everything else has failed
+   }
 
    mMenuTransitionTimer.reset();
 }
