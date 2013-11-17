@@ -584,10 +584,8 @@ F32 GameUserInterface::getObjectiveArrowHighlightAlpha() const
 
 void GameUserInterface::setShowingInGameHelp(bool showing)
 {
-   if(showing == mHelpItemManager.isEnabled())
-      return;
-
-   mHelpItemManager.setEnabled(showing);
+   if(showing != mHelpItemManager.isEnabled())
+      mHelpItemManager.setEnabled(showing);       // Tell the HelpItemManager that its enabled status has changed
 }
 
 
