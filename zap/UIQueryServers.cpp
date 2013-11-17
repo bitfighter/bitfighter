@@ -1050,7 +1050,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
    {
       playBoop();
       leaveGlobalChat();
-      getUIManager()->reactivate(getUIManager()->getUI<MainMenuUserInterface>());
+      getUIManager()->reactivatePrevUI();      // MainMenuUserInterface
    }
    else if(inputCode == KEY_LEFT)
    {
