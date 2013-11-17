@@ -690,6 +690,9 @@ void HelpItemManager::buildItemsToHighlightList()
 void HelpItemManager::setEnabled(bool isEnabled)
 {
    mEnabled = isEnabled;
+
+   if(!mEnabled)
+      mItemsToHighlight.clear();
 }
 
 
