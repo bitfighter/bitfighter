@@ -371,6 +371,7 @@ public:
 
    void checkConnectionToMaster(U32 timeDelta);
    MasterServerConnection *getConnectionToMaster();
+   void setConnectionToMaster(MasterServerConnection *m);
 
    void runAnonymousMasterRequest(MasterConnectionCallback callback);
    void processAnonymousMasterConnection();

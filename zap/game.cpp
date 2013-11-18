@@ -436,6 +436,11 @@ MasterServerConnection *Game::getConnectionToMaster()
 {
    return mConnectionToMaster;
 }
+void Game::setConnectionToMaster(MasterServerConnection *m)
+{
+   TNLAssert(mConnectionToMaster.isNull(), "mConnectionToMaster not NULL");
+   mConnectionToMaster = m;
+}
 
 
 void Game::runAnonymousMasterRequest(MasterConnectionCallback callback)
