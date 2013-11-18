@@ -350,7 +350,8 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
          if(walk->flags & GhostInfo::NotYetGhosted)
          {
             S32 classId = walk->obj->getClassId(getNetClassGroup());
-            bstream->writeClassId(classId, NetClassTypeObject, getNetClassGroup());
+            TNLAssert(U32(classId) < mGhostClassCount, "classID out of range");
+            bstream->writeInt(classId, mGhostClassBitSize);
             NetObject::mIsInitialUpdate = true;
          }
          // update the object
@@ -480,8 +481,8 @@ void GhostConnection::readPacket(BitStream *bstream)
 
          if(!mLocalGhosts[index]) // it's a new ghost... cool
          {
-            S32 classId = bstream->readClassId(NetClassTypeObject, getNetClassGroup());
-            if(classId == -1)
+            S32 classId = bstream->readInt(mGhostClassBitSize);
+            if(U32(classId) >= mGhostClassCount)
             {
                setLastError("Invalid packet.");
                return;
@@ -605,6 +606,8 @@ void GhostConnection::objectLocalScopeAlways(NetObject *obj)
 {
    if(!doesGhostFrom())
       return;
+   if(U32(obj->getClassId(getNetClassGroup())) >= U32(mGhostClassCount))
+      return; // Not supported from both side of connection
    objectInScope(obj);
    for(GhostInfo *walk = mGhostLookupTable[obj->getHashId() & GhostLookupTableMask]; walk; walk = walk->nextLookupInfo)
    {
@@ -658,6 +661,9 @@ void GhostConnection::objectInScope(NetObject *obj)
 
    if (!obj->isGhostable() || (obj->isScopeLocal() && !isLocalConnection()))
       return;
+
+   if(U32(obj->getClassId(getNetClassGroup())) >= U32(mGhostClassCount))
+      return; // Not supported from both side of connection
 
    S32 index = obj->getHashId() & GhostLookupTableMask;
    
@@ -881,6 +887,66 @@ void GhostConnection::onEndGhosting()
 {
    // Do nothing
 }
+
+
+void GhostConnection::writeConnectRequest(BitStream *stream)
+{
+   Parent::writeConnectRequest(stream);
+   stream->writeInt(NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeObject), 16);
+}
+
+// Reads the NetEvent class count max that the remote host is requesting.
+// If this host has MORE NetEvent classes declared, the mGhostClassCount
+// is set to the requested count, and is verified to lie on a boundary between versions.
+// This gets run when someone is connecting to us
+bool GhostConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason)
+{
+   if(!Parent::readConnectRequest(stream, reason))
+      return false;
+
+   U32 remoteClassCount = stream->readInt(16);
+
+   U32 localClassCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeObject);
+
+   // If remote client has more classes defined than we do, hope/assume they're defined in the same order, so that we at least agree
+   // on the available set of RPCs.
+   // This implies the client is higher version than the server  
+   if(localClassCount <= remoteClassCount)
+      mGhostClassCount = localClassCount;    // We're only willing to support as many as we have
+   else     // We have more RPCs on the local machine ==> implies server is higher version than client
+      mGhostClassCount = remoteClassCount;   // We're willing to support the number of classes the client has
+
+   mGhostClassBitSize = getNextBinLog2(mGhostClassCount);
+   return true;
+}
+
+
+void GhostConnection::writeConnectAccept(BitStream *stream)
+{
+   Parent::writeConnectAccept(stream);
+   stream->writeInt(mGhostClassCount, 16);// Tell the client how many RPCs we, the server, are willing to support
+                                          // (we may support more... see how this val is calced above)
+}
+
+
+bool GhostConnection::readConnectAccept(BitStream *stream, NetConnection::TerminationReason &reason)
+{
+   if(!Parent::readConnectAccept(stream, reason))
+      return false;
+
+   mGhostClassCount = stream->readInt(16);                                                      // Number of RPCs the remote server is willing to support
+   U32 myCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeObject);   // Number we, the client, support
+
+   if(mGhostClassCount > myCount)      // Normally, these should be equal.  If the server is not willing to support
+   {                                   // as many RPCs as we want to use, then bail.
+      logprintf(LogConsumer::LogConnection, "Connection failed due to a disagreement on the number of RPCs supported.");
+      return false;
+   }
+
+   mGhostClassBitSize = getNextBinLog2(mGhostClassCount);
+   return true;
+}
+
 
 
 };
