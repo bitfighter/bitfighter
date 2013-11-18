@@ -72,11 +72,15 @@ md5wrapper Game::md5;
 // Statics
 static Game *mObjectAddTarget = NULL;
 
+const U32 Game::CurrentLevelFormat = 2;
 
 // Constructor
 Game::Game(const Address &theBindAddress, GameSettingsPtr settings) : mGameObjDatabase(new GridDatabase())  // New database will be deleted by boost
 {
-   mLegacyGridSize = 1.f;
+   mLegacyGridSize = 1.f;              // Default to 1 unless we detect LevelFormat is missing or there's a GridSize parameter
+   mLevelFormat = CurrentLevelFormat;  // Default to current format version
+   mHasLevelFormat = false;
+
    mLevelDatabaseId = 0;
    mSettings = settings;
 
@@ -610,7 +614,8 @@ void Game::onConnectedToMaster()
 
 void Game::resetLevelInfo()
 {
-   mLegacyGridSize = 1.0f;
+   mLegacyGridSize = 1.f;
+   mLevelFormat = CurrentLevelFormat;
 }
 
 
@@ -693,6 +698,22 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
    if(!stricmp(argv[0], "BotsPerTeam"))
       return;
 
+   // LevelFormat was introduced in 019 to handle significant file format changes, like
+   // with GridSize removal and the saving of real spacial coordinates.
+   //
+   // This should be the first line of the file
+   else if(!stricmp(argv[0], "LevelFormat"))
+   {
+      if(argc < 2)
+         logprintf(LogConsumer::LogLevelError, "Invalid LevelFormat provided");
+      else
+         mLevelFormat = (U32)atoi(argv[1]);
+
+      mHasLevelFormat = true;
+
+      return;
+   }
+
    // Legacy Gridsize handling - levels used to have a 'GridSize' line that could be used to
    // multiply all points found in the level file.  Since version 019 this is no longer used
    // and all points are saved as the real spacial coordinates.
@@ -701,15 +722,17 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
    // the level file.  However, once it is loaded and resaved in the editor, this setting will
    // disappear and all points will reflect their true, absolute nature.
    else if(!stricmp(argv[0], "GridSize"))
-   {                                           
-      if(argc < 2)
-         logprintf(LogConsumer::LogLevelError, "Improperly formed GridSize parameter");
-      else 
+   {
+      // We should have properly detected the level format by the time GridSize is found
+      if(mLevelFormat == 1)
       {
-         mLegacyGridSize = (F32)atof(argv[1]);
-         //logprintf("Legacy 'GridSize' parameter found in level \"%s\".  Load and save level in the editor to get rid of this message.", 
-                    //levelFileName.c_str());
+         if(argc < 2)
+            logprintf(LogConsumer::LogLevelError, "Improperly formed GridSize parameter");
+         else
+            mLegacyGridSize = (F32)atof(argv[1]);
       }
+      else
+         logprintf(LogConsumer::LogLevelError, "GridSize can no longer be used in level files");
 
       return;
    }
@@ -731,6 +754,17 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
    // Parse GameType line... All game types are of form XXXXGameType
    else if(strlenCmd >= 8 && !strcmp(argv[0] + strlenCmd - 8, "GameType"))
    {
+      // First check to see if we have a LevelFormat line, which should have been detected
+      // by now since it's the first line of the file.  If it didn't find it, we are at
+      // version 1 and we have to set the old GridSize to 255 as default
+      //
+      // This check is performed here because every file should have a game type..  right??
+      if(!mHasLevelFormat)
+      {
+         mLevelFormat = 1;
+         mLegacyGridSize = 255.f;
+      }
+
       if(mGameType.isValid())
       {
          logprintf(LogConsumer::LogLevelError, "Duplicate GameType is not allowed");
@@ -877,7 +911,9 @@ string Game::toLevelCode() const
 
    GameType *gameType = getGameType();
 
-   str = gameType->toLevelCode() + "\n";
+   str = "LevelFormat " + itos(CurrentLevelFormat) + "\n";
+
+   str += string(gameType->toLevelCode() + "\n");
 
    str += string("LevelName ")        + writeLevelString(gameType->getLevelName()->getString()) + "\n";
    str += string("LevelDescription ") + writeLevelString(gameType->getLevelDescription()->getString()) + "\n";

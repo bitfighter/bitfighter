@@ -169,6 +169,10 @@ class Game
 {
 private:
    F32 mLegacyGridSize;
+   U32 mLevelFormat;      // Version of level file loaded.  Used for legacy analyses
+   bool mHasLevelFormat;
+
+   static const U32 CurrentLevelFormat;
 
    U32 mTimeUnconnectedToMaster;          // Time that we've been disconnected to the master
    bool mHaveTriedToConnectToMaster;
