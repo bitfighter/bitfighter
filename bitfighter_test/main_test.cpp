@@ -1262,7 +1262,6 @@ int main(int argc, char **argv)
    testing::InitGoogleTest(&argc, argv);
    int returnvalue = RUN_ALL_TESTS();
    FontManager::cleanup();
-	Platform::sleep(1000000);
    return returnvalue;
 }
 

@@ -153,15 +153,21 @@ TEST_F(ObjectTest, ServerClient)
    for(S32 i=0; i<objects->size(); i++)
    {
       BfObject *bfobj = dynamic_cast<BfObject *>((*objects)[i]);
-      U32 id = bfobj->getClassId(NetClassGroupGame);
-      isAdded[id] |= FlagClientGameExist;
+      if(bfobj->getClassRep() != NULL)  // Barriers and some other objects might not be ghostable..
+      {
+         U32 id = bfobj->getClassId(NetClassGroupGame);
+         isAdded[id] |= FlagClientGameExist;
+      }
    }
    objects = serverGame->getGameObjDatabase()->findObjects_fast();
    for(S32 i=0; i<objects->size(); i++)
    {
       BfObject *bfobj = dynamic_cast<BfObject *>((*objects)[i]);
-      U32 id = bfobj->getClassId(NetClassGroupGame);
-      isAdded[id] |= FlagServerGameExist;
+      if(bfobj->getClassRep() != NULL)
+      {
+         U32 id = bfobj->getClassId(NetClassGroupGame);
+         isAdded[id] |= FlagServerGameExist;
+      }
    }
 
 
