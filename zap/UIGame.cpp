@@ -900,7 +900,7 @@ void GameUserInterface::renderWrongModeIndicator() const
    if(mWrongModeMsgDisplay.getCurrent())
    {
       // Fade for last half second
-      F32 alpha = mWrongModeMsgDisplay.getCurrent() < 500 ? mWrongModeMsgDisplay.getCurrent() / 500.0f : 1.0;
+      F32 alpha = mWrongModeMsgDisplay.getCurrent() < 500 ? mWrongModeMsgDisplay.getCurrent() / 500.0f : 1.0f;
 
       glColor(Colors::red, alpha);
       FontManager::pushFontContext(HelperMenuContext);
