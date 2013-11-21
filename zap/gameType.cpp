@@ -3743,6 +3743,11 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
       message = "%s has earned the HAT TRICK badge!";
       textEffectText = "HAT TRICK";
    }
+   else if(achievement == BADGE_LAST_SECOND_WIN)
+   {
+      message = "%s has earned the LAST-SECOND WIN badge!";
+      textEffectText = "LAST-SECOND WIN";
+   }
    else
       return;
 

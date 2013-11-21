@@ -3152,6 +3152,24 @@ void renderRagingRabidRabbitBadge(F32 x, F32 y, F32 rad)
 }
 
 
+void renderLastSecondWinBadge(F32 x, F32 y, F32 rad)
+{
+   glPushMatrix();
+      glTranslate(x, y, 0);
+      glScale(.05f * rad);
+
+      renderFlag(-.10f * rad, -.10f * rad, &Colors::blue);
+   glPopMatrix();
+
+   F32 tx = x + .40f * rad;
+   F32 ty = y + .40f * rad;
+
+
+   glColor(Colors::white);
+   renderCenteredString(Point(tx, ty), rad, ":01");
+}
+
+
 void renderHatTrickBadge(F32 x, F32 y, F32 rad)
 {
    static const F32 outline[] = {
@@ -3259,6 +3277,9 @@ void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
          break;
       case BADGE_HAT_TRICK:
          renderHatTrickBadge(x, y, rad);
+         break;
+      case BADGE_LAST_SECOND_WIN:
+         renderLastSecondWinBadge(x, y, rad);
          break;
       default:
          TNLAssert(false, "Unknown Badge!");

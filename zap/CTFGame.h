@@ -19,7 +19,11 @@ class CTFGameType : public GameType
 private:
    typedef GameType Parent;
 
+   bool mLastWinBadgeAchievable;
+   ClientInfo *mPossibleLastWinBadgeAchiever;
+
 public:
+   CTFGameType();
    virtual ~CTFGameType();
 
    void addFlag(FlagItem *flag);
@@ -42,6 +46,8 @@ public:
    bool canBeIndividualGame() const;
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
+
+   void onGameOver();
 
    TNL_DECLARE_CLASS(CTFGameType);
 };
