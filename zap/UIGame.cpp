@@ -105,7 +105,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
    mAnnouncement = "";
 
    mShowProgressBar = false;
-   mProgressBarFadeTimer.setPeriod(1000);
+   mProgressBarFadeTimer.setPeriod(ONE_SECOND);
 
    // Transition time between regular map and commander's map; in ms, higher = slower
    mCommanderZoomDelta.setPeriod(350);
