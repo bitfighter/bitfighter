@@ -731,8 +731,7 @@ void GameUserInterface::prepareStars()
    for(S32 i = 0; i < NumStars; i++)
    {
       // Positions
-      mStars[i].x = TNL::Random::readF();    // Between 0 and 1
-      mStars[i].y = TNL::Random::readF();
+      mStars[i].set(TNL::Random::readF(), TNL::Random::readF());    // Between 0 and 1
 
       // Colors
       S32 starSeed = TNL::Random::readI(0, 100);
