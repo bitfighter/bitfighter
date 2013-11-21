@@ -532,6 +532,7 @@ static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
       { BADGE_ZONE_CONTROLLER,     "Zone Controller",    "Capture all zones to win a Zone Control game" },
       { BADGE_RAGING_RABID_RABBIT, "Raging Rabid Rabbit","Zap several ships in a row with the carrot in a Rabbit game" },
       { BADGE_HAT_TRICK,           "Hat Trick",          "Score 3 goals in a row in a Soccer game" },
+      { BADGE_LAST_SECOND_WIN,     "Last-Second Win",    "Win a CTF match by scoring within the last second" },
    };
 
    for(U32 i = 0; i < ARRAYSIZE(badgeDescrs); i++)

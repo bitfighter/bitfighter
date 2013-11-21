@@ -239,6 +239,7 @@ private:
    SafePtr<BfObject> mDraggingDockItem;
    SafePtr<BfObject> mDockItemHit;
 
+   S32 mDockPluginScrollOffset;
    U32 mDockWidth;
    bool mouseOnDock();                // Return whether mouse is currently over the dock
    bool mNeedToSave;                  // Have we modified the level such that we need to save?

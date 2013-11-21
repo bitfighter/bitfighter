@@ -399,7 +399,7 @@ S32 ItemSpawn::lua_spawnNow(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-TNL_IMPLEMENT_NETOBJECT_VERSION(AsteroidSpawn, 1);
+TNL_IMPLEMENT_NETOBJECT(AsteroidSpawn);
 
 // Constructor
 AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)

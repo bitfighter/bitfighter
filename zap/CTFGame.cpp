@@ -18,6 +18,14 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(CTFGameType);
 
 
+// Constructor
+CTFGameType::CTFGameType()
+{
+   mLastWinBadgeAchievable = false;
+   mPossibleLastWinBadgeAchiever = NULL;
+}
+
+
 // Destructor
 CTFGameType::~CTFGameType()
 {
@@ -83,6 +91,16 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
                updateScore(theShip, CaptureFlag);
 
                clientInfo->getStatistics()->mFlagScore++;
+
+
+               // Check to see if it was possible to win the Last-Win Badge
+               // A capture must occur in the last second (plus a little buffer for lag)
+               // This could happen multiple times.  Last person to do it is what counts
+               if(getRemainingGameTimeInMs() < 1100)
+               {
+                  mLastWinBadgeAchievable = true;
+                  mPossibleLastWinBadgeAchiever = clientInfo;
+               }
             }
          }
       }
@@ -260,6 +278,46 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
          default:
             return naScore;
       }
+   }
+}
+
+
+void CTFGameType::onGameOver()
+{
+   Parent::onGameOver();
+
+   // Check if we got the Last-Second Win badge
+   if(mLastWinBadgeAchievable &&                                           // Badge was possibly achieved (some flag scored in last second)
+      mPossibleLastWinBadgeAchiever &&
+      mPossibleLastWinBadgeAchiever->isAuthenticated() &&                  // Player must be authenticated
+      mPossibleLastWinBadgeAchiever->getTeamIndex() == getLeadingTeam() && // On the winning team
+      getGame()->getPlayerCount() >= 4 &&                                  // Game must have 4+ human players
+      getGame()->getAuthenticatedPlayerCount() >= 2 &&                     // Two of whom must be authenticated
+      !mPossibleLastWinBadgeAchiever->hasBadge(BADGE_LAST_SECOND_WIN))     // Player doesn't already have the badge
+   {
+      // Now the hard stuff
+      // Find if its a tie and if there's a team with winning score minus 1
+      bool tiedGame = false;
+      bool secondPlaceIsMinusOne = false;
+
+      for(S32 i = 1; i < getGame()->getTeamCount(); i++)
+      {
+         // Skip ourselves
+         if(i == mPossibleLastWinBadgeAchiever->getTeamIndex())
+            continue;
+
+         // Test for tie
+         if(static_cast<Team*>(getGame()->getTeam(i))->getScore() == getLeadingScore())
+            tiedGame = true;
+
+         // Test for exists 1 team with winning score minus 1
+         if(static_cast<Team*>(getGame()->getTeam(i))->getScore() == getLeadingScore() - 1)
+            secondPlaceIsMinusOne = true;
+      }
+
+      // If not tie and losing team lost by one, then badge!
+      if(!tiedGame && secondPlaceIsMinusOne)
+         achievementAchieved(BADGE_LAST_SECOND_WIN, mPossibleLastWinBadgeAchiever->getName());
    }
 }
 

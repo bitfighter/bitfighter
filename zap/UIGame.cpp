@@ -2330,6 +2330,9 @@ void GameUserInterface::renderScoreboard()
 
 void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio)
 {
+   // Default to vector font for badges
+   FontManager::pushFontContext(OldSkoolContext);
+
    F32 badgeRadius = 10.f * scaleRatio;
    S32 badgeOffset = S32(2 * badgeRadius) + 5;
    F32 badgeBackgroundEdgeSize = 2 * badgeRadius + 2.f;
@@ -2361,6 +2364,8 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
          x += badgeOffset;
       }
    }
+
+   FontManager::popFontContext();
 }
 
 

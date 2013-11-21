@@ -165,6 +165,9 @@ protected:
 
    bool mGhostFrom;
    bool mGhostTo;
+
+   U32 mGhostClassCount;
+   U32 mGhostClassBitSize;
 public:
    GhostConnection();
    ~GhostConnection();
@@ -229,6 +232,12 @@ public:
 
    /// RPC from server to client sent to notify that ghosting should stop
    TNL_DECLARE_RPC(rpcEndGhosting, ());
+
+   virtual void writeConnectRequest(BitStream *stream);
+   virtual bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
+   virtual void writeConnectAccept(BitStream *stream);
+   virtual bool readConnectAccept(BitStream *stream, NetConnection::TerminationReason &reason);
+
 };
 
 //----------------------------------------------------------------------------

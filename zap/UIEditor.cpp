@@ -121,6 +121,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mDockItemHit = NULL;
    mDockWidth = ITEMS_DOCK_WIDTH;
    mDockMode = DOCKMODE_ITEMS;
+   mDockPluginScrollOffset = 0;
 
    mHitVertex = NONE;
    mEdgeHit   = NONE;
@@ -2104,20 +2105,22 @@ static void renderDockItemLabel(const Point &pos, const char *label)
 void EditorUserInterface::renderDockPlugins()
 {
    S32 hoveredPlugin = mouseOnDock() ? findHitPlugin() : -1;
-   for(S32 i = 0; i < mPluginInfos.size(); i++)
+   S32 maxPlugins = getDockHeight() / PLUGIN_LINE_SPACING;
+   for(S32 i = mDockPluginScrollOffset; i < mPluginInfos.size() && i < maxPlugins; i++)
    {
       if(hoveredPlugin == i)
       {
          S32 x = gScreenInfo.getGameCanvasWidth() - mDockWidth - horizMargin;
-         F32 y = 1.5f * vertMargin + PLUGIN_LINE_SPACING * i;
+         F32 y = 1.5f * vertMargin + PLUGIN_LINE_SPACING * (i - mDockPluginScrollOffset);
          drawHollowRect(x + horizMargin / 3, y, x + mDockWidth - horizMargin / 3, y + PLUGIN_LINE_SPACING, Colors::white);
          mInfoMsg = mPluginInfos[i].description;
       }
 
       glColor(Colors::white);
-      drawString((S32) (gScreenInfo.getGameCanvasWidth() - mDockWidth - horizMargin / 2), (S32) (1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 0.33)), DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
+      S32 y = (S32) (1.5 * vertMargin + PLUGIN_LINE_SPACING * (i - mDockPluginScrollOffset + 0.33));
+      drawString((S32) (gScreenInfo.getGameCanvasWidth() - mDockWidth - horizMargin / 2), y, DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
       S32 bindingWidth = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
-      drawString((S32) (gScreenInfo.getGameCanvasWidth() - bindingWidth - horizMargin * 1.5), (S32) (1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 0.33)), DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
+      drawString((S32) (gScreenInfo.getGameCanvasWidth() - bindingWidth - horizMargin * 1.5), y, DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
    }
 }
 
@@ -2809,7 +2812,7 @@ S32 EditorUserInterface::findHitPlugin()
          mMousePos.y < 1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 1)
       )
       {
-         return i;
+         return i + mDockPluginScrollOffset;
       }
    }
    return -1;
@@ -3739,12 +3742,28 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)       // Enter - Edit props
       startAttributeEditor();
 
-   // Mouse wheel zooms in and out
+   // Mouse wheel scrolls the plugin list, or zooms in and out
 
    else if(inputCode == MOUSE_WHEEL_UP)
-      zoom(0.2f);
+   {
+      if(mDockMode == DOCKMODE_PLUGINS && mouseOnDock())
+      {
+         if(mDockPluginScrollOffset > 0)
+            mDockPluginScrollOffset -= 1;
+      }
+      else
+         zoom(0.2f);
+   }
    else if(inputCode == MOUSE_WHEEL_DOWN)
-      zoom(-0.2f);
+   {
+      if(mDockMode == DOCKMODE_PLUGINS && mouseOnDock())
+      {
+         if(mDockPluginScrollOffset < (S32) (mPluginInfos.size() - getDockHeight() / PLUGIN_LINE_SPACING))
+            mDockPluginScrollOffset += 1;
+      }
+      else
+         zoom(-0.2f);
+   }
    else if(inputCode == MOUSE_MIDDLE)     // Click wheel to drag
    {
       mScrollWithMouseLocation = mMousePos;

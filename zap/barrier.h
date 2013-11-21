@@ -70,8 +70,6 @@ public:
 
    static void prepareRenderingGeometry(Game *game);
    static void clearRenderItems();
-
-   TNL_DECLARE_CLASS(Barrier);
 };
 
 

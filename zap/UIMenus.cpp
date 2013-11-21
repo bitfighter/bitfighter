@@ -1618,15 +1618,6 @@ void RobotOptionsMenuUserInterface::onActivate()
 }
 
 
-//////////
-// Callbacks for RobotOptions menu
-static void robotOptionsAcceptCallback(ClientGame *game, U32 index)
-{
-   game->getUIManager()->getUI<RobotOptionsMenuUserInterface>()->saveSettings();
-   game->getUIManager()->reactivatePrevUI();
-}
-
-
 void RobotOptionsMenuUserInterface::setupMenus()
 {
    clearMenuItems();
@@ -1642,8 +1633,6 @@ void RobotOptionsMenuUserInterface::setupMenus()
 
    addMenuItem(new YesNoMenuItem("FORCE TEAM BALANCE:", iniSettings->botsAlwaysBalanceTeams,
          "Force teams to balance, even if the minimum player count has been met",  KEY_F));
-
-   addMenuItem(new MenuItem("OK", robotOptionsAcceptCallback, ""));
 }
 
 

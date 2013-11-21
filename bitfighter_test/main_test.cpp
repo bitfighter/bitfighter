@@ -50,6 +50,9 @@
 #include "tnlGhostConnection.h"
 #include "tnlPlatform.h"
 
+#include "../master/MasterServerConnection.h"
+#include "masterConnection.h"
+
 #include <string>
 #include <cmath>
 
@@ -142,6 +145,15 @@ TEST_F(BfTest, MasterTests)
    // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
    FontManager::initialize(gameSettings.get(), false);
    ClientGame clientGame(addr, gameSettings, new UIManager());    // ClientGame destructor will clean up UIManager
+
+   clientGame.setConnectionToMaster(new Zap::MasterServerConnection((Game*) &clientGame)); // uses Zap::MasterServerConnection
+   clientGame.getConnectionToMaster()->connectLocal((NetInterface*) clientGame.getNetInterface(), master.getNetInterface());
+   EXPECT_TRUE(clientGame.isConnectedToMaster());
+
+   Zap::MasterServerConnection *clientConnection = clientGame.getConnectionToMaster();
+   EXPECT_TRUE(clientConnection != NULL);
+	Master::MasterServerConnection *masterConnection = dynamic_cast<Master::MasterServerConnection *>(clientConnection->getRemoteConnectionObject());
+   EXPECT_TRUE(masterConnection != NULL);
 }
 
 
