@@ -529,7 +529,8 @@ void BfObject::addToGame(Game *game, GridDatabase *database)
 void BfObject::removeFromGame(bool deleteObject)
 {
    removeFromDatabase(deleteObject);
-   mGame = NULL;
+   if(!deleteObject)  // if "this" gets deleted inside removeFromDatabase(deleteObject == true), don't corrupt memory
+      mGame = NULL;
 }
 
 
