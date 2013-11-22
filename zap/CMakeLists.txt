@@ -438,14 +438,15 @@ if(MSVC)
 	endforeach()
 
 	# Set some linker flags to use console mode in debug build, etc..
+	# Always use SUBSYSTEM:CONSOLE; hiding the console window is controlled in zap/main.cpp near the bottom of main()
+	# Allows console to stay visible if ran from typing in command window.
 	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
 	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
+	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
+	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
 	
 	# Set more compiler flags for console on appropriate targets
 	list(APPEND ALL_DEBUG_DEFS "_CONSOLE")
 endif()
 
 set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "${ALL_DEBUG_DEFS}")
-set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "${ALL_DEBUG_DEFS}")
