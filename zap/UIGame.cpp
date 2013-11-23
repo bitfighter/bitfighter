@@ -37,7 +37,7 @@
 #include "FontManager.h"
 #include "Intervals.h"
 
-#include "tnlEndian.h"
+//#include "tnlEndian.h"
 
 #include "Rect.h"
 
@@ -101,7 +101,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
       mModuleDoubleTapTimer[i].setPeriod(DoubleClickTimeout);
    }
    
-   mAnnouncementTimer.setPeriod(15000);  // 15 seconds
+   mAnnouncementTimer.setPeriod(FIFTEEN_SECONDS);  
    mAnnouncement = "";
 
    mShowProgressBar = false;
