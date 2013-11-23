@@ -1783,19 +1783,8 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
    if(typeNumber == AsteroidTypeNumber)
       return true;
 
-   WeaponType weaponType;
-
-   if(typeNumber == BulletTypeNumber)
-      weaponType = static_cast<Projectile *>(damager)->mWeaponType;
-   else if(typeNumber == BurstTypeNumber || typeNumber == MineTypeNumber || typeNumber == SpyBugTypeNumber)
-      weaponType = static_cast<Burst *>(damager)->mWeaponType;
-   else if(typeNumber == SeekerTypeNumber)
-      weaponType = static_cast<Seeker *>(damager)->mWeaponType;
-   else
-   {
-      TNLAssert(false, "Unknown Damage type");
-      return false;
-   }
+   WeaponType weaponType = WeaponInfo::getWeaponTypeFromObject(damager);
+   TNLAssert(weaponType != WeaponNone, "WeaponType should never be WeaponNone here");
 
    ClientInfo *damagerOwner = damager->getOwner();
 

@@ -766,6 +766,10 @@ void Ship::findRepairTargets()
       if(item->getTeam() != TEAM_NEUTRAL && item->getTeam() != getTeam())
          continue;
 
+      // ...or same team in non-team game, except self
+      if(!getGame()->getGameType()->isTeamGame() && item->getTeam() == getTeam() && item != this)
+         continue;
+
       // Find the radius of the repairable.  Handle teleporter special case
       F32 itemRadius = 0;
       if(item->getObjectTypeNumber() == TeleporterTypeNumber)

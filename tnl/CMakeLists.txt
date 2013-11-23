@@ -33,4 +33,3 @@ add_library(tnl ${TNL_SOURCES} ${TNL_HEADERS})
 target_link_libraries(tnl tomcrypt)
 
 set_target_properties(tnl PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG;TNL_ENABLE_LOGGING")
-set_target_properties(tnl PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "TNL_DEBUG;TNL_ENABLE_LOGGING")

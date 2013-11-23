@@ -2106,7 +2106,7 @@ void EditorUserInterface::renderDockPlugins()
 {
    S32 hoveredPlugin = mouseOnDock() ? findHitPlugin() : -1;
    S32 maxPlugins = getDockHeight() / PLUGIN_LINE_SPACING;
-   for(S32 i = mDockPluginScrollOffset; i < mPluginInfos.size() && i < maxPlugins; i++)
+   for(S32 i = mDockPluginScrollOffset; i < mPluginInfos.size() && (i - mDockPluginScrollOffset) < maxPlugins; i++)
    {
       if(hoveredPlugin == i)
       {
