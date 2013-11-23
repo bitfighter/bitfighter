@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "WeaponInfo.h"
+#include "BfObject.h"
+#include "projectile.h"
 
 
 namespace Zap
@@ -34,6 +36,23 @@ WeaponInfo weaponInfo[] = {
 WeaponInfo WeaponInfo::getWeaponInfo(WeaponType weaponType)
 {
    return weaponInfo[weaponType];
+}
+
+
+// Discover the WeaponType from any BfObject
+// This method feels like a workaround for a bad object model...
+WeaponType WeaponInfo::getWeaponTypeFromObject(BfObject *bfObject)
+{
+   U8 typeNumber = bfObject->getObjectTypeNumber();
+
+   if(typeNumber == BulletTypeNumber)
+      return static_cast<Projectile *>(bfObject)->mWeaponType;
+   else if(typeNumber == BurstTypeNumber || typeNumber == MineTypeNumber || typeNumber == SpyBugTypeNumber)
+      return static_cast<Burst *>(bfObject)->mWeaponType;
+   else if(typeNumber == SeekerTypeNumber)
+      return static_cast<Seeker *>(bfObject)->mWeaponType;
+
+   return WeaponNone;
 }
 
 

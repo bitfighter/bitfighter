@@ -12,6 +12,11 @@ using namespace TNL;
 
 namespace Zap
 {
+
+// Forward declarations
+class BfObject;
+
+
 /**
  * @luaenum Weapon(2, 1)
  * The Weapon enum can be used to represent a weapon in some functions.
@@ -93,6 +98,7 @@ struct WeaponInfo
    ProjectileType projectileType;   // If this is a projectile item, which sort is it?  If not, use NotAProjectile
 
    static WeaponInfo getWeaponInfo(WeaponType weaponType);
+   static WeaponType getWeaponTypeFromObject(BfObject *bfObject);
 };
 
 

@@ -172,7 +172,8 @@ S32 RabbitGameType::getFlagScore() const
 
 bool RabbitGameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 {
-   if(getGame()->getTeamCount() != 1)
+   // Do normal damage rules on team Rabbit games
+   if(getGame()->getTeamCount() > 1)
       return Parent::objectCanDamageObject(damager, victim);
 
    if(!damager)
@@ -190,8 +191,14 @@ bool RabbitGameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
    if(!attackShip || !victimShip)
       return true;
 
+   // Apply normal weapon rules without the team changes
+   WeaponType weaponType = WeaponInfo::getWeaponTypeFromObject(damager);
+   bool damageTeamMate = false;
+   if(weaponType != WeaponNone && WeaponInfo::getWeaponInfo(weaponType).canDamageTeammate)
+      damageTeamMate = true;
+
    // Hunters can only hurt rabbits -- no "friendly fire"
-   return shipHasFlag(attackShip) || shipHasFlag(victimShip);
+   return shipHasFlag(attackShip) || shipHasFlag(victimShip) || damageTeamMate;
 }
 
 
