@@ -4827,6 +4827,12 @@ string EditorUserInterface::getLevelText()
 }
 
 
+const Vector<EditorUserInterface::PluginInfo> *EditorUserInterface::getPluginInfos() const
+{
+   return &mPluginInfos;
+}
+
+
 void EditorUserInterface::clearRobotLines()
 {
    mRobotLines.clear();
@@ -5055,6 +5061,7 @@ void EditorUserInterface::findPlugins()
 
    mPluginInfos.sort(pluginInfoSort);
 }
+
 
 U32 EditorUserInterface::findPluginDockWidth()
 {

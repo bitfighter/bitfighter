@@ -321,6 +321,7 @@ public:
    bool isQuitLocked();
 
    string getLevelText();
+   const Vector<EditorUserInterface::PluginInfo> *getPluginInfos() const;
 
    F32 getCurrentScale();
    Point getCurrentOffset();
