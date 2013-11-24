@@ -807,7 +807,6 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicL
       default:
          return;
    }
-
 }
 
 
