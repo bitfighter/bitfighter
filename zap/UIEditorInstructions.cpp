@@ -6,6 +6,7 @@
 #include "UIEditorInstructions.h"
 
 #include "UIManager.h"
+#include "UIEditor.h"         // For PluginInfo def
 
 #include "ClientGame.h"       // For usage with getGame()
 #include "barrier.h"     
@@ -223,13 +224,12 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
                              symbols, HelpContext, FontSize, &Colors::yellow, keyColor);
    mPluginInstructions.add(SymbolString(symbols));
 
+   const Vector<PluginInfo> *pluginInfos = getUIManager()->getUI<EditorUserInterface>()->getPluginInfos();
 
-   const Vector<PluginBinding> *plugins = settings->getPluginBindings();
-
-   for(S32 i = 0; i < plugins->size(); i++)
+   for(S32 i = 0; i < pluginInfos->size(); i++)
    {
-      string key   = "[[" + plugins->get(i).key + "]]";  // Add the [[ & ]] to make it parsable
-      string instr = plugins->get(i).help;
+      string key = "[[" + pluginInfos->get(i).binding + "]]";  // Add the [[ & ]] to make it parsable
+      string instr = pluginInfos->get(i).description;
 
       symbols.clear();
       SymbolString::symbolParse(settings->getInputCodeManager(), key + tabstr + instr,
