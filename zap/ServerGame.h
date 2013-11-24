@@ -189,12 +189,15 @@ public:
 
    DataSender dataSender;
 
+   bool clientCanSuspend(ClientInfo *info);
    void suspendGame();
+   void suspendGame(GameConnection *gc);
    void unsuspendGame(bool remoteRequest);
 
    void suspenderLeftGame();
    GameConnection *getSuspendor();
    void suspendIfNoActivePlayers();
+   void unsuspendIfActivePlayers();
 
    Ship *getLocalPlayerShip() const;
 

@@ -206,7 +206,6 @@ void GameConnection::undelaySpawn()
    {
       clientInfo->setReturnToGameTimer(0);    // No penalties when game is suspended
       clientInfo->requireReturnToGameTimer(false);
-      mServerGame->unsuspendGame(true);
    }
 
    // Check if there is a penalty being applied to client (e.g. there is a 5 sec penalty for using the /idle command).
@@ -223,6 +222,7 @@ void GameConnection::undelaySpawn()
    {
       clientInfo->setSpawnDelayed(false);       // ClientInfo here is a FullClientInfo
       mServerGame->getGameType()->spawnShip(clientInfo);
+      mServerGame->unsuspendIfActivePlayers();
    }
 }
 
@@ -301,26 +301,27 @@ void GameConnection::submitPassword(const char *password)
 }
 
 
-// If the server thinks everyone is alseep, it will suspend the game
-TNL_IMPLEMENT_RPC(GameConnection, s2cSuspendGame, (), (),
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+TNL_IMPLEMENT_RPC(GameConnection, s2rSetSuspendGame, (bool isSuspend), (isSuspend),
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
+   if(!isInitiator()) // server
+   {
+      if(mServerGame->clientCanSuspend(getClientInfo()))
+      {
+         if(isSuspend)
+            mServerGame->suspendGame(this);
+         else
+            mServerGame->unsuspendGame(true);
+      }
+      else
+         s2cDisplayErrorMessage("!!! Need admin");
+   }
 #ifndef ZAP_DEDICATED
-   mClientGame->suspendGame();
+   else // client
+      mClientGame->setGameSuspended_FromServerMessage(isSuspend);
 #endif
 }
   
-
-// Here, the server has sent a message to a suspended client to wake up, action's coming in hot!
-// We'll also play the playerJoined sfx to alert local client that the game is on again.
-TNL_IMPLEMENT_RPC(GameConnection, s2cUnsuspend, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
-{
-#ifndef ZAP_DEDICATED
-   mClientGame->unsuspendGame();       
-   mClientGame->playSoundEffect(SFXPlayerJoined, 1);
-#endif
-}
-
 
 void GameConnection::changeParam(const char *param, ParamType type)
 {
@@ -2000,6 +2001,9 @@ void GameConnection::onConnectionEstablished_server()
       // Forever!
       mSwitchTimer.reset(U32_MAX, U32_MAX);
    }
+
+   if(mServerGame->isSuspended())
+      s2rSetSuspendGame(true);
 }
 
 

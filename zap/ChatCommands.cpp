@@ -714,23 +714,23 @@ static bool fixupArgs(ClientGame *game, Vector<StringTableEntry> &args)
 
 void announceHandler(ClientGame *game, const Vector<string> &words)
 {
-	if(game->hasAdmin("!!! You need to be an admin to use /announce"))
+   if(game->hasAdmin("!!! You need to be an admin to use /announce"))
    {
-	   // Rebuild our announcement from the split up vector
-		string message = "";
-		for(S32 i = 1; i < words.size(); i++)
-		{
-		   if(i != 1)
-		      message = message + " ";
+      // Rebuild our announcement from the split up vector
+      string message = "";
+      for(S32 i = 1; i < words.size(); i++)
+      {
+         if(i != 1)
+            message = message + " ";
 
-		   message = message + words[i];
-		}
-	
-		GameType* gt = game->getGameType();
-					
-		if(gt)
-			gt->c2sSendAnnouncement(message);
-	}
+         message = message + words[i];
+      }
+   
+      GameType* gt = game->getGameType();
+               
+      if(gt)
+         gt->c2sSendAnnouncement(message);
+   }
 }
 
 
@@ -1047,6 +1047,13 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
    }
 }
 
+void pauseHandler(ClientGame *game, const Vector<string> &args)
+{
+   if(game->isSuspended())
+      game->unsuspendGame();
+   else
+      game->suspendGame();
+}
 
 // The following are only available in debug builds
 #ifdef TNL_DEBUG

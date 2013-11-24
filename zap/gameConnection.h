@@ -179,9 +179,8 @@ public:
    void setGotPermissionsReply(bool gotReply);
    bool gotPermissionsReply();
 
-   // Suspend/unsuspend game
-   TNL_DECLARE_RPC(s2cSuspendGame, ());
-   TNL_DECLARE_RPC(s2cUnsuspend, ());
+   // Suspend/unsuspend game, s2c and c2s
+   TNL_DECLARE_RPC(s2rSetSuspendGame, (bool isSuspend));
 
    void undelaySpawn();
 

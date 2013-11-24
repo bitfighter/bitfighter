@@ -1209,7 +1209,7 @@ void Ship::onAddedToGame(Game *game)
    if(isClient())       // Client
    {
       if(isLocalPlayerShip(game))
-         static_cast<ClientGame *>(game)->unsuspendGame();    // Server tells us we're undelayed by spawning our ship
+         static_cast<ClientGame *>(game)->undelaySpawn();    // Server tells us we're undelayed by spawning our ship
    }
 
    else                 // Server

@@ -282,6 +282,7 @@ public:
 
    void suspendGame();
    void unsuspendGame();
+   void setGameSuspended_FromServerMessage(bool suspend);
 
    S32 getBotCount() const;
 

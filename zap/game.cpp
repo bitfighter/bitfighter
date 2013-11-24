@@ -102,8 +102,6 @@ Game::Game(const Address &theBindAddress, GameSettingsPtr settings) : mGameObjDa
 
    mActiveTeamManager = &mTeamManager;
 
-   mTimeToSuspend.setPeriod(PreSuspendSettlingPeriod);  
-
    mObjectsLoaded = 0;
 }
 
@@ -183,7 +181,7 @@ GameSettingsPtr Game::getSettingsPtr() const
 
 bool Game::isOrIsAboutToBeSuspended()
 {
-   return mGameSuspended || mTimeToSuspend.getCurrent() > 0;
+   return mGameSuspended;
 }
 
 
@@ -1136,8 +1134,6 @@ void Game::processAnonymousMasterConnection()
 // Called by both ClientGame::idle and ServerGame::idle
 void Game::idle(U32 timeDelta)
 {
-   if(mTimeToSuspend.update(timeDelta))
-      mGameSuspended = true;
 }
 
 
