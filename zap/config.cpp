@@ -230,6 +230,7 @@ Vector<PluginBinding> IniSettings::getDefaultPluginBindings() const
 
    static Vector<string> plugins;
    plugins.push_back("Ctrl+;|draw_arcs.lua|Make curves!");
+   plugins.push_back("Ctrl+'|draw_stars.lua|Create polygon/star");
 
    Vector<string> words;
 
