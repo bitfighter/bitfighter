@@ -201,8 +201,10 @@ static void doScenario34(GamePair &gamePair, bool letGameSlipIntoFullSuspendMode
    ASSERT_TRUE(static_cast<FullClientInfo *>(serverGame->getClientInfo(0))->hasReturnToGamePenalty()); // Penalty has been primed
    ASSERT_EQ(0, serverGame->getClientInfo(0)->getReturnToGameTime());
 
+   const U32 PreSuspendSettlingPeriod = 2000; // There is no more Game::PreSuspendSettlingPeriod
+
    if(letGameSlipIntoFullSuspendMode)
-      gamePair.idle(Game::PreSuspendSettlingPeriod / 20, 25);
+      gamePair.idle(PreSuspendSettlingPeriod / 20, 25);
 
    // Player presses a key to rejoin the game; since game was suspended, player can resume without penalty
    ASSERT_TRUE(serverGame->isOrIsAboutToBeSuspended()) << "Game should be suspended";

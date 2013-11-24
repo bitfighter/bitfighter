@@ -222,7 +222,7 @@ void GameConnection::undelaySpawn()
    {
       clientInfo->setSpawnDelayed(false);       // ClientInfo here is a FullClientInfo
       mServerGame->getGameType()->spawnShip(clientInfo);
-      mServerGame->unsuspendIfActivePlayers();
+      mServerGame->unsuspendIfActivePlayers(); // should be done after setSpawnDelayed(false)
    }
 }
 
