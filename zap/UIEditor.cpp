@@ -82,7 +82,7 @@ static GridDatabase *mLoadTarget;
 const string EditorUserInterface::UnnamedFile = "unnamed_file";      // When a file has no name, this is its name!
 
 
-S32 QSORT_CALLBACK pluginInfoSort(EditorUserInterface::PluginInfo *a, EditorUserInterface::PluginInfo *b)
+S32 QSORT_CALLBACK pluginInfoSort(PluginInfo *a, PluginInfo *b)
 {
    return stricmp((a)->prettyName.c_str(), (b)->prettyName.c_str());
 }
@@ -4827,7 +4827,7 @@ string EditorUserInterface::getLevelText()
 }
 
 
-const Vector<EditorUserInterface::PluginInfo> *EditorUserInterface::getPluginInfos() const
+const Vector<PluginInfo> *EditorUserInterface::getPluginInfos() const
 {
    return &mPluginInfos;
 }

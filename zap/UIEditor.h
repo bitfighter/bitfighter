@@ -40,12 +40,11 @@ class PluginMenuUI;
 class SimpleTextEntryMenuUI;
 struct FolderManager;
 
-class EditorUserInterface : public UserInterface
-{
-   typedef UserInterface Parent;
 
-public:
-   struct PluginInfo
+////////////////////////////////////////
+////////////////////////////////////////
+
+struct PluginInfo
    {
       PluginInfo(string prettyName, string fileName, string description, string requestedBinding)
          : prettyName(prettyName), fileName(fileName), description(description), requestedBinding(requestedBinding) { }
@@ -56,6 +55,15 @@ public:
       string requestedBinding;
    };
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+class EditorUserInterface : public UserInterface
+{
+   typedef UserInterface Parent;
+
+public:
    // Some items have special attributes.  These are the ones we can edit in the editor.
    enum SpecialAttribute {  
       Text,
@@ -321,7 +329,7 @@ public:
    bool isQuitLocked();
 
    string getLevelText();
-   const Vector<EditorUserInterface::PluginInfo> *getPluginInfos() const;
+   const Vector<PluginInfo> *getPluginInfos() const;
 
    F32 getCurrentScale();
    Point getCurrentOffset();
