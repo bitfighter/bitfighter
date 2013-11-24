@@ -619,8 +619,10 @@ void Game::onConnectedToMaster()
 
 void Game::resetLevelInfo()
 {
+   // These data need to be reset everytime before a level loads
    mLegacyGridSize = 1.f;
    mLevelFormat = CurrentLevelFormat;
+   mHasLevelFormat = false;
 }
 
 
