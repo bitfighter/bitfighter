@@ -272,7 +272,6 @@ void HelperManager::doExitHelper(S32 index)
    //mHelperStack[index]->deactivate();
    mOffDeckHelper = mHelperStack[index];
    mHelperStack.erase(index);
-   mGame->unsuspendGame();
 
    // Undelay spawn for any helper except chat helper - people may want to type while idled
    if(mHelperStack.size() == 0 && mOffDeckHelper->getType() != HelperMenu::ChatHelperType)

@@ -248,7 +248,6 @@ void ClientGame::setSpawnDelayed(bool spawnDelayed)
 {
    if(!spawnDelayed)
    {
-      unsuspendGame();
       getUIManager()->clearSparks();
    }
 }
@@ -650,9 +649,8 @@ void ClientGame::idle(U32 timeDelta)
 
    theMove->time = timeDelta + prevTimeDelta;
 
-   if(mConnectionToServer.isValid())      // i.e. if we're connected to a game server
+   if(mConnectionToServer.isValid() && !mGameSuspended)      // i.e. if we're connected to a game server
    {
-      // Disable controls if we are going too fast (usually by being blasted around by a GoFast or mine or whatever)
       BfObject *localPlayerShip = getLocalPlayerShip();
 
       // Don't saturate server with moves...
@@ -929,7 +927,7 @@ void ClientGame::onGameReallyAndTrulyOver()
 // GameConnection::onConnectionEstablished_client(), but serves a similar function.
 void ClientGame::onGameUIActivated()
 {
-   setSpawnDelayed(false);
+   mGameSuspended = false;
    resetCommandersMap();       // Start game in regular mode
 
    getGameObjDatabase()->removeEverythingFromDatabase();
@@ -1167,6 +1165,7 @@ void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
             ship->creditEnergy(-energyCost);    // Deduct energy from engineer
             ship->resetFastRecharge();
          }
+         getUIManager()->exitHelper();
          break;
 
       case EngineerEventTeleporterExitBuilt:
@@ -1439,16 +1438,21 @@ string ClientGame::getEnteredServerAccessPassword()
 
 void ClientGame::suspendGame()
 {
-   mTimeToSuspend.reset();
+   if(getConnectionToServer())
+      getConnectionToServer()->s2rSetSuspendGame(true);
 }
 
 
 void ClientGame::unsuspendGame()
 {
-   mTimeToSuspend.clear();
-   mGameSuspended = false;
+   if(getConnectionToServer())
+      getConnectionToServer()->s2rSetSuspendGame(false);
 }
 
+void ClientGame::setGameSuspended_FromServerMessage(bool suspend)
+{
+   mGameSuspended = suspend;
+}
 
 void ClientGame::displayErrorMessage(const char *format, ...) const
 {

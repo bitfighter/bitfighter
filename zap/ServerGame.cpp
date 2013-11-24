@@ -799,26 +799,55 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
    return currentLevelIndex;
 }
 
+bool ServerGame::clientCanSuspend(ClientInfo *info)
+{
+   if(info->isAdmin())
+      return true;
+
+   if(info->isSpawnDelayed())
+      return false;
+
+   U32 activePlayers = 0;
+   for(S32 i = 0; i < getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = getClientInfo(i);
+      if(!clientInfo->isRobot() && !clientInfo->isSpawnDelayed())
+         activePlayers++;
+   }
+   return activePlayers <= 1; // If only one player active, allow suspend.
+}
+
 // Enter suspended animation mode
 void ServerGame::suspendGame()
 {
+   if(mGameSuspended) // Already suspended
+      return;
+
+   for(S32 i = 0; i < getClientCount(); i++)
+      if(getClientInfo(i)->getConnection())
+         getClientInfo(i)->getConnection()->s2rSetSuspendGame(true);
    mGameSuspended = true;
-   cycleLevel(getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL);    // Advance to beginning of next level
+}
+void ServerGame::suspendGame(GameConnection *gc)
+{
+   if(mGameSuspended) // Already suspended
+      return;
+   mSuspendor = gc;
+   suspendGame();
 }
 
  
 // Resume game after it is no longer suspended
 void ServerGame::unsuspendGame(bool remoteRequest)
 {
-   mTimeToSuspend.clear();
-
    if(!mGameSuspended)
       return;
 
    mGameSuspended = false;
 
-   if(mSuspendor && !remoteRequest)     // If the request is from remote server, don't need to alert that server!
-      mSuspendor->s2cUnsuspend();
+   for(S32 i = 0; i < getClientCount(); i++)
+      if(getClientInfo(i)->getConnection())
+         getClientInfo(i)->getConnection()->s2rSetSuspendGame(false);
 
    mSuspendor = NULL;
 }
@@ -827,6 +856,7 @@ void ServerGame::unsuspendGame(bool remoteRequest)
 void ServerGame::suspenderLeftGame()
 {
    mSuspendor = NULL;
+   unsuspendIfActivePlayers();
 }
 
 
@@ -852,19 +882,26 @@ void ServerGame::suspendIfNoActivePlayers()
          return;
    }
 
+   suspendGame();
+}
 
-   // If this is not a dedicated server, the only way we'd get to 0 players is if the locally hosted player
-   // has quit... which means we're shutting down.  In which case we don't want to suspend.
-   if(getPlayerCount() == 0 && isDedicated())
-      suspendGame();
-   else
+// Check to see if there are any players who are active; suspend the game if not.  Server only.
+void ServerGame::unsuspendIfActivePlayers()
+{
+   if(!mGameSuspended && !mSuspendor && clientCanSuspend(mSuspendor->getClientInfo()))
+      return; // Keep the game suspended if a player paused the game and still can pause game.
+
+   // Check all clients and check if any are active
+   for(S32 i = 0; i < getClientCount(); i++)
    {
-      // Alert any connected players
-      for(S32 i = 0; i < getClientCount(); i++)
-         if(!getClientInfo(i)->isRobot())  
-            getClientInfo(i)->getConnection()->s2cSuspendGame();
+      ClientInfo *clientInfo = getClientInfo(i);
 
-      mTimeToSuspend.reset();    // Game will suspend when this timer expires
+      // Robots don't count
+      if(!clientInfo->isRobot() && !clientInfo->isSpawnDelayed())
+      {
+         unsuspendGame(false);
+         return;
+      }
    }
 }
 
@@ -988,8 +1025,7 @@ void ServerGame::addClient(ClientInfo *clientInfo)
    }
    
    // When a new player joins, game is always unsuspended!
-   if(mGameSuspended)
-      unsuspendGame(false);
+   unsuspendIfActivePlayers();
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
@@ -1003,6 +1039,9 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
+
+   if(getPlayerCount() == 0)
+      cycleLevel(getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL);    // Advance to beginning of next level
 }
 
 

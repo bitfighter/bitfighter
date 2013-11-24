@@ -202,8 +202,6 @@ protected:
    Rect mWorldExtents;                    // Extents of everything
    string mLevelFileHash;                 // MD5 hash of level file
 
-   Timer mTimeToSuspend;                  // Countdown to suspend to allow our fade animation to play out
-
    virtual void idle(U32 timeDelta);      // Only called from ServerGame::idle() and ClientGame::idle()
 
    virtual void cleanUp();
@@ -255,9 +253,6 @@ public:
    static const S32 PLAYER_VISUAL_DISTANCE_VERTICAL = 450;      // ...and vertically
 
    static const S32 PLAYER_SCOPE_MARGIN = 150;
-
-   // Time for screen to fade when going /idle on client, time for things to settle down on server
-   static const S32 PreSuspendSettlingPeriod = 2000;
 
    static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL = 800;    // How far player can see with sensor equipped horizontally...
    static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL = 600;      // ...and vertically
