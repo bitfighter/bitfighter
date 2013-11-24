@@ -922,6 +922,9 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    {
       // Don't enable in-game help
       settings->setShowingInGameHelp(false);
+
+      // Add new plugin
+      GameSettings::iniFile.SetValue("EditorPlugins", "Plugin1", "Ctrl+'|draw_stars.lua|Create polygon/star");
    }
 
 
