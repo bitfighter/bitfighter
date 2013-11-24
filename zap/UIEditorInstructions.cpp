@@ -16,6 +16,7 @@
 #include "FontManager.h"
 
 #include "Colors.h"
+#include "Intervals.h"
 
 #include "GeomUtils.h"        // For polygon triangulation
 #include "RenderUtils.h"
@@ -36,7 +37,7 @@ using UI::SymbolStringSet;
 
 // Constructor
 EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game),
-                                                                                     mAnimTimer(1000),
+                                                                                     mAnimTimer(ONE_SECOND),
                                                                                      mConsoleInstructions(10),
                                                                                      mPluginInstructions(10)
 {
