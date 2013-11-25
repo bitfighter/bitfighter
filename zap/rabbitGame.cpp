@@ -451,8 +451,10 @@ S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
       {
          case KillEnemy:
             return 0;
-         case KilledByAsteroid:  // Fall through OK
-         case KilledByTurret:    // Fall through OK
+         case KilledByAsteroid:
+            return 0;
+         case KilledByTurret:
+            return 0;
          case KillSelf:
             return -5;
          case KillTeammate:
