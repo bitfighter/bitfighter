@@ -416,8 +416,6 @@ public:
    GameSettingsPtr getSettingsPtr() const;
 
 
-   bool isOrIsAboutToBeSuspended();
-
    void setReadyToConnectToMaster(bool ready);
 
    // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.

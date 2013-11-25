@@ -179,12 +179,6 @@ GameSettingsPtr Game::getSettingsPtr() const
 }
 
 
-bool Game::isOrIsAboutToBeSuspended()
-{
-   return mGameSuspended;
-}
-
-
 Robot *Game::getBot(S32 index)
 {
    return mRobots[index];

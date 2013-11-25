@@ -694,7 +694,7 @@ void ClientGame::idle(U32 timeDelta)
          }
       }
 
-      if(mGameType && !isSuspended())
+      if(mGameType)
          mGameType->idle(BfObject::ClientIdlingNotLocalShip, timeDelta);
 
       if(localPlayerShip)

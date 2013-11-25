@@ -254,7 +254,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (bool incursPena
    }
 
    clientInfo->setSpawnDelayed(true);           
-   mServerGame->suspendIfNoActivePlayers();
+   mServerGame->suspendIfNoActivePlayers(true);
 }
 
 

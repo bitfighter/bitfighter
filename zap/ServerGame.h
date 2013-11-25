@@ -57,6 +57,10 @@ private:
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
    SafePtr<GameConnection> mSuspendor;            // Player requesting suspension if game suspended by request
+   Timer mTimeToSuspend;
+public:
+   static const U32 PreSuspendSettlingPeriod = 2000;
+private:
 
    // For simulating CPU stutter
    Timer mStutterTimer;                   
@@ -189,6 +193,7 @@ public:
 
    DataSender dataSender;
 
+   bool isOrIsAboutToBeSuspended();
    bool clientCanSuspend(ClientInfo *info);
    void suspendGame();
    void suspendGame(GameConnection *gc);
@@ -196,7 +201,7 @@ public:
 
    void suspenderLeftGame();
    GameConnection *getSuspendor();
-   void suspendIfNoActivePlayers();
+   void suspendIfNoActivePlayers(bool delaySuspend = false);
    void unsuspendIfActivePlayers();
 
    Ship *getLocalPlayerShip() const;

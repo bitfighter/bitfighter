@@ -799,6 +799,11 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
    return currentLevelIndex;
 }
 
+bool ServerGame::isOrIsAboutToBeSuspended()
+{
+   return mGameSuspended || mTimeToSuspend.getCurrent() > 0;
+}
+
 bool ServerGame::clientCanSuspend(ClientInfo *info)
 {
    if(info->isAdmin())
@@ -840,6 +845,7 @@ void ServerGame::suspendGame(GameConnection *gc)
 // Resume game after it is no longer suspended
 void ServerGame::unsuspendGame(bool remoteRequest)
 {
+   mTimeToSuspend.clear();
    if(!mGameSuspended)
       return;
 
@@ -865,44 +871,51 @@ GameConnection *ServerGame::getSuspendor()
    return mSuspendor;
 }
 
+// suspend only if there are non-idling players (TestSpawnDelay.cpp needs changing if using this)
+static bool shouldBeSuspended(ServerGame *game)
+{
+   // Check all clients and make sure they're not active
+   for(S32 i = 0; i < game->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = game->getClientInfo(i);
+
+      // Robots don't count
+      if(!clientInfo->isRobot() && !clientInfo->isSpawnDelayed())
+         return false;
+   }
+   return true;
+}
+
+// suspend if there no players? even when all players idling? (TestSpawnDelay.cpp assume so)
+//static bool shouldBeSuspended(ServerGame *game)
+//{
+//   return game->getPlayerCount() == 0;
+//}
 
 // Check to see if there are any players who are active; suspend the game if not.  Server only.
-void ServerGame::suspendIfNoActivePlayers()
+void ServerGame::suspendIfNoActivePlayers(bool delaySuspend)
 {
    if(mGameSuspended)
       return;
 
-   // Check all clients and make sure they're not active
-   for(S32 i = 0; i < getClientCount(); i++)
+   if(shouldBeSuspended(this))
    {
-      ClientInfo *clientInfo = getClientInfo(i);
-
-      // Robots don't count
-      if(!clientInfo->isRobot() && !clientInfo->isSpawnDelayed())
-         return;
+      if(delaySuspend)
+         mTimeToSuspend.reset(PreSuspendSettlingPeriod);
+      else
+         suspendGame();
    }
-
-   suspendGame();
 }
 
 // Check to see if there are any players who are active; suspend the game if not.  Server only.
 void ServerGame::unsuspendIfActivePlayers()
 {
-   if(!mGameSuspended && !mSuspendor && clientCanSuspend(mSuspendor->getClientInfo()))
+   mTimeToSuspend.clear();
+   if(!mGameSuspended && !(mSuspendor && clientCanSuspend(mSuspendor->getClientInfo())))
       return; // Keep the game suspended if a player paused the game and still can pause game.
 
-   // Check all clients and check if any are active
-   for(S32 i = 0; i < getClientCount(); i++)
-   {
-      ClientInfo *clientInfo = getClientInfo(i);
-
-      // Robots don't count
-      if(!clientInfo->isRobot() && !clientInfo->isSpawnDelayed())
-      {
-         unsuspendGame(false);
-         return;
-      }
-   }
+   if(!shouldBeSuspended(this))
+      unsuspendGame(false);
 }
 
 
@@ -1149,6 +1162,9 @@ void ServerGame::idle(U32 timeDelta)
    // Play any sounds server might have made... (this is only for special alerts such as player joined or left)
    if(isDedicated())   // Non-dedicated servers will process sound in client side
       SoundSystem::processAudio(mSettings->getIniSettings()->alertsVolLevel);    // No music or voice on server!
+
+   if(mTimeToSuspend.update(timeDelta))
+      suspendGame();
 
    if(mGameSuspended)     // If game is suspended, we need do nothing more
       return;

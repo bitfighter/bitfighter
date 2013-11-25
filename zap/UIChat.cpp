@@ -578,7 +578,7 @@ SuspendedUserInterface::~SuspendedUserInterface()
 
 void SuspendedUserInterface::renderHeader()
 {
-   if(getGame()->isOrIsAboutToBeSuspended())
+   if(getGame()->isSuspended())
    {
       glColor(Colors::white);
       drawCenteredString(vertMargin, MENU_TITLE_SIZE, "-- GAME SUSPENDED -- ");
