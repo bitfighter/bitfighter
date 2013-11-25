@@ -192,12 +192,6 @@ bool Robot::prepareEnvironment()
       if(!LuaScriptRunner::prepareEnvironment())
          return false;
 
-      // Push a pointer to this Robot to the Lua stack, then set the name of this pointer in the protected environment.  
-      // This is the name that we'll use to refer to this robot from our Lua code.  
-
-      if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY, RobotContext))
-         return false;
-
       // Set this first so we have this object available in the helper functions in case we need overrides
       setSelf(L, this, "bot");
 
@@ -301,7 +295,6 @@ void Robot::onAddedToGame(Game *game)
    }
 
    mLuaGame = game;
-
 
    if(!start())
    {

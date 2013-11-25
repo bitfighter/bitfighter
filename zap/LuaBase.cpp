@@ -648,6 +648,33 @@ const char *getCheckedString(lua_State *L, S32 index, const char *methodName)
 }
 
 
+/**
+ * [ -1, +1 ]
+ * Pops a table off of the stack and returns a shallow copy.
+ */
+S32 luaTableCopy(lua_State *L)
+{
+                               // -- t_old
+   lua_newtable(L);            // -- t_old, t_new
+   lua_pushnil(L);             // -- t_old, t_new, nil
+   while(lua_next(L, -3))
+   {
+                               // -- t_old, t_new, k, v
+      lua_pushvalue(L, -2);    // -- t_old, t_new, k, v, k
+      lua_insert(L, -3);       // -- t_old, t_new, k, k, v
+      lua_settable(L, -4);     // -- t_old, t_new, k
+   }
+                               // -- t_old, t_new
+   if(lua_getmetatable(L, -2))
+   {
+                               // -- t_old, t_new, mt
+      lua_setmetatable(L, -2); // -- t_old, t_new
+   } 
+   lua_remove(L, -2);          // -- t_new
+   return 1;
+}
+
+
 // Returns a float to a calling Lua function
 S32 returnFloat(lua_State *L, F32 num)
 {

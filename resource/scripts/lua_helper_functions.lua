@@ -18,24 +18,12 @@
 -----------------------------------------------------------
 
 
--- Smarter implementation of dofile; finds script before loading it into current environment
-function include(filename)
-   fullName = findFile(filename)
-   
-   if(fullName) then
-      f = loadfile(fullName)
-      setfenv(f, getfenv())
-      return f()
-   end
-end
-
-
 -- Load some additional libraries
-include("geometry")   -- Load geometry functions into Geom namespace; call with Geom.function
-include("timer")
+require("geometry")   -- Load geometry functions into Geom namespace; call with Geom.function
+require("timer")
 
 -- Hookup our supercharged stacktrace util
-_stackTracer = include("stack_trace_plus").stacktrace
+_stackTracer = require("stack_trace_plus").stacktrace
 
 
 arg = arg or { }  -- Make sure arg is defined before we ban globals
@@ -65,51 +53,51 @@ end
 --
 
 
-local mt = getmetatable(getfenv())
-if mt == nil then
-  mt = {}
-  setmetatable(getfenv(), mt)
-end
-
-__STRICT = true
-mt.__declared = {}
-
-mt.__newindex = function (t, n, v)
-  if __STRICT and not mt.__declared[n] then
-    local w = debug.getinfo(2, "S").what     -- See PiL ch 23
-    if w == "C" then                         -- It's a C function!
-      local name = debug.getinfo(2, "n").name
-      if name ~= "main" then                    -- Allowed to declare globals in main function
-         error("Attempted assign to undeclared variable '"..n.."' in function '"..(name or "<<unknown function>>").."'.\n" ..
-               "All vars must be declared with 'local'; globals must be defined either in main() or outside a function declaration.", 2)
-      end
-    end
-    mt.__declared[n] = true
-  end
-  rawset(t, n, v)
-end
-
-mt.__index = function (t, n)
-  if not mt.__declared[n] and debug.getinfo(2, "S") and debug.getinfo(2, "S").what ~= "C" then
-    error("Variable '"..n.."' cannot be used if it is not first declared.", 2)
-  end
-  return rawget(t, n)
-end
-
-function global(...)
-   for _, v in ipairs{...} do mt.__declared[v] = true end
-end
-
-
-function _declared(fname)
-   local mt = getmetatable(getfenv())
-
-   if mt.__declared[fname] then
-      return true
-   end
-
-   return false
-end
+-- local mt = getmetatable(getfenv())
+-- if mt == nil then
+--   mt = {}
+--   setmetatable(getfenv(), mt)
+-- end
+-- 
+-- __STRICT = true
+-- mt.__declared = {}
+-- 
+-- mt.__newindex = function (t, n, v)
+--   if __STRICT and not mt.__declared[n] then
+--     local w = debug.getinfo(2, "S").what     -- See PiL ch 23
+--     if w == "C" then                         -- It's a C function!
+--       local name = debug.getinfo(2, "n").name
+--       if name ~= "main" then                    -- Allowed to declare globals in main function
+--          error("Attempted assign to undeclared variable '"..n.."' in function '"..(name or "<<unknown function>>").."'.\n" ..
+--                "All vars must be declared with 'local'; globals must be defined either in main() or outside a function declaration.", 2)
+--       end
+--     end
+--     mt.__declared[n] = true
+--   end
+--   rawset(t, n, v)
+-- end
+-- 
+-- mt.__index = function (t, n)
+--   if not mt.__declared[n] and debug.getinfo(2, "S") and debug.getinfo(2, "S").what ~= "C" then
+--     error("Variable '"..n.."' cannot be used if it is not first declared.", 2)
+--   end
+--   return rawget(t, n)
+-- end
+-- 
+-- function global(...)
+--    for _, v in ipairs{...} do mt.__declared[v] = true end
+-- end
+-- 
+-- 
+-- function _declared(fname)
+--    local mt = getmetatable(getfenv())
+-- 
+--    if mt.__declared[fname] then
+--       return true
+--    end
+-- 
+--    return false
+-- end
 
 
 --

@@ -129,7 +129,7 @@ const char *LuaScriptRunner::getScriptId()
 // Return false if there was an error, true if not
 bool LuaScriptRunner::runScript(bool cacheScript)
 {
-   return prepareEnvironment() && loadScript(cacheScript) && runMain(); 
+   return prepareEnvironment() && loadScript(cacheScript) && runMain();
 }
 
 
@@ -399,25 +399,10 @@ void LuaScriptRunner::configureNewLuaInstance()
    luaL_openlibs(L);    // Load the standard libraries
    luaopen_vec(L);      // For vector math (lua-vec)
 
+   // This allows the safe use of 'require' in our scripts
    setModulePath();
 
-   /*luaL_dostring(L, "local env = setmetatable({}, {__index=function(t,k) if k=='_G' then return nil else return _G[k] end})");*/
-
-   // Define a function for copying the global environment to create a private environment for our scripts to run in
-   // TODO: This needs to be a deep copy
-   luaL_dostring(L, " function table.copy(t)"
-                    "    local u = { }"
-                    "    for k, v in pairs(t) do u[k] = v end"
-                    "    return setmetatable(u, getmetatable(t))"
-                    " end");
-
-   // Load our helper functions and store copies of the compiled code in the registry where we can use them for starting new scripts
-   loadCompileSaveHelper("lua_helper_functions.lua",      LUA_HELPER_FUNCTIONS_KEY);
-   loadCompileSaveHelper("robot_helper_functions.lua",    ROBOT_HELPER_FUNCTIONS_KEY);
-   loadCompileSaveHelper("levelgen_helper_functions.lua", LEVELGEN_HELPER_FUNCTIONS_KEY);
-
    // Register all our classes in the global namespace... they will be copied below when we copy the environment
-
    registerClasses();            // Perform class and global function registration once per lua_State
    registerLooseFunctions(L);    // Register some functions not associated with a particular class
 
@@ -425,12 +410,36 @@ void LuaScriptRunner::configureNewLuaInstance()
    // These will be copied into the script's environment when we run createEnvironment.
    setEnums(L);
    setGlobalObjectArrays(L);
+
+   // Immediately execute the lua helper functions (these are global and need to be loaded before sandboxing)
+   loadCompileRunHelper("lua_helper_functions.lua");
+
+   // Load our helper functions and store copies of the compiled code in the registry where we can use them for starting new scripts
+   loadCompileSaveHelper("robot_helper_functions.lua",    ROBOT_HELPER_FUNCTIONS_KEY);
+   loadCompileSaveHelper("levelgen_helper_functions.lua", LEVELGEN_HELPER_FUNCTIONS_KEY);
+
+   // Perform sandboxing now
+   // Only code executed before this point can access dangerous functions
+   loadCompileRunHelper("sandbox.lua");
 }
 
 
 void LuaScriptRunner::loadCompileSaveHelper(const string &scriptName, const char *registryKey)
 {
    loadCompileSaveScript(joindir(mScriptingDir, scriptName).c_str(), registryKey);
+}
+
+
+/**
+ * Load a script from the scripting directory by basename (e.g. "my_script.lua")
+ *
+ * Throws LuaException when there's an error compiling or running the script
+ */
+void LuaScriptRunner::loadCompileRunHelper(const string &scriptName)
+{
+   loadCompileScript(joindir(mScriptingDir, scriptName).c_str());
+   if(lua_pcall(L, 0, 0, 0))
+      throw LuaException("Error running " + scriptName + ": " + string(lua_tostring(L, -1)));
 }
 
 
@@ -472,47 +481,6 @@ void LuaScriptRunner::deleteScript(const char *name)
 }
 
 
-// This is our sandboxed Lua environment that gets set as the global environment for any
-// user script that is run.
-//
-// This is basically a whitelist of Lua functions known to be safe, taken from here:
-//    http://lua-users.org/wiki/SandBoxes
-static const char *sandbox_env =
-      "sandbox_e = {"
-      "  ipairs = ipairs,"
-      "  next = next,"
-      "  pairs = pairs,"
-      "  pcall = pcall,"
-      "  select = select,"
-      "  tonumber = tonumber,"
-      "  tostring = tostring,"
-      "  type = type,"
-      "  unpack = unpack,"
-      "  coroutine = { create = coroutine.create, resume = coroutine.resume,"
-      "     running = coroutine.running, status = coroutine.status, "
-      "     wrap = coroutine.wrap },"
-      "  string = { byte = string.byte, char = string.char, find = string.find,"
-      "     format = string.format, gmatch = string.gmatch, gsub = string.gsub,"
-      "     len = string.len, lower = string.lower, match = string.match,"
-      "     rep = string.rep, reverse = string.reverse, sub = string.sub,"
-      "     upper = string.upper },"
-      "  table = { insert = table.insert, maxn = table.maxn, remove = table.remove,"
-      "     sort = table.sort },"
-      "  math = { abs = math.abs, acos = math.acos, asin = math.asin,"
-      "     atan = math.atan, atan2 = math.atan2, ceil = math.ceil, cos = math.cos,"
-      "     cosh = math.cosh, deg = math.deg, exp = math.exp, floor = math.floor,"
-      "     fmod = math.fmod, frexp = math.frexp, huge = math.huge,"
-      "     ldexp = math.ldexp, log = math.log, log10 = math.log10, max = math.max,"
-      "     min = math.min, modf = math.modf, pi = math.pi, pow = math.pow,"
-      "     rad = math.rad, sin = math.sin, sinh = math.sinh, sqrt = math.sqrt,"
-      "     tan = math.tan, tanh = math.tanh,"
-      "     random = math.random,"   // This points to our math.random override in registerLooseFunctions()
-      "  },"
-      "  os = { clock = os.clock, difftime = os.difftime, time = os.time },"
-      "}"
-      "";
-
-
 bool LuaScriptRunner::prepareEnvironment()              
 {
    if(!L)
@@ -523,21 +491,15 @@ bool LuaScriptRunner::prepareEnvironment()
 
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
-   // First register our sandbox as the global namespace
-   luaL_dostring(L, sandbox_env);
-   lua_getglobal(L, "sandbox_e");                        // -- environment sandbox_e
-   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // -- <<empty stack>>
+   lua_pushvalue(L, LUA_GLOBALSINDEX);                      // -- globalEnv
+   luaTableCopy(L);                                         // -- localEnvCopy
+   TNLAssert(!lua_isnoneornil(L, -1), "Failed to copy _G");
+   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());       // --
 
-   luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create a local scripting environment
-   lua_getglobal(L, "e");                                //                                        -- environment e   
-   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
-   lua_pushnil(L);                                       //
-   lua_setglobal(L, "e");                                //
-
-   // Make non-static Lua methods in this class available via "bf".  We have to static_cast here
-   // because it is possible for two 'setSelf' methods to be called from a subclass that calls
-   // its own prepareEnvironment() method and subsequently this one (its parent), e.g. in the
-   // case of bots.
+   // Make non-static Lua methods in this class available via "bf".  We have to
+   // static_cast here because it is possible for two 'setSelf' methods to be
+   // called from a subclass that calls its own prepareEnvironment() method and
+   // subsequently this one (its parent), e.g. in the case of bots.
    setSelf(L, static_cast<LuaScriptRunner*>(this), "bf");
 
    return true;

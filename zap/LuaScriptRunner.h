@@ -39,7 +39,6 @@ class MenuItem;
 ////////////////////////////////////////
 
 
-#define LUA_HELPER_FUNCTIONS_KEY      "lua_helper_functions"
 #define ROBOT_HELPER_FUNCTIONS_KEY    "robot_helper_functions"
 #define LEVELGEN_HELPER_FUNCTIONS_KEY "levelgen_helper_functions"
 
@@ -58,6 +57,7 @@ private:
    static void configureNewLuaInstance();              // Prepare a new Lua environment for use
 
    static void loadCompileSaveHelper(const string &scriptName, const char *registryKey);
+   static void loadCompileRunHelper(const string &scriptName);
    static void loadCompileSaveScript(const char *filename, const char *registryKey);
    static void loadCompileScript(const char *filename);
 
@@ -91,9 +91,8 @@ protected:
 
    bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
 
-   // This method should be abstract, but luaW requires us to be able to instantiate this class
+   // Sub-classes that override this should still call this with Parent::prepareEnvironment()
    virtual bool prepareEnvironment();
-//   void setSelf(lua_State *L, LuaScriptRunner *self, const char *name);
 
    static int luaPanicked(lua_State *L);  // Handle a total freakout by Lua
    static void registerClasses();

@@ -167,6 +167,8 @@ const char *getCheckedString(lua_State *L, S32 index, const char *methodName);
 
 const char *getString(lua_State *L, S32 index, const char *defaultVal);
 
+S32 luaTableCopy(lua_State *L);
+
 /////
 // Script context
 ScriptContext getScriptContext(lua_State *L);

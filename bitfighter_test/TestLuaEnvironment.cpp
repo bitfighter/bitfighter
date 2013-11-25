@@ -64,17 +64,37 @@ protected:
 };
 
 
-TEST_F(LuaEnvironmentTest, BasicTests)
+TEST_F(LuaEnvironmentTest, sanityCheck)
 {
    // Test exception throwing
    EXPECT_FALSE(levelgen->runString("a = b.b"));
 }
 
 
-TEST_F(LuaEnvironmentTest, SandboxTests)
+TEST_F(LuaEnvironmentTest, sandbox)
 {
-   // Test that our sandbox is working, try to load an evil function
+   // Sandbox prohibits access to unsafe functions, a few listed here
    EXPECT_FALSE(existsFunctionInEnvironment("setfenv"));
+   EXPECT_FALSE(existsFunctionInEnvironment("setmetatable"));
+
+   // But it should not interfere with permitted functions
+   EXPECT_TRUE(existsFunctionInEnvironment("unpack"));
+   EXPECT_TRUE(existsFunctionInEnvironment("ipairs"));
+   EXPECT_TRUE(existsFunctionInEnvironment("require"));
+}
+
+
+TEST_F(LuaEnvironmentTest, scriptIsolation)
+{
+   LuaLevelGenerator levelgen2(serverGame);
+   levelgen2.prepareEnvironment();
+   lua_State *L = levelgen->getL();
+
+   // All scripts should have separate environment tables
+   lua_getfield(L, LUA_REGISTRYINDEX, levelgen->getScriptId());
+   lua_getfield(L, LUA_REGISTRYINDEX, levelgen2.getScriptId());
+   EXPECT_FALSE(lua_equal(L, -1, -2));
+   lua_pop(L, 2);
 }
 
 
