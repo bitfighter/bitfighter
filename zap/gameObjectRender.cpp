@@ -3309,12 +3309,12 @@ void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 g
 
          while(yStart < gScreenInfo.getGameCanvasHeight())
          {
-            drawHorizLine(0, gScreenInfo.getGameCanvasWidth(), (S32)yStart);
+            drawHorizLine((F32)0, (F32)gScreenInfo.getGameCanvasWidth(), (F32)yStart);
             yStart += gridScale;
          }
          while(xStart < gScreenInfo.getGameCanvasWidth())
          {
-            drawVertLine((S32)xStart, 0, gScreenInfo.getGameCanvasHeight());
+            drawVertLine((F32)xStart, (F32)0, (F32)gScreenInfo.getGameCanvasHeight());
             xStart += gridScale;
          }
       }
@@ -3324,8 +3324,8 @@ void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 g
    glColor(0.7f * snapFadeFact);
    glLineWidth(gLineWidth3);
 
-   drawHorizLine(0, gScreenInfo.getGameCanvasWidth(), (S32)origin.y);
-   drawVertLine((S32)origin.x, 0, gScreenInfo.getGameCanvasHeight());
+   drawHorizLine((F32)0, (F32)gScreenInfo.getGameCanvasWidth(), (F32)origin.y);
+   drawVertLine((F32)origin.x, (F32)0, (F32)gScreenInfo.getGameCanvasHeight());
 
    glLineWidth(gDefaultLineWidth);
 }

@@ -886,12 +886,6 @@ static bool shouldBeSuspended(ServerGame *game)
    return true;
 }
 
-// suspend if there no players? even when all players idling? (TestSpawnDelay.cpp assume so)
-//static bool shouldBeSuspended(ServerGame *game)
-//{
-//   return game->getPlayerCount() == 0;
-//}
-
 // Check to see if there are any players who are active; suspend the game if not.  Server only.
 void ServerGame::suspendIfNoActivePlayers(bool delaySuspend)
 {
@@ -910,8 +904,7 @@ void ServerGame::suspendIfNoActivePlayers(bool delaySuspend)
 // Check to see if there are any players who are active; suspend the game if not.  Server only.
 void ServerGame::unsuspendIfActivePlayers()
 {
-   mTimeToSuspend.clear();
-   if(!mGameSuspended && !(mSuspendor && clientCanSuspend(mSuspendor->getClientInfo())))
+   if(mSuspendor && clientCanSuspend(mSuspendor->getClientInfo()))
       return; // Keep the game suspended if a player paused the game and still can pause game.
 
    if(!shouldBeSuspended(this))
