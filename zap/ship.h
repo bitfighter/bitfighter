@@ -65,7 +65,7 @@ private:
    BfObject *doIsInZone(const Vector<DatabaseObject *> &objects) const; // Private helper for isInZone() and isInAnyZone()
 
    // Idle helpers
-   void checkForSpeedzones();                      // Check to see if we collided with a GoFast
+   bool checkForSpeedzones(U32 stateIndex = ActualState); // Check to see if we collided with a GoFast
    void checkForZones();                           // See if ship entered or left any zones
    void getZonesShipIsIn(Vector<DatabaseObject *> *zoneList);     // Fill zoneList with a list of all zones that the ship is currently in
    bool isLocalPlayerShip(Game *game) const;       // Returns true if ship represents local player
@@ -288,9 +288,9 @@ public:
    BfObject *isInZone(U8 zoneType) const; // Return whether the ship is currently in a zone of the specified type, and which one
    BfObject *isInAnyZone() const;         // Return whether the ship is currently in any zone, and which one
 
-   DatabaseObject *isOnObject(U8 objectType); // Returns the object in question if this ship is on an object of type objectType
+   DatabaseObject *isOnObject(U8 objectType, U32 stateIndex = ActualState); // Returns the object in question if this ship is on an object of type objectType
 
-   bool isOnObject(BfObject *object);         // Return whether or not ship is sitting on a particular object
+   bool isOnObject(BfObject *object, U32 stateIndex = ActualState);         // Return whether or not ship is sitting on a particular object
 
    virtual Ship *clone() const;
 

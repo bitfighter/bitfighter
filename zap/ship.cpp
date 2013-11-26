@@ -10,6 +10,7 @@
 #include "Zone.h"
 #include "Colors.h"
 #include "teleporter.h"
+#include "speedZone.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -287,9 +288,12 @@ F32 Ship::processMove(U32 stateIndex)
    mLastProcessStateAngle = getAngle(stateIndex);
    setAngle(stateIndex, mCurrentMove.angle);
 
-   // Nothing to do when ship is not moving
+   // Nothing to do when ship is not moving, Continue to check for SpeedZones
    if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && getVel(stateIndex) == Point(0,0))
-      return 0;  
+   {
+      if(!checkForSpeedzones(stateIndex))
+         return 0;
+   }
 
    F32 maxVel = (mLoadout.isModulePrimaryActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) *
                 (hasModule(ModuleArmor) ? ARMOR_SPEED_FACT : NORMAL_SPEED_FACT);
@@ -377,7 +381,7 @@ BfObject *Ship::doIsInZone(const Vector<DatabaseObject *> &objects) const
 
 
 // Returns the object in question if this ship is on an object of type objectType
-DatabaseObject *Ship::isOnObject(U8 objectType)
+DatabaseObject *Ship::isOnObject(U8 objectType, U32 stateIndex)
 {
    findObjectsUnderShip(objectType);
 
@@ -386,7 +390,7 @@ DatabaseObject *Ship::isOnObject(U8 objectType)
 
    // Return first actually overlapping object on our candidate list
    for(S32 i = 0; i < fillVector.size(); i++)
-      if(isOnObject(dynamic_cast<BfObject *>(fillVector[i])))
+      if(isOnObject(static_cast<BfObject *>(fillVector[i]), ActualState))
          return fillVector[i];
 
    return NULL;
@@ -394,7 +398,7 @@ DatabaseObject *Ship::isOnObject(U8 objectType)
 
 
 // Given an object, see if the ship is sitting on it (useful for figuring out if ship is on top of a regenerated repair item, z.B.)
-bool Ship::isOnObject(BfObject *object)
+bool Ship::isOnObject(BfObject *object, U32 stateIndex)
 {
    Point center;
    float radius;
@@ -691,7 +695,16 @@ Vector<DatabaseObject *> *Ship::getPrevZoneList()
 {
    return mZones1IsCurrent ? &mZones2 : &mZones1;
 }
- 
+
+
+bool Ship::checkForSpeedzones(U32 stateIndex)
+{
+   SpeedZone *speedZone = static_cast<SpeedZone *>(isOnObject(SpeedZoneTypeNumber, stateIndex));
+
+   if(speedZone && speedZone->collide(this))
+      return speedZone->collided(this, stateIndex);
+   return false;
+}
 
 // See if ship entered or left any zones
 // Server only

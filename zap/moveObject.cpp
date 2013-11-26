@@ -481,7 +481,7 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
          if(PolygonSweptCircleIntersect(&poly->first(), poly->size(), getPos(stateIndex),
                                         delta, mRadius, cp, collisionFraction))
          {
-            if(cp != getPos(stateIndex))   // Avoid getting stuck inside polygon wall
+            if(cp != getPos(stateIndex) || !isCollideableType(foundObject->getObjectTypeNumber()))   // Avoid getting stuck inside polygon wall
             {
                bool collide1 = collide(foundObject);
                bool collide2 = foundObject->collide(this);
