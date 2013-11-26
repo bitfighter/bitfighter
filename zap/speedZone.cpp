@@ -113,7 +113,22 @@ SpeedZone *SpeedZone::clone() const
 // vector (the three points of our triangle graphic), and compute its extent
 void SpeedZone::preparePoints()
 {
-   generatePoints(getVert(0), getVert(1), mPolyBounds, mOutline);
+   Point vert1 = getVert(1);
+
+   if(mRotateSpeed != 0)
+   {
+      vert1 = getVert(1) - getVert(0);
+      F32 angle = vert1.ATAN2();
+
+      // Adjust angle
+      angle += mRotateSpeed * ((getGame() && getGame()->getGameType()) ? getGame()->getGameType()->getTotalGamePlayedInMs() : 0) * 0.001f;
+      vert1.setPolar(vert1.len(), angle);
+
+      // Set new end point
+      vert1 += getVert(0);
+   }
+
+   generatePoints(getVert(0), vert1, mPolyBounds, mOutline);
 
    computeExtent();
 }
@@ -396,6 +411,19 @@ bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
    start = getVert(0);
    end   = getVert(1);
 
+   if(mRotateSpeed != 0)
+   {
+      end = end - start;
+      F32 angle = end.ATAN2();
+
+      // Adjust angle
+      angle += mRotateSpeed * ((getGame() && getGame()->getGameType()) ? getGame()->getGameType()->getTotalGamePlayedInMs() : 0) * 0.001f;
+      end.setPolar(end.len(), angle);
+
+      // Set new end point
+      end += start;
+   }
+
    impulse = end - start;                 // Gives us direction
    impulse.normalize(mSpeed);             // Gives us the magnitude of speed
    Point shipNormal = s->getVel(stateIndex);
@@ -468,20 +496,7 @@ void SpeedZone::idle(BfObject::IdleCallPath path)
 {
    if(mRotateSpeed != 0)
    {
-      Point dir = getVert(1) - getVert(0);
-      F32 angle = dir.ATAN2();
-
-      // Adjust angle
-      angle += mRotateSpeed * mCurrentMove.time * 0.001f;
-      dir.setPolar(dir.len(), angle);
-
-      // Set new end point
-      dir += getVert(0);
-      setVert(dir, 1);
-
-      setMaskBits(InitMask);
-
-      preparePoints();     // Avoids "off center" problem
+      preparePoints();     // Updates rotating position
    }
 }
 
@@ -498,7 +513,11 @@ U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream
 
       stream->writeInt(mSpeed, 16);
       stream->writeFlag(mSnapLocation);
-   }      
+
+      stream->write(mRotateSpeed);
+   }
+
+   stream->writeFlag((updateMask & HitMask) && updateMask != 0xFFFFFFFF);
 
    return 0;
 }
@@ -521,10 +540,12 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mSpeed = stream->readInt(16);
       mSnapLocation = stream->readFlag();
 
+      stream->read(&mRotateSpeed);
+
       preparePoints();
    }
 
-   else 
+   if(stream->readFlag()) 
       SoundSystem::playSoundEffect(SFXGoFastOutside, getVert(0), getVert(0));
 }
 
