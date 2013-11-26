@@ -4,8 +4,10 @@
 //------------------------------------------------------------------------------
 
 #include "WeaponInfo.h"
+#ifndef BF_MASTER
 #include "BfObject.h"
 #include "projectile.h"
+#endif
 
 
 namespace Zap
@@ -38,7 +40,7 @@ WeaponInfo WeaponInfo::getWeaponInfo(WeaponType weaponType)
    return weaponInfo[weaponType];
 }
 
-
+#ifndef BF_MASTER
 // Discover the WeaponType from any BfObject
 // This method feels like a workaround for a bad object model...
 WeaponType WeaponInfo::getWeaponTypeFromObject(BfObject *bfObject)
@@ -54,6 +56,6 @@ WeaponType WeaponInfo::getWeaponTypeFromObject(BfObject *bfObject)
 
    return WeaponNone;
 }
-
+#endif
 
 };

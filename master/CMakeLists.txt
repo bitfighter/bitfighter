@@ -86,6 +86,12 @@ include_directories(${MASTER_INCLUDES})
 if(MYSQL_FOUND AND NOT MASTER_MINIMAL)
 	set_target_properties(master
 		PROPERTIES
-		COMPILE_DEFINITIONS "BF_WRITE_TO_MYSQL;VERIFY_PHPBB3"
+		COMPILE_DEFINITIONS "BF_WRITE_TO_MYSQL;VERIFY_PHPBB3;BF_MASTER"
+	)
+else()
+	# BF_MASTER workaround to prevent WeaponInfo.cpp from including BfObject
+	set_target_properties(master
+		PROPERTIES
+		COMPILE_DEFINITIONS "BF_MASTER"
 	)
 endif()
