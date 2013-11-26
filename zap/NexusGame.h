@@ -21,8 +21,8 @@ class NexusGameType : public GameType
 private:
    typedef GameType Parent;
 
-   S32 mNexusClosedTime;      // Time Nexus remains closed, in seconds
-   S32 mNexusOpenTime;        // Time Nexus remains open, in seconds
+   S32 mNexusClosedTime;      // Time Nexus remains closed, in milliseconds
+   S32 mNexusOpenTime;        // Time Nexus remains open, in milliseconds
    S32 mNexusChangeAtTime;    // When the next Nexus status change will occur  --> needs to be able go be negative
 
    struct YardSaleWaypoint
@@ -40,8 +40,6 @@ private:
    void idle_server(U32 deltaT);     // Idle for server
 
 protected:
-   void setTimeRemaining(U32 timeLeft, bool isUnlimited);                           // Runs on server
-   void setTimeRemaining(U32 timeLeft, bool isUnlimited, S32 renderingOffset);      // Runs on client
 
 public:
    NexusGameType();           // Constructor
@@ -51,7 +49,7 @@ public:
    string toLevelCode() const;
 
    bool mNexusIsOpen;               // Is the nexus open?
-   S32 getNexusTimeLeft() const;    // Get time until the nexus changes state
+   S32 getNexusTimeLeftMs() const;    // Get time until the nexus changes state in MilliSeconds
 
 
    bool isSpawnWithLoadoutGame();

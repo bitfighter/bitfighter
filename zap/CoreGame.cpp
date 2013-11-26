@@ -45,7 +45,7 @@ bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreGameType::toLevelCode() const
 {
-   return string(getClassName()) + " " + mGameTimer.toString_minutes();
+   return string(getClassName()) + " " + getRemainingGameTimeInMinutesString();
 }
 
 
@@ -327,7 +327,7 @@ void CoreItem::renderItem(const Point &pos)
    if(!mHasExploded)
    {
       GameType *gameType = getGame()->getGameType();
-      S32 time = gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset();
+      S32 time = gameType->getTotalGamePlayedInMs();
       renderCore(pos, getColor(), time, getPanelGeom(), mPanelHealth, mStartingPanelHealth);
    }
 #endif
@@ -589,7 +589,7 @@ void CoreItem::doExplosion(const Point &pos)
 PanelGeom *CoreItem::getPanelGeom()
 {
    if(!mPanelGeom.isValid)
-      fillPanelGeom(getPos(), getGame()->getGameType()->getRemainingGameTimeInMs() + getGame()->getGameType()->getRenderingOffset(), mPanelGeom);
+      fillPanelGeom(getPos(), getGame()->getGameType()->getTotalGamePlayedInMs(), mPanelGeom);
 
    return &mPanelGeom;
 }
@@ -984,7 +984,7 @@ void CoreItem::onGeomChanged()
    Parent::onGeomChanged();
 
    GameType *gameType = getGame()->getGameType();
-   fillPanelGeom(getPos(), gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset(), mPanelGeom);
+   fillPanelGeom(getPos(), gameType->getTotalGamePlayedInMs(), mPanelGeom);
 }
 #endif
 

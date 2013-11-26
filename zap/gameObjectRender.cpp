@@ -2398,7 +2398,7 @@ void renderCore(const Point &pos, const Color *coreColor, U32 time,
    F32 angle = CoreItem::getCoreAngle(time);
 
    // Draw atom graphic
-   F32 t = FloatTau - (F32(time & 1023) / 1024.f * FloatTau);  // Reverse because time is counting down
+   F32 t = FloatTau + (F32(time & 1023) / 1024.f * FloatTau);
    for(F32 rotate = 0; rotate < FloatTau - 0.01f; rotate += FloatTau / 5)  //  0.01f part avoids rounding error
    {
       // 32 vertices and colors

@@ -44,39 +44,6 @@ class Zone;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class GameTimer
-{
-private:
-   Timer mTimer;
-   bool mIsUnlimited;
-   bool mGameOver;
-   S32 mRenderingOffset;
-
-public:
-   void reset(U32 timeInMs);
-   void sync(U32 deltaT);
-   void extend(S32 deltaT);
-
-   void setIsUnlimited(bool isUnlimited);
-   void setRenderingOffset(S32 offset);
-   void setGameIsOver();
-   void setTimeRemaining(U32 timeLeft, bool isUnlimited);
-
-   bool update(U32 deltaT);
-   bool isUnlimited() const;
-
-   U32 getCurrent() const; 
-   U32 getTotalGameTime() const;
-   S32 getRenderingOffset() const;
-
-
-   string toString_minutes() const;      // Creates string representation of timer for level saving purposes
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 
 class GameType : public NetObject
 {
@@ -94,7 +61,6 @@ private:
    bool mLevelHasFlagSpawns;
 
    bool mShowAllBots;
-   U32 mTotalGamePlay;
 
    Vector<WallRec> mWalls;
 
@@ -140,13 +106,14 @@ private:
 protected:
    Timer mScoreboardUpdateTimer;
 
-   GameTimer mGameTimer;               // Track when current game will end
+   U32 mTotalGamePlay;  // Continuously counts up and never goes down. Used for syncing and gameplay stats. In Milliseconds.
+   U32 mEndingGamePlay; // Game over when mTotalGamePlay reaches mEndingGamePlay, 0 = no time limit. In Milliseconds.
+
    Timer mGameTimeUpdateTimer;         // Timer for when to send clients a game clock update
    Timer mBotBalanceAnalysisTimer;     // Analyze if we need to add/remove bots to balance team
                        
-   virtual void syncTimeRemaining(U32 timeLeft);
    virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited);                         // Runs on server
-   virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited, S32 renderingOffset);    // Runs on client
+   virtual void setTimeEnding(U32 timeLeft);    // Runs on client
 
    void notifyClientsWhoHasTheFlag();           // Notify the clients when flag status changes... only called by some game types (server only)
    bool doTeamHasFlag(S32 teamIndex) const;     // Do the actual work of figuring out if the specified team has the flag  (server only)
@@ -197,8 +164,11 @@ public:
    void extendGameTime(S32 timeInMs);
 
    U32 getTotalGameTime() const;            // In seconds
+   U32 getTotalGameTimeInMs() const;            // In milliseconds
+   U32 getTotalGamePlayedInMs() const;    // In milliseconds
    S32 getRemainingGameTime() const;        // In seconds
    S32 getRemainingGameTimeInMs() const;    // In ms
+   string getRemainingGameTimeInMinutesString() const;        // In seconds
    bool isTimeUnlimited() const;
    S32 getRenderingOffset() const;
    /////
@@ -225,8 +195,6 @@ public:
    static void printRules();             // Dump game-rule info
 
    bool levelHasLoadoutZone();           // Does the level have a loadout zone?
-
-   bool advanceGameClock(U32 deltaT);
 
    enum
    {
@@ -352,6 +320,9 @@ public:
 
    void onLevelLoaded();      // Server-side function run once level is loaded from file
 
+   virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
    virtual void idle(BfObject::IdleCallPath path, U32 deltaT);
 
    void gameOverManGameOver();
@@ -432,8 +403,7 @@ public:
    TNL_DECLARE_RPC(c2sSyncMessagesComplete, (U32 sequence));
 
    TNL_DECLARE_RPC(s2cSetGameOver, (bool gameOver));
-   TNL_DECLARE_RPC(s2cSyncTimeRemaining, (U32 timeLeftInMs));
-   TNL_DECLARE_RPC(s2cSetNewTimeRemaining, (U32 timeLeftInMs, bool isUnlimited, S32 renderingOffset));
+   TNL_DECLARE_RPC(s2cSetNewTimeRemaining, (U32 timeEndingInMs));
    TNL_DECLARE_RPC(s2cChangeScoreToWin, (U32 score, StringTableEntry changer));
 
    TNL_DECLARE_RPC(s2cSendFlagPossessionStatus, (U16 packedBits));
@@ -489,7 +459,7 @@ public:
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams
-   void processClientRequestForChangingGameTime(S32 time, bool isUnlimited, bool changeTimeIfAlreadyUnlimited, bool addTime);
+   void processClientRequestForChangingGameTime(S32 time, bool isUnlimited1, bool changeTimeIfAlreadyUnlimited, bool addTime);
 
    TNL_DECLARE_RPC(c2sSendAnnouncement,(string message));
    TNL_DECLARE_RPC(s2cDisplayAnnouncement,(string message));
@@ -548,8 +518,6 @@ public:
    void balanceTeams();
 
    map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots
-
-   GameTimer *getTimer();
 };
 
 #define GAMETYPE_RPC_S2C(className, methodName, args, argNames) \

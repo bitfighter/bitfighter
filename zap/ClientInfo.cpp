@@ -480,7 +480,7 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
    // Else deployment failed and we need to credit some energy back to the client
    S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
    getConnection()->s2cCreditEnergy(energyCost);
-   getConnection()->s2cSetFastRechargeTime(gameType->getTimer()->getCurrent() - ship->mFastRechargeTimer.getCurrent());
+   getConnection()->s2cSetFastRechargeTime(/*gameType->getTotalGamePlayedInMs() -*/ ship->mFastRechargeTimer.getCurrent());
 
    // Depart quietly
    return false;

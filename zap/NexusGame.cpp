@@ -91,10 +91,10 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
 // Constructor
 NexusGameType::NexusGameType() : GameType(100)
 {
-   mNexusClosedTime = 60;
-   mNexusOpenTime = 15;
+   mNexusClosedTime = 60 * 1000;
+   mNexusOpenTime = 15 * 1000;
    mNexusIsOpen = false;
-   mNexusChangeAtTime = -1;
+   mNexusChangeAtTime = 0;
 }
 
 // Destructor
@@ -108,15 +108,15 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
    {
-      setGameTime(F32(atof(argv[0]) * 60.0));                 // Game time, stored in minutes in level file
+      setGameTime(F32(atof(argv[0]) * 60.f));                 // Game time, stored in minutes in level file
 
       if(argc > 1)
       {
-         mNexusClosedTime = S32(atof(argv[1]) * 60.f + 0.5);  // Time until nexus opens, specified in minutes (0.5 converts truncation into rounding)
+         mNexusClosedTime = S32(atof(argv[1]) * 60.f * 1000.f + 0.5); // Time until nexus opens, specified in minutes (0.5 converts truncation into rounding)
 
          if(argc > 2)
          {
-            mNexusOpenTime = S32(atof(argv[2]));              // Time nexus remains open, specified in seconds
+            mNexusOpenTime = S32(atof(argv[2]) * 1000.f);     // Time nexus remains open, specified in seconds
 
             if(argc > 3)
                setWinningScore(atoi(argv[3]));                // Winning score
@@ -124,70 +124,33 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
       }
    }
 
-   if(mGameTimer.isUnlimited())
-      mNexusChangeAtTime = S32_MAX / 1000 - mNexusClosedTime;
-   else
-      mNexusChangeAtTime = mGameTimer.getTotalGameTime() / 1000 - mNexusClosedTime + 1;      // + 1 fixes quirk when setting times initially
+   mNexusChangeAtTime = mNexusClosedTime;
    return true;
 }
 
 
 string NexusGameType::toLevelCode() const
 {
-   return string(getClassName()) + " " + mGameTimer.toString_minutes() + " " + ftos(F32(mNexusClosedTime) / 60, 3) + " " + 
-                                         ftos(F32(mNexusOpenTime), 3)  + " " + itos(getWinningScore());
+   return string(getClassName()) + " " + getRemainingGameTimeInMinutesString() + " " + ftos(F32(mNexusClosedTime) / (60.f * 1000.f)) + " " + 
+                                         ftos(F32(mNexusOpenTime) / 1000.f, 3)  + " " + itos(getWinningScore());
 }
 
 
 // Returns time left in current Nexus cycle -- if we're open, this will be the time until Nexus closes; if we're closed,
 // it will return the time until Nexus opens
 // Client only
-S32 NexusGameType::getNexusTimeLeft() const
+S32 NexusGameType::getNexusTimeLeftMs() const
 {
-   return mGameTimer.getCurrent() / 1000 - mNexusChangeAtTime;
-}
-
-
-// Here we need to update the game clock as well as change the time we expect the Nexus will next change state
-// This version runs only on the client 
-void NexusGameType::setTimeRemaining(U32 timeLeft, bool isUnlimited, S32 renderingOffset)
-{
-   U32 oldDisplayTime = mGameTimer.getCurrent() / 1000;           // Time displayed before remaining time changed
-
-   Parent::setTimeRemaining(timeLeft, isUnlimited, renderingOffset);
-
-   U32 newDisplayTime = mGameTimer.getCurrent() / 1000;           // Time displayed after remaining time changed
-
-   if(mNexusChangeAtTime == -1)     // Initial visit to this function, will happen on client when they first join a level
-      mNexusChangeAtTime = newDisplayTime - mNexusClosedTime;
-   else
-      mNexusChangeAtTime = newDisplayTime - (oldDisplayTime - mNexusChangeAtTime);
-}
-
-
-// Game time has changed -- need to do an update
-// This version runs only on the server
-void NexusGameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
-{
-   U32 oldDisplayTime = mGameTimer.getCurrent() / 1000;           // Time displayed before remaining time changed
-
-   Parent::setTimeRemaining(timeLeft, isUnlimited);
-
-   U32 newDisplayTime = mGameTimer.getCurrent() / 1000;           // Time displayed after remaining time changed
-
-   if(mNexusChangeAtTime == -1)     // Initial visit to this function, will happen on client when they first join a level
-      mNexusChangeAtTime = newDisplayTime - mNexusClosedTime;
-   else
-      mNexusChangeAtTime = newDisplayTime - (oldDisplayTime - mNexusChangeAtTime);
+   return mNexusChangeAtTime == 0 ? 0 : (mNexusChangeAtTime - getTotalGamePlayedInMs());
 }
 
 
 bool NexusGameType::nexusShouldChange()
 {
-   if(mNexusChangeAtTime == -1)     
+   if(mNexusChangeAtTime == 0)     
       return false;
 
-   return mNexusChangeAtTime * 1000 > (S32)mGameTimer.getCurrent();
+   return getNexusTimeLeftMs() <= 0;
 }
 
 
@@ -328,10 +291,10 @@ Vector<string> NexusGameType::getGameParameterMenuKeys()
 boost::shared_ptr<MenuItem> NexusGameType::getMenuItem(const string &key)
 {
    if(key == "Nexus Time to Open")
-      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Time for Nexus to Open:", mNexusClosedTime, MaxMenuScore*60, "Never",
+      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Time for Nexus to Open:", (mNexusClosedTime + 500) / 1000, MaxMenuScore*60, "Never",
                                                                  "Time it takes for the Nexus to open"));
    else if(key == "Nexus Time Remain Open")
-      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", mNexusOpenTime, MaxMenuScore*60, "Always",
+      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", (mNexusOpenTime + 500) / 1000, MaxMenuScore*60, "Always",
                                                                         "Time that the Nexus will remain open"));
    else if(key == "Nexus Win Score")
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, 20000, "points", "", 
@@ -343,9 +306,9 @@ boost::shared_ptr<MenuItem> NexusGameType::getMenuItem(const string &key)
 bool NexusGameType::saveMenuItem(const MenuItem *menuItem, const string &key)
 {
    if(key == "Nexus Time to Open")
-      mNexusClosedTime = menuItem->getIntValue();
+      mNexusClosedTime = menuItem->getIntValue() * 1000;
    else if(key == "Nexus Time Remain Open")
-      mNexusOpenTime = menuItem->getIntValue();
+      mNexusOpenTime = menuItem->getIntValue() * 1000;
    else if(key == "Nexus Win Score")
       setWinningScore(menuItem->getIntValue());
    else 
@@ -451,9 +414,9 @@ void NexusGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 static U32 getNextChangeTime(U32 changeTime, S32 duration)
 {
    if(duration == 0)    // Handle special case of never opening/closing nexus
-      return -1;
+      return 0;
 
-   return changeTime - duration;
+   return changeTime + duration;
 }
 
 
@@ -662,7 +625,7 @@ S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom, bool render) con
          drawStringfr(x, y - size, size, "Nexus never closes");
       else if(!mNexusIsOpen && mNexusClosedTime == 0)
          drawStringfr(x, y - size, size, "Nexus never opens");
-      else if(!mNexusIsOpen && mNexusChangeAtTime <= 0)
+      else if(!mNexusIsOpen && !isTimeUnlimited() && getRemainingGameTimeInMs() <= getNexusTimeLeftMs())
          drawStringfr(x, y - size, size, "Nexus closed until end of game");
       else if(!isGameOver())
       {
@@ -670,7 +633,7 @@ S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom, bool render) con
          static const U32 wCloses = getStringWidth(size, "Nexus closes: ");
          static const U32 wOpens  = getStringWidth(size, "Nexus opens: ");
 
-         S32 timeLeft = MIN(getNexusTimeLeft() * 1000, (S32)mGameTimer.getCurrent());
+         S32 timeLeft = getNexusTimeLeftMs();
 
          // Get the width of the minutes and 10 seconds digit(s), account for two leading 0s (00:45)
          const U32 minsRemaining = timeLeft / (60 * 1000);

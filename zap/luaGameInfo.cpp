@@ -217,7 +217,7 @@ S32 LuaGameInfo::lua_getNexusTimeLeft(lua_State *L)
    if(!gameType || gameType->getGameTypeId() != NexusGame)
       return returnNil(L);
 
-   return returnInt(L, static_cast<NexusGameType *>(gameType)->getNexusTimeLeft());
+   return returnInt(L, static_cast<NexusGameType *>(gameType)->getNexusTimeLeftMs() / 1000);
 }
 
 

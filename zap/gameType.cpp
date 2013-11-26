@@ -46,117 +46,6 @@ static const char *gameTypeClassNames[] = {
 };
 
 
-////////////////////////////////////////               
-////////////////////////////////////////
-
-
-// Pass 0 for unlimited game
-void GameTimer::reset(U32 timeInMs)
-{
-   if(timeInMs == 0)
-   {
-      mTimer.reset(GameType::MAX_GAME_TIME);
-      mIsUnlimited = true;
-   }
-   else
-   {
-      mTimer.reset(timeInMs);
-      mIsUnlimited = false;
-   }
-
-   mRenderingOffset = 0;
-   mGameOver = false;
-}
-
-
-void GameTimer::sync(U32 deltaT)
-{
-   mTimer.reset(deltaT);
-}
-
-
-// Return true if timer has expired, false otherwise -- unlimited games never expire
-bool GameTimer::update(U32 deltaT)
-{
-   bool status = mTimer.update(deltaT);
-
-   if(mGameOver)
-      mRenderingOffset -= deltaT;
-
-   if(mIsUnlimited)
-      return false;
-
-   return status;
-}
-
-
-U32 GameTimer::getCurrent() const
-{
-    return mTimer.getCurrent();
-}
-
-
-void GameTimer::extend(S32 deltaT)
-{
-   if(mTimer.getPeriod() + (U32)deltaT > (U32)GameType::MAX_GAME_TIME)
-      deltaT = GameType::MAX_GAME_TIME - mTimer.getPeriod();
-   mTimer.extend(deltaT);
-}
-
-
-void GameTimer::setIsUnlimited(bool isUnlimited)
-{
-   mIsUnlimited = isUnlimited;
-}
-
-
-bool GameTimer::isUnlimited() const
-{
-   return mIsUnlimited;
-}
-
-
-U32 GameTimer::getTotalGameTime() const      // in ms
-{
-   return mTimer.getPeriod();
-}
-
-
-string GameTimer::toString_minutes() const
-{
-   F32 gameTime = mIsUnlimited ? 0 : F32(mTimer.getPeriod());
-
-   return ftos(gameTime / (60 * 1000), 3);
-}
-
-
-S32 GameTimer::getRenderingOffset() const
-{
-   return mRenderingOffset;
-}
-
-
-void GameTimer::setRenderingOffset(S32 offset)
-{
-   mRenderingOffset = offset;
-}
-
-
-void GameTimer::setGameIsOver()
-{
-   mGameOver = true;
-}
-
-
-void GameTimer::setTimeRemaining(U32 timeLeft, bool isUnlimited)
-{
-   U32 offset = getCurrent() + getRenderingOffset() - timeLeft;
-
-   reset(timeLeft);
-   setIsUnlimited(isUnlimited);
-   setRenderingOffset(offset);
-}
-
 
 ////////////////////////////////////////      __              ___           
 ////////////////////////////////////////     /__  _. ._ _   _  |    ._   _  
@@ -188,7 +77,6 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(3000), mGameTimeUp
    mLevelHasPredeployedFlags = false;
    mLevelHasFlagSpawns = false;
    mShowAllBots = false;
-   mTotalGamePlay = 0;
    mHaveSoccer = false;
    mBotZoneCreationFailed = false;
 
@@ -200,7 +88,8 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(3000), mGameTimeUp
    mBotsAllowed = true;
    mBotBalancingDisabled = false;
 
-   mGameTimer.reset(DefaultGameTime);
+   mTotalGamePlay = 0;
+   mEndingGamePlay = DefaultGameTime;
    mBotBalanceAnalysisTimer.update(mBotBalanceTimerPeriod - 2000);  // Add bots closer to game start
 
    mObjectsExpected = 0;
@@ -229,9 +118,8 @@ bool GameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string GameType::toLevelCode() const
 {
-   return string(getClassName()) + " " + mGameTimer.toString_minutes() + " " + itos(mWinningScore);
+   return string(getClassName()) + " " + getRemainingGameTimeInMinutesString() + " " + itos(mWinningScore);
 }
-
 
 // GameType object is the first to be added when a new game starts... 
 // therefore, this is a reasonable signifier that a new game is starting up.  I think.
@@ -323,7 +211,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
                                                               255));
    else if(key == "Game Time")
    {
-      S32 gameTime = mGameTimer.isUnlimited() ? 0 : mGameTimer.getTotalGameTime() / 1000;
+      S32 gameTime = isTimeUnlimited() ? 0 : (getTotalGameTimeInMs() + 500) / 1000;
       return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Game Time:", gameTime, MaxMenuScore*60, "Unlimited", "Time game will last"));
    }
    else if(key == "Win Score")
@@ -373,7 +261,7 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const string &key)
    else if(key == "Levelgen Script")
       setScript(parseString(menuItem->getValue()));
    else if(key == "Game Time")
-      setGameTime((F32)menuItem->getIntValue());
+      setTimeEnding((U32)(menuItem->getIntValue() * 1000));
    else if(key == "Win Score")
       setWinningScore(menuItem->getIntValue());
    else if(key == "Min Players")
@@ -618,6 +506,17 @@ const char *GameType::validateGameType(const char *gameTypeName)
 }
 
 
+U32 GameType::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   stream->write(mTotalGamePlay);
+   return 0;
+}
+void GameType::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   stream->read(&mTotalGamePlay);
+}
+
+
 void GameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 {
    mTotalGamePlay += deltaT;
@@ -703,21 +602,14 @@ void GameType::idle_server(U32 deltaT)
    EventManager::get()->update();
 
    // If game time has expired... game is over, man, it's over
-   if(advanceGameClock(deltaT))
+   if(!isTimeUnlimited() && U32(mEndingGamePlay - mTotalGamePlay) + 5000 <= 5000)
       gameOverManGameOver();
 }
 
 
 void GameType::idle_client(U32 deltaT)
 {
-   advanceGameClock(deltaT);
    mZoneGlowTimer.update(deltaT);
-}
-
-
-bool GameType::advanceGameClock(U32 deltaT)
-{
-   return mGameTimer.update(deltaT);
 }
 
 
@@ -847,8 +739,6 @@ void GameType::gameOverManGameOver()
    s2cSetGameOver(true);                 // Alerts clients that the game is over
    ((ServerGame *)mGame)->gameEnded();   // Sets level-switch timer, which gives us a short delay before switching games
 
-
-   mGameTimer.setGameIsOver();
 
    saveGameStats();
 
@@ -1213,9 +1103,6 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver
    if(gameOver)
    {
       static_cast<ClientGame *>(mGame)->setEnteringGameOverScoreboardPhase();
-
-      // Tell timer it's all over
-      mGameTimer.setGameIsOver();
    }
 
 #endif
@@ -2227,11 +2114,11 @@ void GameType::processClientRequestForChangingGameTime(S32 time, bool isUnlimite
    }
 
    if(addTime)
-      time += mGameTimer.getCurrent();
+      time += getRemainingGameTimeInMs();
 
    if(isUnlimited)
       setTimeRemaining(MAX_GAME_TIME, true);
-   else if(changeTimeIfAlreadyUnlimited || !mGameTimer.isUnlimited())
+   else if(changeTimeIfAlreadyUnlimited || !isTimeUnlimited())
       setTimeRemaining(time, false);
    else
       return;
@@ -2405,44 +2292,36 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
    static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
 }
 
-
-// This method should only be used for periodic updates, not for events that change the actual time left in the game
-void GameType::syncTimeRemaining(U32 timeLeft)
-{
-   mGameTimer.sync(timeLeft);
-}
-
-
 void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 {
-   TNLAssert(getGame()->isServer(), "This should only run on the server!");
+   //TNLAssert(getGame()->isServer(), "This should only run on the server!");
 
-   mGameTimer.setTimeRemaining(timeLeft, isUnlimited);
+   if(isUnlimited)
+      mEndingGamePlay = 0;
+   else
+      mEndingGamePlay = mTotalGamePlay + timeLeft;
 }
 
 
 // Game time has changed -- need to do an update
-void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited, S32 renderingOffset)
+void GameType::setTimeEnding(U32 timeEnding)
 {
    TNLAssert(!getGame()->isServer(), "This should only run on the client!");
-
-   mGameTimer.reset(timeLeft);
-   mGameTimer.setIsUnlimited(isUnlimited);
-   mGameTimer.setRenderingOffset(renderingOffset);
+   mEndingGamePlay = timeEnding;
 }
 
 
 // Send remaining time to all clients -- used for synchronization only
 void GameType::broadcastTimeSyncSignal()
 {
-   s2cSyncTimeRemaining(mGameTimer.getCurrent());
+   setMaskBits(1);  // "1" is some dummy mask bit to run packUpdate, not actually specific to anything for GameType::packUpdate
 }
 
 
 // Send remaining time to all clients after time has been updated
 void GameType::broadcastNewRemainingTime()
 {
-   s2cSetNewTimeRemaining(mGameTimer.getCurrent(), mGameTimer.isUnlimited(), mGameTimer.getRenderingOffset());
+   s2cSetNewTimeRemaining(mEndingGamePlay);
 }
 
 
@@ -2534,16 +2413,9 @@ GAMETYPE_RPC_S2C(GameType, s2cSetPlayerScore, (U16 index, S32 score), (index, sc
 
 
 // Server has sent us (the client) a message telling us how much longer we have in the current game
-GAMETYPE_RPC_S2C(GameType, s2cSyncTimeRemaining, (U32 timeLeftInMs), (timeLeftInMs))
+GAMETYPE_RPC_S2C(GameType, s2cSetNewTimeRemaining, (U32 timeEndingInMs), (timeEndingInMs))
 {
-   syncTimeRemaining(timeLeftInMs);
-}
-
-
-// Server has sent us (the client) a message telling us how much longer we have in the current game
-GAMETYPE_RPC_S2C(GameType, s2cSetNewTimeRemaining, (U32 timeLeftInMs, bool isUnlimited, S32 renderingOffset), (timeLeftInMs, isUnlimited, renderingOffset))
-{
-   setTimeRemaining(timeLeftInMs, isUnlimited, renderingOffset);
+   setTimeEnding(timeEndingInMs);
 }
 
 
@@ -4014,46 +3886,64 @@ void GameType::setWinningScore(S32 score)
 // Mostly used while reading a level file
 void GameType::setGameTime(F32 timeInSeconds)
 {
-   mGameTimer.reset(U32(timeInSeconds * 1000));    // reset handles case of time being 0
+   U32 time = U32(timeInSeconds * 1000);
+   setTimeRemaining(time, time == 0);
 }
 
 
 // Only called by various voting codes, server only
 void GameType::extendGameTime(S32 timeInMs)
 {
-   setTimeRemaining(mGameTimer.getCurrent() + timeInMs, false); 
+   setTimeRemaining(getRemainingGameTimeInMs() + timeInMs, false); 
 }
 
 
-// Return time in seconds; returns 0 if game is unlimited
+// Return current game play + time limit in seconds; returns 0 if game is unlimited
 U32 GameType::getTotalGameTime() const
 {
-   return mGameTimer.getTotalGameTime() / 1000;
+   return mEndingGamePlay / 1000;
 }
 
+U32 GameType::getTotalGameTimeInMs() const
+{
+   return mEndingGamePlay;
+}
+
+// Return total time played, new gametype starts at 0 and constantly count up while playing, it doesn't matter what the time limit is.
+U32 GameType::getTotalGamePlayedInMs() const
+{
+   return mTotalGamePlay;
+}
 
 // Return time remaining in seconds; currently used for Lua on the server, and display purposes on the client
 S32 GameType::getRemainingGameTime() const         
 {
-   return mGameTimer.getCurrent() / 1000;
+   return getRemainingGameTimeInMs() / 1000;
 }
 
 
 S32 GameType::getRemainingGameTimeInMs() const
 {
-   return mGameTimer.getCurrent();
+   if(mEndingGamePlay == 0)
+      return 0;
+   return max(S32(mEndingGamePlay) - S32(mTotalGamePlay), 0);
+
 }
 
+string GameType::getRemainingGameTimeInMinutesString() const
+{
+   return ftos(F32(getRemainingGameTimeInMs()) * (1.f/1000.f/60.f));
+}
 
 bool GameType::isTimeUnlimited() const
 {
-   return mGameTimer.isUnlimited();
+   return mEndingGamePlay == 0;
 }
 
 
 S32 GameType::getRenderingOffset() const
 {
-   return mGameTimer.getRenderingOffset();
+   return mEndingGamePlay;
 }
 
 
@@ -4339,11 +4229,6 @@ void GameType::shipTouchFlag(Ship *ship, FlagItem *flag) { /* Do nothing */ }
 void GameType::releaseFlag(const Point &pos, const Point &vel, S32 count) { /* Do nothing */ }
 void GameType::shipTouchZone(Ship *ship, GoalZone *zone) { /* Do nothing */ }
 void GameType::majorScoringEventOcurred(S32 team)        { /* Do nothing */ }
-
-GameTimer* GameType::getTimer()
-{
-   return &mGameTimer;
-}
 
 };
 

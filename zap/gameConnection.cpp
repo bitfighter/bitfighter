@@ -913,7 +913,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cCreditEnergy, (SignedInt<18> energy), (ener
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetFastRechargeTime, (U32 time), (time), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-   U32 interval = getClientGame()->getGameType()->getTimer()->getCurrent() - time;
+   U32 interval = /*getClientGame()->getGameType()->getTotalGamePlayedInMs() -*/ time;
    Ship *ship = static_cast<Ship *>(getControlObject());
    if(ship)
    {

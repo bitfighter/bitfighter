@@ -66,7 +66,7 @@ protected:
 
    bool mInterpolating;
    F32 mMass;
-	bool mWaitingForMoveToUpdate;  // client only
+   bool mWaitingForMoveToUpdate;  // client only
 
    enum MaskBits {
       PositionMask     = Parent::FirstFreeMask << 0,     // Position has changed and needs to be updated
