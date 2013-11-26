@@ -910,7 +910,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                F32 health[] = { 1,1,1,1,1,1,1,1,1,1 };
                
                Point pos(0,0);
-               U32 time = U32(-1 * S32(Platform::getRealMilliseconds()));
+               U32 time = Platform::getRealMilliseconds();
 
                PanelGeom panelGeom;
                CoreItem::fillPanelGeom(pos, time, panelGeom);
