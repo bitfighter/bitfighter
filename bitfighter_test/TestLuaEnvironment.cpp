@@ -73,6 +73,10 @@ TEST_F(LuaEnvironmentTest, sanityCheck)
 
 TEST_F(LuaEnvironmentTest, sandbox)
 {
+   // Ensure that local setmetatable refs in sandbox are not globalized somehow
+   EXPECT_FALSE(existsFunctionInEnvironment("smt"));
+   EXPECT_FALSE(existsFunctionInEnvironment("gmt"));
+
    // Sandbox prohibits access to unsafe functions, a few listed here
    EXPECT_FALSE(existsFunctionInEnvironment("setfenv"));
    EXPECT_FALSE(existsFunctionInEnvironment("setmetatable"));
@@ -95,6 +99,27 @@ TEST_F(LuaEnvironmentTest, scriptIsolation)
    lua_getfield(L, LUA_REGISTRYINDEX, levelgen2.getScriptId());
    EXPECT_FALSE(lua_equal(L, -1, -2));
    lua_pop(L, 2);
+
+   // Scripts can mess with their own environment, but not others'
+   EXPECT_TRUE(levelgen->runString("levelgen = nil"));
+   EXPECT_TRUE(levelgen->runString("assert(levelgen == nil)"));
+   EXPECT_TRUE(levelgen2.runString("assert(levelgen ~= nil)"));
+
+   EXPECT_TRUE(levelgen->runString("BfObject= nil"));
+   EXPECT_TRUE(levelgen->runString("assert(BfObject== nil)"));
+   EXPECT_TRUE(levelgen2.runString("assert(BfObject~= nil)"));
+
+   /* A true deep copy is needed before these will pass
+   EXPECT_TRUE(levelgen->runString("Timer.foo = 'test'"));
+   EXPECT_TRUE(levelgen->runString("assert(Timer.foo == 'test')"));
+   EXPECT_TRUE(levelgen2.runString("assert(Timer.foo ~= 'test')"));
+   */
+}
+
+
+TEST_F(LuaEnvironmentTest, immutability)
+{
+   EXPECT_FALSE(levelgen->runString("string.sub = nil"));
 }
 
 
