@@ -107,9 +107,8 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
 
       // This is a total hack based on visual inspection trying to get scores ending in 1 to align with others
       // in a way that is nice.  This is totally font dependent, sadly...
-      S32 oneFixFactor = score % 10 == 1 ? 5 : 0;
 
-      S32 width = drawStringfr(rightAlignCoord - oneFixFactor, ypos, bigScoreTextSize, "%d", score);
+      S32 width = drawStringfr(rightAlignCoord, ypos, bigScoreTextSize, "%d", score);
       maxWidth = max(maxWidth, width);
 
       ypos -= bigScoreTextSize + bigScoreTextGap;
