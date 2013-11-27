@@ -21,6 +21,7 @@
 -- Load some additional libraries
 require("geometry")   -- Load geometry functions into Geom namespace; call with Geom.function
 require("timer")
+require("debugger")
 
 -- Hookup our supercharged stacktrace util
 _stackTracer = require("stack_trace_plus").stacktrace
