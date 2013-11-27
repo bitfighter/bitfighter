@@ -293,7 +293,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
                mBounced = true;
 
                static const U32 MAX_LIVETIME_INCREASES = 6;
-               static const U32 LIVETIME_INCREASE = 500;
+               static const U32 LIVETIME_INCREASE = 250;
 
                // Let's extend the projectile life time on each bounce, up to twice the normal
                // live-time
