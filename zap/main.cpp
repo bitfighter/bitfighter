@@ -1126,6 +1126,10 @@ int main(int argc, char **argv)
    
    if(settings->isDedicatedServer())
    {
+#ifndef ZAP_DEDICATED
+      // Dedicated ClientGame needs fonts, but not external ones
+      FontManager::initialize(settings.get(), false);
+#endif
       LevelSourcePtr levelSource = LevelSourcePtr(new FolderLevelSource(settings->getLevelList(), settings->getFolderManager()->levelDir));
       gServerGame = initHosting(settings, levelSource, false, true);     // Figure out what levels we'll be playing with, and start hosting  
    }
