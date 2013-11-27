@@ -293,6 +293,7 @@ void Robot::onAddedToGame(Game *game)
    }
 
    mLuaGame = game;
+   mLuaGridDatabase = game->getGameObjDatabase();
 
    if(!start())
    {
