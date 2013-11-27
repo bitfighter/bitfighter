@@ -11,9 +11,6 @@
 #include "UIMenus.h"
 #include "UIInstructions.h"
 #include "UIChat.h"
-#include "UIMessage.h"
-#include "UIDiagnostics.h"
-#include "UIErrorMessage.h"
 #include "UIManager.h"
 
 #include "gameType.h"
@@ -37,19 +34,10 @@
 #include "FontManager.h"
 #include "Intervals.h"
 
-//#include "tnlEndian.h"
-
-#include "Rect.h"
-
 #include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 #include "GeomUtils.h"
-
-#include <ctype.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <math.h>
 
 namespace Zap
 {
