@@ -84,6 +84,9 @@ LuaScriptRunner::~LuaScriptRunner()
       if(mSubscriptions[i])
          EventManager::get()->unsubscribeImmediate(this, (EventManager::EventType)i);
 
+   // Clean-up any game objects that were added in Lua with '.new()' but not added
+   // with bf:addItem()
+
    // And delete the script's environment table from the Lua instance
    deleteScript(getScriptId());
 

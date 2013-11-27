@@ -1751,23 +1751,12 @@ bool Ship::setLoadout(const LoadoutTracker &loadout, bool silent)
    if(getClientInfo())
       getClientInfo()->getStatistics()->mChangedLoadout++;
 
-   WeaponType currentWeapon = mLoadout.getActiveWeapon();
-
    mLoadout = loadout;
 
    setMaskBits(LoadoutMask);
 
-   // Try to see if we can maintain the same weapon we had before.
-   S32 i;
-   for(i = 0; i < ShipWeaponCount; i++)
-      if(mLoadout.getWeapon(i) == currentWeapon)
-      {
-         setActiveWeapon(i);
-         break;
-      }
-
-   if(i == ShipWeaponCount)               // Nope...
-      selectWeapon(0);                    // ...so select first weapon
+   // Set our current weapon to the first one, for consistency
+   selectWeapon(0);
 
    if(!hasModule(ModuleEngineer))         // We don't have engineer, so drop any resources we may be carrying
    {
