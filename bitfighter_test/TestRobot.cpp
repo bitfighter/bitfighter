@@ -62,4 +62,33 @@ TEST(RobotTest, luaRobotNew)
 }
 
 
+/** onShipSpawned doesn't fire?
+
+TEST(RobotTest, RemoveFromGameDuringInitialOnShipSpawn)
+{
+	GamePair gamePair;
+
+	EXPECT_EQ(0, gamePair.server->getRobotCount());
+	EXPECT_EQ(0, gamePair.client->getRobotCount());
+
+	LuaLevelGenerator levelgen(gamePair.server);
+	levelgen.runScript(false);
+
+	EXPECT_TRUE(levelgen.runString("onShipSpawned = function(ship) RUN = true ; ship:removeFromGame() end"));
+	EXPECT_TRUE(levelgen.runString("subscribe(Event.ShipSpawned)"));
+	
+	Vector<StringTableEntry> args;
+	gamePair.server->getGameType()->addBot(args);
+
+	for(U32 i = 0; i < 10; i++)
+		gamePair.idle(10);
+
+	EXPECT_TRUE(levelgen.runString("assert(RUN)"));
+
+	EXPECT_EQ(0, gamePair.server->getRobotCount());
+	EXPECT_EQ(0, gamePair.client->getRobotCount());
+}
+*/
+
+
 };

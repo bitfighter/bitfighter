@@ -166,7 +166,7 @@ const char *Robot::getErrorMessagePrefix() { return "***ROBOT ERROR***"; }
 // Server only
 bool Robot::start()
 {
-   if(!runScript(!getGame()->isTestServer()))   // Load the script, execute the chunk to get it in memory, then run its main() function
+   if(!getGame() || !runScript(!getGame()->isTestServer()))   // Load the script, execute the chunk to get it in memory, then run its main() function
       return false;
 
    // Pass true so that if this bot doesn't have a TickEvent handler, we don't print a message
@@ -273,8 +273,6 @@ void Robot::onAddedToGame(Game *game)
       mClientInfo->setShip(this);
       this->setOwner(mClientInfo);
    }
-
-   Parent::onAddedToGame(game);
    
    if(isGhost())
       return;
@@ -305,6 +303,8 @@ void Robot::onAddedToGame(Game *game)
    disableCollision();
    game->getGameType()->serverAddClient(mClientInfo.getPointer());
    enableCollision();
+
+   Parent::onAddedToGame(game);
 }
 
 
