@@ -1409,7 +1409,7 @@ F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2;
 F32 Seeker::TargetSearchAngle = FloatTau * .6f;     // Anglular spread in front of ship to search for targets
 
 const S32 Seeker::InnerBlastRadius = 80;
-const S32 Seeker::OuterBlastRadius = 230;
+const S32 Seeker::OuterBlastRadius = 120;
 
 // Runs on client and server
 void Seeker::idle(IdleCallPath path)
@@ -1704,8 +1704,7 @@ void Seeker::handleCollision(BfObject *hitObject, Point collisionPoint)
       damageInfo.damagingObject = this;
       damageInfo.damageSelfMultiplier = WeaponInfo::getWeaponInfo(mWeaponType).damageSelfMultiplier;
 
-      // impulseVector handled in radiusDamage, set force to 0 here so we have no kickback
-      S32 hits = radiusDamage(collisionPoint, InnerBlastRadius, OuterBlastRadius, (TestFunc)isRadiusDamageAffectableType, damageInfo, 0);
+      S32 hits = radiusDamage(collisionPoint, InnerBlastRadius, OuterBlastRadius, (TestFunc)isRadiusDamageAffectableType, damageInfo, 200);
 
       if(getOwner())
          for(S32 i = 0; i < hits; i++)
