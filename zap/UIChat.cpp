@@ -221,6 +221,8 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is 
    if (mMessageCount == 0)
       return;
 
+   FontManager::pushFontContext(ChatMessageContext);
+
    U32 firstMsg = (mMessageCount <= lineCountToDisplay) ? 0 : (mMessageCount - lineCountToDisplay);  // Don't use min/max because of U32/S32 issues!
    U32 ypos_top = ypos;
    ypos += (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) * lineCountToDisplay;
@@ -288,6 +290,8 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is 
 
       renderLoop = !renderLoop;
    } while(renderLoop);
+
+   FontManager::popFontContext();
 }
 
 
