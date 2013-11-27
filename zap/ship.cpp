@@ -1609,6 +1609,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       getGame()->playSoundEffect(SFXTeleportIn, getActualPos());
    }
 
+   if(positionChanged)
+      updateExtentInDatabase();
+
 #endif
 }  // unpackUpdate
 
