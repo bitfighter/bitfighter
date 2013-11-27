@@ -130,6 +130,10 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    mShapeType = ShipShape::Normal;
 #endif
 
+   // Added to keep the old loadout and keep the currently selected weapon. (Ship delete/new on player's respawn)
+   if(clientInfo && clientInfo->getOldLoadout().getModule(0) != ModuleNone)
+      mLoadout = clientInfo->getOldLoadout();
+
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
@@ -1750,8 +1754,6 @@ bool Ship::setLoadout(const LoadoutTracker &loadout, bool silent)
    WeaponType currentWeapon = mLoadout.getActiveWeapon();
 
    mLoadout = loadout;
-
-   TNLAssert(mLoadout.getActiveWeapon() == loadout.getActiveWeapon(), "Delete this assert!");
 
    setMaskBits(LoadoutMask);
 
