@@ -1128,6 +1128,7 @@ void Game::processAnonymousMasterConnection()
 // Called by both ClientGame::idle and ServerGame::idle
 void Game::idle(U32 timeDelta)
 {
+   // Do nothing
 }
 
 
