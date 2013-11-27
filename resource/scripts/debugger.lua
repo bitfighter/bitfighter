@@ -377,6 +377,7 @@ local function luajit_load_readline_support()
 	dbg_writeln("Readline support loaded.")
 end
 
+--[[ Quiet, you.
 if jit and
 	jit.version == "LuaJIT 2.0.0-beta10"
 then
@@ -391,5 +392,6 @@ else
 	dbg_writeln("debugger.lua not tested against ".._VERSION)
 	dbg_writeln("Please send me feedback!")
 end
+]]
 
 _G.dbg = dbg
