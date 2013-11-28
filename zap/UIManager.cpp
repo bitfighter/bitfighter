@@ -485,8 +485,6 @@ void UIManager::idle(U32 timeDelta)
 // Select music based on where we are
 MusicLocation UIManager::selectMusic()
 {
-   UserInterface *currentUI = getCurrentUI();
-
    // In game (or one of its submenus)...
    if(isCurrentUI<GameUserInterface>() || cameFrom<GameUserInterface>())
       return MusicLocationGame;
