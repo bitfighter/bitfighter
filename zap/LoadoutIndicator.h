@@ -35,6 +35,7 @@ public:
    static const S32 LoadoutIndicatorHeight = IndicatorFontSize + IndicatorVertPadding * 2;
    static const S32 LoadoutIndicatorBottomPos = LoadoutIndicatorTopPos + LoadoutIndicatorHeight + 1;  // 1 accounts for line widths and such
 
+   void reset();
    void newLoadoutHasArrived(const LoadoutTracker &loadout);
    void setActiveWeapon(U32 weaponIndex);
 

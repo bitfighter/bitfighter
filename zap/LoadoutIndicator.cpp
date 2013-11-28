@@ -34,6 +34,14 @@ LoadoutIndicator::~LoadoutIndicator()
 }
 
 
+void LoadoutIndicator::reset()
+{
+   mCurrLoadout.resetLoadout();
+   mPrevLoadout.resetLoadout();
+   resetScrollTimer();
+}
+
+
 void LoadoutIndicator::newLoadoutHasArrived(const LoadoutTracker &loadout)
 {
    mPrevLoadout.update(mCurrLoadout);

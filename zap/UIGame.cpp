@@ -144,6 +144,8 @@ void GameUserInterface::onActivate()
    Barrier::clearRenderItems();           // TODO: Should really go in an onDeactivate method, which we don't really have
    mLevelInfoDisplayer.clearDisplayTimer();
 
+   mLoadoutIndicator.reset();
+
    // Queue up some initial help messages for the new users
 
    mHelpItemManager.reset();
