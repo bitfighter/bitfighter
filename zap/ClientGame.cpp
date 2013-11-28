@@ -629,7 +629,7 @@ bool hasRelatedHelpItem(U8 x)
 }
 
 
-U32 prevTimeDelta = 0;
+static U32 prevTimeDelta = 0;
 
 void ClientGame::idle(U32 timeDelta)
 {
