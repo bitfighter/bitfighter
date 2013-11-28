@@ -39,6 +39,8 @@
 #include "OpenglUtils.h"
 #include "GeomUtils.h"
 
+#include <cmath>
+
 namespace Zap
 {
 
