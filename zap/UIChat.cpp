@@ -473,8 +473,6 @@ void ChatUserInterface::render()
       drawCenteredString(yPos1 + margin, fontsize, line1);
       drawCenteredString(yPos1 + margin + fontsize + fontgap, fontsize, line2);
    }
-
-   glPopMatrix();
 }
 
 
