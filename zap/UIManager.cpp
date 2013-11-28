@@ -487,15 +487,15 @@ MusicLocation UIManager::selectMusic()
    UserInterface *currentUI = getCurrentUI();
 
    // In game (or one of its submenus)...
-   if(currentUI == getUI<GameUserInterface>() || cameFrom<GameUserInterface>())
+   if(isCurrentUI<GameUserInterface>() || cameFrom<GameUserInterface>())
       return MusicLocationGame;
 
    // In editor...
-   if(currentUI == getUI<EditorUserInterface>() || cameFrom<EditorUserInterface>())
+   if(isCurrentUI<EditorUserInterface>() || cameFrom<EditorUserInterface>())
       return MusicLocationEditor;
 
    // In credits...
-   if(currentUI == getUI<CreditsUserInterface>() || cameFrom<CreditsUserInterface>())
+   if(isCurrentUI<CreditsUserInterface>() || cameFrom<CreditsUserInterface>())
       return MusicLocationCredits;
 
    // Otherwise, we must be in the menus...
@@ -686,7 +686,7 @@ void UIManager::setNeedToUpgrade(bool needToUpgrade)
 void UIManager::gotPasswordOrPermissionsReply(const ClientGame *game, const char *message)
 {
    // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
-   if(getCurrentUI() == getUI<GameMenuUserInterface>())
+   if(isCurrentUI<GameMenuUserInterface>())
       getUI<GameMenuUserInterface>()->mMenuSubTitle = message;
    else
       game->displayCmdChatMessage(message);     
