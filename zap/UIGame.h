@@ -185,6 +185,7 @@ private:
 
    Timer mProgressBarFadeTimer;     // For fading out progress bar after level is loaded
    bool mShowProgressBar;
+   bool mHasShipPos;                // True if mShipPos has been explicitly set
 
 
    // Some rendering routines

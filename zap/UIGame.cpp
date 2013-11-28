@@ -95,6 +95,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
    mAnnouncement = "";
 
    mShowProgressBar = false;
+   mHasShipPos = false;
    mProgressBarFadeTimer.setPeriod(ONE_SECOND);
 
    // Transition time between regular map and commander's map; in ms, higher = slower
@@ -146,6 +147,7 @@ void GameUserInterface::onActivate()
 
    mLoadoutIndicator.reset();
    mShowProgressBar = true;               // Causes screen to be black before level is loaded
+   mHasShipPos = false;
 
    // Queue up some initial help messages for the new users
 
@@ -366,7 +368,10 @@ void GameUserInterface::idle(U32 timeDelta)
    Ship *ship = getGame()->getLocalPlayerShip();
 
    if(ship)
+   {
       mShipPos.set(ship->getRenderPos());     // Get the player's ship position
+      mHasShipPos = true;
+   }
 
    // Keep ship pointed towards mouse cmdrs map zoom transition
    if(mCommanderZoomDelta.getCurrent() > 0)               
@@ -2637,7 +2642,13 @@ void GameUserInterface::renderGameNormal()
    // TODO: This should not be needed here -- mPos is set elsewhere, but appears to be lagged by a frame, which 
    //       creates a weird slightly off-center effect when moving.  This is harmless for the moment, but should be removed.
    if(ship)
+   {
       mShipPos.set(ship->getRenderPos());
+      mHasShipPos = true;
+   }
+
+   if(!mHasShipPos)     // If we don't know where the ship is, we can't render in this mode
+      return;
 
    glPushMatrix();
 
@@ -2813,6 +2824,7 @@ void GameUserInterface::renderGameCommander()
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
    glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
 
+   // We should probably check that mHasShipPos == true, but it will hardly ever matter
    Point offset = (mDispWorldExtents.getCenter() - mShipPos) * zoomFrac + mShipPos;
    glTranslatef(-offset.x, -offset.y, 0);
 
