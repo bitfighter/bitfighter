@@ -480,8 +480,6 @@ static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 a
 void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                 bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
 {
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
    ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[shapeType];
 
    // First render the thruster flames
@@ -947,8 +945,6 @@ void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
    string str = string("@") + itos((S32) coords.x) + "," + itos((S32) coords.y);
    const U32 textSize = 18;
 
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-      
    glLineWidth(gLineWidth1);
    glColor(Colors::white, 0.5f * alpha);
 
@@ -1544,8 +1540,6 @@ void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outli
 
 void renderPolygonFill(const Vector<Point> *triangulatedFillPoints, const Color *fillColor, F32 alpha)      
 {
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
    if(fillColor)
       glColor(fillColor, alpha);
 
@@ -1994,8 +1988,6 @@ void renderMine(const Point &pos, bool armed, bool visible)
       vis = 0.18f;
    }
 
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
    glColor4f(mod, mod, mod, vis);
    drawCircle(pos, 10);
 
@@ -2347,8 +2339,6 @@ void renderSoccerBall(const Point &pos, F32 size)
 void renderCore(const Point &pos, const Color *coreColor, U32 time, 
                 PanelGeom *panelGeom, F32 panelHealth[], F32 panelStartingHealth)
 {
-   TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on here!");
-
    // Draw outer polygon and inner circle
    Color baseColor = Colors::gray80;
 
@@ -3517,8 +3507,6 @@ void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color
 
    Color fillColor = *outlineColor;    // Create local copy
    fillColor *= .7f;
-
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    static Point vertices[3];     // Reusable array
 

@@ -1646,8 +1646,6 @@ void EditorUserInterface::renderInfoPanel()
    PanelRight  = PanelLeft + 180;      // left + width
    PanelInnerMargin = 4;
 
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
    drawFilledFancyBox(PanelLeft, PanelTop, PanelRight, PanelBottom, 6, Colors::richGreen, .7f, Colors::white);
 
 
@@ -1833,8 +1831,6 @@ void EditorUserInterface::renderReferenceShip()
       const S32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
       const S32 vertDist = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
 
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
       glColor4f(.5, .5, 1, .35f);
       drawFilledRect(-horizDist, -vertDist, horizDist, vertDist);
 
@@ -1854,8 +1850,6 @@ void EditorUserInterface::render()
    mInfoMsg = "";
 
    mouseIgnore = false;                // Avoid freezing effect from too many mouseMoved events without a render in between (sam)
-
-   TNLAssert(glIsEnabled(GL_BLEND), "Blending should be on here!");
 
    // Render bottom-most layer of our display
    if(mPreviewMode)
@@ -2133,8 +2127,6 @@ void EditorUserInterface::renderSaveMessage() const
       if(mSaveMsgTimer.getCurrent() < (U32)ONE_SECOND)
          alpha = (F32) mSaveMsgTimer.getCurrent() / 1000;
 
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
       const S32 textsize = 25;
       const S32 len = getStringWidth(textsize, mSaveMsg.c_str()) + 20;
       const S32 inset = min((gScreenInfo.getGameCanvasWidth() - len)  / 2, 200);
@@ -2163,8 +2155,6 @@ void EditorUserInterface::renderWarnings() const
       F32 alpha = 1.0;
       if (mWarnMsgTimer.getCurrent() < 1000)
          alpha = (F32) mWarnMsgTimer.getCurrent() / 1000;
-
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(mWarnMsgColor, alpha);
       drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4, 25, mWarnMsg1.c_str());

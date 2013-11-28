@@ -351,8 +351,6 @@ void PasswordEntryUserInterface::render()
 
       glColor(Colors::black, 0.5);
 
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
       F32 vertices[] = {
             0,                 0,
             (F32)canvasWidth,  0,

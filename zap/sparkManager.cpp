@@ -315,8 +315,6 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction) const
       {
          glPointSize(gDefaultLineWidth);
 
-         TNLAssert(glIsEnabled(GL_BLEND), "We expect blending to be on here!");
-
          glEnableClientState(GL_COLOR_ARRAY);
          glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -563,8 +561,6 @@ void FxTrail::unregisterTrail()
 
 void FxTrail::renderTrails()
 {
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
    FxTrail *w = mHead;
    while(w)
    {

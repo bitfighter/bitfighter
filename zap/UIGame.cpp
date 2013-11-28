@@ -795,8 +795,6 @@ void GameUserInterface::renderProgressBar() const
    GameType *gt = getGame()->getGameType();
    if((mShowProgressBar || mProgressBarFadeTimer.getCurrent() > 0) && gt && gt->mObjectsExpected > 0)
    {
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
       glColor(Colors::green, mShowProgressBar ? 1 : mProgressBarFadeTimer.getFraction());
 
       // Outline
@@ -2424,8 +2422,6 @@ void GameUserInterface::renderInputModeChangeAlert() const
    if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
       alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
 
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
    glColor(Colors::paleRed, alpha);
    drawCenteredStringf(vertMargin + 130, 20, "Input mode changed to %s", 
                        getGame()->getInputMode() == InputModeJoystick ? "Joystick" : "Keyboard");
@@ -3343,8 +3339,6 @@ void LevelListDisplayer::render() const
 {
    if(mLevelLoadDisplay || mLevelLoadDisplayFadeTimer.getCurrent() > 0)
    {
-      TNLAssert(glIsEnabled(GL_BLEND), "Blending should be enabled here!");
-
       for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
       {
          glColor(Colors::white, (1.4f - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.f)) * 

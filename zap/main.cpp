@@ -925,6 +925,9 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 
       // Add new plugin
       GameSettings::iniFile.SetValue("EditorPlugins", "Plugin1", "Ctrl+'|draw_stars.lua|Create polygon/star");
+
+      // Add back linesmoothing option
+      settings->getIniSettings()->mSettings.setVal("LineSmoothing", Yes);
    }
 
 

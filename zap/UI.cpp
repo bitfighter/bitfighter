@@ -284,8 +284,6 @@ void UserInterface::dimUnderlyingUI(F32 amount)
 {
    glColor(Colors::black, amount); 
 
-   TNLAssert(glIsEnabled(GL_BLEND), "Blending should be enabled here!");
-
    drawFilledRect (0, 0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
 }
 
