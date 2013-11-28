@@ -39,7 +39,7 @@
 #include "OpenglUtils.h"
 #include "GeomUtils.h"
 
-#include <cmath>
+#include <cmath>     // Needed to compile under Linux, OSX
 
 namespace Zap
 {
