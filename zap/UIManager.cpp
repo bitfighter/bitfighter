@@ -417,7 +417,8 @@ void UIManager::onGameStarting()
 
 void UIManager::onGameOver()
 {
-   getUI<GameUserInterface>()->onGameOver();    // Closes helpers and such
+   if(mUis[getTypeInfo<GameUserInterface>()])
+      getUI<GameUserInterface>()->onGameOver();    // Closes helpers and such
 }
 
 
@@ -654,7 +655,8 @@ void UIManager::serverLoadedLevel(const string &levelName)
 
 void UIManager::disableLevelLoadDisplay(bool fade)
 {
-   getUI<GameUserInterface>()->showLevelLoadDisplay(false, fade);
+   if(mUis[getTypeInfo<GameUserInterface>()])
+      getUI<GameUserInterface>()->showLevelLoadDisplay(false, fade);
 }
 
 
@@ -977,7 +979,8 @@ void UIManager::displaySuccessMessage(const char *message)
 
 void UIManager::setShowingInGameHelp(bool showing)
 {
-   getUI<GameUserInterface>()->setShowingInGameHelp(showing);
+   if(mUis[getTypeInfo<GameUserInterface>()])
+      getUI<GameUserInterface>()->setShowingInGameHelp(showing);
 }
 
 

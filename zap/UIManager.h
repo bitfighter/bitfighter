@@ -63,9 +63,17 @@ public:
 
 
    template <typename T>
-   T *getUI()
+   const std::type_info *getTypeInfo()
    {
       static const std::type_info *typeinfo = &typeid(T);
+      return typeinfo;
+   }
+
+
+   template <typename T>
+   T *getUI()
+   {
+      const std::type_info *typeinfo = getTypeInfo<T>();
 
       T *ui = static_cast<T *>(mUis[typeinfo]);
 
@@ -83,7 +91,7 @@ public:
    template <typename T>
    bool isCurrentUI()
    {
-      return mCurrentInterface == getUI<T>();
+      return mCurrentInterface == mUis[getTypeInfo<T>()];
    }
 
 
@@ -92,7 +100,7 @@ public:
    bool cameFrom()
    {
       for(S32 i = 0; i < mPrevUIs.size(); i++)
-         if(mPrevUIs[i] == getUI<T>())
+         if(mPrevUIs[i] == mUis[getTypeInfo<T>()])
             return true;
 
       return false;
