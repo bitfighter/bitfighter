@@ -639,92 +639,94 @@ void ClientGame::idle(U32 timeDelta)
 
    checkConnectionToMaster(timeDelta);   // If no current connection to master, create (or recreate) one
 
-   mClientInfo->updateReturnToGameTimer(timeDelta);
-
-   mCurrentTime += timeDelta;
-
-   computeWorldObjectExtents();
-
-   Move *theMove = getUIManager()->getCurrentMove();       // Get move from keyboard input
-
-   theMove->time = timeDelta + prevTimeDelta;
-
-   if(mConnectionToServer.isValid() && !mGameSuspended)      // i.e. if we're connected to a game server
+   if(mConnectionToServer.isValid())
    {
-      BfObject *localPlayerShip = getLocalPlayerShip();
+      mClientInfo->updateReturnToGameTimer(timeDelta);
 
-      // Don't saturate server with moves...
-      if(theMove->time < 6)     // Why 6?  Can this be related to some other factor?
-         prevTimeDelta += timeDelta;
-      else
-      { 
-         // Limited MaxPendingMoves only allows sending a few moves at a time. 
-         // Changing MaxPendingMoves may break compatibility with old version server/client.
-         // If running at 1000 FPS and 300 ping it will try to add more then MaxPendingMoves, losing control horribly.
-         // Without the unlimited shield fix, the ship would also go super slow motion with over the limit MaxPendingMoves.
-         // With 100 FPS limit, time is never less then 10 milliseconds. (1000 / millisecs = FPS), may be changed in .INI [Settings] MinClientDelay
-         mConnectionToServer->addPendingMove(theMove);
-         prevTimeDelta = 0;
-      }
-     
-      theMove->time = timeDelta;
-      theMove->prepare();           // Pack and unpack the move for consistent rounding errors
+      mCurrentTime += timeDelta;
 
-      const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
+      computeWorldObjectExtents();
 
-      // Visit each game object, handling moves and running its idle method
-      for(S32 i = gameObjects->size() - 1; i >= 0; i--)
+      Move *theMove = getUIManager()->getCurrentMove();       // Get move from keyboard input
+
+      theMove->time = timeDelta + prevTimeDelta;
+
+      if(!mGameSuspended)
       {
-         BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
+         BfObject *localPlayerShip = getLocalPlayerShip();
 
-         if(obj->isDeleted())
-            continue;
-
-         if(obj == localPlayerShip)
-         {
-            obj->setCurrentMove(*theMove);
-            obj->idle(BfObject::ClientIdlingLocalShip);     // on client, object is our control object
-         }
+         // Don't saturate server with moves...
+         if(theMove->time < 6)     // Why 6?  Can this be related to some other factor?
+            prevTimeDelta += timeDelta;
          else
          {
-            Move m = obj->getCurrentMove();
-            m.time = timeDelta;
-            obj->setCurrentMove(m);
-            obj->idle(BfObject::ClientIdlingNotLocalShip);  // on client, object is not our control object
+            // Limited MaxPendingMoves only allows sending a few moves at a time. 
+            // Changing MaxPendingMoves may break compatibility with old version server/client.
+            // If running at 1000 FPS and 300 ping it will try to add more then MaxPendingMoves, losing control horribly.
+            // Without the unlimited shield fix, the ship would also go super slow motion with over the limit MaxPendingMoves.
+            // With 100 FPS limit, time is never less then 10 milliseconds. (1000 / millisecs = FPS), may be changed in .INI [Settings] MinClientDelay
+            mConnectionToServer->addPendingMove(theMove);
+            prevTimeDelta = 0;
          }
-      }
 
-      if(mGameType)
-         mGameType->idle(BfObject::ClientIdlingNotLocalShip, timeDelta);
+         theMove->time = timeDelta;
+         theMove->prepare();           // Pack and unpack the move for consistent rounding errors
 
-      if(localPlayerShip)
-         getUIManager()->setListenerParams(localPlayerShip->getPos(), localPlayerShip->getVel());
+         const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
+
+         // Visit each game object, handling moves and running its idle method
+         for(S32 i = gameObjects->size() - 1; i >= 0; i--)
+         {
+            BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
+
+            if(obj->isDeleted())
+               continue;
+
+            if(obj == localPlayerShip)
+            {
+               obj->setCurrentMove(*theMove);
+               obj->idle(BfObject::ClientIdlingLocalShip);     // on client, object is our control object
+            }
+            else
+            {
+               Move m = obj->getCurrentMove();
+               m.time = timeDelta;
+               obj->setCurrentMove(m);
+               obj->idle(BfObject::ClientIdlingNotLocalShip);  // on client, object is not our control object
+            }
+         }
+
+         if(mGameType)
+            mGameType->idle(BfObject::ClientIdlingNotLocalShip, timeDelta);
+
+         if(localPlayerShip)
+            getUIManager()->setListenerParams(localPlayerShip->getPos(), localPlayerShip->getVel());
 
 
-      // Check to see if there are any items near the ship we need to display help for
-      if(getUIManager()->isShowingInGameHelp() && localPlayerShip != NULL)
-      {
-         static const S32 HelpSearchRadius = 200;
-         Rect searchRect = Rect(localPlayerShip->getPos(), HelpSearchRadius);
-         fillVector.clear();
-         mGameObjDatabase->findObjects((TestFunc)hasRelatedHelpItem, fillVector, searchRect);
+         // Check to see if there are any items near the ship we need to display help for
+         if(getUIManager()->isShowingInGameHelp() && localPlayerShip != NULL)
+         {
+            static const S32 HelpSearchRadius = 200;
+            Rect searchRect = Rect(localPlayerShip->getPos(), HelpSearchRadius);
+            fillVector.clear();
+            mGameObjDatabase->findObjects((TestFunc)hasRelatedHelpItem, fillVector, searchRect);
 
-         if(getUIManager()->isShowingInGameHelp())
+            if(getUIManager()->isShowingInGameHelp())
             for(S32 i = 0; i < fillVector.size(); i++)
             {
                BfObject *obj = static_cast<BfObject *>(fillVector[i]);
                addInlineHelpItem(obj->getObjectTypeNumber(), obj->getTeam(), localPlayerShip->getTeam());
             }
+         }
       }
+
+      processDeleteList(timeDelta);          // Delete any objects marked for deletion
    }
 
-   processDeleteList(timeDelta);                         // Delete any objects marked for deletion
-   
-   mNetInterface->processConnections();                  // Pass updated ship info to the server
+   mNetInterface->processConnections();      // Pass updated ship info to the server
 
    mUIManager->idle(timeDelta);
 }
-
 
 
 void ClientGame::gotServerListFromMaster(const Vector<IPAddress> &serverList)
