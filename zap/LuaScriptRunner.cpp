@@ -938,15 +938,15 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
  */
 //               Fn name    Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
-      METHOD(CLASS, pointCanSeePoint,  ARRAYDEF({{ PT, PT, END }}), 1 ) \
-      METHOD(CLASS, findObjectById,    ARRAYDEF({{ INT, END }}), 1 )    \
-      METHOD(CLASS, findAllObjects,    ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
+      METHOD(CLASS, pointCanSeePoint,      ARRAYDEF({{ PT, PT, END }}), 1 ) \
+      METHOD(CLASS, findObjectById,        ARRAYDEF({{ INT, END }}), 1 )    \
+      METHOD(CLASS, findAllObjects,        ARRAYDEF({{ TABLE, INTx, END }, { INTx, END }, { END }}), 3 ) \
       METHOD(CLASS, findAllObjectsInArea,  ARRAYDEF({{ TABLE, PT, PT, INTS, END }, { PT, PT, INTS, END }}), 2 ) \
-      METHOD(CLASS, addItem,           ARRAYDEF({{ BFOBJ, END }}), 1 )  \
-      METHOD(CLASS, getGameInfo,       ARRAYDEF({{ END }}), 1 )         \
-      METHOD(CLASS, getPlayerCount,    ARRAYDEF({{ END }}), 1 )         \
-      METHOD(CLASS, subscribe,         ARRAYDEF({{ EVENT, END }}), 1 )  \
-      METHOD(CLASS, unsubscribe,       ARRAYDEF({{ EVENT, END }}), 1 )  \
+      METHOD(CLASS, addItem,               ARRAYDEF({{ BFOBJ, END }}), 1 )  \
+      METHOD(CLASS, getGameInfo,           ARRAYDEF({{ END }}), 1 )         \
+      METHOD(CLASS, getPlayerCount,        ARRAYDEF({{ END }}), 1 )         \
+      METHOD(CLASS, subscribe,             ARRAYDEF({{ EVENT, END }}), 1 )  \
+      METHOD(CLASS, unsubscribe,           ARRAYDEF({{ EVENT, END }}), 1 )  \
 
 
 GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);
@@ -1080,8 +1080,11 @@ static void checkFillTable(lua_State *L, S32 size)
  * If a table is not provided, the function will create a table and return it on
  * the stack.
  *
- * @param results (optional) Reusable table into which results can be written.
- * @param objType One or more ObjTypes specifying what types of objects to find.
+ * If no object types are provided, this function will return every object on
+ * the level.
+ *
+ * @param [results] Reusable table into which results can be written.
+ * @param [objType] Zero or more ObjTypes specifying what types of objects to find.
  *
  * @return A reference back to the passed table, or a new table if one was not
  * provided.
@@ -1126,16 +1129,26 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
       lua_pop(L, 1);
    }
 
-   mLuaGridDatabase->findObjects(types, fillVector);
+   const Vector<DatabaseObject *> * results;
+
+   if(types.size() == 0)
+   {
+      results = mLuaGridDatabase->findObjects_fast();
+   }
+   else
+   {
+      mLuaGridDatabase->findObjects(types, fillVector);
+      results = &fillVector;
+   }
 
    // This will guarantee a table at the top of the stack
-   checkFillTable(L, fillVector.size());
+   checkFillTable(L, results->size());
 
    S32 pushed = 0;      // Count of items we put into our table
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < results->size(); i++)
    {
-      static_cast<BfObject *>(fillVector[i])->push(L);
+      static_cast<BfObject *>(results->get(i))->push(L);
       pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }

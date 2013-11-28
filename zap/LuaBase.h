@@ -58,6 +58,7 @@ namespace LuaArgs
    LUA_ARG_TYPE_ITEM( INT,         "Integer"                                      ) \
    LUA_ARG_TYPE_ITEM( INT_GE0,     "Integer >= 0"                                 ) \
    LUA_ARG_TYPE_ITEM( INTS,        "One or more integers"                         ) \
+   LUA_ARG_TYPE_ITEM( INTx,        "Zero or more integers"                        ) \
    LUA_ARG_TYPE_ITEM( NUM,         "Number"                                       ) \
    LUA_ARG_TYPE_ITEM( NUM_GE0,     "Number >= 0"                                  ) \
    LUA_ARG_TYPE_ITEM( STR,         "String"                                       ) \

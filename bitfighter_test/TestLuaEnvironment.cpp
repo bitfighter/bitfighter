@@ -123,4 +123,27 @@ TEST_F(LuaEnvironmentTest, immutability)
 }
 
 
+TEST_F(LuaEnvironmentTest, findAllObjects)
+{
+   EXPECT_TRUE(levelgen->runString("bf:addItem(ResourceItem.new(point.new(0,0)))"));
+   EXPECT_TRUE(levelgen->runString("bf:addItem(ResourceItem.new(point.new(300,300)))"));
+   EXPECT_TRUE(levelgen->runString("bf:addItem(TestItem.new(point.new(200,200)))"));
+
+
+   EXPECT_TRUE(levelgen->runString("t = { }"));
+   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t)"));
+   EXPECT_TRUE(levelgen->runString("assert(#t == 3)"));
+
+   EXPECT_TRUE(levelgen->runString("t = { }"));
+   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
+   EXPECT_TRUE(levelgen->runString("assert(#t == 2)"));
+
+   EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects()"));
+   EXPECT_TRUE(levelgen->runString("assert(#t == 3)"));
+
+   EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects(ObjType.ResourceItem)"));
+   EXPECT_TRUE(levelgen->runString("assert(#t == 2)"));
+}
+
+
 };
