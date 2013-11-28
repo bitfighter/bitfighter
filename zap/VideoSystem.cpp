@@ -440,8 +440,12 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    glLineWidth(gDefaultLineWidth);
 
    // Enable Line smoothing everywhere!  Make sure to disable temporarily for filled polygons and such
-   glEnable(GL_LINE_SMOOTH);
-   //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+   if(settings->getIniSettings()->mSettings.getVal<YesNo>("LineSmoothing"))
+   {
+      glEnable(GL_LINE_SMOOTH);
+      //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+   }
+
    glEnable(GL_BLEND);
 
    // Now set the window position

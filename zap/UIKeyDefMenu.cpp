@@ -289,8 +289,6 @@ void KeyDefMenuUserInterface::render()
       if(errorMsgTimer.getCurrent() < 1000)
          alpha = (F32) errorMsgTimer.getCurrent() / 1000;
 
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
       glColor(Colors::red, alpha);
       drawCenteredString(yPos, 15, errorMsg.c_str());
    }

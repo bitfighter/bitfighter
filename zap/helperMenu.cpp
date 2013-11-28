@@ -104,8 +104,6 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    static const Color baseColor(Colors::red);
 
-   TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on");
-
    S32 displayItems = 0;
 
    // Count how many items we will be displaying -- some may be hidden

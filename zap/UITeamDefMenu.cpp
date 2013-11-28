@@ -209,8 +209,6 @@ void TeamDefUserInterface::render()
       if (errorMsgTimer.getCurrent() < 1000)
          alpha = (F32) errorMsgTimer.getCurrent() / 1000;
 
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
       glColor(Colors::red, alpha);
       drawCenteredString(canvasHeight - vertMargin - 141, fontsize, errorMsg.c_str());
    }
