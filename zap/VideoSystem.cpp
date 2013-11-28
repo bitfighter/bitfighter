@@ -444,10 +444,6 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
    glEnable(GL_BLEND);
 
-#ifndef BF_NO_CONSOLE
-   gConsole.onScreenModeChanged();
-#endif
-
    // Now set the window position
    if(displayMode == DISPLAY_MODE_WINDOWED)
    {
@@ -465,6 +461,12 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
 
    // Re-initialize our fonts because OpenGL textures can be lost upon screen change
    FontManager::reinitialize(settings);
+
+   // This needs to happen after font re-initialization because I think fontstash interferes
+   // with the oglconsole font somehow...
+#ifndef BF_NO_CONSOLE
+   gConsole.onScreenModeChanged();
+#endif
 }
 
 
