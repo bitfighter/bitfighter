@@ -145,6 +145,7 @@ void GameUserInterface::onActivate()
    mLevelInfoDisplayer.clearDisplayTimer();
 
    mLoadoutIndicator.reset();
+   mShowProgressBar = true;               // Causes screen to be black before level is loaded
 
    // Queue up some initial help messages for the new users
 
