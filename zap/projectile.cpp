@@ -495,7 +495,7 @@ S32 Projectile::lua_getVel(lua_State *L)
  */
 S32 Projectile::lua_getWeapon(lua_State *L)
 { 
-   return returnInt(L, mWeaponType);      
+   return returnWeaponType(L, mWeaponType);
 }
 
 
@@ -772,7 +772,7 @@ const char *Burst::luaClassName = "Burst";
 REGISTER_LUA_SUBCLASS(Burst, MoveObject);
 
 
-S32 Burst::lua_getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
+S32 Burst::lua_getWeapon(lua_State *L) { return returnWeaponType(L, mWeaponType); }
 
 
 ////////////////////////////////////////
@@ -1829,7 +1829,7 @@ REGISTER_LUA_SUBCLASS(Seeker, MoveObject);
  * 
  * @return int The index of the weapon used to fire the projectile.
  */
-S32 Seeker::lua_getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
+S32 Seeker::lua_getWeapon(lua_State *L) { return returnWeaponType(L, mWeaponType); }
 
 
 };
