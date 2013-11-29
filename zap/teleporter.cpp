@@ -697,7 +697,7 @@ void Teleporter::computeExtent()
 }
 
 
-inline Point Teleporter::getOrigin() const
+Point Teleporter::getOrigin() const
 {
    return getVert(0);
 }

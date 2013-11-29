@@ -105,7 +105,7 @@ public:
 
    U32 mTeleporterCooldown;
 
-   inline Point getOrigin() const;      // For clarity
+   Point getOrigin() const;      // For clarity
    // Destination management
    S32 getDestCount() const;
    Point getDest(S32 index) const;
