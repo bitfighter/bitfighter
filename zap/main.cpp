@@ -416,7 +416,7 @@ private:
 #ifndef BF_NO_CONSOLE
       gConsole.output(string);
 #else
-      fprintf(stderr, string, NULL);
+      //fprintf(stderr, string, NULL);  // really want stdout?
 #endif
    }
 };
@@ -426,7 +426,9 @@ private:
 ////////////////////////////////////////
 // Our logfiles
 StdoutLogConsumer gStdoutLog;          // Logs to OS console, when there is one
+#ifndef BF_NO_CONSOLE
 OglConsoleLogConsumer gOglConsoleLog;  // Logs to our in-game console, when available
+#endif
 
 FileLogConsumer gMainLog;
 FileLogConsumer gServerLog;            // We'll apply a filter later on, in main()
