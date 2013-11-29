@@ -1,0 +1,423 @@
+#!/usr/bin/env python
+
+import sys
+import subprocess
+import os
+import os.path
+import json
+import logging
+
+logging.basicConfig(format="%(message)s")
+
+try:
+    import configparser
+except:
+    import ConfigParser as configparser
+
+
+# the hard part. check the runtime environment
+
+isQtGui = False
+isGIGtk = False
+isPyGtk = False
+isNotify2 = False
+isDBus = False
+isCmdNotifySend = False
+
+def checkQtGui():
+    logging.info("Trying to load PyQt4")
+    global QApplication, QSystemTrayIcon, QMenu, QIcon, QImage, QTimer, QObject, SIGNAL, isQtGui
+    try:
+        from PyQt4.QtGui import QApplication, QSystemTrayIcon, QMenu, QIcon, QImage
+        from PyQt4.QtCore import QTimer, QObject, SIGNAL
+        isQtGui = True
+    except:
+        pass
+    return isQtGui
+
+def checkGIGtk():
+    logging.info("Trying to load GTK+ via GObject Introspection")
+    global gtk, gobject, GdkPixbuf, isGIGtk
+    try:
+        from gi.repository import Gtk as gtk
+        from gi.repository import GObject as gobject
+        from gi.repository import GdkPixbuf
+        isGIGtk = True
+    except:
+        pass
+    return isGIGtk
+
+def checkPyGtk():
+    logging.info("Trying to load GTK+ via PyGtk (legacy)")
+    global gtk, gobject, isPyGtk
+    try:
+        import pygtk
+        import gtk
+        import gobject
+        isPyGtk = True
+    except:
+        pass
+    return isPyGtk
+
+def checkNotify2():
+    logging.info("Trying to load notify2")
+    global notify2, isNotify2
+    try:
+        import notify2
+        isNotify2 = True
+    except:
+        pass
+    return isNotify2
+
+def checkDBus():
+    logging.info("Trying to load dbus")
+    global dbus, isDBus
+    try:
+        import dbus
+        isDBus = True
+    except:
+        pass
+    return isDBus
+
+def checkCmdNotifySend():
+    logging.info("Trying to find notify-send command")
+    global isCmdNotifySend
+    try:
+        isCmdNotifySend = subprocess.call(["type", "notify-send"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True) == 0
+    finally:
+        return isCmdNotifySend
+
+
+guiCheckers = [checkQtGui, checkGIGtk, checkPyGtk]
+notifyCheckers = [checkNotify2, checkDBus, checkCmdNotifySend]
+
+for check in guiCheckers:
+    if check():
+        break
+else:
+    logging.error("No suitable GUI toolkit found. Install either PyQt4 or GTK+ bindings for Python")
+    exit(1)
+
+for check in notifyCheckers:
+    if check():
+        break
+else:
+    logging.error("No suitable notification interface found. Install Python library notify2 or Python bindings to dbus or notify-send command")
+    exit(1)
+
+
+# Now prepare classes for detected environment
+class TrayAppBase(object):
+    def __init__(self, cmd):
+        self.cmd = cmd
+
+    def formTooltip(self, players):
+        if len(players) > 1:
+            return "{0}\nare playing now".format("\n".join(players))
+        elif len(players):
+            return "{0}\nis playing now".format("\n".join(players))
+        else:
+            return "Nobody is playing now"
+
+    def launch(self, *args):
+        try:
+            subprocess.Popen(self.cmd, shell=True)
+        except:
+            logging.error("Unable to run {0}".format(self.cmd))
+    
+if isQtGui:
+    class SystemTrayApp(TrayAppBase):
+        def __init__(self, cmd, refreshTimeout, iconPath, parent=None):
+            TrayAppBase.__init__(self, cmd)
+            self.eventLoop = 'qt'
+            self.app = QApplication(sys.argv) # this should be done before anything else
+            self.refreshTimeout = refreshTimeout
+            if QIcon.hasThemeIcon(iconPath):
+                icon = QIcon.fromTheme(iconPath)
+            else:
+                icon = QIcon(iconPath)
+            self.statusIcon = QSystemTrayIcon(icon, parent)
+    
+            self.menu = QMenu(parent)
+    
+            exitAction = self.menu.addAction("Exit")
+            exitAction.triggered.connect(self.quit)
+            self.statusIcon.setContextMenu(self.menu)
+            def activate(reason):
+                if reason == QSystemTrayIcon.Trigger:
+                    return self.launch()
+
+            QObject.connect(self.statusIcon,
+                SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), activate)
+
+            self.statusIcon.show()
+
+        def refreshToolTip(self, players):
+            self.statusIcon.setToolTip(self.formTooltip(players))
+            
+        def run(self, refreshFunc):
+            timer = QTimer()
+            timer.timeout.connect(refreshFunc)
+            timer.start(self.refreshTimeout)
+            sys.exit(self.app.exec_())
+
+        def quit(self):
+            sys.exit(0)
+            # self.app.exit(0) # this gives segfault on exit :-/
+        
+
+elif isGIGtk or isPyGtk:
+    class SystemTrayApp(TrayAppBase):
+        def __init__(self, cmd, refreshTimeout, iconPath, parent = None):
+            TrayAppBase.__init__(self, cmd)
+            self.eventLoop = 'glib'
+            self.refreshTimeout = refreshTimeout
+            self.statusIcon = gtk.StatusIcon()
+            self.statusIcon.set_from_file(iconPath)
+            self.statusIcon.connect("activate", self.launch)
+            self.statusIcon.connect("popup-menu", self.rightClickEvent)
+            self.statusIcon.set_visible(True)
+
+        def rightClickEvent(self, icon, button, time):
+            menu = gtk.Menu()
+
+            quit = gtk.MenuItem("Exit")
+        
+            quit.connect("activate", gtk.main_quit)
+        
+            menu.append(quit)
+            menu.show_all()
+
+            if isGIGtk:
+                menuPosition = gtk.StatusIcon.position_menu
+                menu.popup(None, None, menuPosition, self.statusIcon, button, time)
+            else:
+                menuPosition = gtk.status_icon_position_menu
+                menu.popup(None, None, menuPosition, button, time, self.statusIcon)
+    
+        def refreshToolTip(self, players):
+            self.statusIcon.set_tooltip_text(self.formTooltip(players))
+
+        def run(self, refreshFunc):
+            def callback():
+                refreshFunc()
+                return True # otherwise timer stopped
+            gobject.timeout_add(self.refreshTimeout, callback)
+            sys.exit(gtk.main())
+
+if isQtGui:
+    # a portable icon wrapper. Notify2 demands icon class to be compatible with GdkPixbuf so we provide such a compatibility layer
+    class IconWrapper(object):
+        def __init__(self, iconName):
+            if QIcon.hasThemeIcon(iconName):
+                icon = QIcon.fromTheme(iconName)
+            else:
+                icon = QIcon(iconName)
+            size = icon.availableSizes()[0]
+            self.image = icon.pixmap(size).toImage().convertToFormat(QImage.Format_ARGB32)
+            self.image = self.image.rgbSwapped() # otherwise colors are weird :/
+
+        def get_width(self):
+            return self.image.width()
+
+        def get_height(self):
+            return self.image.height()
+
+        def get_rowstride(self):
+            return self.image.bytesPerLine()
+
+        def get_has_alpha(self):
+            return self.image.hasAlphaChannel()
+
+        def get_bits_per_sample(self):
+            return self.image.depth() // self.get_n_channels()
+
+        def get_n_channels(self):
+            if self.image.isGrayscale():
+                return 1
+            elif self.image.hasAlphaChannel():
+                return 4
+            else:
+                return 3; 
+
+        def get_pixels(self):
+            return self.image.constBits().asstring(self.image.numBytes())
+    # end of wrapper class
+
+    def getNotificationIcon(fileName):
+        try:
+            return IconWrapper(fileName)
+        except:
+            return None
+
+elif isGIGtk or isPyGtk:
+    def getNotificationIcon(fileName):
+        try:
+            if isGIGtk:
+                return GdkPixbuf.Pixbuf.new_from_file(fileName)
+            else:
+                return gtk.gdk.pixbuf_new_from_file(fileName)
+        except:
+            return None
+
+
+class UserNotifierBase(object):
+    TITLE = "Bitfighter server"
+    def __init__(self, timeout, iconPath = None):
+        if iconPath:
+            self.icon = getNotificationIcon(iconPath)
+        self.timeout = timeout
+
+    def makeMessage(self, comein, goout):
+        if len(comein) and len(goout):
+            body="{0} came in, {1} went out".format(", ".join(comein), ", ".join(goout))
+        elif len(comein):
+            body="{0} came in".format(", ".join(comein))
+        elif len(goout):
+            body="{0} went out".format(", ".join(goout))
+        return body
+
+if isNotify2:
+    class UserNotifier(UserNotifierBase):
+        def __init__(self, appName, timeout, mainLoop, iconPath):
+            UserNotifierBase.__init__(self, timeout, iconPath)
+            notify2.init(appName, mainLoop)
+            self.notification = None
+
+        def notify(self, comein, goout):
+            body = self.makeMessage(comein, goout)
+            if not self.notification:
+                self.notification = notify2.Notification(self.TITLE, body)
+                if self.icon and self.icon.get_width() > 0:
+                    self.notification.set_icon_from_pixbuf(self.icon)
+                self.notification.timeout = self.timeout
+            else:
+                self.notification.update(self.TITLE, body)
+            self.notification.show()
+
+elif isDBus:
+    class UserNotifier(UserNotifierBase):
+        def __init__(self, appName, timeout, mainLoop, iconPath = None):
+            UserNotifierBase.__init__(self, timeout, iconPath)
+            self.appName = appName
+            # copied from pynotify2
+            if mainLoop == 'glib':
+                from dbus.mainloop.glib import DBusGMainLoop
+                self.mainloop = DBusGMainLoop()
+            elif mainLoop == 'qt':
+                from dbus.mainloop.qt import DBusQtMainLoop
+                self.mainloop = DBusQtMainLoop()
+
+        def notify(self, comein, goout):
+            item = 'org.freedesktop.Notifications'
+            path = '/org/freedesktop/Notifications'
+            interface = 'org.freedesktop.Notifications'
+            iconName = ''
+            actions = []
+            hints = {}
+            if self.icon and self.icon.get_width() > 0:
+                struct = (
+                    self.icon.get_width(),
+                    self.icon.get_height(),
+                    self.icon.get_rowstride(),
+                    self.icon.get_has_alpha(),
+                    self.icon.get_bits_per_sample(),
+                    self.icon.get_n_channels(),
+                    dbus.ByteArray(self.icon.get_pixels())
+                )
+                hints['icon_data'] = struct
+            body = self.makeMessage(comein, goout)
+
+            bus=dbus.SessionBus(self.mainloop)
+            nobj = bus.get_object(item, path)
+            notify = dbus.Interface(nobj, interface)
+            notify.Notify(self.appName, 0, iconName, self.TITLE, body, actions, hints, self.timeout)
+#
+elif isCmdNotifySend:
+    class UserNotifier(UserNotifierBase):
+        def __init__(self, appName, timeout, mainLoop, iconPath = None):
+            UserNotifierBase.__init__(self, timeout, None) # we don't need icon loaded
+            self.appName = appName
+            if iconPath and os.path.exists(iconPath):
+                self.iconPath = os.path.abspath(iconPath) # the path must be absolute
+            else:
+                self.iconPath = iconPath 
+
+        def notify(self, comein, goout):
+            body = self.makeMessage(comein, goout)
+            args = ["notify-send", "--app-name", self.appName, "--expire-time", str(self.timeout)]
+            if self.iconPath:
+                args.append("--icon")
+                args.append(self.iconPath)
+            args.append(self.TITLE)
+            args.append(body)
+            try:
+                subprocess.call(args,  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            except:
+                logging.exception("notify-send ({0}) call failed".format(args))
+
+class PlayersListReceiver(object):
+    def __init__(self, url, notifier, trayIcon):
+        self.players = set()
+        self.url = url
+        self.notifier = notifier
+        self.trayIcon = trayIcon
+        self.refresh()
+        self.trayIcon.refreshToolTip(self.players) # set initial tooltip
+
+    if sys.version_info >= (3, 0):
+        def fetch(self):
+            import urllib.request
+            fp = urllib.request.urlopen(self.url)
+            bytesInf = fp.read()
+            strInf = bytesInf.decode("utf8")
+            fp.close()
+            return strInf
+    else:
+        def fetch(self):
+            import urllib2
+            response = urllib2.urlopen(self.url)
+            return response.read()
+            
+    def refresh(self):
+        try:
+            gameInf = json.loads(self.fetch())
+        except:
+            logging.exception("Unable to fetch data from {0}".format(self.url))
+            return
+        playersNew = set(gameInf["players"])
+        if playersNew != self.players:
+            comein = playersNew.difference(self.players)
+            goout = self.players.difference(playersNew)
+    
+            self.notifier.notify(comein, goout)
+            self.players = playersNew
+            self.trayIcon.refreshToolTip(self.players)
+            
+def main():
+    userConfigDir = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser("~"), '.config'))
+    sysConfigDirs = os.environ.get('XDG_CONFIG_DIRS', '/etc').split(':')
+    configFiles = [os.path.join(d, 'bitfighter.ini') for d in sysConfigDirs + [userConfigDir]]
+    
+    cfg = configparser.SafeConfigParser({
+        'url':      "http://bitfighter.org/bitfighterStatus.json",
+        'iconPath': "./icon.png",
+        'appName':  "Bitfighter Notifier Applet",
+        'notificationTimeout': '5000', # 5 seconds to show notification
+        'refreshInterval': '10000', # 10 seconds between refreshes
+        'cmd': "bitfighter" # command to launch
+        })
+    cfg.read(configFiles)
+    if not "notifier" in cfg.sections():
+        cfg.add_section('notifier') # in case it's not defined in config at all
+
+    # application part
+    trayApp = SystemTrayApp(cfg.get('notifier', 'cmd'), cfg.getint('notifier', 'refreshInterval'), cfg.get('notifier', 'iconPath'))
+    userNotifier = UserNotifier(
+        cfg.get('notifier', 'appName'), cfg.getint('notifier', 'notificationTimeout'),
+        trayApp.eventLoop, cfg.get('notifier', 'iconPath'))
+    plr = PlayersListReceiver(cfg.get('notifier', 'url'), userNotifier, trayApp)
+    trayApp.run(plr.refresh)
+
+if __name__ == '__main__':
+    main()

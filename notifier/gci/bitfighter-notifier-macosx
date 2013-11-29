@@ -1,0 +1,170 @@
+#!/usr/bin/env python
+
+import objc
+from Foundation import *
+from AppKit import *
+from PyObjCTools import NibClassBuilder, AppHelper
+import time
+import sys
+import json
+import logging
+
+logging.basicConfig(format="%(message)s")
+
+try:
+    import configparser
+except:
+    import ConfigParser as configparser
+
+startTime = NSDate.date()
+
+class MountainLionNotification(NSObject):
+    def makeMessage(self, comein, goout):
+        if len(comein) and len(goout):
+            body="{0} came in, {1} went out".format(", ".join(comein), ", ".join(goout))
+        elif len(comein):
+            body="{0} came in".format(", ".join(comein))
+        elif len(goout):
+            body="{0} went out".format(", ".join(goout))
+        return body
+
+
+    def notify(self, comein, goout):
+        NSUserNotification = objc.lookUpClass('NSUserNotification')
+        NSUserNotificationCenter = objc.lookUpClass('NSUserNotificationCenter')
+        notification = NSUserNotification.alloc().init()
+        notification.setTitle_(str( "Bitfighter server"))
+        notification.setInformativeText_(self.makeMessage(comein, goout))
+        NSUserNotificationCenter.defaultUserNotificationCenter().setDelegate_(self)
+        NSUserNotificationCenter.defaultUserNotificationCenter().scheduleNotification_(notification)
+    def notifyNoChange(self):
+        NSUserNotification = objc.lookUpClass('NSUserNotification')
+        NSUserNotificationCenter = objc.lookUpClass('NSUserNotificationCenter')
+        notification = NSUserNotification.alloc().init()
+        notification.setTitle_(str( "Bitfighter server"))
+        notification.setInformativeText_("Nothing changed on the server")
+        NSUserNotificationCenter.defaultUserNotificationCenter().setDelegate_(self)
+        NSUserNotificationCenter.defaultUserNotificationCenter().scheduleNotification_(notification)
+        
+# delegate for setting up NSStatusitem
+
+class PlayersListReceiver(object):
+    def __init__(self, url):
+        self.players = set()
+        self.url = url
+        global mln
+        self.notifier = mln
+        global trayApp
+        self.trayIcon = trayApp
+        self.refresh()
+        self.trayIcon.refreshToolTip(self.players) # set initial tooltip
+
+    if sys.version_info >= (3, 0):
+        def fetch(self):
+            import urllib.request
+            fp = urllib.request.urlopen(self.url)
+            bytesInf = fp.read()
+            strInf = bytesInf.decode("utf8")
+            fp.close()
+            return strInf
+    else:
+        def fetch(self):
+            import urllib2
+            response = urllib2.urlopen(self.url)
+            return response.read()
+            
+    def refresh(self):
+        try:
+            gameInf = json.loads(self.fetch())
+        except:
+            logging.exception("Unable to fetch data from {0}".format(self.url))
+            return
+        playersNew = set(gameInf["players"])
+        
+        if playersNew != self.players:
+            comein = playersNew.difference(self.players)
+            goout = self.players.difference(playersNew)
+    
+            self.notifier.notify(comein, goout)
+            self.players = playersNew
+            self.trayIcon.refreshToolTip(self.players)
+        else:
+            # debug message
+            self.notifier.notifyNoChange()
+              
+class SystemTrayApp(NSObject):
+
+    statusbar = None
+    state = 'idle'
+    statusitem = None
+    
+    def applicationDidFinishLaunching_(self, notification):
+        statusbar = NSStatusBar.systemStatusBar()
+        self.statusitem = statusbar.statusItemWithLength_(NSVariableStatusItemLength)
+        global cfg
+        try:
+            self.statusitem.setImage_(NSImage.alloc().initByReferencingFile_(cfg.get('notifier', 'iconPath')))
+        except:
+            logging.exception("Unable to load icon, use label instead")
+            self.statusitem.setTitle_('Bitfighter server')
+            
+        self.statusitem.setHighlightMode_(1)
+        # Set a tooltip
+        self.statusitem.setToolTip_('Nobody is on server...')
+
+        # Build a very simple menu
+        self.menu = NSMenu.alloc().init()
+
+        # Default event
+        menuitem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_('Exit', 'terminate:', '')
+        self.menu.addItem_(menuitem)
+        # Bind it to the status item
+        self.statusitem.setMenu_(self.menu)
+
+        # self.tick_(None)
+        # Get the timer going
+        self.timer = NSTimer.alloc().initWithFireDate_interval_target_selector_userInfo_repeats_(
+            startTime, cfg.getfloat('notifier', 'refreshInterval') / 1000, self, 'tick:', None, True
+        )
+        NSRunLoop.currentRunLoop().addTimer_forMode_(self.timer, NSDefaultRunLoopMode)
+        self.timer.fire()
+        
+    def formTooltip(self, players):
+        if len(players) > 1:
+            return "{0}\nare playing now".format("\n".join(players))
+        elif len(players):
+            return "{0}\nis playing now".format("\n".join(players))
+        else:
+            return "Nobody is playing now"
+
+    def refreshToolTip(self, players):
+        if self.statusitem:
+            self.statusitem.setToolTip_(self.formTooltip(players))
+
+    def tick_(self, notification):
+        print time.strftime("Refreshing at %a, %d %b %Y %H:%M:%S +0000", time.localtime())
+        global plr
+        plr.refresh()
+
+if __name__ == "__main__":
+    import os.path
+    # set up system statusbar GUI
+    cfg = configparser.SafeConfigParser({
+        'url':      "http://bitfighter.org/bitfighterStatus.json",
+        'iconPath': os.path.abspath("./icon.png"),
+        'appName':  "Bitfighter Notifier Applet",
+        'notificationTimeout': '5000', # 5 seconds to show notification
+        'refreshInterval': '10000', # 10 seconds between refreshes
+        'cmd': "bitfighter" # command to launch
+        })
+                
+    if not "notifier" in cfg.sections():
+        cfg.add_section('notifier') # in case it's not defined in config at all
+    
+    app = NSApplication.sharedApplication()
+    trayApp = SystemTrayApp.alloc().init()
+    app.setDelegate_(trayApp)
+    mln = MountainLionNotification.alloc().init()
+    plr = PlayersListReceiver(cfg.get('notifier', 'url'))
+
+    AppHelper.runEventLoop()

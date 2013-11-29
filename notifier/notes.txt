@@ -1,0 +1,12 @@
+List of wanted features to code:
+
+1) Visual display of if players currently on (or, ideally, how many)  [[my mint one does this, it's nice -- maybe desaturated icon for no players, colored one for yes players]]
+2) Registered players names underlined  [[ may not be possible in all contexts]]
+3) Hover over icon to see current player list
+4) Click on icon to run Bitfighter
+5) Right-click on icon to
+    a) disable/enable active notifications (for less clutter, presumes 1) and/or 3) working)
+    b) disable/enable notices of players leaving
+    c) launch Bitfighter
+    d) close notifier
+6) Generally adheres to standard English spelling and grammar
