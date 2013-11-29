@@ -414,9 +414,9 @@ class OglConsoleLogConsumer : public LogConsumer    // Dumps to oglConsole
 private:
    void writeString(const char *string) {
 #ifndef BF_NO_CONSOLE
-      //gConsole.output(string);
+      gConsole.output(string);
 #else
-      fprintf(stderr, string, NULL);
+      //fprintf(stderr, string, NULL);  // really want stdout?
 #endif
    }
 };
