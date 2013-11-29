@@ -221,7 +221,6 @@ public:
    TNL_DECLARE_RPC(c2sRequestCommanderMap, ());
    TNL_DECLARE_RPC(c2sReleaseCommanderMap, ());
 
-   TNL_DECLARE_RPC(c2sDeploySpybug, ());                       // Client requests a spybug be placed at ship's current location
    TNL_DECLARE_RPC(s2cCreditEnergy, (SignedInt<18> energy));
    TNL_DECLARE_RPC(s2cSetFastRechargeTime, (U32 time));
 
