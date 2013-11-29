@@ -1,58 +1,48 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 --
--- OrbitBot, a simple robot that finds the nearest TestItem and orbits it
--- Note that this relies on line-of-sight navigation, so only good for open levels
+-- AegisBot, a simple robot that detects nearby projectiles and shoots them
 --
 -------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- This is called by the robot's idle routine each tick.
--- This function must be present for the robot to work!
+-------------------------------------------------------------------------------=
 
 -------------------------------------------------------------------------------
 -- This function is called once and should return the robot's name
-
 function getName()
-    return("AegisBot")
-end
-
-
-function main()
-    -- Not much to do
+	return("AegisBot")
 end
 
 -------------------------------------------------------------------------------
 -- This function called every tick
+function onTick() 
+	table.clear(items)
+	bot:findVisibleObjects(items, ObjType.Burst, ObjType.Seeker, ObjType.Mine, ObjType.SpyBug)   -- Find a suitable target
 
-items = {}       -- Reusable container for finding objects
+	local closestItem = findClosest(items)
 
-function onTick()
+	if(closestItem == nil) then   -- Didn't find any bullets
+		return
+	end
 
-    table.clear(items)
-    bot:findVisibleObjects(items, ObjType.Burst, ObjType.Seeker, ObjType.Mine, ObjType.SpyBug)   -- Find a suitable target
+	local angle = getFiringSolution(closestItem)
 
-    local closestItem = findClosest(items)
+	if(angle == nil) then
+		return
+	end
 
-    if(closestItem == nil) then   -- Didn't find any bullets
-        return
-    end
+	bot:setAngle(angle)
+	bot:fireWeapon(Weapon.Phaser)
 
-    local angle = getFiringSolution(closestItem)
-
-    if(angle == nil) then
-        return
-    end
-
-    bot:setAngle(angle)
-    bot:fireWeapon(WeaponInfo.Phaser)
-
-    local weap = closestItem:getWeapon()
-    local weapInfo = WeaponInfo[weap]
-    logprint("Targeting " .. weapInfo.name)
-
+	-- closestItem must be a Weapon object for :getWeapon to work here
+	local weap = closestItem:getWeapon()
+	local weapInfo = WeaponInfo[weap]
+	logprint("Targeting " .. weapInfo.name)
 end
 
 
+-------------------------------------------------------------------------------
+-- This function is called before all other functions, only on robot start-up
+function main()
+	-- Set global objects here
+	items = {}       -- Reusable container for finding objects
+end
