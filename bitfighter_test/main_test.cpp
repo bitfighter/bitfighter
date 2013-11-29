@@ -428,10 +428,10 @@ TEST_F(BfTest, LevelReadingAndItemPropagation)
 
    /////
    // Test metadata propagation
-   EXPECT_STREQ("Bluey", clientGame->getTeam(0)->getName().getString());                                       // Team name
-   EXPECT_STREQ("Test Level",                 clientGame->getGameType()->getLevelName()->getString());         // Quoted in level file
-   EXPECT_STREQ("This is a basic test level", clientGame->getGameType()->getLevelDescription()->getString());  // Quoted in level file
-   EXPECT_STREQ("level creator",              clientGame->getGameType()->getLevelCredits()->getString());      // Not quoted in level file
+   EXPECT_STREQ("Bluey", clientGame->getTeam(0)->getName().getString());                                    // Team name
+   EXPECT_STREQ("Test Level",                 clientGame->getGameType()->getLevelName()->getString());      // Quoted in level file
+   EXPECT_STREQ("This is a basic test level", clientGame->getGameType()->getLevelDescription());            // Quoted in level file
+   EXPECT_STREQ("level creator",              clientGame->getGameType()->getLevelCredits()->getString());   // Not quoted in level file
 }
 
 

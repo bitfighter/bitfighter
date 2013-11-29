@@ -85,7 +85,7 @@ private:
 
    // Info about current level
    StringTableEntry mLevelName;
-   StringTableEntry mLevelDescription;
+   string mLevelDescription;
    StringTableEntry mLevelCredits;
 
    string mScriptName;                 // Name of levelgen script, if any
@@ -290,8 +290,8 @@ public:
    const StringTableEntry *getLevelName() const;
    void setLevelName(const StringTableEntry &levelName);
 
-   const StringTableEntry *getLevelDescription() const;
-   void setLevelDescription(const StringTableEntry &levelDescription);
+   const char *getLevelDescription() const;
+   void setLevelDescription(const string &levelDescription);
 
    const StringTableEntry *getLevelCredits() const;
    void setLevelCredits(const StringTableEntry &levelCredits);
@@ -386,7 +386,7 @@ public:
    virtual void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
 
    virtual void onGhostAvailable(GhostConnection *theConnection);
-   TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, 
+   TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringPtr levelDesc, StringPtr musicName, S32 teamScoreLimit,
                                      StringTableEntry levelCreds, S32 objectCount, 
                                      bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId));
    TNL_DECLARE_RPC(s2cAddWalls, (Vector<F32> barrier, F32 width, bool solid));

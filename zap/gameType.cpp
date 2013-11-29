@@ -193,7 +193,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
    }
    else if(key == "Level Descr")
       return boost::shared_ptr<MenuItem>(new TextEntryMenuItem("Level Descr:", 
-                                                              mLevelDescription.getString(), 
+                                                              mLevelDescription, 
                                                               "", 
                                                               "A brief description of the level",                     
                                                               MAX_GAME_DESCR_LEN));
@@ -2052,10 +2052,10 @@ void GameType::addAdminGameMenuOptions(MenuUserInterface *menu)
 // Broadcast info about the current level... code gets run on client, obviously
 // Note that if we add another arg to this, we need to further expand FunctorDecl methods in tnlMethodDispatch.h
 // Also serves to tell the client we're on a new level.
-GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, 
+GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringPtr levelDesc, StringPtr musicName, S32 teamScoreLimit,
                                                 StringTableEntry levelCreds, S32 objectCount, 
                                                 bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId),
-                                            (levelName, levelDesc, teamScoreLimit, 
+                                            (levelName, levelDesc, musicName, teamScoreLimit,
                                                 levelCreds, objectCount,  
                                                 levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled, levelDatabaseId))
 {
@@ -2506,7 +2506,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
 
-   s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, mGame->mObjectsLoaded, 
+   s2cSetLevelInfo(mLevelName, mLevelDescription.c_str(), "music name here", mWinningScore, mLevelCredits, mGame->mObjectsLoaded, 
                    mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId());
 
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
@@ -4107,13 +4107,13 @@ void GameType::setLevelName(const StringTableEntry &levelName)
 }
 
 
-const StringTableEntry *GameType::getLevelDescription() const
+const char *GameType::getLevelDescription() const
 {
-   return &mLevelDescription;
+   return mLevelDescription.c_str();
 }
 
 
-void GameType::setLevelDescription(const StringTableEntry &levelDescription)
+void GameType::setLevelDescription(const string &levelDescription)
 {
    mLevelDescription = levelDescription;
 }

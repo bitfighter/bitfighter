@@ -915,7 +915,7 @@ string Game::toLevelCode() const
    str += string(gameType->toLevelCode() + "\n");
 
    str += string("LevelName ")        + writeLevelString(gameType->getLevelName()->getString()) + "\n";
-   str += string("LevelDescription ") + writeLevelString(gameType->getLevelDescription()->getString()) + "\n";
+   str += string("LevelDescription ") + writeLevelString(gameType->getLevelDescription()) + "\n";
    str += string("LevelCredits ")     + writeLevelString(gameType->getLevelCredits()->getString()) + "\n";
 
    if(getLevelDatabaseId())
@@ -998,7 +998,7 @@ void Game::onReadLevelNameParam(S32 argc, const char **argv)
 void Game::onReadLevelDescriptionParam(S32 argc, const char **argv)
 {
    string s = getString(argc, argv);
-   getGameType()->setLevelDescription(s.substr(0, MAX_GAME_DESCR_LEN).c_str());
+   getGameType()->setLevelDescription(s.substr(0, MAX_GAME_DESCR_LEN));
 }
 
 

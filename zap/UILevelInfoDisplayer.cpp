@@ -70,7 +70,7 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
 
     // Only render these when they are not empty
    bool showCredits = gameType->getLevelCredits()->isNotNull();    
-   bool showDescr   = gameType->getLevelDescription()->isNotNull();
+   bool showDescr   = strcmp(gameType->getLevelDescription(), "") != 0;
 
    const char *title   = gameType->getLevelName()->isNotNull() ? gameType->getLevelName()->getString() : "Unnamed Level";
    const S32 titleSize = 30;
@@ -150,7 +150,7 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
 
 
 
-   const char *descr           = gameType->getLevelDescription()->getString();
+   const char *descr           = gameType->getLevelDescription();
    const S32 descriptionSize   = 20;
    const S32 descriptionHeight = showDescr ? descriptionSize + 8 : 0;
 
