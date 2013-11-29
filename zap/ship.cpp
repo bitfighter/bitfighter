@@ -130,6 +130,8 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    mShapeType = ShipShape::Normal;
 #endif
 
+   mLoadout.setLoadout(DefaultLoadout);
+
    // Added to keep the old loadout and keep the currently selected weapon. (Ship delete/new on player's respawn)
    if(clientInfo && clientInfo->getOldLoadout().getModule(0) != ModuleNone)
       mLoadout = clientInfo->getOldLoadout();
@@ -192,8 +194,6 @@ void Ship::initialize(const Point &pos)
 #endif
 
    mEnergy = (S32) ((F32) EnergyMax * .80);     // Start off with 80% energy
-
-   mLoadout.setLoadout(DefaultLoadout);
 
    mCooldownNeeded = false;
 
