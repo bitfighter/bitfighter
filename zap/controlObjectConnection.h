@@ -18,6 +18,16 @@ using namespace TNL;
 namespace Zap
 {
 
+struct ControlObjectData : public Move
+{
+   S32 mEnergy;
+   S32 mFireTimer;
+   U32 mFastRechargeTimer;
+   U32 mSpyBugPlacementTimer;
+   bool mCooldownNeeded;
+   bool mFastRecharging;
+};
+
 class BfObject;
 
 class ControlObjectConnection: public GhostConnection    // only child class is GameConnection...
@@ -31,7 +41,8 @@ private:
       MaxMoveTimeCredit = 512,
    };
 
-   Vector<Move> pendingMoves;
+
+   Vector<ControlObjectData> pendingMoves;
    SafePtr<BfObject> controlObject;
 
    U32 mLastClientControlCRC;

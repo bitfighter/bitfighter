@@ -661,7 +661,7 @@ void Ship::idle(IdleCallPath path)
          findRepairTargets();       
 
    // Process weapons and modules on controlled objects; handles all the energy reductions as well
-   if(path == ServerProcessingUpdatesFromClient || path == ClientIdlingLocalShip)
+   if(path == ServerProcessingUpdatesFromClient || path == ClientIdlingLocalShip || path == ClientReplayingPendingMoves)
    {
       mFastRechargeTimer.update(mCurrentMove.time);
       mFastRecharging = mFastRechargeTimer.getCurrent() == 0;
@@ -940,17 +940,17 @@ void Ship::processModules()
          // Sensor module needs to place a spybug
          if(i == ModuleSensor &&  
                mSpyBugPlacementTimer.getCurrent() == 0 &&        // Prevent placement too fast
-               mEnergy > moduleInfo->getPrimaryPerUseCost() &&   // Have enough energy
-               isClient())                                       // Is happening on client side
+               mEnergy > moduleInfo->getPrimaryPerUseCost())     // Have enough energy
          {
-            GameConnection *cc = getControllingClient();
 
-            if(cc)
+            if(isClient())
             {
-               mSpyBugPlacementTimer.reset();
                mEnergy -= moduleInfo->getPrimaryPerUseCost();
-               cc->c2sDeploySpybug();
+               mSpyBugPlacementTimer.reset();
             }
+            else
+               deploySpybug();
+
          }
       }
 
@@ -1260,6 +1260,26 @@ void Ship::computeMaxFireDelay()
 
 const U32 negativeFireDelay = 123;  // how far into negative we are allowed to send.
 // MaxFireDelay + negativeFireDelay, 900 + 123 = 1023, so writeRangedU32 are sending full range of 10 bits of information.
+
+
+void Ship::setState(ControlObjectData *state)
+{
+   mEnergy = state->mEnergy;
+   mFireTimer = state->mFireTimer;
+   mFastRechargeTimer.reset(state->mFastRechargeTimer, mFastRechargeTimer.getPeriod());
+   mSpyBugPlacementTimer.reset(state->mSpyBugPlacementTimer, mSpyBugPlacementTimer.getPeriod());
+   mCooldownNeeded = state->mCooldownNeeded;
+   mFastRecharging = state->mFastRecharging;
+}
+void Ship::getState(ControlObjectData *state) const
+{
+   state->mEnergy = mEnergy;
+   state->mFireTimer = mFireTimer;
+   state->mFastRechargeTimer = mFastRechargeTimer.getCurrent();
+   state->mSpyBugPlacementTimer = mSpyBugPlacementTimer.getCurrent();
+   state->mCooldownNeeded = mCooldownNeeded;
+   state->mFastRecharging = mFastRecharging;
+}
 
 void Ship::writeControlState(BitStream *stream)
 {

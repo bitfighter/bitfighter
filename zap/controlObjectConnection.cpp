@@ -7,6 +7,8 @@
 #include "BfObject.h"
 #include "game.h"
 
+#include "ship.h"
+
 #include <math.h>
 
 namespace Zap
@@ -86,7 +88,13 @@ U32 ControlObjectConnection::getControlCRC()
 void ControlObjectConnection::addPendingMove(Move *theMove)
 {
    if(pendingMoves.size() < MaxPendingMoves)
-      pendingMoves.push_back(*theMove);
+   {
+      ControlObjectData data;
+      *((Move*)(&data)) = *theMove;
+      if(controlObject.isValid() && controlObject->getObjectTypeNumber() == PlayerShipTypeNumber)
+         ((Ship*)controlObject.getPointer())->getState(&data);
+      pendingMoves.push_back(data);
+   }
 }
 
 
@@ -220,10 +228,18 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
          if(controlObjectValid)
          {
             U32 ghostIndex = bstream->readInt(GhostConnection::GhostIdBitSize);
+            BfObject *prevControlObject = controlObject.getPointer();
             controlObject = (BfObject *) resolveGhost(ghostIndex);
             TNLAssert(controlObject, "controlObject is NULL, bstream will be broken");
             if(controlObject)
+            {
+               if(controlObject.isValid() &&
+                  controlObject.getPointer() == prevControlObject &&
+                  controlObject->getObjectTypeNumber() == PlayerShipTypeNumber &&
+                  pendingMoves.size() != 0)
+                     ((Ship*)controlObject.getPointer())->setState(&pendingMoves[0]);
                controlObject->readControlState(bstream);
+            }
             mServerPosition = controlObject->getPos();
             replayControlObjectMoves = true;
          }
@@ -238,6 +254,8 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
    {
       for(S32 i = 0; i < pendingMoves.size(); i++)
       {
+         if(controlObject.isValid() && controlObject->getObjectTypeNumber() == PlayerShipTypeNumber)
+            ((Ship*)controlObject.getPointer())->getState(&pendingMoves[i]);
          Move theMove = pendingMoves[i];
          theMove.prepare();
          controlObject->setCurrentMove(theMove);

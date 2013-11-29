@@ -28,6 +28,7 @@ class MountableItem;
 class SpeedZone;
 class Statistics;
 class Teleporter;
+struct ControlObjectData;
 
 // class derived_class_name: public base_class_name
 class Ship : public MoveObject
@@ -273,6 +274,9 @@ public:
 
    static void computeMaxFireDelay();
 
+   void setState(ControlObjectData *state);
+   void getState(ControlObjectData *state) const;
+
    void writeControlState(BitStream *stream);
    void readControlState(BitStream *stream);
 
@@ -299,8 +303,8 @@ public:
    //// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Ship);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_isAlive(lua_State *L);
