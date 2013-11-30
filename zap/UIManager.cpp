@@ -330,8 +330,9 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
 
       case NetConnection::ReasonTimedOut:
          // Avoid spamming the player if they are not connected to the Internet
-         if(reason == NetConnection::ReasonTimedOut && mUserHasSeenTimeoutMessage)
+         if(mUserHasSeenTimeoutMessage)
             return;
+
          if(wasFullyConnected)
             return;
 
