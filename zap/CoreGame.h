@@ -119,6 +119,7 @@ private:
    Timer mHeartbeatTimer;        // Client-side timer
    Timer mExplosionTimer;        // Client-side timer
    Timer mAttackedWarningTimer;  // Server-side timer
+   S32 mRotateSpeed;
 
 protected:
    enum MaskBits {

@@ -70,7 +70,7 @@ function main()
 	
 	-- Iterate through them and only adjust those of the specified type
 	for k, currentObject in pairs(allObjects) do
-		if currentObject:getClassId() == objectType then
+		if currentObject:getObjType() == objectType then
 			currentObject:setSelected(select)
 		end
 	end
