@@ -348,6 +348,8 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
 
       case NetConnection::ReasonSelfDisconnect:
          // No errors when client disconnect (this happens when quitting bitfighter normally)
+         return;
+
       case NetConnection::ReasonAnonymous:
          // Anonymous connections are disconnected quickly, usually after retrieving some data
          return;
