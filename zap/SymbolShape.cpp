@@ -407,7 +407,7 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label
 
    if(buttonSymbol == Joystick::ButtonSymbolNone)
       symbols.push_back(SymbolShapePtr(new SymbolText(label, LabelSize + shapePtr->getLabelSizeAdjustor(label, LabelSize), 
-                                                      KeyContext, shapePtr->getLabelOffset(label, LabelSize))));
+                                                      KeyContext, shapePtr->getLabelOffset(label, LabelSize) + Point(0,-1))));
    else
       symbols.push_back(SymbolShapePtr(new SymbolButtonSymbol(buttonSymbol)));
 
