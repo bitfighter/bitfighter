@@ -1483,13 +1483,13 @@ static Vector<bool> promiscuousSnapper;
 static Vector<S32> selectedWalls;
 
 
-static void markSelectedObjectsAsUnsnapped_init(S32 itemCount, bool markProimscuous)
+static void markSelectedObjectsAsUnsnapped_init(S32 itemCount, bool calledDuringDragInitialization)
 {
    selectedSnappedEngrObjects.clear();
    selectedWalls.clear();
    selectedSnappedEngrObjectIndices.clear();
 
-   if(markProimscuous)
+   if(calledDuringDragInitialization)
    {
       promiscuousSnapper.resize(itemCount);
       for(S32 i = 0; i < itemCount; i++)
@@ -1498,7 +1498,7 @@ static void markSelectedObjectsAsUnsnapped_init(S32 itemCount, bool markProimscu
 }
 
 
-static void markSelectedObjectAsUnsnapped_body(BfObject *obj, S32 index, bool markProimscuous)
+static void markSelectedObjectAsUnsnapped_body(BfObject *obj, S32 index, bool calledDuringDragInitialization)
 {
    if(obj->isSelected())
    {
@@ -1527,7 +1527,7 @@ static void markSelectedObjectAsUnsnapped_body(BfObject *obj, S32 index, bool ma
 }
 
 
-static void markSelectedObjectAsUnsnapped_done(bool markPromiscuous)
+static void markSelectedObjectAsUnsnapped_done(bool calledDuringDragInitialization)
 {
    // Now review all the engineer items that are being dragged and see if the wall they are mounted to is being
    // dragged as well.  If it is, keep them snapped; if not, mark them as unsnapped. 
@@ -1536,7 +1536,7 @@ static void markSelectedObjectAsUnsnapped_done(bool markPromiscuous)
       bool snapped = selectedWalls.contains(selectedSnappedEngrObjects[i]->getMountSegment()->getOwner());
       selectedSnappedEngrObjects[i]->setSnapped(snapped);
 
-      if(snapped && markPromiscuous)
+      if(snapped && calledDuringDragInitialization)
          promiscuousSnapper[selectedSnappedEngrObjectIndices[i]] = false;
    }
 }
@@ -1554,15 +1554,15 @@ void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<boost::sha
 }
 
 
-void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList, bool markPromiscuous)
+void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList, bool calledDuringDragInitialization)
 {
-   markSelectedObjectsAsUnsnapped_init(objList->size(), markPromiscuous);
+   markSelectedObjectsAsUnsnapped_init(objList->size(), calledDuringDragInitialization);
 
    // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
    for(S32 i = 0; i < objList->size(); i++)
-      markSelectedObjectAsUnsnapped_body(static_cast<BfObject *>(objList->get(i)), i, markPromiscuous);
+      markSelectedObjectAsUnsnapped_body(static_cast<BfObject *>(objList->get(i)), i, calledDuringDragInitialization);
 
-   markSelectedObjectAsUnsnapped_done(markPromiscuous);
+   markSelectedObjectAsUnsnapped_done(calledDuringDragInitialization);
 }
 
 
