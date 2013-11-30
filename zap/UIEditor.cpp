@@ -1413,7 +1413,7 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
 
    if(mDraggingObjects)
    {  
-      markSelectedObjectsAsUnsnapped(objList, false);
+      //markSelectedObjectsAsUnsnapped(objList, false);
 
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice, regardless of whether snapping is on or off
       if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
