@@ -293,8 +293,6 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
    const S32 leftLineOverhangAmount = 4;
    const S32 visualVerticalTextAlignmentHackyFacty = 6;     // This is that little gap btwn the gray vert and horiz lines
    const S32 farLeftCoord = smallTextRPos - max(wt, wb) - leftLineOverhangAmount;
-   // Adjusting this topCord will control how much space above the horiz gray line there is before the flags or other junk is drawn
-   const S32 topCoord = timeTop - 2 * grayLineVertPadding - (S32)gDefaultLineWidth - 8;
 
    if(render)
    {
@@ -302,6 +300,9 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
       drawHorizLine(farLeftCoord, rightAlignCoord, timeTop - grayLineVertPadding);
       drawVertLine(grayLinePos, timeTop + visualVerticalTextAlignmentHackyFacty, timeTop + timeTextSize);
    }
+
+   // Adjusting this topCord will control how much space above the horiz gray line there is before the flags or other junk is drawn
+   const S32 topCoord = timeTop - 2 * grayLineVertPadding - (S32)gDefaultLineWidth - 8;
 
    return Point(farLeftCoord, topCoord);
 }
