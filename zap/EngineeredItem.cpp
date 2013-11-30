@@ -632,7 +632,7 @@ void EngineeredItem::setSnapped(bool snapped)
 }
 
 
-bool EngineeredItem::isSnapped()
+bool EngineeredItem::isSnapped() const
 {
    return mSnapped;
 }

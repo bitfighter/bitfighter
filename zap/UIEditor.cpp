@@ -1413,20 +1413,45 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
 
    if(mDraggingObjects)
    {
+      Vector<EngineeredItem *> selectedSnappedEngrObjects;
+      Vector<S32> selectedWalls;
+
       // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
       for(S32 i = 0; i < objList->size(); i++)
       {
          BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
          if(obj->isSelected())
-            obj->setSnapped(false);
+         {
+            if(isEngineeredType(obj->getObjectTypeNumber()))
+            {
+               EngineeredItem *engrObj = static_cast<EngineeredItem *>(objList->get(i));
+               if(engrObj->getMountSegment() && engrObj->isSnapped())
+                  selectedSnappedEngrObjects.push_back(engrObj);
+               else
+                  obj->setSnapped(false);
+            }
+            else        // Not an engineered object
+            {
+               if(isWallItemType(obj->getObjectTypeNumber()))
+               {
+                  WallItem *wallItem = static_cast<WallItem *>(objList->get(i));
+                  selectedWalls.push_back(wallItem->getSerialNumber());
+               }
+               obj->setSnapped(false);
+            }
+         }
       }
+
+      // Now review all the engineer items that are being dragged and see if the wall they are mounted to is being
+      // dragged as well.  If it is, keep them snapped; if not, mark them as unsnapped. 
+      for(S32 i = 0; i < selectedSnappedEngrObjects.size(); i++)
+         selectedSnappedEngrObjects[i]->setSnapped(selectedWalls.contains(selectedSnappedEngrObjects[i]->getMountSegment()->getOwner()));
+
    
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice, regardless of whether snapping is on or off
       if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
-      {
          return snapPointToLevelGrid(p);
-      }
    }
 
    F32 minDist = 255 / mCurrentScale;    // 255 just seems to work well, not related to gridsize; only has an impact when grid is off
@@ -3031,8 +3056,9 @@ void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOff
    {
       if(isEngineeredType(objList->get(i)->getObjectTypeNumber()))
       {
+         // Don't try to mount any items that are either 1) not selected or 2) already marked as snapped
          EngineeredItem *engrObj = static_cast<EngineeredItem *>(objList->get(i));
-         if(!engrObj->isSelected())
+         if(!engrObj->isSelected() || engrObj->isSnapped())
             continue;
 
          engrObj->mountToWall(snapPointToLevelGrid(mMoveOrigins[i] + cumulativeOffset), wallSegmentManager);

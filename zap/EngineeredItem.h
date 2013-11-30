@@ -124,7 +124,7 @@ public:
 
    //// Is item sufficiently snapped?  
    void setSnapped(bool snapped);
-   bool isSnapped();
+   bool isSnapped() const;
 
 
    /////
