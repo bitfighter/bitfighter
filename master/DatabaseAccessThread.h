@@ -8,38 +8,33 @@
 
 
 #include "tnlThread.h"
+#include "tnlLog.h"
 
 namespace Master
 {
 
-class MasterSettings;
+class ThreadEntry : public RefPtrData
+{
+public:
+   virtual ~ThreadEntry() {};
+
+   virtual void run() = 0;    // runs on seperate thread
+   virtual void finish() {};  // finishes the entry on primary thread after "run()" is done to avoid 2 threads crashing in to the same network TNL and others.
+};
 
 class DatabaseAccessThread : public TNL::Thread
 {
-public:
-
-   class BasicEntry : public RefPtrData
-   {
-   protected:
-      const MasterSettings *mSettings;
-
-   public:
-      BasicEntry(const MasterSettings *settings) { mSettings = settings; } // Quickie constructor
-
-      virtual void run() = 0;    // runs on seperate thread
-      virtual void finish() {};  // finishes the entry on primary thread after "run()" is done to avoid 2 threads crashing in to the same network TNL and others.
-   };
-
 private:
    U32 mEntryStart;
    U32 mEntryThread;
    U32 mEntryEnd;
 
    bool mRunning;
+   bool mThreadActive;
 
-   static const U32 mEntrySize = 32;
+   static const U32 mEntrySize = 128;
 
-   RefPtr<BasicEntry> mEntry[mEntrySize];
+   RefPtr<ThreadEntry> mEntry[mEntrySize];
 
 public:
    DatabaseAccessThread() // Constructor
@@ -49,10 +44,11 @@ public:
       mEntryEnd = 0;
 
       mRunning = true;
+      mThreadActive = false;
    }
 
 
-   void addEntry(BasicEntry *entry)
+   void addEntry(ThreadEntry *entry)
    {
       U32 entryEnd = mEntryEnd + 1;
 
@@ -67,24 +63,31 @@ public:
 
       mEntry[mEntryEnd] = entry;
       mEntryEnd = entryEnd;
+      if(!mThreadActive)
+      {
+         mThreadActive = true;
+         start();
+      }
    }
 
 
    U32 run()
    {
+      mThreadActive = true;
       while(mRunning)
       {
-         Platform::sleep(50);
-         while(mEntryThread != mEntryEnd)
+         if(mEntryThread != mEntryEnd)
          {
             mEntry[mEntryThread]->run();
             mEntryThread++;
             if(mEntryThread >= mEntrySize)
                mEntryThread = 0;
          }
+         else
+            Platform::sleep(50);
       }
 
-      delete this;
+      mThreadActive = false;
 
       return 0;
    }
@@ -106,7 +109,15 @@ public:
    void terminate()
    {
       mRunning = false;
+      while(mThreadActive)
+         Platform::sleep(50);
    }
+
+   ~DatabaseAccessThread()
+   {
+      terminate();
+   }
+
 };
 
 

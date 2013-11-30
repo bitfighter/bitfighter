@@ -1025,7 +1025,7 @@ const Vector<Point> *WallSegment::getTriangulatedFillPoints() { return &mTriangu
 
 const Vector<Point> *WallSegment::getCollisionPoly() const
 {
-   return &mEdges;
+   return &mCorners;
 }
 
 

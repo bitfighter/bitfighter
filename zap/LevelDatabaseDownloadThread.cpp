@@ -27,25 +27,12 @@ LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(string levelId, ClientG
    : mLevelId(levelId), 
      mGame(game)
 {
-   // Do nothing
-}
-
-
-// Destructor
-LevelDatabaseDownloadThread::~LevelDatabaseDownloadThread()    
-{
-   // Do nothing
-}
-
-
-U32 LevelDatabaseDownloadThread::run()
-{
-   char url[UrlLength];
-
-   string levelFileName = "db_" + mLevelId + ".level";
+   errorNumber = 0;
+   levelFileName = "db_" + mLevelId + ".level";
 
    FolderManager *fm = mGame->getSettings()->getFolderManager();
-   string filePath = joindir(fm->levelDir, levelFileName);
+   levelDir = fm->levelDir;
+   string filePath = joindir(levelDir, levelFileName);
 
    if(fileExists(filePath))
    {
@@ -57,69 +44,73 @@ U32 LevelDatabaseDownloadThread::run()
       else     // File exists and is not on the skip list... show an error message
       {
          mGame->displayErrorMessage("!!! Already have a file called %s on the server.  Download aborted.", filePath.c_str());
-         delete this;
-         return 0;
+         errorNumber = 100;
+         return;
       }
    }
 
 
    mGame->displaySuccessMessage("Downloading %s", mLevelId.c_str());
+}
+
+
+// Destructor
+LevelDatabaseDownloadThread::~LevelDatabaseDownloadThread()    
+{
+   // Do nothing
+}
+
+
+void LevelDatabaseDownloadThread::run()
+{
+   if(errorNumber == 100)
+      return;
+
    dSprintf(url, UrlLength, (HttpRequest::LevelDatabaseBaseUrl + LevelRequest).c_str(), mLevelId.c_str());
    HttpRequest req(url);
    
    if(!req.send())
    {
-      mGame->displayErrorMessage("!!! Error connecting to server");
-      delete this;
-      return 0;
+      dSprintf(url, UrlLength, "!!! Error connecting to server");
+      errorNumber = 1;
+      return;
    }
 
    if(req.getResponseCode() != HttpRequest::OK)
    {
-      mGame->displayErrorMessage("!!! Server returned an error: %d", req.getResponseCode());
-      delete this;
-      return 0;
+      dSprintf(url, UrlLength, "!!! Server returned an error: %d", req.getResponseCode());
+      errorNumber = 1;
+      return;
    }
 
    string levelCode = req.getResponseBody();
 
+   string filePath = joindir(levelDir, levelFileName);
    if(writeFile(filePath, levelCode))
    {
-      mGame->displaySuccessMessage("Saved to %s", levelFileName.c_str());
-      if(gServerGame)
-      {
-    	  LevelInfo levelInfo;
-    	  levelInfo.filename = levelFileName;
-        levelInfo.folder = fm->levelDir;
-
-    	  if(gServerGame->populateLevelInfoFromSource(filePath, levelInfo))
-        {
-    	     gServerGame->addLevel(levelInfo);
-           gServerGame->sendLevelListToLevelChangers(string("Level ") + levelInfo.mLevelName.getString() + " added to server");
-        }
-      }
+      // Success
    }
    else  // File writing went bad
    {
-      mGame->displayErrorMessage("!!! Could not write to %s", levelFileName.c_str());
-      delete this;
-      return 0;
+      dSprintf(url, UrlLength, "!!! Could not write to %s", levelFileName.c_str());
+      errorNumber = 1;
+      return;
    }
 
    dSprintf(url, UrlLength, (HttpRequest::LevelDatabaseBaseUrl + LevelgenRequest).c_str(), mLevelId.c_str());
    req = HttpRequest(url);
    if(!req.send())
    {
-      mGame->displayErrorMessage("!!! Error connecting to server");
-      delete this;
-      return 0;
+      dSprintf(url, UrlLength, "!!! Error connecting to server", levelFileName.c_str());
+      errorNumber = 2;
+      return;
    }
 
    if(req.getResponseCode() != HttpRequest::OK)
    {
-      mGame->displayErrorMessage("!!! Server returned an error: %d", req.getResponseCode());
-      delete this;
-      return 0;
+      dSprintf(url, UrlLength, "!!! Server returned an error: %d", req.getResponseCode());
+      errorNumber = 2;
+      return;
    }
 
    string levelgenCode = req.getResponseBody();
@@ -134,21 +125,51 @@ U32 LevelDatabaseDownloadThread::run()
       // trim the filename line before writing
       levelgenCode = levelgenCode.substr(breakIndex + 2, levelgenCode.length());
 
-      FolderManager *fm = mGame->getSettings()->getFolderManager();
-      filePath = joindir(fm->levelDir, levelgenFileName);
+      filePath = joindir(levelDir, levelgenFileName);
       if(writeFile(filePath, levelgenCode))
       {
-         mGame->displaySuccessMessage("Saved to %s", levelgenFileName.c_str());
+         // Success
       }
       else
       {
-         mGame->displayErrorMessage("!!! Could not write to %s", levelgenFileName.c_str());
+         dSprintf(url, UrlLength, "!!! Server returned an error: %d", req.getResponseCode());
+         errorNumber = 2;
+         return;
       }
    }
-   delete this;
-   return 0;
 }
+void LevelDatabaseDownloadThread::finish()
+{
+   if(errorNumber == 100)
+      return;
 
+   if(errorNumber == 2)
+      mGame->displayErrorMessage("!!! Downloaded level without levelgen");
+
+   if(errorNumber != 0)
+      mGame->displayErrorMessage("%s", url);
+   else
+   {
+      mGame->displaySuccessMessage("Saved to %s", levelFileName.c_str());
+      if(levelGenFileName.length() != 0)
+         mGame->displaySuccessMessage("Saved to %s", levelGenFileName.c_str());
+
+      if(gServerGame)
+      {
+         LevelInfo levelInfo;
+         levelInfo.filename = levelFileName;
+         levelInfo.folder = levelDir;
+
+         string filePath = joindir(levelDir, levelFileName);
+         if(gServerGame->populateLevelInfoFromSource(filePath, levelInfo))
+         {
+            gServerGame->addLevel(levelInfo);
+            gServerGame->sendLevelListToLevelChangers(string("Level ") + levelInfo.mLevelName.getString() + " added to server");
+         }
+      }
+   }
+
+}
 
 }
 

@@ -25,11 +25,16 @@
 #include <fstream>
 #include <sstream>
 
+#include "../master/DatabaseAccessThread.h"
 
 using namespace TNL;
 
 namespace Zap
 {
+
+
+Master::DatabaseAccessThread gSecondaryThread;
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -1128,7 +1133,7 @@ void Game::processAnonymousMasterConnection()
 // Called by both ClientGame::idle and ServerGame::idle
 void Game::idle(U32 timeDelta)
 {
-   // Do nothing
+   gSecondaryThread.idle();
 }
 
 

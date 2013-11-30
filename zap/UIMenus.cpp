@@ -513,7 +513,7 @@ void MenuUserInterface::processMouse()
          if(!mScrollTimer.getCurrent() && mFirstVisibleItem > 0)
          {
             mFirstVisibleItem--;
-            mScrollTimer.reset(100);
+            mScrollTimer.reset(MOUSE_SCROLL_INTERVAL);
          }
          selectedIndex = mFirstVisibleItem;
       }
@@ -2412,6 +2412,7 @@ void LevelMenuSelectUserInterface::onActivate()
 
 void LevelMenuSelectUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
    if(mStillTypingNameTimer.update(timeDelta))
       mNameSoFar = "";
 }

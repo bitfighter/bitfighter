@@ -8,6 +8,7 @@
 
 #include "tnlThread.h"
 #include <string>
+#include "../master/DatabaseAccessThread.h"
 
 using namespace std;
 using namespace TNL;
@@ -18,7 +19,7 @@ namespace Zap
 class ClientGame;
 class EditorUserInterface;
 
-class LevelDatabaseUploadThread : public TNL::Thread
+class LevelDatabaseUploadThread : public Master::ThreadEntry
 {
 private:
    string mLevelCode;
@@ -27,6 +28,18 @@ private:
 
    S32 done(EditorUserInterface* editor, const string &message, bool success);
 
+   string uploadrequest;
+   string username;
+   string user_password;
+   string content;
+   string screenshot;
+   string screenshot2;
+   string levelgen;
+
+   S32 errorNumber;
+   S32 responseCode;
+   string responseBody;
+
 public:
    static const string UploadScreenshotFilename;
    static const string UploadRequest;
@@ -34,7 +47,8 @@ public:
    LevelDatabaseUploadThread(ClientGame* game);
    virtual ~LevelDatabaseUploadThread();
 
-   U32 run();
+   void run();
+   void finish();
 };
 
 }

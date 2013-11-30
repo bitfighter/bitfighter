@@ -25,11 +25,41 @@ const string LevelDatabaseRateThread::RatingStrings[] = {
 };
 
 
+// temp, hacky solution
+static string getRatingString(S32 rating)
+{
+   if(rating == LevelDatabaseRateThread::MinusOne)   return "down";
+   if(rating ==  LevelDatabaseRateThread::Neutral)   return "neutral";
+   if(rating ==  LevelDatabaseRateThread::PlusOne)   return "up";
+
+   TNLAssert(false, "Argh!");
+
+   return "";
+
+}
+
+
 // Constructor
 LevelDatabaseRateThread::LevelDatabaseRateThread(ClientGame* game, LevelRating rating)
 {
    mGame   = game;
    mRating = rating;
+   errorNumber = 0;
+
+   TNLAssert(mGame->isLevelInDatabase(), "Level should already have been checked by now!");
+   if(!mGame->isLevelInDatabase())
+   {
+      mGame->displayErrorMessage("Level should already have been checked by now!");
+      errorNumber = 100;
+   }
+
+   stringstream id;
+   id << mGame->getLevelDatabaseId();
+
+   reqURL = LevelDatabaseRateUrl + id.str() + "/" + getRatingString(mRating);
+   username = mGame->getPlayerName();
+   user_password = mGame->getPlayerPassword();
+
 }
 
 
@@ -40,58 +70,44 @@ LevelDatabaseRateThread::~LevelDatabaseRateThread()
 }
 
 
-// temp, hacky solution
-static string getRatingString(S32 rating)
+void LevelDatabaseRateThread::run()
 {
-   if(rating == -1)   return "down";
-   if(rating ==  0)   return "neutral";
-   if(rating ==  1)   return "up";
+   if(errorNumber == 100)
+      return;
 
-   TNLAssert(false, "Argh!");
-
-   return "";
-
-}
-
-
-U32 LevelDatabaseRateThread::run()
-{
-   TNLAssert(mGame->isLevelInDatabase(), "Level should already have been checked by now!");
-   if(!mGame->isLevelInDatabase())
-   {
-      delete this;
-      return 1;
-   }
-
-   stringstream id;
-   id << mGame->getLevelDatabaseId();
-
-   HttpRequest req = HttpRequest(LevelDatabaseRateUrl + id.str() + "/" + getRatingString(mRating));
+   HttpRequest req = HttpRequest(reqURL);
    req.setMethod(HttpRequest::PostMethod);
-   req.setData("data[User][username]",      mGame->getPlayerName());
-   req.setData("data[User][user_password]", mGame->getPlayerPassword());
+   req.setData("data[User][username]",      username);
+   req.setData("data[User][user_password]", user_password);
 
    if(!req.send())
    {
-      mGame->displayErrorMessage("!!! Error rating level: Cannot connect to server");
+      //mGame->displayErrorMessage("!!! Error rating level: Cannot connect to server");
 
-      delete this;
-      return 0;
+      errorNumber = 1;
+      return;
    }
 
-   S32 responseCode = req.getResponseCode();
+   responseCode = req.getResponseCode();
+   responseBody = req.getResponseBody();
    if(responseCode != HttpRequest::OK && responseCode != HttpRequest::Found)
    {
-      stringstream message("!!! Error rating level: ");
-      message << responseCode;
-      mGame->displayErrorMessage(req.getResponseBody().c_str());
-
-      delete this;
-      return 0;
+      errorNumber = 2;
+      return;
    }
+}
 
-   delete this;
-   return 0;
+
+void LevelDatabaseRateThread::finish()
+{
+   if(errorNumber == 0)
+      mGame->displaySuccessMessage("Done");
+   else if(errorNumber == 1)
+      mGame->displayErrorMessage("!!! Error rating level: Cannot connect to server");
+   else
+   {
+      mGame->displayErrorMessage("!!! Error rating level: %i %s", responseCode, responseBody);
+   }
 }
 
 

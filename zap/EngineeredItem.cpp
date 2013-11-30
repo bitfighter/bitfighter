@@ -1046,18 +1046,10 @@ void EngineeredItem::findMountPoint(Game *game, const Point &pos)
 Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegmentManager)
 {  
    Point anchor, nrml;
-   DatabaseObject *mountEdge = NULL, *mountSeg = NULL;
+   DatabaseObject *mountSeg = NULL;
 
-   // First we snap to a wall edge -- this will ensure we don't end up attaching to an interior wall segment in the case of a wall intersection.
-   // That will determine our location, but we also need to figure out which segment we're attaching to so that if that segment were to move,
-   // we could update or item accordingly.  Unfortunately, there is no direct way to associate a WallEdge with a WallSegment, but we can do
-   // it indirectly by snapping again, this time to a segment in our WallSegment database.
-   mountEdge = findAnchorPointAndNormal(wallSegmentManager->getWallEdgeDatabase(), pos, 
-                               MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
-
-   if(mountEdge)
-      mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), pos,    // <== Note different database than above!
-                                 MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
+   mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), pos,    // <== Note different database than above!
+                                 MAX_SNAP_DISTANCE, true, (TestFunc)isWallType, anchor, nrml);
 
    // It is possible to find an edge but not a segment while a wall is being dragged -- the edge remains in it's original location 
    // while the segment is being dragged around, some distance away
@@ -1545,7 +1537,7 @@ void ForceFieldProjector::findForceFieldEnd()
    Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
 
    // Pass in database containing WallSegments, returns object in collObj
-   if(ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallEdgeDatabase(), 
+   if(ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), 
                                     start, mAnchorNormal, forceFieldEnd, &collObj))
    {
       setEndSegment(dynamic_cast<WallSegment *>(collObj));

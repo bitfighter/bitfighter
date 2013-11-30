@@ -7,6 +7,7 @@
 #define LEVELDATABASEDOWNLOADTHREAD_H
 
 #include "tnlThread.h"
+#include "../master/DatabaseAccessThread.h"
 
 #include <string>
 
@@ -15,7 +16,7 @@ namespace Zap
 {
 
 class ClientGame;
-class LevelDatabaseDownloadThread : public TNL::Thread
+class LevelDatabaseDownloadThread  : public Master::ThreadEntry
 {
 typedef Thread Parent;
 public:
@@ -26,10 +27,16 @@ public:
    explicit LevelDatabaseDownloadThread(string levelId, ClientGame* game);
    virtual ~LevelDatabaseDownloadThread();
 
-   U32 run();
+   void run();
+   void finish();
 private:
+   char url[UrlLength];
    string mLevelId;
+   string levelDir;
+   string levelFileName;
+   string levelGenFileName;
    ClientGame* mGame;
+   S32 errorNumber;
 };
 
 }

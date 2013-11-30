@@ -23,6 +23,17 @@ namespace Master
 {
 
 
+class MasterThreadEntry : public ThreadEntry
+{
+protected:
+   const MasterSettings *mSettings;
+
+public:
+   MasterThreadEntry(const MasterSettings *settings) { mSettings = settings; } // Quickie constructor
+	virtual ~MasterThreadEntry() {};
+};
+
+
 // Define some statics
 HighScores MasterServerConnection::highScores;
 MasterServer *MasterServerConnection::mMaster = NULL;
@@ -155,7 +166,7 @@ DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
 }
 
 
-struct Auth_Stats : public DatabaseAccessThread::BasicEntry
+struct Auth_Stats : public MasterThreadEntry
 {
    SafePtr<MasterServerConnection> client;
    Int<BADGE_COUNT> badges;
@@ -165,7 +176,7 @@ struct Auth_Stats : public DatabaseAccessThread::BasicEntry
    char password[256];
 
 
-   Auth_Stats(const MasterSettings *settings): DatabaseAccessThread::BasicEntry(settings) {}    // Quickie constructor
+   Auth_Stats(const MasterSettings *settings): MasterThreadEntry(settings) {}    // Quickie constructor
 
    void run()
    {
@@ -725,11 +736,11 @@ void MasterServerConnection::processIsAuthenticated(GameStats *gameStats)
 
 
 
-struct AddGameReport : public DatabaseAccessThread::BasicEntry
+struct AddGameReport : public MasterThreadEntry
 {
    GameStats mStats;
 
-   AddGameReport(const MasterSettings *settings) : DatabaseAccessThread::BasicEntry(settings) { }    // Quickie constructor
+   AddGameReport(const MasterSettings *settings) : MasterThreadEntry(settings) { }    // Quickie constructor
 
    void run()
    {
@@ -765,14 +776,14 @@ void MasterServerConnection::writeStatisticsToDb(VersionedGameStats &stats)
 }
 
    
-struct AchievementWriter : public DatabaseAccessThread::BasicEntry
+struct AchievementWriter : public MasterThreadEntry
 {
    U8 achievementId;
    StringTableEntry playerNick;
    StringTableEntry mPlayerOrServerName;
    string addressString;
 
-   AchievementWriter(const MasterSettings *settings) : DatabaseAccessThread::BasicEntry(settings) { }    // Quickie constructor
+   AchievementWriter(const MasterSettings *settings) : MasterThreadEntry(settings) { }    // Quickie constructor
 
    void run()
    {
@@ -801,7 +812,7 @@ void MasterServerConnection::writeAchievementToDb(U8 achievementId, const String
 }
 
 
-struct LevelInfoWriter : public DatabaseAccessThread::BasicEntry
+struct LevelInfoWriter : public MasterThreadEntry
 {
    string hash;
    string levelName;
@@ -812,7 +823,7 @@ struct LevelInfoWriter : public DatabaseAccessThread::BasicEntry
    S32 winningScore;
    S32 gameDurationInSeconds;
 
-   LevelInfoWriter(const MasterSettings *settings) : DatabaseAccessThread::BasicEntry(settings) { }    // Quickie constructor
+   LevelInfoWriter(const MasterSettings *settings) : MasterThreadEntry(settings) { }    // Quickie constructor
 
    void run()
    {
@@ -847,12 +858,12 @@ void MasterServerConnection::writeLevelInfoToDb(const string &hash, const string
 }
 
 
-struct HighScoresReader : public DatabaseAccessThread::BasicEntry
+struct HighScoresReader : public MasterThreadEntry
 {
    S32 scoresPerGroup;
 
    // Constructor
-   HighScoresReader(const MasterSettings *settings, S32 scoresPerGroup) : DatabaseAccessThread::BasicEntry(settings)        
+   HighScoresReader(const MasterSettings *settings, S32 scoresPerGroup) : MasterThreadEntry(settings)        
    {
       this->scoresPerGroup = scoresPerGroup;
    }
@@ -917,12 +928,12 @@ typedef map<U32, boost::shared_ptr<TotalLevelRating> > TotalLevelRatingsMap;
 static TotalLevelRatingsMap totalLevelRatingsCache;
 
    
-struct TotalLevelRatingsReader : public DatabaseAccessThread::BasicEntry
+struct TotalLevelRatingsReader : public MasterThreadEntry
 {
    U32 dbId;
    S16 rating;
 
-   TotalLevelRatingsReader(const MasterSettings *settings, U32 databaseId) : DatabaseAccessThread::BasicEntry(settings)    // Constructor
+   TotalLevelRatingsReader(const MasterSettings *settings, U32 databaseId) : MasterThreadEntry(settings)    // Constructor
    {
       dbId = databaseId;
    }
@@ -968,7 +979,7 @@ typedef map<DbIdPlayerNamePair, boost::shared_ptr<PlayerLevelRating> > PlayerLev
 static PlayerLevelRatingsMap playerLevelRatingsCache;
 
 
-struct PlayerLevelRatingsReader : public DatabaseAccessThread::BasicEntry
+struct PlayerLevelRatingsReader : public MasterThreadEntry
 {
    U32 dbId;
    StringTableEntry playerName;
@@ -976,7 +987,7 @@ struct PlayerLevelRatingsReader : public DatabaseAccessThread::BasicEntry
 
    // Constructor
    PlayerLevelRatingsReader(const MasterSettings *settings, U32 databaseId, const StringTableEntry &playerName) : 
-         DatabaseAccessThread::BasicEntry(settings), 
+         MasterThreadEntry(settings), 
          playerName(playerName)
    {
       dbId = databaseId;

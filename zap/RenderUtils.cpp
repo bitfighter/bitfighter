@@ -734,11 +734,10 @@ void renderRightArrow(const Point &center, S32 size)
 
 
 // Given a string, break it up such that no part is wider than width.  
-// This handles correct width based on font context
-void wrapString(const string &str, S32 wrapWidth, S32 fontSize, FontContext context, Vector<string> &lines, const string &indentPrefix)
+void wrapString(const string &str, S32 wrapWidth, S32 fontSize, FontContext context, Vector<string> &lines)
 {
    FontManager::pushFontContext(context);
-   Vector<string> wrapped = wrapString(str, wrapWidth, fontSize, indentPrefix);
+   Vector<string> wrapped = wrapString(str, wrapWidth, fontSize);
    FontManager::popFontContext();
 
    for(S32 i = 0; i < wrapped.size(); i++)
@@ -747,7 +746,7 @@ void wrapString(const string &str, S32 wrapWidth, S32 fontSize, FontContext cont
 
 
 // Given a string, break it up such that no part is wider than width.  Prefix subsequent lines with indentPrefix.
-Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const string &indentPrefix)
+Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const string indentPrefix)
 {
    Vector<string> wrappedLines;
 
