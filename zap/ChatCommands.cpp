@@ -995,7 +995,7 @@ void globalMuteHandler(ClientGame *game, const Vector<string> &words)
 void downloadMapHandler(ClientGame *game, const Vector<string> &args)
 {
    // the download thread deletes itself, so there is no memory leak
-   static Thread* downloadThread;
+   RefPtr<LevelDatabaseDownloadThread> downloadThread;
    if(args.size() < 2)
    {
       game->displayErrorMessage("!!! You must specify a level");
@@ -1003,7 +1003,7 @@ void downloadMapHandler(ClientGame *game, const Vector<string> &args)
    }
 
    downloadThread = new LevelDatabaseDownloadThread(args[1], game);
-   downloadThread->start();
+   gSecondaryThread.addEntry(downloadThread);
 }
 
 

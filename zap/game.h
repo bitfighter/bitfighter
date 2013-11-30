@@ -30,6 +30,12 @@
 
 #include <string>
 
+namespace Master
+{
+   class DatabaseAccessThread;
+}
+
+
 ///
 /// Bitfighter - a 2D space game demonstrating the full capabilities of the
 /// Torque Network Library.
@@ -84,6 +90,8 @@ using namespace std;
 
 namespace Zap
 {
+
+extern Master::DatabaseAccessThread gSecondaryThread;
 
 const U32 MAX_GAME_NAME_LEN = 32;      // Any longer, and it won't fit on-screen
 const U32 MAX_GAME_DESCR_LEN = 60;     // Any longer, and it won't fit on-screen; also limits max length of credits string

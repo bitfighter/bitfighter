@@ -24,17 +24,7 @@ const string LevelDatabaseUploadThread::UploadScreenshotFilename = "upload_scree
 LevelDatabaseUploadThread::LevelDatabaseUploadThread(ClientGame* game)
 {
    mGame = game;
-}
-
-
-LevelDatabaseUploadThread::~LevelDatabaseUploadThread()
-{
-   // Do nothing
-}
-
-
-U32 LevelDatabaseUploadThread::run()
-{
+   errorNumber = 0;
    EditorUserInterface* editor = mGame->getUIManager()->getUI<EditorUserInterface>();
    editor->lockQuit("CAN'T QUIT WHILE UPLOADING");
 
@@ -45,43 +35,94 @@ U32 LevelDatabaseUploadThread::run()
 
    string fileData = readFile(joindir(mGame->getSettings()->getFolderManager()->screenshotDir, UploadScreenshotFilename + string(".png")));
 
-   HttpRequest req(HttpRequest::LevelDatabaseBaseUrl + UploadRequest);
-   req.setMethod(HttpRequest::PostMethod);
-   req.setData("data[User][username]",      mGame->getPlayerName());
-   req.setData("data[User][user_password]", mGame->getPlayerPassword());
-   req.setData("data[Level][content]",      editor->getLevelText());
-   req.addFile("data[Level][screenshot]",   UploadScreenshotFilename + string(".png"), (const U8*) fileData.c_str(), fileData.length());
+   username = mGame->getPlayerName();
+   user_password = mGame->getPlayerPassword();
+   content = editor->getLevelText();
+   screenshot = UploadScreenshotFilename + string(".png");
+   screenshot2 = fileData;
+
 
    string levelgenFilename;
    levelgenFilename = mGame->getScriptName();
 
    if(levelgenFilename != "")
    {
-      const string &levelgenContents = readFile(mGame->getSettings()->getFolderManager()->findLevelGenScript(levelgenFilename));
-      req.setData("data[Level][levelgen]", levelgenContents);
+      levelgen = readFile(mGame->getSettings()->getFolderManager()->findLevelGenScript(levelgenFilename));
    }
 
-   if(!req.send())
-      return done(editor, "Error connecting to server", false);
-
-   S32 responseCode = req.getResponseCode();
-   if(responseCode != HttpRequest::OK && responseCode != HttpRequest::Found)
-   {
-      editor->showUploadErrorMessage(responseCode, req.getResponseBody());
-
-      stringstream message;
-      message << "Error " << responseCode << ": " << endl << req.getResponseBody() << endl;
-      logprintf(LogConsumer::LogError, "%s",  message.str().c_str());
-      return done(editor, "Error uploading... see Console or Log", false);
-   }
-
-   // The server responds with the DBID of the level we just uploaded
-   mGame->setLevelDatabaseId(atoi(req.getResponseBody().c_str()));
-   editor->saveLevel(false, false);    // Write databaseId to the level file
-
-   return done(editor, "Uploaded successfully", true);
+   uploadrequest = HttpRequest::LevelDatabaseBaseUrl + UploadRequest;
 }
 
+
+LevelDatabaseUploadThread::~LevelDatabaseUploadThread()
+{
+   // Do nothing
+}
+
+
+void LevelDatabaseUploadThread::run()
+{
+
+   HttpRequest req(uploadrequest);
+   req.setMethod(HttpRequest::PostMethod);
+   req.setData("data[User][username]",      username);
+   req.setData("data[User][user_password]", user_password);
+   req.setData("data[Level][content]",      content);
+   req.addFile("data[Level][screenshot]",   screenshot, (U8*) screenshot2.c_str(), screenshot2.length());
+
+   string levelgenFilename;
+   levelgenFilename = mGame->getScriptName();
+
+   if(levelgen != "")
+      req.setData("data[Level][levelgen]", levelgen);
+
+   if(!req.send())
+   {
+      errorNumber = 1;
+      return;
+   }
+
+   responseCode = req.getResponseCode();
+   responseBody = req.getResponseBody();
+   if(responseCode != HttpRequest::OK && responseCode != HttpRequest::Found)
+   {
+      errorNumber = 2;
+      return;
+   }
+}
+
+void LevelDatabaseUploadThread::finish()
+{
+   EditorUserInterface* editor = mGame->getUIManager()->getUI<EditorUserInterface>();
+   if(!editor)
+      return;
+
+   if(errorNumber == 0)
+   {
+      // The server responds with the DBID of the level we just uploaded
+      mGame->setLevelDatabaseId(atoi(responseBody.c_str()));
+      editor->saveLevel(false, false);    // Write databaseId to the level file
+
+      done(editor, "Uploaded successfully", true);
+   }
+   else if(errorNumber == 1)
+   {
+      done(editor, "Error connecting to server", false);
+   }
+   else if(errorNumber == 2)
+   {
+      editor->showUploadErrorMessage(responseCode, responseBody);
+
+      stringstream message;
+      message << "Error " << responseCode << ": " << endl << responseBody << endl;
+      logprintf(LogConsumer::LogError, "%s",  message.str().c_str());
+      done(editor, "Error uploading... see Console or Log", false);
+   }
+   else
+   {
+      done(editor, "Unknown error", false);
+   }
+}
 
 S32 LevelDatabaseUploadThread::done(EditorUserInterface* editor, const string &message, bool success)
 {
@@ -93,7 +134,6 @@ S32 LevelDatabaseUploadThread::done(EditorUserInterface* editor, const string &m
    editor->clearLingeringMessage();
    editor->unlockQuit();
 
-   delete this;
    return 0;
 }
 

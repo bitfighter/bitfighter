@@ -169,7 +169,6 @@ MasterServer::MasterServer(MasterSettings *settings)
    mJsonWritingSuspended = false;
    
    mDatabaseAccessThread = new DatabaseAccessThread();    // Deleted in destructor
-   mDatabaseAccessThread->start();            
 
    MasterServerConnection::setMasterServer(this);
 }
@@ -180,8 +179,7 @@ MasterServer::~MasterServer()
 {
    delete mNetInterface;
 
-   // Turn off the database access thread
-   mDatabaseAccessThread->terminate();
+   delete mDatabaseAccessThread;
 }
 
 
