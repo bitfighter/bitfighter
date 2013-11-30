@@ -1472,7 +1472,10 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
 // the ids of various walls that are also selected.  Everything that is not an engineered object gets marked as being unsnapped.
 // After the loop, engineered items are reviewed; if the wall they were snapped to was not found during the first pass, the 
 // item is marked as no longer snapped, so it will start snapping as it moves.  If the wall was found, then the item is marked as
-// happily snapped, so it will not try to find another partner during the move.
+// happily snapped, so it will not try to find another partner during the move.  
+//
+// The promiscuousSnapper vector keeps track of whether an engr. item is trying to snap to other things.  It is only set on the first
+// pass through here, and is based on whether the item it is snapped to (if any) is included in the selection.
 //
 // We have broken the logic up into a series of functions to facilitate processing different kinds of lists.  Kind of annoying... but
 // it seemed the best way to avoid repeating very similar logic.
