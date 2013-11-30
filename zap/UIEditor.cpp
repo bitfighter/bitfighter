@@ -3009,7 +3009,6 @@ void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndo
    mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
-
 #ifdef TNL_OS_MAC_OSX 
    bool ctrlDown = InputCodeManager::getState(KEY_META);
 #else
@@ -3030,7 +3029,7 @@ void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndo
    for(S32 i = 0; i < objList->size(); i++)
       mMoveOrigins[i].set(objList->get(i)->getVert(0));
 
-   //markSelectedObjectsAsUnsnapped(objList);
+   markSelectedObjectsAsUnsnapped(objList);
 }
 
 
