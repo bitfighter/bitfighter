@@ -91,8 +91,6 @@ using namespace std;
 namespace Zap
 {
 
-extern Master::DatabaseAccessThread gSecondaryThread;
-
 const U32 MAX_GAME_NAME_LEN = 32;      // Any longer, and it won't fit on-screen
 const U32 MAX_GAME_DESCR_LEN = 60;     // Any longer, and it won't fit on-screen; also limits max length of credits string
 
@@ -200,6 +198,7 @@ private:
    S32 mRobotCount;
 
    NameToAddressThread *mNameToAddressThread;
+   Master::DatabaseAccessThread *mSecondaryThread;
 
 protected:
    U32 mNextMasterTryTime;
@@ -480,6 +479,8 @@ public:
    virtual void addInlineHelpItem(HelpItem item) const;
    virtual void removeInlineHelpItem(HelpItem item, bool markAsSeen) const;
    virtual F32 getObjectiveArrowHighlightAlpha() const;
+
+    Master::DatabaseAccessThread *getSecondaryThread();
 };
 
 

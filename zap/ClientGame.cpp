@@ -978,7 +978,7 @@ PersonalRating ClientGame::toggleLevelRating()
 
    // 2) Alert Pleiades with an http request
    RefPtr<LevelDatabaseRateThread> rateThread = new LevelDatabaseRateThread(this, LevelDatabaseRateThread::LevelRating(mPlayerLevelRating));
-   gSecondaryThread.addEntry(rateThread);
+   getSecondaryThread()->addEntry(rateThread);
 
    return mPlayerLevelRating;
 }

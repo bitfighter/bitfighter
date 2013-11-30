@@ -108,14 +108,6 @@ public:
 /// Platform independent Thread class.
 class Thread : public Object
 {
-protected:
-   U32 mReturnValue; ///< Return value from thread function
-
-#ifdef TNL_OS_WIN32
-   HANDLE mThread;
-#else
-   pthread_t mThread;
-#endif
 public:
    /// run function called when thread is started.
    virtual U32 run() = 0;
