@@ -438,7 +438,7 @@ void EditorUserInterface::redo()
 void EditorUserInterface::rebuildEverything(GridDatabase *database)
 {
    database->getWallSegmentManager()->recomputeAllWallGeometry(database);
-   resnapAllEngineeredItems(database);
+   resnapAllEngineeredItems(database, false);
 
    // If we're rebuilding items in our levelgen database, no need to save anything!
    if(database != &mLevelGenDatabase)
@@ -450,7 +450,7 @@ void EditorUserInterface::rebuildEverything(GridDatabase *database)
 
 
 // Resnaps all engineered items in database
-void EditorUserInterface::resnapAllEngineeredItems(GridDatabase *database)
+void EditorUserInterface::resnapAllEngineeredItems(GridDatabase *database, bool onlyUnsnapped)
 {
    fillVector.clear();
    database->findObjects((TestFunc)isEngineeredType, fillVector);
@@ -458,6 +458,11 @@ void EditorUserInterface::resnapAllEngineeredItems(GridDatabase *database)
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(fillVector[i]);
+
+      // Skip already snapped items if only processing unsnapped ones
+      if(onlyUnsnapped && engrObj->isSnapped())
+         continue;
+
       engrObj->mountToWall(engrObj->getPos(), database->getWallSegmentManager(), NULL);
    }
 }
@@ -576,7 +581,7 @@ void EditorUserInterface::loadLevel()
    mLoadTarget->getWallSegmentManager()->recomputeAllWallGeometry(mLoadTarget);
    
    // Snap all engineered items to the closest wall, if one is found
-   resnapAllEngineeredItems(mLoadTarget);
+   resnapAllEngineeredItems(mLoadTarget, false);
 }
 
 
@@ -2414,7 +2419,7 @@ void EditorUserInterface::pasteSelection()
 
    onSelectionChanged();
 
-   resnapAllEngineeredItems(getDatabase());
+   resnapAllEngineeredItems(getDatabase(), false);  // True would work?
 
    validateLevel();
    setNeedToSave(true);
@@ -3642,7 +3647,7 @@ void EditorUserInterface::doneDeleteingWalls()
    WallSegmentManager *wallSegmentManager = mLoadTarget->getWallSegmentManager();
 
    wallSegmentManager->recomputeAllWallGeometry(mLoadTarget);   // Recompute wall edges
-   resnapAllEngineeredItems(mLoadTarget);         
+   resnapAllEngineeredItems(mLoadTarget, false);
 }
 
 
@@ -4685,12 +4690,12 @@ void EditorUserInterface::onFinishedDragging()
             if(obj->isSelected() || objList->get(i)->anyVertsSelected())
                obj->onGeomChanged();
 
-            if(isWallType(obj->getObjectTypeNumber()))      // Wall or polywall
+            if(obj->isSelected() && isWallType(obj->getObjectTypeNumber()))      // Wall or polywall
                wallMoved = true;
          }
 
          if(wallMoved)
-            resnapAllEngineeredItems(getDatabase());
+            resnapAllEngineeredItems(getDatabase(), true);
 
          setNeedToSave(true);
          autoSave();

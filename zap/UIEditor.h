@@ -266,7 +266,7 @@ private:
    Point convertCanvasToLevelCoord(Point p);
    Point convertLevelToCanvasCoord(Point p, bool convert = true);
 
-   void resnapAllEngineeredItems(GridDatabase *database);
+   void resnapAllEngineeredItems(GridDatabase *database, bool onlyUnsnapped);
 
    boost::scoped_ptr<SimpleTextEntryMenuUI> mSimpleTextEntryMenu;
    boost::scoped_ptr<PluginMenuUI> mPluginMenu;      
