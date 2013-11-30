@@ -367,7 +367,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
          break;
    }
 
-   displayMessageBox("Connection Terminated", "", message);
+   displayMessageBox("Connection Terminated", "Press [[Esc]] to exit", message);
 }
 
 
