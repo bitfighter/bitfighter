@@ -1413,8 +1413,6 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
 
    if(mDraggingObjects)
    {  
-      //markSelectedObjectsAsUnsnapped(objList, false);
-
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice, regardless of whether snapping is on or off
       if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
          return snapPointToLevelGrid(p);
@@ -1546,25 +1544,25 @@ static void markSelectedObjectAsUnsnapped_done(bool calledDuringDragInitializati
 
 void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<boost::shared_ptr<BfObject> > &objList)
 {
-   markSelectedObjectsAsUnsnapped_init(objList.size(), false);
+   markSelectedObjectsAsUnsnapped_init(objList.size(), true);
 
    // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
    for(S32 i = 0; i < objList.size(); i++)
-      markSelectedObjectAsUnsnapped_body(objList[i].get(), i, false);
+      markSelectedObjectAsUnsnapped_body(objList[i].get(), i, true);
 
-   markSelectedObjectAsUnsnapped_done(false);
+   markSelectedObjectAsUnsnapped_done(true);
 }
 
 
-void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList, bool calledDuringDragInitialization)
+void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList)
 {
-   markSelectedObjectsAsUnsnapped_init(objList->size(), calledDuringDragInitialization);
+   markSelectedObjectsAsUnsnapped_init(objList->size(), true);
 
    // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
    for(S32 i = 0; i < objList->size(); i++)
-      markSelectedObjectAsUnsnapped_body(static_cast<BfObject *>(objList->get(i)), i, calledDuringDragInitialization);
+      markSelectedObjectAsUnsnapped_body(static_cast<BfObject *>(objList->get(i)), i, true);
 
-   markSelectedObjectAsUnsnapped_done(calledDuringDragInitialization);
+   markSelectedObjectAsUnsnapped_done(true);
 }
 
 
