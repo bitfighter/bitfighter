@@ -270,6 +270,7 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
    mCurrentExplosionNumber = 0;
    mPanelGeom.isValid = false;
+   mRotateSpeed = 1;
 
 
    // Read some params from our L, if we have it
@@ -589,7 +590,7 @@ void CoreItem::doExplosion(const Point &pos)
 PanelGeom *CoreItem::getPanelGeom()
 {
    if(!mPanelGeom.isValid)
-      fillPanelGeom(getPos(), getGame()->getGameType()->getTotalGamePlayedInMs(), mPanelGeom);
+      fillPanelGeom(getPos(), getGame()->getGameType()->getTotalGamePlayedInMs() * mRotateSpeed, mPanelGeom);
 
    return &mPanelGeom;
 }
@@ -861,6 +862,7 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & (InitialMask | TeamMask)))
    {
       writeThisTeam(stream);
+      stream->writeSignedInt(mRotateSpeed, 4);
    }
 
    stream->writeFlag(mHasExploded);
@@ -898,6 +900,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())
    {
       readThisTeam(stream);
+      mRotateSpeed = stream->readSignedInt(4);
    }
 
    if(stream->readFlag())     // Exploding!  Take cover!!
@@ -984,7 +987,7 @@ void CoreItem::onGeomChanged()
    Parent::onGeomChanged();
 
    GameType *gameType = getGame()->getGameType();
-   fillPanelGeom(getPos(), gameType->getTotalGamePlayedInMs(), mPanelGeom);
+   fillPanelGeom(getPos(), gameType->getTotalGamePlayedInMs() * mRotateSpeed, mPanelGeom);
 }
 #endif
 
