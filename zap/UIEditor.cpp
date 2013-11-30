@@ -1462,6 +1462,20 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
 }
 
 
+// The purpose of the following code is to intelligently mark selected objects as unsnapped so that they will behave better
+// while being dragged or pasted.  For example, if we are moving a turret, we want it to snap to anything nearby.  However, if
+// that turret is attached to a wall that is also being moved, we don't want the turret going off and snapping to something
+// else.  To prevent that, we keep the turret's status as being snapped, even though things are usually marked as unsnapped when
+// they are being moved.
+//
+// The logic here is basically to loop through all selected objects in the passed set, keeping a list of engineer items, and of
+// the ids of various walls that are also selected.  Everything that is not an engineered object gets marked as being unsnapped.
+// After the loop, engineered items are reviewed; if the wall they were snapped to was not found during the first pass, the 
+// item is marked as no longer snapped, so it will start snapping as it moves.  If the wall was found, then the item is marked as
+// happily snapped, so it will not try to find another partner during the move.
+//
+// We have broken the logic up into a series of functions to facilitate processing different kinds of lists.  Kind of annoying... but
+// it seemed the best way to avoid repeating very similar logic.
 
 static Vector<EngineeredItem *> selectedSnappedEngrObjects;
 static Vector<S32> selectedWalls;
@@ -1528,8 +1542,6 @@ void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<DatabaseOb
       doMarkObjectAsUnsnapped(static_cast<BfObject *>(objList->get(i)));
 
    doneMarkObjectAsUnsnapped();
-
-
 }
 
 
