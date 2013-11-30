@@ -1413,7 +1413,7 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
 
    if(mDraggingObjects)
    {  
-      markSelectedObjectsAsUnsnapped(objList);
+      markSelectedObjectsAsUnsnapped(objList, false);
 
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice, regardless of whether snapping is on or off
       if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
@@ -1478,16 +1478,27 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
 // it seemed the best way to avoid repeating very similar logic.
 
 static Vector<EngineeredItem *> selectedSnappedEngrObjects;
+static Vector<S32> selectedSnappedEngrObjectIndices;
+static Vector<bool> promiscuousSnapper;
 static Vector<S32> selectedWalls;
 
-static void initMarkObjectAsUnsnapped()
+
+static void markSelectedObjectsAsUnsnapped_init(S32 itemCount, bool markProimscuous)
 {
    selectedSnappedEngrObjects.clear();
    selectedWalls.clear();
+   selectedSnappedEngrObjectIndices.clear();
+
+   if(markProimscuous)
+   {
+      promiscuousSnapper.resize(itemCount);
+      for(S32 i = 0; i < itemCount; i++)
+         promiscuousSnapper[i] = true;    // They're all a bit loose to begin with!
+   }
 }
 
 
-static void doMarkObjectAsUnsnapped(BfObject *obj)
+static void markSelectedObjectAsUnsnapped_body(BfObject *obj, S32 index, bool markProimscuous)
 {
    if(obj->isSelected())
    {
@@ -1495,7 +1506,10 @@ static void doMarkObjectAsUnsnapped(BfObject *obj)
       {
          EngineeredItem *engrObj = static_cast<EngineeredItem *>(obj);
          if(engrObj->getMountSegment() && engrObj->isSnapped())
+         {
             selectedSnappedEngrObjects.push_back(engrObj);
+            selectedSnappedEngrObjectIndices.push_back(index);
+         }
          else
             obj->setSnapped(false);
       }
@@ -1506,42 +1520,49 @@ static void doMarkObjectAsUnsnapped(BfObject *obj)
             BfObject *bfObj = static_cast<BfObject *>(obj);
             selectedWalls.push_back(bfObj->getSerialNumber());
          }
+
          obj->setSnapped(false);
       }
    }
 }
 
 
-static void doneMarkObjectAsUnsnapped()
+static void markSelectedObjectAsUnsnapped_done(bool markPromiscuous)
 {
    // Now review all the engineer items that are being dragged and see if the wall they are mounted to is being
    // dragged as well.  If it is, keep them snapped; if not, mark them as unsnapped. 
    for(S32 i = 0; i < selectedSnappedEngrObjects.size(); i++)
-      selectedSnappedEngrObjects[i]->setSnapped(selectedWalls.contains(selectedSnappedEngrObjects[i]->getMountSegment()->getOwner()));
+   {
+      bool snapped = selectedWalls.contains(selectedSnappedEngrObjects[i]->getMountSegment()->getOwner());
+      selectedSnappedEngrObjects[i]->setSnapped(snapped);
+
+      if(snapped && markPromiscuous)
+         promiscuousSnapper[selectedSnappedEngrObjectIndices[i]] = false;
+   }
 }
 
 
 void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<boost::shared_ptr<BfObject> > &objList)
 {
-   initMarkObjectAsUnsnapped();
+   markSelectedObjectsAsUnsnapped_init(objList.size(), false);
 
    // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
    for(S32 i = 0; i < objList.size(); i++)
-      doMarkObjectAsUnsnapped(objList[i].get());
+      markSelectedObjectAsUnsnapped_body(objList[i].get(), i, false);
 
-   doneMarkObjectAsUnsnapped();
+   markSelectedObjectAsUnsnapped_done(false);
 }
 
 
-void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList)
+void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList, bool markPromiscuous)
 {
-   initMarkObjectAsUnsnapped();
+   markSelectedObjectsAsUnsnapped_init(objList->size(), markPromiscuous);
 
    // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
    for(S32 i = 0; i < objList->size(); i++)
-      doMarkObjectAsUnsnapped(static_cast<BfObject *>(objList->get(i)));
+      markSelectedObjectAsUnsnapped_body(static_cast<BfObject *>(objList->get(i)), i, markPromiscuous);
 
-   doneMarkObjectAsUnsnapped();
+   markSelectedObjectAsUnsnapped_done(markPromiscuous);
 }
 
 
@@ -3006,6 +3027,8 @@ void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndo
    // Saves location of every item, selected or not
    for(S32 i = 0; i < objList->size(); i++)
       mMoveOrigins[i].set(objList->get(i)->getVert(0));
+
+   markSelectedObjectsAsUnsnapped(objList, true);
 }
 
 
@@ -3108,10 +3131,8 @@ void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOff
       {
          // Don't try to mount any items that are either 1) not selected or 2) already marked as snapped
          EngineeredItem *engrObj = static_cast<EngineeredItem *>(objList->get(i));
-         if(!engrObj->isSelected() || engrObj->isSnapped())
-            continue;
-
-         engrObj->mountToWall(snapPointToLevelGrid(mMoveOrigins[i] + cumulativeOffset), wallSegmentManager);
+         if(engrObj->isSelected() && promiscuousSnapper[i])
+            engrObj->mountToWall(snapPointToLevelGrid(mMoveOrigins[i] + cumulativeOffset), wallSegmentManager);
       }
    }
 }
