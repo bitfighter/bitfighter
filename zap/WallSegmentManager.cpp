@@ -94,7 +94,7 @@ void WallSegmentManager::finishedChangingWalls(GridDatabase *editorObjectDatabas
 
       // Remount any engr items that were either not attached to any wall, or were attached to any segments on the modified wall
       if(engrItem->getMountSegment() == NULL || engrItem->getMountSegment()->getOwner() == changedWallSerialNumber)
-         engrItem->mountToWall(engrItem->getVert(0), editorObjectDatabase->getWallSegmentManager());
+         engrItem->mountToWall(engrItem->getVert(0), editorObjectDatabase->getWallSegmentManager(), NULL);
 
       // Calculate where all ffs land -- no telling if the segment we moved is or was interfering in its path
       if(engrItem->getObjectTypeNumber() == ForceFieldProjectorTypeNumber)
@@ -230,7 +230,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
 
    // Remount all turrets & forcefields mounted on or terminating on any of the wall segments we deleted and potentially recreated
    for(S32 i = 0; i < toBeRemounted.size(); i++)  
-      toBeRemounted[i]->mountToWall(toBeRemounted[i]->getVert(0), database->getWallSegmentManager());
+      toBeRemounted[i]->mountToWall(toBeRemounted[i]->getVert(0), database->getWallSegmentManager(), NULL);
 
 #endif
 }
@@ -267,7 +267,7 @@ void WallSegmentManager::updateAllMountedItems(GridDatabase *database)
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EngineeredItem *engrItem = static_cast<EngineeredItem *>(fillVector[i]);
-      engrItem->mountToWall(engrItem->getVert(0), database->getWallSegmentManager());
+      engrItem->mountToWall(engrItem->getVert(0), database->getWallSegmentManager(), NULL);
    }
 }
 

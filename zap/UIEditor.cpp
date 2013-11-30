@@ -458,7 +458,7 @@ void EditorUserInterface::resnapAllEngineeredItems(GridDatabase *database)
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(fillVector[i]);
-      engrObj->mountToWall(engrObj->getPos(), database->getWallSegmentManager());
+      engrObj->mountToWall(engrObj->getPos(), database->getWallSegmentManager(), NULL);
    }
 }
 
@@ -3132,7 +3132,7 @@ void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOff
          // Don't try to mount any items that are either 1) not selected or 2) already marked as snapped
          EngineeredItem *engrObj = static_cast<EngineeredItem *>(objList->get(i));
          if(engrObj->isSelected() && promiscuousSnapper[i])
-            engrObj->mountToWall(snapPointToLevelGrid(mMoveOrigins[i] + cumulativeOffset), wallSegmentManager);
+            engrObj->mountToWall(snapPointToLevelGrid(mMoveOrigins[i] + cumulativeOffset), wallSegmentManager, &selectedWalls);
       }
    }
 }

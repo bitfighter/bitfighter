@@ -532,14 +532,17 @@ void EngineeredItem::fillAttributesVectors(Vector<string> &keys, Vector<string> 
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
 // Polulates anchor and normal
 DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
-                                                           bool format, Point &anchor, Point &normal)
+                                                         const Vector<S32> *excludedWallList,
+                                                         bool format, Point &anchor, Point &normal)
 {
-   return findAnchorPointAndNormal(wallEdgeDatabase, pos, snapDist, format, (TestFunc)isWallType, anchor, normal);
+   return findAnchorPointAndNormal(wallEdgeDatabase, pos, snapDist, excludedWallList, format, (TestFunc)isWallType, anchor, normal);
 }
 
 
+// Static function
 DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
-                                                           bool format, TestFunc testFunc, Point &anchor, Point &normal)
+                                                         const Vector<S32> *excludedWallList,
+                                                         bool format, TestFunc testFunc, Point &anchor, Point &normal)
 {
    F32 minDist = F32_MAX;
    DatabaseObject *closestWall = NULL;
@@ -564,16 +567,19 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
       // Look for walls
       DatabaseObject *wall = wallEdgeDatabase->findObjectLOS(testFunc, ActualState, format, mountPos, mountPos + dir, t, n);
 
-      if(wall != NULL)     // Found one!
-      {
-         if(t < minDist)
-         {
-            anchor.set(mountPos + dir * t);
-            normal.set(n);
-            minDist = t;
-            closestWall = wall;
-         }
-      }
+      if(wall == NULL)
+         continue;
+
+      if(t >= minDist)
+         continue;
+
+      if(excludedWallList && excludedWallList->contains(static_cast<WallSegment *>(wall)->getOwner()))
+         continue;
+
+      anchor.set(mountPos + dir * t);
+      normal.set(n);
+      minDist = t;
+      closestWall = wall;
    }
 
    // Re-adjust our anchor to a segment built from the anchor and normal vector found above.
@@ -1026,7 +1032,7 @@ void EngineeredItem::findMountPoint(Game *game, const Point &pos)
    Point normal, anchor;
 
    // Anchor objects to the correct point
-   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
+   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
    {
       setPos(pos);               // Found no mount point, but for editor, needs to set the position
       mAnchorNormal.set(1,0);
@@ -1043,13 +1049,14 @@ void EngineeredItem::findMountPoint(Game *game, const Point &pos)
 
 
 // Find mount point or turret or forcefield closest to pos; used in editor.  See findMountPoint() for in-game version.
-Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegmentManager)
+Point EngineeredItem::mountToWall(const Point &pos, const WallSegmentManager *wallSegmentManager, const Vector<S32> *excludedWallList)
 {  
    Point anchor, nrml;
    DatabaseObject *mountSeg = NULL;
 
    mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), pos,    // <== Note different database than above!
-                                 MAX_SNAP_DISTANCE, true, (TestFunc)isWallType, anchor, nrml);
+                                       MAX_SNAP_DISTANCE, excludedWallList,
+                                       true, (TestFunc)isWallType, anchor, nrml);
 
    // It is possible to find an edge but not a segment while a wall is being dragged -- the edge remains in it's original location 
    // while the segment is being dragged around, some distance away

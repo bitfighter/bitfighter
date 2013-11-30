@@ -101,17 +101,20 @@ public:
    bool collide(BfObject *hitObject);
    F32 getHealth() const;
    void healObject(S32 time);
-   Point mountToWall(const Point &pos, WallSegmentManager *wallSegmentManager);
+   Point mountToWall(const Point &pos, const WallSegmentManager *wallSegmentManager, const Vector<S32> *excludedWallList);
 
    void onGeomChanged();
 
    void getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const;
 
    // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
-   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, bool format, 
-                                                   Point &anchor, Point &normal);
-
    static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
+                                                   const Vector<S32> *excludedWallList,
+                                                   bool format, Point &anchor, Point &normal);
+
+   // Pass NULL if there is no excludedWallList
+   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
+                                                   const Vector<S32> *excludedWallList,
                                                    bool format, TestFunc testFunc, Point &anchor, Point &normal);
 
    void setAnchorNormal(const Point &nrml);
