@@ -1003,7 +1003,7 @@ void downloadMapHandler(ClientGame *game, const Vector<string> &args)
    }
 
    downloadThread = new LevelDatabaseDownloadThread(args[1], game);
-   gSecondaryThread.addEntry(downloadThread);
+   game->getSecondaryThread()->addEntry(downloadThread);
 }
 
 
@@ -1043,7 +1043,7 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
    else                    // Args look ok; release the kraken!
    {
       RefPtr<LevelDatabaseRateThread> rateThread = new LevelDatabaseRateThread(game, LevelDatabaseRateThread::LevelRating(rating));
-      gSecondaryThread.addEntry(rateThread);
+      game->getSecondaryThread()->addEntry(rateThread);
    }
 }
 

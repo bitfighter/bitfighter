@@ -33,9 +33,6 @@ namespace Zap
 {
 
 
-Master::DatabaseAccessThread gSecondaryThread;
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -108,6 +105,8 @@ Game::Game(const Address &theBindAddress, GameSettingsPtr settings) : mGameObjDa
    mActiveTeamManager = &mTeamManager;
 
    mObjectsLoaded = 0;
+
+   mSecondaryThread = new Master::DatabaseAccessThread();
 }
 
 
@@ -116,6 +115,7 @@ Game::~Game()
 {
    if(mNameToAddressThread)
       delete mNameToAddressThread;
+   delete mSecondaryThread;
 }
 
 
@@ -1133,7 +1133,7 @@ void Game::processAnonymousMasterConnection()
 // Called by both ClientGame::idle and ServerGame::idle
 void Game::idle(U32 timeDelta)
 {
-   gSecondaryThread.idle();
+   mSecondaryThread->idle();
 }
 
 
@@ -1631,6 +1631,13 @@ S32 Game::getRemainingGameTime() const
    else
       return 0;
 }
+
+
+Master::DatabaseAccessThread *Game::getSecondaryThread()
+{
+   return  mSecondaryThread;
+}
+
 
 };
 

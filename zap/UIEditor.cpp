@@ -5226,7 +5226,7 @@ void uploadToDbCallback(ClientGame *game, U32 unused)
 
    RefPtr<LevelDatabaseUploadThread> uploadThread;
    uploadThread = new LevelDatabaseUploadThread(game);
-   gSecondaryThread.addEntry(uploadThread);
+   game->getSecondaryThread()->addEntry(uploadThread);
 }
 
 
