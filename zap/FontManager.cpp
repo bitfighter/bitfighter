@@ -246,7 +246,7 @@ void FontManager::setFontContext(FontContext fontContext)
 
       case TimeLeftHeadlineContext:
       case TimeLeftIndicatorContext:
-         setFont(FontPlayBold);
+         setFont(FontPlay);
          return;
 
       default:
