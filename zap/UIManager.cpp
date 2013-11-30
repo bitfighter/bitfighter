@@ -267,6 +267,7 @@ void UIManager::onConnectionTerminated(const Address &serverAddress, NetConnecti
 
       case NetConnection::ReasonServerFull:
          message = "Could not connect to server because server is full.\n\n"
+
                    "Please try a different server, or try again later.";
          break;
 
