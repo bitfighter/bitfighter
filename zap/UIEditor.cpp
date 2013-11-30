@@ -2409,7 +2409,7 @@ void EditorUserInterface::pasteSelection()
 
    getDatabase()->addToDatabase(copiedObjects);
 
-   snapSelectedEngineeredItems(Point(0,0));
+   //snapSelectedEngineeredItems(Point(0,0));
       
    for(S32 i = 0; i < copiedObjects.size(); i++)   
       copiedObjects[i]->onGeomChanged();
