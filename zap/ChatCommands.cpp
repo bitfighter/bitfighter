@@ -1042,8 +1042,8 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
    }
    else                    // Args look ok; release the kraken!
    {
-      Thread *rateThread = new LevelDatabaseRateThread(game, LevelDatabaseRateThread::LevelRating(rating));
-      rateThread->start();
+      RefPtr<LevelDatabaseRateThread> rateThread = new LevelDatabaseRateThread(game, LevelDatabaseRateThread::LevelRating(rating));
+      gSecondaryThread.addEntry(rateThread);
    }
 }
 

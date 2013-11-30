@@ -8,13 +8,20 @@
 
 #include "tnlThread.h"
 #include <string>
+#include "../master/DatabaseAccessThread.h"
 
 namespace Zap
 {
 
 class ClientGame;
-class LevelDatabaseRateThread: public TNL::Thread
+class LevelDatabaseRateThread : public Master::ThreadEntry
 {
+   string username;
+   string user_password;
+   string reqURL;
+   string responseBody;
+   S32 responseCode;
+   S32 errorNumber;
 public:
 
 #define LEVEL_RATINGS_TABLE           \
@@ -36,7 +43,8 @@ public:
    static const string LevelDatabaseRateUrl;
    LevelDatabaseRateThread(ClientGame* game, LevelRating rating);
    virtual ~LevelDatabaseRateThread();
-   virtual U32 run();
+   void run();
+   void finish();
 
    ClientGame* mGame;
    string mLevelId;
