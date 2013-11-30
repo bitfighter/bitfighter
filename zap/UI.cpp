@@ -230,7 +230,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
       textSize = TextSizeBig;
 
    const S32 textGap = textSize / 3;   // Spacing between text lines
-   const S32 instrGap = 15;            // Gap between last line of text and instruction line
+   const S32 instrGap = 20;            // Gap between last line of text and instruction line
    const S32 instrGapBottom = 5;       // A bit of extra gap below the instr. line
 
    S32 titleHeight = title->getHeight();
