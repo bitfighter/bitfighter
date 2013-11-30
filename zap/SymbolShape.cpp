@@ -1376,7 +1376,9 @@ SymbolKey::~SymbolKey()
 void SymbolKey::render(const Point &center) const
 {
    // Compensate for the fact that boxes draw from center
-   const Point boxVertAdj  = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - KeyFontSize / 2 - 3);   
+   const Point boxVertAdj  = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - KeyFontSize / 2 - 3); 
+
+   // The -4 is a font-dependent aesthetic value determined by trial and error while looking at the help screens
    const Point textVertAdj = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - 4);
 
    if(mHasColor)
