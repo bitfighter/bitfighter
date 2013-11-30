@@ -424,7 +424,7 @@ public:
    Point snapPoint(GridDatabase *database, Point const &p, bool snapWhileOnDock = false);
    Point snapPointToLevelGrid(Point const &p);
 
-   void markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList, bool markPromiscuous);
+   void markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList);
    void markSelectedObjectsAsUnsnapped(const Vector<boost::shared_ptr<BfObject> > &objList);
 
 

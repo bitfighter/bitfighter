@@ -2408,6 +2408,8 @@ void EditorUserInterface::pasteSelection()
    }
 
    getDatabase()->addToDatabase(copiedObjects);
+
+   snapSelectedEngineeredItems(Point(0,0));
       
    for(S32 i = 0; i < copiedObjects.size(); i++)   
       copiedObjects[i]->onGeomChanged();
@@ -3028,7 +3030,7 @@ void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndo
    for(S32 i = 0; i < objList->size(); i++)
       mMoveOrigins[i].set(objList->get(i)->getVert(0));
 
-   markSelectedObjectsAsUnsnapped(objList, true);
+   //markSelectedObjectsAsUnsnapped(objList);
 }
 
 
