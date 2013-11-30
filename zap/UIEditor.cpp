@@ -3129,7 +3129,7 @@ void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOff
    {
       if(isEngineeredType(objList->get(i)->getObjectTypeNumber()))
       {
-         // Don't try to mount any items that are either 1) not selected or 2) already marked as snapped
+         // Only try to mount any items that are both 1) selected and 2) marked as wanting to snap
          EngineeredItem *engrObj = static_cast<EngineeredItem *>(objList->get(i));
          if(engrObj->isSelected() && promiscuousSnapper[i])
             engrObj->mountToWall(snapPointToLevelGrid(mMoveOrigins[i] + cumulativeOffset), wallSegmentManager, &selectedWalls);
