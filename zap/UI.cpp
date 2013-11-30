@@ -149,7 +149,7 @@ void UserInterface::renderConsole() const
 
 extern ScreenInfo gScreenInfo;
 
-static const S32 MessageBoxPadding = 10;  
+static const S32 MessageBoxPadding = 20;  
 static const S32 TitleSize = 30;
 static const S32 TitleGap = 10;           // Spacing between title and first line of message box
 static const S32 TitleHeight = TitleSize + TitleGap;
@@ -230,7 +230,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
       textSize = TextSizeBig;
 
    const S32 textGap = textSize / 3;   // Spacing between text lines
-   const S32 instrGap = 15;            // Gap between last line of text and instruction line
+   const S32 instrGap = 20;            // Gap between last line of text and instruction line
    const S32 instrGapBottom = 5;       // A bit of extra gap below the instr. line
 
    S32 titleHeight = title->getHeight();

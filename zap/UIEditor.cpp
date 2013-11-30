@@ -2365,8 +2365,6 @@ void EditorUserInterface::copySelection()
          mClipboard.push_back(boost::shared_ptr<BfObject>(objcopy));
       }
    }
-
-   //markSelectedObjectsAsUnsnapped(mClipboard);
 }
 
 
@@ -2409,12 +2407,14 @@ void EditorUserInterface::pasteSelection()
 
    getDatabase()->addToDatabase(copiedObjects);
 
-   //snapSelectedEngineeredItems(Point(0,0));
-      
+   // TODO: Need to do something here to snap pasted turrets that are not already snapped to something else
+
    for(S32 i = 0; i < copiedObjects.size(); i++)   
       copiedObjects[i]->onGeomChanged();
 
    onSelectionChanged();
+
+   resnapAllEngineeredItems(getDatabase());
 
    validateLevel();
    setNeedToSave(true);

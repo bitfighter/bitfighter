@@ -267,6 +267,7 @@ void UIManager::onConnectionTerminated(const Address &serverAddress, NetConnecti
 
       case NetConnection::ReasonServerFull:
          message = "Could not connect to server because server is full.\n\n"
+
                    "Please try a different server, or try again later.";
          break;
 
@@ -329,8 +330,9 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
 
       case NetConnection::ReasonTimedOut:
          // Avoid spamming the player if they are not connected to the Internet
-         if(reason == NetConnection::ReasonTimedOut && mUserHasSeenTimeoutMessage)
+         if(mUserHasSeenTimeoutMessage)
             return;
+
          if(wasFullyConnected)
             return;
 
@@ -346,6 +348,8 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
 
       case NetConnection::ReasonSelfDisconnect:
          // No errors when client disconnect (this happens when quitting bitfighter normally)
+         return;
+
       case NetConnection::ReasonAnonymous:
          // Anonymous connections are disconnected quickly, usually after retrieving some data
          return;
@@ -363,7 +367,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
          break;
    }
 
-   displayMessageBox("Connection Terminated", "", message);
+   displayMessageBox("Connection Terminated", "Press [[Esc]] to continue", message);
 }
 
 
