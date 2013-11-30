@@ -405,6 +405,7 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label
    // Handle some special cases -- there are some button labels that refer to special glyphs
    Joystick::ButtonSymbol buttonSymbol = Joystick::stringToButtonSymbol(label);
 
+   // Point(0,-1) below is a font-dependent rendering factor chosen by trial-and-error
    if(buttonSymbol == Joystick::ButtonSymbolNone)
       symbols.push_back(SymbolShapePtr(new SymbolText(label, LabelSize + shapePtr->getLabelSizeAdjustor(label, LabelSize), 
                                                       KeyContext, shapePtr->getLabelOffset(label, LabelSize) + Point(0,-1))));
