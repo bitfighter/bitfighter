@@ -35,7 +35,6 @@ static string getRatingString(S32 rating)
    TNLAssert(false, "Argh!");
 
    return "";
-
 }
 
 
@@ -45,6 +44,7 @@ LevelDatabaseRateThread::LevelDatabaseRateThread(ClientGame* game, LevelRating r
    mGame   = game;
    mRating = rating;
    errorNumber = 0;
+   responseCode = 0;
 
    TNLAssert(mGame->isLevelInDatabase(), "Level should already have been checked by now!");
    if(!mGame->isLevelInDatabase())
@@ -59,7 +59,6 @@ LevelDatabaseRateThread::LevelDatabaseRateThread(ClientGame* game, LevelRating r
    reqURL = LevelDatabaseRateUrl + id.str() + "/" + getRatingString(mRating);
    username = mGame->getPlayerName();
    user_password = mGame->getPlayerPassword();
-
 }
 
 
@@ -106,7 +105,7 @@ void LevelDatabaseRateThread::finish()
       mGame->displayErrorMessage("!!! Error rating level: Cannot connect to server");
    else
    {
-      mGame->displayErrorMessage("!!! Error rating level: %i %s", responseCode, responseBody);
+      mGame->displayErrorMessage("!!! Error rating level: %i %s", responseCode, responseBody.c_str());
    }
 }
 
