@@ -4674,6 +4674,8 @@ void EditorUserInterface::onFinishedDragging()
 
       if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
       {
+         bool wallMoved = false;
+
          const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
          for(S32 i = 0; i < objList->size(); i++)
@@ -4682,7 +4684,13 @@ void EditorUserInterface::onFinishedDragging()
 
             if(obj->isSelected() || objList->get(i)->anyVertsSelected())
                obj->onGeomChanged();
+
+            if(isWallType(obj->getObjectTypeNumber()))      // Wall or polywall
+               wallMoved = true;
          }
+
+         if(wallMoved)
+            resnapAllEngineeredItems(getDatabase());
 
          setNeedToSave(true);
          autoSave();
