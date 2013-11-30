@@ -39,13 +39,13 @@ WallSegmentManager::~WallSegmentManager()
 }
 
 
-GridDatabase *WallSegmentManager::getWallSegmentDatabase()
+GridDatabase *WallSegmentManager::getWallSegmentDatabase() const
 {
    return mWallSegmentDatabase;
 }
 
 
-GridDatabase *WallSegmentManager::getWallEdgeDatabase()
+GridDatabase *WallSegmentManager::getWallEdgeDatabase() const
 {
    return mWallEdgeDatabase;
 }

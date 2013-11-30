@@ -37,8 +37,8 @@ public:
    WallSegmentManager();   // Constructor
    virtual ~WallSegmentManager();  // Destructor
 
-   GridDatabase *getWallSegmentDatabase();
-   GridDatabase *getWallEdgeDatabase();
+   GridDatabase *getWallSegmentDatabase() const;
+   GridDatabase *getWallEdgeDatabase() const;
 
    const Vector<Point> *getWallEdgePoints() const;
    const Vector<Point> *getSelectedWallEdgePoints() const;
