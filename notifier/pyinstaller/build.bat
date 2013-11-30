@@ -1,3 +1,4 @@
+rem Building the notifier requires pyinstaller -- install with "pip install pyinstaller" 
 @echo off
 echo Building notifier executable...
 pyinstaller --onefile --noconsole --icon=..\redship48.ico ..\bitfighter_notifier.py
