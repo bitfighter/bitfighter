@@ -1410,7 +1410,11 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
       return true;
 }
 
-
+// This uses poly2tri to triangulate.  poly2tri isn't very robust so clipper needs to do
+// the cleaning of points before getting here.
+//
+// For assistance with a special case crash, see this utility:
+//    http://javascript.poly2tri.googlecode.com/hg/index.html
 bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bounds,
       const PolyTree &polyTree, bool ignoreFills, bool ignoreHoles)
 {
