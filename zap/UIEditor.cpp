@@ -1485,7 +1485,6 @@ static Vector<S32> selectedSnappedEngrObjectIndices;
 static Vector<bool> promiscuousSnapper;
 static Vector<S32> selectedWalls;
 
-
 static void markSelectedObjectsAsUnsnapped_init(S32 itemCount, bool calledDuringDragInitialization)
 {
    selectedSnappedEngrObjects.clear();
