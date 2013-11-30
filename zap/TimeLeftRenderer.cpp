@@ -25,7 +25,7 @@ namespace UI {
 
 const U32 rightAlignCoord = gScreenInfo.getGameCanvasWidth() - TimeLeftRenderer::TimeLeftIndicatorMargin;
 
-const S32 timeTextSize = 28;
+const S32 timeTextSize = 30;
 const S32 bigScoreTextSize = 28;
 const S32 bigScoreTextGap = 5;
 
@@ -233,7 +233,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
 {
    const S32 siSize = 12;                 // Size of stacked indicators
    const S32 grayLineHorizPadding = 4;
-   const S32 grayLineVertPadding = 3;
+   const S32 grayLineVertPadding = -1;
 
    // Precalc some widths we'll need from time to time
    static const U32 w0     = getStringWidth(timeTextSize, "0");
@@ -270,8 +270,8 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
    if(render)
    {
       glColor(Colors::cyan);
-      // Align with top of time, + 4 technically not needed, but just looks better
-      wt = drawStringfr(smallTextRPos, timeTop + 2, siSize, gameType->getShortName());
+      // Align with top of time, + 6 is a font-dependent fudge factor
+      wt = drawStringfr(smallTextRPos, timeTop + 6, siSize, gameType->getShortName());
 
       glColor(Colors::red);
       // Align with bottom of time
@@ -291,9 +291,10 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
    }
 
    const S32 leftLineOverhangAmount = 4;
-   const S32 visualVerticalTextAlignmentHackyFacty = 3;
+   const S32 visualVerticalTextAlignmentHackyFacty = 6;     // This is that little gap btwn the gray vert and horiz lines
    const S32 farLeftCoord = smallTextRPos - max(wt, wb) - leftLineOverhangAmount;
-   const S32 topCoord = timeTop - 2 * grayLineVertPadding - (S32)gDefaultLineWidth - 3;
+   // Adjusting this topCord will control how much space above the horiz gray line there is before the flags or other junk is drawn
+   const S32 topCoord = timeTop - 2 * grayLineVertPadding - (S32)gDefaultLineWidth - 8;
 
    if(render)
    {
