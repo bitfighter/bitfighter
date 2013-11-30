@@ -3163,8 +3163,7 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 // Add it to the list, will be displayed in render()
 void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const string &msg)
 {
-   Vector<string> lines;
-   wrapString(substitueVars(msg), mWrapWidth, mFontSize, ChatMessageContext, lines, "      ");
+   Vector<string> lines = wrapString(substitueVars(msg), mWrapWidth, mFontSize, "      ");
 
    // All lines from this message will share a groupId.  We'll use that to expire the group as a whole.
    for(S32 i = 0; i < lines.size(); i++)
