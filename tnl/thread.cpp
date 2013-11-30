@@ -112,17 +112,21 @@ U32 Thread::run()
 
 void Thread::start()
 {
+   if(mThread)
+      CloseHandle(mThread);
    mThread = CreateThread(NULL, 0, ThreadProc, this, 0, NULL);
    mReturnValue = 0;
 }
 
 Thread::Thread()
 {
+   mThread = NULL;
 }
 
 Thread::~Thread()
 {
-   CloseHandle(mThread);
+   if(mThread)
+      CloseHandle(mThread);
 }
 
 #else
