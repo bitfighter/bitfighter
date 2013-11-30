@@ -1413,42 +1413,8 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
 
    if(mDraggingObjects)
    {
-      Vector<EngineeredItem *> selectedSnappedEngrObjects;
-      Vector<S32> selectedWalls;
+      markSelectedObjectsAsUnsnapped(objList);
 
-      // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
-      for(S32 i = 0; i < objList->size(); i++)
-      {
-         BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-         if(obj->isSelected())
-         {
-            if(isEngineeredType(obj->getObjectTypeNumber()))
-            {
-               EngineeredItem *engrObj = static_cast<EngineeredItem *>(objList->get(i));
-               if(engrObj->getMountSegment() && engrObj->isSnapped())
-                  selectedSnappedEngrObjects.push_back(engrObj);
-               else
-                  obj->setSnapped(false);
-            }
-            else        // Not an engineered object
-            {
-               if(isWallType(obj->getObjectTypeNumber()))      // Wall or polywall
-               {
-                  BfObject *bfObj = static_cast<BfObject *>(objList->get(i));
-                  selectedWalls.push_back(bfObj->getSerialNumber());
-               }
-               obj->setSnapped(false);
-            }
-         }
-      }
-
-      // Now review all the engineer items that are being dragged and see if the wall they are mounted to is being
-      // dragged as well.  If it is, keep them snapped; if not, mark them as unsnapped. 
-      for(S32 i = 0; i < selectedSnappedEngrObjects.size(); i++)
-         selectedSnappedEngrObjects[i]->setSnapped(selectedWalls.contains(selectedSnappedEngrObjects[i]->getMountSegment()->getOwner()));
-
-   
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice, regardless of whether snapping is on or off
       if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
          return snapPointToLevelGrid(p);
@@ -1493,6 +1459,77 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
    }
 
    return snapPoint;
+}
+
+
+
+static Vector<EngineeredItem *> selectedSnappedEngrObjects;
+static Vector<S32> selectedWalls;
+
+static void initMarkObjectAsUnsnapped()
+{
+   selectedSnappedEngrObjects.clear();
+   selectedWalls.clear();
+}
+
+
+static void doMarkObjectAsUnsnapped(BfObject *obj)
+{
+   if(obj->isSelected())
+   {
+      if(isEngineeredType(obj->getObjectTypeNumber()))
+      {
+         EngineeredItem *engrObj = static_cast<EngineeredItem *>(obj);
+         if(engrObj->getMountSegment() && engrObj->isSnapped())
+            selectedSnappedEngrObjects.push_back(engrObj);
+         else
+            obj->setSnapped(false);
+      }
+      else        // Not an engineered object
+      {
+         if(isWallType(obj->getObjectTypeNumber()))      // Wall or polywall in this context
+         {
+            BfObject *bfObj = static_cast<BfObject *>(obj);
+            selectedWalls.push_back(bfObj->getSerialNumber());
+         }
+         obj->setSnapped(false);
+      }
+   }
+}
+
+
+static void doneMarkObjectAsUnsnapped()
+{
+   // Now review all the engineer items that are being dragged and see if the wall they are mounted to is being
+   // dragged as well.  If it is, keep them snapped; if not, mark them as unsnapped. 
+   for(S32 i = 0; i < selectedSnappedEngrObjects.size(); i++)
+      selectedSnappedEngrObjects[i]->setSnapped(selectedWalls.contains(selectedSnappedEngrObjects[i]->getMountSegment()->getOwner()));
+}
+
+
+void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<boost::shared_ptr<BfObject> > &objList)
+{
+   initMarkObjectAsUnsnapped();
+
+   // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
+   for(S32 i = 0; i < objList.size(); i++)
+      doMarkObjectAsUnsnapped(objList[i].get());
+
+   doneMarkObjectAsUnsnapped();
+}
+
+
+void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList)
+{
+   initMarkObjectAsUnsnapped();
+
+   // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
+   for(S32 i = 0; i < objList->size(); i++)
+      doMarkObjectAsUnsnapped(static_cast<BfObject *>(objList->get(i)));
+
+   doneMarkObjectAsUnsnapped();
+
+
 }
 
 
@@ -2295,6 +2332,8 @@ void EditorUserInterface::copySelection()
          mClipboard.push_back(boost::shared_ptr<BfObject>(objcopy));
       }
    }
+
+   markSelectedObjectsAsUnsnapped(mClipboard);
 }
 
 
