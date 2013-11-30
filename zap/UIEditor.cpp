@@ -1412,7 +1412,7 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
    WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
    if(mDraggingObjects)
-   {
+   {  
       markSelectedObjectsAsUnsnapped(objList);
 
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice, regardless of whether snapping is on or off
@@ -2999,7 +2999,6 @@ void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndo
    onSelectionChanged();
    mDraggingObjects = true; 
    mSnapDelta.set(0,0);
-
 
    mMoveOrigins.resize(objList->size());
 
