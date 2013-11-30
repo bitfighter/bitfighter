@@ -1057,6 +1057,7 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
    {
       setPos(anchor);
       setAnchorNormal(nrml);
+      // TODO -- After 019 release -- change this to a static_cast with a protecting assert
       setMountSegment(dynamic_cast<WallSegment *>(mountSeg));
 
       mSnapped = true;
