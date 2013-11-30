@@ -1433,10 +1433,10 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
             }
             else        // Not an engineered object
             {
-               if(isWallItemType(obj->getObjectTypeNumber()))
+               if(isWallType(obj->getObjectTypeNumber()))      // Wall or polywall
                {
-                  WallItem *wallItem = static_cast<WallItem *>(objList->get(i));
-                  selectedWalls.push_back(wallItem->getSerialNumber());
+                  BfObject *bfObj = static_cast<BfObject *>(objList->get(i));
+                  selectedWalls.push_back(bfObj->getSerialNumber());
                }
                obj->setSnapped(false);
             }
