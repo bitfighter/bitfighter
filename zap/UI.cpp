@@ -149,7 +149,7 @@ void UserInterface::renderConsole() const
 
 extern ScreenInfo gScreenInfo;
 
-static const S32 MessageBoxPadding = 10;  
+static const S32 MessageBoxPadding = 20;  
 static const S32 TitleSize = 30;
 static const S32 TitleGap = 10;           // Spacing between title and first line of message box
 static const S32 TitleHeight = TitleSize + TitleGap;
