@@ -2366,7 +2366,7 @@ void EditorUserInterface::copySelection()
       }
    }
 
-   markSelectedObjectsAsUnsnapped(mClipboard);
+   //markSelectedObjectsAsUnsnapped(mClipboard);
 }
 
 
