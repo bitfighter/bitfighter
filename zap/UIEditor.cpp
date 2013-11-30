@@ -2365,8 +2365,6 @@ void EditorUserInterface::copySelection()
          mClipboard.push_back(boost::shared_ptr<BfObject>(objcopy));
       }
    }
-
-   //markSelectedObjectsAsUnsnapped(mClipboard);
 }
 
 
@@ -2415,6 +2413,8 @@ void EditorUserInterface::pasteSelection()
       copiedObjects[i]->onGeomChanged();
 
    onSelectionChanged();
+
+   resnapAllEngineeredItems(getDatabase());
 
    validateLevel();
    setNeedToSave(true);
