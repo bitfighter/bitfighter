@@ -1295,12 +1295,6 @@ const Rect *Game::getWorldExtents() const
 }
 
 
-bool Game::isTestServer()
-{
-   return false;
-}
-
-
 const Color *Game::getTeamColor(S32 teamId) const
 {
    return mActiveTeamManager->getTeamColor(teamId);

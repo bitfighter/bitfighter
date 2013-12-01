@@ -309,8 +309,6 @@ public:
    
    const Rect *getWorldExtents() const;
 
-   virtual bool isTestServer();                                   // Overridden in ServerGame
-
    virtual const Color *getTeamColor(S32 teamId) const;
 
    void computeWorldObjectExtents();
