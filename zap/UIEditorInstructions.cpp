@@ -27,9 +27,14 @@
 namespace Zap
 {
 
+static S32 col1 = UserInterface::horizMargin;
+static S32 col2 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 45;     // + 45 to make a little more room for Binding column
+static S32 col3 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.5);
+static S32 col4 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.75) + 45;
+
+
 using UI::SymbolString;
 using UI::SymbolStringSet;
-
 
 // Constructor
 EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game),
@@ -37,11 +42,6 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
                                                                                      mConsoleInstructions(10),
                                                                                      mPluginInstructions(10)
 {
-   mCol1 = UserInterface::horizMargin;
-   mCol2 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 45;     // + 45 to make a little more room for Binding column
-   mCol3 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.5);
-   mCol4 = UserInterface::horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.75) + 45;
-
    GameSettings *settings = getGame()->getSettings();
    mCurPage = 0;
    mAnimStage = 0;
@@ -153,15 +153,15 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
-   mSymbolSets1Left.addSymbolStringSet(keysInstrLeft1,      UI::AlignmentLeft,   mCol1);
-   mSymbolSets1Left.addSymbolStringSet(keysBindingsLeft1,   UI::AlignmentCenter, mCol2 + centeringOffset);
-   mSymbolSets1Right.addSymbolStringSet(keysInstrRight1,    UI::AlignmentLeft,   mCol3);
-   mSymbolSets1Right.addSymbolStringSet(keysBindingsRight1, UI::AlignmentCenter, mCol4 + centeringOffset);
+   mSymbolSets1Left.addSymbolStringSet(keysInstrLeft1,      UI::AlignmentLeft,   col1);
+   mSymbolSets1Left.addSymbolStringSet(keysBindingsLeft1,   UI::AlignmentCenter, col2 + centeringOffset);
+   mSymbolSets1Right.addSymbolStringSet(keysInstrRight1,    UI::AlignmentLeft,   col3);
+   mSymbolSets1Right.addSymbolStringSet(keysBindingsRight1, UI::AlignmentCenter, col4 + centeringOffset);
 
-   mSymbolSets2Left.addSymbolStringSet(keysInstrLeft2,      UI::AlignmentLeft,   mCol1);
-   mSymbolSets2Left.addSymbolStringSet(keysBindingsLeft2,   UI::AlignmentCenter, mCol2 + centeringOffset);
-   mSymbolSets2Right.addSymbolStringSet(keysInstrRight2,    UI::AlignmentLeft,   mCol3);
-   mSymbolSets2Right.addSymbolStringSet(keysBindingsRight2, UI::AlignmentCenter, mCol4 + centeringOffset);
+   mSymbolSets2Left.addSymbolStringSet(keysInstrLeft2,      UI::AlignmentLeft,   col1);
+   mSymbolSets2Left.addSymbolStringSet(keysBindingsLeft2,   UI::AlignmentCenter, col2 + centeringOffset);
+   mSymbolSets2Right.addSymbolStringSet(keysInstrRight2,    UI::AlignmentLeft,   col3);
+   mSymbolSets2Right.addSymbolStringSet(keysBindingsRight2, UI::AlignmentCenter, col4 + centeringOffset);
 
 
    // Prepare special instructions
@@ -325,13 +325,13 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 
    y += 45;
 
-   mSpecialKeysInstrLeft.render (mCol1, y, UI::AlignmentLeft);
-   mSpecialKeysInstrRight.render(mCol3, y, UI::AlignmentLeft);
+   mSpecialKeysInstrLeft.render (col1, y, UI::AlignmentLeft);
+   mSpecialKeysInstrRight.render(col3, y, UI::AlignmentLeft);
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
-   mSpecialKeysBindingsLeft.render (mCol2 + centeringOffset, y, UI::AlignmentCenter);
-   mSpecialKeysBindingsRight.render(mCol4 + centeringOffset, y, UI::AlignmentCenter);
+   mSpecialKeysBindingsLeft.render (col2 + centeringOffset, y, UI::AlignmentCenter);
+   mSpecialKeysBindingsRight.render(col4 + centeringOffset, y, UI::AlignmentCenter);
 }
 
 

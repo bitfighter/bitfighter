@@ -23,21 +23,12 @@ extern ScreenInfo gScreenInfo;
 
 namespace UI {
 
+const U32 rightAlignCoord = gScreenInfo.getGameCanvasWidth() - TimeLeftRenderer::TimeLeftIndicatorMargin;
+
 const S32 timeTextSize = 30;
 const S32 bigScoreTextSize = 28;
 const S32 bigScoreTextGap = 5;
 
-// Constructor
-TimeLeftRenderer::TimeLeftRenderer()
-{
-   mRightAlignCoord = gScreenInfo.getGameCanvasWidth() - TimeLeftIndicatorMargin;
-}
-
-// Destructor
-TimeLeftRenderer::~TimeLeftRenderer()
-{
-   // Do nothing
-}
 
 // When render param is true, will render as expected; when false, will simply return dimensions
 Point TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible, bool render) const
@@ -52,7 +43,7 @@ Point TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible,
    corner.y = gScreenInfo.getGameCanvasHeight() - corner.y - TimeLeftIndicatorMargin;    // Height
 
    // Some game types *ahem* Nexus *ahem* require an extra line for the scoreboard... a "special" if you will
-   const S32 timeLeftSpecialHeight = gameType->renderTimeLeftSpecial(mRightAlignCoord, timeTop, render);
+   const S32 timeLeftSpecialHeight = gameType->renderTimeLeftSpecial(rightAlignCoord, timeTop, render);
    timeTop  -= timeLeftSpecialHeight;
    corner.y += timeLeftSpecialHeight;
 
@@ -83,7 +74,7 @@ S32 TimeLeftRenderer::renderTeamScores(const GameType *gameType, S32 bottom, boo
    S32 ypos = bottom - bigScoreTextSize;      
 
    S32 maxWidth = render ? renderHeadlineScores(game, ypos) : 0;   // Use max score width to vertically align symbols
-   S32 xpos = mRightAlignCoord - maxWidth - 18;
+   S32 xpos = rightAlignCoord - maxWidth - 18;
 
    S32 teamCount = game->getTeamCount();
 
@@ -117,7 +108,7 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
       // This is a total hack based on visual inspection trying to get scores ending in 1 to align with others
       // in a way that is nice.  This is totally font dependent, sadly...
 
-      S32 width = drawStringfr(mRightAlignCoord, ypos, bigScoreTextSize, "%d", score);
+      S32 width = drawStringfr(rightAlignCoord, ypos, bigScoreTextSize, "%d", score);
       maxWidth = max(maxWidth, width);
 
       ypos -= bigScoreTextSize + bigScoreTextGap;
@@ -216,8 +207,8 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
    {
       glColor(winnerColor);
 
-      drawStringDigitByDigit(mRightAlignCoord - topOneFixFactor, ypos - firstNameOffset, textsize, topScoreStr);
-      drawStringr           (mRightAlignCoord - maxWidth,        ypos - firstNameOffset, textsize, topName);
+      drawStringDigitByDigit(rightAlignCoord - topOneFixFactor, ypos - firstNameOffset, textsize, topScoreStr);
+      drawStringr           (rightAlignCoord - maxWidth,        ypos - firstNameOffset, textsize, topName);
 
       // Render bottom score if we have one
       if(renderTwoNames)
@@ -227,8 +218,8 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
          else
             glColor(loserColor);
 
-         drawStringDigitByDigit(mRightAlignCoord - botOneFixFactor, ypos, textsize, botScoreStr);
-         drawStringr           (mRightAlignCoord - maxWidth,        ypos, textsize, botName);
+         drawStringDigitByDigit(rightAlignCoord - botOneFixFactor, ypos, textsize, botScoreStr);
+         drawStringr           (rightAlignCoord - maxWidth,        ypos, textsize, botName);
       }
    }
 
@@ -265,11 +256,11 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
          timeWidth += w0;
    }
 
-   const S32 grayLinePos = mRightAlignCoord - timeWidth - grayLineHorizPadding;  // Where the vertical gray line is drawn
+   const S32 grayLinePos = rightAlignCoord - timeWidth - grayLineHorizPadding;  // Where the vertical gray line is drawn
    const S32 smallTextRPos = grayLinePos - grayLineHorizPadding;                // Right-align the stacked text here
    
    // Left and top coordinates of the time display
-   const S32 timeLeft = mRightAlignCoord - timeWidth;
+   const S32 timeLeft = rightAlignCoord - timeWidth;
    const S32 timeTop  = gScreenInfo.getGameCanvasHeight() - timeTextSize - TimeLeftIndicatorMargin;
 
    S32 wt, wb;    // Width of top and bottom items respectively
@@ -306,7 +297,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
    if(render)
    {
       glColor(Colors::gray40);
-      drawHorizLine(farLeftCoord, mRightAlignCoord, timeTop - grayLineVertPadding);
+      drawHorizLine(farLeftCoord, rightAlignCoord, timeTop - grayLineVertPadding);
       drawVertLine(grayLinePos, timeTop + visualVerticalTextAlignmentHackyFacty, timeTop + timeTextSize);
    }
 
