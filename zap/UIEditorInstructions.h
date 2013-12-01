@@ -19,11 +19,6 @@ class EditorInstructionsUserInterface : public AbstractInstructionsUserInterface
    typedef AbstractInstructionsUserInterface Parent;
 
 private:
-   S32 mCol1;
-   S32 mCol2;
-   S32 mCol3;
-   S32 mCol4;
-
    S32 mCurPage;
    Timer mAnimTimer;
    S32 mAnimStage;
