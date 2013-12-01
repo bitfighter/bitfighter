@@ -91,7 +91,7 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "GPL"
   ; Pages
 
      !insertmacro MUI_PAGE_WELCOME
-     !insertmacro MUI_PAGE_LICENSE "..\..\..\End-User License.txt"
+     !insertmacro MUI_PAGE_LICENSE "..\..\..\LICENSE.txt"
      !insertmacro MUI_PAGE_DIRECTORY
      !insertmacro MUI_PAGE_INSTFILES
      !insertmacro MUI_PAGE_FINISH		
@@ -137,6 +137,9 @@ Section "Install"
   SetOutPath "$INSTDIR"
   File "..\..\..\exe\Bitfighter.exe"
   File "..\..\..\exe\joystick_presets.ini"
+  
+  File /nonfatal "..\..\..\notifier\pyinstaller\dist\bitfighter_notifier.exe"
+  File /nonfatal "..\..\..\notifier\redship48.ico"
 
   File "..\..\..\lib\OpenAL32.dll"
   File "..\..\..\lib\ALURE32.dll"
@@ -150,7 +153,8 @@ Section "Install"
   File "..\..\..\lib\libmodplug.dll"
 
   File "..\..\..\doc\readme.txt"
-  File "..\..\..\End-User License.txt"
+  File "..\..\..\LICENSE.txt"
+  File "..\..\..\COPYING.txt"
   File ".\twoplayers.bat"
   File "..\..\..\resource\bficon.bmp"
 
@@ -180,6 +184,9 @@ Section "Install"
   SetOutPath "$INSTDIR\robots"
   File /r "..\..\..\resource\robots\*.bot" 
 
+  SetOutPath "$INSTDIR\fonts"
+  File /r "..\..\..\resource\fonts\*.*" 
+
 
   CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe"
 
@@ -201,6 +208,7 @@ Section "Install"
       CreateShortCut "$SMPROGRAMS\Bitfighter\Uninstall Bitfighter.lnk" "$INSTDIR\uninstall-bitfighter.exe"
       SetOutPath $INSTDIR
       CreateShortCut "$SMPROGRAMS\Bitfighter\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe"
+      CreateShortCut "$SMPROGRAMS\Bitfighter\bitfighter_notifier.lnk" "$INSTDIR\bitfighter_notifier.exe"
 
       call MigrateUserData
        
@@ -247,6 +255,7 @@ SectionEnd
     RMDir /r $INSTDIR\cache
     RMDir /r $INSTDIR\lua
     RMDir /r $INSTDIR\editor_plugins
+    RMDir /r $INSTDIR\fonts
     RMDir /r $INSTDIR
     
     ; Remove the links from the start menu and desktop
