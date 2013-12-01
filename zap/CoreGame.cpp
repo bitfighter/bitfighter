@@ -992,8 +992,8 @@ void CoreItem::onGeomChanged()
 #endif
 
 
-bool CoreItem::canBeHostile() { return false; }
-bool CoreItem::canBeNeutral() { return false; }
+bool CoreItem::canBeHostile() { return true; }
+bool CoreItem::canBeNeutral() { return true; }
 
 
 S32 CoreItem::lua_setTeam(lua_State *L)
