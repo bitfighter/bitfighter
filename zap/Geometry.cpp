@@ -950,7 +950,7 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
    for(S32 i = firstCoord; i < argc - 1; i += 2)
    {
       // If we are loading legacy levels (earlier than 019), then they used a gridsize multiplier.
-      if(gridSize != 1.f)
+      //if(gridSize != 1.f)   // on windows can crash even with gridsize == 1
          // Here we also round the resultant gridsize-multiplied points.  This is because
          // the older editor would save identical points with floating point rounding errors.
          // These errors can sometimes create issues with clipping and triangulation, usually
@@ -961,8 +961,8 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
          // This can probably be removed once we can implement StrictlySimple with Clipper 6
          p.set( (F32) floorf(atof(argv[i]) * gridSize * 10000) *.0001f, (F32) floorf(atof(argv[i+1]) * gridSize * 10000) *.0001f );
 
-      else
-         p.set( (F32) atof(argv[i]), (F32) atof(argv[i+1]));
+      //else
+      //   p.set( (F32) atof(argv[i]), (F32) atof(argv[i+1]));
 
       // Normally, we'll want to filter out adjacent points that are identical.  But we also
       // need to handle the situation where the user has created a 2-pt 0-length line.
