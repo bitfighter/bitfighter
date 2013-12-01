@@ -407,6 +407,8 @@
 		73D2F56612E2DA1700EA5EBE /* xtea.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F52112E2DA1700EA5EBE /* xtea.c */; };
 		73D2F56712E2DA1700EA5EBE /* yarrow.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F52212E2DA1700EA5EBE /* yarrow.c */; };
 		73D2F5DF12E2DDD200EA5EBE /* libtomcrypt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
+		73D3C5C3184AD84600591915 /* bitfighter_notifier.py in Resources */ = {isa = PBXBuildFile; fileRef = 73D3C5C0184AD84600591915 /* bitfighter_notifier.py */; };
+		73D3C5C4184AD84600591915 /* redship18.png in Resources */ = {isa = PBXBuildFile; fileRef = 73D3C5C1184AD84600591915 /* redship18.png */; };
 		73D5926D1800798F0054244E /* LevelSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D592691800798F0054244E /* LevelSource.cpp */; };
 		73D5926E1800798F0054244E /* LuaGlobals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D5926B1800798F0054244E /* LuaGlobals.cpp */; };
 		73DD59891753102000985BFA /* OpenAL-Soft.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73DD59881753102000985BFA /* OpenAL-Soft.framework */; };
@@ -1157,6 +1159,8 @@
 		73D2F6B112E2E1D400EA5EBE /* lzio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lzio.c; path = "../../../lua/lua-vec/src/lzio.c"; sourceTree = SOURCE_ROOT; };
 		73D2F6B212E2E1D400EA5EBE /* lzio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lzio.h; path = "../../../lua/lua-vec/src/lzio.h"; sourceTree = SOURCE_ROOT; };
 		73D2F6B312E2E1D400EA5EBE /* print.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = print.c; path = "../../../lua/lua-vec/src/print.c"; sourceTree = SOURCE_ROOT; };
+		73D3C5C0184AD84600591915 /* bitfighter_notifier.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = bitfighter_notifier.py; path = ../../../notifier/bitfighter_notifier.py; sourceTree = SOURCE_ROOT; };
+		73D3C5C1184AD84600591915 /* redship18.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = redship18.png; path = ../../../notifier/redship18.png; sourceTree = SOURCE_ROOT; };
 		73D592681800798F0054244E /* LevelFilesForTesting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LevelFilesForTesting.h; path = ../../../zap/LevelFilesForTesting.h; sourceTree = SOURCE_ROOT; };
 		73D592691800798F0054244E /* LevelSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LevelSource.cpp; path = ../../../zap/LevelSource.cpp; sourceTree = SOURCE_ROOT; };
 		73D5926A1800798F0054244E /* LevelSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LevelSource.h; path = ../../../zap/LevelSource.h; sourceTree = SOURCE_ROOT; };
@@ -1336,6 +1340,7 @@
 		29B97314FDCFA39411CA2CEA /* Bitfighter */ = {
 			isa = PBXGroup;
 			children = (
+				73D3C5BB184AD82400591915 /* notifier */,
 				739E18E5172DCC370002286C /* poly2tri */,
 				73B1C2FA171CEA830007207A /* fontstash */,
 				73793C2516138CD6000E693E /* libmodplug */,
@@ -2304,6 +2309,15 @@
 			name = lua;
 			sourceTree = "<group>";
 		};
+		73D3C5BB184AD82400591915 /* notifier */ = {
+			isa = PBXGroup;
+			children = (
+				73D3C5C0184AD84600591915 /* bitfighter_notifier.py */,
+				73D3C5C1184AD84600591915 /* redship18.png */,
+			);
+			name = notifier;
+			sourceTree = "<group>";
+		};
 		D3A9DC2C139C925E00FC8814 /* vorbis */ = {
 			isa = PBXGroup;
 			children = (
@@ -2587,6 +2601,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73D3C5C3184AD84600591915 /* bitfighter_notifier.py in Resources */,
+				73D3C5C4184AD84600591915 /* redship18.png in Resources */,
 				73846BC614CDD70D00A5553F /* editor_plugins in Resources */,
 				94B7EAC011D7DABC0083AEAF /* Bitfighter.icns in Resources */,
 				737CE40512904D5300D732B7 /* robots in Resources */,
