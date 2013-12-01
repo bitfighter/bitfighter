@@ -23,6 +23,8 @@ namespace UI
 class TimeLeftRenderer
 {
 private:
+   U32 mRightAlignCoord;
+
    Point renderTimeLeft      (const GameType *gameType, bool render = true) const;     // Returns width and height
    S32 renderHeadlineScores  (const Game *game, S32 ypos) const;
    S32 renderTeamScores      (const GameType *gameType, S32 bottom, bool render) const;
@@ -30,6 +32,9 @@ private:
 
 public:
    static const S32 TimeLeftIndicatorMargin = 7;
+
+   TimeLeftRenderer();
+   virtual ~TimeLeftRenderer();
 
    Point render(const GameType *gameType, bool scoreboardVisible, bool render) const;
 };
