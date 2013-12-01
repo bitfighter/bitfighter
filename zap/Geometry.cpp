@@ -951,16 +951,7 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
    {
       // If we are loading legacy levels (earlier than 019), then they used a gridsize multiplier.
       if(gridSize != 1.f)
-         // Here we also round the resultant gridsize-multiplied points.  This is because
-         // the older editor would save identical points with floating point rounding errors.
-         // These errors can sometimes create issues with clipping and triangulation, usually
-         // by creating not strictly-simple polygons or self-intersecting lines - these then
-         // crash poly2tri in triangulation.  For a good reference to these issues see:
-         //    http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/Rounding.htm
-         //
-         // This can probably be removed once we can implement StrictlySimple with Clipper 6
          p.set( (F32) (atof(argv[i]) * gridSize), (F32) (atof(argv[i+1]) * gridSize ) );
-
       else
          p.set( (F32) atof(argv[i]), (F32) atof(argv[i+1]));
 

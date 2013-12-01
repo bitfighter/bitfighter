@@ -383,15 +383,22 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
       forceFieldProjector->getBufferForBotZone(bufferRadius, inputPolygons.last());
    }
 
+
+   // Here we round the botzone points before clipper takes ahold.  This is because
+   // the older editor would save identical points with floating point rounding errors.
+   // These errors can sometimes create issues with clipping and triangulation, usually
+   // by creating not strictly-simple polygons or self-intersecting lines - these then
+   // crash poly2tri in triangulation.  For a good reference to these issues see:
+   //    http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/Rounding.htm
+   //
+   // This can probably be removed once we can implement StrictlySimple with Clipper 6
    for(S32 i=0; i < inputPolygons.size(); i++)
    {
-      inputPolygons[0];
       for(S32 j=0; j < inputPolygons[i].size(); j++)
       {
          inputPolygons[i][j].x = (F32)floor(inputPolygons[i][j].x * 1) * 1.f;
          inputPolygons[i][j].y = (F32)floor(inputPolygons[i][j].y * 1) * 1.f;
       }
-      inputPolygons[0];
    }
 
    return mergePolysToPolyTree(inputPolygons, solution);
