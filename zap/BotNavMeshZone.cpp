@@ -383,6 +383,17 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
       forceFieldProjector->getBufferForBotZone(bufferRadius, inputPolygons.last());
    }
 
+   for(S32 i=0; i < inputPolygons.size(); i++)
+   {
+      inputPolygons[0];
+      for(S32 j=0; j < inputPolygons[i].size(); j++)
+      {
+         inputPolygons[i][j].x = (F32)floor(inputPolygons[i][j].x * 1) * 1.f;
+         inputPolygons[i][j].y = (F32)floor(inputPolygons[i][j].y * 1) * 1.f;
+      }
+      inputPolygons[0];
+   }
+
    return mergePolysToPolyTree(inputPolygons, solution);
 }
 
