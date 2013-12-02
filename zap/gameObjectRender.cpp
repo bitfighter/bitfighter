@@ -3321,8 +3321,11 @@ void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 g
 }
 
 
-void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent)
+void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alpha, Point cameraPos, Point visibleExtent)
 {
+   if(alpha <= 0.5f)
+      return;
+
    static const F32 starChunkSize = 1024;        // Smaller numbers = more dense stars
    static const F32 starDist = 3500;             // Bigger value = slower moving stars
 
@@ -3350,9 +3353,13 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
    glPointSize( gLineWidth1 );
 
    glEnableClientState(GL_VERTEX_ARRAY);
-   glEnableClientState(GL_COLOR_ARRAY);
+   //glEnableClientState(GL_COLOR_ARRAY);
 
-   glColorPointer(4, GL_FLOAT, sizeof(Color), &colors[0]);
+   //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   glEnable(GL_BLEND);
+   glColor(Colors::gray60, alpha);
+
+   //glColorPointer(4, GL_FLOAT, sizeof(Color), &colors[0]);
    glVertexPointer(2, GL_FLOAT, sizeof(Point), &stars[0]);    // Each star is a pair of floats between 0 and 1
 
 
@@ -3366,7 +3373,7 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
    S32 fy2 =  1 - yDist;
 
 
-   glDisable(GL_BLEND);
+   //glDisable(GL_BLEND);
 
    for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2; xPage++)
       for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2; yPage++)
@@ -3385,10 +3392,17 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
          glPopMatrix();
       }
 
-   glEnable(GL_BLEND);
+   //glEnable(GL_BLEND);
 
-   glDisableClientState(GL_COLOR_ARRAY);
+   //glDisableClientState(GL_COLOR_ARRAY);
    glDisableClientState(GL_VERTEX_ARRAY);
+
+   if(alpha < 1.0f)
+   {
+      ////glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      //glColor(Colors::black, .25);
+      //drawFilledRect(0, 0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
+   }
 }
 
 
