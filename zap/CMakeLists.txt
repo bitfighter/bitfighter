@@ -30,6 +30,7 @@ set(SHARED_SOURCES
 	CoreGame.cpp
 	CTFGame.cpp
 	dataConnection.cpp
+	DisplayManager.cpp
 	EngineeredItem.cpp
 	EventManager.cpp
 	flagItem.cpp
@@ -119,7 +120,6 @@ set(CLIENT_SOURCES
 	ChatHelper.cpp
 	ClientGame.cpp
 	Cursor.cpp
-	DisplayManager.cpp
 	EditorAttributeMenuItemBuilder.cpp
 	EditorPlugin.cpp
 	EditorTeam.cpp
