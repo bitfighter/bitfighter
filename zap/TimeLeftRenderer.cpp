@@ -29,8 +29,8 @@ const S32 bigScoreTextGap = 5;
 // Constructor
 TimeLeftRenderer::TimeLeftRenderer()
 {
-   TNLAssert(mScreenInfo != NULL, "ScreenInfo is NULL!")
    mScreenInfo = DisplayManager::getScreenInfo();
+   TNLAssert(mScreenInfo != NULL, "ScreenInfo is NULL!")
 }
 
 // When render param is true, will render as expected; when false, will simply return dimensions
