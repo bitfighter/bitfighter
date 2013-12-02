@@ -2662,7 +2662,7 @@ void GameUserInterface::renderGameNormal()
    glScalef(scaleFactX, scaleFactY, 1);
    glTranslatef(-mShipPos.x, -mShipPos.y, 0);
 
-   drawStars(mStars, mStarColors, NumStars, 1.0, mShipPos, visExt * 2);
+   renderStars(mStars, mStarColors, NumStars, 1.0, mShipPos, visExt * 2);
 
    // Render all the objects the player can see
    screenSize.set(visExt);

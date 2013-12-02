@@ -3321,7 +3321,7 @@ void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 g
 }
 
 
-void drawStars(const Point *stars, const Color *colors, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent)
+void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent)
 {
    static const F32 starChunkSize = 1024;        // Smaller numbers = more dense stars
    static const F32 starDist = 3500;             // Bigger value = slower moving stars
