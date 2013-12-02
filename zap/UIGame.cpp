@@ -24,7 +24,7 @@
 #include "EnergyGaugeRenderer.h"
 
 #include "Console.h"             // Our console object
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "ClientGame.h"
 #include "Colors.h"
 #include "Cursor.h"
@@ -514,7 +514,7 @@ void GameUserInterface::render()
    // Fade inlineHelpItem in and out as chat widget appears or F2 levelInfo appears.
    // Don't completely hide help item when chatting -- it's jarring.  
    F32 helpItemAlpha = getBackgroundTextDimFactor(false);
-   mHelpItemManager.renderMessages(getGame(), gScreenInfo.getGameCanvasHeight() / 2.0f + 40, helpItemAlpha);
+   mHelpItemManager.renderMessages(getGame(), DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.0f + 40, helpItemAlpha);
 
    renderReticle();                       // Draw crosshairs if using mouse
    renderWrongModeIndicator();            // Try to avert confusion after player has changed btwn joystick and keyboard modes
@@ -525,14 +525,14 @@ void GameUserInterface::render()
    renderProgressBar();                   // Status bar that shows progress of loading this level
    mVoiceRecorder.render();               // Indicator that someone is sending a voice msg
 
-   mFpsRenderer.render(gScreenInfo.getGameCanvasWidth());     // Display running average FPS
+   mFpsRenderer.render(DisplayManager::getScreenInfo()->getGameCanvasWidth());     // Display running average FPS
 
    mHelperManager.render();
 
    GameType *gameType = getGame()->getGameType();
 
    if(gameType)
-      gameType->renderInterfaceOverlay(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
+      gameType->renderInterfaceOverlay(DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
 
    renderLevelInfo();
 
@@ -804,7 +804,7 @@ void GameUserInterface::renderProgressBar() const
 
       // Outline
       const F32 left = 200;
-      const F32 width = gScreenInfo.getGameCanvasWidth() - 2 * left;
+      const F32 width = DisplayManager::getScreenInfo()->getGameCanvasWidth() - 2 * left;
       const F32 height = 10;
 
       // For some reason, there are occasions where the status bar doesn't progress all the way over during the load process.
@@ -819,10 +819,10 @@ void GameUserInterface::renderProgressBar() const
          F32 w = i ? width : barWidth;
 
          F32 vertices[] = {
-               left,     F32(gScreenInfo.getGameCanvasHeight() - vertMargin),
-               left + w, F32(gScreenInfo.getGameCanvasHeight() - vertMargin),
-               left + w, F32(gScreenInfo.getGameCanvasHeight() - vertMargin - height),
-               left,     F32(gScreenInfo.getGameCanvasHeight() - vertMargin - height)
+               left,     F32(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin),
+               left + w, F32(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin),
+               left + w, F32(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - height),
+               left,     F32(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - height)
          };
          renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GL_LINE_LOOP : GL_TRIANGLE_FAN);
       }
@@ -837,7 +837,7 @@ void GameUserInterface::renderReticle() const
                        getUIManager()->isCurrentUI<GameUserInterface>();   // And not when a menu is active
    if(shouldRender)
    {
-      Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
+      Point offsetMouse = mMousePoint + Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
 
       F32 vertices[] = {
             // Center cross-hairs
@@ -851,13 +851,13 @@ void GameUserInterface::renderReticle() const
             offsetMouse.x - 30, offsetMouse.y,
 
             offsetMouse.x + 30, offsetMouse.y,
-            (F32)gScreenInfo.getGameCanvasWidth(), offsetMouse.y,
+            (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), offsetMouse.y,
 
             offsetMouse.x, 0,
             offsetMouse.x, offsetMouse.y - 30,
 
             offsetMouse.x, offsetMouse.y + 30,
-            offsetMouse.x, (F32)gScreenInfo.getGameCanvasHeight(),
+            offsetMouse.x, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight(),
       };
 
 #define RETICLE_COLOR Colors::green
@@ -918,8 +918,8 @@ void GameUserInterface::onMouseMoved()
 {
    Parent::onMouseMoved();
 
-   mMousePoint.set(gScreenInfo.getMousePos()->x - gScreenInfo.getGameCanvasWidth()  / 2,
-                   gScreenInfo.getMousePos()->y - gScreenInfo.getGameCanvasHeight() / 2);
+   mMousePoint.set(DisplayManager::getScreenInfo()->getMousePos()->x - DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
+                   DisplayManager::getScreenInfo()->getMousePos()->y - DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
 
    if(mInCommanderMap)     // Ship not in center of the screen in cmdrs map.  Where is it?
    {
@@ -929,10 +929,10 @@ void GameUserInterface::onMouseMoved()
          return;
 
       Point o = ship->getRenderPos();  // To avoid taking address of temporary
-      Point p = worldToScreenPoint(&o, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
+      Point p = worldToScreenPoint(&o, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
 
-      mCurrentMove.angle = atan2(mMousePoint.y + gScreenInfo.getGameCanvasHeight() / 2 - p.y, 
-                                 mMousePoint.x + gScreenInfo.getGameCanvasWidth()  / 2 - p.x);
+      mCurrentMove.angle = atan2(mMousePoint.y + DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - p.y, 
+                                 mMousePoint.x + DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - p.x);
    }
 
    else     // Ship is at center of the screen
@@ -2116,7 +2116,7 @@ static void renderScoreboardLegend(S32 humans, U32 scoreboardTop, U32 totalHeigh
    }
 
    UI::SymbolString symbolString(symbols);
-   symbolString.render(gScreenInfo.getGameCanvasWidth() / 2, legendPos, AlignmentCenter);
+   symbolString.render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, legendPos, AlignmentCenter);
 }
 
 
@@ -2185,8 +2185,8 @@ void GameUserInterface::renderScoreboard()
 
    static const U32 gap = 3;  // Small gap for use between various UI elements
 
-   const U32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-   const U32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const U32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+   const U32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    const U32 drawableWidth = canvasWidth - horizMargin * 2;
    const U32 columnCount = min(teams, 2);
@@ -2376,8 +2376,8 @@ void GameUserInterface::renderBasicInterfaceOverlay()
       if(progress != 0)
       {
          glColor(Colors::yellow);
-         drawRect(25.f, 200.f, progress * (gScreenInfo.getGameCanvasWidth()-50) + 25.f, 210.f, GL_TRIANGLE_FAN);
-         drawRect(25, 200, gScreenInfo.getGameCanvasWidth()-25, 210, GL_LINE_LOOP);
+         drawRect(25.f, 200.f, progress * (DisplayManager::getScreenInfo()->getGameCanvasWidth()-50) + 25.f, 210.f, GL_TRIANGLE_FAN);
+         drawRect(25, 200, DisplayManager::getScreenInfo()->getGameCanvasWidth()-25, 210, GL_LINE_LOOP);
       }
    }
    
@@ -2471,7 +2471,7 @@ void GameUserInterface::renderDebugStatus() const
       S32 x, y;
 
       // Draw box
-      x = gScreenInfo.getGameCanvasWidth() - horizMargin - 2 * (PAUSE_WIDTH + PAUSE_GAP) - BOX_INSET - getStringWidth(TEXT_SIZE, TEXT);
+      x = DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin - 2 * (PAUSE_WIDTH + PAUSE_GAP) - BOX_INSET - getStringWidth(TEXT_SIZE, TEXT);
       y = vertMargin + PAUSE_HEIGHT;
 
       // Draw Pause symbol
@@ -2653,11 +2653,11 @@ void GameUserInterface::renderGameNormal()
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
-   glTranslatef(gScreenInfo.getGameCanvasWidth() / 2.f, gScreenInfo.getGameCanvasHeight() / 2.f, 0);       
+   glTranslatef(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2.f, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.f, 0);       
 
    // These scaling factors are different when changing the visible area by equiping the sensor module
-   F32 scaleFactX = (gScreenInfo.getGameCanvasWidth()  / 2) / visExt.x;
-   F32 scaleFactY = (gScreenInfo.getGameCanvasHeight() / 2) / visExt.y;
+   F32 scaleFactX = (DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2) / visExt.x;
+   F32 scaleFactY = (DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2) / visExt.y;
 
    glScalef(scaleFactX, scaleFactY, 1);
    glTranslatef(-mShipPos.x, -mShipPos.y, 0);
@@ -2789,8 +2789,8 @@ void GameUserInterface::renderGameCommander()
    if(mShowProgressBar)
       return;
 
-   const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    GameType *gameType = getGame()->getGameType();
    
@@ -2817,7 +2817,7 @@ void GameUserInterface::renderGameCommander()
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
-   glTranslatef(gScreenInfo.getGameCanvasWidth() * 0.5f, gScreenInfo.getGameCanvasHeight() * 0.5f, 0);    
+   glTranslatef(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f, DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f, 0);    
 
    F32 zoomFrac = getCommanderZoomFraction();
 
@@ -2955,8 +2955,8 @@ void GameUserInterface::renderGameCommander()
 
 //void GameUserInterface::renderOverlayMap()
 //{
-//   const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
-//   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+//   const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+//   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 //
 //   Ship *ship = getShip(game->getConnectionToServer());
 //
@@ -3031,7 +3031,7 @@ void GameUserInterface::renderSuspended()
    glColor(Colors::yellow);
    S32 textHeight = 20;
    S32 textGap = 5;
-   S32 ypos = gScreenInfo.getGameCanvasHeight() / 2 - 3 * (textHeight + textGap);
+   S32 ypos = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - 3 * (textHeight + textGap);
 
    drawCenteredString(ypos, textHeight, "==> Game is currently suspended, waiting for other players <==");
    ypos += textHeight + textGap;
@@ -3250,7 +3250,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
       S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
 
       scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                             0.0f, F32(displayAreaYPos - displayAreaHeight), F32(gScreenInfo.getGameCanvasWidth()), F32(displayAreaHeight));
+                             0.0f, F32(displayAreaYPos - displayAreaHeight), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), F32(displayAreaHeight));
    }
 
    // Initialize the starting rendering position.  This represents the bottom of the message rendering area, and
@@ -3356,7 +3356,7 @@ void LevelListDisplayer::render() const
       {
          glColor(Colors::white, (1.4f - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.f)) * 
                                         (mLevelLoadDisplay ? 1 : mLevelLoadDisplayFadeTimer.getFraction()) );
-         drawStringf(100, gScreenInfo.getGameCanvasHeight() - /*vertMargin*/ 0 - (mLevelLoadDisplayNames.size() - i) * 20, 
+         drawStringf(100, DisplayManager::getScreenInfo()->getGameCanvasHeight() - /*vertMargin*/ 0 - (mLevelLoadDisplayNames.size() - i) * 20, 
                      15, "%s", mLevelLoadDisplayNames[i].c_str());
       }
    }

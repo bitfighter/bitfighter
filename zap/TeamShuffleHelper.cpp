@@ -5,7 +5,7 @@
 
 #include "TeamShuffleHelper.h"
 #include "ClientGame.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "Colors.h"
 
 #include "RenderUtils.h"
@@ -111,7 +111,7 @@ void TeamShuffleHelper::calculateRenderSizes()
    rows = (S32)ceil((F32)teamCount / (F32)cols);
 
    columnWidth = -1;
-   maxColumnWidth = (gScreenInfo.getGameCanvasWidth() - 100) / cols;
+   maxColumnWidth = (DisplayManager::getScreenInfo()->getGameCanvasWidth() - 100) / cols;
    rowHeight = (2 * vpad) + S32((playersPerTeam + 1) * TEXT_SIZE * TEXT_SIZE_FACTOR);  
 
    for(S32 i = 0; i < mTeams.size(); i++)
@@ -131,8 +131,8 @@ void TeamShuffleHelper::calculateRenderSizes()
          }
       }
 
-   topMargin = (gScreenInfo.getGameCanvasHeight() - rows * rowHeight - (rows - 1) * margin) / 2;
-   leftMargin = (gScreenInfo.getGameCanvasWidth() - cols * columnWidth - (cols - 1) * margin) / 2;
+   topMargin = (DisplayManager::getScreenInfo()->getGameCanvasHeight() - rows * rowHeight - (rows - 1) * margin) / 2;
+   leftMargin = (DisplayManager::getScreenInfo()->getGameCanvasWidth() - cols * columnWidth - (cols - 1) * margin) / 2;
 
    columnWidth += 2 * hpad;
 }
@@ -173,7 +173,7 @@ void TeamShuffleHelper::render()
 
    glColor(Colors::green);
 
-   drawCenteredString(gScreenInfo.getGameCanvasHeight() - 80, 20, "[Enter to accept] | [Space to reshuffle] | [Esc to cancel]");
+   drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - 80, 20, "[Enter to accept] | [Space to reshuffle] | [Esc to cancel]");
 }
 
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "EnergyGaugeRenderer.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "UI.h"
 #include "ship.h"
 
@@ -20,7 +20,7 @@ void EnergyGaugeRenderer::render(S32 energy)
 {
    // Coorinates of upper left corner of main guage bar
    const F32 xul = F32(                                    GaugeLeftMargin);
-   const F32 yul = F32(gScreenInfo.getGameCanvasHeight() - GaugeBottomMargin - GaugeHeight);
+   const F32 yul = F32(DisplayManager::getScreenInfo()->getGameCanvasHeight() - GaugeBottomMargin - GaugeHeight);
 
    F32 full = F32(energy) / F32(Ship::EnergyMax) * GuageWidth;
 

@@ -7,7 +7,7 @@
 
 #include "SharedConstants.h"  // For MAX_PLAYERS
 #include "BanList.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "stringUtils.h"      // For itos
 #include "LuaWrapper.h"       // For printing Lua class hiearchy
 #include "LevelSource.h"
@@ -870,7 +870,7 @@ void GameSettings::onFinishedLoading()
    }
 
    if(winWidth > 0)
-      getIniSettings()->winSizeFact = max((F32) winWidth / (F32) gScreenInfo.getGameCanvasWidth(), gScreenInfo.getMinScalingFactor());
+      getIniSettings()->winSizeFact = max((F32) winWidth / (F32) DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getMinScalingFactor());
 
 #ifndef ZAP_DEDICATED
    U32 stick = getU32(USE_STICK);

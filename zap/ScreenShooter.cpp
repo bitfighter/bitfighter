@@ -10,7 +10,7 @@
 #include "UI.h"
 #include "UIEditor.h"
 #include "UIManager.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "ClientGame.h"
 #include "VideoSystem.h"   // For setting screen geom vars
 #include "stringUtils.h"
@@ -45,8 +45,8 @@ ScreenShooter::~ScreenShooter()
 void ScreenShooter::resizeViewportToCanvas(UIManager *uiManager)
 {
    // Grab the canvas width/height and normalize our screen to it
-   S32 width = gScreenInfo.getGameCanvasWidth();
-   S32 height = gScreenInfo.getGameCanvasHeight();
+   S32 width = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   S32 height = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    glViewport(0, 0, width, height);
 
@@ -90,13 +90,13 @@ void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
    // Now scissor
    if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
    {
-      glScissor(gScreenInfo.getHorizPhysicalMargin(), // x
-            gScreenInfo.getVertPhysicalMargin(),      // y
-            gScreenInfo.getDrawAreaWidth(),           // width
-            gScreenInfo.getDrawAreaHeight());         // height
+      glScissor(DisplayManager::getScreenInfo()->getHorizPhysicalMargin(), // x
+            DisplayManager::getScreenInfo()->getVertPhysicalMargin(),      // y
+            DisplayManager::getScreenInfo()->getDrawAreaWidth(),           // width
+            DisplayManager::getScreenInfo()->getDrawAreaHeight());         // height
    }
    else
-      glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
+      glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
 }
 
 
@@ -131,7 +131,7 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
    // We default to resizing the opengl viewport to the standard canvas size, unless we're
    // in the editor or our window is smaller than the canvas size
    bool doResize = (!uiManager->isCurrentUI<EditorUserInterface>()) &&
-                     gScreenInfo.getWindowWidth() > gScreenInfo.getGameCanvasWidth();
+                     DisplayManager::getScreenInfo()->getWindowWidth() > DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    // Change opengl viewport temporarily to have consistent screenshot sizes
    if(doResize)
@@ -144,14 +144,14 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
    // If we're resizing, use the default canvas size
    if(doResize)
    {
-      width = gScreenInfo.getGameCanvasWidth();
-      height = gScreenInfo.getGameCanvasHeight();
+      width = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+      height = DisplayManager::getScreenInfo()->getGameCanvasHeight();
    }
    // Otherwise just take the window size
    else
    {
-      width = gScreenInfo.getWindowWidth();
-      height = gScreenInfo.getWindowHeight();
+      width = DisplayManager::getScreenInfo()->getWindowWidth();
+      height = DisplayManager::getScreenInfo()->getWindowHeight();
    }
 
    // Allocate buffer

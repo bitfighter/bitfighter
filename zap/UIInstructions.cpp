@@ -12,7 +12,7 @@
 #include "teleporter.h"
 #include "speedZone.h"        // For SpeedZone::height
 #include "Colors.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "Joystick.h"
 #include "JoystickRender.h"
 #include "CoreGame.h"         // For coreItem rendering
@@ -70,7 +70,7 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
    // Quick sanity check...
    TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum IntructionPages!!!");
 
-   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    col1 = horizMargin + 0 * canvasWidth / 4;
    col2 = horizMargin + canvasWidth / 4 + 45;     // +45 to make a little more room for Action col
@@ -471,7 +471,7 @@ void InstructionsUserInterface::initPageHeaders()
 
 void InstructionsUserInterface::renderPage2()
 {
-   mLoadoutInstructions.render(gScreenInfo.getGameCanvasWidth() / 2, 65, AlignmentCenter);    // Overall block is centered
+   mLoadoutInstructions.render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 65, AlignmentCenter);    // Overall block is centered
 }
 
 
@@ -949,7 +949,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
    S32 ypos = 65;
 
    S32 cmdCol = horizMargin;                                                         // Action column
-   S32 descrCol = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 55;   // Control column
+   S32 descrCol = horizMargin + S32(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.25) + 55;   // Control column
 
    ypos += mPageHeaders.render(cmdCol, ypos, AlignmentLeft) - FontSize;    // Account for different positioning of SymbolStrings and drawString()
 

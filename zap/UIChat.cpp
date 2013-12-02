@@ -11,7 +11,7 @@
 #include "UIManager.h"
 
 #include "masterConnection.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "ClientGame.h"
 #include "Colors.h"
 #include "SoundSystem.h"
@@ -256,7 +256,7 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is 
             if(!msg.isSystem)
                xpos += getStringWidth(CHAT_FONT_SIZE, ARROW) + AFTER_ARROW_SPACE;
 
-            S32 allowedWidth = gScreenInfo.getGameCanvasWidth() - (2 * UserInterface::horizMargin) - xpos;
+            S32 allowedWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth() - (2 * UserInterface::horizMargin) - xpos;
 
             // Calculate (and draw if in renderLoop) the message lines
             U32 lineCount = drawWrapText(msg.message, xpos, ypos, allowedWidth, ypos_top,
@@ -424,7 +424,7 @@ void ChatUserInterface::render()
 
    // And footer
    glColor(Colors::green);
-   S32 vertFooterPos = gScreenInfo.getGameCanvasHeight() - vertMargin - VERT_FOOTER_SIZE;
+   S32 vertFooterPos = DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - VERT_FOOTER_SIZE;
    drawCenteredString(vertFooterPos, VERT_FOOTER_SIZE - 2, "Type your message | ENTER to send | ESC exits");
 
    renderChatters(horizMargin, vertFooterPos - CHAT_NAMELIST_SIZE - CHAT_FONT_MARGIN * 2);
@@ -434,7 +434,7 @@ void ChatUserInterface::render()
 
    U32 y = UserInterface::vertMargin + 60;
 
-   static const S32 chatAreaHeight = gScreenInfo.getGameCanvasHeight() - 2 * vertMargin -   // Screen area less margins
+   static const S32 chatAreaHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight() - 2 * vertMargin -   // Screen area less margins
                      VERT_FOOTER_SIZE -                                                     // Instructions at the bottom
                      CHAT_NAMELIST_SIZE - CHAT_FONT_MARGIN * 2  -                           // Names of those in chatroom
                      MENU_TITLE_SIZE - TITLE_SUBTITLE_GAP - MENU_SUBTITLE_SIZE -            // Title/subtitle display
@@ -463,7 +463,7 @@ void ChatUserInterface::render()
 
       const S32 width = getStringWidth(fontsize, line2);
 
-      S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+      S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
       S32 xPos1 = (canvasWidth - width) / 2 - margin;
       S32 xPos2 = xPos1 + width + (2 * margin);
 

@@ -8,7 +8,7 @@
 #include "ClientGame.h"
 #include "IniFile.h"
 #include "Console.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "UI.h"
 #include "version.h"
 #include "FontManager.h"
@@ -91,7 +91,7 @@ bool VideoSystem::init()
 
    SDL_GetCurrentDisplayMode(0, &mode);  // We only have one display..  for now
 
-   gScreenInfo.init(mode.w, mode.h);
+   DisplayManager::getScreenInfo()->init(mode.w, mode.h);
 
    S32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
    // Fake fullscreen might not be needed with SDL2 - I think it does the fast switching
@@ -110,18 +110,18 @@ bool VideoSystem::init()
 #endif
 
    // SDL 2.0 lets us create the window first, only once
-   gScreenInfo.sdlWindow = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-         gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight(), flags);
+   DisplayManager::getScreenInfo()->sdlWindow = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+         DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight(), flags);
 
-   if(!gScreenInfo.sdlWindow)
+   if(!DisplayManager::getScreenInfo()->sdlWindow)
    {
       logprintf(LogConsumer::LogFatalError, "SDL window creation failed: %s", SDL_GetError());
       return false;
    }
 
    // Create our OpenGL context; save it in case we ever need it
-   SDL_GLContext context = SDL_GL_CreateContext(gScreenInfo.sdlWindow);
-   gScreenInfo.sdlGlContext = &context;
+   SDL_GLContext context = SDL_GL_CreateContext(DisplayManager::getScreenInfo()->sdlWindow);
+   DisplayManager::getScreenInfo()->sdlGlContext = &context;
 
    // We can set up vsync, too
    SDL_GL_SetSwapInterval(1);
@@ -130,7 +130,7 @@ bool VideoSystem::init()
 
    const SDL_VideoInfo* info = SDL_GetVideoInfo();
 
-   gScreenInfo.init(info->current_w, info->current_h);
+   DisplayManager::getScreenInfo()->init(info->current_w, info->current_h);
 
 #endif
 
@@ -148,7 +148,7 @@ bool VideoSystem::init()
    {
       // flag must be non-zero to enable color key
       SDL_SetColorKey(icon, 1, SDL_MapRGB(icon->format, 0, 0, 0));
-      SDL_SetWindowIcon(gScreenInfo.sdlWindow, icon);
+      SDL_SetWindowIcon(DisplayManager::getScreenInfo()->sdlWindow, icon);
    }
 #else
    // Set window and icon title here so window will be created with proper name later
@@ -177,7 +177,7 @@ static SDL_SysWMinfo windowManagerInfo;
 void VideoSystem::setWindowPosition(S32 left, S32 top)
 {
 #if SDL_VERSION_ATLEAST(2,0,0)
-   SDL_SetWindowPosition(gScreenInfo.sdlWindow, left, top);
+   SDL_SetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, left, top);
 #else /* SDL_VERSION_ATLEAST(2,0,0) */
 
    // SDL 1.2 requires a lot more rigmarole to get and set window positions
@@ -217,7 +217,7 @@ S32 VideoSystem::getWindowPositionCoord(bool getX)
 #if SDL_VERSION_ATLEAST(2,0,0)
 
    S32 x, y;
-   SDL_GetWindowPosition(gScreenInfo.sdlWindow, &x, &y);
+   SDL_GetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, &x, &y);
 
    return getX ? x : y;
 
@@ -293,8 +293,8 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
 {
    DisplayMode displayMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
 
-   gScreenInfo.resetGameCanvasSize();     // Set GameCanvasSize vars back to their default values
-   gScreenInfo.setActualized();
+   DisplayManager::getScreenInfo()->resetGameCanvasSize();     // Set GameCanvasSize vars back to their default values
+   DisplayManager::getScreenInfo()->setActualized();
 
 
    // If old display mode is windowed or current is windowed but we change interfaces,
@@ -320,9 +320,9 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
       // For screens smaller than normal, we need to readjust magFactor to make sure we get the full canvas height crammed onto
       // the screen; otherwise our dock will break.  Since this mode is only used in the editor, we don't really care about
       // screen width; tall skinny screens will work just fine.
-      magFactor = max(magFactor, (F32)gScreenInfo.getGameCanvasHeight() / (F32)gScreenInfo.getPhysicalScreenHeight());
+      magFactor = max(magFactor, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight() / (F32)DisplayManager::getScreenInfo()->getPhysicalScreenHeight());
 
-      gScreenInfo.setGameCanvasSize(S32(gScreenInfo.getPhysicalScreenWidth() * magFactor), S32(gScreenInfo.getPhysicalScreenHeight() * magFactor));
+      DisplayManager::getScreenInfo()->setGameCanvasSize(S32(DisplayManager::getScreenInfo()->getPhysicalScreenWidth() * magFactor), S32(DisplayManager::getScreenInfo()->getPhysicalScreenHeight() * magFactor));
 
       displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
    }
@@ -344,22 +344,22 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    switch (displayMode)
    {
    case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
-      SDL_SetWindowSize(gScreenInfo.sdlWindow, sdlWindowWidth, sdlWindowHeight);
-      SDL_SetWindowFullscreen(gScreenInfo.sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+      SDL_SetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, sdlWindowWidth, sdlWindowHeight);
+      SDL_SetWindowFullscreen(DisplayManager::getScreenInfo()->sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
       break;
 
    case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
-      SDL_SetWindowSize(gScreenInfo.sdlWindow, sdlWindowWidth, sdlWindowHeight);
-      SDL_SetWindowFullscreen(gScreenInfo.sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+      SDL_SetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, sdlWindowWidth, sdlWindowHeight);
+      SDL_SetWindowFullscreen(DisplayManager::getScreenInfo()->sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
       break;
 
    case DISPLAY_MODE_WINDOWED:
    default:
       // Reverse order, leave fullscreen before setting size
-      SDL_SetWindowFullscreen(gScreenInfo.sdlWindow, 0);
-      SDL_SetWindowSize(gScreenInfo.sdlWindow, sdlWindowWidth, sdlWindowHeight);
+      SDL_SetWindowFullscreen(DisplayManager::getScreenInfo()->sdlWindow, 0);
+      SDL_SetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, sdlWindowWidth, sdlWindowHeight);
       break;
    }
 
@@ -398,7 +398,7 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
 
 
    // Now save the new window dimensions in ScreenInfo
-   gScreenInfo.setWindowSize(sdlWindowWidth, sdlWindowHeight);
+   DisplayManager::getScreenInfo()->setWindowSize(sdlWindowWidth, sdlWindowHeight);
 
    glClearColor( 0, 0, 0, 0 );
 
@@ -418,10 +418,10 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    // Do the scissoring
    if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
    {
-      glScissor(gScreenInfo.getHorizPhysicalMargin(),    // x
-                gScreenInfo.getVertPhysicalMargin(),     // y
-                gScreenInfo.getDrawAreaWidth(),          // width
-                gScreenInfo.getDrawAreaHeight());        // height
+      glScissor(DisplayManager::getScreenInfo()->getHorizPhysicalMargin(),    // x
+                DisplayManager::getScreenInfo()->getVertPhysicalMargin(),     // y
+                DisplayManager::getScreenInfo()->getDrawAreaWidth(),          // width
+                DisplayManager::getScreenInfo()->getDrawAreaHeight());        // height
    }
    else
    {
@@ -431,7 +431,7 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
       // causing some lines to wrap around the screen, or by writing other
       // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
       // This is probably a bug in the Linux Intel graphics driver.
-      glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
+      glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
    }
 
    glEnable(GL_SCISSOR_TEST);    // Turn on clipping
@@ -481,30 +481,30 @@ void VideoSystem::getWindowParameters(GameSettings *settings, DisplayMode displa
    switch(displayMode)
    {
       case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
-         sdlWindowWidth  = gScreenInfo.getPhysicalScreenWidth();
-         sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
+         sdlWindowWidth  = DisplayManager::getScreenInfo()->getPhysicalScreenWidth();
+         sdlWindowHeight = DisplayManager::getScreenInfo()->getPhysicalScreenHeight();
          orthoLeft   = 0;
-         orthoRight  = gScreenInfo.getGameCanvasWidth();
-         orthoBottom = gScreenInfo.getGameCanvasHeight();
+         orthoRight  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+         orthoBottom = DisplayManager::getScreenInfo()->getGameCanvasHeight();
          orthoTop    = 0;
          break;
 
       case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
-         sdlWindowWidth  = gScreenInfo.getPhysicalScreenWidth();
-         sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-         orthoLeft   = -1 * gScreenInfo.getHorizDrawMargin();
-         orthoRight  = gScreenInfo.getGameCanvasWidth() + gScreenInfo.getHorizDrawMargin();
-         orthoBottom = gScreenInfo.getGameCanvasHeight() + gScreenInfo.getVertDrawMargin();
-         orthoTop    = -1 * gScreenInfo.getVertDrawMargin();
+         sdlWindowWidth  = DisplayManager::getScreenInfo()->getPhysicalScreenWidth();
+         sdlWindowHeight = DisplayManager::getScreenInfo()->getPhysicalScreenHeight();
+         orthoLeft   = -1 * DisplayManager::getScreenInfo()->getHorizDrawMargin();
+         orthoRight  = DisplayManager::getScreenInfo()->getGameCanvasWidth() + DisplayManager::getScreenInfo()->getHorizDrawMargin();
+         orthoBottom = DisplayManager::getScreenInfo()->getGameCanvasHeight() + DisplayManager::getScreenInfo()->getVertDrawMargin();
+         orthoTop    = -1 * DisplayManager::getScreenInfo()->getVertDrawMargin();
          break;
 
       case DISPLAY_MODE_WINDOWED:
       default:  //  Fall through OK
-         sdlWindowWidth  = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
-         sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
+         sdlWindowWidth  = (S32) floor((F32)DisplayManager::getScreenInfo()->getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
+         sdlWindowHeight = (S32) floor((F32)DisplayManager::getScreenInfo()->getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
          orthoLeft   = 0;
-         orthoRight  = gScreenInfo.getGameCanvasWidth();
-         orthoBottom = gScreenInfo.getGameCanvasHeight();
+         orthoRight  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+         orthoBottom = DisplayManager::getScreenInfo()->getGameCanvasHeight();
          orthoTop    = 0;
          break;
    }

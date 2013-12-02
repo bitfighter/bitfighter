@@ -15,7 +15,7 @@
 #include "UIManager.h"
 #include "LoadoutIndicator.h"    // For indicator static dimensions
 #include "EnergyGaugeRenderer.h"
-#include "ScreenInfo.h"          // For canvas width
+#include "DisplayManager.h"          // For canvas width
 #include "ScissorsManager.h"
 
 #include "SymbolShape.h"
@@ -290,8 +290,8 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
       const Point widthAndHeight = game->getUIManager()->getUI<GameUserInterface>()->getTimeLeftIndicatorWidthAndHeight();
       const S32 w = (S32)widthAndHeight.x;
       const S32 h = (S32)widthAndHeight.y;
-      const S32 x = gScreenInfo.getGameCanvasWidth() - UI::TimeLeftRenderer::TimeLeftIndicatorMargin - w;
-      const S32 indicatorTop = gScreenInfo.getGameCanvasHeight() - UI::TimeLeftRenderer::TimeLeftIndicatorMargin - h - indicatorVerticalGap;
+      const S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() - UI::TimeLeftRenderer::TimeLeftIndicatorMargin - w;
+      const S32 indicatorTop = DisplayManager::getScreenInfo()->getGameCanvasHeight() - UI::TimeLeftRenderer::TimeLeftIndicatorMargin - h - indicatorVerticalGap;
 
       const S32 indicatorLeft  = x + w + indicatorHorizontalGap;
       const S32 indicatorRight = x - indicatorHorizontalGap;
@@ -299,7 +299,7 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
       const S32 indicatorMiddle = (indicatorLeft + indicatorRight) / 2;
       const S32 textMiddle = (textTop + textBottom) / 2;
 
-      const S32 textRight = gScreenInfo.getGameCanvasWidth() - textLeft;
+      const S32 textRight = DisplayManager::getScreenInfo()->getGameCanvasWidth() - textLeft;
 
       renderHelpTextBracket(textRight, textTop, textBottom, -stubLen);
       renderIndicatorBracket(indicatorLeft, indicatorRight, indicatorTop, stubLen);
@@ -312,7 +312,7 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
    {
       const S32 indicatorLeft  = UI::EnergyGaugeRenderer::GaugeLeftMargin - indicatorHorizontalGap;
       const S32 indicatorRight = UI::EnergyGaugeRenderer::GaugeLeftMargin + UI::EnergyGaugeRenderer::GuageWidth + indicatorHorizontalGap;
-      const S32 indicatorTop   = gScreenInfo.getGameCanvasHeight() - 
+      const S32 indicatorTop   = DisplayManager::getScreenInfo()->getGameCanvasHeight() - 
                                           (UI::EnergyGaugeRenderer::GaugeBottomMargin + 
                                            UI::EnergyGaugeRenderer::GaugeHeight + 
                                            UI::EnergyGaugeRenderer::SafetyLineExtend + 
@@ -337,7 +337,7 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
 
    S32 lines = 0;
    S32 maxw = 0;
-   F32 xPos = gScreenInfo.getGameCanvasWidth() / 2.0f;
+   F32 xPos = DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2.0f;
    S32 yOffset = 0;
 
    // Final item in messages array will be NULL; loop until we hit that
@@ -406,7 +406,7 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
       F32 offset = height * (mHelpFading[i] ? 1 - mHelpTimer[i].getFraction() : 0);
 
       scissorsManager.enable(mHelpFading[i], game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                             0, yPos - FontSize, gScreenInfo.getGameCanvasWidth(), height);
+                             0, yPos - FontSize, DisplayManager::getScreenInfo()->getGameCanvasWidth(), height);
 
       doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos - offset);
       yPos += height - offset;      

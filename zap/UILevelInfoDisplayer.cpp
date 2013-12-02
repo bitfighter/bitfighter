@@ -5,7 +5,7 @@
 
 #include "UILevelInfoDisplayer.h"   // Header
 
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "Colors.h"
 #include "game.h"
 #include "ClientGame.h"
@@ -24,8 +24,6 @@
 
 namespace Zap { 
    
-extern ScreenInfo gScreenInfo;
-
 namespace UI {
 
 // Constructor
@@ -124,7 +122,7 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    if(isInDatabase)
    {
       // Figure out where the ratings will be rendered
-      const F32 rightEdge = (gScreenInfo.getGameCanvasWidth() + titleSymbolString.getWidth()) / 2;
+      const F32 rightEdge = (DisplayManager::getScreenInfo()->getGameCanvasWidth() + titleSymbolString.getWidth()) / 2;
 
       const F32 x1 = rightEdge - totalSignlessRatingWidth - totalSignWidth - dividerWidth - mySignlessRatingWidth / 2;
       const F32 y1 = 10;
@@ -162,14 +160,14 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    const S32 frameMargin       = UserInterface::vertMargin;
 
    const S32 totalHeight = frameMargin + titleSize + titleGap + descriptionHeight + creditsHeight + frameMargin;
-   const S32 totalWidth = gScreenInfo.getGameCanvasWidth() - 60;
+   const S32 totalWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth() - 60;
    S32 yPos = frameMargin + titleSize;
 
    // Draw top info box
-   renderSlideoutWidgetFrame((gScreenInfo.getGameCanvasWidth() - totalWidth) / 2, 0, totalWidth, totalHeight, Colors::blue);
+   renderSlideoutWidgetFrame((DisplayManager::getScreenInfo()->getGameCanvasWidth() - totalWidth) / 2, 0, totalWidth, totalHeight, Colors::blue);
 
    glColor(Colors::white);
-   titleSymbolString.render(gScreenInfo.getGameCanvasWidth() / 2, yPos, AlignmentCenter);
+   titleSymbolString.render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, yPos, AlignmentCenter);
 
    yPos += titleGap;
 
@@ -234,9 +232,9 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    FontManager::popFontContext();
 
    const S32 sideBoxWidth = max(instrWidth, max(gameTypeWidth, scoreToWinWidth)) + sideMargin * 2;
-   const S32 sideBoxCen   = gScreenInfo.getGameCanvasWidth() - sideBoxWidth / 2;
+   const S32 sideBoxCen   = DisplayManager::getScreenInfo()->getGameCanvasWidth() - sideBoxWidth / 2;
    
-   renderSlideoutWidgetFrame(gScreenInfo.getGameCanvasWidth() - sideBoxWidth, sideBoxY, sideBoxWidth, sideBoxTotalHeight, Colors::blue);
+   renderSlideoutWidgetFrame(DisplayManager::getScreenInfo()->getGameCanvasWidth() - sideBoxWidth, sideBoxY, sideBoxWidth, sideBoxTotalHeight, Colors::blue);
 
    yPos = sideBoxY + frameMargin;
 

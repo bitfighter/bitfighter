@@ -9,7 +9,7 @@
 #include "UIManager.h"
 
 #include "masterConnection.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "SymbolShape.h"
 #include "JoystickRender.h"
 #include "Joystick.h"
@@ -193,7 +193,7 @@ static S32 showFoldersBlock(FolderManager *folderManager, F32 textsize, S32 ypos
 
    for(S32 i = 0; i < names.size(); i++)
    {
-      S32 xpos = (gScreenInfo.getGameCanvasWidth() - totLen) / 2;
+      S32 xpos = (DisplayManager::getScreenInfo()->getGameCanvasWidth() - totLen) / 2;
       glColor(Colors::cyan);
       drawString(xpos, ypos, (S32)textsize, names[i]);
       xpos += nameWidth + spaceWidth;
@@ -317,8 +317,8 @@ void DiagnosticUserInterface::render()
    drawCenteredStringf(571, 20, "%s - next page  ESC exits", getInputCodeString(getGame()->getSettings(), InputCodeManager::BINDING_DIAG));
 
    glColor(0.7f);
-   drawHorizLine(0, gScreenInfo.getGameCanvasWidth(), 31);
-   drawHorizLine(0, gScreenInfo.getGameCanvasWidth(), 569);
+   drawHorizLine(0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), 31);
+   drawHorizLine(0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), 569);
 
    S32 textsize = 14;
 
@@ -344,7 +344,7 @@ void DiagnosticUserInterface::render()
 
       // Box around something wrong? block
       glColor(Colors::cyan);
-      drawHollowRect(horizMargin, vertMargin + 27, gScreenInfo.getGameCanvasWidth() - horizMargin, vertMargin + 90);
+      drawHollowRect(horizMargin, vertMargin + 27, DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin, vertMargin + 90);
 
       const S32 gap = 5;
 
@@ -491,7 +491,7 @@ void DiagnosticUserInterface::render()
          //////////
          // Draw joystick and button map
          hpos = 100;
-         ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - 110;
+         ypos = DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - 110;
 
          JoystickRender::renderDPad(Point(hpos, ypos), 25, 
                InputCodeManager::getState(BUTTON_DPAD_UP),   InputCodeManager::getState(BUTTON_DPAD_DOWN),
@@ -526,7 +526,7 @@ void DiagnosticUserInterface::render()
                symbols.push_back(UI::SymbolString::getBlankSymbol(8));      // Provide a little breathing room
          }
 
-         UI::SymbolString(symbols).render(Point(gScreenInfo.getGameCanvasWidth() / 2 + 100, ypos + 50));
+         UI::SymbolString(symbols).render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 + 100, ypos + 50));
 
          for(U32 i = FIRST_CONTROLLER_BUTTON; i <= LAST_CONTROLLER_BUTTON; i++)
          {
@@ -644,7 +644,7 @@ void DiagnosticUserInterface::render()
       for(j = 0; j < 4 && i < allLevels.length(); j++)
       {
          while(getStringWidth(textsize - 6, allLevels.substr(k, i - k).c_str()) < 
-               gScreenInfo.getGameCanvasWidth() - 2 * horizMargin && i < allLevels.length()) 
+               DisplayManager::getScreenInfo()->getGameCanvasWidth() - 2 * horizMargin && i < allLevels.length()) 
          {
             i++;
          }

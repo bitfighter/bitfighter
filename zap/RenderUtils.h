@@ -10,7 +10,7 @@
 #include "Point.h"
 #include "Color.h"
 #include "FontContextEnum.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
@@ -133,7 +133,7 @@ S32 drawCenteredStringf(S32 x, S32 y, S32 size, const char *format, ...);
 template <typename T, typename U>
 F32 drawCenteredString(T y, U size, const char *str)
 {
-   return drawCenteredString((F32)gScreenInfo.getGameCanvasWidth() / 2.0f, (F32)y, (F32)size, str);
+   return drawCenteredString((F32)DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2.0f, (F32)y, (F32)size, str);
 }
 
 // Draw text at x,y --> fixes ye olde timee string rendering bug

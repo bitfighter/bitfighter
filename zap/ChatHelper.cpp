@@ -14,7 +14,7 @@
 #include "UIInstructions.h"   // For code to activate help screen
 
 #include "ScissorsManager.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 
 #include "Colors.h"
 
@@ -132,8 +132,6 @@ void ChatHelper::activate(ChatType chatType)
 }
 
 
-extern ScreenInfo gScreenInfo;
-
 bool ChatHelper::isCmdChat()
 {
    return mLineEditor.at(0) == '/' || mCurrentChatType == CmdChat;
@@ -189,7 +187,7 @@ void ChatHelper::render()
    if(isAnimating)
       ypos += S32((getFraction()) * BOX_HEIGHT);
 
-   S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * UserInterface::horizMargin - (nameWidth - promptWidth) - 230;
+   S32 boxWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth() - 2 * UserInterface::horizMargin - (nameWidth - promptWidth) - 230;
 
    // Reuse this to avoid startup and breakdown costs
    static ScissorsManager scissorsManager;
@@ -198,7 +196,7 @@ void ChatHelper::render()
    // the specified number of lines; there are normally no partial lines that need vertical clipping as 
    // there are when we're scrolling.  Note also that we only clip vertically, and can ignore the horizontal.
    scissorsManager.enable(isAnimating, getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                          0.0f, F32(realYPos - 3), F32(gScreenInfo.getGameCanvasWidth()), F32(BOX_HEIGHT));
+                          0.0f, F32(realYPos - 3), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), F32(BOX_HEIGHT));
 
    // Render text entry box like thingy
    F32 top = (F32)ypos - 3;

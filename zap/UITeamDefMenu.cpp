@@ -9,7 +9,7 @@
 #include "UIManager.h"
 
 #include "EditorTeam.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "ClientGame.h"
 #include "Cursor.h"
 
@@ -141,8 +141,8 @@ void TeamDefUserInterface::idle(U32 timeDelta)
 // TODO: Clean this up a bit...  this menu was two-cols before, and some of that garbage is still here...
 void TeamDefUserInterface::render()
 {
-   const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    glColor(Colors::white);
    drawCenteredString(vertMargin, 30, mMenuTitle);
@@ -375,7 +375,7 @@ void TeamDefUserInterface::onMouseMoved()
 
    S32 teams = ui->getTeamCount();
 
-   selectedIndex = (S32)((gScreenInfo.getMousePos()->y - yStart + 6) / (fontsize + fontgap)) - 2; 
+   selectedIndex = (S32)((DisplayManager::getScreenInfo()->getMousePos()->y - yStart + 6) / (fontsize + fontgap)) - 2; 
 
    if(selectedIndex >= teams)
       selectedIndex = teams - 1;

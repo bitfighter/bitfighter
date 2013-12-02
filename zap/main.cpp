@@ -109,7 +109,7 @@ using namespace TNL;
 #include "ServerGame.h"
 #include "version.h"       // For BUILD_VERSION def
 #include "Colors.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "stringUtils.h"
 #include "BanList.h"
 #include "game.h"
@@ -254,7 +254,7 @@ void display()
    // Double buffering prevents nasty visual tearing from the application drawing on areas of the
    // screen that are being updated at the same time.
 #if SDL_VERSION_ATLEAST(2,0,0)
-   SDL_GL_SwapWindow(gScreenInfo.sdlWindow);
+   SDL_GL_SwapWindow(DisplayManager::getScreenInfo()->sdlWindow);
 #else
    SDL_GL_SwapBuffers();  // Use this if we convert to SDL
 #endif
@@ -507,6 +507,8 @@ void shutdownBitfighter(ServerGame *serverGame)
    settings->save();                                  // Write settings to bitfighter.ini
 
    delete settings;
+
+   DisplayManager::cleanup();
 
    NetClassRep::logBitUsage();
    logprintf("Bye!");
@@ -1053,6 +1055,9 @@ int main(int argc, char **argv)
 #ifdef USE_EXCEPTION_BACKTRACE
    signal(SIGSEGV, exceptionHandler);   // install our handler
 #endif
+
+   // Everything seems to need ScreenInfo from the DisplayManager
+   DisplayManager::initialize();
 
    GameSettingsPtr settings = GameSettingsPtr(new GameSettings());      // Autodeleted
 

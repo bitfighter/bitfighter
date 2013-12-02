@@ -7,7 +7,7 @@
 
 #ifndef BF_NO_CONSOLE
 
-#include "ScreenInfo.h"    // For ScreenInfo object
+#include "DisplayManager.h"    // For ScreenInfo object
 #include "tnlAssert.h"     // For TNLAssert, of course
 
 #include <stdio.h>         // For vsnprintf
@@ -48,11 +48,9 @@ Console::~Console()
 }
 
 
-extern ScreenInfo gScreenInfo;
-
 void Console::initialize()
 {
-   TNLAssert(gScreenInfo.isActualized(), "Must run VideoSystem::actualizeScreenMode() before initializing console!");
+   TNLAssert(DisplayManager::getScreenInfo()->isActualized(), "Must run VideoSystem::actualizeScreenMode() before initializing console!");
    TNLAssert(!mConsole,                  "Only intialize once!");
 
    mConsole = OGLCONSOLE_Create(); 

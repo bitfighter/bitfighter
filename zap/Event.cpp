@@ -9,7 +9,7 @@
 #include "UIManager.h"
 #include "UIMenus.h"       // ==> Could be refactored out with some work
 #include "IniFile.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "Joystick.h"
 #include "ClientGame.h"
 #include "InputCode.h"     // For InputCodeManager def
@@ -59,7 +59,7 @@ void Event::setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode repo
    if(currentUI->usesEditorScreenMode() && reportedDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
       reportedDisplayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
 
-   gScreenInfo.setMousePos(x, y, reportedDisplayMode);
+   DisplayManager::getScreenInfo()->setMousePos(x, y, reportedDisplayMode);
 }
 
 
@@ -299,7 +299,7 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
             case SDL_WINDOWEVENT_RESIZED:
                // Ignore window resize events if we are in fullscreen mode.  This actually does
                // occur when you ALT-TAB away and back to the window
-               if(SDL_GetWindowFlags(gScreenInfo.sdlWindow) & SDL_WINDOW_FULLSCREEN)
+               if(SDL_GetWindowFlags(DisplayManager::getScreenInfo()->sdlWindow) & SDL_WINDOW_FULLSCREEN)
                   break;
 
                onResize(game, event->window.data1, event->window.data2);
@@ -343,16 +343,16 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
    // ALT+ENTER --> toggles window mode/full screen
    if(key == SDLK_RETURN && (SDL_GetModState() & KMOD_ALT))
    {
-      const Point *pos = gScreenInfo.getMousePos();
+      const Point *pos = DisplayManager::getScreenInfo()->getMousePos();
 
       game->getUIManager()->getUI<OptionsMenuUserInterface>()->toggleDisplayMode();
 
-      gScreenInfo.setCanvasMousePos((S32)pos->x, (S32)pos->y, game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"));
+      DisplayManager::getScreenInfo()->setCanvasMousePos((S32)pos->x, (S32)pos->y, game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"));
 
 #if SDL_VERSION_ATLEAST(2,0,0)
-      SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, (S32)gScreenInfo.getWindowMousePos()->x, (S32)gScreenInfo.getWindowMousePos()->y);
+      SDL_WarpMouseInWindow(DisplayManager::getScreenInfo()->sdlWindow, (S32)DisplayManager::getScreenInfo()->getWindowMousePos()->x, (S32)DisplayManager::getScreenInfo()->getWindowMousePos()->y);
 #else
-      SDL_WarpMouse(gScreenInfo.getWindowMousePos()->x, gScreenInfo.getWindowMousePos()->y);
+      SDL_WarpMouse(DisplayManager::getScreenInfo()->getWindowMousePos()->x, DisplayManager::getScreenInfo()->getWindowMousePos()->y);
 #endif
    }
 #ifndef BF_NO_SCREENSHOTS
@@ -533,20 +533,20 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
 {
    IniSettings *iniSettings = game->getSettings()->getIniSettings();
 
-   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+   S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    // Constrain window to correct proportions...
    if((width - canvasWidth) > (height - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
-      iniSettings->winSizeFact = max((F32) height / (F32)canvasHeight, gScreenInfo.getMinScalingFactor());
+      iniSettings->winSizeFact = max((F32) height / (F32)canvasHeight, DisplayManager::getScreenInfo()->getMinScalingFactor());
    else
-      iniSettings->winSizeFact = max((F32) width / (F32)canvasWidth, gScreenInfo.getMinScalingFactor());
+      iniSettings->winSizeFact = max((F32) width / (F32)canvasWidth, DisplayManager::getScreenInfo()->getMinScalingFactor());
 
    S32 newWidth  = (S32)floor(canvasWidth  * iniSettings->winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
    S32 newHeight = (S32)floor(canvasHeight * iniSettings->winSizeFact + 0.5f);
 
 #if SDL_VERSION_ATLEAST(2,0,0)
-   SDL_SetWindowSize(gScreenInfo.sdlWindow, newWidth, newHeight);
+   SDL_SetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, newWidth, newHeight);
 
    // Flush window events because SDL2 triggers another resize event with SDL_SetWindowSize
    SDL_FlushEvent(SDL_WINDOWEVENT);
@@ -555,9 +555,9 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
    SDL_SetVideoMode(newWidth, newHeight, 0, flags);
 #endif
 
-   gScreenInfo.setWindowSize(newWidth, newHeight);
+   DisplayManager::getScreenInfo()->setWindowSize(newWidth, newHeight);
   
-   glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
+   glViewport(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
 
 #ifndef BF_NO_CONSOLE
    gConsole.onScreenResized();
@@ -565,7 +565,7 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
 
    GameSettings::iniFile.SetValueF("Settings", "WindowScalingFactor", iniSettings->winSizeFact, true);
 
-   glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());    // See comment on identical line in main.cpp
+   glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());    // See comment on identical line in main.cpp
 }
 
 

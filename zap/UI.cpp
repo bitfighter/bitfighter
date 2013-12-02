@@ -14,7 +14,7 @@
 #include "ClientGame.h"
 #include "Console.h"             // For console rendering
 #include "Colors.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "Joystick.h"
 #include "masterConnection.h"    // For MasterServerConnection def
 #include "VideoSystem.h"
@@ -147,8 +147,6 @@ void UserInterface::renderConsole() const
 }
 
 
-extern ScreenInfo gScreenInfo;
-
 static const S32 MessageBoxPadding = 20;  
 static const S32 TitleSize = 30;
 static const S32 TitleGap = 10;           // Spacing between title and first line of message box
@@ -159,8 +157,8 @@ static const S32 TextSizeBig = 30;
 
 void UserInterface::renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset, S32 style) const
 {
-   const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    S32 textSize;
 
@@ -210,15 +208,15 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
 void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, const Color &fillColor, 
                                            F32 fillAlpha, const Color &borderColor)
 {
-   drawFilledFancyBox(inset, boxTop, gScreenInfo.getGameCanvasWidth() - inset, boxTop + boxHeight, cornerInset, fillColor, fillAlpha, borderColor);
+   drawFilledFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxTop + boxHeight, cornerInset, fillColor, fillAlpha, borderColor);
 }
 
 
 void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolShapePtr &instr, 
                                            SymbolShapePtr *message, S32 msgLines, S32 vertOffset, S32 style) const
 {
-   const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    const S32 titleTextGap = 30;        // Space between title and rest of message
 
@@ -262,20 +260,20 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
       renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::black, 0.70f, Colors::blue);
 
    // Draw title
-   title->render(gScreenInfo.getGameCanvasWidth() / 2, boxTop + vertMargin + TitleSize, AlignmentCenter);
+   title->render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, boxTop + vertMargin + TitleSize, AlignmentCenter);
 
    // Draw messages
    S32 y = boxTop + titleHeight + titleTextGap + textSize;
 
    for(S32 i = 0; i < msgLines; i++)
    {
-      message[i]->render(gScreenInfo.getGameCanvasWidth() / 2, y, AlignmentCenter);
+      message[i]->render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, y, AlignmentCenter);
       y += message[i]->getHeight() + textGap;
    }
 
    // And footer
    if(instr)
-      instr->render(gScreenInfo.getGameCanvasWidth() / 2, boxTop + boxHeight - vertMargin - instrGapBottom, AlignmentCenter);
+      instr->render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, boxTop + boxHeight - vertMargin - instrGapBottom, AlignmentCenter);
 }
 
 
@@ -284,7 +282,7 @@ void UserInterface::dimUnderlyingUI(F32 amount)
 {
    glColor(Colors::black, amount); 
 
-   drawFilledRect (0, 0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
+   drawFilledRect (0, 0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
 }
 
 
@@ -406,7 +404,7 @@ void UserInterface::renderDiagnosticKeysOverlay()
 {
    if(gClientGames[0]->getSettings()->getIniSettings()->diagnosticKeyDumpMode)
    {
-     S32 vpos = gScreenInfo.getGameCanvasHeight() / 2;
+     S32 vpos = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2;
      S32 hpos = horizMargin;
 
      glColor(Colors::white);

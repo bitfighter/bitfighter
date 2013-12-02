@@ -5,7 +5,7 @@
 
 #include "SlideOutWidget.h"
 
-#include "ScreenInfo.h"          // For gScreenInfo def
+#include "DisplayManager.h"          // For DisplayManager::getScreenInfo() def
 #include "Point.h"
 #include "Colors.h"
 #include "OpenglUtils.h"
@@ -114,8 +114,6 @@ void SlideOutWidget::setAnimationTime(U32 period)
 
 
 
-extern ScreenInfo gScreenInfo;
-
 void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor) const
 {
    const S32 CORNER_SIZE = 15;      
@@ -129,7 +127,7 @@ void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 
 
    if(top == 0)
       topBox = true;
-   else if(right == gScreenInfo.getGameCanvasWidth())
+   else if(right == DisplayManager::getScreenInfo()->getGameCanvasWidth())
       rightBox = true;
    else if(left == 0)
       leftBox = true;

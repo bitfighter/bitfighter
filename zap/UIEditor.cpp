@@ -51,7 +51,7 @@
 #include "SystemFunctions.h"
 
 #include "Console.h"          // Our console object
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "VideoSystem.h"
 
 #include "stringUtils.h"
@@ -181,7 +181,7 @@ void EditorUserInterface::populateDock()
 {
    mDockItems.clear();
 
-   F32 xPos = (F32)gScreenInfo.getGameCanvasWidth() - horizMargin - ITEMS_DOCK_WIDTH / 2;
+   F32 xPos = (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin - ITEMS_DOCK_WIDTH / 2;
    F32 yPos = 35;
    const F32 spacer = 35;
 
@@ -844,7 +844,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    
    mPluginMenu->addSaveAndQuitMenuItem("Run plugin", "Saves values and runs plugin");
 
-   mPluginMenu->setMenuCenterPoint(Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2));  
+   mPluginMenu->setMenuCenterPoint(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2));  
 
    // Restore previous values, if available
    string key = getPluginSignature();
@@ -1376,11 +1376,11 @@ void EditorUserInterface::onDisplayModeChange()
    static S32 previousXSize = -1;
    static S32 previousYSize = -1;
 
-   if(previousXSize != gScreenInfo.getGameCanvasWidth() || previousYSize != gScreenInfo.getGameCanvasHeight())
+   if(previousXSize != DisplayManager::getScreenInfo()->getGameCanvasWidth() || previousYSize != DisplayManager::getScreenInfo()->getGameCanvasHeight())
    {
       // Recenter canvas -- note that canvasWidth may change during displayMode change
-      mCurrentOffset.set(mCurrentOffset.x - previousXSize / 2 + gScreenInfo.getGameCanvasWidth() / 2, 
-                         mCurrentOffset.y - previousYSize / 2 + gScreenInfo.getGameCanvasHeight() / 2);
+      mCurrentOffset.set(mCurrentOffset.x - previousXSize / 2 + DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 
+                         mCurrentOffset.y - previousYSize / 2 + DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
    }
 
    // Need to populate the dock here because dock items are tied to a particular screen x,y; 
@@ -1388,8 +1388,8 @@ void EditorUserInterface::onDisplayModeChange()
    if(getGame()->getGameType())
       populateDock();               // If game type has changed, items on dock will change
 
-   previousXSize = gScreenInfo.getGameCanvasWidth();
-   previousYSize = gScreenInfo.getGameCanvasHeight();
+   previousXSize = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   previousYSize = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 }
 
 
@@ -1690,15 +1690,15 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
 
 S32 getDockHeight()
 {
-   return gScreenInfo.getGameCanvasHeight() - 2 * EditorUserInterface::vertMargin;
+   return DisplayManager::getScreenInfo()->getGameCanvasHeight() - 2 * EditorUserInterface::vertMargin;
 }
 
 
 void EditorUserInterface::renderDock()    
 {
    // Render item dock down RHS of screen
-   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    Color fillColor;
 
@@ -1740,7 +1740,7 @@ static S32 PanelBottom, PanelTop, PanelLeft, PanelRight, PanelInnerMargin;
 void EditorUserInterface::renderInfoPanel() 
 {
    // Recalc dimensions in case screen mode changed
-   PanelBottom = gScreenInfo.getGameCanvasHeight() - EditorUserInterface::vertMargin;
+   PanelBottom = DisplayManager::getScreenInfo()->getGameCanvasHeight() - EditorUserInterface::vertMargin;
    PanelTop    = PanelBottom - (4 * PANEL_SPACING + 9);
    PanelLeft   = EditorUserInterface::horizMargin;
    PanelRight  = PanelLeft + 180;      // left + width
@@ -1787,7 +1787,7 @@ void EditorUserInterface::renderPanelInfoLine(S32 line, const char *format, ...)
    vsnprintf(text, sizeof(text), format, args); 
    va_end(args);
 
-   drawString(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - line * PANEL_SPACING + 6, PANEL_TEXT_SIZE, text);
+   drawString(xpos, DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - line * PANEL_SPACING + 6, PANEL_TEXT_SIZE, text);
 }
 
 
@@ -2204,7 +2204,7 @@ void EditorUserInterface::renderDockPlugins()
    {
       if(hoveredPlugin == i)
       {
-         S32 x = gScreenInfo.getGameCanvasWidth() - mDockWidth - horizMargin;
+         S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin;
          F32 y = 1.5f * vertMargin + PLUGIN_LINE_SPACING * (i - mDockPluginScrollOffset);
          drawHollowRect(x + horizMargin / 3, y, x + mDockWidth - horizMargin / 3, y + PLUGIN_LINE_SPACING, Colors::white);
          mInfoMsg = mPluginInfos[i].description;
@@ -2212,9 +2212,9 @@ void EditorUserInterface::renderDockPlugins()
 
       glColor(Colors::white);
       S32 y = (S32) (1.5 * vertMargin + PLUGIN_LINE_SPACING * (i - mDockPluginScrollOffset + 0.33));
-      drawString((S32) (gScreenInfo.getGameCanvasWidth() - mDockWidth - horizMargin / 2), y, DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
+      drawString((S32) (DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin / 2), y, DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
       S32 bindingWidth = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
-      drawString((S32) (gScreenInfo.getGameCanvasWidth() - bindingWidth - horizMargin * 1.5), y, DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
+      drawString((S32) (DisplayManager::getScreenInfo()->getGameCanvasWidth() - bindingWidth - horizMargin * 1.5), y, DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
    }
 }
 
@@ -2229,18 +2229,18 @@ void EditorUserInterface::renderSaveMessage() const
 
       const S32 textsize = 25;
       const S32 len = getStringWidth(textsize, mSaveMsg.c_str()) + 20;
-      const S32 inset = min((gScreenInfo.getGameCanvasWidth() - len)  / 2, 200);
+      const S32 inset = min((DisplayManager::getScreenInfo()->getGameCanvasWidth() - len)  / 2, 200);
       const S32 boxTop = 515;
       const S32 boxBottom = 555;
       const S32 cornerInset = 10;
 
       // Fill
       glColor(Colors::black, alpha * 0.80f);
-      drawFancyBox(inset, boxTop, gScreenInfo.getGameCanvasWidth() - inset, boxBottom, cornerInset, GL_TRIANGLE_FAN);
+      drawFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxBottom, cornerInset, GL_TRIANGLE_FAN);
 
       // Border
       glColor(Colors::blue, alpha);
-      drawFancyBox(inset, boxTop, gScreenInfo.getGameCanvasWidth() - inset, boxBottom, cornerInset, GL_LINE_LOOP);
+      drawFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxBottom, cornerInset, GL_LINE_LOOP);
 
       glColor(mSaveMsgColor, alpha);
       drawCenteredString(520, textsize, mSaveMsg.c_str());
@@ -2257,8 +2257,8 @@ void EditorUserInterface::renderWarnings() const
          alpha = (F32) mWarnMsgTimer.getCurrent() / 1000;
 
       glColor(mWarnMsgColor, alpha);
-      drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4, 25, mWarnMsg1.c_str());
-      drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4 + 30, 25, mWarnMsg2.c_str());
+      drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() / 4, 25, mWarnMsg1.c_str());
+      drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() / 4 + 30, 25, mWarnMsg2.c_str());
    }
 
    if(mLevelErrorMsgs.size() || mLevelWarnings.size())
@@ -2922,7 +2922,7 @@ void EditorUserInterface::onMouseMoved()
 
    mouseIgnore = true;
 
-   mMousePos.set(gScreenInfo.getMousePos());
+   mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
 
    // Doing this with MOUSE_RIGHT allows you to drag a vertex you just placed by holding the right-mouse button
    if(InputCodeManager::getState(MOUSE_LEFT) || InputCodeManager::getState(MOUSE_RIGHT) || InputCodeManager::getState(MOUSE_MIDDLE))
@@ -3753,24 +3753,24 @@ void EditorUserInterface::centerView()
    if(extents.getWidth() < 1 && extents.getHeight() < 1)    // e.g. a single point item
    {
       mCurrentScale = STARTING_SCALE;
-      mCurrentOffset.set(gScreenInfo.getGameCanvasWidth()  / 2 - mCurrentScale * x, 
-                         gScreenInfo.getGameCanvasHeight() / 2 - mCurrentScale * y);
+      mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - mCurrentScale * x, 
+                         DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - mCurrentScale * y);
    }
    else
    {
-      mCurrentScale = min(gScreenInfo.getGameCanvasWidth()  / extents.getWidth(), 
-                          gScreenInfo.getGameCanvasHeight() / extents.getHeight());
+      mCurrentScale = min(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / extents.getWidth(), 
+                          DisplayManager::getScreenInfo()->getGameCanvasHeight() / extents.getHeight());
 
       mCurrentScale /= 1.3f;      // Zoom out a bit
 
-      mCurrentOffset.set(gScreenInfo.getGameCanvasWidth() / 2  - mCurrentScale * x, 
-                           gScreenInfo.getGameCanvasHeight() / 2 - mCurrentScale * y);
+      mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2  - mCurrentScale * x, 
+                           DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - mCurrentScale * y);
    }
    //}
    //else     // Put (0,0) at center of screen
    //{
    //   mCurrentScale = STARTING_SCALE;
-   //   mCurrentOffset.set(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
+   //   mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
    //}
 }
 
@@ -4058,7 +4058,7 @@ void EditorUserInterface::onMouseClicked_left()
    bool spaceDown = InputCodeManager::getState(KEY_SPACE);
 
    mDraggingDockItem = NULL;
-   mMousePos.set(gScreenInfo.getMousePos());
+   mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
    mJustInsertedVertex = false;
 
    if(mCreatingPoly || mCreatingPolyline)       // Save any polygon/polyline we might be creating
@@ -4188,7 +4188,7 @@ void EditorUserInterface::onMouseClicked_right()
    if(InputCodeManager::getState(MOUSE_LEFT) && !InputCodeManager::checkModifier(KEY_CTRL))  // Prevent weirdness
       return;  
 
-   mMousePos.set(gScreenInfo.getMousePos());
+   mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
 
    if(mCreatingPoly || mCreatingPolyline)
    {
@@ -4569,7 +4569,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
          break;
       case MOUSE_LEFT:
       case MOUSE_RIGHT:  
-         mMousePos.set(gScreenInfo.getMousePos());
+         mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
 
          if(mDragSelecting)      // We were drawing a rubberband selection box
          {
@@ -4714,10 +4714,10 @@ void EditorUserInterface::onFinishedDragging()
 
 bool EditorUserInterface::mouseOnDock()
 {
-   return (mMousePos.x >= gScreenInfo.getGameCanvasWidth() - mDockWidth - horizMargin &&
-           mMousePos.x <= gScreenInfo.getGameCanvasWidth() - horizMargin &&
-           mMousePos.y >= gScreenInfo.getGameCanvasHeight() - vertMargin - getDockHeight() &&
-           mMousePos.y <= gScreenInfo.getGameCanvasHeight() - vertMargin);
+   return (mMousePos.x >= DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin &&
+           mMousePos.x <= DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin &&
+           mMousePos.y >= DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - getDockHeight() &&
+           mMousePos.y <= DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin);
 }
 
 

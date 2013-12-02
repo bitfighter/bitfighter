@@ -7,7 +7,7 @@
 
 #include "UIEditor.h"
 #include "UIManager.h"
-#include "ScreenInfo.h"    // For canvasHeight
+#include "DisplayManager.h"    // For canvasHeight
 #include "ClientGame.h"    // For UIManager and callback
 
 #include "Colors.h"
@@ -62,8 +62,6 @@ S32 QuickMenuUI::getGap(MenuItemSize size)
 }
 
 
-extern ScreenInfo gScreenInfo;
-
 void QuickMenuUI::render()
 {
    // Draw the underlying editor screen
@@ -104,13 +102,13 @@ void QuickMenuUI::render()
    
    if(naturalLeft < 0)
        keepingItOnScreenAdjFactorX = -1 * naturalLeft;
-   else if(naturalRight > gScreenInfo.getGameCanvasWidth())
-      keepingItOnScreenAdjFactorX = gScreenInfo.getGameCanvasWidth() - naturalRight;
+   else if(naturalRight > DisplayManager::getScreenInfo()->getGameCanvasWidth())
+      keepingItOnScreenAdjFactorX = DisplayManager::getScreenInfo()->getGameCanvasWidth() - naturalRight;
 
    if(naturalTop < 0)
       keepingItOnScreenAdjFactorY = -1 * naturalTop;
-   else if(naturalBottom > gScreenInfo.getGameCanvasHeight())
-      keepingItOnScreenAdjFactorY = gScreenInfo.getGameCanvasHeight() - naturalBottom;
+   else if(naturalBottom > DisplayManager::getScreenInfo()->getGameCanvasHeight())
+      keepingItOnScreenAdjFactorY = DisplayManager::getScreenInfo()->getGameCanvasHeight() - naturalBottom;
 
 
    yStart += keepingItOnScreenAdjFactorY;
@@ -188,10 +186,10 @@ void QuickMenuUI::render()
    // Amount help "sticks out" beyond menu box:
    S32 xoff = (getStringWidth(HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str()) - width) / 2; 
    if(xoff > 0)
-      instrXPos += max(xoff - left, min(gScreenInfo.getGameCanvasWidth() - xoff - right, 0));
+      instrXPos += max(xoff - left, min(DisplayManager::getScreenInfo()->getGameCanvasWidth() - xoff - right, 0));
 
    // Now consider vertical position
-   if(naturalBottom + vpad + HELP_TEXT_SIZE < gScreenInfo.getGameCanvasHeight())
+   if(naturalBottom + vpad + HELP_TEXT_SIZE < DisplayManager::getScreenInfo()->getGameCanvasHeight())
       instrYPos = naturalBottom + keepingItOnScreenAdjFactorY + vpad;                           // Help goes below, in normal location
    else
       instrYPos = naturalTop + keepingItOnScreenAdjFactorY - HELP_TEXT_SIZE - getGap(MENU_ITEM_SIZE_NORMAL) - vpad;   // No room below, help goes above
@@ -227,8 +225,8 @@ void QuickMenuUI::onDisplayModeChange()
    getUIManager()->getUI<EditorUserInterface>()->onDisplayModeChange();   // This is intended to run the same method in the editor
 
    // Reposition menu on screen, keeping same relative position as before
-   Point pos(mMenuLocation.x * gScreenInfo.getGameCanvasWidth() /gScreenInfo.getPrevCanvasWidth(), 
-             mMenuLocation.y * gScreenInfo.getGameCanvasHeight() / gScreenInfo.getPrevCanvasHeight());
+   Point pos(mMenuLocation.x * DisplayManager::getScreenInfo()->getGameCanvasWidth() /DisplayManager::getScreenInfo()->getPrevCanvasWidth(), 
+             mMenuLocation.y * DisplayManager::getScreenInfo()->getGameCanvasHeight() / DisplayManager::getScreenInfo()->getPrevCanvasHeight());
 
    setMenuCenterPoint(pos);
 }
@@ -404,7 +402,7 @@ SimpleTextEntryMenuUI::SimpleTextEntryMenuUI(ClientGame *game, const string &tit
 
    mDisableHighlight = true;  // No text highlighting
 
-   setMenuCenterPoint(Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2));
+   setMenuCenterPoint(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2));
 }
 
 

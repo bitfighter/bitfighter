@@ -7,7 +7,7 @@
 
 #include "UIManager.h"
 
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "Joystick.h"
 #include "JoystickRender.h"
 #include "ClientGame.h"
@@ -223,7 +223,7 @@ void KeyDefMenuUserInterface::render()
    drawCenteredString(vertMargin + 63, 14, "You can define different keys for keyboard or joystick mode.  Switch in Options menu.");
 
    glColor(Colors::white);
-   drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - 20, 18, mMenuFooter);
+   drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - 20, 18, mMenuFooter);
 
    if(selectedIndex >= menuItems.size())
       selectedIndex = 0;
@@ -234,7 +234,7 @@ void KeyDefMenuUserInterface::render()
    {
       S32 y = yStart + (i - ((i < firstItemInCol2) ? 0 : firstItemInCol2)) * height;
 
-		S32 Column_Width = gScreenInfo.getGameCanvasWidth() / 2 - horizMargin;
+		S32 Column_Width = DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 - horizMargin;
 		S32 xPos = (menuItems[i].column - 1) * Column_Width + horizMargin * 2;
 
       if(selectedIndex == i)       // Highlight selected item
@@ -403,10 +403,10 @@ void KeyDefMenuUserInterface::onMouseMoved()
 
    Cursor::enableCursor();  // Show cursor when user moves mouse
 
-   const Point *mousePos = gScreenInfo.getMousePos();
+   const Point *mousePos = DisplayManager::getScreenInfo()->getMousePos();
 
    // Which column is the mouse in?  Left half of screen = 0, right half = 1
-   S32 col = (mousePos->x < (gScreenInfo.getGameCanvasWidth() - horizMargin) / 2) ? 0 : 1;
+   S32 col = (mousePos->x < (DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin) / 2) ? 0 : 1;
    S32 row = min(max(static_cast<int>(floor(( mousePos->y - yStart ) / height)), 0), menuItems.size() - 1);
 
    selectedIndex = min(max(row + firstItemInCol2 * col, 0), menuItems.size() - 1);    // Bounds checking

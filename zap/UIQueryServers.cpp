@@ -12,7 +12,7 @@
 #include "gameNetInterface.h"
 #include "ClientGame.h"
 #include "Colors.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "gameObjectRender.h"
 #include "Cursor.h"
 
@@ -48,7 +48,7 @@ static const U32 TOP_OF_SERVER_LIST = BANNER_HEIGHT + COLUMN_HEADER_TEXTSIZE + 9
 static const U32 AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER = (SEL_SERVER_INSTR_SIZE + SERVER_DESCR_TEXTSIZE + SERVER_ENTRY_VERT_GAP + 10);
 
 // "Chat window" includes chat composition, but not list of names of people in chatroom
-#define BOTTOM_OF_CHAT_WINDOW (gScreenInfo.getGameCanvasHeight() - vertMargin / 2 - CHAT_NAMELIST_SIZE)
+#define BOTTOM_OF_CHAT_WINDOW (DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin / 2 - CHAT_NAMELIST_SIZE)
 
 
 // Button callbacks
@@ -134,7 +134,7 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInt
    TNLAssert(columns[2].xStart - columns[1].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[1].name), "Col[1] too narrow!");
    TNLAssert(columns[3].xStart - columns[2].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[2].name), "Col[2] too narrow!");
    TNLAssert(columns[4].xStart - columns[3].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[3].name), "Col[3] too narrow!");
-   TNLAssert(gScreenInfo.getGameCanvasWidth() - columns[4].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[4].name), "Col[4] too narrow!");
+   TNLAssert(DisplayManager::getScreenInfo()->getGameCanvasWidth() - columns[4].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[4].name), "Col[4] too narrow!");
 #endif
 
    selectedId = 0xFFFFFF;
@@ -150,7 +150,7 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInt
    S32 ypos = BANNER_HEIGHT - 30;
 
    Button prevButton = Button(getGame(), horizMargin, ypos, textsize, 4, "PREV", Colors::white, Colors::yellow, prevButtonClickedCallback);
-   Button nextButton = Button(getGame(), gScreenInfo.getGameCanvasWidth() - horizMargin - 50, ypos, 
+   Button nextButton = Button(getGame(), DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin - 50, ypos, 
                               textsize, 4, "NEXT", Colors::white, Colors::yellow, nextButtonClickedCallback);
    
    buttons.push_back(prevButton);
@@ -580,7 +580,7 @@ S32 QueryServersUserInterface::getSelectedIndex()
 
    if(mItemSelectedWithMouse)    // When using mouse, always follow mouse cursor
    {
-      S32 indx = S32(floor((gScreenInfo.getMousePos()->y - TOP_OF_SERVER_LIST + 2) / SERVER_ENTRY_HEIGHT) + 
+      S32 indx = S32(floor((DisplayManager::getScreenInfo()->getMousePos()->y - TOP_OF_SERVER_LIST + 2) / SERVER_ENTRY_HEIGHT) + 
                      getFirstServerIndexOnCurrentPage() ); // fixes mouse offset problem by removing this part: - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0) 
 
       // Bounds checking and such
@@ -649,8 +649,8 @@ extern void glScale(F32 scaleFactor);
 
 void QueryServersUserInterface::render()
 {
-   const S32 canvasWidth =  gScreenInfo.getGameCanvasWidth();
-//   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   const S32 canvasWidth =  DisplayManager::getScreenInfo()->getGameCanvasWidth();
+//   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    bool drawmsg1 = false;
    bool drawmsg2 = false;
@@ -658,7 +658,7 @@ void QueryServersUserInterface::render()
    renderTopBanner();
 
    // Render buttons
-   const Point *mousePos = gScreenInfo.getMousePos();
+   const Point *mousePos = DisplayManager::getScreenInfo()->getMousePos();
 
    for(S32 i = 0; i < buttons.size(); i++)
       buttons[i].render(mJustMovedMouse ? mousePos->x : -1, mJustMovedMouse ? mousePos->y : -1);
@@ -830,7 +830,7 @@ void QueryServersUserInterface::render()
 
 void QueryServersUserInterface::renderTopBanner()
 {
-   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    // Top banner
    glColor(Colors::black);
@@ -854,7 +854,7 @@ void QueryServersUserInterface::renderTopBanner()
 
 void QueryServersUserInterface::renderColumnHeaders()
 {
-   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    // Draw vertical dividing lines
    glColor(0.7f);
@@ -900,8 +900,8 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
 {
    // Warning... the following section is pretty darned ugly!  We're just drawing a message box...
 
-   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    const S32 fontsize = 20;
    const S32 fontgap = 5;
@@ -999,7 +999,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
 
    if(inputCode == KEY_ENTER || inputCode == BUTTON_START || inputCode == MOUSE_LEFT)     // Return - select highlighted server & join game
    {
-      const Point *mousePos = gScreenInfo.getMousePos();
+      const Point *mousePos = DisplayManager::getScreenInfo()->getMousePos();
 
       if(inputCode == MOUSE_LEFT && mouseInHeaderRow(mousePos))
       {
@@ -1156,7 +1156,7 @@ void QueryServersUserInterface::onKeyUp(InputCode inputCode)
 
 void QueryServersUserInterface::onMouseDragged() 
 {
-   const Point *mousePos = gScreenInfo.getMousePos();    // (used in some of the macro expansions)
+   const Point *mousePos = DisplayManager::getScreenInfo()->getMousePos();    // (used in some of the macro expansions)
 
    if(mDraggingDivider)
    {
@@ -1220,7 +1220,7 @@ void QueryServersUserInterface::onMouseMoved()
       return;
    }
 
-   const Point *mousePos = gScreenInfo.getMousePos();
+   const Point *mousePos = DisplayManager::getScreenInfo()->getMousePos();
 
    Cursor::enableCursor();
 
@@ -1253,7 +1253,7 @@ S32 QueryServersUserInterface::getDividerPos()
    if(mShowChat)
       return TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER;
    else
-      return gScreenInfo.getGameCanvasHeight();
+      return DisplayManager::getScreenInfo()->getGameCanvasHeight();
 }
 
 
@@ -1262,7 +1262,7 @@ S32 QueryServersUserInterface::getServersPerPage()
    if(mShowChat)
       return mServersPerPage;
    else
-      return (gScreenInfo.getGameCanvasHeight() - TOP_OF_SERVER_LIST - AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER) / SERVER_ENTRY_HEIGHT;
+      return (DisplayManager::getScreenInfo()->getGameCanvasHeight() - TOP_OF_SERVER_LIST - AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER) / SERVER_ENTRY_HEIGHT;
 }
 
 
@@ -1277,7 +1277,7 @@ bool QueryServersUserInterface::isMouseOverDivider()
    if(!mShowChat)       // Divider is only in operation when window is split
       return false;
 
-   F32 mouseY = gScreenInfo.getMousePos()->y;
+   F32 mouseY = DisplayManager::getScreenInfo()->getMousePos()->y;
 
    S32 hitMargin = 4;
    S32 dividerPos = getDividerPos();

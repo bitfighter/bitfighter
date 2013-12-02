@@ -24,7 +24,7 @@
 #include "UITeamDefMenu.h"
 #include "UIGame.h"
 #include "UIHighScores.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "ClientGame.h"
 
 #include "stringUtils.h"

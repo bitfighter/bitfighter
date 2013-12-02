@@ -8,7 +8,7 @@
 #include "UIManager.h"
 
 #include "gameObjectRender.h"    // For renderBitfighterLogo
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "Colors.h"
 
 #include "RenderUtils.h"
@@ -207,7 +207,7 @@ void CreditsScroller::updateFX(U32 delta)
          mCredits[i].pos -= (delta / 8.f);
 
       // Test if credit music is playing - this just picks an arbitrary time to test if the music loaded properly
-      if(!creditsMusicExists && mCredits[indexMinus1].pos > gScreenInfo.getGameCanvasHeight() && SoundSystem::isMusicPlaying())
+      if(!creditsMusicExists && mCredits[indexMinus1].pos > DisplayManager::getScreenInfo()->getGameCanvasHeight() && SoundSystem::isMusicPlaying())
          creditsMusicExists = true;
    }
    else
@@ -241,8 +241,8 @@ void CreditsScroller::render()
    F32 vertices[] = {
          0, 0,
          0, 150,
-         (F32)gScreenInfo.getGameCanvasWidth(), 150,
-         (F32)gScreenInfo.getGameCanvasWidth(), 0
+         (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), 150,
+         (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), 0
    };
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
@@ -252,7 +252,7 @@ void CreditsScroller::render()
 
 void CreditsScroller::resetPosition()
 {
-   mCredits[0].pos = (F32)gScreenInfo.getGameCanvasHeight();
+   mCredits[0].pos = (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    for(S32 i = 1; i < mCredits.size(); i++)
       mCredits[i].pos = mCredits[i-1].pos + (CreditSpace * mCredits[i-1].lines.size()) + SectionSpace;
@@ -321,7 +321,7 @@ void SplashUserInterface::render()
 
       F32 fr = pow(mSplashTimer.getFraction(), 2);
 
-      S32 ctr = gScreenInfo.getGameCanvasHeight() / 2;
+      S32 ctr = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2;
 
       renderBitfighterLogo(ctr, fr * 20.0f + 1, 1 << 0);
       renderBitfighterLogo(ctr, fr * 50.0f + 1, 1 << 1);
@@ -337,12 +337,12 @@ void SplashUserInterface::render()
    else if(mPhase == SplashPhaseResting)          // Resting phase
    {
       glColor(Colors::blue);
-      renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 1);
+      renderBitfighterLogo(DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2, 1);
    }
    else if(mPhase == SplashPhaseRising)           // Rising phase
    {
       glColor(0, sqrt(1 - mSplashTimer.getFraction()), 1 - pow(1 - mSplashTimer.getFraction(), 2));
-      renderBitfighterLogo((S32)(73.0f + ((F32) gScreenInfo.getGameCanvasHeight() / 2.0f - 73.0f) * mSplashTimer.getFraction()), 1);
+      renderBitfighterLogo((S32)(73.0f + ((F32) DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.0f - 73.0f) * mSplashTimer.getFraction()), 1);
    }
 }
 

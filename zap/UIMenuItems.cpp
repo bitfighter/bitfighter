@@ -7,7 +7,7 @@
 #include "UIMenus.h"
 #include "UIEditorMenus.h"
 
-#include "ScreenInfo.h"    // For gScreenInfo stuff
+#include "DisplayManager.h"    // For DisplayManager::getScreenInfo() stuff
 #include "FontManager.h"
 
 #include "LuaWrapper.h"
@@ -157,7 +157,7 @@ void MenuItem::setMenu(MenuUserInterface *menu)
 // Shouldn't need to be overridden -- all redering routines should include xpos
 void MenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 {
-   render(gScreenInfo.getGameCanvasWidth() / 2, ypos, textsize, isSelected);
+   render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, ypos, textsize, isSelected);
 }
 
 

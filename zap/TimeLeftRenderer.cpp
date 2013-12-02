@@ -7,7 +7,7 @@
 
 #include "ClientGame.h"
 #include "gameType.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "FontManager.h"
 #include "Colors.h"
 #include "gameObjectRender.h"    // For renderFlag()
@@ -19,16 +19,19 @@
 
 namespace Zap { 
 
-extern ScreenInfo gScreenInfo;
-
 namespace UI {
 
-const U32 rightAlignCoord = gScreenInfo.getGameCanvasWidth() - TimeLeftRenderer::TimeLeftIndicatorMargin;
 
 const S32 timeTextSize = 30;
 const S32 bigScoreTextSize = 28;
 const S32 bigScoreTextGap = 5;
 
+// Constructor
+TimeLeftRenderer::TimeLeftRenderer()
+{
+   TNLAssert(mScreenInfo != NULL, "ScreenInfo is NULL!")
+   mScreenInfo = DisplayManager::getScreenInfo();
+}
 
 // When render param is true, will render as expected; when false, will simply return dimensions
 Point TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible, bool render) const
@@ -39,11 +42,11 @@ Point TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible,
    S32 timeTop  = (S32)corner.y;
 
    // Convert the coordinates we got above into dimensions
-   corner.x = gScreenInfo.getGameCanvasWidth()  - corner.x - TimeLeftIndicatorMargin;    // Width
-   corner.y = gScreenInfo.getGameCanvasHeight() - corner.y - TimeLeftIndicatorMargin;    // Height
+   corner.x = mScreenInfo->getGameCanvasWidth()  - corner.x - TimeLeftIndicatorMargin;    // Width
+   corner.y = mScreenInfo->getGameCanvasHeight() - corner.y - TimeLeftIndicatorMargin;    // Height
 
    // Some game types *ahem* Nexus *ahem* require an extra line for the scoreboard... a "special" if you will
-   const S32 timeLeftSpecialHeight = gameType->renderTimeLeftSpecial(rightAlignCoord, timeTop, render);
+   const S32 timeLeftSpecialHeight = gameType->renderTimeLeftSpecial((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), timeTop, render);
    timeTop  -= timeLeftSpecialHeight;
    corner.y += timeLeftSpecialHeight;
 
@@ -74,7 +77,7 @@ S32 TimeLeftRenderer::renderTeamScores(const GameType *gameType, S32 bottom, boo
    S32 ypos = bottom - bigScoreTextSize;      
 
    S32 maxWidth = render ? renderHeadlineScores(game, ypos) : 0;   // Use max score width to vertically align symbols
-   S32 xpos = rightAlignCoord - maxWidth - 18;
+   S32 xpos = (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth - 18;
 
    S32 teamCount = game->getTeamCount();
 
@@ -108,7 +111,7 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
       // This is a total hack based on visual inspection trying to get scores ending in 1 to align with others
       // in a way that is nice.  This is totally font dependent, sadly...
 
-      S32 width = drawStringfr(rightAlignCoord, ypos, bigScoreTextSize, "%d", score);
+      S32 width = drawStringfr((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), ypos, bigScoreTextSize, "%d", score);
       maxWidth = max(maxWidth, width);
 
       ypos -= bigScoreTextSize + bigScoreTextGap;
@@ -207,8 +210,8 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
    {
       glColor(winnerColor);
 
-      drawStringDigitByDigit(rightAlignCoord - topOneFixFactor, ypos - firstNameOffset, textsize, topScoreStr);
-      drawStringr           (rightAlignCoord - maxWidth,        ypos - firstNameOffset, textsize, topName);
+      drawStringDigitByDigit((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - topOneFixFactor, ypos - firstNameOffset, textsize, topScoreStr);
+      drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,        ypos - firstNameOffset, textsize, topName);
 
       // Render bottom score if we have one
       if(renderTwoNames)
@@ -218,8 +221,8 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
          else
             glColor(loserColor);
 
-         drawStringDigitByDigit(rightAlignCoord - botOneFixFactor, ypos, textsize, botScoreStr);
-         drawStringr           (rightAlignCoord - maxWidth,        ypos, textsize, botName);
+         drawStringDigitByDigit((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - botOneFixFactor, ypos, textsize, botScoreStr);
+         drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,        ypos, textsize, botName);
       }
    }
 
@@ -256,12 +259,12 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
          timeWidth += w0;
    }
 
-   const S32 grayLinePos = rightAlignCoord - timeWidth - grayLineHorizPadding;  // Where the vertical gray line is drawn
+   const S32 grayLinePos = (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - timeWidth - grayLineHorizPadding;  // Where the vertical gray line is drawn
    const S32 smallTextRPos = grayLinePos - grayLineHorizPadding;                // Right-align the stacked text here
    
    // Left and top coordinates of the time display
-   const S32 timeLeft = rightAlignCoord - timeWidth;
-   const S32 timeTop  = gScreenInfo.getGameCanvasHeight() - timeTextSize - TimeLeftIndicatorMargin;
+   const S32 timeLeft = (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - timeWidth;
+   const S32 timeTop  = mScreenInfo->getGameCanvasHeight() - timeTextSize - TimeLeftIndicatorMargin;
 
    S32 wt, wb;    // Width of top and bottom items respectively
 
@@ -297,7 +300,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
    if(render)
    {
       glColor(Colors::gray40);
-      drawHorizLine(farLeftCoord, rightAlignCoord, timeTop - grayLineVertPadding);
+      drawHorizLine(farLeftCoord, (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), timeTop - grayLineVertPadding);
       drawVertLine(grayLinePos, timeTop + visualVerticalTextAlignmentHackyFacty, timeTop + timeTextSize);
    }
 

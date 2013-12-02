@@ -4,14 +4,12 @@
 //------------------------------------------------------------------------------
 
 #include "ScissorsManager.h"     // Class header
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 
 
 namespace Zap
 {
    
-extern ScreenInfo gScreenInfo;
-
 // Store previous scissors settings
 void ScissorsManager::enable(bool enable, DisplayMode displayMode, F32 x, F32 y, F32 width, F32 height) 
 {
@@ -26,8 +24,8 @@ void ScissorsManager::enable(bool enable, DisplayMode displayMode, F32 x, F32 y,
       glGetIntegerv(GL_SCISSOR_BOX, &mScissorBox[0]);
 
    static Point p1, p2;
-   p1 = gScreenInfo.convertCanvasToWindowCoord(x,     gScreenInfo.getGameCanvasHeight() - y - height, displayMode);
-   p2 = gScreenInfo.convertCanvasToWindowCoord(width, height,                                         displayMode);
+   p1 = DisplayManager::getScreenInfo()->convertCanvasToWindowCoord(x,     DisplayManager::getScreenInfo()->getGameCanvasHeight() - y - height, displayMode);
+   p2 = DisplayManager::getScreenInfo()->convertCanvasToWindowCoord(width, height,                                         displayMode);
 
    glScissor(GLint(p1.x), GLint(p1.y), GLsizei(p2.x), GLsizei(p2.y));
 

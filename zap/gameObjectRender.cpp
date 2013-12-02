@@ -15,7 +15,7 @@
 #include "teleporter.h"          // For TELEPORTER_RADIUS
 #include "version.h"
 #include "config.h"              // Only for testing burst graphics below
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "game.h"
 #include "VertexStylesEnum.h"
 #include "FontManager.h"
@@ -2703,7 +2703,7 @@ void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
    // 3609 is the diff btwn the min and max x coords below, 594 is same for y
 
    glPushMatrix();
-      glTranslatef((gScreenInfo.getGameCanvasWidth() - 3609 * fact) / 2, yPos - 594 * fact / 2, 0);
+      glTranslatef((DisplayManager::getScreenInfo()->getGameCanvasWidth() - 3609 * fact) / 2, yPos - 594 * fact / 2, 0);
       glScale(fact);                   // Scale it down...
       renderBitfighterLogo(mask);
    glPopMatrix();
@@ -3297,14 +3297,14 @@ void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 g
          F32 grayVal = ((i ? .2f : .4f) * snapFadeFact);
          glColor(grayVal);
 
-         while(yStart < gScreenInfo.getGameCanvasHeight())
+         while(yStart < DisplayManager::getScreenInfo()->getGameCanvasHeight())
          {
-            drawHorizLine((F32)0, (F32)gScreenInfo.getGameCanvasWidth(), (F32)yStart);
+            drawHorizLine((F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), (F32)yStart);
             yStart += gridScale;
          }
-         while(xStart < gScreenInfo.getGameCanvasWidth())
+         while(xStart < DisplayManager::getScreenInfo()->getGameCanvasWidth())
          {
-            drawVertLine((F32)xStart, (F32)0, (F32)gScreenInfo.getGameCanvasHeight());
+            drawVertLine((F32)xStart, (F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight());
             xStart += gridScale;
          }
       }
@@ -3314,8 +3314,8 @@ void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 g
    glColor(0.7f * snapFadeFact);
    glLineWidth(gLineWidth3);
 
-   drawHorizLine((F32)0, (F32)gScreenInfo.getGameCanvasWidth(), (F32)origin.y);
-   drawVertLine((F32)origin.x, (F32)0, (F32)gScreenInfo.getGameCanvasHeight());
+   drawHorizLine((F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), (F32)origin.y);
+   drawVertLine((F32)origin.x, (F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight());
 
    glLineWidth(gDefaultLineWidth);
 }

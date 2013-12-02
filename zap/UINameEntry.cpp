@@ -11,7 +11,7 @@
 #include "UIManager.h"
 
 #include "ClientGame.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 
 #include "Colors.h"
 
@@ -74,7 +74,7 @@ void TextEntryUserInterface::render()
 {
    glColor(Colors::white);
 
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    // Center vertically
    S32 y = TextEntryYPos - 45 ;
@@ -342,8 +342,8 @@ PasswordEntryUserInterface::~PasswordEntryUserInterface()
 
 void PasswordEntryUserInterface::render()
 {
-   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    if(getGame()->getConnectionToServer())
    {

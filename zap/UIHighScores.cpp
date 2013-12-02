@@ -11,7 +11,7 @@
 #include "ClientGame.h"
 #include "gameObjectRender.h"
 #include "masterConnection.h"   
-#include "ScreenInfo.h"          // For canvas dimensions
+#include "DisplayManager.h"          // For canvas dimensions
 
 #include "FontManager.h"
 #include "Colors.h"
@@ -49,8 +49,6 @@ void HighScoresUserInterface::render()
 }
 
 
-extern ScreenInfo gScreenInfo;
-
 void HighScoresUserInterface::renderScores()
 {
    FontManager::pushFontContext(HelpContext);
@@ -76,7 +74,7 @@ void HighScoresUserInterface::renderScores()
    {
       yStart = y;    // For future reference
 
-      S32 x = col == 0 ? horizMargin : gScreenInfo.getGameCanvasWidth() / 2;
+      S32 x = col == 0 ? horizMargin : DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2;
 
       glColor(Colors::palePurple);
 
@@ -85,7 +83,7 @@ void HighScoresUserInterface::renderScores()
 
       // Draw line
       glColor(Colors::gray70);
-      drawHorizLine(x, x + gScreenInfo.getGameCanvasWidth() / 2 - 2 * horizMargin, y);
+      drawHorizLine(x, x + DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 - 2 * horizMargin, y);
       y += 5;
 
 
@@ -117,7 +115,7 @@ void HighScoresUserInterface::renderScores()
 
    glColor(Colors::red80);
 
-   drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - titleSize, titleSize, "The week ends Sunday/Monday at 0:00:00 UTC Time");
+   drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - titleSize, titleSize, "The week ends Sunday/Monday at 0:00:00 UTC Time");
 
    FontManager::popFontContext();
 }
@@ -147,7 +145,7 @@ void HighScoresUserInterface::renderWaitingForScores()
       symbolSet.add(SymbolString(SymbolString::getBlankSymbol(0, 10)));   
       symbolSet.add(SymbolString(SymbolString::getSymbolSpinner(18, &Colors::cyan)));   
 
-      symbolSet.render(gScreenInfo.getGameCanvasWidth() / 2, (gScreenInfo.getGameCanvasHeight() - symbolSet.getHeight()) / 2, AlignmentCenter);
+      symbolSet.render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, (DisplayManager::getScreenInfo()->getGameCanvasHeight() - symbolSet.getHeight()) / 2, AlignmentCenter);
    }
    else     // Let the user know they are not connected to master and shouldn't wait
    {

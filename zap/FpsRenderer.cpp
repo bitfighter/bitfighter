@@ -5,7 +5,7 @@
 
 #include "FpsRenderer.h"
 
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "ClientGame.h"
 #include "FontManager.h"
 #include "barrier.h"
@@ -92,7 +92,7 @@ void FpsRenderer::render(S32 canvasWidth) const
    if(mGame->getLocalPlayerShip())
    {
       Point shipPos = mGame->getLocalPlayerShip()->getPos();
-      Point vis(gScreenInfo.getDrawAreaWidth(), gScreenInfo.getDrawAreaHeight());
+      Point vis(DisplayManager::getScreenInfo()->getDrawAreaWidth(), DisplayManager::getScreenInfo()->getDrawAreaHeight());
       Rect visibleRect(
          shipPos.x - vis.x / 2,
          shipPos.y - vis.y / 2,

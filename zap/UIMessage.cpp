@@ -41,8 +41,8 @@ void MessageUserInterface::onActivate()
 void MessageUserInterface::reset()
 {
    mTitle = (char*)"Message";     // Default title
-   mWidth = gScreenInfo.getGameCanvasWidth() - 200;
-   mHeight = gScreenInfo.getGameCanvasHeight() - 200;
+   mWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth() - 200;
+   mHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight() - 200;
    mFadeTime = 0;          // 0 --> "Hit any key to continue"
    mMessageColor = Colors::white;
    mVertOffset = 0;
@@ -121,8 +121,8 @@ void MessageUserInterface::idle(U32 timeDelta)
 
 void MessageUserInterface::render()
 {
-   const F32 canvasWidth  = (F32)gScreenInfo.getGameCanvasWidth();
-   const F32 canvasHeight = (F32)gScreenInfo.getGameCanvasHeight();
+   const F32 canvasWidth  = (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   const F32 canvasHeight = (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    F32 hInset = F32(canvasHeight - mHeight) / 2;
    F32 wInset = F32(canvasWidth - mWidth) / 2;

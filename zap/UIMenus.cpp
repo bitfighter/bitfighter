@@ -25,7 +25,7 @@
 #include "ServerGame.h"
 #include "gameType.h"            // Can get rid of this with some simple passthroughs
 #include "IniFile.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "Joystick.h"
 #include "JoystickRender.h"
 #include "Colors.h"
@@ -94,7 +94,7 @@ void MenuUserInterface::initialize()
    mAssociatedObject = NULL;
 
    // Max number of menu items we show on screen before we go into scrolling mode -- won't work with mixed size menus
-   mMaxMenuSize = S32((gScreenInfo.getGameCanvasHeight() - 150) / (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)));
+   mMaxMenuSize = S32((DisplayManager::getScreenInfo()->getGameCanvasHeight() - 150) / (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)));
 }
 
 
@@ -222,15 +222,15 @@ S32 MenuUserInterface::getYStart()
    if(getUIManager()->isCurrentUI<GameParamUserInterface>())  // If we're on the GameParams menu, start at a constant position
       return 70;
    else                             // Otherwise, attpempt to center the menu vertically
-      return (gScreenInfo.getGameCanvasHeight() - min(mMenuItems.size(), mMaxMenuSize) * 
+      return (DisplayManager::getScreenInfo()->getGameCanvasHeight() - min(mMenuItems.size(), mMaxMenuSize) * 
              (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL))) / 2 + vertOff;
 }
 
 
 static void renderMenuInstructions(GameSettings *settings)
 {
-   S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
-   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    S32 y = canvasHeight - UserInterface::vertMargin - 20;
    const S32 size = 18;
@@ -286,7 +286,7 @@ static void renderArrow(S32 pos, bool pointingUp)
    static const S32 ARROW_HEIGHT = 20;
    static const S32 ARROW_MARGIN = 5;
 
-   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    S32 y = 0;
    if(pointingUp)    // Up arrow
@@ -326,8 +326,8 @@ void MenuUserInterface::render()
 {
    FontManager::pushFontContext(MenuContext);
 
-   S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
-   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(getGame()->getConnectionToServer())
@@ -412,18 +412,18 @@ void MenuUserInterface::render()
       const S32 textsize = 25;
       const S32 padding = 10;
       const S32 width = getStringWidth(textsize, mFadingNoticeMessage.c_str()) + (4 * padding);  // Extra padding to not collide with bevels
-      const S32 left = (gScreenInfo.getGameCanvasWidth() - width) / 2;
+      const S32 left = (DisplayManager::getScreenInfo()->getGameCanvasWidth() - width) / 2;
       const S32 top = mFadingNoticeVerticalPosition;
       const S32 bottom = top + textsize + (2 * padding);
       const S32 cornerInset = 10;
 
       // Fill
       glColor(Colors::red40, alpha);
-      drawFancyBox(left, top, gScreenInfo.getGameCanvasWidth() - left, bottom, cornerInset, GL_TRIANGLE_FAN);
+      drawFancyBox(left, top, DisplayManager::getScreenInfo()->getGameCanvasWidth() - left, bottom, cornerInset, GL_TRIANGLE_FAN);
 
       // Border
       glColor(Colors::red, alpha);
-      drawFancyBox(left, top, gScreenInfo.getGameCanvasWidth() - left, bottom, cornerInset, GL_LINE_LOOP);
+      drawFancyBox(left, top, DisplayManager::getScreenInfo()->getGameCanvasWidth() - left, bottom, cornerInset, GL_LINE_LOOP);
 
       glColor(Colors::white, alpha);
       drawCenteredString(top + padding, textsize, mFadingNoticeMessage.c_str());
@@ -477,7 +477,7 @@ void MenuUserInterface::onMouseMoved()
 
 S32 MenuUserInterface::getSelectedMenuItem()
 {
-   S32 mouseY = (S32)gScreenInfo.getMousePos()->y;   
+   S32 mouseY = (S32)DisplayManager::getScreenInfo()->getMousePos()->y;   
 
    S32 cumHeight = getYStart();
 
@@ -687,7 +687,7 @@ bool MenuUserInterface::processKeys(InputCode inputCode)
       {
          // Make sure we're actually pointing at a menu item before we process it
          S32 yStart = getYStart();
-         const Point *mousePos = gScreenInfo.getMousePos();
+         const Point *mousePos = DisplayManager::getScreenInfo()->getMousePos();
 
          getSelectedMenuItem();
 
@@ -994,7 +994,7 @@ void MainMenuUserInterface::setNeedToUpgrade(bool needToUpgrade)
 
 void MainMenuUserInterface::render()
 {
-   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    // Draw our Message-Of-The-Day, if we have one
    if(strcmp(mMOTD, ""))
@@ -1044,7 +1044,7 @@ void MainMenuUserInterface::renderExtras()
 {
    glColor(Colors::white);
    const S32 size = 16;
-   drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - size, size, "join us @ www.bitfighter.org");
+   drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - size, size, "join us @ www.bitfighter.org");
 }
 
 
@@ -1283,7 +1283,7 @@ void InputOptionsMenuUserInterface::render()
             symbols.push_back(SymbolString::getBlankSymbol(8));      // Provide a little breathing room
       }
 
-      SymbolString(symbols).render(Point(gScreenInfo.getGameCanvasWidth() / 2, 440));
+      SymbolString(symbols).render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 440));
 
       drawCenteredString(456, 12, "[Debug builds only]");
 
@@ -1750,7 +1750,7 @@ void NameEntryUserInterface::renderExtras()
 {
    const S32 size = 15;
    const S32 gap = 5;
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    const S32 rows = 3;
    S32 row = 0;
@@ -2462,9 +2462,9 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
    // method called WarpMouse that adds the suppression.  At this point, however, the only place we care about this
    // is here so...  well... this works.
 #if SDL_VERSION_ATLEAST(2,0,0)
-   SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, (S32)gScreenInfo.getMousePos()->x, y);
+   SDL_WarpMouseInWindow(DisplayManager::getScreenInfo()->sdlWindow, (S32)DisplayManager::getScreenInfo()->getMousePos()->x, y);
 #else
-   SDL_WarpMouse(gScreenInfo.getMousePos()->x, y);
+   SDL_WarpMouse(DisplayManager::getScreenInfo()->getMousePos()->x, y);
 #endif
    Cursor::disableCursor();
    mIgnoreNextMouseEvent = true;

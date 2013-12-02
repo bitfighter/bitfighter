@@ -7,7 +7,7 @@
 
 #include "ClientGame.h"
 #include "GameSettings.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "Colors.h"
 
 #include "RenderUtils.h"
@@ -126,7 +126,7 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
 
    S32 ypos = 60;
    S32 cmdCol = horizMargin;                                                         // Action column
-   S32 descrCol = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 55;   // Control column
+   S32 descrCol = horizMargin + S32(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.25) + 55;   // Control column
 
    ypos += instructions.render(cmdCol, ypos, UI::AlignmentLeft);
 

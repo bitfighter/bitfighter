@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "AToBScroller.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 #include "ScissorsManager.h"
 
 
@@ -82,7 +82,7 @@ S32 AToBScroller::prepareToRenderFromDisplay(DisplayMode displayMode, S32 top, S
    S32 height = getTransitionPos(fromHeight, toHeight);
 
    scissorsManager.enable(mScrollTimer.getCurrent() > 0, displayMode, 0, top, 
-                          gScreenInfo.getGameCanvasWidth(), getTransitionPos(height, 0));
+                          DisplayManager::getScreenInfo()->getGameCanvasWidth(), getTransitionPos(height, 0));
 
    return top - fromHeight * (1 - mScrollTimer.getFraction());
 }
@@ -98,7 +98,7 @@ S32 AToBScroller::prepareToRenderToDisplay(DisplayMode displayMode, S32 top, S32
 
    S32 vertBuffer = 2;  // A little extra space to avoid clipping lines at the top of our clip area
    scissorsManager.enable(mScrollTimer.getCurrent() > 0, displayMode, 0, top + getTransitionPos(height, 0) - vertBuffer, 
-                          gScreenInfo.getGameCanvasWidth(), getTransitionPos(0, height) + 2 * vertBuffer);
+                          DisplayManager::getScreenInfo()->getGameCanvasWidth(), getTransitionPos(0, height) + 2 * vertBuffer);
 
    return top + fromHeight * mScrollTimer.getFraction();
 }

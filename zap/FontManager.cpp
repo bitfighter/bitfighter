@@ -6,7 +6,7 @@
 #include "FontManager.h"         // Class header
 
 #include "GameSettings.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 
 #include "OpenglUtils.h"         // For various rendering helpers
 #include "stringUtils.h"         // For getFileSeparator()
@@ -404,7 +404,7 @@ void FontManager::renderString(F32 size, const char *string)
 
       // Clamp to range of 0.5 - 1 then multiply by line width (2 by default)
       F32 linewidth =
-            CLAMP(size * gScreenInfo.getPixelRatio() * modelview[0] * 0.05f, 0.5f, 1.0f) * gDefaultLineWidth;
+            CLAMP(size * DisplayManager::getScreenInfo()->getPixelRatio() * modelview[0] * 0.05f, 0.5f, 1.0f) * gDefaultLineWidth;
 
       glLineWidth(linewidth);
 
@@ -426,7 +426,7 @@ void FontManager::renderString(F32 size, const char *string)
       // correct for the pixelRatio scaling, and then generate a texture with twice
       // the resolution we need. This produces crisp, anti-aliased text even after the
       // texture is resampled.
-      F32 k = gScreenInfo.getPixelRatio() * 2.0f;
+      F32 k = DisplayManager::getScreenInfo()->getPixelRatio() * 2.0f;
 
       // Flip upside down because y = -y
       glScalef(1 / k, -1 / k, 1);

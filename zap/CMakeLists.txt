@@ -119,6 +119,7 @@ set(CLIENT_SOURCES
 	ChatHelper.cpp
 	ClientGame.cpp
 	Cursor.cpp
+	DisplayManager.cpp
 	EditorAttributeMenuItemBuilder.cpp
 	EditorPlugin.cpp
 	EditorTeam.cpp

@@ -6,7 +6,7 @@
 #include "RenderUtils.h"
 
 #include "UI.h"
-#include "ScreenInfo.h"
+#include "DisplayManager.h"
 
 #include "MathUtils.h"     // For MIN/MAX def
 #include "OpenglUtils.h"
@@ -27,8 +27,6 @@ F32 gLineWidth1 = 1.0f;
 F32 gDefaultLineWidth = 2.0f;
 F32 gLineWidth3 = 3.0f;
 F32 gLineWidth4 = 4.0f;
-
-extern ScreenInfo gScreenInfo;
 
 
 void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
@@ -223,7 +221,7 @@ S32 drawStringc(const Point &cen, F32 size, const char *string)
 
 S32 drawCenteredString_fixed(S32 y, S32 size, const char *string)
 {
-   return drawCenteredString_fixed(gScreenInfo.getGameCanvasWidth() / 2, y, size, string);
+   return drawCenteredString_fixed(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, y, size, string);
 }
 
 
@@ -231,7 +229,7 @@ S32 drawCenteredString_fixed(S32 y, S32 size, const char *string)
 void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const Color &bodyColor, const Color &keyColor)
 {
    S32 len = getStringWidth(size, str.c_str());
-   S32 x = gScreenInfo.getGameCanvasWidth() / 2 - len / 2;
+   S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 - len / 2;
 
    std::size_t keyStart, keyEnd = 0;
    S32 pos = 0;
@@ -260,9 +258,9 @@ extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
 S32 drawCenteredUnderlinedString(S32 y, S32 size, const char *string)
 {
-   S32 x = gScreenInfo.getGameCanvasWidth() / 2;
+   S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2;
    S32 xpos = drawCenteredString(x, y, size, string);
-   drawHorizLine(xpos, gScreenInfo.getGameCanvasWidth() - xpos, y + size + 5);
+   drawHorizLine(xpos, DisplayManager::getScreenInfo()->getGameCanvasWidth() - xpos, y + size + 5);
 
    return xpos;
 }
@@ -328,7 +326,7 @@ S32 drawCenteredStringf(S32 x, S32 y, S32 size, const char *format, ...)
 // Figure out the first position of our CenteredString
 S32 getCenteredStringStartingPos(S32 size, const char *string)
 {
-   S32 x = gScreenInfo.getGameCanvasWidth() / 2;      // x must be S32 in case it leaks off left side of screen
+   S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2;      // x must be S32 in case it leaks off left side of screen
    x -= getStringWidth(size, string) / 2;
 
    return x;
@@ -373,7 +371,7 @@ S32 drawCenteredString2Colf(S32 y, S32 size, bool leftCol, const char *format, .
    
 S32 get2ColStartingPos(bool leftCol)      // Must be S32 to avoid problems downstream
 {
-   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    return leftCol ? (canvasWidth / 4) : (canvasWidth - (canvasWidth / 4));
 }
 
@@ -384,7 +382,7 @@ S32 get2ColStartingPos(bool leftCol)      // Must be S32 to avoid problems downs
 S32 drawCenteredStringPair(S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
                                           const char *leftStr, const char *rightStr)
 {
-   return drawCenteredStringPair(gScreenInfo.getGameCanvasWidth() / 2, ypos, size, leftColor, rightColor, leftStr, rightStr);
+   return drawCenteredStringPair(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, ypos, size, leftColor, rightColor, leftStr, rightStr);
 }
 
 
@@ -392,7 +390,7 @@ S32 drawCenteredStringPair(S32 ypos, S32 size, const Color &leftColor, const Col
 S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
                                           const char *leftStr, const char *rightStr)
 {
-   S32 xpos2 = getCenteredStringStartingPosf(size, "%s %s", leftStr, rightStr) + xpos - gScreenInfo.getGameCanvasWidth() / 2;
+   S32 xpos2 = getCenteredStringStartingPosf(size, "%s %s", leftStr, rightStr) + xpos - DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2;
 
    return drawStringPair(xpos2, ypos, size, leftColor, rightColor, leftStr, rightStr);
 }
@@ -495,7 +493,7 @@ S32 drawCenteredStringPair2Col(S32 y, S32 size, bool leftCol, const Color &leftC
 // Draw a left-justified string at column # (1-4)
 void drawString4Col(S32 y, S32 size, U32 col, const char *string)
 {
-   drawString(UserInterface::horizMargin + ((gScreenInfo.getGameCanvasWidth() - 2 * UserInterface::horizMargin) / 4 * (col - 1)), y, size, string);
+   drawString(UserInterface::horizMargin + ((DisplayManager::getScreenInfo()->getGameCanvasWidth() - 2 * UserInterface::horizMargin) / 4 * (col - 1)), y, size, string);
 }
 
 

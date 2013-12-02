@@ -81,6 +81,10 @@ public:
    // The following methods return values in VIRTUAL pixels, not accurate in editor
    void setGameCanvasSize(S32 width, S32 height);
    void resetGameCanvasSize();
+
+   S32 getDefaultCanvasWidth() const;
+   S32 getDefaultCanvasHeight() const;
+
    S32 getGameCanvasWidth() const;
    S32 getGameCanvasHeight() const;
 
@@ -117,8 +121,6 @@ public:
 #endif
 
 };
-
-extern ScreenInfo gScreenInfo;
 
 };
 

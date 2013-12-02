@@ -8,10 +8,6 @@
 namespace Zap {
 
 
-// Our global screenInfo object
-ScreenInfo gScreenInfo;
-
-
 ScreenInfo::ScreenInfo()
 {
    MIN_SCALING_FACTOR = 0.15f;
@@ -148,6 +144,10 @@ void ScreenInfo::resetGameCanvasSize()
    setGameCanvasSize(GAME_WIDTH, GAME_HEIGHT);
 }  
 
+S32 ScreenInfo::getDefaultCanvasWidth()  const { return GAME_WIDTH;  }
+S32 ScreenInfo::getDefaultCanvasHeight() const { return GAME_HEIGHT; }
+
+// These only change from the default when in the editor
 S32 ScreenInfo::getGameCanvasWidth()  const { return mGameCanvasWidth;  }     // canvasWidth, usually 800
 S32 ScreenInfo::getGameCanvasHeight() const { return mGameCanvasHeight; }     // canvasHeight, usually 600
                                       
