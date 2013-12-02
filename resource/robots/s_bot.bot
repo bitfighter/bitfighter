@@ -50,7 +50,7 @@ function main()
         Weapon.Phaser,
         Weapon.Seeker,
         Weapon.Triple,
-        Module.Armor,
+        Module.Cloak,
         Module.Shield
     }
     
