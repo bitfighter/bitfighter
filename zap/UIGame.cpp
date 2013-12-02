@@ -2829,8 +2829,8 @@ void GameUserInterface::renderGameCommander()
    glTranslatef(-offset.x, -offset.y, 0);
 
    // zoomFrac == 1.0 when fully zoomed out to cmdr's map
-   if(zoomFrac < 0.95)
-      drawStars(mStars, mStarColors, NumStars, 1 - zoomFrac, offset, modVisSize);
+   if(zoomFrac < 0.5)
+      renderStars(mStars, mStarColors, NumStars, 1 - zoomFrac, offset, modVisSize);
  
 
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
