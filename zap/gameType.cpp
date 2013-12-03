@@ -1149,7 +1149,9 @@ void GameType::onLevelLoaded()
    mLevelHasFlagSpawns       = gridDatabase->hasObjectOfType(FlagSpawnTypeNumber);
 
    TNLAssert(dynamic_cast<ServerGame *>(mGame), "Wrong game here!");
-   static_cast<ServerGame *>(mGame)->startAllBots();           // Cycle through all our bots and start them up
+
+   //--> bots should be started when added to game; with this line, they are started twice!
+   //static_cast<ServerGame *>(mGame)->startAllBots();           // Cycle through all our bots and start them up  --> bots should be started when added to game
 }
 
 

@@ -1055,12 +1055,12 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
 // Only called from GameType::onLevelLoaded()
 void ServerGame::startAllBots()
 {   
-   for(S32 i = 0; i < mRobots.size(); i++)
-      if(!mRobots[i]->start())
-      {
-         mRobots.erase_fast(i);
-         i--;
-      }
+   //for(S32 i = 0; i < mRobots.size(); i++)
+   //   if(!mRobots[i]->start())
+   //   {
+   //      mRobots.erase_fast(i);
+   //      i--;
+   //   }
 }
 
 
