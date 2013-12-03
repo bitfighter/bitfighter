@@ -174,8 +174,8 @@ bool Robot::start()
 
    mSubscriptions[EventManager::TickEvent] = true;
 
-   string name = runGetName();                                             // Run bot's getName function
-   mClientInfo->setName(getGame()->makeUnique(name.c_str()).c_str());  // Make sure name is unique
+   string name = runGetName();                                          // Run bot's getName function
+   mClientInfo->setName(getGame()->makeUnique(name.c_str()).c_str());   // Make sure name is unique
 
    mHasSpawned = true;
 
