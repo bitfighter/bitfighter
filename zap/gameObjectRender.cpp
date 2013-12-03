@@ -3355,7 +3355,6 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
    glEnableClientState(GL_VERTEX_ARRAY);
    //glEnableClientState(GL_COLOR_ARRAY);
 
-   //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glEnable(GL_BLEND);
    glColor(Colors::gray60, alpha);
 
@@ -3371,9 +3370,6 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
    S32 fx2 =  1 - xDist;
    S32 fy1 = -1 - yDist;
    S32 fy2 =  1 - yDist;
-
-
-   //glDisable(GL_BLEND);
 
    for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2; xPage++)
       for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2; yPage++)
@@ -3392,17 +3388,7 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
          glPopMatrix();
       }
 
-   //glEnable(GL_BLEND);
-
-   //glDisableClientState(GL_COLOR_ARRAY);
    glDisableClientState(GL_VERTEX_ARRAY);
-
-   if(alpha < 1.0f)
-   {
-      ////glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      //glColor(Colors::black, .25);
-      //drawFilledRect(0, 0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
-   }
 }
 
 
