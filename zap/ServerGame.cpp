@@ -968,7 +968,7 @@ bool ServerGame::loadLevel()
 
    // Check after script, script might add Teams
    if(getGameType()->makeSureTeamCountIsNotZero())
-      logprintf(LogConsumer::LogWarning, "Warning: Missing Team in %s", mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
+      logprintf(LogConsumer::LogLevelError, "Warning: Missing Team in %s", mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
 
    getGameType()->onLevelLoaded();
 
