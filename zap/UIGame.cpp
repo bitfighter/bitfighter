@@ -1844,7 +1844,9 @@ Move *GameUserInterface::getCurrentMove()
 
 void GameUserInterface::resetLevelInfoDisplayTimer()
 {
-   mLevelInfoDisplayer.onActivated();
+   if(!mLevelInfoDisplayer.isActive())
+      mLevelInfoDisplayer.onActivated();
+
    mLevelInfoDisplayer.resetDisplayTimer();
 }
 

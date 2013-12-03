@@ -6,7 +6,6 @@
 #include "UILevelInfoDisplayer.h"   // Header
 
 #include "DisplayManager.h"
-#include "Colors.h"
 #include "game.h"
 #include "ClientGame.h"
 #include "UI.h"                     // Only here for the margins
@@ -15,6 +14,9 @@
 #include "FontManager.h"
 #include "SymbolShape.h"
 #include "UIGame.h"
+
+#include "Colors.h"
+#include "Intervals.h"
 
 #include "stringUtils.h"
 #include "OpenglUtils.h"               
@@ -29,7 +31,7 @@ namespace UI {
 // Constructor
 LevelInfoDisplayer::LevelInfoDisplayer()
 {
-   // Do nothing
+   mDisplayTimer.setPeriod(SIX_SECONDS);
 }
 
 // Destructor
@@ -41,7 +43,7 @@ LevelInfoDisplayer::~LevelInfoDisplayer()
 
 void LevelInfoDisplayer::resetDisplayTimer()
 {
-   mDisplayTimer.reset(6 * 1000);
+   mDisplayTimer.reset();
 }
 
 
