@@ -290,7 +290,7 @@ public:
 
    bool isSuspended() const;
 
-
+   virtual string getCurrentLevelFileName() const;
    virtual U32 getMaxPlayers() const;
    virtual bool isTestServer() const;
    virtual bool isDedicated() const;

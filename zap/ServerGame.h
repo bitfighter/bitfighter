@@ -168,17 +168,17 @@ public:
 
    void onConnectedToMaster();
 
-   void startAllBots();                         // Loop through all our bots and run thier main() functions
+   void startAllBots();                            // Loop through all our bots and run thier main() functions
    void addBot(Robot *robot);
    S32 getBotCount() const;
 
    StringTableEntry getLevelNameFromIndex(S32 indx);
-   S32 getAbsoluteLevelIndex(S32 indx);         // Figures out the level index if the input is a relative index
+   S32 getAbsoluteLevelIndex(S32 indx);            // Figures out the level index if the input is a relative index
 
-   string getCurrentLevelFileName();            // Return filename of level currently in play  
-   StringTableEntry getCurrentLevelName();      // Return name of level currently in play
-   GameTypeId getCurrentLevelType();            // Return type of level currently in play
-   StringTableEntry getCurrentLevelTypeName();  // Return name of type of level currently in play
+   string getCurrentLevelFileName() const;         // Return filename of level currently in play  
+   StringTableEntry getCurrentLevelName() const;   // Return name of level currently in play
+   GameTypeId getCurrentLevelType();               // Return type of level currently in play
+   StringTableEntry getCurrentLevelTypeName();     // Return name of type of level currently in play
 
    bool isServer() const;
    void idle(U32 timeDelta);

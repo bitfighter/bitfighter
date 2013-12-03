@@ -336,12 +336,30 @@ void Robot::kill()
 // Need this, as this may come from level or levelgen
 bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 {
-   string unused_String;
-   return processArguments(argc, argv, game, unused_String); 
+   string errorMessage;
+
+   bool retcode = processArguments(argc, argv, game, errorMessage);
+
+   if(errorMessage != "")
+   {
+      string line;
+      
+      for(S32 i = 0; i < argc; i++)
+      {
+         if(i > 0)
+            line += " ";
+         line += argv[i];
+      }
+
+      logprintf(LogConsumer::LogLevelError, "Levelcode error in level %s, line \"%s\":\n\t%s",
+                gServerGame->getCurrentLevelFileName().c_str(), line.c_str(), errorMessage.c_str());
+   }
+
+   return retcode;
 }
 
 
-// Expect <team> <bot>
+// Expect [team] <bot> [bot args]
 bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &errorMessage)
 {
    if(argc <= 1)
@@ -359,7 +377,6 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
       }
    }
    
-
    string scriptName;
 
    if(argc >= 2)
