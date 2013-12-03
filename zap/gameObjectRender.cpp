@@ -392,7 +392,7 @@ void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 leng
 }
 
 
-static void renderActiveModules(F32 alpha, F32 radius, U32 sensorTime, bool shieldActive, bool sensorActive, bool repairActive,
+static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bool shieldActive, bool sensorActive, bool repairActive,
       bool hasArmor)
 {
    // Armor
@@ -513,7 +513,7 @@ void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 
    renderVertexArray(shipShapeInfo->outerHullPoints, shipShapeInfo->outerHullPointCount, GL_LINE_LOOP);
 
    // Now render any module states
-   renderActiveModules(alpha, radius, sensorTime, shieldActive, sensorActive, repairActive, hasArmor);
+   renderActiveModuleOverlays(alpha, radius, sensorTime, shieldActive, sensorActive, repairActive, hasArmor);
 }
 
 
