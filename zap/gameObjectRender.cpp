@@ -392,8 +392,8 @@ void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 leng
 }
 
 
-static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bool shieldActive, bool sensorActive, bool repairActive,
-      bool hasArmor)
+static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bool shieldActive, 
+                                       bool sensorActive, bool repairActive, bool hasArmor)
 {
    // Armor
    if(hasArmor)
