@@ -344,7 +344,7 @@ U32 TextItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
 void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   char txt[MAX_TEXTITEM_LEN];
+   char txt[MAX_TEXTITEM_LEN+1];
 
    Point pos, dir;
 
