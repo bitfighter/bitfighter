@@ -656,7 +656,7 @@ void InstructionsUserInterface::renderModulesPage()
 
          case 4:     // Repair
             {
-               F32 health = (getGame()->getCurrentTime() & 0x7FF) * 0.0005f;
+               F32 health = (Platform::getRealMilliseconds() & 0x7FF) * 0.0005f;
 
                F32 alpha = 1.0;
                renderShip(ShipShape::Normal, &Colors::blue, alpha, thrusts, health, (F32)Ship::CollisionRadius, 0, false, false, true, false);
@@ -664,14 +664,15 @@ void InstructionsUserInterface::renderModulesPage()
             break;
 
          case 5:     // Sensor
-            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, getGame()->getCurrentTime(), false, true, false, false);
+            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, Platform::getRealMilliseconds(), 
+                       false, true, false, false);
             break;
 
          // skip 6 for 2nd line of sensor
 
          case 7:     // Cloak
             {
-               U32 time = getGame()->getCurrentTime();
+               U32 time = Platform::getRealMilliseconds();
                F32 frac = F32(time & 0x3FF);
                F32 alpha;
                if((time & 0x400) != 0)
@@ -771,19 +772,19 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       switch(i)
       {
          case 0:
-            renderProjectile(Point(0,0), 0, getGame()->getCurrentTime());
+            renderProjectile(Point(0,0), 0, Platform::getRealMilliseconds());
             break;
          case 1:
-            renderProjectile(Point(0,0), 1, getGame()->getCurrentTime());
+            renderProjectile(Point(0,0), 1, Platform::getRealMilliseconds());
             break;
          case 2:
-            renderProjectile(Point(0,0), 2, getGame()->getCurrentTime());
+            renderProjectile(Point(0,0), 2, Platform::getRealMilliseconds());
             break;
          case 3:
             renderGrenade(Point(0,0), 1);
             break;
          case 4:
-            renderSeeker(Point(0,0), 0, 400, getGame()->getCurrentTime());
+            renderSeeker(Point(0,0), 0, 400, Platform::getRealMilliseconds());
             break;
          case 5:     // Blank
             break;
@@ -834,7 +835,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
          case 18:
             {
                Vector<Point> dummy;
-               renderTeleporter(Point(0,0), 0, true, getGame()->getCurrentTime(), 1, 1, (F32)Teleporter::TELEPORTER_RADIUS, 1, &dummy);
+               renderTeleporter(Point(0,0), 0, true, Platform::getRealMilliseconds(), 1, 1, (F32)Teleporter::TELEPORTER_RADIUS, 1, &dummy);
             }
             break;
          case 19:
@@ -868,7 +869,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                Triangulate::Process(o, f);
 
                renderNexus(&o, &f, findCentroid(o), angleOfLongestSide(o), 
-                                       getGame()->getCurrentTime() % 5000 > 2500, 0);
+                                       Platform::getRealMilliseconds() % 5000 > 2500, 0);
             }
             break;
 
@@ -890,7 +891,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 
          case 23:    // Asteroid... using goofball factor to keep out of sync with Nexus graphic
             renderAsteroid(Point(0,-10), 
-                     (S32)(getGame()->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7f);    
+                     (S32)(Platform::getRealMilliseconds() / 2891) % Asteroid::getDesignCount(), .7f);    
             break;
 
          case 24:    // TestItem
@@ -928,7 +929,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                Vector<Point> speedZoneRenderPoints, outlinePoints;
                SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0), speedZoneRenderPoints, outlinePoints);
 
-               renderSpeedZone(speedZoneRenderPoints, getGame()->getCurrentTime());
+               renderSpeedZone(speedZoneRenderPoints, Platform::getRealMilliseconds());
             }
             break;
 

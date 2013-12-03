@@ -978,7 +978,7 @@ void drawFourArrows(const Point &pos)
 
 
 // TODO: Document me better!  Especially the nerdy math stuff
-void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha,
+void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha,
                       const Vector<Point> *dests, U32 trackerCount)
 {
    const S32 NumColors = 6;
