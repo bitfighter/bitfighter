@@ -2594,23 +2594,12 @@ const char *GameUserInterface::getChatMessage()
 }
 
 
-// Some reusable containers
+// Some reusable containers --> will probably need to become non-static if we have more than one clientGame active
 static Point screenSize, visSize, visExt;
 static Vector<DatabaseObject *> rawRenderObjects;
 static Vector<BfObject *> renderObjects;
 static Vector<BotNavMeshZone *> renderZones;
 
-
-static ServerGame *getLocalServerGame(ClientGame *game)
-{
-   if(game->getConnectionToServer())
-   {
-      NetConnection *netconn = game->getConnectionToServer()->getRemoteConnectionObject();
-      if(netconn)
-         return ((GameConnection*)netconn)->getServerGame();
-   }
-	return NULL;
-}
 
 static void fillRenderZones()
 {
@@ -2618,6 +2607,7 @@ static void fillRenderZones()
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
       renderZones.push_back(static_cast<BotNavMeshZone *>(rawRenderObjects[i]));
 }
+
 
 // Fills renderZones for drawing botNavMeshZones
 static void populateRenderZones(ClientGame *game, const Rect *extentRect = NULL)
@@ -2630,13 +2620,14 @@ static void populateRenderZones(ClientGame *game, const Rect *extentRect = NULL)
    fillRenderZones();
 }
 
+
 static void renderBotPaths(ClientGame *game, Vector<BfObject *> &renderObjects)
 {
-   if(ServerGame *serverGame = getLocalServerGame(game))
-   {
+   ServerGame *serverGame = game->getServerGame();
+
+   if(serverGame)
       for(S32 i = 0; i < serverGame->getBotCount(); i++)
          renderObjects.push_back(serverGame->getBot(i));
-   }
 }
 
 

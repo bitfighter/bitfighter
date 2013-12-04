@@ -79,6 +79,8 @@ public:
    void joinLocalGame(GameNetInterface *remoteInterface);
    void joinRemoteGame(Address remoteAddress, bool isFromMaster);
 
+   ServerGame *getServerGame() const;
+
    void closeConnectionToGameServer();
 
    //UserInterfaceData *mUserInterfaceData;

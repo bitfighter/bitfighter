@@ -168,6 +168,26 @@ void ClientGame::closeConnectionToGameServer()
 }
 
 
+extern ServerGame *gServerGame;     // Only needed for assert below
+
+// Returns server game
+ServerGame *ClientGame::getServerGame() const
+{
+   ServerGame *serverGame = NULL;
+
+   if(getConnectionToServer())
+   {
+      NetConnection *netconn = getConnectionToServer()->getRemoteConnectionObject();
+      if(netconn)
+         serverGame = ((GameConnection*)netconn)->getServerGame();
+   }
+
+   TNLAssert(serverGame == gServerGame, "Should be the same!");
+
+   return serverGame;
+}
+
+
 void ClientGame::onConnectedToMaster()
 {
    Parent::onConnectedToMaster();
