@@ -138,6 +138,7 @@ public:
    ClientGame *getClientGame();
    void setClientGame(ClientGame *game);
 #endif
+   ServerGame *getServerGame();
 
    Timer mSwitchTimer;           // Timer controlling when player can switch teams after an initial switch
 

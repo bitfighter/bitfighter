@@ -138,6 +138,10 @@ void GameConnection::setClientGame(ClientGame *game)
 }
 #endif
 
+ServerGame *GameConnection::getServerGame()
+{
+   return mServerGame;
+}
 
 // Clears/initializes some things between levels
 void GameConnection::resetConnectionStatus()

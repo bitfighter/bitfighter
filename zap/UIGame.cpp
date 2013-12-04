@@ -26,6 +26,7 @@
 #include "Console.h"             // Our console object
 #include "DisplayManager.h"
 #include "ClientGame.h"
+#include "ServerGame.h"
 #include "Colors.h"
 #include "Cursor.h"
 #include "ScissorsManager.h"
@@ -2600,6 +2601,17 @@ static Vector<BfObject *> renderObjects;
 static Vector<BotNavMeshZone *> renderZones;
 
 
+static ServerGame *getLocalServerGame(ClientGame *game)
+{
+   if(game->getConnectionToServer())
+   {
+      NetConnection *netconn = game->getConnectionToServer()->getRemoteConnectionObject();
+      if(netconn)
+         return ((GameConnection*)netconn)->getServerGame();
+   }
+	return NULL;
+}
+
 static void fillRenderZones()
 {
    renderZones.clear();
@@ -2608,19 +2620,23 @@ static void fillRenderZones()
 }
 
 // Fills renderZones for drawing botNavMeshZones
-static void populateRenderZones()
+static void populateRenderZones(ClientGame *game, const Rect *extentRect = NULL)
 {
    rawRenderObjects.clear();
-   BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
+   if(extentRect)
+      BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, *extentRect);
+   else
+      BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
    fillRenderZones();
 }
 
-
-static void populateRenderZones(const Rect extentRect)
+static void renderBotPaths(ClientGame *game, Vector<BfObject *> &renderObjects)
 {
-   rawRenderObjects.clear();
-   BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, extentRect);
-   fillRenderZones();
+   if(ServerGame *serverGame = getLocalServerGame(game))
+   {
+      for(S32 i = 0; i < serverGame->getBotCount(); i++)
+         renderObjects.push_back(serverGame->getBot(i));
+   }
 }
 
 
@@ -2685,11 +2701,10 @@ void GameUserInterface::renderGameNormal()
    // the game down with the normal process of transmitting zones from server to client.  The result is that we can only see zones on our local
    // server.
    if(mDebugShowMeshZones)
-      populateRenderZones(extentRect);
+      populateRenderZones(getGame(), &extentRect);
 
    if(mShowDebugBots)
-      for(S32 i = 0; i < getGame()->getBotCount(); i++)
-         renderObjects.push_back(getGame()->getBot(i));
+      renderBotPaths(getGame(), renderObjects);
 
    renderObjects.sort(renderSortCompare);
 
@@ -2852,12 +2867,11 @@ void GameUserInterface::renderGameCommander()
 
    // Add extra bots if we're showing them
    if(mShowDebugBots)
-      for(S32 i = 0; i < getGame()->getBotCount(); i++)
-         renderObjects.push_back(getGame()->getBot(i));
+      renderBotPaths(getGame(), renderObjects);
 
    // If we're drawing bot zones, get them now (put them in the renderZones vector)
    if(mDebugShowMeshZones)
-      populateRenderZones();
+      populateRenderZones(getGame());
 
    if(ship)
    {

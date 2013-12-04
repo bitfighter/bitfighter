@@ -481,7 +481,7 @@ void Robot::renderLayer(S32 layerIndex)
       Parent::renderLayer(layerIndex);
 
    else if(layerIndex == 1 && flightPlan.size() != 0)    // Client hosting is rendering server objects
-      renderFlightPlan(getActualPos(), flightPlan[0], flightPlan);
+      renderFlightPlan(getActualPos(), flightPlan.last(), flightPlan);
 #endif
 }
 
