@@ -154,17 +154,19 @@ void LevelDatabaseDownloadThread::finish()
       if(levelGenFileName.length() != 0)
          mGame->displaySuccessMessage("Saved to %s", levelGenFileName.c_str());
 
-      if(gServerGame)
+      ServerGame *serverGame = mGame->getServerGame();
+
+      if(serverGame)
       {
          LevelInfo levelInfo;
          levelInfo.filename = levelFileName;
          levelInfo.folder = levelDir;
 
          string filePath = joindir(levelDir, levelFileName);
-         if(gServerGame->populateLevelInfoFromSource(filePath, levelInfo))
+         if(serverGame->populateLevelInfoFromSource(filePath, levelInfo))
          {
-            gServerGame->addLevel(levelInfo);
-            gServerGame->sendLevelListToLevelChangers(string("Level ") + levelInfo.mLevelName.getString() + " added to server");
+            serverGame->addLevel(levelInfo);
+            serverGame->sendLevelListToLevelChangers(string("Level ") + levelInfo.mLevelName.getString() + " added to server");
          }
       }
    }

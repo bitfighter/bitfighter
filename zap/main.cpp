@@ -266,41 +266,42 @@ void shutdownBitfighter(ServerGame *serverGame);    // Forward declaration
 
 
 // There is a lot of weird ickiness in this function
-void gameIdle(U32 timeDelta)
+// This function could be moved anywhere... onto Game?
+void gameIdle(const Vector<ClientGame *> &clientGames, ServerGame *serverGame, U32 timeDelta)
 {
-   // Don't idle games during level load... if gServerGame exists, it means we're hosting locally
-   if(!(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels))    
+   // Don't idle games during level load... if serverGame exists, it means we're hosting locally
+   if(!(serverGame && serverGame->hostingModePhase == ServerGame::LoadingLevels))    
    {
 #ifndef ZAP_DEDICATED
-      for(S32 i = 0; i < gClientGames.size(); i++)
-         gClientGames[i]->idle(timeDelta);
+      for(S32 i = 0; i < clientGames.size(); i++)
+         clientGames[i]->idle(timeDelta);
 #endif
 
-      if(gServerGame)
-         gServerGame->idle(timeDelta);
+      if(serverGame)
+         serverGame->idle(timeDelta);
    }
 }
 
 
 // If the server game exists, and is shutting down, close any ClientGame connections we might have to it, then delete it.
 // If there are no client games, delete it and return to the OS.
-void checkIfServerGameIsShuttingDown(U32 timeDelta)
+void checkIfServerGameIsShuttingDown(const Vector<ClientGame *> &clientGames, ServerGame *serverGame, U32 timeDelta)
 {
-   if(gServerGame && gServerGame->isReadyToShutdown(timeDelta))         
+   if(serverGame && serverGame->isReadyToShutdown(timeDelta))
    {
 #ifndef ZAP_DEDICATED
-      for(S32 i = 0; i < gClientGames.size(); i++)
-         gClientGames[i]->closeConnectionToGameServer();    // ...disconnect any local clients
+      for(S32 i = 0; i < clientGames.size(); i++)
+         clientGames[i]->closeConnectionToGameServer();    // ...disconnect any local clients
 
-      if(gClientGames.size() > 0)          // If there are any clients running...
+      if(clientGames.size() > 0)       // If there are any clients running...
       {
-         delete gServerGame;              // ...purge gServerGame (leaving the clients running)
+         delete serverGame;            // ...purge serverGame (leaving the clients running)
          gServerGame = NULL;
       }
       else                                
 #endif
          // Either we have no clients, or this is a dedicated build so...
-         shutdownBitfighter(gServerGame);    // ...shut down the whole shebang, return to OS, never come back
+         shutdownBitfighter(serverGame);    // ...shut down the whole shebang, return to OS, never come back
    }
 }
 
@@ -353,8 +354,8 @@ void idle()
    if( ( dedicated && integerTime >= S32(1000 / settings->getIniSettings()->maxDedicatedFPS)) || 
        (!dedicated && integerTime >= S32(1000 / settings->getIniSettings()->maxFPS)) )
    {
-      checkIfServerGameIsShuttingDown(U32(integerTime));
-      gameIdle(U32(integerTime));
+      checkIfServerGameIsShuttingDown(gClientGames, gServerGame, U32(integerTime));
+      gameIdle(gClientGames, gServerGame, U32(integerTime));
 
 #ifndef ZAP_DEDICATED
       if(!dedicated)
@@ -471,7 +472,6 @@ void shutdownBitfighter(ServerGame *serverGame)
    {
       settings = serverGame->getSettings();
       delete serverGame;     // Destructor terminates connection to master
-      // gServerGame = NULL;  <== does nothing, really, as nothing below here refers to gServerGame...
    }
 
 

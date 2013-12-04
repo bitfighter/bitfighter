@@ -67,7 +67,7 @@ BotNavMeshZone::~BotNavMeshZone()
 }
 
 
-// Called when gServerGame is instantiated
+// Called when a ServerGame is instantiated
 void BotNavMeshZone::createBotZoneDatabase()
 {
    TNLAssert(botZoneDatabase == NULL, "Expected botZoneDatabase to be NULL here!");
@@ -75,7 +75,7 @@ void BotNavMeshZone::createBotZoneDatabase()
 }
 
 
-// Called when gServerGame is deleted
+// Called when a ServerGame is deleted
 void BotNavMeshZone::deleteBotZoneDatabase()
 {
    delete botZoneDatabase;

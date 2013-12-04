@@ -461,9 +461,11 @@ void MenuUserInterface::onMouseMoved()
 
    Parent::onMouseMoved();
 
+   ServerGame *serverGame = getGame()->getServerGame();
+
    // Really only matters when starting to host game... don't want to be able to change menu items while the levels are loading.
    // This is purely an aesthetic issue, a minor irritant.
-   if(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels)
+   if(serverGame && serverGame->hostingModePhase == ServerGame::LoadingLevels)
       return;
 
    itemSelectedWithMouse = true;
@@ -575,18 +577,20 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode)
    mRepeatMode = mKeyDown;
    mKeyDown = true;
 
+   ServerGame *serverGame = getGame()->getServerGame();
+
    // Handle special case of keystrokes during hosting preparation phases
-   if(gServerGame && (gServerGame->hostingModePhase == ServerGame::LoadingLevels || 
-                      gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels))
+   if(serverGame && (serverGame->hostingModePhase == ServerGame::LoadingLevels ||
+                     serverGame->hostingModePhase == ServerGame::DoneLoadingLevels))
    {
       if(inputCode == KEY_ESCAPE)     // Can only get here when hosting
       {
-         gServerGame->hostingModePhase = ServerGame::NotHosting;
+         serverGame->hostingModePhase = ServerGame::NotHosting;
          //getUIManager()->getHostMenuUserInterface()->clearLevelLoadDisplay();
          getGame()->closeConnectionToGameServer();
 
-         delete gServerGame;
-         gServerGame = NULL;
+         delete serverGame;
+         serverGame = NULL;
       }
 
       // All other keystrokes will be ignored
@@ -919,11 +923,9 @@ static void creditsSelectedCallback(ClientGame *game, U32 unused)
 }
 
 
-extern ServerGame *gServerGame;
-
 static void quitSelectedCallback(ClientGame *game, U32 unused)
 {
-   shutdownBitfighter(gServerGame);
+   shutdownBitfighter(game->getServerGame());
 }
 
 //////////
@@ -1066,7 +1068,7 @@ void MainMenuUserInterface::showUpgradeAlert()
 
 void MainMenuUserInterface::onEscape()
 {
-   shutdownBitfighter(gServerGame);    // Quit!
+   shutdownBitfighter(getGame()->getServerGame());    // Quit!
 }
 
 
@@ -1790,7 +1792,7 @@ void NameEntryUserInterface::renderExtras()
 // Save options to INI file, and return to our regularly scheduled program
 void NameEntryUserInterface::onEscape()
 {
-   shutdownBitfighter(gServerGame);
+   shutdownBitfighter(getGame()->getServerGame());
 }
 
 
@@ -1819,6 +1821,8 @@ void HostMenuUserInterface::onActivate()
    setupMenus();
 }
 
+
+extern ServerGame *gServerGame;
 
 static void startHostingCallback(ClientGame *game, U32 unused)
 {
