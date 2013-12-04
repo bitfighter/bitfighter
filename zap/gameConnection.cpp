@@ -1333,6 +1333,17 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
    LevelInfo levelInfo;
    LevelSource::getLevelInfoFromCodeChunk((char *)leveldata, levelsize, levelInfo);
 
+   if(isServer && levelgensize == 0 && levelInfo.mScriptFileName.length() != 0)
+   {
+      if(isServer)
+      {
+         s2cDisplayErrorMessage("!!! LevelGen not uploaded, does Script name end with .levelgen ?"); // for existing client release 019
+         return;
+      }
+      else
+         s2cDisplayErrorMessage_remote("!!! Levelgen not downloaded, downloaded level needs levelgen");
+   }
+
    string titleName = makeFilenameFromString(levelInfo.mLevelName.getString());
    string filename = (isServer ? UploadPrefix : DownloadPrefix) + titleName + ".level";
    string filenameLevelgen = (isServer ? UploadPrefix : DownloadPrefix) + titleName + ".levelgen";
@@ -1527,6 +1538,21 @@ bool GameConnection::TransferLevelFile(const char *filename)
          FolderManager *folderManager = mSettings->getFolderManager();
          string filename1 = strictjoindir(folderManager->levelDir, levelInfo.mScriptFileName);
          f = fopen(filename1.c_str(), "rb");
+
+         if(!f)
+         {
+            filename1 += ".levelgen"; // Script line missing ".levelgen"?
+            f = fopen(filename1.c_str(), "rb");
+            if(!f)
+            {
+               if(isInitiator()) // isClient
+               {
+                  s2cDisplayErrorMessage_remote("Unable to find LevelGen");
+                  mPendingTransferData.deleteAndClear();
+                  return false;
+               }
+            }
+         }
       }
       else
          f = NULL;
