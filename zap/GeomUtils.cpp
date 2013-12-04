@@ -883,9 +883,9 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 static const F32 CLIPPER_SCALE_FACT = 1000.0f;
 static const F32 CLIPPER_SCALE_FACT_INVERSE = 0.001f;
 
-Polygons upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons) 
+Paths upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons)
 {
-   Polygons outputPolygons;
+   Paths outputPolygons;
 
    outputPolygons.resize(inputPolygons.size());
 
@@ -902,9 +902,9 @@ Polygons upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons
 
 
 // Same as above, using slightly different input structure
-Polygons upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons) 
+Paths upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons)
 {
-   Polygons outputPolygons;
+   Paths outputPolygons;
 
    outputPolygons.resize(inputPolygons.size());
 
@@ -920,7 +920,7 @@ Polygons upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons)
 }
 
 
-Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons) 
+Vector<Vector<Point> > downscaleClipperPoints(const Paths &inputPolygons)
 {
    Vector<Vector<Point> > outputPolygons;
 
@@ -1017,17 +1017,16 @@ void polyMeshToPolygons(const rcPolyMesh &mesh, Vector<Vector<Point> > &result)
  */
 bool clipPolygonsAsTree(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, PolyTree &solution)
 {
-   Polygons upscaledSubject = upscaleClipperPoints(subject);
-   Polygons upscaledClip = upscaleClipperPoints(clip);
+   Paths upscaledSubject = upscaleClipperPoints(subject);
+   Paths upscaledClip = upscaleClipperPoints(clip);
    Clipper clipper;
 
    try  // there is a "throw" in AddPolygon
    {
-      clipper.AddPolygons(upscaledSubject, ptSubject);
+      clipper.AddPaths(upscaledSubject, ptSubject, true);
+
       if(clip.size() > 0)
-      {
-         clipper.AddPolygons(upscaledClip, ptClip);
-      }
+         clipper.AddPaths(upscaledClip, ptClip, true);
    }
    catch(...)
    {
@@ -1083,8 +1082,8 @@ bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const 
    else
    {
       // otherwise no holes were found, so just downscale the result
-      Polygons convertedSolution;
-      PolyTreeToPolygons(solution, convertedSolution);
+      Paths convertedSolution;
+      PolyTreeToPaths(solution, convertedSolution);
       result = downscaleClipperPoints(convertedSolution);
    }
 
@@ -1101,12 +1100,12 @@ bool triangulate(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &re
 {
    Vector<Vector<Point> > cleanedInput;
    splitSelfIntersectingPolys(input, cleanedInput);
-   Polygons upscaledInput = upscaleClipperPoints(cleanedInput);
+   Paths upscaledInput = upscaleClipperPoints(cleanedInput);
    Clipper clipper;
 
-   try  // there is a "throw" in AddPolygon
+   try  // there is a "throw" in AddPaths
    {
-      clipper.AddPolygons(upscaledInput, ptSubject);
+      clipper.AddPaths(upscaledInput, ptSubject, true);
    }
    catch(...)
    {
@@ -1267,15 +1266,15 @@ bool polyganize(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &out
 // Use Clipper to merge inputPolygons, placing the result in outputPolygons
 bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vector<Point> > &outputPolygons)
 {
-   Polygons input = upscaleClipperPoints(inputPolygons);
-   Polygons solution;
+   Paths input = upscaleClipperPoints(inputPolygons);
+   Paths solution;
 
    // Fire up clipper and union!
    Clipper clipper;
 
    try  // there is a "throw" in AddPolygon
    {
-      clipper.AddPolygons(input, ptSubject);
+      clipper.AddPaths(input, ptSubject, true);
    }
    catch(...)
    {
@@ -1295,14 +1294,14 @@ bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vecto
 // NOTE: this does NOT downscale the Clipper points.  You must do this afterwards
 bool mergePolysToPolyTree(const Vector<Vector<Point> > &inputPolygons, PolyTree &solution)
 {
-   Polygons input = upscaleClipperPoints(inputPolygons);
+   Paths input = upscaleClipperPoints(inputPolygons);
 
    // Fire up clipper and union!
    Clipper clipper;
 
    try  // there is a "throw" in AddPolygon
    {
-      clipper.AddPolygons(input, ptSubject);
+      clipper.AddPaths(input, ptSubject, true);
    }
    catch(...)
    {
@@ -1346,13 +1345,14 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
 
 void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
 {
-   Polygons polygons = upscaleClipperPoints(inputPolys);
+   Paths polygons = upscaleClipperPoints(inputPolys);
 
    // Call Clipper to do the dirty work
-   OffsetPolygons(polygons, polygons, offset * CLIPPER_SCALE_FACT);
+   Paths outPolys(polygons.size());
+   OffsetPaths(polygons, outPolys, offset * CLIPPER_SCALE_FACT, jtSquare, etClosed);
 
    // Downscale
-   outputPolys = downscaleClipperPoints(polygons);
+   outputPolys = downscaleClipperPoints(outPolys);
 }
 
 
@@ -1410,6 +1410,7 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
       return true;
 }
 
+
 // This uses poly2tri to triangulate.  poly2tri isn't very robust so clipper needs to do
 // the cleaning of points before getting here.
 //
@@ -1422,7 +1423,7 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
    F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
    F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
 
-   Polygon outline;
+   Path outline;
    outline.push_back(IntPoint(S64(minx * CLIPPER_SCALE_FACT), S64(miny * CLIPPER_SCALE_FACT)));
    outline.push_back(IntPoint(S64(minx * CLIPPER_SCALE_FACT), S64(maxy * CLIPPER_SCALE_FACT)));
    outline.push_back(IntPoint(S64(maxx * CLIPPER_SCALE_FACT), S64(maxy * CLIPPER_SCALE_FACT)));
@@ -1840,7 +1841,7 @@ void pushPolyNode(lua_State *L, const PolyNode *node)
    lua_createtable(L, node->Contour.size(), 0);   // -- node, points
    for(U32 i = 1; i <= node->Contour.size(); i++)
    {
-      const Polygon &poly = node->Contour;
+      const Path &poly = node->Contour;
       lua_pushnumber(L, i);                       // -- node, points, i
       lua_pushvec(L, poly[i-1].X * CLIPPER_SCALE_FACT_INVERSE, poly[i-1].Y * CLIPPER_SCALE_FACT_INVERSE);
                                                   // -- node, points, i, p

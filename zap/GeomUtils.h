@@ -47,7 +47,7 @@ namespace Zap {
 
 using ClipperLib::PolyTree;
 using ClipperLib::ClipType;
-using ClipperLib::Polygons;
+using ClipperLib::Paths;
 
 class Point;
 class Rect;
@@ -143,10 +143,10 @@ bool triangulatedFillContains(const Vector<Point> *triangulatedFillPoints, const
 bool isConvex(const Vector<Point> *verts);
 
 // scale Geometric points for clipper
-Polygons upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons);
-Polygons upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons);
+Paths upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons);
+Paths upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons);
 
-Vector<Vector<Point> > downscaleClipperPoints(const Polygons &inputPolygons);
+Vector<Vector<Point> > downscaleClipperPoints(const Paths &inputPolygons);
 
 /*****************************************************************/
 /** Static class to triangulate any contour/polygon efficiently **/

@@ -347,7 +347,7 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
 
    Vector<Vector<Point> > inputPolygons;
 
-   // Add barriers
+   // Add barriers (PolyWalls are Barriers on the server)
    for(S32 i = 0; i < barriers.size(); i++)
    {
       if(barriers[i]->getObjectTypeNumber() != BarrierTypeNumber)
