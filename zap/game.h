@@ -292,8 +292,8 @@ public:
 
    virtual string getCurrentLevelFileName() const;
    virtual U32 getMaxPlayers() const;
-   virtual bool isTestServer() const;
    virtual bool isDedicated() const;
+   virtual bool isTestServer() const = 0;
 
    virtual void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken);
    virtual void gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
@@ -436,7 +436,6 @@ public:
    virtual string getPlayerName() const;
 
    // A couple of statics to keep gServerGame out of some classes
-   static bool isLocalTestServer();
    static const GridDatabase *getServerGameObjectDatabase();
 
    // Passthroughs to GameType

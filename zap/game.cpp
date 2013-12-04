@@ -1463,13 +1463,6 @@ void Game::updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newN
 }
 
 
-// Static method
-bool Game::isLocalTestServer()
-{
-   return gServerGame && gServerGame->isTestServer();
-}
-
-
 // Static method - only used for "illegal" activities
 const GridDatabase *Game::getServerGameObjectDatabase()
 {
@@ -1526,13 +1519,6 @@ U32 Game::getMaxPlayers() const
 }
 
    
-bool Game::isTestServer() const 
-{
-   TNLAssert(false, "Not implemented for this class!");
-   return false;
-}
-
-
 void Game::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken)
 {
    TNLAssert(false, "Not implemented for this class!");

@@ -88,6 +88,8 @@ public:
    bool isConnectedToServer() const;
    bool isConnectedToMaster() const;
 
+   bool isTestServer() const;
+
    GameConnection *getConnectionToServer() const;
    
    void setConnectionToServer(GameConnection *connection);

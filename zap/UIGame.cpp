@@ -2496,8 +2496,8 @@ void GameUserInterface::renderDebugStatus() const
 // Show server-side object ids... using illegal reachover to obtain them!
 void GameUserInterface::renderObjectIds() const
 {
-   TNLAssert(Game::isLocalTestServer(), "Will crash on non server!");
-   if(!Game::isLocalTestServer())
+   TNLAssert(getGame()->isTestServer(), "Will crash on non server!");
+   if(getGame()->isTestServer())
       return;
 
    const Vector<DatabaseObject *> *objects = Game::getServerGameObjectDatabase()->findObjects_fast();

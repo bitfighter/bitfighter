@@ -15,6 +15,8 @@
 #include "UIManager.h"
 #include "EditorTeam.h"
 
+#include "ServerGame.h"
+
 #include "LevelDatabaseRateThread.h"
 #include "LevelDatabase.h"
 
@@ -216,6 +218,17 @@ bool ClientGame::isConnectedToServer() const
 bool ClientGame::isConnectedToMaster() const
 {
    return mConnectionToMaster.isValid() && mConnectionToMaster->isEstablished();
+}
+
+
+bool ClientGame::isTestServer() const
+{
+   ServerGame *serverGame = getServerGame();
+
+   if(serverGame)
+      return serverGame->isTestServer();
+
+   return false;
 }
 
 

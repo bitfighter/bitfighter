@@ -274,7 +274,7 @@ void submitPassHandler(ClientGame *game, const Vector<string> &words)
 
 static bool isLocalTestServer(ClientGame *game, const char *failureMessage)
 {
-   if(Game::isLocalTestServer())
+   if(game->isTestServer())
       return true;
    
    game->displayErrorMessage(failureMessage);
