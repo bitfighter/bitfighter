@@ -1516,6 +1516,7 @@ bool Game::objectCanDamageObject(BfObject *damager, BfObject *victim)
 string Game::getCurrentLevelFileName() const
 {
    TNLAssert(false, "Not implemented for this class!");
+   return "";
 }
 
 U32 Game::getMaxPlayers() const 
