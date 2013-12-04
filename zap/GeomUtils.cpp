@@ -1020,6 +1020,7 @@ bool clipPolygonsAsTree(ClipType operation, const Vector<Vector<Point> > &subjec
    Paths upscaledSubject = upscaleClipperPoints(subject);
    Paths upscaledClip = upscaleClipperPoints(clip);
    Clipper clipper;
+   clipper.StrictlySimple(true);
 
    try  // there is a "throw" in AddPolygon
    {
@@ -1102,6 +1103,7 @@ bool triangulate(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &re
    splitSelfIntersectingPolys(input, cleanedInput);
    Paths upscaledInput = upscaleClipperPoints(cleanedInput);
    Clipper clipper;
+   clipper.StrictlySimple(true);
 
    try  // there is a "throw" in AddPaths
    {
@@ -1271,6 +1273,7 @@ bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vecto
 
    // Fire up clipper and union!
    Clipper clipper;
+   clipper.StrictlySimple(true);
 
    try  // there is a "throw" in AddPolygon
    {
@@ -1298,6 +1301,7 @@ bool mergePolysToPolyTree(const Vector<Vector<Point> > &inputPolygons, PolyTree 
 
    // Fire up clipper and union!
    Clipper clipper;
+   clipper.StrictlySimple(true);
 
    try  // there is a "throw" in AddPolygon
    {
