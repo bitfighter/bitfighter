@@ -1470,7 +1470,7 @@ bool Game::isLocalTestServer()
 }
 
 
-// Static method
+// Static method - only used for "illegal" activities
 const GridDatabase *Game::getServerGameObjectDatabase()
 {
    return gServerGame->getGameObjDatabase();
