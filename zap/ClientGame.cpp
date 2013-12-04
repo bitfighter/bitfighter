@@ -1186,6 +1186,15 @@ S32 ClientGame::getBotCount() const
 }
 
 
+GridDatabase *ClientGame::getBotZoneDatabase() const
+{
+   ServerGame *serverGame = getServerGame();
+   TNLAssert(serverGame, "Expect a ServerGame here!");
+
+   return serverGame->getBotZoneDatabase();
+}
+
+
 void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
 {
    S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();

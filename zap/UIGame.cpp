@@ -2613,10 +2613,12 @@ static void fillRenderZones()
 static void populateRenderZones(ClientGame *game, const Rect *extentRect = NULL)
 {
    rawRenderObjects.clear();
+
    if(extentRect)
-      BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, *extentRect);
+      game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, *extentRect);
    else
-      BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
+      game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
+
    fillRenderZones();
 }
 

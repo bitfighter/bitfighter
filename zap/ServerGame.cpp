@@ -20,6 +20,7 @@
 
 #include "gameObjectRender.h"
 #include "stringUtils.h"
+#include "GeomUtils.h"
 
 
 using namespace TNL;
@@ -63,10 +64,10 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
 
    hostingModePhase = ServerGame::NotHosting;
 
-   mInfoFlags = 0;                  // Currently used to specify test mode and debug builds
+   mInfoFlags = 0;                           // Currently used to specify test mode and debug builds
    mCurrentLevelIndex = 0;
 
-   BotNavMeshZone::createBotZoneDatabase();
+   mBotZoneDatabase = new GridDatabase();    // Deleted in destructor
 
    if(testMode)
       mInfoFlags |= TestModeFlag;
@@ -109,14 +110,15 @@ ServerGame::~ServerGame()
 {
    if(getConnectionToMaster()) // Prevents errors when ServerGame is gone too soon.
       getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+
    cleanUp();
 
    clearAddTarget();
 
-   delete mGameInfo;
    instantiated = false;
 
-   BotNavMeshZone::deleteBotZoneDatabase();
+   delete mGameInfo;
+   delete mBotZoneDatabase;
 }
 
 
@@ -582,9 +584,9 @@ void ServerGame::cycleLevel(S32 nextLevel)
    triangulate = !isDedicated();
 #endif
 
-   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(getWorldExtents(), barrierList, turretList, 
+   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mBotZoneDatabase, &mAllZones,
+                                                                          getWorldExtents(), barrierList, turretList,
                                                                           forceFieldProjectorList, teleporterData, triangulate);
-
    // Clear team info for all clients
    resetAllClientTeams();
 
@@ -1616,6 +1618,42 @@ LuaGameInfo *ServerGame::getGameInfo()
    return mGameInfo;
 }
 
+///// 
+//BotNavMeshZone management
+
+GridDatabase *ServerGame::getBotZoneDatabase() const
+{
+   return mBotZoneDatabase;
+}
+
+
+const Vector<BotNavMeshZone *> *ServerGame::getBotZones() const
+{
+   return &mAllZones;
+}
+
+
+// Returns ID of zone containing specified point
+U16 ServerGame::findZoneContaining(const Point &p) const
+{
+   fillVector.clear();
+   mBotZoneDatabase->findObjects(BotNavMeshZoneTypeNumber, fillVector,
+                                Rect(p - Point(0.1f, 0.1f), p + Point(0.1f, 0.1f)));  // Slightly extend Rect, it can be on the edge of zone
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      // First a quick, crude elimination check then more comprehensive one
+      // Since our zones are convex, we can use the faster method!  Yay!
+      // Actually, we can't, as it is not reliable... reverting to more comprehensive (and working) version.
+      BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(fillVector[i]);
+
+      if(zone->getExtent().contains(p) &&
+            (polygonContainsPoint(zone->getOutline()->address(), zone->getOutline()->size(), p)))
+         return zone->getZoneId();
+   }
+
+   return U16_MAX;
+}
 
 };
 

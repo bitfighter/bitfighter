@@ -45,10 +45,6 @@ const S32 BotNavMeshZone::BufferRadius = Ship::CollisionRadius;  // Radius to bu
 // Make sure we always have 50 for good measure
 const S32 BotNavMeshZone::LevelZoneBuffer = MAX(BufferRadius * 2, 50);
 
-Vector<BotNavMeshZone *> BotNavMeshZone::mAllZones;
-
-static GridDatabase *botZoneDatabase;
-
 
 // Constructor
 BotNavMeshZone::BotNavMeshZone(S32 id)
@@ -64,24 +60,6 @@ BotNavMeshZone::BotNavMeshZone(S32 id)
 BotNavMeshZone::~BotNavMeshZone()
 {
    removeFromDatabase(false);
-}
-
-
-// Called when a ServerGame is instantiated
-void BotNavMeshZone::createBotZoneDatabase()
-{
-   TNLAssert(botZoneDatabase == NULL, "Expected botZoneDatabase to be NULL here!");
-   botZoneDatabase = new GridDatabase();
-}
-
-
-// Called when a ServerGame is deleted
-void BotNavMeshZone::deleteBotZoneDatabase()
-{
-   delete botZoneDatabase;
-   botZoneDatabase = NULL;
-
-   mAllZones.clear();
 }
 
 
@@ -118,16 +96,11 @@ void BotNavMeshZone::renderLayer(S32 layerIndex)
 //}
 
 
-GridDatabase *BotNavMeshZone::getBotZoneDatabase()
-{
-   return botZoneDatabase;
-}
 
-
-void BotNavMeshZone::addToZoneDatabase()
+void BotNavMeshZone::addToZoneDatabase(GridDatabase *botZoneDatabase)
 {
    setExtent(calcExtents());
-   DatabaseObject::addToDatabase(botZoneDatabase);
+   DatabaseObject::addToDatabase(botZoneDatabase);    // not a static, just looks like one from here!
 }
 
 
@@ -135,29 +108,6 @@ void BotNavMeshZone::addToZoneDatabase()
 const Vector<Point> *BotNavMeshZone::getCollisionPoly() const
 {
    return getOutline();
-}
-
-
-// Returns ID of zone containing specified point
-U16 BotNavMeshZone::findZoneContaining(GridDatabase *botZoneDatabase, const Point &p)
-{
-   fillVector.clear();
-   botZoneDatabase->findObjects(BotNavMeshZoneTypeNumber, fillVector,
-                              Rect(p - Point(0.1f,0.1f),p + Point(0.1f,0.1f)));  // Slightly extend Rect, it can be on the edge of zone
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      // First a quick, crude elimination check then more comprehensive one
-      // Since our zones are convex, we can use the faster method!  Yay!
-      // Actually, we can't, as it is not reliable... reverting to more comprehensive (and working) version.
-      BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(fillVector[i]);
-
-      if( zone->getExtent().contains(p) 
-                        && (polygonContainsPoint(zone->getOutline()->address(), zone->getOutline()->size(), p)) )
-         return zone->mZoneId;
-   }
-
-   return U16_MAX;
 }
 
 
@@ -180,9 +130,10 @@ struct rcEdge
 
 
 // Build connections between zones using the adjacency data created in recast
-bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap)    
+bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(const Vector<BotNavMeshZone *> *allZones, 
+                                                               rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap)
 {
-   if(mAllZones.size() == 0)      // Nothing to do!
+   if(allZones->size() == 0)      // Nothing to do!
       return true;
 
    // We'll reuse these objects throughout the following block, saving the cost of creating and destructing them
@@ -295,10 +246,10 @@ bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh,
          neighbor.borderCenter.set((neighbor.borderStart + neighbor.borderEnd) * 0.5);
 
          neighbor.zoneID = polyToZoneMap[e.poly[1]];  
-         mAllZones[polyToZoneMap[e.poly[0]]]->mNeighbors.push_back(neighbor);  // (copies neighbor implicitly)
+         allZones->get(polyToZoneMap[e.poly[0]])->mNeighbors.push_back(neighbor);  // (copies neighbor implicitly)
 
          neighbor.zoneID = polyToZoneMap[e.poly[0]];   
-         mAllZones[polyToZoneMap[e.poly[1]]]->mNeighbors.push_back(neighbor);
+         allZones->get(polyToZoneMap[e.poly[1]])->mNeighbors.push_back(neighbor);
       }
    }
    
@@ -312,7 +263,7 @@ bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh,
 static Vector<DatabaseObject *> zones;
 
 // Returns index of zone containing specified point
-static BotNavMeshZone *findZoneTouchingCircle(GridDatabase *botZoneDatabase, const Point &centerPoint, F32 radius)
+static BotNavMeshZone *findZoneTouchingCircle(const GridDatabase *botZoneDatabase, const Point &centerPoint, F32 radius)
 {
    Rect rect(centerPoint, radius);
    zones.clear();
@@ -406,22 +357,64 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
 }
 
 
-// Populate mAllZones -- we'll use this for efficiency, saving us the trouble of repeating this operation in multiple places.  We can retrieve
-// them using BotNavMeshZone::getBotZones().
-void BotNavMeshZone::populateZoneList()
+// Populate allZones -- we'll use this for efficiency, saving us the trouble of repeating this operation in multiple places.  
+// We can retrieve them using BotNavMeshZone::getBotZones().
+void BotNavMeshZone::populateZoneList(GridDatabase *botZoneDatabase, Vector<BotNavMeshZone *> *allZones)
 {
    const Vector<DatabaseObject *> *objects = botZoneDatabase->findObjects_fast();
 
-   mAllZones.resize(objects->size());
+   allZones->resize(objects->size());
 
    for(S32 i = 0; i < objects->size(); i++)
-      mAllZones[i] = static_cast<BotNavMeshZone *>(objects->get(i));
+      allZones->get(i) = static_cast<BotNavMeshZone *>(objects->get(i));
+}
+
+
+// Only runs on server
+static void linkTeleportersBotNavMeshZoneConnections(const GridDatabase *botZoneDatabase,
+                                                     const Vector<pair<Point, const Vector<Point> *> > &teleporterData)
+{
+   NeighboringZone neighbor;
+   // Now create paths representing the teleporters
+   Point origin, dest;
+
+   F32 triggerRadius = F32(Teleporter::TELEPORTER_RADIUS - Ship::CollisionRadius);
+
+   for(S32 i = 0; i < teleporterData.size(); i++)
+   {
+      origin = teleporterData[i].first;
+      BotNavMeshZone *origZone = findZoneTouchingCircle(botZoneDatabase, origin, triggerRadius);
+
+      if(origZone != NULL)
+      for(S32 j = 0; j < teleporterData[i].second->size(); j++)     // Review each teleporter destination
+      {
+         dest = teleporterData[i].second->get(j);
+         BotNavMeshZone *destZone = findZoneTouchingCircle(botZoneDatabase, dest, triggerRadius);
+
+         if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
+         {
+            // Teleporter is one way path
+            neighbor.zoneID = destZone->getZoneId();
+            neighbor.borderStart.set(origin);
+            neighbor.borderEnd.set(dest);
+            neighbor.borderCenter.set(origin);
+
+            // Teleport instantly, at no cost -- except this is wrong... if teleporter has multiple dests, actual cost could be quite high.
+            // This should be the average of the costs of traveling from each dest zone to the target zone
+            neighbor.distTo = 0;
+            neighbor.center.set(origin);
+
+            origZone->mNeighbors.push_back(neighbor);
+         }
+      }  // for loop iterating over teleporter dests
+   } // for loop iterating over teleporters
 }
 
 
 // Server only
 // Use the Triangle library to create zones.  Aggregate triangles with Recast
-bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList, 
+bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, Vector<BotNavMeshZone *> *allZones,
+                                       const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                        const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
                                        const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones)
 {
@@ -430,7 +423,7 @@ bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<Da
 #endif
 
    Rect bounds(worldExtents);      // Modifiable copy
-   mAllZones.deleteAndClear();
+   allZones->deleteAndClear();
 
    bounds.expandToInt(Point(LevelZoneBuffer, LevelZoneBuffer));      // Provide a little breathing room
 
@@ -480,7 +473,7 @@ bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<Da
       recastPassed = Triangulate::mergeTriangles(outputTriangles, mesh);
    }
 
-   populateZoneList();     // Populate mAllZones
+   populateZoneList(botZoneDatabase, allZones);     // Populate allZones from botZoneDatabase
 
    // So here we are.  If recastPassed, our triangles were successfully aggregated into zones, but will need further polishing below.  If it failed 
    // (which will happen rarely, if ever), the aggregation failed and our zones are just the unaggregated raw triangles that we created before 
@@ -533,7 +526,7 @@ bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<Da
    
          if(botzone != NULL)
          {
-            botzone->addToZoneDatabase();   
+            botzone->addToZoneDatabase(botZoneDatabase);
             addedZones = true;
          }
       }
@@ -543,10 +536,10 @@ bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<Da
 #endif              
 
       if(addedZones)
-         populateZoneList();     // Repopulate mAllZones with the zones we modified above
+         populateZoneList(botZoneDatabase, allZones);     // Repopulate allZones with the zones we modified above
 
-      buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
-      linkTeleportersBotNavMeshZoneConnections(teleporterData);
+      buildBotNavMeshZoneConnectionsRecastStyle(allZones, mesh, polyToZoneMap);
+      linkTeleportersBotNavMeshZoneConnections(botZoneDatabase, teleporterData);
    }
 
    // If recast failed, build zones from the underlying triangle geometry.  This bit could be made more efficient by using the adjacnecy
@@ -572,11 +565,11 @@ bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<Da
          botzone->addVert(outputTriangles[i+1]);
          botzone->addVert(outputTriangles[i+2]);
 
-         botzone->addToZoneDatabase();
+         botzone->addToZoneDatabase(botZoneDatabase);
       }
 
-      BotNavMeshZone::buildBotNavMeshZoneConnections();
-      linkTeleportersBotNavMeshZoneConnections(teleporterData);
+      buildBotNavMeshZoneConnections(allZones);
+      linkTeleportersBotNavMeshZoneConnections(botZoneDatabase, teleporterData);
    }
 
 #ifdef LOG_TIMER
@@ -589,18 +582,11 @@ bool BotNavMeshZone::buildBotMeshZones(const Rect *worldExtents, const Vector<Da
 }
 
 
-// static fn
-const Vector<BotNavMeshZone *> *BotNavMeshZone::getBotZones()
-{
-   return &mAllZones;
-}
-
-
 // Only runs on server
 // TODO can be combined with buildBotNavMeshZoneConnectionsRecastStyle() ?
-void BotNavMeshZone::buildBotNavMeshZoneConnections()
+void BotNavMeshZone::buildBotNavMeshZoneConnections(const Vector<BotNavMeshZone *> *allZones)
 {
-   if(mAllZones.size() == 0)      // Nothing to do!
+   if(allZones->size() == 0)      // Nothing to do!
       return;
 
    // We'll reuse these objects throughout the following block, saving the cost of creating and destructing them
@@ -617,7 +603,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
          if(!zones[i]->getExtent().intersectsOrBorders(zones[j]->getExtent()))
             continue;
 
-         if(zonesTouch(mAllZones[i]->getOutline(), mAllZones[j]->getOutline(), 1.0, bordStart, bordEnd))
+         if(zonesTouch(allZones->get(i)->getOutline(), allZones->get(j)->getOutline(), 1.0, bordStart, bordEnd))
          {
             rect.set(bordStart, bordEnd);
             bordCen.set(rect.getCenter());
@@ -628,9 +614,9 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
             neighbor.borderEnd.set(bordEnd);
             neighbor.borderCenter.set(bordCen);
 
-            neighbor.distTo = mAllZones[i]->getExtent().getCenter().distanceTo(bordCen);     // Whew!
-            neighbor.center.set(mAllZones[j]->getCenter());
-            mAllZones[i]->mNeighbors.push_back(neighbor);
+            neighbor.distTo = allZones->get(i)->getExtent().getCenter().distanceTo(bordCen);     // Whew!
+            neighbor.center.set(allZones->get(j)->getCenter());
+            allZones->get(i)->mNeighbors.push_back(neighbor);
 
             // Zone i is a neighbor of j
             neighbor.zoneID = i;
@@ -638,52 +624,12 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
             neighbor.borderEnd.set(bordEnd);
             neighbor.borderCenter.set(bordCen);
 
-            neighbor.distTo = mAllZones[j]->getExtent().getCenter().distanceTo(bordCen);     
-            neighbor.center.set(mAllZones[i]->getCenter());
-            mAllZones[j]->mNeighbors.push_back(neighbor);
+            neighbor.distTo = allZones->get(j)->getExtent().getCenter().distanceTo(bordCen);     
+            neighbor.center.set(allZones->get(i)->getCenter());
+            allZones->get(j)->mNeighbors.push_back(neighbor);
          }
       }
    }
-}
-
-
-// Only runs on server
-void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(const Vector<pair<Point, const Vector<Point> *> > &teleporterData)
-{
-   NeighboringZone neighbor;
-   // Now create paths representing the teleporters
-   Point origin, dest;
-
-   F32 triggerRadius = F32(Teleporter::TELEPORTER_RADIUS - Ship::CollisionRadius);
-
-   for(S32 i = 0; i < teleporterData.size(); i++)
-   {
-      origin = teleporterData[i].first;
-      BotNavMeshZone *origZone = findZoneTouchingCircle(botZoneDatabase, origin, triggerRadius);
-
-      if(origZone != NULL)
-         for(S32 j = 0; j < teleporterData[i].second->size(); j++)     // Review each teleporter destination
-         {
-            dest = teleporterData[i].second->get(j);
-            BotNavMeshZone *destZone = findZoneTouchingCircle(botZoneDatabase, dest, triggerRadius);
-
-            if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
-            {
-               // Teleporter is one way path
-               neighbor.zoneID = destZone->mZoneId;
-               neighbor.borderStart.set(origin);
-               neighbor.borderEnd.set(dest);
-               neighbor.borderCenter.set(origin);
-
-               // Teleport instantly, at no cost -- except this is wrong... if teleporter has multiple dests, actual cost could be quite high.
-               // This should be the average of the costs of traveling from each dest zone to the target zone
-               neighbor.distTo = 0;                                    
-               neighbor.center.set(origin);
-
-               origZone->mNeighbors.push_back(neighbor);
-            }
-         }  // for loop iterating over teleporter dests
-   } // for loop iterating over teleporters
 }
 
 

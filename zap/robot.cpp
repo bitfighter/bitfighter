@@ -419,7 +419,7 @@ S32 Robot::getCurrentZone()
    TNLAssert(getGame()->isServer(), "Not a ServerGame");
 
    // We're in uncharted territory -- try to get the current zone
-   mCurrentZone = BotNavMeshZone::findZoneContaining(BotNavMeshZone::getBotZoneDatabase(), getActualPos());
+   mCurrentZone = static_cast<ServerGame *>(getGame())->findZoneContaining(getActualPos());
 
    return mCurrentZone;
 }
@@ -573,7 +573,7 @@ U16 Robot::findClosestZone(const Point &point)
    Vector<DatabaseObject*> objects;
    Rect rect = Rect(point.x + searchRadius, point.y + searchRadius, point.x - searchRadius, point.y - searchRadius);
 
-   BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects, rect);
+   getGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects, rect);
 
    for(S32 i = 0; i < objects.size(); i++)
    {
@@ -595,7 +595,7 @@ U16 Robot::findClosestZone(const Point &point)
       F32 collisionTimeIgnore;
       Point surfaceNormalIgnore;
 
-      DatabaseObject* object = BotNavMeshZone::getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
+      DatabaseObject* object = getGame()->getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
             ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
 
       BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(object);
@@ -761,7 +761,7 @@ S32 Robot::lua_getWaypoint(lua_State *L)
 
    // TODO: cache destination point; if it hasn't moved, then skip ahead.
 
-   U16 targetZone = BotNavMeshZone::findZoneContaining(BotNavMeshZone::getBotZoneDatabase(), target); // Where we're going  ===> returns zone id
+   U16 targetZone = static_cast<ServerGame *>(getGame())->findZoneContaining(target); // Where we're going  ===> returns zone id
 
    if(targetZone == U16_MAX)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
    {
@@ -834,7 +834,7 @@ S32 Robot::lua_getWaypoint(lua_State *L)
 
       if(!canSeePoint(target, true))           // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
-         BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(BotNavMeshZone::getBotZoneDatabase()->getObjectByIndex(targetZone));
+         BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(getGame()->getBotZoneDatabase()->getObjectByIndex(targetZone));
 
          p = zone->getCenter();
          flightPlan.push_back(p);
@@ -852,7 +852,7 @@ S32 Robot::lua_getWaypoint(lua_State *L)
    // check cache for path first
    pair<S32,S32> pathIndex = pair<S32,S32>(currentZone, targetZone);
 
-   const Vector<BotNavMeshZone *> *zones = BotNavMeshZone::getBotZones();      // Grab our pre-cached list of nav zones
+   const Vector<BotNavMeshZone *> *zones = static_cast<ServerGame *>(getGame())->getBotZones();  // Our pre-cached list of nav zones
 
    if(getGame()->getGameType()->cachedBotFlightPlans.find(pathIndex) == getGame()->getGameType()->cachedBotFlightPlans.end())
    {
@@ -1339,7 +1339,7 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
       if(typenum != BotNavMeshZoneTypeNumber)
          types.push_back(typenum);
       else
-         BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, queryRect);
+         getGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, queryRect);
 
       lua_pop(L, 1);
    }

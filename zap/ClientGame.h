@@ -289,6 +289,8 @@ public:
    void setGameSuspended_FromServerMessage(bool suspend);
 
    S32 getBotCount() const;
+   GridDatabase *getBotZoneDatabase() const;
+
 
    // For loading levels in editor
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);

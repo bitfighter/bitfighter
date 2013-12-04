@@ -51,8 +51,7 @@ class BotNavMeshZone : public DatabaseObject
 private:   
    U16 mZoneId;                                    // Unique ID for each zone
 
-   static Vector<BotNavMeshZone *> mAllZones;   
-   static void populateZoneList();                 // Populates mAllZones
+   static void populateZoneList(GridDatabase *mBotZoneDatabase, Vector<BotNavMeshZone *> *allZones);  // Populates allZones
 
 public:
    explicit BotNavMeshZone(S32 id = -1);     // Constructor
@@ -64,12 +63,7 @@ public:
    void renderLayer(S32 layerIndex);
 
    GridDatabase *getGameObjDatabase();
-   void addToZoneDatabase();
-
-   static GridDatabase *getBotZoneDatabase();
-
-   static void createBotZoneDatabase();
-   static void deleteBotZoneDatabase();
+   void addToZoneDatabase(GridDatabase *botZoneDatabase);
 
    Point getCenter();      // Return center of zone
 
@@ -85,17 +79,14 @@ public:
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
    S32 getNeighborIndex(S32 zone);           // Returns index of neighboring zone, or -1 if zone is not a neighbor
 
-   static U16 findZoneContaining(GridDatabase *botZoneDatabase, const Point &p);     // Returns ID of zone containing specified point
-
-   static const Vector<BotNavMeshZone *> *getBotZones();                // Return cached list of all zones
-
-   static bool buildBotMeshZones(const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList, 
+   static bool buildBotMeshZones(GridDatabase *botZoneDatabase, Vector<BotNavMeshZone *> *allZones,
+                                 const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                  const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
                                  const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones);
 
-   static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
-   static void buildBotNavMeshZoneConnections();
-   static void linkTeleportersBotNavMeshZoneConnections(const Vector<pair<Point, const Vector<Point> *> > &teleporterData);
+   static bool buildBotNavMeshZoneConnectionsRecastStyle(const Vector<BotNavMeshZone *> *allZones, 
+                                                         rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
+   static void buildBotNavMeshZoneConnections(const Vector<BotNavMeshZone *> *allZones);
 };
 
 

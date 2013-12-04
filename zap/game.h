@@ -432,6 +432,7 @@ public:
 
    virtual void setLevelDatabaseId(U32 id);
    U32 getLevelDatabaseId() const;
+   virtual GridDatabase *getBotZoneDatabase() const = 0;
 
    virtual string getPlayerName() const;
 

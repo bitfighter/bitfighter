@@ -8,6 +8,7 @@
 
 #include "game.h"                // Parent class
 
+#include "BotNavMeshZone.h"
 #include "dataConnection.h"
 #include "LevelSource.h"         // For LevelSourcePtr def
 #include "LevelSpecifierEnum.h"
@@ -88,7 +89,6 @@ private:
    bool loadLevel();                                  // Load the level pointed to by mCurrentLevelIndex
    void runLevelGenScript(const string &scriptName);  // Run any levelgens specified by the level or in the INI
 
-
    AbstractTeam *getNewTeam();
 
    RefPtr<NetEvent> mSendLevelInfoDelayNetInfo;
@@ -99,6 +99,9 @@ private:
    Timer botControlTickTimer;
 
    LuaGameInfo *mGameInfo;
+
+   GridDatabase *mBotZoneDatabase;
+   Vector<BotNavMeshZone *> mAllZones;
 
 public:
    ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated);    // Constructor
@@ -218,6 +221,13 @@ public:
    void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const;
 
    LuaGameInfo *getGameInfo();
+
+   /////
+   // BotNavMeshZone management
+   GridDatabase *getBotZoneDatabase() const;
+   const Vector<BotNavMeshZone *> *getBotZones() const;
+   U16 findZoneContaining(const Point &p) const;
+
 };
 
 ////////////////////////////////////////
