@@ -1391,6 +1391,9 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
 static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, 
                                 F32 aimLife, bool ignoreFriendly, bool botHasSensor, F32 &interceptAngle)
 {
+   if(target == NULL)
+      return false;
+
    Point offset = target->getPos() - aimPos;    // Account for fact that robot doesn't fire from center
    offset.normalize(aimRadius * 1.2f);          // 1.2 ==> fudge factor to prevent robot from not shooting because it thinks it will hit itself
    aimPos += offset;
