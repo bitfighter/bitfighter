@@ -40,5 +40,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set_target_properties(lua-vec
 		PROPERTIES
 		COMPILE_DEFINITIONS TNL_DEBUG
+        COMPILE_DEFINITIONS LUA_USE_MKSTEMP
 	)
 endif()
