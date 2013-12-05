@@ -1260,8 +1260,10 @@ TEST_F(BfTest, LittleStory)
 int main(int argc, char **argv) 
 {
    testing::InitGoogleTest(&argc, argv);
+   DisplayManager::initialize();
    int returnvalue = RUN_ALL_TESTS();
    FontManager::cleanup();
+   DisplayManager::cleanup();
    return returnvalue;
 }
 
