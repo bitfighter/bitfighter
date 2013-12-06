@@ -437,6 +437,9 @@ if(MSVC)
 			PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_SOURCE_DIR}/exe
 		)
 	endforeach()
+	
+	# separate output name "bitfighter_debug.exe" for debug build, to avoid conflicts with debug/release build
+	set_target_properties(test bitfighterd bitfighter PROPERTIES DEBUG_POSTFIX "_debug")
 
 	# Set some linker flags to use console mode in debug build, etc..
 	# Always use SUBSYSTEM:CONSOLE; hiding the console window is controlled in zap/main.cpp near the bottom of main()
