@@ -354,6 +354,10 @@ void idle()
    if( ( dedicated && integerTime >= S32(1000 / settings->getIniSettings()->maxDedicatedFPS)) || 
        (!dedicated && integerTime >= S32(1000 / settings->getIniSettings()->maxFPS)) )
    {
+#ifdef ZAP_DEDICATED
+      // Probably wrong, but at least dedicated can build without errors.
+      static Vector<ClientGame *> gClientGames;
+#endif
       checkIfServerGameIsShuttingDown(gClientGames, gServerGame, U32(integerTime));
       gameIdle(gClientGames, gServerGame, U32(integerTime));
 
