@@ -1144,7 +1144,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
 
    // Use F64 because if the value is too high, we lose resolution when we convert it to an F32 and
    // its animation gets "chunky"
-   F64 time_f64 = F64(time & 0xFFFF) * 0.001;
+   F64 time_f64 = (F64)time * 0.001;
 
    // Draw the Trackers
    for(U32 i = 0; i < MaxParticles; i++)
