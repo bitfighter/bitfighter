@@ -219,7 +219,8 @@ static const F32 FloatHalf = F32(0.5);                           ///< Constant f
 static const F32 FloatZero = F32(0.0);                           ///< Constant float 0.0
 
 static const F32 FloatPi   = F32(3.14159265358979323846);            ///< Constant float PI
-static const F32 Float2Pi  = F32(2.0 * 3.14159265358979323846);      ///< Constant float 2*PI
+static const F64 DoubleTau = 2.0 * 3.14159265358979323846;
+static const F32 Float2Pi = F32(DoubleTau);                          ///< Constant float 2*PI
 static const F32 FloatTau  = Float2Pi;                               ///< For raptor
 static const F32 FloatInversePi = F32(1.0 / 3.14159265358979323846); ///< Constant float 1 / PI
 static const F32 FloatHalfPi = F32(0.5 * 3.14159265358979323846);    ///< Constant float 1/2 * PI

@@ -1142,17 +1142,21 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
    // Width of the particle 'head'
    F32 beamWidth = 4;
 
+   // Use F64 because if the value is too high, we lose resolution when we convert it to an F32 and
+   // its animation gets "chunky"
+   F64 time_f64 = F64(time & 0xFFFF) * 0.001;
+
    // Draw the Trackers
    for(U32 i = 0; i < MaxParticles; i++)
    {
       // Do some math first
       Tracker &t = particles[i];
-      F32 d = (t.dP - fmod(t.dI + F32(time) * 0.001f, t.dP)) / t.dP;
+      F32 d = (t.dP - fmod(t.dI + time_f64, (F64)t.dP)) / t.dP;
       F32 alphaMod = 1;
       if(d > 0.9)
          alphaMod = (1 - d) * 10;
 
-      F32 theta = fmod(t.thetaI + F32(time) * 0.001f * t.thetaP, FloatTau);
+      F32 theta = fmod(t.thetaI + time_f64 * t.thetaP, DoubleTau);
       F32 startRadius = radiusFraction * radius * d;
 
       Point start(cos(theta), sin(theta));
