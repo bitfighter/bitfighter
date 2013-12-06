@@ -100,8 +100,8 @@ void KeyDefMenuUserInterface::onActivate()
       // Col 1
       menuItems.push_back(KeyDefMenuItem("Advance Weapon",        1, InputCodeManager::BINDING_ADVWEAP, 
                                          "Toggles your weapons, use as an alternative to Select Weapon commands"));
-      menuItems.push_back(KeyDefMenuItem("Advance Weapon",        1, InputCodeManager::BINDING_ADVWEAP2, 
-                                         "Toggles your weapons, use as an alternative to Select Weapon commands"));
+      menuItems.push_back(KeyDefMenuItem("Advance Weapon (alt.)", 1, InputCodeManager::BINDING_ADVWEAP2, 
+                                         "Alternate toggle key to give you more flexibility"));
       menuItems.push_back(KeyDefMenuItem("Previous Weapon",       1, InputCodeManager::BINDING_PREVWEAP, 
                                          "Toggles your weapons, use as an alternative to Select Weapon commands"));
       menuItems.push_back(KeyDefMenuItem("Activate Module 1",     1, InputCodeManager::BINDING_MOD1, 
@@ -163,8 +163,8 @@ void KeyDefMenuUserInterface::onActivate()
                                          "Use as an alternative to Advance Weapon"));
       menuItems.push_back(KeyDefMenuItem("Advance Weapon",          2, InputCodeManager::BINDING_ADVWEAP, 
                                          "Toggles your weapons, use as an alternative to Select Weapon commands"));
-      menuItems.push_back(KeyDefMenuItem("Advance Weapon",          2, InputCodeManager::BINDING_ADVWEAP2, 
-                                         "Toggles your weapons, use as an alternative to Select Weapon commands"));
+      menuItems.push_back(KeyDefMenuItem("Advance Weapon (alt.)",   2, InputCodeManager::BINDING_ADVWEAP2, 
+                                         "Alternate toggle key to give you more flexibility"));
       menuItems.push_back(KeyDefMenuItem("Previous Weapon",         2, InputCodeManager::BINDING_PREVWEAP, 
                                          "Toggles your weapons, use as an alternative to Select Weapon commands"));
       menuItems.push_back(KeyDefMenuItem("Quick Chat",              2, InputCodeManager::BINDING_QUICKCHAT, ""));
@@ -246,7 +246,7 @@ void KeyDefMenuUserInterface::render()
       glColor(Colors::cyan);
       drawString(xPos, y + offset, 15, menuItems[i].text);
 
-		xPos += Column_Width * 11 / 20;
+		xPos += Column_Width * 14 / 20;
 
       if(changingItem == i)
       {
