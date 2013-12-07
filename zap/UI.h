@@ -49,12 +49,11 @@ class UserInterface
    friend class UIManager;    // Give UIManager access to private and protected members
 
 private:
+   ClientGame *mClientGame;
+   U32 mTimeSinceLastInput;
+
    static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
    static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
-
-   ClientGame *mClientGame;
-
-   U32 mTimeSinceLastInput;
 
 protected:
    bool mDisableShipKeyboardInput;                 // Disable ship movement while user is in menus
@@ -70,7 +69,6 @@ public:
    static const S32 MaxServerDescrLen = 254;
 
    static const U32 StreakingThreshold = 5;        // This many kills in a row makes you a streaker!
-
 
    ClientGame *getGame() const;
 
@@ -134,15 +132,14 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Used only for multiple mClientGame in one instance
 struct UserInterfaceData
 {
    S32 vertMargin, horizMargin;
    S32 chatMargin;
-
-   //void get();
-   //void set();
 };
 
 };
