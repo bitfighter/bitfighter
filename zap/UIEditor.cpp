@@ -61,6 +61,7 @@
 #include "ScreenShooter.h"
 
 #include <cmath>
+#include <set>
 
 
 using namespace boost;
@@ -2490,23 +2491,26 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
    // If we're not going to use the origin, we're going to use the 'center of mass' of the total
    if(!useOrigin)
    {
-      // Add all object centroids to a list.  We'll get the centroid of that
-      Vector<Point> centroidPoly;
+      // Add all object centroids to a set for de-duplication.  We'll get the centroid of the set
+      set<Point> centroidSet;
       for(S32 i = 0; i < objList->size(); i++)
       {
          BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
          if(obj->isSelected())
-            centroidPoly.push_back(obj->getCentroid());
+            centroidSet.insert(obj->getCentroid());
       }
 
+      // Convert to Vector for centroid finding
+      Vector<Point> centroidList(vector<Point>(centroidSet.begin(), centroidSet.end()));
+
       // If we have only 1 or 2 selected objects, the centroid is calculated differently
-      if(centroidPoly.size() == 1)
-         center = centroidPoly[0];
-      else if(centroidPoly.size() == 2)
-         center = (centroidPoly[0] + centroidPoly[1]) * 0.5f;  // midpoint
+      if(centroidList.size() == 1)
+         center = centroidList[0];
+      else if(centroidList.size() == 2)
+         center = (centroidList[0] + centroidList[1]) * 0.5f;  // midpoint
       else
-         center = findCentroid(centroidPoly);
+         center = findCentroid(centroidList);
    }
 
    // Now do the actual rotation
