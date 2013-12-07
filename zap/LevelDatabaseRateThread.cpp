@@ -26,13 +26,13 @@ const string LevelDatabaseRateThread::RatingStrings[] = {
 
 
 // temp, hacky solution
-static string getRatingString(S32 rating)
+static string getRatingString(LevelDatabaseRateThread::LevelRating rating)
 {
-   if(rating == LevelDatabaseRateThread::MinusOne)   return "down";
-   if(rating ==  LevelDatabaseRateThread::Neutral)   return "neutral";
-   if(rating ==  LevelDatabaseRateThread::PlusOne)   return "up";
+   if(rating == LevelDatabaseRateThread::MinusOne)  return "down";
+   if(rating == LevelDatabaseRateThread::Neutral)   return "neutral";
+   if(rating == LevelDatabaseRateThread::PlusOne)   return "up";
 
-   TNLAssert(false, "Argh!");
+   TNLAssert(false, "Invalid rating!");
 
    return "";
 }
@@ -45,6 +45,8 @@ LevelDatabaseRateThread::LevelDatabaseRateThread(ClientGame* game, LevelRating r
    mRating = rating;
    errorNumber = 0;
    responseCode = 0;
+
+   TNLAssert(mRating >= 0, "Invalid rating!");
 
    TNLAssert(mGame->isLevelInDatabase(), "Level should already have been checked by now!");
    if(!mGame->isLevelInDatabase())
@@ -105,7 +107,8 @@ void LevelDatabaseRateThread::finish()
       mGame->displayErrorMessage("!!! Error rating level: Cannot connect to server");
    else
    {
-      mGame->displayErrorMessage("!!! Error rating level: %i %s", responseCode, responseBody.c_str());
+      mGame->displayErrorMessage("!!! Error rating level: %s", responseBody.c_str());
+      logprintf(LogConsumer::ConsoleMsg, "Error rating level: %s (code %i)", responseBody.c_str(), responseCode);
    }
 }
 
