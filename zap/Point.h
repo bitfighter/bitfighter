@@ -158,13 +158,14 @@ public:
 
    inline bool operator<(const Point& pt) const
    {
-      // Arbitrarily chosen to compare x first, but works
-      return x != pt.x ? x < pt.x : y < pt.y;
+      // Here we say that a point is less than another if its distance
+      // from the origin is less than the other's
+      return (x * x) + (y * y) < (pt.x * pt.x) + (pt.y + pt.y);
    }
 
    inline bool operator>(const Point& pt) const
    {
-      return x != pt.x ? x > pt.x : y > pt.y;
+      return (x * x) + (y * y) > (pt.x * pt.x) + (pt.y + pt.y);
    }
 
    inline bool operator<=(const Point& pt) const
