@@ -279,7 +279,7 @@ void UIManager::onConnectionTerminated(const Address &serverAddress, NetConnecti
          break;
    }
 
-   displayMessageBox("Connection Terminated", "", message);
+   displayMessageBox("Connection Terminated", "Press [[Esc]] to continue", message);
 }
 
 
@@ -384,7 +384,7 @@ void UIManager::onConnectionToServerRejected(const char *reason)
    if(reason[0])
       message += "\n\n" + string(reason);
    
-   displayMessageBox("Connection Terminated", "", message);
+   displayMessageBox("Connection Terminated", "Press [[Esc]] to continue", message);
 }
 
 
