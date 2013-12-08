@@ -379,6 +379,7 @@ TEST_F(BfTest, LevelReadingAndItemPropagation)
          SCOPED_TRACE("4 ServerGame, after origin move with 2 dests");
          checkTeleporter(serverGame, "80, 85 | 180, 300 | 50, 60", 2);
       }
+
       for(S32 i = 0; i < clientGames->size(); i++)
       {
          SCOPED_TRACE("4 ClientGame, after origin move with 2 dests #" + itos(i));
