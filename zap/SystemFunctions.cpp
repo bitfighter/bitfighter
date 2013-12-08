@@ -40,7 +40,7 @@ extern Vector<ClientGame *> gClientGames;
 void setHostingModePhase(Game::HostingModePhase phase)
 {
    TNLAssert(gServerGame, "If gServerGame does not exist, what are we doing here?");
-      gServerGame->setHostingModePhase(phase);
+   gServerGame->setHostingModePhase(phase);
 
 #ifndef ZAP_DEDICATED
    for(S32 i = 0; i < gClientGames.size(); i++)
