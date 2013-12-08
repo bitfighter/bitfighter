@@ -352,9 +352,12 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
          line += argv[i];
       }
 
-      TNLAssert(game == GameManager::getServerGame(), "If true, we can change the gServerGame to game in the line below (which we've done optimistically!)");
-      logprintf(LogConsumer::LogLevelError, "Levelcode error in level %s, line \"%s\":\n\t%s",
-                game->getCurrentLevelFileName().c_str(), line.c_str(), errorMessage.c_str());
+      if(GameManager::getServerGame())
+         logprintf(LogConsumer::LogLevelError, "Levelcode error in level %s, line \"%s\":\n\t%s",
+                   GameManager::getServerGame()->getCurrentLevelFileName().c_str(), line.c_str(), errorMessage.c_str());
+      else
+         logprintf(LogConsumer::LogLevelError, "Levelcode error, line \"%s\":\n\t%s",
+                   line.c_str(), errorMessage.c_str());
    }
 
    return retcode;
