@@ -67,7 +67,7 @@ TEST_F(ObjectTest, ProcessArguments)
       "4", "3", "4", "3", "6", "blah", "4", "2", "6" };
 
    U32 count = TNL::NetClassRep::getNetClassCount(NetClassGroupGame, NetClassTypeObject);
-   for(U32 i=0; i < count; i++)
+   for(U32 i = 0; i < count; i++)
    {
       NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
       argv[0] = netClassRep->getClassName();
@@ -113,7 +113,7 @@ TEST_F(ObjectTest, ServerClient)
    geom.push_back(Point(1,0));
    geom.push_back(Point(0,1));
 
-   for(U32 i=0; i < count; i++)
+   for(U32 i = 0; i < count; i++)
    {
       NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
       Object *obj = netClassRep->create();
@@ -138,7 +138,6 @@ TEST_F(ObjectTest, ServerClient)
             gc_server->objectLocalScopeAlways(bfobj); // Force it to scope to client, for testing.
             isAdded[i] |= FlagServerGameAdded;
          }
-
       }
       else
       {
@@ -171,7 +170,7 @@ TEST_F(ObjectTest, ServerClient)
    }
 
 
-   for(U32 i=0; i < count; i++)
+   for(U32 i = 0; i < count; i++)
    {
       if((isAdded[i] & FlagServerGameAdded) && !(isAdded[i] & FlagServerGameExist))
       {
