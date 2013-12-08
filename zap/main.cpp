@@ -338,36 +338,37 @@ void idle()
       settings = gClientGames[0]->getSettings();
 #endif
 
-   static S32 integerTime = 0;   // static, as we need to keep holding the value that was set... probably some reason this is S32?
+   static S32 deltaT = 0;     // static, as we need to keep holding the value that was set... probably some reason this is S32?
    static U32 prevTimer = 0;
 
    U32 currentTimer = Platform::getRealMilliseconds();
-   integerTime += currentTimer - prevTimer;
+   deltaT += currentTimer - prevTimer;    // Time elapsed since previous tick
    prevTimer = currentTimer;
 
    // Do some sanity checks
-   if(integerTime < -500 || integerTime > 5000)
-      integerTime = 10;
+   if(deltaT < -500 || deltaT > 5000)
+      deltaT = 10;
 
    U32 sleepTime = 1;
 
    bool dedicated = gServerGame && gServerGame->isDedicated();
 
-   if( ( dedicated && integerTime >= S32(1000 / settings->getIniSettings()->maxDedicatedFPS)) || 
-       (!dedicated && integerTime >= S32(1000 / settings->getIniSettings()->maxFPS)) )
+   U32 maxFPS = dedicated ? settings->getIniSettings()->maxDedicatedFPS : settings->getIniSettings()->maxFPS;
+
+   if(deltaT >= S32(1000 / maxFPS))
    {
 #ifdef ZAP_DEDICATED
       // Probably wrong, but at least dedicated can build without errors.
       static Vector<ClientGame *> gClientGames;
 #endif
-      checkIfServerGameIsShuttingDown(gClientGames, gServerGame, U32(integerTime));
-      gameIdle(gClientGames, gServerGame, U32(integerTime));
+      checkIfServerGameIsShuttingDown(gClientGames, gServerGame, U32(deltaT));
+      gameIdle(gClientGames, gServerGame, U32(deltaT));
 
 #ifndef ZAP_DEDICATED
       if(!dedicated)
          display();          // Draw the screen if not dedicated
 #endif
-      integerTime = 0;
+      deltaT = 0;
 
       if(!dedicated)
          sleepTime = 0;      
