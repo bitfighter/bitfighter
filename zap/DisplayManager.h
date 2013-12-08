@@ -3,13 +3,14 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#ifndef DISPLAYMANAGER_H_
-#define DISPLAYMANAGER_H_
+#ifndef _DISPLAY_MANAGER_H_
+#define _DISPLAY_MANAGER_H_
 
 #include "ScreenInfo.h"
 
 namespace Zap
 {
+
 
 class DisplayManager
 {
@@ -26,6 +27,7 @@ public:
    static ScreenInfo *getScreenInfo();
 };
 
+
 } /* namespace Zap */
 
-#endif /* DISPLAYMANAGER_H_ */
+#endif /* _DISPLAY_MANAGER_H_ */
