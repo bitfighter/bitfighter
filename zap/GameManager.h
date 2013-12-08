@@ -31,11 +31,16 @@ public:
    static void setServerGame(ServerGame *serverGame);
    static ServerGame *getServerGame();
    static void deleteServerGame();
+   static void idleServerGame(U32 timeDelta);
 
    // ClientGame related
    static const Vector<ClientGame *> *getClientGames();
    static void addClientGame(ClientGame *clientGame);
    static void deleteClientGames();
+   static void idleClientGames(U32 timeDelta);
+
+   // Other
+   static void idle(U32 timeDelta);
 };
 
 } 

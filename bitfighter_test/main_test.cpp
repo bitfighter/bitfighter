@@ -24,6 +24,7 @@
 #include "PickupItem.h"
 #include "ChatCommands.h"
 #include "teleporter.h"
+#include "GameManager.h"
 
 #include "VideoSystem.h"
 
@@ -248,12 +249,9 @@ static void checkTeleporter(Game *game, const string &geomString, S32 expectedDe
 
 
 
-static void checkTeleporter(GamePair &gamePair, Teleporter *teleporter, Point *pts, S32 pointCount)
+static void checkTeleporter(Teleporter *teleporter, Point *pts, S32 pointCount)
 {
    TNLAssert(pointCount > 1, "This method only for use when testing 1 or more destinations!");
-
-   ClientGame *clientGame = gamePair.client;
-   ServerGame *serverGame = gamePair.server;
 
    Vector<Point> geom(pts, pointCount);
 
@@ -262,15 +260,18 @@ static void checkTeleporter(GamePair &gamePair, Teleporter *teleporter, Point *p
       str += joiner + geom[i].toString();
 
    teleporter->doSetGeom(geom);     // When a levelgen changes the geometry, this fn gets called
-   gamePair.idle(10, 5);            // Idle for a while to allow propagation
+   GamePair::idle(10, 5);            // Idle for a while to allow propagation
 
    {
       SCOPED_TRACE("Testing SERVER game");
-      checkTeleporter(serverGame, str, pointCount - 1);
+      checkTeleporter(GameManager::getServerGame(), str, pointCount - 1);
    }
+   
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+   for(S32 i = 0; i < clientGames->size(); i++)
    {
-      SCOPED_TRACE("Testing CLIENT game");
-      checkTeleporter(clientGame, str, pointCount - 1);
+      SCOPED_TRACE("Testing CLIENT game " + itos(i));
+      checkTeleporter(clientGames->get(i), str, pointCount - 1);
    }
 }
 
@@ -279,47 +280,55 @@ static void checkTeleporter(GamePair &gamePair, Teleporter *teleporter, Point *p
 // Things to test: other objects, comments, long names, missing lines, duplicate lines, garbage lines, ids
 TEST_F(BfTest, LevelReadingAndItemPropagation)
 {
-   GamePair gamePair(getLevelCode1());
-   ClientGame *clientGame = gamePair.client;
-   ServerGame *serverGame = gamePair.server;
+   GamePair gamePair(getLevelCode1(), 3);
+
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+   ServerGame *serverGame = GameManager::getServerGame();
 
    // Idle for a while
-   gamePair.idle(10, 5);
+   GamePair::idle(10, 5);
 
    Vector<DatabaseObject *> fillVector;
 
    // Test level item propagation
    // TestItem (placed @ 1,1)
-   clientGame->getGameObjDatabase()->findObjects(TestItemTypeNumber, fillVector);
-   EXPECT_EQ(1, fillVector.size()) << "Looks like object propagation is broken!";
-   EXPECT_TRUE(fillVector[0]->getCentroid() == Point(255,255));
-
-   // RepairItem (placed @ 0,1, repop time = 10)
-   fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(RepairItemTypeNumber, fillVector);
-   EXPECT_EQ(1, fillVector.size());
-   EXPECT_TRUE(fillVector[0]->getCentroid() == Point(0,255));
-
-   fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(RepairItemTypeNumber, fillVector);
-   EXPECT_EQ(10, static_cast<RepairItem *>(fillVector[0])->getRepopDelay()); // <=== repopDelay is not sent to the client; on client will always be default
-
-   // Wall (placed @ -1,-1 ==> -1,1  thickness = 40)
-   fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(BarrierTypeNumber, fillVector);
-   EXPECT_EQ(1, fillVector.size());
-   Barrier *barrier = static_cast<Barrier *>(fillVector[0]);
-   EXPECT_EQ("-255, -255 | -255, 255", barrier->mPoints[0].toString() + " | " + barrier->mPoints[1].toString());
-   EXPECT_EQ(40, barrier->mWidth);
-
-   // Teleporter (placed @ 5,5 ==> 10,10)
+   for(S32 i = 0; i < clientGames->size(); i++)
    {
-      SCOPED_TRACE("ServerGame, original placement");
-      checkTeleporter(serverGame, "1275, 1275 | 2550, 2550", 1);
-   }
-   {
-      SCOPED_TRACE("ClientGame, original placement");
-      checkTeleporter(clientGame, "1275, 1275 | 2550, 2550", 1);
+      SCOPED_TRACE("i = " + itos(i));
+      ClientGame *clientGame = clientGames->get(i);
+
+      fillVector.clear();
+      clientGame->getGameObjDatabase()->findObjects(TestItemTypeNumber, fillVector);
+      ASSERT_EQ(1, fillVector.size()) << "Looks like object propagation is broken!";
+      EXPECT_TRUE(fillVector[0]->getCentroid() == Point(255, 255));
+
+      // RepairItem (placed @ 0,1, repop time = 10)
+      fillVector.clear();
+      clientGame->getGameObjDatabase()->findObjects(RepairItemTypeNumber, fillVector);
+      ASSERT_EQ(1, fillVector.size());
+      EXPECT_TRUE(fillVector[0]->getCentroid() == Point(0, 255));
+
+      fillVector.clear();
+      serverGame->getGameObjDatabase()->findObjects(RepairItemTypeNumber, fillVector);
+      EXPECT_EQ(10, static_cast<RepairItem *>(fillVector[0])->getRepopDelay()); // <=== repopDelay is not sent to the client; on client will always be default
+
+      // Wall (placed @ -1,-1 ==> -1,1  thickness = 40)
+      fillVector.clear();
+      clientGame->getGameObjDatabase()->findObjects(BarrierTypeNumber, fillVector);
+      ASSERT_EQ(1, fillVector.size());
+      Barrier *barrier = static_cast<Barrier *>(fillVector[0]);
+      EXPECT_EQ("-255, -255 | -255, 255", barrier->mPoints[0].toString() + " | " + barrier->mPoints[1].toString());
+      EXPECT_EQ(40, barrier->mWidth);
+
+      // Teleporter (placed @ 5,5 ==> 10,10)
+      {
+         SCOPED_TRACE("ServerGame, original placement");
+         checkTeleporter(serverGame, "1275, 1275 | 2550, 2550", 1);
+      }
+      {
+         SCOPED_TRACE("ClientGame, original placement");
+         checkTeleporter(clientGame, "1275, 1275 | 2550, 2550", 1);
+      }
    }
 
    // Now move the teleporter on server, make sure changes propagate to client
@@ -334,28 +343,29 @@ TEST_F(BfTest, LevelReadingAndItemPropagation)
       Point pts[] = { Point(30, 50) };   
       Vector<Point> geom(pts, ARRAYSIZE(pts));
       teleporter->doSetGeom(geom);        // When a levelgen changes the geometry, this fn gets called
-      gamePair.idle(10, 5);               // Idle for a while to allow propagation
-
+      GamePair::idle(10, 5);              // Idle for a while to allow propagation
       {
          SCOPED_TRACE("1 ServerGame, after origin move");
          checkTeleporter(serverGame, "30, 50 | 2550, 2550", 1);
       }
+
+      for(S32 i = 0; i < clientGames->size(); i++)
       {
-         SCOPED_TRACE("1 ClientGame, after origin move");
-         checkTeleporter(clientGame, "30, 50 | 2550, 2550", 1);
+         SCOPED_TRACE("1 ClientGame, after origin move #" + itos(i));
+         checkTeleporter(clientGames->get(i), "30, 50 | 2550, 2550", 1);
       }
    }
 
    { 
       SCOPED_TRACE("2 Passing two points moves the origin and the dest");
       Point pts[] = { Point(100, 100), Point(150, 200) };    
-      checkTeleporter(gamePair, teleporter, pts, ARRAYSIZE(pts));
+      checkTeleporter(teleporter, pts, ARRAYSIZE(pts));
    }
 
    { 
       SCOPED_TRACE("3 Passing three points moves the origin and the dest and adds a second dest");
       Point pts[] = { Point(200, 220), Point(180, 300), Point(50, 60) };    
-      checkTeleporter(gamePair, teleporter, pts, ARRAYSIZE(pts));
+      checkTeleporter(teleporter, pts, ARRAYSIZE(pts));
    }
 
    ///// Passing one point moves the origin, leaving other dests intact
@@ -363,75 +373,85 @@ TEST_F(BfTest, LevelReadingAndItemPropagation)
       Point pts[] = { Point(80, 85) };   
       Vector<Point> geom(pts, ARRAYSIZE(pts));
       teleporter->doSetGeom(geom);        // When a levelgen changes the geometry, this fn gets called
-      gamePair.idle(10, 5);               // Idle for a while to allow propagation
+      GamePair::idle(10, 5);               // Idle for a while to allow propagation
 
       {
          SCOPED_TRACE("4 ServerGame, after origin move with 2 dests");
          checkTeleporter(serverGame, "80, 85 | 180, 300 | 50, 60", 2);
       }
+      for(S32 i = 0; i < clientGames->size(); i++)
       {
-         SCOPED_TRACE("4 ClientGame, after origin move with 2 dests");
-         checkTeleporter(clientGame, "80, 85 | 180, 300 | 50, 60", 2);
+         SCOPED_TRACE("4 ClientGame, after origin move with 2 dests #" + itos(i));
+         checkTeleporter(clientGames->get(i), "80, 85 | 180, 300 | 50, 60", 2);
       }
    }
 
    { 
       SCOPED_TRACE("5 Passing two points moves the origin and the first dest, removing the second dest");
       Point pts[] = { Point(345, 555), Point(612, 123) };    
-      checkTeleporter(gamePair, teleporter, pts, ARRAYSIZE(pts));
+      checkTeleporter(teleporter, pts, ARRAYSIZE(pts));
    }
 
    // Add a dest with addDest()
    {
       teleporter->addDest(Point(19, 99)); // Party like it's
-      gamePair.idle(10, 5);               // Idle for a while to allow propagation
+      GamePair::idle(10, 5);               // Idle for a while to allow propagation
 
       {
          SCOPED_TRACE("addDest() test - ServerGame");
          checkTeleporter(serverGame, "345, 555 | 612, 123 | 19, 99", 2);
       }
+      for(S32 i = 0; i < clientGames->size(); i++)
       {
-         SCOPED_TRACE("addDest() test - ClientGame");
-         checkTeleporter(clientGame, "345, 555 | 612, 123 | 19, 99", 2);
+         SCOPED_TRACE("addDest() test - ClientGame #" + itos(i));
+         checkTeleporter(clientGames->get(i), "345, 555 | 612, 123 | 19, 99", 2);
       }
    }
 
    // Delete a dest with delDest()
    {
       teleporter->delDest(0);    // Delete first dest
-      gamePair.idle(10, 5);      // Idle for a while to allow propagation
+      GamePair::idle(10, 5);      // Idle for a while to allow propagation
 
       {
          SCOPED_TRACE("delDest() test - ServerGame");
          checkTeleporter(serverGame, "345, 555 | 19, 99", 1);
-      }                                                   
+      }                
+      for(S32 i = 0; i < clientGames->size(); i++)
       {                                                   
-         SCOPED_TRACE("delDest() test - ClientGame");     
-         checkTeleporter(clientGame, "345, 555 | 19, 99", 1);
+         SCOPED_TRACE("delDest() test - ClientGame #" + itos(i));     
+         checkTeleporter(clientGames->get(i), "345, 555 | 19, 99", 1);
       }
    }
 
    // Clear the dests with clearDests()
    {
       teleporter->clearDests(); 
-      gamePair.idle(10, 5);               // Idle for a while to allow propagation
+      GamePair::idle(10, 5);               // Idle for a while to allow propagation
 
       {
          SCOPED_TRACE("clearDests() test - ServerGame");
          checkTeleporter(serverGame, "345, 555", 0);
       }
+      for(S32 i = 0; i < clientGames->size(); i++)
       {
-         SCOPED_TRACE("clearDests() test - ClientGame");    // Will be rendered in-game, will not teleport you anywhere... FYI
-         checkTeleporter(clientGame, "345, 555", 0);
+         // Will be rendered in-game, will not teleport you anywhere... FYI
+         SCOPED_TRACE("clearDests() test - ClientGame #" + itos(i));    
+         checkTeleporter(clientGames->get(i), "345, 555", 0);
       }
    }
 
    /////
    // Test metadata propagation
-   EXPECT_STREQ("Bluey", clientGame->getTeam(0)->getName().getString());                                    // Team name
-   EXPECT_STREQ("Test Level",                 clientGame->getGameType()->getLevelName()->getString());      // Quoted in level file
-   EXPECT_STREQ("This is a basic test level", clientGame->getGameType()->getLevelDescription());            // Quoted in level file
-   EXPECT_STREQ("level creator",              clientGame->getGameType()->getLevelCredits()->getString());   // Not quoted in level file
+   for(S32 i = 0; i < clientGames->size(); i++)
+   {
+      ClientGame *clientGame = clientGames->get(i);
+      SCOPED_TRACE("metadata propagation i = " + itos(i)); 
+      EXPECT_STREQ("Bluey", clientGame->getTeam(0)->getName().getString());                           // Team name
+      EXPECT_STREQ("Test Level", clientGame->getGameType()->getLevelName()->getString());             // Quoted in level file
+      EXPECT_STREQ("This is a basic test level", clientGame->getGameType()->getLevelDescription());   // Quoted in level file
+      EXPECT_STREQ("level creator", clientGame->getGameType()->getLevelCredits()->getString());       // Not quoted in level file
+   }
 }
 
 
@@ -786,20 +806,25 @@ TEST_F(BfTest, ShipTests)
 
 TEST_F(BfTest, EngineerTests)
 {
-   GamePair gamePair(getLevelCodeForTestingEngineer1()); // See def for description of level
-   ClientGame *clientGame       = gamePair.client;
-   ServerGame *serverGame       = gamePair.server;
-   GameSettings *clientSettings = clientGame->getSettings();
-   GameUserInterface *gameUI    = clientGame->getUIManager()->getUI<GameUserInterface>();
+   GamePair gamePair(getLevelCodeForTestingEngineer1(), 3); // See def for description of level
+   ServerGame *serverGame       = GameManager::getServerGame();
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+   GameSettings *clientSettings = clientGames->get(0)->getSettings();
+   GameUserInterface *gameUI    = clientGames->get(0)->getUIManager()->getUI<GameUserInterface>();
 
    DEFINE_KEYS_AND_EVENTS(clientSettings);
 
    // Idle for a while, let things settle
-   gamePair.idle(10, 5);
+   GamePair::idle(10, 5);
 
    // Verify that engineer is enabled
    ASSERT_TRUE(serverGame->getGameType()->isEngineerEnabled());
-   ASSERT_TRUE(clientGame->getGameType()->isEngineerEnabled());
+
+   for(S32 i = 0; i < clientGames->size(); i++)
+   {
+      SCOPED_TRACE("i = " + itos(i));
+      ASSERT_TRUE(clientGames->get(i)->getGameType()->isEngineerEnabled());
+   }
 
    ASSERT_TRUE(serverGame->getClientInfo(0)->getShip()->isInZone(LoadoutZoneTypeNumber)); // Check level is as we expected
 
@@ -812,18 +837,27 @@ TEST_F(BfTest, EngineerTests)
    gameUI->onKeyDown(LOADOUT_KEY_PHASER);    gameUI->onKeyDown(LOADOUT_KEY_BOUNCE);    gameUI->onKeyDown(LOADOUT_KEY_TRIPLE); // ...then 3 weapons
 
    // On this level, the ship spawn is inside a loadout zone, so loadout should take effect immediately
-   gamePair.idle(10, 5);
+   GamePair::idle(10, 5);
    ASSERT_EQ("Engineer,Repair,Phaser,Bouncer,Triple", serverGame->getClientInfo(0)->getShip()->getLoadoutString());
-   ASSERT_EQ("Engineer,Repair,Phaser,Bouncer,Triple", clientGame->getLocalPlayerShip()->getLoadoutString());
+   for(S32 i = 0; i < clientGames->size(); i++)
+   {
+      SCOPED_TRACE("i = " + itos(i));
+      ASSERT_EQ("Engineer,Repair,Phaser,Bouncer,Triple", clientGames->get(0)->getLocalPlayerShip()->getLoadoutString());
+   }
 
    // Fly down to pick up resource item -- to get flying to work, need to create events at a very basic level
+   ClientGame *clientGame = clientGames->get(0);
    Point startPos = clientGame->getLocalPlayerShip()->getActualPos();
    Event::onEvent(clientGame, &EventDownPressed);
-   gamePair.idle(100, 5);
+   GamePair::idle(100, 5);
    Event::onEvent(clientGame, &EventDownReleased);
    Point endPos = clientGame->getLocalPlayerShip()->getActualPos();
    ASSERT_TRUE(startPos.distSquared(endPos) > 0) << "Ship did not move!!";
-   ASSERT_TRUE(clientGame->getLocalPlayerShip()->isCarryingItem(ResourceItemTypeNumber));
+   for(S32 i = 0; i < clientGames->size(); i++)
+   {
+      SCOPED_TRACE("i = " + itos(i));
+      ASSERT_TRUE(clientGames->get(0)->getLocalPlayerShip()->isCarryingItem(ResourceItemTypeNumber));
+   }
 
    // Time to engineer!
    gameUI->onKeyDown(KEY_MOD1);
@@ -834,10 +868,15 @@ TEST_F(BfTest, EngineerTests)
    ASSERT_FALSE(static_cast<const EngineerHelper *>(gameUI->getActiveHelper())->isMenuBeingDisplayed());
    gameUI->onKeyDown(KEY_MOD1);     // Place entrance
    gameUI->onKeyDown(KEY_MOD1);     // Place exit
-   gamePair.idle(100, 5);           // Let things mellow
-   Vector<DatabaseObject *> fillVector;
-   clientGame->getGameObjDatabase()->findObjects(TeleporterTypeNumber, fillVector);
-   EXPECT_EQ(1, fillVector.size()) << "Expected a teleporter!";
+   GamePair::idle(100, 5);           // Let things mellow
+
+   for(S32 i = 0; i < clientGames->size(); i++)
+   {
+      SCOPED_TRACE("i = " + itos(i));
+      Vector<DatabaseObject *> fillVector;
+      clientGames->get(i)->getGameObjDatabase()->findObjects(TeleporterTypeNumber, fillVector);
+      EXPECT_EQ(1, fillVector.size()) << "Expected a teleporter!";
+   }
 }
 
 

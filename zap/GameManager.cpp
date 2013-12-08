@@ -4,7 +4,11 @@
 //------------------------------------------------------------------------------
 
 #include "GameManager.h"
-#include "ServerGame.h" 
+#include "ServerGame.h"
+
+#ifndef ZAP_DEDICATED
+#  include "ClientGame.h"
+#endif
 
 namespace Zap
 {
@@ -52,6 +56,16 @@ void GameManager::deleteServerGame()
 }
 
 
+void GameManager::idleServerGame(U32 timeDelta)
+{
+   if(mServerGame)
+      mServerGame->idle(timeDelta);
+}
+
+
+/////
+
+
 const Vector<ClientGame *> *GameManager::getClientGames()
 {
    return &mClientGames;
@@ -69,5 +83,23 @@ void GameManager::addClientGame(ClientGame *clientGame)
    mClientGames.push_back(clientGame);
 }
 
+
+void GameManager::idleClientGames(U32 timeDelta)
+{
+#ifndef ZAP_DEDICATED
+   for(S32 i = 0; i < mClientGames.size(); i++)
+      mClientGames[i]->idle(timeDelta);
+#endif
+}
+
+
+/////
+
+
+void GameManager::idle(U32 timeDelta)
+{
+   idleServerGame(timeDelta);
+   idleClientGames(timeDelta);
+}
 
 } 

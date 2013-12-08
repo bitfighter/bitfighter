@@ -292,23 +292,6 @@ void checkIfServerGameIsShuttingDown(U32 timeDelta)
 }
 
 
-// This function could be moved anywhere... onto Game? No, not there, as that creates an #include loop with ClientGame.h
-void gameIdle(U32 timeDelta)
-{
-#ifndef ZAP_DEDICATED
-   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-
-   for(S32 i = 0; i < clientGames->size(); i++)
-      clientGames->get(i)->idle(timeDelta);
-#endif
-
-   ServerGame *serverGame = GameManager::getServerGame();
-
-   if(serverGame)
-      serverGame->idle(timeDelta);
-}
-
-
 // Need to do this here because this is really the only place where we can pass information from
 // a ServerGame directly to a ClientGame without any overly gross stuff.  But man, is this ugly!
 void loadAnotherLevelOrStartHosting()
@@ -369,7 +352,7 @@ void idle()
    if(deltaT >= S32(1000 / maxFPS))
    {
       checkIfServerGameIsShuttingDown(U32(deltaT));
-      gameIdle(U32(deltaT));
+      GameManager::idle(U32(deltaT));
 
 #ifndef ZAP_DEDICATED
       if(!dedicated)

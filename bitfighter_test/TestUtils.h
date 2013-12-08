@@ -6,6 +6,7 @@
 #ifndef _TEST_UTILS_H
 #define _TEST_UTILS_H
 
+#include "../zap/GameSettings.h"    // For GameSettingsPtr def
 #include <tnl.h>
 
 #include <string>
@@ -20,6 +21,8 @@ class ServerGame;
 class ClientGame;
 
 ClientGame *newClientGame();
+ClientGame *newClientGame(const GameSettingsPtr &settings);
+
 ServerGame *newServerGame();
 
 /**
@@ -27,9 +30,9 @@ ServerGame *newServerGame();
  */
 struct GamePair
 {
-	GamePair(const string &levelCode = "");
+	GamePair(const string &levelCode = "", S32 clients = 1);
 	~GamePair();
-	void idle(U32 timeDelta, U32 cycles = 1);
+	static void idle(U32 timeDelta, U32 cycles = 1);
 	ClientGame *client;
 	ServerGame *server;
 };
