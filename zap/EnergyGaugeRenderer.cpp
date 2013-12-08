@@ -12,6 +12,10 @@
 #include "gameObjectRender.h"
 #include "OpenglUtils.h"
 
+#ifdef SHOW_SERVER_SITUATION
+#  include "GameManager.h"
+#endif
+
 
 namespace Zap {   namespace UI {
 
@@ -57,9 +61,11 @@ void EnergyGaugeRenderer::render(S32 energy)
    drawVertLine(xul + cutoffx, yul - SafetyLineExtend - 1, yul + GaugeHeight + SafetyLineExtend);
 
 #ifdef SHOW_SERVER_SITUATION
-   if((gServerGame && gServerGame->getClientInfo(0)->getConnection()->getControlObject()))
+   ServerGame *serverGame = GameManager::getServerGame();
+
+   if((serverGame && serverGame->getClientInfo(0)->getConnection()->getControlObject()))
    {
-      S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy();
+      S32 actDiff = static_cast<Ship *>(serverGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy();
       S32 p = F32(actDiff) / Ship::EnergyMax * GuageWidth;
       glColor(Colors::magenta);
       drawVertLine(xul + p, yul - SafetyLineExtend - 1, yul + GaugeHeight + SafetyLineExtend);

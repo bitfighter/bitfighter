@@ -30,6 +30,10 @@
 
 #include "tnlRandom.h"
 
+#ifdef SHOW_SERVER_SITUATION
+#  include "GameManager.h"
+#endif
+
 
 namespace Zap
 {
@@ -416,8 +420,10 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
    }
 
 #ifdef SHOW_SERVER_SITUATION
-   if(gServerGame && static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject()) &&
-      static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->isModulePrimaryActive(ModuleShield))
+   ServerGame *serverGame = GameManager::getServerGame();
+
+   if(serverGame && static_cast<Ship *>(serverGame->getClientInfo(0)->getConnection()->getControlObject()) &&
+      static_cast<Ship *>(serverGame->getClientInfo(0)->getConnection()->getControlObject())->isModulePrimaryActive(ModuleShield))
    {
       F32 shieldRadius = radius;
 

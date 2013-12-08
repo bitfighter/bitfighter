@@ -5,6 +5,8 @@
 
 #include "game.h"
 
+#include "GameManager.h"
+
 #include "gameType.h"
 #include "config.h"
 #include "masterConnection.h"
@@ -61,12 +63,8 @@ U32 NameToAddressThread::run()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Global Game objects
-ServerGame *gServerGame = NULL;
-
 static Vector<DatabaseObject *> fillVector2;
 md5wrapper Game::md5;
-
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -1480,7 +1478,7 @@ void Game::updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newN
 // Static method - only used for "illegal" activities
 const GridDatabase *Game::getServerGameObjectDatabase()
 {
-   return gServerGame->getGameObjDatabase();
+   return GameManager::getServerGame()->getGameObjDatabase();
 }
 
 

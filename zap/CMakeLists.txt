@@ -42,6 +42,7 @@ set(SHARED_SOURCES
 	gameStats.cpp
 	gameType.cpp
 	gameWeapons.cpp
+   GameManager.cpp
 	Geometry.cpp
 	GeomObject.cpp
 	GeomUtils.cpp

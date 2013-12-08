@@ -81,6 +81,8 @@ include (replaces require)
 
 #include "zapjournal.h"
 
+#include "GameManager.h"
+
 using namespace TNL;
 
 #ifndef ZAP_DEDICATED
@@ -264,7 +266,7 @@ void display()
 
 #endif // ZAP_DEDICATED
 
-void shutdownBitfighter(ServerGame *serverGame);    // Forward declaration
+void shutdownBitfighter();    // Forward declaration
 
 
 // If the server game exists, and is shutting down, close any ClientGame connections we might have to it, then delete it.
@@ -278,14 +280,11 @@ void checkIfServerGameIsShuttingDown(const Vector<ClientGame *> &clientGames, Se
          clientGames[i]->closeConnectionToGameServer();    // ...disconnect any local clients
 
       if(clientGames.size() > 0)       // If there are any clients running...
-      {
-         delete serverGame;            // ...purge serverGame (leaving the clients running)
-         gServerGame = NULL;
-      }
+         GameManager::deleteServerGame();
       else                                
 #endif
          // Either we have no clients, or this is a dedicated build so...
-         shutdownBitfighter(serverGame);    // ...shut down the whole shebang, return to OS, never come back
+         shutdownBitfighter();    // ...shut down the whole shebang, return to OS, never come back
    }
 }
 
@@ -308,22 +307,22 @@ void gameIdle(const Vector<ClientGame *> &clientGames, ServerGame *serverGame, U
 // a ServerGame directly to a ClientGame without any overly gross stuff.  But man, is this ugly!
 void loadAnotherLevelOrStartHosting()
 {
-   if(!gServerGame)
+   if(!GameManager::getServerGame())
       return;
 
-   if(gServerGame->getHostingModePhase() == Game::LoadingLevels)
+   if(GameManager::getServerGame()->getHostingModePhase() == Game::LoadingLevels)
    {
-      string levelName = gServerGame->loadNextLevelInfo();
+      string levelName = GameManager::getServerGame()->loadNextLevelInfo();
 
 #ifndef ZAP_DEDICATED
       // Notify any client UIs on the hosting machine that the server has loaded a level
       for(S32 i = 0; i < gClientGames.size(); i++)
-         gClientGames[i]->getUIManager()->serverLoadedLevel(levelName, gServerGame->getHostingModePhase());
+         gClientGames[i]->getUIManager()->serverLoadedLevel(levelName, GameManager::getServerGame()->getHostingModePhase());
 #endif
    }
 
-   else if(gServerGame->getHostingModePhase() == Game::DoneLoadingLevels)
-      hostGame(gServerGame);
+   else if(GameManager::getServerGame()->getHostingModePhase() == Game::DoneLoadingLevels)
+      hostGame(GameManager::getServerGame());
 }
 
 
@@ -336,8 +335,8 @@ void idle()
    // Acquire a settings object... from somewhere
    GameSettings *settings;
 
-   if(gServerGame)
-      settings = gServerGame->getSettings();
+   if(GameManager::getServerGame())
+      settings = GameManager::getServerGame()->getSettings();
 #ifndef ZAP_DEDICATED
    else     // If there is no server game, and this code is running, there *MUST* be a client game
       settings = gClientGames[0]->getSettings();
@@ -356,7 +355,7 @@ void idle()
 
    U32 sleepTime = 1;
 
-   bool dedicated = gServerGame && gServerGame->isDedicated();
+   bool dedicated = GameManager::getServerGame() && GameManager::getServerGame()->isDedicated();
 
    U32 maxFPS = dedicated ? settings->getIniSettings()->maxDedicatedFPS : settings->getIniSettings()->maxFPS;
 
@@ -366,8 +365,8 @@ void idle()
       // Probably wrong, but at least dedicated can build without errors.
       static Vector<ClientGame *> gClientGames;
 #endif
-      checkIfServerGameIsShuttingDown(gClientGames, gServerGame, U32(deltaT));
-      gameIdle(gClientGames, gServerGame, U32(deltaT));
+      checkIfServerGameIsShuttingDown(gClientGames, GameManager::getServerGame(), U32(deltaT));
+      gameIdle(gClientGames, GameManager::getServerGame(), U32(deltaT));
 
 #ifndef ZAP_DEDICATED
       if(!dedicated)
@@ -389,7 +388,7 @@ void idle()
       TNLAssert(gClientGames.size() > 0, "Why are we here if there is no client game??");
 
       if(event.type == SDL_QUIT) // Handle quit here
-         shutdownBitfighter(gServerGame);
+         shutdownBitfighter();
 
       // Pass the event to all clientGames..
       for(S32 i = 0; i < gClientGames.size(); i++)
@@ -404,7 +403,7 @@ void idle()
 
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
-   if(dedicated && gServerGame->isSuspended())
+   if(dedicated && GameManager::getServerGame()->isSuspended())
       sleepTime = 40;     // The higher this number, the less accurate the ping is on server lobby when empty, but the less power consumed.
 
    Platform::sleep(sleepTime);
@@ -460,7 +459,7 @@ FileLogConsumer gServerLog;            // We'll apply a filter later on, in main
 // 6) Click the X on the window to close the game window   <=== NOTE: This scenario fails for me when running a dedicated server on windows.
 // and one illigitimate way
 // 7) Lua panics!!
-void shutdownBitfighter(ServerGame *serverGame)
+void shutdownBitfighter()
 {
    GameSettings *settings = NULL;
 
@@ -468,7 +467,7 @@ void shutdownBitfighter(ServerGame *serverGame)
 #ifndef ZAP_DEDICATED
    if(gClientGames.size() == 0)
 #endif
-      if(!serverGame)
+      if(GameManager::getServerGame())
          exitToOs();
 
 // Grab a pointer to settings wherever we can.  Note that gClientGame and serverGame refer to the same settings object.
@@ -480,10 +479,10 @@ void shutdownBitfighter(ServerGame *serverGame)
 
 #endif
 
-   if(serverGame)
+   if(GameManager::getServerGame())
    {
-      settings = serverGame->getSettings();
-      delete serverGame;     // Destructor terminates connection to master
+      settings = GameManager::getServerGame()->getSettings();
+      GameManager::deleteServerGame();
    }
 
 
@@ -1153,8 +1152,12 @@ int main(int argc, char **argv)
       // Dedicated ClientGame needs fonts, but not external ones
       FontManager::initialize(settings.get(), false);
 #endif
-      LevelSourcePtr levelSource = LevelSourcePtr(new FolderLevelSource(settings->getLevelList(), settings->getFolderManager()->levelDir));
-      gServerGame = initHosting(settings, levelSource, false, true);     // Figure out what levels we'll be playing with, and start hosting  
+      LevelSourcePtr levelSource = LevelSourcePtr(
+               new FolderLevelSource(settings->getLevelList(), settings->getFolderManager()->levelDir)
+                                                 );
+
+      // Figure out what levels we'll be playing with, and start hosting  
+      initHosting(settings, levelSource, false, true);     
    }
    else
    {
@@ -1173,7 +1176,7 @@ int main(int argc, char **argv)
 #endif
 
       if(!VideoSystem::init())                // Initialize video and window system
-         shutdownBitfighter(gServerGame);
+         shutdownBitfighter();
 
 #if SDL_VERSION_ATLEAST(2,0,0)
       SDL_StartTextInput();

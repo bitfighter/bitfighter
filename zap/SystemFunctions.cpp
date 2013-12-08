@@ -5,6 +5,7 @@
 
 #include "SystemFunctions.h"
 
+#include "GameManager.h"
 #include "GameSettings.h"
 #include "ServerGame.h"
 #include "LevelSource.h"
@@ -39,8 +40,8 @@ extern Vector<ClientGame *> gClientGames;
 
 void setHostingModePhase(Game::HostingModePhase phase)
 {
-   TNLAssert(gServerGame, "If gServerGame does not exist, what are we doing here?");
-   gServerGame->setHostingModePhase(phase);
+   TNLAssert(GameManager::getServerGame(), "If a ServerGame does not exist, what are we doing here?");
+   GameManager::getServerGame()->setHostingModePhase(phase);
 
 #ifndef ZAP_DEDICATED
    for(S32 i = 0; i < gClientGames.size(); i++)
@@ -51,14 +52,16 @@ void setHostingModePhase(Game::HostingModePhase phase)
 
 
 // Host a game (and maybe even play a bit, too!)
-ServerGame *initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicatedServer)
+void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicatedServer)
 {
+   TNLAssert(!GameManager::getServerGame(), "Already have a ServerGame!");
+
    Address address(IPProtocol, Address::Any, GameSettings::DEFAULT_GAME_PORT);   // Equivalent to ("IP:Any:28000")
    address.set(settings->getHostAddress());                          // May overwrite parts of address, depending on what getHostAddress contains
 
-   ServerGame *serverGame = new ServerGame(address, settings, levelSource, testMode, dedicatedServer);
+   GameManager::setServerGame(new ServerGame(address, settings, levelSource, testMode, dedicatedServer));
 
-   serverGame->setReadyToConnectToMaster(true);
+   GameManager::getServerGame()->setReadyToConnectToMaster(true);
    Game::seedRandomNumberGenerator(settings->getHostName());
 
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
@@ -66,38 +69,30 @@ ServerGame *initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bo
    {
       logprintf(LogConsumer::ServerFilter, "----------\n"
                                            "Bitfighter server started [%s]", getTimeStamp().c_str());
-      logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", serverGame->getSettings()->getHostName().c_str(), 
-                                                                            serverGame->getSettings()->getHostDescr().c_str());
+      logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", settings->getHostName().c_str(), 
+                                                                            settings->getHostDescr().c_str());
 
       logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelSource->getLevelCount());
    }
 
    if(levelSource->getLevelCount() == 0)     // No levels!
    {
-      abortHosting_noLevels(serverGame);
-      delete serverGame;
-      return NULL;
+      abortHosting_noLevels(GameManager::getServerGame());
+      GameManager::deleteServerGame();
    }
 
-   serverGame->resetLevelLoadIndex();
+   GameManager::getServerGame()->resetLevelLoadIndex();
 
-   // gServerGame hasn't been set yet, so we'll need to set the hostingModePhase directly; setHostingModePhase won't work!
-   // Be sure to set it on both serverGame as well as all gClientGames.
-   serverGame->setHostingModePhase(Game::LoadingLevels);
+   setHostingModePhase(Game::LoadingLevels);
 
 #ifndef ZAP_DEDICATED
    for(S32 i = 0; i < gClientGames.size(); i++)
-   {
       gClientGames[i]->getUIManager()->enableLevelLoadDisplay();
-      gClientGames[i]->setHostingModePhase(Game::LoadingLevels);
-   }
 #endif
-   
-   return serverGame;
 }
 
 
-void shutdownBitfighter(ServerGame *serverGame);    // Forward declaration
+void shutdownBitfighter();    // Forward declaration
 
 // If we can't load any levels, here's the plan...
 void abortHosting_noLevels(ServerGame *serverGame)
@@ -140,7 +135,7 @@ void abortHosting_noLevels(ServerGame *serverGame)
 #ifndef ZAP_DEDICATED
    if(gClientGames.size() == 0)
 #endif
-      shutdownBitfighter(serverGame);      // Quit in an orderly fashion
+      shutdownBitfighter();      // Quit in an orderly fashion
 }
 
 ////////////////////////////////////////

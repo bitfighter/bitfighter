@@ -5,6 +5,8 @@
 
 #include "ClientGame.h"
 
+#include "GameManager.h"
+
 #include "ChatHelper.h"
 #include "masterConnection.h"
 #include "gameNetInterface.h"
@@ -172,8 +174,6 @@ void ClientGame::closeConnectionToGameServer()
 }
 
 
-extern ServerGame *gServerGame;     // Only needed for assert below
-
 // Returns server game
 ServerGame *ClientGame::getServerGame() const
 {
@@ -186,7 +186,7 @@ ServerGame *ClientGame::getServerGame() const
          serverGame = ((GameConnection*)netconn)->getServerGame();
    }
 
-   TNLAssert(serverGame == gServerGame, "Should be the same!");
+   TNLAssert(serverGame == GameManager::getServerGame(), "Should be the same!");
 
    return serverGame;
 }

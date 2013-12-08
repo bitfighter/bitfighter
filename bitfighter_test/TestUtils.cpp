@@ -5,6 +5,7 @@
 
 #include "TestUtils.h"
 #include "../zap/gameType.h"
+#include "../zap/GameManager.h"
 #include "../zap/ServerGame.h"
 #include "../zap/ClientGame.h"
 #include "../zap/FontManager.h"
@@ -61,7 +62,9 @@ GamePair::GamePair(const string &levelCode)
 
    client->userEnteredLoginCredentials("TestPlayerOne", "password", false);    // Simulates entry from NameEntryUserInterface
    LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(levelCode));
-   server = initHosting(settings, levelSource, true, false);
+   initHosting(settings, levelSource, true, false);
+
+   server = GameManager::getServerGame();
 
    GameType *gt = new GameType();    // Cleaned up by database
    gt->addToGame(server, server->getGameObjDatabase());

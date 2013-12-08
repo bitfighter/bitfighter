@@ -5021,8 +5021,6 @@ void EditorUserInterface::testLevel()
 }
 
 
-extern ServerGame *gServerGame;
-
 void EditorUserInterface::testLevelStart()
 {
    static const string TestFileName = "editor.tmp";   // Temp file where we'll save current level while testing
@@ -5042,9 +5040,7 @@ void EditorUserInterface::testLevelStart()
 
       LevelSourcePtr levelSource = LevelSourcePtr(new FolderLevelSource(levelList, getGame()->getSettings()->getFolderManager()->levelDir));
 
-      TNLAssert(!gServerGame, "Already exists!");
-
-      gServerGame = initHosting(getGame()->getSettingsPtr(), levelSource, true, false);
+      initHosting(getGame()->getSettingsPtr(), levelSource, true, false);
    }
 }
 

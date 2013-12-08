@@ -20,7 +20,7 @@
 #include "LevelSource.h"
 #include "LevelDatabase.h"
 
-#include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
+#include "GameManager.h"
 #include "ClientGame.h"
 #include "ServerGame.h"
 #include "gameType.h"            // Can get rid of this with some simple passthroughs
@@ -34,6 +34,7 @@
 #include "FontManager.h"
 #include "SystemFunctions.h"
 
+#include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
 #include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
@@ -52,7 +53,7 @@ S32 QSORT_CALLBACK menuItemValueSort(boost::shared_ptr<MenuItem> *a, boost::shar
 }
 
 
-extern void shutdownBitfighter(ServerGame *serverGame);
+extern void shutdownBitfighter();
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -588,10 +589,7 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode)
          //getUIManager()->getHostMenuUserInterface()->clearLevelLoadDisplay();
          getGame()->closeConnectionToGameServer();
 
-         // We can't get the ServerGame from the ClientGame until after we're already playing...
-         // therefore we need to rely on the ugly ugly global
-         delete gServerGame;
-         gServerGame = NULL;
+         GameManager::deleteServerGame();
       }
 
       // All other keystrokes will be ignored
@@ -926,7 +924,7 @@ static void creditsSelectedCallback(ClientGame *game, U32 unused)
 
 static void quitSelectedCallback(ClientGame *game, U32 unused)
 {
-   shutdownBitfighter(game->getServerGame());
+   shutdownBitfighter();
 }
 
 //////////
@@ -1069,7 +1067,7 @@ void MainMenuUserInterface::showUpgradeAlert()
 
 void MainMenuUserInterface::onEscape()
 {
-   shutdownBitfighter(getGame()->getServerGame());    // Quit!
+   shutdownBitfighter();    // Quit!
 }
 
 
@@ -1793,7 +1791,7 @@ void NameEntryUserInterface::renderExtras()
 // Save options to INI file, and return to our regularly scheduled program
 void NameEntryUserInterface::onEscape()
 {
-   shutdownBitfighter(getGame()->getServerGame());
+   shutdownBitfighter();
 }
 
 
@@ -1823,19 +1821,15 @@ void HostMenuUserInterface::onActivate()
 }
 
 
-extern ServerGame *gServerGame;
-
 static void startHostingCallback(ClientGame *game, U32 unused)
 {
-   TNLAssert(!gServerGame, "already exists!");
-
    game->getUIManager()->getUI<HostMenuUserInterface>()->saveSettings();
 
    GameSettingsPtr settings = game->getSettingsPtr();
 
    LevelSourcePtr levelSource = LevelSourcePtr(new FolderLevelSource(settings->getLevelList(), settings->getFolderManager()->levelDir));
 
-   gServerGame = initHosting(settings, levelSource, false, false);
+   initHosting(settings, levelSource, false, false);
 }
 
 
@@ -1961,11 +1955,7 @@ static void endGameCallback(ClientGame *game, U32 unused)
 {
    game->closeConnectionToGameServer();
 
-   if(gServerGame)
-   {
-      delete gServerGame;
-      gServerGame = NULL;
-   }
+   GameManager::deleteServerGame();
 }
 
 

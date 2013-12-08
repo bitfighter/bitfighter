@@ -17,8 +17,8 @@
 #include "config.h"
 #include "version.h"
 
-
-#include "ServerGame.h"          // For gServerGame refs
+#include "GameManager.h"
+#include "ServerGame.h"          
 
 #include "Colors.h"
 #include "gameObjectRender.h"    // For drawCircle in badge rendering below
@@ -632,11 +632,11 @@ void DiagnosticUserInterface::render()
       glColor(Colors::white);
       string allLevels = "Levels: ";
 
-      if(!gServerGame)
+      if(!GameManager::getServerGame())
          allLevels += " >>> Level list won't be resolved until you start hosting <<<"; 
       else
-         for(S32 i = 0; i < gServerGame->getLevelCount(); i++)
-            allLevels += string(gServerGame->getLevelNameFromIndex(i).getString()) + "; ";
+         for(S32 i = 0; i < GameManager::getServerGame()->getLevelCount(); i++)
+            allLevels += string(GameManager::getServerGame()->getLevelNameFromIndex(i).getString()) + "; ";
 
       U32 i, j, k;
       i = j = k = 0;

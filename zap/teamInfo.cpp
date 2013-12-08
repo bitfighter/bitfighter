@@ -5,6 +5,7 @@
 
 #include "teamInfo.h"
 
+#include "GameManager.h"
 #include "playerInfo.h"
 #include "ServerGame.h"
 #include "robot.h"
@@ -290,7 +291,7 @@ S32 Team::lua_getScore(lua_State *L)
  */
 S32 Team::lua_getPlayerCount(lua_State *L)
 {
-   gServerGame->countTeamPlayers();    // Make sure player counts are up-to-date
+   GameManager::getServerGame()->countTeamPlayers();    // Make sure player counts are up-to-date
    return returnInt(L, mPlayerCount);
 }
 
@@ -312,7 +313,7 @@ S32 Team::lua_getPlayerCount(lua_State *L)
  */
 S32 Team::lua_getPlayers(lua_State *L)
 {
-   ServerGame *game = gServerGame;
+   ServerGame *game = GameManager::getServerGame();
 
    TNLAssert(game->getPlayerCount() == game->getClientCount(), "Mismatched player counts!");
 

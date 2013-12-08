@@ -14,6 +14,7 @@
 #include "GeomUtils.h"
 
 #include "ServerGame.h"
+#include "GameManager.h"
 
 
 #define hypot _hypot    // Kill some warnings
@@ -351,7 +352,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
          line += argv[i];
       }
 
-      TNLAssert(game == gServerGame, "If true, we can change the gServerGame to game in the line below (which we've done optimistically!)");
+      TNLAssert(game == GameManager::getServerGame(), "If true, we can change the gServerGame to game in the line below (which we've done optimistically!)");
       logprintf(LogConsumer::LogLevelError, "Levelcode error in level %s, line \"%s\":\n\t%s",
                 game->getCurrentLevelFileName().c_str(), line.c_str(), errorMessage.c_str());
    }
