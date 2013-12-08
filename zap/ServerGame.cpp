@@ -5,6 +5,7 @@
 
 #include "ServerGame.h"
 
+#include "GameManager.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
 #include "masterConnection.h"
@@ -100,6 +101,7 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    botControlTickTimer.reset(BotControlTickInterval);
 
    mLevelSwitchTimer.setPeriod(LevelSwitchTime);
+   GameManager::setHostingModePhase(GameManager::NotHosting);
 }
 
 
@@ -117,6 +119,8 @@ ServerGame::~ServerGame()
 
    delete mGameInfo;
    delete mBotZoneDatabase;
+
+   GameManager::setHostingModePhase(GameManager::NotHosting);
 }
 
 
@@ -354,7 +358,7 @@ string ServerGame::loadNextLevelInfo()
 
    // Last level to process?
    if(mLevelLoadIndex == mLevelSource->getLevelCount())
-      mHostingModePhase = DoneLoadingLevels;
+      GameManager::setHostingModePhase(GameManager::DoneLoadingLevels);
 
    return levelName;
 }
@@ -648,7 +652,7 @@ void ServerGame::sendLevelStatsToMaster()
       return;
 
    // Also don't bother if we are not yet in full-on hosting mode
-   if(mHostingModePhase != Hosting)
+   if(GameManager::getHostingModePhase() != GameManager::Hosting)
       return;
 
    MasterServerConnection *masterConn = getConnectionToMaster();
@@ -1123,7 +1127,7 @@ bool ServerGame::isServer() const
 void ServerGame::idle(U32 timeDelta)
 {
    // No idle during pre-game level loading
-   if(mHostingModePhase == Game::LoadingLevels)
+   if(GameManager::getHostingModePhase() == GameManager::LoadingLevels)
       return;
 
    Parent::idle(timeDelta);
@@ -1528,8 +1532,7 @@ bool ServerGame::startHosting()
    if(!levelCount)            // No levels loaded... we'll crash if we try to start a game       
       return false;      
 
-   mHostingModePhase = Hosting;
-
+   GameManager::setHostingModePhase(GameManager::NotHosting);
    cycleLevel(FIRST_LEVEL);   // Start with the first level
 
    return true;

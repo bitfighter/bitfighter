@@ -92,15 +92,13 @@ ClientGame::~ClientGame()
 
 
 // Gets run when we join a game that we ourselves are hosting.  Is also used in tests for creating linked pairs of client/server games.
-void ClientGame::joinLocalGame(GameNetInterface *remoteInterface, HostingModePhase phase)
+void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
 {
    // Much of the time, this may seem pointless, but if we arrive here via the editor, we need to swap out the editor's team manager for
    // the one used by the game.  If we don't we'll clobber the editor's copy, and we'll get crashes in the team definition (F2) menu.
    setActiveTeamManager(&mTeamManager);
 
    mClientInfo->setRole(ClientInfo::RoleOwner);       // Local connection is always owner
-
-   mHostingModePhase = phase;
 
    getUIManager()->activateGameUI();
 
@@ -665,7 +663,7 @@ static U32 prevTimeDelta = 0;
 void ClientGame::idle(U32 timeDelta)
 {
    // No idle during pre-game level loading
-   if(mHostingModePhase == Game::LoadingLevels)
+   if(GameManager::getHostingModePhase() == GameManager::LoadingLevels)
       return;
 
    Parent::idle(timeDelta);

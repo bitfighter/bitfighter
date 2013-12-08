@@ -656,11 +656,10 @@ void UIManager::disableLevelLoadDisplay(bool fade)
 }
 
 
-void UIManager::serverLoadedLevel(const string &levelName, Game::HostingModePhase phase)
+void UIManager::serverLoadedLevel(const string &levelName)
 {
    if(levelName != "")
       getUI<GameUserInterface>()->serverLoadedLevel(levelName);
-   mGame->setHostingModePhase(phase);
 }
 
 

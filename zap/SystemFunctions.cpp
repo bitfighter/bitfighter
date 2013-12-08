@@ -36,19 +36,6 @@ using namespace std;
 namespace Zap
 {
 
-void setHostingModePhase(Game::HostingModePhase phase)
-{
-   TNLAssert(GameManager::getServerGame(), "If a ServerGame does not exist, what are we doing here?");
-   GameManager::getServerGame()->setHostingModePhase(phase);
-
-#ifndef ZAP_DEDICATED
-   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-   for(S32 i = 0; i < clientGames->size(); i++)
-      clientGames->get(i)->setHostingModePhase(phase);
-#endif
-
-}
-
 
 // Host a game (and maybe even play a bit, too!)
 void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicatedServer)
@@ -82,7 +69,7 @@ void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool test
 
    GameManager::getServerGame()->resetLevelLoadIndex();
 
-   setHostingModePhase(Game::LoadingLevels);
+   GameManager::setHostingModePhase(GameManager::LoadingLevels);
 
 #ifndef ZAP_DEDICATED
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();

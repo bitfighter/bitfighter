@@ -203,7 +203,7 @@ public:
    void activateGameUserInterface();
    void renderLevelListDisplayer();
    void enableLevelLoadDisplay();
-   void serverLoadedLevel(const string &levelName, Game::HostingModePhase phase);
+   void serverLoadedLevel(const string &levelName);
    void disableLevelLoadDisplay(bool fade);
    void gotPasswordOrPermissionsReply(const ClientGame *game, const char *message);
 

@@ -464,7 +464,7 @@ void MenuUserInterface::onMouseMoved()
 
    // Really only matters when starting to host game... don't want to be able to change menu items while the levels are loading.
    // This is purely an aesthetic issue, a minor irritant.
-   if(getGame()->getHostingModePhase() == Game::LoadingLevels)
+   if(GameManager::getHostingModePhase() == GameManager::LoadingLevels)
       return;
 
    itemSelectedWithMouse = true;
@@ -544,8 +544,6 @@ void MenuUserInterface::processMouse()
 }
 
 
-extern void setHostingModePhase(Game::HostingModePhase phase);
-
 bool MenuUserInterface::onKeyDown(InputCode inputCode)
 {
    if(Parent::onKeyDown(inputCode))
@@ -579,14 +577,13 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode)
    mKeyDown = true;
 
    // Handle special case of keystrokes during hosting preparation phases
-   if(getGame()->getHostingModePhase() == Game::LoadingLevels ||
-      getGame()->getHostingModePhase() == Game::DoneLoadingLevels)
+   if(GameManager::getHostingModePhase() == GameManager::LoadingLevels ||
+      GameManager::getHostingModePhase() == GameManager::DoneLoadingLevels)
    {
       if(inputCode == KEY_ESCAPE)     // Can only get here when hosting
       {
-         setHostingModePhase(Game::NotHosting);
+         GameManager::setHostingModePhase(GameManager::NotHosting);
 
-         //getUIManager()->getHostMenuUserInterface()->clearLevelLoadDisplay();
          getGame()->closeConnectionToGameServer();
 
          GameManager::deleteServerGame();

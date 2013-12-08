@@ -205,7 +205,7 @@ void hostGame(ServerGame *serverGame)
    for(S32 i = 0; i < clientGames->size(); i++)
    {
       clientGames->get(i)->getUIManager()->disableLevelLoadDisplay(true);
-      clientGames->get(i)->joinLocalGame(serverGame->getNetInterface(), serverGame->getHostingModePhase());  // ...then we'll play, too!
+      clientGames->get(i)->joinLocalGame(serverGame->getNetInterface());  // ...then we'll play, too!
    }
 #endif
 }
@@ -299,7 +299,7 @@ void loadAnotherLevelOrStartHosting()
    if(!GameManager::getServerGame())
       return;
 
-   if(GameManager::getServerGame()->getHostingModePhase() == Game::LoadingLevels)
+   if(GameManager::getHostingModePhase() == GameManager::LoadingLevels)
    {
       string levelName = GameManager::getServerGame()->loadNextLevelInfo();
 
@@ -307,11 +307,11 @@ void loadAnotherLevelOrStartHosting()
       const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
       // Notify any client UIs on the hosting machine that the server has loaded a level
       for(S32 i = 0; i < clientGames->size(); i++)
-         clientGames->get(i)->getUIManager()->serverLoadedLevel(levelName, GameManager::getServerGame()->getHostingModePhase());
+         clientGames->get(i)->getUIManager()->serverLoadedLevel(levelName);
 #endif
    }
 
-   else if(GameManager::getServerGame()->getHostingModePhase() == Game::DoneLoadingLevels)
+   else if(GameManager::getHostingModePhase() == GameManager::DoneLoadingLevels)
       hostGame(GameManager::getServerGame());
 }
 

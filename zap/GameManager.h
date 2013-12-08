@@ -19,9 +19,20 @@ class ClientGame;
 // Singleton class for keeping track of various Game objects
 class GameManager
 {
+public:
+   enum HostingModePhase
+   {
+      NotHosting,
+      LoadingLevels,
+      DoneLoadingLevels,
+      Hosting
+   };
+
 private:
    static ServerGame *mServerGame;
    static Vector<ClientGame *> mClientGames;
+
+   static HostingModePhase mHostingModePhase;
 
 public:
    GameManager();
@@ -41,6 +52,8 @@ public:
 
    // Other
    static void idle(U32 timeDelta);
+   static void setHostingModePhase(HostingModePhase);
+   static HostingModePhase getHostingModePhase();
 };
 
 } 

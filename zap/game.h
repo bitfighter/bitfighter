@@ -173,15 +173,6 @@ struct WallRec;
 
 class Game
 {
-public:
-   enum HostingModePhase
-   {
-      NotHosting,
-      LoadingLevels,
-      DoneLoadingLevels,
-      Hosting
-   };
-
 private:
    F32 mLegacyGridSize;
    U32 mLevelFormat;      // Version of level file loaded.  Used for legacy analyses
@@ -217,7 +208,6 @@ protected:
    Vector<Robot *> mRobots;               // Grand master list of all robots in the current game
    Rect mWorldExtents;                    // Extents of everything
    string mLevelFileHash;                 // MD5 hash of level file
-   HostingModePhase mHostingModePhase;
 
    virtual void idle(U32 timeDelta);      // Only called from ServerGame::idle() and ClientGame::idle()
 
@@ -285,9 +275,6 @@ public:
    S32 getPlayerCount() const;                                    // Returns number of human players
    S32 getAuthenticatedPlayerCount() const;                       // Number of authenticated human players
    S32 getRobotCount() const;                                     // Returns number of bots
-
-   void setHostingModePhase(HostingModePhase phase);
-   Game::HostingModePhase getHostingModePhase() const;
 
    ClientInfo *getClientInfo(S32 index) const;
    const Vector<RefPtr<ClientInfo> > *getClientInfos();

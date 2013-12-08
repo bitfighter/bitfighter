@@ -16,12 +16,13 @@ namespace Zap
 // Declare statics
 ServerGame *GameManager::mServerGame = NULL;
 Vector<ClientGame *> GameManager::mClientGames;
+GameManager::HostingModePhase GameManager::mHostingModePhase = GameManager::NotHosting;
 
 
 // Constructor
 GameManager::GameManager()
 {
-   // Do nothing
+      // Do nothing
 }
 
 
@@ -101,5 +102,18 @@ void GameManager::idle(U32 timeDelta)
    idleServerGame(timeDelta);
    idleClientGames(timeDelta);
 }
+
+
+void GameManager::setHostingModePhase(HostingModePhase phase)
+{
+   mHostingModePhase = phase;
+}
+
+
+GameManager::HostingModePhase GameManager::getHostingModePhase()
+{
+   return mHostingModePhase;
+}
+
 
 } 

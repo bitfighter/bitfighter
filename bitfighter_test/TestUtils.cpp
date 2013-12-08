@@ -80,7 +80,7 @@ GamePair::GamePair(const string &levelCode, S32 clients)
 
       client->userEnteredLoginCredentials("TestPlayer" + itos(i), "password", false);    // Simulates entry from NameEntryUserInterface
 
-      client->joinLocalGame(server->getNetInterface(), server->getHostingModePhase());
+      client->joinLocalGame(server->getNetInterface());
 
       // This is a bit hacky, but we need to turn off TNL's bandwidth controls so our tests can run faster.  FASTER!!@!
       client->getConnectionToServer()->useZeroLatencyForTesting();
