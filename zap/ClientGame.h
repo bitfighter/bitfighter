@@ -113,9 +113,11 @@ public:
    void gotPlayerLevelRating(S32 rating);
 
    bool canRateLevel() const;
-
+   void levelIsNotReallyInTheDatabase();
 
    void setLevelDatabaseId(U32 id);
+
+   string getCurrentLevelFileName() const;
 
    UIManager *getUIManager() const;
 

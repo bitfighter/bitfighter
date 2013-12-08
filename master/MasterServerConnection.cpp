@@ -958,7 +958,7 @@ struct TotalLevelRatingsReader : public MasterThreadEntry
    {
       TotalLevelRating *totalRating = totalLevelRatingsCache[dbId].get();
 
-      totalRating->rating = rating;
+      totalRating->setRating(rating);
       totalRating->isBusy = false;
 
       for(S32 i = 0; i < totalRating->waitingClients.size(); i++)
@@ -1007,7 +1007,7 @@ struct PlayerLevelRatingsReader : public MasterThreadEntry
       // If this rating item was updated by the client while we were retrieving data fom the database,
       // we'll treat that as authoritative and not overwrite it with (likely) stale data from the database.
       if(!playerRating->receivedUpdateByClientWhileBusy)
-         playerRating->rating = rating;
+         playerRating->setRating(rating);
 
       playerRating->receivedUpdateByClientWhileBusy = false;
       playerRating->isBusy = false;
@@ -1059,7 +1059,7 @@ TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
       rating = newRating.get();
    }
 
-   if(!rating->isValid || rating->isExpired() || rating->rating == UnknownRating)
+   if(!rating->isValid || rating->isExpired() || rating->getRating() == UnknownRating)
       if(!rating->isBusy)
       {
          rating->isBusy = true;
@@ -1085,7 +1085,7 @@ static PlayerLevelRating *createNewPlayerRating(U32 databaseId, const StringTabl
 
    rating->databaseId = databaseId;
    rating->playerName = playerName;
-   rating->rating = UnknownRating;
+   rating->setRatingMagicValue(UnknownRating);
 
    return rating;
 }
@@ -1105,7 +1105,7 @@ PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const 
    if(!rating)
       rating = createNewPlayerRating(databaseId, playerName);
    
-   if(!rating->isValid || rating->isExpired() || rating->rating == UnknownRating)
+   if(!rating->isValid || rating->isExpired() || rating->getRating() == UnknownRating)
       if(!rating->isBusy)
       {
          rating->isBusy = true;
@@ -1198,16 +1198,19 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestHighScores, ())
 // individual rating, on with the overall average rating.
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 databaseId))
 {
-   // Do nothing if client sent us an invalid id
+   // If client sent us an invalid id, send back a magic number alerting them to that fact
    if(!LevelDatabase::isLevelInDatabase(databaseId))
+   {
+      m2cSendTotalLevelRating(databaseId, LevelDatabase::THIS_LEVEL_IS_NOT_REALLY_IN_THE_DATABASE);
       return;
+   }
 
    TotalLevelRating *totalRating = getLevelRating(databaseId);
 
    TNLAssert(totalRating, "totalRating should not be NULL!");
 
    if(!totalRating->isBusy)   // Not busy, so value must be cached.  Send it now.
-      m2cSendTotalLevelRating(databaseId, totalRating->rating);
+      m2cSendTotalLevelRating(databaseId, totalRating->getRating());
    else                       // Otherwise, add it to the list to send when the database request is complete
       totalRating->addClientToWaitingList(this);
 
@@ -1220,7 +1223,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 d
 
    // If playerRating is not busy, it means we have the value at hand and can send it immediately
    if(!playerRating->isBusy)
-      sendPlayerLevelRating(databaseId, playerRating->rating);
+      sendPlayerLevelRating(databaseId, playerRating->getRating());
 
    // Otherwise, it is busy, and we need to add ourselves to the list of clients waiting for it to
    // finish its work, at which time the rating value will be available.  Note we check here to make
@@ -1272,8 +1275,28 @@ void ThreadingStruct::addClientToWaitingList(MasterServerConnection *connection)
 LevelRating::LevelRating()
 {
    databaseId = LevelDatabase::NOT_IN_DATABASE;
-   rating = UnknownRating;
+   setRatingMagicValue(UnknownRating);
    receivedUpdateByClientWhileBusy = false;
+}
+
+
+S16 LevelRating::getRating()
+{
+   return mRating;
+}
+
+
+void LevelRating::setRating(S16 rating)
+{
+   mRating = MAX(rating, MIN_RATING);
+}
+
+
+// Use this method for ratings that are special values
+void LevelRating::setRatingMagicValue(S16 rating)
+{
+   // We expect rating to be < MIN_RATING here... not sure if we want to set an assert though...
+   mRating = rating;
 }
 
 
@@ -1307,15 +1330,16 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSetLevelRating, (U32 datab
       playerRating->isValid = true;
    }
 
-   S32 oldRating = playerRating->rating;
+   S32 oldRating = playerRating->getRating();
    playerRating->resetClock();
-   playerRating->rating = denormalizedPlayerRating;
+   playerRating->setRating(denormalizedPlayerRating);
 
    if(playerRating->isBusy)
       playerRating->receivedUpdateByClientWhileBusy = true;
 
    // Adjust the total level rating while we're at it
-   totalLevelRatingsCache[databaseId]->rating += denormalizedPlayerRating - oldRating;
+   totalLevelRatingsCache[databaseId]->setRating(
+         totalLevelRatingsCache[databaseId]->getRating() + denormalizedPlayerRating - oldRating);
 
    if(totalLevelRatingsCache[databaseId]->isBusy)
       totalLevelRatingsCache[databaseId]->receivedUpdateByClientWhileBusy = true;

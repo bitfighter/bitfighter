@@ -572,6 +572,35 @@ bool ClientGame::canRateLevel() const
 }
 
 
+void ClientGame::levelIsNotReallyInTheDatabase()
+{
+   setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);
+   logprintf(LogConsumer::LogLevelError, "Level %s is marked as being in the database, but Pleiades does not recognize it!", 
+                                          getCurrentLevelFileName().c_str());
+
+   // If we are locally hosting, show an error message
+   if(isTestServer())
+   {
+      string msg = "This level has a LevelDatabaseId line in it, which means we expect to find it "
+                   "in Pleiades.  But Pleiades reports that it cannot find this level.  Try uploading "
+                   "the level again, or remove the LevelDatabaseId line with a text editor.";
+
+      mUIManager->displayMessageBox("Database Problem", "Press [[Esc]] to continue", msg);
+   }
+}
+
+
+// Return filename of level currently in play
+string ClientGame::getCurrentLevelFileName() const
+{
+   ServerGame *serverGame = getServerGame();
+   if(serverGame)
+      return serverGame->getCurrentLevelFileName();
+   else
+      return "Unknown Levelfile";
+}
+
+
 // On the client, this is called when we are in the editor, or when we've just begun a new game and the server has sent
 // us the latest 411 on the level we're about to play
 void ClientGame::setLevelDatabaseId(U32 id)
@@ -999,7 +1028,8 @@ PersonalRating ClientGame::toggleLevelRating()
    S32 oldRating = mPlayerLevelRating;
 
    mPlayerLevelRating = getNextRating(mPlayerLevelRating);     // Update the player's rating of this level
-   mTotalLevelRating += mPlayerLevelRating - oldRating;        // We can predict the total level rating as well!
+   if(mTotalLevelRating != UnknownRating)
+      mTotalLevelRating += mPlayerLevelRating - oldRating;     // We can predict the total level rating as well (usually)!
 
 
    // Normalize to the datatype needed for sending
