@@ -1010,7 +1010,9 @@ PersonalRating ClientGame::toggleLevelRating()
    getConnectionToMaster()->c2mSetLevelRating(mLevelDatabaseId, normalizedPlayerRating);
 
    // 2) Alert Pleiades with an http request
-   RefPtr<LevelDatabaseRateThread> rateThread = new LevelDatabaseRateThread(this, LevelDatabaseRateThread::LevelRating(mPlayerLevelRating));
+   
+   LevelDatabaseRateThread::LevelRating ratingEnum = LevelDatabaseRateThread::getLevelRatingEnum(mPlayerLevelRating);
+   RefPtr<LevelDatabaseRateThread> rateThread = new LevelDatabaseRateThread(this, ratingEnum);
    getSecondaryThread()->addEntry(rateThread);
 
    return mPlayerLevelRating;

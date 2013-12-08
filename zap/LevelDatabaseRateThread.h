@@ -24,11 +24,11 @@ class LevelDatabaseRateThread : public Master::ThreadEntry
    S32 errorNumber;
 public:
 
-#define LEVEL_RATINGS_TABLE           \
-   LEVEL_RATING(PlusOne,  "up" )      \
-   LEVEL_RATING(Neutral,  "neutral" ) \
-   LEVEL_RATING(MinusOne, "down" )    \
-
+#define LEVEL_RATINGS_TABLE            /* enum val */ \
+   LEVEL_RATING(PlusOne,  "up" )          /* 0 */     \
+   LEVEL_RATING(Neutral,  "neutral" )     /* 1 */     \
+   LEVEL_RATING(MinusOne, "down" )        /* 2 */     \
+                                                      
 
    enum LevelRating {
 #define LEVEL_RATING(val, b) val,
@@ -45,6 +45,8 @@ public:
    virtual ~LevelDatabaseRateThread();
    void run();
    void finish();
+
+   static LevelRating getLevelRatingEnum(S32 rating);
 
    ClientGame* mGame;
    string mLevelId;

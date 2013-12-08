@@ -113,4 +113,20 @@ void LevelDatabaseRateThread::finish()
 }
 
 
+LevelDatabaseRateThread::LevelRating LevelDatabaseRateThread::getLevelRatingEnum(S32 rating)
+{
+   if(rating == -1)
+      return MinusOne;
+   else if(rating == 0)
+      return Neutral;
+   else if(rating == 1)
+      return PlusOne;
+   else
+   {
+      TNLAssert(false, "Invalid rating!");
+      return Neutral;
+   }
+}
+
+
 } /* namespace Zap */
