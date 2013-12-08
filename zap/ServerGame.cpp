@@ -1255,7 +1255,7 @@ void ServerGame::idle(U32 timeDelta)
 
 void ServerGame::processSimulatedStutter(U32 timeDelta)
 {
-   // Simulate CPU stutter without impacting gClientGame
+   // Simulate CPU stutter without impacting ClientGames
    if(mSettings->getSimulatedStutter() > 0)
    {
       if(mStutterTimer.getCurrent() > 0)      

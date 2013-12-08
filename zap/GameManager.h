@@ -27,9 +27,15 @@ public:
    GameManager();
    virtual ~GameManager();
 
+   // ServerGame related
    static void setServerGame(ServerGame *serverGame);
    static ServerGame *getServerGame();
    static void deleteServerGame();
+
+   // ClientGame related
+   static const Vector<ClientGame *> *getClientGames();
+   static void addClientGame(ClientGame *clientGame);
+   static void deleteClientGames();
 };
 
 } 

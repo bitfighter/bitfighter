@@ -5,6 +5,7 @@
 
 #include "VideoSystem.h"
 
+#include "GameManager.h"
 #include "ClientGame.h"
 #include "IniFile.h"
 #include "Console.h"
@@ -290,7 +291,6 @@ S32 VideoSystem::getWindowPositionY()
 
 
 extern void setDefaultBlendFunction();
-extern Vector<ClientGame *> gClientGames;
 
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.
@@ -464,9 +464,10 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
 
    // Notify all active UIs that the screen has changed mode.  This will likely need some work to not do something
    // horrible in split-screen mode.
-   for(S32 i = 0; i < gClientGames.size(); i++)
-      if(gClientGames[i]->getUIManager()->getCurrentUI())
-         gClientGames[i]->getUIManager()->getCurrentUI()->onDisplayModeChange();
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+   for(S32 i = 0; i < clientGames->size(); i++)
+      if(clientGames->get(i)->getUIManager()->getCurrentUI())
+         clientGames->get(i)->getUIManager()->getCurrentUI()->onDisplayModeChange();
 
    // Re-initialize our fonts because OpenGL textures can be lost upon screen change
    FontManager::reinitialize(settings);

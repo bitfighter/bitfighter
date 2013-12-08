@@ -52,4 +52,22 @@ void GameManager::deleteServerGame()
 }
 
 
+const Vector<ClientGame *> *GameManager::getClientGames()
+{
+   return &mClientGames;
+}
+
+
+void GameManager::deleteClientGames()
+{
+   mClientGames.deleteAndClear();
+}
+
+
+void GameManager::addClientGame(ClientGame *clientGame)
+{
+   mClientGames.push_back(clientGame);
+}
+
+
 } 

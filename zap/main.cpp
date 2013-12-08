@@ -160,10 +160,6 @@ using namespace TNL;
 
 namespace Zap
 {
-#ifndef ZAP_DEDICATED
-   extern Vector<ClientGame *> gClientGames;
-#endif
-
 
 ZapJournal gZapJournal;          // Our main journaling object
 
@@ -204,10 +200,12 @@ void hostGame(ServerGame *serverGame)
    }
 
 #ifndef ZAP_DEDICATED
-   for(S32 i = 0; i < gClientGames.size(); i++)
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+
+   for(S32 i = 0; i < clientGames->size(); i++)
    {
-      gClientGames[i]->getUIManager()->disableLevelLoadDisplay(true);
-      gClientGames[i]->joinLocalGame(serverGame->getNetInterface(), serverGame->getHostingModePhase());  // ...then we'll play, too!
+      clientGames->get(i)->getUIManager()->disableLevelLoadDisplay(true);
+      clientGames->get(i)->joinLocalGame(serverGame->getNetInterface(), serverGame->getHostingModePhase());  // ...then we'll play, too!
    }
 #endif
 }
@@ -243,14 +241,16 @@ void display()
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
-   for(S32 i = 0; i < gClientGames.size(); i++)
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+
+   for(S32 i = 0; i < clientGames->size(); i++)
    {
       // Do any la-ti-da that we might need to get the viewport setup for the game we're about to run.  For example, if
       // we have two games, we might want to divide the screen into two viewports, configuring each before running the 
       // associated render method which follows...
       // Each viewport should have an aspect ratio of 800x600.  The aspect ratio of the entire window will likely need to be different.
       TNLAssert(i == 0, "You need a little tra-la-la here before you can do that!");
-      gClientGames[i]->getUIManager()->renderCurrent();
+      clientGames->get(i)->getUIManager()->renderCurrent();
    }
 
    // Swap the buffers. This this tells the driver to render the next frame from the contents of the
@@ -266,20 +266,23 @@ void display()
 
 #endif // ZAP_DEDICATED
 
-void shutdownBitfighter();    // Forward declaration
 
+void shutdownBitfighter();    // Forward declaration
 
 // If the server game exists, and is shutting down, close any ClientGame connections we might have to it, then delete it.
 // If there are no client games, delete it and return to the OS.
-void checkIfServerGameIsShuttingDown(const Vector<ClientGame *> &clientGames, ServerGame *serverGame, U32 timeDelta)
+void checkIfServerGameIsShuttingDown(U32 timeDelta)
 {
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+   ServerGame *serverGame = GameManager::getServerGame();
+
    if(serverGame && serverGame->isReadyToShutdown(timeDelta))
    {
 #ifndef ZAP_DEDICATED
-      for(S32 i = 0; i < clientGames.size(); i++)
-         clientGames[i]->closeConnectionToGameServer();    // ...disconnect any local clients
+      for(S32 i = 0; i < clientGames->size(); i++)
+         clientGames->get(i)->closeConnectionToGameServer();    // ...disconnect any local clients
 
-      if(clientGames.size() > 0)       // If there are any clients running...
+      if(clientGames->size() > 0)       // If there are any clients running...
          GameManager::deleteServerGame();
       else                                
 #endif
@@ -290,13 +293,16 @@ void checkIfServerGameIsShuttingDown(const Vector<ClientGame *> &clientGames, Se
 
 
 // This function could be moved anywhere... onto Game? No, not there, as that creates an #include loop with ClientGame.h
-void gameIdle(const Vector<ClientGame *> &clientGames, ServerGame *serverGame, U32 timeDelta)
+void gameIdle(U32 timeDelta)
 {
-
 #ifndef ZAP_DEDICATED
-   for(S32 i = 0; i < clientGames.size(); i++)
-      clientGames[i]->idle(timeDelta);
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+
+   for(S32 i = 0; i < clientGames->size(); i++)
+      clientGames->get(i)->idle(timeDelta);
 #endif
+
+   ServerGame *serverGame = GameManager::getServerGame();
 
    if(serverGame)
       serverGame->idle(timeDelta);
@@ -315,9 +321,10 @@ void loadAnotherLevelOrStartHosting()
       string levelName = GameManager::getServerGame()->loadNextLevelInfo();
 
 #ifndef ZAP_DEDICATED
+      const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
       // Notify any client UIs on the hosting machine that the server has loaded a level
-      for(S32 i = 0; i < gClientGames.size(); i++)
-         gClientGames[i]->getUIManager()->serverLoadedLevel(levelName, GameManager::getServerGame()->getHostingModePhase());
+      for(S32 i = 0; i < clientGames->size(); i++)
+         clientGames->get(i)->getUIManager()->serverLoadedLevel(levelName, GameManager::getServerGame()->getHostingModePhase());
 #endif
    }
 
@@ -339,7 +346,7 @@ void idle()
       settings = GameManager::getServerGame()->getSettings();
 #ifndef ZAP_DEDICATED
    else     // If there is no server game, and this code is running, there *MUST* be a client game
-      settings = gClientGames[0]->getSettings();
+      settings = GameManager::getClientGames()->get(0)->getSettings();
 #endif
 
    static S32 deltaT = 0;     // static, as we need to keep holding the value that was set... probably some reason this is S32?
@@ -361,12 +368,8 @@ void idle()
 
    if(deltaT >= S32(1000 / maxFPS))
    {
-#ifdef ZAP_DEDICATED
-      // Probably wrong, but at least dedicated can build without errors.
-      static Vector<ClientGame *> gClientGames;
-#endif
-      checkIfServerGameIsShuttingDown(gClientGames, GameManager::getServerGame(), U32(deltaT));
-      gameIdle(gClientGames, GameManager::getServerGame(), U32(deltaT));
+      checkIfServerGameIsShuttingDown(U32(deltaT));
+      gameIdle(U32(deltaT));
 
 #ifndef ZAP_DEDICATED
       if(!dedicated)
@@ -385,14 +388,16 @@ void idle()
 
    while(SDL_PollEvent(&event))
    {
-      TNLAssert(gClientGames.size() > 0, "Why are we here if there is no client game??");
+      const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+
+      TNLAssert(clientGames->size() > 0, "Why are we here if there is no client game??");
 
       if(event.type == SDL_QUIT) // Handle quit here
          shutdownBitfighter();
 
       // Pass the event to all clientGames..
-      for(S32 i = 0; i < gClientGames.size(); i++)
-         Event::onEvent(gClientGames[i], &event);
+      for(S32 i = 0; i < clientGames->size(); i++)
+         Event::onEvent(clientGames->get(i), &event);
    }
    // END SDL event polling
 #endif
@@ -465,17 +470,17 @@ void shutdownBitfighter()
 
    // Avoid this function being called twice when we exit via methods 1-4 above
 #ifndef ZAP_DEDICATED
-   if(gClientGames.size() == 0)
+   if(GameManager::getClientGames()->size() == 0)
 #endif
       if(GameManager::getServerGame())
          exitToOs();
 
-// Grab a pointer to settings wherever we can.  Note that gClientGame and serverGame refer to the same settings object.
+// Grab a pointer to settings wherever we can.  Note that all Games (client or server) currently refer to the same settings object.
 #ifndef ZAP_DEDICATED
-   if(gClientGames.size() > 0)
-      settings = gClientGames[0]->getSettings();
+   if(GameManager::getClientGames()->size() > 0)
+      settings = GameManager::getClientGames()->get(0)->getSettings();
 
-   gClientGames.deleteAndClear();
+   GameManager::deleteClientGames();
 
 #endif
 
@@ -569,15 +574,16 @@ void createClientGame(GameSettingsPtr settings)
       Game::seedRandomNumberGenerator(settings->getIniSettings()->mSettings.getVal<string>("LastName"));
       clientGame->getClientInfo()->getId()->getRandom();
 
-      gClientGames.push_back(clientGame);
+      GameManager::addClientGame(clientGame);
 
       //gClientGames.push_back(new ClientGame(Address(), settings));   //  !!! 2-player split-screen game in same game.
 
       // Set the intial UI
       if(settings->shouldShowNameEntryScreenOnStartup())
       {
-         for(S32 i = 0; i < gClientGames.size(); i++)
-            gClientGames[i]->getUIManager()->activate<NameEntryUserInterface>();
+         const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+         for(S32 i = 0; i < clientGames->size(); i++)
+            clientGames->get(i)->getUIManager()->activate<NameEntryUserInterface>();
 
          //if(gClientGame)
          //{
@@ -593,10 +599,11 @@ void createClientGame(GameSettingsPtr settings)
       }
       else  // Skipping startup screen
       {
-         for(S32 i = 0; i < gClientGames.size(); i++)
+         const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+         for(S32 i = 0; i < clientGames->size(); i++)
          {
-            gClientGames[i]->getUIManager()->activate<MainMenuUserInterface>();
-            gClientGames[i]->setReadyToConnectToMaster(true);
+            clientGames->get(i)->getUIManager()->activate<MainMenuUserInterface>();
+            clientGames->get(i)->setReadyToConnectToMaster(true);
          }
 
          //if(gClientGame2)
@@ -1205,9 +1212,11 @@ int main(int argc, char **argv)
       // Now show any error messages from start-up
       Vector<string> configurationErrors = settings->getConfigurationErrors();
       if(configurationErrors.size() > 0)
-         for(S32 i = 0; i < gClientGames.size(); i++)
+      {
+         const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+         for(S32 i = 0; i < clientGames->size(); i++)
          {
-            UIManager *uiManager = gClientGames[i]->getUIManager();
+            UIManager *uiManager = clientGames->get(i)->getUIManager();
             ErrorMessageUserInterface *ui = uiManager->getUI<ErrorMessageUserInterface>();
 
             ui->reset();
@@ -1221,6 +1230,7 @@ int main(int argc, char **argv)
 
             uiManager->activate(ui);
          }
+      }
 
 #endif   // !ZAP_DEDICATED
 

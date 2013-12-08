@@ -11,6 +11,8 @@
 #include "UIMenus.h"
 #include "UIManager.h"
 
+#include "GameManager.h"
+
 #include "ClientGame.h"
 #include "Console.h"             // For console rendering
 #include "Colors.h"
@@ -40,8 +42,6 @@ using namespace UI;
 // Define statics
 S32 UserInterface::messageMargin = UserInterface::vertMargin + UI::LoadoutIndicator::LoadoutIndicatorHeight + 5;
 
-
-extern Vector<ClientGame *> gClientGames;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -402,7 +402,7 @@ void UserInterface::onTextInput(char ascii)      { /* Do nothing */ }
 // This should make it easier to see what happens when users press joystick buttons.
 void UserInterface::renderDiagnosticKeysOverlay()
 {
-   if(gClientGames[0]->getSettings()->getIniSettings()->diagnosticKeyDumpMode)
+   if(GameManager::getClientGames()->get(0)->getSettings()->getIniSettings()->diagnosticKeyDumpMode)
    {
      S32 vpos = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2;
      S32 hpos = horizMargin;

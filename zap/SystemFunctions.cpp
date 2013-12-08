@@ -36,16 +36,15 @@ using namespace std;
 namespace Zap
 {
 
-extern Vector<ClientGame *> gClientGames;
-
 void setHostingModePhase(Game::HostingModePhase phase)
 {
    TNLAssert(GameManager::getServerGame(), "If a ServerGame does not exist, what are we doing here?");
    GameManager::getServerGame()->setHostingModePhase(phase);
 
 #ifndef ZAP_DEDICATED
-   for(S32 i = 0; i < gClientGames.size(); i++)
-      gClientGames[i]->setHostingModePhase(phase);
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+   for(S32 i = 0; i < clientGames->size(); i++)
+      clientGames->get(i)->setHostingModePhase(phase);
 #endif
 
 }
@@ -86,8 +85,10 @@ void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool test
    setHostingModePhase(Game::LoadingLevels);
 
 #ifndef ZAP_DEDICATED
-   for(S32 i = 0; i < gClientGames.size(); i++)
-      gClientGames[i]->getUIManager()->enableLevelLoadDisplay();
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+
+   for(S32 i = 0; i < clientGames->size(); i++)
+      clientGames->get(i)->getUIManager()->enableLevelLoadDisplay();
 #endif
 }
 
@@ -108,9 +109,11 @@ void abortHosting_noLevels(ServerGame *serverGame)
 
 
 #ifndef ZAP_DEDICATED
-   for(S32 i = 0; i < gClientGames.size(); i++)    // <<=== Should probably only display this message on the clientGame that initiated hosting
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+
+   for(S32 i = 0; i < clientGames->size(); i++)    // <<=== Should probably only display this message on the clientGame that initiated hosting
    {
-      UIManager *uiManager = gClientGames[i]->getUIManager();
+      UIManager *uiManager = clientGames->get(i)->getUIManager();
 
       ErrorMessageUserInterface *errUI = uiManager->getUI<ErrorMessageUserInterface>();
 
@@ -130,10 +133,8 @@ void abortHosting_noLevels(ServerGame *serverGame)
       uiManager->activate<ErrorMessageUserInterface>();
       uiManager->disableLevelLoadDisplay(false); 
    }
-#endif
 
-#ifndef ZAP_DEDICATED
-   if(gClientGames.size() == 0)
+   if(clientGames->size() == 0)
 #endif
       shutdownBitfighter();      // Quit in an orderly fashion
 }
