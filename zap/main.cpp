@@ -193,6 +193,8 @@ void exitToOs()
 // All levels loaded, we're ready to go
 void hostGame(ServerGame *serverGame)
 {
+   TNLAssert(serverGame, "Need a ServerGame to host, silly!");
+
    if(!serverGame->startHosting())
    {
       abortHosting_noLevels(serverGame);
