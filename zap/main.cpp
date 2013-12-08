@@ -202,7 +202,7 @@ void hostGame(ServerGame *serverGame)
    }
 
 #ifndef ZAP_DEDICATED
-   for(S32 i = 0; i < gClientGames.size(); i++)      // Should be true if this isn't a dedicated server...
+   for(S32 i = 0; i < gClientGames.size(); i++)
    {
       gClientGames[i]->getUIManager()->disableLevelLoadDisplay(true);
       gClientGames[i]->joinLocalGame(serverGame->getNetInterface());  // ...then we'll play, too!
