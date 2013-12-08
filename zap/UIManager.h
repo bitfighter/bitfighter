@@ -12,6 +12,7 @@
 #include "SparkTypesEnum.h"
 #include "PlayerActionEnum.h"
 
+#include "game.h"
 #include "HelpItemManager.h"     // For HelpItem def
 #include "LoadoutTracker.h"
 
@@ -202,7 +203,7 @@ public:
    void activateGameUserInterface();
    void renderLevelListDisplayer();
    void enableLevelLoadDisplay();
-   void serverLoadedLevel(const string &levelName);
+   void serverLoadedLevel(const string &levelName, Game::HostingModePhase phase);
    void disableLevelLoadDisplay(bool fade);
    void gotPasswordOrPermissionsReply(const ClientGame *game, const char *message);
 

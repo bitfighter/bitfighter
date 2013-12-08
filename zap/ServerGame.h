@@ -133,13 +133,6 @@ public:
    bool voteStart(ClientInfo *clientInfo, VoteType type, S32 number = 0);
    void voteClient(ClientInfo *clientInfo, bool voteYes);
 
-   enum HostingModePhases {
-      NotHosting,
-      LoadingLevels,
-      DoneLoadingLevels,
-      Hosting
-   };
-
    bool startHosting();
 
    U32 getMaxPlayers() const;
@@ -211,8 +204,6 @@ public:
 
    S32 addLevel(const LevelInfo &info);
    void removeLevel(S32 index);
-
-   HostingModePhases hostingModePhase;
 
    // SFX Related -- these will just generate an error, as they should never be called
    SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f) const;

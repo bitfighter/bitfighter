@@ -93,7 +93,7 @@ static void doScenario2(GamePair &gamePair)
    ClientGame *clientGame2 = newClientGame();
    GameSettingsPtr settings = clientGame2->getSettingsPtr();
    clientGame2->userEnteredLoginCredentials("TestUser2", "password", false);    // Simulates entry from NameEntryUserInterface
-   clientGame2->joinLocalGame(serverGame->getNetInterface());
+   clientGame2->joinLocalGame(serverGame->getNetInterface(), serverGame->getHostingModePhase());
    clientGame2->getConnectionToServer()->useZeroLatencyForTesting();
 
    for(S32 i = 0; i < serverGame->getClientCount(); i++)

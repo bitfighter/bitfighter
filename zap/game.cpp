@@ -107,6 +107,8 @@ Game::Game(const Address &theBindAddress, GameSettingsPtr settings) : mGameObjDa
    mObjectsLoaded = 0;
 
    mSecondaryThread = new Master::DatabaseAccessThread();
+
+   mHostingModePhase = NotHosting;
 }
 
 
@@ -305,6 +307,18 @@ S32 Game::getAuthenticatedPlayerCount() const
 S32 Game::getRobotCount() const
 {
    return mRobotCount;
+}
+
+
+void Game::setHostingModePhase(HostingModePhase phase)
+{
+   mHostingModePhase = phase;
+}
+
+
+Game::HostingModePhase Game::getHostingModePhase() const
+{
+   return mHostingModePhase;
 }
 
 

@@ -35,8 +35,20 @@ using namespace std;
 namespace Zap
 {
 
-
 extern Vector<ClientGame *> gClientGames;
+
+void setHostingModePhase(Game::HostingModePhase phase)
+{
+   TNLAssert(gServerGame, "If gServerGame does not exist, what are we doing here?");
+      gServerGame->setHostingModePhase(phase);
+
+#ifndef ZAP_DEDICATED
+   for(S32 i = 0; i < gClientGames.size(); i++)
+      gClientGames[i]->setHostingModePhase(phase);
+#endif
+
+}
+
 
 // Host a game (and maybe even play a bit, too!)
 ServerGame *initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicatedServer)
@@ -52,7 +64,8 @@ ServerGame *initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bo
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
    if(!testMode)
    {
-      logprintf(LogConsumer::ServerFilter, "----------\nBitfighter server started [%s]", getTimeStamp().c_str());
+      logprintf(LogConsumer::ServerFilter, "----------\n"
+                                           "Bitfighter server started [%s]", getTimeStamp().c_str());
       logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", serverGame->getSettings()->getHostName().c_str(), 
                                                                             serverGame->getSettings()->getHostDescr().c_str());
 
@@ -68,13 +81,18 @@ ServerGame *initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bo
 
    serverGame->resetLevelLoadIndex();
 
+   // gServerGame hasn't been set yet, so we'll need to set the hostingModePhase directly; setHostingModePhase won't work!
+   // Be sure to set it on both serverGame as well as all gClientGames.
+   serverGame->setHostingModePhase(Game::LoadingLevels);
+
 #ifndef ZAP_DEDICATED
    for(S32 i = 0; i < gClientGames.size(); i++)
+   {
       gClientGames[i]->getUIManager()->enableLevelLoadDisplay();
+      gClientGames[i]->setHostingModePhase(Game::LoadingLevels);
+   }
 #endif
    
-   serverGame->hostingModePhase = ServerGame::LoadingLevels;
-
    return serverGame;
 }
 

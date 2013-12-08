@@ -67,7 +67,7 @@ GamePair::GamePair(const string &levelCode)
    gt->addToGame(server, server->getGameObjDatabase());
 
    server->startHosting();     // This will load levels and wipe out any teams
-   client->joinLocalGame(server->getNetInterface());
+   client->joinLocalGame(server->getNetInterface(), server->getHostingModePhase());
 
    // This is a bit hacky, but we need to turn off TNL's bandwidth controls so our tests can run faster.  FASTER!!@!
    client->getConnectionToServer()->useZeroLatencyForTesting();

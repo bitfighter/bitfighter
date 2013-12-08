@@ -62,8 +62,6 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
 
    EventManager::get()->setPaused(false);
 
-   hostingModePhase = ServerGame::NotHosting;
-
    mInfoFlags = 0;                           // Currently used to specify test mode and debug builds
    mCurrentLevelIndex = 0;
 
@@ -334,7 +332,8 @@ bool ServerGame::populateLevelInfoFromSource(const string &fullFilename, LevelIn
 }
 
 
-// Returns name of level loaded, which will be displayed in the client window during level loading phase of hosting
+// Returns name of level loaded, which will be displayed in the client window during level loading phase of hosting.
+// Can return "" if there was a problem with the level.
 string ServerGame::loadNextLevelInfo()
 {
    FolderManager *folderManager = getSettings()->getFolderManager();
@@ -353,8 +352,9 @@ string ServerGame::loadNextLevelInfo()
    else     // Failed to process level; remove it from the list
       mLevelSource->remove(mLevelLoadIndex);
 
+   // Last level to process?
    if(mLevelLoadIndex == mLevelSource->getLevelCount())
-      hostingModePhase = DoneLoadingLevels;
+      mHostingModePhase = DoneLoadingLevels;
 
    return levelName;
 }
@@ -645,6 +645,10 @@ void ServerGame::sendLevelStatsToMaster()
 {
    // Send level stats to master, but don't bother in test mode -- don't want to gum things up with a bunch of one-off levels
    if(mTestMode)
+      return;
+
+   // Also don't bother if we are not yet in full-on hosting mode
+   if(mHostingModePhase != Hosting)
       return;
 
    MasterServerConnection *masterConn = getConnectionToMaster();
@@ -1118,7 +1122,11 @@ bool ServerGame::isServer() const
 // Top-level idle loop for server, runs only on the server by definition
 void ServerGame::idle(U32 timeDelta)
 {
-  Parent::idle(timeDelta);
+   // No idle during pre-game level loading
+   if(mHostingModePhase == Game::LoadingLevels)
+      return;
+
+   Parent::idle(timeDelta);
 
    processSimulatedStutter(timeDelta);
    processVoting(timeDelta);
@@ -1506,13 +1514,10 @@ void ServerGame::clearBotMoves()
 
 
 // Returns true if things went well, false if we couldn't find any levels to host
-// nly
 bool ServerGame::startHosting()
 {
-   if(!mLevelSource->isEmptyLevelDirOk() && mSettings->getFolderManager()->levelDir == "")     // Never did resolve a leveldir... no hosting for you!
+   if(!mLevelSource->isEmptyLevelDirOk() && mSettings->getFolderManager()->levelDir == "")   // No leveldir, no hosting!
       return false;
-
-   hostingModePhase = Hosting;
 
    S32 levelCount = mLevelSource->getLevelCount();
 
@@ -1520,10 +1525,12 @@ bool ServerGame::startHosting()
       logprintf(LogConsumer::ServerFilter, "\t%s [%s]", getLevelNameFromIndex(i).getString(), 
                 mLevelSource->getLevelFileName(i).c_str());
 
-   if(!levelCount)      // No levels loaded... we'll crash if we try to start a game       
+   if(!levelCount)            // No levels loaded... we'll crash if we try to start a game       
       return false;      
 
-   cycleLevel(FIRST_LEVEL);      // Start with the first level
+   mHostingModePhase = Hosting;
+
+   cycleLevel(FIRST_LEVEL);   // Start with the first level
 
    return true;
 }

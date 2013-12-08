@@ -173,6 +173,15 @@ struct WallRec;
 
 class Game
 {
+public:
+   enum HostingModePhase
+   {
+      NotHosting,
+      LoadingLevels,
+      DoneLoadingLevels,
+      Hosting
+   };
+
 private:
    F32 mLegacyGridSize;
    U32 mLevelFormat;      // Version of level file loaded.  Used for legacy analyses
@@ -208,6 +217,7 @@ protected:
    Vector<Robot *> mRobots;               // Grand master list of all robots in the current game
    Rect mWorldExtents;                    // Extents of everything
    string mLevelFileHash;                 // MD5 hash of level file
+   HostingModePhase mHostingModePhase;
 
    virtual void idle(U32 timeDelta);      // Only called from ServerGame::idle() and ClientGame::idle()
 
@@ -266,8 +276,8 @@ public:
 
    static md5wrapper md5;
 
-   Game(const Address &theBindAddress, GameSettingsPtr settings);   // Constructor
-   virtual ~Game();                                                 // Destructor
+   Game(const Address &theBindAddress, GameSettingsPtr settings); // Constructor
+   virtual ~Game();                                               // Destructor
 
    void setActiveTeamManager(TeamManager *teamManager);
 
@@ -275,6 +285,9 @@ public:
    S32 getPlayerCount() const;                                    // Returns number of human players
    S32 getAuthenticatedPlayerCount() const;                       // Number of authenticated human players
    S32 getRobotCount() const;                                     // Returns number of bots
+
+   void setHostingModePhase(HostingModePhase phase);
+   Game::HostingModePhase getHostingModePhase() const;
 
    ClientInfo *getClientInfo(S32 index) const;
    const Vector<RefPtr<ClientInfo> > *getClientInfos();
@@ -320,7 +333,6 @@ public:
    virtual void renderBasicInterfaceOverlay() const;
    virtual void emitTextEffect(const string &text, const Color &color, const Point &pos) const;
 
-
    U32 getTimeUnconnectedToMaster();
    virtual void onConnectedToMaster();
 
@@ -353,7 +365,6 @@ public:
    void addWall(const WallRec &barrier);
 
    virtual void deleteLevelGen(LuaLevelGenerator *levelgen) = 0; 
-
 
    virtual Ship *getLocalPlayerShip() const = 0;
 
