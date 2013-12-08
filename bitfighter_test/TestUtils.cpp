@@ -54,6 +54,7 @@ ServerGame *newServerGame()
 GamePair::GamePair(const string &levelCode)
 {
    client = newClientGame();
+   GameManager::addClientGame(client);
 
    GameSettingsPtr settings = client->getSettingsPtr();
 
@@ -84,8 +85,16 @@ GamePair::~GamePair()
 {
    LuaScriptRunner::clearScriptCache();
    LuaScriptRunner::shutdown();
-	delete client;
-	delete server;
+
+   // Disconnect all ClientGames before deleting
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+
+   for(S32 i = 0; i < clientGames->size(); i++)
+      clientGames->get(i)->closeConnectionToGameServer();
+
+   // Clean up GameManager
+   GameManager::deleteServerGame();    
+   GameManager::deleteClientGames();
 }
 
 
