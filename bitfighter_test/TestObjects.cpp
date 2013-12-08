@@ -46,7 +46,7 @@ class ObjectTest : public testing::Test
 
 static void ProcessArg_test1(ServerGame *game, S32 argc, const char **argv)
 {
-   for(S32 j=1; j<=argc; j++)
+   for(S32 j = 1; j <= argc; j++)
    {
       game->cleanUp();
       game->processLevelLoadLine(j, 0, argv, game->getGameObjDatabase(), "some_non_existing_filename.level");
@@ -71,6 +71,7 @@ TEST_F(ObjectTest, ProcessArguments)
    {
       NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
       argv[0] = netClassRep->getClassName();
+
       ProcessArg_test1(game, argc, argv);
    }
 
