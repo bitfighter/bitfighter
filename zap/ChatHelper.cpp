@@ -74,7 +74,7 @@ namespace Zap
    { "maxbots",            &ChatCommands::setMaxBotsHandler,         { xINT },       1, ADMIN_COMMANDS,  0,  1,  {"<count>"},             "Set the maximum bots allowed for this server" },
    { "shuffle",            &ChatCommands::shuffleTeams,              { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "Randomly reshuffle teams" },
 #ifdef TNL_DEBUG
-	{ "pause",              &ChatCommands::pauseHandler,              { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "TODO: add 'PAUSED' display while paused" },
+   { "pause",              &ChatCommands::pauseHandler,              { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "TODO: add 'PAUSED' display while paused" },
 #endif
 
    { "setownerpass",       &ChatCommands::setOwnerPassHandler,       { STR },        1, OWNER_COMMANDS,  0,  1,  {"[passwd]"},            "Set owner password" },
@@ -272,7 +272,7 @@ void ChatHelper::onActivated()
 // When chatting, show command help if user presses F1
 void ChatHelper::activateHelp(UIManager *uiManager)
 {
-    uiManager->getUI<InstructionsUserInterface>()->activatePage(InstructionsUserInterface::InstructionAdvancedCommands);
+   uiManager->getUI<InstructionsUserInterface>()->activatePage(InstructionsUserInterface::InstructionAdvancedCommands);
 }
 
 
@@ -295,7 +295,6 @@ static void makeTeamNameList(const Game *game, Vector<string> &nameCandidateList
    for(S32 i = 0; i < game->getTeamCount(); i++)
       nameCandidateList.push_back(game->getTeamName(i).getString());
 }
-
 
 static Vector<string> *getCandidateList(Game *game, const char *first, S32 arg)
 {
@@ -414,8 +413,44 @@ bool ChatHelper::processInputCode(InputCode inputCode)
             else
                appender = "";
          }
+         mLineEditor.completePartial(candidates, partial, pos, appender);
+      }
+      else // Username chat completion
+      {
+         // First, parse line into words
+         Vector<string> words = parseString(mLineEditor.getString());
 
-         mLineEditor.completePartial(candidates, partial, pos, appender); 
+         string partial;          // The partially typed word we're trying to match against
+
+         // Check for trailing space --> http://www.suodenjoki.dk/us/archive/2010/basic-string-back.htm
+         if(words.size() > 0 && *mLineEditor.getString().rbegin() != ' ')
+            partial = words[words.size()-1];            // We'll be matching against what we've typed so far
+
+         else
+         {
+            partial = "";
+            return false; // Remove this line if you want to enable username completion for strings that end with a space
+                           // or for empty chat lines
+                           // for example: "hello " (cycling through all usernames)
+         }
+
+         const string *entry = mLineEditor.getStringPtr();
+         static Vector<string> names;
+
+         makePlayerNameList(getGame(), names);
+
+         // If the command string has quotes in it, use the last space up to the first quote
+         std::size_t lastChar = string::npos;
+         if(entry->find_first_of("\"") != string::npos)
+            lastChar = entry->find_first_of("\"");
+
+         string appender = "";
+
+         std::size_t pos = entry->find_last_of(' ', lastChar) + 1;
+         if (pos == string::npos)
+            pos = 0;
+
+         mLineEditor.completePartial(&names, partial, pos, appender);
       }
    }
    else
