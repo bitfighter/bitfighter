@@ -402,7 +402,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendTotalLevelRating, (U32
 
    if(databaseId == clientGame->getLevelDatabaseId())
    {
-      if(rating == LevelDatabase::THIS_LEVEL_IS_NOT_REALLY_IN_THE_DATABASE)
+      if(rating == NotReallyInTheDatabase)
          clientGame->levelIsNotReallyInTheDatabase();
       else
          clientGame->gotTotalLevelRating(rating);

@@ -379,6 +379,7 @@ S16 DatabaseWriter::getLevelRating(U32 databaseId)
 
    selectHandler(sql, 1, results);
 
+   // If no results, it means that the client expected the level to be in the database, but it wasn't.
    if(results.size() == 0)
       return UnknownRating;
 

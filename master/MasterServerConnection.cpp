@@ -1052,7 +1052,7 @@ TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
    // wrapping a NULL object.  So rating, which points to that object, will also be NULL.  Viva la confusion!
    TotalLevelRating *rating = totalLevelRatingsCache[databaseId].get();
 
-   if(!rating)
+   if(!rating)    // i.e. not in cache
    {
       boost::shared_ptr<TotalLevelRating> newRating = boost::shared_ptr<TotalLevelRating>(new TotalLevelRating());
       totalLevelRatingsCache[databaseId] = newRating;
@@ -1198,12 +1198,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestHighScores, ())
 // individual rating, on with the overall average rating.
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLevelRating, (U32 databaseId))
 {
-   // If client sent us an invalid id, send back a magic number alerting them to that fact
+   // If client sent us a bogus id, do nothing
    if(!LevelDatabase::isLevelInDatabase(databaseId))
-   {
-      m2cSendTotalLevelRating(databaseId, LevelDatabase::THIS_LEVEL_IS_NOT_REALLY_IN_THE_DATABASE);
       return;
-   }
 
    TotalLevelRating *totalRating = getLevelRating(databaseId);
 
