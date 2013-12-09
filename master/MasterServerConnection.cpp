@@ -948,7 +948,7 @@ struct TotalLevelRatingsReader : public MasterThreadEntry
       do 
       {
          totalRating->receivedUpdateByClientWhileBusy = false;
-         rating = getDatabaseWriter(mSettings).getLevelRating(dbId);
+         rating = getDatabaseWriter(mSettings).getLevelRating(dbId);    // rating could be a magic number!
       } 
       while(totalRating->receivedUpdateByClientWhileBusy);
    }
@@ -958,7 +958,7 @@ struct TotalLevelRatingsReader : public MasterThreadEntry
    {
       TotalLevelRating *totalRating = totalLevelRatingsCache[dbId].get();
 
-      totalRating->setRating(rating);
+      totalRating->setRatingMagicValue(rating);  // Because, as noted above, rating could be a magic number
       totalRating->isBusy = false;
 
       for(S32 i = 0; i < totalRating->waitingClients.size(); i++)
@@ -966,7 +966,6 @@ struct TotalLevelRatingsReader : public MasterThreadEntry
             totalRating->waitingClients[i]->m2cSendTotalLevelRating(dbId, rating);
 
          totalRating->waitingClients.clear();
-         
    }
 };
 
@@ -1285,14 +1284,13 @@ S16 LevelRating::getRating()
 
 void LevelRating::setRating(S16 rating)
 {
-   mRating = MAX(rating, MIN_RATING);
+   mRating = MAX(rating, MinumumLegitimateRating);
 }
 
 
-// Use this method for ratings that are special values
+// Use this method for ratings that could be special values (though might not be)
 void LevelRating::setRatingMagicValue(S16 rating)
 {
-   // We expect rating to be < MIN_RATING here... not sure if we want to set an assert though...
    mRating = rating;
 }
 

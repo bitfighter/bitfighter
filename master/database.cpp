@@ -387,8 +387,8 @@ S16 DatabaseWriter::getLevelRating(U32 databaseId)
 
    if(rating > S16_MAX)
       return S16_MAX;
-   else if(rating < S16_MIN)
-      return S16_MIN;
+   else if(rating < MinumumLegitimateRating)
+      return MinumumLegitimateRating;
 
    return rating;
 } 

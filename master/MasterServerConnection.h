@@ -61,11 +61,6 @@ struct HighScores : public ThreadingStruct
 
 struct LevelRating : public ThreadingStruct
 {
-   // We have some magic number action going on here --> 
-   // NotReallyInTheDatabase is sent to the client when the server can't find the requested level
-   // We also use UnknownRating and friends in different contexts
-   static const S16 MIN_RATING = S16_MIN + 3;    
-
 private:
    S16 mRating;
 
