@@ -394,6 +394,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendPlayerLevelRating, (U3
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendTotalLevelRating, (U32 databaseId, S16 rating))
 {
    TNLAssert(LevelDatabase::isLevelInDatabase(databaseId), "Should not have received a rating for this level!");
+   if(!LevelDatabase::isLevelInDatabase(databaseId))
+      return;
 
    // Verify that these ratings are for the current level (and that it hasn't somehow changed from underneath us)
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
