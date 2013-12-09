@@ -98,7 +98,6 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    PersonalRating myRating    = clientGame->getPersonalLevelRating();
    S16            totalRating = clientGame->getTotalLevelRating();
 
-
    if(isInDatabase)
    {
       symbols.push_back(SymbolString::getBlankSymbol(10));
@@ -109,7 +108,10 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
       symbols.push_back(SymbolString::getBlankSymbol(8));  // Padding -- more symbols will be added below in symbolParse
 
       if(totalRating == UnknownRating)
-         SymbolString::symbolParse(NULL, "Loading Rating [[SPINNER]]", symbols, LevelInfoContext, (S32)RatingSize, &Colors::red);
+      {
+         SymbolString::symbolParse(NULL, "Loading Rating ", symbols, LevelInfoContext, (S32)RatingSize,     &Colors::red);
+         SymbolString::symbolParse(NULL, "[[SPINNER]]",     symbols, LevelInfoContext, (S32)RatingSize + 6, &Colors::red);
+      }
       else
       {
          string myRatingStr = GameUserInterface::getPersonalRatingString(myRating);
