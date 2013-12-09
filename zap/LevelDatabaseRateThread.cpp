@@ -83,8 +83,6 @@ void LevelDatabaseRateThread::run()
 
    if(!req.send())
    {
-      //mGame->displayErrorMessage("!!! Error rating level: Cannot connect to server");
-
       errorNumber = 1;
       return;
    }
