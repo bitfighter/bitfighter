@@ -93,35 +93,41 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    static const string divider = " / ";
    static const F32 dividerWidth = getStringWidth(LevelInfoContext, RatingSize, divider.c_str());
 
+   ClientGame *clientGame = static_cast<ClientGame *>(gameType->getGame());
+
+   PersonalRating myRating    = clientGame->getPersonalLevelRating();
+   S16            totalRating = clientGame->getTotalLevelRating();
+
 
    if(isInDatabase)
    {
-      ClientGame *clientGame = static_cast<ClientGame *>(gameType->getGame());
-
-      PersonalRating myRating    = clientGame->getPersonalLevelRating();
-      S16            totalRating = clientGame->getTotalLevelRating();
-
       symbols.push_back(SymbolString::getBlankSymbol(10));
       symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext));  // Little database icon
 
       S32 pos;
       
-      string myRatingStr = GameUserInterface::getPersonalRatingString(myRating);
-      pos = (myRatingStr[0] == '+' || myRatingStr[0] == '-') ? 1 : 0;
-      mySignlessRatingWidth = getStringWidth(LevelInfoContext, RatingSize, myRatingStr.c_str() + pos);
+      symbols.push_back(SymbolString::getBlankSymbol(8));  // Padding -- more symbols will be added below in symbolParse
 
-      string totalRatingStr = GameUserInterface::getTotalRatingString(totalRating);
-      pos = (totalRatingStr[0] == '+' || totalRatingStr[0] == '-') ? 1 : 0;
-      totalSignlessRatingWidth = getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.c_str() + pos);
-      totalSignWidth = getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.substr(0, pos).c_str());
+      if(totalRating == UnknownRating)
+         SymbolString::symbolParse(NULL, "Loading Rating [[SPINNER]]", symbols, LevelInfoContext, (S32)RatingSize, &Colors::red);
+      else
+      {
+         string myRatingStr = GameUserInterface::getPersonalRatingString(myRating);
+         pos = (myRatingStr[0] == '+' || myRatingStr[0] == '-') ? 1 : 0;         // Used to skip past sign below
+         mySignlessRatingWidth = getStringWidth(LevelInfoContext, RatingSize, myRatingStr.c_str() + pos);
 
-      symbols.push_back(SymbolString::getBlankSymbol(8));                                  // Padding
-      SymbolString::symbolParse(NULL, myRatingStr + divider + totalRatingStr, symbols, LevelInfoContext, (S32)RatingSize, &Colors::red);
+         string totalRatingStr = GameUserInterface::getTotalRatingString(totalRating);
+         pos = (totalRatingStr[0] == '+' || totalRatingStr[0] == '-') ? 1 : 0;   // Used to skip past sign below
+         totalSignlessRatingWidth = getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.c_str() + pos);
+         totalSignWidth = getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.substr(0, pos).c_str());
+
+         SymbolString::symbolParse(NULL, myRatingStr + divider + totalRatingStr, symbols, LevelInfoContext, (S32)RatingSize, &Colors::red);
+      }
    }
 
    SymbolString titleSymbolString(symbols);
 
-   if(isInDatabase)
+   if(isInDatabase && totalRating != UnknownRating)      // No legend for unknown rating
    {
       // Figure out where the ratings will be rendered
       const F32 rightEdge = (DisplayManager::getScreenInfo()->getGameCanvasWidth() + titleSymbolString.getWidth()) / 2;
