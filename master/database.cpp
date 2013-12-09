@@ -381,7 +381,7 @@ S16 DatabaseWriter::getLevelRating(U32 databaseId)
 
    // If no results, it means that the client expected the level to be in the database, but it wasn't.
    if(results.size() == 0)
-      return UnknownRating;
+      return NotReallyInTheDatabase;
 
    S32 rating = atoi(results[0][0].c_str());
 
