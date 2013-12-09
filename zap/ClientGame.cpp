@@ -529,15 +529,19 @@ PersonalRating ClientGame::getNextRating(PersonalRating currentRating)
 }
 
 
+// Just got the rating from the server... this is definitive
 void ClientGame::gotTotalLevelRating(S16 rating)
 {
    mTotalLevelRating = rating;
+   mTotalLevelRatingOrig = mTotalLevelRating;
 }
 
 
+// Just got the rating from the server... this is definitive
 void ClientGame::gotPlayerLevelRating(S32 rating)
 {
    mPlayerLevelRating = PersonalRating(rating);
+   mPlayerLevelRatingOrig = mPlayerLevelRating;
 }
 
 
@@ -1008,6 +1012,8 @@ void ClientGame::onGameStarting()
 
    mPlayerLevelRating = UnknownRating;
    mTotalLevelRating  = UnknownRating;
+
+   updateOriginalRating();
 }
 
 
@@ -1023,6 +1029,7 @@ PersonalRating ClientGame::getPersonalLevelRating() const
 }
 
 
+// Player hit the rate key.  Preemptively calculate the new rating, but it will not be definitive until we get confirmation.
 PersonalRating ClientGame::toggleLevelRating()
 {
    S32 oldRating = mPlayerLevelRating;
@@ -1046,6 +1053,20 @@ PersonalRating ClientGame::toggleLevelRating()
    getSecondaryThread()->addEntry(rateThread);
 
    return mPlayerLevelRating;
+}
+
+
+void ClientGame::updateOriginalRating()
+{
+   mPlayerLevelRatingOrig = mPlayerLevelRating;
+   mTotalLevelRatingOrig  = mTotalLevelRating;
+}
+
+
+void ClientGame::restoreOriginalRating()
+{
+   mPlayerLevelRating = mPlayerLevelRatingOrig;
+   mTotalLevelRating  = mTotalLevelRatingOrig;
 }
 
 

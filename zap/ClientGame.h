@@ -54,7 +54,9 @@ private:
    SFXHandle mModuleSound[ModuleCount];
 
    PersonalRating mPlayerLevelRating;
+   PersonalRating mPlayerLevelRatingOrig;
    S16 mTotalLevelRating;
+   S16 mTotalLevelRatingOrig;
 
    bool needsRating() const;
 
@@ -127,6 +129,9 @@ public:
    PersonalRating toggleLevelRating();
    S16 getTotalLevelRating() const;
    PersonalRating getPersonalLevelRating() const;
+   void updateOriginalRating();
+   void restoreOriginalRating();
+
 
    bool isLevelInDatabase() const;
 

@@ -102,13 +102,18 @@ void LevelDatabaseRateThread::finish()
    if(errorNumber == 0)
    {
       // Do nothing -- user already saw a preemptive success message
+      mGame->updateOriginalRating();
    }
    else if(errorNumber == 1)
+   {
       mGame->displayErrorMessage("!!! Error rating level: Cannot connect to server");
+      mGame->restoreOriginalRating();
+   }
    else
    {
       mGame->displayErrorMessage("!!! Error rating level: %s", responseBody.c_str());
       logprintf(LogConsumer::ConsoleMsg, "Error rating level: %s (code %i)", responseBody.c_str(), responseCode);
+      mGame->restoreOriginalRating();
    }
 }
 
