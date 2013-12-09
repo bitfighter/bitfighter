@@ -1471,7 +1471,6 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    else if(checkInputCode(InputCodeManager::BINDING_TOGGLE_RATING, inputCode))
       toggleLevelRating();
 
-
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)
    {
       if(mShutdownMode == ShuttingDown)
