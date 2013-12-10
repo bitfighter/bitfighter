@@ -576,6 +576,8 @@ bool ClientGame::canRateLevel() const
 }
 
 
+class EditorUserInterface;
+
 void ClientGame::levelIsNotReallyInTheDatabase()
 {
    setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);
@@ -586,10 +588,21 @@ void ClientGame::levelIsNotReallyInTheDatabase()
    if(isTestServer())
    {
       string msg = "This level has a LevelDatabaseId line in it, which means we expect to find it "
-                   "in Pleiades.  But Pleiades reports that it cannot find this level.  Try uploading "
+                   "in Pleiades, but it is not there.  Try uploading "
                    "the level again, or remove the LevelDatabaseId line with a text editor.";
 
       mUIManager->displayMessageBox("Database Problem", "Press [[Esc]] to continue", msg);
+   }
+
+   // Almost the same as above... maybe we can get rid of the above?
+   else if(mUIManager->isCurrentUI<EditorUserInterface>() || mUIManager->cameFrom<EditorUserInterface>())     
+   {
+      string msg = "This level has a LevelDatabaseId line in it, which means we expect to find it "
+         "in Pleiades, but it is not there.  I will remove the LevelDatabaseId line from the file (you'll "
+         "need to save).  You can upload the level again from the Editor menu.";
+
+      mUIManager->displayMessageBox("Database Problem", "Press [[Esc]] to continue", msg);
+      mUIManager->markEditorLevelPermanentlyDirty();
    }
 }
 
@@ -613,7 +626,7 @@ void ClientGame::setLevelDatabaseId(U32 id)
 
    // If we are in a game, and connected to master,then we can request that the master server send us the current level ratings.
    // If we are connected to a game server, then we are not in the editor (though we could be testing a level).
-   if(isConnectedToMaster() && isConnectedToServer() && needsRating())
+   if(isConnectedToMaster() && needsRating())
       mConnectionToMaster->c2mRequestLevelRating(id);
 }
 
@@ -1010,11 +1023,32 @@ void ClientGame::onGameStarting()
    getGameObjDatabase()->removeEverythingFromDatabase();
    getUIManager()->onGameStarting();
 
+   resetRatings();
+}
+
+
+void ClientGame::resetRatings()
+{
    mPlayerLevelRating = UnknownRating;
    mTotalLevelRating  = UnknownRating;
 
    updateOriginalRating();
 }
+
+
+void ClientGame::updateOriginalRating()
+{
+   mPlayerLevelRatingOrig = mPlayerLevelRating;
+   mTotalLevelRatingOrig = mTotalLevelRating;
+}
+
+
+void ClientGame::restoreOriginalRating()
+{
+   mPlayerLevelRating = mPlayerLevelRatingOrig;
+   mTotalLevelRating = mTotalLevelRatingOrig;
+}
+
 
 
 S16 ClientGame::getTotalLevelRating() const
@@ -1053,20 +1087,6 @@ PersonalRating ClientGame::toggleLevelRating()
    getSecondaryThread()->addEntry(rateThread);
 
    return mPlayerLevelRating;
-}
-
-
-void ClientGame::updateOriginalRating()
-{
-   mPlayerLevelRatingOrig = mPlayerLevelRating;
-   mTotalLevelRatingOrig  = mTotalLevelRating;
-}
-
-
-void ClientGame::restoreOriginalRating()
-{
-   mPlayerLevelRating = mPlayerLevelRatingOrig;
-   mTotalLevelRating  = mTotalLevelRatingOrig;
 }
 
 

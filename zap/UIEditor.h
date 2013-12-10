@@ -418,6 +418,8 @@ public:
    void setLingeringMessage(const string &msg);
    void clearLingeringMessage();
 
+   void markLevelPermanentlyDirty();
+
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
 
    // Snapping related functions:

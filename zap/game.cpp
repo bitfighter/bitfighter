@@ -612,6 +612,7 @@ void Game::onConnectedToMaster()
 }
 
 
+// Called when ServerGame or the editor loads a level
 void Game::resetLevelInfo()
 {
    // These data need to be reset everytime before a level loads

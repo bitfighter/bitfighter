@@ -131,6 +131,8 @@ public:
    PersonalRating getPersonalLevelRating() const;
    void updateOriginalRating();
    void restoreOriginalRating();
+   void resetRatings();
+
 
 
    bool isLevelInDatabase() const;

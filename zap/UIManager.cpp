@@ -770,12 +770,6 @@ void UIManager::startLoadingLevel(bool engineerEnabled)
 }
 
 
-void UIManager::readRobotLine(const string &robotLine)
-{
-   getUI<EditorUserInterface>()->addRobotLine(robotLine);
-}
-
-
 void UIManager::doneLoadingLevel()
 {
    getUI<GameUserInterface>()->doneLoadingLevel();
@@ -991,6 +985,19 @@ void UIManager::resetInGameHelpMessages()
 {
    getUI<GameUserInterface>()->resetInGameHelpMessages();
 }
+
+
+void UIManager::readRobotLine(const string &robotLine)
+{
+   getUI<EditorUserInterface>()->addRobotLine(robotLine);
+}
+
+
+void UIManager::markEditorLevelPermanentlyDirty() 
+{
+   getUI<EditorUserInterface>()->markLevelPermanentlyDirty();
+}
+
 
 #else
 

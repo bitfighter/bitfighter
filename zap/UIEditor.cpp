@@ -512,6 +512,8 @@ void EditorUserInterface::cleanUp()
 {
    ClientGame *game = getGame();
 
+   game->resetRatings();
+
    clearUndoHistory();     // Clear up a little memory
    mDockItems.clear();     // Free a little more -- dock will be rebuilt when editor restarts
    
@@ -571,6 +573,12 @@ void EditorUserInterface::loadLevel()
       // New level!
       game->getGameType()->setLevelCredits(getGame()->getClientInfo()->getName());  // Set default author
    }
+
+   //// If we have a level in the database, let's ping the database to make sure it's really still there
+   //if(game->isLevelInDatabase() && game->getConnectionToMaster())
+   //{
+   //   game->getConnectionToMaster()->c2mRequestLevelRating(getLevelDatabaseId());
+   //}
 
    clearUndoHistory();                 // Clean out undo/redo buffers
    clearSelection(mLoadTarget);        // Nothing starts selected
@@ -1131,8 +1139,14 @@ void EditorUserInterface::teamsHaveChanged()
    validateTeams(&hackyjunk);
 
    validateLevel();          // Revalidate level -- if teams have changed, requirements for spawns have too
-   setNeedToSave(true);
+   markLevelPermanentlyDirty();
    autoSave();
+}
+
+
+void EditorUserInterface::markLevelPermanentlyDirty()
+{
+   setNeedToSave(true);
    mAllUndoneUndoLevel = -1; // This change can't be undone
 }
 
