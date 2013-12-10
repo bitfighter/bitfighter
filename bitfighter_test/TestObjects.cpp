@@ -13,9 +13,6 @@
 #include "tnlGhostConnection.h"
 #include "tnlPlatform.h"
 
-// define private public? only done to allows accessing and checking if mGeometry is NULL
-#define private public
-
 #include "BfObject.h"
 #include "gameType.h"
 #include "ServerGame.h"
@@ -35,23 +32,21 @@
 #  include <windows.h>   // For ARRAYSIZE
 #endif
 
-using namespace Zap;
+namespace Zap {
 using namespace std;
-
 
 class ObjectTest : public testing::Test
 {
+   public:
+      static void ProcessArg_test1(ServerGame *game, S32 argc, const char **argv)
+      {
+         for(S32 j = 1; j <= argc; j++)
+         {
+            game->cleanUp();
+            game->processLevelLoadLine(j, 0, argv, game->getGameObjDatabase(), "some_non_existing_filename.level");
+         }
+      }
 };
-
-
-static void ProcessArg_test1(ServerGame *game, S32 argc, const char **argv)
-{
-   for(S32 j = 1; j <= argc; j++)
-   {
-      game->cleanUp();
-      game->processLevelLoadLine(j, 0, argv, game->getGameObjDatabase(), "some_non_existing_filename.level");
-   }
-}
 
 
 // For the most part, only care about it not crashing or segfault from random argv/argc...
@@ -190,4 +185,5 @@ TEST_F(ObjectTest, ServerClient)
       }
    }
 }
-
+   
+}; // namespace Zap
