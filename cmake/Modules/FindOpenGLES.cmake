@@ -10,6 +10,10 @@ set(GLES_SEARCH_PATHS
 	/opt/local # DarwinPorts
 	/opt/csw # Blastwave
 	/opt
+	/opt/graphics/OpenGL
+	/usr/openwin
+	/usr/shlib
+	/usr/X11R6/
 )
 
 
@@ -20,7 +24,7 @@ find_path(OPENGLES_INCLUDE_DIR
 )
 
 find_library(OPENGLES_LIBRARY 
-	NAMES libGLESv1_CM libGLESv1_CM.so libGLESv1_CM.so.1 libGLESv1_CM.so.1.1.0 
+	NAMES libGLESv1_CM GLESv1_CM libGLES_CM GLES_CM
 	PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64 lib/x86_64-linux-gnu/mesa-egl
 	PATHS ${GLES_SEARCH_PATHS}
 )
