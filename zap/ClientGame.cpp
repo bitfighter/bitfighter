@@ -14,6 +14,7 @@
 
 #include "barrier.h"
 #include "gameType.h"
+#include "UIEditor.h"
 #include "UIManager.h"
 #include "EditorTeam.h"
 
