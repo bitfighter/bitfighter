@@ -116,7 +116,7 @@ public:
    virtual void setGeom(const Vector<Point> &points);
 
    friend class ObjectTest;
-   FRIEND_TEST(ObjectTest, ServerClient);
+   FRIEND_TEST(ObjectTest, GhostingSanity);
 };
 
 }
