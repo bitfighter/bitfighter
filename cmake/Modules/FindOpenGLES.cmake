@@ -11,6 +11,7 @@ set(GLES_SEARCH_PATHS
 	/opt/csw # Blastwave
 	/opt
 	/opt/graphics/OpenGL
+	/opt/vc  # Raspberry pi
 	/usr/openwin
 	/usr/shlib
 	/usr/X11R6/
