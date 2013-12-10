@@ -130,6 +130,7 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 
    TNLAssert(mStash == NULL, "This should be NULL, or else we'll have a memory leak!");
    mStash = sth_create(512, 512);
+   TNLAssert(mStash != NULL, "Font Stash was not created!  OpenGL issue?");
 
    // Our stroke fonts
    fontList[FontRoman]               = new BfFont(&fgStrokeRoman);
