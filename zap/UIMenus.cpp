@@ -949,6 +949,7 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
    addMenuItem(new MenuItem("QUIT",                   quitSelectedCallback,       "", KEY_Q));
 }
 
+
 // Destructor
 MainMenuUserInterface::~MainMenuUserInterface()
 {
