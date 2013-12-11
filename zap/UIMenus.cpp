@@ -913,6 +913,7 @@ static void editorSelectedCallback(ClientGame *game, U32 unused)
    game->getUIManager()->activate<EditorUserInterface>();
 }
 
+
 static void creditsSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->activate<CreditsUserInterface>();
