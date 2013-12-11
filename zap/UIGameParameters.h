@@ -58,8 +58,11 @@ private:
    S32 mQuitItemIndex;               // Index of our quit item -- will vary depending on how many game-specific parameters there are
    S32 mGameSpecificParams;          // How many game specific parameters do we have?
 
-   virtual S32 getTextSize(MenuItemSize size);
-   virtual S32 getGap(MenuItemSize size);
+   virtual S32 getTextSize(MenuItemSize size) const;
+   virtual S32 getGap(MenuItemSize size) const;
+
+   S32 getYStart() const;
+
 
    typedef map<const string, boost::shared_ptr<MenuItem> > MenuItemMap;
    MenuItemMap mMenuItemMap;

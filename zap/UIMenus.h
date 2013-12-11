@@ -41,18 +41,19 @@ private:
    bool mRepeatMode;
    bool mKeyDown;
 
-   virtual void renderExtras();     // For drawing something extra on a menu
-   void advanceItem();              // What happens when we move on to the next menu item?
+   virtual void renderExtras() const;     // For drawing something extra on a menu
+   void advanceItem();                    // What happens when we move on to the next menu item?
 
    virtual void initialize();
 
 protected:
    Vector<boost::shared_ptr<MenuItem> > mMenuItems;
 
-   S32 getOffset();                             // Calculates index of topmost visible item         
-   virtual S32 getYStart();                     // Get vert pos of first menu item
-   virtual S32 getTextSize(MenuItemSize size);  // Let menus set their own text size
-   virtual S32 getGap(MenuItemSize size);       // Gap is the space between items
+   S32 getOffset();                                   // Calculates index of topmost visible item
+   S32 getBaseYStart() const;                         // Base calculation for getYStart()
+   virtual S32 getYStart() const;                     // Get vert pos of first menu item
+   virtual S32 getTextSize(MenuItemSize size) const;  // Let menus set their own text size
+   virtual S32 getGap(MenuItemSize size) const;       // Gap is the space between items
 
    S32 mMaxMenuSize;
    S32 mFirstVisibleItem;  // Some menus have items than will fit on the screen; this is the index of the first visible item
@@ -165,7 +166,9 @@ private:
    bool mNeedToUpgrade;       // True if client is out of date and needs to upgrade, false if we're on the latest version
    bool mShowedUpgradeAlert;  // So we don't show the upgrade message more than once
 
-   void renderExtras();
+   S32 getYStart() const;
+
+   void renderExtras() const;
 
 public:
    explicit MainMenuUserInterface(ClientGame *game);           // Constructor
@@ -319,7 +322,7 @@ class NameEntryUserInterface : public MenuUserInterfaceWithIntroductoryAnimation
    typedef MenuUserInterfaceWithIntroductoryAnimation Parent;
 
 private:
-   void renderExtras();
+   void renderExtras() const;
    NetConnection::TerminationReason mReason;
 
 public:

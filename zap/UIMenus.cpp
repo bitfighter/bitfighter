@@ -215,16 +215,17 @@ S32 MenuUserInterface::checkMenuIndexBounds(S32 index)
 }
 
 
-// Get vert pos of first menu item
-S32 MenuUserInterface::getYStart()
+S32 MenuUserInterface::getBaseYStart() const
 {
-   S32 vertOff = getUIManager()->isCurrentUI<MainMenuUserInterface>() ? 40 : 0;    // Make room for the logo on the main menu
+   return (DisplayManager::getScreenInfo()->getGameCanvasHeight() - min(mMenuItems.size(), mMaxMenuSize) *
+           (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL))) / 2;
+}
 
-   if(getUIManager()->isCurrentUI<GameParamUserInterface>())  // If we're on the GameParams menu, start at a constant position
-      return 70;
-   else                             // Otherwise, attpempt to center the menu vertically
-      return (DisplayManager::getScreenInfo()->getGameCanvasHeight() - min(mMenuItems.size(), mMaxMenuSize) * 
-             (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL))) / 2 + vertOff;
+
+// Get vert pos of first menu item
+S32 MenuUserInterface::getYStart() const
+{
+   return getBaseYStart();
 }
 
 
@@ -736,19 +737,19 @@ bool MenuUserInterface::processKeys(InputCode inputCode)
 }
 
 
-S32 MenuUserInterface::getTextSize(MenuItemSize size)
+S32 MenuUserInterface::getTextSize(MenuItemSize size) const
 {
    return size == MENU_ITEM_SIZE_NORMAL ? 23 : 15;
 }
 
 
-S32 MenuUserInterface::getGap(MenuItemSize size)
+S32 MenuUserInterface::getGap(MenuItemSize size) const
 {
    return 18;
 }
 
 
-void MenuUserInterface::renderExtras()
+void MenuUserInterface::renderExtras() const
 {
    /* Do nothing */
 }
@@ -1029,13 +1030,19 @@ void MainMenuUserInterface::idle(U32 timeDelta)
 }
 
 
+S32 MainMenuUserInterface::getYStart() const
+{
+   return getBaseYStart() + 40;
+}
+
+
 bool MainMenuUserInterface::getNeedToUpgrade()
 {
    return mNeedToUpgrade;
 }
 
 
-void MainMenuUserInterface::renderExtras()
+void MainMenuUserInterface::renderExtras() const
 {
    glColor(Colors::white);
    const S32 size = 16;
@@ -1741,7 +1748,7 @@ void NameEntryUserInterface::setupMenu()
 }
 
 
-void NameEntryUserInterface::renderExtras()
+void NameEntryUserInterface::renderExtras() const
 {
    const S32 size = 15;
    const S32 gap = 5;

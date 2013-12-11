@@ -50,13 +50,13 @@ string QuickMenuUI::getTitle()
 }
 
 
-S32 QuickMenuUI::getTextSize(MenuItemSize size)
+S32 QuickMenuUI::getTextSize(MenuItemSize size) const
 {
    return size == MENU_ITEM_SIZE_NORMAL ? 20 : 12;
 }
 
 
-S32 QuickMenuUI::getGap(MenuItemSize size)
+S32 QuickMenuUI::getGap(MenuItemSize size) const
 {
    return 6;
 }
@@ -199,7 +199,7 @@ void QuickMenuUI::render()
 }
 
 
-S32 QuickMenuUI::getYStart()
+S32 QuickMenuUI::getYStart() const
 {
    return mTopOfFirstMenuItem;
 }

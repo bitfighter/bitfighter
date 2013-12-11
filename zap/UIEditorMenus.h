@@ -26,10 +26,10 @@ private:
    S32 getMenuWidth();     
    Point mMenuLocation;
 
-   S32 getYStart();
+   S32 getYStart() const;
 
-   virtual S32 getTextSize(MenuItemSize size);     // Let menus set their own text size
-   virtual S32 getGap(MenuItemSize size);          // Gap is the space between items
+   virtual S32 getTextSize(MenuItemSize size) const;     // Let menus set their own text size
+   virtual S32 getGap(MenuItemSize size) const;          // Gap is the space between items
 
    // Calculated during rendering, used for figuring out which item mouse is over.  Will always be positive during normal use, 
    // but will be intialized to negative so that we know not to use it before menu has been rendered, and this value caluclated.

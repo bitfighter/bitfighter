@@ -233,16 +233,23 @@ bool GameParamUserInterface::anythingChanged()
 }
 
 
-S32 GameParamUserInterface::getTextSize(MenuItemSize size)
+S32 GameParamUserInterface::getTextSize(MenuItemSize size) const
 {
    return 18;
 }
 
 
-S32 GameParamUserInterface::getGap(MenuItemSize size)
+S32 GameParamUserInterface::getGap(MenuItemSize size) const
 {
    return 12;
 }
+
+
+S32 GameParamUserInterface::getYStart() const
+{
+   return 70;
+}
+
 
 
 };
