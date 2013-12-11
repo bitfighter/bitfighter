@@ -179,6 +179,8 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
 
+   FontManager::pushFontContext(ErrorMsgContext);
+
    S32 maxLen = 0;
    for(S32 i = 0; i < msgLines; i++)
    {
@@ -202,6 +204,8 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
       drawCenteredString(boxTop + vertMargin + titleHeight + i * (textSize + textGap), textSize, message[i].c_str());
 
    drawCenteredString(boxTop + boxHeight - vertMargin - textSize, textSize, instr);
+
+   FontManager::popFontContext();
 }
 
 
