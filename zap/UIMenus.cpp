@@ -961,11 +961,6 @@ void MainMenuUserInterface::onActivate()
 {
    Parent::onActivate();
 
-   // Time for a clean start.  No matter how we got here, there's no going back.
-   // Needed mainly because the editor makes things confusing.  Now that that's been reworked,
-   // it's probably not needed at all.
-   //getUIManager()->clearPrevUIs();
-
    mColorTimer.reset(ColorTime);
    mColorTimer2.reset(ColorTime2);
    mTransDir = true;
