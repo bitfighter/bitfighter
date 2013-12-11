@@ -92,7 +92,6 @@ public:
 
    S32 selectedIndex;               // Index of the currently highlighted menu item (public so tests can access this member)
 
-
    string mMenuTitle;
    string mMenuSubTitle;
 
