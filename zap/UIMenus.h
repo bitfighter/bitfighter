@@ -157,10 +157,10 @@ private:
    U32 motdArriveTime;
    Timer mColorTimer;
    Timer mColorTimer2;
-   enum {
-      ColorTime = 1000,
-      ColorTime2 = 1700,
-   };
+   
+   static const S32 ColorTime = 1000;
+   static const S32 ColorTime2 = 1700;
+   
    bool mTransDir;
    bool mTransDir2;
    bool mNeedToUpgrade;       // True if client is out of date and needs to upgrade, false if we're on the latest version
