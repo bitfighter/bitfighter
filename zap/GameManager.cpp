@@ -50,8 +50,7 @@ void GameManager::setServerGame(ServerGame *serverGame)
 
 void GameManager::deleteServerGame()
 {
-   TNLAssert(mServerGame, "Expect a valid ServerGame here!");
-
+   // mServerGame might be NULL here; for example when quitting after losing a connection to the game server
    delete mServerGame;     // Kill the serverGame (leaving the clients running)
    mServerGame = NULL;
 }
