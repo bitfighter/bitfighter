@@ -219,6 +219,8 @@ public:
    const Vector<BotNavMeshZone *> *getBotZones() const;
    U16 findZoneContaining(const Point &p) const;
 
+   friend class ObjectTest;
+
 };
 
 

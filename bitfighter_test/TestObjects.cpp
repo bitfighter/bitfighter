@@ -13,9 +13,6 @@
 #include "tnlGhostConnection.h"
 #include "tnlPlatform.h"
 
-// define private public? only done to allows accessing and checking if mGeometry is NULL
-#define private public
-
 #include "BfObject.h"
 #include "gameType.h"
 #include "ServerGame.h"
@@ -35,27 +32,28 @@
 #  include <windows.h>   // For ARRAYSIZE
 #endif
 
-using namespace Zap;
+namespace Zap {
 using namespace std;
-
 
 class ObjectTest : public testing::Test
 {
+   public:
+      static void process(ServerGame *game, S32 argc, const char **argv)
+      {
+         for(S32 j = 1; j <= argc; j++)
+         {
+            game->cleanUp();
+            game->processLevelLoadLine(j, 0, argv, game->getGameObjDatabase(), "some_non_existing_filename.level");
+         }
+      }
 };
 
 
-static void ProcessArg_test1(ServerGame *game, S32 argc, const char **argv)
-{
-   for(S32 j = 1; j <= argc; j++)
-   {
-      game->cleanUp();
-      game->processLevelLoadLine(j, 0, argv, game->getGameObjDatabase(), "some_non_existing_filename.level");
-   }
-}
-
-
-// For the most part, only care about it not crashing or segfault from random argv/argc...
-TEST_F(ObjectTest, ProcessArguments) 
+/**
+ * Ensures that processArguments with long, non-sensical argv does not segfault
+ * for all registered NetClasses and a few special level directives.
+ */
+TEST_F(ObjectTest, ProcessArgumentsSanity) 
 {
    ServerGame *game = newServerGame();
    const S32 argc = 40;
@@ -66,16 +64,17 @@ TEST_F(ObjectTest, ProcessArguments)
       "4", "3", "4", "3", "6", "6", "4", "2", "6", "6", 
       "4", "3", "4", "3", "6", "blah", "4", "2", "6" };
 
+   // Substitute the class name for argv[0]
    U32 count = TNL::NetClassRep::getNetClassCount(NetClassGroupGame, NetClassTypeObject);
    for(U32 i = 0; i < count; i++)
    {
       NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
       argv[0] = netClassRep->getClassName();
 
-      ProcessArg_test1(game, argc, argv);
+      process(game, argc, argv);
    }
 
-#define t(n) {argv[0] = n; ProcessArg_test1(game, argc, argv);}
+#define t(n) {argv[0] = n; process(game, argc, argv);}
    t("BarrierMaker");
    t("LevelName");
    t("LevelCredits");
@@ -89,66 +88,67 @@ TEST_F(ObjectTest, ProcessArguments)
 }
 
 
-TEST_F(ObjectTest, ServerClient)
+
+struct GhostingRecord
 {
-   U32 count = TNL::NetClassRep::getNetClassCount(NetClassGroupGame, NetClassTypeObject);
-   Vector<U8> isAdded;
-   isAdded.resize(count);
-   for(U32 i=0; i < count; i++)
-      isAdded[i] = 0;
+  bool server;
+  bool client;
+};
 
-   static const U8 FlagServerGameAdded = 1;
-   static const U8 FlagServerGameExist = 2;
-   static const U8 FlagClientGameExist = 4;
+/**
+ * Instantiate and transmit one object of every registered type from a server to
+ * a client. Ensures that the associated code paths do not crash.
+ */
+TEST_F(ObjectTest, GhostingSanity)
+{
+   // Track the transmission state of each object
+   U32 classCount = TNL::NetClassRep::getNetClassCount(NetClassGroupGame, NetClassTypeObject);
+   Vector<GhostingRecord> ghostingRecords;
+   ghostingRecords.resize(classCount);
+   for(U32 i=0; i < classCount; i++)
+   {
+      ghostingRecords[i].server = false;
+      ghostingRecords[i].client = false;
+   }
 
+   // Create our pair of connected games
    GamePair gamePair;
    ClientGame *clientGame = gamePair.client;
    ServerGame *serverGame = gamePair.server;
-   GameConnection *gc_client = gamePair.client->getConnectionToServer();
-   GameConnection *gc_server = dynamic_cast<GameConnection*>(gc_client->getRemoteConnectionObject());
-   ASSERT_TRUE(gc_client != NULL);
-   ASSERT_TRUE(gc_server != NULL);
 
+   // Basic geometry to plug into polygon objects
    Vector<Point> geom;
    geom.push_back(Point(0,0));
    geom.push_back(Point(1,0));
    geom.push_back(Point(0,1));
 
-   for(U32 i = 0; i < count; i++)
+   // Create one of each type of registered NetClass
+   for(U32 i = 0; i < classCount; i++)
    {
       NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
       Object *obj = netClassRep->create();
       BfObject *bfobj = dynamic_cast<BfObject *>(obj);
-      if(bfobj)
+
+      // Skip registered classes that aren't BfObjects (e.g. GameType) or don't have
+      // a geometry at this point (ForceField)
+      if(bfobj != NULL && bfobj->mGeometry.getGeometry() != NULL)
       {
-
-         if(bfobj->mGeometry.getGeometry() == NULL)
-         {
-            printf("! %s mGeometry is NULL\n", bfobj->getClassName());
-            delete obj;
-         }
-         else
-         {
-            //printf("+ %s\n", bfobj->getClassName());
-
-            // First, add some geometry
-            // is "GeomObject::" really needed to fix compile error of invalid number of arguments?
-            bfobj->setExtent(Rect(0,0,1,1));
-            bfobj->GeomObject::setGeom(geom);
-            bfobj->addToGame(serverGame, serverGame->getGameObjDatabase());
-            gc_server->objectLocalScopeAlways(bfobj); // Force it to scope to client, for testing.
-            isAdded[i] |= FlagServerGameAdded;
-         }
+         // First, add some geometry
+         bfobj->setExtent(Rect(0,0,1,1));
+         bfobj->GeomObject::setGeom(geom);
+         bfobj->addToGame(serverGame, serverGame->getGameObjDatabase());
+         ghostingRecords[i].server = true;
       }
       else
       {
-         //printf("- %s not BfObject\n", obj->getClassName()); // Its only GameTypes that is not a BfObject...
-         delete obj;
+         delete bfobj;
       }
    }
 
-   gamePair.idle(1, 80);
+   // Idle to allow object replication
+   gamePair.idle(10, 10);
 
+   // Check whether the objects made it onto the client
    const Vector<DatabaseObject *> *objects = clientGame->getGameObjDatabase()->findObjects_fast();
    for(S32 i=0; i<objects->size(); i++)
    {
@@ -156,38 +156,23 @@ TEST_F(ObjectTest, ServerClient)
       if(bfobj->getClassRep() != NULL)  // Barriers and some other objects might not be ghostable..
       {
          U32 id = bfobj->getClassId(NetClassGroupGame);
-         isAdded[id] |= FlagClientGameExist;
-      }
-   }
-   objects = serverGame->getGameObjDatabase()->findObjects_fast();
-   for(S32 i=0; i<objects->size(); i++)
-   {
-      BfObject *bfobj = dynamic_cast<BfObject *>((*objects)[i]);
-      if(bfobj->getClassRep() != NULL)
-      {
-         U32 id = bfobj->getClassId(NetClassGroupGame);
-         isAdded[id] |= FlagServerGameExist;
+         ghostingRecords[id].client = true;
       }
    }
 
-
-   for(U32 i = 0; i < count; i++)
+   for(U32 i = 0; i < classCount; i++)
    {
-      if((isAdded[i] & FlagServerGameAdded) && !(isAdded[i] & FlagServerGameExist))
+      NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
+
+      // Expect that all objects on the server are on the client, with the
+      // exception of PolyWalls and ForceFields, because these do not follow the
+      // normal ghosting model.
+      string className = netClassRep->getClassName();
+      if(className != "PolyWall" && className != "ForceField")
       {
-         const char *name = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i)->getClassName();
-         printf("- %s was destroyed during game idle\n", name);
-      }
-      else if((isAdded[i] & FlagServerGameExist) && !(isAdded[i] & FlagClientGameExist))
-      {
-         const char *name = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i)->getClassName();
-         printf("! %s is on ServerGame but not on ClientGame\n", name);
-      }
-      else if((isAdded[i] & FlagClientGameExist) && !(isAdded[i] & FlagServerGameExist))
-      {
-         const char *name = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i)->getClassName();
-         printf("! %s is on ClientGame but not on ServerGame\n", name);
+         EXPECT_EQ(ghostingRecords[i].server, ghostingRecords[i].client);
       }
    }
 }
-
+   
+}; // namespace Zap

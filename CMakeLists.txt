@@ -88,8 +88,8 @@ endif()
 #
 # CMake options
 #
-option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 
+option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 
 # Now search for dependencies
 # Set up Windows specific locations for libraries and headers
@@ -151,8 +151,28 @@ if(WIN32)
 else()
 	set(ALURE_LIBRARIES alure)
 endif()
+
 find_package(OpenAL)
-find_package(OpenGL)
+
+# finds opengl and gnables gles if gl isnt found in the system.
+message(STATUS "Determining system GL provider")
+if(NOT USE_GLES)
+	message(STATUS "Atempting to use standard OpenGL")
+	find_package(OpenGL)
+	set(USE_STANDARD_GL true)
+	set(GL_LIBRARY ${OPENGL_LIBRARY})
+	set(GL_INCLUDE_DIR ${OPENGL_INCLUDE_DIR})
+endif()
+
+if(USE_GLES OR NOT USE_STANDARD_GL)
+	message(STATUS "Atempting to use OpenGL ES")
+	add_definitions(-DBF_USE_GLES)
+	add_definitions(-DBF_NO_CONSOLE)
+	find_package(OpenGLES)
+	set(GL_LIBRARY ${OPENGLES_LIBRARY})
+	set(GL_INCLUDE_DIR ${OPENGLES_INCLUDE_DIR})
+endif()
+
 find_package(Threads REQUIRED)
 find_package(PNG)
 find_package(OGG)
