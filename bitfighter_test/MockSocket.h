@@ -10,6 +10,9 @@
 
 #include <string>
 
+namespace Zap
+{
+
 using namespace TNL;
 using namespace std;
 
@@ -62,6 +65,8 @@ class MockSocket : public Socket
       }
       return receiveError;
    }
+};
+  
 };
 
 #endif /* MOCKSOCKET_H_ */
