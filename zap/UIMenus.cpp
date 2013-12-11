@@ -908,7 +908,7 @@ static void highScoresSelectedCallback(ClientGame *game, U32 unused)
 
 static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);
+   game->setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);      // <=== Should not be here... perhaps in editor onActivate?
    game->getUIManager()->getUI<EditorUserInterface>()->setLevelFileName("");      // Reset this so we get the level entry screen
    game->getUIManager()->activate<EditorUserInterface>();
 }
