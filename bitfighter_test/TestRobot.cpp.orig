@@ -1,0 +1,121 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
+#include "TestUtils.h"
+#include "../zap/ClientGame.h"
+#include "../zap/ServerGame.h"
+#include "../zap/gameType.h"
+#include "../zap/luaLevelGenerator.h"
+#include "gtest/gtest.h"
+
+namespace Zap
+{
+
+using namespace std;
+using namespace TNL;
+
+StdoutLogConsumer gStdoutLog;
+
+TEST(RobotTest, botFight)
+{
+	GamePair gamePair("GameType 8 15\nLevelName \"Bitmatch01\"\nLevelDescription \"\"\nLevelCredits \nGridSize 255\nTeam Blue 0 0 1\nSpecials\nMinPlayers\nMaxPlayers\nBarrierMaker 50 -3.5 0 -3 0\nBarrierMaker 50 3.5 0 3 0\nBarrierMaker 50 0 -3.5 0 -3\nBarrierMaker 50 -3 -0.5 -3 0.5\nBarrierMaker 50 3 -0.5 3 0.5\nBarrierMaker 50 -4.5 0 -4.5 -0.5 -3.5 -1.5 -3 -1.5 -1.5 -3 -1.5 -3.5 -0.5 -4.5 0.5 -4.5 1.5 -3.5 1.5 -3 3 -1.5 3.5 -1.5 4.5 -0.5 4.5 0.5 3.5 1.5 3 1.5 1.5 3 1.5 3.5 0.5 4.5 -0.5 4.5 -1.5 3.5 -1.5 3 -3 1.5 -3.5 1.5 -4.5 0.5 -4.5 -0.5\nBarrierMaker 50 -0.5 -3 0.5 -3\nBarrierMaker 50 0 3.5 0 3\nBarrierMaker 50 -0.5 3 0.5 3\nBarrierMaker 200 -1.5 -1.5 1.5 1.5\nBarrierMaker 200 1.5 -1.5 -1.5 1.5\nRepairItem 0 -4 45\nRepairItem 0 4 45\nRepairItem 4 0 45\nRepairItem -4 0 45\nSpawn 0 0 -1\nSpawn 0 1 0\nSpawn 0 0 1\nSpawn 0 -1 0\nSpawn 0 -2 -2\nSpawn 0 2 -2\nSpawn 0 2 2\nSpawn 0 -2 2\n");
+	gStdoutLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::ConsoleMsg);
+
+	Vector<StringTableEntry> args;
+	gamePair.server->getGameType()->addBot(args);
+	args.push_back(StringTableEntry("addbot"));
+	args.push_back(StringTableEntry("brain"));
+	gamePair.server->getGameType()->addBot(args);
+
+	for(U32 i = 0; i < 10; i++)
+		gamePair.idle(10);
+
+	gamePair.client->getGameType()->c2sSetWinningScore(100000);
+	gamePair.client->getGameType()->c2sSetTime(0);
+
+	while(!gamePair.server->getGameType()->isGameOver())
+		gamePair.idle(10);
+	
+	EXPECT_EQ(1, gamePair.server->getRobotCount());
+	EXPECT_EQ(1, gamePair.client->getRobotCount());
+}
+
+
+TEST(RobotTest, addBot)
+{
+	GamePair gamePair;
+	Vector<StringTableEntry> args;
+
+	EXPECT_EQ(0, gamePair.server->getRobotCount());
+	EXPECT_EQ(0, gamePair.client->getRobotCount());
+
+	gamePair.server->getGameType()->addBot(args);
+
+	for(U32 i = 0; i < 10; i++)
+		gamePair.idle(10);
+	
+	EXPECT_EQ(1, gamePair.server->getRobotCount());
+	EXPECT_EQ(1, gamePair.client->getRobotCount());
+}
+
+
+TEST(RobotTest, luaRobotNew)
+{
+	GamePair gamePair;
+
+	EXPECT_EQ(0, gamePair.server->getRobotCount());
+	EXPECT_EQ(0, gamePair.client->getRobotCount());
+
+	LuaLevelGenerator levelgen(gamePair.server);
+	levelgen.runScript(false);
+
+	EXPECT_TRUE(levelgen.runString("bf:addItem(Robot.new())"));
+
+	for(U32 i = 0; i < 10; i++)
+		gamePair.idle(10);
+	
+	EXPECT_EQ(1, gamePair.server->getRobotCount());
+	EXPECT_EQ(1, gamePair.client->getRobotCount());
+
+	EXPECT_TRUE(levelgen.runString("bots = bf:findAllObjects(ObjType.Robot); bots[1]:removeFromGame()"));
+
+	for(U32 i = 0; i < 10; i++)
+		gamePair.idle(10);
+	
+	EXPECT_EQ(0, gamePair.server->getRobotCount());
+	EXPECT_EQ(0, gamePair.client->getRobotCount());
+}
+
+
+/** onShipSpawned doesn't fire?
+
+TEST(RobotTest, RemoveFromGameDuringInitialOnShipSpawn)
+{
+	GamePair gamePair;
+
+	EXPECT_EQ(0, gamePair.server->getRobotCount());
+	EXPECT_EQ(0, gamePair.client->getRobotCount());
+
+	LuaLevelGenerator levelgen(gamePair.server);
+	levelgen.runScript(false);
+
+	EXPECT_TRUE(levelgen.runString("onShipSpawned = function(ship) RUN = true ; ship:removeFromGame() end"));
+	EXPECT_TRUE(levelgen.runString("subscribe(Event.ShipSpawned)"));
+	
+	Vector<StringTableEntry> args;
+	gamePair.server->getGameType()->addBot(args);
+
+	for(U32 i = 0; i < 10; i++)
+		gamePair.idle(10);
+
+	EXPECT_TRUE(levelgen.runString("assert(RUN)"));
+
+	EXPECT_EQ(0, gamePair.server->getRobotCount());
+	EXPECT_EQ(0, gamePair.client->getRobotCount());
+}
+*/
+
+
+};

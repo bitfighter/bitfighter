@@ -329,17 +329,32 @@ include_directories(
 option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and create 'coverage' target" NO)
 
 set(TEST_SOURCES
-	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/LevelFilesForTesting.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameType.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameUserInterface.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomUtils.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestHelpItemManager.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestHttpRequest.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestINISettings.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestIntegration.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelLoader.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelMenuSelectUserInterface.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutIndicator.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutTracker.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLuaEnvironment.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPolylineGeometry.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMaster.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMove.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestObjects.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPolylineGeometry.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRenderUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRobot.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestServerGame.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSettings.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestShip.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSpawnDelay.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestStringUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
 	${CMAKE_SOURCE_DIR}/master/master.cpp
 	${CMAKE_SOURCE_DIR}/master/MasterServerConnection.cpp
 )

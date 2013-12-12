@@ -8,6 +8,9 @@
 
 #include "tnlUDP.h"
 
+namespace Zap
+{
+
 using namespace TNL;
 
 /**
@@ -16,6 +19,8 @@ using namespace TNL;
 class MockAddress : public Address {
    public:
    bool isValid() { return true; }
+};
+	
 };
 
 #endif /* MOCKADDRESS_H_ */

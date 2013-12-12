@@ -6,8 +6,9 @@
 #ifndef _TEST_UTILS_H
 #define _TEST_UTILS_H
 
-#include "../zap/GameSettings.h"    // For GameSettingsPtr def
+#include "GameSettings.h"    // For GameSettingsPtr def
 #include <tnl.h>
+#include <tnlGhostConnection.h>
 
 #include <string>
 
@@ -24,6 +25,20 @@ ClientGame *newClientGame();
 ClientGame *newClientGame(const GameSettingsPtr &settings);
 
 ServerGame *newServerGame();
+
+// Generic pack/unpack function -- feed it any class that supports pack/unpack
+template <class T>
+void packUnpack(T input, T &output, U32 mask = 0xFFFFFFFF)
+{
+   BitStream stream;       
+   GhostConnection conn;
+   
+   output.markAsGhost(); 
+
+   input.packUpdate(&conn, mask, &stream);   // Write the object
+   stream.setBitPosition(0);                 // Move the stream's pointer back to the beginning
+   output.unpackUpdate(&conn, &stream);      // Read the object back
+}
 
 /**
  * POD struct to hold a pair of connected games

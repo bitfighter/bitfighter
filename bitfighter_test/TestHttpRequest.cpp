@@ -119,7 +119,7 @@ TEST_F(HttpRequestTest, sendTimeout)
    plantMocks();
    sock->sendError = WouldBlock;
 
-   // don't really want to wait for a default timout, so set the timeout
+   // don't really want to wait for a default timeout, so set the timeout
    // to two polling intervals
    req.setTimeout(HttpRequest::PollInterval * 2);
    EXPECT_FALSE(req.sendRequest(string("test")));

@@ -7,7 +7,9 @@
 
 #include "gtest/gtest.h"
 
-using namespace Zap;
+namespace Zap
+{
+
 class PolylineGeometryTest: public testing::Test
 {
 
@@ -70,3 +72,5 @@ TEST_F(PolylineGeometryTest, setGeomWithNanPointTest)
       EXPECT_EQ(newGeom[i], newGeom[i]);
    }
 }
+
+};
