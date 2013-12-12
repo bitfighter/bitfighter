@@ -385,11 +385,13 @@ protected:
 public:
    SymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, Alignment alignment = AlignmentNone);
    SymbolString(const        boost::shared_ptr<SymbolShape>   &symbol,  Alignment alignment = AlignmentNone);
+   SymbolString(const string &str, const InputCodeManager *inputCodeManager, FontContext context, 
+                S32 textSize, bool blockMode, Alignment alignment = AlignmentNone);
    SymbolString();                     // Constructor (can't use until you've setSymbols)
    virtual ~SymbolString();            // Destructor
 
    void setSymbols(const Vector<boost::shared_ptr<SymbolShape> > &symbols);
-   void setSymbolsFromString(const string &string, InputCodeManager *inputCodeManager,
+   void setSymbolsFromString(const string &string, const InputCodeManager *inputCodeManager,
                              FontContext fontContext, S32 textSize, const Color *color);
    void clear();
 

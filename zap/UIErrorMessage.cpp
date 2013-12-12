@@ -42,16 +42,10 @@ void AbstractMessageUserInterface::setMessage(const string &message)
    Vector<string> wrappedLines;
    wrapString(message, UIManager::MessageBoxWrapWidth, TextHeight, Context, wrappedLines);
 
-   Vector<UI::SymbolShapePtr> symbols;
+   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
 
    for(S32 i = 0; i < wrappedLines.size(); i++)
-   {
-      symbols.clear();
-      SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), wrappedLines[i],
-                                symbols, Context, TextHeight, true);
-
-      mMessage[i] = SymbolShapePtr(new SymbolString(symbols));
-   }
+      mMessage[i] = SymbolShapePtr(new SymbolString(wrappedLines[i], inputCodeManager, Context, TextHeight, true));
 
    mMaxLines = wrappedLines.size();
 }
@@ -67,21 +61,13 @@ void AbstractMessageUserInterface::setMaxLines(S32 lines)
 
 void AbstractMessageUserInterface::setTitle(const string &title)
 {
-   Vector<UI::SymbolShapePtr> symbols;
-
-   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), title, symbols, Context, TitleSize, false);
-
-   mTitle = SymbolShapePtr(new SymbolString(symbols));
+   mTitle = SymbolShapePtr(new SymbolString(title, getGame()->getSettings()->getInputCodeManager(), Context, TitleSize, false));
 }
 
 
 void AbstractMessageUserInterface::setInstr(const string &instr)
 {
-   Vector<UI::SymbolShapePtr> symbols;
-
-   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), instr, symbols, Context, TextHeight, false);
-
-   mInstr = SymbolShapePtr(new SymbolString(symbols));
+   mInstr = SymbolShapePtr(new SymbolString(instr, getGame()->getSettings()->getInputCodeManager(), Context, TextHeight, false));
 }
 
 

@@ -346,12 +346,8 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
       TNLAssert(i < MAX_LINES, "Too many lines... better increase MAX_LINES!");
 
       // Do some token subsititution for dynamic elements such as keybindings
-      string renderStr(messages[i]);
-      
-      Vector<SymbolShapePtr> symbols;
-      SymbolString::symbolParse(inputCodeManager, renderStr, symbols, HelpItemContext, FontSize, true);
+      SymbolString symbolString(messages[i], inputCodeManager, HelpItemContext, FontSize, true);
 
-      UI::SymbolString symbolString(symbols);
       symbolString.render(xPos, yPos + yOffset, AlignmentCenter);
 
       S32 w = symbolString.getWidth();

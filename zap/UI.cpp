@@ -171,13 +171,10 @@ void UserInterface::renderMessageBox(const string &titleStr, const string &instr
 void UserInterface::renderMessageBox(const string &titleStr, const string &instrStr, 
                                      const string &messageStr, S32 vertOffset, S32 style) const
 {
-   SymbolShapePtr title = SymbolString::getSymbolText(titleStr, TitleSize, Context);
+   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
 
-   Vector<SymbolShapePtr> symbols;
-   SymbolString::symbolParse(NULL, instrStr, symbols, Context, TextSize, false);
-   SymbolShapePtr instr = SymbolShapePtr(new SymbolString(symbols));
-
-   symbols.clear();
+   SymbolShapePtr title = SymbolShapePtr(new SymbolString(titleStr, inputCodeManager, Context, TitleSize, false));
+   SymbolShapePtr instr = SymbolShapePtr(new SymbolString(instrStr, inputCodeManager, Context, TextSize, false));
 
    Vector<string> wrappedLines;
    wrapString(messageStr, UIManager::MessageBoxWrapWidth, TextSize, Context, wrappedLines);
@@ -185,13 +182,7 @@ void UserInterface::renderMessageBox(const string &titleStr, const string &instr
    Vector<SymbolShapePtr> message(wrappedLines.size());
 
    for(S32 i = 0; i < wrappedLines.size(); i++)
-   {
-      symbols.clear();
-      SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), wrappedLines[i],
-                                symbols, Context, TextSize, true);
-
-      message.push_back(SymbolShapePtr(new SymbolString(symbols)));
-   }
+      message.push_back(SymbolShapePtr(new SymbolString(wrappedLines[i], inputCodeManager, Context, TextSize, true)));
 
    renderMessageBox(title, instr, message.address(), message.size(), vertOffset, style);
 }

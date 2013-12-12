@@ -211,6 +211,16 @@ SymbolString::SymbolString(const SymbolShapePtr &symbol, Alignment alignment)
 }
 
 
+// Convenience constructor, just pass in a string, we'll do the rest!
+SymbolString::SymbolString(const string &str, const InputCodeManager *inputCodeManager, FontContext context, 
+                           S32 textSize, bool blockMode, Alignment alignment)
+{
+   SymbolString::symbolParse(inputCodeManager, str, mSymbols, context, textSize, blockMode);
+   mWidth = computeWidth(mSymbols);
+   mHeight = computeHeight(mSymbols);
+}
+
+
 // Constructor -- symbols will be provided later
 SymbolString::SymbolString()
 {
@@ -235,7 +245,7 @@ void SymbolString::setSymbols(const Vector<SymbolShapePtr> &symbols)
 }
 
 
-void SymbolString::setSymbolsFromString(const string &string, InputCodeManager *inputCodeManager, 
+void SymbolString::setSymbolsFromString(const string &string, const InputCodeManager *inputCodeManager, 
                                         FontContext fontContext, S32 textSize, const Color *color)
 {
    Vector<SymbolShapePtr> symbols;
