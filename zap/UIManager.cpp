@@ -377,12 +377,11 @@ void UIManager::onConnectionToServerRejected(const char *reason)
 
    string message;
 
-   message = "Error when trying to punch through firewall.\n\n"
-             "Server did not respond or rejected you.\n\n"
+   message = "Server did not respond or rejected you.\n\n"
              "Unable to join game.  Please try a different server.";
 
    if(reason[0])
-      message += "\n\n" + string(reason);
+      message += "\n\nReason: " + string(reason);
    
    displayMessageBox("Connection Terminated", "Press [[Esc]] to continue", message);
 }

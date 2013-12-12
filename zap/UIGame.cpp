@@ -671,14 +671,11 @@ void GameUserInterface::renderLostConnectionMessage() const
 
    if(connection && connection->lostContact())
    {
-      static string msg[] = { "", 
-                              "We may have lost contact with the server...", 
-                              "",
-                              " You can't play until the connection has been re-established ", 
-                              "",
-                              "Trying to reconnect now..."};
+      static string msg = "We have lost contact with the server; You can't play until the "
+                          "connection has been re-established.\n\n"
+                          "Trying to reconnect... [[SPINNER]]";
 
-      renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, 5, -30);
+      renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, -30, 1);
    }
 }
 
@@ -695,24 +692,27 @@ void GameUserInterface::renderShutdownMessage() const
 
       if(mShutdownInitiator)     // Local client intitiated the shutdown
       {
-         string msg[] = { "", timemsg, "", "Shutdown sequence intitated by you.", "", mShutdownReason.getString(), "" };
-         renderMessageBox("SERVER SHUTDOWN INITIATED", "Press [ESC] to cancel shutdown", msg, 7);
+         string msg = string(timemsg) + "\n\nShutdown sequence intitated by you.\n\n" + mShutdownReason.getString();
+         renderMessageBox("SERVER SHUTDOWN INITIATED", "Press [[Esc]] to cancel shutdown", msg, 7);
       }
       else                       // Remote user intiated the shutdown
       {
          char whomsg[255];
          dSprintf(whomsg, sizeof(whomsg), "Shutdown sequence initiated by %s.", mShutdownName.getString());
 
-         string msg[] = { "", timemsg, "", whomsg, "", mShutdownReason.getString(), "" };
-         renderMessageBox("SHUTDOWN INITIATED", "Press [ESC] to dismiss", msg, 7);
+         string msg = string(timemsg) + "\n\n" + 
+                      whomsg + "\n\n" + 
+                      mShutdownReason.getString();
+         renderMessageBox("SHUTDOWN INITIATED", "Press [[Esc]] to dismiss", msg, 7);
       }
    }
    else if(mShutdownMode == Canceled)
    {
       // Keep same number of messages as above, so if message changes, it will be a smooth transition
-      string msg[] = { "", "", "Server shutdown sequence canceled.", "", "Play on!", "", "" };     
+      string msg = "Server shutdown sequence canceled.\n\n"
+                   "Play on!";
 
-      renderMessageBox("SHUTDOWN CANCELED", "Press [ESC] to dismiss", msg, 7);
+      renderMessageBox("SHUTDOWN CANCELED", "Press [[Esc]] to dismiss", msg, 7);
    }
 }
 

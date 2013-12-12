@@ -349,7 +349,7 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
       string renderStr(messages[i]);
       
       Vector<SymbolShapePtr> symbols;
-      SymbolString::symbolParse(inputCodeManager, renderStr, symbols, HelpItemContext, FontSize);
+      SymbolString::symbolParse(inputCodeManager, renderStr, symbols, HelpItemContext, FontSize, true);
 
       UI::SymbolString symbolString(symbols);
       symbolString.render(xPos, yPos + yOffset, AlignmentCenter);

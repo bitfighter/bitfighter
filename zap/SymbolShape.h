@@ -421,7 +421,7 @@ public:
 
    //
    static void symbolParse(const InputCodeManager *inputCodeManager, const string &str, Vector<SymbolShapePtr> &symbols,
-                           FontContext fontContext, S32 fontSize, const Color *textColor = NULL, const Color *symColor = NULL);
+                           FontContext fontContext, S32 fontSize, bool block, const Color *textColor = NULL, const Color *symColor = NULL);
 
 };
 

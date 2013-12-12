@@ -154,58 +154,46 @@ static const S32 TitleHeight = TitleSize + TitleGap;
 static const S32 TextSize = 18;
 static const S32 TextSizeBig = 30;
 
+static const FontContext Context = ErrorMsgContext;
 
-void UserInterface::renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset, S32 style) const
+
+void UserInterface::renderMessageBox(const string &titleStr, const string &instrStr,
+                                     string *message, S32 msgLines, S32 vertOffset, S32 style) const
 {
-   const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
-   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
-
-   S32 textSize;
-
-   if(style == 1)
-      textSize = TextSize;             // Size of text and instructions
-   else if(style == 2)
-      textSize = TextSizeBig;
-
-   const S32 textGap = textSize / 3;   // Spacing between text lines
-   const S32 instrGap = 15;            // Gap between last line of text and instruction line
-
-   S32 titleHeight = strcmp(title, "") != 0 ? TitleHeight : 0;
-
-   S32 boxHeight  = titleHeight + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap;
-
-   if(strcmp(instr, "") == 0)
-      boxHeight -= (instrGap + textSize);
-
-   S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
-
-   FontManager::pushFontContext(ErrorMsgContext);
-
-   S32 maxLen = 0;
+   string msg;
    for(S32 i = 0; i < msgLines; i++)
+      msg += message[i] + "\n";
+
+   renderMessageBox(titleStr, instrStr, msg, vertOffset, style);
+}
+
+
+void UserInterface::renderMessageBox(const string &titleStr, const string &instrStr, 
+                                     const string &messageStr, S32 vertOffset, S32 style) const
+{
+   SymbolShapePtr title = SymbolString::getSymbolText(titleStr, TitleSize, Context);
+
+   Vector<SymbolShapePtr> symbols;
+   SymbolString::symbolParse(NULL, instrStr, symbols, Context, TextSize, false);
+   SymbolShapePtr instr = SymbolShapePtr(new SymbolString(symbols));
+
+   symbols.clear();
+
+   Vector<string> wrappedLines;
+   wrapString(messageStr, UIManager::MessageBoxWrapWidth, TextSize, Context, wrappedLines);
+
+   Vector<SymbolShapePtr> message(wrappedLines.size());
+
+   for(S32 i = 0; i < wrappedLines.size(); i++)
    {
-      S32 len = getStringWidth(textSize, message[i].c_str()) + MessageBoxPadding * 2; 
-      if(len > maxLen)
-         maxLen = len;
+      symbols.clear();
+      SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), wrappedLines[i],
+                                symbols, Context, TextSize, true);
+
+      message.push_back(SymbolShapePtr(new SymbolString(symbols)));
    }
 
-   S32 boxwidth = max(UIManager::MessageBoxWrapWidth, maxLen);
-   S32 inset = (canvasWidth - boxwidth) / 2;                            // Inset for left and right edges of box
-
-   if(style == 1)       
-      renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::red30, 1.0f, Colors::white);
-   else if(style == 2)
-      renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::black, 0.70f, Colors::blue);
-
-   // Draw title, message, and footer
-   drawCenteredString(boxTop + vertMargin, TitleSize, title);
-
-   for(S32 i = 0; i < msgLines; i++)
-      drawCenteredString(boxTop + vertMargin + titleHeight + i * (textSize + textGap), textSize, message[i].c_str());
-
-   drawCenteredString(boxTop + boxHeight - vertMargin - textSize, textSize, instr);
-
-   FontManager::popFontContext();
+   renderMessageBox(title, instr, message.address(), message.size(), vertOffset, style);
 }
 
 
@@ -239,7 +227,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
    if(titleHeight > 0)
       titleHeight += TitleGap;
 
-   S32 instrHeight = instr == NULL ? 0 : instr->getHeight();
+   S32 instrHeight = instr->getHeight();
    if(instrHeight > 0)
       instrHeight += instrGap + instrGapBottom;
 
@@ -276,7 +264,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
    }
 
    // And footer
-   if(instr)
+   if(instrHeight > 0)
       instr->render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, boxTop + boxHeight - vertMargin - instrGapBottom, AlignmentCenter);
 }
 

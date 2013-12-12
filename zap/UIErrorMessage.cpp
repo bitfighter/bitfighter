@@ -35,7 +35,6 @@ void AbstractMessageUserInterface::onActivate()
 // TODO: These are repeated in UI.cpp... bad!
 static const S32 TextHeight = 18;
 static const S32 TitleSize = 30;
-
 static const FontContext Context = ErrorMsgContext;
 
 void AbstractMessageUserInterface::setMessage(const string &message)
@@ -49,7 +48,7 @@ void AbstractMessageUserInterface::setMessage(const string &message)
    {
       symbols.clear();
       SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), wrappedLines[i],
-                                symbols, Context, TextHeight);
+                                symbols, Context, TextHeight, true);
 
       mMessage[i] = SymbolShapePtr(new SymbolString(symbols));
    }
@@ -70,7 +69,7 @@ void AbstractMessageUserInterface::setTitle(const string &title)
 {
    Vector<UI::SymbolShapePtr> symbols;
 
-   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), title, symbols, Context, TitleSize);
+   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), title, symbols, Context, TitleSize, false);
 
    mTitle = SymbolShapePtr(new SymbolString(symbols));
 }
@@ -80,7 +79,7 @@ void AbstractMessageUserInterface::setInstr(const string &instr)
 {
    Vector<UI::SymbolShapePtr> symbols;
 
-   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), instr, symbols, Context, TextHeight);
+   SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), instr, symbols, Context, TextHeight, false);
 
    mInstr = SymbolShapePtr(new SymbolString(symbols));
 }

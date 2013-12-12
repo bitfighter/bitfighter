@@ -1773,21 +1773,14 @@ void NameEntryUserInterface::renderExtras() const
 
    if(mReason == NetConnection::ReasonBadLogin || mReason == NetConnection::ReasonInvalidUsername)
    {
-      string message[] = { "If you have reserved this name by registering for",
-                           "the forums, enter your forum password below. Otherwise,",
-                           "this user name may be reserved. Please choose another."
-                         };
+      string message = "If you have reserved this name by registering for "
+                       "the forums, enter your forum password below. Otherwise, "
+                       "this user name may be reserved. Please choose another.";
 
-      renderMessageBox("Invalid Name or Password", "", message, 3, -190);
+      renderMessageBox("Invalid Name or Password", "Press [[Esc]] to continue", message, 3, -190);
    }
-
-   //glColor(Colors::gray50);
-   //drawCenteredString(170, size, "First time playing?  Enter your nick and don't worry about the password!");
-
-   // Render logo at top, never faded
-   //renderStaticBitfighterLogo();
-
 }
+
 
 // Save options to INI file, and return to our regularly scheduled program
 void NameEntryUserInterface::onEscape()
