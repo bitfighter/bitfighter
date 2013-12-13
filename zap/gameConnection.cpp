@@ -1457,7 +1457,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       dataBuffer->takeOwnership();
    }
 
-   if(type & TransmissionDone && mDataBuffer && mDataBuffer->getBufferSize() != 0)
+   if((type & TransmissionDone) && mDataBuffer && mDataBuffer->getBufferSize() != 0)
    {
       if(mDataBufferLevelGen)
          ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), mDataBufferLevelGen->getBuffer(), mDataBufferLevelGen->getBufferSize());
