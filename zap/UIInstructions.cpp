@@ -122,8 +122,6 @@ void InstructionsUserInterface::onActivate()
    mCurPage = 0;
    mUsingArrowKeys = usingArrowKeys();
 
-   Vector<SymbolShapePtr> symbols;
-
    initNormalKeys_page1();
    initPage2();
    initPageHeaders();
