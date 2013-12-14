@@ -527,6 +527,7 @@ SymbolShapePtr SymbolString::getModifiedKeySymbol(const string &symbolName, cons
 
 SymbolShapePtr SymbolString::getModifiedKeySymbol(InputCode inputCode, const Vector<string> &modifiers, const Color *color)
 {
+   // Returns the SymbolUnknown symbol
    if(inputCode == KEY_UNKNOWN || modifiers.size() == 0)
       return getSymbol(inputCode, color);
 
