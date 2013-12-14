@@ -161,6 +161,8 @@
 		738B57731446185700F25FDF /* InputCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576D1446185700F25FDF /* InputCode.cpp */; };
 		738B57741446185700F25FDF /* shipItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B57701446185700F25FDF /* shipItems.cpp */; };
 		738B9D0D15A1E0C700D1F76C /* Zone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B9D0B15A1E0C700D1F76C /* Zone.cpp */; };
+		738FCCAF185AF27200D21F32 /* DisplayManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738FCCAB185AF27200D21F32 /* DisplayManager.cpp */; };
+		738FCCB0185AF27200D21F32 /* GameManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738FCCAD185AF27200D21F32 /* GameManager.cpp */; };
 		7391BE461835FA6A00CA1F4F /* LevelDatabase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7391BE421835FA6A00CA1F4F /* LevelDatabase.cpp */; };
 		7391BE471835FA6A00CA1F4F /* Settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7391BE441835FA6A00CA1F4F /* Settings.cpp */; };
 		73931AFA16DAE15F00465E9E /* ChatCommands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73931AF616DAE15F00465E9E /* ChatCommands.cpp */; };
@@ -728,6 +730,10 @@
 		738B9D0A15A1E0C700D1F76C /* Engineerable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Engineerable.h; path = ../../../zap/Engineerable.h; sourceTree = SOURCE_ROOT; };
 		738B9D0B15A1E0C700D1F76C /* Zone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Zone.cpp; path = ../../../zap/Zone.cpp; sourceTree = SOURCE_ROOT; };
 		738B9D0C15A1E0C700D1F76C /* Zone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Zone.h; path = ../../../zap/Zone.h; sourceTree = SOURCE_ROOT; };
+		738FCCAB185AF27200D21F32 /* DisplayManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DisplayManager.cpp; path = ../../../zap/DisplayManager.cpp; sourceTree = SOURCE_ROOT; };
+		738FCCAC185AF27200D21F32 /* DisplayManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DisplayManager.h; path = ../../../zap/DisplayManager.h; sourceTree = SOURCE_ROOT; };
+		738FCCAD185AF27200D21F32 /* GameManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameManager.cpp; path = ../../../zap/GameManager.cpp; sourceTree = SOURCE_ROOT; };
+		738FCCAE185AF27200D21F32 /* GameManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GameManager.h; path = ../../../zap/GameManager.h; sourceTree = SOURCE_ROOT; };
 		7391BE411835FA6A00CA1F4F /* Intervals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Intervals.h; path = ../../../zap/Intervals.h; sourceTree = SOURCE_ROOT; };
 		7391BE421835FA6A00CA1F4F /* LevelDatabase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LevelDatabase.cpp; path = ../../../zap/LevelDatabase.cpp; sourceTree = SOURCE_ROOT; };
 		7391BE431835FA6A00CA1F4F /* LevelDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LevelDatabase.h; path = ../../../zap/LevelDatabase.h; sourceTree = SOURCE_ROOT; };
@@ -1775,6 +1781,10 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				738FCCAB185AF27200D21F32 /* DisplayManager.cpp */,
+				738FCCAC185AF27200D21F32 /* DisplayManager.h */,
+				738FCCAD185AF27200D21F32 /* GameManager.cpp */,
+				738FCCAE185AF27200D21F32 /* GameManager.h */,
 				7391BE411835FA6A00CA1F4F /* Intervals.h */,
 				7391BE421835FA6A00CA1F4F /* LevelDatabase.cpp */,
 				7391BE431835FA6A00CA1F4F /* LevelDatabase.h */,
@@ -2960,6 +2970,8 @@
 				73D5926E1800798F0054244E /* LuaGlobals.cpp in Sources */,
 				7391BE461835FA6A00CA1F4F /* LevelDatabase.cpp in Sources */,
 				7391BE471835FA6A00CA1F4F /* Settings.cpp in Sources */,
+				738FCCAF185AF27200D21F32 /* DisplayManager.cpp in Sources */,
+				738FCCB0185AF27200D21F32 /* GameManager.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

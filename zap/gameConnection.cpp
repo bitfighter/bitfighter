@@ -1457,7 +1457,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       dataBuffer->takeOwnership();
    }
 
-   if(type & TransmissionDone && mDataBuffer && mDataBuffer->getBufferSize() != 0)
+   if((type & TransmissionDone) && mDataBuffer && mDataBuffer->getBufferSize() != 0)
    {
       if(mDataBufferLevelGen)
          ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), mDataBufferLevelGen->getBuffer(), mDataBufferLevelGen->getBufferSize());
@@ -1552,7 +1552,13 @@ bool GameConnection::TransferLevelFile(const char *filename)
                if(isInitiator()) // isClient
                {
                   s2cDisplayErrorMessage_remote("Unable to find LevelGen");
-                  mPendingTransferData.deleteAndClear();
+
+                  // Vector deleteAndClear doesn't work for SafePtr on OSX, so we do it the
+                  // old-fashioned way
+                  for(S32 i = 0; i < mPendingTransferData.size(); i++)
+                     delete mPendingTransferData[i].getPointer();
+                  mPendingTransferData.clear();
+
                   return false;
                }
             }

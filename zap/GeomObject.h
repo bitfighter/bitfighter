@@ -9,8 +9,6 @@
 #include "Geometry_Base.h"    // For Geometry class def
 #include "Point.h"
 
-#include "gtest/gtest_prod.h"
-
 #include <string>
 
 namespace Zap
@@ -114,9 +112,6 @@ public:
    virtual void setPos(const Point &pos);
 
    virtual void setGeom(const Vector<Point> &points);
-
-   friend class ObjectTest;
-   FRIEND_TEST(ObjectTest, GhostingSanity);
 };
 
 }
