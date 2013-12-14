@@ -1157,12 +1157,12 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
    {
       // Do some math first
       Tracker &t = particles[i];
-      F32 d = (t.dP - fmod(t.dI + time_f64, (F64)t.dP)) / t.dP;
+      F32 d = F32((t.dP - fmod(t.dI + time_f64, (F64)t.dP)) / t.dP);
       F32 alphaMod = 1;
       if(d > 0.9)
          alphaMod = (1 - d) * 10;
 
-      F32 theta = fmod(t.thetaI + time_f64 * t.thetaP, DoubleTau);
+      F32 theta = F32(fmod(t.thetaI + time_f64 * t.thetaP, DoubleTau));
       F32 startRadius = radiusFraction * radius * d;
 
       Point start(cos(theta), sin(theta));
