@@ -162,7 +162,15 @@ void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridS
 {  
    mGeometry.getGeometry()->readGeom(argc, argv, firstCoord, gridSize); 
    onPointsChanged();
-} 
+}
+
+
+// Function currently only used for testing
+bool GeomObject::hasGeometry() const
+{
+   return mGeometry.getGeometry() != NULL;
+}
+
 
 string GeomObject::geomToLevelCode() const {  return mGeometry.geomToLevelCode();     }
 Rect GeomObject::calcExtents()             {  return mGeometry.getGeometry()->calcExtents();  }
@@ -244,12 +252,6 @@ GeometryContainer::~GeometryContainer()
 
 
 Geometry *GeometryContainer::getGeometry() const
-{
-   return mGeometry;
-}
-
-
-const Geometry *GeometryContainer::getConstGeometry() const
 {
    return mGeometry;
 }

@@ -131,7 +131,7 @@ TEST_F(ObjectTest, GhostingSanity)
 
       // Skip registered classes that aren't BfObjects (e.g. GameType) or don't have
       // a geometry at this point (ForceField)
-      if(bfobj != NULL && bfobj->mGeometry.getGeometry() != NULL)
+      if(bfobj && bfobj->hasGeometry())
       {
          // First, add some geometry
          bfobj->setExtent(Rect(0,0,1,1));
@@ -140,9 +140,7 @@ TEST_F(ObjectTest, GhostingSanity)
          ghostingRecords[i].server = true;
       }
       else
-      {
          delete bfobj;
-      }
    }
 
    // Idle to allow object replication

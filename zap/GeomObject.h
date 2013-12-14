@@ -9,7 +9,7 @@
 #include "Geometry_Base.h"    // For Geometry class def
 #include "Point.h"
 
-#include "gtest/gtest_prod.h"
+//#include "gtest/gtest_prod.h"
 
 #include <string>
 
@@ -27,7 +27,6 @@ public:
    virtual ~GeometryContainer();                            // Destructor
 
    Geometry *getGeometry() const;
-   const Geometry *getConstGeometry() const;
    void setGeometry(Geometry *geometry);
    void reverseWinding();
 
@@ -91,6 +90,7 @@ public:
    void reverseWinding();     
 
    virtual Rect calcExtents();
+   bool hasGeometry() const;
 
    void disableTriangulation();
 
@@ -115,8 +115,8 @@ public:
 
    virtual void setGeom(const Vector<Point> &points);
 
-   friend class ObjectTest;
-   FRIEND_TEST(ObjectTest, GhostingSanity);
+   //friend class ObjectTest;
+   //FRIEND_TEST(ObjectTest, GhostingSanity);
 };
 
 }
