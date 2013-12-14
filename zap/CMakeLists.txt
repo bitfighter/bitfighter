@@ -42,7 +42,7 @@ set(SHARED_SOURCES
 	gameStats.cpp
 	gameType.cpp
 	gameWeapons.cpp
-   GameManager.cpp
+    GameManager.cpp
 	Geometry.cpp
 	GeomObject.cpp
 	GeomUtils.cpp
@@ -353,6 +353,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestShip.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSpawnDelay.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestStringUtils.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSymbolStrings.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
 	${CMAKE_SOURCE_DIR}/master/master.cpp
