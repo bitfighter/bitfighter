@@ -423,16 +423,13 @@ static void initPage2Block(const char **block, S32 blockSize, S32 fontSize, cons
 
 void InstructionsUserInterface::initPage2()
 {
-   Vector<SymbolShapePtr> symbols;
-
    mLoadoutInstructions.clear();
 
    initPage2Block(loadoutInstructions1, ARRAYSIZE(loadoutInstructions1), HeaderFontSize, &Colors::yellow, &Colors::green,
                   getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
 
    // Add some space separating the two sections
-   symbols.push_back(SymbolString::getBlankSymbol(0, 30));
-   mLoadoutInstructions.add(SymbolString(symbols));
+   mLoadoutInstructions.add(SymbolString::getBlankSymbol(0, 30));
 
    initPage2Block(loadoutInstructions2, ARRAYSIZE(loadoutInstructions2), HeaderFontSize, &Colors::yellow, &Colors::cyan, 
                getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
@@ -441,20 +438,14 @@ void InstructionsUserInterface::initPage2()
 
 void InstructionsUserInterface::initPageHeaders()
 {
-   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
-
-   Vector<SymbolShapePtr> symbols;
    mPageHeaders.clear();
 
-   symbols.clear();
-   SymbolString::symbolParse(inputCodeManager, "Use [[Tab]] to expand a partially typed command", 
-                             symbols, HelpContext, FontSize, true, &Colors::green, &Colors::white);
-   mPageHeaders.add(SymbolString(symbols, AlignmentLeft));
+   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
 
-   symbols.clear();
-   SymbolString::symbolParse(inputCodeManager, "Enter a cmd by pressing [[Command]], or by typing one at the chat prompt", 
-                             symbols, HelpContext, FontSize, true, &Colors::green, &Colors::white);
-   mPageHeaders.add(SymbolString(symbols, AlignmentLeft));
+   mPageHeaders.add(SymbolString("Use [[Tab]] to expand a partially typed command", 
+                    inputCodeManager, HelpContext, FontSize, true, AlignmentLeft));
+   mPageHeaders.add(SymbolString("Enter a cmd by pressing [[Command]], or by typing one at the chat prompt", 
+                    inputCodeManager, HelpContext, FontSize, true, AlignmentLeft));
 }
 
 
