@@ -18,7 +18,7 @@
 /* #undef HAVE_ALIGNED_ALLOC */
 
 /* Define if we have the posix_memalign function */
-#define HAVE_POSIX_MEMALIGN
+/* #define HAVE_POSIX_MEMALIGN */
 
 /* Define if we have the _aligned_malloc function */
 /* #undef HAVE__ALIGNED_MALLOC */
