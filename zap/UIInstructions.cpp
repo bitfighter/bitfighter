@@ -202,36 +202,27 @@ void InstructionsUserInterface::initNormalKeys_page1()
    UI::SymbolStringSet keysInstrLeft(LineGap),  keysBindingsLeft(LineGap), 
                        keysInstrRight(LineGap), keysBindingsRight(LineGap);
 
-   Vector<SymbolShapePtr> symbols;
-
    // Add some headers to our 4 columns
-   symbols.clear();
-   symbols.push_back(SymbolString::getSymbolText("Action", HeaderFontSize, HelpContext, secColor));
-   keysInstrLeft.add(SymbolString(symbols));
-   keysInstrRight.add(SymbolString(symbols));
 
-   symbols.clear();
-   symbols.push_back(SymbolString::getSymbolText("Control", HeaderFontSize, HelpContext, secColor));
-   keysBindingsLeft.add(SymbolString(symbols));
-   keysBindingsRight.add(SymbolString(symbols));
+   SymbolString action = SymbolString::getSymbolText("Action", HeaderFontSize, HelpContext, secColor);
+   keysInstrLeft.add(action);
+   keysInstrRight.add(action);
+
+   SymbolString control = SymbolString::getSymbolText("Control", HeaderFontSize, HelpContext, secColor);
+   keysBindingsLeft.add(control);
+   keysBindingsRight.add(control);
 
    // Add horizontal line to first column (will draw across all)
-   symbols.clear();
-   symbols.push_back(SymbolString::getHorizLine(735, -14, 8, &Colors::gray70));
-   keysInstrLeft.add(SymbolString(symbols));
+   keysInstrLeft.add(SymbolString::getHorizLine(735, -14, 8, &Colors::gray70));
 
    // Need to add a blank symbol to keep columns in sync
-   symbols.clear();
-   symbols.push_back(SymbolString::getBlankSymbol(0,0));
-   keysBindingsLeft.add(SymbolString(symbols));
-   keysInstrRight.add(SymbolString(symbols));
-   keysBindingsRight.add(SymbolString(symbols));
+   SymbolString blank = SymbolString::getBlankSymbol(0, 0);
+   keysBindingsLeft.add(blank);
+   keysInstrRight.add(blank);
+   keysBindingsRight.add(blank);
 
-   pack(keysInstrLeft,  keysBindingsLeft, 
-        helpBindLeft, helpBindLeftCount, getGame()->getSettings());
-
-   pack(keysInstrRight, keysBindingsRight, 
-        helpBindRight, helpBindRightCount, getGame()->getSettings());
+   pack(keysInstrLeft,  keysBindingsLeft, helpBindLeft, helpBindLeftCount, getGame()->getSettings());
+   pack(keysInstrRight, keysBindingsRight, helpBindRight, helpBindRightCount, getGame()->getSettings());
 
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;  //(= 33)
