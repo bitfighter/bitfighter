@@ -459,12 +459,12 @@ void InstructionsUserInterface::initPageHeaders()
 
    symbols.clear();
    SymbolString::symbolParse(inputCodeManager, "Use [[Tab]] to expand a partially typed command", 
-                             symbols, HelpContext, FontSize, &Colors::green, &Colors::white);
+                             symbols, HelpContext, FontSize, true, &Colors::green, &Colors::white);
    mPageHeaders.add(SymbolString(symbols, AlignmentLeft));
 
    symbols.clear();
    SymbolString::symbolParse(inputCodeManager, "Enter a cmd by pressing [[Command]], or by typing one at the chat prompt", 
-                             symbols, HelpContext, FontSize, &Colors::green, &Colors::white);
+                             symbols, HelpContext, FontSize, true, &Colors::green, &Colors::white);
    mPageHeaders.add(SymbolString(symbols, AlignmentLeft));
 }
 

@@ -109,8 +109,8 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
 
       if(totalRating == UnknownRating)
       {
-         SymbolString::symbolParse(NULL, "Loading Rating ", symbols, LevelInfoContext, (S32)RatingSize,     &Colors::red);
-         SymbolString::symbolParse(NULL, "[[SPINNER]]",     symbols, LevelInfoContext, (S32)RatingSize + 6, &Colors::red);
+         SymbolString::symbolParse(NULL, "Loading Rating ", symbols, LevelInfoContext, (S32)RatingSize,     true, &Colors::red);
+         SymbolString::symbolParse(NULL, "[[SPINNER]]",     symbols, LevelInfoContext, (S32)RatingSize + 6, true, &Colors::red);
       }
       else
       {
@@ -123,7 +123,8 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
          totalSignlessRatingWidth = getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.c_str() + pos);
          totalSignWidth = getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.substr(0, pos).c_str());
 
-         SymbolString::symbolParse(NULL, myRatingStr + divider + totalRatingStr, symbols, LevelInfoContext, (S32)RatingSize, &Colors::red);
+         SymbolString::symbolParse(NULL, myRatingStr + divider + totalRatingStr, symbols, 
+                                   LevelInfoContext, (S32)RatingSize, true, &Colors::red);
       }
    }
 
@@ -132,7 +133,7 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    if(isInDatabase && totalRating != UnknownRating)      // No legend for unknown rating
    {
       // Figure out where the ratings will be rendered
-      const F32 rightEdge = (DisplayManager::getScreenInfo()->getGameCanvasWidth() + titleSymbolString.getWidth()) / 2;
+      const F32 rightEdge = F32(DisplayManager::getScreenInfo()->getGameCanvasWidth() + titleSymbolString.getWidth()) / 2;
 
       const F32 x1 = rightEdge - totalSignlessRatingWidth - totalSignWidth - dividerWidth - mySignlessRatingWidth / 2;
       const F32 y1 = 10;

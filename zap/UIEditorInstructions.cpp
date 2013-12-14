@@ -201,7 +201,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    
    symbols.clear();
    SymbolString::symbolParse(settings->getInputCodeManager(), "Open the console by pressing [[/]]", 
-                             symbols, HelpContext, FontSize, &Colors::green, keyColor);
+                             symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
 
    mConsoleInstructions.add(SymbolString(symbols));
 
@@ -211,19 +211,19 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
    symbols.clear();
    SymbolString::symbolParse(settings->getInputCodeManager(), "Plugins are scripts that can manipuate items in the editor.",
-                             symbols, HelpContext, FontSize, &Colors::green, keyColor);
+                             symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
    mPluginInstructions.add(SymbolString(symbols));
 
    symbols.clear();
    SymbolString::symbolParse(settings->getInputCodeManager(), "See the Bitfighter wiki for info on creating your own.",
-                             symbols, HelpContext, FontSize, &Colors::green, keyColor);
+                             symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
    mPluginInstructions.add(SymbolString(symbols));
 
    // Using TAB_STOP:0 below will cause the text and the horiz. line to be printed in the same space, creating a underline effect
    symbols.clear();
    symbols.push_back(SymbolString::getHorizLine(735, FontSize, FontSize + 4, &Colors::gray70));
    SymbolString::symbolParse(settings->getInputCodeManager(), "[[TAB_STOP:0]]Key" + tabstr + "Description",
-                             symbols, HelpContext, FontSize, &Colors::yellow, keyColor);
+                             symbols, HelpContext, FontSize, true, &Colors::yellow, keyColor);
    mPluginInstructions.add(SymbolString(symbols));
 
    const Vector<PluginInfo> *pluginInfos = getUIManager()->getUI<EditorUserInterface>()->getPluginInfos();
