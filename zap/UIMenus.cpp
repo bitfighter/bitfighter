@@ -1626,15 +1626,15 @@ void RobotOptionsMenuUserInterface::setupMenus()
 
    IniSettings *iniSettings = getGame()->getSettings()->getIniSettings();
 
-   addMenuItem(new YesNoMenuItem("ROBOTS BALANCE TEAMS:", iniSettings->botsBalanceTeams,
-         "Toggle to have robots automatically added to the game and balance the teams",  KEY_B));
+   addMenuItem(new YesNoMenuItem("PLAY WITH BOTS:", iniSettings->botsBalanceTeams,
+         "Add robots to balance the teams?",  KEY_B, KEY_P));
 
     // This doesn't have a callback so we'll handle it in onEscape - make sure to set the correct index!
    addMenuItem(new CounterMenuItem("MINIMUM PLAYERS:", iniSettings->minBalancedPlayers,
          1, 2, 32, "bots", "", "Bots will be added until total player count meets this value", KEY_M));
 
-   addMenuItem(new YesNoMenuItem("FORCE TEAM BALANCE:", iniSettings->botsAlwaysBalanceTeams,
-         "Force teams to balance, even if the minimum player count has been met",  KEY_F));
+   addMenuItem(new YesNoMenuItem("AUTO BALANCE TEAMS:", iniSettings->botsAlwaysBalanceTeams,
+         "Force teams to balance, even if the minimum player count has been met",  KEY_A, KEY_T));
 }
 
 
