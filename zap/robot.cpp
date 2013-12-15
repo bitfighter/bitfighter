@@ -1265,6 +1265,7 @@ S32 Robot::lua_teamMsg(lua_State *L)
  * 
  * @param playerName Name of player to which to send a message.
  */
+// Note that identical code is found in LuaLevelGenerator::lua_privateMsg()
 S32 Robot::lua_privateMsg(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "privateMsg");
