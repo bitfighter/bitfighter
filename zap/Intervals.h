@@ -19,6 +19,7 @@ static const S32 THREE_SECONDS =  3 * ONE_SECOND;
 static const S32 FOUR_SECONDS  =  4 * ONE_SECOND;
 static const S32 FIVE_SECONDS  =  5 * ONE_SECOND;
 static const S32 SIX_SECONDS   =  6 * ONE_SECOND; 
+static const S32 TEN_SECONDS   = 10 * ONE_SECOND;
 
 static const S32 FIFTEEN_SECONDS = 15 * ONE_SECOND;
                                
