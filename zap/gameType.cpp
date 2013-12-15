@@ -603,7 +603,7 @@ void GameType::idle_server(U32 deltaT)
    EventManager::get()->update();
 
    // If game time has expired... game is over, man, it's over
-   if(!isTimeUnlimited() && U32(mEndingGamePlay - mTotalGamePlay) + 5000 <= 5000)
+   if(!isTimeUnlimited() && mTotalGamePlay >= mEndingGamePlay)
       gameOverManGameOver();
 }
 
