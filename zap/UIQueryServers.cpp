@@ -337,7 +337,6 @@ void QueryServersUserInterface::gotServerListFromMaster(const Vector<IPAddress> 
 }
 
 
-
 void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const Nonce &theNonce, U32 clientIdentityToken)
 {
    // See if this ping is a server from the local broadcast ping:
