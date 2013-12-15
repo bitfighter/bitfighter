@@ -100,7 +100,7 @@ IniSettings::IniSettings()
    hostdescr = "";
    maxPlayers = 127;
    maxBots = 10;
-   botsBalanceTeams = false;
+   playWithBots = false;
    minBalancedPlayers = 6;
    botsAlwaysBalanceTeams = false;
    enableServerVoiceChat = true;
@@ -626,15 +626,15 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->hostaddr  = ini->GetValue(section, "ServerAddress", iniSettings->hostaddr);
    iniSettings->hostdescr = ini->GetValue(section, "ServerDescription", iniSettings->hostdescr);
 
-   iniSettings->serverPassword      = ini->GetValue (section, "ServerPassword", iniSettings->serverPassword);
-   iniSettings->ownerPassword       = ini->GetValue (section, "OwnerPassword", iniSettings->ownerPassword);
-   iniSettings->adminPassword       = ini->GetValue (section, "AdminPassword", iniSettings->adminPassword);
-   iniSettings->levelChangePassword = ini->GetValue (section, "LevelChangePassword", iniSettings->levelChangePassword);
-   iniSettings->levelDir            = ini->GetValue (section, "LevelDir", iniSettings->levelDir);
-   iniSettings->maxPlayers          = ini->GetValueI(section, "MaxPlayers", iniSettings->maxPlayers);
-   iniSettings->maxBots             = ini->GetValueI(section, "MaxBots", iniSettings->maxBots);
-   iniSettings->botsBalanceTeams    = ini->GetValueYN(section, "BotsBalanceTeams", iniSettings->botsBalanceTeams);
-   iniSettings->minBalancedPlayers  = ini->GetValueI(section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
+   iniSettings->serverPassword      = ini->GetValue  (section, "ServerPassword", iniSettings->serverPassword);
+   iniSettings->ownerPassword       = ini->GetValue  (section, "OwnerPassword", iniSettings->ownerPassword);
+   iniSettings->adminPassword       = ini->GetValue  (section, "AdminPassword", iniSettings->adminPassword);
+   iniSettings->levelChangePassword = ini->GetValue  (section, "LevelChangePassword", iniSettings->levelChangePassword);
+   iniSettings->levelDir            = ini->GetValue  (section, "LevelDir", iniSettings->levelDir);
+   iniSettings->maxPlayers          = ini->GetValueI (section, "MaxPlayers", iniSettings->maxPlayers);
+   iniSettings->maxBots             = ini->GetValueI (section, "MaxBots", iniSettings->maxBots);
+   iniSettings->playWithBots        = ini->GetValueYN(section, "BotsBalanceTeams", iniSettings->playWithBots);
+   iniSettings->minBalancedPlayers  = ini->GetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
    iniSettings->botsAlwaysBalanceTeams   = ini->GetValueYN(section, "BotsAlwaysBalanceTeams", iniSettings->botsAlwaysBalanceTeams);
    iniSettings->enableServerVoiceChat = ini->GetValueYN (section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
 
@@ -1650,7 +1650,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment(" LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
       addComment(" MaxPlayers - The max number of players that can play on your server.");
       addComment(" MaxBots - The max number of bots allowed on this server.");
-      addComment(" BotsBalanceTeams - Enable bot auto-balancing in each level.");
+      addComment(" BotsBalanceTeams - Add robot players to this server.");
       addComment(" MinBalancedPlayers - The minimum number of players ensured in each map.  Bots will be added up to this number.");
       addComment(" BotsAlwaysBalanceTeams - If set to true, the teams will always be balanced, even if the minimum number of players has been met.");
       addComment(" EnableServerVoiceChat - If false, prevents any voice chat in a server.");
@@ -1682,7 +1682,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValue  (section, "LevelDir", iniSettings->levelDir);
    ini->SetValueI (section, "MaxPlayers", iniSettings->maxPlayers);
    ini->SetValueI (section, "MaxBots", iniSettings->maxBots);
-   ini->setValueYN(section, "BotsBalanceTeams", iniSettings->botsBalanceTeams);
+   ini->setValueYN(section, "BotsBalanceTeams", iniSettings->playWithBots);
    ini->SetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
    ini->setValueYN(section, "BotsAlwaysBalanceTeams", iniSettings->botsAlwaysBalanceTeams);
    ini->setValueYN(section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);

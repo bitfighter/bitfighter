@@ -591,7 +591,7 @@ void GameType::idle_server(U32 deltaT)
 
    // Analyze if we need to re-balance teams with bots
    if(!mBotBalancingDisabled &&
-         getGame()->getSettings()->getIniSettings()->botsBalanceTeams &&
+         getGame()->getSettings()->getIniSettings()->playWithBots &&
          mBotBalanceAnalysisTimer.update(deltaT))
    {
       balanceTeams();

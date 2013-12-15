@@ -1626,7 +1626,7 @@ void RobotOptionsMenuUserInterface::setupMenus()
 
    IniSettings *iniSettings = getGame()->getSettings()->getIniSettings();
 
-   addMenuItem(new YesNoMenuItem("PLAY WITH BOTS:", iniSettings->botsBalanceTeams,
+   addMenuItem(new YesNoMenuItem("PLAY WITH BOTS:", iniSettings->playWithBots,
          "Add robots to balance the teams?",  KEY_B, KEY_P));
 
     // This doesn't have a callback so we'll handle it in onEscape - make sure to set the correct index!
@@ -1649,7 +1649,7 @@ void RobotOptionsMenuUserInterface::onEscape()
 void RobotOptionsMenuUserInterface::saveSettings()
 {
    // Save our minimum players, get the correct index of the appropriate menu item
-   getGame()->getSettings()->getIniSettings()->botsBalanceTeams = getMenuItem(0)->getIntValue() == 1;
+   getGame()->getSettings()->getIniSettings()->playWithBots = getMenuItem(0)->getIntValue() == 1;
    getGame()->getSettings()->getIniSettings()->minBalancedPlayers = getMenuItem(1)->getIntValue();
    getGame()->getSettings()->getIniSettings()->botsAlwaysBalanceTeams = getMenuItem(2)->getIntValue() == 1;
 
