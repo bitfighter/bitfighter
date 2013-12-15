@@ -2772,6 +2772,8 @@ void GameType::addBotFromClient(Vector<StringTableEntry> args)
 
    static const S32 ABSOLUTE_MAX_BOTS = 255;    // Hard limit on number of bots on the server
 
+   const S32 maxBots = clientInfo->isAdmin() ? ABSOLUTE_MAX_BOTS : settings->getIniSettings()->maxBots;
+
    if(mBotZoneCreationFailed)
       conn->s2cDisplayErrorMessage("!!! Zone creation failed for this level -- bots disabled");
 
@@ -2786,9 +2788,8 @@ void GameType::addBotFromClient(Vector<StringTableEntry> args)
    else if(!clientInfo->isLevelChanger())
       return;  // Error message handled client-side
 
-   else if((getGame()->getBotCount() >= settings->getIniSettings()->maxBots && !clientInfo->isAdmin()) ||
-           (getGame()->getBotCount() >= ABSOLUTE_MAX_BOTS))
-      conn->s2cDisplayErrorMessage("!!! Can't add more bots -- this server is full");
+   else if(getGame()->getBotCount() >= maxBots)
+      conn->s2cDisplayErrorMessage("!!! Can't add more bots -- this server can only have " + itos(maxBots));
 
    else if(args.size() >= 2 && !safeFilename(args[1].getString()))
       conn->s2cDisplayErrorMessage("!!! Invalid filename");
