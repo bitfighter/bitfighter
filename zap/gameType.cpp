@@ -86,7 +86,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(3000), mGameTimeUp
    mEngineerEnabled = false;
    mEngineerUnrestrictedEnabled = false;
    mBotsAllowed = true;
-   mBotBalancingDisabled = false;
+   mBotBalancingEnabled = true;
 
    mTotalGamePlay = 0;
    mEndingGamePlay = DefaultGameTime;
@@ -591,7 +591,7 @@ void GameType::idle_server(U32 deltaT)
 
    // Analyze if we need to re-balance teams with bots 
    // Wouldn't this be better triggered when players join/quit server rather than in the idle loop?
-   if(!mBotBalancingDisabled &&
+   if(mBotBalancingEnabled &&
          getGame()->getSettings()->getIniSettings()->playWithBots &&
          mBotBalanceAnalysisTimer.update(deltaT))
    {
@@ -603,7 +603,8 @@ void GameType::idle_server(U32 deltaT)
    EventManager::get()->update();
 
    // If game time has expired... game is over, man, it's over
-   if(!isTimeUnlimited() && mTotalGamePlay >= mEndingGamePlay)
+   // Add 5000 to each side to handle U32 underflow
+   if(!isTimeUnlimited() && mEndingGamePlay <= mTotalGamePlay)
       gameOverManGameOver();
 }
 
@@ -2804,7 +2805,7 @@ void GameType::addBotFromClient(Vector<StringTableEntry> args)
       else
       {
          // Disable bot balancing
-         mBotBalancingDisabled = true;
+         mBotBalancingEnabled = false;
 
          StringTableEntry msg = StringTableEntry("Robot added by %e0");
          messageVals.clear();
@@ -2972,7 +2973,7 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
    getGame()->deleteBotFromTeam(findLargestTeamWithBots());
 
    // Disable bot balancing
-   mBotBalancingDisabled = true;
+   mBotBalancingEnabled = false;
 
    StringTableEntry msg = StringTableEntry("Robot kicked by %e0");
    messageVals.clear();
@@ -3003,7 +3004,7 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBots, (), ())
    getGame()->deleteAllBots();
 
    // Disable bot balancing
-   mBotBalancingDisabled = true;
+   mBotBalancingEnabled = false;
 
    StringTableEntry msg = StringTableEntry("All robots kicked by %e0");
    messageVals.clear();

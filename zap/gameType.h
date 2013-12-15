@@ -79,7 +79,7 @@ private:
    bool mEngineerEnabled;
    bool mEngineerUnrestrictedEnabled;
    bool mBotsAllowed;
-   bool mBotBalancingDisabled;
+   bool mBotBalancingEnabled;
 
    static const U32 mBotBalanceTimerPeriod;
 
