@@ -263,14 +263,11 @@ void KeyDefMenuUserInterface::render()
       }
    }
 
-
    S32 yPos = yStart + maxMenuItemsInAnyCol * height + 10;
-
 
    // Draw the help string
    glColor(Colors::green);
    drawCenteredString(yPos, 15, menuItems[selectedIndex].helpString.c_str());
-
 
    yPos += 20;
 
@@ -280,7 +277,6 @@ void KeyDefMenuUserInterface::render()
       drawCenteredString(yPos, 15, "HINT: You will be using the left joystick to steer, the right to fire");
    else
       drawCenteredString(yPos, 15, "HINT: You will be using the mouse to aim, so make good use of your mouse buttons");
-
 
    if(errorMsgTimer.getCurrent())
    {
