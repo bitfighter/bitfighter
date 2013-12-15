@@ -382,7 +382,9 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
 }
 
 
-void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, const Nonce &clientNonce, const char *serverName, const char *serverDescr, U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
+void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, const Nonce &clientNonce, 
+                                                 const char *serverName, const char *serverDescr, U32 playerCount, 
+                                                 U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
    for(S32 i = 0; i < servers.size(); i++)
    {
