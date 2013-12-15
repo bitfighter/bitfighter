@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "ChatCheck.h"
+
+#include "Intervals.h"
 #include "tnlPlatform.h"
 
 using namespace TNL;
@@ -38,8 +40,12 @@ bool ChatCheck::checkMessage(const char *message, U32 mode)
       return false;
 
    U32 millisecondsClock = Platform::getRealMilliseconds();
-	if(mMillisecondsClock - millisecondsClock < 10) millisecondsClock = mMillisecondsClock;  // makes up for inaccurate clock slightly going backwords by 1 or 2 milliseconds.
+
+	if(mMillisecondsClock - millisecondsClock < 10)       // Makes up for inaccurate clock slightly going backwards by 1 or 2 ms
+      millisecondsClock = mMillisecondsClock;  
+
    U32 milliseconds = millisecondsClock - mMillisecondsClock;
+
    if(mChatTimer > milliseconds)
       mChatTimer -= milliseconds;
    else
@@ -47,16 +53,15 @@ bool ChatCheck::checkMessage(const char *message, U32 mode)
       mChatTimer = 0;
       mChatTimerBlocked = false;
    }
+
    mMillisecondsClock = millisecondsClock;
 
    if(mChatTimerBlocked)
       return false;
 
    U32 chatPrevMessageSum = 0;
-   for(U32 i=0; message[i] != 0; i++)
-   {
+   for(S32 i = 0; message[i] != 0; i++)
       chatPrevMessageSum += U32(message[i]) * (i + 0x4EC691);
-   }
 
    if(chatPrevMessageSum == mChatPrevMessageSum && mChatPrevMessageMode >= mode && mode <= 1 && mChatTimer != 0)
       return false;
@@ -64,13 +69,15 @@ bool ChatCheck::checkMessage(const char *message, U32 mode)
    mChatPrevMessageSum = chatPrevMessageSum;
    mChatPrevMessageMode = mode;
 
-   mChatTimer += 2000;
-   if(mChatTimer > 6000)
+   mChatTimer += TWO_SECONDS;
+
+   if(mChatTimer > SIX_SECONDS)
    {
-      mChatTimer += 2000;
+      mChatTimer += TWO_SECONDS;
       mChatTimerBlocked = true;
       return false;
    }
+
    return true;
 }
 
