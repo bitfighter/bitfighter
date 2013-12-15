@@ -2182,6 +2182,7 @@ static void moreRobotsAcceptCallback(ClientGame *game, U32 index)
 
    // Find largest team player count
    S32 largestTeamCount = 0;
+
    for(S32 i = 0; i < teamCount; i++)
    {
       TNLAssert(dynamic_cast<Team *>(game->getTeam(i)), "Invalid team");
@@ -2192,8 +2193,9 @@ static void moreRobotsAcceptCallback(ClientGame *game, U32 index)
    }
 
    // Determine if there are uneven teams; if so, count up the bots we'll need to add.  We'll
-   // add bots until all teams are even
+   // add bots until all teams are even.
    S32 neededBotCount = 0;
+
    for(S32 i = 0; i < teamCount; i++)
    {
       Team *team = static_cast<Team *>(game->getTeam(i));
@@ -2204,7 +2206,7 @@ static void moreRobotsAcceptCallback(ClientGame *game, U32 index)
    // Add bots to fill up the teams
    if(neededBotCount != 0)
       game->getGameType()->c2sAddBots(neededBotCount, Vector<StringTableEntry>());
-   // Else add a bot to every team
+   // add a bot to every team
    else
       game->getGameType()->c2sAddBots(teamCount, Vector<StringTableEntry>());
 
@@ -2283,8 +2285,8 @@ void RobotsMenuUserInterface::onActivate()
 
    clearMenuItems();
 
-   addMenuItem(new MenuItem("MORE ROBOTS", moreRobotsAcceptCallback, "Add a robot to each team", KEY_M));
-   addMenuItem(new MenuItem("FEWER ROBOTS", fewerRobotsAcceptCallback, "Remove a robot from each team", KEY_F));
+   addMenuItem(new MenuItem("MORE ROBOTS",       moreRobotsAcceptCallback,   "Add a robot to each team",        KEY_M));
+   addMenuItem(new MenuItem("FEWER ROBOTS",      fewerRobotsAcceptCallback,  "Remove a robot from each team",   KEY_F));
    addMenuItem(new MenuItem("REMOVE ALL ROBOTS", removeRobotsAcceptCallback, "Remove all robots from the game", KEY_R));
 }
 
