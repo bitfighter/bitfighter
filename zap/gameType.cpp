@@ -589,7 +589,8 @@ void GameType::idle_server(U32 deltaT)
       mGameTimeUpdateTimer.reset();
    }
 
-   // Analyze if we need to re-balance teams with bots
+   // Analyze if we need to re-balance teams with bots 
+   // Wouldn't this be better triggered when players join/quit server rather than in the idle loop?
    if(!mBotBalancingDisabled &&
          getGame()->getSettings()->getIniSettings()->playWithBots &&
          mBotBalanceAnalysisTimer.update(deltaT))
