@@ -646,8 +646,6 @@ static void renderLockIcon()
 }
 
 
-extern void glScale(F32 scaleFactor);
-
 void QueryServersUserInterface::render()
 {
    const S32 canvasWidth =  DisplayManager::getScreenInfo()->getGameCanvasWidth();
