@@ -960,7 +960,6 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
          requestSpawnDelayed(false);
    }
          
-
    // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
    // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
    if(isLocalClient && getUIManager()->isInScoreboardMode())
