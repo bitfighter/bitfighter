@@ -3346,34 +3346,28 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr me
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *sourceClientInfo = source->getClientInfo();
 
-   bool found = false;
+   ClientInfo *clientInfo = mGame->findClientInfo(toName.getString());
 
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   if(!clientInfo)
+      source->s2cDisplayErrorMessage("!!! Player not found");
+
+   // No sending to bots - they don't have a game connection
+   if(clientInfo->isRobot())
    {
-      ClientInfo *clientInfo = mGame->getClientInfo(i);
-
-      // No sending to bots - they don't have a game connection
-      if(clientInfo->isRobot())
-         continue;
-
-      if(clientInfo->getName() == toName)     // Do we want a case insensitive search?
-      {
-         if(!source->checkMessage(message.getString(), 2))
-            return;
-
-         RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatPM, (sourceClientInfo->getName(), toName, message));
-         source->postNetEvent(theEvent);
-
-         if(source != clientInfo->getConnection())          // No sending messages to self
-            clientInfo->getConnection()->postNetEvent(theEvent);
-
-         found = true;
-         break;
-      }
+      // clientInfo->sendBotPM();      // Placeholder for future
+      source->s2cDisplayErrorMessage("!!! Don't PM bots... they don't read their mail");
+      return;
    }
 
-   if(!found)
-      source->s2cDisplayErrorMessage("!!! Player not found");
+   if(source == clientInfo->getConnection())             // No messages to self
+      return;
+
+   if(!source->checkMessage(message.getString(), 2))     // Check message for flooding, etc.
+      return;
+
+   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatPM, (sourceClientInfo->getName(), toName, message));
+   clientInfo->getConnection()->postNetEvent(theEvent);
+   source->postNetEvent(theEvent);
 }
 
 
@@ -3395,8 +3389,14 @@ void GameType::sendPrivateChat(const StringTableEntry &senderName, const StringT
 {
    ClientInfo *clientInfo = mGame->findClientInfo(receiverName.getString());
 
-   if(clientInfo == NULL)  // Player not found
+   if(clientInfo == NULL)           // Player not found
       return;
+
+   if(clientInfo->isRobot())        // Bots don't have a connection, and don't get PMs
+   {
+      // clientInfo->sendBotPM();   // Placeholder for future
+      return;
+   }
 
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatPM, (senderName, clientInfo->getName(), message));
 

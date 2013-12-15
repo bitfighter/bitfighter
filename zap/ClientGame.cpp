@@ -936,14 +936,10 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
    // Find which client is us (could return NULL if our clientInfo hasn't yet been sent)
    mLocalRemoteClientInfo = findClientInfo(mClientInfo->getName()); 
 
-   // Testing 1-2-3
+   // A localClient may be an in-process client, or another process on the same machine.  In other words,
+   // clientInfo will not always be the same as findClientInfo(mClientInfo->getName())
    if(isLocalClient)
-   {
-      // If this assert never trips, we can get rid of the mLocalRemoteClientInfo assignment above and remove the assert.
-      // If it does trip, we can remove this block, with a note of some sort.
-      TNLAssert(clientInfo == findClientInfo(mClientInfo->getName()), "Not the same??");  // Added 8-Sep-2013
       mLocalRemoteClientInfo = clientInfo;
-   }
 
    if(isLocalClient)
    {
