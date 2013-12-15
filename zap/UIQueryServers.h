@@ -10,6 +10,7 @@
 #include "UIChat.h"
 #include "Point.h"
 #include "Color.h"
+#include "Intervals.h"
 
 #include "tnlNonce.h"
 
@@ -114,10 +115,11 @@ public:
       MaxPendingQueries = 10,
       PingQueryTimeout = 1500,
       PingQueryRetryCount = 3,
-      RequeryTime = 10000,           // Time to refresh ping or query to game servers
-      MasterRequeryTime = 10000,     // Time to refresh server query to master server
-      CheckMasterServerReady = 1000, // If not connected to master, check again in this time
+      RequeryTime = TEN_SECONDS,           // Time to refresh ping or query to game servers
+      MasterRequeryTime = TEN_SECONDS,     // Time to refresh server query to master server
+      CheckMasterServerReady = ONE_SECOND, // If not connected to master, check again in this time
    };
+
    struct ServerRef
    {
       enum State
@@ -150,6 +152,7 @@ public:
       ServerRef(); // Quickie constructor
       virtual ~ServerRef();
    };
+
    struct ColumnInfo
    {
       const char *name;
