@@ -649,7 +649,6 @@ static void renderLockIcon()
 void QueryServersUserInterface::render()
 {
    const S32 canvasWidth =  DisplayManager::getScreenInfo()->getGameCanvasWidth();
-//   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    bool drawmsg1 = false;
    bool drawmsg2 = false;
