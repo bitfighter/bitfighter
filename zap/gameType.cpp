@@ -2658,13 +2658,13 @@ S32 GameType::getMaxPlayersPerBalancedTeam(S32 players, S32 teams)
 void GameType::balanceTeams()
 {
    // Evaluate team counts
-   getGame()->countTeamPlayers();
+   mGame->countTeamPlayers();
 
    S32 teamCount = mGame->getTeamCount();
 
    // Grab our balancing options
-   S32 minimumPlayersNeeded = getGame()->getSettings()->getIniSettings()->minBalancedPlayers;
-   bool botsAlwaysBalance   = getGame()->getSettings()->getIniSettings()->botsAlwaysBalanceTeams;
+   S32 minimumPlayersNeeded = mGame->getSettings()->getIniSettings()->minBalancedPlayers;
+   bool botsAlwaysBalance   = mGame->getSettings()->getIniSettings()->botsAlwaysBalanceTeams;
 
    // If teams were balanced, how many players would the largest team have?
    S32 maxPlayersPerBalancedTeam = getMaxPlayersPerBalancedTeam(minimumPlayersNeeded, teamCount);
@@ -2701,7 +2701,8 @@ void GameType::balanceTeams()
    for(S32 i = 0; i < teamCount; i++)
    {
       Team *currentTeam = static_cast<Team *>(mGame->getTeam(i));
-      S32 currentTeamBotCount = currentTeam->getBotCount();
+
+      S32 currentTeamBotCount       = currentTeam->getBotCount();
       S32 currentTeamPlayerBotCount = currentTeam->getPlayerBotCount();  // All players
 
       // If the current team has bots and has more players than the calculated balance should have
@@ -2729,6 +2730,7 @@ void GameType::balanceTeams()
    if(currentClientCount < minimumPlayersNeeded)
    {
       Vector<StringTableEntry> dummy;
+
       for(S32 i = 0; i < minimumPlayersNeeded - currentClientCount; i++)
          addBot(dummy);
    }
