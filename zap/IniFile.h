@@ -92,14 +92,13 @@ public:
    void Clear();
    void Reset();
 
-   // Returns index of specified key, or noID if not found.
+   // Returns index of specified key, or noID if not found
    S32 findSection(const string &sectionName) const;
 
-   // Returns index of specified value, in the specified key, or noID if not found.
-   S32 FindValue(S32 const sectionID, const string &keyName) const;
+   // Returns index of specified key, in the specified section, or noID if not found
+   S32 findKey(S32 const sectionID, const string &keyName) const;
 
-   // Returns number of sections currently in the ini.
-   S32 NumSections() const;
+   // Returns number of sections currently in the ini
    S32 GetNumSections() const;
 
    // Verify if the key exists
@@ -108,13 +107,13 @@ public:
    // Add a section name
    S32 addSection( const string section);
 
-   // Returns key names by index.
+   // Returns section names by index
    string sectionName( S32 const sectionId) const;
    string getSectionName( S32 const sectionId) const;
 
    // Returns number of values stored for specified section.
    S32 GetNumEntries(S32 const sectionId) const;
-   S32 GetNumEntries(const string &keyName) const;
+   S32 GetNumEntries(const string &section) const;
 
    // Returns value name by index for a given keyname or sectionId.
    string ValueName( S32 const sectionID, S32 const keyID) const;

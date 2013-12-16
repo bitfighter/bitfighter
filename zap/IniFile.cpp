@@ -200,7 +200,7 @@ S32 CIniFile::findSection(const string &sectionName) const
 }
 
 
-S32 CIniFile::FindValue(S32 const sectionId, const string &keyName) const
+S32 CIniFile::findKey(S32 const sectionId, const string &keyName) const
 {
    if(!sections.size() || sectionId >= sections.size())
       return noID;
@@ -208,6 +208,7 @@ S32 CIniFile::FindValue(S32 const sectionId, const string &keyName) const
    for(S32 keyID = 0; keyID < sections[sectionId].keys.size(); ++keyID)
       if(checkCase(sections[sectionId].keys[keyID], keyName))
          return keyID;
+
    return noID;
 }
 
@@ -278,7 +279,7 @@ bool CIniFile::SetValue(const string &section, const string &key, const string &
          return false;
    }
 
-   S32 valueID = FindValue(sectionId, key);
+   S32 valueID = findKey(sectionId, key);
 
    if(valueID == noID) 
    {
@@ -347,7 +348,7 @@ string CIniFile::GetValue(S32 const sectionId, S32 const keyID, const string &de
 
 string CIniFile::GetValue(S32 const sectionId, const string &keyName, const string &defValue) const
 {
-   S32 valueID = FindValue(sectionId, keyName);
+   S32 valueID = findKey(sectionId, keyName);
    if(valueID == noID)
       return defValue;
 
@@ -361,7 +362,7 @@ string CIniFile::GetValue(const string &section, const string &keyName, const st
    if(sectionId == noID)
       return defValue;
 
-   S32 valueID = FindValue(sectionId, keyName);
+   S32 valueID = findKey(sectionId, keyName);
    if(valueID == noID)
       return defValue;
 
@@ -433,7 +434,7 @@ bool CIniFile::GetValueYN(const string &section, const string &key, bool defValu
 
 bool CIniFile::GetValueYN(S32 const sectionId, const string &keyName, const bool &defValue) const
 {
-   S32 valueID = FindValue(sectionId, keyName);
+   S32 valueID = findKey(sectionId, keyName);
    if(valueID == noID)
       return defValue;
 
@@ -455,7 +456,7 @@ bool CIniFile::deleteKey(const string &section, const string &key)
    if(sectionId == noID)
       return false;
 
-   S32 valueID = FindValue(sectionId, key);
+   S32 valueID = findKey(sectionId, key);
    if(valueID == noID)
       return false;
 
@@ -678,15 +679,9 @@ void CIniFile::Reset()
 }
 
 
-S32 CIniFile::NumSections() const
-{
-   return sectionNames.size();
-}
-
-
 S32 CIniFile::GetNumSections() const
 {
-   return NumSections();
+   return sectionNames.size();
 }
 
 
@@ -697,7 +692,7 @@ bool CIniFile::hasKey(const string &section, const string &key) const
    if(sectionId == noID)
       return false;
 
-   return FindValue(sectionId, key) != noID;
+   return findKey(sectionId, key) != noID;
 }
 
 
@@ -716,9 +711,9 @@ S32 CIniFile::GetNumEntries(S32 const sectionId) const
 }
 
 
-S32 CIniFile::GetNumEntries(const string &keyName) const
+S32 CIniFile::GetNumEntries(const string &section) const
 {
-   S32 sectionId = findSection(keyName);
+   S32 sectionId = findSection(section);
 
    if(sectionId == noID)
       return 0;
