@@ -27,9 +27,7 @@
 
 #include "IniFile.h"
 
-#include "tnlJournal.h"       // For journaling support
 #include "stringUtils.h"      // for lcase, itos, etc.
-#include "zapjournal.h"
 #include "tnlTypes.h"
 
 #include <stdio.h>
@@ -67,8 +65,6 @@ CIniFile::~CIniFile()
 }
 
 
-extern Zap::ZapJournal gZapJournal;
-
 void CIniFile::ReadFile()
 {
    // Normally you would use ifstream, but the SGI CC compiler has
@@ -76,31 +72,26 @@ void CIniFile::ReadFile()
    fstream f;
    string line;
 
-   Vector<StringPtr> iniLines;
-   if(gZapJournal.getCurrentMode() != TNL::Journal::Playback)
+   Vector<string> iniLines;
+   string x = path;
+   string y(x.begin(), x.end());
+   y.assign(x.begin(), x.end());
+
+   f.open(y.c_str(), ios::in);
+
+   if(!f.fail())    // This is true if the file cannot be opened or something... in which case we don't want to read the file!
    {
-      string x = path;
-      string y(x.begin(), x.end());
-      y.assign(x.begin(), x.end());
-
-      f.open(y.c_str(), ios::in);
-
-      // To better handle our journaling requirements, we'll read the INI file,
-      // then pass those off to a journaled routine for processing.
-      if(!f.fail())    // This is true if the file cannot be opened or something... in which case we don't want to read the file!
-      {
-         while(getline(f, line))
-            if(line.length() > 2)                   // Anything shorter can't be useful...  strip these out here to reduce journaling burden
-               iniLines.push_back(line.c_str());
-         f.close();
-      }
+      while(getline(f, line))
+         if(line.length() > 2)                   // Anything shorter can't be useful...  
+            iniLines.push_back(line);
+      f.close();
    }
 
    lineCount = iniLines.size();      // Set our INI vector length
    
    // Process our INI lines, will provide sensible defaults for any missing or malformed entries
    for(S32 i = 0; i < lineCount; i++)
-      processLine(iniLines[i].getString());
+      processLine(iniLines[i]);
 }
 
 
