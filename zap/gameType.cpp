@@ -2663,7 +2663,7 @@ void GameType::balanceTeams()
    S32 teamCount = mGame->getTeamCount();
 
    // Grab our balancing options
-   S32 minimumPlayersNeeded = mGame->getSettings()->getIniSettings()->minBalancedPlayers;
+   S32 minimumPlayersNeeded = mGame->getMinPlayerCount();
    bool botsAlwaysBalance   = mGame->getSettings()->getIniSettings()->botsAlwaysBalanceTeams;
 
    // If teams were balanced, how many players would the largest team have?
