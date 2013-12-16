@@ -102,7 +102,10 @@ public:
    S32 NumSections() const;
    S32 GetNumSections() const;
 
-   // Add a key name.
+   // Verify if the key exists
+   bool hasKey(const string &section, const string &key) const;
+
+   // Add a section name
    S32 addSection( const string section);
 
    // Returns key names by index.

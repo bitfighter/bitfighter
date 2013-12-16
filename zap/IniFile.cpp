@@ -690,6 +690,17 @@ S32 CIniFile::GetNumSections() const
 }
 
 
+bool CIniFile::hasKey(const string &section, const string &key) const
+{
+   S32 sectionId = findSection(section);
+
+   if(sectionId == noID)
+      return false;
+
+   return FindValue(sectionId, key) != noID;
+}
+
+
 string CIniFile::getSectionName( S32 const sectionId) const
 {
    return sectionName(sectionId);

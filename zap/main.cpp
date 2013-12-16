@@ -935,6 +935,17 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       settings->getIniSettings()->mSettings.setVal("LineSmoothing", Yes);
    }
 
+   if(previousVersion == VERSION_019)
+   {
+      // Rename BotsBalanceTeams to AddRobots in [Host] --> BotsBalanceTeams was introduced in 019, renamed in 019a
+      if(GameSettings::iniFile.hasKey("Host", "BotsBalanceTeams"))
+      {
+         bool oldval = GameSettings::iniFile.GetValueYN("Host", "BotsBalanceTeams", false);
+         GameSettings::iniFile.setValueYN("Host", "AddRobots", oldval, true);
+         GameSettings::iniFile.deleteKey("Host", "BotsBalanceTeams");
+      }
+   }
+
 
    // Now copy over resources to user's preference directory.  This will overwrite the previous
    // resources with same names.  Dont do this if it is a standalone bundle
