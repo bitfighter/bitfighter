@@ -177,7 +177,7 @@ void NetObject::onGhostAvailable(GhostConnection *)
 
 //-----------------------------------------------------------------------------
 
-F32 NetObject::getUpdatePriority(NetObject*, U32, S32 updateSkips)
+F32 NetObject::getUpdatePriority(GhostConnection*, U32, S32 updateSkips)
 {
    return F32(updateSkips) * 0.1f;
 

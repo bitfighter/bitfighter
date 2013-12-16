@@ -89,11 +89,21 @@ endif()
 # CMake options
 #
 
+# Default to NO for Linux
+option(USE_SDL2 "Force usage of SDL2" NO)
+
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 
+
+#
 # Now search for dependencies
-# Set up Windows specific locations for libraries and headers
+#
+# Set up Windows or OSX specific locations for libraries and headers
+#
 if(WIN32 OR APPLE OR XCOMPILE)
+	# Always use SDL2 on OSX or Windows
+	set(USE_SDL2 1)
+
 	set(SDL2_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libsdl)
 	set(OGG_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libogg)
 	set(VORBIS_SEARCH_PATHS	${CMAKE_SOURCE_DIR}/lib	${CMAKE_SOURCE_DIR}/libvorbis)
@@ -138,14 +148,19 @@ endif()
 
 # Search for our dependencies
 # SDL2 is default and should be found on all platforms except possibly Linux
-find_package(SDL2)
-if(SDL2_FOUND)
-	set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
-	set(SDL_LIBRARY ${SDL2_LIBRARY})
+if(USE_SDL2)
+	find_package(SDL2)
+
+	if(SDL2_FOUND)
+		set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
+		set(SDL_LIBRARY ${SDL2_LIBRARY})
+	endif()
 else()
-	# Default back to SDL 1.2 (most likely Linux)
 	find_package(SDL)
+	
+	# SDL_LIBRARY and SDL_INCLUDE_DIR are set by the FindSDL module
 endif()
+
 if(WIN32)
 	find_package(ALURE)
 else()
@@ -154,12 +169,12 @@ endif()
 
 find_package(OpenAL)
 
-# finds opengl and gnables gles if gl isnt found in the system.
+# Searches for opengl and gnables gles if gl isnt found in the system.
 message(STATUS "Determining system GL provider")
 if(NOT USE_GLES)
 	message(STATUS "Atempting to use standard OpenGL")
 	find_package(OpenGL)
-	set(USE_STANDARD_GL true)
+	set(USE_STANDARD_GL 1)
 	set(GL_LIBRARY ${OPENGL_LIBRARY})
 	set(GL_INCLUDE_DIR ${OPENGL_INCLUDE_DIR})
 endif()

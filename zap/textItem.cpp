@@ -367,6 +367,11 @@ void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    updateExtentInDatabase();
 }
 
+F32 TextItem::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips)
+{
+   return Parent::getUpdatePriority(connection, updateMask, updateSkips) - 1000.f;
+}
+
 
 ///// Editor Methods
 

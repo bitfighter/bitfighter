@@ -688,16 +688,16 @@ void Ship::idle(IdleCallPath path)
 
 
 // Get list of zones ship is currently in
-Vector<DatabaseObject *> *Ship::getCurrZoneList()
+Vector<SafePtr<Zone> > &Ship::getCurrZoneList()
 {
-   return mZones1IsCurrent ? &mZones1 : &mZones2;
+   return mZones1IsCurrent ? mZones1 : mZones2;
 }
 
 
 // Get list of zones ship was in last tick
-Vector<DatabaseObject *> *Ship::getPrevZoneList()
+Vector<SafePtr<Zone> > &Ship::getPrevZoneList()
 {
-   return mZones1IsCurrent ? &mZones2 : &mZones1;
+   return mZones1IsCurrent ? mZones2 : mZones1;
 }
 
 
@@ -714,30 +714,31 @@ bool Ship::checkForSpeedzones(U32 stateIndex)
 // Server only
 void Ship::checkForZones()
 {
-   Vector<DatabaseObject *> *currZoneList = getCurrZoneList();
-   Vector<DatabaseObject *> *prevZoneList = getPrevZoneList();
+   Vector<SafePtr<Zone> > &currZoneList = getCurrZoneList();
+   Vector<SafePtr<Zone> > &prevZoneList = getPrevZoneList();
 
    getZonesShipIsIn(currZoneList);     // Fill currZoneList with a list of all zones ship is currently in
 
    // Now compare currZoneList with prevZoneList to figure out if ship entered or exited any zones
-   for(S32 i = 0; i < currZoneList->size(); i++)
-      if(!prevZoneList->contains(currZoneList->get(i)))
-         EventManager::get()->fireEvent(EventManager::ShipEnteredZoneEvent, this, static_cast<Zone *>(currZoneList->get(i)));
+   for(S32 i = 0; i < currZoneList.size(); i++)
+      if(!prevZoneList.contains(currZoneList[i]))
+         EventManager::get()->fireEvent(EventManager::ShipEnteredZoneEvent, this, static_cast<Zone *>(currZoneList[i].getPointer()));
 
-   for(S32 i = 0; i < prevZoneList->size(); i++)
-      if(!currZoneList->contains(prevZoneList->get(i)))
-         EventManager::get()->fireEvent(EventManager::ShipLeftZoneEvent, this, static_cast<Zone *>(prevZoneList->get(i)));
+   for(S32 i = 0; i < prevZoneList.size(); i++)
+      // Zone can sometimes disappear if removed from the game via Lua, check if valid first
+      if(prevZoneList[i].isValid() && !currZoneList.contains(prevZoneList[i]))
+         EventManager::get()->fireEvent(EventManager::ShipLeftZoneEvent, this, static_cast<Zone *>(prevZoneList[i].getPointer()));
 }
 
 
 // Fill zoneList with a list of all zones that the ship is currently in
 // Server only
-void Ship::getZonesShipIsIn(Vector<DatabaseObject *> *zoneList)
+void Ship::getZonesShipIsIn(Vector<SafePtr<Zone> > &zoneList)
 {
    // Use this boolean as a cheap way of making the current zone list be the previous out without copying
    mZones1IsCurrent = !mZones1IsCurrent;     
 
-   zoneList->clear();
+   zoneList.clear();
 
    Rect rect(getActualPos(), getActualPos());      // Center of ship
 
@@ -751,7 +752,7 @@ void Ship::getZonesShipIsIn(Vector<DatabaseObject *> *zoneList)
       const Vector<Point> *polyPoints = fillVector[i]->getCollisionPoly();
 
       if(polygonContainsPoint(polyPoints->address(), polyPoints->size(), getActualPos()))
-         zoneList->push_back(fillVector[i]);
+         zoneList.push_back(SafePtr<Zone>(static_cast<Zone*>(fillVector[i])));
    }
 }
 
@@ -1351,7 +1352,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       stream->writeFlag(false);
    }  // End initial update
 
-   if(stream->writeFlag(updateMask & ChangeTeamMask))    // A player with admin can change robots teams
+   if(stream->writeFlag(updateMask & TeamMask))    // A player with admin can change robots teams
       writeThisTeam(stream);
 
    if(stream->writeFlag(updateMask & LoadoutMask))       // Loadout configuration
@@ -1462,7 +1463,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    }  // initial update
 
-   if(stream->readFlag())        // Team changed (ChangeTeamMask)
+   if(stream->readFlag())        // Team changed (TeamMask)
       readThisTeam(stream);
 
    if(stream->readFlag())        // New loadout configuration (LoadoutMask)
@@ -1636,9 +1637,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }  // unpackUpdate
 
 
-F32 Ship::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
+F32 Ship::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips)
 {
-   F32 value = Parent::getUpdatePriority(scopeObject, updateMask, updateSkips);
+   F32 value = Parent::getUpdatePriority(connection, updateMask, updateSkips);
 
    if(getControllingClient())
       value += 2.3f;
@@ -1872,12 +1873,12 @@ void Ship::kill()
       EventManager::get()->fireEvent(EventManager::ShipKilledEvent, this);
 
       // Fire the ShipLeftZoneEvent for every zone the ship is in
-      Vector<DatabaseObject *> *zoneList = &foundObjects;   // Reuse our reusable container
+      Vector<SafePtr<Zone> > zoneList;   // Reuse our reusable container
 
       getZonesShipIsIn(zoneList);
    
-      for(S32 i = 0; i < zoneList->size(); i++)
-         EventManager::get()->fireEvent(EventManager::ShipLeftZoneEvent, this, static_cast<Zone *>(zoneList->get(i)));
+      for(S32 i = 0; i < zoneList.size(); i++)
+         EventManager::get()->fireEvent(EventManager::ShipLeftZoneEvent, this, static_cast<Zone *>(zoneList[i].getPointer()));
    }
 
    // Client and server
@@ -1913,7 +1914,7 @@ void Ship::destroyPartiallyDeployedTeleporter()
 
 void Ship::setChangeTeamMask()
 {
-   setMaskBits(ChangeTeamMask);  
+   setMaskBits(TeamMask);  
 }
 
 

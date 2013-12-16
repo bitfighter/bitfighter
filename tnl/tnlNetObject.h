@@ -295,7 +295,7 @@ public:
    /// prepares to send a packet. Typically the update priority is scaled by
    /// updateSkips so that as data becomes stale, it becomes more of a priority to
    /// update.
-   virtual F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
+   virtual F32 getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips);
 
    /// Write the object's state to a packet.
    ///

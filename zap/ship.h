@@ -39,8 +39,8 @@ private:
    bool mIsRobot;
 
    Timer mSendSpawnEffectTimer;           // Only meaningful on the server
-   Vector<DatabaseObject *> mZones1;      // A list of zones the ship is currently in
-   Vector<DatabaseObject *> mZones2;
+   Vector<SafePtr<Zone> > mZones1;      // A list of zones the ship is currently in
+   Vector<SafePtr<Zone> > mZones2;
    bool mZones1IsCurrent;
    bool mFastRecharging;
 
@@ -68,11 +68,11 @@ private:
    // Idle helpers
    bool checkForSpeedzones(U32 stateIndex = ActualState); // Check to see if we collided with a GoFast
    void checkForZones();                           // See if ship entered or left any zones
-   void getZonesShipIsIn(Vector<DatabaseObject *> *zoneList);     // Fill zoneList with a list of all zones that the ship is currently in
+   void getZonesShipIsIn(Vector<SafePtr<Zone> > &zoneList);     // Fill zoneList with a list of all zones that the ship is currently in
    bool isLocalPlayerShip(Game *game) const;       // Returns true if ship represents local player
   
-   Vector<DatabaseObject *> *getCurrZoneList();    // Get list of zones ship is currently in
-   Vector<DatabaseObject *> *getPrevZoneList();    // Get list of zones ship was in last tick
+   Vector<SafePtr<Zone> > &getCurrZoneList();    // Get list of zones ship is currently in
+   Vector<SafePtr<Zone> > &getPrevZoneList();    // Get list of zones ship was in last tick
 
    bool doesShipActivateSensor(const Ship *ship);
    F32 getShipVisibility(const Ship *localShip);
@@ -103,9 +103,8 @@ public:
       LoadoutMask         = Parent::FirstFreeMask << 4,
       RespawnMask         = Parent::FirstFreeMask << 5, // For when robots respawn
       TeleportMask        = Parent::FirstFreeMask << 6, // Ship has just teleported
-      ChangeTeamMask      = Parent::FirstFreeMask << 7, // Used for when robots change teams
-      SpawnShieldMask     = Parent::FirstFreeMask << 8, // Used for the spawn shield
-      FirstFreeMask       = Parent::FirstFreeMask << 9
+      SpawnShieldMask     = Parent::FirstFreeMask << 7, // Used for the spawn shield
+      FirstFreeMask       = Parent::FirstFreeMask << 8
    };
 
 
@@ -285,7 +284,7 @@ public:
 
    void updateInterpolation();
 
-   F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
+   F32 getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips);
 
    bool isRobot();
 

@@ -278,7 +278,7 @@ public:
    void setOwner(ClientInfo *clientInfo);
    ClientInfo *getOwner();
 
-   F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
+   F32 getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips);
 
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;
    void findObjects(TestFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;

@@ -790,11 +790,12 @@ void BfObject::setScopeAlways()
 }
 
 
-F32 BfObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
+F32 BfObject::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips)
 {
-   BfObject *so = dynamic_cast<BfObject *>(scopeObject);
+   GameConnection *gc = static_cast<GameConnection *>(connection);
+   BfObject *so = gc->getControlObject();
    F32 add = 0;
-   if(so) // GameType is not GameObject, and GameType don't have position
+   if(so)
    {
       Point center = so->getExtent().getCenter();
 
