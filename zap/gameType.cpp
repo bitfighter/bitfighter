@@ -2855,19 +2855,16 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBot,
 
 
 GAMETYPE_RPC_C2S(GameType, c2sAddBots,
-      (U32 count, Vector<StringTableEntry> args),
-      (count, args))
+      (U32 botCount, Vector<StringTableEntry> args),
+      (botCount, args))
 {
-   GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   ClientInfo *clientInfo = source->getClientInfo();
+   GameConnection *source     = (GameConnection *) getRPCSourceConnection();
+   ClientInfo     *clientInfo = source->getClientInfo();
 
    if(!clientInfo->isLevelChanger())
       return;  // Error message handled client-side
 
-   // Invalid number of bots
-   //if(count <= 0)  // this doesn't matter here, "while" loops zero times so nothing happens without this check    -sam
-   //   return;  // Error message handled client-side
-
+   // Use prevRobotSize to detect when we try to add a bot but do not succeed
    S32 prevRobotSize = -1;
 
    while(count > 0 && prevRobotSize != getGame()->getBotCount()) // loop may end when cannot add anymore bots
