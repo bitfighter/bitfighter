@@ -103,9 +103,8 @@ public:
       LoadoutMask         = Parent::FirstFreeMask << 4,
       RespawnMask         = Parent::FirstFreeMask << 5, // For when robots respawn
       TeleportMask        = Parent::FirstFreeMask << 6, // Ship has just teleported
-      ChangeTeamMask      = Parent::FirstFreeMask << 7, // Used for when robots change teams
-      SpawnShieldMask     = Parent::FirstFreeMask << 8, // Used for the spawn shield
-      FirstFreeMask       = Parent::FirstFreeMask << 9
+      SpawnShieldMask     = Parent::FirstFreeMask << 7, // Used for the spawn shield
+      FirstFreeMask       = Parent::FirstFreeMask << 8
    };
 
 

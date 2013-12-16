@@ -1352,7 +1352,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       stream->writeFlag(false);
    }  // End initial update
 
-   if(stream->writeFlag(updateMask & ChangeTeamMask))    // A player with admin can change robots teams
+   if(stream->writeFlag(updateMask & TeamMask))    // A player with admin can change robots teams
       writeThisTeam(stream);
 
    if(stream->writeFlag(updateMask & LoadoutMask))       // Loadout configuration
@@ -1463,7 +1463,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    }  // initial update
 
-   if(stream->readFlag())        // Team changed (ChangeTeamMask)
+   if(stream->readFlag())        // Team changed (TeamMask)
       readThisTeam(stream);
 
    if(stream->readFlag())        // New loadout configuration (LoadoutMask)
@@ -1914,7 +1914,7 @@ void Ship::destroyPartiallyDeployedTeleporter()
 
 void Ship::setChangeTeamMask()
 {
-   setMaskBits(ChangeTeamMask);  
+   setMaskBits(TeamMask);  
 }
 
 
