@@ -2867,9 +2867,11 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
    // Use prevRobotSize to detect when we try to add a bot but do not succeed
    S32 prevRobotSize = -1;
 
-   while(count > 0 && prevRobotSize != getGame()->getBotCount()) // loop may end when cannot add anymore bots
+   for(S32 i = 0; i < botCount; i++)
    {
-      count--;
+      if(prevRobotSize != getGame()->getBotCount())
+         break;
+
       prevRobotSize = getGame()->getBotCount();
       addBotFromClient(args);
    }
