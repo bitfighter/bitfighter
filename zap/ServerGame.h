@@ -54,6 +54,7 @@ private:
    SafePtr<GameConnection> mShutdownOriginator;   // Who started the shutdown?
 
    bool mDedicated;
+   bool mAutoAddBots;
 
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
@@ -167,6 +168,9 @@ public:
    void startAllBots();                            // Loop through all our bots and run thier main() functions
    void addBot(Robot *robot);
    S32 getBotCount() const;
+   bool getAutoAddBots() const;
+   void setAutoAddBots(bool addBots);
+
 
    StringTableEntry getLevelNameFromIndex(S32 indx);
    S32 getAbsoluteLevelIndex(S32 indx);            // Figures out the level index if the input is a relative index

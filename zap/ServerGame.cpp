@@ -50,6 +50,7 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    mVoteType = VoteLevelChange;  // Arbitrary
    mLevelLoadIndex = 0;
    mShutdownOriginator = NULL;
+   mAutoAddBots = settings->getIniSettings()->playWithBots;
 
    setAddTarget();               // When we do an addToGame, objects should be added to ServerGame
 
@@ -1083,6 +1084,18 @@ void ServerGame::addBot(Robot *robot)
 S32 ServerGame::getBotCount() const
 {
    return mRobots.size();
+}
+
+
+bool ServerGame::getAutoAddBots() const
+{
+   return mAutoAddBots;
+}
+
+
+void ServerGame::setAutoAddBots(bool addBots)
+{
+   mAutoAddBots = addBots;
 }
 
 

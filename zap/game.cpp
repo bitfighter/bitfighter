@@ -260,6 +260,19 @@ void Game::deleteAllBots()
 }
 
 
+bool Game::getAutoAddBots() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+   return false;
+}
+
+
+void setAutoAddBots(bool addBots)
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
 void Game::setReadyToConnectToMaster(bool ready)
 {
    mReadyToConnectToMaster = ready;

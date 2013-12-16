@@ -592,7 +592,7 @@ void GameType::idle_server(U32 deltaT)
    // Analyze if we need to re-balance teams with bots 
    // Wouldn't this be better triggered when players join/quit server rather than in the idle loop?
    if(mBotBalancingEnabled &&
-         getGame()->getSettings()->getIniSettings()->playWithBots &&
+         getGame()->getAutoAddBots() &&
          mBotBalanceAnalysisTimer.update(deltaT))
    {
       balanceTeams();
@@ -2875,6 +2875,8 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
       prevRobotSize = getGame()->getBotCount();
       addBotFromClient(args);
    }
+
+   getGame()->setAutoAddBots(true);
 }
 
 

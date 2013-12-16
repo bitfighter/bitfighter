@@ -335,6 +335,8 @@ public:
    void deleteBot(S32 i);                         // Delete by index
    void deleteBotFromTeam(S32 teamIndex);         // Delete by teamIndex
    void deleteAllBots();                          // Delete 'em all, let God sort 'em out!
+   virtual bool getAutoAddBots() const;           // Should server add bots automatically?
+   virtual void setAutoAddBots(bool addBots);
 
    void loadLevelFromString(const string &contents, GridDatabase *database, const string& filename = "");
    bool loadLevelFromFile(const string &filename, GridDatabase *database);
