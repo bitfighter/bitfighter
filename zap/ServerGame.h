@@ -55,8 +55,9 @@ private:
 
    bool mDedicated;
    bool mAutoAddBots;
+   S32 mMinPlayerCount;             // Target number of players when we are auto-adding bots          
 
-   S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
+   S32 mLevelLoadIndex;             // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
    SafePtr<GameConnection> mSuspendor;            // Player requesting suspension if game suspended by request
    Timer mTimeToSuspend;
@@ -165,11 +166,19 @@ public:
 
    void onConnectedToMaster();
 
+   /////
+   // Bot related
    void startAllBots();                            // Loop through all our bots and run thier main() functions
+   
    void addBot(Robot *robot);
    S32 getBotCount() const;
+
    bool getAutoAddBots() const;
    void setAutoAddBots(bool addBots);
+
+   S32 getMinPlayerCount() const;
+   void setMinPlayerCount(S32 count);
+   /////
 
 
    StringTableEntry getLevelNameFromIndex(S32 indx);

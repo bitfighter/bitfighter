@@ -337,6 +337,8 @@ public:
    void deleteAllBots();                          // Delete 'em all, let God sort 'em out!
    virtual bool getAutoAddBots() const;           // Should server add bots automatically?
    virtual void setAutoAddBots(bool addBots);
+   virtual S32 getMinPlayerCount() const;
+   virtual void setMinPlayerCount(S32 count);
 
    void loadLevelFromString(const string &contents, GridDatabase *database, const string& filename = "");
    bool loadLevelFromFile(const string &filename, GridDatabase *database);

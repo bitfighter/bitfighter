@@ -50,7 +50,9 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    mVoteType = VoteLevelChange;  // Arbitrary
    mLevelLoadIndex = 0;
    mShutdownOriginator = NULL;
-   mAutoAddBots = settings->getIniSettings()->playWithBots;
+
+   mAutoAddBots    = settings->getIniSettings()->playWithBots;
+   mMinPlayerCount = settings->getIniSettings()->minBalancedPlayers;
 
    setAddTarget();               // When we do an addToGame, objects should be added to ServerGame
 
@@ -1096,6 +1098,19 @@ bool ServerGame::getAutoAddBots() const
 void ServerGame::setAutoAddBots(bool addBots)
 {
    mAutoAddBots = addBots;
+}
+
+
+// If we are using bots to flesh out the player count, how many players (including bots) do we want in the game?
+S32 ServerGame::getMinPlayerCount() const
+{
+   return mMinPlayerCount;
+}
+
+
+void ServerGame::setMinPlayerCount(S32 count)
+{
+   mMinPlayerCount = count;
 }
 
 

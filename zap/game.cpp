@@ -260,17 +260,11 @@ void Game::deleteAllBots()
 }
 
 
-bool Game::getAutoAddBots() const
-{
-   TNLAssert(false, "Not implemented for this class!");
-   return false;
-}
+bool Game::getAutoAddBots() const       { TNLAssert(false, "Not implemented for this class!"); return false; }
+S32  Game::getMinPlayerCount() const    { TNLAssert(false, "Not implemented for this class!"); return 0;     }
 
-
-void Game::setAutoAddBots(bool addBots)
-{
-   TNLAssert(false, "Not implemented for this class!");
-}
+void Game::setAutoAddBots(bool addBots) { TNLAssert(false, "Not implemented for this class!"); }
+void Game::setMinPlayerCount(S32 count) { TNLAssert(false, "Not implemented for this class!"); }
 
 
 void Game::setReadyToConnectToMaster(bool ready)
