@@ -295,7 +295,7 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
          if(walk->flags & GhostInfo::KillGhost)
             walk->priority = 10000;
          else
-            walk->priority = walk->obj->getUpdatePriority(mScopeObject, walk->updateMask, walk->updateSkipCount);
+            walk->priority = walk->obj->getUpdatePriority(this, walk->updateMask, walk->updateSkipCount);
       }
       else
          walk->priority = 0;

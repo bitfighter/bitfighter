@@ -1637,9 +1637,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }  // unpackUpdate
 
 
-F32 Ship::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
+F32 Ship::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips)
 {
-   F32 value = Parent::getUpdatePriority(scopeObject, updateMask, updateSkips);
+   F32 value = Parent::getUpdatePriority(connection, updateMask, updateSkips);
 
    if(getControllingClient())
       value += 2.3f;

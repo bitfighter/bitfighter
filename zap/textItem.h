@@ -58,6 +58,7 @@ public:
    void idle(BfObject::IdleCallPath path);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   F32 getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips);
 
    ///// Editor Methods
 

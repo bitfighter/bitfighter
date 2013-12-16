@@ -1119,7 +1119,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cCanSwitchTeams, (bool allowed), (allowe
 // Need to bump the priority of the gameType up really high, to ensure it gets ghosted first, before any game-specific objects like nexuses and
 // other things that need to get registered with the gameType.  This will fix (I hope) the random crash-at-level start issues that have
 // been annoying everyone so much.
-F32 GameType::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
+F32 GameType::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips)
 {
    return F32_MAX;      // High priority!!
 }

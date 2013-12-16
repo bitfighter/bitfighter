@@ -284,7 +284,7 @@ public:
 
    void updateInterpolation();
 
-   F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
+   F32 getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips);
 
    bool isRobot();
 
