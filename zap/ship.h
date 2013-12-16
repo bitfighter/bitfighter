@@ -39,8 +39,8 @@ private:
    bool mIsRobot;
 
    Timer mSendSpawnEffectTimer;           // Only meaningful on the server
-   Vector<DatabaseObject *> mZones1;      // A list of zones the ship is currently in
-   Vector<DatabaseObject *> mZones2;
+   Vector<SafePtr<Zone> > mZones1;      // A list of zones the ship is currently in
+   Vector<SafePtr<Zone> > mZones2;
    bool mZones1IsCurrent;
    bool mFastRecharging;
 
@@ -68,11 +68,11 @@ private:
    // Idle helpers
    bool checkForSpeedzones(U32 stateIndex = ActualState); // Check to see if we collided with a GoFast
    void checkForZones();                           // See if ship entered or left any zones
-   void getZonesShipIsIn(Vector<DatabaseObject *> *zoneList);     // Fill zoneList with a list of all zones that the ship is currently in
+   void getZonesShipIsIn(Vector<SafePtr<Zone> > &zoneList);     // Fill zoneList with a list of all zones that the ship is currently in
    bool isLocalPlayerShip(Game *game) const;       // Returns true if ship represents local player
   
-   Vector<DatabaseObject *> *getCurrZoneList();    // Get list of zones ship is currently in
-   Vector<DatabaseObject *> *getPrevZoneList();    // Get list of zones ship was in last tick
+   Vector<SafePtr<Zone> > &getCurrZoneList();    // Get list of zones ship is currently in
+   Vector<SafePtr<Zone> > &getPrevZoneList();    // Get list of zones ship was in last tick
 
    bool doesShipActivateSensor(const Ship *ship);
    F32 getShipVisibility(const Ship *localShip);
