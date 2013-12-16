@@ -267,7 +267,7 @@ bool Game::getAutoAddBots() const
 }
 
 
-void setAutoAddBots(bool addBots)
+void Game::setAutoAddBots(bool addBots)
 {
    TNLAssert(false, "Not implemented for this class!");
 }
