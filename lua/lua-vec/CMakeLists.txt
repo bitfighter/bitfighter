@@ -39,6 +39,15 @@ add_library(lua-vec ${LUA_VEC_SOURCES} ${LUA_VEC_HEADERS})
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set_target_properties(lua-vec
 		PROPERTIES
-		COMPILE_DEFINITIONS "TNL_DEBUG; LUA_USE_MKSTEMP"
+		COMPILE_DEFINITIONS "TNL_DEBUG"
 	)
+
+	# Add in LUA_USE_MKSTEMP for environments that can handle it
+	if(NOT MSVC)
+		get_property(LUA_VEC_DEFS TARGET lua-vec PROPERTY COMPILE_DEFINITIONS)
+		set_target_properties(lua-vec
+			PROPERTIES
+			COMPILE_DEFINITIONS "${LUA_VEC_DEFS};LUA_USE_MKSTEMP"
+		)
+	endif()
 endif()
