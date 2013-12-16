@@ -603,7 +603,6 @@ void GameType::idle_server(U32 deltaT)
    EventManager::get()->update();
 
    // If game time has expired... game is over, man, it's over
-   // Add 5000 to each side to handle U32 underflow
    if(!isTimeUnlimited() && mEndingGamePlay <= mTotalGamePlay)
       gameOverManGameOver();
 }
