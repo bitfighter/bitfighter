@@ -2203,14 +2203,12 @@ static void moreRobotsAcceptCallback(ClientGame *game, U32 index)
          neededBotCount += largestTeamCount - team->getPlayerBotCount();
    }
 
-   // Add bots to fill up the teams
-   if(neededBotCount != 0)
+   if(neededBotCount != 0)       // Add bots to fill up the teams
       game->getGameType()->c2sAddBots(neededBotCount, Vector<StringTableEntry>());
-   // add a bot to every team
-   else
+   else                          // Add a bot to every team
       game->getGameType()->c2sAddBots(teamCount, Vector<StringTableEntry>());
 
-
+   
    GameUserInterface *gameUI = game->getUIManager()->getUI<GameUserInterface>();
 
    // Player has demonstrated ability to add bots... no need to show help item
