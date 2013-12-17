@@ -13,6 +13,8 @@
 #include "LevelSource.h"         // For LevelSourcePtr def
 #include "LevelSpecifierEnum.h"
 
+#include "Intervals.h"
+
 using namespace std;
 
 namespace Zap
@@ -35,9 +37,9 @@ class ServerGame : public Game
 
 private:
    enum {
-      UpdateServerStatusTime = 20000,    // How often we update our status on the master server (ms)
-      CheckServerStatusTime = 5000,      // If it did not send updates, recheck after ms
-      BotControlTickInterval = 33,       // Interval for how often should we let bots fire the onTick event (ms)
+      UpdateServerStatusTime = TWENTY_SECONDS,    // How often we update our status on the master server (ms)
+      CheckServerStatusTime = FIVE_SECONDS,       // If it did not send updates, recheck after ms
+      BotControlTickInterval = 33,                // Interval for how often should we let bots fire the onTick event (ms)
    };
 
    bool mTestMode;                        // True if being tested from editor
@@ -62,7 +64,7 @@ private:
    SafePtr<GameConnection> mSuspendor;            // Player requesting suspension if game suspended by request
    Timer mTimeToSuspend;
 public:
-   static const U32 PreSuspendSettlingPeriod = 2000;
+   static const U32 PreSuspendSettlingPeriod = TWO_SECONDS;
 private:
 
    // For simulating CPU stutter
@@ -121,8 +123,8 @@ public:
    };
 
    // These are public so this can be accessed by tests
-   static const U32 MaxTimeDelta = 2000;     
-   static const U32 LevelSwitchTime = 5000;
+   static const U32 MaxTimeDelta = TWO_SECONDS;     
+   static const U32 LevelSwitchTime = FIVE_SECONDS;
 
    U32 mVoteTimer;
    VoteType mVoteType;
