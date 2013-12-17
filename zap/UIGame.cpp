@@ -142,6 +142,8 @@ void GameUserInterface::onActivate()
    mChatMessageDisplayer2.reset();
    mChatMessageDisplayer3.reset();
 
+   mConnectionStatsRenderer.reset();
+
    // Clear out any walls we were using in a previous run
    Barrier::clearRenderItems();           // TODO: Should really go in an onDeactivate method, which we don't really have
    mLevelInfoDisplayer.clearDisplayTimer();
@@ -355,6 +357,7 @@ void GameUserInterface::idle(U32 timeDelta)
    mChatMessageDisplayer3.idle(timeDelta);
 
    mFpsRenderer.idle(timeDelta);
+   mConnectionStatsRenderer.idle(timeDelta, getGame()->getConnectionToServer());
    
    mHelperManager.idle(timeDelta);
    mVoiceRecorder.idle(timeDelta);
@@ -479,7 +482,6 @@ void GameUserInterface::emitTeleportInEffect(const Point &pos, U32 type)
    mFxManager.emitTeleportInEffect(pos, type);
 }
 
-
 // Draw main game screen (client only)
 void GameUserInterface::render()
 {
@@ -529,6 +531,7 @@ void GameUserInterface::render()
    mVoiceRecorder.render();               // Indicator that someone is sending a voice msg
 
    mFpsRenderer.render(DisplayManager::getScreenInfo()->getGameCanvasWidth());     // Display running average FPS
+   mConnectionStatsRenderer.render(getGame()->getConnectionToServer());     // Display running average FPS
 
    mHelperManager.render();
 
@@ -1459,7 +1462,12 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    else if(checkInputCode(InputCodeManager::BINDING_SELWEAP3, inputCode))
       selectWeapon(2);
    else if(checkInputCode(InputCodeManager::BINDING_FPS, inputCode))
-      mFpsRenderer.toggleVisibility();
+   {
+      if(InputCodeManager::checkModifier(KEY_CTRL))
+         mConnectionStatsRenderer.toggleVisibility();
+      else
+         mFpsRenderer.toggleVisibility();
+   }
    else if(checkInputCode(InputCodeManager::BINDING_ADVWEAP, inputCode))
       chooseNextWeapon();
 

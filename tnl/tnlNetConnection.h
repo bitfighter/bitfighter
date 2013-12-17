@@ -647,6 +647,16 @@ protected:
 public:
    /// Enables string tag translation on this connection.
    void setTranslatesStrings();
+
+   // Only used to monitor the connection
+   U32 mPacketRecvDropped;
+   U32 mPacketSendDropped;
+   U32 mPacketRecvBytesLast;
+   U32 mPacketSendBytesLast;
+   U32 mPacketRecvBytesTotal;
+   U32 mPacketSendBytesTotal;
+   U32 mPacketRecvCount;
+   U32 mPacketSendCount;
 };
 
 static const U32 MinimumPaddingBits = 128;       ///< Padding space that is required at the end of each packet for bit flag writes and such.
