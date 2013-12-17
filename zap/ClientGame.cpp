@@ -678,6 +678,21 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
       {
          GameType *gt = getGameType();
 
+         // Build loadout string
+         string loadoutString = "On-deck loadout: ";
+         for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+         {
+            if(i < ShipModuleCount)
+               loadoutString += ModuleInfo::getModuleInfo(loadout.getModule(i))->getName();
+            else
+               loadoutString += WeaponInfo::getWeaponInfo(loadout.getWeapon(i - ShipModuleCount)).name.getString();
+
+            if(i < (ShipModuleCount + ShipWeaponCount) - 1)
+               loadoutString += ", ";
+         }
+         // Show new loadout
+         displaySuccessMessage("%s", loadoutString.c_str());
+
          displaySuccessMessage("Ship design changed -- %s", 
                               gt->levelHasLoadoutZone() ? "enter Loadout Zone to activate changes" : 
                                                           "changes will be activated when you respawn");
