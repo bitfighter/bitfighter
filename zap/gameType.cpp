@@ -2765,6 +2765,7 @@ string GameType::addBot(Vector<StringTableEntry> args)
 }
 
 
+// Get here from c2sAddBot() and c2sAddBots()
 void GameType::addBotFromClient(Vector<StringTableEntry> args)
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
@@ -2797,7 +2798,7 @@ void GameType::addBotFromClient(Vector<StringTableEntry> args)
    else if(args.size() >= 2 && !safeFilename(args[1].getString()))
       conn->s2cDisplayErrorMessage("!!! Invalid filename");
 
-   else
+   else     // Adding bots is OK!!  Let's get on with it!!
    {
       string errorMessage = addBot(args);
 
@@ -2955,6 +2956,7 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
 }
 
 
+// Get here when player issues /kickbot command, or when they choose FEWER ROBOTS from the game menu
 GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
@@ -2985,6 +2987,7 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
 }
 
 
+// Get here when player issues /kickbots command, or when they choose REMOVE ALL ROBOTS from the game menu
 GAMETYPE_RPC_C2S(GameType, c2sKickBots, (), ())
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
@@ -3028,7 +3031,7 @@ GAMETYPE_RPC_C2S(GameType, c2sShowBots, (), ())
    mShowAllBots = !mShowAllBots;  // Toggle
 
    GameConnection *conn = clientInfo->getConnection();
-   TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
+   TNLAssert(conn == source, "If this never fires, we can get rid of conn!"); // Add well before Dec 2013
 
    if(getGame()->getBotCount() == 0)
       conn->s2cDisplayErrorMessage("!!! There are no robots to show");

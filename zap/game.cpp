@@ -290,6 +290,7 @@ S32 Game::getClientCount() const
 }
 
 
+// Return the number of human players (does not include bots)
 S32 Game::getPlayerCount() const
 {
    return mPlayerCount;
