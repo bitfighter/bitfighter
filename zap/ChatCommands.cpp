@@ -796,6 +796,7 @@ void kickBotHandler(ClientGame *game, const Vector<string> &words)
 }
 
 
+// /kickbots ==> Remove all bots from game
 void kickBotsHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasLevelChange("!!! Need level change permissions to kick bots"))
