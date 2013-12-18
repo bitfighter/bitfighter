@@ -8,7 +8,8 @@
 #include "ship.h"
 #include "gameObjectRender.h"    // For renderPolyLineVertices()
 #include "stringUtils.h"         // For itos
-//
+#include "tnlGhostConnection.h"
+
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
@@ -188,7 +189,9 @@ void LineItem::onAddedToGame(Game *game)
 void LineItem::onGhostAvailable(GhostConnection* connection)
 {
    Parent::onGhostAvailable(connection);
-   s2cSetGeom(*GeomObject::getOutline());
+
+   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cSetGeom, (*GeomObject::getOutline()));
+   connection->postNetEvent(theEvent);
 }
 
 void LineItem::onGhostAddBeforeUpdate(GhostConnection* connection)
