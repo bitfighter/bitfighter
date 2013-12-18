@@ -2243,22 +2243,19 @@ static void fewerRobotsAcceptCallback(ClientGame *game, U32 index)
       Team *team = static_cast<Team *>(game->getTeam(i));
 
       // Determine how many bots we can remove from this team if it has more players than the smallest team
-      S32 surplus = team->getPlayerBotCount() - smallestTeamCount;
-      if(surplus > team->getBotCount())
+      S32 surplus = team->getPlayerBotCount() - smallestTeamCount; 
+      if(surplus > team->getBotCount())                              // Never remove more bots than the team has
          surplus = team->getBotCount();
 
-      if(surplus > 0)
-         numBotsToRemove += surplus;
+      numBotsToRemove += surplus;
    }
 
-   // Remove bots from the team with the most bots.
-
-   // Remove bots if teams are uneven
+   // If teams are uneven, remove bots from the team(s) with the most players (which is what c2sKickBot does)
    if(numBotsToRemove != 0)
       for(S32 i = 0; i < numBotsToRemove; i++)
          game->getGameType()->c2sKickBot();
 
-   // Else remove a bot from every team that has one.  This isn't perfect, but it'll do.
+   // Otherwise remove a bot from every team that has one.  This isn't perfect, but it'll do.
    else
       for(S32 i = 0; i < teamCount; i++)
          if(static_cast<Team *>(game->getTeam(i))->getBotCount() > 0)
