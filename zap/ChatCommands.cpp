@@ -790,27 +790,23 @@ void addBotsHandler(ClientGame *game, const Vector<string> &words)
 
 void kickBotHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasLevelChange("!!! Need level change permissions to kick a bot"))
-   {
+   if(game->hasLevelChange("!!! Need level change permissions to kick bots"))
       if(game->getGameType())
          game->getGameType()->c2sKickBot();
-   }
 }
 
 
 void kickBotsHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasLevelChange("!!! Need level change permissions to kick all bots"))
-   {
+   if(game->hasLevelChange("!!! Need level change permissions to kick bots"))
       if(game->getGameType())
          game->getGameType()->c2sKickBots();
-   }
 }
 
 
 void setMaxBotsHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasAdmin("!!! Need admin permission"))
+   if(game->hasAdmin("!!! Need admin permission to change server settings"))
    {
       if(words.size() < 2)
       {
@@ -835,7 +831,7 @@ void setMaxBotsHandler(ClientGame *game, const Vector<string> &words)
 
 void shuffleTeams(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasAdmin("!!! You don't have permissions to shuffle the teams"))
+   if(game->hasAdmin("!!! Need admin permissions to shuffle the teams"))
    {
       if(game->getTeamCount() < 2)
       {
@@ -850,7 +846,7 @@ void shuffleTeams(ClientGame *game, const Vector<string> &words)
 
 void banPlayerHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasAdmin("!!! Need admin permission"))
+   if(game->hasAdmin("!!! Need admin permissions to ban players"))
    {
       if(words.size() < 2)
       {
@@ -898,7 +894,7 @@ void banPlayerHandler(ClientGame *game, const Vector<string> &words)
 
 void banIpHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasAdmin("!!! Need admin permission"))
+   if(game->hasAdmin("!!! Need admin permissions to ban an IP address"))
    {
       if(words.size() < 2)
       {
@@ -926,7 +922,7 @@ void banIpHandler(ClientGame *game, const Vector<string> &words)
 
 void renamePlayerHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasAdmin("!!! Need admin permission"))
+   if(game->hasAdmin("!!! Need admin permissions to rename a player"))
    {
       if(words.size() < 3)
       {
@@ -956,11 +952,11 @@ void renamePlayerHandler(ClientGame *game, const Vector<string> &words)
 
 void globalMuteHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasAdmin("!!! Need admin permission"))
+   if(game->hasAdmin("!!! Need admin permissions to mute a player"))
    {
       if(words.size() < 2)
       {
-         game->displayErrorMessage("!!! Enter player name");
+         game->displayErrorMessage("!!! Need player name");
          return;
       }
 
