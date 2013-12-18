@@ -23,6 +23,7 @@ static const S32 TEN_SECONDS   = 10 * ONE_SECOND;
 
 static const S32 FIFTEEN_SECONDS = 15 * ONE_SECOND;
 static const S32 TWENTY_SECONDS  = 20 * ONE_SECOND;
+static const S32 THIRTY_SECONDS  = 30 * ONE_SECOND;
 
 static const S32 TEN_MINUTES   = 10 * ONE_MINUTE;
                                

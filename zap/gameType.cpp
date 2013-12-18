@@ -58,7 +58,7 @@ const U32 GameType::mBotBalanceTimerPeriod = 10000;
 const S32 GameType::MaxMenuScore = 1000;
 
 // Constructor
-GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(3000), mGameTimeUpdateTimer(30000), mBotBalanceAnalysisTimer(mBotBalanceTimerPeriod)
+GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mGameTimeUpdateTimer(THIRTY_SECONDS)
 {
    mNetFlags.set(Ghostable);
    mBetweenLevels = true;
