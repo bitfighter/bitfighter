@@ -131,6 +131,8 @@ public:
 
    static void drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool disabled = false);
    static void playBoop();    // Make some noise!
+
+   virtual void onColorPicked(const Color &color);
 };
 
 

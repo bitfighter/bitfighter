@@ -157,6 +157,7 @@ set(CLIENT_SOURCES
 	UI.cpp
 	UIAbstractInstructions.cpp
 	UIChat.cpp
+	UIColorPicker.cpp
 	UICredits.cpp
 	UIDiagnostics.cpp
 	UIEditor.cpp

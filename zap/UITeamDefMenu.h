@@ -49,6 +49,7 @@ public:
 
    void onActivate();
    void onEscape();
+   void onColorPicked(const Color &color);
 };
 
 };

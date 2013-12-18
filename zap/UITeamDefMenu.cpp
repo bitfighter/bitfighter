@@ -18,6 +18,8 @@
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 
+#include "UIColorPicker.h"
+
 #include <string>
 
 namespace Zap
@@ -312,6 +314,13 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    else if(inputCode == KEY_B)
       ui->getTeam(selectedIndex)->alterBlue(InputCodeManager::checkModifier(KEY_SHIFT) ? -.01f : .01f);
 
+   else if(inputCode == KEY_C)  // Want a mouse button?   || inputCode == MOUSE_LEFT)
+   {
+      UIColorPicker *uiCol = getUIManager()->getUI<UIColorPicker>();
+      *((Color *)uiCol) = *(ui->getTeam(selectedIndex)->getColor());
+      getUIManager()->activate(uiCol);
+   }
+
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)       // Quit
    {
       playBoop();
@@ -383,6 +392,15 @@ void TeamDefUserInterface::onMouseMoved()
    if(selectedIndex < 0)
       selectedIndex = 0;
 }
+
+
+void TeamDefUserInterface::onColorPicked(const Color &color)
+{
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
+   ui->getTeam(selectedIndex)->setColor(color);
+}
+
+
 
 
 };
