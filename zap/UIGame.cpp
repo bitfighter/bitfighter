@@ -1504,7 +1504,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       if(!getGame()->isConnectedToServer())     // Perhaps we're still joining?
       {
          getGame()->closeConnectionToGameServer();
-         getUIManager()->activate<MainMenuUserInterface>();      // Back to main menu
+         getUIManager()->reactivate(getUIManager()->getUI<MainMenuUserInterface>());      // Back to main menu
       }
       else
       {

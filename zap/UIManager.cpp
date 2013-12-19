@@ -105,6 +105,9 @@ void UIManager::reactivatePrevUI()
 
 void UIManager::reactivate(const UserInterface *ui)
 {
+   if(ui == mCurrentInterface) // Already at the current UI?
+      return;                  // This can happens when both onConnectionTerminated and GameUserInterface::processPlayModeKey both calls this
+
    // Keep discarding menus until we find the one we want
    while(mPrevUIs.size() && (mPrevUIs.last() != ui))
       mPrevUIs.pop_back();
