@@ -560,17 +560,10 @@ void Ship::idle(IdleCallPath path)
 
       mSendSpawnEffectTimer.update(mCurrentMove.time);
    }
-   else   // <=== do we really want this loop running if    path == ServerIdleMainLoop && NOT controllingClientIsValid() ??
-   {
-      //TNLAssert(path != ServerIdleMainLoop, "Does this ever happen?  If so, document and remove assert...");
-      // Happens during testing...
+   else if(path != ClientIdlingLocalShip)   // <=== do we really want this loop running if    path == ServerIdleMainLoop && NOT controllingClientIsValid() ??  (Levels might have "Ship" that should idle)
+   {  // Won't move ship from ClientIdlingLocalShip, but do process some timers (that doesn't effect gameplay) not covered in ClientReplayingPendingMoves
 
-      // If we're the client and are out-of-touch with the server, don't move the ship... 
-      // moving won't actually hurt, but this seems somehow better
-      if((path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip) && 
-               getActualVel().lenSquared() != 0 && 
-               getControllingClient() && getControllingClient()->lostContact())
-         return;
+      //TNLAssert(path == ServerIdleMainLoop, "path == ServerIdleMainLoop is true when level have 'Ship'");
 
       // Apply impulse vector and reset it
       setActualVel(getActualVel() + mImpulseVector);
@@ -613,30 +606,26 @@ void Ship::idle(IdleCallPath path)
 
          copyMoveState(ActualState, RenderState);
       }
-      else if(path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip)
-      {
-         // On the client, update the interpolation of this object unless we are replaying control moves
-         mInterpolating = (getActualVel().lenSquared() < MoveObject::InterpMaxVelocity*MoveObject::InterpMaxVelocity);
-         updateInterpolation();
-      }
 
-      // Don't want the replay to make timer count down much faster while having high ping
-      if(path != ClientReplayingPendingMoves) 
-      {
-         mSensorEquipZoomTimer.update(mCurrentMove.time);
-         mCloakTimer.update(mCurrentMove.time);
+   }
 
-         // Update spawn shield unless we move the ship - then it turns off .. server only
-         if(mSpawnShield.getCurrent() != 0)
+   if(path == ServerProcessingUpdatesFromClient || path == ClientIdlingLocalShip ||
+      path == ClientIdlingNotLocalShip ||
+      (path == ServerIdleMainLoop && !controllingClientIsValid()) )  // Level might have "Ship"
+   {
+      mSensorEquipZoomTimer.update(mCurrentMove.time);
+      mCloakTimer.update(mCurrentMove.time);
+
+      // Update spawn shield unless we move the ship - then it turns off .. server only
+      if(mSpawnShield.getCurrent() != 0)
+      {
+         if(path == ServerProcessingUpdatesFromClient && (mCurrentMove.x != 0 || mCurrentMove.y != 0))
          {
-            if(path == ServerProcessingUpdatesFromClient && (mCurrentMove.x != 0 || mCurrentMove.y != 0))
-            {
-               mSpawnShield.clear();
-               setMaskBits(SpawnShieldMask);  // Tell clients spawn shield turned off due to moving
-            }
-            else
-               mSpawnShield.update(mCurrentMove.time);
+            mSpawnShield.clear();
+            setMaskBits(SpawnShieldMask);  // Tell clients spawn shield turned off due to moving
          }
+         else
+            mSpawnShield.update(mCurrentMove.time);
       }
    }
 
@@ -661,7 +650,7 @@ void Ship::idle(IdleCallPath path)
          findRepairTargets();       
 
    // Process weapons and modules on controlled objects; handles all the energy reductions as well
-   if(path == ServerProcessingUpdatesFromClient || path == ClientIdlingLocalShip || path == ClientReplayingPendingMoves)
+   if(path == ServerProcessingUpdatesFromClient || path == ClientReplayingPendingMoves)
    {
       mFastRechargeTimer.update(mCurrentMove.time);
       mFastRecharging = mFastRechargeTimer.getCurrent() == 0;
@@ -677,12 +666,17 @@ void Ship::idle(IdleCallPath path)
 
    if(path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip)
    {
+      // On the client, update the interpolation of this object unless we are replaying control moves
+      mInterpolating = (getActualVel().lenSquared() < MoveObject::InterpMaxVelocity*MoveObject::InterpMaxVelocity);
+      updateInterpolation();
+
       mWarpInTimer.update(mCurrentMove.time);
 
       // Emit some particles, trail sections and update the turbo noise
       emitMovementSparks();
       updateTrails();
-      updateModuleSounds();                       
+      updateModuleSounds();
+
    }
 }
 
@@ -1265,21 +1259,34 @@ const U32 negativeFireDelay = 123;  // how far into negative we are allowed to s
 // Only used on client for prediction in replay moves
 void Ship::setState(ControlObjectData *state)
 {
+   setPos(ActualState, state->mPos);
+   setVel(ActualState, state->mVel);
+   mImpulseVector = state->mImpulseVector;
    mEnergy = state->mEnergy;
    mFireTimer = state->mFireTimer;
    mFastRechargeTimer.reset(state->mFastRechargeTimer, mFastRechargeTimer.getPeriod());
    mSpyBugPlacementTimer.reset(state->mSpyBugPlacementTimer, mSpyBugPlacementTimer.getPeriod());
+   mModuleSecondaryTimer[ModuleBoost].reset(state->mPulseTimer, mModuleSecondaryTimer[ModuleBoost].getPeriod());
    mCooldownNeeded = state->mCooldownNeeded;
    mFastRecharging = state->mFastRecharging;
+
+   // Probably needed, it is because ship don't update modules from Move until after moving the ship.
+   mLoadout.setModulePrimary(ModuleBoost, state->mBoostActive);
+   
 }
 void Ship::getState(ControlObjectData *state) const
 {
+   state->mPos = getActualPos();
+   state->mVel = getActualVel();
+   state->mImpulseVector = mImpulseVector;
    state->mEnergy = mEnergy;
    state->mFireTimer = mFireTimer;
    state->mFastRechargeTimer = mFastRechargeTimer.getCurrent();
    state->mSpyBugPlacementTimer = mSpyBugPlacementTimer.getCurrent();
+   state->mPulseTimer = mModuleSecondaryTimer[ModuleBoost].getCurrent();
    state->mCooldownNeeded = mCooldownNeeded;
    state->mFastRecharging = mFastRecharging;
+   state->mBoostActive = mLoadout.isModulePrimaryActive(ModuleBoost);
 }
 
 void Ship::writeControlState(BitStream *stream)

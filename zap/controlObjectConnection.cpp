@@ -87,7 +87,21 @@ U32 ControlObjectConnection::getControlCRC()
 
 void ControlObjectConnection::addPendingMove(Move *theMove)
 {
-   if(pendingMoves.size() < MaxPendingMoves)
+   if(controlObject.isNull())
+      return;
+
+   if(pendingMoves.size() != 0 &&
+      (theMove->time + pendingMoves.last().time < 50 ||   // Send less often when almost full.
+      (theMove->time + pendingMoves.last().time < 8 && pendingMoves.size() < MaxPendingMoves-10)) &&
+      U8(highSendIndex[2] - firstMoveIndex) != pendingMoves.size())
+   {
+      ControlObjectData *m = &pendingMoves.last();
+      ((Ship*)controlObject.getPointer())->setState(m);
+      theMove->time += m->time;
+      *(Move*)m = *theMove;
+		static S32 ii2 = 0;
+   }
+   else if(pendingMoves.size() < MaxPendingMoves)
    {
       ControlObjectData data;
       *((Move*)(&data)) = *theMove;
@@ -95,6 +109,11 @@ void ControlObjectConnection::addPendingMove(Move *theMove)
          ((Ship*)controlObject.getPointer())->getState(&data);
       pendingMoves.push_back(data);
    }
+   else
+      return;  // Has an effect of not moving your ship, usually when losing connection.
+
+   controlObject->setCurrentMove(*theMove);
+   controlObject->idle(BfObject::ClientReplayingPendingMoves);
 }
 
 
@@ -210,6 +229,8 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
             controlObject->idle(BfObject::ServerProcessingUpdatesFromClient);
             onGotNewMove(theMove);
          }
+         else
+            mMoveTimeCredit = mMoveTimeCredit;
          firstMoveIndex++;
       }
    }
