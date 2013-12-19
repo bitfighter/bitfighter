@@ -2185,8 +2185,7 @@ static void moreRobotsAcceptCallback(ClientGame *game, U32 index)
 
    for(S32 i = 0; i < teamCount; i++)
    {
-      TNLAssert(dynamic_cast<Team *>(game->getTeam(i)), "Invalid team");
-      S32 currentCount = static_cast<Team *>(game->getTeam(i))->getPlayerBotCount();
+      S32 currentCount = game->getTeam(i)->getPlayerBotCount();
 
       if(currentCount > largestTeamCount)
          largestTeamCount = currentCount;
@@ -2219,6 +2218,7 @@ static void moreRobotsAcceptCallback(ClientGame *game, U32 index)
 }
 
 
+// Can only get here if the player has the appropriate permissions, so no need for a further check
 static void fewerRobotsAcceptCallback(ClientGame *game, U32 index)
 {
    game->countTeamPlayers();
