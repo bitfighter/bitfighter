@@ -1765,9 +1765,9 @@ Move *GameUserInterface::getCurrentMove()
    Move *move = &mCurrentMove;
 
 #ifndef BF_NO_CONSOLE
-   if(!mDisableShipKeyboardInput && !gConsole.isVisible())
+   if(!mDisableShipKeyboardInput && getUIManager()->isCurrentUI<GameUserInterface>() && !gConsole.isVisible())
 #else
-   if(!mDisableShipKeyboardInput)
+   if(!mDisableShipKeyboardInput && getUIManager()->isCurrentUI<GameUserInterface>())
 #endif
    {
       // Some helpers (like TeamShuffle) like to disable movement when they are active
