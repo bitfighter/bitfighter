@@ -10,6 +10,7 @@
 #include "SharedConstants.h"
 #include "LoadoutTracker.h"
 
+#include "Intervals.h"
 #include "Timer.h"
 
 #include "tnlNetBase.h"
@@ -48,7 +49,7 @@ public:
 
    static const S32 MaxKillStreakLength = 4095;
    // After canceling /idle command, this is the delay penalty
-   static const U32 SPAWN_UNDELAY_TIMER_DELAY = 5000;    // 5 secs
+   static const U32 SPAWN_UNDELAY_TIMER_DELAY = FIVE_SECONDS; 
 
 private:
    LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
