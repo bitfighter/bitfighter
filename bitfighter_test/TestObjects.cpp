@@ -113,7 +113,7 @@ TEST_F(ObjectTest, GhostingSanity)
 
    // Create our pair of connected games
    GamePair gamePair;
-   ClientGame *clientGame = gamePair.client;
+   ClientGame *clientGame = gamePair.clients[0];
    ServerGame *serverGame = gamePair.server;
 
    // Basic geometry to plug into polygon objects

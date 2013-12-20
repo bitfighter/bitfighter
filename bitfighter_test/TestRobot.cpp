@@ -19,18 +19,18 @@ using namespace TNL;
 TEST(RobotTest, addBot)
 {
 	GamePair gamePair;
-	Vector<StringTableEntry> args;
+	Vector<const char *> args;
 
 	EXPECT_EQ(0, gamePair.server->getRobotCount());
-	EXPECT_EQ(0, gamePair.client->getRobotCount());
+	EXPECT_EQ(0, gamePair.clients[0]->getRobotCount());
 
-	gamePair.server->getGameType()->addBot(args);
+	gamePair.server->addBot(args);
 
 	for(U32 i = 0; i < 10; i++)
 		gamePair.idle(10);
 	
 	EXPECT_EQ(1, gamePair.server->getRobotCount());
-	EXPECT_EQ(1, gamePair.client->getRobotCount());
+	EXPECT_EQ(1, gamePair.clients[0]->getRobotCount());
 }
 
 
@@ -39,7 +39,7 @@ TEST(RobotTest, luaRobotNew)
 	GamePair gamePair;
 
 	EXPECT_EQ(0, gamePair.server->getRobotCount());
-	EXPECT_EQ(0, gamePair.client->getRobotCount());
+	EXPECT_EQ(0, gamePair.clients[0]->getRobotCount());
 
 	LuaLevelGenerator levelgen(gamePair.server);
 	levelgen.runScript(false);
@@ -50,7 +50,7 @@ TEST(RobotTest, luaRobotNew)
 		gamePair.idle(10);
 	
 	EXPECT_EQ(1, gamePair.server->getRobotCount());
-	EXPECT_EQ(1, gamePair.client->getRobotCount());
+	EXPECT_EQ(1, gamePair.clients[0]->getRobotCount());
 
 	EXPECT_TRUE(levelgen.runString("bots = bf:findAllObjects(ObjType.Robot); bots[1]:removeFromGame()"));
 
@@ -58,7 +58,7 @@ TEST(RobotTest, luaRobotNew)
 		gamePair.idle(10);
 	
 	EXPECT_EQ(0, gamePair.server->getRobotCount());
-	EXPECT_EQ(0, gamePair.client->getRobotCount());
+	EXPECT_EQ(0, gamePair.clients[0]->getRobotCount());
 }
 
 

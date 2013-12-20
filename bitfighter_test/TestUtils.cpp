@@ -44,7 +44,7 @@ ClientGame *newClientGame(const GameSettingsPtr &settings)
 }
 
 
-// Create a new ServerGame with one dummy team
+// Create a new ServerGame with one dummy team -- be sure to delete this somewhere!
 ServerGame *newServerGame()
 {
    Address addr;
@@ -59,7 +59,7 @@ ServerGame *newServerGame()
 
 
 // Create a pair of games suitable for testing client/server interaction.  Provide some levelcode to get things started.
-GamePair::GamePair(const string &levelCode, S32 clients)
+GamePair::GamePair(const string &levelCode, S32 clientCount)
 {
    GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
 
@@ -73,24 +73,11 @@ GamePair::GamePair(const string &levelCode, S32 clients)
 
    server->startHosting();     // This will load levels and wipe out any teams
 
-   for(S32 i = 0; i < clients; i++)
-   {
-      client = newClientGame(settings);
-      GameManager::addClientGame(client);
-
-      client->userEnteredLoginCredentials("TestPlayer" + itos(i), "password", false);    // Simulates entry from NameEntryUserInterface
-
-      client->joinLocalGame(server->getNetInterface());
-
-      // This is a bit hacky, but we need to turn off TNL's bandwidth controls so our tests can run faster.  FASTER!!@!
-      client->getConnectionToServer()->useZeroLatencyForTesting();
-   }
+   for(S32 i = 0; i < clientCount; i++)
+      addClient("TestPlayer" + itos(i));
 
    LuaScriptRunner::setScriptingDir(settings->getFolderManager()->luaDir);
    LuaScriptRunner::startLua();
-
-   for(S32 i = 0; i < server->getClientCount(); i++)
-      server->getClientInfo(i)->getConnection()->useZeroLatencyForTesting();
 }
 
 
@@ -116,6 +103,23 @@ void GamePair::idle(U32 timeDelta, U32 cycles)
 {
    for(U32 i = 0; i < cycles; i++)
       GameManager::idle(timeDelta);
+}
+
+
+void GamePair::addClient(const string &name)
+{
+   ClientGame *client = newClientGame(server->getSettingsPtr());
+   GameManager::addClientGame(client);
+
+   client->userEnteredLoginCredentials(name, "password", false);    // Simulates entry from NameEntryUserInterface
+
+   client->joinLocalGame(server->getNetInterface());
+
+   // This is a bit hacky, but we need to turn off TNL's bandwidth controls so our tests can run faster.  FASTER!!@!
+   client->getConnectionToServer()->useZeroLatencyForTesting();
+
+   clients.push_back(client);
+   server->getClientInfo(clients.size() - 1)->getConnection()->useZeroLatencyForTesting();
 }
 
 
