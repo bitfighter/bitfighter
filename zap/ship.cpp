@@ -1669,7 +1669,7 @@ void Ship::updateInterpolation()
 
 
 
-bool Ship::hasModule(ShipModule mod)
+bool Ship::hasModule(ShipModule mod) const
 {
    return mLoadout.hasModule(mod);
 }
@@ -2222,7 +2222,7 @@ F32 Ship::getShipVisibility(const Ship *localShip)
    // Apply rules to cloaked players not on your team
 
    // If we have sensor equipped and this non-local ship is cloaked
-   if(localShip && localShip->mLoadout.isModulePrimaryActive(ModuleSensor) && alpha < 0.5)
+   if(localShip && localShip->hasModule(ModuleSensor) && alpha < 0.5)
    {
       // Do a distance check - cloaked ships are detected at a reduced distance
       F32 distanceSquared = (localShip->getActualPos() - getActualPos()).lenSquared();
