@@ -2221,8 +2221,10 @@ F32 Ship::getShipVisibility(const Ship *localShip)
 
    // Apply rules to cloaked players not on your team
 
+   static const F32 MAX_ALPHA = 0.4f;
+
    // If we have sensor equipped and this non-local ship is cloaked
-   if(localShip && localShip->hasModule(ModuleSensor) && alpha < 0.5)
+   if(localShip && localShip->hasModule(ModuleSensor) && cloakActive)
    {
       // Do a distance check - cloaked ships are detected at a reduced distance
       F32 distanceSquared = (localShip->getActualPos() - getActualPos()).lenSquared();
@@ -2230,15 +2232,15 @@ F32 Ship::getShipVisibility(const Ship *localShip)
       // Ship is within outer detection radius
       if(distanceSquared < sq(ModuleInfo::SensorCloakOuterDetectionDistance))
       {
-         // Inside inner radius? De-cloak a maximum of 0.5
+         // Inside inner radius? De-cloak a maximum of MAX_ALPHA
          if(distanceSquared < sq(ModuleInfo::SensorCloakInnerDetectionDistance))
-            return 0.5;
+            return MAX_ALPHA;
 
          // Otherwise de-cloak proportionally to the distance between inner and outer detection radii
          F32 ratio = (sq(ModuleInfo::SensorCloakOuterDetectionDistance) - distanceSquared) /
                      (sq(ModuleInfo::SensorCloakOuterDetectionDistance) - sq(ModuleInfo::SensorCloakInnerDetectionDistance));
 
-         return sq(ratio) * 0.5f;  // Non-linear
+         return sq(ratio) * MAX_ALPHA;  // Non-linear
       }
    }
 
