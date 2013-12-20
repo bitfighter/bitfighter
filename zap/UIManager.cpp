@@ -295,6 +295,7 @@ void UIManager::onConnectedToMaster()
 void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected)
 {
    string message;
+   string title = "Connection Terminated";
 
    switch(reason)
    {
@@ -339,6 +340,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
          if(wasFullyConnected)
             return;
 
+         title = "Connection Failed";
          message = 
                "My attempt to connect to the Master Server failed because the server did not respond.  Either the server is down, "
                "or, more likely, you are not connected to the Internet or your firewall is blocking the connection.\n\n"
@@ -358,6 +360,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
          return;
 
       default:  // Not handled
+         title = "Connection Failed";
          message = "Unable to connect to the master server, with error code:\n\n";
 
          if(reasonStr[0])
@@ -370,7 +373,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
          break;
    }
 
-   displayMessageBox("Connection Terminated", "Press [[Esc]] to continue", message);
+   displayMessageBox(title, "Press [[Esc]] to continue", message);
 }
 
 
