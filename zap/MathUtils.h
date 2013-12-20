@@ -41,6 +41,7 @@ inline F32 unitToRadians(F32 angle)    { return angle * Float2Pi; }             
 extern F32 getAngleDiff(F32 a, F32 b);
 
 bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
+S32 roundUp(S32 numToRound, S32 multiple);
 
 };
 
