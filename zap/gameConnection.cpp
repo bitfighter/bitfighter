@@ -121,7 +121,6 @@ GameConnection::~GameConnection()
    }
 
    delete mDataBuffer;
-   delete mClientInfo;
 }
 
 

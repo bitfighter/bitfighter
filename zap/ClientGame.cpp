@@ -90,7 +90,6 @@ ClientGame::~ClientGame()
    //delete mUserInterfaceData;
    delete mUIManager; 
    delete mConnectionToServer.getPointer();
-   delete mClientInfo;
 }
 
 
