@@ -48,7 +48,7 @@
   
 //use_deprecated: Enables support for the obsolete OffsetPaths() function
 //which has been replace with the ClipperOffset class.
-#define use_deprecated  
+//#define use_deprecated
 
 #include <vector>
 #include <set>

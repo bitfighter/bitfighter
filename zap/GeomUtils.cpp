@@ -1352,8 +1352,11 @@ void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Poi
    Paths polygons = upscaleClipperPoints(inputPolys);
 
    // Call Clipper to do the dirty work
+   ClipperOffset clipperOffset(0, 0);
    Paths outPolys(polygons.size());
-   OffsetPaths(polygons, outPolys, offset * CLIPPER_SCALE_FACT, jtSquare, etClosed);
+
+   clipperOffset.AddPaths(polygons, jtSquare, etClosedPolygon);
+   clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
 
    // Downscale
    outputPolys = downscaleClipperPoints(outPolys);
