@@ -3320,7 +3320,8 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       {
          bool geomChanged = false;
 
-         for(S32 j = 0; j < obj->getVertCount(); j++) 
+         // Backwards!  Since we could be deleting multiple at once
+         for(S32 j = obj->getVertCount() - 1; j > -1 ; j--)
          {
             if(obj->vertSelected(j))
             {
