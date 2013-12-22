@@ -1421,8 +1421,8 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
 // Shrink large polygons by reducing each coordinate by 1 in the
 // general direction of the last point as we wind around
 //
-// This normally wouldn't work in ever case, but our upscaled-by-1000 polygons
-// have little change to create new duplicate points with this method
+// This normally wouldn't work in every case, but our upscaled-by-1000 polygons
+// have little chance to create new duplicate points with this method
 static void edgeShrink(Path &path)
 {
    U32 prev = path.size() - 1;
