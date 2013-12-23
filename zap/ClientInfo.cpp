@@ -298,12 +298,6 @@ S32 ClientInfo::getTeamIndex()
 void ClientInfo::setTeamIndex(S32 teamIndex)
 {
    mTeamIndex = teamIndex;
-
-   // Update team list
-   // remove from old team
-
-   // add to new team
-
 }
 
 
