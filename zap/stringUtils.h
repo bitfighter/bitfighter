@@ -102,6 +102,10 @@ string trim_right(const string &source, const string &t = " ");
 string trim_left(const string &source, const string &t = " ");
 string trim(const string &source, const string &t = " ");
 
+void trim_right_in_place(string &source, const string &t = " ");
+void trim_left_in_place(string &source, const string &t = " ");
+void trim_in_place(string &source, const string &t = " ");
+
 S32 countCharInString(const string &source, char search);
 
 const U32 MAX_FILE_NAME_LEN = 128;     // Completely arbitrary
