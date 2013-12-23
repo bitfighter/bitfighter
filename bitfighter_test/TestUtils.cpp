@@ -153,7 +153,13 @@ void GamePair::addBotClient(const string &name, S32 team)
    // Get most recently added clientInfo
    ClientInfo *clientInfo = server->getClientInfo(server->getClientInfos()->size() - 1);
    ASSERT_TRUE(clientInfo->isRobot()) << "This is supposed to be a robot!";
+
+   // Normally, in a game, a ship or bot would be destroyed and would respawn when their team changes, and upon
+   // respawning the BfObject representing that ship would be on the correct team.  Not so here (where we are
+   // taking lots of shortcuts); here we need to manually assign a new team to the robot object in addition to
+   // it's more "official" setting on the ClientInfo.
    clientInfo->setTeamIndex(team);
+   clientInfo->getShip()->setTeam(team);
 }
 
 
