@@ -106,7 +106,7 @@ void GamePair::idle(U32 timeDelta, U32 cycles)
 }
 
 
-void GamePair::addClient(const string &name)
+void GamePair::addClient(const string &name, S32 team)
 {
    ClientGame *client = newClientGame(server->getSettingsPtr());
    GameManager::addClientGame(client);
@@ -115,11 +115,31 @@ void GamePair::addClient(const string &name)
 
    client->joinLocalGame(server->getNetInterface());
 
+
    // This is a bit hacky, but we need to turn off TNL's bandwidth controls so our tests can run faster.  FASTER!!@!
    client->getConnectionToServer()->useZeroLatencyForTesting();
 
    clients.push_back(client);
-   server->getClientInfo(clients.size() - 1)->getConnection()->useZeroLatencyForTesting();
+
+   ClientInfo *clientInfo = server->getClientInfo(clients.size() - 1);
+
+   if(!clientInfo->isRobot())
+      clientInfo->getConnection()->useZeroLatencyForTesting();
+
+   if(team != NO_TEAM)
+   {
+      TNLAssert(team < server->getTeamCount(), "Bad team!");
+      clientInfo->setTeamIndex(team);
+   }
+}
+
+
+void GamePair::addBotClient(const string &name, S32 team)
+{
+   server->addBot(Vector<const char *>());
+   ClientInfo *clientInfo = server->getClientInfo(clients.size() - 1);
+   TNLAssert(clientInfo->isRobot(), "This is supposed to be a robot!");
+   clientInfo->setTeamIndex(team);
 }
 
 
