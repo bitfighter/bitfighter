@@ -263,22 +263,19 @@ string Robot::runGetName()
 
 // This only runs the very first time the robot is added to the level
 // Note that level may not yet be ready, so the bot can't spawn yet
-// Runs on client and server 
+// Runs on client and server -- does nothing on client
 void Robot::onAddedToGame(Game *game)
 {
-   if(!isGhost())    // Robots are created with NULL ClientInfos.  We'll add a valid one here.
-   {
-      TNLAssert(mClientInfo.isNull(), "mClientInfo should be NULL");
-
-      mClientInfo = new FullClientInfo(game, NULL, "Robot", true);  // deleted in destructor
-      mClientInfo->setShip(this);
-      this->setOwner(mClientInfo);
-   }
-   
-   if(isGhost())
+   if(isGhost())     // No clients allowed!
       return;
 
-   // Server only from here on out
+   // Robots are created with NULL ClientInfos.  We'll add a valid one here.
+   TNLAssert(mClientInfo.isNull(), "mClientInfo should be NULL");
+
+   mClientInfo = new FullClientInfo(game, NULL, "Robot", true);  // deleted in destructor
+   mClientInfo->setShip(this);
+   this->setOwner(mClientInfo);
+   
    hasExploded = true;        // Because we start off "dead", but will respawn real soon now...
    disableCollision();
 
