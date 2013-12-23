@@ -59,11 +59,23 @@ ServerGame *newServerGame()
 }
 
 
+GamePair::GamePair(GameSettingsPtr settings)
+{
+   initialize(settings, "", 0);
+}
+
+
 // Create a pair of games suitable for testing client/server interaction.  Provide some levelcode to get things started.
 GamePair::GamePair(const string &levelCode, S32 clientCount)
 {
    GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
 
+   initialize(settings, levelCode, clientCount);
+}
+
+
+void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32 clientCount)
+{
    LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(levelCode));
    initHosting(settings, levelSource, true, false);      // Creates a game and adds it to GameManager
 
@@ -72,7 +84,7 @@ GamePair::GamePair(const string &levelCode, S32 clientCount)
    GameType *gt = new GameType();    // Cleaned up by database
    gt->addToGame(server, server->getGameObjDatabase());
 
-   server->startHosting();     // This will load levels and wipe out any teams
+   server->startHosting();          // This will load levels and wipe out any teams
 
    for(S32 i = 0; i < clientCount; i++)
       addClient("TestPlayer" + itos(i));
@@ -122,7 +134,7 @@ void GamePair::addClient(const string &name, S32 team)
 
    clients.push_back(client);
 
-   ClientInfo *clientInfo = server->getClientInfo(clients.size() - 1);
+   ClientInfo *clientInfo = server->getClientInfo(server->getClientInfos()->size() - 1);
 
    if(!clientInfo->isRobot())
       clientInfo->getConnection()->useZeroLatencyForTesting();
