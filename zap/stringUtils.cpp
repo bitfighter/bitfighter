@@ -810,6 +810,10 @@ const string readFile(const string &path)
    file.read(&result[0], result.size());
    file.close();
 
+   // Kill the UTF-8 BOM if it exists
+   // These are the first three bytes:  EF BB BF
+   result.erase(0, result.find_first_not_of("\357\273\277"));
+
    return result;
 }
 
