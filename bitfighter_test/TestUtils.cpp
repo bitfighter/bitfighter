@@ -13,6 +13,7 @@
 #include "../zap/SystemFunctions.h"
 
 #include "../zap/stringUtils.h"
+#include "gtest/gtest.h"
 
 #include <string>
 
@@ -137,8 +138,9 @@ void GamePair::addClient(const string &name, S32 team)
 void GamePair::addBotClient(const string &name, S32 team)
 {
    server->addBot(Vector<const char *>());
-   ClientInfo *clientInfo = server->getClientInfo(clients.size() - 1);
-   TNLAssert(clientInfo->isRobot(), "This is supposed to be a robot!");
+   // Get most recently added clientInfo
+   ClientInfo *clientInfo = server->getClientInfo(server->getClientInfos()->size() - 1);
+   ASSERT_TRUE(clientInfo->isRobot()) << "This is supposed to be a robot!";
    clientInfo->setTeamIndex(team);
 }
 
