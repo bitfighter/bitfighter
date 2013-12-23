@@ -42,7 +42,6 @@ public:
 
    virtual void setName(const char *name) = 0;
    virtual StringTableEntry getName() const = 0;
-   virtual S32 getPlayerBotCount() const; 
 
    void setTeamIndex(S32 index);
 
@@ -53,6 +52,8 @@ public:
    void alterGreen(F32 amt);
    void alterBlue(F32 amt);
 
+   virtual S32 getPlayerBotCount() const = 0; 
+   virtual S32 getPlayerCount() const = 0;      
    virtual S32 getBotCount() const = 0;
 };
 

@@ -106,13 +106,6 @@ void AbstractTeam::alterBlue(F32 amt)
 }
 
 
-S32 AbstractTeam::getPlayerBotCount() const
-{
-   TNLAssert(false, "Not implemented in this class!");
-   return 0;
-}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 

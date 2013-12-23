@@ -51,10 +51,23 @@ StringTableEntry EditorTeam::getName() const
 }
 
 
-S32 EditorTeam::getBotCount() const
+S32 EditorTeam::getPlayerBotCount() const
 {
    return 0;
 }
+
+
+S32 EditorTeam::getPlayerCount() const
+{
+   return 0;
+}
+
+
+S32 EditorTeam::getBotCount() const
+{
+   return 0;
+}   
+
 
 
 };
