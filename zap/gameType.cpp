@@ -2262,7 +2262,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
       gamesPlayed = clientGame->getClientInfo()->getGamesPlayed();
    }
 
-   // The new ClientInfo will be deleted in s2cRemoveClient   
+   // The new ClientInfo will be deleted in s2cRemoveClient
    ClientInfo *clientInfo = new RemoteClientInfo(clientGame, name, isAuthenticated, badges, gamesPlayed, killStreak, 
                                                 isRobot, (ClientInfo::ClientRole)role.value, isSpawnDelayed, isBusy);
 
@@ -2956,7 +2956,7 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
 }
 
 
-// Get here when player issues /kickbot command, or when they choose FEWER ROBOTS from the game menu
+// Get here when player issues /kickbot command, or (repeatedly) when they choose FEWER ROBOTS from the game menu
 GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();

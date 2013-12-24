@@ -30,7 +30,8 @@ namespace Zap
 {
 
 
-static bool instantiated;     // Just a little something to keep us from creating multiple ServerGames...
+static bool instantiated;           // Just a little something to keep us from creating multiple ServerGames...
+
 
 // Constructor -- be sure to see Game constructor too!  Lots going on there!
 ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated) : 
