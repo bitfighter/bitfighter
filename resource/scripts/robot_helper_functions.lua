@@ -113,7 +113,7 @@ end
 
 function bot:findGlobalObjects(...)
     printDeprecationWarning("bot:findGlobalObjects(...)", "bf:findAllObjects(...)")
-    return bot:findAllObjects(...)
+    return bf:findAllObjects(...)
 end
 
 function bot:setWeapon(index, weapon)
