@@ -8,6 +8,7 @@
 #include "game.h"
 #include "ship.h"
 #include "stringUtils.h"
+#include "ClientGame.h"
 
 #include "gameObjectRender.h"    // For renderTextItem()
 
@@ -104,6 +105,10 @@ void TextItem::render()
       if(ship->getTeam() != getTeam() && getTeam() != TEAM_NEUTRAL)
          return;
    }
+
+   // We're connected to a server but ship is NULL, don't render (like in /idle)
+   if(!ship && static_cast<ClientGame*>(getGame())->isConnectedToServer())
+      return;
 
    renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());
 #endif

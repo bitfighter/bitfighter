@@ -102,7 +102,18 @@ void LineItem::render()
          sameTeam = true;
    }
    else
-      sameTeam = true;     // Render item regardless of team when in editor, which is when gc will be NULL
+   {
+      // Not in editor, probably idle
+      if(static_cast<ClientGame*>(getGame())->isConnectedToServer())
+         sameTeam = false;
+      else
+         sameTeam = true;     // Render item regardless of team when in editor, which is when gc will be NULL
+   }
+
+
+
+   if(!ship && static_cast<ClientGame*>(getGame())->isConnectedToServer())
+      return;
 
    // Now render
    if(mGlobal || sameTeam)

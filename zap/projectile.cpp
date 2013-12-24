@@ -1237,7 +1237,14 @@ void SpyBug::renderItem(const Point &pos)
             (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(ModuleInfo::SensorCloakInnerDetectionDistance));
    }
    else    
-      visible = true;      // We get here in editor when in preview mode
+   {
+      // Not in editor, probably idle
+      if(static_cast<ClientGame*>(getGame())->isConnectedToServer())
+         visible = false;
+      else
+         visible = true;      // We get here in editor when in preview mode
+   }
+
 
    renderSpyBug(pos, *getColor(), visible, true);
 #endif
