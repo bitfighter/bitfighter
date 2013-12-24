@@ -105,15 +105,16 @@ void TextItem::render()
          return;
    }
 
-   renderEditorItem();
+   renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());
 #endif
 }
 
 
 // Called by SimpleItem::renderEditor()
-void TextItem::renderEditorItem()
+void TextItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
-   renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());
+   Parent::renderEditor(currentScale, snappingToWallCornersEnabled);
+   render();
 }
 
 

@@ -64,7 +64,7 @@ public:
 
    Color getEditorRenderColor();
 
-   void renderEditorItem();
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    F32 getSize();
 
    string getText();

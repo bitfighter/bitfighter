@@ -159,7 +159,7 @@ public:
    ///// Editor Methods
    Color getEditorRenderColor();
 
-   void renderEditorItem();
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
    void onAttrsChanging();
    void onGeomChanging();
