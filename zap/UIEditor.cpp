@@ -2100,11 +2100,7 @@ void EditorUserInterface::renderObjects(GridDatabase *database, RenderModes rend
          setColor(obj->isSelected(), obj->isLitUp(), isLevelgenOverlay);
 
          if(mPreviewMode)
-         {
-            BfObject *bfObj = dynamic_cast<BfObject *>(obj);
-            if(bfObj)
-               bfObj->render();
-         }
+            obj->render();
          else
          {
             obj->renderEditor(mCurrentScale, getSnapToWallCorners());
