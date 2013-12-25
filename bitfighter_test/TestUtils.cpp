@@ -147,6 +147,12 @@ void GamePair::addClient(const string &name, S32 team)
 }
 
 
+void GamePair::removeClient(const string &name)
+{
+   // Do something witty here
+}
+
+
 void GamePair::addBotClient(const string &name, S32 team)
 {
    server->addBot(Vector<const char *>());
