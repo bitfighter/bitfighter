@@ -499,6 +499,8 @@ void Robot::idle(BfObject::IdleCallPath path)
       Parent::idle(path);                       
    else                         
    {
+      mSendSpawnEffectTimer.update(mCurrentMove.time); // This is to fix robot go spinny, since we skipped Ship::idle(ServerIdleMainLoop)
+
       U32 deltaT = mCurrentMove.time;
 
       TNLAssert(deltaT != 0, "Time should never be zero!");    

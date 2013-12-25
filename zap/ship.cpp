@@ -644,11 +644,6 @@ void Ship::idle(IdleCallPath path)
 
    mRepairTargets.clear();
 
-   // Find any repair targets for rendering repair rays -- on other paths, this will be done in processModules
-   if(path == ClientIdlingNotLocalShip)
-      if(mLoadout.isModulePrimaryActive(ModuleRepair))
-         findRepairTargets();       
-
    // Process weapons and modules on controlled objects; handles all the energy reductions as well
    if(path == ServerProcessingUpdatesFromClient || path == ClientReplayingPendingMoves
 #ifndef ZAP_DEDICATED
@@ -663,6 +658,10 @@ void Ship::idle(IdleCallPath path)
       processModules();
       rechargeEnergy();
    }
+   // Find any repair targets for rendering repair rays -- on other paths, this will be done in processModules
+   else if(path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip)
+      if(mLoadout.isModulePrimaryActive(ModuleRepair))
+         findRepairTargets();       
 
    if(path == ServerProcessingUpdatesFromClient)
       repairTargets();

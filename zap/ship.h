@@ -35,10 +35,11 @@ class Ship : public MoveObject
 {
    typedef MoveObject Parent;
 
-private:
    bool mIsRobot;
 
+protected:
    Timer mSendSpawnEffectTimer;           // Only meaningful on the server
+private:
    Vector<SafePtr<Zone> > mZones1;      // A list of zones the ship is currently in
    Vector<SafePtr<Zone> > mZones2;
    bool mZones1IsCurrent;
