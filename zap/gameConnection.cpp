@@ -1812,7 +1812,7 @@ void GameConnection::updateTimers(U32 timeDelta)
    else
       mVoteTime -= timeDelta;
 
-   if(mClientInfo->updateReturnToGameTimer(timeDelta))     // Time to spawn a delayed player!
+   if(!isInitiator() && mClientInfo->updateReturnToGameTimer(timeDelta))     // Time to spawn a delayed player!
        undelaySpawn();
 }
 

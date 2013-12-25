@@ -23,6 +23,8 @@
 #include "stringUtils.h"
 #include "GeomUtils.h"
 
+#include "GameRecorder.h"
+
 
 using namespace TNL;
 
@@ -104,6 +106,10 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
 
    mLevelSwitchTimer.setPeriod(LevelSwitchTime);
    GameManager::setHostingModePhase(GameManager::NotHosting);
+
+   mGameRecorderServer = NULL;
+   if(!dedicated)  // TODO:  Make this enable or disable through bitfighter.ini setting.
+      mGameRecorderServer = new GameRecorderServer(this);
 }
 
 
@@ -123,6 +129,9 @@ ServerGame::~ServerGame()
    delete mBotZoneDatabase;
 
    GameManager::setHostingModePhase(GameManager::NotHosting);
+
+   if(mGameRecorderServer)
+      delete mGameRecorderServer;
 }
 
 
@@ -1334,6 +1343,10 @@ void ServerGame::idle(U32 timeDelta)
       cycleLevel(mNextLevel);
       mNextLevel = getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
    }
+
+
+   if(mGameRecorderServer)
+      mGameRecorderServer->idle(timeDelta);
 }
 
 
@@ -1736,6 +1749,20 @@ U16 ServerGame::findZoneContaining(const Point &p) const
    }
 
    return U16_MAX;
+}
+
+
+void ServerGame::setGameType(GameType *theGameType)
+{
+   if(mGameRecorderServer)
+      mGameRecorderServer->objectLocalScopeAlways(theGameType);
+   Parent::setGameType(theGameType);
+}
+
+void ServerGame::onObjectAdded(BfObject *obj)
+{
+   if(mGameRecorderServer && obj->isGhostable())
+      mGameRecorderServer->objectLocalScopeAlways(obj);
 }
 
 };

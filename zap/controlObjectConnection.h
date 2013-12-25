@@ -76,7 +76,7 @@ public:
    BfObject *getControlObject() const;
    U32 getControlCRC();
 
-   void addPendingMove(Move *theMove);
+   virtual void addPendingMove(Move *theMove);
 
    struct GamePacketNotify : public GhostConnection::GhostPacketNotify
    {

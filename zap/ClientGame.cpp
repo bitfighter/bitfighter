@@ -30,6 +30,8 @@
 #include <sys/stat.h>
 #include <cmath>
 
+#include "GameRecorder.h"
+
 using namespace TNL;
 
 namespace Zap
@@ -734,9 +736,10 @@ void ClientGame::idle(U32 timeDelta)
    checkConnectionToMaster(timeDelta);   // If no current connection to master, create (or recreate) one
 
    if(mConnectionToServer.isValid())
-   {
-      mClientInfo->updateReturnToGameTimer(timeDelta);
+      mConnectionToServer->updateTimers(timeDelta);
 
+   if(mConnectionToServer.isValid())
+   {
       mCurrentTime += timeDelta;
 
       computeWorldObjectExtents();
@@ -763,7 +766,7 @@ void ClientGame::idle(U32 timeDelta)
             if(obj->isDeleted())
                continue;
 
-            if(obj == localPlayerShip)
+            if(obj == localPlayerShip && dynamic_cast<GameRecorderPlayback *>(mConnectionToServer.getPointer()) == NULL)
             {
                obj->setCurrentMove(*theMove);
                obj->idle(BfObject::ClientIdlingLocalShip);     // on client, object is our control object

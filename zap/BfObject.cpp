@@ -15,6 +15,8 @@
 #  include "ClientGame.h"
 #endif
 
+#include "ServerGame.h"
+
 #include "Colors.h"
 
 #include "GeomUtils.h"
@@ -522,6 +524,12 @@ void BfObject::addToGame(Game *game, GridDatabase *database)
 
    setCreationTime(game->getCurrentTime());
    onAddedToGame(game);
+
+   if(game->isServer())
+   {
+      ServerGame *serverGame = static_cast<ServerGame *>(game);
+      serverGame->onObjectAdded(this);
+   }
 }
 
 
@@ -792,8 +800,8 @@ void BfObject::setScopeAlways()
 
 F32 BfObject::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips)
 {
-   GameConnection *gc = static_cast<GameConnection *>(connection);
-   BfObject *so = gc->getControlObject();
+   GameConnection *gc = dynamic_cast<GameConnection *>(connection);
+   BfObject *so = gc ? gc->getControlObject() : NULL;
    F32 add = 0;
    if(so)
    {

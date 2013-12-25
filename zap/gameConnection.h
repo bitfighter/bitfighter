@@ -52,11 +52,13 @@ private:
 
    RefPtr<ClientInfo> mClientInfo;               // This could be either a FullClientInfo or a RemoteClientInfo
 
+protected:
 #ifndef ZAP_DEDICATED
    ClientGame *mClientGame;         // NULL on server side, not available for dedicated build
 #endif
    ServerGame *mServerGame;         // NULL on client side
 
+private:
    bool mInCommanderMap;
    bool mWaitingForPermissionsReply;
    bool mGotPermissionsReply;
@@ -150,7 +152,7 @@ public:
 
    void onLocalConnection();
 
-   bool lostContact();
+   virtual bool lostContact();
 
    string getServerName();
 
@@ -293,7 +295,7 @@ public:
    S32 getAuthenticationCounter();
 
    void requestAuthenticationVerificationFromMaster();
-   void updateTimers(U32 timeDelta);
+   virtual void updateTimers(U32 timeDelta);
 
    void displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e);
 

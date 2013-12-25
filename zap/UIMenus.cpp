@@ -43,6 +43,8 @@
 #include <string>
 #include <math.h>
 
+#include "GameRecorder.h"
+
 namespace Zap
 {
 
@@ -925,6 +927,11 @@ static void quitSelectedCallback(ClientGame *game, U32 unused)
 {
    shutdownBitfighter();
 }
+static void playGameRecordingCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activateGameUserInterface();
+   game->setConnectionToServer(new GameRecorderPlayback(game));
+}
 
 //////////
 
@@ -949,6 +956,7 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
    addMenuItem(new MenuItem("LEVEL EDITOR",           editorSelectedCallback,     "", KEY_L, KEY_E));
    addMenuItem(new MenuItem("CREDITS",                creditsSelectedCallback,    "", KEY_C));
    addMenuItem(new MenuItem("QUIT",                   quitSelectedCallback,       "", KEY_Q));
+   addMenuItem(new MenuItem("game recording test",    playGameRecordingCallback,  "", KEY_Q));
 }
 
 

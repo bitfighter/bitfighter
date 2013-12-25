@@ -29,6 +29,8 @@ class WallItem;
 class ItemSpawn;
 struct LevelInfo;
 
+class GameRecorderServer;
+
 static const string UploadPrefix = "upload_";
 static const string DownloadPrefix = "download_";
 
@@ -61,6 +63,8 @@ private:
 
    SafePtr<GameConnection> mSuspendor;    // Player requesting suspension if game suspended by request
    Timer mTimeToSuspend;
+
+   GameRecorderServer *mGameRecorderServer;
 public:
    static const U32 PreSuspendSettlingPeriod = TWO_SECONDS;
 private:
@@ -241,8 +245,10 @@ public:
    const Vector<BotNavMeshZone *> *getBotZones() const;
    U16 findZoneContaining(const Point &p) const;
 
-   friend class ObjectTest;
+   void setGameType(GameType *theGameType);
+   void onObjectAdded(BfObject *obj);
 
+   friend class ObjectTest;
 };
 
 
