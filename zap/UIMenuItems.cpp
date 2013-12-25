@@ -846,7 +846,7 @@ void CounterMenuItem::backspace()
 }
 void CounterMenuItem::enterDigit(S32 digit)
 {
-   if(mValue > (U32(S32_MAX + 9) / U32(10)))
+   if(mValue > (U32(U32(S32_MAX) + 9) / U32(10)))
       mValue = S32_MAX;
    else
       mValue *= 10;
@@ -1025,8 +1025,8 @@ void TimeCounterMenuItem::enterDigit(S32 digit)
    else
    {
       minutes = minutes * 10 + digit;
-      if(minutes > S32(U32(S32_MAX + 59) / U32(60)))
-         minutes = S32(U32(S32_MAX + 59) / U32(60));
+      if(minutes > S32(U32(U32(S32_MAX) + 59) / U32(60)))
+         minutes = S32(U32(U32(S32_MAX) + 59) / U32(60));
    }
 
    mValue = S32(minutes * 60 + seconds);
