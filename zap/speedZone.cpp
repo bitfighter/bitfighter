@@ -193,8 +193,9 @@ Color SpeedZone::getEditorRenderColor()
 }
 
 
-void SpeedZone::renderEditorItem()
+void SpeedZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
+   Parent::renderEditor(currentScale, snappingToWallCornersEnabled);
    render();
 }
 

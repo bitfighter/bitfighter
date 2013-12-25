@@ -12,6 +12,7 @@
 #include "LoadoutIndicator.h"
 #include "TimeLeftRenderer.h"
 #include "FpsRenderer.h"
+#include "ConnectionStatsRenderer.h"
 #include "HelpItemManager.h"
 #include "move.h"
 #include "config.h"     // For UserSettings def
@@ -253,6 +254,7 @@ private:
    ChatMessageDisplayer mChatMessageDisplayer3;    // Long form, messages do not expire
 
    UI::FpsRenderer mFpsRenderer;
+   UI::ConnectionStatsRenderer mConnectionStatsRenderer;
 
    HelpItemManager mHelpItemManager;
 

@@ -22,6 +22,9 @@
 #include "GeomUtils.h"        // For polygon triangulation
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
+#include "stringUtils.h"
+
+#include <cmath>
 
 
 namespace Zap
@@ -33,8 +36,7 @@ using UI::SymbolStringSet;
 // Constructor
 EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game),
                                                                                      mAnimTimer(ONE_SECOND),
-                                                                                     mConsoleInstructions(10),
-                                                                                     mPluginInstructions(10)
+                                                                                     mConsoleInstructions(10)
 {
    GameSettings *settings = getGame()->getSettings();
    mCurPage = 0;
@@ -205,39 +207,64 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
    mConsoleInstructions.add(SymbolString(symbols));
 
-   ///// 
-
-   string tabstr = "[[TAB_STOP:200]]";
-
-   symbols.clear();
-   SymbolString::symbolParse(settings->getInputCodeManager(), "Plugins are scripts that can manipuate items in the editor.",
-                             symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
-   mPluginInstructions.add(SymbolString(symbols));
-
-   symbols.clear();
-   SymbolString::symbolParse(settings->getInputCodeManager(), "See the Bitfighter wiki for info on creating your own.",
-                             symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
-   mPluginInstructions.add(SymbolString(symbols));
-
-   // Using TAB_STOP:0 below will cause the text and the horiz. line to be printed in the same space, creating a underline effect
-   symbols.clear();
-   symbols.push_back(SymbolString::getHorizLine(735, FontSize, FontSize + 4, &Colors::gray70));
-   SymbolString::symbolParse(settings->getInputCodeManager(), "[[TAB_STOP:0]]Key" + tabstr + "Description",
-                             symbols, HelpContext, FontSize, true, &Colors::yellow, keyColor);
-   mPluginInstructions.add(SymbolString(symbols));
+   ///// Plugin pages
 
    const Vector<PluginInfo> *pluginInfos = getUIManager()->getUI<EditorUserInterface>()->getPluginInfos();
 
-   for(S32 i = 0; i < pluginInfos->size(); i++)
+   // Determine how many plugins we have and adjust our page count accordingly
+   mPluginPageCount = 0;
+
+   static const S32 PLUGINS_PER_PAGE = 15;
+   if(pluginInfos->size() > 0)
+      mPluginPageCount = ((pluginInfos->size() - 1) / PLUGINS_PER_PAGE) + 1;
+
+   string tabstr = "[[TAB_STOP:200]]";
+
+   for(S32 i = 0; i < mPluginPageCount; i++)
    {
-      string key = "[[" + pluginInfos->get(i).binding + "]]";  // Add the [[ & ]] to make it parsable
-      string instr = pluginInfos->get(i).description;
+      UI::SymbolStringSet pluginSymbolSet(10);
 
       symbols.clear();
-      SymbolString::symbolParse(settings->getInputCodeManager(), key + tabstr + instr,
-                                symbols, HelpContext, FontSize, txtColor, keyColor);
-      mPluginInstructions.add(SymbolString(symbols));
+      SymbolString::symbolParse(settings->getInputCodeManager(), "Plugins are scripts that can manipuate items in the editor.",
+                                symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
+      pluginSymbolSet.add(SymbolString(symbols));
+
+      symbols.clear();
+      SymbolString::symbolParse(settings->getInputCodeManager(), "See the Bitfighter wiki for info on creating your own.",
+                                symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
+      pluginSymbolSet.add(SymbolString(symbols));
+
+      // Using TAB_STOP:0 below will cause the text and the horiz. line to be printed in the same space, creating a underline effect
+      symbols.clear();
+      symbols.push_back(SymbolString::getHorizLine(735, FontSize, FontSize + 4, &Colors::gray70));
+      SymbolString::symbolParse(settings->getInputCodeManager(), "[[TAB_STOP:0]]Key" + tabstr + "Description",
+                                symbols, HelpContext, FontSize, true, &Colors::yellow, keyColor);
+      pluginSymbolSet.add(SymbolString(symbols));
+
+      S32 start = i + (PLUGINS_PER_PAGE * i);
+      S32 end = MIN(i + (PLUGINS_PER_PAGE * (i + 1)), pluginInfos->size());
+      for(S32 j = start; j < end; j++)
+      {
+         string key = "[[" + pluginInfos->get(j).binding + "]]";  // Add the [[ & ]] to make it parsable
+         string instr = pluginInfos->get(j).description;
+
+         symbols.clear();
+         SymbolString::symbolParse(settings->getInputCodeManager(), key + tabstr + instr,
+                                   symbols, HelpContext, FontSize, txtColor, keyColor);
+         pluginSymbolSet.add(SymbolString(symbols));
+      }
+
+      mPluginInstructions.push_back(pluginSymbolSet);
    }
+
+
+   // Generate page headers, aligned with pages
+   mPageHeaders.push_back("BASIC COMMANDS");
+   mPageHeaders.push_back("ADVANCED COMMANDS");
+   mPageHeaders.push_back("WALLS AND LINES");
+   mPageHeaders.push_back("SCRIPTING CONSOLE");
+   for(S32 i = 0; i < mPluginPageCount; i++)
+      mPageHeaders.push_back("PLUGINS PAGE " + itos(i+1));
 }
 
 
@@ -255,18 +282,9 @@ void EditorInstructionsUserInterface::onActivate()
 }
 
 
-const char *pageHeadersEditor[] = {
-   "BASIC COMMANDS",
-   "ADVANCED COMMANDS",
-   "WALLS AND LINES",
-   "SCRIPTING CONSOLE",
-   "PLUGINS"
-};
-
-
 S32 EditorInstructionsUserInterface::getPageCount()
 {
-   return 4 + (getGame()->getSettings()->getPluginBindings()->size() > 0 ? 1 : 0);
+   return 4 + mPluginPageCount;
 }
 
 
@@ -274,7 +292,7 @@ void EditorInstructionsUserInterface::render()
 {
    FontManager::pushFontContext(HelpContext);
 
-   Parent::render(pageHeadersEditor[mCurPage], mCurPage + 1, getPageCount());
+   Parent::render(mPageHeaders[mCurPage].c_str(), mCurPage + 1, getPageCount());
 
    static ControlStringsEditor consoleCommands[] = {
       { "Coming soon...", "Coming soon..." },
@@ -282,24 +300,16 @@ void EditorInstructionsUserInterface::render()
    };
 
 
-   switch(mCurPage)
-   {
-      case 0:
-         renderPageCommands(1);
-         break;
-      case 1:
-         renderPageCommands(2);
-         break;
-      case 2:
-         renderPageWalls();
-         break;
-      case 3:
-         renderConsoleCommands(mConsoleInstructions, consoleCommands);
-         break;
-      case 4:
-         mPluginInstructions.render(horizMargin, 60, UI::AlignmentLeft);
-         break;
-   }
+   if(mCurPage == 0)
+      renderPageCommands(1);
+   else if(mCurPage == 1)
+      renderPageCommands(2);
+   else if(mCurPage == 2)
+      renderPageWalls();
+   else if(mCurPage == 3)
+      renderConsoleCommands(mConsoleInstructions, consoleCommands);
+   else if(mCurPage >= 4)
+      mPluginInstructions[mCurPage-4].render(horizMargin, 60, UI::AlignmentLeft);
 
    FontManager::popFontContext();
 }

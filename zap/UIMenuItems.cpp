@@ -487,7 +487,7 @@ static void getStringVectorFromTable(lua_State *L, S32 index, const char *method
 
    // The following block loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
 
-   lua_pushvalue(L, index);	// Push our table onto the top of the stack
+   lua_pushvalue(L, index);   // Push our table onto the top of the stack
    lua_pushnil(L);            // lua_next (below) will start the iteration, it needs nil to be the first key it pops
 
    // The table was pushed onto the stack at -1 (recall that -1 is equivalent to lua_gettop)
@@ -809,6 +809,16 @@ bool CounterMenuItem::handleKey(InputCode inputCode)
       return true;
    }
 
+   else if(inputCode == KEY_BACKSPACE || inputCode == KEY_KEYPAD_PERIOD)
+      backspace();
+
+   else if(inputCode >= KEY_0 && inputCode <= KEY_9)
+      enterDigit(inputCode - KEY_0);
+
+   else if(inputCode >= KEY_KEYPAD0 && inputCode <= KEY_KEYPAD9)
+      enterDigit(inputCode - KEY_KEYPAD0);
+
+
    return false;
 }
 
@@ -828,6 +838,26 @@ void CounterMenuItem::decrement(S32 fact)
 S32 CounterMenuItem::getBigIncrement()
 {
    return 10;
+}
+
+void CounterMenuItem::backspace()
+{
+   mValue /= 10;
+}
+void CounterMenuItem::enterDigit(S32 digit)
+{
+   if(mValue > (U32(S32_MAX + 9) / U32(10)))
+      mValue = S32_MAX;
+   else
+      mValue *= 10;
+
+   if(mValue + digit < mValue) // Check for overflow
+      mValue = S32_MAX;
+   else
+      mValue += digit;
+
+   if(mValue > mMaxValue)
+      mValue = mMaxValue;
 }
 
 
@@ -957,7 +987,7 @@ TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 max
                                          S32 step, InputCode k1, InputCode k2) :
    CounterMenuItem(title, value, step, 0, maxVal, "", zeroMsg, help, k1, k2)
 {
-   // Do nothing
+   mEditingSeconds = false;
 }
 
 // Destructor
@@ -972,6 +1002,50 @@ S32 TimeCounterMenuItem::getBigIncrement()
    return 12;  // 12 * 5sec = 1 minute
 }
 
+void TimeCounterMenuItem::backspace()
+{
+   S32 minutes = mValue / 60;
+   S32 seconds = mValue % 60;
+   if(mEditingSeconds)
+      seconds /= 10;
+   else
+      minutes /= 10;
+   mValue = minutes * 60 + seconds;
+}
+void TimeCounterMenuItem::enterDigit(S32 digit)
+{
+   U32 minutes = U32(mValue) / 60;
+   U32 seconds = U32(mValue) % 60;
+   if(mEditingSeconds)
+   {
+      seconds = seconds * 10 + digit;
+      if(seconds >= 60)
+         seconds = digit;
+   }
+   else
+   {
+      minutes = minutes * 10 + digit;
+      if(minutes > S32(U32(S32_MAX + 59) / U32(60)))
+         minutes = S32(U32(S32_MAX + 59) / U32(60));
+   }
+
+   mValue = S32(minutes * 60 + seconds);
+   if(mValue < 0)
+      mValue = S32_MAX;
+
+   if(mValue > mMaxValue)
+      mValue = mMaxValue;
+}
+
+
+bool TimeCounterMenuItem::handleKey(InputCode inputCode)
+{
+   if(inputCode == KEY_SEMICOLON || inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)
+      mEditingSeconds = !mEditingSeconds;
+   else
+      return Parent::handleKey(inputCode);
+   return true;
+}
 
 string TimeCounterMenuItem::getUnits() const
 {

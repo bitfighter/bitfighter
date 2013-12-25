@@ -20,12 +20,17 @@ namespace Zap
 
 struct ControlObjectData : public Move
 {
+   Point mPos;
+   Point mVel;
+   Point mImpulseVector;
    S32 mEnergy;
    S32 mFireTimer;
    U32 mFastRechargeTimer;
    U32 mSpyBugPlacementTimer;
+   U32 mPulseTimer;
    bool mCooldownNeeded;
    bool mFastRecharging;
+   bool mBoostActive;
 };
 
 class BfObject;

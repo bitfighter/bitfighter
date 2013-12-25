@@ -1002,18 +1002,21 @@ S32 CoreItem::lua_setTeam(lua_State *L)
    S32 results = Parent::lua_setTeam(L);
    S32 newTeamIndex = this->getTeam();
 
-   if(oldTeamIndex >= 0)
+   if(getGame() && getGame()->getGameType() && getGame()->getGameType()->getGameTypeId() == CoreGame)
    {
-      Team* oldTeam = dynamic_cast<Team *>(getGame()->getTeam(oldTeamIndex));
-      oldTeam->addScore(-1);
-      getGame()->getGameType()->s2cSetTeamScore(oldTeamIndex, oldTeam->getScore());
-   }
-
-   if(newTeamIndex >= 0)
-   {
-      Team* newTeam = dynamic_cast<Team *>(getGame()->getTeam(newTeamIndex));
-      newTeam->addScore(1);
-      getGame()->getGameType()->s2cSetTeamScore(newTeamIndex, newTeam->getScore());
+      if(oldTeamIndex >= 0 && oldTeamIndex < getGame()->getTeamCount())
+      {
+         Team* oldTeam = dynamic_cast<Team *>(getGame()->getTeam(oldTeamIndex));
+         oldTeam->addScore(-1);
+         getGame()->getGameType()->s2cSetTeamScore(oldTeamIndex, oldTeam->getScore());
+      }
+   
+      if(newTeamIndex >= 0)
+      {
+         Team* newTeam = dynamic_cast<Team *>(getGame()->getTeam(newTeamIndex));
+         newTeam->addScore(1);
+         getGame()->getGameType()->s2cSetTeamScore(newTeamIndex, newTeam->getScore());
+      }
    }
 
    return results;

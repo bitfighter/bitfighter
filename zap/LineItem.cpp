@@ -8,7 +8,8 @@
 #include "ship.h"
 #include "gameObjectRender.h"    // For renderPolyLineVertices()
 #include "stringUtils.h"         // For itos
-//
+#include "tnlGhostConnection.h"
+
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
@@ -101,7 +102,18 @@ void LineItem::render()
          sameTeam = true;
    }
    else
-      sameTeam = true;     // Render item regardless of team when in editor, which is when gc will be NULL
+   {
+      // Not in editor, probably idle
+      if(static_cast<ClientGame*>(getGame())->isConnectedToServer())
+         sameTeam = false;
+      else
+         sameTeam = true;     // Render item regardless of team when in editor, which is when gc will be NULL
+   }
+
+
+
+   if(!ship && static_cast<ClientGame*>(getGame())->isConnectedToServer())
+      return;
 
    // Now render
    if(mGlobal || sameTeam)
@@ -188,7 +200,9 @@ void LineItem::onAddedToGame(Game *game)
 void LineItem::onGhostAvailable(GhostConnection* connection)
 {
    Parent::onGhostAvailable(connection);
-   s2cSetGeom(*GeomObject::getOutline());
+
+   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cSetGeom, (*GeomObject::getOutline()));
+   connection->postNetEvent(theEvent);
 }
 
 void LineItem::onGhostAddBeforeUpdate(GhostConnection* connection)

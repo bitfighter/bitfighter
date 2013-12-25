@@ -892,9 +892,10 @@ void Teleporter::doExplosion()
 #endif
 
 
-void Teleporter::renderEditorItem()
+void Teleporter::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
+   Parent::renderEditor(currentScale, snappingToWallCornersEnabled);
    renderTeleporterEditorObject(getOrigin(), TELEPORTER_RADIUS, getEditorRenderColor());
 #endif
 }

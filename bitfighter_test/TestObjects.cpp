@@ -172,5 +172,65 @@ TEST_F(ObjectTest, GhostingSanity)
       }
    }
 }
+
+
+
+/**
+ * Test some LUA commands to all objects
+ */
+TEST_F(ObjectTest, LuaSanity)
+{
+   // Track the transmission state of each object
+   U32 classCount = TNL::NetClassRep::getNetClassCount(NetClassGroupGame, NetClassTypeObject);
+
+   // Create our pair of connected games
+   GamePair gamePair;
+   ClientGame *clientGame = gamePair.client;
+   ServerGame *serverGame = gamePair.server;
+
+   // Basic geometry to plug into polygon objects
+   Vector<Point> geom;
+   geom.push_back(Point(0,0));
+   geom.push_back(Point(1,0));
+   geom.push_back(Point(0,1));
+
+   lua_State *L = lua_open();
+
+   // Create one of each type of registered NetClass
+   for(U32 i = 0; i < classCount; i++)
+   {
+      NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
+      Object *obj = netClassRep->create();
+      BfObject *bfobj = dynamic_cast<BfObject *>(obj);
+
+      // Skip registered classes that aren't BfObjects (e.g. GameType) or don't have
+      // a geometry at this point (ForceField)
+      if(bfobj && bfobj->hasGeometry())
+      {
+         // First, add some geometry
+         bfobj->setExtent(Rect(0,0,1,1));
+         bfobj->GeomObject::setGeom(geom);
+
+         // LUA testing
+         lua_pushinteger(L, 1);
+         bfobj->lua_setTeam(L);
+         lua_pop(L, 1);
+         lua_pushinteger(L, -2);
+         bfobj->lua_setTeam(L);
+         lua_pop(L, 1);
+         lua_pushvec(L, 2.3f, 4.3f);
+         bfobj->lua_setPos(L);
+         lua_pop(L, 1);
+
+         bfobj->addToGame(serverGame, serverGame->getGameObjDatabase());
+      }
+      else
+         delete bfobj;
+   }
+
+
+   lua_close(L);
+}
+
    
 }; // namespace Zap

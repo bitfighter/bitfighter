@@ -115,6 +115,15 @@ NetConnection::NetConnection()
    mPingTimeout = DefaultPingTimeout;
    mPingRetryCount = DefaultPingRetryCount;
    mStringTable = NULL;
+
+   mPacketRecvDropped = 0;
+   mPacketSendDropped = 0;
+   mPacketRecvBytesLast = 0;
+   mPacketSendBytesLast = 0;
+   mPacketRecvBytesTotal = 0;
+   mPacketSendBytesTotal = 0;
+   mPacketRecvCount = 0;
+   mPacketSendCount = 0;
 }
 
 void NetConnection::setInitialRecvSequence(U32 sequence)
@@ -236,6 +245,9 @@ void NetConnection::writeRawPacket(BitStream *bstream, NetPacketType packetType)
       mSymmetricCipher->setupCounter(mLastSendSeq, mLastSeqRecvd, packetType, 0);
       bstream->hashAndEncrypt(MessageSignatureBytes, PacketHeaderByteSize, mSymmetricCipher);
    }
+   mPacketSendBytesLast = bstream->getBytePosition();
+   mPacketSendBytesTotal += mPacketSendBytesLast;
+   mPacketSendCount++;
 }
 
 void NetConnection::readRawPacket(BitStream *bstream)
@@ -245,7 +257,10 @@ void NetConnection::readRawPacket(BitStream *bstream)
       logprintf(LogConsumer::LogNetConnection, "NetConnection %s: RECVDROP - %d", mNetAddress.toString(), getLastSendSequence());
       return;
    }
-   logprintf(LogConsumer::LogNetConnection, "NetConnection %s: RECV- %d bytes", mNetAddress.toString(), bstream->getMaxReadBitPosition() >> 3);
+   mPacketRecvBytesLast = bstream->getMaxReadBitPosition() >> 3;
+   mPacketRecvBytesTotal += mPacketRecvBytesLast;
+   mPacketRecvCount++;
+   logprintf(LogConsumer::LogNetConnection, "NetConnection %s: RECV- %d bytes", mNetAddress.toString(), mPacketRecvBytesLast);
 
    mErrorBuffer[0] = 0;
 
@@ -413,7 +428,10 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
    U32 pkSendDelay = (pstream->readInt(8) << 3) + 4;
 
    for(U32 i = mLastSeqRecvd+1; i < pkSequenceNumber; i++)
+   {
+      mPacketRecvDropped++;
       logprintf(LogConsumer::LogConnectionProtocol, "Not recv %d", i);
+   }
 
    logprintf(LogConsumer::LogConnectionProtocol, "Recv %d %s", pkSequenceNumber, packetTypeNames[pkPacketType]);
 
@@ -452,7 +470,7 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
       U32 ackMaskWord = (pkHighestAck - notifyIndex) >> 5;
 
       bool packetTransmitSuccess = (pkAckMask[ackMaskWord] & (1 << ackMaskBit)) != 0;
-      logprintf(LogConsumer::LogConnectionProtocol, "Ack %d %d", notifyIndex, packetTransmitSuccess);
+      logprintf(LogConsumer::LogConnectionProtocol, "Ack %d %d", notifyIndex, packetTransmitSuccess ? 1 : 0);
 
       mHighestAckedSendTime = 0;
       handleNotify(notifyIndex, packetTransmitSuccess);
@@ -648,6 +666,7 @@ void NetConnection::handleNotify(U32 sequence, bool recvd)
       }
 
       packetDropped(note);
+      mPacketSendDropped++;
    }
    delete note;
 }

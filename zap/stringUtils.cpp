@@ -675,22 +675,52 @@ string strictjoindir(const string &part1, const string &part2, const string &par
 }
 
 
+// These string methods return a newly allocated string
 string trim_right(const string &source, const string &t)
 {
-   string str = source;
-   return str.erase(str.find_last_not_of(t) + 1);
+   string::size_type index = source.find_last_not_of(t);
+
+   if (index == string::npos)
+      return string();
+
+   return source.substr(0, index + 1);
 }
 
 
 string trim_left(const string &source, const string &t)
 {
-   string str = source;
-   return str.erase(0, source.find_first_not_of(t));
+   string::size_type index = source.find_first_not_of(t);
+
+   if (index == string::npos)
+      return string();
+
+   return source.substr(index, std::string::npos);
 }
+
 
 string trim(const string &source, const string &t)
 {
    return trim_left(trim_right(source, t), t);
+}
+
+
+// These string methods operate on the given string in-place
+void trim_left_in_place(string &source, const string &t)
+{
+   source.erase(0, source.find_first_not_of(t));
+}
+
+
+void trim_right_in_place(string &source, const string &t)
+{
+   source.erase(source.find_last_not_of(t) + 1);
+}
+
+
+void trim_in_place(string& source, const string &t)
+{
+   trim_right_in_place(source, t);
+   trim_left_in_place(source, t);
 }
 
 // count the occurrence of a specific character in a string
@@ -809,6 +839,10 @@ const string readFile(const string &path)
 
    file.read(&result[0], result.size());
    file.close();
+
+   // Remove the UTF-8 BOM if it exists
+   // These are the first three bytes:  EF BB BF
+   trim_left_in_place(result, "\357\273\277");
 
    return result;
 }

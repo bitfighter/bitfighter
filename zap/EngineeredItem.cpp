@@ -1634,7 +1634,7 @@ S32 ForceFieldProjector::lua_setTeam(lua_State *L)
    //
    // We're duplicating a lot of logic in the onEnabled() method because calling onEnabled()
    // doesn't seem to work right after calling onDisabled().  Probably because of slow deletion?
-   if(mOriginalTeam != prevTeam && isEnabled())
+   if(mOriginalTeam != prevTeam && isEnabled() && getGame())
    {
       onDisabled();
 

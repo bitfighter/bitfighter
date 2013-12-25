@@ -1942,6 +1942,13 @@ void EditorUserInterface::renderReferenceShip()
       renderShip(ShipShape::Normal, &Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
       glRotatef(-90, 0, 0, 1);
 
+      // Draw collision circle
+      const F32 spaceAngle = 0.0278 * FloatTau;
+      glColor4f(0, 1, 0, 0.35f);
+      glLineWidth(gLineWidth1);
+      drawDashedCircle(Point(), Ship::CollisionRadius, 10, spaceAngle, 0);
+      glLineWidth(gDefaultLineWidth);
+
       // And show how far it can see
       const S32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
       const S32 vertDist = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
@@ -2100,11 +2107,7 @@ void EditorUserInterface::renderObjects(GridDatabase *database, RenderModes rend
          setColor(obj->isSelected(), obj->isLitUp(), isLevelgenOverlay);
 
          if(mPreviewMode)
-         {
-            BfObject *bfObj = dynamic_cast<BfObject *>(obj);
-            if(bfObj)
-               bfObj->render();
-         }
+            obj->render();
          else
          {
             obj->renderEditor(mCurrentScale, getSnapToWallCorners());
@@ -3320,7 +3323,8 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       {
          bool geomChanged = false;
 
-         for(S32 j = 0; j < obj->getVertCount(); j++) 
+         // Backwards!  Since we could be deleting multiple at once
+         for(S32 j = obj->getVertCount() - 1; j > -1 ; j--)
          {
             if(obj->vertSelected(j))
             {

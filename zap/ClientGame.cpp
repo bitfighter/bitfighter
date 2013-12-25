@@ -679,6 +679,21 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
       {
          GameType *gt = getGameType();
 
+         // Build loadout string
+         string loadoutString = "On-deck loadout: ";
+         for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+         {
+            if(i < ShipModuleCount)
+               loadoutString += ModuleInfo::getModuleInfo(loadout.getModule(i))->getName();
+            else
+               loadoutString += WeaponInfo::getWeaponInfo(loadout.getWeapon(i - ShipModuleCount)).name.getString();
+
+            if(i < (ShipModuleCount + ShipWeaponCount) - 1)
+               loadoutString += ", ";
+         }
+         // Show new loadout
+         displaySuccessMessage("%s", loadoutString.c_str());
+
          displaySuccessMessage("Ship design changed -- %s", 
                               gt->levelHasLoadoutZone() ? "enter Loadout Zone to activate changes" : 
                                                           "changes will be activated when you respawn");
@@ -706,8 +721,6 @@ bool hasRelatedHelpItem(U8 x)
 }
 
 
-static U32 prevTimeDelta = 0;
-
 void ClientGame::idle(U32 timeDelta)
 {
    // No idle during pre-game level loading
@@ -730,28 +743,15 @@ void ClientGame::idle(U32 timeDelta)
 
       Move *theMove = getUIManager()->getCurrentMove();       // Get move from keyboard input
 
-      theMove->time = timeDelta + prevTimeDelta;
+      theMove->time = timeDelta;
 
       if(!mGameSuspended)
       {
          BfObject *localPlayerShip = getLocalPlayerShip();
 
-         // Don't saturate server with moves...
-         if(theMove->time < 6)     // Why 6?  Can this be related to some other factor?
-            prevTimeDelta += timeDelta;
-         else
-         {
-            // Limited MaxPendingMoves only allows sending a few moves at a time. 
-            // Changing MaxPendingMoves may break compatibility with old version server/client.
-            // If running at 1000 FPS and 300 ping it will try to add more then MaxPendingMoves, losing control horribly.
-            // Without the unlimited shield fix, the ship would also go super slow motion with over the limit MaxPendingMoves.
-            // With 100 FPS limit, time is never less then 10 milliseconds. (1000 / millisecs = FPS), may be changed in .INI [Settings] MinClientDelay
-            mConnectionToServer->addPendingMove(theMove);
-            prevTimeDelta = 0;
-         }
-
-         theMove->time = timeDelta;
          theMove->prepare();           // Pack and unpack the move for consistent rounding errors
+         mConnectionToServer->addPendingMove(theMove);
+         theMove->time = timeDelta;
 
          const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
 

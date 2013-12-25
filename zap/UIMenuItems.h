@@ -136,8 +136,8 @@ public:
    // Top level Lua methods
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(MenuItem);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -221,8 +221,8 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ToggleMenuItem);
    explicit ToggleMenuItem(lua_State *L);      // Constructor called from Lua
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -251,8 +251,8 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(YesNoMenuItem);
    explicit YesNoMenuItem(lua_State *L);      // Constructor called from Lua
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
 };
@@ -279,6 +279,8 @@ protected:
    virtual void increment(S32 fact = 1); 
    virtual void decrement(S32 fact = 1);
    virtual S32 getBigIncrement();    // How much our counter is incremented when shift is down (multiplier)
+   virtual void backspace();
+   virtual void enterDigit(S32 digit);
 
 public:
    CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, 
@@ -308,8 +310,8 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(CounterMenuItem);
    explicit CounterMenuItem(lua_State *L);      // Constructor called from Lua
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -320,16 +322,22 @@ public:
 class TimeCounterMenuItem : public CounterMenuItem
 {
 private:
+   typedef CounterMenuItem Parent;
+
    string getOptionText();
+   bool mEditingSeconds;
 
 protected:
    virtual S32 getBigIncrement();
+   virtual void backspace();
+   virtual void enterDigit(S32 digit);
 
 public:
    TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
                        S32 step = 5, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    virtual ~TimeCounterMenuItem();
 
+   virtual bool handleKey(InputCode inputCode);
    virtual string getUnits() const;
 
    virtual MenuItemTypes getItemType();
@@ -412,8 +420,8 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(TextEntryMenuItem);
    explicit TextEntryMenuItem(lua_State *L);      // Constructor called from Lua
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 

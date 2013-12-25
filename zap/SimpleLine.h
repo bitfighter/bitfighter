@@ -31,8 +31,8 @@ public:
    virtual const char *getOnDockName() = 0;
 
    void renderDock();                       
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);     
-   virtual void renderEditorItem() = 0;      // Helper for renderEditor
+   // Child classes will call this
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
    virtual void newObjectFromDock(F32 gridSize);
    virtual Point getInitialPlacementOffset(F32 gridSize);

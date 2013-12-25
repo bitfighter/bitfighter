@@ -31,7 +31,12 @@ private:
 
    UI::SymbolStringSetCollection mSymbolSets1Left,     mSymbolSets1Right;     // For page 1
    UI::SymbolStringSetCollection mSymbolSets2Left,     mSymbolSets2Right;     // For page 2
-   UI::SymbolStringSet           mConsoleInstructions, mPluginInstructions;
+   UI::SymbolStringSet           mConsoleInstructions;
+   Vector<UI::SymbolStringSet>   mPluginInstructions;   // One set per page
+
+   S32 mPluginPageCount;
+
+   Vector<string> mPageHeaders;
 
    void onPageChanged();
 

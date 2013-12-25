@@ -3381,8 +3381,9 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
    S32 fy1 = -1 - yDist;
    S32 fy2 =  1 - yDist;
 
-   for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2; xPage++)
-      for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2; yPage++)
+   // The (F32(xPage + 1.f) == xPage) part becomes true, which could cause endless loop problem freezing game when way too far off the center.
+   for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2 && !(F32(xPage + 1.f) == xPage); xPage++)
+      for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2 && !(F32(yPage + 1.f) == yPage); yPage++)
       {
          glPushMatrix();
          glScale(starChunkSize);   // Creates points with coords btwn 0 and starChunkSize

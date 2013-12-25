@@ -410,6 +410,10 @@ void UserInterface::renderDiagnosticKeysOverlay()
    }
 }   
 
+void UserInterface::onColorPicked(const Color &color)
+{
+   // Do nothing, expect this function should be overridden by other classes that use UIColorPicker
+}
 
 ////////////////////////////////////////
 ////////////////////////////////////////

@@ -220,7 +220,7 @@ public:
 
    void onGhostRemove();
 
-   bool hasModule(ShipModule mod);
+   bool hasModule(ShipModule mod) const;
 
    bool isDestroyed();
    bool isVisible(bool viewerHasSensor);

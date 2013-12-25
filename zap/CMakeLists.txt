@@ -120,6 +120,7 @@ set(CLIENT_SOURCES
 	AToBScroller.cpp
 	ChatCommands.cpp
 	ChatHelper.cpp
+	ConnectionStatsRenderer.cpp
 	ClientGame.cpp
 	Cursor.cpp
 	EditorAttributeMenuItemBuilder.cpp
@@ -157,6 +158,7 @@ set(CLIENT_SOURCES
 	UI.cpp
 	UIAbstractInstructions.cpp
 	UIChat.cpp
+	UIColorPicker.cpp
 	UICredits.cpp
 	UIDiagnostics.cpp
 	UIEditor.cpp

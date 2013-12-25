@@ -8,6 +8,7 @@
 #include "game.h"
 #include "ship.h"
 #include "stringUtils.h"
+#include "ClientGame.h"
 
 #include "gameObjectRender.h"    // For renderTextItem()
 
@@ -105,15 +106,20 @@ void TextItem::render()
          return;
    }
 
-   renderEditorItem();
+   // We're connected to a server but ship is NULL, don't render (like in /idle)
+   if(!ship && static_cast<ClientGame*>(getGame())->isConnectedToServer())
+      return;
+
+   renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());
 #endif
 }
 
 
 // Called by SimpleItem::renderEditor()
-void TextItem::renderEditorItem()
+void TextItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
-   renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());
+   Parent::renderEditor(currentScale, snappingToWallCornersEnabled);
+   render();
 }
 
 

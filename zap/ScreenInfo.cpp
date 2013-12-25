@@ -179,8 +179,8 @@ Point ScreenInfo::convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode)
 //         mGameCanvasWidth, mGameCanvasHeight
 //         );
 
-   return Point((x - getHorizPhysicalMargin(mode)) * getGameCanvasWidth()  / (getWindowWidth()  - 2 * getHorizPhysicalMargin(mode)),
-                (y - getVertPhysicalMargin(mode))  * getGameCanvasHeight() / (getWindowHeight() - 2 * getVertPhysicalMargin(mode)));
+   return Point((x - getHorizPhysicalMargin(mode)) * getGameCanvasWidth()  / F32(getWindowWidth()  - 2 * getHorizPhysicalMargin(mode)),
+                (y - getVertPhysicalMargin(mode))  * getGameCanvasHeight() / F32(getWindowHeight() - 2 * getVertPhysicalMargin(mode)));
 }
 
 

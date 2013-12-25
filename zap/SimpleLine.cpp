@@ -73,7 +73,6 @@ void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnable
 {
 #ifndef ZAP_DEDICATED
    renderHeavysetArrow(getVert(0), getVert(1), getEditorRenderColor(), isSelected(), isLitUp());
-   renderEditorItem();
 #endif
 }
 

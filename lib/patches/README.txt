@@ -2,8 +2,8 @@ This folder contains patches applied against the libraries
 
 Current patches:
 
-sdl2_enable_default_shortcuts.diff:
- - Enable default window shortcuts like Command + Q, H, M
+SDL2-OSX_restore_10.4_compatibility.diff:
+ - Bring OSX 10.4 compatibility to revision 70b305e09b4e (between SDL 2.0.0 and 2.0.1)
 
-sdl2_fix_right_mouse.diff
- - Reversion of hg rev b91e7565e877 so right mouse button works again
+SDL2-Xcode_three_arch_universal_binary.diff
+ - Modification of upstream Xcode project to create a Release framework with x86, ppc, x86_64 architectures
