@@ -563,7 +563,7 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, const string e
          }
       }
       else
-         if (name.length() > 2)  // quick hack to not include . and ..
+         if(name != "." && name != "..")  // Don't include . and ..
             files.push_back(name);
    }
 
