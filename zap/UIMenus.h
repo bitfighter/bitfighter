@@ -413,8 +413,9 @@ class LevelMenuSelectUserInterface : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;
 
-private:
+protected:
    Vector<string> mLevels;
+private:
    Timer mStillTypingNameTimer;
    string mNameSoFar;
 

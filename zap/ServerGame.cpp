@@ -108,8 +108,6 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    GameManager::setHostingModePhase(GameManager::NotHosting);
 
    mGameRecorderServer = NULL;
-   if(!dedicated)  // TODO:  Make this enable or disable through bitfighter.ini setting.
-      mGameRecorderServer = new GameRecorderServer(this);
 }
 
 
@@ -502,6 +500,12 @@ static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo>
  */
 void ServerGame::cycleLevel(S32 nextLevel)
 {
+   if(mGameRecorderServer)
+   {
+      delete mGameRecorderServer;
+      mGameRecorderServer = NULL;
+   }
+
    cleanUp();
    mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
@@ -560,6 +564,9 @@ void ServerGame::cycleLevel(S32 nextLevel)
    }
 
    computeWorldObjectExtents();                       // Compute world Extents nice and early
+
+   if(!mGameRecorderServer && !mShuttingDown && getSettings()->getIniSettings()->enableGameRecording)
+      mGameRecorderServer = new GameRecorderServer(this);
 
 
    ////// This block could easily be moved off somewhere else   
@@ -1074,7 +1081,7 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 
-   if(getPlayerCount() == 0)
+   if(getPlayerCount() == 0 && !mShuttingDown && isDedicated())  // only dedicated server can have zero players
       cycleLevel(getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL);    // Advance to beginning of next level
    else
       mRobotManager.balanceTeams();
@@ -1764,6 +1771,18 @@ void ServerGame::onObjectAdded(BfObject *obj)
    if(mGameRecorderServer && obj->isGhostable())
       mGameRecorderServer->objectLocalScopeAlways(obj);
 }
+
+
+void ServerGame::onObjectRemoved(BfObject *obj)
+{
+   if(mGameRecorderServer && obj->isGhostable())
+      mGameRecorderServer->objectLocalClearAlways(obj);   
+}
+GameConnection *ServerGame::getGameRecorder()
+{
+   return mGameRecorderServer;
+}
+
 
 };
 

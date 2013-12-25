@@ -929,8 +929,7 @@ static void quitSelectedCallback(ClientGame *game, U32 unused)
 }
 static void playGameRecordingCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activateGameUserInterface();
-   game->setConnectionToServer(new GameRecorderPlayback(game));
+   game->getUIManager()->activate<PlaybackSelectUserInterface>();
 }
 
 //////////
@@ -956,7 +955,7 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
    addMenuItem(new MenuItem("LEVEL EDITOR",           editorSelectedCallback,     "", KEY_L, KEY_E));
    addMenuItem(new MenuItem("CREDITS",                creditsSelectedCallback,    "", KEY_C));
    addMenuItem(new MenuItem("QUIT",                   quitSelectedCallback,       "", KEY_Q));
-   addMenuItem(new MenuItem("game recording test",    playGameRecordingCallback,  "", KEY_Q));
+   addMenuItem(new MenuItem("Play Recorded Games",    playGameRecordingCallback,  "", KEY_Q));
 }
 
 
@@ -1869,6 +1868,8 @@ void HostMenuUserInterface::setupMenus()
                                      MAX_PASSWORD_LENGTH, KEY_C));
 
    addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
+
+   addMenuItem(new YesNoMenuItem("RECORD GAMES:", settings->getIniSettings()->enableGameRecording, "", KEY_M));
 }
 
 
@@ -1894,6 +1895,7 @@ void HostMenuUserInterface::saveSettings()
    settings->setServerPassword(getMenuItem(OPT_PASS)->getValue(), true);
 
    settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getIntValue() != 0);
+   settings->getIniSettings()->enableGameRecording = (getMenuItem(OPT_GETMAP + 1)->getIntValue() != 0);
    //settings->getIniSettings()->maxplayers = getMenuItem(OPT_MAX_PLAYERS)->getIntValue();
 
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());

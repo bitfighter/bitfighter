@@ -6,6 +6,10 @@
 #include "tnlNetObject.h"
 #include "gameConnection.h"
 
+#ifndef ZAP_DEDICATED
+#include "UIMenus.h"
+#endif
+
 namespace Zap {
 
 class ServerGame;
@@ -33,7 +37,7 @@ class GameRecorderPlayback : public GameConnection
    S32 mMilliSeconds;
    U32 mSizeToRead;
 public:
-   GameRecorderPlayback(ClientGame *game);
+   GameRecorderPlayback(ClientGame *game, const char *filename);
    ~GameRecorderPlayback();
 
    bool lostContact();
@@ -41,6 +45,15 @@ public:
 
    void updateTimers(TNL::U32 MilliSeconds);
 };
+
+class PlaybackSelectUserInterface : public LevelMenuSelectUserInterface
+{
+public:
+   explicit PlaybackSelectUserInterface(ClientGame *game);
+   void onActivate();
+   void processSelection(U32 index);
+};
+
 #endif
 
 }

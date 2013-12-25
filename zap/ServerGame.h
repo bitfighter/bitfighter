@@ -247,6 +247,8 @@ public:
 
    void setGameType(GameType *theGameType);
    void onObjectAdded(BfObject *obj);
+   void onObjectRemoved(BfObject *obj);
+   GameConnection *getGameRecorder();
 
    friend class ObjectTest;
 };

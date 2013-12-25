@@ -3,9 +3,11 @@
 #include "tnlNetObject.h"
 #include "gameType.h"
 #include "ServerGame.h"
+#include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
+#include "UIManager.h"
 #endif
 
 #include "version.h"
@@ -17,7 +19,7 @@ static void gameRecorderScoping(GameRecorderServer *conn, ServerGame *game)
 {
    GameType *gt = game->getGameType();
    if(gt)
-      conn->objectInScope(gt);
+      conn->objectLocalScopeAlways(gt);
 
 
    const Vector<DatabaseObject *> &gameObjects = *(game->getGameObjDatabase()->findObjects_fast());
@@ -29,6 +31,27 @@ static void gameRecorderScoping(GameRecorderServer *conn, ServerGame *game)
    }
 }
 
+static FILE *openRecordingFile(ServerGame *game)
+{
+   const string &dir = game->getSettings()->getFolderManager()->recordDir;
+
+   makeSureFolderExists(dir);
+
+   Vector<string> files;
+   getFilesFromFolder(dir, files);
+
+   S32 max_id = 0;
+   for(S32 i = 0; i < files.size(); i++)
+   {
+      S32 id = stoi(files[i]);
+      if(max_id < id)
+         max_id = id;
+   }
+
+   string file = joindir(dir, itos(max_id + 1));
+   return fopen(file.c_str(), "wb");
+}
+
 GameRecorderServer::GameRecorderServer(ServerGame *game)
 {
    mFile = NULL;
@@ -37,7 +60,7 @@ GameRecorderServer::GameRecorderServer(ServerGame *game)
    mWriteMaxBitSize = U32_MAX;
 
    if(!mFile)
-      mFile = fopen("record.bin", "wb");
+      mFile = openRecordingFile(game);
 
    if(mFile)
    {
@@ -59,8 +82,8 @@ GameRecorderServer::GameRecorderServer(ServerGame *game)
       data[2] = U8(mEventClassCount);
       data[3] = U8(mEventClassCount >> 8);
       fwrite(data, 1, 4, mFile);
+      gameRecorderScoping(this, game);
    }
-   gameRecorderScoping(this, game);
 }
 GameRecorderServer::~GameRecorderServer()
 {
@@ -107,14 +130,14 @@ void GameRecorderServer::idle(U32 MilliSeconds)
 #ifndef ZAP_DEDICATED
 
 
-GameRecorderPlayback::GameRecorderPlayback(ClientGame *game) : GameConnection(game)
+GameRecorderPlayback::GameRecorderPlayback(ClientGame *game, const char *filename) : GameConnection(game)
 {
    mFile = NULL;
    mMilliSeconds = 0;
    mSizeToRead = 0;
 
    if(!mFile)
-      mFile = fopen("record.bin", "rb");
+      mFile = fopen(filename, "rb");
 
    if(mFile)
    {
@@ -205,6 +228,48 @@ void GameRecorderPlayback::updateTimers(U32 MilliSeconds)
          setControlObject(dynamic_cast<BfObject*>(fillVector[0]));
    }
 }
+
+static void processPlaybackSelectionCallback(ClientGame *game, U32 index)             
+{
+   game->getUIManager()->getUI<PlaybackSelectUserInterface>()->processSelection(index);
+
+}
+
+
+
+PlaybackSelectUserInterface::PlaybackSelectUserInterface(ClientGame *game) : LevelMenuSelectUserInterface(game)
+{
+}
+
+void PlaybackSelectUserInterface::onActivate()
+{
+//mLevels
+   mMenuTitle = "Choose Recorded Game";
+
+   const string &dir = getGame()->getSettings()->getFolderManager()->recordDir;
+
+   clearMenuItems();
+   mLevels.clear();
+   getFilesFromFolder(dir, mLevels);
+   for(S32 i = 0; i < mLevels.size(); i++)
+   {
+      addMenuItem(new MenuItem(i, mLevels[i].c_str(), processPlaybackSelectionCallback, ""));
+   }
+
+   if(mLevels.size() == 0)
+      mMenuTitle = "No recorded games exists";  // TODO: Need better way to display this problem
+
+   MenuUserInterface::onActivate();
+}
+
+
+void PlaybackSelectUserInterface::processSelection(U32 index)
+{
+   string file = joindir(getGame()->getSettings()->getFolderManager()->recordDir, mLevels[index]);
+   getGame()->getUIManager()->activateGameUserInterface();
+   getGame()->setConnectionToServer(new GameRecorderPlayback(getGame(), file.c_str()));
+}
+
 
 
 #endif
