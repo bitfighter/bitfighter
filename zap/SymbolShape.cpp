@@ -552,7 +552,6 @@ SymbolShapePtr SymbolString::getControlSymbol(InputCode inputCode, const Color *
    return getSymbol(inputCode, color);
 }
 
-
 // Static method
 SymbolShapePtr SymbolString::getSymbolGear(S32 fontSize)
 {
@@ -661,38 +660,38 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
    else if(symbolName == "CHANGEWEP")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP2)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP3)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_SELWEAP1)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_SELWEAP2)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_SELWEAP3)));
    }
 
    else if(symbolName == "MOVEMENT")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_UP)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_DOWN)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_LEFT)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_RIGHT)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_UP)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_DOWN)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_LEFT)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_RIGHT)));
    }
 
    else if(symbolName == "MOVEMENT_LDR")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_LEFT)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_DOWN)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_RIGHT)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_LEFT)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_DOWN)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_RIGHT)));
    }
 
    else if(symbolName == "MODULE_CTRL1")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_MOD1)));
    }
 
    else if(symbolName == "MODULE_CTRL2")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_MOD2)));
    }
 
    else if(symbolName == "BULLET")                    // Square bullet point 

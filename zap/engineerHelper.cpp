@@ -136,8 +136,8 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 
       Ship *ship = getGame()->getLocalPlayerShip();
 
-      if(!ship || (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1) && ship->getModule(0) == ModuleEngineer) ||
-                  (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2) && ship->getModule(1) == ModuleEngineer))
+      if(!ship || (inputCode == inputCodeManager->getBinding(BINDING_MOD1) && ship->getModule(0) == ModuleEngineer) ||
+                  (inputCode == inputCodeManager->getBinding(BINDING_MOD2) && ship->getModule(1) == ModuleEngineer))
       {
          exitHelper();
          return true;
@@ -147,8 +147,8 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
    {
       Ship *ship = getGame()->getLocalPlayerShip();
 
-      if(ship && ((inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1) && ship->getModule(0) == ModuleEngineer) ||
-                  (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2) && ship->getModule(1) == ModuleEngineer)))
+      if(ship && ((inputCode == inputCodeManager->getBinding(BINDING_MOD1) && ship->getModule(0) == ModuleEngineer) ||
+                  (inputCode == inputCodeManager->getBinding(BINDING_MOD2) && ship->getModule(1) == ModuleEngineer)))
       {
          EngineerModuleDeployer deployer;
 

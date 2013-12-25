@@ -7,6 +7,7 @@
 
 #include "GameSettings.h"
 #include "IniFile.h"
+#include "InputCode.h"
 #include "version.h"
 #include "BanList.h"
 #include "Colors.h"
@@ -700,11 +701,20 @@ static InputCode getInputCode(CIniFile *ini, const string &section, const string
    return InputCodeManager::stringToInputCode(ini->GetValue(section, key, code).c_str());
 }
 
-
+void setDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
+{
+#define EDITOR_BINDING(editorEnumVal, b, c, defaultEditorKeyboardBinding)  \
+      if(true)                                                                                                                                                        \
+         inputCodeManager->setEditorBinding(InputCodeManager::editorEnumVal, InputModeKeyboard,                                                                       \
+            getInputString(ini, "EditorKeyboardKeyBindings", InputCodeManager::getEditorBindingName(InputCodeManager::editorEnumVal), defaultEditorKeyboardBinding)); \
+    EDITOR_BINDING_TABLE
+#undef EDITOR_BINDING
+}
 
 // Remember: If you change any of these defaults, you'll need to rebuild your INI file to see the results!
 static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {                                
+   ///// BINDING_TABLE
    ///// KEYBOARD
 
    // Generates a block of code that looks like this:
@@ -715,8 +725,8 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
 
 #define BINDING(enumVal, b, savedInIni, d, defaultKeyboardBinding, f)                                             \
       if(savedInIni)                                                                                              \
-         inputCodeManager->setBinding(InputCodeManager::enumVal, InputModeKeyboard,                               \
-            getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(InputCodeManager::enumVal), \
+         inputCodeManager->setBinding(enumVal, InputModeKeyboard,                            						   \
+            getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(enumVal), 						\
                          defaultKeyboardBinding));
     BINDING_TABLE
 #undef BINDING
@@ -727,12 +737,11 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
    // Basically the same, except that we use the default joystick binding column... generated code will look pretty much the same
 #define BINDING(enumVal, b, savedInIni, d, e, defaultJoystickBinding)                                             \
       if(savedInIni)                                                                                              \
-         inputCodeManager->setBinding(InputCodeManager::enumVal, InputModeJoystick,                               \
-            getInputCode(ini, "JoystickKeyBindings", InputCodeManager::getBindingName(InputCodeManager::enumVal), \
+         inputCodeManager->setBinding(enumVal, InputModeJoystick,                               						\
+            getInputCode(ini, "JoystickKeyBindings", InputCodeManager::getBindingName(enumVal), 						\
                          defaultJoystickBinding));
     BINDING_TABLE
 #undef BINDING
-
 
    // Keys where savedInIni is false are not user-defineable at the moment, mostly because we want consistency
    // throughout the game, and that would require some real constraints on what keys users could choose.
@@ -741,7 +750,6 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
    // keyFPS = KEY_F6;
    // keyDIAG = KEY_F7;
 }
-
 
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section, InputMode mode)
 {
@@ -752,16 +760,30 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
 
 #define BINDING(enumVal, b, savedInIni, d, e, f)  \
       if(savedInIni)                                                                                                                \
-         ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::enumVal),                                        \
-                                InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::enumVal, mode))); 
+         ini->SetValue(section, InputCodeManager::getBindingName(enumVal),                                           						\
+                                InputCodeManager::inputCodeToString(inputCodeManager->getBinding(enumVal, mode)));
     BINDING_TABLE
 #undef BINDING
 }
 
+static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section, InputMode mode)
+{
+   // Top line evaluates to:
+   // if(true)
+   //    ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::FlipItemHorizontalFlipItemHorizontal),
+   //                           InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::FlipItemHorizontal, mode)));
+#define EDITOR_BINDING(editorEnumVal, b, c, d)  \
+      if(true)                                                                                                \
+         ini->SetValue(section, InputCodeManager::getEditorBindingName(editorEnumVal),     						  \
+         							  inputCodeManager->getEditorBinding(editorEnumVal));
+    EDITOR_BINDING_TABLE
+#undef EDITOR_BINDING
+}
 
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
    writeKeyBindings(ini, inputCodeManager, "KeyboardKeyBindings", InputModeKeyboard);
+   writeEditorKeyBindings(ini, inputCodeManager,     "EditorKeyboardKeyBindings",       InputModeKeyboard);
    writeKeyBindings(ini, inputCodeManager, "JoystickKeyBindings", InputModeJoystick);
 }
 
@@ -1403,6 +1425,8 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadTestSettings(ini, iniSettings);
 
    setDefaultKeyBindings(ini, inputCodeManager);
+   setDefaultEditorKeyBindings(ini, inputCodeManager);
+
    loadForeignServerInfo(ini, iniSettings);     // Info about other servers
    loadLevels(ini, iniSettings);                // Read levels, if there are any
    loadLevelSkipList(ini, settings);            // Read level skipList, if there are any
@@ -2258,5 +2282,3 @@ void CmdLineSettings::init()
 
 
 };
-
-

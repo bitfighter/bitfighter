@@ -28,10 +28,10 @@ struct KeyDefMenuItem
 {
    const char *text;
    U32 column;
-   InputCodeManager::BindingNameEnum primaryControl;
+   BindingNameEnum primaryControl;
    string helpString;
 
-   KeyDefMenuItem(const char *text, U32 col, InputCodeManager::BindingNameEnum PC, string helpStr);     // Constructor
+   KeyDefMenuItem(const char *text, U32 col, BindingNameEnum PC, string helpStr);     // Constructor
    virtual ~KeyDefMenuItem();
 };
 

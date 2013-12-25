@@ -88,13 +88,13 @@ void DiagnosticUserInterface::quit()
 
 bool DiagnosticUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(checkInputCode(InputCodeManager::BINDING_DIAG, inputCode))
+   if(checkInputCode(BINDING_DIAG, inputCode))
    {
       mCurPage++;
       if(mCurPage >= NUM_PAGES)
          quit();
    }
-   else if(checkInputCode(InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
+   else if(checkInputCode(BINDING_OUTGAMECHAT, inputCode))
    {
       // Do nothing -- no global chat from diagnostics screen... it's perverse!
    }
@@ -314,7 +314,7 @@ void DiagnosticUserInterface::render()
    drawStringf(  3, 3, 25, "DIAGNOSTICS - %s", pageHeaders[mCurPage]);
    drawStringf(625, 3, 25, "PAGE %d/%d",       mCurPage + 1, NUM_PAGES);
  
-   drawCenteredStringf(571, 20, "%s - next page  ESC exits", getInputCodeString(getGame()->getSettings(), InputCodeManager::BINDING_DIAG));
+   drawCenteredStringf(571, 20, "%s - next page  ESC exits", getInputCodeString(getGame()->getSettings(), BINDING_DIAG));
 
    glColor(0.7f);
    drawHorizLine(0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), 31);

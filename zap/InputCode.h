@@ -21,31 +21,13 @@ using namespace std;
 namespace Zap
 {
 
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-struct BindingSet;
-
-class InputCodeManager 
-{
-private:
-   bool mBindingsHaveKeypadEntry;
-   InputMode mInputMode;             // Joystick or Keyboard
-
-   BindingSet *mCurrentBindingSet;     
-   Vector<BindingSet> mBindingSets;
-
-public:
-   enum JoystickJoysticks {
-      JOYSTICK_DPAD,
-      JOYSTICK_STICK_1,
-      JOYSTICK_STICK_2
-   };
 
 // Note that the BindingSet member name referenced below doesn't actually appear anywhere else... it could be any aribtrary and unique token
 
+/*-----------------------------------------------------BINDING_TABLE---------------------------------------------------------*/
 /*                                                            Saved    BindingSet        Def. kb           Def. js           */
 /*            Enum                      Name in INI           in INI   member name       binding           binding           */
 #define BINDING_TABLE \
@@ -83,11 +65,52 @@ public:
    BINDING( BINDING_SAVE_PRESET_1,      "SaveLoadoutPreset1",  false, keySavePreset1,    KEY_CTRL_1,       KEY_CTRL_1       ) \
    BINDING( BINDING_SAVE_PRESET_2,      "SaveLoadoutPreset2",  false, keySavePreset2,    KEY_CTRL_2,       KEY_CTRL_2       ) \
    BINDING( BINDING_SAVE_PRESET_3,      "SaveLoadoutPreset3",  false, keySavePreset3,    KEY_CTRL_3,       KEY_CTRL_3       ) \
-                                                                                                                              \
-   /* Editor specific */                                                                                                      \
-                                                                                                                              \
-   BINDING( BINDING_TEAM_EDITOR,        "TeamEditor",          false, keyTeamEditor,      KEY_F2,           KEY_F2          ) \
-   BINDING( BINDING_GAME_PARAMS_EDITOR, "GameParameterEditor", false, keyGameParamEditor, KEY_F3,           KEY_F3          ) \
+/*---------------------------------------------------------------------------------------------------------------------------*/
+
+
+/*----------------------------------------EDITOR_BINDING_TABLE-------------------------------------------*/
+/*                                                                  BindingSet           Def. kb         */
+/*             Enum                            Name in INI          member name          binding         */
+#define EDITOR_BINDING_TABLE \
+   EDITOR_BINDING( BINDING_FLIP_HORIZ,        "FlipItemHorizontal", keyFlipItemHoriz,   "H"             ) \
+   EDITOR_BINDING( BINDING_PASTE_SELECTION,   "PasteSelection",     keyPasteSelection,  "Ctrl+V"        ) \
+   EDITOR_BINDING( BINDING_FLIP_VERTICAL,     "FlipItemVertical",   keyFlipItemVertl,   "V"             ) \
+   EDITOR_BINDING( BINDING_RELOAD_LEVEL,      "ReloadLevel",        keyReloadLevel,     "Ctrl+Shift+L"  ) \
+   EDITOR_BINDING( BINDING_REDO_ACTION,       "RedoAction",         keyRedoAction,      "Ctrl+Shift+Z"  ) \
+   EDITOR_BINDING( BINDING_UNDO_ACTION,       "UndoAction",         keyUndoAction,      "Ctrl+Z"        ) \
+   EDITOR_BINDING( BINDING_RESET_VIEW,        "ResetView",          keyResetView,       "Z"             ) \
+   EDITOR_BINDING( BINDING_LVLGEN_SCRIPT,     "RunLevelgenScript",  keyRunLvlgenScript, "Ctrl+K"        ) \
+   EDITOR_BINDING( BINDING_ROTATE_CENTROID,   "RotateCentroid",     keyRotateCentroid,  "Alt+R"         ) \
+   EDITOR_BINDING( BINDING_ROTATE_ORIGIN,     "RotateOrigin",       keyRotateOrigin,    "Ctrl+Alt+R"    ) \
+   EDITOR_BINDING( BINDING_SPIN_CCW,          "RotateSpinCCW",      keyRotateSpinCCW,   "R"             ) \
+   EDITOR_BINDING( BINDING_SPIN_CW,           "RotateSpinCW",       keyRotateSpinCW,    "Shift+R"       ) \
+   EDITOR_BINDING( BINDING_ROTATE_CCW_ORIGIN, "RotateCCWOrigin",    keyRotateCCWOrigin, "Ctrl+R"        ) \
+   EDITOR_BINDING( BINDING_ROTATE_CW_ORIGIN,  "RotateCWOrigin",     keyRotateCWOrigin,  "Ctrl+Shift+R"  ) \
+   EDITOR_BINDING( BINDING_INSERT_GEN_ITEMS,  "InsertGenItems",     keyInsertGenItems,  "Ctrl+I"        ) \
+   EDITOR_BINDING( BINDING_SAVE_LEVEL,        "SaveLevel",          keySaveLevel,       "Ctrl+S"        ) \
+   EDITOR_BINDING( BINDING_ZOOM_IN,           "ZoomIn",             keyZoomIn,          "E"             ) \
+   EDITOR_BINDING( BINDING_ZOOM_OUT,          "ZoomOut",            keyZoomOut,         "C"             ) \
+   EDITOR_BINDING( BINDING_JOIN_SELECTION,    "JoinSelection",      keyJoinSelection,   "J"             ) \
+   EDITOR_BINDING( BINDING_SELECT_EVERYTHING, "SelectEverything",   keySelectAll,       "Ctrl+A"        ) \
+   EDITOR_BINDING( BINDING_RESIZE_SELECTION,  "ResizeSelection",    keyResizeSelection, "Ctrl+Shift+X"  ) \
+   EDITOR_BINDING( BINDING_CUT_SELECTION,     "CutSelection",       keyCutSelection,    "Ctrl+X"        ) \
+   EDITOR_BINDING( BINDING_COPY_SELECTION,    "CopySelection",      keyCopySelection,   "Ctrl+C"        ) \
+   EDITOR_BINDING( BINDING_LEVEL_PARAM_EDITOR,"GameParameterEditor",keyGameParamEditor, "F3"            ) \
+   EDITOR_BINDING( BINDING_TEAM_EDITOR,       "TeamEditor",         keyTeamEditor,      "F2"            ) \
+   EDITOR_BINDING( BINDING_PLACE_TELEPORTER,  "PlaceNewTeleporter", keyPlaceTeleporter, "T"             ) \
+   EDITOR_BINDING( BINDING_PLACE_SPEEDZONE,   "PlaceNewSpeedZone",  keyPlaceSpeedZone,  "P"             ) \
+   EDITOR_BINDING( BINDING_PLACE_SPAWN,       "PlaceNewSpawn",      keyPlaceSpawn,      "G"             ) \
+   EDITOR_BINDING( BINDING_PLACE_SPYBUG,      "PlaceNewSpybug",     keyPlaceSpybug,     "Ctrl+Shift+B"  ) \
+   EDITOR_BINDING( BINDING_PLACE_REPAIR,      "PlaceNewRepair",     keyPlaceRepair,     "B"             ) \
+   EDITOR_BINDING( BINDING_PLACE_TURRET,      "PlaceNewTurret",     keyPlaceTurret,     "Y"             ) \
+   EDITOR_BINDING( BINDING_PLACE_MINE,        "PlaceNewMine",       keyPlaceMine,       "M"             ) \
+   EDITOR_BINDING( BINDING_PLACE_FORCEFIELD,  "PlaceNewForcefield", keyPlaceForcefield, "F"             ) \
+   EDITOR_BINDING( BINDING_NO_SNAPPING,       "NoSnapping",         keyNoSnapping,      "Shift+Space"   ) \
+   EDITOR_BINDING( BINDING_NO_GRID_SNAPPING,  "NoGridSnapping",     keyNoGridSnapping,  "Space"         ) \
+   EDITOR_BINDING( BINDING_PREVIEW_MODE,      "PreviewMode",        keyPreviewMode,     "Tab"           ) \
+   EDITOR_BINDING( BINDING_DOCKMODE_ITEMS,    "DockmodeItems",      keyDockmodeItems,   "F9"            ) \
+/*-------------------------------------------------------------------------------------------------------*/
+
 
 enum BindingNameEnum {
 #define BINDING(enumName, b, c, d, e, f) enumName,
@@ -95,6 +118,62 @@ enum BindingNameEnum {
 #undef BINDING
     BINDING_DEFINEABLE_KEY_COUNT
 };
+
+
+enum EditorBindingNameEnum {
+#define EDITOR_BINDING(editorEnumName, b, c, d) editorEnumName,
+    EDITOR_BINDING_TABLE
+#undef EDITOR_BINDING
+    EDITOR_BINDING_DEFINEABLE_KEY_COUNT
+};
+
+
+struct BindingSet
+{
+   BindingSet();     // Constructor
+   virtual ~BindingSet();
+
+   bool hasKeypad();
+
+   InputCode getBinding(BindingNameEnum bindingName) const;
+   void setBinding(BindingNameEnum bindingName, InputCode key);
+
+   // Create a sequence of member variables from memberName column of the BINDING_TABLE above
+#define BINDING(a, b, c, memberName, e, f) InputCode memberName;
+    BINDING_TABLE
+#undef BINDING
+};
+
+struct EditorBindingSet
+{
+   EditorBindingSet();     // Constructor
+   virtual ~EditorBindingSet();
+
+   string getEditorBinding(EditorBindingNameEnum bindingName) const;
+   void setEditorBinding(EditorBindingNameEnum bindingName, string key);
+
+#define EDITOR_BINDING(a, b, memberName, d) string memberName;
+   EDITOR_BINDING_TABLE
+#undef EDITOR_BINDING
+};
+
+class InputCodeManager
+{
+private:
+   bool mBindingsHaveKeypadEntry;
+   InputMode mInputMode;             // Joystick or Keyboard
+
+   BindingSet *mCurrentBindingSet;
+   Vector<BindingSet> mBindingSets;
+
+   EditorBindingSet mEditorBindingSet;
+
+public:
+   enum JoystickJoysticks {
+      JOYSTICK_DPAD,
+      JOYSTICK_STICK_1,
+      JOYSTICK_STICK_2
+   };
 
    InputCodeManager();     // Constructor
    virtual ~InputCodeManager();
@@ -112,8 +191,10 @@ enum BindingNameEnum {
 
    //static S32 getBindingCount();
    static string getBindingName(BindingNameEnum binding);
+   static string getEditorBindingName(EditorBindingNameEnum binding);
    
    InputCode getKeyBoundToBindingCodeName(const string &name) const;
+   string getEditorKeyBoundToBindingCodeName(const string &name) const;
 
    // Some converters
    InputCode filterInputCode(InputCode inputCode);    // Calls filters below
@@ -170,30 +251,16 @@ public:
    InputCode getBinding(BindingNameEnum bindingName, InputMode inputMode) const;
    void setBinding(BindingNameEnum bindingName, InputCode key);
    void setBinding(BindingNameEnum bindingName, InputMode inputMode, InputCode key);
+
+   string getEditorBinding(EditorBindingNameEnum bindingName) const;
+   void setEditorBinding(EditorBindingNameEnum bindingName, string key);
 };
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-struct BindingSet
-{
-   BindingSet();     // Constructor
-   virtual ~BindingSet();
-
-   bool hasKeypad();
-
-   InputCode getBinding(InputCodeManager::BindingNameEnum bindingName) const;
-   void setBinding(InputCodeManager::BindingNameEnum bindingName, InputCode key);
-
-   // Create a sequence of member variables from memberName column of the BINDING_TABLE above
-#define BINDING(a, b, c, memberName, e, f) InputCode memberName;
-    BINDING_TABLE
-#undef BINDING
-};
-
 
 
 };     // namespace Zap
 
 #endif
-

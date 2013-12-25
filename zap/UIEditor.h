@@ -38,6 +38,7 @@ class GameType;
 class LuaLevelGenerator;
 class PluginMenuUI;
 class SimpleTextEntryMenuUI;
+
 struct FolderManager;
 
 
@@ -154,6 +155,8 @@ private:
    bool mLastUndoStateWasBarrierWidthChange;
 
    string mEditFileName;            // Manipulate with get/setLevelFileName
+
+   
 
    TeamManager mTeamManager;
 

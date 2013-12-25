@@ -301,19 +301,25 @@ void UserInterface::onMouseMoved()
 void UserInterface::onMouseDragged()  { /* Do nothing */ }
 
 
-InputCode UserInterface::getInputCode(GameSettings *settings, InputCodeManager::BindingNameEnum binding)
+InputCode UserInterface::getInputCode(GameSettings *settings, BindingNameEnum binding)
 {
    return settings->getInputCodeManager()->getBinding(binding);
 }
 
 
-void UserInterface::setInputCode(GameSettings *settings, InputCodeManager::BindingNameEnum binding, InputCode inputCode)
+string UserInterface::getEditorBindingString(GameSettings *settings, EditorBindingNameEnum binding)
+{
+   return  settings->getInputCodeManager()->getEditorBinding(binding);
+}
+
+
+void UserInterface::setInputCode(GameSettings *settings, BindingNameEnum binding, InputCode inputCode)
 {
    settings->getInputCodeManager()->setBinding(binding, inputCode);
 }
 
 
-bool UserInterface::checkInputCode(InputCodeManager::BindingNameEnum binding, InputCode inputCode)
+bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode)
 {
    GameSettings *settings = getGame()->getSettings();
 
@@ -330,7 +336,7 @@ bool UserInterface::checkInputCode(InputCodeManager::BindingNameEnum binding, In
 }
 
 
-const char *UserInterface::getInputCodeString(GameSettings *settings, InputCodeManager::BindingNameEnum binding)
+const char *UserInterface::getInputCodeString(GameSettings *settings, BindingNameEnum binding)
 {
    return InputCodeManager::inputCodeToString(getInputCode(settings, binding));
 }
@@ -348,7 +354,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
 
    UIManager *uiManager = getGame()->getUIManager();
 
-   if(checkInputCode(InputCodeManager::BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
+   if(checkInputCode(BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
    { 
       if(uiManager->isCurrentUI<DiagnosticUserInterface>())
          return false;
@@ -359,7 +365,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
       
       handled = true;
    }
-   else if(checkInputCode(InputCodeManager::BINDING_OUTGAMECHAT, inputCode))  // Turn on Global Chat overlay
+   else if(checkInputCode(BINDING_OUTGAMECHAT, inputCode))  // Turn on Global Chat overlay
    {
       // Don't activate if we're already in chat or if we're on the Name Entry
       // screen (since we don't have a nick yet)

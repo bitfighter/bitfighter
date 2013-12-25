@@ -974,7 +974,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
    mJustMovedMouse = (inputCode == MOUSE_LEFT || inputCode == MOUSE_MIDDLE || inputCode == MOUSE_RIGHT);
    mDraggingDivider = false;
 
-   if(checkInputCode(InputCodeManager::BINDING_OUTGAMECHAT, inputCode))  
+   if(checkInputCode(BINDING_OUTGAMECHAT, inputCode))
    {
       // Toggle half-height servers, full-height servers, full chat overlay
 

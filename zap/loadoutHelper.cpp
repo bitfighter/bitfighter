@@ -191,7 +191,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 InputCode LoadoutHelper::getActivationKey() 
 { 
    GameSettings *settings = getGame()->getSettings();
-   return settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LOADOUT); 
+   return settings->getInputCodeManager()->getBinding(BINDING_LOADOUT);
 }
 
 

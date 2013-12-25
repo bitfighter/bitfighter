@@ -87,53 +87,53 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    { "HEADER", "Navigation" },
          { "Pan Map",                  "[[W]]/[[A]]/[[S]]/[[D]] or"},
          { " ",                         "Arrow Keys"},
-         { "Zoom In",                  "[[E]] or [[Ctrl+Up Arrow]]" },
-         { "Zoom Out",                 "[[C]] or [[Ctrl+Down Arrow]]" },
-         { "Center Display",           "[[Z]]" },
-         { "Toggle Script Results",    "[[Ctrl+K]]" },
-         { "Copy Results Into Editor", "[[Ctrl+I]]" },
-         { "Show/Hide Plugins Pane",   "[[F9]]"},
+         { "Zoom In",                  "[[keyZoomIn]] or [[Ctrl+Up Arrow]]" },
+         { "Zoom Out",                 "[[keyZoomOut]] or [[Ctrl+Down Arrow]]" },
+         { "Center Display",           "[[keyResetView]]" },
+         { "Toggle Script Results",    "[[keyRunLvlgenScript]]" },
+         { "Copy Results Into Editor", "[[keyInsertGenItems]]" },
+         { "Show/Hide Plugins Pane",   "[[keyDockmodeItems]]"},
       { "-", "" },         // Horiz. line
    { "HEADER", "Editing" },
-         { "Cut/Copy/Paste",           "[[Ctrl+X]]/[[C]]/[[V]]"},
+         { "Cut/Copy/Paste",           "[[keyCutSelection]]/[[C]]/[[V]]"},
          { "Delete Selection",         "[[Del]]" },
-         { "Undo",                     "[[Ctrl+Z]]" },
-         { "Redo",                     "[[Ctrl+Shift+Z]]" }
+         { "Undo",                     "[[keyRedoAction]]" },
+         { "Redo",                     "[[keyRedoAction]]" }
    };
 
    ControlStringsEditor controls1Right[] = {
    { "HEADER", "Object Shortcuts" },
-         { "Insert Teleporter",     "[[T]]" },
-         { "Insert Spawn Point",    "[[G]]" },
-         { "Insert Repair",         "[[B]]" },
-         { "Insert Turret",         "[[Y]]" },
-         { "Insert Force Field",    "[[F]]" },
-         { "Insert Mine",           "[[M]]" },
+         { "Insert Teleporter",     "[[keyPlaceTeleporter]]" },
+         { "Insert Spawn Point",    "[[keyPlaceSpawn]]" },
+         { "Insert Repair",         "[[keyPlaceRepair]]" },
+         { "Insert Turret",         "[[keyPlaceTurret]]" },
+         { "Insert Force Field",    "[[keyPlaceForcefield]]" },
+         { "Insert Mine",           "[[keyPlaceMine]]" },
       { "-", "" },         // Horiz. line
    { "HEADER", "Assigning Teams" },
          { "Set object's team",     "[[1]]-[[9]]" },
          { "Set object to neutral", "[[0]]" },
          { "Set object to hostile", "[[Shift+0]]" },
       { "-", "" },         // Horiz. line
-         { "Save",                  "[[Ctrl+S]]" },
-         { "Reload from file",      "[[Ctrl+Shift+L]]" }
+         { "Save",                  "[[keySaveLevel]]" },
+         { "Reload from file",      "[[keyReloadLevel]]" }
    };
 
 
    // For page 2 of general instructions
    ControlStringsEditor controls2Left[] = {
    { "HEADER", "Size & Rotation" },
-         { "Flip horizontal/vertical", "[[H]],  [[V]]" },
-         { "Rotate object in place",   "[[R]],  [[Shift+R]]" },
-         { "Rotate about (0,0)",       "[[Ctrl+R]],  [[Ctrl+Shift+R]]" },
-         { "Free rotate in place",     "[[Alt+R]]" },
-         { "Free rotate about (0,0)",  "[[Ctrl+Alt+R]]" },
-         { "Scale selection",          "[[Ctrl+Shift+X]]" },
+         { "Flip horizontal/vertical", "[[FlipItemHorizontal]],  [[FlipItemVertical]]" },
+         { "Rotate object in place",   "[[keyRotateSpinCCW]],  [[keyRotateSpinCW]]" },
+         { "Rotate about (0,0)",       "[[keyRotateCCWOrigin]],  [[keyRotateCWOrigin]]" },
+         { "Free rotate in place",     "[[keyRotateCentroid]]" },
+         { "Free rotate about (0,0)",  "[[keyRotateOrigin]]" },
+         { "Scale selection",          "[[keyResizeSelection]]" },
 
       { "-", "" },      // Horiz. line
-         { "Hold [[Space]] to suspend grid snapping",    "" },
-         { "[[Shift+Space]] to suspend vertex snapping", "" },
-         { "Hold [[Tab]] to view a reference ship",      "" }
+         { "Press or Hold [[keyNoGridSnapping]] to suspend grid snapping",    "" },
+         { "[[keyNoSnapping]] to suspend vertex snapping", "" },
+         { "Hold [[keyPreviewMode]] to view a reference ship",      "" }
    };
 
 
@@ -532,7 +532,7 @@ bool EditorInstructionsUserInterface::onKeyDown(InputCode inputCode)
       nextPage();
    }
    // F1 has dual use... advance page, then quit out of help when done
-   else if(checkInputCode(InputCodeManager::BINDING_HELP, inputCode))
+   else if(checkInputCode(BINDING_HELP, inputCode))
    {
       if(mCurPage < getPageCount())
          nextPage();

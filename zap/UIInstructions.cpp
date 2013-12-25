@@ -113,7 +113,7 @@ InstructionsUserInterface::~InstructionsUserInterface()
 struct ControlString
 {
    const char *controlDescr;
-   InputCodeManager::BindingNameEnum primaryControlIndex;    // Not really a good name
+   BindingNameEnum primaryControlIndex;    // Not really a good name
 };
 
 
@@ -339,10 +339,10 @@ bool InstructionsUserInterface::usingArrowKeys()
 {
    GameSettings *settings = getGame()->getSettings();
 
-   return getInputCode(settings, InputCodeManager::BINDING_LEFT)  == KEY_LEFT  &&
-          getInputCode(settings, InputCodeManager::BINDING_RIGHT) == KEY_RIGHT &&
-          getInputCode(settings, InputCodeManager::BINDING_UP)    == KEY_UP    &&
-          getInputCode(settings, InputCodeManager::BINDING_DOWN)  == KEY_DOWN;
+   return getInputCode(settings, BINDING_LEFT)  == KEY_LEFT  &&
+          getInputCode(settings, BINDING_RIGHT) == KEY_RIGHT &&
+          getInputCode(settings, BINDING_UP)    == KEY_UP    &&
+          getInputCode(settings, BINDING_DOWN)  == KEY_DOWN;
 }
 
 
@@ -1123,7 +1123,7 @@ bool InstructionsUserInterface::onKeyDown(InputCode inputCode)
       nextPage();
    }
    
-   else if(checkInputCode(InputCodeManager::BINDING_HELP, inputCode))
+   else if(checkInputCode(BINDING_HELP, inputCode))
       nextPage();
    else if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
       exitInstructions();

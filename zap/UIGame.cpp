@@ -1216,11 +1216,11 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       else if(getGame()->isSpawnDelayed())
       {
          // Allow scoreboard and the various chats while idle
-         if(!checkInputCode(InputCodeManager::BINDING_OUTGAMECHAT, inputCode)  &&
-            !checkInputCode(InputCodeManager::BINDING_GLOBCHAT,    inputCode)  &&
-            !checkInputCode(InputCodeManager::BINDING_TEAMCHAT,    inputCode)  &&
-            !checkInputCode(InputCodeManager::BINDING_CMDCHAT,     inputCode)  &&
-            !checkInputCode(InputCodeManager::BINDING_SCRBRD,      inputCode))
+         if(!checkInputCode(BINDING_OUTGAMECHAT, inputCode)  &&
+            !checkInputCode(BINDING_GLOBCHAT,    inputCode)  &&
+            !checkInputCode(BINDING_TEAMCHAT,    inputCode)  &&
+            !checkInputCode(BINDING_CMDCHAT,     inputCode)  &&
+            !checkInputCode(BINDING_SCRBRD,      inputCode))
          {
             getGame()->undelaySpawn();
             if(inputCode != KEY_ESCAPE)  // Don't swollow escape: Lagged out and can't un-idle to bring up the menu?
@@ -1229,7 +1229,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       }
    }
 
-   if(checkInputCode(InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
+   if(checkInputCode(BINDING_OUTGAMECHAT, inputCode))
       getGame()->setBusyChatting(true);
 
    if(Parent::onKeyDown(inputCode))    // Let parent try handling the key
@@ -1240,7 +1240,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       return true;
 #endif
 
-   if(checkInputCode(InputCodeManager::BINDING_HELP, inputCode))   // Turn on help screen
+   if(checkInputCode(BINDING_HELP, inputCode))   // Turn on help screen
    {
       playBoop();
       getGame()->setBusyChatting(true);
@@ -1268,7 +1268,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       return true;
    }
 
-   if(checkInputCode(InputCodeManager::BINDING_MISSION, inputCode))    // F2
+   if(checkInputCode(BINDING_MISSION, inputCode))    // F2
    {
       onMissionKeyPressed();
 
@@ -1295,8 +1295,8 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
          
       if(ship)
       {
-         if((checkInputCode(InputCodeManager::BINDING_MOD1, inputCode) && ship->getModule(0) == ModuleEngineer) ||
-            (checkInputCode(InputCodeManager::BINDING_MOD2, inputCode) && ship->getModule(1) == ModuleEngineer))
+         if((checkInputCode(BINDING_MOD1, inputCode) && ship->getModule(0) == ModuleEngineer) ||
+            (checkInputCode(BINDING_MOD2, inputCode) && ship->getModule(1) == ModuleEngineer))
          {
             string msg = EngineerModuleDeployer::checkResourcesAndEnergy(ship);  // Returns "" if ok, error message otherwise
 
@@ -1408,11 +1408,11 @@ bool checkInputCode(InputCode codeUserEntered, InputCode codeToActivateCommand)
 // Helper function -- checks input keys and sees if we should start chatting.  Returns true if entered chat mode, false if not.
 bool GameUserInterface::checkEnterChatInputCode(InputCode inputCode)
 {
-   if(checkInputCode(InputCodeManager::BINDING_TEAMCHAT, inputCode))          // Start entering a team chat msg
+   if(checkInputCode(BINDING_TEAMCHAT, inputCode))          // Start entering a team chat msg
       mHelperManager.activateHelper(ChatHelper::TeamChat);
-   else if(checkInputCode(InputCodeManager::BINDING_GLOBCHAT, inputCode))     // Start entering a global chat msg
+   else if(checkInputCode(BINDING_GLOBCHAT, inputCode))     // Start entering a global chat msg
       mHelperManager.activateHelper(ChatHelper::GlobalChat);
-   else if(checkInputCode(InputCodeManager::BINDING_CMDCHAT, inputCode))      // Start entering a command
+   else if(checkInputCode(BINDING_CMDCHAT, inputCode))      // Start entering a command
       mHelperManager.activateHelper(ChatHelper::CmdChat);
    else
       return false;
@@ -1432,51 +1432,51 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    else if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl+] advances bots by 10 steps if frozen
       EventManager::get()->addSteps(10);
 
-   else if(checkInputCode(InputCodeManager::BINDING_LOAD_PRESET_1, inputCode))  // Loading loadout presets
+   else if(checkInputCode(BINDING_LOAD_PRESET_1, inputCode))  // Loading loadout presets
       loadLoadoutPreset(getGame(), 0);
-   else if(checkInputCode(InputCodeManager::BINDING_LOAD_PRESET_2, inputCode))
+   else if(checkInputCode(BINDING_LOAD_PRESET_2, inputCode))
       loadLoadoutPreset(getGame(), 1);
-   else if(checkInputCode(InputCodeManager::BINDING_LOAD_PRESET_3, inputCode))
+   else if(checkInputCode(BINDING_LOAD_PRESET_3, inputCode))
       loadLoadoutPreset(getGame(), 2);
 
-   else if(checkInputCode(InputCodeManager::BINDING_SAVE_PRESET_1, inputCode))  // Saving loadout presets
+   else if(checkInputCode(BINDING_SAVE_PRESET_1, inputCode))  // Saving loadout presets
       saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 0);
-   else if(checkInputCode(InputCodeManager::BINDING_SAVE_PRESET_2, inputCode))
+   else if(checkInputCode(BINDING_SAVE_PRESET_2, inputCode))
       saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 1);
-   else if(checkInputCode(InputCodeManager::BINDING_SAVE_PRESET_3, inputCode))
+   else if(checkInputCode(BINDING_SAVE_PRESET_3, inputCode))
       saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 2);
 
-   else if(checkInputCode(InputCodeManager::BINDING_MOD1, inputCode))       
+   else if(checkInputCode(BINDING_MOD1, inputCode))
       activateModule(0);
-   else if(checkInputCode(InputCodeManager::BINDING_MOD2, inputCode))       
+   else if(checkInputCode(BINDING_MOD2, inputCode))
       activateModule(1);
-   else if(checkInputCode(InputCodeManager::BINDING_FIRE, inputCode))
+   else if(checkInputCode(BINDING_FIRE, inputCode))
    {
       mFiring = true;
       mHelpItemManager.removeInlineHelpItem(ControlsKBItem, true, 0xFF - 1);     // Player has demonstrated knowledge of how to fire
    }
-   else if(checkInputCode(InputCodeManager::BINDING_SELWEAP1, inputCode))
+   else if(checkInputCode(BINDING_SELWEAP1, inputCode))
       selectWeapon(0);
-   else if(checkInputCode(InputCodeManager::BINDING_SELWEAP2, inputCode))
+   else if(checkInputCode(BINDING_SELWEAP2, inputCode))
       selectWeapon(1);
-   else if(checkInputCode(InputCodeManager::BINDING_SELWEAP3, inputCode))
+   else if(checkInputCode(BINDING_SELWEAP3, inputCode))
       selectWeapon(2);
-   else if(checkInputCode(InputCodeManager::BINDING_FPS, inputCode))
+   else if(checkInputCode(BINDING_FPS, inputCode))
    {
       if(InputCodeManager::checkModifier(KEY_CTRL))
          mConnectionStatsRenderer.toggleVisibility();
       else
          mFpsRenderer.toggleVisibility();
    }
-   else if(checkInputCode(InputCodeManager::BINDING_ADVWEAP, inputCode))
+   else if(checkInputCode(BINDING_ADVWEAP, inputCode))
       chooseNextWeapon();
 
    // By default, Handle mouse wheel. Users can change it in "Define Keys" option
-   else if(checkInputCode(InputCodeManager::BINDING_ADVWEAP2, inputCode))
+   else if(checkInputCode(BINDING_ADVWEAP2, inputCode))
       chooseNextWeapon();
-   else if(checkInputCode(InputCodeManager::BINDING_PREVWEAP, inputCode))
+   else if(checkInputCode(BINDING_PREVWEAP, inputCode))
       choosePrevWeapon();
-   else if(checkInputCode(InputCodeManager::BINDING_TOGGLE_RATING, inputCode))
+   else if(checkInputCode(BINDING_TOGGLE_RATING, inputCode))
       toggleLevelRating();
 
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)
@@ -1512,7 +1512,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          getUIManager()->activate<GameMenuUserInterface>();
       }
    }     
-   else if(checkInputCode(InputCodeManager::BINDING_CMDRMAP, inputCode))
+   else if(checkInputCode(BINDING_CMDRMAP, inputCode))
    {
       toggleCommanderMap();
       
@@ -1520,7 +1520,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       mHelpItemManager.removeInlineHelpItem(CmdrsMapItem, true);  
    }
 
-   else if(checkInputCode(InputCodeManager::BINDING_SCRBRD, inputCode))
+   else if(checkInputCode(BINDING_SCRBRD, inputCode))
    {     // (braces needed)
       if(!mInScoreboardMode)    // We're activating the scoreboard
       {
@@ -1532,7 +1532,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          mHelpItemManager.removeInlineHelpItem(ViewScoreboardItem, true);  // User found the tab key!
       }
    }
-   else if(checkInputCode(InputCodeManager::BINDING_TOGVOICE, inputCode))
+   else if(checkInputCode(BINDING_TOGVOICE, inputCode))
    {     // (braces needed)
       if(!mVoiceRecorder.mRecordingAudio)  // Turning recorder on
          mVoiceRecorder.start();
@@ -1547,11 +1547,11 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       // These keys are only available when there is no helper active
       if(!mHelperManager.isHelperActive())
       {
-         if(checkInputCode(InputCodeManager::BINDING_QUICKCHAT, inputCode))
+         if(checkInputCode(BINDING_QUICKCHAT, inputCode))
             activateHelper(HelperMenu::QuickChatHelperType);
-         else if(checkInputCode(InputCodeManager::BINDING_LOADOUT, inputCode))
+         else if(checkInputCode(BINDING_LOADOUT, inputCode))
             activateHelper(HelperMenu::LoadoutHelperType);
-         else if(checkInputCode(InputCodeManager::BINDING_DROPITEM, inputCode))
+         else if(checkInputCode(BINDING_DROPITEM, inputCode))
             dropItem();
          // Check if the user is trying to use keyboard to move when in joystick mode
          else if(getGame()->getInputMode() == InputModeJoystick)
@@ -1589,10 +1589,10 @@ SFXHandle GameUserInterface::playSoundEffect(U32 profileIndex, F32 gain) const
 // Show a message if the user starts trying to play with keyboard in joystick mode
 void GameUserInterface::checkForKeyboardMovementKeysInJoystickMode(InputCode inputCode)
 {
-   if(checkInputCode(InputCodeManager::BINDING_UP,    inputCode) ||
-      checkInputCode(InputCodeManager::BINDING_DOWN,  inputCode) ||
-      checkInputCode(InputCodeManager::BINDING_LEFT,  inputCode) ||
-      checkInputCode(InputCodeManager::BINDING_RIGHT, inputCode))
+   if(checkInputCode(BINDING_UP,    inputCode) ||
+      checkInputCode(BINDING_DOWN,  inputCode) ||
+      checkInputCode(BINDING_LEFT,  inputCode) ||
+      checkInputCode(BINDING_RIGHT, inputCode))
          mWrongModeMsgDisplay.reset(THREE_SECONDS);
 }
 
@@ -1652,10 +1652,10 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
 {
    // These keys works in any mode!  And why not??
 
-   if(checkInputCode(InputCodeManager::BINDING_MISSION, inputCode))    // F2
+   if(checkInputCode(BINDING_MISSION, inputCode))    // F2
       onMissionKeyReleased();
 
-   else if(checkInputCode(InputCodeManager::BINDING_MOD1, inputCode))
+   else if(checkInputCode(BINDING_MOD1, inputCode))
    {
       mModPrimaryActivated[0] = false;
       mModSecondaryActivated[0] = false;
@@ -1663,7 +1663,7 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
       if(getGame()->getLocalPlayerShip())    // Sometimes false if in hit any key to continue mode
          setModulePrimary(getGame()->getLocalPlayerShip()->getModule(0), false);
    }
-   else if(checkInputCode(InputCodeManager::BINDING_MOD2, inputCode))
+   else if(checkInputCode(BINDING_MOD2, inputCode))
    {
       mModPrimaryActivated[1] = false;
       mModSecondaryActivated[1] = false;
@@ -1671,9 +1671,9 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
       if(getGame()->getLocalPlayerShip())    // Sometimes false if in hit any key to continue mode
          setModulePrimary(getGame()->getLocalPlayerShip()->getModule(1), false);
    }
-   else if(checkInputCode(InputCodeManager::BINDING_FIRE, inputCode))
+   else if(checkInputCode(BINDING_FIRE, inputCode))
       mFiring = false;
-   else if(checkInputCode(InputCodeManager::BINDING_SCRBRD, inputCode))
+   else if(checkInputCode(BINDING_SCRBRD, inputCode))
    {     // (braces required)
       if(mInScoreboardMode)     // We're turning scoreboard off
       {
@@ -1683,7 +1683,7 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
             gameType->c2sRequestScoreboardUpdates(false);
       }
    }
-   else if(checkInputCode(InputCodeManager::BINDING_TOGVOICE, inputCode))
+   else if(checkInputCode(BINDING_TOGVOICE, inputCode))
    {     // (braces required)
       if(mVoiceRecorder.mRecordingAudio)  // Turning recorder off
          mVoiceRecorder.stop();
@@ -1780,11 +1780,11 @@ Move *GameUserInterface::getCurrentMove()
       {
          GameSettings *settings = getGame()->getSettings();
 
-         mCurrentMove.x = F32((InputCodeManager::getState(getInputCode(settings, InputCodeManager::BINDING_RIGHT)) ? 1 : 0) - 
-                              (InputCodeManager::getState(getInputCode(settings, InputCodeManager::BINDING_LEFT))  ? 1 : 0));
+         mCurrentMove.x = F32((InputCodeManager::getState(getInputCode(settings, BINDING_RIGHT)) ? 1 : 0) -
+                              (InputCodeManager::getState(getInputCode(settings, BINDING_LEFT))  ? 1 : 0));
 
-         mCurrentMove.y = F32((InputCodeManager::getState(getInputCode(settings, InputCodeManager::BINDING_DOWN))  ? 1 : 0) -  
-                              (InputCodeManager::getState(getInputCode(settings, InputCodeManager::BINDING_UP))    ? 1 : 0));
+         mCurrentMove.y = F32((InputCodeManager::getState(getInputCode(settings, BINDING_DOWN))  ? 1 : 0) -
+                              (InputCodeManager::getState(getInputCode(settings, BINDING_UP))    ? 1 : 0));
       }
 
       // If player is moving, do not show move instructions
