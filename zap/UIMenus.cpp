@@ -2174,93 +2174,40 @@ RobotsMenuUserInterface::~RobotsMenuUserInterface()
 }
 
 
+// Can only get here if the player has the appropriate permissions, so no need for a further check
 static void moreRobotsAcceptCallback(ClientGame *game, U32 index)
 {
-   game->countTeamPlayers();
+   GameType *gameType = game->getGameType();
 
-   S32 teamCount = game->getTeamCount();
-
-   // Find largest team player count
-   S32 largestTeamCount = 0;
-
-   for(S32 i = 0; i < teamCount; i++)
+   if(gameType)
    {
-      S32 currentCount = game->getTeam(i)->getPlayerBotCount();
-
-      if(currentCount > largestTeamCount)
-         largestTeamCount = currentCount;
+      Vector<StringPtr> args;
+      gameType->c2sSendCommand("MoreBots", args);
    }
-
-   // Determine if there are uneven teams; if so, count up the bots we'll need to add.  We'll
-   // add bots until all teams are even.
-   S32 neededBotCount = 0;
-
-   for(S32 i = 0; i < teamCount; i++)
-   {
-      Team *team = static_cast<Team *>(game->getTeam(i));
-      if(team->getPlayerBotCount() < largestTeamCount)
-         neededBotCount += largestTeamCount - team->getPlayerBotCount();
-   }
-
-   if(neededBotCount != 0)       // Add bots to fill up the teams
-      game->getGameType()->c2sAddBots(neededBotCount, Vector<StringTableEntry>());
-   else                          // Add a bot to every team
-      game->getGameType()->c2sAddBots(teamCount, Vector<StringTableEntry>());
-
-   
-   GameUserInterface *gameUI = game->getUIManager()->getUI<GameUserInterface>();
 
    // Player has demonstrated ability to add bots... no need to show help item
-   gameUI->removeInlineHelpItem(AddBotsItem, true);
+   game->getUIManager()->getUI<GameUserInterface>()->removeInlineHelpItem(AddBotsItem, true);
 
-   // Back to the game!
-   game->getUIManager()->reactivate(gameUI);
+   // Back to the game!   
+   game->getUIManager()->reactivateGameUI();
 }
 
 
 // Can only get here if the player has the appropriate permissions, so no need for a further check
 static void fewerRobotsAcceptCallback(ClientGame *game, U32 index)
 {
-   game->countTeamPlayers();
+   if(game->getBotCount() == 0)
+      game->displayErrorMessage("!!! There are no robots to kick");
 
-   S32 teamCount = game->getTeamCount();
+   GameType *gameType = game->getGameType();
 
-   // Find smallest team player count
-   S32 smallestTeamCount = S32_MAX;
-   for(S32 i = 0; i < teamCount; i++)
+   if(gameType)
    {
-      TNLAssert(dynamic_cast<Team *>(game->getTeam(i)), "Invalid team");
-      S32 currentCount = static_cast<Team *>(game->getTeam(i))->getPlayerBotCount();
-
-      if(currentCount < smallestTeamCount)
-         smallestTeamCount = currentCount;
+      Vector<StringPtr> args;
+      gameType->c2sSendCommand("FewerBots", args);
    }
 
-   // Determine if we should remove some bots because teams are uneven
-   S32 numBotsToRemove = 0;
-   for(S32 i = 0; i < teamCount; i++)
-   {
-      Team *team = static_cast<Team *>(game->getTeam(i));
-
-      // Determine how many bots we can remove from this team if it has more players than the smallest team
-      S32 surplus = team->getPlayerBotCount() - smallestTeamCount; 
-      if(surplus > team->getBotCount())                              // Never remove more bots than the team has
-         surplus = team->getBotCount();
-
-      numBotsToRemove += surplus;
-   }
-
-   // If teams are uneven, remove bots from the team(s) with the most players (which is what c2sKickBot does)
-   if(numBotsToRemove != 0)
-      for(S32 i = 0; i < numBotsToRemove; i++)
-         game->getGameType()->c2sKickBot();
-
-   // Otherwise remove a bot from every team that has one.  This isn't perfect, but it'll do.
-   else
-      for(S32 i = 0; i < teamCount; i++)
-         if(static_cast<Team *>(game->getTeam(i))->getBotCount() > 0)
-            game->getGameType()->c2sKickBot();
-
+   // Back to the game!
    game->getUIManager()->reactivateGameUI();
 }
 

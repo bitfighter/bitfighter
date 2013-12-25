@@ -35,7 +35,8 @@ static bool instantiated;           // Just a little something to keep us from c
 
 // Constructor -- be sure to see Game constructor too!  Lots going on there!
 ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated) : 
-      Game(address, settings)
+      Game(address, settings),
+      mRobotManager(this, settings)
 {
    TNLAssert(!instantiated, "Only one ServerGame at a time, please!  If this trips while testing, "
       "it is probably because a test failed before another instance could be deleted.  Try disabling "
@@ -51,9 +52,6 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    mVoteType = VoteLevelChange;  // Arbitrary
    mLevelLoadIndex = 0;
    mShutdownOriginator = NULL;
-
-   mAutoAddBots    = settings->getIniSettings()->playWithBots;
-   mMinPlayerCount = settings->getIniSettings()->minBalancedPlayers;
 
    setAddTarget();               // When we do an addToGame, objects should be added to ServerGame
 
@@ -626,6 +624,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
       }
    }
 
+   mRobotManager.balanceTeams();
+
    sendLevelStatsToMaster();     // Give the master some information about this level for its database
 
    suspendIfNoActivePlayers();   // Does nothing if we're already suspended
@@ -1038,11 +1038,16 @@ void ServerGame::addClient(ClientInfo *clientInfo)
       conn->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000,
             mShutdownOriginator.isNull() ? StringTableEntry() : mShutdownOriginator->getClientInfo()->getName(), 
             "Sorry -- server shutting down", false);
+
+   TNLAssert(mGameType, "No gametype?");     // Added 12/20/2013 by wat to try to understand if this ever happens
    if(mGameType.isValid())
    {
       mGameType->serverAddClient(clientInfo);
       addToClientList(clientInfo);
    }
+   // Else... what?
+
+   mRobotManager.balanceTeams();
    
    // When a new player joins, game is always unsuspended!
    unsuspendIfActivePlayers();
@@ -1062,6 +1067,8 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
 
    if(getPlayerCount() == 0)
       cycleLevel(getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL);    // Advance to beginning of next level
+   else
+      mRobotManager.balanceTeams();
 }
 
 
@@ -1069,49 +1076,93 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
 // Only called from GameType::onLevelLoaded()
 void ServerGame::startAllBots()
 {   
-   //for(S32 i = 0; i < mRobots.size(); i++)
-   //   if(!mRobots[i]->start())
-   //   {
-   //      mRobots.erase_fast(i);
-   //      i--;
-   //   }
+   // Do nothing -- remove this fn!
+}
+
+
+// Only used from testing
+string ServerGame::addBot(const Vector<const char *> &args)
+{
+   return mRobotManager.addBot(args);
 }
 
 
 void ServerGame::addBot(Robot *robot)
 {
-   mRobots.push_back(robot);  
+   mRobotManager.addBot(robot);
+}
+
+
+void ServerGame::balanceTeams()
+{
+   mRobotManager.balanceTeams();
+}
+
+
+Robot *ServerGame::getBot(S32 index)
+{
+   return mRobotManager.getBot(index);
 }
 
 
 S32 ServerGame::getBotCount() const
 {
-   return mRobots.size();
+   return mRobotManager.getBotCount();
 }
 
 
-bool ServerGame::getAutoAddBots() const
+Robot *ServerGame::findBot(const char *id)
 {
-   return mAutoAddBots;
+   return mRobotManager.findBot(id);
 }
 
 
-void ServerGame::setAutoAddBots(bool addBots)
+void ServerGame::removeBot(Robot *robot)
 {
-   mAutoAddBots = addBots;
+   mRobotManager.removeBot(robot);
 }
 
 
-// If we are using bots to flesh out the player count, how many players (including bots) do we want in the game?
-S32 ServerGame::getMinPlayerCount() const
+void ServerGame::deleteBot(const StringTableEntry &name)
 {
-   return mMinPlayerCount;
+   mRobotManager.deleteBot(name);
 }
 
 
-void ServerGame::setMinPlayerCount(S32 count)
+void ServerGame::deleteBot(S32 i)
 {
-   mMinPlayerCount = count;
+   mRobotManager.deleteBot(i);
+}
+
+
+void ServerGame::deleteBotFromTeam(S32 teamIndex)
+{
+   mRobotManager.deleteBotFromTeam(teamIndex);
+}
+
+
+void ServerGame::deleteAllBots()
+{
+   mRobotManager.deleteAllBots();
+}
+
+
+void ServerGame::moreBots()
+{
+   mRobotManager.moreBots();
+}
+
+
+void ServerGame::fewerBots()
+{
+   mRobotManager.fewerBots();
+}
+
+
+// Comes from c2sKickBot
+void ServerGame::kickSingleBotFromLargestTeamWithBots()
+{
+    mRobotManager.deleteBotFromTeam(findLargestTeamWithBots());
 }
 
 
@@ -1243,7 +1294,7 @@ void ServerGame::idle(U32 timeDelta)
    if(botControlTickTimer.update(timeDelta))
    {
       // Clear all old bot moves, so that if the bot does nothing, it doesn't just continue with what it was doing before
-      clearBotMoves();
+      mRobotManager.clearMoves();
 
       // Fire TickEvent, in case anyone is listening
       EventManager::get()->fireEvent(EventManager::TickEvent, botControlTickElapsed + timeDelta);
@@ -1536,13 +1587,6 @@ void ServerGame::updateStatusOnMaster()
       prevPlayerCount = -1;   // Not sure if needed, but if we're disconnected, we need to update to master when we reconnect
       mMasterUpdateTimer.reset(CheckServerStatusTime);
    }
-}
-
-
-void ServerGame::clearBotMoves()
-{
-   for(S32 i = 0; i < mRobots.size(); i++)
-      mRobots[i]->clearMove();
 }
 
 

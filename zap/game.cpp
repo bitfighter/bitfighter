@@ -182,89 +182,20 @@ GameSettingsPtr Game::getSettingsPtr() const
 }
 
 
-Robot *Game::getBot(S32 index)
-{
-   return mRobots[index];
-}
+S32    Game::getBotCount() const                          { TNLAssert(false, "Not implemented for this class!"); return 0; }
+Robot *Game::findBot(const char *id)                      { TNLAssert(false, "Not implemented for this class!"); return NULL; }
+string Game::addBot(const Vector<const char *> &args)     { TNLAssert(false, "Not implemented for this class!"); return "";    }
 
-
-S32 Game::getBotCount() const
-{
-   TNLAssert(false, "Not implemented for this class!");
-   return 0;
-}
-
-
-// Find bot from its id (static)
-Robot *Game::findBot(const char *id)
-{
-   for(S32 i = 0; i < mRobots.size(); i++)
-      if(strcmp(mRobots[i]->getScriptId(), id) == 0)
-         return mRobots[i];
-
-   return NULL;
-}
-
-
-void Game::addBot(Robot *robot)
-{
-   TNLAssert(false, "Not implemented for this class!");  
-}
-
-
-// Remove this robot from the list of bots; does not delete it (only called from Robot desctructor)
-void Game::removeBot(Robot *robot)
-{
-   for(S32 i = 0; i < mRobots.size(); i++)
-      if(mRobots[i] == robot)
-      {
-         mRobots.erase_fast(i);
-         return;
-      }
-}
-
-
-// Delete bot by index
-void Game::deleteBot(const StringTableEntry &name)
-{
-   for(S32 i = 0; i < mRobots.size(); i++)
-      if(mRobots[i]->getClientInfo()->getName() == name)
-         deleteBot(i);
-}
-
-
-// Delete bot by index
-void Game::deleteBot(S32 i)
-{
-   delete mRobots[i];
-}
-
-
-// Delete bot from a given team
-void Game::deleteBotFromTeam(S32 teamIndex)
-{
-   for(S32 i = 0; i < mRobots.size(); i++)
-      if(mRobots[i]->getTeam() == teamIndex)
-      {
-         deleteBot(i);
-         return;        // Only one!
-      }
-}
-
-
-// Delete 'em all, let got sort 'em out!
-void Game::deleteAllBots()
-{
-   for(S32 i = mRobots.size() - 1; i >= 0; i--)
-      deleteBot(i);
-}
-
-
-bool Game::getAutoAddBots() const       { TNLAssert(false, "Not implemented for this class!"); return false; }
-S32  Game::getMinPlayerCount() const    { TNLAssert(false, "Not implemented for this class!"); return 0;     }
-
-void Game::setAutoAddBots(bool addBots) { TNLAssert(false, "Not implemented for this class!"); }
-void Game::setMinPlayerCount(S32 count) { TNLAssert(false, "Not implemented for this class!"); }
+void   Game::kickSingleBotFromLargestTeamWithBots()  { TNLAssert(false, "Not implemented for this class!"); }
+void   Game::moreBots()                              { TNLAssert(false, "Not implemented for this class!"); }
+void   Game::fewerBots()                             { TNLAssert(false, "Not implemented for this class!"); }
+Robot *Game::getBot(S32 index)                       { TNLAssert(false, "Not implemented for this class!"); }
+void   Game::addBot(Robot *robot)                    { TNLAssert(false, "Not implemented for this class!"); }
+void   Game::removeBot(Robot *robot)                 { TNLAssert(false, "Not implemented for this class!"); }
+void   Game::deleteBot(const StringTableEntry &name) { TNLAssert(false, "Not implemented for this class!"); }
+void   Game::deleteBot(S32 i)                        { TNLAssert(false, "Not implemented for this class!"); }
+void   Game::deleteBotFromTeam(S32 teamIndex)        { TNLAssert(false, "Not implemented for this class!"); }
+void   Game::deleteAllBots()                         { TNLAssert(false, "Not implemented for this class!"); }
 
 
 void Game::setReadyToConnectToMaster(bool ready)
@@ -581,7 +512,7 @@ void Game::countTeamPlayers() const
 
       if(teamIndex >= 0 && teamIndex < getTeamCount())
       { 
-         // Robot could be neutral or hostile, skip out of range team numbers
+         // Robot could be neutral or hostile, skip out-of-range team numbers
          TNLAssert(dynamic_cast<Team *>(getTeam(teamIndex)), "Invalid team");
          Team *team = static_cast<Team *>(getTeam(teamIndex));            
 
@@ -598,6 +529,31 @@ void Game::countTeamPlayers() const
          }
       }
    }
+}
+
+
+// Finds biggest team that has bots; if two teams are tied for largest, will return index of the first
+S32 Game::findLargestTeamWithBots() const
+{
+   countTeamPlayers();
+
+   S32 largestTeamCount = 0;
+   S32 largestTeamIndex = NONE;
+
+   for(S32 i = 0; i < getTeamCount(); i++)
+   {
+      TNLAssert(dynamic_cast<Team *>(getTeam(i)), "Invalid team");
+      Team *team = static_cast<Team *>(getTeam(i));
+
+      // Must have at least one bot!
+      if(team->getPlayerBotCount() > largestTeamCount && team->getBotCount() > 0)
+      {
+         largestTeamCount = team->getPlayerBotCount();
+         largestTeamIndex = i;
+      }
+   }
+
+   return largestTeamIndex;
 }
 
 

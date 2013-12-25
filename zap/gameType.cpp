@@ -54,7 +54,6 @@ static const char *gameTypeClassNames[] = {
 
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
-const U32 GameType::mBotBalanceTimerPeriod = 10000;
 const S32 GameType::MaxMenuScore = 1000;
 
 // Constructor
@@ -86,11 +85,9 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mG
    mEngineerEnabled = false;
    mEngineerUnrestrictedEnabled = false;
    mBotsAllowed = true;
-   mBotBalancingEnabled = true;
 
    mTotalGamePlay = 0;
    mEndingGamePlay = DefaultGameTime;
-   mBotBalanceAnalysisTimer.update(mBotBalanceTimerPeriod - 2000);  // Add bots closer to game start
 
    mObjectsExpected = 0;
    mGame = NULL;
@@ -587,16 +584,6 @@ void GameType::idle_server(U32 deltaT)
    {
       broadcastTimeSyncSignal();
       mGameTimeUpdateTimer.reset();
-   }
-
-   // Analyze if we need to re-balance teams with bots 
-   // Wouldn't this be better triggered when players join/quit server rather than in the idle loop?
-   if(mBotBalancingEnabled &&
-         getGame()->getAutoAddBots() &&
-         mBotBalanceAnalysisTimer.update(deltaT))
-   {
-      balanceTeams();
-      mBotBalanceAnalysisTimer.reset();
    }
 
    // Process any pending Robot events
@@ -2151,7 +2138,7 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
       s2cCanSwitchTeams(false);
       NetObject::setRPCDestConnection(NULL);
 
-      return;                                                         // return without processing the change team request
+      return;     // Return without processing the change team request
    }
 
    // Vote to change team might have different problems than the old way...
@@ -2370,6 +2357,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
    clientGame->onPlayerQuit(name);
 
    updateLeadingPlayerAndScore();
+
 #endif
 }
 
@@ -2617,11 +2605,15 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
 {
    ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
-   if(!stricmp(cmd, "yes"))
+   if(stricmp(cmd, "FewerBots") == 0)
+      fewerBots(clientInfo);
+   else if(stricmp(cmd, "MoreBots") == 0)
+      moreBots(clientInfo);   
+   else if(stricmp(cmd, "yes") == 0)
       serverGame->voteClient(clientInfo, true);
-   else if(!stricmp(cmd, "no"))
+   else if(stricmp(cmd, "no") == 0)
       serverGame->voteClient(clientInfo, false);
-   else if(!stricmp(cmd, "loadini") || !stricmp(cmd, "loadsetting"))
+   else if(stricmp(cmd, "loadini") == 0 || stricmp(cmd, "loadsetting") == 0)
    {
       if(clientInfo->isAdmin())
       {
@@ -2645,128 +2637,8 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
 }
 
 
-S32 GameType::getMaxPlayersPerBalancedTeam(S32 players, S32 teams)
-{
-   if(players % teams == 0)
-      return players / teams;
-
-   return players / teams + 1;
-}
-
-
-// Server only
-void GameType::balanceTeams()
-{
-   // Evaluate team counts
-   mGame->countTeamPlayers();
-
-   S32 teamCount = mGame->getTeamCount();
-
-   // Grab our balancing options
-   S32 minimumPlayersNeeded = mGame->getMinPlayerCount();
-   bool botsAlwaysBalance   = mGame->getSettings()->getIniSettings()->botsAlwaysBalanceTeams;
-
-   // If teams were balanced, how many players would the largest team have?
-   S32 maxPlayersPerBalancedTeam = getMaxPlayersPerBalancedTeam(minimumPlayersNeeded, teamCount);
-
-   // Find team with most human players
-   S32 largestTeamHumanCount = 0;
-
-   for(S32 i = 0; i < teamCount; i++)
-   {
-      TNLAssert(dynamic_cast<Team *>(mGame->getTeam(i)), "Invalid team");
-      S32 currentHumanCount = static_cast<Team *>(mGame->getTeam(i))->getPlayerCount();
-
-      if(currentHumanCount > largestTeamHumanCount)
-         largestTeamHumanCount = currentHumanCount;
-   }
-
-   // If bots are always set to balance, then adjust minimum players needed to fill up all teams
-   if(botsAlwaysBalance && isTeamGame())
-   {
-      // If all teams were balanced to the largest human team, then adjust the minimum players
-      if(largestTeamHumanCount * teamCount > minimumPlayersNeeded)
-         minimumPlayersNeeded = largestTeamHumanCount * teamCount;
-
-      // If all humans are spread out and still don't meet the minimum players, adjust so minimum
-      // is met and all teams would be balanced
-      else if(largestTeamHumanCount * teamCount < minimumPlayersNeeded)
-         minimumPlayersNeeded = maxPlayersPerBalancedTeam * teamCount;
-   }
-
-   // Kick bots on any weirdly balanced teams
-   // Re-adjust our max players per team based on our new minimum that is needed
-   maxPlayersPerBalancedTeam = getMaxPlayersPerBalancedTeam(minimumPlayersNeeded, teamCount);
-
-   for(S32 i = 0; i < teamCount; i++)
-   {
-      Team *currentTeam = static_cast<Team *>(mGame->getTeam(i));
-
-      S32 currentTeamBotCount       = currentTeam->getBotCount();
-      S32 currentTeamPlayerBotCount = currentTeam->getPlayerBotCount();  // All players
-
-      // If the current team has bots and has more players than the calculated balance should have
-      if(currentTeamBotCount > 0 && currentTeamPlayerBotCount > maxPlayersPerBalancedTeam)
-      {
-         // Find the difference
-         S32 difference = currentTeamPlayerBotCount - maxPlayersPerBalancedTeam;
-
-         // Kick as many bots as we need, or, only up to how many we have
-         S32 numBotsToKick = difference;
-         if(currentTeamBotCount < difference)
-            numBotsToKick = currentTeamBotCount;
-
-         for(S32 j = 0; j < numBotsToKick; j++)
-            getGame()->deleteBotFromTeam(i);
-      }
-   }
-
-   // Re-evaluate team counts
-   getGame()->countTeamPlayers();
-
-   // Not enough players!  Add bots until we're balanced.  This assumes adding a bot will go
-   // to the team with fewest players
-   S32 currentClientCount = getGame()->getClientCount();  // Need to save this, it could be adjusted when adding bots
-   if(currentClientCount < minimumPlayersNeeded)
-   {
-      Vector<StringTableEntry> dummy;
-
-      for(S32 i = 0; i < minimumPlayersNeeded - currentClientCount; i++)
-         addBot(dummy);
-   }
-}
-
-// Server only
-string GameType::addBot(Vector<StringTableEntry> args)
-{
-   Robot *robot = new Robot();
-   static const S32 MaxArgs = 4096;  // Most args on a single line
-
-   S32 args_count = 0;
-   const char *args_char[MaxArgs];  // Convert to a format processArgs will allow
-
-   // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
-   for(S32 i = 0; i < args.size() && i < MaxArgs; i++)
-   {
-      args_char[i] = args[i].getString();
-      args_count++;
-   }
-
-   string errorMessage;
-   if(!robot->processArguments(args_count, args_char, mGame, errorMessage))
-   {
-      delete robot;
-      return "!!! " + errorMessage;
-   }
-
-   robot->addToGame(mGame, mGame->getGameObjDatabase());
-
-   return "";
-}
-
-
 // Get here from c2sAddBot() and c2sAddBots()
-void GameType::addBotFromClient(Vector<StringTableEntry> args)
+bool GameType::addBotFromClient(Vector<StringTableEntry> args)
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
@@ -2774,12 +2646,10 @@ void GameType::addBotFromClient(Vector<StringTableEntry> args)
 
    GameConnection *conn = clientInfo->getConnection();
 
-   static const S32 ABSOLUTE_MAX_BOTS = 255;    // Hard limit on number of bots on the server
-
-   const S32 maxBots = clientInfo->isAdmin() ? ABSOLUTE_MAX_BOTS : settings->getIniSettings()->maxBots;
+   S32 maxBots = RobotManager::getMaxBots(settings, clientInfo->isAdmin());
 
    if(mBotZoneCreationFailed)
-      conn->s2cDisplayErrorMessage("!!! Zone creation failed for this level -- bots disabled");
+      conn->s2cDisplayErrorMessage("!!! Bots are disabled because zone creation failed for this level");
 
    // Bots not allowed flag is set, unless admin
    else if(!areBotsAllowed() && !clientInfo->isAdmin())
@@ -2790,7 +2660,7 @@ void GameType::addBotFromClient(Vector<StringTableEntry> args)
       conn->s2cDisplayErrorMessage("!!! This server doesn't have default robots configured");
 
    else if(!clientInfo->isLevelChanger())
-      return;  // Error message handled client-side
+   { /* Do nothing -- error message handled upstream */ }
 
    else if(getGame()->getBotCount() >= maxBots)
       conn->s2cDisplayErrorMessage("!!! Can't add more bots -- this server can only have " + itos(maxBots));
@@ -2800,61 +2670,43 @@ void GameType::addBotFromClient(Vector<StringTableEntry> args)
 
    else     // Adding bots is OK!!  Let's get on with it!!
    {
-      string errorMessage = addBot(args);
+      Vector<const char *> args_char(args.size());
+
+      // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
+      for(S32 i = 0; i < args.size(); i++)
+         args_char.push_back(args[i].getString());
+
+      string errorMessage = getGame()->addBot(args_char);
 
       if(errorMessage != "")
          conn->s2cDisplayErrorMessage(errorMessage);
-      else
-      {
-         // Disable bot balancing
-         mBotBalancingEnabled = false;
-
-         StringTableEntry msg = StringTableEntry("Robot added by %e0");
-         messageVals.clear();
-         messageVals.push_back(clientInfo->getName());
-
-         broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, messageVals);
-      }
+      else     // Success!!
+         return true;
    }
+
+   return false;
 }
 
 
-// Assumes we have already verified that at least one team has a bot
-S32 GameType::findLargestTeamWithBots() const
-{
-   // Find team with bots that has the most players
-   getGame()->countTeamPlayers();
-
-   S32 largestTeamCount = 0;
-   S32 largestTeamIndex = -1;
-
-   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
-   {
-      TNLAssert(dynamic_cast<Team *>(getGame()->getTeam(i)), "Invalid team");
-      Team *team = static_cast<Team *>(getGame()->getTeam(i));
-
-      // Must have at least one bot!
-      if(team->getPlayerBotCount() > largestTeamCount && team->getBotCount() > 0)
-      {
-         largestTeamCount = team->getPlayerBotCount();
-         largestTeamIndex = i;
-      }
-   }
-
-   TNLAssert(largestTeamIndex != -1, "No teams had a bot here!");
-
-   return largestTeamIndex;
-}
-
-
+// Get here from /addbot
 GAMETYPE_RPC_C2S(GameType, c2sAddBot,
       (Vector<StringTableEntry> args),
       (args))
 {
-   addBotFromClient(args);
+   if(addBotFromClient(args))
+   {
+      GameConnection *source = (GameConnection *) getRPCSourceConnection();
+
+      StringTableEntry msg = StringTableEntry("Robot added by %e0");
+      messageVals.clear();
+      messageVals.push_back(source->getClientInfo()->getName());
+
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, messageVals);
+   }
 }
 
 
+// Get here from the More Robots menu item, or the /addbots command
 GAMETYPE_RPC_C2S(GameType, c2sAddBots,
       (U32 botCount, Vector<StringTableEntry> args),
       (botCount, args))
@@ -2862,22 +2714,31 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
    GameConnection *source     = (GameConnection *) getRPCSourceConnection();
    ClientInfo     *clientInfo = source->getClientInfo();
 
-   if(!clientInfo->isLevelChanger())
-      return;  // Error message handled client-side
+   S32 botsAdded = 0;
 
-   // Use prevRobotSize to detect when we try to add a bot but do not succeed
-   S32 prevRobotSize = -1;
-
-   for(S32 i = 0; i < botCount; i++)
+   for(U32 i = 0; i < botCount; i++)
    {
-      if(prevRobotSize != getGame()->getBotCount())
+      // Exit the loop if there is a problem adding bots
+      if(addBotFromClient(args))
+         botsAdded++;
+      else
          break;
-
-      prevRobotSize = getGame()->getBotCount();
-      addBotFromClient(args);
    }
 
-   getGame()->setAutoAddBots(true);
+   if(botsAdded > 0)
+   {
+      GameConnection *source = (GameConnection *) getRPCSourceConnection();
+
+      StringTableEntry msg = StringTableEntry("%e0 %e1 added by %e2");
+      messageVals.clear();
+
+      messageVals.push_back(itos(botsAdded));
+      messageVals.push_back(botsAdded == 1 ? "robot" : "robots");
+      messageVals.push_back(source->getClientInfo()->getName());
+
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, messageVals);
+   }
+
 }
 
 
@@ -2941,11 +2802,11 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
       // broadcast it to the clients
-      if(((Team*)mGame->getTeam(i))->getScore() != 0)
+      if(((Team *)mGame->getTeam(i))->getScore() != 0)
          s2cSetTeamScore(i, 0);
 
       // Set the score internally...
-      ((Team*)mGame->getTeam(i))->setScore(0);
+      ((Team *)mGame->getTeam(i))->setScore(0);
    }
 
    StringTableEntry msg("%e0 has reset the score of the game");
@@ -2965,19 +2826,13 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
    if(!clientInfo->isLevelChanger())
       return;  // Error message handled client-side
 
-   S32 botCount = getGame()->getBotCount();
-
-   if(botCount == 0)
+   if(getGame()->getBotCount() == 0) 
    {
       source->s2cDisplayErrorMessage("!!! There are no robots to kick");
       return;
    }
 
-   // Delete one robot from our largest team
-   getGame()->deleteBotFromTeam(findLargestTeamWithBots());
-
-   // Disable bot balancing
-   mBotBalancingEnabled = false;
+   getGame()->kickSingleBotFromLargestTeamWithBots();
 
    StringTableEntry msg = StringTableEntry("Robot kicked by %e0");
    messageVals.clear();
@@ -2996,26 +2851,39 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBots, (), ())
    if(!clientInfo->isLevelChanger())
       return;  // Error message handled client-side
 
-   GameConnection *conn = clientInfo->getConnection();
-   TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
-
    if(getGame()->getBotCount() == 0)
    {
-      conn->s2cDisplayErrorMessage("!!! There are no robots to kick");
+      source->s2cDisplayErrorMessage("!!! There are no robots to kick");
       return;
    }
 
-   // Delete all bots
-   getGame()->deleteAllBots();
-
-   // Disable bot balancing
-   mBotBalancingEnabled = false;
+   getGame()->deleteAllBots();            // Delete all bots
 
    StringTableEntry msg = StringTableEntry("All robots kicked by %e0");
    messageVals.clear();
    messageVals.push_back(clientInfo->getName());
 
    broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, messageVals);
+}
+
+
+// Future home of c2sMoreBots handler... normal function for now
+void GameType::moreBots(ClientInfo *clientInfo)
+{
+   if(!clientInfo->isLevelChanger())
+      return;  // Error message handled client-side
+
+   getGame()->moreBots();
+}
+
+
+// Future home of c2sFewerBots handler... normal function for now
+void GameType::fewerBots(ClientInfo *clientInfo)
+{
+   if(!clientInfo->isLevelChanger())
+      return;  // Error message handled client-side
+
+   getGame()->fewerBots();
 }
 
 
@@ -3030,11 +2898,8 @@ GAMETYPE_RPC_C2S(GameType, c2sShowBots, (), ())
    // Show all robots affects all players
    mShowAllBots = !mShowAllBots;  // Toggle
 
-   GameConnection *conn = clientInfo->getConnection();
-   TNLAssert(conn == source, "If this never fires, we can get rid of conn!"); // Add well before Dec 2013
-
    if(getGame()->getBotCount() == 0)
-      conn->s2cDisplayErrorMessage("!!! There are no robots to show");
+      source->s2cDisplayErrorMessage("!!! There are no robots to show");
    else
    {
       StringTableEntry msg = mShowAllBots ? StringTableEntry("Show all robots option enabled by %e0") : StringTableEntry("Show all robots option disabled by %e0");
@@ -3062,7 +2927,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetMaxBots, (S32 count), (count))
    settings->getIniSettings()->maxBots = count;
 
    GameConnection *conn = clientInfo->getConnection();
-   TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
+   TNLAssert(conn == source, "If this never fires, we can get rid of conn!");    // Added long ago, well before Dec 2013
 
    messageVals.clear();
    messageVals.push_back(itos(count));
@@ -3321,7 +3186,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
 
-   processServerCommand(source->getClientInfo(), cmd.getString(), args);     // was conn instead of source...
+   processServerCommand(source->getClientInfo(), cmd.getString(), args);     
 }
 
 

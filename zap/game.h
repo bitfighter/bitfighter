@@ -205,7 +205,6 @@ protected:
 
    bool mReadyToConnectToMaster;
 
-   Vector<Robot *> mRobots;               // Grand master list of all robots in the current game
    Rect mWorldExtents;                    // Extents of everything
    string mLevelFileHash;                 // MD5 hash of level file
 
@@ -326,19 +325,20 @@ public:
    void resetLevelInfo();
 
    // Manage bot lists
-   Robot *getBot(S32 index);
+   virtual Robot *getBot(S32 index);
    virtual S32 getBotCount() const;
-   Robot *findBot(const char *id);                // Find bot with specified script id
+   virtual Robot *findBot(const char *id);                // Find bot with specified script id
    virtual void addBot(Robot *robot);
-   void removeBot(Robot *robot);
-   void deleteBot(const StringTableEntry &name);  // Delete by name 
-   void deleteBot(S32 i);                         // Delete by index
-   void deleteBotFromTeam(S32 teamIndex);         // Delete by teamIndex
-   void deleteAllBots();                          // Delete 'em all, let God sort 'em out!
-   virtual bool getAutoAddBots() const;           // Should server add bots automatically?
-   virtual void setAutoAddBots(bool addBots);
-   virtual S32 getMinPlayerCount() const;
-   virtual void setMinPlayerCount(S32 count);
+   virtual void removeBot(Robot *robot);
+   virtual void deleteBot(const StringTableEntry &name);  // Delete by name 
+   virtual void deleteBot(S32 i);                         // Delete by index
+   virtual void deleteBotFromTeam(S32 teamIndex);         // Delete by teamIndex
+   virtual void deleteAllBots();                          // Delete 'em all, let God sort 'em out!
+   virtual string addBot(const Vector<const char *> &args);
+   virtual void moreBots();
+   virtual void fewerBots();
+   virtual void kickSingleBotFromLargestTeamWithBots();
+
 
    void loadLevelFromString(const string &contents, GridDatabase *database, const string& filename = "");
    bool loadLevelFromFile(const string &filename, GridDatabase *database);
@@ -401,6 +401,7 @@ public:
    S32 getTeamIndexFromTeamName(const char *teamName) const;
 
    void countTeamPlayers() const;      // Makes sure that the mTeams[] structure has the proper player counts
+   S32 findLargestTeamWithBots() const;
 
    void addTeam(AbstractTeam *team);
    void addTeam(AbstractTeam *team, S32 index);

@@ -79,9 +79,6 @@ private:
    bool mEngineerEnabled;
    bool mEngineerUnrestrictedEnabled;
    bool mBotsAllowed;
-   bool mBotBalancingEnabled;
-
-   static const U32 mBotBalanceTimerPeriod;
 
    // Info about current level
    StringTableEntry mLevelName;
@@ -99,9 +96,9 @@ private:
    void idle_client(U32 deltaT);
    void idle_server(U32 deltaT);
 
-   S32 findLargestTeamWithBots() const;
-
    void launchKillStreakTextEffects(const ClientInfo *clientInfo) const;
+   void fewerBots(ClientInfo *clientInfo);
+   void moreBots(ClientInfo *clientInfo);
 
 protected:
    Timer mScoreboardUpdateTimer;
@@ -110,7 +107,6 @@ protected:
    U32 mEndingGamePlay; // Game over when mTotalGamePlay reaches mEndingGamePlay, 0 = no time limit. In Milliseconds.
 
    Timer mGameTimeUpdateTimer;         // Timer for when to send clients a game clock update
-   Timer mBotBalanceAnalysisTimer;     // Analyze if we need to add/remove bots to balance team
                        
    virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited);                         // Runs on server
    virtual void setTimeEnding(U32 timeLeft);    // Runs on client
@@ -511,11 +507,7 @@ public:
    virtual void majorScoringEventOcurred(S32 team);    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
 
    void processServerCommand(ClientInfo *clientInfo, const char *cmd, Vector<StringPtr> args);
-   void addBotFromClient(Vector<StringTableEntry> args);
-
-   string addBot(Vector<StringTableEntry> args);
-   S32 getMaxPlayersPerBalancedTeam(S32 minPlayersNeeded, S32 teamCount);
-   void balanceTeams();
+   bool addBotFromClient(Vector<StringTableEntry> args);
 
    map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots
 };

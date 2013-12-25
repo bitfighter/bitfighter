@@ -12,6 +12,7 @@
 #include "dataConnection.h"
 #include "LevelSource.h"         // For LevelSourcePtr def
 #include "LevelSpecifierEnum.h"
+#include "RobotManager.h"
 
 #include "Intervals.h"
 
@@ -56,12 +57,9 @@ private:
    SafePtr<GameConnection> mShutdownOriginator;   // Who started the shutdown?
 
    bool mDedicated;
-   bool mAutoAddBots;
-   S32 mMinPlayerCount;             // Target number of players when we are auto-adding bots          
+   S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
-   S32 mLevelLoadIndex;             // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
-
-   SafePtr<GameConnection> mSuspendor;            // Player requesting suspension if game suspended by request
+   SafePtr<GameConnection> mSuspendor;    // Player requesting suspension if game suspended by request
    Timer mTimeToSuspend;
 public:
    static const U32 PreSuspendSettlingPeriod = TWO_SECONDS;
@@ -71,6 +69,8 @@ private:
    Timer mStutterTimer;                   
    Timer mStutterSleepTimer;
    U32 mAccumulatedSleepTime;
+
+   RobotManager mRobotManager;
 
    Vector<LuaLevelGenerator *> mLevelGens;
    Vector<LuaLevelGenerator *> mLevelGenDeleteList;
@@ -97,8 +97,6 @@ private:
 
    RefPtr<NetEvent> mSendLevelInfoDelayNetInfo;
    Timer mSendLevelInfoDelayCount;
-
-   void clearBotMoves();
 
    Timer botControlTickTimer;
 
@@ -172,14 +170,23 @@ public:
    // Bot related
    void startAllBots();                            // Loop through all our bots and run thier main() functions
    
-   void addBot(Robot *robot);
    S32 getBotCount() const;
 
-   bool getAutoAddBots() const;
-   void setAutoAddBots(bool addBots);
+   void balanceTeams();
 
-   S32 getMinPlayerCount() const;
-   void setMinPlayerCount(S32 count);
+   Robot *getBot(S32 index);
+   string addBot(const Vector<const char *> &args);
+   void addBot(Robot *robot);
+   void removeBot(Robot *robot);
+   void deleteBot(const StringTableEntry &name);
+   void deleteBot(S32 i);
+   void deleteBotFromTeam(S32 teamIndex);
+   void deleteAllBots();
+   Robot *findBot(const char *id);
+   void moreBots();
+   void fewerBots();
+   void kickSingleBotFromLargestTeamWithBots();
+
    /////
 
 
