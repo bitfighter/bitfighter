@@ -128,7 +128,11 @@ IniSettings::IniSettings()
    allowAdminMapUpload = true;
    allowLevelgenUpload = true;
 
+#ifdef ZAP_DEDICATED
    enableGameRecording = false;
+#else
+   enableGameRecording = true;
+#endif
 
    voteEnable = false;     // Voting disabled by default
    voteLength = 12;

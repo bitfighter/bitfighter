@@ -30,12 +30,16 @@ public:
 
 #ifndef ZAP_DEDICATED
 class ClientGame;
+class ClientInfo;
 class GameRecorderPlayback : public GameConnection
 {
    typedef GameConnection Parent;
    FILE *mFile;
+   ClientGame *mGame;
    S32 mMilliSeconds;
    U32 mSizeToRead;
+   SafePtr<ClientInfo> mClientInfoSpectating;
+   bool isButtonHeldDown;
 public:
    GameRecorderPlayback(ClientGame *game, const char *filename);
    ~GameRecorderPlayback();

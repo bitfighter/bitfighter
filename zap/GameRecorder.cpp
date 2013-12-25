@@ -15,7 +15,7 @@
 namespace Zap
 {
 
-static void gameRecorderScoping(GameRecorderServer *conn, ServerGame *game)
+static void gameRecorderScoping(GameRecorderServer *conn, Game *game)
 {
    GameType *gt = game->getGameType();
    if(gt)
@@ -58,6 +58,7 @@ GameRecorderServer::GameRecorderServer(ServerGame *game)
    mGame = game;
    mMilliSeconds = 0;
    mWriteMaxBitSize = U32_MAX;
+   mPackUnpackShipEnergyMeter = true;
 
    if(!mFile)
       mFile = openRecordingFile(game);
@@ -80,9 +81,11 @@ GameRecorderServer::GameRecorderServer(ServerGame *game)
       data[0] = CS_PROTOCOL_VERSION;
       data[1] = U8(mGhostClassCount);
       data[2] = U8(mEventClassCount);
-      data[3] = U8(mEventClassCount >> 8);
+      data[3] = U8(mEventClassCount >> 8) | 0x10;
       fwrite(data, 1, 4, mFile);
       gameRecorderScoping(this, game);
+
+      s2cSetServerName(game->getSettings()->getHostName());
    }
 }
 GameRecorderServer::~GameRecorderServer()
@@ -133,6 +136,7 @@ void GameRecorderServer::idle(U32 MilliSeconds)
 GameRecorderPlayback::GameRecorderPlayback(ClientGame *game, const char *filename) : GameConnection(game)
 {
    mFile = NULL;
+   mGame = game;
    mMilliSeconds = 0;
    mSizeToRead = 0;
 
@@ -146,6 +150,11 @@ GameRecorderPlayback::GameRecorderPlayback(ClientGame *game, const char *filenam
       fread(data, 1, 4, mFile);
       mGhostClassCount = data[1];
       mEventClassCount = U32(data[2]) | (U32(data[3]) << 8);
+      if(mEventClassCount & 0x1000)
+      {
+         mPackUnpackShipEnergyMeter = true;
+         mEventClassCount &= ~0x1000;
+      }
       if(data[0] != CS_PROTOCOL_VERSION || 
          mEventClassCount > NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent) || 
          mGhostClassCount > NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeObject))
@@ -171,13 +180,31 @@ GameRecorderPlayback::~GameRecorderPlayback()
 bool GameRecorderPlayback::lostContact() {return false;}
 void GameRecorderPlayback::addPendingMove(Move *theMove)
 {
-   /*BfObject *obj = getControlObject();
-   if(obj)
+   bool nextButton = theMove->fire;
+   bool prevButton = theMove->modulePrimary[0] || theMove->modulePrimary[1];
+
+   if(!isButtonHeldDown && (nextButton || prevButton))
    {
-      U32 time = theMove->time;
-      *theMove = obj->getCurrentMove();
-      theMove->time = time;
-   }*/
+      S32 n = nextButton ? 1 : -1;
+
+      const Vector<RefPtr<ClientInfo> > &infos = *(mGame->getClientInfos());
+      for(S32 i = 0; i < infos.size(); i++)
+         if(infos[i].getPointer() == mClientInfoSpectating.getPointer())
+         {
+            n += i;
+            break;
+         }
+
+      if(n < 0)
+         n = infos.size() - 1;
+      else if(n >= infos.size())
+         n = 0;
+
+      if(infos.size() != 0)
+         mClientInfoSpectating = infos[n];
+   }
+
+   isButtonHeldDown = nextButton || prevButton;
 }
 
 void GameRecorderPlayback::updateTimers(U32 MilliSeconds)
@@ -220,12 +247,18 @@ void GameRecorderPlayback::updateTimers(U32 MilliSeconds)
 
    }
 
-   if(getControlObject() == NULL) // Maybe we need a better way to choose which ship to spectate
+   const Vector<RefPtr<ClientInfo> > &infos = *(mGame->getClientInfos());
+   if(mClientInfoSpectating.isNull() && infos.size() != 0)
    {
-      fillVector.clear();
-      mClientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-      if(fillVector.size())
-         setControlObject(dynamic_cast<BfObject*>(fillVector[0]));
+      mClientInfoSpectating = infos[0];
+   }
+   
+   if(mClientInfoSpectating.isValid())
+   {
+      Ship *ship = mClientInfoSpectating->getShip();
+      setControlObject(ship);
+      if(ship)
+         mGame->newLoadoutHasArrived(*(ship->getLoadout()));
    }
 }
 

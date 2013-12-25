@@ -650,7 +650,11 @@ void Ship::idle(IdleCallPath path)
          findRepairTargets();       
 
    // Process weapons and modules on controlled objects; handles all the energy reductions as well
-   if(path == ServerProcessingUpdatesFromClient || path == ClientReplayingPendingMoves)
+   if(path == ServerProcessingUpdatesFromClient || path == ClientReplayingPendingMoves
+#ifndef ZAP_DEDICATED
+      || (path == ClientIdlingNotLocalShip && ((ClientGame *)getGame())->getConnectionToServer()->mPackUnpackShipEnergyMeter)
+#endif
+       )
    {
       mFastRechargeTimer.update(mCurrentMove.time);
       mFastRecharging = mFastRechargeTimer.getCurrent() == 0;
@@ -1425,9 +1429,33 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          for(S32 i = 0; i < ModuleCount; i++)                  // Send info about which modules are active (secondary)
             stream->writeFlag(mLoadout.isModuleSecondaryActive(ShipModule(i)));
    }
+
+
+
+   if(gameConnection->mPackUnpackShipEnergyMeter)
+   {
+      stream->writeRangedU32(mEnergy >> 5, 0, EnergyMax >> 5);
+      stream->writeInt(mFastRechargeTimer.getCurrent() >> 4, 9);
+      stream->writeFlag(mCooldownNeeded);
+      if(stream->writeFlag(mFireTimer != 0))
+         stream->writeInt(mFireTimer >> 4, 8);
+      stream->writeRangedU32(mLoadout.getActiveWeaponIndex(), 0, ShipWeaponCount);
+   }
+
    return 0;
 }
 
+
+void Ship::findClientInfoFromName()
+{
+   if(mClientInfo.isValid())
+      return;
+
+   // ClientInfo can be NULL if the ship has been added via level file, for example
+   mClientInfo = getGame()->findClientInfo(mPlayerName);
+   if(mClientInfo)
+      mClientInfo->setShip(this);
+}
 
 // Any changes here need to be reflected in Ship::packUpdate
 void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
@@ -1449,15 +1477,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       // identifyt the proper ClientInfo by the player's name.
       //
       // Read the name and use it to find the clientInfo that should be waiting for us... hopefully
-      StringTableEntry playerName;
-      stream->readStringTableEntry(&playerName);
+      stream->readStringTableEntry(&mPlayerName);
 
-      // ClientInfo can be NULL if the ship has been added via level file, for example
-      ClientInfo *clientInfo = getGame()->findClientInfo(playerName);
-      
-      mClientInfo = clientInfo;
-      if(mClientInfo)
-         mClientInfo->setShip(this);
+      findClientInfoFromName();
 
       // Read mounted items:
       while(stream->readFlag())
@@ -1640,6 +1662,18 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(positionChanged)
       updateExtentInDatabase();
 
+   if(((GameConnection *)connection)->mPackUnpackShipEnergyMeter)
+   {
+      mEnergy = stream->readRangedU32(0, EnergyMax >> 5) << 5;
+      mFastRechargeTimer.reset(stream->readInt(9) << 4, mFastRechargeTimer.getPeriod());
+      mCooldownNeeded = stream->readFlag();
+      if(stream->readFlag())
+         mFireTimer = (stream->readInt(8) << 4) + 10;
+      else
+         mFireTimer = 0;
+      setActiveWeapon(stream->readRangedU32(0, ShipWeaponCount));
+   }
+
 #endif
 }  // unpackUpdate
 
@@ -1766,6 +1800,11 @@ bool Ship::isLoadoutSameAsCurrent(const LoadoutTracker &loadout)
    return loadout == mLoadout;      // Yay for operator overloading!
 }
 
+
+const LoadoutTracker *Ship::getLoadout() const
+{
+   return &mLoadout;
+}
 
 // This actualizes the requested loadout... when, for example the user enters a loadout zone
 // To set the "on-deck" loadout, use GameType->setClientShipLoadout()

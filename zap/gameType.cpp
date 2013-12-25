@@ -2261,6 +2261,14 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 
    clientGame->onPlayerJoined(clientInfo, isMyClient, playAlert, showMessage);
 
+
+   const Vector<DatabaseObject*> &database = *(getGame()->getGameObjDatabase()->findObjects_fast());
+
+   for(S32 i = database.size()-1; i >= 0; i--)
+   {
+      if(database[i]->getObjectTypeNumber() == PlayerShipTypeNumber || database[i]->getObjectTypeNumber() == RobotShipTypeNumber)
+         ((Ship*)database[i])->findClientInfoFromName();
+   }
 #endif
 }
 

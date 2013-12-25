@@ -81,6 +81,7 @@ private:
 
 protected:
    SafePtr <ClientInfo> mClientInfo;
+   StringTableEntry mPlayerName;
 
    Vector<SafePtr<MountableItem> > mMountedItems;   
 
@@ -234,6 +235,7 @@ public:
 
    void deploySpybug();
 
+   const LoadoutTracker *getLoadout() const;
    bool setLoadout(const LoadoutTracker &loadout, bool silent = false);
    bool isLoadoutSameAsCurrent(const LoadoutTracker &loadout);
 
@@ -280,6 +282,7 @@ public:
    void readControlState(BitStream *stream);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void findClientInfoFromName();
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void updateInterpolation();

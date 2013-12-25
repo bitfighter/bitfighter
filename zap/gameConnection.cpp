@@ -91,6 +91,8 @@ void GameConnection::initialize()
 
    mVoiceChatEnabled = true;
 
+   mPackUnpackShipEnergyMeter = false;
+
    resetConnectionStatus();
 }
 

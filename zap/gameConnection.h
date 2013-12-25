@@ -80,6 +80,7 @@ private:
    string undeleteMostRecentlyDeletedLevel();               // Undoes above function
 
 public:
+   bool mPackUnpackShipEnergyMeter; // Only true for game recorder
    U16 switchedTeamCount;
 
    U8 mVote;                     // 0 = not voted,  1 = vote yes,  2 = vote no    TODO: Make 
