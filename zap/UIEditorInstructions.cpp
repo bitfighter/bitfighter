@@ -87,53 +87,53 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    { "HEADER", "Navigation" },
          { "Pan Map",                  "[[W]]/[[A]]/[[S]]/[[D]] or"},
          { " ",                         "Arrow Keys"},
-         { "Zoom In",                  "[[keyZoomIn]] or [[Ctrl+Up Arrow]]" },
-         { "Zoom Out",                 "[[keyZoomOut]] or [[Ctrl+Down Arrow]]" },
-         { "Center Display",           "[[keyResetView]]" },
-         { "Toggle Script Results",    "[[keyRunLvlgenScript]]" },
-         { "Copy Results Into Editor", "[[keyInsertGenItems]]" },
-         { "Show/Hide Plugins Pane",   "[[keyDockmodeItems]]"},
+         { "Zoom In",                  "[[ZoomIn]] or [[Ctrl+Up Arrow]]" },
+         { "Zoom Out",                 "[[ZoomOut]] or [[Ctrl+Down Arrow]]" },
+         { "Center Display",           "[[ResetView]]" },
+         { "Toggle Script Results",    "[[RunLevelgenScript]]" },
+         { "Copy Results Into Editor", "[[InsertGenItems]]" },
+         { "Show/Hide Plugins Pane",   "[[DockmodeItems]]"},
       { "-", "" },         // Horiz. line
    { "HEADER", "Editing" },
-         { "Cut/Copy/Paste",           "[[keyCutSelection]]/[[C]]/[[V]]"},
+         { "Cut/Copy/Paste",           "[[CutSelection]]/[[keyCopySelection]]/[[PasteSelection]]"},
          { "Delete Selection",         "[[Del]]" },
-         { "Undo",                     "[[keyRedoAction]]" },
-         { "Redo",                     "[[keyRedoAction]]" }
+         { "Undo",                     "[[UndoAction]]" },
+         { "Redo",                     "[[RedoAction]]" }
    };
 
    ControlStringsEditor controls1Right[] = {
    { "HEADER", "Object Shortcuts" },
-         { "Insert Teleporter",     "[[keyPlaceTeleporter]]" },
-         { "Insert Spawn Point",    "[[keyPlaceSpawn]]" },
-         { "Insert Repair",         "[[keyPlaceRepair]]" },
-         { "Insert Turret",         "[[keyPlaceTurret]]" },
-         { "Insert Force Field",    "[[keyPlaceForcefield]]" },
-         { "Insert Mine",           "[[keyPlaceMine]]" },
+         { "Insert Teleporter",     "[[PlaceNewTeleporter]]" },
+         { "Insert Spawn Point",    "[[PlaceNewSpawn]]" },
+         { "Insert Repair",         "[[PlaceNewRepair]]" },
+         { "Insert Turret",         "[[PlaceNewTurret]]" },
+         { "Insert Force Field",    "[[PlaceNewForcefield]]" },
+         { "Insert Mine",           "[[PlaceNewMine]]" },
       { "-", "" },         // Horiz. line
    { "HEADER", "Assigning Teams" },
          { "Set object's team",     "[[1]]-[[9]]" },
          { "Set object to neutral", "[[0]]" },
          { "Set object to hostile", "[[Shift+0]]" },
       { "-", "" },         // Horiz. line
-         { "Save",                  "[[keySaveLevel]]" },
-         { "Reload from file",      "[[keyReloadLevel]]" }
+         { "Save",                  "[[SaveLevel]]" },
+         { "Reload from file",      "[[ReloadLevel]]" }
    };
 
 
    // For page 2 of general instructions
    ControlStringsEditor controls2Left[] = {
    { "HEADER", "Size & Rotation" },
-         { "Flip horizontal/vertical", "[[FlipItemHorizontal]],  [[FlipItemVertical]]" },
-         { "Rotate object in place",   "[[keyRotateSpinCCW]],  [[keyRotateSpinCW]]" },
-         { "Rotate about (0,0)",       "[[keyRotateCCWOrigin]],  [[keyRotateCWOrigin]]" },
-         { "Free rotate in place",     "[[keyRotateCentroid]]" },
-         { "Free rotate about (0,0)",  "[[keyRotateOrigin]]" },
-         { "Scale selection",          "[[keyResizeSelection]]" },
+         { "Flip horizontal/vertical", "[[FlipItemHorizontal]], [[FlipItemVertical]]" },
+         { "Rotate object in place",   "[[RotateSpinCCW]], [[RotateSpinCW]]" },
+         { "Rotate about (0,0)",       "[[RotateCCWOrigin]], [[RotateCWOrigin]]" },
+         { "Free rotate in place",     "[[RotateCentroid]]" },
+         { "Free rotate about (0,0)",  "[[RotateOrigin]]" },
+         { "Scale selection",          "[[ResizeSelection]]" },
 
       { "-", "" },      // Horiz. line
-         { "Press or Hold [[keyNoGridSnapping]] to suspend grid snapping",    "" },
-         { "[[keyNoSnapping]] to suspend vertex snapping", "" },
-         { "Hold [[keyPreviewMode]] to view a reference ship",      "" }
+         { "Press or Hold [[NoGridSnapping]] to suspend grid snapping", "" },
+         { "[[NoSnapping]] to suspend vertex snapping",                 "" },
+         { "Hold [[PreviewMode]] to view a reference ship",             "" }
    };
 
 

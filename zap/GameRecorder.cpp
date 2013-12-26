@@ -6,8 +6,8 @@
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "UIManager.h"
+#  include "ClientGame.h"
+#  include "UIManager.h"
 #endif
 
 #include "version.h"
@@ -30,6 +30,7 @@ static void gameRecorderScoping(GameRecorderServer *conn, Game *game)
          conn->objectLocalScopeAlways(obj);
    }
 }
+
 
 static FILE *openRecordingFile(ServerGame *game)
 {

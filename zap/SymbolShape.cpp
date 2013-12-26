@@ -552,6 +552,7 @@ SymbolShapePtr SymbolString::getControlSymbol(InputCode inputCode, const Color *
    return getSymbol(inputCode, color);
 }
 
+
 // Static method
 SymbolShapePtr SymbolString::getSymbolGear(S32 fontSize)
 {
