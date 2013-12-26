@@ -340,8 +340,8 @@ static void writePluginBindings(CIniFile *ini, IniSettings *iniSettings)
       addComment(" Plugin1=Key1|ScriptName.lua|Script help string");
       addComment(" ... etc ...");
       addComment(" The names of the presets are not important, and can be changed. Key combos follow the general form of");
-      addComment(" Ctrl+Alt+Shift+Meta+Super+key (omit unneeded modifiers, you can get correct Input Strings from the ");
-      addComment(" diagnostics screen).  Scripts should be stored in the plugins folder  in the install directory. Please")
+      addComment(" Ctrl+Alt+Shift+Meta+Super+key (omit unneeded modifiers, you can get correct Input Strings from the");
+      addComment(" diagnostics screen).  Scripts should be stored in the plugins folder in the install directory. Please")
       addComment(" see the Bitfighter wiki for details.");
       addComment("----------------");
    }
@@ -701,15 +701,25 @@ static InputCode getInputCode(CIniFile *ini, const string &section, const string
    return InputCodeManager::stringToInputCode(ini->GetValue(section, key, code).c_str());
 }
 
+
+// Returns a string like "Ctrl+L"
+static string getInputString(CIniFile *ini, const string &section, const string &key, const string &defaultValue)
+{
+   return ini->GetValue(section, key, defaultValue);
+}
+
+
 void setDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
-#define EDITOR_BINDING(editorEnumVal, b, c, defaultEditorKeyboardBinding)  \
-      if(true)                                                                                                                                                        \
-         inputCodeManager->setEditorBinding(InputCodeManager::editorEnumVal, InputModeKeyboard,                                                                       \
-            getInputString(ini, "EditorKeyboardKeyBindings", InputCodeManager::getEditorBindingName(InputCodeManager::editorEnumVal), defaultEditorKeyboardBinding)); \
+#define EDITOR_BINDING(editorEnumVal, b, c, defaultEditorKeyboardBinding)                                       \
+      inputCodeManager->setEditorBinding(editorEnumVal,                                                         \
+                                          getInputString(ini, "EditorKeyboardKeyBindings",                      \
+                                                         InputCodeManager::getEditorBindingName(editorEnumVal), \
+                                                         defaultEditorKeyboardBinding)); 
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
 }
+
 
 // Remember: If you change any of these defaults, you'll need to rebuild your INI file to see the results!
 static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
@@ -735,10 +745,10 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
    ///// JOYSTICK
 
    // Basically the same, except that we use the default joystick binding column... generated code will look pretty much the same
-#define BINDING(enumVal, b, savedInIni, d, e, defaultJoystickBinding)                                             \
-      if(savedInIni)                                                                                              \
-         inputCodeManager->setBinding(enumVal, InputModeJoystick,                               						\
-            getInputCode(ini, "JoystickKeyBindings", InputCodeManager::getBindingName(enumVal), 						\
+#define BINDING(enumVal, b, savedInIni, d, e, defaultJoystickBinding)                           \
+      if(savedInIni)                                                                            \
+         inputCodeManager->setBinding(enumVal, InputModeJoystick,                               \
+            getInputCode(ini, "JoystickKeyBindings", InputCodeManager::getBindingName(enumVal), \
                          defaultJoystickBinding));
     BINDING_TABLE
 #undef BINDING
@@ -759,23 +769,21 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
    //                           InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1, mode)));
 
 #define BINDING(enumVal, b, savedInIni, d, e, f)  \
-      if(savedInIni)                                                                                                                \
-         ini->SetValue(section, InputCodeManager::getBindingName(enumVal),                                           						\
-                                InputCodeManager::inputCodeToString(inputCodeManager->getBinding(enumVal, mode)));
+      if(savedInIni)                                                                                               \
+         ini->SetValue(section, InputCodeManager::getBindingName(enumVal),                                         \
+                                InputCodeManager::inputCodeToString(inputCodeManager->getBinding(enumVal, mode))); 
     BINDING_TABLE
 #undef BINDING
 }
 
-static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section, InputMode mode)
+static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section)
 {
-   // Top line evaluates to:
-   // if(true)
-   //    ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::FlipItemHorizontalFlipItemHorizontal),
-   //                           InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::FlipItemHorizontal, mode)));
+   // Expands to:
+   // ini->SetValue(section, InputCodeManager::getEditorBindingName(FlipItemHorizontal),
+   //               inputCodeManager->getEditorBinding(FlipItemHorizontal)));
 #define EDITOR_BINDING(editorEnumVal, b, c, d)  \
-      if(true)                                                                                                \
-         ini->SetValue(section, InputCodeManager::getEditorBindingName(editorEnumVal),     						  \
-         							  inputCodeManager->getEditorBinding(editorEnumVal));
+      ini->SetValue(section, InputCodeManager::getEditorBindingName(editorEnumVal),  \
+         			  inputCodeManager->getEditorBinding(editorEnumVal));
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
 }
@@ -783,8 +791,8 @@ static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMan
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
    writeKeyBindings(ini, inputCodeManager, "KeyboardKeyBindings", InputModeKeyboard);
-   writeEditorKeyBindings(ini, inputCodeManager,     "EditorKeyboardKeyBindings",       InputModeKeyboard);
    writeKeyBindings(ini, inputCodeManager, "JoystickKeyBindings", InputModeJoystick);
+   writeEditorKeyBindings(ini, inputCodeManager, "EditorKeyboardKeyBindings");
 }
 
 
@@ -801,7 +809,7 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
    Message=Our flag is not in the base!
    MessageType=Team     -or-     MessageType=Global
 
-   == or, a top tiered message might look like this ==
+   == or, a top-tiered message might look like this ==
 
    [QuickChat_Message1]
    Key=A

@@ -309,7 +309,7 @@ InputCode UserInterface::getInputCode(GameSettings *settings, BindingNameEnum bi
 
 string UserInterface::getEditorBindingString(GameSettings *settings, EditorBindingNameEnum binding)
 {
-   return  settings->getInputCodeManager()->getEditorBinding(binding);
+   return settings->getInputCodeManager()->getEditorBinding(binding);
 }
 
 
@@ -416,10 +416,12 @@ void UserInterface::renderDiagnosticKeysOverlay()
    }
 }   
 
+
 void UserInterface::onColorPicked(const Color &color)
 {
    // Do nothing, expect this function should be overridden by other classes that use UIColorPicker
 }
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

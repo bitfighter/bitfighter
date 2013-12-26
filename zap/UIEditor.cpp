@@ -3839,9 +3839,6 @@ void EditorUserInterface::onTextInput(char ascii)
 // Handle key presses
 bool EditorUserInterface::onKeyDown(InputCode inputCode)
 {
-
-
-
    if(Parent::onKeyDown(inputCode))
       return true;
 
@@ -3855,9 +3852,8 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
 #endif
 
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
-	   InputCodeManager mInputCodeManager;
 
-	   GameSettings *settings = getGame()->getSettings();
+   GameSettings *settings = getGame()->getSettings();
 
    if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)       // Enter - Edit props
       startAttributeEditor();
@@ -3912,36 +3908,36 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       onMouseClicked_left();
 
    // Neither mouse button, let's try some keys
-   else if(inputString == "D"|| inputString == "Shift+D")            // Pan right
+   else if(inputString == "D" || inputString == "Shift+D")                                  // Pan right
       mRight = true;
    else if(inputString == "Right Arrow")  // Pan right
       mRight = true;
-	   else if(inputString == getEditorBindingString(settings, BINDING_FLIP_HORIZ))                        // Flip horizontal
+	   else if(inputString == getEditorBindingString(settings, BINDING_FLIP_HORIZ))          // Flip horizontal
       flipSelectionHorizontal();
-	   else if(inputString == getEditorBindingString(settings, BINDING_PASTE_SELECTION))            // Paste selection
+	   else if(inputString == getEditorBindingString(settings, BINDING_PASTE_SELECTION))     // Paste selection
       pasteSelection();
-	   else if(inputString == getEditorBindingString(settings, BINDING_FLIP_VERTICAL))                  // Flip vertical
+	   else if(inputString == getEditorBindingString(settings, BINDING_FLIP_VERTICAL))       // Flip vertical
       flipSelectionVertical();
    else if(inputString == "/" || inputString == "Keypad /")
       openConsole(NULL);
-	   else if(inputString == getEditorBindingString(settings, BINDING_RELOAD_LEVEL))                 // Reload level
+	   else if(inputString == getEditorBindingString(settings, BINDING_RELOAD_LEVEL))        // Reload level
    {
       loadLevel();                        
       setSaveMessage("Reloaded " + getLevelFileName(), true);
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_REDO_ACTION))                   // Redo
+	   else if(inputString == getEditorBindingString(settings, BINDING_REDO_ACTION))         // Redo
    {
       if(!mCreatingPolyline && !mCreatingPoly && !mDraggingObjects && !mDraggingDockItem)
          redo();
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_UNDO_ACTION))                  // Undo
+	   else if(inputString == getEditorBindingString(settings, BINDING_UNDO_ACTION))         // Undo
    {
       if(!mCreatingPolyline && !mCreatingPoly && !mDraggingObjects && !mDraggingDockItem)
          undo(true);
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_RESET_VIEW))                     // Reset veiw
+	   else if(inputString == getEditorBindingString(settings, BINDING_RESET_VIEW))          // Reset veiw
       centerView();
-	   else if(inputString == getEditorBindingString(settings, BINDING_LVLGEN_SCRIPT))               // Run levelgen script, or clear last results
+	   else if(inputString == getEditorBindingString(settings, BINDING_LVLGEN_SCRIPT))       // Run levelgen script, or clear last results
    {
       // Ctrl+R is a toggle -- we either add items or clear them
       if(mLevelGenDatabase.getObjectCount() == 0)
@@ -3951,23 +3947,23 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputString == "Shift+1" || inputString == "Shift+3")  // '!' or '#'
       startSimpleTextEntryMenu(SimpleTextEntryID);
-	   else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CENTROID))          // Spin by arbitrary amount
+	   else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CENTROID))     // Spin by arbitrary amount
       startSimpleTextEntryMenu(SimpleTextEntryRotateCentroid);
-	    else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_ORIGIN))              // Rotate by arbitrary amount
+	    else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_ORIGIN))      // Rotate by arbitrary amount
       startSimpleTextEntryMenu(SimpleTextEntryRotateOrigin);
-	   else if(inputString == getEditorBindingString(settings, BINDING_SPIN_CCW))                         // Spin CCW
+	   else if(inputString == getEditorBindingString(settings, BINDING_SPIN_CCW))            // Spin CCW
       rotateSelection(-15.f, false);
-	   else if(inputString == getEditorBindingString(settings, BINDING_SPIN_CW))                           // Spin CW
+	   else if(inputString == getEditorBindingString(settings, BINDING_SPIN_CW))             // Spin CW
       rotateSelection(15.f, false);
-	   else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CCW_ORIGIN))     // Rotate CCW about origin
+	   else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CCW_ORIGIN))   // Rotate CCW about origin
       rotateSelection(-15.f, true);
-	   else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CW_ORIGIN))       // Rotate CW about origin
+	   else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CW_ORIGIN))    // Rotate CW about origin
       rotateSelection(15.f, true);
 
-	   else if(inputString == getEditorBindingString(settings, BINDING_INSERT_GEN_ITEMS))        // Insert items generated with script into editor
+	   else if(inputString == getEditorBindingString(settings, BINDING_INSERT_GEN_ITEMS))    // Insert items generated with script into editor
       copyScriptItemsToEditor();
 
-   else if(inputString == "Up Arrow" || inputString == "W" || inputString == "Shift+W")  // W or Up - Pan up
+   else if(inputString == "Up Arrow" || inputString == "W" || inputString == "Shift+W")     // W or Up - Pan up
       mUp = true;
    else if(inputString == "Ctrl+Up Arrow")      // Zoom in
       mIn = true;
@@ -3975,68 +3971,68 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       mOut = true;
    else if(inputString == "Down Arrow")         // Pan down
       mDown = true;
-	   else if(inputString == getEditorBindingString(settings, BINDING_SAVE_LEVEL))                   // Save
+	   else if(inputString == getEditorBindingString(settings, BINDING_SAVE_LEVEL))           // Save
       saveLevel(true, true);
-   else if(inputString == "S"|| inputString == "Shift+S")                  // Pan down
+   else if(inputString == "S"|| inputString == "Shift+S")                                    // Pan down
       mDown = true;
-   else if(inputString == "Left Arrow" || inputString == "A"|| inputString == "Shift+A")   // Left or A - Pan left
+   else if(inputString == "Left Arrow" || inputString == "A" || inputString == "Shift+A")    // Left or A - Pan left
       mLeft = true;
-   else if(inputString == "Shift+=" || inputString == "Shift+Keypad +")    // Shifted - Increase barrier width by 1
+   else if(inputString == "Shift+=" || inputString == "Shift+Keypad +")                      // Shifted - Increase barrier width by 1
       changeBarrierWidth(1);
-   else if(inputString == "=" || inputString == "Keypad +")                // Unshifted + --> by 5
+   else if(inputString == "=" || inputString == "Keypad +")                                  // Unshifted + --> by 5
       changeBarrierWidth(5);
-   else if(inputString == "Shift+-" || inputString == "Shift+Keypad -")    // Shifted - Decrease barrier width by 1
+   else if(inputString == "Shift+-" || inputString == "Shift+Keypad -")                      // Shifted - Decrease barrier width by 1
       changeBarrierWidth(-1);
-   else if(inputString == "-" || inputString == "Keypad -")                // Unshifted --> by 5
+   else if(inputString == "-" || inputString == "Keypad -")                                  // Unshifted --> by 5
       changeBarrierWidth(-5);
-	   else if(inputString == getEditorBindingString(settings, BINDING_ZOOM_IN))                        // Zoom In
-      mIn = true;
-   else if(inputString == "\\")           // Split barrier on selected vertex
-      splitBarrier();
-	   else if(inputString == getEditorBindingString(settings, BINDING_JOIN_SELECTION))            // Join selected barrier segments or polygons
-      joinBarrier();
-	   else if(inputString == getEditorBindingString(settings, BINDING_SELECT_EVERYTHING))    // Select everything
-      selectAll(getDatabase());
-	   else if(inputString == getEditorBindingString(settings, BINDING_RESIZE_SELECTION))       // Resize selection
-      startSimpleTextEntryMenu(SimpleTextEntryScale);
-	   else if(inputString == getEditorBindingString(settings, BINDING_CUT_SELECTION))            // Cut selection
+	else if(inputString == getEditorBindingString(settings, BINDING_ZOOM_IN))                 // Zoom In
+      mIn = true;                                                                           
+   else if(inputString == "\\")                                                              // Split barrier on selected vertex               
+      splitBarrier();                                                                       
+	else if(inputString == getEditorBindingString(settings, BINDING_JOIN_SELECTION))          // Join selected barrier segments or polygons
+      joinBarrier();                                                                        
+	else if(inputString == getEditorBindingString(settings, BINDING_SELECT_EVERYTHING))       // Select everything
+      selectAll(getDatabase());                                                             
+	else if(inputString == getEditorBindingString(settings, BINDING_RESIZE_SELECTION))        // Resize selection
+      startSimpleTextEntryMenu(SimpleTextEntryScale);                                       
+	else if(inputString == getEditorBindingString(settings, BINDING_CUT_SELECTION))           // Cut selection
    {
       copySelection();
       deleteSelection(true);
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_COPY_SELECTION))             // Copy selection to clipboard
-      copySelection();
-	   else if(inputString == getEditorBindingString(settings, BINDING_ZOOM_OUT))                   // Zoom out
-      mOut = true;
-	   else if(inputString == getEditorBindingString(settings, BINDING_LEVEL_PARAM_EDITOR))         // Level Parameter Editor
-   {
-      getUIManager()->activate<GameParamUserInterface>();
-      playBoop();
-   }
-	   else if(inputString == getEditorBindingString(settings, BINDING_TEAM_EDITOR))                 // Team Editor Menu
-   {
-      getUIManager()->activate<TeamDefUserInterface>();
-      playBoop();
-   }
-	   else if(inputString == getEditorBindingString(settings, BINDING_PLACE_TELEPORTER))          // Teleporter
-      insertNewItem(TeleporterTypeNumber);
-	   else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPEEDZONE))           // SpeedZone
-      insertNewItem(SpeedZoneTypeNumber);
-	   else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPAWN))                   // Spawn
-      insertNewItem(ShipSpawnTypeNumber);
-	   else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPYBUG))                  // Spybug
-      insertNewItem(SpyBugTypeNumber);
-	   else if(inputString == getEditorBindingString(settings, BINDING_PLACE_REPAIR))                   // Repair
-      insertNewItem(RepairItemTypeNumber);
-	   else if(inputString == getEditorBindingString(settings, BINDING_PLACE_TURRET))                  // Turret
-      insertNewItem(TurretTypeNumber);
-	   else if(inputString == getEditorBindingString(settings, BINDING_PLACE_MINE))                      // Mine
-      insertNewItem(MineTypeNumber);
-	   else if(inputString == getEditorBindingString(settings, BINDING_PLACE_FORCEFIELD))          // Forcefield
+	else if(inputString == getEditorBindingString(settings, BINDING_COPY_SELECTION))          // Copy selection to clipboard
+      copySelection();                                                                      
+	else if(inputString == getEditorBindingString(settings, BINDING_ZOOM_OUT))                // Zoom out
+      mOut = true;                                                                          
+	else if(inputString == getEditorBindingString(settings, BINDING_LEVEL_PARAM_EDITOR))      // Level Parameter Editor
+   {                                                                                        
+      getUIManager()->activate<GameParamUserInterface>();                                   
+      playBoop();                                                                           
+   }                                                                                        
+	else if(inputString == getEditorBindingString(settings, BINDING_TEAM_EDITOR))             // Team Editor Menu
+   {                                                                                        
+      getUIManager()->activate<TeamDefUserInterface>();                                     
+      playBoop();                                                                           
+   }                                                                                        
+	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_TELEPORTER))        // Teleporter
+      insertNewItem(TeleporterTypeNumber);                                                  
+	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPEEDZONE))         // SpeedZone
+      insertNewItem(SpeedZoneTypeNumber);                                                   
+	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPAWN))             // Spawn
+      insertNewItem(ShipSpawnTypeNumber);                                                   
+	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPYBUG))            // Spybug
+      insertNewItem(SpyBugTypeNumber);                                                      
+	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_REPAIR))            // Repair
+      insertNewItem(RepairItemTypeNumber);                                                  
+	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_TURRET))            // Turret
+      insertNewItem(TurretTypeNumber);                                                      
+	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_MINE))              // Mine
+      insertNewItem(MineTypeNumber);                                                        
+	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_FORCEFIELD))        // Forcefield
       insertNewItem(ForceFieldProjectorTypeNumber);
-   else if(inputString == "Backspace" || inputString == "Del" || inputString == "Keypad .")     // Keypad . is the keypad's del key
+   else if(inputString == "Backspace" || inputString == "Del" || inputString == "Keypad .")  // Keypad . is the keypad's del key
       deleteSelection(false);
-	   else if(checkInputCode(BINDING_HELP, inputCode))                                                      // Turn on help screen
+	else if(checkInputCode(BINDING_HELP, inputCode))                                          // Turn on help screen
    {
       getGame()->getUIManager()->activate<EditorInstructionsUserInterface>();
       playBoop();
@@ -4046,13 +4042,13 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       playBoop();
       getGame()->getUIManager()->activate<EditorMenuUserInterface>();
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_NO_SNAPPING))                  // No snapping to grid, but still to other things
-      mSnapContext = NO_GRID_SNAPPING;
-	   else if(inputString == getEditorBindingString(settings, BINDING_NO_GRID_SNAPPING))        // Completely disable snapping
-      mSnapContext = NO_SNAPPING;
-	   else if(inputString == getEditorBindingString(settings, BINDING_PREVIEW_MODE))               // Turn on preview mode
-      mPreviewMode = true;
-	   else if(inputString == getEditorBindingString(settings, BINDING_DOCKMODE_ITEMS))          //  Toggle dockmode Items
+	else if(inputString == getEditorBindingString(settings, BINDING_NO_SNAPPING))             // No snapping to grid, but still to other things
+      mSnapContext = NO_GRID_SNAPPING;                                                     
+	else if(inputString == getEditorBindingString(settings, BINDING_NO_GRID_SNAPPING))        // Completely disable snapping
+      mSnapContext = NO_SNAPPING;                                                          
+	else if(inputString == getEditorBindingString(settings, BINDING_PREVIEW_MODE))            // Turn on preview mode
+      mPreviewMode = true;                                                                 
+	else if(inputString == getEditorBindingString(settings, BINDING_DOCKMODE_ITEMS))          //  Toggle dockmode Items
    {
 	  if(mDockMode == DOCKMODE_ITEMS)
 	  {
@@ -4070,9 +4066,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       // Do nothing
    }
    else
-	   {
       return false;
-	   }
 
    // A key was handled
    return true;

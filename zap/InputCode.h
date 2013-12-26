@@ -70,7 +70,7 @@ namespace Zap
 
 /*----------------------------------------EDITOR_BINDING_TABLE-------------------------------------------*/
 /*                                                                  BindingSet           Def. kb         */
-/*             Enum                            Name in INI          member name          binding         */
+/*                       Enum                  Name in INI          member name          binding         */
 #define EDITOR_BINDING_TABLE \
    EDITOR_BINDING( BINDING_FLIP_HORIZ,        "FlipItemHorizontal", keyFlipItemHoriz,   "H"             ) \
    EDITOR_BINDING( BINDING_PASTE_SELECTION,   "PasteSelection",     keyPasteSelection,  "Ctrl+V"        ) \
@@ -150,7 +150,7 @@ struct EditorBindingSet
    virtual ~EditorBindingSet();
 
    string getEditorBinding(EditorBindingNameEnum bindingName) const;
-   void setEditorBinding(EditorBindingNameEnum bindingName, string key);
+   void setEditorBinding(EditorBindingNameEnum bindingName, const string &key);
 
 #define EDITOR_BINDING(a, b, memberName, d) string memberName;
    EDITOR_BINDING_TABLE
@@ -253,7 +253,7 @@ public:
    void setBinding(BindingNameEnum bindingName, InputMode inputMode, InputCode key);
 
    string getEditorBinding(EditorBindingNameEnum bindingName) const;
-   void setEditorBinding(EditorBindingNameEnum bindingName, string key);
+   void setEditorBinding(EditorBindingNameEnum bindingName, const string &key);
 };
 
 
