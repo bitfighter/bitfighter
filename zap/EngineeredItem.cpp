@@ -13,6 +13,7 @@
 
 #include "projectile.h"
 
+#include "ServerGame.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"        // for accessing client's spark manager
@@ -62,16 +63,22 @@ void Engineerable::setResource(MountableItem *resource)
 {
    mResource = resource;
    mResource->removeFromDatabase(false);     // Don't want to delete this item -- we'll need it later in releaseResource()
+
+   TNLAssert(dynamic_cast<ServerGame*>(mResource->getGame()), "Null ServerGame");
+   static_cast<ServerGame*>(mResource->getGame())->onObjectRemoved(mResource);
 }
 
 
 void Engineerable::releaseResource(const Point &releasePos, GridDatabase *database)
 {
    if(!mResource) {
-	   return;
+      return;
    }
    mResource->addToDatabase(database);
    mResource->setPosVelAng(releasePos, Point(), 0);               // Reset velocity of resource item to 0,0
+
+   TNLAssert(dynamic_cast<ServerGame*>(mResource->getGame()), "Null ServerGame");
+   static_cast<ServerGame*>(mResource->getGame())->onObjectAdded(mResource);
 }
 
 

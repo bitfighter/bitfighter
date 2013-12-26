@@ -189,7 +189,7 @@ string Game::addBot(const Vector<const char *> &args)     { TNLAssert(false, "No
 void   Game::kickSingleBotFromLargestTeamWithBots()  { TNLAssert(false, "Not implemented for this class!"); }
 void   Game::moreBots()                              { TNLAssert(false, "Not implemented for this class!"); }
 void   Game::fewerBots()                             { TNLAssert(false, "Not implemented for this class!"); }
-Robot *Game::getBot(S32 index)                       { TNLAssert(false, "Not implemented for this class!"); }
+Robot *Game::getBot(S32 index)                       { TNLAssert(false, "Not implemented for this class!"); return NULL; }
 void   Game::addBot(Robot *robot)                    { TNLAssert(false, "Not implemented for this class!"); }
 void   Game::removeBot(Robot *robot)                 { TNLAssert(false, "Not implemented for this class!"); }
 void   Game::deleteBot(const StringTableEntry &name) { TNLAssert(false, "Not implemented for this class!"); }

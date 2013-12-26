@@ -129,6 +129,12 @@ IniSettings::IniSettings()
    allowAdminMapUpload = true;
    allowLevelgenUpload = true;
 
+#ifdef ZAP_DEDICATED
+   enableGameRecording = false;
+#else
+   enableGameRecording = true;
+#endif
+
    voteEnable = false;     // Voting disabled by default
    voteLength = 12;
    voteLengthToChangeTeam = 10;
@@ -686,6 +692,8 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
 
    iniSettings->defaultRobotScript = ini->GetValue(section, "DefaultRobotScript", iniSettings->defaultRobotScript);
    iniSettings->globalLevelScript  = ini->GetValue(section, "GlobalLevelScript", iniSettings->globalLevelScript);
+
+   iniSettings->enableGameRecording = ini->GetValueYN(section, "GameRecording", iniSettings->enableGameRecording);
 }
 
 
@@ -1767,6 +1775,8 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
 
    ini->SetValue  (section, "DefaultRobotScript", iniSettings->defaultRobotScript);
    ini->SetValue  (section, "GlobalLevelScript", iniSettings->globalLevelScript);
+
+   ini->setValueYN(section, "GameRecording", iniSettings->enableGameRecording);
 #ifdef BF_WRITE_TO_MYSQL
    if(iniSettings->mySqlStatsDatabaseServer == "" && iniSettings->mySqlStatsDatabaseName == "" && iniSettings->mySqlStatsDatabaseUser == "" && iniSettings->mySqlStatsDatabasePassword == "")
       ini->SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password");
@@ -1961,7 +1971,7 @@ FolderManager::FolderManager()
 // Constructor
 FolderManager::FolderManager(const string &levelDir,    const string &robotDir,  const string &sfxDir,        const string &musicDir, 
                              const string &iniDir,      const string &logDir,    const string &screenshotDir, const string &luaDir,
-                             const string &rootDataDir, const string &pluginDir, const string &fontsDir) :
+                             const string &rootDataDir, const string &pluginDir, const string &fontsDir,      const string &recordDir) :
                levelDir      (levelDir),
                robotDir      (robotDir),
                sfxDir        (sfxDir),
@@ -1972,7 +1982,8 @@ FolderManager::FolderManager(const string &levelDir,    const string &robotDir, 
                luaDir        (luaDir),
                rootDataDir   (rootDataDir),
                pluginDir     (pluginDir),
-               fontsDir      (fontsDir)
+               fontsDir      (fontsDir),
+               recordDir     (recordDir)
 {
    // Do nothing (more)
 }
@@ -2019,6 +2030,7 @@ void FolderManager::resolveDirs(GameSettings *settings)
    folderManager->logDir        = resolutionHelper(cmdLineDirs.logDir,        rootDataDir, "");
    folderManager->screenshotDir = resolutionHelper(cmdLineDirs.screenshotDir, rootDataDir, "screenshots");
    folderManager->musicDir      = resolutionHelper(cmdLineDirs.musicDir,      rootDataDir, "music");
+   folderManager->recordDir     = resolutionHelper(cmdLineDirs.musicDir,      rootDataDir, "record");
 
    // rootDataDir not used for these folders
    folderManager->sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
@@ -2040,6 +2052,7 @@ void FolderManager::resolveDirs(const string &root)
    logDir        = joindir(root, "");
    screenshotDir = joindir(root, "screenshots");
    musicDir      = joindir(root, "music");
+   recordDir     = joindir(root, "record");
 
    // root not used for these folders
    sfxDir        = joindir("", "sfx");

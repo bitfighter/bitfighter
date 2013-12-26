@@ -59,6 +59,7 @@ enum ParamId {
    SFX_DIR,
    MUSIC_DIR,
    FONTS_DIR,
+   RECORD_DIR,
 
    SIMULATED_LOSS,
    SIMULATED_LAG,

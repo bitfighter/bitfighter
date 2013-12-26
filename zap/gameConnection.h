@@ -52,11 +52,13 @@ private:
 
    RefPtr<ClientInfo> mClientInfo;               // This could be either a FullClientInfo or a RemoteClientInfo
 
+protected:
 #ifndef ZAP_DEDICATED
    ClientGame *mClientGame;         // NULL on server side, not available for dedicated build
 #endif
    ServerGame *mServerGame;         // NULL on client side
 
+private:
    bool mInCommanderMap;
    bool mWaitingForPermissionsReply;
    bool mGotPermissionsReply;
@@ -78,6 +80,7 @@ private:
    string undeleteMostRecentlyDeletedLevel();               // Undoes above function
 
 public:
+   bool mPackUnpackShipEnergyMeter; // Only true for game recorder
    U16 switchedTeamCount;
 
    U8 mVote;                     // 0 = not voted,  1 = vote yes,  2 = vote no    TODO: Make 
@@ -150,7 +153,7 @@ public:
 
    void onLocalConnection();
 
-   bool lostContact();
+   virtual bool lostContact();
 
    string getServerName();
 
@@ -293,7 +296,7 @@ public:
    S32 getAuthenticationCounter();
 
    void requestAuthenticationVerificationFromMaster();
-   void updateTimers(U32 timeDelta);
+   virtual void updateTimers(U32 timeDelta);
 
    void displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e);
 

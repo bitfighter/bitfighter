@@ -98,6 +98,7 @@ ParamInfo paramDefs[] = {
 { "musicdir",              ONE_REQUIRED,   MUSIC_DIR,             3, "<path>",                "Folder where game music stored",             "You must specify your music folder with the -musicdir option" },
 { "plugindir",             ONE_REQUIRED,   PLUGIN_DIR,            3, "<path>",                "Folder where editor plugins are stored",     "You must specify your plugins folder with the -plugindir option" },
 { "fontsdir",              ONE_REQUIRED,   FONTS_DIR,             3, "<path>",                "Folder where fonts are stored",              "You must specify your fonts folder with the -fontsdir option" },
+{ "recorddir",             ONE_REQUIRED,   RECORD_DIR,            3, "<path>",                "Folder where recording gameplay are stored", "You must specify your recorded gameplay folder with the -recorddir option" },
 
 // Developer-oriented options
 { "loss",                  ONE_REQUIRED,   SIMULATED_LOSS,        4, "<float>",   "Simulate the specified amount of packet loss, from 0 (no loss) to 1 (all packets lost) Note: Client only!", "You must specify a loss rate between 0 and 1 with the -loss option" },
@@ -328,7 +329,8 @@ FolderManager GameSettings::getCmdLineFolderManager()
                           getString(SCRIPTS_DIR),
                           getString(ROOT_DATA_DIR),
                           getString(PLUGIN_DIR),
-                          getString(FONTS_DIR));
+                          getString(FONTS_DIR),
+                          getString(RECORD_DIR));
 }
 
 

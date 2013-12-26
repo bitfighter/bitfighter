@@ -211,7 +211,8 @@ class NetConnection : public Object
    bool hasUnackedSentPackets() { return mLastSendSeq != mHighestAckedSeq; }
 
 protected:
-      U32 mLastPacketRecvTime; ///< Time of the receipt of the last data packet.
+   U32 mLastPacketRecvTime; ///< Time of the receipt of the last data packet.
+   U32 mWriteMaxBitSize;
 
 public:
    struct PacketNotify;

@@ -8,6 +8,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
+#  include "ClientInfo.h"
 #endif
 
 namespace Zap

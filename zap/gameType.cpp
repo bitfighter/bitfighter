@@ -535,7 +535,13 @@ void GameType::idle_server(U32 deltaT)
    bool needsScoreboardUpdate = mScoreboardUpdateTimer.update(deltaT);
 
    if(needsScoreboardUpdate)
+   {
       mScoreboardUpdateTimer.reset();
+
+      GameConnection *gc = ((ServerGame*)mGame)->getGameRecorder();
+      if(gc)
+         updateClientScoreboard(gc);
+   }
 
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
@@ -560,7 +566,7 @@ void GameType::idle_server(U32 deltaT)
 
             // Send scores/pings to client if game is over, or client has requested them
             if(mGameOver || conn->wantsScoreboardUpdates())
-               updateClientScoreboard(clientInfo);
+               updateClientScoreboard(clientInfo->getConnection());
          }
 
          if(getGame()->getSettings()->getIniSettings()->allowTeamChanging)
@@ -2255,6 +2261,14 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 
    clientGame->onPlayerJoined(clientInfo, isMyClient, playAlert, showMessage);
 
+
+   const Vector<DatabaseObject*> &database = *(getGame()->getGameObjDatabase()->findObjects_fast());
+
+   for(S32 i = database.size()-1; i >= 0; i--)
+   {
+      if(database[i]->getObjectTypeNumber() == PlayerShipTypeNumber || database[i]->getObjectTypeNumber() == RobotShipTypeNumber)
+         ((Ship*)database[i])->findClientInfoFromName();
+   }
 #endif
 }
 
@@ -2711,9 +2725,6 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
       (U32 botCount, Vector<StringTableEntry> args),
       (botCount, args))
 {
-   GameConnection *source     = (GameConnection *) getRPCSourceConnection();
-   ClientInfo     *clientInfo = source->getClientInfo();
-
    S32 botsAdded = 0;
 
    for(U32 i = 0; i < botCount; i++)
@@ -3197,19 +3208,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (me
    ClientInfo *sourceClientInfo = source->getClientInfo();
    
    if(!sourceClientInfo->isAdmin())
-         return;
+      return;
 
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
-   {
-      ClientInfo *clientInfo = mGame->getClientInfo(i);
-      
-      if(clientInfo->isRobot())
-         continue;
-
-      RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayAnnouncement, (message));
-         
-      clientInfo->getConnection()->postNetEvent(theEvent);
-   }
+   s2cDisplayAnnouncement(message);
 }
 
 
@@ -3329,6 +3330,10 @@ void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderCl
    // But don't add event if called by robot - it is already called in Robot::globalMsg/teamMsg
    if(senderClientInfo && !senderClientInfo->isRobot())
       EventManager::get()->fireEvent(NULL, EventManager::MsgReceivedEvent, message, senderClientInfo->getPlayerInfo(), global);
+
+   GameConnection *gc = ((ServerGame*)mGame)->getGameRecorder();
+   if(gc)
+      gc->postNetEvent(theEvent);
 }
 
 
@@ -3369,7 +3374,7 @@ GAMETYPE_RPC_C2S(GameType, c2sRequestScoreboardUpdates, (bool updates), (updates
    source->setWantsScoreboardUpdates(updates);
 
    if(updates)
-      updateClientScoreboard(source->getClientInfo());
+      updateClientScoreboard(source->getClientInfo()->getConnection());
 }
 
 
@@ -3512,7 +3517,7 @@ Vector<SignedInt<24> > GameType::mScores;
 Vector<SignedFloat<8> > GameType::mRatings;  // 8 bits for 255 gradations between -1 and 1 ~ about 1 value per .01
 
 
-void GameType::updateClientScoreboard(ClientInfo *requestor)
+void GameType::updateClientScoreboard(GameConnection *gc)
 {
    mPingTimes.clear();
    mScores.clear();
@@ -3532,7 +3537,7 @@ void GameType::updateClientScoreboard(ClientInfo *requestor)
       mRatings.push_back(info->getCalculatedRating());
    }
 
-   NetObject::setRPCDestConnection(requestor->getConnection());
+   NetObject::setRPCDestConnection(gc);
    s2cScoreboardUpdate(mPingTimes, mRatings);
    NetObject::setRPCDestConnection(NULL);
 }
@@ -3618,6 +3623,10 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
          if(dest && dest->mVoiceChatEnabled && clientInfo->getTeamIndex() == sourceClientInfo->getTeamIndex() && (dest != source || echo))
             dest->postNetEvent(event);
       }
+
+      GameConnection *gc = ((ServerGame*)mGame)->getGameRecorder();
+      if(gc)
+         gc->postNetEvent(event);
    }
 }
 
@@ -3893,9 +3902,16 @@ const Vector<WallRec> *GameType::getBarrierList()
 void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &message)
 {
    if(!isGameOver())  // Avoid flooding messages on game over.
+   {
       for(S32 i = 0; i < mGame->getClientCount(); i++)
          if(!mGame->getClientInfo(i)->isRobot())
             mGame->getClientInfo(i)->getConnection()->s2cDisplayMessage(color, sfx, message);
+
+      GameConnection *gc = ((ServerGame*)mGame)->getGameRecorder();
+      if(gc)
+         gc->s2cDisplayMessage(color, sfx, message);
+   }
+
 }
 
 
@@ -3904,9 +3920,15 @@ void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles
                                 const StringTableEntry &formatString, const Vector<StringTableEntry> &e)
 {
    if(!isGameOver())  // Avoid flooding messages on game over
+   {
       for(S32 i = 0; i < mGame->getClientCount(); i++)
          if(!mGame->getClientInfo(i)->isRobot())
             mGame->getClientInfo(i)->getConnection()->s2cDisplayMessageE(color, sfx, formatString, e);
+
+      GameConnection *gc = ((ServerGame*)mGame)->getGameRecorder();
+      if(gc)
+         gc->s2cDisplayMessageE(color, sfx, formatString, e);
+   }
 }
 
 

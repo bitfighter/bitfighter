@@ -99,7 +99,6 @@ void ControlObjectConnection::addPendingMove(Move *theMove)
       ((Ship*)controlObject.getPointer())->setState(m);
       theMove->time += m->time;
       *(Move*)m = *theMove;
-		static S32 ii2 = 0;
    }
    else if(pendingMoves.size() < MaxPendingMoves)
    {

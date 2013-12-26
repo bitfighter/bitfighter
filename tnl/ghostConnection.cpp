@@ -301,7 +301,8 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
          walk->priority = 0;
    }
    GhostRef *updateList = NULL;
-   qsort(&mGhostArray[0], mGhostZeroUpdateIndex, sizeof(GhostInfo *), UQECompare);
+   if(mGhostZeroUpdateIndex != 0)
+      qsort(&mGhostArray[0], mGhostZeroUpdateIndex, sizeof(GhostInfo *), UQECompare);
    // reset the array indices...
    for(S32 i = mGhostZeroUpdateIndex - 1; i >= 0; i--)
       mGhostArray[i]->arrayIndex = i;
@@ -375,10 +376,10 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
 
       // check for packet overrun, and rewind this update if there
       // was one:
-      if(!bstream->isValid() || bstream->getBitPosition() >= MaxPreferredPacketDataSize*8 - MinimumPaddingBits)
+      if(!bstream->isValid() || bstream->getBitPosition() >= mWriteMaxBitSize)
       {
          mStringTable->packetRewind(&getCurrentWritePacketNotify()->stringList, strEntry);  // we never sent those stuff (TableStringEntry), so let it drop
-         TNLAssert(have_something_to_send || bstream->getBitPosition() < MaxPacketDataSize*8 - MinimumPaddingBits, "Packet too big to send");
+         TNLAssert(have_something_to_send || bstream->getBitPosition() < mWriteMaxBitSize, "Packet too big to send");
          if(have_something_to_send)
          {
             bstream->setBitPosition(updateStart);

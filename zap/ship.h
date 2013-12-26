@@ -35,10 +35,11 @@ class Ship : public MoveObject
 {
    typedef MoveObject Parent;
 
-private:
    bool mIsRobot;
 
+protected:
    Timer mSendSpawnEffectTimer;           // Only meaningful on the server
+private:
    Vector<SafePtr<Zone> > mZones1;      // A list of zones the ship is currently in
    Vector<SafePtr<Zone> > mZones2;
    bool mZones1IsCurrent;
@@ -81,6 +82,7 @@ private:
 
 protected:
    SafePtr <ClientInfo> mClientInfo;
+   StringTableEntry mPlayerName;
 
    Vector<SafePtr<MountableItem> > mMountedItems;   
 
@@ -234,6 +236,7 @@ public:
 
    void deploySpybug();
 
+   const LoadoutTracker *getLoadout() const;
    bool setLoadout(const LoadoutTracker &loadout, bool silent = false);
    bool isLoadoutSameAsCurrent(const LoadoutTracker &loadout);
 
@@ -280,6 +283,7 @@ public:
    void readControlState(BitStream *stream);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void findClientInfoFromName();
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void updateInterpolation();

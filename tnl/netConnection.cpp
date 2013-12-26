@@ -124,6 +124,8 @@ NetConnection::NetConnection()
    mPacketSendBytesTotal = 0;
    mPacketRecvCount = 0;
    mPacketSendCount = 0;
+
+   mWriteMaxBitSize = MaxPreferredPacketDataSize*8 - MinimumPaddingBits;
 }
 
 void NetConnection::setInitialRecvSequence(U32 sequence)
@@ -870,7 +872,14 @@ void NetConnection::connectArranged(NetInterface *connectionInterface, const Vec
 
 void NetConnection::disconnect(TerminationReason tr, const char *reason)
 {
-   mInterface->disconnect(this, tr, reason);
+   if(mInterface.isValid())
+      mInterface->disconnect(this, tr, reason);
+   else
+   {
+      onConnectTerminated(tr, reason);
+      incRef();
+      decRef(); // 'this' gets deleted when nothing else reference it.
+   }
 }
 
 void NetConnection::onConnectionEstablished()

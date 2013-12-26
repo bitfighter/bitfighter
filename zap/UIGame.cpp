@@ -40,6 +40,8 @@
 #include "OpenglUtils.h"
 #include "GeomUtils.h"
 
+#include "GameRecorder.h"
+
 #include <cmath>     // Needed to compile under Linux, OSX
 
 namespace Zap
@@ -521,7 +523,8 @@ void GameUserInterface::render()
    F32 helpItemAlpha = getBackgroundTextDimFactor(false);
    mHelpItemManager.renderMessages(getGame(), DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.0f + 40, helpItemAlpha);
 
-   renderReticle();                       // Draw crosshairs if using mouse
+   if(dynamic_cast<GameRecorderPlayback *>(getGame()->getConnectionToServer()) == NULL)
+      renderReticle();                    // Draw crosshairs if using mouse
    renderWrongModeIndicator();            // Try to avert confusion after player has changed btwn joystick and keyboard modes
    renderChatMsgs();                      // Render incoming chat and server msgs
    mLoadoutIndicator.render(getGame());   // Draw indicators for the various loadout items

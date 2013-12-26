@@ -430,7 +430,7 @@ public:
    TNL_DECLARE_RPC(c2sRequestScoreboardUpdates, (bool updates));
    TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedFloat<8> > ratings));
 
-   void updateClientScoreboard(ClientInfo *clientInfo);
+   void updateClientScoreboard(GameConnection *gc);
 
    TNL_DECLARE_RPC(c2sChooseNextWeapon, ());
    TNL_DECLARE_RPC(c2sChoosePrevWeapon, ());

@@ -38,6 +38,7 @@ set(SHARED_SOURCES
 	gameConnection.cpp
 	gameLoader.cpp
 	gameNetInterface.cpp
+	GameRecorder.cpp
 	GameSettings.cpp
 	gameStats.cpp
 	gameType.cpp

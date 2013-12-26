@@ -23,6 +23,8 @@
 #include "stringUtils.h"
 #include "GeomUtils.h"
 
+#include "GameRecorder.h"
+
 
 using namespace TNL;
 
@@ -104,6 +106,8 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
 
    mLevelSwitchTimer.setPeriod(LevelSwitchTime);
    GameManager::setHostingModePhase(GameManager::NotHosting);
+
+   mGameRecorderServer = NULL;
 }
 
 
@@ -123,6 +127,9 @@ ServerGame::~ServerGame()
    delete mBotZoneDatabase;
 
    GameManager::setHostingModePhase(GameManager::NotHosting);
+
+   if(mGameRecorderServer)
+      delete mGameRecorderServer;
 }
 
 
@@ -493,6 +500,12 @@ static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo>
  */
 void ServerGame::cycleLevel(S32 nextLevel)
 {
+   if(mGameRecorderServer)
+   {
+      delete mGameRecorderServer;
+      mGameRecorderServer = NULL;
+   }
+
    cleanUp();
    mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
@@ -551,6 +564,9 @@ void ServerGame::cycleLevel(S32 nextLevel)
    }
 
    computeWorldObjectExtents();                       // Compute world Extents nice and early
+
+   if(!mGameRecorderServer && !mShuttingDown && getSettings()->getIniSettings()->enableGameRecording)
+      mGameRecorderServer = new GameRecorderServer(this);
 
 
    ////// This block could easily be moved off somewhere else   
@@ -1065,7 +1081,7 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 
-   if(getPlayerCount() == 0)
+   if(getPlayerCount() == 0 && !mShuttingDown && isDedicated())  // only dedicated server can have zero players
       cycleLevel(getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL);    // Advance to beginning of next level
    else
       mRobotManager.balanceTeams();
@@ -1334,6 +1350,10 @@ void ServerGame::idle(U32 timeDelta)
       cycleLevel(mNextLevel);
       mNextLevel = getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
    }
+
+
+   if(mGameRecorderServer)
+      mGameRecorderServer->idle(timeDelta);
 }
 
 
@@ -1737,6 +1757,32 @@ U16 ServerGame::findZoneContaining(const Point &p) const
 
    return U16_MAX;
 }
+
+
+void ServerGame::setGameType(GameType *theGameType)
+{
+   if(mGameRecorderServer)
+      mGameRecorderServer->objectLocalScopeAlways(theGameType);
+   Parent::setGameType(theGameType);
+}
+
+void ServerGame::onObjectAdded(BfObject *obj)
+{
+   if(mGameRecorderServer && obj->isGhostable())
+      mGameRecorderServer->objectLocalScopeAlways(obj);
+}
+
+
+void ServerGame::onObjectRemoved(BfObject *obj)
+{
+   if(mGameRecorderServer && obj->isGhostable())
+      mGameRecorderServer->objectLocalClearAlways(obj);   
+}
+GameConnection *ServerGame::getGameRecorder()
+{
+   return mGameRecorderServer;
+}
+
 
 };
 

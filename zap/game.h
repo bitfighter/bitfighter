@@ -417,7 +417,7 @@ public:
 
    StringTableEntry getTeamName(S32 teamIndex) const;   // Return the name of the team
 
-   void setGameType(GameType *theGameType);
+   virtual void setGameType(GameType *theGameType);
    void processDeleteList(U32 timeDelta);
 
    GameSettings   *getSettings() const;

@@ -8,7 +8,9 @@
 #include "game.h"
 #include "ship.h"
 #include "stringUtils.h"
+#ifndef ZAP_DEDICATED
 #include "ClientGame.h"
+#endif
 
 #include "gameObjectRender.h"    // For renderTextItem()
 
