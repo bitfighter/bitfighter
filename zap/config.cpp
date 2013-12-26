@@ -627,19 +627,19 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->hostaddr  = ini->GetValue(section, "ServerAddress", iniSettings->hostaddr);
    iniSettings->hostdescr = ini->GetValue(section, "ServerDescription", iniSettings->hostdescr);
 
-   iniSettings->serverPassword      = ini->GetValue  (section, "ServerPassword", iniSettings->serverPassword);
-   iniSettings->ownerPassword       = ini->GetValue  (section, "OwnerPassword", iniSettings->ownerPassword);
-   iniSettings->adminPassword       = ini->GetValue  (section, "AdminPassword", iniSettings->adminPassword);
-   iniSettings->levelChangePassword = ini->GetValue  (section, "LevelChangePassword", iniSettings->levelChangePassword);
-   iniSettings->levelDir            = ini->GetValue  (section, "LevelDir", iniSettings->levelDir);
-   iniSettings->maxPlayers          = ini->GetValueI (section, "MaxPlayers", iniSettings->maxPlayers);
-   iniSettings->maxBots             = ini->GetValueI (section, "MaxBots", iniSettings->maxBots);
-   iniSettings->playWithBots        = ini->GetValueYN(section, "AddRobots", iniSettings->playWithBots);
-   iniSettings->minBalancedPlayers  = ini->GetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
-   iniSettings->botsAlwaysBalanceTeams   = ini->GetValueYN(section, "BotsAlwaysBalanceTeams", iniSettings->botsAlwaysBalanceTeams);
-   iniSettings->enableServerVoiceChat = ini->GetValueYN (section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
+   iniSettings->serverPassword         = ini->GetValue  (section, "ServerPassword", iniSettings->serverPassword);
+   iniSettings->ownerPassword          = ini->GetValue  (section, "OwnerPassword", iniSettings->ownerPassword);
+   iniSettings->adminPassword          = ini->GetValue  (section, "AdminPassword", iniSettings->adminPassword);
+   iniSettings->levelChangePassword    = ini->GetValue  (section, "LevelChangePassword", iniSettings->levelChangePassword);
+   iniSettings->levelDir               = ini->GetValue  (section, "LevelDir", iniSettings->levelDir);
+   iniSettings->maxPlayers             = ini->GetValueI (section, "MaxPlayers", iniSettings->maxPlayers);
+   iniSettings->maxBots                = ini->GetValueI (section, "MaxBots", iniSettings->maxBots);
+   iniSettings->playWithBots           = ini->GetValueYN(section, "AddRobots", iniSettings->playWithBots);
+   iniSettings->minBalancedPlayers     = ini->GetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
+   iniSettings->botsAlwaysBalanceTeams = ini->GetValueYN(section, "BotsAlwaysBalanceTeams", iniSettings->botsAlwaysBalanceTeams);
+   iniSettings->enableServerVoiceChat  = ini->GetValueYN (section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
 
-   iniSettings->alertsVolLevel = (float) ini->GetValueI(section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10)) / 10.0f;
+   iniSettings->alertsVolLevel       = (F32) ini->GetValueI(section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10)) / 10.0f;
    iniSettings->allowGetMap          = ini->GetValueYN (section, "AllowGetMap", iniSettings->allowGetMap);
    iniSettings->allowDataConnections = ini->GetValueYN (section, "AllowDataConnections", iniSettings->allowDataConnections);
 
@@ -840,7 +840,7 @@ static void loadQuickChatMessages(CIniFile *ini)
 
    messages.sort(alphaSort);
 
-   for(S32 i = messages.size()-1; i >= 0; i--)
+   for(S32 i = messages.size() - 1; i >= 0; i--)
    {
       QuickChatNode node;
       node.depth = 1;   // This is a top-level message node
