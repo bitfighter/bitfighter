@@ -60,7 +60,7 @@ TEST(InputStringTest, normalizeStrings)
    EXPECT_EQ("Ctrl+Alt+Up Arrow", normalized);     EXPECT_TRUE(InputCodeManager::isValidInputString(normalized));
 
    normalized = InputCodeManager::normalizeInputString("ctrl+g");   
-   EXPECT_EQ("Ctrl+G", normalized);     EXPECT_TRUE(InputCodeManager::isValidInputString(normalized));
+   EXPECT_EQ("Ctrl+G", normalized);                EXPECT_TRUE(InputCodeManager::isValidInputString(normalized));
 
    // Invalid inputStrings:
    normalized = InputCodeManager::normalizeInputString("Bullocks");   
