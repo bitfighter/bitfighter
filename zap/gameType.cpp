@@ -2725,9 +2725,6 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
       (U32 botCount, Vector<StringTableEntry> args),
       (botCount, args))
 {
-   GameConnection *source     = (GameConnection *) getRPCSourceConnection();
-   ClientInfo     *clientInfo = source->getClientInfo();
-
    S32 botsAdded = 0;
 
    for(U32 i = 0; i < botCount; i++)

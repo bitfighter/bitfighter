@@ -844,9 +844,11 @@ void CounterMenuItem::backspace()
 {
    mValue /= 10;
 }
+
+
 void CounterMenuItem::enterDigit(S32 digit)
 {
-   if(mValue > (U32(U32(S32_MAX) + 9) / U32(10)))
+   if(mValue > S32((U32(S32_MAX) + 9) / 10))
       mValue = S32_MAX;
    else
       mValue *= 10;
