@@ -339,6 +339,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestHelpItemManager.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestHttpRequest.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestINISettings.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestInputCode.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestIntegration.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelLoader.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelMenuSelectUserInterface.cpp

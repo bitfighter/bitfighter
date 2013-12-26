@@ -214,7 +214,11 @@ public:
 
    static bool checkModifier(InputCode mod1);            
    static bool checkModifier(InputCode mod1, InputCode mod2);            
-   static bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3);            
+   static bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3);
+
+   static bool isValidInputString(const string &inputString);
+   static string normalizeInputString(const string &inputString);
+
 
    void setInputMode(InputMode inputMode);
    InputMode getInputMode()    const;
@@ -246,14 +250,13 @@ public:
 
    static JoystickButton inputCodeToJoystickButton(InputCode inputCode);
 
-
    InputCode getBinding(BindingNameEnum bindingName) const; 
    InputCode getBinding(BindingNameEnum bindingName, InputMode inputMode) const;
    void setBinding(BindingNameEnum bindingName, InputCode key);
    void setBinding(BindingNameEnum bindingName, InputMode inputMode, InputCode key);
 
    string getEditorBinding(EditorBindingNameEnum bindingName) const;
-   void setEditorBinding(EditorBindingNameEnum bindingName, const string &key);
+   void setEditorBinding(EditorBindingNameEnum bindingName, const string &inputString);
 };
 
 

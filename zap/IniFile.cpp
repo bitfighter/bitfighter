@@ -251,7 +251,7 @@ bool CIniFile::SetValue(S32 const sectionId, S32 const valueID, const string val
 }
 
 
-// Will create key if it does not exist if create is set to true
+// If create is set to true, will create key if it does not exist
 bool CIniFile::SetValue(const string &section, const string &key, const string &value, bool const create)
 {
    S32 sectionId = findSection(section);
@@ -410,7 +410,7 @@ int CIniFile::GetValueI(const string &section, const string &key, S32 const defV
 }
 
 
-bool valueIsYes(const string &val)
+static bool valueIsYes(const string &val)
 {
    return lcase(val) == "yes";
 }

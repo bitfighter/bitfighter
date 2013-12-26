@@ -185,7 +185,7 @@ TEST_F(ObjectTest, LuaSanity)
 
    // Create our pair of connected games
    GamePair gamePair;
-   ClientGame *clientGame = gamePair.client;
+   ClientGame *clientGame = gamePair.clients.first();
    ServerGame *serverGame = gamePair.server;
 
    // Basic geometry to plug into polygon objects

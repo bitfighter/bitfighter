@@ -250,7 +250,7 @@ bool InputCodeManager::getState(InputCode inputCode)
 
 
 static const InputCode modifiers[] = { KEY_CTRL, KEY_ALT, KEY_SHIFT, KEY_META, KEY_SUPER };
-
+static const char InputStringJoiner = '+';
 
 // At any given time, for any combination of keys being pressed, there will be an official "input string" that looks a bit like [Ctrl+T] or whatever.  
 // This may be different than the keys actually being pressed.  For example, if the A and B keys are down, the inputString will be [A].
@@ -281,11 +281,10 @@ string InputCodeManager::getCurrentInputString(InputCode inputCode)
       return "";
       
    string inputString = "";
-   string joiner = "+";
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
       if(getState(modifiers[i]))
-         inputString += inputCodeToString(modifiers[i]) + joiner;
+         inputString += inputCodeToString(modifiers[i]) + InputStringJoiner;
    
    inputString += inputCodeToString(baseKey);
    return inputString;
@@ -343,6 +342,86 @@ bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2, InputCode m
       }
 
    return foundCount == 3;
+}
+
+
+// Returns "" if inputString is unparsable
+string InputCodeManager::normalizeInputString(const string &inputString)
+{
+   static const string INVALID = "";
+   Vector<string> words;
+   parseString(inputString, words, InputStringJoiner);
+
+   // Modifiers will be first words... sort them, normalize capitalization, get them organized
+   bool hasModifier[ARRAYSIZE(modifiers)];
+   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+      hasModifier[i] = false;
+
+   for(S32 i = 0; i < words.size() - 1; i++)
+   {
+      InputCode inputCode = stringToInputCode(words[i].c_str());
+      if(inputCode == KEY_UNKNOWN)     // Encountered something unexpected
+         return INVALID;
+
+      bool found = false;
+      for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+         if(inputCode == modifiers[i])
+         {
+            hasModifier[i] = true;
+            found = true;
+            break;
+         }
+
+      if(!found)     // InputCode we found was not a modifier, but was in a modifier position
+         return INVALID;
+   }
+
+   // Now examine base key itself
+   InputCode baseCode = stringToInputCode(words.last().c_str());
+   if(baseCode == KEY_UNKNOWN)     // Unknown base key
+      return INVALID;
+
+   // baseCode cannot be a modifier -- "Ctrl" is not a valid inputString
+   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+      if(baseCode == modifiers[i])
+         return INVALID;
+
+   string normalizedInputString = "";
+   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+      if(hasModifier[i])
+         normalizedInputString += string(inputCodeToString(modifiers[i])) + InputStringJoiner;
+
+   normalizedInputString += string(inputCodeToString(baseCode));
+   return normalizedInputString;
+}
+
+
+// A valid input string will consist of one or modifiers, seperated by "+", followed by a valid inputCode.
+// Modifier order and case are significant!!  Use normalizeInputString to get case and modifiers fixed up.
+bool InputCodeManager::isValidInputString(const string &inputString)
+{
+   Vector<string> words;
+   parseString(inputString, words, InputStringJoiner);
+
+   S32 startMod = 0;    
+
+   // Make sure all but the last word are modifiers
+   for(S32 i = 0; i < words.size() - 1; i++)
+   {
+      bool found = false;
+      for(S32 j = startMod; j < S32(ARRAYSIZE(modifiers)); j++)
+         if(words[i] == inputCodeToString(modifiers[j]))
+         {
+            found = true;
+            startMod = j + 1;     // Helps ensure modifiers are in the correct order
+            break;
+         }
+
+         if(!found)
+            return false;
+   }
+
+   return stringToInputCode(words.last().c_str()) != KEY_UNKNOWN;
 }
 
 
@@ -553,9 +632,9 @@ void InputCodeManager::setBinding(BindingNameEnum bindingName, InputMode inputMo
 }
 
 
-void InputCodeManager::setEditorBinding(EditorBindingNameEnum bindingName, const string &key)
+void InputCodeManager::setEditorBinding(EditorBindingNameEnum bindingName, const string &inputString)
 {
-	mEditorBindingSet.setEditorBinding(bindingName, key);
+	mEditorBindingSet.setEditorBinding(bindingName, inputString);
 }
 
 

@@ -705,10 +705,27 @@ static InputCode getInputCode(CIniFile *ini, const string &section, const string
 // Returns a string like "Ctrl+L"
 static string getInputString(CIniFile *ini, const string &section, const string &key, const string &defaultValue)
 {
-   return ini->GetValue(section, key, defaultValue);
+   string inputStringFromIni = ini->GetValue(section, key, defaultValue);
+   string normalizedInputString = InputCodeManager::normalizeInputString(inputStringFromIni);
+
+   // Check if inputString is valid -- we could get passed any ol' garbage that got put in the INI file
+   if(InputCodeManager::isValidInputString(normalizedInputString))
+   {
+      // If normalized binding is different than what is in the INI file, replace the INI version with the good version
+      if(normalizedInputString != inputStringFromIni)
+         ini->SetValue(section, key, normalizedInputString);
+
+      return normalizedInputString;
+   }
+
+   // We don't understand what is in the INI file... print a warning, and fall back to the default
+   logprintf(LogConsumer::ConfigurationError, "Invalid key binding in INI section [%s]: %s=%s", 
+             section.c_str(), key.c_str(), inputStringFromIni.c_str());
+   return defaultValue;
 }
 
 
+// Only called while loading keys from the INI
 void setDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
 #define EDITOR_BINDING(editorEnumVal, b, c, defaultEditorKeyboardBinding)                                       \
@@ -778,12 +795,19 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
 
 static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section)
 {
+   string key;
+
    // Expands to:
-   // ini->SetValue(section, InputCodeManager::getEditorBindingName(FlipItemHorizontal),
-   //               inputCodeManager->getEditorBinding(FlipItemHorizontal)));
+   // key = InputCodeManager::getEditorBindingName(FlipItemHorizontal); 
+   // if(!ini->hasKey(section, key))
+   //   ini->SetValue(section, key, inputCodeManager->getEditorBinding(editorEnumVal));
+
+   // Don't overwrite existing bindings for now... there is no way to modify them in-game, and if the user has
+   // specified an invalid binding, leaving it wrong will make it easier for them to find and fix the error
 #define EDITOR_BINDING(editorEnumVal, b, c, d)  \
-      ini->SetValue(section, InputCodeManager::getEditorBindingName(editorEnumVal),  \
-         			  inputCodeManager->getEditorBinding(editorEnumVal));
+      key = InputCodeManager::getEditorBindingName(editorEnumVal); \
+      if(!ini->hasKey(section, key))                               \
+         ini->SetValue(section, key, inputCodeManager->getEditorBinding(editorEnumVal));
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
 }

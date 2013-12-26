@@ -24,8 +24,8 @@ TEST(GameUserInterfaceTest, Engineer)
    GamePair gamePair(getLevelCodeForTestingEngineer1(), 3); // See def for description of level
    ServerGame *serverGame       = GameManager::getServerGame();
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-   GameSettings *clientSettings = clientGames->get(0)->getSettings();
-   GameUserInterface *gameUI    = clientGames->get(0)->getUIManager()->getUI<GameUserInterface>();
+   GameSettings *clientSettings = clientGames->first()->getSettings();
+   GameUserInterface *gameUI    = clientGames->first()->getUIManager()->getUI<GameUserInterface>();
 
    DEFINE_KEYS_AND_EVENTS(clientSettings);
 
