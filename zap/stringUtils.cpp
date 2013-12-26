@@ -142,12 +142,15 @@ string ftos(F32 f)
    return stripZeros(outString);
 }
 
+
+#ifdef NEED_STOI
 // These next two functions are defined in c++0x/c++11 and can be removed if we migrate to
 // the new standard
 S32 stoi(const string &s)
 {
    return atoi(s.c_str());
 }
+#endif
 
 
 F64 stof(const string &s)
