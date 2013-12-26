@@ -49,6 +49,10 @@ static FILE *openRecordingFile(ServerGame *game)
    }
 
    string file = joindir(dir, itos(max_id + 1));
+
+   string file2 = makeFilenameFromString(game->getGameType()->getLevelName()->getString());
+   if(file2.size() != 0)
+      file = file + "_" + file2;
    return fopen(file.c_str(), "wb");
 }
 
@@ -101,7 +105,7 @@ void GameRecorderServer::idle(U32 MilliSeconds)
    if(!mFile)
       return;
 
-   if(!GhostConnection::isDataToTransmit() && mMilliSeconds + MilliSeconds < (1 << 10) - 200)  // we record milliseconds as 12 bits
+   if(!GhostConnection::isDataToTransmit() && mMilliSeconds + MilliSeconds < (1 << 10) - 200)  // we record milliseconds as 10 bits
    {
       mMilliSeconds += MilliSeconds;
       return;
