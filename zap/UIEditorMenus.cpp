@@ -31,11 +31,13 @@ QuickMenuUI::QuickMenuUI(ClientGame *game, const string &title) : Parent(game, t
    initialize();
 }
 
+
 // Destructor
 QuickMenuUI::~QuickMenuUI()
 {
    // Do nothing
 }
+
 
 void QuickMenuUI::initialize()
 {
