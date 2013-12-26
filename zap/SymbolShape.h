@@ -377,7 +377,6 @@ class SymbolString : public SymbolShape      // So a symbol string can hold othe
    typedef SymbolShape Parent;
 
 protected:
-   S32 mReady;
    Alignment mAlignment;
 
    Vector<boost::shared_ptr<SymbolShape> > mSymbols;
