@@ -145,7 +145,7 @@ static void doScenario2(GamePair &gamePair)
    //ASSERT_TRUE(clientGame2->findClientInfo("TestPlayerOne")->isSpawnDelayed());    // Check that other player knows our status
 
    // After some time has passed -- no longer in returnToGameCountdown period, ship should have appeared on server and client
-   gamePair.idle(ClientInfo::SPAWN_UNDELAY_TIMER_DELAY / 100, 105);
+   gamePair.idle(ClientInfo::SPAWN_UNDELAY_TIMER_DELAY / 100, 105);  // More time than SPAWN_UNDELAY_TIMER_DELAY
    ASSERT_FALSE(clientGame->inReturnToGameCountdown());
    fillVector.clear();
    serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
