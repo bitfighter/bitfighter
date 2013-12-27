@@ -345,6 +345,11 @@ bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2, InputCode m
 }
 
 
+// Array tying InputCodes to string representations; used for translating one to the other 
+static const char *keyNames[KEY_COUNT];
+static Vector<string> modifierNames;
+
+
 // Returns "" if inputString is unparsable
 string InputCodeManager::normalizeInputString(const string &inputString)
 {
@@ -381,17 +386,16 @@ string InputCodeManager::normalizeInputString(const string &inputString)
    if(baseCode == KEY_UNKNOWN)     // Unknown base key
       return INVALID;
 
-   // baseCode cannot be a modifier -- "Ctrl" is not a valid inputString
-   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
-      if(baseCode == modifiers[i])
-         return INVALID;
+   // baseCode cannot be a modifier -- "Ctrl" and "Alt+Shift" are not valid inputStrings
+   if(isModifier(baseCode))
+      return INVALID;
 
    string normalizedInputString = "";
    for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
       if(hasModifier[i])
-         normalizedInputString += string(inputCodeToString(modifiers[i])) + InputStringJoiner;
+         normalizedInputString += string(keyNames[modifiers[i]]) + InputStringJoiner;
 
-   normalizedInputString += string(inputCodeToString(baseCode));
+   normalizedInputString += string(keyNames[baseCode]);
    return normalizedInputString;
 }
 
@@ -403,6 +407,9 @@ bool InputCodeManager::isValidInputString(const string &inputString)
    Vector<string> words;
    parseString(inputString, words, InputStringJoiner);
 
+   const Vector<string> *mods = InputCodeManager::getModifierNames();
+
+
    S32 startMod = 0;    
 
    // Make sure all but the last word are modifiers
@@ -410,7 +417,7 @@ bool InputCodeManager::isValidInputString(const string &inputString)
    {
       bool found = false;
       for(S32 j = startMod; j < S32(ARRAYSIZE(modifiers)); j++)
-         if(words[i] == inputCodeToString(modifiers[j]))
+         if(words[i] == mods->get(j))
          {
             found = true;
             startMod = j + 1;     // Helps ensure modifiers are in the correct order
@@ -1773,11 +1780,6 @@ bool InputCodeManager::isModifier(InputCode inputCode)
 }
 
 
-// Array tying InputCodes to string representations; used for translating one to the other 
-static const char *keyNames[KEY_COUNT];
-static Vector<string> modifierNames;
-
-
 InputCode InputCodeManager::getModifier(InputCode inputCode)
 {
    if(isCtrlKey(inputCode))
@@ -2068,11 +2070,8 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_KEYPAD_ENTER)]    = "Keypad Enter";     
    keyNames[S32(KEY_LESS)]            = "Less";    
 
-   modifierNames.push_back(keyNames[S32(KEY_SHIFT)]);            
-   modifierNames.push_back(keyNames[S32(KEY_ALT)]);            
-   modifierNames.push_back(keyNames[S32(KEY_CTRL)]);            
-   modifierNames.push_back(keyNames[S32(KEY_META)]);            
-   modifierNames.push_back(keyNames[S32(KEY_SUPER)]);  
+   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+      modifierNames.push_back(keyNames[S32(modifiers[i])]);            
 }
 
 
