@@ -148,7 +148,7 @@ TEST_F(ObjectTest, GhostingSanity)
 
    // Check whether the objects made it onto the client
    const Vector<DatabaseObject *> *objects = clientGame->getGameObjDatabase()->findObjects_fast();
-   for(S32 i=0; i<objects->size(); i++)
+   for(S32 i = 0; i < objects->size(); i++)
    {
       BfObject *bfobj = dynamic_cast<BfObject *>((*objects)[i]);
       if(bfobj->getClassRep() != NULL)  // Barriers and some other objects might not be ghostable..
