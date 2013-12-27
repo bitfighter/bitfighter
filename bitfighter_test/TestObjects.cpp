@@ -168,7 +168,7 @@ TEST_F(ObjectTest, GhostingSanity)
       string className = netClassRep->getClassName();
       if(className != "PolyWall" && className != "ForceField")
       {
-         EXPECT_EQ(ghostingRecords[i].server, ghostingRecords[i].client);
+         EXPECT_EQ(ghostingRecords[i].server, ghostingRecords[i].client) << " className=" << className;
       }
    }
 }
