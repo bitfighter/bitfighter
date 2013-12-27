@@ -22,6 +22,12 @@ namespace Zap
 using namespace std;
 using namespace TNL;
 
+// Test this scenario!!
+// Watusimoto: i found a bug, not sure if it's related to your RobotManager - if you start a level with 'Robot' s in the level file, people are sorted to either team without respecting the bot count
+// so say I have 5 aegisbots in a file all on team blue and 5 humans are playing, if you restart the level, the humans get places 2 on blue 2 on red
+// *4 humans
+// only happens if players are already connected to the game server and the level is started
+
 TEST(RobotManagerTest, findMinPlayers)
 { 
    //        v--add this many       players--v  v--teams
