@@ -284,7 +284,7 @@ string InputCodeManager::getCurrentInputString(InputCode inputCode)
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
       if(getState(modifiers[i]))
-         inputString += inputCodeToString(modifiers[i]) + InputStringJoiner;
+         inputString += string(inputCodeToString(modifiers[i])) + InputStringJoiner;
    
    inputString += inputCodeToString(baseKey);
    return inputString;
