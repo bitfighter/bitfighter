@@ -9,7 +9,7 @@
 #include "gameType.h"
 #include "ServerGame.h"
 
-#include "StringUtils.h"
+#include "stringUtils.h"
 #include "TestUtils.h"
 #include "gtest/gtest.h"
 
