@@ -95,7 +95,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
          { "Show/Hide Plugins Pane",   "[[DockmodeItems]]"},
       { "-", "" },         // Horiz. line
    { "HEADER", "Editing" },
-         { "Cut/Copy/Paste",           "[[CutSelection]]/[[keyCopySelection]]/[[PasteSelection]]"},
+         { "Cut/Copy/Paste",           "[[CutSelection]] / [[CopySelection]] / [[PasteSelection]]"},
          { "Delete Selection",         "[[Del]]" },
          { "Undo",                     "[[UndoAction]]" },
          { "Redo",                     "[[RedoAction]]" }
@@ -123,9 +123,9 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    // For page 2 of general instructions
    ControlStringsEditor controls2Left[] = {
    { "HEADER", "Size & Rotation" },
-         { "Flip horizontal/vertical", "[[FlipItemHorizontal]], [[FlipItemVertical]]" },
-         { "Rotate object in place",   "[[RotateSpinCCW]], [[RotateSpinCW]]" },
-         { "Rotate about (0,0)",       "[[RotateCCWOrigin]], [[RotateCWOrigin]]" },
+         { "Flip horizontal/vertical", "[[FlipItemHorizontal]] / [[FlipItemVertical]]" },
+         { "Rotate object in place",   "[[RotateSpinCCW]] / [[RotateSpinCW]]" },
+         { "Rotate about (0,0)",       "[[RotateCCWOrigin]] / [[RotateCWOrigin]]" },
          { "Free rotate in place",     "[[RotateCentroid]]" },
          { "Free rotate about (0,0)",  "[[RotateOrigin]]" },
          { "Scale selection",          "[[ResizeSelection]]" },

@@ -615,50 +615,84 @@ SymbolShapePtr SymbolString::getHorizLine(S32 length, S32 vertOffset, S32 height
 }
 
 
-// Parse special symbols enclosed inside [[ ]] in strings.  The passed symbolName is the bit inside the brackets.
-// Pass in NULL for inputCodeManager only if you double-pinky-promise that the string your parsing doesn't need it.
-static void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbol, S32 fontSize,
-                           const Color *color, Vector<SymbolShapePtr> &symbols)
+static InputCode convertStringToInputCode(const InputCodeManager *inputCodeManager, const string &symbol)
 {
-   Vector<string> words;
-   parseString(symbol, words, ':');
-
-   string symbolName = words[0];
    InputCode inputCode = KEY_UNKNOWN;
 
    // We might pass in a NULL inputCodeManager, in which case we won't process any inputCode related items
    if(inputCodeManager)
    {
       // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
-      inputCode = inputCodeManager->getKeyBoundToBindingCodeName(symbolName);
+      inputCode = inputCodeManager->getKeyBoundToBindingCodeName(symbol);
 
       // Second chance -- maybe it's a key name instead of a control binding (like "K")
       if(inputCode == KEY_UNKNOWN)
-         inputCode = inputCodeManager->stringToInputCode(symbolName.c_str());
-
-      // Third chance -- see if there is a modifier key at the front (like "Ctrl+K")
-      if(inputCode == KEY_UNKNOWN)
-      {
-         SymbolShapePtr modifiedKey = SymbolString::getModifiedKeySymbol(symbolName, color);
-         if(modifiedKey.get() != NULL)
-         {
-            symbols.push_back(modifiedKey);
-            return;
-         }
-      }
+         inputCode = inputCodeManager->stringToInputCode(symbol.c_str());
    }
 
-   if(inputCode != KEY_UNKNOWN)
+   return inputCode;
+}
+
+
+static SymbolShapePtr convertStringToControlSymbol(const InputCodeManager *inputCodeManager, const string &symbol, const Color *color)
+{
+   string controlString = "";
+
+   // We might pass in a NULL inputCodeManager, in which case we can't go further
+   if(inputCodeManager)
+   {
+      // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
+      controlString = inputCodeManager->getEditorKeyBoundToBindingCodeName(symbol);
+   }
+
+   if(controlString != "")
+      return SymbolString::getModifiedKeySymbol(controlString, color);
+
+   return SymbolString::getModifiedKeySymbol(symbol, color);     // Is symbol something like "Ctrl+J"?
+}
+
+
+// Parse special symbols enclosed inside [[ ]] in strings.  The passed symbolName is the bit inside the brackets.
+// Pass in NULL for inputCodeManager only if you double-pinky-promise that the string your parsing doesn't need it.
+static void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbol, S32 fontSize,
+                           const Color *color, Vector<SymbolShapePtr> &symbols)
+{
+   // The first thing we'll do is see if we can convert symbolName into an inputCode, which we can then convert into its 
+   // string representation.  If conversion doesn't work, convertStringToInputCode will return KEY_UNKNOWN.
+   InputCode inputCode = convertStringToInputCode(inputCodeManager, symbol);
+
+   if(inputCode != KEY_UNKNOWN)     // We got a usable inputCode!!
+   {
       symbols.push_back(SymbolString::getControlSymbol(inputCode, color));
-   else if(symbolName == "LOADOUT_ICON")
+      return;
+   }
+
+   // See if we can get something that looks like a string containing the name of an inputString, something like "Shift+O",
+   // or perhaps a binding that can be converted into such.
+   SymbolShapePtr modifiedKey = convertStringToControlSymbol(inputCodeManager, symbol, color);
+
+   if(modifiedKey.get() != NULL)    // Got something!!
+   {
+      symbols.push_back(modifiedKey);
+      return;
+   }
+
+
+   // Now for some standard parsing...
+   Vector<string> words;
+   parseString(symbol, words, ':');
+
+   string symbolName = words[0];
+
+   if(symbol == "LOADOUT_ICON")
       symbols.push_back(SymbolString::getSymbolGear(14));
-   else if(symbolName == "GOAL_ICON")
+   else if(symbol == "GOAL_ICON")
       symbols.push_back(SymbolString::getSymbolGoal(14));
-   else if(symbolName == "NEXUS_ICON")
+   else if(symbol == "NEXUS_ICON")
       symbols.push_back(SymbolString::getSymbolNexus(14));
-   else if(symbolName == "SPINNER")
+   else if(symbol == "SPINNER")
       symbols.push_back(SymbolString::getSymbolSpinner(fontSize, color));
-   else if(symbolName == "CHANGEWEP")
+   else if(symbol == "CHANGEWEP")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_SELWEAP1)));
@@ -666,7 +700,7 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_SELWEAP3)));
    }
 
-   else if(symbolName == "MOVEMENT")
+   else if(symbol == "MOVEMENT")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_UP)));
@@ -675,7 +709,7 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_RIGHT)));
    }
 
-   else if(symbolName == "MOVEMENT_LDR")
+   else if(symbol == "MOVEMENT_LDR")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_LEFT)));
@@ -683,19 +717,19 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_RIGHT)));
    }
 
-   else if(symbolName == "MODULE_CTRL1")
+   else if(symbol == "MODULE_CTRL1")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_MOD1)));
    }
 
-   else if(symbolName == "MODULE_CTRL2")
+   else if(symbol == "MODULE_CTRL2")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
       symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_MOD2)));
    }
 
-   else if(symbolName == "BULLET")                    // Square bullet point 
+   else if(symbol == "BULLET")                    // Square bullet point 
       symbols.push_back(SymbolString::getBullet());
 
    else if(symbolName == "TAB_STOP")                  // Adds whitespace until width is equal to n
