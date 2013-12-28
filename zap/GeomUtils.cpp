@@ -1347,6 +1347,7 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
 }
 
 
+// This method offsets and squares any acute corners, perfect for bot zones
 void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
 {
    Paths polygons = upscaleClipperPoints(inputPolys);
@@ -1356,6 +1357,24 @@ void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Poi
    Paths outPolys(polygons.size());
 
    clipperOffset.AddPaths(polygons, jtSquare, etClosedPolygon);
+   clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
+
+   // Downscale
+   outputPolys = downscaleClipperPoints(outPolys);
+}
+
+
+// This method is a generic offsetting method that uses the miter offset
+void offsetPolygons(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
+{
+   // Upscale
+   Paths polygons = upscaleClipperPoints(inputPolys);
+
+   // Allow a liberal mitering offset
+   ClipperOffset clipperOffset(50, 0);
+   Paths outPolys(polygons.size());
+
+   clipperOffset.AddPaths(polygons, jtMiter, etClosedPolygon);
    clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
 
    // Downscale
@@ -1890,6 +1909,7 @@ void pushPolyNode(lua_State *L, const PolyNode *node)
 }
 
 #define LUA_STATIC_METHODS(METHOD) \
+   METHOD(offsetPolygons,     ARRAYDEF({{ NUM, TABLE, END }}),                                          1 ) \
    METHOD(polyganize,         ARRAYDEF({{ TABLE, END }}),                                               1 ) \
    METHOD(triangulate,        ARRAYDEF({{ TABLE, END }}),                                               1 ) \
    METHOD(clipPolygons,       ARRAYDEF({{ INT, TABLE, TABLE, END }, { INT, TABLE, TABLE, BOOL, END }}), 2 ) \
@@ -2022,6 +2042,48 @@ S32 lua_clipPolygonsAsTree(lua_State* L)
 
    pushPolyNode(L, solution.GetFirst());
    return 1;
+}
+
+
+/**
+ * @luafunc static table Geom::offsetPolygons(num offset, mixed polygons)
+ * @brief
+ * Offset polygons by the given offset.
+ *
+ * @desc
+ * This offsets polygons using a 'miter' join type.
+ *
+ * If the input offset generates polygons that overlap, the output can
+ * have fewer total polygons than the input.
+ *
+ * If the input polygon has 'isthmus' pieces, then the output cat have more
+ * polygons than the input.
+ *
+ * @param offset Amount to offset the polygons.
+ * @param polygons A table of polygons.
+ *
+ * @return A table of the solution polygons, or `nil` on failure.
+ */
+S32 lua_offsetPolygons(lua_State *L)
+{
+   checkArgList(L, "Geom", "offsetPolygons");
+
+   F32 amount = lua_tonumber(L, 1);
+   Vector<Vector<Point> > input = getPolygons(L, 2);
+
+   lua_pop(L, 2);
+
+   // try to execute the operation
+   Vector<Vector<Point> > result;
+
+   offsetPolygons(input, result, amount);
+
+   // No output??
+   if(result.size() == 0)
+      return returnNil(L);
+
+   // return the polygons if we're successful
+   return returnPolygons(L, result);
 }
 
 
