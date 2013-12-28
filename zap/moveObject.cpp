@@ -110,7 +110,7 @@ void MoveObject::idle(BfObject::IdleCallPath path)
 void MoveObject::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
-
+    
 #ifndef ZAP_DEDICATED
    if(isGhost())     // Client only
       setControllingClient(static_cast<ClientGame *>(game)->getConnectionToServer());

@@ -1,3 +1,8 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 #include "GameRecorder.h"
 #include "tnlBitStream.h"
 #include "tnlNetObject.h"
@@ -57,6 +62,7 @@ static FILE *openRecordingFile(ServerGame *game)
    return fopen(file.c_str(), "wb");
 }
 
+
 GameRecorderServer::GameRecorderServer(ServerGame *game)
 {
    mFile = NULL;
@@ -93,12 +99,13 @@ GameRecorderServer::GameRecorderServer(ServerGame *game)
       s2cSetServerName(game->getSettings()->getHostName());
    }
 }
+
+
 GameRecorderServer::~GameRecorderServer()
 {
    if(mFile)
       fclose(mFile);
 }
-
 
 
 void GameRecorderServer::idle(U32 MilliSeconds)
@@ -176,13 +183,18 @@ GameRecorderPlayback::GameRecorderPlayback(ClientGame *game, const char *filenam
    mConnectionParameters.mIsInitiator = true;
    mConnectionParameters.mDebugObjectSizes = false;
 }
+
+
 GameRecorderPlayback::~GameRecorderPlayback()
 {
    if(mFile)
       fclose(mFile);
 }
 
-bool GameRecorderPlayback::lostContact() {return false;}
+
+bool GameRecorderPlayback::lostContact() { return false; }
+
+
 void GameRecorderPlayback::addPendingMove(Move *theMove)
 {
    bool nextButton = theMove->fire;
@@ -211,6 +223,7 @@ void GameRecorderPlayback::addPendingMove(Move *theMove)
 
    isButtonHeldDown = nextButton || prevButton;
 }
+
 
 void GameRecorderPlayback::updateTimers(U32 MilliSeconds)
 {
@@ -249,7 +262,6 @@ void GameRecorderPlayback::updateTimers(U32 MilliSeconds)
       }
 
       mSizeToRead = size;
-
    }
 
    const Vector<RefPtr<ClientInfo> > &infos = *(mGame->getClientInfos());
@@ -267,6 +279,7 @@ void GameRecorderPlayback::updateTimers(U32 MilliSeconds)
    }
 }
 
+
 static void processPlaybackSelectionCallback(ClientGame *game, U32 index)             
 {
    game->getUIManager()->getUI<PlaybackSelectUserInterface>()->processSelection(index);
@@ -274,14 +287,14 @@ static void processPlaybackSelectionCallback(ClientGame *game, U32 index)
 }
 
 
-
 PlaybackSelectUserInterface::PlaybackSelectUserInterface(ClientGame *game) : LevelMenuSelectUserInterface(game)
 {
+   // Do nothing
 }
+
 
 void PlaybackSelectUserInterface::onActivate()
 {
-//mLevels
    mMenuTitle = "Choose Recorded Game";
 
    const string &dir = getGame()->getSettings()->getFolderManager()->recordDir;

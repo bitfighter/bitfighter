@@ -32,6 +32,7 @@ ControlObjectConnection::ControlObjectConnection()
    mIsBusy = false;
 }
 
+
 // Destructor
 ControlObjectConnection::~ControlObjectConnection()
 {
