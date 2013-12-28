@@ -105,7 +105,7 @@ TEST_F(ObjectTest, GhostingSanity)
    U32 classCount = TNL::NetClassRep::getNetClassCount(NetClassGroupGame, NetClassTypeObject);
    Vector<GhostingRecord> ghostingRecords;
    ghostingRecords.resize(classCount);
-   for(U32 i=0; i < classCount; i++)
+   for(U32 i = 0; i < classCount; i++)
    {
       ghostingRecords[i].server = false;
       ghostingRecords[i].client = false;
@@ -146,12 +146,12 @@ TEST_F(ObjectTest, GhostingSanity)
    // Idle to allow object replication
    gamePair.idle(10, 10);
 
-   // Check whether the objects made it onto the client
+   // Check whether the objects created on the server made it onto the client
    const Vector<DatabaseObject *> *objects = clientGame->getGameObjDatabase()->findObjects_fast();
    for(S32 i = 0; i < objects->size(); i++)
    {
       BfObject *bfobj = dynamic_cast<BfObject *>((*objects)[i]);
-      if(bfobj->getClassRep() != NULL)  // Barriers and some other objects might not be ghostable..
+      if(bfobj->getClassRep() != NULL)  // Barriers and some other objects might not be ghostable...
       {
          U32 id = bfobj->getClassId(NetClassGroupGame);
          ghostingRecords[id].client = true;
@@ -167,9 +167,9 @@ TEST_F(ObjectTest, GhostingSanity)
       // normal ghosting model.
       string className = netClassRep->getClassName();
       if(className != "PolyWall" && className != "ForceField")
-      {
          EXPECT_EQ(ghostingRecords[i].server, ghostingRecords[i].client) << " className=" << className;
-      }
+      else
+         EXPECT_NE(ghostingRecords[i].server, ghostingRecords[i].client) << " className=" << className;
    }
 }
 
