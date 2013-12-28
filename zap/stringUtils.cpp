@@ -508,6 +508,7 @@ string getFileSeparator()
 #endif
 }
 
+
 // Returns true if file or folder exists
 // Ok, not strictly a string util, but do we really want a fileutils just for this??
 bool fileExists(const string &path)
@@ -533,7 +534,6 @@ bool makeSureFolderExists(const string &folder)
          return false;
       }
    }
-
    return true;
 }
 
@@ -730,11 +730,12 @@ void trim_in_place(string& source, const string &t)
 S32 countCharInString(const string &source, char search)
 {
     S32 count = 0, c = 0;
-    while (source[c] != '\0')
+
+    while(source[c] != '\0')
     {
-          if (source[c] == search)
-              count++;
-          c++;
+      if (source[c] == search)
+         count++;
+      c++;
     }
     return count;
 }
@@ -827,6 +828,7 @@ bool writeFile(const string &path, const string &contents, bool append)
 }
 
 
+// Pass in a path, returns contents of file; if file does not exist, returns empty string
 const string readFile(const string &path)
 {
    ifstream file(path.c_str(), ios_base::in | ios_base::binary);
@@ -849,7 +851,6 @@ const string readFile(const string &path)
 
    return result;
 }
-
 
 
 // Returns the directory of this running executable
