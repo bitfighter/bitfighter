@@ -52,6 +52,8 @@ static FILE *openRecordingFile(ServerGame *game)
    string file = joindir(dir, itos(max_id + 1));
 
    string file2 = makeFilenameFromString(game->getGameType()->getLevelName()->getString());
+   if(file2.size() == 0)
+      file2 = makeFilenameFromString(game->getSettings()->getHostName().c_str());
    if(file2.size() != 0)
       file = file + "_" + file2;
    return fopen(file.c_str(), "wb");
