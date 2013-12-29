@@ -122,6 +122,10 @@ TEST_F(ObjectTest, GhostingSanity)
    geom.push_back(Point(1,0));
    geom.push_back(Point(0,1));
 
+   Vector<Point> geom_speedZone;
+   geom_speedZone.push_back(Point(400,0));
+   geom_speedZone.push_back(Point(400,1));
+
    // Create one of each type of registered NetClass
    for(U32 i = 0; i < classCount; i++)
    {
@@ -135,7 +139,13 @@ TEST_F(ObjectTest, GhostingSanity)
       {
          // First, add some geometry
          bfobj->setExtent(Rect(0,0,1,1));
-         bfobj->GeomObject::setGeom(geom);
+         if(bfobj->getObjectTypeNumber() == SpeedZoneTypeNumber)
+         {
+            bfobj->GeomObject::setGeom(geom_speedZone);
+            bfobj->onGeomChanged();
+         }
+         else
+            bfobj->GeomObject::setGeom(geom);
          bfobj->addToGame(serverGame, serverGame->getGameObjDatabase());
          ghostingRecords[i].server = true;
       }
