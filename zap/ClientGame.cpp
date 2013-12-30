@@ -796,11 +796,11 @@ void ClientGame::idle(U32 timeDelta)
             mGameObjDatabase->findObjects((TestFunc)hasRelatedHelpItem, fillVector, searchRect);
 
             if(getUIManager()->isShowingInGameHelp())
-            for(S32 i = 0; i < fillVector.size(); i++)
-            {
-               BfObject *obj = static_cast<BfObject *>(fillVector[i]);
-               addInlineHelpItem(obj->getObjectTypeNumber(), obj->getTeam(), localPlayerShip->getTeam());
-            }
+               for(S32 i = 0; i < fillVector.size(); i++)
+               {
+                  BfObject *obj = static_cast<BfObject *>(fillVector[i]);
+                  addInlineHelpItem(obj->getObjectTypeNumber(), obj->getTeam(), localPlayerShip->getTeam());
+               }
          }
       }
 

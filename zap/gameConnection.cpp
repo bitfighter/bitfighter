@@ -1815,7 +1815,7 @@ S32 GameConnection::getAuthenticationCounter()
 }
 
 
-// Server only
+// Client and Server
 void GameConnection::updateTimers(U32 timeDelta)
 {
    if(mAuthenticationTimer.update(timeDelta))
