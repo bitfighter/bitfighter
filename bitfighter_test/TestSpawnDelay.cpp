@@ -86,77 +86,77 @@ static void doScenario1(GamePair &gamePair)
 // player used idle command, a 5 second penalty will be levied against them.
 static void doScenario2(GamePair &gamePair)
 {
-   ClientGame *clientGame = gamePair.clients[0];
+   ClientGame *client1 = gamePair.clients[0];
    ServerGame *serverGame = gamePair.server;
 
       // Add a second player so server does not suspend itself
-   ClientGame *clientGame2 = newClientGame();
-   GameSettingsPtr settings = clientGame2->getSettingsPtr();
-   clientGame2->userEnteredLoginCredentials("TestUser2", "password", false);    // Simulates entry from NameEntryUserInterface
-   clientGame2->joinLocalGame(serverGame->getNetInterface());
-   clientGame2->getConnectionToServer()->useZeroLatencyForTesting();
+   ClientGame *client2 = newClientGame();
+   GameSettingsPtr settings = client2->getSettingsPtr();
+   client2->userEnteredLoginCredentials("TestUser2", "password", false);    // Simulates entry from NameEntryUserInterface
+   client2->joinLocalGame(serverGame->getNetInterface());
+   client2->getConnectionToServer()->useZeroLatencyForTesting();
 
    for(S32 i = 0; i < serverGame->getClientCount(); i++)
       serverGame->getClientInfo(i)->getConnection()->useZeroLatencyForTesting();
 
-   // Should now be 2 ships in the game -- one belonging to clientGame and another belonging to clientGame2
+   // Should now be 2 ships in the game -- one belonging to client1 and another belonging to client2
    gamePair.idle(10, 5);               // Idle 5x; give things time to propagate
    fillVector.clear();
    serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(2, fillVector.size());                   // Ship should have been killed off -- only 2nd player ship should be left
    fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   client1->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(2, fillVector.size());
 
    Vector<string> words;
-   ChatCommands::idleHandler(clientGame, words);
+   ChatCommands::idleHandler(client1, words);
    gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give things time to propagate, timers to time out, etc.
-   //for(S32 i = 0; i < 5; i++) clientGame2->idle(10);
+   //for(S32 i = 0; i < 5; i++) client2->idle(10);
    ASSERT_TRUE(serverGame->getClientInfo(0)->isSpawnDelayed());
-   ASSERT_TRUE(clientGame->isSpawnDelayed());         // Status should have propagated to client by now
+   ASSERT_TRUE(client1->isSpawnDelayed());         // Status should have propagated to client by now
    fillVector.clear();
    serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());                   // Ship should have been killed off -- only 2nd player ship should be left
    fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   client1->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());
-   //ASSERT_FALSE(clientGame2->findClientInfo("TestPlayerOne")->isSpawnDelayed());    // Check that other player knows our status
+   //ASSERT_FALSE(client2->findClientInfo("TestPlayerOne")->isSpawnDelayed());    // Check that other player knows our status
 
    // ReturnToGame penalty has been set, but won't start to count down until ship attempts to spawn
-   ASSERT_FALSE(clientGame->inReturnToGameCountdown());
+   ASSERT_FALSE(client1->inReturnToGameCountdown());
    ASSERT_TRUE(static_cast<FullClientInfo *>(serverGame->getClientInfo(0))->hasReturnToGamePenalty()); // Penalty has been primed
    ASSERT_EQ(0, serverGame->getClientInfo(0)->getReturnToGameTime());
 
    // Player presses a key to rejoin the game; there should be a SPAWN_UNDELAY_TIMER_DELAY ms penalty incurred for using /idle
    ASSERT_FALSE(serverGame->isSuspended()) << "Game is suspended -- subsequent tests will fail";
-   clientGame->undelaySpawn();                                             // Simulate effects of key press
+   client1->undelaySpawn();                                             // Simulate effects of key press
    gamePair.idle(10, 10);                                                  // Idle; give things time to propagate
-   //for(S32 i = 0; i < 5; i++) clientGame2->idle(10);
+   //for(S32 i = 0; i < 5; i++) client2->idle(10);
    ASSERT_TRUE(serverGame->getClientInfo(0)->getReturnToGameTime() > 0);   // Timers should be set and counting down
-   ASSERT_TRUE(clientGame->inReturnToGameCountdown());
+   ASSERT_TRUE(client1->inReturnToGameCountdown());
 
    // Check to ensure ship didn't spawn -- spawn should be delayed until penalty period has expired
    fillVector.clear();
    serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size());   // (one ship for clientGame2) 
+   ASSERT_EQ(1, fillVector.size());   // (one ship for client2) 
    fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   client1->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());
-   //ASSERT_TRUE(clientGame2->findClientInfo("TestPlayerOne")->isSpawnDelayed());    // Check that other player knows our status
+   //ASSERT_TRUE(client2->findClientInfo("TestPlayerOne")->isSpawnDelayed());    // Check that other player knows our status
 
    // After some time has passed -- no longer in returnToGameCountdown period, ship should have appeared on server and client
    gamePair.idle(ClientInfo::SPAWN_UNDELAY_TIMER_DELAY / 100, 105);  // More time than SPAWN_UNDELAY_TIMER_DELAY
-   ASSERT_FALSE(clientGame->inReturnToGameCountdown());
+   ASSERT_FALSE(client1->inReturnToGameCountdown());
    fillVector.clear();
    serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(2, fillVector.size());    
    fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   client1->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(2, fillVector.size());
 
    // Cleanup -- remove second player from game
-   clientGame2->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
-   delete clientGame2;
+   client2->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+   delete client2;
 }
 
 
