@@ -1819,24 +1819,24 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
          {
             if(i != teamIndex)  // Every team but scoring team
             {
-               // Fire Lua event, but not for scoring team
-               EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, -teamPoints, i + 1, playerInfo);
-
                // Adjust score of everyone, scoring team will have it changed back again after this loop
                ((Team *)mGame->getTeam(i))->addScore(-teamPoints);             // Add magnitiude of negative score to all teams
                s2cSetTeamScore(i, ((Team *)(mGame->getTeam(i)))->getScore());  // Broadcast result
+
+               // Fire Lua event, but not for scoring team
+               EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, -teamPoints, i + 1, playerInfo);
             }
          }
       }
       else
       {
-         // Fire Lua event for scoring team
-         EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, teamPoints, teamIndex + 1, playerInfo);
-
          // Now add the score
          Team *team = (Team *)mGame->getTeam(teamIndex);
          team->addScore(teamPoints);
          s2cSetTeamScore(teamIndex, team->getScore());     // Broadcast new team score
+
+         // Fire Lua event for scoring team
+         EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, teamPoints, teamIndex + 1, playerInfo);
       }
 
       updateLeadingTeamAndScore();
