@@ -63,6 +63,7 @@ struct GamePair
    void addBotClient(const string &name, S32 team = NO_TEAM);
 
    void removeClient(const string &name);
+   void removeClient(S32 index);
 };
 
 

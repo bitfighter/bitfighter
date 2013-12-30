@@ -149,9 +149,7 @@ static void doScenario2(GamePair &gamePair)
    client1->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(2, fillVector.size());
 
-   // Cleanup -- remove second player from game
-   client2->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
-   delete client2;
+   gamePair.removeClient(1);
 }
 
 
@@ -330,7 +328,6 @@ TEST(SpawnDelayTest, SpawnDelayTests)
    GamePair gamePair("");     // An empty level should work fine here
    ClientGame *clientGame = gamePair.clients[0];
    ServerGame *serverGame = gamePair.server;
-
 
    // Idle for a while, let things settle
    gamePair.idle(10, 5);

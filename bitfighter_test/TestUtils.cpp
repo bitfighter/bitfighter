@@ -109,7 +109,7 @@ GamePair::~GamePair()
    for(S32 i = 0; i < clientGames->size(); i++)
       clientGames->get(i)->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
-   this->idle(10, 5);
+   idle(10, 5);
 
    // Clean up GameManager
    GameManager::deleteClientGames();
@@ -150,6 +150,19 @@ void GamePair::addClient(const string &name, S32 team)
       TNLAssert(team < server->getTeamCount(), "Bad team!");
       clientInfo->setTeamIndex(team);
    }
+}
+
+
+void GamePair::removeClient(S32 index)
+{
+   // Disconnect before deleting
+   ClientGame *clientGame = GameManager::getClientGames()->get(index);
+
+   clientGame->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+
+   this->idle(10, 5);      // Let things propagate
+
+   GameManager::deleteClientGame(index);
 }
 
 

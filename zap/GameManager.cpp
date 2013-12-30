@@ -79,6 +79,12 @@ void GameManager::deleteClientGames()
 }
 
 
+void GameManager::deleteClientGame(S32 index)
+{
+   mClientGames.deleteAndErase(index);
+}
+
+
 void GameManager::addClientGame(ClientGame *clientGame)
 {
    mClientGames.push_back(clientGame);

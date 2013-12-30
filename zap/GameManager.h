@@ -47,7 +47,9 @@ public:
    // ClientGame related
    static const Vector<ClientGame *> *getClientGames();
    static void addClientGame(ClientGame *clientGame);
-   static void deleteClientGames();
+   static void deleteClientGame(S32 index);     // Delete specified game
+   static void deleteClientGames();             // Delete all games
+
    static void idleClientGames(U32 timeDelta);
 
    // Other
