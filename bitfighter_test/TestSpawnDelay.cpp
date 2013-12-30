@@ -86,18 +86,13 @@ static void doScenario1(GamePair &gamePair)
 // player used idle command, a 5 second penalty will be levied against them.
 static void doScenario2(GamePair &gamePair)
 {
-   ClientGame *client1 = gamePair.clients[0];
    ServerGame *serverGame = gamePair.server;
 
-      // Add a second player so server does not suspend itself
-   ClientGame *client2 = newClientGame();
-   GameSettingsPtr settings = client2->getSettingsPtr();
-   client2->userEnteredLoginCredentials("TestUser2", "password", false);    // Simulates entry from NameEntryUserInterface
-   client2->joinLocalGame(serverGame->getNetInterface());
-   client2->getConnectionToServer()->useZeroLatencyForTesting();
+   gamePair.addClient("TestUser2", 0);
 
-   for(S32 i = 0; i < serverGame->getClientCount(); i++)
-      serverGame->getClientInfo(i)->getConnection()->useZeroLatencyForTesting();
+   ClientGame *client1 = gamePair.clients[0];
+   ClientGame *client2 = gamePair.clients[1];
+
 
    // Should now be 2 ships in the game -- one belonging to client1 and another belonging to client2
    gamePair.idle(10, 5);               // Idle 5x; give things time to propagate
