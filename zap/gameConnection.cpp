@@ -1821,16 +1821,22 @@ void GameConnection::updateTimers(U32 timeDelta)
    if(mAuthenticationTimer.update(timeDelta))
       requestAuthenticationVerificationFromMaster();
 
-   if(!isInitiator())
-      addToTimeCredit(timeDelta);
-
    if(mVoteTime <= timeDelta)
       mVoteTime = 0;
    else
       mVoteTime -= timeDelta;
 
-   if(!isInitiator() && mClientInfo->updateReturnToGameTimer(timeDelta))     // Time to spawn a delayed player!
-       undelaySpawn();
+   if(!isInitiator())
+      updateTimers_server(timeDelta);
+}
+
+
+void GameConnection::updateTimers_server(U32 timeDelta)
+{
+   addToTimeCredit(timeDelta);
+
+   if(mClientInfo->updateReturnToGameTimer(timeDelta))     // Time to spawn a delayed player!
+       undelaySpawn();     
 }
 
 

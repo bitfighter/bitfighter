@@ -79,6 +79,8 @@ private:
    void markCurrentLevelAsDeleted();
    string undeleteMostRecentlyDeletedLevel();               // Undoes above function
 
+   void updateTimers_server(U32 timeDelta);
+
 public:
    bool mPackUnpackShipEnergyMeter; // Only true for game recorder
    U16 switchedTeamCount;
