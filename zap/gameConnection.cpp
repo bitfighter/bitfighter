@@ -1828,6 +1828,8 @@ void GameConnection::updateTimers(U32 timeDelta)
 
    if(!isInitiator())
       updateTimers_server(timeDelta);
+   else
+      mClientInfo->updateReturnToGameTimer(timeDelta);
 }
 
 
