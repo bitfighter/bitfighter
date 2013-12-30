@@ -30,7 +30,7 @@
 #include <sys/stat.h>
 #include <cmath>
 
-#include "GameRecorder.h"
+#include "GameRecorderPlayback.h"
 
 using namespace TNL;
 

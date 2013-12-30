@@ -43,7 +43,7 @@
 #include <string>
 #include <math.h>
 
-#include "GameRecorder.h"
+#include "GameRecorderPlayback.h"
 
 namespace Zap
 {
