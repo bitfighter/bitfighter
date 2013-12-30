@@ -118,11 +118,7 @@ public:
       ServerPassword,
       ServerName,
       ServerDescr,
-
-      // Items not listed in c2sSetParam()::*keys[] should be added here
       LevelDir, 
-
-      // Items not listed in c2sSetParam()::*types[] should be added here
       DeleteLevel,  
       UndeleteLevel,
 

@@ -502,18 +502,20 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
                                                 mServerGame->getCurrentLevelFileName().c_str());   
    else
    {
-      // Must be kept aligned with ParamType enum --> move to xmacro?
-      const char *types[] = {
-            "level change password",
-            "admin password",
-            "owner password",
-            "server password",
-            "server name",
-            "server description",
-            "leveldir param"
-      };
+      const char *paramName;
+      switch(type)
+      {
+         case LevelChangePassword: paramName = "level change password"; break;
+         case AdminPassword:       paramName = "admin password";        break;
+         case OwnerPassword:       paramName = "owner password";        break;
+         case ServerPassword:      paramName = "server password";       break;
+         case ServerName:          paramName = "server name";           break;
+         case ServerDescr:         paramName = "server description";    break;
+         case LevelDir:            paramName = "leveldir param";        break;
+         default:                  paramName = "unknown"; TNLAssert(false, "Fix unknown description");
+      }
       logprintf(LogConsumer::ServerFilter, "User [%s] %s to [%s]", mClientInfo->getName().getString(), 
-                                                                   strcmp(param.getString(), "") ? "changed" : "cleared", types[type]);
+                                                                   strcmp(param.getString(), "") ? "changed" : "cleared", paramName);
    }
 
    // Update our in-memory copies of the param, but do not save the new values to the INI
@@ -622,11 +624,24 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
    if(type != DeleteLevel && type != UndeleteLevel && type != LevelDir)
    {
-      const char *keys[] = { "LevelChangePassword", "AdminPassword", "ServerPassword", "ServerName", "ServerDescription" };
+      const char *paramName;
+      switch(type)
+      {
+         case LevelChangePassword: paramName = "LevelChangePassword"; break;
+         case AdminPassword:       paramName = "AdminPassword";       break;
+         case OwnerPassword:       paramName = "OwnerPassword";       break;
+         case ServerPassword:      paramName = "ServerPassword";      break;
+         case ServerName:          paramName = "ServerName";          break;
+         case ServerDescr:         paramName = "ServerDescription";   break;
+         default:                  paramName = NULL; TNLAssert(false, "Fix unknown parameter to save");
+      }
 
-      // Update the INI file
-      GameSettings::iniFile.SetValue("Host", keys[type], param.getString(), true);
-      GameSettings::iniFile.WriteFile();    // Save new INI settings to disk
+      if(paramName != NULL)
+      {
+         // Update the INI file
+         GameSettings::iniFile.SetValue("Host", paramName, param.getString(), true);
+         GameSettings::iniFile.WriteFile();    // Save new INI settings to disk
+      }
    }
 
    // Some messages we might show the user... should these just be inserted directly below?   Yes.  TODO: <== do that!
