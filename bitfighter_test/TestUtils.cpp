@@ -81,8 +81,12 @@ void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32
 
    server = GameManager::getServerGame();                // Get the game created in initHosting
 
-   GameType *gt = new GameType();    // Cleaned up by database
-   gt->addToGame(server, server->getGameObjDatabase());
+   if(::testing::UnitTest::GetInstance()->current_test_case() != NULL)
+   {
+      const char *name = ::testing::UnitTest::GetInstance()->current_test_case()->name();
+      const char *name2 = ::testing::UnitTest::GetInstance()->current_test_info()->name();
+      server->getSettings()->setHostName(string(name) + "_" + name2, false);
+   }
 
    server->startHosting();          // This will load levels and wipe out any teams
 

@@ -133,6 +133,7 @@ set(CLIENT_SOURCES
 	FontManager.cpp
 	FpsRenderer.cpp
 	gameObjectRender.cpp
+	GameRecorderPlayback.cpp
 	HelpItemManager.cpp
 	HelperManager.cpp
 	helperMenu.cpp

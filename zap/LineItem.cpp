@@ -409,6 +409,8 @@ S32 LineItem::lua_setGlobal(lua_State *L)
    checkArgList(L, functionArgs, "LineItem", "setGlobal");
    mGlobal = getBool(L, 1);
 
+   setMaskBits(0x80000000);  // Update to clients,  dummy mask because of no mask bits used on packUpdate
+
    return 0;
 }
 

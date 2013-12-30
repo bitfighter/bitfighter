@@ -40,7 +40,7 @@
 #include "OpenglUtils.h"
 #include "GeomUtils.h"
 
-#include "GameRecorder.h"
+#include "GameRecorderPlayback.h"
 
 #include <cmath>     // Needed to compile under Linux, OSX
 
