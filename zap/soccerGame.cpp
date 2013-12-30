@@ -154,7 +154,7 @@ void SoccerGameType::scoreGoal(Ship *ship, const StringTableEntry &scorerName, S
    }
 
    // Check for Hat trick badge
-   ClientInfo *clientInfo = ship->getClientInfo();
+   ClientInfo *clientInfo = ship ? ship->getClientInfo() : NULL;
    if(clientInfo != NULL)
    {
       // If our current scorer was the last scorer and is wasn't an own-goal
