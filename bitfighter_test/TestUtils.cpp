@@ -107,11 +107,13 @@ GamePair::~GamePair()
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
 
    for(S32 i = 0; i < clientGames->size(); i++)
-      clientGames->get(i)->closeConnectionToGameServer();
+      clientGames->get(i)->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+
+   this->idle(10, 5);
 
    // Clean up GameManager
-   GameManager::deleteServerGame();    
    GameManager::deleteClientGames();
+   GameManager::deleteServerGame();    
 }
 
 
