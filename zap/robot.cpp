@@ -261,13 +261,16 @@ string Robot::runGetName()
 }
 
 
-// This only runs the very first time the robot is added to the level
-// Note that level may not yet be ready, so the bot can't spawn yet
-// Runs on client and server -- does nothing on client
+// This only runs the very first time the robot is added to the level.
+// Note that level may not yet be ready, so the bot can't spawn yet.
+// Runs on client and server.
 void Robot::onAddedToGame(Game *game)
 {
    if(isGhost())     // No clients allowed!
+   {
+      // Parent::onAddedToGame(game);  ==> This was never actually included in the game, but I feel like it should be added. -CE
       return;
+   }
 
    // Robots are created with NULL ClientInfos.  We'll add a valid one here.
    TNLAssert(mClientInfo.isNull(), "mClientInfo should be NULL");
