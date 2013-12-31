@@ -1388,7 +1388,7 @@ string Game::getScriptName() const
 
 bool Game::levelHasLoadoutZone()
 {
-   return mGameType->levelHasLoadoutZone();
+   return mGameType && mGameType->levelHasLoadoutZone();
 }
 
 

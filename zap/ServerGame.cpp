@@ -613,9 +613,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
    resetAllClientTeams();
 
    // Reset loadouts now that we have GameType set up
-   bool levelHasLoadoutZone = getGameType()->levelHasLoadoutZone();
    for(S32 i = 0; i < getClientCount(); i++)
-      getClientInfo(i)->resetLoadout(levelHasLoadoutZone);
+      getClientInfo(i)->resetLoadout(levelHasLoadoutZone());
   
 
    // Now add players to the gameType, from highest rating to lowest in an attempt to create ratings-based teams
