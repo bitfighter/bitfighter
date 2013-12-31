@@ -160,7 +160,7 @@ TEST(RobotManagerTest, moreLessBots)
    gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH B",     getTeams(gamePair));
 
    // With autoleveling off, no bots will be added when new client joins
-   gamePair.addClient("newclient", 1);    EXPECT_EQ("HHHH HB",      getTeams(gamePair));
+   gamePair.addClient("newclient2", 1);    EXPECT_EQ("HHHH HB",      getTeams(gamePair));
 
    // /addbot
    gamePair.server->addBot(botArgs);   EXPECT_EQ("HHHH HBB",    getTeams(gamePair));
