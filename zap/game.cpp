@@ -196,6 +196,8 @@ void   Game::deleteBot(const StringTableEntry &name) { TNLAssert(false, "Not imp
 void   Game::deleteBot(S32 i)                        { TNLAssert(false, "Not implemented for this class!"); }
 void   Game::deleteBotFromTeam(S32 teamIndex)        { TNLAssert(false, "Not implemented for this class!"); }
 void   Game::deleteAllBots()                         { TNLAssert(false, "Not implemented for this class!"); }
+void   Game::balanceTeams()                          { TNLAssert(false, "Not implemented for this class!"); }
+
 
 
 void Game::setReadyToConnectToMaster(bool ready)

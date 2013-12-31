@@ -147,7 +147,7 @@ void GamePair::addClient(const string &name, S32 team)
    if(team != NO_TEAM)
    {
       TNLAssert(team < server->getTeamCount(), "Bad team!");
-      clientInfo->setTeamIndex(team);
+      server->getGameType()->changeClientTeam(clientInfo, team);
    }
 }
 
@@ -167,7 +167,19 @@ void GamePair::removeClient(S32 index)
 
 void GamePair::removeClient(const string &name)
 {
-   // Do something witty here
+   S32 index = -1;
+
+   for(S32 i = 0; i < clients.size(); i++)
+   {
+      if(string(clients[i]->getClientInfo()->getName().getString()) == name)
+      {
+         index = i;
+         break;
+      }
+   }
+
+   TNLAssert(index >= 0, "Could not find specified player!");
+   removeClient(index);
 }
 
 

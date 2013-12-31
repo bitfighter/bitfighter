@@ -302,7 +302,6 @@ public:
    virtual ClientInfo *getLocalRemoteClientInfo() const;
    virtual void quitEngineerHelper();
 
-
    ClientInfo *findClientInfo(const StringTableEntry &name);      // Find client by name
    Ship *findShip(const StringTableEntry &clientName);            // Find ship by name
    
@@ -338,6 +337,8 @@ public:
    virtual void moreBots();
    virtual void fewerBots();
    virtual void kickSingleBotFromLargestTeamWithBots();
+   virtual void balanceTeams();
+
 
 
    void loadLevelFromString(const string &contents, GridDatabase *database, const string& filename = "");

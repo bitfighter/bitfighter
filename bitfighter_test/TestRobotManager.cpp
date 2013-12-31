@@ -149,7 +149,11 @@ TEST(RobotManagerTest, moreLessBots)
    gamePair.server->moreBots();      EXPECT_EQ("HHHB BBBB",   getTeams(gamePair));    
    gamePair.server->moreBots();      EXPECT_EQ("HHHBB BBBBB", getTeams(gamePair));    
 
-   // New player joins; autoleveling should be enabled -- since target game size is 5v5, bot will be removed
+   // New player joins other team; autoleveling should be enabled -- since target game size is 5v5, bot will be removed
+   gamePair.addClient("newclient", 1);    EXPECT_EQ("HHHBB HBBBB",      getTeams(gamePair));
+
+   // Remove the player again, and try again with the other team
+   gamePair.removeClient("newclient");    EXPECT_EQ("HHHBB BBBBB",      getTeams(gamePair));
    gamePair.addClient("newclient", 0);    EXPECT_EQ("HHHHB BBBBB",      getTeams(gamePair));
 
    // /kickbot -- disables autoleveling

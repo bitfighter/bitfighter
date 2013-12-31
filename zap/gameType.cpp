@@ -2179,8 +2179,11 @@ void GameType::addTime(U32 time)
 
 
 // Change client's team.  If team == -1, then pick next team
+// Server only
 void GameType::changeClientTeam(ClientInfo *client, S32 team)
 {
+   TNLAssert(getGame()->isServer(), "Should run on server only!");
+
    if(mGame->getTeamCount() <= 1)         // Can't change if there's only one team...
       return;
 
@@ -2225,10 +2228,13 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
    if(client->getTeamIndex() >= 0)                                                     // But if we know the team...
       s2cClientJoinedTeam(client->getName(), client->getTeamIndex(), !isGameOver());   // ...announce the change
 
-   spawnShip(client);                                                                  // Create a new ship
+   spawnShip(client);                                // Create a new ship
 
    if(!client->isRobot())
-      client->getConnection()->switchedTeamCount++;                                    // Track number of times the player switched teams
+   {
+      client->getConnection()->switchedTeamCount++;  // Track number of times the player switched teams
+      mGame->balanceTeams();
+   }
 }
 
 
