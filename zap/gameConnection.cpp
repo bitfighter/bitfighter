@@ -1826,10 +1826,16 @@ void GameConnection::updateTimers(U32 timeDelta)
    else
       mVoteTime -= timeDelta;
 
-   if(!isInitiator())
-      updateTimers_server(timeDelta);
+   if(isInitiator())
+      updateTimers_client(timeDelta);
    else
-      mClientInfo->updateReturnToGameTimer(timeDelta);
+      updateTimers_server(timeDelta);
+}
+
+
+void GameConnection::updateTimers_client(U32 timeDelta)
+{
+   mClientInfo->updateReturnToGameTimer(timeDelta);   
 }
 
 

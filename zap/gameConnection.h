@@ -79,6 +79,7 @@ private:
    void markCurrentLevelAsDeleted();
    string undeleteMostRecentlyDeletedLevel();               // Undoes above function
 
+   void updateTimers_client(U32 timeDelta);
    void updateTimers_server(U32 timeDelta);
 
 public:
