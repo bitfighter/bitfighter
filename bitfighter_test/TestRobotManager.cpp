@@ -88,12 +88,6 @@ static void setTeams(GamePair &gamePair, const string &teamConfig)
 
    S32 teams = words.size();
 
-   // Clear teams, players, and bots
-   //for(S32 i = 0; i < gamePair.server->getClientCount(); i++)
-   //   gamePair.server->removeClient(gamePair.server->getClientInfos()->get(0));
-
-   //gamePair.server->clearTeams();
-
    // Add teams -- a fresh gamePair will have 0 players and 1 team
    for(S32 i = 1; i < teams; i++)
       gamePair.server->addTeam(new Team());
@@ -160,10 +154,10 @@ TEST(RobotManagerTest, moreLessBots)
 
    // /kickbot -- disables autoleveling
    gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH BBBBB", getTeams(gamePair));
-   gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH BBBB",    getTeams(gamePair));
-   gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH BBB",     getTeams(gamePair));
-   gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH BB",      getTeams(gamePair));
-   gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH B",      getTeams(gamePair));
+   gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH BBBB",  getTeams(gamePair));
+   gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH BBB",   getTeams(gamePair));
+   gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH BB",    getTeams(gamePair));
+   gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH B",     getTeams(gamePair));
 
    // With autoleveling off, no bots will be added when new client joins
    gamePair.addClient("newclient", 1);    EXPECT_EQ("HHHH HB",      getTeams(gamePair));

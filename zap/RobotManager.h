@@ -59,6 +59,8 @@ public:
    void fewerBots();
    void deleteBotFromTeam(S32 teamIndex);
 
+   static void printTeams(Game *game, const string &message);  // For debugging only
+
    void deleteAllBots();
 
    void clearMoves();

@@ -134,13 +134,12 @@ void GamePair::addClient(const string &name, S32 team)
 
    client->joinLocalGame(server->getNetInterface());
 
-
    // We need to turn off TNL's bandwidth controls so our tests can run faster.  FASTER!!@!
    client->getConnectionToServer()->useZeroLatencyForTesting();
 
    clients.push_back(client);
 
-   ClientInfo *clientInfo = server->getClientInfo(server->getClientInfos()->size() - 1);
+   ClientInfo *clientInfo = server->findClientInfo(name.c_str());
 
    if(!clientInfo->isRobot())
       clientInfo->getConnection()->useZeroLatencyForTesting();

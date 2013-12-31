@@ -9,8 +9,6 @@
 #include "robot.h"
 #include "ServerGame.h"
 
-#include "GameManager.h"      // {P{P
-
 #include "MathUtils.h"
 
 namespace Zap
@@ -112,7 +110,7 @@ void RobotManager::balanceTeams()
          // Find the difference
          S32 difference = currentTeamPlayerBotCount - maxPlayersPerBalancedTeam;
 
-         // Kick as many bots as we need, or, only up to how many we have
+         // Kick as many bots as we need to, but not more than we have
          S32 numBotsToKick = difference;
          if(currentTeamBotCount < difference)
             numBotsToKick = currentTeamBotCount;
@@ -313,6 +311,31 @@ void RobotManager::fewerBots()
 }
 
 
+// Dumps teams to the console, used for debugging only
+void RobotManager::printTeams(Game *game, const string &message)
+{
+   game->countTeamPlayers();
+   S32 teams = game->getTeamCount();
+
+   string teamDescr = "";
+
+   for(S32 i = 0; i < teams; i++)
+   {
+      AbstractTeam *team = game->getTeam(i);
+      teamDescr += string(team->getPlayerCount(), 'H');
+      teamDescr += string(team->getBotCount(), 'B');
+
+      if(team->getPlayerBotCount() == 0)
+         teamDescr += "0";
+
+      if(i < teams - 1)
+         teamDescr += " ";
+   }
+
+   printf("%s: Teams: %s\n", message.c_str(), teamDescr.c_str());
+}
+
+
 // Delete bot from a given team 
 // Will teamIndex == NONE gracefully, ok if team contains no bots
 void RobotManager::deleteBotFromTeam(S32 teamIndex)
@@ -322,27 +345,7 @@ void RobotManager::deleteBotFromTeam(S32 teamIndex)
       {
          TNLAssert(teamIndex == mRobots[i]->getClientInfo()->getTeamIndex(), "Inconsistent team info!");
             
-         //{P{P
-         GameManager::getServerGame()->countTeamPlayers();
-         printf("before ");
-            for(S32 b = 0; b < GameManager::getServerGame()->getTeamCount(); b++)
-            {
-              printf("%d %d/%d || ", b, GameManager::getServerGame()->getTeam(b)->getPlayerCount(), GameManager::getServerGame()->getTeam(b)->getBotCount());
-            }
-            printf("\n");
-
          deleteBot(i);
-
-      //{P{P
-         GameManager::getServerGame()->countTeamPlayers();
-               printf("after ");
-            for(S32 b = 0; b < GameManager::getServerGame()->getTeamCount(); b++)
-            {
-              printf("%d %d/%d || ", b, GameManager::getServerGame()->getTeam(b)->getPlayerCount(), GameManager::getServerGame()->getTeam(b)->getBotCount());
-            }
-            printf("\n");
-
-
 
          mAutoLevelTeams = false;
          return;        // Only one!
