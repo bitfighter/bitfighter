@@ -79,6 +79,9 @@ public:
    EventConnection();
    ~EventConnection();
 protected:
+   void clearSendEvents();
+   void clearRecvEvents();
+
    enum DebugConstants
    {
       DebugChecksum = 0xF00DBAAD,

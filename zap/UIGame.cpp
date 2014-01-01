@@ -367,7 +367,8 @@ void GameUserInterface::idle(U32 timeDelta)
 
    mLoadoutIndicator.idle(timeDelta);
 
-   mFxManager.idle(timeDelta);      // Processes sparks and teleporter effects
+   if(!getGame()->isSuspended())
+      mFxManager.idle(timeDelta);      // Processes sparks and teleporter effects
 
    if(shouldCountdownHelpItemTimer())
       mHelpItemManager.idle(timeDelta, getGame());
@@ -426,6 +427,11 @@ bool GameUserInterface::isShowingDebugShipCoords() const { return mDebugShowShip
 void GameUserInterface::clearSparks()
 {
    mFxManager.clearSparks();
+}
+
+void GameUserInterface::idleFxManager(U32 timeDelta)
+{
+   mFxManager.idle(timeDelta);
 }
 
 
@@ -502,7 +508,7 @@ void GameUserInterface::render()
       return;
    }
 
-   TNLAssert(getUIManager()->isCurrentUI<GameUserInterface>() || getUIManager()->cameFrom<GameUserInterface>(), "Then why are we rendering???");
+   //TNLAssert(getUIManager()->isCurrentUI<GameUserInterface>() || getUIManager()->cameFrom<GameUserInterface>(), "Then why are we rendering???"); // Now comes from PlaybackGameUserInterface
 
    if(renderWithCommanderMap())
       renderGameCommander();
@@ -1514,7 +1520,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          getGame()->setBusyChatting(true);
          getUIManager()->activate<GameMenuUserInterface>();
       }
-   }     
+   }
    else if(checkInputCode(BINDING_CMDRMAP, inputCode))
    {
       toggleCommanderMap();

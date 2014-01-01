@@ -2014,19 +2014,20 @@ void GameMenuUserInterface::buildMenu()
    addMenuItem(new MenuItem("OPTIONS",      optionsSelectedCallback, "", KEY_O));
    addMenuItem(new MenuItem("INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, getInputCode(settings, BINDING_HELP)));
 
-   GameType *gameType = getGame()->getGameType();
-
-   // Add any game-specific menu items
-   if(gameType)
-   {
-      mGameType = gameType;
-      gameType->addClientGameMenuOptions(getGame(), this);
-   }
 
    GameConnection *gc = (getGame())->getConnectionToServer();
 
-   if(gc)
+   if(gc && dynamic_cast<GameRecorderPlayback *>(gc) == NULL)
    {
+      GameType *gameType = getGame()->getGameType();
+
+      // Add any game-specific menu items
+      if(gameType)
+      {
+         mGameType = gameType;
+         gameType->addClientGameMenuOptions(getGame(), this);
+      }
+
       if(gc->getClientInfo()->isLevelChanger())
       {
          addMenuItem(new MenuItem("ROBOTS",               robotsGameCallback,     "", KEY_B, KEY_R));
