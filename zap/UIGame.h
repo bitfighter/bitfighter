@@ -350,6 +350,7 @@ public:
 
    // FxManager passthroughs
    void clearSparks();
+   void idleFxManager(U32 timeDelta);
    void emitBlast(const Point &pos, U32 size);
    void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2);
    void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);

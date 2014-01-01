@@ -367,7 +367,8 @@ void GameUserInterface::idle(U32 timeDelta)
 
    mLoadoutIndicator.idle(timeDelta);
 
-   mFxManager.idle(timeDelta);      // Processes sparks and teleporter effects
+   if(!getGame()->isSuspended())
+      mFxManager.idle(timeDelta);      // Processes sparks and teleporter effects
 
    if(shouldCountdownHelpItemTimer())
       mHelpItemManager.idle(timeDelta, getGame());
@@ -426,6 +427,11 @@ bool GameUserInterface::isShowingDebugShipCoords() const { return mDebugShowShip
 void GameUserInterface::clearSparks()
 {
    mFxManager.clearSparks();
+}
+
+void GameUserInterface::idleFxManager(U32 timeDelta)
+{
+   mFxManager.idle(timeDelta);
 }
 
 

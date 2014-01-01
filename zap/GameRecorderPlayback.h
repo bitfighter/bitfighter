@@ -29,6 +29,7 @@ public:
 
    GameRecorderPlayback(ClientGame *game, const char *filename);
    ~GameRecorderPlayback();
+   bool isValid();
 
    bool lostContact();
    void addPendingMove(Move *theMove);
@@ -60,6 +61,7 @@ class PlaybackGameUserInterface : public UserInterface
 public:
    explicit PlaybackGameUserInterface(ClientGame *game);
    void onActivate();
+   void onReactivate();
 
    bool onKeyDown(InputCode inputCode);
    void onKeyUp(InputCode inputCode);

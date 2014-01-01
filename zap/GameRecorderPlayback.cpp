@@ -114,6 +114,7 @@ GameRecorderPlayback::~GameRecorderPlayback()
       fclose(mFile);
 }
 
+bool GameRecorderPlayback::isValid() {return mFile != NULL;}
 bool GameRecorderPlayback::lostContact() {return false;}
 void GameRecorderPlayback::addPendingMove(Move *theMove)
 {
@@ -230,7 +231,8 @@ void GameRecorderPlayback::restart()
    mMilliSeconds = 0;
    mSizeToRead = 0;
    mCurrentTime = 0;
-   // mNextRecvEventSeq  (Do something, it causes events to no longer work)
+   clearRecvEvents();
+   mGame->clearClientList();
    if(mFile)
       fseek(mFile, 4, SEEK_SET);
 }
@@ -272,7 +274,20 @@ void PlaybackSelectUserInterface::onActivate()
 void PlaybackSelectUserInterface::processSelection(U32 index)
 {
    string file = joindir(getGame()->getSettings()->getFolderManager()->recordDir, mLevels[index]);
-   getGame()->setConnectionToServer(new GameRecorderPlayback(getGame(), file.c_str()));
+   GameRecorderPlayback *gc = new GameRecorderPlayback(getGame(), file.c_str());
+   if(!gc->isValid())
+   {
+      delete gc;
+      getUIManager()->displayMessageBox("Error", "Press [[Esc]] to continue", "Recorded Gameplay not valid or not compatible");
+      return;
+   }
+   if(gc->mTotalTime == 0)
+   {
+      delete gc;
+      getUIManager()->displayMessageBox("Error", "Press [[Esc]] to continue", "Recorded Gameplay is empty");
+      return;
+   }
+   getGame()->setConnectionToServer(gc);
    getGame()->getUIManager()->activate<PlaybackGameUserInterface>();
 }
 
@@ -290,6 +305,10 @@ void PlaybackGameUserInterface::onActivate()
    mSpeed = 2;
    mSpeedRemainder = 0;
    mVisible = true;
+}
+void PlaybackGameUserInterface::onReactivate()
+{
+   Cursor::enableCursor();
 }
 
 
@@ -421,11 +440,19 @@ void PlaybackGameUserInterface::idle(U32 timeDelta)
 {
    mGameInterface->idle(timeDelta);
 
+   U32 idleTime = timeDelta;
    switch(mSpeed)
    {
-   case 1: mPlaybackConnection->processMoreData((timeDelta + mSpeedRemainder) >> 2); mSpeedRemainder = (mSpeedRemainder + timeDelta) & 3; break;
-   case 2: mPlaybackConnection->processMoreData(timeDelta); break;
-   case 3: mPlaybackConnection->processMoreData(timeDelta * 4); break;
+   case 0: idleTime = 0; break;
+   case 1: idleTime = (timeDelta + mSpeedRemainder) >> 2; mSpeedRemainder = (mSpeedRemainder + timeDelta) & 3; break;
+   case 2: break;
+   case 3: idleTime = timeDelta * 4; break;
+   }
+
+   if(idleTime != 0)
+   {
+      mGameInterface->idleFxManager(idleTime);
+      mPlaybackConnection->processMoreData(idleTime);
    }
 
    getGame()->setGameSuspended_FromServerMessage(true); // Cheap way to avoid letting the client move objects, because of pause/slow motion/fast forward

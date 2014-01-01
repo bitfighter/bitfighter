@@ -56,6 +56,12 @@ static const U32 mTNLDataBufferMaxSize = 1024 * 1024 * 4;  // 4 MB
 
 EventConnection::~EventConnection()
 {
+   clearSendEvents();
+   clearRecvEvents();
+}
+
+void EventConnection::clearSendEvents()
+{
    clearAllPacketNotifies(); ///BUGFIX --> http://www.garagegames.com/community/forums/viewthread/80511
 
    while(mNotifyEventList)
@@ -82,6 +88,18 @@ EventConnection::~EventConnection()
       temp->mEvent->notifyDelivered(this, true);
       mEventNoteChunker.free(temp);
    }
+   mNextSendEventSeq = FirstValidSendEventSeq;
+}
+
+void EventConnection::clearRecvEvents()
+{
+   while(mWaitSeqEvents)
+   {
+      EventNote *temp = mWaitSeqEvents;
+      mWaitSeqEvents = temp->mNextEvent;
+      mEventNoteChunker.free(temp);
+   }
+   mNextRecvEventSeq = FirstValidSendEventSeq;
    if(mTNLDataBuffer)
       delete mTNLDataBuffer;
 }
@@ -126,6 +144,10 @@ bool EventConnection::readConnectRequest(BitStream *stream, NetConnection::Termi
 
    mEventClassVersion = NetClassRep::getClass(getNetClassGroup(), NetClassTypeEvent, mEventClassCount-1)->getClassVersion();
    mEventClassBitSize = getNextBinLog2(mEventClassCount);
+
+   clearSendEvents();
+   clearRecvEvents();
+
    return true;
 }
 
@@ -159,6 +181,10 @@ bool EventConnection::readConnectAccept(BitStream *stream, NetConnection::Termin
    }
 
    mEventClassBitSize = getNextBinLog2(mEventClassCount);
+
+   clearSendEvents();
+   clearRecvEvents();
+
    return true;
 }
 
@@ -504,7 +530,11 @@ bool EventConnection::postNetEvent(NetEvent *theEvent)
 
    S32 classId = theEvent->getClassId(getNetClassGroup());
    if(U32(classId) >= mEventClassCount && getConnectionState() == Connected)
+   {
+      theEvent->incRef();
+      theEvent->decRef(); // Avoids some type of memory leak by deleting here if nothing reference it.
       return false;
+   }
 
    theEvent->notifyPosted(this);
 
