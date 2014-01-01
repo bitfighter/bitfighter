@@ -502,7 +502,7 @@ void GameUserInterface::render()
       return;
    }
 
-   TNLAssert(getUIManager()->isCurrentUI<GameUserInterface>() || getUIManager()->cameFrom<GameUserInterface>(), "Then why are we rendering???");
+   //TNLAssert(getUIManager()->isCurrentUI<GameUserInterface>() || getUIManager()->cameFrom<GameUserInterface>(), "Then why are we rendering???"); // Now comes from PlaybackGameUserInterface
 
    if(renderWithCommanderMap())
       renderGameCommander();
@@ -1514,7 +1514,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          getGame()->setBusyChatting(true);
          getUIManager()->activate<GameMenuUserInterface>();
       }
-   }     
+   }
    else if(checkInputCode(BINDING_CMDRMAP, inputCode))
    {
       toggleCommanderMap();

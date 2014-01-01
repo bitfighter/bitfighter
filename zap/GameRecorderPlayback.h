@@ -20,16 +20,23 @@ class GameRecorderPlayback : public GameConnection
    ClientGame *mGame;
    S32 mMilliSeconds;
    U32 mSizeToRead;
+   U32 mGameTypeTimer;
    SafePtr<ClientInfo> mClientInfoSpectating;
    bool isButtonHeldDown;
 public:
+   U32 mTotalTime;
+   U32 mCurrentTime;
+
    GameRecorderPlayback(ClientGame *game, const char *filename);
    ~GameRecorderPlayback();
 
    bool lostContact();
    void addPendingMove(Move *theMove);
+   void changeSpectate(S32 n);
 
-   void updateTimers(TNL::U32 MilliSeconds);
+   void updateSpectate();
+   void processMoreData(TNL::U32 MilliSeconds);
+   void restart();
 };
 
 class PlaybackSelectUserInterface : public LevelMenuSelectUserInterface
@@ -47,6 +54,9 @@ class PlaybackGameUserInterface : public UserInterface
 {
    GameUserInterface *mGameInterface;
    SafePtr<GameRecorderPlayback> mPlaybackConnection;
+   U32 mSpeed;
+   U32 mSpeedRemainder;
+   bool mVisible;
 public:
    explicit PlaybackGameUserInterface(ClientGame *game);
    void onActivate();
@@ -54,6 +64,7 @@ public:
    bool onKeyDown(InputCode inputCode);
    void onKeyUp(InputCode inputCode);
    void onTextInput(char ascii);
+   void onMouseMoved();
 
    void idle(U32 timeDelta);
    void render();

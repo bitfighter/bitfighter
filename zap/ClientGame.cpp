@@ -736,10 +736,8 @@ void ClientGame::idle(U32 timeDelta)
    checkConnectionToMaster(timeDelta);   // If no current connection to master, create (or recreate) one
 
    if(mConnectionToServer.isValid())
-      mConnectionToServer->updateTimers(timeDelta);
-
-   if(mConnectionToServer.isValid())
    {
+      mConnectionToServer->updateTimers(timeDelta);
       mCurrentTime += timeDelta;
 
       computeWorldObjectExtents();
@@ -766,7 +764,7 @@ void ClientGame::idle(U32 timeDelta)
             if(obj->isDeleted())
                continue;
 
-            if(obj == localPlayerShip && dynamic_cast<GameRecorderPlayback *>(mConnectionToServer.getPointer()) == NULL)
+            if(obj == localPlayerShip)
             {
                obj->setCurrentMove(*theMove);
                obj->idle(BfObject::ClientIdlingLocalShip);     // on client, object is our control object
