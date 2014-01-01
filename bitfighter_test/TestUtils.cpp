@@ -107,7 +107,8 @@ GamePair::~GamePair()
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
 
    for(S32 i = 0; i < clientGames->size(); i++)
-      clientGames->get(i)->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+      if(clientGames->get(i)->getConnectionToServer())
+         clientGames->get(i)->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
    idle(10, 5);
 
@@ -127,6 +128,7 @@ void GamePair::idle(U32 timeDelta, U32 cycles)
 
 void GamePair::addClient(const string &name, S32 team)
 {
+   ServerGame *server = GameManager::getServerGame();
    ClientGame *client = newClientGame(server->getSettingsPtr());
    GameManager::addClientGame(client);
 
@@ -136,8 +138,6 @@ void GamePair::addClient(const string &name, S32 team)
 
    // We need to turn off TNL's bandwidth controls so our tests can run faster.  FASTER!!@!
    client->getConnectionToServer()->useZeroLatencyForTesting();
-
-   clients.push_back(client);
 
    ClientInfo *clientInfo = server->findClientInfo(name.c_str());
 
@@ -149,6 +149,12 @@ void GamePair::addClient(const string &name, S32 team)
       TNLAssert(team < server->getTeamCount(), "Bad team!");
       server->getGameType()->changeClientTeam(clientInfo, team);
    }
+}
+
+
+ClientGame *GamePair::getClient(S32 index)
+{
+   return GameManager::getClientGames()->get(0);
 }
 
 
@@ -169,9 +175,11 @@ void GamePair::removeClient(const string &name)
 {
    S32 index = -1;
 
-   for(S32 i = 0; i < clients.size(); i++)
+   const Vector<ClientGame *> *clients = GameManager::getClientGames();
+
+   for(S32 i = 0; i < clients->size(); i++)
    {
-      if(string(clients[i]->getClientInfo()->getName().getString()) == name)
+      if(clients->get(i)->getClientInfo() && string(clients->get(i)->getClientInfo()->getName().getString()) == name)
       {
          index = i;
          break;
@@ -185,6 +193,8 @@ void GamePair::removeClient(const string &name)
 
 void GamePair::addBotClient(const string &name, S32 team)
 {
+   ServerGame *server = GameManager::getServerGame();
+
    server->addBot(Vector<const char *>());
    // Get most recently added clientInfo
    ClientInfo *clientInfo = server->getClientInfo(server->getClientInfos()->size() - 1);

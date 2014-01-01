@@ -113,7 +113,7 @@ TEST_F(ObjectTest, GhostingSanity)
 
    // Create our pair of connected games
    GamePair gamePair;
-   ClientGame *clientGame = gamePair.clients[0];
+   ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
 
    // Basic geometry to plug into polygon objects
@@ -196,7 +196,7 @@ TEST_F(ObjectTest, LuaSanity)
 
    // Create our pair of connected games
    GamePair gamePair;
-   ClientGame *clientGame = gamePair.clients.first();
+   ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
 
    // Basic geometry to plug into polygon objects

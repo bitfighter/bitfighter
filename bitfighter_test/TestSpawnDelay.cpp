@@ -32,7 +32,7 @@ static void killShip(Ship *ship)
 // Scenario 1: Player is idle and gets suspended -- no other players in game
 static void doScenario1(GamePair &gamePair)
 {
-   ClientGame *clientGame = gamePair.clients[0];
+   ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
 
    // Idle for a while -- ship should become spawn delayed.  GameConnection::SPAWN_DELAY_TIME is measured in ms.
@@ -90,8 +90,8 @@ static void doScenario2(GamePair &gamePair)
 
    gamePair.addClient("TestUser2", 0);
 
-   ClientGame *client1 = gamePair.clients[0];
-   ClientGame *client2 = gamePair.clients[1];
+   ClientGame *client1 = gamePair.getClient(0);
+   ClientGame *client2 = gamePair.getClient(1);
 
 
    // Should now be 2 ships in the game -- one belonging to client1 and another belonging to client2
@@ -159,7 +159,7 @@ static void doScenario2(GamePair &gamePair)
 // In scenario 4, player enters full suspend mode before unidling
 static void doScenario34(GamePair &gamePair, bool letGameSlipIntoFullSuspendMode)
 {
-   ClientGame *clientGame = gamePair.clients[0];
+   ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
 
    // Make sure we start off in a "normal" state
@@ -258,7 +258,7 @@ static void doScenario34(GamePair &gamePair, bool letGameSlipIntoFullSuspendMode
 // Scenario 5 -- Player enters /idle when in punishment delay period for pervious /idle command
 static void doScenario5(GamePair &gamePair)
 {
-   ClientGame *clientGame = gamePair.clients[0];
+   ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
 }
 
@@ -266,7 +266,7 @@ static void doScenario5(GamePair &gamePair)
 // Scenario 6 -- Player is shown a new levelup screen
 static void doScenario6(GamePair &gamePair)
 {
-   ClientGame *clientGame = gamePair.clients[0];
+   ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
 }
 
@@ -274,7 +274,7 @@ static void doScenario6(GamePair &gamePair)
 // Scenario 7 -- Player is shown a levelup screen they have already seen
 static void doScenario7(GamePair &gamePair)
 {
-   ClientGame *clientGame = gamePair.clients[0];
+   ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
 }
 
@@ -282,7 +282,7 @@ static void doScenario7(GamePair &gamePair)
 // Scenario 11 -- Player is editing loadout when level changes --> TEST NOT COMPLETE!!!!
 static void doScenario11(GamePair &gamePair)
 {
-   ClientGame *clientGame = gamePair.clients[0];
+   ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
 
    serverGame->setGameTime(.5);     // 30 seconds
@@ -326,7 +326,7 @@ static void doScenario11(GamePair &gamePair)
 TEST(SpawnDelayTest, SpawnDelayTests)
 {
    GamePair gamePair("");     // An empty level should work fine here
-   ClientGame *clientGame = gamePair.clients[0];
+   ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
 
    // Idle for a while, let things settle
