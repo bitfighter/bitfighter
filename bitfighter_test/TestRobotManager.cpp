@@ -147,10 +147,15 @@ TEST(RobotManagerTest, moreLessBots)
    gamePair.server->fewerBots();     EXPECT_EQ("HHH 0",       getTeams(gamePair));
    gamePair.server->moreBots();      EXPECT_EQ("HHH BBB",     getTeams(gamePair));    
    gamePair.server->moreBots();      EXPECT_EQ("HHHB BBBB",   getTeams(gamePair));    
-   gamePair.server->moreBots();      EXPECT_EQ("HHHBB BBBBB", getTeams(gamePair));    
+   gamePair.server->moreBots();      EXPECT_EQ("HHHBB BBBBB", getTeams(gamePair));  
 
    // New player joins other team; autoleveling should be enabled -- since target game size is 5v5, bot will be removed
    gamePair.addClient("newclient", 1);    EXPECT_EQ("HHHBB HBBBB",      getTeams(gamePair));
+
+   // With autoleveling on, changing teams should trigger balancing
+   ClientInfo *clientInfo = gamePair.server->findClientInfo("newclient");
+   gamePair.server->getGameType()->changeClientTeam(clientInfo, 0);  EXPECT_EQ("HHHHB BBBBB", getTeams(gamePair));
+   gamePair.server->getGameType()->changeClientTeam(clientInfo, 1);  EXPECT_EQ("HHHBB HBBBB", getTeams(gamePair));
 
    // Remove the player again, and try again with the other team
    gamePair.removeClient("newclient");    EXPECT_EQ("HHHBB BBBBB",      getTeams(gamePair));
@@ -162,6 +167,11 @@ TEST(RobotManagerTest, moreLessBots)
    gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH BBB",   getTeams(gamePair));
    gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH BB",    getTeams(gamePair));
    gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH B",     getTeams(gamePair));
+
+   // With autoleveling off, changing teams should not trigger balancing
+   clientInfo = gamePair.server->findClientInfo("newclient");
+   gamePair.server->getGameType()->changeClientTeam(clientInfo, 1);  EXPECT_EQ("HHH HB", getTeams(gamePair));
+   gamePair.server->getGameType()->changeClientTeam(clientInfo, 0);  EXPECT_EQ("HHHH B", getTeams(gamePair));
 
    // With autoleveling off, no bots will be added when new client joins
    gamePair.addClient("newclient2", 0);    EXPECT_EQ("HHHHH B",      getTeams(gamePair));
