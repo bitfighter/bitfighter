@@ -50,6 +50,9 @@ public:
 
    Settings mSettings;
    CIniFile ini;
+
+   map <U32, string> motdClientMap;
+   string getCurrentMotd() const;
 };
 
 
