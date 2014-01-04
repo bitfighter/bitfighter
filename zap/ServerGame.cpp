@@ -1095,10 +1095,9 @@ void ServerGame::startAllBots()
 }
 
 
-// Only used from testing
-string ServerGame::addBot(const Vector<const char *> &args)
+string ServerGame::addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass)
 {
-   return mRobotManager.addBot(args);
+   return mRobotManager.addBot(args, clientClass);
 }
 
 

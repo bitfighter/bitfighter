@@ -131,7 +131,7 @@ void RobotManager::balanceTeams()
       Vector<const char *> noArgs;
 
       for(S32 i = 0; i < minimumPlayersNeeded - currentClientCount; i++)
-         addBot(noArgs);
+         addBot(noArgs, ClientInfo::ClassRobotAddedByAutoleveler);
    }
 
    mAutoLevelTeams = true;    // Reneable autoleveling, which is disabled in deleteBotFromTeam()
@@ -149,7 +149,7 @@ S32 RobotManager::getMaxPlayersPerBalancedTeam(S32 players, S32 teams)
 }
 
 
-string RobotManager::addBot(const Vector<const char *> &args)
+string RobotManager::addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass)
 {
    Robot *robot = new Robot();
 
@@ -161,6 +161,7 @@ string RobotManager::addBot(const Vector<const char *> &args)
    }
 
    robot->addToGame(mGame, mGame->getGameObjDatabase());
+   static_cast<FullClientInfo *>(robot->getClientInfo())->setClientClass(clientClass);
 
    return "";
 }
@@ -263,13 +264,13 @@ void RobotManager::moreBots()
    // If teams all have the same number of players, neededBotCount will be 0 ==> add a bot to each team
    if(neededBotCount == 0)       
       for(S32 i = 0; i < teamCount; i++)
-         addBot(Vector<const char *>());
+         addBot(Vector<const char *>(), ClientInfo::ClassRobotAddedByAutoleveler);
 
    // Otherwise, add neededBotCount bots to bring all the teams up to the same number of players as on the biggest team
    else
       for(S32 i = 0; i < neededBotCount; i++)
-         addBot(Vector<const char *>());
-      mAutoLevelTeams = true;
+         addBot(Vector<const char *>(), ClientInfo::ClassRobotAddedByAutoleveler);
+   mAutoLevelTeams = true;
    mManagerActive = true;
    mTargetPlayerCount = findMinPlayers(mGame->getPlayerCount() + mGame->getRobotCount(), teamCount);
 }

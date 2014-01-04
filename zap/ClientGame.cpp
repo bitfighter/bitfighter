@@ -69,7 +69,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIM
    mUIManager->setClientGame(this);       // Need to do this before we can use it
 
    // TODO: Make this a ref instead of a pointer
-   mClientInfo = new FullClientInfo(this, NULL, mSettings->getPlayerName(), false);  // Will be deleted in destructor
+   mClientInfo = new FullClientInfo(this, NULL, mSettings->getPlayerName(), ClientInfo::ClassHuman);  // Deleted in destructor
 
    for(S32 i = 0; i < JoystickAxesDirectionCount; i++)
       mJoystickInputs[i] = 0;

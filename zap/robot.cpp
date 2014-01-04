@@ -275,7 +275,9 @@ void Robot::onAddedToGame(Game *game)
    // Robots are created with NULL ClientInfos.  We'll add a valid one here.
    TNLAssert(mClientInfo.isNull(), "mClientInfo should be NULL");
 
-   mClientInfo = new FullClientInfo(game, NULL, "Robot", true);  // deleted in destructor
+   // Bots from a variety of sources will pass through here.  Sources other than those added by a level
+   // will have to run ClientInfo::setClientClass() after the bot is added.
+   mClientInfo = new FullClientInfo(game, NULL, "Robot", ClientInfo::ClassRobotAddedByLevel);  // deleted in destructor
    mClientInfo->setShip(this);
    this->setOwner(mClientInfo);
    
@@ -364,7 +366,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-// Expect [team] <bot> [bot args]
+// Expect [team] [bot script file] [bot args]
 bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &errorMessage)
 {
    if(argc <= 1)

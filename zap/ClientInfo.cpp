@@ -30,7 +30,6 @@ ClientInfo::ClientInfo()
    mPing = 0;
    mCurrentKillStreak = 0;
    mRole = RoleNone;
-   mIsRobot = false;
    mIsAuthenticated = false;
    mBadges = NO_BADGES;
    mNeedToCheckAuthenticationWithMaster = false;     // Does client report that they are verified
@@ -350,12 +349,6 @@ bool ClientInfo::isOwner()
 }
 
 
-bool ClientInfo::isRobot()
-{
-   return mIsRobot;
-}
-
-
 F32 ClientInfo::getCalculatedRating()
 {
    return mStatistics.getCalculatedRating();
@@ -595,13 +588,13 @@ void ClientInfo::requireReturnToGameTimer(bool required) {        mNeedReturnToG
 ////////////////////////////////////////
 
 // Constructor
-FullClientInfo::FullClientInfo(Game *game, GameConnection *gameConnection, const string &name, bool isRobot) : ClientInfo()
+FullClientInfo::FullClientInfo(Game *game, GameConnection *gameConnection, const string &name, ClientClass clientClass) : ClientInfo()
 {
    mGame = game;
    mName = name;
 
    mClientConnection = gameConnection;
-   mIsRobot = isRobot;
+   mClientClass = clientClass;
 
    mShowLevelUpMessage = NONE;
 }
@@ -640,10 +633,31 @@ F32 FullClientInfo::getRating()
 }
 
 
+bool FullClientInfo::isRobot() const
+{
+   return mClientClass == ClassRobotAddedByAddbots     || 
+          mClientClass == ClassRobotAddedByAutoleveler || 
+          mClientClass == ClassRobotAddedByLevel       ||
+          mClientClass == ClassRobotWithUnknownSource;
+}
+
+
+void FullClientInfo::setClientClass(ClientClass clientClass)
+{
+   mClientClass = clientClass;
+}
+
+
+ClientInfo::ClientClass FullClientInfo::getClientClass()
+{
+   return mClientClass;
+}
+
+
 // Check if player is "on hold" due to inactivity; bots are never on hold.  Server only!
 bool FullClientInfo::isPlayerInactive()
 {
-   if(mIsRobot)         // Robots are never spawn-delayed
+   if(isRobot())         // Robots are never spawn-delayed
       return false;
 
    return getConnection()->getTimeSinceLastMove() > GameConnection::SPAWN_DELAY_TIME;    // 20 secs -- includes time between games
@@ -809,6 +823,12 @@ F32 RemoteClientInfo::getRating()
 void RemoteClientInfo::setRating(F32 rating)
 {
    mRating = rating;
+}
+
+
+bool RemoteClientInfo::isRobot() const
+{
+   return mIsRobot;
 }
 
 

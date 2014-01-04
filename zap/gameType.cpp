@@ -2696,7 +2696,7 @@ bool GameType::addBotFromClient(Vector<StringTableEntry> args)
       for(S32 i = 0; i < args.size(); i++)
          args_char.push_back(args[i].getString());
 
-      string errorMessage = getGame()->addBot(args_char);
+      string errorMessage = getGame()->addBot(args_char, ClientInfo::ClassRobotAddedByAddbots);
 
       if(errorMessage != "")
          conn->s2cDisplayErrorMessage(errorMessage);

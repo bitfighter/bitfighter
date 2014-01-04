@@ -10,6 +10,7 @@
 
 #include "GameTypesEnum.h"
 #include "DismountModesEnum.h"
+#include "ClientInfo.h"          // For ClientClass enum
 
 #include "GameSettings.h"
 #include "SoundEffect.h"         // For SFXHandle
@@ -333,7 +334,7 @@ public:
    virtual void deleteBot(S32 i);                         // Delete by index
    virtual void deleteBotFromTeam(S32 teamIndex);         // Delete by teamIndex
    virtual void deleteAllBots();                          // Delete 'em all, let God sort 'em out!
-   virtual string addBot(const Vector<const char *> &args);
+   virtual string addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass);
    virtual void moreBots();
    virtual void fewerBots();
    virtual void kickSingleBotFromLargestTeamWithBots();

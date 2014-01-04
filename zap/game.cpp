@@ -184,7 +184,8 @@ GameSettingsPtr Game::getSettingsPtr() const
 
 S32    Game::getBotCount() const                          { TNLAssert(false, "Not implemented for this class!"); return 0; }
 Robot *Game::findBot(const char *id)                      { TNLAssert(false, "Not implemented for this class!"); return NULL; }
-string Game::addBot(const Vector<const char *> &args)     { TNLAssert(false, "Not implemented for this class!"); return "";    }
+string Game::addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass)     
+                                                          { TNLAssert(false, "Not implemented for this class!"); return "";    }
 
 void   Game::kickSingleBotFromLargestTeamWithBots()  { TNLAssert(false, "Not implemented for this class!"); }
 void   Game::moreBots()                              { TNLAssert(false, "Not implemented for this class!"); }

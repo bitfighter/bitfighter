@@ -179,7 +179,7 @@ public:
    void balanceTeams();
 
    Robot *getBot(S32 index);
-   string addBot(const Vector<const char *> &args);
+   string addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass);
    void addBot(Robot *robot);
    void removeBot(Robot *robot);
    void deleteBot(const StringTableEntry &name);

@@ -47,6 +47,17 @@ public:
       MaxRoles
    };
 
+   // Robots can be different classes... as we descend the following list, each class is a lower priority
+   // and can be more readily removed
+   enum ClientClass {
+      ClassHuman,                   // Human player, obviously
+      ClassRobotAddedByLevel,       // A bot, specified in the level file with Robot directive
+      ClassRobotAddedByAddbots,     // A bot added with the /addbot or /addbots command
+      ClassRobotAddedByAutoleveler, // A bot added by the autoleveling system
+      ClassRobotWithUnknownSource,
+      ClassUnknown
+   };
+
    static const S32 MaxKillStreakLength = 4095;
    // After canceling /idle command, this is the delay penalty
    static const U32 SPAWN_UNDELAY_TIMER_DELAY = FIVE_SECONDS; 
@@ -68,7 +79,6 @@ protected:
    S32 mTeamIndex;               // <=== Does not get set on the client's LocalClientInfo!!!
    S32 mPing;
    ClientRole mRole;
-   bool mIsRobot;
    bool mIsAuthenticated;
    bool mSpawnDelayed;
    bool mIsBusy;
@@ -95,7 +105,6 @@ public:
 
    const U8 getPlayerFlagstoSendToMaster() const;
 
-
    S32 getScore();
    void setScore(S32 score);
    void addScore(S32 score);
@@ -114,7 +123,6 @@ public:
    void requestLoadout(const LoadoutTracker &loadout);
 
    Timer respawnTimer;
-
 
    bool isLoadoutValid(const LoadoutTracker &loadout, bool engineerAllowed);
 
@@ -162,7 +170,7 @@ public:
    bool isAdmin();
    bool isOwner();
 
-   bool isRobot();
+   virtual bool isRobot() const = 0;
 
    Statistics *getStatistics();      // Return pointer to statistics tracker 
 
@@ -209,10 +217,11 @@ class FullClientInfo : public ClientInfo
 private:
    GameConnection *mClientConnection;
    S32 mShowLevelUpMessage;
+   ClientClass mClientClass;
 
 public:
-   FullClientInfo(Game *game, GameConnection *clientConnection, const string &name, bool isRobot); // Constructor
-   virtual ~FullClientInfo();                                                                      // Destructor
+   FullClientInfo(Game *game, GameConnection *clientConnection, const string &name, ClientClass clientClass); // Constructor
+   virtual ~FullClientInfo();                                                                                 // Destructor
 
    // WARNING!! mClientConnection can be NULL on client and server's robots
    GameConnection *getConnection();
@@ -226,6 +235,11 @@ public:
 
    void setRating(F32 rating);
    F32 getRating();
+
+   bool isRobot() const;
+   void setClientClass(ClientClass clientClass);
+   ClientClass getClientClass();
+
 
    SoundEffect *getVoiceSFX();
    VoiceDecoder *getVoiceDecoder();
@@ -254,6 +268,8 @@ private:
    RefPtr<SoundEffect> mVoiceSFX;
    VoiceDecoder *mDecoder;
 
+   bool mIsRobot;
+
 public:
    RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges,      // Constructor
                     U16 gamesPlayed, RangedU32<0, MaxKillStreakLength> killStreak, bool isRobot, ClientRole role, 
@@ -267,6 +283,7 @@ public:
 
    F32 getRating();
    void setRating(F32 rating);
+   bool isRobot() const;
 
    void setSpawnDelayed(bool spawnDelayed);
 
