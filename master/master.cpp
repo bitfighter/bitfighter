@@ -78,7 +78,7 @@ void MasterSettings::loadSettingsFromINI()
    // Read all settings defined in the new modern manner
    string sections[] = { "host", "phpbb", "stats", "motd" };
 
-   for(S32 i = 0; i < ARRAYSIZE(sections); i++)
+   for(U32 i = 0; i < ARRAYSIZE(sections); i++)
    {
       string section = sections[i];
 
@@ -153,13 +153,20 @@ string MasterSettings::getCurrentMOTDFromFile(const string &filename) const
 }
 
 
-string MasterSettings::getCurrentMotd() const
+// If clientBuildVersion is U32_MAX, then return the motd for the latest build
+string MasterSettings::getMotd(U32 clientBuildVersion) const
 {
-   map <U32, string>::const_iterator iter = motdClientMap.find(getVal<U32>("LatestReleasedBuildVersion"));
-   if(iter == motdClientMap.end())
-      return "Welcome to Bitfighter!";
+   string motdString = "Welcome to Bitfighter!";
 
-   return (*iter).second;
+   // Use latest if build version is U32_MAX
+   if(clientBuildVersion == U32_MAX)
+      clientBuildVersion = getVal<U32>("LatestReleasedBuildVersion");
+
+   map <U32, string>::const_iterator iter = motdClientMap.find(clientBuildVersion);
+   if(iter != motdClientMap.end())
+      motdString = (*iter).second;
+
+   return motdString;
 }
 
 
@@ -320,7 +327,7 @@ void MasterServer::idle(const U32 timeDelta)
    {
       GameConnectRequest *request = MasterServerConnection::gConnectList[i];    
 
-      if(currentTime - request->requestTime > FIVE_SECONDS)  
+      if(currentTime - request->requestTime > (U32)FIVE_SECONDS)
       {
          if(request->initiator.isValid())
          {
@@ -347,7 +354,7 @@ void MasterServer::idle(const U32 timeDelta)
          MasterServerConnection::gLeaveChatTimerList.erase(i);                         
       else
       {
-         if(currentTime - c->mLeaveGlobalChatTimer > ONE_SECOND)
+         if(currentTime - c->mLeaveGlobalChatTimer > (U32)ONE_SECOND)
          {
             c->isInGlobalChat = false;
 

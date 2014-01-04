@@ -520,8 +520,7 @@ void MasterServerConnection::writeClientServerList_JSON()
       fprintf(f, "],\n\t\"serverCount\": %d,\n\t\"playerCount\": %d,\n", serverCount, playerCount);
 
       // And the message-of-the-day
-      string motd = mMaster->getSettings()->getCurrentMotd();
-      fprintf(f, "\t\"motd\": \"%s\"\n}\n", sanitizeForJson(motd.c_str()));
+      fprintf(f, "\t\"motd\": \"%s\"\n}\n", sanitizeForJson(mMaster->getSettings()->getMotd().c_str()));
 
       fflush(f);
       fclose(f);
@@ -1417,11 +1416,7 @@ string MasterServerConnection::cleanName(string name)    // Makes copy of name t
 void MasterServerConnection::sendMotd()
 {
    // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
-   string motdString = "Welcome to Bitfighter!";  // Default msg
-   map<U32,string>::const_iterator iter = mMaster->getSettings()->motdClientMap.find(mClientBuild);
-
-   if(iter != mMaster->getSettings()->motdClientMap.end())
-      motdString = (*iter).second;
+   string motdString = mMaster->getSettings()->getMotd(mClientBuild);
 
    m2cSetMOTD(mMaster->getSetting<string>("ServerName"), motdString.c_str());     // Even level 0 clients can handle this
 }
