@@ -770,7 +770,6 @@ void UIManager::displayMessageBox(const string &title, const string &instr, cons
 void UIManager::startLoadingLevel(bool engineerEnabled)
 {
    clearSparks();
-   getUI<EditorUserInterface>()->clearRobotLines();
    getUI<GameUserInterface>()->startLoadingLevel(engineerEnabled);
 }
 
