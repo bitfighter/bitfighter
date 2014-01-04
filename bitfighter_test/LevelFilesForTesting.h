@@ -15,6 +15,7 @@ using namespace std;
 
 string getLevelCode1();
 string getLevelCodeForTestingEngineer1();
+string getLevelCodeForEmptyLevelWithTwoBots();
 
 };
 

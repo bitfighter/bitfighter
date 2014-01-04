@@ -65,6 +65,12 @@ GamePair::GamePair(GameSettingsPtr settings)
 }
 
 
+GamePair::GamePair(GameSettingsPtr settings, const string &levelCode)
+{
+   initialize(settings, levelCode, 0);
+}
+
+
 // Create a pair of games suitable for testing client/server interaction.  Provide some levelcode to get things started.
 GamePair::GamePair(const string &levelCode, S32 clientCount)
 {
@@ -195,7 +201,7 @@ void GamePair::addBotClient(const string &name, S32 team)
 {
    ServerGame *server = GameManager::getServerGame();
 
-   server->addBot(Vector<const char *>());
+   server->addBot(Vector<const char *>(), ClientInfo::ClassRobotAddedByAutoleveler);
    // Get most recently added clientInfo
    ClientInfo *clientInfo = server->getClientInfo(server->getClientInfos()->size() - 1);
    ASSERT_TRUE(clientInfo->isRobot()) << "This is supposed to be a robot!";

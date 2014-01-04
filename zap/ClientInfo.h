@@ -55,7 +55,8 @@ public:
       ClassRobotAddedByAddbots,     // A bot added with the /addbot or /addbots command
       ClassRobotAddedByAutoleveler, // A bot added by the autoleveling system
       ClassRobotWithUnknownSource,
-      ClassUnknown
+      ClassUnknown,
+      ClassCount
    };
 
    static const S32 MaxKillStreakLength = 4095;

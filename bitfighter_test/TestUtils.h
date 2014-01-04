@@ -49,6 +49,7 @@ struct GamePair
 {
 	GamePair(const string &levelCode = "", S32 clients = 1);
    GamePair(GameSettingsPtr settings);
+   GamePair(GameSettingsPtr settings, const string &levelCode);
 
 	~GamePair();
 

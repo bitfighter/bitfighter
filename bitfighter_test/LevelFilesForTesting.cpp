@@ -51,4 +51,23 @@ string getLevelCodeForTestingEngineer1()
    ;
 }
 
+
+string getLevelCodeForEmptyLevelWithTwoBots()
+{
+   return
+      "LevelFormat 2\n"
+      "GameType 10 8\n"
+      "LevelName TwoBots\n"
+      "LevelDescription\n"
+      "LevelCredits Tyler Derden\n"
+      "Team Blue 0 0 1\n"
+      "Team Red 1 0 0\n"
+      "Specials\n"
+      "MinPlayers\n"
+      "MaxPlayers\n"
+      "Robot 1\n"
+      "Robot 1\n"
+   ;
+}
+
 };

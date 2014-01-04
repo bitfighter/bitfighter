@@ -9,6 +9,8 @@
 #include "gameType.h"
 #include "ServerGame.h"
 
+#include "LevelFilesForTesting.h"
+
 #include "stringUtils.h"
 #include "TestUtils.h"
 #include "gtest/gtest.h"
@@ -22,11 +24,6 @@ namespace Zap
 using namespace std;
 using namespace TNL;
 
-// Test this scenario!!
-// Watusimoto: i found a bug, not sure if it's related to your RobotManager - if you start a level with 'Robot' s in the level file, people are sorted to either team without respecting the bot count
-// so say I have 5 aegisbots in a file all on team blue and 5 humans are playing, if you restart the level, the humans get places 2 on blue 2 on red
-// *4 humans
-// only happens if players are already connected to the game server and the level is started
 
 TEST(RobotManagerTest, findMinPlayers)
 { 
@@ -55,24 +52,64 @@ TEST(RobotManagerTest, getMaxPlayersPerBalancedTeam)
 }
 
 
+static char getChar(S32 clientClass)
+{
+   switch(clientClass)
+   {
+      case (S32)ClientInfo::ClassHuman:                    return 'H';
+      case (S32)ClientInfo::ClassRobotAddedByLevel:        return 'L';
+      case (S32)ClientInfo::ClassRobotAddedByAddbots:      return 'A';
+      case (S32)ClientInfo::ClassRobotAddedByAutoleveler:  return 'B';
+      case (S32)ClientInfo::ClassRobotWithUnknownSource:   return 'U';
+      case (S32)ClientInfo::ClassUnknown:                  return 'X'; 
+      default: 
+         TNLAssert(false, "Unknown class!");
+   }
+
+   return '!';    // Or anything... this is never run!
+}
+
+
+
 // Reverses the above process, generating a string from team config for easy testing
 static string getTeams(const GamePair &gamePair)
 {
    gamePair.server->countTeamPlayers();
-   S32 teams = gamePair.server->getTeamCount();
+   //S32 teams = gamePair.server->getTeamCount();
+   Vector<Vector<S32> > teamStrings;
+
+   teamStrings.resize(gamePair.server->getTeamCount());
+   for(S32 i = 0; i < teamStrings.size(); i++)
+   {
+      teamStrings[i].resize((S32)ClientInfo::ClassCount);
+      for(S32 j = 0; j < teamStrings[i].size(); j++)
+         teamStrings[i][j] = 0;
+   }
+
+   const Vector<RefPtr<ClientInfo> > *clientInfos = gamePair.server->getClientInfos();
+
+   for(S32 i = 0; i < clientInfos->size(); i++)
+   {
+      S32 team = clientInfos->get(i)->getTeamIndex();
+      S32 cc   = static_cast<FullClientInfo *>(clientInfos->get(i).getPointer())->getClientClass();
+
+      teamStrings[team][cc]++;
+   }
 
    string teamDescr = "";
-
-   for(S32 i = 0; i < teams; i++)
+   for(S32 i = 0; i < teamStrings.size(); i++)
    {
-      AbstractTeam *team = gamePair.server->getTeam(i);
-      teamDescr += string(team->getPlayerCount(), 'H');
-      teamDescr += string(team->getBotCount(), 'B');
-
-      if(team->getPlayerBotCount() == 0)
+      S32 total = 0;
+      for(S32 j = 0; j < teamStrings[i].size(); j++)
+      {
+         S32 count = teamStrings[i][j];
+         teamDescr += string(count, getChar(j));
+         total += count;
+      }
+      if(total == 0)
          teamDescr += "0";
 
-      if(i < teams - 1)
+      if(i < teamStrings.size() - 1)
          teamDescr += " ";
    }
 
@@ -179,10 +216,10 @@ TEST(RobotManagerTest, moreLessBots)
    gamePair.addClient("newclient2", 1);    EXPECT_EQ("HHHH HB",      getTeams(gamePair));
 
    // /addbot
-   gamePair.server->addBot(botArgs);   EXPECT_EQ("HHHH HBB",    getTeams(gamePair));
-   gamePair.server->addBot(botArgs);   EXPECT_EQ("HHHH HBBB",   getTeams(gamePair));
-   gamePair.server->addBot(botArgs);   EXPECT_EQ("HHHHB HBBB",  getTeams(gamePair));
-   gamePair.server->addBot(botArgs);   EXPECT_EQ("HHHHB HBBBB", getTeams(gamePair));
+   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAutoleveler);   EXPECT_EQ("HHHH HBB",    getTeams(gamePair));
+   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAutoleveler);   EXPECT_EQ("HHHH HBBB",   getTeams(gamePair));
+   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAutoleveler);   EXPECT_EQ("HHHHB HBBB",  getTeams(gamePair));
+   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAutoleveler);   EXPECT_EQ("HHHHB HBBBB", getTeams(gamePair));
    }
 
 
@@ -220,6 +257,22 @@ TEST(RobotManagerTest, moreLessBots)
    setTeams(gamePair, "BBB HHH BBB H B H B");
    EXPECT_EQ("BBB HHH BBB H B H B", getTeams(gamePair));
    }
+
+   // Test this scenario!!
+   // Watusimoto: i found a bug, not sure if it's related to your RobotManager - if you start a level with 'Robot' s in the level file, people are sorted to either team without respecting the bot count
+   // so say I have 5 aegisbots in a file all on team blue and 5 humans are playing, if you restart the level, the humans get places 2 on blue 2 on red
+   // *4 humans
+   // only happens if players are already connected to the game server and the level is started
+
+   // Test what happens when you load a level with several bots on one team, and a new player joins.  There was a problem here somewhere...
+   {
+   GamePair gamePair(settings, getLevelCodeForEmptyLevelWithTwoBots());
+   // Fire up the game to get the level (and bots) to load
+   gamePair.server->cycleLevel();
+   gamePair.idle(10, 10);
+   EXPECT_EQ("0 LL", getTeams(gamePair));
+   }
+
 }
 
 

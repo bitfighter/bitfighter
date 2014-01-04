@@ -41,7 +41,7 @@ TEST(ServerGameTest, KillStreakTests)
    GameConnection conn;
    conn.setObjectMovedThisGame(true);     // Hacky way to avoid getting disconnected when the game is over, which will 
                                           // cause the tests to crash.  Will probably find a better way as we develop further.
-   FullClientInfo *ci = new FullClientInfo(game, &conn, "Noman", false);      // Cleaned up somewhere
+   FullClientInfo *ci = new FullClientInfo(game, &conn, "Noman", ClientInfo::ClassHuman);      // Cleaned up somewhere
    conn.setClientInfo(ci);
 
    LevelInfo levelInfo("Level", BitmatchGame);     // Need a levelInfo for when we change levels
