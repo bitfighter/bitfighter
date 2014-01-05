@@ -3816,14 +3816,30 @@ S32 GameType::getRemainingGameTimeInMs() const
 {
    if(mEndingGamePlay == 0)
       return 0;
-   return max(S32(mEndingGamePlay) - S32(mTotalGamePlay), 0);
 
+   return max(S32(mEndingGamePlay) - S32(mTotalGamePlay), 0);
 }
+
 
 string GameType::getRemainingGameTimeInMinutesString() const
 {
-   return ftos(F32(getRemainingGameTimeInMs()) * (1.f/1000.f/60.f));
+   // Let's be smart here and get a float as accurate as possible
+   // This is so we don't have migratory float problems when saving game
+   // time in the editor
+
+   // First convert to seconds and round to nearest
+   S32 seconds = S32(floorf((F32(getRemainingGameTimeInMs()) / 1000.f) + 0.5));
+
+   // Now break into pieces to improve accuracy
+   S32 minutesOnly = seconds / 60;
+   S32 secondsOnly = seconds % 60;
+
+   // Finally build our minutes as a float
+   F32 minutes = minutesOnly + ((F32)secondsOnly / 60.f);
+
+   return ftos(minutes);
 }
+
 
 bool GameType::isTimeUnlimited() const
 {
