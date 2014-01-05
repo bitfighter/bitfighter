@@ -522,6 +522,9 @@ void ServerGame::cycleLevel(S32 nextLevel)
       clientInfo->clearKillStreak();   // Clear any rampage the players have going... sorry, lads!
    }
 
+   mRobotManager.onLevelChanged();
+
+
    bool loaded = false;
 
    while(!loaded)
@@ -712,6 +715,20 @@ void ServerGame::resetAllClientTeams()
 {
    for(S32 i = 0; i < getClientCount(); i++)
       getClientInfo(i)->setTeamIndex(NO_TEAM);
+}
+
+
+// Currently only used by tests to temporarily disable bot leveling while setting up various team configurations
+bool ServerGame::getAutoLevelingEnabled() const
+{
+   return mRobotManager.getAutoLevelingEnabled();
+}
+
+
+// Currently only used by tests to temporarily disable bot leveling while setting up various team configurations
+void ServerGame::setAutoLeveling(bool enabled)
+{
+   mRobotManager.setAutoLeveling(enabled);
 }
 
 

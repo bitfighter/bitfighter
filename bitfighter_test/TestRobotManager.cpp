@@ -72,6 +72,7 @@ static char getChar(S32 clientClass)
 
 
 // Reverses the above process, generating a string from team config for easy testing
+// TODO: Use code from getCategorizedPlayerCountsByTeam() to reduce duplication
 static string getTeams(const GamePair &gamePair)
 {
    gamePair.server->countTeamPlayers();
@@ -121,6 +122,10 @@ static string getTeams(const GamePair &gamePair)
 // One team per word  e.g. "HHH HHB" would create two teams, one with 3 players, the other with 2 players and a bot
 static void setTeams(GamePair &gamePair, const string &teamConfig)
 {
+   // Turn off autoleveling for the duration of this command
+   bool autoLevelingWasEnabled =  gamePair.server->getAutoLevelingEnabled();
+   gamePair.server->setAutoLeveling(false);
+
    Vector<string> words = parseString(teamConfig);
 
    S32 teams = words.size();
@@ -142,6 +147,7 @@ static void setTeams(GamePair &gamePair, const string &teamConfig)
       }
 
    gamePair.server->countTeamPlayers();
+   gamePair.server->setAutoLeveling(autoLevelingWasEnabled);
 }
 
 
@@ -216,10 +222,10 @@ TEST(RobotManagerTest, moreLessBots)
    gamePair.addClient("newclient2", 1);    EXPECT_EQ("HHHH HB",      getTeams(gamePair));
 
    // /addbot
-   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAutoleveler);   EXPECT_EQ("HHHH HBB",    getTeams(gamePair));
-   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAutoleveler);   EXPECT_EQ("HHHH HBBB",   getTeams(gamePair));
-   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAutoleveler);   EXPECT_EQ("HHHHB HBBB",  getTeams(gamePair));
-   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAutoleveler);   EXPECT_EQ("HHHHB HBBBB", getTeams(gamePair));
+   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHH HAB",    getTeams(gamePair));
+   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHH HAAB",   getTeams(gamePair));
+   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHHA HAAB",  getTeams(gamePair));
+   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHHA HAAAB", getTeams(gamePair));
    }
 
 
@@ -264,13 +270,13 @@ TEST(RobotManagerTest, moreLessBots)
    // *4 humans
    // only happens if players are already connected to the game server and the level is started
 
-   // Test what happens when you load a level with several bots on one team, and a new player joins.  There was a problem here somewhere...
+   // Test what happens when you load a level with several bots on one team, and a new player joins.  This was broken in 019.
    {
    GamePair gamePair(settings, getLevelCodeForEmptyLevelWithTwoBots());
    // Fire up the game to get the level (and bots) to load
    gamePair.server->cycleLevel();
    gamePair.idle(10, 10);
-   EXPECT_EQ("0 LL", getTeams(gamePair));
+   EXPECT_EQ("BB LL", getTeams(gamePair));
    }
 
 }

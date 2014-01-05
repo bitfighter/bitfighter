@@ -191,8 +191,11 @@ public:
    void fewerBots();
    void kickSingleBotFromLargestTeamWithBots();
 
-   /////
+   // Currently only used by tests to temporarily disable bot leveling while setting up various team configurations
+   bool getAutoLevelingEnabled() const;
+   void setAutoLeveling(bool enabled);
 
+   /////
 
    StringTableEntry getLevelNameFromIndex(S32 indx);
    S32 getAbsoluteLevelIndex(S32 indx);            // Figures out the level index if the input is a relative index

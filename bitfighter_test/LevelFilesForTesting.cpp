@@ -65,8 +65,8 @@ string getLevelCodeForEmptyLevelWithTwoBots()
       "Specials\n"
       "MinPlayers\n"
       "MaxPlayers\n"
-      "Robot 1\n"
-      "Robot 1\n"
+      "Robot 1 s_bot\n"
+      "Robot 1 s_bot\n"
    ;
 }
 

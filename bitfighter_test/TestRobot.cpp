@@ -24,7 +24,7 @@ TEST(RobotTest, addBot)
 	EXPECT_EQ(0, gamePair.server->getRobotCount());
 	EXPECT_EQ(0, gamePair.getClient(0)->getRobotCount());
 
-	gamePair.server->addBot(args);
+	gamePair.server->addBot(args, ClientInfo::ClassRobotAddedByAddbots);
 
 	for(U32 i = 0; i < 10; i++)
 		gamePair.idle(10);

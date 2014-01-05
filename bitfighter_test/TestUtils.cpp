@@ -132,6 +132,7 @@ void GamePair::idle(U32 timeDelta, U32 cycles)
 }
 
 
+// Simulates player joining game from new client
 void GamePair::addClient(const string &name, S32 team)
 {
    ServerGame *server = GameManager::getServerGame();

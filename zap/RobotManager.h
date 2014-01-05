@@ -29,14 +29,15 @@ private:
    bool mAutoLevelTeams;         // When true, bots will be added/removed to make sure all teams are even
    
    S32 mTargetPlayerCount;       // Target number of bots and players; actual count may be higher when mAutoLevelTeams is true
-   S32 mTeams;                   // Team count in the current game
    ServerGame *mGame;
+
+   Vector<Vector<S32> > getCategorizedPlayerCountsByTeam() const;
 
 public:
    RobotManager(ServerGame *game, GameSettingsPtr settings);     // Contsructor
    virtual ~RobotManager();                                      // Destructor
 
-   void onLevelChanged(S32 teams);     // Called when level changes or is reset
+   void onLevelChanged();        // Called when level changes or is reset
 
    void balanceTeams();
 
@@ -59,6 +60,11 @@ public:
    void moreBots();
    void fewerBots();
    void deleteBotFromTeam(S32 teamIndex);
+
+   // Currently only used by tests to temporarily disable bot leveling while setting up various team configurations
+   bool getAutoLevelingEnabled() const;
+   void setAutoLeveling(bool enabled);
+
 
    static void printTeams(Game *game, const string &message);  // For debugging only
 

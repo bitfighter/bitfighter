@@ -279,7 +279,8 @@ void Robot::onAddedToGame(Game *game)
    // will have to run ClientInfo::setClientClass() after the bot is added.
    mClientInfo = new FullClientInfo(game, NULL, "Robot", ClientInfo::ClassRobotAddedByLevel);  // deleted in destructor
    mClientInfo->setShip(this);
-   this->setOwner(mClientInfo);
+
+   setOwner(mClientInfo);
    
    hasExploded = true;        // Because we start off "dead", but will respawn real soon now...
    disableCollision();
@@ -369,20 +370,22 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 // Expect [team] [bot script file] [bot args]
 bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &errorMessage)
 {
+   S32 team;
+
    if(argc <= 1)
-      setTeam(NO_TEAM);   
+      team = NO_TEAM;   
    else
    {
-      S32 team = atoi(argv[0]);
+      team = atoi(argv[0]);
 
-      if(team == NO_TEAM || (team >= 0 && team < game->getTeamCount()))
-         setTeam(atoi(argv[0]));
-      else
+      if(team != NO_TEAM && (team < 0 || team >= game->getTeamCount()))
       {
          errorMessage = "Invalid team specified";
          return false;
       }
    }
+
+   setTeam(team);
    
    string scriptName;
 
