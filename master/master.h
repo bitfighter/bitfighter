@@ -36,6 +36,7 @@ private:
    void loadSettingsFromINI();
    string getCurrentMOTDFromFile(const string &filename) const;
 
+   map<U32, string> motdClientMap;
 
 public:
    MasterSettings(const string &iniFile);     // Constructor --> here all the keys, vals, and defaults are defined
@@ -50,6 +51,8 @@ public:
 
    Settings mSettings;
    CIniFile ini;
+
+   string getMotd(U32 clientBuildVersion = U32_MAX) const;
 };
 
 

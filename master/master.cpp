@@ -71,7 +71,6 @@ void MasterSettings::readConfigFile()
 
 
 extern Vector<string> master_admins;
-extern map <U32, string> gMOTDClientMap;
 
 
 void MasterSettings::loadSettingsFromINI()
@@ -79,7 +78,7 @@ void MasterSettings::loadSettingsFromINI()
    // Read all settings defined in the new modern manner
    string sections[] = { "host", "phpbb", "stats", "motd" };
 
-   for(S32 i = 0; i < ARRAYSIZE(sections); i++)
+   for(U32 i = 0; i < ARRAYSIZE(sections); i++)
    {
       string section = sections[i];
 
@@ -107,14 +106,14 @@ void MasterSettings::loadSettingsFromINI()
    Vector<string> keys;
    ini.GetAllKeys("motd_clients", keys);
 
-   gMOTDClientMap.clear();
+   motdClientMap.clear();
 
    for(S32 i = 0; i < keys.size(); i++)
    {
       U32 build_version = (U32)Zap::stoi(keys[i]);    // Avoid conflicts with std::stoi() which is defined for VC++ 10
       string message = ini.GetValue("motd_clients", keys[i], defaultMessage);
 
-      gMOTDClientMap.insert(pair<U32, string>(build_version, message));
+      motdClientMap.insert(pair<U32, string>(build_version, message));
    }
 
 
@@ -124,7 +123,7 @@ void MasterSettings::loadSettingsFromINI()
    string motdFilename = ini.GetValue("motd", "motd_file", "motd");  // Default 'motd' in current directory
 
    // Grab the current message and add it to the map as the most recently released build
-   gMOTDClientMap[getVal<U32>("LatestReleasedBuildVersion")] = getCurrentMOTDFromFile(motdFilename);
+   motdClientMap[getVal<U32>("LatestReleasedBuildVersion")] = getCurrentMOTDFromFile(motdFilename);
 }
 
 
@@ -143,10 +142,31 @@ string MasterSettings::getCurrentMOTDFromFile(const string &filename) const
    bool ok = fgets(message, MOTD_LEN, f);
    fclose(f);
 
-   if(ok)
-      return message;
+   if(!ok)
+      return defaultMessage;
 
-   return defaultMessage; 
+
+   string returnMessage(message);
+   trim_right_in_place(returnMessage, "\n");  // Remove any trailing new lines
+
+   return returnMessage;
+}
+
+
+// If clientBuildVersion is U32_MAX, then return the motd for the latest build
+string MasterSettings::getMotd(U32 clientBuildVersion) const
+{
+   string motdString = "Welcome to Bitfighter!";
+
+   // Use latest if build version is U32_MAX
+   if(clientBuildVersion == U32_MAX)
+      clientBuildVersion = getVal<U32>("LatestReleasedBuildVersion");
+
+   map <U32, string>::const_iterator iter = motdClientMap.find(clientBuildVersion);
+   if(iter != motdClientMap.end())
+      motdString = (*iter).second;
+
+   return motdString;
 }
 
 
@@ -307,7 +327,7 @@ void MasterServer::idle(const U32 timeDelta)
    {
       GameConnectRequest *request = MasterServerConnection::gConnectList[i];    
 
-      if(currentTime - request->requestTime > FIVE_SECONDS)  
+      if(currentTime - request->requestTime > (U32)FIVE_SECONDS)
       {
          if(request->initiator.isValid())
          {
@@ -334,7 +354,7 @@ void MasterServer::idle(const U32 timeDelta)
          MasterServerConnection::gLeaveChatTimerList.erase(i);                         
       else
       {
-         if(currentTime - c->mLeaveGlobalChatTimer > ONE_SECOND)
+         if(currentTime - c->mLeaveGlobalChatTimer > (U32)ONE_SECOND)
          {
             c->isInGlobalChat = false;
 
