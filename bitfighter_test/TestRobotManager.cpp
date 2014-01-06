@@ -269,48 +269,74 @@ TEST(RobotManagerTest, moreLessBots)
    // Try one with a small number of players specified
    {
    settings->getIniSettings()->minBalancedPlayers = 2;
+   settings->getIniSettings()->playWithBots       = true;
    GamePair gamePair(settings, getLevelCodeForEmptyLevelWithTwoBots());
-   // Fire up the game to get the level (and bots) to load
-   gamePair.server->cycleLevel();
-   gamePair.idle(10, 10);
-   EXPECT_EQ("BB LL", getTeams(gamePair));
 
-   gamePair.addClient("Cookie Jarvis");
-   EXPECT_EQ("HB LL", getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("BB LL",     getTeams(gamePair));
 
-   gamePair.server->cycleLevel();
-   gamePair.idle(10, 10);
-   EXPECT_EQ("HB LL", getTeams(gamePair));
+   gamePair.addClient("Cookie Jarvis");                          EXPECT_EQ("HB LL",     getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HB LL",     getTeams(gamePair));
 
-   gamePair.addClient("Booberry");
-   EXPECT_EQ("HH LL", getTeams(gamePair));
+   gamePair.addClient("Booberry");                               EXPECT_EQ("HH LL",     getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HH LL",     getTeams(gamePair));
 
-   gamePair.server->cycleLevel();
-   gamePair.idle(10, 10);
-   EXPECT_EQ("HH LL", getTeams(gamePair));
+   gamePair.addClient("Frankenberry");                           EXPECT_EQ("HHH LLB",   getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HHH LLB",   getTeams(gamePair));
 
-   gamePair.addClient("Frankenberry");
-   EXPECT_EQ("HHH LLB", getTeams(gamePair));
+   gamePair.addClient("Count Chocula");                          EXPECT_EQ("HHH HLL",   getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HHH HLL",   getTeams(gamePair));
 
-   gamePair.server->cycleLevel();
-   gamePair.idle(10, 10);
-   EXPECT_EQ("HHH LLB", getTeams(gamePair));
-
-   gamePair.addClient("Count Chocula");
-   EXPECT_EQ("HHH HLL", getTeams(gamePair));
-
-   gamePair.server->cycleLevel();
-   gamePair.idle(10, 10);
-   EXPECT_EQ("HHH HLL", getTeams(gamePair));
-
-   gamePair.addClient("Toucan Sam");
-   EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
-
-   gamePair.server->cycleLevel();
-   gamePair.idle(10, 10);
-   EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
+   gamePair.addClient("Toucan Sam");                             EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
    }
 
+   // Same test, but with a larger number of players specified
+   {
+   settings->getIniSettings()->minBalancedPlayers = 8;
+   settings->getIniSettings()->playWithBots       = true;
+   GamePair gamePair(settings, getLevelCodeForEmptyLevelWithTwoBots());
+
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("BBBB LLBB", getTeams(gamePair));
+
+   gamePair.addClient("Cookie Jarvis");                          EXPECT_EQ("HBBB LLBB", getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HBBB LLBB", getTeams(gamePair));
+
+   gamePair.addClient("Booberry");                               EXPECT_EQ("HHBB LLBB", getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HHBB LLBB", getTeams(gamePair));
+
+   gamePair.addClient("Frankenberry");                           EXPECT_EQ("HHHB LLBB", getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HHHB LLBB", getTeams(gamePair));
+
+   gamePair.addClient("Count Chocula");                          EXPECT_EQ("HHHB HLLB", getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HHHB HLLB", getTeams(gamePair));
+
+   gamePair.addClient("Toucan Sam");                             EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
+
+   }
+
+   // And again, with bot balancing disabled
+   {
+   settings->getIniSettings()->playWithBots = false;     // Disables autoleveling
+   GamePair gamePair(settings, getLevelCodeForEmptyLevelWithTwoBots());
+
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("0 LL",     getTeams(gamePair));
+
+   gamePair.addClient("Cookie Jarvis");                          EXPECT_EQ("H LL",     getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("H LL",     getTeams(gamePair));
+   
+   gamePair.addClient("Booberry");                               EXPECT_EQ("HH LL",    getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HH LL",    getTeams(gamePair));
+   
+   gamePair.addClient("Frankenberry");                           EXPECT_EQ("HHH LL",   getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HHH LL",   getTeams(gamePair));
+   
+   gamePair.addClient("Count Chocula");                          EXPECT_EQ("HHH HLL",  getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HHH HLL",  getTeams(gamePair));
+   
+   gamePair.addClient("Toucan Sam");                             EXPECT_EQ("HHHH HLL", getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HHHH HLL", getTeams(gamePair));
+   }
 }
 
 

@@ -34,7 +34,7 @@ RobotManager::~RobotManager()
 // Called when level changes or is reset
 void RobotManager::onLevelChanged()
 {
-   mAutoLevelTeams = true;    // Reactivate auto-leveling (may have been deactivated with manual bot controls)
+   mManagerActive = true;    
 }
 
 
