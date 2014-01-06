@@ -2710,10 +2710,12 @@ bool GameType::addBotFromClient(Vector<StringTableEntry> args)
 
       string errorMessage = getGame()->addBot(args_char, ClientInfo::ClassRobotAddedByAddbots);
 
-      if(errorMessage != "")
-         conn->s2cDisplayErrorMessage(errorMessage);
-      else     // Success!!
+      if(errorMessage == "")     // Success!!
+      {
          return true;
+      }
+
+   conn->s2cDisplayErrorMessage(errorMessage);
    }
 
    return false;
