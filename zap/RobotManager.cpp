@@ -92,25 +92,9 @@ void RobotManager::balanceTeams()
       largestFixedPlayerCount = max(largestFixedPlayerCount, fixedPlayers);
    }
 
-   //// If bots are always set to balance, then adjust minimum players needed to fill up all teams
-   //if(mGame->isTeamGame())
-   //{
-   //   // If all teams were balanced to the largest human team, then adjust the minimum players
-   //   if(minimumPlayersNeeded < largestFixedPlayerCount * teamCount)
-   //      minimumPlayersNeeded = largestFixedPlayerCount * teamCount;
-
-   //   // If all fixed players are spread out and still don't meet the minimum players, adjust so minimum
-   //   // is met and all teams would be balanced
-   //   else if(minimumPlayersNeeded < maxPlayersPerBalancedTeam * teamCount)
-   //      minimumPlayersNeeded = maxPlayersPerBalancedTeam * teamCount;
-   //}
-
    S32 totalPlayersNeededPerTeam = max(largestFixedPlayerCount, maxPlayersPerBalancedTeam);
 
    // Kick bots on any teams with more palyers than we need
-   //// Re-adjust our max players per team based on our new minimum that is needed
-   //maxPlayersPerBalancedTeam = getMaxPlayersPerBalancedTeam(totalPlayersNeededPerTeam * teamCount, teamCount);
-
    for(S32 i = 0; i < teamCount; i++)
    {
       Team *team = static_cast<Team *>(mGame->getTeam(i));
@@ -138,7 +122,6 @@ void RobotManager::balanceTeams()
    // Not enough players!  Add bots until we're balanced.  This assumes adding a bot will go
    // to the team with fewest players.
    S32 currentClientCount = mGame->getClientCount();  // Need to save this, it could be adjusted when adding bots
-   //if(currentClientCount < totalPlayersNeededPerTeam * teamCount)
    {
       Vector<const char *> noArgs;
 
