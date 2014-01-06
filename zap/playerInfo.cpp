@@ -265,13 +265,13 @@ S32 RobotPlayerInfo::lua_getTeamIndex(lua_State *L)
 
 S32 RobotPlayerInfo::lua_getRating(lua_State *L)
 {
-   return returnFloat(L, mRobot->getRating());
+   return returnFloat(L, mRobot->getClientInfo()->getRating());
 }
 
 
 S32 RobotPlayerInfo::lua_getScore(lua_State *L)
 {
-   return returnInt(L, mRobot->getScore());
+   return returnInt(L, mRobot->getClientInfo()->getScore());
 }
 
 

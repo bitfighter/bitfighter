@@ -50,7 +50,7 @@ void ConnectionStatsRenderer::idle(U32 timeDelta, GameConnection *conn)
 
 
    mTime += timeDelta;
-   if(mTime >= 1000)
+   if(mTime >= 1000 && conn)
    {
       mTime = 0;
 

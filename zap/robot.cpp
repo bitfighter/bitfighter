@@ -73,8 +73,6 @@ Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),
    flightPlanTo = U16_MAX;
 
    mPlayerInfo = new RobotPlayerInfo(this);
-   mScore = 0;
-   mTotalScore = 0;
 
 #ifndef ZAP_DEDICATED
    mShapeType = ShipShape::Normal;
@@ -546,18 +544,6 @@ bool Robot::isRobot()
 LuaPlayerInfo *Robot::getPlayerInfo()
 {
    return mPlayerInfo;
-}
-
-
-S32 Robot::getScore()
-{
-   return mScore;
-}
-
-
-F32 Robot::getRating()
-{
-   return mTotalScore == 0 ? 0.5f : (F32)mScore / (F32)mTotalScore;
 }
 
 
