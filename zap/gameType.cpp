@@ -1580,8 +1580,6 @@ const Color *GameType::getTeamColor(S32 teamIndex) const
 // strongest to weakest.  Bots will be added to their predefined teams, or if that is invalid, to the lowest ranked team.
 void GameType::serverAddClient(ClientInfo *clientInfo)
 {
-   getGame()->countTeamPlayers();     // Also calcs team ratings
-
    if(!clientInfo->isRobot())
    {
       GameConnection *conn = clientInfo->getConnection();
@@ -1593,40 +1591,55 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
       }
    }
 
-   // Figure out how many players the team with the fewest players has
-   Team *team = (Team *)mGame->getTeam(0);
-   S32 minPlayers = team->getPlayerCount() + team->getBotCount();
+   // Figure out how many players the team with the fewest players has, not including leveling bots, which can be ignored 
+   // if autoleveling is enabled (unless we are adding a bot for the purposes of autoleveling, in which case we do need
+   // to count them)
+   Vector<Vector<S32> > counts = static_cast<ServerGame *>(getGame())->getCategorizedPlayerCountsByTeam();
+   bool autoLevelingEnabled = static_cast<ServerGame *>(getGame())->getAutoLevelingEnabled();
+   bool countAutoLevelBots = clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByAutoleveler ||
+                             clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByLevel       ||
+                             clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByLevelNoTeam;
+   S32 minPlayers = S32_MAX;
 
-   for(S32 i = 1; i < mGame->getTeamCount(); i++)
+   for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
-      team = (Team *)mGame->getTeam(i);
+      S32 playerCount  = counts[i][ClientInfo::ClassHuman] +
+                         counts[i][ClientInfo::ClassRobotAddedByLevel] +
+                         counts[i][ClientInfo::ClassRobotAddedByLevelNoTeam] +
+                         counts[i][ClientInfo::ClassRobotAddedByAddbots] +
+                         (countAutoLevelBots ? counts[i][ClientInfo::ClassRobotAddedByAutoleveler] : 0);
 
-      if(team->getPlayerBotCount() < minPlayers)
-         minPlayers = team->getPlayerBotCount();
-   }
+      if(minPlayers > playerCount)
+         minPlayers = playerCount;
+   } 
 
    // Of the teams with minPlayers, find the one with the lowest total rating...
-   S32 minTeamIndex = 0;
+   S32 minTeamIndex = NONE;
    F32 minRating = F32_MAX;
 
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
-      team = (Team *)mGame->getTeam(i);
-      if(team->getPlayerBotCount() == minPlayers && team->getRating() < minRating)
+      S32 playerCount  = counts[i][ClientInfo::ClassHuman] +
+                         counts[i][ClientInfo::ClassRobotAddedByLevel] +
+                         counts[i][ClientInfo::ClassRobotAddedByLevelNoTeam] +
+                         counts[i][ClientInfo::ClassRobotAddedByAddbots] +
+                         (countAutoLevelBots ? counts[i][ClientInfo::ClassRobotAddedByAutoleveler] : 0);
+
+      Team *team = (Team *)mGame->getTeam(i);
+      if(playerCount == minPlayers && team->getRating() < minRating)
       {
          minTeamIndex = i;
          minRating = team->getRating();
       }
    }
 
-   // Robots use their own team number, so if we have a valid one, override that assigned above
+   TNLAssert(minTeamIndex != NONE, "Preposterous!!")
+
+
+   // Robots may have already been assigned a team number; if so, use it in place of team determined above
    if(clientInfo->isRobot())                              
    {
       Ship *robot = clientInfo->getShip();
-
-      TNLAssert(robot, "Expected robot here!");
-      if(!robot)
-         return;
 
       if(robot->getTeam() >= 0 && robot->getTeam() < mGame->getTeamCount())   // No neutral or hostile bots -- why not?
          minTeamIndex = robot->getTeam();
@@ -1642,7 +1655,6 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
       min(clientInfo->getKillStreak(), (U32)ClientInfo::MaxKillStreakLength), false,
                 clientInfo->getRole(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(), 
                 clientInfo->isBusy(), true, true);
-
 
    if(clientInfo->getTeamIndex() >= 0) 
       s2cClientJoinedTeam(clientInfo->getName(), clientInfo->getTeamIndex(), isTeamGame() && !isGameOver());

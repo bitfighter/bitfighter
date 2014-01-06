@@ -159,6 +159,7 @@ public:
    bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
 
    void deleteLevelGen(LuaLevelGenerator *levelgen);     // Add misbehaved levelgen to the kill list
+   Vector<Vector<S32> > getCategorizedPlayerCountsByTeam() const;
 
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);
 
@@ -184,7 +185,7 @@ public:
    void removeBot(Robot *robot);
    void deleteBot(const StringTableEntry &name);
    void deleteBot(S32 i);
-   void deleteBotFromTeam(S32 teamIndex);
+   //void deleteBotFromTeam(S32 teamIndex);
    void deleteAllBots();
    Robot *findBot(const char *id);
    void moreBots();

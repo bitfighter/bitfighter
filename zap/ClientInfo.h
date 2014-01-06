@@ -51,12 +51,14 @@ public:
    // and can be more readily removed
    enum ClientClass {
       ClassHuman,                   // Human player, obviously
-      ClassRobotAddedByLevel,       // A bot, specified in the level file with Robot directive
+      ClassRobotAddedByLevel,       // A bot, specified in the level file with Robot directive, along with a team
+      ClassRobotAddedByLevelNoTeam, // A bot added by level file, but with no team specified (could be added to any team)
       ClassRobotAddedByAddbots,     // A bot added with the /addbot or /addbots command
       ClassRobotAddedByAutoleveler, // A bot added by the autoleveling system
       ClassRobotWithUnknownSource,
       ClassUnknown,
-      ClassCount
+      ClassCount,
+      ClassAnyBot
    };
 
    static const S32 MaxKillStreakLength = 4095;
@@ -133,7 +135,8 @@ public:
    bool isSpawnDelayed();              // Returns true if spawn has actually been delayed   
    virtual void setSpawnDelayed(bool spawnDelayed) = 0;
 
-   virtual bool isPlayerInactive();    // Server only
+   virtual bool isPlayerInactive();                // Server only
+   virtual ClientClass getClientClass() const;     // Server only
 
    bool isBusy();
    void setIsBusy(bool isBusy);
@@ -239,8 +242,7 @@ public:
 
    bool isRobot() const;
    void setClientClass(ClientClass clientClass);
-   ClientClass getClientClass();
-
+   ClientClass getClientClass() const;
 
    SoundEffect *getVoiceSFX();
    VoiceDecoder *getVoiceDecoder();

@@ -471,9 +471,21 @@ void ServerGame::addWallItem(BfObject *wallItem, GridDatabase *unused)
 
 // Sort by order in which players should be added to teams
 // Highest ratings first -- runs on server only, so these should be FullClientInfos
-// Return 1 if a is above b, -1 if b is above a, and 0 if they are equal
+// Return 1 if a should be added before b, -1 if b should be added before a, and 0 if it doesn't matter
 static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo> *b)
 {
+   // Always add level-specified bots first
+   if((*a)->getClientClass() == ClientInfo::ClassRobotAddedByLevel)
+      return 1;
+   if((*b)->getClientClass() == ClientInfo::ClassRobotAddedByLevel)
+      return -1;
+
+   // Always add other bots last
+   if((*a)->getClientClass() != ClientInfo::ClassHuman)
+      return -1;
+   if((*b)->getClientClass() != ClientInfo::ClassHuman)
+      return 1;
+
    bool aIsIdle = !(*a)->getConnection() || !(*a)->getConnection()->getObjectMovedThisGame();
    bool bIsIdle = !(*b)->getConnection() || !(*b)->getConnection()->getObjectMovedThisGame();
 
@@ -484,7 +496,7 @@ static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo>
    if(!aIsIdle && bIsIdle)
       return 1;
 
-   // Let's be simple about this
+   // Add higher-rated players first
    if((*a)->getCalculatedRating() > (*b)->getCalculatedRating())
       return 1;
    else if((*a)->getCalculatedRating() < (*b)->getCalculatedRating())
@@ -1055,6 +1067,33 @@ void ServerGame::deleteLevelGen(LuaLevelGenerator *levelgen)
 }
 
 
+Vector<Vector<S32> > ServerGame::getCategorizedPlayerCountsByTeam() const
+{
+   countTeamPlayers();
+
+   Vector<Vector<S32> > counts;
+
+   counts.resize(getTeamCount());
+   for(S32 i = 0; i < counts.size(); i++)
+   {
+      counts[i].resize(ClientInfo::ClassCount);
+      for(S32 j = 0; j < counts[i].size(); j++)
+         counts[i][j] = 0;
+   }
+
+   for(S32 i = 0; i < mClientInfos.size(); i++)
+   {
+      S32 team = mClientInfos[i]->getTeamIndex();
+      S32 cc   = mClientInfos[i]->getClientClass();
+
+      if(team >= 0)
+         counts[team][cc]++;
+   }
+
+   return counts;
+}
+
+
 void ServerGame::addClient(ClientInfo *clientInfo)
 {
    TNLAssert(!clientInfo->isRobot(), "This only gets called for players");
@@ -1166,10 +1205,10 @@ void ServerGame::deleteBot(S32 i)
 }
 
 
-void ServerGame::deleteBotFromTeam(S32 teamIndex)
-{
-   mRobotManager.deleteBotFromTeam(teamIndex);
-}
+//void ServerGame::deleteBotFromTeam(S32 teamIndex)
+//{
+//   mRobotManager.deleteBotFromTeam(teamIndex);
+//}
 
 
 void ServerGame::deleteAllBots()
@@ -1193,7 +1232,7 @@ void ServerGame::fewerBots()
 // Comes from c2sKickBot
 void ServerGame::kickSingleBotFromLargestTeamWithBots()
 {
-    mRobotManager.deleteBotFromTeam(findLargestTeamWithBots());
+    mRobotManager.deleteBotFromTeam(findLargestTeamWithBots(), ClientInfo::ClassAnyBot);
 }
 
 

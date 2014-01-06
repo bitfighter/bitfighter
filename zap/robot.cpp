@@ -277,7 +277,9 @@ void Robot::onAddedToGame(Game *game)
 
    // Bots from a variety of sources will pass through here.  Sources other than those added by a level
    // will have to run ClientInfo::setClientClass() after the bot is added.
-   mClientInfo = new FullClientInfo(game, NULL, "Robot", ClientInfo::ClassRobotAddedByLevel);  // deleted in destructor
+   ClientInfo::ClientClass clientClass = getTeam() < 0 ? ClientInfo::ClassRobotAddedByLevelNoTeam : ClientInfo::ClassRobotAddedByLevel;
+
+   mClientInfo = new FullClientInfo(game, NULL, "Robot", clientClass);  // deleted in destructor
    mClientInfo->setShip(this);
 
    setOwner(mClientInfo);

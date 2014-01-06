@@ -58,6 +58,7 @@ static char getChar(S32 clientClass)
    {
       case (S32)ClientInfo::ClassHuman:                    return 'H';
       case (S32)ClientInfo::ClassRobotAddedByLevel:        return 'L';
+      case (S32)ClientInfo::ClassRobotAddedByLevelNoTeam:  return 'l';
       case (S32)ClientInfo::ClassRobotAddedByAddbots:      return 'A';
       case (S32)ClientInfo::ClassRobotAddedByAutoleveler:  return 'B';
       case (S32)ClientInfo::ClassRobotWithUnknownSource:   return 'U';
@@ -92,7 +93,7 @@ static string getTeams(const GamePair &gamePair)
    for(S32 i = 0; i < clientInfos->size(); i++)
    {
       S32 team = clientInfos->get(i)->getTeamIndex();
-      S32 cc   = static_cast<FullClientInfo *>(clientInfos->get(i).getPointer())->getClientClass();
+      S32 cc   = clientInfos->get(i).getPointer()->getClientClass();
 
       teamStrings[team][cc]++;
    }
@@ -264,19 +265,50 @@ TEST(RobotManagerTest, moreLessBots)
    EXPECT_EQ("BBB HHH BBB H B H B", getTeams(gamePair));
    }
 
-   // Test this scenario!!
-   // Watusimoto: i found a bug, not sure if it's related to your RobotManager - if you start a level with 'Robot' s in the level file, people are sorted to either team without respecting the bot count
-   // so say I have 5 aegisbots in a file all on team blue and 5 humans are playing, if you restart the level, the humans get places 2 on blue 2 on red
-   // *4 humans
-   // only happens if players are already connected to the game server and the level is started
-
    // Test what happens when you load a level with several bots on one team, and a new player joins.  This was broken in 019.
+   // Try one with a small number of players specified
    {
+   settings->getIniSettings()->minBalancedPlayers = 2;
    GamePair gamePair(settings, getLevelCodeForEmptyLevelWithTwoBots());
    // Fire up the game to get the level (and bots) to load
    gamePair.server->cycleLevel();
    gamePair.idle(10, 10);
    EXPECT_EQ("BB LL", getTeams(gamePair));
+
+   gamePair.addClient("Cookie Jarvis");
+   EXPECT_EQ("HB LL", getTeams(gamePair));
+
+   gamePair.server->cycleLevel();
+   gamePair.idle(10, 10);
+   EXPECT_EQ("HB LL", getTeams(gamePair));
+
+   gamePair.addClient("Booberry");
+   EXPECT_EQ("HH LL", getTeams(gamePair));
+
+   gamePair.server->cycleLevel();
+   gamePair.idle(10, 10);
+   EXPECT_EQ("HH LL", getTeams(gamePair));
+
+   gamePair.addClient("Frankenberry");
+   EXPECT_EQ("HHH LLB", getTeams(gamePair));
+
+   gamePair.server->cycleLevel();
+   gamePair.idle(10, 10);
+   EXPECT_EQ("HHH LLB", getTeams(gamePair));
+
+   gamePair.addClient("Count Chocula");
+   EXPECT_EQ("HHH HLL", getTeams(gamePair));
+
+   gamePair.server->cycleLevel();
+   gamePair.idle(10, 10);
+   EXPECT_EQ("HHH HLL", getTeams(gamePair));
+
+   gamePair.addClient("Toucan Sam");
+   EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
+
+   gamePair.server->cycleLevel();
+   gamePair.idle(10, 10);
+   EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
    }
 
 }

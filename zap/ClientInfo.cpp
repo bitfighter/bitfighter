@@ -166,8 +166,15 @@ bool ClientInfo::isShipSystemsDisabled()
 
 bool ClientInfo::isPlayerInactive()
 {
-   TNLAssert(false, "Override this if you want to use it!");
+   TNLAssert(false, "Not implemented for this class!");
    return false;
+}
+
+
+ClientInfo::ClientClass ClientInfo::getClientClass() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+   return ClassUnknown;
 }
 
 
@@ -638,6 +645,7 @@ bool FullClientInfo::isRobot() const
    return mClientClass == ClassRobotAddedByAddbots     || 
           mClientClass == ClassRobotAddedByAutoleveler || 
           mClientClass == ClassRobotAddedByLevel       ||
+          mClientClass == ClassRobotAddedByLevelNoTeam ||
           mClientClass == ClassRobotWithUnknownSource;
 }
 
@@ -648,7 +656,7 @@ void FullClientInfo::setClientClass(ClientClass clientClass)
 }
 
 
-ClientInfo::ClientClass FullClientInfo::getClientClass()
+ClientInfo::ClientClass FullClientInfo::getClientClass() const
 {
    return mClientClass;
 }

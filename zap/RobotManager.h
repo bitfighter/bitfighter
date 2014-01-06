@@ -31,8 +31,6 @@ private:
    S32 mTargetPlayerCount;       // Target number of bots and players; actual count may be higher when mAutoLevelTeams is true
    ServerGame *mGame;
 
-   Vector<Vector<S32> > getCategorizedPlayerCountsByTeam() const;
-
 public:
    RobotManager(ServerGame *game, GameSettingsPtr settings);     // Contsructor
    virtual ~RobotManager();                                      // Destructor
@@ -59,7 +57,7 @@ public:
    void deleteBot(S32 i);
    void moreBots();
    void fewerBots();
-   void deleteBotFromTeam(S32 teamIndex);
+   void deleteBotFromTeam(S32 teamIndex, ClientInfo::ClientClass botClass);
 
    // Currently only used by tests to temporarily disable bot leveling while setting up various team configurations
    bool getAutoLevelingEnabled() const;
