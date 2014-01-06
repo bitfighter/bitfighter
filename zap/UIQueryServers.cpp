@@ -952,6 +952,8 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
 void QueryServersUserInterface::recalcCurrentIndex()
 {
    S32 indx = mPage * getServersPerPage() + selectedId % getServersPerPage() - 1;
+   if(indx < 0)
+      indx = 0;
    if(indx >= servers.size())
       indx = servers.size() - 1;
 
