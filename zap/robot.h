@@ -34,9 +34,6 @@ private:
 
    U16 mCurrentZone;                // Zone robot is currently in
 
-   S32 mScore;
-   S32 mTotalScore;
-
    LuaPlayerInfo *mPlayerInfo;      // Player info object describing the robot
 
    bool mHasSpawned;
@@ -85,8 +82,6 @@ public:
    void clearMove();                   // Reset bot's move to do nothing
 
 
-   S32 getScore();    // Return robot's score
-   F32 getRating();   // Return robot's rating
    const char *getScriptName();
 
    Robot *clone() const;
