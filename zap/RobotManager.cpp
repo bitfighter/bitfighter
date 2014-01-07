@@ -59,74 +59,48 @@ void RobotManager::balanceTeams()
    S32 teamCount = mGame->getTeamCount();
    TNLAssert(botCounts.size() == teamCount, "Problem!");
 
-
-   // First figure out how many "players" we have.  This is basically everyone except bots added by the autoleveler
-   S32 fixedPlayers = 0;
-   
-   for(S32 i = 0; i < botCounts.size(); i++)
-      fixedPlayers += botCounts[i][ClientInfo::ClassHuman] + 
-                      botCounts[i][ClientInfo::ClassRobotAddedByLevel] + 
-                      botCounts[i][ClientInfo::ClassRobotAddedByLevelNoTeam] + 
-                      botCounts[i][ClientInfo::ClassRobotAddedByAddbots];
-
-   S32 minimumPlayersNeeded = fixedPlayers;     // Will be adjusted later
-   //bool botsAlwaysBalance = mGame->getSettings()->getIniSettings()->botsAlwaysBalanceTeams;  <== remove from settings
-
-   // If teams were balanced, how many players would the largest team have?
-   S32 maxPlayersPerBalancedTeam = getMaxPlayersPerBalancedTeam(mTargetPlayerCount, teamCount);
-
-
-   // Find team with most "fixed" players... 
-   // i.e. those that we can't shuffle around... 
-   // i.e. those that are Human or added by the Level
+   // First figure out how many "players" we have.  This is basically everyone except bots added by the autoleveler.
+   // Fixed players are those we can't shuffle around; basically everyone except autoleveling bots
+   S32 totalFixedPlayers = 0;
    S32 largestFixedPlayerCount = 0;
 
-   for(S32 i = 0; i < teamCount; i++)
+   for(S32 i = 0; i < botCounts.size(); i++)
    {
-      // These are the players we can't shuffle around (once they are on a team, they don't move as players join and leave)
-      S32 fixedPlayers = botCounts[i][ClientInfo::ClassHuman] + 
-                         botCounts[i][ClientInfo::ClassRobotAddedByLevel] +
-                         botCounts[i][ClientInfo::ClassRobotAddedByLevelNoTeam] +
-                         botCounts[i][ClientInfo::ClassRobotAddedByAddbots];
+      S32 kickablePlayers = botCounts[i][ClientInfo::ClassRobotAddedByAutoleveler];
+      S32 fixedPlayers = (mGame->getTeam(i)->getPlayerBotCount() - kickablePlayers);
 
+      totalFixedPlayers += fixedPlayers;
       largestFixedPlayerCount = max(largestFixedPlayerCount, fixedPlayers);
    }
 
-   S32 totalPlayersNeededPerTeam = max(largestFixedPlayerCount, maxPlayersPerBalancedTeam);
+   // If teams were balanced, (and we had no autoleveling bots) how many players would the largest team have?
+   S32 maxPlayersPerBalancedTeam = getMaxPlayersPerBalancedTeam(mTargetPlayerCount, teamCount);
+   S32 playersNeededPerTeam = max(largestFixedPlayerCount, maxPlayersPerBalancedTeam);
 
    // Kick bots on any teams with more palyers than we need
    for(S32 i = 0; i < teamCount; i++)
    {
       Team *team = static_cast<Team *>(mGame->getTeam(i));
 
-      S32 kickableBotCount = botCounts[i][ClientInfo::ClassRobotAddedByAutoleveler];
-      S32 teamPlayerBotCount = team->getPlayerBotCount();  // All players
+      S32 teamSize = team->getPlayerBotCount();  // All players
 
       // If the current team has autolevel bots and has more players than the calculated balance should have
-      if(kickableBotCount > 0 && teamPlayerBotCount > totalPlayersNeededPerTeam)
+      if(teamSize > playersNeededPerTeam)
       {
          // Find the difference
-         S32 playersWeWouldLikeToKick = teamPlayerBotCount - totalPlayersNeededPerTeam;
+         S32 playersToKick = teamSize - playersNeededPerTeam;
+         TNLAssert(playersToKick <= botCounts[i][ClientInfo::ClassRobotAddedByAutoleveler], "Just checking...");
 
-         // Kick as many bots as we need to, but not more than we can
-         S32 numBotsToKick = min(kickableBotCount, playersWeWouldLikeToKick);
-
-         for(S32 j = 0; j < numBotsToKick; j++)
+         for(S32 j = 0; j < playersToKick; j++)
             deleteBotFromTeam(i, ClientInfo::ClassRobotAddedByAutoleveler);
       }
-   }
+      else if(teamSize < playersNeededPerTeam)
+      {
+         Vector<const char *> noArgs;
 
-   // Re-evaluate team counts
-   mGame->countTeamPlayers();
-
-   // Not enough players!  Add bots until we're balanced.  This assumes adding a bot will go
-   // to the team with fewest players.
-   S32 currentClientCount = mGame->getClientCount();  // Need to save this, it could be adjusted when adding bots
-   {
-      Vector<const char *> noArgs;
-
-      for(S32 i = 0; i < totalPlayersNeededPerTeam * teamCount - currentClientCount; i++)
-         addBot(noArgs, ClientInfo::ClassRobotAddedByAutoleveler);
+         for(S32 j = teamSize; j < playersNeededPerTeam; j++)
+            addBot(noArgs, ClientInfo::ClassRobotAddedByAutoleveler, i);
+      }
    }
 
    mAutoLevelTeams = true;    // Reneable autoleveling, which is disabled in deleteBotFromTeam()
@@ -144,7 +118,7 @@ S32 RobotManager::getMaxPlayersPerBalancedTeam(S32 players, S32 teams)
 }
 
 
-string RobotManager::addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass)
+string RobotManager::addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass, S32 teamIndex)
 {
    Robot *robot = new Robot();
 
@@ -154,6 +128,10 @@ string RobotManager::addBot(const Vector<const char *> &args, ClientInfo::Client
       delete robot;
       return "!!! " + errorMessage;
    }
+
+   // Set the team if we know it
+   if(teamIndex != NO_TEAM)
+      robot->setTeam(teamIndex);
 
    robot->addToGame(mGame, mGame->getGameObjDatabase());
    static_cast<FullClientInfo *>(robot->getClientInfo())->setClientClass(clientClass);

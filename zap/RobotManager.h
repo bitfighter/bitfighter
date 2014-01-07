@@ -7,7 +7,8 @@
 #define _ROBOT_MANAGER_H_
 
 #include "GameSettings.h"
-#include "ClientInfo.h"    // For ClientClass enum
+#include "ClientInfo.h"       // For ClientClass enum
+#include "TeamConstants.h"    // For NO_TEAM def
 
 #include "tnlTypes.h"
 
@@ -39,7 +40,7 @@ public:
 
    void balanceTeams();
 
-   string addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass);
+   string addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass, S32 teamIndex = NO_TEAM);
 
    static S32 getMaxBots(GameSettings *settings, bool isAdmin);
 
