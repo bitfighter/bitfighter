@@ -108,11 +108,10 @@ void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32
 
 GamePair::~GamePair()
 {
-   LuaScriptRunner::clearScriptCache();
-   LuaScriptRunner::shutdown();
-
    // Disconnect all ClientGames before deleting
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+
+   GameManager::getServerGame()->setAutoLeveling(false);    // No need to run this while we're shutting down
 
    for(S32 i = 0; i < clientGames->size(); i++)
       if(clientGames->get(i)->getConnectionToServer())
@@ -121,8 +120,11 @@ GamePair::~GamePair()
    idle(10, 5);
 
    // Clean up GameManager
+   GameManager::deleteServerGame();
    GameManager::deleteClientGames();
-   GameManager::deleteServerGame();    
+
+   LuaScriptRunner::clearScriptCache();
+   LuaScriptRunner::shutdown();
 }
 
 
