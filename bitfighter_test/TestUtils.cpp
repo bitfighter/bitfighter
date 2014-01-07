@@ -87,7 +87,8 @@ void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32
 
    server = GameManager::getServerGame();                // Get the game created in initHosting
 
-   if(::testing::UnitTest::GetInstance()->current_test_case() != NULL)
+   // Give the host name something meaningful... in this case the name of the test
+   if(::testing::UnitTest::GetInstance()->current_test_case())
    {
       const char *name = ::testing::UnitTest::GetInstance()->current_test_case()->name();
       const char *name2 = ::testing::UnitTest::GetInstance()->current_test_info()->name();
