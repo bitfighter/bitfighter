@@ -65,6 +65,7 @@ void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool test
    {
       abortHosting_noLevels(GameManager::getServerGame());
       GameManager::deleteServerGame();
+      return;
    }
 
    GameManager::getServerGame()->resetLevelLoadIndex();
@@ -109,13 +110,15 @@ void abortHosting_noLevels(ServerGame *serverGame)
 
       errUI->reset();
       errUI->setTitle("HOUSTON, WE HAVE A PROBLEM");
-      errUI->setMessage("No levels were loaded.  Cannot host a game."
-                        "Check the LevelDir parameter in your INI file,"
-                        "or your command-line parameters to make sure"
-                        "you have correctly specified a folder containing"
+      errUI->setMessage("No levels were loaded.  Cannot host a game.  "
+                        "Check the LevelDir parameter in your INI file, "
+                        "or your command-line parameters to make sure "
+                        "you have correctly specified a folder containing "
                         "valid level files.\n\n"
                         "Trying to load levels from folder:\n" +
                      (levelDir == "" ? string("<<Unresolvable>>") : levelDir));
+
+      errUI->setInstr("Press [[Esc]] to continue");
 
       uiManager->activate<ErrorMessageUserInterface>();
       uiManager->disableLevelLoadDisplay(false); 

@@ -80,11 +80,14 @@ void AbstractMessageUserInterface::quit()
 void AbstractMessageUserInterface::reset()
 {
    for(S32 i = 0; i < MAX_LINES; i++)
-      mMessage[i] =  SymbolShapePtr(new SymbolBlank());
+      mMessage[i] = SymbolShapePtr(new SymbolBlank());
 
    mMaxLines = MAX_LINES;
    mKeyRegistrations.clear();
    mRenderUnderlyingUi = true;
+
+   mInstr = SymbolShapePtr(new SymbolBlank());
+   mTitle = SymbolShapePtr(new SymbolBlank());
 }
 
 
