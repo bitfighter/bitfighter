@@ -34,21 +34,9 @@ TEST(ServerGameTest, ProcessEmptyLevelLine)
 
 TEST(ServerGameTest, KillStreakTests)
 {
-   ServerGame *game = newServerGame();
-   GameType *gt = new GameType();      // Cleaned up in game destructor
-   gt->addToGame(game, game->getGameObjDatabase());
+   GamePair gamePair;
+   ServerGame *game = gamePair.server;
 
-   GameConnection conn;
-   conn.setObjectMovedThisGame(true);     // Hacky way to avoid getting disconnected when the game is over, which will 
-                                          // cause the tests to crash.  Will probably find a better way as we develop further.
-   FullClientInfo *ci = new FullClientInfo(game, &conn, "Noman", ClientInfo::ClassHuman);      // Cleaned up somewhere
-   conn.setClientInfo(ci);
-
-   LevelInfo levelInfo("Level", BitmatchGame);     // Need a levelInfo for when we change levels
-
-   game->addClient(ci);
-   game->addLevel(levelInfo);
-   
    game->setGameTime(1.0f / 60.0f); // 1 second, in minutes
 
    ASSERT_EQ(0, game->getClientInfo(0)->getKillStreak());
@@ -67,8 +55,6 @@ TEST(ServerGameTest, KillStreakTests)
 
    // New game has begun... kill streak should be reset to 0
    ASSERT_EQ(0, game->getClientInfo(0)->getKillStreak());
-
-   delete game;
 }
 
 
