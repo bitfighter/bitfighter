@@ -120,8 +120,8 @@ GamePair::~GamePair()
    idle(10, 5);
 
    // Clean up GameManager
-   GameManager::deleteServerGame();
    GameManager::deleteClientGames();
+   GameManager::deleteServerGame();
 
    LuaScriptRunner::clearScriptCache();
    LuaScriptRunner::shutdown();
