@@ -71,6 +71,7 @@ TEST(ServerGameTest, KillStreakTests)
    delete game;
 }
 
+
 TEST(ServerGameTest, LittleStory) 
 {
    ServerGame *serverGame = newServerGame();
