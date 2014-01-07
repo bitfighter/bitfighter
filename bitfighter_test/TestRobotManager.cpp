@@ -264,6 +264,12 @@ TEST(RobotManagerTest, moreLessBots)
    setTeams(gamePair, "BBB HHH BBB H B H B");
    EXPECT_EQ("BBB HHH BBB H B H B", getTeams(gamePair));
    }
+}
+
+TEST(RobotManagerTest, levelsThatIncludeBots)
+{
+   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+   settings->getIniSettings()->playWithBots = false;
 
    // Test what happens when you load a level with several bots on one team, and a new player joins.  This was broken in 019.
    // Try one with a small number of players specified
