@@ -82,6 +82,10 @@ GamePair::GamePair(const string &levelCode, S32 clientCount)
 
 void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32 clientCount)
 {
+   // Need to start Lua before we add any clients.  Might as well do it now.
+   LuaScriptRunner::setScriptingDir(settings->getFolderManager()->luaDir);
+   LuaScriptRunner::startLua();
+
    LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(levelCode));
    initHosting(settings, levelSource, true, false);      // Creates a game and adds it to GameManager
 
@@ -99,9 +103,6 @@ void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32
 
    for(S32 i = 0; i < clientCount; i++)
       addClient("TestPlayer" + itos(i));
-
-   LuaScriptRunner::setScriptingDir(settings->getFolderManager()->luaDir);
-   LuaScriptRunner::startLua();
 }
 
 
