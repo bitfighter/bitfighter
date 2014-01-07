@@ -548,7 +548,7 @@ S32 Game::findLargestTeamWithBots() const
       TNLAssert(dynamic_cast<Team *>(getTeam(i)), "Invalid team");
       Team *team = static_cast<Team *>(getTeam(i));
 
-      // Must have at least one bot!
+      // Must have at least one bot to be the largest team with bots!
       if(team->getPlayerBotCount() > largestTeamCount && team->getBotCount() > 0)
       {
          largestTeamCount = team->getPlayerBotCount();
