@@ -735,10 +735,11 @@ void ClientGame::idle(U32 timeDelta)
 
    checkConnectionToMaster(timeDelta);   // If no current connection to master, create (or recreate) one
 
+   mCurrentTime += timeDelta;
+
    if(mConnectionToServer.isValid())
    {
       mConnectionToServer->updateTimers(timeDelta);
-      mCurrentTime += timeDelta;
 
       computeWorldObjectExtents();
 
