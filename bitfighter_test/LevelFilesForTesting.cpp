@@ -4,7 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "LevelFilesForTesting.h"
-#include <string>
+#include "stringUtils.h"
+#include "tnlVector.h"
 
 namespace Zap
 {
@@ -52,22 +53,37 @@ string getLevelCodeForTestingEngineer1()
 }
 
 
-string getLevelCodeForEmptyLevelWithTwoBots()
+// Botspec looks like this:
+// BBB BB  for 2 teams with 3 bots on first team, 2 on second
+// Use 0 for a team with no bots
+string getLevelCodeForEmptyLevelWithBots(const string &botSpec)
 {
-   return
+   Vector<string> words = parseString(botSpec);
+   S32 teams = words.size();
+
+   string level = 
       "LevelFormat 2\n"
       "GameType 10 8\n"
       "LevelName TwoBots\n"
       "LevelDescription\n"
-      "LevelCredits Tyler Derden\n"
-      "Team Blue 0 0 1\n"
-      "Team Red 1 0 0\n"
+      "LevelCredits Tyler Derden\n";
+
+   for(S32 i = 0; i < teams; i++)
+   {
+      level += "Team team" + itos(i) + " 0 0 0\n";
+   }
+
+   level += 
       "Specials\n"
       "MinPlayers\n"
-      "MaxPlayers\n"
-      "Robot 1 s_bot\n"
-      "Robot 1 s_bot\n"
-   ;
+      "MaxPlayers\n";
+
+   for(S32 i = 0; i < teams; i++)
+      if(words[i] != "0")
+         for(S32 j = 0; j < words[i].size(); j++)
+            level += "Robot " + itos(i) + " s_bot\n";
+
+   return level;
 }
 
 };

@@ -266,6 +266,7 @@ TEST(RobotManagerTest, moreLessBots)
    }
 }
 
+
 TEST(RobotManagerTest, levelsThatIncludeBots)
 {
    GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
@@ -276,7 +277,7 @@ TEST(RobotManagerTest, levelsThatIncludeBots)
    {
    settings->getIniSettings()->minBalancedPlayers = 2;
    settings->getIniSettings()->playWithBots       = true;
-   GamePair gamePair(settings, getLevelCodeForEmptyLevelWithTwoBots());
+   GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 BB"));
 
    gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("BB LL",     getTeams(gamePair));
 
@@ -300,7 +301,7 @@ TEST(RobotManagerTest, levelsThatIncludeBots)
    {
    settings->getIniSettings()->minBalancedPlayers = 8;
    settings->getIniSettings()->playWithBots       = true;
-   GamePair gamePair(settings, getLevelCodeForEmptyLevelWithTwoBots());
+   GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 BB"));
 
    gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("BBBB LLBB", getTeams(gamePair));
 
@@ -324,7 +325,7 @@ TEST(RobotManagerTest, levelsThatIncludeBots)
    // And again, with bot balancing disabled
    {
    settings->getIniSettings()->playWithBots = false;     // Disables autoleveling
-   GamePair gamePair(settings, getLevelCodeForEmptyLevelWithTwoBots());
+   GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 BB"));
 
    gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("0 LL",     getTeams(gamePair));
 
@@ -345,5 +346,25 @@ TEST(RobotManagerTest, levelsThatIncludeBots)
    }
 }
 
+
+TEST(RobotManagerTest, autolevelingWithLevelsThatIncludeBots)
+{
+   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+   settings->getIniSettings()->playWithBots = false;
+
+   // And again, with bot balancing disabled
+   {
+   settings->getIniSettings()->playWithBots = false;     // Disables autoleveling
+   GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 BB"));
+
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("0 LL",     getTeams(gamePair));
+
+   gamePair.addClient("Cookie Jarvis");                          EXPECT_EQ("H LL",     getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("H LL",     getTeams(gamePair));
+   
+   gamePair.addClient("Booberry");                               EXPECT_EQ("HH LL",    getTeams(gamePair));
+   gamePair.server->cycleLevel();     gamePair.idle(10, 10);     EXPECT_EQ("HH LL",    getTeams(gamePair));
+   }
+}
 
 };

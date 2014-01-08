@@ -122,7 +122,7 @@ GamePair::~GamePair()
    // Clean up GameManager
    GameManager::deleteClientGames();
    GameManager::deleteServerGame();
-
+ 
    LuaScriptRunner::clearScriptCache();
    LuaScriptRunner::shutdown();
 }
