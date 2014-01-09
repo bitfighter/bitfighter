@@ -36,7 +36,6 @@ int main(int argc, char **argv)
    //StdoutLogConsumer StdoutLog;
    //StdoutLog.setMsgTypes(consoleEvents);
 
-
    testing::InitGoogleTest(&argc, argv);
    DisplayManager::initialize();
    int returnvalue = RUN_ALL_TESTS();
