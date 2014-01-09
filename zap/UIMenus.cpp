@@ -999,18 +999,21 @@ void MainMenuUserInterface::render()
 {
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
+   static const S32 MOTD_VERT_POS = 540;
+
    // Draw our Message-Of-The-Day, if we have one
-   if(strcmp(mMOTD, ""))
+   if(strcmp(mMOTD, "") != 0)
    {
       // Draw message, scrolling
       U32 width = getStringWidth(20, mMOTD);
-      glColor(Colors::white);
       U32 totalWidth = width + canvasWidth;
       U32 pixelsPerSec = 100;
       U32 delta = getGame()->getCurrentTime() - motdArriveTime;
       delta = U32(delta * pixelsPerSec * 0.001) % totalWidth;
 
       FontManager::pushFontContext(MotdContext);
+      glColor(Colors::white);
+      drawString(canvasWidth - delta, MOTD_VERT_POS, 20, mMOTD);
       FontManager::popFontContext();
    }
 
