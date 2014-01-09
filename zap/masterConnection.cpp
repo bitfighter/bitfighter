@@ -126,7 +126,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
 {
    if(!mGame->isServer())   // We're not a server!  Reject connection!
    {
-      logprintf(LogConsumer::LogConnection, "Rejecting arranged connection from %s, We're not a server!", Address(possibleAddresses[0]).toString());
+      logprintf(LogConsumer::LogConnection, "Rejecting arranged connection from %s, We're not a server!", 
+                Address(possibleAddresses[0]).toString());
       s2mRejectArrangedConnection(requestId, ByteBufferPtr(new ByteBuffer((U8 *)NotServerError, sizeof(NotServerError))));
       return;
    }
@@ -151,9 +152,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
 
    conn->setNetAddress(fullPossibleAddresses[0]);
 
-   logprintf(LogConsumer::LogConnection, "Accepting arranged connection from %s", Address(fullPossibleAddresses[0]).toString());
+   logprintf(LogConsumer::LogConnection, "Accepting arranged connection from %s", 
+             Address(fullPossibleAddresses[0]).toString());
 
-   ByteBufferPtr theSharedData = new ByteBuffer(data + 2 * Nonce::NonceSize, sizeof(data) - 2 * Nonce::NonceSize);
+   U32 bufferSize = sizeof(data) - 2 * Nonce::NonceSize;
+   ByteBufferPtr theSharedData = new ByteBuffer(data + 2 * Nonce::NonceSize, bufferSize);
    Nonce nonce(data);
    Nonce serverNonce(data + Nonce::NonceSize);
    theSharedData->takeOwnership();
@@ -203,7 +206,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected
    {
       rejectData->takeOwnership();
       rejectData->resize(rejectData->getBufferSize() + 1);
-      char *rejectString = (char *)rejectData->getBuffer();  // Convert a rejectData into a string, adding a null terminate character.
+      char *rejectString = (char *)rejectData->getBuffer();  // Convert a rejectData into a string, adding a null terminate character
       rejectString[rejectData->getBufferSize() - 1] = 0;
 
       logprintf(LogConsumer::LogConnection, "Arranged connection rejected: %s", rejectString);
@@ -288,9 +291,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated_019, (Vec
             }
 
             StringTableEntry oldName = clientInfo->getName();
-            clientInfo->setName("");                               // avoid unique self
+            clientInfo->setName("");                               // Avoid unique self
             StringTableEntry uniqueName = mGame->makeUnique(name.getString()).c_str();  // The new name
-            clientInfo->setName(oldName);                          // restore name to properly get it updated to clients.
+            clientInfo->setName(oldName);                          // Restore name to properly get it updated to clients
 
             if(clientInfo->getName() != uniqueName)
                mGame->updateClientChangedName(clientInfo, uniqueName);
