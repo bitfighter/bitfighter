@@ -9,6 +9,7 @@
 
 #include "DisplayManager.h"
 #include "FontManager.h"
+#include "tnlLog.h"
 
 #include "tnl.h"
 
@@ -28,6 +29,14 @@ void shutdownBitfighter()  { TNLAssert(false, "Should never be called!"); };
 using namespace Zap;
 int main(int argc, char **argv) 
 {
+   // Uncomment to see lots of events... we should do this from time to time and eliminate as many messages as possible
+   //const S32 consoleEvents = LogConsumer::AllErrorTypes |
+   //                          LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage |
+   //                          LogConsumer::ConsoleMsg;
+   //StdoutLogConsumer StdoutLog;
+   //StdoutLog.setMsgTypes(consoleEvents);
+
+
    testing::InitGoogleTest(&argc, argv);
    DisplayManager::initialize();
    int returnvalue = RUN_ALL_TESTS();
