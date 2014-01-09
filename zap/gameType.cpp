@@ -3842,7 +3842,7 @@ string GameType::getRemainingGameTimeInMinutesString() const
    // time in the editor
 
    // First convert to seconds and round to nearest
-   S32 seconds = S32(floorf((F32(getRemainingGameTimeInMs()) / 1000.f) + 0.5));
+   S32 seconds = S32(floorf((F32(getRemainingGameTimeInMs()) / 1000.0f) + 0.5f));
 
    // Now break into pieces to improve accuracy
    S32 minutesOnly = seconds / 60;
