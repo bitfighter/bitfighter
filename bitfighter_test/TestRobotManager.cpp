@@ -24,6 +24,7 @@ namespace Zap
 using namespace std;
 using namespace TNL;
 
+// TODO: Add some tests related to /addbot(s) and /kickbot(s) and Remove All Bots
 
 TEST(RobotManagerTest, findMinPlayers)
 { 
@@ -377,5 +378,6 @@ TEST(RobotManagerTest, autolevelingWithLevelsThatIncludeBots)
    gamePair.server->cycleLevel();       EXPECT_EQ("HH LL LB",    getTeams(gamePair));
    }
 }
+
 
 };
