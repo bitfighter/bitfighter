@@ -224,7 +224,6 @@ public:
    S32 maxBots;
    bool playWithBots;               // Should the server add bots
    S32 minBalancedPlayers;          // If bot auto-balance, make sure there are at least this many players
-   bool botsAlwaysBalanceTeams;     // If minimum players are met, still balance to make teams even
    bool enableServerVoiceChat;      // No voice chat allowed in server if disabled
    bool allowTeamChanging;
    bool enableGameRecording;

@@ -1642,9 +1642,6 @@ void RobotOptionsMenuUserInterface::setupMenus()
     // This doesn't have a callback so we'll handle it in onEscape - make sure to set the correct index!
    addMenuItem(new CounterMenuItem("MINIMUM PLAYERS:", iniSettings->minBalancedPlayers,
          1, 2, 32, "bots", "", "Bots will be added until total player count meets this value", KEY_M));
-
-   addMenuItem(new YesNoMenuItem("AUTO BALANCE TEAMS:", iniSettings->botsAlwaysBalanceTeams,
-         "Force teams to balance, even if the minimum player count has been met",  KEY_A, KEY_T));
 }
 
 
@@ -1661,7 +1658,6 @@ void RobotOptionsMenuUserInterface::saveSettings()
    // Save our minimum players, get the correct index of the appropriate menu item
    getGame()->getSettings()->getIniSettings()->playWithBots = getMenuItem(0)->getIntValue() == 1;
    getGame()->getSettings()->getIniSettings()->minBalancedPlayers = getMenuItem(1)->getIntValue();
-   getGame()->getSettings()->getIniSettings()->botsAlwaysBalanceTeams = getMenuItem(2)->getIntValue() == 1;
 
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
 }

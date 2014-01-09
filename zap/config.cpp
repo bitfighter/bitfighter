@@ -103,7 +103,6 @@ IniSettings::IniSettings()
    maxBots = 10;
    playWithBots = false;
    minBalancedPlayers = 6;
-   botsAlwaysBalanceTeams = false;
    enableServerVoiceChat = true;
    allowTeamChanging = true;
    serverPassword = "";               // Passwords empty by default
@@ -642,7 +641,6 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->maxBots                = ini->GetValueI (section, "MaxBots", iniSettings->maxBots);
    iniSettings->playWithBots           = ini->GetValueYN(section, "AddRobots", iniSettings->playWithBots);
    iniSettings->minBalancedPlayers     = ini->GetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
-   iniSettings->botsAlwaysBalanceTeams = ini->GetValueYN(section, "BotsAlwaysBalanceTeams", iniSettings->botsAlwaysBalanceTeams);
    iniSettings->enableServerVoiceChat  = ini->GetValueYN (section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
 
    iniSettings->alertsVolLevel       = (F32) ini->GetValueI(section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10)) / 10.0f;
@@ -1716,7 +1714,6 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment(" MaxBots - The max number of bots allowed on this server.");
       addComment(" AddRobots - Add robot players to this server.");
       addComment(" MinBalancedPlayers - The minimum number of players ensured in each map.  Bots will be added up to this number.");
-      addComment(" BotsAlwaysBalanceTeams - If set to true, the teams will always be balanced, even if the minimum number of players has been met.");
       addComment(" EnableServerVoiceChat - If false, prevents any voice chat in a server.");
       addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
       addComment(" MaxFPS - Maximum FPS the dedicaetd server will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
@@ -1748,7 +1745,6 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValueI (section, "MaxBots", iniSettings->maxBots);
    ini->setValueYN(section, "AddRobots", iniSettings->playWithBots);
    ini->SetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
-   ini->setValueYN(section, "BotsAlwaysBalanceTeams", iniSettings->botsAlwaysBalanceTeams);
    ini->setValueYN(section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
    ini->setValueYN(section, "AllowTeamChanging", iniSettings->allowTeamChanging);
    ini->SetValueI (section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10));
