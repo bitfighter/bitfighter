@@ -31,12 +31,15 @@ protected:
 class GupParameters : public XMLTool {
 public:
 	GupParameters() : _currentVersion(""), _className2Close(""), _isSilentMode(true) {};
-	GupParameters(string xmlFileName);
+	GupParameters(const char * xmlFileName);
 	
 	const string & getCurrentVersion() const { return _currentVersion;};
 	const string & getInfoLocation() const {return _infoUrl;};
 	const string & getClassName() const {return _className2Close;};
 	const string & getMessageBoxTitle() const {return _messageBoxTitle;};
+	int get3rdButtonCmd() const {return _3rdButton_wm_cmd;};
+	int get3rdButtonWparam() const {return _3rdButton_wParam;};
+	int get3rdButtonLparam() const {return _3rdButton_lParam;};
 
 	void setCurrentVersion(const char *currentVersion) {_currentVersion = currentVersion;};
 	bool setSilentMode(bool mode) {
@@ -51,6 +54,9 @@ private:
 	string _infoUrl;
 	string _className2Close;
 	string _messageBoxTitle;
+	int _3rdButton_wm_cmd;
+	int _3rdButton_wParam;
+	int _3rdButton_lParam;
 	bool _isSilentMode;
 };
 

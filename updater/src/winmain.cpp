@@ -18,11 +18,6 @@
 */
 
 #include <windows.h>
-
-// For experimental window killer
-#include <tlhelp32.h>
-#include <stdio.h>
-
 #include <curl/curl.h>
 #include <string>
 #include <commctrl.h>
@@ -43,12 +38,26 @@ static long proxyPort  = 0;
 const char FLAG_OPTIONS[] = "-options";
 const char FLAG_VERSION[] = "-v";
 const char FLAG_VERBOSE[] = "-verbose";
+const char FLAG_HELP[] = "--help";
 
 const char MSGID_NOUPDATE[] = "No update is available.";
-const char MSGID_UPDATEAVAILABLE[] = "A new version of Bitfighter is available.  Do you want to download it?";
-const char MSGID_DOWNLOADSTOPPED[] = "The download has been canceled. Update is aborted.";
-const char MSGID_CLOSEAPP[] = "The updater must close any open Bitfighter windows.\r\rAny unsaved editor files will be lost.\r\rDo you want to continue?";
-const char MSGID_ABORTORNOT[] = "Do you want to abort downloading the update?";
+const char MSGID_UPDATEAVAILABLE[] = "An update package is available, do you want to download it?";
+const char MSGID_DOWNLOADSTOPPED[] = "Download is stopped by user. Update is aborded.";
+const char MSGID_CLOSEAPP[] = " is opened.\rUpdater will close it in order to process the installation.\rContinue?";
+const char MSGID_ABORTORNOT[] = "Do you want to abort update download?";
+const char MSGID_HELP[] = "Usage :\r\
+\r\
+gup --help\r\
+gup -options\r\
+gup [-verbose] [-vVERSION_VALUE]\r\
+\r\
+    --help : Show this help message (and quit program).\r\
+    -options : Show the proxy configuration dialog (and quit program).\r\
+    -v : Launch GUP with VERSION_VALUE.\r\
+         VERSION_VALUE is the current version number of program to update.\r\
+         If you pass the version number as the argument,\r\
+         then the version set in the gup.xml will be overrided.\r\
+    -verbose : Show error/warning message if any.";
 
 static bool isInList(const char *token2Find, char *list2Clean) {
 	char word[1024];
@@ -208,8 +217,8 @@ static size_t setProgress(HWND hProgress,	double t, /* dltotal */
 	SendMessage(hProgressBar, PBM_SETSTEP, (WPARAM)step, 0);
 	SendMessage(hProgressBar, PBM_STEPIT, 0, 0);
 
-	char percentage[20];
-   _snprintf(percentage, sizeof(percentage), "%d %% Downloaded", ratio);
+	char percentage[8];
+	sprintf(percentage, "%d %%", ratio);
 	::SetWindowTextA(hProgressDlg, percentage);
 	return 0;
 };
@@ -298,65 +307,6 @@ static DWORD WINAPI launchProgressBar(void *)
 	return 0;
 }
 
-
-wchar_t *convertCharStrToWcharStr(const char *str)
-{
-    // newsize describes the length of the 
-    // wchar_t string called wcstring in terms of the number 
-    // of wide characters, not the number of bytes.
-    size_t newsize = strlen(str) + 1;
-
-    // The following creates a buffer large enough to contain 
-    // the exact number of characters in the original string
-    // in the new format. If you want to add more characters
-    // to the end of the string, increase the value of newsize
-    // to increase the size of the buffer.
-    wchar_t * wcstring = new wchar_t[newsize];
-
-    // Convert char* string to a wchar_t* string.
-    size_t convertedChars = 0;
-    mbstowcs_s(&convertedChars, wcstring, newsize, str, _TRUNCATE);
-
-    return wcstring;
-}
-
-
-BOOL KillProcessByName(const char *processToKill)
-{
-   wchar_t *szProcessToKill = convertCharStrToWcharStr(processToKill);
-
-   HANDLE hProcessSnap;
-   HANDLE hProcess;
-   PROCESSENTRY32 pe32;
-
-   hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);  // Takes a snapshot of all the processes
-
-   if(hProcessSnap == INVALID_HANDLE_VALUE){
-		return( FALSE );
-	}
-
-	pe32.dwSize = sizeof(PROCESSENTRY32);
-
-	if(!Process32First(hProcessSnap, &pe32)){
-		CloseHandle(hProcessSnap);     
-		return( FALSE );
-	}
-
-   // Remember, more than one instance of Bitfighter might be running.  They all must die!
-	do{
-      //if(!wcscmp(pe32.szExeFile,szProcessToKill)){    //<-- needed in debug mode, for some reason...
-		if(!stricmp(pe32.szExeFile,processToKill)){    //  checks if process at current position has the name of to be killed app
-			hProcess = OpenProcess(PROCESS_TERMINATE,0, pe32.th32ProcessID);  // gets handle to process
-			TerminateProcess(hProcess,0);   // Terminate process by handle
-			CloseHandle(hProcess);  // close the handle
-		} 
-	}while(Process32Next(hProcessSnap,&pe32));  // gets next member of snapshot
-
-	CloseHandle(hProcessSnap);  // closes the snapshot handle
-	return( TRUE );
-}
-
-
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdShow)
 {
 	bool isSilentMode = false;
@@ -364,18 +314,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 
 	bool launchSettingsDlg = false;
 	bool isVerbose = false;
+	bool isHelp = false;
 	string version = "";
 
 	if (lpszCmdLine && lpszCmdLine[0])
 	{
 		launchSettingsDlg = isInList(FLAG_OPTIONS, lpszCmdLine);
 		isVerbose = isInList(FLAG_VERBOSE, lpszCmdLine);
+		isHelp = isInList(FLAG_HELP, lpszCmdLine);
 		version = getParamVal('v', lpszCmdLine);
 	}
+
+	if (isHelp)
+	{
+		::MessageBoxA(NULL, MSGID_HELP, "GUP Command Argument Help", MB_OK);
+		return 0;
+	}
+
 	hInst = hInstance;
 	try {
-		GupParameters gupParams("bfup.xml");
-		GupExtraOptions extraOptions("bfupOptions.xml");
+		GupParameters gupParams("gup.xml");
+		GupExtraOptions extraOptions("gupOptions.xml");
 		GupNativeLang nativeLang("nativeLang.xml");
 
 		if (launchSettingsDlg)
@@ -436,7 +395,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 				curl_easy_setopt(curl, CURLOPT_PROXYPORT, extraOptions.getPort());
 			}
 
-         curl_easy_setopt(curl, CURLOPT_USERAGENT, "Bitfighter Updater 1.0");
 			res = curl_easy_perform(curl);
 
 			curl_easy_cleanup(curl);
@@ -466,10 +424,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 		string updateAvailable = nativeLang.getMessageString("MSGID_UPDATEAVAILABLE");
 		if (updateAvailable == "")
 			updateAvailable = MSGID_UPDATEAVAILABLE;
-		int dlAnswer = ::MessageBoxA(NULL, updateAvailable.c_str(), gupParams.getMessageBoxTitle().c_str(), MB_YESNO);
+		
+		int thirdButtonCmd = gupParams.get3rdButtonCmd();
+		int buttonStyle = thirdButtonCmd?MB_YESNOCANCEL:MB_YESNO;
+		int dlAnswer = ::MessageBoxA(NULL, updateAvailable.c_str(), gupParams.getMessageBoxTitle().c_str(), buttonStyle);
 
 		if (dlAnswer == IDNO)
 		{
+			return 0;
+		}
+		
+		if (dlAnswer == IDCANCEL)
+		{
+			if (gupParams.getClassName() != "")
+			{
+				HWND h = ::FindWindowExA(NULL, NULL, gupParams.getClassName().c_str(), NULL);
+
+				if (h)
+				{
+					::SendMessage(h, thirdButtonCmd, gupParams.get3rdButtonWparam(), gupParams.get3rdButtonLparam());
+				}
+			}
 			return 0;
 		}
 		
@@ -531,25 +506,35 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 
 		if (gupParams.getClassName() != "")
 		{
-			HWND h = ::FindWindowExA(NULL, NULL, NULL, gupParams.getClassName().c_str() );
+			HWND h = ::FindWindowExA(NULL, NULL, gupParams.getClassName().c_str(), NULL);
 
 			if (h)
 			{
-				int installAnswer = ::MessageBoxA(NULL, MSGID_CLOSEAPP, gupParams.getMessageBoxTitle().c_str(), MB_YESNO);
+				string msg = gupParams.getClassName();
+				string closeApp = nativeLang.getMessageString("MSGID_CLOSEAPP");
+				if (closeApp == "")
+					closeApp = MSGID_CLOSEAPP;
+				msg += closeApp;
+
+				int installAnswer = ::MessageBoxA(NULL, msg.c_str(), gupParams.getMessageBoxTitle().c_str(), MB_YESNO);
 
 				if (installAnswer == IDNO)
 				{
 					return 0;
 				}
 			}
-   
-         KillProcessByName("bitfighter.exe");
+			// kill all process of binary needs to be updated.
+			while (h)
+			{
+				::SendMessage(h, WM_CLOSE, 0, 0);
+				h = ::FindWindowExA(NULL, NULL, gupParams.getClassName().c_str(), NULL);
+			}
 		}
 
 		// execute the installer
 		HINSTANCE result = ::ShellExecuteA(NULL, "open", dlDest.c_str(), "", ".", SW_SHOW);
         
-        if ((unsigned long)result <= 32) // There's a problem (Don't ask me why, ask Microsoft)
+        if (result <= (HINSTANCE)32) // There's a problem (Don't ask me why, ask Microsoft)
         {
             return -1;
         }   

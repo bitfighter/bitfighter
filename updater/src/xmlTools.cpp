@@ -19,9 +19,10 @@
 
 #include "xmlTools.h"
 
-GupParameters::GupParameters(string xmlFileName) : _currentVersion(""), _className2Close(""), _messageBoxTitle(""), _isSilentMode(true)
+GupParameters::GupParameters(const char * xmlFileName) : _currentVersion(""), _className2Close(""), _messageBoxTitle(""),\
+                                                         _3rdButton_wm_cmd(0), _3rdButton_wParam(0), _3rdButton_lParam(0), _isSilentMode(true)
 {
-	_xmlDoc.LoadFile(xmlFileName.c_str());
+	_xmlDoc.LoadFile(xmlFileName);
 
 	TiXmlNode *root = _xmlDoc.FirstChild("GUPInput");
 	if (!root)
@@ -73,13 +74,34 @@ GupParameters::GupParameters(string xmlFileName) : _currentVersion(""), _classNa
 	if (progNameNode)
 	{
 		TiXmlNode *n = progNameNode->FirstChild();
+        const char *valStr = NULL;
+
 		if (n)
 		{
-			const char *val = n->Value();
-			if (val)
+			valStr = n->Value();
+			if (valStr)
 			{
-				_messageBoxTitle = val;
+				_messageBoxTitle = valStr;
 			}
+		}
+
+        int val = 0;
+		valStr = (progNameNode->ToElement())->Attribute("extraCmd", &val);
+		if (valStr)
+		{
+			_3rdButton_wm_cmd = val;
+		}
+		
+		valStr = (progNameNode->ToElement())->Attribute("ecWparam", &val);
+		if (valStr)
+		{
+			_3rdButton_wParam = val;
+		}
+		
+		valStr = (progNameNode->ToElement())->Attribute("ecLparam", &val);
+		if (valStr)
+		{
+			_3rdButton_lParam = val;
 		}
 	}
 
