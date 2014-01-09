@@ -84,7 +84,7 @@ MenuUserInterface::~MenuUserInterface()
 
 void MenuUserInterface::initialize()
 {
-   mMenuTitle = "Menu:";
+   mMenuTitle = "MENU:";
    mMenuSubTitle = "";
 
    selectedIndex = 0;
