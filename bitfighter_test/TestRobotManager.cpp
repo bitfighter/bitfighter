@@ -373,7 +373,7 @@ TEST(RobotManagerTest, autolevelingWithLevelsThatIncludeBots)
 
    // Robot manager will remove level-specified bots if there are no more autoleveling bots available
    gamePair.server->fewerBots();        EXPECT_EQ("HH L L",      getTeams(gamePair));  
-   // But they'll be back after the next restart
+   // But they'll be back after the next restart, as will an autolevel bot since the autoleveler is now active
    gamePair.server->cycleLevel();       EXPECT_EQ("HH LL LB",    getTeams(gamePair));
    }
 }
