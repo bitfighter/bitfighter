@@ -94,11 +94,11 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
 
    mDedicated = dedicated;
 
-   mGameSuspended = true; // server starts at zero players
+   mGameSuspended = true;                 // Server starts with zero players
 
    U32 stutter = mSettings->getSimulatedStutter();
 
-   mStutterTimer.reset(1001 - stutter);    // Use 1001 to ensure timer is never set to 0
+   mStutterTimer.reset(1001 - stutter);   // Use 1001 to ensure timer is never set to 0
    mStutterSleepTimer.reset(stutter);
    mAccumulatedSleepTime = 0;
 
@@ -114,7 +114,7 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
 // Destructor
 ServerGame::~ServerGame()
 {
-   if(getConnectionToMaster()) // Prevents errors when ServerGame is gone too soon.
+   if(getConnectionToMaster())   // Prevents errors when ServerGame is gone too soon
       getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
    cleanUp();
@@ -167,9 +167,9 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, VoteType type, S32 number)
    if(type != VoteLevelChange)
    {
       if(getGameType()->isGameOver())
-         return true;   // Don't allow trying to start votes during game over, except level changing.
+         return true;   // Don't allow trying to start votes during game over, except level changing
 
-      if((U32)getGameType()->getRemainingGameTimeInMs() - 1 < VoteTimer)  // handles unlimited GameType time, by forcing the U32 range.
+      if((U32)getGameType()->getRemainingGameTimeInMs() - 1 < VoteTimer)  // Handles unlimited GameType time, by forcing the U32 range
       {
          conn->s2cDisplayErrorMessage("Not enough time");
          return true;
@@ -200,7 +200,7 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, VoteType type, S32 number)
    mVoteClientName = clientInfo->getName();
 
    for(S32 i = 0; i < getClientCount(); i++)
-      if(getClientInfo(i)->getConnection())  // robots don't have GameConnection
+      if(getClientInfo(i)->getConnection())  // Robots don't have GameConnection
          getClientInfo(i)->getConnection()->mVote = 0;
 
    conn->mVote = 1;
