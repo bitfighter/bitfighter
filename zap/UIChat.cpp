@@ -7,6 +7,7 @@
 
 #include "FontManager.h"
 #include "UIQueryServers.h"      // For menuID
+#include "UIEditor.h"            // For excepting the editor from rendering in the background
 #include "UIGame.h"              // For putting private messages into game console
 #include "UIManager.h"
 
@@ -413,7 +414,11 @@ static const S32 MENU_SUBTITLE_SIZE = 18;
 
 void ChatUserInterface::render()
 {
-   if(mRenderUnderlyingUI && getUIManager()->hasPrevUI())           // If there is an underlying menu...
+   // If there is an underlying menu or other UI screen, render and dim it.
+   // We don't want to render the editor because it may be in full-screen
+   // mode with a different aspect ratio.
+   if((mRenderUnderlyingUI && getUIManager()->hasPrevUI()) &&
+         getUIManager()->getPrevUI() != getUIManager()->getUI<EditorUserInterface>())
    {
       getUIManager()->renderPrevUI(this);  // ...render it...
       dimUnderlyingUI();
