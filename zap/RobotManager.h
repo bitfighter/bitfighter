@@ -58,7 +58,8 @@ public:
    void deleteBot(S32 i);
    void moreBots();
    void fewerBots();
-   void deleteBotFromTeam(S32 teamIndex, ClientInfo::ClientClass botClass);
+   void deleteBotsFromTeam(S32 botsToKick, S32 teamIndex);
+   bool deleteBotFromTeam(S32 teamIndex, ClientInfo::ClientClass botClass);
 
    // Currently only used by tests to temporarily disable bot leveling while setting up various team configurations
    bool getAutoLevelingEnabled() const;

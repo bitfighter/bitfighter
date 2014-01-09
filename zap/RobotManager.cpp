@@ -84,16 +84,17 @@ void RobotManager::balanceTeams()
 
       S32 teamSize = team->getPlayerBotCount();  // All players
 
-      // If the current team has autolevel bots and has more players than the calculated balance should have
+      // Delete bots
       if(teamSize > playersNeededPerTeam)
       {
          // Find the difference
          S32 playersToKick = teamSize - playersNeededPerTeam;
          TNLAssert(playersToKick <= botCounts[i][ClientInfo::ClassRobotAddedByAutoleveler], "Just checking...");
 
-         for(S32 j = 0; j < playersToKick; j++)
-            deleteBotFromTeam(i, ClientInfo::ClassRobotAddedByAutoleveler);
+         deleteBotsFromTeam(playersToKick, i);
       }
+
+      // Add bots
       else if(teamSize < playersNeededPerTeam)
       {
          Vector<const char *> noArgs;
@@ -272,10 +273,9 @@ void RobotManager::fewerBots()
    for(S32 i = 0; i < teamCount; i++)
    {
       // Determine how many bots we can remove from this team if it has more players than the smallest team
-      S32 surplus = mGame->getTeam(i)->getPlayerBotCount() - targetPlayerCount;
+      S32 botsToKick = mGame->getTeam(i)->getPlayerBotCount() - targetPlayerCount;
 
-      for(S32 j = 0; j < surplus; j++)
-         deleteBotFromTeam(i, ClientInfo::ClassRobotAddedByAutoleveler);
+      deleteBotsFromTeam(botsToKick, i);
    }
 
    mAutoLevelTeams = true;
@@ -325,9 +325,41 @@ void RobotManager::printTeams(Game *game, const string &message)
 }
 
 
-// Delete bot from a given team 
+void RobotManager::deleteBotsFromTeam(S32 botsToKick, S32 teamIndex)
+{
+   // First kick autolevel bots
+   while(botsToKick > 0)
+   {
+      if(deleteBotFromTeam(teamIndex, ClientInfo::ClassRobotAddedByAutoleveler))
+         botsToKick--;
+      else
+         break;
+   }
+
+   // Then kick /addbot bots
+   while(botsToKick > 0)
+   {
+      if(deleteBotFromTeam(teamIndex, ClientInfo::ClassRobotAddedByAddbots))
+         botsToKick--;
+      else
+         break;
+   }
+
+   // Finally, kick any bots at all
+   while(botsToKick > 0)
+   {
+      if(deleteBotFromTeam(teamIndex, ClientInfo::ClassAnyBot))
+         botsToKick--;
+      else
+         break;
+   }
+}
+
+
+// Delete bot from a given team, and disable autoleveling
 // Will teamIndex == NONE gracefully, ok if team contains no bots
-void RobotManager::deleteBotFromTeam(S32 teamIndex, ClientInfo::ClientClass botClass)
+// Returns true if it found a bot to delete
+bool RobotManager::deleteBotFromTeam(S32 teamIndex, ClientInfo::ClientClass botClass)
 {
    for(S32 i = 0; i < mRobots.size(); i++)
       if(mRobots[i]->getTeam() == teamIndex && (mRobots[i]->getClientInfo()->getClientClass() == botClass || 
@@ -338,8 +370,10 @@ void RobotManager::deleteBotFromTeam(S32 teamIndex, ClientInfo::ClientClass botC
          deleteBot(i);
 
          mAutoLevelTeams = false;
-         return;        // Only one!
+         return true; 
       }
+
+   return false;
 }
 
 
