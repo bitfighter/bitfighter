@@ -217,7 +217,6 @@ void onPlayerAwardedAchievement(const MasterSettings *settings, const MasterServ
    }
 
    S32 pid = fork();
-   wait();
 
    if(pid < 0)
    {
