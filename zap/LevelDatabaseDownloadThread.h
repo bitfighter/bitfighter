@@ -24,7 +24,7 @@ public:
    static string LevelgenRequest;
    static const S32 UrlLength = 2048;
 
-   explicit LevelDatabaseDownloadThread(string levelId, ClientGame* game);
+   explicit LevelDatabaseDownloadThread(const string &levelId, ClientGame* game);
    virtual ~LevelDatabaseDownloadThread();
 
    void run();

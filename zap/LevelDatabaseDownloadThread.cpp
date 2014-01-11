@@ -23,7 +23,7 @@ string LevelDatabaseDownloadThread::LevelRequest = "/levels/raw/%s";
 string LevelDatabaseDownloadThread::LevelgenRequest = "/levels/raw/%s/levelgen";
 
 // Constructor
-LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(string levelId, ClientGame *game)
+LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(const string &levelId, ClientGame *game)
    : mLevelId(levelId), 
      mGame(game)
 {
@@ -48,7 +48,6 @@ LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(string levelId, ClientG
          return;
       }
    }
-
 
    mGame->displaySuccessMessage("Downloading %s", mLevelId.c_str());
 }
