@@ -298,6 +298,12 @@ const char *sanitizeForJson(const char *value)
 }
 
 
+string sanitizeForSql(const string &value)     
+{
+   return replaceString(replaceString(value, "\\", "\\\\"), "'", "''");
+}
+
+
 bool isControlCharacter(char ch)
 {
    return ch > 0 && ch <= 0x1F;

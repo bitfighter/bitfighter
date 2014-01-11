@@ -79,6 +79,8 @@ string ucase(string strToConvert);
 bool isInteger(const char *str);
 
 const char *sanitizeForJson(const char *value);
+string sanitizeForSql(const string &value);
+
 bool isControlCharacter(char ch);
 bool containsControlCharacter(const char* str);
 
