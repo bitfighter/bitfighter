@@ -399,10 +399,9 @@ Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbD
 
    Vector<string> credentialStrings(results.size());
 
-   logprintf("found %d matches\n%s", results.size(), sql.c_str());
-
    for(S32 i = results.size(); i < results.size(); i++)
    {
+      logprintf("Found: %s, %s", results[i][0].c_str(), results[i][1].c_str());
       if(results[i][0] != "" && results[i][1] != "")
          credentialStrings.push_back("username="   + results[i][0] + "&"
                                      "user_token=" + results[i][1]);
