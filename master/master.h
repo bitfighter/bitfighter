@@ -26,6 +26,11 @@ namespace Zap {
 }
 
 
+// No GameJolt for Windows, or when phpbb is disabled -- can also disable GameJolt in the INI file
+#if defined VERIFY_PHPBB3 && !defined TNL_OS_WIN32    
+#  define GAME_JOLT
+#endif
+
 namespace Master 
 {
 

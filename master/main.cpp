@@ -24,6 +24,9 @@
 #include <time.h>
 #include <map>
 
+#ifdef GAME_JOLT
+#  include <signal.h>
+#endif
 
 using namespace TNL;
 using namespace std;
@@ -169,6 +172,10 @@ int main(int argc, const char **argv)
    seedRandomNumberGenerator();
 
    MasterServer masterServer(&settings);
+
+#ifdef GAME_JOLT
+   signal(SIGCHLD, SIG_IGN);     // Allow zombie children to die quietly
+#endif
 
 
    U32 lastTime = Platform::getRealMilliseconds();
