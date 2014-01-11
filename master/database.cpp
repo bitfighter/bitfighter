@@ -55,16 +55,10 @@ DatabaseWriter::DatabaseWriter(const char *db)
 
 void DatabaseWriter::initialize(const char *server, const char *db, const char *user, const char *password)
 {
-   strncpy(mServer, server, sizeof(mServer) - 1);   // was const char *, but problems when data in pointer dies.
-   strncpy(mDb, db, sizeof(mDb) - 1);
-   strncpy(mUser, user, sizeof(mUser) - 1);
+   strncpy(mServer,   server,   sizeof(mServer)   - 1);   // was const char *, but problems when data in pointer dies.
+   strncpy(mDb,       db,       sizeof(mDb)       - 1);
+   strncpy(mUser,     user,     sizeof(mUser)     - 1);
    strncpy(mPassword, password, sizeof(mPassword) - 1);
-}
-
-
-static string sanitize(const string &value)     
-{
-   return replaceString(replaceString(value, "\\", "\\\\"), "'", "''");
 }
 
 
@@ -124,7 +118,7 @@ static U64 insertStatsPlayer(const DbQuery &query, const PlayerStats *playerStat
                                                "asteroid_kills,                 turrets_engineered, "
                                                "ffs_engineered,                 teleports_engineered, "
                                                "distance_traveled )"                      
-                         "VALUES(" + itos(gameId) + ", " + teamId + ", '"     + sanitize(playerStats->name)           + "', " +
+                         "VALUES(" + itos(gameId) + ", " + teamId + ", '"     + sanitizeForSql(playerStats->name)           + "', " +
                                  btos(playerStats->isAuthenticated)     + ", " + btos(playerStats->isRobot)           + ", " +
                                  "'" + playerStats->gameResult + "'"    + ", " + itos(playerStats->points)            + ", " + 
                                  itos(playerStats->kills)               + ", " + itos(playerStats->deaths)            + ", " +
@@ -151,7 +145,7 @@ static U64 insertStatsPlayer(const DbQuery &query, const PlayerStats *playerStat
 static U64 insertStatsTeam(const DbQuery &query, const TeamStats *teamStats, U64 &gameId)
 {
    string sql = "INSERT INTO stats_team(stats_game_id, team_name, team_score, result, color_hex) "
-                "VALUES(" + itos(gameId) + ", '" + sanitize(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
+                "VALUES(" + itos(gameId) + ", '" + sanitizeForSql(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
                 ctos(teamStats->gameResult) + "' ,'" + teamStats->hexColor + "');";
 
    U64 teamId = query.runQuery(sql);
@@ -169,7 +163,7 @@ static U64 insertStatsGame(const DbQuery &query, const GameStats *gameStats, U64
                                        "duration_seconds, level_name, is_team_game, team_count) "
                 "VALUES( " + itos(serverId) + ", '" + gameStats->gameType + "', " + btos(gameStats->isOfficial) + ", " + 
                              itos(gameStats->playerCount) + ", " + itos(gameStats->duration) + ", '" + 
-                             sanitize(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " + 
+                             sanitizeForSql(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " + 
                              itos(gameStats->teamStats.size())  + ");";
 
    U64 gameId = query.runQuery(sql);
@@ -184,7 +178,7 @@ static U64 insertStatsGame(const DbQuery &query, const GameStats *gameStats, U64
 static U64 insertStatsServer(const DbQuery &query, const string &serverName, const string &serverIP)
 {
    string sql = "INSERT INTO server(server_name, ip_address) "
-                "VALUES('" + sanitize(serverName) + "', '" + serverIP + "');";
+                "VALUES('" + sanitizeForSql(serverName) + "', '" + serverIP + "');";
 
    if(query.query)
      return query.runQuery(sql);
@@ -204,7 +198,7 @@ S32 DatabaseWriter::getServerIdFromDatabase(const DbQuery &query, const string &
 {
    // Find server in database
    string sql = "SELECT server_id FROM server AS server "
-                "WHERE server_name = '" + sanitize(serverName) + "' AND ip_address = '" + serverIP + "' LIMIT 1;";
+                "WHERE server_name = '" + sanitizeForSql(serverName) + "' AND ip_address = '" + serverIP + "' LIMIT 1;";
                 //"WHERE server_name = 'Bitfighter sam686' AND ip_address = '96.2.123.136';";
 
    Vector<Vector<string> > results;
@@ -292,7 +286,8 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
          U64 serverId = getServerID(query, serverName, serverIP);
 
          string sql = "INSERT INTO player_achievements(player_name, achievement_id, server_id) "
-                      "VALUES( '" + sanitize(string(playerNick.getString())) + "', '" + itos(achievementId) + "', " + itos(serverId) + ");";
+                      "VALUES( '" + sanitizeForSql(playerNick.getString()) + "', "
+                              "'" + itos(achievementId) + "', " + itos(serverId) + ");";
 
          query.runQuery(sql);
       }
@@ -321,7 +316,7 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
       string sql;
 
       // We only want to insert a record of this server if the hash does not yet exist
-      sql = "SELECT hash FROM stats_level WHERE hash = '" + sanitize(hash) + "' LIMIT 1;";
+      sql = "SELECT hash FROM stats_level WHERE hash = '" + sanitizeForSql(hash) + "' LIMIT 1;";
 
       Vector<Vector<string> > results;
       selectHandler(sql, 1, results);
@@ -331,8 +326,8 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
       if(!found) 
       {
          sql = "INSERT INTO stats_level(hash, level_name, creator, game_type, has_levelgen, team_count, winning_score, game_duration) "
-               "VALUES('" + sanitize(hash)      + "', '" + sanitize(levelName)         + "', " + 
-                      "'" + sanitize(creator)   + "', '" + sanitize(gameType)          + "', " +
+               "VALUES('" + sanitizeForSql(hash)      + "', '" + sanitizeForSql(levelName)         + "', " + 
+                      "'" + sanitizeForSql(creator)   + "', '" + sanitizeForSql(gameType)          + "', " +
                       "'" + btos(hasLevelGen)   + "', '" + itos(teamCount)             + "', " + 
                       "'" + itos(winningScore)  + "', '" + itos(gameDurationInSeconds) + "');";
          query.runQuery(sql);
@@ -367,6 +362,31 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
       names.push_back("");
       scores.push_back("");
    }
+}
+
+
+// Please make sure names in nameList have been sanitized!
+Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &nameList, S32 nameCount)
+{
+   // Find server in database
+   string sql = "SELECT pf_gj_user_name, pf_gj_user_token "
+                "FROM phpbb_profile_fields_data AS pd " 
+                "LEFT JOIN phpbb_users AS u ON u.user_id = pd.user_id "
+                "WHERE u.username IN (" + nameList + ") AND "
+                "pf_gj_user_name IS NOT NULL and pf_gj_user_token IS NOT NULL";
+                 
+   Vector<Vector<string> > results(nameCount);    // Expect a single result here
+
+   selectHandler(sql, 2, results);
+
+   Vector<string> credentialStrings(results.size());
+
+   for(S32 i = results.size(); i < results.size(); i++)
+      if(results[i][0] != "" && results[i][1] != "")
+         credentialStrings.push_back("username="   + results[i][0] + "&"
+                                     "user_token=" + results[i][1]);
+
+   return credentialStrings;
 }
 
 

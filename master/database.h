@@ -31,6 +31,10 @@ using namespace TNL;
 using namespace Zap;
 using namespace std;
 
+namespace Master {
+   class MasterSettings;
+}
+
 
 namespace DbWriter
 {
@@ -77,6 +81,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
 class DatabaseWriter 
 {
 private:
@@ -109,6 +114,8 @@ public:
    // SQLite constructor
    DatabaseWriter(const char *db);
 
+   static DatabaseWriter getDatabaseWriter(const Master::MasterSettings *settings);
+
    void selectHandler(const string &sql, S32 cols, Vector<Vector<string> > &values);
 
    void setDumpSql(bool dump);
@@ -119,6 +126,7 @@ public:
                         const string &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds);
 
    void getTopPlayers(const string &table, const string &col2, S32 count, Vector<string> &names, Vector<string> &scores);
+   Vector<string> getGameJoltCredentialStrings(const string &nameList, S32 nameCount);
 
    S16 getLevelRating(U32 databaseId);                                  // Returns average rating of the specified level
    S32 getLevelRating(U32 databaseId, const StringTableEntry &name);    // Returns player's rating of the specified level

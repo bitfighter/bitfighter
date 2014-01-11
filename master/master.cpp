@@ -6,6 +6,7 @@
 #include "master.h"
 #include "database.h"            // For writing to the database
 #include "DatabaseAccessThread.h"
+#include "GameJoltConnector.h"
 
 #include "../zap/stringUtils.h"  // For itos, replaceString
 #include "../zap/IniFile.h"      // For INI reading/writing
@@ -27,7 +28,7 @@ MasterSettings::MasterSettings(const string &iniFile)
    ini.SetPath(iniFile);
 
    // Note that on the master, our settings are read-only, so there is no need to specify a comment
-   //                      Data type  Setting name                       Default value         INI Key                              INI Section                                  
+   //                      Data type  Setting name                       Default value         INI Key                                INI Section                                  
    mSettings.add(new Setting<string>("ServerName",                 "Bitfighter Master Server", "name",                                 "host"));
    mSettings.add(new Setting<string>("JsonOutfile",                      "server.json",        "json_file",                            "host"));
    mSettings.add(new Setting<U32>   ("Port",                                 25955,            "port",                                 "host"));
@@ -49,6 +50,10 @@ MasterSettings::MasterSettings(const string &iniFile)
    mSettings.add(new Setting<string>("StatsDatabaseName",                      "",             "stats_database_name",                  "stats"));
    mSettings.add(new Setting<string>("StatsDatabaseUsername",                  "",             "stats_database_username",              "stats"));
    mSettings.add(new Setting<string>("StatsDatabasePassword",                  "",             "stats_database_password",              "stats"));
+
+   // GameJolt settings
+   mSettings.add(new Setting<YesNo> ("UseGameJolt",                            Yes,            "use_game_jolt",                        "GameJolt"));
+   mSettings.add(new Setting<string>("GameJoltSecret",                         "",             "game_secret",                          "GameJolt"));
 }                  
 
 
@@ -187,6 +192,8 @@ MasterServer::MasterServer(MasterSettings *settings)
    mReadConfigTimer.reset(FIVE_SECONDS);     // Reread the config file every 5 seconds... excessive?
    mJsonWriteTimer.reset(0, FIVE_SECONDS);   // Max frequency for writing JSON files -- set current to 0 so we'll write immediately
    mJsonWritingSuspended = false;
+
+   mPingGameJoltTimer.reset(0, THIRTY_SECONDS);    // Game Jolt recommended frequency... sessions time out after 2 mins
    
    mDatabaseAccessThread = new DatabaseAccessThread();    // Deleted in destructor
 
@@ -317,6 +324,13 @@ void MasterServer::idle(const U32 timeDelta)
 
       mJsonWritingSuspended = true;    // No more writes until this is cleared
       mJsonWriteTimer.reset();         // But reset the timer so it start ticking down even if we aren't writing
+   }
+
+
+   if(mPingGameJoltTimer.update(timeDelta))
+   {
+      GameJolt::ping(mSettings, getClientList());
+      mPingGameJoltTimer.reset();
    }
 
 

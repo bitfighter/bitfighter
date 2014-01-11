@@ -71,6 +71,8 @@ private:
    Timer mJsonWriteTimer;
    bool mJsonWritingSuspended;
 
+   Timer mPingGameJoltTimer;
+
    DatabaseAccessThread *mDatabaseAccessThread;
 
    Vector<MasterServerConnection *> mServerList;

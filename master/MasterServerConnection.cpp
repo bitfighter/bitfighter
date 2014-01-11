@@ -3,17 +3,18 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-
 #include "MasterServerConnection.h"
 
 #include "master.h"
 #include "database.h"
 #include "DatabaseAccessThread.h"
 #include "authenticator.h"
+#include "GameJoltConnector.h"
 
 #include "../zap/version.h"
 #include "../zap/stringUtils.h"
 #include "../zap/LevelDatabase.h"
+
 
 #include "../boost/boost/shared_ptr.hpp"
 
@@ -104,6 +105,7 @@ MasterServerConnection::~MasterServerConnection()
       // CLIENT_DISCONNECT | timestamp | player name
       logprintf(LogConsumer::LogConnection, "CLIENT_DISCONNECT\t%s\t%s", getTimeStamp().c_str(), 
                                                                            mPlayerOrServerName.getString());
+      GameJolt::onPlayerQuit(mMaster->getSettings(), this);
    }
 
    mMaster->writeJsonNow();
@@ -155,12 +157,17 @@ MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::verif
 #endif
 
 
+class MasterSettings;
+
+
 // TODO: Should we be reusing these?
 DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
 {
    if(settings->getVal<YesNo>("WriteStatsToMySql"))
-      return DatabaseWriter(settings->getVal<string>("StatsDatabaseAddress").c_str(), settings->getVal<string>("StatsDatabaseName").c_str(),
-      settings->getVal<string>("StatsDatabaseUsername").c_str(), settings->getVal<string>("StatsDatabasePassword").c_str());
+      return DatabaseWriter(settings->getVal<string>("StatsDatabaseAddress").c_str(), 
+                            settings->getVal<string>("StatsDatabaseName").c_str(),
+                            settings->getVal<string>("StatsDatabaseUsername").c_str(), 
+                            settings->getVal<string>("StatsDatabasePassword").c_str());
    else
       return DatabaseWriter("stats.db");
 }
@@ -246,14 +253,15 @@ void MasterServerConnection::processAutentication(StringTableEntry newName, PHPB
    }
    else if(stat == Authenticated)
    {
-      mIsIgnoredFromList = false;  // just for authenticating..
+      mIsIgnoredFromList = false;   // Just for authenticating
       logprintf(LogConsumer::LogConnection, "Authenticated user %s", mPlayerOrServerName.getString());
       mAuthenticated = true;
-      mMaster->writeJsonNow();  // Make sure JSON shows authenticated state
+      mMaster->writeJsonNow();      // Make sure JSON shows authenticated state
+      GameJolt::onPlayerAuthenticated(mMaster->getSettings(), this);
 
       if(mPlayerOrServerName != newName)
       {
-         if(isInGlobalChat)  // Need to tell clients new name, in case of delayed authentication
+         if(isInGlobalChat)         // Need to tell clients new name, in case of delayed authentication
          {
             const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
@@ -554,6 +562,7 @@ void MasterServerConnection::writeClientServerList_JSON()
    "motd": "Welcome to Bitfighter!"
 }
 */
+
 
 // This is called when a client wishes to arrange a connection with a server
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestArrangedConnection, 

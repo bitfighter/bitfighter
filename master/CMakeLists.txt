@@ -5,6 +5,7 @@
 
 set(MASTER_SOURCES
 	database.cpp
+	GameJoltConnector.cpp
 	main.cpp
 	master.cpp
 	masterInterface.cpp
@@ -14,6 +15,7 @@ set(MASTER_SOURCES
 	../zap/gameStats.cpp
 	../zap/IniFile.cpp
 	../zap/LevelDatabase.cpp
+	../zap/md5wrapper.cpp
 	../zap/Settings.cpp
 	../zap/stringUtils.cpp
 	../zap/Timer.cpp
