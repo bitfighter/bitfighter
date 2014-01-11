@@ -67,9 +67,9 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
 
 static void onPlayerAuthenticatedOrQuit(const MasterSettings *settings, const MasterServerConnection *client, const string &verb)
 {
-
+   logprintf("here1");
 #ifdef GAME_JOLT  
-
+   logprintf("here2");
    bool useGameJolt = settings->getVal<YesNo>("UseGameJolt");
    if(!useGameJolt)
       return;
