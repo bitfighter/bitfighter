@@ -41,7 +41,9 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
                            const string &secret,           const string &quotedNameList)
 {
    DatabaseWriter databaseWriter = DbWriter::getDatabaseWriter(settings);
-   Vector<string> credentialStrings = databaseWriter.getGameJoltCredentialStrings(quotedNameList, 1);
+
+   string databaseName = settings->getVal<string>("Phpbb3Database");
+   Vector<string> credentialStrings = databaseWriter.getGameJoltCredentialStrings(databaseName, quotedNameList, 1);
 
    HttpRequest request;
 

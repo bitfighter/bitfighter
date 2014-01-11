@@ -124,7 +124,7 @@ public:
                         const string &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds);
 
    void getTopPlayers(const string &table, const string &col2, S32 count, Vector<string> &names, Vector<string> &scores);
-   Vector<string> getGameJoltCredentialStrings(const string &nameList, S32 nameCount);
+   Vector<string> getGameJoltCredentialStrings(const string &phpbbDatabase, const string &nameList, S32 nameCount);
 
    S16 getLevelRating(U32 databaseId);                                  // Returns average rating of the specified level
    S32 getLevelRating(U32 databaseId, const StringTableEntry &name);    // Returns player's rating of the specified level

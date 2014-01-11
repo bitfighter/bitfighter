@@ -384,12 +384,12 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
 
 
 // Please make sure names in nameList have been sanitized!
-Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &nameList, S32 nameCount)
+Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbDatabase, const string &nameList, S32 nameCount)
 {
    // Find server in database
    string sql = "SELECT pf_gj_user_name, pf_gj_user_token "
-                "FROM phpbb_profile_fields_data AS pd " 
-                "LEFT JOIN phpbb_users AS u ON u.user_id = pd.user_id "
+                "FROM "      + phpbbDatabase + ".phpbb_profile_fields_data AS pd " 
+                "LEFT JOIN " + phpbbDatabase + ".phpbb_users AS u ON u.user_id = pd.user_id "
                 "WHERE u.username IN (" + nameList + ") AND "
                 "pf_gj_user_name IS NOT NULL and pf_gj_user_token IS NOT NULL";
                  
