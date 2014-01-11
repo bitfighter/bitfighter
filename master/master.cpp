@@ -69,10 +69,6 @@ void MasterSettings::readConfigFile()
    // Now set up variables -- copies data from ini to settings
    loadSettingsFromINI();
 
-   bool useGameJolt = getVal<YesNo>("UseGameJolt");
-   string msg = string("Using gamejolt: ") + (useGameJolt ? "Yes" : "No");
-   logprintf(msg.c_str()); 
-
    // Not sure if this should go here...
    if(getVal<U32>("LatestReleasedCSProtocol") == 0 && getVal<U32>("LatestReleasedBuildVersion") == 0)
       logprintf(LogConsumer::LogError, "Unable to find a valid protocol line or build_version in config file... disabling update checks!");
@@ -85,7 +81,7 @@ extern Vector<string> master_admins;
 void MasterSettings::loadSettingsFromINI()
 {
    // Read all settings defined in the new modern manner
-   string sections[] = { "host", "phpbb", "stats", "motd" };
+   string sections[] = { "host", "phpbb", "stats", "motd", "GameJolt" };
 
    for(U32 i = 0; i < ARRAYSIZE(sections); i++)
    {
