@@ -25,7 +25,10 @@ const string HttpRequest::HttpRequestBoundary = "---REQUEST---BOUNDARY---";
 const string HttpRequest::LevelDatabaseBaseUrl = "bitfighter.org/pleiades";
 
 HttpRequest::HttpRequest(const string &url)
-   : mUrl(url), mMethod("GET"), mResponseCode(0), mTimeout(THREE_SECONDS)
+   : mUrl(url), 
+     mMethod("GET"), 
+     mResponseCode(0), 
+     mTimeout(THREE_SECONDS)
 {
    mLocalAddress.reset(new Address(TCPProtocol, Address::Any, 0));
    mSocket.reset(new Socket(*mLocalAddress));
