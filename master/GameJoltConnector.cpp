@@ -64,7 +64,7 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
    }
 }
 
- 
+
 static void onPlayerAuthenticatedOrQuit(const MasterSettings *settings, const MasterServerConnection *client, const string &verb)
 {
 #ifdef GAME_JOLT  
