@@ -59,8 +59,6 @@ MasterSettings::MasterSettings(const string &iniFile)
 
 void MasterSettings::readConfigFile()
 {
-   logprintf("Loading settings from INI %s", ini.getPath().c_str());
-
    if(ini.getPath() == "")
       return;
 
@@ -70,6 +68,9 @@ void MasterSettings::readConfigFile()
 
    // Now set up variables -- copies data from ini to settings
    loadSettingsFromINI();
+
+   bool useGameJolt = getVal<YesNo>("UseGameJolt");
+   logprintf("Using gamejolt: " + useGameJolt ? "Yes" : "No");
 
    // Not sure if this should go here...
    if(getVal<U32>("LatestReleasedCSProtocol") == 0 && getVal<U32>("LatestReleasedBuildVersion") == 0)
