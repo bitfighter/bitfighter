@@ -64,12 +64,10 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
    }
 }
 
-
+ 
 static void onPlayerAuthenticatedOrQuit(const MasterSettings *settings, const MasterServerConnection *client, const string &verb)
 {
-   logprintf("here1");
 #ifdef GAME_JOLT  
-   logprintf("here2");
    bool useGameJolt = settings->getVal<YesNo>("UseGameJolt");
    if(!useGameJolt)
       return;
@@ -77,7 +75,10 @@ static void onPlayerAuthenticatedOrQuit(const MasterSettings *settings, const Ma
    string secret = settings->getVal<string>("GameJoltSecret");
 
    if(secret == "")
+   {
+      logprintf(LogConsumer::LogWarning, "Missing GameJolt secret key!");
       return;
+   }
 
    S32 pid = fork();
 
@@ -130,7 +131,10 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
    string secret = settings->getVal<string>("GameJoltSecret");
 
    if(secret == "")
+   {
+      logprintf(LogConsumer::LogWarning, "Missing GameJolt secret key!");
       return;
+   }
 
    S32 pid = fork();
 
