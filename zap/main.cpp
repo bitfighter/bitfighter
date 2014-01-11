@@ -945,7 +945,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
          GameSettings::iniFile.deleteKey("Host", "BotsBalanceTeams");
       }
 
-      // Remove option that is no longer used, added in 019
+      // Remove option that is no longer used, added in 019 
       GameSettings::iniFile.deleteKey("Host", "BotsAlwaysBalanceTeams");   
    }
 
