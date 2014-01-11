@@ -214,18 +214,21 @@ static void SocketToTNLAddress(const SOCKADDR *sockAddr, Address *address)
 
 Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSize, bool acceptsBroadcast, bool nonblockingIO)
 {
-   TNL_JOURNAL_READ_BLOCK(Socket::Socket,
-         TNL_JOURNAL_READ( (&mPlatformSocket) );
-      return;
-   )
+   //TNL_JOURNAL_READ_BLOCK(Socket::Socket,
+   //      TNL_JOURNAL_READ( (&mPlatformSocket) );
+   //   return;
+   //)
    init();
    mPlatformSocket = INVALID_SOCKET;
    mTransportProtocol = bindAddress.transport;
 
-   const char *socketType = "UDP";
+   const char *socketType;
 
    if(bindAddress.transport == IPProtocol)
+   {
+      socketType = "UDP";
       mPlatformSocket = socket(AF_INET, SOCK_DGRAM, 0);
+   }
    else if(bindAddress.transport == TCPProtocol)
    {
       socketType = "TCP";
@@ -241,6 +244,7 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
    else
    {
       logprintf(LogConsumer::LogError, "Attempted to create a socket bound to an invalid transport.");
+      return;
    }
    if(mPlatformSocket != INVALID_SOCKET)
    {
@@ -313,9 +317,9 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
          mPlatformSocket = INVALID_SOCKET;
       }
    }
-   TNL_JOURNAL_WRITE_BLOCK(Socket::Socket,
-      TNL_JOURNAL_WRITE( (mPlatformSocket) );
-   )
+   //TNL_JOURNAL_WRITE_BLOCK(Socket::Socket,
+   //   TNL_JOURNAL_WRITE( (mPlatformSocket) );
+   //)
 }
 
 Socket::~Socket()
