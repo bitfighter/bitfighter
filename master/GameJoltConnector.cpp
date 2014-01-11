@@ -58,8 +58,8 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
       request.setUrl(url);
 
       if(!request.send())
-         logprintf(LogConsumer::LogError, "Error sending GameJolt request! (msg=%s, base=%s, url=%s, namelist=%s)", 
-                                           request.getError().c_str(), baseUrl.c_str(), url.c_str(), quotedNameList.c_str());
+         logprintf(LogConsumer::LogError, "Error sending GameJolt request! (msg=%s, url=%s)", 
+                                           request.getError().c_str(), url.c_str());
 
       Platform::sleep(100);
    }
