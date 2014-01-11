@@ -59,6 +59,8 @@ MasterSettings::MasterSettings(const string &iniFile)
 
 void MasterSettings::readConfigFile()
 {
+   logprintf("Loading settings from INI %s", ini.getPath());
+
    if(ini.getPath() == "")
       return;
 
