@@ -1861,7 +1861,7 @@ void Ship::setActiveWeapon(U32 weaponIndex)
 
 #ifndef ZAP_DEDICATED
    // Notify the UI that the weapon has changed (mGame might be NULL when testing)
-   if(mGame && !mGame->isServer())    
+   if(mGame && !mGame->isServer() && static_cast<ClientGame *>(mGame)->getConnectionToServer() && static_cast<ClientGame *>(mGame)->getConnectionToServer()->getControlObject() == this)    
       static_cast<ClientGame *>(mGame)->setActiveWeapon(weaponIndex);
 #endif
 }

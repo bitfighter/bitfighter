@@ -160,10 +160,10 @@ void GameRecorderPlayback::updateSpectate()
       Ship *ship = mClientInfoSpectating->getShip();
       setControlObject(ship);
       if(ship)
+      {
          mGame->newLoadoutHasArrived(*(ship->getLoadout()));
-      if(ship)
          mGame->getUIManager()->setListenerParams(ship->getPos(), ship->getVel());
-
+      }
    }
 }
 
@@ -240,7 +240,6 @@ void GameRecorderPlayback::restart()
 static void processPlaybackSelectionCallback(ClientGame *game, U32 index)             
 {
    game->getUIManager()->getUI<PlaybackSelectUserInterface>()->processSelection(index);
-
 }
 
 
@@ -256,6 +255,8 @@ void PlaybackSelectUserInterface::onActivate()
 
    const string &dir = getGame()->getSettings()->getFolderManager()->recordDir;
 
+   S32 oldIndex = selectedIndex;
+
    clearMenuItems();
    mLevels.clear();
    getFilesFromFolder(dir, mLevels);
@@ -264,10 +265,18 @@ void PlaybackSelectUserInterface::onActivate()
       addMenuItem(new MenuItem(i, mLevels[i].c_str(), processPlaybackSelectionCallback, ""));
    }
 
+
    if(mLevels.size() == 0)
       mMenuTitle = "No recorded games exists";  // TODO: Need better way to display this problem
 
    MenuUserInterface::onActivate();
+
+   selectedIndex = oldIndex;
+   if(selectedIndex >= mLevels.size())
+      selectedIndex = mLevels.size() - 1;
+   mFirstVisibleItem = selectedIndex - 5;
+   if(mFirstVisibleItem < 0)
+      mFirstVisibleItem = 0;
 }
 
 
