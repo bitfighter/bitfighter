@@ -72,11 +72,16 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
       //                                     request.getError().c_str(), url.c_str());
    }
 
-   // This is a fallback because the request.send() was returning a "Socket not writable" error
-   execl("/usr/bin/curl", "curl", urlList.c_str(), NULL);
+   if(urlList.length() > 0)
+   {
+      // This is a fallback because the request.send() was returning a "Socket not writable" error
+      execl("/usr/bin/curl", "curl", urlList.c_str(), NULL);
 
-   logprintf(LogConsumer::LogError, "Error running exec()");
-   exit(1);
+      logprintf(LogConsumer::LogError, "Error running exec()");
+      exit(1);
+   }
+
+   exit(0);
 
 #endif
 }
