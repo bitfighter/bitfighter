@@ -56,7 +56,6 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
       url += "&signature=" + signature;
 
       request.setUrl(url);
-      logprintf("XXXXX Sening GJ request: %s", url.c_str());
 
       if(!request.send())
          logprintf(LogConsumer::LogError, "Error sending GameJolt request! (msg=%s, base=%s, url=%s, namelist=%s)", 
