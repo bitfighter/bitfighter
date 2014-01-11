@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "HttpRequest.h"
+#include "Intervals.h"
+
 #include <stdio.h>
 #include <string>
 #include <iostream>
@@ -22,8 +24,8 @@ const string HttpRequest::HttpRequestBoundary = "---REQUEST---BOUNDARY---";
 
 const string HttpRequest::LevelDatabaseBaseUrl = "bitfighter.org/pleiades";
 
-HttpRequest::HttpRequest(string url)
-   : mUrl(url), mMethod("GET"), mResponseCode(0), mTimeout(30000)
+HttpRequest::HttpRequest(const string &url)
+   : mUrl(url), mMethod("GET"), mResponseCode(0), mTimeout(THREE_SECONDS)
 {
    mLocalAddress.reset(new Address(TCPProtocol, Address::Any, 0));
    mSocket.reset(new Socket(*mLocalAddress));
@@ -37,7 +39,7 @@ HttpRequest::~HttpRequest()
 }
 
 
-void HttpRequest::setUrl(const string& url)
+void HttpRequest::setUrl(const string &url)
 {
    mUrl = url;
 
@@ -52,42 +54,57 @@ void HttpRequest::setUrl(const string& url)
 
 bool HttpRequest::send()
 {
+   mError = "";
+
    // check that TNL understands the supplied address
    if(!mRemoteAddress->isValid())
    {
+      mError = "Address invalid";
       return false;
    }
 
    S32 connectError = mSocket->connect(*mRemoteAddress);
    if(connectError == UnknownError)
    {
+      mError = "Connect error";
 	   return false;
    }
    
-   if(!mSocket->isWritable(5000))
+   if(!mSocket->isWritable(FIVE_SECONDS))
    {
+      mError = "Socket not writable";
 	   return false;
    }
  
    buildRequest();
    if(!sendRequest(mRequest))
    {
+      mError = "Can't send request";
       return false;
    }
 
    string response = receiveResponse();
    if(response == "")
    {
+      mError = "No response";
       return false;
    }
 
    parseResponse(response);
    if(getResponseCode() == 0)
    {
+      mError = "Invalid response code";
       return false;
    }
 
    return true;
+}
+
+
+// Returns most recent error message
+string HttpRequest::getError()
+{
+   return mError;
 }
 
 

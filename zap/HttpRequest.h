@@ -44,9 +44,9 @@ public:
    static const string LevelDatabaseBaseUrl;
 
    static string urlEncodeChar(char c);
-   static string urlEncode(const string& str);
+   static string urlEncode(const string &str);
 
-   HttpRequest(string url = "/");
+   HttpRequest(const string &url = "/");
    virtual ~HttpRequest();
 
    void addFile(string field, string filename, const U8* data, U32 length);
@@ -54,6 +54,7 @@ public:
    string getResponseBody();
    S32 getResponseCode();
    string getResponseHead();
+   string getError();
    void parseResponse(string response);
    void setData(const string& key, const string& value);
    void setMethod(const string&);
@@ -79,6 +80,7 @@ private:
    string mResponseBody;
    S32 mResponseCode;
    U32 mTimeout;
+   string mError;
 
    friend class HttpRequestTest;
 };
