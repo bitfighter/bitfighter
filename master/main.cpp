@@ -140,10 +140,6 @@ void seedRandomNumberGenerator()
 
 using namespace Master;
 
-//#ifdef _MSC_VER
-//#  pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
-//#endif
-
 int main(int argc, const char **argv)
 {
    // Handle cmd line params
@@ -174,9 +170,9 @@ int main(int argc, const char **argv)
    MasterServer masterServer(&settings);
 
 #ifdef GAME_JOLT
+   // See http://stackoverflow.com/questions/6718272/c-exec-fork-defunct-processes for more info
    signal(SIGCHLD, SIG_IGN);     // Allow zombie children to die quietly
 #endif
-
 
    U32 lastTime = Platform::getRealMilliseconds();
 
