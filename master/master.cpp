@@ -70,7 +70,8 @@ void MasterSettings::readConfigFile()
    loadSettingsFromINI();
 
    bool useGameJolt = getVal<YesNo>("UseGameJolt");
-   logprintf("Using gamejolt: " + (useGameJolt ? "Yes" : "No")); 
+   string msg = string("Using gamejolt: ") + (useGameJolt ? "Yes" : "No");
+   logprintf(msg.c_str()); 
 
    // Not sure if this should go here...
    if(getVal<U32>("LatestReleasedCSProtocol") == 0 && getVal<U32>("LatestReleasedBuildVersion") == 0)
