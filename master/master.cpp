@@ -189,11 +189,11 @@ MasterServer::MasterServer(MasterSettings *settings)
    mNetInterface = createNetInterface();
 
    mCleanupTimer.reset(TEN_MINUTES);
-   mReadConfigTimer.reset(FIVE_SECONDS);     // Reread the config file every 5 seconds... excessive?
-   mJsonWriteTimer.reset(0, FIVE_SECONDS);   // Max frequency for writing JSON files -- set current to 0 so we'll write immediately
-   mJsonWritingSuspended = false;
+   mReadConfigTimer.reset(FIVE_SECONDS);        // Reread the config file every 5 seconds... excessive?
+   mJsonWriteTimer.reset(0, FIVE_SECONDS);      // Max frequency for writing JSON files -- set current to 0 so we'll write immediately
+   mPingGameJoltTimer.reset(THIRTY_SECONDS);    // Game Jolt recommended frequency... sessions time out after 2 mins
 
-   mPingGameJoltTimer.reset(0, THIRTY_SECONDS);    // Game Jolt recommended frequency... sessions time out after 2 mins
+   mJsonWritingSuspended = false;
    
    mDatabaseAccessThread = new DatabaseAccessThread();    // Deleted in destructor
 
