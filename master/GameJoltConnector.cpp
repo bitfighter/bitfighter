@@ -27,6 +27,9 @@ using namespace std;
 //#define GAME_JOLT
 //#define fork() false;
 //#define execl() 
+//#ifndef TNL_OS_WIN32
+//#  error -- need to comment this block out to build!
+//#endif
 
 
 namespace GameJolt
@@ -214,6 +217,7 @@ void onPlayerAwardedAchievement(const MasterSettings *settings, const MasterServ
    }
 
    S32 pid = fork();
+   wait();
 
    if(pid < 0)
    {
