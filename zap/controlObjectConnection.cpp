@@ -30,6 +30,7 @@ ControlObjectConnection::ControlObjectConnection()
 
    mObjectMovedThisGame = false;
    mIsBusy = false;
+   mNeedReplayMoves = false;
 }
 
 
@@ -198,8 +199,6 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
    // This way the control object won't get ahead of objects
    // it is pushing in a laggy situation.
 
-   bool replayControlObjectMoves = false;
-
    if(isConnectionToClient())    // Is server ??
    {
       mLastClientControlCRC = bstream->readInt(CLIENTCONTROLBITS);
@@ -258,11 +257,11 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
                   controlObject.getPointer() == prevControlObject &&
                   controlObject->getObjectTypeNumber() == PlayerShipTypeNumber &&
                   pendingMoves.size() != 0)
-                     ((Ship*)controlObject.getPointer())->setState(&pendingMoves[0]);
+                     prepareReplay();
                controlObject->readControlState(bstream);
             }
             mServerPosition = controlObject->getPos();
-            replayControlObjectMoves = true;
+            mNeedReplayMoves = true;
          }
          else
             controlObject = NULL;
@@ -271,7 +270,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
    Parent::readPacket(bstream);
 
 
-   if(replayControlObjectMoves && controlObject.isValid())
+   if(mNeedReplayMoves && controlObject.isValid())
    {
       for(S32 i = 0; i < pendingMoves.size(); i++)
       {
@@ -283,9 +282,18 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
          controlObject->idle(BfObject::ClientReplayingPendingMoves);
       }
       controlObject->controlMoveReplayComplete();
+      mNeedReplayMoves = false;
    }
 }
-
+void ControlObjectConnection::prepareReplay()
+{
+   if(!mNeedReplayMoves)
+   {
+      mNeedReplayMoves = true;
+      if(controlObject.isValid() && pendingMoves.size() != 0)
+         ((Ship*)controlObject.getPointer())->setState(&pendingMoves[0]);
+   }
+}
 
 // A new move has arrived
 void ControlObjectConnection::onGotNewMove(const Move &move)

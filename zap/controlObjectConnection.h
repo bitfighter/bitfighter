@@ -67,6 +67,7 @@ private:
 
 protected:
    bool mIsBusy;
+   bool mNeedReplayMoves;
 
 public:
    ControlObjectConnection();
@@ -89,6 +90,8 @@ public:
 
    void writePacket(BitStream *bstream, PacketNotify *notify);
    void readPacket(BitStream *bstream);
+
+	void prepareReplay();
 
    void packetReceived(PacketNotify *notify);
    void addToTimeCredit(U32 timeAmount);
