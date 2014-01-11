@@ -26,6 +26,7 @@ using namespace std;
 // Uncomment to test compiling on Windows
 //#define GAME_JOLT
 //#define fork() false;
+//#define execl() 
 
 
 namespace GameJolt
@@ -40,12 +41,16 @@ static md5wrapper md5;
 static void updateGameJolt(const MasterSettings *settings, const string &baseUrl, 
                            const string &secret,           const string &quotedNameList)
 {
+#ifdef GAME_JOLT
+
    DatabaseWriter databaseWriter = DbWriter::getDatabaseWriter(settings);
 
    string databaseName = settings->getVal<string>("Phpbb3Database");
    Vector<string> credentialStrings = databaseWriter.getGameJoltCredentialStrings(databaseName, quotedNameList, 1);
 
-   HttpRequest request;
+   //HttpRequest request;
+
+   string urlList = "";
 
    for(S32 i = 0; i < credentialStrings.size(); i++)
    {
@@ -55,14 +60,20 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
 
       url += "&signature=" + signature;
 
-      request.setUrl(url);
+      urlList += url + " ";
 
-      if(!request.send())
-         logprintf(LogConsumer::LogError, "Error sending GameJolt request! (msg=%s, url=%s)", 
-                                           request.getError().c_str(), url.c_str());
+      //request.setUrl(url);
 
-      Platform::sleep(100);
+      //if(!request.send())
+      //   logprintf(LogConsumer::LogError, "Error sending GameJolt request! (msg=%s, url=%s)", 
+      //                                     request.getError().c_str(), url.c_str());
    }
+
+   execl("/usr/bin/curl", "curl", urlList.c_str(), NULL);
+
+   logprintf(LogConsumer::LogError, "Error running exec()");
+
+#endif
 }
 
 
