@@ -190,7 +190,7 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
       }
    }
 
-   updateGameJolt(settings, "http://gamejolt.com/api/game/v1/sessions/open", secret, nameList);
+   updateGameJolt(settings, "http://gamejolt.com/api/game/v1/sessions/ping", secret, nameList);
 
    exit(0);    // Bye bye!
 
