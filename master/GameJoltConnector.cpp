@@ -23,6 +23,10 @@ using namespace std;
 #  define GAME_JOLT
 #endif
 
+// Uncomment to test compiling on Windows
+//#define GAME_JOLT
+//#define fork() false;
+
 
 namespace GameJolt
 {
@@ -36,7 +40,7 @@ static md5wrapper md5;
 static void updateGameJolt(const MasterSettings *settings, const string &baseUrl, 
                            const string &secret,           const string &quotedNameList)
 {
-   DatabaseWriter databaseWriter = DatabaseWriter::getDatabaseWriter(settings);
+   DatabaseWriter databaseWriter = DbWriter::getDatabaseWriter(settings);
    Vector<string> credentialStrings = databaseWriter.getGameJoltCredentialStrings(quotedNameList, 1);
 
    HttpRequest request;

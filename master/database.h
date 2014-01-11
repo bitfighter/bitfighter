@@ -114,8 +114,6 @@ public:
    // SQLite constructor
    DatabaseWriter(const char *db);
 
-   static DatabaseWriter getDatabaseWriter(const Master::MasterSettings *settings);
-
    void selectHandler(const string &sql, S32 cols, Vector<Vector<string> > &values);
 
    void setDumpSql(bool dump);
@@ -135,6 +133,8 @@ public:
    U16 getGamesPlayed(const char *name);
 };
 
+
+DatabaseWriter getDatabaseWriter(const Master::MasterSettings *settings);
 
 }
 

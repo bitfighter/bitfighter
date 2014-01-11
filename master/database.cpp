@@ -3,12 +3,15 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include <fstream>
+#include "master.h"
 #include "database.h"
 #include "tnlTypes.h"
 #include "tnlLog.h"
+
 #include "../zap/stringUtils.h"            // For replaceString() and itos()
 #include "../zap/WeaponInfo.h"
+
+#include <fstream>
 
 #ifdef BF_WRITE_TO_MYSQL
 #  include "mysql++.h"
@@ -17,10 +20,25 @@ using namespace mysqlpp;
 
 using namespace std;
 using namespace TNL;
+using namespace Master;
 
 
 namespace DbWriter
 {
+
+   
+// TODO: Should we be reusing these?
+DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
+{
+   if(settings->getVal<YesNo>("WriteStatsToMySql"))
+      return DatabaseWriter(settings->getVal<string>("StatsDatabaseAddress").c_str(), 
+                            settings->getVal<string>("StatsDatabaseName").c_str(),
+                            settings->getVal<string>("StatsDatabaseUsername").c_str(), 
+                            settings->getVal<string>("StatsDatabasePassword").c_str());
+   else
+      return DatabaseWriter("stats.db");
+}
+
 
 // Default constructor -- don't use this one!
 DatabaseWriter::DatabaseWriter()

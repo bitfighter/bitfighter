@@ -160,19 +160,6 @@ MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::verif
 class MasterSettings;
 
 
-// TODO: Should we be reusing these?
-DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
-{
-   if(settings->getVal<YesNo>("WriteStatsToMySql"))
-      return DatabaseWriter(settings->getVal<string>("StatsDatabaseAddress").c_str(), 
-                            settings->getVal<string>("StatsDatabaseName").c_str(),
-                            settings->getVal<string>("StatsDatabaseUsername").c_str(), 
-                            settings->getVal<string>("StatsDatabasePassword").c_str());
-   else
-      return DatabaseWriter("stats.db");
-}
-
-
 struct Auth_Stats : public MasterThreadEntry
 {
    SafePtr<MasterServerConnection> client;
