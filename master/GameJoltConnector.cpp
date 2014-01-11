@@ -24,9 +24,9 @@ using namespace std;
 #endif
 
 // Uncomment to test compiling on Windows
-//#define GAME_JOLT
-//#define fork() false;
-//#define execl() 
+#define GAME_JOLT
+#define fork() false;
+#define execl() 
 
 
 namespace GameJolt
@@ -38,8 +38,10 @@ static const string gameIdString = "game_id=20546";
 static md5wrapper md5;
 
 
+// When using curl, this will never return
 static void updateGameJolt(const MasterSettings *settings, const string &baseUrl, 
-                           const string &secret,           const string &quotedNameList)
+                           const string &secret,           const string &quotedNameList,
+                           const string &otherParams = "")
 {
 #ifdef GAME_JOLT
 
@@ -51,10 +53,11 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
    //HttpRequest request;
 
    string urlList = "";
+   string otherParamString = otherParams + (otherParams != "" ? "&" : "");
 
    for(S32 i = 0; i < credentialStrings.size(); i++)
    {
-      string url = baseUrl + "?" + gameIdString + "&" + credentialStrings[i];
+      string url = baseUrl + "?" + gameIdString + "&" + otherParamString + credentialStrings[i];
 
       string signature = md5.getHashFromString(url + secret);
 
@@ -82,8 +85,8 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
 static void onPlayerAuthenticatedOrQuit(const MasterSettings *settings, const MasterServerConnection *client, const string &verb)
 {
 #ifdef GAME_JOLT  
-   bool useGameJolt = settings->getVal<YesNo>("UseGameJolt");
-   if(!useGameJolt)
+
+   if(!settings->getVal<YesNo>("UseGameJolt"))
       return;
 
    string secret = settings->getVal<string>("GameJoltSecret");
@@ -138,8 +141,7 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
 {
 #ifdef GAME_JOLT    
 
-   bool useGameJolt = settings->getVal<YesNo>("UseGameJolt");
-   if(!useGameJolt)
+   if(!settings->getVal<YesNo>("UseGameJolt"))
       return;
 
    string secret = settings->getVal<string>("GameJoltSecret");
@@ -184,6 +186,53 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
    }
 
    updateGameJolt(settings, "http://gamejolt.com/api/game/v1/sessions/open", secret, nameList);
+
+   exit(0);    // Bye bye!
+
+#endif
+}
+
+
+void onPlayerAwardedAchievement(const MasterSettings *settings, const MasterServerConnection *client, S32 achievementId)
+{
+#ifdef GAME_JOLT  
+
+   if(!settings->getVal<YesNo>("UseGameJolt"))
+      return;
+
+   string secret = settings->getVal<string>("GameJoltSecret");
+
+   if(secret == "")
+   {
+      logprintf(LogConsumer::LogWarning, "Missing GameJolt secret key!");
+      return;
+   }
+
+   S32 pid = fork();
+
+   if(pid < 0)
+   {
+      logprintf(LogConsumer::LogError, "PANIC: Could not fork process! (achievement)");
+      exit(1);    
+   }
+
+   if(pid > 0)
+      return;        // Parent process, return and get on with life
+
+
+   // From here on down is child process... we'll never return!
+   string name = "'" + sanitizeForSql(client->mPlayerOrServerName.getString()) + "'";
+
+   DatabaseWriter databaseWriter = DbWriter::getDatabaseWriter(settings);
+   string trophyId = databaseWriter.getGameJoltTrophyId(achievementId);
+
+   // Make sure we have the trophy in Game Jolt
+   if(trophyId == "")
+      exit(0);
+
+   string trophyStr = "trophy_id=" + trophyId;
+
+   updateGameJolt(settings, "http://gamejolt.com/api/game/v1/trophies/add-achieved", secret, name, trophyStr);
 
    exit(0);    // Bye bye!
 

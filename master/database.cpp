@@ -383,6 +383,21 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
 }
 
 
+string DatabaseWriter::getGameJoltTrophyId(S32 achievementId) 
+{
+   string sql = "SELECT gamejolt_id FROM achievements WHERE id = " + itos(achievementId);
+
+   Vector<Vector<string> > results(1);    // Expect a single result here
+
+   selectHandler(sql, 1, results);
+
+   if(results.size() == 0)
+      return "";
+
+   return results[0][0];
+}
+
+
 // Please make sure names in nameList have been sanitized!
 Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbDatabase, const string &nameList, S32 nameCount)
 {
@@ -393,7 +408,7 @@ Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbD
                 "WHERE u.username IN (" + nameList + ") AND "
                 "pf_gj_user_name IS NOT NULL and pf_gj_user_token IS NOT NULL";
                  
-   Vector<Vector<string> > results(nameCount);    // Expect a single result here
+   Vector<Vector<string> > results(nameCount);
 
    selectHandler(sql, 2, results);
 
