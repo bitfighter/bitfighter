@@ -34,7 +34,8 @@ namespace mysqlpp{
 	class TCPConnection;
 }
 
-class Authenticator{
+class Authenticator
+{
 public:
 	Authenticator();
 	Authenticator(std::string server, std::string username, std::string password, std::string database, std::string tablePrefix, int securityLevel = 1);
