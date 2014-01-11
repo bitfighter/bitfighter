@@ -352,6 +352,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cEngineerResponseEvent, (RangedU32<0,Enginee
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
+   prepareReplay();
    mClientGame->gotEngineerResponseEvent(EngineerResponseEvent(event.value));
 #endif
 }
@@ -918,7 +919,10 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cCreditEnergy, (SignedInt<18> energy), (ener
    Ship *ship = static_cast<Ship *>(getControlObject());
 
    if(ship)
+   {
+      prepareReplay();
       ship->creditEnergy(energy);
+   }
 }
 
 
