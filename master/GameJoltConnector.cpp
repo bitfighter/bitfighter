@@ -24,9 +24,9 @@ using namespace std;
 #endif
 
 // Uncomment to test compiling on Windows
-#define GAME_JOLT
-#define fork() false;
-#define execl() 
+//#define GAME_JOLT
+//#define fork() false;
+//#define execl() 
 
 
 namespace GameJolt
