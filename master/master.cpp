@@ -52,8 +52,8 @@ MasterSettings::MasterSettings(const string &iniFile)
    mSettings.add(new Setting<string>("StatsDatabasePassword",                  "",             "stats_database_password",              "stats"));
 
    // GameJolt settings
-   mSettings.add(new Setting<YesNo> ("UseGameJolt",                            Yes,            "use_game_jolt",                        "GameJolt"));
-   mSettings.add(new Setting<string>("GameJoltSecret",                         "",             "game_secret",                          "GameJolt"));
+   mSettings.add(new Setting<YesNo> ("UseGameJolt",                            Yes,            "UseGameJolt",                          "GameJolt"));
+   mSettings.add(new Setting<string>("GameJoltSecret",                         "",             "GameJoltSecret",                       "GameJolt"));
 }                  
 
 
