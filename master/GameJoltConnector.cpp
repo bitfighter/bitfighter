@@ -188,7 +188,8 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
       }
    }
 
-   updateGameJolt(settings, "http://gamejolt.com/api/game/v1/sessions/ping", secret, nameList);
+   if(nameCount > 0)
+      updateGameJolt(settings, "http://gamejolt.com/api/game/v1/sessions/ping", secret, nameList);
 
    exit(0);    // Bye bye!
 
