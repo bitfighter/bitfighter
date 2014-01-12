@@ -72,6 +72,8 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
 
    if(urlList.length() > 0)
    {
+      logprintf("Curling: %s", urList.c_str());
+
       // This is a fallback because the request.send() was returning a "Socket not writable" error
       execl("/usr/bin/curl", "curl", urlList.c_str(), NULL);
 
@@ -229,8 +231,6 @@ void onPlayerAwardedAchievement(const MasterSettings *settings, const MasterServ
 
    DatabaseWriter databaseWriter = DbWriter::getDatabaseWriter(settings);
    string trophyId = databaseWriter.getGameJoltTrophyId(achievementId);
-
-   logprintf("trohpy %s %d", trophyId.c_str(), achievementId);
 
    // Make sure we have the trophy in Game Jolt
    if(trophyId == "")
