@@ -47,6 +47,8 @@ enum AuthenticationStatus {
 };
 
 
+// !!! Important !!!
+// When adding a new badge here, we need to add it to Game Jolt, and also update the achievements table in the database
 enum MeritBadges {
    NO_BADGES = 0,             // <--- REALLY?????
    DEVELOPER_BADGE = 0,
