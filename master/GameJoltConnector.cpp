@@ -72,7 +72,7 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
 
    if(urlList.length() > 0)
    {
-      logprintf("Curling: %s", urList.c_str());
+      logprintf("Curling: %s", urlList.c_str());
 
       // This is a fallback because the request.send() was returning a "Socket not writable" error
       execl("/usr/bin/curl", "curl", urlList.c_str(), NULL);
