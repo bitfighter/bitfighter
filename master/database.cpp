@@ -408,8 +408,6 @@ Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbD
                 "WHERE u.username IN (" + nameList + ") AND "
                 "pf_gj_user_name IS NOT NULL and pf_gj_user_token IS NOT NULL";
 
-   logprintf("SQL: %s", sql.c_str());
-                 
    Vector<Vector<string> > results(nameCount);
 
    selectHandler(sql, 2, results);
