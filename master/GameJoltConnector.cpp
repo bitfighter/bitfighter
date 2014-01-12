@@ -199,7 +199,7 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
 }
 
 
-void onPlayerAwardedAchievement(const MasterSettings *settings, const MasterServerConnection *client, S32 achievementId)
+void onPlayerAwardedAchievement(const MasterSettings *settings, const string &awardedTo, S32 achievementId)
 {
 #ifdef GAME_JOLT  
 
@@ -227,7 +227,7 @@ void onPlayerAwardedAchievement(const MasterSettings *settings, const MasterServ
 
 
    // From here on down is child process... we'll never return!
-   string name = "'" + sanitizeForSql(client->mPlayerOrServerName.getString()) + "'";
+   string name = "'" + sanitizeForSql(awardedTo) + "'";
 
    DatabaseWriter databaseWriter = DbWriter::getDatabaseWriter(settings);
    string trophyId = databaseWriter.getGameJoltTrophyId(achievementId);

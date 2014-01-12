@@ -9,6 +9,8 @@
 #include "tnlVector.h"
 #include "tnlLog.h"
 
+#include <string>
+
 namespace Master {
    class MasterSettings;
    class MasterServerConnection;
@@ -16,6 +18,7 @@ namespace Master {
 
 using namespace TNL;
 using namespace Master;
+using namespace std;
 
 
 namespace GameJolt
@@ -23,7 +26,7 @@ namespace GameJolt
    void onPlayerAuthenticated     (const MasterSettings *settings, const MasterServerConnection *client);
    void onPlayerQuit              (const MasterSettings *settings, const MasterServerConnection *client);
    void ping                      (const MasterSettings *settings, const Vector<MasterServerConnection *> *clientList);
-   void onPlayerAwardedAchievement(const MasterSettings *settings, const MasterServerConnection *client, S32 achievement);
+   void onPlayerAwardedAchievement(const MasterSettings *settings, const string &awardedTo, S32 achievement);
 }
 
 #endif

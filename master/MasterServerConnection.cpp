@@ -1162,7 +1162,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcheivementAchieved, (U8 a
 
    writeAchievementToDb(achievementId, playerNick);
 
-   GameJolt::onPlayerAwardedAchievement(mMaster->getSettings(), this, achievementId);
+   GameJolt::onPlayerAwardedAchievement(mMaster->getSettings(), playerNick.getString(), achievementId);
 
    const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
