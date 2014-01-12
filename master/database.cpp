@@ -407,6 +407,8 @@ Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbD
                 "LEFT JOIN " + phpbbDatabase + ".phpbb_users AS u ON u.user_id = pd.user_id "
                 "WHERE u.username IN (" + nameList + ") AND "
                 "pf_gj_user_name IS NOT NULL and pf_gj_user_token IS NOT NULL";
+
+   logprintf("SQL: ", sql.c_str());
                  
    Vector<Vector<string> > results(nameCount);
 
