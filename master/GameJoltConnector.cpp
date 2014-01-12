@@ -229,6 +229,8 @@ void onPlayerAwardedAchievement(const MasterSettings *settings, const MasterServ
    DatabaseWriter databaseWriter = DbWriter::getDatabaseWriter(settings);
    string trophyId = databaseWriter.getGameJoltTrophyId(achievementId);
 
+   logprintf("trohpy %s %d", trophyId.c_str(), achievementId);
+
    // Make sure we have the trophy in Game Jolt
    if(trophyId == "")
       exit(0);
