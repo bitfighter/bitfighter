@@ -81,11 +81,11 @@ extern Vector<string> master_admins;
 void MasterSettings::loadSettingsFromINI()
 {
    // Read all settings defined in the new modern manner
-   string sections[] = { "host", "phpbb", "stats", "motd", "GameJolt" };
+   S32 sectionCount = ini.GetNumSections();
 
-   for(U32 i = 0; i < ARRAYSIZE(sections); i++)
+   for(U32 i = 0; i < sectionCount; i++)
    {
-      string section = sections[i];
+      string section = ini.getSectionName(i);
 
       // Enumerate all settings we've defined for [section]
       Vector<AbstractSetting *> settings = mSettings.getSettingsInSection(section);
@@ -93,7 +93,6 @@ void MasterSettings::loadSettingsFromINI()
       for(S32 j = 0; j < settings.size(); j++)
          settings[j]->setValFromString(ini.GetValue(section, settings[j]->getKey(), settings[j]->getDefaultValueString()));
    }
-
 
    // Got to do something about this!
    string str1 = ini.GetValue("host", "master_admin", "");
