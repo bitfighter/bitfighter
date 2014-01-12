@@ -82,6 +82,7 @@ RabbitGameType::RabbitGameType()
    mFlagScoreTimer = 5 * 1000;
 }
 
+
 // Destructor
 RabbitGameType::~RabbitGameType()
 {
@@ -396,7 +397,7 @@ void RabbitGameType::onFlaggerKill(Ship *rabbitShip)
 
    // See if we've acheived our raging rabid rabbit badge
    if(clientInfo->isAuthenticated() &&                      // Player must be authenticated
-      clientInfo->getKillStreak() >= 7 &&                   // Player must have a kill streak of 5 or more
+      clientInfo->getKillStreak() >= 7 &&                   // Player must have a kill streak of 7 or more
       !clientInfo->hasBadge(BADGE_RAGING_RABID_RABBIT) &&   // Player doesn't already have the badge
       getGame()->getPlayerCount() >= 4 &&                   // Game must have 4+ human players
       getGame()->getAuthenticatedPlayerCount() >= 2)        // Two of whom must be authenticated
