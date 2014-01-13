@@ -20,8 +20,8 @@ class UIColorPicker : public UserInterface, public Color
    U32 mMouseDown;
 
 public:
-   explicit UIColorPicker(ClientGame *game);   // Constructor
-   virtual ~UIColorPicker();          // Destructor
+   explicit UIColorPicker(ClientGame *game);    // Constructor
+   virtual ~UIColorPicker();                    // Destructor
 
    void onActivate();
    void onReactivate();
@@ -32,8 +32,6 @@ public:
    void onKeyUp(InputCode inputCode);
    void onMouseMoved();
 };
-
-
 
 }
 

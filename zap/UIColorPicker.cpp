@@ -3,10 +3,17 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 #include "UIColorPicker.h"
+
+#include "gameObjectRender.h"
+#include "UIManager.h"
+#include "FontManager.h"
+#include "Cursor.h"
+#include "Colors.h"
+#include "ship.h"
+
 #include "OpenglUtils.h"
 #include "RenderUtils.h"
-#include "UIManager.h"
-#include "Cursor.h"
+#include "GeomUtils.h"    // For triangulation
 
 namespace Zap
 {
@@ -15,8 +22,10 @@ static void limitRange(Color &c)
 {
    if(c.r < 0) c.r = 0;
    if(c.r > 1) c.r = 1;
+
    if(c.g < 0) c.g = 0;
    if(c.g > 1) c.g = 1;
+
    if(c.b < 0) c.b = 0;
    if(c.b > 1) c.b = 1;
 }
@@ -40,20 +49,26 @@ const S32 colorBrightness_w_space = 50;
 const S32 colorBrightness_h = 400;
 
 UIColorPicker::UIColorPicker(ClientGame *game) : Parent(game) {mMouseDown = 0;}
-UIColorPicker::~UIColorPicker(){}
+UIColorPicker::~UIColorPicker(){ /* Do nothing */ }
+
+
 void UIColorPicker::onActivate()
 {
    Parent::onActivate();
    mMouseDown = 0;
    Cursor::enableCursor();
 }
+
+
 void UIColorPicker::onReactivate()
 {
    Parent::onReactivate();
    mMouseDown = 0;
    Cursor::enableCursor();
 }
-void UIColorPicker::idle(U32 timeDelta){Parent::idle(timeDelta);}
+
+
+void UIColorPicker::idle(U32 timeDelta) { Parent::idle(timeDelta); }
 
 
 const F32 colorWheelPoints[] = {
@@ -67,12 +82,14 @@ const F32 colorWheelPoints[] = {
                       colorWheel_x, colorWheel_h / 4     + colorWheel_y,
 };
 
+
 const F32 colorBrightnessPoints[] = {
    colorBrightness_x,                     colorBrightness_y,
    colorBrightness_x + colorBrightness_w, colorBrightness_y,
    colorBrightness_x + colorBrightness_w, colorBrightness_y + colorBrightness_h,
    colorBrightness_x,                     colorBrightness_y + colorBrightness_h,
 };
+
 
 const F32 colorBrightnessPointsRed[] = {
    colorBrightness_x + colorBrightness_w_space,                     colorBrightness_y,
@@ -81,12 +98,14 @@ const F32 colorBrightnessPointsRed[] = {
    colorBrightness_x + colorBrightness_w_space,                     colorBrightness_y + colorBrightness_h,
 };
 
+
 const F32 colorBrightnessPointsGreen[] = {
    colorBrightness_x + colorBrightness_w_space * 2,                     colorBrightness_y,
    colorBrightness_x + colorBrightness_w_space * 2 + colorBrightness_w, colorBrightness_y,
    colorBrightness_x + colorBrightness_w_space * 2 + colorBrightness_w, colorBrightness_y + colorBrightness_h,
    colorBrightness_x + colorBrightness_w_space * 2,                     colorBrightness_y + colorBrightness_h,
 };
+
 
 const F32 colorBrightnessPointsBlue[] = {
    colorBrightness_x + colorBrightness_w_space * 3,                     colorBrightness_y,
@@ -98,14 +117,22 @@ const F32 colorBrightnessPointsBlue[] = {
 
 void UIColorPicker::render()
 {
-   glColor(1);
-   drawCenteredString(15, 30, "Color Picker");
+   glColor(Colors::green);
 
-   F32 maxCol = r > g ? r : g;
+   FontManager::pushFontContext(MenuHeaderContext);
+   drawCenteredUnderlinedString(15, 30, "COLOR PICKER");
+   drawStringc(400, 580, 30, "Done");
+   drawString (730, 580, 15, "Cancel");
+   FontManager::popFontContext();
+
+   glColor(Colors::white);
+
+   F32 maxCol = max(r, g);
+
    if(b > maxCol)
       maxCol = b;
 
-   F32 r2,g2,b2;
+   F32 r2, g2, b2;
    if(maxCol == 0)
    {
       b2 = g2 = r2 = 1;
@@ -118,29 +145,29 @@ void UIColorPicker::render()
    }
 
    F32 colorArray[32] = {
-      maxCol,maxCol,maxCol,1,
-      maxCol,     0,     0,1,
-      maxCol,     0,maxCol,1,
-           0,     0,maxCol,1,
-           0,maxCol,maxCol,1,
-           0,maxCol,     0,1,
-      maxCol,maxCol,     0,1,
-      maxCol,     0,     0,1,
+      maxCol, maxCol ,maxCol, 1,
+      maxCol,      0,      0, 1,
+      maxCol,      0, maxCol, 1,
+           0,      0, maxCol, 1,
+           0, maxCol, maxCol, 1,
+           0, maxCol,      0, 1,
+      maxCol, maxCol,      0, 1,
+      maxCol,      0,      0, 1,
    };
 
    renderColorVertexArray(colorWheelPoints, colorArray, 8, GL_TRIANGLE_FAN);
 
 
-   colorArray[0]  = r2; colorArray[1]  = g2; colorArray[2]  = b2;
-   colorArray[4]  = r2; colorArray[5]  = g2; colorArray[6]  = b2; 
-   colorArray[8]  = 0;  colorArray[9]  = 0;  colorArray[10] = 0; 
-   colorArray[12] = 0;  colorArray[13] = 0;  colorArray[14] = 0;
+   colorArray[0]  = r2;  colorArray[1]  = g2;  colorArray[2]  = b2;
+   colorArray[4]  = r2;  colorArray[5]  = g2;  colorArray[6]  = b2; 
+   colorArray[8]  = 0;   colorArray[9]  = 0;   colorArray[10] = 0; 
+   colorArray[12] = 0;   colorArray[13] = 0;   colorArray[14] = 0;
    renderColorVertexArray(colorBrightnessPoints, colorArray, 4, GL_TRIANGLE_FAN);
 
-   colorArray[0]  = 1; colorArray[1]  = g; colorArray[2]  = b;
-   colorArray[4]  = 1; colorArray[5]  = g; colorArray[6]  = b;
-   colorArray[9]  = g; colorArray[10] = b;
-   colorArray[13] = g; colorArray[14] = b;
+   colorArray[0]  = 1;  colorArray[1]  = g;  colorArray[2]  = b;
+   colorArray[4]  = 1;  colorArray[5]  = g;  colorArray[6]  = b;
+   colorArray[9]  = g;  colorArray[10] = b;
+   colorArray[13] = g;  colorArray[14] = b;
    renderColorVertexArray(colorBrightnessPointsRed, colorArray, 4, GL_TRIANGLE_FAN);
 
    colorArray[0]  = r; colorArray[1]  = 1;
@@ -155,13 +182,12 @@ void UIColorPicker::render()
    colorArray[13] = g; colorArray[14] = 0;
    renderColorVertexArray(colorBrightnessPointsBlue, colorArray, 4, GL_TRIANGLE_FAN);
 
-   glColor(1);
-   renderVertexArray(&colorWheelPoints[2], 6, GL_LINE_LOOP);
-   renderVertexArray(colorBrightnessPoints, 4, GL_LINE_LOOP);
-   renderVertexArray(colorBrightnessPointsRed, 4, GL_LINE_LOOP);
+   glColor(Colors::white);
+   renderVertexArray(&colorWheelPoints[2],       6, GL_LINE_LOOP);
+   renderVertexArray(colorBrightnessPoints,      4, GL_LINE_LOOP);
+   renderVertexArray(colorBrightnessPointsRed,   4, GL_LINE_LOOP);
    renderVertexArray(colorBrightnessPointsGreen, 4, GL_LINE_LOOP);
-   renderVertexArray(colorBrightnessPointsBlue, 4, GL_LINE_LOOP);
-
+   renderVertexArray(colorBrightnessPointsBlue,  4, GL_LINE_LOOP);
 
 
    F32 pointerArrow[8];
@@ -203,20 +229,53 @@ void UIColorPicker::render()
       pointerArrow[2] = pointerArrow[0] + 20;                 pointerArrow[3] = pointerArrow[1];
       pointerArrow[4] = pointerArrow[0] + 10;                 pointerArrow[5] = pointerArrow[1] + 10;
       pointerArrow[6] = pointerArrow[0] + 10;                 pointerArrow[7] = pointerArrow[1] - 10;
+
       glColor(maxCol > .6f ?  0.f : 1.f);
+
       renderVertexArray(pointerArrow, 4, GL_LINES);
    }
 
 
-   glColor(this);
-   drawRect(50, 525, 100, 575, GL_TRIANGLE_FAN);
-   glColor(1);
-   drawRect(50, 525, 100, 575, GL_LINE_LOOP);
+   // Render some samples in selected color
+   static const S32 x = 50;
+   static const S32 y = 540;
+   static const S32 h = 50;
 
-   drawStringc(400, 580, 30, "Done");
-   drawString(730, 580, 15, "Cancel");
+
+   // Loadout zone
+   static const Point pointAry[] = { Point(x, y), Point(x + h, y), Point(x + h, y + h), Point(x, y + h) };
+   static const Vector<Point> o(pointAry, ARRAYSIZE(pointAry)); 
+   Vector<Point> f;     // fill
+   Triangulate::Process(o, f);
+   renderLoadoutZone(this, &o, &f, Point(x + h/2, y + h/2), 0);
+
+   // Ship
+   static F32 thrusts[4] =  { 1, 0, 0, 0 };
+
+   glPushMatrix();
+   glTranslatef(165, F32(y + h / 2), 0);
+   glRotatef(-90, 0, 0, 1);
+
+   renderShip(ShipShape::Normal, this, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
+
+   glPopMatrix();
+
+   // Turret
+   glPushMatrix();
+   glTranslatef(240, F32(y + h / 2), 0);
+
+   renderTurret(*(const Color *)this, Point(0, 15), Point(0, -1), true, 1, 0, 0);
+
+   glPopMatrix();
 }
-void UIColorPicker::quit(){}
+
+
+void UIColorPicker::quit()
+{
+   // Do nothing
+}
+
+
 bool UIColorPicker::onKeyDown(InputCode inputCode)
 {
    if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)       // Quit
@@ -263,6 +322,8 @@ bool UIColorPicker::onKeyDown(InputCode inputCode)
 
    return true;
 }
+
+
 void UIColorPicker::onKeyUp(InputCode inputCode)
 {
    if(inputCode == MOUSE_LEFT)
@@ -342,5 +403,6 @@ void UIColorPicker::onMouseMoved()
 
    limitRange(*this);
 }
+
 
 }
