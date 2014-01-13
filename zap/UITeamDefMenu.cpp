@@ -20,6 +20,8 @@
 
 #include "UIColorPicker.h"
 
+#include "FontManager.h"
+
 #include <string>
 
 namespace Zap
@@ -84,7 +86,7 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : Parent(game),
    // Text at the bottom of the screen
    addLineToSymbolStringSet("[[1]] - [[9]] selects a team preset for current slot",
                             inputCodeManager, 16, Colors::menuHelpColor, mBottomInstructions);
-   addLineToSymbolStringSet("[[Enter]] edits team name",
+   addLineToSymbolStringSet("[[Enter]] edits team name | [[C]] shows Color Picker",
                             inputCodeManager, 16, Colors::menuHelpColor, mBottomInstructions);
    addLineToSymbolStringSet("[[R]] [[G]] [[B]] to change preset color (with or without [[Shift]])",
                             inputCodeManager, 16, Colors::menuHelpColor, mBottomInstructions);
@@ -146,14 +148,17 @@ void TeamDefUserInterface::render()
    const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
-   glColor(Colors::white);
-   drawCenteredString(vertMargin, 30, mMenuTitle);
+   FontManager::pushFontContext(MenuHeaderContext);
+   glColor(Colors::green);
+   drawCenteredUnderlinedString(vertMargin, 30, mMenuTitle);
    
-   mMenuSubTitle.render      (canvasWidth / 2, vertMargin + 65,                 UI::AlignmentCenter);
-   mBottomInstructions.render(canvasWidth / 2, canvasHeight - vertMargin - 115, UI::AlignmentCenter);
+   mMenuSubTitle.render(canvasWidth / 2, vertMargin + 65, UI::AlignmentCenter);
+   drawCenteredString(canvasHeight - vertMargin - 20, 18, "Arrow Keys to choose | ESC to exit");
 
    glColor(Colors::white);
-   drawCenteredString(canvasHeight - vertMargin - 20, 18, "Arrow Keys to choose | ESC to exit");
+   mBottomInstructions.render(canvasWidth / 2, canvasHeight - vertMargin - 115, UI::AlignmentCenter);
+   FontManager::popFontContext();
+
 
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
