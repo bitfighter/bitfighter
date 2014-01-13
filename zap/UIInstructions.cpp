@@ -417,7 +417,7 @@ static void initPage2Block(const char **block, S32 blockSize, S32 fontSize, cons
       {
          symbols.clear();
          string str(block[i]);
-         SymbolString::symbolParse(inputCodeManager, str, symbols, HelpContext, fontSize, bodyColor, &Colors::white);
+         SymbolString::symbolParse(inputCodeManager, str, symbols, HelpContext, fontSize, true, bodyColor, &Colors::white);
 
          instrBlock.add(SymbolString(symbols, AlignmentLeft));
       }

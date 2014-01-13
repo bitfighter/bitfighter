@@ -83,13 +83,13 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
       {
          symbols.clear();
          SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].command, 
-                                       symbols, HelpContext, FontSize, txtColor, keyColor);
+                                   symbols, HelpContext, FontSize, true, txtColor, keyColor);
 
          instrs.add(SymbolString(symbols));
 
          symbols.clear();
          SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].binding, 
-                                       symbols, HelpContext, FontSize, keyColor);
+                                   symbols, HelpContext, FontSize, true, keyColor);
          bindings.add(SymbolString(symbols));
       }
    }
@@ -158,14 +158,14 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
       {
          symbols.clear();
          SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), cmdList[i].command, 
-                                   symbols, HelpContext, cmdSize, txtColor, keyColor);
+                                   symbols, HelpContext, cmdSize, true, txtColor, keyColor);
 
          SymbolString instrs(symbols);
          instrs.render(cmdCol, ypos, UI::AlignmentLeft);
 
          symbols.clear();
          SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), cmdList[i].binding, 
-                                   symbols, HelpContext, cmdSize, txtColor, keyColor);
+                                   symbols, HelpContext, cmdSize, true, txtColor, keyColor);
 
          SymbolString keys(symbols);
          keys.render(descrCol, ypos, UI::AlignmentLeft);
