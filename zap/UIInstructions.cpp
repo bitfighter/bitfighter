@@ -286,6 +286,10 @@ void InstructionsUserInterface::render()
          renderPageCommands(InstructionLevelCommands - FIRST_COMMAND_PAGE, 
                             "Level change permissions are required to use these commands");  
          break;
+      case InstructionBotCommands:
+         renderPageCommands(InstructionBotCommands - FIRST_COMMAND_PAGE, 
+                            "Level change permissions are required to use these commands");  
+         break;
       case InstructionAdminCommands:
          renderPageCommands(InstructionAdminCommands - FIRST_COMMAND_PAGE, 
                             "Admin permissions are required to use these commands");   // Admin commands

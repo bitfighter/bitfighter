@@ -26,6 +26,7 @@ namespace Zap
    INSTR_ITEM(InstructionAdvancedCommands,   "ADVANCED COMMANDS")   \
    INSTR_ITEM(InstructionSoundCommands,      "SOUND AND MUSIC")     \
    INSTR_ITEM(InstructionLevelCommands,      "LEVEL COMMANDS")      \
+   INSTR_ITEM(InstructionBotCommands,        "BOT COMMANDS")        \
    INSTR_ITEM(InstructionAdminCommands,      "ADMIN COMMANDS")      \
    INSTR_ITEM(InstructionOwnerCommands,      "OWNER COMMANDS")      \
    INSTR_ITEM(InstructionDebugCommands,      "DEBUG COMMANDS")      \
