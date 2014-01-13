@@ -10,6 +10,7 @@
 #include "ChatCommands.h"
 #include "ClientGame.h"
 #include "Console.h"
+#include "LevelSource.h"      // For LevelInfo used in level name tab-completion
 #include "UIChat.h"           // For font sizes and such
 #include "UIInstructions.h"   // For code to activate help screen
 
@@ -48,6 +49,7 @@ namespace Zap
    { "prev",        &ChatCommands::prevLevelHandler,       {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Replay previous level" },
    { "restart",     &ChatCommands::restartLevelHandler,    {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Restart current level" },
    { "random",      &ChatCommands::randomLevelHandler,     {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Start random level" },
+   { "map",         &ChatCommands::mapLevelHandler,        { LEVEL },                1, LEVEL_COMMANDS,  0,  1,  {"<level name>"},                                       "Start random level" },
    { "shownextlevel",&ChatCommands::showNextLevelHandler,  {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Show name of the next level" },
    { "showprevlevel",&ChatCommands::showPrevLevelHandler,  {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Show name of the previous level" },
 
@@ -287,8 +289,6 @@ static void makePlayerNameList(Game *game, Vector<string> &nameCandidateList)
 }
 
 
-static Vector<string> commandCandidateList;
-
 static void makeTeamNameList(const Game *game, Vector<string> &nameCandidateList)
 {
    nameCandidateList.clear();
@@ -296,6 +296,25 @@ static void makeTeamNameList(const Game *game, Vector<string> &nameCandidateList
    for(S32 i = 0; i < game->getTeamCount(); i++)
       nameCandidateList.push_back(game->getTeamName(i).getString());
 }
+
+
+static void makeLevelNameList(Game *game, Vector<string> &nameCandidateList)
+{
+   nameCandidateList.clear();
+
+   TNLAssert(dynamic_cast<ClientGame*>(game), "Not a client game?");
+   ClientGame *clientGame = static_cast<ClientGame*>(game);
+
+   GameConnection *gameConnection = clientGame->getConnectionToServer();
+   if(!gameConnection)
+      return;
+
+   for(S32 i = 0; i < gameConnection->mLevelInfos.size(); i++)
+      nameCandidateList.push_back(gameConnection->mLevelInfos[i].mLevelName.getString());
+}
+
+
+static Vector<string> commandCandidateList;
 
 static Vector<string> *getCandidateList(Game *game, const char *first, S32 arg)
 {
@@ -329,6 +348,12 @@ static Vector<string> *getCandidateList(Game *game, const char *first, S32 arg)
          else if(argType == TEAM)      // ==> Team name completion
          {
             makeTeamNameList(game, nameCandidateList);
+            return &nameCandidateList;
+         }
+
+         else if(argType == LEVEL)      // ==> Level name completion
+         {
+            makeLevelNameList(game, nameCandidateList);
             return &nameCandidateList;
          }
          // else no arg completion for you!

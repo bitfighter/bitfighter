@@ -9,6 +9,7 @@
 #include "gameType.h"
 #include "LevelDatabaseDownloadThread.h"
 #include "LevelDatabaseRateThread.h"
+#include "LevelSource.h"
 #include "LevelSpecifierEnum.h"
 
 #include "UIManager.h"
@@ -196,6 +197,40 @@ void randomLevelHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasLevelChange("!!! You don't have permission to change levels"))
       game->getConnectionToServer()->c2sRequestLevelChange(RANDOM_LEVEL, false);
+}
+
+
+void mapLevelHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasLevelChange("!!! You don't have permission to change levels"))
+   {
+      GameConnection *gameConnection = game->getConnectionToServer();
+
+      S32 levelIndex = S32_MIN;
+
+      string levelName = words[1];
+
+      // Find our level index...  very inefficient; not sure how to do this
+      // differently without a large refactor
+      for(S32 i = 0; i < gameConnection->mLevelInfos.size(); i++)
+      {
+         // This finds the first level with the name..  so don't have duplicate-named levels!
+         if(levelName == gameConnection->mLevelInfos[i].mLevelName.getString())
+         {
+            levelIndex = i;
+            break;
+         }
+      }
+
+      if(levelIndex == S32_MIN)
+      {
+         game->displayErrorMessage("!!! Level not found");
+         return;
+      }
+
+      // Change level!
+      gameConnection->c2sRequestLevelChange(levelIndex, false);
+   }
 }
 
 

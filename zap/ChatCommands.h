@@ -22,7 +22,8 @@ static const S32 MAX_CMDS = 9;
 enum ArgTypes {
    NAME,    // Player name (can be tab-completed)
    TEAM,    // Team name (can be tab-completed)
-   xINT,     // Integer argument
+   LEVEL,   // Level name (can be tab-completed)
+   xINT,    // Integer argument
    STR,     // String argument
    PT,      // Point argument (only used by Lua scripts)
    ARG_TYPES
@@ -76,6 +77,7 @@ void nextLevelHandler          (ClientGame *game, const Vector<string> &args);
 void prevLevelHandler          (ClientGame *game, const Vector<string> &args);
 void restartLevelHandler       (ClientGame *game, const Vector<string> &args);
 void randomLevelHandler        (ClientGame *game, const Vector<string> &args);
+void mapLevelHandler           (ClientGame *game, const Vector<string> &args);
 void showNextLevelHandler      (ClientGame *game, const Vector<string> &args);
 void shutdownServerHandler     (ClientGame *game, const Vector<string> &args);
 void showPrevLevelHandler      (ClientGame *game, const Vector<string> &args);
