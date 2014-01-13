@@ -474,11 +474,11 @@ static void renderBadgeLine(S32 y, S32 textSize, MeritBadges badge, S32 radius, 
    glColor(Colors::yellow);
    x += drawStringAndGetWidth(x, y, textSize, name);
 
-   glColor(Colors::cyan);
-   x += drawStringAndGetWidth(x, y, textSize, " - ");
+   //glColor(Colors::cyan);
+   //x += drawStringAndGetWidth(x, y, textSize, " - ");
 
    glColor(Colors::white);
-   drawString(x, y, textSize, descr);
+   drawString(280, y, textSize, descr);
 }
 
 
