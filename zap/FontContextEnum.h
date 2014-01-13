@@ -14,6 +14,7 @@ namespace Zap
       LevelInfoContext,        // Display info about the level (at beginning of game, and when F2 pressed)
       LevelInfoHeadlineContext,
       MenuContext,             // Menu font (main game menus)
+      MenuHeaderContext,
       FPSContext,              // FPS display
       HelpContext,             // For Help screens
       ErrorMsgContext,         // For big red boxes and such

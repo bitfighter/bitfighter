@@ -84,7 +84,7 @@ MenuUserInterface::~MenuUserInterface()
 
 void MenuUserInterface::initialize()
 {
-   mMenuTitle = "MENU:";
+   mMenuTitle = "MENU";
    mMenuSubTitle = "";
 
    selectedIndex = 0;
@@ -337,9 +337,12 @@ void MenuUserInterface::render()
    if(getGame()->getConnectionToServer())
       getUIManager()->renderAndDimGameUserInterface();
 
+
+   FontManager::pushFontContext(MenuHeaderContext);
+
    // Title 
-   glColor(Colors::white);    
-   drawCenteredString(vertMargin, 30, mMenuTitle.c_str());
+   glColor(Colors::green);
+   drawCenteredUnderlinedString(vertMargin, 30, mMenuTitle.c_str());
    
    // Subtitle
    glColor(mMenuSubTitleColor);
@@ -348,6 +351,8 @@ void MenuUserInterface::render()
    // Instructions
    if(mRenderInstructions)
       renderMenuInstructions(getGame()->getSettings());
+
+   FontManager::popFontContext();
 
    S32 count = mMenuItems.size();
 
@@ -1088,7 +1093,7 @@ void MainMenuUserInterface::onEscape()
 // Constructor
 OptionsMenuUserInterface::OptionsMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   mMenuTitle = "OPTIONS MENU:";
+   mMenuTitle = "OPTIONS MENU";
 }
 
 
@@ -1257,7 +1262,7 @@ void OptionsMenuUserInterface::onEscape()
 // Constructor
 InputOptionsMenuUserInterface::InputOptionsMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   mMenuTitle = "INPUT OPTIONS:";
+   mMenuTitle = "INPUT OPTIONS";
 }
 
 
@@ -1451,7 +1456,7 @@ void InputOptionsMenuUserInterface::onEscape()
 // Constructor
 SoundOptionsMenuUserInterface::SoundOptionsMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   mMenuTitle = "SOUND OPTIONS:";
+   mMenuTitle = "SOUND OPTIONS";
 }
 
 
@@ -1552,7 +1557,7 @@ void SoundOptionsMenuUserInterface::onEscape()
 // Constructor
 InGameHelpOptionsUserInterface::InGameHelpOptionsUserInterface(ClientGame *game) : Parent(game)
 {
-   mMenuTitle = "IN-GAME HELP OPTIONS:";
+   mMenuTitle = "IN-GAME HELP OPTIONS";
 }
 
 
@@ -1612,7 +1617,7 @@ void InGameHelpOptionsUserInterface::onEscape()
 // Constructor
 RobotOptionsMenuUserInterface::RobotOptionsMenuUserInterface(ClientGame *game) : Parent(game)
 {
-   mMenuTitle = "ROBOT OPTIONS:";
+   mMenuTitle = "ROBOT OPTIONS";
 }
 
 
@@ -1801,7 +1806,7 @@ void NameEntryUserInterface::onEscape()
 // Constructor
 HostMenuUserInterface::HostMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
 {
-   mMenuTitle ="HOST A GAME:";
+   mMenuTitle ="HOST A GAME";
 
    mEditingIndex = -1;     // Not editing at the start
 }
@@ -1914,7 +1919,7 @@ void HostMenuUserInterface::render()
 // Constructor
 GameMenuUserInterface::GameMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
 {
-   mMenuTitle = "GAME MENU:";
+   mMenuTitle = "GAME MENU";
 }
 
 
@@ -2119,7 +2124,7 @@ static void selectLevelTypeCallback(ClientGame *game, U32 level)
 void LevelMenuUserInterface::onActivate()
 {
    Parent::onActivate();
-   mMenuTitle = "CHOOSE LEVEL TYPE:";
+   mMenuTitle = "CHOOSE LEVEL TYPE";
 
    // replace with getLevelCount() method on game?
    GameConnection *gc = getGame()->getConnectionToServer();
@@ -2297,7 +2302,7 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
 void LevelMenuSelectUserInterface::onActivate()
 {
    Parent::onActivate();
-   mMenuTitle = "CHOOSE LEVEL: [" + category + "]";
+   mMenuTitle = "CHOOSE LEVEL [" + category + "]";
 
    mNameSoFar = "";
    mStillTypingNameTimer.clear();
@@ -2539,9 +2544,9 @@ void PlayerMenuUserInterface::render()
    sortMenuItems();
 
    if(action == PlayerActionKick)
-      mMenuTitle = "CHOOSE PLAYER TO KICK:";
+      mMenuTitle = "CHOOSE PLAYER TO KICK";
    else if(action == PlayerActionChangeTeam)
-      mMenuTitle = "CHOOSE WHOSE TEAM TO CHANGE:";
+      mMenuTitle = "CHOOSE WHOSE TEAM TO CHANGE";
    else
       TNLAssert(false, "Unknown action!");
 
@@ -2629,7 +2634,7 @@ void TeamMenuUserInterface::render()
       name = "";
 
    // Finally, set menu title
-   mMenuTitle = "TEAM TO SWITCH " + name + "TO:";       // No space before the TO!
+   mMenuTitle = "TEAM TO SWITCH " + name + "TO";       // No space before the TO!
 
    Parent::render();
 }

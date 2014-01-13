@@ -66,7 +66,7 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    glPushMatrix();
    glTranslate(0, getInsideEdge(), 0);
 
-   FontManager::pushFontContext(LevelInfoContext);
+   FontManager::pushFontContext(MenuHeaderContext);
 
     // Only render these when they are not empty
    bool showCredits = gameType->getLevelCredits()->isNotNull();    
