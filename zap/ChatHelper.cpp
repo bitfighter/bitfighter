@@ -90,7 +90,7 @@ namespace Zap
    { "showids",    &ChatCommands::showIdsHandler,       {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show object ids" },
    { "showpaths",  &ChatCommands::showPathsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show robot navigation paths" },
    { "showbots",   &ChatCommands::showBotsHandler,      {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show all robots" },
-   { "pausebots",  &ChatCommands::pauseBotsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Pause all bots.  Reissue to start again." },
+   { "pausebots",  &ChatCommands::pauseBotsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Pause all bots; reissue to start again" },
    { "stepbots",   &ChatCommands::stepBotsHandler,      { xINT },    1, DEBUG_COMMANDS, 1,  1, {"[steps]"},   "Advance bots by number of steps (default = 1)"},
    { "linewidth",  &ChatCommands::lineWidthHandler,     { xINT },    1, DEBUG_COMMANDS, 1,  1, {"[number]"},  "Change width of all lines (default = 2)" },
    { "maxfps",     &ChatCommands::maxFpsHandler,        { xINT },    1, DEBUG_COMMANDS, 1,  1, {"<number>"},  "Set maximum speed of game in frames per second" },
