@@ -1034,6 +1034,8 @@ void ClientGame::onGameUIActivated()
 
    getGameObjDatabase()->removeEverythingFromDatabase();
    mClientInfo->setSpawnDelayed(false);
+
+   setPreviousLevelName("");
 }
 
 
