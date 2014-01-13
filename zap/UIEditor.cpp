@@ -1943,7 +1943,7 @@ void EditorUserInterface::renderReferenceShip()
       glRotatef(-90, 0, 0, 1);
 
       // Draw collision circle
-      const F32 spaceAngle = 0.0278 * FloatTau;
+      const F32 spaceAngle = 0.0278f * FloatTau;
       glColor4f(0, 1, 0, 0.35f);
       glLineWidth(gLineWidth1);
       drawDashedCircle(Point(), Ship::CollisionRadius, 10, spaceAngle, 0);

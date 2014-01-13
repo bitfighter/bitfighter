@@ -312,7 +312,7 @@ F32 drawCenteredString(F32 x, F32 y, F32 size, const char *string)
 S32 drawCenteredStringf(S32 y, S32 size, const char *format, ...)
 {
    makeBuffer; 
-   return drawCenteredString(y, size, buffer);
+   return (S32) drawCenteredString(y, size, buffer);
 }
 
 
