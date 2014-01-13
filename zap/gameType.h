@@ -81,7 +81,7 @@ private:
    bool mBotsAllowed;
 
    // Info about current level
-   StringTableEntry mLevelName;
+   string mLevelName;
    string mLevelDescription;
    StringTableEntry mLevelCredits;
 

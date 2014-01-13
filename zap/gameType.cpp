@@ -184,7 +184,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
 {
    if(key == "Level Name")
    {
-      MenuItem *item = new TextEntryMenuItem("Level Name:", mLevelName.getString(), "", "The level's name -- pick a good one!", MAX_GAME_NAME_LEN);   
+      MenuItem *item = new TextEntryMenuItem("Level Name:", mLevelName.c_str(), "", "The level's name -- pick a good one!", MAX_GAME_NAME_LEN);   
       item->setFilter(allAsciiFilter);
 
       return boost::shared_ptr<MenuItem>(item);
@@ -772,7 +772,7 @@ VersionedGameStats GameType::getGameStats()
    gameStats->playerCount = 0; //mClientList.size(); ... will count number of players.
    gameStats->duration = mTotalGamePlay / 1000;
    gameStats->isTeamGame = isTeamGame();
-   gameStats->levelName = mLevelName.getString();
+   gameStats->levelName = mLevelName.c_str();
    gameStats->gameType = getGameTypeName();
    gameStats->cs_protocol_version = CS_PROTOCOL_VERSION;
    gameStats->build_version = BUILD_VERSION;
@@ -2068,7 +2068,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringP
                                                 levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled, levelDatabaseId))
 {
 #ifndef ZAP_DEDICATED
-   mLevelName        = levelName;
+   setLevelName(levelName);
+
    mLevelDescription = levelDesc;
    mLevelCredits     = levelCreds;
 
@@ -4030,16 +4031,16 @@ Vector<string> GameType::getGameTypeNames()
 
 string GameType::getLevelName() const
 {
-   if(mLevelName.isNull())
+   if(mLevelName == "")
       return "Unnamed Level";
 
-   return string(mLevelName.getString());
+   return mLevelName;
 }
 
 
 void GameType::setLevelName(const StringTableEntry &levelName)
 {
-   mLevelName = levelName;
+   mLevelName = string(levelName.getString());
 }
 
 
