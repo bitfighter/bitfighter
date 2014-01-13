@@ -49,6 +49,7 @@ namespace Zap
    { "restart",     &ChatCommands::restartLevelHandler,    {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Restart current level" },
    { "random",      &ChatCommands::randomLevelHandler,     {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Start random level" },
    { "shownextlevel",&ChatCommands::showNextLevelHandler,  {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Show name of the next level" },
+   { "showprevlevel",&ChatCommands::showPrevLevelHandler,  {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Show name of the previous level" },
 
    { "settime",     &ChatCommands::setTimeHandler,         { xINT },                 1, LEVEL_COMMANDS,  0,  1,  {"<time in minutes>"},                      "Set play time for the level" },
    { "setscore",    &ChatCommands::setWinningScoreHandler, { xINT },                 1, LEVEL_COMMANDS,  0,  1,  {"<score>"},                                "Set score to win the level" },

@@ -5250,8 +5250,9 @@ void uploadToDbCallback(ClientGame *game, U32 unused)
    EditorUserInterface* editor = game->getUIManager()->getUI<EditorUserInterface>();
    editor->createNormalizedScreenshot(game);
 
-   if(game->getGameType()->getLevelName()->getString()[0] == '\0')
+   if(game->getGameType()->getLevelName() == "")    
    {
+      TNLAssert(false, "This should never happen!");
       editor->setSaveMessage("You must give your map a name before uploading it", false);
       return;
    }

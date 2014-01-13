@@ -77,6 +77,8 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIM
    initializeHelpItemForObjects();
 
    mShowAllObjectOutlines = false;        // Will only be changed in debug builds... in production code will never be true
+
+   mPreviousLevelName = "";
 }
 
 
@@ -622,6 +624,26 @@ string ClientGame::getCurrentLevelFileName() const
 }
 
 
+void ClientGame::setPreviousLevelName(const string &name)
+{
+   mPreviousLevelName = name;
+}
+
+
+// Display previous level in response to /showprevlevel command
+void ClientGame::showPreviousLevelName() const
+{
+   string message;
+
+   if(mPreviousLevelName == "")
+      message = "Who knows?  I wasn't here!";      // Sassy wisecracker!
+   else
+      message = "Previous level was \"" + mPreviousLevelName + "\"";
+
+   getUIManager()->displayMessage(Colors::infoColor, message.c_str());
+}
+
+
 // On the client, this is called when we are in the editor, or when we've just begun a new game and the server has sent
 // us the latest 411 on the level we're about to play
 void ClientGame::setLevelDatabaseId(U32 id)
@@ -1047,7 +1069,6 @@ void ClientGame::restoreOriginalRating()
    mPlayerLevelRating = mPlayerLevelRatingOrig;
    mTotalLevelRating = mTotalLevelRatingOrig;
 }
-
 
 
 S16 ClientGame::getTotalLevelRating() const

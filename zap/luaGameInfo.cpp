@@ -175,7 +175,7 @@ S32 LuaGameInfo::lua_getTeamCount(lua_State *L) { return returnInt (L, mServerGa
  *
  * @return A string representing the level's name.
  */
-S32 LuaGameInfo::lua_getLevelName(lua_State *L) { return returnString(L, mServerGame->getGameType()->getLevelName()->getString()); }
+S32 LuaGameInfo::lua_getLevelName(lua_State *L) { return returnString(L, mServerGame->getGameType()->getLevelName().c_str()); }
 
 
 /**

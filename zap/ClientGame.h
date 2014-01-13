@@ -58,6 +58,8 @@ private:
    S16 mTotalLevelRating;
    S16 mTotalLevelRatingOrig;
 
+   string mPreviousLevelName;    // For /prevlevel command
+
    bool needsRating() const;
 
    static PersonalRating getNextRating(PersonalRating currentRating);
@@ -120,6 +122,9 @@ public:
    void setLevelDatabaseId(U32 id);
 
    string getCurrentLevelFileName() const;
+   void setPreviousLevelName(const string &name);
+   void showPreviousLevelName() const;
+
 
    UIManager *getUIManager() const;
 

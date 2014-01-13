@@ -310,6 +310,8 @@ public:
 
    virtual const Color *getTeamColor(S32 teamId) const;
 
+   virtual void setPreviousLevelName(const string &name);
+
    void computeWorldObjectExtents();
    Rect computeBarrierExtents();
 

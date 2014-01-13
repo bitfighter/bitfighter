@@ -68,6 +68,7 @@ namespace Colors
    const Color idlePlayerNameColor(gray50);
    const Color standardPlayerNameColor(white);
    const Color streakPlayerNameColor(red80);
+   const Color infoColor(cyan);
 
    const Color overlayMenuSelectedItemColor   = Color(1.0f, 0.1f, 0.1f);
    const Color overlayMenuUnselectedItemColor = Color(0.1f, 1.0f, 0.1f);

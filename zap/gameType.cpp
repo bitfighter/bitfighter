@@ -97,7 +97,8 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mG
 // Destructor
 GameType::~GameType()
 {
-   // Do nothing
+   if(mGame)
+      mGame->setPreviousLevelName(getLevelName());
 }
 
 
@@ -1091,13 +1092,12 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver
                             NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
 #ifndef ZAP_DEDICATED
+
    mBetweenLevels = gameOver;
    mGameOver = gameOver;
 
    if(gameOver)
-   {
       static_cast<ClientGame *>(mGame)->setEnteringGameOverScoreboardPhase();
-   }
 
 #endif
 }
@@ -4028,9 +4028,12 @@ Vector<string> GameType::getGameTypeNames()
 }
 
 
-const StringTableEntry *GameType::getLevelName() const
+string GameType::getLevelName() const
 {
-   return &mLevelName;
+   if(mLevelName.isNull())
+      return "Unnamed Level";
+
+   return string(mLevelName.getString());
 }
 
 

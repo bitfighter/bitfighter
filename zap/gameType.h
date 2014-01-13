@@ -283,7 +283,7 @@ public:
    virtual string getSpecialsLine();
 
 
-   const StringTableEntry *getLevelName() const;
+   string getLevelName() const;
    void setLevelName(const StringTableEntry &levelName);
 
    const char *getLevelDescription() const;

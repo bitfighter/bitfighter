@@ -78,6 +78,7 @@ void restartLevelHandler       (ClientGame *game, const Vector<string> &args);
 void randomLevelHandler        (ClientGame *game, const Vector<string> &args);
 void showNextLevelHandler      (ClientGame *game, const Vector<string> &args);
 void shutdownServerHandler     (ClientGame *game, const Vector<string> &args);
+void showPrevLevelHandler      (ClientGame *game, const Vector<string> &args);
 void kickPlayerHandler         (ClientGame *game, const Vector<string> &args);
 void submitPassHandler         (ClientGame *game, const Vector<string> &args);
 void showCoordsHandler         (ClientGame *game, const Vector<string> &args);

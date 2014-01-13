@@ -885,7 +885,7 @@ string Game::toLevelCode() const
 
    str += string(gameType->toLevelCode() + "\n");
 
-   str += string("LevelName ")        + writeLevelString(gameType->getLevelName()->getString()) + "\n";
+   str += string("LevelName ")        + writeLevelString(gameType->getLevelName().c_str()) + "\n";
    str += string("LevelDescription ") + writeLevelString(gameType->getLevelDescription()) + "\n";
    str += string("LevelCredits ")     + writeLevelString(gameType->getLevelCredits()->getString()) + "\n";
 
@@ -1265,6 +1265,13 @@ const Color *Game::getTeamColor(S32 teamId) const
 {
    return mActiveTeamManager->getTeamColor(teamId);
 }
+
+
+void Game::setPreviousLevelName(const string &name)
+{
+   // Do nothing (but will be overidded in ClientGame)
+}
+
 
 
 void Game::onReadTeamParam(S32 argc, const char **argv)

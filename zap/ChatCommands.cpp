@@ -158,7 +158,7 @@ void getMapHandler(ClientGame *game, const Vector<string> &words)
          filename = words[1];
       else
          filename = "downloaded_" + makeFilenameFromString(game->getGameType() ?
-               game->getGameType()->getLevelName()->getString() : "Level");
+               game->getGameType()->getLevelName().c_str() : "Level");
 
       // Add an extension if needed
       if(filename.find(".") == string::npos)
@@ -202,6 +202,12 @@ void randomLevelHandler(ClientGame *game, const Vector<string> &words)
 void showNextLevelHandler(ClientGame *game, const Vector<string> &words)
 {
    game->getConnectionToServer()->c2sShowNextLevel();
+}
+
+
+void showPrevLevelHandler(ClientGame *game, const Vector<string> &words)
+{
+   game->showPreviousLevelName();
 }
 
 
