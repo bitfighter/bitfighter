@@ -64,7 +64,7 @@ string SavedMenuItem::getParamVal()
 // Constructor
 GameParamUserInterface::GameParamUserInterface(ClientGame *game) : Parent(game)
 {
-   mMenuTitle = "Game Parameters Menu";
+   mMenuTitle = "GAME PARAMETERS MENU";
    mMenuSubTitle = "";
    mMaxMenuSize = S32_MAX;                // We never want scrolling on this menu!
 

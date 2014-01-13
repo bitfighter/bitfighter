@@ -75,7 +75,7 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : Parent(game),
                                                                mMenuSubTitle(8),
                                                                mBottomInstructions(8)
 {
-   mMenuTitle = "Configure Teams";
+   mMenuTitle = "CONFIGURE TEAMS";
 
    InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
 
