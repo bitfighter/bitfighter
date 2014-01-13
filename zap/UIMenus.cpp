@@ -2629,7 +2629,7 @@ void TeamMenuUserInterface::render()
       name = "";
 
    // Finally, set menu title
-   mMenuTitle = (string("TEAM TO SWITCH ") + name + "TO:").c_str();       // No space before the TO!
+   mMenuTitle = "TEAM TO SWITCH " + name + "TO:";       // No space before the TO!
 
    Parent::render();
 }
