@@ -926,5 +926,22 @@ bool isPrintable(char c)
    return c >= 32 && c <= 126;
 }
 
+
+bool isHex(char c)
+{
+   return c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F';
+}
+
+
+// Return true if str contains only hex chars
+bool isHex(const string &str)
+{
+   for(S32 i = 0; i < str.length(); i++)
+      if(!isHex(str[i]))
+         return false;
+
+   return true;
+}
+
 };
 

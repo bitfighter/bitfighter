@@ -134,6 +134,9 @@ string toString(YesNo yesNo);
 string toString(RelAbs relAbs);  
 
 bool isPrintable(char c);
+bool isHex(char c);
+bool isHex(const string &str);
+
 
 
 };
