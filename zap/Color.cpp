@@ -66,8 +66,9 @@ void Color::interp(float t, const Color &c1, const Color &c2)
    b = c1.b * t  +  c2.b * oneMinusT;
 }
 
-//void set(float _r, float _g, float _b) { r = _r; g = _g; b = _b; }
-void Color::set(const Color &c) { r = c.r; g = c.g; b = c.b; }
+void Color::set(const Color &c) { r = c.r;  g = c.g;  b = c.b;  }
+void Color::set(const Color *c) { r = c->r; g = c->g; b = c->b; }
+
 void Color::set(const string &s)
 {
    Vector<string> list;

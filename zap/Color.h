@@ -49,6 +49,7 @@ public:
       void set(T in_r, U in_g, V in_b) { r = static_cast<F32>(in_r); g = static_cast<F32>(in_g); b = static_cast<F32>(in_b); }
 
    void set(const Color &c);
+   void set(const Color *c);
    void set(const string &s);
 
    string toRGBString() const;
