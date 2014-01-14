@@ -403,6 +403,7 @@ public:
    virtual S32 render(F32 x, F32 y, Alignment alignment, S32 blockWidth = -1) const;
    void render(const Point &center, Alignment alignment) const;
    void render(const Point &pos) const;
+   void render(S32 x, S32 y) const;
 
    bool getHasGap() const;
 

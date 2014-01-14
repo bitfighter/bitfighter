@@ -285,6 +285,12 @@ void SymbolString::render(const Point &pos) const
 }
 
 
+void SymbolString::render(S32 x, S32 y) const
+{
+   render(x, y, AlignmentCenter);
+}
+
+
 void SymbolString::render(const Point &center, Alignment alignment) const
 {
    render((S32)center.x, (S32)center.y, alignment);
