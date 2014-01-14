@@ -103,7 +103,6 @@ namespace Colors
    const Color HostileTeamColor(Colors::gray50);         // Objects that are "hostile-to-all" (on team -2)
    const Color MasterServerBlue(0.8, 0.8, 1);            // Messages about successful master server statii
    const Color HelpItemRenderColor(Colors::green);       // Render color for inline-help messages
-
 };
 
 }
