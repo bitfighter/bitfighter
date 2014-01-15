@@ -61,7 +61,7 @@ void SimpleLine::newObjectFromDock(F32 gridSize)
 
 // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
 // In this case, we'll drag these items by their slender midriff.
-Point SimpleLine::getInitialPlacementOffset(F32 gridSize) 
+Point SimpleLine::getInitialPlacementOffset(U32 gridSize)  const
 { 
    return Point(INITIAL_ITEM_LENGTH * gridSize / 2, 0); 
 }

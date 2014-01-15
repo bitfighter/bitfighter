@@ -113,7 +113,7 @@ void PolygonObject::newObjectFromDock(F32 gridSize)
 
 
 // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-Point PolygonObject::getInitialPlacementOffset(F32 gridSize)
+Point PolygonObject::getInitialPlacementOffset(U32 gridSize) const
 { 
    return Point(INITIAL_HEIGHT * gridSize / 2, INITIAL_WIDTH * gridSize / 2); 
 }

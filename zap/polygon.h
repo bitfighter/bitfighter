@@ -26,7 +26,7 @@ private:
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.
    // This makes placement seem more natural.
-   Point getInitialPlacementOffset(F32 gridSize);
+   Point getInitialPlacementOffset(U32 gridSize) const;
 
 protected:
     void renderPolyHighlight();

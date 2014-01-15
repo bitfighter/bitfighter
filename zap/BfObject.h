@@ -396,7 +396,7 @@ public:
    virtual Point getEditorSelectionOffset(F32 currentScale);  
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   virtual Point getInitialPlacementOffset(F32 gridSize);
+   virtual Point getInitialPlacementOffset(U32 gridSize) const;
 
 #ifndef ZAP_DEDICATED
    void renderAndLabelHighlightedVertices(F32 currentScale);      // Render selected and highlighted vertices, called from renderEditor
