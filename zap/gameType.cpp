@@ -15,6 +15,7 @@
 #include "loadoutZone.h"      // For LoadoutZone
 #include "LineEditorFilterEnum.h"
 #include "game.h"
+#include "GameRecorder.h"
 
 #ifndef ZAP_DEDICATED
 #  include "gameObjectRender.h"
@@ -1633,7 +1634,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
       }
    }
 
-   TNLAssert(minTeamIndex != NONE, "Preposterous!!")
+   TNLAssert(minTeamIndex != NONE, "Preposterous!!");
 
 
    // Robots may have already been assigned a team number; if so, use it in place of team determined above

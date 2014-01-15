@@ -32,10 +32,8 @@ static void gameRecorderScoping(GameRecorderServer *conn, Game *game)
 }
 
 
-static FILE *openRecordingFile(ServerGame *game)
+static string newRecordingFileName(const string &dir, const string &levelName, const string &hostName)
 {
-   const string &dir = game->getSettings()->getFolderManager()->recordDir;
-
    makeSureFolderExists(dir);
 
    Vector<string> files;
@@ -49,14 +47,14 @@ static FILE *openRecordingFile(ServerGame *game)
          max_id = id;
    }
 
-   string file = joindir(dir, itos(max_id + 1));
+   string file = itos(max_id + 1);
 
-   string file2 = makeFilenameFromString(game->getGameType()->getLevelName().c_str());
+   string file2 = makeFilenameFromString(levelName.c_str());
    if(file2.size() == 0)
-      file2 = makeFilenameFromString(game->getSettings()->getHostName().c_str());
+      file2 = makeFilenameFromString(hostName.c_str());
    if(file2.size() != 0)
       file = file + "_" + file2;
-   return fopen(file.c_str(), "wb");
+   return file;
 }
 
 GameRecorderServer::GameRecorderServer(ServerGame *game)
@@ -68,7 +66,12 @@ GameRecorderServer::GameRecorderServer(ServerGame *game)
    mPackUnpackShipEnergyMeter = true;
 
    if(!mFile)
-      mFile = openRecordingFile(game);
+	{
+		const string &dir = game->getSettings()->getFolderManager()->recordDir;
+      mFileName = newRecordingFileName(dir, game->getGameType()->getLevelName(), game->getSettings()->getHostName());
+		string filename = joindir(dir, mFileName);
+		mFile = fopen(filename.c_str(), "wb");
+	}
 
    if(mFile)
    {

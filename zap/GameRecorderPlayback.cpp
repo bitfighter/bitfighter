@@ -19,6 +19,23 @@ namespace Zap
 
 
 
+static S32 QSORT_CALLBACK alphaNumberSort(string *a, string *b)
+{
+   int aNum = atoi(a->c_str());
+   int bNum = atoi(b->c_str());
+   if(aNum != bNum)
+   {
+      if(aNum == 0)
+         return -1;
+      if(bNum == 0)
+         return 1;
+      return bNum - aNum;
+   }
+   return stricmp(a->c_str(), b->c_str());        // Is there something analagous to stricmp for strings (as opposed to c_strs)?
+}
+
+
+
 static void idleObjects(ClientGame *game, U32 timeDelta)
 {
    const Vector<DatabaseObject *> *gameObjects = game->getGameObjDatabase()->findObjects_fast();
@@ -260,14 +277,17 @@ void PlaybackSelectUserInterface::onActivate()
    clearMenuItems();
    mLevels.clear();
    getFilesFromFolder(dir, mLevels);
+
+   if(mLevels.size() == 0)
+      mMenuTitle = "No recorded games exists";  // TODO: Need better way to display this problem
+   else
+      mLevels.sort(alphaNumberSort);
+
    for(S32 i = 0; i < mLevels.size(); i++)
    {
       addMenuItem(new MenuItem(i, mLevels[i].c_str(), processPlaybackSelectionCallback, ""));
    }
 
-
-   if(mLevels.size() == 0)
-      mMenuTitle = "No recorded games exists";  // TODO: Need better way to display this problem
 
    MenuUserInterface::onActivate();
 
@@ -302,6 +322,11 @@ void PlaybackSelectUserInterface::processSelection(U32 index)
 
 // --------
 
+static void processPlaybackDownloadCallback(ClientGame *game, U32 index)             
+{
+   game->getUIManager()->getUI<PlaybackServerDownloadUserInterface>()->processSelection(index);
+}
+
 PlaybackServerDownloadUserInterface::PlaybackServerDownloadUserInterface(ClientGame *game) : LevelMenuSelectUserInterface(game)
 {
 }
@@ -318,12 +343,19 @@ void PlaybackServerDownloadUserInterface::onActivate()
 
 void PlaybackServerDownloadUserInterface::processSelection(U32 index)
 {
-   getGame()->getConnectionToServer()->c2sRequestRecordedGameplay(StringPtr(mLevels[index].c_str()));
-}
+   if(U32(index) >= U32(mLevels.size()))
+      return;
 
-static void processPlaybackDownloadCallback(ClientGame *game, U32 index)             
-{
-   game->getUIManager()->getUI<PlaybackServerDownloadUserInterface>()->processSelection(index);
+   getGame()->getConnectionToServer()->c2sRequestRecordedGameplay(StringPtr(mLevels[index].c_str()));
+   MenuItem *item = getMenuItem(index);
+   if(item)
+   {
+      string downloadedstring = mLevels[index] + " (downloaded)";
+
+      // Call destructor and contructor without changing memory pointers... Got a better way to change multiple arguments?
+      item->~MenuItem();
+      new(item) MenuItem(index | 0x40000000, downloadedstring.c_str(), NULL, "");
+   }
 }
 
 void PlaybackServerDownloadUserInterface::receivedLevelList(const Vector<string> &levels)

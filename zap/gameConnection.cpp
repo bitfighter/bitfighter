@@ -15,6 +15,7 @@
 #include "LevelSource.h"
 
 #include "SoundSystemEnums.h"
+#include "GameRecorder.h"
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
@@ -1534,6 +1535,17 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rTransferFileSize, (U32 size), (size),
    mReceiveTotalSize = size;
 }
 
+static S32 QSORT_CALLBACK numberAlphaSort(string *a, string *b)
+{
+   int aNum = atoi(a->c_str());
+   int bNum = atoi(b->c_str());
+   if(aNum != bNum)
+      return bNum - aNum;
+
+   return stricmp(a->c_str(), b->c_str());        // Is there something analagous to stricmp for strings (as opposed to c_strs)?
+}
+
+
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestRecordedGameplay, (StringPtr file), (file), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2)
 {
@@ -1547,6 +1559,18 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestRecordedGameplay, (StringPtr file), 
       Vector<string> levels;
       const string &dir = mServerGame->getSettings()->getFolderManager()->recordDir;
       getFilesFromFolder(dir, levels);
+		GameRecorderServer *g = mServerGame->getGameRecorder();
+		if(g)
+		{
+			for(S32 i = 0; i < levels.size(); i++)
+				if(levels[i] == g->mFileName)
+				{
+					levels.erase(i);
+					break;
+				}
+		}
+		if(levels.size())
+			levels.sort(numberAlphaSort);
       s2cListRecordedGameplays(levels);
    }
 }

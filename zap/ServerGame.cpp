@@ -1832,7 +1832,7 @@ void ServerGame::onObjectRemoved(BfObject *obj)
    if(mGameRecorderServer && obj->isGhostable())
       mGameRecorderServer->objectLocalClearAlways(obj);   
 }
-GameConnection *ServerGame::getGameRecorder()
+GameRecorderServer *ServerGame::getGameRecorder()
 {
    return mGameRecorderServer;
 }

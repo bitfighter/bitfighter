@@ -2061,7 +2061,7 @@ void GameMenuUserInterface::buildMenu()
       if(!gc->getClientInfo()->isOwner())
          addMenuItem(new MenuItem("ENTER PASSWORD", levelChangeOrAdminPWCallback, "", KEY_A, KEY_E));
 
-      if(gc->mSendableFlags & GameConnection::ServerFlagHasRecordedGameplayDownloads)// && !gc->isLocalConnection())
+      if(gc->mSendableFlags & GameConnection::ServerFlagHasRecordedGameplayDownloads && !gc->isLocalConnection())
          addMenuItem(new MenuItem("DOWNLOAD RECORDED GAME", activateMenuCallback<PlaybackServerDownloadUserInterface>, "", KEY_A, KEY_E));
    }
 

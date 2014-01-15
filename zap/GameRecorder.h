@@ -19,6 +19,8 @@ class GameRecorderServer : public GameConnection
    TNL::NetObject mNetObj;
    U32 mMilliSeconds;
 public:
+   string mFileName;
+
    GameRecorderServer(ServerGame *game);
    ~GameRecorderServer();
 
