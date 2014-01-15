@@ -230,7 +230,7 @@ bool isInteger(const char *str)
 
 
 // Sanitize strings before inclusion into JSON
-const char *sanitizeForJson(const char *value)
+string sanitizeForJson(const char *value)
 {
    unsigned maxsize = strlen(value) * 2 + 3; // allescaped+quotes+NULL
    std::string result;
@@ -936,7 +936,7 @@ bool isHex(char c)
 // Return true if str contains only hex chars
 bool isHex(const string &str)
 {
-   for(S32 i = 0; i < str.length(); i++)
+   for(string::size_type i = 0; i < str.length(); i++)
       if(!isHex(str[i]))
          return false;
 
