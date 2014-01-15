@@ -116,10 +116,10 @@ public:
    S32 GetNumEntries(const string &section) const;
 
    // Returns value name by index for a given keyname or sectionId.
-   string ValueName( S32 const sectionID, S32 const keyID) const;
-   string GetValueName( S32 const sectionID, S32 const keyID) const;
-   string ValueName( const string section, S32 const keyID) const;
-   string GetValueName( const string section, S32 const keyID) const;
+   string ValueName(S32 const sectionID, S32 const keyID) const;
+   string GetValueName(S32 const sectionID, S32 const keyID) const;
+   string ValueName(const string &section, S32 const keyID) const;
+   string GetValueName(const string &section, S32 const keyID) const;
 
    // Gets value of [keyname] valuename =.
    // Overloaded to return string, int, and double.
@@ -163,7 +163,7 @@ public:
    bool setValueYN(const string section, const string key, bool const value, bool const create = true);
    bool SetValueF(const string &section, const string &key, F32 const value, bool const create = true);
    //bool SetValueV(const string &section, const string &key, char *format, ...);
-   bool SetValue(S32 const sectionId, S32 const valueID, const string value);
+   bool SetValue(S32 const sectionId, S32 const valueID, const string &value);
 
    // Deletes specified value.
    // Returns true if value existed and deleted, false otherwise.
@@ -179,11 +179,11 @@ public:
    // Get number of header comments.
    std::size_t NumHeaderComments();
    // Add a header comment.
-   void     headerComment( const string comment);
+   void     headerComment(const string &comment);
    // Return a header comment.
-   string   headerComment( S32 const commentID) const;
+   string   headerComment(S32 const commentID) const;
    // Delete a header comment.
-   bool     deleteHeaderComment( S32 commentID);
+   bool     deleteHeaderComment(S32 commentID);
    // Delete all header comments.
    void     deleteHeaderComments();
 
@@ -193,21 +193,21 @@ public:
    // these comments will be moved to the top of the key definition when
    // the CIniFile::WriteFile() is called.
    //
-   // Number of key comments.
+   // Number of key comments
    S32 numSectionComments(S32 const sectionId) const;
    S32 numSectionComments(const string keyname) const;
-   // Add a key comment.
+   // Add a key comment
    bool     sectionComment(S32 sectionId, const string &comment);
-   bool     sectionComment(const string keyname, const string comment, bool const create = true);
-   // Return a key comment.
-   string   sectionComment( S32 const sectionId, S32 const commentID) const;
-   string   sectionComment( const string keyname, S32 const commentID) const;
-   // Delete a key comment.
-   bool     deleteSectionComment( S32 const sectionId, S32 const commentID);
-   bool     deleteSectionComment( const string keyname, S32 const commentID);
-   // Delete all comments for a key.
-   bool     deleteSectionComments( S32 const sectionId);
-   bool     deleteSectionComments( const string keyname);
+   bool     sectionComment(const string &keyname, const string &comment, bool const create = true);
+   // Return a key comment
+   string   sectionComment(S32 const sectionId, S32 const commentID) const;
+   string   sectionComment(const string &keyname, S32 const commentID) const;
+   // Delete a key comment
+   bool     deleteSectionComment(S32 const sectionId, S32 const commentID);
+   bool     deleteSectionComment(const string keyname, S32 const commentID);
+   // Delete all comments for a key
+   bool     deleteSectionComments(S32 const sectionId);
+   bool     deleteSectionComments(const string &keyname);
 
    bool     deleteAllSectionComments();
 };
