@@ -14,6 +14,7 @@
 #ifndef ZAP_DEDICATED
 #  include "sparkManager.h"
 #  include "ShipShape.h"
+#  include "SoundEffect.h"         // For SFXHandle def
 #endif
 
 #include "tnlVector.h"
@@ -251,6 +252,12 @@ public:
    void processModules();
    void rechargeEnergy();
    void resetFastRecharge();
+
+#ifndef ZAP_DEDICATED
+private:
+   SFXHandle mModuleSound[ModuleCount];
+#endif
+public:
 
    void updateModuleSounds();
    void emitMovementSparks();

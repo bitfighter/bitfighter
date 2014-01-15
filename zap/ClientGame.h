@@ -50,9 +50,6 @@ private:
    string mEnteredServerPermsPassword;
    string mEnteredServerAccessPassword;
 
-
-   SFXHandle mModuleSound[ModuleCount];
-
    PersonalRating mPlayerLevelRating;
    PersonalRating mPlayerLevelRatingOrig;
    S16 mTotalLevelRating;
@@ -219,8 +216,6 @@ public:
    void playNextTrack() const;
    void playPrevTrack() const;
    void queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const;
-
-   void updateModuleSounds(const Point &pos, const Point &vel, const LoadoutTracker &loadout);
 
    // Passthroughs to mUi
    void quitEngineerHelper();

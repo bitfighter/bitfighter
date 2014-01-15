@@ -14,6 +14,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
+#  include "UIManager.h"
 #endif
 
 #include "gameObjectRender.h"
@@ -1239,8 +1240,38 @@ void Ship::onAddedToGame(Game *game)
 void Ship::updateModuleSounds()
 {
 #ifndef ZAP_DEDICATED
+   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Need ClientGame for updateModuleSounds");
    ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-   clientGame->updateModuleSounds(getRenderPos(), getRenderVel(), mLoadout);
+
+   const S32 moduleSFXs[ModuleCount] =
+   {
+      SFXShieldActive,
+      SFXShipBoost,
+      SFXNone,       // No more sensor
+      SFXRepairActive,
+      SFXUIBoop,     // Need better sound...
+      SFXCloakActive,
+      SFXNone,       // Armor... tough, but he don't say much
+   };
+   
+   for(U32 i = 0; i < ModuleCount; i++)
+   {
+      if(mLoadout.isModulePrimaryActive(ShipModule(i)) && moduleSFXs[i] != SFXNone)
+      {
+         if(mModuleSound[i].isValid())
+            clientGame->getUIManager()->setMovementParams(mModuleSound[i], getRenderPos(), getRenderVel());
+         else
+            mModuleSound[i] = clientGame->playSoundEffect(moduleSFXs[i], getRenderPos(), getRenderVel());
+      }
+      else
+      {
+         if(mModuleSound[i].isValid())
+         {
+            clientGame->getUIManager()->stopSoundEffect(mModuleSound[i]);
+            mModuleSound[i] = NULL;
+         }
+      }
+   }
 #endif
 }
 

@@ -389,41 +389,6 @@ void ClientGame::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferP
 }
 
 
-// TODO: This should be moved to ship or UIManager or something... doesn't really belong here
-void ClientGame::updateModuleSounds(const Point &pos, const Point &vel, const LoadoutTracker &loadout)
-{
-   const S32 moduleSFXs[ModuleCount] =
-   {
-      SFXShieldActive,
-      SFXShipBoost,
-      SFXNone,       // No more sensor
-      SFXRepairActive,
-      SFXUIBoop,     // Need better sound...
-      SFXCloakActive,
-      SFXNone,       // Armor... tough, but he don't say much
-   };
-   
-   for(U32 i = 0; i < ModuleCount; i++)
-   {
-      if(loadout.isModulePrimaryActive(ShipModule(i)) && moduleSFXs[i] != SFXNone)
-      {
-         if(mModuleSound[i].isValid())
-            getUIManager()->setMovementParams(mModuleSound[i], pos, vel);
-         else
-            mModuleSound[i] = playSoundEffect(moduleSFXs[i], pos, vel);
-      }
-      else
-      {
-         if(mModuleSound[i].isValid())
-         {
-            getUIManager()->stopSoundEffect(mModuleSound[i]);
-            mModuleSound[i] = NULL;
-         }
-      }
-   }
-}
-
-
 // User selected Switch Teams menu item
 void ClientGame::switchTeams()
 {
