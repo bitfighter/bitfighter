@@ -25,8 +25,11 @@ static const S32 MAX_NAME_LEN = 256;
 
 class AbstractTeam : public RefPtrData
 {
-protected:
+private:
    Color mColor;
+
+protected:
+   
    S32 mTeamIndex;           // Team index of this team according to the level file and game
 
 public:
@@ -35,8 +38,8 @@ public:
 
    static const S32 MAX_TEAM_NAME_LENGTH = 32;
 
-   void setColor(F32 r, F32 g, F32 b);
-   void setColor(const Color &color);
+   virtual void setColor(F32 r, F32 g, F32 b);
+   virtual void setColor(const Color &color);
 
    const Color *getColor() const;
 

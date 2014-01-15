@@ -30,12 +30,14 @@ AbstractTeam::~AbstractTeam()
 }
 
 
+// Overridden in EditorTeam
 void AbstractTeam::setColor(F32 r, F32 g, F32 b)
 {
    mColor.set(r,g,b);
 }
 
 
+// Overridden in EditorTeam
 void AbstractTeam::setColor(const Color &color)
 {
    mColor.set(color);
@@ -61,7 +63,11 @@ bool AbstractTeam::processArguments(S32 argc, const char **argv)
       return false;
 
    setName(argv[1]);
-   mColor.read(argv + 2);
+   
+   Color color;
+   color.read(argv + 2);
+
+   setColor(color);
 
    return true;
 }
@@ -75,34 +81,46 @@ string AbstractTeam::toLevelCode() const
 
 void AbstractTeam::alterRed(F32 amt) 
 {
-   mColor.r += amt;
+   Color color(getColor());
 
-   if(mColor.r < 0)
-      mColor.r = 0;
-   else if(mColor.r > 1)
-      mColor.r = 1;
+   color.r += amt;
+
+   if(color.r < 0)
+      color.r = 0;
+   else if(color.r > 1)
+      color.r = 1;
+
+   setColor(color);     // Do not set mColor directly, or overrides won't fire
 }
 
 
 void AbstractTeam::alterGreen(F32 amt) 
 {
-   mColor.g += amt;
+   Color color(getColor());
 
-   if(mColor.g < 0)
-      mColor.g = 0;
-   else if(mColor.g > 1)
-      mColor.g = 1;
+   color.g += amt;
+
+   if(color.g < 0)
+      color.g = 0;
+   else if(color.g > 1)
+      color.g = 1;
+
+   setColor(color);     // Do not set mColor directly, or overrides won't fire
 }
 
 
 void AbstractTeam::alterBlue(F32 amt) 
 {
-   mColor.b += amt;
+   Color color(getColor());
 
-   if(mColor.b < 0)
-      mColor.b = 0;
-   else if(mColor.b > 1)
-      mColor.b = 1;
+   color.b += amt;
+
+   if(color.b < 0)
+      color.b = 0;
+   else if(color.b > 1)
+      color.b = 1;
+
+   setColor(color);     // Do not set mColor directly, or overrides won't fire
 }
 
 

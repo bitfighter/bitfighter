@@ -36,6 +36,7 @@ public:
    explicit Color(double grayScale);
 
    explicit Color(U32 rgbInt);
+   Color(const string &hex);
 
    // Do not add a virtual destructor as it adds a pointer before the r, g, b members.  This
    // will mess up the pointer tricks with feeding the Color to OpenGL

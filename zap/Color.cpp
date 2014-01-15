@@ -50,6 +50,23 @@ Color::Color(U32 rgbInt)
 };
 
 
+Color::Color(const string &hex)
+{
+   if(hex.length() != 6)
+   {
+      r = 0;
+      g = 0;
+      b = 0;
+
+      return;
+   }
+
+   r = strtol(hex.substr(0,2).c_str(), NULL, 16) / 255.0f;
+   g = strtol(hex.substr(2,2).c_str(), NULL, 16) / 255.0f;
+   b = strtol(hex.substr(4,2).c_str(), NULL, 16) / 255.0f;
+}
+
+
 void Color::read(const char **argv) 
 { 
    r = (F32) atof(argv[0]); 

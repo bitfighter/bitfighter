@@ -21,21 +21,32 @@ namespace Zap
 // Class for managing teams in the editor
 class EditorTeam : public AbstractTeam
 {
+   typedef AbstractTeam Parent;
+
 private:
    LineEditor mNameEditor;
+   LineEditor mHexColorEditor;
+
+   void initialize();
 
 public:
-   EditorTeam();                          // Constructor
+   EditorTeam();                                   // Constructor
    explicit EditorTeam(const TeamPreset &preset);  // Constructor II
-   virtual ~EditorTeam();                 // Destructor
+   virtual ~EditorTeam();                          // Destructor
 
-   LineEditor *getLineEditor();
+   LineEditor *getTeamNameEditor();
+   LineEditor *getHexColorEditor();
+
    void setName(const char *name);
    StringTableEntry getName() const;  // Wrap in STE to make signatures match
 
    S32 getPlayerBotCount() const;
    S32 getPlayerCount() const;    
    S32 getBotCount() const;
+
+   void setColor(F32 r, F32 g, F32 b);
+   void setColor(const Color &color);
+
 };
 
 }

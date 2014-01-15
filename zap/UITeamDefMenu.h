@@ -23,16 +23,39 @@ class TeamDefUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 private:
+
+   enum ColorEntryMode {
+      ColorEntryMode100,
+      ColorEntryMode255,
+      ColorEntryModeHex,
+      ColorEntryModeCount
+   };
+
    Timer errorMsgTimer;
    string errorMsg;
 
    UI::SymbolStringSet mMenuSubTitle;
-   UI::SymbolStringSet mBottomInstructions;
+
+   UI::SymbolString    mTopInstructions;
+
+   UI::SymbolString    mBottomInstructions1;
+   UI::SymbolString    mBottomInstructions2;
+   UI::SymbolString    mBottomInstructions3a;
+   UI::SymbolString    mBottomInstructions3b;
+   UI::SymbolString    mBottomInstructions4;
    
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
 
-   bool mEditing;              // true if editing selectedIndex, false if not
+   bool mEditingTeam;         
+   bool mEditingColor;
+   ColorEntryMode mColorEntryMode;
+
+   F32 getColorBase() const;
+   F32 getAmount() const;
+
+   const char *getEntryMessage() const;
+
 
 public:
    explicit TeamDefUserInterface(ClientGame *game);     // Constructor

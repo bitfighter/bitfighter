@@ -13,16 +13,24 @@ namespace Zap
 // Constructor
 EditorTeam::EditorTeam()
 {
-   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
+   initialize();
 }
 
 
 // Constructor II
 EditorTeam::EditorTeam(const TeamPreset &preset)
 {
-   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
+   initialize();
+
+   setColor(preset.r, preset.g, preset.b);
    mNameEditor.setString(preset.name);
-   mColor = Color(preset.r, preset.g, preset.b);
+}
+
+
+void EditorTeam::initialize()
+{
+   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
+   mHexColorEditor.mMaxLen = 6;     // rrggbb
 }
 
 
@@ -33,10 +41,31 @@ EditorTeam::~EditorTeam()
 }
 
 
-LineEditor *EditorTeam::getLineEditor()
+LineEditor *EditorTeam::getTeamNameEditor()
 {
    return &mNameEditor;
 }
+
+
+LineEditor *EditorTeam::getHexColorEditor()
+{
+   return &mHexColorEditor;
+}
+
+
+void EditorTeam::setColor(F32 r, F32 g, F32 b)
+{
+   Parent::setColor(r, g, b);
+   mHexColorEditor.setString(getColor()->toHexString());
+}
+
+
+void EditorTeam::setColor(const Color &color)
+{
+   Parent::setColor(color);
+   mHexColorEditor.setString(getColor()->toHexString());
+}
+
 
 
 void EditorTeam::setName(const char *name)

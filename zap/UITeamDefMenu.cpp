@@ -17,6 +17,7 @@
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
+#include "stringUtils.h"
 
 #include "UIColorPicker.h"
 
@@ -61,37 +62,47 @@ TeamPreset gTeamPresets[] = {
 //Team Peach 1 0.7 0
 
 
-void addLineToSymbolStringSet(const string &text, const InputCodeManager *inputCodeManager, S32 size, const Color &color, UI::SymbolStringSet &symbolStringSet)
+namespace UI
 {
-   Vector<UI::SymbolShapePtr> symbols;
 
-   UI::SymbolString::symbolParse(inputCodeManager, text, symbols, MenuContext, size, &color);
-   symbolStringSet.add(UI::SymbolString(symbols, UI::AlignmentCenter));
+static SymbolString getSymbolString(const string &text, const InputCodeManager *inputCodeManager, S32 size, const Color &color)
+{
+   Vector<SymbolShapePtr> symbols;
+
+   SymbolString::symbolParse(inputCodeManager, text, symbols, MenuContext, size, &color);
+   return SymbolString(symbols, AlignmentCenter);
+
+   //symbolStringSet.add(SymbolString(symbols, AlignmentCenter));
 }
 
+}
 
 // Constructor
-TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : Parent(game),
-                                                               mMenuSubTitle(8),
-                                                               mBottomInstructions(8)
+TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : 
+   Parent(game),
+   mMenuSubTitle(8),
+   mMenuTitle("CONFIGURE TEAMS")
 {
-   mMenuTitle = "CONFIGURE TEAMS";
+   
 
    InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
 
-   // Subtitle at the top of the screen
-   addLineToSymbolStringSet("For quick configuration, press [[Alt+1]] - [[Alt+9]] to specify number of teams",
-                            inputCodeManager, 18, Colors::menuHelpColor, mMenuSubTitle);
+   mTopInstructions =  getSymbolString("For quick configuration, press [[Alt+1]] - [[Alt+9]] to specify number of teams",
+                                             inputCodeManager, 18, Colors::menuHelpColor);
 
    // Text at the bottom of the screen
-   addLineToSymbolStringSet("[[1]] - [[9]] selects a team preset for current slot",
-                            inputCodeManager, 16, Colors::menuHelpColor, mBottomInstructions);
-   addLineToSymbolStringSet("[[Enter]] edits team name | [[C]] shows Color Picker",
-                            inputCodeManager, 16, Colors::menuHelpColor, mBottomInstructions);
-   addLineToSymbolStringSet("[[R]] [[G]] [[B]] to change preset color (with or without [[Shift]])",
-                            inputCodeManager, 16, Colors::menuHelpColor, mBottomInstructions);
-   addLineToSymbolStringSet("[[Insert]] or [[+]] to insert team | [[Del]] or [[-]] to remove selected team",
-                            inputCodeManager, 16, Colors::menuHelpColor, mBottomInstructions);
+   mBottomInstructions1 =  getSymbolString("[[1]] - [[9]] selects a team preset for current slot",
+                                           inputCodeManager, 16, Colors::menuHelpColor);
+   mBottomInstructions2 =  getSymbolString("[[Enter]] edits team name | [[C]] shows Color Picker | [[M]] changes color entry mode",
+                                          inputCodeManager, 16, Colors::menuHelpColor);
+   mBottomInstructions3a = getSymbolString("[[R]] [[G]] [[B]] to change preset color (with or without [[Shift]])",
+                                          inputCodeManager, 16, Colors::menuHelpColor);
+   mBottomInstructions3b = getSymbolString("[[H]] to edit color hex value",
+                                          inputCodeManager, 16, Colors::menuHelpColor);
+   mBottomInstructions4 =  getSymbolString("[[Insert]] or [[+]] to insert team | [[Del]] or [[-]] to remove selected team",
+                                          inputCodeManager, 16, Colors::menuHelpColor);
+
+   mColorEntryMode = ColorEntryMode100;      // TODO: Get this from INI to make this setting persistent
 }
 
 
@@ -102,7 +113,7 @@ TeamDefUserInterface::~TeamDefUserInterface()
 }
 
 
-static const U32 errorMsgDisplayTime = 4000; // 4 seconds
+static const U32 errorMsgDisplayTime = FOUR_SECONDS;
 static const S32 fontsize = 19;
 static const S32 fontgap = 12;
 static const U32 yStart = UserInterface::vertMargin + 90;
@@ -110,8 +121,8 @@ static const U32 itemHeight = fontsize + 5;
 
 void TeamDefUserInterface::onActivate()
 {
-   selectedIndex = 0;                                 // First item selected when we begin
-   mEditing = false;                                  // Not editing anything by default
+   selectedIndex = 0;                        // First item selected when we begin
+   mEditingTeam = mEditingColor = false;     // Not editing anything by default
 
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
    S32 teamCount = ui->getTeamCount();
@@ -152,11 +163,32 @@ void TeamDefUserInterface::render()
    glColor(Colors::green);
    drawCenteredUnderlinedString(vertMargin, 30, mMenuTitle);
    
-   mMenuSubTitle.render(canvasWidth / 2, vertMargin + 65, UI::AlignmentCenter);
+   //mMenuSubTitle.render(canvasWidth / 2, vertMargin + 65, UI::AlignmentCenter); 
    drawCenteredString(canvasHeight - vertMargin - 20, 18, "Arrow Keys to choose | ESC to exit");
 
    glColor(Colors::white);
-   mBottomInstructions.render(canvasWidth / 2, canvasHeight - vertMargin - 115, UI::AlignmentCenter);
+
+   S32 x = canvasWidth / 2;
+
+   mTopInstructions.render(x, 83);
+
+   S32 y = canvasHeight - vertMargin - 116;
+   S32 gap = 28;
+
+   mBottomInstructions1.render(x, y);
+   y += gap;
+
+   mBottomInstructions2.render(x, y);
+   y += gap;
+
+   if(mColorEntryMode != ColorEntryModeHex)
+      mBottomInstructions3a.render(x, y);
+   else
+      mBottomInstructions3b.render(x, y);
+   y += gap;
+
+   mBottomInstructions4.render(x, y);
+
    FontManager::popFontContext();
 
 
@@ -185,27 +217,58 @@ void TeamDefUserInterface::render()
 
       if(j < ui->getTeamCount())
       {
-         char numstr[10];
-         dSprintf(numstr, sizeof(numstr), "Team %d: ", j+1);
-
-         char namestr[MAX_NAME_LEN + 20];    // Added a little extra, just to cover any contingency...
-         dSprintf(namestr, sizeof(namestr), "%s%s", numstr, ui->getTeam(j)->getName().getString());
-
-         char colorstr[16];                  // Need enough room for "(100, 100, 100)" + 1 for null
-         const Color *color = ui->getGame()->getTeamColor(j);
-         dSprintf(colorstr, sizeof(colorstr), "(%d, %d, %d)", S32(color->r * 100 + 0.5), S32(color->g * 100 + 0.5), S32(color->b * 100 + 0.5));
+         string numstr = "Team " + itos(j + 1) + ": ";
+         string namestr = numstr + ui->getTeam(j)->getName().getString();
          
-         static const char *nameColorStr = "%s  %s";
+         string colorstr;
+
+         const Color *color = ui->getGame()->getTeamColor(j);
+
+         if(mColorEntryMode == ColorEntryModeHex)
+            colorstr = "#" + ui->getTeam(j)->getHexColorEditor()->getString();
+         else
+         {
+            F32 multiplier;
+
+            if(mColorEntryMode == ColorEntryMode100)
+               multiplier = 100;
+            else if(mColorEntryMode == ColorEntryMode255)
+               multiplier = 255;
+            else
+               TNLAssert(false, "Unknown entry mode!");
+
+            colorstr = "(" + itos(S32(color->r * multiplier + 0.5)) + ", " + 
+                             itos(S32(color->g * multiplier + 0.5)) + ", " +
+                             itos(S32(color->b * multiplier + 0.5)) + ")";
+         }
+         
+         static const string spacer1 = "  ";
+         string nameColorStr = namestr + spacer1 + colorstr + " " + getEntryMessage();
 
          // Draw item text
          glColor(color);
-         drawCenteredStringf(y, fontsize, nameColorStr, namestr, colorstr);
+         drawCenteredString(y, fontsize, nameColorStr.c_str());
 
          // Draw cursor if we're editing
-         if(mEditing && j == selectedIndex)
+         if(j == selectedIndex)
          {
-            S32 x = getCenteredStringStartingPosf(fontsize, nameColorStr, namestr, colorstr) + getStringWidth(fontsize, numstr);
-            ui->getTeam(j)->getLineEditor()->drawCursor(x, y, fontsize);
+            if(mEditingTeam)
+            {
+               S32 x = getCenteredStringStartingPos(fontsize, nameColorStr.c_str()) + 
+                       getStringWidth(fontsize, numstr.c_str());
+                       
+
+               ui->getTeam(j)->getTeamNameEditor()->drawCursor(x, y, fontsize);
+            }
+            else if(mEditingColor)
+            {
+               S32 x = getCenteredStringStartingPos(fontsize, nameColorStr.c_str()) + 
+                       getStringWidth(fontsize, namestr.c_str()) +
+                       getStringWidth(fontsize, spacer1.c_str()) +
+                       getStringWidth(fontsize, "#");
+
+               ui->getTeam(j)->getHexColorEditor()->drawCursor(x, y, fontsize);
+            }
          }
       }
    }
@@ -213,8 +276,8 @@ void TeamDefUserInterface::render()
    if(errorMsgTimer.getCurrent())
    {
       F32 alpha = 1.0;
-      if (errorMsgTimer.getCurrent() < 1000)
-         alpha = (F32) errorMsgTimer.getCurrent() / 1000;
+      if (errorMsgTimer.getCurrent() < ONE_SECOND)
+         alpha = (F32) errorMsgTimer.getCurrent() / ONE_SECOND;
 
       glColor(Colors::red, alpha);
       drawCenteredString(canvasHeight - vertMargin - 141, fontsize, errorMsg.c_str());
@@ -243,11 +306,18 @@ void TeamDefUserInterface::onTextInput(char ascii)
 {
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
-   if(mEditing)
+   if(mEditingTeam)
+   {
       if(isPrintable(ascii))
-         ui->getTeam(selectedIndex)->getLineEditor()->addChar(ascii);
-}
+         ui->getTeam(selectedIndex)->getTeamNameEditor()->addChar(ascii);
+   }
 
+   else if(mEditingColor)
+   {
+      if(isHex(ascii))
+         ui->getTeam(selectedIndex)->getHexColorEditor()->addChar(ascii);
+   }
+}
 
 
 bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
@@ -257,21 +327,56 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
-   if(inputCode == KEY_ENTER)
+   // If we're editing, need to send keypresses to editor
+   if(mEditingTeam)
    {
-      mEditing = !mEditing;
-      if(mEditing)
-         origName = ui->getTeam(selectedIndex)->getName().getString();
-   }
-   else if(mEditing)                // Editing, send keystroke to editor
-   {
-      if(inputCode == KEY_ESCAPE)     // Stop editing, and restore the original value
+      if(inputCode == KEY_ENTER)          // Finish editing
+      {
+         mEditingTeam = false;
+      }
+      else if(inputCode == KEY_ESCAPE)    // Stop editing, and restore the original value
       {
          ui->getTeam(selectedIndex)->setName(origName.c_str());
-         mEditing = false;
+         mEditingTeam = false;
       }
       else
-         return ui->getTeam(selectedIndex)->getLineEditor()->handleKey(inputCode);
+         return ui->getTeam(selectedIndex)->getTeamNameEditor()->handleKey(inputCode);
+
+      return true;
+   }
+
+   else if(mEditingColor)
+   {
+      if(inputCode == KEY_ENTER)          // Finish editing
+      {
+         mEditingColor = false;
+         ui->getTeam(selectedIndex)->setColor(Color(ui->getTeam(selectedIndex)->getHexColorEditor()->getString()));
+      }
+      else if(inputCode == KEY_ESCAPE)    // Stop editing, and restore the original value
+      {
+         mEditingColor = false;
+         ui->getTeam(selectedIndex)->setColor(*ui->getTeam(selectedIndex)->getColor());   // Will reset hexColorEditor. Ugly!
+      }
+      else
+         return ui->getTeam(selectedIndex)->getHexColorEditor()->handleKey(inputCode);
+
+      return true;
+   }
+
+   // Not editing, normal key processing follows
+
+   if(inputCode == KEY_ENTER)
+   {
+      mEditingTeam = true;
+      origName = ui->getTeam(selectedIndex)->getName().getString();
+   }
+
+   else if(inputCode == KEY_H)
+   {
+      if(mColorEntryMode != ColorEntryModeHex)
+         return true;
+      
+      mEditingColor = true;
    }
 
    else if(inputCode == KEY_DELETE || inputCode == KEY_MINUS)            // Del or Minus - Delete current team
@@ -311,19 +416,36 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    }
 
    else if(inputCode == KEY_R)
-     ui->getTeam(selectedIndex)->alterRed(InputCodeManager::checkModifier(KEY_SHIFT) ? -.01f : .01f);
+   {
+      if(mColorEntryMode != ColorEntryModeHex)
+         ui->getTeam(selectedIndex)->alterRed(getAmount());
+   }
 
    else if(inputCode == KEY_G)
-      ui->getTeam(selectedIndex)->alterGreen(InputCodeManager::checkModifier(KEY_SHIFT) ? -.01f : .01f);
+   {
+      if(mColorEntryMode != ColorEntryModeHex)
+         ui->getTeam(selectedIndex)->alterGreen(getAmount());
+   }
 
    else if(inputCode == KEY_B)
-      ui->getTeam(selectedIndex)->alterBlue(InputCodeManager::checkModifier(KEY_SHIFT) ? -.01f : .01f);
+   {
+      if(mColorEntryMode != ColorEntryModeHex)
+         ui->getTeam(selectedIndex)->alterBlue(getAmount());
+   }
 
    else if(inputCode == KEY_C)  // Want a mouse button?   || inputCode == MOUSE_LEFT)
    {
       UIColorPicker *uiCol = getUIManager()->getUI<UIColorPicker>();
       *((Color *)uiCol) = *(ui->getTeam(selectedIndex)->getColor());
       getUIManager()->activate(uiCol);
+   }
+
+   else if(inputCode == KEY_M)      // Toggle ColorEntryMode
+   {
+      mColorEntryMode = ColorEntryMode(mColorEntryMode + 1);
+
+      if(mColorEntryMode >= ColorEntryModeCount)
+         mColorEntryMode = ColorEntryMode(0);
    }
 
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)       // Quit
@@ -379,6 +501,35 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 }
 
 
+F32 TeamDefUserInterface::getAmount() const
+{
+   F32 s = InputCodeManager::checkModifier(KEY_SHIFT) ? -1.0f : 1.0f;
+   return s / getColorBase();
+}
+
+
+F32 TeamDefUserInterface::getColorBase() const
+{
+   if(mColorEntryMode == ColorEntryMode100)
+      return 100.0f;
+   else if(mColorEntryMode == ColorEntryMode255)
+      return 255.0f;
+   else
+      return 1;
+}
+
+
+const char *TeamDefUserInterface::getEntryMessage() const
+{
+   if(mColorEntryMode == ColorEntryMode100)
+      return "[base 100]";
+   else if(mColorEntryMode == ColorEntryMode255)
+      return "[base 255]";
+   else
+      return "";
+}
+
+
 void TeamDefUserInterface::onMouseMoved()
 {
    Parent::onMouseMoved();
@@ -407,6 +558,5 @@ void TeamDefUserInterface::onColorPicked(const Color &color)
 
 
 
-
-};
+}
 
