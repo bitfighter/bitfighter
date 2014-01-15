@@ -451,7 +451,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       s2cSetRole(ClientInfo::RoleAdmin, true);                   // Tell client they have been granted access
 
       if(mSettings->getIniSettings()->allowAdminMapUpload)
-         s2rSendableFlags(ServerFlagAllowUpload);                 // Enable level uploads
+      {
+         mSendableFlags |= ServerFlagAllowUpload;                 // Enable level uploads
+         s2rSendableFlags(mSendableFlags);
+      }
 
       // Announce change to world
       if(gameType)
