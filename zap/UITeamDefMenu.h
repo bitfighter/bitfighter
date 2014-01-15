@@ -23,7 +23,6 @@ class TeamDefUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 private:
-
    enum ColorEntryMode {
       ColorEntryMode100,
       ColorEntryMode255,
@@ -53,9 +52,11 @@ private:
 
    F32 getColorBase() const;
    F32 getAmount() const;
+   void doneEditingColor();
+   void cancelEditing();
+   void startEditing();
 
    const char *getEntryMessage() const;
-
 
 public:
    explicit TeamDefUserInterface(ClientGame *game);     // Constructor
