@@ -8,6 +8,7 @@
 
 #include "UI.h"
 #include "InputModeEnum.h"
+#include "ConfigEnum.h"
 #include "Color.h"
 #include "Timer.h"
 #include "SymbolShape.h"
@@ -23,13 +24,6 @@ class TeamDefUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 private:
-   enum ColorEntryMode {
-      ColorEntryMode100,
-      ColorEntryMode255,
-      ColorEntryModeHex,
-      ColorEntryModeCount
-   };
-
    Timer errorMsgTimer;
    string errorMsg;
 

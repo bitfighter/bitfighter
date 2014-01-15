@@ -25,6 +25,18 @@ static DisplayMode stringToDisplayMode(string mode)
 }
 
 
+// Convert a string value to a DisplayMode enum value
+static ColorEntryMode stringToColorEntryMode(string mode)
+{
+   if(lcase(mode) == "rgbhex")
+      return ColorEntryModeHex;
+   else if(lcase(mode) == "rgb255")
+      return ColorEntryMode255;
+   else
+      return ColorEntryMode100;     // <== default
+}
+
+
 static YesNo stringToYesNo(string yesNo)
 {
    return lcase(yesNo) == "yes" ? Yes : No;
@@ -37,20 +49,23 @@ static RelAbs stringToRelAbs(string relAbs)
 }
 
 
-template<> string      Setting<string>     ::fromString(const string &val) { return val; }
-template<> S32         Setting<S32>        ::fromString(const string &val) { return atoi(val.c_str()); }
-template<> U32         Setting<U32>        ::fromString(const string &val) { return atoi(val.c_str()); }
-template<> DisplayMode Setting<DisplayMode>::fromString(const string &val) { return stringToDisplayMode(val); }
-template<> YesNo       Setting<YesNo>      ::fromString(const string &val) { return stringToYesNo(val); }
-template<> RelAbs      Setting<RelAbs>     ::fromString(const string &val) { return stringToRelAbs(val); }
-
+template<> string         Setting<string>        ::fromString(const string &val) { return val; }
+template<> S32            Setting<S32>           ::fromString(const string &val) { return atoi(val.c_str()); }
+template<> U32            Setting<U32>           ::fromString(const string &val) { return atoi(val.c_str()); }
+template<> DisplayMode    Setting<DisplayMode>   ::fromString(const string &val) { return stringToDisplayMode(val); }
+template<> YesNo          Setting<YesNo>         ::fromString(const string &val) { return stringToYesNo(val); }
+template<> RelAbs         Setting<RelAbs>        ::fromString(const string &val) { return stringToRelAbs(val); }
+template<> ColorEntryMode Setting<ColorEntryMode>::fromString(const string &val) { return stringToColorEntryMode(val); }
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 // Constructor
 AbstractSetting::AbstractSetting(const string &name, const string &key, const string &section, const string &comment):
-   mName(name), mIniKey(key), mIniSection(section), mComment(comment)
+   mName(name), 
+   mIniKey(key), 
+   mIniSection(section), 
+   mComment(comment)
 {
    // Do nothing
 }
@@ -70,7 +85,6 @@ string AbstractSetting::getComment() const { return mComment; }
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
 
 // Destructor
 Settings::~Settings()
@@ -198,6 +212,7 @@ template class Setting<U32>;
 template class Setting<DisplayMode>;
 template class Setting<YesNo>;
 template class Setting<RelAbs>;
+template class Setting<ColorEntryMode>;
 
 
 }

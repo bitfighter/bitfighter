@@ -131,7 +131,8 @@ string toString(const string &val);
 string toString(S32 val);                
 string toString(DisplayMode displayMode);
 string toString(YesNo yesNo);            
-string toString(RelAbs relAbs);  
+string toString(RelAbs relAbs); 
+string toString(ColorEntryMode colorMode);
 
 bool isPrintable(char c);
 bool isHex(char c);

@@ -905,20 +905,33 @@ inline string displayModeToString(DisplayMode mode)
 {
    if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
       return "Fullscreen-Stretch";
-   else if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+   if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
       return "Fullscreen";
-   else
-      return "Window";
+   
+   return "Window";
+}
+
+
+inline string colorEntryModeToString(ColorEntryMode colorEntryMode)
+{
+   if(colorEntryMode == ColorEntryModeHex)
+      return "RGBHEX";
+
+   if(colorEntryMode == ColorEntryMode255)
+      return "RGB255";
+
+   return "RGB100";
 }
 
 
 // Convert various things to strings -- needed by settings (which requires a consistent naming schema);
 // used elsewhere
-string toString(const string &val)       { return val;                                          }
-string toString(S32 val)                 { return itos(val);                                    }
-string toString(YesNo yesNo)             { return yesNo  == Yes      ? "Yes" :      "No";       }
-string toString(RelAbs relAbs)           { return relAbs == Relative ? "Relative" : "Absolute"; }
-string toString(DisplayMode displayMode) { return displayModeToString(displayMode);             }
+string toString(const string &val)        { return val;                                          }
+string toString(S32 val)                  { return itos(val);                                    }
+string toString(YesNo yesNo)              { return yesNo  == Yes      ? "Yes" :      "No";       }
+string toString(RelAbs relAbs)            { return relAbs == Relative ? "Relative" : "Absolute"; }
+string toString(DisplayMode displayMode)  { return displayModeToString(displayMode);             }
+string toString(ColorEntryMode colorMode) { return colorEntryModeToString(colorMode);            }
 
 
 bool isPrintable(char c)

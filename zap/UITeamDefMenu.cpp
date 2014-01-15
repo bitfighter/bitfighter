@@ -83,9 +83,8 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) :
    mMenuSubTitle(8),
    mMenuTitle("CONFIGURE TEAMS")
 {
-   
-
-   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
+   GameSettings *settings = getGame()->getSettings();
+   InputCodeManager *inputCodeManager = settings->getInputCodeManager();
 
    mTopInstructions =  getSymbolString("For quick configuration, press [[Alt+1]] - [[Alt+9]] to specify number of teams",
                                              inputCodeManager, 18, Colors::menuHelpColor);
@@ -102,7 +101,7 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) :
    mBottomInstructions4 =  getSymbolString("[[Insert]] or [[+]] to insert team | [[Del]] or [[-]] to remove selected team",
                                           inputCodeManager, 16, Colors::menuHelpColor);
 
-   mColorEntryMode = ColorEntryMode100;      // TODO: Get this from INI to make this setting persistent
+   mColorEntryMode = settings->getIniSettings()->mSettings.getVal<ColorEntryMode>("ColorEntryMode");    
 }
 
 
@@ -459,6 +458,8 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 
       if(mColorEntryMode >= ColorEntryModeCount)
          mColorEntryMode = ColorEntryMode(0);
+
+      getGame()->getSettings()->getIniSettings()->mSettings.setVal<ColorEntryMode>("ColorEntryMode", mColorEntryMode);
    }
 
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)       // Quit
