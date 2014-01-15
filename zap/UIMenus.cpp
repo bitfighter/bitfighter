@@ -2006,6 +2006,11 @@ static void kickPlayerCallback(ClientGame *game, U32 unused)
    game->getUIManager()->showPlayerActionMenu(PlayerActionKick);
 }
 
+template<class T> void activateMenuCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate<T>();
+}
+
 
 void GameMenuUserInterface::buildMenu()
 {
@@ -2055,6 +2060,9 @@ void GameMenuUserInterface::buildMenu()
       // Owner already has max permissions, so don't show option to enter a password
       if(!gc->getClientInfo()->isOwner())
          addMenuItem(new MenuItem("ENTER PASSWORD", levelChangeOrAdminPWCallback, "", KEY_A, KEY_E));
+
+      if(gc->mSendableFlags & GameConnection::ServerFlagHasRecordedGameplayDownloads)// && !gc->isLocalConnection())
+         addMenuItem(new MenuItem("DOWNLOAD RECORDED GAME", activateMenuCallback<PlaybackServerDownloadUserInterface>, "", KEY_A, KEY_E));
    }
 
    if(getUIManager()->cameFrom<EditorUserInterface>())    // Came from editor

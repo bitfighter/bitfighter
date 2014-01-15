@@ -48,6 +48,15 @@ public:
    void processSelection(U32 index);
 };
 
+class PlaybackServerDownloadUserInterface : public LevelMenuSelectUserInterface
+{
+public:
+   explicit PlaybackServerDownloadUserInterface(ClientGame *game);
+   void onActivate();
+   void processSelection(U32 index);
+   void receivedLevelList(const Vector<string> &levels);
+};
+
 
 class GameUserInterface;
 

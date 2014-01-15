@@ -237,12 +237,12 @@ void GameRecorderPlayback::restart()
       fseek(mFile, 4, SEEK_SET);
 }
 
+// --------
+
 static void processPlaybackSelectionCallback(ClientGame *game, U32 index)             
 {
    game->getUIManager()->getUI<PlaybackSelectUserInterface>()->processSelection(index);
 }
-
-
 
 PlaybackSelectUserInterface::PlaybackSelectUserInterface(ClientGame *game) : LevelMenuSelectUserInterface(game)
 {
@@ -300,11 +300,48 @@ void PlaybackSelectUserInterface::processSelection(U32 index)
    getGame()->getUIManager()->activate<PlaybackGameUserInterface>();
 }
 
+// --------
+
+PlaybackServerDownloadUserInterface::PlaybackServerDownloadUserInterface(ClientGame *game) : LevelMenuSelectUserInterface(game)
+{
+}
+
+void PlaybackServerDownloadUserInterface::onActivate()
+{
+   mMenuTitle = "Download Recorded Game";
+
+   MenuUserInterface::onActivate();
+
+   getGame()->getConnectionToServer()->c2sRequestRecordedGameplay(StringPtr(""));
+}
+
+
+void PlaybackServerDownloadUserInterface::processSelection(U32 index)
+{
+   getGame()->getConnectionToServer()->c2sRequestRecordedGameplay(StringPtr(mLevels[index].c_str()));
+}
+
+static void processPlaybackDownloadCallback(ClientGame *game, U32 index)             
+{
+   game->getUIManager()->getUI<PlaybackServerDownloadUserInterface>()->processSelection(index);
+}
+
+void PlaybackServerDownloadUserInterface::receivedLevelList(const Vector<string> &levels)
+{
+   mLevels = levels;
+   clearMenuItems();
+   for(S32 i = 0; i < mLevels.size(); i++)
+   {
+      addMenuItem(new MenuItem(i, mLevels[i].c_str(), processPlaybackDownloadCallback, ""));
+   }
+}
+
+// --------
+
 PlaybackGameUserInterface::PlaybackGameUserInterface(ClientGame *game) : UserInterface(game)
 {
    mGameInterface = game->getUIManager()->getUI<GameUserInterface>();
 }
-
 
 
 void PlaybackGameUserInterface::onActivate()

@@ -18,6 +18,8 @@
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
+#   include "GameRecorderPlayback.h"
+#   include "UIManager.h"
 #endif
 
 #include "Colors.h"
@@ -423,7 +425,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       s2cSetRole(ClientInfo::RoleOwner, true);                    // Tell client they have been granted access
 
       if(mSettings->getIniSettings()->allowAdminMapUpload)
-         s2rSendableFlags(ServerFlagAllowUpload);                 // Enable level uploads
+      {
+         mSendableFlags |= ServerFlagAllowUpload;                 // Enable level uploads
+         s2rSendableFlags(mSendableFlags);
+      }
 
       GameType *gameType = mServerGame->getGameType();
 
@@ -1455,6 +1460,31 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
 
 }
 
+void GameConnection::ReceivedRecordedGameplay(const U8 *filedata, U32 filedatasize)
+{
+   if(!isInitiator())
+   {
+      TNLAssert(false, "ReceivedRecordedGameplay is Client only");
+      return;
+   }
+
+#ifndef ZAP_DEDICATED
+
+   const string &dir = mClientGame->getSettings()->getFolderManager()->recordDir;
+   string filename = string(mServerName.getString()) + "_" + mFileName;
+   filename = joindir(dir, makeFilenameFromString(filename.c_str()));
+   FILE *f = fopen(filename.c_str(), "wb");
+   if(f)
+   {
+      fwrite(f, 1, filedatasize, f);
+      fclose(f);
+   }
+   else
+      s2cDisplayErrorMessage_remote("!!! Unable to save");
+
+#endif
+}
+
 
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data), (type, data), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
@@ -1478,7 +1508,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
 
    if((type & TransmissionDone) && mDataBuffer && mDataBuffer->getBufferSize() != 0)
    {
-      if(mDataBufferLevelGen)
+      if(type & TransmissionRecordedGame)
+         ReceivedRecordedGameplay(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize());
+      else if(mDataBufferLevelGen)
          ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), mDataBufferLevelGen->getBuffer(), mDataBufferLevelGen->getBufferSize());
       else
          ReceivedLevelFile(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize(), NULL, 0);
@@ -1500,6 +1532,36 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rTransferFileSize, (U32 size), (size),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    mReceiveTotalSize = size;
+}
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestRecordedGameplay, (StringPtr file), (file), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2)
+{
+   if(file.getString()[0] != 0)
+   {
+      string filePath = joindir(mServerGame->getSettings()->getFolderManager()->recordDir, file.getString());
+      TransferRecordedGameplay(filePath.c_str());
+   }
+   else
+   {
+      Vector<string> levels;
+      const string &dir = mServerGame->getSettings()->getFolderManager()->recordDir;
+      getFilesFromFolder(dir, levels);
+      s2cListRecordedGameplays(levels);
+   }
+}
+TNL_IMPLEMENT_RPC(GameConnection, s2cListRecordedGameplays, (Vector<string> files), (files), 
+                  NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCDirServerToClient, 2)
+{
+#ifndef ZAP_DEDICATED
+   mClientGame->getUIManager()->getUI<PlaybackServerDownloadUserInterface>()->receivedLevelList(files);
+#endif
+}
+
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetFilename, (string filename), (filename), 
+                  NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCDirServerToClient, 2)
+{
+   mFileName = filename;
 }
 
 bool GameConnection::TransferLevelFile(const char *filename)
@@ -1616,6 +1678,58 @@ bool GameConnection::TransferLevelFile(const char *filename)
 
    return false;
 }
+
+bool GameConnection::TransferRecordedGameplay(const char *filename)
+{
+   BitStream s;
+   const U32 partsSize = 512;   // max 1023, limited by ByteBufferSizeBitSize value of 10
+
+   FILE *f = fopen(filename, "rb");
+
+   if(f)
+   {
+      mPendingTransferData.resize(0);
+      U32 totalTransferSize = 0;
+
+      U32 size = partsSize;
+      while(size == partsSize)
+      {
+         ByteBuffer *bytebuffer = new ByteBuffer(512);
+
+         size = (U32)fread(bytebuffer->getBuffer(), 1, bytebuffer->getBufferSize(), f);
+
+         if(size != partsSize)
+            bytebuffer->resize(size);
+
+         mPendingTransferData.push_back(bytebuffer);
+         totalTransferSize += size;
+      }
+      fclose(f);
+
+      if(mPendingTransferData.size() == 0)
+      {
+         if(!isInitiator())
+            s2cDisplayErrorMessage("Recorded file is empty");
+         return false;
+      }
+
+      s2cSetFilename(filename);
+      s2rTransferFileSize(totalTransferSize);
+      for(U32 i=0; i < U32(mPendingTransferData.size()) - 1; i++)
+         s2rSendDataParts(TransmissionRecordedGame, ByteBufferPtr(mPendingTransferData[i]));
+
+      s2rSendDataParts(TransmissionRecordedGame | TransmissionDone, ByteBufferPtr(new ByteBuffer(0)));
+      return true;
+   }
+   else
+      if(!isInitiator())
+         s2cDisplayErrorMessage("Unable to read recorded file");
+
+   return false;
+}
+
+
+
 
 
 F32 GameConnection::getFileProgressMeter()
@@ -2053,8 +2167,13 @@ void GameConnection::onConnectionEstablished_server()
    logprintf(LogConsumer::ServerFilter,  "%s [%s] joined [%s]", name, 
                                           isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
 
+   mSendableFlags = 0;
    if(mServerGame->getSettings()->getIniSettings()->allowMapUpload)
-      s2rSendableFlags(ServerFlagAllowUpload);
+      mSendableFlags |= ServerFlagAllowUpload;
+   if(mServerGame->getSettings()->getIniSettings()->enableGameRecording)
+      mSendableFlags |= ServerFlagHasRecordedGameplayDownloads;
+
+   s2rSendableFlags(mSendableFlags);
 
    // No team changing allowed
    if(!mServerGame->getSettings()->getIniSettings()->allowTeamChanging)

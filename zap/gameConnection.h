@@ -262,27 +262,36 @@ public:
 
    enum ServerFlags {
       ServerFlagAllowUpload = BIT(0),
+      ServerFlagHasRecordedGameplayDownloads = BIT(1),
       // U8 max!
    };
 
    enum LevelFileTransmissionStage { // for s2rSendDataParts only
       TransmissionLevelFile = 1,
       TransmissionLevelGenFile = 2,
-      TransmissionDone = 4
+      TransmissionDone = 4,
+      TransmissionRecordedGame = 8
    };
 
    U8 mSendableFlags;
 private:
    ByteBuffer *mDataBuffer;
    ByteBuffer *mDataBufferLevelGen;
+   string mFileName; // used for game recorder filename
 public:
 
    TNL_DECLARE_RPC(s2rSendableFlags, (U8 flags));
    TNL_DECLARE_RPC(s2rSendDataParts, (U8 type, ByteBufferPtr data));
    TNL_DECLARE_RPC(s2rTransferFileSize, (U32 size));
+   TNL_DECLARE_RPC(c2sRequestRecordedGameplay, (StringPtr file));
+   TNL_DECLARE_RPC(s2cListRecordedGameplays, (Vector<string> files));
+   TNL_DECLARE_RPC(s2cSetFilename, (string filename));
    bool TransferLevelFile(const char *filename);
+   bool TransferRecordedGameplay(const char *filename);
    void ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const U8 *levelgendata, U32 levelgensize);
+   void ReceivedRecordedGameplay(const U8 *filedata, U32 filedatasize);
    F32 getFileProgressMeter();
+
 
    Vector<SafePtr<ByteBuffer> > mPendingTransferData; // Only used for progress meter
    U32 mReceiveTotalSize;
