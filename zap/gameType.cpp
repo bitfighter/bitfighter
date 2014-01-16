@@ -773,7 +773,7 @@ VersionedGameStats GameType::getGameStats()
    gameStats->playerCount = 0; //mClientList.size(); ... will count number of players.
    gameStats->duration = mTotalGamePlay / 1000;
    gameStats->isTeamGame = isTeamGame();
-   gameStats->levelName = mLevelName.c_str();
+   gameStats->levelName = mLevelName;
    gameStats->gameType = getGameTypeName();
    gameStats->cs_protocol_version = CS_PROTOCOL_VERSION;
    gameStats->build_version = BUILD_VERSION;
@@ -4032,9 +4032,6 @@ Vector<string> GameType::getGameTypeNames()
 
 string GameType::getLevelName() const
 {
-   if(mLevelName == "")
-      return "Unnamed Level";
-
    return mLevelName;
 }
 
