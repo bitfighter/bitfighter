@@ -821,7 +821,8 @@ void ClientGame::gotChatMessage(const StringTableEntry &clientName, const String
    const Color *color = global ? &Colors::globalChatColor : &Colors::teamChatColor;
    getUIManager()->onChatMessageReceived(*color, "%s: %s", clientName.getString(), message.getString());
 
-   addInlineHelpItem(HowToChatItem);
+   if(string(clientName.getString()) != getPlayerName())
+      addInlineHelpItem(HowToChatItem);
 }
 
 
