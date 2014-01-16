@@ -3369,7 +3369,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), 
 
 
 // Server sends message to the client for display using StringPtr
-GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringTableEntry toName, StringPtr message), (fromName, toName, message))
+GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, 
+                 (StringTableEntry fromName, StringTableEntry toName, StringPtr message), 
+                 (fromName, toName, message))
 {
 #ifndef ZAP_DEDICATED
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
@@ -3378,7 +3380,9 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringT
 }
 
 
-GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry clientName, StringPtr message), (global, clientName, message))
+GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, 
+                 (bool global, StringTableEntry clientName, StringPtr message), 
+                 (global, clientName, message))
 {
 #ifndef ZAP_DEDICATED
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
