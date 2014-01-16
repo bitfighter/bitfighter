@@ -156,7 +156,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
          resetScrollTimer();
    }
 
-   if(mCurrentIndex == ShipModuleCount + ShipWeaponCount)     // All loadout options selected, process complete
+   if(mCurrentIndex == ShipModuleCount + ShipWeaponCount)   // All loadout options selected, process complete
    {
       LoadoutTracker loadout;
 
@@ -166,7 +166,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       for(S32 i = 0; i < ShipWeaponCount; i++)
          loadout.setWeapon(i, WeaponType(loadoutWeaponMenuItems[mWeapon[i]].itemIndex));
 
-      Ship *ship = getGame()->getLocalPlayerShip();      // Can be NULL if game has ended while we're here
+      Ship *ship = getGame()->getLocalPlayerShip();         // Can be NULL if game has ended while we're here
       mLoadoutChanged = !ship || !getGame()->getLocalPlayerShip()->isLoadoutSameAsCurrent(loadout);
 
       GameConnection *conn = getGame()->getConnectionToServer();
@@ -174,7 +174,8 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       if(conn)
       {
          if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
-            getGame()->displayShipDesignChangedMessage(loadout, "Modifications canceled -- new ship design same as the current");     
+            getGame()->displayShipDesignChangedMessage(loadout, "Selected loadout: ", 
+                                                                "Modifications canceled -- new ship design same as the current");
 
          // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
          // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.

@@ -105,8 +105,8 @@ public:
 
    void correctPlayerName(const string &name);                                      // When server corrects capitalization of name or similar
 
-   void displayShipDesignChangedMessage(const LoadoutTracker &loadout, const char *msgToShowIfLoadoutsAreTheSame);
-   
+   void displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccesString, 
+                                                                       const char *msgToShowIfLoadoutsAreTheSame);
    void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
 

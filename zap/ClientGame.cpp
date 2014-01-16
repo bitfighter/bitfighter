@@ -646,7 +646,8 @@ void ClientGame::correctPlayerName(const string &name)
 }
 
 
-void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, const char *msgToShowIfLoadoutsAreTheSame)
+void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccesString,
+                                                                                const char *msgToShowIfLoadoutsAreTheSame)
 {
    if(!getConnectionToServer())
       return;
@@ -669,7 +670,7 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
          GameType *gt = getGameType();
 
          // Build loadout string
-         string loadoutString = "On-deck loadout: ";
+         string loadoutString = baseSuccesString;
          for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
          {
             if(i < ShipModuleCount)
@@ -683,9 +684,8 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
          // Show new loadout
          displaySuccessMessage("%s", loadoutString.c_str());
 
-         displaySuccessMessage("Ship design changed -- %s", 
-                              gt->levelHasLoadoutZone() ? "enter Loadout Zone to activate changes" : 
-                                                          "changes will be activated when you respawn");
+         displaySuccessMessage(gt->levelHasLoadoutZone() ? "Enter Loadout Zone to activate changes" : 
+                                                           "Changes will be activated when you respawn");
       }
    }
 }
