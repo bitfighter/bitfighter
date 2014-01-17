@@ -76,7 +76,10 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    const S32 titleGap  = 10;
 
    Vector<SymbolShapePtr> symbols;
-   symbols.push_back(SymbolString::getSymbolText(gameType->getLevelName(), titleSize, LevelInfoHeadlineContext));
+   string levelName = gameType->getLevelName();
+   if(levelName == "")
+      levelName = "Unnamed Level";
+   symbols.push_back(SymbolString::getSymbolText(levelName, titleSize, LevelInfoHeadlineContext));
 
    // Find the unicode in Character Map or similar utility,
    // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
