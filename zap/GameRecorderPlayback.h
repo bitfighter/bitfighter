@@ -20,9 +20,9 @@ class GameRecorderPlayback : public GameConnection
    ClientGame *mGame;
    S32 mMilliSeconds;
    U32 mSizeToRead;
-   U32 mGameTypeTimer;
    SafePtr<ClientInfo> mClientInfoSpectating;
-   bool isButtonHeldDown;
+   bool mIsButtonHeldDown;
+
 public:
    U32 mTotalTime;
    U32 mCurrentTime;
@@ -40,6 +40,7 @@ public:
    void restart();
 };
 
+
 class PlaybackSelectUserInterface : public LevelMenuSelectUserInterface
 {
 public:
@@ -47,6 +48,7 @@ public:
    void onActivate();
    void processSelection(U32 index);
 };
+
 
 class PlaybackServerDownloadUserInterface : public LevelMenuSelectUserInterface
 {

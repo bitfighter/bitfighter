@@ -38,7 +38,6 @@ private:
    UI::SymbolString    mBottomInstructions4;
    
    S32 selectedIndex;          // Highlighted menu item
-   S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
 
    bool mEditingTeam;         
    bool mEditingColor;

@@ -71,7 +71,7 @@ bool ChatCheck::checkMessage(const char *message, U32 mode)
 
    mChatTimer += TWO_SECONDS;
 
-   if(mChatTimer > SIX_SECONDS)
+   if(mChatTimer > (U32)SIX_SECONDS)
    {
       mChatTimer += TWO_SECONDS;
       mChatTimerBlocked = true;

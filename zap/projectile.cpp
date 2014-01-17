@@ -1399,6 +1399,7 @@ void Seeker::initialize(const Point &pos, const Point &vel, F32 angle, BfObject 
    }
       
    mAcquiredTarget = NULL;
+   mReassessTargetTimer = ReassessTargetTime;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -1419,6 +1420,8 @@ U32 Seeker::SpeedIncreasePerSecond = 300;
 U32 Seeker::TargetAcquisitionRadius = 400;
 F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2;
 F32 Seeker::TargetSearchAngle = FloatTau * .6f;     // Anglular spread in front of ship to search for targets
+
+const S32 Seeker::ReassessTargetTime = 100;  // Milliseconds to reassess target
 
 const S32 Seeker::InnerBlastRadius = 80;
 const S32 Seeker::OuterBlastRadius = 120;
@@ -1450,6 +1453,9 @@ void Seeker::idle(IdleCallPath path)
       else
          mTimeRemaining -= deltaT;
    }
+   // No more processing if we've gone BOOM!
+   else
+      return;
 
    // Do we need a target?
    if(!mAcquiredTarget)
@@ -1528,8 +1534,13 @@ void Seeker::idle(IdleCallPath path)
       }
    }
 
-   // Force re-acquire to test for closer targets
-   mAcquiredTarget = NULL;  // This seems inefficent to set to NULL each tick
+   // Force re-acquire to test for closer targets after a short interval
+   mReassessTargetTimer -= deltaT;
+   if(mReassessTargetTimer < 0)
+   {
+      mReassessTargetTimer = ReassessTargetTime;
+      mAcquiredTarget = NULL;
+   }
 }
 
 
@@ -1550,15 +1561,16 @@ void Seeker::acquireTarget()
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
       TNLAssert(dynamic_cast<BfObject *>(fillVector[i]), "Not a BfObject");
+      BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
 
       // Don't target self
       //if(mShooter == foundObject)
       //   continue;
 
-      // Don't target teammates in team games (except self)
-      if(getGame()->isTeamGame() && mShooter && mShooter->getTeam() == foundObject->getTeam() && mShooter != foundObject)
+      // Check if this pair of objects can damage one another, this takes care of
+      // the team check
+      if(!getGame()->objectCanDamageObject(this, foundObject))
          continue;
 
       Point delta = foundObject->getPos() - getPos();

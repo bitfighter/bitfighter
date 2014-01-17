@@ -1596,7 +1596,6 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
    // if autoleveling is enabled (unless we are adding a bot for the purposes of autoleveling, in which case we do need
    // to count them)
    Vector<Vector<S32> > counts = static_cast<ServerGame *>(getGame())->getCategorizedPlayerCountsByTeam();
-   bool autoLevelingEnabled = static_cast<ServerGame *>(getGame())->getAutoLevelingEnabled();
    bool countAutoLevelBots = clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByAutoleveler ||
                              clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByLevel       ||
                              clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByLevelNoTeam;
