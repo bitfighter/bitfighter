@@ -30,6 +30,8 @@ protected:
    bool isOpening() const;
    bool isClosing() const;          // Return true if widget is playing the closing animation
 
+   S32 mStarting;
+
    void renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor) const;
 
 public:

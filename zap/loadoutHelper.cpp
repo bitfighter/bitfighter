@@ -126,19 +126,20 @@ void LoadoutHelper::render()
 
    if(mPresetMode)
    {
-      drawItemMenu("Choose loadout preset:", &mPresetItems[0], mPresetItems.size(), NULL, 0);
+      Vector<OverlayMenuItem> &prevItems = showingModules ? mModuleMenuItems : mWeaponMenuItems;
+      drawItemMenu("Choose loadout preset:", &mPresetItems[0], mPresetItems.size(), prevItems.address(), prevItems.size());
    }
    else if(showingModules)
    {
       char title[100];
       dSprintf(title, sizeof(title), "Pick %d modules:", ShipModuleCount);
-      drawItemMenu(title, &mModuleMenuItems[0], mModuleMenuItems.size(), NULL, 0);
+      drawItemMenu(title, mModuleMenuItems.address(), mModuleMenuItems.size(), NULL, 0);
    }
    else     // Showing weapons
    {
       char title[100];
       dSprintf(title, sizeof(title), "Pick %d weapons:", ShipWeaponCount);
-      drawItemMenu(title, &mWeaponMenuItems[0], mWeaponMenuItems.size(), &mModuleMenuItems[0], mModuleMenuItems.size());
+      drawItemMenu(title, mWeaponMenuItems.address(), mWeaponMenuItems.size(), &mModuleMenuItems[0], mModuleMenuItems.size());
    }
 }
 
@@ -154,6 +155,15 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
    {
       TNLAssert(!mPresetMode, "Should only get here when mPresetMode is false -- when it is true, menu should close!");
       mPresetMode = true;
+
+      if(!InputCodeManager::getState(KEY_SHIFT))
+      {
+         // These lines would activate a transition animation, but I think it actually looks better without
+         resetScrollTimer();     // Activate menu transition
+         SlideOutWidget::onActivated();
+         mStarting = getCurrentDisplayWidth(&mPresetItems[0], mPresetItems.size());
+      }
+
       return true;
    }
    
@@ -162,10 +172,12 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
    Vector<OverlayMenuItem> &menuItems = mPresetMode ? mPresetItems : 
                                                      (mCurrentIndex < ShipModuleCount) ? mModuleMenuItems : 
                                                                                          mWeaponMenuItems;
-
    for(index = 0; index < menuItems.size(); index++)
       if(inputCode == menuItems[index].key || inputCode == menuItems[index].button)
          break;
+
+   if(index == menuItems.size() || !menuItems[index].showOnMenu)
+      return false;
 
    if(mPresetMode)
    {
@@ -179,9 +191,6 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       exitHelper();
       return true;
    }
-
-   if(index == menuItems.size() || !menuItems[index].showOnMenu)
-      return false;
 
    // Make sure user doesn't select the same loadout item twice
    bool alreadyUsed = false;

@@ -94,6 +94,13 @@ static S32 LeftMargin = 8;          // Left margin where controller symbols/keys
 static S32 ButtonLabelGap = 9;      // Space between button/key rendering and menu item
 
 
+ S32 HelperMenu::getCurrentDisplayWidth(const OverlayMenuItem *items, S32 count)
+{
+   return calcLeftMarginForTextPortionOfEntry(items, count) + mTextPortionOfItemWidth + 
+          LeftMargin + ButtonLabelGap + MENU_PADDING;
+}
+
+
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
 // Oh, this is so ugly and convoluted!  Drawing things on the screen is so messy!
@@ -145,10 +152,10 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    FontManager::pushFontContext(HelperMenuContext);
 
-   // Get the left edge of where the text portion of the menu items should be rendered
-   S32 itemIndent = calcLeftMarginForTextPortionOfEntry(items, count) + LeftMargin + ButtonLabelGap;
+   S32 interiorEdge = getCurrentDisplayWidth(items, count);
 
-   S32 interiorEdge = mTextPortionOfItemWidth + itemIndent + MENU_PADDING;
+   // Get the left edge of where the text portion of the menu items should be rendered
+   S32 itemIndent = interiorEdge - mTextPortionOfItemWidth - MENU_PADDING;
 
    S32 grayLineLeft   = 20;
    S32 grayLineRight  = interiorEdge - 20;
@@ -168,14 +175,15 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    // Gray line
    glColor(Colors::gray20);
-
    drawHorizLine(grayLineLeft, grayLineRight, yPos + 2);
 
    yPos += grayLineBuffer;
 
 
    // Draw menu items (below gray line)
-   drawMenuItems(prevItems, prevCount, yPos + 2, menuBottom, false, false);
+   // {P{P  ugly, fix below
+   drawMenuItems(prevItems, prevCount, yPos + 2, menuBottom, false, false, mStarting - 
+                 (calcLeftMarginForTextPortionOfEntry(items, count) + LeftMargin + ButtonLabelGap + MENU_PADDING));
    drawMenuItems(items,     count,     yPos,     menuBottom, true,  false);      
 
    // itemsHeight includes grayLineBuffer, transitionOffset accounts for potentially changing menu height during transition
@@ -220,7 +228,8 @@ S32 HelperMenu::calcLeftMarginForTextPortionOfEntry(const OverlayMenuItem *items
 
 
 // Render a set of menu items.  Break this code out to make transitions easier (when we'll be rendering two sets of items).
-void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top, S32 bottom, bool newItems, bool renderKeysWithItemColor)
+void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top, S32 bottom, 
+                               bool newItems, bool renderKeysWithItemColor, S32 horizOffset)
 {
    if(!items)
       return;
@@ -250,12 +259,12 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 
    S32 yPos;
 
+   DisplayMode displayMode = getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
+
    if(newItems)      // Draw the new items we're transitioning to
-      yPos = prepareToRenderToDisplay(getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                                      top, oldHeight, height);
+      yPos = prepareToRenderToDisplay(displayMode, top, oldHeight, height);
    else              // Draw the old items we're transitioning away from
-      yPos = prepareToRenderFromDisplay(getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                                      top, oldHeight, height);
+      yPos = prepareToRenderFromDisplay(displayMode, top, oldHeight, height);
 
    yPos += 2;        // Aesthetics
 
@@ -272,18 +281,20 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
       
       const Color *itemColor = items[i].itemColor;
 
+      //S32 x = {P{P
+
       // Need to add buttonWidth / 2 because renderControllerButton() centers on passed coords
       JoystickRender::renderControllerButton(LeftMargin + (F32)buttonWidth / 2, (F32)yPos - 1, Joystick::SelectedPresetIndex, code, buttonOverrideColor); 
 
       glColor(itemColor);  
 
-      S32 textWidth = drawStringAndGetWidth(LeftMargin + buttonWidth + ButtonLabelGap, yPos, MENU_FONT_SIZE, items[i].name); 
+      S32 textWidth = drawStringAndGetWidth(LeftMargin + buttonWidth + ButtonLabelGap + horizOffset, yPos, MENU_FONT_SIZE, items[i].name); 
 
       // Render help string, if one is available
       if(strcmp(items[i].help, "") != 0)
       {
          glColor(items[i].helpColor);    
-         drawString(LeftMargin + buttonWidth + ButtonLabelGap + textWidth + ButtonLabelGap, yPos, MENU_FONT_SIZE, items[i].help);
+         drawString(LeftMargin + buttonWidth + ButtonLabelGap + horizOffset + textWidth + ButtonLabelGap, yPos, MENU_FONT_SIZE, items[i].help);
       }
 
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;

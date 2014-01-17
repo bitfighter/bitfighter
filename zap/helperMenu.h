@@ -64,7 +64,7 @@ private:
 
    // Some render helpers
    S32 calcLeftMarginForTextPortionOfEntry(const OverlayMenuItem *items, S32 itemCount);
-   void drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, bool renderKeysWithItemColor);
+   void drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, bool renderKeysWithItemColor, S32 horizOffset = 0);
    void renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode);
    void renderLegend(S32 xPos, S32 yPos, const char **legendtext, const Color **legendColors, S32 legendCount);
 
@@ -90,6 +90,7 @@ protected:
    static const S32 TITLE_FONT_SIZE       = 20;    // Size of title of menu
 
    S32 mTextPortionOfItemWidth;    // Calculated width of the text portion of the menu items
+   S32 getCurrentDisplayWidth(const OverlayMenuItem *items, S32 count);
 
 public:
    HelperMenu();

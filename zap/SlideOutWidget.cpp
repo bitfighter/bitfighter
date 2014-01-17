@@ -20,6 +20,7 @@ namespace Zap
 SlideOutWidget::SlideOutWidget()
 {
    mActivating = false;
+   mStarting = 0;
 
    // To change animation time, simply use the setAnimationTime() method in the child's constructor
    mAnimationTimer.setPeriod(150);    // Transition time, in ms
@@ -50,6 +51,7 @@ void SlideOutWidget::onActivated()
 {
    mAnimationTimer.invert();
    mActivating = true;
+   mStarting = 0;
 }
 
 
@@ -58,6 +60,7 @@ void SlideOutWidget::onDeactivated()
 {
    mAnimationTimer.invert();
    mActivating = false;
+   mStarting = 0;
 }
 
 
@@ -69,10 +72,10 @@ F32 SlideOutWidget::getInsideEdge() const
 {
    // Magic number that seems to work well... no matter that the real menu might be a different width... by
    // using this constant, menus appear at a consistent rate.
-   F32 width = 400;     
+   F32 width = 400 - mStarting;     
 
-   return (mActivating ? -mAnimationTimer.getFraction() * width : 
-                         (mAnimationTimer.getFraction() - 1) * width);
+   return (mActivating ? -mAnimationTimer.getFraction()      * width :     // -400 => 0
+                         (mAnimationTimer.getFraction() - 1) * width);     // 0 => -400
 }
 
 
