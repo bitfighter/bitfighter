@@ -48,15 +48,20 @@ private:
    WeaponType mWeapon[ShipWeaponCount];   // Weapons selected by user -- 3
 
    S32 mCurrentIndex;
+   S32 mLoadoutItemsDisplayWidth;
+   S32 mPresetItemsDisplayWidth;
 
    Vector<OverlayMenuItem> mModuleMenuItems;
    Vector<OverlayMenuItem> mWeaponMenuItems;
+   Vector<OverlayMenuItem> mPresetItems;
 
    bool mEngineerEnabled;
    bool mLoadoutChanged;      // Tracks if most recent loadout entry actually changed anything
+   bool mPresetMode;          // Are we in regular mode (false) or preset mode (true)?
 
    const char *getCancelMessage() const;
    InputCode getActivationKey();
+   bool getActivationKeyClosesHelper();
 
 public:
    explicit LoadoutHelper();                    // Constructor

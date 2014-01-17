@@ -646,6 +646,26 @@ void ClientGame::correctPlayerName(const string &name)
 }
 
 
+// User wants to load a preset -- either from Loadout menu, or via shortcut key
+void ClientGame::requestLoadoutPreset(S32 index)
+{
+   GameConnection *conn = getConnectionToServer();
+   if(!conn)
+      return;
+
+   LoadoutTracker loadout = getSettings()->getLoadoutPreset(index);
+
+   if(getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
+      displayShipDesignChangedMessage(loadout, "Loaded preset " + itos(index + 1) + ": ",
+                                               "Preset same as the current design");
+
+   // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
+   // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
+   // Tell server loadout has changed.  Server will activate it when we enter a loadout zone.
+   conn->c2sRequestLoadout(loadout.toU8Vector());    
+}
+
+
 void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccesString,
                                                                                 const char *msgToShowIfLoadoutsAreTheSame)
 {
@@ -669,20 +689,8 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
       {
          GameType *gt = getGameType();
 
-         // Build loadout string
-         string loadoutString = baseSuccesString;
-         for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-         {
-            if(i < ShipModuleCount)
-               loadoutString += ModuleInfo::getModuleInfo(loadout.getModule(i))->getName();
-            else
-               loadoutString += WeaponInfo::getWeaponInfo(loadout.getWeapon(i - ShipModuleCount)).name.getString();
-
-            if(i < (ShipModuleCount + ShipWeaponCount) - 1)
-               loadoutString += ", ";
-         }
          // Show new loadout
-         displaySuccessMessage("%s", loadoutString.c_str());
+         displaySuccessMessage("%s %s", baseSuccesString.c_str(), loadout.toString(false).c_str());
 
          displaySuccessMessage(gt->levelHasLoadoutZone() ? "Enter Loadout Zone to activate changes" : 
                                                            "Changes will be activated when you respawn");

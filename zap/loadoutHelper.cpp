@@ -17,7 +17,7 @@
 namespace Zap
 {
 
-// For clarity
+// For clarity and consistency
 #define UNSEL_COLOR &Colors::overlayMenuUnselectedItemColor
 #define HELP_COLOR  &Colors::overlayMenuHelpColor
 
@@ -40,10 +40,11 @@ static const OverlayMenuItem loadoutWeaponMenuItems[] = {
    { KEY_4, BUTTON_4, true, WeaponBurst,  "Burster",    UNSEL_COLOR, "", NULL, NULL },
    { KEY_5, BUTTON_5, true, WeaponMine,   "Mine Layer", UNSEL_COLOR, "", NULL, NULL },
    { KEY_6, BUTTON_6, true, WeaponSeeker, "Seeker",     UNSEL_COLOR, "", NULL, NULL },
-};                                                  
+};      
 
-#undef UNSEL_COLOR
-#undef HELP_COLOR
+
+static string preset1, preset2, preset3;     // Static so that the c_str() pointers we use will stick around
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -52,9 +53,11 @@ static const OverlayMenuItem loadoutWeaponMenuItems[] = {
 LoadoutHelper::LoadoutHelper()
 {
    mCurrentIndex = 0;
-   mTextPortionOfItemWidth = max(getMaxItemWidth(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems)),
-                                 getMaxItemWidth(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems)));
+   mLoadoutItemsDisplayWidth = max(getMaxItemWidth(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems)),
+                                   getMaxItemWidth(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems)));
+   mPresetItemsDisplayWidth = 0;    // Will be set in onActivated()
 }
+
 
 // Destructor
 LoadoutHelper::~LoadoutHelper()
@@ -80,33 +83,63 @@ void LoadoutHelper::onActivated()
    // Player has proven they know how to change loadouts, so no need to show a help message on how to do it
    getGame()->getUIManager()->removeInlineHelpItem(ChangeConfigItem, true);
 
-   mCurrentIndex = 0;
-
+   // Define these here because they get modified as we go through the menus; we want a clean set to start with
    mModuleMenuItems = Vector<OverlayMenuItem>(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems));
    mWeaponMenuItems = Vector<OverlayMenuItem>(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems));
+
+   mCurrentIndex = 0;
 
    mModuleMenuItems[moduleEngineerIndex].showOnMenu = mEngineerEnabled;    // Can't delete this or other arrays will become unaligned
 
    mLoadoutChanged = false;
+   mPresetMode = false;       // Start in regular mode -- press activation key again to enter preset mode
+
+   
+   preset1 = "Preset 1 - " + getGame()->getSettings()->getLoadoutPreset(0).toString(false);
+   preset2 = "Preset 2 - " + getGame()->getSettings()->getLoadoutPreset(1).toString(false);
+   preset3 = "Preset 3 - " + getGame()->getSettings()->getLoadoutPreset(2).toString(false);
+
+#define GET_COLOR(p) getGame()->getSettings()->getLoadoutPreset(p).isValid() ? UNSEL_COLOR : &Colors::DisabledGray
+
+   const OverlayMenuItem presetItems[] = {
+      { KEY_1, BUTTON_1, true, 0, preset1.c_str(), GET_COLOR(0), "", NULL, NULL },
+      { KEY_2, BUTTON_2, true, 1, preset2.c_str(), GET_COLOR(1), "", NULL, NULL },
+      { KEY_3, BUTTON_3, true, 2, preset3.c_str(), GET_COLOR(2), "", NULL, NULL },
+   };
+   TNLAssert(ARRAYSIZE(presetItems) == GameSettings::LoadoutPresetCount, "presetItems[] has the wrong number of elements!");
+
+   mPresetItems = Vector<OverlayMenuItem>(presetItems, ARRAYSIZE(presetItems));
+   mPresetItemsDisplayWidth = getMaxItemWidth(presetItems, ARRAYSIZE(presetItems));
 }
+
+#undef UNSEL_COLOR
+#undef HELP_COLOR
+#undef GET_COLOR
 
 
 void LoadoutHelper::render()
 {
-   char title[100];
+   // Set the display width for the item we are rendering (used in drawItemMenu)
+   mTextPortionOfItemWidth = mPresetMode ? mPresetItemsDisplayWidth : mLoadoutItemsDisplayWidth;
 
    bool showingModules = mCurrentIndex < ShipModuleCount;
 
-   if(showingModules)
+   if(mPresetMode)
+   {
+      drawItemMenu("Choose loadout preset:", &mPresetItems[0], mPresetItems.size(), NULL, 0);
+   }
+   else if(showingModules)
+   {
+      char title[100];
       dSprintf(title, sizeof(title), "Pick %d modules:", ShipModuleCount);
-   else
-      dSprintf(title, sizeof(title), "Pick %d weapons:", ShipWeaponCount);
-
-
-   if(showingModules)
       drawItemMenu(title, &mModuleMenuItems[0], mModuleMenuItems.size(), NULL, 0);
-   else
+   }
+   else     // Showing weapons
+   {
+      char title[100];
+      dSprintf(title, sizeof(title), "Pick %d weapons:", ShipWeaponCount);
       drawItemMenu(title, &mWeaponMenuItems[0], mWeaponMenuItems.size(), &mModuleMenuItems[0], mModuleMenuItems.size());
+   }
 }
 
 
@@ -116,16 +149,38 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 {
    if(Parent::processInputCode(inputCode))    // Check for cancel keys
       return true;
+
+   if(inputCode == getActivationKey())    // Toggle normal loadout mode // preset mode
+   {
+      TNLAssert(!mPresetMode, "Should only get here when mPresetMode is false -- when it is true, menu should close!");
+      mPresetMode = true;
+      return true;
+   }
    
    S32 index;
 
-   Vector<OverlayMenuItem> *menuItems = (mCurrentIndex < ShipModuleCount) ? &mModuleMenuItems : &mWeaponMenuItems;
+   Vector<OverlayMenuItem> &menuItems = mPresetMode ? mPresetItems : 
+                                                     (mCurrentIndex < ShipModuleCount) ? mModuleMenuItems : 
+                                                                                         mWeaponMenuItems;
 
-   for(index = 0; index < menuItems->size(); index++)
-      if(inputCode == menuItems->get(index).key || inputCode == menuItems->get(index).button)
+   for(index = 0; index < menuItems.size(); index++)
+      if(inputCode == menuItems[index].key || inputCode == menuItems[index].button)
          break;
 
-   if(index == menuItems->size() || !menuItems->get(index).showOnMenu)
+   if(mPresetMode)
+   {
+      LoadoutTracker loadout = getGame()->getSettings()->getLoadoutPreset(index);
+
+      // Ignore presets that have not been defined (these are displayed but cannot be chosen)
+      if(!loadout.isValid())
+         return true;
+
+      getGame()->requestLoadoutPreset(index);
+      exitHelper();
+      return true;
+   }
+
+   if(index == menuItems.size() || !menuItems[index].showOnMenu)
       return false;
 
    // Make sure user doesn't select the same loadout item twice
@@ -144,9 +199,9 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    if(!alreadyUsed)
    {
-      menuItems->get(index).itemColor           = &Colors::overlayMenuSelectedItemColor;
-      menuItems->get(index).helpColor           = &Colors::overlayMenuSelectedItemColor;
-      menuItems->get(index).buttonOverrideColor = &Colors::overlayMenuSelectedItemColor;
+      menuItems[index].itemColor           = &Colors::overlayMenuSelectedItemColor;
+      menuItems[index].helpColor           = &Colors::overlayMenuSelectedItemColor;
+      menuItems[index].buttonOverrideColor = &Colors::overlayMenuSelectedItemColor;
 
       mModule[mCurrentIndex] = ShipModule(index);
       mCurrentIndex++;
@@ -193,6 +248,13 @@ InputCode LoadoutHelper::getActivationKey()
 { 
    GameSettings *settings = getGame()->getSettings();
    return settings->getInputCodeManager()->getBinding(BINDING_LOADOUT);
+}
+
+
+// When we are in preset mode, the next press of the activation key will close the menu
+bool LoadoutHelper::getActivationKeyClosesHelper()
+{
+   return mPresetMode;
 }
 
 

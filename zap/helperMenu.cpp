@@ -337,7 +337,8 @@ void HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color
 // Calculate the width of the widest item in items
 S32 HelperMenu::getMaxItemWidth(const OverlayMenuItem *items, S32 count)
 {
-   S32 width = -1;
+   S32 width = 0;
+
    for(S32 i = 0; i < count; i++)
    {
       S32 w = getStringWidth(HelperMenuContext, MENU_FONT_SIZE, items[i].name) + getStringWidth(MENU_FONT_SIZE, items[i].help);
@@ -361,19 +362,24 @@ bool HelperMenu::processInputCode(InputCode inputCode)
    // First, check navigation keys.  When in keyboard mode, we allow the loadout key to toggle menu on and off...
    // we can't do this in joystick mode because it is likely that the loadout key is also used to select items
    // from the loadout menu.
-   if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_DPAD_LEFT ||
-      inputCode == BUTTON_BACK || 
-      (getGame()->getInputMode() == InputModeKeyboard && inputCode == getActivationKey()) )
+   if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_BACK || 
+      (getActivationKeyClosesHelper() && getGame()->getInputMode() == InputModeKeyboard && inputCode == getActivationKey()) )
    {
       exitHelper();      
 
       if(mClientGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
-         mClientGame->displayMessage(Colors::paleRed, getCancelMessage());
+         mClientGame->displayMessage(Colors::ErrorMessageTextColor, getCancelMessage());
 
       return true;
    }
 
    return false;
+}
+
+
+bool HelperMenu::getActivationKeyClosesHelper()
+{
+   return true;
 }
 
 

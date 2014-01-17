@@ -68,6 +68,8 @@ private:
    void renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode);
    void renderLegend(S32 xPos, S32 yPos, const char **legendtext, const Color **legendColors, S32 legendCount);
 
+   virtual bool getActivationKeyClosesHelper();
+
 protected:
    static const S32 MENU_TOP = 175;    // Location of top of title of overlay menu frame
 
@@ -101,7 +103,7 @@ public:
 
    virtual void onWidgetClosed();                     // Gets run when closing animation is complete
 
-   virtual bool processInputCode(InputCode inputCode);  
+   virtual bool processInputCode(InputCode inputCode);
    virtual void onTextInput(char ascii);
 
    virtual void activateHelp(UIManager *uiManager);   // Open help to an appropriate page

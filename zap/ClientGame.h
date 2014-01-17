@@ -105,6 +105,7 @@ public:
 
    void correctPlayerName(const string &name);                                      // When server corrects capitalization of name or similar
 
+   void requestLoadoutPreset(S32 index);
    void displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccesString, 
                                                                        const char *msgToShowIfLoadoutsAreTheSame);
    void startLoadingLevel(bool engineerEnabled);
@@ -222,7 +223,6 @@ public:
    void newLoadoutHasArrived(const LoadoutTracker &loadout);
    void setActiveWeapon(U32 weaponIndex);
    bool isShowingDebugShipCoords();
-
 
    void requestSpawnDelayed(bool incursPenalty) const;
    U32 getReturnToGameDelay() const;

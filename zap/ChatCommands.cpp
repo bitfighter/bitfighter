@@ -464,11 +464,13 @@ void showPresetsHandler(ClientGame *game, const Vector<string> &words)
 {
    for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
    {
-      string loadoutStr = game->getSettings()->getLoadoutPreset(i).toString();
       string display;
-      
-      if(loadoutStr != "")
-         display = "Preset " + itos(i + 1) + ": " + replaceString(loadoutStr, ",", "; ");
+
+      if(game->getSettings()->getLoadoutPreset(i).isValid())
+      {
+         string loadoutStr = game->getSettings()->getLoadoutPreset(i).toString(false);
+         display = "Preset " + itos(i + 1) + ": " + loadoutStr;
+      }
       else
          display = "Preset " + itos(i + 1) + " is undefined";
 
