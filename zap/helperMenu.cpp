@@ -96,6 +96,7 @@ static S32 ButtonLabelGap = 9;      // Space between button/key rendering and me
 
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
+// Oh, this is so ugly and convoluted!  Drawing things on the screen is so messy!
 void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, const OverlayMenuItem *prevItems, S32 prevCount,
                               const char **legendText, const Color **legendColors, S32 legendCount)
 {
