@@ -39,7 +39,7 @@ public:
 
 
    static bool renderControllerButton(F32 centerX, F32 centerY, U32 joystickIndex, InputCode inputCode, const Color *overrideRenderColor = NULL);
-   static S32 getControllerButtonRenderedSize(S32 joystickIndex, InputCode inputCode);
+   static S32 getControllerButtonRenderedSize(InputCode inputCode);
 
    static void renderDPad(Point center, F32 radius, bool upActivated, bool downActivated, bool leftActivated,
          bool rightActivated, const char *msg1, const char *msg2);

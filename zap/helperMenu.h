@@ -63,8 +63,8 @@ private:
    S32 mOldCount;
 
    // Some render helpers
-   S32 calcLeftMarginForTextPortionOfEntry(const OverlayMenuItem *items, S32 itemCount);
-   void drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, bool renderKeysWithItemColor, S32 horizOffset = 0);
+   S32 getButtonWidth(const OverlayMenuItem *items, S32 itemCount);
+   void drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, S32 horizOffset = 0);
    void renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode);
    void renderLegend(S32 xPos, S32 yPos, const char **legendtext, const Color **legendColors, S32 legendCount);
 

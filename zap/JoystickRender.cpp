@@ -117,7 +117,7 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
 
 static S32 SymbolPadding = 6;       // Just some padding we throw around our symbols to make them look hot
 
-S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode inputCode)
+S32 JoystickRender::getControllerButtonRenderedSize(InputCode inputCode)
 {
    // Return keyboard key size, just in case
    if(!InputCodeManager::isControllerButton(inputCode))
@@ -125,6 +125,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
 
    // Get joystick button size
    JoystickButton button = InputCodeManager::inputCodeToJoystickButton(inputCode);
+   S32 joystickIndex = Joystick::SelectedPresetIndex;
 
    Joystick::ButtonShape buttonShape =
          Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].buttonShape;
