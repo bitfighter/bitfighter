@@ -101,7 +101,8 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) :
    mBottomInstructions4 =  getSymbolString("[[Insert]] or [[+]] to insert team | [[Del]] or [[-]] to remove selected team",
                                           inputCodeManager, 16, Colors::menuHelpColor);
 
-   mColorEntryMode = settings->getIniSettings()->mSettings.getVal<ColorEntryMode>("ColorEntryMode");    
+   mColorEntryMode = settings->getIniSettings()->mSettings.getVal<ColorEntryMode>("ColorEntryMode");
+   mEditingColor = false;
 }
 
 
@@ -275,7 +276,7 @@ void TeamDefUserInterface::render()
    if(errorMsgTimer.getCurrent())
    {
       F32 alpha = 1.0;
-      if (errorMsgTimer.getCurrent() < ONE_SECOND)
+      if(errorMsgTimer.getCurrent() < (U32)ONE_SECOND)
          alpha = (F32) errorMsgTimer.getCurrent() / ONE_SECOND;
 
       glColor(Colors::red, alpha);

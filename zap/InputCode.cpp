@@ -359,7 +359,7 @@ string InputCodeManager::normalizeInputString(const string &inputString)
 
    // Modifiers will be first words... sort them, normalize capitalization, get them organized
    bool hasModifier[ARRAYSIZE(modifiers)];
-   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+   for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
       hasModifier[i] = false;
 
    for(S32 i = 0; i < words.size() - 1; i++)
@@ -369,7 +369,7 @@ string InputCodeManager::normalizeInputString(const string &inputString)
          return INVALID;
 
       bool found = false;
-      for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+      for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
          if(inputCode == modifiers[i])
          {
             hasModifier[i] = true;
@@ -391,7 +391,7 @@ string InputCodeManager::normalizeInputString(const string &inputString)
       return INVALID;
 
    string normalizedInputString = "";
-   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+   for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
       if(hasModifier[i])
          normalizedInputString += string(keyNames[modifiers[i]]) + InputStringJoiner;
 
@@ -2070,7 +2070,7 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_KEYPAD_ENTER)]    = "Keypad Enter";     
    keyNames[S32(KEY_LESS)]            = "Less";    
 
-   for(S32 i = 0; i < ARRAYSIZE(modifiers); i++)
+   for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
       modifierNames.push_back(keyNames[S32(modifiers[i])]);            
 }
 
