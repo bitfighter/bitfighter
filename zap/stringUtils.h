@@ -58,7 +58,7 @@ F64 stof(const string &s);
 string replaceString(const string &strString, const string &strOld, const string &strNew);
 string stripExtension(string filename);
 
-string listToString(const Vector<string> &words, char seperator);
+string listToString(const Vector<string> &words, const string &seperator);
 
 // TODO: Merge these methods
 Vector<string> parseString(const string &line);

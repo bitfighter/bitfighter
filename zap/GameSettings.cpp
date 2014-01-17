@@ -902,7 +902,7 @@ void GameSettings::saveMasterAddressListInIniUnlessItCameFromCmdLine()
       return;
 
    // Otherwise write the master list to the INI file in their new order; the most recently successful address will now be first
-   mIniSettings.masterAddress = listToString(mMasterServerList, ',');
+   mIniSettings.masterAddress = listToString(mMasterServerList, ",");
 }
 
 

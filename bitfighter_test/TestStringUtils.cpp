@@ -6,6 +6,10 @@
 #include "stringUtils.h"
 #include "gtest/gtest.h"
 
+#ifdef TNL_OS_WIN32 
+#  include <windows.h>        // For ARRAYSIZE def
+#endif
+
 namespace Zap {
 
 TEST(StringUtilsTest, stringContainsAllTheSameCharacter)
@@ -39,6 +43,18 @@ TEST(StringUtilsTest, isHex)
    EXPECT_FALSE(isHex("12:345"));   // ':' comes just after '9'
    EXPECT_FALSE(isHex("@bcdef"));   // '@' comes just before 'A'
    EXPECT_FALSE(isHex("c01`"));     // '`' comes just before 'a'
+}
+
+
+TEST(StringUtilsTest, listToString)
+{
+   Vector<string> empty;
+   EXPECT_EQ("", listToString(empty, ", "));
+
+   string wordArry[] = {"one", "two", "three"};
+   Vector<string> words(wordArry, ARRAYSIZE(wordArry));
+   EXPECT_EQ("one;two;three", listToString(words, ";"));
+   EXPECT_EQ("one, two, three", listToString(words, ", "));
 }
 
 };

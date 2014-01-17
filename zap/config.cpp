@@ -380,7 +380,7 @@ static void writeConnectionsInfo(CIniFile *ini, IniSettings *iniSettings)
    }
 
    // Creates comma delimited list
-   ini->SetValue(section, "AlwaysPingList", listToString(iniSettings->alwaysPingList, ','));
+   ini->SetValue(section, "AlwaysPingList", listToString(iniSettings->alwaysPingList, ","));
 }
 
 

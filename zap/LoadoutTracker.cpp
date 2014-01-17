@@ -345,7 +345,7 @@ string LoadoutTracker::toString() const
    for(S32 i = 0; i < ShipWeaponCount; i++)
       loadoutStrings.push_back(WeaponInfo::getWeaponInfo(mWeapons[i]).name.getString());
 
-   return listToString(loadoutStrings, ',');
+   return listToString(loadoutStrings, compact ? "," : ", ");
 }
 
 

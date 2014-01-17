@@ -471,17 +471,12 @@ string concatenate(const Vector<string> &words, S32 startingWith)
 
 
 // TODO: Merge with concatenate above
-string listToString(const Vector<string> &words, char seperator)
+string listToString(const Vector<string> &words, const string &seperator)
 {
    string str = "";
-
-   // Convert separator char to a c_string so it can be added below
-   char sep[2];
-   sep[0] = seperator;
-   sep[1] = 0;    // Null terminate
       
    for(S32 i = 0; i < words.size(); i++)
-        str += words[i] + ((i < words.size() - 1) ? sep : "");
+      str += words[i] + ((i < words.size() - 1) ? seperator : "");
 
    return str;
 }
