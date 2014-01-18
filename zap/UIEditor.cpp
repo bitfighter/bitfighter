@@ -1590,7 +1590,10 @@ bool EditorUserInterface::getSnapToWallCorners()
 {
    // Allow snapping to wall corners when we're dragging items.  Disallow for all wall types other than PolyWall
    return mSnapContext != NO_SNAPPING && mDraggingObjects &&
-         (!isWallType(mSnapObject->getObjectTypeNumber()) || mSnapObject->getObjectTypeNumber() == PolyWallTypeNumber);
+         (mSnapObject->getObjectTypeNumber() == PolyWallTypeNumber ||  // Allow PolyWall
+          mSnapObject->getObjectTypeNumber() == WallItemTypeNumber ||  // Allow WallItem
+          !isWallType(mSnapObject->getObjectTypeNumber()));            // Disallow other Wall-related parts (would
+                                                                       // these even ever appear as a snap object?)
 }
 
 
