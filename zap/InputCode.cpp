@@ -2001,8 +2001,8 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(MOUSE_LEFT)]          = "Left-mouse";       
    keyNames[S32(MOUSE_MIDDLE)]        = "Middle-mouse";     
    keyNames[S32(MOUSE_RIGHT)]         = "Right-mouse";      
-   keyNames[S32(MOUSE_WHEEL_UP)]      = "Mouse wheel up";   
-   keyNames[S32(MOUSE_WHEEL_DOWN)]    = "Mouse wheel down"; 
+   keyNames[S32(MOUSE_WHEEL_UP)]      = "Mouse Wheel Up";   
+   keyNames[S32(MOUSE_WHEEL_DOWN)]    = "Mouse Wheel Down"; 
 
    keyNames[S32(BUTTON_1)]            = "Button 1";         
    keyNames[S32(BUTTON_2)]            = "Button 2";         
