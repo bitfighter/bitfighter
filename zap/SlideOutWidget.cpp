@@ -15,15 +15,14 @@
 namespace Zap
 {
 
+static const F32 WidgetSpeed = 2.0f;    // Pixels / ms
 
 // Constructor
 SlideOutWidget::SlideOutWidget()
 {
    mActivating = false;
-   mStarting = 0;
-
-   // To change animation time, simply use the setAnimationTime() method in the child's constructor
-   mAnimationTimer.setPeriod(150);    // Transition time, in ms
+   mWidth = 350;           // Menus should set this to a real value so they appear more quickly
+   setStartingOffset(0);
 }
 
 
@@ -49,33 +48,111 @@ void SlideOutWidget::idle(U32 deltaT)
 // User requested widget to open
 void SlideOutWidget::onActivated() 
 {
-   mAnimationTimer.invert();
+   S32 currDisplayWidth = 0;
+   mActivationDirection = true;     // Normal
+
+   // If we're still playing the animation from a previous action, we need to grab it's width to
+   // use as the starting point for animating this activation
+   if(isActive())
+      currDisplayWidth = getCurrentDisplayWidth();
+
    mActivating = true;
-   mStarting = 0;
+   setStartingOffset(currDisplayWidth);
+   adjustAnimationTimer();
 }
 
 
 // User requested widget to close
 void SlideOutWidget::onDeactivated()
 {
-   mAnimationTimer.invert();
+   S32 currentWidth  = getCurrentDisplayWidth();
+   S32 expectedWidth = getTotalDisplayWidth();
+   setStartingOffset(0);
+   setExpectedWidth(expectedWidth);
+
+   mAnimationTimer.reset(currentWidth / WidgetSpeed, expectedWidth / WidgetSpeed);
    mActivating = false;
-   mStarting = 0;
 }
 
 
-void SlideOutWidget::onWidgetOpened() { /* Do nothing */ }      // Gets run when opening animation is complete
-void SlideOutWidget::onWidgetClosed() { /* Do nothing */ }      // Gets run when closing animation is complete
+// Width of widget as currently displayed
+S32 SlideOutWidget::getCurrentDisplayWidth() const
+{
+   if(mActivating && mActivationDirection)
+      return mAnimationTimer.getElapsed() * WidgetSpeed + mStartingOffset;
+   // else
+   return mAnimationTimer.getCurrent() * WidgetSpeed + mStartingOffset;
+}
+
+
+// Width of widget when fully displayed
+S32 SlideOutWidget::getTotalDisplayWidth() const
+{
+   return mAnimationTimer.getPeriod() * WidgetSpeed + mStartingOffset;
+}
+
+
+// Gets run when opening animation is complete
+void SlideOutWidget::onWidgetOpened() 
+{ 
+   /* Do nothing */ 
+}
+
+
+// Gets run when closing animation is complete
+void SlideOutWidget::onWidgetClosed() 
+{ 
+   // Do nothing
+}  
+
+
+S32 SlideOutWidget::getWidth() const
+{
+   return mWidth;
+}
 
 
 F32 SlideOutWidget::getInsideEdge() const
 {
-   // Magic number that seems to work well... no matter that the real menu might be a different width... by
-   // using this constant, menus appear at a consistent rate.
-   F32 width = 400 - mStarting;     
+   return getFraction() * (mStartingOffset - mWidth);
+}
 
-   return (mActivating ? -mAnimationTimer.getFraction()      * width :     // -400 => 0
-                         (mAnimationTimer.getFraction() - 1) * width);     // 0 => -400
+
+S32 SlideOutWidget::getStartingOffset()
+{
+   return mStartingOffset;
+}
+
+
+void SlideOutWidget::adjustAnimationTimer()
+{
+   // Will almost always be true; only false when menu as shown is already wider than it needs to be
+   mActivationDirection = (mWidth > mStartingOffset);
+
+   U32 distToGo = abs(mWidth - mStartingOffset);
+   U32 timeNeeded = U32(distToGo / WidgetSpeed);
+
+   mAnimationTimer.reset(timeNeeded);  
+}
+
+
+void SlideOutWidget::setStartingOffset(S32 startingOffset)
+{
+   mStartingOffset = startingOffset;
+}
+
+
+void SlideOutWidget::setExpectedWidth(S32 width)
+{
+   mWidth = width;
+}
+
+
+// Only needed for multi-stage widgets like the LoadoutHelper that have multiple widths
+void SlideOutWidget::setExpectedWidth_MidTransition(S32 width)
+{
+   mWidth = width;
+   adjustAnimationTimer();
 }
 
 
@@ -116,15 +193,15 @@ void SlideOutWidget::setAnimationTime(U32 period)
 }
 
 
-
-void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor) const
+// Static method
+void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor)
 {
-   const S32 CORNER_SIZE = 15;      
+   const S32 CornerSize = 15;      
 
-   const S32 left   = ulx;
-   const S32 right  = ulx + width;
-   const S32 top    = uly;
-   const S32 bottom = uly + height;
+   S32 left   = ulx;
+   S32 right  = ulx + width;
+   S32 top    = uly;
+   S32 bottom = uly + height;
 
    bool topBox = false, leftBox = false, rightBox = false;
 
@@ -139,24 +216,26 @@ void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 
 
    if(leftBox)  // Clip UR corner -- going CW from top-left corner
    {
-      Point p[] = { Point(left, top), Point(right - CORNER_SIZE, top),  // Top
-                    Point(right, top + CORNER_SIZE),                    // Right
-                    Point(right, bottom), Point(left, bottom) };        // Bottom
+      left = -500;      // Make sure that, even with translate, the line extends to left edge of the screen.
+                        // This is only an issue with LoadoutHelper at the moment.
+      Point p[] = { Point(left, top), Point(right - CornerSize, top),  // Top
+                    Point(right, top + CornerSize),                    // Right
+                    Point(right, bottom), Point(left, bottom) };       // Bottom
 
       points = Vector<Point>(p, ARRAYSIZE(p));
    }
    else if(rightBox)              // Clip LL corner -- going CCW from top-right corner
    {
-      Point p[] = { Point(right, top), Point(left, top),                        // Top
-                    Point(left, bottom - CORNER_SIZE),                          // Edge
-                    Point(left + CORNER_SIZE, bottom), Point(right, bottom) };  // Bottom
+      Point p[] = { Point(right, top), Point(left, top),                       // Top
+                    Point(left, bottom - CornerSize),                          // Edge
+                    Point(left + CornerSize, bottom), Point(right, bottom) };  // Bottom
 
       points = Vector<Point>(p, ARRAYSIZE(p));
    }
    else if(topBox)               // Clip LL corner -- going CCW from top-left corner
    {
-      Point p[] = { Point(left, top), Point(left, bottom - CORNER_SIZE),
-                    Point(left + CORNER_SIZE, bottom),
+      Point p[] = { Point(left, top), Point(left, bottom - CornerSize),
+                    Point(left + CornerSize, bottom),
                     Point(right, bottom), Point(right, top) };
 
       points = Vector<Point>(p, ARRAYSIZE(p));

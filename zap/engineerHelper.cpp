@@ -45,17 +45,10 @@ static const char *engineerInstructions[] = {
 static const char *menuTitle = "Choose One:";
 
 // Constructor
-EngineerHelper::EngineerHelper()
+EngineerHelper::EngineerHelper() :
+   mEngineerItemsDisplayWidth( getWidthOfItems() )
 {
    mSelectedIndex = -1;
-
-   // With this one, the title is wider than the text (at the moment at least), so we should consider the title width.  This
-   // is a bit tricky, however, since the menu items are normally indented, and that indention is added to the menu width
-   // we pass.  Therefore, to make everything look nice, we need to subtract that bit off here so we don't end up with a 
-   // much wider menu than necessary.  Add the horizMargin to make things look balanced.
-   mTextPortionOfItemWidth = max(getMaxItemWidth(engineerItemInfo, ARRAYSIZE(engineerItemInfo)), 
-                                    getStringWidth(MENU_FONT_SIZE, menuTitle) - (ITEM_INDENT + 2 * ITEM_HELP_PADDING) +
-                                         UserInterface::horizMargin);
 }
 
 
@@ -63,6 +56,20 @@ EngineerHelper::EngineerHelper()
 EngineerHelper::~EngineerHelper()
 {
    // Do nothing
+}
+
+
+S32 EngineerHelper::getWidthOfItems() const
+{
+   // With this one, the title is wider than the text (at the moment at least), so we should consider the title width.  This
+   // is a bit tricky, however, since the menu items are normally indented, and that indention is added to the menu width
+   // we pass.  Therefore, to make everything look nice, we need to subtract that bit off here so we don't end up with a 
+   // much wider menu than necessary.  Add the horizMargin to make things look balanced.
+   S32 maxItemWidth = getMaxItemWidth(engineerItemInfo, ARRAYSIZE(engineerItemInfo));
+   S32 titleWidth = getStringWidth(MENU_FONT_SIZE, menuTitle) - (ITEM_INDENT + 2 * ITEM_HELP_PADDING) +
+                                         UserInterface::horizMargin;
+
+   return max(maxItemWidth, titleWidth);
 }
 
 
@@ -79,6 +86,11 @@ void EngineerHelper::setSelectedEngineeredObject(U32 objectType)
 
 void EngineerHelper::onActivated()
 {
+   // Need to do this here because user may have toggled joystick and keyboard modes
+   mEngineerButtonsWidth = getButtonWidth(engineerItemInfo, ARRAYSIZE(engineerItemInfo));
+
+   // Before we activate the helper, we need to tell it what its width will be
+   setExpectedWidth(getTotalDisplayWidth(mEngineerButtonsWidth, mEngineerItemsDisplayWidth));
    Parent::onActivated();
 
    mSelectedIndex = -1;
@@ -90,7 +102,7 @@ void EngineerHelper::render()
    S32 yPos = MENU_TOP + MENU_PADDING;
    
    if(isMenuBeingDisplayed())    // Haven't selected an item yet, so show the menu
-      drawItemMenu(menuTitle, engineerItemInfo, ARRAYSIZE(engineerItemInfo), NULL, 0);
+      drawItemMenu(menuTitle, engineerItemInfo, ARRAYSIZE(engineerItemInfo), NULL, 0, mEngineerItemsDisplayWidth, mEngineerButtonsWidth);
 
    else     // Have selected a module, need to indicate where to deploy
    {

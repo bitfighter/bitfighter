@@ -48,7 +48,12 @@ private:
    Vector<OverlayMenuItem> mMenuItems2;
    bool mMenuItems1IsCurrent;
 
+   const S32 mQuickChatItemsDisplayWidth;
+   S32 mQuickChatButtonsWidth;
+
    Vector<OverlayMenuItem> *getMenuItems(bool one);
+   S32 getWidthOfItems() const;
+   S32 getWidthOfButtons() const;
 
    void updateChatMenuItems(S32 curNode);
 

@@ -24,6 +24,10 @@ private:
    const char *getCancelMessage() const;
    S32 mSelectedIndex;
 
+   const S32 mEngineerItemsDisplayWidth;
+   S32 mEngineerButtonsWidth;
+
+   S32 getWidthOfItems() const;
    void exitHelper();
 
 public:

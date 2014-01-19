@@ -199,6 +199,10 @@ void HelperManager::activateHelper(HelperMenu::HelperMenuType helperType, bool a
          return;
    }
 
+   // Protect against the offDeckHelper being the same as a helper in the helperStack... can cause double idles
+   if(mOffDeckHelper == mHelperStack[index])
+      mOffDeckHelper = NULL;
+
    mHelperStack[index]->onActivated();
 }
 

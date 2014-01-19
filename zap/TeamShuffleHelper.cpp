@@ -76,6 +76,8 @@ void TeamShuffleHelper::shuffle()
 
 void TeamShuffleHelper::onActivated()
 {
+   //// Before we activate the helper, we need to tell it what its width will be
+   //setExpectedWidth(getTotalDisplayWidth(mEngineerButtonsWidth, mEngineerItemsDisplayWidth));
    Parent::onActivated();
 
    shuffle();

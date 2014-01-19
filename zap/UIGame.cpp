@@ -65,6 +65,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
                   mChatMessageDisplayer2 (game,  5, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mChatMessageDisplayer3 (game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mFpsRenderer(game),
+                  mLevelInfoDisplayer(game),
                   mHelpItemManager(game->getSettings())
 {
    mInScoreboardMode = false;
@@ -237,6 +238,12 @@ void GameUserInterface::displayErrorMessage(const char *format, ...)
    va_end(args);
 
    displayMessage(Colors::cmdChatColor, stringBuffer);
+}
+
+
+void GameUserInterface::onGameTypeChanged()
+{
+   mLevelInfoDisplayer.onGameTypeChanged();     // Tell mLevelInfoDisplayer there is a new GameType in town
 }
 
 
@@ -2419,11 +2426,9 @@ void GameUserInterface::renderLevelInfo()
    if(getGame()->getGameType() == NULL)
       return;
 
-   S32 teamCount = getGame()->getTeamCount();
-
    if(shouldRenderLevelInfo())
    {
-      mLevelInfoDisplayer.render(getGame()->getGameType(), teamCount, getGame()->getLevelDatabaseId() > 0);
+      mLevelInfoDisplayer.render();
       mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
    }
 }

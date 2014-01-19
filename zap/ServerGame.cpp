@@ -1816,12 +1816,14 @@ U16 ServerGame::findZoneContaining(const Point &p) const
 }
 
 
-void ServerGame::setGameType(GameType *theGameType)
+void ServerGame::setGameType(GameType *gameType)
 {
+   Parent::setGameType(gameType);
+
    if(mGameRecorderServer)
-      mGameRecorderServer->objectLocalScopeAlways(theGameType);
-   Parent::setGameType(theGameType);
+      mGameRecorderServer->objectLocalScopeAlways(gameType);
 }
+
 
 void ServerGame::onObjectAdded(BfObject *obj)
 {

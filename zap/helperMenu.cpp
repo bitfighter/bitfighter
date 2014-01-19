@@ -34,8 +34,8 @@ HelperMenu::HelperMenu()
 
    mOldBottom = 0;
    mOldCount = 0;
-   mTextPortionOfItemWidth = 0;
 }
+
 
 // Destructor
 HelperMenu::~HelperMenu()
@@ -64,6 +64,8 @@ InputCode HelperMenu::getInputCodeForOption(const OverlayMenuItem *items, S32 it
 
 void HelperMenu::onActivated()    
 {
+   mHorizLabelOffset = 0;
+
    // Activate parent classes
    Slider::onActivated();
    Scroller::onActivated();
@@ -85,7 +87,7 @@ InputCode HelperMenu::getActivationKey()
 // Exit helper mode by entering play mode
 void HelperMenu::exitHelper() 
 { 
-   Slider::onDeactivated();
+   onDeactivated();
    mClientGame->getUIManager()->getUI<GameUserInterface>()->exitHelper();
 }
 
@@ -94,16 +96,26 @@ static S32 LeftMargin = 8;          // Left margin where controller symbols/keys
 static S32 ButtonLabelGap = 9;      // Space between button/key rendering and menu item
 
 
- S32 HelperMenu::getCurrentDisplayWidth(const OverlayMenuItem *items, S32 count)
+// Returns total width of the helper
+ S32 HelperMenu::getTotalDisplayWidth(S32 widthOfButtons, S32 widthOfTextBlock) const
 {
-   return getButtonWidth(items, count) + mTextPortionOfItemWidth + LeftMargin + ButtonLabelGap + MENU_PADDING;
+   return widthOfButtons + widthOfTextBlock + LeftMargin + ButtonLabelGap + MENU_PADDING;
+}
+
+
+// Returns visible width of the helper
+ S32 HelperMenu::getCurrentDisplayWidth(S32 widthOfButtons, S32 widthOfTextBlock) const
+{
+   return getWidth() + getInsideEdge();
 }
 
 
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
 // Oh, this is so ugly and convoluted!  Drawing things on the screen is so messy!
-void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, const OverlayMenuItem *prevItems, S32 prevCount,
+void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, 
+                              const OverlayMenuItem *prevItems, S32 prevCount,
+                              S32 widthOfButtons, S32 widthOfTextBlock,
                               const char **legendText, const Color **legendColors, S32 legendCount)
 {
    glPushMatrix();
@@ -151,17 +163,15 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    FontManager::pushFontContext(HelperMenuContext);
 
-   S32 interiorEdge = getCurrentDisplayWidth(items, count);
-
    // Get the left edge of where the text portion of the menu items should be rendered
-   S32 itemIndent = interiorEdge - mTextPortionOfItemWidth - MENU_PADDING;
+   S32 itemIndent = getWidth() - widthOfTextBlock - MENU_PADDING;
 
    S32 grayLineLeft   = 20;
-   S32 grayLineRight  = interiorEdge - 20;
+   S32 grayLineRight  = getWidth() - 20;
    S32 grayLineCenter = (grayLineLeft + grayLineRight) / 2;
 
-   static const Color frameColor(.35,0,0);
-   renderSlideoutWidgetFrame(0, MENU_TOP, interiorEdge, menuBottom - MENU_TOP, frameColor);
+   static const Color frameColor = Colors::red35;
+   renderSlideoutWidgetFrame(0, MENU_TOP, getWidth(), menuBottom - MENU_TOP, frameColor);
 
    // Draw the title (above gray line)
    glColor(baseColor);
@@ -178,12 +188,9 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    yPos += grayLineBuffer;
 
-
    // Draw menu items (below gray line)
-   // {P{P  ugly, fix below
-   drawMenuItems(prevItems, prevCount, yPos + 2, menuBottom, false, mStarting - 
-                 (getButtonWidth(items, count) + LeftMargin + ButtonLabelGap + MENU_PADDING));
-   drawMenuItems(items,     count,     yPos,     menuBottom, true);      
+   drawMenuItems(prevItems, prevCount, yPos + 2, menuBottom, false, mHorizLabelOffset);
+   drawMenuItems(items,     count,     yPos,     menuBottom, true,  0);      
 
    // itemsHeight includes grayLineBuffer, transitionOffset accounts for potentially changing menu height during transition
    yPos += itemsHeight; 
@@ -205,7 +212,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 }
 
 
-S32 HelperMenu::getButtonWidth(const OverlayMenuItem *items, S32 itemCount)
+S32 HelperMenu::getButtonWidth(const OverlayMenuItem *items, S32 itemCount) const
 {
    // Determine whether to show keys or joystick buttons on menu
    InputMode inputMode = getGame()->getInputMode();
@@ -223,6 +230,13 @@ S32 HelperMenu::getButtonWidth(const OverlayMenuItem *items, S32 itemCount)
    }
 
    return buttonWidth;
+}
+
+
+void HelperMenu::setExpectedWidth_MidTransition(S32 width)
+{
+   mHorizLabelOffset =  width - getWidth();
+   Slider::setExpectedWidth_MidTransition(width);
 }
 
 
@@ -279,8 +293,9 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
       const Color *itemColor = items[i].itemColor;
 
       // Need to add buttonWidth / 2 because renderControllerButton() centers on passed coords
-      JoystickRender::renderControllerButton(LeftMargin + (F32)buttonWidth / 2, (F32)yPos - 1, Joystick::SelectedPresetIndex, code, buttonOverrideColor); 
-
+      JoystickRender::renderControllerButton(LeftMargin + horizOffset + (F32)buttonWidth / 2, 
+                                             (F32)yPos - 1, Joystick::SelectedPresetIndex, code, 
+                                             buttonOverrideColor); 
       glColor(itemColor);  
 
       S32 xPos = LeftMargin + buttonWidth + ButtonLabelGap + horizOffset;
@@ -344,18 +359,18 @@ void HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color
 
 
 // Calculate the width of the widest item in items
-S32 HelperMenu::getMaxItemWidth(const OverlayMenuItem *items, S32 count)
+S32 HelperMenu::getMaxItemWidth(const OverlayMenuItem *items, S32 count) const
 {
-   S32 width = 0;
+   S32 maxWidth = 0;
 
    for(S32 i = 0; i < count; i++)
    {
-      S32 w = getStringWidth(HelperMenuContext, MENU_FONT_SIZE, items[i].name) + getStringWidth(MENU_FONT_SIZE, items[i].help);
-      if(w > width)
-         width = w;
+      S32 width = getStringWidth(HelperMenuContext, MENU_FONT_SIZE, items[i].name) + getStringWidth(MENU_FONT_SIZE, items[i].help);
+      if(width > maxWidth)
+         maxWidth = width;
    }
 
-   return width;
+   return maxWidth;
 }
 
 
@@ -419,6 +434,7 @@ void HelperMenu::idle(U32 deltaT)
 // Gets run when closing animation is complet
 void HelperMenu::onWidgetClosed()
 {
+   Slider::onWidgetClosed();
    mHelperManager->doneClosingHelper();
 }
 

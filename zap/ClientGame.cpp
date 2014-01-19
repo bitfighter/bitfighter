@@ -813,6 +813,14 @@ void ClientGame::gotServerListFromMaster(const Vector<IPAddress> &serverList)
 }
 
 
+void ClientGame::setGameType(GameType *gameType)
+{
+   Parent::setGameType(gameType);
+
+   getUIManager()->onGameTypeChanged();
+}
+
+
 // Message relayed through master -- global chat system
 void ClientGame::gotGlobalChatMessage(const char *playerNick, const char *message, bool isPrivate)
 {

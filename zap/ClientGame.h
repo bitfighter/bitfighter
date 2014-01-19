@@ -315,6 +315,9 @@ public:
    void setShowingInGameHelp(bool showing);
    void resetInGameHelpMessages();
 
+   void setGameType(GameType *gameType);
+
+
 };
 
 

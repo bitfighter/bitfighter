@@ -991,6 +991,12 @@ void UIManager::resetInGameHelpMessages()
 }
 
 
+void UIManager::onGameTypeChanged()
+{
+   getUI<GameUserInterface>()->onGameTypeChanged();
+}
+
+
 void UIManager::readRobotLine(const string &robotLine)
 {
    getUI<EditorUserInterface>()->addRobotLine(robotLine);

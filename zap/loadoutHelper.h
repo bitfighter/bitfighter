@@ -49,7 +49,9 @@ private:
 
    S32 mCurrentIndex;
    S32 mLoadoutItemsDisplayWidth;
+   S32 mLoadoutButtonsWidth;
    S32 mPresetItemsDisplayWidth;
+   S32 mPresetButtonsWidth;
 
    Vector<OverlayMenuItem> mModuleMenuItems;
    Vector<OverlayMenuItem> mWeaponMenuItems;
@@ -57,11 +59,14 @@ private:
 
    bool mEngineerEnabled;
    bool mLoadoutChanged;      // Tracks if most recent loadout entry actually changed anything
-   bool mPresetMode;          // Are we in regular mode (false) or preset mode (true)?
+   bool mShowingPresets;      // Are we in regular mode (false) or preset mode (true)?
 
    const char *getCancelMessage() const;
    InputCode getActivationKey();
    bool getActivationKeyClosesHelper();
+
+   void activateTransitionFromLoadoutMenuToPresetMenu();
+   void rebuildPresetItems();
 
 public:
    explicit LoadoutHelper();                    // Constructor

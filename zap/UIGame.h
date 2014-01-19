@@ -302,6 +302,8 @@ public:
    void displaySuccessMessage(const char *format, ...);
 
    void onGameStarting();
+   void onGameTypeChanged();
+
    void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
 

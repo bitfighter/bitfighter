@@ -7,13 +7,16 @@
 #define _UI_LEVEL_INFO_DISPLAYER_H_
 
 #include "SlideOutWidget.h"      // Parent
+#include <string>
 
 using namespace TNL; 
+using namespace std;
 
 
 namespace Zap {
 
 class GameType;
+class ClientGame;
 
 namespace UI {
 
@@ -24,14 +27,22 @@ class LevelInfoDisplayer : public SlideOutWidget
 
 private:
    Timer mDisplayTimer;
+   const ClientGame *mGame;
+
+   S32 getSideBoxWidth() const;
+
+   string getGameTypeName() const;
+   string getShortGameTypeName() const;
 
 public:
-   LevelInfoDisplayer();
+   LevelInfoDisplayer(const ClientGame *game);
    virtual ~LevelInfoDisplayer();
+
+   void onGameTypeChanged();
 
    void resetDisplayTimer();
    void idle(U32 timeDelta);
-   void render(const GameType *gameType, S32 teamCount, bool isInDatabase) const;
+   void render() const;
 
    void clearDisplayTimer();
    virtual bool isActive() const;
