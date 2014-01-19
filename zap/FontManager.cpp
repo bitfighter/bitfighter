@@ -204,7 +204,8 @@ void FontManager::setFontContext(FontContext fontContext)
       case OldSkoolContext:
          setFont(FontRoman);
          return;
-      
+
+      case MotdContext:
       case HelpContext:
       case ErrorMsgContext:
       case ReleaseVersionContext:
@@ -214,7 +215,6 @@ void FontManager::setFontContext(FontContext fontContext)
          setFont(FontPlay);
          return;
 
-      case MotdContext:
       case FPSContext:
       case LevelInfoHeadlineContext:
       case LoadoutIndicatorContext:
