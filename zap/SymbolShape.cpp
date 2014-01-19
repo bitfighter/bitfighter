@@ -440,26 +440,6 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
    if(InputCodeManager::isKeyboardKey(inputCode))
       return SymbolShapePtr(new SymbolKey(InputCodeManager::inputCodeToString(inputCode), color));
 
-   // These items are rendered as just plain old text... for no particular reason, but it seems to work at the moment
-   else if(inputCode == LEFT_JOYSTICK)
-      return SymbolString::getSymbolText("Left Joystick", KeyFontSize, KeyContext, color);
-   else if(inputCode == RIGHT_JOYSTICK)
-      return SymbolString::getSymbolText("Right Joystick", KeyFontSize, KeyContext, color);
-   else if(inputCode == MOUSE)
-      return SymbolString::getSymbolText("Mouse", KeyFontSize, KeyContext, color);
-
-   // The following items are rendered like keys, with boxes around the text -- they are often mixed with other keys
-   // and look weird if they are just bare text
-   else if(inputCode == MOUSE_LEFT)
-      return SymbolShapePtr(new SymbolKey("Left Mouse Button", color));
-   else if(inputCode == MOUSE_MIDDLE)
-      return SymbolShapePtr(new SymbolKey("Middle Mouse Button", color));
-   else if(inputCode == MOUSE_RIGHT)
-      return SymbolShapePtr(new SymbolKey("Right Mouse Button", color));
-   else if(inputCode == MOUSE_WHEEL_UP)
-      return SymbolShapePtr(new SymbolKey("Mouse Wheel Up", color));
-   else if(inputCode == MOUSE_WHEEL_DOWN)
-      return SymbolShapePtr(new SymbolKey("Mouse Wheel Down", color));
    else if(InputCodeManager::isCtrlKey(inputCode) || InputCodeManager::isAltKey(inputCode))
    {
       Vector<string> modifiers(1);
@@ -487,8 +467,11 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
       SymbolShapePtr symbol = getSymbol(buttonShape, buttonInfo.label, &buttonInfo.color);
 
       return symbol;
-
    }
+
+   else if(InputCodeManager::inputCodeToString(inputCode) != "")
+      return SymbolShapePtr(new SymbolKey(InputCodeManager::inputCodeToString(inputCode), color)); 
+
    else if(inputCode == KEY_UNKNOWN)
       return SymbolShapePtr(new SymbolUnknown(color));
 
