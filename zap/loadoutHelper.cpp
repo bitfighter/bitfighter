@@ -174,7 +174,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
                                                    (mCurrentIndex < ShipModuleCount) ? mModuleMenuItems : 
                                                                                        mWeaponMenuItems;
 
-   if(inputCode == getActivationKey())    // Toggle normal loadout mode // preset mode
+   if(inputCode == getActivationKey())       // Toggle normal loadout mode // preset mode
    {
       TNLAssert(!mShowingPresets, "Should only get here when mShowingPresets is false -- when it is true, menu should close!");
       activateTransitionFromLoadoutMenuToPresetMenu();
