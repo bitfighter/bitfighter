@@ -173,23 +173,27 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
    Vector<OverlayMenuItem> &menuItems = mShowingPresets ? mPresetItems : 
                                                    (mCurrentIndex < ShipModuleCount) ? mModuleMenuItems : 
                                                                                        mWeaponMenuItems;
-
-   if(inputCode == getActivationKey())       // Toggle normal loadout mode // preset mode
-   {
-      TNLAssert(!mShowingPresets, "Should only get here when mShowingPresets is false -- when it is true, menu should close!");
-      activateTransitionFromLoadoutMenuToPresetMenu();
-
-      return true;
-   }
-   
    S32 index;
 
    for(index = 0; index < menuItems.size(); index++)
       if(inputCode == menuItems[index].key || inputCode == menuItems[index].button)
          break;
 
-   if(index == menuItems.size() || !menuItems[index].showOnMenu)
-      return false;
+   // Does key correspond to a menu item being displayed?  No?
+   if(index == menuItems.size() || !menuItems[index].showOnMenu)     
+   {
+      // Since this isn't a menu option, maybe it is a request to avance loadout menu to the presets display.
+      // Put this inside here so if joystick users remap the loadout button, maybe they can use the preset menu.
+      if(inputCode == getActivationKey())       // Pressing loadout button again advances to preset mode
+      {
+         TNLAssert(!mShowingPresets, "Should only get here when mShowingPresets is false -- when it is true, menu should close!");
+         activateTransitionFromLoadoutMenuToPresetMenu();
+
+         return true;
+      }
+
+      return false;     // Key not handled
+   }
 
    if(mShowingPresets)
    {
@@ -203,6 +207,9 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       exitHelper();
       return true;
    }
+
+   /////
+   // Showing normal loadout menu
 
    // Make sure user doesn't select the same loadout item twice
    bool alreadyUsed = false;
@@ -273,6 +280,8 @@ void LoadoutHelper::activateTransitionFromLoadoutMenuToPresetMenu()
                                                 (mCurrentIndex < ShipModuleCount) ? mModuleMenuItems : 
                                                                                     mWeaponMenuItems;
 
+   // The menu will be getting larger to accomodate the presets, which are wider than the standard 
+   // loadout menu.  Here we'll calculate the width of the loadout menu and the preset menu.
    S32 currDisplayWidth = getCurrentDisplayWidth(mLoadoutButtonsWidth, mLoadoutItemsDisplayWidth);
    S32 futureDisplayWidth = getTotalDisplayWidth(mPresetButtonsWidth, mPresetItemsDisplayWidth);
 
