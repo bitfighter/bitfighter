@@ -60,18 +60,20 @@ IniSettings::IniSettings()
 {
    // Can probably get rid of VerboseHelpMessages
 
-   //                       Data type     Setting name                   Default value           INI Key                      INI Section  INI Comment                                               
-   mSettings.add(new Setting<string>     ("LastName",                    "ChumpChange",         "LastName",                    "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
-   mSettings.add(new Setting<DisplayMode>("WindowMode",                  DISPLAY_MODE_WINDOWED, "WindowMode",                  "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
-   mSettings.add(new Setting<YesNo>      ("UseFakeFullscreen",           Yes,                   "UseFakeFullscreen",           "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
-   mSettings.add(new Setting<RelAbs>     ("ControlMode",                 Absolute,              "ControlMode",                 "Settings", "Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)"));
-   mSettings.add(new Setting<YesNo>      ("VoiceEcho",                   No,                    "VoiceEcho",                   "Settings", "Play echo when recording a voice message? Yes/No"));
-   mSettings.add(new Setting<YesNo>      ("VerboseHelpMessages",         Yes,                   "VerboseHelpMessages",         "Settings", "Display all messages related to loadout management?  Yes/No"));
-   mSettings.add(new Setting<YesNo>      ("ShowInGameHelp",              Yes,                   "ShowInGameHelp",              "Settings", "Show tutorial style messages in-game?  Yes/No"));
-   mSettings.add(new Setting<string>     ("JoystickType",                NoJoystick,            "JoystickType",                "Settings", "Type of joystick to use if auto-detect doesn't recognize your controller"));
-   mSettings.add(new Setting<string>     ("HelpItemsAlreadySeenList",    "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));
-   mSettings.add(new Setting<U32>        ("EditorGridSize",              255,                   "EditorGridSize",              "Settings", "Grid size used in the editor, mostly for snapping purposes"));
-   mSettings.add(new Setting<YesNo>      ("LineSmoothing",               Yes,                   "LineSmoothing",               "Settings", "Activates anti-aliased rendering.  This may be a little slower on some machines.  Yes/No"));
+   //                       Data type        Setting name                Default value           INI Key                      INI Section  INI Comment                                               
+   mSettings.add(new Setting<string>        ("LastName",                 "ChumpChange",         "LastName",                    "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
+   mSettings.add(new Setting<DisplayMode>   ("WindowMode",               DISPLAY_MODE_WINDOWED, "WindowMode",                  "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
+   mSettings.add(new Setting<YesNo>         ("UseFakeFullscreen",        Yes,                   "UseFakeFullscreen",           "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
+   mSettings.add(new Setting<RelAbs>        ("ControlMode",              Absolute,              "ControlMode",                 "Settings", "Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)"));
+   mSettings.add(new Setting<YesNo>         ("VoiceEcho",                No,                    "VoiceEcho",                   "Settings", "Play echo when recording a voice message? Yes/No"));
+   mSettings.add(new Setting<YesNo>         ("VerboseHelpMessages",      Yes,                   "VerboseHelpMessages",         "Settings", "Display all messages related to loadout management?  Yes/No"));
+   mSettings.add(new Setting<YesNo>         ("ShowInGameHelp",           Yes,                   "ShowInGameHelp",              "Settings", "Show tutorial style messages in-game?  Yes/No"));
+   mSettings.add(new Setting<string>        ("JoystickType",             NoJoystick,            "JoystickType",                "Settings", "Type of joystick to use if auto-detect doesn't recognize your controller"));
+   mSettings.add(new Setting<string>        ("HelpItemsAlreadySeenList", "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));
+   mSettings.add(new Setting<U32>           ("EditorGridSize",           255,                   "EditorGridSize",              "Settings", "Grid size used in the editor, mostly for snapping purposes"));
+   mSettings.add(new Setting<YesNo>         ("LineSmoothing",            Yes,                   "LineSmoothing",               "Settings", "Activates anti-aliased rendering.  This may be a little slower on some machines.  Yes/No"));
+
+   mSettings.add(new Setting<ColorEntryMode>("ColorEntryMode",           ColorEntryMode100,     "ColorEntryMode",        "EditorSettings", "Specifies which color entry mode to use: RGB100, RGB255, RGBHEX; best to let the game manage this"));
 
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
    joystickLinuxUseOldDeviceSystem = false;
@@ -323,7 +325,7 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
 
    for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
    {
-      string presetStr = settings->getLoadoutPreset(i).toString();
+      string presetStr = settings->getLoadoutPreset(i).toString(true);
 
       if(presetStr != "")
          ini->SetValue(section, "Preset" + itos(i + 1), presetStr);
@@ -378,7 +380,7 @@ static void writeConnectionsInfo(CIniFile *ini, IniSettings *iniSettings)
    }
 
    // Creates comma delimited list
-   ini->SetValue(section, "AlwaysPingList", listToString(iniSettings->alwaysPingList, ','));
+   ini->SetValue(section, "AlwaysPingList", listToString(iniSettings->alwaysPingList, ","));
 }
 
 
@@ -495,6 +497,17 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    gLineWidth3 = gDefaultLineWidth * 1.5f;
    gLineWidth4 = gDefaultLineWidth * 2;
 #endif
+}
+
+
+static void loadEditorSettings(CIniFile *ini, IniSettings *iniSettings)
+{
+   string section = "EditorSettings";
+
+   // Read all settings defined in the new modern manner
+   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
+   for(S32 i = 0; i < settings.size(); i++)
+      settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
 }
 
 
@@ -1453,6 +1466,7 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadSoundSettings(ini, settings, iniSettings);
    loadEffectsSettings(ini, iniSettings);
    loadGeneralSettings(ini, iniSettings);
+   loadEditorSettings(ini, iniSettings);
    loadLoadoutPresets(ini, settings);
    loadPluginBindings(ini, iniSettings);
 
@@ -1670,10 +1684,36 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValueB (section, "QueryServerSortAscending", iniSettings->queryServerSortAscending);
 
 #ifndef ZAP_DEDICATED
-   // Don't save new value if out of range, so it will go back to the old value. Just in case a user screw up with /linewidth command using value too big or too small
+   // Don't save new value if out of range, so it will go back to the old value. 
+   // Just in case a user screw up with /linewidth command using value too big or too small.
    if(gDefaultLineWidth >= 0.5 && gDefaultLineWidth <= 5)
       ini->SetValueF (section, "LineWidth", gDefaultLineWidth);
 #endif
+}
+
+
+static void writeEditorSettings(CIniFile *ini, IniSettings *iniSettings)
+{
+   const char *section = "EditorSettings";
+   ini->addSection(section);
+
+   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
+
+   if(ini->numSectionComments(section) == 0)
+   {
+      ini->sectionComment(section, "----------------");
+      ini->sectionComment(section, " EditorSettings entries relate to items in the editor");
+
+      // Write all our section comments for items defined in the new manner
+      for(S32 i = 0; i < settings.size(); i++)
+         ini->sectionComment(section, " " + settings[i]->getKey() + " - " + settings[i]->getComment());
+
+      ini->sectionComment(section, "----------------");
+   }
+
+   // Write all settings defined in the new modern manner
+   for(S32 i = 0; i < settings.size(); i++)
+      ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
 }
 
 
@@ -1885,6 +1925,7 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeEffects(ini, iniSettings);
    writeSounds(ini, iniSettings);
    writeSettings(ini, iniSettings);
+   writeEditorSettings(ini, iniSettings);
    writeDiagnostics(ini, iniSettings);
    writeLevels(ini);
    writeSkipList(ini, settings->getLevelSkipList());

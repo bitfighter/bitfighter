@@ -34,8 +34,8 @@ HelperMenu::HelperMenu()
 
    mOldBottom = 0;
    mOldCount = 0;
-   mTextPortionOfItemWidth = 0;
 }
+
 
 // Destructor
 HelperMenu::~HelperMenu()
@@ -64,6 +64,8 @@ InputCode HelperMenu::getInputCodeForOption(const OverlayMenuItem *items, S32 it
 
 void HelperMenu::onActivated()    
 {
+   mHorizLabelOffset = 0;
+
    // Activate parent classes
    Slider::onActivated();
    Scroller::onActivated();
@@ -85,7 +87,7 @@ InputCode HelperMenu::getActivationKey()
 // Exit helper mode by entering play mode
 void HelperMenu::exitHelper() 
 { 
-   Slider::onDeactivated();
+   onDeactivated();
    mClientGame->getUIManager()->getUI<GameUserInterface>()->exitHelper();
 }
 
@@ -94,9 +96,26 @@ static S32 LeftMargin = 8;          // Left margin where controller symbols/keys
 static S32 ButtonLabelGap = 9;      // Space between button/key rendering and menu item
 
 
+// Returns total width of the helper
+ S32 HelperMenu::getTotalDisplayWidth(S32 widthOfButtons, S32 widthOfTextBlock) const
+{
+   return widthOfButtons + widthOfTextBlock + LeftMargin + ButtonLabelGap + MENU_PADDING;
+}
+
+
+// Returns visible width of the helper
+ S32 HelperMenu::getCurrentDisplayWidth(S32 widthOfButtons, S32 widthOfTextBlock) const
+{
+   return getWidth() + getInsideEdge();
+}
+
+
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
-void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, const OverlayMenuItem *prevItems, S32 prevCount,
+// Oh, this is so ugly and convoluted!  Drawing things on the screen is so messy!
+void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, 
+                              const OverlayMenuItem *prevItems, S32 prevCount,
+                              S32 widthOfButtons, S32 widthOfTextBlock,
                               const char **legendText, const Color **legendColors, S32 legendCount)
 {
    glPushMatrix();
@@ -145,16 +164,14 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    FontManager::pushFontContext(HelperMenuContext);
 
    // Get the left edge of where the text portion of the menu items should be rendered
-   S32 itemIndent = calcLeftMarginForTextPortionOfEntry(items, count) + LeftMargin + ButtonLabelGap;
-
-   S32 interiorEdge = mTextPortionOfItemWidth + itemIndent + MENU_PADDING;
+   S32 itemIndent = getWidth() - widthOfTextBlock - MENU_PADDING;
 
    S32 grayLineLeft   = 20;
-   S32 grayLineRight  = interiorEdge - 20;
+   S32 grayLineRight  = getWidth() - 20;
    S32 grayLineCenter = (grayLineLeft + grayLineRight) / 2;
 
-   static const Color frameColor(.35,0,0);
-   renderSlideoutWidgetFrame(0, MENU_TOP, interiorEdge, menuBottom - MENU_TOP, frameColor);
+   static const Color frameColor = Colors::red35;
+   renderSlideoutWidgetFrame(0, MENU_TOP, getWidth(), menuBottom - MENU_TOP, frameColor);
 
    // Draw the title (above gray line)
    glColor(baseColor);
@@ -167,15 +184,13 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    // Gray line
    glColor(Colors::gray20);
-
    drawHorizLine(grayLineLeft, grayLineRight, yPos + 2);
 
    yPos += grayLineBuffer;
 
-
    // Draw menu items (below gray line)
-   drawMenuItems(prevItems, prevCount, yPos + 2, menuBottom, false, false);
-   drawMenuItems(items,     count,     yPos,     menuBottom, true,  false);      
+   drawMenuItems(prevItems, prevCount, yPos + 2, menuBottom, false, mHorizLabelOffset);
+   drawMenuItems(items,     count,     yPos,     menuBottom, true,  0);      
 
    // itemsHeight includes grayLineBuffer, transitionOffset accounts for potentially changing menu height during transition
    yPos += itemsHeight; 
@@ -197,7 +212,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 }
 
 
-S32 HelperMenu::calcLeftMarginForTextPortionOfEntry(const OverlayMenuItem *items, S32 itemCount)
+S32 HelperMenu::getButtonWidth(const OverlayMenuItem *items, S32 itemCount) const
 {
    // Determine whether to show keys or joystick buttons on menu
    InputMode inputMode = getGame()->getInputMode();
@@ -209,7 +224,7 @@ S32 HelperMenu::calcLeftMarginForTextPortionOfEntry(const OverlayMenuItem *items
          continue;
 
       InputCode code = (inputMode == InputModeJoystick) ? items[i].button : items[i].key;
-      S32 w = JoystickRender::getControllerButtonRenderedSize(Joystick::SelectedPresetIndex, code);
+      S32 w = JoystickRender::getControllerButtonRenderedSize(code);
 
       buttonWidth = MAX(buttonWidth, w);
    }
@@ -218,43 +233,49 @@ S32 HelperMenu::calcLeftMarginForTextPortionOfEntry(const OverlayMenuItem *items
 }
 
 
+void HelperMenu::setExpectedWidth_MidTransition(S32 width)
+{
+   mHorizLabelOffset =  width - getWidth();
+   Slider::setExpectedWidth_MidTransition(width);
+}
+
+
 // Render a set of menu items.  Break this code out to make transitions easier (when we'll be rendering two sets of items).
-void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top, S32 bottom, bool newItems, bool renderKeysWithItemColor)
+void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top, S32 bottom, bool newItems, S32 horizOffset)
 {
    if(!items)
       return;
 
-   S32 displayItems = 0;
+   S32 height = 0;
 
-   // Count how many items we will be displaying -- some may be hidden
+   // Calculate height of all our items, ignorning those that are hidden
    for(S32 i = 0; i < count; i++)
       if(items[i].showOnMenu)
-         displayItems++;
+         height += MENU_FONT_SIZE + MENU_FONT_SPACING;
 
-   S32 height    = (MENU_FONT_SIZE + MENU_FONT_SPACING) * displayItems;
    S32 oldHeight = (MENU_FONT_SIZE + MENU_FONT_SPACING) * mOldCount;
 
    //// Determine whether to show keys or joystick buttons on menu
    InputMode inputMode = getGame()->getInputMode();
 
-   //// For testing purposes -- toggles between keyboard and joystick renders --> Comment this out when not testing
+//// For testing purposes -- toggles between keyboard and joystick renders --> Comment this out when not testing
 //   if(Platform::getRealMilliseconds() % 2000 > 1000)
 //      inputMode = InputModeJoystick;
 //#  ifndef TNL_DEBUG
 //#     error "This block must be removed in any production builds"
 //#  endif
-   /////
+/////
 
-   S32 buttonWidth = calcLeftMarginForTextPortionOfEntry(items, count);
+   S32 buttonWidth = getButtonWidth(items, count);
 
    S32 yPos;
 
+   DisplayMode displayMode = getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
+
    if(newItems)      // Draw the new items we're transitioning to
-      yPos = prepareToRenderToDisplay(getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                                      top, oldHeight, height);
+      yPos = prepareToRenderToDisplay(displayMode, top, oldHeight, height);
    else              // Draw the old items we're transitioning away from
-      yPos = prepareToRenderFromDisplay(getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                                      top, oldHeight, height);
+      yPos = prepareToRenderFromDisplay(displayMode, top, oldHeight, height);
 
    yPos += 2;        // Aesthetics
 
@@ -267,22 +288,25 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
       InputCode code = (inputMode == InputModeJoystick) ? items[i].button : items[i].key;    // Get the input code for the thing we want to render
 
       // Render key in white, or, if there is a legend, in the color of the adjacent item
-      const Color *buttonOverrideColor = items[i].buttonOverrideColor;  // renderKeysWithItemColor ? items[i].itemColor : NULL; 
+      const Color *buttonOverrideColor = items[i].buttonOverrideColor;
       
       const Color *itemColor = items[i].itemColor;
 
       // Need to add buttonWidth / 2 because renderControllerButton() centers on passed coords
-      JoystickRender::renderControllerButton(LeftMargin + (F32)buttonWidth / 2, (F32)yPos - 1, Joystick::SelectedPresetIndex, code, buttonOverrideColor); 
-
+      JoystickRender::renderControllerButton(LeftMargin + horizOffset + (F32)buttonWidth / 2, 
+                                             (F32)yPos - 1, Joystick::SelectedPresetIndex, code, 
+                                             buttonOverrideColor); 
       glColor(itemColor);  
 
-      S32 textWidth = drawStringAndGetWidth(LeftMargin + buttonWidth + ButtonLabelGap, yPos, MENU_FONT_SIZE, items[i].name); 
+      S32 xPos = LeftMargin + buttonWidth + ButtonLabelGap + horizOffset;
+      S32 textWidth = drawStringAndGetWidth(xPos, yPos, MENU_FONT_SIZE, items[i].name); 
 
       // Render help string, if one is available
       if(strcmp(items[i].help, "") != 0)
       {
          glColor(items[i].helpColor);    
-         drawString(LeftMargin + buttonWidth + ButtonLabelGap + textWidth + ButtonLabelGap, yPos, MENU_FONT_SIZE, items[i].help);
+         xPos += textWidth + ButtonLabelGap;
+         drawString(xPos, yPos, MENU_FONT_SIZE, items[i].help);
       }
 
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
@@ -302,13 +326,13 @@ void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &base
                   "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
    else
    {
-      S32 butSize = JoystickRender::getControllerButtonRenderedSize(Joystick::SelectedPresetIndex, BUTTON_BACK);
 
-      xPos += drawStringAndGetWidth(xPos, yPos, MENU_LEGEND_FONT_SIZE, "Press ") + 4;
-      JoystickRender::renderControllerButton(F32(xPos + 4), F32(yPos), Joystick::SelectedPresetIndex, BUTTON_BACK);
-      xPos += butSize;
-      glColor(baseColor);
-      drawString(xPos, yPos, MENU_LEGEND_FONT_SIZE, "to cancel");
+      static const SymbolString JoystickInstructions(
+            "Press [[Back]] to cancel", 
+            mClientGame->getSettings()->getInputCodeManager(), MenuHeaderContext, 
+            MENU_LEGEND_FONT_SIZE, false, AlignmentCenter);
+
+      JoystickInstructions.render(Point(xPos + 4, yPos));
    }
 }
 
@@ -335,17 +359,18 @@ void HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color
 
 
 // Calculate the width of the widest item in items
-S32 HelperMenu::getMaxItemWidth(const OverlayMenuItem *items, S32 count)
+S32 HelperMenu::getMaxItemWidth(const OverlayMenuItem *items, S32 count) const
 {
-   S32 width = -1;
+   S32 maxWidth = 0;
+
    for(S32 i = 0; i < count; i++)
    {
-      S32 w = getStringWidth(HelperMenuContext, MENU_FONT_SIZE, items[i].name) + getStringWidth(MENU_FONT_SIZE, items[i].help);
-      if(w > width)
-         width = w;
+      S32 width = getStringWidth(HelperMenuContext, MENU_FONT_SIZE, items[i].name) + getStringWidth(MENU_FONT_SIZE, items[i].help);
+      if(width > maxWidth)
+         maxWidth = width;
    }
 
-   return width;
+   return maxWidth;
 }
 
 
@@ -361,19 +386,24 @@ bool HelperMenu::processInputCode(InputCode inputCode)
    // First, check navigation keys.  When in keyboard mode, we allow the loadout key to toggle menu on and off...
    // we can't do this in joystick mode because it is likely that the loadout key is also used to select items
    // from the loadout menu.
-   if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_DPAD_LEFT ||
-      inputCode == BUTTON_BACK || 
-      (getGame()->getInputMode() == InputModeKeyboard && inputCode == getActivationKey()) )
+   if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_BACK || 
+      (getActivationKeyClosesHelper() && getGame()->getInputMode() == InputModeKeyboard && inputCode == getActivationKey()) )
    {
       exitHelper();      
 
       if(mClientGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
-         mClientGame->displayMessage(Colors::paleRed, getCancelMessage());
+         mClientGame->displayMessage(Colors::ErrorMessageTextColor, getCancelMessage());
 
       return true;
    }
 
    return false;
+}
+
+
+bool HelperMenu::getActivationKeyClosesHelper()
+{
+   return true;
 }
 
 
@@ -404,6 +434,7 @@ void HelperMenu::idle(U32 deltaT)
 // Gets run when closing animation is complet
 void HelperMenu::onWidgetClosed()
 {
+   Slider::onWidgetClosed();
    mHelperManager->doneClosingHelper();
 }
 

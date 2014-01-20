@@ -82,7 +82,7 @@ public:
    bool isModuleSecondaryActive(ShipModule module) const;
 
    Vector<U8> toU8Vector() const;
-   string toString() const;
+   string toString(bool compact) const;
 };
 
 

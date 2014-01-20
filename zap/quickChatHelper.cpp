@@ -10,6 +10,8 @@
 #include "ClientGame.h"
 #include "Colors.h"
 
+#include "JoystickRender.h"
+
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 
@@ -48,12 +50,13 @@ QuickChatNode::~QuickChatNode()
 
 Vector<QuickChatNode> QuickChatHelper::nodeTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file
 
-QuickChatHelper::QuickChatHelper()
+QuickChatHelper::QuickChatHelper() :
+   mQuickChatItemsDisplayWidth( getWidthOfItems() )
 {
    mCurNode = 0;
-   mTextPortionOfItemWidth = -1;
    mMenuItems1IsCurrent = true;
 }
+
 
 // Destructor
 QuickChatHelper::~QuickChatHelper()
@@ -94,7 +97,9 @@ void QuickChatHelper::render()
    {
       // Protect against an empty oldMenuItems list, as will happen when this is called at the top level
       const OverlayMenuItem *oldItem = oldMenuItems->size() > 0 ? &oldMenuItems->get(0) : NULL;
-      drawItemMenu("QuickChat menu", &menuItems->get(0), menuItems->size(), oldItem, oldMenuItems->size(),
+      drawItemMenu("QuickChat menu", &menuItems->get(0), menuItems->size(), 
+                   oldItem, oldMenuItems->size(), 
+                   mQuickChatButtonsWidth, mQuickChatItemsDisplayWidth,
                    quickChatLegendText, quickChatLegendColors, ARRAYSIZE(quickChatLegendText));
    }
 }
@@ -102,23 +107,54 @@ void QuickChatHelper::render()
 
 void QuickChatHelper::onActivated()
 {
+   // Need to do this here because user may have toggled joystick and keyboard modes
+   mQuickChatButtonsWidth = getWidthOfButtons();   
+
+   // Before we activate the helper, we need to tell it what its width will be
+   setExpectedWidth(getTotalDisplayWidth(mQuickChatButtonsWidth, mQuickChatItemsDisplayWidth));
    Parent::onActivated();
+
 
    mMenuItems1.clear();
    mMenuItems2.clear();
 
    updateChatMenuItems(0);
+}
 
-  
-   if(mTextPortionOfItemWidth == -1)
+
+S32 QuickChatHelper::getWidthOfItems() const
+{
+   S32 maxWidth = 0;
+
+   for(S32 i = 0; i < nodeTree.size(); i++)
    {
-      for(S32 i = 0; i < nodeTree.size(); i++)
-      {
-         S32 width = getStringWidth(MENU_FONT_SIZE, nodeTree[i].caption.c_str());
-         if(width > mTextPortionOfItemWidth)
-            mTextPortionOfItemWidth = width;
-      }
+      S32 width = getStringWidth(MENU_FONT_SIZE, nodeTree[i].caption.c_str());
+
+      if(width > maxWidth)
+         maxWidth = width;
    }
+
+   return maxWidth;
+}
+
+
+S32 QuickChatHelper::getWidthOfButtons() const
+{
+   // Determine whether to show keys or joystick buttons on menu
+   InputMode inputMode = getGame()->getInputMode();
+
+   S32 maxWidth = 0;
+
+   for(S32 i = 0; i < nodeTree.size(); i++)
+   {
+      InputCode code = (inputMode == InputModeJoystick) ? nodeTree[i].buttonCode : nodeTree[i].inputCode;
+      S32 width = JoystickRender::getControllerButtonRenderedSize(code);
+
+      if(width > maxWidth)
+         maxWidth = width;
+   }
+
+   return maxWidth;
 }
 
 

@@ -71,6 +71,7 @@ GameRecorderPlayback::GameRecorderPlayback(ClientGame *game, const char *filenam
    mSizeToRead = 0;
    mCurrentTime = 0;
    mTotalTime = 0;
+   mIsButtonHeldDown = false;
 
    if(!mFile)
       mFile = fopen(filename, "rb");
@@ -138,10 +139,10 @@ void GameRecorderPlayback::addPendingMove(Move *theMove)
    bool nextButton = theMove->fire;
    bool prevButton = theMove->modulePrimary[0] || theMove->modulePrimary[1];
 
-   if(!isButtonHeldDown && (nextButton || prevButton))
+   if(!mIsButtonHeldDown && (nextButton || prevButton))
       changeSpectate(nextButton ? 1 : -1);
 
-   isButtonHeldDown = nextButton || prevButton;
+   mIsButtonHeldDown = nextButton || prevButton;
 }
 void GameRecorderPlayback::changeSpectate(S32 n)
 {
@@ -358,6 +359,7 @@ void PlaybackServerDownloadUserInterface::processSelection(U32 index)
    }
 }
 
+
 void PlaybackServerDownloadUserInterface::receivedLevelList(const Vector<string> &levels)
 {
    mLevels = levels;
@@ -373,6 +375,9 @@ void PlaybackServerDownloadUserInterface::receivedLevelList(const Vector<string>
 PlaybackGameUserInterface::PlaybackGameUserInterface(ClientGame *game) : UserInterface(game)
 {
    mGameInterface = game->getUIManager()->getUI<GameUserInterface>();
+   mSpeed = 0;
+   mSpeedRemainder = 0;
+   mVisible = false;
 }
 
 
@@ -384,6 +389,8 @@ void PlaybackGameUserInterface::onActivate()
    mSpeedRemainder = 0;
    mVisible = true;
 }
+
+
 void PlaybackGameUserInterface::onReactivate()
 {
    Cursor::enableCursor();
@@ -507,7 +514,7 @@ void PlaybackGameUserInterface::onTextInput(char ascii) {mGameInterface->onTextI
 
 void PlaybackGameUserInterface::onMouseMoved()
 {
-   F32 x = DisplayManager::getScreenInfo()->getMousePos()->x;
+//   F32 x = DisplayManager::getScreenInfo()->getMousePos()->x;
    F32 y = DisplayManager::getScreenInfo()->getMousePos()->y;
 
    mVisible = (y >= 100); // Maybe a better way to hide the bottom bar?

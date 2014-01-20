@@ -236,50 +236,26 @@ static void renderMenuInstructions(GameSettings *settings)
    S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
-   S32 y = canvasHeight - UserInterface::vertMargin - 20;
+   F32 y = F32(canvasHeight - UserInterface::vertMargin - 20);
    const S32 size = 18;
 
    glColor(Colors::white);
 
-   U32 joystickIndex = Joystick::SelectedPresetIndex;
-
    if(settings->getInputMode() == InputModeKeyboard)
-      drawCenteredString(y, size, "UP, DOWN to choose | ENTER to select | ESC exits menu");
+   {
+      static const SymbolString KeyboardInstructions(
+            "[[Up Arrow]], [[Down Arrow]] to choose | [[Enter]] to select | [[Esc]] exits menu", 
+            settings->getInputCodeManager(), MenuHeaderContext, size, false, AlignmentCenter);
+
+      KeyboardInstructions.render(Point(canvasWidth / 2, y + size));
+   }
    else
    {
-      S32 upWidth    = JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_DPAD_UP);
-      S32 downWidth  = JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_DPAD_DOWN);
-      S32 startWidth = JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_START);
-      S32 backWidth  = JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_BACK);
+      static const SymbolString JoystickInstructions(
+            "[[DPad Up]],  [[Dpad Down]] to choose | [[Start]] to select | [[Back]] exits menu", 
+            settings->getInputCodeManager(), MenuHeaderContext, size, false, AlignmentCenter);
 
-      S32 totalWidth = upWidth + downWidth + startWidth + backWidth +
-                       getStringWidth(size, "to choose |  to select |  exits menu");
-
-      S32 x = canvasWidth / 2 - UserInterface::horizMargin - totalWidth / 2;
-
-      JoystickRender::renderControllerButton((F32)x, (F32)y, joystickIndex, BUTTON_DPAD_UP);
-      x += upWidth + getStringWidth(size, " ");
-
-      JoystickRender::renderControllerButton((F32)x, (F32)y, joystickIndex, BUTTON_DPAD_DOWN);
-      x += downWidth + getStringWidth(size, " ");
-
-      glColor(Colors::white);
-      static const char *msg1 = "to choose | ";
-
-      x += drawStringAndGetWidth(x, y, size, msg1);
-
-      JoystickRender::renderControllerButton((F32)x, F32(y + 4), joystickIndex, BUTTON_START);
-      x += startWidth;
-
-      glColor(Colors::white);
-      static const char *msg2 = "to select | ";
-      x += drawStringAndGetWidth(x, y, size, msg2);
-
-      JoystickRender::renderControllerButton(F32(x + 4), F32(y + 4), joystickIndex, BUTTON_BACK);
-      x += backWidth;
-
-      glColor(Colors::white);
-      drawString(x, y, size, "exits menu");
+      JoystickInstructions.render(Point(canvasWidth / 2, y + size));
    }
 }
 

@@ -1501,7 +1501,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
 
    if(dataBuffer)
    {
-      if(dataBuffer->getBufferSize() < maxDataBufferSize)  // Limit memory consumption
+      if(dataBuffer->getBufferSize() < maxDataBufferSize || isInitiator())  // Limit memory consumption (no limit on clients due to how big game recordings can be)
          dataBuffer->appendBuffer(*data.getPointer());
    }
    else

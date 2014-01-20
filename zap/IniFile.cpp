@@ -96,7 +96,7 @@ void CIniFile::ReadFile()
 
 
 // Parse a single line of the INI file and break it into its component bits
-void CIniFile::processLine(string line)
+void CIniFile::processLine(string line)      // Pass by value
 {
    string k, v;
    string key, value;
@@ -204,9 +204,9 @@ S32 CIniFile::findKey(S32 const sectionId, const string &keyName) const
 }
 
 
-S32 CIniFile::addSection(const string keyname)
+S32 CIniFile::addSection(const string keyname)  // Pass by value
 {
-   if(findSection(keyname) != noID)            // Don't create duplicate keys!
+   if(findSection(keyname) != noID)             // Don't create duplicate keys!
       return noID;
 
    sectionNames.push_back(keyname);
@@ -233,7 +233,7 @@ string CIniFile::ValueName(S32 const sectionId, S32 const valueID) const
 }
 
 
-string CIniFile::ValueName(const string keyname, S32 const valueID) const
+string CIniFile::ValueName(const string &keyname, S32 const valueID) const
 {
    S32 sectionId = findSection(keyname);
    if(sectionId == noID)
@@ -242,7 +242,7 @@ string CIniFile::ValueName(const string keyname, S32 const valueID) const
 }
 
 
-bool CIniFile::SetValue(S32 const sectionId, S32 const valueID, const string value)
+bool CIniFile::SetValue(S32 const sectionId, S32 const valueID, const string &value)
 {
    if(sectionId < sections.size() && valueID < sections[sectionId].keys.size())
       sections[sectionId].values[valueID] = value;
@@ -480,7 +480,7 @@ void CIniFile::Erase()
 }
 
 
-void CIniFile::headerComment(const string comment)
+void CIniFile::headerComment(const string &comment)
 {
    headerComments.push_back(comment);
 }
@@ -534,7 +534,7 @@ bool CIniFile::sectionComment(S32 sectionId, const string &comment)
 }
 
 
-bool CIniFile::sectionComment(const string section, const string comment, bool const create)
+bool CIniFile::sectionComment(const string &section, const string &comment, bool const create)
 {
    S32 sectionId = findSection(section);
 
@@ -568,7 +568,7 @@ string CIniFile::sectionComment(S32 const sectionId, S32 const commentID) const
 }
 
 
-string CIniFile::sectionComment(const string keyname, S32 const commentID) const
+string CIniFile::sectionComment(const string &keyname, S32 const commentID) const
 {
    S32 sectionId = findSection(keyname);
 
@@ -605,7 +605,7 @@ bool CIniFile::deleteSectionComments(S32 const sectionId)
 }
 
 
-bool CIniFile::deleteSectionComments(const string keyname)
+bool CIniFile::deleteSectionComments(const string &keyname)
 {
    S32 sectionId = findSection(keyname);
    if(sectionId == noID)
@@ -720,7 +720,7 @@ string CIniFile::GetValueName(S32 const sectionID, S32 const keyID) const
 
 
 
-string CIniFile::GetValueName( const string section, S32 const keyID) const
+string CIniFile::GetValueName( const string &section, S32 const keyID) const
 {
    return ValueName( section, keyID);
 }

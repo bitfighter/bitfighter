@@ -2277,30 +2277,30 @@ void renderAsteroidSpawn(const Point &pos, S32 time)
 
    renderAsteroid(pos, 2, 0.1f, &Colors::green, alpha);
 
-   static const F32 lines[] = {
-         // Inner
-          -8, -12,     8, -12,
-          12,  -8,    12,   8,
-           8,  12,    -8,  12,
-         -12,   8,   -12,  -8,
-
-         // Outer
-         -12, -16,    12, -16,
-          16, -12,    16,  12,
-          12,  16,   -12,  16,
-         -16,  12,   -16, -12,
-   };
-
-   glColor(Colors::green, 0.5f);
-
-   glPushMatrix();
-      glTranslate(pos);
-
-      // Inner
-      renderVertexArray(lines, 8, GL_LINE_LOOP);
-      // Outer
-      renderVertexArray(&lines[16], 8, GL_LINE_LOOP);
-   glPopMatrix();
+//   static const F32 lines[] = {
+//         // Inner
+//          -8, -12,     8, -12,
+//          12,  -8,    12,   8,
+//           8,  12,    -8,  12,
+//         -12,   8,   -12,  -8,
+//
+//         // Outer
+//         -12, -16,    12, -16,
+//          16, -12,    16,  12,
+//          12,  16,   -12,  16,
+//         -16,  12,   -16, -12,
+//   };
+//
+//   glColor(Colors::green, 0.5f);
+//
+//   glPushMatrix();
+//      glTranslate(pos);
+//
+//      // Inner
+//      renderVertexArray(lines, 8, GL_LINE_LOOP);
+//      // Outer
+//      renderVertexArray(&lines[16], 8, GL_LINE_LOOP);
+//   glPopMatrix();
 }
 
 

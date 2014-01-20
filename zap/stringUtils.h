@@ -58,7 +58,7 @@ F64 stof(const string &s);
 string replaceString(const string &strString, const string &strOld, const string &strNew);
 string stripExtension(string filename);
 
-string listToString(const Vector<string> &words, char seperator);
+string listToString(const Vector<string> &words, const string &seperator);
 
 // TODO: Merge these methods
 Vector<string> parseString(const string &line);
@@ -78,7 +78,7 @@ string ucase(string strToConvert);
 
 bool isInteger(const char *str);
 
-const char *sanitizeForJson(const char *value);
+string sanitizeForJson(const char *value);
 string sanitizeForSql(const string &value);
 
 bool isControlCharacter(char ch);
@@ -131,7 +131,8 @@ string toString(const string &val);
 string toString(S32 val);                
 string toString(DisplayMode displayMode);
 string toString(YesNo yesNo);            
-string toString(RelAbs relAbs);  
+string toString(RelAbs relAbs); 
+string toString(ColorEntryMode colorMode);
 
 bool isPrintable(char c);
 bool isHex(char c);

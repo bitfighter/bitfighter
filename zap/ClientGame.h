@@ -105,8 +105,9 @@ public:
 
    void correctPlayerName(const string &name);                                      // When server corrects capitalization of name or similar
 
-   void displayShipDesignChangedMessage(const LoadoutTracker &loadout, const char *msgToShowIfLoadoutsAreTheSame);
-   
+   void requestLoadoutPreset(S32 index);
+   void displayShipDesignChangedMessage(const LoadoutTracker &loadout, const string &baseSuccesString, 
+                                                                       const char *msgToShowIfLoadoutsAreTheSame);
    void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
 
@@ -223,7 +224,6 @@ public:
    void setActiveWeapon(U32 weaponIndex);
    bool isShowingDebugShipCoords();
 
-
    void requestSpawnDelayed(bool incursPenalty) const;
    U32 getReturnToGameDelay() const;
    bool inReturnToGameCountdown() const;
@@ -314,6 +314,9 @@ public:
 
    void setShowingInGameHelp(bool showing);
    void resetInGameHelpMessages();
+
+   void setGameType(GameType *gameType);
+
 
 };
 

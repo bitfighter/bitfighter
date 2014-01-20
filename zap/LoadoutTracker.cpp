@@ -330,10 +330,11 @@ bool LoadoutTracker::operator != (const LoadoutTracker &other) const
 }
 
 
-string LoadoutTracker::toString() const
+// Pass compact == true to squeeze spaces out of string, false to make string prettier
+string LoadoutTracker::toString(bool compact) const
 {
    if(!isValid())
-      return "";
+      return compact ? "" : "<< Undefined >>";
 
    Vector<string> loadoutStrings(ShipModuleCount + ShipWeaponCount);    // Reserve space for efficiency
 
@@ -345,8 +346,7 @@ string LoadoutTracker::toString() const
    for(S32 i = 0; i < ShipWeaponCount; i++)
       loadoutStrings.push_back(WeaponInfo::getWeaponInfo(mWeapons[i]).name.getString());
 
-   return listToString(loadoutStrings, ',');
+   return listToString(loadoutStrings, compact ? "," : ", ");
 }
-
 
 }

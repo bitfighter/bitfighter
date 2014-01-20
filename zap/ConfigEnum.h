@@ -30,6 +30,14 @@ enum YesNo {
 };
 
 
+enum ColorEntryMode {
+   ColorEntryMode100,
+   ColorEntryMode255,
+   ColorEntryModeHex,
+   ColorEntryModeCount
+};
+
+
 enum RelAbs{
    Relative,
    Absolute

@@ -40,13 +40,13 @@ namespace Zap {
 
 extern SFXProfile *gSFXProfiles;
 
-SoundEffect::SoundEffect(U32 profileIndex, ByteBufferPtr ib, F32 gain, Point position, Point velocity)
+SoundEffect::SoundEffect(U32 profileIndex, ByteBufferPtr ib, F32 gain, Point position, Point velocity) :
+   mPosition(position),
+   mVelocity(velocity)
 {
    mSFXIndex = profileIndex;
    mProfile = gSFXProfiles + profileIndex;
    mGain = gain;
-   mPosition = position;
-   mVelocity = velocity;
    mSourceIndex = -1;
    mPriority = 0;
    mInitialBuffer = ib;

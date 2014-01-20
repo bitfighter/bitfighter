@@ -476,7 +476,7 @@ void MasterServerConnection::writeClientServerList_JSON()
             continue;
 
          fprintf(f, "%s\n\t\t{\n\t\t\t\"serverName\": \"%s\",\n\t\t\t\"protocolVersion\": %d,\n\t\t\t\"currentLevelName\": \"%s\",\n\t\t\t\"currentLevelType\": \"%s\",\n\t\t\t\"playerCount\": %d\n\t\t}",
-                     first ? "" : ", ", sanitizeForJson(server->mPlayerOrServerName.getString()),
+                     first ? "" : ", ", sanitizeForJson(server->mPlayerOrServerName.getString()).c_str(),
                      server->mCSProtocolVersion, server->mLevelName.getString(), server->mLevelType.getString(), server->mPlayerCount);
          playerCount += server->mPlayerCount;
          serverCount++;
@@ -493,7 +493,7 @@ void MasterServerConnection::writeClientServerList_JSON()
       {
          if(listClient(clientList->get(i)))
          {
-            fprintf(f, "%s\"%s\"", first ? "" : ", ", sanitizeForJson(clientList->get(i)->mPlayerOrServerName.getString()));
+            fprintf(f, "%s\"%s\"", first ? "" : ", ", sanitizeForJson(clientList->get(i)->mPlayerOrServerName.getString()).c_str());
             first = false;
          }
       }
@@ -515,7 +515,7 @@ void MasterServerConnection::writeClientServerList_JSON()
       fprintf(f, "],\n\t\"serverCount\": %d,\n\t\"playerCount\": %d,\n", serverCount, playerCount);
 
       // And the message-of-the-day
-      fprintf(f, "\t\"motd\": \"%s\"\n}\n", sanitizeForJson(mMaster->getSettings()->getMotd().c_str()));
+      fprintf(f, "\t\"motd\": \"%s\"\n}\n", sanitizeForJson(mMaster->getSettings()->getMotd().c_str()).c_str());
 
       fflush(f);
       fclose(f);

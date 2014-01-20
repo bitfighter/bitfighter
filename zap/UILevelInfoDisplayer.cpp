@@ -6,7 +6,6 @@
 #include "UILevelInfoDisplayer.h"   // Header
 
 #include "DisplayManager.h"
-#include "game.h"
 #include "ClientGame.h"
 #include "UI.h"                     // Only here for the margins
 #include "GameTypesEnum.h"
@@ -29,15 +28,25 @@ namespace Zap {
 namespace UI {
 
 // Constructor
-LevelInfoDisplayer::LevelInfoDisplayer()
+LevelInfoDisplayer::LevelInfoDisplayer(const ClientGame *game) :
+   mGame(game),
+   mDisplayTimer(SIX_SECONDS)
 {
-   mDisplayTimer.setPeriod(SIX_SECONDS);
+   // Use width of side item, because it is greater than the thickness of the top item
+   //setExpectedWidth(getSideBoxWidth());
 }
+
 
 // Destructor
 LevelInfoDisplayer::~LevelInfoDisplayer()
 {
    // Do nothing
+}
+
+
+void LevelInfoDisplayer::onGameTypeChanged()
+{
+   setExpectedWidth(getSideBoxWidth()); 
 }
 
 
@@ -61,10 +70,20 @@ void LevelInfoDisplayer::clearDisplayTimer()
 }
 
 
-void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool isInDatabase) const
+static const S32 SideMargin       = UserInterface::horizMargin;
+static const S32 InstructionSize  = 13;
+static const S32 GameTypeTextSize = 20;
+static const S32 ScoreToWinSize   = 20;
+
+static const char *ScoreToWinStr = "Score to Win:";
+
+
+void LevelInfoDisplayer::render() const
 {
    glPushMatrix();
    glTranslate(0, getInsideEdge(), 0);
+
+   GameType *gameType = mGame->getGameType();
 
    FontManager::pushFontContext(MenuHeaderContext);
 
@@ -76,7 +95,10 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    const S32 titleGap  = 10;
 
    Vector<SymbolShapePtr> symbols;
-   symbols.push_back(SymbolString::getSymbolText(gameType->getLevelName(), titleSize, LevelInfoHeadlineContext));
+   string levelName = gameType->getLevelName();
+   if(levelName == "")
+      levelName = "Unnamed Level";
+   symbols.push_back(SymbolString::getSymbolText(levelName, titleSize, LevelInfoHeadlineContext));
 
    // Find the unicode in Character Map or similar utility,
    // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
@@ -92,10 +114,10 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    static const string divider = " / ";
    static const F32 dividerWidth = getStringWidth(LevelInfoContext, RatingSize, divider.c_str());
 
-   ClientGame *clientGame = static_cast<ClientGame *>(gameType->getGame());
+   PersonalRating myRating    = mGame->getPersonalLevelRating();
+   S16            totalRating = mGame->getTotalLevelRating();
 
-   PersonalRating myRating    = clientGame->getPersonalLevelRating();
-   S16            totalRating = clientGame->getTotalLevelRating();
+   bool isInDatabase = mGame->getLevelDatabaseId() > 0;
 
    if(isInDatabase)
    {
@@ -156,8 +178,6 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
       drawString_fixed(textleft, y2 + legendSize / 2, legendSize, "Total rating");
    }
 
-
-
    const char *descr           = gameType->getLevelDescription();
    const S32 descriptionSize   = 20;
    const S32 descriptionHeight = showDescr ? descriptionSize + 8 : 0;
@@ -205,74 +225,105 @@ void LevelInfoDisplayer::render(const GameType *gameType, S32 teamCount, bool is
    bool showTwoLinesOfInstructions = gameType->getInstructionString()[1];     // Show 'em if we got 'em
 
    const S32 sideBoxY = 275;     // Top edge of side box
-   const S32 sideMargin = UserInterface::horizMargin;
 
-   const S32 gameTypeTextSize  = 20;
    const S32 gameTypeMargin    =  8;
-   const S32 gameTypeHeight    = gameTypeTextSize + gameTypeMargin;
+   const S32 gameTypeHeight    = GameTypeTextSize + gameTypeMargin;
 
-   const S32 instructionSize   = 13;
    const S32 instructionMargin =  5;
    const S32 postInstructionMargin = 8 - instructionMargin;
-   const S32 instructionHeight = instructionSize + instructionMargin;
+   const S32 instructionHeight = InstructionSize + instructionMargin;
 
-   const S32 scoreToWinSize    = 20;
    const S32 scoreToWinMargin  =  6;
-   const S32 scoreToWinHeight  = scoreToWinSize  + scoreToWinMargin;
+   const S32 scoreToWinHeight  = ScoreToWinSize + scoreToWinMargin;
 
    const S32 sideBoxTotalHeight = frameMargin + gameTypeHeight + instructionHeight * (showTwoLinesOfInstructions ? 2 : 1) + 
                                   postInstructionMargin + scoreToWinHeight + frameMargin;
 
-   const S32 instrWidth = max(getStringWidth(instructionSize, gameType->getInstructionString()[0]), 
-                              showTwoLinesOfInstructions ? getStringWidth(instructionSize, gameType->getInstructionString()[1]) : 0); 
+   string gt  = getGameTypeName();
+   string sgt = getShortGameTypeName();
 
-   // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
-   bool team = gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && teamCount > 1;
-   string gt  = string(team ? "Team " : "") + gameType->getGameTypeName();
-   string sgt = string("[") + gameType->getShortName() + "]";
-
-   const S32 gameTypeWidth = getStringPairWidth(gameTypeTextSize, LevelInfoHeadlineContext, 
-                                                LevelInfoHeadlineContext, gt.c_str(), sgt.c_str());
-
-
-   static const char *scoreToWinStr = "Score to Win:";
-   
-   FontManager::pushFontContext(LevelInfoHeadlineContext);
-   const S32 scoreToWinWidth = getStringWidthf(scoreToWinSize, "%s%d", scoreToWinStr, gameType->getWinningScore()) + 5;
-   FontManager::popFontContext();
-
-   const S32 sideBoxWidth = max(instrWidth, max(gameTypeWidth, scoreToWinWidth)) + sideMargin * 2;
+   const S32 sideBoxWidth = getSideBoxWidth();
    const S32 sideBoxCen   = DisplayManager::getScreenInfo()->getGameCanvasWidth() - sideBoxWidth / 2;
    
-   renderSlideoutWidgetFrame(DisplayManager::getScreenInfo()->getGameCanvasWidth() - sideBoxWidth, sideBoxY, sideBoxWidth, sideBoxTotalHeight, Colors::blue);
+   renderSlideoutWidgetFrame(DisplayManager::getScreenInfo()->getGameCanvasWidth() - sideBoxWidth, 
+                             sideBoxY, sideBoxWidth, sideBoxTotalHeight, Colors::blue);
 
    yPos = sideBoxY + frameMargin;
 
-   drawCenteredStringPair(sideBoxCen, yPos, gameTypeTextSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext,
+   drawCenteredStringPair(sideBoxCen, yPos, GameTypeTextSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext,
                           Colors::white, Colors::cyan, gt.c_str(), sgt.c_str());
 
    yPos += gameTypeHeight;
 
    glColor(Colors::yellow);
-   drawCenteredString(sideBoxCen, yPos, instructionSize, gameType->getInstructionString()[0]);
+   drawCenteredString(sideBoxCen, yPos, InstructionSize, gameType->getInstructionString()[0]);
    yPos += instructionHeight;
 
    // Add a second line of instructions if there is one...
    if(showTwoLinesOfInstructions)
    {
-      drawCenteredString(sideBoxCen, yPos, instructionSize, gameType->getInstructionString()[1]);
+      drawCenteredString(sideBoxCen, yPos, InstructionSize, gameType->getInstructionString()[1]);
       yPos += instructionHeight;
    }
 
    yPos += postInstructionMargin;
 
-   drawCenteredStringPair(sideBoxCen, yPos, scoreToWinSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext, 
-                          Colors::cyan, Colors::red, scoreToWinStr, itos(gameType->getWinningScore()).c_str());
+   drawCenteredStringPair(sideBoxCen, yPos, ScoreToWinSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext, 
+                          Colors::cyan, Colors::red, ScoreToWinStr, itos(gameType->getWinningScore()).c_str());
    yPos += scoreToWinHeight;
 
    glPopMatrix();
 
    FontManager::popFontContext();
+}
+
+
+string LevelInfoDisplayer::getGameTypeName() const
+{
+   GameType *gameType = mGame->getGameType();
+   S32 teamCount = mGame->getTeamCount();
+
+   // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
+   bool team = gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && teamCount > 1;
+   return string(team ? "Team " : "") + gameType->getGameTypeName();
+}
+
+
+string LevelInfoDisplayer::getShortGameTypeName() const
+{
+   GameType *gameType = mGame->getGameType();
+
+   return string("[") + gameType->getShortName() + "]";
+}
+
+
+S32 LevelInfoDisplayer::getSideBoxWidth() const
+{
+   GameType *gameType = mGame->getGameType();
+
+   TNLAssert(gameType, "Expect a gameType here!");
+
+   bool showTwoLinesOfInstructions = gameType->getInstructionString()[1];     // Show 'em if we got 'em
+
+   string gt  = getGameTypeName();
+   string sgt = getShortGameTypeName();
+
+   
+   FontManager::pushFontContext(LevelInfoHeadlineContext);
+   const S32 scoreToWinWidth = getStringWidthf(ScoreToWinSize, "%s%d", ScoreToWinStr, gameType->getWinningScore()) + 5;
+   FontManager::popFontContext();
+
+
+   const S32 instrWidth = max(getStringWidth(InstructionSize, gameType->getInstructionString()[0]), 
+                           showTwoLinesOfInstructions ? getStringWidth(InstructionSize, gameType->getInstructionString()[1]) : 0); 
+
+   const S32 gameTypeWidth = getStringPairWidth(GameTypeTextSize, LevelInfoHeadlineContext, 
+                                                LevelInfoHeadlineContext, gt.c_str(), sgt.c_str());
+
+
+   S32 width = max(instrWidth, max(gameTypeWidth, scoreToWinWidth)) + SideMargin * 2;
+
+   return width;
 }
 
 

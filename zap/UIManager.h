@@ -260,6 +260,7 @@ public:
    void displaySuccessMessage(const char *message);
    void setShowingInGameHelp(bool showing);
    void resetInGameHelpMessages();
+   void onGameTypeChanged();
 
    // EditorUI
    void readRobotLine(const string &robotLine);

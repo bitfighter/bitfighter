@@ -105,7 +105,6 @@ enum InputCode {
    BUTTON_9, BUTTON_10, BUTTON_11, BUTTON_12,// Extra buttons that only a few game controller have
    BUTTON_BACK, BUTTON_START,                // Sometimes 9 & 10
 
-
    BUTTON_DPAD_UP,   BUTTON_DPAD_DOWN,
    BUTTON_DPAD_LEFT, BUTTON_DPAD_RIGHT,
 

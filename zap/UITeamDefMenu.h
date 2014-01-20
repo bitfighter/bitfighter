@@ -8,6 +8,7 @@
 
 #include "UI.h"
 #include "InputModeEnum.h"
+#include "ConfigEnum.h"
 #include "Color.h"
 #include "Timer.h"
 #include "SymbolShape.h"
@@ -23,14 +24,6 @@ class TeamDefUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 private:
-
-   enum ColorEntryMode {
-      ColorEntryMode100,
-      ColorEntryMode255,
-      ColorEntryModeHex,
-      ColorEntryModeCount
-   };
-
    Timer errorMsgTimer;
    string errorMsg;
 
@@ -45,7 +38,6 @@ private:
    UI::SymbolString    mBottomInstructions4;
    
    S32 selectedIndex;          // Highlighted menu item
-   S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
 
    bool mEditingTeam;         
    bool mEditingColor;
@@ -53,9 +45,11 @@ private:
 
    F32 getColorBase() const;
    F32 getAmount() const;
+   void doneEditingColor();
+   void cancelEditing();
+   void startEditing();
 
    const char *getEntryMessage() const;
-
 
 public:
    explicit TeamDefUserInterface(ClientGame *game);     // Constructor

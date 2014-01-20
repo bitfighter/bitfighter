@@ -533,8 +533,12 @@ void ChatHelper::issueChat()
       if(isCmdChat())    // It's a command
          runCommand(getGame(), mLineEditor.c_str());
       else               // It's a chat message
+      {
          getGame()->sendChat(mCurrentChatType == GlobalChat, mLineEditor.c_str());   // Broadcast message
          
+         // Player has demonstrated ability to send messages
+         getGame()->getUIManager()->removeInlineHelpItem(HowToChatItem, true);
+      }
    }
 
    exitHelper();     // Hide chat display

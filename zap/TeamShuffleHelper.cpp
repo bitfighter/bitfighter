@@ -4,9 +4,12 @@
 //------------------------------------------------------------------------------
 
 #include "TeamShuffleHelper.h"
+
 #include "ClientGame.h"
 #include "DisplayManager.h"
+#include "FontManager.h"
 #include "Colors.h"
+#include "SymbolShape.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
@@ -33,6 +36,7 @@ TeamShuffleHelper::TeamShuffleHelper() : Parent()
 
    setAnimationTime(0);    // Transition time, in ms
 }
+
 
 // Destructor
 TeamShuffleHelper::~TeamShuffleHelper()
@@ -88,24 +92,25 @@ void TeamShuffleHelper::calculateRenderSizes()
 {
    switch(teamCount)
    {
-   case 1:
-      cols = 1;
-      break;
-   case 2:
-   case 4:
-      cols = 2;
-      break;
-   case 3:
-   case 5:
-   case 6:
-   case 7:
-   case 8:
-   case 9:
-      cols = 3;
-      break;
-   default:
-      cols = 1;
-      break;
+      case 1:
+         cols = 1;
+         break;
+      case 2:
+      case 4:
+         cols = 2;
+         break;
+      case 3:
+      case 5:
+      case 6:
+      case 7:
+      case 8:
+      case 9:
+         cols = 3;
+         break;
+      default:
+         TNLAssert(false, "Unexpected number of teams!");
+         cols = 1;
+         break;
    }
 
    rows = (S32)ceil((F32)teamCount / (F32)cols);
@@ -131,10 +136,10 @@ void TeamShuffleHelper::calculateRenderSizes()
          }
       }
 
-   topMargin = (DisplayManager::getScreenInfo()->getGameCanvasHeight() - rows * rowHeight - (rows - 1) * margin) / 2;
-   leftMargin = (DisplayManager::getScreenInfo()->getGameCanvasWidth() - cols * columnWidth - (cols - 1) * margin) / 2;
+   topMargin  = (DisplayManager::getScreenInfo()->getGameCanvasHeight() - rows * rowHeight   - (rows - 1) * margin) / 2;
+   leftMargin = (DisplayManager::getScreenInfo()->getGameCanvasWidth()  - cols * columnWidth - (cols - 1) * margin) / 2;
 
-   columnWidth += 2 * hpad;
+   columnWidth += 3 * hpad;
 }
 
 
@@ -144,6 +149,8 @@ extern void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const
 
 void TeamShuffleHelper::render()
 {
+   FontManager::pushFontContext(TeamShuffleContext);
+
    for(S32 i = 0; i < rows; i++)
       for(S32 j = 0; j < cols; j++)
       {
@@ -151,14 +158,16 @@ void TeamShuffleHelper::render()
             break;
 
          S32 x = leftMargin + j * (columnWidth + margin);
-         S32 y = topMargin + i * (rowHeight + margin);
+         S32 y = topMargin  + i * (rowHeight   + margin);
 
          S32 teamIndex = i * cols + j;
 
          Color c = *getGame()->getTeamColor(teamIndex);
          c *= .2f;
 
-         drawFilledRoundedRect(Point(x + columnWidth/2, y + rowHeight/2), columnWidth, rowHeight, c, *getGame()->getTeamColor(teamIndex), 8);
+         drawFilledRoundedRect(Point(x + columnWidth / 2, y + rowHeight / 2), 
+                               columnWidth, rowHeight, 
+                               c, *getGame()->getTeamColor(teamIndex), 8);
 
          glColor(getGame()->getTeamColor(teamIndex));
          drawString(x + hpad, y + vpad, TEXT_SIZE, getGame()->getTeamName(teamIndex).getString());
@@ -173,7 +182,16 @@ void TeamShuffleHelper::render()
 
    glColor(Colors::green);
 
-   drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - 80, 20, "[Enter to accept] | [Space to reshuffle] | [Esc to cancel]");
+   static const UI::SymbolString Instructions(
+         "[[Enter]] to accept | [[Space]] to reshuffle | [[Esc]] to cancel", 
+         getGame()->getSettings()->getInputCodeManager(), TeamShuffleContext, 20, false, AlignmentCenter);
+
+   static Point RenderPos(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2,
+                          DisplayManager::getScreenInfo()->getGameCanvasHeight() - 60);
+
+   Instructions.render(RenderPos);
+
+   FontManager::popFontContext();
 }
 
 

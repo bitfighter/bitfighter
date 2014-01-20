@@ -230,7 +230,7 @@ bool isInteger(const char *str)
 
 
 // Sanitize strings before inclusion into JSON
-const char *sanitizeForJson(const char *value)
+string sanitizeForJson(const char *value)
 {
    unsigned maxsize = strlen(value) * 2 + 3; // allescaped+quotes+NULL
    std::string result;
@@ -471,17 +471,12 @@ string concatenate(const Vector<string> &words, S32 startingWith)
 
 
 // TODO: Merge with concatenate above
-string listToString(const Vector<string> &words, char seperator)
+string listToString(const Vector<string> &words, const string &seperator)
 {
    string str = "";
-
-   // Convert separator char to a c_string so it can be added below
-   char sep[2];
-   sep[0] = seperator;
-   sep[1] = 0;    // Null terminate
       
    for(S32 i = 0; i < words.size(); i++)
-        str += words[i] + ((i < words.size() - 1) ? sep : "");
+      str += words[i] + ((i < words.size() - 1) ? seperator : "");
 
    return str;
 }
@@ -905,20 +900,33 @@ inline string displayModeToString(DisplayMode mode)
 {
    if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
       return "Fullscreen-Stretch";
-   else if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+   if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
       return "Fullscreen";
-   else
-      return "Window";
+   
+   return "Window";
+}
+
+
+inline string colorEntryModeToString(ColorEntryMode colorEntryMode)
+{
+   if(colorEntryMode == ColorEntryModeHex)
+      return "RGBHEX";
+
+   if(colorEntryMode == ColorEntryMode255)
+      return "RGB255";
+
+   return "RGB100";
 }
 
 
 // Convert various things to strings -- needed by settings (which requires a consistent naming schema);
 // used elsewhere
-string toString(const string &val)       { return val;                                          }
-string toString(S32 val)                 { return itos(val);                                    }
-string toString(YesNo yesNo)             { return yesNo  == Yes      ? "Yes" :      "No";       }
-string toString(RelAbs relAbs)           { return relAbs == Relative ? "Relative" : "Absolute"; }
-string toString(DisplayMode displayMode) { return displayModeToString(displayMode);             }
+string toString(const string &val)        { return val;                                          }
+string toString(S32 val)                  { return itos(val);                                    }
+string toString(YesNo yesNo)              { return yesNo  == Yes      ? "Yes" :      "No";       }
+string toString(RelAbs relAbs)            { return relAbs == Relative ? "Relative" : "Absolute"; }
+string toString(DisplayMode displayMode)  { return displayModeToString(displayMode);             }
+string toString(ColorEntryMode colorMode) { return colorEntryModeToString(colorMode);            }
 
 
 bool isPrintable(char c)
@@ -929,14 +937,14 @@ bool isPrintable(char c)
 
 bool isHex(char c)
 {
-   return c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F';
+   return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 }
 
 
 // Return true if str contains only hex chars
 bool isHex(const string &str)
 {
-   for(S32 i = 0; i < str.length(); i++)
+   for(string::size_type i = 0; i < str.length(); i++)
       if(!isHex(str[i]))
          return false;
 

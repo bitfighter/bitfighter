@@ -709,9 +709,9 @@ Point BfObject::getEditorSelectionOffset(F32 scale)
 }
 
 
-Point BfObject::getInitialPlacementOffset(F32 gridSize)
+Point BfObject::getInitialPlacementOffset(U32 gridSize) const
 {
-   return Point(0, 0);
+   return Point(0,0);
 }
 
 

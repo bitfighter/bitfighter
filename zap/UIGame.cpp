@@ -65,6 +65,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
                   mChatMessageDisplayer2 (game,  5, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mChatMessageDisplayer3 (game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mFpsRenderer(game),
+                  mLevelInfoDisplayer(game),
                   mHelpItemManager(game->getSettings())
 {
    mInScoreboardMode = false;
@@ -237,6 +238,12 @@ void GameUserInterface::displayErrorMessage(const char *format, ...)
    va_end(args);
 
    displayMessage(Colors::cmdChatColor, stringBuffer);
+}
+
+
+void GameUserInterface::onGameTypeChanged()
+{
+   mLevelInfoDisplayer.onGameTypeChanged();     // Tell mLevelInfoDisplayer there is a new GameType in town
 }
 
 
@@ -1389,22 +1396,11 @@ static void loadLoadoutPreset(ClientGame *game, S32 slot)
       return;
    }
 
-   GameType *gameType = game->getGameType();
-   if(!gameType)
-      return;
-   
+   //GameType *gameType = game->getGameType();
+   //if(!gameType)
+   //   return;
 
-   GameConnection *conn = game->getConnectionToServer();
-   if(!conn)
-      return;
-
-   if(game->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
-      game->displayShipDesignChangedMessage(loadout, "Preset same as the current design");
-
-   // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
-   // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
-   // Tell server loadout has changed.  Server will activate it when we enter a loadout zone.
-   conn->c2sRequestLoadout(loadout.toU8Vector());    
+   game->requestLoadoutPreset(slot);
 }
 
 
@@ -2430,11 +2426,9 @@ void GameUserInterface::renderLevelInfo()
    if(getGame()->getGameType() == NULL)
       return;
 
-   S32 teamCount = getGame()->getTeamCount();
-
    if(shouldRenderLevelInfo())
    {
-      mLevelInfoDisplayer.render(getGame()->getGameType(), teamCount, getGame()->getLevelDatabaseId() > 0);
+      mLevelInfoDisplayer.render();
       mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
    }
 }

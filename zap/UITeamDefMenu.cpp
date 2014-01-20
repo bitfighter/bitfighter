@@ -83,9 +83,8 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) :
    mMenuSubTitle(8),
    mMenuTitle("CONFIGURE TEAMS")
 {
-   
-
-   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
+   GameSettings *settings = getGame()->getSettings();
+   InputCodeManager *inputCodeManager = settings->getInputCodeManager();
 
    mTopInstructions =  getSymbolString("For quick configuration, press [[Alt+1]] - [[Alt+9]] to specify number of teams",
                                              inputCodeManager, 18, Colors::menuHelpColor);
@@ -102,7 +101,8 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) :
    mBottomInstructions4 =  getSymbolString("[[Insert]] or [[+]] to insert team | [[Del]] or [[-]] to remove selected team",
                                           inputCodeManager, 16, Colors::menuHelpColor);
 
-   mColorEntryMode = ColorEntryMode100;      // TODO: Get this from INI to make this setting persistent
+   mColorEntryMode = settings->getIniSettings()->mSettings.getVal<ColorEntryMode>("ColorEntryMode");
+   mEditingColor = false;
 }
 
 
@@ -276,7 +276,7 @@ void TeamDefUserInterface::render()
    if(errorMsgTimer.getCurrent())
    {
       F32 alpha = 1.0;
-      if (errorMsgTimer.getCurrent() < ONE_SECOND)
+      if(errorMsgTimer.getCurrent() < (U32)ONE_SECOND)
          alpha = (F32) errorMsgTimer.getCurrent() / ONE_SECOND;
 
       glColor(Colors::red, alpha);
@@ -300,6 +300,7 @@ void TeamDefUserInterface::onEscape()
 
 class Team;
 string origName;
+Color origColor;
 extern bool isPrintable(char c);
 
 void TeamDefUserInterface::onTextInput(char ascii)
@@ -334,10 +335,17 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       {
          mEditingTeam = false;
       }
+      else if(inputCode == KEY_TAB)       // Toggle what we're editing
+      {
+         if(mColorEntryMode == ColorEntryModeHex)
+         {
+            mEditingTeam = false;
+            mEditingColor = true;
+         }
+      }
       else if(inputCode == KEY_ESCAPE)    // Stop editing, and restore the original value
       {
-         ui->getTeam(selectedIndex)->setName(origName.c_str());
-         mEditingTeam = false;
+         cancelEditing();
       }
       else
          return ui->getTeam(selectedIndex)->getTeamNameEditor()->handleKey(inputCode);
@@ -349,13 +357,17 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    {
       if(inputCode == KEY_ENTER)          // Finish editing
       {
-         mEditingColor = false;
-         ui->getTeam(selectedIndex)->setColor(Color(ui->getTeam(selectedIndex)->getHexColorEditor()->getString()));
+         doneEditingColor();
       }
+      else if(inputCode == KEY_TAB)       // Toggle to edit name
+      {
+         doneEditingColor();
+         mEditingTeam = true;
+      }
+
       else if(inputCode == KEY_ESCAPE)    // Stop editing, and restore the original value
       {
-         mEditingColor = false;
-         ui->getTeam(selectedIndex)->setColor(*ui->getTeam(selectedIndex)->getColor());   // Will reset hexColorEditor. Ugly!
+         cancelEditing();
       }
       else
          return ui->getTeam(selectedIndex)->getHexColorEditor()->handleKey(inputCode);
@@ -367,15 +379,16 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 
    if(inputCode == KEY_ENTER)
    {
+      startEditing();
       mEditingTeam = true;
-      origName = ui->getTeam(selectedIndex)->getName().getString();
    }
 
    else if(inputCode == KEY_H)
    {
       if(mColorEntryMode != ColorEntryModeHex)
          return true;
-      
+
+      startEditing();
       mEditingColor = true;
    }
 
@@ -446,6 +459,8 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 
       if(mColorEntryMode >= ColorEntryModeCount)
          mColorEntryMode = ColorEntryMode(0);
+
+      getGame()->getSettings()->getIniSettings()->mSettings.setVal<ColorEntryMode>("ColorEntryMode", mColorEntryMode);
    }
 
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)       // Quit
@@ -498,6 +513,36 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 
    // A key was handled
    return true;
+}
+
+
+void TeamDefUserInterface::startEditing()
+{
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
+   origName = ui->getTeam(selectedIndex)->getName().getString();
+   origColor.set(*ui->getTeam(selectedIndex)->getColor());
+}
+
+void TeamDefUserInterface::doneEditingColor()
+{
+   mEditingColor = false;
+
+   if(mColorEntryMode == ColorEntryModeHex)
+   {
+      EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
+      ui->getTeam(selectedIndex)->setColor(Color(ui->getTeam(selectedIndex)->getHexColorEditor()->getString()));
+   }
+}
+
+
+void TeamDefUserInterface::cancelEditing()
+{
+   mEditingTeam = false;
+   mEditingColor = false;
+
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
+   ui->getTeam(selectedIndex)->setName(origName.c_str());
+   ui->getTeam(selectedIndex)->setColor(origColor);   // Will reset hexColorEditor. Ugly!
 }
 
 

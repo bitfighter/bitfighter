@@ -1908,7 +1908,7 @@ WeaponType Ship::getActiveWeapon() const
 // Used by tests
 string Ship::getLoadoutString() const
 {
-   return mLoadout.toString();
+   return mLoadout.toString(true);
 }
 
 

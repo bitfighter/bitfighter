@@ -773,7 +773,7 @@ VersionedGameStats GameType::getGameStats()
    gameStats->playerCount = 0; //mClientList.size(); ... will count number of players.
    gameStats->duration = mTotalGamePlay / 1000;
    gameStats->isTeamGame = isTeamGame();
-   gameStats->levelName = mLevelName.c_str();
+   gameStats->levelName = mLevelName;
    gameStats->gameType = getGameTypeName();
    gameStats->cs_protocol_version = CS_PROTOCOL_VERSION;
    gameStats->build_version = BUILD_VERSION;
@@ -1596,7 +1596,6 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
    // if autoleveling is enabled (unless we are adding a bot for the purposes of autoleveling, in which case we do need
    // to count them)
    Vector<Vector<S32> > counts = static_cast<ServerGame *>(getGame())->getCategorizedPlayerCountsByTeam();
-   bool autoLevelingEnabled = static_cast<ServerGame *>(getGame())->getAutoLevelingEnabled();
    bool countAutoLevelBots = clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByAutoleveler ||
                              clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByLevel       ||
                              clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByLevelNoTeam;
@@ -3369,7 +3368,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), 
 
 
 // Server sends message to the client for display using StringPtr
-GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringTableEntry toName, StringPtr message), (fromName, toName, message))
+GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, 
+                 (StringTableEntry fromName, StringTableEntry toName, StringPtr message), 
+                 (fromName, toName, message))
 {
 #ifndef ZAP_DEDICATED
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
@@ -3378,7 +3379,9 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringT
 }
 
 
-GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry clientName, StringPtr message), (global, clientName, message))
+GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, 
+                 (bool global, StringTableEntry clientName, StringPtr message), 
+                 (global, clientName, message))
 {
 #ifndef ZAP_DEDICATED
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
@@ -4032,9 +4035,6 @@ Vector<string> GameType::getGameTypeNames()
 
 string GameType::getLevelName() const
 {
-   if(mLevelName == "")
-      return "Unnamed Level";
-
    return mLevelName;
 }
 

@@ -1310,8 +1310,6 @@ void ServerGame::idle(U32 timeDelta)
    if(mMasterUpdateTimer.update(timeDelta))
       updateStatusOnMaster();
 
-   mNetInterface->processConnections();
-
    // If we have a data transfer going on, process it
    if(!dataSender.isDone())
       dataSender.sendNextLine();
@@ -1324,7 +1322,10 @@ void ServerGame::idle(U32 timeDelta)
       suspendGame();
 
    if(mGameSuspended)     // If game is suspended, we need do nothing more
+   {
+      mNetInterface->processConnections();
       return;
+   }
 
 
    mCurrentTime += timeDelta;
@@ -1408,6 +1409,8 @@ void ServerGame::idle(U32 timeDelta)
 
    if(mGameRecorderServer)
       mGameRecorderServer->idle(timeDelta);
+
+   mNetInterface->processConnections(); // Update to other clients right after idling everything else, so clients get more up to date information
 }
 
 
@@ -1813,12 +1816,14 @@ U16 ServerGame::findZoneContaining(const Point &p) const
 }
 
 
-void ServerGame::setGameType(GameType *theGameType)
+void ServerGame::setGameType(GameType *gameType)
 {
+   Parent::setGameType(gameType);
+
    if(mGameRecorderServer)
-      mGameRecorderServer->objectLocalScopeAlways(theGameType);
-   Parent::setGameType(theGameType);
+      mGameRecorderServer->objectLocalScopeAlways(gameType);
 }
+
 
 void ServerGame::onObjectAdded(BfObject *obj)
 {

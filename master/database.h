@@ -46,7 +46,7 @@ struct ServerInfo
    string ip;
 
    // Quickie constructor
-   ServerInfo(U64 id, const string name, const string ip) 
+   ServerInfo(U64 id, const string name, const string &ip) 
    { 
       this->id = id; 
       this->name = name; 

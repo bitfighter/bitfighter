@@ -42,7 +42,7 @@ class HelperMenu : public SlideOutWidget, public AToBScroller
 {
    typedef SlideOutWidget Slider;
    typedef AToBScroller   Scroller;
-   
+
 public:
    enum HelperMenuType {
       ChatHelperType,
@@ -62,11 +62,14 @@ private:
    S32 mOldBottom;
    S32 mOldCount;
 
+   S32 mHorizLabelOffset;
+
    // Some render helpers
-   S32 calcLeftMarginForTextPortionOfEntry(const OverlayMenuItem *items, S32 itemCount);
-   void drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, bool renderKeysWithItemColor);
+   void drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, S32 horizOffset);
    void renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode);
    void renderLegend(S32 xPos, S32 yPos, const char **legendtext, const Color **legendColors, S32 legendCount);
+
+   virtual bool getActivationKeyClosesHelper();
 
 protected:
    static const S32 MENU_TOP = 175;    // Location of top of title of overlay menu frame
@@ -74,7 +77,9 @@ protected:
    // Shortcut helper function
    virtual void exitHelper();
 
-   void drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, const OverlayMenuItem *prevItems, S32 prevCount,
+   void drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, 
+                     const OverlayMenuItem *prevItems, S32 prevCount,
+                     S32 widthOfButtons, S32 widthOfTextBlock,
                      const char **legendText = NULL, const Color **legendColors = NULL, S32 legendCount = 0);
 
    ClientGame *getGame() const;
@@ -87,7 +92,10 @@ protected:
    static const S32 MENU_PADDING          =  9;    // Padding around outer edge of overlay
    static const S32 TITLE_FONT_SIZE       = 20;    // Size of title of menu
 
-   S32 mTextPortionOfItemWidth;    // Calculated width of the text portion of the menu items
+   S32 getTotalDisplayWidth  (S32 widthOfButtons, S32 widthOfTextBlock) const;
+   S32 getCurrentDisplayWidth(S32 widthOfButtons, S32 widthOfTextBlock) const;
+   S32 getButtonWidth(const OverlayMenuItem *items, S32 itemCount) const;
+   void setExpectedWidth_MidTransition(S32 width);
 
 public:
    HelperMenu();
@@ -101,14 +109,14 @@ public:
 
    virtual void onWidgetClosed();                     // Gets run when closing animation is complete
 
-   virtual bool processInputCode(InputCode inputCode);  
+   virtual bool processInputCode(InputCode inputCode);
    virtual void onTextInput(char ascii);
 
    virtual void activateHelp(UIManager *uiManager);   // Open help to an appropriate page
    virtual bool isMovementDisabled() const;           // Is ship movement disabled while this helper is active?
    virtual bool isChatDisabled() const;               // Returns true if chat and friends should be disabled while this is active
 
-   S32 getMaxItemWidth(const OverlayMenuItem *items, S32 count);
+   S32 getMaxItemWidth(const OverlayMenuItem *items, S32 count) const;
 
    virtual HelperMenuType getType() = 0;
 
