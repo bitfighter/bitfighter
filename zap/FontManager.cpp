@@ -247,6 +247,7 @@ void FontManager::setFontContext(FontContext fontContext)
 
       case TimeLeftHeadlineContext:
       case TimeLeftIndicatorContext:
+      case TeamShuffleContext:
          setFont(FontPlay);
          return;
 

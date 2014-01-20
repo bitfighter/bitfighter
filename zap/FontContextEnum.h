@@ -29,6 +29,7 @@ namespace Zap
       InputContext,            // Input value font
       ReleaseVersionContext,   // Version number on title screen
       WebDingContext,          // Font for rendering database icon
+      TeamShuffleContext,      // For /shuffle command
       ChatMessageContext,      // Font for rendering in-game chat messages
       OldSkoolContext,         // Render things like in the good ol' days
       TimeLeftHeadlineContext, // Big text on indicator in lower right corner of game  
