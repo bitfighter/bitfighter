@@ -326,13 +326,13 @@ void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &base
                   "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
    else
    {
-      S32 butSize = JoystickRender::getControllerButtonRenderedSize(BUTTON_BACK);
 
-      xPos += drawStringAndGetWidth(xPos, yPos, MENU_LEGEND_FONT_SIZE, "Press ") + 4;
-      JoystickRender::renderControllerButton(F32(xPos + 4), F32(yPos), Joystick::SelectedPresetIndex, BUTTON_BACK);
-      xPos += butSize;
-      glColor(baseColor);
-      drawString(xPos, yPos, MENU_LEGEND_FONT_SIZE, "to cancel");
+      static const SymbolString JoystickInstructions(
+            "Press [[Back]] to cancel", 
+            mClientGame->getSettings()->getInputCodeManager(), MenuHeaderContext, 
+            MENU_LEGEND_FONT_SIZE, false, AlignmentCenter);
+
+      JoystickInstructions.render(Point(xPos + 4, yPos));
    }
 }
 
