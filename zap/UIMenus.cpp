@@ -242,7 +242,13 @@ static void renderMenuInstructions(GameSettings *settings)
    glColor(Colors::white);
 
    if(settings->getInputMode() == InputModeKeyboard)
-      drawCenteredString(y, size, "UP, DOWN to choose | ENTER to select | ESC exits menu");
+   {
+      static const SymbolString KeyboardInstructions(
+            "[[Up Arrow]], [[Down Arrow]] to choose | [[Enter]] to select | [[Esc]] exits menu", 
+            settings->getInputCodeManager(), MenuHeaderContext, size, false, AlignmentCenter);
+
+      KeyboardInstructions.render(Point(canvasWidth / 2, y + size));
+   }
    else
    {
       static const SymbolString JoystickInstructions(
