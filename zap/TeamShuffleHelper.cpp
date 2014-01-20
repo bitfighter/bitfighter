@@ -139,7 +139,7 @@ void TeamShuffleHelper::calculateRenderSizes()
    topMargin  = (DisplayManager::getScreenInfo()->getGameCanvasHeight() - rows * rowHeight   - (rows - 1) * margin) / 2;
    leftMargin = (DisplayManager::getScreenInfo()->getGameCanvasWidth()  - cols * columnWidth - (cols - 1) * margin) / 2;
 
-   columnWidth += 2 * hpad;
+   columnWidth += 3 * hpad;
 }
 
 
@@ -158,14 +158,16 @@ void TeamShuffleHelper::render()
             break;
 
          S32 x = leftMargin + j * (columnWidth + margin);
-         S32 y = topMargin + i * (rowHeight + margin);
+         S32 y = topMargin  + i * (rowHeight   + margin);
 
          S32 teamIndex = i * cols + j;
 
          Color c = *getGame()->getTeamColor(teamIndex);
          c *= .2f;
 
-         drawFilledRoundedRect(Point(x + columnWidth/2, y + rowHeight/2), columnWidth, rowHeight, c, *getGame()->getTeamColor(teamIndex), 8);
+         drawFilledRoundedRect(Point(x + columnWidth / 2, y + rowHeight / 2), 
+                               columnWidth, rowHeight, 
+                               c, *getGame()->getTeamColor(teamIndex), 8);
 
          glColor(getGame()->getTeamColor(teamIndex));
          drawString(x + hpad, y + vpad, TEXT_SIZE, getGame()->getTeamName(teamIndex).getString());
