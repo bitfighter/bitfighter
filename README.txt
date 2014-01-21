@@ -47,6 +47,8 @@ Bitfighter README
    
    To build a dedicated server run 'make bitfighterd'.
 
+   To build tests do: 'make test'. It will create a binary in 'exe/' called 'test'.
+   Make sure to copy the resources over to 'exe/', as specified in step 3a), below.
 
  b) Windows
 
