@@ -153,9 +153,9 @@ void SoccerGameType::scoreGoal(Ship *ship, const StringTableEntry &scorerName, S
       s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - FirstTeamNumber), scorePos);      // See comment above
    }
 
-   // Check for Hat trick badge
+   // Check for Hat trick badge, hostile goals excluded
    ClientInfo *clientInfo = ship ? ship->getClientInfo() : NULL;
-   if(clientInfo != NULL)
+   if(clientInfo != NULL && goalTeamIndex != TEAM_HOSTILE)
    {
       // If our current scorer was the last scorer and is wasn't an own-goal
       if(clientInfo == mPossibleHatTrickPlayer && !isOwnGoal)
