@@ -76,6 +76,6 @@ while(my @row = $query->fetchrow_array)
    # Add the signature we calculated
    $url .= "\&signature=$signature";
 
-   system("curl", "-s", "\"$url\"");
+   `curl -s \"$url\"`;
 } 
 

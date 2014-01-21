@@ -8,6 +8,7 @@
 #include "stringUtils.h"
 #include "GameSettings.h"
 #include "Console.h"
+#include "version.h"
 
 #include <tnl.h>
 #include <tnlLog.h>
@@ -254,6 +255,19 @@ S32 lua_writeToFile(lua_State *L)
 
 
 /**
+ * @luafunc static string global::getVersion()
+ *
+ * @brief Get the current Bitfighter version as a string.
+ *
+ * @return Bitfighter Version.
+ */
+S32 lua_getVersion(lua_State *L)
+{
+   return returnString(L, ZAP_GAME_RELEASE);
+}
+
+
+/**
  * These static methods are independent of gameplay and do not perform any actions on game objects
  */
 //               Fn name    Param profiles         Profile count
@@ -265,6 +279,7 @@ S32 lua_writeToFile(lua_State *L)
       METHOD(findFile,        ARRAYDEF({{ STR,   END }}), 1 ) \
       METHOD(writeToFile,     ARRAYDEF({{ STR, STR, END }, { STR, STR, BOOL, END }}), 2 ) \
       METHOD(readFromFile,    ARRAYDEF({{ STR,   END }}), 1 ) \
+      METHOD(getVersion,      ARRAYDEF({{        END }}), 1 ) \
 
 GENERATE_LUA_STATIC_METHODS_TABLE(global, LUA_STATIC_METHODS);
 
