@@ -744,19 +744,6 @@ static string getInputString(CIniFile *ini, const string &section, const string 
 }
 
 
-// Only called while loading keys from the INI
-void setDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
-{
-#define EDITOR_BINDING(editorEnumVal, b, c, defaultEditorKeyboardBinding)                                       \
-      inputCodeManager->setEditorBinding(editorEnumVal,                                                         \
-                                          getInputString(ini, "EditorKeyboardKeyBindings",                      \
-                                                         InputCodeManager::getEditorBindingName(editorEnumVal), \
-                                                         defaultEditorKeyboardBinding)); 
-    EDITOR_BINDING_TABLE
-#undef EDITOR_BINDING
-}
-
-
 // Remember: If you change any of these defaults, you'll need to rebuild your INI file to see the results!
 static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {                                
@@ -797,6 +784,33 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
    // keyDIAG = KEY_F7;
 }
 
+
+// Only called while loading keys from the INI
+void setDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
+{
+#define EDITOR_BINDING(editorEnumVal, b, c, defaultEditorKeyboardBinding)                                       \
+      inputCodeManager->setEditorBinding(editorEnumVal,                                                         \
+                                          getInputString(ini, "EditorKeyBindings",                              \
+                                                         InputCodeManager::getEditorBindingName(editorEnumVal), \
+                                                         defaultEditorKeyboardBinding)); 
+    EDITOR_BINDING_TABLE
+#undef EDITOR_BINDING
+}
+
+
+// Only called while loading keys from the INI
+void setDefaultSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
+{
+#define SPECIAL_BINDING(specialEnumVal, b, c, defaultSpecialKeyboardBinding)                                      \
+      inputCodeManager->setSpecialBinding(specialEnumVal,                                                         \
+                                          getInputString(ini, "SpecialKeyBindings",                               \
+                                                         InputCodeManager::getSpecialBindingName(specialEnumVal), \
+                                                         defaultSpecialKeyboardBinding)); 
+    SPECIAL_BINDING_TABLE
+#undef SPECIAL_BINDING
+}
+
+
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section, InputMode mode)
 {
    // Top line evaluates to:
@@ -804,13 +818,14 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
    //    ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1),
    //                           InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1, mode)));
 
-#define BINDING(enumVal, b, savedInIni, d, e, f)  \
+#define BINDING(enumVal, b, savedInIni, d, e, f)                                                                   \
       if(savedInIni)                                                                                               \
          ini->SetValue(section, InputCodeManager::getBindingName(enumVal),                                         \
                                 InputCodeManager::inputCodeToString(inputCodeManager->getBinding(enumVal, mode))); 
     BINDING_TABLE
 #undef BINDING
 }
+
 
 static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section)
 {
@@ -823,19 +838,41 @@ static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMan
 
    // Don't overwrite existing bindings for now... there is no way to modify them in-game, and if the user has
    // specified an invalid binding, leaving it wrong will make it easier for them to find and fix the error
-#define EDITOR_BINDING(editorEnumVal, b, c, d)  \
-      key = InputCodeManager::getEditorBindingName(editorEnumVal); \
-      if(!ini->hasKey(section, key))                               \
+#define EDITOR_BINDING(editorEnumVal, b, c, d)                                               \
+      key = InputCodeManager::getEditorBindingName(editorEnumVal);                           \
+      if(!ini->hasKey(section, key))                                                         \
          ini->SetValue(section, key, inputCodeManager->getEditorBinding(editorEnumVal));
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
 }
 
+
+static void writeSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section)
+{
+   string key;
+
+   // Expands to:
+   // key = InputCodeManager::getSpecialBindingName(FlipItemHorizontal); 
+   // if(!ini->hasKey(section, key))
+   //   ini->SetValue(section, key, inputCodeManager->getSpecialBinding(specialEnumVal));
+
+   // Don't overwrite existing bindings for now... there is no way to modify them in-game, and if the user has
+   // specified an invalid binding, leaving it wrong will make it easier for them to find and fix the error
+#define SPECIAL_BINDING(specialEnumVal, b, c, d)                                            \
+      key = InputCodeManager::getSpecialBindingName(specialEnumVal);                        \
+      if(!ini->hasKey(section, key))                                                        \
+         ini->SetValue(section, key, inputCodeManager->getSpecialBinding(specialEnumVal));
+    SPECIAL_BINDING_TABLE
+#undef SPECIAL_BINDING
+}
+
+
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
    writeKeyBindings(ini, inputCodeManager, "KeyboardKeyBindings", InputModeKeyboard);
    writeKeyBindings(ini, inputCodeManager, "JoystickKeyBindings", InputModeJoystick);
-   writeEditorKeyBindings(ini, inputCodeManager, "EditorKeyboardKeyBindings");
+   writeEditorKeyBindings (ini, inputCodeManager, "EditorKeyboardKeyBindings");
+   writeSpecialKeyBindings(ini, inputCodeManager, "SpecialKeyBindings");
 }
 
 
@@ -1478,6 +1515,7 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 
    setDefaultKeyBindings(ini, inputCodeManager);
    setDefaultEditorKeyBindings(ini, inputCodeManager);
+   setDefaultSpecialKeyBindings(ini, inputCodeManager);
 
    loadForeignServerInfo(ini, iniSettings);     // Info about other servers
    loadLevels(ini, iniSettings);                // Read levels, if there are any

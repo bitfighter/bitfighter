@@ -130,6 +130,13 @@ static const string EditorBindingNames[] = {
 };
 
 
+// Generates an array of bindingNames for the special keys
+static const string SpecialBindingNames[] = {
+#define SPECIAL_BINDING(a, bindingName, c, d) bindingName,
+    SPECIAL_BINDING_TABLE
+#undef SPECIAL_BINDING
+};
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -139,16 +146,13 @@ EditorBindingSet::EditorBindingSet()
    // These bindings will be overwritten by config::setDefaultEditorKeyBindings()...
    // we provide default values here just for the sake of sanity.  And testing.
    // Sanity and testing.  And just because.  Sanity, testing, and just because.
-   // Also remember that we have multiple BindingSets (one for keyboard, one for
-   // joystick, for example), so these defaults may not even apply in all cases.
-
 
    // Generates a block of code that looks like this:
    // FlipItemHorizontal = "H";
    // PasteSelection = "Ctrl+V";
    // ...
 
-#define EDITOR_BINDING(a, b, memberName, defaultKeyboardBinding) memberName = defaultKeyboardBinding;
+#define EDITOR_BINDING(a, b, memberName, defaultBinding) memberName = defaultBinding;
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
 }
@@ -160,7 +164,7 @@ EditorBindingSet::~EditorBindingSet()
 }
 
 
-string EditorBindingSet::getEditorBinding(EditorBindingNameEnum bindingName) const
+string EditorBindingSet::getBinding(EditorBindingNameEnum bindingName) const
 {
    // Produces a block of code that looks like this:
    // if(editorBindingName == BINDING_FLIP_HORIZ) return keyFlipItemHoriz;
@@ -177,7 +181,7 @@ string EditorBindingSet::getEditorBinding(EditorBindingNameEnum bindingName) con
 }
 
 
-void EditorBindingSet::setEditorBinding(EditorBindingNameEnum bindingName, const string &key)
+void EditorBindingSet::setBinding(EditorBindingNameEnum bindingName, const string &key)
 {
      // Produces a block of code that looks like this:
      // if(false) { }
@@ -188,6 +192,68 @@ void EditorBindingSet::setEditorBinding(EditorBindingNameEnum bindingName, const
 #define EDITOR_BINDING(enumName, b, memberName, d) else if(bindingName == enumName) memberName = key;
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
+   else 
+      TNLAssert(false, "Invalid key binding!");
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+SpecialBindingSet::SpecialBindingSet()
+{
+   // These bindings will be overwritten by config::setDefaultSpecialKeyBindings()...
+   // we provide default values here just for the sake of sanity.  And testing.
+   // Sanity and testing.  And just because.  Sanity, testing, and just because.
+   // We have one set of binings that apply everywhere; some keys may allow multiple 
+   // definitions so that one can be bound to a joystick button.
+
+   // Generates a block of code that looks like this:
+   // Screenshot_1 = "Ctrl+Q";
+   // Screenshot_2 = "Ctrl+Q";
+   // ...
+
+#define SPECIAL_BINDING(a, b, memberName, defaultBinding) memberName = defaultBinding;
+    SPECIAL_BINDING_TABLE
+#undef SPECIAL_BINDING
+}
+
+
+SpecialBindingSet::~SpecialBindingSet()
+{
+   // Do nothing
+}
+
+
+string SpecialBindingSet::getBinding(SpecialBindingNameEnum bindingName) const
+{
+   // Produces a block of code that looks like this:
+   // if(bindingName == BINDING_SCREENSHOT_1) return keyScreenshot1;
+   // if...
+   // TNLAssert(false);
+   // return "";
+
+#define SPECIAL_BINDING(enumName, b, memberName, d) if(bindingName == enumName) return memberName;
+   SPECIAL_BINDING_TABLE
+#undef SPECIAL_BINDING
+   // Just in case:
+   TNLAssert(false, "Invalid key binding!");
+   return "";
+}
+
+
+void SpecialBindingSet::setBinding(SpecialBindingNameEnum bindingName, const string &key)
+{
+     // Produces a block of code that looks like this:
+     // if(false) { }
+     // else if(bindingName == BINDING_SCREENSHOT_1) keyScreenshot1 = key;
+     // else if...
+     // else TNLAssert(false);
+     if(false) { }     // Dummy conditional to let us use else if below
+#define SPECIAL_BINDING(enumName, b, memberName, d) else if(bindingName == enumName) memberName = key;
+    SPECIAL_BINDING_TABLE
+#undef SPECIAL_BINDING
    else 
       TNLAssert(false, "Invalid key binding!");
 }
@@ -609,7 +675,13 @@ InputCode InputCodeManager::getBinding(BindingNameEnum bindingName, InputMode in
 
 string InputCodeManager::getEditorBinding(EditorBindingNameEnum bindingName) const
 {
-   return mEditorBindingSet.getEditorBinding(bindingName);
+   return mEditorBindingSet.getBinding(bindingName);
+}
+
+
+string InputCodeManager::getSpecialBinding(SpecialBindingNameEnum bindingName) const
+{
+   return mSpecialBindingSet.getBinding(bindingName);
 }
 
 
@@ -641,7 +713,13 @@ void InputCodeManager::setBinding(BindingNameEnum bindingName, InputMode inputMo
 
 void InputCodeManager::setEditorBinding(EditorBindingNameEnum bindingName, const string &inputString)
 {
-	mEditorBindingSet.setEditorBinding(bindingName, inputString);
+	mEditorBindingSet.setBinding(bindingName, inputString);
+}
+
+
+void InputCodeManager::setSpecialBinding(SpecialBindingNameEnum bindingName, const string &inputString)
+{
+	mSpecialBindingSet.setBinding(bindingName, inputString);
 }
 
 
@@ -1869,13 +1947,23 @@ string InputCodeManager::getBindingName(BindingNameEnum bindingName)
 }
 
 
-string InputCodeManager::getEditorBindingName(EditorBindingNameEnum editorBindingName)
+string InputCodeManager::getEditorBindingName(EditorBindingNameEnum binding)
 {
-   U32 editorIndex = (U32)editorBindingName;
+   U32 index = (U32)binding;
 
-   TNLAssert(editorIndex >= 0 && editorIndex < ARRAYSIZE(EditorBindingNames), "Invalid value for bindingName!");
+   TNLAssert(index >= 0 && index < ARRAYSIZE(EditorBindingNames), "Invalid value for binding!");
 
-   return EditorBindingNames[editorIndex];
+   return EditorBindingNames[index];
+}
+
+
+string InputCodeManager::getSpecialBindingName(SpecialBindingNameEnum binding)
+{
+   U32 index = (U32)binding;
+
+   TNLAssert(index >= 0 && index < ARRAYSIZE(SpecialBindingNames), "Invalid value for binding!");
+
+   return SpecialBindingNames[index];
 }
 
 
@@ -1903,6 +1991,21 @@ string InputCodeManager::getEditorKeyBoundToBindingCodeName(const string &name) 
    {
       if(caseInsensitiveStringCompare(EditorBindingNames[i], name))
          return this->getEditorBinding(EditorBindingNameEnum(i));
+   }
+
+   return "";
+}
+
+
+// Same as above, but for our special binding set
+string InputCodeManager::getSpecialKeyBoundToBindingCodeName(const string &name) const
+{
+   // Linear search is of O(n) speed and therefore is not really efficient, but this will be called very infrequently,
+   // Note that for some reason the { }s are needed below... without them this code does not work right.
+   for(U32 i = 0; i < ARRAYSIZE(SpecialBindingNames); i++)
+   {
+      if(caseInsensitiveStringCompare(SpecialBindingNames[i], name))
+         return this->getSpecialBinding(SpecialBindingNameEnum(i));
    }
 
    return "";

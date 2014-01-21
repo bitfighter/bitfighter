@@ -632,6 +632,9 @@ static SymbolShapePtr convertStringToControlSymbol(const InputCodeManager *input
    {
       // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
       controlString = inputCodeManager->getEditorKeyBoundToBindingCodeName(symbol);
+
+      if(controlString == "")
+         controlString = inputCodeManager->getSpecialKeyBoundToBindingCodeName(symbol);
    }
 
    if(controlString != "")

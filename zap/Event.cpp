@@ -12,8 +12,6 @@
 #include "DisplayManager.h"
 #include "Joystick.h"
 #include "ClientGame.h"
-#include "InputCode.h"     // For InputCodeManager def
-#include "ScreenShooter.h"
 #include "Cursor.h"
 
 #include "SDL.h" 
@@ -355,11 +353,6 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
       SDL_WarpMouse(DisplayManager::getScreenInfo()->getWindowMousePos()->x, DisplayManager::getScreenInfo()->getWindowMousePos()->y);
 #endif
    }
-#ifndef BF_NO_SCREENSHOTS
-   // CTRL+Q --> screenshot!
-   else if(key == SDLK_q && InputCodeManager::getState(KEY_CTRL))
-      ScreenShooter::saveScreenshot(game->getUIManager(), game->getSettings());
-#endif
    // The rest
    else
    {

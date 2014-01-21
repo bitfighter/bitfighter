@@ -30,7 +30,7 @@ namespace Zap
 /*-----------------------------------------------------BINDING_TABLE---------------------------------------------------------*/
 /*                                                            Saved    BindingSet        Def. kb           Def. js           */
 /*            Enum                      Name in INI           in INI   member name       binding           binding           */
-#define BINDING_TABLE \
+#define BINDING_TABLE                                                                                                         \
    BINDING( BINDING_SELWEAP1,           "SelWeapon1",          true,  inputSELWEAP1,     KEY_1,            KEY_1            ) \
    BINDING( BINDING_SELWEAP2,           "SelWeapon2",          true,  inputSELWEAP2,     KEY_2,            KEY_2            ) \
    BINDING( BINDING_SELWEAP3,           "SelWeapon3",          true,  inputSELWEAP3,     KEY_3,            KEY_3            ) \
@@ -71,7 +71,7 @@ namespace Zap
 /*----------------------------------------EDITOR_BINDING_TABLE-------------------------------------------*/
 /*                                                                  BindingSet           Def. kb         */
 /*                       Enum                  Name in INI          member name          binding         */
-#define EDITOR_BINDING_TABLE \
+#define EDITOR_BINDING_TABLE                                                                              \
    EDITOR_BINDING( BINDING_FLIP_HORIZ,        "FlipItemHorizontal", keyFlipItemHoriz,   "H"             ) \
    EDITOR_BINDING( BINDING_PASTE_SELECTION,   "PasteSelection",     keyPasteSelection,  "Ctrl+V"        ) \
    EDITOR_BINDING( BINDING_FLIP_VERTICAL,     "FlipItemVertical",   keyFlipItemVertl,   "V"             ) \
@@ -111,6 +111,14 @@ namespace Zap
    EDITOR_BINDING( BINDING_DOCKMODE_ITEMS,    "DockmodeItems",      keyDockmodeItems,   "F9"            ) \
 /*-------------------------------------------------------------------------------------------------------*/
 
+/*---------------------------------------SPECIAL_BINDING_TABLE-------------------------------------*/
+/*                                                                  BindingSet          Def. kb    */
+/*                       Enum                    Name in INI        member name         binding    */
+#define SPECIAL_BINDING_TABLE                                                                       \
+   SPECIAL_BINDING( BINDING_SCREENSHOT_1,       "Screenshot_1",     keyScreenshot1,    "PrntScrn")  \
+   SPECIAL_BINDING( BINDING_SCREENSHOT_2,       "Screenshot_2",     keyScreenshot2,    "Ctrl+Q")    \
+/*-------------------------------------------------------------------------------------------------*/
+   
 
 enum BindingNameEnum {
 #define BINDING(enumName, b, c, d, e, f) enumName,
@@ -128,6 +136,17 @@ enum EditorBindingNameEnum {
 };
 
 
+enum SpecialBindingNameEnum {
+#define SPECIAL_BINDING(specialEnumName, b, c, d) specialEnumName,
+    SPECIAL_BINDING_TABLE
+#undef SPECIAL_BINDING
+    SPECIAL_BINDING_DEFINEABLE_KEY_COUNT
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 struct BindingSet
 {
    BindingSet();     // Constructor
@@ -144,18 +163,43 @@ struct BindingSet
 #undef BINDING
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 struct EditorBindingSet
 {
    EditorBindingSet();     // Constructor
    virtual ~EditorBindingSet();
 
-   string getEditorBinding(EditorBindingNameEnum bindingName) const;
-   void setEditorBinding(EditorBindingNameEnum bindingName, const string &key);
+   string getBinding(EditorBindingNameEnum bindingName) const;
+   void setBinding(EditorBindingNameEnum bindingName, const string &key);
 
 #define EDITOR_BINDING(a, b, memberName, d) string memberName;
    EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
 };
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+struct SpecialBindingSet
+{
+   SpecialBindingSet();     // Constructor
+   virtual ~SpecialBindingSet();
+
+   string getBinding(SpecialBindingNameEnum bindingName) const;
+   void setBinding(SpecialBindingNameEnum bindingName, const string &key);
+
+#define SPECIAL_BINDING(a, b, memberName, d) string memberName;
+   SPECIAL_BINDING_TABLE
+#undef SPECIAL_BINDING
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class InputCodeManager
 {
@@ -167,6 +211,7 @@ private:
    Vector<BindingSet> mBindingSets;
 
    EditorBindingSet mEditorBindingSet;
+   SpecialBindingSet mSpecialBindingSet;
 
 public:
    enum JoystickJoysticks {
@@ -192,9 +237,11 @@ public:
    //static S32 getBindingCount();
    static string getBindingName(BindingNameEnum binding);
    static string getEditorBindingName(EditorBindingNameEnum binding);
+   static string getSpecialBindingName(SpecialBindingNameEnum binding);
    
    InputCode getKeyBoundToBindingCodeName(const string &name) const;
    string getEditorKeyBoundToBindingCodeName(const string &name) const;
+   string getSpecialKeyBoundToBindingCodeName(const string &name) const;
 
    // Some converters
    InputCode filterInputCode(InputCode inputCode);    // Calls filters below
@@ -257,6 +304,9 @@ public:
 
    string getEditorBinding(EditorBindingNameEnum bindingName) const;
    void setEditorBinding(EditorBindingNameEnum bindingName, const string &inputString);
+
+   string getSpecialBinding(SpecialBindingNameEnum bindingName) const;
+   void setSpecialBinding(SpecialBindingNameEnum bindingName, const string &inputString);
 };
 
 

@@ -105,6 +105,8 @@ public:
    // Helpers to simplify dealing with key bindings
    static InputCode getInputCode(GameSettings *settings, BindingNameEnum binding);
    string getEditorBindingString(GameSettings *settings, EditorBindingNameEnum binding);
+   string getSpecialBindingString(GameSettings *settings, SpecialBindingNameEnum binding);
+
    void setInputCode(GameSettings *settings, BindingNameEnum binding, InputCode inputCode);
    bool checkInputCode(BindingNameEnum, InputCode inputCode);
    const char *getInputCodeString(GameSettings *settings, BindingNameEnum binding);

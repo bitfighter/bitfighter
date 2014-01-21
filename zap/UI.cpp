@@ -23,6 +23,7 @@
 #include "SoundSystem.h"
 #include "OpenglUtils.h"
 #include "LoadoutIndicator.h"    // For LoadoutIndicatorHeight
+#include "ScreenShooter.h"
 
 #include "FontManager.h"
 
@@ -313,6 +314,12 @@ string UserInterface::getEditorBindingString(GameSettings *settings, EditorBindi
 }
 
 
+string UserInterface::getSpecialBindingString(GameSettings *settings, SpecialBindingNameEnum binding)
+{
+   return settings->getInputCodeManager()->getSpecialBinding(binding);
+}
+
+
 void UserInterface::setInputCode(GameSettings *settings, BindingNameEnum binding, InputCode inputCode)
 {
    settings->getInputCodeManager()->setBinding(binding, inputCode);
@@ -353,6 +360,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
    bool handled = false;
 
    UIManager *uiManager = getGame()->getUIManager();
+   string inputString = InputCodeManager::getCurrentInputString(inputCode);
 
    if(checkInputCode(BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
    { 
@@ -377,6 +385,16 @@ bool UserInterface::onKeyDown(InputCode inputCode)
 
       handled = true;
    }
+   
+#ifndef BF_NO_SCREENSHOTS
+   // Screenshot!
+   else if(inputString == getSpecialBindingString(getGame()->getSettings(), BINDING_SCREENSHOT_1) ||
+           inputString == getSpecialBindingString(getGame()->getSettings(), BINDING_SCREENSHOT_2))      
+   {
+      ScreenShooter::saveScreenshot(getUIManager(), getGame()->getSettings());
+      handled = true;
+   }
+#endif
 
    return handled;
 }
@@ -384,7 +402,6 @@ bool UserInterface::onKeyDown(InputCode inputCode)
 
 void UserInterface::onKeyUp(InputCode inputCode) { /* Do nothing */ }
 void UserInterface::onTextInput(char ascii)      { /* Do nothing */ }
-
 
 
 // Dumps any keys and raw stick button inputs depressed to the screen when in diagnostic mode.

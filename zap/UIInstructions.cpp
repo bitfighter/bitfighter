@@ -177,7 +177,7 @@ void InstructionsUserInterface::initNormalKeys_page1()
          { "Open QuickChat menu",  "[[QuickChat]]"     },
          { "Record voice chat",    "[[VoiceChat]]"     },
          { "Message display mode", "[[Ctrl+M]]"        },
-         { "Save screenshot",      "[[Ctrl+Q]]"        }
+         { "Save screenshot",      "[[Screenshot_1]]/[[Screenshot_2]]" }
    };
 
 
