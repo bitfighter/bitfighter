@@ -17,6 +17,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "SDL.h"
 
 // Begin Bitfighter specific block
 #ifndef ZAP_DEDICATED
@@ -1002,7 +1003,7 @@ void OGLCONSOLE_HideConsole()
 
 
 #define KEY_RETURN      Zap::KEY_ENTER
-#define KMOD_SHIFT      1
+//#define KMOD_SHIFT      1
 
 #define SHOW_CONSOLE_KEY Zap::KEY_NONE      // Bitfighter console created via different mechanism
 #define HIDE_CONSOLE_KEY Zap::KEY_ESCAPE
@@ -1125,7 +1126,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Page up key
-    else if(sym == Zap::KEY_PAGEUP)
+    else if(sym == Zap::KEY_PAGEUP || (sym == Zap::KEY_KEYPAD9 && !(SDL_GetModState() & KMOD_NUM)))  
     {
         userConsole->lineScrollIndex -= userConsole->textHeight / 2;
 
@@ -1136,7 +1137,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Page down key
-    else if(sym == Zap::KEY_PAGEDOWN)
+    else if(sym == Zap::KEY_PAGEDOWN || (sym == Zap::KEY_KEYPAD3 && !(SDL_GetModState() & KMOD_NUM)))  
     {
         userConsole->lineScrollIndex += userConsole->textHeight / 2;
       
@@ -1146,7 +1147,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
         return 1;
     }
      // Home key
-     else if(sym == Zap::KEY_HOME)
+     else if(sym == Zap::KEY_HOME || (sym == Zap::KEY_KEYPAD7 && !(SDL_GetModState() & KMOD_NUM)))   
      {
          /* Yank the command history if necessary */
          OGLCONSOLE_YankHistory(userConsole);
@@ -1156,7 +1157,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
      }
 
      // End key
-     else if(sym == Zap::KEY_END)
+     else if(sym == Zap::KEY_END || (sym == Zap::KEY_KEYPAD1 && !(SDL_GetModState() & KMOD_NUM)))  
      {
          /* Yank the command history if necessary */
          OGLCONSOLE_YankHistory(userConsole);
@@ -1167,7 +1168,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
 
 
     // Arrow key up
-    else if(sym == Zap::KEY_UP)
+    else if(sym == Zap::KEY_UP || (sym == Zap::KEY_KEYPAD8 && !(SDL_GetModState() & KMOD_NUM)))
     {
         // Shift key is for scrolling the output display
         if(mod & KMOD_SHIFT)
@@ -1201,7 +1202,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Arrow key down
-    else if(sym == Zap::KEY_DOWN)
+    else if(sym == Zap::KEY_DOWN || (sym == Zap::KEY_KEYPAD2 && !(SDL_GetModState() & KMOD_NUM)))
     {
         // Shift key is for scrolling the output display
         if(mod & KMOD_SHIFT)
@@ -1235,7 +1236,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Arrow key left
-    else if(sym == Zap::KEY_LEFT)
+    else if(sym == Zap::KEY_LEFT || (sym == Zap::KEY_KEYPAD4 && !(SDL_GetModState() & KMOD_NUM)))
     {
         /* Yank the command history if necessary */
         OGLCONSOLE_YankHistory(userConsole);
@@ -1247,7 +1248,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     }
 
     // Arrow key right
-    else if(sym == Zap::KEY_RIGHT)
+    else if(sym == Zap::KEY_RIGHT || (sym == Zap::KEY_KEYPAD6 && !(SDL_GetModState() & KMOD_NUM)))
     {
         /* Yank the command history if necessary */
         OGLCONSOLE_YankHistory(userConsole);
