@@ -20,7 +20,6 @@
 
 -- Load some additional libraries
 require("geometry")   -- Load geometry functions into Geom namespace; call with Geom.function
-require("timer")
 require("debugger")
 
 -- Hookup our supercharged stacktrace util
@@ -34,14 +33,6 @@ arg = arg or { }  -- Make sure arg is defined before we ban globals
 
 function table.clear(tab)
    for k,v in pairs(tab) do tab[k]=nil end
-end
-
-
---
--- This will be called every tick... updates timers
---
-function _tickTimer(self, deltaT)
-   Timer:_tick(deltaT)     -- Really should only be called once for all bots/levelgens
 end
 
 
