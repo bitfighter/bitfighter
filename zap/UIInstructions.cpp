@@ -167,17 +167,17 @@ void InstructionsUserInterface::initNormalKeys_page1()
    // These controls will work for both joystick and keyboard users
    ControlStringsEditor controlsRight[] = 
    {
-         { "Cycle current weapon", "[[SelNextWeapon]]" },
-         { "Select weapon 1",      "[[SelWeapon1]]"    },
-         { "Select weapon 2",      "[[SelWeapon2]]"    },
-         { "Select weapon 3",      "[[SelWeapon3]]"    },
-         { "-",                    ""                  },
-         { "Chat to everyone",     "[[GlobalChat]]"    },
-         { "Chat to team",         "[[TeamChat]]"      },
-         { "Open QuickChat menu",  "[[QuickChat]]"     },
-         { "Record voice chat",    "[[VoiceChat]]"     },
-         { "Message display mode", "[[Ctrl+M]]"        },
-         { "Save screenshot",      "[[Screenshot_1]]/[[Screenshot_2]]" }
+         { "Cycle current weapon",          "[[SelNextWeapon]]" },
+         { "Select weapon 1",               "[[SelWeapon1]]"    },
+         { "Select weapon 2",               "[[SelWeapon2]]"    },
+         { "Select weapon 3",               "[[SelWeapon3]]"    },
+         { "-",                             ""                  },
+         { "Chat to everyone (\"Global\")", "[[GlobalChat]]"    },
+         { "Chat to team",                  "[[TeamChat]]"      },
+         { "Open QuickChat menu",           "[[QuickChat]]"     },
+         { "Record voice chat",             "[[VoiceChat]]"     },
+         { "Message display mode",          "[[Ctrl+M]]"        },
+         { "Save screenshot",               "[[Screenshot_1]]/[[Screenshot_2]]" }
    };
 
 
