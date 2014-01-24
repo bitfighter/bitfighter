@@ -276,7 +276,12 @@ bool LineEditor::addChar(const char c)
       break;
    case nickNameFilter:
       if(c == '"') return false;
-      // if(c == '%') return false; // Did not see any problem with allowing % in usernames; to avoid this problem, use logprintf("%s", nicknamestring), not logprintf(nicknamestring)
+
+      // %s are banned because of their use in this function: ChatMessageDisplayer::substitueVars(), and it could cause
+      // confusion if a player referred to another player and got a variable substitiution instead.  We could/should probably
+      // either remove or improve that capability, then we can remove the following line.
+      if(c == '%') return false; 
+
       if(c == ' ' && mLine.c_str()[0] == 0) return false; // Don't let name start with a space.
       break;
    case fileNameFilter:
