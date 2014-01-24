@@ -378,7 +378,7 @@ void idle()
       if(event.type == SDL_QUIT) // Handle quit here
          shutdownBitfighter();
 
-      // Pass the event to all clientGames..
+      // Pass the event to all clientGames
       for(S32 i = 0; i < clientGames->size(); i++)
          Event::onEvent(clientGames->get(i), &event);
    }
