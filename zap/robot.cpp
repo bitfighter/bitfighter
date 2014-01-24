@@ -509,11 +509,8 @@ void Robot::idle(BfObject::IdleCallPath path)
    {
       mSendSpawnEffectTimer.update(mCurrentMove.time); // This is to fix robot go spinny, since we skipped Ship::idle(ServerIdleMainLoop)
 
-      U32 deltaT = mCurrentMove.time;
-
-      TNLAssert(deltaT != 0, "Time should never be zero!");    
-
-      tickTimer<Robot>(deltaT);
+      // Robot Timer ticks are now processed in the global Lua Timer along with
+      // levelgens in ServerGame::idle()
 
       Parent::idle(BfObject::ServerProcessingUpdatesFromClient);   // Let's say the script is the client  ==> really not sure this is right
    }

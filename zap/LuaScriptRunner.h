@@ -140,6 +140,9 @@ public:
    static bool startLua();          // Create L
    static void shutdown();          // Delete L
 
+   static void tickTimer(U32 timeDelta);
+   static void resetTimer();
+
    bool runString(const string &code);
    bool runMain();                                    // Run a script's main() function
    bool runMain(const Vector<string> &args);          // Run a script's main() function, putting args into Lua's arg table
@@ -157,21 +160,6 @@ public:
 
    S32 doSubscribe(lua_State *L, ScriptContext context);
    S32 doUnsubscribe(lua_State *L);
-
-   // Consolidate code from bots and levelgens -- this tickTimer works for both!
-   template <class T>
-   void tickTimer(U32 deltaT)          
-   {
-      TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
-      clearStack(L);
-
-      luaW_push<T>(L, static_cast<T *>(this));           // -- this
-      lua_pushnumber(L, deltaT);                         // -- this, deltaT
-
-      // Note that we don't care if this generates an error... if it does the error handler will
-      // print a nice message, then call killScript().
-      runCmd("_tickTimer", 0);
-   }
 
 
    //// Lua interface

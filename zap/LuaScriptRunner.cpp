@@ -197,6 +197,45 @@ void LuaScriptRunner::pushStackTracer()
 }
 
 
+// Update our Lua Timer each tick
+void LuaScriptRunner::tickTimer(U32 timeDelta)
+{
+   if(!L)
+      return;
+
+   // This will grab the function _tick() and call it like so:
+   //    Timer._tick(self, timeDelta)
+   //
+   // This is equivalent to calling
+   //    Timer:_tick(timeDelta)
+   lua_getglobal(L, "Timer");       // Timer
+   lua_getfield(L, -1, "_tick");    // Timer, _tick
+   lua_pushvalue(L, -2);            // Timer, _tick, Timer
+   lua_pushinteger(L, timeDelta);   // Timer, _tick, Timer, timeDelta
+
+   // Run
+   lua_call(L, 2, 0);               // Timer
+   lua_pop(L, 1);
+}
+
+
+// Here we reset the global Lua Timer at the start of each level
+void LuaScriptRunner::resetTimer()
+{
+   if(!L)
+      return;
+
+   // Call Timer._initialize(self) a.k.a. Timer:_initialize()
+   lua_getglobal(L, "Timer");          // Timer
+   lua_getfield(L, -1, "_initialize"); // Timer, _initialize
+   lua_pushvalue(L, -2);               // Timer, _initialize, Timer
+
+   // Run
+   lua_call(L, 1, 0);                  // Timer
+   lua_pop(L, 1);
+}
+
+
 // Loads script from file into a Lua chunk, then runs it.  This has the effect of loading all our functions into the local environment,
 // defining any globals, and executing any "loose" code not defined in a function.  If we're going to get any compile errors, they'll
 // show up here.
@@ -416,6 +455,9 @@ void LuaScriptRunner::configureNewLuaInstance()
 
    // Immediately execute the lua helper functions (these are global and need to be loaded before sandboxing)
    loadCompileRunHelper("lua_helper_functions.lua");
+
+   // Now load our Timer class.  This is global and will need to be reset between levels
+   loadCompileRunHelper("timer.lua");
 
    // Load our helper functions and store copies of the compiled code in the registry where we can use them for starting new scripts
    loadCompileSaveHelper("robot_helper_functions.lua",    ROBOT_HELPER_FUNCTIONS_KEY);
