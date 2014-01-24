@@ -12,7 +12,7 @@ namespace Zap
       allAsciiFilter,          // any ascii character
       digitsOnlyFilter,        // 0-9
       numericFilter,           // 0-9, -, .
-      fileNameFilter,          // A-Z, a-z, 0-9, _
+      fileNameFilter,          // Legal chars in a filename; all but \/:*?"<>|
       nickNameFilter           // No "s, and don't let name start with spaces
    };
 };

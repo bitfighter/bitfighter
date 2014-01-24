@@ -285,7 +285,8 @@ bool LineEditor::addChar(const char c)
       if(c == ' ' && mLine.c_str()[0] == 0) return false; // Don't let name start with a space.
       break;
    case fileNameFilter:
-      if((c < '0' || c > '9') && (c != '_') && (c < 'A' || c > 'Z') && (c < 'a' || c > 'z')) return false;
+      // \/:*?"<>|
+      if(string("\\/:*?\"<>|").find(c) != string::npos) return false;
       break;
    case allAsciiFilter:
    default:
