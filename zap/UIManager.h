@@ -147,6 +147,8 @@ public:
    UserInterface *getCurrentUI();
    UserInterface *getPrevUI();
 
+   const Vector<UserInterface *> *getPrevUIs() const;
+
    void activate(UserInterface *ui, bool save = true);
 
    void idle(U32 timeDelta);

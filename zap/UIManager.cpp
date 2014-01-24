@@ -126,6 +126,12 @@ UserInterface *UIManager::getPrevUI()
 }
 
 
+const Vector<UserInterface *> *UIManager::getPrevUIs() const
+{
+   return &mPrevUIs;
+}
+
+
 UserInterface *UIManager::getCurrentUI()
 {
    return mCurrentInterface;
