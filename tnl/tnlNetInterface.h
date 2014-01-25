@@ -157,27 +157,27 @@ public:
 
    enum PacketType
    {
-      ConnectChallengeRequest       = 0, ///< Initial packet of the two-phase connect process
-      ConnectChallengeResponse      = 1, ///< Response packet to the ChallengeRequest containing client identity, a client puzzle, and possibly the server's public key.
-      ConnectRequest                = 2, ///< A connect request packet, including all puzzle solution data and connection initiation data.
-      ConnectReject                 = 3, ///< A packet sent to notify a host that a ConnectRequest was rejected.
-      ConnectAccept                 = 4, ///< A packet sent to notify a host that a connection was accepted.
-      Disconnect                    = 5, ///< A packet sent to notify a host that the specified connection has terminated.
-      Punch                         = 6, ///< A packet sent in order to create a hole in a firewall or NAT so packets from the remote host can be received.
-      ArrangedConnectRequest        = 7, ///< A connection request for an "arranged" connection.
-      FirstValidInfoPacketId        = 8, ///< The first valid ID for a NetInterface subclass's info packets.
+      ConnectChallengeRequest       = 0, /// Initial packet of the two-phase connect process
+      ConnectChallengeResponse      = 1, /// Response packet to the ChallengeRequest containing client identity, a client puzzle, and possibly the server's public key.
+      ConnectRequest                = 2, /// A connect request packet, including all puzzle solution data and connection initiation data.
+      ConnectReject                 = 3, /// A packet sent to notify a host that a ConnectRequest was rejected.
+      ConnectAccept                 = 4, /// A packet sent to notify a host that a connection was accepted.
+      Disconnect                    = 5, /// A packet sent to notify a host that the specified connection has terminated.
+      Punch                         = 6, /// A packet sent in order to create a hole in a firewall or NAT so packets from the remote host can be received.
+      ArrangedConnectRequest        = 7, /// A connection request for an "arranged" connection.
+      FirstValidInfoPacketId        = 8, /// The first valid ID for a NetInterface subclass's info packets.
    };
 
 protected:
-   Vector<NetConnection *> mConnectionList;      ///< List of all the connections that are in a connected state on this NetInterface.
-   Vector<NetConnection *> mConnectionHashTable; ///< A resizable hash table for all connected connections.  This is a flat hash table (no buckets).
+   Vector<NetConnection *> mConnectionList;        /// List of all the connections that are in a connected state on this NetInterface.
+   Vector<NetConnection *> mConnectionHashTable;   /// A resizable hash table for all connected connections.  This is a flat hash table (no buckets).
 
-   Vector<NetConnection *> mPendingConnections; ///< List of connections that are in the startup state, where the remote host has not fully
-                                                ///  validated the connection.
+   Vector<NetConnection *> mPendingConnections;    /// List of connections that are in the startup state, where the remote host has not fully
+                                                   /// validated the connection.
 
-   RefPtr<AsymmetricKey> mPrivateKey;  ///< The private key used by this NetInterface for secure key exchange.
-   RefPtr<Certificate> mCertificate;   ///< A certificate, signed by some Certificate Authority, to authenticate this host.
-   ClientPuzzleManager mPuzzleManager; ///< The object that tracks the current client puzzle difficulty, current puzzle and solutions for this NetInterface.
+   RefPtr<AsymmetricKey> mPrivateKey;  /// The private key used by this NetInterface for secure key exchange.
+   RefPtr<Certificate> mCertificate;   /// A certificate, signed by some Certificate Authority, to authenticate this host.
+   ClientPuzzleManager mPuzzleManager; /// The object that tracks the current client puzzle difficulty, current puzzle and solutions for this NetInterface.
 
    /// @name NetInterfaceSocket Socket
    ///
@@ -190,39 +190,39 @@ protected:
 
    /// @}
 
-   U32 mCurrentTime;            ///< Current time tracked by this NetInterface.
-   bool mRequiresKeyExchange;   ///< True if all connections outgoing and incoming require key exchange.
-   U32  mLastTimeoutCheckTime;  ///< Last time all the active connections were checked for timeouts.
-   U8  mRandomHashData[12];    ///< Data that gets hashed with connect challenge requests to prevent connection spoofing.
-   bool mAllowConnections;      ///< Set if this NetInterface allows connections from remote instances.
+   U32 mCurrentTime;            /// Current time tracked by this NetInterface.
+   bool mRequiresKeyExchange;   /// True if all connections outgoing and incoming require key exchange.
+   U32  mLastTimeoutCheckTime;  /// Last time all the active connections were checked for timeouts.
+   U8  mRandomHashData[12];     /// Data that gets hashed with connect challenge requests to prevent connection spoofing.
+   bool mAllowConnections;      /// Set if this NetInterface allows connections from remote instances.
 
    /// Structure used to track packets that are delayed in sending for simulating a high-latency connection.
    ///
    /// The DelaySendPacket is allocated as sizeof(DelaySendPacket) + packetSize;
    struct DelaySendPacket
    {
-      DelaySendPacket *nextPacket; ///< The next packet in the list of delayed packets.
-      Address remoteAddress;       ///< The address to send this packet to.
-      U32 sendTime;                ///< Time when we should send the packet.
-      U32 packetSize;              ///< Size, in bytes, of the packet data.
+      DelaySendPacket *nextPacket; /// The next packet in the list of delayed packets.
+      Address remoteAddress;       /// The address to send this packet to.
+      U32 sendTime;                /// Time when we should send the packet.
+      U32 packetSize;              /// Size, in bytes, of the packet data.
       SafePtr<NetConnection> receiveTo; // Used if delayed receiving
       bool isReceive;
-      U8 packetData[1];            ///< Packet data.
+      U8 packetData[1];            /// Packet data.
    };
-   DelaySendPacket *mSendPacketList; ///< List of delayed packets pending to send.
+   DelaySendPacket *mSendPacketList; /// List of delayed packets pending to send.
 
    enum NetInterfaceConstants {
-      ChallengeRetryCount = 4,     ///< Number of times to send connect challenge requests before giving up.
-      ChallengeRetryTime = 2500,   ///< Timeout interval in milliseconds before retrying connect challenge.
+      ChallengeRetryCount = 4,     /// Number of times to send connect challenge requests before giving up.
+      ChallengeRetryTime = 2500,   /// Timeout interval in milliseconds before retrying connect challenge.
 
-      ConnectRetryCount = 4,       ///< Number of times to send connect requests before giving up.
-      ConnectRetryTime = 2500,     ///< Timeout interval in milliseconds before retrying connect request.
+      ConnectRetryCount = 4,       /// Number of times to send connect requests before giving up.
+      ConnectRetryTime = 2500,     /// Timeout interval in milliseconds before retrying connect request.
 
-      PunchRetryCount = 6,         ///< Number of times to send groups of firewall punch packets before giving up.
-      PunchRetryTime = 2500,       ///< Timeout interval in milliseconds before retrying punch sends.
+      PunchRetryCount = 6,         /// Number of times to send groups of firewall punch packets before giving up.
+      PunchRetryTime = 2500,       /// Timeout interval in milliseconds before retrying punch sends.
 
-      TimeoutCheckInterval = 1500, ///< Interval in milliseconds between checking for connection timeouts.
-      PuzzleSolutionTimeout = 30000, ///< If the server gives us a puzzle that takes more than 30 seconds, time out.
+      TimeoutCheckInterval = 1500,     /// Interval in milliseconds between checking for connection timeouts.
+      PuzzleSolutionTimeout = 30000,   /// If the server gives us a puzzle that takes more than 30 seconds, time out.
    };
 
    /// Computes an identity token for the connecting client based on the address of the client and the
