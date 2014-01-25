@@ -52,6 +52,8 @@ U32 computeSimpleToken(const Address &theAddress, const Nonce &theNonce)
 
 static void handlePing(Game *game, const Address &remoteAddress, Socket &socket, BitStream *stream)
 {
+   TNLAssert(game->isServer(), "Expected this to be a server!");
+
    Nonce clientNonce;
    clientNonce.read(stream);
 
@@ -73,6 +75,8 @@ static void handlePing(Game *game, const Address &remoteAddress, Socket &socket,
 
 static void handlePingResponse(Game *game, const Address &remoteAddress, BitStream *stream)
 {
+   TNLAssert(!game->isServer(), "Expected this to be a client!");
+
    Nonce nonce;
    U32 clientIdentityToken;
 
@@ -85,6 +89,8 @@ static void handlePingResponse(Game *game, const Address &remoteAddress, BitStre
 
 static void handleQuery(Game *game, const Address &remoteAddress, Socket &socket, BitStream *stream)
 {
+   TNLAssert(game->isServer(), "Expected this to be a server!");
+
    Nonce theNonce;
    U32 clientIdentityToken;
 
@@ -114,6 +120,8 @@ static void handleQuery(Game *game, const Address &remoteAddress, Socket &socket
 
 static void handleQueryResponse(Game *game, const Address &remoteAddress, BitStream *stream)
 {
+   TNLAssert(!game->isServer(), "Expected this to be a client!");
+
    Nonce theNonce;
    StringTableEntry name;
    StringTableEntry descr;
@@ -160,6 +168,9 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
          if(!mGame->isServer())  
             handleQueryResponse(mGame, remoteAddress, stream);
          break;
+
+      default:
+         TNLAssert(false, "Unknown packetType!");
    }
 }
 
