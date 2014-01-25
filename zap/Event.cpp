@@ -556,9 +556,7 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
   
    glViewport(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
 
-#ifndef BF_NO_CONSOLE
    gConsole.onScreenResized();
-#endif
 
    GameSettings::iniFile.SetValueF("Settings", "WindowScalingFactor", iniSettings->winSizeFact, true);
 

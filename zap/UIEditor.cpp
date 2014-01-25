@@ -672,15 +672,12 @@ void EditorUserInterface::runLevelGenScript()
 // game is an unused parameter needed to make the method fit the signature of the callbacks used by UIMenus
 static void openConsole(ClientGame *game)
 {
-#ifndef BF_NO_CONSOLE
    if(gConsole.isOk())
    {
       gConsole.show();
       return;
    }
-   // else
-#endif
-   // show error message  <== TODO DO ThiS!
+   // else show error message  <== TODO DO ThiS!
 }
 
 
@@ -709,8 +706,15 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
 
       ui->reset();
       ui->setTitle("SCRIPT ERROR");
+
+#ifndef BF_NO_CONSOLE
       ui->setMessage("The levelgen script you ran encountered an error.\n\n"
                      "See the console (press [[/]]) or the logfile for details.");
+#else
+      ui->setMessage("The levelgen script you ran encountered an error.\n\n"
+                     "See the logfile for details.");
+#endif
+
       ui->setInstr("Press [[Esc]] to return to the editor");
 
       ui->registerKey(KEY_SLASH, &openConsole);
@@ -777,7 +781,12 @@ void EditorUserInterface::showPluginError(const string &msg)
 
    messages.push_back("This plugin encountered an error " + msg + ".\n"
                       "It has probably been misconfigured.\n\n"
+
+#ifndef BF_NO_CONSOLE
                       "See the Bitfighter logfile or console ([[/]]) for details.");
+#else
+                      "See the Bitfighter logfile for details.");
+#endif
 
    mMessageBoxQueue.push_back(messages);
 }
@@ -3834,11 +3843,9 @@ void EditorUserInterface::zoom(F32 zoomAmount)
 
 void EditorUserInterface::onTextInput(char ascii)
 {
-#ifndef BF_NO_CONSOLE
    // Pass the key on to the console for processing
    if(gConsole.onKeyDown(ascii))
        return;
-#endif
 }
 
 
@@ -3848,14 +3855,12 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    if(Parent::onKeyDown(inputCode))
       return true;
 
-#ifndef BF_NO_CONSOLE
    if(gConsole.onKeyDown(inputCode))      // Pass the key on to the console for processing
       return true;
 
    // If console is open, then we want to capture text, so return false
    if(gConsole.isVisible())
       return false;
-#endif
 
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
 

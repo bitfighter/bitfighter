@@ -7,10 +7,12 @@
 #define _OGLCONSOLE_H
 
 #ifdef TNL_OS_MOBILE
-#define BF_NO_CONSOLE
+#  define BF_NO_CONSOLE
 #endif
 
-#ifndef BF_NO_CONSOLE
+#ifdef BF_NO_CONSOLE
+   typedef _OGLCONSOLE_Console *void;
+#else 
 
 /* Opaque to you you lowly user */
 struct _OGLCONSOLE_Console;

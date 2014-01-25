@@ -6,38 +6,12 @@
 #ifndef _CONSOLE_H_
 #define _CONSOLE_H_
 
-#include "InputCode.h"           // For InputCodeManager and associated enums
-
 #if defined(ZAP_DEDICATED) || defined(TNL_OS_MOBILE)
-#define BF_NO_CONSOLE
+#  define BF_NO_CONSOLE
 #endif
 
-#ifdef BF_NO_CONSOLE
-
-namespace Zap {
-
-class Console
-{
-
-public:
-   // Do nothing
-   void output(const char *s, ...) {}
-   bool onKeyDown(char ascii) { return false; }
-   bool onKeyDown(InputCode inputCode) { return false; }
-   bool isVisible() { return false; }
-   void show() {}
-   bool isOk() { return false; }
-   void toggleVisibility() {}
-   void initialize() {}
-   void onScreenModeChanged() {}
-   void onScreenResized() {}
-};
-
-
-
-#else
-
 #include "LuaScriptRunner.h"     // Parent class
+#include "InputCode.h"           // For InputCodeManager and associated enums
 #include "oglconsole.h"
 #include "lua.h"
 #include "tnlTypes.h"
@@ -90,7 +64,6 @@ public:
    void output(const char *s, ...);    // Print message to console
 };
 
-#endif // BF_NO_CONSOLE
 
 // Provide transparent access to our global console instance
 extern Console gConsole;

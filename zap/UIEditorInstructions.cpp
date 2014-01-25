@@ -201,11 +201,13 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    pack(mWallInstr, mWallBindings, wallInstructions, ARRAYSIZE(wallInstructions), settings);
 
    
+#ifndef BF_NO_CONSOLE
    symbols.clear();
    SymbolString::symbolParse(settings->getInputCodeManager(), "Open the console by pressing [[/]]", 
                              symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
 
    mConsoleInstructions.add(SymbolString(symbols));
+#endif
 
    ///// Plugin pages
 
