@@ -397,16 +397,21 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
          s.dedicated = dedicated;
          s.test = test;
          s.passwordRequired = passwordRequired;
-         if(!s.isFromMaster)
-            s.pingTimedOut = false;       // Cures problem with local servers incorrectly displaying ?s for first 15 seconds
-         s.sendCount = 0;  // Fix random "Query/ping timed out"
+         s.sendCount = 0;              // Fix random "Query/ping timed out"
          s.everGotQueryResponse = true;
 
          s.serverName = string(serverName).substr(0, MaxServerNameLen);
          s.serverDescr = string(serverDescr).substr(0, MaxServerDescrLen);
          s.msgColor = Colors::yellow;   // yellow server details
          s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
-         s.lastSendTime = Platform::getRealMilliseconds();     // Record time our last query was received, so we'll know when to send again
+
+         // Record time our last query was received, so we'll know when to send again
+         s.lastSendTime = Platform::getRealMilliseconds();     
+
+         if(!s.isFromMaster)
+            s.pingTimedOut = false;    // Cures problem with local servers incorrectly displaying ?s for first 15 seconds
+
+
          if(s.state == ServerRef::SentQuery)
          {
             s.state = ServerRef::ReceivedQuery;
@@ -414,6 +419,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
          }
       }
    }
+
    mShouldSort = true;
 }
 
