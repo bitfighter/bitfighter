@@ -15,7 +15,8 @@ namespace Zap
 GameNetInterface::GameNetInterface(const Address &bindAddress, Game *theGame) : NetInterface(bindAddress)
 {
    mGame = theGame;
-};
+}
+
 
 // Destructor
 GameNetInterface::~GameNetInterface()
@@ -36,7 +37,7 @@ void GameNetInterface::processPacket(const Address &sourceAddress, BitStream *pS
 }
 
 
-// using this and not computeClientIdentityToken fix problem with random ping timed out in game lobby.
+// Using this and not computeClientIdentityToken fix problem with random ping timed out in game lobby.
 // Only server use this function, client only holds Token received in PingResponse.
 // This function can be changed at any time without breaking compatibility.
 U32 computeSimpleToken(const Address &theAddress, const Nonce &theNonce)
