@@ -346,11 +346,14 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
          if(servers[i].serverAddress == theAddress)      // servers[i].sendNonce == theNonce &&
             return;
 
+      mLastUsedServerId++;
+
       // Yes, it was from a local ping
       ServerRef s;
+
       s.pingTime = Platform::getRealMilliseconds() - mBroadcastPingSendTime;
       s.state = ServerRef::ReceivedPing;
-      s.id = ++mLastUsedServerId;
+      s.id = mLastUsedServerId;
       s.sendNonce = theNonce;
       s.identityToken = clientIdentityToken;
       s.serverAddress = theAddress;
@@ -419,7 +422,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
          }
       }
    }
-
+      
    mShouldSort = true;
 }
 
