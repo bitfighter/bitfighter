@@ -735,6 +735,8 @@ void GameType::gameOverManGameOver()
    s2cSetGameOver(true);                 // Alerts clients that the game is over
    ((ServerGame *)mGame)->gameEnded();   // Sets level-switch timer, which gives us a short delay before switching games
 
+   // Fire a Lua event
+   EventManager::get()->fireEvent(EventManager::GameOverEvent);
 
    saveGameStats();
 

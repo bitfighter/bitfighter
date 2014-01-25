@@ -52,6 +52,7 @@ class EventManager
    EVENT(ShipEnteredZoneEvent,   "ShipEnteredZone",   "onShipEnteredZone",   "onShipEnteredZone(Ship ship, Zone zone)"                                ) \
    EVENT(ShipLeftZoneEvent,      "ShipLeftZone",      "onShipLeftZone",      "onShipLeftZone(Ship ship, Zone zone)"                                   ) \
    EVENT(ScoreChangedEvent,      "ScoreChanged",      "onScoreChanged",      "onScoreChanged(num scoreChange, num teamIndex, PlayerInfo player)"      ) \
+   EVENT(GameOverEvent,          "GameOver",          "onGameOver",          "onGameOver()"                                                           ) \
 
 public:
 
