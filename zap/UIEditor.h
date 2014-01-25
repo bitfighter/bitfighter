@@ -156,8 +156,6 @@ private:
 
    string mEditFileName;            // Manipulate with get/setLevelFileName
 
-   
-
    TeamManager mTeamManager;
 
    F32 mCurrentScale;
@@ -219,9 +217,12 @@ private:
 
    BfObject *doMergeLines   (BfObject *firstItem, S32 firstItemIndex);   
    BfObject *doMergePolygons(BfObject *firstItem, S32 firstItemIndex);
+   
+   BfObject *findObjBySerialNumber(const GridDatabase *database, S32 serialNumber) const;
 
    bool anyItemsSelected(GridDatabase *database);  // Are any items selected?
    bool anythingSelected();                        // Are any items/vertices selected?
+
 public:
    S32 getItemSelectedCount();                     // How many are objects are selected?
 

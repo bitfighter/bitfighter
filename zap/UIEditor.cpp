@@ -389,8 +389,10 @@ void EditorUserInterface::redo()
       // Act I:
       S32 selectedItem = NONE;
 
-      const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
       if(mLastRedoIndex == mLastUndoIndex && getItemSelectedCount() == 1)
+      {
+         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+
          for(S32 i = 0; i < objList->size(); i++)
          {
             BfObject *obj = static_cast<BfObject *>(objList->get(i));
@@ -401,6 +403,7 @@ void EditorUserInterface::redo()
                break;
             }
          }
+      }
 
       setDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
       GridDatabase *database = mUndoItems[mLastUndoIndex % UNDO_STATES].get();
@@ -409,30 +412,40 @@ void EditorUserInterface::redo()
       // Act II:
       if(selectedItem != NONE)
       {
-         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-
          clearSelection(getDatabase());
-         for(S32 i = 0; i < objList->size(); i++)
-         {
-            BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
-            if(obj->getSerialNumber() == selectedItem)
-            {
-               obj->setSelected(true);
-               break;
-            }
-         }
+         BfObject *obj = findObjBySerialNumber(getDatabase(), selectedItem);
+
+         if(obj)
+            obj->setSelected(true);
       }
 
 
       TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
 
-      rebuildEverything(database);   // Needed?  Yes, for now, but theoretically no, because we should be restoring everything fully reconstituted...
+      rebuildEverything(database);  // Needed?  Yes, for now, but theoretically no, because we should be restoring everything fully reconstituted...
       onSelectionChanged();
       validateLevel();
 
       onMouseMoved();               // If anything gets undeleted under the mouse, make sure it's highlighted
    }
+}
+
+
+// Find specified object in specified database
+BfObject *EditorUserInterface::findObjBySerialNumber(const GridDatabase *database, S32 serialNumber) const
+{
+   const Vector<DatabaseObject *> *objList = database->findObjects_fast();
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+      if(obj->getSerialNumber() == serialNumber)
+         return obj;
+   }
+
+   return NULL;
 }
 
 
