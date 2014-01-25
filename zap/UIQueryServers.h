@@ -143,7 +143,7 @@ public:
       U32 identityToken;
       U32 lastSendTime;
       U32 sendCount;
-      bool isFromMaster;
+      bool isFromMaster;      // True if remote server, false if local server
       bool dedicated;
       bool test;
       bool passwordRequired;

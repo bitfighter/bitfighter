@@ -65,14 +65,14 @@ static void prevButtonClickedCallback(ClientGame *game)
 
 
 // Constructor
-QueryServersUserInterface::ServerRef::ServerRef(State state)
+QueryServersUserInterface::ServerRef::ServerRef(State initialState)
 {
    pingTimedOut = false;
    everGotQueryResponse = false;
    passwordRequired = false;
    test = false;
    dedicated = false;
-   isFromMaster = false;
+   isFromMaster = false;      
    sendCount = 0;
    pingTime = 9999;
    setPlayerBotMax(-1, 01, -1);
@@ -80,7 +80,7 @@ QueryServersUserInterface::ServerRef::ServerRef(State state)
    id = getNextId();
    identityToken = 0;
    lastSendTime = 0;
-   state = state;
+   state = initialState;
 }
 
 
@@ -571,7 +571,6 @@ void QueryServersUserInterface::idle(U32 timeDelta)
    while(getFirstServerIndexOnCurrentPage() >= servers.size() && mPage > 0)
        mPage--;
 
-
    if(mShouldSort)
    {
       mShouldSort = false;
@@ -776,7 +775,11 @@ void QueryServersUserInterface::render()
                else
                   break;
 
-         glColor(Colors::white);
+         if(s.isFromMaster)
+            glColor(Colors::white);
+         else
+            glColor(Colors::blue);
+
          drawString(columns[0].xStart, y, SERVER_ENTRY_TEXTSIZE, sname.c_str());
 
          // Render icons
@@ -1310,49 +1313,65 @@ bool QueryServersUserInterface::isMouseOverDivider()
 }
 
 
+#define CAST_AB_TO_SERVERAB_AND_PUT_LOCAL_SERVERS_ON_TOP                                        \
+   QueryServersUserInterface::ServerRef *serverA = (QueryServersUserInterface::ServerRef *) a;  \
+   QueryServersUserInterface::ServerRef *serverB = (QueryServersUserInterface::ServerRef *) b;  \
+                                                                                                \
+   if(serverA->isFromMaster != serverB->isFromMaster)                                           \
+   {                                                                                            \
+      if(!serverA->isFromMaster) return -1;                                                     \
+      if(!serverB->isFromMaster) return 1;                                                      \
+   }                                                                 
+
+
 // Sort server list by various columns
 static S32 QSORT_CALLBACK compareFuncName(const void *a, const void *b)
 {
-   return stricmp(((QueryServersUserInterface::ServerRef *) a)->serverName.c_str(),
-                  ((QueryServersUserInterface::ServerRef *) b)->serverName.c_str());
+   CAST_AB_TO_SERVERAB_AND_PUT_LOCAL_SERVERS_ON_TOP;
+
+   return stricmp(serverA->serverName.c_str(), serverB->serverName.c_str());
 }
 
 
 static S32 QSORT_CALLBACK compareFuncPing(const void *a, const void *b)
 {
-   return S32(((QueryServersUserInterface::ServerRef *) a)->pingTime -
-              ((QueryServersUserInterface::ServerRef *) b)->pingTime);
+   CAST_AB_TO_SERVERAB_AND_PUT_LOCAL_SERVERS_ON_TOP;
+
+   return S32(serverA->pingTime - serverB->pingTime);
 }
 
 
 static S32 QSORT_CALLBACK compareFuncPlayers(const void *a, const void *b)
 {
-   S32 pc = S32(((QueryServersUserInterface::ServerRef *) a)->playerCount -
-                ((QueryServersUserInterface::ServerRef *) b)->playerCount);
+   CAST_AB_TO_SERVERAB_AND_PUT_LOCAL_SERVERS_ON_TOP;
+
+   S32 pc = S32(serverA->playerCount - serverB->playerCount);
+
    if(pc)
       return pc;
 
-   return S32(((QueryServersUserInterface::ServerRef *) a)->maxPlayers -
-              ((QueryServersUserInterface::ServerRef *) b)->maxPlayers);
+   return S32(serverA->maxPlayers - serverB->maxPlayers);
 }
 
 
 // First compare IPs, then, if equal, port numbers
 static S32 QSORT_CALLBACK compareFuncAddress(const void *a, const void *b)
 {
-   U32 netNumA = ((QueryServersUserInterface::ServerRef *) a)->serverAddress.netNum[0];
-   U32 netNumB = ((QueryServersUserInterface::ServerRef *) b)->serverAddress.netNum[0];
+   CAST_AB_TO_SERVERAB_AND_PUT_LOCAL_SERVERS_ON_TOP;
+
+   U32 netNumA = serverA->serverAddress.netNum[0];
+   U32 netNumB = serverB->serverAddress.netNum[0];
 
    if(netNumA == netNumB)
-      return (S32)(((QueryServersUserInterface::ServerRef *) a)->serverAddress.port - 
-                   ((QueryServersUserInterface::ServerRef *) b)->serverAddress.port);
-   // else
+      return (S32)(serverA->serverAddress.port - serverB->serverAddress.port);
+   
    return S32(netNumA - netNumB);
 }
 
 
 void QueryServersUserInterface::sort()
 {
+   // In all cases, put local servers at the top of the list
    switch(mSortColumn)
    {
       case 0:
