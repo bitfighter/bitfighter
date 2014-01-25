@@ -65,7 +65,7 @@ static void prevButtonClickedCallback(ClientGame *game)
 
 
 // Constructor
-QueryServersUserInterface::ServerRef::ServerRef()
+QueryServersUserInterface::ServerRef::ServerRef(State state)
 {
    pingTimedOut = false;
    everGotQueryResponse = false;
@@ -75,15 +75,14 @@ QueryServersUserInterface::ServerRef::ServerRef()
    isFromMaster = false;
    sendCount = 0;
    pingTime = 9999;
-   playerCount = -1;
-   maxPlayers = -1;
-   botCount = -1;
+   setPlayerBotMax(-1, 01, -1);
 
-   id = 0;
+   id = getNextId();
    identityToken = 0;
    lastSendTime = 0;
-   state = Start;
+   state = state;
 }
+
 
 // Destructor
 QueryServersUserInterface::ServerRef::~ServerRef()
@@ -91,6 +90,33 @@ QueryServersUserInterface::ServerRef::~ServerRef()
    // Do nothing
 }
 
+
+void QueryServersUserInterface::ServerRef::setNameDescr(const string &name, const string &descr, const Color &color)
+{
+   this->serverName = name.substr(0, MaxServerNameLen);
+   this->serverDescr = descr.substr(0, MaxServerDescrLen);
+   this->msgColor = color;
+}
+
+
+void QueryServersUserInterface::ServerRef::setPlayerBotMax(U32 playerCount, U32 botCount, U32 maxPlayers)
+{
+   this->playerCount = playerCount;
+   this->maxPlayers = maxPlayers;
+   this->botCount = botCount;
+}
+
+
+U32 QueryServersUserInterface::ServerRef::getNextId()
+{
+   static U32 nextId = 0;
+
+   nextId++;
+   return nextId;
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Constructor
 QueryServersUserInterface::ColumnInfo::ColumnInfo(const char *nm, U32 xs)
@@ -107,10 +133,15 @@ QueryServersUserInterface::ColumnInfo::~ColumnInfo()
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 // Constructor
-QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInterface(game), ChatParent(game)
+QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : 
+   UserInterface(game), 
+   ChatParent(game),
+   mLastSelectedServer(ServerRef::Start)
 {
-   mLastUsedServerId = 0;
    mSortColumn = getGame()->getSettings()->getQueryServerSortColumn();
    mSortAscending = getGame()->getSettings()->getQueryServerSortAscending();
    mLastSortColumn = mSortColumn;
@@ -187,18 +218,16 @@ void QueryServersUserInterface::onActivate()
       char name[128];
       dSprintf(name, MaxServerNameLen, "Dummy Svr%8x", Random::readI());
 
-      ServerRef s;
-      s.serverName = name;
-      s.id = i;
+      ServerRef s(ServerRef::ReceivedPing);
+
+      s.setNameDescr(name, "This is my description.  There are many like it, but this one is mine.", Colors::yellow);
+      s.setPlayerBotMax(Random::readF() * max / 2, Random::readF() * max / 2, max);
       s.pingTime = Random::readF() * 512;
       s.serverAddress.port = GameSettings::DEFAULT_GAME_PORT;
       s.serverAddress.netNum[0] = Random::readI();
-      s.maxPlayers = Random::readF() * 16 + 8;
-      s.playerCount = Random::readF() * s.maxPlayers;
+      U32 max = Random::readF() * 16 + 8;
       s.pingTimedOut = false;
       s.everGotQueryResponse = false;
-      s.serverDescr = "This is my description.  There are many like it, but this one is mine.";
-      s.msgColor = Colors::yellow;
       servers.push_back(s);
    }
 #endif
@@ -310,16 +339,14 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
 
       if(!found)  // It's a new server!
       {
-         ServerRef s;
-         s.state = ServerRef::Start;
-         s.id = ++mLastUsedServerId;
+         ServerRef s(ServerRef::Start);
+
+         s.setNameDescr("Internet Server",  "Internet Server -- attempting to connect", Colors::white);
+
          s.sendNonce.getRandom();
          s.isFromMaster = true;
          s.serverAddress.set(ipList[i]);
 
-         s.serverName = "Internet Server";
-         s.serverDescr = "Internet Server -- attempting to connect";
-         s.msgColor = Colors::white;   // white messages
          servers.push_back(s);
          mShouldSort = true;
       }
@@ -337,31 +364,27 @@ void QueryServersUserInterface::gotServerListFromMaster(const Vector<IPAddress> 
 }
 
 
-void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const Nonce &theNonce, U32 clientIdentityToken)
+void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const Nonce &nonce, U32 clientIdentityToken)
 {
    // See if this ping is a server from the local broadcast ping:
-   if(mNonce == theNonce)
+   if(mNonce == nonce)
    {
       for(S32 i = 0; i < servers.size(); i++)
-         if(servers[i].serverAddress == theAddress)      // servers[i].sendNonce == theNonce &&
+         if(servers[i].serverAddress == theAddress)      // servers[i].sendNonce == nonce &&
             return;
 
-      mLastUsedServerId++;
-
       // Yes, it was from a local ping
-      ServerRef s;
+      ServerRef s(ServerRef::ReceivedPing);
+
+      s.setNameDescr("LAN Server", "LAN Server -- attempting to connect", Colors::white);
 
       s.pingTime = Platform::getRealMilliseconds() - mBroadcastPingSendTime;
-      s.state = ServerRef::ReceivedPing;
-      s.id = mLastUsedServerId;
-      s.sendNonce = theNonce;
+      s.sendNonce = nonce;
       s.identityToken = clientIdentityToken;
       s.serverAddress = theAddress;
       s.isFromMaster = false;
-      s.serverName = "LAN Server";
-      s.serverDescr = "LAN Server -- attempting to connect";
-      s.msgColor = Colors::white;   // white messages
       servers.push_back(s);
+
       return;
    }
 
@@ -369,7 +392,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
    for(S32 i = 0; i < servers.size(); i++)
    {
       ServerRef &s = servers[i];
-      if(s.sendNonce == theNonce && s.serverAddress == theAddress && s.state == ServerRef::SentPing)
+      if(s.sendNonce == nonce && s.serverAddress == theAddress && s.state == ServerRef::SentPing)
       {
          s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
          s.identityToken = clientIdentityToken;
@@ -394,19 +417,15 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
       ServerRef &s = servers[i];
       if(s.sendNonce == clientNonce && s.serverAddress == theAddress && s.state == ServerRef::SentQuery)
       {
-         s.playerCount = playerCount;
-         s.maxPlayers = maxPlayers;
-         s.botCount = botCount;
+         s.setNameDescr(serverName, serverDescr, Colors::yellow);
+         s.setPlayerBotMax(playerCount, botCount, maxPlayers);
+         s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
+
          s.dedicated = dedicated;
          s.test = test;
          s.passwordRequired = passwordRequired;
          s.sendCount = 0;              // Fix random "Query/ping timed out"
          s.everGotQueryResponse = true;
-
-         s.serverName = string(serverName).substr(0, MaxServerNameLen);
-         s.serverDescr = string(serverDescr).substr(0, MaxServerDescrLen);
-         s.msgColor = Colors::yellow;   // yellow server details
-         s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
 
          // Record time our last query was received, so we'll know when to send again
          s.lastSendTime = Platform::getRealMilliseconds();     
@@ -464,16 +483,14 @@ void QueryServersUserInterface::idle(U32 timeDelta)
             s.sendCount++;
             if(s.sendCount > PingQueryRetryCount)     // Ping has timed out, sadly
             {
+               s.setNameDescr("Ping Timed Out", "No information: Server not responding to pings", Colors::red);
+               s.setPlayerBotMax(0, 0, 0);
                s.pingTime = 999;
-               s.serverName = "Ping Timed Out";
-               s.serverDescr = "No information: Server not responding to pings";
-               s.msgColor = Colors::red;   // red for errors
-               s.playerCount = 0;
-               s.maxPlayers = 0;
-               s.botCount = 0;
+
                s.state = ServerRef::ReceivedQuery;    // In effect, this will tell app not to send any more pings or queries to this server
-               mShouldSort = true;
                s.pingTimedOut = true;
+
+               mShouldSort = true;
             }
             else
             {
@@ -482,6 +499,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                s.sendNonce.getRandom();
                getGame()->getNetInterface()->sendPing(s.serverAddress, s.sendNonce);
                pendingPings++;
+
                if(pendingPings >= MaxPendingPings)
                   break;
             }
@@ -491,7 +509,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
 
    // When all pings have been answered or have timed out, send out server status queries ... too slow
    // Want to start query immediately, to display server name / current players faster
-   for(S32 i = servers.size()-1; i >= 0 ; i--)
+   for(S32 i = servers.size() - 1; i >= 0; i--)
    {
       if(pendingQueries < MaxPendingQueries)
       {
@@ -509,13 +527,11 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                   continue;
                }
                // Otherwise, we can deal with timeouts on remote servers
-               s.serverName = "Query Timed Out";
-               s.serverDescr = "No information: Server not responding to status query";
-               s.msgColor = Colors::red;   // red for errors
-               s.playerCount = s.maxPlayers = s.botCount = 0;
+               s.setNameDescr("Query Timed Out", "No information: Server not responding to status query", Colors::red);
+               s.setPlayerBotMax(0, 0, 0);
+
                s.state = ServerRef::Start;//ReceivedQuery;
                mShouldSort = true;
-
             }
             else
             {
@@ -523,6 +539,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                s.lastSendTime = time;
                getGame()->getNetInterface()->sendQuery(s.serverAddress, s.sendNonce, s.identityToken);
                pendingQueries++;
+
                if(pendingQueries >= MaxPendingQueries)
                   break;
             }
@@ -537,9 +554,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
       if(s.state == ServerRef::ReceivedQuery && time - s.lastSendTime > RequeryTime)
       {
          if(s.pingTimedOut)
-         {
             s.state = ServerRef::Start;            // Will trigger a new round of pinging
-         }
          else
             s.state = ServerRef::ReceivedPing;     // Will trigger a new round of querying
 

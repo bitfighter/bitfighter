@@ -122,15 +122,22 @@ public:
 
    struct ServerRef
    {
-      enum State
-      {
+   private:
+      U32 getNextId();
+
+   public:
+      enum State {
          Start,
          SentPing,
          ReceivedPing,
          SentQuery,
          ReceivedQuery,
       };
-      U32 state;
+
+      ServerRef(State state); 
+      virtual ~ServerRef();
+
+      State state;
       U32 id;
       U32 pingTime;
       U32 identityToken;
@@ -143,14 +150,13 @@ public:
       bool pingTimedOut;
       bool everGotQueryResponse;
       Nonce sendNonce;
-      string serverName;
-      string serverDescr;
+      string serverName, serverDescr;
       Color msgColor;
       Address serverAddress;
       U32 playerCount, maxPlayers, botCount;     // U32 because that's what we use on the master
 
-      ServerRef(); // Quickie constructor
-      virtual ~ServerRef();
+      void setNameDescr(const string &serverName, const string &serverDescr, const Color &msgColor);
+      void setPlayerBotMax(U32 playerCount, U32 botCount, U32 maxPlayers);
    };
 
    struct ColumnInfo
