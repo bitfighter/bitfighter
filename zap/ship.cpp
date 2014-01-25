@@ -9,7 +9,7 @@
 #include "gameType.h"
 #include "Zone.h"
 #include "Colors.h"
-#include "teleporter.h"
+#include "Teleporter.h"
 #include "speedZone.h"
 
 #ifndef ZAP_DEDICATED

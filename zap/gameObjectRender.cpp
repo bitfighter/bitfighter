@@ -12,7 +12,7 @@
 #include "CoreGame.h"            // For CORE_PANELS
 #include "EngineeredItem.h"      // For TURRET_OFFSET
 #include "BotNavMeshZone.h"      // For Border def
-#include "teleporter.h"          // For TELEPORTER_RADIUS
+#include "Teleporter.h"          // For TELEPORTER_RADIUS
 #include "version.h"
 #include "config.h"              // Only for testing burst graphics below
 #include "DisplayManager.h"

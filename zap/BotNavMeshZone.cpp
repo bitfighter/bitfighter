@@ -6,7 +6,7 @@
 #include "BotNavMeshZone.h"
 
 #include "ship.h"                   // For Ship::CollisionRadius
-#include "teleporter.h"             // For Teleporter::TELEPORTER_RADIUS
+#include "Teleporter.h"             // For Teleporter::TELEPORTER_RADIUS
 #include "gameObjectRender.h"
 #include "barrier.h"                // For Barrier methods in generating zones
 #include "EngineeredItem.h"         // For Turret and ForceFieldProjector methods in generating zones

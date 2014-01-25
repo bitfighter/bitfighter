@@ -14,7 +14,7 @@
 #include "robot.h"
 #include "stringUtils.h"
 #include "SlipZone.h"  
-#include "teleporter.h"
+#include "Teleporter.h"
 #include "ServerGame.h"
 #include "gameNetInterface.h"
 

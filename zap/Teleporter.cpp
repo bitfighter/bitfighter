@@ -3,7 +3,7 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "teleporter.h"
+#include "Teleporter.h"
 
 #include "Colors.h"
 #include "gameObjectRender.h"

@@ -97,8 +97,8 @@ set(SHARED_SOURCES
 	stringUtils.cpp
 	SystemFunctions.cpp
 	teamInfo.cpp
-	teleporter.cpp
-	textItem.cpp
+	Teleporter.cpp
+	TextItem.cpp
 	Timer.cpp
 	WallSegmentManager.cpp
 	WeaponInfo.cpp

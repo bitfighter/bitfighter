@@ -8,7 +8,7 @@
 #include "ClientGame.h"
 #include "ServerGame.h"
 #include "GameManager.h"
-#include "teleporter.h"
+#include "Teleporter.h"
 #include "PickupItem.h"
 #include "barrier.h"
 #include "gameType.h"

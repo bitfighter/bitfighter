@@ -5,7 +5,7 @@
 
 #include "UI.h"
 #include "sparkManager.h"
-#include "teleporter.h"
+#include "Teleporter.h"
 #include "gameObjectRender.h"
 #include "Colors.h"
 #include "config.h"

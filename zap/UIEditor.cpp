@@ -31,8 +31,8 @@
 
 #include "Spawn.h"
 #include "speedZone.h"           // For Speedzone def
-#include "teleporter.h"          // For Teleporter def
-#include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
+#include "Teleporter.h"          // For Teleporter def
+#include "TextItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
 
 #include "config.h"
 #include "Cursor.h"              // For various editor cursor

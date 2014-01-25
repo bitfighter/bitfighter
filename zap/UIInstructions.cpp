@@ -9,7 +9,7 @@
 
 #include "ClientGame.h"
 #include "gameObjectRender.h"
-#include "teleporter.h"
+#include "Teleporter.h"
 #include "speedZone.h"        // For SpeedZone::height
 #include "Colors.h"
 #include "DisplayManager.h"

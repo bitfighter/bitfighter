@@ -12,7 +12,7 @@
 #include "Spawn.h"
 #include "PickupItem.h"
 
-#include "textItem.h"
+#include "TextItem.h"
 
 
 namespace Zap

@@ -3,7 +3,7 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "textItem.h"
+#include "TextItem.h"
 
 #include "game.h"
 #include "ship.h"

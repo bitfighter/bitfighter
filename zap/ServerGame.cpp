@@ -13,7 +13,7 @@
 #include "luaGameInfo.h"
 #include "luaLevelGenerator.h"
 #include "robot.h"
-#include "teleporter.h"
+#include "Teleporter.h"
 #include "BanList.h"             // For banList kick duration
 #include "BotNavMeshZone.h"      // For zone clearing code
 #include "LevelSource.h"
