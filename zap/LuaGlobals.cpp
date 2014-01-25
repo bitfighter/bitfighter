@@ -82,7 +82,7 @@ S32 lua_logprint(lua_State *L)
 S32 lua_print(lua_State *L)
 {
    string str = buildPrintString(L);
-   gConsole.output("%s\n", str.c_str());
+   logprintf(LogConsumer::ConsoleMsg, "%s", str.c_str());
 
    return 0;
 }

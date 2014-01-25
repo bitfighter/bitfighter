@@ -658,12 +658,7 @@ void EditorUserInterface::runLevelGenScript()
    if(scriptName == "")      // No script included!!
       return;
 
-#ifndef BF_NO_CONSOLE
-   gConsole.output(
-#else
-   fprintf(stderr,
-#endif
-                    "Running script %s\n", gameType->getScriptLine().c_str());
+   logprintf(LogConsumer::ConsoleMsg, "Running script %s", gameType->getScriptLine().c_str());
 
    const Vector<string> *scriptArgs = gameType->getScriptArgs();
 
@@ -697,13 +692,8 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
 
    if(name == "")
    {
-#ifndef BF_NO_CONSOLE
-      gConsole.output(
-#else
-      fprintf(stderr,
-#endif
-               "Could not find script %s; looked in folders: %s\n",
-               scriptName.c_str(), concatenate(folderManager->getScriptFolderList()).c_str());
+      logprintf(LogConsumer::ConsoleMsg, "Could not find script %s; looked in folders: %s",
+                     scriptName.c_str(), concatenate(folderManager->getScriptFolderList()).c_str());
       return;
    }
    

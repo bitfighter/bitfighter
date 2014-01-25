@@ -409,14 +409,14 @@ void dedicatedServerLoop()
 ////////////////////////////////////////
 
 // Include class here to avoid contaminating tnlLog with the filth that is oglConsole
+// If BF_NO_CONSOLE is defined, console output will be merged into normal stdout logging elsewhere
 class OglConsoleLogConsumer : public LogConsumer    // Dumps to oglConsole
 {
 private:
    void writeString(const char *string) {
+
 #ifndef BF_NO_CONSOLE
-      gConsole.output(string);
-#else
-      //fprintf(stderr, string, NULL);  // really want stdout?
+   gConsole.output(string);
 #endif
    }
 };
@@ -618,9 +618,11 @@ void setupLogging(const string &logDir)
    //gMainLog.setMsgTypes(events);  ==> set from INI settings     
    gMainLog.logprintf("------ Bitfighter Log File ------");
 
-   gStdoutLog.setMsgTypes(events);              // writes to stdout
 #ifndef BF_NO_CONSOLE
    gOglConsoleLog.setMsgTypes(consoleEvents);   // writes to in-game console
+   gStdoutLog.setMsgTypes(events);              // writes to stdout
+#else
+   gStdoutLog.setMsgTypes(events | consoleEvents);              // writes to stdout
 #endif
 
    gServerLog.init(joindir(logDir, "bitfighter_server.log"), "a");
