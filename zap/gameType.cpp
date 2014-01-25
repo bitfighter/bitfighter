@@ -1196,6 +1196,9 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
          return false;
       robot->setTeam(teamIndex);
       spawnRobot(robot);
+
+      // Fire ShipSpawned event for robots
+      EventManager::get()->fireEvent(EventManager::ShipSpawnedEvent, robot);
    }
    else
    {
@@ -1205,6 +1208,9 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
 
       newShip->setOwner(clientInfo);
       newShip->addToGame(mGame, mGame->getGameObjDatabase());
+
+      // Fire ShipSpawned event for players
+      EventManager::get()->fireEvent(EventManager::ShipSpawnedEvent, newShip);
 
       if(!levelHasLoadoutZone())
       {

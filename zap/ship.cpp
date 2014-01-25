@@ -1232,7 +1232,6 @@ void Ship::onAddedToGame(Game *game)
 #endif
    {
       mSendSpawnEffectTimer.reset();
-      EventManager::get()->fireEvent(EventManager::ShipSpawnedEvent, this);
    }
 }
 
