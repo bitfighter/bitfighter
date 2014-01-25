@@ -670,14 +670,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
 
    if(isProjectileType(damagingObjectType))
    {
-      BfObject *shooter = NULL;
-
-      if(damagingObjectType == BulletTypeNumber)
-         shooter = static_cast<Projectile *>(damagingObject)->mShooter;
-      else if(damagingObjectType == SeekerTypeNumber)
-         shooter = static_cast<Seeker *>(damagingObject)->mShooter;
-      else if(damagingObjectType == BurstTypeNumber)
-         shooter = static_cast<Burst *>(damagingObject)->mShooter;
+      BfObject *shooter = WeaponInfo::getWeaponShooterFromObject(damagingObject);
 
       // We have a shooter that is another engineered object (turret)
       if(shooter != NULL && isEngineeredType(shooter->getObjectTypeNumber()))

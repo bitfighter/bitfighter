@@ -56,6 +56,24 @@ WeaponType WeaponInfo::getWeaponTypeFromObject(BfObject *bfObject)
 
    return WeaponNone;
 }
+
+
+BfObject *WeaponInfo::getWeaponShooterFromObject(BfObject *bfObject)
+{
+   if(bfObject == NULL)
+      return NULL;
+
+   U8 typeNumber = bfObject->getObjectTypeNumber();
+
+   if(typeNumber == BulletTypeNumber)
+      return static_cast<Projectile *>(bfObject)->getShooter();
+   else if(typeNumber == BurstTypeNumber || typeNumber == MineTypeNumber || typeNumber == SpyBugTypeNumber)
+      return static_cast<Burst *>(bfObject)->getShooter();
+   else if(typeNumber == SeekerTypeNumber)
+      return static_cast<Seeker *>(bfObject)->getShooter();
+
+   return NULL;
+}
 #endif
 
 };

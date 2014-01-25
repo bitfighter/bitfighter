@@ -1747,13 +1747,7 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *client
       }
       else                                       // Check for turret shot - Can get here if turret is Hostile Team
       {
-         BfObject *shooter = NULL;
-         if(killerObject->getObjectTypeNumber() == BulletTypeNumber)
-            shooter = static_cast<Projectile *>(killerObject)->mShooter;
-         if(killerObject->getObjectTypeNumber() == BurstTypeNumber)
-            shooter = static_cast<Burst *>(killerObject)->mShooter;
-         if(killerObject->getObjectTypeNumber() == SeekerTypeNumber)
-            shooter = static_cast<Seeker *>(killerObject)->mShooter;
+         BfObject *shooter = WeaponInfo::getWeaponShooterFromObject(killerObject);
 
          if(shooter && shooter->getObjectTypeNumber() == TurretTypeNumber)
             updateScore(victim, KilledByTurret, 0);
