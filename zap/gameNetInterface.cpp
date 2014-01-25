@@ -49,96 +49,115 @@ U32 computeSimpleToken(const Address &theAddress, const Nonce &theNonce)
 }
 
 
+static void handlePing(Game *game, const Address &remoteAddress, Socket &socket, BitStream *stream)
+{
+   Nonce clientNonce;
+   clientNonce.read(stream);
+
+   U32 protocolVersion;
+   stream->read(&protocolVersion);
+
+   if(protocolVersion != CS_PROTOCOL_VERSION)   // Ignore pings from incompatible versions
+      return;
+
+   U32 token = computeSimpleToken(remoteAddress, clientNonce);
+   PacketStream pingResponse;
+
+   pingResponse.write(U8(GameNetInterface::PingResponse));
+   clientNonce.write(&pingResponse);
+   pingResponse.write(token);
+   pingResponse.sendto(socket, remoteAddress);
+}
+
+
+static void handlePingResponse(Game *game, const Address &remoteAddress, BitStream *stream)
+{
+   Nonce nonce;
+   U32 clientIdentityToken;
+
+   nonce.read(stream);
+   stream->read(&clientIdentityToken);
+            
+   game->gotPingResponse(remoteAddress, nonce, clientIdentityToken);
+}
+
+
+static void handleQuery(Game *game, const Address &remoteAddress, Socket &socket, BitStream *stream)
+{
+   Nonce theNonce;
+   U32 clientIdentityToken;
+
+   theNonce.read(stream);
+   stream->read(&clientIdentityToken);
+
+   if(clientIdentityToken == computeSimpleToken(remoteAddress, theNonce))
+   {
+      PacketStream queryResponse;
+      queryResponse.write(U8(GameNetInterface::QueryResponse));
+
+      theNonce.write(&queryResponse);
+      queryResponse.writeStringTableEntry(game->getSettings()->getHostName());
+      queryResponse.writeStringTableEntry(game->getSettings()->getHostDescr());
+
+      queryResponse.write(game->getPlayerCount());
+      queryResponse.write(game->getMaxPlayers());
+      queryResponse.write(game->getRobotCount());
+      queryResponse.writeFlag(game->isDedicated());
+      queryResponse.writeFlag(game->isTestServer());
+      queryResponse.writeFlag(game->getSettings()->getServerPassword() != "");
+
+      queryResponse.sendto(socket, remoteAddress);
+   }
+}
+
+
+static void handleQueryResponse(Game *game, const Address &remoteAddress, BitStream *stream)
+{
+   Nonce theNonce;
+   StringTableEntry name;
+   StringTableEntry descr;
+   U32 playerCount, maxPlayers, botCount;
+   bool dedicated, test, passwordRequired;
+
+   theNonce.read(stream);
+   stream->readStringTableEntry(&name);
+   stream->readStringTableEntry(&descr);
+
+   stream->read(&playerCount);
+   stream->read(&maxPlayers);
+   stream->read(&botCount);
+   dedicated = stream->readFlag();
+   test = stream->readFlag();
+   passwordRequired = stream->readFlag();
+
+   // Alert the user
+   game->gotQueryResponse(remoteAddress, theNonce, name.getString(), descr.getString(), 
+                          playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
+}
+
+
 void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetType, BitStream *stream)
 {
    switch(packetType)
    {
       case Ping:
          if(mGame->isServer())
-         {
-            Nonce clientNonce;
-            clientNonce.read(stream);
-
-            U32 protocolVersion;
-            stream->read(&protocolVersion);
-
-            if(protocolVersion != CS_PROTOCOL_VERSION)   // Ignore pings from incompatible versions
-               break;
-
-            U32 token = computeSimpleToken(remoteAddress, clientNonce);
-            PacketStream pingResponse;
-            pingResponse.write(U8(PingResponse));
-            clientNonce.write(&pingResponse);
-            pingResponse.write(token);
-            pingResponse.sendto(mSocket, remoteAddress);
-         }
+            handlePing(mGame, remoteAddress, mSocket, stream);
          break;
 
       case PingResponse: 
-         if(!mGame->isServer())  // Client only
-         {
-            Nonce theNonce;
-            U32 clientIdentityToken;
-            theNonce.read(stream);
-            stream->read(&clientIdentityToken);
-            
-            mGame->gotPingResponse(remoteAddress, theNonce, clientIdentityToken);
-         }
+         if(!mGame->isServer())  
+            handlePingResponse(mGame, remoteAddress, stream);
          break;
 
       case Query:
          if(mGame->isServer())
-         {
-            Nonce theNonce;
-            U32 clientIdentityToken;
-            theNonce.read(stream);
-            stream->read(&clientIdentityToken);
-
-            if(clientIdentityToken == computeSimpleToken(remoteAddress, theNonce))
-            {
-               PacketStream queryResponse;
-               queryResponse.write(U8(QueryResponse));
-
-               theNonce.write(&queryResponse);
-               queryResponse.writeStringTableEntry(mGame->getSettings()->getHostName());
-               queryResponse.writeStringTableEntry(mGame->getSettings()->getHostDescr());
-
-               queryResponse.write(mGame->getPlayerCount());
-               queryResponse.write(mGame->getMaxPlayers());
-               queryResponse.write(mGame->getRobotCount());
-               queryResponse.writeFlag(mGame->isDedicated());
-               queryResponse.writeFlag(mGame->isTestServer());
-               queryResponse.writeFlag(mGame->getSettings()->getServerPassword() != "");
-
-               queryResponse.sendto(mSocket, remoteAddress);
-            }
-         }
+            handleQuery(mGame, remoteAddress, mSocket, stream);
          break;
 
       case QueryResponse: 
-         if(!mGame->isServer())  // Client only
-         {
-            Nonce theNonce;
-            StringTableEntry name;
-            StringTableEntry descr;
-            U32 playerCount, maxPlayers, botCount;
-            bool dedicated, test, passwordRequired;
-
-            theNonce.read(stream);
-            stream->readStringTableEntry(&name);
-            stream->readStringTableEntry(&descr);
-
-            stream->read(&playerCount);
-            stream->read(&maxPlayers);
-            stream->read(&botCount);
-            dedicated = stream->readFlag();
-            test = stream->readFlag();
-            passwordRequired = stream->readFlag();
-
-            // Alert the user
-            mGame->gotQueryResponse(remoteAddress, theNonce, name.getString(), descr.getString(), 
-                                    playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
-         }
+         if(!mGame->isServer())  
+            handleQueryResponse(mGame, remoteAddress, stream);
          break;
    }
 }
@@ -154,6 +173,7 @@ void GameNetInterface::sendPing(const Address &theAddress, const Nonce &clientNo
    packet.write(CS_PROTOCOL_VERSION);
    packet.sendto(mSocket, theAddress);
 }
+
 
 void GameNetInterface::sendQuery(const Address &theAddress, const Nonce &clientNonce, U32 identityToken)
 {
