@@ -136,7 +136,8 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             passwordRequired = stream->readFlag();
 
             // Alert the user
-            mGame->gotQueryResponse(remoteAddress, theNonce, name.getString(), descr.getString(), playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
+            mGame->gotQueryResponse(remoteAddress, theNonce, name.getString(), descr.getString(), 
+                                    playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
          }
          break;
    }
