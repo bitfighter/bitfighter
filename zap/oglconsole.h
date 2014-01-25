@@ -6,18 +6,16 @@
 #ifndef _OGLCONSOLE_H
 #define _OGLCONSOLE_H
 
-#ifdef TNL_OS_MOBILE
+#if defined(ZAP_DEDICATED) || defined(TNL_OS_MOBILE)
 #  define BF_NO_CONSOLE
 #endif
 
-#ifdef BF_NO_CONSOLE
-   typedef _OGLCONSOLE_Console *void;
-#else 
 
 /* Opaque to you you lowly user */
 struct _OGLCONSOLE_Console;
 typedef _OGLCONSOLE_Console *OGLCONSOLE_Console;
 
+#ifndef BF_NO_CONSOLE
 
 
 #define MAX_CONSOLE_OUTPUT_LENGTH 4096
