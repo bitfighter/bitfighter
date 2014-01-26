@@ -1488,8 +1488,8 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
          mMaster->writeJsonNow();
 
          // SERVER_CONNECT | timestamp | server name | server description
-         logprintf(LogConsumer::LogConnection, "SERVER_CONNECT\t%s\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString(), mServerDescr.getString());
-
+         logprintf(LogConsumer::LogConnection, "SERVER_CONNECT\t%s\t%s\t%s", getTimeStamp().c_str(), 
+                                               mPlayerOrServerName.getString(), mServerDescr.getString());
       }
       break;
 
@@ -1512,15 +1512,15 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
 
          mPlayerId.read(bstream);
 
-         // Probably redundant, but let's cycle through all our clients and make sure the playerId is unique.  With 2^64
-         // possibilities, it most likely will be.
+         // Probably redundant, but let's cycle through all our clients and make sure the playerId is unique.
+         // With 2^64 possibilities, it most likely will be.
          const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
          for(S32 i = 0; i < clientList->size(); i++)
             if(clientList->get(i) != this && clientList->get(i)->mPlayerId == mPlayerId)
             {
                logprintf(LogConsumer::LogConnection, "User %s provided duplicate id to %s", mPlayerOrServerName.getString(),
-                                                                                             clientList->get(i)->mPlayerOrServerName.getString());
+                                                     clientList->get(i)->mPlayerOrServerName.getString());
                disconnect(ReasonDuplicateId, "");
                reason = ReasonDuplicateId;
                return false;
@@ -1548,16 +1548,19 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                mMaster->addClient(this);
 
                // CLIENT_CONNECT | timestamp | player name
-               logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
+               logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s", 
+                                                     getTimeStamp().c_str(), mPlayerOrServerName.getString());
 
-               mMaster->writeJsonDelayed();  // Delay writing JSON to reduce chances of incorrectly showing new player as unauthenticated
+               // Delay writing JSON to reduce chances of incorrectly showing new player as unauthenticated
+               mMaster->writeJsonDelayed();  
                break;
 
             case Authenticated: 
                mMaster->addClient(this);
 
                // CLIENT_CONNECT | timestamp | player name
-               logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
+               logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s", 
+                                                     getTimeStamp().c_str(), mPlayerOrServerName.getString());
 
                mMaster->writeJsonNow();      // Write immediately  
                break;
@@ -1571,7 +1574,7 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
 
          // If client needs to upgrade, tell them
          m2cSendUpdgradeStatus(mMaster->getSetting<U32>("LatestReleasedCSProtocol")   > mCSProtocolVersion || 
-                                 mMaster->getSetting<U32>("LatestReleasedBuildVersion") > mClientBuild);
+                               mMaster->getSetting<U32>("LatestReleasedBuildVersion") > mClientBuild);
 
          // Send message of the day
          sendMotd();
@@ -1600,47 +1603,6 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
    return true;
 }
 
-// Appears unused!
-//static void checkConnectTimeouts()
-//{
-//   const S32 ConnectRequestTimeout = 30000;      // 30 secs
-//   U32 currentTime = Platform::getRealMilliseconds();
-
-//   // Expire any connect requests that have grown old...
-//   for(S32 i = 0; i < gConnectList.size(); )    // third param deliberately blank
-//   {
-//      GameConnectRequest *gcr = gConnectList[i];
-//      if(currentTime - gcr->requestTime > ConnectRequestTimeout)
-//      {
-//         // It's old, so remove it from the initiator's list...
-//         if(gcr->initiator.isValid())
-//         {
-//            gcr->initiator->removeConnectRequest(gcr);
-//            ByteBufferPtr reqTimeoutBuffer = new ByteBuffer((U8 *) MasterRequestTimedOut, (U32) strlen(MasterRequestTimedOut) + 1);
-//            
-//            // For older clients (009 and below)
-//            if(mCMProtocolVersion <= 1)
-//               gcr->initiator->s2mRejectArrangedConnection(gcr->initiatorQueryId, reqTimeoutBuffer);
-//            // For clients 010 and above
-//            else
-//               gcr->initiator->s2mRejectArrangedConnection(gcr->initiatorQueryId, reqTimeoutBuffer, ConnectionAttemptTimedOut);
-//         }
-
-//         // And the host's lists..
-//         if(gcr->host.isValid())
-//            gcr->host->removeConnectRequest(gcr);
-
-//         // Delete it...
-//         delete gcr;
-
-//         // And remove it from our list, too.
-//         gConnectList.erase_fast(i);
-//         continue;
-//      }
-//      i++;
-//   }
-//}
-
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mJoinGlobalChat, ())
 {
@@ -1667,7 +1629,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mJoinGlobalChat, ())
    for(S32 i = 0; i < clientList->size(); i++)
       if(clientList->get(i) != this && clientList->get(i)->isInGlobalChat)
          clientList->get(i)->m2cPlayerJoinedGlobalChat(mPlayerOrServerName);
-
 }
 
 
