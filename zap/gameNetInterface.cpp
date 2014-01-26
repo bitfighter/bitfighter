@@ -63,12 +63,12 @@ static void handlePing(Game *game, const Address &remoteAddress, Socket &socket,
    if(protocolVersion != CS_PROTOCOL_VERSION)   // Ignore pings from incompatible versions
       return;
 
-   U32 token = computeSimpleToken(remoteAddress, clientNonce);
+   U32 clientIdentityToken = computeSimpleToken(remoteAddress, clientNonce);
    PacketStream pingResponse;
 
    pingResponse.write(U8(GameNetInterface::PingResponse));
    clientNonce.write(&pingResponse);
-   pingResponse.write(token);
+   pingResponse.write(clientIdentityToken);
    pingResponse.sendto(socket, remoteAddress);
 }
 
