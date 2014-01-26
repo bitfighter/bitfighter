@@ -83,7 +83,7 @@ void MasterSettings::loadSettingsFromINI()
    // Read all settings defined in the new modern manner
    S32 sectionCount = ini.GetNumSections();
 
-   for(U32 i = 0; i < sectionCount; i++)
+   for(S32 i = 0; i < sectionCount; i++)
    {
       string section = ini.getSectionName(i);
 
