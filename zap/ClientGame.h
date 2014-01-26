@@ -136,8 +136,6 @@ public:
    void restoreOriginalRating();
    void resetRatings();
 
-
-
    bool isLevelInDatabase() const;
 
    // A place to store input from the joysticks while we are composing our moves
@@ -164,7 +162,7 @@ public:
    void removeInlineHelpItem(HelpItem item, bool markAsSeen) const;
    F32 getObjectiveArrowHighlightAlpha() const;
 
-   void gotServerListFromMaster(const Vector<IPAddress> &serverList);
+   void gotServerListFromMaster(const Vector<ServerAddr> &serverList);
 
    // Got some shizzle
    void gotGlobalChatMessage(const char *playerNick, const char *message, bool isPrivate);

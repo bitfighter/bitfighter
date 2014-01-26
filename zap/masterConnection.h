@@ -7,6 +7,7 @@
 #define _MASTERCONNECTION_H_
 
 #include "../master/masterInterface.h"
+#include "MasterTypes.h"
 
 #include <string>
 
@@ -49,7 +50,7 @@ public:
 
    void startServerQuery();
 
-   Vector<IPAddress> mServerList;
+   Vector<ServerAddr> mServerList;
 
    void cancelArrangedConnectionAttempt();
    void requestArrangedConnection(const Address &remoteAddress);
@@ -57,7 +58,8 @@ public:
                            U32 playerCount, U32 maxPlayers, U32 infoFlags);
 
 #ifndef ZAP_DEDICATED
-   TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList));
+   TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse,      (U32 queryId, Vector<IPAddress> ipList));
+   TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse_019a, (U32 queryId, Vector<IPAddress> ipList, Vector<S32> clientIdList));
 #endif
 
    TNL_DECLARE_RPC_OVERRIDE(m2sClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,

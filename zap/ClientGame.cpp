@@ -807,7 +807,7 @@ void ClientGame::idle(U32 timeDelta)
 }
 
 
-void ClientGame::gotServerListFromMaster(const Vector<IPAddress> &serverList)
+void ClientGame::gotServerListFromMaster(const Vector<ServerAddr> &serverList)
 {
    getUIManager()->gotServerListFromMaster(serverList);
 }

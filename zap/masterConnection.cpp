@@ -67,7 +67,8 @@ void MasterServerConnection::startServerQuery()
 
 
 #ifndef ZAP_DEDICATED
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList))
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_019a, 
+                           (U32 queryId, Vector<IPAddress> ipList, Vector<S32> clientIdList))
 {
    if(mGame->isServer())
       return;
@@ -76,16 +77,21 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
    if(queryId != mCurrentQueryId || mGame->isServer())
       return;
 
+   TNLAssert(ipList.size() == clientIdList.size(), "Expect the same number of elements!");
+   if(ipList.size() != clientIdList.size())
+      return;
+
    // The master server sends out an empty list to signify and "end of transmission".  We'll build up a
    // list of servers here until we get that final EOT list, and then send the entire list to the UI.
    // We need to do this because the UI will look for servers that it knows about that are not on the master 
    // list, and will remove them from the display.  If we send the list in parts, the UI will remove any known servers that
    // don't happen to be on that part.
+   // Note that for every entry in ipList, there will be a corresponding entry in clientIdList.
    if(ipList.size() > 0)
    {
       // Store these intermediate results
       for(S32 i = 0; i < ipList.size(); i++)
-         mServerList.push_back(ipList[i]);
+         mServerList.push_back(ServerAddr(ipList[i], clientIdList[i]));
    }
    else  // Empty list received, transmission complete, send whole list on to the UI
    {

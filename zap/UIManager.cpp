@@ -138,8 +138,6 @@ UserInterface *UIManager::getCurrentUI()
 }
 
 
-#ifndef BF_TEST
-
 bool UIManager::hasPrevUI()
 {
    return mPrevUIs.size() > 0;
@@ -1013,103 +1011,6 @@ void UIManager::markEditorLevelPermanentlyDirty()
 {
    getUI<EditorUserInterface>()->markLevelPermanentlyDirty();
 }
-
-
-#else
-
-// Constructor
-bool UIManager::hasPrevUI() { return true; }
-void UIManager::clearPrevUIs() { }
-void UIManager::renderPrevUI(const UserInterface *ui) { }
-void UIManager::activate(UserInterface *ui, bool save)  { }
-void UIManager::saveUI(UserInterface *ui) { }
-void UIManager::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr) { }
-void UIManager::onConnectedToMaster() { }
-void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected) { }
-void UIManager::onConnectionToServerRejected(const char *reason) { }
-void UIManager::onPlayerJoined(const char *playerName, bool isLocalClient, bool playAlert, bool showMessage) { }
-void UIManager::onPlayerQuit(const char *name)  { }
-void UIManager::onGameStarting() { }
-void UIManager::onGameOver() { }
-void UIManager::displayMessage(const Color &msgColor, const char *format, ...) { }
-void UIManager::renderCurrent() { }
-void UIManager::idle(U32 timeDelta) { }
-MusicLocation UIManager::selectMusic() { return MusicLocationNone; }
-void UIManager::processAudio(U32 timeDelta) { }
-SFXHandle UIManager::playSoundEffect(U32 profileIndex, F32 gain) const { return NULL; }
-SFXHandle UIManager::playSoundEffect(U32 profileIndex, const Point &position) const { return NULL; }
-SFXHandle UIManager::playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain) const { return NULL; }
-void UIManager::setMovementParams(SFXHandle &effect, const Point &position, const Point &velocity) const { }
-void UIManager::stopSoundEffect(SFXHandle &effect) const { }
-void UIManager::setListenerParams(const Point &position, const Point &velocity) const { }
-void UIManager::playNextTrack() const { }
-void UIManager::playPrevTrack() const { }
-void UIManager::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const { }
-void UIManager::renderAndDimGameUserInterface() { }
-void UIManager::setHighScores(const Vector<StringTableEntry> &groupNames, const Vector<string> &names, const Vector<string> &scores) { }
-void UIManager::gotGlobalChatMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf) { }
-void UIManager::gotServerListFromMaster(const Vector<IPAddress> &serverList) { }
-void UIManager::setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks) { }
-void UIManager::playerJoinedGlobalChat(const StringTableEntry &playerNick) { }
-void UIManager::playerLeftGlobalChat(const StringTableEntry &playerNick) { }
-void UIManager::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken) { }
-void UIManager::gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
-                                 U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired) { }
-string UIManager::getLastSelectedServerName() { return ""; }
-void UIManager::setConnectAddressAndActivatePasswordEntryUI(const Address &serverAddress) { }
-void UIManager::enableLevelLoadDisplay() { }
-void UIManager::serverLoadedLevel(const string &levelName) { }
-void UIManager::disableLevelLoadDisplay(bool fade) { }
-void UIManager::activateGameUserInterface() { }
-void UIManager::renderLevelListDisplayer() { }
-void UIManager::setMOTD(const char *motd) { }
-void UIManager::setNeedToUpgrade(bool needToUpgrade) { }
-void UIManager::gotPasswordOrPermissionsReply(const ClientGame *game, const char *message) { }
-void UIManager::showPlayerActionMenu(PlayerAction action) { }
-void UIManager::showMenuToChangeTeamForPlayer(const string &playerName) { }
-void UIManager::activateGameUI() { }
-void UIManager::reactivateGameUI() { }
-void UIManager::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, 
-                                  const Vector<StringTableEntry> &messages) { }
-void UIManager::displayMessageBox(const char *title, const char *instr, const Vector<string> &messages) { }
-void UIManager::startLoadingLevel(bool engineerEnabled) { }
-void UIManager::readRobotLine(const string &robotLine) { }
-void UIManager::doneLoadingLevel() { }
-void UIManager::clearSparks() { }
-void UIManager::emitBlast(const Point &pos, U32 size) { }
-void UIManager::emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2) { }
-void UIManager::emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation) { }
-void UIManager::emitTextEffect(const string &text, const Color &color, const Point &pos) { }
-void UIManager::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType) { }
-void UIManager::emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors) { }
-void UIManager::emitTeleportInEffect(const Point &pos, U32 type) { }
-void UIManager::addInlineHelpItem(HelpItem item) { }
-void UIManager::addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam) { }
-void UIManager::removeInlineHelpItem(HelpItem item, bool markAsSeen) { }
-F32 UIManager::getObjectiveArrowHighlightAlpha() { return 0; }
-bool UIManager::isShowingInGameHelp() { return false; }
-void UIManager::onChatMessageReceived(const Color &msgColor, const char *format, ...) { }
-void UIManager::gotAnnouncement(const string &announcement) { }
-bool UIManager::isInScoreboardMode() { return false;}
-void UIManager::newLoadoutHasArrived(const LoadoutTracker &loadout) { }
-void UIManager::setActiveWeapon(U32 weaponIndex) { }
-bool UIManager::isShowingDebugShipCoords() { return false; }
-Point UIManager::worldToScreenPoint(const Point *point, S32 canvasWidth, S32 canvasHeight) { return Point(); }
-void UIManager::resetCommandersMap() { }
-F32 UIManager::getCommanderZoomFraction() { return 0; }
-void UIManager::renderBasicInterfaceOverlay() { }
-void UIManager::quitEngineerHelper() { }
-void UIManager::exitHelper() { }
-void UIManager::shutdownInitiated(U16 time, const StringTableEntry &name, const StringPtr &reason, bool originator) { }
-void UIManager::cancelShutdown()  { }
-void UIManager::setSelectedEngineeredObject(U32 objectType) { }
-Move *UIManager::getCurrentMove() { return NULL; }      
-void UIManager::displayErrorMessage(const char *message) { }
-void UIManager::displaySuccessMessage(const char *message) { }
-void UIManager::setShowingInGameHelp(bool showing) { }
-void UIManager::resetInGameHelpMessages() { }
-
-#endif
 
 
 };
