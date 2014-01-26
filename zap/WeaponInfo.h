@@ -98,8 +98,10 @@ struct WeaponInfo
    ProjectileType projectileType;   // If this is a projectile item, which sort is it?  If not, use NotAProjectile
 
    static WeaponInfo getWeaponInfo(WeaponType weaponType);
+
 #ifndef BF_MASTER
    static WeaponType getWeaponTypeFromObject(BfObject *bfObject);
+   static BfObject *getWeaponShooterFromObject(BfObject *bfObject);
 #endif
 };
 

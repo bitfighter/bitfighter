@@ -42,7 +42,7 @@ class EventManager
 #define EVENT_TABLE \
    EVENT(TickEvent,              "Tick",              "onTick",              "onTick()"                                                               ) \
    EVENT(ShipSpawnedEvent,       "ShipSpawned",       "onShipSpawned",       "onShipSpawned(Ship ship)"                                               ) \
-   EVENT(ShipKilledEvent,        "ShipKilled",        "onShipKilled",        "onShipKilled(Ship ship)"                                                ) \
+   EVENT(ShipKilledEvent,        "ShipKilled",        "onShipKilled",        "onShipKilled(Ship ship, BfObject damagingObject, BfObject shooter)"     ) \
    EVENT(PlayerJoinedEvent,      "PlayerJoined",      "onPlayerJoined",      "onPlayerJoined(PlayerInfo player)"                                      ) \
    EVENT(PlayerLeftEvent,        "PlayerLeft",        "onPlayerLeft",        "onPlayerLeft(PlayerInfo player)"                                        ) \
    EVENT(PlayerTeamChangedEvent, "PlayerTeamChanged", "onPlayerTeamChanged", "onPlayerTeamChanged(PlayerInfo player)"                                 ) \
@@ -107,7 +107,8 @@ public:
    // We'll have several different signatures for this one...
    void fireEvent(EventType eventType);
    void fireEvent(EventType eventType, U32 deltaT);      // Tick
-   void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
+   void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned
+   void fireEvent(EventType eventType, Ship *ship, BfObject *damagingObject, BfObject *shooter);  // ShipKilled
    void fireEvent(LuaScriptRunner *sender, EventType eventType, const char *message, LuaPlayerInfo *playerInfo, bool global);  // MsgReceived
    void fireEvent(LuaScriptRunner *player, EventType eventType, LuaPlayerInfo *playerInfo);  // PlayerJoined, PlayerLeft, PlayerTeamChanged
    void fireEvent(EventType eventType, Ship *ship, Zone *zone); // ShipEnteredZoneEvent, ShipLeftZoneEvent

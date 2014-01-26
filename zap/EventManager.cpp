@@ -279,7 +279,7 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
 }
 
 
-// onShipSpawned, onShipKilled
+// onShipSpawned
 void EventManager::fireEvent(EventType eventType, Ship *ship)
 {
    if(suppressEvents(eventType))   
@@ -292,6 +292,35 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       ship->push(L);                // -- ship
+      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
+   }
+}
+
+
+// onShipKilled
+void EventManager::fireEvent(EventType eventType, Ship *ship, BfObject *damagingObject, BfObject *shooter)
+{
+   if(suppressEvents(eventType))
+      return;
+
+   lua_State *L = LuaScriptRunner::getL();
+
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
+
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   {
+      ship->push(L);                // -- ship
+
+      if(damagingObject)
+         damagingObject->push(L);   // -- ship, damagingObject
+      else
+         lua_pushnil(L);
+
+      if(shooter)
+         shooter->push(L);          // -- ship, damagingObject, shooter
+      else
+         lua_pushnil(L);
+
       fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
    }
 }

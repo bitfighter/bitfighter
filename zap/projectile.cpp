@@ -412,6 +412,8 @@ void Projectile::explode(BfObject *hitObject, Point pos)
 #endif
 }
 
+BfObject *Projectile::getShooter() const {return mShooter; }
+
 
 Point Projectile::getRenderVel() const { return mVelocity; }
 Point Projectile::getActualVel() const { return mVelocity; }
@@ -730,6 +732,8 @@ bool Burst::collide(BfObject *otherObj)
    return true;
 }
 
+
+BfObject *Burst::getShooter() const {return mShooter; }
 
 bool Burst::canAddToEditor() { return false; }      // No bursts in the editor
 
@@ -1807,6 +1811,9 @@ bool Seeker::collided(BfObject *otherObj, U32 stateIndex)
    setVel(stateIndex, Point(0,0)); // Might save some CPU telling move() to stop moving.
    return true;
 }
+
+
+BfObject *Seeker::getShooter() const {return mShooter; }
 
 
 void Seeker::renderItem(const Point &pos)

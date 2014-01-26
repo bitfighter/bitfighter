@@ -24,12 +24,14 @@ class ClientInfo;
 
 
 // Basic bullet object
-class Projectile : public BfObject
+class Projectile: public BfObject
 {
    typedef BfObject Parent;
 
 private:
    static const S32 COMPRESSED_VELOCITY_MAX = 2047;
+
+   SafePtr<BfObject> mShooter;
 
    void initialize(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);
 
@@ -54,7 +56,6 @@ public:
    bool mAlive;
    bool mBounced;
    U32 mLiveTimeIncreases;
-   SafePtr<BfObject> mShooter;
 
    Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when weapon is fired  
    explicit Projectile(lua_State *L = NULL);                                            // Combined Lua / C++ default constructor -- only used in Lua at the moment
@@ -78,6 +79,8 @@ public:
 
    void render();
    void renderItem(const Point &pos);
+
+   BfObject *getShooter() const;
 
    TNL_DECLARE_CLASS(Projectile);
 
@@ -104,6 +107,8 @@ class Burst : public MoveItem
    typedef MoveItem Parent;
 
 private:
+   SafePtr<BfObject> mShooter;
+
    void initialize(const Point &pos, const Point &vel, BfObject *shooter);
 
 public:
@@ -119,7 +124,6 @@ public:
    static const S32 InnerBlastRadius = 100;
    static const S32 OuterBlastRadius = 250;
 
-   SafePtr<BfObject> mShooter;
    S32 mTimeRemaining;
    bool exploded;
    bool collide(BfObject *otherObj);   // Things (like bullets) can collide with grenades
@@ -139,6 +143,8 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    bool collided(BfObject *hitObject, U32 stateIndex);
+
+   BfObject *getShooter() const;
 
    TNL_DECLARE_CLASS(Burst);
 
@@ -297,6 +303,7 @@ private:
    static const S32 InnerBlastRadius;
    static const S32 OuterBlastRadius;
 
+   SafePtr<BfObject> mShooter;
    SafePtr<BfObject> mAcquiredTarget;
    S32 mReassessTargetTimer;
 
@@ -318,7 +325,6 @@ public:
    explicit Seeker(lua_State *L = NULL);                                        // Combined Lua / C++ default constructor
    virtual ~Seeker();                                                           // Destructor
 
-   SafePtr<BfObject> mShooter;
    WeaponType mWeaponType;
 
    bool collide(BfObject *otherObj);                    // Things (like bullets) can collide with grenades
@@ -334,6 +340,8 @@ public:
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   BfObject *getShooter() const;
 
    TNL_DECLARE_CLASS(Seeker);
 

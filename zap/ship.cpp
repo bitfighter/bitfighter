@@ -1232,7 +1232,6 @@ void Ship::onAddedToGame(Game *game)
 #endif
    {
       mSendSpawnEffectTimer.reset();
-      EventManager::get()->fireEvent(EventManager::ShipSpawnedEvent, this);
    }
 }
 
@@ -1933,20 +1932,23 @@ void Ship::killAndScore(DamageInfo *theInfo)
    if(gt)
       gt->controlObjectForClientKilled(getClientInfo(), this, theInfo->damagingObject);
 
+   BfObject *shooter = WeaponInfo::getWeaponShooterFromObject(theInfo->damagingObject);
+
+   // Fire ShipKilled event
+   EventManager::get()->fireEvent(EventManager::ShipKilledEvent,
+         this, theInfo->damagingObject, shooter);
+
    kill();
 }
 
 
-// Ship was killed
+// Ship was killed.
 void Ship::kill()
 {
    if(isServer())    // Server only block
    {
       if(getOwner())
          getOwner()->saveActiveLoadout(mLoadout);      // Save current loadout in getOwner()->mActiveLoadout
-
-      // Fire some events, starting with ShipKilledEvent
-      EventManager::get()->fireEvent(EventManager::ShipKilledEvent, this);
 
       // Fire the ShipLeftZoneEvent for every zone the ship is in
       Vector<SafePtr<Zone> > zoneList;   // Reuse our reusable container
