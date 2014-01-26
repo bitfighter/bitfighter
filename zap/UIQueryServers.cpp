@@ -346,6 +346,13 @@ static void saveServerListToIni(GameSettings *settings, const Vector<IPAddress> 
 }
 
 
+void QueryServersUserInterface::gotServerListFromMaster(const Vector<IPAddress> &serverList)
+{
+   mReceivedListOfServersFromMaster = true;
+   addServersToPingList(serverList);
+}
+
+
 // Master server has returned a list of servers that match our original criteria (including being of the
 // correct version).  Send a query packet to each.
 void QueryServersUserInterface::addServersToPingList(const Vector<IPAddress> &ipList)
@@ -378,13 +385,6 @@ void QueryServersUserInterface::addServersToPingList(const Vector<IPAddress> &ip
 
    mMasterRequeryTimer.reset(MasterRequeryTime);
    mWaitingForResponseFromMaster = false;
-}
-
-
-void QueryServersUserInterface::gotServerListFromMaster(const Vector<IPAddress> &serverList)
-{
-   mReceivedListOfServersFromMaster = true;
-   addServersToPingList(serverList);
 }
 
 
