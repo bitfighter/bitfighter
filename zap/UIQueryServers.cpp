@@ -669,6 +669,42 @@ static void renderLockIcon()
 }
 
 
+static void setLocalRemoteColor(bool isRemote)
+{
+   if(isRemote)
+      glColor(Colors::white);
+   else
+      glColor(Colors::cyan);
+}
+
+
+// Set color based on ping time
+static void setPingTimeColor(U32 pingTime)
+{
+   if(pingTime < 100)
+      glColor(Colors::green);
+   else if(pingTime < 250)
+      glColor(Colors::yellow);
+   else
+      glColor(Colors::red);
+}
+
+
+// Set color by number of players
+static void setPlayerCountColor(S32 players, S32 maxPlayers)
+{
+   Color color;
+   if(players == maxPlayers)
+      color = Colors::red;       // max players
+   else if(players == 0)
+      color = Colors::yellow;    // no players
+   else
+      color = Colors::green;     // 1 or more players
+
+   glColor(color * 0.5);         // dim color
+}
+
+
 void QueryServersUserInterface::render()
 {
    const S32 canvasWidth =  DisplayManager::getScreenInfo()->getGameCanvasWidth();
@@ -740,14 +776,28 @@ void QueryServersUserInterface::render()
 
       S32 colwidth = columns[1].xStart - columns[0].xStart;    
 
+      // Color background of local servers
+      S32 lastServer = min(servers.size() - 1, (mPage + 1) * getServersPerPage() - 1);
+
+      for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; i++)
+      {
+         U32 y = TOP_OF_SERVER_LIST + (i - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT + 1;
+         ServerRef &s = servers[i];
+
+         if(!s.isFromMaster)
+         {
+            glColor(Colors::red, .25);
+            drawFilledRect(0, y, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4);
+         }
+      }
+
+
       U32 y = TOP_OF_SERVER_LIST + (selectedIndex - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT;
 
       // Render box behind selected item -- do this first so that it will not obscure descenders on letters like g in the column above
       bool disabled = composingMessage() && !mJustMovedMouse;
       drawMenuItemHighlight(0, y, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4, disabled);
 
-
-      S32 lastServer = min(servers.size() - 1, (mPage + 1) * getServersPerPage() - 1);
 
       for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; i++)
       {
@@ -775,10 +825,7 @@ void QueryServersUserInterface::render()
                else
                   break;
 
-         if(s.isFromMaster)
-            glColor(Colors::white);
-         else
-            glColor(Colors::blue);
+         setLocalRemoteColor(s.isFromMaster);
 
          drawString(columns[0].xStart, y, SERVER_ENTRY_TEXTSIZE, sname.c_str());
 
@@ -810,33 +857,16 @@ void QueryServersUserInterface::render()
             glPopMatrix();
          }
 
-         // Set color based on ping time
-         if(s.pingTime < 100)
-            glColor(Colors::green);
-         else if(s.pingTime < 250)
-            glColor(Colors::yellow);
-         else
-            glColor(Colors::red);
-
+         setPingTimeColor(s.pingTime);
          drawStringf(columns[2].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.pingTime);
 
-         // Color by number of players
-         Color color;
-         if(s.playerCount == s.maxPlayers)
-            color = Colors::red;       // max players
-         else if(s.playerCount == 0)
-            color = Colors::yellow;    // no players
-         else
-            color = Colors::green;     // 1 or more players
+         setPlayerCountColor(s.playerCount, s.maxPlayers);
 
-         glColor(color * 0.5);         // dim color
          drawStringf(columns[3].xStart + 30, y, SERVER_ENTRY_TEXTSIZE, "/%d", s.maxPlayers);
+         drawStringf(columns[3].xStart,      y, SERVER_ENTRY_TEXTSIZE, "%d",  s.playerCount);
+         drawStringf(columns[3].xStart + 78, y, SERVER_ENTRY_TEXTSIZE, "%d",  s.botCount);
 
-         glColor(color);
-         drawStringf(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.playerCount);
-         drawStringf(columns[3].xStart + 78, y, SERVER_ENTRY_TEXTSIZE, "%d", s.botCount);
-
-         glColor(Colors::white);
+         setLocalRemoteColor(s.isFromMaster);
          drawString(columns[4].xStart, y, SERVER_ENTRY_TEXTSIZE, s.serverAddress.toString());
       }
    }
