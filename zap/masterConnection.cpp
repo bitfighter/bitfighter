@@ -383,12 +383,13 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendPlayerLevelRating, (U3
    TNLAssert(LevelDatabase::isLevelInDatabase(databaseId), "Should not have received a rating for this level!");
 
    // Verify that these ratings are for the current level (and that it hasn't somehow changed from underneath us)
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-
    S32 rating = normalizedRating - 1;     // We want -1 -> 1, but send 0 -> 2
 
-   if(databaseId == clientGame->getLevelDatabaseId())
+   if(databaseId == mGame->getLevelDatabaseId())
+   {
+      ClientGame *clientGame = static_cast<ClientGame *>(mGame);
       clientGame->gotPlayerLevelRating(rating);
+   }
 }
 
 
@@ -398,11 +399,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendTotalLevelRating, (U32
    if(!LevelDatabase::isLevelInDatabase(databaseId))
       return;
 
-   // Verify that these ratings are for the current level (and that it hasn't somehow changed from underneath us)
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-
-   if(databaseId == clientGame->getLevelDatabaseId())
+   if(databaseId == mGame->getLevelDatabaseId())
    {
+      // Verify that these ratings are for the current level (and that it hasn't somehow changed from underneath us)
+      ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+
       if(rating == NotReallyInTheDatabase)
          clientGame->levelIsNotReallyInTheDatabase();
       else
@@ -432,6 +433,7 @@ void MasterServerConnection::setMasterName(string name)
 {
    mMasterName = name;
 }
+
 
 // Retrieve master server name
 string MasterServerConnection::getMasterName()
