@@ -53,7 +53,6 @@ MasterServerConnection::~MasterServerConnection()
 }
 
 
-// Try this...
 void MasterServerConnection::startServerQuery()
 {
    // Invalidate old queries
@@ -62,8 +61,8 @@ void MasterServerConnection::startServerQuery()
    // And automatically do a server query as well - you may not want to do things
    // in this order in your own clients.
    c2mQueryServers(mCurrentQueryId);
-
 }
+
 
 #ifndef ZAP_DEDICATED
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList))
@@ -470,7 +469,6 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 
       bstream->writeString(serverGame->getSettings()->getHostName().c_str());       // Server name
       bstream->writeString(serverGame->getSettings()->getHostDescr().c_str());      // Server description
-
    }
 
    // We're a client
@@ -492,6 +490,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       clientInfo->getId()->write(bstream);
 #endif
    }
+
    else if(mConnectionType == MasterConnectionTypeAnonymous)
    {
       // Do nothing.  We're anonymous!
@@ -516,6 +515,8 @@ void MasterServerConnection::onConnectionTerminated(TerminationReason reason, co
    }
 #endif
 }
+
+
 // A still-being-established connection has been terminated
 void MasterServerConnection::onConnectTerminated(TerminationReason reason, const char *reasonStr)   
 {
