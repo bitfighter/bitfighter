@@ -373,23 +373,27 @@ MasterServerConnection *Game::getConnectionToMaster()
 {
    return mConnectionToMaster;
 }
-void Game::setConnectionToMaster(MasterServerConnection *m)
+
+
+// Only used for testing
+void Game::setConnectionToMaster(MasterServerConnection *connection)
 {
    TNLAssert(mConnectionToMaster.isNull(), "mConnectionToMaster not NULL");
-   mConnectionToMaster = m;
+   mConnectionToMaster = connection;
 }
 
 
-void Game::runAnonymousMasterRequest(MasterConnectionCallback callback)
-{
-   TNLAssert(mAnonymousMasterServerConnection.isNull(), "An anonymous master connection is still open!");
-
-   // Create a new anonymous connection and set a callback method
-   // You need to make sure to remember to put terminateIfAnonymous() into the master
-   // response RPC that this callback calls
-   mAnonymousMasterServerConnection = new AnonymousMasterServerConnection(this);
-   mAnonymousMasterServerConnection->setConnectionCallback(callback);
-}
+// Unused?
+//void Game::runAnonymousMasterRequest(MasterConnectionCallback callback)
+//{
+//   TNLAssert(mAnonymousMasterServerConnection.isNull(), "An anonymous master connection is still open!");
+//
+//   // Create a new anonymous connection and set a callback method
+//   // You need to make sure to remember to put terminateIfAnonymous() into the master
+//   // response RPC that this callback calls
+//   mAnonymousMasterServerConnection = new AnonymousMasterServerConnection(this);
+//   mAnonymousMasterServerConnection->setConnectionCallback(callback);
+//}
 
 
 GameType *Game::getGameType() const

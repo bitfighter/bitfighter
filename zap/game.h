@@ -377,9 +377,9 @@ public:
 
    void checkConnectionToMaster(U32 timeDelta);
    MasterServerConnection *getConnectionToMaster();
-   void setConnectionToMaster(MasterServerConnection *m);
+   void setConnectionToMaster(MasterServerConnection *connection);
 
-   void runAnonymousMasterRequest(MasterConnectionCallback callback);
+   //void runAnonymousMasterRequest(MasterConnectionCallback callback);
    void processAnonymousMasterConnection();
 
    GameNetInterface *getNetInterface();
