@@ -315,6 +315,18 @@ static S32 findServerByAddress(const Vector<QueryServersUserInterface::ServerRef
 }
 
 
+// Returns index of found server, -1 if it found none
+static S32 findServerByAddressNonceState(const Vector<QueryServersUserInterface::ServerRef> &serverList, const Address &address, 
+                                         const Nonce &nonce, QueryServersUserInterface::ServerRef::State state)
+{
+   for(S32 i = 0; i < serverList.size(); i++)
+      if(serverList[i].serverAddress == address && serverList[i].sendNonce == nonce && serverList[i].state == state)
+         return i;
+
+   return -1;
+}
+
+
 // The master has given us a list of servers it knows about.  We need to scan our local server list and remove any that are
 // not on the updated list from the master.  These will be servers that were alive, but have now disappeared.
 void QueryServersUserInterface::forgetServersNoLongerOnList(const Vector<IPAddress> &ipListFromMaster)
@@ -390,46 +402,40 @@ void QueryServersUserInterface::addServersToPingList(const Vector<IPAddress> &ip
 
 void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const Nonce &nonce, U32 clientIdentityToken)
 {
-   // See if this ping is a server from the local broadcast ping:
-   if(mNonce == nonce)
+   if(mNonce == nonce)     // From local broadcast ping
    {
-      for(S32 i = 0; i < servers.size(); i++)
-         if(servers[i].serverAddress == theAddress)      // servers[i].sendNonce == nonce &&
-            return;
+     if(findServerByAddress(servers, theAddress) > -1)     // If we already know about the server, move along
+         return;
 
-      // Yes, it was from a local ping
+      // Create a new server entry
       ServerRef s(ServerRef::ReceivedPing);
 
       s.setNameDescr("LAN Server", "LAN Server -- attempting to connect", Colors::white);
 
       s.pingTime = Platform::getRealMilliseconds() - mBroadcastPingSendTime;
-      s.sendNonce = nonce;
       s.identityToken = clientIdentityToken;
+      s.sendNonce = nonce;
       s.serverAddress = theAddress;
       s.isFromMaster = false;
+
       servers.push_back(s);
+   } 
 
-      mShouldSort = true;
-
-      return;
-   }
-
-   // Otherwise, not from local broadcast ping.  Check if this ping is in the list:
-   for(S32 i = 0; i < servers.size(); i++)
+   else  // From a ping sent to a remote server
    {
-      ServerRef &s = servers[i];
-      if(s.sendNonce == nonce && s.serverAddress == theAddress && s.state == ServerRef::SentPing)
+      S32 index = findServerByAddressNonceState(servers, theAddress, nonce, ServerRef::SentPing);
+
+      if(index > -1)
       {
+         ServerRef &s = servers[index];
          s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
          s.identityToken = clientIdentityToken;
-         if(s.state == ServerRef::SentPing)
-         {
-            s.state = ServerRef::ReceivedPing;
-            pendingPings--;
-         }
-         break;
+         s.state = ServerRef::ReceivedPing;
+
+         pendingPings--;
       }
    }
+
    mShouldSort = true;
 }
 
@@ -500,7 +506,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
    // Send new pings
    for(S32 i = 0; i < servers.size() ; i++)
    {
-      if(pendingPings < MaxPendingPings)   // IF goes inside FOR, so it won't send 100 pings at the same time.
+      if(pendingPings < MaxPendingPings)
       {
          ServerRef &s = servers[i];
          if(s.state == ServerRef::Start)     // This server is at the beginning of the process
