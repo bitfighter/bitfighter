@@ -293,61 +293,85 @@ void QueryServersUserInterface::contactEveryone()
 }
 
 
-// Master server has returned a list of servers that match our original criteria (including being of the
-// correct version).  Send a query packet to each.
-void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
+// Returns index of found server, -1 if it found none
+static S32 findServerByAddress(const Vector<IPAddress> &ipList, const Address &address)
 {
-   // First check our list for dead servers -- if it's on our local list, but not on the master server's list, it's dead
-   for(S32 i = servers.size()-1; i >= 0 ; i--)
+   for(S32 i = 0; i < ipList.size(); i++)
+      if(Address(ipList[i]) == address)
+         return i;
+
+   return -1;
+}
+
+
+// Returns index of found server, -1 if it found none
+static S32 findServerByAddress(const Vector<QueryServersUserInterface::ServerRef> &serverList, const Address &address)
+{
+   for(S32 i = 0; i < serverList.size(); i++)
+      if(serverList[i].serverAddress == address)
+         return i;
+
+   return -1;
+}
+
+
+// The master has given us a list of servers it knows about.  We need to scan our local server list and remove any that are
+// not on the updated list from the master.  These will be servers that were alive, but have now disappeared.
+void QueryServersUserInterface::forgetServersNoLongerOnList(const Vector<IPAddress> &ipListFromMaster)
+{
+   for(S32 i = servers.size() - 1; i >= 0; i--)
    {
-      if(!servers[i].isFromMaster)     // Skip servers that we didn't learn about from the master
+      if(!servers[i].isFromMaster)  // Skip local servers
          continue;
 
-      bool found = false;
-      for(S32 j = 0; j < ipList.size(); j++)
-      {
-         if(servers[i].serverAddress == Address(ipList[j]))
-         {
-            found = true;
-            break;
-         }
-      }
+      S32 index = findServerByAddress(ipListFromMaster, servers[i].serverAddress);
 
-      if(!found)              // It's a defunct server...
-         servers.erase_fast(i);    // ...bye-bye!
+      if(index == -1)               // It's a defunct server...
+         servers.erase_fast(i);     // ...bye-bye!
    }
+}
 
-   Vector<string> *serverList = &getGame()->getSettings()->getIniSettings()->prevServerListFromMaster;
 
-   // Save servers from the master
-   if(ipList.size() != 0) 
-      serverList->clear();    // Don't clear if we have nothing to add... 
+// Save servers from the master -- we'll use these as a fallback next time if we can't connect to the server
+static void saveServerListToIni(GameSettings *settings, const Vector<IPAddress> &ipListFromMaster)
+{
+   if(ipListFromMaster.size() != 0)
+   {
+      Vector<string> &prevServerList = settings->getIniSettings()->prevServerListFromMaster;
+      prevServerList.clear();    // Only clear the saved list if we have something to add... 
 
-   // Now add any new servers
+      for(S32 i = 0; i < ipListFromMaster.size(); i++)
+         prevServerList.push_back(Address(ipListFromMaster[i]).toString());
+   }
+}
+
+
+// Master server has returned a list of servers that match our original criteria (including being of the
+// correct version).  Send a query packet to each.
+void QueryServersUserInterface::addServersToPingList(const Vector<IPAddress> &ipList)
+{
+   saveServerListToIni(getGame()->getSettings(), ipList);
+
+   forgetServersNoLongerOnList(ipList);
+
+   // Add any new servers to the server display
    for(S32 i = 0; i < ipList.size(); i++)
    {
-      serverList->push_back(Address(ipList[i]).toString());
-
-      bool found = false;
       // Is this server already in our list?
-      for(S32 j = 0; j < servers.size(); j++)
-         if(servers[j].serverAddress == Address(ipList[i]))
-         {
-            found = true;
-            break;
-         }
+      S32 index = findServerByAddress(servers, Address(ipList[i]));
 
-      if(!found)  // It's a new server!
+      if(index == -1)  // Not found -- it's a new server; create a new entry in the servers list
       {
-         ServerRef s(ServerRef::Start);
+         ServerRef server(ServerRef::Start);
 
-         s.setNameDescr("Internet Server",  "Internet Server -- attempting to connect", Colors::white);
+         server.setNameDescr("Internet Server",  "Internet Server -- attempting to connect", Colors::white);
 
-         s.sendNonce.getRandom();
-         s.isFromMaster = true;
-         s.serverAddress.set(ipList[i]);
+         server.sendNonce.getRandom();
+         server.isFromMaster = true;
+         server.serverAddress.set(ipList[i]);
 
-         servers.push_back(s);
+         servers.push_back(server);
+
          mShouldSort = true;
       }
    }
@@ -360,7 +384,7 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
 void QueryServersUserInterface::gotServerListFromMaster(const Vector<IPAddress> &serverList)
 {
    mReceivedListOfServersFromMaster = true;
-   addPingServers(serverList);
+   addServersToPingList(serverList);
 }
 
 

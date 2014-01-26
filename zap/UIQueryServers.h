@@ -94,8 +94,12 @@ private:
 
    bool mouseInHeaderRow(const Point *pos);
 
+   void addServersToPingList(const Vector<IPAddress> &ipList); 
+   void forgetServersNoLongerOnList(const Vector<IPAddress> &ipListFromMaster);
+   void sort();                                                
+
 public:
-   explicit QueryServersUserInterface(ClientGame *game);      // Constructor
+   explicit QueryServersUserInterface(ClientGame *game);       // Constructor
    virtual ~QueryServersUserInterface();
 
    bool mReceivedListOfServersFromMaster;
@@ -190,10 +194,6 @@ public:
    void idle(U32 t);             // Idle loop
 
    void render();                // Draw the screen
-
-   void addPingServers(const Vector<IPAddress> &ipList);    // Add many addresses
-
-   void sort();               // Sort servers for pretty viewing
 
    // Handle responses to packets we sent
    void gotPingResponse(const Address &theAddress, const Nonce &clientNonce, U32 clientIdentityToken);
