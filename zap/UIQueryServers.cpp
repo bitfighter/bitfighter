@@ -385,6 +385,8 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
       s.isFromMaster = false;
       servers.push_back(s);
 
+      mShouldSort = true;
+
       return;
    }
 
@@ -985,7 +987,7 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
    const S32 strwid = getStringWidth(fontsize, msg1);
    const S32 msgboxMargin = 20;
 
-   S32 ypos = mShowChat ? TOP_OF_SERVER_LIST + 25 + (getDividerPos() - TOP_OF_SERVER_LIST) * 2 / 5 : canvasHeight / 2 ;
+   S32 ypos = mShowChat ? TOP_OF_SERVER_LIST + 25 + (getDividerPos() - TOP_OF_SERVER_LIST) * 2 / 5 : canvasHeight / 2;
    ypos += (lines - 2) * (fontsize + fontgap) / 2;
 
    const S32 ypos1 = ypos - lines * (fontsize + fontgap) - msgboxMargin;
@@ -1441,7 +1443,7 @@ void QueryServersUserInterface::issueChat()
 
    if(words.size() == 0)  // might be caused by mLineEditor == " "
    {
-      ;
+      // Do nothing
    }
    else if(words[0] == "/connect")
    {
