@@ -307,8 +307,7 @@ void MasterServerConnection::processAutentication(StringTableEntry newName, PHPB
 // sends it to the client, followed by a QueryServersDone RPC.
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId))
 {
-   Vector<IPAddress> theVector(IP_MESSAGE_ADDRESS_COUNT);
-   theVector.reserve(IP_MESSAGE_ADDRESS_COUNT);
+   Vector<IPAddress> addresses(IP_MESSAGE_ADDRESS_COUNT);
 
    const Vector<MasterServerConnection *> *serverList = mMaster->getServerList();
 
@@ -322,23 +321,23 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId
          continue;
 
       // Somehow, despite it all, we matched.  Add us to the results list.
-      theVector.push_back(serverList->get(i)->getNetAddress().toIPAddress());
+      addresses.push_back(serverList->get(i)->getNetAddress().toIPAddress());
 
       // If we get a packet's worth, send it to the client and empty our buffer...
-      if(theVector.size() == IP_MESSAGE_ADDRESS_COUNT)
+      if(addresses.size() == IP_MESSAGE_ADDRESS_COUNT)
       {
-         m2cQueryServersResponse(queryId, theVector);
-         theVector.clear();
+         m2cQueryServersResponse(queryId, addresses);
+         addresses.clear();
       }
    }
 
    // Send the final packet
-   m2cQueryServersResponse(queryId, theVector);
+   m2cQueryServersResponse(queryId, addresses);
    // If we sent any with the previous message, send another list with no servers.
-   if(theVector.size())
+   if(addresses.size())
    {
-      theVector.clear();
-      m2cQueryServersResponse(queryId, theVector);
+      addresses.clear();
+      m2cQueryServersResponse(queryId, addresses);
    }
 }
 
