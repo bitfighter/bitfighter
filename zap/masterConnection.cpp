@@ -4,10 +4,9 @@
 //------------------------------------------------------------------------------
 
 #include "masterConnection.h"
-#include "game.h"
+
 #include "version.h"
 #include "ServerGame.h"
-#include "gameConnection.h"
 #include "LevelDatabase.h"
 
 #ifndef ZAP_DEDICATED
