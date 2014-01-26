@@ -1427,7 +1427,7 @@ Vector<Address> gListAddressHide;  // --> move to settings struct
 // Must match MasterServerConnection::writeConnectRequest()!!
 bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
 {
-   mLoggingStatus = "Something failed in readConnectRequest";
+   
    if(!Parent::readConnectRequest(bstream, reason))
    {
       mLoggingStatus = "Parent::readConnectRequest failed";
@@ -1523,6 +1523,8 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                                                      clientList->get(i)->mPlayerOrServerName.getString());
                disconnect(ReasonDuplicateId, "");
                reason = ReasonDuplicateId;
+
+               mLoggingStatus = "Duplicate ID";
                return false;
             }
 
@@ -1538,10 +1540,12 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
          {
             case WrongPassword:   
                reason = ReasonBadLogin;        
+               mLoggingStatus = "Wrong password";
                return false;
 
             case InvalidUsername: 
                reason = ReasonInvalidUsername; 
+               mLoggingStatus = "Invalid username";
                return false;
 
             case UnknownStatus: 
