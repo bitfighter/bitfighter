@@ -298,7 +298,9 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));
 
    static string cleanName(string name);
-   bool readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason);
+   bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
+   void writeConnectAccept(BitStream *stream);
+
 
    TNL_DECLARE_RPC_OVERRIDE(c2mJoinGlobalChat, ());
    TNL_DECLARE_RPC_OVERRIDE(c2mLeaveGlobalChat, ());

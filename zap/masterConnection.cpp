@@ -498,6 +498,18 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 }
 
 
+// Client side reads ConnectAccept
+bool MasterServerConnection::readConnectAccept(BitStream *stream, NetConnection::TerminationReason &reason)
+{
+   if(!Parent::readConnectAccept(stream, reason))
+      return false;
+
+   logprintf("Read connect accept!!");
+
+   return true;
+}
+
+
 void MasterServerConnection::onConnectionEstablished()
 {
    mGame->onConnectedToMaster();

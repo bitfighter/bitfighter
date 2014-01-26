@@ -208,6 +208,7 @@ MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::check
    strncpy(auth->password, password, sizeof(auth->password));
    auth->stat = UnknownStatus;
    mMaster->getDatabaseAccessThread()->addEntry(auth);
+
    if(doNotDelay)  // Wait up to 1000 milliseconds so we can return some value, for clients version 017 and older
    {
       U32 timer = Platform::getRealMilliseconds();
@@ -220,11 +221,12 @@ MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::check
    return UnknownStatus;
 }
 
+
 Vector<string> master_admins;  // --> move to settings struct
 
 
 void MasterServerConnection::processAutentication(StringTableEntry newName, PHPBB3AuthenticationStatus stat, 
-                                                   TNL::Int<32> badges, U16 gamesPlayed)
+                                                  TNL::Int<32> badges, U16 gamesPlayed)
 {
    mBadges = NO_BADGES;
    if(stat == WrongPassword)
@@ -1427,7 +1429,6 @@ Vector<Address> gListAddressHide;  // --> move to settings struct
 // Must match MasterServerConnection::writeConnectRequest()!!
 bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
 {
-   
    if(!Parent::readConnectRequest(bstream, reason))
    {
       mLoggingStatus = "Parent::readConnectRequest failed";
@@ -1605,6 +1606,14 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
    mLoggingStatus = "";  // No issues!
 
    return true;
+}
+
+
+// Server side writes ConnectAccept
+void MasterServerConnection::writeConnectAccept(BitStream *stream)
+{
+   Parent::writeConnectAccept(stream);
+   logprintf("Write connect accept!!");
 }
 
 

@@ -94,6 +94,8 @@ public:
                                                       RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges,
                                                       U16 gamesPlayed));
    void writeConnectRequest(BitStream *bstream);
+   bool readConnectAccept(BitStream *stream, NetConnection::TerminationReason &reason);
+
    virtual void onConnectionEstablished();
    void onConnectionTerminated(TerminationReason r, const char *string); // An existing connection has been terminated
    void onConnectTerminated(TerminationReason r, const char *string);    // A still-being-established connection has been terminated

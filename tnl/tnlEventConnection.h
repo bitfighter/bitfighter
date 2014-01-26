@@ -140,19 +140,19 @@ protected:
 
    /// Writes the NetEvent class count into the stream, so that the remote
    /// host can negotiate a class count for the connection
-   void writeConnectRequest(BitStream *stream);
+   virtual void writeConnectRequest(BitStream *stream);
 
    /// Reads the NetEvent class count max that the remote host is requesting.
    /// If this host has MORE NetEvent classes declared, the mEventClassCount
    /// is set to the requested count, and is verified to lie on a boundary between versions.
-   bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
+   virtual bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
 
    /// Writes the negotiated NetEvent class count into the stream.   
-   void writeConnectAccept(BitStream *stream);
+   virtual void writeConnectAccept(BitStream *stream);
 
    /// Reads the negotiated NetEvent class count from the stream and validates that it is on
    /// a boundary between versions.
-   bool readConnectAccept(BitStream *stream, NetConnection::TerminationReason &reason);
+   virtual bool readConnectAccept(BitStream *stream, NetConnection::TerminationReason &reason);
 
 public:
    /// returns the highest event version number supported on this connection --> unused
