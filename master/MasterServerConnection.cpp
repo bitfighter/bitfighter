@@ -313,14 +313,15 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId
 
    for(S32 i = 0; i < serverList->size(); i++)
    {
-      if(serverList->get(i)->mIsIgnoredFromList)  // hide hidden servers...
+      // Hide hidden servers
+      if(serverList->get(i)->mIsIgnoredFromList)  
          continue;
 
-      // First check the version -- we only want to match potential players that agree on which protocol to use
-      if(serverList->get(i)->mCSProtocolVersion != mCSProtocolVersion)     // Incomptible protocols
+      // Skip servers with incompatible versions
+      if(serverList->get(i)->mCSProtocolVersion != mCSProtocolVersion)  
          continue;
 
-      // Somehow, despite it all, we matched.  Add us to the results list.
+      // Add us to the results list
       addresses.push_back(serverList->get(i)->getNetAddress().toIPAddress());
 
       // If we get a packet's worth, send it to the client and empty our buffer...
@@ -333,7 +334,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId
 
    // Send the final packet
    m2cQueryServersResponse(queryId, addresses);
-   // If we sent any with the previous message, send another list with no servers.
+
+   // If we sent any with the previous message, send another list with no servers
    if(addresses.size())
    {
       addresses.clear();

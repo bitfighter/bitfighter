@@ -38,15 +38,14 @@ void GameNetInterface::processPacket(const Address &sourceAddress, BitStream *pS
 
 
 // Using this and not computeClientIdentityToken fix problem with random ping timed out in game lobby.
-// Only server use this function, client only holds Token received in PingResponse.
+// Only servers use this function, client only holds Token received in PingResponse.
 // This function can be changed at any time without breaking compatibility.
-U32 computeSimpleToken(const Address &theAddress, const Nonce &theNonce)
+U32 computeSimpleToken(const Nonce &nonce)
 {
-   return ( (theNonce.data[1] ^ theNonce.data[3])
-      | ((theNonce.data[0] ^ theNonce.data[5]) << 8)
-      | ((theNonce.data[2] ^ theNonce.data[7]) << 16)
-      | ((theNonce.data[4] ^ theNonce.data[6]) << 24) )
-      ^ 0x638542e6;
+   return ((nonce.data[1] ^ nonce.data[3])        |
+          ((nonce.data[0] ^ nonce.data[5]) << 8)  |
+          ((nonce.data[2] ^ nonce.data[7]) << 16) |
+          ((nonce.data[4] ^ nonce.data[6]) << 24)) ^ 0x638542e6;
 }
 
 
@@ -63,7 +62,7 @@ static void handlePing(Game *game, const Address &remoteAddress, Socket &socket,
    if(protocolVersion != CS_PROTOCOL_VERSION)   // Ignore pings from incompatible versions
       return;
 
-   U32 clientIdentityToken = computeSimpleToken(remoteAddress, clientNonce);
+   U32 clientIdentityToken = computeSimpleToken(clientNonce);
    PacketStream pingResponse;
 
    pingResponse.write(U8(GameNetInterface::PingResponse));
@@ -91,18 +90,18 @@ static void handleQuery(Game *game, const Address &remoteAddress, Socket &socket
 {
    TNLAssert(game->isServer(), "Expected this to be a server!");
 
-   Nonce theNonce;
+   Nonce nonce;
    U32 clientIdentityToken;
 
-   theNonce.read(stream);
+   nonce.read(stream);
    stream->read(&clientIdentityToken);
 
-   if(clientIdentityToken == computeSimpleToken(remoteAddress, theNonce))
+   if(clientIdentityToken == computeSimpleToken(nonce))
    {
       PacketStream queryResponse;
       queryResponse.write(U8(GameNetInterface::QueryResponse));
 
-      theNonce.write(&queryResponse);
+      nonce.write(&queryResponse);
       queryResponse.writeStringTableEntry(game->getSettings()->getHostName());
       queryResponse.writeStringTableEntry(game->getSettings()->getHostDescr());
 
@@ -122,13 +121,13 @@ static void handleQueryResponse(Game *game, const Address &remoteAddress, BitStr
 {
    TNLAssert(!game->isServer(), "Expected this to be a client!");
 
-   Nonce theNonce;
+   Nonce nonce;
    StringTableEntry name;
    StringTableEntry descr;
    U32 playerCount, maxPlayers, botCount;
    bool dedicated, test, passwordRequired;
 
-   theNonce.read(stream);
+   nonce.read(stream);
    stream->readStringTableEntry(&name);
    stream->readStringTableEntry(&descr);
 
@@ -140,7 +139,7 @@ static void handleQueryResponse(Game *game, const Address &remoteAddress, BitStr
    passwordRequired = stream->readFlag();
 
    // Alert the user
-   game->gotQueryResponse(remoteAddress, theNonce, name.getString(), descr.getString(), 
+   game->gotQueryResponse(remoteAddress, nonce, name.getString(), descr.getString(), 
                           playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
 }
 
