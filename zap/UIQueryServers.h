@@ -62,6 +62,15 @@ private:
    S32 mServersPerPage;
    S32 getFirstServerIndexOnCurrentPage();
 
+   Nonce mNonce;
+   bool mReceivedListOfServersFromMaster;
+   U32 pendingPings;
+   U32 pendingQueries;
+   U32 mBroadcastPingSendTime;
+   U32 mLastUsedServerId;     // A unique ID we can assign to new servers
+   Timer mMasterRequeryTimer;
+   U32 time;
+
    Timer mouseScrollTimer;
    void sortSelected();
 
@@ -101,15 +110,6 @@ private:
 public:
    explicit QueryServersUserInterface(ClientGame *game);       // Constructor
    virtual ~QueryServersUserInterface();
-
-   bool mReceivedListOfServersFromMaster;
-   Nonce mNonce;
-   U32 pendingPings;
-   U32 pendingQueries;
-   U32 mBroadcastPingSendTime;
-   U32 mLastUsedServerId;     // A unique ID we can assign to new servers
-   Timer mMasterRequeryTimer;
-   U32 time;
 
    void advancePage();
    void backPage();
