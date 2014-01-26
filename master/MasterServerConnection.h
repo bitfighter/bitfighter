@@ -137,44 +137,35 @@ public:
    /// A list of connection requests we're working on fulfilling for this connection.
    Vector< GameConnectRequest* > mConnectList;
 
-   /// @}
 
-   /// @name Server Info
-   ///
-   /// This info is filled in if this connection maps to a
-   /// game server.
-   ///
-   /// @{
+   U32              mCMProtocolVersion; // Version of the protocol we'll be using to converse with the client
+   U32              mCSProtocolVersion; // Protocol version client will use to talk to server (client can only play with others 
+                                        // using this same version)
+   U32              mClientBuild;       // Build number of the client (different builds may use same protocols)
 
-   U32              mCMProtocolVersion; ///< Version of the protocol we'll be using to converse with the client
-   U32              mCSProtocolVersion; ///< Protocol version client will use to talk to server (client can only play with others 
-   ///     using this same version)
-   U32              mClientBuild;       ///< Build number of the client (different builds may use same protocols)
-
-   U32              mInfoFlags;         ///< Info flags describing this server.
-   U32              mPlayerCount;       ///< Current number of players on this server.
-   U32              mMaxPlayers;        ///< Maximum number of players on this server.
-   U32              mNumBots;           ///< Current number of bots on this server.
+   U32              mInfoFlags;         // Info flags describing this server.
+   U32              mPlayerCount;       // Current number of players on this server.
+   U32              mMaxPlayers;        // Maximum number of players on this server.
+   U32              mNumBots;           // Current number of bots on this server.
 
    StringTableEntry mLevelName;        ///<<=== TODO: Change to const char *
    StringTableEntry mLevelType;
-   StringTableEntry mPlayerOrServerName;       ///< Player's nickname, hopefully unique, but not enforced, or server's name
-   Nonce mPlayerId;                            ///< (Hopefully) unique ID of this player
+   StringTableEntry mPlayerOrServerName;        // Player's nickname, hopefully unique, but not enforced, or server's name
+   Nonce mPlayerId;                             // (Hopefully) unique ID of this player
 
-   bool mAuthenticated;                        ///< True if user was authenticated, false if not
-   bool mIsDebugClient;                        ///< True if client is running from a debug build
+   S32 mClientId;                               // Guranteed unique ID assigned my master
 
-   StringTableEntry mServerDescr;              ///< Server description
+   bool mAuthenticated;                         // True if user was authenticated, false if not
+   bool mIsDebugClient;                         // True if client is running from a debug build
+
+   StringTableEntry mServerDescr;               // Server description
    bool isInGlobalChat;
-
 
    bool mIsMasterAdmin;
 
    bool mIsIgnoredFromList;
 
    StringTableEntry mAutoDetectStr;             // Player's joystick autodetect string, for research purposes
-
-   /// @}
 
 public:
    static Vector<SafePtr<MasterServerConnection> > gLeaveChatTimerList;

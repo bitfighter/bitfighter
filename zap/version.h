@@ -8,9 +8,11 @@
 
 #define ZAP_GAME_NAME "Bitfighter"
 
-// Updated from 6 to 7 for 019
-#define MASTER_PROTOCOL_VERSION 7  // Change this when releasing an incompatible cm/sm protocol (must be int)
+// Updated from 7 for 019
+// Updated to 8 for 019a -- added master-generated IDs written after connect
+#define MASTER_PROTOCOL_VERSION 8  // Change this when releasing an incompatible cm/sm protocol (must be int)
                                    // MASTER_PROTOCOL_VERSION = 4, client 015a and older (CS_PROTOCOL_VERSION <= 32) can not connect to our new master.
+
 #define CS_PROTOCOL_VERSION 38     // Change this when releasing an incompatible cs protocol (must be int)
 // 016 = 33 
 // 017[ab] = 35

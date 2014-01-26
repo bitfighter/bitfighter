@@ -26,6 +26,9 @@ MasterServerConnection::MasterServerConnection(Game *game)
 {
    mGame = game;
 
+   // Assign a random ID now, will be overwritten with a value from the master when we make our connection
+   mClientId = -1 * TNL::Random::readI(0, -S32_MIN);
+
    mCurrentQueryId = 0;
 
    // Determine connection type based on Game that is running
@@ -505,7 +508,7 @@ bool MasterServerConnection::readConnectAccept(BitStream *stream, NetConnection:
    if(!Parent::readConnectAccept(stream, reason))
       return false;
 
-   logprintf("Read connect accept!!");
+   stream->read(&mClientId);     // This ID is guaranteed unique across all clients/servers
 
    return true;
 }

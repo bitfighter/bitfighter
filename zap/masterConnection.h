@@ -29,6 +29,8 @@ private:
    Game *mGame;
    string mMasterName;
 
+   S32 mClientId;
+
    void terminateIfAnonymous();
 
 protected:
@@ -36,7 +38,7 @@ protected:
 
 public:
    explicit MasterServerConnection(Game *game);    // Constructor
-   MasterServerConnection();              // Default Constructor required by TNL for some reason..
+   MasterServerConnection();              // Default Constructor required by TNL
    virtual ~MasterServerConnection();     // Destructor
 
    void setConnectionType(MasterConnectionType type);

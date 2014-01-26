@@ -40,6 +40,19 @@ HighScores MasterServerConnection::highScores;
 MasterServer *MasterServerConnection::mMaster = NULL;
 
 
+static S32 getNextId()
+{
+   static S32 nextId = 0;
+   nextId++;
+
+   // Negative range reserved for self-generated IDs
+   if(nextId == S32_MAX)
+      nextId = 0;
+
+   return nextId;
+}
+
+
 /// Constructor initializes the linked list info with "safe" values
 /// so we don't explode if we destruct right away.
 MasterServerConnection::MasterServerConnection()
@@ -55,6 +68,8 @@ MasterServerConnection::MasterServerConnection()
    mIsMasterAdmin = false;
    mLoggingStatus = "Not_Connected";
    mConnectionType = MasterConnectionTypeNone;
+
+   mClientId = getNextId();
 }
 
 
@@ -1613,7 +1628,9 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
 void MasterServerConnection::writeConnectAccept(BitStream *stream)
 {
    Parent::writeConnectAccept(stream);
-   logprintf("Write connect accept!!");
+
+   if(mCMProtocolVersion >= 8)
+      stream->write(mClientId);
 }
 
 
