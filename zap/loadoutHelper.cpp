@@ -276,10 +276,6 @@ void LoadoutHelper::activateTransitionFromLoadoutMenuToPresetMenu()
 {
    mShowingPresets = true;
 
-   Vector<OverlayMenuItem> &menuItems = mShowingPresets ? mPresetItems : 
-                                                (mCurrentIndex < ShipModuleCount) ? mModuleMenuItems : 
-                                                                                    mWeaponMenuItems;
-
    // The menu will be getting larger to accomodate the presets, which are wider than the standard 
    // loadout menu.  Here we'll calculate the width of the loadout menu and the preset menu.
    S32 currDisplayWidth = getCurrentDisplayWidth(mLoadoutButtonsWidth, mLoadoutItemsDisplayWidth);

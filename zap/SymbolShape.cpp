@@ -469,7 +469,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
       return symbol;
    }
 
-   else if(InputCodeManager::inputCodeToString(inputCode) != "")
+   else if(strcmp(InputCodeManager::inputCodeToString(inputCode), "") != 0)
       return SymbolShapePtr(new SymbolKey(InputCodeManager::inputCodeToString(inputCode), color)); 
 
    else if(inputCode == KEY_UNKNOWN)

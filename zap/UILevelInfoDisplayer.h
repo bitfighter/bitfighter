@@ -26,8 +26,8 @@ class LevelInfoDisplayer : public SlideOutWidget
    typedef SlideOutWidget Parent;
 
 private:
-   Timer mDisplayTimer;
    const ClientGame *mGame;
+   Timer mDisplayTimer;
 
    S32 getSideBoxWidth() const;
 
