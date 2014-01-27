@@ -908,10 +908,7 @@ static void quitSelectedCallback(ClientGame *game, U32 unused)
 {
    shutdownBitfighter();
 }
-static void playGameRecordingCallback(ClientGame *game, U32 unused)
-{
-   game->getUIManager()->activate<PlaybackSelectUserInterface>();
-}
+
 
 //////////
 
@@ -936,7 +933,6 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
    addMenuItem(new MenuItem("LEVEL EDITOR",           editorSelectedCallback,     "", KEY_L, KEY_E));
    addMenuItem(new MenuItem("CREDITS",                creditsSelectedCallback,    "", KEY_C));
    addMenuItem(new MenuItem("QUIT",                   quitSelectedCallback,       "", KEY_Q));
-   addMenuItem(new MenuItem("Play Recorded Games",    playGameRecordingCallback,  "", KEY_Q));
 }
 
 
@@ -1820,6 +1816,12 @@ static void robotOptionsSelectedCallback(ClientGame *game, U32 unused)
 }
 
 
+static void playbackGamesCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate<PlaybackSelectUserInterface>();
+}
+
+
 void HostMenuUserInterface::setupMenus()
 {
    clearMenuItems();
@@ -1849,7 +1851,9 @@ void HostMenuUserInterface::setupMenus()
 
    addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
 
-   addMenuItem(new YesNoMenuItem("RECORD GAMES:", settings->getIniSettings()->enableGameRecording, "", KEY_M));
+   addMenuItem(new YesNoMenuItem("RECORD GAMES:", settings->getIniSettings()->enableGameRecording, ""));
+
+   addMenuItem(new MenuItem("PLAYBACK GAMES",    playbackGamesCallback,  ""));
 }
 
 
