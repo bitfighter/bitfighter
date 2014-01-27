@@ -17,6 +17,7 @@
 #include "ClientInfo.h"          // For ClientRole enum
 #include "SparkTypesEnum.h"
 #include "gameConnection.h"
+#include "MasterTypes.h"
 
 
 #ifdef TNL_OS_WIN32
@@ -266,7 +267,7 @@ public:
    void gotPermissionsReply(ClientInfo::ClientRole role);
    void gotWrongPassword();
 
-   void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken);
+   void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 clientId);
    void gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
                          U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 

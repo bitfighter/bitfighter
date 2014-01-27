@@ -49,7 +49,7 @@ U32 computeSimpleToken(const Nonce &nonce)
 }
 
 
-static void handlePing(Game *game, const Address &remoteAddress, Socket &socket, BitStream *stream)
+static void handlePing(Game *game, const Address &remoteAddress, Socket &socket, BitStream *stream, S32 clientId)
 {
    TNLAssert(game->isServer(), "Expected this to be a server!");
 
@@ -68,21 +68,35 @@ static void handlePing(Game *game, const Address &remoteAddress, Socket &socket,
    pingResponse.write(U8(GameNetInterface::PingResponse));
    clientNonce.write(&pingResponse);
    pingResponse.write(clientIdentityToken);
+
+   //pingResponse.write(clientId);    // Disable before 019a release
+#ifndef TNL_DEBUG
+#  error Disable the above, please!
+#endif
+
    pingResponse.sendto(socket, remoteAddress);
 }
 
 
+// Process response to Ping, written in handlePing(), above
 static void handlePingResponse(Game *game, const Address &remoteAddress, BitStream *stream)
 {
    TNLAssert(!game->isServer(), "Expected this to be a client!");
 
    Nonce nonce;
    U32 clientIdentityToken;
+   S32 serverId;
 
    nonce.read(stream);
    stream->read(&clientIdentityToken);
+
+   //stream->read(&serverId);   // Disable before 019a release
+    serverId = 0;
+#ifndef TNL_DEBUG
+#  error Disable the above, please!
+#endif
             
-   game->gotPingResponse(remoteAddress, nonce, clientIdentityToken);
+   game->gotPingResponse(remoteAddress, nonce, clientIdentityToken, serverId);
 }
 
 
@@ -150,7 +164,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
    {
       case Ping:
          if(mGame->isServer())
-            handlePing(mGame, remoteAddress, mSocket, stream);
+            handlePing(mGame, remoteAddress, mSocket, stream, mGame->getClientId());
          break;
 
       case PingResponse: 

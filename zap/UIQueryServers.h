@@ -12,6 +12,8 @@
 #include "Color.h"
 #include "Intervals.h"
 
+#include "MasterTypes.h"
+
 #include "tnlNonce.h"
 
 #include <stdarg.h>
@@ -103,8 +105,8 @@ private:
 
    bool mouseInHeaderRow(const Point *pos);
 
-   void addServersToPingList(const Vector<IPAddress> &ipList); 
-   void forgetServersNoLongerOnList(const Vector<IPAddress> &ipListFromMaster);
+   void addServersToPingList(const Vector<ServerAddr> &serverList); 
+   void forgetServersNoLongerOnList(const Vector<ServerAddr> &serverListFromMaster);
    void sort();                                                
 
 public:
@@ -138,7 +140,7 @@ public:
          ReceivedQuery,
       };
 
-      ServerRef(State state); 
+      ServerRef(S32 serverId, const Address &address, State state, bool isFromMaster); 
       virtual ~ServerRef();
 
       State state;
@@ -153,6 +155,7 @@ public:
       bool passwordRequired;
       bool pingTimedOut;
       bool everGotQueryResponse;
+      S32 serverId;
       Nonce sendNonce;
       string serverName, serverDescr;
       Color msgColor;
@@ -172,7 +175,7 @@ public:
    };
 
    Vector<ServerRef> servers;
-   ServerRef mLastSelectedServer;
+   string mLastSelectedServerName;
    string getLastSelectedServerName();
 
    Vector<ColumnInfo> columns;
@@ -196,11 +199,11 @@ public:
    void render();                // Draw the screen
 
    // Handle responses to packets we sent
-   void gotPingResponse(const Address &theAddress, const Nonce &clientNonce, U32 clientIdentityToken);
+   void gotPingResponse(const Address &theAddress, const Nonce &clientNonce, U32 clientIdentityToken, S32 serverId);
    void gotQueryResponse(const Address &theAddress, const Nonce &clientNonce, const char *serverName, const char *serverDescr, 
                          U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 
-   void gotServerListFromMaster(const Vector<IPAddress> &serverList);
+   void gotServerListFromMaster(const Vector<ServerAddr> &serverList);
 };
 
 

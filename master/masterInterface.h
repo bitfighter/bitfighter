@@ -71,21 +71,22 @@ public:
    /// are limited in size, the response server list is broken up into lists of at most IP_MESSAGE_ADDRESS_COUNT IP addresses
    /// per message.  The Master Server will always send a final, empty m2cQueryServersResponse to signify that the list
    /// is complete.
-   TNL_DECLARE_RPC(m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList));
+   TNL_DECLARE_RPC(m2cQueryServersResponse,      (U32 queryId, Vector<IPAddress> ipList));
+   TNL_DECLARE_RPC(m2cQueryServersResponse_019a, (U32 queryId, Vector<IPAddress> ipList, Vector<S32> serverIdList));
 
    /// c2mRequestArrangedConnection is an RPC sent from the client to the master to request an arranged
    /// connection with the specified server address.  The internalAddress should be the client's own self-reported
    /// IP address.  The connectionParameters buffer will be sent without modification to the specified
    /// server.
    TNL_DECLARE_RPC(c2mRequestArrangedConnection, (U32 requestId,
-      IPAddress remoteAddress, IPAddress internalAddress,
-      ByteBufferPtr connectionParameters));
-
+                                                  IPAddress remoteAddress, IPAddress internalAddress,
+                                                  ByteBufferPtr connectionParameters));
+                                                  
    /// m2sClientRequestedArranged connection is sent from the master to a server to notify it that
    /// a client has requested a connection.  The possibleAddresses vector is a list of possible IP addresses
    /// that the server should attempt to connect to for that client if it accepts the connection request.
    TNL_DECLARE_RPC(m2sClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
-      ByteBufferPtr connectionParameters));
+                                                          ByteBufferPtr connectionParameters));
             
    /// s2mAcceptArrangedConnection is sent by a server to notify the master that it will accept the connection
    /// request from a client.  The requestId parameter sent by the MasterServer in m2sClientRequestedArrangedConnection

@@ -57,8 +57,9 @@ public:
    void updateServerStatus(StringTableEntry levelName, StringTableEntry levelType, U32 botCount, 
                            U32 playerCount, U32 maxPlayers, U32 infoFlags);
 
+   S32 getClientId() const;
+
 #ifndef ZAP_DEDICATED
-   TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse,      (U32 queryId, Vector<IPAddress> ipList));
    TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse_019a, (U32 queryId, Vector<IPAddress> ipList, Vector<S32> clientIdList));
 #endif
 

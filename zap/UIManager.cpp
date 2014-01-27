@@ -599,7 +599,7 @@ void UIManager::gotGlobalChatMessage(const string &from, const string &message, 
 }
 
 
-void UIManager::gotServerListFromMaster(const Vector<IPAddress> &serverList)
+void UIManager::gotServerListFromMaster(const Vector<ServerAddr> &serverList)
 {
    getUI<QueryServersUserInterface>()->gotServerListFromMaster(serverList);
 }
@@ -623,9 +623,9 @@ void UIManager::playerLeftGlobalChat(const StringTableEntry &playerNick)
 }
 
 
-void UIManager::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken)
+void UIManager::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 clientId)
 {
-   getUI<QueryServersUserInterface>()->gotPingResponse(address, nonce, clientIdentityToken);
+   getUI<QueryServersUserInterface>()->gotPingResponse(address, nonce, clientIdentityToken, clientId);
 }
 
 

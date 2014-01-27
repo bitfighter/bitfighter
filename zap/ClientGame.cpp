@@ -1197,9 +1197,9 @@ void ClientGame::gotWrongPassword()
 }
 
 
-void ClientGame::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken)
+void ClientGame::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 clientId)
 {
-   getUIManager()->gotPingResponse(address, nonce, clientIdentityToken);
+   getUIManager()->gotPingResponse(address, nonce, clientIdentityToken, clientId);
 }
 
 

@@ -65,14 +65,18 @@ static void prevButtonClickedCallback(ClientGame *game)
 
 
 // Constructor
-QueryServersUserInterface::ServerRef::ServerRef(State initialState)
+QueryServersUserInterface::ServerRef::ServerRef(S32 serverId, const Address &address, State initialState, bool isFromMaster) :
+   serverAddress(address)
 {
+   this->serverId = serverId;
+   this->state = initialState;
+   this->isFromMaster = isFromMaster;      
+
    pingTimedOut = false;
    everGotQueryResponse = false;
    passwordRequired = false;
    test = false;
    dedicated = false;
-   isFromMaster = false;      
    sendCount = 0;
    pingTime = 9999;
    setPlayerBotMax(-1, 01, -1);
@@ -80,7 +84,6 @@ QueryServersUserInterface::ServerRef::ServerRef(State initialState)
    id = getNextId();
    identityToken = 0;
    lastSendTime = 0;
-   state = initialState;
 }
 
 
@@ -139,8 +142,7 @@ QueryServersUserInterface::ColumnInfo::~ColumnInfo()
 // Constructor
 QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : 
    UserInterface(game), 
-   ChatParent(game),
-   mLastSelectedServer(ServerRef::Start)
+   ChatParent(game)
 {
    mSortColumn = getGame()->getSettings()->getQueryServerSortColumn();
    mSortAscending = getGame()->getSettings()->getQueryServerSortAscending();
@@ -218,7 +220,7 @@ void QueryServersUserInterface::onActivate()
       char name[128];
       dSprintf(name, MaxServerNameLen, "Dummy Svr%8x", Random::readI());
 
-      ServerRef s(ServerRef::ReceivedPing);
+      ServerRef s(0, ServerRef::ReceivedPing, true);
 
       s.setNameDescr(name, "This is my description.  There are many like it, but this one is mine.", Colors::yellow);
       s.setPlayerBotMax(Random::readF() * max / 2, Random::readF() * max / 2, max);
@@ -294,10 +296,10 @@ void QueryServersUserInterface::contactEveryone()
 
 
 // Returns index of found server, -1 if it found none
-static S32 findServerByAddress(const Vector<IPAddress> &ipList, const Address &address)
+static S32 findServerByAddress(const Vector<ServerAddr> &serverList, const Address &address)
 {
-   for(S32 i = 0; i < ipList.size(); i++)
-      if(Address(ipList[i]) == address)
+   for(S32 i = 0; i < serverList.size(); i++)
+      if(Address(serverList[i].first) == address)
          return i;
 
    return -1;
@@ -305,11 +307,23 @@ static S32 findServerByAddress(const Vector<IPAddress> &ipList, const Address &a
 
 
 // Returns index of found server, -1 if it found none
-static S32 findServerByAddress(const Vector<QueryServersUserInterface::ServerRef> &serverList, const Address &address)
+static S32 findServerByAddressOrId(const Vector<QueryServersUserInterface::ServerRef> &serverList, const Address &address, S32 serverId)
 {
    for(S32 i = 0; i < serverList.size(); i++)
-      if(serverList[i].serverAddress == address)
+      if(serverList[i].serverAddress == address || (serverId != 0 && serverList[i].serverId == serverId))
          return i;
+
+   return -1;
+}
+
+
+// Returns index of found server, -1 if it found none.  ServerId of 0 means id is uninitialized.
+static S32 findServerByServerId(const Vector<QueryServersUserInterface::ServerRef> &serverList, S32 serverId)
+{
+   if(serverId != 0)
+      for(S32 i = 0; i < serverList.size(); i++)
+         if(serverList[i].serverId == serverId)
+            return i;
 
    return -1;
 }
@@ -329,14 +343,14 @@ static S32 findServerByAddressNonceState(const Vector<QueryServersUserInterface:
 
 // The master has given us a list of servers it knows about.  We need to scan our local server list and remove any that are
 // not on the updated list from the master.  These will be servers that were alive, but have now disappeared.
-void QueryServersUserInterface::forgetServersNoLongerOnList(const Vector<IPAddress> &ipListFromMaster)
+void QueryServersUserInterface::forgetServersNoLongerOnList(const Vector<ServerAddr> &serverListFromMaster)
 {
    for(S32 i = servers.size() - 1; i >= 0; i--)
    {
       if(!servers[i].isFromMaster)  // Skip local servers
          continue;
 
-      S32 index = findServerByAddress(ipListFromMaster, servers[i].serverAddress);
+      S32 index = findServerByAddress(serverListFromMaster, servers[i].serverAddress);
 
       if(index == -1)               // It's a defunct server...
          servers.erase_fast(i);     // ...bye-bye!
@@ -345,20 +359,20 @@ void QueryServersUserInterface::forgetServersNoLongerOnList(const Vector<IPAddre
 
 
 // Save servers from the master -- we'll use these as a fallback next time if we can't connect to the server
-static void saveServerListToIni(GameSettings *settings, const Vector<IPAddress> &ipListFromMaster)
+static void saveServerListToIni(GameSettings *settings, const Vector<ServerAddr> &serverListFromMaster)
 {
-   if(ipListFromMaster.size() != 0)
+   if(serverListFromMaster.size() != 0)
    {
       Vector<string> &prevServerList = settings->getIniSettings()->prevServerListFromMaster;
       prevServerList.clear();    // Only clear the saved list if we have something to add... 
 
-      for(S32 i = 0; i < ipListFromMaster.size(); i++)
-         prevServerList.push_back(Address(ipListFromMaster[i]).toString());
+      for(S32 i = 0; i < serverListFromMaster.size(); i++)
+         prevServerList.push_back(Address(serverListFromMaster[i].first).toString());
    }
 }
 
 
-void QueryServersUserInterface::gotServerListFromMaster(const Vector<IPAddress> &serverList)
+void QueryServersUserInterface::gotServerListFromMaster(const Vector<ServerAddr> &serverList)
 {
    mReceivedListOfServersFromMaster = true;
    addServersToPingList(serverList);
@@ -367,28 +381,24 @@ void QueryServersUserInterface::gotServerListFromMaster(const Vector<IPAddress> 
 
 // Master server has returned a list of servers that match our original criteria (including being of the
 // correct version).  Send a query packet to each.
-void QueryServersUserInterface::addServersToPingList(const Vector<IPAddress> &ipList)
+void QueryServersUserInterface::addServersToPingList(const Vector<ServerAddr> &serverList)
 {
-   saveServerListToIni(getGame()->getSettings(), ipList);
+   saveServerListToIni(getGame()->getSettings(), serverList);
 
-   forgetServersNoLongerOnList(ipList);
+   forgetServersNoLongerOnList(serverList);
 
    // Add any new servers to the server display
-   for(S32 i = 0; i < ipList.size(); i++)
+   for(S32 i = 0; i < serverList.size(); i++)
    {
       // Is this server already in our list?
-      S32 index = findServerByAddress(servers, Address(ipList[i]));
+      S32 index = findServerByAddressOrId(servers, Address(serverList[i].first), serverList[i].second);
 
       if(index == -1)  // Not found -- it's a new server; create a new entry in the servers list
       {
-         ServerRef server(ServerRef::Start);
-
+         ServerRef server(serverList[i].second, serverList[i].first, ServerRef::Start, true);
          server.setNameDescr("Internet Server",  "Internet Server -- attempting to connect", Colors::white);
 
          server.sendNonce.getRandom();
-         server.isFromMaster = true;
-         server.serverAddress.set(ipList[i]);
-
          servers.push_back(server);
 
          mShouldSort = true;
@@ -400,30 +410,36 @@ void QueryServersUserInterface::addServersToPingList(const Vector<IPAddress> &ip
 }
 
 
-void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const Nonce &nonce, U32 clientIdentityToken)
+void QueryServersUserInterface::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 serverId)
 {
    if(mNonce == nonce)     // From local broadcast ping
    {
-     if(findServerByAddress(servers, theAddress) > -1)     // If we already know about the server, move along
+      // If we already know about the server, move along.
+      // Pass 0 here to disable id check... we're only interested in IP address matches at this point -- if we have
+      // a remote server with the same ID, we want to clobber it below.
+      if(findServerByAddressOrId(servers, address, 0) != -1)     
          return;
 
-      // Create a new server entry
-      ServerRef s(ServerRef::ReceivedPing);
+      // See if we've already been told about server with this serverId by the master... if so, we'll remove that
+      // entry and replace it with a new one for the LAN server.  Local servers represent!
+      S32 index = findServerByServerId(servers, serverId);
+      if(index != -1 && servers[index].isFromMaster)
+         servers.erase_fast(index);
 
+      // Create a new server entry
+      ServerRef s(serverId, address, ServerRef::ReceivedPing, false);
       s.setNameDescr("LAN Server", "LAN Server -- attempting to connect", Colors::white);
 
       s.pingTime = Platform::getRealMilliseconds() - mBroadcastPingSendTime;
       s.identityToken = clientIdentityToken;
       s.sendNonce = nonce;
-      s.serverAddress = theAddress;
-      s.isFromMaster = false;
 
       servers.push_back(s);
    } 
 
    else  // From a ping sent to a remote server
    {
-      S32 index = findServerByAddressNonceState(servers, theAddress, nonce, ServerRef::SentPing);
+      S32 index = findServerByAddressNonceState(servers, address, nonce, ServerRef::SentPing);
 
       if(index > -1)
       {
@@ -440,14 +456,14 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
 }
 
 
-void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, const Nonce &clientNonce, 
+void QueryServersUserInterface::gotQueryResponse(const Address &address, const Nonce &clientNonce, 
                                                  const char *serverName, const char *serverDescr, U32 playerCount, 
                                                  U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
    for(S32 i = 0; i < servers.size(); i++)
    {
       ServerRef &s = servers[i];
-      if(s.sendNonce == clientNonce && s.serverAddress == theAddress && s.state == ServerRef::SentQuery)
+      if(s.sendNonce == clientNonce && s.serverAddress == address && s.state == ServerRef::SentQuery)
       {
          s.setNameDescr(serverName, serverDescr, Colors::yellow);
          s.setPlayerBotMax(playerCount, botCount, maxPlayers);
@@ -620,7 +636,7 @@ bool QueryServersUserInterface::mouseInHeaderRow(const Point *pos)
 
 string QueryServersUserInterface::getLastSelectedServerName()
 {
-   return mLastSelectedServer.serverName;
+   return mLastSelectedServerName;
 }
 
 
@@ -1127,7 +1143,9 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
                // Second param, false when we can ping that server, allows faster connect. If we can ping, we can connect without master help.
                getGame()->joinRemoteGame(servers[currentIndex].serverAddress, servers[currentIndex].isFromMaster && 
                     (getGame()->getSettings()->getIniSettings()->neverConnectDirect || !servers[currentIndex].everGotQueryResponse));
-               mLastSelectedServer = servers[currentIndex];    // Save this because we'll need the server name when connecting.  Kind of a hack.
+
+               // Save this because we'll need the server name when connecting.  Kind of a hack.
+               mLastSelectedServerName = servers[currentIndex].serverName;    
 
                // ...and clear out the server list so we don't do any more pinging
                servers.clear();

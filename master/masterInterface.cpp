@@ -25,10 +25,10 @@ namespace Master
 // Note that these may not be the historically correct version numbers... feel free to correct them if you 
 // want to do the archaeology!
 static const S32 M_RPC_PRE_017 = 0;
-static const S32 M_RPC_017 = 1;
-static const S32 M_RPC_018 = 2;
-static const S32 M_RPC_019 = 3;
-
+static const S32 M_RPC_017  = 1;
+static const S32 M_RPC_018  = 2;
+static const S32 M_RPC_019  = 3;
+static const S32 M_RPC_019a = 4;
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mQueryServers,
    (U32 queryId), (queryId),
@@ -37,6 +37,10 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, c2mQueryServers,
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cQueryServersResponse,
    (U32 queryId, Vector<IPAddress> ipList), (queryId, ipList),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_PRE_017) {}
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2cQueryServersResponse_019a,
+   (U32 queryId, Vector<IPAddress> ipList, Vector<S32> serverIdList), (queryId, ipList, serverIdList),
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_019a) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mRequestArrangedConnection, 
    (U32 requestId, IPAddress remoteAddress, IPAddress internalAddress, ByteBufferPtr connectionParameters),

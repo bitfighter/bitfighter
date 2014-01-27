@@ -375,6 +375,12 @@ MasterServerConnection *Game::getConnectionToMaster()
 }
 
 
+S32 Game::getClientId()
+{
+   return mConnectionToMaster->getClientId();
+}
+
+
 // Only used for testing
 void Game::setConnectionToMaster(MasterServerConnection *connection)
 {
@@ -1490,7 +1496,7 @@ U32 Game::getMaxPlayers() const
 }
 
    
-void Game::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken)
+void Game::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 clientId)
 {
    TNLAssert(false, "Not implemented for this class!");
 }

@@ -67,8 +67,9 @@ void MasterServerConnection::startServerQuery()
 
 
 #ifndef ZAP_DEDICATED
+
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_019a, 
-                           (U32 queryId, Vector<IPAddress> ipList, Vector<S32> clientIdList))
+                           (U32 queryId, Vector<IPAddress> ipList, Vector<S32> serverIdList))
 {
    if(mGame->isServer())
       return;
@@ -77,8 +78,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_019a,
    if(queryId != mCurrentQueryId || mGame->isServer())
       return;
 
-   TNLAssert(ipList.size() == clientIdList.size(), "Expect the same number of elements!");
-   if(ipList.size() != clientIdList.size())
+   TNLAssert(ipList.size() == serverIdList.size(), "Expect the same number of elements!");
+   if(ipList.size() != serverIdList.size())
       return;
 
    // The master server sends out an empty list to signify and "end of transmission".  We'll build up a
@@ -86,12 +87,12 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_019a,
    // We need to do this because the UI will look for servers that it knows about that are not on the master 
    // list, and will remove them from the display.  If we send the list in parts, the UI will remove any known servers that
    // don't happen to be on that part.
-   // Note that for every entry in ipList, there will be a corresponding entry in clientIdList.
+   // Note that for every entry in ipList, there will be a corresponding entry in serverIdList.
    if(ipList.size() > 0)
    {
       // Store these intermediate results
       for(S32 i = 0; i < ipList.size(); i++)
-         mServerList.push_back(ServerAddr(ipList[i], clientIdList[i]));
+         mServerList.push_back(ServerAddr(ipList[i], serverIdList[i]));
    }
    else  // Empty list received, transmission complete, send whole list on to the UI
    {
@@ -126,7 +127,11 @@ void MasterServerConnection::updateServerStatus(StringTableEntry levelName, Stri
 }
 
 
-const char *NotServerError = "Not a server";
+S32 MasterServerConnection::getClientId() const
+{
+   return mClientId;
+}
+
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedConnection, 
                               (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionParameters))
@@ -135,7 +140,10 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
    {
       logprintf(LogConsumer::LogConnection, "Rejecting arranged connection from %s, We're not a server!", 
                 Address(possibleAddresses[0]).toString());
-      s2mRejectArrangedConnection(requestId, ByteBufferPtr(new ByteBuffer((U8 *)NotServerError, sizeof(NotServerError))));
+
+      const char *NotAServer = "Not a server";
+
+      s2mRejectArrangedConnection(requestId, ByteBufferPtr(new ByteBuffer((U8 *)NotAServer, sizeof(NotAServer))));
       return;
    }
 

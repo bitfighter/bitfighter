@@ -295,7 +295,7 @@ public:
    virtual bool isDedicated() const;
    virtual bool isTestServer() const = 0;
 
-   virtual void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken);
+   virtual void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 clientId);
    virtual void gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
                                 U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 
@@ -378,6 +378,9 @@ public:
    void checkConnectionToMaster(U32 timeDelta);
    MasterServerConnection *getConnectionToMaster();
    void setConnectionToMaster(MasterServerConnection *connection);
+
+   S32 getClientId();                        // Returns unique master-assigned Id
+
 
    //void runAnonymousMasterRequest(MasterConnectionCallback callback);
    void processAnonymousMasterConnection();

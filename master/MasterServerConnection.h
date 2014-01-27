@@ -116,6 +116,9 @@ private:
    MasterConnectionType mConnectionType;
    static MasterServer *mMaster;
 
+   void sendM2cQueryServersResponse(U32 queryId, const Vector<IPAddress> &addresses, const Vector<S32> &serverIdList);
+
+
 public:
 
    ///
@@ -220,6 +223,7 @@ public:
 
    static void setMasterServer(MasterServer *master);
 
+   S32 getClientId() const;
 
    MasterServerConnection *findClient(Nonce &clientId);   // Should be const, but that won't compile for reasons not yet determined!!
 

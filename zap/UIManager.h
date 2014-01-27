@@ -20,6 +20,8 @@
 #include "Point.h"
 #include "Timer.h"
 
+#include "MasterTypes.h"
+
 #include "tnlNetStringTable.h"
 #include "tnlNetConnection.h"
 #include "tnlNonce.h"
@@ -192,8 +194,8 @@ public:
    void playerLeftGlobalChat  (const StringTableEntry &playerNick);
 
    // QueryServersUI:
-   void gotServerListFromMaster(const Vector<IPAddress> &serverList);
-   void gotPingResponse (const Address &address, const Nonce &nonce, U32 clientIdentityToken);
+   void gotServerListFromMaster(const Vector<ServerAddr> &serverList);
+   void gotPingResponse (const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 clientId);
    void gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
                          U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
    string getLastSelectedServerName();

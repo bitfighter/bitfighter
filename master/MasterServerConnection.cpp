@@ -45,9 +45,9 @@ static S32 getNextId()
    static S32 nextId = 0;
    nextId++;
 
-   // Negative range reserved for self-generated IDs
+   // Negative range reserved for self-generated IDs, and 0 will never be issued
    if(nextId == S32_MAX)
-      nextId = 0;
+      nextId = 1;
 
    return nextId;
 }
@@ -325,6 +325,8 @@ void MasterServerConnection::processAutentication(StringTableEntry newName, PHPB
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId))
 {
    Vector<IPAddress> addresses(IP_MESSAGE_ADDRESS_COUNT);
+   Vector<S32> serverIdList(IP_MESSAGE_ADDRESS_COUNT);
+   
 
    const Vector<MasterServerConnection *> *serverList = mMaster->getServerList();
 
@@ -340,30 +342,50 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId
 
       // Add us to the results list
       addresses.push_back(serverList->get(i)->getNetAddress().toIPAddress());
+      serverIdList.push_back(serverList->get(i)->getClientId());
 
       // If we get a packet's worth, send it to the client and empty our buffer...
       if(addresses.size() == IP_MESSAGE_ADDRESS_COUNT)
       {
-         m2cQueryServersResponse(queryId, addresses);
+         sendM2cQueryServersResponse(queryId, addresses, serverIdList);
+         
          addresses.clear();
+         serverIdList.clear();
       }
    }
 
    // Send the final packet
-   m2cQueryServersResponse(queryId, addresses);
+   sendM2cQueryServersResponse(queryId, addresses, serverIdList);
 
    // If we sent any with the previous message, send another list with no servers
    if(addresses.size())
    {
       addresses.clear();
-      m2cQueryServersResponse(queryId, addresses);
+      sendM2cQueryServersResponse(queryId, addresses, serverIdList);
    }
+}
+
+
+// Wrapper around m2cQueryServersResponse to handle the different versions we need to use
+void MasterServerConnection::sendM2cQueryServersResponse(U32 queryId, const Vector<IPAddress> &addresses, 
+                                                                      const Vector<S32> &serverIdList)
+{
+   if(mCSProtocolVersion >= 8)
+      m2cQueryServersResponse_019a(queryId, addresses, serverIdList);
+   else
+      m2cQueryServersResponse(queryId, addresses);
 }
 
 
 void MasterServerConnection::setMasterServer(MasterServer *master)
 {
    mMaster = master;
+}
+
+
+S32 MasterServerConnection::getClientId() const
+{
+   return mClientId;
 }
 
 
