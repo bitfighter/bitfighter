@@ -3468,7 +3468,10 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
+				OTHER_CFLAGS = (
+					"-DTNL_DEBUG",
+					"-DTNL_ENABLE_LOGGING",
+				);
 				PRODUCT_NAME = Bitfighter;
 				SDKROOT = macosx10.6;
 				VALID_ARCHS = x86_64;
@@ -3708,7 +3711,10 @@
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
+				OTHER_CFLAGS = (
+					"-DTNL_DEBUG",
+					"-DTNL_ENABLE_LOGGING",
+				);
 				PRODUCT_NAME = Bitfighter;
 			};
 			name = Debug;
