@@ -1986,9 +1986,10 @@ static void kickPlayerCallback(ClientGame *game, U32 unused)
    game->getUIManager()->showPlayerActionMenu(PlayerActionKick);
 }
 
-template<class T> void activateMenuCallback(ClientGame *game, U32 unused)
+
+static void downloadRecordedGameCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->activate<T>();
+   game->getUIManager()->activate<PlaybackServerDownloadUserInterface>();
 }
 
 
@@ -2041,8 +2042,8 @@ void GameMenuUserInterface::buildMenu()
       if(!gc->getClientInfo()->isOwner())
          addMenuItem(new MenuItem("ENTER PASSWORD", levelChangeOrAdminPWCallback, "", KEY_A, KEY_E));
 
-      if(gc->mSendableFlags & GameConnection::ServerFlagHasRecordedGameplayDownloads && !gc->isLocalConnection())
-         addMenuItem(new MenuItem("DOWNLOAD RECORDED GAME", activateMenuCallback<PlaybackServerDownloadUserInterface>, "", KEY_A, KEY_E));
+      if((gc->mSendableFlags & GameConnection::ServerFlagHasRecordedGameplayDownloads) && !gc->isLocalConnection())
+         addMenuItem(new MenuItem("DOWNLOAD RECORDED GAME", downloadRecordedGameCallback, ""));
    }
 
    if(getUIManager()->cameFrom<EditorUserInterface>())    // Came from editor
