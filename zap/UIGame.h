@@ -140,7 +140,6 @@ private:
    Point mShipPos;      // Track ship pos, so we have something if the ship disappears for whatever reason
 
    HelperManager mHelperManager;
-   UI::LevelInfoDisplayer mLevelInfoDisplayer;
    LoadoutIndicator mLoadoutIndicator;
    TimeLeftRenderer mTimeLeftRenderer;
 
@@ -254,6 +253,7 @@ private:
    ChatMessageDisplayer mChatMessageDisplayer3;    // Long form, messages do not expire
 
    UI::FpsRenderer mFpsRenderer;
+   UI::LevelInfoDisplayer mLevelInfoDisplayer;
    UI::ConnectionStatsRenderer mConnectionStatsRenderer;
 
    HelpItemManager mHelpItemManager;

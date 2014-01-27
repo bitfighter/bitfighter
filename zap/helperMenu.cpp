@@ -163,9 +163,6 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    FontManager::pushFontContext(HelperMenuContext);
 
-   // Get the left edge of where the text portion of the menu items should be rendered
-   S32 itemIndent = getWidth() - widthOfTextBlock - MENU_PADDING;
-
    S32 grayLineLeft   = 20;
    S32 grayLineRight  = getWidth() - 20;
    S32 grayLineCenter = (grayLineLeft + grayLineRight) / 2;
