@@ -464,8 +464,9 @@ bool Socket::isWritable(U32 timeoutMillis)
    // tv_usec should never be above 1 million, so it needs to be only
    // the remainder after tv_sec is filled out
    //
-   // This causes an issue on OSX x86 where select(), below, will fail with
-   // error EINVAL and the socket will not properly connect
+   // Not properly filling out this struct results in an issue on OSX x86
+   // where select(), below, will fail with error EINVAL and the socket
+   // will not properly connect
    timeval timeoutval;
    timeoutval.tv_sec = timeoutMillis / 1000;
    timeoutval.tv_usec = timeoutMillis % 1000;
