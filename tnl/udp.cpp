@@ -460,15 +460,21 @@ bool Socket::isWritable(U32 timeoutMillis)
    FD_ZERO(&fds);
    FD_SET(mPlatformSocket, &fds);
 
-   // create the timeval structure as needed
+   // Create the timeval structure as needed *properly*
+   // tv_usec should never be above 1 million, so it needs to be only
+   // the remainder after tv_sec is filled out
+   //
+   // This causes an issue on OSX x86 where select(), below, will fail with
+   // error EINVAL and the socket will not properly connect
    timeval timeoutval;
-   timeoutval.tv_sec = 0;
-   timeoutval.tv_usec = timeoutMillis * 1000;
+   timeoutval.tv_sec = timeoutMillis / 1000;
+   timeoutval.tv_usec = timeoutMillis % 1000;
 
    // passing NULL to select means to block indefinitely
    timeval *timeout = timeoutMillis ? &timeoutval : NULL;
 
-   select(mPlatformSocket + 1, 0, &fds, 0, timeout);
+   if(::select(mPlatformSocket + 1, 0, &fds, 0, timeout) == SOCKET_ERROR)
+      return false;
 
    // select writes a new set to fds consisting of all writable sockets in the original set
    return FD_ISSET(mPlatformSocket, &fds);
