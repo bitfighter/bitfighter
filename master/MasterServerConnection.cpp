@@ -370,10 +370,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId
 void MasterServerConnection::sendM2cQueryServersResponse(U32 queryId, const Vector<IPAddress> &addresses, 
                                                                       const Vector<S32> &serverIdList)
 {
-   logprintf("Detected version %d", mCSProtocolVersion);
-   //if(mCSProtocolVersion >= 8)
-   //   m2cQueryServersResponse_019a(queryId, addresses, serverIdList);
-   //else
+   if(mCMProtocolVersion >= 8)
+      m2cQueryServersResponse_019a(queryId, addresses, serverIdList);
+   else
       m2cQueryServersResponse(queryId, addresses);
 }
 
