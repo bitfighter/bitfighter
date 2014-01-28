@@ -469,7 +469,7 @@ bool Socket::isWritable(U32 timeoutMillis)
    // will not properly connect
    timeval timeoutval;
    timeoutval.tv_sec = timeoutMillis / 1000;
-   timeoutval.tv_usec = timeoutMillis % 1000;
+   timeoutval.tv_usec = (timeoutMillis % 1000) * 1000;
 
    // passing NULL to select means to block indefinitely
    timeval *timeout = timeoutMillis ? &timeoutval : NULL;
