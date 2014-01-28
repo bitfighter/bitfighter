@@ -98,9 +98,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
 }
 
 
-
-
-
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_019a, 
                            (U32 queryId, Vector<IPAddress> ipList, Vector<S32> serverIdList))
 {
