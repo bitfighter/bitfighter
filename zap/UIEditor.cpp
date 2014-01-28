@@ -3734,7 +3734,7 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 }
 
 
-void EditorUserInterface::centerView()
+void EditorUserInterface::centerView(bool isScreenshot)
 {
 //   const Vector<BfObject *> *objList = getDatabase()->getObjectList();
 //   const Vector<BfObject *> *levelGenObjList = mLevelGenDatabase.getObjectList();
@@ -3798,7 +3798,9 @@ void EditorUserInterface::centerView()
       mCurrentScale = min(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / extents.getWidth(), 
                           DisplayManager::getScreenInfo()->getGameCanvasHeight() / extents.getHeight());
 
-      mCurrentScale /= 1.3f;      // Zoom out a bit
+      // Zoom out a bit to look better in the editor, except when doing a screenshot
+      if(!isScreenshot)
+         mCurrentScale /= 1.3f;
 
       mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2  - mCurrentScale * x, 
                            DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - mCurrentScale * y);
@@ -5081,7 +5083,7 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
    mNormalizedScreenshotMode = true;
 
    glClear(GL_COLOR_BUFFER_BIT);
-   centerView();
+   centerView(true);
 
    render();
 #ifndef BF_NO_SCREENSHOTS
@@ -5090,6 +5092,7 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
 #endif
    mPreviewMode = false;
    mNormalizedScreenshotMode = false;
+   centerView(false);
 }
 
 
