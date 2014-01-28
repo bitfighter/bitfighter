@@ -60,6 +60,7 @@ public:
    S32 getClientId() const;
 
 #ifndef ZAP_DEDICATED
+   TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList));
    TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse_019a, (U32 queryId, Vector<IPAddress> ipList, Vector<S32> clientIdList));
 #endif
 
