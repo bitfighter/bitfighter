@@ -361,6 +361,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId
    if(addresses.size())
    {
       addresses.clear();
+      serverIdList.clear();
+
       sendM2cQueryServersResponse(queryId, addresses, serverIdList);
    }
 }
