@@ -210,7 +210,7 @@ private:
    void selectAll(GridDatabase *database);          // Mark all objects and vertices in specified db as selected
    void clearSelection(GridDatabase *database);     // Mark all objects and vertices in specified db as unselected
 
-   void centerView();            // Center display on all objects
+   void centerView(bool isScreenshot = false);      // Center display on all objects
    void splitBarrier();          // Split wall on selected vertex/vertices
    void doSplit(BfObject *object, S32 vertex);
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
