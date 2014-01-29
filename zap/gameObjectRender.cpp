@@ -1843,6 +1843,31 @@ void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point 
 }
 
 
+void renderSlipZoneIcon(const Point &center, S32 radius, F32 angleRadians)
+{
+   static const F32 lines[] = {
+         // Lines
+         -15, 8, -3, 8,
+         -20, 0, -10, 0,
+         -16, -8, -4, -8,
+         // Ship
+         9.77, 12.37, 16.84, -8.84,
+         16.84, -8.84, -4.37, -1.77,
+         -4.37, -1.77, 9.77, 12.37
+   };
+
+
+   glPushMatrix();
+      glTranslate(center);
+      glScale(radius * 0.05f);  // 1/20.  Default radius is 20 in-game
+
+      glColor(Colors::cyan);
+//      renderCenteredString(Point(0,0), 25, "CAUTION - SLIPPERY!");
+      renderVertexArray(lines, ARRAYSIZE(lines) / 2, GL_LINES);
+   glPopMatrix();
+}
+
+
 void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill, const Point &centroid)     
 {
    Color theColor (0, 0.5, 0);  // Go for a pale green, for now...
@@ -1853,15 +1878,7 @@ void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill
    glColor(theColor * 0.7f);
    renderPointVector(bounds, GL_LINE_LOOP);
 
-   glPushMatrix();
-      glTranslate(centroid);
-
-      //if(extents.x < extents.y)
-      //   glRotatef(90, 0, 0, 1);
-
-      glColor(Colors::cyan);
-      renderCenteredString(Point(0,0), 25, "CAUTION - SLIPPERY!");
-   glPopMatrix();
+   renderSlipZoneIcon(centroid, 20);
 }
 
 
