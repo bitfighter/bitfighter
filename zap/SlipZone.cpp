@@ -8,24 +8,40 @@
 
 #include "game.h"
 #include "gameObjectRender.h"
+#include "LuaBase.h"
 
 #include "stringUtils.h"
 
 namespace Zap
 {
 
-SlipZone::SlipZone()     // Constructor
+using namespace LuaArgs;
+
+
+// Constructor
+SlipZone::SlipZone(lua_State *L)
 {
    setTeam(0);
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = SlipZoneTypeNumber;
    slipAmount = 0.1f;
+
+   if(L)   // Coming from Lua -- grab params from L
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { POLY, END }}, 1 };
+      S32 profile = checkArgList(L, constructorArgList, "SlipZone", "constructor");
+
+      if(profile == 1)         // Geom
+         setGeom(L,  1);
+   }
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 // Destructor
 SlipZone::~SlipZone()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -150,7 +166,7 @@ bool SlipZone::collide(BfObject *hitObject)
 
 U32 SlipZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   packGeom(connection, stream);
+   Parent::packUpdate(connection, updateMask, stream);
    stream->write(slipAmount);
    return 0;
 }
@@ -158,12 +174,39 @@ U32 SlipZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
 void SlipZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   unpackGeom(connection, stream);
+   Parent::unpackUpdate(connection, stream);
    stream->read(&slipAmount);
 }
 
 
 TNL_IMPLEMENT_NETOBJECT(SlipZone);
+
+
+/////
+// Lua interface
+/**
+ * @luaclass SlipZone
+ *
+ * @brief Experimental zone that increases a ship's inertia
+ *
+ * @descr SlipZone is weird, don't use it
+ *
+ * @note This is experimental and may be removed from the game at any time
+ */
+//               Fn name         Param profiles     Profile count
+#define LUA_METHODS(CLASS, METHOD) \
+/*
+   METHOD(CLASS, getSlipFactor,       ARRAYDEF({{ END }}), 1 ) \
+*/
+
+GENERATE_LUA_METHODS_TABLE(SlipZone, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(SlipZone, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *SlipZone::luaClassName = "SlipZone";
+REGISTER_LUA_SUBCLASS(SlipZone, Zone);
 
 
 };
