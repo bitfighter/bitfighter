@@ -200,7 +200,7 @@ public:
 
    // Handle responses to packets we sent
    void gotPingResponse(const Address &theAddress, const Nonce &clientNonce, U32 clientIdentityToken, S32 serverId);
-   void gotQueryResponse(const Address &theAddress, const Nonce &clientNonce, const char *serverName, const char *serverDescr, 
+   void gotQueryResponse(const Address &theAddress, S32 serverId, const Nonce &clientNonce, const char *serverName, const char *serverDescr, 
                          U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 
    void gotServerListFromMaster(const Vector<ServerAddr> &serverList);

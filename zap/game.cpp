@@ -1502,7 +1502,8 @@ void Game::gotPingResponse(const Address &address, const Nonce &nonce, U32 clien
 }
 
 
-void Game::gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
+void Game::gotQueryResponse(const Address &address, S32 serverId, 
+                            const Nonce &nonce, const char *serverName, const char *serverDescr, 
                             U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
    TNLAssert(false, "Not implemented for this class!");

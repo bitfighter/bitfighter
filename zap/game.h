@@ -296,8 +296,9 @@ public:
    virtual bool isTestServer() const = 0;
 
    virtual void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 clientId);
-   virtual void gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
-                                U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
+   virtual void gotQueryResponse(const Address &address, S32 serverId, 
+                                 const Nonce &nonce, const char *serverName, const char *serverDescr, 
+                                 U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 
    virtual void displayMessage(const Color &msgColor, const char *format, ...) const;
    virtual ClientInfo *getLocalRemoteClientInfo() const;

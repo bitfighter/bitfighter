@@ -629,10 +629,11 @@ void UIManager::gotPingResponse(const Address &address, const Nonce &nonce, U32 
 }
 
 
-void UIManager::gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 
+void UIManager::gotQueryResponse(const Address &address, S32 serverId, 
+                                 const Nonce &nonce, const char *serverName, const char *serverDescr, 
                                  U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
-   getUI<QueryServersUserInterface>()->gotQueryResponse(address, nonce, serverName, serverDescr, playerCount, 
+   getUI<QueryServersUserInterface>()->gotQueryResponse(address, serverId, nonce, serverName, serverDescr, playerCount, 
                                                         maxPlayers, botCount, dedicated, test, passwordRequired);
 }
 

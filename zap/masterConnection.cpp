@@ -26,8 +26,10 @@ MasterServerConnection::MasterServerConnection(Game *game)
 {
    mGame = game;
 
-   // Assign a random ID now, will be overwritten with a value from the master when we make our connection
-   mClientId = -1 * TNL::Random::readI(0, S32_MAX);
+   // Assign a default id now, will be overwritten with a value from the master when we make our connection
+   // This id is sent out with ping and query responses in order to identify servers that may have a different
+   // internal and external ip address.
+   mClientId = 0;
 
    mCurrentQueryId = 0;
 

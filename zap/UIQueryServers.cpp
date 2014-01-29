@@ -417,7 +417,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &address, const No
       // If we already know about the server, move along.
       // Pass 0 here to disable id check... we're only interested in IP address matches at this point -- if we have
       // a remote server with the same ID, we want to clobber it below.
-      if(findServerByAddressOrId(servers, address, 0) != -1)     
+      if(findServerByAddressOrId(servers, address, serverId) != -1)     
          return;
 
       // See if we've already been told about server with this serverId by the master... if so, we'll remove that
@@ -456,7 +456,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &address, const No
 }
 
 
-void QueryServersUserInterface::gotQueryResponse(const Address &address, const Nonce &clientNonce, 
+void QueryServersUserInterface::gotQueryResponse(const Address &address, S32 serverId, const Nonce &clientNonce, 
                                                  const char *serverName, const char *serverDescr, U32 playerCount, 
                                                  U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
@@ -474,6 +474,21 @@ void QueryServersUserInterface::gotQueryResponse(const Address &address, const N
          s.passwordRequired = passwordRequired;
          s.sendCount = 0;              // Fix random "Query/ping timed out"
          s.everGotQueryResponse = true;
+
+         // If serverId has changed, it means this is a locally hosted server that we first saw before it contacted
+         // the master to get a serverId.  We want to make sure we don't have another version of this same server from 
+         // the master.  Find the dupe and kill it.
+         if(s.serverId != serverId && serverId != 0)
+         {
+            TNLAssert(!s.isFromMaster, "Expected a local server!");
+            
+            S32 index = findServerByServerId(servers, serverId);
+            TNLAssert(servers[index].isFromMaster, "Expected a remote server!");
+
+            servers.erase_fast(index);
+         }
+
+         s.serverId = serverId;
 
          // Record time our last query was received, so we'll know when to send again
          s.lastSendTime = Platform::getRealMilliseconds();     

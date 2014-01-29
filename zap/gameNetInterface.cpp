@@ -69,10 +69,7 @@ static void handlePing(Game *game, const Address &remoteAddress, Socket &socket,
    clientNonce.write(&pingResponse);
    pingResponse.write(clientIdentityToken);
 
-   //pingResponse.write(clientId);    // Disable before 019a release
-#ifndef TNL_DEBUG
-#  error Disable the above, please!
-#endif
+   //pingResponse.write(clientId);    // ENABLE FOR 020
 
    pingResponse.sendto(socket, remoteAddress);
 }
@@ -85,16 +82,12 @@ static void handlePingResponse(Game *game, const Address &remoteAddress, BitStre
 
    Nonce nonce;
    U32 clientIdentityToken;
-   S32 serverId;
+   S32 serverId = 0;
 
    nonce.read(stream);
    stream->read(&clientIdentityToken);
 
-   //stream->read(&serverId);   // Disable before 019a release
-    serverId = 0;
-#ifndef TNL_DEBUG
-#  error Disable the above, please!
-#endif
+   stream->read(&serverId);   // ENABLE FOR 020
             
    game->gotPingResponse(remoteAddress, nonce, clientIdentityToken, serverId);
 }
@@ -126,6 +119,8 @@ static void handleQuery(Game *game, const Address &remoteAddress, Socket &socket
       queryResponse.writeFlag(game->isTestServer());
       queryResponse.writeFlag(game->getSettings()->getServerPassword() != "");
 
+      //queryResponse.write(game->getClientId());  // ENABLE FOR 020
+
       queryResponse.sendto(socket, remoteAddress);
    }
 }
@@ -152,8 +147,11 @@ static void handleQueryResponse(Game *game, const Address &remoteAddress, BitStr
    test = stream->readFlag();
    passwordRequired = stream->readFlag();
 
+   S32 serverId = 0;
+   //stream->read(&serverId);   // ENABLE FOR 020
+
    // Alert the user
-   game->gotQueryResponse(remoteAddress, nonce, name.getString(), descr.getString(), 
+   game->gotQueryResponse(remoteAddress, serverId, nonce, name.getString(), descr.getString(), 
                           playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
 }
 
