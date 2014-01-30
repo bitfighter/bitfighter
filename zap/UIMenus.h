@@ -255,6 +255,8 @@ public:
    void setupMenus();
    void onActivate();
 };
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -272,9 +274,27 @@ public:
    void saveSettings();
 };
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class ServerPasswordsMenuUserInterface : public MenuUserInterface
+{
+   typedef MenuUserInterface Parent;
+
+public:
+   explicit ServerPasswordsMenuUserInterface(ClientGame *game);        // Constructor
+   virtual ~ServerPasswordsMenuUserInterface();
+
+   void onEscape();
+   void setupMenus();
+   void onActivate();
+   void saveSettings();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class HostMenuUserInterface : public MenuUserInterface
 {
@@ -283,9 +303,6 @@ class HostMenuUserInterface : public MenuUserInterface
       OPT_ROBOTS,
       OPT_NAME,
       OPT_DESCR,
-      OPT_LVL_PASS,
-      OPT_ADMIN_PASS,
-      OPT_PASS,
       OPT_GETMAP,
       OPT_MAX_PLAYERS,
       OPT_PORT,

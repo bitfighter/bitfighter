@@ -1644,6 +1644,67 @@ void RobotOptionsMenuUserInterface::saveSettings()
 ////////////////////////////////////////
 
 // Constructor
+ServerPasswordsMenuUserInterface::ServerPasswordsMenuUserInterface(ClientGame *game) : Parent(game)
+{
+   mMenuTitle = "SERVER PASSWORDS";
+}
+
+
+// Destructor
+ServerPasswordsMenuUserInterface::~ServerPasswordsMenuUserInterface()
+{
+   // Do nothing
+}
+
+
+void ServerPasswordsMenuUserInterface::onActivate()
+{
+   Parent::onActivate();
+   setupMenus();
+}
+
+
+void ServerPasswordsMenuUserInterface::setupMenus()
+{
+   clearMenuItems();
+
+   GameSettings *settings = getGame()->getSettings();
+
+   addMenuItem(new TextEntryMenuItem("LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(), 
+                                     "<Anyone can change levels>", "", MAX_PASSWORD_LENGTH, KEY_L));
+
+   addMenuItem(new TextEntryMenuItem("ADMIN PASSWORD:", settings->getAdminPassword(),       
+                                     "<No remote admin access>", "", MAX_PASSWORD_LENGTH, KEY_A));
+
+   addMenuItem(new TextEntryMenuItem("CONNECTION PASSWORD:", settings->getServerPassword(), "<Anyone can connect>", "",      
+                                     MAX_PASSWORD_LENGTH, KEY_C));
+}
+
+
+// Save options to INI file
+void ServerPasswordsMenuUserInterface::onEscape()
+{
+   saveSettings();
+   getUIManager()->reactivatePrevUI();
+}
+
+
+void ServerPasswordsMenuUserInterface::saveSettings()
+{
+   GameSettings *settings = getGame()->getSettings();
+
+   settings->setAdminPassword(getMenuItem(0)->getValue(), true);
+   settings->setLevelChangePassword(getMenuItem(1)->getValue(), true);
+   settings->setServerPassword(getMenuItem(2)->getValue(), true);
+
+   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
 NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : Parent(game)
 {
    mMenuTitle = "";
@@ -1816,6 +1877,13 @@ static void robotOptionsSelectedCallback(ClientGame *game, U32 unused)
 }
 
 
+static void passwordOptionsSelectedCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate<ServerPasswordsMenuUserInterface>();
+
+}
+
+
 static void playbackGamesCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->activate<PlaybackSelectUserInterface>();
@@ -1840,14 +1908,8 @@ void HostMenuUserInterface::setupMenus()
    addMenuItem(new TextEntryMenuItem("DESCRIPTION:", settings->getHostDescr(),                    
                                      "<Empty>", "", MaxServerDescrLen, KEY_D));
 
-   addMenuItem(new TextEntryMenuItem("LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(), 
-                                     "<Anyone can change levels>", "", MAX_PASSWORD_LENGTH, KEY_L));
-
-   addMenuItem(new TextEntryMenuItem("ADMIN PASSWORD:", settings->getAdminPassword(),       
-                                     "<No remote admin access>", "", MAX_PASSWORD_LENGTH, KEY_A));
-
-   addMenuItem(new TextEntryMenuItem("CONNECTION PASSWORD:", settings->getServerPassword(), "<Anyone can connect>", "",      
-                                     MAX_PASSWORD_LENGTH, KEY_C));
+   addMenuItem(new MenuItem(getMenuItemCount(), "PASSWORDS", passwordOptionsSelectedCallback,
+         "Set server passwords/permissions", KEY_P));
 
    addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
 
@@ -1874,13 +1936,8 @@ void HostMenuUserInterface::saveSettings()
    settings->setHostName (getMenuItem(OPT_NAME)->getValue(), true);
    settings->setHostDescr(getMenuItem(OPT_DESCR)->getValue(), true);
 
-   settings->setAdminPassword(getMenuItem(OPT_ADMIN_PASS)->getValue(), true);
-   settings->setLevelChangePassword(getMenuItem(OPT_LVL_PASS)->getValue(), true);
-   settings->setServerPassword(getMenuItem(OPT_PASS)->getValue(), true);
-
    settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getIntValue() != 0);
    settings->getIniSettings()->enableGameRecording = (getMenuItem(OPT_GETMAP + 1)->getIntValue() != 0);
-   //settings->getIniSettings()->maxplayers = getMenuItem(OPT_MAX_PLAYERS)->getIntValue();
 
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
 }
