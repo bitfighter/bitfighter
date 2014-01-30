@@ -305,7 +305,10 @@ string HttpRequest::receiveResponse()
 {
    mResponse = "";
    S32 startTime = Platform::getRealMilliseconds();
-   while(Platform::getRealMilliseconds() - startTime < mTimeout)
+
+   U32 totalbytes = 0;
+   bool receivedData = false;
+   while(receivedData || Platform::getRealMilliseconds() - startTime < mTimeout)
    {
       Platform::sleep(50);
       TNL::NetError recvError;
@@ -313,15 +316,13 @@ string HttpRequest::receiveResponse()
       char receiveBuffer[HttpRequest::BufferSize] = { 0 };
       recvError = mSocket->recv((unsigned char*) receiveBuffer, HttpRequest::BufferSize, &bytesRead);
 
+      // Need to wait
       if(recvError == TNL::WouldBlock)
-      {
-         // need to wait
          continue;
-      }
 
+      // There was an error, ignore partial responses
       if(recvError == TNL::UnknownError)
       {
-         // there was an error, ignore partial responses
          mResponse = "";
          break;
       }
@@ -329,11 +330,10 @@ string HttpRequest::receiveResponse()
       mResponse.append(receiveBuffer, 0, bytesRead);
 
       if(bytesRead == 0)
-      {
          break;
-      }
 
-      // more data to read
+      // More data to read
+      receivedData = true;
    }
    return mResponse;
 }
