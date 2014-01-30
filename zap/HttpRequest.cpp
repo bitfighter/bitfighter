@@ -131,7 +131,7 @@ S32 HttpRequest::getResponseCode()
 
 void HttpRequest::parseResponse(string response)
 {
-   size_t seperatorIndex = response.find("\r\n\r\n");
+   std::size_t seperatorIndex = response.find("\r\n\r\n");
    if(seperatorIndex == string::npos || response == "")
    {
       // seperator not found, this response isn't valid
@@ -143,8 +143,8 @@ void HttpRequest::parseResponse(string response)
    U32 bodyIndex = seperatorIndex + 4;
    mResponseBody = response.substr(bodyIndex, response.length());
 
-   size_t responseCodeStart = mResponseHead.find(" ") + 1;
-   size_t responseCodeEnd = mResponseHead.find("\r\n", responseCodeStart);
+   std::size_t responseCodeStart = mResponseHead.find(" ") + 1;
+   std::size_t responseCodeEnd = mResponseHead.find("\r\n", responseCodeStart);
    string responseCode = mResponseHead.substr(responseCodeStart, responseCodeEnd - responseCodeStart);
    mResponseCode = atoi(responseCode.c_str());
 }
@@ -266,7 +266,9 @@ bool HttpRequest::sendRequest(string request)
    U32 bytesSent = 0, bytesTotal = request.size();
    U32 startTime = Platform::getRealMilliseconds();
 
-   while(Platform::getRealMilliseconds() - startTime < mTimeout)
+   bool sentData = false;
+   // Continue to send indefinitely if data was successfully sent
+   while(sentData || Platform::getRealMilliseconds() - startTime < mTimeout)
    {
       Platform::sleep(PollInterval);
 
@@ -283,6 +285,8 @@ bool HttpRequest::sendRequest(string request)
       {
          // data was transmitted
          bytesSent += bytesAtOnce;
+
+         sentData = true;
 
          if(bytesSent < bytesTotal)
             continue;
