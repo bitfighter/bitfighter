@@ -1,4 +1,10 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 #include "GameRecorderPlayback.h"
+
 #include "tnlBitStream.h"
 #include "tnlNetObject.h"
 #include "gameType.h"
@@ -18,22 +24,21 @@ namespace Zap
 {
 
 
-
 static S32 QSORT_CALLBACK alphaNumberSort(string *a, string *b)
 {
    int aNum = atoi(a->c_str());
    int bNum = atoi(b->c_str());
-   if(aNum != bNum)
+
+   if(aNum == bNum)
+      return stricmp(a->c_str(), b->c_str());   // Is there something analagous to stricmp for strings (as opposed to c_strs)?
+   else
    {
-      if(aNum == 0)
-         return -1;
-      if(bNum == 0)
-         return 1;
+      if(aNum == 0) return -1;
+      if(bNum == 0) return 1;
+
       return bNum - aNum;
    }
-   return stricmp(a->c_str(), b->c_str());        // Is there something analagous to stricmp for strings (as opposed to c_strs)?
 }
-
 
 
 static void idleObjects(ClientGame *game, U32 timeDelta)
@@ -58,9 +63,6 @@ static void idleObjects(ClientGame *game, U32 timeDelta)
    //if(game->getGameType())
       //game->getGameType()->idle(BfObject::ClientIdlingNotLocalShip, timeDelta);
 }
-
-
-
 
 
 GameRecorderPlayback::GameRecorderPlayback(ClientGame *game, const char *filename) : GameConnection(game)
@@ -126,14 +128,19 @@ GameRecorderPlayback::GameRecorderPlayback(ClientGame *game, const char *filenam
       fseek(mFile, filepos, SEEK_SET);
    }
 }
+
+
 GameRecorderPlayback::~GameRecorderPlayback()
 {
    if(mFile)
       fclose(mFile);
 }
 
-bool GameRecorderPlayback::isValid() {return mFile != NULL;}
-bool GameRecorderPlayback::lostContact() {return false;}
+
+bool GameRecorderPlayback::isValid()     { return mFile != NULL; }
+bool GameRecorderPlayback::lostContact() { return false; }
+
+
 void GameRecorderPlayback::addPendingMove(Move *theMove)
 {
    bool nextButton = theMove->fire;
@@ -168,15 +175,15 @@ void GameRecorderPlayback::changeSpectate(S32 n)
 void GameRecorderPlayback::updateSpectate()
 {
    const Vector<RefPtr<ClientInfo> > &infos = *(mGame->getClientInfos());
+
    if(mClientInfoSpectating.isNull() && infos.size() != 0)
-   {
       mClientInfoSpectating = infos[0];
-   }
    
    if(mClientInfoSpectating.isValid())
    {
       Ship *ship = mClientInfoSpectating->getShip();
       setControlObject(ship);
+
       if(ship)
       {
          mGame->newLoadoutHasArrived(*(ship->getLoadout()));
@@ -251,6 +258,7 @@ void GameRecorderPlayback::restart()
    mCurrentTime = 0;
    clearRecvEvents();
    mGame->clearClientList();
+
    if(mFile)
       fseek(mFile, 4, SEEK_SET);
 }
@@ -262,9 +270,12 @@ static void processPlaybackSelectionCallback(ClientGame *game, U32 index)
    game->getUIManager()->getUI<PlaybackSelectUserInterface>()->processSelection(index);
 }
 
+
 PlaybackSelectUserInterface::PlaybackSelectUserInterface(ClientGame *game) : LevelMenuSelectUserInterface(game)
 {
+   // Do nothing
 }
+
 
 void PlaybackSelectUserInterface::onActivate()
 {
@@ -295,6 +306,7 @@ void PlaybackSelectUserInterface::onActivate()
    selectedIndex = oldIndex;
    if(selectedIndex >= mLevels.size())
       selectedIndex = mLevels.size() - 1;
+
    mFirstVisibleItem = selectedIndex - 5;
    if(mFirstVisibleItem < 0)
       mFirstVisibleItem = 0;
@@ -311,6 +323,7 @@ void PlaybackSelectUserInterface::processSelection(U32 index)
       getUIManager()->displayMessageBox("Error", "Press [[Esc]] to continue", "Recorded Gameplay not valid or not compatible");
       return;
    }
+
    if(gc->mTotalTime == 0)
    {
       delete gc;
@@ -328,8 +341,10 @@ static void processPlaybackDownloadCallback(ClientGame *game, U32 index)
    game->getUIManager()->getUI<PlaybackServerDownloadUserInterface>()->processSelection(index);
 }
 
+
 PlaybackServerDownloadUserInterface::PlaybackServerDownloadUserInterface(ClientGame *game) : LevelMenuSelectUserInterface(game)
 {
+   // Do nothing
 }
 
 void PlaybackServerDownloadUserInterface::onActivate()
@@ -370,7 +385,9 @@ void PlaybackServerDownloadUserInterface::receivedLevelList(const Vector<string>
    }
 }
 
-// --------
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 PlaybackGameUserInterface::PlaybackGameUserInterface(ClientGame *game) : UserInterface(game)
 {
@@ -408,7 +425,6 @@ const F32 playbackBarVertex[] = {
    playbackBar_x + playbackBar_w, playbackBar_y + playbackBar_h,
    playbackBar_x,                 playbackBar_y + playbackBar_h,
 };
-
 
 
 const F32 btn0_x = 200; // pause
@@ -451,7 +467,6 @@ const F32 buttons_lines[] = {
    btn3_x + btn_w/2  , btn_y + btn_h    , btn3_x + btn_w    , btn_y + btn_h/2,
 
 };
-
 
 
 bool PlaybackGameUserInterface::onKeyDown(InputCode inputCode)
@@ -509,8 +524,11 @@ bool PlaybackGameUserInterface::onKeyDown(InputCode inputCode)
 
    return true;
 }
-void PlaybackGameUserInterface::onKeyUp(InputCode inputCode) {mGameInterface->onKeyUp(inputCode);}
-void PlaybackGameUserInterface::onTextInput(char ascii) {mGameInterface->onTextInput(ascii);}
+
+
+void PlaybackGameUserInterface::onKeyUp(InputCode inputCode) { mGameInterface->onKeyUp(inputCode); }
+void PlaybackGameUserInterface::onTextInput(char ascii)      { mGameInterface->onTextInput(ascii); }
+
 
 void PlaybackGameUserInterface::onMouseMoved()
 {
@@ -528,10 +546,10 @@ void PlaybackGameUserInterface::idle(U32 timeDelta)
    U32 idleTime = timeDelta;
    switch(mSpeed)
    {
-   case 0: idleTime = 0; break;
-   case 1: idleTime = (timeDelta + mSpeedRemainder) >> 2; mSpeedRemainder = (mSpeedRemainder + timeDelta) & 3; break;
-   case 2: break;
-   case 3: idleTime = timeDelta * 4; break;
+      case 0: idleTime = 0; break;
+      case 1: idleTime = (timeDelta + mSpeedRemainder) >> 2; mSpeedRemainder = (mSpeedRemainder + timeDelta) & 3; break;
+      case 2: break;
+      case 3: idleTime = timeDelta * 4; break;
    }
 
    if(idleTime != 0)
@@ -542,6 +560,8 @@ void PlaybackGameUserInterface::idle(U32 timeDelta)
 
    getGame()->setGameSuspended_FromServerMessage(true); // Cheap way to avoid letting the client move objects, because of pause/slow motion/fast forward
 }
+
+
 void PlaybackGameUserInterface::render()
 {
    mGameInterface->render();
@@ -558,10 +578,9 @@ void PlaybackGameUserInterface::render()
       vertex[3] = playbackBar_y + playbackBar_h;
       renderVertexArray(vertex, 2, GL_LINES);
 
-      renderVertexArray(buttons_lines, sizeof(buttons_lines) / (sizeof(buttons_lines[0])*2), GL_LINES);
+      renderVertexArray(buttons_lines, sizeof(buttons_lines) / (sizeof(buttons_lines[0]) * 2), GL_LINES);
    }
 }
-
 
 
 }
