@@ -84,7 +84,7 @@ public:
    bool isScrollingMenu();
 
    void clearMenuItems();
-   void addMenuItem(MenuItem *menuItem);
+   S32 addMenuItem(MenuItem *menuItem);
    void addWrappedMenuItem(boost::shared_ptr<MenuItem> menuItem);
    MenuItem *getMenuItem(S32 index);
    S32 getMenuItemCount();

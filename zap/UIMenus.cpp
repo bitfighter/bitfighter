@@ -128,10 +128,12 @@ void MenuUserInterface::sortMenuItems()
 }
 
 
-void MenuUserInterface::addMenuItem(MenuItem *menuItem)
+S32 MenuUserInterface::addMenuItem(MenuItem *menuItem)
 {
    menuItem->setMenu(this);
    mMenuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
+
+   return mMenuItems.size();
 }
 
 
@@ -1664,20 +1666,27 @@ void ServerPasswordsMenuUserInterface::onActivate()
 }
 
 
+static S32 LevelChangePwItemIndex = -1;
+static S32 AdminPwItemIndex = -1;
+static S32 ConnectionPwItemIndex = -1;
+
 void ServerPasswordsMenuUserInterface::setupMenus()
 {
    clearMenuItems();
 
    GameSettings *settings = getGame()->getSettings();
 
+   LevelChangePwItemIndex =
    addMenuItem(new TextEntryMenuItem("LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(), 
                                      "<Anyone can change levels>", "", MAX_PASSWORD_LENGTH, KEY_L));
 
+   AdminPwItemIndex =
    addMenuItem(new TextEntryMenuItem("ADMIN PASSWORD:", settings->getAdminPassword(),       
                                      "<No remote admin access>", "", MAX_PASSWORD_LENGTH, KEY_A));
 
-   addMenuItem(new TextEntryMenuItem("CONNECTION PASSWORD:", settings->getServerPassword(), "<Anyone can connect>", "",      
-                                     MAX_PASSWORD_LENGTH, KEY_C));
+   ConnectionPwItemIndex =
+   addMenuItem(new TextEntryMenuItem("CONNECTION PASSWORD:", settings->getServerPassword(), 
+                                     "<Anyone can connect>", "", MAX_PASSWORD_LENGTH, KEY_C));
 }
 
 
@@ -1691,11 +1700,12 @@ void ServerPasswordsMenuUserInterface::onEscape()
 
 void ServerPasswordsMenuUserInterface::saveSettings()
 {
+   TNLAssert(LevelChangePwItemIndex != -1, "Need to call setupMenus first!");
    GameSettings *settings = getGame()->getSettings();
 
-   settings->setAdminPassword(getMenuItem(0)->getValue(), true);
-   settings->setLevelChangePassword(getMenuItem(1)->getValue(), true);
-   settings->setServerPassword(getMenuItem(2)->getValue(), true);
+   settings->setAdminPassword      (getMenuItem(AdminPwItemIndex)->getValue(),       true);
+   settings->setLevelChangePassword(getMenuItem(LevelChangePwItemIndex)->getValue(), true);
+   settings->setServerPassword     (getMenuItem(ConnectionPwItemIndex)->getValue(),  true);
 
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
 }
