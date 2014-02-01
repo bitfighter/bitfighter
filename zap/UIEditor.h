@@ -46,15 +46,17 @@ struct FolderManager;
 ////////////////////////////////////////
 
 struct PluginInfo
-   {
-      PluginInfo(string prettyName, string fileName, string description, string requestedBinding)
-         : prettyName(prettyName), fileName(fileName), description(description), requestedBinding(requestedBinding) { }
-      string prettyName;
-      string fileName;
-      string binding;
-      string description;
-      string requestedBinding;
-   };
+{
+   PluginInfo(string prettyName, string fileName, string description, string requestedBinding);
+
+   string prettyName;
+   string fileName;
+   string binding;
+   string description;
+   string requestedBinding;
+
+   static const string BindingInUse;
+};
 
 ////////////////////////////////////////
 ////////////////////////////////////////

@@ -109,6 +109,24 @@ static void saveLevelCallback(ClientGame *game)
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Statics
+const string PluginInfo::BindingInUse = "IN USE";
+
+// Constructor
+PluginInfo::PluginInfo(string prettyName, string fileName, string description, string requestedBinding)
+   : prettyName(prettyName), fileName(fileName), description(description), requestedBinding(requestedBinding)
+{
+   // Do nothing
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 // Constructor
 EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 {
@@ -5142,13 +5160,13 @@ void EditorUserInterface::findPlugins()
       if(plugin.prepareEnvironment() && plugin.loadScript(false))
          plugin.runGetArgsMenu(title, menuItems);
 
-      // if the title is blank or couldn't be found, use the file name
+      // If the title is blank or couldn't be found, use the file name
       if(title == "")
          title = plugins[i];
 
       PluginInfo info(title, plugins[i], plugin.getDescription(), plugin.getRequestedBinding());
 
-      // check for a binding
+      // Check for a binding from the INI, if it exists set it for this plugin
       for(S32 j = 0; j < bindings.size(); j++)
       {
          if(bindings[j].script == plugins[i])
@@ -5158,13 +5176,14 @@ void EditorUserInterface::findPlugins()
          }
       }
 
-      // if no binding is configured, and the plugin specifies a requested binding
+      // If no binding is configured, and the plugin specifies a requested binding
+      // Use the requested binding if it is not currently in use
       if(info.binding == "" && info.requestedBinding != "")
       {
-         // use the requested binding if it is not currently in use
          bool bindingInUse = false;
 
-         // check configured bindings
+         // Determine if this requested binding is already in use by a binding
+         // in the INI
          for(S32 j = 0; j < bindings.size(); j++)
          {
             if(bindings[j].key == info.requestedBinding)
@@ -5174,7 +5193,8 @@ void EditorUserInterface::findPlugins()
             }
          }
 
-         // check bindings for plugins loaded so far
+         // Determine if this requested binding is already in use by a previously
+         // loaded plugin
          for(S32 j = 0; j < mPluginInfos.size(); j++)
          {
             if(mPluginInfos[j].binding == info.requestedBinding)
@@ -5184,10 +5204,12 @@ void EditorUserInterface::findPlugins()
             }
          }
 
+         // Available!  Set our binding to the requested one
          if(!bindingInUse)
-         {
             info.binding = info.requestedBinding;
-         }
+         // Not available.  Declare the binding is in use
+         else
+            info.binding = PluginInfo::BindingInUse;
       }
 
       mPluginInfos.push_back(info);
