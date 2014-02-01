@@ -306,7 +306,6 @@ string HttpRequest::receiveResponse()
    mResponse = "";
    S32 startTime = Platform::getRealMilliseconds();
 
-   U32 totalbytes = 0;
    bool receivedData = false;
    while(receivedData || Platform::getRealMilliseconds() - startTime < mTimeout)
    {
