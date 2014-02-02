@@ -177,8 +177,6 @@ public:
    string getLevelChangePassword();
    void setLevelChangePassword(const string &LevelChangePassword, bool updateINI);
 
-   const Vector<PluginBinding> *getPluginBindings();
-
    InputCodeManager *getInputCodeManager(); 
 
    Vector<string> *getLevelSkipList();

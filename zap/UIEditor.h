@@ -49,13 +49,12 @@ struct PluginInfo
 {
    PluginInfo(string prettyName, string fileName, string description, string requestedBinding);
 
+   bool bindingCollision;
    string prettyName;
    string fileName;
    string binding;
    string description;
    string requestedBinding;
-
-   static const string BindingInUse;
 };
 
 ////////////////////////////////////////

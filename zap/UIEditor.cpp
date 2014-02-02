@@ -112,14 +112,12 @@ static void saveLevelCallback(ClientGame *game)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Statics
-const string PluginInfo::BindingInUse = "IN USE";
 
 // Constructor
 PluginInfo::PluginInfo(string prettyName, string fileName, string description, string requestedBinding)
    : prettyName(prettyName), fileName(fileName), description(description), requestedBinding(requestedBinding)
 {
-   // Do nothing
+   bindingCollision = false;
 }
 
 
@@ -5148,7 +5146,23 @@ void EditorUserInterface::findPlugins()
    string extension = ".lua";
    getFilesFromFolder(dirName, plugins, &extension, 1);
 
-   const Vector<PluginBinding> &bindings = *getGame()->getSettings()->getPluginBindings();
+   // Reference to original
+   Vector<PluginBinding> &bindings = getGame()->getSettings()->getIniSettings()->pluginBindings;
+
+   // Check for binding collision in INI.  If one is detected, set its key to empty
+   for(S32 i = 0; i < bindings.size(); i++)
+   {
+      for(S32 j = 0; j < i; j++)  // Efficiency!
+      {
+         if(bindings[i].key == bindings[j].key)
+         {
+            bindings[i].key = "";
+            break;
+         }
+      }
+   }
+
+   // Loop through all of our detected plugins
    for(S32 i = 0; i < plugins.size(); i++)
    {
       // Try to find the title
@@ -5180,7 +5194,7 @@ void EditorUserInterface::findPlugins()
       // Use the requested binding if it is not currently in use
       if(info.binding == "" && info.requestedBinding != "")
       {
-         bool bindingInUse = false;
+         bool bindingCollision = false;
 
          // Determine if this requested binding is already in use by a binding
          // in the INI
@@ -5188,7 +5202,7 @@ void EditorUserInterface::findPlugins()
          {
             if(bindings[j].key == info.requestedBinding)
             {
-               bindingInUse = true;
+               bindingCollision = true;
                break;
             }
          }
@@ -5199,23 +5213,41 @@ void EditorUserInterface::findPlugins()
          {
             if(mPluginInfos[j].binding == info.requestedBinding)
             {
-               bindingInUse = true;
+               bindingCollision = true;
                break;
             }
          }
 
+         info.bindingCollision = bindingCollision;
+
          // Available!  Set our binding to the requested one
-         if(!bindingInUse)
+         if(!bindingCollision)
             info.binding = info.requestedBinding;
-         // Not available.  Declare the binding is in use
-         else
-            info.binding = PluginInfo::BindingInUse;
       }
 
       mPluginInfos.push_back(info);
    }
 
    mPluginInfos.sort(pluginInfoSort);
+
+   // Now update all the bindings in the INI
+   bindings.clear();
+
+   for(S32 i = 0; i < mPluginInfos.size(); i++)
+   {
+      PluginInfo info = mPluginInfos[i];
+
+      // Only write out valid ones
+      if(info.binding == "" || info.bindingCollision)
+         continue;
+
+      PluginBinding binding;
+      binding.key = info.binding;
+      binding.script = info.fileName;
+      binding.help = info.description;
+
+      bindings.push_back(binding);
+   }
 }
 
 

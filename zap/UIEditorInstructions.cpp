@@ -247,8 +247,8 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
          string binding = pluginInfos->get(j).binding;
 
          string key = "";
-         if(binding == PluginInfo::BindingInUse)
-            key = "- " + PluginInfo::BindingInUse + " -";
+         if(pluginInfos->get(j).bindingCollision)
+            key = "- KEY CLASH -";
          else if(binding != "")
             key = "[[" + pluginInfos->get(j).binding + "]]";  // Add the [[ & ]] to make it parsable
 

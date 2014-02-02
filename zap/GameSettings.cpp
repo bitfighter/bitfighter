@@ -574,13 +574,6 @@ Vector<string> *GameSettings::getLevelSkipList()
 }
 
 
-// Passthrough
-const Vector<PluginBinding> *GameSettings::getPluginBindings()
-{
-   return &mIniSettings.pluginBindings;
-}
-
-
 InputCodeManager *GameSettings::getInputCodeManager()
 { 
    return &mInputCodeManager;
