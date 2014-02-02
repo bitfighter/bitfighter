@@ -769,6 +769,10 @@ void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const s
          return;
       }
 
+      // Check for the exception of the ']' key, which would create a symbol ending in ']]]'
+      if(str[endPos+2] == ']')
+         endPos++;
+
       symbols.push_back(SymbolShapePtr(new SymbolText(str.substr(offset, startPos - offset), fontSize, fontContext, textColor)));
 
       // Use + 2 to advance past the opening "[["

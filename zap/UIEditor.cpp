@@ -109,6 +109,22 @@ static void saveLevelCallback(ClientGame *game)
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// Constructor
+PluginInfo::PluginInfo(string prettyName, string fileName, string description, string requestedBinding)
+   : prettyName(prettyName), fileName(fileName), description(description), requestedBinding(requestedBinding)
+{
+   bindingCollision = false;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 // Constructor
 EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 {
@@ -5130,7 +5146,23 @@ void EditorUserInterface::findPlugins()
    string extension = ".lua";
    getFilesFromFolder(dirName, plugins, &extension, 1);
 
-   const Vector<PluginBinding> &bindings = *getGame()->getSettings()->getPluginBindings();
+   // Reference to original
+   Vector<PluginBinding> &bindings = getGame()->getSettings()->getIniSettings()->pluginBindings;
+
+   // Check for binding collision in INI.  If one is detected, set its key to empty
+   for(S32 i = 0; i < bindings.size(); i++)
+   {
+      for(S32 j = 0; j < i; j++)  // Efficiency!
+      {
+         if(bindings[i].key == bindings[j].key)
+         {
+            bindings[i].key = "";
+            break;
+         }
+      }
+   }
+
+   // Loop through all of our detected plugins
    for(S32 i = 0; i < plugins.size(); i++)
    {
       // Try to find the title
@@ -5142,13 +5174,13 @@ void EditorUserInterface::findPlugins()
       if(plugin.prepareEnvironment() && plugin.loadScript(false))
          plugin.runGetArgsMenu(title, menuItems);
 
-      // if the title is blank or couldn't be found, use the file name
+      // If the title is blank or couldn't be found, use the file name
       if(title == "")
          title = plugins[i];
 
       PluginInfo info(title, plugins[i], plugin.getDescription(), plugin.getRequestedBinding());
 
-      // check for a binding
+      // Check for a binding from the INI, if it exists set it for this plugin
       for(S32 j = 0; j < bindings.size(); j++)
       {
          if(bindings[j].script == plugins[i])
@@ -5158,42 +5190,64 @@ void EditorUserInterface::findPlugins()
          }
       }
 
-      // if no binding is configured, and the plugin specifies a requested binding
+      // If no binding is configured, and the plugin specifies a requested binding
+      // Use the requested binding if it is not currently in use
       if(info.binding == "" && info.requestedBinding != "")
       {
-         // use the requested binding if it is not currently in use
-         bool bindingInUse = false;
+         bool bindingCollision = false;
 
-         // check configured bindings
+         // Determine if this requested binding is already in use by a binding
+         // in the INI
          for(S32 j = 0; j < bindings.size(); j++)
          {
             if(bindings[j].key == info.requestedBinding)
             {
-               bindingInUse = true;
+               bindingCollision = true;
                break;
             }
          }
 
-         // check bindings for plugins loaded so far
+         // Determine if this requested binding is already in use by a previously
+         // loaded plugin
          for(S32 j = 0; j < mPluginInfos.size(); j++)
          {
             if(mPluginInfos[j].binding == info.requestedBinding)
             {
-               bindingInUse = true;
+               bindingCollision = true;
                break;
             }
          }
 
-         if(!bindingInUse)
-         {
+         info.bindingCollision = bindingCollision;
+
+         // Available!  Set our binding to the requested one
+         if(!bindingCollision)
             info.binding = info.requestedBinding;
-         }
       }
 
       mPluginInfos.push_back(info);
    }
 
    mPluginInfos.sort(pluginInfoSort);
+
+   // Now update all the bindings in the INI
+   bindings.clear();
+
+   for(S32 i = 0; i < mPluginInfos.size(); i++)
+   {
+      PluginInfo info = mPluginInfos[i];
+
+      // Only write out valid ones
+      if(info.binding == "" || info.bindingCollision)
+         continue;
+
+      PluginBinding binding;
+      binding.key = info.binding;
+      binding.script = info.fileName;
+      binding.help = info.description;
+
+      bindings.push_back(binding);
+   }
 }
 
 

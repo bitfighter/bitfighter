@@ -244,7 +244,14 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
       S32 end = MIN(i + (PLUGINS_PER_PAGE * (i + 1)), pluginInfos->size());
       for(S32 j = start; j < end; j++)
       {
-         string key = "[[" + pluginInfos->get(j).binding + "]]";  // Add the [[ & ]] to make it parsable
+         string binding = pluginInfos->get(j).binding;
+
+         string key = "";
+         if(pluginInfos->get(j).bindingCollision)
+            key = "- KEY CLASH -";
+         else if(binding != "")
+            key = "[[" + pluginInfos->get(j).binding + "]]";  // Add the [[ & ]] to make it parsable
+
          string instr = pluginInfos->get(j).description;
 
          symbols.clear();
