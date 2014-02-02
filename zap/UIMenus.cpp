@@ -1678,15 +1678,21 @@ void ServerPasswordsMenuUserInterface::setupMenus()
 
    LevelChangePwItemIndex =
    addMenuItem(new TextEntryMenuItem("LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(), 
-                                     "<Anyone can change levels>", "", MAX_PASSWORD_LENGTH, KEY_L));
+                                     "<Anyone can change levels>", 
+                                     "Grants access to change the levels, and set duration and winning score", 
+                                     MAX_PASSWORD_LENGTH, KEY_L));
 
    AdminPwItemIndex =
    addMenuItem(new TextEntryMenuItem("ADMIN PASSWORD:", settings->getAdminPassword(),       
-                                     "<No remote admin access>", "", MAX_PASSWORD_LENGTH, KEY_A));
+                                     "<No remote admin access>", 
+                                     "Allows you to kick/ban players, change their teams, and set most server parameters", 
+                                     MAX_PASSWORD_LENGTH, KEY_A));
 
    ConnectionPwItemIndex =
    addMenuItem(new TextEntryMenuItem("CONNECTION PASSWORD:", settings->getServerPassword(), 
-                                     "<Anyone can connect>", "", MAX_PASSWORD_LENGTH, KEY_C));
+                                     "<Anyone can connect>", 
+                                     "If the Connection password is set, players need to know it to join the server", 
+                                     MAX_PASSWORD_LENGTH, KEY_C));
 }
 
 
