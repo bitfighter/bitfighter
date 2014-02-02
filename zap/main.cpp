@@ -1156,9 +1156,11 @@ int main(int argc, char **argv)
       // Dedicated ClientGame needs fonts, but not external ones
       FontManager::initialize(settings.get(), false);
 #endif
-      LevelSourcePtr levelSource = LevelSourcePtr(
-               new FolderLevelSource(settings->getLevelList(), settings->getFolderManager()->levelDir)
-                                                 );
+      ServerGame *serverGame = GameManager::getServerGame();
+      
+      // Now even the dedicated server can make use of playlist files...
+      // TODO: test if playlist files work with the dedicated server
+      LevelSourcePtr levelSource = LevelSourcePtr(settings->chooseLevelSource(serverGame));
 
       // Figure out what levels we'll be playing with, and start hosting  
       initHosting(settings, levelSource, false, true);     

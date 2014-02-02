@@ -255,26 +255,30 @@ bool LevelSource::populateLevelInfoFromSource(const string &fullFilename, S32 in
 }
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Constructor -- pass in a list fo level names and a folder; create LevelInfos for each
-FolderLevelSource::FolderLevelSource(const Vector<string> &levelList, const string &folder)
+// Should be overridden in each subclass of LevelSource
+bool LevelSource::loadLevels(FolderManager *folderManager)
 {
-   for(S32 i = 0; i < levelList.size(); i++)
-      mLevelInfos.push_back(LevelInfo(levelList[i], folder));
+	return true;
 }
 
 
-// Destructor
-FolderLevelSource::~FolderLevelSource()
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+MultiLevelSource::MultiLevelSource()
 {
-   // Do noting
+
 }
 
+
+MultiLevelSource::~MultiLevelSource()
+{
+
+}
 
 // Populate all our levelInfos from disk; return true if we managed to load any, false otherwise
-bool FolderLevelSource::loadLevels(FolderManager *folderManager)
+bool MultiLevelSource::loadLevels(FolderManager *folderManager)
 {
    bool anyLoaded = false;
 
@@ -296,7 +300,7 @@ bool FolderLevelSource::loadLevels(FolderManager *folderManager)
 
 
 // Load specified level, put results in gameObjectDatabase.  Return md5 hash of level
-string FolderLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
+string MultiLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
 {
    TNLAssert(index >= 0 && index < mLevelInfos.size(), "Index out of bounds!");
 
@@ -321,7 +325,7 @@ string FolderLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObj
 
 
 // Returns a textual level descriptor good for logging and error messages and such
-string FolderLevelSource::getLevelFileDescriptor(S32 index) const
+string MultiLevelSource::getLevelFileDescriptor(S32 index) const
 {
    return "levelfile \"" + mLevelInfos[index].filename + "\"";
 }
@@ -329,28 +333,83 @@ string FolderLevelSource::getLevelFileDescriptor(S32 index) const
 
 // Populates levelInfo with data from fullFilename -- returns true if successful, false otherwise
 // Reads 4kb of file and uses what it finds there to populate the levelInfo
-bool FolderLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
+bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
 {
-   FILE *f = fopen(fullFilename.c_str(), "rb");
+	FILE *f = fopen(fullFilename.c_str(), "rb");
+	if(f)
+	{
+		char data[1024 * 4];  // 4 kb should be enough to fit all parameters at the beginning of level; we don't need to read everything
+		S32 size = (S32)fread(data, 1, sizeof(data), f);
+	   fclose(f);
 
-   if(f)
-   {
-      char data[1024 * 4];  // 4 kb should be enough to fit all parameters at the beginning of level; we don't need to read everything
-      S32 size = (S32)fread(data, 1, sizeof(data), f);
-      fclose(f);
+ 	   getLevelInfoFromCodeChunk(data, size, levelInfo);     // Fills levelInfo with data from file
 
-      getLevelInfoFromCodeChunk(data, size, levelInfo);     // Fills levelInfo with data from file
+		levelInfo.ensureLevelInfoHasValidName();
 
-      levelInfo.ensureLevelInfoHasValidName();
-
-      return true;
-   }
+		return true;
+	}
    else
    {
-      logprintf(LogConsumer::LogWarning, "Could not load level %s [%s].  Skipping...", 
+      logprintf(LogConsumer::LogWarning, "Could not load level %s [%s]... Skipping...",
                                           levelInfo.filename.c_str(), fullFilename.c_str());
       return false;
    }
+}
+
+
+// Only there to conform to the LevelSource design pattern
+// SHOULD be overriden
+bool MultiLevelSource::isEmptyLevelDirOk() const
+{
+	return false;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// Constructor -- pass in a list of level names and a folder; create LevelInfos for each
+FolderLevelSource::FolderLevelSource(const Vector<string> &levelList, const string &folder)
+{
+   for(S32 i = 0; i < levelList.size(); i++)
+      mLevelInfos.push_back(LevelInfo(levelList[i], folder));
+}
+
+
+// Destructor
+FolderLevelSource::~FolderLevelSource()
+{
+   // Do noting
+}
+
+
+// Populate all our levelInfos from disk; return true if we managed to load any, false otherwise
+bool FolderLevelSource::loadLevels(FolderManager *folderManager)
+{
+	return Parent::loadLevels(folderManager);
+}
+
+
+// Load specified level, put results in gameObjectDatabase.  Return md5 hash of level
+string FolderLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
+{
+	return Parent::loadLevel(index, game, gameObjectDatabase);
+}
+
+
+// Returns a textual level descriptor good for logging and error messages and such
+string FolderLevelSource::getLevelFileDescriptor(S32 index) const
+{
+   return Parent::getLevelFileDescriptor(index);
+}
+
+
+// Populates levelInfo with data from fullFilename -- returns true if successful, false otherwise
+// Reads 4kb of file and uses what it finds there to populate the levelInfo
+bool FolderLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
+{
+	return Parent::populateLevelInfoFromSource(fullFilename, levelInfo);
 }
 
 
@@ -362,6 +421,115 @@ bool FolderLevelSource::isEmptyLevelDirOk() const
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+
+// Constructor -- pass in a list of level names and a file; create LevelInfos for each
+FileListLevelSource::FileListLevelSource(const Vector<string> &levelList, const string &playlist)
+{
+	for(S32 i = 0; i < levelList.size(); i++)
+		  mLevelInfos.push_back(LevelInfo(levelList[i], playlist));
+}
+
+
+// Destructor
+FileListLevelSource::~FileListLevelSource()
+{
+   // Do nothing
+}
+
+
+// Populate all our levelInfos from disk; return true if we managed to load any, false otherwise
+bool FileListLevelSource::loadLevels(FolderManager *folderManager)
+{
+   return Parent::loadLevels(folderManager);
+}
+
+
+// Load specified level, put results in gameObjectDatabase.  Return md5 hash of level
+string FileListLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
+{
+   TNLAssert(index >= 0 && index < mLevelInfos.size(), "Index out of bounds!");
+
+   LevelInfo *levelInfo = &mLevelInfos[index];
+
+	string filename = FolderManager::findLevelFile(GameSettings::getFolderManager()->levelDir, levelInfo->filename);
+
+	if(filename == "")
+	{
+		logprintf("Unable to find level file \"%s\".  Skipping...", levelInfo->filename.c_str());
+		return "";
+	}
+	if(game->loadLevelFromFile(filename, gameObjectDatabase))
+			 return Game::md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
+	else
+	{
+		logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
+		return "";
+	}
+}
+
+
+bool FileListLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
+{
+	return Parent::populateLevelInfoFromSource(fullFilename, levelInfo);
+}
+
+
+// This function uses old C style file parsing...
+// TODO: find a more efficient and modern way of parsing a file line by line
+// This function also has lots local variables and a pointer. the pointer is accounted for (Deleted)
+// But there must be a better way of getting a pointer to GridDatabase, Without ruining the function sig.
+Vector<string> FileListLevelSource::getFilePlaylist(const string FileName, Game* game)
+{
+	GridDatabase *gameObjectDatabase = new GridDatabase;
+	FILE *fp;
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t read;
+	Vector<string> levelinfos;
+
+	fp = fopen(FileName.c_str(), "r");
+	TNLAssert(fp, "Playlist file not loaded, are you using a valid playlist file?");
+	while ((read = getline(&line, &len, fp)) != -1)
+	{
+		// If the parsed line Is'nt a comment in the playlist file
+		if(strncmp(line, "#", strlen("#")))
+		{
+			// trims newline escape characters from parsed strings.
+			// TODO: add this block of newline destroying code to stringutils
+			int len = strlen(line);
+			if (line[len-1] == '\n' )
+				line[len-1] = '\0';
+
+			levelinfos.push_back(line);
+		}
+	}
+
+   if (line)
+		free(line);
+   delete gameObjectDatabase;
+
+	return levelinfos;
+}
+
+
+// Returns a nice descriptor string...
+string FileListLevelSource::getLevelFileDescriptor(S32 index) const
+{
+   return Parent::getLevelFileDescriptor(index);
+}
+
+
+// Same story as above :)
+bool FileListLevelSource::isEmptyLevelDirOk() const
+{
+        return false;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 
 // Constructor
 StringLevelSource::StringLevelSource(const string &levelCode)

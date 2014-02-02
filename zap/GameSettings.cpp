@@ -85,11 +85,11 @@ ParamInfo paramDefs[] = {
 
 // Specifying levels
 { "levels",                ALL_REMAINING,  LEVEL_LIST,            2, "<level 1> [level 2]...", "Specify the levels to play. Note that all remaining items on the command line will be interpreted as levels, so this must be the last parameter.", "You must specify one or more levels to load with the -levels option" },
+{ "usefile",               ALL_REMAINING,  USE_FILE,              2, "<path>", "Specify the location of a playlist of levels, which is a text file that specifies what levels the user want to be played. you must specify its relative location (relative to the Bitfighter binaries) with the -levelplaylist option"},
 
 // Specifying folders
 { "rootdatadir",           ONE_REQUIRED,   ROOT_DATA_DIR,         3, "<path>",                "Equivalent to setting the -inidir, -logdir, -robotdir, -screenshotdir, and -leveldir parameters. The application will automatially append \"/robots\", \"/screenshots\", and \"/levels\" to path as appropriate.", "You must specify the root data folder with the -rootdatadir option" },
 { "leveldir",              ONE_REQUIRED,   LEVEL_DIR,             2, "<folder or subfolder>", "Load all levels in specified system folder, or a subfolder under the levels folder. Levels will be loaded in alphabetical order by level-file name. Admins can create custom level lists by copying selected levels into folders or subfolders, and rename the files to get them to load in the proper order.", "You must specify a levels subfolder with the -leveldir option" },
-{ "inidir",                ONE_REQUIRED,   INI_DIR,               3, "<path>",                "Folder where INI file is stored",            "You must specify a the folder where your INI file is stored with the -inidir option" },
 { "logdir",                ONE_REQUIRED,   LOG_DIR,               3, "<path>",                "Folder where logfiles will be written",      "You must specify your log folder with the -logdir option" },
 { "scriptsdir",            ONE_REQUIRED,   SCRIPTS_DIR,           3, "<path>",                "Folder where Lua helper scripts are stored", "You must specify the folder where your Lua scripts are stored with the -scriptsdir option" },
 { "robotdir",              ONE_REQUIRED,   ROBOT_DIR,             3, "<path>",                "Folder where robot scripts are stored",      "You must specify the robots folder with the -robotdir option" },
@@ -493,6 +493,59 @@ string GameSettings::getLevelDir(SettingSource source)
 }
 
 
+// Returns the string passed to the commandline option -useplaylist
+// Will return the path if using the param, and "" if you arent
+string GameSettings::getPlaylistFile()
+{
+	return getString(USE_FILE);
+}
+
+
+// A system of finding out if you are using a playlist
+bool GameSettings::isUsingPlaylist()
+{
+	if(getPlaylistFile() == "")
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+
+// Returns the location of the playlist or the the directory of the levels, depending on if you are using a playlist.
+// Used in the CTORS for each object, as each object either takes a playlist file of a folder
+string GameSettings::getlevelLoc()
+{
+	if(isUsingPlaylist())
+	{
+		return getPlaylistFile();
+	}
+	else
+	{
+		 return getFolderManager()->levelDir;
+	}
+	return "";
+}
+
+
+// Returns a pointer to the desired LevelSource, depending on if you are using a playlist file or not
+LevelSource *GameSettings::chooseLevelSource(Game *game)
+{
+	if(isUsingPlaylist())
+	{
+		printf("isUsingPlaylist, and returned playlist object\n");
+		return new FileListLevelSource(getPlaylist(game), getPlaylistFile());
+	}
+	else
+	{
+		return new FolderLevelSource(getLevelList(), getFolderManager()->levelDir);
+	}
+}
+
+
 LoadoutTracker GameSettings::getLoadoutPreset(S32 index) 
 { 
    TNLAssert(index >= 0 && index < mLoadoutPresets.size(), "Preset index out of range!") ;
@@ -628,6 +681,28 @@ Vector<string> GameSettings::getLevelList(const string &levelDir, bool ignoreCmd
             i--;
             break;
          }
+   }
+
+   return levelList;
+}
+
+
+// Create a list of levels for hosting a game from a file, but does not read the files or do any validation of them
+Vector<string> GameSettings::getPlaylist(Game *game)
+{
+        const string &playlist = getPlaylistFile();
+   Vector<string> levelList;
+
+   // Build our level list by looking at the playlist
+   levelList = FileListLevelSource::getFilePlaylist(playlist, game);
+
+   // Check fileaname extension
+   for(S32 i = 0; i < levelList.size(); i++)
+   {
+      // Make sure we have the right extension
+      string filename_i = lcase(levelList[i]);
+      if(filename_i.find(".level") == string::npos)
+         filename_i += ".level";
    }
 
    return levelList;
@@ -1268,3 +1343,4 @@ const UserSettings *GameSettings::getUserSettings(const string &name)
 
 
 };
+

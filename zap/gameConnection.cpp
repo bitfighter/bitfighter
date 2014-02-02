@@ -9,6 +9,7 @@
 #include "IniFile.h"             // For CIniFile def
 #include "shipItems.h"           // For EngineerBuildObjects enum
 #include "masterConnection.h"    // For MasterServerConnection def
+#include "GameSettings.h"
 #include "BanList.h"
 #include "gameNetInterface.h"
 #include "gameType.h"
@@ -573,8 +574,16 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          return;
       }
 
+      Vector<string> levelList;
 
-      Vector<string> levelList = LevelSource::findAllLevelFilesInFolder(folder);
+      if(mSettings->isUsingPlaylist())
+      {
+        levelList = LevelSource::findAllLevelFilesInFolder(folder);
+      }
+      else
+      {
+        levelList = FileListLevelSource::getFilePlaylist(folder, mServerGame);
+      }
 
       if(levelList.size() == 0)
       {
@@ -582,14 +591,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          return;
       }
 
+      LevelSource *newLevelSource =  mSettings->chooseLevelSource(mServerGame);
 
-      FolderLevelSource *newLevelSource = new FolderLevelSource(levelList, folder);
 
       bool anyLoaded = newLevelSource->loadLevels(folderManager);    // Populates all our levelInfos by loading each file in turn
 
       if(!anyLoaded)
       {
-         s2cDisplayErrorMessage("!!! Specified folder contains no valid levels.  See server log for details.");
+         s2cDisplayErrorMessage("!!! Specified Location contains no valid levels.  See server log for details.");
          return;
       }
 
@@ -611,6 +620,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       s2cDisplaySuccessMessage("Level folder changed");
 
    }  // end change leveldir
+
 
    else if(type == DeleteLevel)
       markCurrentLevelAsDeleted();

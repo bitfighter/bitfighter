@@ -1881,7 +1881,7 @@ static void startHostingCallback(ClientGame *game, U32 unused)
 
    GameSettingsPtr settings = game->getSettingsPtr();
 
-   LevelSourcePtr levelSource = LevelSourcePtr(new FolderLevelSource(settings->getLevelList(), settings->getFolderManager()->levelDir));
+   LevelSourcePtr levelSource = LevelSourcePtr(settings->chooseLevelSource(game));
 
    initHosting(settings, levelSource, false, false);
 }

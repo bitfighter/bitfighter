@@ -57,6 +57,7 @@ public:
 
 class GridDatabase;
 class Game;
+struct FolderManager;
 
 class LevelSource
 {
@@ -75,12 +76,13 @@ public:
    pair<S32, bool> addLevel(LevelInfo levelInfo);   // Yes, pass by value
 
    // Extract info from specified level
-   string     getLevelName(S32 index);
-   string     getLevelFileName(S32 index);
-   GameTypeId getLevelType(S32 index);
+   string          getLevelName(S32 index);
+   virtual string  getLevelFileName(S32 index);
+   GameTypeId      getLevelType(S32 index);
 
    virtual bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo) = 0;
    virtual string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase) = 0;
+   virtual bool loadLevels(FolderManager *folderManager);
    virtual string getLevelFileDescriptor(S32 index) const = 0;
    virtual bool isEmptyLevelDirOk() const = 0;
 
@@ -92,14 +94,30 @@ public:
 
 
 ////////////////////////////////////////
+class MultiLevelSource : public LevelSource
+{
+   typedef LevelSource Parent;
+
+public:
+   MultiLevelSource();  																	  // Constructor
+   virtual ~MultiLevelSource();                                              // Destructor
+
+   bool loadLevels(FolderManager *folderManager);
+   string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
+   string getLevelFileDescriptor(S32 index) const;
+   bool isEmptyLevelDirOk() const;
+
+   bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
+};
+
+
+////////////////////////////////////////
 ////////////////////////////////////////
 
 
-struct FolderManager;
-
-class FolderLevelSource : public LevelSource
+class FolderLevelSource : public MultiLevelSource
 {
-   typedef LevelSource Parent;
+   typedef MultiLevelSource Parent;
 
 public:
    FolderLevelSource(const Vector<string> &levelList, const string &folder);  // Constructor
@@ -110,6 +128,33 @@ public:
    string getLevelFileDescriptor(S32 index) const;
    bool isEmptyLevelDirOk() const;
 
+   bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// This LevelSource loads levels according to instructions in a text file
+class FileListLevelSource : public MultiLevelSource
+{
+   typedef MultiLevelSource Parent;
+
+private:
+   string playlistFile;
+
+public:
+   FileListLevelSource(const Vector<string> &levelList, const string &playlistFile);     // Constructor
+   virtual ~FileListLevelSource();                                                                                                                // Destructor
+
+   string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
+   bool loadLevels(FolderManager *folderManager);
+
+   static Vector<string> getFilePlaylist(const string FileName, Game* game);
+
+   string getLevelFileDescriptor(TNL::S32) const;
+   bool isEmptyLevelDirOk() const;
    bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
 };
 

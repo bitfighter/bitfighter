@@ -8,6 +8,7 @@
 
 #include "config.h"
 #include "InputCode.h"        // For InputCodeManager def
+#include "LevelSource.h"
 #include "LoadoutTracker.h"
 
 #include "tnlTypes.h"
@@ -47,10 +48,12 @@ enum ParamId {
    HOST_ADDRESS,
 
    LEVEL_LIST,
+   USE_FILE,
 
    ROOT_DATA_DIR,
    PLUGIN_DIR,
    LEVEL_DIR,
+   PLAYLIST_FILE_DIR,
    INI_DIR,
    LOG_DIR,
    SCRIPTS_DIR,
@@ -194,6 +197,9 @@ private:
    Vector<string> getLevelList(const string &levelDir, bool ignoreCmdLine);    // Workhorse for above methods
 
 public:
+
+   Vector<string> getPlaylist(Game *game);    // Grabs a list of levels from a file
+
    static S32 UseJoystickNumber;
 
    Vector<string> *getMasterServerList();
@@ -243,6 +249,11 @@ public:
    bool isDedicatedServer();
 
    string getLevelDir(SettingSource source);
+   string getPlaylistFile();
+   bool isUsingPlaylist();
+   string getlevelLoc();
+
+   LevelSource *chooseLevelSource(Game *game); // determines what levelsource you want to use
 
    LoadoutTracker getLoadoutPreset(S32 index);
    void setLoadoutPreset(const LoadoutTracker *preset, S32 index);
