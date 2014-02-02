@@ -128,13 +128,12 @@ void MenuUserInterface::sortMenuItems()
 }
 
 
-// Returns index of added item
 S32 MenuUserInterface::addMenuItem(MenuItem *menuItem)
 {
    menuItem->setMenu(this);
    mMenuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
 
-   return mMenuItems.size() - 1;
+   return mMenuItems.size();
 }
 
 
@@ -316,7 +315,7 @@ void MenuUserInterface::render()
    if(getGame()->getConnectionToServer())
       getUIManager()->renderAndDimGameUserInterface();
 
-   ///// Render the basic menu framework
+
    FontManager::pushFontContext(MenuHeaderContext);
 
    // Title 
@@ -332,16 +331,11 @@ void MenuUserInterface::render()
       renderMenuInstructions(getGame()->getSettings());
 
    FontManager::popFontContext();
-   /////
 
-   // Calc the menu height -- some entries (rare) may have more than 1 line, so we need to count
-   S32 itemCount = mMenuItems.size();
-   S32 itemLines = 0;
-   for(S32 i = 0; i < mMenuItems.size(); i++)
-      itemLines += mMenuItems[i]->getLines();
- 
+   S32 count = mMenuItems.size();
+
    if(isScrollingMenu())     // Need some sort of scrolling?
-      itemCount = mMaxMenuSize;
+      count = mMaxMenuSize;
 
    S32 yStart = getYStart();
    S32 offset = getOffset();
@@ -350,7 +344,7 @@ void MenuUserInterface::render()
 
    S32 y = yStart;
 
-   for(S32 i = 0; i < itemCount; i++)
+   for(S32 i = 0; i < count; i++)
    {
       MenuItemSize size = getMenuItem(i)->getSize();
       S32 textsize = getTextSize(size);
@@ -364,7 +358,7 @@ void MenuUserInterface::render()
       S32 indx = i + offset;
       mMenuItems[indx]->render(y, textsize, selectedIndex == indx);
 
-      y += (textsize + gap) * mMenuItems[indx]->getLines();
+      y += textsize + gap;
    }
 
    // Render an indicator that there are scrollable items above and/or below
@@ -698,27 +692,21 @@ bool MenuUserInterface::processKeys(InputCode inputCode)
       playBoop();
       onEscape();
    }
-
    else if(inputCode == KEY_UP || (inputCode == KEY_TAB && InputCodeManager::checkModifier(KEY_SHIFT)))   // Prev item
    {
-      S32 startingIndex = selectedIndex;
-      do
+      selectedIndex--;
+      itemSelectedWithMouse = false;
+
+      if(selectedIndex < 0)                        // Scrolling off the top
       {
-         selectedIndex--;
-         itemSelectedWithMouse = false;
-
-         if(selectedIndex < 0)                        // Scrolling off the top
+         if(isScrollingMenu() && mRepeatMode)      // Allow wrapping on long menus only when not in repeat mode
          {
-            if(isScrollingMenu() && mRepeatMode)      // Allow wrapping on long menus only when not in repeat mode
-            {
-               selectedIndex = startingIndex;
-               return true;                     // (leave before playBoop)
-            }
-            else                                         // Always wrap on shorter menus
-               selectedIndex = mMenuItems.size() - 1;    // Wrap --> (select last item)
+            selectedIndex = 0;               // No wrap --> (first item)
+            return true;                     // (leave before playBoop)
          }
-      } while(!mMenuItems[selectedIndex]->isSelectable());
-
+         else                                         // Always wrap on shorter menus
+            selectedIndex = mMenuItems.size() - 1;    // Wrap --> (select last item)
+      }
       playBoop();
    }
 
@@ -754,28 +742,19 @@ void MenuUserInterface::renderExtras() const
 
 void MenuUserInterface::advanceItem()
 {
-   S32 startingIndex = selectedIndex;
-   
+   selectedIndex++;
    itemSelectedWithMouse = false;
 
-   do
+   if(selectedIndex >= mMenuItems.size())     // Scrolling off the bottom
    {
-      selectedIndex++;
-
-      if(selectedIndex >= mMenuItems.size())     // Scrolling off the bottom
+      if(isScrollingMenu() && mRepeatMode)    // Allow wrapping on long menus only when not in repeat mode
       {
-         if(isScrollingMenu() && mRepeatMode)    // Allow wrapping on long menus only when not in repeat mode
-         {
-            selectedIndex = getMenuItemCount() - 1;                 // No wrap --> (last item)
-            if(!mMenuItems[selectedIndex]->isSelectable())
-               selectedIndex = startingIndex;
-            return;                                                 // (leave before playBoop)
-         }
-         else                     // Always wrap on shorter menus
-            selectedIndex = 0;    // Wrap --> (first item)
+         selectedIndex = getMenuItemCount() - 1;                 // No wrap --> (last item)
+         return;                                                 // (leave before playBoop)
       }
-   } while(!mMenuItems[selectedIndex]->isSelectable());
-
+      else                     // Always wrap on shorter menus
+         selectedIndex = 0;    // Wrap --> (first item)
+   }
    playBoop();
 }
 
@@ -1696,24 +1675,14 @@ void ServerPasswordsMenuUserInterface::setupMenus()
    clearMenuItems();
 
    GameSettings *settings = getGame()->getSettings();
-   string explanation;
-
-   explanation = "The Level Change password grants access to change the levels, and set duration and winning score.";
-   addMenuItem(new TextBlockMenuItem(explanation, Colors::red));
 
    LevelChangePwItemIndex =
    addMenuItem(new TextEntryMenuItem("LEVEL CHANGE PASSWORD:", settings->getLevelChangePassword(), 
                                      "<Anyone can change levels>", "", MAX_PASSWORD_LENGTH, KEY_L));
 
-   explanation = "The Admin password allows you to kick/ban players, change their teams, and set most server parameters.";
-   addMenuItem(new TextBlockMenuItem(explanation, Colors::red));
-
    AdminPwItemIndex =
    addMenuItem(new TextEntryMenuItem("ADMIN PASSWORD:", settings->getAdminPassword(),       
                                      "<No remote admin access>", "", MAX_PASSWORD_LENGTH, KEY_A));
-
-   explanation = "If the Connection password is set, players need to know it to join the server.";
-   addMenuItem(new TextBlockMenuItem(explanation, Colors::red));
 
    ConnectionPwItemIndex =
    addMenuItem(new TextEntryMenuItem("CONNECTION PASSWORD:", settings->getServerPassword(), 
