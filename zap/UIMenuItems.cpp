@@ -268,6 +268,10 @@ void MenuItem::setUnselectedColor(const Color &color)
 void MenuItem::setSelectedValueColor(const Color &color)   { /* Override in children */ }
 void MenuItem::setUnselectedValueColor(const Color &color) { /* Override in children */ }
 
+bool MenuItem::isSelectable() const { return true; }
+
+S32 MenuItem::getLines() const { return 1; }
+
 
 /**
  * @luaclass MenuItem
@@ -302,6 +306,7 @@ MessageMenuItem::MessageMenuItem(string displayVal, const Color &color) : MenuIt
    mUnselectedColor = color;
 }
 
+
 // Destructor
 MessageMenuItem::~MessageMenuItem()
 {
@@ -312,6 +317,43 @@ MessageMenuItem::~MessageMenuItem()
 ////////////////////////////////////
 ////////////////////////////////////
 
+
+TextBlockMenuItem::TextBlockMenuItem(string displayVal, const Color &color) : MenuItem(displayVal)
+{
+   mDisplayValAppendage = "";
+   mUnselectedColor = color;
+
+   mWrappedDisplayVal = wrapString(displayVal, 700, 23);    // TODO: Get rid of the 23!!
+}
+
+
+// Destructor
+TextBlockMenuItem::~TextBlockMenuItem()
+{
+   // Do nothing
+}
+
+
+void TextBlockMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
+{
+   glColor(*getColor(isSelected));
+
+   FontManager::pushFontContext(MenuContext);
+   
+   for(S32 i = 0; i < getLines(); i++)
+      drawCenteredStringf(xpos, ypos + i * (textsize + 18), textsize, "%s", mWrappedDisplayVal[i].c_str());
+      // TODO: get rid of 18
+
+   FontManager::popFontContext();
+}
+
+
+bool TextBlockMenuItem::isSelectable() const { return false; }
+S32 TextBlockMenuItem::getLines() const { return mWrappedDisplayVal.size(); }
+
+
+////////////////////////////////////
+////////////////////////////////////
 
 // Constructor
 ValueMenuItem::ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32),

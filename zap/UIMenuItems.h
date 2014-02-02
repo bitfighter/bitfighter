@@ -131,6 +131,8 @@ public:
    void setUnselectedColor(const Color &color);
    virtual void setSelectedValueColor(const Color &color);
    virtual void setUnselectedValueColor(const Color &color);
+   virtual bool isSelectable() const;
+   virtual S32 getLines() const;
 
    ///// Lua interface
    // Top level Lua methods
@@ -139,6 +141,7 @@ public:
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
+
 };
 
 
@@ -151,6 +154,25 @@ class MessageMenuItem : public MenuItem
 public:
    MessageMenuItem(string displayVal, const Color &color);
    virtual ~MessageMenuItem();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Exprerimental non-menu item menu item
+class TextBlockMenuItem : public MenuItem
+{
+private:
+   Vector<string> mWrappedDisplayVal;
+
+public:
+   TextBlockMenuItem(string displayVal, const Color &color);
+   virtual ~TextBlockMenuItem();
+   virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
+
+   bool isSelectable() const;
+   S32 getLines() const;
 };
 
 
