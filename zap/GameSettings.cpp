@@ -690,21 +690,8 @@ Vector<string> GameSettings::getLevelList(const string &levelDir, bool ignoreCmd
 // Create a list of levels for hosting a game from a file, but does not read the files or do any validation of them
 Vector<string> GameSettings::getPlaylist()
 {
-   Vector<string> levelList;
-
-   // Build our level list by looking at the playlist
-   levelList = FileListLevelSource::findAllFilesInPlaylist(getPlaylistFile(), GameSettings::getFolderManager()->levelDir);
-
-   // Check fileaname extension
-   for(S32 i = 0; i < levelList.size(); i++)
-   {
-      // Make sure we have the right extension
-      string filename_i = lcase(levelList[i]);
-      if(filename_i.find(".level") == string::npos)
-         filename_i += ".level";
-   }
-
-   return levelList;
+   // Build our level list by reading the playlist
+   return FileListLevelSource::findAllFilesInPlaylist(getPlaylistFile(), GameSettings::getFolderManager()->levelDir);
 }
 
 
