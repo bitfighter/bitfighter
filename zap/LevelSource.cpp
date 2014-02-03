@@ -231,6 +231,7 @@ void LevelSource::remove(S32 index)
 
 extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);     // Sort alphanumerically
 
+// static method
 Vector<string> LevelSource::findAllLevelFilesInFolder(const string &levelDir)
 {
    Vector<string> levelList;
@@ -426,12 +427,10 @@ string FileListLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameO
 
 
 // Static method
-Vector<string> FileListLevelSource::getFilePlaylist(const string &fileName, Game *game)
+Vector<string> FileListLevelSource::findAllFilesInPlaylist(const string &fileName, const string &levelDir)
 {
    Vector<string> levels;
    Vector<string> lines = parseString(readFile(fileName));
-
-   const string levelDir = GameSettings::getFolderManager()->levelDir;
 
    for(S32 i = 0; i < lines.size(); i++)
 	{

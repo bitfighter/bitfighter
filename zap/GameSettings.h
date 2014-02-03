@@ -198,7 +198,7 @@ private:
 
 public:
 
-   Vector<string> getPlaylist(Game *game);    // Grabs a list of levels from a file
+   Vector<string> getPlaylist();       // Gets name of our playlist file, if specfied
 
    static S32 UseJoystickNumber;
 

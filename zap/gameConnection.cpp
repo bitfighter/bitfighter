@@ -491,13 +491,17 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
 
 
 // Allow admins to change the passwords and other parameters on their systems
-TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> paramType), (param, paramType),
+TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, 
+                  (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> paramType), 
+                  (param, paramType),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    ParamType type = (ParamType) paramType.value;
 
-   if(!mClientInfo->isAdmin())   // Do nothing --> non-admins have no pull here.  Note that this should never happen; client should filter out
-      return;                    // non-admins before we get here, but we'll check anyway in case the client has been hacked.
+   if(!mClientInfo->isAdmin())   // Do nothing --> non-admins have no pull here.  Note that this should never happen; 
+                                 // client should filter out non-admins before we get here, but we'll check anyway in 
+                                 // case the client has been hacked.  But we have no obligation to notify client if 
+                                 // this has happened.
 
    // Check for forbidden blank parameters -- the following commands require a value to be passed in param
    if( (type == AdminPassword || type == OwnerPassword || type == ServerName || type == ServerDescr || type == LevelDir) &&
@@ -586,7 +590,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       else
       {
          sourceType = "playlist file";
-         levelList = FileListLevelSource::getFilePlaylist(folder, mServerGame);
+         levelList = FileListLevelSource::findAllFilesInPlaylist(mServerGame->getSettings()->getPlaylistFile(), 
+                                                                 GameSettings::getFolderManager()->levelDir);
       }
 
       if(levelList.size() == 0)

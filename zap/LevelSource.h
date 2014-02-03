@@ -146,7 +146,7 @@ public:
 
    string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
 
-   static Vector<string> getFilePlaylist(const string &fileName, Game* game);
+   static Vector<string> findAllFilesInPlaylist(const string &fileName, const string &levelDir);
 
    bool isEmptyLevelDirOk() const;
 };
