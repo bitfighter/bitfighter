@@ -103,13 +103,19 @@ string joindir(const string &path, const string &filename);
 string strictjoindir(const string &part1, const string &part2);
 string strictjoindir(const string &part1, const string &part2, const string &part3);
 
-string trim_right(const string &source, const string &t = " ");
-string trim_left(const string &source, const string &t = " ");
-string trim(const string &source, const string &t = " ");
+// By default we'll mimic the behavior or PHP.  Because that's something to aspire to!
+// http://lu1.php.net/trim
+#define DEFAULT_TRIM_CHARS " \n\r\t\0\x0B"   
 
-void trim_right_in_place(string &source, const string &t = " ");
-void trim_left_in_place(string &source, const string &t = " ");
-void trim_in_place(string &source, const string &t = " ");
+string trim_right(const string &source, const string &t = DEFAULT_TRIM_CHARS);
+string trim_left(const string &source, const string &t = DEFAULT_TRIM_CHARS);
+string trim(const string &source, const string &t = DEFAULT_TRIM_CHARS);
+
+void trim_right_in_place(string &source, const string &t = DEFAULT_TRIM_CHARS);
+void trim_left_in_place(string &source, const string &t = DEFAULT_TRIM_CHARS);
+void trim_in_place(string &source, const string &t = DEFAULT_TRIM_CHARS);
+
+#undef DEFAULT_TRIM_CHARS
 
 S32 countCharInString(const string &source, char search);
 
@@ -119,6 +125,9 @@ string makeFilenameFromString(const char *levelname);
 string ctos(char c);
 
 string writeLevelString(const char *in);
+
+string chopComment(const string &line);
+
 
 bool writeFile(const string& path, const string& contents, bool append = false);
 const string readFile(const string& path);

@@ -475,55 +475,29 @@ bool FileListLevelSource::populateLevelInfoFromSource(const string &fullFilename
 }
 
 
-// This function uses old C style file parsing...
-// TODO: find a more efficient and modern way of parsing a file line by line
-// This function also has lots local variables and a pointer. the pointer is accounted for (Deleted)
-// But there must be a better way of getting a pointer to GridDatabase, Without ruining the function sig.
-Vector<string> FileListLevelSource::getFilePlaylist(const string FileName, Game* game)
+// Static method
+Vector<string> FileListLevelSource::getFilePlaylist(const string &fileName, Game *game)
 {
-	GridDatabase *gameObjectDatabase = new GridDatabase;
-	FILE *fp;
-	char *line = NULL;
-	size_t len = 0;
-	ssize_t read;
-	Vector<string> levelinfos;
+   Vector<string> levelinfos;
+   Vector<string> lines = parseString(readFile(fileName));
 
-	fp = fopen(FileName.c_str(), "r");
-	TNLAssert(fp, "Playlist file not loaded, are you using a valid playlist file?");
-	while ((read = getline(&line, &len, fp)) != -1)
+   for(S32 i = 0; i < lines.size(); i++)
 	{
-		// If the parsed line Is'nt a comment in the playlist file
-		if(strncmp(line, "#", strlen("#")))
-		{
-			// trims newline escape characters from parsed strings.
-			// TODO: add this block of newline destroying code to stringutils
-			int len = strlen(line);
-			if (line[len-1] == '\n' )
-				line[len-1] = '\0';
+      string line = trim(chopComment(lines[i]));
 
-			levelinfos.push_back(line);
-		}
+      if(line.length() == 0)
+         continue;
+
+		levelinfos.push_back(line);
 	}
-
-   if (line)
-		free(line);
-   delete gameObjectDatabase;
 
 	return levelinfos;
 }
 
 
-// Returns a nice descriptor string...
-string FileListLevelSource::getLevelFileDescriptor(S32 index) const
-{
-   return Parent::getLevelFileDescriptor(index);
-}
-
-
-// Same story as above :)
 bool FileListLevelSource::isEmptyLevelDirOk() const
 {
-        return false;
+   return false;
 }
 
 

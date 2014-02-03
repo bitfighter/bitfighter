@@ -151,9 +151,8 @@ public:
    string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
    bool loadLevels(FolderManager *folderManager);
 
-   static Vector<string> getFilePlaylist(const string FileName, Game* game);
+   static Vector<string> getFilePlaylist(const string &fileName, Game* game);
 
-   string getLevelFileDescriptor(TNL::S32) const;
    bool isEmptyLevelDirOk() const;
    bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
 };

@@ -57,4 +57,16 @@ TEST(StringUtilsTest, listToString)
    EXPECT_EQ("one, two, three", listToString(words, ", "));
 }
 
+
+TEST(StringUtilsTest, chopComment)
+{
+   EXPECT_EQ("This is a ",        chopComment("This is a #comment"));
+   EXPECT_EQ("",                  chopComment("# This is a comment"));
+   EXPECT_EQ("This is a comment", chopComment("This is a comment#"));
+   EXPECT_EQ("This is a comment", chopComment("This is a comment"));
+   EXPECT_EQ("",                  chopComment("#"));
+
+}
+
+
 };

@@ -794,6 +794,15 @@ string replaceString(const char *in, const char *find, const char *replace)
    return out;
 }
 
+
+// Strip comments from passed lines.  Comments are denoted with a "#".
+string chopComment(const string &line)
+{
+   string copy = line;
+   return copy.erase(copy.find('#'), string::npos);
+}
+
+
 string writeLevelString(const char *in)
 {
    int c=0;
