@@ -560,6 +560,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
          mServerGame->getConnectionToMaster()->s2mServerDescription(StringTableEntry(param.getString()));
    }
 
+   // TODO: Add option here for type == Playlist
+
    else if(type == LevelDir)
    {
       FolderManager *folderManager = mSettings->getFolderManager();
@@ -578,36 +580,21 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
          return;
       }
 
-
-      string sourceType;
-      Vector<string> levelList;
-
-      if(mSettings->isUsingPlaylist())
-      {
-         sourceType = "folder";
-         levelList = LevelSource::findAllLevelFilesInFolder(folder);
-      }
-      else
-      {
-         sourceType = "playlist file";
-         levelList = FileListLevelSource::findAllFilesInPlaylist(mServerGame->getSettings()->getPlaylistFile(), 
-                                                                 GameSettings::getFolderManager()->levelDir);
-      }
+      Vector<string> levelList = LevelSource::findAllLevelFilesInFolder(folder);
 
       if(levelList.size() == 0)
       {
-         s2cDisplayErrorMessage("!!! Specified " + sourceType + " contains no levels");
+         s2cDisplayErrorMessage("!!! Specified folder contains no levels");
          return;
       }
 
       LevelSource *newLevelSource =  mSettings->chooseLevelSource(mServerGame);
 
-
       bool anyLoaded = newLevelSource->loadLevels(folderManager);    // Populates all our levelInfos by loading each file in turn
 
       if(!anyLoaded)
       {
-         s2cDisplayErrorMessage("!!! Specified Location contains no valid levels.  See server log for details.");
+         s2cDisplayErrorMessage("!!! Specified location contains no valid levels.  See server log for details.");
          return;
       }
 

@@ -122,10 +122,12 @@ public:
       ServerName,
       ServerDescr,
       LevelDir, 
+      // PlaylistFile,     // TODO for 020 uncomment this and handle it!
       DeleteLevel,  
       UndeleteLevel,
+      // SpareSlot1, SpareSlot2, SpareSlot3,    // For expansion without breaking compatibility
 
-      ParamTypeCount       // Must be last
+      ParamTypeCount       // Must be last ==> Cannot change this value without breaking compatibility!
    };
 
 
