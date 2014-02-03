@@ -1494,11 +1494,13 @@ void ForceFieldProjector::onAddedToGame(Game *theGame)
 
 void ForceFieldProjector::render()
 {
+#ifndef ZAP_DEDICATED
    // We're not in editor (connected to game)
    if(static_cast<ClientGame*>(getGame())->isConnectedToServer())
       renderForceFieldProjector(&mCollisionPolyPoints, getPos(), getColor(), isEnabled(), mHealRate);
    else
       renderEditor(0, false);
+#endif
 }
 
 
