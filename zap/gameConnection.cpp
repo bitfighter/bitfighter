@@ -574,20 +574,24 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          return;
       }
 
+
+      string sourceType;
       Vector<string> levelList;
 
       if(mSettings->isUsingPlaylist())
       {
-        levelList = LevelSource::findAllLevelFilesInFolder(folder);
+         sourceType = "folder";
+         levelList = LevelSource::findAllLevelFilesInFolder(folder);
       }
       else
       {
-        levelList = FileListLevelSource::getFilePlaylist(folder, mServerGame);
+         sourceType = "playlist file";
+         levelList = FileListLevelSource::getFilePlaylist(folder, mServerGame);
       }
 
       if(levelList.size() == 0)
       {
-         s2cDisplayErrorMessage("!!! Specified folder contains no levels");
+         s2cDisplayErrorMessage("!!! Specified " + sourceType + " contains no levels");
          return;
       }
 

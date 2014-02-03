@@ -357,8 +357,6 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
 }
 
 
-// Only there to conform to the LevelSource design pattern
-// SHOULD be overriden
 bool MultiLevelSource::isEmptyLevelDirOk() const
 {
 	return false;
@@ -384,50 +382,14 @@ FolderLevelSource::~FolderLevelSource()
 }
 
 
-// Populate all our levelInfos from disk; return true if we managed to load any, false otherwise
-bool FolderLevelSource::loadLevels(FolderManager *folderManager)
-{
-	return Parent::loadLevels(folderManager);
-}
-
-
-// Load specified level, put results in gameObjectDatabase.  Return md5 hash of level
-string FolderLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
-{
-	return Parent::loadLevel(index, game, gameObjectDatabase);
-}
-
-
-// Returns a textual level descriptor good for logging and error messages and such
-string FolderLevelSource::getLevelFileDescriptor(S32 index) const
-{
-   return Parent::getLevelFileDescriptor(index);
-}
-
-
-// Populates levelInfo with data from fullFilename -- returns true if successful, false otherwise
-// Reads 4kb of file and uses what it finds there to populate the levelInfo
-bool FolderLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
-{
-	return Parent::populateLevelInfoFromSource(fullFilename, levelInfo);
-}
-
-
-bool FolderLevelSource::isEmptyLevelDirOk() const
-{
-   return false;     // We need a folder to read from!
-}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
-
 
 // Constructor -- pass in a list of level names and a file; create LevelInfos for each
 FileListLevelSource::FileListLevelSource(const Vector<string> &levelList, const string &playlist)
 {
 	for(S32 i = 0; i < levelList.size(); i++)
-		  mLevelInfos.push_back(LevelInfo(levelList[i], playlist));
+      mLevelInfos.push_back(LevelInfo(levelList[i], playlist));
 }
 
 
@@ -438,14 +400,7 @@ FileListLevelSource::~FileListLevelSource()
 }
 
 
-// Populate all our levelInfos from disk; return true if we managed to load any, false otherwise
-bool FileListLevelSource::loadLevels(FolderManager *folderManager)
-{
-   return Parent::loadLevels(folderManager);
-}
-
-
-// Load specified level, put results in gameObjectDatabase.  Return md5 hash of level
+// Load specified level, put results in gameObjectDatabase.  Return md5 hash of level.
 string FileListLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
 {
    TNLAssert(index >= 0 && index < mLevelInfos.size(), "Index out of bounds!");
@@ -459,8 +414,9 @@ string FileListLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameO
 		logprintf("Unable to find level file \"%s\".  Skipping...", levelInfo->filename.c_str());
 		return "";
 	}
+
 	if(game->loadLevelFromFile(filename, gameObjectDatabase))
-			 return Game::md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
+	   return Game::md5.getHashFromFile(filename);   
 	else
 	{
 		logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
@@ -469,41 +425,37 @@ string FileListLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameO
 }
 
 
-bool FileListLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
-{
-	return Parent::populateLevelInfoFromSource(fullFilename, levelInfo);
-}
-
-
 // Static method
 Vector<string> FileListLevelSource::getFilePlaylist(const string &fileName, Game *game)
 {
-   Vector<string> levelinfos;
+   Vector<string> levels;
    Vector<string> lines = parseString(readFile(fileName));
+
+   const string levelDir = GameSettings::getFolderManager()->levelDir;
 
    for(S32 i = 0; i < lines.size(); i++)
 	{
       string line = trim(chopComment(lines[i]));
-
-      if(line.length() == 0)
+      if(line == "")    // Probably a comment or blank line
          continue;
 
-		levelinfos.push_back(line);
+      string filename = FolderManager::findLevelFile(levelDir, line);
+
+      if(filename == "")
+      {
+         logprintf("Unable to find level file \"%s\".  Skipping...", filename.c_str());
+         continue;
+      }
+
+   	levels.push_back(filename);
 	}
 
-	return levelinfos;
-}
-
-
-bool FileListLevelSource::isEmptyLevelDirOk() const
-{
-   return false;
+	return levels;
 }
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
 
 // Constructor
 StringLevelSource::StringLevelSource(const string &levelCode)
