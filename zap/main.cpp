@@ -865,6 +865,16 @@ void prepareFirstLaunch()
 }
 
 
+void removeFile(const char *offendingFile)
+{
+   // Remove game.ogg  from music folder, if it exists...
+   struct stat statbuff;
+   if(stat(offendingFile, &statbuff) == 0)      // Check if exists
+      if(remove(offendingFile) != 0)
+         logprintf(LogConsumer::LogWarning, "Could not remove game.ogg from music folder during upgrade process." );
+}
+
+
 // Function to handle one-time update tasks
 // Use this when upgrading, and changing something like the name of an INI parameter.  The old version is stored in
 // IniSettings.version, and the new version is in BUILD_VERSION.
@@ -905,15 +915,11 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    // 018:
    if(previousVersion < VERSION_018)  
    {
+      // Remove game.ogg  from music folder, if it exists...
       FolderManager *folderManager = settings->getFolderManager();
-
       const char *offendingFile = joindir(folderManager->musicDir, "game.ogg").c_str();
       
-      // Remove game.ogg  from music folder, if it exists...
-      struct stat statbuff;
-      if(stat(offendingFile, &statbuff) == 0)      // Check if exists
-         if(remove(offendingFile) != 0)
-            logprintf(LogConsumer::LogWarning, "Could not remove game.ogg from music folder during upgrade process." );
+      removeFile(offendingFile);
    }
 
    // 018a:
@@ -933,9 +939,16 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 
       // Add back linesmoothing option
       settings->getIniSettings()->mSettings.setVal("LineSmoothing", Yes);
+
+
+      // Remove item_select.lua plugin, it was superseded by filter.lua
+      FolderManager *folderManager = settings->getFolderManager();
+      const char *offendingFile = joindir(folderManager->pluginDir, "item_select.lua").c_str();
+
+      removeFile(offendingFile);
    }
 
-   if(previousVersion == VERSION_019)
+   if(previousVersion < VERSION_019)
    {
       // Rename BotsBalanceTeams to AddRobots in [Host] --> BotsBalanceTeams was introduced in 019, renamed in 019a
       if(GameSettings::iniFile.hasKey("Host", "BotsBalanceTeams"))
