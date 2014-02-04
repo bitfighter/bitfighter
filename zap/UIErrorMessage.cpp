@@ -156,7 +156,10 @@ ErrorMessageUserInterface::~ErrorMessageUserInterface()
 bool ErrorMessageUserInterface::usesEditorScreenMode() const
 {
    if(getUIManager()->getCurrentUI() == this)
+   {
+      TNLAssert(getUIManager()->getPrevUI() != this, "Why same UI twice?");
       return getUIManager()->getPrevUI()->usesEditorScreenMode();
+   }
    else
       return getUIManager()->getCurrentUI()->usesEditorScreenMode();
 

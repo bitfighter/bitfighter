@@ -269,14 +269,15 @@ bool LevelSource::loadLevels(FolderManager *folderManager)
 
 MultiLevelSource::MultiLevelSource()
 {
-
+   // Do nothing
 }
 
 
 MultiLevelSource::~MultiLevelSource()
 {
-
+   // Do nothing
 }
+
 
 // Populate all our levelInfos from disk; return true if we managed to load any, false otherwise
 bool MultiLevelSource::loadLevels(FolderManager *folderManager)
