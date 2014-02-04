@@ -133,7 +133,7 @@ S32 MenuUserInterface::addMenuItem(MenuItem *menuItem)
    menuItem->setMenu(this);
    mMenuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
 
-   return mMenuItems.size();
+   return mMenuItems.size() - 1;
 }
 
 
