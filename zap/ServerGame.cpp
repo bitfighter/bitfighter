@@ -356,9 +356,9 @@ string ServerGame::loadNextLevelInfo()
    string filename;
 
    if(getSettingsPtr()->isUsingPlaylist())
-      filename = folderManager->findLevelFile(mLevelSource->getLevelFileName(mLevelLoadIndex));
-   else
       filename = mLevelSource->getLevelFileName(mLevelLoadIndex);
+   else
+      filename = folderManager->findLevelFile(mLevelSource->getLevelFileName(mLevelLoadIndex));
 
    TNLAssert(filename != "", "Expected a filename here!");
 
