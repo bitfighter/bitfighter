@@ -352,17 +352,11 @@ string ServerGame::loadNextLevelInfo()
 {
    FolderManager *folderManager = getSettings()->getFolderManager();
 
-   string levelName;
-   string filename;
-
-   //if(getSettingsPtr()->isUsingPlaylist())
-   //   filename = mLevelSource->getLevelFileName(mLevelLoadIndex);
-   //else
-      filename = folderManager->findLevelFile(mLevelSource->getLevelFileName(mLevelLoadIndex));
-
+   string filename = folderManager->findLevelFile(mLevelSource->getLevelFileName(mLevelLoadIndex));
    TNLAssert(filename != "", "Expected a filename here!");
 
    // populateLevelInfoFromSource() will return true if the level was processed successfully
+   string levelName;
    if(mLevelSource->populateLevelInfoFromSource(filename, mLevelLoadIndex))
    {
       levelName = mLevelSource->getLevelName(mLevelLoadIndex);    // This will be the name specified in the level file we just populated
