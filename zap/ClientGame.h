@@ -83,7 +83,7 @@ public:
 
    ServerGame *getServerGame() const;
 
-   void closeConnectionToGameServer();
+   void closeConnectionToGameServer(const char *reason = "");
 
    //UserInterfaceData *mUserInterfaceData;
 

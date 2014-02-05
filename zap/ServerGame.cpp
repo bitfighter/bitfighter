@@ -568,8 +568,11 @@ void ServerGame::cycleLevel(S32 nextLevel)
          {
             // No more working levels to load...  quit?
             logprintf(LogConsumer::LogError, "All the levels I was asked to load are corrupt.  Exiting!");
-            mShutdownTimer.reset(1); // nothing to load...
+
+            mShutdownTimer.reset(1); 
             mShuttingDown = true;
+            mShutdownReason = "All the levels I was asked to load are corrupt or missing; "
+                              "Sorry dude -- hosting mode shutting down.";
 
             // To avoid crashing...
             if(!getGameType())
@@ -579,7 +582,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
             }
             getGameType()->makeSureTeamCountIsNotZero();
 
-            break;  // exit out of loop
+            return;
          }
       }
    }
@@ -681,7 +684,8 @@ void ServerGame::onConnectedToMaster()
 
    sendLevelStatsToMaster();    // We're probably in a game, and we should send the level details to the master
 
-   logprintf(LogConsumer::MsgType(LogConsumer::LogConnection | LogConsumer::ServerFilter), "Server established connection with Master Server");
+   logprintf(LogConsumer::MsgType(LogConsumer::LogConnection | LogConsumer::ServerFilter), 
+             "Server established connection with Master Server");
 }
 
 
@@ -1267,8 +1271,9 @@ bool ServerGame::isFull()
 
 
 // Only called from outside ServerGame
-bool ServerGame::isReadyToShutdown(U32 timeDelta)
+bool ServerGame::isReadyToShutdown(U32 timeDelta, string &reason)
 {
+   reason = mShutdownReason;
    return mShuttingDown && (mShutdownTimer.update(timeDelta) || onlyClientIs(mShutdownOriginator));
 }
 

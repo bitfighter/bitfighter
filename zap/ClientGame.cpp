@@ -158,7 +158,7 @@ void ClientGame::joinRemoteGame(Address remoteAddress, bool isFromMaster)
 
 
 // Called when the local connection to game server is terminated for one reason or another
-void ClientGame::closeConnectionToGameServer()
+void ClientGame::closeConnectionToGameServer(const char *reason)
 {
     // Cancel any in-progress attempts to connect
    if(getConnectionToMaster())
@@ -166,7 +166,7 @@ void ClientGame::closeConnectionToGameServer()
 
    // Disconnect from game server
    if(getConnectionToServer())
-      getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+      getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, reason);
 
    getUIManager()->disableLevelLoadDisplay(false);
 
@@ -1520,7 +1520,8 @@ void ClientGame::resetInGameHelpMessages()
 
 
 // Established connection is terminated.  Compare to onConnectTerminate() below.
-void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected)
+void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, 
+                                        const char *reasonStr, bool wasFullyConnected)
 {
    // Calling clearClientList can fix cases of extra names appearing on score board when connecting to server 
    // after getting disconnected for reasons other then "SelfDisconnect"

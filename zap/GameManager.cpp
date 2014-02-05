@@ -4,7 +4,10 @@
 //------------------------------------------------------------------------------
 
 #include "GameManager.h"
+
 #include "ServerGame.h"
+#include "UIErrorMessage.h"
+#include "UIManager.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -98,9 +101,6 @@ void GameManager::idleClientGames(U32 timeDelta)
       mClientGames[i]->idle(timeDelta);
 #endif
 }
-
-
-/////
 
 
 void GameManager::idle(U32 timeDelta)

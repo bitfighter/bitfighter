@@ -220,8 +220,13 @@ void UIManager::onConnectionTerminated(const Address &serverAddress, NetConnecti
    {
       case NetConnection::ReasonSelfDisconnect:
          // We get this when we terminate our own connection.  Since this is intentional behavior,
-         // we don't want to display any message to the user.
-         return;
+         // we don't want to display any message to the user.  Unless we were passed one.
+
+         if(strcmp(reasonStr, "") == 0)
+            return;
+
+         message = reasonStr;
+         break;
 
       case NetConnection::ReasonTimedOut:
          message = "Your connection timed out.  Please try again later.";

@@ -9,6 +9,7 @@
 #include "tnlVector.h"
 
 using namespace TNL;
+using std::string;
 
 namespace Zap
 {

@@ -276,11 +276,13 @@ void checkIfServerGameIsShuttingDown(U32 timeDelta)
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
    ServerGame *serverGame = GameManager::getServerGame();
 
-   if(serverGame && serverGame->isReadyToShutdown(timeDelta))
+   string shutdownReason;
+   if(serverGame && serverGame->isReadyToShutdown(timeDelta, shutdownReason))
    {
 #ifndef ZAP_DEDICATED
+      // Disconnect any local clients, passing whatever reason string we have
       for(S32 i = 0; i < clientGames->size(); i++)
-         clientGames->get(i)->closeConnectionToGameServer();    // ...disconnect any local clients
+         clientGames->get(i)->closeConnectionToGameServer(shutdownReason.c_str());  
 
       if(clientGames->size() > 0)       // If there are any clients running...
          GameManager::deleteServerGame();

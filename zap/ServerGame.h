@@ -54,7 +54,10 @@ private:
    U32 mCurrentLevelIndex;                // Index of level currently being played
    Timer mLevelSwitchTimer;               // Track how long after game has ended before we actually switch levels
    Timer mMasterUpdateTimer;              // Periodically let the master know how we're doing
+
    bool mShuttingDown;
+   string mShutdownReason;                // Message to local user about why we're shutting down, optional
+
    Timer mShutdownTimer;
    SafePtr<GameConnection> mShutdownOriginator;   // Who started the shutdown?
 
@@ -208,7 +211,7 @@ public:
 
    bool isServer() const;
    void idle(U32 timeDelta);
-   bool isReadyToShutdown(U32 timeDelta);
+   bool isReadyToShutdown(U32 timeDelta, string &shutdownReason);
    void gameEnded();
 
    S32 getCurrentLevelIndex();
