@@ -65,6 +65,7 @@ private:
    S32 getFirstServerIndexOnCurrentPage();
 
    Nonce mNonce;
+   Nonce mEmergencyRemoteServerNonce;
    bool mReceivedListOfServersFromMaster;
    U32 pendingPings;
    U32 pendingQueries;

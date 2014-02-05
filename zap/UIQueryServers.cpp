@@ -238,6 +238,7 @@ void QueryServersUserInterface::onActivate()
    pendingPings = 0;
    pendingQueries = 0;
    mNonce.getRandom();
+   mEmergencyRemoteServerNonce.getRandom();
 
    mPlayersInGlobalChat.clear();
 
@@ -269,7 +270,7 @@ void QueryServersUserInterface::contactEveryone()
       Vector<string> *serverList = &getGame()->getSettings()->getIniSettings()->prevServerListFromMaster;
 
       for(S32 i = 0; i < serverList->size(); i++)
-         getGame()->getNetInterface()->sendPing(Address(serverList->get(i).c_str()), mNonce);
+         getGame()->getNetInterface()->sendPing(Address(serverList->get(i).c_str()), mEmergencyRemoteServerNonce);
 
       mGivenUpOnMaster = true;
    }
@@ -307,7 +308,8 @@ static S32 findServerByAddress(const Vector<ServerAddr> &serverList, const Addre
 
 
 // Returns index of found server, -1 if it found none
-static S32 findServerByAddressOrId(const Vector<QueryServersUserInterface::ServerRef> &serverList, const Address &address, S32 serverId)
+static S32 findServerByAddressOrId(const Vector<QueryServersUserInterface::ServerRef> &serverList, 
+                                   const Address &address, S32 serverId)
 {
    for(S32 i = 0; i < serverList.size(); i++)
       if(serverList[i].serverAddress == address || (serverId != 0 && serverList[i].serverId == serverId))
@@ -412,8 +414,13 @@ void QueryServersUserInterface::addServersToPingList(const Vector<ServerAddr> &s
 
 void QueryServersUserInterface::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 serverId)
 {
-   if(mNonce == nonce)     // From local broadcast ping
+   if(nonce == mNonce || nonce == mEmergencyRemoteServerNonce)     // From local broadcast ping or direct ping of remote server
    {
+      // Most of the time, this will be a local network server, and isLocal will be true.  It will only be false if we
+      // are having problems connecting to the master and we broadcast our own set of pings to previously seen
+      // servers.
+      bool isLocal = nonce == mNonce;     
+
       // If we already know about the server, move along.
       // Pass 0 here to disable id check... we're only interested in IP address matches at this point -- if we have
       // a remote server with the same ID, we want to clobber it below.
@@ -423,16 +430,21 @@ void QueryServersUserInterface::gotPingResponse(const Address &address, const No
       // See if we've already been told about server with this serverId by the master... if so, we'll remove that
       // entry and replace it with a new one for the LAN server.  Local servers represent!
       S32 index = findServerByServerId(servers, serverId);
-      if(index != -1 && servers[index].isFromMaster)
+      if(index != -1 && isLocal && servers[index].isFromMaster)
          servers.erase_fast(index);
 
       // Create a new server entry
       ServerRef s(serverId, address, ServerRef::ReceivedPing, false);
-      s.setNameDescr("LAN Server", "LAN Server -- attempting to connect", Colors::white);
+
+      if(isLocal)
+         s.setNameDescr("LAN Server", "LAN Server -- attempting to connect", Colors::white);
+      else
+         s.setNameDescr("Internet Server",  "Internet Server -- attempting to connect", Colors::white);
 
       s.pingTime = Platform::getRealMilliseconds() - mBroadcastPingSendTime;
       s.identityToken = clientIdentityToken;
       s.sendNonce = nonce;
+      s.isFromMaster = !isLocal;
 
       servers.push_back(s);
    } 
