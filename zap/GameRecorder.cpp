@@ -1,3 +1,8 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 #include "GameRecorder.h"
 #include "tnlBitStream.h"
 #include "tnlNetObject.h"
@@ -11,6 +16,8 @@
 #endif
 
 #include "version.h"
+
+#include <algorithm>
 
 namespace Zap
 {
@@ -57,6 +64,7 @@ static string newRecordingFileName(const string &dir, const string &levelName, c
    return file;
 }
 
+// Constructor
 GameRecorderServer::GameRecorderServer(ServerGame *game)
 {
    mFile = NULL;
@@ -68,7 +76,8 @@ GameRecorderServer::GameRecorderServer(ServerGame *game)
    if(!mFile)
 	{
 		const string &dir = game->getSettings()->getFolderManager()->recordDir;
-      mFileName = newRecordingFileName(dir, game->getGameType()->getLevelName(), game->getSettings()->getHostName());
+      mFileName = newRecordingFileName(dir, game->getGameType()->getLevelName(), game->getSettings()->getHostName()) +
+            "." + buildGameRecorderExtension();
 		string filename = joindir(dir, mFileName);
 		mFile = fopen(filename.c_str(), "wb");
 	}
@@ -98,12 +107,27 @@ GameRecorderServer::GameRecorderServer(ServerGame *game)
       s2cSetServerName(game->getSettings()->getHostName());
    }
 }
+
+// Destructor
 GameRecorderServer::~GameRecorderServer()
 {
    if(mFile)
       fclose(mFile);
 }
 
+
+string GameRecorderServer::buildGameRecorderExtension()
+{
+   string baseRevision = ZAP_GAME_RELEASE;
+
+   // Not a integer, e.g. 019a, then strip off the revision letter
+   // Hopefully this pattern never changes
+   if(!isInteger(baseRevision.c_str()))
+      baseRevision.erase(baseRevision.end() - 1, baseRevision.end());
+
+   // This will create a file extension like 'bf019'
+   return "bf" + baseRevision;
+}
 
 
 void GameRecorderServer::idle(U32 MilliSeconds)
