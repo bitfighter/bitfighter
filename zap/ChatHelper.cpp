@@ -57,8 +57,8 @@ namespace Zap
    { "setscore",    &ChatCommands::setWinningScoreHandler, { xINT },  1, LEVEL_COMMANDS,  0,  1,  {"<score>"},                                "Set score to win the level" },
    { "resetscore",  &ChatCommands::resetScoreHandler,      {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Reset all scores to zero" },
 
-   { "addbot",      &ChatCommands::addBotHandler,          { STR, TEAM, STR },       1, BOT_COMMANDS,    1,  2,  {"[file]", "[team name or num]","[args]"},          "Add bot from [file] to [team num], pass [args] to bot" },
-   { "addbots",     &ChatCommands::addBotsHandler,         { xINT, STR, TEAM, STR }, 1, BOT_COMMANDS,    1,  2,  {"[count]","[file]","[team name or num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
+   { "addbot",      &ChatCommands::addBotHandler,          { STR, TEAM, STR },       3, BOT_COMMANDS,    1,  2,  {"[file]", "[team name or num]","[args]"},          "Add bot from [file] to [team num], pass [args] to bot" },
+   { "addbots",     &ChatCommands::addBotsHandler,         { xINT, STR, TEAM, STR }, 4, BOT_COMMANDS,    1,  2,  {"[count]","[file]","[team name or num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
    { "kickbot",     &ChatCommands::kickBotHandler,         {  },                     1, BOT_COMMANDS,    1,  1,  {  },                                               "Kick a bot" },
    { "kickbots",    &ChatCommands::kickBotsHandler,        {  },                     1, BOT_COMMANDS,    1,  1,  {  },                                               "Remove all bots from game" },
 

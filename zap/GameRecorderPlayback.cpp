@@ -5,6 +5,7 @@
 
 #include "GameRecorderPlayback.h"
 
+#include "GameRecorder.h"
 #include "tnlBitStream.h"
 #include "tnlNetObject.h"
 #include "gameType.h"
@@ -288,7 +289,9 @@ void PlaybackSelectUserInterface::onActivate()
 
    clearMenuItems();
    mLevels.clear();
-   getFilesFromFolder(dir, mLevels);
+
+   const string extList[] = {GameRecorderServer::buildGameRecorderExtension()};
+   getFilesFromFolder(dir, mLevels, extList, ARRAYSIZE(extList));
 
    if(mLevels.size() == 0)
       mMenuTitle = "No recorded games exists";  // TODO: Need better way to display this problem

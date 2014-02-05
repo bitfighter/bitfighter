@@ -27,11 +27,12 @@
 #define VERSION_018  6059
 #define VERSION_018a 6800
 #define VERSION_019  8814
+#define VERSION_019a 9364          // Update when we release
 
-#define BUILD_VERSION VERSION_019 // Version of the game according to hg, will be unique every release (must be int)
+#define BUILD_VERSION VERSION_019a // Version of the game according to hg, will be unique every release (must be int)
                                    // Get from "hg summary"
 
-#define ZAP_GAME_RELEASE "019"    // Change this with every release -- for display purposes only, string,
+#define ZAP_GAME_RELEASE "019a"    // Change this with every release -- for display purposes only, string,
                                    // will also be used for name of installer on windows, so be careful with spaces  
 
 #endif

@@ -116,6 +116,7 @@ void Item::setPos(const Point &pos)
    Parent::setPos(pos);
 
    setOutline();
+   setMaskBits(GeomMask);
 }
 
 

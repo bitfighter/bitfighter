@@ -133,7 +133,7 @@ S32 MenuUserInterface::addMenuItem(MenuItem *menuItem)
    menuItem->setMenu(this);
    mMenuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
 
-   return mMenuItems.size();
+   return mMenuItems.size() - 1;
 }
 
 
@@ -1953,7 +1953,7 @@ void HostMenuUserInterface::saveSettings()
    settings->setHostDescr(getMenuItem(OPT_DESCR)->getValue(), true);
 
    settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getIntValue() != 0);
-   settings->getIniSettings()->enableGameRecording = (getMenuItem(OPT_GETMAP + 1)->getIntValue() != 0);
+   settings->getIniSettings()->enableGameRecording = (getMenuItem(OPT_RECORD)->getIntValue() != 0);
 
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
 }

@@ -1,3 +1,8 @@
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
+
 #ifndef _GAMERECORDERPLAYBACK_H_
 #define _GAMERECORDERPLAYBACK_H_
 

@@ -303,9 +303,10 @@ class HostMenuUserInterface : public MenuUserInterface
       OPT_ROBOTS,
       OPT_NAME,
       OPT_DESCR,
+      OPT_PASSWORDS,
       OPT_GETMAP,
-      OPT_MAX_PLAYERS,
-      OPT_PORT,
+      OPT_RECORD,
+      OPT_PLAYBACK,
       OPT_COUNT
    };
 

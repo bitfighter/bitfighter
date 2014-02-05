@@ -228,8 +228,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
             controlObject->idle(BfObject::ServerProcessingUpdatesFromClient);
             onGotNewMove(theMove);
          }
-         else
-            mMoveTimeCredit = mMoveTimeCredit;
+
          firstMoveIndex++;
       }
    }
