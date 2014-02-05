@@ -491,10 +491,8 @@ static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo>
 }
 
 
-/**
- * Clear, prepare, and load the level given by the index \nextLevel. This
- * function respects meta-indices, and otherwise expects an absolute index
- */
+// Clear, prepare, and load the level given by the index \nextLevel. This
+// function respects meta-indices, and otherwise expects an absolute index.
 void ServerGame::cycleLevel(S32 nextLevel)
 {
    if(mGameRecorderServer)
