@@ -141,7 +141,7 @@ private:
    string playlistFile;
 
 public:
-   FileListLevelSource(const Vector<string> &levelList, const string &playlistFile);     // Constructor
+   FileListLevelSource(const Vector<string> &levelList, const string &folder);     // Constructor
    virtual ~FileListLevelSource();                                                                                                                // Destructor
 
    string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);

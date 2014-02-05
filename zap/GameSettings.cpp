@@ -537,7 +537,7 @@ LevelSource *GameSettings::chooseLevelSource(Game *game)
 	if(isUsingPlaylist())
 	{
 		printf("isUsingPlaylist, and returned playlist object\n");
-		return new FileListLevelSource(getPlaylist(), getPlaylistFile());
+		return new FileListLevelSource(getPlaylist(), getFolderManager()->levelDir);
 	}
 	else
 	{

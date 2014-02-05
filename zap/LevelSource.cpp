@@ -388,10 +388,10 @@ FolderLevelSource::~FolderLevelSource()
 ////////////////////////////////////////
 
 // Constructor -- pass in a list of level names and a file; create LevelInfos for each
-FileListLevelSource::FileListLevelSource(const Vector<string> &levelList, const string &playlist)
+FileListLevelSource::FileListLevelSource(const Vector<string> &levelList, const string &folder)
 {
 	for(S32 i = 0; i < levelList.size(); i++)
-      mLevelInfos.push_back(LevelInfo(levelList[i], playlist));
+      mLevelInfos.push_back(LevelInfo(levelList[i], folder));
 }
 
 
@@ -435,19 +435,19 @@ Vector<string> FileListLevelSource::findAllFilesInPlaylist(const string &fileNam
 
    for(S32 i = 0; i < lines.size(); i++)
 	{
-      string line = trim(chopComment(lines[i]));
-      if(line == "")    // Probably a comment or blank line
+      string filename = trim(chopComment(lines[i]));
+      if(filename == "")    // Probably a comment or blank line
          continue;
 
-      string filename = FolderManager::findLevelFile(levelDir, line);
+      string fullFileName = FolderManager::findLevelFile(levelDir, filename);
 
-      if(filename == "")
+      if(fullFileName == "")
       {
          logprintf("Unable to find level file \"%s\".  Skipping...", filename.c_str());
          continue;
       }
 
-   	levels.push_back(filename);
+   	levels.push_back(filename);      // We will append the folder name later
 	}
 
 	return levels;
