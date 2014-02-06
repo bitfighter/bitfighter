@@ -377,7 +377,10 @@ MasterServerConnection *Game::getConnectionToMaster()
 
 S32 Game::getClientId()
 {
-   return mConnectionToMaster->getClientId();
+   if(mConnectionToMaster)
+      return mConnectionToMaster->getClientId();
+
+   return 0;
 }
 
 
