@@ -640,6 +640,11 @@ void ServerGame::cycleLevel(S32 nextLevel)
       }
    }
 
+   // Fire onPlayerJoined event for any players already on the server
+   for(S32 i = 0; i < getClientCount(); i++)
+      EventManager::get()->fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientInfo(i)->getPlayerInfo());
+
+
    mRobotManager.balanceTeams();
 
    sendLevelStatsToMaster();     // Give the master some information about this level for its database
