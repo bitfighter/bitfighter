@@ -799,7 +799,7 @@ string replaceString(const char *in, const char *find, const char *replace)
 string chopComment(const string &line)
 {
    string copy = line;
-   S32 pos = copy.find('#');
+   string::size_type pos = copy.find('#');
 
    if(pos == string::npos)    // # not found
       return line;
