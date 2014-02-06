@@ -744,12 +744,12 @@ static void renderLockIcon()
 }
 
 
-static void setLocalRemoteColor(bool isRemote)
+static void setLocalRemoteColor(bool isLocal)
 {
-   if(isRemote)
-      glColor(Colors::white);
-   else
+   if(isLocal)
       glColor(Colors::cyan);
+   else
+      glColor(Colors::white);
 }
 
 
@@ -900,7 +900,7 @@ void QueryServersUserInterface::render()
                else
                   break;
 
-         setLocalRemoteColor(!s.isLocalServer);
+         setLocalRemoteColor(s.isLocalServer);
 
          drawString(columns[0].xStart, y, SERVER_ENTRY_TEXTSIZE, sname.c_str());
 
@@ -941,7 +941,7 @@ void QueryServersUserInterface::render()
          drawStringf(columns[3].xStart,      y, SERVER_ENTRY_TEXTSIZE, "%d",  s.playerCount);
          drawStringf(columns[3].xStart + 78, y, SERVER_ENTRY_TEXTSIZE, "%d",  s.botCount);
 
-         setLocalRemoteColor(!s.isLocalServer);
+         setLocalRemoteColor(s.isLocalServer);
          drawString(columns[4].xStart, y, SERVER_ENTRY_TEXTSIZE, s.serverAddress.toString());
       }
    }
