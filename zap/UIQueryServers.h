@@ -64,13 +64,13 @@ private:
    S32 mServersPerPage;
    S32 getFirstServerIndexOnCurrentPage();
 
-   Nonce mNonce;
-   Nonce mEmergencyRemoteServerNonce;
+   Nonce mLocalServerNonce;
+   Nonce mRemoteServerNonce;     // Only used when we can't contact the master
    bool mReceivedListOfServersFromMaster;
    U32 pendingPings;
    U32 pendingQueries;
    U32 mBroadcastPingSendTime;
-   U32 mLastUsedServerId;     // A unique ID we can assign to new servers
+   U32 mLastUsedServerId;        // A unique ID we can assign to new servers
    Timer mMasterRequeryTimer;
    U32 time;
 
@@ -141,7 +141,7 @@ public:
          ReceivedQuery,
       };
 
-      ServerRef(S32 serverId, const Address &address, State state, bool isFromMaster); 
+      ServerRef(S32 serverId, const Address &address, State state, bool isLocalServer); 
       virtual ~ServerRef();
 
       State state;
@@ -150,7 +150,7 @@ public:
       U32 identityToken;
       U32 lastSendTime;
       U32 sendCount;
-      bool isFromMaster;      // True if remote server, false if local server
+      bool isLocalServer;      // True if remote server, false if local server
       bool dedicated;
       bool test;
       bool passwordRequired;

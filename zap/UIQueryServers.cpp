@@ -65,12 +65,12 @@ static void prevButtonClickedCallback(ClientGame *game)
 
 
 // Constructor
-QueryServersUserInterface::ServerRef::ServerRef(S32 serverId, const Address &address, State initialState, bool isFromMaster) :
+QueryServersUserInterface::ServerRef::ServerRef(S32 serverId, const Address &address, State initialState, bool isLocalServer) :
    serverAddress(address)
 {
    this->serverId = serverId;
    this->state = initialState;
-   this->isFromMaster = isFromMaster;      
+   this->isLocalServer = isLocalServer;      
 
    pingTimedOut = false;
    everGotQueryResponse = false;
@@ -220,7 +220,7 @@ void QueryServersUserInterface::onActivate()
       char name[128];
       dSprintf(name, MaxServerNameLen, "Dummy Svr%8x", Random::readI());
 
-      ServerRef s(0, ServerRef::ReceivedPing, true);
+      ServerRef s(0, ServerRef::ReceivedPing, false);
 
       s.setNameDescr(name, "This is my description.  There are many like it, but this one is mine.", Colors::yellow);
       s.setPlayerBotMax(Random::readF() * max / 2, Random::readF() * max / 2, max);
@@ -237,8 +237,8 @@ void QueryServersUserInterface::onActivate()
    mHighlightColumn = mSortColumn;
    pendingPings = 0;
    pendingQueries = 0;
-   mNonce.getRandom();
-   mEmergencyRemoteServerNonce.getRandom();
+   mLocalServerNonce.getRandom();
+   mRemoteServerNonce.getRandom();
 
    mPlayersInGlobalChat.clear();
 
@@ -253,7 +253,7 @@ void QueryServersUserInterface::contactEveryone()
    mBroadcastPingSendTime = Platform::getRealMilliseconds();
 
    //Address broadcastAddress(IPProtocol, Address::Broadcast, DEFAULT_GAME_PORT);
-   //getGame()->getNetInterface()->sendPing(broadcastAddress, mNonce);
+   //getGame()->getNetInterface()->sendPing(broadcastAddress, mLocalServerNonce);
 
    // Always ping these servers -- typically a local server
    Vector<string> *pingList = &getGame()->getSettings()->getIniSettings()->alwaysPingList;
@@ -261,7 +261,7 @@ void QueryServersUserInterface::contactEveryone()
    for(S32 i = 0; i < pingList->size(); i++)
    {
       Address address(pingList->get(i).c_str());
-      getGame()->getNetInterface()->sendPing(address, mNonce);
+      getGame()->getNetInterface()->sendPing(address, mLocalServerNonce);
    } 
 
    // Try to ping the servers from our fallback list if we're having trouble connecting to the master
@@ -270,7 +270,7 @@ void QueryServersUserInterface::contactEveryone()
       Vector<string> *serverList = &getGame()->getSettings()->getIniSettings()->prevServerListFromMaster;
 
       for(S32 i = 0; i < serverList->size(); i++)
-         getGame()->getNetInterface()->sendPing(Address(serverList->get(i).c_str()), mEmergencyRemoteServerNonce);
+         getGame()->getNetInterface()->sendPing(Address(serverList->get(i).c_str()), mRemoteServerNonce);
 
       mGivenUpOnMaster = true;
    }
@@ -349,7 +349,7 @@ void QueryServersUserInterface::forgetServersNoLongerOnList(const Vector<ServerA
 {
    for(S32 i = servers.size() - 1; i >= 0; i--)
    {
-      if(!servers[i].isFromMaster)  // Skip local servers
+      if(servers[i].isLocalServer)  // Skip local servers
          continue;
 
       S32 index = findServerByAddress(serverListFromMaster, servers[i].serverAddress);
@@ -397,7 +397,7 @@ void QueryServersUserInterface::addServersToPingList(const Vector<ServerAddr> &s
 
       if(index == -1)  // Not found -- it's a new server; create a new entry in the servers list
       {
-         ServerRef server(serverList[i].second, serverList[i].first, ServerRef::Start, true);
+         ServerRef server(serverList[i].second, serverList[i].first, ServerRef::Start, false);
          server.setNameDescr("Internet Server",  "Internet Server -- attempting to connect", Colors::white);
 
          server.sendNonce.getRandom();
@@ -414,12 +414,12 @@ void QueryServersUserInterface::addServersToPingList(const Vector<ServerAddr> &s
 
 void QueryServersUserInterface::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 serverId)
 {
-   if(nonce == mNonce || nonce == mEmergencyRemoteServerNonce)     // From local broadcast ping or direct ping of remote server
+   if(nonce == mLocalServerNonce || nonce == mRemoteServerNonce)     // From local broadcast ping or direct ping of remote server
    {
       // Most of the time, this will be a local network server, and isLocal will be true.  It will only be false if we
       // are having problems connecting to the master and we broadcast our own set of pings to previously seen
       // servers.
-      bool isLocal = nonce == mNonce;     
+      bool isLocal = nonce == mLocalServerNonce;     
 
       // If we already know about the server, move along.
       // Pass 0 here to disable id check... we're only interested in IP address matches at this point -- if we have
@@ -430,11 +430,11 @@ void QueryServersUserInterface::gotPingResponse(const Address &address, const No
       // See if we've already been told about server with this serverId by the master... if so, we'll remove that
       // entry and replace it with a new one for the LAN server.  Local servers represent!
       S32 index = findServerByServerId(servers, serverId);
-      if(index != -1 && isLocal && servers[index].isFromMaster)
+      if(index != -1 && isLocal && !servers[index].isLocalServer)
          servers.erase_fast(index);
 
       // Create a new server entry
-      ServerRef s(serverId, address, ServerRef::ReceivedPing, false);
+      ServerRef s(serverId, address, ServerRef::ReceivedPing, true);
 
       if(isLocal)
          s.setNameDescr("LAN Server", "LAN Server -- attempting to connect", Colors::white);
@@ -444,7 +444,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &address, const No
       s.pingTime = Platform::getRealMilliseconds() - mBroadcastPingSendTime;
       s.identityToken = clientIdentityToken;
       s.sendNonce = nonce;
-      s.isFromMaster = !isLocal;
+      s.isLocalServer = isLocal;
 
       servers.push_back(s);
    } 
@@ -492,10 +492,10 @@ void QueryServersUserInterface::gotQueryResponse(const Address &address, S32 ser
          // the master.  Find the dupe and kill it.
          if(s.serverId != serverId && serverId != 0)
          {
-            TNLAssert(!s.isFromMaster, "Expected a local server!");
+            TNLAssert(s.isLocalServer, "Expected a local server!");
             
             S32 index = findServerByServerId(servers, serverId);
-            TNLAssert(servers[index].isFromMaster, "Expected a remote server!");
+            TNLAssert(!servers[index].isLocalServer, "Expected a remote server!");
 
             servers.erase_fast(index);
          }
@@ -505,7 +505,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &address, S32 ser
          // Record time our last query was received, so we'll know when to send again
          s.lastSendTime = Platform::getRealMilliseconds();     
 
-         if(!s.isFromMaster)
+         if(s.isLocalServer)
             s.pingTimedOut = false;    // Cures problem with local servers incorrectly displaying ?s for first 15 seconds
 
 
@@ -596,7 +596,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
             {
                // If this is a local server, remove it from the list if the query times out...
                // We don't have another mechanism for culling dead local servers
-               if(!s.isFromMaster)
+               if(s.isLocalServer)
                {
                   servers.erase_fast(i);
                   continue;
@@ -859,7 +859,7 @@ void QueryServersUserInterface::render()
          U32 y = TOP_OF_SERVER_LIST + (i - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT + 1;
          ServerRef &s = servers[i];
 
-         if(!s.isFromMaster)
+         if(s.isLocalServer)
          {
             glColor(Colors::red, .25);
             drawFilledRect(0, y, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4);
@@ -900,7 +900,7 @@ void QueryServersUserInterface::render()
                else
                   break;
 
-         setLocalRemoteColor(s.isFromMaster);
+         setLocalRemoteColor(!s.isLocalServer);
 
          drawString(columns[0].xStart, y, SERVER_ENTRY_TEXTSIZE, sname.c_str());
 
@@ -941,7 +941,7 @@ void QueryServersUserInterface::render()
          drawStringf(columns[3].xStart,      y, SERVER_ENTRY_TEXTSIZE, "%d",  s.playerCount);
          drawStringf(columns[3].xStart + 78, y, SERVER_ENTRY_TEXTSIZE, "%d",  s.botCount);
 
-         setLocalRemoteColor(s.isFromMaster);
+         setLocalRemoteColor(!s.isLocalServer);
          drawString(columns[4].xStart, y, SERVER_ENTRY_TEXTSIZE, s.serverAddress.toString());
       }
    }
@@ -1168,7 +1168,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
 
                // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)
                // Second param, false when we can ping that server, allows faster connect. If we can ping, we can connect without master help.
-               getGame()->joinRemoteGame(servers[currentIndex].serverAddress, servers[currentIndex].isFromMaster && 
+               getGame()->joinRemoteGame(servers[currentIndex].serverAddress, !servers[currentIndex].isLocalServer && 
                     (getGame()->getSettings()->getIniSettings()->neverConnectDirect || !servers[currentIndex].everGotQueryResponse));
 
                // Save this because we'll need the server name when connecting.  Kind of a hack.
@@ -1424,10 +1424,10 @@ bool QueryServersUserInterface::isMouseOverDivider()
    QueryServersUserInterface::ServerRef *serverA = (QueryServersUserInterface::ServerRef *) a;  \
    QueryServersUserInterface::ServerRef *serverB = (QueryServersUserInterface::ServerRef *) b;  \
                                                                                                 \
-   if(serverA->isFromMaster != serverB->isFromMaster)                                           \
+   if(serverA->isLocalServer != serverB->isLocalServer)                                         \
    {                                                                                            \
-      if(!serverA->isFromMaster) return -1;                                                     \
-      if(!serverB->isFromMaster) return 1;                                                      \
+      if(serverA->isLocalServer) return -1;                                                     \
+      if(serverB->isLocalServer) return  1;                                                     \
    }                                                                 
 
 
