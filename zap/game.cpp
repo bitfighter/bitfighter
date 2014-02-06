@@ -356,7 +356,6 @@ Ship *Game::findShip(const StringTableEntry &clientName)
 }
 
 
-
 GameNetInterface *Game::getNetInterface()
 {
    return mNetInterface;
