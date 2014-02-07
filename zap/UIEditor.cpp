@@ -166,7 +166,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 }
 
 
-GridDatabase *EditorUserInterface::getDatabase()  
+GridDatabase *EditorUserInterface::getDatabase() const
 { 
    return mEditorDatabase.get();
 }  
@@ -2382,9 +2382,9 @@ void EditorUserInterface::selectAll(GridDatabase *database)
 }
 
 
-bool EditorUserInterface::anyItemsSelected(GridDatabase *database)
+bool EditorUserInterface::anyItemsSelected(const GridDatabase *database) const
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = database->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2522,16 +2522,21 @@ void EditorUserInterface::scaleSelection(F32 scale)
 }
 
 
+bool EditorUserInterface::canRotate() const
+{
+   return !mDraggingObjects && anyItemsSelected(getDatabase());
+}
+
+
 // Rotate selected objects around their center point by angle
 void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 {
-   GridDatabase *database = getDatabase();
-
-   if(!anyItemsSelected(database))
+   if(!canRotate())
       return;
 
    saveUndoState();
 
+   GridDatabase *database = getDatabase();
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
    Point center(0,0);
@@ -2699,10 +2704,10 @@ void EditorUserInterface::flipSelectionVertical()
 
 void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
 {
-   GridDatabase *database = getDatabase();
-
-   if(!anyItemsSelected(database))
+   if(!canRotate())
       return;
+
+   GridDatabase *database = getDatabase();
 
    saveUndoState();
 
@@ -3976,20 +3981,23 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputString == "Shift+1" || inputString == "Shift+3")  // '!' or '#'
       startSimpleTextEntryMenu(SimpleTextEntryID);
-	   else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CENTROID))     // Spin by arbitrary amount
-      startSimpleTextEntryMenu(SimpleTextEntryRotateCentroid);
-	    else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_ORIGIN))      // Rotate by arbitrary amount
+   else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CENTROID))     // Spin by arbitrary amount
+   {
+      if(canRotate())
+         startSimpleTextEntryMenu(SimpleTextEntryRotateCentroid);
+   }
+	else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_ORIGIN))      // Rotate by arbitrary amount
       startSimpleTextEntryMenu(SimpleTextEntryRotateOrigin);
-	   else if(inputString == getEditorBindingString(settings, BINDING_SPIN_CCW))            // Spin CCW
+	else if(inputString == getEditorBindingString(settings, BINDING_SPIN_CCW))            // Spin CCW
       rotateSelection(-15.f, false);
-	   else if(inputString == getEditorBindingString(settings, BINDING_SPIN_CW))             // Spin CW
+	else if(inputString == getEditorBindingString(settings, BINDING_SPIN_CW))             // Spin CW
       rotateSelection(15.f, false);
-	   else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CCW_ORIGIN))   // Rotate CCW about origin
+	else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CCW_ORIGIN))   // Rotate CCW about origin
       rotateSelection(-15.f, true);
-	   else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CW_ORIGIN))    // Rotate CW about origin
+	else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CW_ORIGIN))    // Rotate CW about origin
       rotateSelection(15.f, true);
 
-	   else if(inputString == getEditorBindingString(settings, BINDING_INSERT_GEN_ITEMS))    // Insert items generated with script into editor
+	else if(inputString == getEditorBindingString(settings, BINDING_INSERT_GEN_ITEMS))    // Insert items generated with script into editor
       copyScriptItemsToEditor();
 
    else if(inputString == "Up Arrow" || inputString == "W" || inputString == "Shift+W")     // W or Up - Pan up
@@ -4791,7 +4799,7 @@ S32 EditorUserInterface::getItemSelectedCount()
 }
 
 
-bool EditorUserInterface::anythingSelected()
+bool EditorUserInterface::anythingSelected() const
 {
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 

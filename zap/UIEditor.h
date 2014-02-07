@@ -221,8 +221,8 @@ private:
    
    BfObject *findObjBySerialNumber(const GridDatabase *database, S32 serialNumber) const;
 
-   bool anyItemsSelected(GridDatabase *database);  // Are any items selected?
-   bool anythingSelected();                        // Are any items/vertices selected?
+   bool anyItemsSelected(const GridDatabase *database) const;  // Are any items selected?
+   bool anythingSelected() const;                              // Are any items/vertices selected?
 
 public:
    S32 getItemSelectedCount();                     // How many are objects are selected?
@@ -244,6 +244,7 @@ private:
    S32 mEdgeHit;
    S32 mHitVertex;
 
+   bool canRotate() const;             // Returns true if we're able to rotate something
 
    SafePtr<BfObject> mNewItem;
    SafePtr<BfObject> mSnapObject;
@@ -306,9 +307,9 @@ protected:
 
 public:
    explicit EditorUserInterface(ClientGame *game);    // Constructor
-   virtual ~EditorUserInterface();           // Destructor
+   virtual ~EditorUserInterface();                    // Destructor
 
-   GridDatabase *getDatabase();      // Need external access to this in one static function
+   GridDatabase *getDatabase() const;        // Need external access to this in one static function
 
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);
