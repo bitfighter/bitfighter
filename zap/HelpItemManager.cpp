@@ -84,6 +84,7 @@ HelpItemManager::HelpItemManager(GameSettings *settings)
    loadAlreadySeenList();
 }
 
+
 // Destructor
 HelpItemManager::~HelpItemManager()
 {
@@ -109,8 +110,20 @@ void HelpItemManager::reset()
    mTestingTimer.clear();
 #endif
 
-
    mItemsToHighlight.clear();
+}
+
+
+// This gets run just as ghosting starts, before GameType has been transmitted.  Specifically, before this runs:
+//    game->addInlineHelpItem(getGameStartInlineHelpItem());
+// So it is safe to clear out all GameStart items, and, when the GameType does get loaded, a new GameStart item will be added.
+void HelpItemManager::onGameStarting()
+{
+   // Remove any queued GameStart items lingering from a previous level
+   removeGameStartItemsFromQueue();
+
+   // And some specific items that shouldn't be here
+   removeInlineHelpItem(TryDroppingItem, false);
 }
 
 
@@ -608,8 +621,7 @@ void HelpItemManager::addInlineHelpItem(HelpItem item, bool messageCameFromQueue
    // of course, it came from the queue!)
    if(!messageCameFromQueue)
    {
-      if(helpItems[item].priority == GameStart)
-         removeGameStartItemsFromQueue();
+      TNLAssert(!queueHasGameStartItems(), "Any lingering GameStart items should have been removed in onGameStarting()!");
 
       Priority pr = helpItems[item].priority;
 
@@ -654,6 +666,17 @@ void HelpItemManager::removeGameStartItemsFromQueue()
    // Any GameStart items should be at the beginning of the queue, as they are only added if the queue is empty
    while(mHighPriorityQueuedItems.size() > 0 && helpItems[mHighPriorityQueuedItems[0].helpItem].priority == GameStart)
       mHighPriorityQueuedItems.erase(0);
+}
+
+
+// Only called from an assert
+bool HelpItemManager::queueHasGameStartItems() const
+{
+   for(S32 i = 0; i < mHighPriorityQueuedItems.size(); i++)
+      if(helpItems[mHighPriorityQueuedItems[0].helpItem].priority == GameStart)
+         return true;
+
+   return false;
 }
 
 

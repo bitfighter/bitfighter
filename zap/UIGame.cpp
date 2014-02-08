@@ -224,6 +224,8 @@ void GameUserInterface::onGameStarting()
    mDispWorldExtents.set(Point(0,0), 0);
    Barrier::clearRenderItems();
    mHasShipPos = false;
+
+   mHelpItemManager.onGameStarting();
 }
 
 

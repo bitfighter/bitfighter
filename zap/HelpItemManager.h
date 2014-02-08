@@ -193,6 +193,7 @@ private:
    void queueHelpItem(HelpItem item);
    void moveItemFromQueueToActiveList(const ClientGame *game);
    void removeGameStartItemsFromQueue();
+   bool queueHasGameStartItems() const;
 
    S32 getLinesInHelpItem(S32 item) const;
 
@@ -234,6 +235,8 @@ public:
    void clearAlreadySeenList();
    void saveAlreadySeenList();
    void loadAlreadySeenList();
+
+   void onGameStarting();        // Reset things for a new level
    
    void loadAlreadySeenLevelupMessageList();
    void saveAlreadySeenLevelupMessageList();
