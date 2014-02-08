@@ -1000,29 +1000,29 @@ void Mine::renderItem(const Point &pos)
    if(exploded)
       return;
 
-   bool visible, armed;
+   bool visible = false, armed = false;
 
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(ship)
+   ClientInfo *clientInfo = getGame()->getLocalRemoteClientInfo();
+
+   if(clientInfo)
    {
       armed = mArmed;
 
-      // Can see mine if laid by teammate in team game OR you laid it yourself OR
-      // sensor is active and you're within the detection distance
-      visible = ( (ship->getTeam() == getTeam()) && getGame()->isTeamGame() ) ||
-            mIsOwnedByLocalClient ||
-            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(ModuleInfo::SensorCloakInnerDetectionDistance));
+      // Can see mine if laid by teammate in team game OR you laid it yourself
+      if( (clientInfo->getTeamIndex() == getTeam() && getGame()->isTeamGame()) ||
+            mIsOwnedByLocalClient)
+         visible = true;
+
+      // If sensor is active and you're within the detection distance
+      if(ship && ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(ModuleInfo::SensorCloakInnerDetectionDistance))
+         visible = true;
    }
    else
    {
       armed = true;
-
-      // Not in editor, probably idle
-      if(static_cast<ClientGame*>(getGame())->isConnectedToServer())
-         visible = false;
-      else
-         visible = true;      // We get here in editor when in preview mode
+      visible = true;      // We get here in editor when in preview mode
    }
 
    renderMine(pos, armed, visible);
@@ -1232,27 +1232,28 @@ void SpyBug::renderItem(const Point &pos)
    if(exploded)
       return;
 
-   bool visible;
+   bool visible = false;
 
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(ship)
+   // Used for getting team, ship can be NULL when idle
+   ClientInfo *clientInfo = getGame()->getLocalRemoteClientInfo();
+
+   if(clientInfo)
    {
-      // Can see bug if laid by teammate in team game OR you laid it yourself OR
-      // spyBug is neutral OR sensor is active and you're within the detection distance
-      visible = ((ship->getTeam() == getTeam()) && getGame()->isTeamGame())   ||
-            mIsOwnedByLocalClient ||
-            getTeam() == TEAM_NEUTRAL ||
-            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(ModuleInfo::SensorCloakInnerDetectionDistance));
+      // Can see bug if laid by teammate in team game OR
+      // you laid it yourself OR spyBug is neutral
+      if( ((clientInfo->getTeamIndex() == getTeam()) && getGame()->isTeamGame())   ||
+            mIsOwnedByLocalClient || getTeam() == TEAM_NEUTRAL)
+         visible = true;
+
+      // If sensor is active and you're within the detection distance
+      if(ship && ship->hasModule(ModuleSensor) &&
+            (ship->getPos() - getPos()).lenSquared() < sq(ModuleInfo::SensorCloakInnerDetectionDistance))
+         visible = true;
    }
    else    
-   {
-      // Not in editor, probably idle
-      if(static_cast<ClientGame*>(getGame())->isConnectedToServer())
-         visible = false;
-      else
-         visible = true;      // We get here in editor when in preview mode
-   }
+      visible = true;      // We get here in editor when in preview mode
 
 
    renderSpyBug(pos, *getColor(), visible, true);

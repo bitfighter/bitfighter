@@ -9,10 +9,6 @@
 #include "ship.h"
 #include "stringUtils.h"
 
-#ifndef ZAP_DEDICATED
-#  include "ClientGame.h"
-#endif
-
 #include "gameObjectRender.h"    // For renderTextItem()
 
 #include "Colors.h"
@@ -99,19 +95,15 @@ void TextItem::newObjectFromDock(F32 gridSize)
 void TextItem::render()
 {
 #ifndef ZAP_DEDICATED
-   Ship *ship = getGame()->getLocalPlayerShip();
+   ClientInfo *clientInfo = getGame()->getLocalRemoteClientInfo();
 
    // Don't render opposing team's text items if we are in a game... but in editor preview mode, where
    // we don't have a connection to the server, text will be rendered normally
-   if(ship)
+   if(clientInfo)
    {
-      if(ship->getTeam() != getTeam() && getTeam() != TEAM_NEUTRAL)
+      if(clientInfo->getTeamIndex() != getTeam() && getTeam() != TEAM_NEUTRAL)
          return;
    }
-
-   // We're connected to a server but ship is NULL, don't render (like in /idle)
-   if(!ship && static_cast<ClientGame*>(getGame())->isConnectedToServer())
-      return;
 
    renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());
 #endif
