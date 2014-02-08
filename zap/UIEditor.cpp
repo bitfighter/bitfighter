@@ -2536,7 +2536,6 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 
    saveUndoState();
 
-   GridDatabase *database = getDatabase();
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
    Point center(0,0);

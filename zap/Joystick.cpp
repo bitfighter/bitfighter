@@ -268,6 +268,14 @@ JoystickButton Joystick::remapSdlButtonToJoystickButton(U8 rawButton)
 
    return JoystickButtonUnknown;
 }
+JoystickButton Joystick::remapSdlAxisToJoystickButton(U8 rawButton)
+{
+   for(S32 i = 0; i < JoystickButtonCount; i++)
+      if(JoystickPresetList[SelectedPresetIndex].buttonMappings[i].rawAxis == rawButton)
+         return JoystickPresetList[SelectedPresetIndex].buttonMappings[i].button;
+
+   return JoystickButtonUnknown;
+}
 
 
 void Joystick::getAllJoystickPrettyNames(Vector<string> &nameList)
@@ -413,7 +421,8 @@ bool Joystick::isButtonDefined(S32 presetIndex, S32 buttonIndex)
 {
    TNLAssert(buttonIndex >= 0 && buttonIndex < JoystickButtonCount, "Button index out of range!");
 
-   return Joystick::JoystickPresetList[presetIndex].buttonMappings[buttonIndex].sdlButton != Joystick::FakeRawButton;
+   return Joystick::JoystickPresetList[presetIndex].buttonMappings[buttonIndex].sdlButton != Joystick::FakeRawButton
+      || Joystick::JoystickPresetList[presetIndex].buttonMappings[buttonIndex].rawAxis != Joystick::FakeRawButton;
 }
 
 
@@ -537,6 +546,7 @@ void Joystick::loadJoystickPresets(GameSettings *settings)
          buttonInfo.buttonShape = buttonLabelToButtonShape(buttonInfoMap["Shape"]);
          buttonInfo.buttonSymbol = stringToButtonSymbol(buttonInfoMap["Label"]);
          buttonInfo.sdlButton = buttonInfoMap["Raw"] == "" ? FakeRawButton : U8(Zap::stoi(buttonInfoMap["Raw"]));
+         buttonInfo.rawAxis = buttonInfoMap["Axis"] == "" ? FakeRawButton : U8(Zap::stoi(buttonInfoMap["Axis"]));
 
          // Set the button info with index of the JoystickButton
          joystickInfo.buttonMappings[buttonInfo.button] = buttonInfo;

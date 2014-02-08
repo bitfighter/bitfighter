@@ -6,10 +6,10 @@
 #include "GameManager.h"
 
 #include "ServerGame.h"
-#include "UIErrorMessage.h"
-#include "UIManager.h"
 
 #ifndef ZAP_DEDICATED
+#  include "UIErrorMessage.h"
+#  include "UIManager.h"
 #  include "ClientGame.h"
 #  include "ClientInfo.h"
 #endif

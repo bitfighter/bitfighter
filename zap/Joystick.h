@@ -72,6 +72,7 @@ public:
       ButtonInfo() { sdlButton = FakeRawButton; }     // Quickie constructor slipped in to header file... shhhh!
       JoystickButton button;
       U8 sdlButton;
+      U8 rawAxis;
       string label;
       Color color;
       Joystick::ButtonShape buttonShape;
@@ -132,6 +133,7 @@ public:
    static bool isButtonDefined(S32 presetIndex, S32 buttonIndex);
 
    static JoystickButton remapSdlButtonToJoystickButton(U8 button);
+   static JoystickButton remapSdlAxisToJoystickButton(U8 button);
 };
 
 } /* namespace Zap */

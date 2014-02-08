@@ -433,7 +433,22 @@ void Event::onJoyAxis(ClientGame *game, U8 whichJoystick, U8 axis, S16 value)
 //   logprintf("SDL Axis number: %u, value: %d", axis, value);
 
    if(axis < Joystick::rawAxisCount)
-      Joystick::rawAxis[axis] = (F32)value / (F32)S16_MAX;
+   {
+      F32 axisOld = Joystick::rawAxis[axis];
+      F32 axisNew = Joystick::rawAxis[axis] = (F32)value / (F32)S16_MAX;
+      if((axisOld > 0) != (axisNew > 0))
+      {
+         JoystickButton button = Joystick::remapSdlAxisToJoystickButton(axis); //JoystickButtonUnknown
+         if(button != JoystickButtonUnknown)
+         {
+            if(axisNew > 0)
+               inputCodeDown(game->getUIManager()->getCurrentUI(), InputCodeManager::joystickButtonToInputCode(button));
+            else
+               inputCodeUp(game->getUIManager()->getCurrentUI(), InputCodeManager::joystickButtonToInputCode(button));
+
+         }
+      }
+   }
 
    // Left/Right movement axis
    if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].moveAxesSdlIndex[0])
