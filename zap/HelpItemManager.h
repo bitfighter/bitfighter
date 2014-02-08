@@ -115,8 +115,8 @@
                                                                                                                                 "Capture zones ([[GOAL_ICON]]) by carrying the flag into them.", NULL }))                    \
                                                                                                                                                                                                                              \
    /* Some GameType specific help items */                                                                                                                                                                                   \
-   HELP_TABLE_ITEM(RabLocalPlayerGrabbedFlagItem, UnknownTypeNumber,            true,  false, Any,        High,      ARRAYDEF({ "You have the flag (carrot)!  Keep it as long as you can!", NULL }))                         \
-   HELP_TABLE_ITEM(RabOtherPlayerGrabbedFlagItem, UnknownTypeNumber,            true,  false, Any,        High,      ARRAYDEF({ "Another player grabbed the flag (carrot)!  KILL THEM!", NULL }))                            \
+   HELP_TABLE_ITEM(RabLocalPlayerGrabbedFlagItem, UnknownTypeNumber,            true,  false, Any,        Now,       ARRAYDEF({ "You have the flag (carrot)!  Keep it as long as you can!", NULL }))                         \
+   HELP_TABLE_ITEM(RabOtherPlayerGrabbedFlagItem, UnknownTypeNumber,            true,  false, Any,        Now,       ARRAYDEF({ "Another player grabbed the flag (carrot)!  KILL THEM!", NULL }))                            \
 
 
 using namespace TNL;
