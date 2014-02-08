@@ -1777,7 +1777,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment("----------------");
       addComment(" The Host section contains entries that configure the game when you are hosting");
       addComment(" ServerName - The name others will see when they are browsing for servers (max 20 chars)");
-      addComment(" ServerAddress - The address of your server, e.g. IP:localhost:1234 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888 (leave blank to let the system decide)");
+      addComment(" ServerAddress - Socket address and port to bind to, e.g. IP:Any:9876 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888 (leave blank to let the system decide; this is almost always what you want)");
       addComment(" ServerDescription - A one line description of your server.  Please include nickname and physical location!");
       addComment(" ServerPassword - You can require players to use a password to play on your server.  Leave blank to grant access to all.");
       addComment(" OwnerPassword - Super admin password.  Gives admin rights + power over admins.  Do not give this out!");
