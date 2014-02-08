@@ -638,28 +638,20 @@ bool GameUserInterface::isChatting() const
 
 void GameUserInterface::renderSuspendedMessage() const
 {
-   static string waitMsg[] = { "", 
-                               "WILL RESPAWN",
-                               "IN BLAH BLAH SECONDS",    // <== This line will be updated below
-                               "",
-                               "" };
-
-   static string readyMsg[] = { "", 
-                                "PRESS ANY",
-                                "KEY TO",
-                                "RESPAWN",
-                                "" };
-
    static const S32 DisplayStyle = 2;
    static const S32 VertOffset = -30;
 
    if(getGame()->inReturnToGameCountdown())
    {
+      static string waitMsg[] = { "", "WILL RESPAWN", "IN BLAH BLAH SECONDS", "", "" };
       waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.0f)) + " SECONDS";
       renderMessageBox("", "", waitMsg,  ARRAYSIZE(waitMsg),  VertOffset, DisplayStyle);
    }
    else
+   {
+      static string readyMsg[] = { "",  "PRESS ANY", "KEY TO", "RESPAWN", "" };
       renderMessageBox("", "", readyMsg, ARRAYSIZE(readyMsg), VertOffset, DisplayStyle);
+   }
 }
 
 
