@@ -436,7 +436,7 @@ void Event::onJoyAxis(ClientGame *game, U8 whichJoystick, U8 axis, S16 value)
    {
       F32 axisOld = Joystick::rawAxis[axis];
       F32 axisNew = Joystick::rawAxis[axis] = (F32)value / (F32)S16_MAX;
-      if(axisOld > 0 != axisNew > 0)
+      if((axisOld > 0) != (axisNew > 0))
       {
          JoystickButton button = Joystick::remapSdlAxisToJoystickButton(axis); //JoystickButtonUnknown
          if(button != JoystickButtonUnknown)
