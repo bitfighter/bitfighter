@@ -107,12 +107,15 @@ void MenuUserInterface::onActivate()
    mDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
    selectedIndex = 0;
    mFirstVisibleItem = 0;
+
+   clearFadingNotice();
 }
 
 
 void MenuUserInterface::onReactivate()
 {
    mDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
+   clearFadingNotice();
 }
 
 
@@ -392,6 +395,7 @@ void MenuUserInterface::render()
    // If we have a fading notice to show
    if(mFadingNoticeTimer.getCurrent() != 0)
    {
+      // Calculate the fade
       F32 alpha = 1.0;
       if(mFadingNoticeTimer.getCurrent() < 1000)
          alpha = (F32) mFadingNoticeTimer.getCurrent() * 0.001f;
@@ -655,13 +659,13 @@ bool MenuUserInterface::processKeys(InputCode inputCode)
    { 
       // Do nothing 
    }
-
    else if(U32(selectedIndex) >= U32(mMenuItems.size()))  // Probably empty menu... Can only go back.
    {
       onEscape();
    }
    else if(mMenuItems[selectedIndex]->handleKey(inputCode))
    {
+      // Do nothing
    }
    else if(inputCode == KEY_ENTER || (inputCode == KEY_SPACE && !mMenuItems[selectedIndex]->hasTextInput()))
    {
@@ -783,6 +787,13 @@ void MenuUserInterface::setFadingNotice(U32 time, S32 top, const string &message
    mFadingNoticeTimer.reset(time);
    mFadingNoticeVerticalPosition = top;
    mFadingNoticeMessage = message;
+}
+
+
+// Clear the notice
+void MenuUserInterface::clearFadingNotice()
+{
+   mFadingNoticeTimer.clear();
 }
 
 
@@ -1553,7 +1564,7 @@ static void resetMessagesCallback(ClientGame *game, U32 val)
 {
    game->resetInGameHelpMessages();
 
-   game->getUIManager()->getUI<InGameHelpOptionsUserInterface>()->setFadingNotice(4000, 400, "RESET");
+   game->getUIManager()->getUI<InGameHelpOptionsUserInterface>()->setFadingNotice(FOUR_SECONDS, 400, "Messages Reset");
 }
 
 

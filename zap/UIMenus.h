@@ -118,6 +118,7 @@ public:
    void setAssociatedObject(BfObject *obj);
 
    void setFadingNotice(U32 time, S32 top, const string &message);  // Set a fading notice on a menu
+   void clearFadingNotice();                                        // Clear a fading notice
 };
 
 
