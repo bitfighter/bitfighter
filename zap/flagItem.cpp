@@ -349,7 +349,7 @@ bool FlagItem::collide(BfObject *hitObject)
 
    // We've hit a ship or robot  (remember, robot is a subtype of ship, so this will work for both)
    // We'll need to make sure the ship is a valid entity and that it hasn't exploded
-   if(ship->hasExploded)
+   if(ship->mHasExploded)
       return false;
 
    // Finally!

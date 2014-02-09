@@ -79,6 +79,8 @@ public:
 
    void render();
    void renderItem(const Point &pos);
+   bool shouldRender() const;
+
 
    BfObject *getShooter() const;
 
@@ -125,12 +127,14 @@ public:
    static const S32 OuterBlastRadius = 250;
 
    S32 mTimeRemaining;
-   bool exploded;
+   bool mExploded;
    bool collide(BfObject *otherObj);   // Things (like bullets) can collide with grenades
 
 
    WeaponType mWeaponType;
    void renderItem(const Point &pos);
+   bool shouldRender() const;
+
    void idle(IdleCallPath path);
    void damageObject(DamageInfo *damageInfo);
    void doExplosion(const Point &pos);
@@ -308,7 +312,7 @@ private:
    S32 mReassessTargetTimer;
 
    S32 mTimeRemaining;
-   bool exploded;
+   bool mExploded;
    bool mBounced;
 
    void initialize(const Point &pos, const Point &vel, F32 angle, BfObject *shooter);
@@ -333,6 +337,8 @@ public:
    virtual bool canAddToEditor();
 
    void renderItem(const Point &pos);
+   bool shouldRender() const;
+
    void idle(IdleCallPath path);
    void damageObject(DamageInfo *damageInfo);
    void doExplosion(const Point &pos);

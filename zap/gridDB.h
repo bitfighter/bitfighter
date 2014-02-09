@@ -61,7 +61,7 @@ public:
    virtual const Vector<Point> *getCollisionPoly() const;
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
 
-   virtual bool isCollisionEnabled();
+   virtual bool isCollisionEnabled() const;
 
    bool isInDatabase();
    bool isDeleted();

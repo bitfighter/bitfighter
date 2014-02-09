@@ -282,7 +282,7 @@ void Robot::onAddedToGame(Game *game)
 
    setOwner(mClientInfo);
    
-   hasExploded = true;        // Because we start off "dead", but will respawn real soon now...
+   mHasExploded = true;        // Because we start off "dead", but will respawn real soon now...
    disableCollision();
 
    game->addBot(this);        // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
@@ -322,10 +322,10 @@ void Robot::killScript()
 // Robot just died
 void Robot::kill()
 {
-   if(hasExploded) 
+   if(mHasExploded) 
       return;
 
-   hasExploded = true;
+   mHasExploded = true;
 
    setMaskBits(ExplodedMask);
    if(!isGhost() && getOwner())
@@ -490,7 +490,7 @@ void Robot::renderLayer(S32 layerIndex)
    if(isGhost())                                         // Client rendering client's objects
       Parent::renderLayer(layerIndex);
 
-   else if(layerIndex == 1 && flightPlan.size() != 0)    // Client hosting is rendering server objects
+   else if(layerIndex == 1 && flightPlan.size() != 0)    // WARNING!!  Client hosting is rendering server objects
       renderFlightPlan(getActualPos(), flightPlan.last(), flightPlan);
 #endif
 }
@@ -500,7 +500,7 @@ void Robot::idle(BfObject::IdleCallPath path)
 {
    TNLAssert(path != BfObject::ServerProcessingUpdatesFromClient, "Should never idle with ServerProcessingUpdatesFromClient");
 
-   if(hasExploded)
+   if(mHasExploded)
       return;
 
    if(path != BfObject::ServerIdleMainLoop)   
@@ -922,7 +922,7 @@ S32 Robot::lua_findClosestEnemy(lua_State *L)
 
       // Ignore ship/robot if it's dead or cloaked
       Ship *ship = static_cast<Ship *>(fillVector[i]);
-      if(ship->hasExploded || !ship->isVisible(hasModule(ModuleSensor)))
+      if(ship->mHasExploded || !ship->isVisible(hasModule(ModuleSensor)))
          continue;
 
       // Ignore ships on same team during team games
@@ -1370,7 +1370,7 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
          // Ignore ship/robot if it's dead or cloaked (unless bot has sensor)
          Ship *ship = static_cast<Ship *>(fillVector[i]);
          bool callerHasSensor = this->hasModule(ModuleSensor);
-         if(!ship->isVisible(callerHasSensor) || ship->hasExploded)
+         if(!ship->isVisible(callerHasSensor) || ship->mHasExploded)
             continue;
       }
 
@@ -1402,7 +1402,7 @@ static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S
       Ship *potential = static_cast<Ship *>(target);
 
       // Is it dead or cloaked?  If so, ignore
-      if(!potential->isVisible(botHasSensor) || potential->hasExploded)
+      if(!potential->isVisible(botHasSensor) || potential->mHasExploded)
          return false;
    }
 

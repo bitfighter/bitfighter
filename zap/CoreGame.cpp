@@ -324,13 +324,19 @@ F32 CoreItem::getCoreAngle(U32 time)
 void CoreItem::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
-   if(!mHasExploded)
+   if(shouldRender())
    {
       GameType *gameType = getGame()->getGameType();
       S32 time = gameType->getTotalGamePlayedInMs();
       renderCore(pos, getColor(), time, getPanelGeom(), mPanelHealth, mStartingPanelHealth);
    }
 #endif
+}
+
+
+bool CoreItem::shouldRender() const
+{
+   return !mHasExploded;
 }
 
 

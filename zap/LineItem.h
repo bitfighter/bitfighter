@@ -35,6 +35,8 @@ public:
    LineItem *clone() const;
 
    virtual void render();
+   bool shouldRender() const;
+
    S32 getRenderSortValue();
 
    bool processArguments(S32 argc, const char **argv, Game *game);   // Create objects from parameters stored in level file

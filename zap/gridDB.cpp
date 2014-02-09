@@ -838,7 +838,7 @@ bool DatabaseObject::getCollisionCircle(U32 stateIndex, Point &point, F32 &radiu
 }
 
 
-bool DatabaseObject::isCollisionEnabled()
+bool DatabaseObject::isCollisionEnabled() const
 {
    return true;
 }

@@ -1068,7 +1068,7 @@ void MountableItem::idle(BfObject::IdleCallPath path)
       if(!mMount)    // We might not have a mount here if we're creating a ship holding a Nexus flag, and the flag is sent before the ship
          return;
 
-      TNLAssert(!mMount->hasExploded || mMount->isGhost(), "When mount explodes, it must unmount any items it is carrying!");
+      TNLAssert(!mMount->mHasExploded || mMount->isGhost(), "When mount explodes, it must unmount any items it is carrying!");
                 // Note on Assert:  Client side could still have it still mounted due to possible lag...
 
       //updateExtentInDatabase();
@@ -1433,9 +1433,15 @@ F32 Asteroid::getAsteroidMass(S32 size_left)
 }
 
 
+bool Asteroid::shouldRender() const
+{
+   return !hasExploded;
+}
+
+
 void Asteroid::renderItem(const Point &pos)
 {
-   if(!hasExploded)
+   if(shouldRender())
       renderAsteroid(pos, mDesign, mRadius / 89.f);
 }
 
@@ -1987,7 +1993,7 @@ bool ResourceItem::collide(BfObject *hitObject)
 
    Ship *ship = static_cast<Ship *>(hitObject);
 
-   if(ship->hasExploded)
+   if(ship->mHasExploded)
       return false;
 
    if(ship->hasModule(ModuleEngineer) && !ship->isCarryingItem(ResourceItemTypeNumber))

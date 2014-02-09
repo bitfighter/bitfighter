@@ -122,7 +122,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    if(!isRobot)               // Robots will run this during their own initialization; no need to run it twice!
       initialize(pos);
    else
-      hasExploded = false;    // Client needs this false for unpackUpdate
+      mHasExploded = false;    // Client needs this false for unpackUpdate
 
    mZones1IsCurrent = true;
 
@@ -187,7 +187,7 @@ void Ship::initialize(const Point &pos)
    updateExtentInDatabase();
 
    mHealth = 1.0;       // Start at full health
-   hasExploded = false; // Haven't exploded yet!
+   mHasExploded = false; // Haven't exploded yet!
 
 #ifndef ZAP_DEDICATED
    for(S32 i = 0; i < TrailCount; i++)          // Clear any vehicle trails
@@ -539,7 +539,7 @@ void Ship::controlMoveReplayComplete()
 void Ship::idle(IdleCallPath path)
 {
    // Don't idle exploded ships
-   if(hasExploded)
+   if(mHasExploded)
       return;
 
    if(path == ServerProcessingUpdatesFromClient && getClientInfo())
@@ -1127,8 +1127,8 @@ void Ship::resetFastRecharge()
 
 void Ship::damageObject(DamageInfo *theInfo)
 {
-   TNLAssert(hasExploded || mHealth > 0, "One must be true!  If this never fires, remove mHealth == 0 from if below.");  // Added 22-Sep-2013 by Watusimoto
-   if(mHealth == 0 || hasExploded)  // Stop multi-kill problem;  might stop robots from becoming invincible
+   TNLAssert(mHasExploded || mHealth > 0, "One must be true!  If this never fires, remove mHealth == 0 from if below.");  // Added 22-Sep-2013 by Watusimoto
+   if(mHealth == 0 || mHasExploded)  // Stop multi-kill problem;  might stop robots from becoming invincible
       return; 
 
    bool hasArmor = hasModule(ModuleArmor);
@@ -1404,7 +1404,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          stream->writeEnum(mLoadout.getWeapon(i), WeaponCount);
    }
 
-   if(!stream->writeFlag(hasExploded))
+   if(!stream->writeFlag(mHasExploded))
    {
       // Note that RespawnMask is only used by Robots -- can this be refactored out of Ship.cpp?
       if(stream->writeFlag(updateMask & (RespawnMask | SpawnShieldMask)))
@@ -1576,12 +1576,12 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
    }
 
-   if(stream->readFlag())  // hasExploded
+   if(stream->readFlag())  // mHasExploded
    {
       mHealth = 0;
-      if(!hasExploded)
+      if(!mHasExploded)
       {
-         hasExploded = true;
+         mHasExploded = true;
          disableCollision();
 
          if(!wasInitialUpdate)
@@ -1595,9 +1595,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       if(stream->readFlag())     // Respawn
       {
-         if(hasExploded)
+         if(mHasExploded)
             enableCollision();
-         hasExploded = false;
+         mHasExploded = false;
          playSpawnEffect = stream->readFlag();    // Prevent spawn effect every time the robot goes into scope
          shipwarped = true;
 
@@ -1740,7 +1740,7 @@ bool Ship::hasModule(ShipModule mod) const
 
 bool Ship::isDestroyed()
 {
-   return hasExploded;
+   return mHasExploded;
 }
 
 
@@ -1961,7 +1961,7 @@ void Ship::kill()
 
    // Client and server
    deleteObject(KillDeleteDelay);
-   hasExploded = true;
+   mHasExploded = true;
    setMaskBits(ExplodedMask);
    disableCollision();
 
@@ -2013,7 +2013,7 @@ void Ship::emitMovementSparks()
 {
 #ifndef ZAP_DEDICATED
    static const F32 TOO_SLOW_FOR_SPARKS = 0.1f;
-   if(hasExploded || getActualVel().lenSquared() < sq(TOO_SLOW_FOR_SPARKS))
+   if(mHasExploded || getActualVel().lenSquared() < sq(TOO_SLOW_FOR_SPARKS))
       return;
 
    ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[mShapeType];
@@ -2185,7 +2185,7 @@ void Ship::renderLayer(S32 layerIndex)
    if(layerIndex == 0)  // Only render on layers -1 and 1
       return;
 
-   if(hasExploded)      // Don't render an exploded ship!
+   if(!shouldRender())      // Don't render an exploded ship!
       return;
 
    ClientGame *clientGame = static_cast<ClientGame *>(getGame());
@@ -2244,6 +2244,12 @@ void Ship::renderLayer(S32 layerIndex)
       if(mMountedItems[i].isValid())
          mMountedItems[i]->renderItemAlpha(getRenderPos(), alpha);
 #endif
+}
+
+
+bool Ship::shouldRender() const
+{
+   return !mHasExploded;
 }
 
 

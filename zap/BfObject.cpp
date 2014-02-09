@@ -505,9 +505,11 @@ Game *BfObject::getGame() const
 }
 
 
-bool BfObject::hasTeam()      { return true; }
-bool BfObject::canBeNeutral() { return true; }
-bool BfObject::canBeHostile() { return true; }
+// These will all be overridden by various child classes
+bool BfObject::hasTeam()            { return true; }
+bool BfObject::canBeNeutral()       { return true; }
+bool BfObject::canBeHostile()       { return true; }
+bool BfObject::shouldRender() const { return true; }     
 
 
 bool BfObject::canAddToEditor() { return true; }
@@ -1125,7 +1127,7 @@ void BfObject::enableCollision()
 }
 
 
-bool BfObject::isCollisionEnabled()
+bool BfObject::isCollisionEnabled() const
 {
    return mDisableCollisionCount == 0;
 }

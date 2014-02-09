@@ -189,11 +189,12 @@ public:
 #endif
 
    F32 mass;            // Mass of ship, not used
-   bool hasExploded;
+   bool mHasExploded;
 
    Vector<SafePtr<BfObject> > mRepairTargets;            // TODO: Make this protected
 
    virtual void renderLayer(S32 layerIndex);
+   bool shouldRender() const;
 
    // Constructor
    Ship(ClientInfo *clientInfo, S32 team, const Point &p, bool isRobot = false);   // Standard constructor   

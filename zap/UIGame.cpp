@@ -2731,7 +2731,7 @@ void GameUserInterface::renderGameNormal()
 
    for(S32 i = 0; i < itemsToHighlight->size(); i++)
       for(S32 j = 0; j < renderObjects.size(); j++)
-         if(itemsToHighlight->get(i).type == renderObjects[j]->getObjectTypeNumber())
+         if(itemsToHighlight->get(i).type == renderObjects[j]->getObjectTypeNumber() && renderObjects[j]->shouldRender())
          {
             HighlightItem::Whose whose = itemsToHighlight->get(i).whose;
 
@@ -2768,7 +2768,8 @@ void GameUserInterface::renderGameNormal()
       getGame()->getGameObjDatabase()->findObjects(itemTypes, fillVector, *getGame()->getWorldExtents());
       polygons.clear();
       for(S32 i = 0; i < fillVector.size(); i++)
-         polygons.push_back(fillVector[i]->getOutline());
+         if(static_cast<BfObject *>(fillVector[i])->shouldRender())
+            polygons.push_back(fillVector[i]->getOutline());
    }
 #endif
 

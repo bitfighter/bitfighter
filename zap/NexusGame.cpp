@@ -1107,7 +1107,7 @@ bool NexusZone::collide(BfObject *hitObject)
 
    Ship *theShip = static_cast<Ship *>(hitObject);
 
-   if(theShip->hasExploded)                              // Ignore collisions with exploded ships
+   if(theShip->mHasExploded)                             // Ignore collisions with exploded ships
       return false;
 
    GameType *gameType = getGame()->getGameType();

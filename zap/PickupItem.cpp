@@ -61,14 +61,18 @@ void PickupItem::idle(BfObject::IdleCallPath path)
       }
    }
    // else ... check onAddedToGame to enable client side idle()
-
-   //updateExtent();    ==> Taking this out... why do we need it for a non-moving object?  CE 8/23/11
 }
 
 
-bool PickupItem::isVisible()
+bool PickupItem::isVisible() const
 {
    return mIsVisible;
+}
+
+
+bool PickupItem::shouldRender() const
+{
+   return isVisible();
 }
 
 
@@ -361,10 +365,8 @@ void RepairItem::onClientPickup()
 
 void RepairItem::renderItem(const Point &pos)
 {
-   if(!isVisible())
-      return;
-
-   renderRepairItem(pos);
+   if(shouldRender())
+      renderRepairItem(pos);
 }
 
 
@@ -491,10 +493,8 @@ void EnergyItem::onClientPickup()
 
 void EnergyItem::renderItem(const Point &pos)
 {
-   if(!isVisible())
-      return;
-
-   renderEnergyItem(pos);
+   if(shouldRender())
+      renderEnergyItem(pos);
 }
 
 

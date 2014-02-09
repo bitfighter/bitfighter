@@ -91,25 +91,27 @@ LineItem *LineItem::clone() const
 
 void LineItem::render()
 {
-#ifndef ZAP_DEDICATED
-   bool sameTeam = false;
+   if(shouldRender())
+      renderLine(getOutline(), getColor());
+}
 
+
+bool LineItem::shouldRender() const
+{
+   if(mGlobal)
+      return true;
+
+#ifndef ZAP_DEDICATED
    ClientInfo *clientInfo = getGame()->getLocalRemoteClientInfo();
 
    // Don't render opposing team's text items... ship will only exist in-game
    if(clientInfo)
-   {
-      if(getTeam() == TEAM_NEUTRAL || clientInfo->getTeamIndex() == getTeam())
-         sameTeam = true;
-   }
-   // Render item regardless of team when in editor (local remote ClientInfo will be NULL)
-   else
-      sameTeam = true;
+      return getTeam() == TEAM_NEUTRAL || getTeam() == clientInfo->getTeamIndex();
 
-   // Now render
-   if(mGlobal || sameTeam)
-      renderLine(getOutline(), getColor());
+   // Render item regardless of team when in editor (local remote ClientInfo will be NULL)
 #endif
+
+   return true;
 }
 
 

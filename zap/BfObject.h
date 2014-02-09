@@ -336,7 +336,7 @@ public:
 
    void disableCollision();        
    void enableCollision();         
-   bool isCollisionEnabled(); 
+   bool isCollisionEnabled() const; 
 
    //bool collisionPolyPointIntersect(Point point);
    //bool collisionPolyPointIntersect(Vector<Point> points);
@@ -364,7 +364,9 @@ public:
    // the ability to manipulate objects more using Lua
    virtual bool canBeHostile();  
    virtual bool canBeNeutral();  
-   virtual bool hasTeam();       
+   virtual bool hasTeam(); 
+
+   virtual bool shouldRender() const;     // Returns true if the item is visible, false if not
 
    BfObject *copy();       // Makes a duplicate of the item (see method for explanation)
    BfObject *newCopy();    // Creates a brand new object based on the current one (see method for explanation)

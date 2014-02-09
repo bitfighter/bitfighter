@@ -323,6 +323,7 @@ public:
    static F32 getAsteroidMass(S32 size_left);
 
    void renderItem(const Point &pos);
+   bool shouldRender() const;
    const Vector<Point> *getCollisionPoly() const;
    bool collide(BfObject *otherObject);
 

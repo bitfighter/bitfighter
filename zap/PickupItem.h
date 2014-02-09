@@ -40,7 +40,8 @@ public:
 
    void onAddedToGame(Game *game);
    void idle(BfObject::IdleCallPath path);
-   bool isVisible();
+   bool isVisible() const;
+   bool shouldRender() const;
    S32 getRenderSortValue();
 
    U32 getRepopDelay();

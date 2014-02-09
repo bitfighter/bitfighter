@@ -431,11 +431,16 @@ bool Projectile::canAddToEditor() { return false; }      // No projectiles in th
 
 void Projectile::renderItem(const Point &pos)
 {
-   if(mCollided || !mAlive)
-      return;
-
-   renderProjectile(pos, mType, getGame()->getCurrentTime() - getCreationTime());
+   if(shouldRender())
+      renderProjectile(pos, mType, getGame()->getCurrentTime() - getCreationTime());
 }
+
+
+bool Projectile::shouldRender() const
+{
+   return mAlive && !mCollided;
+}
+
 
 
 //// Lua methods
@@ -549,7 +554,7 @@ void Burst::initialize(const Point &pos, const Point &vel, BfObject *shooter)
    updateExtentInDatabase();
 
    mTimeRemaining = WeaponInfo::getWeaponInfo(WeaponBurst).projLiveTime;
-   exploded = false;
+   mExploded = false;
 
    if(!shooter)
    {
@@ -607,7 +612,7 @@ void Burst::idle(IdleCallPath path)
    if(isGhost())       // Here on down is server only
       return;
 
-   if(!exploded)
+   if(!mExploded)
       if(getActualVel().lenSquared() < sq(4.0))
          explode(getActualPos());
 
@@ -615,7 +620,7 @@ void Burst::idle(IdleCallPath path)
    S32 deltaT = mCurrentMove.time;
    if(path == ClientIdlingNotLocalShip)
       mTimeRemaining += deltaT;
-   else if(!exploded)
+   else if(!mExploded)
    {
       if(mTimeRemaining <= deltaT)
         explode(getActualPos());
@@ -629,7 +634,7 @@ U32 Burst::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
 {
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
 
-   stream->writeFlag(exploded);
+   stream->writeFlag(mExploded);
    stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500));
    return ret;
 }
@@ -701,12 +706,12 @@ void Burst::doExplosion(const Point &pos)
 // Server only
 void Burst::explode(const Point &pos)
 {
-   if(exploded) 
+   if(mExploded) 
       return;
 
    // Must set exploded to true immediately here or we risk a stack overflow when two
    // bursts hit each other and call radiusDamage on each other over and over
-   exploded = true;
+   mExploded = true;
    setMaskBits(ExplodedMask);
 
    DamageInfo damageInfo;
@@ -741,12 +746,18 @@ bool Burst::canAddToEditor() { return false; }      // No bursts in the editor
 
 void Burst::renderItem(const Point &pos)
 {
-   if(exploded)
+   if(!shouldRender())
       return;
 
    F32 initTTL = (F32) WeaponInfo::getWeaponInfo(WeaponBurst).projLiveTime;
 
    renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL);
+}
+
+
+bool Burst::shouldRender() const
+{
+   return !mExploded;
 }
 
 
@@ -855,7 +866,7 @@ void Mine::idle(IdleCallPath path)
    // Skip the grenade timing goofiness...
    MoveItem::idle(path);
 
-   if(exploded || path != BfObject::ServerIdleMainLoop)
+   if(mExploded || path != BfObject::ServerIdleMainLoop)
       return;
 
    // If our fuse has gone off, count down until explode
@@ -945,7 +956,7 @@ void Mine::damageObject(DamageInfo *info)
       return;
    }
 
-   if(info->damageAmount > 0.f && !exploded)
+   if(info->damageAmount > 0.f && !mExploded)
       explode(getActualPos());
 }
 
@@ -997,7 +1008,7 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
 void Mine::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
-   if(exploded)
+   if(!shouldRender())
       return;
 
    bool visible = false, armed = false;
@@ -1171,7 +1182,7 @@ void SpyBug::idle(IdleCallPath path)
    // Skip the grenade timing goofiness...
    MoveItem::idle(path);
 
-   if(exploded || path != BfObject::ServerIdleMainLoop)
+   if(mExploded || path != BfObject::ServerIdleMainLoop)
       return;
 }
 
@@ -1188,7 +1199,7 @@ bool SpyBug::collide(BfObject *otherObj)
 
 void SpyBug::damageObject(DamageInfo *info)
 {
-   if(info->damageAmount > 0.f && !exploded)    // Any damage will kill the SpyBug
+   if(info->damageAmount > 0.f && !mExploded)    // Any damage will kill the SpyBug
       explode(getActualPos());
 }
 
@@ -1229,7 +1240,7 @@ void SpyBug::unpackUpdate(GhostConnection *connection, BitStream *stream)
 void SpyBug::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
-   if(exploded)
+   if(!shouldRender())
       return;
 
    bool visible = false;
@@ -1387,7 +1398,7 @@ void Seeker::initialize(const Point &pos, const Point &vel, F32 angle, BfObject 
    updateExtentInDatabase();
 
    mTimeRemaining = WeaponInfo::getWeaponInfo(WeaponSeeker).projLiveTime;
-   exploded = false;
+   mExploded = false;
    mBounced = false;
 
    if(!shooter)
@@ -1451,7 +1462,7 @@ void Seeker::idle(IdleCallPath path)
 
    // Update time-to-live server-side
    S32 deltaT = mCurrentMove.time;
-   if(!exploded)
+   if(!mExploded)
    {
       if(mTimeRemaining <= deltaT)
          handleCollision(NULL, getActualPos());
@@ -1651,7 +1662,7 @@ U32 Seeker::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
 {
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
 
-   stream->writeFlag(exploded);
+   stream->writeFlag(mExploded);
    stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500));
    if(stream->writeFlag(updateMask & PositionMask))
       stream->writeSignedFloat(getActualAngle() * FloatInversePi, 8);  // 8 bits good enough?
@@ -1665,14 +1676,14 @@ void Seeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    TNLAssert(connection, "Invalid connection to server in Burst//projectile.cpp");
 
-   bool wasExploded = exploded;
-   exploded = stream->readFlag();
-   if(exploded && !wasExploded)
+   bool wasExploded = mExploded;
+   mExploded = stream->readFlag();
+   if(mExploded && !wasExploded)
    {
       disableCollision();
       doExplosion(getPos());
    }
-   else if(!exploded && !isCollisionEnabled() && getActualVel().lenSquared() != 0)
+   else if(!mExploded && !isCollisionEnabled() && getActualVel().lenSquared() != 0)
       enableCollision();
 
    if(stream->readFlag())     // InitialMask --> seeker was just created
@@ -1715,12 +1726,12 @@ void Seeker::doExplosion(const Point &pos)
 // Server-side only
 void Seeker::handleCollision(BfObject *hitObject, Point collisionPoint)
 {
-   if(exploded)  // Rare, but can happen
+   if(mExploded)  // Rare, but can happen
       return;
 
    // Must set exploded to true immediately here or we risk a stack overflow when two
    // area-damage objects hit each other and call radiusDamage on each other over and over
-   exploded = true;
+   mExploded = true;
 
    // Damage the object we hit
    if(hitObject)
@@ -1820,12 +1831,18 @@ BfObject *Seeker::getShooter() const {return mShooter; }
 void Seeker::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
-   if(!isCollisionEnabled())  // (exploded) always disables collision.
+   if(!shouldRender())  
       return;
 
    S32 startLiveTime = WeaponInfo::getWeaponInfo(mWeaponType).projLiveTime;
    renderSeeker(pos, getActualAngle(), getActualVel().len(), startLiveTime - (getGame()->getCurrentTime() - getCreationTime()));
 #endif
+}
+
+
+bool Seeker::shouldRender() const
+{
+   return isCollisionEnabled();  // (exploded) always disables collision.
 }
 
 
