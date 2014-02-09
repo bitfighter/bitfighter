@@ -207,11 +207,14 @@ private:
    void updateChatMessages(U32 timeDelta);
    bool checkEnterChatInputCode(InputCode inputCode);  // Helper for key handler
 
+   // Retnder helpers
    void renderInputModeChangeAlert() const;
    void renderTalkingClients() const;        // Render things related to voice chat
    void renderDebugStatus() const;           // Render things related to debugging
    void renderChatMsgs() const;
    void renderAnnouncement(S32 pos) const;
+   void renderInlineHelpItemOutlines(const Ship *ship) const;
+
 
    F32 getBackgroundTextDimFactor(bool chatRelated) const;
 

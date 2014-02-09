@@ -2672,7 +2672,8 @@ void GameUserInterface::renderGameNormal()
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
-   glTranslatef(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2.f, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.f, 0);       
+   glTranslatef(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2.f, 
+                DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.f, 0);       
 
    // These scaling factors are different when changing the visible area by equiping the sensor module
    F32 scaleFactX = (DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2) / visExt.x;
@@ -2696,9 +2697,9 @@ void GameUserInterface::renderGameNormal()
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
       renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
-   // Normally a big no-no, we'll access the server's bot zones directly if we are running locally so we can visualize them without bogging
-   // the game down with the normal process of transmitting zones from server to client.  The result is that we can only see zones on our local
-   // server.
+   // Normally a big no-no, we'll access the server's bot zones directly if we are running locally 
+   // so we can visualize them without bogging the game down with the normal process of transmitting 
+   // zones from server to client.  The result is that we can only see zones on our local server.
    if(mDebugShowMeshZones)
       populateRenderZones(getGame(), &extentRect);
 
@@ -2723,6 +2724,32 @@ void GameUserInterface::renderGameNormal()
    }
 
 
+   renderInlineHelpItemOutlines(ship);
+
+   FxTrail::renderTrails();
+
+   getUIManager()->getUI<GameUserInterface>()->renderEngineeredItemDeploymentMarker(ship);
+
+   // Again, we'll be accessing the server's data directly so we can see server-side item ids directly on the client.  Again,
+   // the result is that we can only see zones on our local server.
+   if(mDebugShowObjectIds)
+      renderObjectIds();
+
+   glPopMatrix();
+
+   // Render current ship's energy
+   if(ship)
+      UI::EnergyGaugeRenderer::render(ship->mEnergy);   
+
+   //renderOverlayMap();     // Draw a floating overlay map
+}
+
+
+void GameUserInterface::renderInlineHelpItemOutlines(const Ship *ship) const
+{
+   if(getGame()->isSuspended())
+      return;
+
    // Render a highlight/outline around any objects in our highlight type list, for help
    static Vector<const Vector<Point> *> polygons;
    polygons.clear();
@@ -2731,7 +2758,8 @@ void GameUserInterface::renderGameNormal()
 
    for(S32 i = 0; i < itemsToHighlight->size(); i++)
       for(S32 j = 0; j < renderObjects.size(); j++)
-         if(itemsToHighlight->get(i).type == renderObjects[j]->getObjectTypeNumber() && renderObjects[j]->shouldRender())
+         if(itemsToHighlight->get(i).type == renderObjects[j]->getObjectTypeNumber() && 
+                                             renderObjects[j]->shouldRender())
          {
             HighlightItem::Whose whose = itemsToHighlight->get(i).whose;
 
@@ -2747,7 +2775,6 @@ void GameUserInterface::renderGameNormal()
 
                polygons.push_back(renderObjects[j]->getOutline());
          }
-
 
 #ifdef TNL_DEBUG
    if(getGame()->showAllObjectOutlines())
@@ -2782,23 +2809,6 @@ void GameUserInterface::renderGameNormal()
       for(S32 j = 0; j < outlines.size(); j++)
          renderPolygonOutline(&outlines[j], &Colors::green);
    }
-
-   FxTrail::renderTrails();
-
-   getUIManager()->getUI<GameUserInterface>()->renderEngineeredItemDeploymentMarker(ship);
-
-   // Again, we'll be accessing the server's data directly so we can see server-side item ids directly on the client.  Again,
-   // the result is that we can only see zones on our local server.
-   if(mDebugShowObjectIds)
-      renderObjectIds();
-
-   glPopMatrix();
-
-   // Render current ship's energy
-   if(ship)
-      UI::EnergyGaugeRenderer::render(ship->mEnergy);   
-
-   //renderOverlayMap();     // Draw a floating overlay map
 }
 
 
