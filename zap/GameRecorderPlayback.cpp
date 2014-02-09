@@ -561,7 +561,8 @@ void PlaybackGameUserInterface::idle(U32 timeDelta)
       mPlaybackConnection->processMoreData(idleTime);
    }
 
-   getGame()->setGameSuspended_FromServerMessage(true); // Cheap way to avoid letting the client move objects, because of pause/slow motion/fast forward
+   // Cheap way to avoid letting the client move objects, because of pause/slow motion/fast forward
+   getGame()->setGameSuspended_FromServerMessage(true); 
 }
 
 

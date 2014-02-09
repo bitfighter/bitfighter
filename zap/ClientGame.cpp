@@ -1574,10 +1574,12 @@ void ClientGame::unsuspendGame()
       getConnectionToServer()->s2rSetSuspendGame(false);
 }
 
+
 void ClientGame::setGameSuspended_FromServerMessage(bool suspend)
 {
    mGameSuspended = suspend;
 }
+
 
 void ClientGame::displayErrorMessage(const char *format, ...) const
 {

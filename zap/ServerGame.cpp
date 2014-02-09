@@ -881,8 +881,11 @@ void ServerGame::suspendGame()
    for(S32 i = 0; i < getClientCount(); i++)
       if(getClientInfo(i)->getConnection())
          getClientInfo(i)->getConnection()->s2rSetSuspendGame(true);
+
    mGameSuspended = true;
 }
+
+
 void ServerGame::suspendGame(GameConnection *gc)
 {
    if(mGameSuspended) // Already suspended
