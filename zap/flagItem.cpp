@@ -279,7 +279,7 @@ void FlagItem::removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints) /
 
 void FlagItem::renderItem(const Point &pos)
 {
-   Point offset;
+   Point offset(0,0);
 
    if(mIsMounted)
       offset.set(15, -15);
