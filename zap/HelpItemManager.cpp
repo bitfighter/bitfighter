@@ -383,6 +383,10 @@ static ScissorsManager scissorsManager;
 
 void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha) const
 {
+
+   if(game->isSuspended())
+      return;
+
 #ifdef TNL_DEBUG
    // This bit is for displaying our help messages one-by-one so we can see how they look on-screen, cycle with CTRL+H
    if(mTestingTimer.getCurrent() > 0)
