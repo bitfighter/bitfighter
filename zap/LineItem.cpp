@@ -94,26 +94,17 @@ void LineItem::render()
 #ifndef ZAP_DEDICATED
    bool sameTeam = false;
 
-   Ship *ship = getGame()->getLocalPlayerShip();
+   ClientInfo *clientInfo = getGame()->getLocalRemoteClientInfo();
+
    // Don't render opposing team's text items... ship will only exist in-game
-   if(ship)
+   if(clientInfo)
    {
-      if(getTeam() == TEAM_NEUTRAL || ship->getTeam() == getTeam())
+      if(getTeam() == TEAM_NEUTRAL || clientInfo->getTeamIndex() == getTeam())
          sameTeam = true;
    }
+   // Render item regardless of team when in editor (local remote ClientInfo will be NULL)
    else
-   {
-      // Not in editor, probably idle
-      if(static_cast<ClientGame*>(getGame())->isConnectedToServer())
-         sameTeam = false;
-      else
-         sameTeam = true;     // Render item regardless of team when in editor, which is when gc will be NULL
-   }
-
-
-
-   if(!ship && static_cast<ClientGame*>(getGame())->isConnectedToServer())
-      return;
+      sameTeam = true;
 
    // Now render
    if(mGlobal || sameTeam)

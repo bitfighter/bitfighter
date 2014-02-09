@@ -79,6 +79,8 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIM
    mShowAllObjectOutlines = false;        // Will only be changed in debug builds... in production code will never be true
 
    mPreviousLevelName = "";
+
+   mLocalRemoteClientInfo = NULL;         // Will be set when we join a game
 }
 
 
