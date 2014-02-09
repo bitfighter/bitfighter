@@ -148,18 +148,15 @@ void UserInterface::renderConsole() const
 }
 
 
-static const S32 MessageBoxPadding = 20;  
 static const S32 TitleSize = 30;
-static const S32 TitleGap = 10;           // Spacing between title and first line of message box
-static const S32 TitleHeight = TitleSize + TitleGap;
-static const S32 TextSize = 18;
-
-static const FontContext Context = ErrorMsgContext;
-
 
 void UserInterface::renderMessageBox(const string &titleStr, const string &instrStr, 
                                      const string &messageStr, S32 vertOffset, S32 style) const
 {
+   static const FontContext Context = ErrorMsgContext;
+   static const S32 TextSize = 18;
+
+
    InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
 
    SymbolShapePtr title = SymbolShapePtr(new SymbolString(titleStr, inputCodeManager, Context, TitleSize, false));
@@ -216,7 +213,8 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
    S32 maxLen = 0;
    for(S32 i = 0; i < msgLines; i++)
    {
-      S32 len = message[i]->getWidth() + MessageBoxPadding * 2;
+      static const S32 HorizBoxPadding = 20;  
+      S32 len = message[i]->getWidth() + HorizBoxPadding * 2;
       if(len > maxLen)
          maxLen = len;
    }
