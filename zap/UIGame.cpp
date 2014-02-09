@@ -376,8 +376,9 @@ void GameUserInterface::idle(U32 timeDelta)
 
    mLoadoutIndicator.idle(timeDelta);
 
-   if(!getGame()->isSuspended())
-      mFxManager.idle(timeDelta);      // Processes sparks and teleporter effects
+   // Processes sparks and teleporter effects -- 
+   //    do this even while suspended to make objects look normal while in /idling
+   mFxManager.idle(timeDelta);      
 
    if(shouldCountdownHelpItemTimer())
       mHelpItemManager.idle(timeDelta, getGame());
@@ -438,6 +439,8 @@ void GameUserInterface::clearSparks()
    mFxManager.clearSparks();
 }
 
+
+// Only runs when playing back a saved game... why?
 void GameUserInterface::idleFxManager(U32 timeDelta)
 {
    mFxManager.idle(timeDelta);
@@ -516,8 +519,6 @@ void GameUserInterface::render()
 
       return;
    }
-
-   //TNLAssert(getUIManager()->isCurrentUI<GameUserInterface>() || getUIManager()->cameFrom<GameUserInterface>(), "Then why are we rendering???"); // Now comes from PlaybackGameUserInterface
 
    if(renderWithCommanderMap())
       renderGameCommander();
