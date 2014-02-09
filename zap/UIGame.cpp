@@ -697,8 +697,8 @@ void GameUserInterface::renderLostConnectionMessage() const
 
    if(connection && connection->lostContact())
    {
-      static string msg = "We have lost contact with the server; You can't play until the "
-                          "connection has been re-established.\n\n"
+      static string msg = "We have lost contact with the server; You can't play "
+                          "until the connection has been re-established.\n\n"
                           "Trying to reconnect... [[SPINNER]]";
 
       renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, -30);
