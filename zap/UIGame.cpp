@@ -864,59 +864,59 @@ void GameUserInterface::renderReticle() const
 {
    bool shouldRender = getGame()->getInputMode() == InputModeKeyboard &&   // Reticle in keyboard mode only
                        getUIManager()->isCurrentUI<GameUserInterface>();   // And not when a menu is active
-   if(shouldRender)
-   {
-      Point offsetMouse = mMousePoint + Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
+   if(!shouldRender)
+      return;
 
-      F32 vertices[] = {
-            // Center cross-hairs
-            offsetMouse.x - 15, offsetMouse.y,
-            offsetMouse.x + 15, offsetMouse.y,
-            offsetMouse.x, offsetMouse.y - 15,
-            offsetMouse.x, offsetMouse.y + 15,
+   Point offsetMouse = mMousePoint + Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
 
-            // Large axes lines
-            0, offsetMouse.y,
-            offsetMouse.x - 30, offsetMouse.y,
+   F32 vertices[] = {
+      // Center cross-hairs
+      offsetMouse.x - 15, offsetMouse.y,
+      offsetMouse.x + 15, offsetMouse.y,
+      offsetMouse.x,      offsetMouse.y - 15,
+      offsetMouse.x,      offsetMouse.y + 15,
 
-            offsetMouse.x + 30, offsetMouse.y,
-            (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), offsetMouse.y,
+      // Large axes lines
+      0, offsetMouse.y,
+      offsetMouse.x - 30, offsetMouse.y,
 
-            offsetMouse.x, 0,
-            offsetMouse.x, offsetMouse.y - 30,
+      offsetMouse.x + 30, offsetMouse.y,
+      (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), offsetMouse.y,
 
-            offsetMouse.x, offsetMouse.y + 30,
-            offsetMouse.x, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight(),
-      };
+      offsetMouse.x, 0,
+      offsetMouse.x, offsetMouse.y - 30,
+
+      offsetMouse.x, offsetMouse.y + 30,
+      offsetMouse.x, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight(),
+   };
 
 #define RETICLE_COLOR Colors::green
 #define COLOR_RGB RETICLE_COLOR.r, RETICLE_COLOR.g, RETICLE_COLOR.b      
 
-      static F32 colors[] = {
-      //    R,G,B   aplha
-         COLOR_RGB, 0.7f,
-         COLOR_RGB, 0.7f,
-         COLOR_RGB, 0.7f,
-         COLOR_RGB, 0.7f,
+   static F32 colors[] = {
+   //    R,G,B   aplha
+      COLOR_RGB, 0.7f,
+      COLOR_RGB, 0.7f,
+      COLOR_RGB, 0.7f,
+      COLOR_RGB, 0.7f,
 
-         COLOR_RGB, 0.0f,
-         COLOR_RGB, 0.7f,
+      COLOR_RGB, 0.0f,
+      COLOR_RGB, 0.7f,
 
-         COLOR_RGB, 0.7f,
-         COLOR_RGB, 0.0f,
+      COLOR_RGB, 0.7f,
+      COLOR_RGB, 0.0f,
 
-         COLOR_RGB, 0.0f,
-         COLOR_RGB, 0.7f,
+      COLOR_RGB, 0.0f,
+      COLOR_RGB, 0.7f,
 
-         COLOR_RGB, 0.7f,
-         COLOR_RGB, 0.0f,
-      };
+      COLOR_RGB, 0.7f,
+      COLOR_RGB, 0.0f,
+   };
 
 #undef COLOR_RGB
 #undef RETICLE_COLOR
 
-      renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
-   }
+   renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
 }
 
 
