@@ -383,8 +383,7 @@ static ScissorsManager scissorsManager;
 
 void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha) const
 {
-
-   if(game->isSuspended())
+   if(game->isSpawnDelayed())
       return;
 
 #ifdef TNL_DEBUG
