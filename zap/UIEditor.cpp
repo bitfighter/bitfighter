@@ -1977,7 +1977,7 @@ void EditorUserInterface::renderReferenceShip()
       const F32 spaceAngle = 0.0278f * FloatTau;
       glColor4f(0, 1, 0, 0.35f);
       glLineWidth(gLineWidth1);
-      drawDashedCircle(Point(), Ship::CollisionRadius, 10, spaceAngle, 0);
+      drawDashedCircle(Point(0,0), Ship::CollisionRadius, 10.0f, spaceAngle, 0);
       glLineWidth(gDefaultLineWidth);
 
       // And show how far it can see
