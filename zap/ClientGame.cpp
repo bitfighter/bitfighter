@@ -744,44 +744,44 @@ void ClientGame::idle(U32 timeDelta)
 
       theMove->time = timeDelta;
 
+      BfObject *localPlayerShip = getLocalPlayerShip();
+
+      theMove->prepare();           // Pack and unpack the move for consistent rounding errors
+      mConnectionToServer->addPendingMove(theMove);
+      theMove->time = timeDelta;
+
+      const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
+
+      // Visit each game object, handling moves and running its idle method
+      for(S32 i = gameObjects->size() - 1; i >= 0; i--)
+      {
+         BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
+
+         if(obj->isDeleted())
+            continue;
+
+         if(obj == localPlayerShip)
+         {
+            obj->setCurrentMove(*theMove);
+            obj->idle(BfObject::ClientIdlingLocalShip);     // on client, object is our control object
+         }
+         else
+         {
+            Move m = obj->getCurrentMove();
+            m.time = timeDelta;
+            obj->setCurrentMove(m);
+            obj->idle(BfObject::ClientIdlingNotLocalShip);  // on client, object is not our control object
+         }
+      }
+
       if(!mGameSuspended)
       {
-         BfObject *localPlayerShip = getLocalPlayerShip();
-
-         theMove->prepare();           // Pack and unpack the move for consistent rounding errors
-         mConnectionToServer->addPendingMove(theMove);
-         theMove->time = timeDelta;
-
-         const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
-
-         // Visit each game object, handling moves and running its idle method
-         for(S32 i = gameObjects->size() - 1; i >= 0; i--)
-         {
-            BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
-
-            if(obj->isDeleted())
-               continue;
-
-            if(obj == localPlayerShip)
-            {
-               obj->setCurrentMove(*theMove);
-               obj->idle(BfObject::ClientIdlingLocalShip);     // on client, object is our control object
-            }
-            else
-            {
-               Move m = obj->getCurrentMove();
-               m.time = timeDelta;
-               obj->setCurrentMove(m);
-               obj->idle(BfObject::ClientIdlingNotLocalShip);  // on client, object is not our control object
-            }
-         }
-
          if(mGameType)
             mGameType->idle(BfObject::ClientIdlingNotLocalShip, timeDelta);
 
          if(localPlayerShip)
             getUIManager()->setListenerParams(localPlayerShip->getPos(), localPlayerShip->getVel());
-
+         
 
          // Check to see if there are any items near the ship we need to display help for
          if(getUIManager()->isShowingInGameHelp() && localPlayerShip != NULL)
