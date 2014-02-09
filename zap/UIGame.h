@@ -328,6 +328,8 @@ public:
    void renderLevelUpMessage(S32 newLevel) const;
    void renderObjectIds() const;          // Render server-side object ids on client
    void renderLevelListDisplayer() const;
+   void renderMsgBox(const string *message, S32 msgLines) const;
+
 
    bool isChatting() const;               // Returns true if player is composing a chat message
 

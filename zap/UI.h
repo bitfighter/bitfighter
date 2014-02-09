@@ -120,8 +120,6 @@ public:
 
    // Old school -- deprecated
    void renderMessageBox(const string &title, const string &instr, const string &message, S32 vertOffset = 0, S32 style = 1) const;
-   void renderMessageBox(const string &titleStr, const string &instrStr,
-                         string *message, S32 msgLines, S32 vertOffset, S32 style) const;
 
    // New school
    void renderMessageBox(const SymbolShapePtr &title, const SymbolShapePtr &instr, SymbolShapePtr *message, S32 msgLines, S32 vertOffset = 0, S32 style = 1) const;

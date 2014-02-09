@@ -638,19 +638,18 @@ bool GameUserInterface::isChatting() const
 
 void GameUserInterface::renderSuspendedMessage() const
 {
-   static const S32 DisplayStyle = 2;
    static const S32 VertOffset = -30;
 
    if(getGame()->inReturnToGameCountdown())
    {
-      static string waitMsg[] = { "", "WILL RESPAWN", "IN BLAH BLAH SECONDS", "", "" };
-      waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.0f)) + " SECONDS";
-      renderMessageBox("", "", waitMsg,  ARRAYSIZE(waitMsg),  VertOffset, DisplayStyle);
+      static string waitMsg[] = { "", "WILL RESPAWN", "IN BLAH BLAH SECONDS", "" };
+      waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) * MS_TO_SECONDS)) + " SECONDS";
+      renderMsgBox(waitMsg,  ARRAYSIZE(waitMsg));
    }
    else
    {
-      static string readyMsg[] = { "",  "PRESS ANY", "KEY TO", "RESPAWN", "" };
-      renderMessageBox("", "", readyMsg, ARRAYSIZE(readyMsg), VertOffset, DisplayStyle);
+      static string readyMsg[] = { "", "PRESS ANY", "KEY TO", "RESPAWN", "" };
+      renderMsgBox(readyMsg, ARRAYSIZE(readyMsg));
    }
 }
 
@@ -664,11 +663,22 @@ void GameUserInterface::renderLevelUpMessage(S32 newLevel) const
                            "PRESS ANY KEY TO CONTINUE"
                            "" };
 
-   static const S32 DisplayStyle = 2;
-   static const S32 VertOffset = -30;
-
    msg[3] = "LEVEL " + itos(newLevel);
-   renderMessageBox("", "", msg,  ARRAYSIZE(msg),  VertOffset, DisplayStyle);
+   renderMsgBox(msg,  ARRAYSIZE(msg));
+}
+
+
+// This is a helper for renderSuspendedMessage and renderLevelUpMessage.  It assumes that none of the messages
+// will have [[key_bindings]] in them.  If this assumption changes, will need to replace the NULL below in the
+// SymbolString() construction.
+void GameUserInterface::renderMsgBox(const string *message, S32 msgLines) const
+{
+   Vector<SymbolShapePtr> messages(msgLines);
+
+   for(S32 i = 0; i < msgLines; i++)
+      messages.push_back(SymbolShapePtr(new SymbolString(message[i], NULL, ErrorMsgContext, 30, true)));
+
+   renderMessageBox(NULL, NULL, messages.address(), messages.size(), -30, 2);
 }
 
 
@@ -688,7 +698,7 @@ void GameUserInterface::renderLostConnectionMessage() const
                           "connection has been re-established.\n\n"
                           "Trying to reconnect... [[SPINNER]]";
 
-      renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, -30, 1);
+      renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, -30);
    }
 }
 

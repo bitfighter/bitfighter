@@ -153,20 +153,8 @@ static const S32 TitleSize = 30;
 static const S32 TitleGap = 10;           // Spacing between title and first line of message box
 static const S32 TitleHeight = TitleSize + TitleGap;
 static const S32 TextSize = 18;
-static const S32 TextSizeBig = 30;
 
 static const FontContext Context = ErrorMsgContext;
-
-
-void UserInterface::renderMessageBox(const string &titleStr, const string &instrStr,
-                                     string *message, S32 msgLines, S32 vertOffset, S32 style) const
-{
-   string msg;
-   for(S32 i = 0; i < msgLines; i++)
-      msg += message[i] + "\n";
-
-   renderMessageBox(titleStr, instrStr, msg, vertOffset, style);
-}
 
 
 void UserInterface::renderMessageBox(const string &titleStr, const string &instrStr, 
@@ -196,34 +184,32 @@ void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset,
 }
 
 
+// Note that title and instr can be NULL
 void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolShapePtr &instr, 
                                            SymbolShapePtr *message, S32 msgLines, S32 vertOffset, S32 style) const
 {
    const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
-   const S32 titleTextGap = 30;        // Space between title and rest of message
-
-   S32 textSize;
-
-   if(style == 1)
-      textSize = TextSize;             // Size of text and instructions
-   else if(style == 2)
-      textSize = TextSizeBig;
-
-   const S32 textGap = textSize / 3;   // Spacing between text lines
    const S32 instrGap = 20;            // Gap between last line of text and instruction line
    const S32 instrGapBottom = 5;       // A bit of extra gap below the instr. line
 
-   S32 titleHeight = title->getHeight();
-   if(titleHeight > 0)
-      titleHeight += TitleGap;
+   const F32 LinespacingFactor = 1.333f;
 
-   S32 instrHeight = instr->getHeight();
+
+   S32 titleHeight = title ? title->getHeight() : 0;
+   if(titleHeight > 0)
+      titleHeight += 30;      // 30 is the gap between the title and the message
+
+   S32 instrHeight = instr ? instr->getHeight() : 0;
    if(instrHeight > 0)
       instrHeight += instrGap + instrGapBottom;
 
-   S32 boxHeight = titleHeight + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrHeight;
+   S32 boxHeight = vertMargin + titleHeight + instrHeight + vertMargin;
+
+   // Don't include a linespacing gap after the final line
+   for(S32 i = 0; i < msgLines; i++ )
+      boxHeight += S32(message[i]->getHeight() * LinespacingFactor);
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
 
@@ -244,15 +230,17 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
       renderCenteredFancyBox(boxTop, boxHeight, inset, 15, Colors::black, 0.70f, Colors::blue);
 
    // Draw title
-   title->render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, boxTop + vertMargin + TitleSize, AlignmentCenter);
+   if(titleHeight > 0)
+      title->render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, boxTop + vertMargin + TitleSize, AlignmentCenter);
 
-   // Draw messages
-   S32 y = boxTop + titleHeight + titleTextGap + textSize;
+   // Draw messages -- since symbolstrings are positioned by specifying the baseline, we need to advance y by the height of
+   // the first message so that it will be drawn in the correct location
+   S32 y = boxTop + vertMargin + titleHeight + message[0]->getHeight();
 
    for(S32 i = 0; i < msgLines; i++)
    {
       message[i]->render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, y, AlignmentCenter);
-      y += message[i]->getHeight() + textGap;
+      y += S32(message[i]->getHeight() * LinespacingFactor);
    }
 
    // And footer

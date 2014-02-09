@@ -29,5 +29,7 @@ static const S32 TEN_MINUTES   = 10 * ONE_MINUTE;
                                
 static const S32 TWO_HOURS     =  2 * ONE_HOUR;
 
+// Conversion factors
+static const F32 MS_TO_SECONDS = .001f;
 
 #endif
