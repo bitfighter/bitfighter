@@ -2747,7 +2747,7 @@ void GameUserInterface::renderGameNormal()
 
 void GameUserInterface::renderInlineHelpItemOutlines(const Ship *ship) const
 {
-   if(getGame()->isSpawnDelayed())
+   if(!HelpItemManager::shouldRender(getGame()))
       return;
 
    // Render a highlight/outline around any objects in our highlight type list, for help

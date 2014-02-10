@@ -223,6 +223,7 @@ public:
 
    void idle(U32 timeDelta, const ClientGame *game);
    void renderMessages(const ClientGame *game, F32 yPos, F32 alpha) const;
+   static bool shouldRender(const ClientGame *game);
 
    void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);
    void addInlineHelpItem(HelpItem item, bool messageCameFromQueue = false);   

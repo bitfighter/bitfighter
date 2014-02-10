@@ -379,11 +379,18 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
 }
 
 
+// static method
+bool HelpItemManager::shouldRender(const ClientGame *game)
+{
+   return !game->isSpawnDelayed();
+}
+
+
 static ScissorsManager scissorsManager;
 
 void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha) const
 {
-   if(game->isSpawnDelayed())
+   if(!shouldRender(game))
       return;
 
 #ifdef TNL_DEBUG
@@ -469,7 +476,8 @@ void HelpItemManager::removeInlineHelpItem(HelpItem item, bool markAsSeen, U8 we
    //TNLAssert(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow, "This method is only for paced items!");
    if(helpItems[item].priority == PacedHigh || helpItems[item].priority == PacedLow)      // for now
    {
-      Vector<WeightedHelpItem> *queue = helpItems[item].priority == PacedHigh ? &mHighPriorityQueuedItems : &mLowPriorityQueuedItems;
+      Vector<WeightedHelpItem> *queue = helpItems[item].priority == PacedHigh ? &mHighPriorityQueuedItems : 
+                                                                                &mLowPriorityQueuedItems;
       S32 index = -1;
       for(S32 i = 0; i < queue->size(); i++)
          if(queue->get(i).helpItem == item)
