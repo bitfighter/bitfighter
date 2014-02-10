@@ -93,7 +93,7 @@ endif()
 option(USE_SDL2 "Force usage of SDL2" NO)
 
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
-
+option(USE_LUAJIT "Use Lua-JIT." NO)
 
 #
 # Now search for dependencies
@@ -220,7 +220,29 @@ endif()
 
 # Add our sub-projects
 add_subdirectory(tnl)
-add_subdirectory(lua/lua-vec)
+
+if(USE_LUAJIT)
+	include(ExternalProject)
+	
+	set(LUAJIT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/lua/luajit-2.0/src")
+	
+	ExternalProject_Add(project_luajit
+		SOURCE_DIR ${LUAJIT_SOURCE_DIR}
+		CONFIGURE_COMMAND ""
+		BUILD_IN_SOURCE 1
+		BUILD_COMMAND make
+		INSTALL_COMMAND ""
+	)
+
+	add_library(luajit STATIC IMPORTED)
+	set_property(TARGET luajit PROPERTY IMPORTED_LOCATION ${LUAJIT_SOURCE_DIR}/libluajit.a)
+	add_dependencies(luajit project_luajit)
+
+	include_directories(${LUAJIT_SOURCE_DIR}/src)
+else()
+	add_subdirectory(lua/lua-vec)
+endif()
+
 if(NOT WIN32 AND COMPILE_ALURE)  # ALURE is not compiled on Windows presently
 	add_subdirectory(alure)
 endif()

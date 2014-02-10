@@ -216,10 +216,15 @@ else()
 	set(EXTRA_LIBS dl m)
 endif()
 
+set(LUA_LIB lua-vec)
+if(USE_LUAJIT)
+	set(LUA_LIB luajit)
+endif()
+
 # libraries used by both client and server
 set(SHARED_LIBS
 	${CMAKE_THREAD_LIBS_INIT}
-	lua-vec
+	${LUA_LIB}
 	tnl
 	tomcrypt
 	${EXTRA_LIBS}
@@ -259,7 +264,7 @@ if(SDL_FOUND OR SDL2_FOUND)
 
 	add_dependencies(bitfighter
 		alure
-		lua-vec
+		${LUA_LIB}
 		tnl
 		tomcrypt
 	)
@@ -303,7 +308,7 @@ add_executable(bitfighterd
 
 add_dependencies(bitfighterd
 	tnl
-	lua-vec
+	${LUA_LIB}
 	tomcrypt
 )
 
@@ -382,7 +387,7 @@ target_link_libraries(test
 
 add_dependencies(test
 	alure
-	lua-vec
+	${LUA_LIB}
 	tnl
 	tomcrypt
 	gtest
@@ -416,7 +421,7 @@ if(BITFIGHTER_COVERAGE)
       COMMAND lcov --capture --directory ${CMAKE_SOURCE_DIR} --output-file ${CMAKE_SOURCE_DIR}/build/coverage.info
       COMMAND lcov --extract ${CMAKE_SOURCE_DIR}/build/coverage.info --output-file ${CMAKE_SOURCE_DIR}/build/coverage.info ${CMAKE_SOURCE_DIR}/zap/*
       COMMAND genhtml ${CMAKE_SOURCE_DIR}/build/coverage.info --output-directory ${CMAKE_SOURCE_DIR}/build/cov
-      DEPENDS test alure lua-vec tnl tomcrypt
+      DEPENDS test alure ${LUA_LIB} tnl tomcrypt
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build 
    )
 endif()
