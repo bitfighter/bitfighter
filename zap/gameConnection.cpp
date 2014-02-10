@@ -2052,7 +2052,7 @@ void GameConnection::onLocalConnection()
 
 bool GameConnection::lostContact()
 {
-   return getTimeSinceLastPacketReceived() > 2000 && mLastPacketRecvTime != 0;   // No contact in 2000ms?  That's bad!
+   return getTimeSinceLastPacketReceived() > TWO_SECONDS && mLastPacketRecvTime != 0;   // No contact for 2 secs?  That's bad!
 }
 
 
