@@ -190,6 +190,8 @@ private:
 
    // Some rendering routines
    void renderScoreboard();
+   void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool isTeamGame, S32 row, 
+                             S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths) const;
 
    // Some key press/release handler helpers
    void onMissionKeyPressed();

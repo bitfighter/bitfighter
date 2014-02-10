@@ -2161,6 +2161,20 @@ static void renderPlayerSymbolAndSetColor(ClientInfo *player, S32 x, S32 y, S32 
 }
 
 
+// Horiz offsets from the right for rendering score components
+static const S32 ScoreOff = 160;    // Solo game only
+static const S32 KdOff   = 85;
+static const S32 PingOff = 60;
+static const U32 Gap = 3;        // Small gap for use between various UI elements
+
+enum ColIndex {
+   KdIndex,
+   PingIndex,
+   ScoreIndex,
+   ColIndexCount
+};
+
+
 void GameUserInterface::renderScoreboard()
 {
    // This is probably not needed... if gameType were NULL, we'd have crashed and burned long ago
@@ -2196,14 +2210,14 @@ void GameUserInterface::renderScoreboard()
    if(maxTeamPlayers == 0)
       return;
 
-   static const U32 gap = 3;  // Small gap for use between various UI elements
+   static const U32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+   static const U32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
-   const U32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
-   const U32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   static const U32 drawableWidth = canvasWidth - horizMargin * 2;
 
-   const U32 drawableWidth = canvasWidth - horizMargin * 2;
    const U32 columnCount = min(teams, 2);
    const U32 teamWidth = drawableWidth / columnCount;
+
    const U32 teamHeaderHeight = isTeamGame ? 40 : 2;
 
    const U32 numTeamRows = (teams + 1) >> 1;
@@ -2213,23 +2227,18 @@ void GameUserInterface::renderScoreboard()
    const U32 colHeaderHeight = isTeamGame ? ColHeaderTextSize - 3: ColHeaderTextSize + 2;
 
    const U32 desiredHeight = (canvasHeight - vertMargin * 2) / numTeamRows;
-   const U32 maxHeight     = MIN(30, (desiredHeight - teamHeaderHeight) / maxTeamPlayers);
+   const U32 lineHeight    = MIN(30, (desiredHeight - teamHeaderHeight) / maxTeamPlayers);
 
-   const U32 sectionHeight = teamHeaderHeight + (maxHeight * maxTeamPlayers) + (2 * gap) + 10;
+   const U32 sectionHeight = teamHeaderHeight + (lineHeight * maxTeamPlayers) + (2 * Gap) + 10;
    const U32 totalHeight   = sectionHeight * numTeamRows - 10  + (isTeamGame ? 0 : 4);    // 4 provides a gap btwn bottom name and legend
 
    const U32 scoreboardTop = (canvasHeight - totalHeight) / 2;
 
-   // Vertical scale ratio to maximum line height
-   const F32 scaleRatio = ((F32)maxHeight) / 30.f;
-
-   const S32 playerFontSize = S32(maxHeight * 0.75f);
    const S32 teamFontSize = 24;
-   const S32 symbolFontSize = S32(playerFontSize * 0.75f);
 
    // Outer scoreboard box
-   drawFilledFancyBox(horizMargin - gap, scoreboardTop - (2 * gap),
-                     (canvasWidth - horizMargin) + gap, scoreboardTop + totalHeight + 23,
+   drawFilledFancyBox(horizMargin - Gap, scoreboardTop - (2 * Gap),
+                     (canvasWidth - horizMargin) + Gap, scoreboardTop + totalHeight + 23,
                      13, Colors::black, 0.85f, Colors::blue);
 
    FontManager::pushFontContext(ScoreboardContext);
@@ -2237,15 +2246,15 @@ void GameUserInterface::renderScoreboard()
    for(S32 i = 0; i < teams; i++)
    {
       const S32 yt = scoreboardTop + (i >> 1) * sectionHeight;    // Top edge of team render area
-      const S32 xl = horizMargin + gap + (i & 1) * teamWidth;     // Left edge of team render area
-      const S32 xr = (xl + teamWidth) - (2 * gap);                // Right edge of team render area
+      const S32 xl = horizMargin + Gap + (i & 1) * teamWidth;     // Left edge of team render area
+      const S32 xr = (xl + teamWidth) - (2 * Gap);                // Right edge of team render area
 
       // Team header
       if(isTeamGame)     
       {
          // First the box
          const Color *teamColor = getGame()->getTeamColor(i);
-         const S32 headerBoxHeight = teamFontSize + 2 * gap;
+         const S32 headerBoxHeight = teamFontSize + 2 * Gap;
          drawFilledFancyBox(xl, yt, xr, yt + headerBoxHeight, 10, *teamColor, 0.6f, *teamColor);
 
          // Then the team name & score
@@ -2270,46 +2279,21 @@ void GameUserInterface::renderScoreboard()
       const S32 x = xl + 40;     // + 40 to align with team name in team game
       const S32 colHeaderYPos = isTeamGame ? curRowY + 3 : curRowY + 8;
 
-      S32 maxscorelen = -1;
-      S32 maxkdlen    = -1;
-      S32 maxpinglen  = -1;
-
-      // Horiz offsets from the right for rendering score components
-      static const S32 ScoreOff = 160;    // Solo game only
-      static const S32 KdOff   = 85;
-      static const S32 PingOff = 60;
-
       // Leave a gap for the colHeader... not sure yet of the exact xpos... will figure that out and render in this slot later
       if(playerScores.size() > 0)
          curRowY += colHeaderHeight;
 
-      FontManager::pushFontContext(ScoreboardContext);
+      S32 colIndexWidths[ColIndexCount];     
+      S32 maxColIndexWidths[ColIndexCount] = {0};     // Inits every element of array to 0
+
       for(S32 j = 0; j < playerScores.size(); j++)
       {
-         static const S32 vertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;
+         renderScoreboardLine(playerScores, isTeamGame, j, x, curRowY, lineHeight, xr, colIndexWidths);
+         curRowY += lineHeight;
 
-         renderPlayerSymbolAndSetColor(playerScores[j], x, curRowY + vertAdjustFact + 2, symbolFontSize);
-
-         S32 nameWidth = drawStringAndGetWidth(x, curRowY, playerFontSize, playerScores[j]->getName().getString());
-
-         S32 kdlen = drawStringfr(xr - KdOff, curRowY, playerFontSize, "%2.2f", playerScores[j]->getRating());
-         maxkdlen = max(kdlen, maxkdlen);
-
-         S32 pinglen = drawStringAndGetWidthf(xr - PingOff, curRowY, playerFontSize, "%d", playerScores[j]->getPing());
-         maxpinglen = max(pinglen, maxpinglen);
-
-         if(!isTeamGame)
-         {            
-            S32 scorelen = drawStringfr(xr - ScoreOff, curRowY, playerFontSize, "%d", playerScores[j]->getScore());
-            maxscorelen = max(scorelen, maxscorelen);
-         }
-
-         // Circle back and render the badges now that all the rendering with the name color is finished
-         renderBadges(playerScores[j], x + nameWidth + 10 + gap, curRowY + (maxHeight / 2), scaleRatio);
-
-         curRowY += maxHeight;
+         for(S32 k = 0; k < ColIndexCount; k++)
+            maxColIndexWidths[k] = max(colIndexWidths[k], maxColIndexWidths[k]);
       }
-      FontManager::popFontContext();
 
       // Go back and render the column headers, now that we know the widths.  These will be different for team and solo games.
 
@@ -2318,12 +2302,12 @@ void GameUserInterface::renderScoreboard()
          glColor(Colors::gray50);
 
          drawString_fixed(x, colHeaderYPos, (S32)ColHeaderTextSize, "Name");
-         drawStringc(xr - (KdOff    + maxkdlen    / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Threat Level");
-         drawStringc(xr - (PingOff  - maxpinglen  / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Ping");
+         drawStringc(xr - (KdOff    + maxColIndexWidths[KdIndex]    / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Threat Level");
+         drawStringc(xr - (PingOff  - maxColIndexWidths[PingIndex]  / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Ping");
 
          // Solo games need one more header
          if(!isTeamGame)
-            drawStringc(xr - (ScoreOff + maxscorelen / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Score");
+            drawStringc(xr - (ScoreOff + maxColIndexWidths[ScoreIndex] / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Score");
       }
 
 #ifdef USE_DUMMY_PLAYER_SCORES
@@ -2334,6 +2318,33 @@ void GameUserInterface::renderScoreboard()
    renderScoreboardLegend(getGame()->getPlayerCount(), scoreboardTop, totalHeight);
 
    FontManager::popFontContext();
+}
+
+
+// Renders a line on the scoreboard, and returns the widths of the rendered items in colWidths
+void GameUserInterface::renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool isTeamGame, S32 row,
+                                             S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths) const
+{
+   const S32 playerFontSize = S32(lineHeight * 0.75f);
+   const S32 symbolFontSize = S32(lineHeight * 0.75f * 0.75f);
+
+   static const S32 vertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;
+
+   renderPlayerSymbolAndSetColor(playerScores[row], x, y + vertAdjustFact + 2, symbolFontSize);
+
+   S32 nameWidth = drawStringAndGetWidth(x, y, playerFontSize, playerScores[row]->getName().getString());
+
+   colWidths[KdIndex]   = drawStringfr          (rightEdge - KdOff,   y, playerFontSize, "%2.2f", playerScores[row]->getRating());
+   colWidths[PingIndex] = drawStringAndGetWidthf(rightEdge - PingOff, y, playerFontSize, "%d",    playerScores[row]->getPing());
+
+   if(!isTeamGame)
+      colWidths[ScoreIndex] = drawStringfr(rightEdge - ScoreOff, y, playerFontSize, "%d", playerScores[row]->getScore());
+
+   // Vertical scale ratio to maximum line height
+   const F32 scaleRatio = ((F32)lineHeight) / 30.f;
+
+   // Circle back and render the badges now that all the rendering with the name color is finished
+   renderBadges(playerScores[row], x + nameWidth + 10 + Gap, y + (lineHeight / 2), scaleRatio);
 }
 
 
