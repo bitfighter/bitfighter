@@ -91,8 +91,10 @@ LineItem *LineItem::clone() const
 
 void LineItem::render()
 {
+#ifndef ZAP_DEDICATED
    if(shouldRender())
       renderLine(getOutline(), getColor());
+#endif
 }
 
 
