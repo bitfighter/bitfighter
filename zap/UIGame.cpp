@@ -2166,6 +2166,8 @@ static const S32 ScoreOff = 160;    // Solo game only
 static const S32 KdOff   = 85;
 static const S32 PingOff = 60;
 static const U32 Gap = 3;        // Small gap for use between various UI elements
+static const S32 ColHeaderTextSize = 10;
+
 
 enum ColIndex {
    KdIndex,
@@ -2222,9 +2224,7 @@ void GameUserInterface::renderScoreboard()
 
    const U32 numTeamRows = (teams + 1) >> 1;
 
-   static const U32 ColHeaderTextSize = 10;
-
-   const U32 colHeaderHeight = isTeamGame ? ColHeaderTextSize - 3: ColHeaderTextSize + 2;
+   const S32 colHeaderHeight = isTeamGame ? ColHeaderTextSize - 3: ColHeaderTextSize + 2;
 
    const U32 desiredHeight = (canvasHeight - vertMargin * 2) / numTeamRows;
    const U32 lineHeight    = MIN(30, (desiredHeight - teamHeaderHeight) / maxTeamPlayers);
@@ -2276,8 +2276,8 @@ void GameUserInterface::renderScoreboard()
 
       S32 curRowY = yt + teamHeaderHeight + 1;              // Advance y coord to below team display, if there is one
 
-      const S32 x = xl + 40;     // + 40 to align with team name in team game
-      const S32 colHeaderYPos = isTeamGame ? curRowY + 3 : curRowY + 8;
+      const S32 x = xl + 40;                                               // + 40 to align with team name in team game
+      const S32 colHeaderYPos = isTeamGame ? curRowY + 3 : curRowY + 8;    // Calc this before we change curRowY
 
       // Leave a gap for the colHeader... not sure yet of the exact xpos... will figure that out and render in this slot later
       if(playerScores.size() > 0)
@@ -2296,19 +2296,8 @@ void GameUserInterface::renderScoreboard()
       }
 
       // Go back and render the column headers, now that we know the widths.  These will be different for team and solo games.
-
       if(playerScores.size() > 0)
-      {
-         glColor(Colors::gray50);
-
-         drawString_fixed(x, colHeaderYPos, (S32)ColHeaderTextSize, "Name");
-         drawStringc(xr - (KdOff    + maxColIndexWidths[KdIndex]    / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Threat Level");
-         drawStringc(xr - (PingOff  - maxColIndexWidths[PingIndex]  / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Ping");
-
-         // Solo games need one more header
-         if(!isTeamGame)
-            drawStringc(xr - (ScoreOff + maxColIndexWidths[ScoreIndex] / 2), colHeaderYPos, (S32)ColHeaderTextSize, "Score");
-      }
+         renderScoreboardColumnHeaders(x, colHeaderYPos, xr, maxColIndexWidths, isTeamGame);
 
 #ifdef USE_DUMMY_PLAYER_SCORES
       playerScores.deleteAndClear();      // Clean up
@@ -2318,6 +2307,20 @@ void GameUserInterface::renderScoreboard()
    renderScoreboardLegend(getGame()->getPlayerCount(), scoreboardTop, totalHeight);
 
    FontManager::popFontContext();
+}
+
+
+void GameUserInterface::renderScoreboardColumnHeaders(S32 x, S32 y, S32 rightEdge, const S32 *colIndexWidths, bool isTeamGame) const
+{
+   glColor(Colors::gray50);
+
+   drawString_fixed(x,                                                        y, ColHeaderTextSize, "Name");
+   drawStringc     (rightEdge -  (KdOff   + colIndexWidths[KdIndex]    / 2),  y, ColHeaderTextSize, "Threat Level");
+   drawStringc     (rightEdge -  (PingOff - colIndexWidths[PingIndex]  / 2),  y, ColHeaderTextSize, "Ping");
+
+   // Solo games need one more header
+   if(!isTeamGame)
+      drawStringc   (rightEdge - (ScoreOff + colIndexWidths[ScoreIndex] / 2), y, ColHeaderTextSize, "Score");
 }
 
 

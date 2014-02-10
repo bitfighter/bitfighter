@@ -192,6 +192,8 @@ private:
    void renderScoreboard();
    void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool isTeamGame, S32 row, 
                              S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths) const;
+   void renderScoreboardColumnHeaders(S32 x, S32 y, S32 rightEdge, const S32 *colIndexWidths, bool isTeamGame) const;
+
 
    // Some key press/release handler helpers
    void onMissionKeyPressed();
