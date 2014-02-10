@@ -2212,27 +2212,20 @@ void GameUserInterface::renderScoreboard()
    if(maxTeamPlayers == 0)
       return;
 
-   static const U32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
-   static const U32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   static const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+   static const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
-   static const U32 drawableWidth = canvasWidth - horizMargin * 2;
+   const S32 teamHeaderHeight = isTeamGame ? 40 : 2;
 
-   const U32 columnCount = min(teams, 2);
-   const U32 teamWidth = drawableWidth / columnCount;
+   const S32 numTeamRows = (teams + 1) >> 1;
 
-   const U32 teamHeaderHeight = isTeamGame ? 40 : 2;
+   const S32 desiredHeight = (canvasHeight - vertMargin * 2) / numTeamRows;
+   const S32 lineHeight    = MIN(30, (desiredHeight - teamHeaderHeight) / maxTeamPlayers);
 
-   const U32 numTeamRows = (teams + 1) >> 1;
+   const S32 sectionHeight = teamHeaderHeight + (lineHeight * maxTeamPlayers) + (2 * Gap) + 10;
+   const S32 totalHeight   = sectionHeight * numTeamRows - 10  + (isTeamGame ? 0 : 4);    // 4 provides a gap btwn bottom name and legend
 
-   const S32 colHeaderHeight = isTeamGame ? ColHeaderTextSize - 3: ColHeaderTextSize + 2;
-
-   const U32 desiredHeight = (canvasHeight - vertMargin * 2) / numTeamRows;
-   const U32 lineHeight    = MIN(30, (desiredHeight - teamHeaderHeight) / maxTeamPlayers);
-
-   const U32 sectionHeight = teamHeaderHeight + (lineHeight * maxTeamPlayers) + (2 * Gap) + 10;
-   const U32 totalHeight   = sectionHeight * numTeamRows - 10  + (isTeamGame ? 0 : 4);    // 4 provides a gap btwn bottom name and legend
-
-   const U32 scoreboardTop = (canvasHeight - totalHeight) / 2;
+   const S32 scoreboardTop = (canvasHeight - totalHeight) / 2;    // Center vertically
 
    // Outer scoreboard box
    drawFilledFancyBox(horizMargin - Gap, scoreboardTop - (2 * Gap),
@@ -2242,57 +2235,74 @@ void GameUserInterface::renderScoreboard()
    FontManager::pushFontContext(ScoreboardContext);
 
    for(S32 i = 0; i < teams; i++)
-   {
-      const S32 xl = horizMargin + Gap + (i & 1) * teamWidth;     // Left edge of team render area
-      const S32 xr = (xl + teamWidth) - (2 * Gap);                // Right edge of team render area
-      const S32 yt = scoreboardTop + (i >> 1) * sectionHeight;    // Top edge of team render area
-
-      // Team header
-      if(isTeamGame)     
-         renderTeamName(i, xl, xr, yt);
-
-      // Now for player scores.  First build a list.  Then sort it.  Then display it.
-      Vector<ClientInfo *> playerScores;
-
-#ifdef USE_DUMMY_PLAYER_SCORES      // For testing purposes only!
-      getDummyPlayerScores(getGame(), playerScores);
-#else
-      gameType->getSortedPlayerScores(i, playerScores);     // Fills playerScores for team i
-#endif
-
-      S32 curRowY = yt + teamHeaderHeight + 1;              // Advance y coord to below team display, if there is one
-
-      const S32 x = xl + 40;                                               // + 40 to align with team name in team game
-      const S32 colHeaderYPos = isTeamGame ? curRowY + 3 : curRowY + 8;    // Calc this before we change curRowY
-
-      // Leave a gap for the colHeader... not sure yet of the exact xpos... will figure that out and render in this slot later
-      if(playerScores.size() > 0)
-         curRowY += colHeaderHeight;
-
-      S32 colIndexWidths[ColIndexCount];     
-      S32 maxColIndexWidths[ColIndexCount] = {0};     // Inits every element of array to 0
-
-      for(S32 j = 0; j < playerScores.size(); j++)
-      {
-         renderScoreboardLine(playerScores, isTeamGame, j, x, curRowY, lineHeight, xr, colIndexWidths);
-         curRowY += lineHeight;
-
-         for(S32 k = 0; k < ColIndexCount; k++)
-            maxColIndexWidths[k] = max(colIndexWidths[k], maxColIndexWidths[k]);
-      }
-
-      // Go back and render the column headers, now that we know the widths.  These will be different for team and solo games.
-      if(playerScores.size() > 0)
-         renderScoreboardColumnHeaders(x, xr, colHeaderYPos, maxColIndexWidths, isTeamGame);
-
-#ifdef USE_DUMMY_PLAYER_SCORES
-      playerScores.deleteAndClear();      // Clean up
-#endif
-   }
+      renderTeamScoreboard(i, teams, isTeamGame, scoreboardTop, sectionHeight, teamHeaderHeight, lineHeight);
 
    renderScoreboardLegend(getGame()->getPlayerCount(), scoreboardTop, totalHeight);
 
    FontManager::popFontContext();
+}
+
+
+void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, 
+                                             S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight) const
+{
+   static const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+   static const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+
+   static const S32 drawableWidth = canvasWidth - horizMargin * 2;
+
+   const S32 columnCount = min(teams, 2);
+   const S32 teamWidth = drawableWidth / columnCount;
+
+   const S32 xl = horizMargin + Gap + (index & 1) * teamWidth;    // Left edge of team render area
+   const S32 xr = (xl + teamWidth) - (2 * Gap);                   // Right edge of team render area
+   const S32 yt = scoreboardTop + (index >> 1) * sectionHeight;   // Top edge of team render area
+
+   // Team header
+   if(isTeamGame)     
+      renderTeamName(index, xl, xr, yt);
+
+   // Now for player scores.  First build a list.  Then sort it.  Then display it.
+   Vector<ClientInfo *> playerScores;
+
+#ifdef USE_DUMMY_PLAYER_SCORES      // For testing purposes only!
+   getDummyPlayerScores(getGame(), playerScores);
+#else
+   getGame()->getGameType()->getSortedPlayerScores(index, playerScores);     // Fills playerScores for team index
+#endif
+
+   S32 curRowY = yt + teamHeaderHeight + 1;                          // Advance y coord to below team display, if there is one
+
+   const S32 x = xl + 40;                                            // + 40 to align with team name in team game
+   const S32 colHeaderYPos = isTeamGame ? curRowY + 3 : curRowY + 8; // Calc this before we change curRowY
+
+   // Leave a gap for the colHeader... not sure yet of the exact xpos... will figure that out and render in this slot later
+   if(playerScores.size() > 0)
+   {
+      const S32 colHeaderHeight = isTeamGame ? ColHeaderTextSize - 3: ColHeaderTextSize + 2;
+      curRowY += colHeaderHeight;
+   }
+
+   S32 colIndexWidths[ColIndexCount];     
+   S32 maxColIndexWidths[ColIndexCount] = {0};     // Inits every element of array to 0
+
+   for(S32 i = 0; i < playerScores.size(); i++)
+   {
+      renderScoreboardLine(playerScores, isTeamGame, i, x, curRowY, lineHeight, xr, colIndexWidths);
+      curRowY += lineHeight;
+
+      for(S32 j = 0; j < ColIndexCount; j++)
+         maxColIndexWidths[j] = max(colIndexWidths[j], maxColIndexWidths[j]);
+   }
+
+   // Go back and render the column headers, now that we know the widths.  These will be different for team and solo games.
+   if(playerScores.size() > 0)
+      renderScoreboardColumnHeaders(x, xr, colHeaderYPos, maxColIndexWidths, isTeamGame);
+
+#ifdef USE_DUMMY_PLAYER_SCORES
+   playerScores.deleteAndClear();      // Clean up
+#endif
+
 }
 
 
