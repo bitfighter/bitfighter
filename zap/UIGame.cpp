@@ -2234,8 +2234,6 @@ void GameUserInterface::renderScoreboard()
 
    const U32 scoreboardTop = (canvasHeight - totalHeight) / 2;
 
-   const S32 teamFontSize = 24;
-
    // Outer scoreboard box
    drawFilledFancyBox(horizMargin - Gap, scoreboardTop - (2 * Gap),
                      (canvasWidth - horizMargin) + Gap, scoreboardTop + totalHeight + 23,
@@ -2245,25 +2243,13 @@ void GameUserInterface::renderScoreboard()
 
    for(S32 i = 0; i < teams; i++)
    {
-      const S32 yt = scoreboardTop + (i >> 1) * sectionHeight;    // Top edge of team render area
       const S32 xl = horizMargin + Gap + (i & 1) * teamWidth;     // Left edge of team render area
       const S32 xr = (xl + teamWidth) - (2 * Gap);                // Right edge of team render area
+      const S32 yt = scoreboardTop + (i >> 1) * sectionHeight;    // Top edge of team render area
 
       // Team header
       if(isTeamGame)     
-      {
-         // First the box
-         const Color *teamColor = getGame()->getTeamColor(i);
-         const S32 headerBoxHeight = teamFontSize + 2 * Gap;
-         drawFilledFancyBox(xl, yt, xr, yt + headerBoxHeight, 10, *teamColor, 0.6f, *teamColor);
-
-         // Then the team name & score
-         FontManager::pushFontContext(ScoreboardHeadlineContext);
-         glColor(Colors::white);
-         drawString (xl + 40,  yt + 2, teamFontSize, getGame()->getTeamName(i).getString());
-         drawStringf(xr - 140, yt + 2, teamFontSize, "%d", ((Team *)(getGame()->getTeam(i)))->getScore());
-         FontManager::popFontContext();
-      }
+         renderTeamName(i, xl, xr, yt);
 
       // Now for player scores.  First build a list.  Then sort it.  Then display it.
       Vector<ClientInfo *> playerScores;
@@ -2297,7 +2283,7 @@ void GameUserInterface::renderScoreboard()
 
       // Go back and render the column headers, now that we know the widths.  These will be different for team and solo games.
       if(playerScores.size() > 0)
-         renderScoreboardColumnHeaders(x, colHeaderYPos, xr, maxColIndexWidths, isTeamGame);
+         renderScoreboardColumnHeaders(x, xr, colHeaderYPos, maxColIndexWidths, isTeamGame);
 
 #ifdef USE_DUMMY_PLAYER_SCORES
       playerScores.deleteAndClear();      // Clean up
@@ -2310,11 +2296,32 @@ void GameUserInterface::renderScoreboard()
 }
 
 
-void GameUserInterface::renderScoreboardColumnHeaders(S32 x, S32 y, S32 rightEdge, const S32 *colIndexWidths, bool isTeamGame) const
+void GameUserInterface::renderTeamName(S32 index, S32 left, S32 right, S32 top) const
+{
+   static const S32 teamFontSize = 24;
+
+   // First the box
+   const Color *teamColor = getGame()->getTeamColor(index);
+   const S32 headerBoxHeight = teamFontSize + 2 * Gap;
+
+   drawFilledFancyBox(left, top, right, top + headerBoxHeight, 10, *teamColor, 0.6f, *teamColor);
+
+   // Then the team name & score
+   FontManager::pushFontContext(ScoreboardHeadlineContext);
+   glColor(Colors::white);
+
+   drawString (left  + 40,  top + 2, teamFontSize, getGame()->getTeamName(index).getString());
+   drawStringf(right - 140, top + 2, teamFontSize, "%d", ((Team *)(getGame()->getTeam(index)))->getScore());
+
+   FontManager::popFontContext();
+}
+
+
+void GameUserInterface::renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, const S32 *colIndexWidths, bool isTeamGame) const
 {
    glColor(Colors::gray50);
 
-   drawString_fixed(x,                                                        y, ColHeaderTextSize, "Name");
+   drawString_fixed(leftEdge,                                                 y, ColHeaderTextSize, "Name");
    drawStringc     (rightEdge -  (KdOff   + colIndexWidths[KdIndex]    / 2),  y, ColHeaderTextSize, "Threat Level");
    drawStringc     (rightEdge -  (PingOff - colIndexWidths[PingIndex]  / 2),  y, ColHeaderTextSize, "Ping");
 
@@ -2344,7 +2351,7 @@ void GameUserInterface::renderScoreboardLine(const Vector<ClientInfo *> &playerS
       colWidths[ScoreIndex] = drawStringfr(rightEdge - ScoreOff, y, playerFontSize, "%d", playerScores[row]->getScore());
 
    // Vertical scale ratio to maximum line height
-   const F32 scaleRatio = ((F32)lineHeight) / 30.f;
+   const F32 scaleRatio = (F32)lineHeight / 30.f;
 
    // Circle back and render the badges now that all the rendering with the name color is finished
    renderBadges(playerScores[row], x + nameWidth + 10 + Gap, y + (lineHeight / 2), scaleRatio);
