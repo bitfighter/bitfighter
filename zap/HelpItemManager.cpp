@@ -632,9 +632,9 @@ void HelpItemManager::addInlineHelpItem(HelpItem item, bool messageCameFromQueue
    // of course, it came from the queue!)
    if(!messageCameFromQueue)
    {
-      TNLAssert(!queueHasGameStartItems(), "Any lingering GameStart items should have been removed in onGameStarting()!");
-
       Priority pr = helpItems[item].priority;
+      TNLAssert(pr != GameStart || !queueHasGameStartItems(), 
+                        "Any lingering GameStart items should have been removed in onGameStarting()!");
 
       // GameStart means remove any GameStart items in queue, and add to high priority queue only if it is empty
       if(pr == PacedHigh || pr == PacedLow || (pr == GameStart && mHighPriorityQueuedItems.size() == 0))
