@@ -2133,8 +2133,27 @@ static void renderScoreboardLegend(S32 humans, U32 scoreboardTop, U32 totalHeigh
 }
 
 
+// Horiz offsets from the right for rendering score components
+static const S32 ScoreOff = 160;    // Solo game only
+static const S32 KdOff   = 85;
+static const S32 PingOff = 60;
+static const U32 Gap = 3;        // Small gap for use between various UI elements
+static const S32 ColHeaderTextSize = 10;
+
+
 static void renderPlayerSymbolAndSetColor(ClientInfo *player, S32 x, S32 y, S32 size)
 {
+   // Figure out how much room we need to leave for our player symbol (@, +, etc.)
+   x -= getStringWidth(size, adminSymbol) + Gap;  // Use admin symbol as it's the widest
+
+   // Draw the player's experience level before we set the color
+   FontManager::pushFontContext(OldSkoolContext);
+   static const S32 levelSize = 7;
+   glColor(Colors::green);
+   drawStringf(x - 8, y + 7 , levelSize, "%d", ClientGame::getExpLevel(player->getGamesPlayed()));
+   FontManager::popFontContext();
+
+
    // Figure out what color to use to render player name, and set it
    if(player->isSpawnDelayed())
       glColor(Colors::idlePlayerNameColor);
@@ -2142,10 +2161,6 @@ static void renderPlayerSymbolAndSetColor(ClientInfo *player, S32 x, S32 y, S32 
       glColor(Colors::streakPlayerNameColor);
    else
       glColor(Colors::standardPlayerNameColor);
-
-
-   // Figure out how much room we need to leave for our player symbol (@, +, etc.)
-   x -= getStringWidth(size, adminSymbol) + 3;  // Use admin symbol as it's the widest; 3 provides a bit of whitespace
 
    // Mark of the bot
    if(player->isRobot())
@@ -2159,14 +2174,6 @@ static void renderPlayerSymbolAndSetColor(ClientInfo *player, S32 x, S32 y, S32 
    else if(player->isLevelChanger())
       drawString(x, y, size, levelChangerSymbol);
 }
-
-
-// Horiz offsets from the right for rendering score components
-static const S32 ScoreOff = 160;    // Solo game only
-static const S32 KdOff   = 85;
-static const S32 PingOff = 60;
-static const U32 Gap = 3;        // Small gap for use between various UI elements
-static const S32 ColHeaderTextSize = 10;
 
 
 enum ColIndex {
@@ -2246,7 +2253,6 @@ void GameUserInterface::renderScoreboard()
 void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, 
                                              S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight) const
 {
-   static const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
    static const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    static const S32 drawableWidth = canvasWidth - horizMargin * 2;

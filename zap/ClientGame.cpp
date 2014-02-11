@@ -433,7 +433,8 @@ bool ClientGame::isSpawnDelayed() const
 
 
 // Returns NONE if we are not leveling up
-S32 ClientGame::getLevelThreshold(S32 val) const
+// static method
+S32 ClientGame::getLevelThreshold(S32 val)
 {
    return NONE;      // Disabled for the time being...
 
@@ -450,6 +451,22 @@ S32 ClientGame::getLevelThreshold(S32 val) const
    //   case 5000:           return 8;
    //   default:             return NONE;
    //}
+}
+
+
+// static method
+S32 ClientGame::getExpLevel(S32 gamesPlayed)
+{
+   if(gamesPlayed <   20) return 1;
+   if(gamesPlayed <   50) return 2;
+   if(gamesPlayed <  100) return 3;
+   if(gamesPlayed <  200) return 4;
+   if(gamesPlayed <  500) return 5;
+   if(gamesPlayed < 1000) return 6;
+   if(gamesPlayed < 2000) return 7;
+   if(gamesPlayed < 5000) return 8;
+
+   return 9;
 }
 
 

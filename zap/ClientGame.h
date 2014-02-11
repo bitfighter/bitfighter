@@ -70,7 +70,7 @@ private:
    SafePtr<ClientInfo> mLocalRemoteClientInfo;  // ClientInfo pointer to the remote ClientInfo received from the server
 
    S32 findClientIndex(const StringTableEntry &name);
-   S32 getLevelThreshold(S32 val) const;        // Have we earned a levelup message?
+   static S32 getLevelThreshold(S32 val);          // Have we earned a levelup message?
 
    AbstractTeam *getNewTeam();
 
@@ -123,6 +123,9 @@ public:
    string getCurrentLevelFileName() const;
    void setPreviousLevelName(const string &name);
    void showPreviousLevelName() const;
+
+   static S32 getExpLevel(S32 gamesPlayed);
+
 
 
    UIManager *getUIManager() const;
