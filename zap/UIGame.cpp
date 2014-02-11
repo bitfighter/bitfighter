@@ -502,6 +502,7 @@ void GameUserInterface::emitTeleportInEffect(const Point &pos, U32 type)
    mFxManager.emitTeleportInEffect(pos, type);
 }
 
+
 // Draw main game screen (client only)
 void GameUserInterface::render()
 {
@@ -2758,8 +2759,10 @@ void GameUserInterface::renderGameNormal()
       mFxManager.render(i, getCommanderZoomFraction());
    }
 
-
-   renderInlineHelpItemOutlines(ship);
+   S32 team = NONE;
+   if(getGame()->getLocalRemoteClientInfo())
+      team = getGame()->getLocalRemoteClientInfo()->getTeamIndex();
+   renderInlineHelpItemOutlines(team, getBackgroundTextDimFactor(false));
 
    FxTrail::renderTrails();
 
@@ -2780,7 +2783,7 @@ void GameUserInterface::renderGameNormal()
 }
 
 
-void GameUserInterface::renderInlineHelpItemOutlines(const Ship *ship) const
+void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) const
 {
    if(!HelpItemManager::shouldRender(getGame()))
       return;
@@ -2799,7 +2802,6 @@ void GameUserInterface::renderInlineHelpItemOutlines(const Ship *ship) const
             HighlightItem::Whose whose = itemsToHighlight->get(i).whose;
 
             S32 team = renderObjects[j]->getTeam();
-            S32 playerTeam = ship ? ship->getTeam() : NO_TEAM;
 
             if( whose == HighlightItem::Any ||
                (whose == HighlightItem::Team && team == playerTeam) ||
@@ -2842,7 +2844,7 @@ void GameUserInterface::renderInlineHelpItemOutlines(const Ship *ship) const
       offsetPolygons(polygons, outlines, HIGHLIGHTED_OBJECT_BUFFER_WIDTH);
 
       for(S32 j = 0; j < outlines.size(); j++)
-         renderPolygonOutline(&outlines[j], &Colors::green);
+         renderPolygonOutline(&outlines[j], &Colors::green, alpha);
    }
 }
 

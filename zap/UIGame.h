@@ -220,7 +220,7 @@ private:
    void renderDebugStatus() const;           // Render things related to debugging
    void renderChatMsgs() const;
    void renderAnnouncement(S32 pos) const;
-   void renderInlineHelpItemOutlines(const Ship *ship) const;
+   void renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) const;
 
 
    F32 getBackgroundTextDimFactor(bool chatRelated) const;
