@@ -639,8 +639,6 @@ bool GameUserInterface::isChatting() const
 
 void GameUserInterface::renderSuspendedMessage() const
 {
-   static const S32 VertOffset = -30;
-
    if(getGame()->inReturnToGameCountdown())
    {
       static string waitMsg[] = { "", "WILL RESPAWN", "IN BLAH BLAH SECONDS", "" };

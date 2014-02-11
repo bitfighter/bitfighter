@@ -1470,7 +1470,7 @@ void Seeker::idle(IdleCallPath path)
          mTimeRemaining -= deltaT;
    }
    // No more processing if we've gone BOOM!
-   else
+   if(mExploded)  // handleCollision might make it explode
       return;
 
    // Do we need a target?
