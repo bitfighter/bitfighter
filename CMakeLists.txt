@@ -238,7 +238,7 @@ if(USE_LUAJIT)
 	set_property(TARGET luajit PROPERTY IMPORTED_LOCATION ${LUAJIT_SOURCE_DIR}/libluajit.a)
 	add_dependencies(luajit project_luajit)
 
-	include_directories(${LUAJIT_SOURCE_DIR}/src)
+	include_directories(${LUAJIT_SOURCE_DIR})
 else()
 	add_subdirectory(lua/lua-vec)
 endif()
