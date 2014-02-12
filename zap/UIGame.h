@@ -165,6 +165,8 @@ private:
       Canceled                      // Was shutting down, but are no longer
    };
 
+   void addStartingHelpItemsToQueue();
+
 
    UI::FxManager mFxManager;
 

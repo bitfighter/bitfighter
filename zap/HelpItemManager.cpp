@@ -458,14 +458,21 @@ void HelpItemManager::queueHelpItem(HelpItem item)
    if(mAlreadySeen[item])
        return;
 
+
    WeightedHelpItem weightedItem;
    weightedItem.helpItem = item;
    weightedItem.removalWeight = 0;
 
    if(helpItems[item].priority == PacedHigh || helpItems[item].priority == GameStart)
-      mHighPriorityQueuedItems.push_back(weightedItem);
+   {
+      if(!mHighPriorityQueuedItems.contains(weightedItem))
+         mHighPriorityQueuedItems.push_back(weightedItem);
+   }
    else
-      mLowPriorityQueuedItems.push_back(weightedItem);
+   {
+      if(!mLowPriorityQueuedItems.contains(weightedItem))
+         mLowPriorityQueuedItems.push_back(weightedItem);
+   }
 }
 
 

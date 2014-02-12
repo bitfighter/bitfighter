@@ -155,8 +155,23 @@ void GameUserInterface::onActivate()
    mShowProgressBar = true;               // Causes screen to be black before level is loaded
    mHasShipPos = false;
 
-   // Queue up some initial help messages for the new users
+   mHelperManager.reset();
 
+   for(S32 i = 0; i < ShipModuleCount; i++)
+   {
+      mModPrimaryActivated[i]   = false;
+      mModSecondaryActivated[i] = false;
+   }
+
+   mShutdownMode = None;
+
+   getGame()->onGameUIActivated();
+}
+
+
+void GameUserInterface::addStartingHelpItemsToQueue()
+{
+   // Queue up some initial help messages for the new users
    mHelpItemManager.reset();
    mHelpItemManager.addInlineHelpItem(WelcomeItem);            // Hello, my name is Clippy!     
 
@@ -181,21 +196,8 @@ void GameUserInterface::onActivate()
    // And finally...
    mHelpItemManager.addInlineHelpItem(F1HelpItem);             // How to get Help
    
-
    if(getGame()->getBotCount() == 0)
       mHelpItemManager.addInlineHelpItem(AddBotsItem);         // Add some bots?
-  
-   mHelperManager.reset();
-
-   for(S32 i = 0; i < ShipModuleCount; i++)
-   {
-      mModPrimaryActivated[i]   = false;
-      mModSecondaryActivated[i] = false;
-   }
-
-   mShutdownMode = None;
-
-   getGame()->onGameUIActivated();
 }
 
 
@@ -224,6 +226,8 @@ void GameUserInterface::onGameStarting()
    mDispWorldExtents.set(Point(0,0), 0);
    Barrier::clearRenderItems();
    mHasShipPos = false;
+
+   addStartingHelpItemsToQueue();      // Do this here so if the helpItem manager gets turned on, items will start displaying next game
 
    mHelpItemManager.onGameStarting();
 }

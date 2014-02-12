@@ -166,6 +166,11 @@ private:
    struct WeightedHelpItem {
       HelpItem helpItem;
       U8       removalWeight;
+
+      inline bool operator==(const WeightedHelpItem &item) const
+      {
+         return helpItem == item.helpItem;
+      }
    };
 
    Vector<HelpItem>         mHelpItems;
