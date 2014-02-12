@@ -286,8 +286,10 @@ void Game::addToClientList(ClientInfo *clientInfo)
 S32 Game::findClientIndex(const StringTableEntry &name)
 {
    for(S32 i = 0; i < mClientInfos.size(); i++)
+   {
       if(mClientInfos[i]->getName() == name) 
          return i;
+   }
 
    return -1;     // Not found
 }
