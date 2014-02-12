@@ -392,7 +392,7 @@ Point luaToPoint(lua_State *L, S32 index)
    lua_getfield(L, index, "x");  // ... point, ..., x
    lua_getfield(L, index, "y");  // ... point, ..., x, y
 
-   Point p = Point(lua_tonumber(L, -1), lua_tonumber(L, -2));
+   Point p = Point(lua_tonumber(L, -2), lua_tonumber(L, -1));
    lua_pop(L, 2);
 
    return p;
