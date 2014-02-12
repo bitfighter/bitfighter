@@ -270,7 +270,8 @@ public:
    // For displaying items in a test capacity
    S32 mTestingCtr;
    Timer mTestingTimer;
-   void debugShowNextHelpItem();
+   void debugShowNextSampleHelpItem();
+   void debugAdvanceHelpItem();
 #endif
 };
 

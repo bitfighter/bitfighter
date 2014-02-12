@@ -1334,8 +1334,12 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
 
 #ifdef TNL_DEBUG
    // These commands only available in debug builds
-   if(inputCode == KEY_H && InputCodeManager::checkModifier(KEY_CTRL))     // Ctrl+H to show next HelpItem
-      mHelpItemManager.debugShowNextHelpItem();
+   if(inputCode == KEY_H && InputCodeManager::checkModifier(KEY_SHIFT))     // Shift+H to show next real HelpItem
+      mHelpItemManager.debugAdvanceHelpItem();
+
+   if(inputCode == KEY_H && InputCodeManager::checkModifier(KEY_CTRL))     // Ctrl+H to show next dummy HelpItem
+      mHelpItemManager.debugShowNextSampleHelpItem();
+
 #endif
 
    if(!gConsole.isVisible())

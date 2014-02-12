@@ -438,11 +438,25 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
 
 
 #ifdef TNL_DEBUG
-void HelpItemManager::debugShowNextHelpItem()
+void HelpItemManager::debugShowNextSampleHelpItem()
 {
    mTestingCtr++;
    mTestingTimer.reset();
 }
+
+
+void HelpItemManager::debugAdvanceHelpItem()
+{
+   mInitialDelayTimer.clear();
+
+   for(S32 i = 0; i < mHelpTimer.size(); i++)
+      mHelpTimer[i].update(mHelpTimer[i].getCurrent() - 1);
+
+   mPacedTimer.update(mPacedTimer.getCurrent() - 1);
+   mFloodControl.update(mFloodControl.getCurrent() - 1);
+}
+
+
 #endif
 
 
