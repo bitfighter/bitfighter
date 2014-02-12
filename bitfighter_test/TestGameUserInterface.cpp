@@ -21,6 +21,8 @@ namespace Zap
 
 TEST(GameUserInterfaceTest, Engineer)
 {
+   InputCodeManager::initializeKeyNames();  
+
    GamePair gamePair(getLevelCodeForTestingEngineer1(), 3); // See def for description of level
    ServerGame *serverGame       = GameManager::getServerGame();
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();

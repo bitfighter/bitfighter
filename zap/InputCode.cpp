@@ -2012,6 +2012,7 @@ string InputCodeManager::getSpecialKeyBoundToBindingCodeName(const string &name)
 }
 
 
+// static method
 void InputCodeManager::initializeKeyNames()
 {
    // Fill name list with default value

@@ -106,9 +106,9 @@ static void doScenario2(GamePair &gamePair)
    Vector<string> words;
    ChatCommands::idleHandler(client1, words);
    gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give things time to propagate, timers to time out, etc.
-   //for(S32 i = 0; i < 5; i++) client2->idle(10);
+
    ASSERT_TRUE(serverGame->getClientInfo(0)->isSpawnDelayed());
-   ASSERT_TRUE(client1->isSpawnDelayed());         // Status should have propagated to client by now
+   ASSERT_TRUE(client1->isSpawnDelayed());            // Status should have propagated to client by now
    fillVector.clear();
    serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());                   // Ship should have been killed off -- only 2nd player ship should be left
