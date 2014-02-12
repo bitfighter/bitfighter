@@ -365,6 +365,8 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
 	${CMAKE_SOURCE_DIR}/master/master.cpp
 	${CMAKE_SOURCE_DIR}/master/MasterServerConnection.cpp
+	${CMAKE_SOURCE_DIR}/master/MasterServerConnection.cpp
+	${CMAKE_SOURCE_DIR}/master/GameJoltConnector.cpp
 )
 
 add_executable(test EXCLUDE_FROM_ALL

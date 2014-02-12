@@ -267,6 +267,10 @@ TEST_F(HelpItemManagerTest, highPriorityClobberingBug)
    himgr.addInlineHelpItem(CmdrsMapItem);
    checkQueues(0, 2, 0);     // Both items should be queued, none yet displayed
 
+   // Check that adding a duplicate item does not affect the queues (dupe should be ignored)
+   himgr.addInlineHelpItem(CmdrsMapItem);
+   checkQueues(0, 2, 0);     // Still 2 items displayed
+
    // Create a ClientInfo for a robot -- it will be deleted by ClientGame destructor
    RemoteClientInfo *clientInfo = new RemoteClientInfo(game, "Robot", true, 0, 0, 0, true, ClientInfo::RoleNone, false, false);
    clientInfo->setTeamIndex(0);        // Assign it to our team
