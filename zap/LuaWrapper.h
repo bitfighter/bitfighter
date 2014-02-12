@@ -43,8 +43,8 @@ extern "C"
 {
 #endif // LUAW_NO_EXTERN_C
 
-#  include "../lua/lua-vec/src/lua.h"
-#  include "../lua/lua-vec/src/lauxlib.h"
+#  include "lua.h"
+#  include "lauxlib.h"
 
 #ifndef LUAW_NO_EXTERN_C
 }

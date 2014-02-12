@@ -6,7 +6,7 @@
 #ifndef _LUABASE_H_
 #define _LUABASE_H_
 
-#include "lua.h"
+#include "LuaInc.h"
 #include "LuaException.h"     // LuaException def
 
 #include "Point.h"
