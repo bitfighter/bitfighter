@@ -104,9 +104,11 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
       stream->writeFlag(y < 0);
 
       // This needs to be signed, otherwise, the ship can't face up!  
+      // The writeAngle here will be between -2048 and 2048 because the 'angle' is
+      // always between -tau/2 and tau/2 due to the output of the various atan2() calls we make
       S32 writeAngle = (S32) floor(radiansToUnit(angle) * (1 << AngleBits) + 0.5f);     // floor(angle / 2pi * 4096 + .5)
 
-      stream->writeInt(writeAngle, AngleBits);
+      stream->writeSignedInt(writeAngle, AngleBits);
       stream->writeFlag(fire);
 
       for(S32 i = 0; i < ShipModuleCount; i++)
@@ -140,7 +142,8 @@ void Move::unpack(BitStream *stream, bool unpackTime)
       if(stream->readFlag()) 
          y = -y;
 
-      angle = unitToRadians(stream->readInt(AngleBits) / F32(1 << AngleBits));
+      // angle must output between -tau/2 and tau/2
+      angle = unitToRadians(stream->readSignedInt(AngleBits) / F32(1 << AngleBits));
       fire = stream->readFlag();
 
       for(S32 i = 0; i < ShipModuleCount; i++)
