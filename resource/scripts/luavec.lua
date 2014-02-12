@@ -3,6 +3,8 @@ point = {}
 -- For saving before sandbox wipes out setmetatable
 local tms = setmetatable
 
+local mt = {}
+
 function point.new(x,y)
   local x=x or 0
   local y=y or 0
@@ -48,7 +50,7 @@ end
 point.zero = point.new(0,0)
 point.one = point.new(1,1)
 
-mt = {}
+mt.__tostring = function(p) return "point ("..tostring(p.x)..","..tostring(p.y)..")"  end
 mt.__add = function(v1,v2) return point.new(v1.x+v2.x,v1.y+v2.y) end
 mt.__sub = function(v1,v2) return point.new(v1.x-v2.x,v1.y-v2.y) end
 
