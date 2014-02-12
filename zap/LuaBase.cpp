@@ -499,6 +499,8 @@ static string stringify(lua_State *L, S32 index)
 
    switch (t) 
    {
+      case LUA_TNIL:
+         return "(nil)";
       case LUA_TSTRING:
          return "string: " + string(lua_tostring(L, index));
       case LUA_TBOOLEAN:  
