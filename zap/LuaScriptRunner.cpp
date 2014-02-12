@@ -468,7 +468,7 @@ void LuaScriptRunner::configureNewLuaInstance()
 
    // Perform sandboxing now
    // Only code executed before this point can access dangerous functions
-//   loadCompileRunHelper("sandbox.lua");
+   loadCompileRunHelper("sandbox.lua");
 }
 
 

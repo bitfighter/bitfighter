@@ -1,10 +1,13 @@
 point = {}
 
+-- For saving before sandbox wipes out setmetatable
+local tms = setmetatable
+
 function point.new(x,y)
   local x=x or 0
   local y=y or 0
   local v={x=x,y=y}
-  setmetatable(v,mt)
+  tms(v,mt)
   return v
 end
 
