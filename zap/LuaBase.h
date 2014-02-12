@@ -170,6 +170,12 @@ const char *getString(lua_State *L, S32 index, const char *defaultVal);
 
 S32 luaTableCopy(lua_State *L);
 
+void luaPushPoint(lua_State *L, F32 x, F32 y);
+void luaPushPoint(lua_State *L, const Point &pt);
+
+Point luaToPoint(lua_State *L, S32 index);
+bool luaIsPoint(lua_State *L, S32 index);
+
 /////
 // Script context
 ScriptContext getScriptContext(lua_State *L);

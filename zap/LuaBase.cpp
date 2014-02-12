@@ -127,10 +127,10 @@ static bool checkPoints(lua_State *L, S32 minNumberOfPoints, S32 &stackPos)
 {
    S32 stackDepth = lua_gettop(L);
 
-   if(lua_ispoint(L, stackPos))          // Series of points
+   if(luaIsPoint(L, stackPos))          // Series of points
    {
       S32 initialPos = stackPos;
-      while(stackPos + 1 <= stackDepth && lua_ispoint(L, stackPos + 1))
+      while(stackPos + 1 <= stackDepth && luaIsPoint(L, stackPos + 1))
          stackPos++;
 
       return (stackPos - initialPos + 1) >= minNumberOfPoints;
@@ -141,7 +141,7 @@ static bool checkPoints(lua_State *L, S32 minNumberOfPoints, S32 &stackPos)
       lua_pushnil(L);                     // First key
       while(lua_next(L, stackPos) != 0)   // Traverse table
       { 
-         if(!lua_ispoint(L, -1))          // Is it a point?  If not, cleanup and bail
+         if(!luaIsPoint(L, -1))          // Is it a point?  If not, cleanup and bail
          {
             lua_pop(L, 2);                
             return false;
@@ -216,16 +216,16 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
          return lua_isboolean(L, stackPos);
 
       case PT:
-         if(lua_ispoint(L, stackPos))
+         if(luaIsPoint(L, stackPos))
             return true;
          
          return false;
 
       // SIMPLE_LINE: A pair of points, or a table containing two points
       case SIMPLE_LINE:
-         if(lua_ispoint(L, stackPos))           // Pair of Points
+         if(luaIsPoint(L, stackPos))           // Pair of Points
          {
-            if(stackPos + 1 <= stackDepth && lua_ispoint(L, stackPos + 1))
+            if(stackPos + 1 <= stackDepth && luaIsPoint(L, stackPos + 1))
                stackPos++;
 
             return true;
@@ -244,9 +244,9 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
 
       // GEOM: A series of points, numbers, or a table containing a series of points or numbers
       case GEOM:
-         if(lua_ispoint(L, stackPos))             // Series of Points
+         if(luaIsPoint(L, stackPos))             // Series of Points
          {
-            while(stackPos + 1 <= stackDepth && lua_ispoint(L, stackPos + 1))
+            while(stackPos + 1 <= stackDepth && luaIsPoint(L, stackPos + 1))
                stackPos++;
 
             return true;
@@ -345,7 +345,7 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
 bool isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable)
 {
    lua_rawgeti(L, tableIndex, indexWithinTable);   // Push point onto stack
-   bool isPoint = lua_ispoint(L, -1);              // Check its type
+   bool isPoint = luaIsPoint(L, -1);              // Check its type
    lua_pop(L, 1);                                  // Remove item from stack
 
    return isPoint;
@@ -368,10 +368,42 @@ bool isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable)
 //}
 
 
+// To check if the object at the given index is a point, we first
+// check to make sure it is a table, then that it has x and y fields
+// that are numbers
+bool luaIsPoint(lua_State *L, S32 index)
+{
+   if(!lua_istable(L, index))
+      return false;
+
+   lua_getfield(L, index, "x");  // ... point, ..., x
+   lua_getfield(L, index, "y");  // ... point, ..., x, y
+
+   bool isPoint = lua_isnumber(L, -1) && lua_isnumber(L, -2);
+   lua_pop(L, 2);
+
+   return isPoint;
+}
+
+
+Point luaToPoint(lua_State *L, S32 index)
+{
+   // A 'point' should be on the stack
+   lua_getfield(L, index, "x");  // ... point, ..., x
+   lua_getfield(L, index, "y");  // ... point, ..., x, y
+
+   Point p = Point(lua_tonumber(L, -1), lua_tonumber(L, -2));
+   lua_pop(L, 2);
+
+   return p;
+}
+
+
+
 // Pop a vec object off stack, check its type, and return it
 Point getCheckedVec(lua_State *L, S32 index, const char *methodName)
 {
-   if(!lua_ispoint(L, index))
+   if(!luaIsPoint(L, index))
    {
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s expected vector arg at position %d", methodName, index);
@@ -380,19 +412,16 @@ Point getCheckedVec(lua_State *L, S32 index, const char *methodName)
       throw LuaException(msg);
    }
 
-   const F32 *vec = lua_tovec(L, index);
-   return Point(vec[0], vec[1]);
+   return luaToPoint(L, index);
 }
 
 
 // Pop a point object off stack, or grab two numbers and create a point from them
 Point getPointOrXY(lua_State *L, S32 index)
 {
-   if(lua_ispoint(L, index))
-   {
-      const F32 *vec = lua_tovec(L, index);
-      return Point(vec[0], vec[1]);
-   }
+   if(luaIsPoint(L, index))
+      return luaToPoint(L, index);
+
    else
    {
       F32 x = getFloat(L, index);
@@ -408,13 +437,12 @@ Vector<Point> getPointsOrXYs(lua_State *L, S32 index)
    Vector<Point> points;
    S32 stackDepth = lua_gettop(L);
 
-   if(lua_ispoint(L, index))          // List of points
+   if(luaIsPoint(L, index))          // List of points
    {
       S32 offset = 0;
-      while(index + offset <= stackDepth && lua_ispoint(L, index + offset))
+      while(index + offset <= stackDepth && luaIsPoint(L, index + offset))
       {
-         const F32 *coords = lua_tovec(L, index + offset);
-         points.push_back(Point(coords[0], coords[1]));
+         points.push_back(luaToPoint(L, index + offset));
          offset++;
       }
    }
@@ -467,7 +495,7 @@ static string stringify(lua_State *L, S32 index)
 
    switch (t) 
    {
-      case LUA_TSTRING:   
+      case LUA_TSTRING:
          return "string: " + string(lua_tostring(L, index));
       case LUA_TBOOLEAN:  
          return "boolean: " + string(lua_toboolean(L, index) ? "true" : "false");
@@ -683,6 +711,27 @@ S32 luaTableCopy(lua_State *L)
 }
 
 
+void luaPushPoint(lua_State *L, F32 x, F32 y)
+{
+   // The luavec.lua script should already be loaded and have the 'point'
+   // methods set up
+   lua_getglobal(L, "point");    // point
+   lua_getfield(L, -1, "new");   // point, new
+   lua_pushnumber(L, x);         // point, new, x
+   lua_pushnumber(L, y);         // point, new, x, y
+
+   // Run
+   lua_call(L, 2, 1);            // point, pt
+   lua_remove(L, -2);            // pt
+}
+
+
+void luaPushPoint(lua_State *L, const Point &pt)
+{
+   luaPushPoint(L, pt.x, pt.y);
+}
+
+
 // Returns a float to a calling Lua function
 S32 returnFloat(lua_State *L, F32 num)
 {
@@ -718,7 +767,7 @@ S32 returnNil(lua_State *L)
 // Returns a point to calling Lua function
 S32 returnPoint(lua_State *L, const Point &pt)
 {
-   lua_pushvec(L, pt.x, pt.y);
+   luaPushPoint(L, pt.x, pt.y);
    return 1;
 }
 
@@ -734,7 +783,7 @@ S32 returnPoints(lua_State *L, const Vector<Point> *points)
 
    for(S32 i = 0; i < points->size(); i++)
    {
-      lua_pushvec(L, points->get(i).x, points->get(i).y);  // Push point onto the stack      -- table, point
+      luaPushPoint(L, points->get(i).x, points->get(i).y);  // Push point onto the stack      -- table, point
       lua_rawseti(L, tableIndex, i + 1);                   // + 1  => Lua indices 1-based    -- table[i + 1] = point                                      
    }
 
@@ -754,7 +803,7 @@ S32 returnPolygons(lua_State *L, const Vector<Vector<Point> > &polys)
 
       for(S32 j = 0; j < points.size(); j++)
       {
-         lua_pushvec(L, points[j].x, points[j].y); // polylist, poly, point
+         luaPushPoint(L, points[j].x, points[j].y); // polylist, poly, point
          lua_rawseti(L, -2, j + 1);                // polylist, poly
       }
 
@@ -895,9 +944,7 @@ void getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &points)
    while(lua_next(L, -2))     // -2 is our table
    {
       // Grab the value at the top of the stack
-      const F32 *vec = lua_tovec(L, -1);
-      Point p(vec[0], vec[1]);
-      points.push_back(p);
+      points.push_back(luaToPoint(L, -1));
 
       lua_pop(L, 1);    // We extracted that value, pop it off so we can push the next element
    }

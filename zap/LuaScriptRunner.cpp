@@ -191,7 +191,7 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
 void LuaScriptRunner::pushStackTracer()
 {
    // _stackTracer is a function included in lua_helper_functions that manages the stack trace; it should ALWAYS be present.
-   if(!loadFunction(L, getScriptId(), "_stackTracer"))       
+   if(!loadFunction(L, getScriptId(), "_stackTracer"))
       throw LuaException("Method _stackTracer() could not be found!\n"
                          "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
 }
@@ -432,14 +432,13 @@ bool LuaScriptRunner::startLua()
 // Prepare a new Lua environment ("L") for use -- only called from startLua() above, which has catch block, so we can throw errors
 void LuaScriptRunner::configureNewLuaInstance()
 {
-   lua_atpanic(L, luaPanicked);  // Register our panic function 
+   lua_atpanic(L, luaPanicked);  // Register our panic function
 
 #ifdef USE_PROFILER
    init_profiler(L);
 #endif
 
    luaL_openlibs(L);    // Load the standard libraries
-   luaopen_vec(L);      // For vector math (lua-vec)
 
    // This allows the safe use of 'require' in our scripts
    setModulePath();
@@ -456,6 +455,9 @@ void LuaScriptRunner::configureNewLuaInstance()
    // Immediately execute the lua helper functions (these are global and need to be loaded before sandboxing)
    loadCompileRunHelper("lua_helper_functions.lua");
 
+   // Load our vector library
+   loadCompileRunHelper("luavec.lua");
+
    // Now load our Timer class.  This is global and will need to be reset between levels
    loadCompileRunHelper("timer.lua");
 
@@ -463,9 +465,10 @@ void LuaScriptRunner::configureNewLuaInstance()
    loadCompileSaveHelper("robot_helper_functions.lua",    ROBOT_HELPER_FUNCTIONS_KEY);
    loadCompileSaveHelper("levelgen_helper_functions.lua", LEVELGEN_HELPER_FUNCTIONS_KEY);
 
+
    // Perform sandboxing now
    // Only code executed before this point can access dangerous functions
-   loadCompileRunHelper("sandbox.lua");
+//   loadCompileRunHelper("sandbox.lua");
 }
 
 
