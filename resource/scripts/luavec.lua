@@ -50,7 +50,17 @@ end
 point.zero = point.new(0,0)
 point.one = point.new(1,1)
 
+
+-- Metamethods for a 'point'
+
+-- This lets us detect that this table is a 'point' object from C,
+-- see LuaBase::luaIsPoint()
+mt.__point = true
+
+-- Pretty printing of a point
 mt.__tostring = function(p) return "point ("..tostring(p.x)..","..tostring(p.y)..")"  end
+
+-- Math operators
 mt.__add = function(v1,v2) return point.new(v1.x+v2.x,v1.y+v2.y) end
 mt.__sub = function(v1,v2) return point.new(v1.x-v2.x,v1.y-v2.y) end
 

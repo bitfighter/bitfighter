@@ -345,7 +345,7 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
 bool isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable)
 {
    lua_rawgeti(L, tableIndex, indexWithinTable);   // Push point onto stack
-   bool isPoint = luaIsPoint(L, -1);              // Check its type
+   bool isPoint = luaIsPoint(L, -1);               // Check its type
    lua_pop(L, 1);                                  // Remove item from stack
 
    return isPoint;
@@ -369,33 +369,37 @@ bool isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable)
 
 
 // To check if the object at the given index is a point, we first
-// check to make sure it is a table, then that it has x and y fields
-// that are numbers
+// The signature is that the metatable has the field '__point'
 bool luaIsPoint(lua_State *L, S32 index)
 {
-   if(!lua_istable(L, index))
+   if(lua_getmetatable(L, index) == 0) // No metatable?
       return false;
 
-   lua_getfield(L, index, "x");  // ... point, ..., x
-   lua_getfield(L, index, "y");  // ... point, ..., x, y
+   lua_pushstring(L, "__point");    // ..., mt, __point
+   lua_rawget(L, -2);               // ..., mt, bool (or nil?)
 
-   bool isPoint = lua_isnumber(L, -1) && lua_isnumber(L, -2);
+   bool isPoint = (bool) lua_isboolean(L, -1);
+
    lua_pop(L, 2);
 
    return isPoint;
 }
 
 
+// This method does *not* do error checking, you must guarantee a 'point'
+// object is on the stack at the appropriate index
 Point luaToPoint(lua_State *L, S32 index)
 {
    // A 'point' should be on the stack
    lua_getfield(L, index, "x");  // ... point, ..., x
-   lua_getfield(L, index, "y");  // ... point, ..., x, y
+   F32 x = lua_tonumber(L, -1);
+   lua_pop(L, 1);
 
-   Point p = Point(lua_tonumber(L, -2), lua_tonumber(L, -1));
-   lua_pop(L, 2);
+   lua_getfield(L, index, "y");  // ... point, ..., y
+   F32 y = lua_tonumber(L, -1);
+   lua_pop(L, 1);
 
-   return p;
+   return Point(x, y);
 }
 
 
