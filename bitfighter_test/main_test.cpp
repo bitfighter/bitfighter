@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
    if(!checkResources())
    {
-      logprintf("FAILED: Invalid test environment! Are you sure you copied everything from 'resources/' into 'exe/'?");
+      printf("FAILED: Invalid test environment! Are you sure you copied everything from 'resources/' into 'exe/'?\n");
       testing::internal::posix::Abort();
    }
 
