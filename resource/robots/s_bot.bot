@@ -6,12 +6,11 @@
 -- Works on all game modes, some better than others
 --
 -- Authors:
---  - Unknown     (original QuickBot v2 code)
---  - sam686      (AI code for gametypes, other improvements)
---  - watusimoto  (maintenance, upgrades)
---  - raptor      (maintenance, upgrades)
---  - Fordcars    (AI improvements)
---  - phill       (AI improvements, upgrades)
+--  - Unknown    (original QuickBot v2 code)
+--  - sam686     (AI code for gametypes, other improvements)
+--  - watusimoto (maintenance, upgrades)
+--  - raptor     (maintenance, upgrades)
+--  - Fordcars   (AI improvements)
 --
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -45,16 +44,6 @@ function main()
     directionThreshold = tonumber(arg[5]) or .25
 
     gameType = game:getGameType()
-
-    local loadout = {
-        Weapon.Phaser,
-        Weapon.Seeker,
-        Weapon.Triple,
-        Module.Cloak,
-        Module.Shield
-    }
-    
-    bot:setLoadoutNow(loadout) 
     
     averageIndex = 1
     averageMax = 20
@@ -70,8 +59,8 @@ end
  
 
 items = { }     -- Global variable, reusable container for bf:findAllObjects.  Reusing this table avoids costs of
-             -- constructing and destructing it every time we call bf:findAllObjects().  Be sure to clear the
-             -- table before reusing it!
+                -- constructing and destructing it every time we call bf:findAllObjects().  Be sure to clear the
+                -- table before reusing it!
 function shieldSelf()
     table.clear(items)
     bot:findVisibleObjects(items, ObjType.Bullet, ObjType.Seeker, ObjType.Asteroid, ObjType.Mine)
@@ -101,19 +90,34 @@ function angleDifference(angleA, angleB)
     return (math.mod(math.mod(angleA - angleB, math.pi * 2) + math.pi * 3, math.pi * 2) - math.pi)
 end
 
--- Returns true of the target fulfills these conditions
--- [Same-team eningeered objects, team related objects, non-flag carriers in single-player rabbit]
-function isValidTarget(obj)
-    if(obj == nil) then
-        return false
-    end
+function fireAtObjects()
+    table.clear(items)
+    bot:findVisibleObjects(items, ObjType.Robot, ObjType.Turret, ObjType.Ship, ObjType.Asteroid, 
+        ObjType.ForceFieldProjector, ObjType.SpyBug, ObjType.Core)
 
+    -- Cycle through list of potential items until we find one that we can attack
+    for index, enemy in ipairs(items) do
+        if(fireAtObject(enemy, Weapon.Phaser)) then
+            break
+        end
+    end
+end
+ 
+ 
+-- Fires at the specified object with the specified weapon if the obj is a good target.
+-- Does not fire if object is on the same team or if there is something in the way.
+-- Returns whether it fired or not.
+function fireAtObject(obj, weapon)
     local classId = obj:getObjType()
 
     if(classId == ObjType.Turret or classId == ObjType.ForceFieldProjector) then
         -- Ignore all same-team engineered objects...  even in single-team games
         if obj:getTeamIndex() == bot:getTeamIndex() then
             return false                                 -- Cancel fireAtObject function
+        end
+
+        if obj:getHealth() < .1  then                                             -- If item is essentially dead
+            return false                                                          
         end
     end
     
@@ -134,109 +138,12 @@ function isValidTarget(obj)
         return false
     end
 
-    return true
-end
-
--- Returns the best target to aim at in vicinity, defaulting to the closest enemy within d=250000 if none are found
-function getIdealTarget()
-    -- Clears the global 'items' list
-    table.clear(items)
-    -- Gets all visible objects of types we might be interested in
-    bot:findVisibleObjects(items, ObjType.Robot, ObjType.Turret, ObjType.Ship, ObjType.Asteroid, 
-            ObjType.ForceFieldProjector, ObjType.SpyBug, ObjType.Core)
-
-    -- Advantage defines how good of a target a object is
-    local maxAdv = 0
-    local bestTarget = nil
-
-    for index, obj in ipairs(items) do
-        -- Check to make sure the object is in fact valid
-        if(isValidTarget(obj)) then
-            -- Calculate the advantage, take in account energy and how far away it is
-            local adv = point.distSquared(obj:getPos(), bot:getPos()) / 100000.0
-            if(obj:getObjType() == ObjType.Robot or obj:getObjType() == ObjType.Ship) then
-                adv = adv + 5 * (1 - obj:getEnergy())
-            end
-            if(adv > maxAdv) then
-                maxAdv = adv
-                bestTarget = obj
-            end
-        end
-    end
-
-    if(bestTarget ~= nil) then
-        return bestTarget
-    else
-        -- Default to the enemy within this range
-        return bot:findClosestEnemy(250000)
-    end
-end
-
--- Selects the appropriate weapon to use for a specific target
-function selectWeapon(target)
-    if(target ~= nil) then
-        local weapon = nil
-        -- Currently decides based solely on distance away
-        if(point.distSquared(target:getPos(),botPos) > 100000) then
-            weapon = Weapon.Seeker
-        else
-            weapon = Weapon.Phaser
-        end
-        return weapon
-    end
-end
-
--- First fires at idealTarget, then cycle through all other visible if that fails
-function fireAtObjects(idealTarget)
-    if(fireAtObject(idealTarget,selectWeapon(idealTarget))) then
-        return
-    end
-
-    -- Nothing down here *should* happen, but is kept in case an unforseen case is encountered
-    table.clear(items)
-    bot:findVisibleObjects(items, ObjType.Robot, ObjType.Turret, ObjType.Ship, ObjType.Asteroid, 
-      ObjType.ForceFieldProjector, ObjType.SpyBug, ObjType.Core)
-
-    -- Cycle through list of potential items until we find one that we can attack
-    for index, enemy in ipairs(items) do
-        if(fireAtObject(enemy, selectWeapon(enemy))) then
-            return
-        end
-    end
-end
- 
- 
--- Fires at the specified object with the specified weapon if the obj is a good target.
--- Does not fire if object is on the same team or if there is something in the way.
--- Returns whether it fired or not.
-function fireAtObject(obj, weapon)
-    -- Can't fire at nothing
-    if(obj == nil) then
-        return false
-    end
-
-    -- Don't fire if the target isn't good
-    if(not isValidTarget(obj)) then
-        return false
-    end
-
     -- We made it here!  We have a valid target..
     local angle = getFiringSolution(obj)
     if angle ~= nil and bot:hasWeapon(weapon) then
         bot:setAngle(angle + math.rad((math.random()-0.5)*20*(1-difficulty)))
         bot:fireWeapon(weapon)
         --logprint("bot:fireWeapon() called!");
-        return(true)
-    elseif bot:hasWeapon(weapon) and weapon == Weapon.Seeker and prevtarget ~= nil then
-        -- Base the minimum angle to turn corners on the difficulty rating (more difficult, more likely to shoot around a corner)
-        angle = (math.pi / 2.0) * difficulty
-        -- Check if the angle between where we are firing and where the target is will be large enough for the seeker to navigate
-        -- and whether the seeker will be able to find the target when it reaches the prevtarget
-        if(math.abs(angleDifference(point.angleTo(bot:getPos(),obj:getPos()), dirToGo)) < angle and 
-                                point.distSquared(prevtarget,obj:getPos()) < 160000) then
-            bot:setAngle(dirToGo)
-            bot:fireWeapon(weapon)
-        end
         return(true)
     end
     --logprint("Firing solution not found.");
@@ -245,7 +152,7 @@ end
  
  
 function getName()
-    return("S_Bot_upgrade")
+     return("S_Bot")
 end
 
 
@@ -318,7 +225,7 @@ function gotoPosition(pt)
     end
 end
 
-function gotoAndOrbitPosition(pt,radius)
+function gotoAndOrbitPosition(pt)
     if pt ~= nil then
         gotoPositionWasNil = false
         if not bot:canSeePoint(pt) then
@@ -326,11 +233,36 @@ function gotoAndOrbitPosition(pt,radius)
             gotoPosition(pt)
         else
             gotoPositionWasNil = false
-            orbitPoint(pt, myOrbitalDirection, botRadius * radius, 2)
+            orbitPoint(pt, myOrbitalDirection, botRadius * 5, 2)
         end
     end
 end
  
+-- Returns true if it found an enemy to fight
+function attackNearbyEnemies(target, agressionLevel)
+    if target ~= nil then
+        local targetPos = target:getPos()
+      
+        -- local dist    = point.distanceTo(botPos, targetPos)
+        local myPow   = bot:getEnergy() + bot:getHealth()
+
+        table.clear(items)
+        bot:findVisibleObjects(items, ObjType.Ship, ObjType.Robot)
+      
+        local otherPow = target:getEnergy() + target:getHealth() * #items
+      
+        --advantage is between -1 and 1, -1 meaning an extreme disadvantage and 1 meaning an extreme advantage
+        local advantage = (myPow - otherPow) / math.max(myPow, otherPow)
+        if(advantage  / 2 + .5  >agressionLevel) then
+            --orbitPoint(targetPos, myOrbitalDirection, botRadius * 9, 2)
+            prevtarget = targetPos
+            return(false)      -- was true
+        else
+        end
+    end
+    return(false)
+end
+
 
 -- Returns the objective for the bot, in the form of an object the bot can navigate towards.  This makes bots choose different defending locations.
 -- If onTeam is true, will only return items on specified team.  If onTeam is false, will return items *not* on 
@@ -352,9 +284,9 @@ function getObjective(objType, team, onTeam)
                 currentIndex = currentIndex + 1
             end
         elseif (objType == ObjType.Flag) and 
-                ((gameType == GameType.HTF) or (gameType == GameType.Retrieve)) and 
-                item:isInCaptureZone() then
-            --logprint(item:getCaptureZone():getTeamIndex());
+               ((gameType == GameType.HTF) or (gameType == GameType.Retrieve)) and 
+               item:isInCaptureZone() then
+                --logprint(item:getCaptureZone():getTeamIndex());
             if item:getCaptureZone():getTeamIndex() ~= bot:getTeamIndex() then
                 itemsOnMyTeam[currentIndex] = item
                 currentIndex = currentIndex + 1
@@ -389,10 +321,29 @@ function getObjective(objType, team, onTeam)
     else
         return(nil)
     end
+
+--  local closestitem = 0 --itemsOnMyTeam[1]
+--  local cur = 1
+--  local closestdist = 99999999
+--  while itemsOnMyTeam[cur] ~= nil do
+--      local item1 = itemsOnMyTeam[cur]
+--      if item1 ~= nil then
+--          local loc = item1.getPos()
+--          if loc ~= nil then
+--              local dist = point.distanceTo(botPos, loc)
+--              if dist < closestdist then
+--                  closestdist = dist
+--                  closesetitem = item1
+--              end
+--          end
+--      end
+--      cur=cur+1
+--  end
+--  return(closestitem)
 end
 
 
-function doObjective(idealTarget)
+function doObjective(closestEnemy)
     gotoPositionWasNil = true
     if(gameType == GameType.Bitmatch) then
         --Nothing to do here.           
@@ -440,14 +391,14 @@ function doObjective(idealTarget)
                 if not myFlag:isOnShip() then                                    -- If my flag is not on a ship
                     gotoPosition(myFlag:getPos())                                -- Go to position of my flag
                 else
-                    gotoAndOrbitPosition(myFlag:getPos(),5)                        -- Otherwise, go and orbit the flag on enemy
+                    gotoAndOrbitPosition(myFlag:getPos())                        -- Otherwise, go and orbit the flag on enemy
                 end
                 --gotoPosition(myFlag:getPos())
             else                                                                 -- If the bot doesn't have the flag
                 local retrievingFlag = false
                 if myFlag ~= nil then
                     if not myFlag:isInInitLoc() and not myFlag:isOnShip() and                     -- If my flag is not in its initial location and my flag is not on a ship
-                     point.distSquared(myFlag:getPos(), bot:getPos()) <= 2000 * 2000 then  -- .. and we're within some sane range of the flag
+                            point.distSquared(myFlag:getPos(), bot:getPos()) <= 2000 * 2000 then  -- .. and we're within some sane range of the flag
                         gotoPosition(myFlag:getPos())                                             -- Go to and return my flag
                         retrievingFlag = true
                     end
@@ -460,7 +411,7 @@ function doObjective(idealTarget)
                         elseif not otherFlag:isOnShip() then                     -- If enemy flag is not on a ship
                             gotoPosition(otherFlag:getPos())                     -- Go to that flag
                         else
-                            gotoAndOrbitPosition(otherFlag:getPos(),7)             -- Go and orbit our team flag's carrier
+                            gotoAndOrbitPosition(otherFlag:getPos())             -- Go and orbit our team flag's carrier
                         end
                     end
                 end
@@ -469,10 +420,10 @@ function doObjective(idealTarget)
             if bot:hasFlag() then                                                -- If the bot has a flag and has more than .5 defense
                 gotoPosition(myFlag:getPos())                                    -- Go to team flag
             elseif myFlag:isInInitLoc() then                                     -- If the bot doesn't have a flag and the team flag is in intial location
-                gotoAndOrbitPosition(myFlag:getPos(),7)                            -- Go and orbit team flag
+                gotoAndOrbitPosition(myFlag:getPos())                            -- Go and orbit team flag
             else
                 if myFlag:isOnShip() then                                        -- If team flag is on a ship
-                    gotoAndOrbitPosition(myFlag:getPos(),7)                        -- Go and orbit team flag
+                    gotoAndOrbitPosition(myFlag:getPos())                        -- Go and orbit team flag
                 else
                     gotoPosition(myFlag:getPos())                                -- If team flag is not on a ship, go to team flag
                 end
@@ -498,7 +449,7 @@ function doObjective(idealTarget)
             local otherFlag = getObjective(ObjType.Flag, bot:getTeamIndex(), true)           -- Find flags on our team
             if otherFlag ~= nil then
                 if otherFlag:isOnShip() then
-                    gotoAndOrbitPosition(otherFlag:getPos(),5)
+                    gotoAndOrbitPosition(otherFlag:getPos())
                 else
                     gotoPosition(otherFlag:getPos())
                 end
@@ -509,20 +460,21 @@ function doObjective(idealTarget)
                 gotoPosition(otherFlag:getPos())
             end
         end
+
     elseif(gameType == GameType.Core) then
         local obj = getObjective(ObjType.Core, bot:getTeamIndex(), false)                    -- Find enemy Core
         if obj ~= nil then
-            gotoAndOrbitPosition(obj:getPos(),5)
+            gotoAndOrbitPosition(obj:getPos())
         end
     end
 
     -- If we have no where to go, go to nearest enemy.
     if gotoPositionWasNil then
-        if(idealTarget ~= nil) then
-            prevtarget = idealTarget:getPos()
+        if(closestEnemy ~= nil) then
+            prevtarget = closestEnemy:getPos()
         end
-        if(prevtarget ~= nil) then
-            gotoAndOrbitPosition(prevtarget,6) 
+        if(prevtarget ~= nil) then 
+            gotoAndOrbitPosition(prevtarget) 
         end
     end
 end
@@ -533,19 +485,20 @@ function goInDirection()
 end
 
 
-
 -- This function gets called every game tick; deltaTime is the time that has elapsed since it was last called
 function onTick(deltaTime)
     botPos = bot:getPos()
     pathTimer = pathTimer - deltaTime
     assert(bot:getPos() ~= nil)
 
-    -- Find the best object to attack
-    local target = getIdealTarget()
+    local closestEnemy = bot:findClosestEnemy()
     
-    fireAtObjects(target)       -- Fire weapons
-    doObjective(target)         -- Set bot's objective
+    -- attackNearbyEnemies returns true if there is an enemy to fight, false if the bot can do something else
+    attackNearbyEnemies(closestEnemy, 1 - agression)
+    doObjective(closestEnemy)   -- Set bot's objective
+
     goInDirection()             -- Move the ship
+    fireAtObjects()             -- Fire weapons
     shield()                    -- Apply shield
 
     if(pathTimer < 0) then
