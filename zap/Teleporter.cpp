@@ -830,7 +830,7 @@ void Teleporter::render()
 
       F32 zoomFraction = getGame()->getCommanderZoomFraction();
       U32 renderStyle = mEngineered ? 2 : 0;
-      renderTeleporter(getOrigin(), renderStyle, true, mTime, zoomFraction, radiusFraction, 
+      renderTeleporter(getOrigin(), renderStyle, true, getGame()->getCurrentTime(), zoomFraction, radiusFraction, 
                        (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), trackerCount);
    }
 

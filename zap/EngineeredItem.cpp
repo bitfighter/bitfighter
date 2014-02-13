@@ -2252,6 +2252,7 @@ void Turret::onGeomChanged()
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getAimAngle,  ARRAYDEF({{      END }}), 1 ) \
    METHOD(CLASS, setAimAngle,  ARRAYDEF({{ NUM, END }}), 1 ) \
+   METHOD(CLASS, setWeapon,    ARRAYDEF({{ WEAP_ENUM, END }}), 1 ) \
 
 
 GENERATE_LUA_METHODS_TABLE(Turret, LUA_METHODS);
@@ -2288,6 +2289,25 @@ S32 Turret::lua_setAimAngle(lua_State *L)
 {
    checkArgList(L, functionArgs, "Turret", "setAimAngle");
    mCurrentAngle = getFloat(L, 1);
+
+   return 0;
+}
+
+
+/**
+ * @luafunc Turret::setWeapon(Weapon weapon)
+ *
+ * @brief Sets the weapon for this turret to use.
+ *
+ * @param weapon Weapon to set on the turret
+ *
+ * @note This is experimental and may be removed or changed from the game at any time
+ */
+S32 Turret::lua_setWeapon(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Turret", "setWeapon");
+
+   mWeaponFireType = getWeaponType(L, 1);
 
    return 0;
 }

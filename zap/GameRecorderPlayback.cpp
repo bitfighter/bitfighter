@@ -66,6 +66,24 @@ static void idleObjects(ClientGame *game, U32 timeDelta)
 }
 
 
+static void resetRenderState(ClientGame *game)
+{
+   const Vector<DatabaseObject *> *gameObjects = game->getGameObjDatabase()->findObjects_fast();
+
+   for(S32 i = gameObjects->size() - 1; i >= 0; i--)
+   {
+      BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
+
+      if(obj->isDeleted())
+         continue;
+
+      MoveObject *obj2 = dynamic_cast<MoveObject *>(obj);
+      if(obj2)
+         obj2->copyMoveState(ActualState, RenderState);
+   }
+}
+
+
 GameRecorderPlayback::GameRecorderPlayback(ClientGame *game, const char *filename) : GameConnection(game)
 {
    mFile = NULL;
@@ -506,6 +524,7 @@ bool PlaybackGameUserInterface::onKeyDown(InputCode inputCode)
             mPlaybackConnection->restart();
 
          mPlaybackConnection->processMoreData(time - mPlaybackConnection->mCurrentTime);
+         resetRenderState(getGame());
 
          return true;
       }

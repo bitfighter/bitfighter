@@ -37,11 +37,10 @@ TEST_F(MoveTest, PackUnpack)
 }
 
 
-// An area of concern by an earlier dev is that angles might get transmitted
-// incorreclty.  I agree that the math is confusing, so let's create some tests
-// to verify that prepare() normalizes the input angle to between 0 and 2pi,
-// which will then be handled properly by writeInt (and nicely keeps angles
-// sane).
+// The Move angle should always be between -pi and pi.  This conforms with
+// the output of the arc-tangent of a triangles coordinates and atan2()
+// We neeed to verify that prepare() keeps this output consistent, even
+// with angles of greater magnitude in either direction
 TEST_F(MoveTest, Simple)
 {
    // Obvious cases
@@ -49,18 +48,18 @@ TEST_F(MoveTest, Simple)
    move1.prepare();
    ASSERT_EQ(move1.angle, FloatHalfPi);
 
-   move1.angle = FloatPi + FloatHalfPi;
+   move1.angle = -FloatHalfPi;
    move1.prepare();
-   ASSERT_EQ(move1.angle, FloatPi + FloatHalfPi);
+   ASSERT_EQ(move1.angle, -FloatHalfPi);
 }
 
 
-TEST_F(MoveTest, NegativeAngles)
+TEST_F(MoveTest, NormalizedAngles)
 {
-   // -1/4 turn = 3/4 turn  
-   move1.angle = -FloatHalfPi;
+   // 3/4 turn = -1/4 turn
+   move1.angle = FloatPi + FloatHalfPi;
    move1.prepare();
-   ASSERT_EQ(move1.angle, FloatPi + FloatHalfPi);
+   ASSERT_EQ(move1.angle, -FloatHalfPi);
 
    // -3/4 turn = 1/4 turn  
    move1.angle = -FloatPi - FloatHalfPi;
@@ -92,7 +91,7 @@ TEST_F(MoveTest, LargeAngleWrapAround)
    // Wrap in neg. dir 
    move1.angle = -Float2Pi - FloatHalfPi;
    move1.prepare();
-   ASSERT_EQ(move1.angle, FloatPi + FloatHalfPi);
+   ASSERT_EQ(move1.angle, -FloatHalfPi);
 
    // Really large angles -- we'll never see these in the game
    move1.angle = 432 * Float2Pi;

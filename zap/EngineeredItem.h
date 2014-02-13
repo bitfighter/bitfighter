@@ -374,6 +374,7 @@ public:
    S32 lua_getPos(lua_State *L);
    S32 lua_getAimAngle(lua_State *L);
    S32 lua_setAimAngle(lua_State *L);
+   S32 lua_setWeapon(lua_State *L);
 };
 
 

@@ -214,7 +214,13 @@ void LuaScriptRunner::tickTimer(U32 timeDelta)
    lua_pushinteger(L, timeDelta);   // Timer, _tick, Timer, timeDelta
 
    // Run
-   lua_call(L, 2, 0);               // Timer
+   S32 err = lua_pcall(L, 2, 0, 0);
+   if(err!=0)
+   {
+      logprintf("Timer Error: %s", lua_tostring(L, -1));
+      lua_pop(L, 1);
+   }
+
    lua_pop(L, 1);
 }
 

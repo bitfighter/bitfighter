@@ -766,17 +766,14 @@ static void setPingTimeColor(U32 pingTime)
 
 
 // Set color by number of players
-static void setPlayerCountColor(S32 players, S32 maxPlayers)
+static Color getPlayerCountColor(S32 players, S32 maxPlayers)
 {
-   Color color;
    if(players == maxPlayers)
-      color = Colors::red;       // max players
+      return Colors::red;       // max players
    else if(players == 0)
-      color = Colors::yellow;    // no players
-   else
-      color = Colors::green;     // 1 or more players
+      return Colors::yellow;    // no players
 
-   glColor(color * 0.5);         // dim color
+   return Colors::green;     // 1 or more players
 }
 
 
@@ -935,11 +932,13 @@ void QueryServersUserInterface::render()
          setPingTimeColor(s.pingTime);
          drawStringf(columns[2].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.pingTime);
 
-         setPlayerCountColor(s.playerCount, s.maxPlayers);
+         Color color = getPlayerCountColor(s.playerCount, s.maxPlayers);
+         glColor(color);
 
-         drawStringf(columns[3].xStart + 30, y, SERVER_ENTRY_TEXTSIZE, "/%d", s.maxPlayers);
          drawStringf(columns[3].xStart,      y, SERVER_ENTRY_TEXTSIZE, "%d",  s.playerCount);
          drawStringf(columns[3].xStart + 78, y, SERVER_ENTRY_TEXTSIZE, "%d",  s.botCount);
+         glColor(color * 0.5); // Dim the max players
+         drawStringf(columns[3].xStart + 30, y, SERVER_ENTRY_TEXTSIZE, "/%d", s.maxPlayers);
 
          setLocalRemoteColor(s.isLocalServer);
          drawString(columns[4].xStart, y, SERVER_ENTRY_TEXTSIZE, s.serverAddress.toString());

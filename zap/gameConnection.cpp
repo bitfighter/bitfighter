@@ -527,7 +527,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
          case ServerName:          paramName = "server name";           break;
          case ServerDescr:         paramName = "server description";    break;
          case LevelDir:            paramName = "leveldir param";        break;
-         default:                  paramName = "unknown"; TNLAssert(false, "Fix unknown description");
+         default:                  paramName = "unknown"; TNLAssert(false, "Fix unknown description"); break;
       }
       logprintf(LogConsumer::ServerFilter, "User [%s] %s to [%s]", mClientInfo->getName().getString(), 
                                                                    strcmp(param.getString(), "") ? "changed" : "cleared", paramName);
@@ -649,7 +649,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
          case ServerPassword:      paramName = "ServerPassword";      break;
          case ServerName:          paramName = "ServerName";          break;
          case ServerDescr:         paramName = "ServerDescription";   break;
-         default:                  paramName = NULL; TNLAssert(false, "Fix unknown parameter to save");
+         default:                  paramName = NULL; TNLAssert(false, "Fix unknown parameter to save"); break;
       }
 
       if(paramName != NULL)
@@ -2052,7 +2052,7 @@ void GameConnection::onLocalConnection()
 
 bool GameConnection::lostContact()
 {
-   return getTimeSinceLastPacketReceived() > TWO_SECONDS && mLastPacketRecvTime != 0;   // No contact for 2 secs?  That's bad!
+   return getTimeSinceLastPacketReceived() > (U32)TWO_SECONDS && mLastPacketRecvTime != 0;   // No contact for 2 secs?  That's bad!
 }
 
 

@@ -382,7 +382,9 @@ void GameUserInterface::idle(U32 timeDelta)
 
    // Processes sparks and teleporter effects -- 
    //    do this even while suspended to make objects look normal while in /idling
-   mFxManager.idle(timeDelta);      
+   //    But not while playing back game recordings, idled in idleFxManager with custom timeDelta
+   if(dynamic_cast<GameRecorderPlayback *>(getGame()->getConnectionToServer()) == NULL)
+      mFxManager.idle(timeDelta);
 
    if(shouldCountdownHelpItemTimer())
       mHelpItemManager.idle(timeDelta, getGame());
@@ -445,6 +447,7 @@ void GameUserInterface::clearSparks()
 
 
 // Only runs when playing back a saved game... why?
+// Allows FxManager to pause or run in slow motion with custom timeDelta
 void GameUserInterface::idleFxManager(U32 timeDelta)
 {
    mFxManager.idle(timeDelta);

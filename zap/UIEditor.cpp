@@ -74,8 +74,8 @@ const S32 ITEMS_DOCK_WIDTH = 50;
 const S32 PLUGINS_DOCK_WIDTH = 150;
 const U32 PLUGIN_LINE_SPACING = 20;
 
-const F32 MIN_SCALE = .05f;         // Most zoomed-in scale
-const F32 MAX_SCALE = 2.5;          // Most zoomed-out scale
+const F32 MIN_SCALE = .02f;         // Most zoomed-out scale
+const F32 MAX_SCALE = 10.0f;        // Most zoomed-in scale
 const F32 STARTING_SCALE = 0.5;
 
 static GridDatabase *mLoadTarget;
