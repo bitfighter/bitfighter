@@ -931,6 +931,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       settings->getIniSettings()->connectionSpeed = 0;
    }
 
+   // 019:
    if(previousVersion < VERSION_019)
    {
       // Don't enable in-game help
@@ -941,16 +942,10 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 
       // Add back linesmoothing option
       settings->getIniSettings()->mSettings.setVal("LineSmoothing", Yes);
-
-
-      // Remove item_select.lua plugin, it was superseded by filter.lua
-      FolderManager *folderManager = settings->getFolderManager();
-      const char *offendingFile = joindir(folderManager->pluginDir, "item_select.lua").c_str();
-
-      removeFile(offendingFile);
    }
 
-   if(previousVersion < VERSION_019)
+   // 019a:
+   if(previousVersion < VERSION_019a)
    {
       // Rename BotsBalanceTeams to AddRobots in [Host] --> BotsBalanceTeams was introduced in 019, renamed in 019a
       if(GameSettings::iniFile.hasKey("Host", "BotsBalanceTeams"))
@@ -961,7 +956,13 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       }
 
       // Remove option that is no longer used, added in 019 
-      GameSettings::iniFile.deleteKey("Host", "BotsAlwaysBalanceTeams");   
+      GameSettings::iniFile.deleteKey("Host", "BotsAlwaysBalanceTeams");
+
+      // Remove item_select.lua plugin, it was superseded by filter.lua
+      FolderManager *folderManager = settings->getFolderManager();
+      const char *offendingFile = joindir(folderManager->pluginDir, "item_select.lua").c_str();
+
+      removeFile(offendingFile);
    }
 
 
