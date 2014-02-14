@@ -1,7 +1,8 @@
 point = {}
 
--- For saving before sandbox wipes out setmetatable
+-- For saving before sandbox wipes these out
 local tms = setmetatable
+local tmg = getmetatable
 
 local mt = {}
 
@@ -63,16 +64,24 @@ mt.__tostring = function(p) return "point ("..tostring(p.x)..","..tostring(p.y).
 -- Math operators
 mt.__add = function(v1,v2) return point.new(v1.x+v2.x,v1.y+v2.y) end
 mt.__sub = function(v1,v2) return point.new(v1.x-v2.x,v1.y-v2.y) end
-
 mt.__mul = function(v1,v2)
   local s = tonumber(v2)
   if s then
-    -- vector*scalar
+    -- vector * scalar
     return point.new(v1.x*s,v1.y*s)
   else
-    -- vector*vector
+    -- vector * vector
     return point.new(v1.x*v2.x,v1.y*v2.y)
   end
 end
-
+mt.__div = function(v1,s) return point.new(v1.x/s,v1.y/s) end
 mt.__unm = function(v) return point.new(-v.x,-v.y) end
+
+-- Patch 'type' function
+local t = type
+type = function(o)
+  -- Old type
+  local ot = t(o)
+  if ot == "table" and tmg(o) == mt then return "point" end
+  return ot
+end
