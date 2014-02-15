@@ -439,21 +439,26 @@ set(ALL_DEBUG_DEFS
 
 if(WIN32)
 	# Install windows libraries and resources
+	# The trailing slash is necessary to do here for proper native path translation
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
+	file(TO_NATIVE_PATH ${LUAJIT_SOURCE_DIR}/ luaLibDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
 	
 	if(MSYS OR CYGWIN OR XCOMPILE)
 		set(RES_COPY_CMD cp -r ${resDir}* ${exeDir})
 		set(LIB_COPY_CMD cp ${libDir}*.dll ${exeDir})
+		set(LUAJIT_LIB_COPY_CMD cp ${luaLibDir}lua51.dll ${exeDir})
 	else()
 		set(RES_COPY_CMD xcopy /e /d /y ${resDir}* ${exeDir})
 		set(LIB_COPY_CMD xcopy /d /y ${libDir}*.dll ${exeDir})
+		set(LUAJIT_LIB_COPY_CMD xcopy /d /y ${luaLibDir}lua51.dll ${exeDir})
 	endif()
 	
 	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
 		COMMAND ${RES_COPY_CMD}
 		COMMAND ${LIB_COPY_CMD}
+		COMMAND ${LUAJIT_LIB_COPY_CMD}
 	)
 endif()
 
