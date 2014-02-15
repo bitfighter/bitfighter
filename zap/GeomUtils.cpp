@@ -1891,7 +1891,7 @@ void pushPolyNode(lua_State *L, const PolyNode *node)
    {
       const Path &poly = node->Contour;
       lua_pushnumber(L, i);                       // -- node, points, i
-      lua_pushvec(L, poly[i-1].X * CLIPPER_SCALE_FACT_INVERSE, poly[i-1].Y * CLIPPER_SCALE_FACT_INVERSE);
+      luaPushPoint(L, poly[i-1].X * CLIPPER_SCALE_FACT_INVERSE, poly[i-1].Y * CLIPPER_SCALE_FACT_INVERSE);
                                                   // -- node, points, i, p
       lua_settable(L, -3);                        // -- node, points
    }
