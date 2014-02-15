@@ -225,12 +225,10 @@ if(USE_LUAJIT)
 	include(ExternalProject)
 	
 	set(LUAJIT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/lua/luajit-2.0/src")
-	set(BUILDCOMMAND "make amalg")
+	set(BUILDCOMMAND "make" "amalg")
 	set(LUAJIT_LIBRARY "libluajit.a")
 	if(MSVC)
-		# TODO: Figure out how to do the amalgamated build.
-		# Passing command arguments doesn't seem to work
-		set(BUILDCOMMAND "msvcbuild.bat")
+		set(BUILDCOMMAND "msvcbuild.bat" "amalg")
 		set(LUAJIT_LIBRARY "lua51.lib")
 	endif()
 	
