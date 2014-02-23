@@ -1,5 +1,5 @@
 project (bitfighter)
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
@@ -15,6 +15,21 @@ endif()
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
+
+
+#
+# Environment verification
+#
+if(APPLE)
+	set(OSX_DEPLOY_TARGET $ENV{MACOSX_DEPLOYMENT_TARGET})
+	
+	message(STATUS "MACOSX_DEPLOYMENT_TARGET: ${OSX_DEPLOY_TARGET}")
+	# MACOSX_DEPLOYMENT_TARGET must be set in the environment to compile properly
+	if(NOT OSX_DEPLOY_TARGET)
+		message(FATAL_ERROR "MACOSX_DEPLOYMENT_TARGET environment variable not set.  Set this like so: 'export MACOSX_DEPLOYMENT_TARGET=10.6'")
+	endif()
+endif()
+
 
 #
 # Global linker flags
@@ -32,7 +47,6 @@ if(MSVC)
 		string(REPLACE "INCREMENTAL:YES" "INCREMENTAL" ${LinkerFlag} "${${LinkerFlag}}")
 		string(REPLACE "INCREMENTAL" "INCREMENTAL:NO" ${LinkerFlag} "${${LinkerFlag}}")
 	endforeach()
-	
 else()
 	# MinGW won't statically compile in Microsofts c/c++ library routines
 	if(MINGW)
@@ -44,6 +58,7 @@ else()
 	# Only link in what is absolutely necessary
 	set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
 endif()
+
 
 # 
 # Global compiler specific flags
@@ -83,6 +98,18 @@ if(MINGW)
 	enable_language(RC)
 	set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -i <SOURCE> -o <OBJECT>")
 endif()
+
+
+#
+# Determine game versions.  Used in various places later
+#
+file(STRINGS "${CMAKE_SOURCE_DIR}/zap/version.h" VERSION_H_FILE)
+string(REGEX REPLACE ".*ZAP_GAME_RELEASE[ ]+\"([^\"]+)\".*" "\\1" BITFIGHTER_RELEASE "${VERSION_H_FILE}")
+message(STATUS "Bitfighter Release: ${BITFIGHTER_RELEASE}")
+
+string(REGEX REPLACE ".*#define BUILD_VERSION[ ]+([^ ]+).*" "\\1" BITFIGHTER_BUILD_VERSION_KEY "${VERSION_H_FILE}")
+string(REGEX REPLACE ".*${BITFIGHTER_BUILD_VERSION_KEY}[ ]+([0-9]+).*" "\\1" BITFIGHTER_BUILD_VERSION "${VERSION_H_FILE}")
+message(STATUS "Bitfighter Build Version: ${BITFIGHTER_BUILD_VERSION}")
 
 
 #
@@ -222,31 +249,11 @@ endif()
 add_subdirectory(tnl)
 
 if(USE_LUAJIT)
-	include(ExternalProject)
-	
-	set(LUAJIT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/lua/luajit-2.0/src")
-	set(BUILDCOMMAND "make" "amalg")
-	set(LUAJIT_LIBRARY "libluajit.a")
-	if(MSVC)
-		set(BUILDCOMMAND "msvcbuild.bat" "amalg")
-		set(LUAJIT_LIBRARY "lua51.lib")
-	endif()
-	
-	ExternalProject_Add(luajit_external
-		SOURCE_DIR ${LUAJIT_SOURCE_DIR}
-		CONFIGURE_COMMAND ""
-		BUILD_IN_SOURCE 1
-		BUILD_COMMAND ${BUILDCOMMAND}
-		INSTALL_COMMAND ""
-	)
-
-	add_library(luajit STATIC IMPORTED)
-	set_property(TARGET luajit PROPERTY IMPORTED_LOCATION ${LUAJIT_SOURCE_DIR}/${LUAJIT_LIBRARY})
-	add_dependencies(luajit luajit_external)
-
-	include_directories(${LUAJIT_SOURCE_DIR})
+	add_subdirectory(lua/luajit)
+	include_directories(${CMAKE_SOURCE_DIR}/lua/luajit/src)
 else()
 	add_subdirectory(lua/lua-vec)
+	include_directories(${CMAKE_SOURCE_DIR}/lua/lua-vec/src)
 endif()
 
 if(NOT WIN32 AND COMPILE_ALURE)  # ALURE is not compiled on Windows presently
