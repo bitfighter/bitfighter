@@ -501,16 +501,14 @@ if(WIN32 OR APPLE)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lua/luajit/src/ luaLibDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
-	
+			
 	if(WIN32)
 		if(MSYS OR CYGWIN OR XCOMPILE)
 			set(RES_COPY_CMD cp -r ${resDir}* ${exeDir})
 			set(LIB_COPY_CMD cp ${libDir}*.dll ${exeDir})
-			set(LUAJIT_LIB_COPY_CMD cp ${luaLibDir}lua51.dll ${exeDir})
 		else()
 			set(RES_COPY_CMD xcopy /e /d /y ${resDir}* ${exeDir})
 			set(LIB_COPY_CMD xcopy /d /y ${libDir}*.dll ${exeDir})
-			set(LUAJIT_LIB_COPY_CMD xcopy /d /y ${luaLibDir}lua51.dll ${exeDir})
 		endif()
 	endif()
 	
@@ -524,13 +522,6 @@ if(WIN32 OR APPLE)
 		
 		set(RES_COPY_CMD cp -rp ${resDir}* ${resourcesDir})
 		set(LIB_COPY_CMD rsync -av --exclude=*.h ${libDir}*.framework ${frameworksDir})
-		
-		# 64-bit OSX needs to use shared library
-		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-			set(LUAJIT_LIB_COPY_CMD cp -rp ${luaLibDir}libluajit.dylib ${frameworksDir})
-		else()
-			set(LUAJIT_LIB_COPY_CMD "")  # LuaJIT is statically linked into the binary
-		endif()
 		
 		# Icon file
 		set(COPY_RES_1 cp -rp ${OSX_BUILD_RESOURCE_DIR}/Bitfighter.icns ${resourcesDir})
@@ -550,13 +541,21 @@ if(WIN32 OR APPLE)
 			COMMAND ${COPY_RES_5}
 		)
 		
+		# 64-bit OSX needs to use shared LuaJIT library
+		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+			add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD
+				COMMAND cp -rp ${luaLibDir}libluajit.dylib ${frameworksDir}
+			)
+		endif()
+		
 		# TODO - run lipo on the frameworks
 	endif()
 	
+	
+	# Copy resources
 	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
 		COMMAND ${RES_COPY_CMD}
 		COMMAND ${LIB_COPY_CMD}
-		COMMAND ${LUAJIT_LIB_COPY_CMD}
 	)
 endif()
 

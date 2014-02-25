@@ -9,7 +9,7 @@ set(LUAJIT_POSTBUILDCOMMAND "")
 
 # Different library names depending on platform
 if(MSVC)
-	set(LUAJIT_BUILDCOMMAND "msvcbuild.bat" "amalg")
+	set(LUAJIT_BUILDCOMMAND "msvcbuild.bat" "staticamalg")
 	
 	# Use the .lib for linking, later we'll copy the DLL
 	set(LUAJIT_LIBRARY "lua51.lib")
