@@ -40,10 +40,10 @@ BEGIN
 			VALUE	"CompanyName",	"Don HO don.h@free.fr\0"
 			VALUE	"FileDescription",	"GUP : a free (LGPL) Generic Updater\0"
 			VALUE	"FileVersion",	VERSION_VALUE
-			VALUE	"InternalName",	"gup.exe\0"
+			VALUE	"InternalName",	"bfup.exe\0"
 			VALUE	"LegalCopyright",	"Copyright 2007 by Don HO\0"
-			VALUE	"OriginalFilename",	"gup.exe\0"
-			VALUE	"ProductName",	"GUP\0"
+			VALUE	"OriginalFilename",	"bfup.exe\0"
+			VALUE	"ProductName",	"BFUP\0"
 			VALUE	"ProductVersion",	VERSION_VALUE
 		END
 	END

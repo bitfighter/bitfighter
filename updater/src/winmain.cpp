@@ -333,7 +333,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 
 	hInst = hInstance;
 	try {
-		GupParameters gupParams("gup.xml");
+		GupParameters gupParams("bfup.xml");
 		GupExtraOptions extraOptions("gupOptions.xml");
 		GupNativeLang nativeLang("nativeLang.xml");
 
