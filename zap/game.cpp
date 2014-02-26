@@ -1468,7 +1468,7 @@ void Game::seedRandomNumberGenerator(const string &name)
 
    S32 nameBytes = min((S32)name.length(), totalByteCount - timeByteCount);     // # of bytes we get from the provided name
 
-   unsigned char buf[totalByteCount]; 
+   unsigned char buf[totalByteCount] = {0};
 
    // Bytes from the time
    buf[0] = U8(time);
