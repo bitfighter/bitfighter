@@ -1092,9 +1092,9 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "findObjectById");
 
-   TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
+   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
 
-   return findObjectById(L, mLuaGame->getGameObjDatabase()->findObjects_fast());
+   return findObjectById(L, mLuaGridDatabase->findObjects_fast());
 }
 
 
