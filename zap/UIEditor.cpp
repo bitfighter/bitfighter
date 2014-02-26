@@ -1975,16 +1975,16 @@ void EditorUserInterface::renderReferenceShip()
 
       // Draw collision circle
       const F32 spaceAngle = 0.0278f * FloatTau;
-      glColor4f(0, 1, 0, 0.35f);
+      glColor(Colors::green, 0.35f);
       glLineWidth(gLineWidth1);
       drawDashedCircle(Point(0,0), Ship::CollisionRadius, 10.0f, spaceAngle, 0);
       glLineWidth(gDefaultLineWidth);
 
       // And show how far it can see
       const S32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
-      const S32 vertDist = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
+      const S32 vertDist  = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
 
-      glColor4f(.5, .5, 1, .35f);
+      glColor(Colors::paleBlue, 0.35f);
       drawFilledRect(-horizDist, -vertDist, horizDist, vertDist);
 
    glPopMatrix();
