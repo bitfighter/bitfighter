@@ -237,7 +237,7 @@ void LuaScriptRunner::resetTimer()
    lua_pushvalue(L, -2);               // Timer, _initialize, Timer
 
    // Run
-   S32 err = lua_pcall(L, 2, 0, 0);
+   S32 err = lua_pcall(L, 1, 0, 0);
    if(err!=0)
    {
       logprintf("Timer Error: %s", lua_tostring(L, -1));
