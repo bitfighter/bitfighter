@@ -13,8 +13,10 @@
 
 namespace Zap
 {
+
 // Default constructor
 EditorPlugin::EditorPlugin() { TNLAssert(false, "Don't use this constructor!"); }
+
 
 // Constructor
 EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
@@ -74,8 +76,8 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<boost::shared_ptr<Me
       return true;     
    }
 
-   // We specified that we expect `numResults` items back; this means that
-   // even if the function returns nothing (legit), there will be `numResults`
+   // We specified that we expect 'numResults' items back; this means that
+   // even if the function returns nothing (legit), there will be 'numResults'
    // nils on the stack.  We'll check the top of the stack -- if that's nil,
    // we'll assume that the script intended to return no menu items, which is
    // totally legit.
@@ -238,7 +240,7 @@ void EditorPlugin::killScript()
  * @brief Main object for running methods related to editor plugins.
  * 
  * @descr The current editor plugin is always available in a global variable
- * called `plugin`.
+ * called 'plugin'.
  */
 const char *EditorPlugin::luaClassName = "EditorPlugin";
 
@@ -246,10 +248,13 @@ REGISTER_LUA_CLASS(EditorPlugin);
 
 //               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, getGridSize,        ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getSelectedObjects, ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getAllObjects,      ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, showMessage,        ARRAYDEF({{ STR, END }, { STR, BOOL, END }}), 2 ) \
+   METHOD(CLASS, getGridSize,        ARRAYDEF({{ END          }                    }), 1 ) \
+   METHOD(CLASS, getSelectedObjects, ARRAYDEF({{ END          }                    }), 1 ) \
+   METHOD(CLASS, getAllObjects,      ARRAYDEF({{ END          }                    }), 1 ) \
+   METHOD(CLASS, showMessage,        ARRAYDEF({{ STR,     END }, { STR, BOOL, END }}), 2 ) \
+   METHOD(CLASS, centerDisplay,      ARRAYDEF({{ PT,      END },                   }), 1 ) \
+   METHOD(CLASS, setDisplay,         ARRAYDEF({{ PT, PT,  END },                   }), 1 ) \
+   METHOD(CLASS, zoomDisplay,        ARRAYDEF({{ NUM_GE0, END }                    }), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(EditorPlugin, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
@@ -290,7 +295,7 @@ S32 EditorPlugin::lua_getGridSize(lua_State *L)
  * @endcode
  *
  * This result is sorted by the time at which the objects was selected,
- * so `t[1]` will always be the first selected object and `t[#t]` will
+ * so 't[1]' will always be the first selected object and 't[#t]' will
  * always be the last.
  * 
  * @return Table containing all the objects that are currently selected in
@@ -369,19 +374,19 @@ S32 EditorPlugin::lua_getAllObjects(lua_State *L)
  * 
  * @brief
  * Display a big message on-screen.
- * @desc
  *
+ * @desc
  * Display a message to the user like the message displayed when saving a
  * file. Please be courteous and give the user some feedback about whether or
  * not your plugin has run successfully.
  *
  * @note
- * There is no guarantee that your message will fit onscreen.
+ * There is no guarantee that your message will fit on-screen.
  *
  * @param msg The text to display.
  * @param good Controls the color of the displayed text as follows:
- *  - `true`: green
- *  - `false`: red
+ *  - 'true': green
+ *  - 'false': red
  */
 S32 EditorPlugin::lua_showMessage(lua_State *L)
 {
@@ -390,15 +395,102 @@ S32 EditorPlugin::lua_showMessage(lua_State *L)
 
    bool good = true;
    if(profile >= 1)
-   {
       good = lua_toboolean(L, -1);
-   }
 
    ClientGame* cg = dynamic_cast<ClientGame*>(mGame);
    if(cg)
    {
       cg->getUIManager()->getUI<EditorUserInterface>()->setSaveMessage(msg, good);
    }
+
+   clearStack(L);
+
+   return 0;
+}
+
+
+/**
+ * @luafunc EditorPlugin::centerDisplay(Point pos)
+ * 
+ * @brief
+ * Center editor window on specified point.
+ *
+ * @desc
+ * Will move the editor window to be centered on the specified point.  Will not change the zoom level.
+ *
+ * @param pos Where the window should be centered.
+ */
+S32 EditorPlugin::lua_centerDisplay(lua_State *L)
+{
+   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "centerDisplay");
+
+   Point center = getPointOrXY(L, 1);
+
+   ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
+   if(clientGame)
+      clientGame->getUIManager()->getUI<EditorUserInterface>()->centerDisplay(center);
+
+   clearStack(L);
+
+   return 0;
+}
+
+/**
+ * @luafunc EditorPlugin::zoomDisplay(num zoom)
+ * 
+ * @brief
+ * Zoom the display to the specified zoom level.
+ *
+ * @desc
+ * Zooms the display to the specified level.  Will not change the center point.  
+ * Editor will override specified zoom if it exceeds internal limits, specified by
+ * internal constants MIN_SCALE and MAX_SCALE, which are currently 0.02 and 10 respectively.
+ * Current starting zoom is 0.5.
+ *
+ * @param zoom Zoom level to zoom to.
+ */
+S32 EditorPlugin::lua_zoomDisplay(lua_State *L)
+{
+   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "zoomDisplay");
+
+   F32 scale = getFloat(L, 1);
+
+   ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
+   if(clientGame)
+      clientGame->getUIManager()->getUI<EditorUserInterface>()->setDisplayScale(scale);
+
+   clearStack(L);
+
+   return 0;
+
+}
+
+
+/**
+ * @luafunc EditorPlugin::setDisplay(point pt1, point pt2)
+ * 
+ * @brief
+ * Set the display to the specified bounding box.
+ *
+ * @desc
+ * Sets the display window to the specified bounding box.  If the bounding box is a 
+ * different aspect ratio than the screen, will center the bounding box on the screen.
+ * It doesn't matter which points are in which corners, 
+ * as long as pt1 and pt2 are diagonally opposed on the bounding box.
+ *
+ * @param pt1 
+ * @param pt2 
+ */
+S32 EditorPlugin::lua_setDisplay(lua_State *L)
+{
+   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "setDisplay");
+
+   Point corner1 = getPointOrXY(L, 1);
+   Point corner2 = getPointOrXY(L, 2);
+
+   ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
+   if(clientGame)
+      clientGame->getUIManager()->getUI<EditorUserInterface>()->setDisplay(corner1, corner2);
 
    clearStack(L);
 

@@ -53,8 +53,9 @@ public:
    S32 lua_getSelectedObjects(lua_State *L);        // Return all selected objects in the editor
    S32 lua_getAllObjects(lua_State *L);             // Return all objects in the editor
    S32 lua_showMessage(lua_State *L);
-
-
+   S32 lua_centerDisplay(lua_State *L);
+   S32 lua_zoomDisplay(lua_State *L);
+   S32 lua_setDisplay(lua_State *L);
 
    //// Lua interface
    LUAW_DECLARE_CLASS(EditorPlugin);

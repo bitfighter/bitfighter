@@ -297,6 +297,8 @@ private:
 
    void onActivateReactivate();
 
+   void setCurrentOffset(F32 x, F32 y);
+
 protected:
    void onActivate();
    void onReactivate();
@@ -376,6 +378,9 @@ public:
    void doneWithSimpleTextEntryMenu(SimpleTextEntryMenuUI *menu, S32 entryType);
 
    void zoom(F32 zoomAmount);
+   void setDisplayScale(F32 scale);
+   void centerDisplay(const Point &center);
+   void setDisplay(const Point &p1, const Point &p2);
 
    void onKeyUp(InputCode inputCode);
    void onMouseMoved();

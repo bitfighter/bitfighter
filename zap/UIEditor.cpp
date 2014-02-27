@@ -1419,7 +1419,8 @@ void EditorUserInterface::onDisplayModeChange()
    static S32 previousXSize = -1;
    static S32 previousYSize = -1;
 
-   if(previousXSize != DisplayManager::getScreenInfo()->getGameCanvasWidth() || previousYSize != DisplayManager::getScreenInfo()->getGameCanvasHeight())
+   if(previousXSize != DisplayManager::getScreenInfo()->getGameCanvasWidth() || 
+      previousYSize != DisplayManager::getScreenInfo()->getGameCanvasHeight())
    {
       // Recenter canvas -- note that canvasWidth may change during displayMode change
       mCurrentOffset.set(mCurrentOffset.x - previousXSize / 2 + DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 
@@ -3762,47 +3763,6 @@ void EditorUserInterface::centerView(bool isScreenshot)
    Rect extents = getDatabase()->getExtents();
    extents.unionRect(mLevelGenDatabase.getExtents());
 
-
-   //if(objList->size() || levelGenObjList->size())
-   //{
-   //   F32 minx =  F32_MAX,   miny =  F32_MAX;
-   //   F32 maxx = -F32_MAX,   maxy = -F32_MAX;
-
-   //   for(S32 i = 0; i < objList->size(); i++)
-   //   {
-   //      EditorObject *obj = objList->get(i);
-
-   //      for(S32 j = 0; j < obj->getVertCount(); j++)
-   //      {
-   //         if(obj->getVert(j).x < minx)
-   //            minx = obj->getVert(j).x;
-   //         if(obj->getVert(j).x > maxx)
-   //            maxx = obj->getVert(j).x;
-   //         if(obj->getVert(j).y < miny)
-   //            miny = obj->getVert(j).y;
-   //         if(obj->getVert(j).y > maxy)
-   //            maxy = obj->getVert(j).y;
-   //      }
-   //   }
-
-   //   for(S32 i = 0; i < levelGenObjList->size(); i++)
-   //   {
-   //      EditorObject *obj = levelGenObjList->get(i);
-
-   //      for(S32 j = 0; j < obj->getVertCount(); j++)
-   //      {
-   //         if(obj->getVert(j).x < minx)
-   //            minx = obj->getVert(j).x;
-   //         if(obj->getVert(j).x > maxx)
-   //            maxx = obj->getVert(j).x;
-   //         if(obj->getVert(j).y < miny)
-   //            miny = obj->getVert(j).y;
-   //         if(obj->getVert(j).y > maxy)
-   //            maxy = obj->getVert(j).y;
-   //      }
-   //   }
-
-
    F32 x = extents.getCenter().x;
    F32 y = extents.getCenter().y;
 
@@ -3810,8 +3770,7 @@ void EditorUserInterface::centerView(bool isScreenshot)
    if(extents.getWidth() < 1 && extents.getHeight() < 1)    // e.g. a single point item
    {
       mCurrentScale = STARTING_SCALE;
-      mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - mCurrentScale * x, 
-                         DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - mCurrentScale * y);
+      setCurrentOffset(x, y);
    }
    else
    {
@@ -3822,15 +3781,8 @@ void EditorUserInterface::centerView(bool isScreenshot)
       if(!isScreenshot)
          mCurrentScale /= 1.3f;
 
-      mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2  - mCurrentScale * x, 
-                           DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - mCurrentScale * y);
+      setCurrentOffset(x, y);
    }
-   //}
-   //else     // Put (0,0) at center of screen
-   //{
-   //   mCurrentScale = STARTING_SCALE;
-   //   mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
-   //}
 }
 
 
@@ -3850,16 +3802,51 @@ void EditorUserInterface::zoom(F32 zoomAmount)
 {
    Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
 
-   mCurrentScale *= 1 + zoomAmount;
+   setDisplayScale(mCurrentScale * (1 + zoomAmount));
+
+   Point newMousePoint = convertLevelToCanvasCoord(mouseLevelPoint);
+
+   mCurrentOffset += mMousePos - newMousePoint;
+}
+
+
+void EditorUserInterface::setDisplay(const Point &p1, const Point &p2)
+{
+   Rect rect(p1, p2);
+   Point center = rect.getCenter();
+
+   centerDisplay(center);
+
+   F32 scale = min(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / rect.getWidth(), 
+                   DisplayManager::getScreenInfo()->getGameCanvasHeight() / rect.getHeight());
+
+   setDisplayScale(scale);
+
+   setCurrentOffset(center.x, center.y);
+}
+
+
+void EditorUserInterface::setCurrentOffset(F32 x, F32 y)
+{
+   mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - mCurrentScale * x, 
+                      DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - mCurrentScale * y);
+}
+
+
+void EditorUserInterface::setDisplayScale(F32 scale)
+{
+   mCurrentScale = scale;
 
    if(mCurrentScale < MIN_SCALE)
       mCurrentScale = MIN_SCALE;
    else if(mCurrentScale > MAX_SCALE)
       mCurrentScale = MAX_SCALE;
-   
-   Point newMousePoint = convertLevelToCanvasCoord(mouseLevelPoint);
+}
 
-   mCurrentOffset += mMousePos - newMousePoint;
+
+void EditorUserInterface::centerDisplay(const Point &center)
+{
+   setCurrentOffset(center.x, center.y);
 }
 
 
