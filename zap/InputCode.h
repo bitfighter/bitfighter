@@ -108,7 +108,7 @@ namespace Zap
    EDITOR_BINDING( BINDING_NO_SNAPPING,       "NoSnapping",         keyNoSnapping,      "Shift+Space"   ) \
    EDITOR_BINDING( BINDING_NO_GRID_SNAPPING,  "NoGridSnapping",     keyNoGridSnapping,  "Space"         ) \
    EDITOR_BINDING( BINDING_PREVIEW_MODE,      "PreviewMode",        keyPreviewMode,     "Tab"           ) \
-   EDITOR_BINDING( BINDING_DOCKMODE_ITEMS,    "DockmodeItems",      keyDockmodeItems,   "F9"            ) \
+   EDITOR_BINDING( BINDING_DOCKMODE_ITEMS,    "DockmodeItems",      keyDockmodeItems,   "F4"            ) \
 /*-------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------SPECIAL_BINDING_TABLE-------------------------------------*/
