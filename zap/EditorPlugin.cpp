@@ -462,7 +462,6 @@ S32 EditorPlugin::lua_zoomDisplay(lua_State *L)
    clearStack(L);
 
    return 0;
-
 }
 
 
@@ -477,6 +476,19 @@ S32 EditorPlugin::lua_zoomDisplay(lua_State *L)
  * different aspect ratio than the screen, will center the bounding box on the screen.
  * It doesn't matter which points are in which corners, 
  * as long as pt1 and pt2 are diagonally opposed on the bounding box.
+ *
+ * The following code will find all selected objects and change the display so they are all visible. It
+ * uses the stardust library (included with Bitfighter) to figure out the combined extent of all the selected objects.
+ *
+ * @code
+ * local sd = require('stardust')
+ *
+ * function main()
+ *    local objects = plugin:getSelectedObjects()
+ *    local ext = sd.mergeExtents(objects)
+ *	   plugin:setDisplay(point.new(ext.minx, ext.miny), point.new(ext.maxx, ext.maxy))
+ * end   
+ * @endcode
  *
  * @param pt1 
  * @param pt2 
