@@ -380,7 +380,11 @@ public:
    void zoom(F32 zoomAmount);
    void setDisplayScale(F32 scale);
    void centerDisplay(const Point &center);
-   void setDisplay(const Point &p1, const Point &p2);
+   void setDisplayExtents(const Point &p1, const Point &p2);
+   Rect getDisplayExtents() const;
+
+
+   Point getDisplayCenter() const;
 
    void onKeyUp(InputCode inputCode);
    void onMouseMoved();

@@ -394,14 +394,13 @@ S32 EditorPlugin::lua_showMessage(lua_State *L)
    const char* msg = getString(L, 1);
 
    bool good = true;
+
    if(profile >= 1)
       good = lua_toboolean(L, -1);
 
    ClientGame* cg = dynamic_cast<ClientGame*>(mGame);
    if(cg)
-   {
       cg->getUIManager()->getUI<EditorUserInterface>()->setSaveMessage(msg, good);
-   }
 
    clearStack(L);
 
@@ -434,6 +433,7 @@ S32 EditorPlugin::lua_centerDisplay(lua_State *L)
 
    return 0;
 }
+
 
 /**
  * @luafunc EditorPlugin::zoomDisplay(num zoom)
@@ -502,12 +502,79 @@ S32 EditorPlugin::lua_setDisplay(lua_State *L)
 
    ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
    if(clientGame)
-      clientGame->getUIManager()->getUI<EditorUserInterface>()->setDisplay(corner1, corner2);
+      clientGame->getUIManager()->getUI<EditorUserInterface>()->setDisplayExtents(corner1, corner2);
 
    clearStack(L);
 
    return 0;
 }
+
+
+/**
+ * @luafunc EditorPlugin::getDisplayCenter()
+ * 
+ * @brief
+ * Get the center of the current display window.
+ *
+ * @return A point representing the center of the current editor display window.
+ */
+S32 EditorPlugin::lua_getDisplayCenter(lua_State *L)
+{
+   ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
+   if(!clientGame)
+      return returnNil(L);
+
+   Point center = clientGame->getUIManager()->getUI<EditorUserInterface>()->getDisplayCenter();
+
+   return returnPoint(L, center);  
+}
+
+
+/**
+ * @luafunc EditorPlugin::getDisplayZoom()
+ * 
+ * @brief
+ * Gets the current zoom level of the display.
+ *
+ * @desc
+ * Zoom level is a number between MIN_SCALE and MAX_SCALE, which are currently 0.02 and 10 respectively.
+ * Zoom levels are not linear; that is, the difference between 1 and 2 is different than between 2 and 3.
+ * However, the difference between 1 and 2 is the same as between 2 and 4.
+ *
+ * @return Number representing the current zone level.
+ */
+S32 EditorPlugin::lua_getDisplayZoom(lua_State *L)
+{
+   ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
+   if(!clientGame)
+      return returnNil(L);
+
+   F32 zoomLevel = clientGame->getUIManager()->getUI<EditorUserInterface>()->getCurrentScale();
+
+   return returnFloat(L, zoomLevel);
+}
+
+
+/**
+ * @luafunc EditorPlugin::getDisplayExtents()
+ * 
+ * @brief
+ * Get the corners of the current editor window.
+ *
+ * @return Two points representing the corners of the current display window.
+ */
+S32 EditorPlugin::lua_getDisplayExtents(lua_State *L)
+{
+   ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
+   if(!clientGame)
+      return returnNil(L);
+
+   Rect rect = clientGame->getUIManager()->getUI<EditorUserInterface>()->getDisplayExtents();
+
+   return returnFloat(L, zoomLevel);
+}
+
+
 
 
 }

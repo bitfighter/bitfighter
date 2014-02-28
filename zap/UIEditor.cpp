@@ -3810,7 +3810,7 @@ void EditorUserInterface::zoom(F32 zoomAmount)
 }
 
 
-void EditorUserInterface::setDisplay(const Point &p1, const Point &p2)
+void EditorUserInterface::setDisplayExtents(const Point &p1, const Point &p2)
 {
    Rect rect(p1, p2);
    Point center = rect.getCenter();
@@ -3823,6 +3823,16 @@ void EditorUserInterface::setDisplay(const Point &p1, const Point &p2)
    setDisplayScale(scale);
 
    setCurrentOffset(center.x, center.y);
+}
+
+
+Rect EditorUserInterface::getDisplayExtents() const
+{
+   // mCurrentOffset is the UR corner of our screen... just what we need for the bounding box
+   Point lr = mCurrentOffset + Point(DisplayManager::getScreenInfo()->getGameCanvasWidth()  * mCurrentScale,
+                                     DisplayManager::getScreenInfo()->getGameCanvasHeight() * mCurrentScale);
+
+   return Rect(mCurrentOffset, lr);
 }
 
 
@@ -3847,6 +3857,15 @@ void EditorUserInterface::setDisplayScale(F32 scale)
 void EditorUserInterface::centerDisplay(const Point &center)
 {
    setCurrentOffset(center.x, center.y);
+}
+
+
+Point EditorUserInterface::getDisplayCenter() const
+{
+   Point center(mCurrentOffset.x + (DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2) / mCurrentScale, 
+                mCurrentOffset.y + (DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2) / mCurrentScale);
+
+   return center;
 }
 
 
