@@ -216,10 +216,7 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
          return lua_isboolean(L, stackPos);
 
       case PT:
-         if(lua_ispoint(L, stackPos))
-            return true;
-         
-         return false;
+         return lua_ispoint(L, stackPos);
 
       // SIMPLE_LINE: A pair of points, or a table containing two points
       case SIMPLE_LINE:
