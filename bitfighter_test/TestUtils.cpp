@@ -139,8 +139,10 @@ void GamePair::idle(U32 timeDelta, U32 cycles)
 // Simulates player joining game from new client
 void GamePair::addClient(const string &name, S32 team)
 {
+   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+
    ServerGame *server = GameManager::getServerGame();
-   ClientGame *client = newClientGame(server->getSettingsPtr());
+   ClientGame *client = newClientGame(settings);
    GameManager::addClientGame(client);
 
    client->userEnteredLoginCredentials(name, "password", false);    // Simulates entry from NameEntryUserInterface

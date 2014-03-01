@@ -88,24 +88,16 @@ static void doScenario2(GamePair &gamePair)
 {
    ServerGame *serverGame = gamePair.server;
 
-   printf("Name 1: %s\n", gamePair.getClient(0)->getPlayerName().c_str());
-
-   ClientGame *xxx = gamePair.getClient(0);
-
-   printf("Name 1: %s\n", xxx->getPlayerName().c_str());
-
-   gamePair.addClient("TestUser2", 0);
-   printf("Name 1: %s\n", xxx->getPlayerName().c_str());
+   const char *player1Name = "TestPlayer0";
+   const char *player2Name = "TestUser2";
+   gamePair.addClient(player2Name, 0);
 
    ClientGame *client1 = gamePair.getClient(0);
    ClientGame *client2 = gamePair.getClient(1);
 
-  printf("Name 1: %s\n", xxx->getPlayerName().c_str());
-   printf("Name 2: %s\n", client2->getPlayerName().c_str());
-
-
-   //ASSERT_EQ("TestUser1", client1->getPlayerName());
-   ASSERT_EQ("TestUser2", client2->getPlayerName());
+   // Make sure the names are what we think they are... 
+   ASSERT_STREQ(player1Name, client1->getPlayerName().c_str());
+   ASSERT_STREQ(player2Name, client2->getPlayerName().c_str());
 
 
    // Should now be 2 ships in the game -- one belonging to client1 and another belonging to client2
@@ -136,8 +128,6 @@ static void doScenario2(GamePair &gamePair)
    client2->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    //ASSERT_EQ(1, fillVector.size());                   // Player 2 should see self
 
-   printf("Name 1: %s\n", client1->getPlayerName().c_str());
-   printf("Name 2: %s\n", client2->getPlayerName().c_str());
    ASSERT_TRUE(client2->findClientInfo(client1->getPlayerName())->isSpawnDelayed());    // Check that other player knows our status
 
    // ReturnToGame penalty has been set, but won't start to count down until ship attempts to spawn
@@ -149,7 +139,6 @@ static void doScenario2(GamePair &gamePair)
    ASSERT_FALSE(serverGame->isSuspended()) << "Game is suspended -- subsequent tests will fail";
    client1->undelaySpawn();                                                // Simulate effects of key press
    gamePair.idle(10, 10);                                                  // Idle; give things time to propagate
-   //for(S32 i = 0; i < 5; i++) client2->idle(10);
    ASSERT_TRUE(serverGame->getClientInfo(0)->getReturnToGameTime() > 0);   // Timers should be set and counting down
    ASSERT_TRUE(client1->inReturnToGameCountdown());
 
@@ -157,10 +146,14 @@ static void doScenario2(GamePair &gamePair)
    fillVector.clear();
    serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());   // (one ship for client2) 
+
+   // Client 1 won't see spawning ship while he is suspended
    fillVector.clear();
    client1->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size());
-   //ASSERT_TRUE(client2->findClientInfo("TestPlayerOne")->isSpawnDelayed());    // Check that other player knows our status
+   ASSERT_EQ(0, fillVector.size());
+
+   // Client 2 should see that client 1 has been delayed
+   ASSERT_TRUE(client2->findClientInfo(player1Name)->isSpawnDelayed());
 
    // After some time has passed -- no longer in returnToGameCountdown period, ship should have appeared on server and client
    gamePair.idle(ClientInfo::SPAWN_UNDELAY_TIMER_DELAY / 100, 105);  // More time than SPAWN_UNDELAY_TIMER_DELAY
@@ -307,31 +300,27 @@ static void doScenario11(GamePair &gamePair)
 {
    ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
-
    serverGame->setGameTime(.5);     // 30 seconds
 
    GameUserInterface *gameUI = clientGame->getUIManager()->getUI<GameUserInterface>();
    ASSERT_FALSE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
+
    gameUI->activateHelper(HelperMenu::LoadoutHelperType);
    ASSERT_TRUE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
-
    ASSERT_EQ("", serverGame->getClientInfo(0)->getOnDeckLoadout().toString(true));   // Prove there's no on deck loadout
 
    // See static const OverlayMenuItem loadoutModuleMenuItems[] in loadoutHelper.cpp
    // Feed the UI some keys... like we're configuring a loadout!  
    gameUI->onKeyDown(KEY_1);     gameUI->onKeyDown(KEY_3);                                // First 2 modules...
    gameUI->onKeyDown(KEY_1);     gameUI->onKeyDown(KEY_2);     gameUI->onKeyDown(KEY_3);  // ...then 3 weapons
-
    ASSERT_FALSE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
 
    gamePair.idle(10, 10);
-
    // Check the on deck loadout on server -- does not get set on the client
    ASSERT_EQ("Turbo,Repair,Phaser,Bouncer,Triple", serverGame->getClientInfo(0)->getOnDeckLoadout().toString(true));
 
    gameUI->activateHelper(HelperMenu::LoadoutHelperType);
    ASSERT_TRUE(gameUI->isHelperActive(HelperMenu::LoadoutHelperType));
-
    gamePair.idle(100, 350);        // Idle until game ends
 
    gameUI->onKeyDown(KEY_1);     gameUI->onKeyDown(KEY_4);
