@@ -45,8 +45,8 @@ TEST(EditorTest, panZoom)
    Rect r;
 
    r = editorUi.getDisplayExtents();      
-   ASSERT_FLOAT_EQ(-166.666667, r.min.x);    // These depend on 800x600 display aspect ratio
-   ASSERT_FLOAT_EQ(1166.666667, r.max.x);
+   ASSERT_FLOAT_EQ(-166.666667f, r.min.x);   // These depend on 800x600 display aspect ratio
+   ASSERT_FLOAT_EQ(1166.666667f, r.max.x);
    ASSERT_TRUE(abs(r.min.y) < .0001);        // We're getting errors here too great to use ASSERT_FLOAT_EQ
    ASSERT_FLOAT_EQ(1000       , r.max.y);
 

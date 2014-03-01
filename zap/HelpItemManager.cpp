@@ -425,7 +425,7 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
       F32 offset = height * (mHelpFading[i] ? 1 - mHelpTimer[i].getFraction() : 0);
 
       scissorsManager.enable(mHelpFading[i], game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                             0, yPos - FontSize, DisplayManager::getScreenInfo()->getGameCanvasWidth(), height);
+                             0, yPos - FontSize, (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), height);
 
       doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos - offset);
       yPos += height - offset;      
