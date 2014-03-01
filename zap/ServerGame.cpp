@@ -1395,6 +1395,20 @@ void ServerGame::idle(U32 timeDelta)
    // Load a new level if the time is out on the current one
    if(mLevelSwitchTimer.update(timeDelta))
    {
+      // Kick any players who were idle the entire previous game.  But DO NOT kick the hosting player!
+      for(S32 i = 0; i < getClientCount(); i++)
+      {
+         ClientInfo *clientInfo = getClientInfo(i);
+
+         if(!clientInfo->isRobot())
+         {
+            GameConnection *connection = clientInfo->getConnection();
+            
+            if(!connection->getObjectMovedThisGame() && !connection->isLocalConnection())    // Don't kick the host, please!
+               connection->disconnect(NetConnection::ReasonIdle, "");
+         }
+      }
+
       // Normalize ratings for this game
       getGameType()->updateRatings();
       cycleLevel(mNextLevel);
