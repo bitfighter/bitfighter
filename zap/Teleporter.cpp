@@ -595,8 +595,18 @@ void Teleporter::doTeleport()
    }
 
    Vector<DatabaseObject *> foundTeleporters; // Must be kept local, non static, because of possible recursive.
-   queryRect.set(getOrigin(), TRIGGER_RADIUS);
+   queryRect.set(mDestManager.getDest(dest), TRIGGER_RADIUS * 2);
    findObjects(TeleporterTypeNumber, foundTeleporters, queryRect);
+   for(S32 i = 0; i < foundTeleporters.size(); i++)
+      if(static_cast<Teleporter *>(foundTeleporters[i])->mTeleportCooldown.getCurrent() == 0)
+         static_cast<Teleporter *>(foundTeleporters[i])->doTeleport();
+}
+
+void Teleporter::checkAllTeleporters(BfObject *obj)
+{
+   Vector<DatabaseObject *> foundTeleporters;
+   Rect queryRect(obj->getPos(), TELEPORTER_RADIUS);
+   obj->findObjects(TeleporterTypeNumber, foundTeleporters, queryRect);
    for(S32 i = 0; i < foundTeleporters.size(); i++)
       if(static_cast<Teleporter *>(foundTeleporters[i])->mTeleportCooldown.getCurrent() == 0)
          static_cast<Teleporter *>(foundTeleporters[i])->doTeleport();
@@ -1169,6 +1179,9 @@ void Teleporter::doSetGeom(const Vector<Point> &points)
 
    computeExtent();
    setMaskBits(GeomMask);
+
+   if(mTeleportCooldown.getCurrent() == 0)
+      doTeleport();
 }
 
 

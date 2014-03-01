@@ -170,7 +170,6 @@ public:
    S32 lua_setWidth(lua_State *L);
 
    // Override standard methods basically to add checks to keep us from modifying a wall already in the game
-   S32 lua_setLoc(lua_State *L);
    S32 lua_setPos(lua_State *L);
    S32 lua_setGeom(lua_State *L);
 };
@@ -230,7 +229,6 @@ public:
    static const LuaFunctionProfile functionArgs[];
 
    // Override standard methods basically to add checks to keep us from modifying a wall already in the game
-   S32 lua_setLoc(lua_State *L);
    S32 lua_setPos(lua_State *L);
    S32 lua_setGeom(lua_State *L);
 };

@@ -1560,4 +1560,17 @@ S32 Robot::lua_copyMoveFromObject(lua_State *L)
 }
 
 
+// Override the one from BfObject
+S32 Robot::lua_removeFromGame(lua_State *L)
+{
+   // Handle Robot removal gracefully.  Robot doesn't need to call
+   // BfObject::removeFromGame() as it does all the work in its destructor
+   //
+   // Here we add a delay in case we were called from a Lua onShipSpawned event
+   deleteObject(100);
+
+   return 0;
+}
+
+
 };

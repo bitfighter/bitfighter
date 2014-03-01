@@ -2814,6 +2814,12 @@ S32 Ship::lua_setLoadoutNow(lua_State *L)
    return 0;
 }
 
+S32 Ship::lua_setPos(lua_State *L)
+{
+   S32 r = Parent::lua_setPos(L);
+   Teleporter::checkAllTeleporters(this);
+   return r;
+}
 
 };
 
