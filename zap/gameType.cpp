@@ -16,6 +16,7 @@
 #include "LineEditorFilterEnum.h"
 #include "game.h"
 #include "GameRecorder.h"
+#include "Teleporter.h"
 
 #ifndef ZAP_DEDICATED
 #  include "gameObjectRender.h"
@@ -1220,8 +1221,11 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
          } 
       }
 
+
       //clientInfo->resetActiveLoadout();      // Why?
    }
+
+   Teleporter::checkAllTeleporters(clientInfo->getShip());
 
    return true;
 }

@@ -1601,20 +1601,6 @@ S32 ForceFieldProjector::lua_setPos(lua_State *L)
 }
 
 
-S32 ForceFieldProjector::lua_getLoc(lua_State *L)
-{
-   logprintf(LogConsumer::LuaBotMessage, "'getLoc()' is deprecated and will be removed in the future.  Use 'getPos()', instead");
-   return lua_getPos(L);
-}
-
-
-S32 ForceFieldProjector::lua_setLoc(lua_State *L)
-{
-   logprintf(LogConsumer::LuaBotMessage, "'setLoc()' is deprecated and will be removed in the future.  Use 'setPos()', instead");
-   return lua_setPos(L);
-}
-
-
 S32 ForceFieldProjector::lua_removeFromGame(lua_State *L)
 {
    // Remove field
@@ -2317,13 +2303,6 @@ S32 Turret::lua_setWeapon(lua_State *L)
 S32 Turret::lua_getRad(lua_State *L)
 {
    return returnInt(L, TURRET_OFFSET);
-}
-
-
-S32 Turret::lua_getLoc(lua_State *L)
-{
-   logprintf(LogConsumer::LuaBotMessage, "'getLoc()' is deprecated and will be removed in the future.  Use 'getPos()', instead");
-   return lua_getPos(L);
 }
 
 
