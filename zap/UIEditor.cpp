@@ -172,6 +172,12 @@ GridDatabase *EditorUserInterface::getDatabase() const
 }  
 
 
+F32 EditorUserInterface::getGridSize() const
+{
+   return mGridSize;
+}
+
+
 void EditorUserInterface::setDatabase(boost::shared_ptr<GridDatabase> database)
 {
    TNLAssert(database.get(), "Database should not be NULL!");
@@ -3757,32 +3763,20 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 
 void EditorUserInterface::centerView(bool isScreenshot)
 {
-//   const Vector<BfObject *> *objList = getDatabase()->getObjectList();
-//   const Vector<BfObject *> *levelGenObjList = mLevelGenDatabase.getObjectList();
-
    Rect extents = getDatabase()->getExtents();
-   extents.unionRect(mLevelGenDatabase.getExtents());
+   Rect levelgenDbExtents = mLevelGenDatabase.getExtents();
 
-   F32 x = extents.getCenter().x;
-   F32 y = extents.getCenter().y;
+   if(levelgenDbExtents.getWidth() > 0 || levelgenDbExtents.getHeight() > 0)
+      extents.unionRect(levelgenDbExtents);
 
    // If we have nothing, or maybe only one point object in our level
    if(extents.getWidth() < 1 && extents.getHeight() < 1)    // e.g. a single point item
    {
       mCurrentScale = STARTING_SCALE;
-      setCurrentOffset(x, y);
+      setDisplayCenter(extents.getCenter());
    }
    else
-   {
-      mCurrentScale = min(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / extents.getWidth(), 
-                          DisplayManager::getScreenInfo()->getGameCanvasHeight() / extents.getHeight());
-
-      // Zoom out a bit to look better in the editor, except when doing a screenshot
-      if(!isScreenshot)
-         mCurrentScale /= 1.3f;
-
-      setCurrentOffset(x, y);
-   }
+      setDisplayExtents(extents, isScreenshot ? 1.0f : 1.3f);
 }
 
 
@@ -3798,6 +3792,7 @@ Point EditorUserInterface::getCurrentOffset()
 }
 
 
+// Positive amounts are zooming in, negative are zooming out
 void EditorUserInterface::zoom(F32 zoomAmount)
 {
    Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
@@ -3810,62 +3805,60 @@ void EditorUserInterface::zoom(F32 zoomAmount)
 }
 
 
-void EditorUserInterface::setDisplayExtents(const Point &p1, const Point &p2)
+void EditorUserInterface::setDisplayExtents(const Rect &extents, F32 backoffFact)
 {
-   Rect rect(p1, p2);
-   Point center = rect.getCenter();
+   F32 scale = min(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / extents.getWidth(), 
+                   DisplayManager::getScreenInfo()->getGameCanvasHeight() / extents.getHeight());
 
-   centerDisplay(center);
-
-   F32 scale = min(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / rect.getWidth(), 
-                   DisplayManager::getScreenInfo()->getGameCanvasHeight() / rect.getHeight());
+   scale /= backoffFact;
 
    setDisplayScale(scale);
-
-   setCurrentOffset(center.x, center.y);
+   setDisplayCenter(extents.getCenter());
 }
 
 
 Rect EditorUserInterface::getDisplayExtents() const
 {
-   // mCurrentOffset is the UR corner of our screen... just what we need for the bounding box
-   Point lr = mCurrentOffset + Point(DisplayManager::getScreenInfo()->getGameCanvasWidth()  * mCurrentScale,
-                                     DisplayManager::getScreenInfo()->getGameCanvasHeight() * mCurrentScale);
+   // mCurrentOffset is the UL corner of our screen... just what we need for the bounding box
+   Point lr = Point(DisplayManager::getScreenInfo()->getGameCanvasWidth(),
+                    DisplayManager::getScreenInfo()->getGameCanvasHeight()) - mCurrentOffset;
 
-   return Rect(mCurrentOffset, lr);
+   F32 mult = 1 / mCurrentScale;
+
+   return Rect(-mCurrentOffset * mult, lr * mult);
 }
 
 
-void EditorUserInterface::setCurrentOffset(F32 x, F32 y)
+// cenx and ceny are the desired center of the display; mCurrentOffset is the UL corner
+void EditorUserInterface::setDisplayCenter(const Point &center)
 {
-   mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - mCurrentScale * x, 
-                      DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - mCurrentScale * y);
-}
+   mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - mCurrentScale * center.x, 
+                      DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - mCurrentScale * center.y);
+}                             
 
 
+// We will need to recenter the display after changing the scale.  Higher scales are more zoomed in.
 void EditorUserInterface::setDisplayScale(F32 scale)
 {
+   Point center = getDisplayCenter();
+
    mCurrentScale = scale;
 
    if(mCurrentScale < MIN_SCALE)
       mCurrentScale = MIN_SCALE;
    else if(mCurrentScale > MAX_SCALE)
       mCurrentScale = MAX_SCALE;
-}
 
-
-void EditorUserInterface::centerDisplay(const Point &center)
-{
-   setCurrentOffset(center.x, center.y);
+   setDisplayCenter(center);
 }
 
 
 Point EditorUserInterface::getDisplayCenter() const
 {
-   Point center(mCurrentOffset.x + (DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2) / mCurrentScale, 
-                mCurrentOffset.y + (DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2) / mCurrentScale);
+   F32 mult = 1 / mCurrentScale;
 
-   return center;
+   return Point(((DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2) - mCurrentOffset.x), 
+                ((DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2) - mCurrentOffset.y)) * mult;
 }
 
 

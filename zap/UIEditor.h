@@ -160,7 +160,7 @@ private:
    TeamManager mTeamManager;
 
    F32 mCurrentScale;
-   Point mCurrentOffset;            // Coords of UR corner of screen
+   Point mCurrentOffset;            // Coords of UL corner of screen
 
    Point mMousePos;                 // Where the mouse is at the moment
    Point mMouseDownPos;             // Where the mouse was pressed for a drag operation
@@ -297,7 +297,7 @@ private:
 
    void onActivateReactivate();
 
-   void setCurrentOffset(F32 x, F32 y);
+   void setCurrentOffset(const Point &center);
 
 protected:
    void onActivate();
@@ -379,12 +379,13 @@ public:
 
    void zoom(F32 zoomAmount);
    void setDisplayScale(F32 scale);
-   void centerDisplay(const Point &center);
-   void setDisplayExtents(const Point &p1, const Point &p2);
+   void setDisplayCenter(const Point &center);
+   void setDisplayExtents(const Rect &extents, F32 backoffFact = 1.0f);
    Rect getDisplayExtents() const;
-
-
    Point getDisplayCenter() const;
+
+   F32 getGridSize() const;
+
 
    void onKeyUp(InputCode inputCode);
    void onMouseMoved();

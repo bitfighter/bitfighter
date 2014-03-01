@@ -427,7 +427,7 @@ S32 EditorPlugin::lua_centerDisplay(lua_State *L)
 
    ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
    if(clientGame)
-      clientGame->getUIManager()->getUI<EditorUserInterface>()->centerDisplay(center);
+      clientGame->getUIManager()->getUI<EditorUserInterface>()->setDisplayCenter(center);
 
    clearStack(L);
 
@@ -477,6 +477,8 @@ S32 EditorPlugin::lua_zoomDisplay(lua_State *L)
  * It doesn't matter which points are in which corners, 
  * as long as pt1 and pt2 are diagonally opposed on the bounding box.
  *
+ * When setting the bounding box, the display will zoom out a bit to make the fit look less cramped.
+ *
  * The following code will find all selected objects and change the display so they are all visible. It
  * uses the stardust library (included with Bitfighter) to figure out the combined extent of all the selected objects.
  *
@@ -497,12 +499,11 @@ S32 EditorPlugin::lua_setDisplay(lua_State *L)
 {
    S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "setDisplay");
 
-   Point corner1 = getPointOrXY(L, 1);
-   Point corner2 = getPointOrXY(L, 2);
+   Rect extents(getPointOrXY(L, 1), getPointOrXY(L, 2));
 
    ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
    if(clientGame)
-      clientGame->getUIManager()->getUI<EditorUserInterface>()->setDisplayExtents(corner1, corner2);
+      clientGame->getUIManager()->getUI<EditorUserInterface>()->setDisplayExtents(extents, 1.3);
 
    clearStack(L);
 
@@ -571,10 +572,12 @@ S32 EditorPlugin::lua_getDisplayExtents(lua_State *L)
 
    Rect rect = clientGame->getUIManager()->getUI<EditorUserInterface>()->getDisplayExtents();
 
-   return returnFloat(L, zoomLevel);
+   Vector<Point> points(2);
+   points.push_back(rect.min);
+   points.push_back(rect.max);
+
+   return returnPoints(L, &points);
 }
-
-
 
 
 }
