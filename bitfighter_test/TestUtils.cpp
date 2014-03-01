@@ -165,7 +165,7 @@ void GamePair::addClient(const string &name, S32 team)
 
 ClientGame *GamePair::getClient(S32 index)
 {
-   return GameManager::getClientGames()->get(0);
+   return GameManager::getClientGames()->get(index);
 }
 
 

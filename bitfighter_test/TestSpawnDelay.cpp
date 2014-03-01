@@ -88,24 +88,41 @@ static void doScenario2(GamePair &gamePair)
 {
    ServerGame *serverGame = gamePair.server;
 
+   printf("Name 1: %s\n", gamePair.getClient(0)->getPlayerName().c_str());
+
+   ClientGame *xxx = gamePair.getClient(0);
+
+   printf("Name 1: %s\n", xxx->getPlayerName().c_str());
+
    gamePair.addClient("TestUser2", 0);
+   printf("Name 1: %s\n", xxx->getPlayerName().c_str());
 
    ClientGame *client1 = gamePair.getClient(0);
    ClientGame *client2 = gamePair.getClient(1);
+
+  printf("Name 1: %s\n", xxx->getPlayerName().c_str());
+   printf("Name 2: %s\n", client2->getPlayerName().c_str());
+
+
+   //ASSERT_EQ("TestUser1", client1->getPlayerName());
+   ASSERT_EQ("TestUser2", client2->getPlayerName());
 
 
    // Should now be 2 ships in the game -- one belonging to client1 and another belonging to client2
    gamePair.idle(10, 5);               // Idle 5x; give things time to propagate
    fillVector.clear();
    serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-   ASSERT_EQ(2, fillVector.size());                   // Ship should have been killed off -- only 2nd player ship should be left
+   ASSERT_EQ(2, fillVector.size());                  
    fillVector.clear();
    client1->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(2, fillVector.size());
+   fillVector.clear();
+   client2->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   ASSERT_EQ(2, fillVector.size());
 
    Vector<string> words;
-   ChatCommands::idleHandler(client1, words);
-   gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give things time to propagate, timers to time out, etc.
+   ChatCommands::idleHandler(client1, words);         // Make client 1 go /idle
+   gamePair.idle(Ship::KillDeleteDelay / 15, 30);     // Give things time to propagate, timers to time out, etc.
 
    ASSERT_TRUE(serverGame->getClientInfo(0)->isSpawnDelayed());
    ASSERT_TRUE(client1->isSpawnDelayed());            // Status should have propagated to client by now
@@ -114,8 +131,14 @@ static void doScenario2(GamePair &gamePair)
    ASSERT_EQ(1, fillVector.size());                   // Ship should have been killed off -- only 2nd player ship should be left
    fillVector.clear();
    client1->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size());
-   //ASSERT_FALSE(client2->findClientInfo("TestPlayerOne")->isSpawnDelayed());    // Check that other player knows our status
+   ASSERT_EQ(0, fillVector.size());                   // Suspended players don't see remote objects
+   fillVector.clear();
+   client2->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   //ASSERT_EQ(1, fillVector.size());                   // Player 2 should see self
+
+   printf("Name 1: %s\n", client1->getPlayerName().c_str());
+   printf("Name 2: %s\n", client2->getPlayerName().c_str());
+   ASSERT_TRUE(client2->findClientInfo(client1->getPlayerName())->isSpawnDelayed());    // Check that other player knows our status
 
    // ReturnToGame penalty has been set, but won't start to count down until ship attempts to spawn
    ASSERT_FALSE(client1->inReturnToGameCountdown());
@@ -124,7 +147,7 @@ static void doScenario2(GamePair &gamePair)
 
    // Player presses a key to rejoin the game; there should be a SPAWN_UNDELAY_TIMER_DELAY ms penalty incurred for using /idle
    ASSERT_FALSE(serverGame->isSuspended()) << "Game is suspended -- subsequent tests will fail";
-   client1->undelaySpawn();                                             // Simulate effects of key press
+   client1->undelaySpawn();                                                // Simulate effects of key press
    gamePair.idle(10, 10);                                                  // Idle; give things time to propagate
    //for(S32 i = 0; i < 5; i++) client2->idle(10);
    ASSERT_TRUE(serverGame->getClientInfo(0)->getReturnToGameTime() > 0);   // Timers should be set and counting down
