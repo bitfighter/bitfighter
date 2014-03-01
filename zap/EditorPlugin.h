@@ -55,9 +55,9 @@ public:
    S32 lua_showMessage(lua_State *L);
 
    // Display related Lua methods
-   S32 lua_centerDisplay(lua_State *L);
-   S32 lua_zoomDisplay(lua_State *L);
-   S32 lua_setDisplay(lua_State *L);
+   S32 lua_setDisplayCenter(lua_State *L);
+   S32 lua_setDisplayZoom(lua_State *L);
+   S32 lua_setDisplayExtents(lua_State *L);
    S32 lua_getDisplayCenter(lua_State *L);
    S32 lua_getDisplayZoom(lua_State *L);
    S32 lua_getDisplayExtents(lua_State *L);

@@ -252,9 +252,9 @@ REGISTER_LUA_CLASS(EditorPlugin);
    METHOD(CLASS, getSelectedObjects, ARRAYDEF({{ END          }                    }), 1 ) \
    METHOD(CLASS, getAllObjects,      ARRAYDEF({{ END          }                    }), 1 ) \
    METHOD(CLASS, showMessage,        ARRAYDEF({{ STR,     END }, { STR, BOOL, END }}), 2 ) \
-   METHOD(CLASS, centerDisplay,      ARRAYDEF({{ PT,      END },                   }), 1 ) \
-   METHOD(CLASS, setDisplay,         ARRAYDEF({{ PT, PT,  END },                   }), 1 ) \
-   METHOD(CLASS, zoomDisplay,        ARRAYDEF({{ NUM_GE0, END }                    }), 1 ) \
+   METHOD(CLASS, setDisplayCenter,   ARRAYDEF({{ PT,      END },                   }), 1 ) \
+   METHOD(CLASS, setDisplayExtents,  ARRAYDEF({{ PT, PT,  END },                   }), 1 ) \
+   METHOD(CLASS, setDisplayZoom,     ARRAYDEF({{ NUM_GE0, END }                    }), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(EditorPlugin, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
@@ -409,7 +409,7 @@ S32 EditorPlugin::lua_showMessage(lua_State *L)
 
 
 /**
- * @luafunc EditorPlugin::centerDisplay(Point pos)
+ * @luafunc EditorPlugin::setDisplayCenter(Point pos)
  * 
  * @brief
  * Center editor window on specified point.
@@ -419,9 +419,9 @@ S32 EditorPlugin::lua_showMessage(lua_State *L)
  *
  * @param pos Where the window should be centered.
  */
-S32 EditorPlugin::lua_centerDisplay(lua_State *L)
+S32 EditorPlugin::lua_setDisplayCenter(lua_State *L)
 {
-   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "centerDisplay");
+   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "setDisplayCenter");
 
    Point center = getPointOrXY(L, 1);
 
@@ -436,7 +436,7 @@ S32 EditorPlugin::lua_centerDisplay(lua_State *L)
 
 
 /**
- * @luafunc EditorPlugin::zoomDisplay(num zoom)
+ * @luafunc EditorPlugin::setDisplayZoom(num zoom)
  * 
  * @brief
  * Zoom the display to the specified zoom level.
@@ -447,11 +447,14 @@ S32 EditorPlugin::lua_centerDisplay(lua_State *L)
  * internal constants MIN_SCALE and MAX_SCALE, which are currently 0.02 and 10 respectively.
  * Current starting zoom is 0.5.
  *
+ * @note Note that the lower zoom values correspond to a wider, more zoomed-out view. 
+ * @note Dividing the zoom by 2 will result in twice the width and height being displayed.
+ *
  * @param zoom Zoom level to zoom to.
  */
-S32 EditorPlugin::lua_zoomDisplay(lua_State *L)
+S32 EditorPlugin::lua_setDisplayZoom(lua_State *L)
 {
-   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "zoomDisplay");
+   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "setDisplayZoom");
 
    F32 scale = getFloat(L, 1);
 
@@ -466,7 +469,7 @@ S32 EditorPlugin::lua_zoomDisplay(lua_State *L)
 
 
 /**
- * @luafunc EditorPlugin::setDisplay(point pt1, point pt2)
+ * @luafunc EditorPlugin::setDisplayExtents(point pt1, point pt2)
  * 
  * @brief
  * Set the display to the specified bounding box.
@@ -488,16 +491,16 @@ S32 EditorPlugin::lua_zoomDisplay(lua_State *L)
  * function main()
  *    local objects = plugin:getSelectedObjects()
  *    local ext = sd.mergeExtents(objects)
- *	   plugin:setDisplay(point.new(ext.minx, ext.miny), point.new(ext.maxx, ext.maxy))
+ *	   plugin:setDisplayExtents(point.new(ext.minx, ext.miny), point.new(ext.maxx, ext.maxy))
  * end   
  * @endcode
  *
  * @param pt1 
  * @param pt2 
  */
-S32 EditorPlugin::lua_setDisplay(lua_State *L)
+S32 EditorPlugin::lua_setDisplayExtents(lua_State *L)
 {
-   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "setDisplay");
+   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "setDisplayExtents");
 
    Rect extents(getPointOrXY(L, 1), getPointOrXY(L, 2));
 
