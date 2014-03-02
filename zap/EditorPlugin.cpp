@@ -251,9 +251,12 @@ REGISTER_LUA_CLASS(EditorPlugin);
    METHOD(CLASS, getSelectedObjects, ARRAYDEF({{ END          }                    }), 1 ) \
    METHOD(CLASS, getAllObjects,      ARRAYDEF({{ END          }                    }), 1 ) \
    METHOD(CLASS, showMessage,        ARRAYDEF({{ STR,     END }, { STR, BOOL, END }}), 2 ) \
-   METHOD(CLASS, setDisplayCenter,   ARRAYDEF({{ PT,      END },                   }), 1 ) \
-   METHOD(CLASS, setDisplayExtents,  ARRAYDEF({{ PT, PT,  END },                   }), 1 ) \
+   METHOD(CLASS, setDisplayCenter,   ARRAYDEF({{ PT,      END }                    }), 1 ) \
+   METHOD(CLASS, setDisplayExtents,  ARRAYDEF({{ PT, PT,  END }                    }), 1 ) \
    METHOD(CLASS, setDisplayZoom,     ARRAYDEF({{ NUM_GE0, END }                    }), 1 ) \
+   METHOD(CLASS, getDisplayCenter,   ARRAYDEF({{ END          }                    }), 1 ) \
+   METHOD(CLASS, getDisplayExtents,  ARRAYDEF({{ END          }                    }), 1 ) \
+   METHOD(CLASS, getDisplayZoom,     ARRAYDEF({{ END          }                    }), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(EditorPlugin, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
@@ -424,7 +427,7 @@ S32 EditorPlugin::lua_showMessage(lua_State *L)
  */
 S32 EditorPlugin::lua_setDisplayCenter(lua_State *L)
 {
-   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "setDisplayCenter");
+   checkArgList(L, functionArgs, "EditorPlugin", "setDisplayCenter");
 
    Point center = getPointOrXY(L, 1);
 
@@ -457,7 +460,7 @@ S32 EditorPlugin::lua_setDisplayCenter(lua_State *L)
  */
 S32 EditorPlugin::lua_setDisplayZoom(lua_State *L)
 {
-   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "setDisplayZoom");
+   checkArgList(L, functionArgs, "EditorPlugin", "setDisplayZoom");
 
    F32 scale = getFloat(L, 1);
 
@@ -503,7 +506,7 @@ S32 EditorPlugin::lua_setDisplayZoom(lua_State *L)
  */
 S32 EditorPlugin::lua_setDisplayExtents(lua_State *L)
 {
-   S32 profile = checkArgList(L, functionArgs, "EditorPlugin", "setDisplayExtents");
+   checkArgList(L, functionArgs, "EditorPlugin", "setDisplayExtents");
 
    Rect extents(getPointOrXY(L, 1), getPointOrXY(L, 2));
 
