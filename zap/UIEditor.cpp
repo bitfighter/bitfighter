@@ -842,7 +842,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
 
    // Create new plugin, will be deleted by boost
-   EditorPlugin *plugin = new EditorPlugin(fullName, args, mGridSize, mLoadTarget, getGame());
+   EditorPlugin *plugin = new EditorPlugin(fullName, args, mLoadTarget, getGame());
 
    mPluginRunner = boost::shared_ptr<EditorPlugin>(plugin);
 
@@ -1984,7 +1984,7 @@ void EditorUserInterface::renderReferenceShip()
       const F32 spaceAngle = 0.0278f * FloatTau;
       glColor(Colors::green, 0.35f);
       glLineWidth(gLineWidth1);
-      drawDashedCircle(Point(0,0), Ship::CollisionRadius, 10.0f, spaceAngle, 0);
+      drawDashedCircle(Point(0,0), Ship::CollisionRadius, 10, spaceAngle, 0);
       glLineWidth(gDefaultLineWidth);
 
       // And show how far it can see
@@ -5175,7 +5175,7 @@ void EditorUserInterface::findPlugins()
       string title;
       Vector<boost::shared_ptr<MenuItem> > menuItems;  // Unused
 
-      EditorPlugin plugin(dirName + "/" + plugins[i], Vector<string>(), mGridSize, mLoadTarget, getGame());
+      EditorPlugin plugin(dirName + "/" + plugins[i], Vector<string>(), mLoadTarget, getGame());
 
       if(plugin.prepareEnvironment() && plugin.loadScript(false))
          plugin.runGetArgsMenu(title, menuItems);

@@ -19,7 +19,7 @@ EditorPlugin::EditorPlugin() { TNLAssert(false, "Don't use this constructor!"); 
 
 
 // Constructor
-EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
+EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, 
                            GridDatabase *gridDatabase, Game *game)
 {
    mScriptName = scriptName;
@@ -29,7 +29,6 @@ EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scrip
    mGridDatabase = gridDatabase;
    mLuaGridDatabase = gridDatabase;
 
-   mGridSize = gridSize;
    mGame = game;
    mLuaGame = game;
 
@@ -271,7 +270,11 @@ GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
  */
 S32 EditorPlugin::lua_getGridSize(lua_State *L)
 {
-   return returnFloat(L, mGridSize);    
+   ClientGame *clientGame = dynamic_cast<ClientGame*>(mGame);
+   if(clientGame)
+      returnFloat(L, clientGame->getUIManager()->getUI<EditorUserInterface>()->getGridSize());
+
+   return returnNil(L);    
 }
 
 
@@ -506,7 +509,7 @@ S32 EditorPlugin::lua_setDisplayExtents(lua_State *L)
 
    ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
    if(clientGame)
-      clientGame->getUIManager()->getUI<EditorUserInterface>()->setDisplayExtents(extents, 1.3);
+      clientGame->getUIManager()->getUI<EditorUserInterface>()->setDisplayExtents(extents, 1.3f);
 
    clearStack(L);
 

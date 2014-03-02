@@ -24,7 +24,6 @@ private:
 
    GridDatabase *mGridDatabase;
    Game *mGame;
-   F32 mGridSize;
    string mDescription;
    string mRequestedBinding;
 
@@ -34,8 +33,7 @@ protected:
 public:
    // Constructors
    EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!
-   EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
-                  GridDatabase *gridDatabase, Game *game);
+   EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, GridDatabase *gridDatabase, Game *game);
 
    virtual ~EditorPlugin();  // Destructor
 
