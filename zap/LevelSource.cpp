@@ -9,7 +9,6 @@
 #include "gameType.h"
 #include "GameSettings.h"
 
-#include "md5wrapper.h"
 #include "stringUtils.h"
 
 #include "tnlAssert.h"
