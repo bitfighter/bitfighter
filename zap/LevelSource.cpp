@@ -317,7 +317,7 @@ string MultiLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObje
    }
 
    if(game->loadLevelFromFile(filename, gameObjectDatabase))
-      return Game::md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
+      return Md5::getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
    else
    {
       logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
@@ -418,7 +418,7 @@ string FileListLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameO
 	}
 
 	if(game->loadLevelFromFile(filename, gameObjectDatabase))
-	   return Game::md5.getHashFromFile(filename);   
+	   return Md5::getHashFromFile(filename);   
 	else
 	{
 		logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
@@ -488,7 +488,7 @@ bool StringLevelSource::populateLevelInfoFromSource(const string &fullFilename, 
 string StringLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
 {
    game->loadLevelFromString(mLevelCode, gameObjectDatabase, "");
-   return Game::md5.getHashFromString(mLevelCode); 
+   return Md5::getHashFromString(mLevelCode); 
 }
 
 
