@@ -18,9 +18,6 @@
 #include "ServerGame.h"
 #include "gameNetInterface.h"
 
-
-#include "md5wrapper.h"
-
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>
 #include <cmath>

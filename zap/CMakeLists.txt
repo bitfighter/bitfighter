@@ -66,7 +66,7 @@ set(SHARED_SOURCES
 	LuaScriptRunner.cpp
 	masterConnection.cpp
 	MathUtils.cpp
-	md5wrapper.cpp
+	Md5Utils.cpp
 	move.cpp
 	moveObject.cpp
 	NexusGame.cpp

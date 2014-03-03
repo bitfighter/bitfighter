@@ -25,6 +25,7 @@
 #endif
 
 #include "Colors.h"
+#include "Md5Utils.h"
 #include "stringUtils.h"         // For strictjoindir()
 
 

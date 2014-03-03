@@ -17,7 +17,6 @@
 
 #include "teamInfo.h"            // For ClassManager
 #include "BfObject.h"            // For TypeNumber def
-#include "md5wrapper.h"
 
 #include "Timer.h"
 #include "Rect.h"

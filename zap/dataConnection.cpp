@@ -7,6 +7,7 @@
 #include "ServerGame.h"
 #include "gameNetInterface.h"             // for GetGame() through GameNetInterface
 
+#include "Md5Utils.h"
 #include "stringUtils.h"
 
 using namespace TNL;
