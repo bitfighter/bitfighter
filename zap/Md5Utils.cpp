@@ -13,10 +13,13 @@
 #include "stringUtils.h"               // For lcase
 #include "../libtomcrypt/mycrypt.h"
 
+#include "tnlTypes.h"
+
 #include <fstream>
 #include <iostream>
 
 using std::string;
+using namespace TNL;
 
 
 namespace Md5
@@ -76,8 +79,10 @@ string getHashFromFile(const string &filename)
 	FILE *file;
    hash_state md;
 
+   const S32 ChunkSize = 1024;
+
 	unsigned int len;
-  	unsigned char buffer[1024], digest[16];
+  	unsigned char buffer[ChunkSize], digest[16];
 
 	// Open file
   	if((file = fopen (filename.c_str(), "rb")) == NULL)
@@ -87,7 +92,7 @@ string getHashFromFile(const string &filename)
    md5_init(&md);
 
 	// Read the file
-	while( (len = (unsigned int)fread (buffer, 1, 1024, file)) )
+	while( (len = (unsigned int)fread (buffer, 1, ChunkSize, file)) )
 	   md5_process(&md, buffer, len);
 
 	// Generate hash, close the file, and return the hash as string
