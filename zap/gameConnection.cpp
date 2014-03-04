@@ -1355,7 +1355,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
 }
 
 
-
 void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const U8 *levelgendata, U32 levelgensize)
 {
    bool isServer = !isInitiator();
@@ -1397,7 +1396,7 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
       if(levelgensize != 0)
       {
          // Modify the "Script" line so it points to new uploaded script filename
-         U32 c=0;
+         U32 c = 0;
          bool foundscript = false;
          // First, find a line that says "Script"
          while(c < levelsize - 10)
@@ -1428,9 +1427,9 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
             }
          }
          else
-            c=0;
+            c = 0;
          if(c < levelsize)
-            fwrite(&leveldata[c], 1, levelsize-c, f); // Write the rest of level
+            fwrite(&leveldata[c], 1, levelsize - c, f); // Write the rest of level
       }
       else
          fwrite(leveldata, 1, levelsize, f);
@@ -1459,7 +1458,6 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
 
       if(isServer)
       {
-         
          S32 index = mServerGame->addLevel(levelInfo);
          c2sRequestLevelChange_remote(index, false);  // Might as well switch to it after done with upload
       }
@@ -1468,8 +1466,8 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
       s2cDisplayErrorMessage("!!! Upload failed -- server can't write file");
    else
       s2cDisplayErrorMessage_remote("!!! Unable to save level");
-
 }
+
 
 void GameConnection::ReceivedRecordedGameplay(const U8 *filedata, U32 filedatasize)
 {
