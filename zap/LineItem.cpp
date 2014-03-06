@@ -250,11 +250,15 @@ void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    mGlobal = stream->readFlag();  // Set this client side
 }
 
+
 F32 LineItem::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips)
 {
-   return Parent::getUpdatePriority(connection, updateMask, updateSkips) - 1000.f;
-}
+   // Lower priority for initial update to not slow levels
+   if(isInitialUpdate())
+      return Parent::getUpdatePriority(connection, updateMask, updateSkips) - 1000.f;
 
+   return Parent::getUpdatePriority(connection, updateMask, updateSkips);
+}
 
 
 S32 LineItem::getWidth() const
