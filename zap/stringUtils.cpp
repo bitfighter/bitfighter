@@ -159,6 +159,17 @@ F64 stof(const string &s)
 }
 
 
+// Split a multi-line string into a vector of lines
+void splitMultiLineString(const string &str, Vector<string> &strings)
+{
+   istringstream stream(str);
+   string line;
+
+   while(getline(stream, line)) 
+      strings.push_back(line);
+}
+
+
 // From http://stackoverflow.com/questions/3418231/c-replace-part-of-a-string-with-another-string, replaceAll variant
 string replaceString(const string &strString, const string &from, const string &to) 
 {

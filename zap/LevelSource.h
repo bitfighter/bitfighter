@@ -89,7 +89,7 @@ public:
    bool populateLevelInfoFromSource(const string &sourceName, S32 levelInfoIndex);
 
    static Vector<string> findAllLevelFilesInFolder(const string &levelDir);
-   static void getLevelInfoFromCodeChunk(char *chunk, S32 size, LevelInfo &levelInfo);     // Populates levelInfo
+   static void getLevelInfoFromCodeChunk(const string &code, LevelInfo &levelInfo);     // Populates levelInfo
 };
 
 

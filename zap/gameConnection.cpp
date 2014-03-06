@@ -1369,7 +1369,7 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
    }
 
    LevelInfo levelInfo;
-   LevelSource::getLevelInfoFromCodeChunk((char *)leveldata, levelsize, levelInfo);
+   LevelSource::getLevelInfoFromCodeChunk(string((char *)leveldata, levelsize), levelInfo);
 
    if(isServer && levelgensize == 0 && levelInfo.mScriptFileName.length() != 0)
    {
@@ -1621,12 +1621,11 @@ bool GameConnection::TransferLevelFile(const char *filename)
       }
 
       LevelInfo levelInfo;
-      LevelSource::getLevelInfoFromCodeChunk((char*)data, size, levelInfo);
+      LevelSource::getLevelInfoFromCodeChunk(string((char*)data, size), levelInfo);
 
-
-      for(U32 i=0; i<size; i+=partsSize)
+      for(U32 i = 0; i < size; i += partsSize)
       {
-         ByteBuffer *bytebuffer = new ByteBuffer(&data[i], min(partsSize, size-i));
+         ByteBuffer *bytebuffer = new ByteBuffer(&data[i], min(partsSize, size - i));
          bytebuffer->takeOwnership();
          mPendingTransferData.push_back(bytebuffer);
          totalTransferSize += bytebuffer->getBufferSize();
