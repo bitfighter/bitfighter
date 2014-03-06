@@ -18,6 +18,10 @@ TEST(TestLevelSource, tests)
    Address addr;
    NetInterface net(addr);   // We never use this, but it will initialize TNL to get past an assert
 
+
+   // These tests aren't really intensive... just basic functionality.  Could be expanded to include more 
+   // challenging levels
+
    LevelInfo levelInfo;    // Empty levelInfo
    
    LevelSource::getLevelInfoFromCodeChunk(getLevelCode1(), levelInfo);
@@ -36,43 +40,6 @@ TEST(TestLevelSource, tests)
    EXPECT_EQ(0, levelInfo.minRecPlayers);
    EXPECT_EQ(0, levelInfo.maxRecPlayers);
    EXPECT_EQ("", levelInfo.mScriptFileName);
-
-
-   S64 t1, t2;
-   S32 runs = 10000;
-   t1 = Platform::getRealMilliseconds();
-   for(S32 i = 0; i < runs; i++)
-   {
-      LevelSource::getLevelInfoFromCodeChunk(getLevelCode1(), levelInfo);
-      LevelSource::getLevelInfoFromCodeChunk(getLevelCodeForTestingEngineer1(), levelInfo);
-   }
-   t2 = Platform::getRealMilliseconds();
-   printf("New: %d\n", t2 - t1);
-
-   t1 = Platform::getRealMilliseconds();
-   for(S32 i = 0; i < runs; i++)
-   {
-      LevelSource::getLevelInfoFromCodeChunk_orig(getLevelCode1(), levelInfo);
-      LevelSource::getLevelInfoFromCodeChunk_orig(getLevelCodeForTestingEngineer1(), levelInfo);
-   }
-   t2 = Platform::getRealMilliseconds();
-   printf("Orig: %d\n", t2 - t1);
-
-
-
-   t1 = Platform::getRealMilliseconds();
-   for(S32 i = 0; i < runs; i++)
-   {
-      LevelSource::getLevelInfoFromCodeChunk_RegExp(getLevelCode1(), levelInfo);
-      LevelSource::getLevelInfoFromCodeChunk_RegExp(getLevelCodeForTestingEngineer1(), levelInfo);
-   }
-   t2 = Platform::getRealMilliseconds();
-   printf("regexp: %d\n", t2 - t1);
-
-
-
-
-
 }
 
 
