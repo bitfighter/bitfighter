@@ -253,10 +253,12 @@ void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 F32 LineItem::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips)
 {
-   // Lower priority for initial update to not slow levels
+   // Lower priority for initial update.  This is to work around network-heavy loading of levels
+   // with many LineItems, which will stall the client and prevent you from moving your ship
    if(isInitialUpdate())
       return Parent::getUpdatePriority(connection, updateMask, updateSkips) - 1000.f;
 
+   // Normal priority otherwise so Geom changes are immediately visible to all clients
    return Parent::getUpdatePriority(connection, updateMask, updateSkips);
 }
 
