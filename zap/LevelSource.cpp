@@ -14,6 +14,7 @@
 
 #include "tnlAssert.h"
 
+#include <sstream>
 
 namespace Zap
 {
@@ -119,8 +120,8 @@ static void stripQuotes(string &str)      // not const; will be modified!
 // (like with playlists or menus)
 void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &levelInfo)
 {
-   Vector<string> lines;
-   splitMultiLineString(code, lines);
+   istringstream stream(code);
+   string line;
 
    bool foundGameType   = false, foundLevelName  = false, foundMinPlayers = false, 
         foundMaxPlayers = false, foundScriptName = false;
@@ -133,16 +134,16 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
    std::size_t pos;
 
    // Iterate until we've either exhausted all the lines, or found everything we're looking for
-   for(S32 i = 0; i < lines.size() && (
-         !foundGameType || !foundLevelName || !foundMinPlayers || !foundMaxPlayers || !foundScriptName); i++)
+   while(getline(stream, line) && (
+         !foundGameType || !foundLevelName || !foundMinPlayers || !foundMaxPlayers || !foundScriptName))
    {
       // Check for GameType
       if(!foundGameType)
       {
-         pos = lines[i].find("GameType");
+         pos = line.find("GameType");
          if(pos != string::npos)
          {
-            string gameTypeName = lines[i].substr(0, pos + gameTypeLen); 
+            string gameTypeName = line.substr(0, pos + gameTypeLen); 
             TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(gameTypeName.c_str()));
 
             GameType *gt = dynamic_cast<GameType *>(theObject); 
@@ -158,10 +159,10 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
       // Check for LevelName
       if(!foundLevelName)
       {
-         if(lines[i].substr(0, levelNameLen) == "LevelName")
+         if(line.substr(0, levelNameLen) == "LevelName")
          {
-            pos = lines[i].find_first_not_of(" ", levelNameLen + 1);
-            string levelName = lines[i].substr(pos);
+            pos = line.find_first_not_of(" ", levelNameLen + 1);
+            string levelName = line.substr(pos);
             stripQuotes(levelName);
             levelInfo.mLevelName = trim(levelName);
 
@@ -173,11 +174,11 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
       // Check for MinPlayers
       if(!foundMinPlayers)
       {
-         if(lines[i].substr(0, minMaxPlayersLen) == "MinPlayers")
+         if(line.substr(0, minMaxPlayersLen) == "MinPlayers")
          {
-            pos = lines[i].find_first_not_of(" ", levelNameLen + 1);
+            pos = line.find_first_not_of(" ", levelNameLen + 1);
             if(pos != string::npos)
-               levelInfo.minRecPlayers = atoi(lines[i].substr(pos).c_str());
+               levelInfo.minRecPlayers = atoi(line.substr(pos).c_str());
 
             foundMinPlayers = true;
             continue;
@@ -187,11 +188,11 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
       // Check for MaxPlayers
       if(!foundMaxPlayers)
       {
-         if(lines[i].substr(0, minMaxPlayersLen) == "MaxPlayers")
+         if(line.substr(0, minMaxPlayersLen) == "MaxPlayers")
          {
-            pos = lines[i].find_first_not_of(" ", levelNameLen + 1);
+            pos = line.find_first_not_of(" ", levelNameLen + 1);
             if(pos != string::npos)
-               levelInfo.maxRecPlayers = atoi(lines[i].substr(pos).c_str());
+               levelInfo.maxRecPlayers = atoi(line.substr(pos).c_str());
 
             foundMaxPlayers = true;
             continue;
@@ -201,12 +202,12 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
       // Check for Script
       if(!foundScriptName)
       {
-         if(lines[i].substr(0, scriptLen) == "Script")
+         if(line.substr(0, scriptLen) == "Script")
          {
-            pos = lines[i].find_first_not_of(" ", scriptLen + 1);
+            pos = line.find_first_not_of(" ", scriptLen + 1);
             if(pos != string::npos)
             {
-               string scriptName = lines[i].substr(pos);
+               string scriptName = line.substr(pos);
                stripQuotes(scriptName);
                levelInfo.mScriptFileName = scriptName;
             }
