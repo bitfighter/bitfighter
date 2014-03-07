@@ -162,6 +162,10 @@ void TextItem::setText(lua_State *L, S32 index)
 
 void TextItem::setText(const string &text)
 {
+   // If no change in text, just return.  This prevents unnecessary client updates
+   if(text == mText)
+      return;
+
    mText = text;
    onGeomChanged();
 }

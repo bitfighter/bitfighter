@@ -455,6 +455,10 @@ S32 BfObject::getTeam() const
 
 void BfObject::setTeam(S32 team)
 {
+   // Don't update clients if team has not changed
+   if(team == mTeam)
+      return;
+
    mTeam = team;
    setMaskBits(TeamMask);
 }
