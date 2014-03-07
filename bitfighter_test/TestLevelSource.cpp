@@ -22,24 +22,20 @@ TEST(TestLevelSource, tests)
    // These tests aren't really intensive... just basic functionality.  Could be expanded to include more 
    // challenging levels
 
-   LevelInfo levelInfo;    // Empty levelInfo
-   
-   LevelSource::getLevelInfoFromCodeChunk(getLevelCode1(), levelInfo);
+   pair<Vector<string>, Vector<LevelInfo> > levels = getLevels();
 
-   EXPECT_STREQ("Test Level", levelInfo.mLevelName.getString());
-   EXPECT_EQ(BitmatchGame, levelInfo.mLevelType);
-   EXPECT_EQ(0, levelInfo.minRecPlayers);
-   EXPECT_EQ(0, levelInfo.maxRecPlayers);
-   EXPECT_EQ("", levelInfo.mScriptFileName);
+   for(S32 i = 0; i < levels.first.size(); i++)
+   {
+      LevelInfo levelInfo;
+      LevelSource::getLevelInfoFromCodeChunk(levels.first[i], levelInfo);
 
+      EXPECT_STREQ("Test Level", levels.second[i].mLevelName.getString());
+      EXPECT_EQ(BitmatchGame, levels.second[i].mLevelType);
+      EXPECT_EQ(0, levels.second[i].minRecPlayers);
+      EXPECT_EQ(0, levels.second[i].maxRecPlayers);
+      EXPECT_EQ("", levels.second[i].mScriptFileName);
 
-   LevelSource::getLevelInfoFromCodeChunk(getLevelCodeForTestingEngineer1(), levelInfo);
-
-   EXPECT_STREQ("Engineer Test Bed One", levelInfo.mLevelName.getString());
-   EXPECT_EQ(BitmatchGame, levelInfo.mLevelType);
-   EXPECT_EQ(0, levelInfo.minRecPlayers);
-   EXPECT_EQ(0, levelInfo.maxRecPlayers);
-   EXPECT_EQ("", levelInfo.mScriptFileName);
+   }
 }
 
 

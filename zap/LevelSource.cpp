@@ -46,6 +46,17 @@ LevelInfo::LevelInfo(const string &filename, const string &folder)
 }
 
 
+// Constructor
+LevelInfo::LevelInfo(const string &levelName, GameTypeId levelType, S32 minPlayers, S32 maxPlayers, const string &script)
+{
+   mLevelName = levelName;
+   mLevelType = levelType;
+   minRecPlayers = minPlayers;
+   maxRecPlayers = maxPlayers;
+   mScriptFileName = script;
+}
+
+
 // Destructor
 LevelInfo::~LevelInfo()
 {
@@ -55,10 +66,7 @@ LevelInfo::~LevelInfo()
 
 void LevelInfo::initialize()
 {
-   mLevelName = "";
    mLevelType = BitmatchGame;
-   filename = "";
-   folder = "";
    minRecPlayers = 0;
    maxRecPlayers = 0;
 }

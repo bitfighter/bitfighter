@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "LevelFilesForTesting.h"
+#include "LevelSource.h"
+
 #include "stringUtils.h"
 #include "tnlVector.h"
 
@@ -12,9 +14,13 @@ namespace Zap
 
 using namespace std;
 
-string getLevelCode1()
+
+static Vector<string>    levelCodes;
+static Vector<LevelInfo> levelInfos;
+
+static void intialize()
 {
-   return
+   levelCodes.push_back(
       "GameType 10 8\n"
       "LevelName \"Test Level\"\n"                             // Has quotes
       "LevelDescription \"This is a basic test level\"\n"      // Has quotes
@@ -29,14 +35,12 @@ string getLevelCode1()
       "Spawn 0 -0.6 0\n"
       "Teleporter 5 5 10 10\n"
       "TestItem 1 1\n"
-   ;
-}
+   );
 
+   levelInfos.push_back(LevelInfo("Test Level", BitmatchGame, 0, 0, "" ));
 
-// This level has a spawn in a LoadoutZone, with a ResourceItem directly south of the spawn
-string getLevelCodeForTestingEngineer1()
-{
-   return
+   // This level has a spawn in a LoadoutZone, with a ResourceItem directly south of the spawn
+   levelCodes.push_back(
       "GameType 10 92\n"
       "LevelName Engineer Test Bed One\n"
       "LevelDescription Level for testing Engineer\n"
@@ -49,7 +53,26 @@ string getLevelCodeForTestingEngineer1()
       "LoadoutZone 0   1 0   1 1   0 1   0 0\n"
       "Spawn 0   .5 .5\n"
       "ResourceItem   0.5 1\n"
-   ;
+   );
+   levelInfos.push_back(LevelInfo("Engineer Test Bed One", BitmatchGame, 0, 0, ""));
+}
+
+
+string getLevelCode1()
+{
+   return levelCodes[0];
+}
+
+
+string getLevelCodeForTestingEngineer1()
+{
+   return levelCodes[1];
+}
+
+
+pair<Vector<string>, Vector<LevelInfo> > getLevels()
+{
+   return pair<Vector<string>, Vector<LevelInfo> >(levelCodes, levelInfos);
 }
 
 
