@@ -488,8 +488,12 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
    // TODO: Q. Shouldn't we verify that the number of points here is appropriate for this object?   
    //       A. Yes!!
 
+   // Adjust geometry
    GeomObject::setGeom(points);
    onPointsChanged();
+
+   // Tell the object its geometry changed
+   onGeomChanged();
 }
 
 
@@ -1529,9 +1533,8 @@ S32 BfObject::lua_removeFromGame(lua_State *L)
 S32 BfObject::lua_setGeom(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setGeom");
-   setGeom(L, 1);
 
-   onGeomChanged();
+   setGeom(L, 1);
 
    return 0;
 }
