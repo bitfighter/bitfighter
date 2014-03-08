@@ -2163,7 +2163,6 @@ static void renderPlayerSymbolAndSetColor(ClientInfo *player, S32 x, S32 y, S32 
    drawStringf(x - 8, y + 7 , levelSize, "%d", ClientGame::getExpLevel(player->getGamesPlayed()));
    FontManager::popFontContext();
 
-
    // Figure out what color to use to render player name, and set it
    if(player->isSpawnDelayed())
       glColor(Colors::idlePlayerNameColor);

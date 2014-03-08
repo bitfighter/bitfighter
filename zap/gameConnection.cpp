@@ -25,6 +25,7 @@
 #endif
 
 #include "Colors.h"
+#include "Md5Utils.h"
 #include "stringUtils.h"         // For strictjoindir()
 
 
@@ -300,7 +301,7 @@ const U32 maxDataBufferSize = 1024*1024*8;  // 8 MB
 
 void GameConnection::submitPassword(const char *password)
 {
-   string encrypted = Game::md5.getSaltedHashFromString(password);
+   string encrypted = Md5::getSaltedHashFromString(password);
    c2sSubmitPassword(encrypted.c_str());
 
    mLastEnteredPassword = password;
@@ -414,7 +415,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
 
    GameType *gameType = mServerGame->getGameType();
 
-   if(!mClientInfo->isOwner() && ownerPW != "" && !strcmp(Game::md5.getSaltedHashFromString(ownerPW).c_str(), pass))
+   if(!mClientInfo->isOwner() && ownerPW != "" && !strcmp(Md5::getSaltedHashFromString(ownerPW).c_str(), pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted owner permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -440,7 +441,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    }
 
    // If admin password is blank, no one can get admin permissions except the local host, if there is one...
-   else if(!mClientInfo->isAdmin() && adminPW != "" && !strcmp(Game::md5.getSaltedHashFromString(adminPW).c_str(), pass))
+   else if(!mClientInfo->isAdmin() && adminPW != "" && !strcmp(Md5::getSaltedHashFromString(adminPW).c_str(), pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -463,7 +464,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    }
 
    // If level change password is blank, it should already been granted to all clients
-   else if(!mClientInfo->isLevelChanger() && !strcmp(Game::md5.getSaltedHashFromString(levChangePW).c_str(), pass)) 
+   else if(!mClientInfo->isLevelChanger() && !strcmp(Md5::getSaltedHashFromString(levChangePW).c_str(), pass)) 
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -803,7 +804,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string levelChangePassword = GameSettings::iniFile.GetValue("SavedLevelChangePasswords", getServerName());
       if(levelChangePassword != "")
       {
-         c2sSubmitPassword(Game::md5.getSaltedHashFromString(levelChangePassword).c_str());
+         c2sSubmitPassword(Md5::getSaltedHashFromString(levelChangePassword).c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -814,7 +815,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string adminPassword = GameSettings::iniFile.GetValue("SavedAdminPasswords", getServerName());
       if(adminPassword != "")
       {
-         c2sSubmitPassword(Game::md5.getSaltedHashFromString(adminPassword).c_str());
+         c2sSubmitPassword(Md5::getSaltedHashFromString(adminPassword).c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -825,7 +826,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string ownerPassword = GameSettings::iniFile.GetValue("SavedOwnerPasswords", getServerName());
       if(ownerPassword != "")
       {
-         c2sSubmitPassword(Game::md5.getSaltedHashFromString(ownerPassword).c_str());
+         c2sSubmitPassword(Md5::getSaltedHashFromString(ownerPassword).c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -1354,7 +1355,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
 }
 
 
-
 void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const U8 *levelgendata, U32 levelgensize)
 {
    bool isServer = !isInitiator();
@@ -1369,7 +1369,7 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
    }
 
    LevelInfo levelInfo;
-   LevelSource::getLevelInfoFromCodeChunk((char *)leveldata, levelsize, levelInfo);
+   LevelSource::getLevelInfoFromCodeChunk(string((char *)leveldata, levelsize), levelInfo);
 
    if(isServer && levelgensize == 0 && levelInfo.mScriptFileName.length() != 0)
    {
@@ -1396,7 +1396,7 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
       if(levelgensize != 0)
       {
          // Modify the "Script" line so it points to new uploaded script filename
-         U32 c=0;
+         U32 c = 0;
          bool foundscript = false;
          // First, find a line that says "Script"
          while(c < levelsize - 10)
@@ -1427,9 +1427,9 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
             }
          }
          else
-            c=0;
+            c = 0;
          if(c < levelsize)
-            fwrite(&leveldata[c], 1, levelsize-c, f); // Write the rest of level
+            fwrite(&leveldata[c], 1, levelsize - c, f); // Write the rest of level
       }
       else
          fwrite(leveldata, 1, levelsize, f);
@@ -1458,7 +1458,6 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
 
       if(isServer)
       {
-         
          S32 index = mServerGame->addLevel(levelInfo);
          c2sRequestLevelChange_remote(index, false);  // Might as well switch to it after done with upload
       }
@@ -1467,8 +1466,8 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
       s2cDisplayErrorMessage("!!! Upload failed -- server can't write file");
    else
       s2cDisplayErrorMessage_remote("!!! Unable to save level");
-
 }
+
 
 void GameConnection::ReceivedRecordedGameplay(const U8 *filedata, U32 filedatasize)
 {
@@ -1622,12 +1621,11 @@ bool GameConnection::TransferLevelFile(const char *filename)
       }
 
       LevelInfo levelInfo;
-      LevelSource::getLevelInfoFromCodeChunk((char*)data, size, levelInfo);
+      LevelSource::getLevelInfoFromCodeChunk(string((char*)data, size), levelInfo);
 
-
-      for(U32 i=0; i<size; i+=partsSize)
+      for(U32 i = 0; i < size; i += partsSize)
       {
-         ByteBuffer *bytebuffer = new ByteBuffer(&data[i], min(partsSize, size-i));
+         ByteBuffer *bytebuffer = new ByteBuffer(&data[i], min(partsSize, size - i));
          bytebuffer->takeOwnership();
          mPendingTransferData.push_back(bytebuffer);
          totalTransferSize += bytebuffer->getBufferSize();
@@ -1821,7 +1819,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
       serverPW = mClientGame->getEnteredServerAccessPassword();
 
    // Write some info about the client... name, id, and verification status
-   stream->writeString(Game::md5.getSaltedHashFromString(serverPW).c_str());
+   stream->writeString(Md5::getSaltedHashFromString(serverPW).c_str());
    stream->writeString(mClientInfo->getName().getString());
 
     mClientInfo->getId()->write(stream);
@@ -1859,7 +1857,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    stream->readString(buf);
    string serverPassword = mServerGame->getSettings()->getServerPassword();
 
-   if(serverPassword != "" && stricmp(buf, Game::md5.getSaltedHashFromString(serverPassword).c_str()))
+   if(serverPassword != "" && stricmp(buf, Md5::getSaltedHashFromString(serverPassword).c_str()))
    {
       reason = ReasonNeedServerPassword;
       return false;

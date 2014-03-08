@@ -132,6 +132,8 @@ public:
    S32 lua_engineerDeployObject(lua_State *L);
    S32 lua_dropItem(lua_State *L);
    S32 lua_copyMoveFromObject(lua_State *L);
+
+   S32 lua_removeFromGame(lua_State *L);
 };
 
 

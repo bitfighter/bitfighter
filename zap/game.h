@@ -17,7 +17,6 @@
 
 #include "teamInfo.h"            // For ClassManager
 #include "BfObject.h"            // For TypeNumber def
-#include "md5wrapper.h"
 
 #include "Timer.h"
 #include "Rect.h"
@@ -263,8 +262,6 @@ public:
 
    static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL = 800;    // How far player can see with sensor equipped horizontally...
    static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL = 600;      // ...and vertically
-
-   static md5wrapper md5;
 
    Game(const Address &theBindAddress, GameSettingsPtr settings); // Constructor
    virtual ~Game();                                               // Destructor

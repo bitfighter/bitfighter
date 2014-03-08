@@ -649,13 +649,6 @@ void WallItem::checkIfHasBeenAddedToTheGame(lua_State *L)
 
 // Some Lua method overrides.  Because walls are... special.
 
-S32 WallItem::lua_setLoc(lua_State *L)
-{
-   logprintf(LogConsumer::LuaBotMessage, "'setLoc()' is deprecated and will be removed in the future.  Use 'setPos()', instead");
-   return lua_setPos(L);
-}
-
-
 S32 WallItem::lua_setPos(lua_State *L)
 {
    checkIfHasBeenAddedToTheGame(L);
@@ -855,13 +848,6 @@ void PolyWall::checkIfHasBeenAddedToTheGame(lua_State *L)
 
 
 // Lua method overrides.  Because walls are... special.
-
-S32 PolyWall::lua_setLoc(lua_State *L)
-{
-   logprintf(LogConsumer::LuaBotMessage, "'setLoc()' is deprecated and will be removed in the future.  Use 'setPos()', instead");
-   return lua_setPos(L);
-}
-
 
 S32 PolyWall::lua_setPos(lua_State *L)
 {

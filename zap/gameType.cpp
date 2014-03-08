@@ -16,6 +16,7 @@
 #include "LineEditorFilterEnum.h"
 #include "game.h"
 #include "GameRecorder.h"
+#include "Teleporter.h"
 
 #ifndef ZAP_DEDICATED
 #  include "gameObjectRender.h"
@@ -739,20 +740,6 @@ void GameType::gameOverManGameOver()
    EventManager::get()->fireEvent(EventManager::GameOverEvent);
 
    saveGameStats();
-
-   // Kick any players who were idle the entire previous game.  But DO NOT kick the hosting player!
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
-   {
-      ClientInfo *clientInfo = mGame->getClientInfo(i);
-
-      if(!clientInfo->isRobot())
-      {
-         GameConnection *connection = clientInfo->getConnection();
-            
-         if(!connection->getObjectMovedThisGame() && !connection->isLocalConnection())    // Don't kick the host, please!
-            connection->disconnect(NetConnection::ReasonIdle, "");
-      }
-   }
 }
 
 
@@ -1234,8 +1221,11 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
          } 
       }
 
+
       //clientInfo->resetActiveLoadout();      // Why?
    }
+
+   Teleporter::checkAllTeleporters(clientInfo->getShip());
 
    return true;
 }

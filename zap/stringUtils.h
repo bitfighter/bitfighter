@@ -69,6 +69,10 @@ Vector<string> parseStringAndStripLeadingSlash(const char *str);
 void parseComplexStringToMap(const string &inputString, map<string, string> &fillMap,
                              const string &entryDelimiter = ";", const string &keyValueDelimiter = ":");
 
+// Split a block of text into a vector of lines broken by \n or \r\n
+void splitMultiLineString(const string &str, Vector<string> &strings);
+
+
 const char *findPointerOfArg(const char *message, S32 count);
 
 string concatenate(const Vector<string> &words, S32 startingWith = 0);

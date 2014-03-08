@@ -19,7 +19,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v120_xp</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
@@ -50,6 +50,7 @@
     <OutDir>..\bin\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>bfup</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -90,14 +91,12 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\src\ConfigFiles\gup.xml ..\bin\gup.xml
-copy ..\src\ConfigFiles\getDownLoadUrl.php ..\bin\getDownLoadUrl.php
-copy ..\License.txt ..\bin\License.txt
-copy ..\gpl.txt ..\bin\gpl.txt
-copy ..\readme.txt ..\bin\readme.txt
-copy ..\src\libcurl\libcurl.dll ..\bin\libcurl.dll
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
+    <Xdcmake>
+      <OutputFile>$(OutDir)$(TargetName)</OutputFile>
+    </Xdcmake>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\TinyXml\tinystr.cpp" />

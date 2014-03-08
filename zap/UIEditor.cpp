@@ -172,6 +172,12 @@ GridDatabase *EditorUserInterface::getDatabase() const
 }  
 
 
+F32 EditorUserInterface::getGridSize() const
+{
+   return mGridSize;
+}
+
+
 void EditorUserInterface::setDatabase(boost::shared_ptr<GridDatabase> database)
 {
    TNLAssert(database.get(), "Database should not be NULL!");
@@ -836,7 +842,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
 
    // Create new plugin, will be deleted by boost
-   EditorPlugin *plugin = new EditorPlugin(fullName, args, mGridSize, mLoadTarget, getGame());
+   EditorPlugin *plugin = new EditorPlugin(fullName, args, mLoadTarget, getGame());
 
    mPluginRunner = boost::shared_ptr<EditorPlugin>(plugin);
 
@@ -1419,7 +1425,8 @@ void EditorUserInterface::onDisplayModeChange()
    static S32 previousXSize = -1;
    static S32 previousYSize = -1;
 
-   if(previousXSize != DisplayManager::getScreenInfo()->getGameCanvasWidth() || previousYSize != DisplayManager::getScreenInfo()->getGameCanvasHeight())
+   if(previousXSize != DisplayManager::getScreenInfo()->getGameCanvasWidth() || 
+      previousYSize != DisplayManager::getScreenInfo()->getGameCanvasHeight())
    {
       // Recenter canvas -- note that canvasWidth may change during displayMode change
       mCurrentOffset.set(mCurrentOffset.x - previousXSize / 2 + DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 
@@ -1975,16 +1982,16 @@ void EditorUserInterface::renderReferenceShip()
 
       // Draw collision circle
       const F32 spaceAngle = 0.0278f * FloatTau;
-      glColor4f(0, 1, 0, 0.35f);
+      glColor(Colors::green, 0.35f);
       glLineWidth(gLineWidth1);
-      drawDashedCircle(Point(0,0), Ship::CollisionRadius, 10.0f, spaceAngle, 0);
+      drawDashedCircle(Point(0,0), Ship::CollisionRadius, 10, spaceAngle, 0);
       glLineWidth(gDefaultLineWidth);
 
       // And show how far it can see
       const S32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
-      const S32 vertDist = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
+      const S32 vertDist  = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
 
-      glColor4f(.5, .5, 1, .35f);
+      glColor(Colors::paleBlue, 0.35f);
       drawFilledRect(-horizDist, -vertDist, horizDist, vertDist);
 
    glPopMatrix();
@@ -3756,81 +3763,20 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 
 void EditorUserInterface::centerView(bool isScreenshot)
 {
-//   const Vector<BfObject *> *objList = getDatabase()->getObjectList();
-//   const Vector<BfObject *> *levelGenObjList = mLevelGenDatabase.getObjectList();
-
    Rect extents = getDatabase()->getExtents();
-   extents.unionRect(mLevelGenDatabase.getExtents());
+   Rect levelgenDbExtents = mLevelGenDatabase.getExtents();
 
-
-   //if(objList->size() || levelGenObjList->size())
-   //{
-   //   F32 minx =  F32_MAX,   miny =  F32_MAX;
-   //   F32 maxx = -F32_MAX,   maxy = -F32_MAX;
-
-   //   for(S32 i = 0; i < objList->size(); i++)
-   //   {
-   //      EditorObject *obj = objList->get(i);
-
-   //      for(S32 j = 0; j < obj->getVertCount(); j++)
-   //      {
-   //         if(obj->getVert(j).x < minx)
-   //            minx = obj->getVert(j).x;
-   //         if(obj->getVert(j).x > maxx)
-   //            maxx = obj->getVert(j).x;
-   //         if(obj->getVert(j).y < miny)
-   //            miny = obj->getVert(j).y;
-   //         if(obj->getVert(j).y > maxy)
-   //            maxy = obj->getVert(j).y;
-   //      }
-   //   }
-
-   //   for(S32 i = 0; i < levelGenObjList->size(); i++)
-   //   {
-   //      EditorObject *obj = levelGenObjList->get(i);
-
-   //      for(S32 j = 0; j < obj->getVertCount(); j++)
-   //      {
-   //         if(obj->getVert(j).x < minx)
-   //            minx = obj->getVert(j).x;
-   //         if(obj->getVert(j).x > maxx)
-   //            maxx = obj->getVert(j).x;
-   //         if(obj->getVert(j).y < miny)
-   //            miny = obj->getVert(j).y;
-   //         if(obj->getVert(j).y > maxy)
-   //            maxy = obj->getVert(j).y;
-   //      }
-   //   }
-
-
-   F32 x = extents.getCenter().x;
-   F32 y = extents.getCenter().y;
+   if(levelgenDbExtents.getWidth() > 0 || levelgenDbExtents.getHeight() > 0)
+      extents.unionRect(levelgenDbExtents);
 
    // If we have nothing, or maybe only one point object in our level
    if(extents.getWidth() < 1 && extents.getHeight() < 1)    // e.g. a single point item
    {
       mCurrentScale = STARTING_SCALE;
-      mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - mCurrentScale * x, 
-                         DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - mCurrentScale * y);
+      setDisplayCenter(extents.getCenter());
    }
    else
-   {
-      mCurrentScale = min(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / extents.getWidth(), 
-                          DisplayManager::getScreenInfo()->getGameCanvasHeight() / extents.getHeight());
-
-      // Zoom out a bit to look better in the editor, except when doing a screenshot
-      if(!isScreenshot)
-         mCurrentScale /= 1.3f;
-
-      mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2  - mCurrentScale * x, 
-                           DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - mCurrentScale * y);
-   }
-   //}
-   //else     // Put (0,0) at center of screen
-   //{
-   //   mCurrentScale = STARTING_SCALE;
-   //   mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
-   //}
+      setDisplayExtents(extents, isScreenshot ? 1.0f : 1.3f);
 }
 
 
@@ -3846,20 +3792,73 @@ Point EditorUserInterface::getCurrentOffset()
 }
 
 
+// Positive amounts are zooming in, negative are zooming out
 void EditorUserInterface::zoom(F32 zoomAmount)
 {
    Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
 
-   mCurrentScale *= 1 + zoomAmount;
+   setDisplayScale(mCurrentScale * (1 + zoomAmount));
+
+   Point newMousePoint = convertLevelToCanvasCoord(mouseLevelPoint);
+
+   mCurrentOffset += mMousePos - newMousePoint;
+}
+
+
+void EditorUserInterface::setDisplayExtents(const Rect &extents, F32 backoffFact)
+{
+   F32 scale = min(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / extents.getWidth(), 
+                   DisplayManager::getScreenInfo()->getGameCanvasHeight() / extents.getHeight());
+
+   scale /= backoffFact;
+
+   setDisplayScale(scale);
+   setDisplayCenter(extents.getCenter());
+}
+
+
+Rect EditorUserInterface::getDisplayExtents() const
+{
+   // mCurrentOffset is the UL corner of our screen... just what we need for the bounding box
+   Point lr = Point(DisplayManager::getScreenInfo()->getGameCanvasWidth(),
+                    DisplayManager::getScreenInfo()->getGameCanvasHeight()) - mCurrentOffset;
+
+   F32 mult = 1 / mCurrentScale;
+
+   return Rect(-mCurrentOffset * mult, lr * mult);
+}
+
+
+// cenx and ceny are the desired center of the display; mCurrentOffset is the UL corner
+void EditorUserInterface::setDisplayCenter(const Point &center)
+{
+   mCurrentOffset.set(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - mCurrentScale * center.x, 
+                      DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - mCurrentScale * center.y);
+}                             
+
+
+// We will need to recenter the display after changing the scale.  Higher scales are more zoomed in.
+void EditorUserInterface::setDisplayScale(F32 scale)
+{
+   Point center = getDisplayCenter();
+
+   mCurrentScale = scale;
 
    if(mCurrentScale < MIN_SCALE)
       mCurrentScale = MIN_SCALE;
    else if(mCurrentScale > MAX_SCALE)
       mCurrentScale = MAX_SCALE;
-   
-   Point newMousePoint = convertLevelToCanvasCoord(mouseLevelPoint);
 
-   mCurrentOffset += mMousePos - newMousePoint;
+   setDisplayCenter(center);
+}
+
+
+Point EditorUserInterface::getDisplayCenter() const
+{
+   F32 mult = 1 / mCurrentScale;
+
+   return Point(((DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2) - mCurrentOffset.x), 
+                ((DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2) - mCurrentOffset.y)) * mult;
 }
 
 
@@ -5176,7 +5175,7 @@ void EditorUserInterface::findPlugins()
       string title;
       Vector<boost::shared_ptr<MenuItem> > menuItems;  // Unused
 
-      EditorPlugin plugin(dirName + "/" + plugins[i], Vector<string>(), mGridSize, mLoadTarget, getGame());
+      EditorPlugin plugin(dirName + "/" + plugins[i], Vector<string>(), mLoadTarget, getGame());
 
       if(plugin.prepareEnvironment() && plugin.loadScript(false))
          plugin.runGetArgsMenu(title, menuItems);

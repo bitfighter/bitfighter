@@ -19,14 +19,40 @@
 
 #include "xmlTools.h"
 
+#include <stdio.h>         // For snprintf
+#include <sys/stat.h>      // For fileExists
+
+
+static bool fileExists(const char *path)
+{
+   struct stat st;
+   return (stat(path, &st) == 0);         // Does path exist?
+}
+
+
 GupParameters::GupParameters(const char * xmlFileName) : _currentVersion(""), _className2Close(""), _messageBoxTitle(""),\
                                                          _3rdButton_wm_cmd(0), _3rdButton_wParam(0), _3rdButton_lParam(0), _isSilentMode(true)
 {
+   if (!fileExists(xmlFileName))
+   {
+      const unsigned int LEN = 1024;      // Good enough for government work!
+      char msg[LEN];
+      _snprintf_s(msg, LEN, _TRUNCATE, "Could not find xml file %s.", xmlFileName);    // Lame MS version of snprintf
+
+      throw exception(msg);
+   }
+
 	_xmlDoc.LoadFile(xmlFileName);
 
 	TiXmlNode *root = _xmlDoc.FirstChild("GUPInput");
 	if (!root)
-		throw exception("It's not a valid GUP input xml.");
+   {
+      const unsigned int LEN = 1024;      
+      char msg[LEN];
+      _snprintf_s(msg, LEN, _TRUNCATE, "BFUP input file %s appears to be invalid.", xmlFileName);    // Lame MS version of snprintf
+
+		throw exception(msg);
+   }
 
 	TiXmlNode *versionNode = root->FirstChildElement("Version");
 	if (versionNode)

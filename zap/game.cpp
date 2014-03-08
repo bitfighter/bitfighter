@@ -18,9 +18,6 @@
 #include "ServerGame.h"
 #include "gameNetInterface.h"
 
-
-#include "md5wrapper.h"
-
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>
 #include <cmath>
@@ -64,7 +61,6 @@ U32 NameToAddressThread::run()
 ////////////////////////////////////////
 
 static Vector<DatabaseObject *> fillVector2;
-md5wrapper Game::md5;
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -1468,7 +1464,7 @@ void Game::seedRandomNumberGenerator(const string &name)
 
    S32 nameBytes = min((S32)name.length(), totalByteCount - timeByteCount);     // # of bytes we get from the provided name
 
-   unsigned char buf[totalByteCount]; 
+   unsigned char buf[totalByteCount] = {0};
 
    // Bytes from the time
    buf[0] = U8(time);

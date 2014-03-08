@@ -24,7 +24,6 @@ private:
 
    GridDatabase *mGridDatabase;
    Game *mGame;
-   F32 mGridSize;
    string mDescription;
    string mRequestedBinding;
 
@@ -34,8 +33,7 @@ protected:
 public:
    // Constructors
    EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!
-   EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
-                  GridDatabase *gridDatabase, Game *game);
+   EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, GridDatabase *gridDatabase, Game *game);
 
    virtual ~EditorPlugin();  // Destructor
 
@@ -54,6 +52,13 @@ public:
    S32 lua_getAllObjects(lua_State *L);             // Return all objects in the editor
    S32 lua_showMessage(lua_State *L);
 
+   // Display related Lua methods
+   S32 lua_setDisplayCenter(lua_State *L);
+   S32 lua_setDisplayZoom(lua_State *L);
+   S32 lua_setDisplayExtents(lua_State *L);
+   S32 lua_getDisplayCenter(lua_State *L);
+   S32 lua_getDisplayZoom(lua_State *L);
+   S32 lua_getDisplayExtents(lua_State *L);
 
 
    //// Lua interface

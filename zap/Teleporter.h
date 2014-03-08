@@ -134,6 +134,7 @@ public:
    void damageObject(DamageInfo *theInfo);
    void onDestroyed();
    void doTeleport();
+   static void checkAllTeleporters(BfObject *obj);
    bool collide(BfObject *otherObject);
 
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;

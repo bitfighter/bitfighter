@@ -237,7 +237,13 @@ void LuaScriptRunner::resetTimer()
    lua_pushvalue(L, -2);               // Timer, _initialize, Timer
 
    // Run
-   lua_call(L, 1, 0);                  // Timer
+   S32 err = lua_pcall(L, 1, 0, 0);
+   if(err!=0)
+   {
+      logprintf("Timer Error: %s", lua_tostring(L, -1));
+      lua_pop(L, 1);
+   }
+
    lua_pop(L, 1);
 }
 
@@ -1095,9 +1101,9 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "findObjectById");
 
-   TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
+   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
 
-   return findObjectById(L, mLuaGame->getGameObjDatabase()->findObjects_fast());
+   return findObjectById(L, mLuaGridDatabase->findObjects_fast());
 }
 
 
