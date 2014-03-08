@@ -18,8 +18,12 @@ using namespace std;
 static Vector<string>    levelCodes;
 static Vector<LevelInfo> levelInfos;
 
-static void intialize()
+// Lazy initialization
+static void initialize()
 {
+   if(levelCodes.size() > 0)
+      return;
+
    levelCodes.push_back(
       "GameType 10 8\n"
       "LevelName \"Test Level\"\n"                             // Has quotes
@@ -36,7 +40,6 @@ static void intialize()
       "Teleporter 5 5 10 10\n"
       "TestItem 1 1\n"
    );
-
    levelInfos.push_back(LevelInfo("Test Level", BitmatchGame, 0, 0, "" ));
 
    // This level has a spawn in a LoadoutZone, with a ResourceItem directly south of the spawn
@@ -60,18 +63,21 @@ static void intialize()
 
 string getLevelCode1()
 {
+   initialize();
    return levelCodes[0];
 }
 
 
 string getLevelCodeForTestingEngineer1()
 {
+   initialize();
    return levelCodes[1];
 }
 
 
 pair<Vector<string>, Vector<LevelInfo> > getLevels()
 {
+   initialize();
    return pair<Vector<string>, Vector<LevelInfo> >(levelCodes, levelInfos);
 }
 

@@ -6,6 +6,8 @@
 #include "LevelSource.h"
 #include "LevelFilesForTesting.h"
 
+#include "stringUtils.h"
+
 #include "tnlNetInterface.h"
 #include "gtest/gtest.h"
 
@@ -26,15 +28,15 @@ TEST(TestLevelSource, tests)
 
    for(S32 i = 0; i < levels.first.size(); i++)
    {
+      SCOPED_TRACE("i = " + itos(i));
       LevelInfo levelInfo;
       LevelSource::getLevelInfoFromCodeChunk(levels.first[i], levelInfo);
 
-      EXPECT_STREQ("Test Level", levels.second[i].mLevelName.getString());
-      EXPECT_EQ(BitmatchGame, levels.second[i].mLevelType);
-      EXPECT_EQ(0, levels.second[i].minRecPlayers);
-      EXPECT_EQ(0, levels.second[i].maxRecPlayers);
-      EXPECT_EQ("", levels.second[i].mScriptFileName);
-
+      EXPECT_EQ(levelInfo.mLevelName,      levels.second[i].mLevelName);
+      EXPECT_EQ(levelInfo.mLevelType,      levels.second[i].mLevelType);
+      EXPECT_EQ(levelInfo.minRecPlayers,   levels.second[i].minRecPlayers);
+      EXPECT_EQ(levelInfo.maxRecPlayers,   levels.second[i].maxRecPlayers);
+      EXPECT_EQ(levelInfo.mScriptFileName, levels.second[i].mScriptFileName);
    }
 }
 
