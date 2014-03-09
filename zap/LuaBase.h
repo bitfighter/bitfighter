@@ -6,7 +6,7 @@
 #ifndef _LUABASE_H_
 #define _LUABASE_H_
 
-#include "lua.h"
+#include "LuaInc.h"
 #include "LuaException.h"     // LuaException def
 
 #include "Point.h"
@@ -169,6 +169,12 @@ const char *getCheckedString(lua_State *L, S32 index, const char *methodName);
 const char *getString(lua_State *L, S32 index, const char *defaultVal);
 
 S32 luaTableCopy(lua_State *L);
+
+void luaPushPoint(lua_State *L, F32 x, F32 y);
+void luaPushPoint(lua_State *L, const Point &pt);
+
+Point luaToPoint(lua_State *L, S32 index);
+bool luaIsPoint(lua_State *L, S32 index);
 
 /////
 // Script context

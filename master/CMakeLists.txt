@@ -16,7 +16,7 @@ set(MASTER_SOURCES
 	../zap/HttpRequest.cpp
 	../zap/IniFile.cpp
 	../zap/LevelDatabase.cpp
-	../zap/md5wrapper.cpp
+	../zap/Md5Utils.cpp
 	../zap/Settings.cpp
 	../zap/stringUtils.cpp
 	../zap/Timer.cpp

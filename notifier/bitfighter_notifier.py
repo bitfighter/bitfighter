@@ -261,7 +261,7 @@ class PlayersListReceiver(object):
             self.players = playersNew
             
             # Send a message and update our tooltip
-            self.messenger.notify(comein, goout)
+            self.messenger.notify(self.messenger.makeMessage(comein, goout))
             self.guiApp.refreshToolTip(self.players)
             
         # Guarantee a tooltip if no users are online
@@ -324,7 +324,7 @@ class MessengerBase(object):
         self.title = MESSAGE_TITLE
             
     # Common methods
-    def notify(self, comein, goout):
+    def notify(self, message):
         logging.warn("Override me: %s", inspect.stack()[0][3])
         
             
@@ -358,7 +358,7 @@ class NotifierBase(object):
         self.notificationTimeout = NOTIFICATION_TIMEOUT
         self.refreshInterval = REFRESH_INTERVAL
         self.executable = EXECUTABLE
-
+        
         
     def run(self):
         logging.warn("Override me: %s", inspect.stack()[0][3])
@@ -380,8 +380,8 @@ if sys.platform == 'win32':
             self.guiApp = guiApp
     
     
-        def notify(self, comein, goout):
-            self.guiApp.trayapp.systray.show_message(self.makeMessage(comein, goout))
+        def notify(self, message):
+            self.guiApp.trayapp.systray.show_message(message)
     
     
     class GuiApplicationWindows(GuiApplicationBase):
@@ -514,11 +514,11 @@ elif sys.platform == 'darwin':
             MessengerBase.__init__(timeout)
             
         
-        def notify(self, comein, goout):
+        def notify(self, message):
             pool = NSAutoreleasePool.alloc().init()
             
             ap = LegacyAlert(self.title)
-            ap.informativeText = self.makeMessage(comein, goout)
+            ap.informativeText = message
             ap.displayAlert()
             
             del pool
@@ -533,7 +533,7 @@ elif sys.platform == 'darwin':
             MessengerBase.__init__(timeout)
             
     
-        def notify(self, comein, goout):
+        def notify(self, message):
             # We need to set up our own autorelease pool because this happens outside of the main 
             # thread where there is no pool
             pool = NSAutoreleasePool.alloc().init()
@@ -542,7 +542,7 @@ elif sys.platform == 'darwin':
             NSUserNotificationCenter = objc.lookUpClass('NSUserNotificationCenter')
             notification = NSUserNotification.alloc().init()
             notification.setTitle_(self.title)
-            notification.setInformativeText_(self.makeMessage(comein, goout))
+            notification.setInformativeText_(message)
             NSUserNotificationCenter.defaultUserNotificationCenter().setDelegate_(self)
             NSUserNotificationCenter.defaultUserNotificationCenter().scheduleNotification_(notification)
             
@@ -927,15 +927,14 @@ elif sys.platform.startswith('linux'): # or sys.platform.startswith('freebsd'):
                     self.icon = guiApp.getNotificationIcon()
     
     
-            def notify(self, comein, goout):
-                body = self.makeMessage(comein, goout)
+            def notify(self, message):
                 if not self.notification:
-                    self.notification = notify2.Notification(self.title, body)
+                    self.notification = notify2.Notification(self.title, message)
                     if self.icon and self.icon.get_width() > 0:
                         self.notification.set_icon_from_pixbuf(self.icon)
                     self.notification.timeout = self.timeout
                 else:
-                    self.notification.update(self.title, body)
+                    self.notification.update(self.title, message)
                 self.notification.show()
     
     
@@ -957,7 +956,7 @@ elif sys.platform.startswith('linux'): # or sys.platform.startswith('freebsd'):
                     self.icon = guiApp.getNotificationIcon()
     
     
-            def notify(self, comein, goout):
+            def notify(self, message):
                 item = 'org.freedesktop.Notifications'
                 path = '/org/freedesktop/Notifications'
                 interface = 'org.freedesktop.Notifications'
@@ -975,12 +974,11 @@ elif sys.platform.startswith('linux'): # or sys.platform.startswith('freebsd'):
                         dbus.ByteArray(self.icon.get_pixels())
                     )
                     hints['icon_data'] = struct
-                body = self.makeMessage(comein, goout)
     
                 bus=dbus.SessionBus(self.mainloop)
                 nobj = bus.get_object(item, path)
                 notify = dbus.Interface(nobj, interface)
-                notify.Notify(self.appName, 0, iconName, self.title, body, actions, hints, self.timeout)
+                notify.Notify(self.appName, 0, iconName, self.title, message, actions, hints, self.timeout)
     
     
     elif isCmdNotifySend:
@@ -996,15 +994,14 @@ elif sys.platform.startswith('linux'): # or sys.platform.startswith('freebsd'):
                     self.iconPath = guiApp.iconPath 
     
     
-            def notify(self, comein, goout):
-                body = self.makeMessage(comein, goout)
+            def notify(self, message):
                 args = ["notify-send", "--app-name", self.appName, "--expire-time", str(self.timeout)]
                 
                 if self.iconPath:
                     args.append("--icon")
                     args.append(self.iconPath)
                 args.append(self.title)
-                args.append(body)
+                args.append(message)
                 
                 try:
                     subprocess.call(args,  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
