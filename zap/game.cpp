@@ -203,14 +203,16 @@ void Game::setReadyToConnectToMaster(bool ready)
 }
 
 
+// Static method
 Point Game::getScopeRange(bool sensorEquipped)
 {
-   if(sensorEquipped)
-      return Point(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-            PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
+   static const Point sensorScopeRange(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+                                       PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL   + PLAYER_SCOPE_MARGIN);
 
-   return Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-         PLAYER_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
+   static const Point normalScopeRange(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+                                       PLAYER_VISUAL_DISTANCE_VERTICAL   + PLAYER_SCOPE_MARGIN);
+
+   return sensorEquipped ? sensorScopeRange : normalScopeRange;
 }
 
 

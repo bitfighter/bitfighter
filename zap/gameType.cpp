@@ -533,8 +533,6 @@ void GameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 
 void GameType::idle_server(U32 deltaT)
 {
-   queryItemsOfInterest();
-
    bool needsScoreboardUpdate = mScoreboardUpdateTimer.update(deltaT);
 
    if(needsScoreboardUpdate)
@@ -1438,7 +1436,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
             continue;
 
          Rect queryRect(ship->getActualPos(), ship->getActualPos());
-         queryRect.expand(mGame->getScopeRange(ship->hasModule(ModuleSensor)));
+         queryRect.expand(Game::getScopeRange(ship->hasModule(ModuleSensor)));
 
          TestFunc testFunc;
          if(scopeObject == ship)    
@@ -1458,10 +1456,10 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
       // Note that if we make mine visibility controlled by server, here's where we'd put the code
       Point pos = scopeObject->getPos();
       TNLAssert(dynamic_cast<Ship *>(scopeObject), "Control object not a ship!");
-      Ship *co = static_cast<Ship *>(scopeObject);
+      Ship *ship = static_cast<Ship *>(scopeObject);
 
       Rect queryRect(pos, pos);
-      queryRect.expand( mGame->getScopeRange(co->hasModule(ModuleSensor)) );
+      queryRect.expand(Game::getScopeRange(ship->hasModule(ModuleSensor)));
 
       fillVector.clear();
       mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
@@ -1479,66 +1477,6 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    if(mShowAllBots && connection->isInCommanderMap())
       for(S32 i = 0; i < mGame->getBotCount(); i++)
          connection->objectInScope(mGame->getBot(i));  
-}
-
-
-// Server only
-void GameType::addItemOfInterest(MoveItem *item)
-{
-#ifdef TNL_DEBUG
-   for(S32 i = 0; i < mItemsOfInterest.size(); i++)
-      TNLAssert(mItemsOfInterest[i].theItem.getPointer() != item, "Item already exists in ItemOfInterest!");
-#endif
-
-   ItemOfInterest i;
-   i.theItem = item;
-   i.teamVisMask = 0;
-   mItemsOfInterest.push_back(i);
-}
-
-
-// Here we'll cycle through all itemsOfInterest, then find any ships within scope range of each.  We'll then mark the object as being visible
-// to those teams with ships close enough to see it, if any.  Called from idle()
-void GameType::queryItemsOfInterest()
-{
-   for(S32 i = 0; i < mItemsOfInterest.size(); i++)
-   {
-      ItemOfInterest &ioi = mItemsOfInterest[i];
-      if(ioi.theItem.isNull())
-      {
-         // This can happen when dropping NexusFlagItem in ZoneControlGameType
-         TNLAssert(false,"item in ItemOfInterest is NULL. This can happen when an item got deleted.");
-         mItemsOfInterest.erase(i);    // When not in debug mode, the TNLAssert is not fired.  Delete the problem object and carry on.
-         break;
-      }
-
-      ioi.teamVisMask = 0;                         // Reset mask, object becomes invisible to all teams
-      
-      Point pos = ioi.theItem->getActualPos();
-      Point scopeRange(Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL, Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL);
-      Rect queryRect(pos, pos);
-
-      queryRect.expand(scopeRange);
-      fillVector.clear();
-      mGame->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector, queryRect);
-
-      for(S32 j = 0; j < fillVector.size(); j++)
-      {
-         Ship *theShip = static_cast<Ship *>(fillVector[j]);     // Safe because we only looked for ships and robots
-         Point delta = theShip->getActualPos() - pos;
-         delta.x = fabs(delta.x);
-         delta.y = fabs(delta.y);
-
-         if(
-               (theShip->hasModule(ModuleSensor) &&
-                     delta.x < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL && 
-                     delta.y < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL) ||
-               (delta.x < Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL && 
-                     delta.y < Game::PLAYER_VISUAL_DISTANCE_VERTICAL)
-            )
-            ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
-      }
-   }
 }
 
 

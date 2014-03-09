@@ -21,9 +21,6 @@ public:
    RetrieveGameType();
    virtual ~RetrieveGameType();
 
-   // Server only
-   void addFlag(FlagItem *flag);
-
    bool isFlagGame() const;
 
 

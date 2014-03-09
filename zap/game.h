@@ -436,7 +436,7 @@ public:
    // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
    S32 mObjectsLoaded;  
 
-   Point getScopeRange(bool sensorEquipped);
+   static Point getScopeRange(bool sensorEquipped);
 
    string makeUnique(const char *name);
 
