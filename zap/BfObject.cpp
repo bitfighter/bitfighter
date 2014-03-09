@@ -455,6 +455,10 @@ S32 BfObject::getTeam() const
 
 void BfObject::setTeam(S32 team)
 {
+   // Don't update clients if team has not changed
+   if(team == mTeam)
+      return;
+
    mTeam = team;
    setMaskBits(TeamMask);
 }
@@ -488,8 +492,50 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
    // TODO: Q. Shouldn't we verify that the number of points here is appropriate for this object?   
    //       A. Yes!!
 
+   S32 pointSize = points.size();
+   GeomType geomType = getGeomType();
+
+   // No points?  Do nothing!
+   if(pointSize == 0)
+      return;
+
+   // Don't update geom if the new geom is the same
+   bool hasChanged = false;
+
+   if(geomType == geomPoint)
+      hasChanged = points[0] != GeomObject::getPos();
+
+   else  // geomSimpleLine, geomPolyLine, geomPolygon
+   {
+      // Quickie size check
+      if(GeomObject::getOutline()->size() != pointSize)
+         hasChanged = true;
+
+      // Go through each point
+      else
+      {
+         for(S32 i = 0; i < points.size(); i++)
+         {
+            if(points[i] != GeomObject::getOutline()->get(i))
+            {
+               hasChanged = true;
+               break;
+            }
+         }
+      }
+   }
+
+   // Silently return if geom hasn't changed
+   if(!hasChanged)
+      return;
+
+
+   // Adjust geometry
    GeomObject::setGeom(points);
    onPointsChanged();
+
+   // Tell this BfObject its geometry has changed
+   onGeomChanged();
 }
 
 
@@ -1529,9 +1575,8 @@ S32 BfObject::lua_removeFromGame(lua_State *L)
 S32 BfObject::lua_setGeom(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setGeom");
-   setGeom(L, 1);
 
-   onGeomChanged();
+   setGeom(L, 1);
 
    return 0;
 }

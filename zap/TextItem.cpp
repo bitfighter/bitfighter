@@ -162,6 +162,10 @@ void TextItem::setText(lua_State *L, S32 index)
 
 void TextItem::setText(const string &text)
 {
+   // If no change in text, just return.  This prevents unnecessary client updates
+   if(text == mText)
+      return;
+
    mText = text;
    onGeomChanged();
 }
@@ -368,9 +372,16 @@ void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    updateExtentInDatabase();
 }
 
+
 F32 TextItem::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips)
 {
-   return Parent::getUpdatePriority(connection, updateMask, updateSkips) - 1000.f;
+   // Lower priority for initial update.  This is to work around network-heavy loading of levels
+   // with many TextItems, which will stall the client and prevent you from moving your ship
+   if(isInitialUpdate())
+      return Parent::getUpdatePriority(connection, updateMask, updateSkips) - 1000.f;
+
+   // Normal priority otherwise so Geom changes are immediately visible to all clients
+   return Parent::getUpdatePriority(connection, updateMask, updateSkips);
 }
 
 
