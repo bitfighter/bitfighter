@@ -35,7 +35,7 @@ endif()
 # Global linker flags
 # 
 if(MSVC)
-	set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:MSVCRT.lib")
+	set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:MSVCRT.lib;LIBCMT.lib")
 
 	# Disable incremental linking on RelWithDebInfo for sam686
 	set(LinkerFlags
