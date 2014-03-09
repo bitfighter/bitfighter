@@ -1059,6 +1059,7 @@ void MainMenuUserInterface::showUpgradeAlert()
    ui->setMessage("You are running an older version of Bitfighter.  You will only be able to "
                   "play with players who still have the same outdated version.\n\n"
                   "To get the latest, visit bitfighter.org");
+   ui->setInstr("Press [[Esc]] to continue");
 
    getUIManager()->activate(ui);
 
