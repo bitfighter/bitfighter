@@ -2411,6 +2411,7 @@ REGISTER_LUA_SUBCLASS(Ship, MoveObject);
  */
 S32 Ship::lua_isAlive(lua_State *L)    { return returnBool(L, !isDestroyed()); }
 
+
 /**
  * @luafunc bool Ship::hasFlag()
  *
@@ -2419,6 +2420,7 @@ S32 Ship::lua_isAlive(lua_State *L)    { return returnBool(L, !isDestroyed()); }
  * @return `true` if the Ship is carrying at least one flag, `false` otherwise.
  */
 S32 Ship::lua_hasFlag(lua_State *L)    { return returnBool (L, getFlagCount() > 0); }
+
 
 /**
  * @luafunc int Ship::getFlagCount()
@@ -2438,6 +2440,7 @@ S32 Ship::lua_getFlagCount(lua_State *L) { return returnInt(L, getFlagCount()); 
  * @return The LuaPlayerInfo for this Ship.
  */
 S32 Ship::lua_getPlayerInfo(lua_State *L) { return returnPlayerInfo(L, this); }
+
 
 /**
  * @luafunc num Ship::getAngle()
