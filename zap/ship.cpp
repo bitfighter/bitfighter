@@ -209,8 +209,10 @@ bool Ship::processArguments(S32 argc, const char **argv, Game *game)
       return false;
 
    Point pos;
+
    pos.read(argv + 1);
    pos *= game->getLegacyGridSize();
+
    for(U32 i = 0; i < MoveStateCount; i++)
    {
       setPos(i, pos);
