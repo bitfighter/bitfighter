@@ -2200,7 +2200,7 @@ void Ship::renderLayer(S32 layerIndex)
    const Ship *localShip      = static_cast<Ship *>(conn->getControlObject()); // Local player's ship -- could be NULL
    const bool isLocalShip     = !conn || conn->getControlObject() == this;     // Is render ship the local player?
    const bool showCoordinates = clientGame->isShowingDebugShipCoords();
-   const F32 nameScale        = clientGame->getRenderScale(localShip->hasModule(ModuleSensor));
+   const F32 nameScale        = localShip ? clientGame->getRenderScale(localShip->hasModule(ModuleSensor)) : 1.0f;
 
    ///// Info about the ship being rendered; comes primarily from the clientInfo
    const bool isAuthenticated     = clientInfo ? clientInfo->isAuthenticated()         : false;
@@ -2213,7 +2213,7 @@ void Ship::renderLayer(S32 layerIndex)
    const bool boostActive  = mLoadout.isModulePrimaryActive(ModuleBoost);
    const bool shieldActive = mLoadout.isModulePrimaryActive(ModuleShield);
    const bool repairActive = mLoadout.isModulePrimaryActive(ModuleRepair) && mHealth < 1;
-   const bool hasArmor     = hasModule(ModuleArmor);
+   const bool hasArmor     = mLoadout.hasModule(ModuleArmor);
 
    // If the local player is cloaked, and is close enough to the render ship, it will activate 
    // the ship's sensor module, and we'll need to draw it.  Here, we determine if that has happened.
