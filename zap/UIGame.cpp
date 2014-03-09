@@ -2701,19 +2701,15 @@ void GameUserInterface::renderGameNormal()
    // If not (like after we've been killed), we'll still render the current position and things
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(ship)
-      visExt = getGame()->computePlayerVisArea(ship);
+   if(!ship)     // If we don't know where the ship is, we can't render in this mode
+      return;
+
+   visExt = getGame()->computePlayerVisArea(ship);
 
    // TODO: This should not be needed here -- mPos is set elsewhere, but appears to be lagged by a frame, which 
    //       creates a weird slightly off-center effect when moving.  This is harmless for the moment, but should be removed.
-   if(ship)
-   {
-      mShipPos.set(ship->getRenderPos());
-      mHasShipPos = true;
-   }
-
-   if(!mHasShipPos)     // If we don't know where the ship is, we can't render in this mode
-      return;
+   mShipPos.set(ship->getRenderPos());
+   mHasShipPos = true;
 
    glPushMatrix();
 

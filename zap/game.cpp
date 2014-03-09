@@ -203,14 +203,16 @@ void Game::setReadyToConnectToMaster(bool ready)
 }
 
 
+// Static method
 Point Game::getScopeRange(bool sensorEquipped)
 {
-   if(sensorEquipped)
-      return Point(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-            PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
+   static const Point sensorScopeRange(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+                                       PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL   + PLAYER_SCOPE_MARGIN);
 
-   return Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-         PLAYER_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
+   static const Point normalScopeRange(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+                                       PLAYER_VISUAL_DISTANCE_VERTICAL   + PLAYER_SCOPE_MARGIN);
+
+   return sensorEquipped ? sensorScopeRange : normalScopeRange;
 }
 
 
@@ -1200,6 +1202,17 @@ Point Game::computePlayerVisArea(Ship *ship) const
       return regVis + (sensVis - regVis) * fraction;
    else
       return sensVis + (regVis - sensVis) * fraction;
+}
+
+
+// Returns the render scale based on whether sensor is active.  If sensor is not active, scale will be 1.0.
+// Currently this is used to upscale the name displayed with ships when they are rendered.
+F32 Game::getRenderScale(bool sensorActive) const
+{
+   static const F32 sensorScale = (F32)PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL / 
+                                  (F32)PLAYER_VISUAL_DISTANCE_HORIZONTAL;
+
+   return sensorActive ? sensorScale : 1.0;
 }
 
 

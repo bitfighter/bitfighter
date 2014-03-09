@@ -1055,14 +1055,15 @@ void MainMenuUserInterface::showUpgradeAlert()
    ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
 
    ui->reset();
-   ui->setTitle("OUTDATED VERSION");
-   ui->setMessage("You are running an older version of Bitfighter.  You will only be able to "
-                  "play with players who still have the same outdated version.\n\n"
+   ui->setTitle("UPDATED VERSION AVAILABLE");
+   ui->setMessage("There is now an updated version of Bitfighter available.  You will only "
+                  "be able to play with people who still have the same version you have.\n\n"
                   "To get the latest, visit bitfighter.org");
+   ui->setInstr("Press [[Esc]] to play");
 
    getUIManager()->activate(ui);
 
-   mShowedUpgradeAlert = true;            // Only show this alert once per session -- we don't need to beat them over the head with it!
+   mShowedUpgradeAlert = true;   // Only show this alert once per session -- we don't need to beat them over the head with it!
 }
 
 

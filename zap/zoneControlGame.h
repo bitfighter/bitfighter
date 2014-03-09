@@ -28,8 +28,6 @@ public:
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
 
-   void addFlag(FlagItem *flag);     // Server only
-
    void shipTouchZone(Ship *ship, GoalZone *zone);
 
    GameTypeId getGameTypeId() const;

@@ -314,6 +314,8 @@ public:
    Rect computeBarrierExtents();
 
    Point computePlayerVisArea(Ship *ship) const;
+   F32 getRenderScale(bool sensorActive) const;
+
    virtual Point worldToScreenPoint(const Point *p, S32 canvasWidth, S32 canvasHeight) const;
    virtual F32 getCommanderZoomFraction() const;
    virtual void renderBasicInterfaceOverlay() const;
@@ -434,7 +436,7 @@ public:
    // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
    S32 mObjectsLoaded;  
 
-   Point getScopeRange(bool sensorEquipped);
+   static Point getScopeRange(bool sensorEquipped);
 
    string makeUnique(const char *name);
 

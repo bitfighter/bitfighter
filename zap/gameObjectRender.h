@@ -115,7 +115,7 @@ extern void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColo
 // Renders the ship and all the fixins
 extern void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
                        F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, F32 alpha, 
-                       U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
+                       U32 renderTime, const string &shipName, F32 nameScale, F32 warpInScale, bool isLocalShip, bool isBusy, 
                        bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                        bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
                        bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed);

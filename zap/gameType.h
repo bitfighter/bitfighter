@@ -205,16 +205,6 @@ public:
 
    S32 mObjectsExpected;            // Count of objects we expect to get with this level (for display purposes only)
 
-   struct ItemOfInterest
-   {
-      SafePtr<MoveItem> theItem;
-      U32 teamVisMask;        // Bitmask, where 1 = object is visible to team in that position, 0 if not
-   };
-
-   Vector<ItemOfInterest> mItemsOfInterest;
-
-   void addItemOfInterest(MoveItem *theItem);
-
    void broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &formatString);
 
    void broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, 
@@ -377,7 +367,6 @@ public:
 
    virtual void shipTouchZone(Ship *ship, GoalZone *zone);
 
-   void queryItemsOfInterest();
    void performScopeQuery(GhostConnection *connection);
    virtual void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
 

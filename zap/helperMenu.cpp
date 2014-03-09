@@ -106,7 +106,7 @@ static S32 ButtonLabelGap = 9;      // Space between button/key rendering and me
 // Returns visible width of the helper
  S32 HelperMenu::getCurrentDisplayWidth(S32 widthOfButtons, S32 widthOfTextBlock) const
 {
-   return getWidth() + getInsideEdge();
+   return getWidth() + (S32)getInsideEdge();
 }
 
 

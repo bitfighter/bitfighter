@@ -383,7 +383,7 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
 	FILE *f = fopen(fullFilename.c_str(), "rb");
 	if(f)
 	{
-      S64 t1, t2;
+      S32 t1, t2;
       // Method 1
       {
       S64 ts = Platform::getHighPrecisionTimerValue();
@@ -408,10 +408,10 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
       // Tests suggest this takes between 0 and 1 ms
       string hash = Md5::getHashFromFile(fullFilename); 
       S64 te = Platform::getHighPrecisionTimerValue();
-      t2 = te - ts;
+      t2 = (S32)(te - ts);
       }
 
-      logprintf("Timings: %d, %d", t1, t2);
+      logprintf("Timings: %s %d / %d,    %f2.2 >>> ", fullFilename.c_str(), t1, t2, (F64)t1 / (F64)t2);
 
       levelInfo.ensureLevelInfoHasValidName();
 		return true;
