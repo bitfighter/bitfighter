@@ -2274,10 +2274,6 @@ bool Ship::doesShipActivateSensor(const Ship *ship)
 }
 
 
-// Set to true to allow players to see their cloaked teammates, 
-// false if cloaked teammates should be invisible
-static const bool SHOW_CLOAKED_TEAMMATES = true;    
-
 // Determine ship's visibility, 0 = invisible, 1 = normal visibility.  
 // Value will be used as alpha when rendering ship.
 F32 Ship::getShipVisibility(const Ship *localShip)
@@ -2293,6 +2289,10 @@ F32 Ship::getShipVisibility(const Ship *localShip)
    S32 localTeam =  localShip ? localShip->getTeam() : NO_TEAM;
    bool teamGame = mGame->getGameType()->isTeamGame();
    bool isFriendly = (getTeam() == localTeam) && teamGame;
+
+   // Set to true to allow players to see their cloaked teammates, 
+   // false if cloaked teammates should be invisible
+   static const bool SHOW_CLOAKED_TEAMMATES = true;    
 
    // Don't completely hide local player or ships on same team (in a team game)
    if(isLocalShip || (SHOW_CLOAKED_TEAMMATES && isFriendly))
