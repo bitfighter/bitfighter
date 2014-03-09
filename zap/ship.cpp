@@ -2182,53 +2182,53 @@ void Ship::renderLayer(S32 layerIndex)
    TNLAssert(getGame()->getGameType(), "gameType should always be valid here");
 
 #ifndef ZAP_DEDICATED
-   if(layerIndex == 0)  // Only render on layers -1 and 1
+   if(layerIndex == 0)     // Only render on layers -1 and 1
       return;
 
-   if(!shouldRender())      // Don't render an exploded ship!
+   if(!shouldRender())     // Don't render an exploded ship!
       return;
 
    ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-   GameConnection *conn = clientGame->getConnectionToServer();
+   ClientInfo *clientInfo = getClientInfo();    // Render ship's info; could be NULL
 
-   ClientInfo *clientInfo = getClientInfo();    // Could be NULL
+   // The local player's connection, regardless of which ship is being rendered
+   GameConnection *conn = clientGame->getConnectionToServer();       
+      
+   ///// Info about local player and render environment
+   const Ship *localShip      = static_cast<Ship *>(conn->getControlObject()); // Local player's ship -- could be NULL
+   const bool isLocalShip     = !conn || conn->getControlObject() == this;     // Is render ship the local player?
+   const bool showCoordinates = clientGame->isShowingDebugShipCoords();
+   const F32 nameScale        = clientGame->getRenderScale(localShip->hasModule(ModuleSensor));
 
-   // This is the local player's ship -- could be NULL
-   Ship *localShip = dynamic_cast<Ship *>(conn->getControlObject());
-
-   const bool isLocalShip = !(conn && conn->getControlObject() != this);    // i.e. the ship belongs to the player viewing the rendering
-   const bool isAuthenticated = clientInfo ? clientInfo->isAuthenticated() : false;
-
+   ///// Info about the ship being rendered; comes primarily from the clientInfo
+   const bool isAuthenticated     = clientInfo ? clientInfo->isAuthenticated()         : false;
+   const bool isBusy              = clientInfo ? clientInfo->isBusy()                  : false;
+   const bool engineeringTeleport = clientInfo ? clientInfo->isEngineeringTeleporter() : false;
+   const string shipName          = clientInfo ? clientInfo->getName().getString()     : ""; 
+   const U32 killStreak           = clientInfo ? clientInfo->getKillStreak()           : 0;  
+   const U32 gamesPlayed          = clientInfo ? clientInfo->getGamesPlayed()          : 0;  
+                                                                                       
    const bool boostActive  = mLoadout.isModulePrimaryActive(ModuleBoost);
    const bool shieldActive = mLoadout.isModulePrimaryActive(ModuleShield);
    const bool repairActive = mLoadout.isModulePrimaryActive(ModuleRepair) && mHealth < 1;
-   const bool sensorActive = doesShipActivateSensor(localShip);
    const bool hasArmor     = hasModule(ModuleArmor);
+
+   // If the local player is cloaked, and is close enough to the render ship, it will activate 
+   // the ship's sensor module, and we'll need to draw it.  Here, we determine if that has happened.
+   const bool sensorActive = doesShipActivateSensor(localShip);
 
    const Point vel(mCurrentMove.x, mCurrentMove.y);
 
-   // If the local player is cloaked, and is close enough to this ship, it will activate a sensor module, 
-   // and we'll need to draw it.  Here, we determine if that has happened.
-   
-   const bool isBusy              = clientInfo ? clientInfo->isBusy() : false;
-   const bool engineeringTeleport = clientInfo ? clientInfo->isEngineeringTeleporter() : false;
-   const bool showCoordinates     = clientGame->isShowingDebugShipCoords();
-
+   ///// Info about how to render the ship; color, alpha, angle, etc.
+   const Color *color   = clientGame->getGameType()->getTeamColor(this);
+   const F32 alpha      = getShipVisibility(localShip);
+   const F32 angle      = getRenderAngle();
+   const F32 deltaAngle = getAngleDiff(mLastProcessStateAngle, angle);     // Change in angle since we were last here
    // Caclulate rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
-   F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
-
-   const string shipName = clientInfo ? clientInfo->getName().getString() : "";
-   const U32 killStreak  = clientInfo ? clientInfo->getKillStreak() : 0;
-   const U32 gamesPlayed  = clientInfo ? clientInfo->getGamesPlayed() : 0;
-
-   const Color *color = getGame()->getGameType()->getTeamColor(this);
-   F32 alpha = getShipVisibility(localShip);
-
-   F32 angle = getRenderAngle();
-   F32 deltaAngle = getAngleDiff(mLastProcessStateAngle, angle);     // Change in angle since we were last here
+   const F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
 
    renderShip(layerIndex, getRenderPos(), getActualPos(), vel, angle, deltaAngle,
-              mShapeType, color, alpha, clientGame->getCurrentTime(), shipName, warpInScale, 
+              mShapeType, color, alpha, clientGame->getCurrentTime(), shipName, nameScale, warpInScale, 
               isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(), 
               boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport, killStreak, 
               gamesPlayed);
@@ -2259,7 +2259,7 @@ bool Ship::doesShipActivateSensor(const Ship *ship)
    if(!ship)
       return false;
 
-   // If ship is cloaking, and we have sensor...
+   // If ship is cloaking, and local player has sensor...
    if(ship->mLoadout.isModulePrimaryActive(ModuleCloak) && hasModule(ModuleSensor))
    {
       // ...then check the distance

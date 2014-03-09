@@ -314,6 +314,8 @@ public:
    Rect computeBarrierExtents();
 
    Point computePlayerVisArea(Ship *ship) const;
+   F32 getRenderScale(bool sensorActive) const;
+
    virtual Point worldToScreenPoint(const Point *p, S32 canvasWidth, S32 canvasHeight) const;
    virtual F32 getCommanderZoomFraction() const;
    virtual void renderBasicInterfaceOverlay() const;

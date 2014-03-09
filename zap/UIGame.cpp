@@ -2711,7 +2711,6 @@ void GameUserInterface::renderGameNormal()
    mShipPos.set(ship->getRenderPos());
    mHasShipPos = true;
 
-
    glPushMatrix();
 
    // Put (0,0) at the center of the screen

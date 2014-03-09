@@ -1203,6 +1203,17 @@ Point Game::computePlayerVisArea(Ship *ship) const
 }
 
 
+// Returns the render scale based on whether sensor is active.  If sensor is not active, scale will be 1.0.
+// Currently this is used to upscale the name displayed with ships when they are rendered.
+F32 Game::getRenderScale(bool sensorActive) const
+{
+   static const F32 sensorScale = (F32)PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL / 
+                                  (F32)PLAYER_VISUAL_DISTANCE_HORIZONTAL;
+
+   return sensorActive ? sensorScale : 1.0;
+}
+
+
 extern void exitToOs(S32 errcode);
 
 // Make sure name is unique.  If it's not, make it so.  The problem is that then the client doesn't know their official name.

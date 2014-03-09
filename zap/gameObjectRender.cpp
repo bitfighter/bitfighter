@@ -483,7 +483,8 @@ static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 a
 }
 
 
-void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, 
+                F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                 bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
 {
    ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[shapeType];
@@ -807,12 +808,13 @@ void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
 }
 
 
-static void renderShipName(const string &shipName, bool isAuthenticated, bool isBusy, U32 killStreak, U32 gamesPlayed, F32 alpha)
+static void renderShipName(const string &shipName, bool isAuthenticated, bool isBusy, 
+                           U32 killStreak, U32 gamesPlayed, F32 nameScale, F32 alpha)
 {
    string renderName = isBusy ? "<<" + shipName + ">>" : shipName;
 
    F32 textAlpha = alpha;
-   S32 textSize = 14;
+   F32 textSize = 14 * nameScale;
 
    glLineWidth(gLineWidth1);
 
@@ -821,17 +823,17 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
    if(killStreak >= UserInterface::StreakingThreshold)      
       glColor(Colors::streakPlayerNameColor, textAlpha);    
    else                                      
-      glColor(Colors::idlePlayerNameColor, textAlpha);         // <=== Probably wrong, not sure how to fix...  
+      glColor(Colors::idlePlayerNameColor, textAlpha);      // <=== Probably wrong, not sure how to fix...  
 
 
-   S32 ypos = 30 + textSize;
-   S32 len = drawStringc(0, ypos, textSize, renderName.c_str());
+   F32 ypos = textSize + 30;
+   S32 len = drawStringc(0.0f, ypos, textSize, renderName.c_str());
 
 //   renderGamesPlayedMark(-len / 2, ypos, textSize, gamesPlayed);
 
    // Underline name if player is authenticated
    if(isAuthenticated)
-      drawHorizLine(-len/2, len/2, 33 + textSize);
+      drawHorizLine(-len * 0.5f, len * 0.5f, ypos + 3);     // 3 provides a little gap beneath the text
 
    glLineWidth(gDefaultLineWidth);
 }
@@ -839,7 +841,7 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
 
 void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
                 F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, F32 alpha, 
-                U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
+                U32 renderTime, const string &shipName, F32 nameScale, F32 warpInScale, bool isLocalShip, bool isBusy, 
                 bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                 bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
                 bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed)
@@ -851,7 +853,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
    // Don't label the local ship.
    if(!isLocalShip && layerIndex == 1 && shipName != "")  
    {
-      renderShipName(shipName, isAuthenticated, isBusy, killStreak, gamesPlayed, alpha);
+      renderShipName(shipName, isAuthenticated, isBusy, killStreak, gamesPlayed, nameScale, alpha);
 
       // Show if the player is engineering a teleport
       if(engineeringTeleport)
