@@ -359,6 +359,34 @@ class NotifierBase(object):
         self.refreshInterval = REFRESH_INTERVAL
         self.executable = EXECUTABLE
         
+        self.messenger = None
+        self.guiApp = None
+        
+        
+    def on_start(self):
+        if self.messenger == None:
+            logging.error("messenger not set up?")
+            return
+            
+        self.messenger.notify("Bitfighter Notifier Started")
+        
+        
+    # Set up timers
+    def initialize(self, messenger, guiApp):
+        self.messenger = messenger
+        self.guiApp = guiApp
+        
+        plr = PlayersListReceiver(self.url, self.messenger, self.guiApp)
+        
+        timer = PeriodicTimer(self.refreshInterval, plr.refresh)
+        timer.start()
+        
+        self.guiApp.setTimer(timer)
+        
+        # One time timer to notify user we've started up after 1 second
+        startTimer = threading.Timer(1, self.on_start)
+        startTimer.start()
+        
         
     def run(self):
         logging.warn("Override me: %s", inspect.stack()[0][3])
@@ -451,13 +479,9 @@ if sys.platform == 'win32':
             guiApp = GuiApplicationWindows(self.executable, self.iconPath)
             messenger = MessengerWindows(self.notificationTimeout, guiApp)
             
-            plr = PlayersListReceiver(self.url, messenger, guiApp)
+            # Set up timers
+            self.initialize(messenger, guiApp)
             
-            timer = PeriodicTimer(self.refreshInterval, plr.refresh)
-            timer.start()
-            
-            # Bind the timer
-            guiApp.setTimer(timer)
             guiApp.run()    
             
 # End Windows
@@ -636,12 +660,9 @@ elif sys.platform == 'darwin':
             # Multiple inheritance not working with NSObject??
             messenger.setMembers(self.notificationTimeout, MESSAGE_TITLE)
             
-            receiver = PlayersListReceiver(self.url, messenger, guiApp)
+
+            self.initialize(messenger, guiApp)
             
-            timer = PeriodicTimer(self.refreshInterval, receiver.refresh)
-            timer.start()
-            
-            guiApp.setTimer(timer)
             AppHelper.runEventLoop()
 
 # End OSX
@@ -1025,12 +1046,8 @@ elif sys.platform.startswith('linux'): # or sys.platform.startswith('freebsd'):
             guiApp = GuiApplicationLinux(self.executable, self.iconPath)
             messenger = MessengerLinux(self.appName, self.notificationTimeout, guiApp)
             
-            plr = PlayersListReceiver(self.url, messenger, guiApp)
+            self.initialize(messenger, guiApp)
             
-            timer = PeriodicTimer(self.refreshInterval, plr.refresh)
-            timer.start()
-            
-            guiApp.setTimer(timer)
             guiApp.run()
             
             
