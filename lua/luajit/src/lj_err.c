@@ -370,6 +370,11 @@ LJ_FUNCA int lj_err_unwind_arm(int state, void *ucb, _Unwind_Context *ctx)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#if _MSC_VER <= 1599  // MSVC 2008,  old winnt.h may not have these
+typedef void* PEXCEPTION_ROUTINE;
+typedef void* PUNWIND_HISTORY_TABLE;
+#endif
+
 /* Taken from: http://www.nynaeve.net/?p=99 */
 typedef struct UndocumentedDispatcherContext {
   ULONG64 ControlPc;
