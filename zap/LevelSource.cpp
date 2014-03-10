@@ -170,9 +170,12 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
          if(line.substr(0, levelNameLen) == "LevelName")
          {
             pos = line.find_first_not_of(" ", levelNameLen + 1);
-            string levelName = line.substr(pos);
-            stripQuotes(levelName);
-            levelInfo.mLevelName = trim(levelName);
+            if(pos != string::npos)
+            {
+               string levelName = line.substr(pos);
+               stripQuotes(levelName);
+               levelInfo.mLevelName = trim(levelName);
+            }
 
             foundLevelName = true;
             continue;
@@ -184,7 +187,7 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
       {
          if(line.substr(0, minMaxPlayersLen) == "MinPlayers")
          {
-            pos = line.find_first_not_of(" ", levelNameLen + 1);
+            pos = line.find_first_not_of(" ", minMaxPlayersLen + 1);
             if(pos != string::npos)
                levelInfo.minRecPlayers = atoi(line.substr(pos).c_str());
 
@@ -198,7 +201,7 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
       {
          if(line.substr(0, minMaxPlayersLen) == "MaxPlayers")
          {
-            pos = line.find_first_not_of(" ", levelNameLen + 1);
+            pos = line.find_first_not_of(" ", minMaxPlayersLen + 1);
             if(pos != string::npos)
                levelInfo.maxRecPlayers = atoi(line.substr(pos).c_str());
 
