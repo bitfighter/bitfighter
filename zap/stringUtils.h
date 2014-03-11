@@ -124,7 +124,7 @@ void trim_in_place(string &source, const string &t = DEFAULT_TRIM_CHARS);
 S32 countCharInString(const string &source, char search);
 
 const U32 MAX_FILE_NAME_LEN = 128;     // Completely arbitrary
-string makeFilenameFromString(const char *levelname);
+string makeFilenameFromString(const char *levelname, bool allowLastDot = false);
 
 string ctos(char c);
 

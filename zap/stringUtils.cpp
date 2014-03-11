@@ -753,11 +753,12 @@ S32 countCharInString(const string &source, char search)
 }
 
 
-string makeFilenameFromString(const char *levelname)
+string makeFilenameFromString(const char *levelname, bool allowLastDot)
 {
    static char filename[MAX_FILE_NAME_LEN + 1];    // Leave room for terminating null
 
    U32 i = 0;
+   U32 lastDotIndex = 0;
 
    while(i < MAX_FILE_NAME_LEN && levelname[i] != 0)
    {
@@ -766,11 +767,19 @@ string makeFilenameFromString(const char *levelname)
       if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
          filename[i]=c;
       else
+      {
+         if(c == '.')
+            lastDotIndex = i;
          filename[i]='_';
+      }
       i++;
    }
 
    filename[i] = 0;    // Null terminate
+
+   if(allowLastDot && lastDotIndex != 0) // Allow last dot extensions?
+      filename[lastDotIndex] = '.';
+
    return filename;
 }
 
