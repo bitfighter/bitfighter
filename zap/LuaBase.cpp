@@ -546,12 +546,12 @@ bool dumpStack(lua_State* L, const char *msg)
    int top = lua_gettop(L);
 
    bool hasMsg = (strcmp(msg, "") != 0);
-   logprintf(LogConsumer::LogError, "\nTotal in stack: %d %s%s%s", top, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
+   printf("\nTotal in stack: %d %s%s%s\n", top, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
 
    for(S32 i = 1; i <= top; i++)
    {
       string val = stringify(L, i);
-      logprintf(LogConsumer::LogError, "%d : %s", i, val.c_str());
+      printf("%d : %s\n", i, val.c_str());
    }
 
    return false;

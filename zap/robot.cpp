@@ -1327,7 +1327,7 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
    // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
    // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
    // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
-   while(lua_isnumber(L, -1))
+   while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
       U8 typenum = (U8)lua_tointeger(L, -1);
 

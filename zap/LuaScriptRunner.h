@@ -54,8 +54,6 @@ private:
    void setLuaArgs(const Vector<string> &args);
    static void setModulePath();
 
-   static void configureNewLuaInstance();              // Prepare a new Lua environment for use
-
    static void loadCompileSaveHelper(const string &scriptName, const char *registryKey);
    static void loadCompileRunHelper(const string &scriptName);
    static void loadCompileSaveScript(const char *filename, const char *registryKey);
@@ -139,6 +137,8 @@ public:
    static lua_State *getL();
    static bool startLua();          // Create L
    static void shutdown();          // Delete L
+
+   static void configureNewLuaInstance(lua_State *L);    // Prepare a new Lua environment for use
 
    static void tickTimer(U32 timeDelta);
    static void resetTimer();

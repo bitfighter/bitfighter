@@ -19,6 +19,8 @@
 #include "ClientGame.h"
 #include "SystemFunctions.h"
 
+#include "LuaScriptRunner.h"
+
 #include "GeomUtils.h"
 #include "stringUtils.h"
 #include "RenderUtils.h"
@@ -205,7 +207,11 @@ TEST_F(ObjectTest, LuaSanity)
    geom.push_back(Point(1,0));
    geom.push_back(Point(0,1));
 
-   lua_State *L = lua_open();
+   // TODO: Should not need this... we start an L somewhere in one of the tests and never shut it down
+   if(!LuaScriptRunner::getL())
+      ASSERT_TRUE(LuaScriptRunner::startLua());
+      
+   lua_State *L = LuaScriptRunner::getL();
 
    // Create one of each type of registered NetClass
    for(U32 i = 0; i < classCount; i++)
@@ -229,7 +235,7 @@ TEST_F(ObjectTest, LuaSanity)
          lua_pushinteger(L, -2);
          bfobj->lua_setTeam(L);
          lua_pop(L, 1);
-         lua_pushvec(L, 2.3f, 4.3f);
+         luaPushPoint(L, 2.3f, 4.3f);
          bfobj->lua_setPos(L);
          lua_pop(L, 1);
 
@@ -239,8 +245,7 @@ TEST_F(ObjectTest, LuaSanity)
          delete bfobj;
    }
 
-
-   lua_close(L);
+   LuaScriptRunner::shutdown();
 }
 
    

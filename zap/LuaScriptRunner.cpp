@@ -423,7 +423,7 @@ bool LuaScriptRunner::startLua()
       if(!L)
          throw LuaException("Could not instantiate the Lua interpreter.");
 
-      configureNewLuaInstance();    // Throws any errors it encounters
+      configureNewLuaInstance(L);   // Throws any errors it encounters
 
       return true;
    }
@@ -441,8 +441,9 @@ bool LuaScriptRunner::startLua()
 }
 
 
-// Prepare a new Lua environment ("L") for use -- only called from startLua() above, which has catch block, so we can throw errors
-void LuaScriptRunner::configureNewLuaInstance()
+// Prepare a new Lua environment ("L") for use -- called from startLua(), and testing.
+// This function will throw errors.  (Well, hopefully it won't, but it could!)
+void LuaScriptRunner::configureNewLuaInstance(lua_State *L)
 {
    lua_atpanic(L, luaPanicked);  // Register our panic function
 
@@ -1172,7 +1173,8 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
    // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
    // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
    // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
-   while(lua_isnumber(L, -1))
+   // Note that even if stack is empty, lua_isnumber will return a value... which makes no sense!
+   while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
       U8 typenum = (U8)lua_tointeger(L, -1);
 
@@ -1189,9 +1191,7 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
    const Vector<DatabaseObject *> * results;
 
    if(types.size() == 0)
-   {
       results = mLuaGridDatabase->findObjects_fast();
-   }
    else
    {
       mLuaGridDatabase->findObjects(types, fillVector);
@@ -1252,7 +1252,7 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 
    // We expect the stack to look like this: -- [fillTable], objType1, objType2, ...
    // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
-   while(lua_isnumber(L, -1))
+   while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
       U8 typenum = (U8)lua_tointeger(L, -1);
 
