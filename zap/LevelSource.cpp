@@ -384,47 +384,46 @@ string MultiLevelSource::getLevelFileDescriptor(S32 index) const
 bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
 {
 	FILE *f = fopen(fullFilename.c_str(), "rb");
-	if(f)
-	{
-      S32 t1, t2;
-      // Method 1
-      {
-      S64 ts = Platform::getHighPrecisionTimerValue();
-      string contents = readFile(fullFilename);
-      getLevelInfoFromCodeChunk(contents, levelInfo);     // Fills levelInfo with data from file
-      string hash = Md5::getHashFromString(contents); 
-      S64 te = Platform::getHighPrecisionTimerValue();
-      t1 = te - ts;
-      }
-
-      {
-      // Method 2
-      S64 ts = Platform::getHighPrecisionTimerValue();
-
-      char data[1024 * 4];  // Should be enough to fit all parameters at the beginning of level; we don't need to read everything
-		S32 size = (S32)fread(data, 1, sizeof(data), f);
-	   fclose(f);
-
- 	   getLevelInfoFromCodeChunk(string(data, size), levelInfo);     // Fills levelInfo with data from file
-
-      // See if this slows things down... serves no other purpose at the moment
-      // Tests suggest this takes between 0 and 1 ms
-      string hash = Md5::getHashFromFile(fullFilename); 
-      S64 te = Platform::getHighPrecisionTimerValue();
-      t2 = (S32)(te - ts);
-      }
-
-      logprintf("Timings: %s %d / %d,    %f2.2 >>> ", fullFilename.c_str(), t1, t2, (F64)t1 / (F64)t2);
-
-      levelInfo.ensureLevelInfoHasValidName();
-		return true;
-	}
-   else
+	if(!f)
    {
       logprintf(LogConsumer::LogWarning, "Could not load level %s [%s]... Skipping...",
                                           levelInfo.filename.c_str(), fullFilename.c_str());
       return false;
    }
+	
+   S32 t1, t2;
+   // Method 1
+   {
+   S64 ts = Platform::getHighPrecisionTimerValue();
+   string contents = readFile(fullFilename);
+   getLevelInfoFromCodeChunk(contents, levelInfo);     // Fills levelInfo with data from file
+   string hash = Md5::getHashFromString(contents); 
+   S64 te = Platform::getHighPrecisionTimerValue();
+   t1 = te - ts;
+   }
+
+   {
+   // Method 2
+   S64 ts = Platform::getHighPrecisionTimerValue();
+
+   char data[1024 * 4];  // Should be enough to fit all parameters at the beginning of level; we don't need to read everything
+	S32 size = (S32)fread(data, 1, sizeof(data), f);
+	fclose(f);
+
+ 	getLevelInfoFromCodeChunk(string(data, size), levelInfo);     // Fills levelInfo with data from file
+
+   // See if this slows things down... serves no other purpose at the moment
+   // Tests suggest this takes between 0 and 1 ms
+   string hash = Md5::getHashFromFile(fullFilename); 
+   S64 te = Platform::getHighPrecisionTimerValue();
+   t2 = (S32)(te - ts);
+   }
+
+   logprintf("Timings: %s %d / %d,    %f2.2 >>> ", fullFilename.c_str(), t1, t2, (F64)t1 / (F64)t2);
+
+   levelInfo.ensureLevelInfoHasValidName();
+	return true;
+
 }
 
 
