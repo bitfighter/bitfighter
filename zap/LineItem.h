@@ -53,7 +53,9 @@ public:
    F32 getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips);
 
    virtual void setGeom(lua_State *L, S32 stackIndex);
- 
+
+   virtual void onGeomChanged();
+
    /////
    // Editor methods
    string toLevelCode() const;
