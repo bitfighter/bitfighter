@@ -1481,7 +1481,7 @@ void GameConnection::ReceivedRecordedGameplay(const U8 *filedata, U32 filedatasi
 
    const string &dir = mClientGame->getSettings()->getFolderManager()->recordDir;
    string filename = string(mServerName.getString()) + "_" + mFileName;
-   filename = joindir(dir, makeFilenameFromString(filename.c_str()));
+   filename = joindir(dir, makeFilenameFromString(filename.c_str(), true));
    FILE *f = fopen(filename.c_str(), "wb");
    if(f)
    {

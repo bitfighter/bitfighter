@@ -303,12 +303,20 @@ void LineItem::changeWidth(S32 amt)
    onGeomChanged();
 }
 
+
 void LineItem::setGeom(lua_State *L, S32 stackIndex)
 {
    Parent::setGeom(L, stackIndex);
 
    if(!isGhost())
       s2cSetGeom(*GeomObject::getOutline());
+}
+
+
+void LineItem::onGeomChanged()
+{
+   onPointsChanged();        // Recalculates centroid
+   Parent::onGeomChanged();
 }
 
 
