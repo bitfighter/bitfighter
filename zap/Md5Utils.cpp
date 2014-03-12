@@ -76,19 +76,18 @@ string getSaltedHashFromString(const string &text)
 // (based on Ronald L. Rivest's code from RFC1321 "The MD5 Message-Digest Algorithm") 
 string getHashFromFile(const string &filename)	
 {
-	FILE *file;
-   hash_state md;
-
    const S32 ChunkSize = 1024;
 
 	unsigned int len;
   	unsigned char buffer[ChunkSize], digest[16];
 
 	// Open file
-  	if((file = fopen (filename.c_str(), "rb")) == NULL)
+   FILE *file = fopen (filename.c_str(), "rb");
+   if(!file)
 		return "-1";
 
 	// Init md5
+   hash_state md;
    md5_init(&md);
 
 	// Read the file
