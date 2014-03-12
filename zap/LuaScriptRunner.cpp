@@ -687,7 +687,6 @@ S32 LuaScriptRunner::findObjectById(lua_State *L, const Vector<DatabaseObject *>
 }
 
 
-// These will be implemented by children classes, and will funnel back to the doSubscribe and doUnscubscribe methods below
 S32 LuaScriptRunner::doSubscribe(lua_State *L, ScriptContext context)   
 { 
    lua_Integer eventType = getInt(L, -1);
@@ -1385,6 +1384,7 @@ S32 LuaScriptRunner::lua_getPlayerCount(lua_State *L)
  */
 S32 LuaScriptRunner::lua_subscribe(lua_State *L)
 {
+   checkArgList(L, functionArgs, luaClassName, "subscribe");
    ScriptContext context = UnknownContext;
 
    if(mScriptType == ScriptTypeRobot)
@@ -1410,6 +1410,7 @@ S32 LuaScriptRunner::lua_subscribe(lua_State *L)
  */
 S32 LuaScriptRunner::lua_unsubscribe(lua_State *L)
 {
+   checkArgList(L, functionArgs, luaClassName, "unsubscribe");
    return doUnsubscribe(L);
 }
 
