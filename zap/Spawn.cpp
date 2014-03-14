@@ -314,7 +314,7 @@ void ItemSpawn::idle(IdleCallPath path)
 
 // These methods exist solely to make ItemSpawn instantiable so it can be instantiated by Lua... even though it never will
 const char *ItemSpawn::getClassName() const                                       { TNLAssert(false, "Not implemented!"); return ""; }
-S32 ItemSpawn::getDefaultRespawnTime()                                            { TNLAssert(false, "Not implemented!");  return 0; }
+S32 ItemSpawn::getDefaultRespawnTime()                                            { TNLAssert(false, "Not implemented!"); return 0;  }
 void ItemSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled) { TNLAssert(false, "Not implemented!"); }
 void ItemSpawn::renderDock()                                                      { TNLAssert(false, "Not implemented!"); }
 
