@@ -1315,9 +1315,9 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
 
 
 // Renders turret!  --> note that anchor and normal can't be const &Points because of the point math
-void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
+void renderTurret(const Color &color, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
 {
-   static const F32 frontRadius = 15.f;
+   static const F32 frontRadius = 15.0f;
 
    Point cross(normal.y, -normal.x);
    Point aimCenter = anchor + normal * Turret::TURRET_OFFSET;
@@ -1331,7 +1331,7 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
       vertexArray.push_back(aimCenter + pos * frontRadius);
    }
 
-   glColor(c);
+   glColor(color);
 
    renderPointVector(&vertexArray, GL_LINE_STRIP);
 
@@ -1354,10 +1354,12 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
    Point aimDelta(cos(barrelAngle), sin(barrelAngle));
    Point aim1(aimCenter + aimDelta * frontRadius);
    Point aim2(aimCenter + aimDelta * frontRadius * 2);
+
    F32 vertices[] = {
          aim1.x, aim1.y,
          aim2.x, aim2.y
    };
+
    renderVertexArray(vertices, 2, GL_LINES);
 
    glLineWidth(gDefaultLineWidth);
@@ -1372,16 +1374,18 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
    Point corner2(anchor + cross * 18 + normal * Turret::TURRET_OFFSET);
    Point corner3(anchor - cross * 18 + normal * Turret::TURRET_OFFSET);
    Point corner4(anchor - cross * 18);
+
    F32 vertices2[] = {
          corner1.x, corner1.y,
          corner2.x, corner2.y,
          corner3.x, corner3.y,
          corner4.x, corner4.y
    };
+
    renderVertexArray(vertices2, 4, GL_LINE_LOOP);
 
    // Render health bar
-   glColor(c);
+   glColor(color);
 
    renderHealthBar(health, anchor + normal * 7.5, cross, 28, 5);
 
