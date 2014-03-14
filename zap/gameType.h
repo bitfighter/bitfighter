@@ -149,6 +149,7 @@ public:
 
    Vector<AbstractSpawn *> getSpawnPoints(TypeNumber typeNumber, S32 teamIndex = TeamNotSpecified);
 
+   static GameTypeId getGameTypeIdFromName(const string &name);
 
    // Info about the level itself
    bool hasFlagSpawns() const;      

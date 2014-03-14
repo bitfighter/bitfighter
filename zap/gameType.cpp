@@ -48,6 +48,22 @@ static const char *gameTypeClassNames[] = {
 };
 
 
+typedef map<string, GameTypeId> GameTypeNamesMapType;
+
+static GameTypeNamesMapType initializeGameTypeMap()
+{
+  GameTypeNamesMapType gtmap;
+
+#  define GAME_TYPE_ITEM(id, type, c, d, e, f) gtmap[type] = id; 
+       GAME_TYPE_TABLE
+#  undef GAME_TYPE_ITEM
+
+  return gtmap;
+}
+
+// Get GameTypeId given a name like NexusGameType
+static const GameTypeNamesMapType GameTypeNamesMap = initializeGameTypeMap();
+
 
 ////////////////////////////////////////      __              ___           
 ////////////////////////////////////////     /__  _. ._ _   _  |    ._   _  
@@ -121,6 +137,7 @@ string GameType::toLevelCode() const
    return string(getClassName()) + " " + getRemainingGameTimeInMinutesString() + " " + itos(mWinningScore);
 }
 
+
 // GameType object is the first to be added when a new game starts... 
 // therefore, this is a reasonable signifier that a new game is starting up.  I think.
 // Server only?
@@ -157,6 +174,19 @@ void GameType::onGhostRemove()
    ClientGame *clientGame = static_cast<ClientGame *>(getGame());
    clientGame->gameTypeIsAboutToBeDeleted();
 #endif
+}
+
+
+// Returns GameTypeId from names like "NexusGameType".  Returns NoGameType if it can't figure it out.
+// Static method
+GameTypeId GameType::getGameTypeIdFromName(const string &name)
+{
+   const GameTypeNamesMapType::const_iterator it = GameTypeNamesMap.find(name);
+   
+   if(it == GameTypeNamesMap.end())
+      return NoGameType;
+
+   return it->second;
 }
 
 
