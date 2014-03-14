@@ -149,9 +149,7 @@ string getLevelCodeForEmptyLevelWithBots(const string &botSpec)
       "LevelCredits Tyler Derden\n";
 
    for(S32 i = 0; i < teams; i++)
-   {
       level += "Team team" + itos(i) + " 0 0 0\n";
-   }
 
    level += 
       "Specials\n"
