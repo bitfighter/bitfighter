@@ -29,7 +29,6 @@ PolygonObject::~PolygonObject()
 // Tell the geometry that things have changed
 void PolygonObject::onGeomChanged() 
 { 
-   onPointsChanged(); 
    Parent::onGeomChanged();
 }  
 

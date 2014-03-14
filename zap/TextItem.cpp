@@ -394,7 +394,6 @@ void TextItem::onGeomChanging()  { onGeomChanged(); }
 void TextItem::onGeomChanged()
 {
    recalcTextSize();
-   setMaskBits(GeomMask);
    Parent::onGeomChanged();
 }
 

@@ -421,7 +421,6 @@ void WallItem::onGeomChanged()
    if(db)
       db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
 
-   onPointsChanged();        // Recalculates centroid
    Parent::onGeomChanged();
 }
 
@@ -732,6 +731,7 @@ bool PolyWall::processArguments(S32 argc, const char **argv, Game *game)
    }
 
    readGeom(argc, argv, 1 + offset, game->getLegacyGridSize());
+   updateExtentInDatabase();
 
    return true;
 }

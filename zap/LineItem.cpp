@@ -315,7 +315,6 @@ void LineItem::setGeom(lua_State *L, S32 stackIndex)
 
 void LineItem::onGeomChanged()
 {
-   onPointsChanged();        // Recalculates centroid
    Parent::onGeomChanged();
 }
 
