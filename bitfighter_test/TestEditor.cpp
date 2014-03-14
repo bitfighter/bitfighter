@@ -8,6 +8,8 @@
 #include "TestUtils.h"
 #include "gtest/gtest.h"
 
+#include <cmath>
+
 namespace Zap
 {
 
@@ -47,7 +49,7 @@ TEST(EditorTest, panZoom)
    r = editorUi.getDisplayExtents();      
    ASSERT_FLOAT_EQ(-166.666667f, r.min.x);   // These depend on 800x600 display aspect ratio
    ASSERT_FLOAT_EQ(1166.666667f, r.max.x);
-   ASSERT_TRUE(abs(r.min.y) < .0001);        // We're getting errors here too great to use ASSERT_FLOAT_EQ
+   ASSERT_TRUE(fabs(r.min.y) < .0001);        // We're getting errors here too great to use ASSERT_FLOAT_EQ
    ASSERT_FLOAT_EQ(1000       , r.max.y);
 
    ASSERT_FLOAT_EQ(r.getCenter().x, editorUi.getDisplayCenter().x);
