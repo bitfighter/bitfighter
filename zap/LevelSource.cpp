@@ -72,6 +72,13 @@ void LevelInfo::initialize()
 }
 
 
+void LevelInfo::writeToStream(ostream &stream, const string &hash) const
+{
+   stream << hash          << ",\"" << mLevelName.getString() << "\"," << GameType::getGameTypeName(mLevelType) << "," 
+          << minRecPlayers << ","   << maxRecPlayers          << ","   << mScriptFileName                       << '\n'; 
+}
+
+
 const char *LevelInfo::getLevelTypeName()
 {
    return GameType::getGameTypeName(mLevelType);
@@ -123,9 +130,16 @@ static void stripQuotes(string &str)      // not const; will be modified!
 }
 
 
+// Static method
+bool LevelSource::getLevelInfoFromDatabase(const string &hash, LevelInfo &levelInfo)
+{
+   return false;
+}
+
+
 // Parse through the chunk of data passed in and find parameters to populate levelInfo with
 // This is only used on the server to provide quick level information without having to load the level
-// (like with playlists or menus)
+// (like with playlists or menus).  Static method.
 void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &levelInfo)
 {
    istringstream stream(code);
@@ -134,10 +148,10 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
    bool foundGameType   = false, foundLevelName  = false, foundMinPlayers = false, 
         foundMaxPlayers = false, foundScriptName = false;
 
-   static const S32 gameTypeLen = strlen("GameType");
-   static const S32 levelNameLen = strlen("LevelName");
+   static const S32 gameTypeLen      = strlen("GameType");
+   static const S32 levelNameLen     = strlen("LevelName");
    static const S32 minMaxPlayersLen = strlen("MinPlayers");
-   static const S32 scriptLen = strlen("Script");
+   static const S32 scriptLen        = strlen("Script");
 
    std::size_t pos;
 
@@ -390,6 +404,8 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
                                           levelInfo.filename.c_str(), fullFilename.c_str());
       return false;
    }
+
+   string hash;
 	
    S32 t1, t2;
    // Method 1
@@ -397,7 +413,7 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
    S64 ts = Platform::getHighPrecisionTimerValue();
    string contents = readFile(fullFilename);
    getLevelInfoFromCodeChunk(contents, levelInfo);     // Fills levelInfo with data from file
-   string hash = Md5::getHashFromString(contents); 
+   hash = Md5::getHashFromString(contents); 
    S64 te = Platform::getHighPrecisionTimerValue();
    t1 = te - ts;
    }
@@ -410,16 +426,19 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
 	S32 size = (S32)fread(data, 1, sizeof(data), f);
 	fclose(f);
 
- 	getLevelInfoFromCodeChunk(string(data, size), levelInfo);     // Fills levelInfo with data from file
+   hash = Md5::getHashFromFile(fullFilename); 
+   bool inDatabase = getLevelInfoFromDatabase(hash, levelInfo);
+
+   if(!inDatabase)
+ 	   getLevelInfoFromCodeChunk(string(data, size), levelInfo);     // Fills levelInfo with data from file
 
    // See if this slows things down... serves no other purpose at the moment
    // Tests suggest this takes between 0 and 1 ms
-   string hash = Md5::getHashFromFile(fullFilename); 
    S64 te = Platform::getHighPrecisionTimerValue();
    t2 = (S32)(te - ts);
    }
 
-   logprintf("Timings: %s %d / %d,    %f2.2 >>> ", fullFilename.c_str(), t1, t2, (F64)t1 / (F64)t2);
+   logprintf("Timings: %s read entire file: %d / read chunk + md5: %d,  %f2.2 >>> ", fullFilename.c_str(), t1, t2, (F64)t1 / (F64)t2);
 
    levelInfo.ensureLevelInfoHasValidName();
 	return true;
