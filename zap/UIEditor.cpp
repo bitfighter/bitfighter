@@ -3776,7 +3776,16 @@ void EditorUserInterface::centerView(bool isScreenshot)
       setDisplayCenter(extents.getCenter());
    }
    else
-      setDisplayExtents(extents, isScreenshot ? 1.0f : 1.3f);
+   {
+      if(isScreenshot)
+      {
+         // Expand just slightly so we don't clip edges
+         extents.expand(Point(2,2));
+         setDisplayExtents(extents, 1.0f);
+      }
+      else
+         setDisplayExtents(extents, 1.3f);
+   }
 }
 
 
