@@ -33,7 +33,8 @@ namespace Zap
       ChatMessageContext,      // Font for rendering in-game chat messages
       OldSkoolContext,         // Render things like in the good ol' days
       TimeLeftHeadlineContext, // Big text on indicator in lower right corner of game  
-      TimeLeftIndicatorContext // Smaller text on same indicator
+      TimeLeftIndicatorContext,// Smaller text on same indicator
+      EditorWarningContext     // Warning messages in editor
    };
 
 

@@ -212,6 +212,7 @@ void FontManager::setFontContext(FontContext fontContext)
       case LevelInfoContext:
       case ScoreboardContext:
       case MenuHeaderContext:
+      case EditorWarningContext:
          setFont(FontPlay);
          return;
 

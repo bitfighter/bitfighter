@@ -59,6 +59,7 @@
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 #include "ScreenShooter.h"
+#include "FontManager.h"
 
 #include <cmath>
 #include <set>
@@ -2306,6 +2307,8 @@ void EditorUserInterface::renderSaveMessage() const
 
 void EditorUserInterface::renderWarnings() const
 {
+   FontManager::pushFontContext(EditorWarningContext);
+
    if(mWarnMsgTimer.getCurrent())
    {
       F32 alpha = 1.0;
@@ -2319,7 +2322,7 @@ void EditorUserInterface::renderWarnings() const
 
    if(mLevelErrorMsgs.size() || mLevelWarnings.size())
    {
-      S32 ypos = vertMargin + 50;
+      S32 ypos = vertMargin + 20;
 
       glColor(Colors::ErrorMessageTextColor);
 
@@ -2337,6 +2340,8 @@ void EditorUserInterface::renderWarnings() const
          ypos += 25;
       }
    }
+
+   FontManager::popFontContext();
 }
 
 
