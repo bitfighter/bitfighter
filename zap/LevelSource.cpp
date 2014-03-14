@@ -152,13 +152,13 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
          if(pos != string::npos)
          {
             string gameTypeName = line.substr(0, pos + gameTypeLen); 
-            TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(gameTypeName.c_str()));
 
-            GameType *gt = dynamic_cast<GameType *>(theObject); 
-            if(gt)
-               levelInfo.mLevelType = gt->getGameTypeId();
+            // ValidateGameType is guaranteed to return a valid GameType name.  Or your money back!!!
+            const string validatedName = GameType::validateGameType(gameTypeName);
 
-            delete theObject;
+            GameTypeId gameTypeId = GameType::getGameTypeIdFromName(validatedName);
+            levelInfo.mLevelType = gameTypeId;
+
             foundGameType = true;
             continue;
          }
