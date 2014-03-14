@@ -158,7 +158,7 @@ string getLevelCodeForEmptyLevelWithBots(const string &botSpec)
 
    for(S32 i = 0; i < teams; i++)
       if(words[i] != "0")
-         for(S32 j = 0; j < words[i].size(); j++)
+         for(string::size_type j = 0; j < words[i].size(); j++)
             level += "Robot " + itos(i) + " s_bot\n";
 
    return level;
