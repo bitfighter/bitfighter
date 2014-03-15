@@ -764,16 +764,14 @@ void PolyWall::setSelected(bool selected)
 }
 
 
-// Only called from editor
 void PolyWall::onGeomChanged()
 {
    GridDatabase *db = getDatabase();
 
    if(db)      // db might be NULL if PolyWall hasn't yet been added to the editor (e.g. if it's still a figment of Lua's fancy)
-   {
       db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
-      Parent::onGeomChanged();
-   }
+
+   Parent::onGeomChanged();
 }
 
 
