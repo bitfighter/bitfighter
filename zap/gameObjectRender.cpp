@@ -354,8 +354,8 @@ void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
 
    for(F32 theta = start; theta < end; theta += CIRCLE_SIDE_THETA)
    {
-      filledSectorVertexArray[2*count]       = pos.x + cos(theta) * radius;
-      filledSectorVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
+      filledSectorVertexArray[2 * count]     = pos.x + cos(theta) * radius;
+      filledSectorVertexArray[2 * count + 1] = pos.y + sin(theta) * radius;
       count++;
    }
 
@@ -1314,95 +1314,87 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
 }
 
 
+void generatePointsInASemiCircle(S32 numPoints, F32 radius, Vector<Point> &points)
+{
+   F32 fraction = 1.0f / numPoints;
+
+   for(S32 i = 0; i <= numPoints; i++)
+   {
+      F32 theta = i * FloatPi * fraction;
+      points.push_back(Point(cos(theta), -sin(theta)) * radius);
+   }
+}
+
+
+// [-I-] ==> y1, y2 are the coords at the top and bottom vertex of the I, width the the edge-to-edge width of the brackets
+void generatePointsInARectangle(F32 width, F32 y1, F32 y2, Vector<Point> &points)
+{
+   F32 halfWidth = width * 0.5f;
+
+   points.push_back(Point(-halfWidth, y1));
+   points.push_back(Point( halfWidth, y1));
+   points.push_back(Point( halfWidth, y2));
+   points.push_back(Point(-halfWidth, y2));
+}
+
+
 // Renders turret!  --> note that anchor and normal can't be const &Points because of the point math
 void renderTurret(const Color &color, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
 {
-   static const F32 frontRadius = 15.0f;
+   const F32 FrontRadius = 15;
+   const F32 BaseWidth = 36;
+   const F32 HealthBarLength = 28;
 
-   Point cross(normal.y, -normal.x);
+   // Turret is drawn centered on this point
    Point aimCenter = anchor + normal * Turret::TURRET_OFFSET;
 
-   // Render half-circle front
-   Vector<Point> vertexArray;
-   for(S32 x = -10; x <= 10; x++)
+   // Turret is made up of the base, the front, two horizontal lines framing 
+   // the health bar, an optional healing indicator, and finally the barrel
+   static Vector<Point> basePoints, frontPoints, healthBarFrame, healIndicatorPoints, barrel;
+
+   // Lazily initialize our point vectors
+   if(frontPoints.size() == 0)
    {
-      F32 theta = x * FloatHalfPi * 0.1f;
-      Point pos = normal * cos(theta) + cross * sin(theta);
-      vertexArray.push_back(aimCenter + pos * frontRadius);
+      generatePointsInARectangle(BaseWidth,       0, Turret::TURRET_OFFSET,     basePoints);
+      generatePointsInARectangle(HealthBarLength, 3, Turret::TURRET_OFFSET - 3, healthBarFrame);
+
+      generatePointsInASemiCircle(20, FrontRadius,          frontPoints);
+      generatePointsInASemiCircle(8,  FrontRadius * 0.667f, healIndicatorPoints);
+
+      barrel.resize(2);
    }
 
-   glColor(color);
+   glPushMatrix();
+      glTranslate(aimCenter);
+      glRotate(normal.ATAN2() * RADIANS_TO_DEGREES + 90);
 
-   renderPointVector(&vertexArray, GL_LINE_STRIP);
+      glColor(color);
 
-   // Render symbol if it is a regenerating turret
-   if(healRate > 0)
-   {
-      Vector<Point> pointArray;
-      for(S32 x = -4; x <= 4; x++)
-      {
-         F32 theta = x * FloatHalfPi * 0.2f;
-         Point pos = normal * cos(theta) + cross * sin(theta);
-         pointArray.push_back(aimCenter + pos * frontRadius * 0.667f);
-      }
-      renderPointVector(&pointArray, GL_LINE_STRIP);
-   }
+      renderPointVector(&frontPoints,    GL_LINE_STRIP);
+      renderPointVector(&healthBarFrame, GL_LINES);
 
-   // Render gun
-   glLineWidth(gLineWidth3);
+      glColor(enabled ? Colors::white : Colors::gray60);
+      renderPointVector(&basePoints,     GL_LINE_LOOP);
 
+      glColor(color);
+
+      // Render symbol if it is a regenerating turret
+      if(healRate > 0)
+         renderPointVector(&healIndicatorPoints, GL_LINE_STRIP);
+
+      renderHealthBar(health, Point(0, Turret::TURRET_OFFSET / 2.0f), Point(1, 0), HealthBarLength, 5);
+
+   glPopMatrix();
+
+   // Now render the turret barrel
    Point aimDelta(cos(barrelAngle), sin(barrelAngle));
-   Point aim1(aimCenter + aimDelta * frontRadius);
-   Point aim2(aimCenter + aimDelta * frontRadius * 2);
 
-   F32 vertices[] = {
-         aim1.x, aim1.y,
-         aim2.x, aim2.y
-   };
+   barrel[0].set(aimCenter + aimDelta * FrontRadius);
+   barrel[1].set(aimCenter + aimDelta * FrontRadius * 2);
 
-   renderVertexArray(vertices, 2, GL_LINES);
-
+   glLineWidth(gLineWidth3);
+   renderPointVector(&barrel, GL_LINES);
    glLineWidth(gDefaultLineWidth);
-
-   if(enabled)
-      glColor(Colors::white);
-   else
-      glColor(0.6f);
-
-   // Render base?
-   Point corner1(anchor + cross * 18);
-   Point corner2(anchor + cross * 18 + normal * Turret::TURRET_OFFSET);
-   Point corner3(anchor - cross * 18 + normal * Turret::TURRET_OFFSET);
-   Point corner4(anchor - cross * 18);
-
-   F32 vertices2[] = {
-         corner1.x, corner1.y,
-         corner2.x, corner2.y,
-         corner3.x, corner3.y,
-         corner4.x, corner4.y
-   };
-
-   renderVertexArray(vertices2, 4, GL_LINE_LOOP);
-
-   // Render health bar
-   glColor(color);
-
-   renderHealthBar(health, anchor + normal * 7.5, cross, 28, 5);
-
-   // Render something...
-   Point lsegStart = anchor - cross * 14 + normal * 3;
-   Point lsegEnd = anchor + cross * 14 + normal * 3;
-   Point n = normal * (Turret::TURRET_OFFSET - 6);
-
-   Point seg2start(lsegStart + n);
-   Point seg2end(lsegEnd + n);
-   F32 vertices3[] = {
-         lsegStart.x, lsegStart.y,
-         lsegEnd.x, lsegEnd.y,
-         seg2start.x, seg2start.y,
-         seg2end.x, seg2end.y
-   };
-   renderVertexArray(vertices3, 4, GL_LINES);
 }
 
 

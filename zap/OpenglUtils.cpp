@@ -54,15 +54,18 @@ void glColor(const Color &c, float alpha)
     glColor4f(c.r, c.g, c.b, alpha);
 }
 
+
 void glColor(const Color *c, float alpha)
 {
     glColor4f(c->r, c->g, c->b, alpha);
 }
 
+
 void glColor(F32 c, float alpha)
 {
    glColor4f(c, c, c, alpha);
 }
+
 
 void glScale(F32 scaleFactor)
 {
@@ -73,6 +76,12 @@ void glScale(F32 scaleFactor)
 void glTranslate(const Point &pos)
 {
    glTranslatef(pos.x, pos.y, 0);
+}
+
+
+void glRotate(F32 angle)
+{
+   glRotatef(angle, 0, 0, 1.0f);
 }
 
 

@@ -49,6 +49,8 @@ extern void setFont(FontId fontId);
 
 extern void glScale(F32 scaleFactor);
 extern void glTranslate(const Point &pos);
+extern void glRotate(F32 angle);
+
 extern void setDefaultBlendFunction();
 
 template<class T, class U, class V>
