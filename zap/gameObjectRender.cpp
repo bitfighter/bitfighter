@@ -1957,8 +1957,8 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 
    } else if (bultype == 3) {  // Rosette of circles  MAKES SCREEN GO BEZERK!!
 
-      const int innerR = 6;
-      const int outerR = 3;
+      const F32 innerR = 6;
+      const F32 outerR = 3;
       const int dist = 10;
 
 #define dr(x) degreesToRadians(x)
@@ -2031,7 +2031,7 @@ void renderMine(const Point &pos, bool armed, bool visible)
    if(visible)    // Friendly mine
    {
       glColor(Colors::gray50);
-      drawCircle(pos, Mine::SensorRadius);
+      drawCircle(pos, (F32)Mine::SensorRadius);
       mod = 0.8f;
       vis = 1.0f;
    }
@@ -2478,7 +2478,7 @@ void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width)
    drawPolygon(pos, 10, (F32)width / 2, 0);
 
    glColor(coreColor);
-   drawCircle(pos, width / 5.0f + width * .01);     // + .01 to match full item rendering
+   drawCircle(pos, width / 5.0f + width * .01f);    // + .01 to match full item rendering
 }
 
 
@@ -2807,22 +2807,13 @@ void drawFilledSquare(const Point &pos, F32 radius, const Color *color)
 }
 
 
-void drawFilledSquare(const Point &pos, S32 radius, const Color *color)
-{
-   if(color)
-      glColor(color);
-
-   drawSquare(pos, F32(radius), true);
-}
-
-
 // Red vertices in walls, and magenta snapping vertices
 void renderSmallSolidVertex(F32 currentScale, const Point &pos, bool snapping)
 {
    F32 size = MIN(MAX(currentScale, 1), 2);              // currentScale, but limited to range 1-2
    glColor(snapping ? Colors::magenta : Colors::red);
 
-   drawFilledSquare(pos, (F32)size / currentScale);
+   drawFilledSquare(pos, size / currentScale);
 }
 
 

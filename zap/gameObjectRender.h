@@ -75,7 +75,6 @@ extern void drawSquare(const Point &pos, F32 radius, bool filled = false);
 extern void drawSquare(const Point &pos, S32 radius, bool filled = false);
 extern void drawHollowSquare(const Point &pos, F32 radius, const Color *color = NULL);
 extern void drawFilledSquare(const Point &pos, F32 radius, const Color *color = NULL);
-extern void drawFilledSquare(const Point &pos, S32 radius, const Color *color = NULL);
 
 extern void renderSmallSolidVertex(F32 currentScale, const Point &pos, bool snapping);
 
