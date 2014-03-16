@@ -39,7 +39,7 @@ namespace Zap
 {
 
 static const S32 NUM_CIRCLE_SIDES = 32;
-static const F32 CIRCLE_SIDE_THETA = Float2Pi / F32(NUM_CIRCLE_SIDES);
+static const F32 CIRCLE_SIDE_THETA = Float2Pi / NUM_CIRCLE_SIDES;
 
 extern F32 gLineWidth1;
 extern F32 gLineWidth3;
