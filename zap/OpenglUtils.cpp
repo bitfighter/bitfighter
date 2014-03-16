@@ -142,7 +142,7 @@ void renderPointVector(const Vector<Point> *points, U32 geomType)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
-   glVertexPointer(2, GL_FLOAT, sizeof(Point), points->address());
+   glVertexPointer(2, GL_FLOAT, 0, points->address());
    glDrawArrays(geomType, 0, points->size());
 
    glDisableClientState(GL_VERTEX_ARRAY);
@@ -152,11 +152,8 @@ void renderPointVector(const Vector<Point> *points, U32 geomType)
 void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
 {
    glPushMatrix();
-   glTranslate(offset);
-   glEnableClientState(GL_VERTEX_ARRAY);
-      glVertexPointer(2, GL_FLOAT, 0, points->address());
-      glDrawArrays(geomType, 0, points->size());
-   glDisableClientState(GL_VERTEX_ARRAY);
+      glTranslate(offset);
+      renderPointVector(points, geomType);
    glPopMatrix();
 }
 
