@@ -1164,11 +1164,12 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
             if(servers.size() > currentIndex)      // Index is valid
             {
                leaveGlobalChat();
+               bool neverConnectDirect = getGame()->getSettings()->getIniSettings()->neverConnectDirect;
 
                // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)
                // Second param, false when we can ping that server, allows faster connect. If we can ping, we can connect without master help.
                getGame()->joinRemoteGame(servers[currentIndex].serverAddress, !servers[currentIndex].isLocalServer && 
-                    (getGame()->getSettings()->getIniSettings()->neverConnectDirect || !servers[currentIndex].everGotQueryResponse));
+                                        (neverConnectDirect || !servers[currentIndex].everGotQueryResponse));
 
                // Save this because we'll need the server name when connecting.  Kind of a hack.
                mLastSelectedServerName = servers[currentIndex].serverName;    
