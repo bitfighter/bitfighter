@@ -674,9 +674,8 @@ void ClientGame::requestLoadoutPreset(S32 index)
 
    LoadoutTracker loadout = getSettings()->getLoadoutPreset(index);
 
-   if(getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
-      displayShipDesignChangedMessage(loadout, "Loaded preset " + itos(index + 1) + ": ",
-                                               "Preset same as the current design");
+   displayShipDesignChangedMessage(loadout, "Loaded preset " + itos(index + 1) + ": ",
+                                             "Preset same as the current design");
 
    // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
    // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
@@ -700,20 +699,17 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
    if(ship->isInZone(LoadoutZoneTypeNumber))
       return;
 
-   if(getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
+   if(ship->isLoadoutSameAsCurrent(loadout))
+      displayErrorMessage(msgToShowIfLoadoutsAreTheSame);
+   else
    {
-      if(ship->isLoadoutSameAsCurrent(loadout))
-         displayErrorMessage(msgToShowIfLoadoutsAreTheSame);
-      else
-      {
-         GameType *gt = getGameType();
+      GameType *gt = getGameType();
 
-         // Show new loadout
-         displaySuccessMessage("%s %s", baseSuccesString.c_str(), loadout.toString(false).c_str());
+      // Show new loadout
+      displaySuccessMessage("%s %s", baseSuccesString.c_str(), loadout.toString(false).c_str());
 
-         displaySuccessMessage(gt->levelHasLoadoutZone() ? "Enter Loadout Zone to activate changes" : 
-                                                           "Changes will be activated when you respawn");
-      }
+      displaySuccessMessage(gt->levelHasLoadoutZone() ? "Enter Loadout Zone to activate changes" : 
+                                                         "Changes will be activated when you respawn");
    }
 }
 

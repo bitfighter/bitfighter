@@ -58,15 +58,12 @@ const char *MASTER_SERVER_LIST_ADDRESS = "bitfighter.org:25955,bitfighter.net:25
 // Constructor: Set default values here
 IniSettings::IniSettings()
 {
-   // Can probably get rid of VerboseHelpMessages
-
    //                       Data type        Setting name                Default value           INI Key                      INI Section  INI Comment                                               
    mSettings.add(new Setting<string>        ("LastName",                 "ChumpChange",         "LastName",                    "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
    mSettings.add(new Setting<DisplayMode>   ("WindowMode",               DISPLAY_MODE_WINDOWED, "WindowMode",                  "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
    mSettings.add(new Setting<YesNo>         ("UseFakeFullscreen",        Yes,                   "UseFakeFullscreen",           "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
    mSettings.add(new Setting<RelAbs>        ("ControlMode",              Absolute,              "ControlMode",                 "Settings", "Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)"));
    mSettings.add(new Setting<YesNo>         ("VoiceEcho",                No,                    "VoiceEcho",                   "Settings", "Play echo when recording a voice message? Yes/No"));
-   mSettings.add(new Setting<YesNo>         ("VerboseHelpMessages",      Yes,                   "VerboseHelpMessages",         "Settings", "Display all messages related to loadout management?  Yes/No"));
    mSettings.add(new Setting<YesNo>         ("ShowInGameHelp",           Yes,                   "ShowInGameHelp",              "Settings", "Show tutorial style messages in-game?  Yes/No"));
    mSettings.add(new Setting<string>        ("JoystickType",             NoJoystick,            "JoystickType",                "Settings", "Type of joystick to use if auto-detect doesn't recognize your controller"));
    mSettings.add(new Setting<string>        ("HelpItemsAlreadySeenList", "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));

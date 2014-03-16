@@ -965,6 +965,15 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       removeFile(offendingFile);
    }
 
+   // 019b: Nothing to update
+
+   // 020:
+   if(previousVersion < VERSION_020)
+   {
+      // VerboseHelpMessages was removed
+      GameSettings::iniFile.deleteKey("Settings", "VerboseHelpMessages");
+   }
+
 
    // Now copy over resources to user's preference directory.  This will overwrite the previous
    // resources with same names.  Dont do this if it is a standalone bundle
