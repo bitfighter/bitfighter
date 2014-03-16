@@ -74,6 +74,9 @@ void drawVertLine(F32 x, F32 y1, F32 y2)
 // Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
 void generatePointsInACurve(F32 startAngle, F32 endAngle, S32 numPoints, F32 radius, Vector<Point> &points)
 {
+   TNLAssert(endAngle > startAngle,                     "End angle must be greater than start angle!");
+   TNLAssert(endAngle - startAngle <= FloatTau + .0001, "Difference in angles should be <= FloatTau");
+
    points.resize(numPoints);
 
    F32 theta = (endAngle - startAngle) / (numPoints - 1);
