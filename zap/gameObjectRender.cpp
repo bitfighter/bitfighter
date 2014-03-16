@@ -39,8 +39,7 @@ namespace Zap
 {
 
 static const S32 NUM_CIRCLE_SIDES = 32;
-static const F32 INV_NUM_CIRCLE_SIDES = 1 / F32(NUM_CIRCLE_SIDES);
-static const F32 CIRCLE_SIDE_THETA = Float2Pi * INV_NUM_CIRCLE_SIDES;
+static const F32 CIRCLE_SIDE_THETA = Float2Pi / F32(NUM_CIRCLE_SIDES);
 
 extern F32 gLineWidth1;
 extern F32 gLineWidth3;
@@ -72,27 +71,76 @@ void drawVertLine(F32 x, F32 y1, F32 y2)
 }
 
 
+// Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
+void generatePointsInACurve(F32 startAngle, F32 endAngle, S32 numPoints, F32 radius, Vector<Point> &points)
+{
+   points.resize(numPoints);
+
+   F32 theta = (endAngle - startAngle) / (numPoints - 1);
+
+   // Precalculate the sin and cos
+   F32 cosTheta = cosf(theta);
+   F32 sinTheta = sinf(theta);
+
+   F32 curX = radius * cosf(startAngle);  
+   F32 curY = radius * sinf(startAngle);
+   F32 prevX;
+
+   // This is a repeated rotation
+   for(S32 i = 0; i < numPoints; i++)
+   {
+      points[i].set(curX, curY);
+
+      // Apply the rotation matrix
+      prevX = curX;
+      curX = (cosTheta * curX)  - (sinTheta * curY);
+      curY = (sinTheta * prevX) + (cosTheta * curY);
+   }
+}
+
+
+void generatePointsInACircle(S32 numPoints, F32 radius, Vector<Point> &points)
+{
+   generatePointsInACurve(0, FloatTau, numPoints, radius, points);
+}
+
+
+void generatePointsInASemiCircle(S32 numPoints, F32 radius, Vector<Point> &points)
+{
+   generatePointsInACurve(0, FloatPi, numPoints, radius, points);
+}
+
+
+// [-I-] ==> y1, y2 are the coords at the top and bottom vertex of the I, width the the edge-to-edge width of the brackets
+void generatePointsInARectangle(F32 width, F32 y1, F32 y2, Vector<Point> &points)
+{
+   F32 halfWidth = width * 0.5f;
+
+   points.resize(4);
+
+   points[0].set(-halfWidth, y1);
+   points[1].set( halfWidth, y1);
+   points[2].set( halfWidth, y2);
+   points[3].set(-halfWidth, y2);
+}
+
+
 // Draw arc centered on pos, with given radius, from startAngle to endAngle.  0 is East, increasing CW
 void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
-   // With theta delta of 0.2, that means maximum 32 points + 1 at the end
-   static const S32 MAX_POINTS = NUM_CIRCLE_SIDES + 1;
-   static F32 arcVertexArray[MAX_POINTS * 2];      // 2 components per point
+   static Vector<Point> points;     // Reusable container
 
-   U32 count = 0;
-   for(F32 theta = startAngle; theta < endAngle; theta += CIRCLE_SIDE_THETA)
-   {
-      arcVertexArray[2*count]       = pos.x + cos(theta) * radius;
-      arcVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
-      count++;
-   }
+   // The +1 just makes the curves I've looked at appear nicer
+   S32 numPoints = (S32)ceil(NUM_CIRCLE_SIDES * (endAngle - startAngle) / FloatTau) + 1;
 
-   // Make sure arc makes it all the way to endAngle...  rounding errors look terrible!
-   arcVertexArray[2*count]       = pos.x + cos(endAngle) * radius;
-   arcVertexArray[(2*count) + 1] = pos.y + sin(endAngle) * radius;
-   count++;
+   TNLAssert(numPoints >= 0, "Negative points???");
 
-   renderVertexArray(arcVertexArray, count, GL_LINE_STRIP);
+   generatePointsInACurve(startAngle, endAngle, numPoints, radius, points);
+
+   glPushMatrix();
+      glTranslate(pos);
+      renderPointVector(&points, GL_LINE_STRIP);
+   glPopMatrix();
 }
 
 
@@ -1311,60 +1359,6 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
    F32 range = Turret::TurretPerceptionDistance * currentScale;
 
    drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_TRIANGLE_FAN);
-}
-
-
-// Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
-void generatePointsInACurve(F32 curveAspect, S32 numPoints, F32 radius, Vector<Point> &points)
-{
-   points.resize(numPoints);
-
-   F32 theta = curveAspect / (numPoints - 1);
-
-   // Precalculate the sine and cosine
-   F32 cosTheta = cosf(theta);
-   F32 sinTheta = sinf(theta);
-
-   F32 curX = radius;  // We start at angle = 0
-   F32 curY = 0;
-   F32 prevX;
-
-   // This is a repeated rotation
-   for(S32 i = 0; i < numPoints; i++)
-   {
-      points[i].set(curX, curY);
-
-      // Apply the rotation matrix
-      prevX = curX;
-      curX = (cosTheta * curX)  - (sinTheta * curY);
-      curY = (sinTheta * prevX) + (cosTheta * curY);
-   }
-}
-
-
-void generatePointsInACircle(S32 numPoints, F32 radius, Vector<Point> &points)
-{
-   generatePointsInACurve(FloatTau, numPoints, radius, points);
-}
-
-
-void generatePointsInASemiCircle(S32 numPoints, F32 radius, Vector<Point> &points)
-{
-   generatePointsInACurve(FloatPi, numPoints, radius, points);
-}
-
-
-// [-I-] ==> y1, y2 are the coords at the top and bottom vertex of the I, width the the edge-to-edge width of the brackets
-void generatePointsInARectangle(F32 width, F32 y1, F32 y2, Vector<Point> &points)
-{
-   F32 halfWidth = width * 0.5f;
-
-   points.resize(4);
-
-   points[0].set(-halfWidth, y1);
-   points[1].set( halfWidth, y1);
-   points[2].set( halfWidth, y2);
-   points[3].set(-halfWidth, y2);
 }
 
 
