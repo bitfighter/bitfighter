@@ -2714,15 +2714,15 @@ void GameUserInterface::renderGameNormal()
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
-   glTranslatef(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2.f, 
-                DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.f, 0);       
+   glTranslate(DisplayManager::getScreenInfo()->getGameCanvasWidth()  * 0.5f, 
+               DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f);       
 
    // These scaling factors are different when changing the visible area by equiping the sensor module
    F32 scaleFactX = (DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2) / visExt.x;
    F32 scaleFactY = (DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2) / visExt.y;
 
-   glScalef(scaleFactX, scaleFactY, 1);
-   glTranslatef(-mShipPos.x, -mShipPos.y, 0);
+   glScale(scaleFactX, scaleFactY);
+   glTranslate(-mShipPos.x, -mShipPos.y);
 
    renderStars(mStars, mStarColors, NumStars, 1.0, mShipPos, visExt * 2);
 
@@ -2889,16 +2889,17 @@ void GameUserInterface::renderGameCommander()
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
-   glTranslatef(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f, DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f, 0);    
+   glTranslate(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f, 
+               DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f);    
 
    F32 zoomFrac = getCommanderZoomFraction();
 
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
-   glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
+   glScale(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y);
 
    // We should probably check that mHasShipPos == true, but it will hardly ever matter
    Point offset = (mDispWorldExtents.getCenter() - mShipPos) * zoomFrac + mShipPos;
-   glTranslatef(-offset.x, -offset.y, 0);
+   glTranslate(-offset.x, -offset.y);
 
    // zoomFrac == 1.0 when fully zoomed out to cmdr's map
    renderStars(mStars, mStarColors, NumStars, 1 - zoomFrac, offset, modVisSize);
@@ -3051,9 +3052,9 @@ void GameUserInterface::renderGameCommander()
 //
 //   glPushMatrix();   // Set scaling and positioning of the overlay
 //
-//   glTranslatef(mapX + mapWidth / 2.f, mapY + mapHeight / 2.f, 0);          // Move map off to the corner
-//   glScalef(mapScale, mapScale, 1);                                     // Scale map
-//   glTranslatef(-position.x, -position.y, 0);                           // Put ship at the center of our overlay map area
+//   glTranslate(mapX + mapWidth / 2.f, mapY + mapHeight / 2.f);          // Move map off to the corner
+//   glScale(mapScale);                                     // Scale map
+//   glTranslate(-position.x, -position.y);                           // Put ship at the center of our overlay map area
 //
 //   // Render the objects.  Start by putting all command-map-visible objects into renderObjects
 //   Rect mapBounds(position, position);

@@ -1695,7 +1695,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
       glEnable(GL_DEPTH_WRITEMASK);
       glDepthFunc(GL_LESS);
       glPushMatrix();
-      glTranslatef(0, 0, -0.95f);
+      glTranslate(0, 0, -0.95f);
 
       // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
       glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
@@ -1708,7 +1708,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
          BfObject *editorObj = dynamic_cast<BfObject *>(fillVector[i]);
 
          if(i != 0 && editorObj->getTeam() != prevTeam)
-            glTranslatef(0, 0, 0.05f);
+            glTranslate(0, 0, 0.05f);
          prevTeam = editorObj->getTeam();
 
          Point pos = editorObj->getPos();
@@ -1977,9 +1977,9 @@ void EditorUserInterface::renderReferenceShip()
    glPushMatrix();
       glTranslate(mMousePos);
       glScale(mCurrentScale);
-      glRotatef(90, 0, 0, 1);
+      glRotate(90);
       renderShip(ShipShape::Normal, &Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
-      glRotatef(-90, 0, 0, 1);
+      glRotate(-90);
 
       // Draw collision circle
       const F32 spaceAngle = 0.0278f * FloatTau;

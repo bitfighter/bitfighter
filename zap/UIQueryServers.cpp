@@ -918,7 +918,7 @@ void QueryServersUserInterface::render()
          if(s.passwordRequired || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
-               glTranslatef(F32(columns[1].xStart + 25), F32(y + 2), 0);
+               glTranslate(F32(columns[1].xStart + 25), y + 2);
                if(s.pingTimedOut || !s.everGotQueryResponse)
                   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
                else

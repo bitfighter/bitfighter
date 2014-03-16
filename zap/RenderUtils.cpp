@@ -32,8 +32,8 @@ F32 gLineWidth4 = 4.0f;
 void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
    glPushMatrix();
-      glTranslatef(x, y, 0);
-      glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
+      glTranslate(x, y);
+      glRotate(angle * RADIANS_TO_DEGREES);
 
       FontManager::renderString(size, string);
 

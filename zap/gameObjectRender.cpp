@@ -1447,7 +1447,7 @@ static void drawFlag(const Color *flagColor, const Color *mastColor, F32 alpha)
 void doRenderFlag(F32 x, F32 y, F32 scale, const Color *flagColor, const Color *mastColor, F32 alpha)
 {
    glPushMatrix();
-      glTranslatef(x, y, 0);
+      glTranslate(x, y);
       glScale(scale);
       drawFlag(flagColor, mastColor, alpha);
    glPopMatrix();
@@ -1519,7 +1519,7 @@ void renderFlagSpawn(const Point &pos, F32 currentScale, const Color *color)
 
    glPushMatrix();
       glTranslate(pos);
-      glScalef(0.4f / currentScale, 0.4f / currentScale, 1);
+      glScale(0.4f / currentScale);
       renderFlag(color);
 
       drawCircle(p, 26, &Colors::white);
@@ -2354,9 +2354,9 @@ void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
    static const Point p(0,0);
 
    glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(scale, scale, 1);
-      renderAsteroid(p, 2, .1f);
+      glTranslate(pos.x, pos.y);
+      glScale(scale);
+      renderAsteroid(p, 2, 0.1f);
 
       drawCircle(13, &Colors::white);
    glPopMatrix();
@@ -2501,7 +2501,7 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
       glTranslate(pos);
          glScale(scaleFactor);
          glRotate(pos.angleTo(dir) * RADIANS_TO_DEGREES);
-         glTranslatef(-119, -45, 0);      // Determined experimentally
+         glTranslate(-119, -45);      // Determined experimentally
 
          renderBitfighterLogo(0, 1);
       glPopMatrix();
@@ -2757,7 +2757,7 @@ void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
    // 3609 is the diff btwn the min and max x coords below, 594 is same for y
 
    glPushMatrix();
-      glTranslatef((DisplayManager::getScreenInfo()->getGameCanvasWidth() - 3609 * fact) / 2, yPos - 594 * fact / 2, 0);
+      glTranslate((DisplayManager::getScreenInfo()->getGameCanvasWidth() - 3609 * fact) / 2, yPos - 594 * fact / 2);
       glScale(fact);                   // Scale it down...
       renderBitfighterLogo(mask);
    glPopMatrix();
@@ -3404,7 +3404,7 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
          glPushMatrix();
          glScale(starChunkSize);   // Creates points with coords btwn 0 and starChunkSize
 
-         glTranslatef(xPage + (cameraPos.x / starDist), yPage + (cameraPos.y / starDist), 0);
+         glTranslate(xPage + (cameraPos.x / starDist), yPage + (cameraPos.y / starDist));
 
          glDrawArrays(GL_POINTS, 0, numStars);
          
@@ -3604,8 +3604,8 @@ void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
 void renderSpawn(const Point &pos, F32 scale, const Color *color)
 {   
    glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(scale, scale, 1);    // Make item draw at constant size, regardless of zoom
+      glTranslate(pos.x, pos.y);
+      glScale(scale);    // Make item draw at constant size, regardless of zoom
       renderSquareItem(Point(0,0), color, 1, &Colors::white, 'S');
    glPopMatrix();
 }

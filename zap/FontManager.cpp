@@ -321,7 +321,7 @@ void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
       }
       renderVertexArray(characterVertexArray, strip->Number, GL_LINE_STRIP);
    }
-   glTranslatef( schar->Right, 0.0, 0.0 );
+   glTranslate(schar->Right, 0);
 }
 
 
@@ -412,7 +412,7 @@ void FontManager::renderString(F32 size, const char *string)
       glLineWidth(linewidth);
 
       F32 scaleFactor = size / 120.0f;  // Where does this magic number come from?
-      glScalef(scaleFactor, -scaleFactor, 1);
+      glScale(scaleFactor, -scaleFactor);
       for(S32 i = 0; string[i]; i++)
          FontManager::drawStrokeCharacter(font->getStrokeFont(), string[i]);
 
@@ -429,10 +429,11 @@ void FontManager::renderString(F32 size, const char *string)
       // correct for the pixelRatio scaling, and then generate a texture with twice
       // the resolution we need. This produces crisp, anti-aliased text even after the
       // texture is resampled.
-      F32 k = DisplayManager::getScreenInfo()->getPixelRatio() * 2.0f;
+      F32 k = DisplayManager::getScreenInfo()->getPixelRatio() * 2;
+      F32 rk = 1/k;
 
       // Flip upside down because y = -y
-      glScalef(1 / k, -1 / k, 1);
+      glScale(rk, -rk);
       // `size * k` becomes `size` due to the glScale above
       drawTTFString(font, string, size * k * legacyNormalizationFactor);
    }

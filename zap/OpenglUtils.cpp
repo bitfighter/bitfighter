@@ -73,10 +73,24 @@ void glScale(F32 scaleFactor)
 }
 
 
+void glScale(F32 xScaleFactor, F32 yScaleFactor)
+{
+    glScalef(xScaleFactor, yScaleFactor, 1);
+}
+
+
 void glTranslate(const Point &pos)
 {
-   glTranslatef(pos.x, pos.y, 0);
+   glTranslate(pos.x, pos.y);
 }
+
+
+void glTranslate(F32 x, F32 y)
+{
+   glTranslatef(x, y, 0);
+}
+
+
 
 
 void glRotate(F32 angle)
