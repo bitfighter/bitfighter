@@ -337,12 +337,23 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
 
 
 // Draw an n-sided polygon
-void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
+void drawPolygon(S32 sides, F32 radius, F32 angle)
 {
    Vector<Point> points;
-   generatePointsInACurve(angle, angle + FloatTau, sides + 1, radius, points);      // +1 so we can "close the loop"
+   generatePointsInACurve(angle, angle + FloatTau, sides + 1, radius, points);   // +1 so we can "close the loop"
 
    renderPointVector(&points, GL_LINE_STRIP);
+}
+
+
+// Draw an n-sided polygon
+void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
+{
+   drawPolygon(sides, radius, angle);
+
+   glPushMatrix();
+      glTranslate(pos);
+   glPopMatrix();
 }
 
 
@@ -443,7 +454,7 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
       glLineWidth(gLineWidth3);
       glColor(Colors::yellow, alpha);
 
-      drawPolygon(Point(0,0), 5, 30, FloatHalfPi);
+      drawPolygon(5, 30, FloatHalfPi);
 
       glLineWidth(gDefaultLineWidth);
    }
@@ -1689,7 +1700,7 @@ void renderGoalZoneIcon(const Point &center, S32 radius)
    glPushMatrix();
       glTranslate(center);
       glScale(radius * 0.041667f);  // 1 / 24 since we drew it to in-game radius of 24 (a ship's radius)
-      drawPolygon(Point(0,0), 4, (F32)radius, 0.0f);
+      drawPolygon(4, (F32)radius, 0.0f);
       renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GL_LINE_STRIP);
    glPopMatrix();
 }
