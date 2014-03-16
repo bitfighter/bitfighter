@@ -2467,7 +2467,7 @@ void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width)
    drawPolygon(pos, 10, (F32)width / 2, 0);
 
    glColor(coreColor);
-   drawCircle(pos, width / 5.0f);
+   drawCircle(pos, width / 5.0f + width * .01);     // + .01 to match full item rendering
 }
 
 
