@@ -849,7 +849,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
    glPushMatrix();
    glTranslate(renderPos);
 
-   // Draw the ship name, if there is one, before the glRotatef below, but only on layer 1...
+   // Draw the ship name, if there is one, before the glRotate below, but only on layer 1...
    // Don't label the local ship.
    if(!isLocalShip && layerIndex == 1 && shipName != "")  
    {
@@ -858,7 +858,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
       // Show if the player is engineering a teleport
       if(engineeringTeleport)
          renderTeleporterOutline(Point(cos(angle), sin(angle)) * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS),
-               (F32)Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
+                                (F32)Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
    }
 
    if(showCoordinates && layerIndex == 1)
@@ -870,7 +870,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
 
    // An angle of 0 means the ship is heading down the +X axis since we draw the ship 
    // pointing up the Y axis, we should rotate by the ship's angle, - 90 degrees
-   glRotatef(radiansToDegrees(angle) - 90 + rotAmount, 0, 0, 1.0);
+   glRotate(radiansToDegrees(angle) - 90 + rotAmount);
    glScale(warpInScale);
 
    // NOTE: Get rid of this if we stop sending location of cloaked ship to clients.  Also, we can stop
@@ -964,7 +964,7 @@ void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
 
 void drawFourArrows(const Point &pos)
 {
-   const F32 pointList[] = {
+   static const F32 pointList[] = {
         0,  15,   0, -15,
         0,  15,   5,  10,
         0,  15,  -5,  10,
@@ -1008,29 +1008,29 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
    // Different teleport color styles
    static float colors[][NumColors][3] = {
       {  // 0 -> Our standard blue-styled teleporter                                               
-         { 0, 0.25, 0.8f },
-         { 0, 0.5, 1 },
-         { 0, 0, 1 },
-         { 0, 1, 1 },
-         { 0, 0.5, 0.5 },
-         { 0, 0, 1 },
+         { 0.0f, 0.25f, 0.8f },
+         { 0.0f, 0.5f,  1.0f },
+         { 0.0f, 0.0f,  1.0f },
+         { 0.0f, 1.0f,  1.0f },
+         { 0.0f, 0.5f,  0.5f },
+         { 0.0f, 0.0f,  1.0f },
       },
       {  // 1 -> Unused red/blue/purpley style
-         { 1, 0, 0.5 },
-         { 1, 0, 1 },
-         { 0, 0, 1 },
-         { 0.5, 0, 1 },
-         { 0, 0, 0.5 },
-         { 1, 0, 0 },
+         { 1.0f, 0.0f, 0.5f },
+         { 1.0f, 0.0f, 1.0f },
+         { 0.0f, 0.0f, 1.0f },
+         { 0.5f, 0.0f, 1.0f },
+         { 0.0f, 0.0f, 0.5f },
+         { 1.0f, 0.0f, 0.0f },
       },
       {  // 2 -> Our green engineered teleporter
-         { 0, 0.8f, 0.25f },
-         { 0.5, 1.0, 0 },
-         { 0, 1, 0 },
-         { 1, 1, 0 },
-         { 0.5, 0.5, 0 },
-         { 0, 1, 0 },
-      },
+         { 0.0f, 0.8f, 0.25f },
+         { 0.5f, 1.0f, 0.0f },
+         { 0.0f, 1.0f, 0.0f },
+         { 1.0f, 1.0f, 0.0f },
+         { 0.5f, 0.5f, 0.0f },
+         { 0.0f, 1.0f, 0.0f },
+      },                  
       {  // 3 -> "Dead" tracker gray
          { 0.20f, 0.20f, 0.20f },
          { 0.50f, 0.50f, 0.50f },
@@ -1382,7 +1382,7 @@ void renderTurret(const Color &color, Point anchor, Point normal, bool enabled, 
       if(healRate > 0)
          renderPointVector(&healIndicatorPoints, GL_LINE_STRIP);
 
-      renderHealthBar(health, Point(0, Turret::TURRET_OFFSET / 2.0f), Point(1, 0), HealthBarLength, 5);
+      renderHealthBar(health, Point(0, Turret::TURRET_OFFSET / 2), Point(1, 0), HealthBarLength, 5);
 
    glPopMatrix();
 
@@ -1487,7 +1487,7 @@ void renderFlagSpawn(const Point &pos, F32 currentScale, const Color *color)
    static const Point p(-4, 0);
 
    glPushMatrix();
-      glTranslatef(pos.x + 1, pos.y, 0);
+      glTranslate(pos);
       glScalef(0.4f / currentScale, 0.4f / currentScale, 1);
       renderFlag(color);
 
@@ -1516,7 +1516,7 @@ void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *
    glPushMatrix();
       glScale(scaleFact);
       glTranslate(centroid);
-      glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
+      glRotate(angle * RADIANS_TO_DEGREES);
       renderCenteredString(Point(0,0), size, text);
    glPopMatrix();
 }
@@ -1669,8 +1669,8 @@ void renderGoalZoneIcon(const Point &center, S32 radius, F32 angleRadians)
    static const F32 flagPoints[] = { -6, 10,  -6,-10,  12, -3.333f,  -6, 3.333f, };
 
    glPushMatrix();
-      glTranslatef(center.x, center.y, 0);
-      glRotatef(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
+      glTranslate(center);
+      glRotate(angleRadians * RADIANS_TO_DEGREES);
       glScale(radius * 0.041667f);  // 1 / 24 since we drew it to in-game radius of 24 (a ship's radius)
       renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GL_LINE_STRIP);
    glPopMatrix();
@@ -1806,7 +1806,7 @@ void renderNexusIcon(const Point &center, S32 radius, F32 angleRadians)
    glPushMatrix();
       glTranslate(center);
       glScale(radius * 0.05f);  // 1/20.  Default radius is 20 in-game
-      glRotatef(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
+      glRotate(angleRadians * RADIANS_TO_DEGREES);
 
       // Draw our center spokes
       renderVertexArray(spokes, ARRAYSIZE(spokes) / 2, GL_LINES);
@@ -1894,14 +1894,14 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
          glScale(pi->scaleFactor);
 
          glPushMatrix();
-            glRotatef((time % 720) * 0.5f, 0, 0, 1);
+            glRotate((time % 720) * 0.5f);
 
             static S16 projectilePoints1[] = { -2,2,  0,6,  2,2,  6,0,  2,-2,  0,-6,  -2,-2,  -6,0 };
             renderVertexArray(projectilePoints1, ARRAYSIZE(projectilePoints1) / 2, GL_LINE_LOOP);
 
          glPopMatrix();
 
-         glRotatef(180 - F32(time % 360), 0, 0, 1);
+         glRotate(180 - F32(time % 360));
          glColor(pi->projColors[1]);
 
          static S16 projectilePoints2[] = { -2,2,  0,8,  2,2,  8,0,  2,-2,  0,-8, -2,-2,  -8,0 };
@@ -1918,7 +1918,7 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 
       glPushMatrix();
 
-      glRotatef(F32(time % 720), 0, 0, 1);
+      glRotate(F32(time % 720));
       glColor(pi->projColors[1]);
 
       static S16 projectilePoints3[] = { -2,2,  2,2,  2,-2,  -2,-2 };
@@ -1934,7 +1934,7 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 
 #define dr(x) degreesToRadians(x)
 
-      glRotatef( fmod(F32(time) * .15f, 720.f), 0, 0, 1);
+      glRotate( fmod(F32(time) * .15f, 720.f));
       glColor(pi->projColors[1]);
 
       Point p(0,0);
@@ -1962,7 +1962,7 @@ void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaini
 {
    glPushMatrix();
       glTranslate(pos);
-      glRotatef(angleRadians * 360.f / FloatTau, 0, 0, 1.0);
+      glRotate(angleRadians * RADIANS_TO_DEGREES);
 
       // The flames first!
       F32 speedRatio = speed / WeaponInfo::getWeaponInfo(WeaponSeeker).projVelocity + (S32(timeRemaining) % 200)/ 400.0f;  
@@ -2471,7 +2471,7 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
       glPushMatrix();
       glTranslate(pos);
          glScale(scaleFactor);
-         glRotatef(pos.angleTo(dir) * RADIANS_TO_DEGREES, 0, 0, 1);
+         glRotate(pos.angleTo(dir) * RADIANS_TO_DEGREES);
          glTranslatef(-119, -45, 0);      // Determined experimentally
 
          renderBitfighterLogo(0, 1);
@@ -2512,14 +2512,14 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
       F32 angle = pos.angleTo(geom->get(0));
 
       static const F32 symbol[] = {
-            -2, 5,
-            4, 0,
+            -2,  5,
+             4,  0,
             -2, -5,
       };
 
       glPushMatrix();
          glTranslate(centerPoint);
-         glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
+         glRotate(angle * RADIANS_TO_DEGREES);
          renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, GL_LINE_STRIP);
       glPopMatrix();
    }
@@ -2969,7 +2969,7 @@ void drawDivetedTriangle(F32 height, F32 len)
    
    glPushMatrix();
       glTranslate(200, 200, 0);
-      glRotatef(GLfloat(Platform::getRealMilliseconds() / 10 % 360), 0, 0, 1);
+      glRotate(GLfloat(Platform::getRealMilliseconds() / 10 % 360));
       glScale(6);
 
       renderPolygonOutline(&pts, &Colors::red);
@@ -3005,8 +3005,8 @@ void drawGear(const Point &center, S32 teeth, F32 radius1, F32 radius2, F32 ang1
    }
 
    glPushMatrix();
-      glTranslate(center.x, center.y, 0);
-      glRotatef(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
+      glTranslate(center);
+      glRotate(angleRadians * RADIANS_TO_DEGREES);
 
       renderPolygonOutline(&pts);
 
