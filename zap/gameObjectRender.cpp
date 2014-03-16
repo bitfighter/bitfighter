@@ -2932,17 +2932,24 @@ void drawCircle(const Point &center, F32 radius, const Color *color, F32 alpha)
 }
 
 
+// Circle drawing now precalculates a set of points around the circle, then renders them using glScale()
+// to get the radius right.  This eliminates most point calculations during rendering, making it much
+// more efficient.
 void drawCircle(F32 radius, const Color *color, F32 alpha)
 {
-   static Vector<Point> points;     // Reuse the same container; it will always be the same length
+   static Vector<Point> points;
 
-   // Get the circle points
-   generatePointsInACircle(NUM_CIRCLE_SIDES, radius, points);
+   // Lazily initialize point array
+   if(points.size() == 0)
+      generatePointsInACircle(NUM_CIRCLE_SIDES, 1.0, points);
 
    if(color)
       glColor(color, alpha);
 
-   renderPointVector(&points, GL_LINE_LOOP);
+   glPushMatrix();
+      glScale(radius);
+      renderPointVector(&points, GL_LINE_STRIP);
+   glPopMatrix();
 }
 
 
