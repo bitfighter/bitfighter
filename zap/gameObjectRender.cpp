@@ -416,7 +416,7 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
       F32 shieldRadius = radius + 3;      // radius is the ship radius
 
       glColor(Colors::yellow, alpha);
-      drawCircle(0, 0, shieldRadius);
+      drawCircle(shieldRadius);
    }
 
 #ifdef SHOW_SERVER_SITUATION
@@ -428,7 +428,7 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
       F32 shieldRadius = radius;
 
       glColor(Colors::green, alpha);
-      drawCircle(0, 0, shieldRadius);
+      drawCircle(shieldRadius);
    }
 #endif
 
@@ -438,7 +438,7 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
    {
       glColor(Colors::white, alpha);
       F32 radius = (sensorTime & 0x1FF) * 0.002f;    // Radius changes over time
-      drawCircle(0, 0, radius * Ship::CollisionRadius + 4);
+      drawCircle(radius * Ship::CollisionRadius + 4);
    }
 
    // Repair
@@ -446,7 +446,7 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
    {
       glLineWidth(gLineWidth3);
       glColor(Colors::red, alpha);
-      drawCircle(0, 0, 18);
+      drawCircle(18);
       glLineWidth(gDefaultLineWidth);
    }
 }
@@ -1314,15 +1314,43 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
 }
 
 
+// Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
+void generatePointsInACurve(F32 curveAspect, S32 numPoints, F32 radius, Vector<Point> &points)
+{
+   points.resize(numPoints);
+
+   F32 theta = curveAspect / (numPoints - 1);
+
+   // Precalculate the sine and cosine
+   F32 cosTheta = cosf(theta);
+   F32 sinTheta = sinf(theta);
+
+   F32 curX = radius;  // We start at angle = 0
+   F32 curY = 0;
+   F32 prevX;
+
+   // This is a repeated rotation
+   for(S32 i = 0; i < numPoints; i++)
+   {
+      points[i].set(curX, curY);
+
+      // Apply the rotation matrix
+      prevX = curX;
+      curX = (cosTheta * curX)  - (sinTheta * curY);
+      curY = (sinTheta * prevX) + (cosTheta * curY);
+   }
+}
+
+
+void generatePointsInACircle(S32 numPoints, F32 radius, Vector<Point> &points)
+{
+   generatePointsInACurve(FloatTau, numPoints, radius, points);
+}
+
+
 void generatePointsInASemiCircle(S32 numPoints, F32 radius, Vector<Point> &points)
 {
-   F32 fraction = 1.0f / numPoints;
-
-   for(S32 i = 0; i <= numPoints; i++)
-   {
-      F32 theta = i * FloatPi * fraction;
-      points.push_back(Point(cos(theta), -sin(theta)) * radius);
-   }
+   generatePointsInACurve(FloatPi, numPoints, radius, points);
 }
 
 
@@ -1331,10 +1359,12 @@ void generatePointsInARectangle(F32 width, F32 y1, F32 y2, Vector<Point> &points
 {
    F32 halfWidth = width * 0.5f;
 
-   points.push_back(Point(-halfWidth, y1));
-   points.push_back(Point( halfWidth, y1));
-   points.push_back(Point( halfWidth, y2));
-   points.push_back(Point(-halfWidth, y2));
+   points.resize(4);
+
+   points[0].set(-halfWidth, y1);
+   points[1].set( halfWidth, y1);
+   points[2].set( halfWidth, y2);
+   points[3].set(-halfWidth, y2);
 }
 
 
@@ -1345,7 +1375,9 @@ void renderTurret(const Color &color, Point anchor, Point normal, bool enabled, 
    const F32 BaseWidth = 36;
    const F32 HealthBarLength = 28;
 
-   // Turret is drawn centered on this point
+   // aimCenter is the point at which the turret would intersect the white base, if it extended that far.
+   // It is kind of the "center of rotation" of the turret.
+   // Turret is drawn centered on this point, therefore many offsets will be negative.
    Point aimCenter = anchor + normal * Turret::TURRET_OFFSET;
 
    // Turret is made up of the base, the front, two horizontal lines framing 
@@ -1355,34 +1387,38 @@ void renderTurret(const Color &color, Point anchor, Point normal, bool enabled, 
    // Lazily initialize our point vectors
    if(frontPoints.size() == 0)
    {
-      generatePointsInARectangle(BaseWidth,       0, Turret::TURRET_OFFSET,     basePoints);
-      generatePointsInARectangle(HealthBarLength, 3, Turret::TURRET_OFFSET - 3, healthBarFrame);
+      generatePointsInARectangle(BaseWidth,        0, -Turret::TURRET_OFFSET,     basePoints);
+      generatePointsInARectangle(HealthBarLength, -3, -Turret::TURRET_OFFSET + 3, healthBarFrame);
 
-      generatePointsInASemiCircle(20, FrontRadius,          frontPoints);
-      generatePointsInASemiCircle(8,  FrontRadius * 0.667f, healIndicatorPoints);
+      generatePointsInASemiCircle(16, FrontRadius,          frontPoints);
+      generatePointsInASemiCircle(12, FrontRadius * 0.667f, healIndicatorPoints);
 
-      barrel.resize(2);
+      // Remove first and last points from healing indicator to make it look cooler
+      healIndicatorPoints.erase(healIndicatorPoints.size() - 1);     // Last
+      healIndicatorPoints.erase(0);                                  // First
+
+      barrel.resize(2);    // Set the dimensions of the vector that we'll need
    }
 
    glPushMatrix();
       glTranslate(aimCenter);
-      glRotate(normal.ATAN2() * RADIANS_TO_DEGREES + 90);
+      glRotate(normal.ATAN2() * RADIANS_TO_DEGREES - 90);
 
       glColor(color);
 
       renderPointVector(&frontPoints,    GL_LINE_STRIP);
       renderPointVector(&healthBarFrame, GL_LINES);
 
-      glColor(enabled ? Colors::white : Colors::gray60);
-      renderPointVector(&basePoints,     GL_LINE_LOOP);
-
-      glColor(color);
-
       // Render symbol if it is a regenerating turret
       if(healRate > 0)
          renderPointVector(&healIndicatorPoints, GL_LINE_STRIP);
 
-      renderHealthBar(health, Point(0, Turret::TURRET_OFFSET / 2), Point(1, 0), HealthBarLength, 5);
+      // Draw base after potentially overlapping curvy bits
+      glColor(enabled ? Colors::white : Colors::gray60);
+      renderPointVector(&basePoints,     GL_LINE_LOOP);
+
+      glColor(color);
+      renderHealthBar(health, Point(0, -Turret::TURRET_OFFSET / 2), Point(1, 0), HealthBarLength, 5);
 
    glPopMatrix();
 
@@ -1461,21 +1497,21 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
       glTranslate(pos);
       glScale(0.2f);
 
-      F32 vertices[] = {
+      static F32 vertices[] = {
             -15, -15,
-            15, -5,
-            15, -5,
-            -15, 5,
+             15,  -5,
+             15,  -5,
+            -15,   5,
             -15, -15,
-            -15, 15
+            -15,  15
       };
       F32 colors[] = {
             c.r, c.g, c.b, alpha,
             c.r, c.g, c.b, alpha,
             c.r, c.g, c.b, alpha,
             c.r, c.g, c.b, alpha,
-            1, 1, 1, alpha,
-            1, 1, 1, alpha
+              1,   1,   1, alpha,
+              1,   1,   1, alpha
       };
       renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
    glPopMatrix();
@@ -2329,7 +2365,7 @@ void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
       glScalef(scale, scale, 1);
       renderAsteroid(p, 2, .1f);
 
-      drawCircle(p, 13, &Colors::white);
+      drawCircle(13, &Colors::white);
    glPopMatrix();
 }
 
@@ -2893,50 +2929,26 @@ void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *
 }
 
 
-// Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
-void drawCircle(F32 x, F32 y, F32 radius, const Color *color, F32 alpha)
+void drawCircle(const Point &center, F32 radius, const Color *color, F32 alpha)
 {
+   glPushMatrix();
+      glTranslate(center);
+      drawCircle(radius, color, alpha);
+   glPopMatrix();
+}
+
+
+void drawCircle(F32 radius, const Color *color, F32 alpha)
+{
+   static Vector<Point> points;     // Reuse the same container; it will always be the same length
+
+   // Get the circle points
+   generatePointsInACircle(NUM_CIRCLE_SIDES, radius, points);
+
    if(color)
       glColor(color, alpha);
 
-   F32 theta = Float2Pi * INV_NUM_CIRCLE_SIDES; // 1/32
-
-   // Precalculate the sine and cosine
-   F32 cosTheta = cosf(theta);
-   F32 sinTheta = sinf(theta);
-
-   F32 curX = radius;  // We start at angle = 0
-   F32 curY = 0;
-   F32 prevX;
-
-   // 32 vertices is almost a circle..  right?
-   F32 vertexArray[2 * NUM_CIRCLE_SIDES];
-
-   // This is a repeated rotation
-   for(S32 i = 0; i < NUM_CIRCLE_SIDES; i++)
-   {
-      vertexArray[(2*i)]     = curX + x;
-      vertexArray[(2*i) + 1] = curY + y;
-
-      // Apply the rotation matrix
-      prevX = curX;
-      curX = (cosTheta * curX)  - (sinTheta * curY);
-      curY = (sinTheta * prevX) + (cosTheta * curY);
-   }
-
-   renderVertexArray(vertexArray, 32, GL_LINE_LOOP);
-}
-
-
-void drawCircle(const Point &pos, S32 radius, const Color *color, F32 alpha)
-{
-   drawCircle(pos.x, pos.y, (F32)radius, color, alpha);
-}
-
-
-void drawCircle(const Point &pos, F32 radius, const Color *color, F32 alpha)
-{
-   drawCircle(pos.x, pos.y, radius, color, alpha);
+   renderPointVector(&points, GL_LINE_LOOP);
 }
 
 
@@ -3010,7 +3022,7 @@ void drawGear(const Point &center, S32 teeth, F32 radius1, F32 radius2, F32 ang1
 
       renderPolygonOutline(&pts);
 
-      drawCircle(0, 0, innerCircleRadius);
+      drawCircle(innerCircleRadius);
 
    glPopMatrix();
 }
