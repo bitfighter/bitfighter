@@ -3390,12 +3390,10 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
    glPointSize( gLineWidth1 );
 
    glEnableClientState(GL_VERTEX_ARRAY);
-   //glEnableClientState(GL_COLOR_ARRAY);
 
    glEnable(GL_BLEND);
    glColor(Colors::gray60, alpha);
 
-   //glColorPointer(4, GL_FLOAT, sizeof(Color), &colors[0]);
    glVertexPointer(2, GL_FLOAT, sizeof(Point), &stars[0]);    // Each star is a pair of floats between 0 and 1
 
 
