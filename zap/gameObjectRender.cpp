@@ -2484,7 +2484,7 @@ void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width)
 
 void renderSoccerBall(const Point &pos)
 {
-   renderSoccerBall(pos, (F32)SoccerBallItem::SOCCER_BALL_RADIUS);
+   renderSoccerBall(pos, SoccerBallItem::SOCCER_BALL_RADIUS);
 }
 
 

@@ -292,13 +292,14 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
 static const F32 SOCCER_BALL_ITEM_MASS = 4;
+const F32 SoccerBallItem::SOCCER_BALL_RADIUS = 30;
 
 /**
  * @luafunc SoccerBallItem::SoccerBallItem()
  * @luafunc SoccerBallItem::SoccerBallItem(point)
  */
 // Combined Lua / C++ default constructor
-SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, SOCCER_BALL_ITEM_MASS)
+SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, SoccerBallItem::SOCCER_BALL_RADIUS, SOCCER_BALL_ITEM_MASS)
 {
    mObjectTypeNumber = SoccerBallItemTypeNumber;
    mNetFlags.set(Ghostable);
