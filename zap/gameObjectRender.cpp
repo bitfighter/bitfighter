@@ -336,23 +336,10 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
 // Draw an n-sided polygon
 void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
 {
-   static const S32 MaxSides = 32;
+   Vector<Point> points;
+   generatePointsInACurve(angle, angle + FloatTau, sides + 1, radius, points);
 
-   TNLAssert(sides <= MaxSides, "Too many sides!");
-
-   // There is no polygon greater than 12 (I think) so I choose 32 sides to be safe
-   static F32 polygonVertexArray[MaxSides * 2];  // 2 data points per vertex (x,y)
-
-   F32 theta = 0;
-   F32 dTheta = FloatTau / sides;
-   for(S32 i = 0; i < sides; i++)
-   {
-      polygonVertexArray[2*i]       = pos.x + cos(theta + angle) * radius;
-      polygonVertexArray[(2*i) + 1] = pos.y + sin(theta + angle) * radius;
-      theta += dTheta;
-   }
-
-   renderVertexArray(polygonVertexArray, sides, GL_LINE_LOOP);
+   renderPointVector(&points, GL_LINE_STRIP);
 }
 
 
