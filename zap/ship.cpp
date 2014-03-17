@@ -2741,14 +2741,14 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
 
 
 /**
- * @luafunc Ship::setLoadout(Weapon w1, Weapon w2, Module m1, Module m2, Module m3)
+ * @luafunc Ship::setLoadout(Weapon w1, Weapon w2, Weapon w3, Module m2, Module m3)
  * @brief Convenience alias for setLoadout(table)
  *
  * @param w1 The new \ref WeaponEnum for slot 1.
  * @param w2 The new \ref WeaponEnum for slot 2.
+ * @param w3 The new \ref WeaponEnum for slot 3.
  * @param m1 The new \ref ModuleEnum for slot 1.
  * @param m2 The new \ref ModuleEnum for slot 2.
- * @param m3 The new \ref ModuleEnum for slot 3.
  *
  * @luafunc Ship::setLoadout(table loadout)
  *
@@ -2758,10 +2758,10 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
  * loadout, e.g. moving over a loadout zone.
  *
  * This method will take a table with 5 entries in any order comprised of
- * 2 modules and 3 weapons.
+ * 3 weapons and 2 modules.
  *
  * @note This method will also take 5 parameters as a new loadout, instead
- * of a table. See setLoadout(Weapon, Weapon, Module, Module, Module)
+ * of a table. See setLoadout(Weapon, Weapon, Weapon, Module, Module)
  *
  * @param loadout The new loadout to request.
  *
