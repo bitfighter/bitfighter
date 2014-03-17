@@ -76,7 +76,7 @@ void GoalZone::render()
    if(glowingZoneTeam >= 0 && glowingZoneTeam != getTeam())
       glow = 0;
 
-   bool useOldStyle = getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("OldGoalFlash");
+   static const bool useOldStyle = getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("OldGoalFlash");
    renderGoalZone(*getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, 
                   mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0, useOldStyle);
 }
@@ -84,7 +84,7 @@ void GoalZone::render()
 
 void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
-   bool useOldStyle = getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("OldGoalFlash");
+   static const bool useOldStyle = getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("OldGoalFlash");
 
    renderGoalZone(*getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), false, 0, 0, 0, useOldStyle);
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);
