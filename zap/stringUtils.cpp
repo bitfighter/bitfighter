@@ -961,6 +961,7 @@ string toString(YesNo yesNo)              { return yesNo  == Yes      ? "Yes" : 
 string toString(RelAbs relAbs)            { return relAbs == Relative ? "Relative" : "Absolute"; }
 string toString(DisplayMode displayMode)  { return displayModeToString(displayMode);             }
 string toString(ColorEntryMode colorMode) { return colorEntryModeToString(colorMode);            }
+string toString(const Color &color)       { return color.toHexStringForIni();                    }
 
 
 bool isPrintable(char c)

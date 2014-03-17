@@ -53,8 +53,12 @@ public:
    void set(const Color *c);
    void set(const string &s);
 
+   static Color iniValToColor(const string &s);
+
    string toRGBString() const;
    string toHexString() const;
+   string toHexStringForIni() const ;
+
 
    U32 toU32() const;
 

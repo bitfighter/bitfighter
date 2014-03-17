@@ -17,6 +17,7 @@ Color::Color(const Color &c)
    b = c.b;
 }
 
+
 Color::Color(const Color *c)
 {
    // Protect against NULLs
@@ -28,12 +29,14 @@ Color::Color(const Color *c)
    b = c->b;
 }
 
+
 Color::Color(float grayScale)
 {
    r = grayScale;
    g = grayScale;
    b = grayScale;
 }
+
 
 Color::Color(double grayScale)
 {
@@ -42,12 +45,13 @@ Color::Color(double grayScale)
    b = (F32)grayScale;
 }
 
+
 Color::Color(U32 rgbInt)
 {
-   r = F32(U8(rgbInt)) / 255.0f;
-   g = F32(U8(rgbInt >> 8)) / 255.0f;
-   b = F32(U8(rgbInt >> 16)) / 255.0f;
-};
+   r = F32(U8(rgbInt))       / 255;
+   g = F32(U8(rgbInt >> 8))  / 255;
+   b = F32(U8(rgbInt >> 16)) / 255;
+}
 
 
 Color::Color(const string &hex)
@@ -75,6 +79,7 @@ void Color::read(const char **argv)
 
 }
 
+
 void Color::interp(float t, const Color &c1, const Color &c2)
 {
    float oneMinusT = 1.0f - t;
@@ -82,6 +87,7 @@ void Color::interp(float t, const Color &c1, const Color &c2)
    g = c1.g * t  +  c2.g * oneMinusT;
    b = c1.b * t  +  c2.b * oneMinusT;
 }
+
 
 void Color::set(const Color &c) { r = c.r;  g = c.g;  b = c.b;  }
 void Color::set(const Color *c) { r = c->r; g = c->g; b = c->b; }
@@ -103,6 +109,19 @@ void Color::set(const string &s)
 }
 
 
+Color Color::iniValToColor(const string &s)
+{
+   // If value begins with a "#", then we'll treat it as a hex
+   if(s[0] == '#')
+      return Color(s.substr(1));
+
+   Color color;
+   color.set(s);
+
+   return color;
+}
+
+
 string Color::toRGBString() const 
 { 
    return ftos(r, 3) + " " + ftos(g, 3) + " " + ftos(b, 3); 
@@ -114,6 +133,12 @@ string Color::toHexString() const
    char c[7]; 
    dSprintf(c, sizeof(c), "%.6X", U32(r * 0xFF) << 24 >> 8 | U32(g * 0xFF) << 24 >> 16 | (U32(b * 0xFF) & 0xFF));
    return c; 
+}
+
+
+string Color::toHexStringForIni() const 
+{
+   return string("#") + toHexString();
 }
 
 

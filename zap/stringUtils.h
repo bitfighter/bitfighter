@@ -12,8 +12,9 @@
 
 
 #include "ConfigEnum.h"
-#include "tnlVector.h"     // For Vector
-#include "tnlTypes.h"
+#include "Color.h"
+
+#include "tnlVector.h"
 
 #include <string>
 #include <map>
@@ -146,6 +147,7 @@ string toString(DisplayMode displayMode);
 string toString(YesNo yesNo);            
 string toString(RelAbs relAbs); 
 string toString(ColorEntryMode colorMode);
+string toString(const Color &color);
 
 bool isPrintable(char c);
 bool isHex(char c);

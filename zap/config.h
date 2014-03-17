@@ -260,13 +260,6 @@ public:
 
    bool musicMutedOnCmdLine;
 
-   // Testing values
-   bool neverConnectDirect;
-   Color wallFillColor;
-   Color wallOutlineColor;
-   U16 clientPortNumber;
-   bool disableScreenSaver;
-
    // Logging options   --   true will enable logging these events, false will disable
    bool logConnectionProtocol;
    bool logNetConnection;
@@ -304,8 +297,6 @@ public:
    Vector<string> reservedPWs;
 
    U32 version;
-
-   bool oldGoalFlash;
 
    Vector<string> prevServerListFromMaster;
    Vector<string> alwaysPingList;

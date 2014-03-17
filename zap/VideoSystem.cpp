@@ -368,7 +368,7 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
       break;
    }
 
-   if(settings->getIniSettings()->disableScreenSaver)
+   if(settings->getIniSettings()->mSettings.getVal<YesNo>("DisableScreenSaver"))
       SDL_DisableScreenSaver();
    else
       SDL_EnableScreenSaver();

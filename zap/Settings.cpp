@@ -52,10 +52,12 @@ static RelAbs stringToRelAbs(string relAbs)
 template<> string         Setting<string>        ::fromString(const string &val) { return val; }
 template<> S32            Setting<S32>           ::fromString(const string &val) { return atoi(val.c_str()); }
 template<> U32            Setting<U32>           ::fromString(const string &val) { return atoi(val.c_str()); }
+template<> U16            Setting<U16>           ::fromString(const string &val) { return atoi(val.c_str()); }
 template<> DisplayMode    Setting<DisplayMode>   ::fromString(const string &val) { return stringToDisplayMode(val); }
 template<> YesNo          Setting<YesNo>         ::fromString(const string &val) { return stringToYesNo(val); }
 template<> RelAbs         Setting<RelAbs>        ::fromString(const string &val) { return stringToRelAbs(val); }
 template<> ColorEntryMode Setting<ColorEntryMode>::fromString(const string &val) { return stringToColorEntryMode(val); }
+template<> Color          Setting<Color>         ::fromString(const string &val) { return Color::iniValToColor(val); }
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -209,10 +211,12 @@ void Setting<T>::setValFromString(const string &value)
 template class Setting<string>;
 template class Setting<S32>;
 template class Setting<U32>;
+template class Setting<U16>;
 template class Setting<DisplayMode>;
 template class Setting<YesNo>;
 template class Setting<RelAbs>;
 template class Setting<ColorEntryMode>;
+template class Setting<Color>;
 
 
 }

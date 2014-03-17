@@ -545,16 +545,21 @@ void setupLogging(IniSettings *iniSettings)
 void createClientGame(GameSettingsPtr settings)
 {
 #ifndef ZAP_DEDICATED
-   if(!settings->isDedicatedServer())                      // Create ClientGame object
+   if(!settings->isDedicatedServer())
    {
+      // Grab some values from the settings
+      U16    portNumber     = settings->getIniSettings()->mSettings.getVal<U16>("ClientPortNumber");
+      string lastEditorName = settings->getIniSettings()->lastEditorName;
+      string lastName       = settings->getIniSettings()->mSettings.getVal<string>("LastName");
+
       // Create a new client, and let the system figure out IP address and assign a port
-      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, settings->getIniSettings()->clientPortNumber), 
-                                              settings, new UIManager());    // ClientGame destructor will clean up UIManager
+      // ClientGame destructor will clean up UIManager
+      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, portNumber), settings, new UIManager());    
 
        // Put any saved filename into the editor file entry thingy
-      clientGame->getUIManager()->getUI<LevelNameEntryUserInterface>()->setString(settings->getIniSettings()->lastEditorName);
+      clientGame->getUIManager()->getUI<LevelNameEntryUserInterface>()->setString(lastEditorName);
 
-      Game::seedRandomNumberGenerator(settings->getIniSettings()->mSettings.getVal<string>("LastName"));
+      Game::seedRandomNumberGenerator(lastName);
       clientGame->getClientInfo()->getId()->getRandom();
 
       GameManager::addClientGame(clientGame);

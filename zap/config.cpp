@@ -72,6 +72,15 @@ IniSettings::IniSettings()
 
    mSettings.add(new Setting<ColorEntryMode>("ColorEntryMode",           ColorEntryMode100,     "ColorEntryMode",        "EditorSettings", "Specifies which color entry mode to use: RGB100, RGB255, RGBHEX; best to let the game manage this"));
 
+   ///// Testing
+   mSettings.add(new Setting<YesNo> ("NeverConnectDirect",  No,                              "NeverConnectDirect", "Testing", "Never connect to pingable internet server directly; forces arranged connections via master"));
+   mSettings.add(new Setting<Color> ("WallFillColor",       Colors::DefaultWallFillColor,    "WallFillColor",      "Testing", "Color used locally for rendering wall fill (r,g,b), (values between 0 and 1), or #hexcolor"));
+   mSettings.add(new Setting<Color> ("WallOutlineColor",    Colors::DefaultWallOutlineColor, "WallOutlineColor",   "Testing", "Color used locally for rendering wall outlines (r,g,b), (values between 0 and 1), or #hexcolor"));
+   mSettings.add(new Setting<YesNo> ("OldGoalFlash",        Yes,                             "OldGoalFlash",       "Testing", "?????"));
+   mSettings.add(new Setting<U16>   ("ClientPortNumber",    0,                               "ClientPortNumber",   "Testing", "Only helps when punching through firewall when using router's port forwarded for client port number"));
+   mSettings.add(new Setting<YesNo> ("DisableScreenSaver",  Yes,                             "DisableScreenSaver", "Testing", "Disable ScreenSaver from having no input from keyboard/mouse, useful when using joystick"));
+
+
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
    joystickLinuxUseOldDeviceSystem = false;
    alwaysStartInKeyboardMode = false;
@@ -115,11 +124,6 @@ IniSettings::IniSettings()
    defaultRobotScript = "s_bot.bot";            
    globalLevelScript = "";
 
-   wallFillColor.set(0,0,.15);
-   wallOutlineColor.set(Colors::blue);
-   clientPortNumber = 0;
-   disableScreenSaver = true;
-
    randomLevels = false;
    skipUploads = false;
 
@@ -150,8 +154,6 @@ IniSettings::IniSettings()
 
    musicMutedOnCmdLine = false;
 
-   neverConnectDirect = false;
-
    // Specify which events to log
    logConnectionProtocol = false;
    logNetConnection = false;
@@ -178,8 +180,6 @@ IniSettings::IniSettings()
    logStats = false;          // Log statistics into local sqlite database
 
    version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
-
-   oldGoalFlash = true;
 }
 
 
@@ -434,14 +434,23 @@ extern F32 gLineWidth3;
 extern F32 gLineWidth4;
 
 
-static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
+static void loadSettings(CIniFile *ini, IniSettings *iniSettings, const string &section)
 {
-   string section = "Settings";
-
-   // Read all settings defined in the new modern manner
    Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
+
    for(S32 i = 0; i < settings.size(); i++)
       settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
+}
+
+
+static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
+{
+   // New school
+   loadSettings(ini, iniSettings, "Testing");
+   loadSettings(ini, iniSettings, "EditorSettings");
+   loadSettings(ini, iniSettings, "Settings");
+
+   string section = "Settings";
 
    // Now read the settings still defined all old school
 
@@ -493,17 +502,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 }
 
 
-static void loadEditorSettings(CIniFile *ini, IniSettings *iniSettings)
-{
-   string section = "EditorSettings";
-
-   // Read all settings defined in the new modern manner
-   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
-   for(S32 i = 0; i < settings.size(); i++)
-      settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
-}
-
-
 static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
 {
    string section = "Diagnostics";
@@ -534,15 +532,15 @@ static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
 }
 
 
-static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
-{
-   iniSettings->neverConnectDirect = ini->GetValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
-   iniSettings->wallFillColor.set(ini->GetValue("Testing", "WallFillColor", iniSettings->wallFillColor.toRGBString()));
-   iniSettings->wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString()));
-   iniSettings->oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
-   iniSettings->clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
-   iniSettings->disableScreenSaver = ini->GetValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
-}
+//static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
+//{
+//   iniSettings->neverConnectDirect = ini->GetValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
+//   iniSettings->wallFillColor.set(ini->GetValue("Testing", "WallFillColor", iniSettings->wallFillColor.toRGBString()));
+//   iniSettings->wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString()));
+//   iniSettings->oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
+//   iniSettings->clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
+//   iniSettings->disableScreenSaver = ini->GetValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
+//}
 
 
 static void loadLoadoutPresets(CIniFile *ini, GameSettings *settings)
@@ -1496,15 +1494,12 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadSoundSettings(ini, settings, iniSettings);
    loadEffectsSettings(ini, iniSettings);
    loadGeneralSettings(ini, iniSettings);
-   loadEditorSettings(ini, iniSettings);
    loadLoadoutPresets(ini, settings);
    loadPluginBindings(ini, iniSettings);
 
    loadHostConfiguration(ini, iniSettings);
    loadUpdaterSettings(ini, iniSettings);
    loadDiagnostics(ini, iniSettings);
-
-   loadTestSettings(ini, iniSettings);
 
    setDefaultKeyBindings(ini, inputCodeManager);
    setDefaultEditorKeyBindings(ini, inputCodeManager);
@@ -1874,37 +1869,6 @@ static void writeLevels(CIniFile *ini)
 }
 
 
-static void writeTesting(CIniFile *ini, GameSettings *settings)
-{
-   IniSettings *iniSettings = settings->getIniSettings();
-
-   ini->addSection("Testing");
-   if (ini->numSectionComments("Testing") == 0)
-   {
-      ini->sectionComment("Testing", "----------------");
-      ini->sectionComment("Testing", " These settings are here to enable/disable certain items for testing.  They are by their nature");
-      ini->sectionComment("Testing", " short lived, and may well be removed in the next version of Bitfighter.");
-      ini->sectionComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
-      ini->sectionComment("Testing", " NeverConnectDirect - Never connect to pingable internet server directly; forces arranged connections via master");
-      ini->sectionComment("Testing", " WallOutlineColor - Color used locally for rendering wall outlines (r,g,b), (values between 0 and 1)");
-      ini->sectionComment("Testing", " WallFillColor - Color used locally for rendering wall fill (r,g,b), (values between 0 and 1)");
-      ini->sectionComment("Testing", " ClientPortNumber - Only helps when punching through firewall when using router's port forwarded for client port number");
-      ini->sectionComment("Testing", " DisableScreenSaver - Disable ScreenSaver from having no input from keyboard/mouse, useful when using joystick");
-      ini->sectionComment("Testing", "----------------");
-   }
-
-   ini->setValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
-
-   // Maybe we should not write these if they are the default values?
-   ini->SetValue  ("Testing", "WallFillColor",   settings->getWallFillColor()->toRGBString());
-   ini->SetValue  ("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString());
-
-   ini->setValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
-   ini->SetValueI ("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
-   ini->setValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
-}
-
-
 static void writePasswordSection_helper(CIniFile *ini, string section)
 {
    ini->addSection(section);
@@ -1961,7 +1925,6 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeLevels(ini);
    writeSkipList(ini, settings->getLevelSkipList());
    writeUpdater(ini, iniSettings);
-   writeTesting(ini, settings);
    writePasswordSection(ini);
    writeKeyBindings(ini, settings->getInputCodeManager());
    

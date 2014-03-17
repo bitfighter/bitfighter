@@ -2753,7 +2753,7 @@ void GameUserInterface::renderGameNormal()
    // Render in three passes, to ensure some objects are drawn above others
    for(S32 i = -1; i < 2; i++)
    {
-      Barrier::renderEdges(i, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
+      Barrier::renderEdges(getGame()->getSettings(), i);    // Render wall edges
 
       if(mDebugShowMeshZones)
          for(S32 j = 0; j < renderZones.size(); j++)
@@ -2986,7 +2986,7 @@ void GameUserInterface::renderGameCommander()
       renderObjects[i]->renderLayer(0);
 
    // Second pass
-   Barrier::renderEdges(1, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
+   Barrier::renderEdges(getGame()->getSettings(), 1);    // Render wall edges
 
    if(mDebugShowMeshZones)
       for(S32 i = 0; i < renderZones.size(); i++)

@@ -294,15 +294,20 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vec
 void Barrier::renderLayer(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
+   static const Color fillColor(getGame()->getSettings()->getWallFillColor());
+
    if(layerIndex == 0)           // First pass: draw the fill
-      renderWallFill(&mRenderFillGeometry, *getGame()->getSettings()->getWallFillColor(), mSolid);
+      renderWallFill(&mRenderFillGeometry, fillColor, mSolid);
 #endif
 }
 
 
-// Render all edges for all barriers... faster to do it all at once than try to sort out whose edges are whose
-void Barrier::renderEdges(S32 layerIndex, const Color &outlineColor)  // static
+// Render all edges for all barriers... faster to do it all at once than try to sort out whose edges are whose.
+// Static method.
+void Barrier::renderEdges(const GameSettings *settings, S32 layerIndex)
 {
+   static const Color outlineColor(settings->getWallOutlineColor());
+
    if(layerIndex == 1)
       renderWallEdges(mRenderLineSegments, outlineColor);
 }
