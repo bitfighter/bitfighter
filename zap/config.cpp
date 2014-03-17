@@ -74,8 +74,8 @@ IniSettings::IniSettings()
 
    ///// Testing
    mSettings.add(new Setting<YesNo> ("NeverConnectDirect",  No,                              "NeverConnectDirect", "Testing", "Never connect to pingable internet server directly; forces arranged connections via master"));
-   mSettings.add(new Setting<Color> ("WallFillColor",       Colors::DefaultWallFillColor,    "WallFillColor",      "Testing", "Color used locally for rendering wall fill (r,g,b), (values between 0 and 1), or #hexcolor"));
-   mSettings.add(new Setting<Color> ("WallOutlineColor",    Colors::DefaultWallOutlineColor, "WallOutlineColor",   "Testing", "Color used locally for rendering wall outlines (r,g,b), (values between 0 and 1), or #hexcolor"));
+   mSettings.add(new Setting<Color> ("WallFillColor",       Colors::DefaultWallFillColor,    "WallFillColor",      "Testing", "Color used locally for rendering wall fill (r g b), (values between 0 and 1), or #hexcolor"));
+   mSettings.add(new Setting<Color> ("WallOutlineColor",    Colors::DefaultWallOutlineColor, "WallOutlineColor",   "Testing", "Color used locally for rendering wall outlines (r g b), (values between 0 and 1), or #hexcolor"));
    mSettings.add(new Setting<YesNo> ("OldGoalFlash",        Yes,                             "OldGoalFlash",       "Testing", "?????"));
    mSettings.add(new Setting<U16>   ("ClientPortNumber",    0,                               "ClientPortNumber",   "Testing", "Only helps when punching through firewall when using router's port forwarded for client port number"));
    mSettings.add(new Setting<YesNo> ("DisableScreenSaver",  Yes,                             "DisableScreenSaver", "Testing", "Disable ScreenSaver from having no input from keyboard/mouse, useful when using joystick"));
