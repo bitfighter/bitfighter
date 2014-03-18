@@ -2163,9 +2163,9 @@ void EditorUserInterface::renderWallsAndPolywalls(GridDatabase *database, const 
    GameSettings *settings = getGame()->getSettings();
 
    WallSegmentManager *wsm = database->getWallSegmentManager();
-   const Color &fillColor = mPreviewMode ? *settings->getWallFillColor() : Colors::EDITOR_WALL_FILL_COLOR;
+   const Color &fillColor = mPreviewMode ? settings->getWallFillColor() : Colors::EDITOR_WALL_FILL_COLOR;
 
-   renderWalls(wsm->getWallSegmentDatabase(), *wsm->getWallEdgePoints(), *wsm->getSelectedWallEdgePoints(), *settings->getWallOutlineColor(),  
+   renderWalls(wsm->getWallSegmentDatabase(), *wsm->getWallEdgePoints(), *wsm->getSelectedWallEdgePoints(), settings->getWallOutlineColor(),  
                fillColor, mCurrentScale, mDraggingObjects, drawSelected, offset, mPreviewMode, 
                getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
 

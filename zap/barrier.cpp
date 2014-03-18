@@ -718,7 +718,7 @@ S32 PolyWall::getRenderSortValue()
 void PolyWall::renderDock()
 {
    renderPolygonFill(getFill(), &Colors::EDITOR_WALL_FILL_COLOR);
-   renderPolygonOutline(getOutline(), getGame()->getSettings()->getWallOutlineColor());
+   renderPolygonOutline(getOutline(), &getGame()->getSettings()->getWallOutlineColor());
 }
 
 

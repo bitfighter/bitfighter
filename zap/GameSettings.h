@@ -218,8 +218,8 @@ public:
 
    bool shouldShowNameEntryScreenOnStartup();
 
-   const Color *getWallFillColor() const;
-   const Color *getWallOutlineColor() const;
+   const Color getWallFillColor() const;
+   const Color getWallOutlineColor() const;
 
    void setQueryServerSortColumn(S32 column, bool ascending);
    S32  getQueryServerSortColumn();   

@@ -1194,15 +1194,15 @@ void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
 }
 
 
-const Color *GameSettings::getWallFillColor() const
+const Color GameSettings::getWallFillColor() const
 {
-   return &mIniSettings.mSettings.getVal<Color>("WallFillColor");
+   return mIniSettings.mSettings.getVal<Color>("WallFillColor");
 }
 
 
-const Color *GameSettings::getWallOutlineColor() const
+const Color GameSettings::getWallOutlineColor() const
 {
-   return &mIniSettings.mSettings.getVal<Color>("WallOutlineColor");
+   return mIniSettings.mSettings.getVal<Color>("WallOutlineColor");
 }
 
 
