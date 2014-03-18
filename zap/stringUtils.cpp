@@ -953,15 +953,28 @@ inline string colorEntryModeToString(ColorEntryMode colorEntryMode)
 }
 
 
+inline string goalZoneFlashStyleToString(GoalZoneFlashStyle flashStyle)
+{
+   if(flashStyle == GoalZoneFlashExperimental)
+      return "Experimental";
+
+   if(flashStyle == GoalZoneFlashNone)
+      return "None";
+
+   return "Original";
+}
+
+
 // Convert various things to strings -- needed by settings (which requires a consistent naming schema);
 // used elsewhere
-string toString(const string &val)        { return val;                                          }
-string toString(S32 val)                  { return itos(val);                                    }
-string toString(YesNo yesNo)              { return yesNo  == Yes      ? "Yes" :      "No";       }
-string toString(RelAbs relAbs)            { return relAbs == Relative ? "Relative" : "Absolute"; }
-string toString(DisplayMode displayMode)  { return displayModeToString(displayMode);             }
-string toString(ColorEntryMode colorMode) { return colorEntryModeToString(colorMode);            }
-string toString(const Color &color)       { return color.toHexStringForIni();                    }
+string toString(const string &val)             { return val;                                          }
+string toString(S32 val)                       { return itos(val);                                    }
+string toString(YesNo yesNo)                   { return yesNo  == Yes      ? "Yes" :      "No";       }
+string toString(RelAbs relAbs)                 { return relAbs == Relative ? "Relative" : "Absolute"; }
+string toString(DisplayMode displayMode)       { return displayModeToString(displayMode);             }
+string toString(ColorEntryMode colorMode)      { return colorEntryModeToString(colorMode);            }
+string toString(GoalZoneFlashStyle flashStyle) { return goalZoneFlashStyleToString(flashStyle);       }
+string toString(const Color &color)            { return color.toHexStringForIni();                    }
 
 
 bool isPrintable(char c)

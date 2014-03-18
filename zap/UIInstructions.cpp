@@ -869,7 +869,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                Triangulate::Process(o, f);
 
                renderGoalZone(Color(0.5f, 0.5f, 0.5f), &o, &f, findCentroid(o), angleOfLongestSide(o), 
-                  false, 0, 0, 0, false);
+                  false, 0, 0, 0, GoalZoneFlashNone);
             }
             break;
 

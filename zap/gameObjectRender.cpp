@@ -1766,23 +1766,24 @@ void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<P
 
 // Goal zone flashes after capture, but glows after touchdown...
 void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,
-                    bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, bool useOldStyle)
+                    bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, GoalZoneFlashStyle flashStyle)
 {
-   Color fillColor, outlineColor;
+   Color outlineColor, fillColor;
+   F32 baseAlpha = 0.5f;
 
-   if(useOldStyle)
+   if(flashStyle == GoalZoneFlashOriginal)
    {
 //      fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
 //      outlineColor = getGoalZoneOutlineColor(c, isFlashing);
 
       // TODO: reconcile why using the above commented out code doesn't work
-      F32 alpha = isFlashing ? 0.75f : 0.5f;
+      F32 alpha = isFlashing ? 0.75f : baseAlpha;
       fillColor    = Color(Colors::yellow * (glowFraction * glowFraction) + Color(c) * alpha * (1 - glowFraction * glowFraction));
       outlineColor = Color(Colors::yellow * (glowFraction * glowFraction) + Color(c) *         (1 - glowFraction * glowFraction));
    }
-   else // Some new flashing effect (sam's idea)
+   else if(flashStyle == GoalZoneFlashExperimental) // Some new flashing effect (sam's idea)
    {
-      F32 glowRate = 0.5f - fabs(flashCounter - 0.5f);  // will need flashCounter for this.
+      F32 glowRate = baseAlpha - fabs(flashCounter - baseAlpha); 
 
       Color newColor(c);
       if(isFlashing)
@@ -1793,7 +1794,11 @@ void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<P
       fillColor    = getGoalZoneFillColor(newColor, false, glowFraction);
       outlineColor = getGoalZoneOutlineColor(newColor, false);
    }
-
+   else
+   {
+      fillColor = c * baseAlpha;
+      outlineColor = c;
+   }
 
    renderPolygon(fill, outline, &fillColor, &outlineColor);
    renderGoalZoneIcon(centroid, 24);

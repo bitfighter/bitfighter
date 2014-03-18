@@ -977,6 +977,10 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    {
       // VerboseHelpMessages was removed
       GameSettings::iniFile.deleteKey("Settings", "VerboseHelpMessages");
+
+      // Testing::OldGoalFlash --> Testing::GoalZoneFlashStyle
+      string val = GameSettings::iniFile.GetValueYN("Testing", "OldGoalFlash", Yes) ? "Original" : "Experimental";
+      GameSettings::iniFile.SetValue("Testing", "GoalZoneFlashStyle", val, true);
    }
 
 

@@ -147,6 +147,7 @@ string toString(DisplayMode displayMode);
 string toString(YesNo yesNo);            
 string toString(RelAbs relAbs); 
 string toString(ColorEntryMode colorMode);
+string toString(GoalZoneFlashStyle flashStyle);
 string toString(const Color &color);
 
 bool isPrintable(char c);

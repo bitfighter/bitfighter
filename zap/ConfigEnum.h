@@ -38,6 +38,13 @@ enum ColorEntryMode {
 };
 
 
+enum GoalZoneFlashStyle {
+   GoalZoneFlashOriginal,
+   GoalZoneFlashExperimental,
+   GoalZoneFlashNone
+};
+
+
 enum RelAbs{
    Relative,
    Absolute
