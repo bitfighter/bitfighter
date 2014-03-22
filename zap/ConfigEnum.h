@@ -76,12 +76,18 @@ enum YesNo {
 };
 
 
+#define COLOR_ENTRY_MODES_TABLE \
+COLOR_ENTRY_MODE_ITEM(ColorEntryMode100, "RGB100" )  \
+COLOR_ENTRY_MODE_ITEM(ColorEntryMode255, "RGB255" )  \
+COLOR_ENTRY_MODE_ITEM(ColorEntryModeHex, "RGBHEX" )  \
+
+// Gernerate an enum
 enum ColorEntryMode {
-   ColorEntryMode100,
-   ColorEntryMode255,
-   ColorEntryModeHex,
-   ColorEntryModeCount
-};
+#define COLOR_ENTRY_MODE_ITEM(enumVal, b) enumVal,
+    COLOR_ENTRY_MODES_TABLE
+#undef COLOR_ENTRY_MODE_ITEM
+    ColorEntryModeCount  
+}; 
 
 
 enum GoalZoneFlashStyle {

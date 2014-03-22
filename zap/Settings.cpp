@@ -11,14 +11,6 @@ namespace Zap
 {
 
 
-inline string colorEntryModeToString(ColorEntryMode colorEntryMode)
-{
-   if(colorEntryMode == ColorEntryModeHex) return "RGBHEX";
-   if(colorEntryMode == ColorEntryMode255) return "RGB255";
-   return "RGB100";
-}
-
-
 inline string goalZoneFlashStyleToString(GoalZoneFlashStyle flashStyle)
 {
    if(flashStyle == GoalZoneFlashExperimental) return "Experimental";
@@ -27,7 +19,9 @@ inline string goalZoneFlashStyleToString(GoalZoneFlashStyle flashStyle)
 }
 
 
-EnumParser<DisplayMode> displayModeEnumParser;
+EnumParser<DisplayMode>    displayModeEnumParser;
+EnumParser<ColorEntryMode> colorEntryModeEnumParser;
+
 
 class EnumInitializer
 {
@@ -41,6 +35,10 @@ public:
 #define DISPLAY_MODE_ITEM(value, name) displayModeEnumParser.addItem(name, value);
     DISPLAY_MODES_TABLE
 #undef DISPLAY_MODE_ITEM
+
+#define COLOR_ENTRY_MODE_ITEM(value, name) colorEntryModeEnumParser.addItem(name, value);
+    COLOR_ENTRY_MODES_TABLE
+#undef COLOR_ENTRY_MODE_ITEM
 
       alreadyRan = true;
    }
@@ -56,7 +54,7 @@ string Evaluator::toString(S32 val)                       { return itos(val);   
 string Evaluator::toString(YesNo yesNo)                   { return yesNo  == Yes      ? "Yes" :      "No";       }
 string Evaluator::toString(RelAbs relAbs)                 { return relAbs == Relative ? "Relative" : "Absolute"; }
 string Evaluator::toString(DisplayMode displayMode)       { return displayModeEnumParser.getKey(displayMode);    }
-string Evaluator::toString(ColorEntryMode colorMode)      { return colorEntryModeToString(colorMode);            }
+string Evaluator::toString(ColorEntryMode colorMode)      { return colorEntryModeEnumParser.getKey(colorMode);   }
 string Evaluator::toString(GoalZoneFlashStyle flashStyle) { return goalZoneFlashStyleToString(flashStyle);       }
 string Evaluator::toString(const Color &color)            { return color.toHexStringForIni();                    }
 
@@ -79,19 +77,6 @@ string Evaluator::toString(const Color &color)            { return color.toHexSt
 //   if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED) return "Fullscreen";
 //   return "Window";
 //}
-
-
-
-// Convert a string value to a DisplayMode enum value
-ColorEntryMode Evaluator::stringToColorEntryMode(string mode)
-{
-   if(lcase(mode) == "rgbhex")
-      return ColorEntryModeHex;
-   else if(lcase(mode) == "rgb255")
-      return ColorEntryMode255;
-   else
-      return ColorEntryMode100;     // <== default
-}
 
 
 // Convert a string value to a DisplayMode enum value
@@ -132,7 +117,7 @@ template<> U16                Evaluator::fromString(const string &val) { return 
 template<> DisplayMode        Evaluator::fromString(const string &val) { return displayModeEnumParser.getVal(val); }
 template<> YesNo              Evaluator::fromString(const string &val) { return stringToYesNo(val);              }
 template<> RelAbs             Evaluator::fromString(const string &val) { return stringToRelAbs(val);             }
-template<> ColorEntryMode     Evaluator::fromString(const string &val) { return stringToColorEntryMode(val);     }
+template<> ColorEntryMode     Evaluator::fromString(const string &val) { return colorEntryModeEnumParser.getVal(val); }
 template<> GoalZoneFlashStyle Evaluator::fromString(const string &val) { return stringToGoalZoneFlashStyle(val); }
 template<> Color              Evaluator::fromString(const string &val) { return Color::iniValToColor(val);       }
 

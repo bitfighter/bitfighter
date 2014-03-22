@@ -94,7 +94,7 @@ class Evaluator
 {
 private:
    //static DisplayMode stringToDisplayMode(string mode);
-   static ColorEntryMode stringToColorEntryMode(string mode);
+   //static ColorEntryMode stringToColorEntryMode(string mode);
    static GoalZoneFlashStyle stringToGoalZoneFlashStyle(string style);
    static YesNo stringToYesNo(string yesNo);
    static RelAbs stringToRelAbs(string relAbs);
