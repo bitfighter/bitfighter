@@ -129,7 +129,6 @@ private:
    Evaluator mEvaluator;
 
 public:
-
    Setting(IndexType index, const DataType &defaultValue, const string &iniKey, const string &iniSection, const string &comment):
       Parent(index, iniKey, iniSection, comment),
       mDefaultValue(defaultValue),
