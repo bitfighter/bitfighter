@@ -58,27 +58,33 @@ const char *MASTER_SERVER_LIST_ADDRESS = "bitfighter.org:25955,bitfighter.net:25
 // Constructor: Set default values here
 IniSettings::IniSettings()
 {
-   //                       Data type        Setting name                Default value           INI Key                      INI Section  INI Comment                                               
-   mSettings.add(new Setting<string>        ("LastName",                 "ChumpChange",         "LastName",                    "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
-   mSettings.add(new Setting<DisplayMode>   ("WindowMode",               DISPLAY_MODE_WINDOWED, "WindowMode",                  "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
-   mSettings.add(new Setting<YesNo>         ("UseFakeFullscreen",        Yes,                   "UseFakeFullscreen",           "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
-   mSettings.add(new Setting<RelAbs>        ("ControlMode",              Absolute,              "ControlMode",                 "Settings", "Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)"));
-   mSettings.add(new Setting<YesNo>         ("VoiceEcho",                No,                    "VoiceEcho",                   "Settings", "Play echo when recording a voice message? Yes/No"));
-   mSettings.add(new Setting<YesNo>         ("ShowInGameHelp",           Yes,                   "ShowInGameHelp",              "Settings", "Show tutorial style messages in-game?  Yes/No"));
-   mSettings.add(new Setting<string>        ("JoystickType",             NoJoystick,            "JoystickType",                "Settings", "Type of joystick to use if auto-detect doesn't recognize your controller"));
-   mSettings.add(new Setting<string>        ("HelpItemsAlreadySeenList", "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));
-   mSettings.add(new Setting<U32>           ("EditorGridSize",           255,                   "EditorGridSize",              "Settings", "Grid size used in the editor, mostly for snapping purposes"));
-   mSettings.add(new Setting<YesNo>         ("LineSmoothing",            Yes,                   "LineSmoothing",               "Settings", "Activates anti-aliased rendering.  This may be a little slower on some machines.  Yes/No"));
 
-   mSettings.add(new Setting<ColorEntryMode>("ColorEntryMode",           ColorEntryMode100,     "ColorEntryMode",        "EditorSettings", "Specifies which color entry mode to use: RGB100, RGB255, RGBHEX; best to let the game manage this"));
+#  define SETTINGS_ITEM(typeName, enumVal, section, key, defaultVal, comment) \
+            mSettings.add(new Setting<typeName, IniKey::SettingsItem>(IniKey::enumVal, defaultVal, key, section, comment));
+      SETTINGS_TABLE
+#  undef SETTINGS_ITEM
 
-   ///// Testing
-   mSettings.add(new Setting<YesNo>              ("NeverConnectDirect",  No,                              "NeverConnectDirect", "Testing", "Never connect to pingable internet server directly; forces arranged connections via master"));
-   mSettings.add(new Setting<Color>              ("WallFillColor",       Colors::DefaultWallFillColor,    "WallFillColor",      "Testing", "Color used locally for rendering wall fill (r g b), (values between 0 and 1), or #hexcolor"));
-   mSettings.add(new Setting<Color>              ("WallOutlineColor",    Colors::DefaultWallOutlineColor, "WallOutlineColor",   "Testing", "Color used locally for rendering wall outlines (r g b), (values between 0 and 1), or #hexcolor"));
-   mSettings.add(new Setting<GoalZoneFlashStyle> ("GoalZoneFlashStyle",  GoalZoneFlashOriginal,           "GoalZoneFlashStyle", "Testing", "Different flash patterns when goal is captured in ZC game: Original, Experimental, None"));
-   mSettings.add(new Setting<U16>                ("ClientPortNumber",    0,                               "ClientPortNumber",   "Testing", "Only helps when punching through firewall when using router's port forwarded for client port number"));
-   mSettings.add(new Setting<YesNo>              ("DisableScreenSaver",  Yes,                             "DisableScreenSaver", "Testing", "Disable ScreenSaver from having no input from keyboard/mouse, useful when using joystick"));
+   ////                       Data type        Setting name                Default value           INI Key                      INI Section  INI Comment                                               
+   //mSettings.add(new Setting<string>        ("LastName",                 "ChumpChange",         "LastName",                    "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
+   //mSettings.add(new Setting<DisplayMode>   ("WindowMode",               DISPLAY_MODE_WINDOWED, "WindowMode",                  "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
+   //mSettings.add(new Setting<YesNo>         ("UseFakeFullscreen",        Yes,                   "UseFakeFullscreen",           "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
+   //mSettings.add(new Setting<RelAbs>        ("ControlMode",              Absolute,              "ControlMode",                 "Settings", "Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)"));
+   //mSettings.add(new Setting<YesNo>         ("VoiceEcho",                No,                    "VoiceEcho",                   "Settings", "Play echo when recording a voice message? Yes/No"));
+   //mSettings.add(new Setting<YesNo>         ("ShowInGameHelp",           Yes,                   "ShowInGameHelp",              "Settings", "Show tutorial style messages in-game?  Yes/No"));
+   //mSettings.add(new Setting<string>        ("JoystickType",             NoJoystick,            "JoystickType",                "Settings", "Type of joystick to use if auto-detect doesn't recognize your controller"));
+   //mSettings.add(new Setting<string>        ("HelpItemsAlreadySeenList", "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));
+   //mSettings.add(new Setting<U32>           ("EditorGridSize",           255,                   "EditorGridSize",              "Settings", "Grid size used in the editor, mostly for snapping purposes"));
+   //mSettings.add(new Setting<YesNo>         ("LineSmoothing",            Yes,                   "LineSmoothing",               "Settings", "Activates anti-aliased rendering.  This may be a little slower on some machines.  Yes/No"));
+
+   //mSettings.add(new Setting<ColorEntryMode>("ColorEntryMode",           ColorEntryMode100,     "ColorEntryMode",        "EditorSettings", "Specifies which color entry mode to use: RGB100, RGB255, RGBHEX; best to let the game manage this"));
+
+   /////// Testing
+   //mSettings.add(new Setting<YesNo>              ("NeverConnectDirect",  No,                              "NeverConnectDirect", "Testing", "Never connect to pingable internet server directly; forces arranged connections via master"));
+   //mSettings.add(new Setting<Color>              ("WallFillColor",       Colors::DefaultWallFillColor,    "WallFillColor",      "Testing", "Color used locally for rendering wall fill (r g b), (values between 0 and 1), or #hexcolor"));
+   //mSettings.add(new Setting<Color>              ("WallOutlineColor",    Colors::DefaultWallOutlineColor, "WallOutlineColor",   "Testing", "Color used locally for rendering wall outlines (r g b), (values between 0 and 1), or #hexcolor"));
+   //mSettings.add(new Setting<GoalZoneFlashStyle> ("GoalZoneFlashStyle",  GoalZoneFlashOriginal,           "GoalZoneFlashStyle", "Testing", "Different flash patterns when goal is captured in ZC game: Original, Experimental, None"));
+   //mSettings.add(new Setting<U16>                ("ClientPortNumber",    0,                               "ClientPortNumber",   "Testing", "Only helps when punching through firewall when using router's port forwarded for client port number"));
+   //mSettings.add(new Setting<YesNo>              ("DisableScreenSaver",  Yes,                             "DisableScreenSaver", "Testing", "Disable ScreenSaver from having no input from keyboard/mouse, useful when using joystick"));
 
 
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
@@ -433,10 +439,11 @@ extern F32 gDefaultLineWidth;
 extern F32 gLineWidth3;
 extern F32 gLineWidth4;
 
+typedef Vector<AbstractSetting<IniKey::SettingsItem> *> SettingsType;
 
 static void loadSettings(CIniFile *ini, IniSettings *iniSettings, const string &section)
 {
-   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
+   SettingsType settings = iniSettings->mSettings.getSettingsInSection(section);
 
    for(S32 i = 0; i < settings.size(); i++)
       settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
@@ -459,7 +466,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->mSettings.setVal("WindowMode", DISPLAY_MODE_FULL_SCREEN_STRETCHED);
 #endif
 
-   iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>("WindowMode");
+   iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
 
 #ifndef ZAP_DEDICATED
    iniSettings->joystickLinuxUseOldDeviceSystem = ini->GetValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
@@ -1645,7 +1652,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    const char *section = "Settings";
    ini->addSection(section);
 
-   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
+   SettingsType settings = iniSettings->mSettings.getSettingsInSection(section);
 
    if(ini->numSectionComments(section) == 0)
    {
@@ -1723,7 +1730,7 @@ static void writeEditorSettings(CIniFile *ini, IniSettings *iniSettings)
    const char *section = "EditorSettings";
    ini->addSection(section);
 
-   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
+   SettingsType settings = iniSettings->mSettings.getSettingsInSection(section);
 
    if(ini->numSectionComments(section) == 0)
    {

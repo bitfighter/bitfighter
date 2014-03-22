@@ -191,7 +191,7 @@ S32 LoadoutIndicator::render(ClientGame *game) const
 {
    S32 top;
 
-   DisplayMode windowMode = game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
+   DisplayMode windowMode = game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
 
    // Old loadout
    top = Parent::prepareToRenderFromDisplay(windowMode, LoadoutIndicatorTopPos - 1, LoadoutIndicatorHeight + 1);

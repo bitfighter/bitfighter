@@ -168,6 +168,7 @@ struct UserSettings
 class CIniFile;
 class InputCodeManager;
 
+//template <class T>
 struct IniSettings      // With defaults specified
 {
 private:
@@ -177,7 +178,7 @@ public:
    IniSettings();       // Constructor
    virtual ~IniSettings();
 
-   Settings mSettings;
+   Settings<IniKey::SettingsItem> mSettings;
 
    DisplayMode oldDisplayMode;
    bool joystickLinuxUseOldDeviceSystem;

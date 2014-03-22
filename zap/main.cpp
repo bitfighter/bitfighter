@@ -486,7 +486,7 @@ void shutdownBitfighter()
       Joystick::shutdownJoystick();
 
       // Save current window position if in windowed mode
-      if(settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode") == DISPLAY_MODE_WINDOWED)
+      if(settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode) == DISPLAY_MODE_WINDOWED)
       {
          settings->getIniSettings()->winXPos = VideoSystem::getWindowPositionX();
          settings->getIniSettings()->winYPos = VideoSystem::getWindowPositionY();
@@ -548,9 +548,9 @@ void createClientGame(GameSettingsPtr settings)
    if(!settings->isDedicatedServer())
    {
       // Grab some values from the settings
-      U16    portNumber     = settings->getIniSettings()->mSettings.getVal<U16>("ClientPortNumber");
+      U16    portNumber     = settings->getIniSettings()->mSettings.getVal<U16>(IniKey::ClientPortNumber);
       string lastEditorName = settings->getIniSettings()->lastEditorName;
-      string lastName       = settings->getIniSettings()->mSettings.getVal<string>("LastName");
+      string lastName       = settings->getIniSettings()->mSettings.getVal<string>(IniKey::LastName);
 
       // Create a new client, and let the system figure out IP address and assign a port
       // ClientGame destructor will clean up UIManager
@@ -583,7 +583,7 @@ void createClientGame(GameSettingsPtr settings)
          //   gClientGame = gClientGame1;
          //}
          //gClientGame->getUIManager()->getUI<NameEntryUserInterface>()->activate();     <-- won't work no more!
-         Game::seedRandomNumberGenerator(settings->getIniSettings()->mSettings.getVal<string>("LastName"));
+         Game::seedRandomNumberGenerator(settings->getIniSettings()->mSettings.getVal<string>(IniKey::LastName));
       }
       else  // Skipping startup screen
       {
@@ -946,7 +946,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       GameSettings::iniFile.SetValue("EditorPlugins", "Plugin1", "Ctrl+'|draw_stars.lua|Create polygon/star");
 
       // Add back linesmoothing option
-      settings->getIniSettings()->mSettings.setVal("LineSmoothing", Yes);
+      settings->getIniSettings()->mSettings.setVal(IniKey::LineSmoothing, Yes);
    }
 
    // 019a:

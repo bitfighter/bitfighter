@@ -1124,9 +1124,10 @@ static void setFullscreenCallback(ClientGame *game, U32 mode)
    GameSettings *settings = game->getSettings();
 
    // Save existing setting
-   settings->getIniSettings()->oldDisplayMode = game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");     
+   settings->getIniSettings()->oldDisplayMode = 
+            game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
 
-   settings->getIniSettings()->mSettings.setVal("WindowMode", (DisplayMode)mode);
+   settings->getIniSettings()->mSettings.setVal(IniKey::WindowMode, (DisplayMode)mode);
    VideoSystem::actualizeScreenMode(game->getSettings(), false, game->getUIManager()->getCurrentUI()->usesEditorScreenMode());
 }
 
@@ -1168,7 +1169,7 @@ void OptionsMenuUserInterface::setupMenus()
                                  "on start, bypassing the first screen", KEY_A));
 
 #ifndef TNL_OS_MOBILE
-   addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode")));
+   addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode)));
 #endif
 
 #ifdef INCLUDE_CONN_SPEED_ITEM
@@ -1198,7 +1199,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
    DisplayMode oldMode = settings->getIniSettings()->oldDisplayMode;
 
    // Save current setting
-   DisplayMode curMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
+   DisplayMode curMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
    settings->getIniSettings()->oldDisplayMode = curMode;
 
    DisplayMode mode;
@@ -1224,7 +1225,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
       mode = (nextmode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : nextmode; // Bounds check
    }
 
-   settings->getIniSettings()->mSettings.setVal("WindowMode", mode);
+   settings->getIniSettings()->mSettings.setVal(IniKey::WindowMode, mode);
    VideoSystem::actualizeScreenMode(settings, false, editorScreenMode);
 }
 
@@ -1297,7 +1298,7 @@ void InputOptionsMenuUserInterface::render()
 // Callbacks for InputOptions menu
 static void setControlsCallback(ClientGame *game, U32 val)
 {
-   game->getSettings()->getIniSettings()->mSettings.setVal("ControlMode", RelAbs(val));
+   game->getSettings()->getIniSettings()->mSettings.setVal(IniKey::ControlMode, RelAbs(val));
 }
 
 
@@ -1309,7 +1310,8 @@ static void defineKeysCallback(ClientGame *game, U32 unused)
 
 static void setControllerCallback(ClientGame *game, U32 joystickIndex)
 {
-   game->getSettings()->getIniSettings()->mSettings.setVal("JoystickType", Joystick::JoystickPresetList[joystickIndex].identifier);
+   game->getSettings()->getIniSettings()->mSettings.setVal(IniKey::JoystickType, 
+                                                           Joystick::JoystickPresetList[joystickIndex].identifier);
    Joystick::setSelectedPresetIndex(joystickIndex);
 }
 
@@ -1421,7 +1423,7 @@ void InputOptionsMenuUserInterface::setupMenus()
    opts.push_back(ucase(toString(Absolute)));
    TNLAssert(Relative < Absolute, "Items added in wrong order!");
 
-   RelAbs mode = settings->getIniSettings()->mSettings.getVal<RelAbs>("ControlMode");
+   RelAbs mode = settings->getIniSettings()->mSettings.getVal<RelAbs>(IniKey::ControlMode);
 
    addMenuItem(new ToggleMenuItem("CONTROLS:", opts, (U32)mode, true, 
                                   setControlsCallback, "Set controls to absolute (normal) or relative (like a tank) mode", KEY_C));
@@ -1496,7 +1498,7 @@ static void setVoiceVolumeCallback(ClientGame *game, U32 vol)
 
 static void setVoiceEchoCallback(ClientGame *game, U32 val)
 {
-   game->getSettings()->getIniSettings()->mSettings.setVal("VoiceEcho", YesNo(val));
+   game->getSettings()->getIniSettings()->mSettings.setVal(IniKey::VoiceEcho, YesNo(val));
 }
 
 
@@ -1524,8 +1526,8 @@ void SoundOptionsMenuUserInterface::setupMenus()
    opts.clear();
    opts.push_back("DISABLED");      // No == 0
    opts.push_back("ENABLED");       // Yes == 1
-   addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, (U32)settings->getIniSettings()->mSettings.getVal<YesNo>("VoiceEcho"), true, 
-                                  setVoiceEchoCallback, "Toggle whether you hear your voice on voice chat",  KEY_E));
+   addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, (U32)settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VoiceEcho), 
+                                  true, setVoiceEchoCallback, "Toggle whether you hear your voice on voice chat",  KEY_E));
 }
 
 
@@ -1797,7 +1799,7 @@ void NameEntryUserInterface::setupMenu()
    mRenderSpecialInstructions = false;
 
    addMenuItem(new MenuItem("PLAY", nameAndPasswordAcceptCallback, ""));
-   addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->mSettings.getVal<string>("LastName"), 
+   addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->mSettings.getVal<string>(IniKey::LastName), 
                                     getGame()->getSettings()->getDefaultName(), "", MAX_PLAYER_NAME_LENGTH));
 
    getMenuItem(1)->setFilter(nickNameFilter);  // Quotes are incompatible with PHPBB3 logins, %s are used for var substitution

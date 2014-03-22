@@ -1827,7 +1827,7 @@ Move *GameUserInterface::getCurrentMove()
 
    // Using relative controls -- all turning is done relative to the direction of the ship, so
    // we need to udate the move a little
-   if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<RelAbs>("ControlMode") == Relative)
+   if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<RelAbs>(IniKey::ControlMode) == Relative)
    {
       mTransformedMove = mCurrentMove;    // Copy move
 
@@ -2070,7 +2070,7 @@ void GameUserInterface::VoiceRecorder::process()
       GameType *gameType = mGame->getGameType();
 
       if(gameType && sendBuffer->getBufferSize() < 1024)      // Don't try to send too big
-         gameType->c2sVoiceChat(mGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VoiceEcho"), sendBuffer);
+         gameType->c2sVoiceChat(mGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VoiceEcho), sendBuffer);
    }
 }
 
@@ -2579,19 +2579,19 @@ void GameUserInterface::renderObjectIds() const
 }
 
 
-void GameUserInterface::saveAlreadySeenLevelupMessageList()
-{
-   getGame()->getSettings()->getIniSettings()->mSettings.setVal("LevelupItemsAlreadySeenList", 
-                                                                getAlreadySeenLevelupMessageString());
-}
+//void GameUserInterface::saveAlreadySeenLevelupMessageList()
+//{
+//   getGame()->getSettings()->getIniSettings()->mSettings.setVal("LevelupItemsAlreadySeenList", 
+//                                                                getAlreadySeenLevelupMessageString());
+//}
 
 
-void GameUserInterface::loadAlreadySeenLevelupMessageList()
-{
-   setAlreadySeenLevelupMessageString(
-         getGame()->getSettings()->getIniSettings()->mSettings.getVal<string>("LevelupItemsAlreadySeenList")
-   );
-}
+//void GameUserInterface::loadAlreadySeenLevelupMessageList()
+//{
+//   setAlreadySeenLevelupMessageString(
+//         getGame()->getSettings()->getIniSettings()->mSettings.getVal<string>("LevelupItemsAlreadySeenList")
+//   );
+//}
 
 
 const string GameUserInterface::getAlreadySeenLevelupMessageString() const
@@ -3319,8 +3319,9 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
       S32 displayAreaHeight = (mMessages.size() - 1) * lineHeight;     
       S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
 
-      scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                             0.0f, F32(displayAreaYPos - displayAreaHeight), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), F32(displayAreaHeight));
+      scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode), 0, 
+                             F32(displayAreaYPos - displayAreaHeight), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), 
+                             F32(displayAreaHeight));
    }
 
    // Initialize the starting rendering position.  This represents the bottom of the message rendering area, and

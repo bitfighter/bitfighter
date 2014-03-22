@@ -4,12 +4,14 @@
 //------------------------------------------------------------------------------
 
 #include "master.h"
+
 #include "database.h"            // For writing to the database
 #include "DatabaseAccessThread.h"
 #include "GameJoltConnector.h"
 
 #include "../zap/stringUtils.h"  // For itos, replaceString
 #include "../zap/IniFile.h"      // For INI reading/writing
+
 
 
 namespace Zap
@@ -21,40 +23,16 @@ namespace Zap
 namespace Master 
 {
 
-
 // Constructor
 MasterSettings::MasterSettings(const string &iniFile)     
 {
    ini.SetPath(iniFile);
 
-   // Note that on the master, our settings are read-only, so there is no need to specify a comment
-   //                      Data type  Setting name                       Default value         INI Key                                INI Section                                  
-   mSettings.add(new Setting<string>("ServerName",                 "Bitfighter Master Server", "name",                                 "host"));
-   mSettings.add(new Setting<string>("JsonOutfile",                      "server.json",        "json_file",                            "host"));
-   mSettings.add(new Setting<U32>   ("Port",                                 25955,            "port",                                 "host"));
-   mSettings.add(new Setting<U32>   ("LatestReleasedCSProtocol",               0,              "latest_released_cs_protocol",          "host"));
-   mSettings.add(new Setting<U32>   ("LatestReleasedBuildVersion",             0,              "latest_released_client_build_version", "host"));
-                                                                                               
-   // Variables for managing access to MySQL                                                   
-   mSettings.add(new Setting<string>("MySqlAddress",                           "",             "phpbb_database_address",               "phpbb"));
-   mSettings.add(new Setting<string>("DbUsername",                             "",             "phpbb3_database_username",             "phpbb"));
-   mSettings.add(new Setting<string>("DbPassword",                             "",             "phpbb3_database_password",             "phpbb"));
-                                                                                               
-   // Variables for verifying usernames/passwords in PHPBB3                                    
-   mSettings.add(new Setting<string>("Phpbb3Database",                         "",             "phpbb3_database_name",                 "phpbb"));
-   mSettings.add(new Setting<string>("Phpbb3TablePrefix",                      "",             "phpbb3_table_prefix",                  "phpbb"));
-                                                                                               
-   // Stats database credentials                                                               
-   mSettings.add(new Setting<YesNo> ("WriteStatsToMySql",                      No,             "write_stats_to_mysql",                 "stats"));
-   mSettings.add(new Setting<string>("StatsDatabaseAddress",                   "",             "stats_database_addr",                  "stats"));
-   mSettings.add(new Setting<string>("StatsDatabaseName",                      "",             "stats_database_name",                  "stats"));
-   mSettings.add(new Setting<string>("StatsDatabaseUsername",                  "",             "stats_database_username",              "stats"));
-   mSettings.add(new Setting<string>("StatsDatabasePassword",                  "",             "stats_database_password",              "stats"));
-
-   // GameJolt settings
-   mSettings.add(new Setting<YesNo> ("UseGameJolt",                            Yes,            "UseGameJolt",                          "GameJolt"));
-   mSettings.add(new Setting<string>("GameJoltSecret",                         "",             "GameJoltSecret",                       "GameJolt"));
-}                  
+#  define SETTINGS_ITEM(typeName, enumVal, section, key, defaultVal, comment) \
+            mSettings.add(new Setting<typeName, IniKey::SettingsItem>(IniKey::enumVal, defaultVal, key, section, comment));
+      MASTER_SETTINGS_TABLE
+#  undef SETTINGS_ITEM
+}
 
 
 void MasterSettings::readConfigFile()
@@ -70,7 +48,7 @@ void MasterSettings::readConfigFile()
    loadSettingsFromINI();
 
    // Not sure if this should go here...
-   if(getVal<U32>("LatestReleasedCSProtocol") == 0 && getVal<U32>("LatestReleasedBuildVersion") == 0)
+   if(getVal<U32>(IniKey::LatestReleasedCSProtocol) == 0 && getVal<U32>(IniKey::LatestReleasedBuildVersion) == 0)
       logprintf(LogConsumer::LogError, "Unable to find a valid protocol line or build_version in config file... disabling update checks!");
 }
 
@@ -88,7 +66,7 @@ void MasterSettings::loadSettingsFromINI()
       string section = ini.getSectionName(i);
 
       // Enumerate all settings we've defined for [section]
-      Vector<AbstractSetting *> settings = mSettings.getSettingsInSection(section);
+      Vector<AbstractSetting<IniKey::SettingsItem>  *> settings = mSettings.getSettingsInSection(section);
 
       for(S32 j = 0; j < settings.size(); j++)
          settings[j]->setValFromString(ini.GetValue(section, settings[j]->getKey(), settings[j]->getDefaultValueString()));
@@ -127,7 +105,7 @@ void MasterSettings::loadSettingsFromINI()
    string motdFilename = ini.GetValue("motd", "motd_file", "motd");  // Default 'motd' in current directory
 
    // Grab the current message and add it to the map as the most recently released build
-   motdClientMap[getVal<U32>("LatestReleasedBuildVersion")] = getCurrentMOTDFromFile(motdFilename);
+   motdClientMap[getVal<U32>(IniKey::LatestReleasedBuildVersion)] = getCurrentMOTDFromFile(motdFilename);
 }
 
 
@@ -164,7 +142,7 @@ string MasterSettings::getMotd(U32 clientBuildVersion) const
 
    // Use latest if build version is U32_MAX
    if(clientBuildVersion == U32_MAX)
-      clientBuildVersion = getVal<U32>("LatestReleasedBuildVersion");
+      clientBuildVersion = getVal<U32>(IniKey::LatestReleasedBuildVersion);
 
    map <U32, string>::const_iterator iter = motdClientMap.find(clientBuildVersion);
    if(iter != motdClientMap.end())
@@ -211,12 +189,12 @@ MasterServer::~MasterServer()
 
 NetInterface *MasterServer::createNetInterface() const
 {
-   U32 port = mSettings->getVal<U32>("Port");
+   U32 port = mSettings->getVal<U32>(IniKey::Port);
    NetInterface *netInterface = new NetInterface(Address(IPProtocol, Address::Any, port));
 
    // Log a welcome message in the main log and to the console
    logprintf("[%s] Master Server \"%s\" started - listening on port %d", getTimeStamp().c_str(),
-                                                                         getSetting<string>("ServerName").c_str(),
+                                                                         getSetting<string>(IniKey::ServerName).c_str(),
                                                                          port);
    return netInterface;
 }
@@ -312,7 +290,6 @@ void MasterServer::idle(const U32 timeDelta)
       MasterServerConnection::removeOldEntriesFromRatingsCache();    //<== need non-static access
       mCleanupTimer.reset();
    }
-
 
    // Handle writing our JSON file
    mJsonWriteTimer.update(timeDelta);

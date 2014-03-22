@@ -264,10 +264,9 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 /////
 
    S32 buttonWidth = getButtonWidth(items, count);
-
+   DisplayMode displayMode = getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
+   
    S32 yPos;
-
-   DisplayMode displayMode = getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
 
    if(newItems)      // Draw the new items we're transitioning to
       yPos = prepareToRenderToDisplay(displayMode, top, oldHeight, height);

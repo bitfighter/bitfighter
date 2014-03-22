@@ -435,7 +435,7 @@ void GameSettings::setLoginCredentials(const string &name, const string &passwor
 
    if(save)
    {
-      mIniSettings.mSettings.setVal("LastName", name);          
+      mIniSettings.mSettings.setVal(IniKey::LastName, name);          
       mIniSettings.lastPassword = password;
    
       iniFile.WriteFile();
@@ -450,7 +450,7 @@ void GameSettings::updatePlayerName(const string &name)
 
    if(!mPlayerNameSpecifiedOnCmdLine)
    {
-      mIniSettings.mSettings.setVal("LastName", name);      // Save new name to the INI
+      mIniSettings.mSettings.setVal(IniKey::LastName, name);      // Save new name to the INI
       iniFile.WriteFile();
    }
 }
@@ -467,7 +467,7 @@ void GameSettings::setAutologin(bool autologin)
 {
    if(autologin)
    {
-      mIniSettings.name     = mIniSettings.mSettings.getVal<string>("LastName");
+      mIniSettings.name     = mIniSettings.mSettings.getVal<string>(IniKey::LastName);
       mIniSettings.password = mIniSettings.lastPassword;
    }
    else
@@ -883,7 +883,7 @@ void GameSettings::onFinishedLoading()
    mPlayerNameSpecifiedOnCmdLine = (cmdLineVal!= "");
 
    //                                 Cmd Line value                    User must set manually in INI            Saved in INI based on last entry       
-   mPlayerName             = *choose( cmdLineVal,                       mIniSettings.name,                       mIniSettings.mSettings.getVal<string>("LastName"));
+   mPlayerName             = *choose( cmdLineVal,                       mIniSettings.name,                       mIniSettings.mSettings.getVal<string>(IniKey::LastName));
    mPlayerPassword         = *choose( getString(LOGIN_PASSWORD),        mIniSettings.password,                   mIniSettings.lastPassword);
 
    cmdLineVal = getString(MASTER_ADDRESS);
@@ -917,7 +917,7 @@ void GameSettings::onFinishedLoading()
    // In all of these cases, if something was specified on the cmd line, write the result directly to the INI, clobbering whatever was there.
    // When we need the value, we'll get it from the INI.
    if(cmdLineDisplayMode != DISPLAY_MODE_UNKNOWN)
-      getIniSettings()->mSettings.setVal("WindowMode", cmdLineDisplayMode);
+      getIniSettings()->mSettings.setVal(IniKey::WindowMode, cmdLineDisplayMode);
 
    if(xpos != S32_MIN)
    {
@@ -1196,13 +1196,13 @@ void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
 
 const Color GameSettings::getWallFillColor() const
 {
-   return mIniSettings.mSettings.getVal<Color>("WallFillColor");
+   return mIniSettings.mSettings.getVal<Color>(IniKey::WallFillColor);
 }
 
 
 const Color GameSettings::getWallOutlineColor() const
 {
-   return mIniSettings.mSettings.getVal<Color>("WallOutlineColor");
+   return mIniSettings.mSettings.getVal<Color>(IniKey::WallOutlineColor);
 }
 
 
@@ -1291,13 +1291,13 @@ InputMode GameSettings::getInputMode()
 
 void GameSettings::setShowingInGameHelp(bool show)
 {
-   mIniSettings.mSettings.setVal("ShowInGameHelp", show ? Yes : No);
+   mIniSettings.mSettings.setVal(IniKey::ShowInGameHelp, show ? Yes : No);
 }
 
 
 bool GameSettings::getShowingInGameHelp()
 {
-   return mIniSettings.mSettings.getVal<YesNo>("ShowInGameHelp");
+   return mIniSettings.mSettings.getVal<YesNo>(IniKey::ShowInGameHelp);
 }
 
 

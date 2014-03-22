@@ -174,7 +174,7 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
    // Otherwise, it makes more sense to remember what the user had last specified
    if(!hasBeenOpenedBefore && joystickType != NoJoystick)
    {
-	  settings->getIniSettings()->mSettings.setVal("JoystickType", joystickType);
+	   settings->getIniSettings()->mSettings.setVal(IniKey::JoystickType, joystickType);
       setSelectedPresetIndex(Joystick::getJoystickIndex(joystickType));
    }
 
@@ -248,7 +248,7 @@ string Joystick::autodetectJoystick(GameSettings *settings)
       return JoystickPresetList[match].identifier;
    
    // If we've made it here, let's try the value stored in the INI
-   string lastStickUsed = settings->getIniSettings()->mSettings.getVal<string>("JoystickType");
+   string lastStickUsed = settings->getIniSettings()->mSettings.getVal<string>(IniKey::JoystickType);
 
    // Let's validate that, shall we?
    for(S32 i = 0; i < JoystickPresetList.size(); i++)

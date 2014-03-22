@@ -161,7 +161,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 
    mSaveMsgTimer.setPeriod(FIVE_SECONDS);    
 
-   mGridSize = game->getSettings()->getIniSettings()->mSettings.getVal<U32>("EditorGridSize");
+   mGridSize = game->getSettings()->getIniSettings()->mSettings.getVal<U32>(IniKey::EditorGridSize);
 
    mQuitLocked = false;
 }
@@ -1985,7 +1985,7 @@ void EditorUserInterface::renderReferenceShip()
       const F32 spaceAngle = 0.0278f * FloatTau;
       glColor(Colors::green, 0.35f);
       glLineWidth(gLineWidth1);
-      drawDashedCircle(Point(0,0), Ship::CollisionRadius, 10, spaceAngle, 0);
+      drawDashedCircle(Point(0,0), (F32)Ship::CollisionRadius, 10, spaceAngle, 0);
       glLineWidth(gDefaultLineWidth);
 
       // And show how far it can see
@@ -5384,7 +5384,7 @@ void EditorMenuUserInterface::setupMenus()
 
    clearMenuItems();
    addMenuItem(new MenuItem("RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
-   addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode")));
+   addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode)));
    addMenuItem(new MenuItem("TEST LEVEL",       testLevelCallback,           "", KEY_T));
    addMenuItem(new MenuItem("SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
    addMenuItem(new MenuItem("EDITOR SECRETS",   activateHelpCallback,        "", KEY_E, keyHelp));

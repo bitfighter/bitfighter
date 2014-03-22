@@ -424,8 +424,9 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
       // than normal.  That, combined with scissors clipping, results in the rolling-up effect.
       F32 offset = height * (mHelpFading[i] ? 1 - mHelpTimer[i].getFraction() : 0);
 
-      scissorsManager.enable(mHelpFading[i], game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                             0, yPos - FontSize, (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), height);
+      DisplayMode displayMode = game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
+      scissorsManager.enable(mHelpFading[i], displayMode, 0, yPos - FontSize, 
+                             (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), height);
 
       doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos - offset);
       yPos += height - offset;      
@@ -546,13 +547,13 @@ void HelpItemManager::resetInGameHelpMessages()
 // Write seen status to INI
 void HelpItemManager::saveAlreadySeenList()
 {
-   mGameSettings->getIniSettings()->mSettings.setVal("HelpItemsAlreadySeenList", getAlreadySeenString());
+   mGameSettings->getIniSettings()->mSettings.setVal(IniKey::HelpItemsAlreadySeenList, getAlreadySeenString());
 }
 
 
 void HelpItemManager::loadAlreadySeenList()
 {
-   setAlreadySeenString(mGameSettings->getIniSettings()->mSettings.getVal<string>("HelpItemsAlreadySeenList"));
+   setAlreadySeenString(mGameSettings->getIniSettings()->mSettings.getVal<string>(IniKey::HelpItemsAlreadySeenList));
 }
 
 

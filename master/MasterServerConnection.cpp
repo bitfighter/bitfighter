@@ -492,7 +492,7 @@ static bool listClient(MasterServerConnection *client)
 // This gets updated whenever we gain or lose a server, at most every 5 seconds (currently)
 void MasterServerConnection::writeClientServerList_JSON()
 {
-   string jsonfile = mMaster->getSetting<string>("JsonOutfile");
+   string jsonfile = mMaster->getSetting<string>(IniKey::JsonOutfile);
 
    // Don't write if we don't have a file
    if(jsonfile == "")
@@ -1458,7 +1458,7 @@ void MasterServerConnection::sendMotd()
    // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
    string motdString = mMaster->getSettings()->getMotd(mClientBuild);
 
-   m2cSetMOTD(mMaster->getSetting<string>("ServerName"), motdString.c_str());     // Even level 0 clients can handle this
+   m2cSetMOTD(mMaster->getSetting<string>(IniKey::ServerName), motdString.c_str());     // Even level 0 clients can handle this
 }
 
 
@@ -1617,8 +1617,8 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
          }
 
          // If client needs to upgrade, tell them
-         m2cSendUpdgradeStatus(mMaster->getSetting<U32>("LatestReleasedCSProtocol")   > mCSProtocolVersion || 
-                               mMaster->getSetting<U32>("LatestReleasedBuildVersion") > mClientBuild);
+         m2cSendUpdgradeStatus(mMaster->getSetting<U32>(IniKey::LatestReleasedCSProtocol)  > mCSProtocolVersion || 
+                               mMaster->getSetting<U32>(IniKey::LatestReleasedBuildVersion)> mClientBuild);
 
          // Send message of the day
          sendMotd();

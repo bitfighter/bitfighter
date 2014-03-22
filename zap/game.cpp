@@ -1212,7 +1212,7 @@ F32 Game::getRenderScale(bool sensorActive) const
    static const F32 sensorScale = (F32)PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL / 
                                   (F32)PLAYER_VISUAL_DISTANCE_HORIZONTAL;
 
-   return sensorActive ? sensorScale : 1.0;
+   return sensorActive ? sensorScale : 1;
 }
 
 
