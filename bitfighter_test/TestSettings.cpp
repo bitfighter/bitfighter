@@ -44,6 +44,13 @@ enum TestSettingsKey2 {
 //}
 
 
+TEST(SettingsTest, NoMeansNo)
+{
+   // Make sure these still mean what we think then mean
+   ASSERT_FALSE(No);
+   ASSERT_TRUE(Yes);
+}
+
 
 TEST(SettingsTest, SetValFromString)
 {
