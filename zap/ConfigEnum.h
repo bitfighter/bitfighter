@@ -62,17 +62,15 @@ enum sfxSets {
 };
 
 
-//enum DisplayMode {
-//   DISPLAY_MODE_WINDOWED,
-//   DISPLAY_MODE_FULL_SCREEN_STRETCHED,
-//   DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED,
-//   DISPLAY_MODE_UNKNOWN    // <== Note: code depends on this being the first value that's not a real mode
-//};
-//
+#define YES_NO_TABLE \
+YES_NO_ITEM(No,  "No"  ) /* ==> 0 ==> false */ \
+YES_NO_ITEM(Yes, "Yes" ) /* ==> 1 ==> true  */ \
 
+// Gernerate an enum
 enum YesNo {
-   No,      // ==> 0 ==> false
-   Yes      // ==> 1 ==> true
+#define YES_NO_ITEM(enumVal, b) enumVal,
+    YES_NO_TABLE
+#undef YES_NO_ITEM
 };
 
 
@@ -90,16 +88,28 @@ enum ColorEntryMode {
 }; 
 
 
+#define GOAL_ZONE_FLASH_TABLE \
+GOAL_ZONE_FLASH_ITEM(GoalZoneFlashOriginal,     "Original"     )  \
+GOAL_ZONE_FLASH_ITEM(GoalZoneFlashExperimental, "Experimental" )  \
+GOAL_ZONE_FLASH_ITEM(GoalZoneFlashNone,         "None"         )  \
+
+// Gernerate an enum
 enum GoalZoneFlashStyle {
-   GoalZoneFlashOriginal,
-   GoalZoneFlashExperimental,
-   GoalZoneFlashNone
+#define GOAL_ZONE_FLASH_ITEM(enumVal, b) enumVal,
+    GOAL_ZONE_FLASH_TABLE
+#undef GOAL_ZONE_FLASH_ITEM
 };
 
 
-enum RelAbs{
-   Relative,
-   Absolute
+#define RELATIVE_ABSOLUTE_TABLE \
+RELATIVE_ABSOLUTE_ITEM(Relative, "Relative" )  \
+RELATIVE_ABSOLUTE_ITEM(Absolute, "Absolute" )  \
+
+// Gernerate an enum
+enum RelAbs {
+#define RELATIVE_ABSOLUTE_ITEM(enumVal, b) enumVal,
+    RELATIVE_ABSOLUTE_TABLE
+#undef RELATIVE_ABSOLUTE_ITEM
 };
 
 

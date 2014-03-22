@@ -92,13 +92,6 @@ public:
 // to one (DataType) from the two we have in Setting (DataType and IndexType).
 class Evaluator
 {
-private:
-   //static DisplayMode stringToDisplayMode(string mode);
-   //static ColorEntryMode stringToColorEntryMode(string mode);
-   static GoalZoneFlashStyle stringToGoalZoneFlashStyle(string style);
-   static YesNo stringToYesNo(string yesNo);
-   static RelAbs stringToRelAbs(string relAbs);
-
 public:
    // Templated declaration
    template <class DataType> DataType fromString(const string &val);

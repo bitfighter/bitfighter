@@ -10,17 +10,11 @@ using namespace TNL;
 namespace Zap
 {
 
-
-inline string goalZoneFlashStyleToString(GoalZoneFlashStyle flashStyle)
-{
-   if(flashStyle == GoalZoneFlashExperimental) return "Experimental";
-   if(flashStyle == GoalZoneFlashNone)         return "None";
-   return "Original";
-}
-
-
-EnumParser<DisplayMode>    displayModeEnumParser;
-EnumParser<ColorEntryMode> colorEntryModeEnumParser;
+EnumParser<DisplayMode>        displayModeEnumParser;
+EnumParser<ColorEntryMode>     colorEntryModeEnumParser;
+EnumParser<YesNo>              yesNoEnumParser;
+EnumParser<GoalZoneFlashStyle> goalZoneFlashEnumParser;
+EnumParser<RelAbs>             relativeAbsoluteEnumParser;
 
 
 class EnumInitializer
@@ -40,35 +34,23 @@ public:
     COLOR_ENTRY_MODES_TABLE
 #undef COLOR_ENTRY_MODE_ITEM
 
+#define YES_NO_ITEM(value, name) yesNoEnumParser.addItem(name, value);
+    YES_NO_TABLE
+#undef YES_NO_ITEM
+
+#define GOAL_ZONE_FLASH_ITEM(value, name) goalZoneFlashEnumParser.addItem(name, value);
+    GOAL_ZONE_FLASH_TABLE
+#undef GOAL_ZONE_FLASH_ITEM
+
+#define RELATIVE_ABSOLUTE_ITEM(value, name) relativeAbsoluteEnumParser.addItem(name, value);
+    RELATIVE_ABSOLUTE_TABLE
+#undef RELATIVE_ABSOLUTE_ITEM
+
       alreadyRan = true;
    }
 };
 
 static EnumInitializer enumInitializer;      // Static class only exists to run the intializer once
-
-
-// Convert a string value to a DisplayMode enum value
-GoalZoneFlashStyle Evaluator::stringToGoalZoneFlashStyle(string style)
-{
-   if(lcase(style) == "none")
-      return GoalZoneFlashNone;
-   else if(lcase(style) == "experimental")
-      return GoalZoneFlashExperimental;
-   else
-      return GoalZoneFlashOriginal;     // <== default
-}
-
-
-YesNo Evaluator::stringToYesNo(string yesNo)
-{
-   return lcase(yesNo) == "yes" ? Yes : No;
-}
-
-
-RelAbs Evaluator::stringToRelAbs(string relAbs)
-{
-   return lcase(relAbs) == "relative" ? Relative : Absolute;
-}
 
 
 // Templated default - needs to be overriden
@@ -82,24 +64,23 @@ template<> string             Evaluator::fromString(const string &val) { return 
 template<> S32                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
 template<> U32                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
 template<> U16                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
-template<> DisplayMode        Evaluator::fromString(const string &val) { return displayModeEnumParser.getVal(val); }
-template<> YesNo              Evaluator::fromString(const string &val) { return stringToYesNo(val);              }
-template<> RelAbs             Evaluator::fromString(const string &val) { return stringToRelAbs(val);             }
-template<> ColorEntryMode     Evaluator::fromString(const string &val) { return colorEntryModeEnumParser.getVal(val); }
-template<> GoalZoneFlashStyle Evaluator::fromString(const string &val) { return stringToGoalZoneFlashStyle(val); }
+template<> DisplayMode        Evaluator::fromString(const string &val) { return displayModeEnumParser.getVal(val);      }
+template<> YesNo              Evaluator::fromString(const string &val) { return yesNoEnumParser.getVal(val);            }
+template<> RelAbs             Evaluator::fromString(const string &val) { return relativeAbsoluteEnumParser.getVal(val); }
+template<> ColorEntryMode     Evaluator::fromString(const string &val) { return colorEntryModeEnumParser.getVal(val);   }
+template<> GoalZoneFlashStyle Evaluator::fromString(const string &val) { return goalZoneFlashEnumParser.getVal(val);    }
 template<> Color              Evaluator::fromString(const string &val) { return Color::iniValToColor(val);       }
 
 
 // Convert various things to strings
-string Evaluator::toString(const string &val)             { return val;                                          }
-string Evaluator::toString(S32 val)                       { return itos(val);                                    }
-string Evaluator::toString(YesNo yesNo)                   { return yesNo  == Yes      ? "Yes" :      "No";       }
-string Evaluator::toString(RelAbs relAbs)                 { return relAbs == Relative ? "Relative" : "Absolute"; }
-string Evaluator::toString(DisplayMode displayMode)       { return displayModeEnumParser.getKey(displayMode);    }
-string Evaluator::toString(ColorEntryMode colorMode)      { return colorEntryModeEnumParser.getKey(colorMode);   }
-string Evaluator::toString(GoalZoneFlashStyle flashStyle) { return goalZoneFlashStyleToString(flashStyle);       }
-string Evaluator::toString(const Color &color)            { return color.toHexStringForIni();                    }
-
+string Evaluator::toString(const string &val)      { return val;                                    }
+string Evaluator::toString(S32 val)                { return itos(val);                              }
+string Evaluator::toString(YesNo val)              { return yesNoEnumParser.getKey(val);            }
+string Evaluator::toString(RelAbs val)             { return relativeAbsoluteEnumParser.getKey(val); }
+string Evaluator::toString(DisplayMode val)        { return displayModeEnumParser.getKey(val);      }
+string Evaluator::toString(ColorEntryMode val)     { return colorEntryModeEnumParser.getKey(val);   }
+string Evaluator::toString(GoalZoneFlashStyle val) { return goalZoneFlashEnumParser.getKey(val);    }
+string Evaluator::toString(const Color &color)     { return color.toHexStringForIni();              }
 
 }
 
