@@ -1291,6 +1291,7 @@ void Ship::computeMaxFireDelay()
 const U32 negativeFireDelay = 123;  // how far into negative we are allowed to send.
 // MaxFireDelay + negativeFireDelay, 900 + 123 = 1023, so writeRangedU32 are sending full range of 10 bits of information.
 
+
 // Only used on client for prediction in replay moves
 void Ship::setState(ControlObjectData *state)
 {
@@ -1309,6 +1310,8 @@ void Ship::setState(ControlObjectData *state)
    mLoadout.setModulePrimary(ModuleBoost, state->mBoostActive);
    
 }
+
+
 void Ship::getState(ControlObjectData *state) const
 {
    state->mPos = getActualPos();
@@ -1323,6 +1326,7 @@ void Ship::getState(ControlObjectData *state) const
    state->mFastRecharging = mFastRecharging;
    state->mBoostActive = mLoadout.isModulePrimaryActive(ModuleBoost);
 }
+
 
 void Ship::writeControlState(BitStream *stream)
 {
