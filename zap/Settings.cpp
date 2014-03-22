@@ -47,38 +47,6 @@ public:
 static EnumInitializer enumInitializer;      // Static class only exists to run the intializer once
 
 
-
-// Convert various things to strings
-string Evaluator::toString(const string &val)             { return val;                                          }
-string Evaluator::toString(S32 val)                       { return itos(val);                                    }
-string Evaluator::toString(YesNo yesNo)                   { return yesNo  == Yes      ? "Yes" :      "No";       }
-string Evaluator::toString(RelAbs relAbs)                 { return relAbs == Relative ? "Relative" : "Absolute"; }
-string Evaluator::toString(DisplayMode displayMode)       { return displayModeEnumParser.getKey(displayMode);    }
-string Evaluator::toString(ColorEntryMode colorMode)      { return colorEntryModeEnumParser.getKey(colorMode);   }
-string Evaluator::toString(GoalZoneFlashStyle flashStyle) { return goalZoneFlashStyleToString(flashStyle);       }
-string Evaluator::toString(const Color &color)            { return color.toHexStringForIni();                    }
-
-
-// Convert a string value to a DisplayMode enum value
-//DisplayMode Evaluator::stringToDisplayMode(string mode) 
-//{
-   //if(lcase(mode) == "fullscreen-stretch")
-   //   return DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-   //else if(lcase(mode) == "fullscreen")
-   //   return DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
-   //else
-   //   return DISPLAY_MODE_WINDOWED;
-//}
-
-//// Convert a string value to our sfxSets enum
-//inline string displayModeToString(DisplayMode mode)
-//{
-//   if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)   return "Fullscreen-Stretch";
-//   if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED) return "Fullscreen";
-//   return "Window";
-//}
-
-
 // Convert a string value to a DisplayMode enum value
 GoalZoneFlashStyle Evaluator::stringToGoalZoneFlashStyle(string style)
 {
@@ -121,6 +89,16 @@ template<> ColorEntryMode     Evaluator::fromString(const string &val) { return 
 template<> GoalZoneFlashStyle Evaluator::fromString(const string &val) { return stringToGoalZoneFlashStyle(val); }
 template<> Color              Evaluator::fromString(const string &val) { return Color::iniValToColor(val);       }
 
+
+// Convert various things to strings
+string Evaluator::toString(const string &val)             { return val;                                          }
+string Evaluator::toString(S32 val)                       { return itos(val);                                    }
+string Evaluator::toString(YesNo yesNo)                   { return yesNo  == Yes      ? "Yes" :      "No";       }
+string Evaluator::toString(RelAbs relAbs)                 { return relAbs == Relative ? "Relative" : "Absolute"; }
+string Evaluator::toString(DisplayMode displayMode)       { return displayModeEnumParser.getKey(displayMode);    }
+string Evaluator::toString(ColorEntryMode colorMode)      { return colorEntryModeEnumParser.getKey(colorMode);   }
+string Evaluator::toString(GoalZoneFlashStyle flashStyle) { return goalZoneFlashStyleToString(flashStyle);       }
+string Evaluator::toString(const Color &color)            { return color.toHexStringForIni();                    }
 
 
 }
