@@ -58,6 +58,21 @@ RelAbs Evaluator::stringToRelAbs(string relAbs)
 }
 
 
+// Specializations.
+// NOTE: All template specializations must be declared in the namespace scope to be
+// c++ compliant.  Shame on Visual Studio!
+template<> string             Evaluator::fromString(const string &val) { return val;                             }
+template<> S32                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
+template<> U32                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
+template<> U16                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
+template<> DisplayMode        Evaluator::fromString(const string &val) { return stringToDisplayMode(val);        }
+template<> YesNo              Evaluator::fromString(const string &val) { return stringToYesNo(val);              }
+template<> RelAbs             Evaluator::fromString(const string &val) { return stringToRelAbs(val);             }
+template<> ColorEntryMode     Evaluator::fromString(const string &val) { return stringToColorEntryMode(val);     }
+template<> GoalZoneFlashStyle Evaluator::fromString(const string &val) { return stringToGoalZoneFlashStyle(val); }
+template<> Color              Evaluator::fromString(const string &val) { return Color::iniValToColor(val);       }
+
+
 
 }
 
