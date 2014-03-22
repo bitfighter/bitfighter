@@ -415,10 +415,16 @@ static const S32 MENU_SUBTITLE_SIZE = 18;
 void ChatUserInterface::render()
 {
    // If there is an underlying menu or other UI screen, render and dim it.
-   // We don't want to render the editor because it may be in full-screen
-   // mode with a different aspect ratio.
+   //
+   // We will skip rendering if the editor is a parent UI because of a couple
+   // of difficult-to-solve issues:
+   //  1. Fullscreen mode in editor usually has a different aspect ratio when
+   //     compared to the rest of the game (incl. the chat UI)
+   //  2. The editor may have other sub-UIs opened (like QuickMenuUIs) that
+   //     may not handle the UIManager stack appropriately (likely a bug) and
+   //     will cause stack overflows
    if((mRenderUnderlyingUI && getUIManager()->hasPrevUI()) &&
-         getUIManager()->getPrevUI() != getUIManager()->getUI<EditorUserInterface>())
+         !getUIManager()->cameFrom<EditorUserInterface>())
    {
       getUIManager()->renderPrevUI(this);  // ...render it...
       dimUnderlyingUI();
