@@ -93,7 +93,7 @@ public:
 class Evaluator
 {
 private:
-   static DisplayMode stringToDisplayMode(string mode);
+   //static DisplayMode stringToDisplayMode(string mode);
    static ColorEntryMode stringToColorEntryMode(string mode);
    static GoalZoneFlashStyle stringToGoalZoneFlashStyle(string style);
    static YesNo stringToYesNo(string yesNo);
@@ -146,7 +146,7 @@ public:
    string getValueString() const                { return Evaluator::toString(mValue);          }
    string getDefaultValueString() const         { return Evaluator::toString(mDefaultValue);   }
                                                                                               
-   void   setValFromString(const string &value) { setValue(fromString(value));                 }
+   void setValFromString(const string &value)   { setValue(fromString(value));                 }
 };
 
 
@@ -240,7 +240,48 @@ public:
 
       return settings;
    }
+};
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+   
+template <typename T>
+class EnumParser
+{
+private:
+   typedef map<string, T> ValueMapType;
+   ValueMapType mValues;
+   Vector<string> mKeys;
+
+public:
+    T getVal(const string &value) const
+    { 
+        ValueMapType::const_iterator iValue = mValues.find(lcase(value));
+        if(iValue  == mValues.end())      // Item not found, return default
+            return (T)0;
+
+        return iValue->second;
+    }
+
+
+    string getKey(T value) const
+    {
+      return mKeys[(S32)value];
+    }
+
+
+    void addItem(const string &name, T value) 
+    {
+      mValues[lcase(name)] = value;
+
+      S32 val = (S32)value;
+      
+      if(val >= mKeys.size())
+         mKeys.resize(val + 1);
+
+      mKeys[val] = name;
+    }
 };
 
 

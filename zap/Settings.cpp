@@ -10,14 +10,6 @@ using namespace TNL;
 namespace Zap
 {
 
-// Convert a string value to our sfxSets enum
-inline string displayModeToString(DisplayMode mode)
-{
-   if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)   return "Fullscreen-Stretch";
-   if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED) return "Fullscreen";
-   return "Window";
-}
-
 
 inline string colorEntryModeToString(ColorEntryMode colorEntryMode)
 {
@@ -35,27 +27,59 @@ inline string goalZoneFlashStyleToString(GoalZoneFlashStyle flashStyle)
 }
 
 
+EnumParser<DisplayMode> displayModeEnumParser;
+
+class EnumInitializer
+{
+public:
+   EnumInitializer() 
+   {
+      static bool alreadyRan = false;
+
+      TNLAssert(!alreadyRan, "Should only run once!");
+
+#define DISPLAY_MODE_ITEM(value, name) displayModeEnumParser.addItem(name, value);
+    DISPLAY_MODES_TABLE
+#undef DISPLAY_MODE_ITEM
+
+      alreadyRan = true;
+   }
+};
+
+static EnumInitializer enumInitializer;      // Static class only exists to run the intializer once
+
+
+
 // Convert various things to strings
 string Evaluator::toString(const string &val)             { return val;                                          }
 string Evaluator::toString(S32 val)                       { return itos(val);                                    }
 string Evaluator::toString(YesNo yesNo)                   { return yesNo  == Yes      ? "Yes" :      "No";       }
 string Evaluator::toString(RelAbs relAbs)                 { return relAbs == Relative ? "Relative" : "Absolute"; }
-string Evaluator::toString(DisplayMode displayMode)       { return displayModeToString(displayMode);             }
+string Evaluator::toString(DisplayMode displayMode)       { return displayModeEnumParser.getKey(displayMode);    }
 string Evaluator::toString(ColorEntryMode colorMode)      { return colorEntryModeToString(colorMode);            }
 string Evaluator::toString(GoalZoneFlashStyle flashStyle) { return goalZoneFlashStyleToString(flashStyle);       }
 string Evaluator::toString(const Color &color)            { return color.toHexStringForIni();                    }
 
 
 // Convert a string value to a DisplayMode enum value
-DisplayMode Evaluator::stringToDisplayMode(string mode) 
-{
-   if(lcase(mode) == "fullscreen-stretch")
-      return DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-   else if(lcase(mode) == "fullscreen")
-      return DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
-   else
-      return DISPLAY_MODE_WINDOWED;
-}
+//DisplayMode Evaluator::stringToDisplayMode(string mode) 
+//{
+   //if(lcase(mode) == "fullscreen-stretch")
+   //   return DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   //else if(lcase(mode) == "fullscreen")
+   //   return DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
+   //else
+   //   return DISPLAY_MODE_WINDOWED;
+//}
+
+//// Convert a string value to our sfxSets enum
+//inline string displayModeToString(DisplayMode mode)
+//{
+//   if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)   return "Fullscreen-Stretch";
+//   if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED) return "Fullscreen";
+//   return "Window";
+//}
+
 
 
 // Convert a string value to a DisplayMode enum value
@@ -105,7 +129,7 @@ template<> string             Evaluator::fromString(const string &val) { return 
 template<> S32                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
 template<> U32                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
 template<> U16                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
-template<> DisplayMode        Evaluator::fromString(const string &val) { return stringToDisplayMode(val);        }
+template<> DisplayMode        Evaluator::fromString(const string &val) { return displayModeEnumParser.getVal(val); }
 template<> YesNo              Evaluator::fromString(const string &val) { return stringToYesNo(val);              }
 template<> RelAbs             Evaluator::fromString(const string &val) { return stringToRelAbs(val);             }
 template<> ColorEntryMode     Evaluator::fromString(const string &val) { return stringToColorEntryMode(val);     }

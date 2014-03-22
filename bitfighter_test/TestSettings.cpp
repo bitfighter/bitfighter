@@ -28,6 +28,23 @@ enum TestSettingsKey2 {
 };
 
 
+
+//TEST(SettingsTest, TestEnumParser)
+//{
+//   // Test two values
+//   EXPECT_EQ(DISPLAY_MODE_FULL_SCREEN_STRETCHED, displayModeEnumParser.getVal("Fullscreen-Stretch"));
+//   EXPECT_EQ(DISPLAY_MODE_WINDOWED,              displayModeEnumParser.getVal("Window"));
+//
+//   // Reverse lookup
+//   EXPECT_EQ("Fullscreen-Stretch", displayModeEnumParser.getKey(DISPLAY_MODE_FULL_SCREEN_STRETCHED));
+//   EXPECT_EQ("Window",             displayModeEnumParser.getKey(DISPLAY_MODE_WINDOWED));
+//
+//   // Unknown names
+//   EXPECT_EQ(DISPLAY_MODE_WINDOWED, displayModeEnumParser.getVal("blah"));      // Window is default
+//}
+
+
+
 TEST(SettingsTest, SetValFromString)
 {
    Settings<TestSettingsKey> settings;
