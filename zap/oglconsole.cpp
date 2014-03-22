@@ -394,7 +394,7 @@ void OGLCONSOLE_Resize(_OGLCONSOLE_Console *console)
          for (gLine = 0; gLine < DEFAULT_MAX_LINES; gLine++)
          {
             char * s = oldLines + (gLine * oldTextWidth);
-            if(s[0] != 0) 
+            if(s != NULL && s[0] != 0)
                OGLCONSOLE_Output((OGLCONSOLE_Console)console, "%s\n",s);  // <== this nutso cast needed by VC++
          }
          free(oldLines);
