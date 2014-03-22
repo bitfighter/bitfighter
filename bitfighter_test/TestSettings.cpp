@@ -10,6 +10,7 @@
 namespace Zap
 {
 
+
 enum TestSettingsKey {
    strName,
    S32Name,
@@ -18,6 +19,14 @@ enum TestSettingsKey {
    DispMode,
    RelAbsKey
 };
+
+
+enum TestSettingsKey2 {
+  key1,
+  key2,
+  key3
+};
+
 
 TEST(SettingsTest, SetValFromString)
 {
@@ -77,6 +86,18 @@ TEST(SettingsTest, SetValFromString)
    ASSERT_EQ(Absolute, settings.getVal<RelAbs>(RelAbsKey));
    settings.getSetting(RelAbsKey)->setValFromString("RELATIVE");
    ASSERT_EQ(Relative, settings.getVal<RelAbs>(RelAbsKey));
+
+
+   // Check that we can create a separate set of settings with a different enum
+   Settings<TestSettingsKey2> settings2;
+
+   settings2.add(new Setting<string, TestSettingsKey2>(key1,  "first", "SettingName3", "Section2", "description2"));
+   settings2.add(new Setting<S32,    TestSettingsKey2>(key2,  666,     "SettingName4", "Section2", "description2"));
+   settings2.add(new Setting<YesNo,  TestSettingsKey2>(key3,  No,      "YesNoNo",      "Section2", "description2"));
+   
+   EXPECT_EQ(No, settings2.getVal<YesNo>(key3));
+   // And note that using a key from our other settings set will not compile:
+   // EXPECT_EQ(No, settings2.getVal<YesNo>(RelAbsKey));
 }
    
 
