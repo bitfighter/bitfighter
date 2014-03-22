@@ -65,7 +65,7 @@ public:
       mReadOnly = false;
    }
 
-   ~AbstractSetting() { /* Do nothing */ }      // Destructor
+   virtual ~AbstractSetting() { /* Do nothing */ }      // Destructor
 
    IndexType getIndex()   const { return mIndex; }           
    string    getKey()     const { return mIniKey; }
@@ -102,28 +102,7 @@ private:
 public:
    // Templated declaration
    template <class DataType>
-   DataType fromString(const string &val) { TNLAssert(false, "Specialize me!"); }
-
-   // Specializations
-   template<> string             fromString(const string &val) { return val;                             }
-   template<> S32                fromString(const string &val) { return atoi(val.c_str());               }
-   template<> U32                fromString(const string &val) { return atoi(val.c_str());               }
-   template<> U16                fromString(const string &val) { return atoi(val.c_str());               }
-   template<> DisplayMode        fromString(const string &val) { return stringToDisplayMode(val);        }
-   template<> YesNo              fromString(const string &val) { return stringToYesNo(val);              }
-   template<> RelAbs             fromString(const string &val) { return stringToRelAbs(val);             }
-   template<> ColorEntryMode     fromString(const string &val) { return stringToColorEntryMode(val);     }
-   template<> GoalZoneFlashStyle fromString(const string &val) { return stringToGoalZoneFlashStyle(val); }
-   template<> Color              fromString(const string &val) { return Color::iniValToColor(val);       }
-
-   static string toString(const string &val);
-   static string toString(S32 val);
-   static string toString(YesNo yesNo);
-   static string toString(RelAbs relAbs);
-   static string toString(DisplayMode displayMode);
-   static string toString(ColorEntryMode colorMode);
-   static string toString(GoalZoneFlashStyle flashStyle);
-   static string toString(const Color &color); 
+   DataType fromString(const string &val) { TNLAssert(false, "Specialize me!"); return DataType(); }
 };
 
 
@@ -133,7 +112,7 @@ public:
 template <class DataType, class IndexType>
 class Setting : public AbstractSetting<IndexType>
 {
-   typedef AbstractSetting Parent;
+   typedef AbstractSetting<IndexType> Parent;
 
 private:
    DataType mDefaultValue;
@@ -150,7 +129,7 @@ public:
       // Do nothing
    }
 
-   ~Setting() { /* Do nothing */ }
+   virtual ~Setting() { /* Do nothing */ }
 
    DataType fromString(const string &val)       { return mEvaluator.fromString<DataType>(val); }
 
@@ -178,7 +157,7 @@ private:
 
 public:
    Settings()  { /* Do nothing */ }             // Constructor
-   ~Settings() { mSettings.deleteAndClear(); }  // Destructor
+   virtual ~Settings() { mSettings.deleteAndClear(); }  // Destructor
 
 
    template <class DataType>
