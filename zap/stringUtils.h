@@ -141,15 +141,6 @@ string getExecutableDir();
 
 bool stringContainsAllTheSameCharacter(const string &str);
 
-string toString(const string &val);      
-string toString(S32 val);                
-string toString(DisplayMode displayMode);
-string toString(YesNo yesNo);            
-string toString(RelAbs relAbs); 
-string toString(ColorEntryMode colorMode);
-string toString(GoalZoneFlashStyle flashStyle);
-string toString(const Color &color);
-
 bool isPrintable(char c);
 bool isHex(char c);
 bool isHex(const string &str);

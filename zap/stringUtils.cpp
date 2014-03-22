@@ -929,54 +929,6 @@ bool stringContainsAllTheSameCharacter(const string &str)
 }
 
 
-// Convert a string value to our sfxSets enum
-inline string displayModeToString(DisplayMode mode)
-{
-   if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
-      return "Fullscreen-Stretch";
-   if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-      return "Fullscreen";
-   
-   return "Window";
-}
-
-
-inline string colorEntryModeToString(ColorEntryMode colorEntryMode)
-{
-   if(colorEntryMode == ColorEntryModeHex)
-      return "RGBHEX";
-
-   if(colorEntryMode == ColorEntryMode255)
-      return "RGB255";
-
-   return "RGB100";
-}
-
-
-inline string goalZoneFlashStyleToString(GoalZoneFlashStyle flashStyle)
-{
-   if(flashStyle == GoalZoneFlashExperimental)
-      return "Experimental";
-
-   if(flashStyle == GoalZoneFlashNone)
-      return "None";
-
-   return "Original";
-}
-
-
-// Convert various things to strings -- needed by settings (which requires a consistent naming schema);
-// used elsewhere
-string toString(const string &val)             { return val;                                          }
-string toString(S32 val)                       { return itos(val);                                    }
-string toString(YesNo yesNo)                   { return yesNo  == Yes      ? "Yes" :      "No";       }
-string toString(RelAbs relAbs)                 { return relAbs == Relative ? "Relative" : "Absolute"; }
-string toString(DisplayMode displayMode)       { return displayModeToString(displayMode);             }
-string toString(ColorEntryMode colorMode)      { return colorEntryModeToString(colorMode);            }
-string toString(GoalZoneFlashStyle flashStyle) { return goalZoneFlashStyleToString(flashStyle);       }
-string toString(const Color &color)            { return color.toHexStringForIni();                    }
-
-
 bool isPrintable(char c)
 {
    return c >= 32 && c <= 126;

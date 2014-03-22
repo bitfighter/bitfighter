@@ -1419,8 +1419,8 @@ void InputOptionsMenuUserInterface::setupMenus()
                             "Remap keyboard or joystick controls", KEY_D, KEY_K));
 
    opts.clear();
-   opts.push_back(ucase(toString(Relative)));
-   opts.push_back(ucase(toString(Absolute)));
+   opts.push_back(ucase(Evaluator::toString(Relative)));
+   opts.push_back(ucase(Evaluator::toString(Absolute)));
    TNLAssert(Relative < Absolute, "Items added in wrong order!");
 
    RelAbs mode = settings->getIniSettings()->mSettings.getVal<RelAbs>(IniKey::ControlMode);
