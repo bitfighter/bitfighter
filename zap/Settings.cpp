@@ -94,6 +94,10 @@ RelAbs Evaluator::stringToRelAbs(string relAbs)
 }
 
 
+// Templated default - needs to be overriden
+template<class DataType> DataType
+Evaluator::fromString(const string &val) { TNLAssert(false, "Specialize me!"); return DataType(); }
+
 // Specializations.
 // NOTE: All template specializations must be declared in the namespace scope to be
 // C++ compliant.  Shame on Visual Studio!

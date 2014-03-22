@@ -101,8 +101,7 @@ private:
 
 public:
    // Templated declaration
-   template <class DataType>
-   DataType fromString(const string &val) { TNLAssert(false, "Specialize me!"); return DataType(); }
+   template <class DataType> DataType fromString(const string &val);
 
    static string toString(const string &val);
    static string toString(S32 val);
@@ -169,9 +168,9 @@ public:
 
 
    template <class DataType>
-   void setVal(IndexType index, const DataType &value)
+   void setVal(IndexType indexType, const DataType &value)
    {
-      S32 key = mKeyLookup.find(index)->second;
+      S32 key = mKeyLookup.find(indexType)->second;
       AbstractSetting<IndexType> *absSet = mSettings[key];
       TNLAssert((dynamic_cast<Setting<DataType, IndexType> *>(absSet)), "Expected setting!");
 
@@ -179,18 +178,18 @@ public:
    }
 
 
-   AbstractSetting<IndexType> *getSetting(IndexType index) const
+   AbstractSetting<IndexType> *getSetting(IndexType indexType) const
    {
-      TNLAssert(mKeyLookup.find(index) != mKeyLookup.end(), "Setting with specified index not found!");
+      TNLAssert(mKeyLookup.find(indexType) != mKeyLookup.end(), "Setting with specified index not found!");
 
-      return mSettings[mKeyLookup.find(index)->second];
+      return mSettings[mKeyLookup.find(indexType)->second];
    }
 
 
    template <class DataType>
-   DataType getVal(IndexType index) const
+   DataType getVal(IndexType indexType) const
    {
-      AbstractSetting<IndexType> *abstractSetting = getSetting(index);
+      AbstractSetting<IndexType> *abstractSetting = getSetting(indexType);
       TNLAssert((dynamic_cast<Setting<DataType, IndexType> *>(abstractSetting)), "Expected setting!");
 
       return static_cast<Setting<DataType, IndexType> *>(abstractSetting)->getValue();
@@ -204,28 +203,28 @@ public:
    }
 
 
-   string getStrVal(IndexType index) const
+   string getStrVal(IndexType indexType) const
    {
-      S32 index = mKeyLookup.find(index)->second;
+      S32 index = mKeyLookup.find(indexType)->second;
       return mSettings[index]->getValueString();
    }
 
 
-   string getDefaultStrVal(IndexType index) const
+   string getDefaultStrVal(IndexType indexType) const
    {
-      return mSettings[mKeyLookup.find(index)->second]->getDefaultValueString();
+      return mSettings[mKeyLookup.find(indexType)->second]->getDefaultValueString();
    }
 
 
-   string getKey(IndexType index) const
+   string getKey(IndexType indexType) const
    {
-      return mSettings[mKeyLookup.find(index)->second]->getKey();
+      return mSettings[mKeyLookup.find(indexType)->second]->getKey();
    }
 
 
-   string getSection(IndexType index) const
+   string getSection(IndexType indexType) const
    {
-      return mSettings[mKeyLookup.find(index)->second]->getSection();
+      return mSettings[mKeyLookup.find(indexType)->second]->getSection();
    }
 
 
