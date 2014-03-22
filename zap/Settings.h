@@ -103,6 +103,15 @@ public:
    // Templated declaration
    template <class DataType>
    DataType fromString(const string &val) { TNLAssert(false, "Specialize me!"); return DataType(); }
+
+   static string toString(const string &val);
+   static string toString(S32 val);
+   static string toString(YesNo yesNo);
+   static string toString(RelAbs relAbs);
+   static string toString(DisplayMode displayMode);
+   static string toString(ColorEntryMode colorMode);
+   static string toString(GoalZoneFlashStyle flashStyle);
+   static string toString(const Color &color);
 };
 
 

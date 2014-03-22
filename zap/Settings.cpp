@@ -96,7 +96,7 @@ RelAbs Evaluator::stringToRelAbs(string relAbs)
 
 // Specializations.
 // NOTE: All template specializations must be declared in the namespace scope to be
-// c++ compliant.  Shame on Visual Studio!
+// C++ compliant.  Shame on Visual Studio!
 template<> string             Evaluator::fromString(const string &val) { return val;                             }
 template<> S32                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
 template<> U32                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
