@@ -1231,7 +1231,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
 // Save options to INI file, and return to our regularly scheduled program
 void OptionsMenuUserInterface::onEscape()
 {
-   bool autologin = getMenuItem(2)->getIntValue();
+   bool autologin = getMenuItem(3)->getIntValue();
 
    getGame()->getSettings()->setAutologin(autologin);
 
