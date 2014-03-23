@@ -349,10 +349,9 @@ void drawPolygon(S32 sides, F32 radius, F32 angle)
 // Draw an n-sided polygon
 void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
 {
-   drawPolygon(sides, radius, angle);
-
    glPushMatrix();
       glTranslate(pos);
+      drawPolygon(sides, radius, angle);
    glPopMatrix();
 }
 
