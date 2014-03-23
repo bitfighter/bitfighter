@@ -403,23 +403,6 @@ Point luaToPoint(lua_State *L, S32 index)
 }
 
 
-
-// Pop a vec object off stack, check its type, and return it
-Point getCheckedVec(lua_State *L, S32 index, const char *methodName)
-{
-   if(!luaIsPoint(L, index))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected vector arg at position %d", methodName, index);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-
-   return luaToPoint(L, index);
-}
-
-
 // Pop a point object off stack, or grab two numbers and create a point from them
 Point getPointOrXY(lua_State *L, S32 index)
 {

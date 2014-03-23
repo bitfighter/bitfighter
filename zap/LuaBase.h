@@ -105,8 +105,6 @@ void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName);
 void setfield (lua_State *L, const char *key, F32 value);
 
 bool isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable);
-Point getCheckedVec(lua_State *L, S32 index, const char *methodName);      // TODO: Delete me
-
 
 
 // This doesn't really need to be virtual, but something here does, to allow dynamic_casting to occur... I picked
