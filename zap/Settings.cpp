@@ -22,10 +22,6 @@ class EnumInitializer
 public:
    EnumInitializer() 
    {
-      static bool alreadyRan = false;
-
-      TNLAssert(!alreadyRan, "Should only run once!");
-
 #define DISPLAY_MODE_ITEM(value, name) displayModeEnumParser.addItem(name, value);
     DISPLAY_MODES_TABLE
 #undef DISPLAY_MODE_ITEM
@@ -45,8 +41,6 @@ public:
 #define RELATIVE_ABSOLUTE_ITEM(value, name) relativeAbsoluteEnumParser.addItem(name, value);
     RELATIVE_ABSOLUTE_TABLE
 #undef RELATIVE_ABSOLUTE_ITEM
-
-      alreadyRan = true;
    }
 };
 
