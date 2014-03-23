@@ -46,24 +46,7 @@
 // backport player count stuff
 
 /*
-XXX need to document timers, new luavec stuff XXX
-
 /shutdown enhancements: on screen timer after msg dismissed, instant dismissal of local notice, notice in join menu, shutdown after level, auto shutdown when quitting and players connected
-
- */
-/* Fixes after 016
-<h2>New features</h2>
-<ul>
-<li>
-</ul>
-
-
-// Scripting nots
-bot:findItems --> findItems
-bot:findGlobalItems --> findItems
-
-printToOglConsole --> printToConsole
-include (replaces require)
 
 */
 
