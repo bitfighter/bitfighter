@@ -368,17 +368,20 @@ bool isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable)
 //}
 
 
-// To check if the object at the given index is a point, we first
-// The signature is that the metatable has the field '__point'
+// To check if the object at the given index is a point
+// The signature is that it will have 'x' and 'y' fields
 bool luaIsPoint(lua_State *L, S32 index)
 {
-   if(lua_getmetatable(L, index) == 0) // No metatable?
+   if(lua_istable(L, index) == 0)   // Not a table?
       return false;
 
-   lua_pushstring(L, "__point");    // ..., mt, __point
-   lua_rawget(L, -2);               // ..., mt, bool (or nil?)
+   lua_pushstring(L, "x");    // table, ..., x
+   lua_rawget(L, index);      // table, ..., float (or nil?)
 
-   bool isPoint = (bool) lua_isboolean(L, -1);
+   lua_pushstring(L, "y");    // table, ..., y
+   lua_rawget(L, index);      // table, ..., float (or nil?)
+
+   bool isPoint = (bool) (lua_isnumber(L, -1) && lua_isnumber(L, -2));
 
    lua_pop(L, 2);
 
