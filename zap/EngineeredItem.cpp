@@ -1064,8 +1064,9 @@ Point EngineeredItem::mountToWall(const Point &pos, const WallSegmentManager *wa
    {
       setPos(anchor);
       setAnchorNormal(nrml);
-      // TODO -- After 019 release -- change this to a static_cast with a protecting assert
-      setMountSegment(dynamic_cast<WallSegment *>(mountSeg));
+
+      TNLAssert(dynamic_cast<WallSegment *>(mountSeg), "NULL WallSegment");
+      setMountSegment(static_cast<WallSegment *>(mountSeg));
 
       mSnapped = true;
       onGeomChanged();

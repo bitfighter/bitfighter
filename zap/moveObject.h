@@ -24,7 +24,7 @@ enum MoveStateNames {
 class MoveStates
 {
 private:
-   struct MoveState  // need public, not protected, for SpeedZone handling...  TODO: fix this flaw
+   struct MoveState
    {
       Point pos;        // Actual position of the ship/object
       float angle;      // Actual angle of the ship/object
