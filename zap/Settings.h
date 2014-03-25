@@ -239,7 +239,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
    
-template <typename T>
+template <class T>
 class EnumParser
 {
 private:
@@ -248,33 +248,33 @@ private:
    Vector<string> mKeys;
 
 public:
-    T getVal(const string &value) const
-    { 
-        ValueMapType::const_iterator iValue = mValues.find(lcase(value));
-        if(iValue  == mValues.end())      // Item not found, return default
-            return (T)0;
+   T getVal(const string &value) const
+   {
+      typename ValueMapType::const_iterator iValue = mValues.find(lcase(value));
+      if(iValue  == mValues.end())      // Item not found, return default
+         return (T)0;
 
-        return iValue->second;
-    }
+      return iValue->second;
+   }
 
 
-    string getKey(T value) const
-    {
+   string getKey(T value) const
+   {
       return mKeys[(S32)value];
-    }
+   }
 
 
-    void addItem(const string &name, T value) 
-    {
+   void addItem(const string &name, T value)
+   {
       mValues[lcase(name)] = value;
 
       S32 val = (S32)value;
-      
+
       if(val >= mKeys.size())
          mKeys.resize(val + 1);
 
       mKeys[val] = name;
-    }
+   }
 };
 
 
