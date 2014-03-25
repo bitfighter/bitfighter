@@ -4,12 +4,14 @@
 //------------------------------------------------------------------------------
 
 #include "Color.h"
+
+#include "MathUtils.h"     // For min/max
 #include "stringUtils.h"
+
 
 namespace Zap
 {
 
-// Constructors
 Color::Color(const Color &c)
 {
    r = c.r;
@@ -58,9 +60,9 @@ Color::Color(const string &hex)
 {
    if(hex.length() != 6)
    {
-      r = 0;
-      g = 0;
-      b = 0;
+      r = 1;
+      g = 1;
+      b = 1;
 
       return;
    }
@@ -102,9 +104,16 @@ void Color::set(const string &s)
 
    if(list.size() >= 3)
    {
-      r = (F32)atof(list[0].c_str());
-      g = (F32)atof(list[1].c_str());
-      b = (F32)atof(list[2].c_str());
+      F32 p;
+
+      p = (F32)atof(list[0].c_str());
+      r = CLAMP(p, 0, 1);
+
+      p = (F32)atof(list[1].c_str());
+      g = CLAMP(p, 0, 1);
+
+      p = (F32)atof(list[2].c_str());
+      b = CLAMP(p, 0, 1);
    }
 }
 
