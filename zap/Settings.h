@@ -156,7 +156,7 @@ private:
    Vector<AbstractSetting<IndexType> *> mSettings;
 
 public:
-   Settings()  { /* Do nothing */ }             // Constructor
+   Settings()  { /* Do nothing */ }                     // Constructor
    virtual ~Settings() { mSettings.deleteAndClear(); }  // Destructor
 
 
