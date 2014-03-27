@@ -603,7 +603,7 @@ void GameType::idle_server(U32 deltaT)
                updateClientScoreboard(clientInfo->getConnection());
          }
 
-         if(getGame()->getSettings()->getIniSettings()->allowTeamChanging)
+         if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowTeamChanging))
          {
             if(conn->mSwitchTimer.getCurrent())             // Are we still counting down until the player can switch?
                if(conn->mSwitchTimer.update(deltaT))        // Has the time run out?
@@ -2613,15 +2613,16 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
    {
       if(clientInfo->isAdmin())
       {
-         bool prev_enableServerVoiceChat = serverGame->getSettings()->getIniSettings()->enableServerVoiceChat;
+         Settings<IniKey::SettingsItem> settings = serverGame->getSettings()->getIniSettings()->mSettings;
+         bool prev_enableServerVoiceChat = settings.getVal<YesNo>(IniKey::EnableServerVoiceChat);
          loadSettingsFromINI(&GameSettings::iniFile, serverGame->getSettings());    // Why??
 
-         if(prev_enableServerVoiceChat != serverGame->getSettings()->getIniSettings()->enableServerVoiceChat)
+         if(prev_enableServerVoiceChat != settings.getVal<YesNo>(IniKey::EnableServerVoiceChat))
             for(S32 i = 0; i < mGame->getClientCount(); i++)
                if(!mGame->getClientInfo(i)->isRobot())
                {
                   GameConnection *gc = mGame->getClientInfo(i)->getConnection();
-                  gc->s2rVoiceChatEnable(serverGame->getSettings()->getIniSettings()->enableServerVoiceChat && !gc->mChatMute);
+                  gc->s2rVoiceChatEnable(settings.getVal<YesNo>(IniKey::EnableServerVoiceChat) && !gc->mChatMute);
                }
          clientInfo->getConnection()->s2cDisplayMessage(0, 0, "Configuration settings loaded");
       }
@@ -2652,8 +2653,9 @@ bool GameType::addBotFromClient(Vector<StringTableEntry> args)
       conn->s2cDisplayErrorMessage("!!! This level does not allow robots");
 
    // No default robot set
-   else if(!clientInfo->isAdmin() && settings->getIniSettings()->defaultRobotScript == "" && args.size() < 2)
-      conn->s2cDisplayErrorMessage("!!! This server doesn't have default robots configured");
+   else if(!clientInfo->isAdmin() && args.size() < 2 &&
+           settings->getIniSettings()->mSettings.getVal<string>(IniKey::DefaultRobotScript) == "")
+      conn->s2cDisplayErrorMessage("!!! This server doesn't have a default robot configured");
 
    else if(!clientInfo->isLevelChanger())
    { /* Do nothing -- error message handled upstream */ }
@@ -2919,14 +2921,14 @@ GAMETYPE_RPC_C2S(GameType, c2sSetMaxBots, (S32 count), (count))
    if(count <= 0)
       return;  // Error message handled client-side
 
-   settings->getIniSettings()->maxBots = count;
+   settings->getIniSettings()->mSettings.setVal(IniKey::MaxBots, count);
 
-   GameConnection *conn = clientInfo->getConnection();
-   TNLAssert(conn == source, "If this never fires, we can get rid of conn!");    // Added long ago, well before Dec 2013
+   //GameConnection *conn = clientInfo->getConnection();
+   //TNLAssert(conn == source, "If this never fires, we can get rid of conn!");    // Added long ago, well before Dec 2013
 
    messageVals.clear();
    messageVals.push_back(itos(count));
-   conn->s2cDisplayMessageE(GameConnection::ColorRed, SFXNone, "Maximum bots was changed to %e0", messageVals);
+   source->s2cDisplayMessageE(GameConnection::ColorRed, SFXNone, "Maximum bots was changed to %e0", messageVals);
 }
 
 
@@ -3085,7 +3087,7 @@ GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (
    gc->mChatMute = !gc->mChatMute;
 
    // if server voice chat is allowed, send voice chat status.
-   if(getGame()->getSettings()->getIniSettings()->enableServerVoiceChat)
+   if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::EnableServerVoiceChat))
       gc->s2rVoiceChatEnable(!gc->mChatMute);
 
    GameConnection *conn = clientInfo->getConnection();
@@ -3596,7 +3598,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
    ClientInfo *sourceClientInfo = source->getClientInfo();
 
    // If globally muted or voice chat is disabled on the server, don't send to anyone
-   if(source->mChatMute || !getGame()->getSettings()->getIniSettings()->enableServerVoiceChat)
+   if(source->mChatMute || !getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::EnableServerVoiceChat))
       return;
 
    if(source)

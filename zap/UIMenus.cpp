@@ -1629,12 +1629,12 @@ void RobotOptionsMenuUserInterface::setupMenus()
 
    IniSettings *iniSettings = getGame()->getSettings()->getIniSettings();
 
-   addMenuItem(new YesNoMenuItem("PLAY WITH BOTS:", iniSettings->playWithBots,
-         "Add robots to balance the teams?",  KEY_B, KEY_P));
+   addMenuItem(new YesNoMenuItem("PLAY WITH BOTS:", iniSettings->mSettings.getVal<YesNo>(IniKey::AddRobots),
+               "Add robots to balance the teams?",  KEY_B, KEY_P));
 
     // This doesn't have a callback so we'll handle it in onEscape - make sure to set the correct index!
-   addMenuItem(new CounterMenuItem("MINIMUM PLAYERS:", iniSettings->minBalancedPlayers,
-         1, 2, 32, "bots", "", "Bots will be added until total player count meets this value", KEY_M));
+   addMenuItem(new CounterMenuItem("MINIMUM PLAYERS:", iniSettings->mSettings.getVal<S32>(IniKey::MinBalancedPlayers),
+                                   1, 2, 32, "bots", "", "Bots will be added until total player count meets this value", KEY_M));
 }
 
 
@@ -1649,10 +1649,12 @@ void RobotOptionsMenuUserInterface::onEscape()
 void RobotOptionsMenuUserInterface::saveSettings()
 {
    // Save our minimum players, get the correct index of the appropriate menu item
-   getGame()->getSettings()->getIniSettings()->playWithBots = getMenuItem(0)->getIntValue() == 1;
-   getGame()->getSettings()->getIniSettings()->minBalancedPlayers = getMenuItem(1)->getIntValue();
+   GameSettings *settings = getGame()->getSettings();
 
-   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
+   settings->getIniSettings()->mSettings.setVal(IniKey::AddRobots,          getMenuItem(0)->getIntValue() == 1);
+   settings->getIniSettings()->mSettings.setVal(IniKey::MinBalancedPlayers, getMenuItem(1)->getIntValue());
+
+   saveSettingsToINI(&GameSettings::iniFile, settings);
 }
 
 
@@ -1939,13 +1941,17 @@ void HostMenuUserInterface::setupMenus()
                                      "<Empty>", "", MaxServerDescrLen, KEY_D));
 
    addMenuItem(new MenuItem(getMenuItemCount(), "PASSWORDS", passwordOptionsSelectedCallback,
-         "Set server passwords/permissions", KEY_P));
+                            "Set server passwords/permissions", KEY_P));
 
-   addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
+   addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", 
+                                 settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowGetMap), 
+                                 "", KEY_M));
 
-   addMenuItem(new YesNoMenuItem("RECORD GAMES:", settings->getIniSettings()->enableGameRecording, ""));
+   addMenuItem(new YesNoMenuItem("RECORD GAMES:", 
+                                 settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::GameRecording), 
+                                 ""));
 
-   addMenuItem(new MenuItem("PLAYBACK GAMES",    playbackGamesCallback,  ""));
+   addMenuItem(new MenuItem("PLAYBACK GAMES", playbackGamesCallback, ""));
 }
 
 
@@ -1963,11 +1969,11 @@ void HostMenuUserInterface::saveSettings()
 {
    GameSettings *settings = getGame()->getSettings();
 
-   settings->setHostName (getMenuItem(OPT_NAME)->getValue(), true);
+   settings->setHostName (getMenuItem(OPT_NAME)->getValue(),  true);
    settings->setHostDescr(getMenuItem(OPT_DESCR)->getValue(), true);
 
-   settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getIntValue() != 0);
-   settings->getIniSettings()->enableGameRecording = (getMenuItem(OPT_RECORD)->getIntValue() != 0);
+   settings->getIniSettings()->mSettings.setVal(IniKey::AllowGetMap,   getMenuItem(OPT_GETMAP)->getIntValue() != 0);
+   settings->getIniSettings()->mSettings.setVal(IniKey::GameRecording, getMenuItem(OPT_RECORD)->getIntValue() != 0);
 
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
 }

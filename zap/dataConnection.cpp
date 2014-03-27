@@ -326,7 +326,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    GameSettings *settings = game->getSettings();
 
    // Check if data connections are allowed
-   if(!settings->getIniSettings()->allowDataConnections)
+   if(!settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowDataConnections))
    {
       logprintf("This server does not allow remote access to resources.  It can be enabled in the server's INI file.");
       disconnect(ReasonConnectionsForbidden, "");

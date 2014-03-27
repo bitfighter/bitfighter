@@ -887,8 +887,8 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    // See version.h for short history of roughly what version corresponds to a game release
 
    // 016:
-   if(previousVersion < 1840 && settings->getIniSettings()->maxBots == 127)
-      settings->getIniSettings()->maxBots = 10;
+   if(previousVersion < 1840 && settings->getIniSettings()->mSettings.getVal<S32>(IniKey::MaxBots) == 127)
+      settings->getIniSettings()->mSettings.setVal(IniKey::MaxBots, 10);
 
    if(previousVersion < VERSION_016)
    {

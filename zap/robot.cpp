@@ -292,7 +292,7 @@ void Robot::onAddedToGame(Game *game)
    // Check whether a script file has been specified. If not, use the default
    if(mScriptName == "")
    {
-      string scriptName = game->getSettings()->getIniSettings()->defaultRobotScript;
+      string scriptName = game->getSettings()->getIniSettings()->mSettings.getVal<string>(IniKey::DefaultRobotScript);
       mScriptName = GameSettings::getFolderManager()->findBotFile(scriptName);
    }
 
@@ -392,7 +392,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
    if(argc >= 2)
       scriptName = argv[1];
    else
-      scriptName = game->getSettings()->getIniSettings()->defaultRobotScript;
+      scriptName = game->getSettings()->getIniSettings()->mSettings.getVal<string>(IniKey::DefaultRobotScript);
 
    FolderManager *folderManager = game->getSettings()->getFolderManager();
 
