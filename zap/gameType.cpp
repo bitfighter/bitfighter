@@ -2617,7 +2617,8 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
          bool prev_enableServerVoiceChat = settings.getVal<YesNo>(IniKey::EnableServerVoiceChat);
          loadSettingsFromINI(&GameSettings::iniFile, serverGame->getSettings());    // Why??
 
-         if(prev_enableServerVoiceChat != settings.getVal<YesNo>(IniKey::EnableServerVoiceChat))
+         bool curr_enableServerVoiceChat = settings.getVal<YesNo>(IniKey::EnableServerVoiceChat);
+         if(curr_enableServerVoiceChat, prev_enableServerVoiceChat)
             for(S32 i = 0; i < mGame->getClientCount(); i++)
                if(!mGame->getClientInfo(i)->isRobot())
                {
