@@ -479,17 +479,6 @@ static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
 }
 
 
-//static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
-//{
-//   iniSettings->neverConnectDirect = ini->GetValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
-//   iniSettings->wallFillColor.set(ini->GetValue("Testing", "WallFillColor", iniSettings->wallFillColor.toRGBString()));
-//   iniSettings->wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString()));
-//   iniSettings->oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
-//   iniSettings->clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
-//   iniSettings->disableScreenSaver = ini->GetValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
-//}
-
-
 static void loadLoadoutPresets(CIniFile *ini, GameSettings *settings)
 {
    Vector<string> rawPresets(GameSettings::LoadoutPresetCount);
