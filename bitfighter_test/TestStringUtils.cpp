@@ -65,7 +65,7 @@ TEST(StringUtilsTest, chopComment)
    EXPECT_EQ("This is a comment", chopComment("This is a comment#"));
    EXPECT_EQ("This is a comment", chopComment("This is a comment"));
    EXPECT_EQ("",                  chopComment("#"));
-
+   EXPECT_EQ("",                  chopComment(""));
 }
 
 
