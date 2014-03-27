@@ -175,7 +175,7 @@ GridDatabase *EditorUserInterface::getDatabase() const
 
 F32 EditorUserInterface::getGridSize() const
 {
-   return mGridSize;
+   return (F32)mGridSize;
 }
 
 
