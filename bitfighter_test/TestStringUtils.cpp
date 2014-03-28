@@ -127,6 +127,26 @@ TEST(StringUtilsTest, WrapStringsMaxChars)
    Vector<string> lines = wrapString(s, 8);
    EXPECT_EQ("hello", lines[0]);
    EXPECT_EQ("there", lines[1]);
+
+   // Big line
+   string longLine =
+      "Now is the winter of our discontent "
+      "Made glorious summer by this sun of York; "
+      "And all the clouds that lour'd upon our house "
+      "In the deep bosom of the ocean buried. "
+      "Now are our brows bound with victorious wreaths; "
+      "Our bruised arms hung up for monuments; "
+      "Our stern alarums changed to merry meetings, "
+      "Our dreadful marches to delightful measures.";
+
+   lines = wrapString(longLine, 70);
+
+   EXPECT_EQ("Now is the winter of our discontent Made glorious summer by this sun", lines[0]);
+   EXPECT_EQ("of York; And all the clouds that lour'd upon our house In the deep", lines[1]);
+   EXPECT_EQ("bosom of the ocean buried. Now are our brows bound with victorious", lines[2]);
+   EXPECT_EQ("wreaths; Our bruised arms hung up for monuments; Our stern alarums", lines[3]);
+   EXPECT_EQ("changed to merry meetings, Our dreadful marches to delightful", lines[4]);
+   EXPECT_EQ("measures.", lines[5]);
 }
 
 
