@@ -12,6 +12,7 @@
 #include "OpenglUtils.h"
 #include "FontManager.h"
 #include "Colors.h"
+#include "stringUtils.h"
 
 #include <stdarg.h>        // For va_args
 #include <stdio.h>         // For vsnprintf
@@ -743,52 +744,52 @@ void wrapString(const string &str, S32 wrapWidth, S32 fontSize, FontContext cont
 }
 
 
-// Given a string, break it up such that no part is wider than width.  Prefix subsequent lines with indentPrefix.
-Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const string indentPrefix)
-{
-   Vector<string> wrappedLines;
-
-   if(str == "")
-      return wrappedLines;
-
-   S32 indent = 0;
-   string prefix = "";
-
-   S32 start = 0;
-   S32 potentialBreakPoint = start;
-
-   for(U32 i = 0; i < str.length(); i++)
-   {
-      if(str[i] == '\n')
-      {
-         wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
-         start = i + 1;
-         potentialBreakPoint = start + 1;  
-      }
-      else if(str[i] == ' ')
-         potentialBreakPoint = i;
-      else if(getStringWidth(fontSize, str.substr(start, i - start + 1).c_str()) > wrapWidth - (wrappedLines.size() > 0 ? indent : 0))
-      {
-         if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
-         {
-            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
-            start = i;
-            potentialBreakPoint = start;
-         }
-         else
-         {
-            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, potentialBreakPoint - start));
-            potentialBreakPoint++;
-            start = potentialBreakPoint;
-         }
-      }
-   }
-
-   if(start != (S32)str.length())
-      wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start));
-
-   return wrappedLines;
-}
+//// Given a string, break it up such that no part is wider than width.  Prefix subsequent lines with indentPrefix.
+//Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const string indentPrefix)
+//{
+//   Vector<string> wrappedLines;
+//
+//   if(str == "")
+//      return wrappedLines;
+//
+//   S32 indent = 0;
+//   string prefix = "";
+//
+//   S32 start = 0;
+//   S32 potentialBreakPoint = start;
+//
+//   for(U32 i = 0; i < str.length(); i++)
+//   {
+//      if(str[i] == '\n')
+//      {
+//         wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
+//         start = i + 1;
+//         potentialBreakPoint = start + 1;  
+//      }
+//      else if(str[i] == ' ')
+//         potentialBreakPoint = i;
+//      else if(getStringWidth(fontSize, str.substr(start, i - start + 1).c_str()) > wrapWidth - (wrappedLines.size() > 0 ? indent : 0))
+//      {
+//         if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
+//         {
+//            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
+//            start = i;
+//            potentialBreakPoint = start;
+//         }
+//         else
+//         {
+//            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, potentialBreakPoint - start));
+//            potentialBreakPoint++;
+//            start = potentialBreakPoint;
+//         }
+//      }
+//   }
+//
+//   if(start != (S32)str.length())
+//      wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start));
+//
+//   return wrappedLines;
+//}
 
 
 S32 getStringPairWidth(S32 size, FontContext leftContext,

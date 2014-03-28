@@ -4,6 +4,9 @@
 //------------------------------------------------------------------------------
 
 #include "stringUtils.h"
+
+#include "RenderUtils.h"
+
 #include "tnlPlatform.h"   // For Vector, types, and dSprintf
 #include "tnlVector.h"
 #include "tnlLog.h"
@@ -950,6 +953,76 @@ bool isHex(const string &str)
 
    return true;
 }
+
+
+// Helper functions to customize behavior of wrapString to match one of the sigs below
+S32 getCharCount(const string &chunk, S32 dummy)    { return chunk.size();                            }
+S32 getLineWidth(const string &chunk, S32 fontSize) { return getStringWidth(fontSize, chunk.c_str()); }
+
+
+// This is similar to the RenderUtils function, except this is based on character counts, not computed string width.
+// Given a string, break it up such that no part is wider than width chars.  Prefix subsequent lines with indentPrefix.
+Vector<string> doWrapString(const string &str, S32 wrapWidth, S32(*widthCalculator)(const string &, S32), 
+                            S32 fontSize, const string indentPrefix)
+{
+   Vector<string> wrappedLines;
+
+   if(str == "")
+      return wrappedLines;
+
+   S32 indent = 0;
+   string prefix = "";
+
+   S32 start = 0;
+   S32 potentialBreakPoint = start;
+
+   for(U32 i = 0; i < str.length(); i++)
+   {
+      if(str[i] == '\n')
+      {
+         wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
+         start = i + 1;
+         potentialBreakPoint = start + 1;  
+      }
+      else if(str[i] == ' ')
+         potentialBreakPoint = i;
+      else if(widthCalculator(str.substr(start, i - start + 1).c_str(), fontSize) > wrapWidth - (wrappedLines.size() > 0 ? indent : 0))
+      {
+         if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
+         {
+            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
+            start = i;
+            potentialBreakPoint = start;
+         }
+         else
+         {
+            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, potentialBreakPoint - start));
+            potentialBreakPoint++;
+            start = potentialBreakPoint;
+         }
+      }
+   }
+
+   if(start != (S32)str.length())
+      wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start));
+
+   return wrappedLines;
+}
+
+
+// Wrap strings based on char count
+Vector<string> wrapString(const string &chunk, S32 charCount, const string &indentPrefix)
+{
+   return doWrapString(chunk, charCount, &getCharCount, 0, indentPrefix);
+}
+
+
+// Wrap strings based on rendered string width
+Vector<string> wrapString(const string &chunk, S32 lineWidth, S32 fontSize, const string &indentPrefix)
+{
+   return doWrapString(chunk, lineWidth, &getLineWidth, fontSize, indentPrefix);
+}
+
 
 
 };
