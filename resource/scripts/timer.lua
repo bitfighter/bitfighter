@@ -229,3 +229,11 @@ end
 
 Timer:_initialize()     -- Actually intialize the timer
 
+
+--
+-- This will be called every tick from c++ with each script that loads 
+-- this Timer... updates timers
+--
+function _tickTimer(self, deltaT)
+   Timer:_tick(deltaT)
+end
