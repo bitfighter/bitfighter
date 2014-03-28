@@ -194,7 +194,7 @@ bool Robot::prepareEnvironment()
       // Set this first so we have this object available in the helper functions in case we need overrides
       setSelf(L, this, "bot");
 
-      if(!loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY, RobotContext))
+      if(!loadCompileRunEnvironmentScript("timer.lua") || !loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY, RobotContext))
          return false;
    }
    catch(LuaException &e)
@@ -509,8 +509,11 @@ void Robot::idle(BfObject::IdleCallPath path)
    {
       mSendSpawnEffectTimer.update(mCurrentMove.time); // This is to fix robot go spinny, since we skipped Ship::idle(ServerIdleMainLoop)
 
-      // Robot Timer ticks are now processed in the global Lua Timer along with
-      // levelgens in ServerGame::idle()
+      U32 deltaT = mCurrentMove.time;
+
+      TNLAssert(deltaT != 0, "Time should never be zero!");    
+
+      tickTimer<Robot>(deltaT);
 
       Parent::idle(BfObject::ServerProcessingUpdatesFromClient);   // Let's say the script is the client  ==> really not sure this is right
    }
