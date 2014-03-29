@@ -5340,7 +5340,15 @@ void uploadToDbCallback(ClientGame *game, U32 unused)
 
    if(game->getGameType()->getLevelName() == "")    
    {
-      editor->setSaveMessage("You must give your map a name before uploading it", false);
+      editor->setSaveMessage("Failed: Level name required", false);
+      return;
+   }
+
+
+   if(strcmp(game->getClientInfo()->getName().getString(),
+         game->getGameType()->getLevelCredits()->getString()) != 0)
+   {
+      editor->setSaveMessage("Failed: Level author must match your username", false);
       return;
    }
 
