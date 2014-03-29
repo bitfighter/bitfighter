@@ -222,6 +222,7 @@ class PlayersListReceiver(object):
         self.messenger = messenger
         self.guiApp = guiApp
         self.firstRun = True
+        self.hasConnectivity = True
         
 
     def fetch(self):
@@ -246,9 +247,20 @@ class PlayersListReceiver(object):
         
         try:
             gameInf = json.loads(self.fetch(), strict=False)
+            self.hasConnectivity = True
         except:
-            logging.exception("Unable to fetch data from {0}".format(self.url))
-            return False
+            logging.debug("Unable to fetch data from {0}".format(self.url))
+
+            # We just lost internet connectivity            
+            if self.hasConnectivity == True:
+                # Empty player set
+                self.players = set()
+            
+            self.hasConnectivity = False
+
+            # Continue anyways - we may have lost connectivity for only a short while
+            return True
+        
         
         playersNew = set(gameInf["players"])
         
