@@ -873,6 +873,7 @@ bool ServerGame::clientCanSuspend(ClientInfo *info)
    return activePlayers <= 1; // If only one player active, allow suspend.
 }
 
+
 // Enter suspended animation mode
 void ServerGame::suspendGame()
 {
@@ -925,6 +926,7 @@ GameConnection *ServerGame::getSuspendor()
    return mSuspendor;
 }
 
+
 // suspend only if there are non-idling players (TestSpawnDelay.cpp needs changing if using this)
 static bool shouldBeSuspended(ServerGame *game)
 {
@@ -940,6 +942,7 @@ static bool shouldBeSuspended(ServerGame *game)
    return true;
 }
 
+
 // Check to see if there are any players who are active; suspend the game if not.  Server only.
 void ServerGame::suspendIfNoActivePlayers(bool delaySuspend)
 {
@@ -954,6 +957,7 @@ void ServerGame::suspendIfNoActivePlayers(bool delaySuspend)
          suspendGame();
    }
 }
+
 
 // Check to see if there are any players who are active; suspend the game if not.  Server only.
 void ServerGame::unsuspendIfActivePlayers()
