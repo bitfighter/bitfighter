@@ -960,8 +960,6 @@ S32 getCharCount(const string &chunk, S32 dummy)    { return chunk.size();      
 S32 getLineWidth(const string &chunk, S32 fontSize) { return getStringWidth(fontSize, chunk.c_str()); }
 
 
-// This is similar to the RenderUtils function, except this is based on character counts, not computed string width.
-// Given a string, break it up such that no part is wider than width chars.  Prefix subsequent lines with indentPrefix.
 Vector<string> doWrapString(const string &str, S32 wrapWidth, S32(*widthCalculator)(const string &, S32), 
                             S32 fontSize, const string indentPrefix)
 {
