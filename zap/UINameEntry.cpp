@@ -279,7 +279,7 @@ bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode)
 void LevelNameEntryUserInterface::completePartial()
 {
    mFoundLevel = setLevelIndex();
-   lineEditor.completePartial(&mLevels, lineEditor.getString(), 0, ""); 
+   lineEditor.completePartial(&mLevels, lineEditor.getString(), 0, "", false);
    setLevelIndex();   // Update levelIndex to reflect current level
 }
 
