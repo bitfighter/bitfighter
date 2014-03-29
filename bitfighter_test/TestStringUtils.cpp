@@ -81,11 +81,14 @@ static void testThatLinesAreNotLongerThanMax(const Vector<string> &lines, S32 ma
          int x = getStringWidth(fontSize, lines[i].c_str());
          int y = 0;
       }
-      EXPECT_TRUE(getStringWidth(fontSize, lines[i].c_str()) <= maxLen) << 
-            "TestThatLinesAreNotLongerThanMax failed on iteration " << i <<"; strlen=" << getStringWidth(10, lines[i].c_str());
+      EXPECT_GE(maxLen, getStringWidth(fontSize, lines[i].c_str())) << 
+            "TestThatLinesAreNotLongerThanMax failed on iteration " << i <<"; fontSize=" << fontSize << 
+                                                       "; strlen=" << getStringWidth(fontSize, lines[i].c_str()) <<
+                                                       "; line=" << lines[i];
 
       // Make sure there is no leading or trailing whitespace
       EXPECT_NE(lines[i][0], ' ')                     << "Leading space on iter "  << i <<"; str = \"" << lines[i] << "\"";
+      ASSERT_GT(lines[i].length(), 0);
       EXPECT_NE(lines[i][lines[i].length() - 1], ' ') << "Trailing space on iter " << i <<"; str = \"" << lines[i] << "\"";
    }
 }
@@ -125,6 +128,7 @@ TEST(StringUtilsTest, WrapStringsMaxChars)
 
    string s = "hello there";
    Vector<string> lines = wrapString(s, 8);
+   ASSERT_EQ(2, lines.size());
    EXPECT_EQ("hello", lines[0]);
    EXPECT_EQ("there", lines[1]);
 
@@ -141,6 +145,7 @@ TEST(StringUtilsTest, WrapStringsMaxChars)
 
    lines = wrapString(longLine, 70);
 
+   ASSERT_EQ(6, lines.size());
    EXPECT_EQ("Now is the winter of our discontent Made glorious summer by this sun", lines[0]);
    EXPECT_EQ("of York; And all the clouds that lour'd upon our house In the deep", lines[1]);
    EXPECT_EQ("bosom of the ocean buried. Now are our brows bound with victorious", lines[2]);
@@ -164,12 +169,12 @@ TEST(StringUtilsTest, WrapStringsLineWidth)
 
    lines = wrapString("Short string", 200, 10);
    ASSERT_EQ(1, lines.size());
-   EXPECT_TRUE(lines[0] == "Short string");
+   EXPECT_EQ("Short string", lines[0]);
 
    // Make sure a terminal \n does not create a new line
    lines = wrapString("Short string\n", 200, 10);
    ASSERT_EQ(1, lines.size());
-   EXPECT_TRUE(lines[0] == "Short string");
+   EXPECT_EQ("Short string", lines[0]);
 
    lines = wrapString("Three\nShort\nLines", 200, 10);
    ASSERT_EQ(3, lines.size());
@@ -228,11 +233,11 @@ TEST(StringUtilsTest, WrapStringsLineWidth)
       for(S32 j = 0; j < 5; j++)
       {
          S32 size = 10 + 2 * j;
-         lines = wrapString(longLine, 300, 14);
+         lines = wrapString(longLine, width, size);
 
          SCOPED_TRACE("Pressure Test ==> width=" + itos(width) + ", size=" + itos(size));
-         testThatLinesAreNotLongerThanMax(lines, 300, 14);
-         wouldOneMoreWordMakeTheLineTooLong(lines, 300, 14);
+         testThatLinesAreNotLongerThanMax(lines, width, size);
+         wouldOneMoreWordMakeTheLineTooLong(lines, width, size);
       }
    }
 }
