@@ -81,7 +81,7 @@ public:
    void drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth);   // Draw cursor starting at a given width
 
    // For tab expansion 
-   void completePartial(const Vector<string> *candidates, const string &partial, std::size_t replacePos, const string &appender);
+   void completePartial(const Vector<string> *candidates, const string &partial, std::size_t replacePos, const string &appender, bool wrapQuotes = true);
 
    S32 getMaxLen();
 
