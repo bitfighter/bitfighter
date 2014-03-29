@@ -1705,7 +1705,7 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    //writeJoystick();
    writeServerBanList(ini, settings->getBanList());
 
-   ini->WriteFile();
+   ini->WriteFile();    // Commit the file to disk
 }
 
 
