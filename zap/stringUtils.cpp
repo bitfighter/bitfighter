@@ -961,15 +961,15 @@ S32 getLineWidth(const string &chunk, S32 fontSize) { return getStringWidth(font
 
 
 Vector<string> doWrapString(const string &str, S32 wrapWidth, S32(*widthCalculator)(const string &, S32), 
-                            S32 fontSize, const string indentPrefix)
+                            S32 fontSize, const string &indentPrefix)
 {
    Vector<string> wrappedLines;
 
    if(str == "")
       return wrappedLines;
 
-   S32 indent = 0;
-   string prefix = "";
+   S32 prefixlen = widthCalculator(indentPrefix, fontSize);
+
 
    S32 start = 0;
    S32 potentialBreakPoint = start;
@@ -984,7 +984,7 @@ Vector<string> doWrapString(const string &str, S32 wrapWidth, S32(*widthCalculat
       }
       else if(str[i] == ' ')
          potentialBreakPoint = i;
-      else if(widthCalculator(str.substr(start, i - start + 1).c_str(), fontSize) > wrapWidth - (wrappedLines.size() > 0 ? indent : 0))
+      else if(widthCalculator(str.substr(start, i - start + 1).c_str(), fontSize) > wrapWidth - (wrappedLines.size() > 0 ? prefixlen : 0))
       {
          if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
          {
