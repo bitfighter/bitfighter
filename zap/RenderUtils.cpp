@@ -518,11 +518,7 @@ void drawTime(S32 x, S32 y, S32 size, S32 timeInMs, const char *prefixString)
 
 S32 getStringWidth(FontContext fontContext, S32 size, const char *string)
 {
-   FontManager::pushFontContext(fontContext);
-   S32 width = getStringWidth(size, string);
-   FontManager::popFontContext();
-
-   return width;
+   return (S32)getStringWidth(fontContext, (F32)size, string);
 }
 
 
@@ -538,13 +534,13 @@ F32 getStringWidth(FontContext fontContext, F32 size, const char *string)
 
 S32 getStringWidth(S32 size, const char *string)
 {
-   return FontManager::getStringLength(string) * size / 120;
+   return (S32)getStringWidth((F32)size, string);
 }
 
 
 F32 getStringWidth(F32 size, const char *string)
 {
-   return F32(FontManager::getStringLength(string)) * size / 120.0f;
+   return FontManager::getStringLength(string) * size / 120;
 }
 
 

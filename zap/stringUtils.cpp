@@ -956,20 +956,20 @@ bool isHex(const string &str)
 
 
 // Helper functions to customize behavior of wrapString to match one of the sigs below
-S32 getCharCount(const string &chunk, S32 dummy)    { return chunk.size();                            }
-S32 getLineWidth(const string &chunk, S32 fontSize) { return getStringWidth(fontSize, chunk.c_str()); }
+F32 getCharCount(const string &chunk, S32 dummy)    { return chunk.size();                            }
+F32 getLineWidth(const string &chunk, S32 fontSize) { return getStringWidth((F32)fontSize, chunk.c_str()); }
 
 
 Vector<string> doWrapString(const string &str, S32 wrapWidth, S32(*widthCalculator)(const string &, S32), 
-                            S32 fontSize, const string &indentPrefix)
+                            S32 fontSize, const string indentPrefix)
 {
    Vector<string> wrappedLines;
 
    if(str == "")
       return wrappedLines;
 
-   S32 prefixlen = widthCalculator(indentPrefix, fontSize);
-
+   S32 indent = 0;
+   string prefix = "";
 
    S32 start = 0;
    S32 potentialBreakPoint = start;
@@ -984,7 +984,7 @@ Vector<string> doWrapString(const string &str, S32 wrapWidth, S32(*widthCalculat
       }
       else if(str[i] == ' ')
          potentialBreakPoint = i;
-      else if(widthCalculator(str.substr(start, i - start + 1).c_str(), fontSize) > wrapWidth - (wrappedLines.size() > 0 ? prefixlen : 0))
+      else if(widthCalculator(str.substr(start, i - start + 1).c_str(), fontSize) > wrapWidth - (wrappedLines.size() > 0 ? indent : 0))
       {
          if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
          {
@@ -1006,62 +1006,6 @@ Vector<string> doWrapString(const string &str, S32 wrapWidth, S32(*widthCalculat
 
    return wrappedLines;
 }
-
-
-// This version is much(?) more efficient, but does not quite work.  Can it be fixed?
-//Vector<string> doWrapString(const string &str, S32 wrapWidth, S32(*widthCalculator)(const string &, S32), 
-//                            S32 fontSize, const string indentPrefix)
-//{
-//   Vector<string> wrappedLines;
-//
-//   if(str == "")
-//      return wrappedLines;
-//
-//   string prefix = "";
-//   S32 prefixlen = widthCalculator(prefix, fontSize);
-//
-//   S32 start = 0;
-//   S32 potentialBreakPoint = start;
-//   S32 len = 0;
-//
-//   for(U32 i = 0; i < str.length(); i++)
-//   {
-//      S32 charlen = widthCalculator(str.substr(i, 1), fontSize);
-//      len += charlen;
-//
-//      if(str[i] == '\n')
-//      {
-//         wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
-//         start = i + 1;
-//         potentialBreakPoint = start + 1;  
-//         len = 0;
-//      }
-//      else if(len > wrapWidth - (wrappedLines.size() > 0 ? prefixlen : 0))
-//      {
-//         if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
-//         {
-//            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
-//            start = i;
-//            potentialBreakPoint = start;
-//            len = 0;
-//         }
-//         else
-//         {
-//            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, potentialBreakPoint - start));
-//            potentialBreakPoint++;     // Advance past the space
-//            start = potentialBreakPoint;
-//            len = widthCalculator(str.substr(start, i - start + 1), fontSize);
-//         }
-//      }
-//      else if(str[i] == ' ')
-//         potentialBreakPoint = i;
-//   }
-//
-//   if(start != (S32)str.length())
-//      wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start));
-//
-//   return wrappedLines;
-//}
 
 
 // Wrap strings based on char count

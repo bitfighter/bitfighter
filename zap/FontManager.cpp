@@ -340,7 +340,7 @@ BfFont *FontManager::getFont(FontId currentFontId)
 }
 
 
-S32 FontManager::getStringLength(const char* string)
+F32 FontManager::getStringLength(const char* string)
 {
    BfFont *font = getFont(currentFontId);
 
@@ -351,7 +351,7 @@ S32 FontManager::getStringLength(const char* string)
 }
 
 
-S32 FontManager::getStrokeFontStringLength(const SFG_StrokeFont *font, const char *string)
+F32 FontManager::getStrokeFontStringLength(const SFG_StrokeFont *font, const char *string)
 {
    TNLAssert(font, "Null font!");
 
@@ -361,7 +361,7 @@ S32 FontManager::getStrokeFontStringLength(const SFG_StrokeFont *font, const cha
    F32 length = 0.0;
    F32 lineLength = 0.0;
 
-   while(U8 c = *string++)
+   while(char c = *string++)
       if(c < font->Quantity )
       {
          if(c == '\n')  // EOL; reset the length of this line 
@@ -381,16 +381,16 @@ S32 FontManager::getStrokeFontStringLength(const SFG_StrokeFont *font, const cha
    if(length < lineLength)
       length = lineLength;
 
-   return S32(length + 0.5);
+   return length + 0.5f;
 }
 
 
-S32 FontManager::getTtfFontStringLength(BfFont *font, const char *string)
+F32 FontManager::getTtfFontStringLength(BfFont *font, const char *string)
 {
    F32 minx, miny, maxx, maxy;
    sth_dim_text(mStash, font->getStashFontId(), legacyRomanSizeFactorThanksGlut, string, &minx, &miny, &maxx, &maxy);
 
-   return S32(maxx - minx);
+   return maxx - minx;
 }
 
 
