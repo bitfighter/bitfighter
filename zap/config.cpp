@@ -1727,13 +1727,21 @@ static void writeINIHeader(CIniFile *ini)
 {
    if(!ini->NumHeaderComments())
    {
-      ini->headerComment("Bitfighter configuration file");
-      ini->headerComment("=============================");
-      ini->headerComment(" This file is intended to be user-editable, but some settings here may be overwritten by the game.");
-      ini->headerComment(" If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
-      ini->headerComment(" First, some basic terminology:");
-      ini->headerComment(" [section]");
-      ini->headerComment(" key=value");
+      string headerComments =
+      "Bitfighter configuration file\n"
+      "=============================\n"
+      "This file is intended to be user-editable, but some settings here may be overwritten by the game. "
+      "If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.\n"
+      "\n"
+      "First, some basic terminology:\n"
+      "\t[section]\n"
+      "\tkey=value\n";
+
+      Vector<string> lines = wrapString(headerComments, 100);
+
+      for(S32 i = 0; i < lines.size(); i++)
+         ini->headerComment(" " + lines[i]);
+
       ini->headerComment("");
    }
 }
