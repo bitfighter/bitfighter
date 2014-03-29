@@ -65,7 +65,7 @@ void LoadoutZone::render()
 }
 
 
-void LoadoutZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void LoadoutZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    render();
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);

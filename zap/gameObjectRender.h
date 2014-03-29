@@ -270,7 +270,7 @@ extern void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Po
 
 
 extern void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color *color, 
-                              F32 currentScale, bool snappingToWallCornersEnabled);
+                              F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
 extern void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha);
 extern void renderSpawn(const Point &pos, F32 scale, const Color *color);

@@ -180,7 +180,7 @@ void Item::render()
 }
 
 
-void Item::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void Item::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    renderItem(getPos());                    
 }

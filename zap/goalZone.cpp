@@ -82,7 +82,7 @@ void GoalZone::render()
 }
 
 
-void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    bool useOldStyle = getGame()->getSettings()->getIniSettings()->oldGoalFlash;
 

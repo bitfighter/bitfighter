@@ -59,7 +59,7 @@ public:
    void resetTimer();
    U32 getPeriod();     // temp debugging
 
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled) = 0;
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) = 0;
    virtual void renderDock() = 0;
 };
 
@@ -93,7 +93,7 @@ public:
 
    S32 getDefaultRespawnTime();    // Somewhat meaningless in this context
 
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    void renderDock();
 
    TNL_DECLARE_CLASS(Spawn);
@@ -126,7 +126,7 @@ public:
    // These methods exist solely to make ItemSpawn instantiable so it can be instantiated by Lua... even though it never will
    virtual const char *getClassName() const;
    virtual S32 getDefaultRespawnTime();
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    virtual void renderDock();
 
 
@@ -180,7 +180,7 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void renderLayer(S32 layerIndex);
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    void renderDock();
 
    TNL_DECLARE_CLASS(AsteroidSpawn);
@@ -234,7 +234,7 @@ public:
    S32 getDefaultRespawnTime();
 
    //void spawn(Game *game);
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    void renderDock();
 
    bool processArguments(S32 argc, const char **argv, Game *game);

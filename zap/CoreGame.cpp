@@ -349,7 +349,7 @@ void CoreItem::renderDock()
 }
 
 
-void CoreItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void CoreItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();

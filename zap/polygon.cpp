@@ -34,13 +34,14 @@ void PolygonObject::onGeomChanged()
 }  
 
 
-void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
    if(isSelected() || isLitUp())
       renderPolyHighlight();
 
-   renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
+   if(renderVertices)
+      renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
 #endif
 }
 

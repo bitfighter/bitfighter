@@ -763,7 +763,7 @@ Point BfObject::getInitialPlacementOffset(U32 gridSize) const
 }
 
 
-void BfObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void BfObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    TNLAssert(false, "renderEditor not implemented!");
 }

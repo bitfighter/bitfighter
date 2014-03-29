@@ -3484,13 +3484,15 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
 
 
 void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color *color, 
-                       F32 currentScale, bool snappingToWallCornersEnabled)
+                       F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    if(color)
       glColor(color);
 
    renderLine(outline);
-   renderPolyLineVertices(wallItem, snappingToWallCornersEnabled, currentScale);
+
+   if(renderVertices)
+      renderPolyLineVertices(wallItem, snappingToWallCornersEnabled, currentScale);
 }
 
 

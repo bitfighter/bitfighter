@@ -1510,7 +1510,7 @@ void ForceFieldProjector::renderDock()
 }
 
 
-void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
    F32 scaleFact = 1;
@@ -2036,7 +2036,7 @@ void Turret::renderDock()
 }
 
 
-void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    if(mSnapped)
       render();

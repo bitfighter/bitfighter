@@ -271,7 +271,7 @@ public:
    bool canBeNeutral();
 
    void renderDock();
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
    void onGeomChanged();
    void findForceFieldEnd();                      // Find end of forcefield in editor
@@ -357,7 +357,7 @@ public:
    void onGeomChanged();
 
    void renderDock();
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
    ///// Lua interface
 	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Turret);

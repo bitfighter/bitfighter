@@ -69,7 +69,7 @@ Point SimpleLine::getInitialPlacementOffset(U32 gridSize)  const
 
 // Draw arrow that serves as the core of SimpleLine items in the editor
 // Subclasses will fill in the rest
-void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
    renderHeavysetArrow(getVert(0), getVert(1), getEditorRenderColor(), isSelected(), isLitUp());

@@ -439,7 +439,7 @@ void SoccerBallItem::renderDock()
 }
 
 
-void SoccerBallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void SoccerBallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    renderItem(getRenderPos());
 }
