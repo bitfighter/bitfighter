@@ -1085,7 +1085,7 @@ void SoundSystem::playPrevTrack()
       return;
 
    // Hacky: decrement the playing index by 2 because the music callback will increment by 1
-   mCurrentlyPlayingIndex = (mCurrentlyPlayingIndex + 2) % mGameMusicList.size();
+   mCurrentlyPlayingIndex = (mCurrentlyPlayingIndex - 2) % mGameMusicList.size();
    if(mCurrentlyPlayingIndex < 0)
       mCurrentlyPlayingIndex += mGameMusicList.size();
 
