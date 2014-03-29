@@ -1010,6 +1010,62 @@ Vector<string> doWrapString(const string &str, S32 wrapWidth, S32(*widthCalculat
 }
 
 
+// This version is much(?) more efficient, but does not quite work.  Can it be fixed?
+//Vector<string> doWrapString(const string &str, S32 wrapWidth, S32(*widthCalculator)(const string &, S32), 
+//                            S32 fontSize, const string indentPrefix)
+//{
+//   Vector<string> wrappedLines;
+//
+//   if(str == "")
+//      return wrappedLines;
+//
+//   string prefix = "";
+//   S32 prefixlen = widthCalculator(prefix, fontSize);
+//
+//   S32 start = 0;
+//   S32 potentialBreakPoint = start;
+//   S32 len = 0;
+//
+//   for(U32 i = 0; i < str.length(); i++)
+//   {
+//      S32 charlen = widthCalculator(str.substr(i, 1), fontSize);
+//      len += charlen;
+//
+//      if(str[i] == '\n')
+//      {
+//         wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
+//         start = i + 1;
+//         potentialBreakPoint = start + 1;  
+//         len = 0;
+//      }
+//      else if(len > wrapWidth - (wrappedLines.size() > 0 ? prefixlen : 0))
+//      {
+//         if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
+//         {
+//            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
+//            start = i;
+//            potentialBreakPoint = start;
+//            len = 0;
+//         }
+//         else
+//         {
+//            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, potentialBreakPoint - start));
+//            potentialBreakPoint++;     // Advance past the space
+//            start = potentialBreakPoint;
+//            len = widthCalculator(str.substr(start, i - start + 1), fontSize);
+//         }
+//      }
+//      else if(str[i] == ' ')
+//         potentialBreakPoint = i;
+//   }
+//
+//   if(start != (S32)str.length())
+//      wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start));
+//
+//   return wrappedLines;
+//}
+
+
 // Wrap strings based on char count
 Vector<string> wrapString(const string &chunk, S32 charCount, const string &indentPrefix)
 {
