@@ -255,6 +255,8 @@ class PlayersListReceiver(object):
             if self.hasConnectivity == True:
                 # Empty player set
                 self.players = set()
+                self.guiApp.refreshToolTip(self.players)
+            
             
             self.hasConnectivity = False
 
