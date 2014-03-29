@@ -84,7 +84,7 @@ public:
    ///// Editor methods 
    Color getEditorRenderColor();
 
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
    void onAttrsChanging();
    void onGeomChanging();

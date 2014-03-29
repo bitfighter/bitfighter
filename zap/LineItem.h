@@ -59,7 +59,7 @@ public:
    /////
    // Editor methods
    string toLevelCode() const;
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    virtual const Color *getEditorRenderColor();
 
 

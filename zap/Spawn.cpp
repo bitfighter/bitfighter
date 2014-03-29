@@ -235,7 +235,7 @@ S32 Spawn::getDefaultRespawnTime()
 }
 
 
-void Spawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void Spawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
    renderSpawn(getPos(), 1/currentScale, getColor());
@@ -315,7 +315,7 @@ void ItemSpawn::idle(IdleCallPath path)
 // These methods exist solely to make ItemSpawn instantiable so it can be instantiated by Lua... even though it never will
 const char *ItemSpawn::getClassName() const                                       { TNLAssert(false, "Not implemented!"); return ""; }
 S32 ItemSpawn::getDefaultRespawnTime()                                            { TNLAssert(false, "Not implemented!"); return 0;  }
-void ItemSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled) { TNLAssert(false, "Not implemented!"); }
+void ItemSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) { TNLAssert(false, "Not implemented!"); }
 void ItemSpawn::renderDock()                                                      { TNLAssert(false, "Not implemented!"); }
 
 
@@ -535,7 +535,7 @@ void AsteroidSpawn::renderLayer(S32 layerIndex)
 }
 
 
-void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
    renderAsteroidSpawnEditor(getPos(), 1/currentScale);
@@ -692,7 +692,7 @@ S32 FlagSpawn::getDefaultRespawnTime()
 }
 
 
-void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();

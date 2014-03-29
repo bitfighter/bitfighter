@@ -40,7 +40,7 @@ public:
    // Item is being actively dragged
    virtual void onGeomChanged();   // Tell the geometry that things have changed
 
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
    /////
    // This class serves only to provide an implementation of the abstract methods in LuaItem

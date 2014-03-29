@@ -57,7 +57,7 @@ void Zone::render()
 }
 
 
-void Zone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void Zone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    renderZone(&Colors::white, getOutline(), getFill());
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);

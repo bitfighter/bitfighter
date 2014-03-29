@@ -32,7 +32,7 @@ public:
 
    void renderDock();                       
    // Child classes will call this
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
    virtual void newObjectFromDock(F32 gridSize);
    virtual Point getInitialPlacementOffset(U32 gridSize) const;

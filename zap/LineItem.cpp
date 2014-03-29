@@ -117,7 +117,7 @@ bool LineItem::shouldRender() const
 }
 
 
-void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
    const Color *color = NULL;       // HACK!  Should pass desired color into renderEditor instead of using NULL here

@@ -85,7 +85,7 @@ void GoalZone::render()
 }
 
 
-void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    // This won't change during the game
    static const GoalZoneFlashStyle flashStyle = 

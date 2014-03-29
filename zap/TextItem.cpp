@@ -111,7 +111,7 @@ void TextItem::render()
 
 
 // Called by SimpleItem::renderEditor()
-void TextItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void TextItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    Parent::renderEditor(currentScale, snappingToWallCornersEnabled);
    render();

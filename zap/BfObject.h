@@ -402,7 +402,7 @@ public:
 #ifndef ZAP_DEDICATED
    void renderAndLabelHighlightedVertices(F32 currentScale);      // Render selected and highlighted vertices, called from renderEditor
 #endif
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
 
    virtual void setSnapped(bool snapped);                  // Overridden in EngineeredItem 

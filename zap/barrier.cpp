@@ -454,14 +454,14 @@ void WallItem::render()
 }
 
 
-void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
    const Color *color = NULL;
    if(!isSelected() && !isLitUp())
       color = getEditorRenderColor();
 
-   renderWallOutline(this, getOutline(), color, currentScale, snappingToWallCornersEnabled);
+   renderWallOutline(this, getOutline(), color, currentScale, snappingToWallCornersEnabled, renderVertices);
 #endif
 }
 

@@ -44,7 +44,7 @@ public:
    const char *getOnScreenName();
    string toLevelCode() const;
 
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
 
    TNL_DECLARE_CLASS(SlipZone);

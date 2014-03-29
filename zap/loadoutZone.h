@@ -43,7 +43,7 @@ public:
 
    string toLevelCode() const;
 
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    void renderDock();
 
    TNL_DECLARE_CLASS(LoadoutZone);
