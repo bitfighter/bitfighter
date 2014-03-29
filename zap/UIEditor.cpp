@@ -5340,7 +5340,6 @@ void uploadToDbCallback(ClientGame *game, U32 unused)
 
    if(game->getGameType()->getLevelName() == "")    
    {
-      TNLAssert(false, "This should never happen!");
       editor->setSaveMessage("You must give your map a name before uploading it", false);
       return;
    }
