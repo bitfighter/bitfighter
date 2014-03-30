@@ -101,7 +101,7 @@ static void wouldOneMoreCharMakeTheLineTooLong(const Vector<string> &lines, S32 
    {
       string line = lines[i] + lines[i + 1][0];    // Add first char of next item
 
-      EXPECT_TRUE(getStringWidth(fontSize, line.c_str()) > maxLen) << 
+      EXPECT_GE(getStringWidth(fontSize, line.c_str()), maxLen) << 
             "WouldOneMoreCharMakeTheLineTooLong failed on iteration " << i <<"; len = " << getStringWidth(10, line.c_str());
    }
 }
@@ -115,7 +115,7 @@ static void wouldOneMoreWordMakeTheLineTooLong(const Vector<string> &lines, S32 
       parseString(lines[i + 1], words);
       string line = lines[i] + ' ' + words[0];
 
-      EXPECT_TRUE(getStringWidth(fontSize, line.c_str()) > maxLen) <<
+      EXPECT_GE(getStringWidth(fontSize, line.c_str()), maxLen) <<
          "WouldOneMoreWordMakeTheLineTooLong failed on iteration " << i << "; len = " << getStringWidth(10, line.c_str());
    }
 }
