@@ -65,7 +65,7 @@ public:
    void setItemId(U16 id);
 
    // Editor interface
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    virtual F32 getEditorRadius(F32 currentScale);
    virtual string toLevelCode() const;
 

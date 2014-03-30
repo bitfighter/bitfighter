@@ -902,7 +902,7 @@ void Teleporter::doExplosion()
 #endif
 
 
-void Teleporter::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void Teleporter::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
    Parent::renderEditor(currentScale, snappingToWallCornersEnabled);

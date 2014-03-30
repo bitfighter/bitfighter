@@ -79,7 +79,7 @@ bool LuaLevelGenerator::prepareEnvironment()
    // Set this first so we have this object available in the helper functions in case we need overrides
    setSelf(L, this, "levelgen");
 
-   if(!loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY, LevelgenContext))
+   if(!loadCompileRunEnvironmentScript("timer.lua") || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY, LevelgenContext))
       return false;
 
    return true;

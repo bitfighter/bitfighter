@@ -105,7 +105,7 @@ public:
    bool canBeNeutral();
 
    void renderDock();
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
    const Color *getColor() const;
 

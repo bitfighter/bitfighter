@@ -1041,7 +1041,7 @@ void Mine::renderItem(const Point &pos)
 }
 
 
-void Mine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void Mine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    renderMine(getActualPos(), true, true);
 }
@@ -1272,7 +1272,7 @@ void SpyBug::renderItem(const Point &pos)
 }
 
 
-void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    renderSpyBug(getPos(), *getColor(), true, true);
 }

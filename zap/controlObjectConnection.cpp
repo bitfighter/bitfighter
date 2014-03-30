@@ -117,6 +117,11 @@ void ControlObjectConnection::addPendingMove(Move *theMove)
    controlObject->idle(BfObject::ClientReplayingPendingMoves);
 }
 
+bool ControlObjectConnection::isMovesFull()
+{
+   return pendingMoves.size() >= MaxPendingMoves;
+}
+
 
 
 ControlObjectConnection::PacketNotify *ControlObjectConnection::allocNotify()

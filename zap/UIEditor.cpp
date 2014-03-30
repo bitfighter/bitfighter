@@ -164,6 +164,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mGridSize = game->getSettings()->getIniSettings()->mSettings.getVal<U32>(IniKey::EditorGridSize);
 
    mQuitLocked = false;
+   mVertexEditMode = true;
 }
 
 
@@ -2067,14 +2068,15 @@ void EditorUserInterface::render()
       }
 
       // Render our snap vertex as a hollow magenta box...
-      if(!mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE &&        // ...but not in preview mode...
-         mSnapObject->getGeomType() != geomPoint &&                                                      // ...and not on point objects...
-         !mSnapObject->isVertexLitUp(mSnapVertexIndex) && !mSnapObject->vertSelected(mSnapVertexIndex))  // ...or selected vertices
+      if(mVertexEditMode &&                                                                                 // Must be in vertex-edit mode
+            !mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE &&        // ...but not in preview mode...
+            mSnapObject->getGeomType() != geomPoint &&                                                      // ...and not on point objects...
+            !mSnapObject->isVertexLitUp(mSnapVertexIndex) && !mSnapObject->vertSelected(mSnapVertexIndex))  // ...or selected vertices
       {
          renderVertex(SnappingVertex, mSnapObject->getVert(mSnapVertexIndex), NO_NUMBER, mCurrentScale/*, alpha*/);  
       }
 
-    glPopMatrix(); 
+   glPopMatrix();
 
    if(!mNormalizedScreenshotMode)
    {
@@ -2149,7 +2151,7 @@ void EditorUserInterface::renderObjects(GridDatabase *database, RenderModes rend
             obj->render();
          else
          {
-            obj->renderEditor(mCurrentScale, getSnapToWallCorners());
+            obj->renderEditor(mCurrentScale, getSnapToWallCorners(), mVertexEditMode);
             obj->renderAndLabelHighlightedVertices(mCurrentScale);
          }
       }
@@ -3011,15 +3013,18 @@ void EditorUserInterface::onMouseMoved()
 
    bool spaceDown = InputCodeManager::getState(KEY_SPACE);
 
-   // We hit a vertex that wasn't already selected
-   if(!spaceDown && mHitItem && mHitVertex != NONE && !mHitItem->vertSelected(mHitVertex))   
-      mHitItem->setVertexLitUp(mHitVertex);
-
    // Highlight currently selected item
    if(mHitItem)
       mHitItem->setLitUp(true);
 
-   findSnapVertex();
+   if(mVertexEditMode) {
+      // We hit a vertex that wasn't already selected
+      if(!spaceDown && mHitItem && mHitVertex != NONE && !mHitItem->vertSelected(mHitVertex))   
+         mHitItem->setVertexLitUp(mHitVertex);
+
+      findSnapVertex();
+   }
+
    Cursor::enableCursor();
 }
 
@@ -4114,6 +4119,10 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    {
       // Do nothing
    }
+   else if(inputString == getEditorBindingString(settings, BINDING_TOGGLE_EDIT_MODE))
+   {
+      mVertexEditMode = !mVertexEditMode;
+   }
    else
       return false;
 
@@ -4190,7 +4199,7 @@ void EditorUserInterface::onMouseClicked_left()
       if(InputCodeManager::checkModifier(KEY_SHIFT))  // ==> Shift key is down
       {
          // Check for vertices
-         if(!spaceDown && mHitItem && mHitVertex != NONE && mHitItem->getGeomType() != geomPoint)
+         if(mVertexEditMode && !spaceDown && mHitItem && mHitVertex != NONE && mHitItem->getGeomType() != geomPoint)
          {
             if(mHitItem->vertSelected(mHitVertex))
                mHitItem->unselectVert(mHitVertex);
@@ -4210,7 +4219,7 @@ void EditorUserInterface::onMouseClicked_left()
 
          // If we hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection.
          // Note that in the case of a point item, we want to skip this step, as we don't select individual vertices.
-         if(!spaceDown && mHitVertex != NONE && mHitItem && mHitItem->isSelected() && mHitItem->getGeomType() != geomPoint)
+         if(mVertexEditMode && !spaceDown && mHitVertex != NONE && mHitItem && mHitItem->isSelected() && mHitItem->getGeomType() != geomPoint)
          {
             clearSelection(getDatabase());
             mHitItem->selectVert(mHitVertex);
@@ -4227,7 +4236,7 @@ void EditorUserInterface::onMouseClicked_left()
             mHitItem->setSelected(true);
             onSelectionChanged();
          }
-         else if(!spaceDown && mHitVertex != NONE && (mHitItem && !mHitItem->isSelected()))      // Hit a vertex of an unselected item
+         else if(mVertexEditMode && !spaceDown && mHitVertex != NONE && (mHitItem && !mHitItem->isSelected()))      // Hit a vertex of an unselected item
          {        // (braces required)
             if(!(mHitItem->vertSelected(mHitVertex)))
             {
@@ -4632,7 +4641,6 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
          if(InputCodeManager::getState(KEY_SPACE) && mSnapContext == NO_SNAPPING)
             mSnapContext = NO_GRID_SNAPPING;
          break;
-
       case KEY_TAB:
          mPreviewMode = false;
          break;
@@ -5108,6 +5116,8 @@ void EditorUserInterface::testLevelStart()
 
       LevelSourcePtr levelSource = LevelSourcePtr(new FolderLevelSource(levelList, getGame()->getSettings()->getFolderManager()->levelDir));
 
+      getGame()->setGameType(NULL); // Prevents losing seconds on game timer (test level from editor, save, and reload level)
+
       initHosting(getGame()->getSettingsPtr(), levelSource, true, false);
    }
 }
@@ -5340,8 +5350,15 @@ void uploadToDbCallback(ClientGame *game, U32 unused)
 
    if(game->getGameType()->getLevelName() == "")    
    {
-      TNLAssert(false, "This should never happen!");
-      editor->setSaveMessage("You must give your map a name before uploading it", false);
+      editor->setSaveMessage("Failed: Level name required", false);
+      return;
+   }
+
+
+   if(strcmp(game->getClientInfo()->getName().getString(),
+         game->getGameType()->getLevelCredits()->getString()) != 0)
+   {
+      editor->setSaveMessage("Failed: Level author must match your username", false);
       return;
    }
 

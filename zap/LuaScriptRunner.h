@@ -41,6 +41,7 @@ class MenuItem;
 
 #define ROBOT_HELPER_FUNCTIONS_KEY    "robot_helper_functions"
 #define LEVELGEN_HELPER_FUNCTIONS_KEY "levelgen_helper_functions"
+#define SCRIPT_TIMER_KEY "script_timer"
 
 class LuaScriptRunner
 {
@@ -60,7 +61,6 @@ private:
    static void loadCompileScript(const char *filename);
 
    void pushStackTracer();      // Put error handler function onto the stack
-
 
    static void setEnums(lua_State *L);                       // Set a whole slew of enum values that we want the scripts to have access to
    static void setGlobalObjectArrays(lua_State *L);          // And some objects
@@ -95,6 +95,8 @@ protected:
    static int luaPanicked(lua_State *L);  // Handle a total freakout by Lua
    static void registerClasses();
    void setEnvironment();                 // Sets the environment for the function on the top of the stack to that associated with name
+
+   bool loadCompileRunEnvironmentScript(const string &scriptName);
 
    static void deleteScript(const char *name);  // Remove saved script from the Lua registry
 
@@ -140,9 +142,6 @@ public:
 
    static void configureNewLuaInstance(lua_State *L);    // Prepare a new Lua environment for use
 
-   static void tickTimer(U32 timeDelta);
-   static void resetTimer();
-
    bool runString(const string &code);
    bool runMain();                                    // Run a script's main() function
    bool runMain(const Vector<string> &args);          // Run a script's main() function, putting args into Lua's arg table
@@ -160,6 +159,22 @@ public:
 
    S32 doSubscribe(lua_State *L, ScriptContext context);
    S32 doUnsubscribe(lua_State *L);
+
+
+   // Consolidate code from bots and levelgens -- this tickTimer works for both!
+   template <class T>
+   void tickTimer(U32 deltaT)          
+   {
+      TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
+      clearStack(L);
+
+      luaW_push<T>(L, static_cast<T *>(this));           // -- this
+      lua_pushnumber(L, deltaT);                         // -- this, deltaT
+
+      // Note that we don't care if this generates an error... if it does the error handler will
+      // print a nice message, then call killScript().
+      runCmd("_tickTimer", 0);
+   }
 
 
    //// Lua interface

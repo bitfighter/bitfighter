@@ -140,7 +140,6 @@ void ServerGame::cleanUp()
    mDatabaseForBotZones.findObjects(fillVector);
 
    mLevelGens.deleteAndClear();
-   LuaScriptRunner::resetTimer();
 
    for(S32 i = 0; i < fillVector.size(); i++)
       delete dynamic_cast<Object *>(fillVector[i]);
@@ -1346,8 +1345,9 @@ void ServerGame::idle(U32 timeDelta)
       }
    }
 
-   // Tick Lua Timer
-   LuaScriptRunner::tickTimer(timeDelta);
+   // Tick levelgen timers
+   for(S32 i = 0; i < mLevelGens.size(); i++)
+      mLevelGens[i]->tickTimer<LuaLevelGenerator>(timeDelta);
 
    // Check for any levelgens that must die
    for(S32 i = 0; i < mLevelGenDeleteList.size(); i++)

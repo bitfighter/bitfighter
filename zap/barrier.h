@@ -130,7 +130,7 @@ public:
    void changeWidth(S32 amt);
 
    void render();
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString();

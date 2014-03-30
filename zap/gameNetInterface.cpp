@@ -69,7 +69,7 @@ static void handlePing(Game *game, const Address &remoteAddress, Socket &socket,
    clientNonce.write(&pingResponse);
    pingResponse.write(clientIdentityToken);
 
-   //pingResponse.write(clientId);    // ENABLE FOR 020
+   pingResponse.write(clientId);  // older 019 ignore this or won't read this
 
    pingResponse.sendto(socket, remoteAddress);
 }
@@ -82,13 +82,17 @@ static void handlePingResponse(Game *game, const Address &remoteAddress, BitStre
 
    Nonce nonce;
    U32 clientIdentityToken;
-   S32 serverId = 0;
+   S32 serverId;
 
    nonce.read(stream);
    stream->read(&clientIdentityToken);
 
-   stream->read(&serverId);   // ENABLE FOR 020
-            
+   if(!stream->isValid())
+      return;
+
+   if(!stream->read(&serverId))   // If we can't read (goes past the end of data size from older 019)
+      serverId = 0;               // then set this to zero
+
    game->gotPingResponse(remoteAddress, nonce, clientIdentityToken, serverId);
 }
 
@@ -119,7 +123,7 @@ static void handleQuery(Game *game, const Address &remoteAddress, Socket &socket
       queryResponse.writeFlag(game->isTestServer());
       queryResponse.writeFlag(game->getSettings()->getServerPassword() != "");
 
-      //queryResponse.write(game->getClientId());  // ENABLE FOR 020
+      queryResponse.write(game->getClientId());  // older 019 ignore this or won't read this
 
       queryResponse.sendto(socket, remoteAddress);
    }
@@ -147,8 +151,12 @@ static void handleQueryResponse(Game *game, const Address &remoteAddress, BitStr
    test = stream->readFlag();
    passwordRequired = stream->readFlag();
 
-   S32 serverId = 0;
-   //stream->read(&serverId);   // ENABLE FOR 020
+   if(!stream->isValid())
+      return;
+
+   S32 serverId;
+   if(!stream->read(&serverId))  // If we can't read (goes past the end of data size from older 019)
+      serverId = 0;              // then set this to zero
 
    // Alert the user
    game->gotQueryResponse(remoteAddress, serverId, nonce, name.getString(), descr.getString(), 

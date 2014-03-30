@@ -200,7 +200,7 @@ public:
 
    /////
    // Editor methods
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    void renderDock();
 
    const char *getEditorHelpString();
@@ -261,7 +261,7 @@ public:
 
    /////
    // Editor methods
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    void renderDock();
 
    const char *getEditorHelpString();
