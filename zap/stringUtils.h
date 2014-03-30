@@ -145,6 +145,8 @@ bool isPrintable(char c);
 bool isHex(char c);
 bool isHex(const string &str);
 
+static const S32 NO_AUTO_WRAP = -1;
+
 // Wraps a long string into a Vector of stings equal to or shorter than wrapWidth.  Pass a custom width calculator to distinguish
 // between char count and rendered width.  See tests for examples.
 Vector<string> wrapString(const string &str, S32 charCount, const string &indentPrefix = "");

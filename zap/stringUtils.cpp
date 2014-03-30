@@ -959,10 +959,12 @@ bool isHex(const string &str)
 F32 getCharCount(const string &chunk, S32 dummy)    { return chunk.size();                                 }
 F32 getLineWidth(const string &chunk, S32 fontSize) { return getStringWidth((F32)fontSize, chunk.c_str()); }
 
-// Pass -1 for wrapWidth to disable width-based wrapping
+// Pass NO_AUTO_WRAP for wrapWidth to disable width-based wrapping
 Vector<string> doWrapString(const string &str, S32 wrapWidth, F32(*widthCalculator)(const string &, S32), 
                             S32 fontSize, const string indentPrefix)
 {
+   TNLAssert(wrapWidth == NO_AUTO_WRAP || wrapWidth > 0, "Invalid wrapWidth!");
+
    Vector<string> wrappedLines;
 
    if(str == "")
@@ -986,7 +988,7 @@ Vector<string> doWrapString(const string &str, S32 wrapWidth, F32(*widthCalculat
       else if(str[i] == ' ')
          potentialBreakPoint = i;
 
-      else if(wrapWidth >= 0 && widthCalculator(str.substr(start, i - start + 1).c_str(), fontSize) > wrapWidth - (wrappedLines.size() > 0 ? indent : 0))
+      else if(wrapWidth != NO_AUTO_WRAP && widthCalculator(str.substr(start, i - start + 1).c_str(), fontSize) > wrapWidth - (wrappedLines.size() > 0 ? indent : 0))
       {
          if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
          {
