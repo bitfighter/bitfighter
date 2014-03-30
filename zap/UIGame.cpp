@@ -557,10 +557,11 @@ void GameUserInterface::render()
    renderProgressBar();                   // Status bar that shows progress of loading this level
    mVoiceRecorder.render();               // Indicator that someone is sending a voice msg
 
+   mHelperManager.render();
+   renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
+
    mFpsRenderer.render(DisplayManager::getScreenInfo()->getGameCanvasWidth());     // Display running average FPS
    mConnectionStatsRenderer.render(getGame()->getConnectionToServer());     // Display running average FPS
-
-   mHelperManager.render();
 
    GameType *gameType = getGame()->getGameType();
 
@@ -568,8 +569,6 @@ void GameUserInterface::render()
       gameType->renderInterfaceOverlay(DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
 
    renderLevelInfo();
-
-   renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
    
    renderShutdownMessage();
 
@@ -703,11 +702,46 @@ void GameUserInterface::renderLostConnectionMessage() const
 
    if(connection && connection->lostContact())
    {
-      static string msg = "We have lost contact with the server; You can't play "
-                          "until the connection has been re-established.\n\n"
-                          "Trying to reconnect... [[SPINNER]]";
+      //static string msg = "We have lost contact with the server; You can't play "
+      //                    "until the connection has been re-established.\n\n"
+      //                    "Trying to reconnect... [[SPINNER]]";
+      //renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, -30);
 
-      renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, -30);
+      // Above: the old way of displaying connection problem
+
+      // You may test this rendering by using /lag 0 100
+
+      renderCenteredFancyBox(130, 54, 130, 10, Colors::red30, 0.75f, Colors::white);
+
+      glColor(Colors::white);
+      drawStringc(430, 170, 30, "CONNECTION INTERRUPTED");
+
+      const S32 x1 = 140;
+      const S32 y1 = 142;
+
+      glColor(Colors::black);
+      drawRect(x1 +  1, y1 + 20, x1 + 8, y1 + 30, GL_TRIANGLE_FAN);
+      drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GL_TRIANGLE_FAN);
+      drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GL_TRIANGLE_FAN);
+      drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GL_TRIANGLE_FAN);
+      drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GL_TRIANGLE_FAN);
+      glColor(Colors::gray40);
+      drawRect(x1 +  1, y1 + 20, x1 + 8, y1 + 30, GL_LINE_LOOP);
+      drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GL_LINE_LOOP);
+      drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GL_LINE_LOOP);
+      drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GL_LINE_LOOP);
+      drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GL_LINE_LOOP);
+
+
+      if((Platform::getRealMilliseconds() & 0x300) != 0) // Draw flashing red "X" on empty connection bars
+      {
+         static const F32 vertices[] = {x1 + 5, y1 - 5, x1 + 45, y1 + 35,  x1 + 5, y1 + 35, x1 + 45, y1 - 5 };
+         glColor(Colors::red);
+         glLineWidth(gDefaultLineWidth * 2.f);
+         renderVertexArray(vertices, 4, GL_LINES);
+         glLineWidth(gDefaultLineWidth);
+      }
+
    }
 }
 

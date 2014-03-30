@@ -78,6 +78,7 @@ public:
    U32 getControlCRC();
 
    virtual void addPendingMove(Move *theMove);
+   bool ControlObjectConnection::isMovesFull();
 
    struct GamePacketNotify : public GhostConnection::GhostPacketNotify
    {
