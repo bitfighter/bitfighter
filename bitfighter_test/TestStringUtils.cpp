@@ -152,6 +152,14 @@ TEST(StringUtilsTest, WrapStringsMaxChars)
    EXPECT_EQ("wreaths; Our bruised arms hung up for monuments; Our stern alarums", lines[3]);
    EXPECT_EQ("changed to merry meetings, Our dreadful marches to delightful", lines[4]);
    EXPECT_EQ("measures.", lines[5]);
+
+   // Test wrapping with length -1, which will disable length checking and only wrap on \ns.
+   string taxLine1 = "The withdrawal of your contribution won't count as taxable income, but any earnings you take out do.";
+   string taxline2 = "For example, if you contributed $3,000 and had to withdraw $3,000 plus $150 of earnings, that $150 of earnings counts as taxable income. In addition, if you're not 59 1/2 years old, those earnings are also hit with the 10 percent additional tax on early withdrawals.";
+   lines = wrapString(taxLine1 + "\n" + taxline2, -1);
+   ASSERT_EQ(2, lines.size());
+   EXPECT_EQ(taxLine1, lines[0]);
+   EXPECT_EQ(taxline2, lines[1]);
 }
 
 
