@@ -126,7 +126,8 @@ void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
       color = getEditorRenderColor();
 
    renderLine(getOutline(), color);
-   renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
+   if(renderVertices)
+      renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
 #endif
 }
 
