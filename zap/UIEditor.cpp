@@ -5116,6 +5116,8 @@ void EditorUserInterface::testLevelStart()
 
       LevelSourcePtr levelSource = LevelSourcePtr(new FolderLevelSource(levelList, getGame()->getSettings()->getFolderManager()->levelDir));
 
+      getGame()->setGameType(NULL); // Prevents losing seconds on game timer (test level from editor, save, and reload level)
+
       initHosting(getGame()->getSettingsPtr(), levelSource, true, false);
    }
 }

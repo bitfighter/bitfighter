@@ -832,7 +832,8 @@ void ClientGame::setGameType(GameType *gameType)
 {
    Parent::setGameType(gameType);
 
-   getUIManager()->onGameTypeChanged();
+   if(gameType)
+      getUIManager()->onGameTypeChanged();
 }
 
 
