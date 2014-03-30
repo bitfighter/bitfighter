@@ -1460,47 +1460,77 @@ void saveWindowPosition(CIniFile *ini, S32 x, S32 y)
 }
 
 
+// This list is currently incomplete, will grow as we move our settings into the new structure
+static const string sections[] = {"Settings", "Host", "Host-Voting"};
+static const string headerComments[] = 
+{
+   "Settings entries contain a number of different options.",
+   "Items in this section control how Bitfighter works when you are hosting a game.  See also Host-Voting.",
+   "Control how voting works on the server.  The default values work pretty well, but if you want to tweak them, go ahead!\n"
+   "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"
+   "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below."
+};
+
+
 static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 {
-   const char *section = "Settings";
-   ini->addSection(section);
+   TNLAssert(ARRAYSIZE(sections) == ARRAYSIZE(headerComments), "Mismatch!");
 
-   SettingsType settings = iniSettings->mSettings.getSettingsInSection(section);
-
-   if(ini->numSectionComments(section) == 0)
+   for(S32 i = 0; i < ARRAYSIZE(sections); i++)
    {
-      ini->sectionComment(section, "----------------");
-      ini->sectionComment(section, " Settings entries contain a number of different options");
+      ini->addSection(sections[i]);
 
-      // Write all our section comments for items defined in the new manner
+      const string section = sections[i];
+
+      SettingsType settings = iniSettings->mSettings.getSettingsInSection(section);
+   
+      if(true || ini->numSectionComments(section) == 0)  // <<<==== remove true when done testing!
+      {
+         const Vector<string> comments = wrapString(headerComments[i], NO_AUTO_WRAP);
+
+         ini->deleteSectionComments(section);      // Delete when done testing (harmless but useless)
+
+         ini->sectionComment(section, "----------------");
+         for(S32 i = 0; i < comments.size(); i++)
+            ini->sectionComment(section, " " + comments[i]);
+         ini->sectionComment(section, "----------------");
+
+         // Write all our section comments for items defined in the new manner
+         for(S32 i = 0; i < settings.size(); i++)
+         {
+            // Pass NO_AUTO_WRAP as width to disable automatic wrapping... we'll rely on \ns to do our wrapping here
+            const string prefix = settings[i]->getKey() + " - ";
+            const Vector<string> comments = wrapString(prefix + settings[i]->getComment(), NO_AUTO_WRAP, string(prefix.size(), ' '));
+            for(S32 j = 0; j < comments.size(); j++)
+               ini->sectionComment(section, " " + comments[j]);
+         }
+      }
+
+      // Write the settings themselves
       for(S32 i = 0; i < settings.size(); i++)
-         ini->sectionComment(section, " " + settings[i]->getKey() + " - " + settings[i]->getComment());
-
-
-      ini->sectionComment(section, " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
-      ini->sectionComment(section, " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
-      ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
-      ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
-      ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
-      ini->sectionComment(section, " MasterServerAddressList - Comma seperated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
-      ini->sectionComment(section, " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
-      ini->sectionComment(section, " Nickname - Specify the nickname to use for autologin, or clear to disable autologin");
-      ini->sectionComment(section, " Password - Password to use for autologin, if your nickname has been reserved in the forums");
-      ini->sectionComment(section, " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
-      ini->sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
-      ini->sectionComment(section, " LastEditorName - Last edited file name");
-      ini->sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
-      ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
-      ini->sectionComment(section, " Version - Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!");
-      ini->sectionComment(section, " QueryServerSortColumn - Index of column to sort by when in the Join Servers menu. (0 is first col.)  This value managed by game.");
-      ini->sectionComment(section, " QueryServerSortAscending - 1 for ascending sort, 0 for descending.  This value managed by game.");
-
-      ini->sectionComment(section, "----------------");
+         ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
    }
 
-   // Write all settings defined in the new modern manner
-   for(S32 i = 0; i < settings.size(); i++)
-      ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
+   const char *section = "Settings";
+
+   ini->sectionComment(section, " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
+   ini->sectionComment(section, " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
+   ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
+   ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
+   ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
+   ini->sectionComment(section, " MasterServerAddressList - Comma seperated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
+   ini->sectionComment(section, " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
+   ini->sectionComment(section, " Nickname - Specify the nickname to use for autologin, or clear to disable autologin");
+   ini->sectionComment(section, " Password - Password to use for autologin, if your nickname has been reserved in the forums");
+   ini->sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
+   ini->sectionComment(section, " LastEditorName - Last edited file name");
+   ini->sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
+   ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
+   ini->sectionComment(section, " Version - Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!");
+   ini->sectionComment(section, " QueryServerSortColumn - Index of column to sort by when in the Join Servers menu. (0 is first col.)  This value managed by game.");
+   ini->sectionComment(section, " QueryServerSortAscending - 1 for ascending sort, 0 for descending.  This value managed by game.");
+
+   ini->sectionComment(section, "----------------");
 
 
    // And the ones still to be ported to the new system
@@ -1654,6 +1684,14 @@ static void writeINIHeader(CIniFile *ini)
 {
    if(!ini->NumHeaderComments())
    {
+      //ini->headerComment("Bitfighter configuration file");
+      //ini->headerComment("=============================");
+      //ini->headerComment(" This file is intended to be user-editable, but some settings here may be overwritten by the game.");
+      //ini->headerComment(" If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
+      //ini->headerComment(" First, some basic terminology:");
+      //ini->headerComment(" [section]");
+      //ini->headerComment(" key=value");
+
       string headerComments =
       "Bitfighter configuration file\n"
       "=============================\n"

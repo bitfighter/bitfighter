@@ -154,7 +154,7 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, VoteType type, S32 number)
 {
    GameConnection *conn = clientInfo->getConnection();
 
-   if(!mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VoteEnable))
+   if(!mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VotingEnabled))
       return false;
 
    U32 voteTimer;
