@@ -683,6 +683,11 @@ void NetConnection::checkPacketSend(bool force, U32 curTime)
    {
       if(!isAdaptive())
       {
+         //  This might fix extremely high ping for users with very limited speeds
+         //printf("%i", mLastSendSeq - mHighestAckedSeq);
+         if(mLastSendSeq - mHighestAckedSeq > 5)
+            delay *= (mLastSendSeq - mHighestAckedSeq - 5) * 2;
+
          if(curTime - mLastUpdateTime + mSendDelayCredit < delay)
             return;
       
