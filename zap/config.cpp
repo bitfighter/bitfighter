@@ -135,6 +135,19 @@ IniSettings::~IniSettings()
 }
 
 
+// This list is currently incomplete, will grow as we move our settings into the new structure
+static const string sections[] = {"Settings", "Host", "Host-Voting", "EditorSettings"};
+static const string headerComments[] = 
+{
+   "Settings entries contain a number of different options.",
+   "Items in this section control how Bitfighter works when you are hosting a game.  See also Host-Voting.",
+   "Control how voting works on the server.  The default values work pretty well, but if you want to tweak them, go ahead!\n"
+      "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"
+      "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below.",
+   "EditorSettings entries relate to items in the editor"
+};
+
+
 // Some static helper methods:
 
 // Set all bits in items[] to false
@@ -1452,19 +1465,6 @@ void saveWindowPosition(CIniFile *ini, S32 x, S32 y)
    ini->SetValueI("Settings", "WindowXPos", x);
    ini->SetValueI("Settings", "WindowYPos", y);
 }
-
-
-// This list is currently incomplete, will grow as we move our settings into the new structure
-static const string sections[] = {"Settings", "Host", "Host-Voting", "EditorSettings"};
-static const string headerComments[] = 
-{
-   "Settings entries contain a number of different options.",
-   "Items in this section control how Bitfighter works when you are hosting a game.  See also Host-Voting.",
-   "Control how voting works on the server.  The default values work pretty well, but if you want to tweak them, go ahead!\n"
-      "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"
-      "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below.",
-   "EditorSettings entries relate to items in the editor"
-};
 
 
 static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
