@@ -77,7 +77,6 @@ IniSettings::IniSettings()
 
    diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
 
-   maxDedicatedFPS = 100;             // Max FPS on dedicated server
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
 
    masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
