@@ -332,9 +332,11 @@ void idle()
 
    bool dedicated = GameManager::getServerGame() && GameManager::getServerGame()->isDedicated();
 
-   U32 maxFPS = dedicated ? settings->getIniSettings()->maxDedicatedFPS : settings->getIniSettings()->maxFPS;
-
-   if(deltaT >= S32(1000 / maxFPS))
+   U32 maxFPS = dedicated ? settings->getIniSettings()->mSettings.getVal<U32>(IniKey::MaxFpsServer) : 
+                            settings->getIniSettings()->maxFPS;
+   
+   // If user specifies 0, run full-bore!
+   if(maxFPS == 0 || deltaT >= S32(1000 / maxFPS))
    {
       checkIfServerGameIsShuttingDown(U32(deltaT));
       GameManager::idle(U32(deltaT));

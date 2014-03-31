@@ -570,10 +570,6 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
 
    iniSettings->alertsVolLevel = checkVol(iniSettings->alertsVolLevel);
 
-   S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxDedicatedFPS);
-   if(fps >= 1) 
-      iniSettings->maxDedicatedFPS = fps; 
-   // TODO: else warn?
 
    //iniSettings->SendStatsToMaster = (lcase(ini->GetValue(section, "SendStatsToMaster", "yes")) != "no");
 
@@ -1623,14 +1619,12 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment(" MySqlStatsDatabaseCredentials - If MySql integration has been compiled in (which it probably hasn't been), you can specify the");
       addComment("                                 database server, database name, login, and password as a comma delimeted list");
       addComment(" Vote Strengths - Vote will pass when sum of all vote strengths is bigger then zero.");
-      addComment(" MaxFPS - Maximum FPS the dedicaetd server will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
       addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
 
       addComment("----------------");
    }
 
    ini->SetValueI (section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10));
-   ini->SetValueI (section, "MaxFPS", iniSettings->maxDedicatedFPS);
    ini->setValueYN(section, "LogStats", iniSettings->logStats);
 
 #ifdef BF_WRITE_TO_MYSQL

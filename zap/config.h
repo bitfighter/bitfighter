@@ -199,7 +199,6 @@ public:
 
    bool diagnosticKeyDumpMode;      // True if want to dump keystrokes to the screen
 
-   U32 maxDedicatedFPS;
    U32 maxFPS;
 
 
