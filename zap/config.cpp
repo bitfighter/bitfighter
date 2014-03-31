@@ -392,9 +392,8 @@ static void loadSettings(CIniFile *ini, IniSettings *iniSettings, const string &
 static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    // New school
-   loadSettings(ini, iniSettings, "Testing");
-   loadSettings(ini, iniSettings, "EditorSettings");
-   loadSettings(ini, iniSettings, "Settings");
+   for(S32 i = 0; i < ARRAYSIZE(sections); i++)
+      loadSettings(ini, iniSettings, sections[i]);
 
    string section = "Settings";
 
@@ -1456,14 +1455,15 @@ void saveWindowPosition(CIniFile *ini, S32 x, S32 y)
 
 
 // This list is currently incomplete, will grow as we move our settings into the new structure
-static const string sections[] = {"Settings", "Host", "Host-Voting"};
+static const string sections[] = {"Settings", "Host", "Host-Voting", "EditorSettings"};
 static const string headerComments[] = 
 {
    "Settings entries contain a number of different options.",
    "Items in this section control how Bitfighter works when you are hosting a game.  See also Host-Voting.",
    "Control how voting works on the server.  The default values work pretty well, but if you want to tweak them, go ahead!\n"
       "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"
-      "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below."
+      "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below.",
+   "EditorSettings entries relate to items in the editor"
 };
 
 
@@ -1563,31 +1563,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    if(gDefaultLineWidth >= 0.5 && gDefaultLineWidth <= 5)
       ini->SetValueF (section, "LineWidth", gDefaultLineWidth);
 #endif
-}
-
-
-static void writeEditorSettings(CIniFile *ini, IniSettings *iniSettings)
-{
-   const char *section = "EditorSettings";
-   ini->addSection(section);
-
-   SettingsType settings = iniSettings->mSettings.getSettingsInSection(section);
-
-   if(ini->numSectionComments(section) == 0)
-   {
-      ini->sectionComment(section, "----------------");
-      ini->sectionComment(section, " EditorSettings entries relate to items in the editor");
-
-      // Write all our section comments for items defined in the new manner
-      for(S32 i = 0; i < settings.size(); i++)
-         ini->sectionComment(section, " " + settings[i]->getKey() + " - " + settings[i]->getComment());
-
-      ini->sectionComment(section, "----------------");
-   }
-
-   // Write all settings defined in the new modern manner
-   for(S32 i = 0; i < settings.size(); i++)
-      ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
 }
 
 
@@ -1723,7 +1698,6 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeEffects(ini, iniSettings);
    writeSounds(ini, iniSettings);
    writeSettings(ini, iniSettings);
-   writeEditorSettings(ini, iniSettings);
    writeDiagnostics(ini, iniSettings);
    writeLevels(ini);
    writeSkipList(ini, settings->getLevelSkipList());
