@@ -150,7 +150,9 @@ static const S32 NO_AUTO_WRAP = -1;
 // Wraps a long string into a Vector of stings equal to or shorter than wrapWidth.  Pass a custom width calculator to distinguish
 // between char count and rendered width.  See tests for examples.
 Vector<string> wrapString(const string &str, S32 charCount, const string &indentPrefix = "");
+#if !defined(ZAP_DEDICATED) && !defined(BF_MASTER)
 Vector<string> wrapString(const string &str, S32 lineWidth, S32 fontSize, const string &indentPrefix = "");
+#endif
 
 };
 

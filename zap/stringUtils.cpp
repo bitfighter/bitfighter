@@ -5,7 +5,9 @@
 
 #include "stringUtils.h"
 
+#if !defined(ZAP_DEDICATED) && !defined(BF_MASTER)
 #include "RenderUtils.h"
+#endif
 
 #include "tnlPlatform.h"   // For Vector, types, and dSprintf
 #include "tnlVector.h"
@@ -956,8 +958,10 @@ bool isHex(const string &str)
 
 
 // Helper functions to customize behavior of wrapString to match one of the sigs below
-F32 getCharCount(const string &chunk, S32 dummy)    { return chunk.size();                                 }
-F32 getLineWidth(const string &chunk, S32 fontSize) { return getStringWidth((F32)fontSize, chunk.c_str()); }
+static F32 getCharCount(const string &chunk, S32 dummy)    { return chunk.size();                                 }
+#if !defined(ZAP_DEDICATED) && !defined(BF_MASTER)
+static F32 getLineWidth(const string &chunk, S32 fontSize) { return getStringWidth((F32)fontSize, chunk.c_str()); }
+#endif
 
 // Pass NO_AUTO_WRAP for wrapWidth to disable width-based wrapping
 Vector<string> doWrapString(const string &str, S32 wrapWidth, F32(*widthCalculator)(const string &, S32), 
@@ -1018,13 +1022,13 @@ Vector<string> wrapString(const string &chunk, S32 charCount, const string &inde
    return doWrapString(chunk, charCount, &getCharCount, 0, indentPrefix);
 }
 
-
+#if !defined(ZAP_DEDICATED) && !defined(BF_MASTER)
 // Wrap strings based on rendered string width
 Vector<string> wrapString(const string &chunk, S32 lineWidth, S32 fontSize, const string &indentPrefix)
 {
    return doWrapString(chunk, lineWidth, &getLineWidth, fontSize, indentPrefix);
 }
-
+#endif
 
 
 };
