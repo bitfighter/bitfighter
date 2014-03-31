@@ -1467,8 +1467,8 @@ static const string headerComments[] =
    "Settings entries contain a number of different options.",
    "Items in this section control how Bitfighter works when you are hosting a game.  See also Host-Voting.",
    "Control how voting works on the server.  The default values work pretty well, but if you want to tweak them, go ahead!\n"
-   "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"
-   "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below."
+      "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"
+      "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below."
 };
 
 
