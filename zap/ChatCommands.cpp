@@ -1055,17 +1055,17 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
    if(!game->canRateLevel())      // Will display any appropriate error messages
       return;
 
-   S32 rating = NONE;
+   LevelDatabaseRateThread::LevelRating ratingEnum = LevelDatabaseRateThread::UnknownRating;
 
    if(args.size() >= 2)
       for(S32 i = 0; i < LevelDatabaseRateThread::RatingsCount; i++)
          if(args[1] == LevelDatabaseRateThread::RatingStrings[i])
          {
-            rating = i;
+            ratingEnum = LevelDatabaseRateThread::getLevelRatingEnum(args[1]);
             break;
          }
 
-   if(rating == NONE)      // Error
+   if(ratingEnum == LevelDatabaseRateThread::UnknownRating)      // Error
    {  
       string msg = "!!! You must specify a rating (";
 
@@ -1085,7 +1085,6 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
    }
    else                    // Args look ok; release the kraken!
    {
-      LevelDatabaseRateThread::LevelRating ratingEnum = LevelDatabaseRateThread::getLevelRatingEnum(rating);
       RefPtr<LevelDatabaseRateThread> rateThread = new LevelDatabaseRateThread(game, ratingEnum);
       game->getSecondaryThread()->addEntry(rateThread);
    }
