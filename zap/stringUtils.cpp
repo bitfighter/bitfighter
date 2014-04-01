@@ -4,6 +4,11 @@
 //------------------------------------------------------------------------------
 
 #include "stringUtils.h"
+
+#if !defined(ZAP_DEDICATED) && !defined(BF_MASTER)
+#include "RenderUtils.h"
+#endif
+
 #include "tnlPlatform.h"   // For Vector, types, and dSprintf
 #include "tnlVector.h"
 #include "tnlLog.h"
@@ -156,6 +161,17 @@ S32 stoi(const string &s)
 F64 stof(const string &s)
 {
    return atof(s.c_str());
+}
+
+
+// Split a multi-line string into a vector of lines
+void splitMultiLineString(const string &str, Vector<string> &strings)
+{
+   istringstream stream(str);
+   string line;
+
+   while(getline(stream, line)) 
+      strings.push_back(line);
 }
 
 
@@ -913,40 +929,6 @@ bool stringContainsAllTheSameCharacter(const string &str)
 }
 
 
-// Convert a string value to our sfxSets enum
-inline string displayModeToString(DisplayMode mode)
-{
-   if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
-      return "Fullscreen-Stretch";
-   if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-      return "Fullscreen";
-   
-   return "Window";
-}
-
-
-inline string colorEntryModeToString(ColorEntryMode colorEntryMode)
-{
-   if(colorEntryMode == ColorEntryModeHex)
-      return "RGBHEX";
-
-   if(colorEntryMode == ColorEntryMode255)
-      return "RGB255";
-
-   return "RGB100";
-}
-
-
-// Convert various things to strings -- needed by settings (which requires a consistent naming schema);
-// used elsewhere
-string toString(const string &val)        { return val;                                          }
-string toString(S32 val)                  { return itos(val);                                    }
-string toString(YesNo yesNo)              { return yesNo  == Yes      ? "Yes" :      "No";       }
-string toString(RelAbs relAbs)            { return relAbs == Relative ? "Relative" : "Absolute"; }
-string toString(DisplayMode displayMode)  { return displayModeToString(displayMode);             }
-string toString(ColorEntryMode colorMode) { return colorEntryModeToString(colorMode);            }
-
-
 bool isPrintable(char c)
 {
    return c >= 32 && c <= 126;
@@ -968,6 +950,81 @@ bool isHex(const string &str)
 
    return true;
 }
+
+
+// Helper functions to customize behavior of wrapString to match one of the sigs below
+static F32 getCharCount(const string &chunk, S32 dummy)    { return chunk.size();                                 }
+#if !defined(ZAP_DEDICATED) && !defined(BF_MASTER)
+static F32 getLineWidth(const string &chunk, S32 fontSize) { return getStringWidth((F32)fontSize, chunk.c_str()); }
+#endif
+
+// Pass NO_AUTO_WRAP for wrapWidth to disable width-based wrapping
+Vector<string> doWrapString(const string &str, S32 wrapWidth, F32(*widthCalculator)(const string &, S32), 
+                            S32 fontSize, const string indentPrefix)
+{
+   TNLAssert(wrapWidth == NO_AUTO_WRAP || wrapWidth > 0, "Invalid wrapWidth!");
+
+   Vector<string> wrappedLines;
+
+   if(str == "")
+      return wrappedLines;
+
+   S32 indent = 0;
+   string prefix = "";
+
+   S32 start = 0;
+   S32 potentialBreakPoint = start;
+
+   for(U32 i = 0; i < str.length(); i++)
+   {
+      if(str[i] == '\n')
+      {
+         wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
+         start = i + 1;
+         potentialBreakPoint = start + 1;  
+      }
+
+      else if(str[i] == ' ')
+         potentialBreakPoint = i;
+
+      else if(wrapWidth != NO_AUTO_WRAP && widthCalculator(str.substr(start, i - start + 1).c_str(), fontSize) > wrapWidth - (wrappedLines.size() > 0 ? indent : 0))
+      {
+         if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
+         {
+            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
+            start = i;
+            potentialBreakPoint = start;
+         }
+         else
+         {
+            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, potentialBreakPoint - start));
+            potentialBreakPoint++;
+            start = potentialBreakPoint;
+         }
+      }
+   }
+
+   if(start != (S32)str.length())
+      wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start));
+
+   return wrappedLines;
+}
+
+
+// Wrap strings based on char count
+Vector<string> wrapString(const string &chunk, S32 charCount, const string &indentPrefix)
+{
+   return doWrapString(chunk, charCount, &getCharCount, 0, indentPrefix);
+}
+
+#if !defined(ZAP_DEDICATED) && !defined(BF_MASTER)
+// Wrap strings based on rendered string width
+Vector<string> wrapString(const string &chunk, S32 lineWidth, S32 fontSize, const string &indentPrefix)
+{
+   return doWrapString(chunk, lineWidth, &getLineWidth, fontSize, indentPrefix);
+}
+#endif
+
 
 };
 

@@ -114,16 +114,6 @@ S32 HTFGameType::getFlagScore() const
 bool HTFGameType::isFlagGame() const { return true; }
 
 
-// Server only
-void HTFGameType::addFlag(FlagItem *flag)
-{
-   Parent::addFlag(flag);
-
-   if(!isGhost())
-      addItemOfInterest(flag);      // Server only
-}
-
-
 // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this may be important!!!
 void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {

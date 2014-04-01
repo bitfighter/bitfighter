@@ -25,7 +25,7 @@ namespace Zap
 struct LevelInfo
 {
 private:
-   void initialize();      // Called by constructors
+   void initialize();               // Called by constructors
 
 public:
    string filename;                 // File level is stored in
@@ -37,13 +37,19 @@ public:
    S32 minRecPlayers;               // Min recommended number of players for this level
    S32 maxRecPlayers;               // Max recommended number of players for this level
 
-   LevelInfo();      // Default constructor used on server side
+   // Default constructor used on server side
+   LevelInfo();      
 
    // Constructor, used on client side where we don't care about min/max players
    LevelInfo(const StringTableEntry &name, GameTypeId type);
 
    // Constructor, used on server side, augmented with setInfo method below
    LevelInfo(const string &filename, const string &folder);
+
+   // Constructor with most fields, for testing purposes
+   LevelInfo(const string &levelName, GameTypeId levelType, S32 minPlayers, S32 maxPlayers, const string &script);
+
+   // Destructor
    virtual ~LevelInfo();
 
    const char *getLevelTypeName();
@@ -89,7 +95,7 @@ public:
    bool populateLevelInfoFromSource(const string &sourceName, S32 levelInfoIndex);
 
    static Vector<string> findAllLevelFilesInFolder(const string &levelDir);
-   static void getLevelInfoFromCodeChunk(char *chunk, S32 size, LevelInfo &levelInfo);     // Populates levelInfo
+   static void getLevelInfoFromCodeChunk(const string &code, LevelInfo &levelInfo);     // Populates levelInfo
 };
 
 

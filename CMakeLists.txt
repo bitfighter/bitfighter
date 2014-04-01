@@ -1,5 +1,5 @@
 project (bitfighter)
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
@@ -16,11 +16,30 @@ if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+
+#
+# Environment verification
+#
+if(APPLE)
+	set(OSX_DEPLOY_TARGET $ENV{MACOSX_DEPLOYMENT_TARGET})
+	
+	message(STATUS "MACOSX_DEPLOYMENT_TARGET: ${OSX_DEPLOY_TARGET}")
+	# MACOSX_DEPLOYMENT_TARGET must be set in the environment to compile properly
+	if(NOT OSX_DEPLOY_TARGET)
+		message(FATAL_ERROR "MACOSX_DEPLOYMENT_TARGET environment variable not set.  Set this like so: 'export MACOSX_DEPLOYMENT_TARGET=10.6'")
+	endif()
+endif()
+
+
 #
 # Global linker flags
 # 
 if(MSVC)
-	set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:MSVCRT.lib")
+	# Using the following NODEFAULTLIB to fix LNK4098 warning and some linker errors
+	set(CMAKE_EXE_LINKER_FLAGS_DEBUG          "/NODEFAULTLIB:libc.lib;libcmt.lib;msvcrt.lib;libcd.lib;msvcrtd.lib")
+	set(CMAKE_EXE_LINKER_FLAGS_RELEASE        "/NODEFAULTLIB:libc.lib;msvcrt.lib;libcd.lib;libcmtd.lib;msvcrtd.lib")
+	set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/NODEFAULTLIB:libc.lib;msvcrt.lib;libcd.lib;libcmtd.lib;msvcrtd.lib")
+	set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL     "/NODEFAULTLIB:libc.lib;msvcrt.lib;libcd.lib;libcmtd.lib;msvcrtd.lib")
 
 	# Disable incremental linking on RelWithDebInfo for sam686
 	set(LinkerFlags
@@ -32,7 +51,6 @@ if(MSVC)
 		string(REPLACE "INCREMENTAL:YES" "INCREMENTAL" ${LinkerFlag} "${${LinkerFlag}}")
 		string(REPLACE "INCREMENTAL" "INCREMENTAL:NO" ${LinkerFlag} "${${LinkerFlag}}")
 	endforeach()
-	
 else()
 	# MinGW won't statically compile in Microsofts c/c++ library routines
 	if(MINGW)
@@ -44,6 +62,7 @@ else()
 	# Only link in what is absolutely necessary
 	set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
 endif()
+
 
 # 
 # Global compiler specific flags
@@ -86,6 +105,18 @@ endif()
 
 
 #
+# Determine game versions.  Used in various places later
+#
+file(STRINGS "${CMAKE_SOURCE_DIR}/zap/version.h" VERSION_H_FILE)
+string(REGEX REPLACE ".*ZAP_GAME_RELEASE[ ]+\"([^\"]+)\".*" "\\1" BITFIGHTER_RELEASE "${VERSION_H_FILE}")
+message(STATUS "Bitfighter Release: ${BITFIGHTER_RELEASE}")
+
+string(REGEX REPLACE ".*#define BUILD_VERSION[ ]+([^ ]+).*" "\\1" BITFIGHTER_BUILD_VERSION_KEY "${VERSION_H_FILE}")
+string(REGEX REPLACE ".*${BITFIGHTER_BUILD_VERSION_KEY}[ ]+([0-9]+).*" "\\1" BITFIGHTER_BUILD_VERSION "${VERSION_H_FILE}")
+message(STATUS "Bitfighter Build Version: ${BITFIGHTER_BUILD_VERSION}")
+
+
+#
 # CMake options
 #
 
@@ -93,7 +124,7 @@ endif()
 option(USE_SDL2 "Force usage of SDL2" NO)
 
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
-
+option(USE_LUAJIT "Use LuaJIT." YES)
 
 #
 # Now search for dependencies
@@ -220,7 +251,15 @@ endif()
 
 # Add our sub-projects
 add_subdirectory(tnl)
-add_subdirectory(lua/lua-vec)
+
+if(USE_LUAJIT)
+	add_subdirectory(lua/luajit)
+	include_directories(${CMAKE_SOURCE_DIR}/lua/luajit/src)
+else()
+	add_subdirectory(lua/lua-vec)
+	include_directories(${CMAKE_SOURCE_DIR}/lua/lua-vec/src)
+endif()
+
 if(NOT WIN32 AND COMPILE_ALURE)  # ALURE is not compiled on Windows presently
 	add_subdirectory(alure)
 endif()

@@ -168,6 +168,7 @@ struct UserSettings
 class CIniFile;
 class InputCodeManager;
 
+//template <class T>
 struct IniSettings      // With defaults specified
 {
 private:
@@ -177,7 +178,7 @@ public:
    IniSettings();       // Constructor
    virtual ~IniSettings();
 
-   Settings mSettings;
+   Settings<IniKey::SettingsItem> mSettings;
 
    DisplayMode oldDisplayMode;
    bool joystickLinuxUseOldDeviceSystem;
@@ -198,9 +199,6 @@ public:
 
    bool diagnosticKeyDumpMode;      // True if want to dump keystrokes to the screen
 
-   bool allowGetMap;                // allow '/GetMap' command
-   bool allowDataConnections;       // Specify whether data connections are allowed on this computer
-
    U32 maxDedicatedFPS;
    U32 maxFPS;
 
@@ -212,38 +210,7 @@ public:
    string lastPassword;
    string lastEditorName;           // Name of file most recently edited by the user
 
-   string hostname;                 // Server name when in host mode
-   string hostaddr;                 // User-specified address/port of server
-   string hostdescr;                // One-line description of server
-   string serverPassword;
-   string ownerPassword;
-   string adminPassword;
-   string levelChangePassword;      // Password to allow access to level changing functionality on non-local server
-   string levelDir;                 // Folder where levels are stored, by default
-   S32 maxPlayers;                  // Max number of players that can play on local server
-   S32 maxBots;
-   bool playWithBots;               // Should the server add bots
-   S32 minBalancedPlayers;          // If bot auto-balance, make sure there are at least this many players
-   bool enableServerVoiceChat;      // No voice chat allowed in server if disabled
-   bool allowTeamChanging;
-   bool enableGameRecording;
-
    S32 connectionSpeed;
-
-   bool randomLevels;
-   bool skipUploads;
-
-   bool allowMapUpload;
-   bool allowAdminMapUpload;
-   bool allowLevelgenUpload;
-
-   bool voteEnable;
-   U32 voteLength;
-   U32 voteLengthToChangeTeam;
-   U32 voteRetryLength;
-   S32 voteYesStrength;
-   S32 voteNoStrength;
-   S32 voteNothingStrength;
 
    bool useUpdater;                 // Use updater system (windows only)
 
@@ -259,13 +226,6 @@ public:
    F32 winSizeFact;
 
    bool musicMutedOnCmdLine;
-
-   // Testing values
-   bool neverConnectDirect;
-   Color wallFillColor;
-   Color wallOutlineColor;
-   U16 clientPortNumber;
-   bool disableScreenSaver;
 
    // Logging options   --   true will enable logging these events, false will disable
    bool logConnectionProtocol;
@@ -295,17 +255,12 @@ public:
    string mySqlStatsDatabaseUser;
    string mySqlStatsDatabasePassword;
 
-   string defaultRobotScript;
-   string globalLevelScript;
-
    Vector<StringTableEntry> levelList;
 
    Vector<string> reservedNames;
    Vector<string> reservedPWs;
 
    U32 version;
-
-   bool oldGoalFlash;
 
    Vector<string> prevServerListFromMaster;
    Vector<string> alwaysPingList;

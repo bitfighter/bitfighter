@@ -276,8 +276,8 @@ private:
    void dropItem();                                // User presses drop item key
 
 
-   void loadAlreadySeenLevelupMessageList();
-   void saveAlreadySeenLevelupMessageList();
+   //void loadAlreadySeenLevelupMessageList();
+   //void saveAlreadySeenLevelupMessageList();
 
    const string getAlreadySeenLevelupMessageString() const;
    void setAlreadySeenLevelupMessageString(const string &vals);

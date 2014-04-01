@@ -600,9 +600,9 @@ void InstructionsUserInterface::renderModulesPage()
       drawString(x, y, textsize, moduleDescriptions[i][1]);
 
       glPushMatrix();
-      glTranslatef(60, F32(y + 10), 0);
+      glTranslate(60, y + 10.0f);
       glScale(0.7f);
-      glRotatef(-90, 0, 0, 1);
+      glRotate(-90);
 
       static F32 thrusts[4] =  { 1, 0, 0, 0 };
       static F32 thrustsBoost[4] =  { 1.3f, 0, 0, 0 };
@@ -869,7 +869,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                Triangulate::Process(o, f);
 
                renderGoalZone(Color(0.5f, 0.5f, 0.5f), &o, &f, findCentroid(o), angleOfLongestSide(o), 
-                  false, 0, 0, 0, false);
+                  false, 0, 0, 0, GoalZoneFlashNone);
             }
             break;
 

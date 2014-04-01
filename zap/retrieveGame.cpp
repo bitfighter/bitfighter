@@ -29,16 +29,6 @@ RetrieveGameType::~RetrieveGameType()
 bool RetrieveGameType::isFlagGame() const { return true; }
 
 
-// Server only
-void RetrieveGameType::addFlag(FlagItem *flag)
-{
-   Parent::addFlag(flag);
-
-   if(!isGhost())
-      addItemOfInterest(flag);      // Server only
-}
-
-
 // Note -- neutral or enemy-to-all robots can't pick up the flag!!!
 void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {

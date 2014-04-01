@@ -32,17 +32,17 @@ protected:
 
       // Set-up our environment
       LuaScriptRunner::setScriptingDir(settings->getFolderManager()->luaDir);
-      EXPECT_TRUE(LuaScriptRunner::startLua());
+      ASSERT_TRUE(LuaScriptRunner::startLua());
 
       // Set up a levelgen object, with no script
       levelgen = new LuaLevelGenerator(serverGame);
 
       // Ensure environment set-up
-      EXPECT_TRUE(levelgen->prepareEnvironment());
+      ASSERT_TRUE(levelgen->prepareEnvironment());
 
       // Grab our Lua state
       L = LuaScriptRunner::getL();
-      EXPECT_TRUE(L);
+      ASSERT_TRUE(L);
    }
 
 
@@ -135,12 +135,14 @@ TEST_F(LuaEnvironmentTest, findAllObjects)
    EXPECT_TRUE(levelgen->runString("assert(#t == 3)"));
 
    EXPECT_TRUE(levelgen->runString("t = { }"));
+
    EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 2)"));
+   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
 
    EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects()"));
+   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 3)"));
-
    EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects(ObjType.ResourceItem)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 2)"));
 }

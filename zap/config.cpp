@@ -58,22 +58,11 @@ const char *MASTER_SERVER_LIST_ADDRESS = "bitfighter.org:25955,bitfighter.net:25
 // Constructor: Set default values here
 IniSettings::IniSettings()
 {
-   // Can probably get rid of VerboseHelpMessages
 
-   //                       Data type        Setting name                Default value           INI Key                      INI Section  INI Comment                                               
-   mSettings.add(new Setting<string>        ("LastName",                 "ChumpChange",         "LastName",                    "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
-   mSettings.add(new Setting<DisplayMode>   ("WindowMode",               DISPLAY_MODE_WINDOWED, "WindowMode",                  "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
-   mSettings.add(new Setting<YesNo>         ("UseFakeFullscreen",        Yes,                   "UseFakeFullscreen",           "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
-   mSettings.add(new Setting<RelAbs>        ("ControlMode",              Absolute,              "ControlMode",                 "Settings", "Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)"));
-   mSettings.add(new Setting<YesNo>         ("VoiceEcho",                No,                    "VoiceEcho",                   "Settings", "Play echo when recording a voice message? Yes/No"));
-   mSettings.add(new Setting<YesNo>         ("VerboseHelpMessages",      Yes,                   "VerboseHelpMessages",         "Settings", "Display all messages related to loadout management?  Yes/No"));
-   mSettings.add(new Setting<YesNo>         ("ShowInGameHelp",           Yes,                   "ShowInGameHelp",              "Settings", "Show tutorial style messages in-game?  Yes/No"));
-   mSettings.add(new Setting<string>        ("JoystickType",             NoJoystick,            "JoystickType",                "Settings", "Type of joystick to use if auto-detect doesn't recognize your controller"));
-   mSettings.add(new Setting<string>        ("HelpItemsAlreadySeenList", "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));
-   mSettings.add(new Setting<U32>           ("EditorGridSize",           255,                   "EditorGridSize",              "Settings", "Grid size used in the editor, mostly for snapping purposes"));
-   mSettings.add(new Setting<YesNo>         ("LineSmoothing",            Yes,                   "LineSmoothing",               "Settings", "Activates anti-aliased rendering.  This may be a little slower on some machines.  Yes/No"));
-
-   mSettings.add(new Setting<ColorEntryMode>("ColorEntryMode",           ColorEntryMode100,     "ColorEntryMode",        "EditorSettings", "Specifies which color entry mode to use: RGB100, RGB255, RGBHEX; best to let the game manage this"));
+#  define SETTINGS_ITEM(typeName, enumVal, section, key, defaultVal, comment) \
+            mSettings.add(new Setting<typeName, IniKey::SettingsItem>(IniKey::enumVal, defaultVal, key, section, comment));
+      SETTINGS_TABLE
+#  undef SETTINGS_ITEM
 
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
    joystickLinuxUseOldDeviceSystem = false;
@@ -88,9 +77,6 @@ IniSettings::IniSettings()
 
    diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
 
-   allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
-   allowGetMap = false;               // Disabled by default -- many admins won't want this
-
    maxDedicatedFPS = 100;             // Max FPS on dedicated server
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
 
@@ -99,47 +85,8 @@ IniSettings::IniSettings()
    defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
    lastPassword = "";
    lastEditorName = "";               // No default editor level name
-   hostname = "Bitfighter host";      // Default host name
-   hostdescr = "";
-   maxPlayers = 127;
-   maxBots = 10;
-   playWithBots = false;
-   minBalancedPlayers = 6;
-   enableServerVoiceChat = true;
-   allowTeamChanging = true;
-   serverPassword = "";               // Passwords empty by default
-   ownerPassword = "";
-   adminPassword = "";
-   levelChangePassword = "";
-   levelDir = "";
 
    connectionSpeed = 0;
-
-   defaultRobotScript = "s_bot.bot";            
-   globalLevelScript = "";
-
-   wallFillColor.set(0,0,.15);
-   wallOutlineColor.set(Colors::blue);
-   clientPortNumber = 0;
-   disableScreenSaver = true;
-
-   randomLevels = false;
-   skipUploads = false;
-
-   allowMapUpload = false;
-   allowAdminMapUpload = true;
-   allowLevelgenUpload = true;
-
-   enableGameRecording = false;
-
-   voteEnable = false;     // Voting disabled by default
-   voteLength = 12;
-   voteLengthToChangeTeam = 10;
-   voteRetryLength = 30;
-   voteYesStrength = 3;
-   voteNoStrength = -3;
-   voteNothingStrength = -1;
-
 
    queryServerSortColumn = 0;
    queryServerSortAscending = true;
@@ -152,8 +99,6 @@ IniSettings::IniSettings()
    winSizeFact = 1.0;
 
    musicMutedOnCmdLine = false;
-
-   neverConnectDirect = false;
 
    // Specify which events to log
    logConnectionProtocol = false;
@@ -181,8 +126,6 @@ IniSettings::IniSettings()
    logStats = false;          // Log statistics into local sqlite database
 
    version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
-
-   oldGoalFlash = true;
 }
 
 
@@ -436,15 +379,25 @@ extern F32 gDefaultLineWidth;
 extern F32 gLineWidth3;
 extern F32 gLineWidth4;
 
+typedef Vector<AbstractSetting<IniKey::SettingsItem> *> SettingsType;
+
+static void loadSettings(CIniFile *ini, IniSettings *iniSettings, const string &section)
+{
+   SettingsType settings = iniSettings->mSettings.getSettingsInSection(section);
+
+   for(S32 i = 0; i < settings.size(); i++)
+      settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
+}
+
 
 static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 {
-   string section = "Settings";
+   // New school
+   loadSettings(ini, iniSettings, "Testing");
+   loadSettings(ini, iniSettings, "EditorSettings");
+   loadSettings(ini, iniSettings, "Settings");
 
-   // Read all settings defined in the new modern manner
-   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
-   for(S32 i = 0; i < settings.size(); i++)
-      settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
+   string section = "Settings";
 
    // Now read the settings still defined all old school
 
@@ -453,7 +406,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->mSettings.setVal("WindowMode", DISPLAY_MODE_FULL_SCREEN_STRETCHED);
 #endif
 
-   iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>("WindowMode");
+   iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
 
 #ifndef ZAP_DEDICATED
    iniSettings->joystickLinuxUseOldDeviceSystem = ini->GetValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
@@ -496,17 +449,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 }
 
 
-static void loadEditorSettings(CIniFile *ini, IniSettings *iniSettings)
-{
-   string section = "EditorSettings";
-
-   // Read all settings defined in the new modern manner
-   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
-   for(S32 i = 0; i < settings.size(); i++)
-      settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
-}
-
-
 static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
 {
    string section = "Diagnostics";
@@ -534,17 +476,6 @@ static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->luaLevelGenerator     = ini->GetValueYN(section, "LuaLevelGenerator",     iniSettings->luaLevelGenerator);
    iniSettings->luaBotMessage         = ini->GetValueYN(section, "LuaBotMessage",         iniSettings->luaBotMessage);
    iniSettings->serverFilter          = ini->GetValueYN(section, "ServerFilter",          iniSettings->serverFilter);
-}
-
-
-static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
-{
-   iniSettings->neverConnectDirect = ini->GetValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
-   iniSettings->wallFillColor.set(ini->GetValue("Testing", "WallFillColor", iniSettings->wallFillColor.toRGBString()));
-   iniSettings->wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString()));
-   iniSettings->oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
-   iniSettings->clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
-   iniSettings->disableScreenSaver = ini->GetValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
 }
 
 
@@ -637,52 +568,14 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
 {
    const char *section = "Host";
 
-   iniSettings->hostname  = ini->GetValue(section, "ServerName", iniSettings->hostname);
-   iniSettings->hostaddr  = ini->GetValue(section, "ServerAddress", iniSettings->hostaddr);
-   iniSettings->hostdescr = ini->GetValue(section, "ServerDescription", iniSettings->hostdescr);
-
-   iniSettings->serverPassword         = ini->GetValue  (section, "ServerPassword", iniSettings->serverPassword);
-   iniSettings->ownerPassword          = ini->GetValue  (section, "OwnerPassword", iniSettings->ownerPassword);
-   iniSettings->adminPassword          = ini->GetValue  (section, "AdminPassword", iniSettings->adminPassword);
-   iniSettings->levelChangePassword    = ini->GetValue  (section, "LevelChangePassword", iniSettings->levelChangePassword);
-   iniSettings->levelDir               = ini->GetValue  (section, "LevelDir", iniSettings->levelDir);
-   iniSettings->maxPlayers             = ini->GetValueI (section, "MaxPlayers", iniSettings->maxPlayers);
-   iniSettings->maxBots                = ini->GetValueI (section, "MaxBots", iniSettings->maxBots);
-   iniSettings->playWithBots           = ini->GetValueYN(section, "AddRobots", iniSettings->playWithBots);
-   iniSettings->minBalancedPlayers     = ini->GetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
-   iniSettings->enableServerVoiceChat  = ini->GetValueYN (section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
-
-   iniSettings->alertsVolLevel       = (F32) ini->GetValueI(section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10)) / 10.0f;
-   iniSettings->allowGetMap          = ini->GetValueYN (section, "AllowGetMap", iniSettings->allowGetMap);
-   iniSettings->allowDataConnections = ini->GetValueYN (section, "AllowDataConnections", iniSettings->allowDataConnections);
+   iniSettings->alertsVolLevel = checkVol(iniSettings->alertsVolLevel);
 
    S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxDedicatedFPS);
    if(fps >= 1) 
       iniSettings->maxDedicatedFPS = fps; 
    // TODO: else warn?
 
-   iniSettings->logStats = ini->GetValueYN(section, "LogStats", iniSettings->logStats);
-
    //iniSettings->SendStatsToMaster = (lcase(ini->GetValue(section, "SendStatsToMaster", "yes")) != "no");
-
-   iniSettings->alertsVolLevel = checkVol(iniSettings->alertsVolLevel);
-
-   iniSettings->randomLevels           = (U32) ini->GetValueYN(section, "RandomLevels", S32(iniSettings->randomLevels) );
-   iniSettings->skipUploads            = (U32) ini->GetValueYN(section, "SkipUploads", S32(iniSettings->skipUploads) );
-
-   iniSettings->allowMapUpload         = (U32) ini->GetValueYN(section, "AllowMapUpload", S32(iniSettings->allowMapUpload) );
-   iniSettings->allowAdminMapUpload    = (U32) ini->GetValueYN(section, "AllowAdminMapUpload", S32(iniSettings->allowAdminMapUpload) );
-   iniSettings->allowLevelgenUpload    = (U32) ini->GetValueYN(section, "AllowLevelgenUpload", S32(iniSettings->allowLevelgenUpload) );
-
-   iniSettings->voteEnable             = (U32) ini->GetValueYN(section, "VoteEnable", S32(iniSettings->voteEnable) );
-   iniSettings->voteLength             = (U32) ini->GetValueI (section, "VoteLength", S32(iniSettings->voteLength) );
-   iniSettings->voteLengthToChangeTeam = (U32) ini->GetValueI (section, "VoteLengthToChangeTeam", S32(iniSettings->voteLengthToChangeTeam) );
-   iniSettings->voteRetryLength        = (U32) ini->GetValueI (section, "VoteRetryLength", S32(iniSettings->voteRetryLength) );
-
-   iniSettings->voteYesStrength        = ini->GetValueI(section, "VoteYesStrength", iniSettings->voteYesStrength );
-   iniSettings->voteNoStrength         = ini->GetValueI(section, "VoteNoStrength", iniSettings->voteNoStrength );
-   iniSettings->voteNothingStrength    = ini->GetValueI(section, "VoteNothingStrength", iniSettings->voteNothingStrength );
-   iniSettings->allowTeamChanging      = ini->GetValueYN(section, "AllowTeamChanging", iniSettings->allowTeamChanging);
 
 #ifdef BF_WRITE_TO_MYSQL
    Vector<string> args;
@@ -696,11 +589,6 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
       iniSettings->mySqlStatsDatabaseServer = "";  // blank this, so it won't try to connect to "server"
    }
 #endif
-
-   iniSettings->defaultRobotScript = ini->GetValue(section, "DefaultRobotScript", iniSettings->defaultRobotScript);
-   iniSettings->globalLevelScript  = ini->GetValue(section, "GlobalLevelScript", iniSettings->globalLevelScript);
-
-   iniSettings->enableGameRecording = ini->GetValueYN(section, "GameRecording", iniSettings->enableGameRecording);
 }
 
 
@@ -1366,79 +1254,6 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
       ini->SetValue("QuickChatMessagesGroup7_Message7", "Message", "Yoohoo!");
 }
 
-// TODO:  reimplement joystick mapping methods for future custom joystick
-// mappings with axes as well as buttons
-//void readJoystick()
-//{
-//   gJoystickMapping.enable = ini->GetValueYN("Joystick", "Enable", false);
-//   for(U32 i=0; i<MaxJoystickAxes*2; i++)
-//   {
-//      Vector<string> buttonList;
-//      parseString(ini->GetValue("Joystick", "Axes" + itos(i), i<8 ? itos(i+16) : ""), buttonList, ',');
-//      gJoystickMapping.axes[i] = 0;
-//      for(S32 j=0; j<buttonList.size(); j++)
-//      {
-//         gJoystickMapping.axes[i] |= 1 << atoi(buttonList[j].c_str());
-//      }
-//   }
-//   for(U32 i=0; i<32; i++)
-//   {
-//      Vector<string> buttonList;
-//      parseString(ini->GetValue("Joystick", "Button" + itos(i), i<10 ? itos(i) : ""), buttonList, ',');
-//      gJoystickMapping.button[i] = 0;
-//      for(S32 j=0; j<buttonList.size(); j++)
-//      {
-//         gJoystickMapping.button[i] |= 1 << atoi(buttonList[j].c_str());
-//      }
-//   }
-//   for(U32 i=0; i<4; i++)
-//   {
-//      Vector<string> buttonList;
-//      parseString(ini->GetValue("Joystick", "Pov" + itos(i), itos(i+10)), buttonList, ',');
-//      gJoystickMapping.pov[i] = 0;
-//      for(S32 j=0; j<buttonList.size(); j++)
-//      {
-//         gJoystickMapping.pov[i] |= 1 << atoi(buttonList[j].c_str());
-//      }
-//   }
-//}
-//
-//void writeJoystick()
-//{
-//   ini->setValueYN("Joystick", "Enable", gJoystickMapping.enable);
-//   ///for(listToString(alwaysPingList, ',')
-//   for(U32 i=0; i<MaxJoystickAxes*2; i++)
-//   {
-//      Vector<string> buttonList;
-//      for(U32 j=0; j<32; j++)
-//      {
-//         if(gJoystickMapping.axes[i] & (1 << j))
-//            buttonList.push_back(itos(j));
-//      }
-//      ini->SetValue("Joystick", "Axes" + itos(i), listToString(buttonList, ','));
-//   }
-//   for(U32 i=0; i<32; i++)
-//   {
-//      Vector<string> buttonList;
-//      for(U32 j=0; j<32; j++)
-//      {
-//         if(gJoystickMapping.button[i] & (1 << j))
-//            buttonList.push_back(itos(j));
-//      }
-//      ini->SetValue("Joystick", "Button" + itos(i), listToString(buttonList, ','));
-//   }
-//   for(U32 i=0; i<4; i++)
-//   {
-//      Vector<string> buttonList;
-//      for(U32 j=0; j<32; j++)
-//      {
-//         if(gJoystickMapping.pov[i] & (1 << j))
-//            buttonList.push_back(itos(j));
-//      }
-//      ini->SetValue("Joystick", "Pov" + itos(i), listToString(buttonList, ','));
-//   }
-//}
-
 
 static void loadServerBanList(CIniFile *ini, BanList *banList)
 {
@@ -1499,15 +1314,12 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadSoundSettings(ini, settings, iniSettings);
    loadEffectsSettings(ini, iniSettings);
    loadGeneralSettings(ini, iniSettings);
-   loadEditorSettings(ini, iniSettings);
    loadLoadoutPresets(ini, settings);
    loadPluginBindings(ini, iniSettings);
 
    loadHostConfiguration(ini, iniSettings);
    loadUpdaterSettings(ini, iniSettings);
    loadDiagnostics(ini, iniSettings);
-
-   loadTestSettings(ini, iniSettings);
 
    setDefaultKeyBindings(ini, inputCodeManager);
    setDefaultEditorKeyBindings(ini, inputCodeManager);
@@ -1648,47 +1460,77 @@ void saveWindowPosition(CIniFile *ini, S32 x, S32 y)
 }
 
 
+// This list is currently incomplete, will grow as we move our settings into the new structure
+static const string sections[] = {"Settings", "Host", "Host-Voting"};
+static const string headerComments[] = 
+{
+   "Settings entries contain a number of different options.",
+   "Items in this section control how Bitfighter works when you are hosting a game.  See also Host-Voting.",
+   "Control how voting works on the server.  The default values work pretty well, but if you want to tweak them, go ahead!\n"
+   "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"
+   "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below."
+};
+
+
 static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 {
-   const char *section = "Settings";
-   ini->addSection(section);
+   TNLAssert(ARRAYSIZE(sections) == ARRAYSIZE(headerComments), "Mismatch!");
 
-   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
-
-   if(ini->numSectionComments(section) == 0)
+   for(S32 i = 0; i < ARRAYSIZE(sections); i++)
    {
-      ini->sectionComment(section, "----------------");
-      ini->sectionComment(section, " Settings entries contain a number of different options");
+      ini->addSection(sections[i]);
 
-      // Write all our section comments for items defined in the new manner
+      const string section = sections[i];
+
+      SettingsType settings = iniSettings->mSettings.getSettingsInSection(section);
+   
+      if(true || ini->numSectionComments(section) == 0)  // <<<==== remove true when done testing!
+      {
+         const Vector<string> comments = wrapString(headerComments[i], NO_AUTO_WRAP);
+
+         ini->deleteSectionComments(section);      // Delete when done testing (harmless but useless)
+
+         ini->sectionComment(section, "----------------");
+         for(S32 i = 0; i < comments.size(); i++)
+            ini->sectionComment(section, " " + comments[i]);
+         ini->sectionComment(section, "----------------");
+
+         // Write all our section comments for items defined in the new manner
+         for(S32 i = 0; i < settings.size(); i++)
+         {
+            // Pass NO_AUTO_WRAP as width to disable automatic wrapping... we'll rely on \ns to do our wrapping here
+            const string prefix = settings[i]->getKey() + " - ";
+            const Vector<string> comments = wrapString(prefix + settings[i]->getComment(), NO_AUTO_WRAP, string(prefix.size(), ' '));
+            for(S32 j = 0; j < comments.size(); j++)
+               ini->sectionComment(section, " " + comments[j]);
+         }
+      }
+
+      // Write the settings themselves
       for(S32 i = 0; i < settings.size(); i++)
-         ini->sectionComment(section, " " + settings[i]->getKey() + " - " + settings[i]->getComment());
-
-
-      ini->sectionComment(section, " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
-      ini->sectionComment(section, " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
-      ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
-      ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
-      ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
-      ini->sectionComment(section, " MasterServerAddressList - Comma seperated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
-      ini->sectionComment(section, " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
-      ini->sectionComment(section, " Nickname - Specify the nickname to use for autologin, or clear to disable autologin");
-      ini->sectionComment(section, " Password - Password to use for autologin, if your nickname has been reserved in the forums");
-      ini->sectionComment(section, " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
-      ini->sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
-      ini->sectionComment(section, " LastEditorName - Last edited file name");
-      ini->sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
-      ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
-      ini->sectionComment(section, " Version - Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!");
-      ini->sectionComment(section, " QueryServerSortColumn - Index of column to sort by when in the Join Servers menu. (0 is first col.)  This value managed by game.");
-      ini->sectionComment(section, " QueryServerSortAscending - 1 for ascending sort, 0 for descending.  This value managed by game.");
-
-      ini->sectionComment(section, "----------------");
+         ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
    }
 
-   // Write all settings defined in the new modern manner
-   for(S32 i = 0; i < settings.size(); i++)
-      ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
+   const char *section = "Settings";
+
+   ini->sectionComment(section, " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
+   ini->sectionComment(section, " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
+   ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
+   ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
+   ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
+   ini->sectionComment(section, " MasterServerAddressList - Comma seperated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
+   ini->sectionComment(section, " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
+   ini->sectionComment(section, " Nickname - Specify the nickname to use for autologin, or clear to disable autologin");
+   ini->sectionComment(section, " Password - Password to use for autologin, if your nickname has been reserved in the forums");
+   ini->sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
+   ini->sectionComment(section, " LastEditorName - Last edited file name");
+   ini->sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
+   ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
+   ini->sectionComment(section, " Version - Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!");
+   ini->sectionComment(section, " QueryServerSortColumn - Index of column to sort by when in the Join Servers menu. (0 is first col.)  This value managed by game.");
+   ini->sectionComment(section, " QueryServerSortAscending - 1 for ascending sort, 0 for descending.  This value managed by game.");
+
+   ini->sectionComment(section, "----------------");
 
 
    // And the ones still to be ported to the new system
@@ -1731,7 +1573,7 @@ static void writeEditorSettings(CIniFile *ini, IniSettings *iniSettings)
    const char *section = "EditorSettings";
    ini->addSection(section);
 
-   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
+   SettingsType settings = iniSettings->mSettings.getSettingsInSection(section);
 
    if(ini->numSectionComments(section) == 0)
    {
@@ -1775,78 +1617,19 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
    if(ini->numSectionComments(section) == 0)
    {
       addComment("----------------");
-      addComment(" The Host section contains entries that configure the game when you are hosting");
-      addComment(" ServerName - The name others will see when they are browsing for servers (max 20 chars)");
-      addComment(" ServerAddress - Socket address and port to bind to, e.g. IP:Any:9876 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888 (leave blank to let the system decide; this is almost always what you want)");
-      addComment(" ServerDescription - A one line description of your server.  Please include nickname and physical location!");
-      addComment(" ServerPassword - You can require players to use a password to play on your server.  Leave blank to grant access to all.");
-      addComment(" OwnerPassword - Super admin password.  Gives admin rights + power over admins.  Do not give this out!");
-      addComment(" AdminPassword - Use this password to manage players & change levels on your server.");
-      addComment(" LevelChangePassword - Use this password to change levels on your server.  Leave blank to grant access to all.");
-      addComment(" LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
-      addComment(" MaxPlayers - The max number of players that can play on your server.");
-      addComment(" MaxBots - The max number of bots allowed on this server.");
-      addComment(" AddRobots - Add robot players to this server.");
-      addComment(" MinBalancedPlayers - The minimum number of players ensured in each map.  Bots will be added up to this number.");
-      addComment(" EnableServerVoiceChat - If false, prevents any voice chat in a server.");
-      addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
-      addComment(" MaxFPS - Maximum FPS the dedicaetd server will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
-      addComment(" RandomLevels - When current level ends, this can enable randomly switching to any available levels.");
-      addComment(" SkipUploads - When current level ends, enables skipping all uploaded levels.");
-      addComment(" AllowGetMap - When getmap is allowed, anyone can download the current level using the /getmap command.");
-      addComment(" AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
-      addComment("                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
-      addComment(" LogStats - Save game stats locally to built-in sqlite database (saves the same stats as are sent to the master)");
-      addComment(" DefaultRobotScript - If user adds a robot, this script is used if none is specified");
-      addComment(" GlobalLevelScript - Specify a levelgen that will get run on every level");
       addComment(" MySqlStatsDatabaseCredentials - If MySql integration has been compiled in (which it probably hasn't been), you can specify the");
       addComment("                                 database server, database name, login, and password as a comma delimeted list");
-      addComment(" VoteLength - number of seconds the voting will last, zero will disable voting.");
-      addComment(" VoteRetryLength - When vote fail, the vote caller is unable to vote until after this number of seconds.");
       addComment(" Vote Strengths - Vote will pass when sum of all vote strengths is bigger then zero.");
+      addComment(" MaxFPS - Maximum FPS the dedicaetd server will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
+      addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
+
       addComment("----------------");
    }
 
-   ini->SetValue  (section, "ServerName", iniSettings->hostname);
-   ini->SetValue  (section, "ServerAddress", iniSettings->hostaddr);
-   ini->SetValue  (section, "ServerDescription", iniSettings->hostdescr);
-   ini->SetValue  (section, "ServerPassword", iniSettings->serverPassword);
-   ini->SetValue  (section, "OwnerPassword", iniSettings->ownerPassword);
-   ini->SetValue  (section, "AdminPassword", iniSettings->adminPassword);
-   ini->SetValue  (section, "LevelChangePassword", iniSettings->levelChangePassword);
-   ini->SetValue  (section, "LevelDir", iniSettings->levelDir);
-   ini->SetValueI (section, "MaxPlayers", iniSettings->maxPlayers);
-   ini->SetValueI (section, "MaxBots", iniSettings->maxBots);
-   ini->setValueYN(section, "AddRobots", iniSettings->playWithBots);
-   ini->SetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
-   ini->setValueYN(section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
-   ini->setValueYN(section, "AllowTeamChanging", iniSettings->allowTeamChanging);
    ini->SetValueI (section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10));
-   ini->setValueYN(section, "AllowGetMap", iniSettings->allowGetMap);
-   ini->setValueYN(section, "AllowDataConnections", iniSettings->allowDataConnections);
    ini->SetValueI (section, "MaxFPS", iniSettings->maxDedicatedFPS);
    ini->setValueYN(section, "LogStats", iniSettings->logStats);
 
-   ini->setValueYN(section, "RandomLevels", S32(iniSettings->randomLevels) );
-   ini->setValueYN(section, "SkipUploads", S32(iniSettings->skipUploads) );
-
-   ini->setValueYN(section, "AllowMapUpload", S32(iniSettings->allowMapUpload) );
-   ini->setValueYN(section, "AllowAdminMapUpload", S32(iniSettings->allowAdminMapUpload) );
-   ini->setValueYN(section, "AllowLevelgenUpload", S32(iniSettings->allowLevelgenUpload) );
-
-
-   ini->setValueYN(section, "VoteEnable", S32(iniSettings->voteEnable) );
-   ini->SetValueI (section, "VoteLength", S32(iniSettings->voteLength) );
-   ini->SetValueI (section, "VoteLengthToChangeTeam", S32(iniSettings->voteLengthToChangeTeam) );
-   ini->SetValueI (section, "VoteRetryLength", S32(iniSettings->voteRetryLength) );
-   ini->SetValueI (section, "VoteYesStrength", iniSettings->voteYesStrength );
-   ini->SetValueI (section, "VoteNoStrength", iniSettings->voteNoStrength );
-   ini->SetValueI (section, "VoteNothingStrength", iniSettings->voteNothingStrength );
-
-   ini->SetValue  (section, "DefaultRobotScript", iniSettings->defaultRobotScript);
-   ini->SetValue  (section, "GlobalLevelScript", iniSettings->globalLevelScript);
-
-   ini->setValueYN(section, "GameRecording", iniSettings->enableGameRecording);
 #ifdef BF_WRITE_TO_MYSQL
    if(iniSettings->mySqlStatsDatabaseServer == "" && iniSettings->mySqlStatsDatabaseName == "" && iniSettings->mySqlStatsDatabaseUser == "" && iniSettings->mySqlStatsDatabasePassword == "")
       ini->SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password");
@@ -1877,37 +1660,6 @@ static void writeLevels(CIniFile *ini)
 }
 
 
-static void writeTesting(CIniFile *ini, GameSettings *settings)
-{
-   IniSettings *iniSettings = settings->getIniSettings();
-
-   ini->addSection("Testing");
-   if (ini->numSectionComments("Testing") == 0)
-   {
-      ini->sectionComment("Testing", "----------------");
-      ini->sectionComment("Testing", " These settings are here to enable/disable certain items for testing.  They are by their nature");
-      ini->sectionComment("Testing", " short lived, and may well be removed in the next version of Bitfighter.");
-      ini->sectionComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
-      ini->sectionComment("Testing", " NeverConnectDirect - Never connect to pingable internet server directly; forces arranged connections via master");
-      ini->sectionComment("Testing", " WallOutlineColor - Color used locally for rendering wall outlines (r,g,b), (values between 0 and 1)");
-      ini->sectionComment("Testing", " WallFillColor - Color used locally for rendering wall fill (r,g,b), (values between 0 and 1)");
-      ini->sectionComment("Testing", " ClientPortNumber - Only helps when punching through firewall when using router's port forwarded for client port number");
-      ini->sectionComment("Testing", " DisableScreenSaver - Disable ScreenSaver from having no input from keyboard/mouse, useful when using joystick");
-      ini->sectionComment("Testing", "----------------");
-   }
-
-   ini->setValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
-
-   // Maybe we should not write these if they are the default values?
-   ini->SetValue  ("Testing", "WallFillColor",   settings->getWallFillColor()->toRGBString());
-   ini->SetValue  ("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString());
-
-   ini->setValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
-   ini->SetValueI ("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
-   ini->setValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
-}
-
-
 static void writePasswordSection_helper(CIniFile *ini, string section)
 {
    ini->addSection(section);
@@ -1932,13 +1684,29 @@ static void writeINIHeader(CIniFile *ini)
 {
    if(!ini->NumHeaderComments())
    {
-      ini->headerComment("Bitfighter configuration file");
-      ini->headerComment("=============================");
-      ini->headerComment(" This file is intended to be user-editable, but some settings here may be overwritten by the game.");
-      ini->headerComment(" If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
-      ini->headerComment(" First, some basic terminology:");
-      ini->headerComment(" [section]");
-      ini->headerComment(" key=value");
+      //ini->headerComment("Bitfighter configuration file");
+      //ini->headerComment("=============================");
+      //ini->headerComment(" This file is intended to be user-editable, but some settings here may be overwritten by the game.");
+      //ini->headerComment(" If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
+      //ini->headerComment(" First, some basic terminology:");
+      //ini->headerComment(" [section]");
+      //ini->headerComment(" key=value");
+
+      string headerComments =
+      "Bitfighter configuration file\n"
+      "=============================\n"
+      "This file is intended to be user-editable, but some settings here may be overwritten by the game. "
+      "If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.\n"
+      "\n"
+      "First, some basic terminology:\n"
+      "\t[section]\n"
+      "\tkey=value\n";
+
+      Vector<string> lines = wrapString(headerComments, 100);
+
+      for(S32 i = 0; i < lines.size(); i++)
+         ini->headerComment(" " + lines[i]);
+
       ini->headerComment("");
    }
 }
@@ -1964,7 +1732,6 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeLevels(ini);
    writeSkipList(ini, settings->getLevelSkipList());
    writeUpdater(ini, iniSettings);
-   writeTesting(ini, settings);
    writePasswordSection(ini);
    writeKeyBindings(ini, settings->getInputCodeManager());
    
@@ -1976,7 +1743,7 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    //writeJoystick();
    writeServerBanList(ini, settings->getBanList());
 
-   ini->WriteFile();
+   ini->WriteFile();    // Commit the file to disk
 }
 
 

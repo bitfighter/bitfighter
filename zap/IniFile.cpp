@@ -256,6 +256,8 @@ bool CIniFile::SetValue(const string &section, const string &key, const string &
 {
    S32 sectionId = findSection(section);
 
+   TNLAssert(key != "LevelDir" && value != "", "Blank LevelDir?");
+
    if(sectionId == noID) 
    {
       if(create)

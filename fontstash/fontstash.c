@@ -690,7 +690,7 @@ void sth_dim_text(struct sth_stash* stash,
 		if (q.x1 > *maxx) *maxx = q.x1;
 		if (q.y1 < *miny) *miny = q.y1;
 		if (q.y0 > *maxy) *maxy = q.y0;
-	}
+	}  
 	if (floorf(x) > *maxx) *maxx = floorf(x);
 }
 

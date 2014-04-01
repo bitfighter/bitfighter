@@ -46,24 +46,7 @@
 // backport player count stuff
 
 /*
-XXX need to document timers, new luavec stuff XXX
-
 /shutdown enhancements: on screen timer after msg dismissed, instant dismissal of local notice, notice in join menu, shutdown after level, auto shutdown when quitting and players connected
-
- */
-/* Fixes after 016
-<h2>New features</h2>
-<ul>
-<li>
-</ul>
-
-
-// Scripting nots
-bot:findItems --> findItems
-bot:findGlobalItems --> findItems
-
-printToOglConsole --> printToConsole
-include (replaces require)
 
 */
 
@@ -486,7 +469,7 @@ void shutdownBitfighter()
       Joystick::shutdownJoystick();
 
       // Save current window position if in windowed mode
-      if(settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode") == DISPLAY_MODE_WINDOWED)
+      if(settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode) == DISPLAY_MODE_WINDOWED)
       {
          settings->getIniSettings()->winXPos = VideoSystem::getWindowPositionX();
          settings->getIniSettings()->winYPos = VideoSystem::getWindowPositionY();
@@ -545,16 +528,21 @@ void setupLogging(IniSettings *iniSettings)
 void createClientGame(GameSettingsPtr settings)
 {
 #ifndef ZAP_DEDICATED
-   if(!settings->isDedicatedServer())                      // Create ClientGame object
+   if(!settings->isDedicatedServer())
    {
+      // Grab some values from the settings
+      U16    portNumber     = settings->getIniSettings()->mSettings.getVal<U16>(IniKey::ClientPortNumber);
+      string lastEditorName = settings->getIniSettings()->lastEditorName;
+      string lastName       = settings->getIniSettings()->mSettings.getVal<string>(IniKey::LastName);
+
       // Create a new client, and let the system figure out IP address and assign a port
-      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, settings->getIniSettings()->clientPortNumber), 
-                                              settings, new UIManager());    // ClientGame destructor will clean up UIManager
+      // ClientGame destructor will clean up UIManager
+      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, portNumber), settings, new UIManager());    
 
        // Put any saved filename into the editor file entry thingy
-      clientGame->getUIManager()->getUI<LevelNameEntryUserInterface>()->setString(settings->getIniSettings()->lastEditorName);
+      clientGame->getUIManager()->getUI<LevelNameEntryUserInterface>()->setString(lastEditorName);
 
-      Game::seedRandomNumberGenerator(settings->getIniSettings()->mSettings.getVal<string>("LastName"));
+      Game::seedRandomNumberGenerator(lastName);
       clientGame->getClientInfo()->getId()->getRandom();
 
       GameManager::addClientGame(clientGame);
@@ -578,7 +566,7 @@ void createClientGame(GameSettingsPtr settings)
          //   gClientGame = gClientGame1;
          //}
          //gClientGame->getUIManager()->getUI<NameEntryUserInterface>()->activate();     <-- won't work no more!
-         Game::seedRandomNumberGenerator(settings->getIniSettings()->mSettings.getVal<string>("LastName"));
+         Game::seedRandomNumberGenerator(settings->getIniSettings()->mSettings.getVal<string>(IniKey::LastName));
       }
       else  // Skipping startup screen
       {
@@ -899,8 +887,8 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    // See version.h for short history of roughly what version corresponds to a game release
 
    // 016:
-   if(previousVersion < 1840 && settings->getIniSettings()->maxBots == 127)
-      settings->getIniSettings()->maxBots = 10;
+   if(previousVersion < 1840 && settings->getIniSettings()->mSettings.getVal<S32>(IniKey::MaxBots) == 127)
+      settings->getIniSettings()->mSettings.setVal(IniKey::MaxBots, 10);
 
    if(previousVersion < VERSION_016)
    {
@@ -941,7 +929,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       GameSettings::iniFile.SetValue("EditorPlugins", "Plugin1", "Ctrl+'|draw_stars.lua|Create polygon/star");
 
       // Add back linesmoothing option
-      settings->getIniSettings()->mSettings.setVal("LineSmoothing", Yes);
+      settings->getIniSettings()->mSettings.setVal(IniKey::LineSmoothing, Yes);
    }
 
    // 019a:
@@ -963,6 +951,19 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       const char *offendingFile = joindir(folderManager->pluginDir, "item_select.lua").c_str();
 
       removeFile(offendingFile);
+   }
+
+   // 019b: Nothing to update
+
+   // 020:
+   if(previousVersion < VERSION_020)
+   {
+      // VerboseHelpMessages was removed
+      GameSettings::iniFile.deleteKey("Settings", "VerboseHelpMessages");
+
+      // Testing::OldGoalFlash --> Testing::GoalZoneFlashStyle
+      string val = GameSettings::iniFile.GetValueYN("Testing", "OldGoalFlash", Yes) ? "Original" : "Experimental";
+      GameSettings::iniFile.SetValue("Testing", "GoalZoneFlashStyle", val, true);
    }
 
 

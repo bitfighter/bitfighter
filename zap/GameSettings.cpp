@@ -199,12 +199,12 @@ string GameSettings::getHostName()
 }
 
 
-void GameSettings::setHostName(const string &hostName, bool updateINI) 
+void GameSettings::setHostName(const string &serverName, bool updateINI) 
 { 
-   mHostName = hostName; 
+   mHostName = serverName; 
 
    if(updateINI)
-      mIniSettings.hostname = hostName; 
+      mIniSettings.mSettings.setVal(IniKey::ServerName, serverName);
 }
 
 
@@ -214,12 +214,12 @@ string GameSettings::getHostDescr()
 }
 
 
-void GameSettings::setHostDescr(const string &hostDescr, bool updateINI) 
+void GameSettings::setHostDescr(const string &serverDescription, bool updateINI) 
 { 
-   mHostDescr = hostDescr;
+   mHostDescr = serverDescription;
    
    if(updateINI)
-      mIniSettings.hostdescr = hostDescr; 
+      mIniSettings.mSettings.setVal(IniKey::ServerDescription, serverDescription);
 }
 
 
@@ -234,7 +234,7 @@ void GameSettings::setServerPassword(const string &serverPassword, bool updateIN
    mServerPassword = serverPassword; 
 
    if(updateINI)
-      mIniSettings.serverPassword = serverPassword; 
+      mIniSettings.mSettings.setVal(IniKey::ServerPassword, serverPassword);
 }
 
 
@@ -249,7 +249,7 @@ void GameSettings::setOwnerPassword(const string &ownerPassword, bool updateINI)
    mOwnerPassword = ownerPassword;
 
    if(updateINI)
-      mIniSettings.ownerPassword = ownerPassword;
+      mIniSettings.mSettings.setVal(IniKey::OwnerPassword, ownerPassword);
 }
 
 
@@ -264,7 +264,7 @@ void GameSettings::setAdminPassword(const string &adminPassword, bool updateINI)
    mAdminPassword = adminPassword; 
 
    if(updateINI)
-      mIniSettings.adminPassword = adminPassword; 
+      mIniSettings.mSettings.setVal(IniKey::AdminPassword, adminPassword);
 }
 
 
@@ -279,7 +279,7 @@ void GameSettings::setLevelChangePassword(const string &levelChangePassword, boo
    mLevelChangePassword = levelChangePassword;     // Update our working copy
 
    if(updateINI)
-      mIniSettings.levelChangePassword = levelChangePassword; 
+      mIniSettings.mSettings.setVal(IniKey::LevelChangePassword, levelChangePassword);        
 }
 
 
@@ -356,8 +356,10 @@ string GameSettings::getHostAddress()
       return cmdLineHostAddr;
 
    // Then look in the INI
-   if(mIniSettings.hostaddr != "")
-      return mIniSettings.hostaddr;
+   string addr = mIniSettings.mSettings.getVal<string>(IniKey::ServerAddress);
+
+   if(addr != "")
+      return addr;
 
    // Fall back to default, which is what we usually want anyway!
    return "IP:Any:" + itos(DEFAULT_GAME_PORT);
@@ -366,10 +368,10 @@ string GameSettings::getHostAddress()
 
 U32 GameSettings::getMaxPlayers()
 {
-   U32 maxplayers = getU32(MAX_PLAYERS_PARAM);
+   U32 maxplayers = getU32(MAX_PLAYERS_PARAM);     // Command line value
 
    if(maxplayers == 0)
-      maxplayers = mIniSettings.maxPlayers;
+      maxplayers = mIniSettings.mSettings.getVal<U32>(IniKey::MaxPlayers);
 
    if(maxplayers > MAX_PLAYERS)
       maxplayers = MAX_PLAYERS;
@@ -435,7 +437,7 @@ void GameSettings::setLoginCredentials(const string &name, const string &passwor
 
    if(save)
    {
-      mIniSettings.mSettings.setVal("LastName", name);          
+      mIniSettings.mSettings.setVal(IniKey::LastName, name);          
       mIniSettings.lastPassword = password;
    
       iniFile.WriteFile();
@@ -450,7 +452,7 @@ void GameSettings::updatePlayerName(const string &name)
 
    if(!mPlayerNameSpecifiedOnCmdLine)
    {
-      mIniSettings.mSettings.setVal("LastName", name);      // Save new name to the INI
+      mIniSettings.mSettings.setVal(IniKey::LastName, name);      // Save new name to the INI
       iniFile.WriteFile();
    }
 }
@@ -467,7 +469,7 @@ void GameSettings::setAutologin(bool autologin)
 {
    if(autologin)
    {
-      mIniSettings.name     = mIniSettings.mSettings.getVal<string>("LastName");
+      mIniSettings.name     = mIniSettings.mSettings.getVal<string>(IniKey::LastName);
       mIniSettings.password = mIniSettings.lastPassword;
    }
    else
@@ -489,7 +491,7 @@ string GameSettings::getLevelDir(SettingSource source)
    if(source == CMD_LINE)
       return getString(LEVEL_DIR);
    else
-      return mIniSettings.levelDir;
+      return mIniSettings.mSettings.getVal<string>(IniKey::LevelDir);
 }
 
 
@@ -856,34 +858,35 @@ void GameSettings::runCmdLineDirectives()
 void GameSettings::onFinishedLoading()
 {
    string masterAddressList, cmdLineVal;
+   Settings<IniKey::SettingsItem> &settings = mIniSettings.mSettings;
 
    // Some parameters can be specified both on the cmd line and in the INI... in those cases, the cmd line version takes precedence
    //                                First choice (cmdLine)             Second choice (INI)                  Third choice (fallback)
-   mServerPassword         = *choose( getString(SERVER_PASSWORD),       mIniSettings.serverPassword );
+   mServerPassword         = *choose( getString(SERVER_PASSWORD),       settings.getVal<string>(IniKey::ServerPassword) );
 
-   mOwnerPassword          = *choose( getString(OWNER_PASSWORD),        mIniSettings.ownerPassword );
+   mOwnerPassword          = *choose( getString(OWNER_PASSWORD),        settings.getVal<string>(IniKey::OwnerPassword) );
 
    // Admin and level change passwords have special overrides that force them to be blank... handle those below
    if(getSpecified(NO_ADMIN_PASSWORD))
       mAdminPassword = "";
    else
-      mAdminPassword       = *choose( getString(ADMIN_PASSWORD),        mIniSettings.adminPassword );
+      mAdminPassword       = *choose( getString(ADMIN_PASSWORD),        settings.getVal<string>(IniKey::AdminPassword) );
 
    if(getSpecified(NO_LEVEL_CHANGE_PASSWORD))
       mLevelChangePassword = "";
    else
-      mLevelChangePassword = *choose( getString(LEVEL_CHANGE_PASSWORD), mIniSettings.levelChangePassword );
+      mLevelChangePassword = *choose( getString(LEVEL_CHANGE_PASSWORD), settings.getVal<string>(IniKey::LevelChangePassword) );
 
 
-   mHostName               = *choose( getString(HOST_NAME),             mIniSettings.hostname );
-   mHostDescr              = *choose( getString(HOST_DESCRIPTION),      mIniSettings.hostdescr );
+   mHostName               = *choose( getString(HOST_NAME),             settings.getVal<string>(IniKey::ServerName) );
+   mHostDescr              = *choose( getString(HOST_DESCRIPTION),      settings.getVal<string>(IniKey::ServerDescription) );
 
 
    cmdLineVal = getString(LOGIN_NAME);
    mPlayerNameSpecifiedOnCmdLine = (cmdLineVal!= "");
 
    //                                 Cmd Line value                    User must set manually in INI            Saved in INI based on last entry       
-   mPlayerName             = *choose( cmdLineVal,                       mIniSettings.name,                       mIniSettings.mSettings.getVal<string>("LastName"));
+   mPlayerName             = *choose( cmdLineVal,                       mIniSettings.name,                       mIniSettings.mSettings.getVal<string>(IniKey::LastName));
    mPlayerPassword         = *choose( getString(LOGIN_PASSWORD),        mIniSettings.password,                   mIniSettings.lastPassword);
 
    cmdLineVal = getString(MASTER_ADDRESS);
@@ -895,8 +898,9 @@ void GameSettings::onFinishedLoading()
 
    getFolderManager()->resolveLevelDir(this);                     // Figure out where the heck our levels are stored
 
-   if(getIniSettings()->levelDir == "")                           // If there is nothing in the INI,
-      getIniSettings()->levelDir = getFolderManager()->levelDir;  // write a good default to the INI
+   // If there is nothing in the INI, write a good default to the INI
+   if(mIniSettings.mSettings.getVal<string>(IniKey::LevelDir) == "")    
+      mIniSettings.mSettings.setVal(IniKey::LevelDir, getFolderManager()->levelDir);
 
    // Now we turn to the size and position of the game window
    // First, figure out what display mode to start in...
@@ -917,7 +921,7 @@ void GameSettings::onFinishedLoading()
    // In all of these cases, if something was specified on the cmd line, write the result directly to the INI, clobbering whatever was there.
    // When we need the value, we'll get it from the INI.
    if(cmdLineDisplayMode != DISPLAY_MODE_UNKNOWN)
-      getIniSettings()->mSettings.setVal("WindowMode", cmdLineDisplayMode);
+      getIniSettings()->mSettings.setVal(IniKey::WindowMode, cmdLineDisplayMode);
 
    if(xpos != S32_MIN)
    {
@@ -1194,15 +1198,15 @@ void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
 }
 
 
-const Color *GameSettings::getWallFillColor() const
+const Color GameSettings::getWallFillColor() const
 {
-   return &mIniSettings.wallFillColor;
+   return mIniSettings.mSettings.getVal<Color>(IniKey::WallFillColor);
 }
 
 
-const Color *GameSettings::getWallOutlineColor() const
+const Color GameSettings::getWallOutlineColor() const
 {
-   return &mIniSettings.wallOutlineColor;
+   return mIniSettings.mSettings.getVal<Color>(IniKey::WallOutlineColor);
 }
 
 
@@ -1291,13 +1295,13 @@ InputMode GameSettings::getInputMode()
 
 void GameSettings::setShowingInGameHelp(bool show)
 {
-   mIniSettings.mSettings.setVal("ShowInGameHelp", show ? Yes : No);
+   mIniSettings.mSettings.setVal(IniKey::ShowInGameHelp, show ? Yes : No);
 }
 
 
 bool GameSettings::getShowingInGameHelp()
 {
-   return mIniSettings.mSettings.getVal<YesNo>("ShowInGameHelp");
+   return mIniSettings.mSettings.getVal<YesNo>(IniKey::ShowInGameHelp);
 }
 
 

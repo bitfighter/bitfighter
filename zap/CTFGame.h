@@ -26,7 +26,6 @@ public:
    CTFGameType();
    virtual ~CTFGameType();
 
-   void addFlag(FlagItem *flag);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
    void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);

@@ -120,7 +120,7 @@ void FxManager::DebrisChunk::render() const
    glPushMatrix();
 
    glTranslate(pos);
-   glRotatef(rd(angle), 0, 0, 1);
+   glRotate(angle * RADIANS_TO_DEGREES);
 
    F32 alpha = 1;
    if(ttl < 250)

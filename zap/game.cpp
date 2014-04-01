@@ -18,9 +18,6 @@
 #include "ServerGame.h"
 #include "gameNetInterface.h"
 
-
-#include "md5wrapper.h"
-
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>
 #include <cmath>
@@ -64,7 +61,6 @@ U32 NameToAddressThread::run()
 ////////////////////////////////////////
 
 static Vector<DatabaseObject *> fillVector2;
-md5wrapper Game::md5;
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -207,14 +203,16 @@ void Game::setReadyToConnectToMaster(bool ready)
 }
 
 
+// Static method
 Point Game::getScopeRange(bool sensorEquipped)
 {
-   if(sensorEquipped)
-      return Point(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-            PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
+   static const Point sensorScopeRange(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+                                       PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL   + PLAYER_SCOPE_MARGIN);
 
-   return Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-         PLAYER_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
+   static const Point normalScopeRange(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+                                       PLAYER_VISUAL_DISTANCE_VERTICAL   + PLAYER_SCOPE_MARGIN);
+
+   return sensorEquipped ? sensorScopeRange : normalScopeRange;
 }
 
 
@@ -756,7 +754,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       }
 
       // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
-      TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(argv[0]));
+      TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(argv[0]).c_str());
 
       GameType *gt = dynamic_cast<GameType *>(theObject);
       if(gt)
@@ -1204,6 +1202,17 @@ Point Game::computePlayerVisArea(Ship *ship) const
       return regVis + (sensVis - regVis) * fraction;
    else
       return sensVis + (regVis - sensVis) * fraction;
+}
+
+
+// Returns the render scale based on whether sensor is active.  If sensor is not active, scale will be 1.0.
+// Currently this is used to upscale the name displayed with ships when they are rendered.
+F32 Game::getRenderScale(bool sensorActive) const
+{
+   static const F32 sensorScale = (F32)PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL / 
+                                  (F32)PLAYER_VISUAL_DISTANCE_HORIZONTAL;
+
+   return sensorActive ? sensorScale : 1;
 }
 
 

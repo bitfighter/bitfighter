@@ -17,7 +17,6 @@
 
 #include "teamInfo.h"            // For ClassManager
 #include "BfObject.h"            // For TypeNumber def
-#include "md5wrapper.h"
 
 #include "Timer.h"
 #include "Rect.h"
@@ -264,8 +263,6 @@ public:
    static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL = 800;    // How far player can see with sensor equipped horizontally...
    static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL = 600;      // ...and vertically
 
-   static md5wrapper md5;
-
    Game(const Address &theBindAddress, GameSettingsPtr settings); // Constructor
    virtual ~Game();                                               // Destructor
 
@@ -317,6 +314,8 @@ public:
    Rect computeBarrierExtents();
 
    Point computePlayerVisArea(Ship *ship) const;
+   F32 getRenderScale(bool sensorActive) const;
+
    virtual Point worldToScreenPoint(const Point *p, S32 canvasWidth, S32 canvasHeight) const;
    virtual F32 getCommanderZoomFraction() const;
    virtual void renderBasicInterfaceOverlay() const;
@@ -437,7 +436,7 @@ public:
    // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
    S32 mObjectsLoaded;  
 
-   Point getScopeRange(bool sensorEquipped);
+   static Point getScopeRange(bool sensorEquipped);
 
    string makeUnique(const char *name);
 

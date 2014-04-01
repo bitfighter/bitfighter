@@ -122,7 +122,7 @@ public:
 
    static const S32 FirstTeamNumber = -2;                               // First team is "Hostile to All" with index -2
    static const U32 gMaxTeamCount = Game::MAX_TEAMS - FirstTeamNumber;  // Number of possible teams, including Neutral and Hostile to All
-   static const char *validateGameType(const char *gtype);              // Returns a valid gameType, defaulting to base class if needed
+   static string validateGameType(const string &gtype);                 // Returns a valid gameType, defaulting to base class if needed
 
    Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
@@ -149,6 +149,7 @@ public:
 
    Vector<AbstractSpawn *> getSpawnPoints(TypeNumber typeNumber, S32 teamIndex = TeamNotSpecified);
 
+   static GameTypeId getGameTypeIdFromName(const string &name);
 
    // Info about the level itself
    bool hasFlagSpawns() const;      
@@ -204,16 +205,6 @@ public:
    const Vector<WallRec> *getBarrierList();
 
    S32 mObjectsExpected;            // Count of objects we expect to get with this level (for display purposes only)
-
-   struct ItemOfInterest
-   {
-      SafePtr<MoveItem> theItem;
-      U32 teamVisMask;        // Bitmask, where 1 = object is visible to team in that position, 0 if not
-   };
-
-   Vector<ItemOfInterest> mItemsOfInterest;
-
-   void addItemOfInterest(MoveItem *theItem);
 
    void broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &formatString);
 
@@ -377,7 +368,6 @@ public:
 
    virtual void shipTouchZone(Ship *ship, GoalZone *zone);
 
-   void queryItemsOfInterest();
    void performScopeQuery(GhostConnection *connection);
    virtual void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
 
