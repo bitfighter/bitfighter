@@ -7,49 +7,34 @@
 
 local sd = require('stardust')
 
-TARGET_TYPES = {
-  "WallItem",
-  "PolyWall",
-  "Zone",
-  "LoadoutZone",
-  "GoalZone",
-  "LineItem",
-  "FlagItem",
-  "ResourceItem",
-  "TestItem",
-  "Mine",
-  "SpyBug",
-  "SoccerBallItem",
-  "Spawn",
-  "RepairItem",
-  "EnergyItem",
-  "SpeedZone",
-  "Turret",
-  "ForceFieldProjector",
-  "Teleporter",
-  "Asteroid",
-}
-
 function getArgsMenu()
 
-	menu = 	{
-		ToggleMenuItem.new("New Object Type", TARGET_TYPES, 1, "Object type to convert to"),
-		YesNoMenuItem.new("Delete Old Objects", 2, "Delete the original objects after the new ones are created")
-	}
+  local menu
+  if #plugin:getSelectedObjects() ~= 0 then
+  	menu = 	{
+  		ToggleMenuItem.new("New Object Type", sd.VALID_TYPES, 1, "Object type to convert to"),
+  		YesNoMenuItem.new("Delete Old Objects", 2, "Delete the original objects after the new ones are created")
+  	}
+  end
 
 	return "Convert Objects", "Convert all selected objects to another type", "Ctrl+Shift+.", menu
 end
 
 function main()
-  local objectType = table.remove(arg, 1)
+  local objectType = ObjType[table.remove(arg, 1)]
   local deleteOld  = table.remove(arg, 1)
 
   local objects = plugin:getSelectedObjects()
+  if #objects == 0 then
+    plugin:showMessage('Please select at least one object', false)
+    return
+  end
 
   for _, obj in pairs(objects) do
     obj:setSelected(false)
     local geom = obj:getGeom()
-    local newObj = _G[objectType].new()
+    print(objectType)
+    local newObj = sd.OBJTYPE_TO_CLASS[objectType].new()
 
     if type(geom) == "table" then
       -- add or remove closing point as needed
