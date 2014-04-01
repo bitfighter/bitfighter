@@ -649,12 +649,7 @@ string joindir(const string &path, const string &filename)
       return path + filename;
 
    // Otherwise, join with a delimeter.
-   // Since mixed delimeters look like crap, we'll use whichever we find first to try to make them match.
-   if(path.find('\\') != string::npos)
-      return path + "\\" + filename;
-
-   // If there are currently no delimeters in path, use good ol' trusty forward slash.
-   return path + "/" + filename;
+   return path + getFileSeparator() + filename;
 }
    
 
@@ -667,8 +662,8 @@ string strictjoindir(const string &part1, const string &part2)
    if(part1[part1.length() - 1] == '\\' || part1[part1.length() - 1] == '/')
       return part1 + part2;
 
-   // Otherwise, join with a delimeter.  This works on Win, OS X, and Linux.
-   return part1 + "/" + part2;
+   // Otherwise, join with a delimeter.
+   return part1 + getFileSeparator() + part2;
 }
 
 
