@@ -33,15 +33,6 @@ CTFGameType::~CTFGameType()
 }
 
 
-void CTFGameType::addFlag(FlagItem *flag)
-{
-   Parent::addFlag(flag);
-
-   if(!isGhost())
-      addItemOfInterest(flag);      // Server only
-}
-
-
 void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {
    ClientInfo *clientInfo = theShip->getClientInfo();

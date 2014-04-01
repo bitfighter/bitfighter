@@ -292,7 +292,7 @@ void Robot::onAddedToGame(Game *game)
    // Check whether a script file has been specified. If not, use the default
    if(mScriptName == "")
    {
-      string scriptName = game->getSettings()->getIniSettings()->defaultRobotScript;
+      string scriptName = game->getSettings()->getIniSettings()->mSettings.getVal<string>(IniKey::DefaultRobotScript);
       mScriptName = GameSettings::getFolderManager()->findBotFile(scriptName);
    }
 
@@ -392,7 +392,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
    if(argc >= 2)
       scriptName = argv[1];
    else
-      scriptName = game->getSettings()->getIniSettings()->defaultRobotScript;
+      scriptName = game->getSettings()->getIniSettings()->mSettings.getVal<string>(IniKey::DefaultRobotScript);
 
    FolderManager *folderManager = game->getSettings()->getFolderManager();
 
@@ -1330,7 +1330,7 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
    // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
    // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
    // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
-   while(lua_isnumber(L, -1))
+   while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
       U8 typenum = (U8)lua_tointeger(L, -1);
 

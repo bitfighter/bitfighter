@@ -71,7 +71,7 @@ bool GeomObject::deleteVert(S32 vertIndex)
 {   
    if(mGeometry.getGeometry()->deleteVert(vertIndex))
    {
-      onPointsChanged();
+      onGeomChanged();
       return true;
    }
 
@@ -83,7 +83,7 @@ bool GeomObject::insertVert(Point vertex, S32 vertIndex)
 {   
    if(mGeometry.getGeometry()->insertVert(vertex, vertIndex))
    {
-      onPointsChanged();
+      onGeomChanged();
       return true;
    }
 
@@ -97,14 +97,14 @@ bool GeomObject::anyVertsSelected()          {   return mGeometry.getGeometry()-
 S32 GeomObject::getVertCount() const         {   return mGeometry.getGeometry()->getVertCount();            }
 S32 GeomObject::getMinVertCount() const      {   return mGeometry.getGeometry()->getMinVertCount();         }
 
-void GeomObject::clearVerts()                {   mGeometry.getGeometry()->clearVerts(); onPointsChanged();  }                        
+void GeomObject::clearVerts()                {   mGeometry.getGeometry()->clearVerts(); onGeomChanged();  }
 
 
 bool GeomObject::addVertFront(Point vert)
 {
    if(mGeometry.getGeometry()->addVertFront(vert))
    {
-      onPointsChanged();
+      onGeomChanged();
       return true;
    }
 
@@ -116,7 +116,7 @@ bool GeomObject::addVert(const Point &point, bool ignoreMaxPointsLimit)
 {
    if(mGeometry.getGeometry()->addVert(point, ignoreMaxPointsLimit))
    {
-      onPointsChanged();
+      onGeomChanged();
       return true;
    }
 
@@ -155,13 +155,13 @@ void GeomObject::offset(const Point &offset)                       {  mGeometry.
 
 // Geom in-out
 void GeomObject::packGeom(GhostConnection *connection, BitStream *stream)    {   mGeometry.getGeometry()->packGeom(connection, stream);     }
-void GeomObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {   mGeometry.getGeometry()->unpackGeom(connection, stream); onPointsChanged();  }
+void GeomObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {   mGeometry.getGeometry()->unpackGeom(connection, stream); onGeomChanged();  }
 void GeomObject::setGeom(const Vector<Point> &points)                        {   mGeometry.getGeometry()->setGeom(points); }
 
 void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) 
 {  
    mGeometry.getGeometry()->readGeom(argc, argv, firstCoord, gridSize); 
-   onPointsChanged();
+   onGeomChanged();
 }
 
 
@@ -193,20 +193,17 @@ void GeomObject::setPos(const Point &pos)
 
 void GeomObject::onGeomChanging()
 {
-   if(getGeomType() == geomPolygon)
-      onGeomChanged();               // Allows poly fill to get reshaped as vertices move
-
-   onPointsChanged();
+   onGeomChanged();
 }
 
 
-void GeomObject::onGeomChanged() {  /* Do nothing */ }
-
-
-void GeomObject::onPointsChanged()                        
-{   
+void GeomObject::onGeomChanged()
+{
+   // This will update any other internal data our geometry may have,
+   // like a centroid or triangulated polygon fill
    mGeometry.getGeometry()->onPointsChanged();
 }
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

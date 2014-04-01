@@ -18,8 +18,8 @@ namespace Zap
 RobotManager::RobotManager(ServerGame *game, GameSettingsPtr settings)
 {
    mManagerActive = true;
-   mAutoLevelTeams    = settings->getIniSettings()->playWithBots;
-   mTargetPlayerCount = settings->getIniSettings()->minBalancedPlayers;
+   mAutoLevelTeams    = settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AddRobots);
+   mTargetPlayerCount = settings->getIniSettings()->mSettings.getVal<S32>(IniKey::MinBalancedPlayers);
    mGame = game;
 }
 
@@ -146,7 +146,7 @@ S32 RobotManager::getMaxBots(GameSettings *settings, bool isAdmin)
 {
    static const S32 ABSOLUTE_MAX_BOTS = 255;    // Hard limit on number of bots on the server
 
-   return isAdmin ? ABSOLUTE_MAX_BOTS : settings->getIniSettings()->maxBots;
+   return isAdmin ? ABSOLUTE_MAX_BOTS : settings->getIniSettings()->mSettings.getVal<S32>(IniKey::MaxBots);
 }
 
 

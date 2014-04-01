@@ -237,9 +237,9 @@ void UIColorPicker::render()
 
 
    // Render some samples in selected color
-   static const S32 x = 50;
-   static const S32 y = 540;
-   static const S32 h = 50;
+   static const F32 x = 50;
+   static const F32 y = 540;
+   static const F32 h = 50;
 
 
    // Loadout zone
@@ -253,8 +253,8 @@ void UIColorPicker::render()
    static F32 thrusts[4] =  { 1, 0, 0, 0 };
 
    glPushMatrix();
-   glTranslatef(165, F32(y + h / 2), 0);
-   glRotatef(-90, 0, 0, 1);
+   glTranslate(165, y + h / 2);
+   glRotate(-90);
 
    renderShip(ShipShape::Normal, this, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
 
@@ -262,7 +262,7 @@ void UIColorPicker::render()
 
    // Turret
    glPushMatrix();
-   glTranslatef(240, F32(y + h / 2), 0);
+   glTranslate(240, y + h / 2);
 
    renderTurret(*(const Color *)this, Point(0, 15), Point(0, -1), true, 1, 0, 0);
 

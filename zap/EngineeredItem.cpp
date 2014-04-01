@@ -1064,8 +1064,9 @@ Point EngineeredItem::mountToWall(const Point &pos, const WallSegmentManager *wa
    {
       setPos(anchor);
       setAnchorNormal(nrml);
-      // TODO -- After 019 release -- change this to a static_cast with a protecting assert
-      setMountSegment(dynamic_cast<WallSegment *>(mountSeg));
+
+      TNLAssert(dynamic_cast<WallSegment *>(mountSeg), "NULL WallSegment");
+      setMountSegment(static_cast<WallSegment *>(mountSeg));
 
       mSnapped = true;
       onGeomChanged();
@@ -1857,6 +1858,8 @@ void ForceField::getForceFieldStartAndEndPoints(Point &start, Point &end)
 TNL_IMPLEMENT_NETOBJECT(Turret);
 
 
+const F32 Turret::TURRET_OFFSET = 15; 
+
 // Combined Lua / C++ default constructor
 /**
  * @luafunc Turret::Turret()
@@ -2302,7 +2305,7 @@ S32 Turret::lua_setWeapon(lua_State *L)
 // Override some methods
 S32 Turret::lua_getRad(lua_State *L)
 {
-   return returnInt(L, TURRET_OFFSET);
+   return returnFloat(L, TURRET_OFFSET);
 }
 
 

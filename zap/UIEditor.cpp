@@ -59,6 +59,7 @@
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 #include "ScreenShooter.h"
+#include "FontManager.h"
 
 #include <cmath>
 #include <set>
@@ -160,7 +161,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 
    mSaveMsgTimer.setPeriod(FIVE_SECONDS);    
 
-   mGridSize = game->getSettings()->getIniSettings()->mSettings.getVal<U32>("EditorGridSize");
+   mGridSize = game->getSettings()->getIniSettings()->mSettings.getVal<U32>(IniKey::EditorGridSize);
 
    mQuitLocked = false;
    mVertexEditMode = true;
@@ -175,7 +176,7 @@ GridDatabase *EditorUserInterface::getDatabase() const
 
 F32 EditorUserInterface::getGridSize() const
 {
-   return mGridSize;
+   return (F32)mGridSize;
 }
 
 
@@ -1695,7 +1696,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
       glEnable(GL_DEPTH_WRITEMASK);
       glDepthFunc(GL_LESS);
       glPushMatrix();
-      glTranslatef(0, 0, -0.95f);
+      glTranslate(0, 0, -0.95f);
 
       // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
       glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
@@ -1708,7 +1709,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
          BfObject *editorObj = dynamic_cast<BfObject *>(fillVector[i]);
 
          if(i != 0 && editorObj->getTeam() != prevTeam)
-            glTranslatef(0, 0, 0.05f);
+            glTranslate(0, 0, 0.05f);
          prevTeam = editorObj->getTeam();
 
          Point pos = editorObj->getPos();
@@ -1977,15 +1978,15 @@ void EditorUserInterface::renderReferenceShip()
    glPushMatrix();
       glTranslate(mMousePos);
       glScale(mCurrentScale);
-      glRotatef(90, 0, 0, 1);
+      glRotate(90);
       renderShip(ShipShape::Normal, &Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
-      glRotatef(-90, 0, 0, 1);
+      glRotate(-90);
 
       // Draw collision circle
       const F32 spaceAngle = 0.0278f * FloatTau;
       glColor(Colors::green, 0.35f);
       glLineWidth(gLineWidth1);
-      drawDashedCircle(Point(0,0), Ship::CollisionRadius, 10, spaceAngle, 0);
+      drawDashedCircle(Point(0,0), (F32)Ship::CollisionRadius, 10, spaceAngle, 0);
       glLineWidth(gDefaultLineWidth);
 
       // And show how far it can see
@@ -2164,9 +2165,9 @@ void EditorUserInterface::renderWallsAndPolywalls(GridDatabase *database, const 
    GameSettings *settings = getGame()->getSettings();
 
    WallSegmentManager *wsm = database->getWallSegmentManager();
-   const Color &fillColor = mPreviewMode ? *settings->getWallFillColor() : Colors::EDITOR_WALL_FILL_COLOR;
+   const Color &fillColor = mPreviewMode ? settings->getWallFillColor() : Colors::EDITOR_WALL_FILL_COLOR;
 
-   renderWalls(wsm->getWallSegmentDatabase(), *wsm->getWallEdgePoints(), *wsm->getSelectedWallEdgePoints(), *settings->getWallOutlineColor(),  
+   renderWalls(wsm->getWallSegmentDatabase(), *wsm->getWallEdgePoints(), *wsm->getSelectedWallEdgePoints(), settings->getWallOutlineColor(),  
                fillColor, mCurrentScale, mDraggingObjects, drawSelected, offset, mPreviewMode, 
                getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
 
@@ -2308,6 +2309,8 @@ void EditorUserInterface::renderSaveMessage() const
 
 void EditorUserInterface::renderWarnings() const
 {
+   FontManager::pushFontContext(EditorWarningContext);
+
    if(mWarnMsgTimer.getCurrent())
    {
       F32 alpha = 1.0;
@@ -2321,7 +2324,7 @@ void EditorUserInterface::renderWarnings() const
 
    if(mLevelErrorMsgs.size() || mLevelWarnings.size())
    {
-      S32 ypos = vertMargin + 50;
+      S32 ypos = vertMargin + 20;
 
       glColor(Colors::ErrorMessageTextColor);
 
@@ -2339,6 +2342,8 @@ void EditorUserInterface::renderWarnings() const
          ypos += 25;
       }
    }
+
+   FontManager::popFontContext();
 }
 
 
@@ -5393,7 +5398,7 @@ void EditorMenuUserInterface::setupMenus()
 
    clearMenuItems();
    addMenuItem(new MenuItem("RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
-   addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode")));
+   addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode)));
    addMenuItem(new MenuItem("TEST LEVEL",       testLevelCallback,           "", KEY_T));
    addMenuItem(new MenuItem("SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
    addMenuItem(new MenuItem("EDITOR SECRETS",   activateHelpCallback,        "", KEY_E, keyHelp));

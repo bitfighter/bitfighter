@@ -797,7 +797,7 @@ TNL_IMPLEMENT_NETOBJECT(Mine);
 
 
 const U32 Mine::FuseDelay = 100;
-const S32 Mine::SensorRadius = 50;
+const F32 Mine::SensorRadius = 50;
 
 
 // Constructor -- used when mine is planted

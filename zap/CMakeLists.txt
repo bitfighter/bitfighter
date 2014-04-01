@@ -66,7 +66,7 @@ set(SHARED_SOURCES
 	LuaScriptRunner.cpp
 	masterConnection.cpp
 	MathUtils.cpp
-	md5wrapper.cpp
+	Md5Utils.cpp
 	move.cpp
 	moveObject.cpp
 	NexusGame.cpp
@@ -216,10 +216,15 @@ else()
 	set(EXTRA_LIBS dl m)
 endif()
 
+set(LUA_LIB lua-vec)
+if(USE_LUAJIT)
+	set(LUA_LIB luajit)
+endif()
+
 # libraries used by both client and server
 set(SHARED_LIBS
 	${CMAKE_THREAD_LIBS_INIT}
-	lua-vec
+	${LUA_LIB}
 	tnl
 	tomcrypt
 	${EXTRA_LIBS}
@@ -248,47 +253,64 @@ endif()
 ##
 ## Full client build
 ##
-if(SDL_FOUND OR SDL2_FOUND)
-	add_executable(bitfighter
-		${SHARED_SOURCES}
-		${CLIENT_SOURCES}
-		${BITFIGHTER_HEADERS}
-		${OTHER_HEADERS}
-		main.cpp
-	)
+add_executable(bitfighter
+	${SHARED_SOURCES}
+	${CLIENT_SOURCES}
+	${BITFIGHTER_HEADERS}
+	${OTHER_HEADERS}
+	main.cpp
+)
 
-	add_dependencies(bitfighter
-		alure
-		lua-vec
-		tnl
-		tomcrypt
-	)
+add_dependencies(bitfighter
+	alure
+	${LUA_LIB}
+	tnl
+	tomcrypt
+)
 
-	target_link_libraries(bitfighter
-		${CLIENT_LIBS}
-		${SHARED_LIBS}
-	)
+target_link_libraries(bitfighter
+	${CLIENT_LIBS}
+	${SHARED_LIBS}
+)
 
-	include_directories(
-		${OPENAL_INCLUDE_DIR}
-		${GL_INCLUDE_DIR}
-		${PNG_INCLUDE_DIR}
-		${SDL_INCLUDE_DIR}
-		${SPEEX_INCLUDE_DIR}
-		${SPARKLE_INCLUDE_DIR}
-	)
+include_directories(
+	${OPENAL_INCLUDE_DIR}
+	${GL_INCLUDE_DIR}
+	${PNG_INCLUDE_DIR}
+	${SDL_INCLUDE_DIR}
+	${SPEEX_INCLUDE_DIR}
+	${SPARKLE_INCLUDE_DIR}
+)
 
-	# Where to put the executable
-	set_target_properties(bitfighter PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe)
+# More OSX bundle things
+if(APPLE)
+	set(OSX_BUILD_RESOURCE_DIR "${CMAKE_SOURCE_DIR}/build/osx/")
+	# Specify output to be a .app
+	set_target_properties(bitfighter PROPERTIES MACOSX_BUNDLE TRUE)
 	
-	if(USE_GLES AND SDL2_FOUND)
+	# Use a custom plist
+	set_target_properties(bitfighter PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${OSX_BUILD_RESOURCE_DIR}/Bitfighter-Info.plist)
+	
+	# Set up our bundle plist variables
+	set(MACOSX_BUNDLE_NAME "Bitfighter")
+	set(MACOSX_BUNDLE_VERSION ${BITFIGHTER_BUILD_VERSION})
+	set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${BITFIGHTER_RELEASE})
+	
+	# TODO figure out deployment targets
+	set(MACOSX_DEPLOYMENT_TARGET "10.6")
+endif()
 
-		get_property(CLIENT_DEFS TARGET bitfighter PROPERTY COMPILE_DEFINITIONS)
-		set_target_properties(bitfighter
-			PROPERTIES
-			COMPILE_DEFINITIONS "${CLIENT_DEFS};BF_USE_GLES"
-		)
-	endif()
+
+# Where to put the executable
+set_target_properties(bitfighter PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe)
+
+if(USE_GLES AND SDL2_FOUND)
+
+	get_property(CLIENT_DEFS TARGET bitfighter PROPERTY COMPILE_DEFINITIONS)
+	set_target_properties(bitfighter
+		PROPERTIES
+		COMPILE_DEFINITIONS "${CLIENT_DEFS};BF_USE_GLES"
+	)
 endif()
 
 
@@ -303,7 +325,7 @@ add_executable(bitfighterd
 
 add_dependencies(bitfighterd
 	tnl
-	lua-vec
+	${LUA_LIB}
 	tomcrypt
 )
 
@@ -335,7 +357,9 @@ option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and 
 
 set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/LevelFilesForTesting.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestColor.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestEditor.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGame.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameType.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameUserInterface.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomUtils.cpp
@@ -345,6 +369,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestInputCode.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestIntegration.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelLoader.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelSource.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelMenuSelectUserInterface.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutIndicator.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutTracker.cpp
@@ -385,7 +410,7 @@ target_link_libraries(test
 
 add_dependencies(test
 	alure
-	lua-vec
+	${LUA_LIB}
 	tnl
 	tomcrypt
 	gtest
@@ -419,7 +444,7 @@ if(BITFIGHTER_COVERAGE)
       COMMAND lcov --capture --directory ${CMAKE_SOURCE_DIR} --output-file ${CMAKE_SOURCE_DIR}/build/coverage.info
       COMMAND lcov --extract ${CMAKE_SOURCE_DIR}/build/coverage.info --output-file ${CMAKE_SOURCE_DIR}/build/coverage.info ${CMAKE_SOURCE_DIR}/zap/*
       COMMAND genhtml ${CMAKE_SOURCE_DIR}/build/coverage.info --output-directory ${CMAKE_SOURCE_DIR}/build/cov
-      DEPENDS test alure lua-vec tnl tomcrypt
+      DEPENDS test alure ${LUA_LIB} tnl tomcrypt
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build 
    )
 endif()
@@ -435,26 +460,6 @@ set(ALL_DEBUG_DEFS
 	"TNL_DEBUG"
 )
 
-if(WIN32)
-	# Install windows libraries and resources
-	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
-	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
-	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
-	
-	if(MSYS OR CYGWIN OR XCOMPILE)
-		set(RES_COPY_CMD cp -r ${resDir}* ${exeDir})
-		set(LIB_COPY_CMD cp ${libDir}*.dll ${exeDir})
-	else()
-		set(RES_COPY_CMD xcopy /e /d /y ${resDir}* ${exeDir})
-		set(LIB_COPY_CMD xcopy /d /y ${libDir}*.dll ${exeDir})
-	endif()
-	
-	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
-		COMMAND ${RES_COPY_CMD}
-		COMMAND ${LIB_COPY_CMD}
-	)
-endif()
-
 # Visual Studio only settings
 if(MSVC)
 	# Work around the "Debug", "Release", etc. directories Visual Studio tries to add
@@ -465,7 +470,7 @@ if(MSVC)
 		)
 	endforeach()
 	
-	# separate output name "bitfighter_debug.exe" for debug build, to avoid conflicts with debug/release build
+	# Separate output name "bitfighter_debug.exe" for debug build, to avoid conflicts with debug/release build
 	set_target_properties(test bitfighterd bitfighter PROPERTIES DEBUG_POSTFIX "_debug")
 
 	# Set some linker flags to use console mode in debug build, etc..
@@ -480,4 +485,91 @@ if(MSVC)
 	list(APPEND ALL_DEBUG_DEFS "_CONSOLE")
 endif()
 
+if(APPLE)
+	# Special flags needed because of LuaJIT on 64 bit OSX
+	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set_target_properties(bitfighterd bitfighter PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
+	endif()
+endif()
+
 set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "${ALL_DEBUG_DEFS}")
+
+
+##
+## Install resources for various platforms
+##
+if(WIN32 OR APPLE)
+	# Install windows libraries and resources
+	# The trailing slash is necessary to do here for proper native path translation
+	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
+	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
+	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lua/luajit/src/ luaLibDir)
+	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
+			
+	if(WIN32)
+		if(MSYS OR CYGWIN OR XCOMPILE)
+			set(RES_COPY_CMD cp -r ${resDir}* ${exeDir})
+			set(LIB_COPY_CMD cp ${libDir}*.dll ${exeDir})
+		else()
+			set(RES_COPY_CMD xcopy /e /d /y ${resDir}* ${exeDir})
+			set(LIB_COPY_CMD xcopy /d /y ${libDir}*.dll ${exeDir})
+		endif()
+	endif()
+	
+	# OSX
+	# We have to do much, much more to properly build a .app
+	if(APPLE)
+		set(frameworksDir "${exeDir}/bitfighter.app/Contents/Frameworks")
+		set(resourcesDir "${exeDir}/bitfighter.app/Contents/Resources")
+		execute_process(COMMAND mkdir -p ${frameworksDir})
+		execute_process(COMMAND mkdir -p ${resourcesDir})
+		
+		set(RES_COPY_CMD cp -rp ${resDir}* ${resourcesDir})
+		set(LIB_COPY_CMD rsync -av --exclude=*.h ${libDir}*.framework ${frameworksDir})
+		
+		# Icon file
+		set(COPY_RES_1 cp -rp ${OSX_BUILD_RESOURCE_DIR}/Bitfighter.icns ${resourcesDir})
+		# Public key for Sparkle
+		set(COPY_RES_2 cp -rp ${OSX_BUILD_RESOURCE_DIR}/dsa_pub.pem ${resourcesDir})
+		# Joystick presets
+		set(COPY_RES_3 cp -rp ${exeDir}/joystick_presets.ini ${resourcesDir})
+		# Notifier
+		set(COPY_RES_4 cp -rp ${exeDir}/../notifier/bitfighter_notifier.py ${resourcesDir})
+		set(COPY_RES_5 cp -rp ${exeDir}/../notifier/redship18.png ${resourcesDir})
+		
+		add_custom_command(TARGET bitfighterd bitfighter POST_BUILD 
+			COMMAND ${COPY_RES_1}
+			COMMAND ${COPY_RES_2}
+			COMMAND ${COPY_RES_3}
+			COMMAND ${COPY_RES_4}
+			COMMAND ${COPY_RES_5}
+		)
+		
+		# 64-bit OSX needs to use shared LuaJIT library
+		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+			add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD
+				COMMAND cp -rp ${luaLibDir}libluajit.dylib ${frameworksDir}
+			)
+		endif()
+		
+		# TODO - run lipo on the frameworks
+	endif()
+	
+	
+	# Copy resources
+	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
+		COMMAND ${RES_COPY_CMD}
+		COMMAND ${LIB_COPY_CMD}
+	)
+endif()
+
+
+##
+## Create custom installers, etc.
+##
+if(APPLE)
+	add_custom_target(dmg)
+	# TODO:  build DMG
+	#set_target_properties(dmg PROPERTIES POST_INSTALL_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/CreateMacBundle.cmake)
+
+endif()

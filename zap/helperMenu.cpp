@@ -106,7 +106,7 @@ static S32 ButtonLabelGap = 9;      // Space between button/key rendering and me
 // Returns visible width of the helper
  S32 HelperMenu::getCurrentDisplayWidth(S32 widthOfButtons, S32 widthOfTextBlock) const
 {
-   return getWidth() + getInsideEdge();
+   return getWidth() + (S32)getInsideEdge();
 }
 
 
@@ -264,10 +264,9 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 /////
 
    S32 buttonWidth = getButtonWidth(items, count);
-
+   DisplayMode displayMode = getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
+   
    S32 yPos;
-
-   DisplayMode displayMode = getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
 
    if(newItems)      // Draw the new items we're transitioning to
       yPos = prepareToRenderToDisplay(displayMode, top, oldHeight, height);
@@ -388,8 +387,7 @@ bool HelperMenu::processInputCode(InputCode inputCode)
    {
       exitHelper();      
 
-      if(mClientGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
-         mClientGame->displayMessage(Colors::ErrorMessageTextColor, getCancelMessage());
+      mClientGame->displayMessage(Colors::ErrorMessageTextColor, getCancelMessage());
 
       return true;
    }

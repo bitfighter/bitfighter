@@ -557,10 +557,11 @@ void GameUserInterface::render()
    renderProgressBar();                   // Status bar that shows progress of loading this level
    mVoiceRecorder.render();               // Indicator that someone is sending a voice msg
 
+   mHelperManager.render();
+   renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
+
    mFpsRenderer.render(DisplayManager::getScreenInfo()->getGameCanvasWidth());     // Display running average FPS
    mConnectionStatsRenderer.render(getGame()->getConnectionToServer());     // Display running average FPS
-
-   mHelperManager.render();
 
    GameType *gameType = getGame()->getGameType();
 
@@ -568,8 +569,6 @@ void GameUserInterface::render()
       gameType->renderInterfaceOverlay(DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
 
    renderLevelInfo();
-
-   renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
    
    renderShutdownMessage();
 
@@ -703,11 +702,46 @@ void GameUserInterface::renderLostConnectionMessage() const
 
    if(connection && connection->lostContact())
    {
-      static string msg = "We have lost contact with the server; You can't play "
-                          "until the connection has been re-established.\n\n"
-                          "Trying to reconnect... [[SPINNER]]";
+      //static string msg = "We have lost contact with the server; You can't play "
+      //                    "until the connection has been re-established.\n\n"
+      //                    "Trying to reconnect... [[SPINNER]]";
+      //renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, -30);
 
-      renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, -30);
+      // Above: the old way of displaying connection problem
+
+      // You may test this rendering by using /lag 0 100
+
+      renderCenteredFancyBox(130, 54, 130, 10, Colors::red30, 0.75f, Colors::white);
+
+      glColor(Colors::white);
+      drawStringc(430, 170, 30, "CONNECTION INTERRUPTED");
+
+      const S32 x1 = 140;
+      const S32 y1 = 142;
+
+      glColor(Colors::black);
+      drawRect(x1 +  1, y1 + 20, x1 + 8, y1 + 30, GL_TRIANGLE_FAN);
+      drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GL_TRIANGLE_FAN);
+      drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GL_TRIANGLE_FAN);
+      drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GL_TRIANGLE_FAN);
+      drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GL_TRIANGLE_FAN);
+      glColor(Colors::gray40);
+      drawRect(x1 +  1, y1 + 20, x1 + 8, y1 + 30, GL_LINE_LOOP);
+      drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GL_LINE_LOOP);
+      drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GL_LINE_LOOP);
+      drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GL_LINE_LOOP);
+      drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GL_LINE_LOOP);
+
+
+      if((Platform::getRealMilliseconds() & 0x300) != 0) // Draw flashing red "X" on empty connection bars
+      {
+         static const F32 vertices[] = {x1 + 5, y1 - 5, x1 + 45, y1 + 35,  x1 + 5, y1 + 35, x1 + 45, y1 - 5 };
+         glColor(Colors::red);
+         glLineWidth(gDefaultLineWidth * 2.f);
+         renderVertexArray(vertices, 4, GL_LINES);
+         glLineWidth(gDefaultLineWidth);
+      }
+
    }
 }
 
@@ -1827,7 +1861,7 @@ Move *GameUserInterface::getCurrentMove()
 
    // Using relative controls -- all turning is done relative to the direction of the ship, so
    // we need to udate the move a little
-   if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<RelAbs>("ControlMode") == Relative)
+   if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<RelAbs>(IniKey::ControlMode) == Relative)
    {
       mTransformedMove = mCurrentMove;    // Copy move
 
@@ -2070,7 +2104,7 @@ void GameUserInterface::VoiceRecorder::process()
       GameType *gameType = mGame->getGameType();
 
       if(gameType && sendBuffer->getBufferSize() < 1024)      // Don't try to send too big
-         gameType->c2sVoiceChat(mGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VoiceEcho"), sendBuffer);
+         gameType->c2sVoiceChat(mGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VoiceEcho), sendBuffer);
    }
 }
 
@@ -2579,19 +2613,19 @@ void GameUserInterface::renderObjectIds() const
 }
 
 
-void GameUserInterface::saveAlreadySeenLevelupMessageList()
-{
-   getGame()->getSettings()->getIniSettings()->mSettings.setVal("LevelupItemsAlreadySeenList", 
-                                                                getAlreadySeenLevelupMessageString());
-}
+//void GameUserInterface::saveAlreadySeenLevelupMessageList()
+//{
+//   getGame()->getSettings()->getIniSettings()->mSettings.setVal("LevelupItemsAlreadySeenList", 
+//                                                                getAlreadySeenLevelupMessageString());
+//}
 
 
-void GameUserInterface::loadAlreadySeenLevelupMessageList()
-{
-   setAlreadySeenLevelupMessageString(
-         getGame()->getSettings()->getIniSettings()->mSettings.getVal<string>("LevelupItemsAlreadySeenList")
-   );
-}
+//void GameUserInterface::loadAlreadySeenLevelupMessageList()
+//{
+//   setAlreadySeenLevelupMessageString(
+//         getGame()->getSettings()->getIniSettings()->mSettings.getVal<string>("LevelupItemsAlreadySeenList")
+//   );
+//}
 
 
 const string GameUserInterface::getAlreadySeenLevelupMessageString() const
@@ -2701,32 +2735,28 @@ void GameUserInterface::renderGameNormal()
    // If not (like after we've been killed), we'll still render the current position and things
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(ship)
-      visExt = getGame()->computePlayerVisArea(ship);
+   if(!ship)     // If we don't know where the ship is, we can't render in this mode
+      return;
+
+   visExt = getGame()->computePlayerVisArea(ship);
 
    // TODO: This should not be needed here -- mPos is set elsewhere, but appears to be lagged by a frame, which 
    //       creates a weird slightly off-center effect when moving.  This is harmless for the moment, but should be removed.
-   if(ship)
-   {
-      mShipPos.set(ship->getRenderPos());
-      mHasShipPos = true;
-   }
-
-   if(!mHasShipPos)     // If we don't know where the ship is, we can't render in this mode
-      return;
+   mShipPos.set(ship->getRenderPos());
+   mHasShipPos = true;
 
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
-   glTranslatef(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2.f, 
-                DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.f, 0);       
+   glTranslate(DisplayManager::getScreenInfo()->getGameCanvasWidth()  * 0.5f, 
+               DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f);       
 
    // These scaling factors are different when changing the visible area by equiping the sensor module
    F32 scaleFactX = (DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2) / visExt.x;
    F32 scaleFactY = (DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2) / visExt.y;
 
-   glScalef(scaleFactX, scaleFactY, 1);
-   glTranslatef(-mShipPos.x, -mShipPos.y, 0);
+   glScale(scaleFactX, scaleFactY);
+   glTranslate(-mShipPos.x, -mShipPos.y);
 
    renderStars(mStars, mStarColors, NumStars, 1.0, mShipPos, visExt * 2);
 
@@ -2757,7 +2787,7 @@ void GameUserInterface::renderGameNormal()
    // Render in three passes, to ensure some objects are drawn above others
    for(S32 i = -1; i < 2; i++)
    {
-      Barrier::renderEdges(i, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
+      Barrier::renderEdges(getGame()->getSettings(), i);    // Render wall edges
 
       if(mDebugShowMeshZones)
          for(S32 j = 0; j < renderZones.size(); j++)
@@ -2893,16 +2923,17 @@ void GameUserInterface::renderGameCommander()
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
-   glTranslatef(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f, DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f, 0);    
+   glTranslate(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f, 
+               DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f);    
 
    F32 zoomFrac = getCommanderZoomFraction();
 
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
-   glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
+   glScale(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y);
 
    // We should probably check that mHasShipPos == true, but it will hardly ever matter
    Point offset = (mDispWorldExtents.getCenter() - mShipPos) * zoomFrac + mShipPos;
-   glTranslatef(-offset.x, -offset.y, 0);
+   glTranslate(-offset.x, -offset.y);
 
    // zoomFrac == 1.0 when fully zoomed out to cmdr's map
    renderStars(mStars, mStarColors, NumStars, 1 - zoomFrac, offset, modVisSize);
@@ -2989,7 +3020,7 @@ void GameUserInterface::renderGameCommander()
       renderObjects[i]->renderLayer(0);
 
    // Second pass
-   Barrier::renderEdges(1, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
+   Barrier::renderEdges(getGame()->getSettings(), 1);    // Render wall edges
 
    if(mDebugShowMeshZones)
       for(S32 i = 0; i < renderZones.size(); i++)
@@ -3055,9 +3086,9 @@ void GameUserInterface::renderGameCommander()
 //
 //   glPushMatrix();   // Set scaling and positioning of the overlay
 //
-//   glTranslatef(mapX + mapWidth / 2.f, mapY + mapHeight / 2.f, 0);          // Move map off to the corner
-//   glScalef(mapScale, mapScale, 1);                                     // Scale map
-//   glTranslatef(-position.x, -position.y, 0);                           // Put ship at the center of our overlay map area
+//   glTranslate(mapX + mapWidth / 2.f, mapY + mapHeight / 2.f);          // Move map off to the corner
+//   glScale(mapScale);                                     // Scale map
+//   glTranslate(-position.x, -position.y);                           // Put ship at the center of our overlay map area
 //
 //   // Render the objects.  Start by putting all command-map-visible objects into renderObjects
 //   Rect mapBounds(position, position);
@@ -3322,8 +3353,9 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
       S32 displayAreaHeight = (mMessages.size() - 1) * lineHeight;     
       S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
 
-      scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                             0.0f, F32(displayAreaYPos - displayAreaHeight), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), F32(displayAreaHeight));
+      scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode), 0, 
+                             F32(displayAreaYPos - displayAreaHeight), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), 
+                             F32(displayAreaHeight));
    }
 
    // Initialize the starting rendering position.  This represents the bottom of the message rendering area, and

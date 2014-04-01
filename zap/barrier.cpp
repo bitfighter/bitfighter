@@ -294,15 +294,20 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vec
 void Barrier::renderLayer(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
+   static const Color fillColor(getGame()->getSettings()->getWallFillColor());
+
    if(layerIndex == 0)           // First pass: draw the fill
-      renderWallFill(&mRenderFillGeometry, *getGame()->getSettings()->getWallFillColor(), mSolid);
+      renderWallFill(&mRenderFillGeometry, fillColor, mSolid);
 #endif
 }
 
 
-// Render all edges for all barriers... faster to do it all at once than try to sort out whose edges are whose
-void Barrier::renderEdges(S32 layerIndex, const Color &outlineColor)  // static
+// Render all edges for all barriers... faster to do it all at once than try to sort out whose edges are whose.
+// Static method.
+void Barrier::renderEdges(const GameSettings *settings, S32 layerIndex)
 {
+   static const Color outlineColor(settings->getWallOutlineColor());
+
    if(layerIndex == 1)
       renderWallEdges(mRenderLineSegments, outlineColor);
 }
@@ -421,7 +426,6 @@ void WallItem::onGeomChanged()
    if(db)
       db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
 
-   onPointsChanged();        // Recalculates centroid
    Parent::onGeomChanged();
 }
 
@@ -713,8 +717,10 @@ S32 PolyWall::getRenderSortValue()
 
 void PolyWall::renderDock()
 {
+   static const Color wallOutlineColor(getGame()->getSettings()->getWallOutlineColor());
+
    renderPolygonFill(getFill(), &Colors::EDITOR_WALL_FILL_COLOR);
-   renderPolygonOutline(getOutline(), getGame()->getSettings()->getWallOutlineColor());
+   renderPolygonOutline(getOutline(), &wallOutlineColor);
 }
 
 
@@ -732,6 +738,7 @@ bool PolyWall::processArguments(S32 argc, const char **argv, Game *game)
    }
 
    readGeom(argc, argv, 1 + offset, game->getLegacyGridSize());
+   updateExtentInDatabase();
 
    return true;
 }
@@ -764,16 +771,14 @@ void PolyWall::setSelected(bool selected)
 }
 
 
-// Only called from editor
 void PolyWall::onGeomChanged()
 {
    GridDatabase *db = getDatabase();
 
    if(db)      // db might be NULL if PolyWall hasn't yet been added to the editor (e.g. if it's still a figment of Lua's fancy)
-   {
       db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
-      Parent::onGeomChanged();
-   }
+
+   Parent::onGeomChanged();
 }
 
 

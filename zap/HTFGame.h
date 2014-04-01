@@ -38,10 +38,6 @@ public:
 
    bool isFlagGame() const;
 
-   // Server only
-   void addFlag(FlagItem *flag);
-
-
    // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this may be important!!!
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
 

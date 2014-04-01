@@ -61,7 +61,7 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    // Stupid C++ spec doesn't allow ternary logic with static const if there is no definition
    // Workaround is to add '+' to force a read of the value
    // See:  http://stackoverflow.com/questions/5446005/why-dont-static-member-variables-play-well-with-the-ternary-operator
-   mNextLevel = settings->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
+   mNextLevel = mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::RandomLevels) ? +RANDOM_LEVEL : +NEXT_LEVEL;
 
    mShuttingDown = false;
 
@@ -153,15 +153,16 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, VoteType type, S32 number)
 {
    GameConnection *conn = clientInfo->getConnection();
 
-   if(!mSettings->getIniSettings()->voteEnable)
+   if(!mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VotingEnabled))
       return false;
 
-   U32 VoteTimer;
+   U32 voteTimer;
    if(type == VoteChangeTeam)
-      VoteTimer = mSettings->getIniSettings()->voteLengthToChangeTeam * 1000;
+      voteTimer = mSettings->getIniSettings()->mSettings.getVal<U32>(IniKey::VoteLengthToChangeTeam) * 1000;
    else
-      VoteTimer = mSettings->getIniSettings()->voteLength * 1000;
-   if(VoteTimer == 0)
+      voteTimer = mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VoteLength) * 1000;
+
+   if(voteTimer == 0)
       return false;
 
    if(type != VoteLevelChange)
@@ -169,7 +170,7 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, VoteType type, S32 number)
       if(getGameType()->isGameOver())
          return true;   // Don't allow trying to start votes during game over, except level changing
 
-      if((U32)getGameType()->getRemainingGameTimeInMs() - 1 < VoteTimer)  // Handles unlimited GameType time, by forcing the U32 range
+      if((U32)getGameType()->getRemainingGameTimeInMs() - 1 < voteTimer)  // Handles unlimited GameType time, by forcing the U32 range
       {
          conn->s2cDisplayErrorMessage("Not enough time");
          return true;
@@ -189,12 +190,12 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, VoteType type, S32 number)
       Vector<S32> i;
 
       i.push_back(conn->mVoteTime / 1000);
-      conn->s2cDisplayMessageESI(GameConnection::ColorRed, SFXNone, "Can't start vote, try again %i0 seconds later.", e, s, i);
+      conn->s2cDisplayMessageESI(GameConnection::ColorRed, SFXNone, "Can't start vote, try again in %i0 seconds.", e, s, i);
 
       return true;
    }
 
-   mVoteTimer = VoteTimer;
+   mVoteTimer = voteTimer;
    mVoteType = type;
    mVoteNumber = number;
    mVoteClientName = clientInfo->getName();
@@ -565,7 +566,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    computeWorldObjectExtents();                       // Compute world Extents nice and early
 
-   if(!mGameRecorderServer && !mShuttingDown && getSettings()->getIniSettings()->enableGameRecording)
+   if(!mGameRecorderServer && !mShuttingDown && getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::GameRecording))
       mGameRecorderServer = new GameRecorderServer(this);
 
 
@@ -764,7 +765,7 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
 {
    S32 currentLevelIndex = mCurrentLevelIndex;
    S32 levelCount = mLevelSource->getLevelCount();
-   bool skipUploads = getSettings()->getIniSettings()->skipUploads;
+   bool skipUploads = getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::SkipUploads);
 
    if(levelCount == 1)
       nextLevel = FIRST_LEVEL;
@@ -871,6 +872,7 @@ bool ServerGame::clientCanSuspend(ClientInfo *info)
    return activePlayers <= 1; // If only one player active, allow suspend.
 }
 
+
 // Enter suspended animation mode
 void ServerGame::suspendGame()
 {
@@ -923,6 +925,7 @@ GameConnection *ServerGame::getSuspendor()
    return mSuspendor;
 }
 
+
 // suspend only if there are non-idling players (TestSpawnDelay.cpp needs changing if using this)
 static bool shouldBeSuspended(ServerGame *game)
 {
@@ -938,6 +941,7 @@ static bool shouldBeSuspended(ServerGame *game)
    return true;
 }
 
+
 // Check to see if there are any players who are active; suspend the game if not.  Server only.
 void ServerGame::suspendIfNoActivePlayers(bool delaySuspend)
 {
@@ -952,6 +956,7 @@ void ServerGame::suspendIfNoActivePlayers(bool delaySuspend)
          suspendGame();
    }
 }
+
 
 // Check to see if there are any players who are active; suspend the game if not.  Server only.
 void ServerGame::unsuspendIfActivePlayers()
@@ -1008,9 +1013,9 @@ bool ServerGame::loadLevel()
    // Run level's levelgen script (if any)
    runLevelGenScript(getGameType()->getScriptName());
 
-   // Run any global levelgen scripts (if defined)
+   // Global levelgens are run on every level.  Run any that are defined.
    Vector<string> scriptList;
-   parseString(mSettings->getIniSettings()->globalLevelScript, scriptList, '|');
+   parseString(getSettings()->getIniSettings()->mSettings.getVal<string>(IniKey::GlobalLevelScript), scriptList, '|');
 
    for(S32 i = 0; i < scriptList.size(); i++)
       runLevelGenScript(scriptList[i]);
@@ -1020,7 +1025,8 @@ bool ServerGame::loadLevel()
 
    // Check after script, script might add Teams
    if(getGameType()->makeSureTeamCountIsNotZero())
-      logprintf(LogConsumer::LogLevelError, "Warning: Missing Team in %s", mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
+      logprintf(LogConsumer::LogLevelError, "Warning: Missing Team in %s", 
+                                            mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
 
    getGameType()->onLevelLoaded();
 
@@ -1130,8 +1136,9 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 
-   if(getPlayerCount() == 0 && !mShuttingDown && isDedicated())  // only dedicated server can have zero players
-      cycleLevel(getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL);    // Advance to beginning of next level
+   // Advance to beginning of next level if there are no remaining players
+   if(getPlayerCount() == 0 && !mShuttingDown && isDedicated())  // Only dedicated server can have zero players
+      cycleLevel(getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::RandomLevels) ? +RANDOM_LEVEL : +NEXT_LEVEL);
    else
       mRobotManager.balanceTeams();
 }
@@ -1412,14 +1419,15 @@ void ServerGame::idle(U32 timeDelta)
       // Normalize ratings for this game
       getGameType()->updateRatings();
       cycleLevel(mNextLevel);
-      mNextLevel = getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
+      mNextLevel = getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::RandomLevels) ? +RANDOM_LEVEL : +NEXT_LEVEL;
    }
 
 
    if(mGameRecorderServer)
       mGameRecorderServer->idle(timeDelta);
 
-   mNetInterface->processConnections(); // Update to other clients right after idling everything else, so clients get more up to date information
+   // Update to other clients right after idling everything else, so clients get more up to date information
+   mNetInterface->processConnections(); 
 }
 
 
@@ -1457,13 +1465,15 @@ void ServerGame::processVoting(U32 timeDelta)
    {
       if(timeDelta < mVoteTimer)  // voting continue
       {
-         if((mVoteTimer-timeDelta) % 1000 > mVoteTimer % 1000) // show message
+         if((mVoteTimer - timeDelta) % 1000 > mVoteTimer % 1000) // show message
          {
             Vector<StringTableEntry> e;
             Vector<StringPtr> s;
             Vector<S32> i;
             StringTableEntry msg;
+
             i.push_back(mVoteTimer / 1000);
+
             switch(mVoteType)
             {
             case VoteLevelChange:
@@ -1532,9 +1542,11 @@ void ServerGame::processVoting(U32 timeDelta)
                voteNothing++;
          }
 
-         bool votePass = voteYes     * mSettings->getIniSettings()->voteYesStrength + 
-                         voteNo      * mSettings->getIniSettings()->voteNoStrength  + 
-                         voteNothing * mSettings->getIniSettings()->voteNothingStrength > 0;
+         Settings<IniKey::SettingsItem> &settings = getSettings()->getIniSettings()->mSettings;
+
+         bool votePass = (voteYes     * settings.getVal<YesNo>(IniKey::VoteYesStrength) + 
+                          voteNo      * settings.getVal<YesNo>(IniKey::VoteNoStrength)  + 
+                          voteNothing * settings.getVal<YesNo>(IniKey::VoteNothingStrength)) > 0;
          if(votePass)
          {
             mVoteTimer = 0;
@@ -1545,6 +1557,7 @@ void ServerGame::processVoting(U32 timeDelta)
                   if(mGameType)
                      mGameType->gameOverManGameOver();
                   break;
+
                case VoteAddTime:
                   if(mGameType)
                   {
@@ -1552,6 +1565,7 @@ void ServerGame::processVoting(U32 timeDelta)
                      mGameType->broadcastNewRemainingTime();   
                   }
                   break;   
+
                case VoteSetTime:
                   if(mGameType)
                   {
@@ -1559,6 +1573,7 @@ void ServerGame::processVoting(U32 timeDelta)
                      mGameType->broadcastNewRemainingTime();                                   
                   }
                   break;
+
                case VoteSetScore:
                   if(mGameType)
                   {
@@ -1566,6 +1581,7 @@ void ServerGame::processVoting(U32 timeDelta)
                      mGameType->s2cChangeScoreToWin(mVoteNumber, mVoteClientName);     // Broadcast score to clients
                   }
                   break;
+
                case VoteChangeTeam:
                   if(mGameType)
                   {
@@ -1578,6 +1594,7 @@ void ServerGame::processVoting(U32 timeDelta)
                      }
                   }
                   break;
+
                case VoteResetScore:
                   if(mGameType && mGameType->getGameTypeId() != CoreGame) // No changing score in Core
                   {
@@ -1601,6 +1618,7 @@ void ServerGame::processVoting(U32 timeDelta)
                      }
                   }
                   break;
+
                default:
                   TNLAssert(false, "Invalid option in switch statement!");
                   break;
@@ -1627,7 +1645,7 @@ void ServerGame::processVoting(U32 timeDelta)
                conn->s2cDisplayMessageESI(GameConnection::ColorInfo, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 did not vote", e, s, i);
 
                if(!votePass && clientInfo->getName() == mVoteClientName)
-                  conn->mVoteTime = mSettings->getIniSettings()->voteRetryLength * 1000;
+                  conn->mVoteTime = settings.getVal<YesNo>(IniKey::VoteRetryLength) * 1000;
             }
          }
       }

@@ -12,6 +12,7 @@
 #include "OpenglUtils.h"
 #include "FontManager.h"
 #include "Colors.h"
+#include "stringUtils.h"
 
 #include <stdarg.h>        // For va_args
 #include <stdio.h>         // For vsnprintf
@@ -32,8 +33,8 @@ F32 gLineWidth4 = 4.0f;
 void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
    glPushMatrix();
-      glTranslatef(x, y, 0);
-      glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
+      glTranslate(x, y);
+      glRotate(angle * RADIANS_TO_DEGREES);
 
       FontManager::renderString(size, string);
 
@@ -517,11 +518,7 @@ void drawTime(S32 x, S32 y, S32 size, S32 timeInMs, const char *prefixString)
 
 S32 getStringWidth(FontContext fontContext, S32 size, const char *string)
 {
-   FontManager::pushFontContext(fontContext);
-   S32 width = getStringWidth(size, string);
-   FontManager::popFontContext();
-
-   return width;
+   return (S32)getStringWidth(fontContext, (F32)size, string);
 }
 
 
@@ -537,13 +534,13 @@ F32 getStringWidth(FontContext fontContext, F32 size, const char *string)
 
 S32 getStringWidth(S32 size, const char *string)
 {
-   return FontManager::getStringLength(string) * size / 120;
+   return (S32)getStringWidth((F32)size, string);
 }
 
 
 F32 getStringWidth(F32 size, const char *string)
 {
-   return F32(FontManager::getStringLength(string)) * size / 120.0f;
+   return FontManager::getStringLength(string) * size / 120;
 }
 
 
@@ -743,52 +740,52 @@ void wrapString(const string &str, S32 wrapWidth, S32 fontSize, FontContext cont
 }
 
 
-// Given a string, break it up such that no part is wider than width.  Prefix subsequent lines with indentPrefix.
-Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const string indentPrefix)
-{
-   Vector<string> wrappedLines;
-
-   if(str == "")
-      return wrappedLines;
-
-   S32 indent = 0;
-   string prefix = "";
-
-   S32 start = 0;
-   S32 potentialBreakPoint = start;
-
-   for(U32 i = 0; i < str.length(); i++)
-   {
-      if(str[i] == '\n')
-      {
-         wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
-         start = i + 1;
-         potentialBreakPoint = start + 1;  
-      }
-      else if(str[i] == ' ')
-         potentialBreakPoint = i;
-      else if(getStringWidth(fontSize, str.substr(start, i - start + 1).c_str()) > wrapWidth - (wrappedLines.size() > 0 ? indent : 0))
-      {
-         if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
-         {
-            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
-            start = i;
-            potentialBreakPoint = start;
-         }
-         else
-         {
-            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, potentialBreakPoint - start));
-            potentialBreakPoint++;
-            start = potentialBreakPoint;
-         }
-      }
-   }
-
-   if(start != (S32)str.length())
-      wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start));
-
-   return wrappedLines;
-}
+//// Given a string, break it up such that no part is wider than width.  Prefix subsequent lines with indentPrefix.
+//Vector<string> wrapString(const string &str, S32 wrapWidth, S32 fontSize, const string indentPrefix)
+//{
+//   Vector<string> wrappedLines;
+//
+//   if(str == "")
+//      return wrappedLines;
+//
+//   S32 indent = 0;
+//   string prefix = "";
+//
+//   S32 start = 0;
+//   S32 potentialBreakPoint = start;
+//
+//   for(U32 i = 0; i < str.length(); i++)
+//   {
+//      if(str[i] == '\n')
+//      {
+//         wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
+//         start = i + 1;
+//         potentialBreakPoint = start + 1;  
+//      }
+//      else if(str[i] == ' ')
+//         potentialBreakPoint = i;
+//      else if(getStringWidth(fontSize, str.substr(start, i - start + 1).c_str()) > wrapWidth - (wrappedLines.size() > 0 ? indent : 0))
+//      {
+//         if(potentialBreakPoint == start)    // No breakpoints were found before string grew too long... will just break here
+//         {
+//            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
+//            start = i;
+//            potentialBreakPoint = start;
+//         }
+//         else
+//         {
+//            wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, potentialBreakPoint - start));
+//            potentialBreakPoint++;
+//            start = potentialBreakPoint;
+//         }
+//      }
+//   }
+//
+//   if(start != (S32)str.length())
+//      wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start));
+//
+//   return wrappedLines;
+//}
 
 
 S32 getStringPairWidth(S32 size, FontContext leftContext,

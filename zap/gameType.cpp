@@ -48,6 +48,22 @@ static const char *gameTypeClassNames[] = {
 };
 
 
+typedef map<string, GameTypeId> GameTypeNamesMapType;
+
+static GameTypeNamesMapType initializeGameTypeMap()
+{
+  GameTypeNamesMapType gtmap;
+
+#  define GAME_TYPE_ITEM(id, type, c, d, e, f) gtmap[type] = id; 
+       GAME_TYPE_TABLE
+#  undef GAME_TYPE_ITEM
+
+  return gtmap;
+}
+
+// Get GameTypeId given a name like NexusGameType
+static const GameTypeNamesMapType GameTypeNamesMap = initializeGameTypeMap();
+
 
 ////////////////////////////////////////      __              ___           
 ////////////////////////////////////////     /__  _. ._ _   _  |    ._   _  
@@ -121,6 +137,7 @@ string GameType::toLevelCode() const
    return string(getClassName()) + " " + getRemainingGameTimeInMinutesString() + " " + itos(mWinningScore);
 }
 
+
 // GameType object is the first to be added when a new game starts... 
 // therefore, this is a reasonable signifier that a new game is starting up.  I think.
 // Server only?
@@ -157,6 +174,19 @@ void GameType::onGhostRemove()
    ClientGame *clientGame = static_cast<ClientGame *>(getGame());
    clientGame->gameTypeIsAboutToBeDeleted();
 #endif
+}
+
+
+// Returns GameTypeId from names like "NexusGameType".  Returns NoGameType if it can't figure it out.
+// Static method
+GameTypeId GameType::getGameTypeIdFromName(const string &name)
+{
+   const GameTypeNamesMapType::const_iterator it = GameTypeNamesMap.find(name);
+   
+   if(it == GameTypeNamesMap.end())
+      return NoGameType;
+
+   return it->second;
 }
 
 
@@ -491,18 +521,19 @@ string GameType::getScoringEventDescr(ScoringEvent event)
 }
 
 
-// Will return a valid GameType string -- either what's passed in, or the default if something bogus was specified  (static)
-const char *GameType::validateGameType(const char *gameTypeName)
+// Will return a valid GameType string -- either what's passed in, or the default if something bogus was specified.
+// Can't return const char * because hosting string object will be out-of-scope on return.
+// Static method
+string GameType::validateGameType(const string &gameTypeName)
 {
-   if(!stricmp(gameTypeName, "HuntersGameType"))
+   if(gameTypeName == "HuntersGameType")
        return "NexusGameType";
 
-   for(S32 i = 0; gameTypeClassNames[i]; i++)    // Repeat until we hit NULL
-      if(stricmp(gameTypeClassNames[i], gameTypeName) == 0)
-         return gameTypeClassNames[i];
+   // If no valid game type was specified, we'll return the default (Bitmatch)
+   if(getGameTypeIdFromName(gameTypeName) == NoGameType)
+      return gameTypeClassNames[0];
 
-   // If we get to here, no valid game type was specified, so we'll return the default (Bitmatch)
-   return gameTypeClassNames[0];
+   return gameTypeName;
 }
 
 
@@ -511,6 +542,8 @@ U32 GameType::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    stream->write(mTotalGamePlay);
    return 0;
 }
+
+
 void GameType::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    stream->read(&mTotalGamePlay);
@@ -533,8 +566,6 @@ void GameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 
 void GameType::idle_server(U32 deltaT)
 {
-   queryItemsOfInterest();
-
    bool needsScoreboardUpdate = mScoreboardUpdateTimer.update(deltaT);
 
    if(needsScoreboardUpdate)
@@ -572,7 +603,7 @@ void GameType::idle_server(U32 deltaT)
                updateClientScoreboard(clientInfo->getConnection());
          }
 
-         if(getGame()->getSettings()->getIniSettings()->allowTeamChanging)
+         if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowTeamChanging))
          {
             if(conn->mSwitchTimer.getCurrent())             // Are we still counting down until the player can switch?
                if(conn->mSwitchTimer.update(deltaT))        // Has the time run out?
@@ -1438,7 +1469,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
             continue;
 
          Rect queryRect(ship->getActualPos(), ship->getActualPos());
-         queryRect.expand(mGame->getScopeRange(ship->hasModule(ModuleSensor)));
+         queryRect.expand(Game::getScopeRange(ship->hasModule(ModuleSensor)));
 
          TestFunc testFunc;
          if(scopeObject == ship)    
@@ -1458,10 +1489,10 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
       // Note that if we make mine visibility controlled by server, here's where we'd put the code
       Point pos = scopeObject->getPos();
       TNLAssert(dynamic_cast<Ship *>(scopeObject), "Control object not a ship!");
-      Ship *co = static_cast<Ship *>(scopeObject);
+      Ship *ship = static_cast<Ship *>(scopeObject);
 
       Rect queryRect(pos, pos);
-      queryRect.expand( mGame->getScopeRange(co->hasModule(ModuleSensor)) );
+      queryRect.expand(Game::getScopeRange(ship->hasModule(ModuleSensor)));
 
       fillVector.clear();
       mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
@@ -1479,66 +1510,6 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    if(mShowAllBots && connection->isInCommanderMap())
       for(S32 i = 0; i < mGame->getBotCount(); i++)
          connection->objectInScope(mGame->getBot(i));  
-}
-
-
-// Server only
-void GameType::addItemOfInterest(MoveItem *item)
-{
-#ifdef TNL_DEBUG
-   for(S32 i = 0; i < mItemsOfInterest.size(); i++)
-      TNLAssert(mItemsOfInterest[i].theItem.getPointer() != item, "Item already exists in ItemOfInterest!");
-#endif
-
-   ItemOfInterest i;
-   i.theItem = item;
-   i.teamVisMask = 0;
-   mItemsOfInterest.push_back(i);
-}
-
-
-// Here we'll cycle through all itemsOfInterest, then find any ships within scope range of each.  We'll then mark the object as being visible
-// to those teams with ships close enough to see it, if any.  Called from idle()
-void GameType::queryItemsOfInterest()
-{
-   for(S32 i = 0; i < mItemsOfInterest.size(); i++)
-   {
-      ItemOfInterest &ioi = mItemsOfInterest[i];
-      if(ioi.theItem.isNull())
-      {
-         // This can happen when dropping NexusFlagItem in ZoneControlGameType
-         TNLAssert(false,"item in ItemOfInterest is NULL. This can happen when an item got deleted.");
-         mItemsOfInterest.erase(i);    // When not in debug mode, the TNLAssert is not fired.  Delete the problem object and carry on.
-         break;
-      }
-
-      ioi.teamVisMask = 0;                         // Reset mask, object becomes invisible to all teams
-      
-      Point pos = ioi.theItem->getActualPos();
-      Point scopeRange(Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL, Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL);
-      Rect queryRect(pos, pos);
-
-      queryRect.expand(scopeRange);
-      fillVector.clear();
-      mGame->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector, queryRect);
-
-      for(S32 j = 0; j < fillVector.size(); j++)
-      {
-         Ship *theShip = static_cast<Ship *>(fillVector[j]);     // Safe because we only looked for ships and robots
-         Point delta = theShip->getActualPos() - pos;
-         delta.x = fabs(delta.x);
-         delta.y = fabs(delta.y);
-
-         if(
-               (theShip->hasModule(ModuleSensor) &&
-                     delta.x < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL && 
-                     delta.y < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL) ||
-               (delta.x < Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL && 
-                     delta.y < Game::PLAYER_VISUAL_DISTANCE_VERTICAL)
-            )
-            ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
-      }
-   }
 }
 
 
@@ -2642,15 +2613,17 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
    {
       if(clientInfo->isAdmin())
       {
-         bool prev_enableServerVoiceChat = serverGame->getSettings()->getIniSettings()->enableServerVoiceChat;
+         Settings<IniKey::SettingsItem> settings = serverGame->getSettings()->getIniSettings()->mSettings;
+         bool prev_enableServerVoiceChat = settings.getVal<YesNo>(IniKey::EnableServerVoiceChat);
          loadSettingsFromINI(&GameSettings::iniFile, serverGame->getSettings());    // Why??
 
-         if(prev_enableServerVoiceChat != serverGame->getSettings()->getIniSettings()->enableServerVoiceChat)
+         bool curr_enableServerVoiceChat = settings.getVal<YesNo>(IniKey::EnableServerVoiceChat);
+         if(curr_enableServerVoiceChat, prev_enableServerVoiceChat)
             for(S32 i = 0; i < mGame->getClientCount(); i++)
                if(!mGame->getClientInfo(i)->isRobot())
                {
                   GameConnection *gc = mGame->getClientInfo(i)->getConnection();
-                  gc->s2rVoiceChatEnable(serverGame->getSettings()->getIniSettings()->enableServerVoiceChat && !gc->mChatMute);
+                  gc->s2rVoiceChatEnable(settings.getVal<YesNo>(IniKey::EnableServerVoiceChat) && !gc->mChatMute);
                }
          clientInfo->getConnection()->s2cDisplayMessage(0, 0, "Configuration settings loaded");
       }
@@ -2681,8 +2654,9 @@ bool GameType::addBotFromClient(Vector<StringTableEntry> args)
       conn->s2cDisplayErrorMessage("!!! This level does not allow robots");
 
    // No default robot set
-   else if(!clientInfo->isAdmin() && settings->getIniSettings()->defaultRobotScript == "" && args.size() < 2)
-      conn->s2cDisplayErrorMessage("!!! This server doesn't have default robots configured");
+   else if(!clientInfo->isAdmin() && args.size() < 2 &&
+           settings->getIniSettings()->mSettings.getVal<string>(IniKey::DefaultRobotScript) == "")
+      conn->s2cDisplayErrorMessage("!!! This server doesn't have a default robot configured");
 
    else if(!clientInfo->isLevelChanger())
    { /* Do nothing -- error message handled upstream */ }
@@ -2948,14 +2922,14 @@ GAMETYPE_RPC_C2S(GameType, c2sSetMaxBots, (S32 count), (count))
    if(count <= 0)
       return;  // Error message handled client-side
 
-   settings->getIniSettings()->maxBots = count;
+   settings->getIniSettings()->mSettings.setVal(IniKey::MaxBots, count);
 
-   GameConnection *conn = clientInfo->getConnection();
-   TNLAssert(conn == source, "If this never fires, we can get rid of conn!");    // Added long ago, well before Dec 2013
+   //GameConnection *conn = clientInfo->getConnection();
+   //TNLAssert(conn == source, "If this never fires, we can get rid of conn!");    // Added long ago, well before Dec 2013
 
    messageVals.clear();
    messageVals.push_back(itos(count));
-   conn->s2cDisplayMessageE(GameConnection::ColorRed, SFXNone, "Maximum bots was changed to %e0", messageVals);
+   source->s2cDisplayMessageE(GameConnection::ColorRed, SFXNone, "Maximum bots was changed to %e0", messageVals);
 }
 
 
@@ -3114,7 +3088,7 @@ GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (
    gc->mChatMute = !gc->mChatMute;
 
    // if server voice chat is allowed, send voice chat status.
-   if(getGame()->getSettings()->getIniSettings()->enableServerVoiceChat)
+   if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::EnableServerVoiceChat))
       gc->s2rVoiceChatEnable(!gc->mChatMute);
 
    GameConnection *conn = clientInfo->getConnection();
@@ -3625,7 +3599,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
    ClientInfo *sourceClientInfo = source->getClientInfo();
 
    // If globally muted or voice chat is disabled on the server, don't send to anyone
-   if(source->mChatMute || !getGame()->getSettings()->getIniSettings()->enableServerVoiceChat)
+   if(source->mChatMute || !getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::EnableServerVoiceChat))
       return;
 
    if(source)

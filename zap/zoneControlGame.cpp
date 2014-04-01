@@ -29,14 +29,6 @@ ZoneControlGameType::~ZoneControlGameType()
 }
 
 
-void ZoneControlGameType::addFlag(FlagItem *flag)
-{
-   Parent::addFlag(flag);
-   if(!isGhost())
-      addItemOfInterest(flag);      // Server only
-}
-
-
 // Ship picks up the flag
 void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {

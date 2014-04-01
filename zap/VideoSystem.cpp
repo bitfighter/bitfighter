@@ -296,7 +296,7 @@ extern void setDefaultBlendFunction();
 // This has the unfortunate side-effect of triggering a mouse move event.
 void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInterfaces, bool currentUIUsesEditorScreenMode)
 {
-   DisplayMode displayMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
+   DisplayMode displayMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
 
    DisplayManager::getScreenInfo()->resetGameCanvasSize();     // Set GameCanvasSize vars back to their default values
    DisplayManager::getScreenInfo()->setActualized();
@@ -368,7 +368,7 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
       break;
    }
 
-   if(settings->getIniSettings()->disableScreenSaver)
+   if(settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::DisableScreenSaver))
       SDL_DisableScreenSaver();
    else
       SDL_EnableScreenSaver();
@@ -383,11 +383,11 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    switch (displayMode)
    {
       case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
-         sdlVideoFlags |= settings->getIniSettings()->mSettings.getVal<YesNo>("UseFakeFullscreen") ? SDL_NOFRAME : SDL_FULLSCREEN;
+         sdlVideoFlags |= settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::UseFakeFullscreen) ? SDL_NOFRAME : SDL_FULLSCREEN;
          break;
 
       case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
-         sdlVideoFlags |= settings->getIniSettings()->mSettings.getVal<YesNo>("UseFakeFullscreen")  ? SDL_NOFRAME : SDL_FULLSCREEN;
+         sdlVideoFlags |= settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::UseFakeFullscreen)  ? SDL_NOFRAME : SDL_FULLSCREEN;
          break;
 
       case DISPLAY_MODE_WINDOWED:
@@ -445,7 +445,7 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    glLineWidth(gDefaultLineWidth);
 
    // Enable Line smoothing everywhere!  Make sure to disable temporarily for filled polygons and such
-   if(settings->getIniSettings()->mSettings.getVal<YesNo>("LineSmoothing"))
+   if(settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::LineSmoothing))
    {
       glEnable(GL_LINE_SMOOTH);
       //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);

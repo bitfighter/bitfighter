@@ -6,6 +6,11 @@
 #ifndef _SETTINGS_H_
 #define _SETTINGS_H_
 
+#include "ConfigEnum.h"
+
+#include "Color.h"
+#include "stringUtils.h"
+
 #include "tnlVector.h"
 
 #include <string>
@@ -17,54 +22,124 @@ using namespace TNL;
 namespace Zap
 {
 
+// These settings represent various INI values and can handle transofrmation of INI strings
+// into normal C++ values/enums.  Settings from the INI must have a section, key, value, and comment.
+// Settings also have an index by which the C++ code can reference them.
+//
+// Remember the INI structure:
+//    [Section]
+//    ; Comment describing Key
+//    Key=Value
+//
+// You can use any type as an index to identify settings; an enum is recommended for clarity and safety.
+// Part of the complexity of this class is that it handles coding and decoding of INI values that represent
+// enums.  For example, we have a simple enum called YesNo that contains the two values Yes and No.  We
+// can use this in the INI to make the settings more readanble, e.g.:
+//
+//    SaveOnExit=Yes
+//
+// This code will help translate that string representation of Yes into the enum value Yes, which you can 
+// retrieve with a statement like:
+//
+//    YesNo saveOnExit = settings.getSetting(SaveOnExit);
+//    if(saveOnExit == Yes) { save(); }
+//
+template <class IndexType>
 class AbstractSetting
 {
 private:
-   string mName;        // Value we use to look this item up
+   IndexType mIndex;    // Value we use to look this item up
    string mIniKey;      // INI key
    string mIniSection;  // INI section
    string mComment;
+   bool mReadOnly;
 
 public:
-   AbstractSetting(const string &name, const string &key, const string &section, const string &comment);   // Constructor
-   virtual ~AbstractSetting();                                                                             // Destructor
+   // Constructor
+   AbstractSetting(IndexType index, const string &key, const string &section, const string &comment):
+      mIniKey(key), 
+      mIniSection(section), 
+      mComment(comment)
+   {
+      mIndex = index;
+      mReadOnly = false;
+   }
 
-   string getName() const;
-   string getKey() const;
-   string getSection() const;
+   virtual ~AbstractSetting() { /* Do nothing */ }      // Destructor
+
+   IndexType getIndex()   const { return mIndex; }           
+   string    getKey()     const { return mIniKey; }
+   string    getSection() const { return mIniSection; }
+   string    getComment() const { return mComment; }
+
+
+   /////
+   // Pure virtual methods, must be implemented by children classes
+   /////
 
    virtual void setValFromString(const string &value) = 0;
 
-   virtual string getValueString() const = 0;         // Returns current value, as a string
-   virtual string getDefaultValueString() const = 0;  // Returns default value, as a string
-   virtual string getComment() const;
+   virtual string getValueString() const = 0;         // Return current value, as a string
+   virtual string getDefaultValueString() const = 0;  // Return default value, as a string
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
-template <class T>
-class Setting : public AbstractSetting
+// This class exists mainly to get past the C++ restriction about partial specialization
+// of class methods.  By creating a new class, we can reduce our template parameters
+// to one (DataType) from the two we have in Setting (DataType and IndexType).
+class Evaluator
 {
-   typedef AbstractSetting Parent;
+public:
+   // Templated declaration
+   template <class DataType> DataType fromString(const string &val);
+
+   static string toString(const string &val);
+   static string toString(S32 val);
+   static string toString(YesNo yesNo);
+   static string toString(RelAbs relAbs);
+   static string toString(DisplayMode displayMode);
+   static string toString(ColorEntryMode colorMode);
+   static string toString(GoalZoneFlashStyle flashStyle);
+   static string toString(const Color &color);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+template <class DataType, class IndexType>
+class Setting : public AbstractSetting<IndexType>
+{
+   typedef AbstractSetting<IndexType> Parent;
 
 private:
-   T mDefaultValue;
-   T mValue;
+   DataType mDefaultValue;
+   DataType mValue;
+   Evaluator mEvaluator;
 
 public:
-   Setting<T>(const string &name, const T &defaultValue, const string &iniKey, const string &iniSection, const string &comment = "");  // Constructor
-   virtual ~Setting<T>();                                                                                                              // Destructor
+   Setting(IndexType index, const DataType &defaultValue, const string &iniKey, const string &iniSection, const string &comment):
+      Parent(index, iniKey, iniSection, comment),
+      mDefaultValue(defaultValue),
+      mValue(defaultValue)
+   {
+      // Do nothing
+   }
 
-   T getValue() const;
-   void setValue(const T &value);
-   string getValueString() const;
-   string getDefaultValueString() const;
-   void setValFromString(const string &value);
+   virtual ~Setting() { /* Do nothing */ }
 
-   T fromString(const string &val);
+   DataType fromString(const string &val)       { return mEvaluator.fromString<DataType>(val); }
+
+   void setValue(const DataType &value)         { mValue = value;                              }
+                                                                                              
+   DataType getValue() const                    { return mValue;                               }
+   string getValueString() const                { return Evaluator::toString(mValue);          }
+   string getDefaultValueString() const         { return Evaluator::toString(mDefaultValue);   }
+                                                                                              
+   void setValFromString(const string &value)   { setValue(fromString(value));                 }
 };
 
 
@@ -73,44 +148,133 @@ public:
 
 
 // Container for all our settings
+template <class IndexType>
 class Settings
 {
 private:
-   map<string, S32> mKeyLookup;     // Maps string key to vector index; updated when item is added
-   Vector<AbstractSetting *> mSettings;
+   map<IndexType, S32> mKeyLookup;     // Maps key to vector index; updated when item is added
+   Vector<AbstractSetting<IndexType> *> mSettings;
 
 public:
-   ~Settings();      // Destructor
+   Settings()  { /* Do nothing */ }                     // Constructor
+   virtual ~Settings() { mSettings.deleteAndClear(); }  // Destructor
 
-   AbstractSetting *getSetting(const string &name);
-   void add(AbstractSetting *setting);
 
-   template <class T>
-   void setVal(const string &name, const T &value)
+   template <class DataType>
+   void setVal(IndexType indexType, const DataType &value)
    {
-      S32 key = mKeyLookup.find(name)->second;
-      AbstractSetting *absSet = mSettings[key];
-      TNLAssert(dynamic_cast<Setting<T> *>(absSet), "Expected setting!");
+      S32 key = mKeyLookup.find(indexType)->second;
+      AbstractSetting<IndexType> *absSet = mSettings[key];
+      TNLAssert((dynamic_cast<Setting<DataType, IndexType> *>(absSet)), "Expected setting!");
 
-      static_cast<Setting<T> *>(absSet)->setValue(value);
+      static_cast<Setting<DataType, IndexType> *>(absSet)->setValue(value);
    }
 
 
-   template <class T>
-   T getVal(const string &name) const
+   AbstractSetting<IndexType> *getSetting(IndexType indexType) const
    {
-      AbstractSetting *absSet = mSettings[mKeyLookup.find(name)->second];
-      TNLAssert(dynamic_cast<Setting<T> *>(absSet), "Expected setting!");
+      TNLAssert(mKeyLookup.find(indexType) != mKeyLookup.end(), "Setting with specified index not found!");
 
-      return static_cast<Setting<T> *>(absSet)->getValue();
+      return mSettings[mKeyLookup.find(indexType)->second];
    }
 
-   string getStrVal(const string &name) const;
-   string getDefaultStrVal(const string &name) const;
-   string getKey(const string &name) const;
-   string getSection(const string &name) const;
 
-   Vector<AbstractSetting *> getSettingsInSection(const string &section) const;
+   template <class DataType>
+   DataType getVal(IndexType indexType) const
+   {
+      AbstractSetting<IndexType> *abstractSetting = getSetting(indexType);
+      TNLAssert((dynamic_cast<Setting<DataType, IndexType> *>(abstractSetting)), "Expected setting!");
+
+      return static_cast<Setting<DataType, IndexType> *>(abstractSetting)->getValue();
+   }
+
+
+   void add(AbstractSetting<IndexType> *setting)
+   {
+      mSettings.push_back(setting);
+      mKeyLookup[setting->getIndex()] = mSettings.size() - 1;
+   }
+
+
+   string getStrVal(IndexType indexType) const
+   {
+      S32 index = mKeyLookup.find(indexType)->second;
+      return mSettings[index]->getValueString();
+   }
+
+
+   string getDefaultStrVal(IndexType indexType) const
+   {
+      return mSettings[mKeyLookup.find(indexType)->second]->getDefaultValueString();
+   }
+
+
+   string getKey(IndexType indexType) const
+   {
+      return mSettings[mKeyLookup.find(indexType)->second]->getKey();
+   }
+
+
+   string getSection(IndexType indexType) const
+   {
+      return mSettings[mKeyLookup.find(indexType)->second]->getSection();
+   }
+
+
+   // There are much more efficient ways to do this!
+   Vector<AbstractSetting<IndexType> *> getSettingsInSection(const string &section) const
+   {
+      Vector<AbstractSetting<IndexType> *> settings;
+      for(S32 i = 0; i < mSettings.size(); i++)
+      {
+         if(mSettings[i]->getSection() == section)
+            settings.push_back(mSettings[i]);
+      }
+
+      return settings;
+   }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+   
+template <class T>
+class EnumParser
+{
+private:
+   typedef map<string, T> ValueMapType;
+   ValueMapType mValues;
+   Vector<string> mKeys;
+
+public:
+   T getVal(const string &value) const
+   {
+      typename ValueMapType::const_iterator iValue = mValues.find(lcase(value));
+      if(iValue  == mValues.end())      // Item not found, return default
+         return (T)0;
+
+      return iValue->second;
+   }
+
+
+   string getKey(T value) const
+   {
+      return mKeys[(S32)value];
+   }
+
+
+   void addItem(const string &name, T value)
+   {
+      mValues[lcase(name)] = value;
+
+      S32 val = (S32)value;
+
+      if(val >= mKeys.size())
+         mKeys.resize(val + 1);
+
+      mKeys[val] = name;
+   }
 };
 
 

@@ -39,8 +39,7 @@ namespace Zap
 {
 
 static const S32 NUM_CIRCLE_SIDES = 32;
-static const F32 INV_NUM_CIRCLE_SIDES = 1 / F32(NUM_CIRCLE_SIDES);
-static const F32 CIRCLE_SIDE_THETA = Float2Pi * INV_NUM_CIRCLE_SIDES;
+static const F32 CIRCLE_SIDE_THETA = Float2Pi / NUM_CIRCLE_SIDES;
 
 extern F32 gLineWidth1;
 extern F32 gLineWidth3;
@@ -72,27 +71,79 @@ void drawVertLine(F32 x, F32 y1, F32 y2)
 }
 
 
+// Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
+void generatePointsInACurve(F32 startAngle, F32 endAngle, S32 numPoints, F32 radius, Vector<Point> &points)
+{
+   TNLAssert(endAngle > startAngle,                     "End angle must be greater than start angle!");
+   TNLAssert(endAngle - startAngle <= FloatTau + .0001, "Difference in angles should be <= FloatTau");
+
+   points.resize(numPoints);
+
+   F32 theta = (endAngle - startAngle) / (numPoints - 1);
+
+   // Precalculate the sin and cos
+   F32 cosTheta = cosf(theta);
+   F32 sinTheta = sinf(theta);
+
+   F32 curX = radius * cosf(startAngle);  
+   F32 curY = radius * sinf(startAngle);
+   F32 prevX;
+
+   // This is a repeated rotation
+   for(S32 i = 0; i < numPoints; i++)
+   {
+      points[i].set(curX, curY);
+
+      // Apply the rotation matrix
+      prevX = curX;
+      curX = (cosTheta * curX)  - (sinTheta * curY);
+      curY = (sinTheta * prevX) + (cosTheta * curY);
+   }
+}
+
+
+void generatePointsInACircle(S32 numPoints, F32 radius, Vector<Point> &points)
+{
+   generatePointsInACurve(0, FloatTau, numPoints, radius, points);
+}
+
+
+void generatePointsInASemiCircle(S32 numPoints, F32 radius, Vector<Point> &points)
+{
+   generatePointsInACurve(0, FloatPi, numPoints, radius, points);
+}
+
+
+// [-I-] ==> y1, y2 are the coords at the top and bottom vertex of the I, width the the edge-to-edge width of the brackets
+void generatePointsInARectangle(F32 width, F32 y1, F32 y2, Vector<Point> &points)
+{
+   F32 halfWidth = width * 0.5f;
+
+   points.resize(4);
+
+   points[0].set(-halfWidth, y1);
+   points[1].set( halfWidth, y1);
+   points[2].set( halfWidth, y2);
+   points[3].set(-halfWidth, y2);
+}
+
+
 // Draw arc centered on pos, with given radius, from startAngle to endAngle.  0 is East, increasing CW
 void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
-   // With theta delta of 0.2, that means maximum 32 points + 1 at the end
-   static const S32 MAX_POINTS = NUM_CIRCLE_SIDES + 1;
-   static F32 arcVertexArray[MAX_POINTS * 2];      // 2 components per point
+   static Vector<Point> points;     // Reusable container
 
-   U32 count = 0;
-   for(F32 theta = startAngle; theta < endAngle; theta += CIRCLE_SIDE_THETA)
-   {
-      arcVertexArray[2*count]       = pos.x + cos(theta) * radius;
-      arcVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
-      count++;
-   }
+   // The +1 just makes the curves I've looked at appear nicer
+   S32 numPoints = (S32)ceil(NUM_CIRCLE_SIDES * (endAngle - startAngle) / FloatTau) + 1;
 
-   // Make sure arc makes it all the way to endAngle...  rounding errors look terrible!
-   arcVertexArray[2*count]       = pos.x + cos(endAngle) * radius;
-   arcVertexArray[(2*count) + 1] = pos.y + sin(endAngle) * radius;
-   count++;
+   TNLAssert(numPoints >= 0, "Negative points???");
 
-   renderVertexArray(arcVertexArray, count, GL_LINE_STRIP);
+   generatePointsInACurve(startAngle, endAngle, numPoints, radius, points);
+
+   glPushMatrix();
+      glTranslate(pos);
+      renderPointVector(&points, GL_LINE_STRIP);
+   glPopMatrix();
 }
 
 
@@ -286,25 +337,22 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
 
 
 // Draw an n-sided polygon
+void drawPolygon(S32 sides, F32 radius, F32 angle)
+{
+   Vector<Point> points;
+   generatePointsInACurve(angle, angle + FloatTau, sides + 1, radius, points);   // +1 so we can "close the loop"
+
+   renderPointVector(&points, GL_LINE_STRIP);
+}
+
+
+// Draw an n-sided polygon
 void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
 {
-   static const S32 MaxSides = 32;
-
-   TNLAssert(sides <= MaxSides, "Too many sides!");
-
-   // There is no polygon greater than 12 (I think) so I choose 32 sides to be safe
-   static F32 polygonVertexArray[MaxSides * 2];  // 2 data points per vertex (x,y)
-
-   F32 theta = 0;
-   F32 dTheta = FloatTau / sides;
-   for(S32 i = 0; i < sides; i++)
-   {
-      polygonVertexArray[2*i]       = pos.x + cos(theta + angle) * radius;
-      polygonVertexArray[(2*i) + 1] = pos.y + sin(theta + angle) * radius;
-      theta += dTheta;
-   }
-
-   renderVertexArray(polygonVertexArray, sides, GL_LINE_LOOP);
+   glPushMatrix();
+      glTranslate(pos);
+      drawPolygon(sides, radius, angle);
+   glPopMatrix();
 }
 
 
@@ -354,8 +402,8 @@ void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
 
    for(F32 theta = start; theta < end; theta += CIRCLE_SIDE_THETA)
    {
-      filledSectorVertexArray[2*count]       = pos.x + cos(theta) * radius;
-      filledSectorVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
+      filledSectorVertexArray[2 * count]     = pos.x + cos(theta) * radius;
+      filledSectorVertexArray[2 * count + 1] = pos.y + sin(theta) * radius;
       count++;
    }
 
@@ -405,7 +453,7 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
       glLineWidth(gLineWidth3);
       glColor(Colors::yellow, alpha);
 
-      drawPolygon(Point(0,0), 5, 30, FloatHalfPi);
+      drawPolygon(5, 30, FloatHalfPi);
 
       glLineWidth(gDefaultLineWidth);
    }
@@ -416,7 +464,7 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
       F32 shieldRadius = radius + 3;      // radius is the ship radius
 
       glColor(Colors::yellow, alpha);
-      drawCircle(0, 0, shieldRadius);
+      drawCircle(shieldRadius);
    }
 
 #ifdef SHOW_SERVER_SITUATION
@@ -428,7 +476,7 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
       F32 shieldRadius = radius;
 
       glColor(Colors::green, alpha);
-      drawCircle(0, 0, shieldRadius);
+      drawCircle(shieldRadius);
    }
 #endif
 
@@ -438,7 +486,7 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
    {
       glColor(Colors::white, alpha);
       F32 radius = (sensorTime & 0x1FF) * 0.002f;    // Radius changes over time
-      drawCircle(0, 0, radius * Ship::CollisionRadius + 4);
+      drawCircle(radius * Ship::CollisionRadius + 4);
    }
 
    // Repair
@@ -446,7 +494,7 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
    {
       glLineWidth(gLineWidth3);
       glColor(Colors::red, alpha);
-      drawCircle(0, 0, 18);
+      drawCircle(18);
       glLineWidth(gDefaultLineWidth);
    }
 }
@@ -483,7 +531,8 @@ static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 a
 }
 
 
-void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, 
+                F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                 bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
 {
    ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[shapeType];
@@ -807,12 +856,13 @@ void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
 }
 
 
-static void renderShipName(const string &shipName, bool isAuthenticated, bool isBusy, U32 killStreak, U32 gamesPlayed, F32 alpha)
+static void renderShipName(const string &shipName, bool isAuthenticated, bool isBusy, 
+                           U32 killStreak, U32 gamesPlayed, F32 nameScale, F32 alpha)
 {
    string renderName = isBusy ? "<<" + shipName + ">>" : shipName;
 
    F32 textAlpha = alpha;
-   S32 textSize = 14;
+   F32 textSize = 14 * nameScale;
 
    glLineWidth(gLineWidth1);
 
@@ -821,17 +871,17 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
    if(killStreak >= UserInterface::StreakingThreshold)      
       glColor(Colors::streakPlayerNameColor, textAlpha);    
    else                                      
-      glColor(Colors::idlePlayerNameColor, textAlpha);         // <=== Probably wrong, not sure how to fix...  
+      glColor(Colors::idlePlayerNameColor, textAlpha);      // <=== Probably wrong, not sure how to fix...  
 
 
-   S32 ypos = 30 + textSize;
-   S32 len = drawStringc(0, ypos, textSize, renderName.c_str());
+   F32 ypos = textSize + 30;
+   S32 len = drawStringc(0.0f, ypos, textSize, renderName.c_str());
 
 //   renderGamesPlayedMark(-len / 2, ypos, textSize, gamesPlayed);
 
    // Underline name if player is authenticated
    if(isAuthenticated)
-      drawHorizLine(-len/2, len/2, 33 + textSize);
+      drawHorizLine(-len * 0.5f, len * 0.5f, ypos + 3);     // 3 provides a little gap beneath the text
 
    glLineWidth(gDefaultLineWidth);
 }
@@ -839,7 +889,7 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
 
 void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
                 F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, F32 alpha, 
-                U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
+                U32 renderTime, const string &shipName, F32 nameScale, F32 warpInScale, bool isLocalShip, bool isBusy, 
                 bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                 bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
                 bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed)
@@ -847,16 +897,16 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
    glPushMatrix();
    glTranslate(renderPos);
 
-   // Draw the ship name, if there is one, before the glRotatef below, but only on layer 1...
+   // Draw the ship name, if there is one, before the glRotate below, but only on layer 1...
    // Don't label the local ship.
    if(!isLocalShip && layerIndex == 1 && shipName != "")  
    {
-      renderShipName(shipName, isAuthenticated, isBusy, killStreak, gamesPlayed, alpha);
+      renderShipName(shipName, isAuthenticated, isBusy, killStreak, gamesPlayed, nameScale, alpha);
 
       // Show if the player is engineering a teleport
       if(engineeringTeleport)
          renderTeleporterOutline(Point(cos(angle), sin(angle)) * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS),
-               (F32)Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
+                                (F32)Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
    }
 
    if(showCoordinates && layerIndex == 1)
@@ -868,7 +918,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
 
    // An angle of 0 means the ship is heading down the +X axis since we draw the ship 
    // pointing up the Y axis, we should rotate by the ship's angle, - 90 degrees
-   glRotatef(radiansToDegrees(angle) - 90 + rotAmount, 0, 0, 1.0);
+   glRotate(radiansToDegrees(angle) - 90 + rotAmount);
    glScale(warpInScale);
 
    // NOTE: Get rid of this if we stop sending location of cloaked ship to clients.  Also, we can stop
@@ -962,7 +1012,7 @@ void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
 
 void drawFourArrows(const Point &pos)
 {
-   const F32 pointList[] = {
+   static const F32 pointList[] = {
         0,  15,   0, -15,
         0,  15,   5,  10,
         0,  15,  -5,  10,
@@ -1006,29 +1056,29 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
    // Different teleport color styles
    static float colors[][NumColors][3] = {
       {  // 0 -> Our standard blue-styled teleporter                                               
-         { 0, 0.25, 0.8f },
-         { 0, 0.5, 1 },
-         { 0, 0, 1 },
-         { 0, 1, 1 },
-         { 0, 0.5, 0.5 },
-         { 0, 0, 1 },
+         { 0.0f, 0.25f, 0.8f },
+         { 0.0f, 0.5f,  1.0f },
+         { 0.0f, 0.0f,  1.0f },
+         { 0.0f, 1.0f,  1.0f },
+         { 0.0f, 0.5f,  0.5f },
+         { 0.0f, 0.0f,  1.0f },
       },
       {  // 1 -> Unused red/blue/purpley style
-         { 1, 0, 0.5 },
-         { 1, 0, 1 },
-         { 0, 0, 1 },
-         { 0.5, 0, 1 },
-         { 0, 0, 0.5 },
-         { 1, 0, 0 },
+         { 1.0f, 0.0f, 0.5f },
+         { 1.0f, 0.0f, 1.0f },
+         { 0.0f, 0.0f, 1.0f },
+         { 0.5f, 0.0f, 1.0f },
+         { 0.0f, 0.0f, 0.5f },
+         { 1.0f, 0.0f, 0.0f },
       },
       {  // 2 -> Our green engineered teleporter
-         { 0, 0.8f, 0.25f },
-         { 0.5, 1.0, 0 },
-         { 0, 1, 0 },
-         { 1, 1, 0 },
-         { 0.5, 0.5, 0 },
-         { 0, 1, 0 },
-      },
+         { 0.0f, 0.8f, 0.25f },
+         { 0.5f, 1.0f, 0.0f },
+         { 0.0f, 1.0f, 0.0f },
+         { 1.0f, 1.0f, 0.0f },
+         { 0.5f, 0.5f, 0.0f },
+         { 0.0f, 1.0f, 0.0f },
+      },                  
       {  // 3 -> "Dead" tracker gray
          { 0.20f, 0.20f, 0.20f },
          { 0.50f, 0.50f, 0.50f },
@@ -1313,90 +1363,68 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
 
 
 // Renders turret!  --> note that anchor and normal can't be const &Points because of the point math
-void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
+void renderTurret(const Color &color, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
 {
-   static const F32 frontRadius = 15.f;
+   const F32 FrontRadius = 15;
+   const F32 BaseWidth = 36;
+   const F32 HealthBarLength = 28;
 
-   Point cross(normal.y, -normal.x);
+   // aimCenter is the point at which the turret would intersect the white base, if it extended that far.
+   // It is kind of the "center of rotation" of the turret.
+   // Turret is drawn centered on this point, therefore many offsets will be negative.
    Point aimCenter = anchor + normal * Turret::TURRET_OFFSET;
 
-   // Render half-circle front
-   Vector<Point> vertexArray;
-   for(S32 x = -10; x <= 10; x++)
+   // Turret is made up of the base, the front, two horizontal lines framing 
+   // the health bar, an optional healing indicator, and finally the barrel
+   static Vector<Point> basePoints, frontPoints, healthBarFrame, healIndicatorPoints, barrel;
+
+   // Lazily initialize our point vectors
+   if(frontPoints.size() == 0)
    {
-      F32 theta = x * FloatHalfPi * 0.1f;
-      Point pos = normal * cos(theta) + cross * sin(theta);
-      vertexArray.push_back(aimCenter + pos * frontRadius);
+      generatePointsInARectangle(BaseWidth,        0, -Turret::TURRET_OFFSET,     basePoints);
+      generatePointsInARectangle(HealthBarLength, -3, -Turret::TURRET_OFFSET + 3, healthBarFrame);
+
+      generatePointsInASemiCircle(16, FrontRadius,          frontPoints);
+      generatePointsInASemiCircle(12, FrontRadius * 0.667f, healIndicatorPoints);
+
+      // Remove first and last points from healing indicator to make it look cooler
+      healIndicatorPoints.erase(healIndicatorPoints.size() - 1);     // Last
+      healIndicatorPoints.erase(0);                                  // First
+
+      barrel.resize(2);    // Set the dimensions of the vector that we'll need
    }
 
-   glColor(c);
+   glPushMatrix();
+      glTranslate(aimCenter);
+      glRotate(normal.ATAN2() * RADIANS_TO_DEGREES - 90);
 
-   renderPointVector(&vertexArray, GL_LINE_STRIP);
+      glColor(color);
 
-   // Render symbol if it is a regenerating turret
-   if(healRate > 0)
-   {
-      Vector<Point> pointArray;
-      for(S32 x = -4; x <= 4; x++)
-      {
-         F32 theta = x * FloatHalfPi * 0.2f;
-         Point pos = normal * cos(theta) + cross * sin(theta);
-         pointArray.push_back(aimCenter + pos * frontRadius * 0.667f);
-      }
-      renderPointVector(&pointArray, GL_LINE_STRIP);
-   }
+      renderPointVector(&frontPoints,    GL_LINE_STRIP);
+      renderPointVector(&healthBarFrame, GL_LINES);
 
-   // Render gun
-   glLineWidth(gLineWidth3);
+      // Render symbol if it is a regenerating turret
+      if(healRate > 0)
+         renderPointVector(&healIndicatorPoints, GL_LINE_STRIP);
 
+      // Draw base after potentially overlapping curvy bits
+      glColor(enabled ? Colors::white : Colors::gray60);
+      renderPointVector(&basePoints,     GL_LINE_LOOP);
+
+      glColor(color);
+      renderHealthBar(health, Point(0, -Turret::TURRET_OFFSET / 2), Point(1, 0), HealthBarLength, 5);
+
+   glPopMatrix();
+
+   // Now render the turret barrel
    Point aimDelta(cos(barrelAngle), sin(barrelAngle));
-   Point aim1(aimCenter + aimDelta * frontRadius);
-   Point aim2(aimCenter + aimDelta * frontRadius * 2);
-   F32 vertices[] = {
-         aim1.x, aim1.y,
-         aim2.x, aim2.y
-   };
-   renderVertexArray(vertices, 2, GL_LINES);
 
+   barrel[0].set(aimCenter + aimDelta * FrontRadius);
+   barrel[1].set(aimCenter + aimDelta * FrontRadius * 2);
+
+   glLineWidth(gLineWidth3);
+   renderPointVector(&barrel, GL_LINES);
    glLineWidth(gDefaultLineWidth);
-
-   if(enabled)
-      glColor(Colors::white);
-   else
-      glColor(0.6f);
-
-   // Render base?
-   Point corner1(anchor + cross * 18);
-   Point corner2(anchor + cross * 18 + normal * Turret::TURRET_OFFSET);
-   Point corner3(anchor - cross * 18 + normal * Turret::TURRET_OFFSET);
-   Point corner4(anchor - cross * 18);
-   F32 vertices2[] = {
-         corner1.x, corner1.y,
-         corner2.x, corner2.y,
-         corner3.x, corner3.y,
-         corner4.x, corner4.y
-   };
-   renderVertexArray(vertices2, 4, GL_LINE_LOOP);
-
-   // Render health bar
-   glColor(c);
-
-   renderHealthBar(health, anchor + normal * 7.5, cross, 28, 5);
-
-   // Render something...
-   Point lsegStart = anchor - cross * 14 + normal * 3;
-   Point lsegEnd = anchor + cross * 14 + normal * 3;
-   Point n = normal * (Turret::TURRET_OFFSET - 6);
-
-   Point seg2start(lsegStart + n);
-   Point seg2end(lsegEnd + n);
-   F32 vertices3[] = {
-         lsegStart.x, lsegStart.y,
-         lsegEnd.x, lsegEnd.y,
-         seg2start.x, seg2start.y,
-         seg2end.x, seg2end.y
-   };
-   renderVertexArray(vertices3, 4, GL_LINES);
 }
 
 
@@ -1418,7 +1446,7 @@ static void drawFlag(const Color *flagColor, const Color *mastColor, F32 alpha)
 void doRenderFlag(F32 x, F32 y, F32 scale, const Color *flagColor, const Color *mastColor, F32 alpha)
 {
    glPushMatrix();
-      glTranslatef(x, y, 0);
+      glTranslate(x, y);
       glScale(scale);
       drawFlag(flagColor, mastColor, alpha);
    glPopMatrix();
@@ -1463,21 +1491,21 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
       glTranslate(pos);
       glScale(0.2f);
 
-      F32 vertices[] = {
+      static F32 vertices[] = {
             -15, -15,
-            15, -5,
-            15, -5,
-            -15, 5,
+             15,  -5,
+             15,  -5,
+            -15,   5,
             -15, -15,
-            -15, 15
+            -15,  15
       };
       F32 colors[] = {
             c.r, c.g, c.b, alpha,
             c.r, c.g, c.b, alpha,
             c.r, c.g, c.b, alpha,
             c.r, c.g, c.b, alpha,
-            1, 1, 1, alpha,
-            1, 1, 1, alpha
+              1,   1,   1, alpha,
+              1,   1,   1, alpha
       };
       renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
    glPopMatrix();
@@ -1489,8 +1517,8 @@ void renderFlagSpawn(const Point &pos, F32 currentScale, const Color *color)
    static const Point p(-4, 0);
 
    glPushMatrix();
-      glTranslatef(pos.x + 1, pos.y, 0);
-      glScalef(0.4f / currentScale, 0.4f / currentScale, 1);
+      glTranslate(pos);
+      glScale(0.4f / currentScale);
       renderFlag(color);
 
       drawCircle(p, 26, &Colors::white);
@@ -1518,7 +1546,7 @@ void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *
    glPushMatrix();
       glScale(scaleFact);
       glTranslate(centroid);
-      glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
+      glRotate(angle * RADIANS_TO_DEGREES);
       renderCenteredString(Point(0,0), size, text);
    glPopMatrix();
 }
@@ -1664,16 +1692,14 @@ void renderLoadoutZoneIcon(const Point &center, S32 outerRadius, F32 angleRadian
 }
 
 
-void renderGoalZoneIcon(const Point &center, S32 radius, F32 angleRadians)
+void renderGoalZoneIcon(const Point &center, S32 radius)
 {
-   drawPolygon(center, 4, (F32)radius, 0.0f);
-
    static const F32 flagPoints[] = { -6, 10,  -6,-10,  12, -3.333f,  -6, 3.333f, };
 
    glPushMatrix();
-      glTranslatef(center.x, center.y, 0);
-      glRotatef(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
+      glTranslate(center);
       glScale(radius * 0.041667f);  // 1 / 24 since we drew it to in-game radius of 24 (a ship's radius)
+      drawPolygon(4, (F32)radius, 0.0f);
       renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GL_LINE_STRIP);
    glPopMatrix();
 }
@@ -1739,23 +1765,24 @@ void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<P
 
 // Goal zone flashes after capture, but glows after touchdown...
 void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,
-                    bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, bool useOldStyle)
+                    bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, GoalZoneFlashStyle flashStyle)
 {
-   Color fillColor, outlineColor;
+   Color outlineColor, fillColor;
+   F32 baseAlpha = 0.5f;
 
-   if(useOldStyle)
+   if(flashStyle == GoalZoneFlashOriginal)
    {
 //      fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
 //      outlineColor = getGoalZoneOutlineColor(c, isFlashing);
 
-      // TODO: reconcile why using the above commentted out code doesn't work
-      F32 alpha = isFlashing ? 0.75f : 0.5f;
-      fillColor    = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) * alpha * (1 - glowFraction * glowFraction));
-      outlineColor = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) *         (1 - glowFraction * glowFraction));
+      // TODO: reconcile why using the above commented out code doesn't work
+      F32 alpha = isFlashing ? 0.75f : baseAlpha;
+      fillColor    = Color(Colors::yellow * (glowFraction * glowFraction) + Color(c) * alpha * (1 - glowFraction * glowFraction));
+      outlineColor = Color(Colors::yellow * (glowFraction * glowFraction) + Color(c) *         (1 - glowFraction * glowFraction));
    }
-   else // Some new flashing effect (sam's idea)
+   else if(flashStyle == GoalZoneFlashExperimental) // Some new flashing effect (sam's idea)
    {
-      F32 glowRate = 0.5f - fabs(flashCounter - 0.5f);  // will need flashCounter for this.
+      F32 glowRate = baseAlpha - fabs(flashCounter - baseAlpha); 
 
       Color newColor(c);
       if(isFlashing)
@@ -1766,10 +1793,13 @@ void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<P
       fillColor    = getGoalZoneFillColor(newColor, false, glowFraction);
       outlineColor = getGoalZoneOutlineColor(newColor, false);
    }
-
+   else
+   {
+      fillColor = c * baseAlpha;
+      outlineColor = c;
+   }
 
    renderPolygon(fill, outline, &fillColor, &outlineColor);
-   //renderPolygonLabel(centroid, labelAngle, 25, "GOAL");
    renderGoalZoneIcon(centroid, 24);
 }
 
@@ -1808,7 +1838,7 @@ void renderNexusIcon(const Point &center, S32 radius, F32 angleRadians)
    glPushMatrix();
       glTranslate(center);
       glScale(radius * 0.05f);  // 1/20.  Default radius is 20 in-game
-      glRotatef(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
+      glRotate(angleRadians * RADIANS_TO_DEGREES);
 
       // Draw our center spokes
       renderVertexArray(spokes, ARRAYSIZE(spokes) / 2, GL_LINES);
@@ -1896,14 +1926,14 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
          glScale(pi->scaleFactor);
 
          glPushMatrix();
-            glRotatef((time % 720) * 0.5f, 0, 0, 1);
+            glRotate((time % 720) * 0.5f);
 
             static S16 projectilePoints1[] = { -2,2,  0,6,  2,2,  6,0,  2,-2,  0,-6,  -2,-2,  -6,0 };
             renderVertexArray(projectilePoints1, ARRAYSIZE(projectilePoints1) / 2, GL_LINE_LOOP);
 
          glPopMatrix();
 
-         glRotatef(180 - F32(time % 360), 0, 0, 1);
+         glRotate(180 - F32(time % 360));
          glColor(pi->projColors[1]);
 
          static S16 projectilePoints2[] = { -2,2,  0,8,  2,2,  8,0,  2,-2,  0,-8, -2,-2,  -8,0 };
@@ -1920,7 +1950,7 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 
       glPushMatrix();
 
-      glRotatef(F32(time % 720), 0, 0, 1);
+      glRotate(F32(time % 720));
       glColor(pi->projColors[1]);
 
       static S16 projectilePoints3[] = { -2,2,  2,2,  2,-2,  -2,-2 };
@@ -1930,13 +1960,13 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 
    } else if (bultype == 3) {  // Rosette of circles  MAKES SCREEN GO BEZERK!!
 
-      const int innerR = 6;
-      const int outerR = 3;
+      const F32 innerR = 6;
+      const F32 outerR = 3;
       const int dist = 10;
 
 #define dr(x) degreesToRadians(x)
 
-      glRotatef( fmod(F32(time) * .15f, 720.f), 0, 0, 1);
+      glRotate( fmod(F32(time) * .15f, 720.f));
       glColor(pi->projColors[1]);
 
       Point p(0,0);
@@ -1964,7 +1994,7 @@ void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaini
 {
    glPushMatrix();
       glTranslate(pos);
-      glRotatef(angleRadians * 360.f / FloatTau, 0, 0, 1.0);
+      glRotate(angleRadians * RADIANS_TO_DEGREES);
 
       // The flames first!
       F32 speedRatio = speed / WeaponInfo::getWeaponInfo(WeaponSeeker).projVelocity + (S32(timeRemaining) % 200)/ 400.0f;  
@@ -2004,7 +2034,7 @@ void renderMine(const Point &pos, bool armed, bool visible)
    if(visible)    // Friendly mine
    {
       glColor(Colors::gray50);
-      drawCircle(pos, Mine::SensorRadius);
+      drawCircle(pos, (F32)Mine::SensorRadius);
       mod = 0.8f;
       vis = 1.0f;
    }
@@ -2327,11 +2357,11 @@ void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
    static const Point p(0,0);
 
    glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(scale, scale, 1);
-      renderAsteroid(p, 2, .1f);
+      glTranslate(pos.x, pos.y);
+      glScale(scale);
+      renderAsteroid(p, 2, 0.1f);
 
-      drawCircle(p, 13, &Colors::white);
+      drawCircle(13, &Colors::white);
    glPopMatrix();
 }
 
@@ -2451,13 +2481,13 @@ void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width)
    drawPolygon(pos, 10, (F32)width / 2, 0);
 
    glColor(coreColor);
-   drawCircle(pos, width / 5.0f);
+   drawCircle(pos, width / 5.0f + width * .01f);    // + .01 to match full item rendering
 }
 
 
 void renderSoccerBall(const Point &pos)
 {
-   renderSoccerBall(pos, (F32)SoccerBallItem::SOCCER_BALL_RADIUS);
+   renderSoccerBall(pos, SoccerBallItem::SOCCER_BALL_RADIUS);
 }
 
 
@@ -2473,8 +2503,8 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
       glPushMatrix();
       glTranslate(pos);
          glScale(scaleFactor);
-         glRotatef(pos.angleTo(dir) * RADIANS_TO_DEGREES, 0, 0, 1);
-         glTranslatef(-119, -45, 0);      // Determined experimentally
+         glRotate(pos.angleTo(dir) * RADIANS_TO_DEGREES);
+         glTranslate(-119, -45);      // Determined experimentally
 
          renderBitfighterLogo(0, 1);
       glPopMatrix();
@@ -2514,14 +2544,14 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
       F32 angle = pos.angleTo(geom->get(0));
 
       static const F32 symbol[] = {
-            -2, 5,
-            4, 0,
+            -2,  5,
+             4,  0,
             -2, -5,
       };
 
       glPushMatrix();
          glTranslate(centerPoint);
-         glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
+         glRotate(angle * RADIANS_TO_DEGREES);
          renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, GL_LINE_STRIP);
       glPopMatrix();
    }
@@ -2730,7 +2760,7 @@ void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
    // 3609 is the diff btwn the min and max x coords below, 594 is same for y
 
    glPushMatrix();
-      glTranslatef((DisplayManager::getScreenInfo()->getGameCanvasWidth() - 3609 * fact) / 2, yPos - 594 * fact / 2, 0);
+      glTranslate((DisplayManager::getScreenInfo()->getGameCanvasWidth() - 3609 * fact) / 2, yPos - 594 * fact / 2);
       glScale(fact);                   // Scale it down...
       renderBitfighterLogo(mask);
    glPopMatrix();
@@ -2780,22 +2810,13 @@ void drawFilledSquare(const Point &pos, F32 radius, const Color *color)
 }
 
 
-void drawFilledSquare(const Point &pos, S32 radius, const Color *color)
-{
-   if(color)
-      glColor(color);
-
-   drawSquare(pos, F32(radius), true);
-}
-
-
 // Red vertices in walls, and magenta snapping vertices
 void renderSmallSolidVertex(F32 currentScale, const Point &pos, bool snapping)
 {
    F32 size = MIN(MAX(currentScale, 1), 2);              // currentScale, but limited to range 1-2
    glColor(snapping ? Colors::magenta : Colors::red);
 
-   drawFilledSquare(pos, (F32)size / currentScale);
+   drawFilledSquare(pos, size / currentScale);
 }
 
 
@@ -2895,50 +2916,33 @@ void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *
 }
 
 
-// Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
-void drawCircle(F32 x, F32 y, F32 radius, const Color *color, F32 alpha)
+void drawCircle(const Point &center, F32 radius, const Color *color, F32 alpha)
 {
+   glPushMatrix();
+      glTranslate(center);
+      drawCircle(radius, color, alpha);
+   glPopMatrix();
+}
+
+
+// Circle drawing now precalculates a set of points around the circle, then renders them using glScale()
+// to get the radius right.  This eliminates most point calculations during rendering, making it much
+// more efficient.
+void drawCircle(F32 radius, const Color *color, F32 alpha)
+{
+   static Vector<Point> points;
+
+   // Lazily initialize point array
+   if(points.size() == 0)
+      generatePointsInACircle(NUM_CIRCLE_SIDES, 1.0, points);
+
    if(color)
       glColor(color, alpha);
 
-   F32 theta = Float2Pi * INV_NUM_CIRCLE_SIDES; // 1/32
-
-   // Precalculate the sine and cosine
-   F32 cosTheta = cosf(theta);
-   F32 sinTheta = sinf(theta);
-
-   F32 curX = radius;  // We start at angle = 0
-   F32 curY = 0;
-   F32 prevX;
-
-   // 32 vertices is almost a circle..  right?
-   F32 vertexArray[2 * NUM_CIRCLE_SIDES];
-
-   // This is a repeated rotation
-   for(S32 i = 0; i < NUM_CIRCLE_SIDES; i++)
-   {
-      vertexArray[(2*i)]     = curX + x;
-      vertexArray[(2*i) + 1] = curY + y;
-
-      // Apply the rotation matrix
-      prevX = curX;
-      curX = (cosTheta * curX)  - (sinTheta * curY);
-      curY = (sinTheta * prevX) + (cosTheta * curY);
-   }
-
-   renderVertexArray(vertexArray, 32, GL_LINE_LOOP);
-}
-
-
-void drawCircle(const Point &pos, S32 radius, const Color *color, F32 alpha)
-{
-   drawCircle(pos.x, pos.y, (F32)radius, color, alpha);
-}
-
-
-void drawCircle(const Point &pos, F32 radius, const Color *color, F32 alpha)
-{
-   drawCircle(pos.x, pos.y, radius, color, alpha);
+   glPushMatrix();
+      glScale(radius);
+      renderPointVector(&points, GL_LINE_STRIP);
+   glPopMatrix();
 }
 
 
@@ -2971,7 +2975,7 @@ void drawDivetedTriangle(F32 height, F32 len)
    
    glPushMatrix();
       glTranslate(200, 200, 0);
-      glRotatef(GLfloat(Platform::getRealMilliseconds() / 10 % 360), 0, 0, 1);
+      glRotate(GLfloat(Platform::getRealMilliseconds() / 10 % 360));
       glScale(6);
 
       renderPolygonOutline(&pts, &Colors::red);
@@ -3007,12 +3011,12 @@ void drawGear(const Point &center, S32 teeth, F32 radius1, F32 radius2, F32 ang1
    }
 
    glPushMatrix();
-      glTranslate(center.x, center.y, 0);
-      glRotatef(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
+      glTranslate(center);
+      glRotate(angleRadians * RADIANS_TO_DEGREES);
 
       renderPolygonOutline(&pts);
 
-      drawCircle(0, 0, innerCircleRadius);
+      drawCircle(innerCircleRadius);
 
    glPopMatrix();
 }
@@ -3380,12 +3384,10 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
    glPointSize( gLineWidth1 );
 
    glEnableClientState(GL_VERTEX_ARRAY);
-   //glEnableClientState(GL_COLOR_ARRAY);
 
    glEnable(GL_BLEND);
    glColor(Colors::gray60, alpha);
 
-   //glColorPointer(4, GL_FLOAT, sizeof(Color), &colors[0]);
    glVertexPointer(2, GL_FLOAT, sizeof(Point), &stars[0]);    // Each star is a pair of floats between 0 and 1
 
 
@@ -3405,7 +3407,7 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
          glPushMatrix();
          glScale(starChunkSize);   // Creates points with coords btwn 0 and starChunkSize
 
-         glTranslatef(xPage + (cameraPos.x / starDist), yPage + (cameraPos.y / starDist), 0);
+         glTranslate(xPage + (cameraPos.x / starDist), yPage + (cameraPos.y / starDist));
 
          glDrawArrays(GL_POINTS, 0, numStars);
          
@@ -3607,8 +3609,8 @@ void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
 void renderSpawn(const Point &pos, F32 scale, const Color *color)
 {   
    glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(scale, scale, 1);    // Make item draw at constant size, regardless of zoom
+      glTranslate(pos.x, pos.y);
+      glScale(scale);    // Make item draw at constant size, regardless of zoom
       renderSquareItem(Point(0,0), color, 1, &Colors::white, 'S');
    glPopMatrix();
 }
