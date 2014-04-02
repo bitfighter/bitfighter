@@ -322,8 +322,11 @@ void MenuUserInterface::render()
    FontManager::pushFontContext(MenuHeaderContext);
 
    // Title 
-   glColor(Colors::green);
-   drawCenteredUnderlinedString(vertMargin, 30, mMenuTitle.c_str());
+   if(mMenuTitle.length() != 0) // This check is to fix green dot from zero length underline on some systems including linux software renderer (linux command: LIBGL_ALWAYS_SOFTWARE=1 ./bitfighter)
+   {
+      glColor(Colors::green);
+      drawCenteredUnderlinedString(vertMargin, 30, mMenuTitle.c_str());
+   }
    
    // Subtitle
    glColor(mMenuSubTitleColor);
