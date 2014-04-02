@@ -186,7 +186,6 @@ public:
 
    F32 sfxVolLevel;                 // SFX volume (0 = silent, 1 = full bore)
    F32 voiceChatVolLevel;           // Ditto
-   F32 alertsVolLevel;              // And again
 
    F32 getMusicVolLevel();
    F32 getRawMusicVolLevel();

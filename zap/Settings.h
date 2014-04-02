@@ -79,7 +79,7 @@ public:
 
    virtual void setValFromString(const string &value) = 0;
 
-   virtual string getValueString() const = 0;         // Return current value, as a string
+   virtual string getIniString() const = 0;           // Return current value, as a string
    virtual string getDefaultValueString() const = 0;  // Return default value, as a string
 };
 
@@ -98,6 +98,8 @@ public:
 
    static string toString(const string &val);
    static string toString(S32 val);
+   static string toString(U32 val);
+   static string toString(F32 val);
    static string toString(YesNo yesNo);
    static string toString(RelAbs relAbs);
    static string toString(DisplayMode displayMode);
@@ -110,6 +112,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
 template <class DataType, class IndexType>
 class Setting : public AbstractSetting<IndexType>
 {
@@ -119,28 +122,50 @@ private:
    DataType mDefaultValue;
    DataType mValue;
    Evaluator mEvaluator;
+   DataType (*mReadValidator)(const DataType &val);
+   DataType (*mWriteValidator)(const DataType &val);
+
+   DataType fromString(const string &val) 
+   { 
+      DataType v = mEvaluator.fromString<DataType>(val);
+
+      // Validate value if we have a validator
+      if(mReadValidator == NULL)
+         return v;
+
+      return mReadValidator(v); 
+   }
 
 public:
-   Setting(IndexType index, const DataType &defaultValue, const string &iniKey, const string &iniSection, const string &comment):
+   Setting(IndexType index, const DataType &defaultValue, const string &iniKey, 
+           const string &iniSection, DataType (*readValidator)(const DataType &val), 
+           DataType (*writeValidator)(const DataType &val), const string &comment):
       Parent(index, iniKey, iniSection, comment),
       mDefaultValue(defaultValue),
       mValue(defaultValue)
    {
-      // Do nothing
+      mReadValidator = readValidator;
+      mWriteValidator = writeValidator;
    }
 
    virtual ~Setting() { /* Do nothing */ }
 
-   DataType fromString(const string &val)       { return mEvaluator.fromString<DataType>(val); }
 
-   void setValue(const DataType &value)         { mValue = value;                              }
-                                                                                              
-   DataType getValue() const                    { return mValue;                               }
-   string getValueString() const                { return Evaluator::toString(mValue);          }
-   string getDefaultValueString() const         { return Evaluator::toString(mDefaultValue);   }
-                                                                                              
-   void setValFromString(const string &value)   { setValue(fromString(value));                 }
-};
+   void setValue(const DataType &value)         { mValue = value;                            }
+                                                                                             
+   DataType getValue() const                    { return mValue;                             }
+   string getDefaultValueString() const         { return Evaluator::toString(mDefaultValue); }
+   void setValFromString(const string &value)   { setValue(fromString(value));               }
+
+   string getIniString() const                  
+   { 
+      if(mWriteValidator == NULL)
+         return Evaluator::toString(mValue);                      
+
+      return Evaluator::toString(mWriteValidator(mValue));
+   }
+
+};                                                                                                         
 
 
 ////////////////////////////////////////
@@ -196,10 +221,11 @@ public:
    }
 
 
+   // Currently only used in tests
    string getStrVal(IndexType indexType) const
    {
       S32 index = mKeyLookup.find(indexType)->second;
-      return mSettings[index]->getValueString();
+      return mSettings[index]->getIniString();
    }
 
 

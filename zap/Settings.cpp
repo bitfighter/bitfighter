@@ -57,6 +57,7 @@ Evaluator::fromString(const string &val) { TNLAssert(false, "Specialize me!"); r
 template<> string             Evaluator::fromString(const string &val) { return val;                             }
 template<> S32                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
 template<> U32                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
+template<> F32                Evaluator::fromString(const string &val) { return atof(val.c_str());               }
 template<> U16                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
 template<> DisplayMode        Evaluator::fromString(const string &val) { return displayModeEnumParser.getVal(val);      }
 template<> YesNo              Evaluator::fromString(const string &val) { return yesNoEnumParser.getVal(val);            }
@@ -69,6 +70,8 @@ template<> Color              Evaluator::fromString(const string &val) { return 
 // Convert various things to strings
 string Evaluator::toString(const string &val)      { return val;                                    }
 string Evaluator::toString(S32 val)                { return itos(val);                              }
+string Evaluator::toString(U32 val)                { return itos(val);                              }
+string Evaluator::toString(F32 val)                { return ftos(val);                              }
 string Evaluator::toString(YesNo val)              { return yesNoEnumParser.getKey(val);            }
 string Evaluator::toString(RelAbs val)             { return relativeAbsoluteEnumParser.getKey(val); }
 string Evaluator::toString(DisplayMode val)        { return displayModeEnumParser.getKey(val);      }

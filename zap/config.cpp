@@ -55,12 +55,29 @@ const char *MASTER_SERVER_LIST_ADDRESS = "bitfighter.org:25955,bitfighter.net:25
 //const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955, bitfighter.net:25955";
 
 
+// Vol gets stored as a number from 0 to 10; normalize it to 0-1
+static F32 checkVol(const F32 &vol) 
+{ 
+   F32 v = vol / 10.0f; 
+   return CLAMP(v, 0, 1);
+}  
+
+
+static F32 writeVol(const F32 &vol) 
+{ 
+   return ceilf(vol * 10.0f);
+}  
+
+
 // Constructor: Set default values here
 IniSettings::IniSettings()
 {
 
-#  define SETTINGS_ITEM(typeName, enumVal, section, key, defaultVal, comment) \
-            mSettings.add(new Setting<typeName, IniKey::SettingsItem>(IniKey::enumVal, defaultVal, key, section, comment));
+#  define SETTINGS_ITEM(typeName, enumVal, section, key, defaultVal, readValidator, writeValidator, comment)    \
+            mSettings.add(                                                                                      \
+               new Setting<typeName, IniKey::SettingsItem>(IniKey::enumVal, defaultVal, key,                    \
+                                                           section, readValidator, writeValidator, comment)     \
+            );
       SETTINGS_TABLE
 #  undef SETTINGS_ITEM
 
@@ -71,7 +88,6 @@ IniSettings::IniSettings()
    sfxVolLevel       = 1.0;           // SFX volume (0 = silent, 1 = full bore)
    musicVolLevel     = 1.0;           // Music volume (range as above)
    voiceChatVolLevel = 1.0;           // INcoming voice chat volume (range as above)
-   alertsVolLevel    = 1.0;           // Audio alerts volume (when in dedicated server mode only, range as above)
 
    sfxSet = sfxModernSet;             // Start off with our modern sounds
 
@@ -231,7 +247,6 @@ void  IniSettings::setMusicVolLevel(F32 vol)
 {
    musicVolLevel = vol;
 }
-
 
 
 extern string lcase(string strToConvert);
@@ -551,12 +566,6 @@ static sfxSets stringToSFXSet(string sfxSet)
 }
 
 
-static F32 checkVol(F32 vol)
-{
-   return max(min(vol, 1.f), 0.f);    // Restrict volume to be between 0 and 1
-}
-
-
 static void loadSoundSettings(CIniFile *ini, GameSettings *settings, IniSettings *iniSettings)
 {
    iniSettings->musicMutedOnCmdLine = settings->getSpecified(NO_MUSIC);
@@ -577,16 +586,10 @@ static void loadSoundSettings(CIniFile *ini, GameSettings *settings, IniSettings
 
 static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
 {
-   const char *section = "Host";
-
-   iniSettings->alertsVolLevel = checkVol(iniSettings->alertsVolLevel);
-
-
-   //iniSettings->SendStatsToMaster = (lcase(ini->GetValue(section, "SendStatsToMaster", "yes")) != "no");
 
 #ifdef BF_WRITE_TO_MYSQL
    Vector<string> args;
-   parseString(ini->GetValue(section, "MySqlStatsDatabaseCredentials"), args, ',');
+   parseString(ini->GetValue("Host", "MySqlStatsDatabaseCredentials"), args, ',');
    if(args.size() >= 1) iniSettings->mySqlStatsDatabaseServer = args[0];
    if(args.size() >= 2) iniSettings->mySqlStatsDatabaseName = args[1];
    if(args.size() >= 3) iniSettings->mySqlStatsDatabaseUser = args[2];
@@ -1506,7 +1509,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
       // Write the settings themselves
       for(S32 i = 0; i < settings.size(); i++)
-         ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
+         ini->SetValue(section, settings[i]->getKey(), settings[i]->getIniString());
    }
 
    const char *section = "Settings";
@@ -1598,7 +1601,6 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment("----------------");
    }
 
-   ini->SetValueI (section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10));
    ini->setValueYN(section, "LogStats", iniSettings->logStats);
 
 #ifdef BF_WRITE_TO_MYSQL

@@ -1317,8 +1317,9 @@ void ServerGame::idle(U32 timeDelta)
       dataSender.sendNextLine();
 
    // Play any sounds server might have made... (this is only for special alerts such as player joined or left)
+   // (No music or voice on server!)
    if(isDedicated())   // Non-dedicated servers will process sound in client side
-      SoundSystem::processAudio(mSettings->getIniSettings()->alertsVolLevel);    // No music or voice on server!
+      SoundSystem::processAudio(mSettings->getIniSettings()->mSettings.getVal<F32>(IniKey::AlertsVolume));    
 
    if(mTimeToSuspend.update(timeDelta))
       suspendGame();
