@@ -11,7 +11,7 @@ local VALID_TYPES = {
   "FlagSpawn",
   "ForceFieldProjector",
   "GoalZone",
-  "LineItem",
+  "Line",
   "LoadoutZone",
   "Mine",
   "Nexus",
@@ -19,6 +19,7 @@ local VALID_TYPES = {
   "RepairItem",
   "ResourceItem",
   "SoccerBallItem",
+  "SlipZone",
   "ShipSpawn",
   "SpeedZone",
   "SpyBug",
@@ -37,6 +38,7 @@ end
 local IMPLICITLY_CLOSED_CLASS_IDS = {
 	[ObjType.GoalZone] = true,
 	[ObjType.LoadoutZone] = true,
+	[ObjType.Nexus] = true,
 	[ObjType.PolyWall] = true,
 	[ObjType.SlipZone] = true,
 	[ObjType.Zone] = true
@@ -45,6 +47,7 @@ local IMPLICITLY_CLOSED_CLASS_IDS = {
 local ZONE_CLASS_IDS = {
 	[ObjType.GoalZone] = true,
 	[ObjType.LoadoutZone] = true,
+	[ObjType.Nexus] = true,
 	[ObjType.SlipZone] = true,
 	[ObjType.Zone] = true
 }
@@ -78,7 +81,7 @@ local OBJTYPE_TO_CLASS = {
 	[ObjType.FlagSpawn]           = FlagSpawn,
 	[ObjType.AsteroidSpawn]       = AsteroidSpawn,
 	[ObjType.WallItem]            = WallItem,
-	-- [ObjType.SlipZone]            = SlipZone,
+	[ObjType.SlipZone]            = SlipZone,
 	[ObjType.SpyBug]              = SpyBug,
 	[ObjType.Core]                = CoreItem,
 	[ObjType.Zone]                = Zone,
@@ -178,6 +181,12 @@ end
 local function append(t1, t2)
 	for _, v in pairs(t2) do
 		table.insert(t1, v)
+	end
+end
+
+local function prepend(t1, t2)
+	for i = #t2,1,-1 do
+		table.insert(t1, t2[i], 1)
 	end
 end
 
@@ -352,7 +361,7 @@ local function align(objects, alignment)
 			centerOn(obj, point.new(ext.minx + h.x, c.y))
 		elseif alignment == "Right" then
 			centerOn(obj, point.new(ext.maxx - h.x, c.y))
-		elseif alignment == "c" then
+		elseif alignment == "Center" then
 			centerOn(obj, point.new(ext.minx + (ext.maxx - ext.minx) / 2, c.y))
 		elseif alignment == "Top" then
 			centerOn(obj, point.new(c.x, ext.miny + h.y))
@@ -925,6 +934,11 @@ local function clone(obj)
 	pcall(function() result:setWidth(obj:getWidth()) end)
 	pcall(function() result:setTeam(obj:getTeamIndex()) end)
 	pcall(function() result:setText(obj:getText()) end)
+	pcall(function() result:setRegenTime(obj:getRegenTime()) end)
+	pcall(function() result:setHealRate(obj:getHealRate()) end)
+	pcall(function() result:setSpeed(obj:getSpeed()) end)
+	pcall(function() result:setSlipFactor(obj:getSlipFactor()) end)
+	pcall(function() result:setSnapping(obj:getSnapping()) end)
 	return result
 end
 
@@ -967,6 +981,7 @@ sd = {
 	mergeExtents                = mergeExtents,
 	midPoint                    = midPoint,
 	minimumDistance             = minimumDistance,
+	prepend                     = prepend,
 	plural                      = plural,
 	polarClamp                  = polarClamp,
 	rdp_simplify                = rdp_simplify,

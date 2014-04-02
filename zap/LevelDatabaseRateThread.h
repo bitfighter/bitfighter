@@ -34,7 +34,8 @@ public:
 #define LEVEL_RATING(val, b) val,
     LEVEL_RATINGS_TABLE
 #undef LEVEL_RATING
-    RatingsCount
+    RatingsCount,
+    UnknownRating
 };
 
 
@@ -47,6 +48,7 @@ public:
    void finish();
 
    static LevelRating getLevelRatingEnum(S32 rating);
+   static LevelRating getLevelRatingEnum(const string &ratingString);
 
    ClientGame* mGame;
    string mLevelId;

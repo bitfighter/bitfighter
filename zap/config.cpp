@@ -1321,6 +1321,10 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 
    ini->ReadFile();                             // Read the INI file
 
+   static const string sections[] = {"Settings", "Host", "Host-Voting"};
+   for(S32 i = 0; i < ARRAYSIZE(sections); i++)
+      loadSettings(ini, iniSettings, sections[i]);
+
    loadSoundSettings(ini, settings, iniSettings);
    loadEffectsSettings(ini, iniSettings);
    loadGeneralSettings(ini, iniSettings);

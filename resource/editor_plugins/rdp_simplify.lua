@@ -8,7 +8,7 @@ local sd = require('stardust')
 function getArgsMenu()
 
 	menu = 	{
-		TextEntryMenuItem.new("Epsilon: ", "2.0", "2.0", "Maximum variation to allow"),
+		TextEntryMenuItem.new("Threshold: ", "1.0", "1.0", "Maximum variation to allow"),
 	}
 
 	return "Simplify II", "Simplify by removing variations greater than a threshold", "Ctrl+=", menu

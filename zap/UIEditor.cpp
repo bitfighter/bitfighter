@@ -2505,9 +2505,6 @@ void EditorUserInterface::scaleSelection(F32 scale)
    database->computeSelectionMinMax(min, max);
    Point ctr = (min + max) * 0.5;
 
-   if(scale > 1 && min.distanceTo(max) * scale > 50 * mGridSize)    // If walls get too big, they'll bog down the db
-      return;
-
    bool modifiedWalls = false;
    WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 

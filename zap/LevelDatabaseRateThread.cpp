@@ -101,7 +101,7 @@ void LevelDatabaseRateThread::finish()
 {
    if(errorNumber == 0)
    {
-      // Do nothing -- user already saw a preemptive success message
+      mGame->displaySuccessMessage("Done");
       mGame->updateOriginalRating();
    }
    else if(errorNumber == 1)
@@ -129,7 +129,23 @@ LevelDatabaseRateThread::LevelRating LevelDatabaseRateThread::getLevelRatingEnum
    else
    {
       TNLAssert(false, "Invalid rating!");
+      return UnknownRating;
+   }
+}
+
+
+LevelDatabaseRateThread::LevelRating LevelDatabaseRateThread::getLevelRatingEnum(const string &ratingString)
+{
+   if(ratingString == "down")
+      return MinusOne;
+   else if(ratingString == "neutral")
       return Neutral;
+   else if(ratingString == "up")
+      return PlusOne;
+   else
+   {
+      TNLAssert(false, "Invalid rating!");
+      return UnknownRating;
    }
 }
 
