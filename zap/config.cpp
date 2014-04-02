@@ -1324,13 +1324,16 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    for(S32 i = 0; i < ARRAYSIZE(sections); i++)
       loadSettings(ini, iniSettings, sections[i]);
 
+   loadHostConfiguration(ini, iniSettings);
+
+
    loadSoundSettings(ini, settings, iniSettings);
    loadEffectsSettings(ini, iniSettings);
    loadGeneralSettings(ini, iniSettings);
    loadLoadoutPresets(ini, settings);
    loadPluginBindings(ini, iniSettings);
 
-   loadHostConfiguration(ini, iniSettings);
+   
    loadUpdaterSettings(ini, iniSettings);
    loadDiagnostics(ini, iniSettings);
 
@@ -1343,7 +1346,6 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadLevelSkipList(ini, settings);            // Read level skipList, if there are any
 
    loadQuickChatMessages(ini);
-
    loadServerBanList(ini, settings->getBanList());
 
    saveSettingsToINI(ini, settings);            // Save to fill in any missing settings
