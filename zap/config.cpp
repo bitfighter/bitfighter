@@ -1311,7 +1311,6 @@ void writeServerBanList(CIniFile *ini, BanList *banList)
 }
 
 
-// Option default values are stored here, in the 3rd prarm of the GetValue call
 // This is only called once, during initial initialization
 // Is also called from gameType::processServerCommand (why?)
 void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
