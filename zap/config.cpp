@@ -1321,7 +1321,6 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 
    ini->ReadFile();                             // Read the INI file
 
-   static const string sections[] = {"Settings", "Host", "Host-Voting"};
    for(S32 i = 0; i < ARRAYSIZE(sections); i++)
       loadSettings(ini, iniSettings, sections[i]);
 
@@ -1349,7 +1348,7 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 
    saveSettingsToINI(ini, settings);            // Save to fill in any missing settings
 
-   settings->onFinishedLoading();
+   settings->onFinishedLoading();               // Merge INI settings with cmd line settings
 }
 
 
