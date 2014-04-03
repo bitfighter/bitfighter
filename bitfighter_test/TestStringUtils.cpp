@@ -121,6 +121,20 @@ static void wouldOneMoreWordMakeTheLineTooLong(const Vector<string> &lines, S32 
 }
 
 
+TEST(StringUtilsTest, ParseStringTests)
+{
+   Vector<string> words;
+   parseString("   Superior, Michigan, Huron    , Erie,     Ontario", words, ',');
+
+   ASSERT_EQ(5, words.size());
+   EXPECT_EQ("Superior", words[0]);
+   EXPECT_EQ("Michigan", words[1]);
+   EXPECT_EQ("Huron",    words[2]);
+   EXPECT_EQ("Erie",     words[3]);
+   EXPECT_EQ("Ontario",  words[4]);
+}
+
+
 // Test wrapping based on character counts
 TEST(StringUtilsTest, WrapStringsMaxChars)
 {
