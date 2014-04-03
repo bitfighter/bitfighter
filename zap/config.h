@@ -248,11 +248,6 @@ public:
    bool serverFilter;  
    bool logStats;
 
-   string mySqlStatsDatabaseServer;
-   string mySqlStatsDatabaseName;
-   string mySqlStatsDatabaseUser;
-   string mySqlStatsDatabasePassword;
-
    Vector<StringTableEntry> levelList;
 
    Vector<string> reservedNames;

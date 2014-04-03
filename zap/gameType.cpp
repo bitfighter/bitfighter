@@ -951,6 +951,34 @@ private:
    GameSettings *mSettings;
    VersionedGameStats mStats;
 
+#ifdef BF_WRITE_TO_MYSQL
+   static string mMySqlStatsDatabaseServer;
+   static string mMySqlStatsDatabaseName;
+   static string mMySqlStatsDatabaseUser;
+   static string mMySqlStatsDatabasePassword;
+   static bool mInitialized;
+
+   static void initializeDbSettings(const string &params)
+   {
+      // params will be a (probably) 4 item comma separated string
+      Vector<string> args;
+
+      parseString(params, args, ',');
+
+      if(args.size() >= 1) mMySqlStatsDatabaseServer   = args[0];
+      if(args.size() >= 2) mMySqlStatsDatabaseName     = args[1];
+      if(args.size() >= 3) mMySqlStatsDatabaseUser     = args[2];
+      if(args.size() >= 4) mMySqlStatsDatabasePassword = args[3];
+
+      // Check for default sample values that get automatically inserted into the INI... can't do anything
+      // until the user has updated them!
+      if(mMySqlStatsDatabaseServer == "server" && mMySqlStatsDatabaseName == "dbname")
+         mMySqlStatsDatabaseServer = "";      // blank this, so it won't try to connect to "server"
+
+      mInitialized = true;
+   }
+#endif
+
 public:
    InsertStatsToDatabaseThread(GameSettings *settings, const VersionedGameStats &stats) { mSettings = settings; mStats = stats; }
    virtual ~InsertStatsToDatabaseThread() { }
@@ -958,12 +986,16 @@ public:
    U32 run()
    {
 #ifdef BF_WRITE_TO_MYSQL
-      if(mSettings->getIniSettings()->mySqlStatsDatabaseServer != "")
+      if(!mInitialized)
+         initializeDbSettings(mSettings->getIniSettings()->mSettings.getVal<string>(IniKey::MySqlStatsDatabaseCredentials));
+
+      if(mMySqlStatsDatabaseServer != "")
       {
-         DatabaseWriter databaseWriter(mSettings->getIniSettings()->mySqlStatsDatabaseServer.c_str(), 
-                                       mSettings->getIniSettings()->mySqlStatsDatabaseName.c_str(),
-                                       mSettings->getIniSettings()->mySqlStatsDatabaseUser.c_str(),   
-                                       mSettings->getIniSettings()->mySqlStatsDatabasePassword.c_str() );
+
+         DatabaseWriter databaseWriter(mMySqlStatsDatabaseServer.c_str(), 
+                                       mMySqlStatsDatabaseName.c_str(),
+                                       mMySqlStatsDatabaseUser.c_str(),   
+                                       mMySqlStatsDatabasePassword.c_str() );
          databaseWriter.insertStats(mStats.gameStats);
       }
       else
@@ -975,6 +1007,12 @@ public:
       return 0;
    }
 };
+
+
+#ifdef BF_WRITE_TO_MYSQL
+   // Initialize our statics
+   bool InsertStatsToDatabaseThread::mInitialized = false;
+#endif
 
 
 // Transmit statistics to the master server, LogStats to game server

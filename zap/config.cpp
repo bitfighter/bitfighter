@@ -1599,18 +1599,10 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment("----------------");
       addComment(" MySqlStatsDatabaseCredentials - If MySql integration has been compiled in (which it probably hasn't been), you can specify the");
       addComment("                                 database server, database name, login, and password as a comma delimeted list");
-      addComment(" Vote Strengths - Vote will pass when sum of all vote strengths is bigger then zero.");
-      addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
-
       addComment("----------------");
    }
 
    ini->setValueYN(section, "LogStats", iniSettings->logStats);
-
-#ifdef BF_WRITE_TO_MYSQL
-   if(iniSettings->mySqlStatsDatabaseServer == "" && iniSettings->mySqlStatsDatabaseName == "" && iniSettings->mySqlStatsDatabaseUser == "" && iniSettings->mySqlStatsDatabasePassword == "")
-      ini->SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password");
-#endif
 }
 
 

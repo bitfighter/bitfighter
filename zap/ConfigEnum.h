@@ -6,6 +6,14 @@
 #ifndef _CONFIG_ENUM_H_
 #define _CONFIG_ENUM_H_
 
+#ifdef BF_WRITE_TO_MYSQL
+#  define MYSQL_SETTINGS_TABLE_ENTRY \
+      SETTINGS_ITEM(string, MySqlStatsDatabaseCredentials, "Host", "MySqlStatsDatabaseCredentials", "server, dbname, login, password", NULL, NULL,  \
+      "To activate MySql integration, specify the database server, database name, login, and password as a comma delimeted list")
+#else
+#  define MYSQL_SETTINGS_TABLE_ENTRY
+#endif
+
 //                                                                                                                                          Reading    Writing
 //               Data type           Setting name              INI Section       INI Key                     Default value                 Validator  Validator   INI Comment                                               
 #define SETTINGS_TABLE   \
@@ -60,6 +68,7 @@
    SETTINGS_ITEM(YesNo,              GameRecording,            "Host",           "GameRecording",            No,                              NULL,     NULL,     "If Yes, games will be recorded; if No, they will not.  This is typically set via the menu.")                                   \
    SETTINGS_ITEM(U32,                MaxFpsServer,             "Host",           "MaxFPS",                   100,                             NULL,     NULL,     "Maximum FPS the dedicated server will run at.  Higher values use more CPU (and power), lower may increase lag.\n"              \
                                                                                                                                                                   "Specify 0 for no limit. Negative values will not make Bitfighter run backwards.  Sorry.  (default = 100)")                     \
+   MYSQL_SETTINGS_TABLE_ENTRY                                                                                                                                                                                                                                                                     \
                                                                                                                                                                                                                                                                                                   \
    SETTINGS_ITEM(YesNo,              VotingEnabled,            "Host-Voting",    "VoteEnable",               No,                              NULL,     NULL,     "Enable voting on this server")                                                                                                 \
    SETTINGS_ITEM(U32,                VoteLength,               "Host-Voting",    "VoteLength",               12,                              NULL,     NULL,     "Time voting will last for general items, in seconds (use 0 to disable)")                                                       \
@@ -68,6 +77,7 @@
    SETTINGS_ITEM(S32,                VoteYesStrength,          "Host-Voting",    "VoteYesStrength",           3,                              NULL,     NULL,     "How much does a Yes vote count?")                                                                                              \
    SETTINGS_ITEM(S32,                VoteNoStrength,           "Host-Voting",    "VoteNoStrength",           -3,                              NULL,     NULL,     "How much does a No vote count?")                                                                                               \
    SETTINGS_ITEM(S32,                VoteNothingStrength,      "Host-Voting",    "VoteNothingStrength",      -1,                              NULL,     NULL,     "How much does an abstention count?")                                                                                           \
+
 
 
 namespace Zap
