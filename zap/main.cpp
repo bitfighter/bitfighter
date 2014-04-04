@@ -504,26 +504,28 @@ void shutdownBitfighter()
 void setupLogging(IniSettings *iniSettings)
 {
    //                           Logging type               Setting where whether we log this type is stored
-   gMainLog.setMsgType(LogConsumer::LogConnectionProtocol, iniSettings->logConnectionProtocol);
-   gMainLog.setMsgType(LogConsumer::LogNetConnection,      iniSettings->logNetConnection);
-   gMainLog.setMsgType(LogConsumer::LogEventConnection,    iniSettings->logEventConnection);
-   gMainLog.setMsgType(LogConsumer::LogGhostConnection,    iniSettings->logGhostConnection);
+   gMainLog.setMsgType(LogConsumer::LogConnectionProtocol, iniSettings->mSettings.getVal<YesNo>(IniKey::LogConnectionProtocol));
+   gMainLog.setMsgType(LogConsumer::LogNetConnection,      iniSettings->mSettings.getVal<YesNo>(IniKey::LogNetConnection));
+   gMainLog.setMsgType(LogConsumer::LogEventConnection,    iniSettings->mSettings.getVal<YesNo>(IniKey::LogEventConnection));
+   gMainLog.setMsgType(LogConsumer::LogGhostConnection,    iniSettings->mSettings.getVal<YesNo>(IniKey::LogGhostConnection));
 
-   gMainLog.setMsgType(LogConsumer::LogNetInterface,       iniSettings->logNetInterface);
-   gMainLog.setMsgType(LogConsumer::LogPlatform,           iniSettings->logPlatform);
-   gMainLog.setMsgType(LogConsumer::LogNetBase,            iniSettings->logNetBase);
-   gMainLog.setMsgType(LogConsumer::LogUDP,                iniSettings->logUDP);
+   gMainLog.setMsgType(LogConsumer::LogNetInterface,       iniSettings->mSettings.getVal<YesNo>(IniKey::LogNetInterface));
+   gMainLog.setMsgType(LogConsumer::LogPlatform,           iniSettings->mSettings.getVal<YesNo>(IniKey::LogPlatform));
+   gMainLog.setMsgType(LogConsumer::LogNetBase,            iniSettings->mSettings.getVal<YesNo>(IniKey::LogNetBase));
+   gMainLog.setMsgType(LogConsumer::LogUDP,                iniSettings->mSettings.getVal<YesNo>(IniKey::LogUDP));
 
-   gMainLog.setMsgType(LogConsumer::LogFatalError,         iniSettings->logFatalError); 
-   gMainLog.setMsgType(LogConsumer::LogError,              iniSettings->logError); 
-   gMainLog.setMsgType(LogConsumer::LogWarning,            iniSettings->logWarning); 
-   gMainLog.setMsgType(LogConsumer::ConfigurationError,    iniSettings->logConfigurationError);
-   gMainLog.setMsgType(LogConsumer::LogConnection,         iniSettings->logConnection); 
-   gMainLog.setMsgType(LogConsumer::LogLevelLoaded,        iniSettings->logLevelLoaded); 
-   gMainLog.setMsgType(LogConsumer::LogLuaObjectLifecycle, iniSettings->logLuaObjectLifecycle); 
-   gMainLog.setMsgType(LogConsumer::LuaLevelGenerator,     iniSettings->luaLevelGenerator); 
-   gMainLog.setMsgType(LogConsumer::LuaBotMessage,         iniSettings->luaBotMessage); 
-   gMainLog.setMsgType(LogConsumer::ServerFilter,          iniSettings->serverFilter); 
+   gMainLog.setMsgType(LogConsumer::LogFatalError,         iniSettings->mSettings.getVal<YesNo>(IniKey::LogFatalError)); 
+   gMainLog.setMsgType(LogConsumer::LogError,              iniSettings->mSettings.getVal<YesNo>(IniKey::LogError)); 
+   gMainLog.setMsgType(LogConsumer::LogWarning,            iniSettings->mSettings.getVal<YesNo>(IniKey::LogWarning)); 
+   gMainLog.setMsgType(LogConsumer::ConfigurationError,    iniSettings->mSettings.getVal<YesNo>(IniKey::LogConfigurationError));
+   gMainLog.setMsgType(LogConsumer::LogConnection,         iniSettings->mSettings.getVal<YesNo>(IniKey::LogConnection)); 
+
+   gMainLog.setMsgType(LogConsumer::LogLevelLoaded,        iniSettings->mSettings.getVal<YesNo>(IniKey::LogLevelLoaded)); 
+   gMainLog.setMsgType(LogConsumer::LogLevelError,         iniSettings->mSettings.getVal<YesNo>(IniKey::LogLevelError)); 
+   gMainLog.setMsgType(LogConsumer::LogLuaObjectLifecycle, iniSettings->mSettings.getVal<YesNo>(IniKey::LogLuaObjectLifecycle)); 
+   gMainLog.setMsgType(LogConsumer::LuaLevelGenerator,     iniSettings->mSettings.getVal<YesNo>(IniKey::LuaLevelGenerator)); 
+   gMainLog.setMsgType(LogConsumer::LuaBotMessage,         iniSettings->mSettings.getVal<YesNo>(IniKey::LuaBotMessage)); 
+   gMainLog.setMsgType(LogConsumer::ServerFilter,          iniSettings->mSettings.getVal<YesNo>(IniKey::ServerFilter)); 
 }
 
 

@@ -115,29 +115,6 @@ IniSettings::IniSettings()
 
    musicMutedOnCmdLine = false;
 
-   // Specify which events to log
-   logConnectionProtocol = false;
-   logNetConnection = false;
-   logEventConnection = false;
-   logGhostConnection = false;
-   logNetInterface = false;
-   logPlatform = false;
-   logNetBase = false;
-   logUDP = false;
-
-   logFatalError = true;       
-   logError = true;            
-   logWarning = true;     
-   logConfigurationError = true;
-   logConnection = true;       
-   logLevelLoaded = true;      
-   logLuaObjectLifecycle = false;
-   luaLevelGenerator = true;   
-   luaBotMessage = true;       
-   serverFilter = false; 
-
-   logLevelError = true;
-
    version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
 }
 
@@ -150,7 +127,7 @@ IniSettings::~IniSettings()
 
 
 // This list is currently incomplete, will grow as we move our settings into the new structure
-static const string sections[] = {"Settings", "Host", "Host-Voting", "EditorSettings"};
+static const string sections[] = {"Settings", "Host", "Host-Voting", "EditorSettings", "Diagnostics"};
 static const string headerComments[] = 
 {
    "Settings entries contain a number of different options.",
@@ -158,7 +135,9 @@ static const string headerComments[] =
    "Control how voting works on the server.  The default values work pretty well, but if you want to tweak them, go ahead!\n"
       "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"
       "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below.",
-   "EditorSettings entries relate to items in the editor"
+   "EditorSettings entries relate to items in the editor",
+   "Diagnostic entries can be used to enable or disable particular actions for debugging purposes.\n"
+      "You probably can't use any of these settings to enhance your gameplay experience!"
 };
 
 
@@ -478,28 +457,6 @@ static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
    string section = "Diagnostics";
 
    iniSettings->diagnosticKeyDumpMode = ini->GetValueYN(section, "DumpKeys",              iniSettings->diagnosticKeyDumpMode);
-
-   iniSettings->logConnectionProtocol = ini->GetValueYN(section, "LogConnectionProtocol", iniSettings->logConnectionProtocol);
-   iniSettings->logNetConnection      = ini->GetValueYN(section, "LogNetConnection",      iniSettings->logNetConnection);
-   iniSettings->logEventConnection    = ini->GetValueYN(section, "LogEventConnection",    iniSettings->logEventConnection);
-   iniSettings->logGhostConnection    = ini->GetValueYN(section, "LogGhostConnection",    iniSettings->logGhostConnection);
-   iniSettings->logNetInterface       = ini->GetValueYN(section, "LogNetInterface",       iniSettings->logNetInterface);
-   iniSettings->logPlatform           = ini->GetValueYN(section, "LogPlatform",           iniSettings->logPlatform);
-   iniSettings->logNetBase            = ini->GetValueYN(section, "LogNetBase",            iniSettings->logNetBase);
-   iniSettings->logUDP                = ini->GetValueYN(section, "LogUDP",                iniSettings->logUDP);
-
-   iniSettings->logFatalError         = ini->GetValueYN(section, "LogFatalError",         iniSettings->logFatalError);
-   iniSettings->logError              = ini->GetValueYN(section, "LogError",              iniSettings->logError);
-   iniSettings->logWarning            = ini->GetValueYN(section, "LogWarning",            iniSettings->logWarning);
-   iniSettings->logConfigurationError = ini->GetValueYN(section, "LogConfigurationError", iniSettings->logConfigurationError);
-   iniSettings->logConnection         = ini->GetValueYN(section, "LogConnection",         iniSettings->logConnection);
-   iniSettings->logLevelError         = ini->GetValueYN(section, "LogLevelError",         iniSettings->logLevelError);
-
-   iniSettings->logLevelLoaded        = ini->GetValueYN(section, "LogLevelLoaded",        iniSettings->logLevelLoaded);
-   iniSettings->logLuaObjectLifecycle = ini->GetValueYN(section, "LogLuaObjectLifecycle", iniSettings->logLuaObjectLifecycle);
-   iniSettings->luaLevelGenerator     = ini->GetValueYN(section, "LuaLevelGenerator",     iniSettings->luaLevelGenerator);
-   iniSettings->luaBotMessage         = ini->GetValueYN(section, "LuaBotMessage",         iniSettings->luaBotMessage);
-   iniSettings->serverFilter          = ini->GetValueYN(section, "ServerFilter",          iniSettings->serverFilter);
 }
 
 
@@ -1360,51 +1317,11 @@ static void writeDiagnostics(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " Diagnostic entries can be used to enable or disable particular actions for debugging purposes.");
       ini->sectionComment(section, " You probably can't use any of these settings to enhance your gameplay experience!");
       ini->sectionComment(section, " DumpKeys - Enable this to dump raw input to the screen (Yes/No)");
-      ini->sectionComment(section, " LogConnectionProtocol - Log ConnectionProtocol events (Yes/No)");
-      ini->sectionComment(section, " LogNetConnection - Log NetConnectionEvents (Yes/No)");
-      ini->sectionComment(section, " LogEventConnection - Log EventConnection events (Yes/No)");
-      ini->sectionComment(section, " LogGhostConnection - Log GhostConnection events (Yes/No)");
-      ini->sectionComment(section, " LogNetInterface - Log NetInterface events (Yes/No)");
-      ini->sectionComment(section, " LogPlatform - Log Platform events (Yes/No)");
-      ini->sectionComment(section, " LogNetBase - Log NetBase events (Yes/No)");
-      ini->sectionComment(section, " LogUDP - Log UDP events (Yes/No)");
-
-      ini->sectionComment(section, " LogFatalError - Log fatal errors; should be left on (Yes/No)");
-      ini->sectionComment(section, " LogError - Log serious errors; should be left on (Yes/No)");
-      ini->sectionComment(section, " LogWarning - Log less serious errors (Yes/No)");
-      ini->sectionComment(section, " LogConfigurationError - Log problems with configuration (Yes/No)");
-      ini->sectionComment(section, " LogConnection - High level logging connections with remote machines (Yes/No)");
-      ini->sectionComment(section, " LogLevelLoaded - Write a log entry when a level is loaded (Yes/No)");
-      ini->sectionComment(section, " LogLevelError - Log errors and warnings about levels loaded (Yes/No)");
-      ini->sectionComment(section, " LogLuaObjectLifecycle - Creation and destruciton of lua objects (Yes/No)");
-      ini->sectionComment(section, " LuaLevelGenerator - Messages from the LuaLevelGenerator (Yes/No)");
-      ini->sectionComment(section, " LuaBotMessage - Message from a bot (Yes/No)");
-      ini->sectionComment(section, " ServerFilter - For logging messages specific to hosting games (Yes/No)");
-      ini->sectionComment(section, "                (Note: these messages will go to bitfighter_server.log regardless of this setting) ");
       ini->sectionComment(section, "----------------");
    }
 
    ini->setValueYN(section, "DumpKeys", iniSettings->diagnosticKeyDumpMode);
-   ini->setValueYN(section, "LogConnectionProtocol", iniSettings->logConnectionProtocol);
-   ini->setValueYN(section, "LogNetConnection",      iniSettings->logNetConnection);
-   ini->setValueYN(section, "LogEventConnection",    iniSettings->logEventConnection);
-   ini->setValueYN(section, "LogGhostConnection",    iniSettings->logGhostConnection);
-   ini->setValueYN(section, "LogNetInterface",       iniSettings->logNetInterface);
-   ini->setValueYN(section, "LogPlatform",           iniSettings->logPlatform);
-   ini->setValueYN(section, "LogNetBase",            iniSettings->logNetBase);
-   ini->setValueYN(section, "LogUDP",                iniSettings->logUDP);
 
-   ini->setValueYN(section, "LogFatalError",         iniSettings->logFatalError);
-   ini->setValueYN(section, "LogError",              iniSettings->logError);
-   ini->setValueYN(section, "LogWarning",            iniSettings->logWarning);
-   ini->setValueYN(section, "LogConfigurationError", iniSettings->logConfigurationError);
-   ini->setValueYN(section, "LogConnection",         iniSettings->logConnection);
-   ini->setValueYN(section, "LogLevelLoaded",        iniSettings->logLevelLoaded);
-   ini->setValueYN(section, "LogLevelError",         iniSettings->logLevelError);
-   ini->setValueYN(section, "LogLuaObjectLifecycle", iniSettings->logLuaObjectLifecycle);
-   ini->setValueYN(section, "LuaLevelGenerator",     iniSettings->luaLevelGenerator);
-   ini->setValueYN(section, "LuaBotMessage",         iniSettings->luaBotMessage);
-   ini->setValueYN(section, "ServerFilter",          iniSettings->serverFilter);
 }
 
 

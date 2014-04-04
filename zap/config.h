@@ -225,28 +225,6 @@ public:
 
    bool musicMutedOnCmdLine;
 
-   // Logging options   --   true will enable logging these events, false will disable
-   bool logConnectionProtocol;
-   bool logNetConnection;
-   bool logEventConnection;
-   bool logGhostConnection;
-   bool logNetInterface;
-   bool logPlatform;
-   bool logNetBase;
-   bool logUDP;
-
-   bool logFatalError;        
-   bool logError;             
-   bool logWarning;    
-   bool logConfigurationError;
-   bool logConnection;        
-   bool logLevelLoaded;    
-   bool logLevelError;
-   bool logLuaObjectLifecycle;
-   bool luaLevelGenerator;    
-   bool luaBotMessage;        
-   bool serverFilter;  
-
    Vector<StringTableEntry> levelList;
 
    Vector<string> reservedNames;
