@@ -56,12 +56,12 @@ TEST(SettingsTest, SetValFromString)
 {
    Settings<TestSettingsKey> settings;
 
-   settings.add(new Setting<string,      TestSettingsKey>(strName,   "defval",              "SettingName1", "Section", "description"));
-   settings.add(new Setting<S32,         TestSettingsKey>(S32Name,   123,                   "SettingName2", "Section", "description"));
-   settings.add(new Setting<YesNo,       TestSettingsKey>(YesNoYes,  Yes,                   "YesNoYes",     "Section", "description"));
-   settings.add(new Setting<YesNo,       TestSettingsKey>(YesNoNo,   No,                    "YesNoNo",      "Section", "description"));
-   settings.add(new Setting<DisplayMode, TestSettingsKey>(DispMode,  DISPLAY_MODE_WINDOWED, "DispMode",     "Section", "description"));
-   settings.add(new Setting<RelAbs,      TestSettingsKey>(RelAbsKey, Relative,              "RelAbs",       "Section", "description"));
+   settings.add(new Setting<string,      TestSettingsKey>(strName,   "defval",              "SettingName1", "Section", NULL, NULL, "description"));
+   settings.add(new Setting<S32,         TestSettingsKey>(S32Name,   123,                   "SettingName2", "Section", NULL, NULL, "description"));
+   settings.add(new Setting<YesNo,       TestSettingsKey>(YesNoYes,  Yes,                   "YesNoYes",     "Section", NULL, NULL, "description"));
+   settings.add(new Setting<YesNo,       TestSettingsKey>(YesNoNo,   No,                    "YesNoNo",      "Section", NULL, NULL, "description"));
+   settings.add(new Setting<DisplayMode, TestSettingsKey>(DispMode,  DISPLAY_MODE_WINDOWED, "DispMode",     "Section", NULL, NULL, "description"));
+   settings.add(new Setting<RelAbs,      TestSettingsKey>(RelAbsKey, Relative,              "RelAbs",       "Section", NULL, NULL, "description"));
 
    // Check default values
    // Get a string representation of the value
@@ -115,9 +115,9 @@ TEST(SettingsTest, SetValFromString)
    // Check that we can create a separate set of settings with a different enum
    Settings<TestSettingsKey2> settings2;
 
-   settings2.add(new Setting<string, TestSettingsKey2>(key1,  "first", "SettingName3", "Section2", "description2"));
-   settings2.add(new Setting<S32,    TestSettingsKey2>(key2,  666,     "SettingName4", "Section2", "description2"));
-   settings2.add(new Setting<YesNo,  TestSettingsKey2>(key3,  No,      "YesNoNo",      "Section2", "description2"));
+   settings2.add(new Setting<string, TestSettingsKey2>(key1,  "first", "SettingName3", "Section2", NULL, NULL, "description2"));
+   settings2.add(new Setting<S32,    TestSettingsKey2>(key2,  666,     "SettingName4", "Section2", NULL, NULL, "description2"));
+   settings2.add(new Setting<YesNo,  TestSettingsKey2>(key3,  No,      "YesNoNo",      "Section2", NULL, NULL, "description2"));
    
    EXPECT_EQ(No, settings2.getVal<YesNo>(key3));
    // And note that using a key from our other settings set will not compile:

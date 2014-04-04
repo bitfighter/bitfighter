@@ -28,8 +28,9 @@ MasterSettings::MasterSettings(const string &iniFile)
 {
    ini.SetPath(iniFile);
 
-#  define SETTINGS_ITEM(typeName, enumVal, section, key, defaultVal, comment) \
-            mSettings.add(new Setting<typeName, IniKey::SettingsItem>(IniKey::enumVal, defaultVal, key, section, comment));
+#  define SETTINGS_ITEM(typeName, enumVal, section, key, defaultVal, readValidator, writeValidator, comment)               \
+            mSettings.add(new Setting<typeName, IniKey::SettingsItem>(IniKey::enumVal, defaultVal, key,                    \
+                                                                      section, readValidator, writeValidator, comment));
       MASTER_SETTINGS_TABLE
 #  undef SETTINGS_ITEM
 }

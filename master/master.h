@@ -21,34 +21,34 @@ using namespace TNL;
 using namespace Zap;
 
 
-// Note that on the master, our settings are read-only, so there is no need to specify a comment
-//            Data type  Setting name              INI Section    INI Key                                Default value            INI Comment
+// Note that on the master, our settings are read-only, so there is no need to specify a comment                                       Read/Write  INI
+//            Data type    Setting name              INI Section    INI Key                                Default value                Functions Comment
 #define MASTER_SETTINGS_TABLE   \
-   SETTINGS_ITEM(string,    ServerName,                 "host",     "name",                                 "Bitfighter Master Server", "" ) \
-   SETTINGS_ITEM(string,    JsonOutfile,                "host",     "json_file",                            "server.json",              "" ) \
-   SETTINGS_ITEM(U32,       Port,                       "host",     "port",                                 25955,                      "" ) \
-   SETTINGS_ITEM(U32,       LatestReleasedCSProtocol,   "host",     "latest_released_cs_protocol",          0,                          "" ) \
-   SETTINGS_ITEM(U32,       LatestReleasedBuildVersion, "host",     "latest_released_client_build_version", 0,                          "" ) \
-                                                                                                                                             \
-   /* Variables for managing access to MySQL */                                                                                              \
-   SETTINGS_ITEM(string,    MySqlAddress,               "phpbb",    "phpbb_database_address",               "",                         "" ) \
-   SETTINGS_ITEM(string,    DbUsername,                 "phpbb",    "phpbb3_database_username",             "",                         "" ) \
-   SETTINGS_ITEM(string,    DbPassword,                 "phpbb",    "phpbb3_database_password",             "",                         "" ) \
-                                                                                                                                             \
-   /* Variables for verifying usernames/passwords in PHPBB3 */                                                                               \
-   SETTINGS_ITEM(string,    Phpbb3Database,             "phpbb",    "phpbb3_database_name",                 "",                         "" ) \
-   SETTINGS_ITEM(string,    Phpbb3TablePrefix,          "phpbb",    "phpbb3_table_prefix",                  "",                         "" ) \
-                                                                                                                                             \
-   /* Stats database credentials */                                                                                                          \
-   SETTINGS_ITEM(YesNo,     WriteStatsToMySql,          "stats",    "write_stats_to_mysql",                 No,                         "" ) \
-   SETTINGS_ITEM(string,    StatsDatabaseAddress,       "stats",    "stats_database_addr",                  "",                         "" ) \
-   SETTINGS_ITEM(string,    StatsDatabaseName,          "stats",    "stats_database_name",                  "",                         "" ) \
-   SETTINGS_ITEM(string,    StatsDatabaseUsername,      "stats",    "stats_database_username",              "",                         "" ) \
-   SETTINGS_ITEM(string,    StatsDatabasePassword,      "stats",    "stats_database_password",              "",                         "" ) \
-                                                                                                                                             \
-   /* GameJolt settings */                                                                                                                   \
-   SETTINGS_ITEM(YesNo,     UseGameJolt,                "GameJolt", "UseGameJolt",                          Yes,                        "" ) \
-   SETTINGS_ITEM(string,    GameJoltSecret,             "GameJolt", "GameJoltSecret",                       "",                         "" ) \
+   SETTINGS_ITEM(string,    ServerName,                 "host",     "name",                                 "Bitfighter Master Server", NULL, NULL, "" ) \
+   SETTINGS_ITEM(string,    JsonOutfile,                "host",     "json_file",                            "server.json",              NULL, NULL, "" ) \
+   SETTINGS_ITEM(U32,       Port,                       "host",     "port",                                 25955,                      NULL, NULL, "" ) \
+   SETTINGS_ITEM(U32,       LatestReleasedCSProtocol,   "host",     "latest_released_cs_protocol",          0,                          NULL, NULL, "" ) \
+   SETTINGS_ITEM(U32,       LatestReleasedBuildVersion, "host",     "latest_released_client_build_version", 0,                          NULL, NULL, "" ) \
+                                                                                                                                                         \
+   /* Variables for managing access to MySQL */                                                                                                          \
+   SETTINGS_ITEM(string,    MySqlAddress,               "phpbb",    "phpbb_database_address",               "",                         NULL, NULL, "" ) \
+   SETTINGS_ITEM(string,    DbUsername,                 "phpbb",    "phpbb3_database_username",             "",                         NULL, NULL, "" ) \
+   SETTINGS_ITEM(string,    DbPassword,                 "phpbb",    "phpbb3_database_password",             "",                         NULL, NULL, "" ) \
+                                                                                                                                                         \
+   /* Variables for verifying usernames/passwords in PHPBB3 */                                                                                           \
+   SETTINGS_ITEM(string,    Phpbb3Database,             "phpbb",    "phpbb3_database_name",                 "",                         NULL, NULL, "" ) \
+   SETTINGS_ITEM(string,    Phpbb3TablePrefix,          "phpbb",    "phpbb3_table_prefix",                  "",                         NULL, NULL, "" ) \
+                                                                                                                                                         \
+   /* Stats database credentials */                                                                                                                      \
+   SETTINGS_ITEM(YesNo,     WriteStatsToMySql,          "stats",    "write_stats_to_mysql",                 No,                         NULL, NULL, "" ) \
+   SETTINGS_ITEM(string,    StatsDatabaseAddress,       "stats",    "stats_database_addr",                  "",                         NULL, NULL, "" ) \
+   SETTINGS_ITEM(string,    StatsDatabaseName,          "stats",    "stats_database_name",                  "",                         NULL, NULL, "" ) \
+   SETTINGS_ITEM(string,    StatsDatabaseUsername,      "stats",    "stats_database_username",              "",                         NULL, NULL, "" ) \
+   SETTINGS_ITEM(string,    StatsDatabasePassword,      "stats",    "stats_database_password",              "",                         NULL, NULL, "" ) \
+                                                                                                                                                         \
+   /* GameJolt settings */                                                                                                                               \
+   SETTINGS_ITEM(YesNo,     UseGameJolt,                "GameJolt", "UseGameJolt",                          Yes,                        NULL, NULL, "" ) \
+   SETTINGS_ITEM(string,    GameJoltSecret,             "GameJolt", "GameJoltSecret",                       "",                         NULL, NULL, "" ) \
 
 
 namespace Zap {
@@ -68,7 +68,7 @@ namespace Master
 namespace IniKey
 {
 enum SettingsItem {
-#define SETTINGS_ITEM(a, enumVal, c, d, e, f) enumVal,
+#define SETTINGS_ITEM(a, enumVal, c, d, e, f, g, h) enumVal,
     MASTER_SETTINGS_TABLE
 #undef SETTINGS_ITEM
 };
