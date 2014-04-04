@@ -91,8 +91,6 @@ IniSettings::IniSettings()
 
    sfxSet = sfxModernSet;             // Start off with our modern sounds
 
-   diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
-
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
 
    masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
@@ -449,14 +447,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    gLineWidth3 = gDefaultLineWidth * 1.5f;
    gLineWidth4 = gDefaultLineWidth * 2;
 #endif
-}
-
-
-static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
-{
-   string section = "Diagnostics";
-
-   iniSettings->diagnosticKeyDumpMode = ini->GetValueYN(section, "DumpKeys",              iniSettings->diagnosticKeyDumpMode);
 }
 
 
@@ -1268,7 +1258,6 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 
    
    loadUpdaterSettings(ini, iniSettings);
-   loadDiagnostics(ini, iniSettings);
 
    setDefaultKeyBindings(ini, inputCodeManager);
    setDefaultEditorKeyBindings(ini, inputCodeManager);
@@ -1303,25 +1292,6 @@ void IniSettings::loadUserSettingsFromINI(CIniFile *ini, GameSettings *settings)
 
       settings->addUserSettings(userSettings);
    }
-}
-
-
-static void writeDiagnostics(CIniFile *ini, IniSettings *iniSettings)
-{
-   const char *section = "Diagnostics";
-   ini->addSection(section);
-
-   if (ini->numSectionComments(section) == 0)
-   {
-      ini->sectionComment(section, "----------------");
-      ini->sectionComment(section, " Diagnostic entries can be used to enable or disable particular actions for debugging purposes.");
-      ini->sectionComment(section, " You probably can't use any of these settings to enhance your gameplay experience!");
-      ini->sectionComment(section, " DumpKeys - Enable this to dump raw input to the screen (Yes/No)");
-      ini->sectionComment(section, "----------------");
-   }
-
-   ini->setValueYN(section, "DumpKeys", iniSettings->diagnosticKeyDumpMode);
-
 }
 
 
@@ -1573,7 +1543,6 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeEffects(ini, iniSettings);
    writeSounds(ini, iniSettings);
    writeSettings(ini, iniSettings);
-   writeDiagnostics(ini, iniSettings);
    writeLevels(ini);
    writeSkipList(ini, settings->getLevelSkipList());
    writeUpdater(ini, iniSettings);

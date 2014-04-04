@@ -394,7 +394,11 @@ void UserInterface::onTextInput(char ascii)      { /* Do nothing */ }
 // This should make it easier to see what happens when users press joystick buttons.
 void UserInterface::renderDiagnosticKeysOverlay()
 {
-   if(GameManager::getClientGames()->get(0)->getSettings()->getIniSettings()->diagnosticKeyDumpMode)
+   // This setting can't be changed from in-game, so we can just grab the value at the outset and use that to save the lookup
+   static const bool dumpKeys = 
+         GameManager::getClientGames()->get(0)->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::DumpKeys);
+
+   if(dumpKeys)
    {
      S32 vpos = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2;
      S32 hpos = horizMargin;

@@ -196,8 +196,6 @@ public:
 
    sfxSets sfxSet;                  // Which set of SFX does the user want?
 
-   bool diagnosticKeyDumpMode;      // True if want to dump keystrokes to the screen
-
    U32 maxFPS;
 
 
