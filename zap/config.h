@@ -246,7 +246,6 @@ public:
    bool luaLevelGenerator;    
    bool luaBotMessage;        
    bool serverFilter;  
-   bool logStats;
 
    Vector<StringTableEntry> levelList;
 

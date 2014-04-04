@@ -138,8 +138,6 @@ IniSettings::IniSettings()
 
    logLevelError = true;
 
-   logStats = false;          // Log statistics into local sqlite database
-
    version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
 }
 
@@ -581,24 +579,6 @@ static void loadSoundSettings(CIniFile *ini, GameSettings *settings, IniSettings
    iniSettings->sfxVolLevel       = checkVol(iniSettings->sfxVolLevel);
    iniSettings->setMusicVolLevel(checkVol(iniSettings->getRawMusicVolLevel()));
    iniSettings->voiceChatVolLevel = checkVol(iniSettings->voiceChatVolLevel);
-}
-
-
-static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
-{
-
-#ifdef BF_WRITE_TO_MYSQL
-   Vector<string> args;
-   parseString(ini->GetValue("Host", "MySqlStatsDatabaseCredentials"), args, ',');
-   if(args.size() >= 1) iniSettings->mySqlStatsDatabaseServer = args[0];
-   if(args.size() >= 2) iniSettings->mySqlStatsDatabaseName = args[1];
-   if(args.size() >= 3) iniSettings->mySqlStatsDatabaseUser = args[2];
-   if(args.size() >= 4) iniSettings->mySqlStatsDatabasePassword = args[3];
-   if(iniSettings->mySqlStatsDatabaseServer == "server" && iniSettings->mySqlStatsDatabaseName == "dbname")
-   {
-      iniSettings->mySqlStatsDatabaseServer = "";  // blank this, so it won't try to connect to "server"
-   }
-#endif
 }
 
 
@@ -1323,9 +1303,6 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    for(S32 i = 0; i < ARRAYSIZE(sections); i++)
       loadSettings(ini, iniSettings, sections[i]);
 
-   loadHostConfiguration(ini, iniSettings);
-
-
    loadSoundSettings(ini, settings, iniSettings);
    loadEffectsSettings(ini, iniSettings);
    loadGeneralSettings(ini, iniSettings);
@@ -1589,22 +1566,6 @@ static void writeUpdater(CIniFile *ini, IniSettings *iniSettings)
 }
 
 
-static void writeHost(CIniFile *ini, IniSettings *iniSettings)
-{
-   const char *section = "Host";
-   ini->addSection(section);
-
-   if(ini->numSectionComments(section) == 0)
-   {
-      addComment("----------------");
-      addComment(" MySqlStatsDatabaseCredentials - If MySql integration has been compiled in (which it probably hasn't been), you can specify the");
-      addComment("                                 database server, database name, login, and password as a comma delimeted list");
-      addComment("----------------");
-   }
-
-   ini->setValueYN(section, "LogStats", iniSettings->logStats);
-}
-
 
 static void writeLevels(CIniFile *ini)
 {
@@ -1688,7 +1649,6 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
 
    IniSettings *iniSettings = settings->getIniSettings();
 
-   writeHost(ini, iniSettings);
    writeForeignServerInfo(ini, iniSettings);
    writeLoadoutPresets(ini, settings);
    writePluginBindings(ini, iniSettings);

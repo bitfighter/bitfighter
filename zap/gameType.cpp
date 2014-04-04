@@ -1045,7 +1045,7 @@ void GameType::saveGameStats()
    if(masterConn)
       masterConn->s2mSendStatistics(stats);
 
-   if(getGame()->getSettings()->getIniSettings()->logStats)
+   if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::LogStats))
    {
       processStatsResults(&stats.gameStats);
 
