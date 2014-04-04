@@ -138,10 +138,11 @@ static bool checkPoints(lua_State *L, S32 minNumberOfPoints, S32 &stackPos)
    else if(lua_istable(L, stackPos))      // Table: should contain <minNumberOfPoints> or more points, and nothing else
    {
       S32 pointsFound = 0;
+      S32 initialTop = lua_gettop(L);
       lua_pushnil(L);                     // First key
       while(lua_next(L, stackPos) != 0)   // Traverse table
       { 
-         if(!luaIsPoint(L, -1))          // Is it a point?  If not, cleanup and bail
+         if(!luaIsPoint(L, initialTop + 2))          // Is it a point?  If not, cleanup and bail
          {
             lua_pop(L, 2);                
             return false;
