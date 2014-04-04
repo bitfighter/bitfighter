@@ -138,11 +138,10 @@ static bool checkPoints(lua_State *L, S32 minNumberOfPoints, S32 &stackPos)
    else if(lua_istable(L, stackPos))      // Table: should contain <minNumberOfPoints> or more points, and nothing else
    {
       S32 pointsFound = 0;
-      S32 initialTop = lua_gettop(L);
       lua_pushnil(L);                     // First key
       while(lua_next(L, stackPos) != 0)   // Traverse table
       { 
-         if(!luaIsPoint(L, initialTop + 2))          // Is it a point?  If not, cleanup and bail
+         if(!luaIsPoint(L, -1))          // Is it a point?  If not, cleanup and bail
          {
             lua_pop(L, 2);                
             return false;
@@ -371,10 +370,17 @@ bool isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable)
 
 // To check if the object at the given index is a point
 // The signature is that it will have 'x' and 'y' fields
+// This function requires index to be absolute
 bool luaIsPoint(lua_State *L, S32 index)
 {
    if(lua_istable(L, index) == 0)   // Not a table?
       return false;
+
+   // convert relative stack index to absolute
+   if(index < 0)
+   {
+      index = lua_gettop(L) + index + 1;
+   }
 
    lua_pushstring(L, "x");    // table, ..., x
    lua_rawget(L, index);      // table, ..., float (or nil?)
