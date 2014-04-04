@@ -126,6 +126,7 @@ TEST(StringUtilsTest, ParseStringTests)
    Vector<string> words;
    parseString("   Superior, Michigan, Huron    , Erie,     Ontario", words, ',');
 
+   // Parsed words should come out stripped of all extraneous whitespace
    ASSERT_EQ(5, words.size());
    EXPECT_EQ("Superior", words[0]);
    EXPECT_EQ("Michigan", words[1]);
