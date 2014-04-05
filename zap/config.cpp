@@ -1243,9 +1243,6 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadLoadoutPresets(ini, settings);
    loadPluginBindings(ini, iniSettings);
 
-   
-   loadUpdaterSettings(ini, iniSettings);
-
    setDefaultKeyBindings(ini, inputCodeManager);
    setDefaultEditorKeyBindings(ini, inputCodeManager);
    setDefaultSpecialKeyBindings(ini, inputCodeManager);
@@ -1501,7 +1498,6 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeSettings(ini, iniSettings);
    writeLevels(ini);
    writeSkipList(ini, settings->getLevelSkipList());
-   writeUpdater(ini, iniSettings);
    writePasswordSection(ini);
    writeKeyBindings(ini, settings->getInputCodeManager());
    
