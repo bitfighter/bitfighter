@@ -1486,7 +1486,7 @@ void GameConnection::ReceivedRecordedGameplay(const U8 *filedata, U32 filedatasi
    FILE *f = fopen(filename.c_str(), "wb");
    if(f)
    {
-      fwrite(f, 1, filedatasize, f);
+      fwrite(filedata, 1, filedatasize, f);
       fclose(f);
    }
    else
