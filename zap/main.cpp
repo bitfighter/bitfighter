@@ -693,7 +693,7 @@ void checkOnlineUpdate(GameSettings *settings)
    // Windows only
 #ifdef USE_BFUP
    // Spawn external updater tool to check for new version of Bitfighter
-   if(settings->getIniSettings()->useUpdater)
+   if(settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::UseUpdater))
       launchWindowsUpdater(settings->getForceUpdate());
 #endif   // USE_BFUP
 

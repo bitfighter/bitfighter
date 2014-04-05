@@ -208,8 +208,6 @@ public:
 
    S32 connectionSpeed;
 
-   bool useUpdater;                 // Use updater system (windows only)
-
    // Server display settings in join menu
    S32 queryServerSortColumn;
    bool queryServerSortAscending;

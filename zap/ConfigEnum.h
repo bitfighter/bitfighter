@@ -78,6 +78,8 @@
    SETTINGS_ITEM(S32,                VoteNoStrength,           "Host-Voting",    "VoteNoStrength",           -3,                              NULL,     NULL,     "How much does a No vote count?")                                                                                               \
    SETTINGS_ITEM(S32,                VoteNothingStrength,      "Host-Voting",    "VoteNothingStrength",      -1,                              NULL,     NULL,     "How much does an abstention count?")                                                                                           \
                                                                                                                                                                                                                                                                                                   \
+   SETTINGS_ITEM(YesNo,              UseUpdater,               "Updater",        "UseUpdater",                Yes,                            NULL,     NULL,     "Automatically upgrade Bitfighter when a new version is available (Yes/No, Windows only)")                                      \
+                                                                                                                                                                                                                                                                                                  \
    SETTINGS_ITEM(YesNo,              DumpKeys,                 "Diagnostics",    "DumpKeys",                  No,                             NULL,     NULL,     "Enable this to dump raw input to the screen (Yes/No)")                                                                         \
    SETTINGS_ITEM(YesNo,              LogConnectionProtocol,    "Diagnostics",    "LogConnectionProtocol",     No,                             NULL,     NULL,     "Log ConnectionProtocol events (Yes/No)")                                                                                       \
    SETTINGS_ITEM(YesNo,              LogNetConnection,         "Diagnostics",    "LogNetConnection",          No,                             NULL,     NULL,     "Log NetConnectionEvents (Yes/No)")                                                                                             \
@@ -100,8 +102,6 @@
    SETTINGS_ITEM(YesNo,              ServerFilter,             "Diagnostics",    "ServerFilter",              No,                             NULL,     NULL,     "For logging messages specific to hosting games (Yes/No)\n"                                                                     \
                                                                                                                                                                   "(Note: These messages will go to bitfighter_server.log regardless of this setting)")                                           \
                                                                                                                                                                                                                                                                                              
-
-
 
 namespace Zap
 {

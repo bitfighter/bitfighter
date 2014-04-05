@@ -104,8 +104,6 @@ IniSettings::IniSettings()
    queryServerSortColumn = 0;
    queryServerSortAscending = true;
 
-   useUpdater = true;
-
    // Game window location when in windowed mode
    winXPos = 0;  // if set to (0,0), it will not set the position meaning it uses operating system default position. (see bottom of "VideoSystem::actualizeScreenMode" in VideoSystem.cpp)
    winYPos = 0;
@@ -125,7 +123,7 @@ IniSettings::~IniSettings()
 
 
 // This list is currently incomplete, will grow as we move our settings into the new structure
-static const string sections[] = {"Settings", "Effects", "Host", "Host-Voting", "EditorSettings", "Diagnostics"};
+static const string sections[] = {"Settings", "Effects", "Host", "Host-Voting", "EditorSettings", "Updater", "Diagnostics"};
 static const string headerComments[] = 
 {
    "Settings entries contain a number of different options.",
@@ -135,6 +133,7 @@ static const string headerComments[] =
       "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"
       "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below.",
    "EditorSettings entries relate to items in the editor",
+   "The Updater section contains entries that control how game updates are handled.",
    "Diagnostic entries can be used to enable or disable particular actions for debugging purposes.\n"
       "You probably can't use any of these settings to enhance your gameplay experience!"
 };
@@ -521,12 +520,6 @@ static void loadSoundSettings(CIniFile *ini, GameSettings *settings, IniSettings
    iniSettings->sfxVolLevel       = checkVol(iniSettings->sfxVolLevel);
    iniSettings->setMusicVolLevel(checkVol(iniSettings->getRawMusicVolLevel()));
    iniSettings->voiceChatVolLevel = checkVol(iniSettings->voiceChatVolLevel);
-}
-
-
-void loadUpdaterSettings(CIniFile *ini, IniSettings *iniSettings)
-{
-   iniSettings->useUpdater = lcase(ini->GetValue("Updater", "UseUpdater", "Yes")) != "no";
 }
 
 
@@ -1416,23 +1409,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->SetValueF (section, "LineWidth", gDefaultLineWidth);
 #endif
 }
-
-
-static void writeUpdater(CIniFile *ini, IniSettings *iniSettings)
-{
-   ini->addSection("Updater");
-
-   if(ini->numSectionComments("Updater") == 0)
-   {
-      ini->sectionComment("Updater", "----------------");
-      ini->sectionComment("Updater", " The Updater section contains entries that control how game updates are handled");
-      ini->sectionComment("Updater", " UseUpdater - Enable or disable process that installs updates (WINDOWS ONLY)");
-      ini->sectionComment("Updater", "----------------");
-
-   }
-   ini->setValueYN("Updater", "UseUpdater", iniSettings->useUpdater, true);
-}
-
 
 
 static void writeLevels(CIniFile *ini)
