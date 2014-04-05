@@ -2681,7 +2681,7 @@ void renderStaticBitfighterLogo()
    glColor(Colors::green);
    renderBitfighterLogo(73, 1);
    FontManager::pushFontContext(ReleaseVersionContext);
-   drawCenteredStringf(120, 10, "Release %s", ZAP_GAME_RELEASE);
+   drawCenteredString(120, 10, ZAP_GAME_RELEASE_LONGSTRING);  // The compiler combines both strings
    FontManager::popFontContext();
 }
 

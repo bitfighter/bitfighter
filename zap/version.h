@@ -33,14 +33,18 @@
 
 #define VERSION_019d  9710
 
-#define BUILD_VERSION VERSION_019d   // Version of the game according to hg, will be unique every release (must be int)
+#define BUILD_VERSION VERSION_019d  // Version of the game according to hg, will be unique every release (must be int)
                                     // Get from "hg summary"
 
-#if CS_PROTOCOL_VERSION == 38
-#define ZAP_GAME_RELEASE "019d_not_released"
+#define ZAP_GAME_RELEASE "019d"     // Change this with every release -- for display purposes only, string,
+                                    // will also be used for name of installer on windows, so be careful with spaces
+                                    // Used for GameRecorder.cpp, buildGameRecorderExtension
+
+// ZAP_GAME_RELEASE_LONGSTRING is used for version display at main menu
+#if BUILD_VERSION >= 9720  // Won't release too soon...
+#  define ZAP_GAME_RELEASE_LONGSTRING ("Release " ZAP_GAME_RELEASE)
 #else
-#define ZAP_GAME_RELEASE "020"    // Change this with every release -- for display purposes only, string,
-                                    // will also be used for name of installer on windows, so be careful with spaces  
+#  define ZAP_GAME_RELEASE_LONGSTRING (ZAP_GAME_RELEASE " - beta")
 #endif
 
 #endif
