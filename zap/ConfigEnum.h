@@ -98,7 +98,7 @@
    SETTINGS_ITEM(YesNo,              LuaLevelGenerator,        "Diagnostics",    "LuaLevelGenerator",         Yes,                            NULL,     NULL,     "Messages from the LuaLevelGenerator (Yes/No)")                                                                                 \
    SETTINGS_ITEM(YesNo,              LuaBotMessage,            "Diagnostics",    "LuaBotMessage",             Yes,                            NULL,     NULL,     "Message from a bot (Yes/No)")                                                                                                  \
    SETTINGS_ITEM(YesNo,              ServerFilter,             "Diagnostics",    "ServerFilter",              No,                             NULL,     NULL,     "For logging messages specific to hosting games (Yes/No)\n"                                                                     \
-                                                                                                                                                                  "(Note: these messages will go to bitfighter_server.log regardless of this setting)")                                           \
+                                                                                                                                                                  "(Note: These messages will go to bitfighter_server.log regardless of this setting)")                                           \
                                                                                                                                                                                                                                                                                              
 
 
