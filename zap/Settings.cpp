@@ -54,17 +54,17 @@ Evaluator::fromString(const string &val) { TNLAssert(false, "Specialize me!"); r
 // Specializations.
 // NOTE: All template specializations must be declared in the namespace scope to be
 // C++ compliant.  Shame on Visual Studio!
-template<> string             Evaluator::fromString(const string &val) { return val;                             }
-template<> S32                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
-template<> U32                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
-template<> F32                Evaluator::fromString(const string &val) { return atof(val.c_str());               }
-template<> U16                Evaluator::fromString(const string &val) { return atoi(val.c_str());               }
+template<> string             Evaluator::fromString(const string &val) { return val;                                    }
+template<> S32                Evaluator::fromString(const string &val) { return atoi(val.c_str());                      }
+template<> U32                Evaluator::fromString(const string &val) { return atoi(val.c_str());                      }
+template<> F32                Evaluator::fromString(const string &val) { return (F32)atof(val.c_str());                 }
+template<> U16                Evaluator::fromString(const string &val) { return atoi(val.c_str());                      }
 template<> DisplayMode        Evaluator::fromString(const string &val) { return displayModeEnumParser.getVal(val);      }
 template<> YesNo              Evaluator::fromString(const string &val) { return yesNoEnumParser.getVal(val);            }
 template<> RelAbs             Evaluator::fromString(const string &val) { return relativeAbsoluteEnumParser.getVal(val); }
 template<> ColorEntryMode     Evaluator::fromString(const string &val) { return colorEntryModeEnumParser.getVal(val);   }
 template<> GoalZoneFlashStyle Evaluator::fromString(const string &val) { return goalZoneFlashEnumParser.getVal(val);    }
-template<> Color              Evaluator::fromString(const string &val) { return Color::iniValToColor(val);       }
+template<> Color              Evaluator::fromString(const string &val) { return Color::iniValToColor(val);              }
 
 
 // Convert various things to strings
