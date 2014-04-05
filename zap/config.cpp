@@ -125,10 +125,11 @@ IniSettings::~IniSettings()
 
 
 // This list is currently incomplete, will grow as we move our settings into the new structure
-static const string sections[] = {"Settings", "Host", "Host-Voting", "EditorSettings", "Diagnostics"};
+static const string sections[] = {"Settings", "Effects", "Host", "Host-Voting", "EditorSettings", "Diagnostics"};
 static const string headerComments[] = 
 {
    "Settings entries contain a number of different options.",
+   "Various visual effects.",
    "Items in this section control how Bitfighter works when you are hosting a game.  See also Host-Voting.",
    "Control how voting works on the server.  The default values work pretty well, but if you want to tweak them, go ahead!\n"
       "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"
@@ -495,12 +496,6 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
    // If no plugins we're loaded, add our defaults  (maybe we don't want to do this?)
    if(iniSettings->pluginBindings.size() == 0)
       iniSettings->pluginBindings = iniSettings->getDefaultPluginBindings();
-}
-
-
-static void loadEffectsSettings(CIniFile *ini, IniSettings *iniSettings)
-{
-   // Nothing at the moment
 }
 
 
@@ -1251,7 +1246,6 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
       loadSettings(ini, iniSettings, sections[i]);
 
    loadSoundSettings(ini, settings, iniSettings);
-   loadEffectsSettings(ini, iniSettings);
    loadGeneralSettings(ini, iniSettings);
    loadLoadoutPresets(ini, settings);
    loadPluginBindings(ini, iniSettings);
@@ -1294,19 +1288,6 @@ void IniSettings::loadUserSettingsFromINI(CIniFile *ini, GameSettings *settings)
    }
 }
 
-
-static void writeEffects(CIniFile *ini, IniSettings *iniSettings)
-{
-   const char *section = "Effects";
-   ini->addSection(section);
-
-   if (ini->numSectionComments(section) == 0)
-   {
-      ini->sectionComment(section, "----------------");
-      ini->sectionComment(section, " Various visual effects");
-      ini->sectionComment(section, "----------------");
-   }
-}
 
 static void writeSounds(CIniFile *ini, IniSettings *iniSettings)
 {
@@ -1540,7 +1521,6 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeLoadoutPresets(ini, settings);
    writePluginBindings(ini, iniSettings);
    writeConnectionsInfo(ini, iniSettings);
-   writeEffects(ini, iniSettings);
    writeSounds(ini, iniSettings);
    writeSettings(ini, iniSettings);
    writeLevels(ini);
