@@ -1188,6 +1188,7 @@ static void loadServerBanList(CIniFile *ini, BanList *banList)
    banList->loadBanList(banItemList);
 }
 
+
 // Can't be static -- called externally!
 void writeServerBanList(CIniFile *ini, BanList *banList)
 {
